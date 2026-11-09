@@ -265,6 +265,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           DATE(timestamp) as date,
           COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
           COUNT(*) as totalRequests,
+          endpoint as requestEndpoint,
           COALESCE(tokens_input, 0) as requestInputTokens,
           COALESCE(tokens_output, 0) as requestOutputTokens,
           COALESCE(tokens_cache_read, 0) as requestCacheReadTokens,
@@ -281,7 +282,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         WHERE timestamp < ?
           AND provider IS NOT NULL AND provider != ''
           AND model IS NOT NULL AND model != ''
-        GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier,
+        GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier, requestEndpoint,
           requestInputTokens, requestOutputTokens, requestCacheReadTokens,
           requestCacheCreationTokens, requestReasoningTokens, hasStoredCost`
       )
@@ -291,6 +292,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
       date: string;
       serviceTier: string;
       totalRequests: number;
+      requestEndpoint: string | null;
       requestInputTokens: number;
       requestOutputTokens: number;
       requestCacheReadTokens: number;
@@ -334,6 +336,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
                 provider: row.provider,
                 model: row.model,
                 serviceTier: row.serviceTier,
+                endpoint: row.requestEndpoint,
                 // The archive stores API-equivalent value. Billed-cost consumers
                 // still mask flat-rate providers when they read this value.
                 flatRateAsZero: false,

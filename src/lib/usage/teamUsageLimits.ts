@@ -28,6 +28,7 @@ export interface TeamUsageLimitStatus {
 }
 
 type CostRow = {
+  endpoint?: string | null;
   provider: string;
   model: string;
   serviceTier: string;
@@ -68,7 +69,12 @@ async function calculateRows(
           cacheCreation: toNumber(row.cacheCreationTokens),
           reasoning: toNumber(row.reasoningTokens),
         },
-        { provider: row.provider, model: row.model, serviceTier: row.serviceTier || "standard" }
+        {
+          provider: row.provider,
+          model: row.model,
+          serviceTier: row.serviceTier || "standard",
+          endpoint: row.endpoint,
+        }
       );
       total += result.costUsd;
       hasUnpricedUsage ||= !result.priced || Boolean(row.retained);
@@ -78,6 +84,7 @@ async function calculateRows(
           provider: row.provider,
           model: row.model,
           serviceTier: row.serviceTier || "standard",
+          endpoint: row.endpoint,
         });
         total += result.costUsd * count;
         hasUnpricedUsage ||= !result.priced;
@@ -99,6 +106,7 @@ async function getCommittedTeamEstimatedListCostUsd(
          COALESCE(NULLIF(LOWER(provider), ''), '__unknown_provider__') as provider,
          COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__') as model,
          COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
+         endpoint,
          COALESCE(SUM(tokens_input), 0) as inputTokens,
          COALESCE(SUM(tokens_output), 0) as outputTokens,
          COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
@@ -111,7 +119,7 @@ async function getCommittedTeamEstimatedListCostUsd(
          AND team_rollup_processed_at IS NULL
          AND timestamp >= @windowStartIso AND timestamp < @resetAtIso
          AND success = 1
-       GROUP BY LOWER(provider), LOWER(model), serviceTier,
+       GROUP BY LOWER(provider), LOWER(model), serviceTier, endpoint,
          tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning`
     )
     .all({ teamId, windowStartIso, resetAtIso }) as CostRow[];

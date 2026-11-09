@@ -32,6 +32,8 @@ export type CostCalculationOptions = {
   provider?: string | null;
   model?: string | null;
   serviceTier?: string | null;
+  /** The recorded request path distinguishes reranking from a custom node prefix. */
+  endpoint?: string | null;
   /**
    * When true, return $0 for flat-rate (subscription / cookie-web) providers
    * instead of the per-token estimate (#5552). Opt-in so only analytics/display
@@ -100,6 +102,21 @@ function extractExactCostUsd(tokens: CostTokenUsage | null | undefined): number 
     return costUsd;
   }
   return null;
+}
+
+/** Only rerank usage, not a configurable Cortecs chat/embedding alias, forbids token pricing. */
+function isCortecsRerankUsage(
+  provider: string | null | undefined,
+  tokens: CostTokenUsage,
+  endpoint?: string | null
+): boolean {
+  const credits = tokens.provider_credits;
+  return (
+    provider?.trim().toLowerCase() === "cortecs" &&
+    (endpoint === "/v1/rerank" ||
+      endpoint === "/rerank" ||
+      (typeof credits === "number" && Number.isFinite(credits) && credits >= 0))
+  );
 }
 
 function normalizeServiceTier(value: unknown): string {
@@ -253,7 +270,11 @@ export function computeCostFromPricing(
   // A credit-metered provider bills in credits, reported per request as the exact
   // cost handled above. Its per-token rows describe no real tariff, so they are
   // never a cost basis: pricing them would bill the request a second time.
-  if (isCreditMeteredProvider(options.provider)) return 0;
+  if (
+    isCreditMeteredProvider(options.provider) ||
+    isCortecsRerankUsage(options.provider, tokens, options.endpoint)
+  )
+    return 0;
   const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
   const rates = applyLongContextTier(pricing, inputTokens);
   const inputPrice = toNumber(rates.input, 0);
@@ -350,7 +371,8 @@ export async function calculateCostDetailed(
   if (exactCostUsd !== null) return { costUsd: exactCostUsd, priced: true };
   // Native Cortecs credits need an explicit USD valuation. A token catalogue
   // entry must not turn an unknown conversion into a free or guessed USD bill.
-  if (provider.trim().toLowerCase() === "cortecs") return { costUsd: 0, priced: false };
+  if (isCortecsRerankUsage(provider, tokens, options.endpoint))
+    return { costUsd: 0, priced: false };
 
   try {
     const pricing = await resolvePricingRow(provider, model);

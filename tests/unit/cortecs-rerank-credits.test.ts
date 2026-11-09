@@ -95,10 +95,15 @@ test("malformed usage and counts do not invent token quantities", () => {
 });
 
 test("native credits are never token-repriced when USD is unknown; explicit USD zero wins", async () => {
-  assert.deepEqual(await calculateCostDetailed(" CORTECS ", "synthetic-reranker", valid), {
-    costUsd: 0,
-    priced: false,
-  });
+  assert.deepEqual(
+    await calculateCostDetailed(" CORTECS ", "synthetic-reranker", valid, {
+      endpoint: "/v1/rerank",
+    }),
+    {
+      costUsd: 0,
+      priced: false,
+    }
+  );
   assert.deepEqual(await calculateCostDetailed("cortecs", "synthetic-reranker", { cost_usd: 0 }), {
     costUsd: 0,
     priced: true,

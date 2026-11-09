@@ -10,6 +10,7 @@
  */
 
 import { getDbInstance } from "./core";
+import { tokenPriceableUsageSql } from "./usageCostSql";
 import type { AnalyticsParams } from "./usageAnalytics/sources";
 
 export { buildUnifiedSource, buildPresetUnifiedSource } from "./usageAnalytics/sources";
@@ -35,7 +36,7 @@ const UNIFIED_COST_TOKEN_SUMS = `
 /** The same split for queries that read usage_history directly. */
 function rawCostSums(table: string): string {
   const priceable = (column: string) =>
-    `COALESCE(SUM(CASE WHEN ${table}.provider_cost_usd IS NULL THEN ${table}.${column} ELSE 0 END), 0)`;
+    `COALESCE(SUM(CASE WHEN ${tokenPriceableUsageSql(table)} THEN ${table}.${column} ELSE 0 END), 0)`;
   return `
         COALESCE(SUM(${table}.provider_cost_usd), 0.0) as storedCost,
         0 as isAggregated,
@@ -401,6 +402,7 @@ export function getAccountCostRows(whereClause: string, params: AnalyticsParams)
             'connection:' || COALESCE(LOWER(usage_history.provider), 'unknown') || ':' || COALESCE(NULLIF(TRIM(usage_history.connection_id), ''), 'unknown')
           ) as resolved_account_key,
           usage_history.provider,
+          usage_history.endpoint,
           usage_history.model,
           usage_history.service_tier,
           usage_history.timestamp,

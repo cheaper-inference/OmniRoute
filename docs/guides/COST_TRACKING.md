@@ -157,6 +157,13 @@ No-log keys keep numerical accounting without document payloads.
 Other rerank providers retain their existing behavior. This is forward-only
 accounting, not a historical backfill or an invoice reconciliation.
 
+The name `cortecs` alone does not disable a custom chat/embedding node's
+configured token prices. Rerank accounting is distinguished by the recorded
+endpoint or explicit normalized credit provenance. Missing rerank costs remain
+unpriced in durable quotas, reports and rollups even if a token tariff exists;
+those tokens remain visible but are not billed. Archived Cortecs snapshots,
+including zero/unknown values, are not retrospectively token-repriced.
+
 ## Dashboard: the Costs page
 
 The **Costs** page lives at `/dashboard/costs`

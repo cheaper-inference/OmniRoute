@@ -248,6 +248,30 @@ test("missing USD remains unknown and cannot bypass caller budgets", async () =>
   assert.equal(calls(), 1);
 });
 
+test("missing rerank USD cannot be repriced from a configured token tariff in durable consumers", async () => {
+  const { key } = await seed();
+  const { updatePricing } = await import("../../src/lib/db/settings/pricing.ts");
+  await updatePricing({ cortecs: { "bge-reranker-v2-m3": { input: 999, output: 999 } } });
+  mockUpstream({ ...responseBody, usage: { prompt_tokens: 1234, total_tokens: 1234 } });
+  assert.equal((await POST(request(key.key), {})).status, 200);
+  await waitForCallLogSaves(10000);
+  const limits = await import("../../src/lib/usage/apiKeyUsageLimits.ts");
+  const status = await limits.getApiKeyUsageLimitStatus({
+    id: key.id,
+    usageLimitEnabled: true,
+    dailyUsageLimitUsd: 1,
+  });
+  assert.equal(status.dailySpentUsd, 0);
+  assert.equal(status.dailyHasUnpricedUsage, true);
+  const { getUnpricedUsageReport } = await import("../../src/lib/usage/unpricedUsage.ts");
+  assert.equal(
+    (await getUnpricedUsageReport()).models.some((row) => row.provider === "cortecs"),
+    true
+  );
+  const { getUsageStats } = await import("../../src/lib/usage/usageStats.ts");
+  assert.equal((await getUsageStats()).byApiKey[`id:${key.id}`].cost, 0);
+});
+
 test("a completed paid rerank counts against the next request's budget", async () => {
   process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed(0.2);
