@@ -484,11 +484,11 @@ createResponsesApiTransformStream(): TransformStream
 
 ## ఆకృతీకరణ
 
-`open-sse/config/` ఆకృతీకరణ పొరను కలిగి ఉంది:
+`open-sse/config/` కాన్ఫిగరేషన్ లేయర్ను కలిగి ఉంది:
 
 | ఫైల్                          | ప్రయోజనం                                      |
 | ----------------------------- | --------------------------------------------- |
-| `providerRegistry.ts`         | 380-ప్రొవైడర్ కేటలాగ్లో చాట్-మోడల్ రిజిస్ట్రీ |
+| `providerRegistry.ts`         | 381-ప్రొవైడర్ కేటలాగ్లో చాట్-మోడల్ రిజిస్ట్రీ |
 | `providerModels.ts`           | మోడల్ మారుపేర్లు, ఫార్మాట్ మ్యాపింగ్          |
 | `constants.ts`                | గడువులు, పరిమితులు, స్థితి కోడ్లు             |
 | `defaultThinkingSignature.ts` | డిఫాల్ట్ Claude ఆలోచన సంతకం                   |
