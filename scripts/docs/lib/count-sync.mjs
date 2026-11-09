@@ -23,6 +23,10 @@ const GROUPED_FORMATS = Object.freeze({
   "grouped-narrow-nbsp": "\u202f",
 });
 const DECIMAL_FACTS = new Set(["steadyBillions", "firstBillions", "gatedMillions"]);
+const supportedFormat = (fact, format) =>
+  format === undefined ||
+  (Object.hasOwn(GROUPED_FORMATS, format) && INTEGER_FACTS.has(fact)) ||
+  (format === "ten-thousands" && fact === "gatedMillions");
 const NUMBER = "([\\p{Nd}]+(?:[.,][\\p{Nd}]+)*)";
 const fail = (code, file = "registry") => {
   throw Object.assign(new Error(`${code}:${file}`), { code, path: file });
@@ -48,17 +52,16 @@ export function spellCount(value, sample, fact, format) {
   if (!INTEGER_FACTS.has(fact) && !DECIMAL_FACTS.has(fact)) fail("COUNT_UNKNOWN_FACT", fact);
   if (INTEGER_FACTS.has(fact) && (!Number.isSafeInteger(value) || value < 0))
     fail("COUNT_INVALID_FACT", fact);
-  const canonical = String(value);
+  let canonical = String(value);
   if (!/^\d+(?:\.\d+)?$/.test(canonical)) fail("COUNT_INVALID_FACT", fact);
+  if (!supportedFormat(fact, format)) fail("COUNT_NUMBER_FORMAT", fact);
   const digits = [...sample].filter((character) => /\p{Nd}/u.test(character));
   const bases = new Set(
     digits.map((character) => character.codePointAt(0) - digitValue(character))
   );
   if (bases.size !== 1) fail("COUNT_MIXED_DIGIT_SCRIPT", fact);
   const zero = [...bases][0];
-  if (format !== undefined) {
-    if (!Object.hasOwn(GROUPED_FORMATS, format) || !INTEGER_FACTS.has(fact))
-      fail("COUNT_NUMBER_FORMAT", fact);
+  if (Object.hasOwn(GROUPED_FORMATS, format)) {
     const separator = GROUPED_FORMATS[format];
     const normalized = [...sample]
       .map((character) => (/\p{Nd}/u.test(character) ? String(digitValue(character)) : character))
@@ -70,6 +73,16 @@ export function spellCount(value, sample, fact, format) {
     return canonical
       .replace(/\B(?=(\d{3})+(?!\d))/g, separator)
       .replace(/\d/g, (character) => String.fromCodePoint(zero + Number(character)));
+  }
+  if (format === "ten-thousands") {
+    if (!/^\p{Nd}+(?:[.,]\p{Nd}+)?$/u.test(sample)) fail("COUNT_DECIMAL_FORMAT", fact);
+    // One million is 100 ten-thousands (万 / 萬 / 만). Shift the decimal
+    // as text so fractional or large exact quantities never round through Number.
+    const [integer, fraction = ""] = canonical.split(".");
+    const padded = fraction.padEnd(2, "0");
+    const whole = (integer + padded.slice(0, 2)).replace(/^0+(?=\d)/, "");
+    const remainder = padded.slice(2).replace(/0+$/, "");
+    canonical = whole + (remainder ? `.${remainder}` : "");
   }
   const separator = sample.includes(",") ? "," : ".";
   if (INTEGER_FACTS.has(fact) && !/^\p{Nd}+$/u.test(sample)) fail("COUNT_INTEGER_FORMAT", fact);
@@ -122,11 +135,7 @@ export function validateCountRegistry(registry) {
           fail("COUNT_REGISTRY_SLOT", doc.path);
         if (!INTEGER_FACTS.has(claim.fact) && !DECIMAL_FACTS.has(claim.fact))
           fail("COUNT_UNKNOWN_FACT", claim.fact);
-        if (
-          claim.format !== undefined &&
-          (!Object.hasOwn(GROUPED_FORMATS, claim.format) || !INTEGER_FACTS.has(claim.fact))
-        )
-          fail("COUNT_NUMBER_FORMAT", doc.path);
+        if (!supportedFormat(claim.fact, claim.format)) fail("COUNT_NUMBER_FORMAT", doc.path);
         slots.add(claim.slot);
       }
     }
