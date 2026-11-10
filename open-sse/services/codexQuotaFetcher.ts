@@ -164,6 +164,10 @@ function getRequestedModel(connection?: Record<string, unknown>): string | null 
     : null;
 }
 
+function nonBlankString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
+}
+
 function getCodexConnectionMeta(
   connectionId: string,
   connection?: Record<string, unknown>
@@ -175,15 +179,8 @@ function getCodexConnectionMeta(
       !Array.isArray(connection.providerSpecificData)
         ? (connection.providerSpecificData as Record<string, unknown>)
         : {};
-    const accessToken =
-      typeof connection.accessToken === "string" && connection.accessToken.trim().length > 0
-        ? connection.accessToken
-        : null;
-    const workspaceId =
-      typeof providerSpecificData.workspaceId === "string" &&
-      providerSpecificData.workspaceId.trim().length > 0
-        ? providerSpecificData.workspaceId
-        : undefined;
+    const accessToken = nonBlankString(connection.accessToken);
+    const workspaceId = nonBlankString(providerSpecificData.workspaceId) ?? undefined;
 
     if (accessToken) {
       const meta = { accessToken, ...(workspaceId ? { workspaceId } : {}) };
