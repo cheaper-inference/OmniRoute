@@ -88,3 +88,23 @@ test("plugin CI is selected when its canonical npm pin changes", () => {
     assert.ok(workflow.on[event].paths.includes("config/ci/toolchain.json"));
   }
 });
+
+test("independently installed OpenCode packages keep lock inputs aligned with manifests", () => {
+  for (const name of ["opencode-plugin", "opencode-plugin-v2", "opencode-provider"]) {
+    const manifest = JSON.parse(read(`@omniroute/${name}/package.json`));
+    const lock = JSON.parse(read(`@omniroute/${name}/package-lock.json`));
+    assert.ok(lock.packages?.[""], `${name}: lockfile must describe its root package`);
+    for (const field of [
+      "dependencies",
+      "devDependencies",
+      "optionalDependencies",
+      "peerDependencies",
+    ]) {
+      assert.deepEqual(
+        lock.packages[""][field] ?? {},
+        manifest[field] ?? {},
+        `${name}: ${field} must agree before npm ci`
+      );
+    }
+  }
+});
