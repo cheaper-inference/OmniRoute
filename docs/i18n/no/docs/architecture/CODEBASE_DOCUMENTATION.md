@@ -444,7 +444,7 @@ Delt inn i fokuserte underkataloger:
 
 ---
 
-## 4. `open-sse/` — Arbeidsområde for strømmemotor
+## 4. `open-sse/` — arbeidsområde for streamingmotor
 
 Separat npm-arbeidsområde publisert som `@omniroute/open-sse`. Eier forespørselsbehandling, eksekutører, oversettere, tjenester, transformator og MCP serveren.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 eksekveringsmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` og tester - antallet `npm run check:docs-counts` måler). Hver eksekveringsklasse strekker seg ut `BaseExecutor` (`base.ts`), direkte eller gjennom `DefaultExecutor` eller en annen eksekutør; de resterende modulene er hjelpere per leverandør (verktøyskjemaer, fetch/TTS adaptere, quirk-behandlere). Utøvere inkluderer:
+159 eksekveringsmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` og tester — count `npm run check:docs-counts` måler). Hver eksekveringsklasse strekker seg `BaseExecutor` (`base.ts`), direkte eller gjennom `DefaultExecutor` eller en annen eksekutør; de resterende modulene er hjelpere per leverandør (verktøyskjemaer, fetch/TTS adaptere, quirk-behandlere). Utøvere inkluderer:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` og `claudeIdentity.ts` (identitet, zqert og `index.ts` ) (register).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> Merk: leverandører som ikke er oppført her, betjenes av `default.ts` ved å bruke den generiske OpenAI-kompatible eksekveren. Den fullstendige leverandørkatalogen (377 leverandører) bor i `src/shared/constants/providers.ts`.
+> Merk: leverandører som ikke er oppført her, betjenes av `default.ts` ved å bruke den generiske OpenAI-kompatible eksekveren. Den fullstendige leverandørkatalogen (381 leverandører) finnes i `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -519,7 +519,7 @@ Høydepunkter (full liste under `open-sse/services/`):
 | Buffer                | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Ruting av intelligens | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Modellhåndtering      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Komprimering          | `compression/` — ledninger for full kompresjonsmotor                                                                                                                                                                                                     |
+| Komprimering          | `compression/` — fullkompresjonsmotorledninger                                                                                                                                                                                                           |
 | Token + økt           | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Nivå / manifest       | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / nettverk         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,20 +528,20 @@ Høydepunkter (full liste under `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unike verktøy** kablet i `server.ts` (45 kanoniske i `schemas/tools.ts` + -minne, ferdigheter, GitHub-ferdigheter, pool, gamification, plugin, Notion, Obsidian, lokalkorpus og komprimeringsmoduler - union telles av `countUniqueMcpTools`).
+- **110 unike verktøy** kablet i `server.ts` (45 kanoniske i `schemas/tools.ts` + minne, ferdigheter, GitHub-ferdigheter, pool, gamification, plugin, Notion, Obsidian, lokalkorpus og komprimeringsmoduler — union telles av `countUniqueMcpTools`).
 - **3 transporter** : stdio, HTTP Streamable, SSE.
-- **33 omfang** håndheves ved kjøretid — basisliste i `src/shared/constants/mcpScopes.ts`, fullt sett er foreningen av omfangene som er deklarert av hver verktøymodul.
+- **33 omfang** håndheves ved kjøretid — base list i `src/shared/constants/mcpScopes.ts`, fullt sett er foreningen av omfangene deklarert av hver verktøymodul.
 - Revisjonstabell: `mcp_tool_audit` (befolket av `audit.ts`).
 - Filer: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, pluss tester under `__tests__/`.
 - Se [MCP-SERVER.md](../frameworks/MCP-SERVER.md) for hele verktøykatalogen.
 
 ### 4.7 `open-sse/config/`
 
-Leverandørregistre (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), modellregistre per format (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identitetshjelpere (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `defaultThinkingSignature.ts`), zq `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts` legitimasjonshjelpere (`credentialLoader.ts`, `codexClient.ts`), og skyadaptere (`azureAi.ts`, `bedrock.ts`, zqx, `datarobot.ts`, `oci.ts` `glmProvider.ts` `maritalk.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `registryUtils.ts`.
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Streaming-primitiver og leverandørhjelpere: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, zq `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
+Streamingprimitiver og leverandørhjelpere: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, zq , `thinkTagParser.ts` `requestLogger.ts`, `urlSanitize.ts`, `usageTracking.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts` `ollamaTransform.ts`
 
 ---
 

@@ -28,6 +28,8 @@ const { handleAudioTranscription } = await import("../../open-sse/handlers/audio
 const { createProviderConnection, getProviderConnectionById } =
   await import("../../src/lib/db/providers.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+// Registers the refresher the Grok media handlers renew through.
+await import("../../src/sse/services/tokenRefresh.ts");
 const { closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 
 test.after(async () => {

@@ -18,8 +18,12 @@ on:
     types: [checks_requested]
   workflow_dispatch:
 
+  # A description edit on a Mergify queue draft (Mergify writes its queue summary there, and
+  # the Blacksmith app appends its footer, ~4 edits in the first 30 s) gets its own group and
+  # skips the matrix: in the shared group it cancelled the candidate's real run, and Mergify
+  # dequeued the PR on the cancelled checks ("checks interrupted", #18853/#18858 on 2026-11-03).
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && format('-queue-edit-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -37,6 +41,7 @@ env:
 jobs:
   changes:
     name: Change Classification
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     outputs:
       # Match the official Mergify App and both repository IDs from GitHub's
@@ -238,6 +243,15 @@ jobs:
       # runs tsc scoped to the dashboard tree against a frozen baseline of
       # pre-existing errors; only NEW errors fail it.
       - run: npm run check:dashboard-typecheck
+      # The rest of the app surface — src/lib, src/shared, bin, packages and the
+      # Electron types — had no type gate: next build ignores type errors and
+      # the root tsconfig cannot finish. API routes are covered separately by
+      # api-route-typecheck.yml, so this is not "everything else was unchecked".
+      # This runs the production-only program against a frozen per-(file, code)
+      # count baseline, so a new error anywhere in that surface fails the job
+      # while the pre-existing debt stays visible and cannot grow.
+      - run: npm run check:build-typecheck
+        timeout-minutes: 5
       # typecheck:noimplicit:core dropped from this job (2026-07 optimize):
       # it was advisory (continue-on-error) and largely subsumed by the blocking
       # check:type-coverage ratchet in quality-gate. Local: npm run typecheck:noimplicit:core.
@@ -415,12 +429,12 @@ jobs:
       #     every gate then self-skips and the metric is never produced. We instead
       #     use `gh release download`, which is preinstalled on GitHub runners and
       #     authenticated via GITHUB_TOKEN (5000 req/hr) — robust under load.
-      #   • actionlint keeps its official download script; zizmor stays on pipx.
+      # Workflow scanners are installed separately and must both verify successfully.
       # We `set +e` (no single failure aborts the step), ALWAYS export $GITHUB_PATH
       # at the end, and print diagnostics so the next CI run proves exactly what
       # installed. The job is continue-on-error too, so an install hiccup never
       # blocks the build.
-      - name: Install advisory security scanners (gitleaks/osv/actionlint/zizmor)
+      - name: Install advisory security scanners (gitleaks/osv/oasdiff)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -435,18 +449,6 @@ jobs:
           rm -rf /tmp/osv && mkdir -p /tmp/osv
           gh release download --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
           install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
-          # actionlint — official download script
-          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest "$HOME/.local/bin"
-          # zizmor — PyPI (pipx preferred, pip --user fallback); lands in ~/.local/bin.
-          # PINNED on purpose. Unpinned, the runner installed whatever PyPI served that day and
-          # measured 1 finding MORE than the devbox on the identical commit (190 vs 189) during
-          # the v3.8.49 cycle — which cost a second rebaseline push per release, chasing a
-          # number that was never the code's. The ratchet compares counts across machines, so
-          # the auditor version has to be the same on both. Bump this deliberately, and
-          # rebaseline in the same commit: check-workflows.mjs now prints `zizmorVersion=` next
-          # to the count so the new number is traceable to the tool that produced it.
-          ZIZMOR_VERSION=1.25.2
-          pipx install "zizmor==$ZIZMOR_VERSION" || pip install --user "zizmor==$ZIZMOR_VERSION"
           # oasdiff — download latest linux amd64 tarball via gh (authed), extract binary
           rm -rf /tmp/oasd && mkdir -p /tmp/oasd
           gh release download --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
@@ -456,10 +458,14 @@ jobs:
           # diagnostics — prove what installed on the next CI run
           ls -la "$HOME/.local/bin"
           "$HOME/.local/bin/gitleaks" version || true
-          "$HOME/.local/bin/actionlint" -version || true
           "$HOME/.local/bin/osv-scanner" --version || true
           "$HOME/.local/bin/oasdiff" --version || true
-          zizmor --version || true
+      # Required auditors use verified, pinned artifacts in a fresh PATH directory.
+      # Installation failure is INCOMPLETE, never a skipped or zero-finding audit.
+      - name: Prepare pinned workflow scanners
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci/install-workflow-scanners.sh
       # BLOCKING ratchet (Etapa 2): secretFindings must not regress vs the baseline.
       # --ratchet exits 1 on a measured regression; it SKIPs (exit 0) when gitleaks
       # is absent (a missing binary never blocks).
@@ -1037,6 +1043,15 @@ jobs:
       API_KEY_SECRET: ci-test-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
+      # Raw V8 coverage filled the hosted runner disk on 2026-11-02: the job died with
+      # "No space left on device" and a log with no test summary, which reads as a flake.
+      # Hosted only: this must never delete anything on the self-hosted slots.
+      - name: Free hosted runner non-Android disk
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -1044,11 +1059,9 @@ jobs:
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
-      - uses: ./.github/actions/npm-ci-retry
+      - uses: ./.github/actions/prepare-unit-storage
         with:
-          # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
-      - run: npm run check:node-runtime
       # QW-d (plano mestre): fonte única — o MESMO npm script dos runs locais (adiciona o
       # setupPolyfill que o comando inline omitia; o glob canônico vive só no package.json).
       # D3 (plano mestre): a coverage é coletada NESTE mesmo run (c8/NODE_V8_COVERAGE propaga
@@ -1072,6 +1085,7 @@ jobs:
           # pelo job de merge de cobertura mais abaixo.
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
+          trap 'status=$?; { df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"; du -sh coverage-shard; } || :; exit "$status"' EXIT
           rm -rf coverage-shard coverage-shard-report
           npx c8 --merge-async \
             --temp-directory=coverage-shard \
@@ -1204,6 +1218,14 @@ jobs:
       JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-test-api-key-secret-long
     steps:
+      # Same disk exhaustion as the unit shards: merging the 8 raw shard JSONs filled the
+      # hosted runner disk on 2026-11-03 (job 125909618697, "No space left on device").
+      - name: Free hosted runner disk
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
@@ -1295,6 +1317,11 @@ jobs:
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           files: coverage/lcov.info
+          # `files` does not stop the uploader from also searching the workspace: on the
+          # v3.8.53 release push (run 42180292091) it found the 22207 per-shard JSON files
+          # under coverage-shards/, hit the 5-minute ceiling and never uploaded anything,
+          # while continue-on-error kept the step green. lcov.info is the only report.
+          disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
       - name: Upload coverage artifacts
@@ -1661,8 +1688,13 @@ jobs:
       - run: npm run test:protocols:e2e
 
   admission-verdict:
-    name: Gate / CI
-    if: ${{ always() }}
+    # A queue-draft edit run must not leave a check named "Gate / CI" on the draft: Mergify
+    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
+    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / CI (queue-draft edit)' || 'Gate / CI' }}
+    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
+    # workflow concurrency note): that draft is never what branch protection merges.
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
@@ -1715,7 +1747,7 @@ jobs:
   ci-summary:
     name: CI Dashboard
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     needs:
       - changes
       - lint

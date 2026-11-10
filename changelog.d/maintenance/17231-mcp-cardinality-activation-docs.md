@@ -1,1 +1,0 @@
-- **docs(mcp):** Correct the stale tool-cardinality activation note: `MCP_TOOL_ALLOW` and `MCP_TOOL_DENY` already filter the registered MCP tool manifest on an opt-in basis, with no runtime behavior change ([#17231](https://github.com/diegosouzapw/OmniRoute/pull/17231)) — thanks @fabioKoruja00

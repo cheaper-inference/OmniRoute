@@ -1,5 +1,7 @@
 "use client";
 
+import Checkbox from "@/shared/components/Checkbox";
+
 export default function ModelVisionOverrideEditor({
   modelId,
   value,
@@ -15,19 +17,17 @@ export default function ModelVisionOverrideEditor({
 }) {
   if (!onSave) return null;
   return (
-    <label
-      className="inline-flex items-center gap-1 text-[11px] text-text-muted"
-      title={t("visionCapableHint")}
-    >
-      <input
-        type="checkbox"
+    <span className="inline-flex" title={t("visionCapableHint")}>
+      <Checkbox
         aria-label={t("visionCapableLabel")}
+        label={
+          <span className="text-[11px] font-normal text-text-muted">{t("visionCapableLabel")}</span>
+        }
+        className="items-center gap-1"
         checked={value === true}
         disabled={saving}
         onChange={(event) => void onSave(modelId, event.target.checked ? true : null)}
-        className="accent-primary"
       />
-      {t("visionCapableLabel")}
-    </label>
+    </span>
   );
 }

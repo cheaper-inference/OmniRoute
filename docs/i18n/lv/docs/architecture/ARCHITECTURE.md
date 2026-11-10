@@ -14,7 +14,7 @@ OmniRoute ir vietējā AI maršrutēšanas vārteja un informācijas panelis, ka
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API virsma priekš CLI/tools (377 nodrošinātāji, 156 izpildītāja moduļi)
+- Ar OpenAI saderīga API virsma CLI/tools (381 nodrošinātājs, 159 izpildītāja moduļi)
 - Request/response tulkojums starp pakalpojumu sniedzēju formātiem
 - Modeļa kombinācijas atkāpšanās (vairāku modeļu secība)
 - Strukturētas kombinētās darbības (`provider + model + connection`) ar izpildlaika secību pēc `compositeTiers`
@@ -405,7 +405,7 @@ Lai iegūtu informāciju par kārtulu kopas izveidi un sliekšņa regulēšanu, 
 
 `src/domain/` nosaukumtelpa centralizē politikas lēmumus, tāpēc maršruta apstrādātājiem pašiem nav jāmontē lockout/budget/fallback loģika.
 
-- Politikas dzinējs: `src/domain/policyEngine.ts` — vienots ieejas punkts pirmsizpildes novērtējumam (bloķēšanas → budžeta → rezerves pasūtīšana)
+- Politikas dzinējs: `src/domain/policyEngine.ts` — vienots ieejas punkts pirmsizpildes novērtēšanai (lokauts → budžeta → rezerves pasūtīšana)
 - Izmaksu noteikumi: `src/domain/costRules.ts`
 - Atkāpšanās politika: `src/domain/fallbackPolicy.ts`
 - Lokauta politika: `src/domain/lockoutPolicy.ts`
@@ -414,7 +414,7 @@ Lai iegūtu informāciju par kārtulu kopas izveidi un sliekšņa regulēšanu, 
 - Connection/model noteikumu galdnieks: `src/domain/connectionModelRules.ts`
 - Modeļu pieejamības momentuzņēmumi: `src/domain/modelAvailability.ts`
 - Pakalpojumu sniedzēja derīguma termiņa izsekošana: `src/domain/providerExpiration.ts`
-- Kvotas kešatmiņa: `src/domain/quotaCache.ts`
+- Kvotas kešatmiņa: `src/domain/quotaCache.ts`. Pakalpojumu sniedzēji pievieno un noņem kvotu logus (dažos plānos OpenAI atcēla 5 stundu Codex logu), tāpēc pakalpojumu sniedzēja adaptera izmantošanas nolasīšana apliecina, ka tā ir pilnīga (`quotasComplete`, sk. `src/lib/usage/usageReading.ts`) ir visa konta logu kopa: logs, kas bija zināms agrāk, bet tajā nav Claude `quota_snapshots` Codex. Daļēji pierādījumi (atbilžu galvenes, novecojušas kopijas) atjaunina tikai tajā esošos logus.
 - Noārdīšanās stāvoklis: `src/domain/degradation.ts`
 - Konfigurācijas audits: `src/domain/configAudit.ts`
 - OmniRoute atbildes metadatu veidotājs: `src/domain/omnirouteResponseMeta.ts`

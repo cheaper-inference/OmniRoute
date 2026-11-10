@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
-import { Collapsible, SegmentedControl } from "@/shared/components";
+import Collapsible from "@/shared/components/Collapsible";
+import SegmentedControl from "@/shared/components/SegmentedControl";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Checkbox from "@/shared/components/Checkbox";
@@ -466,7 +467,7 @@ export default function RtkContextPageClient() {
         <Alert
           variant="warning"
           icon={<Icon name="info" size={18} />}
-          className="[&>.ci-alert__dismiss]:hidden"
+          dismissible={false}
           description={t("masterSwitchOffAlert")}
         />
       )}

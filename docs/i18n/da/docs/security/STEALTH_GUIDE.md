@@ -246,19 +246,18 @@ Alle MITM-endepunkter kræver administrationsgodkendelse (`requireCliToolsAuth`)
 
 ---
 
-## Tilsidesættelser af User-Agent — miljøvariabler (`.env.example` afsnit 12)
+## User-Agent tilsidesætter — env vars (`.env.example` sektion 12)
 
-| Variabel                 | Standardværdi                                                   |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Variabel            | Misligholdelse                                |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Anvendes af `open-sse/executors/base.ts::buildHeaders()` via dynamisk opslag. **Opdatér disse, når udbyderne udgiver nye CLI-versioner** — forældede UA-strenge bliver afvist som værende fra forældede klienter.
+Forbruges af `open-sse/executors/base.ts::buildHeaders()` via dynamisk opslag.** Bump disse, når udbydere frigiver nye CLI versioner** — forældede UA -strenge begynder at blive afvist som forældede klienter.
 
 ## Omskiftere for CLI-kompatibilitetstilstand (`.env.example` afsnit 13)
 

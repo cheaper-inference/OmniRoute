@@ -78,6 +78,34 @@ describe("DataTable family adapters", () => {
     expect(onChange).toHaveBeenCalledWith("down");
   });
 
+  it("FilterPills render kit ToggleChips in a named group, with counts and single-select clicks", () => {
+    const onChange = vi.fn();
+    render(
+      <FilterPills
+        aria-label="Status"
+        value="ok"
+        onChange={onChange}
+        options={[
+          { value: "ok", label: "OK", count: 2, icon: "check" },
+          { value: "down", label: "Down" },
+        ]}
+      />
+    );
+    const group = screen.getByRole("group", { name: "Status" });
+    expect(group.className).toContain("flex-wrap");
+    const ok = screen.getByRole("button", { name: "OK 2" });
+    expect(ok.className).toContain("ci-toggle-chip");
+    expect(ok.getAttribute("data-size")).toBe("sm");
+    expect(ok.querySelector(".ci-toggle-chip__count")?.textContent).toBe("2");
+    expect(ok.querySelector(".ci-toggle-chip__icon svg")).not.toBeNull();
+    const down = screen.getByRole("button", { name: "Down" });
+    expect(down.getAttribute("aria-pressed")).toBe("false");
+    expect(down.querySelector(".ci-toggle-chip__count")).toBeNull();
+    // Clicking the active pill reports its own value again (it never toggles off).
+    fireEvent.click(ok);
+    expect(onChange).toHaveBeenLastCalledWith("ok");
+  });
+
   it("PresetSlider renders the kit slider with preset buttons", () => {
     const onChange = vi.fn();
     render(
@@ -109,6 +137,27 @@ describe("DataTable family adapters", () => {
     expect(items.map((i) => i.getAttribute("aria-checked"))).toEqual(["true", "false"]);
     fireEvent.click(items[1]);
     expect(onToggle).toHaveBeenCalledWith("status");
+  });
+
+  it("ColumnToggle is the kit DataTableColumnsMenu: trigger, scrollable menu, stays open", async () => {
+    const onToggle = vi.fn();
+    render(<ColumnToggle columns={columns} visible={{ status: false }} onToggle={onToggle} />);
+    const trigger = screen.getByRole("button", { name: "Toggle columns" });
+    expect(trigger.getAttribute("title")).toBe("Toggle columns");
+    expect(trigger.textContent).toBe("Columns");
+    expect(trigger.querySelector("svg.lucide-columns-3")).not.toBeNull();
+
+    fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+    fireEvent.click(trigger);
+    expect((await screen.findByRole("menu")).className).toContain("ci-menu--scrollable");
+
+    const items = screen.getAllByRole("menuitemcheckbox");
+    // A column missing from `visible` counts as visible.
+    expect(items.map((i) => i.getAttribute("aria-checked"))).toEqual(["true", "false"]);
+    fireEvent.click(items[0]);
+    fireEvent.click(items[1]);
+    expect(onToggle.mock.calls).toEqual([["name"], ["status"]]);
+    expect(screen.getByRole("menu")).not.toBeNull();
   });
 
   it("FilterBar searches, filters through selects and clears everything", () => {

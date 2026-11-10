@@ -127,7 +127,7 @@ function StepIndicator({
             <div
               aria-current={isCurrent ? "step" : undefined}
               className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium transition-colors
-                ${isDone ? "bg-success text-white" : isCurrent ? "bg-accent text-accent-foreground" : "bg-border text-text-muted"}`}
+                ${isDone ? "bg-success-bg text-success" : isCurrent ? "bg-accent text-accent-foreground" : "bg-border text-text-muted"}`}
             >
               {isDone ? <Icon name="check" size={14} /> : s}
             </div>

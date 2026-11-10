@@ -10,6 +10,7 @@ import {
 } from "node:crypto";
 import { arch, release } from "node:os";
 import { z } from "zod";
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 
 const CONFIG_URL = "https://zcode.z.ai/api/v1/agent/configs";
 const SOURCE_URL = "https://api.z.ai/api/anthropic/v1/messages";
@@ -57,7 +58,7 @@ export function zcodeSourceHeaders(): Record<string, string> {
   };
 }
 function stateFor(apiKey: string): State {
-  const id = createHash("sha256").update(apiKey).digest("hex");
+  const id = opaqueTokenFingerprint(apiKey);
   let state = states.get(id);
   if (!state) {
     if (states.size >= 32) states.delete(states.keys().next().value!);

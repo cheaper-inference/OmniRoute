@@ -27,5 +27,6 @@ test("codexAccount/write exposes the direct connection reader from db/providers"
 
 test("passiveCodex.ts does not import src/ directly", () => {
   const s = readFileSync("open-sse/services/tokenRefresh/passiveCodex.ts", "utf8");
+  assert.match(s, /export function isPassiveCodex/);
   assert.doesNotMatch(s, /(?:from|import\()\s*["'](?:@\/|(?:\.\.\/)+src\/)/);
 });

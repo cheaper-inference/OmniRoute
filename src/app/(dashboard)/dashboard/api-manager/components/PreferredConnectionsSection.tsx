@@ -22,7 +22,7 @@ export interface PreferredConnectionsSectionProps {
  * are listed: the preference is a ranking hint evaluated after the normal eligibility
  * pipeline, never an access grant.
  */
-export const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
+const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
   connections,
   allowAllConnections,
   selectedConnections,

@@ -1,0 +1,1 @@
+- **chore:** removed 10 unused exports flagged by the `dead-code` gate during the v3.8.53 cycle, plus the `fileExists` helper that only one of them used.

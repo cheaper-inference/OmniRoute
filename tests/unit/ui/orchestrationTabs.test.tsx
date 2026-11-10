@@ -349,6 +349,34 @@ describe("OverviewTab", () => {
     expect(clicked).toBe("cloud-agent:1");
     cleanup();
   });
+  it("state counters are kit Tiles that toggle the board filter through aria-pressed", () => {
+    const { c, cleanup } = render(
+      <OverviewTab
+        snapshot={snap as never}
+        comboEvents={[]}
+        onCardClick={() => {}}
+        onSeeInGraph={() => {}}
+      />
+    );
+    const tiles = Array.from(c.querySelectorAll<HTMLButtonElement>('[data-slot="tile"]'));
+    const running = tiles.find((el) => el.textContent?.includes("stateRunning"));
+    expect(running).toBeTruthy();
+    expect(running!.className).toContain("ci-tile");
+    expect(running!.getAttribute("aria-pressed")).toBe("false");
+    // The accessible name (the title) keeps the count and the state label.
+    const titleId = running!.getAttribute("aria-labelledby")!;
+    expect(c.querySelector(`#${CSS.escape(titleId)}`)?.textContent).toBe("1 stateRunning");
+    const cardsBefore = c.querySelectorAll("[data-orch-card]").length;
+    expect(cardsBefore).toBeGreaterThan(1);
+    act(() => running!.click());
+    expect(running!.getAttribute("aria-pressed")).toBe("true");
+    const visible = Array.from(c.querySelectorAll("[data-orch-card]"));
+    expect(visible.every((el) => el.textContent?.includes("task A"))).toBe(true);
+    act(() => running!.click());
+    expect(running!.getAttribute("aria-pressed")).toBe("false");
+    expect(c.querySelectorAll("[data-orch-card]").length).toBe(cardsBefore);
+    cleanup();
+  });
   it("formatElapsed guards against an unparseable startedAt and renders an em dash", () => {
     const snapBadStart = {
       ...snap,

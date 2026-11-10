@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getModelAliases, setModelAlias, getProviderConnections } from "@/models";
 import { AI_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { updateModelAliasSchema } from "@/shared/validation/schemas";
@@ -8,6 +9,8 @@ import { getSettings } from "@/lib/db/settings";
 import {
   createModelCapabilityResolutionSnapshot,
   getResolvedModelCapabilities,
+  getResolvedModelCapabilitiesWithLimitSources,
+  type ModelCapabilityResolutionSnapshot,
 } from "@/lib/modelCapabilities";
 import { isFreeModel, providerHasFreeModels } from "@/shared/utils/freeModels";
 import { getAllActiveSyncedModels } from "@/lib/db/models/activeSyncedCatalog";
@@ -27,11 +30,50 @@ interface GetModelsDependencies {
   createCapabilitySnapshot?: typeof createModelCapabilityResolutionSnapshot;
 }
 
+// `withLimits=1` opts into per-model token limits plus their provenance (`capsSource`).
+const getModelsQuerySchema = z.object({
+  withLimits: z
+    .enum(["1", "true", "0", "false"])
+    .optional()
+    .transform((value) => value === "1" || value === "true"),
+});
+
+function resolveModelCapabilityFields(
+  fullModel: string,
+  snapshot: ModelCapabilityResolutionSnapshot,
+  withLimits: boolean
+) {
+  if (!withLimits) {
+    return {
+      supportsVision:
+        getResolvedModelCapabilities(fullModel, undefined, snapshot).supportsVision === true,
+    };
+  }
+  const { capabilities, limitSources } = getResolvedModelCapabilitiesWithLimitSources(
+    fullModel,
+    snapshot
+  );
+  return {
+    supportsVision: capabilities.supportsVision === true,
+    contextWindow: capabilities.contextWindow,
+    maxInputTokens: capabilities.maxInputTokens,
+    maxOutputTokens: capabilities.maxOutputTokens,
+    capsSource: limitSources,
+  };
+}
+
 // GET /api/models - Get models with aliases (only from active providers by default)
 export async function handleGetModels(request: Request, dependencies: GetModelsDependencies = {}) {
   try {
     const { searchParams } = new URL(request.url);
     const showAll = searchParams.get("all") === "true";
+    const query = validateBody(getModelsQuerySchema, {
+      withLimits: searchParams.get("withLimits") ?? undefined,
+    });
+    if (isValidationFailure(query)) {
+      return NextResponse.json({ error: query.error }, { status: 400 });
+    }
+    const { withLimits } = query.data;
 
     const modelAliases = await getModelAliases();
 
@@ -178,9 +220,7 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
         fullModel,
         alias: modelAliases[fullModel] || m.model,
         available,
-        supportsVision:
-          getResolvedModelCapabilities(fullModel, undefined, capabilitySnapshot).supportsVision ===
-          true,
+        ...resolveModelCapabilityFields(fullModel, capabilitySnapshot, withLimits),
       };
     });
 

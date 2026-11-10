@@ -14,9 +14,17 @@ import assert from "node:assert/strict";
 import { proxyFetch } from "../../open-sse/utils/proxyFetch.ts";
 
 function withFastTimeout<T>(ms: number, fn: () => Promise<T>): Promise<T> {
+  const previousTimeout = process.env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS;
+  const previousNoProxy = process.env.NO_PROXY;
   process.env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS = String(ms);
+  // Only the synthetic host uses the injected direct transport. Keep the
+  // runner's proxy configuration for every other destination.
+  process.env.NO_PROXY = [previousNoProxy, "slow-ttfb.example"].filter(Boolean).join(",");
   return fn().finally(() => {
-    delete process.env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS;
+    if (previousTimeout === undefined) delete process.env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS;
+    else process.env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS = previousTimeout;
+    if (previousNoProxy === undefined) delete process.env.NO_PROXY;
+    else process.env.NO_PROXY = previousNoProxy;
   });
 }
 

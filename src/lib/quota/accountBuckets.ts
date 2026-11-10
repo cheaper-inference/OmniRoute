@@ -17,6 +17,7 @@
  * Part of: Quota Sharing Engine — Phase 3 (#3 multi-window buckets).
  */
 import { boundedMap } from "./boundedMap";
+import { isCompleteUsageReading } from "../usage/usageReading";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -201,11 +202,24 @@ export function updateAccountBuckets(
   processQuotaEntry(connectionId, "5h", quotas["session (5h)"], nowMs);
   processQuotaEntry(connectionId, "7d", quotas["weekly (7d)"], nowMs);
 
+  const reported = new Set<string>();
+  if (quotas["session (5h)"]) reported.add("5h");
+  if (quotas["weekly (7d)"]) reported.add("7d");
+
   // Per-model weekly windows: "weekly <model> (7d)" → "7d:<model>".
   for (const [key, entry] of Object.entries(quotas)) {
     const match = /^weekly (.+) \(7d\)$/.exec(key);
     if (match?.[1]) {
+      reported.add(`7d:${match[1]}`);
       processQuotaEntry(connectionId, `7d:${match[1]}`, entry, nowMs);
+    }
+  }
+  // A complete reading lists every window the account has: a saturation kept for a window it no
+  // longer reports (a removed session window, say) must not keep the account saturated.
+  if (isCompleteUsageReading(usageResult)) {
+    const prefix = storeKey(connectionId, "");
+    for (const key of [..._buckets.keys()]) {
+      if (key.startsWith(prefix) && !reported.has(key.slice(prefix.length))) _buckets.delete(key);
     }
   }
 }

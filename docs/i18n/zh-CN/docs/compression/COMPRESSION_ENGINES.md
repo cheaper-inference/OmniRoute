@@ -286,6 +286,95 @@ open-sse/services/compression/engines/mcpAccessibility/
 
 控制面板入口：`控制面板 -> 上下文与缓存 -> 压缩组合`。
 
+## 先决条件/操作员指南（CCR和会话重复数据删除）
+
+CCR (`ccr`) 和`session-dedup`替换或删除文本并留下**标记**在后面。本节是操作员参考，用于连接客户端、读取两个标记以及检索或诊断隐藏的内容。上面介绍了每个发动机的机械原理；这是“我如何运行它”层。
+
+### 传输和端点
+
+可以通过三种方式访问公开CCR工具的MCP服务器。默认基础URL是`http://localhost:20128` (`OMNIROUTE_BASE_URL`)：
+
+| 运输                             | URL /命令                               | 笔记                                                                                                     |
+| -------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Streamable HTTP （客户端，推荐） | `http://localhost:20128/api/mcp/stream` | 当前MCP客户端与之通信的端点。                                                                            |
+| 旧版SSE单例                      | `http://localhost:20128/api/mcp/sse`    | 较旧的单例运输。它**关闭**流式传输会话；使用`streamable-http`客户端来对抗`/api/mcp/stream`，而不是这个。 |
+| 标准输入输出                     | `omniroute --mcp`                       | 对于生成进程的IDE MCP配置。没有`--dev`标志； `omniroute --mcp`是 stdio 入口点。                          |
+
+### 存储层（重启后仍保留的层）
+
+CCR是一个**两层**存储，而不是仅在内存中：
+
+- **热内存层**—每区块上限 2 MiB，每主体 16 MiB，全局 64 MiB。条目默认为 24 小时TTL （最长 7 天）。从内存中完整MCP检索的上限为 256 KiB；任何更大的东西仍然可以通过 ranged / grep 模式到达。
+- **耐用的SQLite层**（`ccr_blocks`、 `COMPRESSION_CCR_DURABLE_STORE`，默认情况下处于打开状态） —支持内存层，因此块在LRU驱逐、重新启动或检索登陆到另一个实例时仍然存在。该行保留了块的TTL，因此超过其TTL块将从两层中消失。
+
+三个守卫使持久层保持有界—块在以下情况下仅保留内存：
+
+1. 区块结束了**第512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. 运行时为云运行时（无本地盘）；
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+因此，“块消失”并不是一个全面的重启故事：本地非云运行时上的sub-512 KB块可以通过持久层重新启动，直到其TTL耗尽。请参阅变量的[环境参考](../reference/ENVIRONMENT.md)。
+
+### 两个标记
+
+| 标记                                  | 意义                                                                                                  | 模型应该做什么                                                                                                                             |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `[CCR retrieve hash=<24hex> chars=N]` | 一个大块是按内容寻址存储的。                                                                          | 致电`omniroute_ccr_retrieve`** 24 十六进制哈希值逐字复制**取回原始文本。                                                                   |
+| `[dedup:ref sha=…]`                   | `session-dedup`删除了在同一会话的较早回合中已发送的文本。这是一个**有意识地回头看**，不是损失或错误。 | 做**不是**调用任何工具并执行**不是**尝试“重建”它。文本的第一次出现是规范副本；当前回合永远不会被重写，它会在以后的回合中进行重复数据删除。 |
+
+`[dedup:ref]`回顾是一个深思熟虑的协议决定—没有预发送重建。将其视为“此确切文本已在本次会议早些时候传输”。
+
+### 客户先决条件
+
+- **密钥（标准输入输出）：** stdio 调用者不携带每个请求的身份，因此它使用`OMNIROUTE_API_KEY`进行身份验证（在MCP服务器的`env`中设置）。如果没有它，调用者是匿名的，并且需要主体的工具可能会降级。
+- **`tools[]`是注入前提条件。**注入CCR检索协议指令 (#8033)**仅有的**当请求的通告`tools[]`证明客户端实际上可以到达`omniroute_ccr_retrieve`。该匹配是由分隔符（`__`、 `.`、 `/`、 `:`）界定的尾随段匹配—绝不是裸子字符串—因此命名空间名称（例如`mcp__gateway__omniroute_ccr_retrieve`仍然有效。不存在或不匹配的`tools[]`意味着该指令不是有意注入的。
+- **`codemode:false` （OpenCode客户端）。** OpenCode默认为代码模式，仅向模型通告其本机工具，并且**不**将MCP工具放在本机`tools[]`列表中。在MCP服务器条目上设置`codemode: false`以便通告`omniroute_ccr_*`工具。这是一个**客户**设置，不是OmniRoute设置。它还没有注入CCR指令： OpenCode将工具命名为`<server>_<tool>`，因此名为`omniroute`服务器公开`omniroute_omniroute_ccr_retrieve`，并且`_`不是匹配的分隔符之一。
+- **校长们。**存储和检索按照经过身份验证的主体（每个API密钥）进行隔离。一个键只能看到它自己的块。
+
+### 每个工具的范围
+
+对于小范围的HTTP/SSE调用者，范围强制始终处于开启状态。 `omniroute_` CCR工具需要：
+
+| 工具                     | 范围                |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+缺少范围会返回**MCP工具错误结果**（`isError: true`，不是HTTP 403 — `403 LOCAL_ONLY`是单独的环回路由保护身份验证）： `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.`最小远程密钥可以保存`mcp:connect` （授权`/api/mcp/`仅本地剥离）加上它需要的特定read/write范围。
+
+### 客户矩阵
+
+| 客户           | 运输                             | 使用配置                                                                                                                                                                                                 | `tools[]`打广告了？ （注入→ CCR指令）                                                                                                              |
+| -------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude代码     | 流式传输-http                    | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                        | 是— MCP 功能；注射。                                                                                                                               |
+| Cursor / Cline | `stdio`**或者**`streamable-http` | stdio： `omniroute --mcp`和`env`中的`OMNIROUTE_API_KEY` ；或指向`http://localhost:20128/api/mcp/stream`远程MCP条目（请参阅[设置指南→ MCP客户端配置](../guides/SETUP_GUIDE.md#mcp-client-configuration)） | 是的， — `omniroute_ccr_*`工具做广告。                                                                                                             |
+| OpenCode       | 流式传输-http                    | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`,加上`codemode: false`                                                                                                           | 仅通过`codemode: false`宣传的工具；该指令仍未注入，因为`omniroute_omniroute_ccr_retrieve`不匹配（请参阅[客户端先决条件](#client-prerequisites)）。 |
+| 兼容 OpenAI    | 兼容 OpenAI 的HTTP （聊天完成）  | 针对 OpenAI 兼容端点的标准聊天完成客户端                                                                                                                                                                 | **绝不**—一个普通的 OpenAI 兼容调用者永远不会被告知调用该工具，并且不会注入指令。                                                                  |
+
+### 检索限制和分页
+
+MCP工具文本结果被裁剪在`mcpAccessibility.maxTextChars` （默认`50000`）周围。块的`full`检索上限为 256 KiB —**不存在无限的完整检索**。当块的`chars=N`很大时，对其进行分页而不是拉动整个块：
+
+- 经验法则：**`chars > 40000` →使用`mode`** ，从来没有一个裸满。
+- `mode:"grep"` —正则表达式`pattern`逐行匹配，最多 1,000 条匹配行（`unique: true`删除重复），最便宜的“找到我需要的一行”。
+- `mode:"lines"` — 1 索引行范围；需要`start`和`end`。
+- `mode:"head"` / `mode:"tail"` — first/last `n`线。
+- `mode:"stats"` —不包含正文的行数、字符数和字节数。
+
+`mode:"lines"`与`start`/`end`一起使用可以在页面中遍历很长的块，而不是一次请求整个内容。
+
+### 工具命名
+
+检索工具当前名为`omniroute_ccr_retrieve` （ `omniroute_`前缀是跨服务器名称冲突的过时解决方法）。更清晰的有界后缀工具名称和对MCP JSON结果截断中间字符串的修复被作为上游后续跟踪进行跟踪；此页面仅记录当前的发货行为。
+
+### 会话生命周期
+
+Streamable-HTTP 会话空闲，服务器获取它们；空闲窗口由`OMNIROUTE_MCP_SESSION_IDLE_MS`设置（默认 5 分钟；通过名称引用，而不是硬编码值，因此该页面在更改时不会漂移）。空闲会话的症状是HTTP 404 和`Unknown Mcp-Session-Id` —补救措施是重新连接或重新启动会话，**不是**旋转关键点、更改范围或重命名工具。
+
 ## API 接口
 
 | 路由                                   | 用途                                         |
@@ -363,7 +452,7 @@ open-sse/services/compression/engines/mcpAccessibility/
 
 ## 验证
 
-此区域的重点关卡是：
+该区域的重点门是：
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

@@ -263,6 +263,12 @@ export function normalizeCodexTools(
         : typeof options?.defaultFunctionStrict === "boolean"
           ? options.defaultFunctionStrict
           : undefined;
+    const deferLoading =
+      typeof tool.defer_loading === "boolean"
+        ? tool.defer_loading
+        : typeof functionObject?.defer_loading === "boolean"
+          ? functionObject.defer_loading
+          : undefined;
 
     // Codex/OpenAI Responses API rejects `pattern` fields using regex lookaround
     // (e.g. `^(?=.*@).+$`) with a 400 "regex lookaround is not supported" error.
@@ -282,6 +288,7 @@ export function normalizeCodexTools(
     if (description) tool.description = description;
     tool.parameters = sanitizedParameters;
     restoreToolStrict(tool, strict);
+    if (deferLoading !== undefined) tool.defer_loading = deferLoading;
 
     validToolNames.add(name);
     return true;

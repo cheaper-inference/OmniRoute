@@ -1,11 +1,12 @@
 "use client";
 
 import { useId, useState } from "react";
-import type { ComponentProps, CSSProperties } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { cn } from "./lib/utils";
 import { Button } from "./button";
 
 export interface SliderPreset { value: number; label: string }
+export interface SliderMark { value: number; label?: ReactNode }
 
 export interface SliderProps extends Omit<ComponentProps<"input">, "type" | "value" | "defaultValue" | "onChange"> {
   value?: number;
@@ -17,6 +18,8 @@ export interface SliderProps extends Omit<ComponentProps<"input">, "type" | "val
   /** Optional shortcuts; dragging and keyboard adjustment remain continuous. */
   presets?: SliderPreset[];
   presetsLabel?: string;
+  /** Static scale under the track: a tick per value, with an optional label. Not interactive. */
+  marks?: SliderMark[];
 }
 
 export function Slider({
@@ -33,6 +36,7 @@ export function Slider({
   id,
   presets,
   presetsLabel = "Slider presets",
+  marks,
   ...props
 }: SliderProps) {
   const generatedId = useId();
@@ -44,6 +48,8 @@ export function Slider({
     if (controlled === undefined) setUncontrolled(next);
     onValueChange?.(next);
   };
+  const range = Number(max) - Number(min);
+  const visibleMarks = (marks ?? []).filter((mark) => Number.isFinite(mark.value) && mark.value >= Number(min) && mark.value <= Number(max));
   return (
     <div className={cn("ci-slider", className)}>
       {label || showValue ? <div className="ci-slider__header">{label ? <label htmlFor={inputId}>{label}</label> : <span />}{showValue ? <output htmlFor={inputId}>{formatValue(value)}</output> : null}</div> : null}
@@ -61,6 +67,16 @@ export function Slider({
         }}
         {...props}
       />
+      {visibleMarks.length ? <div className="ci-slider__marks" aria-hidden="true">
+        {visibleMarks.map((mark, index) => {
+          const position = range > 0 ? (mark.value - Number(min)) / range : 0;
+          return <span key={`${mark.value}-${index}`} className="ci-slider__mark" data-edge={position === 0 ? "start" : position === 1 ? "end" : undefined}
+            style={{ "--ci-slider-mark-position": position } as CSSProperties}>
+            <span className="ci-slider__mark-tick" />
+            {mark.label != null ? <span className="ci-slider__mark-label">{mark.label}</span> : null}
+          </span>;
+        })}
+      </div> : null}
       {presets?.length ? <div className="ci-slider__presets" role="group" aria-label={presetsLabel}>
         {presets.filter(preset => Number.isFinite(preset.value) && preset.value >= Number(min) && preset.value <= Number(max)).map(preset => {
           const position = (preset.value - Number(min)) / (Number(max) - Number(min)) * 100;

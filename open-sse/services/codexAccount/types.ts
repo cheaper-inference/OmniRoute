@@ -98,6 +98,8 @@ export interface CodexPersistedQuotaState {
   readonly limit7d?: number;
   readonly resetAt7d?: string | null;
   readonly observedAt?: string | null;
+  /** When each window was last observed; `observedAt` is the newest of them. */
+  readonly observedAtByWindow?: Readonly<Partial<Record<"5h" | "7d", string>>>;
 }
 
 export interface CodexChildQuotaHydration {
