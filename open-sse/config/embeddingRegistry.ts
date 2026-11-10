@@ -255,6 +255,14 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     models: [{ id: "mistral-embed", name: "Mistral Embed", dimensions: 1024 }],
   },
 
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "Bge_M3_FP16", name: "BGE-M3 (deAPI)", dimensions: 1024 }],
+  },
+
   together: {
     id: "together",
     baseUrl: "https://api.together.xyz/v1/embeddings",
@@ -577,6 +585,15 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     authHeader: "bearer",
     models: [{ id: "qwen3-embedding", name: "Qwen3 Embedding", dimensions: 4096 }],
   },
+
+  // ParalonCloud — OpenAI-compatible /v1/embeddings behind the chat API key.
+  paraloncloud: {
+    id: "paraloncloud",
+    baseUrl: "https://paraloncloud.com/v1/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "multilingual-e5-small", name: "Multilingual E5 Small", dimensions: 384 }],
+  },
 };
 
 const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {
@@ -589,6 +606,7 @@ const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {
   "lm-studio": "lmstudio",
   llamacpp: "llama-cpp",
   "llama.cpp": "llama-cpp",
+  paralon: "paraloncloud",
   gh: "github",
 };
 
