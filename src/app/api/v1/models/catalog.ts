@@ -1,6 +1,7 @@
 import { createCatalogConnectionExclusionFilter } from "@/lib/providerModels/copilotCatalogRejections";
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
+import { getUnavailableLocalCliProviderKeys } from "@/shared/services/localCliAvailability";
 import { getCombos } from "@/lib/db/combos";
 import { createHiddenModelLookup } from "@/lib/hiddenModelLookup";
 import { getSettings } from "@/lib/db/settings";
@@ -542,8 +543,14 @@ async function buildUnifiedModelsResponseCore(
     }
 
     // noAuth providers have no DB rows; settings.blockedProviders disables them.
+    // #18753: local-CLI providers (auggie, zcode) whose binary is absent on this host are not
+    // advertised; resolved once per build. An explicit connection row (added above) keeps them.
+    const unavailableLocalCli = getUnavailableLocalCliProviderKeys();
+    const isLocalCliUnavailable = (...keys: Array<string | null | undefined>) =>
+      keys.some((key) => key != null && unavailableLocalCli.has(key));
     for (const p of Object.values(NOAUTH_PROVIDERS)) {
       if (isNoAuthProviderBlocked(blockedProviders, p.id, "alias" in p ? p.alias : null)) continue;
+      if (isLocalCliUnavailable(p.id, "alias" in p ? p.alias : null)) continue;
       activeAliases.add(p.id);
       if ("alias" in p && typeof p.alias === "string") activeAliases.add(p.alias);
     }
@@ -590,7 +597,11 @@ async function buildUnifiedModelsResponseCore(
       const alias = providerIdToAlias[providerId] || providerKey;
       // noAuth providers have no connection rows — treat every model as eligible. (#2798)
       const isNoAuth = isNoAuthProviderKey(providerId, providerKey, alias);
-      if (isNoAuth && !isNoAuthProviderBlocked(blockedProviders, providerId, providerKey, alias))
+      if (
+        isNoAuth &&
+        !isNoAuthProviderBlocked(blockedProviders, providerId, providerKey, alias) &&
+        !isLocalCliUnavailable(providerId, providerKey, alias)
+      )
         return true;
       return hasEligibleConnectionForModel(
         getConnectionsForProvider(providerKey, providerId, alias),
@@ -1931,7 +1942,9 @@ async function buildUnifiedModelsResponseCore(
           )
             continue;
           // noAuth providers have no connection rows; keep auth providers gated. (#2798/#3200)
-          const isNoAuthProvider = isNoAuthProviderKey(canonicalProviderId, providerId, alias);
+          const isNoAuthProvider =
+            isNoAuthProviderKey(canonicalProviderId, providerId, alias) &&
+            !isLocalCliUnavailable(canonicalProviderId, providerId, alias);
           if (
             (!isNoAuthProvider ||
               isNoAuthProviderBlocked(blockedProviders, canonicalProviderId, providerId, alias)) &&
