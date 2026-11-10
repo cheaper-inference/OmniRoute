@@ -142,7 +142,7 @@ type AssistantMessageLike = {
 };
 
 type AssistantMessageCacheContext = {
-  scope?: string;
+  scope?: string | null;
   historyMessages?: AssistantMessageLike[];
   videoTranscriptSensitive?: boolean;
 };
@@ -300,6 +300,33 @@ function canonicalizeHistoryMessage(message: AssistantMessageLike): unknown {
   });
 }
 
+/** The owner of a request's reasoning entries: its API key, plus its session when known. */
+export function buildReasoningCacheScope(
+  apiKeyId: unknown,
+  sessionKey: string | null | undefined
+): string {
+  const apiKeyScope = `api-key:${String(apiKeyId ?? "local")}`;
+  return sessionKey ? `${apiKeyScope}\x1f${sessionKey}` : apiKeyScope;
+}
+
+/**
+ * Cache key for reasoning tied to one tool call. Clients can reuse ids such as `call_0`, so the
+ * id only selects an entry inside its scope. Callers with no request context keep the plain id.
+ */
+export function buildToolCallCacheKey(
+  scope: string | null | undefined,
+  toolCallId: string
+): string {
+  const normalizedScope = scope?.trim();
+  if (!normalizedScope || !toolCallId) return toolCallId;
+  const digest = createHash("sha256")
+    .update(normalizedScope)
+    .update("\x1f")
+    .update(toolCallId)
+    .digest("hex");
+  return `tool-call:${digest}`;
+}
+
 export function buildAssistantMessageCacheKey(
   scope: string | null | undefined,
   messages: AssistantMessageLike[],
@@ -380,7 +407,12 @@ export function cacheReasoningFromAssistantMessage(
     return 1;
   }
 
-  cacheReasoningBatch(toolCallIds, provider, model, reasoning);
+  cacheReasoningBatch(
+    toolCallIds.map((id) => buildToolCallCacheKey(context?.scope, id)),
+    provider,
+    model,
+    reasoning
+  );
   return toolCallIds.length;
 }
 

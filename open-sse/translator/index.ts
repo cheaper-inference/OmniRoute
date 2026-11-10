@@ -43,6 +43,7 @@ import { acceptsInlineToolAdditions, hoistToolAdditions } from "./helpers/claude
 import { isStrictResponsesToolHistoryEnabled } from "./helpers/responsesToolHistory.ts";
 import {
   buildAssistantMessageCacheKey,
+  buildToolCallCacheKey,
   lookupReasoning,
   recordReplay,
   requiresReasoningReplay,
@@ -287,7 +288,7 @@ function replayOpenAIReasoningMessage(
       : null;
   const cacheKey = hasToolCalls
     ? typeof firstToolCall?.id === "string"
-      ? firstToolCall.id
+      ? buildToolCallCacheKey(options.reasoningCacheScope, firstToolCall.id)
       : ""
     : buildAssistantMessageCacheKey(options.reasoningCacheScope, messages, messageIndex);
   if (cacheKey && !options.videoTranscriptSensitive) {
@@ -734,6 +735,7 @@ export function translateRequest(
     const preserveCache = isClaudePassthrough || options?.preserveCacheControl === true;
     result = prepareClaudeRequest(result, provider, preserveCache, model, {
       fallbackToHeuristicWhenNoMarkers: true,
+      reasoningCacheScope: options?.reasoningCacheScope,
     });
   }
 
@@ -875,7 +877,9 @@ export function translateRequest(
         // Client reasoning wins above. Otherwise try authentic replay before
         // retaining Kimi Code's empty protocol marker as the final fallback.
         if (firstToolUseId && !options?.videoTranscriptSensitive) {
-          const cached = lookupReasoning(firstToolUseId);
+          const cached = lookupReasoning(
+            buildToolCallCacheKey(options?.reasoningCacheScope, firstToolUseId)
+          );
           if (cached) {
             if (thinkingBlock) {
               thinkingBlock.type = "thinking";
