@@ -138,7 +138,7 @@ test("handleWebFetch wraps fetch errors via buildErrorBody (no raw stack)", asyn
   }
 });
 
-test("handleWebFetch drops depth and wait_for_selector on the firecrawl cloud endpoint", async () => {
+test("handleWebFetch sends a selector wait action and drops depth on the firecrawl cloud endpoint", async () => {
   const originalFetch = globalThis.fetch;
   let captured: { body: Record<string, unknown> } = { body: {} };
 
@@ -159,6 +159,7 @@ test("handleWebFetch drops depth and wait_for_selector on the firecrawl cloud en
 
     assert.equal(captured.body.maxDepth, undefined, "v2 scrape has no maxDepth");
     assert.equal(captured.body.waitFor, undefined, "v2 waitFor is a delay, not a selector");
+    assert.deepEqual(captured.body.actions, [{ type: "wait", selector: "main" }]);
   } finally {
     globalThis.fetch = originalFetch;
   }

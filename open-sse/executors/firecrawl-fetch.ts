@@ -97,17 +97,22 @@ export async function firecrawlFetch(opts: FirecrawlScrapeOptions): Promise<WebF
   // The `includeMetadata` flag only controls whether we surface metadata
   // in our response (see response parsing below).
 
-  // `depth` and `wait_for_selector` stay on our own request schema, but the
-  // Firecrawl v2 scrape endpoint cannot express either: maxDepth moved to the
-  // crawl endpoint as maxDiscoveryDepth, and waitFor is a millisecond delay,
-  // not a CSS selector. Sending the selector string there fails v2 validation.
-  // A self-hosted base URL still speaks v1, which accepts both fields.
+  // `depth` stays on our own request schema, but the Firecrawl v2 scrape
+  // endpoint cannot express it: maxDepth moved to the crawl endpoint as
+  // maxDiscoveryDepth. A self-hosted base URL still speaks v1, which accepts it.
   if (!isDefaultBaseUrl && depth > 0) {
     requestBody.maxDepth = depth;
   }
 
-  if (!isDefaultBaseUrl && waitForSelector) {
-    requestBody.waitFor = waitForSelector;
+  // v2 waitFor is a millisecond delay, not a selector. A selector goes through
+  // the actions list, which waits until the element is visible. v1 takes the
+  // selector string directly in waitFor.
+  if (waitForSelector) {
+    if (isDefaultBaseUrl) {
+      requestBody.actions = [{ type: "wait", selector: waitForSelector }];
+    } else {
+      requestBody.waitFor = waitForSelector;
+    }
   }
 
   const controller = new AbortController();
