@@ -5,6 +5,8 @@ const http = require("node:http");
 const HIGH_RISK_METHOD_RULES = [
   [/^\/api\/auth\/login\/?$/, ["POST"]],
   [/^\/api\/auth\/logout\/?$/, ["POST"]],
+  [/^\/api\/auth\/mfa\/(?:setup|enable|disable|verify)\/?$/, ["POST"]],
+  [/^\/api\/auth\/mfa\/status\/?$/, ["GET", "HEAD"]],
   // Next automatically serves HEAD through GET for the status route.
   [/^\/api\/auth\/status\/?$/, ["GET", "HEAD"]],
   [/^\/api\/keys\/?$/, ["GET", "POST"]],
