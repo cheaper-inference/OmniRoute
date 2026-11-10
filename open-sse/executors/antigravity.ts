@@ -475,6 +475,19 @@ function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, un
     : { ...request, systemInstruction };
 }
 
+/** Remove empty `{}` systemInstruction parts only; every other part and field is kept. */
+function dropEmptyAntigravitySystemParts<T extends Record<string, unknown>>(request: T): T {
+  const record = asRecord(request.systemInstruction);
+  if (!Array.isArray(record?.parts)) return request;
+  const parts = (record.parts as unknown[]).filter(
+    (p) => Object.keys(asRecord(p) ?? {}).length > 0
+  );
+  if (parts.length === record.parts.length) return request;
+  if (parts.length > 0) return { ...request, systemInstruction: { ...record, parts } };
+  const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
+  return withoutSystemInstruction as T;
+}
+
 function sanitizeAntigravityGeminiRequest(
   request: Record<string, unknown>
 ): Record<string, unknown> {
@@ -904,7 +917,9 @@ export class AntigravityExecutor extends BaseExecutor {
         ? stripTrailingAntigravityAssistantTurn(
             normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
           )
-        : rawTransformedRequest;
+        : // Other chat models (gemini-4-argon-high, gpt-oss-120b-medium): no trailing-turn strip
+          // and no identity rewrite, but empty system parts are rejected the same way.
+          dropEmptyAntigravitySystemParts(rawTransformedRequest);
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
     // Identity labels join (never replace) the caller's own labels (#16618).
