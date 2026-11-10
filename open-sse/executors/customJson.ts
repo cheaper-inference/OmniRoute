@@ -8,9 +8,11 @@
  * streams) so the regular response translators deliver it in the client's format.
  *
  * Business calls can have side effects, so the request is never retried here
- * (`retry: false`, no redirects) and never replayed by routing fallback (see
+ * (no retry, no redirects) and never replayed by routing fallback (see
  * open-sse/utils/noReplayResponse.ts). The outbound URL guard is enforced on every call,
- * not only when the node is saved.
+ * not only when the node is saved: the string-level check plus the connect-time
+ * DNS-rebinding guard of `dispatchGuarded()`, the same transport every other executor
+ * uses for an operator-supplied base URL (kept in the engine — no open-sse → src import).
  */
 import { randomUUID } from "node:crypto";
 import type { ExecuteInput, ExecutorExecuteResult } from "./base.ts";
@@ -24,8 +26,12 @@ import {
   normalizeCustomJsonConfig,
 } from "../utils/customJson.ts";
 import { errorResponse } from "../utils/error.ts";
-import { getProviderOutboundGuard } from "./dispatchPin.ts";
-import { SafeOutboundFetchError, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { assertDispatchUrlAllowed, dispatchGuarded } from "./dispatchPin.ts";
+import { isConnectGuardRefusal } from "../utils/connectGuardDispatcher.ts";
+import { FetchTimeoutError, fetchWithTimeout } from "../utils/fetchTimeout.ts";
+
+/** Provider id used when the caller (the dashboard test probe) has no connection id. */
+const DEFAULT_CUSTOM_JSON_PROVIDER = "openai-compatible-custom-json";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -44,9 +50,8 @@ function setHeader(headers: Record<string, string>, name: string, value: string)
 }
 
 function fetchFailureStatus(error: unknown): number {
-  if (!(error instanceof SafeOutboundFetchError)) return 502;
-  if (error.code === "URL_GUARD_BLOCKED" || error.code === "INVALID_URL") return 403;
-  if (error.code === "TIMEOUT") return 504;
+  if (isConnectGuardRefusal(error)) return 403;
+  if (error instanceof FetchTimeoutError) return 504;
   return 502;
 }
 
@@ -114,17 +119,33 @@ function prepareRequest(input: ExecuteInput, providerData: JsonRecord, endpoint:
   return { config, payload, headers, loggedHeaders } satisfies PreparedRequest;
 }
 
-async function callEndpoint(input: ExecuteInput, endpoint: string, prepared: PreparedRequest) {
+async function callEndpoint(
+  input: ExecuteInput,
+  provider: string,
+  endpoint: string,
+  prepared: PreparedRequest
+) {
   try {
-    return await safeOutboundFetch(endpoint, {
+    assertDispatchUrlAllowed(provider, endpoint);
+  } catch {
+    // Invalid, private (public-only mode) or cloud-metadata URL: refused before any request.
+    return errorResponse(403, "Custom JSON endpoint request failed");
+  }
+  try {
+    const reply = await fetchWithTimeout(endpoint, {
       method: prepared.config.method,
       headers: prepared.headers,
       body: JSON.stringify(prepared.payload),
-      guard: getProviderOutboundGuard(),
-      retry: false,
-      allowRedirect: false,
+      // A pinned redirect mode makes dispatchGuarded send exactly one request (no follow).
+      redirect: "manual",
       signal: input.signal ?? undefined,
+      fetchFn: (url, init) => dispatchGuarded(provider, String(url), init ?? {}, input.credentials),
     });
+    if (reply.status >= 300 && reply.status < 400) {
+      void reply.body?.cancel().catch(() => {});
+      return errorResponse(502, "Custom JSON endpoint request failed");
+    }
+    return reply;
   } catch (error) {
     if (input.signal?.aborted) throw input.signal.reason ?? error;
     return errorResponse(fetchFailureStatus(error), "Custom JSON endpoint request failed");
@@ -142,7 +163,10 @@ async function completionFromReply(input: ExecuteInput, config: CustomJsonConfig
   }
 }
 
-export async function executeCustomJson(input: ExecuteInput): Promise<ExecutorExecuteResult> {
+export async function executeCustomJson(
+  input: ExecuteInput,
+  provider: string = DEFAULT_CUSTOM_JSON_PROVIDER
+): Promise<ExecutorExecuteResult> {
   const providerData = asRecord(input.credentials?.providerSpecificData);
   const endpoint = typeof providerData.baseUrl === "string" ? providerData.baseUrl.trim() : "";
 
@@ -163,7 +187,7 @@ export async function executeCustomJson(input: ExecuteInput): Promise<ExecutorEx
     headers: prepared.loggedHeaders,
     transformedBody: prepared.payload,
   };
-  const upstream = await callEndpoint(input, endpoint, prepared);
+  const upstream = await callEndpoint(input, provider, endpoint, prepared);
   // Upstream errors pass through unchanged; chatCore parses and sanitizes them.
   if (!upstream.ok) return { ...result, response: upstream };
   return { ...result, response: await completionFromReply(input, prepared.config, upstream) };

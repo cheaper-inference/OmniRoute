@@ -3,10 +3,7 @@ import {
   parseAndValidateNonMetadataUrl,
   parseAndValidatePublicUrl,
 } from "@/shared/network/outboundUrlGuard";
-import {
-  getProviderOutboundGuard,
-  getProviderValidationGuard,
-} from "@/shared/network/outboundUrlGuardPolicy";
+import { getProviderValidationGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { getGuardedDispatcher } from "../utils/connectGuardDispatcher.ts";
 import {
   hasAmbientProxyContext,
@@ -14,8 +11,6 @@ import {
   isTlsFingerprintActive,
   resolveProxyForRequest,
 } from "../utils/proxyFetch.ts";
-
-export { getProviderOutboundGuard };
 
 /**
  * String-level SSRF guard for the runtime dispatch path (GHSA-4f49-hj64-448x) — moved verbatim
