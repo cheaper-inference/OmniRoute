@@ -27,6 +27,31 @@ export function isCortecsRerankUrl(value: string): boolean {
 const isCount = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 
+/** Copy only the token counts that satisfy the upstream's numeric contract. */
+function pickTokenCounts(source: Record<string, unknown>): Usage {
+  const usage: Usage = {};
+  for (const key of ["prompt_tokens", "completion_tokens", "total_tokens"]) {
+    const count = source[key];
+    if (isCount(count)) usage[key] = count;
+  }
+  return usage;
+}
+
+/** A positive finite USD-per-credit rate, or null when none was configured validly. */
+function parseCreditPriceUsd(creditPriceUsd: string | undefined): number | null {
+  if (!creditPriceUsd?.trim()) return null;
+  const rate = Number(creditPriceUsd);
+  return Number.isFinite(rate) && rate > 0 ? rate : null;
+}
+
+/** USD value of a credit quantity; zero credits stay a known zero without any rate. */
+function creditsToUsd(credits: number | null, rate: number | null): number | null {
+  if (credits === 0) return 0;
+  if (credits === null || rate === null) return null;
+  const converted = credits * rate;
+  return Number.isFinite(converted) ? converted : null;
+}
+
 /**
  * Cortecs documents usage.cost as credits, NOT USD. Keep only numerical
  * metering fields. A positive USD-per-credit rate is explicit operator input;
@@ -38,20 +63,10 @@ export function normalizeCortecsRerankUsage(
 ): CortecsRerankBill {
   const source =
     raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
-  const usage: Usage = {};
-  for (const key of ["prompt_tokens", "completion_tokens", "total_tokens"]) {
-    if (isCount(source[key])) usage[key] = source[key];
-  }
+  const usage = pickTokenCounts(source);
   const credits = isCount(source.cost) ? source.cost : null;
   if (credits !== null) usage.provider_credits = credits;
-  const rate = creditPriceUsd?.trim() ? Number(creditPriceUsd) : Number.NaN;
-  const converted =
-    credits === 0
-      ? 0
-      : credits !== null && Number.isFinite(rate) && rate > 0
-        ? credits * rate
-        : Number.NaN;
-  const costUsd = Number.isFinite(converted) && converted >= 0 ? converted : null;
+  const costUsd = creditsToUsd(credits, parseCreditPriceUsd(creditPriceUsd));
   if (costUsd !== null) usage.cost_usd = costUsd;
   return { usage, costUsd };
 }
