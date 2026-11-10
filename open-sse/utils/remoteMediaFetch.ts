@@ -173,6 +173,23 @@ async function cancelBody(response: Response): Promise<void> {
 }
 
 /**
+ * Pick the fetch for one redirect hop: an injected fetch wins, then the test override, then a
+ * connection pinned to the vetted address when pinning applies, else the global fetch.
+ */
+function selectHopFetch(
+  injectedFetch: typeof fetch | undefined,
+  pin: boolean,
+  addresses: Array<{ address: string; family: number }>
+): typeof fetch {
+  if (injectedFetch) return injectedFetch;
+  if (pinnedFetchTestOverride) return pinnedFetchTestOverride;
+  if (pin && addresses.length) {
+    return createPinnedFetch(addresses[0].address, addresses[0].family);
+  }
+  return fetch;
+}
+
+/**
  * Follow redirects by hand, checking every hop, and return the first non-redirect response
  * without reading its body. A 3xx body is discarded before the next hop.
  */
@@ -202,12 +219,7 @@ async function openRemoteMedia(
     const proxied =
       options.pinDirectOnly === true && !!resolveProxyForRequest(currentUrl.toString()).proxyUrl;
     const addresses = await assertHostnameResolvesPublic(currentUrl, guard, lookup, !proxied);
-    const fetchImpl =
-      injectedFetch ??
-      pinnedFetchTestOverride ??
-      (pinDns && !proxied && addresses.length
-        ? createPinnedFetch(addresses[0].address, addresses[0].family)
-        : fetch);
+    const fetchImpl = selectHopFetch(injectedFetch, pinDns && !proxied, addresses);
     const response = await fetchImpl(currentUrl.toString(), {
       method: "GET",
       redirect: "manual",
