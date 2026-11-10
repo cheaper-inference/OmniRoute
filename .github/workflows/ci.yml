@@ -377,8 +377,9 @@ jobs:
   # steps stay ADVISORY via step-level continue-on-error (scanner install,
   # vuln/osv ratchet, OpenAPI/oasdiff breaking-change, circular-deps/dpdm): they
   # depend on external binaries/state that may legitimately self-skip, so they must
-  # never block. The blocking gates themselves SKIP (exit 0) when their binary/plugin
-  # is absent — only a measured regression on the SAME metric the baseline froze
+  # never block. Most blocking gates SKIP (exit 0) when their binary/plugin is absent;
+  # the osv vuln ratchet instead fails as INCOMPLETE (exit 2) on a missing measurement.
+  # Otherwise only a measured regression on the SAME metric the baseline froze
   # blocks. The CodeQL ratchet was PROMOTED to the quality-gate job (v3.8.26).
   # SonarQube needs SONAR_TOKEN/SONAR_HOST_URL secrets.
   quality-extended:
@@ -472,9 +473,11 @@ jobs:
       - name: Secret scan (gitleaks, ratchet, blocking)
         run: npm run check:secrets -- --ratchet
       # BLOCKING ratchet (v3.8.27 cycle-end): vulnCount must not regress vs the
-      # baseline. --ratchet exits 1 on a measured regression (measured > baseline);
-      # it SKIPs (exit 0) when osv-scanner is absent or osv.dev is unreachable (a
-      # missing/failed measurement never blocks). See the CVE-variance note in
+      # baseline. --ratchet exits 1 on a measured regression (measured > baseline)
+      # and exits 2 (INCOMPLETE) when osv-scanner is absent, its run fails or its
+      # report is invalid — a missing measurement is never a pass. An install
+      # failure in the advisory-scanner step above surfaces here as
+      # `vulnCount=INCOMPLETE reason=binary-absent`. See the CVE-variance note in
       # docs/security/SUPPLY_CHAIN.md — a newly-disclosed CVE on an unchanged dep can
       # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount.
       - name: Vulnerability ratchet (osv-scanner, ratchet, blocking)

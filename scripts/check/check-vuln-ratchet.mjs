@@ -4,7 +4,9 @@
 //
 // Saída (stdout):
 //   vulnCount=N         — total de vulnerabilidades encontradas (todos os severities)
-//   vulnCount=SKIP reason=binary-absent   — osv-scanner não está no PATH
+//   vulnCount=SKIP reason=<r>        — medição indisponível em modo advisory (exit 0)
+//   vulnCount=INCOMPLETE reason=<r>  — medição indisponível com --ratchet (exit 2);
+//                                      <r> = binary-absent | invalid-report | parse-error | …
 //
 // Advisory mode reports findings without blocking. With --ratchet, exit 1 means
 // a measured regression and exit 2 means INCOMPLETE (tool/report/baseline missing).
@@ -22,7 +24,7 @@
 //   node scripts/check/check-vuln-ratchet.mjs
 //   node scripts/check/check-vuln-ratchet.mjs --json    # imprime JSON bruto do osv-scanner
 //   node scripts/check/check-vuln-ratchet.mjs --quiet   # suprime logs de diagnóstico
-//   node scripts/check/check-vuln-ratchet.mjs --ratchet  # falha (exit 1) numa regressão
+//   node scripts/check/check-vuln-ratchet.mjs --ratchet  # exit 1 numa regressão, exit 2 se INCOMPLETE
 
 import fs from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
