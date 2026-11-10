@@ -1020,31 +1020,28 @@ Piletid on nähtavad ainult need loonud API-võtmele. Taasesitus, mille tulemus 
 
 ---
 
-## Iseteeninduslik kasutus (`/api/usage/om-usage`)
+## Iseteeninduse kasutamine (`/api/usage/om-usage`)
 
-Iga API-võti saab lugeda **enda** kasutust ja kvoote — haldusautentimist pole vaja. See on lõpp-punkt,
-mida klient (CLI, OmniCopiloti paneel) kasutab, et näidata võtme omanikule tema kulutusi.
+Iga API klahv suudab lugeda** oma** kasutus ja kvoodid — haldamise autentimine puudub. See on lõpp-punkt, mida klient (CLI, OmniCopilot paneel) kasutab võtmehoidjale oma kulutuste näitamiseks.
 
 ```bash
-# Tekstivorm (ajalooline leping — terminali jaoks lihttekst)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Struktureeritud vorm — seda kasutajaliides tarbib
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Võtmel peab olema lubatud **`allowUsageCommand`** (vaikimisi välja lülitatud — juhtpaneeli API-võtmete
-haldur lülitab selle võtme kaupa sisse või välja). Ilma selleta vastab lõpp-punkt olekuga `403`.
+Võtmel peab olema**`allowUsageCommand`** lubatud (vaikimisi väljas — armatuurlaua API-võtmehaldur lülitab selle võtme kohta sisse). Ilma selleta vastab lõpp-punkt `403`.
 
-`?format=json` tagastab eristatava struktuuri, nii et helistaja ei loe keeldumise korral kunagi
-andmevälja. Eduka vastuse korral:
+`?format=json` tagastab eristatava kuju, nii et helistaja ei loe kunagi keeldumise andmevälja. Edu kohta:
 
 ```jsonc
 {
   "allowed": true,
-  // olemas ainult siis, kui võti lubas võtmekohased kasutuspiirangud (päevased/nädalased USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1053,9 +1050,9 @@ andmevälja. Eduka vastuse korral:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // valitud teenusepakkuja kvoodi hetktõmmis või null, kui midagi pole veel vahemällu salvestatud:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // iga ühenduse hetktõmmis, et kasutajaliides saaks kuvada mitut teenusepakkujat kõrvuti:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1063,57 +1060,49 @@ andmevälja. Eduka vastuse korral:
 }
 ```
 
-Keeldumise korral (`401` vigane võti / `403` pole lubatud) tagastab sama marsruut
-`{ "allowed": false, "error": { "message": "…" } }` — olemasolev, kuid tühi `personal`/`provider`
-(võti on lubatud, kuid midagi pole veel teada) tähistab keeldumisest erinevat olekut ja ainult JSON-vorm
-eristab neid.
+Keeldumisel (`401` halb võti / `403` pole lubatud) tagastab sama marsruut `{ "allowed": false, "error": { "message": "…" } }` — a olemasolev, kuid tühi `personal`/`provider` (võti lubatud, midagi pole veel õpitud) on keeldumisest erinev olek ja ainult JSON vorm eristab neid.
 
-**Autentimine:** helistaja enda Bearer API-võti, mida valideeritakse funktsiooniga `isValidApiKey` — see ei ole
-haldusliides (`/api/keys/…`), mis jääb `requireManagementAuth`-i kaitse alla.
+**Auth:** helistaja enda kandja API klahv, mis on kinnitatud `isValidApiKey` — see _ei ole_ halduspind (`/api/keys/…`), mis jääb `requireManagementAuth` taha.
 
-### Toored ja läviväärtusega korrigeeritud kvoodiprotsendid
+### Toores vs. piirmääraga kohandatud kvoodi protsendid
 
-`/api/usage/om-usage` kasutamisel peaksid helistajad arvestama erinevusega, mis on esitatud
-**lihtteksti väljundi** ja struktureeritud **JSON-väljundi** protsentides:
+`/api/usage/om-usage` tarbimisel peaksid helistajad tähele panema erinevust protsendimäärade vahel** lihtteksti väljund** ja struktureeritud**JSON väljund** :
 
-| Aspekt                        | Lihtteksti vorming (`/api/usage/om-usage` / `@@om-usage`)                                                            | JSON-vorming (`?format=json`)                                                              |
-| :---------------------------- | :------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
-| **Väljundiväli**              | `NN% left` (nt `20% left`)                                                                                           | `provider.quotas` / `providers[].quotas`                                                   |
-| **Mõõtmine**                  | **Läviväärtusega korrigeeritud kasutatav lubatud maht**: allesjäänud maht üle läviväärtuse                           | **Teenusepakkuja toores kvoot**: korrigeerimata teenusepakkuja mõõtmine                    |
-| **Läviväärtuse skaleerimine** | Skaleeritakse funktsiooni `effectiveRemainingPercent()` kaudu, nii et kaitstud reserv kuvatakse väärtusena `0% left` | Puudub (teenusepakkuja teatatud töötlemata hetktõmmise väärtused)                          |
-| **Läviväärtuse andmed**       | Arvestatakse kuvatavas protsendis                                                                                    | Salvestatakse iga ühenduse puhul `quotaWindowThresholds`-i (või serveri vaikeväärtustesse) |
-| **Peamine tarbija**           | Interaktiivsed CLI-d, terminaliviibad, inimoperaatorid                                                               | Programmilised integratsioonid, juhtpaneelid, analüütika, arvelduse jälgijad               |
+| Aspekt                      | Lihtteksti vorming (`/api/usage/om-usage` / `@@om-usage`)                                  | JSON -vorming (`?format=json`)                                               |
+| :-------------------------- | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- |
+| **Väljundväli**             | `NN% left` (nt `20% left`)                                                                 | `provider.quotas` / `providers[].quotas`                                     |
+| **Mõõtmine**                | **Piirmääraga kohandatud kasutatav varu** : järelejäänud võimsus üle piirmäära             | **Toores ülesvoolu kvoot** : teenusepakkuja kohandamata mõõtmine             |
+| **Katkestuse skaleerimine** | Skaleeritud `effectiveRemainingPercent()` kaudu, nii et kaitstud reserv loetakse `0% left` | Puudub (pakkuja esitatud hetktõmmise töötlemata väärtused)                   |
+| **Läveandmed**              | Kaasatud kuvatava protsendi hulka                                                          | Salvestatud `quotaWindowThresholds` ühenduse kohta (või serveri vaikeseaded) |
+| **Esmane tarbija**          | Interaktiivne CLIs, terminaliviibad, inimoperaatorid                                       | Programmilised integratsioonid, armatuurlauad, analüüs, arvelduse jälgijad   |
 
-#### Läviväärtuse korrigeerimise valem
+#### Lõike reguleerimise valem
 
-OmniRoute toetab ennetavaid kvoodilävesid, et vältida teenusepakkuja kvoodi ammendumist (seadistatakse ühenduse
-`quotaWindowThresholds`-i, teenusepakkuja vaikeväärtuste või globaalsete vastupidavusseadete kaudu). Kui kvoodiaknas on aktiivne
-läviväärtus (nt `cutoff = 25%`), arvutab tekstirenderdaja allesjäänud lubatud mahu järgmiselt:
+OmniRoute toetab proaktiivseid kvootide piiramist, et vältida ülesvoolu ammendumist (konfigureeritud ühenduse `quotaWindowThresholds` kaudu, pakkuja vaikeseaded või globaalsed vastupidavuse seaded). Kui piirlävi (nt `cutoff = 25%`) on kvoodiaknas aktiivne, arvutab teksti renderdaja järelejäänud varu järgmiselt:
 
-- Kui `remaining <= cutoff`: tagastatakse `0%`.
-- Kui `remaining > cutoff`: tagastatakse `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Kui `remaining <= cutoff`: tagastab `0%`.
+- Kui `remaining > cutoff`: tagastab `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Vormindatud tekstiväljund ümardatakse lähima täisarvuni (`Math.round(...)`).
+Vormindatud tekstiväljund ümardab selle lähima täisarvuni (`Math.round(...)`).
 
-#### Näitlik näide
+#### Illustreeriv näide
 
-Mõelge teenusepakkuja aknale, mille **töötlemata kasutus on 60%** (seega **töötlemata allesjäänud kvoot on 40%**) ja konfigureeritud
-**allesjäänud kvoodi katkestuslävi** on **25%**:
+Kaaluge teenusepakkuja akent koos** 60% toores kasutus** (seega** 40% toorest järelejäänud kvoot** ) ja konfigureeritud** 25% järelejäänud kvoodi piir** lävi:
 
-| Esitusviis                           | Arvutus                                            | Allesjäänud |            Tuletatud kasutus             |
-| :----------------------------------- | :------------------------------------------------- | :---------: | :--------------------------------------: |
-| **Töötlemata JSON (`?format=json`)** | Teenusepakkuja hetktõmmis (`quotas[window]`)       |   **40%**   |                 **60%**                  |
-| **Tekstivorming (`NN% left`)**       | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |   **20%**   | **80%** (kui arvutada `100 - remaining`) |
+| Esindus                              | Arvutamine                                         | Ülejäänud |            Kaudselt kasutatud            |
+| :----------------------------------- | :------------------------------------------------- | :-------: | :--------------------------------------: |
+| **töötlemata JSON (`?format=json`)** | Ülesvoolu hetktõmmis (`quotas[window]`)            |  **40%**  |                 **60%**                  |
+| **Tekstivorming (`NN% left`)**       | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**  | **80%** (kui arvutada `100 - remaining`) |
 
-- **Miks tekst näitab 20% alles:** Konto füüsiliselt allesjäänud 40% kvoodist on katkestuspoliitika poolt reserveeritud 25%. Helistajal on enne ruuteri marsruutimise peatamist sellesse ühendusse alles vaid 15% 75% kasutatavast varust. Skaalimine tagab, et ühendus annab ammendumisest märku (`0% left`) täpselt siis, kui marsruutimine peatub.
-- **Miks JSON säilitab töötlemata väärtused:** JSON-i kasulik koormus tagastab täpse teenusepakkuja hetktõmmise (`UsageSnapshot`), et välistel tööriistadel oleks juurdepääs ülesvoolu tegelikule kasutusele ja ühenduse taseme `quotaWindowThresholds` väärtustele ilma serveripoolse kadudega skaleerimiseta.
+- **Miks kuvatakse tekstist 20% alles:** Kontole jäänud 40% füüsilisest kvoodist on 25% reserveeritud katkestuspoliitikaga. Helistajal on alles vaid 15% 75% kasutatavast kõneruumist, enne kui ruuter lõpetab sellele ühendusele suunamise. Skaleerimine tagab ühenduse signaalide ammendumise (`0% left`) täpselt siis, kui marsruutimine lõpeb.
+- **Miks JSON säilitab toorväärtusi:** JSON kasulik koormus tagastab täpse teenusepakkuja hetktõmmise (`UsageSnapshot`), nii et välistel tööriistadel on juurdepääs põhitõe ülesvoolu kasutamisele ja ühenduse tasemel `quotaWindowThresholds` ilma serveripoolse kadudeta skaleerimiseta.
 
-#### Tarbijate migreerimisjuhised
+#### Tarbijate rände juhised
 
-Kui väline integratsioon (näiteks redaktori plugin või agendilaiendus) luges varem tekstilõpp-punktist (`NN% left`) väärtusi ja arvutas kasutatud protsendi kujul `100 - NN`, siis `?format=json` kasutamisele üleminek tähendab järgmist:
+Kui väline integratsioon (nt redaktori pistikprogramm või agendilaiend) kraabis eelnevalt teksti lõpp-punkti (`NN% left`) ja arvutas kasutatud protsendi kui `100 - NN`, tähendab `?format=json` le üleminek järgmist.
 
-- Töötlemata JSON-i väärtuste lugemine kajastab **tegelikku ülesvoolu kasutust** (ülaltoodud näites 60% kasutatud).
-- Kui integratsioon soovib säilitada tekstilõpp-punkti kasutatava kvoodi semantika, saab see kliendi poolel hinnata tõhusa allesjäänud kvoodi valemit, kasutades ühenduse taseme override’ide jaoks `quotaWindowThresholds`.
+- Toores JSON väärtuste lugemine kajastub** tegelik ülesvoolu tarbimine** (60% kasutatud ülaltoodud näites).
+- Kui integreerimine soovib säilitada teksti lõpp-punkti kasutatavate piirangute semantika, saab see hinnata kehtivat ülejäänud valemit kliendi poolel, kasutades ühendustaseme alistamiseks `quotaWindowThresholds`.
 
 ---
 
@@ -1314,36 +1303,37 @@ Rakendamine: `getResolvedModelCapabilitiesWithLimitSources()` `src/lib/modelCapa
 
 `PATCH /api/keys/{id}` värskendab olemasoleva võtme õigusi. Nagu iga `/api/keys*` marsruut, vajab see haldusvolitust (vt [Halduse autentimine](../guides/MANAGEMENT-AUTH.md) ), mitte järeldusvõtit. Saatke ainult need väljad, mida soovite muuta; taotlus, milles ükski neist pole, lükatakse `No valid fields to update`-ga tagasi. Aktsepteeritud väljad on defineeritud `updateKeyPermissionsSchema` -ga `src/shared/validation/schemas/keys.ts`.
 
-| Väli                                        | Tüüp                                                                    | Märkmed                                                                                                                                      |
-| ------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 tähemärki                                                 |                                                                                                                                              |
-| `isActive`                                  | tõeväärtus                                                              |                                                                                                                                              |
-| `isBanned`                                  | tõeväärtus                                                              |                                                                                                                                              |
-| `expiresAt`                                 | ISO 8601 datetime või `null`                                            | `null` kustutab aegumise                                                                                                                     |
-| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` peab olema tühi, kui režiim on `all`                                                                                         |
-| `allowedModels`, `blockedModels`            | stringide massiiv, kuni 1000                                            |                                                                                                                                              |
-| `allowedCombos`                             | stringide massiiv, kuni 500                                             | Väravad, mille kombinatsioonid võti võib kutsuda; otseseid mudeleid juhivad `modelAccessMode` / `allowedModels`                              |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` ei tohi olla tühi, kui `restricted` ja tühi, kui `all`                                                                  |
-| `allowedConnections`                        | UUIDs massiiv, kuni 100                                                 |                                                                                                                                              |
-| `allowAutoCombos`                           | tõeväärtus                                                              | `false` lükkab selle võtmega `auto/*` mudelite taotlused tagasi; võtmed, mis seda kunagi ei määra, on lubatud                                |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Mida `GET /v1/models` selle võtme jaoks loeb (ainult kombinatsioonid, ainult mudelid või mõlemad); see ei muuda seda, mida võti võib kutsuda |
-| `forcedModel`                               | string kuni 300 tähemärki või `null`                                    | Suunab vestlustaotlused sellele model/combo-le `X-Route-Model` ja `body.model` kaudu; võtmepiirangud kehtivad endiselt                       |
-| `noLog`, `autoResolve`                      | tõeväärtus                                                              |                                                                                                                                              |
-| `throttleDelayMs`                           | täisarv, 0–300 000                                                      |                                                                                                                                              |
-| `maxSessions`                               | täisarv, 0–10 000                                                       |                                                                                                                                              |
-| `rateLimits`                                | `{ limit, window }` (positiivsed täisarvud, kuni 50) või `null` massiiv | `null` puhastab piirid                                                                                                                       |
-| `accessSchedule`                            | ajakava objekt või `null`                                               | `null` puhastab ajakava                                                                                                                      |
-| `scopes`                                    | stringide massiiv, kuni 32                                              |                                                                                                                                              |
-| `allowedEndpoints`                          | stringide massiiv, kuni 20                                              |                                                                                                                                              |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                              |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Vaadake [jaotist Vahemälu ümbersõit võtme kohta](#per-key-cache-bypass)                                                                      |
-| `compressionEnabled`                        | tõeväärtus                                                              |                                                                                                                                              |
-| `codexServiceMode`                          | üks Codex teenindusrežiimidest                                          |                                                                                                                                              |
-| `disableNonPublicModels`                    | tõeväärtus                                                              |                                                                                                                                              |
-| `allowUsageCommand`                         | tõeväärtus                                                              |                                                                                                                                              |
-| `usageLimitEnabled`                         | tõeväärtus                                                              |                                                                                                                                              |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 või `null`                                                  |                                                                                                                                              |
-| `chaosModeEnabled`                          | tõeväärtus                                                              |                                                                                                                                              |
+| Väli                                        | Tüüp                                                                    | Märkmed                                                                                                                                                                                                                                                       |
+| ------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 tähemärki                                                 |                                                                                                                                                                                                                                                               |
+| `isActive`                                  | tõeväärtus                                                              |                                                                                                                                                                                                                                                               |
+| `isBanned`                                  | tõeväärtus                                                              |                                                                                                                                                                                                                                                               |
+| `expiresAt`                                 | ISO 8601 datetime või `null`                                            | `null` kustutab aegumise                                                                                                                                                                                                                                      |
+| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` peab olema tühi, kui režiim on `all`                                                                                                                                                                                                          |
+| `allowedModels`, `blockedModels`            | stringide massiiv, kuni 1000                                            |                                                                                                                                                                                                                                                               |
+| `allowedCombos`                             | stringide massiiv, kuni 500                                             | Väravad, mille kombinatsioonid võti võib kutsuda; otseseid mudeleid juhivad `modelAccessMode` / `allowedModels`                                                                                                                                               |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` ei tohi olla tühi, kui `restricted` ja tühi, kui `all`                                                                                                                                                                                   |
+| `allowedConnections`                        | UUIDs massiiv, kuni 100                                                 |                                                                                                                                                                                                                                                               |
+| `allowAutoCombos`                           | tõeväärtus                                                              | `false` lükkab selle võtmega `auto/*` mudelite taotlused tagasi; võtmed, mis seda kunagi ei määra, on lubatud                                                                                                                                                 |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Mida `GET /v1/models` selle võtme jaoks loeb (ainult kombinatsioonid, ainult mudelid või mõlemad); see ei muuda seda, mida võti võib kutsuda                                                                                                                  |
+| `forcedModel`                               | string kuni 300 tähemärki või `null`                                    | Suunab vestlustaotlused sellele model/combo-le `X-Route-Model` ja `body.model` kaudu; võtmepiirangud kehtivad endiselt                                                                                                                                        |
+| `noLog`, `autoResolve`                      | tõeväärtus                                                              |                                                                                                                                                                                                                                                               |
+| `throttleDelayMs`                           | täisarv, 0–300 000                                                      |                                                                                                                                                                                                                                                               |
+| `maxSessions`                               | täisarv, 0–10 000                                                       |                                                                                                                                                                                                                                                               |
+| `rateLimits`                                | `{ limit, window }` (positiivsed täisarvud, kuni 50) või `null` massiiv | `null` puhastab piirid                                                                                                                                                                                                                                        |
+| `accessSchedule`                            | ajakava objekt või `null`                                               | `null` puhastab ajakava                                                                                                                                                                                                                                       |
+| `scopes`                                    | stringide massiiv, kuni 32                                              |                                                                                                                                                                                                                                                               |
+| `allowedEndpoints`                          | stringide massiiv, kuni 20                                              |                                                                                                                                                                                                                                                               |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                                                                                                                               |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Vaadake [jaotist Vahemälu ümbersõit võtme kohta](#per-key-cache-bypass)                                                                                                                                                                                       |
+| `compressionEnabled`                        | tõeväärtus                                                              |                                                                                                                                                                                                                                                               |
+| `codexServiceMode`                          | üks Codex teenindusrežiimidest                                          |                                                                                                                                                                                                                                                               |
+| `disableNonPublicModels`                    | tõeväärtus                                                              |                                                                                                                                                                                                                                                               |
+| `allowUsageCommand`                         | tõeväärtus                                                              |                                                                                                                                                                                                                                                               |
+| `usageLimitEnabled`                         | tõeväärtus                                                              |                                                                                                                                                                                                                                                               |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 või `null`                                                  |                                                                                                                                                                                                                                                               |
+| `fiveHourUsageLimitUsd`                     | number >= 0 või `null`                                                  | Jooksev 5-tunnine USD eelarve, mida jõustatakse nagu päeva- ja nädalapiirangud (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` on siis, kui akna vanim kulu vananeb, mistõttu võib võti, mis ületab selle limiidi, endiselt blokeeritud. |
+| `chaosModeEnabled`                          | tõeväärtus                                                              |                                                                                                                                                                                                                                                               |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
