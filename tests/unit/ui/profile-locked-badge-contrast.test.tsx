@@ -89,7 +89,10 @@ describe("Profile locked badge tiles", () => {
     const locked = tile(container, "Locked");
     expect(locked).toBeDefined();
     expect(locked.className).not.toMatch(/\bopacity-|\bgrayscale\b/);
-    for (const text of [...locked.querySelectorAll("p")]) {
+    // The badge name and description (kit Tile title/description slots since #18076).
+    const copy = [...locked.querySelectorAll(".ci-tile__title, .ci-tile__description")];
+    expect(copy).toHaveLength(2);
+    for (const text of copy) {
       expect(text.closest("[class*='opacity-']")).toBeNull();
     }
     expect(locked.getAttribute("data-locked")).toBe("true");
