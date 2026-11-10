@@ -1,1 +1,0 @@
-- **fix(sse):** a streaming upstream that sends only comment lines or invalid data now fails readiness after 1 MiB, instead of filling gateway memory until the readiness deadline.

@@ -1,0 +1,1 @@
+- **fix(sse):** a chat stream that already sent its keepalive no longer hangs when the upstream sends a non-event-stream body that never ends. The slow-path deadline now covers that body read and cancels it. ([#19713](https://github.com/cheaper-inference/OmniRoute/pull/19713))
