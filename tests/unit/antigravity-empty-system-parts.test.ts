@@ -1,13 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "or9r-antigravity-parts-"));
+const TEST_DATA_DIR = mkdtempSync(join(tmpdir(), "or9r-antigravity-parts-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { AntigravityExecutor, normalizeAntigravitySystemInstruction } =
   await import("../../open-sse/executors/antigravity.ts");
+const core = await import("../../src/lib/db/core.ts");
+
+// transformRequest reaches getMitmAlias -> getDbInstance: close that handle before removing the dir.
+test.after(() => {
+  core.closeDbInstance();
+  rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+});
 
 test("Antigravity system normalization drops only empty part objects", () => {
   const textPart = { text: "Keep this instruction" };

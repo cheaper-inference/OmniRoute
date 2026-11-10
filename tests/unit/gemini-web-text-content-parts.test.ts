@@ -1,13 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "or9r-gemini-web-parts-"));
+const TEST_DATA_DIR = mkdtempSync(join(tmpdir(), "or9r-gemini-web-parts-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { GeminiWebExecutor, buildGeminiPrompt, buildGeminiToolPrompt } =
   await import("../../open-sse/executors/gemini-web.ts");
+const core = await import("../../src/lib/db/core.ts");
+
+test.after(() => {
+  core.closeDbInstance();
+  rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+});
 
 test("Gemini prompts flatten text parts and reject other content parts", () => {
   assert.equal(
