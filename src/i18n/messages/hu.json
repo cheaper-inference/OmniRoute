@@ -11134,6 +11134,8 @@
       "refreshFailures": "Token frissítési hibák észlelve",
       "unknown": "Az egészségi állapot ismeretlen"
     },
+    "tokenHealthRefreshAll": "Összes frissítése",
+    "tokenHealthRefreshResult": "{refreshed} frissítve, {failed} sikertelen, {skipped} kihagyva",
     "systemMonitor": {
       "metricsAriaLabel": "Rendszer metrikák",
       "memory": "Memória",

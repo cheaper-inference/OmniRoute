@@ -11134,6 +11134,8 @@
       "refreshFailures": "토큰 갱신 실패가 감지되었습니다",
       "unknown": "건강 상태 불명"
     },
+    "tokenHealthRefreshAll": "모두 새로 고침",
+    "tokenHealthRefreshResult": "{refreshed} 새로고침됨, {failed} 실패, {skipped} 건너뜀",
     "systemMonitor": {
       "metricsAriaLabel": "시스템 메트릭스",
       "memory": "메모리",

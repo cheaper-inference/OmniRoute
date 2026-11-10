@@ -11134,6 +11134,8 @@
       "refreshFailures": "Token vernieuwingsfouten gedetecteerd",
       "unknown": "Gezondheidsstatus onbekend"
     },
+    "tokenHealthRefreshAll": "Alles vernieuwen",
+    "tokenHealthRefreshResult": "{refreshed} ververst, {failed} mislukt, {skipped} overgeslagen",
     "systemMonitor": {
       "metricsAriaLabel": "Systeemstatistieken",
       "memory": "Geheugen",

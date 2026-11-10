@@ -11134,6 +11134,8 @@
       "refreshFailures": "ଟୋକେନ୍ ରିଫ୍ରେଶ୍ ବିଫଳତା ଚିହ୍ନଟ ହୋଇଛି",
       "unknown": "ସ୍ୱାସ୍ଥ୍ୟ ସ୍ଥିତି ଅଜଣା"
     },
+    "tokenHealthRefreshAll": "ସବୁ ରିଫ୍ରେଶ କରନ୍ତୁ",
+    "tokenHealthRefreshResult": "{refreshed} ରିଫ୍ରେସ୍ ହୋଇଛି, {failed} ବିଫଳ, {skipped} ବାଦ୍ ଦିଆଯାଇଛି",
     "systemMonitor": {
       "metricsAriaLabel": "ସିଷ୍ଟମ୍ ମେଟ୍ରିକ୍ସ",
       "memory": "ମେମୋରି",

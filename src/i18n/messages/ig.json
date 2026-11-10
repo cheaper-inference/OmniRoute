@@ -11134,6 +11134,8 @@
       "refreshFailures": "Achọpụtara ọdịda mgbe a na-emegharị token ọhụrụ",
       "unknown": "Amaghị ọnọdụ ahụike"
     },
+    "tokenHealthRefreshAll": "Megharịa ha niile",
+    "tokenHealthRefreshResult": "{refreshed} emeliterela, {failed} agbasaghị, {skipped} agafeere",
     "systemMonitor": {
       "metricsAriaLabel": "Metrik sistemụ",
       "memory": "Ebe nchekwa",

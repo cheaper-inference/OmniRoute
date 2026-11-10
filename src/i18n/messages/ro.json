@@ -11134,6 +11134,8 @@
       "refreshFailures": "Au fost detectate eșecuri la reîmprospătarea token-ului",
       "unknown": "Starea de sănătate necunoscută"
     },
+    "tokenHealthRefreshAll": "Reîmprospătați toate",
+    "tokenHealthRefreshResult": "{refreshed} actualizate, {failed} eșuate, {skipped} omise",
     "systemMonitor": {
       "metricsAriaLabel": "Metrici de sistem",
       "memory": "Memorie",

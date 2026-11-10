@@ -11134,6 +11134,8 @@
       "refreshFailures": "Aptikta žetonų atnaujinimo klaidų",
       "unknown": "Būklė nežinoma"
     },
+    "tokenHealthRefreshAll": "Atnaujinti viską",
+    "tokenHealthRefreshResult": "{refreshed} atnaujinta, {failed} nepavyko, {skipped} praleista",
     "systemMonitor": {
       "metricsAriaLabel": "Sistemos metrikos",
       "memory": "Atmintis",

@@ -11134,6 +11134,8 @@
       "refreshFailures": "Հայտնաբերվել են թոքենների թարմացման ձախողումներ",
       "unknown": "Վիճակն անհայտ է"
     },
+    "tokenHealthRefreshAll": "Թարմացնել բոլորը",
+    "tokenHealthRefreshResult": "{refreshed} թարմացվել են, {failed} ձախողվել են, {skipped} բաց են թողնվել",
     "systemMonitor": {
       "metricsAriaLabel": "Համակարգի չափորոշիչներ",
       "memory": "Հիշողություն",

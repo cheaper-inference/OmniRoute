@@ -11134,6 +11134,8 @@
       "refreshFailures": "တိုကင်ပြန်လည်ဆန်းသစ်မှု မအောင်မြင်ခြင်းများ တွေ့ရှိထားသည်",
       "unknown": "အခြေအနေကို မသိရှိရပါ"
     },
+    "tokenHealthRefreshAll": "အားလုံးကို ပြန်လည်စစ်ဆေးရန်",
+    "tokenHealthRefreshResult": "{refreshed} ပြန်လည်ဆွဲယူပြီး၊ {failed} မအောင်မြင်၊ {skipped} ကျော်လွှာ",
     "systemMonitor": {
       "metricsAriaLabel": "စနစ်တိုင်းတာချက်များ",
       "memory": "မှတ်ဉာဏ်",

@@ -11134,6 +11134,8 @@
       "refreshFailures": "זוהו כישלונות ברענון טוקן",
       "unknown": "סטטוס בריאות לא ידוע"
     },
+    "tokenHealthRefreshAll": "רענן הכל",
+    "tokenHealthRefreshResult": "{refreshed} רועננו, {failed} נכשלו, {skipped} דולגו",
     "systemMonitor": {
       "metricsAriaLabel": "מדדי מערכת",
       "memory": "זיכרון",

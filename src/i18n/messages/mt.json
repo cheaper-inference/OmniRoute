@@ -11134,6 +11134,8 @@
       "refreshFailures": "Instabu fallimenti fit-tiġdid tat-tokens",
       "unknown": "L-istatus tas-saħħa mhux magħruf"
     },
+    "tokenHealthRefreshAll": "Aġġorna kollox",
+    "tokenHealthRefreshResult": "{refreshed} aġġornati, {failed} fallati, {skipped} mwarrfa",
     "systemMonitor": {
       "metricsAriaLabel": "Metriċi tas-sistema",
       "memory": "Memorja",

@@ -11134,6 +11134,8 @@
       "refreshFailures": "టోకెన్ పునరుద్ధరణ విఫలమయ్యాయి",
       "unknown": "ఆరోగ్య స్థితి తెలియదు"
     },
+    "tokenHealthRefreshAll": "అన్నింటినీ రిఫ్రెష్ చేయి",
+    "tokenHealthRefreshResult": "{refreshed} రీఫ్రెష్ చేయబడింది, {failed} విఫలమైంది, {skipped} దాటవేయబడింది",
     "systemMonitor": {
       "metricsAriaLabel": "సిస్టమ్ మెట్రిక్స్",
       "memory": "మెమరీ",

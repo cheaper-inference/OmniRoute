@@ -11134,6 +11134,8 @@
       "refreshFailures": "გამოვლინდა ტოკენების განახლების შეცდომები",
       "unknown": "მდგომარეობა უცნობია"
     },
+    "tokenHealthRefreshAll": "ყველას განახლება",
+    "tokenHealthRefreshResult": "{refreshed} განახლდა, {failed} ვერ მოხერხდა, {skipped} გამოტოვებული",
     "systemMonitor": {
       "metricsAriaLabel": "სისტემური მეტრიკები",
       "memory": "მეხსიერება",
