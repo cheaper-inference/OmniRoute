@@ -10,7 +10,7 @@ lastUpdated: 2026-11-10
 > Regenerate with: `npm run gen:provider-reference`
 > **Last generated:** 2026-11-10
 
-Total providers: **387**. See category breakdown below.
+Total providers: **388**. See category breakdown below.
 
 ## Categories
 
@@ -408,7 +408,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `vllm` | `vllm` | vLLM | Local, self-hosted | [link](https://github.com/vllm-project/vllm) | API key optional. Configure the local vLLM OpenAI-compatible base URL (default: http://localhost:8000/v1). |
 | `xinference` | `xinference` | XInference | Local, self-hosted | [link](https://inference.readthedocs.io) | API key optional. Configure the local XInference OpenAI-compatible base URL (default: http://localhost:9997/v1). |
 
-## Search Providers (20)
+## Search Providers (21)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
