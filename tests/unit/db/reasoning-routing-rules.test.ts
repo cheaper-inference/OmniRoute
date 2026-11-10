@@ -84,6 +84,36 @@ test("CRUD refreshes warm cache and preserves missing-row results", async () => 
   assert.deepEqual(await rules.getReasoningRoutingRules(), []);
 });
 
+test("warm cache reflects overlapping create", async () => {
+  assert.deepEqual(await rules.getReasoningRoutingRules(), []);
+  const pending = rules.createReasoningRoutingRule(ruleInput());
+  const during = await rules.getReasoningRoutingRules();
+  const created = await pending;
+  assert.deepEqual(during, [created]);
+});
+
+test("warm cache reflects overlapping update", async () => {
+  const created = await rules.createReasoningRoutingRule(ruleInput());
+  assert.deepEqual(await rules.getReasoningRoutingRules(), [created]);
+  const pending = rules.updateReasoningRoutingRule(created.id, {
+    name: "Updated during read",
+    requestTags: ["changed"],
+  });
+  const during = await rules.getReasoningRoutingRules();
+  const updated = await pending;
+  assert.ok(updated);
+  assert.deepEqual(during, [updated]);
+});
+
+test("warm cache reflects overlapping delete", async () => {
+  const created = await rules.createReasoningRoutingRule(ruleInput());
+  assert.deepEqual(await rules.getReasoningRoutingRules(), [created]);
+  const pending = rules.deleteReasoningRoutingRule(created.id);
+  const during = await rules.getReasoningRoutingRules();
+  assert.equal(await pending, true);
+  assert.deepEqual(during, []);
+});
+
 test("reference diagnostics stay synchronous, ordered and identical to CRUD errors", async () => {
   for (const [patch, message] of [
     [{ scope: "apiKey", apiKeyId: "missing" }, "The referenced API key does not exist"],

@@ -183,6 +183,43 @@ test("facade delegates every CRUD path to the repository and caches only list re
   assert.equal(list.mock.callCount(), 3);
 });
 
+test("overlapping list waits for a delayed repository write", async (t) => {
+  assert.deepEqual(await facade.getReasoningRoutingRules(), []);
+  const write = repository.create;
+  const release = Promise.withResolvers<void>();
+  t.mock.method(repository, "create", async (...args: Parameters<typeof write>) => {
+    await release.promise;
+    return write(...args);
+  });
+  const pending = facade.createReasoningRoutingRule(ruleInput());
+  const during = facade.getReasoningRoutingRules();
+  try {
+    assert.deepEqual(await repository.list(), [], "write is still pending");
+  } finally {
+    release.resolve();
+  }
+  const created = await pending;
+  assert.deepEqual(await during, [created]);
+  assert.deepEqual(await facade.getReasoningRoutingRules(), [created]);
+});
+
+test("failed pending mutation does not reject an overlapping list or poison its cache", async (t) => {
+  const created = await facade.createReasoningRoutingRule(ruleInput());
+  assert.deepEqual(await facade.getReasoningRoutingRules(), [created]);
+  const release = Promise.withResolvers<void>();
+  t.mock.method(repository, "create", async () => {
+    await release.promise;
+    throw new Error("Persistence failed");
+  });
+  const pending = facade.createReasoningRoutingRule(ruleInput());
+  const rejection = assert.rejects(pending, { message: "Persistence failed" });
+  const during = facade.getReasoningRoutingRules();
+  release.resolve();
+  await rejection;
+  assert.deepEqual(await during, [created]);
+  assert.deepEqual(await facade.getReasoningRoutingRules(), [created]);
+});
+
 for (const invalidation of ["external", "reset"] as const) {
   test(`in-flight list cannot refill stale cache after ${invalidation} invalidation`, async (t) => {
     const created = await facade.createReasoningRoutingRule(ruleInput());
