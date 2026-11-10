@@ -120,39 +120,40 @@ $20-ისა და ლიმიტების მიღწევით გა
 
 ## 📖 პროვაიდერის დაყენება
 
-CSV ან JSON ფაილიდან API გასაღების კავშირების მასობრივად დასამატებლად გამოიყენეთ **მართვის პანელი → პროვაიდერები → ფაილიდან იმპორტი**. სვეტების რიგითობა ფიქსირებულია (`provider,name,apiKey,baseUrl,priority`); `provider` უკვე უნდა არსებობდეს, როგორც მართვადი პროვაიდერი ან თავსებადი კვანძი. იხილეთ [პროვაიდერების იმპორტი CSV ან JSON ფაილიდან](../providers/CSV-IMPORT.md).
+CSV ან JSON ფაილიდან API-გასაღების მქონე კავშირების ერთიანად დასამატებლად გამოიყენეთ **Dashboard → Providers → Import from file**. სვეტები პოზიციურია (`provider,name,apiKey,baseUrl,priority`); `provider` უკვე უნდა არსებობდეს როგორც მართული პროვაიდერი ან თავსებადი ნოდი. იხილეთ [პროვაიდერების იმპორტი CSV ან JSON ფაილიდან](../providers/CSV-IMPORT.md).
 
-### 🔐 სააბონენტო პროვაიდერები
+### 🔐 გამოწერაზე დაფუძნებული პროვაიდერები
 
 #### Claude Code (Pro/Max)
 
 ```bash
-მართვის პანელი → პროვაიდერები → Claude Code-ის დაკავშირება
-→ OAuth ავტორიზაცია → ტოკენის ავტომატური განახლება
-→ 5-საათიანი + ყოველკვირეული კვოტის მონიტორინგი
+Dashboard → Providers → Connect Claude Code
+→ OAuth login → Auto token refresh
+→ 5-hour + weekly quota tracking
 
-მოდელები:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**პროფესიონალური რჩევა:** რთული ამოცანებისთვის გამოიყენეთ Opus, ხოლო სისწრაფისთვის — Sonnet. OmniRoute თითოეული მოდელის კვოტას ცალ-ცალკე აკონტროლებს!
+**პროფესიონალური რჩევა:** რთული ამოცანებისთვის გამოიყენეთ Opus, სისწრაფისთვის — Sonnet. OmniRoute თითოეული მოდელისთვის კვოტას აკონტროლებს!
 
-OmniRoute-ის ჰოსტზე ბრაუზერი არ არის? გაუშვით `claude setup-token` ნებისმიერ ადგილას, სადაც Claude Code-ში ავტორიზებული ხართ, და ერთწლიანი ტოკენი ჩასვით **Setup Token** ჩანართში. იხილეთ [Claude Code დაყენების ტოკენით](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+OmniRoute-ის ჰოსტზე ბრაუზერი არ გაქვთ? გაუშვით `claude setup-token` ნებისმიერ ადგილას, სადაც Claude Code-ში შესული ხართ, და ერთწლიანი ტოკენი ჩასვით **Setup Token** ჩანართში. იხილეთ [Claude Code დაყენების ტოკენით](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude-ისა და Claude Code-თან თავსებადი მარშრუტები Opus და Sonnet
-მოდელებისთვის ინარჩუნებს აზროვნების `max` ძალისხმევას. Haiku მოდელები `max` ძალისხმევის დონეს არ იღებს, ამიტომ OmniRoute
-ამ მოთხოვნას ზემოთ გაგზავნამდე აზროვნების მაღალ ბიუჯეტამდე ამცირებს.
+Claude-თან და Claude Code-თან თავსებადი მარშრუტები Opus-ისა და Sonnet-ის
+მოდელებისთვის `max` აზროვნების ძალისხმევას ინარჩუნებს. Haiku-ის მოდელები `max` ძალისხმევის
+დონეს არ იღებენ, ამიტომ OmniRoute ეს მოთხოვნა upstream-ში გაგზავნამდე მაღალი აზროვნების
+ბიუჯეტამდე ამცირებს.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-მართვის პანელი → პროვაიდერები → Codex-ის დაკავშირება
-→ OAuth ავტორიზაცია (პორტი 1455)
-→ 5-საათიანი + ყოველკვირეული განულება
+Dashboard → Providers → Connect Codex
+→ OAuth login (port 1455)
+→ 5-hour + weekly reset
 
-მოდელები:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,11 +163,11 @@ Claude-ისა და Claude Code-თან თავსებადი მა
 #### GitHub Copilot
 
 ```bash
-მართვის პანელი → პროვაიდერები → GitHub-ის დაკავშირება
-→ OAuth GitHub-ის მეშვეობით
-→ ყოველთვიური განულება (თვის 1-ელ რიცხვში)
+Dashboard → Providers → Connect GitHub
+→ OAuth via GitHub
+→ Monthly reset (1st of month)
 
-მოდელები:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -174,57 +175,74 @@ Claude-ისა და Claude Code-თან თავსებადი მა
   gh/gemini-3.1-pro-preview
 ```
 
+**AI კრედიტები (ტოკენებზე დაფუძნებული ბილინგი).** როდესაც GitHub ანგარიშისთვის
+`credits_used` მნიშვნელობას აგზავნის, Provider Limits ბარათზე გამოჩნდება **AI Credits** სტრიქონი,
+რომელიც მოიცავს მიმდინარე ბილინგის პერიოდში გამოყენებულ კრედიტებს, მათ შორის
+შეუზღუდავი ორგანიზაციული გეგმების შემთხვევაშიც.
+
+**AI კრედიტების ლოკალური ლიმიტი.** დაარედაქტირეთ GitHub-ის კავშირი და მიუთითეთ **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). ცარიელი მნიშვნელობა ფუნქციას თიშავს; `0`
+ყოველთვის გამოტოვებს ამ კავშირს. როდესაც გამოყენების ბოლო მაჩვენებელი ლიმიტის ტოლია ან მასზე მეტია,
+ანგარიშის არჩევისას ეს კავშირი გამოტოვებული იქნება და მარშრუტიზაცია თქვენს სხვა
+კავშირებზე გადაერთვება — ისევე, როგორც კვოტის პოლიტიკით დაწესებული შეწყვეტის შემთხვევაში. შემოწმება
+იყენებს გამოყენების მონაცემს, რომელსაც კვოტის პერიოდული განახლება ისედაც აგროვებს — მოთხოვნის
+გზაზე ის GitHub-ს არასოდეს უკავშირდება — და შეცდომის შემთხვევაში კავშირს არ ბლოკავს: დაკარგული ან მოძველებული მონაცემი
+(15 წუთზე ძველი ან უკვე განულებული ბილინგის პერიოდიდან) კავშირს არ დაბლოკავს. ეს ლოკალური დამცავი მექანიზმია
+და **არ წარმოადგენს ხარჯვის გარანტირებულ ზედა ზღვარს**: GitHub-ის ანგარიშგების დაყოვნებამ, განახლების
+ინტერვალმა, მიმდინარე მოთხოვნებმა და OmniRoute-ის ფარგლებს გარეთ გამოყენებამ შეიძლება ამ ზღვარს გადააჭარბოს. მკაცრი ლიმიტისთვის
+გამოიყენეთ GitHub-ის საკუთარი ხარჯვის კონტროლები.
+
 ### 💰 იაფი პროვაიდერები
 
 #### GLM-4.7 (ყოველდღიური განულება, $0.6/1M)
 
 1. დარეგისტრირდით: [Zhipu AI](https://open.bigmodel.cn)
 2. მიიღეთ API გასაღები Coding Plan-იდან
-3. მართვის პანელი → API გასაღების დამატება: პროვაიდერი: `glm`, API გასაღები: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**გამოყენება:** `glm/glm-4.7` — **პროფესიონალური რჩევა:** Coding Plan გთავაზობთ 3-ჯერ მეტ კვოტას 7-ჯერ ნაკლებ ფასად! ყოველდღიურად ნულდება დილის 10:00 საათზე.
+**გამოყენება:** `glm/glm-4.7` — **პროფესიონალური რჩევა:** Coding Plan გთავაზობთ 3-ჯერ მეტ კვოტას ფასის 1/7-ად! ყოველდღიური განულება: დილის 10:00.
 
 #### MiniMax M2.1 (5-საათიანი განულება, $0.20/1M)
 
 1. დარეგისტრირდით: [MiniMax](https://www.minimax.io)
-2. მიიღეთ API გასაღები → მართვის პანელი → API გასაღების დამატება
+2. მიიღეთ API გასაღები → Dashboard → Add API Key
 
-**გამოყენება:** `minimax/MiniMax-M2.1` — **პროფესიონალური რჩევა:** ყველაზე იაფი ვარიანტია გრძელი კონტექსტისთვის (1M ტოკენი)!
+**გამოყენება:** `minimax/MiniMax-M2.1` — **პროფესიონალური რჩევა:** გრძელი კონტექსტისთვის ყველაზე იაფი ვარიანტი (1M ტოკენი)!
 
-#### Kimi K2 (ფიქსირებული $9/თვეში)
+#### Kimi K2 ($9/თვე, ფიქსირებული)
 
 1. გამოიწერეთ: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. მიიღეთ API გასაღები → მართვის პანელი → API გასაღების დამატება
+2. მიიღეთ API გასაღები → Dashboard → Add API Key
 
-**გამოყენება:** `kimi/kimi-k2.5` — **პროფესიონალური რჩევა:** ფიქსირებული $9/თვეში 10M ტოკენისთვის = ეფექტური ღირებულება $0.90/1M!
+**გამოყენება:** `kimi/kimi-k2.5` — **პროფესიონალური რჩევა:** ფიქსირებული $9/თვე 10M ტოკენისთვის = ეფექტური ფასი $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. დარეგისტრირდით: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. შექმენით Qianfan API გასაღები → მართვის პანელი → API გასაღების დამატება: პროვაიდერი: `qianfan`
+2. შექმენით Qianfan API გასაღები → Dashboard → Add API Key: Provider: `qianfan`
 
-**გამოყენება:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ან Qianfan-ის სხვა OpenAI-თან თავსებადი მოდელის ID.
+**გამოყენება:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ან Qianfan-თან თავსებადი სხვა OpenAI მოდელის ID.
 
 ### 🆓 უფასო პროვაიდერები
 
-ავთენტიფიკაციის არმომთხოვნ უფასო პროვაიდერებს თავიანთ გვერდზე **ავთენტიფიკაცია საჭირო არ არის** პარამეტრთან ჩამრთველი აქვთ.
-მისი გამორთვა პროვაიდერს გათიშავს, წაშლის მას პროვაიდერების კონფიგურირებული/კომპაქტური ხედებიდან და
-მის მოდელებს `/v1/models`-დან ამოიღებს.
+ავტორიზაციის არმომთხოვნ უფასო პროვაიდერებს პროვაიდერის გვერდზე **No authentication required**-ის გვერდით აქვთ გადამრთველი.
+მისი გამორთვა თიშავს ამ პროვაიდერს, შლის მას Providers configured/compact ხედებიდან
+და მის მოდელებს `/v1/models`-იდან.
 
 #### Qoder (9 უფასო მოდელი)
 
 ```bash
-მართვის პანელი → Qoder-ის დაკავშირება → OAuth ავტორიზაცია → წვდომა დამოკიდებულია პროვაიდერის მიმდინარე ლიმიტებზე
+Dashboard → Connect Qoder → OAuth login → Access is subject to current provider limits
 
-მოდელები: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude უფასოდ)
+#### Kiro (Claude-ის უფასო ვერსია)
 
 ```bash
-მართვის პანელი → Kiro-ს დაკავშირება → AWS Builder ID ან Google/GitHub → ~50 კრედიტი/თვეში
+Dashboard → Connect Kiro → AWS Builder ID or Google/GitHub → ~50 credits/month
 
-მოდელები: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -337,65 +355,65 @@ API-ის გასაღები: [მართვის პანელი�
 
 ---
 
-## 🚀 განთავსება
+## 🚀 განლაგება
 
-### გლობალური npm-ინსტალაცია (რეკომენდებული)
+### გლობალური npm ინსტალაცია (რეკომენდირებულია)
 
 ```bash
 npm install -g omniroute
 
-# შექმენით კონფიგურაციის დირექტორია
+# Create config directory
 mkdir -p ~/.omniroute
 
-# შექმენით .env ფაილი (იხილეთ .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# გაუშვით სერვერი
+# Start server
 omniroute
-# ან მორგებული პორტით:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ავტომატურად ტვირთავს `.env`-ს `~/.omniroute/.env`-დან ან `./.env`-დან.
+CLI ავტომატურად იტვირთება `.env` `~/.omniroute/.env` დან ან `./.env`. სამუშაო დირექტორიაში `./.env` შეუძლია დააყენოს კლავიშების მხოლოდ მოკლე დაშვებული სია (პორტები, `REQUIRE_API_KEY`, ლოკალი და ფერის პარამეტრები); ყველაფერი დანარჩენი `~/.omniroute/.env` ში ჩადეთ. იხილეთ [CLI გაშვების კონტრაქტები](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### სისტემურ პანელში მუშაობის რეჟიმი
+### უჯრის რეჟიმი
 
-გაუშვით OmniRoute სისტემურ პანელში:
+დაიწყეთ OmniRoute სისტემის უჯრაში:
 
 ```bash
 omniroute serve --tray
 ```
 
-ბრძანება მუშაობას ასრულებს მას შემდეგ, რაც სერვერი და სისტემური პანელის ხატულა მზად იქნება.
+ბრძანება ბრუნდება მას შემდეგ, რაც სერვერი და უჯრა მზად იქნება.
 
-სერვერი ტერმინალის გარეშე აგრძელებს მუშაობას.
+სერვერი გრძელდება ტერმინალის გარეშე.
 
-სისტემურ პანელში მუშაობის რეჟიმი მხარდაჭერილია macOS-ზე, Windows-ზე და გრაფიკულ Linux-სესიებში. ამ რეჟიმში მართვის პანელი ავტომატურად არ იხსნება.
+უჯრის რეჟიმი მხარს უჭერს macOS, Windows და გრაფიკულ Linux სესიებს. უჯრის რეჟიმი ავტომატურად არ ხსნის დაფას.
 
-შემდეგი მოქმედებებისთვის გამოიყენეთ სისტემური პანელის მენიუ:
+გამოიყენეთ უჯრის მენიუ ამ მოქმედებებისთვის:
 
-- გახსენით მართვის პანელი.
+- გახსენით დაფა.
 - გახსენით `/dashboard/logs`.
-- შეცვალეთ ავტომატური გაშვების პარამეტრი.
-- გააჩერეთ OmniRoute.
+- შეცვალეთ ავტომატური დაწყება.
+- შეაჩერე OmniRoute.
 
-არ გამოიყენოთ `--tray` შემდეგ პარამეტრებთან ერთად:
+არ დააკავშიროთ `--tray` ამ ვარიანტებთან:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-ამ რეჟიმებს პროცესზე ფლობის განსხვავებული მოდელები სჭირდება.
+ეს რეჟიმები მოითხოვს სხვადასხვა პროცესის მფლობელობას.
 
-ჩართეთ ავტომატური გაშვება სისტემაში მომდევნო შესვლისას:
+ჩართეთ გაშვება მანქანიდან მომდევნო შესვლისას:
 
 ```bash
 omniroute autostart enable
 ```
 
-ავტომატური გაშვება macOS-ზე, Windows-ზე და გრაფიკულ Linux-სესიებში სისტემურ პანელში მუშაობის რეჟიმს იყენებს. გრაფიკული გარემოს გარეშე Linux იყენებს არსებულ systemd-ის მომხმარებლის სერვისს.
+ავტომატური დაწყება იყენებს უჯრის რეჟიმს macOS, Windows და გრაფიკული Linux სესიებზე. Headless Linux იყენებს არსებულ systemd მომხმარებლის სერვისს.
 
-გამორთეთ სისტემაში შესვლისას ავტომატური გაშვება:
+გამორთეთ გაშვება შესვლისას:
 
 ```bash
 omniroute autostart disable
@@ -403,16 +421,16 @@ omniroute autostart disable
 
 ### დეინსტალაცია
 
-როდესაც OmniRoute აღარ დაგჭირდებათ, სრულად წასაშლელად გთავაზობთ ორ სწრაფ სკრიპტს:
+როდესაც აღარ გჭირდებათ OmniRoute, ჩვენ გთავაზობთ ორ სწრაფ სკრიპტს სუფთა ამოღებისთვის:
 
-| ბრძანება                 | მოქმედება                                                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | შლის სისტემურ აპლიკაციას, მაგრამ `~/.omniroute`-ში **ინარჩუნებს თქვენს მონაცემთა ბაზასა და კონფიგურაციებს**. |
-| `npm run uninstall:full` | შლის აპლიკაციას და სამუდამოდ **შლის ყველა კონფიგურაციას, გასაღებსა და მონაცემთა ბაზას**.                     |
+| ბრძანება                 | მოქმედება                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | შლის სისტემის აპს მაგრამ** ინახავს თქვენს DB და კონფიგურაციებს** `~/.omniroute` ში.  |
+| `npm run uninstall:full` | სამუდამოდ შლის აპს AND** წაშლის ყველა კონფიგურაციას, გასაღებს და მონაცემთა ბაზას** . |
 
-> შენიშვნა: ამ ბრძანებების გასაშვებად გადადით OmniRoute-ის პროექტის საქაღალდეში (თუ მისი კლონირება მოახდინეთ) და გაუშვით ისინი. ალტერნატიულად, თუ ის გლობალურადაა დაინსტალირებული, შეგიძლიათ უბრალოდ გაუშვათ `npm uninstall -g omniroute`.
+> შენიშვნა: ამ ბრძანებების გასაშვებად, გადადით OmniRoute პროექტის საქაღალდეში (თუ თქვენ კლონირებული გაქვთ) და გაუშვით ისინი. ალტერნატიულად, თუ გლობალურად არის დაინსტალირებული, შეგიძლიათ უბრალოდ გაუშვათ `npm uninstall -g omniroute`.
 
-### VPS-ზე განთავსება
+### VPS განლაგება
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,21 +446,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# ან: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-ით განთავსება (მეხსიერების მცირე მოხმარება)
+### PM2 განლაგება (დაბალი მეხსიერება)
 
-შეზღუდული RAM-ის მქონე სერვერებისთვის გამოიყენეთ მეხსიერების ლიმიტის პარამეტრი:
+შეზღუდული RAM სერვერებისთვის გამოიყენეთ მეხსიერების ლიმიტის ვარიანტი:
 
 ```bash
-# 512MB ლიმიტით (ნაგულისხმევი)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# ან მორგებული მეხსიერების ლიმიტით
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# ან ecosystem.config.js-ის გამოყენებით
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -471,24 +489,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# ააგეთ იმიჯი (ნაგულისხმევი = runner-cli წინასწარ დაინსტალირებული codex/claude/droid-ით)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# პორტატიული რეჟიმი (რეკომენდებული)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI-ის ბინარულ ფაილებთან ჰოსტში ინტეგრირებული რეჟიმის შესახებ იხილეთ Docker-ის განყოფილება ძირითად დოკუმენტაციაში.
+ჰოსტში ინტეგრირებული რეჟიმისთვის CLI ბინარებით, იხილეთ Docker განყოფილება მთავარ დოკუმენტებში.
 
-### Void Linux (xbps-src)
+### ბათილად Linux (xbps-src)
 
-Void Linux-ის მომხმარებლებს შეუძლიათ OmniRoute-ის პაკეტირება და ნატიურად ინსტალაცია `xbps-src` კროსკომპილაციის ფრეიმვორკის გამოყენებით. ეს ავტომატიზაციას უკეთებს Node.js-ის დამოუკიდებელ აგებას საჭირო `better-sqlite3` ნატიურ ბაინდინგებთან ერთად.
+Void Linux მომხმარებლებს შეუძლიათ შეფუთონ და დააინსტალირონ OmniRoute მშობლიურად `xbps-src` ჯვარედინი კომპილაციის ჩარჩოს გამოყენებით. ეს ავტომატიზირებს Node.js დამოუკიდებელ კონსტრუქციას საჭირო `better-sqlite3` მშობლიურ კავშირებთან ერთად.
 
 <details>
-<summary><b>xbps-src-ის შაბლონის ნახვა</b></summary>
+<summary><b>xbps-src შაბლონის ნახვა</b></summary>
 
 ```bash
-# შაბლონის ფაილი 'omniroute'-ისთვის
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +527,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp-ისთვის სამიზნე CPU-ის არქიტექტურის განსაზღვრა
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +536,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) ყველა დამოკიდებულების ინსტალაცია – სკრიპტების გამოტოვებით
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js-ის დამოუკიდებელი პაკეტის აგება
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) სტატიკური რესურსების დამოუკიდებელ პაკეტში კოპირება
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3-ის ნატიური ბაინდინგის კომპილაცია
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) კომპილირებული ბაინდინგის დამოუკიდებელ პაკეტში მოთავსება
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) არქიტექტურისთვის სპეციფიკური sharp პაკეტების წაშლა
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js-ის სტატიკური ანალიზის მიერ გამოტოვებული pino-ს გაშვების გარემოს დამოკიდებულებების კოპირება:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +572,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ინსტალაციის შემდგომი ჰუკის მიერ Next.js-ის აპის როუტერის ცარიელი დირექტორიების წაშლის თავიდან აცილება
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -582,30 +600,30 @@ post_install() {
 
 ### გარემოს ცვლადები
 
-| ცვლადი                                  | ნაგულისხმევი მნიშვნელობა                    | აღწერა                                                                                                                                                  |
-| --------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me`        | JWT-ის ხელმოწერის საიდუმლო გასაღები (**შეცვალეთ საწარმოო გარემოში**)                                                                                    |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                                  | პირველი შესვლის პაროლი                                                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                              | მონაცემთა დირექტორია (მონაცემთა ბაზა, გამოყენების მონაცემები, ჟურნალები)                                                                                |
-| `PORT`                                  | ფრეიმვორკის ნაგულისხმევი მნიშვნელობა        | სერვისის პორტი (მაგალითებში — `20128`)                                                                                                                  |
-| `HOSTNAME`                              | ფრეიმვორკის ნაგულისხმევი მნიშვნელობა        | მისაბმელი ჰოსტი (Docker-ის ნაგულისხმევი მნიშვნელობაა `0.0.0.0`)                                                                                         |
-| `NODE_ENV`                              | შესრულების გარემოს ნაგულისხმევი მნიშვნელობა | განთავსებისთვის მიუთითეთ `production`                                                                                                                   |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`                    | საჯარო საბაზისო URL, რომელიც აისახება მართვის პანელზე და ხელმისაწვდომია სერვერისთვის (ანაცვლებს მოძველებულ `BASE_URL`-ს)                                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`                     | ღრუბელთან სინქრონიზაციის ბოლო წერტილის საბაზისო URL (ანაცვლებს მოძველებულ `CLOUD_URL`-ს)                                                                |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`             | HMAC-ის საიდუმლო გასაღები გენერირებული API გასაღებებისთვის                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                                     | `/v1/*`-ზე Bearer API გასაღების სავალდებულო გამოყენება                                                                                                  |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                                     | ავტორიზებულ მართვის პანელის მომხმარებლებს მოთხოვნისამებრ შენახული API გასაღებების სრული მნიშვნელობების ნახვის უფლება                                    |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                        | პროვაიდერის ლიმიტების კეშირებული მონაცემების სერვერის მხრიდან განახლების პერიოდულობა; ინტერფეისის განახლების ღილაკები კვლავ ხელით სინქრონიზაციას იწვევს |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                                     | ჩაწერის/იმპორტის/აღდგენის წინ SQLite-ის ავტომატური სარეზერვო ასლების შექმნის გამორთვა; ხელით სარეზერვო ასლების შექმნა კვლავ მუშაობს                     |
-| `APP_LOG_TO_FILE`                       | `true`                                      | რთავს აპლიკაციისა და აუდიტის ჟურნალების დისკზე ჩაწერას                                                                                                  |
-| `AUTH_COOKIE_SECURE`                    | `false`                                     | ავტორიზაციის ქუქის `Secure` ატრიბუტის იძულებით გამოყენება (HTTPS უკუ-პროქსის უკან)                                                                      |
-| `CLOUDFLARED_BIN`                       | არ არის დაყენებული                          | მართული ჩამოტვირთვის ნაცვლად არსებული `cloudflared` ბინარული ფაილის გამოყენება                                                                          |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                                     | მართული Quick Tunnels-ის ტრანსპორტი (`http2`, `quic` ან `auto`)                                                                                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                       | Node.js-ის heap-ის ლიმიტი MB-ში                                                                                                                         |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                        | მოთხოვნების კეშის ჩანაწერების მაქსიმალური რაოდენობა                                                                                                     |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                       | სემანტიკური კეშის ჩანაწერების მაქსიმალური რაოდენობა                                                                                                     |
+| ცვლადი                                  | ნაგულისხმევი                 | აღწერა                                                                                                                                                           |
+| --------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ავტომატურად გენერირებული)_ | JWT ხელმოწერის საიდუმლო — ავტომატურად გენერირებულია პირველ გაშვებაზე და გრძელდება `server.env` მდე; დააყენეთ ის აშკარად, როდესაც მონაცემთა დირექტორია ეფემერულია |
+| `INITIAL_PASSWORD`                      | _(დაუყენებელი)_              | პირველი შესვლის პაროლი. npm/source ინსტალაცია იწყება `CHANGEME` ით: შეცვალეთ იგი. გაუქმებულია: ჩასვლის ოსტატი                                                    |
+| `DATA_DIR`                              | `~/.omniroute`               | მონაცემთა დირექტორია (დბ, გამოყენება, ჟურნალები)                                                                                                                 |
+| `PORT`                                  | ჩარჩო ნაგულისხმევი           | სერვისის პორტი (`20128` მაგალითებში)                                                                                                                             |
+| `HOSTNAME`                              | ჩარჩო ნაგულისხმევი           | ჰოსტის მიბმა (Docker ნაგულისხმევად არის `0.0.0.0`)                                                                                                               |
+| `NODE_ENV`                              | გაშვების ნაგულისხმევი        | დააყენეთ `production` განლაგებისთვის                                                                                                                             |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | საზოგადოებრივი ბაზა URL გამოჩნდა საინფორმაციო დაფაზე და ექვემდებარება სერვერს (ანაცვლებს მოძველებულ `BASE_URL`)                                                  |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | ღრუბლის სინქრონიზაციის ბოლო წერტილის ბაზა URL (ანაცვლებს მოძველებულ `CLOUD_URL`)                                                                                 |
+| `API_KEY_SECRET`                        | _(ავტომატურად გენერირებული)_ | HMAC საიდუმლო გენერირებული API კლავიშებისთვის — ავტომატურად გენერირებულია პირველ გაშვებაზე და გრძელდება `server.env` მდე                                         |
+| `REQUIRE_API_KEY`                       | `false`                      | შეასრულეთ Bearer API გასაღები `/v1/*` ზე                                                                                                                         |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                      | ნება მიეცით ავთენტიფიცირებულ დაფის მომხმარებლებს გამოავლინონ სრული შენახული API გასაღების მნიშვნელობები მოთხოვნისამებრ                                           |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                         | სერვერის მხრიდან განახლების კადენცია ქეშირებული პროვაიდერის ლიმიტების მონაცემებისთვის; UI განახლების ღილაკები კვლავ ახდენენ ხელით სინქრონიზაციას                 |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                      | გამორთეთ ავტომატური SQLite სნეპშოტები writes/import/restore მდე; მექანიკური სარეზერვო ასლები ჯერ კიდევ მუშაობს                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                       | რთავს აპლიკაციისა და აუდიტის ჟურნალის გამოტანას დისკზე                                                                                                           |
+| `AUTH_COOKIE_SECURE`                    | `false`                      | `Secure` auth ქუქი-ფაილის იძულება ( HTTPS საპირისპირო პროქსის უკან)                                                                                              |
+| `CLOUDFLARED_BIN`                       | დაუყენებელი                  | გამოიყენეთ არსებული `cloudflared` ორობითი მართული ჩამოტვირთვის ნაცვლად                                                                                           |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                      | ტრანსპორტი მართული სწრაფი გვირაბებისთვის (`http2`, `quic` ან `auto`)                                                                                             |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                        | Node.js გროვის ლიმიტი MB ში                                                                                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                         | მაქსიმალური სწრაფი ქეში ჩანაწერები                                                                                                                               |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                        | მაქსიმალური სემანტიკური ქეში ჩანაწერები                                                                                                                          |
 
-გარემოს ცვლადების სრული ცნობარისთვის იხილეთ [README](../README.md).
+გარემოს ცვლადის სრული მითითებისთვის იხილეთ [README](../README.md).
 
 ---
 
@@ -614,9 +632,9 @@ post_install() {
 <details>
 <summary><b>ყველა ხელმისაწვდომი მოდელის ნახვა</b></summary>
 
-> ქვემოთ მოცემული სია შერჩეულია `open-sse/config/providerRegistry.ts`-დან v3.8.0-ისთვის. ღრუბლოვანი კატალოგები (Gemini, OpenRouter და სხვ.) დინამიკურად სინქრონდება — სრული მიმდინარე კატალოგის სანახავად გახსენით **Dashboard → Providers → [provider] → Available Models** ან გამოიძახეთ `GET /api/models/catalog`.
+> ქვემოთ მოცემული სია შედგენილია `open-sse/config/providerRegistry.ts`-დან v3.8.0-ისთვის. ღრუბლოვანი კატალოგები (Gemini, OpenRouter და სხვ.) დინამიკურად სინქრონიზდება — სრული მიმდინარე კატალოგის სანახავად გახსენით **Dashboard → Providers → [provider] → Available Models** ან გამოიძახეთ `GET /api/models/catalog`.
 >
-> თუ პროვაიდერის ჩაშენებული სია მოძველდა, გამოიყენეთ **Import from /models** ამ გვერდზე (ან ჩართეთ **Auto-Sync**), რათა მიიღოთ აქტუალური გარე კატალოგი. ეს შემოწმდა v3.8.50-ში LLM7.io-სთვის (`gemini-3.1-flash-lite`) და UncloseAI-სთვის (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); იმავე ტესტირებისას Pollinations-ის ანონიმური წვდომა კვლავ გარე სერვისის მიერ იყო შეზღუდული.
+> თუ პროვაიდერის ჩაშენებული სია განახლების გარეშე დარჩა, გამოიყენეთ **Import from /models** ამ გვერდზე (ან ჩართეთ **Auto-Sync**), რათა მიიღოთ ცოცხალი upstream კატალოგი. ეს დადასტურებულია v3.8.50-ში LLM7.io-სთვის (`gemini-3.1-flash-lite`) და UncloseAI-სთვის (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); იმავე სატესტო ეტაპზე Pollinations-ის ანონიმური წვდომა upstream-ის შეზღუდვებს კვლავ ექვემდებარებოდა.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -624,7 +642,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — უფასო OAuth: გამოიყენეთ მიმდინარე კატალოგი, რომელიც ნაჩვენებია **Dashboard → Providers → Kiro → Available Models** განყოფილებაში. ხელმისაწვდომობა დამოკიდებულია ანგარიშსა და გეგმაზე.
+**Kiro (`kr/`)** — უფასო OAuth: გამოიყენეთ ცოცხალი კატალოგი, რომელიც ნაჩვენებია **Dashboard → Providers → Kiro → Available Models**-ში. ხელმისაწვდომობა დამოკიდებულია ანგარიშსა და გეგმაზე.
 
 **Qoder (`if/`)** — უფასო OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,93 +650,113 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/თვე ფიქსირებულად ან გამოყენების მიხედვით: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ფიქსირებული $9/თვე ან გამოყენების მიხედვით: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API გასაღები: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ულტრასწრაფი: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ულტრა სწრაფი: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — ნატიური Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-ის მშობლიური: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — განთავსებულია ევროკავშირში: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — ევროკავშირში განთავსებული: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — ძიებით გაძლიერებული: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ღია კოდით: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (უფასო), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ღია კოდის: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (უფასო), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — სწრაფი ინფერენსი: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — ვაფლის მასშტაბის: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — ვაფერის მასშტაბის: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — ორიენტირებულია RAG-ზე: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-ზე ორიენტირებული: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — საწარმოებისთვის: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — საწარმოო: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-იდან API გასაღების მიხედვით მიმდინარე რეჟიმში სინქრონდება — სტატიკური სია არ არსებობს. დააკავშირეთ გასაღები **Dashboard → Providers**-ში, შემდეგ კი მიმდინარე კატალოგის იმპორტისთვის გამოიყენეთ **Available Models** (მაგ., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: სინქრონიზდება ცოცხლად თითოეული API გასაღებისთვის Google-იდან — სტატიკური სია არ არსებობს. დააკავშირეთ გასაღები **Dashboard → Providers**-ში, შემდეგ გამოიყენეთ **Available Models** მიმდინარე კატალოგის იმპორტისთვის (მაგ., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**სხვა თავსებადი პროვაიდერები** (შერჩეული): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-ის მეშვეობით), `azure-ai`, `openrouter` (გამჭოლი კატალოგი), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. თითოეული საკუთარ მოდელების სიას ინახავს `providerRegistry.ts`-ში და შეიძლება ავტომატურად სინქრონდეს, როდესაც პროვაიდერი `/models` საბოლოო წერტილს ხელმისაწვდომს ხდის.
+**სხვა თავსებადი პროვაიდერები** (შერჩეული): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-ის მეშვეობით), `azure-ai`, `openrouter` (კატალოგის passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. თითოეული მათგანი საკუთარ მოდელების სიას ინახავს `providerRegistry.ts`-ში და შესაძლებელია ავტომატური სინქრონიზაცია, როდესაც პროვაიდერი `/models` endpoint-ს ავრცელებს.
 
-**შენიშვნა მოდელის ID-ების შესახებ:** OmniRoute იყენებს პროვაიდერის ნატიურ ID-ებს (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ზოგიერთი ID შეიცავს წერტილით გამოყოფილ ვერსიებს, რადგან გარე API მათ სწორედ ამ ფორმატით მოითხოვს. თუ მოდელი ზემოთ არ არის ჩამოთვლილი, ხელმისაწვდომობის დასადასტურებლად გაუშვით `omniroute models --search <term>` ან მიმართეთ `GET /api/models/catalog`-ს.
+**შენიშვნა მოდელების ID-ების შესახებ:** OmniRoute იყენებს პროვაიდერის მშობლიურ ID-ებს (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ზოგიერთი ID შეიცავს წერტილებით გამოყოფილ ვერსიებს, რადგან upstream API სწორედ ამ ფორმით მოითხოვს მათ. თუ მოდელი ზემოთ ჩამოთვლილი არ არის, გაუშვით `omniroute models --search <term>` ან მიმართეთ `GET /api/models/catalog` ხელმისაწვდომობის დასადასტურებლად.
 
 </details>
 
 ---
 
-## 🧩 გაფართოებული შესაძლებლობები
+## 🧩 გაფართოებული ფუნქციები
 
 ### მორგებული მოდელები
 
-ნებისმიერ პროვაიდერს დაამატეთ ნებისმიერი მოდელის ID, აპის განახლებას რომ არ დაელოდოთ:
+დაამატეთ ID ნებისმიერი მოდელი ნებისმიერ პროვაიდერს აპლიკაციის განახლების მოლოდინის გარეშე:
 
 ```bash
-# API-ის მეშვეობით
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# სია: curl http://localhost:20128/api/provider-models?provider=openai
-# წაშლა: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-ან გამოიყენეთ მართვის პანელი: **პროვაიდერები → [პროვაიდერი] → მორგებული მოდელები**.
+ან გამოიყენეთ Dashboard:** პროვაიდერები → [პროვაიდერი] → მორგებული მოდელები** .
 
 შენიშვნები:
 
-- OpenRouter-ისა და OpenAI/Anthropic-თან თავსებადი პროვაიდერების მართვა მხოლოდ **ხელმისაწვდომი მოდელებიდან** ხდება. ხელით დამატება, იმპორტი და ავტომატური სინქრონიზაცია ყველა ერთსა და იმავე ხელმისაწვდომი მოდელების სიაში ხვდება, ამიტომ ამ პროვაიდერებისთვის ცალკე „მორგებული მოდელების“ სექცია არ არსებობს.
-- **მორგებული მოდელების** სექცია განკუთვნილია პროვაიდერებისთვის, რომლებიც ხელმისაწვდომი მოდელების მართულ იმპორტს არ უზრუნველყოფენ.
+- OpenRouter და OpenAI/Anthropic-compatible პროვაიდერები იმართება** ხელმისაწვდომი მოდელები** მხოლოდ. ხელით დაამატეთ, იმპორტი და ავტომატური სინქრონიზაცია ყველა მიწის ერთსა და იმავე ხელმისაწვდომი მოდელების სიაში, ასე რომ არ არსებობს ცალკე მორგებული მოდელების განყოფილება ამ პროვაიდერებისთვის.
+- The** მორგებული მოდელები** განყოფილება განკუთვნილია პროვაიდერებისთვის, რომლებიც არ ამჟღავნებენ მართული ხელმისაწვდომი მოდელის იმპორტს.
 
 ### მორგებული OpenAI-თან თავსებადი პროვაიდერები
 
-ნებისმიერი კარიბჭე, რომელიც OpenAI API-ს იყენებს (საკუთარ სერვერზე განთავსებული პროქსი, vLLM ან მესამე მხარის აგრეგატორი), შეიძლება დაემატოს როგორც ცალკე პროვაიდერის კვანძი:
+ნებისმიერი კარიბჭე, რომელიც საუბრობს OpenAI API ზე (თვითმმართველობის პროქსი, vLLM, მესამე მხარის აგრეგატორი) შეიძლება დაემატოს როგორც საკუთარი პროვაიდერის კვანძი:
 
-1. **პროვაიდერები → OpenAI-თან თავსებადის დამატება**.
-2. **სახელი**: კვანძის საჩვენებელი სახელი.
-3. **პრეფიქსი**: მარშრუტიზაციის სახელი. კლიენტები მოდელებს იძახებენ როგორც `<prefix>/<model>`, ამიტომ კვანძი პრეფიქსით `mygw` ემსახურება `mygw/gpt-4o-mini`-ს. სავალდებულოა; სიმბოლოებზე შეზღუდვა არ არსებობს.
-4. **API-ის ტიპი**: იმ ბოლო წერტილების ოჯახი, რომელსაც კარიბჭე ემსახურება (ჩატის დასრულებები, პასუხები, ვექტორული წარმოდგენები, აუდიო, სურათები).
-5. **საბაზისო URL**: API-ის ძირეული მისამართი, `/v1`-ის ჩათვლით (მაგალითად, `https://gateway.example.com/v1`) და არა სრული `/chat/completions` გზა. არასტანდარტული გზების მქონე კარიბჭეებისთვის ისინი უნდა მიუთითოთ **გაფართოებულ პარამეტრებში** (ჩატის გზა, მოდელების გზა).
-6. ველი **API გასაღები (შემოწმებისთვის)** მხოლოდ კავშირს ამოწმებს. კვანძის შექმნის შემდეგ გახსენით იგი და მოთხოვნების მიერ გამოსაყენებელი გასაღების შესანახად გამოიყენეთ **კავშირის დამატება**.
+1. **პროვაიდერები → დამატება OpenAI თავსებადი** .
+2. **სახელი** : საჩვენებელი ეტიკეტი კვანძისთვის.
+3. **პრეფიქსი** : მარშრუტის სახელი. კლიენტები მოდელებს უწოდებენ `<prefix>/<model>`, ამიტომ კვანძი პრეფიქსით `mygw` ემსახურება `mygw/gpt-4o-mini`. საჭირო; არ არსებობს პერსონაჟის შეზღუდვა.
+4. **API ტიპი** : საბოლოო წერტილის ოჯახი, რომელსაც ემსახურება კარიბჭე (ჩეთის დასრულებები, პასუხები, ჩაშენებები, აუდიო, სურათები).
+5. **ბაზა URL** : API ფესვი, `/v1` მდე და მათ შორის (მაგალითად `https://gateway.example.com/v1`), არა სრული `/chat/completions` ბილიკი. არასტანდარტული ბილიკების კარიბჭეები მათ ქვეშ აყენებენ** გაფართოებული პარამეტრები** (ჩეთის ბილიკი, მოდელების გზა).
+6. The**API გასაღები (შემოწმებისთვის)** ველი მხოლოდ ამოწმებს კავშირს. კვანძის შექმნის შემდეგ გახსენით და გამოიყენეთ** კავშირის დამატება** გასაღების შესანახად, რომელსაც გამოიყენებს მოთხოვნა.
 
-კვანძი იღებს შიდა ID-ს ფორმით `openai-compatible-<apiType>-<uuid>`; მისი ხელით შეყვანა არასოდეს დაგჭირდებათ — საჯარო სახელი პრეფიქსია.
+კვანძი იღებს `openai-compatible-<apiType>-<uuid>` ფორმის შიდა id-ს; თქვენ არასოდეს გჭირდებათ მისი აკრეფა, პრეფიქსი არის საჯარო სახელი.
 
-#### რეზერვირებული პრეფიქსები
+#### დაცულია პრეფიქსები
 
-პრეფიქსი არ შეიძლება ემთხვეოდეს ჩაშენებული პროვაიდერის ID-ს ან მეტსახელს (მაგალითად, `openai`, `cf`) და არც გაუქმებული პროვაიდერის ID-ს. მოდელის გადამწყვეტი მორგებულ კვანძებამდე ამოწმებს ჩაშენებულ ID-ებსა და მეტსახელებს, ამიტომ ასეთი პრეფიქსის მქონე კვანძი ტრაფიკს ვერასოდეს მიიღებს: `<prefix>/model` სანაცვლოდ ჩაშენებულ პროვაიდერთან გადავა, ან დახურული შეცდომით დასრულდება, თუ ეს პროვაიდერი გაუქმებულია. ასეთი პრეფიქსით კვანძის შექმნა ან რედაქტირება უარყოფილი იქნება შემდეგი შეტყობინებით:
+პრეფიქსი არ შეიძლება იყოს ჩაშენებული პროვაიდერის id ან მეტსახელი (მაგალითად `openai`, `cf`), არც გადამდგარი პროვაიდერის id. მოდელის გადამწყვეტი ამოწმებს ჩაშენებულ ID-ებს და ფსევდონიმებს მორგებული კვანძების წინ, ასე რომ, კვანძი, რომელიც იყენებს ერთ-ერთ ამ პრეფიქსს, არასოდეს მიიღებს ტრაფიკს: ამის ნაცვლად `<prefix>/model` მიდის ჩაშენებულ პროვაიდერთან, ან ვერ დაიხურება, თუ ეს პროვაიდერი პენსიაზე გავიდა. ასეთი პრეფიქსით კვანძის შექმნა ან რედაქტირება უარყოფილია:
 
 ```text
-prefix: "<prefix>" არის რეზერვირებული პროვაიდერის პრეფიქსი — აირჩიეთ სხვა პრეფიქსი (რეზერვირებული ID-ებისა და მეტსახელების გამოყენება მორგებული კვანძებისთვის შეუძლებელია, რადგან მოთხოვნები, როგორიცაა <prefix>/model, ჩაშენებულ პროვაიდერთან მარშრუტდება ან, გაუქმების შემთხვევაში, დახურული შეცდომით სრულდება)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-აირჩიეთ განსხვავებული პრეფიქსი (`mygw`, `acme-proxy`). თუ მორგებული კვანძისადმი მოთხოვნები სრულდება შეცდომით, რომელშიც ჩაშენებული პროვაიდერი ან მისი ავტორიზაციის მონაცემებია მოხსენიებული, შეამოწმეთ, რეზერვირებული ხომ არ არის კვანძის პრეფიქსი: ამ წესის შემოღებამდე შენახული კვანძები კვლავ ინახება, მაგრამ მათი პრეფიქსი ჩაშენებულ პროვაიდერთან მარშრუტდება. დაარედაქტირეთ კვანძი და მიანიჭეთ ახალი პრეფიქსი.
+აირჩიეთ განსხვავებული პრეფიქსი (`mygw`, `acme-proxy`). თუ მორგებული კვანძის მოთხოვნა ვერ მოხერხდა შეცდომით, რომელიც ასახელებს ჩაშენებულ პროვაიდერს ან მის სერთიფიკატებს, შეამოწმეთ არის თუ არა კვანძის პრეფიქსი დაცული: ამ წესის არსებობამდე შენახული კვანძები კვლავ ინახება, მაგრამ მათი პრეფიქსი მარშრუტები ჩაშენებული პროვაიდერისკენ. შეცვალეთ კვანძი და მიეცით მას ახალი პრეფიქსი.
 
-### OmniRoute-ის თანამონაწილეების ჯაჭვად დაკავშირება
+#### თითო კავშირის კარიბჭის ვარიანტები
 
-სხვა OmniRoute კარიბჭე შეიძლება დაემატოს როგორც **მორგებული OpenAI-თან თავსებადი** პროვაიდერი. გამოიყენეთ თანამონაწილის `/v1` საბაზისო URL და მის მიერ გაცემული, მინიმალური პრივილეგიების მქონე გამოყოფილი API გასაღები.
+ეს კლავიშები მიდის კავშირის `providerSpecificData` (მაგალითად, `PUT /api/providers/{id}` მეშვეობით):
 
-ორმხრივი ან მრავალსაფეხურიანი ჯაჭვებისთვის ყველა კარიბჭეზე ჩართეთ არჩევითი ციკლისგან დაცვის მექანიზმი:
+- `toolNameMaxLength` (მთელი რიცხვი, 1–1024) - OpenAI ჩატის ფორმატის თავსებადი კავშირებისთვის, რომელთა კარიბჭე უარყოფს ხელსაწყოების გრძელ სახელებს. უფრო გრძელი სახელები იგზავნება მოკლე მეტსახელების სახით და აღდგენილია პასუხში.
+- `quotaEndpoint` — კარიბჭის quota/credits ბოლო წერტილი, წაიკითხეთ დაფის კვოტის ზოლისა და კვოტების შესახებ მარშრუტიზაციისთვის. მუშაობს როგორც OpenAI- და Anthropic-თან თავსებად კავშირებზე; სრული ფორმა დოკუმენტირებულია `open-sse/services/usage/openaiCompatible.ts` ში.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### მიჯაჭვება OmniRoute თანატოლებს
+
+კიდევ ერთი OmniRoute კარიბჭე შეიძლება დაემატოს როგორც a** მორგებული OpenAI-თან თავსებადი** პროვაიდერი. გამოიყენეთ თანატოლის `/v1` ბაზა URL და გამოყოფილი, მინიმალური პრივილეგიით API გასაღები, რომელიც გაცემულია ამ თანატოლის მიერ.
+
+ორმხრივი ან მრავალჰოპიანი ჯაჭვებისთვის, ჩართეთ არჩევის მარყუჟის დაცვა ყველა კარიბჭეზე:
 
 ```bash
 # gateway-a
@@ -734,13 +772,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-`X-OmniRoute-Peer-Trace` სათაურს მხოლოდ იმ თანამონაწილის URL-ზე გაგზავნილი მოთხოვნები იღებს, რომელიც ნებადართულთა სიაში აშკარად არის მითითებული. კარიბჭე განმეორებულ ინსტანციის ID-ს ან ამოწურულ გადასვლათა ლიმიტს უარყოფს HTTP `508 Loop Detected`-ით; ჩვეულებრივი აღმავალი პროვაიდერები თანამონაწილეთა მეტამონაცემებს არ იღებენ.
+მხოლოდ ის მოთხოვნები, რომლებიც გაგზავნილია ცალსახად დაშვებულ სიაში შეყვანილ თანატოლ URL ზე, იღებს `X-OmniRoute-Peer-Trace` სათაურს. კარიბჭე უარყოფს განმეორებით მაგალითს ID ან ამოწურულ ჰოპ ბიუჯეტს HTTP `508 Loop Detected` ით; ჩვეულებრივი ზედა დინების პროვაიდერები არ იღებენ თანატოლების მეტამონაცემებს.
 
-თანამონაწილეთა ჯაჭვად დაკავშირება არც მონაცემთა ბაზის რეპლიკაციაა და არც ჰოსტის ავარიული გადართვა. თითოეული კარიბჭე ინახავს დამოუკიდებელ SQLite მდგომარეობას, კეშებს, სიხშირის მთვლელებსა და სესიებს. აქტიური/პასიური ან აქტიური/აქტიური ხელმისაწვდომობისთვის გამოიყენეთ მდგომარეობის შემმოწმებელი უკუპროქსი ან კლიენტის ავარიული გადართვა და არასოდეს მიამაგროთ ერთი SQLite მონაცემთა ბაზა რამდენიმე გაშვებულ OmniRoute ინსტანციას.
+Peer chaining არ არის მონაცემთა ბაზის რეპლიკაცია ან ჰოსტის გაუმართაობა. თითოეული კარიბჭე ინახავს დამოუკიდებელ SQLite მდგომარეობას, ქეშებს, შეფასების მრიცხველებს და სესიებს. გამოიყენეთ ჯანმრთელობის შემოწმებული საპირისპირო პროქსი ან კლიენტის მარცხი active/passive ან active/active ხელმისაწვდომობისთვის და არასოდეს დაამონტაჟოთ ერთი SQLite მონაცემთა ბაზა რამდენიმე გაშვებულ OmniRoute ინსტანციაში.
 
-### პროვაიდერის გამოყოფილი მარშრუტები
+### გამოყოფილი პროვაიდერის მარშრუტები
 
-მოთხოვნები მოდელის ვალიდაციით პირდაპირ კონკრეტულ პროვაიდერთან გადაამისამართეთ:
+მარშრუტის მოთხოვნა პირდაპირ კონკრეტულ პროვაიდერთან მოდელის დადასტურებით:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -748,140 +786,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-თუ პროვაიდერის პრეფიქსი აკლია, ის ავტომატურად ემატება. შეუსაბამო მოდელები აბრუნებს `400`-ს.
+პროვაიდერის პრეფიქსი ავტომატურად ემატება, თუ აკლია. შეუსაბამო მოდელები აბრუნებენ `400`.
 
-### ქსელის პროქსის კონფიგურაცია
+### ქსელის პროქსი კონფიგურაცია
 
 ```bash
-# გლობალური პროქსის დაყენება
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# პროქსი თითოეული პროვაიდერისთვის
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# პროქსის ტესტირება
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**პრიორიტეტი:** კონკრეტული გასაღები → კონკრეტული კომბინაცია → კონკრეტული პროვაიდერი → გლობალური → გარემო.
+**უპირატესობა:** გასაღების სპეციფიკური → Combo-სპეციფიკური → პროვაიდერის სპეციფიკური → გლობალური → გარემო.
 
-### მოდელების კატალოგის API
+### მოდელის კატალოგი API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-აბრუნებს პროვაიდერების მიხედვით დაჯგუფებულ მოდელებს ტიპებით (`chat`, `embedding`, `image`).
+აბრუნებს პროვაიდერის მიერ დაჯგუფებულ მოდელებს ტიპებით (`chat`, `embedding`, `image`).
 
 ### ღრუბლოვანი სინქრონიზაცია
 
-- პროვაიდერების, კომბინაციებისა და პარამეტრების სინქრონიზაცია მოწყობილობებს შორის
-- ავტომატური ფონური სინქრონიზაცია დროის ლიმიტითა და სწრაფი შეწყვეტით
-- საწარმოო გარემოში უპირატესობა მიანიჭეთ სერვერის მხარის `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`-ს
+- პროვაიდერების, კომბინაციებისა და პარამეტრების სინქრონიზაცია მოწყობილობებში
+- ავტომატური ფონური სინქრონიზაცია + ის დროის ამოწურვით
+- უპირატესობა მიანიჭეთ სერვერის მხარეს `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` წარმოებაში
 
-### Cloudflare-ის სწრაფი გვირაბი
+### Cloudflare სწრაფი გვირაბი
 
-- ხელმისაწვდომია **Dashboard → Endpoints**-ში Docker-ისა და სხვა თვითჰოსტირებული განთავსებებისთვის
-- ქმნის დროებით `https://*.trycloudflare.com` URL-ს, რომელიც გადამისამართდება თქვენს მიმდინარე OpenAI-თან თავსებად `/v1` საბოლოო წერტილზე
-- პირველად ჩართვისას `cloudflared` ინსტალირდება მხოლოდ საჭიროების შემთხვევაში; შემდგომი გადატვირთვები იმავე მართულ ბინარულ ფაილს იყენებს
-- Quick Tunnels ავტომატურად არ აღდგება OmniRoute-ის ან კონტეინერის გადატვირთვის შემდეგ; საჭიროების შემთხვევაში ხელახლა ჩართეთ ისინი დაფიდან
-- გვირაბის URL-ები დროებითია და გვირაბის ყოველი შეჩერების/გაშვებისას იცვლება
-- მართული Quick Tunnels ნაგულისხმევად იყენებს HTTP/2 ტრანსპორტს, რათა რესურსებით შეზღუდულ კონტეინერებში თავიდან აიცილოს QUIC UDP ბუფერთან დაკავშირებული ხმაურიანი გაფრთხილებები
-- დააყენეთ `CLOUDFLARED_PROTOCOL=quic` ან `auto`, თუ გსურთ მართული ტრანსპორტის არჩევანის გადაფარვა
-- დააყენეთ `CLOUDFLARED_BIN`, თუ მართული ჩამოტვირთვის ნაცვლად წინასწარ დაინსტალირებული `cloudflared` ბინარული ფაილის გამოყენება გირჩევნიათ
-- Cloudflare Quick Tunnel-ის, Tailscale Funnel-ისა და ngrok Tunnel-ის პანელების ჩვენება ან დამალვა შესაძლებელია **Settings → Appearance**-ში. პანელის დამალვა გაშვებულ გვირაბს არ აჩერებს.
+- ხელმისაწვდომია** დაფა → ბოლო წერტილები** Docker და სხვა თვითმმართველობის განლაგებისთვის
+- ქმნის დროებით `https://*.trycloudflare.com` URL, რომელიც გადადის თქვენს ამჟამინდელ OpenAI-თან თავსებადი `/v1` საბოლოო წერტილში
+- ჯერ ჩართეთ ინსტალაცია `cloudflared` მხოლოდ საჭიროების შემთხვევაში; მოგვიანებით განაახლებს იგივე მართულ ორობით გამოყენებას
+- სწრაფი გვირაბები არ არის ავტომატურად აღდგენილი OmniRoute ან კონტეინერის გადატვირთვის შემდეგ; საჭიროების შემთხვევაში ხელახლა ჩართეთ ისინი დაფიდან
+- გვირაბი URLs არის ეფემერული და იცვლება ყოველ ჯერზე, როცა გვირაბი stop/start
+- მართული სწრაფი გვირაბების ნაგულისხმევად არის HTTP/2 ტრანსპორტი, რათა თავიდან იქნას აცილებული ხმაურიანი QUIC UDP ბუფერის გაფრთხილებები შეზღუდულ კონტეინერებში
+- დააყენეთ `CLOUDFLARED_PROTOCOL=quic` ან `auto`, თუ გსურთ გადალახოთ მართული ტრანსპორტის არჩევანი
+- დააყენეთ `CLOUDFLARED_BIN` თუ გირჩევნიათ გამოიყენოთ წინასწარ დაინსტალირებული `cloudflared` ორობითი მართული ჩამოტვირთვის ნაცვლად
+- Cloudflare Quick Tunnel, Tailscale Funnel და ngrok გვირაბის პანელები შეიძლება იყოს ნაჩვენები ან დამალული** პარამეტრები → გარეგნობა** . პანელის დამალვა არ აჩერებს გაშვებულ გვირაბს.
 
-### LLM Gateway-ის ინტელექტუალური ფუნქციები (ფაზა 9)
+### LLM Gateway Intelligence (ფაზა 9)
 
-- **სემანტიკური ქეში** — ავტომატურად ინახავს ქეშში არასტრიმინგულ, temperature=0 პასუხებს (`X-OmniRoute-No-Cache: true`-ით გვერდის ავლა)
-- **მოთხოვნების იდემპოტენტურობა** — `Idempotency-Key` ან `X-Request-Id` სათაურის მეშვეობით 5 წამის განმავლობაში ახდენს მოთხოვნების დუბლიკატების აღმოფხვრას
-- **პროგრესის თვალყურის დევნება** — სურვილისამებრ SSE `event: progress` მოვლენები `X-OmniRoute-Progress: true` სათაურის მეშვეობით
+- **სემანტიკური ქეში** — ავტომატური ქეშირების გარეშე ნაკადი, ტემპერატურა = 0 პასუხები (შემოვლება `X-OmniRoute-No-Cache: true` ით)
+- **მოითხოვეთ იდემპოტენცია** — აშორებს მოთხოვნებს 5 წამში `Idempotency-Key` ან `X-Request-Id` სათაურის საშუალებით
+- **პროგრესის თვალყურის დევნება** — ჩართეთ SSE `event: progress` მოვლენები `X-OmniRoute-Progress: true` სათაურის მეშვეობით
 
 ---
 
-### მთარგმნელის საცდელი გარემო
+### თარჯიმანი სათამაშო მოედანი
 
-წვდომა შესაძლებელია **Dashboard → Translator**-ის მეშვეობით. გამართეთ და ვიზუალურად დააკვირდით, როგორ თარგმნის OmniRoute API მოთხოვნებს პროვაიდერებს შორის.
+წვდომა მეშვეობით** Dashboard → Translator** . გამართეთ და წარმოიდგინეთ, თუ როგორ თარგმნის OmniRoute API მოთხოვნებს პროვაიდერებს შორის.
 
-| რეჟიმი                 | დანიშნულება                                                                              |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| **საცდელი გარემო**     | აირჩიეთ წყაროს/სამიზნის ფორმატები, ჩასვით მოთხოვნა და მყისიერად იხილეთ თარგმნილი შედეგი  |
-| **ჩატის ტესტერი**      | გაგზავნეთ ჩატის შეტყობინებები პროქსის გავლით და შეამოწმეთ მოთხოვნის/პასუხის სრული ციკლი  |
-| **ტესტირების სტენდი**  | გაუშვით პაკეტური ტესტები ფორმატების მრავალ კომბინაციაზე თარგმანის სისწორის შესამოწმებლად |
-| **პირდაპირი მონიტორი** | დააკვირდით თარგმანებს რეალურ დროში, როდესაც მოთხოვნები პროქსის გავლით მიედინება          |
+| რეჟიმი               | მიზანი                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| **სათამაშო მოედანი** | აირჩიეთ source/target ფორმატები, ჩასვით მოთხოვნა და მყისიერად ნახეთ ნათარგმნი გამომავალი             |
+| **ჩატის ტესტერი**    | გააგზავნეთ პირდაპირი ჩეთის შეტყობინებები პროქსის მეშვეობით და შეამოწმეთ სრული request/response ციკლი |
+| **ტესტის სკამი**     | ჩაატარეთ სერიული ტესტები მრავალ ფორმატის კომბინაციებში თარგმანის სისწორის შესამოწმებლად              |
+| **ცოცხალი მონიტორი** | უყურეთ რეალურ დროში თარგმანებს, როდესაც მოთხოვნები მიედინება პროქსის მეშვეობით                       |
 
 **გამოყენების შემთხვევები:**
 
-- გაარკვიეთ, რატომ ვერ მუშაობს კლიენტისა და პროვაიდერის კონკრეტული კომბინაცია
-- გადაამოწმეთ, რომ აზროვნების ტეგები, ხელსაწყოების გამოძახებები და სისტემური მოთხოვნები სწორად ითარგმნება
-- შეადარეთ ფორმატების განსხვავებები OpenAI-ის, Claude-ის, Gemini-ისა და Responses API-ის ფორმატებს შორის
+- გამართეთ, რატომ ვერ ხერხდება კონკრეტული client/provider კომბინაცია
+- გადაამოწმეთ, რომ აზროვნების ტეგები, ხელსაწყოების ზარები და სისტემის მოთხოვნები სწორად ითარგმნება
+- შეადარეთ ფორმატის განსხვავებები OpenAI, Claude, Gemini და Responses API ფორმატებს შორის
 
 ---
 
 ### მარშრუტიზაციის სტრატეგიები
 
-კონფიგურაცია შესაძლებელია **Dashboard → Settings → Routing**-ის მეშვეობით. დაფაზე წარმოდგენილია ექვსი ყველაზე ხშირად გამოყენებული სტრატეგია; კომბინაციებსა და ავტომარშრუტიზატორს შიდა დონეზე სტრატეგიების უფრო ფართო ნაკრების მხარდაჭერა აქვს.
+კონფიგურაცია მეშვეობით** დაფის → პარამეტრები → მარშრუტიზაცია** . დაფა ასახავს ექვს ყველაზე ხშირად გამოყენებულ სტრატეგიას; კომბინაციები და ავტომატური როუტერი შიგნიდან მხარს უჭერს უფრო ფართო კომპლექტს.
 
 **დაფაზე ხილული სტრატეგიები (ანგარიშის დონის მარშრუტიზაცია):**
 
-| სტრატეგია                         | აღწერა                                                                                                                                              |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **პირველის შევსება**              | ანგარიშებს პრიორიტეტული თანმიმდევრობით იყენებს — ძირითადი ანგარიში ყველა მოთხოვნას ამუშავებს, სანამ ხელმისაწვდომია                                  |
-| **წრიული განაწილება**             | ყველა ანგარიშს ციკლურად გადის კონფიგურირებადი მიბმის ლიმიტით (ნაგულისხმევი: 3 გამოძახება თითო ანგარიშზე)                                            |
-| **P2C (ორი ვარიანტის ძალა)**      | ირჩევს 2 შემთხვევით ანგარიშს და მოთხოვნას უფრო ჯანსაღისკენ მარშრუტიზებს — დატვირთვას ჯანმრთელობის მდგომარეობის გათვალისწინებით აბალანსებს           |
-| **შემთხვევითი**                   | თითოეული მოთხოვნისთვის Fisher-Yates-ის არევის გამოყენებით შემთხვევითად ირჩევს ანგარიშს                                                              |
-| **ყველაზე ნაკლებად გამოყენებული** | მოთხოვნას უძველესი `lastUsedAt` დროის ნიშნულის მქონე ანგარიშისკენ მარშრუტიზებს და ტრაფიკს თანაბრად ანაწილებს                                        |
-| **ხარჯზე ოპტიმიზებული**           | მოთხოვნას ყველაზე დაბალი პრიორიტეტის მნიშვნელობის მქონე ანგარიშისკენ მარშრუტიზებს, რაც ყველაზე დაბალხარჯიანი პროვაიდერების გამოყენებას უზრუნველყოფს |
+| სტრატეგია                         | აღწერა                                                                                                                      |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **შეავსეთ პირველი**               | იყენებს ანგარიშებს პრიორიტეტული თანმიმდევრობით — ძირითადი ანგარიში ამუშავებს ყველა მოთხოვნას, სანამ მიუწვდომელია            |
+| **მრგვალი რობინი**                | ციკლი ყველა ანგარიშში კონფიგურირებადი წებოვანი ლიმიტით (ნაგულისხმევი: 3 ზარი თითო ანგარიშზე)                                |
+| **P2C (ორი არჩევანის ძალა)**      | ირჩევს 2 შემთხვევით ანგარიშს და მარშრუტს ჯანსაღი ანგარიშისკენ — აბალანსებს დატვირთვას ჯანმრთელობის შესახებ ინფორმირებულობით |
+| **შემთხვევითი**                   | შემთხვევითად ირჩევს ანგარიშს თითოეული მოთხოვნისთვის Fisher-Yates shuffle-ის გამოყენებით                                     |
+| **ყველაზე ნაკლებად გამოყენებული** | მარშრუტები ანგარიშზე უძველესი `lastUsedAt` დროის შტამპით, თანაბრად ანაწილებს ტრაფიკს                                        |
+| **ხარჯების ოპტიმიზებული**         | მარშრუტები ყველაზე დაბალი პრიორიტეტული მნიშვნელობის მქონე ანგარიშზე, ოპტიმიზირებულია ყველაზე იაფი პროვაიდერებისთვის         |
 
-**კომბინაციებისა და ავტომატური მარშრუტიზაციის გაფართოებული სტრატეგიები** (კონფიგურირდება თითოეული კომბინაციისთვის ან `auto/*` პრეფიქსების მეშვეობით — იხილეთ [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**გაფართოებული კომბინირებული და ავტო სტრატეგიები** (კონფიგურირებადია თითო კომბინაციით ან `auto/*` პრეფიქსების საშუალებით — იხილეთ [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — მკაცრი თანმიმდევრობა, წრიულ განაწილებას არასოდეს იყენებს
-- `weighted` — ტრაფიკის პროპორციული განაწილება თითოეული მოდელის წონების მიხედვით
-- `fill-first` — იყენებს პირველ მოდელს ლიმიტების მიღწევამდე
+- `priority` - მკაცრი წესრიგი, არასოდეს მრგვალი
+- `weighted` - პროპორციული ტრაფიკი გაყოფილი მოდელის წონებით
+- `fill-first` - გადაწურეთ პირველი მოდელი, სანამ ლიმიტები არ მიაღწევს
 - `round-robin` / `strict-random` / `random`
-- `p2c` (ორი ვარიანტის ძალა)
+- `p2c` (ორი არჩევანის ძალა)
 - `least-used` და `cost-optimized`
-- `auto` — ქულებზე დაფუძნებული არჩევანი ყველა კანდიდატს შორის
-- `lkgp` (ბოლო ცნობილი გამართული პროვაიდერი) — აფიქსირებს ბოლო წარმატებულ პროვაიდერზე, შემდეგ კი სარეზერვო წესებზე გადადის
-- `context-optimized` — ირჩევს ყველაზე დიდი თავისუფალი კონტექსტური ფანჯრის მქონე მოდელს
-- `context-relay` — შემდგომი რაუნდებისთვის გრძელი კონტექსტის მქონე მოდელებს ჯაჭვურად აერთიანებს
+- `auto` - ქულაზე ორიენტირებული ყველა კანდიდატი
+- `lkgp` (ბოლო ცნობილი კარგი პროვაიდერი) — მიამაგრებს ბოლო წარმატებულ პროვაიდერს, შემდეგ უბრუნდება წესებს
+- `context-optimized` - ირჩევს მოდელს ყველაზე დიდი თავისუფალი კონტექსტური ფანჯრით
+- `context-relay` - ჯაჭვები გრძელი კონტექსტის მოდელები შემდგომი მონაცვლეობისთვის
 
-#### გარე მიბმული სესიის სათაური
+#### გარე წებოვანი სესიის სათაური
 
-გარე სესიის მიბმისთვის (მაგალითად, Claude Code/Codex აგენტებისთვის უკუპროქსების უკან) გაგზავნეთ:
+გარე სესიის მსგავსებისთვის (მაგალითად, Claude Code/Codex აგენტები საპირისპირო მარიონეტების უკან), გაგზავნეთ:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute ასევე იღებს `x_session_id`-ს და მოქმედ სესიის გასაღებს `X-OmniRoute-Session-Id`-ში აბრუნებს.
+OmniRoute ასევე იღებს `x_session_id` და აბრუნებს ეფექტურ სესიის გასაღებს `X-OmniRoute-Session-Id` ში.
 
-თუ Nginx-ს იყენებთ და ქვედა ტირიან სათაურებს აგზავნით, ჩართეთ:
+თუ იყენებთ Nginx-ს და აგზავნით ხაზგასმული ფორმის სათაურებს, ჩართეთ:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### მოდელების ვაილდქარდ ფსევდონიმები
+#### Wildcard მოდელის მეტსახელები
 
-შექმენით ვაილდქარდ შაბლონები მოდელების სახელების ხელახლა მისაბმელად:
+შექმენით wildcard შაბლონები მოდელების სახელების ხელახლა გამოსახულების მიზნით:
 
 ```
-შაბლონი: claude-sonnet-*     →  სამიზნე: cc/claude-sonnet-4-6
-შაბლონი: gpt-*               →  სამიზნე: gh/gpt-5.3-codex
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-ვაილდქარდები მხარს უჭერს `*`-ს (ნებისმიერი სიმბოლოები) და `?`-ს (ერთი სიმბოლო).
+Wildcards მხარს უჭერს `*` (ნებისმიერი სიმბოლო) და `?` (ერთი სიმბოლო).
 
 #### სარეზერვო ჯაჭვები
 
-განსაზღვრეთ გლობალური სარეზერვო ჯაჭვები, რომლებიც ყველა მოთხოვნაზე ვრცელდება:
+განსაზღვრეთ გლობალური სარეზერვო ჯაჭვები, რომლებიც ვრცელდება ყველა მოთხოვნაზე:
 
 ```
-ჯაჭვი: production-fallback
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -889,22 +927,22 @@ underscores_in_headers on;
 
 ---
 
-### პროვაიდერების გავრცელებული კომბინაციები და მარშრუტიზაციის შაბლონები
+### პროვაიდერის საერთო კომბინაციები და მარშრუტიზაციის ნიმუშები
 
-ქვემოთ მოცემულია OmniRoute-ში მრავალი პროვაიდერის გაერთიანებისა და მათ შორის მარშრუტიზაციის მაგალითები:
+აქ მოცემულია რამდენიმე პროვაიდერის გაერთიანებისა და მათ შორის მარშრუტის მაგალითები OmniRoute ში:
 
-#### 1. პროგრამირების აგენტის კომბინაცია: მაღალი დონის მსჯელობა ხარჯის/სიჩქარის მიხედვით სარეზერვო გადართვით
+#### 1. კოდირების აგენტის კომბინაცია: მაღალი დონის მსჯელობა Cost/Speed Fallback-ით
 
-იდეალურია პროგრამირების აგენტებისთვის (OpenCode, Claude Code, Cursor, Cline). თავდაპირველად მოთხოვნებს მოწინავე მსჯელობის მოდელებისკენ მარშრუტიზებს, ხოლო კვოტის ამოწურვის ან შეცდომების შემთხვევაში სწრაფ პროგრამირების მოდელებზე გადადის.
+იდეალურია კოდირების აგენტებისთვის (OpenCode, Claude Code, Cursor, Cline). მარშრუტები თავდაპირველად სასაზღვრო მსჯელობის მოდელებზე, ბრუნდება სწრაფი კოდირების მოდელებზე კვოტების ამოწურვის ან შეცდომების შემთხვევაში.
 
-- **დაფა**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
-- **მოდელები**:
-  1. `claude/claude-sonnet-4-6` (ძირითადი პროგრამირების აგენტი)
-  2. `openai/gpt-4o` (მაღალი სიმძლავრის მეორეული სარეზერვო ვარიანტი)
-  3. `deepseek/deepseek-v4-flash` (მაღალი ეფექტიანობის, ხარჯთეფექტიანი სარეზერვო ვარიანტი)
+- **დაფა** : Combos → New Combo → სახელი: `agent-coding` → სტრატეგია: `Priority`
+- **მოდელები** :
+  1. `claude/claude-sonnet-4-6` (ძირითადი კოდირების აგენტი)
+  2. `openai/gpt-4o` (მეორადი მაღალი ტევადობის სარეზერვო)
+  3. `deepseek/deepseek-v4-flash` (მაღალი ეფექტურობა, ხარჯთეფექტური სარეზერვო)
 
 ```bash
-# მაგალითი API-ის გამოყენებით
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -919,183 +957,179 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. უფასო დონის ავტომატური გადართვის კომბინაცია
+#### 2. Free-Tier Auto Failover Combo
 
-API-ის ხარჯების გარეშე მაქსიმალური ხელმისაწვდომობის უზრუნველსაყოფად ერთმანეთთან აკავშირებს უფასო დონისა და გასაღების არმომთხოვნ რამდენიმე პროვაიდერს.
+აკავშირებს მრავალჯერადი უფასო დონის და გასაღების პროვაიდერებს, რათა მაქსიმალურად გაზარდოს მუშაობის დრო API ხარჯების გარეშე.
 
-- **სტრატეგია**: `Least Used` ან `Round Robin` (ანაწილებს დატვირთვას კვოტებს შორის)
-- **მოდელები**:
+- **სტრატეგია** : `Least Used` ან `Round Robin` (ანაწილებს დატვირთვას კვოტებზე)
+- **მოდელები** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# მაგალითი CLI-ის გამოყენებით
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. მულტიმოდალური / ხედვისა და ტექსტის კონვეიერი
+#### 3. მულტიმოდალური / Vision & Text Pipeline
 
-გამოსახულებების გააზრებასა და კოდის გენერაციასთან დაკავშირებული სამუშაო პროცესებისთვის სპეციალიზებული ხედვის მოდელების დაწყვილება მაღალსიჩქარიან ტექსტის გენერაციასთან.
+სპეციალიზებული ხედვის მოდელების დაწყვილება ტექსტის მაღალსიჩქარიან გენერირებისთვის სამუშაო პროცესებისთვის, რომლებიც მოიცავს გამოსახულების გაგებას და კოდის გენერირებას.
 
-- **შაბლონი**: `Priority` კომბინაცია, რომელშიც ჯერ ჩამოთვლილია ხედვის შესაძლებლობის მქონე მოდელები, ბოლოს კი — მაღალი გამტარუნარიანობის ტექსტის/კოდის მოდელი.
-- **მოდელები**:
-  1. `gemini/gemini-2.5-pro` (გამოსახულებების/მულტიმოდალური კონტენტის მძლავრი გააზრება)
-  2. `openai/gpt-4o` (ხედვისა და ხელსაწყოების გამოყენების დაბალანსებული შესაძლებლობები)
-  3. `deepseek/deepseek-v4-flash` (ტექსტის/კოდის გენერაცია)
+- **ნიმუში** : `Priority` კომბინაცია, რომელიც ჩამოთვლის ხედვის უნარიან მოდელებს ჯერ და ბოლოს მაღალი გამტარუნარიანობის text/code მოდელებს.
+- **მოდელები** :
+  1. `gemini/gemini-2.5-pro` (ძლიერი image/multimodal გაგება)
+  2. `openai/gpt-4o` (დაბალანსებული ხედვა და ხელსაწყოების გამოყენება)
+  3. `deepseek/deepseek-v4-flash` (Text/code თაობა)
 
 ---
 
-### მდგრადობა და წრედის ამომრთველები
+### გამძლეობა და ამომრთველები
 
-დააკონფიგურირეთ **მართვის პანელი → პარამეტრები → მდგრადობა** განყოფილებიდან.
+კონფიგურაცია მეშვეობით** დაფის → პარამეტრები → გამძლეობა** .
 
-OmniRoute ახორციელებს პროვაიდერის დონის მდგრადობას ხუთი კომპონენტის მეშვეობით:
+OmniRoute ახორციელებს პროვაიდერის დონის გამძლეობას ხუთი კომპონენტით:
 
-1. **მოთხოვნების რიგი და ტემპის მართვა** — სისტემის დონის მოთხოვნების ნაკადის ფორმირება:
-   - **მოთხოვნები წუთში (RPM)** — მაქსიმალური მოთხოვნების რაოდენობა წუთში თითოეული ანგარიშისთვის
-   - **მოთხოვნებს შორის მინიმალური დრო** — მოთხოვნებს შორის მინიმალური ინტერვალი მილიწამებში
-   - **მაქსიმალური პარალელური მოთხოვნები** — მაქსიმალური ერთდროული მოთხოვნების რაოდენობა თითოეული ანგარიშისთვის
+1. **მოითხოვეთ რიგი და ტემპი** — სისტემის დონის მოთხოვნის ფორმირება:
+   - **მოთხოვნები წუთში (RPM)** — მაქსიმალური მოთხოვნა წუთში თითო ანგარიშზე
+   - **მინიმალური დრო მოთხოვნებს შორის** - მინიმალური უფსკრული მოთხოვნებს შორის მილიწამებში
+   - **მაქსიმალური კონკურენტული მოთხოვნები** — მაქსიმალური ერთდროული მოთხოვნები თითო ანგარიშზე
 
-2. **კავშირის მოცდის პერიოდი** — განმეორებადად ცდადი შეცდომების შემდეგ ერთი კავშირისთვის ავტორიზაციის ტიპის მიხედვით განსაზღვრული კონფიგურაცია:
-   - **საბაზისო მოცდის პერიოდი** — ნაგულისხმევი მოცდის ფანჯარა ზედა დონის სერვისის განმეორებადად ცდადი შეცდომებისთვის
-   - **ზედა დონის სერვისის განმეორებითი ცდის მინიშნებების გამოყენება** — მათი არსებობის შემთხვევაში ითვალისწინებს ავტორიტეტულ `Retry-After` ან განულების მინიშნებებს
-   - **უკანდახევის მაქსიმალური ნაბიჯები** — განმეორებითი შეცდომებისთვის ექსპონენციალური უკანდახევის მაქსიმალური დონე
+2. **კავშირის გაგრილება** — თითო ავტორიზაციის ტიპის კონფიგურაცია ერთი კავშირისთვის ხელახლა საცდელი წარუმატებლობის შემდეგ:
+   - **ბაზის გაგრილება** — ნაგულისხმევი გაგრილების ფანჯარა ხელახლა საცდელი ზემო დინებაში წარუმატებლობისთვის
+   - **გამოიყენეთ Upstream Retry მინიშნებები** - პატივს სცემს ავტორიტეტულ `Retry-After` ან გადატვირთვის მინიშნებებს, როდესაც მოცემულია
+   - **მაქს უკან დახევის ნაბიჯები** - მაქსიმალური ექსპონენციალური უკან დახევის დონე განმეორებითი წარუმატებლობისთვის
 
-3. **პროვაიდერის წრედის ამომრთველი** — აკვირდება პროვაიდერის გამჭოლ შეცდომებს, კონფიგურირებული გაფრთხილების ზღვრის მიღწევისას პროვაიდერს გაუარესებულად მონიშნავს და კონფიგურირებული შეცდომების ზღვრის მიღწევისას ამომრთველს ხსნის:
-   - **გაუარესების ზღვარი** — პროვაიდერის თანმიმდევრული შეცდომების რაოდენობა `DEGRADED` მდგომარეობაში გადასვლამდე
-   - **შეცდომების ზღვარი** — პროვაიდერის თანმიმდევრული შეცდომების რაოდენობა `OPEN` მდგომარეობაში გადასვლამდე
-   - **განულების მოლოდინის დრო** — დროის მონაკვეთი, რომლის გასვლის შემდეგაც პროვაიდერი ხელახლა შემოწმდება
-   - **CLOSED** (ჯანსაღი) — მოთხოვნები ჩვეულებრივ მიედინება
-   - **DEGRADED** — მოთხოვნები კვლავ მიედინება, ხოლო შეცდომების მომატებული რაოდენობის მონიტორინგი გრძელდება
-   - **OPEN** — განმეორებითი შეცდომების შემდეგ პროვაიდერი დროებით დაბლოკილია
-   - **HALF_OPEN** — მოწმდება, აღდგა თუ არა პროვაიდერი
+3. **პროვაიდერის ამომრთველი** — თვალყურს ადევნებს პროვაიდერის ბოლოდან ბოლომდე წარუმატებლობას, აღნიშნავს პროვაიდერს, რომელიც დეგრადირებულია კონფიგურირებულ გამაფრთხილებელ ზღურბლზე და ხსნის ამომრთველს, როდესაც კონფიგურირებული წარუმატებლობის ზღვარი მიაღწევს:
+   - **დეგრადაციის ბარიერი** — პროვაიდერის თანმიმდევრული წარუმატებლობა `DEGRADED` შესვლამდე
+   - **წარუმატებლობის ბარიერი** — პროვაიდერის თანმიმდევრული წარუმატებლობა `OPEN` შესვლამდე
+   - **გადატვირთვის დროის ამოწურვა** — დროის ფანჯარა პროვაიდერის ხელახლა ტესტირებამდე
+   - **CLOSED** (ჯანმრთელი) - მოთხოვნები ნორმალურად მიედინება
+   - **DEGRADED** — მოთხოვნები კვლავ მიედინება, ხოლო ამაღლებული წარუმატებლობის თვალყურის დევნება ხდება
+   - **OPEN** — პროვაიდერი დროებით დაბლოკილია განმეორებითი წარუმატებლობის შემდეგ
+   - **HALF_OPEN** - ტესტირება, თუ პროვაიდერი გამოჯანმრთელდა
 
-   კავშირის მასშტაბის `429` სიჩქარის შეზღუდვები რჩება **კავშირის მოცდის პერიოდში** და პროვაიდერის ამომრთველში არ ითვლება.
+   კავშირის ფარგლებში `429` განაკვეთის ლიმიტები რჩება** კავშირის გაგრილება** და არ ჩავთვლით პროვაიდერის ამომრთველს.
 
-   პროვაიდერის ამომრთველის შესრულების დროის მდგომარეობა ნაჩვენებია მხოლოდ **მართვის პანელი → მდგომარეობა** განყოფილებაში.
+   პროვაიდერის ამომრთველის გაშვების მდგომარეობა ნაჩვენებია** დაფა → Health** მხოლოდ.
 
-4. **მოცდის პერიოდის დასრულების ლოდინი** — თუ ყველა კანდიდატი კავშირი უკვე მოცდის პერიოდშია, OmniRoute-ს შეუძლია დაელოდოს ყველაზე ადრე დასრულებად მოცდის პერიოდს და ავტომატურად გაიმეოროს კლიენტის იგივე მოთხოვნა.
+4. **დაელოდეთ გაგრილებას** — თუ ყველა კანდიდატის კავშირი უკვე კლებულობს, OmniRoute შეუძლია დაელოდოს ადრეულ გაგრილებას და ხელახლა სცადოს იგივე კლიენტის მოთხოვნა ავტომატურად.
 
-5. **სიჩქარის შეზღუდვის ავტომატური აღმოჩენა** — როდესაც ზედა დონის პროვაიდერები ლოდინის მკაფიო დროის მონაკვეთებს აბრუნებენ, პარამეტრის ჩართვის შემთხვევაში ეს მინიშნებები ანაცვლებს კავშირის ლოკალურ მოცდის პერიოდს.
+5. **შეფასების ლიმიტის ავტომატური ამოცნობა** — როდესაც ზედა დინების პროვაიდერები აბრუნებენ გამოკვეთილ ლოდინის ფანჯრებს, ეს მინიშნებები არღვევს ლოკალური კავშირის გაგრილებას, როდესაც პარამეტრი ჩართულია.
 
-**პროფესიონალური რჩევა:** გათიშვის შემდეგ აქტიური პროვაიდერის ამომრთველების შესამოწმებლად და გასანულებლად გამოიყენეთ **მდგომარეობის** გვერდი. მდგრადობის გვერდი მხოლოდ კონფიგურაციას ცვლის.
+**პროფესიონალური რჩევა:** გამოიყენეთ** ჯანმრთელობა** გვერდი, რათა შეამოწმოს და გადააყენოს ცოცხალი პროვაიდერის ამომრთველები გათიშვის შემდეგ. Resilience გვერდი მხოლოდ ცვლის კონფიგურაციას.
 
 ---
 
 ### მონაცემთა ბაზის ექსპორტი / იმპორტი
 
-მართეთ მონაცემთა ბაზის სარეზერვო ასლები **მართვის პანელი → პარამეტრები → სისტემა და საცავი** განყოფილებაში.
+მონაცემთა ბაზის სარეზერვო ასლების მართვა** დაფის → პარამეტრები → სისტემა და შენახვა** .
 
-| მოქმედება                        | აღწერა                                                                                                                                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **მონაცემთა ბაზის ექსპორტი**     | ჩამოტვირთავს მიმდინარე SQLite მონაცემთა ბაზას `.sqlite` ფაილის სახით                                                                                                                     |
-| **ყველაფრის ექსპორტი (.tar.gz)** | ჩამოტვირთავს სრულ სარეზერვო არქივს, რომელიც მოიცავს: მონაცემთა ბაზას, პარამეტრებს, კომბინაციებს, პროვაიდერის კავშირებს (ავტორიზაციის მონაცემების გარეშე), API გასაღებების მეტამონაცემებს |
-| **მონაცემთა ბაზის იმპორტი**      | ატვირთავს `.sqlite` ფაილს მიმდინარე მონაცემთა ბაზის ჩასანაცვლებლად. იმპორტამდე სარეზერვო ასლი ავტომატურად იქმნება, თუ `DISABLE_SQLITE_AUTO_BACKUP=true` მითითებული არ არის               |
+| მოქმედება                        | აღწერა                                                                                                                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ექსპორტის მონაცემთა ბაზა**     | ჩამოტვირთავს მიმდინარე SQLite მონაცემთა ბაზას `.sqlite` ფაილის სახით                                                                                                   |
+| **ყველაფრის ექსპორტი (.tar.gz)** | ჩამოტვირთავს სრულ სარეზერვო არქივს, მათ შორის: მონაცემთა ბაზა, პარამეტრები, კომბინაციები, პროვაიდერის კავშირები (სერთიფიკატების გარეშე), API გასაღების მეტამონაცემები  |
+| **მონაცემთა ბაზის იმპორტი**      | ატვირთეთ `.sqlite` ფაილი მიმდინარე მონაცემთა ბაზის ჩასანაცვლებლად. წინასწარი იმპორტის სარეზერვო ასლი ავტომატურად იქმნება, თუ `DISABLE_SQLITE_AUTO_BACKUP=true` არ არის |
 
 ```bash
-# API: მონაცემთა ბაზის ექსპორტი
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: ყველაფრის ექსპორტი (სრული არქივი)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: მონაცემთა ბაზის იმპორტი
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**იმპორტის ვალიდაცია:** იმპორტირებული ფაილი მოწმდება მთლიანობაზე (SQLite pragma შემოწმება), აუცილებელი ცხრილების (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) არსებობასა და ზომაზე (მაქს. 100MB).
+**იმპორტის ვალიდაცია:** იმპორტირებული ფაილი დამოწმებულია მთლიანობისთვის (SQLite pragma შემოწმება), საჭირო ცხრილებისთვის (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) და ზომით (მაქსიმუმ 100 მბ).
 
 **გამოყენების შემთხვევები:**
 
-- OmniRoute-ის გადატანა მოწყობილობებს შორის
-- ავარიული აღდგენისთვის გარე სარეზერვო ასლების შექმნა
-- კონფიგურაციების გაზიარება გუნდის წევრებს შორის (ყველაფრის ექსპორტი → არქივის გაზიარება)
+- მიგრაცია OmniRoute მანქანებს შორის
+- შექმენით გარე სარეზერვო ასლები კატასტროფის აღდგენისთვის
+- კონფიგურაციების გაზიარება გუნდის წევრებს შორის (ყველა → გაზიარების არქივის ექსპორტი)
 
 ---
 
-### პარამეტრების მართვის პანელი
+### პარამეტრების დაფა
 
-მარტივი ნავიგაციისთვის პარამეტრების გვერდი ორგანიზებულია **7 ჩანართად**:
+პარამეტრების გვერდი ორგანიზებულია** 7 ჩანართი** მარტივი ნავიგაციისთვის:
 
-| ჩანართი           | შიგთავსი                                                                                                                                                                                                                                  |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ზოგადი**        | სისტემური მეხსიერების ხელსაწყოები, ნაგულისხმევი ქცევა, Endpoint-ტუნელის ხილვადობა                                                                                                                                                         |
-| **გარეგნობა**     | თემის მართვა (ღია/მუქი/სისტემური), გვერდითი ზოლის ხილვადობა, Cloudflare/Tailscale/ngrok-ტუნელების ბარათების პანელების გადამრთველები                                                                                                       |
-| **AI**            | აზროვნების ბიუჯეტი (უცვლელად გადაცემა / ავტომატური მოცილება / მორგებული / ადაპტიური — იხილეთ [THINKING_BUDGET.md](./THINKING_BUDGET.md)), გლობალური სისტემური მოთხოვნა, მოთხოვნების კეშის სტატისტიკა                                      |
-| **უსაფრთხოება**   | შესვლის/პაროლის პარამეტრები, IP-წვდომის კონტროლი, API-ავთენტიფიკაცია `/models`-ისთვის, პროვაიდერების დაბლოკვა, მოთხოვნის ინექციისგან დაცვა                                                                                                |
-| **მარშრუტიზაცია** | გლობალური მარშრუტიზაციის სტრატეგია (პირველის შევსება / წრიული / P2C / შემთხვევითი / ყველაზე ნაკლებად გამოყენებული / ღირებულებით ოპტიმიზებული), მოდელების wildcard-ფსევდონიმები, სარეზერვო ჯაჭვები, კომბინაციების ნაგულისხმევი პარამეტრები |
-| **მდგრადობა**     | მოთხოვნების რიგი, კავშირის დაყოვნების პერიოდი, პროვაიდერის ამომრთველის კონფიგურაცია და დაყოვნების პერიოდის დასრულების ლოდინის ქცევა                                                                                                       |
-| **გაფართოებული**  | გლობალური პროქსის კონფიგურაცია (HTTP/SOCKS5), თითოეული პროვაიდერისთვის პროქსის ინდივიდუალური ჩანაცვლებები                                                                                                                                 |
+| ჩანართი           | შინაარსი                                                                                                                                                                                                                               |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **გენერალი**      | სისტემის შენახვის ხელსაწყოები, ნაგულისხმევი ქცევა, ბოლო წერტილის გვირაბის ხილვადობა                                                                                                                                                    |
+| **გარეგნობა**     | თემის მართვის საშუალებები (light/dark/system), გვერდითი ზოლის ხილვადობა, პანელის გადართვები Cloudflare/Tailscale/ngrok გვირაბის ბარათებისთვის                                                                                          |
+| **AI**            | აზროვნების ბიუჯეტი (გამშვები / ავტომატური ზოლები / მორგებული / ადაპტური — იხილეთ [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), გლობალური სისტემის მოთხოვნა, სწრაფი ქეშის სტატისტიკა                                                    |
+| **უსაფრთხოება**   | Login/Password პარამეტრები, IP წვდომის კონტროლი, API auth for `/models`, პროვაიდერის ბლოკირება, სწრაფი ინექციის დამცავი                                                                                                                |
+| **მარშრუტიზაცია** | გლობალური მარშრუტიზაციის სტრატეგია (პირველი შევსება / Round Robin / P2C / შემთხვევითი / ნაკლებად გამოყენებული / ოპტიმიზირებულია ხარჯები), აბსტრაქტული მოდელების მეტსახელები, სარეზერვო ჯაჭვები, კომბინირებული ნაგულისხმევი პარამეტრები |
+| **გამძლეობა**     | რიგის მოთხოვნა, კავშირის გაგრილება, პროვაიდერის ამომრთველის კონფიგურაცია და ლოდინის გაგრილების ქცევა                                                                                                                                   |
+| **გაფართოებული**  | პროქსის გლობალური კონფიგურაცია (HTTP/SOCKS5), პროვაიდერის პროქსის უგულებელყოფა                                                                                                                                                         |
 
-ზოგადი ჩანართი აღარ იმეორებს მხოლოდ წაკითხვად ჩანაწერებისა და კეშის შენიშვნებს. მონაცემთა ბაზის შენახვისა და
-ოპტიმიზაციის პარამეტრები ინახება `/api/settings/database`-ის მეშვეობით; კეშის ხელით გასუფთავებისთვის გამოიყენება
-`DELETE /api/cache`. მოთხოვნებისა და პროქსის ჟურნალის მწკრივების მაქსიმალური რაოდენობა კონტროლდება
-`CALL_LOGS_TABLE_MAX_ROWS`-ისა და `PROXY_LOGS_TABLE_MAX_ROWS`-ის მეშვეობით.
+General აღარ იმეორებს მხოლოდ წასაკითხად ჩანაწერს და ქეში შენიშვნებს. მონაცემთა ბაზის შენახვა და ოპტიმიზაციის პარამეტრები შენარჩუნებულია `/api/settings/database` მეშვეობით; ქეშის ხელით გასუფთავება იყენებს `DELETE /api/cache`. მოთხოვნისა და პროქსის ჟურნალის მწკრივების ქუდები კონტროლდება `CALL_LOGS_TABLE_MAX_ROWS` და `PROXY_LOGS_TABLE_MAX_ROWS` მიერ.
 
 ---
 
-### ხარჯებისა და ბიუჯეტის მართვა
+### ხარჯები და ბიუჯეტის მართვა
 
-წვდომა შესაძლებელია **მართვის პანელი → ხარჯები**-დან.
+წვდომა მეშვეობით** დაფის → ხარჯები** .
 
-| ჩანართი          | დანიშნულება                                                                                                                               |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| **ბიუჯეტი**      | დააყენეთ ხარჯვის ლიმიტები თითოეული API-გასაღებისთვის ყოველდღიური/ყოველკვირეული/ყოველთვიური ბიუჯეტებითა და რეალურ დროში თვალყურის დევნებით |
-| **ფასწარმოქმნა** | იხილეთ და დაარედაქტირეთ მოდელების ფასების ჩანაწერები — თითოეული პროვაიდერისთვის 1K შემავალ/გამავალ ტოკენზე ღირებულება                     |
+| ჩანართი     | მიზანი                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------ |
+| **ბიუჯეტი** | დააყენეთ ხარჯვის ლიმიტები API კლავიშზე daily/weekly/monthly ბიუჯეტით და რეალურ დროში თვალყურის დევნით  |
+| **ფასი**    | მოდელის ფასების ჩანაწერების ნახვა და რედაქტირება — ღირებულება 1K input/output ჟეტონზე თითო პროვაიდერზე |
 
 ```bash
-# API: ბიუჯეტის დაყენება
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: ბიუჯეტის მიმდინარე სტატუსის მიღება
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**ხარჯების აღრიცხვა:** თითოეული მოთხოვნისთვის აღირიცხება ტოკენების გამოყენება და ღირებულება გამოითვლება ფასების ცხრილის მიხედვით. პროვაიდერის, მოდელისა და API-გასაღების მიხედვით ჩაშლა იხილეთ **მართვის პანელი → გამოყენება**-ში.
+**ხარჯების თვალყურის დევნება:** ყოველი მოთხოვნა აღრიცხავს ტოკენის გამოყენებას და ითვლის ღირებულებას ფასების ცხრილის გამოყენებით. ავარიების ნახვა** დაფის → გამოყენება** პროვაიდერის, მოდელის და API გასაღების მიერ.
 
 ---
 
-### აუდიოს ტრანსკრიფცია
+### აუდიო ტრანსკრიფცია
 
-OmniRoute მხარს უჭერს აუდიოს ტრანსკრიფციას OpenAI-თან თავსებადი endpoint-ის მეშვეობით:
+OmniRoute მხარს უჭერს აუდიო ტრანსკრიფციას OpenAI-თან თავსებადი საბოლოო წერტილის მეშვეობით:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# მაგალითი curl-ის გამოყენებით
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` არის Deepgram-ის ნატიური მარშრუტი და საჭიროებს Deepgram API-გასაღებს.
-თუ კონფიგურირებულია მხოლოდ OpenRouter, გამოიყენეთ `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` არის Deepgram-ის მშობლიური მარშრუტი და სჭირდება Deepgram API გასაღები. თუ მხოლოდ OpenRouter არის კონფიგურირებული, გამოიყენეთ `openrouter/deepgram/nova-3`.
 
-**მეტყველების ტექსტად გარდაქმნის (ტრანსკრიფციის)** პროვაიდერები:
+**მეტყველება ტექსტში (ტრანსკრიფცია)** პროვაიდერები:
 
-- `openai/` (whisper-თან თავსებადი)
+- `openai/` (ჩურჩულით თავსებადი)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova-ს ოჯახი)
+- `deepgram/` (ნოვას ოჯახი)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper-ის ვარიანტები)
+- `nvidia/` (პარაკეტი, კანარი)
+- `huggingface/` (ჩურჩულის ვარიანტები)
 - `qwen/`
 
-**ტექსტის მეტყველებად გარდაქმნის (`POST /v1/audio/speech`)** პროვაიდერები:
+**ტექსტის მეტყველება (`POST /v1/audio/speech`)** პროვაიდერები:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
-- `nvidia/` (Magpie TTS)
+- `deepgram/` (აურა)
+- `nvidia/` (კაჭაკა TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1107,55 +1141,45 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-ტრანსკრიფციისთვის მხარდაჭერილი აუდიოფორმატებია: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS-ის გამომავალი ფორმატები დამოკიდებულია პროვაიდერზე (mp3, wav, opus, pcm, mulaw).
+მხარდაჭერილი აუდიო ფორმატები ტრანსკრიფციისთვის: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS გამომავალი ფორმატები დამოკიდებულია პროვაიდერზე (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### კომბინაციების დაბალანსების სტრატეგიები
+### კომბინირებული დაბალანსების სტრატეგიები
 
-თითოეული კომბინაციის დაბალანსება დააკონფიგურირეთ **მართვის პანელი → კომბინაციები → შექმნა/რედაქტირება → სტრატეგია**-ში.
+თითო კომბინირებული დაბალანსების კონფიგურაცია** დაფა → Combos → Create/Edit → სტრატეგია** .
 
-| სტრატეგია                         | აღწერა                                                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| **წრიული**                        | მოდელებს შორის თანმიმდევრულად მონაცვლეობს                                                               |
-| **პრიორიტეტული**                  | ყოველთვის პირველად პირველ მოდელს ცდის; სარეზერვო ვარიანტზე მხოლოდ შეცდომის შემთხვევაში გადადის          |
-| **შემთხვევითი**                   | თითოეული მოთხოვნისთვის კომბინაციიდან შემთხვევით მოდელს ირჩევს                                           |
-| **შეწონილი**                      | მარშრუტიზაციას თითოეული მოდელისთვის მინიჭებული წონების პროპორციულად ახორციელებს                         |
-| **ყველაზე ნაკლებად გამოყენებული** | მარშრუტს ბოლო დროს ყველაზე ნაკლები მოთხოვნის მქონე მოდელისკენ მიმართავს (იყენებს კომბინაციის მეტრიკებს) |
-| **ღირებულებით ოპტიმიზებული**      | მარშრუტს ყველაზე იაფი ხელმისაწვდომი მოდელისკენ მიმართავს (იყენებს ფასების ცხრილს)                       |
+| სტრატეგია                         | აღწერა                                                                            |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| **რაუნდ-რობინ**                   | თანმიმდევრულად ბრუნავს მოდელებს შორის                                             |
+| **პრიორიტეტი**                    | ყოველთვის ცდის პირველ მოდელს; უკუაგდებს მხოლოდ შეცდომას                           |
+| **შემთხვევითი**                   | ირჩევს შემთხვევით მოდელს კომბინაციიდან თითოეული მოთხოვნისთვის                     |
+| **შეწონილი**                      | მარშრუტები პროპორციულად ეფუძნება მინიჭებულ წონებს თითო მოდელზე                    |
+| **ყველაზე ნაკლებად გამოყენებული** | მარშრუტები მოდელისკენ უმცირესი ბოლო მოთხოვნით (გამოიყენებს კომბინირებულ მეტრიკას) |
+| **ხარჯების ოპტიმიზებული**         | მარშრუტები ყველაზე იაფი ხელმისაწვდომი მოდელისკენ (იყენებს ფასების ცხრილს)         |
 
-კომბინაციების გლობალური ნაგულისხმევი პარამეტრების დაყენება შესაძლებელია **მართვის პანელი → პარამეტრები → მარშრუტიზაცია → კომბინაციის ნაგულისხმევი პარამეტრები**-ში.
-კომბინაციის სამიზნეების timeout-ები ნაგულისხმევად მოთხოვნის მიმდინარე timeout-ს მემკვიდრეობით იღებს. გამოიყენეთ **სამიზნის timeout
-(წამები)** კომბინაციის ნაგულისხმევ პარამეტრებში ან ცალკეულ კომბინაციაში მხოლოდ მაშინ, როდესაც თითოეული სამიზნისთვის უფრო მოკლე ლიმიტმა
-სარეზერვო ვარიანტზე უფრო სწრაფი გადასვლა უნდა გამოიწვიოს.
+გლობალური კომბინირებული ნაგულისხმევი პარამეტრების დაყენება შესაძლებელია** დაფის → პარამეტრები → მარშრუტირება → კომბინირებული ნაგულისხმევი** . კომბინირებული სამიზნე დროის ამოწურვა ნაგულისხმევად მემკვიდრეობით იღებს მიმდინარე მოთხოვნის ვადას. გამოყენება** სამიზნე დროის ამოწურვა (წამები)** კომბინირებულ ნაგულისხმევზე ან ინდივიდუალურ კომბინაციებზე მხოლოდ მაშინ, როდესაც თითო სამიზნეზე უფრო მოკლე ლიმიტი უნდა გამოიწვიოს უფრო სწრაფი დაბრუნება.
 
-ნულოვანი დაყოვნების მქონე კომბინაციების ოპტიმიზაციები მხოლოდ მკაფიოდ ჩართვის შემთხვევაში მოქმედებს. დატოვეთ **ნულოვანი დაყოვნების ოპტიმიზაციები** გამორთული, რათა
-ამ დაყოვნების ფუნქციებმა ერთმანეთს არ შეაჯიბროს სარეზერვო სამიზნეები, TTFT-ის
-ისტორიის საფუძველზე არ გამოტოვოს სამიზნეები ან არ შეკუმშოს სარეზერვო მოთხოვნები; მისი ჩართვა საშუალებას იძლევა, კონფიგურირებულმა პარალელურმა დაზღვევამ, პროგნოზულმა TTFT
-გამოტოვებებმა და პროაქტიულმა სარეზერვო შეკუმშვამ მარშრუტიზაციის/მოთხოვნის სიზუსტე შეამციროს საბოლოო დაყოვნების შესამცირებლად.
+ნულოვანი შეყოვნების კომბინირებული ოპტიმიზაცია ნებადართულია. დატოვე** ნულოვანი შეყოვნების ოპტიმიზაცია** გამორთულია ამ შეყოვნების ფუნქციების თავიდან ასაცილებლად სარეზერვო სამიზნეების რბოლაში, TTFT ისტორიაზე დაფუძნებული სამიზნეების გამოტოვებისგან ან სარეზერვო მოთხოვნების შეკუმშვისგან; მისი ჩართვა საშუალებას იძლევა კონფიგურირებული ჰეჯინგი, პროგნოზირებადი TTFT გამოტოვება და პროაქტიული სარეზერვო შეკუმშვა routing/request ერთგულებით ვაჭრობის ქვედა კუდის შეყოვნებით.
 
-გამორთეთ **მსჯელობის ტოკენების ბუფერი**, როდესაც ზემდგომი პროვაიდერები მკაცრ
-`max_tokens` / `maxOutputTokens` ლიმიტებს მოითხოვენ. ჩართვისას კომბინირებული მარშრუტიზაცია მსჯელობის მოდელებისთვის
-დამატებით რესურსს მხოლოდ ცნობილი გამომავალი ლიმიტის მქონე მოდელებზე ამატებს და კლიენტის ტოკენების ლიმიტს უცვლელად ტოვებს, როდესაც
-უსაფრთხო ბუფერირებული მნიშვნელობა ამ ზღვარს გადააჭარბებდა. თუ კლიენტის ლიმიტი უკვე აღემატება ცნობილ ზღვარს,
-ზემდგომი მოთხოვნის გაგზავნამდე OmniRoute მას ამ ზღვრამდე ამცირებს.
+გამორთვა** მსჯელობის ნიშანი ბუფერი** როდესაც ზედა დინების პროვაიდერები ითხოვენ მკაცრ `max_tokens` / `maxOutputTokens` შეზღუდვებს. როდესაც ჩართულია, კომბინირებული მარშრუტიზაცია მხოლოდ მსჯელობის მოდელის სათავეს ამატებს ცნობილი გამომავალი ქუდის მქონე მოდელებს და უცვლელად ტოვებს კლიენტის ტოკენის ლიმიტს, როდესაც უსაფრთხო ბუფერული მნიშვნელობა აღემატება ამ ზღვარს. თუ კლიენტის ლიმიტი უკვე აღემატება ცნობილ ზღვარს, OmniRoute ამაგრებს მას ამ ლიმიტზე ზემოთ მოთხოვნის გაგზავნამდე.
 
 ---
 
-### სისტემის მდგომარეობის დაფა
+### ჯანმრთელობის დაფა
 
-წვდომა შესაძლებელია მენიუდან **დაფა → მდგომარეობა**. სისტემის მდგომარეობის რეალურ დროში მიმოხილვა 6 ბარათით:
+წვდომა მეშვეობით** დაფა → Health** . რეალურ დროში სისტემის ჯანმრთელობის მიმოხილვა 6 ბარათით:
 
-| ბარათი                        | რას აჩვენებს                                                                            |
-| ----------------------------- | --------------------------------------------------------------------------------------- |
-| **სისტემის სტატუსი**          | უწყვეტი მუშაობის დრო, ვერსია, მეხსიერების გამოყენება, მონაცემთა დირექტორია              |
-| **პროვაიდერების მდგომარეობა** | პროვაიდერების გლობალური circuit breaker-ის მიმდინარე მდგომარეობა                        |
-| **სიხშირის ლიმიტები**         | აქტიური კავშირების შეყოვნებები თითოეული ანგარიშისთვის, დარჩენილი დროის მითითებით        |
-| **აქტიური დაბლოკვები**        | მოდელის დონეზე მოქმედი აქტიური დაბლოკვები და დროებითი გამორიცხვები                      |
-| **ხელმოწერების ქეში**         | დუბლიკატების აღმოფხვრის ქეშის სტატისტიკა (აქტიური გასაღებები, დამთხვევების მაჩვენებელი) |
-| **დაყოვნების ტელემეტრია**     | p50/p95/p99 დაყოვნების აგრეგაცია თითოეული პროვაიდერისთვის                               |
+| ბარათი                      | რას აჩვენებს                                                      |
+| --------------------------- | ----------------------------------------------------------------- |
+| **სისტემის სტატუსი**        | Uptime, ვერსია, მეხსიერების გამოყენება, მონაცემთა დირექტორია      |
+| **პროვაიდერის ჯანმრთელობა** | გლობალური პროვაიდერის ამომრთველის გაშვების მდგომარეობა            |
+| **შეფასების ლიმიტები**      | აქტიური კავშირის გაგრილება თითო ანგარიშზე დარჩენილი დროით         |
+| **აქტიური ლოკაუტები**       | აქტიური მოდელის მასშტაბის ჩაკეტვა და დროებითი გამორიცხვები        |
+| **ხელმოწერის ქეში**         | ქეშის დუბლირების სტატისტიკა (აქტიური კლავიშები, დარტყმის სიჩქარე) |
+| **ლატენტური ტელემეტრია**    | p50/p95/p99 შეყოვნების აგრეგაცია პროვაიდერზე                      |
 
-**პროფესიონალური რჩევა:** მდგომარეობის გვერდი ავტომატურად ახლდება ყოველ 10 წამში. პრობლემების მქონე პროვაიდერების გამოსავლენად გამოიყენეთ circuit breaker-ის ბარათი.
+**პროფესიონალური რჩევა:** ჯანმრთელობის გვერდი ავტომატურად განახლდება ყოველ 10 წამში. გამოიყენეთ ამომრთველის ბარათი იმის დასადგენად, თუ რომელ პროვაიდერებს აქვთ პრობლემები.
 
 ---
 

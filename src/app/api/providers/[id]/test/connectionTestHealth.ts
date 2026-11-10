@@ -1,5 +1,6 @@
 import { setCredentialHealth } from "@/lib/credentialHealth/cache";
 import { recoverKeyHealth } from "@omniroute/open-sse/services/apiKeyRotator.ts";
+import { isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh.ts";
 import { applyDetectedControlUpdate, type ApiKeyValidationResult } from "./apiKeyTestResult";
 
 interface ConnectionHealthSnapshot {
@@ -56,7 +57,14 @@ export async function persistConnectionTestHealth({
     !result.valid &&
     terminalTestStatuses.has(String(diagnosis.code ?? diagnosis.type ?? "").toLowerCase());
   const updateData: Record<string, unknown> = {
-    testStatus: clearErrorState ? "active" : result.valid ? connection.testStatus : "error",
+    testStatus:
+      provider === "chatgpt" && !result.valid && diagnosis.code === "expired"
+        ? "expired"
+        : clearErrorState
+          ? "active"
+          : result.valid
+            ? connection.testStatus
+            : "error",
     ...(result.valid && !operatorDisabled ? { isActive: true } : {}),
     lastError: clearErrorState ? null : result.valid ? connection.lastError : result.error,
     lastErrorAt: clearErrorState ? null : result.valid ? connection.lastErrorAt : now,
@@ -76,11 +84,12 @@ export async function persistConnectionTestHealth({
       : result.valid
         ? connection.errorCode
         : diagnosis.code || result.statusCode || null,
-    rateLimitedUntil: clearErrorState
-      ? null
-      : isTerminalFailure || result.valid
-        ? connection.rateLimitedUntil || null
-        : new Date(Date.now() + 30_000).toISOString(),
+    rateLimitedUntil:
+      clearErrorState || (provider === "chatgpt" && !result.valid && diagnosis.code === "expired")
+        ? null
+        : isTerminalFailure || result.valid
+          ? connection.rateLimitedUntil || null
+          : new Date(Date.now() + 30_000).toISOString(),
   };
   if (clearErrorState) updateData.backoffLevel = 0;
   if (result.valid && (connection.apiKey || connection.accessToken)) {
@@ -88,7 +97,9 @@ export async function persistConnectionTestHealth({
     if (recovered) updateData.providerSpecificData = recovered;
   }
   applyDetectedControlUpdate(updateData, latest.providerSpecificData, result);
-  if (result.refreshed && result.newTokens) {
+  // A passive Codex standby only adopts tokens from the active instance; it must never persist
+  // tokens a connection test carries back, or it would overwrite the replicated credentials.
+  if (result.refreshed && result.newTokens && !isPassiveCodex(provider)) {
     updateData.accessToken = result.newTokens.accessToken;
     if (result.newTokens.refreshToken) updateData.refreshToken = result.newTokens.refreshToken;
     if (result.newTokens.expiresIn)

@@ -149,24 +149,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## উপলব্ধ স্কিল
+## উপলব্ধ দক্ষতা
 
-OmniRoute 6টি A2A স্কিল এক্সপোজ করে, যেগুলো `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`-এ সংযুক্ত। প্রতিটি স্কিল মডিউল `src/lib/a2a/skills/`-এ অবস্থিত।
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` এ তারযুক্ত 6 A2A দক্ষতা প্রকাশ করে। প্রতিটি দক্ষতা মডিউল `src/lib/a2a/skills/` এ থাকে।
 
-| স্কিল              | ID                   | বিবরণ                                                                                                                                                     | ট্যাগ                      | উদাহরণ                                 |
-| :----------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------- |
-| Smart Routing      | `smart-routing`      | OmniRoute-এর কম্বো ইঞ্জিন + স্কোরিং ব্যবহার করে সর্বোত্তম প্রোভাইডার/কম্বোর মাধ্যমে একটি প্রম্পট রাউট করে                                                 | routing, providers         | "Route this prompt via the best model" |
-| Quota Management   | `quota-management`   | প্রতি-প্রোভাইডার কোটার অবস্থা রিপোর্ট করে, কলারদের কখন থ্রটল/সুইচ করতে হবে তা সিদ্ধান্ত নিতে সাহায্য করে                                                  | quota, providers           | "Check quota for anthropic"            |
-| Provider Discovery | `provider-discovery` | ক্ষমতা, ফ্রি-টিয়ার ফ্ল্যাগ, OAuth স্ট্যাটাসসহ ইনস্টল করা প্রোভাইডারদের তালিকাভুক্ত করে                                                                   | providers, discovery       | "What providers are available?"        |
-| Cost Analysis      | `cost-analysis`      | ক্যাটালগ + সাম্প্রতিক ব্যবহারের ভিত্তিতে একটি রিকোয়েস্ট/কথোপকথনের খরচ অনুমান করে                                                                         | cost, usage                | "Estimate cost for this conversation"  |
-| Health Report      | `health-report`      | প্রতি প্রোভাইডারের সার্কিট ব্রেকার, কুলডাউন, লকআউট অবস্থা একত্রিত করে                                                                                     | health, resilience         | "Show health status of all providers"  |
-| List Capabilities  | `list-capabilities`  | কনটেক্সট ইনজেকশনের জন্য raw SKILL.md URL সহ সম্পূর্ণ 45-এন্ট্রির Agent Skills ক্যাটালগ (23 API + 21 CLI + 1 config) একটি মার্কডাউন টেবিল হিসেবে ফেরত দেয় | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| দক্ষতা              | ID                   | বর্ণনা                                                                                                                                                           | ট্যাগ                      | উদাহরণ                                       |
+| :------------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
+| স্মার্ট রাউটিং      | `smart-routing`      | OmniRoute এর কম্বো ইঞ্জিন + স্কোরিং ব্যবহার করে সর্বোত্তম provider/combo এর মাধ্যমে একটি প্রম্পট রুট করে                                                         | রাউটিং, প্রদানকারী         | "সেরা মডেলের মাধ্যমে এই প্রম্পটটি রুট করুন"  |
+| কোটা ব্যবস্থাপনা    | `quota-management`   | প্রতি-প্রোভাইডার কোটা স্টেট রিপোর্ট করে, কলকারীদের কখন throttle/switch করতে হবে তা সিদ্ধান্ত নিতে সাহায্য করে                                                    | কোটা, প্রদানকারী           | "নৃবিজ্ঞানের জন্য কোটা পরীক্ষা করুন"         |
+| প্রদানকারী আবিষ্কার | `provider-discovery` | সক্ষমতা, ফ্রি-টায়ার পতাকা, OAuth স্ট্যাটাস সহ ইনস্টল করা প্রদানকারীদের তালিকা করুন                                                                              | প্রদানকারী, আবিষ্কার       | "কি প্রদানকারী পাওয়া যায়?"                 |
+| খরচ বিশ্লেষণ        | `cost-analysis`      | ক্যাটালগ + সাম্প্রতিক ব্যবহার অনুযায়ী একটি request/conversation এর মূল্য অনুমান করে                                                                             | খরচ, ব্যবহার               | "এই কথোপকথনের জন্য আনুমানিক খরচ"             |
+| স্বাস্থ্য রিপোর্ট   | `health-report`      | সার্কিট ব্রেকার, কুলডাউন, প্রদানকারী প্রতি লকআউট অবস্থা                                                                                                          | স্বাস্থ্য, স্থিতিস্থাপকতা  | "সমস্ত প্রদানকারীর স্বাস্থ্যের অবস্থা দেখান" |
+| তালিকা ক্ষমতা       | `list-capabilities`  | প্রসঙ্গ ইনজেকশনের জন্য কাঁচা SKILL.md URLs সহ একটি মার্কডাউন টেবিল হিসাবে সম্পূর্ণ 45-এন্ট্রি এজেন্ট দক্ষতা ক্যাটালগ (23 API + 21 CLI + 1 কনফিগারেশন) প্রদান করে | ক্যাটালগ, আবিষ্কার, দক্ষতা | "সমস্ত OmniRoute ক্ষমতা তালিকাভুক্ত করুন"    |
 
-> Agent Cardটি লাইভ 376-প্রোভাইডার ক্যাটালগের সাথে সামঞ্জস্যপূর্ণ রাখা উচিত; প্রোভাইডার সংখ্যা এবং ফ্রি/নো-অথ মেটাডেটা রানটাইম রেজিস্ট্রি থেকে সংগৃহীত হয়।
+> এজেন্ট কার্ডটি লাইভ 381-প্রদানকারীর ক্যাটালগের সাথে সারিবদ্ধ রাখা উচিত; প্রদানকারীর সংখ্যা এবং free/no-auth মেটাডেটা রানটাইম রেজিস্ট্রি থেকে নেওয়া হয়।
 
-### `list-capabilities` স্কিলের বিস্তারিত
+### `list-capabilities` দক্ষতা বিস্তারিত
 
-`list-capabilities` স্কিলটি বিশেষভাবে এমন বহিরাগত এজেন্টদের জন্য উপযোগী যাদের API কল পাঠানোর আগে OmniRoute কী এক্সপোজ করে তা আবিষ্কার করতে হয়। এটি একটি স্ট্রাকচার্ড মার্কডাউন টেবিল আর্টিফ্যাক্ট ফেরত দেয়:
+`list-capabilities` দক্ষতা বিশেষত বহিরাগত এজেন্টদের জন্য উপযোগী যাদের API কল পাঠানোর আগে OmniRoute কী প্রকাশ করে তা আবিষ্কার করতে হবে। এটি একটি কাঠামোগত মার্কডাউন টেবিল আর্টিফ্যাক্ট প্রদান করে:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -175,46 +175,54 @@ OmniRoute 6টি A2A স্কিল এক্সপোজ করে, যেগ
 ...
 ```
 
-প্রতিটি সারিতে `rawUrl` কলাম অন্তর্ভুক্ত থাকে, যাতে এজেন্টরা সঙ্গে সঙ্গে সম্পূর্ণ SKILL.md ফেচ করতে পারে। `metadata.totalSkills` ফিল্ডটি ক্যাটালগের আকার প্রতিফলিত করে (বর্তমানে 45)। ইমপ্লিমেন্টেশন: `src/lib/a2a/skills/listCapabilities.ts`। আরও দেখুন [AGENT-SKILLS.md](./AGENT-SKILLS.md)।
+প্রতিটি সারিতে `rawUrl` কলাম থাকে যাতে এজেন্টরা অবিলম্বে সম্পূর্ণ SKILL.md আনতে পারে। `metadata.totalSkills` ক্ষেত্রটি ক্যাটালগের আকারকে প্রতিফলিত করে (45 আজ)। বাস্তবায়ন: `src/lib/a2a/skills/listCapabilities.ts`। এছাড়াও [AGENT-SKILLS.md](./AGENT-SKILLS.md) দেখুন।
 
 ---
 
 ## REST API (সহায়ক)
 
-JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামাণ্য A2A প্রবেশপথ। নিচের REST এন্ডপয়েন্টগুলো ড্যাশবোর্ড এবং বাহ্যিক টুলিংয়ের জন্য সহায়ক অ্যাক্সেস প্রদান করে:
+JSON-RPC এন্ডপয়েন্ট `/a2a` হল ক্যানোনিকাল A2A এন্ট্রি পয়েন্ট। নীচের REST শেষ পয়েন্টগুলি ড্যাশবোর্ড এবং বাহ্যিক টুলিংয়ের জন্য সহায়ক অ্যাক্সেস প্রদান করে:
 
-| এন্ডপয়েন্ট                  | মেথড | বিবরণ                                                      | প্রমাণীকরণ                                     |
-| :--------------------------- | :--- | :--------------------------------------------------------- | :--------------------------------------------- |
-| `/api/a2a/status`            | GET  | সার্ভারের অবস্থা, নিবন্ধিত স্কিল                           | (সর্বজনীন)                                     |
-| `/api/a2a/tasks`             | GET  | ফিল্টারসহ টাস্কের তালিকা                                   | ব্যবস্থাপনা                                    |
-| `/api/a2a/tasks/[id]`        | GET  | ID অনুযায়ী টাস্ক সংগ্রহ                                   | ব্যবস্থাপনা                                    |
-| `/api/a2a/tasks/[id]/cancel` | POST | চলমান টাস্ক বাতিল করা                                      | ব্যবস্থাপনা                                    |
-| `/.well-known/agent.json`    | GET  | Agent Card (A2A আবিষ্কার)                                  | (সর্বজনীন, 3600s ক্যাশ করা)                    |
-| `/api/a2a/tasks`             | POST | OmniConductor ফ্লিটে ইনবাউন্ড ডেলিগেশন (Conductor PRD RF5) | Bearer বনাম `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| শেষবিন্দু                    | পদ্ধতি | বর্ণনা                                                         | প্রমাণ                                                                                           |
+| :--------------------------- | :----- | :------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | সার্ভারের অবস্থা, নিবন্ধিত দক্ষতা                              | (পাবলিক)                                                                                         |
+| `/api/a2a/tasks`             | GET    | ফিল্টার সহ কাজের তালিকা করুন                                   | ব্যবস্থাপনা বা API কী (নীচে দেখুন)                                                               |
+| `/api/a2a/tasks/[id]`        | GET    | ID দ্বারা কাজ পান                                              | ব্যবস্থাপনা বা API কী (নীচে দেখুন)                                                               |
+| `/api/a2a/tasks/[id]/cancel` | POST   | চলমান টাস্ক বাতিল করুন                                         | ব্যবস্থাপনা বা API কী (নীচে দেখুন)                                                               |
+| `/.well-known/agent.json`    | GET    | এজেন্ট কার্ড (A2A আবিষ্কার)                                    | (সর্বজনীন, ক্যাশে 3600s)                                                                         |
+| `/api/a2a/tasks`             | POST   | OmniConductor বহরে অন্তর্মুখী প্রতিনিধি দল (কন্ডাক্টর PRD RF5) | same as `GET`, প্লাস `OMNIROUTE_API_KEY` সেট করা থাকলে `REQUIRE_API_KEY` বন্ধ থাকে; `a2aEnabled` |
 
-**ইনবাউন্ড Conductor ডেলিগেশন (`POST /api/a2a/tasks`):** বাহ্যিক A2A এজেন্টগুলো OmniRoute-এর মাধ্যমে OmniConductor ফ্লিটে কোডিংয়ের কাজ অর্পণ করে। বডি: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — শুধু Conductor ফ্লিটের স্কিলগুলোই (Agent Card-এ ঘোষিত স্কিলগুলো) অর্পণযোগ্য; `metadata.conductor.repo.url` আবশ্যক (ফ্লিটটি git রিপোজিটরিতে কাজ করে)। রুটটি সার্ভার-সাইড `CONDUCTOR_ORCHESTRATOR_TOKEN` (ফলব্যাক `CONDUCTOR_HUB_TOKEN`) ব্যবহার করে হাবের `POST /v1/tasks`-এ অনুবাদ করে এবং `201 { conductor_task_id, state: "submitted" }` ফেরত দেয়; টাস্কের অবস্থাগুলো SSE→A2A মিরর (RF1)-এর মাধ্যমে ফিরে আসে এবং `GET /api/a2a/tasks?skill=conductor` ব্যবহার করে দেখা যায়।
+কে `/api/a2a/tasks*` রুটে যায় তা নির্ভর করে লগইন এবং API-কী সেটিংসের উপর:
+
+- `requireLogin=true` (ডিফল্ট): মিডলওয়্যার শুধুমাত্র ব্যবস্থাপনা শংসাপত্র (ড্যাশবোর্ড সেশন, `manage` -scope API কী, `oma_` অ্যাক্সেস টোকেন) এবং `OMNIROUTE_API_KEY` স্বীকার করে। একটি সাধারণ অনুমান কী `403` পায়। `Authorization` হেডারে মিডলওয়্যার শুধুমাত্র `OMNIROUTE_API_KEY` `Bearer <key>` হিসাবে নেয়; `Bearer` `401` পাওয়ার পর একটি বেয়ার কী বা একটি ট্যাব।
+- `requireLogin=false`, অথবা অনবোর্ডিং করার আগে লুপব্যাক উইন্ডো: `REQUIRE_API_KEY=true` সাথে যেকোনো বৈধ OmniRoute API কী বা ম্যানেজমেন্ট শংসাপত্র গ্রহণ করা হয় এবং বেনামী কলকারীরা `401` পায়; সঙ্গে `REQUIRE_API_KEY` বন্ধ রুট খোলা আছে.
+- `POST /api/a2a/tasks` অতিরিক্তভাবে `Authorization` হেডারে `OMNIROUTE_API_KEY` প্রয়োজন যখন সেই ভেরিয়েবল সেট করা থাকে এবং `REQUIRE_API_KEY` বন্ধ থাকে। অন্যান্য হেডার, যেমন `x-api-key`, সেখানে গণনা করা হয় না। লগইন অফ হলে বা অনবোর্ডিং করার আগে `Bearer` উপসর্গ সহ বা ছাড়াই কী পাস হয়; লগইন করার সাথে সাথে, শুধুমাত্র `Bearer <key>` মিডলওয়্যার অতিক্রম করে।
+
+যেখানে একটি প্রমাণপত্রের প্রয়োজন হয়, একটি `read` -scope `oma_` টোকেন শুধুমাত্র `GET` জন্য কাজ করে।
+
+**ইনবাউন্ড কন্ডাক্টর প্রতিনিধি দল (`POST /api/a2a/tasks`):** বহিরাগত A2A এজেন্টরা OmniRoute এর মাধ্যমে OmniConductor ফ্লীটে কোডিং কাজ অর্পণ করে। মূল অংশ: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — শুধুমাত্র কন্ডাক্টর ফ্লিট দক্ষতা (এজেন্ট কার্ডে ঘোষিত) হস্তান্তরযোগ্য; `metadata.conductor.repo.url` প্রয়োজন (বহরটি গিট রেপোতে কাজ করে)। রুটটি সার্ভার-সাইড `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) ব্যবহার করে হাবের `POST /v1/tasks` এ অনুবাদ করে এবং `201 { conductor_task_id, state: "submitted" }` ফেরত দেয়; টাস্ক স্টেটগুলি SSE→A2A মিরর (RF1) এর মাধ্যমে প্রবাহিত হয় এবং `GET /api/a2a/tasks?skill=conductor` এর মাধ্যমে দৃশ্যমান হয়।
 
 ---
 
-## নতুন স্কিল যোগ করা
+## একটি নতুন দক্ষতা যোগ করা হচ্ছে
 
-1. **স্কিল ফাইল তৈরি করুন:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **দক্ষতা ফাইল তৈরি করুন:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   একটি async ফাংশন `(task: A2ATask) => Promise<{ artifacts, metadata }>` এক্সপোর্ট করুন। `smartRouting.ts`-এর মতো বিদ্যমান স্কিলগুলোর কাঠামো অনুসরণ করুন।
+   একটি async ফাংশন `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` রপ্তানি করুন। বিদ্যমান দক্ষতা যেমন `smartRouting.ts` এর আকার অনুসরণ করুন। যদি দক্ষতা HTTP এ OmniRoute এ ফিরে আসে, তাহলে `src/lib/a2a/selfLoopAuth.ts` থেকে `buildSelfLoopHeaders(caller)` দিয়ে হেডার তৈরি করুন যাতে কলটি `OMNIROUTE_API_KEY` নয়, A2A কলার কী দিয়ে চলে এবং `redirect: "error"` এ `fetch` এ পাস করুন যাতে কোনও পুনঃনির্দেশ কখনই কী পায় না। সাহায্যকারী শুধুমাত্র হেডার তৈরি করে; প্রতিটি দক্ষতা পুনঃনির্দেশ নীতি নিজেই সেট করে। এটি একটি কী সংযুক্ত করার পরিবর্তে `UnsafeSelfLoopTargetError` ছুঁড়ে দেয় যখন সমাধান করা বেস URL প্রাইভেট নেটওয়ার্কের বাইরে প্লেইন http হয় (লুপব্যাক, একটি ধারক বা পরিষেবার নাম এবং ব্যক্তিগত ঠিকানাগুলি ভাল) বা শংসাপত্রগুলি ধারণ করে, তাই একটি দক্ষতা যা প্রত্যাখ্যান করা কলগুলিকে গ্রাস করে সেই ত্রুটিটিকে অবশ্যই পুনরায় থ্রো করতে হবে৷
 
-2. **হ্যান্ডলার নিবন্ধন করুন:** `src/lib/a2a/taskExecution.ts`-এ `A2A_SKILL_HANDLERS`-এ একটি এন্ট্রি যোগ করুন:
+2. **রেজিস্টার হ্যান্ডলার:** `src/lib/a2a/taskExecution.ts` তে, `A2A_SKILL_HANDLERS` এ একটি এন্ট্রি যোগ করুন:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...বিদ্যমান স্কিলগুলো
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Agent Card-এ প্রকাশ করুন:** `src/app/.well-known/agent.json/route.ts`-এ `skills` অ্যারেতে যোগ করুন:
+3. **এজেন্ট কার্ডে প্রকাশ করুন:** `src/lib/a2a/agentCardMetadata.ts` ( `/.well-known/agent.json` এবং `/.well-known/agent-card.json` দ্বারা ভাগ করা হয়েছে), `skills` অ্যারেতে যুক্ত করুন:
 
    ```json
    {
@@ -226,9 +234,9 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
    }
    ```
 
-4. **টেস্ট লিখুন:** `tests/unit/a2a-<your-skill>.test.ts`। সফলতার পথ + ত্রুটির পথ কভার করুন।
+4. **পরীক্ষা লিখুন:** `tests/unit/a2a-<your-skill>.test.ts` সুখী পথ + ত্রুটি পথ কভার করুন।
 
-5. **এই ফাইলের `Available Skills` টেবিলে** নতুন স্কিলটি নথিভুক্ত করুন।
+5. **দলিল** এই ফাইলের `Available Skills` টেবিলে নতুন দক্ষতা।
 
 ---
 
@@ -265,9 +273,9 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
 
 ---
 
-## ইন্টিগ্রেশনের উদাহরণ
+## ইন্টিগ্রেশন উদাহরণ
 
-### Python (requests)
+### পাইথন (অনুরোধ)
 
 ```python
 import requests
@@ -286,7 +294,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (আনয়ন)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

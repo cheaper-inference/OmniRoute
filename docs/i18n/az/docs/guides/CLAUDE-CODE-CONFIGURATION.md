@@ -24,23 +24,27 @@ omniroute launch --profile glm52  # OmniRoute vasitəsilə glm/glm-5.2 istifadə
 
 ---
 
-## Claude Code şlüzə necə qoşulur
+## Claude Kodu şlüzə necə qoşulur
 
-Claude Code **Anthropic Messages API** ilə əlaqə qurur və mühit dəyişənləri vasitəsilə xüsusi son nöqtəyə yönləndirilir (onun `--base-url` bayrağı yoxdur):
+Claude Code danışır**Anthropic Mesajlar API** və ətraf mühit dəyişənləri ilə xüsusi son nöqtəyə işarə olunur (onun `--base-url` bayrağı yoxdur):
 
-| Dəyişən                                      | Təyinatı                                                                                                   |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Şlüzün kök URL-i (Claude Code `/v1/messages` əlavə edir). **`/v1` suffiksi olmamalıdır.**                  |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` kimi göndərilir — OmniRoute giriş tokeninizdən / API açarınızdan istifadə edin   |
-| `ANTHROPIC_API_KEY`                          | Alternativ: `x-api-key` kimi göndərilir. Hər ikisi təyin edilibsə, `ANTHROPIC_AUTH_TOKEN` üstünlük qazanır |
-| `ANTHROPIC_MODEL`                            | Konkret modeli məcburi seçir (`/model` seçicisinin standart dəyərini əvəz edir)                            |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → daxili `/model` seçicisi `/v1/models` siyahısından `claude*`/`anthropic*` modellərini göstərir       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Hər cavab üçün çıxış tokenlərinin sayını məhdudlaşdırır (məsələn, `65536`)                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Avtomatik sıxlaşdırma üçün token həddi                                                                     |
+| Dəyişən                                      | Məqsəd                                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gateway kök URL (Claude Kodu `/v1/messages` əlavə edir).** `/v1` şəkilçisi yoxdur.**                    |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — olaraq göndərilən OmniRoute giriş nişanı / API açarınızdan istifadə edin    |
+| `ANTHROPIC_API_KEY`                          | Alternativ: `x-api-key` olaraq göndərildi. Hər ikisi təyin edilərsə, `ANTHROPIC_AUTH_TOKEN` qalib gəlir |
+| `ANTHROPIC_MODEL`                            | Xüsusi modeli məcbur edin ( `/model` seçici defoltunu ləğv edir)                                        |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → yerli `/model` seçicisi `/v1/models` dən `claude*`/`anthropic*` modellərini siyahıya alır         |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Cavab üçün çıxış tokenləri (məsələn, `65536`)                                                           |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Avtomatik sıxılma üçün işarə həddi                                                                      |
 
-> Mühit dəyişənləri **işə salınarkən yalnız bir dəfə** oxunur — onları dəyişdirdikdən sonra Claude Code-u yenidən başladın.
+> Env vars oxunur** başlanğıcda bir dəfə** — onları dəyişdirdikdən sonra Claude Kodunu yenidən başladın.
 
-`omniroute launch` bunların hamısını sizin üçün təyin edir: əsas URL-i və tokeni aktiv kontekstdən müəyyənləşdirir (beləliklə, `omniroute connect <vps>` və ardınca `omniroute launch` dərhal işləyir), serverin sağlamlıq yoxlamasını aparır və `claude` proqramını işə salır.
+Sabit sətir əvəzinə fırlanan etimadnamə üçün `~/.claude/settings.json` `apiKeyHelper` nı cari etimadnaməsini stdout-a çap edən əmrə təyin edin. Claude Kodu defolt olaraq öz çıxışını beş dəqiqə ərzində yaddaşda saxlayır (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` bunu ləğv edir) və dəyəri həm `Authorization: Bearer`, həm də `x-api-key` də göndərir. Skript etimadnaməni çap etməlidir və onun yanında banner — başqa heç bir şey v2.1.227 +-də köməkçini uğursuz edə bilməz.
+
+Entra ID SSO belə işləyir: `scripts/cli/omniroute-sso.mjs token` API açarı əvəzinə OmniRoute təsdiqlənən qısamüddətli Entra giriş nişanını çap edir. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) baxın.
+
+`omniroute launch` bunların hamısını sizin üçün təyin edir: o, əsas URL + nişanını aktiv kontekstdən həll edir (beləliklə `omniroute connect <vps>` sonra `omniroute launch` sadəcə işləyir), serverin sağlamlığını yoxlayır və `claude` icra edir.
 
 ---
 

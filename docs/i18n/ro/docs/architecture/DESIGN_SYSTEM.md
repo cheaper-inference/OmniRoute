@@ -4,161 +4,92 @@
 
 ---
 
-> **Stare:** tabloul de bord este construit pe baza **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), inclus
-> în surse ca spațiul de lucru `packages/ui-kit` (`@omniroute/ui-kit`; instantaneul din amonte este fixat în
-> `packages/ui-kit/UPSTREAM.md` și verificat prin `npm run check:ui-kit-snapshot`). Tema luminoasă este cea canonică;
-> preferința implicită este `system`. Culoarea de accent este verdele lime Keak (`--ci-color-accent`). Inter
-> (spațiere între litere 0, `--ci-letter-spacing-ui`) este familia de fonturi pentru interfața cu utilizatorul, Instrument Serif fiind utilizat doar pentru
-> texte de afișare mari și aerisite (`.ci-dashboard-display`), iar IBM Plex Mono pentru cod — toate sunt găzduite local prin
-> importurile `@fontsource/*` de la începutul fișierului `src/app/globals.css`. Fiecare pictogramă este un simbol Lucide.
+> **Stare:** tabloul de bord este construit pe** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vândut ca spațiu de lucru `packages/ui-kit` (`@omniroute/ui-kit`; instantaneul din amonte este fixat în `packages/ui-kit/UPSTREAM.md` și protejat de `npm run check:ui-kit-snapshot`). Lumina este tema canonică; preferința implicită este `system`. Paleta implicită este cea a trusei** Ediții** aspect (neutre de hârtie caldă și accentul de cupru `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Setări → Aspect → Paleta de culori oferă** Clasic** , jetoanele de bază ale trusei cu accent de var. Switzer este singura familie pentru UI, afișare și text de cod (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Scripturi Switzer lipsesc prin glif cu glif (`src/app/globals.css`): Inter pentru chirilic, greacă și vietnameză și, numai sub `html[dir="rtl"]`, Vazirmatn pentru scrierea arabă. Fiecare pictogramă este un glif Lucide.
 
-## 1. Unde se află elementele
+## 1. Unde trăiesc lucrurile
 
-- **Kit.** `packages/ui-kit/src` este o copie identică, octet cu octet, a directorului upstream `src/` de la commitul fixat în
-  `packages/ui-kit/UPSTREAM.md` (care consemnează și autorizarea licenței); `PATCHES.md` listează patch-urile
-  locale (niciunul). Este consumat ca sursă, fără build: `next.config.mjs` îl transpilează, iar
-  `tsconfig.json` mapează `@omniroute/ui-kit` → `packages/ui-kit/src` și `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` și `vitest.mcp.config.ts` conțin același alias). Importați o
-  componentă din kit prin subcalea sa (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), niciodată
-  prin agregatorul `@omniroute/ui-kit`: agregatorul include fiecare componentă (inclusiv selectorul de dată)
-  în fiecare modul care îl importă. Foaia de stil a kitului este inclusă prin `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokenuri.** `packages/ui-kit/src/ci-tokens.css` declară tokenurile `--ci-*`; `src/app/globals.css`
-  le conectează la denumirile OmniRoute moștenite (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), astfel încât citirile existente `var(--color-*)` și utilitarele
-  Tailwind să funcționeze în continuare. Codul nou folosește utilitarele Tailwind (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) sau clasele kitului — niciodată o valoare hexazecimală
-  (`tests/unit/design-kit-bridge.test.ts` impune această punte). `text-primary` se rezolvă la
-  `--color-primary-ink` prin `--text-color-primary` (lime-800 în tema luminoasă, accentul lime în tema întunecată), astfel încât
-  textul principal rămâne lizibil, în timp ce `bg-primary`/`border-primary` păstrează suprafața lime. Seriile graficelor folosesc
-  `--color-chart-1` … `--color-chart-5`.
-- **Teme.** `<html className="ci-theme">` (`src/app/layout.tsx`) înscrie documentul în tema kitului.
-  Preferința este `light`, `dark` sau `system` (`THEME_CONFIG.defaultTheme = "system"` în
-  `src/shared/constants/appConfig.ts`; `system` urmează `prefers-color-scheme`). `applyTheme()` din
-  `src/store/themeStore.ts` (oglindită de scriptul bootstrap inline din `src/app/layout.tsx`, care rulează
-  înainte de hidratare) setează `data-theme="dark"|"light"` și comută simultan clasa `.dark` pe `<html>`.
-  Setul de tokenuri întunecate al kitului este asociat cu `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  propriile suprascrieri întunecate ale OmniRoute (blocul `.dark` din `globals.css`) și utilitarele Tailwind `dark:`
-  moștenite sunt asociate cu clasa `.dark`. Nu există presetări pentru culoarea de accent: accentul provine întotdeauna din
-  kit, iar o presetare persistentă dintr-un build mai vechi este eliminată atunci când se încarcă store-ul.
-- **Componente (adaptoare).** `src/shared/components/index.tsx` păstrează API-ul componentelor OmniRoute (aceleași
-  nume, exporturi implicite și proprietăți), iar primitivele din spatele acestuia sunt adaptoare peste kit: formulare
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), suprapuneri și feedback
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  structură (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) și tabele
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Un adaptor importă componenta kitului
-  prin subcale și mapează pe aceasta proprietățile moștenite — de exemplu, `Button variant="primary"` este butonul
-  `default` al kitului (`--ci-button-primary-*`: suprafața inversată în tema luminoasă, accentul cu propria culoare de text
-  `--ci-color-accent-foreground` în tema întunecată), `danger` este `destructive`, iar `warning` este `outline` plus
-  extensia `.ci-button--warning`. Regulile `.ci-button--warning` și `.ci-badge[data-tone]` de la
-  sfârșitul fișierului `globals.css` (`@layer components`) sunt extensii OmniRoute peste clasele kitului.
-  `tests/unit/ui/adapters/*.test.tsx` fixează comportamentul fiecărui adaptor.
-- **Înveliș.** `src/app/(dashboard)/layout.tsx` randează `DashboardLayout`, care randează
-  `src/shared/components/layouts/DashboardShell.tsx`: componentele kitului `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), împreună cu logica de navigare OmniRoute din
-  `src/shared/components/Sidebar.tsx`. Un link „salt la conținut” către `#main-content` este primul element
-  care poate primi focus. `src/shared/components/Header.tsx` conține componenta kitului `SidebarTrigger` (singurul
-  comutator al barei laterale din înveliș), `ProductSwitcher` de la Keak și butonul de deschidere a paletei de comenzi; afișează titlul rutei doar cât timp
-  nicio componentă `PageHeader` a kitului (`.ci-page-header`) nu este montată în interiorul `#main-content`, astfel încât o pagină cu propriul
-  `PageHeader` are un singur `h1`. `src/shared/components/CommandPalette.tsx` este un `Dialog` al kitului.
-- **Pictograme.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) rezolvă numele (vocabularul
-  Material Symbols utilizat de ecrane) prin `ICON_MAP` (`src/shared/constants/iconMap.ts`) la un simbol grafic
-  Lucide. Fontul și pachetul Material Symbols au fost eliminate: un nume care lipsește din mapare randează un
-  simbol substituent neutru (`data-icon-missing="true"`) și înregistrează un avertisment în consolă în afara producției.
-  `npm run gen:icon-map` afișează numele utilizate care lipsesc din mapare
-  (`tests/unit/icon-map-coverage.test.ts` eșuează pentru orice nume fără o pictogramă Lucide;
-  `tests/unit/icon-map-object-values.test.ts` acoperă numele stocate în obiectele de căutare);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` rescrie elementele span literale
-  `<span className="material-symbols-outlined">` în `<Icon>`.
-- **Marcă.** `src/shared/components/OmniRouteLogo.tsx` încapsulează kitul: exportul implicit `OmniRouteLogo`
-  randează `ProductIcon product="omniroute" variant="glyph"` (SVG inline, compatibil cu `basePath`), iar
-  `OmniRouteLockup` randează `ProductLockup product="omniroute"` (nume accesibil „Keak OmniRoute”) sau, pentru
-  operatorii cu marcă proprie, propriile valori `name`/`logoSrc`. Destinațiile selectorului de produse se află în
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Ecranele independente
-  — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` și `src/shared/components/ErrorPageScaffold.tsx`
-  — afișează semnătura vizuală; `tests/unit/brand-pages-static.test.ts` garantează acest lucru.
+- **Kit.** `packages/ui-kit/src` este o copie octet-cu-octet a `src/` din amonte la commit-ul fixat în `packages/ui-kit/UPSTREAM.md` (care înregistrează și autorizarea licenței); `PATCHES.md` listează patch-uri locale (nici unul). Este consumat ca sursă, fără build: `next.config.mjs` îl transpilează și `tsconfig.json` mapează `@omniroute/ui-kit` → `packages/ui-kit/src` și `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` și `vitest.mcp.config.ts` poartă același alias). Importați o componentă a kit-ului după calea secundară (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), niciodată prin butoiul `@omniroute/ui-kit` : butoiul trage fiecare componentă (inclusiv selectorul de date) în fiecare importator. Foaia de stil kit intră prin `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, foaia completă: `ci-ui.css` de bază plus fiecare familie de modele).
+- **Jetoane.** `packages/ui-kit/src/ci-tokens.css` declară jetoanele `--ci-*` ; `src/app/globals.css` le face legătura cu numele OmniRoute moștenite (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), astfel încât citirile `var(--color-*)` existente și utilitarele Tailwind continuă să funcționeze. Codul nou folosește utilitățile Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) sau clasele de kit — niciodată o valoare hex (`tests/unit/design-kit-bridge.test.ts` impune puntea). `text-primary` se rezolvă la `--color-primary-ink` prin `--text-color-primary`, astfel încât textul primar rămâne lizibil în timp ce `bg-primary`/`border-primary` păstrează suprafața de accent: sub Editions este `--ci-color-accent-active` kit-ului ( `#99562f` cupru adânc în lumină, accentul cupru în întuneric); sub Clasic, lime-800 în lumină și accentul de var în întuneric. Seria de diagrame utilizează `--color-chart-1` … `--color-chart-8`, fiecare cu o nuanță `--color-chart-N-ink` sigură pentru text și o nuanță de cip `--color-chart-N-subtle` opac, atribuite în ordinea seriei kit (`ciChartSeriesOrder`).
+- **Teme.** `<html className="ci-theme">` (`src/app/layout.tsx`) include documentul în tema kit-ului. Preferința este `light`, `dark` sau `system` (`THEME_CONFIG.defaultTheme = "system"` în `src/shared/constants/appConfig.ts`; `system` urmează `prefers-color-scheme`). `applyTheme()` în `src/store/themeStore.ts` (oglindit de `THEME_BOOT_SCRIPT`, înliniat în `src/app/layout.tsx`, care rulează înainte de hidratare) setează `data-theme="dark"|"light"` și comută clasa `.dark` pe `<html>` împreună. Setul de jetoane întunecate al kitului este introdus pe `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); Supracrierile întunecate proprii ale lui OmniRoute(blocul `.dark` din `globals.css`) și cheia de utilitare Tailwind `dark:` moștenită din clasa `.dark`. Nu există presetări de culoare de accent: accentul vine întotdeauna din kit, iar o presetare persistentă dintr-o versiune mai veche este eliminată atunci când magazinul se încarcă.
+- **Palete.** Două, ambele din kit (`src/shared/constants/appearancePalette.ts`): `editions`, implicit și `classic`. Editions este atributul `data-ci-appearance="editions"` al kit-ului pe `<html>`, pe care `ci-editions.css` (importat de `ci-ui.css`) îl combină cu `data-theme`; Clasic este absența atributului. Serverul de aspect rădăcină redă atributul, astfel încât un vizitator fără nimic stocat (sau fără JS) primește ediții pe fiecare tablou de bord — de suprafață, autentificare, `/status`, pagini de eroare, `/docs` și PWA. Alegerea se persistă lângă tema în același magazin `theme` (`palette`, `setPalette()`, `applyPalette()` în `src/store/themeStore.ts`) și se aplică înainte de vopsea prin `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, aliniat în `<head>` layout-ului ), care elimină atributul doar când paleta stocată este `"classic"`; `src/app/global-error.tsx`, în afara aspectului rădăcină, îl aplică din același magazin. Nu puneți `data-ci-appearance` pe niciun alt element: kit-ul îl potrivește cu `html:root:has([data-ci-appearance="editions"])`, astfel încât un descendent ar schimba întregul document. Varianta Editions `data-ci-editions-variant="landing"` este pentru paginile de marketing, nu pentru tabloul de bord. Browser chrome: serverul redă versiunea implicită, Editions, în `viewport.themeColor` (o etichetă per `prefers-color-scheme`) și manifestul web — `PWA_THEME_COLORS` în `src/shared/constants/pwaThemeColors.ts`, singura oglindă a Editions `--ci-color-background` (`#f3f1e9` / `#11120f`), fixată la `ci-editions.css` de `tests/unit/pwa-theme-colors.test.ts`. `<meta name="theme-color">` live urmează apoi paleta și modul stocate: `THEME_BOOT_SCRIPT` rescrie etichetele înainte de vopsire, iar acțiunile magazinului de teme o fac la fiecare modificare (`resolveThemeColor()` / `applyThemeColor()` în `src/shared/utils/themeColorMeta.ts`, cu `CLASSIC_PAGE_BACKGROUND` citit din `ciTokens` din kit). O temă explicită light/dark setează fiecare etichetă în acel mod; `system` păstrează o culoare per schemă. Manifestul rămâne Ediții: este preluat o dată pe instalare, fără preferință. Monaco își citește culorile de pe o sondă (`monacoKitTheme.ts`); sub Editions, sonda citită întoarce rădăcina `data-theme` pentru o trecere sincronă, deoarece kitul rezolvă Editions light/dark de la rădăcină.
+- **Componente (adaptoare).** `src/shared/components/index.tsx` păstrează componenta OmniRoute API (aceleași nume, exporturi implicite și elemente de recuzită), iar primitivele din spatele acesteia sunt adaptoare peste kit: forme (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays /`Modal`, /`ConfirmModal` `NotificationToast` `Tooltip`,`InfoTooltip`, `EmptyState`, `Loading`), structura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) și tabele (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Un adaptor importă componenta kit-ului după o cale secundară și mapează elementele de recuzită moștenite pe ea — de exemplu, `Button variant="primary"` este butonul kit `default` (`--ci-button-primary-*`: suprafața inversă în lumină, accentul cu cerneala sa `--ci-color-accent-foreground` în întuneric), `danger` este `destructive` și `warning` este butonul `warning`. Variantele de stare `Badge` sunt tonuri de kit, iar `Select` cu copii `<option>` redă kit-ul `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` pin fiecare adaptor.
+- **Coajă.** `src/app/(dashboard)/layout.tsx` redă `DashboardLayout`, care redă `src/shared/components/layouts/DashboardShell.tsx`: kitul `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), cu logica de navigare a lui OmniRoute în `src/shared/components/Sidebar.tsx`. Un link „săriți la conținut” către `#main-content` este primul element focalizat. `src/shared/components/Header.tsx` deține kitul `SidebarTrigger` (singurul comutator al barei laterale a shell-ului), Keak `ProductSwitcher` și deschiderea paletei de comandă; arată titlul rutei numai în timp ce nici un kit `PageHeader` (`.ci-page-header`) nu este montat în interiorul `#main-content`, deci o pagină cu propriul `PageHeader` are un singur `h1`. `src/shared/components/CommandPalette.tsx` este un kit `Dialog`.
+- **icoane.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) rezolvă numele (vocabulul Simbolurilor materiale pe care îl utilizează ecranele) prin `ICON_MAP` (`src/shared/constants/iconMap.ts`) într-un glif Lucide. Fontul și pachetul Material Symbols au dispărut: un nume care lipsește de pe hartă redă un glif de substituent neutru (`data-icon-missing="true"`) și înregistrează un avertisment de consolă în afara producției. `npm run gen:icon-map` afișează numele în uz care lipsesc de pe hartă (`tests/unit/icon-map-coverage.test.ts` eșuează pe orice nume fără o pictogramă Lucide; `tests/unit/icon-map-object-values.test.ts` acoperă numele stocate în obiectele de căutare); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` rescrie literal `<span className="material-symbols-outlined">` se întinde la `<Icon>`.
+- **Marca.** `src/shared/components/OmniRouteLogo.tsx` înfășoară kit-ul: exportul implicit `OmniRouteLogo` redă `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) și `OmniRouteLockup` redă `ProductLockup product="omniroute"` (nume accesibil „Keak OmniRoute”) sau, pentru operatorii cu etichetă albă, propriul lor `name`/`logoSrc`. Destinațiile de comutare de produse locuiesc în `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Ecranele independente — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` și `src/shared/components/ErrorPageScaffold.tsx` — arată blocarea; `tests/unit/brand-pages-static.test.ts` îl păzește.
 
 ## 2. Reguli
 
-1. Tokenuri, niciodată valori literale. Excepțiile păstrate intenționat: terminalul de consolă mereu întunecat și
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), oglinda în hex rezolvată a paletei de statusuri din kit
-   pentru apelanții care au nevoie de un hex literal. Paletele categorice nu mai sunt o excepție: ele se bazează pe
-   cele cinci tokenuri de grafice ale kitului (`--color-chart-1..5`) prin
-   `src/shared/utils/categoricalPalette.ts` și, pentru strategiile de rutare,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; muchiile ReactFlow și canvasul de orchestrare citesc
-   variabilele sensibile la temă `--orch-status-*` (`src/shared/components/flow/edgeStyles.ts`).
-2. Nu modifica niciodată manual `packages/ui-kit/src`: sincronizează cu `scripts/dev/sync-ui-kit.sh <commit>`;
-   poarta pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) eșuează la orice octet care diferă de
-   commit-ul upstream fixat (trece peste cu un avertisment când clona upstream, `UI_KIT_CLONE` sau
-   `_references/cheaper-inference-ui-kit`, lipsește). Când kitului îi lipsește ceva, rezolvă printr-o soluție
-   ocolitoare în adaptor sau în ecran și cere upstream adăugarea ei.
-3. Textele implicite ale kitului sunt în engleză (`label = "Loading"`, `loadingLabel = "Loading table"`…) — transmite
-   șiruri traduse din `useTranslations(...)` ori de câte ori o componentă a kitului afișează text.
-4. Utilitarele Tailwind au prioritate față de clasele componentelor kitului (kitul declară
-   `@layer theme, base, components, utilities` și regulile sale se află în `components`) — folosește utilitarele
-   pentru spațiere și layout, nu pentru a recolora componentele kitului.
-5. Titluri: `.ci-heading` (Inter, fără tracking) pentru titlurile de pagină și de secțiune; `.ci-dashboard-display`
-   (Instrument Serif) doar pentru text de afișare mare și rar, cum ar fi codul de stare al paginii de eroare.
-6. `tests/unit/dashboard-kit-sweep.test.ts` supraveghează adoptarea kitului: niciun span cu ligaturi Material în
-   `src/app` sau `src/shared/components`; în arborele dashboardului (`src/app/(dashboard)` și
-   `src/shared/components`) niciun `<select>`, `<textarea>` sau `<table>` brut și niciun `role="dialog"` implementat
-   manual în afara excepțiilor listate (ramura nativă a adaptorului `Select`, `RequestLoggerDetail`); fiecare
-   `<button>` sau `<input>` brut de acolo are nevoie de un comentariu care conține `kit-exception:` (cu motivul),
-   terminându-se la cel mult 3 linii deasupra lui; nuanțele paletei și variantele `dark:` doar în fișierele listate
-   de test.
-7. Verifică ambele teme și viewportul de 390 px înainte de un PR (capturi de ecran); `tests/e2e/a11y.spec.ts`
-   rulează axe.
+1. Jetoane, niciodată literale. Excepții păstrate intenționat: terminalul de consolă mereu întunecat și `STATUS_HEX` (`src/shared/constants/statusColors.ts`), oglinda hexadecimală rezolvată a paletei de stare a kit-ului pentru apelanții care au nevoie de un hex literal. Paletele categorice nu mai fac excepție: ele călătoresc pe cele opt jetoane de diagramă ale trusei (`--color-chart-1..8`, plus `-ink`/`-subtle`), în ordinea serii de kit, prin `src/shared/utils/categoricalPalette.ts` și, pentru strategiile de rutare, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; marginile ReactFlow și pânza de orchestrare citesc variabilele `--orch-status-*` care țin cont de temă (`src/shared/components/flow/edgeStyles.ts`).
+2. Nu corectați niciodată `packages/ui-kit/src` manual: sincronizați cu `scripts/dev/sync-ui-kit.sh <commit>`; poarta pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) eșuează pe orice octet care diferă de commit-ul în amonte fixat (sare cu un avertisment când clona din amonte, `UI_KIT_CLONE` sau `_references/cheaper-inference-ui-kit`, este absentă). Când kit-ului îi lipsește ceva, rezolvați-l în adaptor sau ecran și cereți-l în amonte.
+3. Valorile implicite ale textului kit-ului sunt engleză (`label = "Loading"`, `loadingLabel = "Loading table"`...) — trece șiruri traduse din `useTranslations(...)` ori de câte ori o componentă a kit-ului redă text.
+4. Utilitarele Tailwind câștigă clasele de componente ale kit-ului (kit-ul declară `@layer theme, base, components, utilities` și regulile sale trăiesc în `components`) — utilizează utilitare pentru spațiere și aspect, nu pentru a recolora componentele kit-ului.
+5. Titluri: `.ci-heading` pentru titlurile paginilor și secțiunilor; `.ci-dashboard-display` numai pentru textul de afișare mare și rar, cum ar fi codul de stare a paginii de eroare. Ambele folosesc Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` protejează adoptarea kit-ului: nu Material ligatură span sub `src/app` sau `src/shared/components`; în arborele tabloului de bord (`src/app/(dashboard)` și `src/shared/components`) nu `<select>` brut , `<textarea>` sau `<table>` și nici un `role="dialog"` rulat manual în afara excepțiilor enumerate (ramura nativă a adaptorului `Select`, `RequestLoggerDetail`); fiecare `<button>` sau `<input>` brut de acolo are nevoie de un comentariu care să conțină `kit-exception:` (cu motivul) care se termină cu cel mult 3 rânduri deasupra acestuia; nuanțe de paletă și variante `dark:` numai în fișierele listele de testare.
+7. Verificați ambele teme și fereastra de vizualizare de 390 px înainte de un PR (capturi de ecran); `tests/e2e/a11y.spec.ts` aleargă axe.
 
 ## 3. Adăugarea unui ecran
 
 1. Deschideți pagina cu `PageHeader` din kit (`@omniroute/ui-kit/page-header`, `compact` în interiorul
-   tabloului de bord) — titlu, descriere și `actions`. Antetul shell-ului își elimină apoi propriul titlu.
-2. Construiți controalele din `@/shared/components` (adaptoarele) și folosiți componentele kitului prin subcale acolo unde nu
-   există un adaptor (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   dashboardului) — titlu, descriere și `actions`. Antetul shell-ului renunță apoi la propriul titlu.
+2. Construiți controalele din `@/shared/components` (adaptoarele) și folosiți componente kit pe subcăi acolo unde
+   nu există un adaptor (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
    `Slider`…).
-3. Pictograme: `<Icon name="…" />`. Un nume nou trebuie adăugat în `ICON_MAP` împreună cu componenta Lucide
-   corespunzătoare semantic; `npm run gen:icon-map` enumeră numele care încă lipsesc.
+3. Iconițe: `<Icon name="…" />`. Un nume nou se adaugă în `ICON_MAP` cu componenta Lucide care corespunde semantic;
+   `npm run gen:icon-map` listează numele care încă lipsesc.
 4. Culori: utilitare semantice (`text-success`, `bg-warning-bg`, `border-border`…) și
-   `var(--color-chart-N)` pentru seriile graficelor; fără valori hexazecimale și fără variante `dark:` care doar repetă o culoare.
-5. Text: fiecare șir, inclusiv etichetele transmise componentelor kitului, provine din `useTranslations`. Cheile
-   noi trebuie adăugate în `src/i18n/messages/en.json`, `pt-BR.json` și `vi.json` (testul de paritate pentru vietnameză fixează
-   fiecare cheie în limba engleză); celelalte localizări sunt completate prin sincronizarea i18n.
-6. Rulați verificările înainte de PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `var(--color-chart-N)` pentru seriile de grafice; fără valori hex și fără variante `dark:` care doar repetă o culoare.
+5. Text: fiecare șir, inclusiv etichetele pe care le transmiteți componentelor kit, provine din `useTranslations`. Cheile
+   noi se adaugă în `src/i18n/messages/en.json`, `pt-BR.json` și `vi.json` (testul de paritate vietnameză fixează
+   fiecare cheie engleză); celelalte localizări sunt completate de sincronizarea i18n.
+6. Rulați verificările de protecție înainte de PR: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
    `npm run check:dashboard-typecheck` (singura verificare care detectează un import duplicat în `iconMap.ts`),
    `npm run check:ui-icu` și testele proprii ale ecranului.
 
 ## 4. Adăugarea sau modificarea unui adaptor
 
-1. Păstrați API-ul public din `src/shared/components/index.tsx`: aceleași nume de export, exporturi implicite și
-   proprietăți acceptate. Mapați proprietățile vechi la kit în interiorul adaptorului (consultați `Button.tsx`: `VARIANT_TO_KIT`,
+1. Păstrează API-ul public al `src/shared/components/index.tsx`: aceleași nume de exporturi, exporturi implicite și
+   props acceptate. Mapează props-urile legacy pe kit în interiorul adaptorului (vezi `Button.tsx`: `VARIANT_TO_KIT`,
    `SIZE_TO_KIT`).
-2. Importați kitul folosind subcalea (`@omniroute/ui-kit/<component>`).
-3. Soluțiile temporare pentru lipsurile kitului trebuie să rămână în adaptor (sau în `globals.css`, în `@layer components`, atunci când remedierea este
-   una de stil), niciodată în `packages/ui-kit/src`.
-4. Adăugați sau actualizați `tests/unit/ui/adapters/<name>.test.tsx`. Pentru un adaptor cu mulți apelanți, comparați
-   marcajul randat înainte și după modificare — schimbările de spațiere interioară sau de elemente învelitoare se propagă în fiecare ecran.
+2. Importă kit-ul prin subcale (`@omniroute/ui-kit/<component>`).
+3. Soluțiile de ocolire pentru lipsurile kit-ului trăiesc în adaptor (sau în `globals.css` `@layer components` atunci când remedierea este un
+   stil), niciodată în `packages/ui-kit/src`.
+4. Adaugă sau actualizează `tests/unit/ui/adapters/<name>.test.tsx`. Pentru un adaptor cu mulți apelanți, compară
+   marcajul randat înainte și după modificare — schimbările de padding sau de wrapper se propagă pe fiecare ecran.
 
-## 5. Actualizarea kitului
+## 5. Actualizarea trusei
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copiază directorul `src/` din sursa upstream, de la commitul respectiv, în
-`packages/ui-kit/src` și aplică singura transformare permisă (elimină sufixul `.js` din
-importurile relative). Apoi: examinați `git diff packages/ui-kit`, efectuați o verificare vizuală a furnizorilor, setărilor, combinațiilor,
-utilizării și endpointului în ambele teme, rulați `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui`, apoi
-deschideți PR-ul împreună cu jurnalul de modificări upstream.
+`npm run check:ui-kit-upstream` compară versiunea fixată în `packages/ui-kit/UPSTREAM.md` cu cea mai nouă etichetă `v*` a depozitului din amonte și tipărește comanda de sincronizare atunci când este disponibilă o versiune.
 
-## 6. Index de referință
+Fluxul de lucru zilnic `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) rulează aceeași verificare. În timp ce pinul este în urmă, `scripts/ci/ui-kit-sync-pr.sh` menține un PR sincronizat deschis față de cea mai înaltă ramură `release/vX.Y.Z`, pe ramura rulantă `chore/ui-kit-sync-latest`. Nu se îmbină niciodată: fiecare lansare de kit are nevoie de o verificare vizuală a VPS local. Ramura este reconstruită când apare o versiune mai nouă și este lăsată în pace în caz contrar. Un PR deschis cu commit-uri împinse manual nu este suprascris, iar un PR pentru o versiune pe care un întreținător a închis-o nefusionată rămâne închis până la o versiune mai nouă.
 
-- `src/app/globals.css` — puntea pentru tokenuri, suprascrierile `.dark`, extensiile OmniRoute pentru `@layer components`
-- `packages/ui-kit/UPSTREAM.md` — commitul upstream fixat și autorizarea licenței; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` și adaptoarele alăturate; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+Când nu poate fi deschis niciun PR (ediția țintă este înghețată, PR are commit-uri împinse manual, PR a fost închis sau nu este setat niciun simbol PR ), fluxul de lucru păstrează deschisă o problemă de urmărire care spune de ce.
+
+Fluxul de lucru folosește două secrete:
+
+- `secrets.UI_KIT_READ_TOKEN`: un token numai pentru citire pentru depozitul privat din amonte. Când fluxul de lucru nu poate citi în amonte (nici un token, un token care a încetat să funcționeze sau GitHub inaccesibil), rularea rămâne verde, dar scrie un avertisment și menține deschisă o problemă separată, care se închide singură odată ce o rulare ulterioară poate citi din nou în amonte.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: un token cu granulație fină pe acest depozit cu acces la scriere la conținut și la solicitări Pull. `GITHUB_TOKEN` implicit nu poate crea PRs aici, iar un PR pe care l-a deschis nu ar declanșa CI. Fără acest simbol, fluxul de lucru împinge doar ramura.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copiază `src/` din amonte la acel commit (`latest` = cea mai nouă etichetă `v*` ) în `packages/ui-kit/src`, aplică transformarea unică permisă (elimină sufixul `.js` din importurile relative) și setează versiunea spațiului de lucru în `packages/ui-kit/package.json` și `package-lock.json` la cea din amonte. Apoi: revizuiți `git diff packages/ui-kit`, faceți o trecere vizuală asupra furnizorilor, setărilor, combo-urilor, utilizării și punctului final în ambele teme, rulați `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui` și deschideți PR cu jurnalul de modificări din amonte.
+
+## 6. diagrame README
+
+Cele douăsprezece diagrame pe care le încorporează rădăcina `README.md` (`docs/diagrams/*.svg`) sunt kitul aplicat unei imagini statice și sunt generate, nu desenate manual: 13 fișiere generatoare la `scripts/docs/gen-readme-*.mjs` (douăsprezece diagrame plus driverul `gen-readme-diagrams.mjs` ) și 12 teste de staleness la `tests/unit/docs/readme-*-svg.test.ts`, câte unul pe diagramă, fiecare octet comparând fișierul generat `test-unit` cu ieșirea lui jobqf.
+
+- **Jetoane.** `scripts/docs/readme-diagram-theme.mjs` copie paleta Editions (aspectul implicit) din `packages/ui-kit/src/ci-editions.css` (fixat pe acel fișier de `tests/unit/docs/readme-diagram-theme.test.ts`, care verifică, de asemenea WCAG AA pentru fiecare culoare de text de pe fiecare suprafață în ambele scheme; singura excepție, light `warn`, este avertismentul de kit întunecat cu 10% deoarece valoarea kit-ului este 4.46:1 pe scara tipului de text ale kiturii)`ci-tokens.css`): Switzer la greutățile kit-ului (400/500/600, afișare la 500) și urmărire pentru tot, cu excepția rolurilor de cod (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), care sunt IBM Plex Mono și sunt doar pentru comenzi, URLs și ecran de terminal. Valorile luminii stau pe `:root`, valorile întunecate în spatele `prefers-color-scheme: dark`, în interiorul fișierului, astfel încât fiecare imagine urmează schema privitorului pe GitHub.
+- **Fonturi.** GitHub Markdown nu poartă CSS, iar proxy-ul camo blochează fiecare preluare externă, așa că tipul de kit trebuie să călătorească în interiorul fișierului. `scripts/docs/readme-outline.mjs`, ultimul pas al fiecărui generator, modelează rolurile Switzer cu HarfBuzz și le desenează ca contururi vectoriale (`<defs>` paths și `<use>`), cu săgețile și simbolurile geometrice ale lui Switzer desenate pe propriile metrice. Contururi, niciodată un font încorporat: licența Switzer (`packages/ui-kit/src/fonts/FFL.txt`) interzice subsetarea și conversia formatului fără acordul scris și permite desene vectoriale, așa că nu reintroduceți un Switzer `@font-face` sau `data:` URI. Singurul font rămas într-un fișier este subsetul OFL IBM Plex Mono pentru ceea ce rămâne text de cod real (`scripts/docs/readme-fonts.mjs`), construit din acele caractere; orice glifă pe care nu o poate încorpora aruncă.
+- **Regenera.** `npm run docs:readme-diagrams` rescrie toate cele doisprezece în ordine README și tipărește o linie pe fișier cu dimensiunea acestuia. De asemenea, un singur generator funcționează singur (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` are nevoie `node --import tsx/esm` deoarece cifrele sale provin din încărcătorul de catalog live în `open-sse/config/freeModelCatalog.ts`; consecința CI a unei modificări de catalog este în `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Angajați generatorul și SVG împreună.
+- **Dovada.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` redă un fișier așa cum îl servește GitHub (o etichetă `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), captează un cadru deschis și unul întunecat și raportează solicitările de font extern făcute de pagină (trebuie să fie 0).
+- **Buget.** Sub 200 KB pe dosar (fiecare test de învechire îl afirmă); 500 KB este limita pentru orice imagine README (regula validatorului SVG studio).
+- **Copie neschimbată, numără de la poartă.** Rebrand-ul a schimbat tipul și paleta, nu cuvinte: fiecare generator își poartă copia diagramei într-o constantă `*_COPY` (sau o construiește din catalogul live) care este atât textul desenat, cât și intrarea pasului de conturare. Figurile canonice rămân în noduri `<text>` (invizibile odată conturate, `fill-opacity:0`), citite de `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testele de staleness ale diagramelor pe care le citește poarta rulează și validatorii săi pe fișierul generat, așa că o cifră care se deplasează de la cod eșuează testul — fixează sursa pe care o citește poarta, niciodată numărul din generator.
+
+## 7. Indice de referință
+
+- `src/app/globals.css` — token bridge, suprascrieri `.dark`, extensii OmniRoute `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — fixat în amonte commit și autorizație de licență; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` și adaptoarele de lângă el; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

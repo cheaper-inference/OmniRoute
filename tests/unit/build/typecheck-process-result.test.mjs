@@ -21,8 +21,22 @@ function fixture(t, scope) {
   writeFileSync(path.join(root, config), "{}\n");
   writeFileSync(path.join(root, "package.json"), '{"private":true}\n');
   writeFileSync(path.join(root, "node_modules/typescript/package.json"), '{"name":"typescript"}\n');
+  // The gate reads a tsconfig through the compiler's own parser, so the boundary the
+  // fixture controls has to include it.
+  writeFileSync(
+    path.join(root, "node_modules/typescript/index.js"),
+    "module.exports = { readConfigFile: () => ({ config: {} }), sys: { readFile: () => '' }, " +
+      "flattenDiagnosticMessageText: (m) => String(m) };\n"
+  );
   writeFileSync(baseline, JSON.stringify({ "src/example.ts": { TS2339: 1 } }) + "\n");
   const compiler = `#!/usr/bin/env node
+// The gate resolves the program before comparing counts. Answer that probe with a
+// file list so these fixtures exercise the real path rather than tripping the
+// empty-program guard.
+if (process.argv.includes("--listFilesOnly")) {
+  process.stdout.write(process.env.QG_TSC_FILES || process.cwd() + "/src/example.ts\\n");
+  process.exit(0);
+}
 process.stdout.write(process.env.QG_TSC_STDOUT || "");
 process.stderr.write(process.env.QG_TSC_STDERR || "");
 if (process.env.QG_TSC_SIGNAL) process.kill(process.pid, process.env.QG_TSC_SIGNAL);
@@ -162,7 +176,11 @@ for (const scope of ["dashboard", "api", "open-sse"]) {
     const result = project.run({ QG_TSC_EXIT: "0" }, ["--update"]);
     assert.equal(result.error, undefined);
     assert.equal(result.status, 0, result.stdout + result.stderr);
-    assert.deepEqual(JSON.parse(readFileSync(project.baseline, "utf8")), {});
+    const written = JSON.parse(readFileSync(project.baseline, "utf8"));
+    const diagnostics = Object.fromEntries(
+      Object.entries(written).filter(([key]) => !key.startsWith("_"))
+    );
+    assert.deepEqual(diagnostics, {});
   });
 }
 

@@ -15,6 +15,11 @@ vi.mock("next-intl", () => ({
   useLocale: () => "en",
   useTranslations: () => (key: string) => key,
 }));
+// This row test exercises expiry/usage UI, not the global persisted privacy store.
+vi.mock("@/store/emailPrivacyStore", () => ({
+  default: (select: (state: { emailsVisible: boolean }) => unknown) =>
+    select({ emailsVisible: true }),
+}));
 
 import ConnectionRow, {
   type ConnectionRowConnection,
@@ -42,12 +47,14 @@ const baseProps = {
   onDelete: () => {},
 };
 
-function renderRow(connection: ConnectionRowConnection): HTMLElement {
+function renderRow(connection: ConnectionRowConnection, onReauth?: () => void): HTMLElement {
   const container = makeContainer();
   const root = createRoot(container);
   cleanupCallbacks.push(() => act(() => root.unmount()));
   act(() => {
-    root.render(React.createElement(ConnectionRow, { ...baseProps, connection } as never));
+    root.render(
+      React.createElement(ConnectionRow, { ...baseProps, connection, onReauth } as never)
+    );
   });
   return container;
 }
@@ -88,5 +95,48 @@ describe("ConnectionRow token expiry badge (#5836)", () => {
       priority: 1,
     } as ConnectionRowConnection);
     expect(container.textContent).toContain("tokenExpiredBadge");
+  });
+
+  it("shows healthy ChatGPT expiry as renewal information and links to official usage settings", () => {
+    const container = renderRow({
+      id: "chatgpt",
+      provider: "chatgpt",
+      testStatus: "active",
+      isActive: true,
+      expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+    });
+    expect(container.querySelector('[title="chatgptTokenRenewsTitle"]')).not.toBeNull();
+    const link = container.querySelector('a[href="https://chatgpt.com/settings/usage"]');
+    expect(link?.textContent).toContain("chatgptManageUsage");
+    expect(link?.getAttribute("rel")).toContain("noreferrer");
+    expect(link?.getAttribute("target")).toBe("_blank");
+  });
+
+  it("keeps renewal errors visible and does not add ChatGPT usage actions to other providers", () => {
+    const invalid = renderRow({
+      id: "bad",
+      provider: "chatgpt",
+      testStatus: "invalid",
+      expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
+    });
+    expect(invalid.querySelector('[title="chatgptTokenRenewsTitle"]')).toBeNull();
+    const other = renderRow({ id: "other", provider: "antigravity", testStatus: "active" });
+    expect(other.querySelector('a[href="https://chatgpt.com/settings/usage"]')).toBeNull();
+  });
+
+  it("opens ChatGPT reauthentication with a compact action instead of a branded sign-in button", () => {
+    const onReauth = vi.fn();
+    const container = renderRow(
+      { id: "chatgpt", provider: "chatgpt", testStatus: "active" },
+      onReauth
+    );
+    expect(container.textContent).not.toContain("Continue with ChatGPT");
+    const button = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="reauthenticateConnection"]'
+    );
+    expect(button).not.toBeNull();
+    expect(button?.getAttribute("aria-haspopup")).toBe("dialog");
+    act(() => button!.click());
+    expect(onReauth).toHaveBeenCalledOnce();
   });
 });

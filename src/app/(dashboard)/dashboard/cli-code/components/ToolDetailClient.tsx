@@ -22,6 +22,7 @@ import {
   GrokBuildToolCard,
   KiloToolCard,
   OpenClawToolCard,
+  PiToolCard,
 } from "./index";
 
 export interface ToolDetailClientProps {
@@ -271,6 +272,8 @@ export default function ToolDetailClient({ toolId, category }: ToolDetailClientP
         return <ClineToolCard {...cardProps} />;
       case "kilo":
         return <KiloToolCard {...cardProps} />;
+      case "pi":
+        return <PiToolCard {...cardProps} />;
       case "copilot":
         return <CopilotToolCard {...cardProps} />;
       case "hermes-agent":

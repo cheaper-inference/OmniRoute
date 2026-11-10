@@ -11,6 +11,7 @@ export interface ComboControlCenterCombo {
   strategy?: string | null;
   models?: unknown[];
   isActive?: boolean | null;
+  type?: string | null;
   config?: JsonRecord | null;
   /**
    * #17393: connectionId → account display name, resolved server-side by the
@@ -325,5 +326,32 @@ export function summarizeComboControlCenter(
 }
 
 export function extractComboRuntimeConfig(combo: ComboControlCenterCombo): JsonRecord {
-  return isRecord(combo.config) ? combo.config : {};
+  const config = isRecord(combo.config) ? combo.config : {};
+  // Virtual auto combos nest the resolved router knobs under `config.auto`
+  // (virtualFactory.ts). Unwrapping one level keeps each setting on its own
+  // row instead of a single `auto` row holding a stringified mega-object.
+  if (combo.type === "auto" && isRecord(config.auto)) {
+    const { auto, ...rest } = config;
+    return { ...auto, ...rest };
+  }
+  return config;
+}
+
+/**
+ * Resolved targets for a virtual auto combo. The UUID-keyed combo-health
+ * endpoint can't serve auto/* ids, so the materialized `models` steps — the
+ * runtime-resolved candidate set — stand in, with every metric left absent
+ * (no fabricated health numbers).
+ */
+export function getVirtualComboResolvedTargets(
+  combo: ComboControlCenterCombo
+): ComboControlCenterTargetHealth[] {
+  return getComboControlCenterTargets(combo, null).map((target) => ({
+    stepId: target.id,
+    model: target.model,
+    provider: target.provider ?? undefined,
+    connectionId: target.connectionId,
+    label: target.label,
+    quotaScope: "none" as const,
+  }));
 }

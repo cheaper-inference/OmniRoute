@@ -3,9 +3,8 @@
  *
  * Implements QuotaFetcher for the Codex provider (quotaPreflight.ts + quotaMonitor.ts).
  *
- * Codex has TWO independent quota windows:
- *   - Primary (5h):   short-term rate limit, resets every 5 hours
- *   - Secondary (7d): weekly limit, resets every 7 days
+ * Codex may report independent 5h and 7d windows in either upstream position.
+ * Their explicit duration determines identity; primary may be weekly-only.
  *
  * We return percentUsed = max(5h%, 7d%) so the system switches accounts when
  * EITHER window approaches exhaustion (95% threshold).
@@ -42,25 +41,33 @@ export {
   CODEX_WINDOW_WEEKLY,
 } from "./codexQuotaParser.ts";
 
-/**
- * Stable identifiers for Codex's quota windows. These match the quota keys
- * surfaced by `getCodexUsage` (in usage.ts) and rendered by the dashboard,
- * so per-window thresholds set in the UI line up with the keys persisted
- * in `provider_connections.quota_window_thresholds_json`. The dedicated
- * Codex fetcher exposes only session + weekly today; the plan-dependent
- * code_review window is surfaced by the generic path when present.
- */
-
 // Codex usage endpoint (same as usage.ts CODEX_CONFIG)
 const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
 
 // Cache TTL — short enough to be reactive, long enough to avoid rate limits
 const CACHE_TTL_MS = 60_000; // 60 seconds
 
-// Per-account quota window info (richer than QuotaInfo — includes both windows)
+// Max age for reusing a cached snapshot when a refresh fails or times out
+const MAX_STALE_CACHE_MS = 15 * 60_000; // 15 minutes
+
+// The preflight awaits this fetch on the request path, so the default stays short.
+const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
+
+// Largest delay a Node timer honors; AbortSignal.timeout also rejects fractions.
+const MAX_REQUEST_TIMEOUT_MS = 2_147_483_647;
+
+export function getCodexQuotaFetchTimeoutMs(): number {
+  const raw = process.env.CODEX_QUOTA_FETCH_TIMEOUT_MS?.trim();
+  const parsed = raw ? Number(raw) : NaN;
+  return Number.isInteger(parsed) && parsed > 0 && parsed <= MAX_REQUEST_TIMEOUT_MS
+    ? parsed
+    : DEFAULT_REQUEST_TIMEOUT_MS;
+}
+
+// Per-account quota window info; structural slots exist only for known durations.
 export interface CodexDualWindowQuota extends QuotaInfo {
-  window5h: { percentUsed: number; resetAt: string | null };
-  window7d: { percentUsed: number; resetAt: string | null };
+  window5h?: { percentUsed: number; resetAt: string | null };
+  window7d?: { percentUsed: number; resetAt: string | null };
   limitReached: boolean;
   /** All known Codex quota windows, including Spark when the upstream exposes it. */
   allWindows?: Record<string, { percentUsed: number; resetAt: string | null }>;
@@ -81,15 +88,17 @@ interface CacheEntry {
 // In-memory cache: connectionId → { quota, fetchedAt }
 const quotaCache = new Map<string, CacheEntry>();
 
-// Auto-cleanup stale entries every 5 minutes
-const _cacheCleanup = setInterval(() => {
+function sweepQuotaCache(): void {
   const now = Date.now();
   for (const [key, entry] of quotaCache) {
-    if (now - entry.fetchedAt > CACHE_TTL_MS * 5) {
+    if (now - entry.fetchedAt > MAX_STALE_CACHE_MS) {
       quotaCache.delete(key);
     }
   }
-}, 5 * 60_000);
+}
+
+// Auto-cleanup stale entries every 5 minutes
+const _cacheCleanup = setInterval(sweepQuotaCache, 5 * 60_000);
 
 if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
@@ -192,11 +201,30 @@ function getCodexConnectionMeta(
 // ─── Core Fetcher ────────────────────────────────────────────────────────────
 
 /**
+ * The snapshot a failed refresh may fall back to. A spent window can have been
+ * reset upstream and a window past its resetAt no longer says anything, so
+ * either one leaves the account unknown (null), as if nothing had been cached.
+ * The `stale` mark lets the cutoff apply the connection's own thresholds.
+ */
+function getUsableCachedQuota(cached: CacheEntry | undefined): CodexDualWindowQuota | null {
+  if (!cached || Date.now() - cached.fetchedAt >= MAX_STALE_CACHE_MS) return null;
+  const { quota } = cached;
+  if (quota.limitReached) return null;
+  const now = Date.now();
+  const outdated = Object.values(quota.windows ?? {}).some(
+    ({ percentUsed, resetAt }) =>
+      percentUsed >= 1 || (resetAt ? new Date(resetAt).getTime() <= now : false)
+  );
+  return outdated ? null : { ...quota, stale: true };
+}
+
+/**
  * Fetch current quota for a Codex connection.
  * Returns percentUsed = max(5h%, 7d%) — worst-case across both windows.
  *
  * @param connectionId - Connection ID from the DB (used to look up credentials)
- * @returns QuotaInfo or null if fetch fails / no credentials
+ * @returns QuotaInfo, a usable stale snapshot if the refresh fails, or null when
+ *   the quota is unknown (no credentials, or a failed fetch with no usable snapshot)
  */
 export async function fetchCodexQuota(
   connectionId: string,
@@ -242,36 +270,37 @@ export async function fetchCodexQuota(
     const response = await fetchWithConnectionProxy(connectionId, CODEX_USAGE_URL, {
       method: "GET",
       headers,
-      signal: AbortSignal.timeout(8_000),
+      signal: AbortSignal.timeout(getCodexQuotaFetchTimeoutMs()),
     });
-    if (!response) return null;
+    if (!response) return getUsableCachedQuota(cached);
 
     if (!response.ok) {
       // Non-2xx: could be token expired or quota API down.
-      // Return null to proceed (fail-open — don't block on API errors).
+      // Keep a usable snapshot, otherwise null: an API error is not exhaustion.
       if (response.status === 401 || response.status === 403) {
         // Token expired — remove from cache so next call re-fetches
         deleteQuotaCacheForConnection(connectionId);
         connectionRegistry.delete(connectionId);
+        return null;
       }
-      return null;
+      return getUsableCachedQuota(cached);
     }
 
     const data = await response.json();
     const quota = parseCodexUsageResponse(data, requestedModel);
 
-    if (!quota) return null;
+    if (!quota) return getUsableCachedQuota(cached);
 
     // Store in cache
-    if (!quotaCache.has(connectionId) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
+    if (!quotaCache.has(cacheKey) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
       const oldestCacheKey = quotaCache.keys().next().value;
       if (oldestCacheKey !== undefined) quotaCache.delete(oldestCacheKey);
     }
     quotaCache.set(cacheKey, { quota, fetchedAt: Date.now() });
     return quota;
   } catch {
-    // Network error, timeout, etc. — fail open
-    return null;
+    // Network error, timeout, etc. — same fallback as a non-2xx response
+    return getUsableCachedQuota(cached);
   }
 }
 
@@ -293,13 +322,13 @@ export function getCodexQuotaCooldownMs(quota: CodexDualWindowQuota, threshold =
   const now = Date.now();
 
   // 7d window takes priority (if exhausted, must wait longer)
-  if (quota.window7d.percentUsed >= threshold && quota.window7d.resetAt) {
+  if (quota.window7d && quota.window7d.percentUsed >= threshold && quota.window7d.resetAt) {
     const resetTime = new Date(quota.window7d.resetAt).getTime();
     if (resetTime > now) return resetTime - now;
   }
 
   // 5h window
-  if (quota.window5h.percentUsed >= threshold && quota.window5h.resetAt) {
+  if (quota.window5h && quota.window5h.percentUsed >= threshold && quota.window5h.resetAt) {
     const resetTime = new Date(quota.window5h.resetAt).getTime();
     if (resetTime > now) return resetTime - now;
   }
@@ -334,3 +363,14 @@ export function registerCodexQuotaFetcher(): void {
     CODEX_SPARK_QUOTA_WEEKLY,
   ]);
 }
+
+export const __testing = {
+  sweepQuotaCache,
+  ageCacheEntry(connectionIdOrKey: string, ageMs: number): void {
+    for (const [key, entry] of quotaCache) {
+      if (key === connectionIdOrKey || key.startsWith(`${connectionIdOrKey}:`)) {
+        quotaCache.set(key, { ...entry, fetchedAt: Date.now() - ageMs });
+      }
+    }
+  },
+};

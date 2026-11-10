@@ -15,6 +15,7 @@
  * combo targets may be prompt-optional I2V models), so it is treated as a
  * retryable skip rather than a terminal failure.
  */
+import type { PrepareFalInput } from "../handlers/fal/compatibility.ts";
 import { getComboByName, getCombos } from "@/lib/db/combos";
 import { resolveComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
@@ -55,6 +56,7 @@ export async function executeVideoCombo(
   comboName: string,
   body: Record<string, unknown>,
   auth: {
+    prepareFalInput?: PrepareFalInput | null;
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
     /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
@@ -65,6 +67,11 @@ export async function executeVideoCombo(
   startTime: number,
   log: typeof logger
 ): Promise<Response> {
+  // Every target gets the client's signal, so a disconnect stops each
+  // target's local polling exactly like the single-provider route.
+  const signal = auth.request.signal;
+  if (signal.aborted) return errorResponse(499, "Request aborted");
+
   const combo = await getComboByName(comboName);
   if (!combo) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
@@ -126,6 +133,7 @@ export async function executeVideoCombo(
 
   const runTarget = async (modelStr: string, resolved: VideoModelTarget): Promise<void> => {
     try {
+      if (signal.aborted) return;
       const { provider: targetProvider, model: targetModel, isCustomModel } = resolved;
       if (!targetProvider) {
         lastError = { status: 400, error: `Invalid video model: ${modelStr}` };
@@ -237,12 +245,14 @@ export async function executeVideoCombo(
       }
 
       const result: MediaGenerationResultLike = await handleVideoGeneration({
+        prepareFalInput: auth.prepareFalInput,
         body: { ...body, model: modelStr },
         credentials,
         log,
         // Route-injected sink, so a job-preset result is servable exactly like the
         // fal targets' public URLs (#16372).
         mediaSink: auth.mediaSink,
+        signal,
         ...(isCustomModel && { resolvedProvider: targetProvider }),
       });
 
@@ -310,10 +320,19 @@ export async function executeVideoCombo(
     });
   }
 
-  // All targets failed — prefer the terminal (400/401/403) error when one
-  // exists; it is the actionable misconfiguration signal. Fall back to the
-  // last failure otherwise.
-  const reportedError = terminalError ?? lastError;
+  return allVideoTargetsFailedResponse(signal, terminalError ?? lastError);
+}
+
+/**
+ * The combo response once no target succeeded: 499 when the client disconnected,
+ * otherwise the terminal (400/401/403) error when one exists — the actionable
+ * misconfiguration signal — falling back to the last failure.
+ */
+function allVideoTargetsFailedResponse(
+  signal: AbortSignal,
+  reportedError: { status: number; error: string } | null
+): Response {
+  if (signal.aborted) return errorResponse(499, "Request aborted");
   const errorPayload = toJsonErrorPayload(
     reportedError?.error || "All combo targets failed",
     "Video combo targets all failed"

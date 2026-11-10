@@ -12,17 +12,18 @@ test("costs section exists in SIDEBAR_SECTIONS", () => {
   assert.ok(section, "costs section must exist");
 });
 
-test("costs section has exactly 6 items in the correct order", () => {
+test("costs section has exactly 7 items in the correct order", () => {
   const section = findSection("costs");
   assert.ok(section, "costs section must exist");
 
   const items = sidebarVisibility.getSectionItems(section);
-  assert.equal(items.length, 6, "costs section must have 6 items");
+  assert.equal(items.length, 7, "costs section must have 7 items");
 
   const itemIds = items.map((i) => i.id);
   assert.deepEqual(itemIds, [
     "costs",
     "costs-pricing",
+    "costs-teams",
     "costs-budget",
     "costs-free-tiers",
     "free-provider-rankings",
@@ -40,6 +41,7 @@ test("costs section items have correct hrefs", () => {
   assert.deepEqual(hrefs, [
     { id: "costs", href: "/dashboard/costs" },
     { id: "costs-pricing", href: "/dashboard/costs/pricing" },
+    { id: "costs-teams", href: "/dashboard/costs/teams" },
     { id: "costs-budget", href: "/dashboard/costs/budget" },
     { id: "costs-free-tiers", href: "/dashboard/free-tiers" },
     { id: "free-provider-rankings", href: "/dashboard/free-provider-rankings" },
@@ -118,9 +120,7 @@ test("FIX5: no other costs-section item declares a featureFlagKey (no regression
   const section = findSection("costs");
   assert.ok(section, "costs section must exist");
 
-  const otherItems = sidebarVisibility
-    .getSectionItems(section)
-    .filter((i) => i.id !== "radar");
+  const otherItems = sidebarVisibility.getSectionItems(section).filter((i) => i.id !== "radar");
 
   for (const item of otherItems) {
     assert.equal(

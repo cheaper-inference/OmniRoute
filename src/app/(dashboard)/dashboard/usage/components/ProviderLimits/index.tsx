@@ -17,6 +17,7 @@ import {
 } from "./utils";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
 import Select from "@/shared/components/Select";
 import { CardSkeleton } from "@/shared/components/Loading";
@@ -55,6 +56,11 @@ import { formatAutoRefreshCountdown } from "./formatters";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
 import { compareTr } from "@/shared/utils/turkishText";
 import { fetchWithTimeout } from "@/shared/utils/fetchTimeout";
+import {
+  ConnectionsAuthError,
+  emptyQuotaCardKeys,
+  fetchDashboardConnections,
+} from "./fetchConnections";
 
 // Bound the two first-paint requests so a stalled connection cannot wedge
 // `initialLoading` on `true` and freeze the quota page on its skeleton forever
@@ -214,6 +220,18 @@ function FilterChip({
   );
 }
 
+/**
+ * SIWC exposes usage management in ChatGPT settings, not a quota polling API; automatic
+ * requests also wait until a live request is allowed.
+ */
+function skipsQuotaFetch(
+  provider: string,
+  automatic: boolean | undefined,
+  canRequestLive: () => boolean
+): boolean {
+  return provider === "chatgpt" || (automatic === true && !canRequestLive());
+}
+
 export default function ProviderLimits({
   showFilters = true,
   autoRefreshInterval = 0,
@@ -242,6 +260,7 @@ export default function ProviderLimits({
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Record<string, string>>({});
   const [refreshingAll, setRefreshingAll] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [authRequired, setAuthRequired] = useState(false);
   const [tierFilter, setTierFilter] = useState("all");
   const { quotaVisibility, handleHideQuota, handleShowQuota } = useQuotaVisibility(tr, notify);
 
@@ -300,19 +319,19 @@ export default function ProviderLimits({
     };
   }, []);
 
-  const fetchConnections = useCallback(async () => {
+  const fetchConnections = useCallback(async (signal?: AbortSignal) => {
     try {
-      const response = await fetchWithTimeout("/api/providers/client", {
-        timeoutMs: PROVIDER_LIMITS_FETCH_TIMEOUT_MS,
+      const list = await fetchDashboardConnections(PROVIDER_LIMITS_FETCH_TIMEOUT_MS, {
         method: "GET",
         cache: "no-store",
+        signal,
       });
-      if (!response.ok) throw new Error("Failed");
-      const data = await response.json();
-      const list = data.connections || [];
+      if (signal?.aborted) return null;
+      setAuthRequired(false);
       setConnections(list);
       return list;
-    } catch {
+    } catch (error) {
+      if (!signal?.aborted) setAuthRequired(error instanceof ConnectionsAuthError);
       return null;
     }
   }, []);
@@ -391,12 +410,13 @@ export default function ProviderLimits({
     []
   );
 
-  const fetchCachedProviderLimits = useCallback(async () => {
+  const fetchCachedProviderLimits = useCallback(async (signal?: AbortSignal) => {
     try {
       const response = await fetchWithTimeout("/api/usage/provider-limits", {
         timeoutMs: PROVIDER_LIMITS_FETCH_TIMEOUT_MS,
         method: "GET",
         cache: "no-store",
+        signal,
       });
       if (!response.ok) throw new Error("Failed");
       const data = await response.json();
@@ -413,7 +433,7 @@ export default function ProviderLimits({
       provider: string,
       options: { force?: boolean; automatic?: boolean } = {}
     ) => {
-      if (options.automatic && !canRequestLive()) return;
+      if (skipsQuotaFetch(provider, options.automatic, canRequestLive)) return;
       const force = options?.force === true;
       const now = Date.now();
       const lastFetch = lastFetchTimeRef.current[connectionId] || 0;
@@ -562,7 +582,7 @@ export default function ProviderLimits({
       connections.filter(
         (conn) =>
           isProviderQuotaVisible(conn) &&
-          supportsProviderQuota(conn.provider, conn) &&
+          (conn.provider === "chatgpt" || supportsProviderQuota(conn.provider, conn)) &&
           (conn.authType === "oauth" || conn.authType === "apikey")
       ),
     [connections]
@@ -827,14 +847,13 @@ export default function ProviderLimits({
   }
 
   if (sortedConnections.length === 0) {
+    const emptyCard = emptyQuotaCardKeys(authRequired);
     return (
       <Card padding="lg">
         <div className="text-center py-12">
           <Icon name="cloud_off" size={64} className="opacity-15" />
-          <h3 className="mt-4 text-lg font-semibold text-text-main">{t("noProviders")}</h3>
-          <p className="mt-2 text-sm text-text-muted max-w-[400px] mx-auto">
-            {t("connectProvidersForQuota")}
-          </p>
+          <h3 className="mt-4 text-lg font-semibold text-text-main">{t(emptyCard.title)}</h3>
+          <p className="mt-2 text-sm text-text-muted max-w-[400px] mx-auto">{t(emptyCard.hint)}</p>
         </div>
       </Card>
     );
@@ -865,11 +884,11 @@ export default function ProviderLimits({
               autoRefreshIntervalMs > 0 ? tr("autoRefreshing", "Auto-refreshing") : t("refreshAll")
             }
           >
-            <Icon
-              name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-              size={16}
-              className={refreshingAll ? "animate-spin" : undefined}
-            />
+            {refreshingAll ? (
+              <Spinner decorative size="sm" />
+            ) : (
+              <Icon name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"} size={16} />
+            )}
             {refreshingAll
               ? tr("refreshing", "Refreshing")
               : autoRefreshIntervalMs > 0

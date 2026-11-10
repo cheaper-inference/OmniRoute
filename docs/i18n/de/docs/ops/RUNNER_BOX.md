@@ -27,13 +27,12 @@ Gemessen am 2026-10-18:
 | Swap      | 16 GB                                | `omniroute-113-5` läuft mit deaktiviertem Swap (`MemorySwapMax=0`), sodass ein außer Kontrolle geratener Build beim Erreichen seines Limits beendet wird, anstatt den Host zum Swappen zu bringen                                                                                                                                                                                                                                            |
 | `/tmp`    | **12 GB tmpfs = RAM**                | Alles, was dort abgelegt wird, belegt Arbeitsspeicher; verbliebene Dateien werden nach 3 h entfernt                                                                                                                                                                                                                                                                                                                                          |
 | CPU       | Load von 60 bei 32 Kernen beobachtet | Vor Einführung der Quoten führte ein Turbopack-Build (ca. 1166 % CPU) zusammen mit einer Coverage-Suite auf demselben Host dazu, dass die Heartbeats der anderen Listener keine Ressourcen mehr erhielten (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                              |
-| Runner    | **6 Listener**                       | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` sind deaktiviert (`systemctl enable --now` reaktiviert einen davon)                                                                                                                                                                                                                                                                                                          |
+| Runner    | **7 Listener** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` trägt zusätzlich `omni-build`; `omniroute-113-3/-4/-8` wurden aus dem Repository gelöscht (2026-10-28)                                                                                                                                                                                                                                                                                |
 
 Die Limits befinden sich für jede Unit in `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (vorherige Werte wurden als `override.conf.bak-20261018` beibehalten) und wurden im laufenden Betrieb mit
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` angewendet – ohne Neustart, sodass kein
-laufender Job beeinträchtigt wurde. Labels werden über die Runner-API geändert
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+laufender Job beeinträchtigt wurde. Labels werden über die Runner-API geändert (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), ebenfalls im laufenden Betrieb.
 
 ## Janitor installieren (einmalig auf dem Rechner)
@@ -42,7 +41,7 @@ laufender Job beeinträchtigt wurde. Labels werden über die Runner-API geänder
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): alle 30 Minuten, Protokollierung nach /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` ist erforderlich: Der Janitor weist anhand einer Momentaufnahme der geöffneten
@@ -131,8 +130,9 @@ die Prüfung auf Inaktivität und der Neustart im selben Befehl erfolgen müssen
   sich dort 54 Minuten lang durch Speicher-Rückgewinnung; 8 GB beseitigen die Drosselung.
 - **Bewusst weniger Listener.** Vier OmniRoute-Units wurden am 2026-08-29 deaktiviert — jeder zusätzliche
   Listener ist ein weiterer Nutzer des oben genannten Speicherbudgets. Die Obergrenze des Janitors
-  beträgt 6 (`MAX_ACTIVE_RUNNERS=6` in cron): Er zählt jeden `Runner.Listener` auf dem System, und
-  OmniHeuris + OmniMind kommen als zwei weitere zu unseren vier hinzu.
+  beträgt 8 (`MAX_ACTIVE_RUNNERS=8` in cron): Er zählt jeden `Runner.Listener` auf dem System, und
+  OmniHeuris + OmniMind kommen als zwei weitere zu unseren fünf hinzu.
+- **Unit- und Vitest-Jobs bleiben gehostet.** `ci.yml` schickt seine Unit-Shards und den Vitest-Job nur dann an `[self-hosted, omni-ci]`, wenn die Repository-Variable `vars.USE_VPS_TEST_RUNNER` auf `true` steht, und auch dann nur für `pull_request`-Läufe aus demselben Repository; Forks, `merge_group` und Pushes bleiben auf `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Die Variable steht auf `false`. Am 2026-10-28 brauchten drei `omni-ci`-Listener mit je 4 Kernen 250–270 s für `npm ci`, und jeder Unit-Shard lief in das 30-Minuten-Job-Limit, gegenüber ~634 s für einen gehosteten Shard, bei einer Last von 17–24 auf dem System. Die Listener wurden gelöscht. Die Variable nicht wieder einschalten, solange es keine Listener gibt, die für einen Unit-Shard dimensioniert sind.
 - **Niemals `/tmp` oder `_work` manuell bereinigen, während ein Runner beschäftigt ist.** Eine
   Prüfung mit anschließender, zeitlich verzögerter Löschung führte dazu, dass einem laufenden Build-Job
   am 2026-08-27 sein `_work` entzogen wurde. Der Janitor führt die Prüfung und die Entfernung in einem
@@ -147,8 +147,7 @@ die Prüfung auf Inaktivität und der Neustart im selben Befehl erfolgen müssen
 
 ## Gehostete Lane (GitHub-gehostete Runner)
 
-Das Konto nutzt den **Pro**-Tarif: **40 gleichzeitig ausgeführte gehostete Jobs**, die von sämtlichen PR-Prüfungen,
-allen durch Pushes ausgelösten Workflows und dem Standard-Setup von CodeQL gemeinsam genutzt werden. Gemessen am 2026-10-18 während einer
+Das Repository gehört zur Organisation `cheaper-inference` mit dem **Team**-Tarif: **60 gleichzeitig ausgeführte gehostete Jobs**, die von sämtlichen Repositories der Organisation, allen PR-Prüfungen, allen durch Pushes ausgelösten Workflows und dem Standard-Setup von CodeQL gemeinsam genutzt werden. Die folgenden Zahlen wurden noch mit dem **Pro**-Tarif (40 gleichzeitig ausgeführte gehostete Jobs) gemessen. Gemessen am 2026-10-18 während einer
 Merge-Kampagne (~10 Merges/Stunde auf `release/v3.8.52`): **2.500 Workflow-Ausführungen wurden innerhalb von
 24 Stunden erstellt**, 44 Pushes auf den Branch innerhalb von 6 Stunden, **106 gehostete Jobs in der Warteschlange**, während PR-Prüfungen
 stundenlang warteten und PRs ohne sie gemergt wurden. Bei jedem Push auf den Branch wurden neun Workflows ausgelöst:

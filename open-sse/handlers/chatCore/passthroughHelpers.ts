@@ -2,6 +2,12 @@ import { FORMATS } from "../../translator/formats.ts";
 import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
 import { isClaudeCodeCompatibleProvider } from "../../services/claudeCodeCompatible.ts";
 import { downgradeRestoredClaudeThinking } from "../../services/claudeThinkingStore.ts";
+import {
+  disableManualThinkingWithoutFinalBlock,
+  type ClaudeRequestBody,
+} from "../../translator/helpers/claudeHelper.ts";
+import { getModelTargetFormat } from "../../config/providerModels.ts";
+import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
 import { isResponsesEndpointPath } from "../../utils/responsesEndpoint.ts";
 import { mergeClientAnthropicBeta } from "../../config/anthropicHeaders.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
@@ -160,7 +166,7 @@ export function shouldUseNativeOpenAICompatibleResponsesPassthrough({
  */
 export function redactPassthroughThinkingSignatures(
   messages: unknown,
-  _signature: string
+  _signature?: string
 ): unknown {
   // Signed blocks stay verbatim; only blocks Anthropic never issued are dropped (#12917).
   return dropUnsignedPassthroughThinkingBlocks(messages);
@@ -227,6 +233,7 @@ export function dropUnsignedPassthroughThinkingBlocks(messages: unknown): unknow
 
 type ThinkingSignatureError = {
   provider?: string | null;
+  model?: string | null;
   status?: number | null;
   message?: string | null;
 };
@@ -254,6 +261,45 @@ function hasBlock(message: MessageLike | null | undefined, type: string): boolea
  */
 export function isAnthropicThinkingSignatureError({
   provider,
+  model,
+  status,
+  message,
+}: ThinkingSignatureError): boolean {
+  // Same upstream set that prepareClaudeRequest treats as signature-validating: Anthropic
+  // itself, Vertex Claude, and any registry model whose targetFormat is "claude" (GitHub
+  // Copilot claude-*, opencode-go claude-target models, ...).
+  const isAnthropicTarget =
+    provider === "claude" ||
+    provider === "vertex" ||
+    provider === "vertex-partner" ||
+    (typeof provider === "string" && provider.startsWith("anthropic-compatible-")) ||
+    (!!provider && !!model && getModelTargetFormat(provider, model) === "claude");
+  if (!isAnthropicTarget || status !== 400 || typeof message !== "string") return false;
+
+  return /invalid\s+[`'\"]?signature[`'\"]?\s+in\s+[`'\"]?thinking[`'\"]?\s+block/i.test(message);
+}
+
+/**
+ * Match the other Anthropic thinking-block validation failure, which names
+ * the LATEST assistant message specifically rather than a stale signature:
+ *
+ *   400 messages.N.content.M: `thinking` or `redacted_thinking` blocks in
+ *   the latest assistant message cannot be modified. These blocks must
+ *   remain as they were in the original response.
+ *
+ * This fires when the thinking/redacted_thinking block OmniRoute replayed
+ * for the latest turn is not a faithful copy of what Anthropic actually
+ * produced for it — most commonly because the upstream stream for that turn
+ * was cut short (e.g. a `content_filter` stop mid-stream, #17324) before a
+ * complete, replayable signed block could be captured, so the block OmniRoute
+ * has on file (or the client resent) no longer matches. Unlike
+ * {@link isAnthropicThinkingSignatureError}, stripping HISTORICAL thinking
+ * cannot help here — the rejected block is in the message the error names,
+ * not an earlier one — so this uses its own targeted recovery
+ * ({@link stripLatestAssistantThinkingForModifiedRecovery}).
+ */
+export function isAnthropicThinkingModifiedError({
+  provider,
   status,
   message,
 }: ThinkingSignatureError): boolean {
@@ -262,7 +308,102 @@ export function isAnthropicThinkingSignatureError({
     (typeof provider === "string" && provider.startsWith("anthropic-compatible-"));
   if (!isAnthropicTarget || status !== 400 || typeof message !== "string") return false;
 
-  return /invalid\s+[`'\"]?signature[`'\"]?\s+in\s+[`'\"]?thinking[`'\"]?\s+block/i.test(message);
+  return /[`'\"]?thinking[`'\"]?\s+or\s+[`'\"]?redacted_thinking[`'\"]?\s+blocks\s+in\s+the\s+latest\s+assistant\s+message\s+cannot\s+be\s+modified/i.test(
+    message
+  );
+}
+
+function isManualExtendedThinking(record: Record<string, unknown>): boolean {
+  const thinking = record.thinking as { type?: unknown } | null | undefined;
+  return thinking?.type === "enabled";
+}
+
+function hasNoSafeThinkingRecovery(content: unknown[]): boolean {
+  if (content.every(isThinkingBlock)) return true;
+  if (!hasBlock({ content }, "tool_use")) return false;
+  const first = content[0] as Record<string, unknown> | null;
+  if (!first || typeof first !== "object" || Object.keys(first).length !== 2) return false;
+  return (
+    first.type === "redacted_thinking" &&
+    first.data === DEFAULT_THINKING_CLAUDE_SIGNATURE &&
+    content.slice(1).every((block) => !isThinkingBlock(block))
+  );
+}
+
+/**
+ * Build a one-shot recovery body after Anthropic rejected the thinking block
+ * of the LATEST assistant message as modified (see
+ * {@link isAnthropicThinkingModifiedError}). Only that one message is
+ * touched: a block this store restored is dropped (forgotten); any other
+ * thinking block left in that message — never restored by this store, so
+ * either sent by the client or produced by a filtered/truncated upstream
+ * turn OmniRoute could not capture faithfully — is dropped outright, since
+ * it cannot be resent regardless of how it became unreplayable. A `tool_use`
+ * left in the same message stays without a precursor thinking block: that is
+ * a valid Anthropic request shape (#17324/#17344 — re-injecting the
+ * fabricated placeholder re-triggers the same 400). Earlier assistant turns
+ * also drop store-restored blocks: Anthropic flags the modified message by
+ * cache warmth, not recency (#17324 recurrence 2026-10-27). Returns the
+ * original body reference when there is nothing safe to recover.
+ */
+export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return body;
+
+  const record = body as Record<string, unknown>;
+  if (!Array.isArray(record.messages)) return body;
+
+  const messages = record.messages as MessageLike[];
+  let index = messages.length - 1;
+  while (index >= 0 && messages[index]?.role !== "assistant") index -= 1;
+  if (index < 0) return body;
+
+  // #17324 recurrence (2026-10-27): Anthropic flags the message by cache-warmth, not
+  // recency — live 400s pointed at messages.1/messages.3 while the LATEST assistant
+  // message was clean, so the strip no-oped and the request failed with
+  // recoveryAttempted:false. Drop server-restored (store-provenance) thinking blocks
+  // from EVERY assistant turn; they are blocks the client never sent, so removing
+  // them is always a legal fallback shape on adaptive thinking. The latest assistant
+  // message additionally drops any non-restored thinking block (unchanged behavior).
+  const manualThinking = isManualExtendedThinking(record);
+  let changed = false;
+  const recoveredMessages = messages.map((message) => {
+    if (!message || message.role !== "assistant" || !Array.isArray(message.content)) {
+      return message;
+    }
+    const isLatestAssistant = message === messages[index];
+    if (!message.content.some(isThinkingBlock)) return message;
+
+    if (isLatestAssistant) {
+      // Dropping every block would create an invalid empty assistant message.
+      // Keep the original failure when there is no safe content to retry.
+      if (hasNoSafeThinkingRecovery(message.content)) return message;
+      // Manual extended thinking requires the latest assistant tool_use turn to open
+      // with a thinking block: dropping it would trade this 400 for "expected thinking
+      // ... found tool_use", and the fabricated placeholder re-triggers this same 400.
+      // Keep the original failure instead of retrying (only adaptive verified live).
+      if (manualThinking && hasBlock(message, "tool_use")) return message;
+      const downgraded = downgradeRestoredClaudeThinking(message.content);
+      const base = (downgraded ?? message.content) as unknown[];
+      const content = base.filter((block) => !isThinkingBlock(block));
+      if (content.length === base.length && base === message.content) return message;
+      changed = true;
+      return { ...message, content: content as typeof message.content };
+    }
+
+    // Inject nothing on earlier turns either (#18036): only the final tool_use turn needs
+    // a precursor under manual thinking, and the guard above keeps that one intact.
+    const downgraded = downgradeRestoredClaudeThinking(message.content);
+    if (downgraded) {
+      changed = true;
+      return { ...message, content: downgraded as typeof message.content };
+    }
+    return message;
+  });
+
+  if (!changed) return body;
+  const recovered = { ...record, messages: recoveredMessages } as ClaudeRequestBody;
+  disableManualThinkingWithoutFinalBlock(recovered);
+  return recovered as T;
 }
 
 /**
@@ -273,8 +414,8 @@ export function isAnthropicThinkingSignatureError({
  * still-open cycle keeps its thinking blocks. A trailing unresolved assistant
  * `tool_use` turn is protected as well. The one exception inside that cycle is a
  * block OmniRoute itself restored from claudeThinkingStore (the client never sent
- * it): it is swapped back to the #5312 `redacted_thinking` placeholder and
- * forgotten, so a rejected restored signature is still recoverable.
+ * it): it is dropped and forgotten, so a rejected restored signature is still
+ * recoverable. Manual thinking is disabled if that leaves the final tool turn bare.
  *
  * This helper is intentionally NOT used eagerly. Normal same-model requests must
  * retain their thinking history, cache shape, and current-model semantics.
@@ -334,7 +475,9 @@ export function stripHistoricalThinkingForSignatureRecovery<T>(body: T): T {
   });
 
   if (!changed) return body;
-  return { ...record, messages: recoveredMessages } as T;
+  const recovered = { ...record, messages: recoveredMessages } as ClaudeRequestBody;
+  disableManualThinkingWithoutFinalBlock(recovered);
+  return recovered as T;
 }
 
 type SignatureRecoveryExecution<T> = {
@@ -346,6 +489,7 @@ type SignatureRecoveryExecution<T> = {
 /** Execute the normal body once, then perform at most one exact-error recovery. */
 export async function executeWithAnthropicThinkingSignatureRecovery<T>(args: {
   provider?: string | null;
+  model?: string | null;
   body: unknown;
   execute: (body: unknown) => Promise<T>;
   getError: (
@@ -357,18 +501,24 @@ export async function executeWithAnthropicThinkingSignatureRecovery<T>(args: {
 }): Promise<SignatureRecoveryExecution<T>> {
   const first = await args.execute(args.body);
   const failure = await args.getError(first);
-  if (
-    !failure ||
-    !isAnthropicThinkingSignatureError({
-      provider: args.provider,
-      status: failure.status,
-      message: failure.message,
-    })
-  ) {
+  if (!failure) {
     return { result: first, retried: false, recoveryBody: null };
   }
 
-  const recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body);
+  const errorArgs = {
+    provider: args.provider,
+    model: args.model,
+    status: failure.status,
+    message: failure.message,
+  };
+  let recoveryBody: unknown;
+  if (isAnthropicThinkingSignatureError(errorArgs)) {
+    recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body);
+  } else if (isAnthropicThinkingModifiedError(errorArgs)) {
+    recoveryBody = stripLatestAssistantThinkingForModifiedRecovery(args.body);
+  } else {
+    return { result: first, retried: false, recoveryBody: null };
+  }
   if (recoveryBody === args.body) {
     return { result: first, retried: false, recoveryBody: null };
   }
@@ -394,7 +544,7 @@ export function isClaudeCodeSemanticPassthroughRequest({
   userAgent?: string | null;
 }): boolean {
   const isDirectClaudeCodeProvider =
-    provider === "claude" || isClaudeCodeCompatibleProvider(provider);
+    provider === "claude" || provider === "anthropic" || isClaudeCodeCompatibleProvider(provider);
   if (!isDirectClaudeCodeProvider) return false;
   if (sourceFormat !== FORMATS.CLAUDE) return false;
   if (targetFormat !== FORMATS.CLAUDE) return false;

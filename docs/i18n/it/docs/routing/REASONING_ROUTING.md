@@ -38,24 +38,19 @@ e supportano la corrispondenza `any` o `all`.
 Una regola `connection` viene valutata solo quando nessuna regola preliminare ha prevalso ed è già stata
 selezionata una connessione concreta al provider. Può modificare soltanto l'intensità e il budget.
 
-## Intensità e budget
+## Impegno e budget
 
-`sourceEffort` accetta `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` e
-`ultra`. `missing` indica che la richiesta non contiene né un'intensità discreta né un'opzione di attivazione
-del ragionamento o un budget di ragionamento. Un segnale costituito dal solo budget corrisponde quindi esclusivamente ad `any`.
+`sourceEffort` accetta `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` e `ultra`. `missing` significa che la richiesta non contiene né uno sforzo discreto né un interruttore di riflessione o un budget di riflessione. Un segnale solo budget viene quindi abbinato solo a `any`.
 
-`effortMode` presenta tre varianti:
+`effortMode` ha tre varianti:
 
-- `inherit` mantiene l'intensità del client, consentendo comunque la modifica del modello o della combo.
-- `default` imposta `targetEffort` solo quando non è presente alcun segnale esplicito di ragionamento.
-- `force` sostituisce l'intensità discreta con `targetEffort`.
+- `inherit` mantiene l'impegno del cliente pur consentendo al modello o alla combinazione di cambiare.
+- `default` imposta `targetEffort` solo quando non è presente alcun segnale di ragionamento esplicito.
+- `force` sostituisce lo sforzo discreto con `targetEffort`.
 
-Indipendentemente, `budgetAction` può essere `preserve`, `remove` o `set`. `force` con `none` rimuove
-tutti i campi riconosciuti relativi a intensità e budget. `none` insieme a `set` non è valido.
+Indipendentemente, `budgetAction` può essere `preserve`, `remove` o `set`. `force` con `none` rimuove tutti i campi di impegno e budget riconosciuti, quindi imposta `reasoning_effort: "none"`, perché alcuni provider si attivano quando il campo è assente. I fornitori che rifiutano il valore letterale `none` vengono adeguati al momento dell'invio in `open-sse/executors/base/reasoningEffort.ts`. Il codice di comando lo mappa su `low`, tranne che per le richieste a forma di risposta (`input` senza `messages`), dove mantiene `none`. Su Cloudflare Workers AI (`cloudflare-ai`), i modelli che rifiutano `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) ottengono `low`; gli altri modelli Workers AI mantengono `none`. In questo caso abbandonare il campo non è un'opzione, perché uno sforzo assente fa funzionare il livello predefinito del modello. `none` insieme a `set` non è valido.
 
-Le richieste destinate a modelli noti come incompatibili vengono rifiutate prima della chiamata upstream. Per le destinazioni
-combo, le voci incompatibili vengono rimosse; se non ne rimane alcuna, la richiesta restituisce lo stato `400`.
-I dati sulle funzionalità sconosciuti generano un avviso e lasciano attiva la regola.
+Le richieste destinate a modelli notoriamente incompatibili vengono rifiutate prima della chiamata upstream. Per le destinazioni combinate, le voci incompatibili vengono rimosse; se non ne rimane nessuno, la richiesta restituisce lo stato `400`. I dati sulla capacità sconosciuta producono un avviso e lasciano la regola attiva.
 
 ## Sicurezza e trasporti
 

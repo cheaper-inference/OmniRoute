@@ -30,22 +30,20 @@ Oraliq:          1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## U nimalarni siqadi
 
-Ichki katalog hozirda quyidagi toifalar bo‘yicha 49 ta filtrni o‘z ichiga oladi:
+Oʻrnatilgan katalog hozirgi holatda quyidagi kategoriyalar boʻylab 56 ta filtrni oʻz ichiga oladi:
 
-| Toifa     | Misollar                                                            |
-| --------- | ------------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                   |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go testlari, Cargo testlari       |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx       |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler       |
-| `shell`   | `ls`, `find`, `grep`, umumiy shell jurnallari                       |
-| `docker`  | `docker ps`, Docker jurnallari                                      |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                             |
-| `generic` | JSON chiqishi, stack trace’lar, umumiy chiqish uchun zaxira variant |
+| Kategoriya | Misollar                                                      |
+| ---------- | ------------------------------------------------------------- |
+| `git`      | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testlari |
+| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`    | `ls`, `find`, `grep`, umumiy shell jurnallari                 |
+| `docker`   | `docker ps`, Docker jurnallari                                |
+| `infra`    | Terraform, OpenTofu, `systemctl status`                       |
+| `generic`  | JSON chiqishi, stack trace'lar, umumiy chiqish zaxira rejimi  |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` ichidagi detektor filtr tanlashdan
-oldin chiqishni tasniflaydi. Buyruq klassi yetarli bo‘lmaganda, filtrlar buyruq namunasi yoki chiqish regex’i
-bo‘yicha ham mos kelishi mumkin.
+`open-sse/services/compression/engines/rtk/commandDetector.ts` faylidagi detektor filtr tanlashdan oldin chiqishni tasniflaydi. Buyruq klassi yetarli boʻlmagan hollarda filtrlar buyruq naqshi yoki chiqish regex'i boʻyicha ham mos kelishi mumkin.
 
 ## Filtrlarni aniqlash
 
@@ -364,19 +362,19 @@ node --import tsx/esm --test \
 
 ## Intensivlik darajalari (v3.8.16+)
 
-RTK **siqish agressivligi** va **xavfsizlik** o‘rtasida muvozanat yaratadigan **3 ta intensivlik darajasini** qo‘llab-quvvatlaydi. Daraja dvigatel konfiguratsiyasidagi `config.intensity` orqali o‘rnatiladi.
+RTK **siqish agressivligi** va **xavfsizlik** oʻrtasida tanlov imkonini beruvchi **3 ta intensivlik darajasini** qoʻllab-quvvatlaydi. Daraja dvigatel konfiguratsiyasidagi `config.intensity` orqali oʻrnatiladi.
 
 ### 3 ta daraja
 
-| Daraja                | Qisqartirish chegarasi    | Token tejalishi | Xavf      | Eng mos holat                            |
-| --------------------- | ------------------------- | --------------- | --------- | ---------------------------------------- |
-| `minimal`             | Har bir bo‘limda 24 qator | ~20-40%         | Juda past | Muhim kontekstli ishlab chiqarish muhiti |
-| `standard` (standart) | Har bir bo‘limda 24 qator | ~50-70%         | Past      | Kundalik kod yozish seanslari            |
-| `aggressive`          | Har bir bo‘limda 16 qator | ~70-90%         | O‘rtacha  | Uzoq seanslar, maksimal tejash           |
+| Daraja                | Qirqish chegarasi             | Token tejash | Xavf      | Eng yaxshi mos                   |
+| --------------------- | ----------------------------- | ------------ | --------- | -------------------------------- |
+| `minimal`             | har bir boʻlim uchun 24 qator | ~20-40%      | Juda past | Muhim kontekstli prodakshn       |
+| `standard` (standart) | har bir boʻlim uchun 24 qator | ~50-70%      | Past      | Kundalik dasturlash sessiyalari  |
+| `aggressive`          | har bir boʻlim uchun 16 qator | ~70-90%      | Oʻrta     | Uzoq sessiyalar, maksimal tejash |
 
-### Qisqartirish qayerda amalga oshiriladi
+### Qirqish qayerda sodir boʻladi
 
-Qisqartirish chegarasi `lineFilter.ts` fayliga ta’sir qiladi:
+Qirqish chegarasi `lineFilter.ts` fayliga taʼsir qiladi:
 
 ```ts
 // open-sse/services/compression/engines/rtk/index.ts:329-330 dan
@@ -384,39 +382,40 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Har bir bo‘limning **boshi** ham, **oxiri** ham saqlanadi; qisqartirish ishga tushganda o‘rtadagi kontent olib tashlanadi.
+Har bir boʻlimning **boshi** ham, **oxiri** ham saqlanadi; qirqish ishga tushganda oʻrta kontent tushirib qoldiriladi.
 
-### Nimalar saqlanadi va nimalar qisqartiriladi
+### Nima qoladi va nima qirqiladi
 
-| Kontent                             | minimal         | standard           | aggressive         |
-| ----------------------------------- | --------------- | ------------------ | ------------------ |
-| Xatolar / stek treyslari            | ✅ saqlanadi    | ✅ saqlanadi       | ✅ saqlanadi       |
-| Muvaffaqiyatsiz sinovlar            | ✅ saqlanadi    | ✅ saqlanadi       | ✅ saqlanadi       |
-| Yig‘ish xatolari                    | ✅ saqlanadi    | ✅ saqlanadi       | ✅ saqlanadi       |
-| Muvaffaqiyatli sinovlar (batafsil)  | ✅ saqlanadi    | 🟡 ixchamlanadi    | 🟡 ixchamlanadi    |
-| Odatiy chiqish (axborot jurnallari) | 🟡 ixchamlanadi | 🟡 ixchamlanadi    | ❌ olib tashlanadi |
-| Jarayon ko‘rsatkichlari             | 🟡 ixchamlanadi | ❌ olib tashlanadi | ❌ olib tashlanadi |
-| Banner / ASCII tasviri              | 🟡 ixchamlanadi | ❌ olib tashlanadi | ❌ olib tashlanadi |
+| Kontent                           | minimal      | standard       | aggressive     |
+| --------------------------------- | ------------ | -------------- | -------------- |
+| Xatolar / stack trace'lar         | ✅ saqlanadi | ✅ saqlanadi   | ✅ saqlanadi   |
+| Test muvaffaqiyatsizliklari       | ✅ saqlanadi | ✅ saqlanadi   | ✅ saqlanadi   |
+| Build xatolari                    | ✅ saqlanadi | ✅ saqlanadi   | ✅ saqlanadi   |
+| Muvaffaqiyatli testlar (batafsil) | ✅ saqlanadi | 🟡 jamlanadi   | 🟡 jamlanadi   |
+| Oddiy chiqish (info loglari)      | 🟡 jamlanadi | 🟡 jamlanadi   | ❌ tushiriladi |
+| Progress barlar                   | 🟡 jamlanadi | ❌ tushiriladi | ❌ tushiriladi |
+| Banner / ASCII art                | 🟡 jamlanadi | ❌ tushiriladi | ❌ tushiriladi |
 
-### To‘g‘ri intensivlikni tanlash
+### Toʻgʻri intensivlikni tanlash
 
 ```
-                  Kontekstni yo‘qotish halokatlimi?
-                  │
+              Kontekst yoʻqolishi falokatlimi?
+                            │
       ┌───────────┼───────────┐
       │           │           │
-     HA          YO‘Q      ISHONCHSIZ
+     HA         YOʻQ      ISHONCH YOʻQ
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      O‘tkazuvchanlik  Avval `standard`ni sinang
-      │      qanchalik muhim? (holatlarning 80% ida
-      │           │          ishlaydi)
+      │      Oʻtkazuvchanlik  Avval `standard`ni
+      │      qanchalik        sinab koʻring
+      │      muhim?           (holatlarning 80%ida
+      │           │           ishlaydi)
       │      ┌────┴────┐
       │      │         │
-      │    PAST      YUQORI
+      │     PAST      YUQORI
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -426,7 +425,7 @@ Har bir bo‘limning **boshi** ham, **oxiri** ham saqlanadi; qisqartirish ishga 
 
 ### Intensivlikni sozlash
 
-**Har bir combo uchun** (combo konfiguratsiyasida):
+**Har bir kombo uchun** (kombo konfiguratsiyasida):
 
 ```json
 {
@@ -439,11 +438,11 @@ Har bir bo‘limning **boshi** ham, **oxiri** ham saqlanadi; qisqartirish ishga 
 }
 ```
 
-**Dasturiy tarzda**:
+**Dasturiy ravishda**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) — bu
-`CompressionEngine` bo‘lib, unda `updateConfig` metodi yo‘q. Dvigatel konfiguratsiyasini
-buning o‘rniga reyestr yordamchisi orqali yangilang:
+`CompressionEngine` boʻlib, unda `updateConfig` metodi mavjud emas. Buning oʻrniga
+dvigatel konfiguratsiyasini registry yordamchi funksiyasi orqali yangilang:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -451,16 +450,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Ta’sirni tekshirish
+### Effektni tekshirish
 
-Filtringiz tanlangan intensivlikda xavfsiz ekanini tasdiqlash uchun **Tekshiruv darvozasi**dan (quyiga qarang) foydalaning:
+Tanlangan intensivlik darajasida filtringiz xavfsizligini tasdiqlash uchun **Verify Gate**dan (quyiga qarang) foydalaning:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtrlar agressiv intensivlikda muvaffaqiyatsiz yakunlandi");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

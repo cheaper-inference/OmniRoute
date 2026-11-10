@@ -4,64 +4,58 @@
 
 ---
 
-> سرور Model Context Protocol با 110 ابزار برای عملیات مسیریابی، کش، فشردهسازی، حافظه، مهارتها، پروکسی، استخر، Radar و منابع زمینه.
+> سرور پروتکل متن مدل با 110 ابزار در مسیریابی، حافظه پنهان، فشرده سازی، حافظه، مهارت ها، پروکسی، استخر، رادار و عملیات منبع زمینه.
 >
-> منبع حقیقت: فایل `open-sse/mcp-server/server.ts` با استفاده از `countUniqueMcpTools()` تعداد **110 ابزار منحصربهفرد** را محاسبه میکند: 45 تعریف متعارف (شامل شش ابزار چرخهٔ حیات CCR، سهگانهٔ agent-skills، ابزار `omniroute_radar_catalog` و ابزار `omniroute_x_search`)، بهعلاوهٔ حافظه (3)، مهارتها (4)، مهارتهای GitHub (3)، استخر (6)، بازیوارسازی (8)، افزونهها (8)، Notion (6)، Obsidian (22)، پیکرهٔ محلی (3) و دو ابزار فشردهسازی مختص RTK.
+> Source of truth: `open-sse/mcp-server/server.ts` computes **110 unique tools** with `countUniqueMcpTools()`: 45 canonical definitions (including the six CCR lifecycle tools, the agent-skills trio, `omniroute_radar_catalog`, and `omniroute_x_search`), plus memory (3), skills (4), GitHub skills (3), pool (6), gamification (8), plugins (8), Notion (6), Obsidian (22), local corpus (3), and two RTK-only compression tools.
 
-## نصب
+## نصب و راه اندازی
 
-OmniRoute MCP بهصورت داخلی ارائه شده است. آن را با دستور زیر راهاندازی کنید:
+OmniRoute MCP تعبیه شده است. شروعش کنید با:
 
 ```bash
 omniroute --mcp
 ```
 
-یا از طریق انتقال open-sse:
+یا از طریق حمل و نقل open-sse:
 
 ```bash
-# انتقال HTTP قابلاستریم (درگاه 20130)
-omniroute --dev  # MCP بهطور خودکار روی نقطهٔ پایانی /mcp راهاندازی میشود
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-انتقالهای HTTP (`sse` / `streamable-http` که درون همان فرایند توسط سرور داشبورد ارائه میشوند)
-بهطور پیشفرض غیرفعالاند و پیشتر فقط از صفحهٔ `/dashboard/mcp` قابل تغییر بودند. از v3.8.51
-به بعد، CLI نیز قابلیتهای یکسانی دارد:
+انتقالهای HTTP (`sse` / `streamable-http`، در حین پردازش توسط سرور داشبورد ارائه میشود) بهطور پیشفرض خاموش هستند و قبلاً فقط از صفحه `/dashboard/mcp` قابل تغییر بودند. از نسخه 3.8.51، CLI برابری دارد:
 
 ```bash
-omniroute mcp status                                  # وضعیت فعال/آنلاین، انتقال و تعداد ابزارها
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # نشستهای فعال sse/streamable-http را بازنشانی میکند
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` همان تنظیم `mcpEnabled` (و در صورت نیاز `mcpTransport`) را که
-داشبورد از طریق `/api/settings` تغییر میدهد، با PATCH بهروزرسانی میکنند. `mcp restart`،
-`POST /api/mcp/restart` را فراخوانی میکند: این عملیات نشستهای فعال `sse`/`streamable-http`
-را خاتمه میدهد تا درخواست بعدی بهصورت تمیز مقداردهی اولیه شود؛ اگر MCP غیرفعال باشد `409`
-و برای انتقال `stdio` مقدار `501` را بازمیگرداند (کلاینتهای stdio مالک زیرفرایند خود هستند —
-هیچ دستگیرهٔ درونفرایندی برای راهاندازی مجدد وجود ندارد).
+`mcp enable`/`mcp disable` PATCH همان `mcpEnabled` (و در صورت اختیاری `mcpTransport`) تنظیم داشبورد از طریق `/api/settings` ضامن میشود. `mcp restart` `POST /api/mcp/restart` را فراخوانی میکند: جلسات `sse`/`streamable-http` فعال را از بین میبرد، بنابراین درخواست بعدی بهطور تمیز مجدداً شروع میشود، اگر MCP غیرفعال باشد `409` برمیگرداند، و `501` برای حمل و نقل `stdio` برمیگرداند (کلاینتهای stdio زیرفرایند خود را دارند — هیچ دسته درونفرایندی برای راهاندازی مجدد وجود ندارد).
 
-## انتقالها
+## حمل و نقل
 
-سرور MCP سه انتقال را ارائه میدهد که همگی از کارخانهٔ یکسان `createMcpServer()` استفاده میکنند:
+سرور MCP سه انتقال را نشان می دهد که همگی توسط یک کارخانه `createMcpServer()` پشتیبانی می شوند:
 
-| انتقال            | محل                                             | زمان استفاده                                         |
-| :---------------- | :---------------------------------------------- | :--------------------------------------------------- |
-| `stdio`           | `open-sse/mcp-server/server.ts`                 | یکپارچهسازی با IDEها (Claude Desktop، Cursor و غیره) |
-| `sse`             | `POST/GET /api/mcp/sse` از طریق `httpTransport` | کلاینتهای مرورگر/عامل که به جریان رویداد نیاز دارند  |
-| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`               | کلاینتهای HTTP چندنشستی (هدر `mcp-session-id`)       |
+| حمل و نقل         | کجا                                             | زمان استفاده                                           |
+| :---------------- | :---------------------------------------------- | :----------------------------------------------------- |
+| `stdio`           | `open-sse/mcp-server/server.ts`                 | ادغام IDE (Claude دسکتاپ، Cursor، و غیره)              |
+| `sse`             | `POST/GET /api/mcp/sse` از طریق `httpTransport` | مشتریان Browser/agent که به یک جریان رویداد نیاز دارند |
+| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`               | مشتریان HTTP چند جلسه ای (سرصفحه `mcp-session-id` )    |
 
-انتقال HTTP فعال (`sse` یا `streamable-http`) توسط تنظیم `mcpTransport` انتخاب میشود. تغییر انتقال باعث بستهشدن نشستهای موجود در انتقال دیگر میشود.
+انتقال فعال HTTP (`sse` یا `streamable-http`) با تنظیم `mcpTransport` انتخاب می شود. تعویض حمل و نقل، جلسات موجود در حمل و نقل دیگر را می بندد.
 
-### دسترسی راه دور (دور زدن محدودیت با حوزهٔ manage)
+### دسترسی از راه دور (مدیریت دور زدن دامنه)
 
-`/api/mcp/*` در سطح LOCAL_ONLY قرار دارد (`src/server/authz/routeGuard.ts`) — بهطور پیشفرض فقط میزبانهای loopback (`localhost`، `127.0.0.1`، `::1`) میتوانند به آن دسترسی پیدا کنند. از v3.8.2 به بعد، کلاینتهای غیر-loopback در صورتی میتوانند متصل شوند که یک `Authorization: Bearer <api-key>` ارائه دهند و کلید آنها دارای حوزهٔ `manage` باشد. این تنها روش دسترسی به سرور MCP راه دور از طریق تونل، پروکسی معکوس یا نام میزبان عمومی است.
+`/api/mcp/*` به صورت پیشفرض در ردیف LOCAL_ONLY (`src/server/authz/routeGuard.ts`) — است، فقط میزبانهای حلقه بک (`localhost`، `127.0.0.1`، `::1`) میتوانند به آن دسترسی پیدا کنند. از نسخه 3.8.2، کلاینتهای غیرحلقهای در صورت ارائه `Authorization: Bearer <api-key>` که کلید آن محدوده `manage` را دارد، ممکن است متصل شوند. این تنها راه برای دسترسی به سرور MCP راه دور از طریق یک تونل، پروکسی معکوس یا نام میزبان عمومی است.
 
 ```bash
-# اعطای حوزهٔ manage: صفحهٔ API Keys داشبورد را باز کرده و گزینهٔ
-# "Management Access" را برای کلید فعال کنید، یا هنگام ایجاد، scopes:["manage"] را با POST ارسال کنید.
+# Grant manage scope: open the dashboard API Keys page and toggle
+# "Management Access" on the key, or POST scopes:["manage"] when creating.
 
-# سپس از یک کلاینت MCP راه دور متصل شوید:
+# Then connect from a remote MCP client:
 curl -i \
   -H "Host: your-public-host.example" \
   -H "Authorization: Bearer sk-…" \
@@ -71,324 +65,279 @@ curl -i \
   https://your-public-host.example/api/mcp/stream
 ```
 
-یک کلید فاقد حوزهٔ manage (یا نبود Bearer) پاسخ `403 LOCAL_ONLY` را بازمیگرداند. پیشوند همسطح `/api/cli-tools/runtime/*` عمداً قابل دور زدن نیست — به بخش [سطوح محافظ مسیر — استثنای حوزهٔ manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) مراجعه کنید.
+یک کلید غیر مدیریت (یا بدون حامل) `403 LOCAL_ONLY` را برمیگرداند. پیشوند خواهر و برادر `/api/cli-tools/runtime/*` عمدا NOT قابل دور زدن — است [. Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
-### اعتبارسنجی Origin
+### اعتبارسنجی مبدا
 
-پس از احراز هویت، سرآیند `Origin` در هر درخواست به `/api/mcp/*` — ترابری‌ها و مسیرهای مدیریتی مانند `status`, `tools`, `audit`, `restart` — اعتبارسنجی می‌شود، فارغ از اینکه فراخوان کیست (کلید API، توکن CLI، نشست داشبورد یا loopback ناشناس با ورود غیرفعال). این همان محافظت در برابر DNS rebinding است که مشخصات MCP Streamable HTTP الزام می‌کند.
+پس از احراز هویت، هر درخواستی برای `/api/mcp/*` — حمل و نقل و مسیرهای مدیریتی مانند `status`، `tools`، `audit` و `restart` — ، هدر `Origin` خود را تأیید میکند، صرف نظر از تماسگیرنده (کلید API ، رمز CLI ، جلسه داشبورد، یا حلقه بک ناشناس با غیرفعال شدن ورود). این حفاظتی است که با DNS rebinding مشخصات MCP Streamable HTTP به آن نیاز دارد.
 
-- **بدون سرآیند `Origin`** ← مجاز. CLI ـِ OmniRoute، SDK و کلاینت‌های IDE آن را ارسال نمی‌کنند.
-- **`Origin` مجاز** ← `localhost` / `127.0.0.1` / `[::1]` روی هر پورت، یا origin عمومی خود OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`، origin ارسال‌شده توسط یک پراکسی معکوس مورد اعتماد (`OMNIROUTE_TRUST_PROXY`، فقط وقتی base URL تنظیم نشده باشد)، یا میزبان IP از نوع loopback/LAN که مستقیم به آن دسترسی می‌شود. سرآیند `Host` به‌تنهایی هرگز یک origin را مورد اعتماد نمی‌کند.
-- **هر `Origin` دیگر، از جمله `null`** ← `403` با بدنهٔ خطای JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. نشست داشبوردی که توکن CSRF معتبر ارائه کند، مانند سایر نوشتن‌های داشبورد، همچنان پذیرفته می‌شود.
+- **بدون سربرگ `Origin`** → مجاز است. مشتریان OmniRoute CLI، SDK و IDE یکی را ارسال نمی کنند.
+- **مجاز `Origin`** → `localhost`، `127.0.0.1` یا `[::1]` در هر پورت، یا مبدا عمومی خود OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`، مبدا ارسالشده یک پروکسی معکوس مطمئن (`OMNIROUTE_TRUST_PROXY`، فقط زمانی که URL پایه تنظیم نشده باشد)، یا یک میزبان loopback/LAN IP مستقیم. هدر `Host` به تنهایی هرگز منبعی را قابل اعتماد نمی کند.
+- **هر `Origin` دیگری از جمله `null`** → `403` با بدنه خطای JSON-RPC: `id: null`، `error.code: -32000`، `error.data.code: "INVALID_ORIGIN"`. جلسه داشبورد که یک توکن CSRF معتبر ارائه میکند همچنان پذیرفته میشود، مانند سایر نوشتههای داشبورد.
 
-کلاینت MCP مرورگری که پشت پراکسی معکوس سرو می‌شود به `OMNIROUTE_PUBLIC_BASE_URL` نیاز دارد؛ فهرست مجاز برای originهای دیگر وجود ندارد. درخواست پیش‌پرواز CORS (`OPTIONS`) از نظر Origin بررسی نمی‌شود؛ درخواست بعدی بررسی می‌شود.
+یک سرویس گیرنده مرورگر MCP که پشت پراکسی معکوس ارائه می شود به `OMNIROUTE_PUBLIC_BASE_URL` نیاز دارد. هیچ لیست مجاز برای مبداهای دیگر وجود ندارد. CORS preflight (`OPTIONS`) با منبع بررسی نشده است. درخواستی که در ادامه می آید این است.
 
 ## پیکربندی IDE
 
-برای راهاندازی Claude Desktop،‏ Cursor،‏ Cline و کلاینتهای سازگار با MCP، به [پیکربندی کلاینت MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) مراجعه کنید.
+[MCP Client Configuration را](../guides/SETUP_GUIDE.md#mcp-client-configuration) برای Claude Desktop، Cursor، Cline و راه اندازی سرویس گیرنده MCP سازگار ببینید.
 
 ---
 
-## ابزارهای ضروری (14) — فاز 1
+## ابزار ضروری (14) — فاز 1
 
-| ابزار                           | حوزههای دسترسی        | توضیحات                                                                                                                           |
-| :------------------------------ | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_get_health`          | `read:health`         | زمان فعالیت، حافظه، قطعکنندههای مدار، محدودیتهای نرخ، آمار کش                                                                     |
-| `omniroute_list_combos`         | `read:combos`         | همه ترکیبهای پیکربندیشده بههمراه راهبردها (معیارهای اختیاری)                                                                      |
-| `omniroute_get_combo_metrics`   | `read:combos`         | معیارهای عملکرد برای یک ترکیب مشخص                                                                                                |
-| `omniroute_switch_combo`        | `write:combos`        | فعال یا غیرفعالکردن یک ترکیب                                                                                                      |
-| `omniroute_create_combo`        | `write:combos`        | ایجاد یک ترکیب اعتبارسنجیشده از طریق API موجود ترکیبها                                                                            |
-| `omniroute_check_quota`         | `read:quota`          | سهمیه مصرفشده/کل، درصد باقیمانده، زمان بازنشانی، سلامت توکن                                                                       |
-| `omniroute_route_request`       | `execute:completions` | ارسال یک تکمیل گفتوگو از طریق مسیریابی OmniRoute                                                                                  |
-| `omniroute_cost_report`         | `read:usage`          | گزارش هزینه بر اساس دوره (نشست/روز/هفته/ماه)                                                                                      |
-| `omniroute_list_models_catalog` | `read:models`         | فهرست کامل مدلها بههمراه قابلیتها، وضعیت و قیمتگذاری                                                                              |
-| `omniroute_radar_catalog`       | `read:radar`          | فهرست محلی و امضاشده Radar؛ فیلترهای اختیاری ارائهدهنده/خانواده                                                                   |
-| `omniroute_tool_search`         | `read:tools`          | یافتن ابزارها از فهرست ثبتشده MCP                                                                                                 |
-| `omniroute_web_search`          | `execute:search`      | جستوجوی وب از طریق ارائهدهندگان جستوجوی پیکربندیشده. شامل X/Twitter نمیشود.                                                       |
-| `omniroute_x_search`            | `execute:search`      | جستوجوی X از طریق xAI/SuperGrok، یا انتخاب `xquik-search` برای نتایج API سرویس Xquik. به اعتبارنامههای بکاند انتخابشده نیاز دارد. |
-| `omniroute_web_fetch`           | `execute:search`      | واکشی محتوای وب از طریق ارائهدهندگان واکشی پیکربندیشده                                                                            |
+| ابزار                           | محدوده ها             | توضیحات                                                                                                                                 |
+| :------------------------------ | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_get_health`          | `read:health`         | Uptime، حافظه، قطع کننده های مدار، محدودیت های نرخ، آمار حافظه نهان                                                                     |
+| `omniroute_list_combos`         | `read:combos`         | همه ترکیبهای ترکیبی پیکربندی شده با استراتژی (متریکهای اختیاری)                                                                         |
+| `omniroute_get_combo_metrics`   | `read:combos`         | معیارهای عملکرد برای یک ترکیب خاص                                                                                                       |
+| `omniroute_switch_combo`        | `write:combos`        | یک ترکیبی را فعال یا غیرفعال کنید                                                                                                       |
+| `omniroute_create_combo`        | `write:combos`        | یک کمبو تایید شده از طریق ترکیب موجود API ایجاد کنید                                                                                    |
+| `omniroute_check_quota`         | `read:quota`          | سهمیه used/total، درصد باقیمانده، زمان بازنشانی، سلامت نشانه                                                                            |
+| `omniroute_route_request`       | `execute:completions` | تکمیل چت را از طریق مسیریابی OmniRoute ارسال کنید                                                                                       |
+| `omniroute_cost_report`         | `read:usage`          | گزارش هزینه بر اساس دوره (session/day/week/month)                                                                                       |
+| `omniroute_list_models_catalog` | `read:models`         | کاتالوگ مدل کامل با قابلیت ها، وضعیت، قیمت                                                                                              |
+| `omniroute_radar_catalog`       | `read:radar`          | کاتالوگ رادار امضا شده محلی؛ فیلترهای اختیاری provider/family                                                                           |
+| `omniroute_tool_search`         | `read:tools`          | ابزارها را از کاتالوگ ثبت شده MCP کشف کنید                                                                                              |
+| `omniroute_web_search`          | `execute:search`      | جستجوی وب از طریق ارائه دهندگان جستجوی پیکربندی شده. نه X/Twitter.                                                                      |
+| `omniroute_x_search`            | `execute:search`      | X را از طریق xAI/SuperGrok جستجو کنید یا `xquik-search` را برای نتایج Xquik API انتخاب کنید. برای باطن انتخابی به اعتبارنامه نیاز دارد. |
+| `omniroute_web_fetch`           | `execute:search`      | محتوای وب را از طریق ارائه دهندگان واکشی پیکربندی شده واکشی کنید                                                                        |
 
 ## ابزارهای پیشرفته (11) — فاز 2
 
-| ابزار                              | محدودههای دسترسی                     | توضیحات                                                                                                   |
-| :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------------------------------------------------- |
-| `omniroute_simulate_route`         | `read:health`, `read:combos`         | شبیهسازی مسیریابی بهصورت اجرای آزمایشی همراه با درخت مسیرهای جایگزین                                      |
-| `omniroute_set_budget_guard`       | `write:budget`                       | بودجهٔ نشست با اقدام کاهش کیفیت/مسدودسازی/هشدار                                                           |
-| `omniroute_set_routing_strategy`   | `write:combos`                       | بهروزرسانی راهبرد ترکیبی در زمان اجرا (اولویتدار/وزندار/خودکار/غیره)                                      |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | اعمال پیشتنظیم تابآوری `aggressive` / `balanced` / `conservative`                                         |
-| `omniroute_test_combo`             | `execute:completions`, `read:combos` | آزمون زندهٔ همهٔ ارائهدهندگان در یک ترکیب با استفاده از فراخوانی واقعی بالادستی                           |
-| `omniroute_get_provider_metrics`   | `read:health`                        | معیارهای هر ارائهدهنده شامل تأخیر p50/p95/p99 و وضعیت قطعکنندهٔ مدار                                      |
-| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | پیشنهاد ترکیب بر اساس نوع وظیفه، با محدودیتهای بودجه/تأخیر                                                |
-| `omniroute_explain_route`          | `read:health`, `read:usage`          | توضیح علت مسیریابی یک درخواست به ارائهدهنده (عوامل امتیازدهی + مسیرهای جایگزین)                           |
-| `omniroute_get_session_snapshot`   | `read:usage`                         | تصویر لحظهای کامل نشست: هزینه، توکنها، مدلها/ارائهدهندگان برتر، خطاها و محافظ بودجه                       |
-| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | تشخیص ناهماهنگی پایگاه داده، مانند ارجاعات ترکیبی خراب/ردیفهای یتیم (و در صورت انتخاب، تعمیر خودکار آنها) |
-| `omniroute_sync_pricing`           | `pricing:write`                      | همگامسازی دادههای قیمتگذاری از منابع خارجی (LiteLLM)؛ پشتیبانی از `dryRun`                                |
+| ابزار                              | محدوده ها                            | توضیحات                                                                                               |
+| :--------------------------------- | :----------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `omniroute_simulate_route`         | `read:health`, `read:combos`         | شبیهسازی مسیریابی خشک با درخت بازگشتی                                                                 |
+| `omniroute_set_budget_guard`       | `write:budget`                       | بودجه جلسه با عمل degrade/block/alert                                                                 |
+| `omniroute_set_routing_strategy`   | `write:combos`                       | به روز رسانی استراتژی ترکیبی در زمان اجرا (priority/weighted/auto/etc.)                               |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | از پیش تنظیم انعطاف پذیری `aggressive` / `balanced` / `conservative` استفاده کنید                     |
+| `omniroute_test_combo`             | `execute:completions`, `read:combos` | تست زنده هر ارائه دهنده در یک ترکیب ترکیبی با استفاده از یک تماس بالادستی واقعی                       |
+| `omniroute_get_provider_metrics`   | `read:health`                        | معیارهای هر ارائه دهنده با تاخیر p50/p95/p99 و وضعیت قطع کننده مدار                                   |
+| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | ترکیبی را بر اساس نوع کار با محدودیتهای budget/latency توصیه کنید                                     |
+| `omniroute_explain_route`          | `read:health`, `read:usage`          | توضیح دهید که چرا یک درخواست به یک ارائهدهنده ارسال شده است (عوامل امتیازدهی مجدد + )                 |
+| `omniroute_get_session_snapshot`   | `read:usage`                         | عکس فوری جلسه کامل: هزینه، توکن ها، models/providers برتر، خطاها، محافظ بودجه                         |
+| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | تشخیص (و به صورت اختیاری تعمیر خودکار) جابجایی پایگاه داده مانند ref های ترکیبی شکسته / ردیف های یتیم |
+| `omniroute_sync_pricing`           | `pricing:write`                      | همگام سازی داده های قیمت گذاری از منابع خارجی (LiteLLM)؛ `dryRun` پشتیبانی می کند                     |
 
-## ابزارهای حافظهٔ نهان (2)
+## ابزارهای کش (2)
 
-| ابزار                   | محدودههای دسترسی | توضیحات                                               |
-| :---------------------- | :--------------- | :---------------------------------------------------- |
-| `omniroute_cache_stats` | `read:cache`     | آمار حافظهٔ نهان معنایی، حافظهٔ نهان پرامپت و همتوانی |
-| `omniroute_cache_flush` | `write:cache`    | پاکسازی سراسری حافظهٔ نهان یا بر اساس امضا/مدل        |
+| ابزار                   | محدوده ها     | توضیحات                                                       |
+| :---------------------- | :------------ | :------------------------------------------------------------ |
+| `omniroute_cache_stats` | `read:cache`  | کش معنایی، حافظه پنهان سریع، و آمار ناتوانی                   |
+| `omniroute_cache_flush` | `write:cache` | حافظه نهان را در سطح جهانی یا توسط signature/model شستشو دهید |
 
-## ابزارهای فشردهسازی (13)
+## ابزار فشرده سازی (13)
 
-| ابزار                               | محدودههای دسترسی    | توضیحات                                                                                                               |
-| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | تنظیمات فشردهسازی، خلاصهٔ تحلیلها و آمار آگاه از حافظهٔ نهان (شامل فرادادهٔ `analytics.mcpDescriptionCompression`)    |
-| `omniroute_compression_configure`   | `write:compression` | پیکربندی حالت فشردهسازی، آستانه، نسبت هدف، حفظ پرامپت سیستمی و کلید تغییر وضعیت فشردهسازی توضیحات MCP                 |
-| `omniroute_set_compression_engine`  | `write:compression` | انتخاب موتور فعال (off/caveman/rtk/stacked) و شدت Caveman/RTK                                                         |
-| `omniroute_list_compression_combos` | `read:compression`  | فهرستکردن ترکیبهای نامگذاریشدهٔ فشردهسازی و خط لولهٔ موتورهای آنها                                                    |
-| `omniroute_compression_combo_stats` | `read:compression`  | تحلیلهای گروهبندیشده بر اساس ترکیب فشردهسازی و موتور                                                                  |
-| `omniroute_ccr_store`               | `write:compression` | ذخیرهٔ محتوای تفکیکشده بر اساس فراخواننده در مخزن درونحافظهای محدود CCR و بازگرداندن یک نشانگر بههمراه ارجاع `ccr://` |
-| `omniroute_ccr_retrieve`            | `read:compression`  | بازیابی کامل محتوای CCR یا بازیابی با حالتهای ابتدا، انتها، خطوط، grep و آمار                                         |
-| `omniroute_ccr_inspect`             | `read:compression`  | بررسی فرادادهٔ CCR متعلق به فراخواننده بدون بازگرداندن محتوا                                                          |
-| `omniroute_ccr_list`                | `read:compression`  | فهرستکردن صفحهبندیشدهٔ فرادادهٔ بلوکهای CCR متعلق به فراخواننده                                                       |
-| `omniroute_ccr_delete`              | `write:compression` | حذف یک بلوک CCR متعلق به فراخواننده                                                                                   |
-| `omniroute_ccr_stats`               | `read:compression`  | گزارش مصرف حافظه در محدودهٔ فراخواننده، شمارندههای چرخهٔ عمر و محدودیتهای مخزن                                        |
-| `omniroute_rtk_discover`            | `read:compression`  | کشف نویز تکرارشونده در نمونههای خروجی RTK با مشارکت اختیاری                                                           |
-| `omniroute_rtk_learn`               | `read:compression`  | ایجاد پیشنویس قابلبازبینی فیلتر RTK از نمونههای دارای مشارکت اختیاری                                                  |
+| ابزار                               | محدوده ها           | توضیحات                                                                                                                   |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_compression_status`      | `read:compression`  | تنظیمات فشرده سازی، خلاصه تجزیه و تحلیل، و آمار حافظه پنهان (شامل ابرداده `analytics.mcpDescriptionCompression` )         |
+| `omniroute_compression_configure`   | `write:compression` | پیکربندی حالت فشرده سازی، آستانه، نسبت هدف، حفظ اعلان سیستم، تغییر حالت فشرده سازی توضیحات MCP                            |
+| `omniroute_set_compression_engine`  | `write:compression` | موتور فعال (off/caveman/rtk/stacked) و شدت Caveman/RTK را انتخاب کنید                                                     |
+| `omniroute_list_compression_combos` | `read:compression`  | لیستی از ترکیبات فشرده سازی و خطوط لوله موتور آنها                                                                        |
+| `omniroute_compression_combo_stats` | `read:compression`  | تجزیه و تحلیل بر اساس ترکیب فشرده سازی و موتور گروه بندی شده است                                                          |
+| `omniroute_ccr_store`               | `write:compression` | محتوای جدا شده از تماس گیرنده را در فروشگاه CCR در حافظه محدود ذخیره کنید و یک نشانگر به همراه مرجع `ccr://` را برگردانید |
+| `omniroute_ccr_retrieve`            | `read:compression`  | محتوای CCR را به طور کامل یا با حالت های سر، دم، خطوط، grep و آمار بازیابی کنید                                           |
+| `omniroute_ccr_inspect`             | `read:compression`  | فراداده CCR متعلق به تماسگیرنده را بدون بازگرداندن محتوا بررسی کنید                                                       |
+| `omniroute_ccr_list`                | `read:compression`  | فراداده های صفحه بندی شده برای بلوک های CCR متعلق به تماس گیرنده را فهرست کنید                                            |
+| `omniroute_ccr_delete`              | `write:compression` | بلوک CCR متعلق به تماس گیرنده را حذف کنید                                                                                 |
+| `omniroute_ccr_stats`               | `read:compression`  | استفاده از حافظه با محدوده تماس گیرنده، شمارنده های چرخه عمر و محدودیت های ذخیره را گزارش دهید                            |
+| `omniroute_rtk_discover`            | `read:compression`  | نویز تکرارشونده را در نمونههای خروجی RTK انتخاب کنید                                                                      |
+| `omniroute_rtk_learn`               | `read:compression`  | یک پیش نویس فیلتر RTK قابل بررسی از نمونه های انتخابی ایجاد کنید                                                          |
 
-ورودیهای CCR فقط در حافظه نگهداری میشوند و پس از راهاندازی مجدد از بین میروند. هر بلوک به 2 MiB، هر
-هویت اصلی به 16 MiB و کل مخزن به 64 MiB محدود است. TTL پیشفرض ورودیها 24 ساعت است (حداکثر
-هفت روز). بازیابی کامل MCP به 256 KiB محدود است؛ بلوکهای بزرگتر همچنان از طریق حالتهای
-محدودهای و grep در دسترس میمانند. ذخیرهسازی، بازیابی، فهرستکردن، بررسی، حذف و آمار بر اساس
-هویت اصلی کلید API احراز هویتشده تفکیک میشوند. رکوردهای ممیزی فقط شامل هشها و فرادادهٔ اندازه هستند و هرگز محتوا را در بر نمیگیرند.
+ورودیهای CCR از یک ذخیرهسازی دو لایه استفاده میکنند: یک لایه حافظه داغ که در زمانهای اجرا غیر ابری محلی، توسط یک ردیف SQLite بادوام (`ccr_blocks`، به طور پیشفرض روشن) پشتیبانی میشود، بنابراین یک بلوک تا زمانی که TTL آن تمام شود — پایان برسد، به جز بلوکهای بیش از 512 KB و زمانهای اجرا ابری، که در حافظه باقی میمانند. هر بلوک به 2 MiB، هر اصل به 16 MiB و فروشگاه جهانی به 64 MiB محدود شده است. ورودی ها به طور پیش فرض به TTL 24 ساعته (حداکثر هفت روز) می باشد. بازیابی کامل MCP به 256 KiB محدود شده است. بلوک های بزرگتر از طریق حالت های محدوده و grep در دسترس باقی می مانند. ذخیرهسازی، بازیابی، فهرستبندی، بازرسی، حذف و آمار توسط اصل کلید API تأیید شده جدا میشود. سوابق حسابرسی حاوی هش ها و ابرداده های اندازه هستند و هرگز محتوا ندارند. جزئیات مربوط به اپراتور (دو نشانگر، پیش نیازهای مشتری، `codemode:false`، محدوده هر ابزار، صفحه بندی، و یک ماتریس تشخیصی) در [موتورهای فشرده سازی → پیش نیازها / راهنمای اپراتور](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) وجود دارد.
 
-`omniroute_compression_status` فشردهسازی توضیحات MCP را بهصورت جداگانه در
-`analytics.mcpDescriptionCompression` گزارش میکند. این مقادیر، برآوردهایی از اندازه فراداده برای توضیحات قابلفهرستشدن MCP
-(`tools`، `prompts`، `resources` و `resourceTemplates`) هستند؛ این مقادیر رسیدهای مصرف ارائهدهنده
-نیستند و با `source: "mcp_metadata_estimate"` علامتگذاری میشوند.
+`omniroute_compression_status` فشرده سازی توضیحات MCP را به طور جداگانه تحت `analytics.mcpDescriptionCompression` گزارش می کند. این مقادیر تخمینهای اندازه ابرداده برای توصیفهای فهرستشده MCP هستند (`tools`، `prompts`، `resources` و `resourceTemplates`). آنها رسید استفاده ارائه دهنده نیستند و با `source: "mcp_metadata_estimate"` مشخص شده اند.
 
-### فیلتر درخت دسترسپذیری MCP (v3.8.0)
+### فیلتر درخت دسترسی MCP (نسخه 3.8.0)
 
-جدا از ابزارهای فشردهسازی بالا، OmniRoute شامل یک فیلتر پس از اجرا است که
-**نتایج ابزار** مربوط به ابزارهای مرورگر/دسترسپذیری MCP را پیش از بازگرداندن آنها به
-عامل، فشرده میکند. این فیلتر خود یک ابزار نیست — بلکه بهصورت شفاف روی هر نتیجه ابزاری اجرا میشود که
-حاوی متن طولانی درخت دسترسپذیری یا تصویر لحظهای مرورگر باشد (≥2000 نویسه).
+جدا از ابزارهای فشرده سازی بالا، OmniRoute شامل یک فیلتر پس از اجرا است که فیلتر را فشرده می کند** نتایج ابزار** ابزارهای MCP browser/accessibility قبل از اینکه به عامل بازگردانده شوند. این فیلتر به خودی خود یک ابزار — نیست و بر روی هر نتیجه ابزاری که حاوی متن درخت دسترسی پرمخاطب یا عکس فوری مرورگر (≥ 2000 کاراکتر) باشد به صورت شفاف اجرا می شود.
 
 رفتارهای کلیدی:
 
-- ≥30 خط همسطح تکراری و متوالی را در قالب خلاصهای شامل ابتدا + انتها فشرده میکند
-- لنگرهای `[ref=eXX]` موردنیاز Playwright/computer-use را حفظ میکند
-- متنهای بیشازحد بزرگ (>50,000 نویسه) را با یک راهنمای پیمایش بهصورت قطعی کوتاه میکند
-- صرفهجویی موردانتظار: **60–80%** در دادههای تصویر لحظهای مرورگر
+- 30 خط ≥ و برادر تکراری متوالی را در خلاصه دم سر + جمع می کند
+- لنگرهای `[ref=eXX]` مورد نیاز Playwright/computer-use را حفظ می کند
+- متن بزرگ (> 50000 کاراکتر) را با یک اشاره پیمایش کوتاه می کند
+- پس انداز مورد انتظار:** 60-80٪** در بارهای اسنپ شات مرورگر
 
-پیکربندی: `compression.mcpAccessibility` در تنظیمات سراسری (مهاجرت 056).
-پیادهسازی: `open-sse/services/compression/engines/mcpAccessibility/`.
-مستندات کامل: [موتورهای فشردهسازی — فیلتر درخت دسترسپذیری MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+پیکربندی: `compression.mcpAccessibility` در تنظیمات جهانی (مهاجرت 056). پیاده سازی: `open-sse/services/compression/engines/mcpAccessibility/`. اسناد کامل: [موتورهای فشرده سازی — MCP فیلتر درخت دسترسی](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-برای آشنایی با مدل فشردهسازی زمان اجرا در پس این ابزارها، به [موتورهای فشردهسازی](../compression/COMPRESSION_ENGINES.md) و [فشردهسازی RTK](../compression/RTK_COMPRESSION.md)
-مراجعه کنید.
+برای مدل فشرده سازی زمان اجرا در پشت این ابزارها [، Compression Engines](../compression/COMPRESSION_ENGINES.md) و [RTK Compression](../compression/RTK_COMPRESSION.md) را ببینید.
 
-## ابزارهای 1Proxy (3)
+## 1 ابزار پروکسی (3)
 
-| ابزار                       | محدودهها       | توضیحات                                                                         |
-| :-------------------------- | :------------- | :------------------------------------------------------------------------------ |
-| `omniroute_oneproxy_fetch`  | `read:proxies` | دریافت پراکسیهای رایگان از بازار 1proxy (فیلترهای پروتکل/کشور/کیفیت/تعداد)      |
-| `omniroute_oneproxy_rotate` | `read:proxies` | دریافت پراکسی دردسترس بعدی بر اساس راهبرد (`random` / `quality` / `sequential`) |
-| `omniroute_oneproxy_stats`  | `read:proxies` | آمار مخزن، وضعیت همگامسازی و توزیع بر اساس پروتکل و کشور                        |
+| ابزار                       | محدوده ها      | توضیحات                                                                                  |
+| :-------------------------- | :------------- | :--------------------------------------------------------------------------------------- |
+| `omniroute_oneproxy_fetch`  | `read:proxies` | واکشی پراکسی های رایگان از 1proxy marketplace (فیلترهای protocol/country/quality/limit ) |
+| `omniroute_oneproxy_rotate` | `read:proxies` | پروکسی موجود بعدی را براساس استراتژی دریافت کنید (`random` / `quality` / `sequential`)   |
+| `omniroute_oneproxy_stats`  | `read:proxies` | آمار استخر، وضعیت همگام سازی، توزیع بر اساس پروتکل و کشور                                |
 
 ## ابزارهای حافظه (3)
 
-در `open-sse/mcp-server/tools/memoryTools.ts` تعریف شدهاند. احراز هویت/محدوده از طریق خط لوله استاندارد محدوده MCP اعمال میشود.
+در `open-sse/mcp-server/tools/memoryTools.ts` تعریف شده است. Auth/scope از طریق خط لوله استاندارد MCP scope اعمال می شود.
 
-| ابزار                     | محدودهها       | توضیحات                                                                            |
-| :------------------------ | :------------- | :--------------------------------------------------------------------------------- |
-| `omniroute_memory_search` | `read:memory`  | جستوجوی حافظهها بر اساس پرسوجو / نوع / کلید API با اعمال محدودیت بودجه توکن        |
-| `omniroute_memory_add`    | `write:memory` | افزودن یک ورودی حافظه جدید (`factual` / `episodic` / `procedural` / `semantic`)    |
-| `omniroute_memory_clear`  | `write:memory` | پاککردن حافظههای یک کلید API، با امکان فیلتر بر اساس نوع یا مُهر زمانی `olderThan` |
+| ابزار                     | محدوده ها      | توضیحات                                                                                                   |
+| :------------------------ | :------------- | :-------------------------------------------------------------------------------------------------------- |
+| `omniroute_memory_search` | `read:memory`  | جستجوی خاطرات بر اساس پرسش / نوع / کلید API با اجرای بودجه رمز                                            |
+| `omniroute_memory_add`    | `write:memory` | یک ورودی حافظه جدید اضافه کنید (`factual` / `episodic` / `procedural` / `semantic`)                       |
+| `omniroute_memory_clear`  | `write:memory` | حافظهها را برای یک کلید API پاک کنید، که به صورت اختیاری بر اساس نوع یا مهر زمانی `olderThan` فیلتر میشود |
 
-## ابزارهای مهارت (4)
+## ابزار مهارت (4)
 
-در `open-sse/mcp-server/tools/skillTools.ts` تعریف شدهاند. با پشتیبانی `src/lib/skills/registry` + `src/lib/skills/executor`.
+در `open-sse/mcp-server/tools/skillTools.ts` تعریف شده است. با پشتیبانی `src/lib/skills/registry` + `src/lib/skills/executor`.
 
-| ابزار                         | محدودهها         | توضیحات                                                                          |
-| :---------------------------- | :--------------- | :------------------------------------------------------------------------------- |
-| `omniroute_skills_list`       | `read:skills`    | فهرستکردن مهارتهای ثبتشده با امکان فیلتر بر اساس کلید API، نام یا وضعیت فعالبودن |
-| `omniroute_skills_enable`     | `write:skills`   | فعال یا غیرفعالکردن یک مهارت مشخص بر اساس ID                                     |
-| `omniroute_skills_execute`    | `execute:skills` | اجرای یک مهارت با ورودی ارائهشده و بازگرداندن رکورد اجرا                         |
-| `omniroute_skills_executions` | `read:skills`    | فهرستکردن تاریخچه اجرای اخیر مهارتها                                             |
+| ابزار                         | محدوده ها        | توضیحات                                                                               |
+| :---------------------------- | :--------------- | :------------------------------------------------------------------------------------ |
+| `omniroute_skills_list`       | `read:skills`    | مهارت های ثبت شده را با فیلتر اختیاری بر اساس کلید API ، نام یا وضعیت فعال فهرست کنید |
+| `omniroute_skills_enable`     | `write:skills`   | یک مهارت خاص را توسط ID فعال یا غیرفعال کنید                                          |
+| `omniroute_skills_execute`    | `execute:skills` | یک مهارت را با ورودی ارائه شده اجرا کنید و رکورد اجرا را برگردانید                    |
+| `omniroute_skills_executions` | `read:skills`    | تاریخچه اخیر اجرای مهارت را فهرست کنید                                                |
 
 ## منبع زمینه Notion (6)
 
-در `open-sse/mcp-server/tools/notionTools.ts` تعریف شدهاند. توکن از طریق `src/lib/db/notion.ts` در جدول `key_value` ذخیره میشود. کلاینت REST در `src/lib/notion/api.ts` قرار دارد. API تنظیمات در `src/app/api/settings/notion/route.ts` قرار دارد. رابط کاربری داشبورد در `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` قرار دارد.
+در `open-sse/mcp-server/tools/notionTools.ts` تعریف شده است. رمز ذخیره شده در جدول `key_value` از طریق `src/lib/db/notion.ts`. مشتری REST در `src/lib/notion/api.ts`. تنظیمات API در `src/app/api/settings/notion/route.ts`. داشبورد UI in `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx`.
 
-توکن یکپارچهسازی Notion خود را از زبانه **منابع زمینه** در داشبورد Endpoint یا از طریق REST API پیکربندی کنید:
+رمز ادغام Notion خود را از روی پیکربندی کنید** منابع زمینه** تب در داشبورد Endpoint یا از طریق REST API:
 
 ```bash
-# تنظیم توکن
+# Set token
 curl -X POST http://localhost:20128/api/settings/notion \
   -H "Content-Type: application/json" \
   -d '{"token": "ntn_..."}'
 
-# بررسی وضعیت
+# Check status
 curl http://localhost:20128/api/settings/notion
 
-# قطع اتصال
+# Disconnect
 curl -X DELETE http://localhost:20128/api/settings/notion
 ```
 
-| ابزار                        | محدودهها       | توضیحات                                                              |
-| :--------------------------- | :------------- | :------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | جستوجوی متن کامل در تمام صفحهها و پایگاههای داده                     |
-| `notion_get_page`            | `read:notion`  | دریافت یک صفحه بر اساس ID بههمراه ویژگیهای آن                        |
-| `notion_list_block_children` | `read:notion`  | فهرستکردن بلوکهای فرزند یک صفحه یا بلوک                              |
-| `notion_query_database`      | `read:notion`  | پرسوجوی یک پایگاه داده با فیلترها، مرتبسازیها و صفحهبندی             |
-| `notion_get_database`        | `read:notion`  | دریافت شِمای پایگاه داده بر اساس ID                                  |
-| `notion_append_blocks`       | `write:notion` | افزودن بلوکهای فرزند به یک بلوک والد (حداکثر 100 مورد در هر درخواست) |
+| ابزار                        | محدوده ها      | توضیحات                                                            |
+| :--------------------------- | :------------- | :----------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | جستجوی متن کامل در تمام صفحات و پایگاه های داده                    |
+| `notion_get_page`            | `read:notion`  | یک صفحه توسط ID با خواص آن دریافت کنید                             |
+| `notion_list_block_children` | `read:notion`  | بلوک های فرزند یک صفحه یا بلوک را فهرست کنید                       |
+| `notion_query_database`      | `read:notion`  | یک پایگاه داده با فیلتر، مرتب سازی و صفحه بندی را پرس و جو کنید    |
+| `notion_get_database`        | `read:notion`  | دریافت طرح پایگاه داده توسط ID                                     |
+| `notion_append_blocks`       | `write:notion` | اضافه کردن بلوکهای فرزند به بلوک والدین (حداکثر 100 در هر درخواست) |
 
-## ابزارهای کاتالوگ مهارتهای عامل (3)
+## ابزارهای کاتالوگ مهارت نماینده (3)
 
-در `open-sse/mcp-server/tools/agentSkillTools.ts` تعریف شدهاند و توسط `src/lib/agentSkills/catalog` پشتیبانی میشوند. این ابزارها کاتالوگ مستندات 45 موردی «مهارتهای عامل» را در اختیار کلاینتهای MCP و عاملهای خارجی قرار میدهند. دامنه: `read:catalog`.
+در `open-sse/mcp-server/tools/agentSkillTools.ts` تعریف شده است. با پشتیبانی `src/lib/agentSkills/catalog`. این ابزارها کاتالوگ مستندات Agent Skills با 45 ورودی را در اختیار مشتریان MCP و عوامل خارجی قرار می دهند. محدوده: `read:catalog`.
 
-| ابزار                             | دامنهها        | توضیحات                                                                                                                                        |
-| :-------------------------------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_agent_skills_list`     | `read:catalog` | فهرستکردن هر 45 مهارت عامل با فیلترهای اختیاری `category` (api\|cli) و `area`؛ فراداده و پوشش را برمیگرداند                                    |
-| `omniroute_agent_skills_get`      | `read:catalog` | دریافت فراداده کامل و محتوای SKILL.md برای یک مهارت، بر اساس `id` کانونی                                                                       |
-| `omniroute_agent_skills_coverage` | `read:catalog` | آمار پوشش: تعداد مهارتهای دارای فایل SKILL.md در سیستم فایل، از میان 23 مهارت API، 21 مهارت CLI و 1 مهارت پیکربندی، در مقایسه با مجموع کاتالوگ |
+| ابزار                             | محدوده ها      | توضیحات                                                                                                                         |
+| :-------------------------------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_agent_skills_list`     | `read:catalog` | همه 45 مهارت عامل را با فیلترهای `category` اختیاری (api\| cli) و `area` فهرست کنید. فراداده را پوشش + برمی گرداند              |
+| `omniroute_agent_skills_get`      | `read:catalog` | با استفاده از `id` متاداده کامل، محتوای + SKILL.md را برای یک مهارت واحد دریافت کنید                                            |
+| `omniroute_agent_skills_coverage` | `read:catalog` | آمار پوشش: چه تعداد از مهارت های 23 API، 21 CLI و 1 پیکربندی دارای فایل های SKILL.md در سیستم فایل در مقابل مجموع کاتالوگ هستند |
 
-برای مشاهده کاتالوگ کامل و نحوه استفاده عاملهای خارجی از آن، به [AGENT-SKILLS.md](./AGENT-SKILLS.md) مراجعه کنید.
+برای مشاهده کاتالوگ کامل و نحوه مصرف عوامل خارجی از [AGENT-SKILLS.md](./AGENT-SKILLS.md) دیدن کنید.
 
-## چارچوبهای مرتبط (v3.8.0)
+## چارچوب های مرتبط (نسخه 3.8.0)
 
-موجودی ابزار MCP بالا (110 ابزار منحصربهفرد که با `countUniqueMcpTools()` محاسبه شدهاند) عمداً
-به عملیات مسیریابی زمان اجرا/کش/فشردهسازی/حافظه/مهارتها/پراکسی/منبع زمینه محدود شده است. دو
-چارچوب مجاور نیز همراه با سرور MCP در v3.8.0 ارائه میشوند و مستندات جداگانهای دارند:
+موجودی ابزار MCP در بالا (110 ابزار منحصر به فرد، محاسبه شده توسط `countUniqueMcpTools()`) عمداً به عملیات routing/cache/compression/memory/skills/proxy/context-source زمان اجرا اختصاص داده شده است. دو فریمورک مجاور در کنار سرور MCP در نسخه 3.8.0 ارسال می شوند و به طور جداگانه مستند می شوند:
 
-### عاملهای ابری
+### عوامل ابری
 
-عاملهای ابری، عاملهای کدنویسی هوش مصنوعی خارج از فرایند (codex-cloud، cursor-cloud، devin، jules) هستند که از طریق
-همان مدل اتصال مورد استفاده برای ارائهدهندگان LLM به OmniRoute متصل شدهاند. این عاملها از طریق
-سطح REST اختصاصی خود (`/api/v1/agents/*`) ارائه میشوند و بخشی از کاتالوگ ابزار MCP
-**نیستند** — فراخوانی یک عامل ابری هیچ دامنه MCPای را مصرف نمیکند.
+Cloud Agents عاملهای کدگذاری AI خارج از فرآیند (codex-cloud، cursor-cloud، devin، jules) هستند که از طریق همان مدل اتصال مورد استفاده برای ارائه دهندگان LLM به OmniRoute سیمکشی میشوند. آنها از طریق سطح REST خود (`/api/v1/agents/*`) در معرض دید قرار می گیرند و هستند** نه** بخشی از کاتالوگ ابزار MCP — که یک Cloud Agent را فراخوانی می کند، محدوده MCP را مصرف نمی کند.
 
-- پیادهسازی: `src/lib/cloudAgent/` (`registry.ts`، `agents/codex.ts`، `agents/cursor.ts`، `agents/devin.ts`، `agents/jules.ts`).
-- چرخه حیات: `createTask`، `getStatus`، `approvePlan`، `sendMessage`، `listSources`.
+- تطبیق: `src/lib/cloudAgent/` (`registry.ts`، `agents/codex.ts`، `agents/cursor.ts`، `agents/devin.ts`، `agents/jules.ts`).
+- چرخه حیات: `createTask`, `getStatus`, `approvePlan`, `sendMessage`, `listSources`.
 - مستندات: [docs/frameworks/CLOUD_AGENT.md](./CLOUD_AGENT.md).
 
-### گاردریلها
+### نرده های محافظ
 
-گاردریلها فیلترهای پیش/پس از اجرا (vision-bridge، pii-masker، prompt-injection) هستند که
-درون خط لوله چت اعمال میشوند. آنها پیش از رسیدن به لایه ابزار/مسیر MCP اجرا میشوند
-و تخلفهای ساختاریافته را به خط لوله ممیزی ارسال میکنند؛ آنها بهعنوان ابزارهای MCP فراخوانی نمیشوند.
+گاردریلها فیلترهای pre/post-execution (پل بینایی، pii-masker، تزریق سریع) هستند که در خط لوله چت اعمال میشوند. آنها قبل از رسیدن به لایه MCP tool/route اجرا می شوند و تخلفات ساختاری را به خط لوله ممیزی منتشر می کنند. آنها به عنوان ابزار MCP فراخوانی نمی شوند.
 
-- پیادهسازی: `src/lib/guardrails/`.
+- اجرا: `src/lib/guardrails/`.
 - مستندات: [docs/security/GUARDRAILS.md](../security/GUARDRAILS.md).
 
-هنگام اشکالزدایی یک فراخوانی MCP که مسدودشده به نظر میرسد، هم گزارش ممیزی MCP
-(ورودیهای `scope_denied:*`) و هم ردپای ممیزی گاردریلها را بررسی کنید — ممکن است یک درخواست توسط
-یک گاردریل، **پیش از** رسیدن به لایه اعمال دامنه MCP، رد شود.
+هنگام اشکال زدایی یک تماس MCP که مسدود به نظر می رسد، هم گزارش حسابرسی MCP ( ورودی های `scope_denied:*` ) و هم مسیر حسابرسی گاردریل ها را بررسی کنید — ممکن است یک درخواست توسط یک گاردریل رد شود.** قبل از** همیشه به لایه اجرای MCP scope می رسد.
 
 ---
 
-## نقاط پایانی REST API
+## REST API نقاط پایانی
 
-| نقطه پایانی            | متد                   | توضیحات                                                                                              | احراز هویت          |
-| :--------------------- | :-------------------- | :--------------------------------------------------------------------------------------------------- | :------------------ |
-| `/api/mcp/status`      | `GET`                 | وضعیت سرور: ضربان حیات، وضعیت انتقال HTTP، خلاصه فعالیت ممیزی                                        | مدیریتی (نشست/مدیر) |
-| `/api/mcp/tools`       | `GET`                 | کاتالوگ ابزار (نام، توضیحات، دامنهها، مرحله، نقاط پایانی منبع)                                       | مدیریتی             |
-| `/api/mcp/sse`         | `GET` / `POST`        | نقطه پایانی انتقال SSE (مشروط به `mcpEnabled` + `mcpTransport === "sse"`)                            | کلید API + دامنهها  |
-| `/api/mcp/stream`      | `POST`/`GET`/`DELETE` | انتقال HTTP قابلجریان (از هدر `mcp-session-id` استفاده میکند؛ `DELETE` نشست را خاتمه میدهد)          | کلید API + دامنهها  |
-| `/api/mcp/audit`       | `GET`                 | ورودیهای گزارش ممیزی از `mcp_tool_audit` (فیلترها: `limit`، `offset`، `tool`، `success`، `apiKeyId`) | مدیریتی             |
-| `/api/mcp/audit/stats` | `GET`                 | آمار تجمیعی ممیزی (`totalCalls`، `successRate`، `avgDurationMs`، ابزارهای برتر)                      | مدیریتی             |
+| نقطه پایانی            | روش                   | توضیحات                                                                                                | احراز هویت             |
+| :--------------------- | :-------------------- | :----------------------------------------------------------------------------------------------------- | :--------------------- |
+| `/api/mcp/status`      | `GET`                 | وضعیت سرور: ضربان قلب، وضعیت حمل و نقل HTTP ، خلاصه فعالیت حسابرسی                                     | مدیریت (session/admin) |
+| `/api/mcp/tools`       | `GET`                 | کاتالوگ ابزار (نام، توضیحات، محدوده، فاز، نقاط پایانی منبع)                                            | مدیریت                 |
+| `/api/mcp/sse`         | `GET` / `POST`        | نقطه پایانی انتقال SSE (دردار توسط `mcpEnabled` + `mcpTransport === "sse"`)                            | API key + scopes       |
+| `/api/mcp/stream`      | `POST`/`GET`/`DELETE` | انتقال HTTP قابل جریان (از هدر `mcp-session-id` استفاده می کند؛ `DELETE` جلسه را پایان می دهد)         | API key + scopes       |
+| `/api/mcp/audit`       | `GET`                 | ورودیهای گزارش حسابرسی از `mcp_tool_audit` (فیلترها: `limit`، `offset`، `tool`، `success`، `apiKeyId`) | مدیریت                 |
+| `/api/mcp/audit/stats` | `GET`                 | آمار حسابرسی انبوه (`totalCalls`، `successRate`، `avgDurationMs`، ابزارهای برتر)                       | مدیریت                 |
 
-فایلهای منبع: `src/app/api/mcp/{status,tools,sse,stream,audit,audit/stats}/route.ts`.
+فایل های منبع: `src/app/api/mcp/{status,tools,sse,stream,audit,audit/stats}/route.ts`.
 
-هر دو انتقال SSE و HTTP قابلجریان تا زمانی که سرور MCP در تنظیمات (`mcpEnabled`) فعال نشده و `mcpTransport` مناسب انتخاب نشده باشد، مسدود هستند. اگر انتقال اشتباهی پیکربندی شده باشد، مسیر HTTP 400 را همراه با راهنمایی برای تغییر تنظیمات برمیگرداند.
+هر دو انتقال SSE و Streamable HTTP مسدود می شوند تا زمانی که سرور MCP در تنظیمات (`mcpEnabled`) فعال شود و `mcpTransport` مناسب انتخاب شود. اگر حمل و نقل اشتباه پیکربندی شده باشد، مسیر HTTP 400 را با اشاره به تغییر تنظیمات برمیگرداند.
 
 ---
 
-## احراز هویت و محدودهها
+## احراز هویت و محدوده
 
-فراخوانیهای ابزار MCP رشتههای محدوده را از فراخواننده میخوانند. این بررسی یکی از سه فضای نام مستقل است. قبولی در یک بررسیکننده بهمعنای قبولی در بررسیکنندههای دیگر نیست. قواعد در بخش [سه فضای نام محدوده](#three-scope-namespaces) آمدهاند.
-فهرست ابزارها در بخش [محدودههای ابزار MCP](#mcp-tool-scopes) قرار دارد.
+ابزار MCP رشته های محدوده را از تماس گیرنده می خواند. این بررسی یکی از سه فضای نام مستقل است. پاس از یک چککننده، پاس دیگری نیست. قوانین [سه فضای نام دامنه](#three-scope-namespaces) هستند. کاتالوگ ابزار [MCP tool scopes](#mcp-tool-scopes) است.
 
-### سه فضای نام محدوده
+### سه فضای نام دامنه
 
-`manage` در یک کلید API،‏ `read:compression` در یک ابزار MCP و `read` در یک توکن دسترسی `oma_live_…` سه مجوز متفاوتاند. فراخوانندگانی که یک توکن دسترسی `read` را به یک مسیر مدیریتی تغییردهنده ارسال کنند، پاسخ HTTP 403 زیر را دریافت میکنند:
-`Access token scope 'read' is insufficient; 'write' required.`
-این رتبهبندی توسط `scopeSatisfies` انجام میشود. این تابع به جدول MCP مراجعه نمیکند و تطبیقدهنده MCP نیز به آن مراجعه نمیکند.
+`manage` در یک کلید API ، `read:compression` در یک ابزار MCP و `read` در یک توکن دسترسی `oma_live_…` سه کمک هزینه متفاوت هستند. تماس گیرندگانی که رمز دسترسی `read` را به یک مسیر مدیریت جهش یافته ارسال می کنند HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` دریافت می کنند که رتبه `scopeSatisfies` است. با جدول MCP مشورت نمی کند و تطبیق MCP با آن مشورت نمی کند.
 
-| فضای نام                  | اعتبارنامه                                                                     | بررسیکننده                    | قبولی چه چیزی را مجاز میکند                          |
-| :------------------------ | :----------------------------------------------------------------------------- | :---------------------------- | :--------------------------------------------------- |
-| مدیریت کلید API           | `api_keys.scopes`                                                              | `hasManageScope`              | REST مدیریتی برای آن کلید Bearer                     |
-| قابلیتهای افزوده کلید API | همان آرایه، با یک رشته دقیق                                                    | تابع کمکی نامبردهشده در ادامه | فقط همان یک قابلیت                                   |
-| محدودههای ابزار MCP       | همان آرایه، در غیر این صورت `_meta` مربوط به MCP، و سپس `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | پس از فعالشدن اعمال محدودیت، همان ابزار              |
-| توکن دسترسی               | `oma_live_…`                                                                   | `scopeSatisfies`              | مسیر مدیریتیای که متد و مسیر آن به آن رتبه نیاز دارد |
+| فضای نام         | اعتبارنامه                                                                            | چکر              | یک پاس اجازه می دهد                              |
+| :--------------- | :------------------------------------------------------------------------------------ | :--------------- | :----------------------------------------------- |
+| مدیریت کلید API  | `api_keys.scopes`                                                                     | `hasManageScope` | مدیریت REST برای آن کلید حامل                    |
+| افزودنی کلید API | همان آرایه، یک رشته دقیق                                                              | یاری به نام زیر  | فقط همین یک قابلیت                               |
+| محدوده ابزار MCP | همان آرایه، دیگری MCP `_meta` (فقط HTTP/SSE )، در غیر این صورت `OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | آن ابزار، به محض اینکه اجرا روشن شد              |
+| نشانه دسترسی     | `oma_live_…`                                                                          | `scopeSatisfies` | مسیر مدیریتی که روش و مسیر آن مستلزم آن رتبه است |
 
-صدور هر اعتبارنامه در
-[احراز هویت مدیریتی](../guides/MANAGEMENT-AUTH.md) توضیح داده شده است.
+ثبت هر اعتبار در [احراز هویت مدیریت](../guides/MANAGEMENT-AUTH.md) پوشش داده شده است.
 
-#### محدودههای کلید API
+#### دامنه های کلید API
 
-یک آرایه `api_keys.scopes` دو وظیفه را انجام میدهد. این وظایف از توابع متفاوتی استفاده میکنند.
+یک آرایه `api_keys.scopes` دو کار را تغذیه می کند. آنها از توابع مختلف استفاده می کنند.
 
-**REST مدیریتی.** `manage` و `admin` اعضای
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) هستند.
-تابع `hasManageScope` مسیرهای مدیریتی را برای آن کلید مجاز میکند. `admin` در آن مسیرها قابلیت مدیریت دارد. واژه `admin` در اینجا رتبه توکن دسترسی نیست و به محدودههای ابزار MCP گسترش پیدا نمیکند.
+**مدیریت REST.** `manage` و `admin` اعضای `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) هستند. `hasManageScope` چیزی است که مسیرهای مدیریتی را برای آن کلید مجاز می کند. `admin` در آن مسیرها قابلیت مدیریت دارد. کلمه `admin` در اینجا رتبه نشانه دسترسی نیست و به دامنه ابزار MCP گسترش نمی یابد.
 
-**رشتههای افزوده.** هرکدام با آزمون عضویت دقیق بررسی میشوند و همگی بیرون از `MANAGEMENT_API_KEY_SCOPES` باقی میمانند.
+**رشته های افزودنی** هر کدام یک آزمون عضویت دقیق است و هر کدام خارج از `MANAGEMENT_API_KEY_SCOPES` می مانند.
 
-| محدوده                         | قبولی چه چیزی را مجاز میکند                                                                                                                                                   |
-| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | فقط استثنای LOCAL_ONLY برای `/api/mcp/` غیر-loopback‏ (`hasMcpConnectOrManageScope`). کلیدی با `manage` یا `admin` همچنان از این استثنا عبور میکند.                           |
-| `self:usage`                   | `GET /api/v1/me/status` برای این کلید (`src/app/api/v1/me/status/route.ts`). هنگام ایجاد، `POST /api/keys` این محدوده را اضافه میکند (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | سهمیههای حساب upstream درون payload همان وضعیت (`src/lib/usage/apiKeySelfService.ts`). مسیر وضعیت همچنان به `self:usage` نیاز دارد.                                           |
-| `policy:bypass-provider-quota` | فراخوانیهای inference این کلید، خطمشی سهمیه ارائهدهنده را نادیده میگیرند (`hasProviderQuotaBypassScope` در `src/sse/handlers/chat.ts`).                                       |
+| دامنه                          | یک پاس اجازه می دهد                                                                                                                                                        |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | `/api/mcp/` LOCAL_ONLY بدون حلقه فقط حک شده (`hasMcpConnectOrManageScope`). یک کلید با `manage` یا `admin` هنوز از آن حک شده عبور می کند.                                  |
+| `self:usage`                   | `GET /api/v1/me/status` برای این کلید (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` این محدوده را در ایجاد (`normalizeSelfServiceScopesForCreate`) اضافه می کند. |
+| `self:account-quota`           | سهمیههای حساب بالادستی در آن بار وضعیت (`src/lib/usage/apiKeySelfService.ts`). مسیر وضعیت همچنان به `self:usage` نیاز دارد.                                                |
+| `policy:bypass-provider-quota` | فراخوانی استنتاج این کلید از خط مشی سهمیه ارائه دهنده (`hasProviderQuotaBypassScope` در `src/sse/handlers/chat.ts`) رد می شود.                                             |
 
 #### تطبیق
 
-فهرست رسمی همان جدول زیر بخش [محدودههای ابزار MCP](#mcp-tool-scopes) است. `MCP_SCOPE_LIST` در `src/shared/constants/mcpScopes.ts` را آن فهرست در نظر نگیرید:
-این فقط زیرمجموعه نوعدار اولیه است. ابزارهای بعدی، محدودههای بیشتری را در کنار آن تعریف میکنند
-(`read:notion`،‏ `read:skills`،‏ `read:local-corpus` و سایر موارد جدول).
+کاتالوگ جدول زیر [محدوده ابزار MCP](#mcp-tool-scopes) است. `MCP_SCOPE_LIST` در `src/shared/constants/mcpScopes.ts` به عنوان آن کاتالوگ در نظر نگیرید: زیر مجموعه اصلی تایپ شده است. ابزارهای بعدی دامنه های بیشتری را در کنار آن اعلام می کنند (`read:notion`، `read:skills`، `read:local-corpus`، و بقیه جدول).
 
-تابع `evaluateToolScopes` در `open-sse/mcp-server/scopeEnforcement.ts` زمانی یک فراخوانی را مجاز میکند که هر محدوده موردنیاز با یکی از محدودههای اعطاشده تطبیق داشته باشد:
+`evaluateToolScopes` در `open-sse/mcp-server/scopeEnforcement.ts` زمانی امکان تماس را فراهم میکند که هر محدوده مورد نیاز با محدوده اعطایی مطابقت داشته باشد:
 
-- `*` با هر محدوده موردنیاز تطبیق دارد.
-- محدوده اعطاشدهای که به `*` ختم شود، با محدوده موردنیازی تطبیق دارد که با پیشوند قبل از ستاره آغاز شود. `read:*` با `read:compression` تطبیق دارد.
-- هر محدوده اعطاشده دیگر فقط با رشته موردنیاز کاملاً یکسان تطبیق دارد.
+- `*` با هر محدوده مورد نیاز مطابقت دارد.
+- یک محدوده اعطایی که به `*` ختم میشود با محدوده مورد نیازی که با پیشوند قبل از ستاره شروع میشود مطابقت دارد. `read:*` `read:compression` مطابقت دارد.
+- هر دامنه اعطایی دیگر فقط با رشته مورد نیاز یکسان مطابقت دارد.
 
-کلیدی که محدودههای آن `["manage"]` است، در `scopeMatches` برای `read:compression` رد میشود.
-اگر `admin`،‏ `mcp:connect`،‏ `read` یا `write` تنها رشته اعطاشده باشد، همان فراخوانی برای آنها نیز رد میشود. بهجز `*` انتهایی، هیچ سلسلهمراتبی میان محدودههای ابزار MCP وجود ندارد.
+کلیدی که دامنه آن `["manage"]` است، `scopeMatches` برای `read:compression` ناموفق است. همان فراخوانی برای `admin`، `mcp:connect`، `read` و `write` ناموفق میشود، زمانی که آنها تنها رشتههای داده شده باشند. هیچ سلسله مراتبی در میان حوزه های ابزار MCP فراتر از `*` دنباله دار وجود ندارد.
 
-اعمال محدودیت غیرفعال است، مگر آنکه `OMNIROUTE_MCP_ENFORCE_SCOPES=true` باشد (مقدار پیشفرض
-`false` است). تا زمانی که غیرفعال باشد، `evaluateToolScopes` فراخوانی را مجاز میکند و فهرست را نادیده میگیرد. هنگامی که فعال باشد، HTTP از `api_keys.scopes` کلید Bearer بهعنوان
-`authInfo` استفاده میکند (بخش [اتصال محدوده HTTP به تفکیک کلید](#per-key-http-scope-binding-7895) را ببینید).
-وقتی هیچ محدودهای برای کلید یافت نشود، مجموعه اعطاشده ابتدا به `_meta` مربوط به MCP و سپس به
-`OMNIROUTE_MCP_SCOPES` رجوع میکند.
+اجرای غیرفعال است مگر اینکه `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (پیشفرض `false`). در حالی که خاموش است، `evaluateToolScopes` به تماس اجازه می دهد و از کاتالوگ می گذرد. هنگامی که روشن است، HTTP از `api_keys.scopes` کلید حامل به عنوان `authInfo` استفاده می کند ( [به هر کلید HTTP scope binding](#per-key-http-scope-binding-7895) مراجعه کنید). وقتی هیچ حوزه کلیدی حل نمیشود، مجموعه اعطا شده به MCP `_meta` میافتد (که فقط برای تماسگیرندگان HTTP/SSE ، در یک زمینه HTTP auth احترام گذاشته میشود؛ `_meta` تماسگیرنده stdio نادیده گرفته میشود، زیرا مشتری آن را کنترل میکند و هیچ هویتی برای هر تماسگیرنده ندارد)، سپس `OMNIROUTE_MCP_SCOPES`.
 
-#### محدودههای توکن دسترسی
+#### دامنه های نشانه دسترسی
 
-توکنهای `oma_live_…` (`src/lib/accessTokens/scopes.ts`) دارای `read`،‏ `write`
-یا `admin` هستند. `scopeSatisfies` یک رتبهبندی است: `admin` شامل `write` و `read` میشود و
-`write` شامل `read` میشود. محدودههای ناشناخته هیچ دسترسیای فراهم نمیکنند.
+نشانه های `oma_live_…` (`src/lib/accessTokens/scopes.ts`) `read`، `write` یا `admin` را حمل می کنند. `scopeSatisfies` یک مرتبه است: `admin` `write` و `read` را می پوشاند و `write` `read` می پوشاند. دامنه های ناشناخته چیزی را پوشش نمی دهند.
 
-تابع `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) این رتبه را با
-`inferRequiredScope` (`src/server/authz/accessScopes.ts`) مقایسه میکند:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) آن رتبه را با `inferRequiredScope` (`src/server/authz/accessScopes.ts`) مقایسه می کند:
 
-- `GET`،‏ `HEAD` و `OPTIONS` به `read` نیاز دارند.
-- هر متد دیگری به `write` نیاز دارد.
-- مسیرهای موجود در `ADMIN_SCOPE_PREFIXES` برای هر متد به `admin` نیاز دارند. `/api/mcp`
-  در این فهرست قرار دارد؛ بنابراین حتی یک توکن دسترسی `write` نیز نمیتواند سطح HTTP مربوط به MCP را فراخوانی کند.
-- مسیرهای موجود در `ADMIN_MUTATION_PREFIXES` فقط برای عملیات تغییردهنده به `admin` نیاز دارند.
-- مسیرهای موجود در `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`،
-  `/api/settings/require-login`) فقط برای عملیات تغییردهنده و فقط در همان مسیر دقیق به `admin` نیاز دارند — سایر زیرمسیرهای `/api/settings/*` همچنان با `write` کار میکنند.
+- `GET` و `HEAD` و `OPTIONS` نیاز به `read` دارند.
+- هر روش دیگری به `write` نیاز دارد.
+- مسیرها در `ADMIN_SCOPE_PREFIXES` برای هر روشی `admin` نیاز دارند. `/api/mcp` در آن لیست است، بنابراین یک رمز دسترسی `write` هنوز نمی تواند سطح MCP HTTP را فراخوانی کند.
+- مسیرها در `ADMIN_MUTATION_PREFIXES` فقط برای جهش نیاز به `admin` دارند.
+- مسیرهای موجود در `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`، `/api/settings/require-login`) فقط برای جهشها `admin` نیاز دارند، و فقط در آن مسیر دقیق — سایر مسیرهای فرعی `/api/settings/*` `write` را نگه میدارند.
 
-`PATCH /api/keys/{id}` یک عملیات تغییردهنده است و در آن فهرستهای مدیریتی قرار ندارد؛ بنابراین، یک توکن با سطح دسترسی `read` پاسخ 403 دریافت میکند:
+`PATCH /api/keys/{id}` یک جهش است و در آن لیستهای مدیریت نیست، بنابراین یک توکن `read` 403 `Access token scope 'read' is insufficient; 'write' required.` دریافت میکند. توکن دسترسی `write` یا `admin` آن مسیر را برآورده میکند. داشبورد JWT، نشانه چرخشی CLI machine-id، و کلید API با `manage` یا `admin` شاخههای دیگری را میگیرند و با این رتبه محدود نمیشوند.
 
-`Access token scope 'read' is insufficient; 'write' required.`
+یک نشانه دسترسی که `scopeSatisfies` برای `/api/mcp` پاس میکند، فقط گیت مدیریت را پاک کرده است. فراخوانی ابزار همچنان `scopeMatches` در برابر حوزه های کلید API اجرا می کند. رتبه نشانه دسترسی ورودی `scopeMatches` نیست.
 
-یک توکن دسترسی با سطح `write` یا `admin` الزامات آن مسیر را برآورده میکند. JWT داشبورد، توکن machine-id مربوط به CLI روی loopback و یک کلید API با سطح `manage` یا `admin` از شاخههای دیگری عبور میکنند و توسط این رتبهبندی محدود نمیشوند.
+### محدوده ابزار MCP
 
-توکن دسترسیای که برای `/api/mcp` بررسی `scopeSatisfies` را با موفقیت پشت سر میگذارد، فقط از دروازهٔ مدیریت عبور کرده است. فراخوانی ابزارها همچنان `scopeMatches` را در برابر scopeهای کلید API اجرا میکند. رتبهٔ توکن دسترسی، ورودی `scopeMatches` نیست.
+اجرای محدوده در `open-sse/mcp-server/scopeEnforcement.ts` متمرکز است. هر ابزار به محدوده خاصی نیاز دارد:
 
-### Scopeهای ابزار MCP
-
-اعمال scope بهصورت متمرکز در `open-sse/mcp-server/scopeEnforcement.ts` انجام میشود.
-هر ابزار به scopeهای مشخصی نیاز دارد:
-
-| دامنه                 | ابزارها                                                                                                                                                                        |
+| دامنه                 | ابزار                                                                                                                                                                          |
 | :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                              |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                      |
@@ -417,118 +366,88 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 | `read:tools`          | `omniroute_tool_search`                                                                                                                                                        |
 | `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                      |
 | `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                               |
-| `write:gamification`  | `gamification_invite`، `gamification_transfer`                                                                                                                                 |
-| `read:plugins`        | `plugin_list`، `plugin_executions`                                                                                                                                             |
-| `write:plugins`       | `plugin_scan`، `plugin_install`، `plugin_uninstall`، `plugin_activate`، `plugin_deactivate`، `plugin_configure`                                                                |
-| `read:obsidian`       | 13 ابزار خواندن — `obsidian_list_vault`، `obsidian_read_note`، `obsidian_search_simple`، `obsidian_search_structured`، `obsidian_get_periodic_note`، `obsidian_sync_status`، … |
-| `write:obsidian`      | 9 ابزار نوشتن — `obsidian_write_note`، `obsidian_append_note`، `obsidian_patch_note`، `obsidian_move_note`، `obsidian_delete_note`، `obsidian_sync_trigger`، …                 |
-| `read:local-corpus`   | `local_corpus_search`، `local_corpus_read`، `local_corpus_status`                                                                                                              |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                 |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                             |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                |
+| `read:obsidian`       | 13 ابزار خواندن — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 ابزار نوشتن — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                              |
 
-دامنههای دارای نویسهٔ عام پشتیبانی میشوند: `read:*` همهٔ دامنههای خواندن را اعطا میکند و `*` دسترسی کامل را اعطا میکند.
+دامنههای Wildcard پشتیبانی میشوند: `read:*` به همه دامنههای خواندنی اعطا میکند، `*` دسترسی کامل را اعطا میکند.
 
-### `mcp:connect` — قابلیت محدود مسیر (#7895)
+### قابلیت مسیر باریک `mcp:connect` — (#7895)
 
-دسترسی به انتقال HTTP/SSE مربوط به MCP (`/api/mcp/*`) از مبدأ غیر-loopback، به استثنای LOCAL_ONLY برای
-`/api/mcp/` نیاز دارد (به `docs/security/ROUTE_GUARD_TIERS.md` مراجعه کنید). در گذشته،
-این استثنا فقط یک کلید API با دامنهٔ کامل `manage`/`admin` را میپذیرفت — دامنهای بیشازحد گسترده برای
-فراخوانی که فقط باید با MCP ارتباط برقرار کند. اکنون `src/shared/constants/managementScopes.ts`
-مقدار `MCP_CONNECT_SCOPE = "mcp:connect"` را صادر میکند: دامنهای محدود و افزایشی (با همان رویهٔ
-`SELF_USAGE_SCOPE`) که فقط مجوز عبور از محدودیت `/api/mcp/` را در
-`src/server/authz/policies/management.ts` صادر میکند — این دامنه هیچ دسترسی دیگری به مسیرهای مدیریتی
-اعطا نمیکند و عمداً خارج از `MANAGEMENT_API_KEY_SCOPES` نگه داشته شده است. کلیدی که دارای `manage`/`admin`
-باشد همچنان بدون تغییر از این استثنا عبور میکند؛ `mcp:connect` جایگزینی با سطح دسترسی پایینتر برای
-فراخوانهای راه دورِ صرفاً MCP است که از طریق `hasMcpConnectOrManageScope()` بررسی میشود.
+رسیدن به انتقال HTTP/SSE MCP (`/api/mcp/*`) از غیر حلقه بک مستلزم حک کردن `/api/mcp/` LOCAL_ONLY است (به `docs/security/ROUTE_GUARD_TIERS.md` مراجعه کنید). از لحاظ تاریخی، این حکاکی فقط یک کلید `manage`/`admin` -scope API — کامل را برای تماس گیرنده ای که فقط نیاز به صحبت با MCP دارد بسیار گسترده است. `src/shared/constants/managementScopes.ts` اکنون `MCP_CONNECT_SCOPE = "mcp:connect"` را صادر می کند: یک دامنه باریک و افزودنی (همان سابقه `SELF_USAGE_SCOPE`) که به ONLY بای پس `/api/mcp/` در `src/server/authz/policies/management.ts` — اجازه دسترسی به مسیر مدیریت دیگری را نمی دهد و عمدا OUT از `MANAGEMENT_API_KEY_SCOPES` نگهداری می شود. کلیدی که `manage`/`admin` را نگه میدارد همچنان حکاکی را بدون تغییر عبور میدهد. `mcp:connect` یک جایگزین با امتیاز کمتر برای تماسگیرندگان فقط از راه دور MCP است که از طریق `hasMcpConnectOrManageScope()` بررسی میشود.
 
-### اتصال دامنهٔ HTTP بهازای هر کلید (#7895)
+### صحافی دامنه HTTP هر کلید (#7895)
 
-در HTTP/SSE، اکنون `open-sse/mcp-server/httpTransport.ts` دامنههای واقعی
-`api_keys.scopes` فراخوان را از طریق `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-تفکیک میکند و آنها را به `transport.handleRequest(req, { authInfo })` در SDK مربوط به MCP
-ارسال میکند؛ بنابراین `extra.authInfo.scopes` که به هر فراخوانی ابزار میرسد، دامنههای خودِ کلید Bearer را
-بازتاب میدهد. `resolveCallerScopeContext()` در `scopeEnforcement.ts` از قبل `authInfo` را نسبت به
-`_meta` و راهکار جایگزین متغیر محیطی `OMNIROUTE_MCP_SCOPES` در اولویت قرار میداد — این تغییر فقط همان
-منبع اول و دارای بالاترین اولویت را مقداردهی میکند که پیشتر از طریق HTTP تغذیه نمیشد. وقتی هیچ کلید API
-تفکیک نشود (نبودن هدر یا نامعتبر بودن کلید)، `authInfo` برابر `undefined` باقی میماند و تفکیک بدون تغییر
-به زنجیرهٔ موجود `meta`/متغیر محیطی منتقل میشود. stdio هیچ هویت مجزایی برای هر فراخوان ندارد (به
-`mcpCallerIdentity.ts` مراجعه کنید) و تحت تأثیر قرار نمیگیرد — همچنان از زنجیرهٔ جایگزین `_meta`/متغیر محیطی استفاده میکند.
+از طریق HTTP/SSE، `open-sse/mcp-server/httpTransport.ts` اکنون `api_keys.scopes` واقعی تماسگیرنده را از طریق `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) حل میکند و آن را به SDKMCP میدهد، بنابراین `extra.authInfo.scopes` رسیدن به هر فراخوانی ابزار `transport.handleRequest(req, { authInfo })` محدودههای خود کلید حامل را منعکس میکند. `scopeEnforcement.ts` `resolveCallerScopeContext()` قبلاً `authInfo` بر `_meta` و `OMNIROUTE_MCP_SCOPES` env را در اولویت قرار داده است — این تنها منبع اول و با بالاترین اولویت را پر می کند که قبلاً از HTTP تغذیه نمی شد. هنگامی که هیچ کلید API حل نمی شود (بدون هدر، کلید نامعتبر)، `authInfo` `undefined` باقی می ماند و وضوح به زنجیره `meta`/env موجود بدون تغییر می رسد. stdio هیچ هویتی برای هر تماسگیرنده ندارد (به `mcpCallerIdentity.ts` مراجعه کنید) و تحت تأثیر اتصال هر کلید — قرار نمیگیرد، از مرحله `_meta` میگذرد (`_meta` فقط در یک زمینه HTTP auth، #15159 احترام میشود) و تنها از کلید env `OMNIROUTE_MCP_SCOPES` حل میشود.
 
-**اعمال محدودیت برای فراخوانهای HTTP/SSE با دامنهٔ محدود، صرفنظر از
-`OMNIROUTE_MCP_ENFORCE_SCOPES` اجباری است.** مقدار پیشفرض `false` برای `OMNIROUTE_MCP_ENFORCE_SCOPES` فقط
-برای جریان محلی/stdio تکاپراتوری امن است که در آن هیچ هویت مجزایی برای هر فراخوان وجود ندارد تا دامنه بر اساس آن
-اعمال شود. `open-sse/mcp-server/server.ts::withScopeEnforcement()` اعمال دامنهٔ هر ابزار را
-بدون قیدوشرط فعال میکند (`shouldForceScopeEnforcement()` در `scopeEnforcement.ts`)
-هرگاه `resolveCallerScopeContext()` مقدار
-`source === "authInfo"` را تفکیک کرده باشد (یعنی یک هدر HTTP Authorization واقعی بهازای هر کلید، فقط در HTTP/SSE) و آن
-کلید دامنهٔ کامل `manage`/`admin` را نداشته باشد. این کار شکافی را میبندد که در آن کلیدی که فقط
-دامنهٔ محدود `mcp:connect` را برای عبور در اختیار داشت — که در بالا مستند شده فقط مجوز استثنای LOCAL_ONLY برای
-`/api/mcp/` را صادر میکند — در غیر این صورت میتوانست پس از فعالسازی دسترسی MCP راه دور/غیر-loopback توسط اپراتور،
-صرفاً به این دلیل که `OMNIROUTE_MCP_ENFORCE_SCOPES` بهطور پیشفرض با مقدار
-`false` عرضه میشود، هر ابزار MCP را فراخوانی کند. یک کلید کامل `manage`/`admin` از طریق HTTP و تمام فراخوانهای
-stdio/محلی، رفتار موجودِ مشروط به `OMNIROUTE_MCP_ENFORCE_SCOPES` را بدون تغییر حفظ میکنند.
+**برای تماس گیرندگان HTTP/SSE با دامنه محدود بدون در نظر گرفتن `OMNIROUTE_MCP_ENFORCE_SCOPES` اجرای قانون اجباری است.** پیشفرض `OMNIROUTE_MCP_ENFORCE_SCOPES` به `false` فقط برای جریان تک اپراتور local/stdio ایمن است، جایی که هیچ هویتی برای هر تماسگیرنده وجود ندارد. هر زمان که `resolveCallerScopeContext()` `shouldForceScopeEnforcement()` (به عنوان مثال یک سرصفحه مجوز HTTP واقعی به ازای هر کلید، HTTP/SSE-only) `source === "authInfo"` حل کرد، بدون قید و شرط، اجرای دامنه هر ابزار را بدون قید و شرط روشن میکند ( `open-sse/mcp-server/server.ts::withScopeEnforcement()` در `scopeEnforcement.ts`)، AND آن کلید محدوده `manage`/`admin` کامل را نگه نمیدارد. این شکافی را که در آن کلیدی ONLY محدوده بای پس `mcp:connect` باریک — را نگه میدارد، که در بالا مستند شده بود به عنوان مجوزی برای چیزی جز `/api/mcp/` LOCAL_ONLY حککردن — میبندد که در غیر این صورت میتواند هر ابزار MCP را هنگامی که اپراتور دسترسی remote/non-loopback MCP را فعال میکند فراخوانی کند، فقط به این دلیل که `OMNIROUTE_MCP_ENFORCE_SCOPES` به طور پیشفرض `false` ارسال میکند. یک کلید کامل `manage`/`admin` روی HTTP، و هر تماس گیرنده stdio/local ، رفتار `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated موجود را بدون تغییر نگه می دارد.
 
 ---
 
 ## متغیرهای محیطی
 
-| متغیر                                   | پیشفرض                                  | هدف                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| :-------------------------------------- | :-------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                | نشانی پایهای که سرور MCP هنگام فراخوانی APIهای داخلی OmniRoute استفاده میکند                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `OMNIROUTE_API_KEY`                     | (خالی)                                  | کلید API که با قالب `Authorization: Bearer` به فراخوانیهای API داخلی ارسال میشود                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (فقط `"true"` آن را فعال میکند) | در صورت فعال بودن، نبود محدودههای دسترسی باعث رد شدن فراخوانی ابزارها و ثبت `scope_denied:<reason>` در گزارش ممیزی میشود. همچنین، صرفنظر از این پرچم، اعمال محدودیت برای هر فراخوان HTTP/SSE که بر اساس سرآیند Authorization مختص هر کلید (`source === "authInfo"`) شناسایی شده و فاقد محدوده دسترسی کامل `manage`/`admin` باشد، اجباری است — برای مثال، کلیدی که فقط محدوده محدود `mcp:connect` برای دور زدن محدودیت را دارد — بنابراین این مقدار پیشفرض فقط برای گردشکار محلی/stdio با یک اپراتور امن است و هرگز نباید برای دسترسی راه دور غیر loopback استفاده شود |
-| `OMNIROUTE_MCP_SCOPES`                  | (خالی)                                  | فهرست مجازِ محدودههای دسترسی جداشده با ویرگول که بهطور پیشفرض «در دسترس» تلقی میشوند (هنگامی استفاده میشود که فراخواننده محدودههای دسترسی خود را ارائه نکند)                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (تنظیمنشده = روشن)                      | اگر روی `0/false/off/no` تنظیم شود، فشردهسازی توضیحات MCP را هنگام ثبت غیرفعال میکند                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (تنظیمنشده = روشن)                      | نام مستعار جایگزین برای همان گزینه بالا                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                 | مهلت لغو برای خواندنهای مدیریتی داخلی (سلامت، تابآوری، ترکیبها، سهمیه، میزان استفاده)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                 | مهلت لغو برای گامهایی که منتظر یک ارائهدهنده میمانند (`route_request`، `web_search`، `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `MCP_TOOL_DENY`                         | (تنظیمنشده = بدون فیلتر)                | نام ابزارهای جداشده با ویرگول که باید از `tools/list` حذف شوند (کاهش تعداد ابزارها — پایین را ببینید)                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `MCP_TOOL_ALLOW`                        | (تنظیمنشده = بدون فیلتر)                | نام ابزارهایی که با ویرگول از هم جدا شدهاند و باید منحصراً حفظ شوند (حالت فهرست مجاز — پایین را ببینید)                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `DATA_DIR`                              | `~/.omniroute`                          | فایل ضربان قلب در `${DATA_DIR}/runtime/mcp-heartbeat.json` نوشته میشود                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| متغیر                                   | پیش فرض                                  | هدف                                                                                                                                                                                                                                                                                                                 |
+| :-------------------------------------- | :--------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                 | مبنا URL سرور MCP هنگام فراخوانی OmniRoute داخلی APIs استفاده می کند                                                                                                                                                                                                                                                |
+| `OMNIROUTE_API_KEY`                     | (خالی)                                   | کلید API به عنوان `Authorization: Bearer` به تماسهای داخلی API هدایت میشود                                                                                                                                                                                                                                          |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (فقط `"true"` آن را فعال می کند) | وقتی فعال باشد، محدودههای گمشده تماس ابزار را رد میکنند و `scope_denied:<reason>` در گزارش حسابرسی ثبت میکنند. اجرای ALSO بدون توجه به این پرچم برای هر تماسگیرنده HTTP/SSE که از سرصفحه مجوز برای هر کلید (`source === "authInfo"`) که فاقد دامنه `manage` `mcp:connect` `admin` کامل — local/stdio ، اجباری است — |
+| `OMNIROUTE_MCP_SCOPES`                  | (خالی)                                   | لیست مجاز از هم جدا شده با کاما از محدودههایی که بهطور پیشفرض «در دسترس» در نظر گرفته میشوند (زمانی که تماسگیرنده محدودههای خود را ارائه نمیکند استفاده میشود)                                                                                                                                                      |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (تنظیم = روشن)                           | هنگامی که روی `0/false/off/no` تنظیم می شود، فشرده سازی توضیحات MCP را در زمان ثبت نام غیرفعال می کند                                                                                                                                                                                                               |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (تنظیم = روشن)                           | نام مستعار جایگزین برای همان ضامن مانند بالا                                                                                                                                                                                                                                                                        |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                  | لغو بودجه برای مدیریت داخلی (سلامت، انعطاف پذیری، ترکیب، سهمیه، استفاده)                                                                                                                                                                                                                                            |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                  | لغو بودجه برای هاپ هایی که منتظر ارائه دهنده هستند (`route_request`، `web_search`، `web_fetch`)                                                                                                                                                                                                                     |
+| `MCP_TOOL_DENY`                         | (تنظیم = بدون فیلتر)                     | نام ابزار جدا شده با کاما برای حذف از `tools/list` (کاهش کاردینالیتی ابزار — زیر را ببینید)                                                                                                                                                                                                                         |
+| `MCP_TOOL_ALLOW`                        | (تنظیم = بدون فیلتر)                     | نام ابزار جدا شده با کاما برای نگهداری منحصراً (حالت فهرست مجاز — در زیر ببینید)                                                                                                                                                                                                                                    |
+| `DATA_DIR`                              | `~/.omniroute`                           | فایل ضربان قلب در `${DATA_DIR}/runtime/mcp-heartbeat.json` نوشته شده است                                                                                                                                                                                                                                            |
 
 ---
 
-## فشردهسازی توضیحات
+## توضیحات فشرده سازی
 
-رجیستریهای ابزار، پرامپت و منبع MCP میتوانند توضیحات را هنگام ثبت/فهرستکردن فشرده کنند تا حجم فرادادهای که در اختیار کلاینتها قرار میگیرد (و در نتیجه هزینه زمینه پرامپت) کاهش یابد. پیادهسازی در `open-sse/mcp-server/descriptionCompressor.ts` قرار دارد و از طریق `compressMcpRegistryMetadata` درون `createMcpServer()` به سرور MCP متصل شده است.
+ابزار MCP ، اعلانها و ثبت منابع میتوانند توضیحات را در زمان registration/list فشردهسازی کنند تا ردپای ابرداده در معرض مشتریان (و در نتیجه هزینه متن سریع) را کاهش دهند. پیاده سازی در `open-sse/mcp-server/descriptionCompressor.ts` زندگی می کند و از طریق `compressMcpRegistryMetadata` داخل `createMcpServer()` به سرور MCP متصل می شود.
 
-- فشردهسازی با استفاده از مجموعهقواعد Caveman (`getRulesForContext("all", "full")`) و استخراج بلوکهای محافظتشده (قطعهکدهای درونخطی، بلوکهای محصورشده و غیره) روی متن توضیحات اجرا میشود تا محتوای ساختاری تغییر نکند.
-- برای هر استقرار، از طریق مقدار `compression.mcpDescriptionCompressionEnabled` در جدول تنظیمات `key_value` آن را تغییر دهید (پیشفرض: فعال) — این گزینه در رابط کاربری با عنوان **تحلیلها → فشردهسازی توضیحات MCP** ارائه میشود.
-- در سطح کل فرایند، از طریق `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS=false` یا `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION=false` آن را تغییر دهید.
-- آمار بلادرنگ از طریق `omniroute_compression_status` در مسیر `analytics.mcpDescriptionCompression` ارائه میشود و با `source: "mcp_metadata_estimate"` برچسبگذاری میشود تا از رسیدهای واقعی استفاده از ارائهدهنده متمایز باشد.
+- فشردهسازی روی متن توضیحات با استفاده از مجموعه قوانین Caveman (`getRulesForContext("all", "full")`) با استخراج بلوکهای حفظشده (دهانههای کد، بلوکهای حصاردار، و غیره) اجرا میشود، بنابراین محتوای ساختاری تغییر نمیکند.
+- تغییر وضعیت به ازای هر استقرار از طریق مقدار `compression.mcpDescriptionCompressionEnabled` در جدول تنظیمات `key_value` (پیشفرض: فعال) — در UI در معرض** فشرده سازی توضیحات تجزیه و تحلیل → MCP** .
+- در سراسر فرآیند از طریق `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS=false` یا `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION=false` تغییر وضعیت دهید.
+- آمارهای بیدرنگ از طریق `omniroute_compression_status` تحت `analytics.mcpDescriptionCompression` و برچسب `source: "mcp_metadata_estimate"` برای رفع ابهام از رسیدهای استفاده از ارائه دهنده واقعی ظاهر می شوند.
 
 ---
 
-## کاهش تعداد ابزارها (F4.3)
+## کاهش کاردینالیته ابزار (F4.3)
 
-فشردهسازی توضیحات، فرادادههای هر ابزار را کوچکتر میکند؛ **کاهش تعداد ابزارها** یک گام فراتر میرود و تعداد ابزارهایی را که اساساً اعلام میشوند کاهش میدهد. معرفی ابزارهای کمتر در مانیفست `tools/list`، هزینهٔ توکن هر درخواست را که مدل کلاینت بابت فهرست ابزارها میپردازد کاهش میدهد (فشردهسازی «لایهٔ ۵»). پیادهسازی آن یک فیلتر خالص و بدون حالت در `open-sse/mcp-server/toolCardinality.ts` (`reduceToolManifest`) است که در حلقهٔ ثبت در `createMcpServer()` (`open-sse/mcp-server/server.ts`) ادغام شده است.
+فشرده سازی توضیحات، ابرداده هر ابزار را کوچک می کند.** کاهش کاردینالیته ابزار** با کاهش _چه تعداد_ ابزاری که اصلاً اعلام شده اند، یک قدم جلوتر می رود. تبلیغ ابزارهای کمتر در مانیفست `tools/list` هزینه توکن درخواستی را که مدل مشتری برای کاتالوگ ابزار پرداخت می کند کاهش می دهد (فشرده سازی "لایه 5"). پیاده سازی یک فیلتر خالص و بدون حالت در `open-sse/mcp-server/toolCardinality.ts` (`reduceToolManifest`) است که به حلقه ثبت در `createMcpServer()` (`open-sse/mcp-server/server.ts`) متصل شده است.
 
-**اختیاری و بهطور پیشفرض غیرفعال است.** این فیلتر تنها زمانی اجرا میشود که دستکم یکی از دو متغیر محیطی تنظیم شده باشد؛ اگر هیچکدام تنظیم نشده باشند، هر ۱۱۰ ابزار بدون تغییر اعلام میشوند.
+**انتخاب، به طور پیشفرض غیرفعال است.** فیلتر فقط زمانی اجرا می شود که حداقل یکی از دو متغیر محیطی تنظیم شده باشد. با هیچ مجموعه ای، همه 110 ابزار بدون تغییر اعلام می شوند.
 
-| متغیر            | حالت                                                                                         |
-| :--------------- | :------------------------------------------------------------------------------------------- |
-| `MCP_TOOL_DENY`  | فهرست سیاه — نام ابزارهایی با جداکنندهٔ ویرگول که همیشه از `tools/list` حذف میشوند           |
-| `MCP_TOOL_ALLOW` | فهرست مجاز — نام ابزارهایی با جداکنندهٔ ویرگول؛ فقط این موارد باقی میمانند و بقیه حذف میشوند |
+| متغیر            | حالت                                                                                           |
+| :--------------- | :--------------------------------------------------------------------------------------------- |
+| `MCP_TOOL_DENY`  | نام ابزارهای جدا شده با ویرگول — که همیشه از `tools/list` حذف می شوند را لیست سیاه کنید        |
+| `MCP_TOOL_ALLOW` | Allow-list — نام ابزار جدا شده با کاما. فقط اینها زنده می مانند، بقیه چیزها کنار گذاشته می شود |
 
-`deny` بر `allow` اولویت دارد. نامها با ویرگول جدا میشوند، فاصلههای ابتدا و انتهایشان حذف میشود و ورودیهای خالی نادیده گرفته میشوند. مثالها:
+`deny` بر `allow` اولویت دارد. نام ها با کاما از هم جدا می شوند، بریده می شوند و ورودی های خالی نادیده گرفته می شوند. مثال ها:
 
 ```bash
-# دو ابزار را از فهرست ابزارها حذف کنید
+# Drop two tools from the catalog
 MCP_TOOL_DENY="omniroute_get_health,omniroute_list_combos" omniroute --mcp
 
-# فقط ابزارهای مسیریابی و سهمیه را اعلام کنید (حالت فهرست مجاز)
+# Announce only the routing + quota tools (allow-list mode)
 MCP_TOOL_ALLOW="omniroute_route_request,omniroute_check_quota" omniroute --mcp
 ```
 
-**نحوهٔ حذف ابزارهای فیلترشده:** ثبت همیشه با موفقیت انجام میشود؛ سپس ابزاری که پروفایل رد میکند، روی هندل MCP SDK با `.disable()` غیرفعال میشود؛ بنابراین هرگز در `tools/list` ظاهر نمیشود، اما اتصال داخلی آن دستنخورده باقی میماند (فعالسازی/غیرفعالسازی تمیز، بدون ثبت مجدد). تجزیهگر پروفایل `readMcpToolProfileFromEnv(process.env)` است که وقتی هر دو متغیر خالی باشند، `null` (بدون فیلتر) برمیگرداند.
+**چگونه ابزارهای فیلتر شده حذف می شوند:** ثبت نام همیشه موفق است. ابزاری که نمایه آن را رد می کند، `.disable()` d روی دسته MCP SDK است، بنابراین هرگز در `tools/list` ظاهر نمی شود اما سیم کشی دست نخورده باقی می ماند ( enable/disable تمیز، بدون ثبت مجدد). تجزیه کننده پروفایل `readMcpToolProfileFromEnv(process.env)` است که وقتی هر دو متغیر خالی هستند `null` (بدون فیلتر) را برمی گرداند.
 
-ساختار غنیتر `ToolProfile` در پسِ `reduceToolManifest` همچنین از فیلترکردن بر اساس اشتراک دامنهها (`allowScopes`، با تطبیق نویسهٔ عام به سبک `read:*`) و یک سقف قطعی `maxTools` پشتیبانی میکند، اما این دو گزینه هنگام ثبت به مانیفست کامل نیاز دارند و در حال حاضر از طریق متغیرهای محیطی ارائه **نمیشوند** (یک هوک در سطح `tools/list` بهعنوان پیگیری بعدی ثبت شده است). تابع `estimateManifestTokens()` برای مقایسهٔ هزینهٔ توکن مانیفست پیش و پس از کاهش در دسترس است.
+شکل غنیتر `ToolProfile` پشت `reduceToolManifest` همچنین از فیلتر محدوده تقاطع (`allowScopes`، با تطبیق حروف عام `read:*` -style ) و یک سرپوش قطعی `maxTools` پشتیبانی میکند، اما این دو دستگیره در زمان ثبت به مانیفست کامل نیاز دارند و** نه** امروزه از طریق متغیرهای محیطی در معرض دید قرار می گیرد (قلاب `tools/list` -level یک پیگیری ردیابی شده است). `estimateManifestTokens()` برای مقایسه هزینه توکن مانیفست قبل و بعد از کاهش در دسترس است.
 
 ---
 
-## ضربان حیات زمان اجرا
+## ضربان قلب زمان اجرا
 
-انتقال stdio هر ۵ ثانیه وضعیت فعالبودن را در `${DATA_DIR}/runtime/mcp-heartbeat.json` ذخیره میکند. داشبورد (`/api/mcp/status`) این فایل را همراه با وضعیت فعالبودن PID میخواند تا مقدار `online` را تعیین کند. در عوض، انتقالهای HTTP وضعیت را از `getMcpHttpStatus()` درونپردازهای گزارش میکنند (بدون نوشتن فایل).
+حمل و نقل stdio هر 5 ثانیه به `${DATA_DIR}/runtime/mcp-heartbeat.json` ادامه می دهد. داشبورد (`/api/mcp/status`) این فایل را به همراه PID liveness برای استخراج `online` می خواند. HTTP وضعیت گزارش را از `getMcpHttpStatus()` در فرآیند انتقال میدهد (بدون نوشتن فایل).
 
-تصویر لحظهای ضربان حیات شامل موارد زیر است:
+عکس فوری ضربان قلب شامل:
 
 ```json
 {
@@ -545,47 +464,47 @@ MCP_TOOL_ALLOW="omniroute_route_request,omniroute_check_quota" omniroute --mcp
 
 ---
 
-## ثبت گزارش ممیزی
+## ثبت حسابرسی
 
-هر فراخوانی ابزار توسط `open-sse/mcp-server/audit.ts` در جدول SQLite با نام `mcp_tool_audit` ثبت میشود:
+هر فراخوانی ابزار توسط `open-sse/mcp-server/audit.ts` به جدول SQLite `mcp_tool_audit` ثبت می شود:
 
-- نام ابزار، آرگومانها (مطابق `auditLevel` مختص هر ابزار بهصورت هششده/کوتاهشده)، نتیجه
-- مدتزمان بر حسب میلیثانیه، پرچم موفقیت/شکست، پیام خطا (در صورت وجود)
-- هش کلید API، برچسب زمانی
-- ردشدن دامنهها با قالب `scope_denied:<reason>` همراه با فهرست دامنههای موجود ثبت میشود
+- نام ابزار، آرگومان ها (hashed/truncated as per-tool `auditLevel`)، نتیجه
+- مدت زمان بر حسب ms، پرچم success/failure ، پیام خطا (در صورت وجود)
+- هش کلید API ، مهر زمانی
+- انکار دامنه بهعنوان `scope_denied:<reason>` با فهرست محدوده گمشده ثبت میشود
 
-برای بررسی فراخوانیهای اخیر، از داشبورد یا نقاط پایانی REST به نشانیهای `/api/mcp/audit` و `/api/mcp/audit/stats` استفاده کنید.
+از داشبورد یا نقاط پایانی `/api/mcp/audit` و `/api/mcp/audit/stats` REST برای بررسی تماسهای اخیر استفاده کنید.
 
 ---
 
-## فایلها
+## فایل ها
 
-| فایل                                                                     | هدف                                                                      |
-| :----------------------------------------------------------------------- | :----------------------------------------------------------------------- |
-| `open-sse/mcp-server/server.ts`                                          | کارخانهٔ سرور MCP، نقطهٔ ورود stdio، ثبت ابزارهای محدودشده بر اساس دامنه |
-| `open-sse/mcp-server/httpTransport.ts`                                   | انتقال SSE و HTTP قابلجریان (مدیریت نشست)                                |
-| `open-sse/mcp-server/scopeEnforcement.ts`                                | ارزیابی دامنهٔ ابزار و تشخیص فراخواننده                                  |
-| `open-sse/mcp-server/audit.ts`                                           | ثبت گزارش ممیزی فراخوانی ابزار (`mcp_tool_audit`)                        |
-| `open-sse/mcp-server/runtimeHeartbeat.ts`                                | نویسندهٔ ضربان حیات stdio (`mcp-heartbeat.json`)                         |
-| `open-sse/mcp-server/descriptionCompressor.ts`                           | فشردهسازی توضیحات برای رجیستریهای ابزار، پرامپت و منبع                   |
-| `open-sse/mcp-server/schemas/tools.ts`                                   | طرحوارههای Zod و رجیستری ابزار (`MCP_TOOLS`، ۴۵ ورودی)                   |
-| `open-sse/mcp-server/tools/advancedTools.ts`                             | کنترلکنندههای ابزارهای فاز ۲، کش و 1proxy                                |
-| `open-sse/mcp-server/tools/compressionTools.ts`                          | کنترلکنندههای ابزار فشردهسازی                                            |
-| `open-sse/mcp-server/tools/memoryTools.ts`                               | تعاریف ابزارهای حافظه (۳ ابزار)                                          |
-| `open-sse/mcp-server/tools/skillTools.ts`                                | تعاریف ابزارهای مهارت (۴ ابزار)                                          |
-| `open-sse/mcp-server/tools/notionTools.ts`                               | تعاریف ابزارهای منبع زمینهٔ Notion (۶ ابزار)                             |
-| `open-sse/mcp-server/tools/gamificationTools.ts`                         | تعاریف ابزارهای بازیوارسازی (۸ ابزار)                                    |
-| `open-sse/mcp-server/tools/pluginTools.ts`                               | ابزارهای ثبت و مدیریت افزونه (۸ ابزار)                                   |
-| `src/app/api/mcp/status/route.ts`                                        | نقطهٔ پایانی `/api/mcp/status`                                           |
-| `src/app/api/mcp/tools/route.ts`                                         | نقطهٔ پایانی `/api/mcp/tools`                                            |
-| `src/app/api/mcp/sse/route.ts`                                           | مسیر انتقال SSE در `/api/mcp/sse`                                        |
-| `src/app/api/mcp/stream/route.ts`                                        | مسیر انتقال HTTP قابلجریان در `/api/mcp/stream`                          |
-| `src/app/api/mcp/audit/route.ts`                                         | پرسوجوی گزارش ممیزی `/api/mcp/audit`                                     |
-| `src/app/api/mcp/audit/stats/route.ts`                                   | معیارهای تجمیعشدهٔ ممیزی `/api/mcp/audit/stats`                          |
-| `src/lib/notion/api.ts`                                                  | کلاینت REST API مربوط به Notion (تلاش مجدد، مهلت زمانی، طبقهبندی خطا)    |
-| `src/lib/db/notion.ts`                                                   | ماندگارسازی توکن Notion (جدول `key_value`)                               |
-| `src/app/api/settings/notion/route.ts`                                   | API تنظیمات Notion‏ (GET/POST/DELETE)                                    |
-| `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` | رابط کاربری مدیریت توکن Notion                                           |
-| `tests/unit/notion-api.test.ts`                                          | آزمونهای کلاینت API مربوط به Notion‏ (۷)                                 |
-| `tests/unit/notion-tools.test.ts`                                        | آزمونهای اعمال دامنه برای ابزارهای Notion‏ (۱۰)                          |
-| `tests/unit/db/notion.test.mjs`                                          | آزمونهای ماژول پایگاه دادهٔ Notion‏ (۳)                                  |
+| فایل                                                                     | هدف                                                          |
+| :----------------------------------------------------------------------- | :----------------------------------------------------------- |
+| `open-sse/mcp-server/server.ts`                                          | کارخانه سرور MCP ، نقطه ورودی stdio، ثبت ابزارهای scoped     |
+| `open-sse/mcp-server/httpTransport.ts`                                   | SSE + حمل و نقل HTTP قابل جریان (مدیریت جلسه)                |
+| `open-sse/mcp-server/scopeEnforcement.ts`                                | ارزیابی دامنه ابزار و وضوح تماس گیرنده                       |
+| `open-sse/mcp-server/audit.ts`                                           | ثبت حسابرسی تماس ابزار (`mcp_tool_audit`)                    |
+| `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio heartbeat writer (`mcp-heartbeat.json`)                |
+| `open-sse/mcp-server/descriptionCompressor.ts`                           | فشرده سازی توضیحات برای ثبت ابزار / اعلان / منبع             |
+| `open-sse/mcp-server/schemas/tools.ts`                                   | طرحوارههای Zod رجیستری ابزار + (`MCP_TOOLS`، 45 ورودی)       |
+| `open-sse/mcp-server/tools/advancedTools.ts`                             | فاز 2 + cache + 1proxy tool handlers                         |
+| `open-sse/mcp-server/tools/compressionTools.ts`                          | دسته های ابزار فشرده سازی                                    |
+| `open-sse/mcp-server/tools/memoryTools.ts`                               | تعاریف ابزار حافظه (3 ابزار)                                 |
+| `open-sse/mcp-server/tools/skillTools.ts`                                | تعاریف ابزار مهارت (4 ابزار)                                 |
+| `open-sse/mcp-server/tools/notionTools.ts`                               | تعاریف ابزار منبع زمینه Notion (6 ابزار)                     |
+| `open-sse/mcp-server/tools/gamificationTools.ts`                         | تعاریف ابزار گیمیفیکیشن (8 ابزار)                            |
+| `open-sse/mcp-server/tools/pluginTools.ts`                               | ابزارهای ثبت و مدیریت پلاگین (8 ابزار)                       |
+| `src/app/api/mcp/status/route.ts`                                        | نقطه پایان `/api/mcp/status`                                 |
+| `src/app/api/mcp/tools/route.ts`                                         | نقطه پایان `/api/mcp/tools`                                  |
+| `src/app/api/mcp/sse/route.ts`                                           | مسیر حمل و نقل `/api/mcp/sse` SSE                            |
+| `src/app/api/mcp/stream/route.ts`                                        | مسیر حمل و نقل HTTP قابل جریان `/api/mcp/stream`             |
+| `src/app/api/mcp/audit/route.ts`                                         | جستجوی گزارش حسابرسی `/api/mcp/audit`                        |
+| `src/app/api/mcp/audit/stats/route.ts`                                   | معیارهای حسابرسی انبوه `/api/mcp/audit/stats`                |
+| `src/lib/notion/api.ts`                                                  | مشتری Notion REST API (تلاش مجدد، مهلت زمانی، طبقه بندی خطا) |
+| `src/lib/db/notion.ts`                                                   | تداوم نشانه Notion (جدول `key_value` )                       |
+| `src/app/api/settings/notion/route.ts`                                   | تنظیمات Notion API (GET/POST/DELETE)                         |
+| `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` | مدیریت توکن Notion UI                                        |
+| `tests/unit/notion-api.test.ts`                                          | تست های مشتری Notion API (7)                                 |
+| `tests/unit/notion-tools.test.ts`                                        | تست های اجرای دامنه ابزار Notion (10)                        |
+| `tests/unit/db/notion.test.mjs`                                          | تست های ماژول Notion DB (3)                                  |
