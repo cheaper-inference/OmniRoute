@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Podrobnosti o využití",
     "quotaPlanBadge": "Plán předplatného (z údajů o využití)",
+    "codexAccountPersonal": "Osobní",
+    "codexAccountBusiness": "Firemní",
+    "codexAccountRole": "Role: {role}",
     "anonymousFallbackTitle": "Anonymní záložní řešení",
     "anonymousFallbackDesc": "Když jsou všechny nakonfigurované připojení vyčerpány (kvóta, kredity nebo expirace), dočasně použijte bezklíčovou úroveň tohoto poskytovatele. Vypněte, abyste tohoto poskytovatele přeskočili místo odesílání anonymních požadavků — doporučeno, když bezklíčová úroveň je odmítá (401).",
     "anonymousFallbackEnabled": "Anonymní záložní možnost povolena pro {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Transformace streamu se nezdařila"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokeny (tento cyklus)",
+    "cursorModelUsageBilledHint": "Účtováno službou Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Vstup",
+    "cursorModelUsageOutput": "Výstup",
+    "cursorModelUsageCacheRead": "Čtení z mezipaměti",
+    "cursorModelUsageCacheWrite": "Zápis do mezipaměti",
+    "cursorModelUsageCost": "Náklady",
     "healthExtraUsageBypass": "Kvóta je vyčerpána; dodatečné využití je povoleno, takže služba pokračuje.",
     "healthPaidCreditsBypass": "Kvóta je vyčerpána; dostupné placené kredity umožňují pokračování služby.",
     "healthFilteringBypass": "Kvóta je vyčerpána; místní filtrování kvót je vypnuto, takže služba pokračuje.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Byly zjištěny chyby při obnovení tokenu",
       "unknown": "Zdravotní stav neznámý"
     },
+    "tokenHealthRefreshAll": "Obnovit vše",
+    "tokenHealthRefreshResult": "{refreshed} obnoveno, {failed} selhalo, {skipped} přeskočeno",
     "systemMonitor": {
       "metricsAriaLabel": "Systémové metriky",
       "memory": "Paměť",

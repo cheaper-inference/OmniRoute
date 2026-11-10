@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Gebruiksgegevens",
     "quotaPlanBadge": "Abonnementsplan (op basis van gebruiksgegevens)",
+    "codexAccountPersonal": "Persoonlijk",
+    "codexAccountBusiness": "Zakelijk",
+    "codexAccountRole": "Rol: {role}",
     "anonymousFallbackTitle": "Anonieme fallback",
     "anonymousFallbackDesc": "Wanneer alle geconfigureerde verbindingen zijn uitgeput (quota, tegoeden of vervaldatum), gebruik tijdelijk de keyless-laag van deze provider. Zet uit om deze provider over te slaan in plaats van anonieme verzoeken te verzenden - aanbevolen wanneer de keyless-laag deze afwijst (401).",
     "anonymousFallbackEnabled": "Anonieme fallback ingeschakeld voor {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Transformeren van stream mislukt"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokens (deze cyclus)",
+    "cursorModelUsageBilledHint": "Gefactureerd door Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Invoer",
+    "cursorModelUsageOutput": "Uitvoer",
+    "cursorModelUsageCacheRead": "Cache-lezen",
+    "cursorModelUsageCacheWrite": "Cache schrijven",
+    "cursorModelUsageCost": "Kosten",
     "healthExtraUsageBypass": "Quotum verbruikt; extra gebruik is toegestaan, dus de dienst gaat door.",
     "healthPaidCreditsBypass": "Quotum verbruikt; beschikbare betaalde credits maken voortzetting van de dienst mogelijk.",
     "healthFilteringBypass": "Quotum verbruikt; lokale quotumfiltering is uitgeschakeld, dus de dienst gaat door.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Token vernieuwingsfouten gedetecteerd",
       "unknown": "Gezondheidsstatus onbekend"
     },
+    "tokenHealthRefreshAll": "Alles vernieuwen",
+    "tokenHealthRefreshResult": "{refreshed} ververst, {failed} mislukt, {skipped} overgeslagen",
     "systemMonitor": {
       "metricsAriaLabel": "Systeemstatistieken",
       "memory": "Geheugen",

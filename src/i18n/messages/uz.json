@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Foydalanish tafsilotlari",
     "quotaPlanBadge": "Obuna rejasi (foydalanish ma'lumotlaridan)",
+    "codexAccountPersonal": "Shaxsiy",
+    "codexAccountBusiness": "Biznes",
+    "codexAccountRole": "Rol: {role}",
     "anonymousFallbackTitle": "Anonim zaxira",
     "anonymousFallbackDesc": "Barcha sozlangan ulanishlar tugaganda (kvota, kreditlar yoki amal qilish muddati), ushbu provayderning kalitsiz tarifidan vaqtincha foydalaning. Anonim soʻrovlarni yuborish oʻrniga ushbu provayderni chetlab oʻtish uchun buni oʻchiring — kalitsiz tarif ularni rad etganda (401) tavsiya etiladi.",
     "anonymousFallbackEnabled": "{provider} uchun anonim zaxira yoqildi",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Oqimni o‘zgartirib bo‘lmadi"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokenlari (ushbu davr)",
+    "cursorModelUsageBilledHint": "Cursor tomonidan hisoblangan",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Kiritish",
+    "cursorModelUsageOutput": "Chiqish",
+    "cursorModelUsageCacheRead": "Keshdan oʻqish",
+    "cursorModelUsageCacheWrite": "Keshga yozish",
+    "cursorModelUsageCost": "Narx",
     "healthExtraUsageBypass": "Kvota tugagan; qo‘shimcha foydalanishga ruxsat berilgan, shuning uchun xizmat davom etadi.",
     "healthPaidCreditsBypass": "Kvota tugagan; mavjud pullik kreditlar xizmatni davom ettirish imkonini beradi.",
     "healthFilteringBypass": "Kvota tugagan; mahalliy kvota filtrlash o‘chirilgan, shuning uchun xizmat davom etadi.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Tokenlarni yangilashda xatoliklar aniqlandi",
       "unknown": "Holat noma’lum"
     },
+    "tokenHealthRefreshAll": "Barchasini yangilash",
+    "tokenHealthRefreshResult": "{refreshed} yangilandi, {failed} muvaffaqiyatsiz boʻldi, {skipped} tashlab qoldi",
     "systemMonitor": {
       "metricsAriaLabel": "Tizim ko‘rsatkichlari",
       "memory": "Xotira",

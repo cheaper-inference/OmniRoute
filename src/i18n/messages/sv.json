@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Användningsdetaljer",
     "quotaPlanBadge": "Abonnemangsplan (utifrån användningsdata)",
+    "codexAccountPersonal": "Privat",
+    "codexAccountBusiness": "Företag",
+    "codexAccountRole": "Roll: {role}",
     "anonymousFallbackTitle": "Anonym fallback",
     "anonymousFallbackDesc": "När alla konfigurerade anslutningar är uttömda (kvot, krediter eller utgång), använd tillfälligt denna leverantörs nyckellösa nivå. Stäng av för att hoppa över denna leverantör istället för att skicka anonyma förfrågningar — rekommenderas när den nyckellösa nivån avvisar dem (401).",
     "anonymousFallbackEnabled": "Anonym fallback aktiverad för {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Misslyckades med att transformera strömmen"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokens (denna cykel)",
+    "cursorModelUsageBilledHint": "Fakturerat av Cursor",
+    "cursorModelUsageModel": "Modell",
+    "cursorModelUsageInput": "Indata",
+    "cursorModelUsageOutput": "Utdata",
+    "cursorModelUsageCacheRead": "Cacheläsning",
+    "cursorModelUsageCacheWrite": "Cache Skriv",
+    "cursorModelUsageCost": "Kostnad",
     "healthExtraUsageBypass": "Kvoten är slut; extra användning är tillåten, så tjänsten fortsätter.",
     "healthPaidCreditsBypass": "Kvoten är slut; tillgängliga betalda krediter gör att tjänsten kan fortsätta.",
     "healthFilteringBypass": "Kvoten är slut; lokal kvotfiltrering är avstängd, så tjänsten fortsätter.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Tokenuppdateringsfel upptäckta",
       "unknown": "Hälsostatus okänd"
     },
+    "tokenHealthRefreshAll": "Uppdatera alla",
+    "tokenHealthRefreshResult": "{refreshed} uppdaterade, {failed} misslyckades, {skipped} hoppades över",
     "systemMonitor": {
       "metricsAriaLabel": "Systemmetrik",
       "memory": "Minne",

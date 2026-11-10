@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Detalhes de uso",
     "quotaPlanBadge": "Plano de assinatura (dos dados de uso)",
+    "codexAccountPersonal": "Pessoal",
+    "codexAccountBusiness": "Empresarial",
+    "codexAccountRole": "Função: {role}",
     "anonymousFallbackTitle": "Fallback anônimo",
     "anonymousFallbackDesc": "Quando todas as conexões configuradas estiverem esgotadas (cota, créditos ou expiração), use temporariamente a camada sem chave deste provedor. Desative para ignorar este provedor em vez de enviar solicitações anônimas — recomendado quando a camada sem chave as rejeita (401).",
     "anonymousFallbackEnabled": "Fallback anônimo ativado para {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Falha ao transformar o stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokens de API (este ciclo)",
+    "cursorModelUsageBilledHint": "Cobrado pelo Cursor",
+    "cursorModelUsageModel": "Modelo",
+    "cursorModelUsageInput": "Entrada",
+    "cursorModelUsageOutput": "Saída",
+    "cursorModelUsageCacheRead": "Leitura de cache",
+    "cursorModelUsageCacheWrite": "Escrita em Cache",
+    "cursorModelUsageCost": "Custo",
     "healthExtraUsageBypass": "Cota esgotada; o uso extra está permitido, então o serviço continua.",
     "healthPaidCreditsBypass": "Cota esgotada; os créditos pagos disponíveis permitem continuar o serviço.",
     "healthFilteringBypass": "Cota esgotada; a filtragem local de cotas está desativada, então o serviço continua.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Falhas na atualização do token detectadas",
       "unknown": "Status de saúde desconhecido"
     },
+    "tokenHealthRefreshAll": "Atualizar tudo",
+    "tokenHealthRefreshResult": "{refreshed} atualizados, {failed} falharam, {skipped} ignorados",
     "systemMonitor": {
       "metricsAriaLabel": "Métricas do sistema",
       "memory": "Memória",

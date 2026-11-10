@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Kullanım ayrıntıları",
     "quotaPlanBadge": "Abonelik planı (kullanım verilerinden)",
+    "codexAccountPersonal": "Kişisel",
+    "codexAccountBusiness": "İş",
+    "codexAccountRole": "Rol: {role}",
     "anonymousFallbackTitle": "Anonim yedekleme",
     "anonymousFallbackDesc": "Tüm yapılandırılmış bağlantılar tükendiğinde (kota, kredi veya süresi dolmuş), bu sağlayıcının anahtarsız katmanını geçici olarak kullanın. Anahtarsız katmanın bunları reddettiği (401) durumlarda, anonim istek göndermek yerine bu sağlayıcıyı atlamak için kapatın — önerilir.",
     "anonymousFallbackEnabled": "{provider} için anonim geri dönüş etkinleştirildi",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Akış dönüştürülemedi"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokenları (bu dönem)",
+    "cursorModelUsageBilledHint": "Cursor tarafından faturalandırıldı",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Girdi",
+    "cursorModelUsageOutput": "Çıktı",
+    "cursorModelUsageCacheRead": "Önbellek okuma",
+    "cursorModelUsageCacheWrite": "Önbellek Yazımı",
+    "cursorModelUsageCost": "Maliyet",
     "healthExtraUsageBypass": "Kota tükendi; ek kullanıma izin verildiği için hizmet devam ediyor.",
     "healthPaidCreditsBypass": "Kota tükendi; kullanılabilir ücretli krediler hizmetin sürmesini sağlıyor.",
     "healthFilteringBypass": "Kota tükendi; yerel kota filtreleme kapalı olduğu için hizmet devam ediyor.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Token yenileme hataları tespit edildi",
       "unknown": "Sağlık durumu bilinmiyor"
     },
+    "tokenHealthRefreshAll": "Tümünü Yenile",
+    "tokenHealthRefreshResult": "{refreshed} yenilendi, {failed} başarısız, {skipped} atlandı",
     "systemMonitor": {
       "metricsAriaLabel": "Sistem metrikleri",
       "memory": "Hafıza",

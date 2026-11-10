@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Օգտագործման մանրամասներ",
     "quotaPlanBadge": "Բաժանորդագրության պլան (օգտագործման տվյալներից)",
+    "codexAccountPersonal": "Անձնական",
+    "codexAccountBusiness": "Բիզնես",
+    "codexAccountRole": "Դեր՝ {role}",
     "anonymousFallbackTitle": "Անանուն պահուստային տարբերակ",
     "anonymousFallbackDesc": "Երբ կազմաձևված բոլոր կապերի ռեսուրսները սպառվեն (քվոտա, կրեդիտներ կամ վավերականության ժամկետ), ժամանակավորապես օգտագործեք այս մատակարարի՝ բանալի չպահանջող մակարդակը։ Անջատեք՝ անանուն հարցումներ ուղարկելու փոխարեն այս մատակարարն անտեսելու համար։ Սա խորհուրդ է տրվում, երբ բանալի չպահանջող մակարդակը մերժում է դրանք (401)։",
     "anonymousFallbackEnabled": "Անանուն պահուստային տարբերակը միացված է {provider}-ի համար",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Չհաջողվեց փոխակերպել հոսքը"
   },
   "usage": {
+    "cursorModelUsageTitle": "API թոքեններ (այս ցիկլ)",
+    "cursorModelUsageBilledHint": "Հաշվարկված է Cursor-ի կողմից",
+    "cursorModelUsageModel": "Մոդել",
+    "cursorModelUsageInput": "Մուտք",
+    "cursorModelUsageOutput": "Ելք",
+    "cursorModelUsageCacheRead": "Քեշից ընթերցում",
+    "cursorModelUsageCacheWrite": "Քեշի գրառում",
+    "cursorModelUsageCost": "Արժեք",
     "healthExtraUsageBypass": "Քվոտան սպառվել է․ լրացուցիչ օգտագործումը թույլատրված է, ուստի ծառայությունը շարունակվում է։",
     "healthPaidCreditsBypass": "Քվոտան սպառվել է․ հասանելի վճարովի կրեդիտները թույլ են տալիս շարունակել ծառայությունը։",
     "healthFilteringBypass": "Քվոտան սպառվել է․ տեղային քվոտայի զտումն անջատված է, ուստի ծառայությունը շարունակվում է։",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Հայտնաբերվել են թոքենների թարմացման ձախողումներ",
       "unknown": "Վիճակն անհայտ է"
     },
+    "tokenHealthRefreshAll": "Թարմացնել բոլորը",
+    "tokenHealthRefreshResult": "{refreshed} թարմացվել են, {failed} ձախողվել են, {skipped} բաց են թողնվել",
     "systemMonitor": {
       "metricsAriaLabel": "Համակարգի չափորոշիչներ",
       "memory": "Հիշողություն",

@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Detalles de uso",
     "quotaPlanBadge": "Plan de suscripción (según datos de uso)",
+    "codexAccountPersonal": "Personal",
+    "codexAccountBusiness": "Empresa",
+    "codexAccountRole": "Rol: {role}",
     "anonymousFallbackTitle": "Recaudación anónima",
     "anonymousFallbackDesc": "Cuando todas las conexiones configuradas están agotadas (cuota, créditos o expiración), utiliza temporalmente el nivel sin clave de este proveedor. Desactiva para omitir este proveedor en lugar de enviar solicitudes anónimas — recomendado cuando el nivel sin clave las rechaza (401).",
     "anonymousFallbackEnabled": "Fallback anónimo habilitado para {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "No se pudo transformar el flujo"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokens de API (este ciclo)",
+    "cursorModelUsageBilledHint": "Facturado por Cursor",
+    "cursorModelUsageModel": "Modelo",
+    "cursorModelUsageInput": "Entrada",
+    "cursorModelUsageOutput": "Salida",
+    "cursorModelUsageCacheRead": "Lectura de caché",
+    "cursorModelUsageCacheWrite": "Escritura en caché",
+    "cursorModelUsageCost": "Coste",
     "healthExtraUsageBypass": "Cuota agotada; se permite el uso adicional, por lo que el servicio continúa.",
     "healthPaidCreditsBypass": "Cuota agotada; los créditos de pago disponibles permiten continuar el servicio.",
     "healthFilteringBypass": "Cuota agotada; el filtrado local de cuotas está desactivado, por lo que el servicio continúa.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Se detectaron fallos en la actualización del token",
       "unknown": "Estado de salud desconocido"
     },
+    "tokenHealthRefreshAll": "Actualizar todo",
+    "tokenHealthRefreshResult": "{refreshed} actualizados, {failed} fallidos, {skipped} omitidos",
     "systemMonitor": {
       "metricsAriaLabel": "Métricas del sistema",
       "memory": "Memoria",

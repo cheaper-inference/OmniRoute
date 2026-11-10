@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Podrobnosti uporabe",
     "quotaPlanBadge": "Naročniški paket (iz podatkov o uporabi)",
+    "codexAccountPersonal": "Osebno",
+    "codexAccountBusiness": "Poslovno",
+    "codexAccountRole": "Vloga: {role}",
     "anonymousFallbackTitle": "Anonimni nadomestni način",
     "anonymousFallbackDesc": "Ko so izčrpane vse konfigurirane povezave (kvota, dobroimetje ali veljavnost), začasno uporabite raven tega ponudnika brez ključa. Izklopite, če želite tega ponudnika preskočiti, namesto da bi pošiljali anonimne zahteve — priporočljivo, kadar jih raven brez ključa zavrne (401).",
     "anonymousFallbackEnabled": "Anonimni nadomestni način je omogočen za {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Pretvorba toka ni uspela"
   },
   "usage": {
+    "cursorModelUsageTitle": "Žetoni API (ta cikel)",
+    "cursorModelUsageBilledHint": "Zaračunal Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Vnos",
+    "cursorModelUsageOutput": "Izhod",
+    "cursorModelUsageCacheRead": "Branje iz predpomnilnika",
+    "cursorModelUsageCacheWrite": "Zapis v predpomnilnik",
+    "cursorModelUsageCost": "Strošek",
     "healthExtraUsageBypass": "Kvota je izčrpana; dodatna uporaba je dovoljena, zato se storitev nadaljuje.",
     "healthPaidCreditsBypass": "Kvota je izčrpana; razpoložljivi plačani krediti omogočajo nadaljevanje storitve.",
     "healthFilteringBypass": "Kvota je izčrpana; lokalno filtriranje kvot je izklopljeno, zato se storitev nadaljuje.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Zaznane so bile napake pri osveževanju žetonov",
       "unknown": "Stanje ni znano"
     },
+    "tokenHealthRefreshAll": "Osveži vse",
+    "tokenHealthRefreshResult": "{refreshed} osveženih, {failed} neuspešnih, {skipped} preskočenih",
     "systemMonitor": {
       "metricsAriaLabel": "Sistemske metrike",
       "memory": "Pomnilnik",

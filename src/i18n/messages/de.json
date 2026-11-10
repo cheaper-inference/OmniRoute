@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Nutzungsdetails",
     "quotaPlanBadge": "Abo-Plan (aus Nutzungsdaten)",
+    "codexAccountPersonal": "Persönlich",
+    "codexAccountBusiness": "Geschäftlich",
+    "codexAccountRole": "Rolle: {role}",
     "anonymousFallbackTitle": "Anonymer Fallback",
     "anonymousFallbackDesc": "Wenn alle konfigurierten Verbindungen erschöpft sind (Kontingent, Guthaben oder Ablauf), verwenden Sie vorübergehend die schlüssellose Stufe dieses Anbieters. Deaktivieren Sie dies, um diesen Anbieter zu überspringen, anstatt anonyme Anfragen zu senden – empfohlen, wenn die schlüssellose Stufe diese ablehnt (401).",
     "anonymousFallbackEnabled": "Anonymer Fallback für {provider} aktiviert",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Stream konnte nicht transformiert werden"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-Token (dieser Zyklus)",
+    "cursorModelUsageBilledHint": "Von Cursor abgerechnet",
+    "cursorModelUsageModel": "Modell",
+    "cursorModelUsageInput": "Eingabe",
+    "cursorModelUsageOutput": "Ausgabe",
+    "cursorModelUsageCacheRead": "Cache-Lesevorgang",
+    "cursorModelUsageCacheWrite": "Cache-Schreiben",
+    "cursorModelUsageCost": "Kosten",
     "healthExtraUsageBypass": "Kontingent aufgebraucht; zusätzliche Nutzung ist erlaubt, daher läuft der Dienst weiter.",
     "healthPaidCreditsBypass": "Kontingent aufgebraucht; verfügbare bezahlte Guthaben ermöglichen den weiteren Betrieb.",
     "healthFilteringBypass": "Kontingent aufgebraucht; die lokale Kontingentfilterung ist deaktiviert, daher läuft der Dienst weiter.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Token-Aktualisierungsfehler erkannt",
       "unknown": "Gesundheitsstatus unbekannt"
     },
+    "tokenHealthRefreshAll": "Alle aktualisieren",
+    "tokenHealthRefreshResult": "{refreshed} aktualisiert, {failed} fehlgeschlagen, {skipped} übersprungen",
     "systemMonitor": {
       "metricsAriaLabel": "Systemmetriken",
       "memory": "Speicher",

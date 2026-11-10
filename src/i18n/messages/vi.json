@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Chi tiết sử dụng",
     "quotaPlanBadge": "Gói đăng ký (từ dữ liệu sử dụng)",
+    "codexAccountPersonal": "Cá nhân",
+    "codexAccountBusiness": "Doanh nghiệp",
+    "codexAccountRole": "Vai trò: {role}",
     "anonymousFallbackTitle": "Dự phòng ẩn danh",
     "anonymousFallbackDesc": "Khi tất cả kết nối đã cấu hình đều cạn kiệt (hạn ngạch, tín dụng hoặc hết hạn), hãy tạm thời sử dụng tầng không cần khóa của nhà cung cấp này. Tắt tùy chọn này để bỏ qua nhà cung cấp thay vì gửi yêu cầu ẩn danh — khuyến nghị khi tầng không cần khóa từ chối các yêu cầu đó (401).",
     "anonymousFallbackEnabled": "Đã bật dự phòng ẩn danh cho {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Không thể chuyển đổi luồng"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (chu kỳ này)",
+    "cursorModelUsageBilledHint": "Do Cursor tính phí",
+    "cursorModelUsageModel": "Mô hình",
+    "cursorModelUsageInput": "Đầu vào",
+    "cursorModelUsageOutput": "Đầu ra",
+    "cursorModelUsageCacheRead": "Đọc cache",
+    "cursorModelUsageCacheWrite": "Ghi cache",
+    "cursorModelUsageCost": "Chi phí",
     "healthExtraUsageBypass": "Đã hết hạn mức; cho phép sử dụng thêm nên dịch vụ vẫn tiếp tục.",
     "healthPaidCreditsBypass": "Đã hết hạn mức; tín dụng trả phí khả dụng cho phép dịch vụ tiếp tục.",
     "healthFilteringBypass": "Đã hết hạn mức; bộ lọc hạn mức cục bộ đã tắt nên dịch vụ vẫn tiếp tục.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Đã phát hiện lỗi làm mới token",
       "unknown": "Không rõ trạng thái sức khỏe"
     },
+    "tokenHealthRefreshAll": "Làm mới tất cả",
+    "tokenHealthRefreshResult": "{refreshed} đã làm mới, {failed} thất bại, {skipped} đã bỏ qua",
     "systemMonitor": {
       "metricsAriaLabel": "Các chỉ số hệ thống",
       "memory": "Bộ nhớ",

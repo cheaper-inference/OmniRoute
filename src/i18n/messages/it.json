@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Dettagli utilizzo",
     "quotaPlanBadge": "Piano di abbonamento (dai dati di utilizzo)",
+    "codexAccountPersonal": "Personale",
+    "codexAccountBusiness": "Aziendale",
+    "codexAccountRole": "Ruolo: {role}",
     "anonymousFallbackTitle": "Fallback anonimo",
     "anonymousFallbackDesc": "Quando tutte le connessioni configurate sono esaurite (quota, crediti o scadenza), utilizza temporaneamente il livello senza chiave di questo fornitore. Disattiva per saltare questo fornitore invece di inviare richieste anonime — consigliato quando il livello senza chiave le rifiuta (401).",
     "anonymousFallbackEnabled": "Fallback anonimo abilitato per {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Impossibile trasformare lo stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (questo ciclo)",
+    "cursorModelUsageBilledHint": "Fatturato da Cursor",
+    "cursorModelUsageModel": "Modello",
+    "cursorModelUsageInput": "Input",
+    "cursorModelUsageOutput": "Output",
+    "cursorModelUsageCacheRead": "Lettura cache",
+    "cursorModelUsageCacheWrite": "Scrittura nella cache",
+    "cursorModelUsageCost": "Costo",
     "healthExtraUsageBypass": "Quota esaurita; l’utilizzo aggiuntivo è consentito, quindi il servizio continua.",
     "healthPaidCreditsBypass": "Quota esaurita; i crediti a pagamento disponibili consentono di continuare il servizio.",
     "healthFilteringBypass": "Quota esaurita; il filtro locale delle quote è disattivato, quindi il servizio continua.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Rilevati errori di aggiornamento del token",
       "unknown": "Stato di salute sconosciuto"
     },
+    "tokenHealthRefreshAll": "Aggiorna tutto",
+    "tokenHealthRefreshResult": "{refreshed} aggiornati, {failed} non riusciti, {skipped} saltati",
     "systemMonitor": {
       "metricsAriaLabel": "Metriche di sistema",
       "memory": "Memoria",

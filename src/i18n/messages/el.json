@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Λεπτομέρειες χρήσης",
     "quotaPlanBadge": "Σχέδιο συνδρομής (από δεδομένα χρήσης)",
+    "codexAccountPersonal": "Προσωπικό",
+    "codexAccountBusiness": "Επιχείρηση",
+    "codexAccountRole": "Ρόλος: {role}",
     "anonymousFallbackTitle": "Ανώνυμη εναλλακτική",
     "anonymousFallbackDesc": "Όταν εξαντληθούν όλες οι διαμορφωμένες συνδέσεις (όριο χρήσης, πιστώσεις ή λήξη), χρησιμοποιήστε προσωρινά το επίπεδο χωρίς κλειδί αυτού του παρόχου. Απενεργοποιήστε αυτήν τη ρύθμιση για να παραλείπεται αυτός ο πάροχος αντί να αποστέλλονται ανώνυμα αιτήματα — συνιστάται όταν το επίπεδο χωρίς κλειδί τα απορρίπτει (401).",
     "anonymousFallbackEnabled": "Η ανώνυμη εναλλακτική ενεργοποιήθηκε για τον {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Αποτυχία μετασχηματισμού της ροής"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (αυτός ο κύκλος)",
+    "cursorModelUsageBilledHint": "Χρέωση από το Cursor",
+    "cursorModelUsageModel": "Μοντέλο",
+    "cursorModelUsageInput": "Είσοδος",
+    "cursorModelUsageOutput": "Έξοδος",
+    "cursorModelUsageCacheRead": "Ανάγνωση κρυφής μνήμης",
+    "cursorModelUsageCacheWrite": "Εγγραφή στην κρυφή μνήμη",
+    "cursorModelUsageCost": "Κόστος",
     "healthExtraUsageBypass": "Το όριο εξαντλήθηκε· επιτρέπεται επιπλέον χρήση, οπότε η υπηρεσία συνεχίζεται.",
     "healthPaidCreditsBypass": "Το όριο εξαντλήθηκε· οι διαθέσιμες πληρωμένες πιστώσεις επιτρέπουν τη συνέχιση της υπηρεσίας.",
     "healthFilteringBypass": "Το όριο εξαντλήθηκε· το τοπικό φιλτράρισμα ορίων είναι απενεργοποιημένο, οπότε η υπηρεσία συνεχίζεται.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Εντοπίστηκαν αποτυχίες ανανέωσης διακριτικών",
       "unknown": "Η κατάσταση των διακριτικών είναι άγνωστη"
     },
+    "tokenHealthRefreshAll": "Ανανέωση όλων",
+    "tokenHealthRefreshResult": "{refreshed} ανανεώθηκαν, {failed} απέτυχαν, {skipped} παραλείφθηκαν",
     "systemMonitor": {
       "metricsAriaLabel": "Μετρικά συστήματος",
       "memory": "Μνήμη",

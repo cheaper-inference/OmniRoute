@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Подробности за използването",
     "quotaPlanBadge": "Абонаментен план (от данни за използване)",
+    "codexAccountPersonal": "Личен",
+    "codexAccountBusiness": "Бизнес",
+    "codexAccountRole": "Роля: {role}",
     "anonymousFallbackTitle": "Анонимен резервен вариант",
     "anonymousFallbackDesc": "Когато всички конфигурирани връзки са изчерпани (квота, кредити или изтичане), временно използвайте безключовия слой на този доставчик. Изключете, за да пропуснете този доставчик вместо да изпращате анонимни заявки — препоръчително, когато безключовият слой ги отхвърля (401).",
     "anonymousFallbackEnabled": "Анонимен резервен вариант е активиран за {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Неуспешно преобразуване на потока"
   },
   "usage": {
+    "cursorModelUsageTitle": "API токени (този цикъл)",
+    "cursorModelUsageBilledHint": "Таксувано от Cursor",
+    "cursorModelUsageModel": "Модел",
+    "cursorModelUsageInput": "Входни данни",
+    "cursorModelUsageOutput": "Резултат",
+    "cursorModelUsageCacheRead": "Четене от кеша",
+    "cursorModelUsageCacheWrite": "Кеш запис",
+    "cursorModelUsageCost": "Цена",
     "healthExtraUsageBypass": "Квотата е изчерпана; допълнителното потребление е разрешено, затова услугата продължава.",
     "healthPaidCreditsBypass": "Квотата е изчерпана; наличните платени кредити позволяват услугата да продължи.",
     "healthFilteringBypass": "Квотата е изчерпана; локалното филтриране на квоти е изключено, затова услугата продължава.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Открити са неуспехи при обновяване на токена",
       "unknown": "Статус на здравето неизвестен"
     },
+    "tokenHealthRefreshAll": "Опресни всички",
+    "tokenHealthRefreshResult": "{refreshed} обновени, {failed} неуспешни, {skipped} пропуснати",
     "systemMonitor": {
       "metricsAriaLabel": "Системни метрики",
       "memory": "Памет",

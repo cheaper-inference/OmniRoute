@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "جزئیات مصرف",
     "quotaPlanBadge": "پلن اشتراک (بر اساس داده‌های مصرف)",
+    "codexAccountPersonal": "شخصی",
+    "codexAccountBusiness": "کسبوکار",
+    "codexAccountRole": "نقش: {role}",
     "anonymousFallbackTitle": "پشتیبانی ناشناس",
     "anonymousFallbackDesc": "زمانی که تمام اتصالات پیکربندی‌شده تمام شده‌اند (سهمیه، اعتبار یا انقضا)، به‌طور موقت از سطح بدون کلید این ارائه‌دهنده استفاده کنید. برای رد کردن این ارائه‌دهنده به‌جای ارسال درخواست‌های ناشناس خاموش کنید — این کار زمانی توصیه می‌شود که سطح بدون کلید آن‌ها را رد کند (401).",
     "anonymousFallbackEnabled": "پشتیبانی ناشناس برای {provider} فعال شد",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "تبدیل استریم ناموفق بود"
   },
   "usage": {
+    "cursorModelUsageTitle": "توکن‌های API (این دوره)",
+    "cursorModelUsageBilledHint": "صورتحساب توسط Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ورودی",
+    "cursorModelUsageOutput": "خروجی",
+    "cursorModelUsageCacheRead": "خواندن از کش",
+    "cursorModelUsageCacheWrite": "نوشتن در حافظه نهان",
+    "cursorModelUsageCost": "هزینه",
     "healthExtraUsageBypass": "سهمیه تمام شده است؛ مصرف اضافه مجاز است، بنابراین سرویس ادامه دارد.",
     "healthPaidCreditsBypass": "سهمیه تمام شده است؛ اعتبار پولی موجود امکان ادامه سرویس را می‌دهد.",
     "healthFilteringBypass": "سهمیه تمام شده است؛ فیلتر محلی سهمیه غیرفعال است، بنابراین سرویس ادامه دارد.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "خطاهای تازه‌سازی توکن شناسایی شدند",
       "unknown": "وضعیت سلامتی ناشناخته است"
     },
+    "tokenHealthRefreshAll": "تازهسازی همه",
+    "tokenHealthRefreshResult": "{refreshed} تازه‌سازی شد، {failed} ناموفق، {skipped} نادیده گرفته شد",
     "systemMonitor": {
       "metricsAriaLabel": "معیارهای سیستم",
       "memory": "حافظه",

@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Dettalji ta' użu",
     "quotaPlanBadge": "Pjan ta' abbonament (mid-data ta' użu)",
+    "codexAccountPersonal": "Personali",
+    "codexAccountBusiness": "Negozju",
+    "codexAccountRole": "Rwol: {role}",
     "anonymousFallbackTitle": "Alternattiva anonima",
     "anonymousFallbackDesc": "Meta l-konnessjonijiet konfigurati kollha jkunu eżawriti (minħabba l-kwota, il-krediti jew l-iskadenza), uża temporanjament il-livell mingħajr ċavetta ta’ dan il-fornitur. Itfi din l-għażla biex taqbeż lil dan il-fornitur minflok ma tibgħat talbiet anonimi — dan huwa rakkomandat meta l-livell mingħajr ċavetta jirrifjutahom (401).",
     "anonymousFallbackEnabled": "L-alternattiva anonima ġiet attivata għal {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "It-trasformazzjoni tal-fluss falliet"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokens tal-API (dan iċ-ċiklu)",
+    "cursorModelUsageBilledHint": "Iffatturat minn Cursor",
+    "cursorModelUsageModel": "Mudell",
+    "cursorModelUsageInput": "Dħul",
+    "cursorModelUsageOutput": "Riżultat",
+    "cursorModelUsageCacheRead": "Qari mill-cache",
+    "cursorModelUsageCacheWrite": "Kitba fil-Cache",
+    "cursorModelUsageCost": "Spiża",
     "healthExtraUsageBypass": "Il-kwota ntużat kollha; l-użu żejjed huwa permess, għalhekk is-servizz ikompli.",
     "healthPaidCreditsBypass": "Il-kwota ntużat kollha; il-krediti mħallsa disponibbli jippermettu li s-servizz ikompli.",
     "healthFilteringBypass": "Il-kwota ntużat kollha; il-filtrazzjoni lokali tal-kwoti hija diżattivata, għalhekk is-servizz ikompli.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Instabu fallimenti fit-tiġdid tat-tokens",
       "unknown": "L-istatus tas-saħħa mhux magħruf"
     },
+    "tokenHealthRefreshAll": "Aġġorna kollox",
+    "tokenHealthRefreshResult": "{refreshed} aġġornati, {failed} fallati, {skipped} mwarrfa",
     "systemMonitor": {
       "metricsAriaLabel": "Metriċi tas-sistema",
       "memory": "Memorja",

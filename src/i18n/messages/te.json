@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "వినియోగ వివరాలు",
     "quotaPlanBadge": "సభ్యతా ప్లాన్ (వినియోగ డేటా నుండి)",
+    "codexAccountPersonal": "వ్యక్తిగత",
+    "codexAccountBusiness": "వ్యాపారం",
+    "codexAccountRole": "పాత్ర: {role}",
     "anonymousFallbackTitle": "అనామక ఫాల్బ్యాక్",
     "anonymousFallbackDesc": "అన్ని కాన్ఫిగర్ చేసిన కనెక్షన్లు ముగిసినప్పుడు (కోటా, క్రెడిట్స్, లేదా కాలం ముగిసినప్పుడు), తాత్కాలికంగా ఈ ప్రొవైడర్ యొక్క కీ లెస్ టియర్‌ను ఉపయోగించండి. అనామక అభ్యర్థనలను పంపించకుండా ఈ ప్రొవైడర్‌ను దాటించడానికి ఆపివేయండి — కీ లెస్ టియర్ వాటిని తిరస్కరించినప్పుడు (401) సిఫారసు చేయబడింది.",
     "anonymousFallbackEnabled": "{provider} కోసం అనామక ఫాల్బ్యాక్ ప్రారంభించబడింది",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "స్ట్రీమ్‌ను మార్చడం విఫలమైంది"
   },
   "usage": {
+    "cursorModelUsageTitle": "API టోకెన్లు (ఈ చక్రం)",
+    "cursorModelUsageBilledHint": "Cursor బిల్ చేసింది",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ఇన్పుట్",
+    "cursorModelUsageOutput": "అవుట్పుట్",
+    "cursorModelUsageCacheRead": "కాష్ రీడ్",
+    "cursorModelUsageCacheWrite": "క్యాష్ రైట్",
+    "cursorModelUsageCost": "ఖర్చు",
     "healthExtraUsageBypass": "కోటా అయిపోయింది; అదనపు వినియోగానికి అనుమతి ఉంది కాబట్టి సేవ కొనసాగుతుంది.",
     "healthPaidCreditsBypass": "కోటా అయిపోయింది; అందుబాటులో ఉన్న చెల్లింపు క్రెడిట్‌లతో సేవ కొనసాగుతుంది.",
     "healthFilteringBypass": "కోటా అయిపోయింది; స్థానిక కోటా వడపోత నిలిపివేయబడింది కాబట్టి సేవ కొనసాగుతుంది.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "టోకెన్ పునరుద్ధరణ విఫలమయ్యాయి",
       "unknown": "ఆరోగ్య స్థితి తెలియదు"
     },
+    "tokenHealthRefreshAll": "అన్నింటినీ రిఫ్రెష్ చేయి",
+    "tokenHealthRefreshResult": "{refreshed} రీఫ్రెష్ చేయబడింది, {failed} విఫలమైంది, {skipped} దాటవేయబడింది",
     "systemMonitor": {
       "metricsAriaLabel": "సిస్టమ్ మెట్రిక్స్",
       "memory": "మెమరీ",

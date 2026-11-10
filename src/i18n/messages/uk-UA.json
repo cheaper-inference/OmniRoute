@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Подробиці використання",
     "quotaPlanBadge": "План підписки (з даних використання)",
+    "codexAccountPersonal": "Особисте",
+    "codexAccountBusiness": "Бізнес",
+    "codexAccountRole": "Роль: {role}",
     "anonymousFallbackTitle": "Анонімний резервний варіант",
     "anonymousFallbackDesc": "Коли всі налаштовані з'єднання вичерпані (квота, кредити або термін дії), тимчасово використовуйте безключовий рівень цього постачальника. Вимкніть, щоб пропустити цього постачальника замість надсилання анонімних запитів — рекомендовано, коли безключовий рівень їх відхиляє (401).",
     "anonymousFallbackEnabled": "Анонімний резервний варіант увімкнено для {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Не вдалося перетворити потік"
   },
   "usage": {
+    "cursorModelUsageTitle": "Токени API (цей цикл)",
+    "cursorModelUsageBilledHint": "Нараховано Cursor",
+    "cursorModelUsageModel": "Модель",
+    "cursorModelUsageInput": "Вхідні дані",
+    "cursorModelUsageOutput": "Вивід",
+    "cursorModelUsageCacheRead": "Читання з кешу",
+    "cursorModelUsageCacheWrite": "Запис кешу",
+    "cursorModelUsageCost": "Вартість",
     "healthExtraUsageBypass": "Квоту вичерпано; додаткове використання дозволено, тому обслуговування триває.",
     "healthPaidCreditsBypass": "Квоту вичерпано; доступні платні кредити дозволяють продовжити обслуговування.",
     "healthFilteringBypass": "Квоту вичерпано; локальне фільтрування квот вимкнено, тому обслуговування триває.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Виявлено помилки оновлення токенів",
       "unknown": "Статус здоров'я невідомий"
     },
+    "tokenHealthRefreshAll": "Оновити все",
+    "tokenHealthRefreshResult": "{refreshed} оновлено, {failed} не вдалося, {skipped} пропущено",
     "systemMonitor": {
       "metricsAriaLabel": "Системні метрики",
       "memory": "Пам'ять",

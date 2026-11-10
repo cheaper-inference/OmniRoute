@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Maelezo ya matumizi",
     "quotaPlanBadge": "Mpango wa usajili (kutoka kwa data ya matumizi)",
+    "codexAccountPersonal": "Binafsi",
+    "codexAccountBusiness": "Biashara",
+    "codexAccountRole": "Wadhifa: {role}",
     "anonymousFallbackTitle": "Kurejea kwa Kijakazi",
     "anonymousFallbackDesc": "Wakati muunganisho wote uliowekwa umepita (kikomo, mikopo, au muda wa kumalizika), tumia muda huu kiwango kisicho na funguo cha mtoa huduma huyu. Zima ili kupuuza mtoa huduma huyu badala ya kutuma maombi yasiyo na utambulisho — inapendekezwa wakati kiwango kisicho na funguo kinapokataa maombi hayo (401).",
     "anonymousFallbackEnabled": "Fallback isiyojulikana imewezeshwa kwa {provider}",
@@ -10580,6 +10583,14 @@
     "streamTransformFailed": "Imeshindwa kubadilisha mtiririko"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokeni za API (mzunguko huu)",
+    "cursorModelUsageBilledHint": "Imetozwa na Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Ingizo",
+    "cursorModelUsageOutput": "Matokeo",
+    "cursorModelUsageCacheRead": "Usomaji wa kache",
+    "cursorModelUsageCacheWrite": "Uandishi kwenye Akiba",
+    "cursorModelUsageCost": "Gharama",
     "healthExtraUsageBypass": "Kiwango kimeisha; matumizi ya ziada yanaruhusiwa, hivyo huduma inaendelea.",
     "healthPaidCreditsBypass": "Kiwango kimeisha; salio la kulipia linalopatikana linaruhusu huduma kuendelea.",
     "healthFilteringBypass": "Kiwango kimeisha; uchujaji wa kiwango wa ndani umezimwa, hivyo huduma inaendelea.",
@@ -11167,6 +11178,8 @@
       "refreshFailures": "Kukosekana kwa ufanisi wa upya token kumegundulika",
       "unknown": "Hali ya afya haijulikani"
     },
+    "tokenHealthRefreshAll": "Onyesha Upya Zote",
+    "tokenHealthRefreshResult": "{refreshed} imesasishwa, {failed} imeshindwa, {skipped} imerukwa",
     "systemMonitor": {
       "metricsAriaLabel": "Metriki za Mfumo",
       "memory": "Kumbukumbu",
