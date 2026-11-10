@@ -1,3 +1,9 @@
+---
+title: "Connection Concurrency Defaults and Adaptive Mode"
+version: 3.8.54
+lastUpdated: 2026-11-10
+---
+
 # Connection concurrency defaults and adaptive mode
 
 On a provider detail page, the default connection cap selector writes `resilienceSettings.providerQuotaOverrides[providerId].defaultConnectionConcurrency` (1–10000). It applies only when a connection's `maxConcurrent` is null/zero. Explicit positive connection caps take precedence; no configured default preserves previous unlimited account behavior.

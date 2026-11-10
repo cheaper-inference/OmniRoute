@@ -49,6 +49,7 @@ const limiter = new SlidingWindowLimiter();
 interface ProviderQuotaOverrideEntry {
   rpm?: number;
   concurrency?: number;
+  defaultConnectionConcurrency?: number;
   rateLimitCooldownSeconds?: number;
 }
 
@@ -81,6 +82,17 @@ export function getProviderRateLimitCooldownOverrideMs(provider: string): number
   if (!provider) return null;
   const seconds = providerQuotaOverrides?.[provider]?.rateLimitCooldownSeconds;
   return typeof seconds === "number" && seconds > 0 ? seconds * 1000 : null;
+}
+
+/**
+ * Operator-configured default per-connection cap for connections with no explicit
+ * `maxConcurrent`, or null when unset. Read by the combo pre-dispatch cap lookup, which
+ * sits outside the chat request's own resolved `ResilienceSettings`.
+ */
+export function getProviderDefaultConnectionConcurrency(provider: string): number | null {
+  if (!provider) return null;
+  const value = providerQuotaOverrides?.[provider]?.defaultConnectionConcurrency;
+  return typeof value === "number" && value > 0 ? value : null;
 }
 
 export function getProviderDefaultRateLimit(provider: string): RateLimitWindow | undefined {
