@@ -85,12 +85,14 @@ const CJK_EXTRA_CHARS = CHARS_PER_TOKEN - 1;
 
 function cjkExtraChars(value: string): number {
   let count = 0;
-  for (let i = 0; i < value.length; i++) {
-    const code = value.charCodeAt(i);
+  // Iterate by code point: a supplementary Han character is two UTF-16 units.
+  for (const char of value) {
+    const code = char.codePointAt(0) as number;
     if (
       (code >= 0x3000 && code <= 0x9fff) ||
       (code >= 0xac00 && code <= 0xd7af) ||
-      (code >= 0xf900 && code <= 0xfaff)
+      (code >= 0xf900 && code <= 0xfaff) ||
+      (code >= 0x20000 && code <= 0x2fa1f)
     ) {
       count++;
     }

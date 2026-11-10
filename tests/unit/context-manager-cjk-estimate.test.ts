@@ -34,3 +34,11 @@ test("estimateTokens keeps the chars/4 estimate for non-CJK text", () => {
   assert.equal(estimateTokens("a".repeat(100)), 25);
   assert.equal(estimateTokens("naïve café ✓ ".repeat(10)), Math.ceil(130 / 4));
 });
+
+test("estimateTokens gives supplementary Han (Extension B) characters the CJK weight", () => {
+  // U+20000 is one character but two UTF-16 units; both units are outside the BMP ranges.
+  const extB = "\u{20000}".repeat(400);
+  assert.ok(estimateTokens(extB) >= 300, `got ${estimateTokens(extB)}`);
+  const messages = [{ role: "user", content: "\u{2A6D6}".repeat(400) }];
+  assert.ok(estimateTokens(messages) >= 300);
+});
