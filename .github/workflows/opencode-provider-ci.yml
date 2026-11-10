@@ -38,8 +38,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
-          cache-dependency-path: "@omniroute/opencode-provider/package-lock.json"
+          package-manager-cache: false
       - run: npm ci
       - run: npm test
 
@@ -54,8 +53,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: "@omniroute/opencode-provider/package-lock.json"
+          package-manager-cache: false
       - run: npm ci
       - run: npm run build
       - uses: actions/upload-artifact@v7
