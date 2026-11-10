@@ -1,1 +1,0 @@
-- **fix(skills):** the server tool replay table no longer grows without limit; rows older than 30 days and rows beyond the newest 10,000 (never the last day, never a live claim) are removed.
