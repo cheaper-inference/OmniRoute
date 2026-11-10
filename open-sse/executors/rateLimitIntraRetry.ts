@@ -32,7 +32,8 @@ function retryAfterHeaderMs(headers: Headers | null | undefined): number | null 
 export async function readRateLimitRetryHintMs(response: Response): Promise<number | null> {
   const headerMs = retryAfterHeaderMs(response.headers);
   if (headerMs !== null) return headerMs;
-  // Capped at 64 KiB and 5 s like every upstream error body; over the cap or a stall gives no hint.
+  // Capped at 64 KiB and 5 s like every upstream error body. Over the cap gives no hint. After a
+  // stall only the text read so far is parsed, so a partial body usually gives no hint.
   const text = await readErrorBodyText(response.clone()).catch(() => "");
   if (!text) return null;
   return parseDetailedRetryHintFromJsonBody(text, Number.MAX_SAFE_INTEGER)?.retryAfterMs ?? null;
