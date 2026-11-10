@@ -1,0 +1,6 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:test-tla-order
+> node scripts/check/check-test-tla-order.mjs
+
+✔ check:test-tla-order: 8780 files under tests/unit, 45 allowlisted offenders, no new ones.

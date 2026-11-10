@@ -1436,6 +1436,17 @@ async function handleChatImplementation(
       } catch {}
     }
   }
+  // A body that continues another provider's session (opaque reasoning, continuation
+  // ids, a response id) or an already-owned Muse session must not be replayed on a
+  // different provider: provider failover is pinned for it.
+  const bodyObject = (body ?? {}) as Record<string, unknown>;
+  const boundContinuation =
+    muse.bodyCarriesBoundContinuation(bodyObject) ||
+    (await muse.museSessionIsOwned({
+      body: bodyObject,
+      headers: request?.headers ?? null,
+      apiKeyId: apiKeyInfo?.id ?? null,
+    }));
   const response = await dispatchWithProviderFailover({
     modelStr: resolvedModelStr,
     apiKeyInfo,
@@ -1445,6 +1456,7 @@ async function handleChatImplementation(
       forcedConnectionId: requestedConnectionId,
       managedLease,
       comboLiveTest: isComboLiveTest,
+      boundContinuation,
     },
     dispatch: (targetModelStr, failoverOptions) =>
       handleSingleModelChat(

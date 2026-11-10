@@ -1,0 +1,6 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:test-discovery
+> node scripts/check/check-test-discovery.mjs
+
+[test-discovery] OK — 9109 arquivos de teste, 33 collectors, 0 arquivo(s) inventariado(s) em quarentena (não é PASS ativo), 6 órfão(s) congelado(s) (dívida rastreada, só decresce)

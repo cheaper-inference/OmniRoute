@@ -10,7 +10,8 @@
  *   rate limits, timeouts, network errors, 5xx and exhausted quota; never auth,
  *   permission or invalid-request errors. At most `maxProviderAttempts` providers.
  * - Only a failed response moves on, so nothing fails over after the first
- *   streamed byte (a started stream is a 2xx response).
+ *   streamed byte (a started stream is a 2xx response), and a request that
+ *   continues another provider's session is pinned to it.
  * - Every attempt but the last runs with `providerFailoverPending`: no
  *   cooldown-wait restart, no same-account transport retry and no emergency
  *   model swap while another provider of the requested model is still queued.
@@ -43,6 +44,12 @@ export interface ProviderFailoverPins {
   forcedConnectionId?: string | null;
   managedLease?: unknown;
   comboLiveTest?: boolean;
+  /**
+   * The body continues a session that another provider served: opaque reasoning,
+   * continuation ids, a response id, or a Muse session that already has an owner.
+   * Replaying it on another provider would move provider-bound state across accounts.
+   */
+  boundContinuation?: boolean;
 }
 
 function isPinned(pins: ProviderFailoverPins): boolean {
@@ -109,6 +116,7 @@ function failoverTargetBudget(
   if (policy.maxProviderAttempts <= 1) return 0;
   if (modelStr.includes("/")) return 0;
   if (isPinned(pins)) return 0;
+  if (pins.boundContinuation === true) return 0;
   return policy.maxProviderAttempts - 1;
 }
 

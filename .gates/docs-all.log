@@ -1,0 +1,499 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:docs-all
+> npm run check:docs-sync && npm run check:docs-frontmatter && npm run check:docs-counts && npm run check:env-doc-sync && npm run check:deprecated-versions && npm run check:doc-links && npm run check:fabricated-docs
+
+npm warn Unknown env config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:docs-sync
+> node scripts/check/check-docs-sync.mjs
+
+[docs-sync] package.json version: 3.8.54
+[docs-sync] openapi.yaml info.version matches: 3.8.54
+[docs-sync] changelog has top Unreleased section
+[docs-sync] latest changelog release matches package version: 3.8.54
+[docs-sync] llm.txt i18n mirrors match root content: 66 locales
+[docs-sync] CHANGELOG.md i18n translations validated: 66 locales (version sections + size check)
+[docs-sync] PASS - documentation version sync is consistent.
+npm warn Unknown env config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:docs-frontmatter
+> node scripts/check/check-docs-frontmatter.mjs
+
+[docs-frontmatter] OK — 182 compiled doc(s) carry a valid frontmatter title.
+npm warn Unknown env config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:docs-counts
+> node scripts/check/check-docs-counts-sync.mjs
+
+Docs counts sync report
+=======================
+
+• DB migrations count (README mirrors): 226 (real) [STRICT]
+  ✓ docs/i18n/am/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ar/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/az/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/bg/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/bn/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/bs/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/cs/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/da/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/de/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/el/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/es/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/et/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/fa/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/fi/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/fr/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ga/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/gu/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ha/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/he/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/hi/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/hr/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/hu/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/hy/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/id/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ig/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/it/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ja/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ka/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/km/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/kn/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ko/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/lt/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/lv/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ml/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/mr/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ms/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/mt/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/my/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ne/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/nl/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/no/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/or/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/pa/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/phi/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/pl/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/pt/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/pt-BR/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ro/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ru/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/si/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/sk/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/sl/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/sr/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/sv/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/sw/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ta/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/te/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/th/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/tr/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/uk-UA/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/ur/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/uz/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/vi/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/yo/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/zh-CN/README.md — translated database row: 226 migrations; SQL files: 226
+  ✓ docs/i18n/zh-TW/README.md — translated database row: 226 migrations; SQL files: 226
+
+• Provider count: 381 (real) [STRICT]
+  ✓ README.md — 8 aggregate provider count claim(s) match the code
+  ✓ AGENTS.md — 1 aggregate provider count claim(s) match the code
+  ✓ llm.txt — 3 aggregate provider count claim(s) match the code
+
+• Provider count (secondary docs and skills): 381 (real) [STRICT]
+  ✓ docs/architecture/ARCHITECTURE.md — 1 aggregate provider count claim(s) match the code
+  ✓ docs/architecture/CODEBASE_DOCUMENTATION.md — 1 aggregate provider count claim(s) match the code
+  ✓ docs/architecture/REPOSITORY_MAP.md — 2 aggregate provider count claim(s) match the code
+  ✓ docs/frameworks/A2A-SERVER.md — 1 aggregate provider count claim(s) match the code
+  ✓ docs/frameworks/ACP.md — no aggregate provider count claim in this file
+  ✓ docs/frameworks/AGENTBRIDGE.md — 1 aggregate provider count claim(s) match the code
+  ✓ docs/frameworks/OPEN_SSE_ARCHITECTURE.md — 1 aggregate provider count claim(s) match the code
+  ✓ docs/getting-started/FREE-TIERS-GUIDE.md — no aggregate provider count claim in this file
+  ✓ docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md — 1 aggregate provider count claim(s) match the code
+  ✓ docs/guides/FREE_PROVIDER_RANKINGS.md — 1 aggregate provider count claim(s) match the code
+  ✓ src/shared/constants/agentSkills.ts — 1 aggregate provider count claim(s) match the code
+  ✓ skills/README.md — 1 aggregate provider count claim(s) match the code
+  ✓ skills/omni-auth/SKILL.md — 1 aggregate provider count claim(s) match the code
+  ✓ skills/omni-providers/SKILL.md — 2 aggregate provider count claim(s) match the code
+
+• Provider count (package.json description): 381 (real) [STRICT]
+  ✓ package.json — description mentions the live provider count 381
+
+• DB migrations count: 226 (real) [STRICT]
+  ✓ README.md — 1 migrations claim(s) match the code
+  ✓ AGENTS.md — 1 migrations claim(s) match the code
+  ✓ llm.txt — 4 migrations claim(s) match the code
+
+• Package version (docs prose): 3.8.54 (real) [STRICT]
+  ✓ README.md — 5 version claim(s) match package.json 3.8.54
+  ✓ llm.txt — 2 version claim(s) match package.json 3.8.54
+
+• Coverage floor (docs vs blocking ratchet): 67.33 / 67.33 / 72.02 / 65.08 (real) [STRICT]
+  ✓ AGENTS.md — 3 coverage-floor claim(s) meet or exceed the blocking ratchet
+  ✓ README.md — no coverage-floor claim in this file
+
+• i18n locales count: 67 (real) [STRICT]
+  ✓ docs/README.md mentions "67"
+  ✓ docs/guides/I18N.md mentions "67"
+
+• Auto-Combo mode packs: 6 (real) [STRICT]
+  ✓ README.md — no mode packs claim in this file
+  ✓ llm.txt — 1 mode packs claim(s) match the code
+  ✓ docs/guides/FEATURES.md — 1 mode packs claim(s) match the code
+  ✓ docs/architecture/ARCHITECTURE.md — 1 mode packs claim(s) match the code
+  ✓ docs/architecture/REPOSITORY_MAP.md — 1 mode packs claim(s) match the code
+  ✓ docs/routing/AUTO-COMBO.md — 2 mode packs claim(s) match the code
+
+• Auto-Combo mode packs (reference doc must state the count): 6 (real) [STRICT]
+  ✓ docs/routing/AUTO-COMBO.md — 2 mode packs claim(s) match the code
+
+• Auto-Combo mode packs (named in the reference doc): 6 (real) [STRICT]
+  ✓ docs/routing/AUTO-COMBO.md — all 6 mode packs are named
+
+• mode packs pin quality explicitly (live code): 6 (real) [STRICT]
+  ✓ open-sse/services/autoCombo/modePacks.ts — 6 quality pins
+
+• Provider reference total (doc vs live modules): 381 (real) [STRICT]
+  ✓ docs/reference/PROVIDER_REFERENCE.md — doc total 381 matches the live provider modules
+
+• Manifest free-tier capability count (live code): 75 (real) [STRICT]
+  ✓ scripts/check/check-docs-counts-sync.mjs — manifest 75 vs leaf∩registry 75 (leaf 75)
+
+• SVG canonical numbers (live code): 381 providers / 110 MCP tools / 20 strategies / 34 pools (real) [STRICT]
+  ✓ docs/diagrams/readme-hero.svg — 4 canonical claim(s) match the code
+  ✓ docs/diagrams/free-tier-budget.svg — no canonical-number claims in this SVG
+  ✓ docs/diagrams/promise-pillars.svg — 5 canonical claim(s) match the code
+  ✓ docs/diagrams/comparison-table.svg — 3 canonical claim(s) match the code
+  ✓ docs/diagrams/cli-terminal.svg — 1 canonical claim(s) match the code
+  ✓ docs/diagrams/tier-cascade.svg — 1 canonical claim(s) match the code
+  ✓ public/images/tier-flow-dark.svg — 3 canonical claim(s) match the code
+  ✓ public/images/tier-flow-light.svg — 3 canonical claim(s) match the code
+
+• Free-tier headline (live catalog): ~1.62B steady / 34 pools / 6M gated (real) [STRICT]
+  ✓ README.md — 3 headline claim(s) match the live catalog
+  ✓ docs/reference/FREE_TIERS.md — 4 headline claim(s) match the live catalog
+
+• compression engines (live code): 12 (real) [STRICT]
+  ✓ README.md — 4 compression engines claim(s) match the code
+
+• MCP tools (live code): 110 (real) [STRICT]
+  ✓ README.md — 3 MCP tools claim(s) match the code
+  ✓ AGENTS.md — 1 MCP tools claim(s) match the code
+  ✓ docs/frameworks/MCP-SERVER.md — 2 MCP tools claim(s) match the code
+  ✓ llm.txt — 7 MCP tools claim(s) match the code
+  ✓ open-sse/mcp-server/README.md — 1 MCP tools claim(s) match the code
+  ✓ skills/omni-mcp/SKILL.md — 4 MCP tools claim(s) match the code
+
+• MCP scopes (live code): 33 (real) [STRICT]
+  ✓ README.md — 1 MCP scopes claim(s) match the code
+  ✓ AGENTS.md — 1 MCP scopes claim(s) match the code
+  ✓ llm.txt — 2 MCP scopes claim(s) match the code
+  ✓ skills/omni-mcp/SKILL.md — 1 MCP scopes claim(s) match the code
+
+• CLI tools (live code): 39 (real) [STRICT]
+  ✓ README.md — 1 CLI tools claim(s) match the code
+
+• free-forever providers (live code): 52 (real) [STRICT]
+  ✓ README.md — 2 free-forever providers claim(s) match the code
+  ✓ docs/diagrams/promise-pillars.svg — 1 free-forever providers claim(s) match the code
+
+• free-tier catalog entries (live code): 465 (real) [STRICT]
+  ✓ README.md — 3 free-tier catalog entries claim(s) match the code
+  ✓ docs/diagrams/free-tier-budget.svg — 1 free-tier catalog entries claim(s) match the code
+
+• recurring pools (live code): 34 (real) [STRICT]
+  ✓ README.md — 4 recurring pools claim(s) match the code
+  ✓ docs/diagrams/free-tier-budget.svg — 2 recurring pools claim(s) match the code
+  ✓ docs/reference/FREE_TIERS.md — 2 recurring pools claim(s) match the code
+
+• hard-stop-guaranteed entries (live code): 44 (real) [STRICT]
+  ✓ docs/reference/FREE_TIERS.md — 1 hard-stop-guaranteed entries claim(s) match the code
+
+• training-disclosure entries (live code): 21 (real) [STRICT]
+  ✓ docs/reference/FREE_TIERS.md — 1 training-disclosure entries claim(s) match the code
+
+• Free provider rankings sortBy (live code): reliability (real) [STRICT]
+  ✓ src/lib/freeProviderRankings.ts — union+branch (rankings) or z.enum (route) present
+  ✓ src/app/api/free-provider-rankings/route.ts — union+branch (rankings) or z.enum (route) present
+
+• FREE_CATALOG_CURATED_AT (live code): 2026-10-30 (real) [soft]
+  ✓ open-sse/config/freeModelCatalog.data.ts — literal "2026-10-30" present — FREE_CATALOG_CURATED_AT
+
+• INTELLIGENT vs DEFAULT (live code): 16 (real) [soft]
+  ✓ src/lib/combos/intelligentRouting.ts — weight constant present (strict coverage in combo-scoring-weights-schema-coverage:66)
+  ✓ open-sse/services/autoCombo/scoring.ts — weight constant present (strict coverage in combo-scoring-weights-schema-coverage:66)
+
+• ToS caution (16) (live docs): 16 (real) [soft]
+  ✓ docs/reference/FREE_TIERS.md — 1 ToS caution (16) claim(s) match the code
+
+• quality neutral prose (live docs): quality neutral 0.5 (real) [soft]
+  ✓ docs/routing/AUTO-COMBO.md — quality neutral 0.5 mentioned
+
+• Executors count: 172 (real) [soft]
+  ⚠ docs/architecture/ARCHITECTURE.md does NOT mention "172" for executors
+  ⚠ docs/architecture/CODEBASE_DOCUMENTATION.md does NOT mention "172" for executors
+
+• Auto-Combo scoring factors count: 16 (real) [STRICT]
+  ✓ README.md — 3 scoring factors claim(s) match the code
+  ✓ AGENTS.md — 2 scoring factors claim(s) match the code
+  ✓ docs/routing/AUTO-COMBO.md — 9 scoring factors claim(s) match the code
+  ✓ docs/guides/TIERS.md — 1 scoring factors claim(s) match the code
+  ✓ docs/guides/FEATURES.md — 1 scoring factors claim(s) match the code
+  ✓ docs/guides/FREE_PROVIDER_RANKINGS.md — 2 scoring factors claim(s) match the code
+  ✓ docs/diagrams/strategies-grid.svg — 1 scoring factors claim(s) match the code
+  ✓ docs/diagrams/auto-combo-scoring.mmd — 3 scoring factors claim(s) match the code
+  ✓ llm.txt — 5 scoring factors claim(s) match the code
+  ✓ docs/architecture/ARCHITECTURE.md — 1 scoring factors claim(s) match the code
+  ✓ docs/architecture/REPOSITORY_MAP.md — 1 scoring factors claim(s) match the code
+  ✓ docs/architecture/RESILIENCE_GUIDE.md — 1 scoring factors claim(s) match the code
+  ✓ docs/frameworks/OPEN_SSE_ARCHITECTURE.md — 4 scoring factors claim(s) match the code
+  ✓ docs/getting-started/AUTO-COMBO-GUIDE.md — 1 scoring factors claim(s) match the code
+  ✓ skills/omni-combos-routing/SKILL.md — 2 scoring factors claim(s) match the code
+  ✓ open-sse/services/autoCombo/routerStrategy.ts — 3 scoring factors claim(s) match the code
+  ✓ open-sse/services/taskAwareRouter.ts — 1 scoring factors claim(s) match the code
+  ✓ tests/unit/lkgp-enabled-context-11181.test.ts — 1 scoring factors claim(s) match the code
+  ✓ tests/integration/combo-matrix/auto.test.ts — 1 scoring factors claim(s) match the code
+
+• Routing strategies count: 20 (real) [soft]
+  ✓ docs/routing/AUTO-COMBO.md mentions "20"
+  ✓ docs/architecture/RESILIENCE_GUIDE.md mentions "20"
+  ✓ llm.txt mentions "20"
+
+• OAuth providers count: 30 (real) [soft]
+  ✓ docs/architecture/ARCHITECTURE.md mentions "30"
+
+• A2A skills count: 6 (real) [soft]
+  ✓ docs/frameworks/A2A-SERVER.md mentions "6"
+
+• Cloud agents count: 4 (real) [soft]
+  ✓ docs/frameworks/CLOUD_AGENT.md mentions "4"
+  ✓ docs/frameworks/AGENT_PROTOCOLS_GUIDE.md mentions "4"
+
+⚠ 2 potential (soft) drift(s) detected. Review the docs above.
+npm warn Unknown env config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:env-doc-sync
+> node scripts/check/check-env-doc-sync.mjs
+
+Env var contract sync report
+============================
+Code references:          733 unique vars
+In .env.example:          1027 unique vars
+In docs/reference/ENVIRONMENT.md: 1044 unique vars
+
+  ✓ In code but missing from .env.example: none
+  ✓ In .env.example but missing from ENVIRONMENT.md: none
+  ✓ In ENVIRONMENT.md but missing from .env.example: none
+
+✓ Env / docs contract is in sync.
+npm warn Unknown env config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:deprecated-versions
+> node scripts/check/check-deprecated-versions.mjs
+
+Version drift report (current: v3.8.54)
+========================================
+
+  docs/DEVIN_CLAUDE_BRIDGE.md
+    L12 [stale-version] 2.1.258: > **Current status: pinned Claude Code `2.1.258`; offline and live validation last recorded
+    L13 [stale-version] 2.1.220: > on `2.1.220`.** The `2.1.220` pin completed three isolated scenarios through Devin CLI
+    L27 [stale-version] 2.1.258: Claude Code 2.1.258 (isolated non-root Linux container)
+
+  docs/architecture/ARCHITECTURE.md
+    L11 [stale-date] 2026-06-28: _Last updated: 2026-06-28_
+
+  docs/architecture/CODEBASE_DOCUMENTATION.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28
+    L120 [stale-version] 3.1.1: #### 3.1.1 `src/app/(dashboard)/dashboard/` — UI pages
+    L129 [stale-version] 3.1.2: #### 3.1.2 `src/app/api/` — Top-level API groups
+    L229 [stale-version] 3.1.3: #### 3.1.3 `src/app/api/v1/` — OpenAI-compatible public API
+    L331 [stale-version] 3.2.1: #### 3.2.1 `src/lib/db/`
+
+  docs/architecture/REPOSITORY_MAP.md
+    L10 [stale-date] 2026-06-28: > Last updated: 2026-06-28 — OmniRoute v3.8.40
+
+  docs/architecture/RESILIENCE_GUIDE.md
+    L184 [stale-version] 2.1.263: `/limit-reset` commands (wire contract captured from Claude Code 2.1.263).
+
+  docs/architecture/cluster-decisions.md
+    L42 [stale-version] v1.12.4: | `qdrant` | `qdrant/qdrant:v1.12.4` | `6333` HTTP | HNSW index; persistent volume `omniroute_qdrant
+    L60 [stale-version] v1.6.11: | `bifrost` | `ghcr.io/maximhq/bifrost:v1.6.11` | `8080` | Go-based Tier-1 router; persistent logs v
+
+  docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md
+    L70 [stale-date] 2026-08-02: _Last updated: 2026-08-02. Submit corrections via PR to keep this table accurate._
+
+  docs/compression/COMPRESSION_ENGINES.md
+    L27 [stale-version] 1.4.0: The `omniglyph` engine (package `omniglyph`, 1.4.0+) accepts a named semantic profile, set
+    L179 [stale-version] 2.0.5: | `@atjsh/llmlingua-2` | `2.0.5`       | Entry package; declares the others as peers |
+    L180 [stale-version] 1.0.20: | `js-tiktoken`        | `^1.0.20`     | Tokenizer                                   |
+    L183 [stale-version] 2.0.5: also traced into the standalone bundle); `@atjsh/llmlingua-2@2.0.5` peers on it with
+    L198 [stale-version] 2.0.5: npm install @atjsh/llmlingua-2@2.0.5 js-tiktoken
+
+  docs/frameworks/AGENT-SKILLS.md
+    L10 [stale-date] 2026-08-02: > **Last updated:** 2026-08-02 — v3.8.50
+
+  docs/frameworks/AGENTBRIDGE.md
+    L568 [stale-version] v1.0.19: Note: GitHub Copilot CLI ≥v1.0.19 supports `COPILOT_PROVIDER_BASE_URL` — use direct config instead o
+
+  docs/frameworks/AGENT_PROTOCOLS_GUIDE.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+
+  docs/frameworks/CLOUD_AGENT.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40 (frontmatter refresh; 4 agents incl. cursor-cloud)
+
+  docs/frameworks/EMBEDDED-SERVICES.md
+    L372 [stale-version] 1.2.3: "installedVersion": "1.2.3",
+    L373 [stale-version] 1.2.4: "latestVersion": "1.2.4",
+
+  docs/frameworks/EVALS.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+
+  docs/frameworks/GAMIFICATION.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+
+  docs/frameworks/MCP-SERVER.md
+    L567 [stale-version] 1.8.1: "version": "1.8.1",
+
+  docs/frameworks/MEMORY.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40 (off-by-default + int8 quantization catch-up)
+
+  docs/frameworks/PLUGIN_MARKETPLACE.md
+    L12 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+    L320 [stale-version] 1.0.0: | `version`       | TEXT    | semver; default `1.0.0`                          |
+
+  docs/frameworks/PLUGIN_SDK.md
+    L73 [stale-version] 1.0.0: return addMetadata({ source: "my-plugin", version: "1.0.0" });
+    L94 [stale-version] 1.0.0: "version": "1.0.0",
+
+  docs/frameworks/RADAR.md
+    L10 [stale-date] 2026-09-01: > **Last updated:** 2026-09-01 — v3.8.51
+
+  docs/frameworks/SKILLS.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+    L233 [stale-version] 1.0.0: "version": "1.0.0",
+
+  docs/frameworks/WEBHOOKS.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+
+  docs/guides/ANTIGRAVITY-ONBOARDING.md
+    L278 [stale-date] 2026-07-31: _Last updated: 2026-07-31. Based on OmniRoute v3.8.50._
+
+  docs/guides/CLAUDE-CODE-CONFIGURATION.md
+    L52 [stale-version] v2.1.227: and nothing else — a banner alongside it fails the helper on v2.1.227+.
+    L255 [stale-version] v2.1.219: v2.1.219+ and `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`. Only `claude*` /
+
+  docs/guides/ELECTRON_GUIDE.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+
+  docs/guides/FEATURES.md
+    L13 [stale-date] 2026-06-28: > 📅 **Last updated:** 2026-06-28 — **v3.8.40**
+    L112 [stale-version] v2.0.9: ## 🎮 Model Playground _(v2.0.9+)_
+    L118 [stale-version] v2.0.5: ## 🎨 Themes _(v2.0.5+)_
+    L148 [stale-version] v2.0.11: ## 🤖 CLI Agents _(v2.0.11+)_
+    L160 [stale-version] v3.5.5: ## 🔗 Context Relay _(v3.5.5+)_
+    ... and 15 more
+
+  docs/guides/SESSION-SYNC-EXTENSION.md
+    L111 [stale-version] v2.0.1: 4. Verify that **OmniRoute Session Sync** (v2.0.1) is listed.
+
+  docs/guides/UNINSTALL.md
+    L15 [stale-version] v3.6.2: ## Quick Uninstall (v3.6.2+)
+
+  docs/ops/BUILD_WARNINGS.md
+    L87 [stale-version] 1.4.2: branch. Bun `1.4.2` is pinned as a devDependency and is used only to run a small,
+
+  docs/ops/COVERAGE_PLAN.md
+    L9 [stale-date] 2026-06-28: Last updated: 2026-06-28
+
+  docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md
+    L327 [stale-version] v3.4.7: git show --no-patch --oneline v3.4.7
+    L349 [stale-version] v3.4.7: If you want to align with a specific release tag (e.g. `v3.4.7`), first verify that the tag is alrea
+    L352 [stale-version] v3.4.7: git merge-base --is-ancestor v3.4.7 upstream/main
+
+  docs/ops/RELEASE_CHECKLIST.md
+    L9 [stale-date] 2026-08-28: > **Last updated:** 2026-08-28 — v3.8.51
+    L354 [stale-version] 1.2.3: - [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/9router/start` returns
+    L355 [stale-version] 1.2.3: - [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/cliproxy/start` return
+    L369 [stale-version] 2.0.5: keytar, tls-client, and the llmlingua SLM stack: `@atjsh/llmlingua-2@2.0.5`,
+
+  docs/ops/TUNNELS_GUIDE.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+
+  docs/providers/AGENTROUTER.md
+    L133 [stale-version] 2.1.280: | `User-Agent`                                | `claude-cli/2.1.280 (external, sdk-cli)`            
+
+  docs/reference/API_REFERENCE.md
+    L1636 [stale-version] v3.6.1: ### OAuth Environment Repair _(v3.6.1+)_
+    L2164 [stale-version] 1.0.45: "version": "1.0.45",
+
+  docs/reference/CLI-TOOLS.md
+    L9 [stale-date] 2026-08-23: Last updated: 2026-08-23
+    L617 [stale-version] 1.0.0: "version": "1.0.0",
+
+  docs/reference/EMBEDDINGS.md
+    L9 [stale-version] 1.6.0: Hindsight 0.9.1 (text-only `encode(list[str])`) and Memorix 1.6.0 (Jina media
+    L124 [stale-version] 1.6.0: Memorix 1.6.0 / Jina native shape:
+    L158 [stale-version] 1.6.0: ### Memorix 1.6.0
+
+  docs/reference/ENVIRONMENT.md
+    L504 [stale-version] 3.6.27: | `DEVIN_DESKTOP_VERSION`           | `3.6.27`                         | `open-sse/executors/devin-d
+    L505 [stale-version] 1.48.2: | `DEVIN_DESKTOP_EXTENSION_VERSION` | `1.48.2`                         | `open-sse/executors/devin-d
+    L785 [stale-version] 2.1.280: | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)` | When Anthropic releases a new CLI ver
+    L789 [stale-version] 1.0.41: | `GROK_CLI_CLIENT_VERSION` | `1.0.41` | Override `x-grok-client-version` for inference, model sync,
+    L790 [stale-version] 2.1.280: | `CLAUDE_CODE_CLIENT_VERSION` | `2.1.280` | Override advertised Claude Code version independently o
+    ... and 4 more
+
+  docs/reference/FREE_TIERS.md
+    L188 [stale-version] 2.2.1: | `cloudflare-ai`  | caution   | Cloudflare Self-Serve ToS §2.2.1(j) prohibits using Services to "pr
+
+  docs/routing/REASONING_REPLAY.md
+    L8 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+
+  docs/security/COMPLIANCE.md
+    L10 [stale-date] 2026-06-28: > **Last updated:** 2026-06-28 — v3.8.40
+
+  docs/security/ENTRA_SSO.md
+    L210 [stale-version] v2.1.227: `token` prints the credential alone by design — Claude Code v2.1.227+ fails an
+
+  docs/security/ERROR_SANITIZATION.md
+    L13 [stale-date] 2026-09-02: > **Last updated:** 2026-09-02 — v3.8.51
+
+  docs/security/PUBLIC_CREDS.md
+    L11 [stale-date] 2026-08-07: > **Last updated:** 2026-08-07 — v3.8.50
+
+  docs/security/STEALTH_GUIDE.md
+    L10 [stale-date] 2026-09-02: > **Last updated:** 2026-09-02 — v3.8.51
+    L42 [stale-version] 3.2.0: ### Web-cookie provider transport — wreq-js 3.2.0
+    L127 [stale-version] 2.1.280: - `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
+    L251 [stale-version] 2.1.280: | `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
+    L254 [stale-version] 1.0.0: | `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
+
+⚠ 101 potential drift(s) detected across 201 doc files.
+npm warn Unknown env config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:doc-links
+> node scripts/check/check-doc-links.mjs
+
+[doc-links] scanned 201 docs, checked 1280 internal links
+[doc-links] PASS — no broken internal links
+npm warn Unknown env config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:fabricated-docs
+> node scripts/check/check-fabricated-docs.mjs --strict
+
+Doc accuracy gate — fabricated-claim detection
+================================================
+Scanned 201 markdown file(s)
+Codebase: 1590 api routes · 1543 env vars · 524 cli commands
+
+✓ No fabricated API/env/CLI/hook/file references found.
+

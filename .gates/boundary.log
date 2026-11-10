@@ -1,0 +1,7 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:boundary
+> node scripts/quality/measure-boundary.mjs --ratchet --base-ref 5f37cee15c068fb721d62257853e5f88ea014f78
+
+[boundary] PR mode (--base-ref 5f37cee15c06): 772 open-sse → src edges on the base.
+[boundary] RATCHET OK - open-sse → src edges within max(baseline ceiling, PR base) (head 772, base 772, baseline ceiling 774; effective ceiling 774).

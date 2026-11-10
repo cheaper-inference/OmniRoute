@@ -1,0 +1,9 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:type-coverage
+> node scripts/check/check-type-coverage.mjs
+
+[type-coverage] Running type-coverage (this may take ~30-60 s)…
+[type-coverage] tsconfig: open-sse/tsconfig.json
+typeCoveragePct=96.14
+[type-coverage] OK — 96.14% symbols typed (baseline 76.81%, eps=0.05)

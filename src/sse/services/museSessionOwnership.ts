@@ -183,6 +183,28 @@ function continuationIds(value: unknown, ids = new Set<string>()): Set<string> {
   return ids;
 }
 
+/**
+ * Request state that binds a continuation to the provider session which served it:
+ * opaque reasoning, tool/item continuation ids, a response id, or a reasoning/tool
+ * item in `input`. Such a body must not be replayed on another provider.
+ */
+export function bodyCarriesBoundContinuation(body: Record<string, unknown>): boolean {
+  if (!body || typeof body !== "object") return false;
+  if (opaqueHashes(body).size || continuationIds(body).size) return true;
+  if (body.previous_response_id || body._omniroutePreviousResponseResumed) return true;
+  return (
+    Array.isArray(body.input) &&
+    body.input.some(
+      (item) =>
+        item &&
+        typeof item === "object" &&
+        ["reasoning", "function_call", "function_call_output", "item_reference"].includes(
+          String((item as Record<string, unknown>).type)
+        )
+    )
+  );
+}
+
 /** Atomic session assignment; once output was served, pins never expire or move to another account. */
 export function claimMuseSession(
   scope: string,
@@ -214,21 +236,7 @@ export function claimMuseSession(
         throw new MuseOwnershipError("Requested Muse account differs from the session owner.");
       }
     } else {
-      if (
-        opaqueHashes(body).size ||
-        continuationIds(body).size ||
-        body.previous_response_id ||
-        body._omniroutePreviousResponseResumed ||
-        (Array.isArray(body.input) &&
-          body.input.some(
-            (item) =>
-              item &&
-              typeof item === "object" &&
-              ["reasoning", "function_call", "function_call_output", "item_reference"].includes(
-                String(item.type)
-              )
-          ))
-      ) {
+      if (bodyCarriesBoundContinuation(body)) {
         throw new MuseOwnershipError(
           "Muse continuation has no recorded owner; start an independent session without imported opaque history."
         );

@@ -1,0 +1,8 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:open-sse-typecheck
+> node scripts/check/check-open-sse-typecheck.mjs
+
+[open-sse-typecheck] Running tsc scoped to open-sse/ workspace…
+openSseTypecheckErrors=0
+[open-sse-typecheck] OK — 0 pre-existing error(s), all within frozen baseline.

@@ -1,0 +1,9 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:openapi-breaking
+> node scripts/check/check-openapi-breaking.mjs --ratchet
+
+openapiBreaking=SKIP reason=binary-absent
+[openapi-breaking] SKIP — oasdiff não encontrado no PATH.
+[openapi-breaking] Instale via: https://github.com/oasdiff/oasdiff
+[openapi-breaking] ADVISORY — este gate sai 0 (promove a bloqueante depois).

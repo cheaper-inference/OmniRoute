@@ -88,7 +88,12 @@ function stubUpstreams(failing: Partial<Record<Upstream, () => Response>>) {
   }) as typeof fetch;
 }
 
-function bareRequest(apiKey?: string, headers: Record<string, string> = {}, stream = false) {
+function bareRequest(
+  apiKey?: string,
+  headers: Record<string, string> = {},
+  stream = false,
+  extraBody: Record<string, unknown> = {}
+) {
   return buildRequest({
     authKey: apiKey,
     headers,
@@ -97,7 +102,8 @@ function bareRequest(apiKey?: string, headers: Record<string, string> = {}, stre
       messages: [{ role: "user", content: `Reply with OK only. ${crypto.randomUUID()}` }],
       max_tokens: 16,
       stream,
-    },
+      ...extraBody,
+    } as Record<string, unknown>,
   });
 }
 
@@ -311,6 +317,38 @@ test("a combo grant naming the bare id does not lift blockedModels from an alter
   assert.deepEqual(tried(), [first], `blocked alternate was dispatched: ${calls}`);
   assert.equal(response.status, 429, body);
 });
+
+// A continuation belongs to the provider session that served it. Replaying opaque
+// reasoning or a response id on another provider would move provider-bound state.
+for (const [label, extra] of [
+  ["a response id", { previous_response_id: "resp_previous" }],
+  [
+    "opaque reasoning",
+    {
+      input: [
+        { type: "message", role: "user", content: "earlier turn" },
+        { type: "reasoning", encrypted_content: "gAAAA-opaque-reasoning" },
+      ],
+    },
+  ],
+] as const) {
+  test(`a body carrying ${label} never fails over to another provider`, async () => {
+    await seedConnection("fireworks");
+    await seedConnection("cerebras");
+    const first = await firstChoice();
+    stubUpstreams({
+      [first]: () =>
+        Response.json(
+          { error: { message: "upstream boom", type: "server_error" } },
+          { status: 500 }
+        ),
+    });
+    const response = await handleChat(bareRequest(undefined, {}, false, extra));
+    await response.text();
+    assert.equal(response.status, 500);
+    assert.deepEqual(tried(), [first], `continuation moved provider: ${calls}`);
+  });
+}
 
 test("an alternate the key blocks is skipped: the client gets the real upstream error", async () => {
   await seedConnection("fireworks");

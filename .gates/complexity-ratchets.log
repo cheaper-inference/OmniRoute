@@ -1,0 +1,10 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:complexity-ratchets
+> node scripts/check/check-complexity-ratchets.mjs --base-ref 5f37cee15c068fb721d62257853e5f88ea014f78
+
+[complexity-ratchets] new-code mode: merge-base 5f37cee15c06, 5 changed file(s) in scope
+complexityNewCode=-1
+[complexity] OK (código novo) — 11 violações nos arquivos tocados (base 12)
+cognitiveComplexityNewCode=0
+[cognitive-complexity] OK (código novo) — 5 violações nos arquivos tocados (base 5)

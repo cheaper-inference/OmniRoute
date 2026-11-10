@@ -1,0 +1,15 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:agent-skills-sync
+> node --import tsx/esm scripts/skills/generate-agent-skills.mjs
+
+
+Agent Skills Generator [dry-run]
+────────────────────────────────────────────────────────────
+
+Generated: 0 · Unchanged: 46 · Pruned: 0 · Orphans: 0 · Errors: 0
+
+  UNCHANGED: 46 skills (all up-to-date)
+
+(dry-run) No files written. Use --apply to write SKILL.md files.
+

@@ -1,0 +1,6 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:test-masking
+> node scripts/check/check-test-masking.mjs
+
+[test-masking] OK — 1 modificado(s), 0 renomeado(s) (relocação), 0 deletado(s) — sem enfraquecimento

@@ -1,0 +1,3 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Checking formatting...
+All matched files use Prettier code style!

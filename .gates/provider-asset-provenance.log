@@ -1,0 +1,6 @@
+npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> omniroute@3.8.54 check:provider-asset-provenance
+> node scripts/check/check-provider-asset-provenance.mjs
+
+Provider asset provenance passed: 144/144 registered; proven=72 probable=69 unresolved=3; duplicate-groups=1.
