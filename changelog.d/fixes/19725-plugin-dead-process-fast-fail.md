@@ -1,0 +1,1 @@
+- **fix(plugins):** a plugin whose process has died no longer makes every request wait out the hook timeout before its hook fails; the call now fails at once. ([#19725](https://github.com/cheaper-inference/OmniRoute/pull/19725))
