@@ -56,7 +56,10 @@ export function resolveChatCoreTargetFormat(opts: {
           ? sourceFormat
           : undefined
       : undefined;
-  const providerTargetFormat = getTargetFormat(provider, providerSpecificData);
+  const providerTargetFormat = getTargetFormat(
+    provider,
+    providerSpecificData as Record<string, unknown> | null
+  );
   const declaredConnectionAlternate = resolveAlternateFormat(
     getRegistryEntry(provider),
     providerSpecificData

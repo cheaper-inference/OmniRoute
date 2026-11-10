@@ -480,7 +480,10 @@ export function buildProviderHeaders(provider, credentials, stream = true, body 
 }
 
 // Get target format for provider
-export function getTargetFormat(provider, providerSpecificData = null) {
+export function getTargetFormat(
+  provider,
+  providerSpecificData: Record<string, unknown> | null = null
+) {
   if (isOpenAICompatible(provider)) {
     return getOpenAICompatibleType(provider, providerSpecificData) === "responses"
       ? "openai-responses"
