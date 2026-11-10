@@ -56,12 +56,24 @@ export function isLoopbackHost(hostname: string): boolean {
   return host === "localhost" || host === "::1" || /^127(?:\.\d{1,3}){3}$/.test(host);
 }
 
+// Hostname checks alone cannot see a public DNS name that resolves to an internal
+// address; they only refuse the literal and reserved spellings below.
 function isInternalHost(hostname: string): boolean {
-  const host = hostname.replace(/^\[|\]$/g, "").toLowerCase();
-  if (isLoopbackHost(host) || host.endsWith(".localhost") || host.endsWith(".local")) return true;
+  // `localhost.` names the same host as `localhost`: drop the trailing root dot.
+  const host = hostname
+    .replace(/^\[|\]$/g, "")
+    .toLowerCase()
+    .replace(/\.+$/, "");
+  if (!host || isLoopbackHost(host) || host.endsWith(".localhost")) return true;
+  if (host.endsWith(".local") || host.endsWith(".internal")) return true;
   if (/^(?:10|0)\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host)) return true;
   if (/^172\.(?:1[6-9]|2\d|3[01])\./.test(host)) return true;
-  return host.includes(":") && (/^f[cd]/.test(host) || host.startsWith("fe80:"));
+  // 100.64.0.0/10, carrier-grade NAT space.
+  if (/^100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(host)) return true;
+  if (!host.includes(":")) return false;
+  // `::` (unspecified) and IPv4-mapped literals (`::ffff:7f00:1` is 127.0.0.1).
+  if (host === "::" || host.startsWith("::ffff:")) return true;
+  return /^f[cd]/.test(host) || host.startsWith("fe80:");
 }
 
 // Forwarded URLs end up in opencode "file" parts that the LOCAL server fetches or

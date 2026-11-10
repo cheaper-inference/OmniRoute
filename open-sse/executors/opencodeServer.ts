@@ -77,6 +77,8 @@ import {
 
 const DEFAULT_TIMEOUT_MS = 180_000;
 const CATALOG_TTL_MS = 60_000;
+// Upper bound on waiting for the shared /event stream before a streamed turn starts.
+const EVENT_READY_TIMEOUT_MS = 5_000;
 
 // Settings come from the dashboard (Providers → local → opencode server) and
 // win over the defaults; applyRuntimeSettings() pushes them into
@@ -148,11 +150,28 @@ async function unavailableResponse(): Promise<Response | null> {
     ) {
       throw error;
     }
-    return new Response(JSON.stringify(buildErrorBody(error.status, error.message)), {
-      status: error.status,
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-    });
+    return errorResponse(error.status, error.message);
   }
+}
+
+function errorResponse(status: number, message: string): Response {
+  return new Response(JSON.stringify(buildErrorBody(status, message)), {
+    status,
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+  });
+}
+
+/**
+ * A turn that failed upstream (an `error` on the assistant message, or a
+ * `session.error` event) and produced no answer is an error, never an empty
+ * successful completion; the status lets combo routing fall back. Only the error
+ * name is reported, never opencode's message text (Hard Rule 12).
+ */
+function failedTurn(result: TurnResult): (Error & { status: number }) | null {
+  if (!result.error || result.text.trim()) return null;
+  return Object.assign(new Error(`[opencode-server] turn failed (${result.error.name})`), {
+    status: result.error.status,
+  });
 }
 
 type ServerJsonOptions = {
@@ -315,6 +334,8 @@ async function runStreamingTurn({
   }
 
   try {
+    // The turn's frames are only seen once /event is live (no replay upstream).
+    await eventBus.ready(EVENT_READY_TIMEOUT_MS, signal);
     await serverJson(`/session/${sessionID}/prompt_async`, { method: "POST", body: payload });
     await finished;
   } catch (error) {
@@ -367,6 +388,8 @@ async function pumpStreamTurn(
       onReasoning: forward(frames.reasoning),
       wait: true,
     });
+    const failure = failedTurn(result);
+    if (failure) throw failure;
     for (const frame of finalStreamFrames(frames, result, args.tools, args.toolMode)) {
       sink.emit(frame);
     }
@@ -443,6 +466,8 @@ export class OpencodeServerExecutor extends BaseExecutor {
     if (!wantsStream) {
       try {
         const result = await runTurn({ sessionID, payload, signal: input.signal, wait: false });
+        const failure = failedTurn(result);
+        if (failure) return { response: errorResponse(failure.status, failure.message) };
         const toolCalls = toolMode ? parseToolEnvelope(result.text, normalized.tools) : null;
         const text = toolCalls ? "" : result.text;
         if (wireFormat === "responses") {

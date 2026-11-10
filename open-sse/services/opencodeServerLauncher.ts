@@ -91,6 +91,23 @@ function pidAlive(pid: number | null): boolean {
   }
 }
 
+// A cmd.exe shim owns the real node child on Windows, so terminate the whole
+// tree; everywhere else the pid is the server itself.
+function terminateServer(pid: number): void {
+  if (process.platform === "win32") {
+    spawn("taskkill", ["/pid", String(pid), "/T", "/F"], {
+      windowsHide: true,
+      stdio: "ignore",
+    }).on("error", () => {});
+    return;
+  }
+  try {
+    process.kill(pid, "SIGTERM");
+  } catch {
+    /* already gone */
+  }
+}
+
 function statusOf(url: string, health: OpencodeServerHealth | null): OpencodeServerStatus {
   const managed = pidAlive(state.pid);
   return {
@@ -111,11 +128,17 @@ export async function getOpencodeServerStatus(): Promise<OpencodeServerStatus> {
   return statusOf(url, await probeOpencodeServerHealth(url));
 }
 
-async function waitForHealth(url: string): Promise<OpencodeServerHealth | null> {
+// Polls until healthy, the deadline, or `gaveUp()` (the child failed to spawn or
+// already exited), so a missing binary fails fast instead of after the timeout.
+async function waitForHealth(
+  url: string,
+  gaveUp: () => boolean = () => false
+): Promise<OpencodeServerHealth | null> {
   const deadline = Date.now() + startTimeoutMs();
   let delay = 150;
   while (Date.now() < deadline) {
     await sleep(delay);
+    if (gaveUp()) return null;
     delay = Math.min(1000, Math.round(delay * 1.4));
     const health = await probeOpencodeServerHealth(url, 1200);
     if (health) return health;
@@ -160,19 +183,47 @@ async function spawnServer(url: string): Promise<OpencodeServerStatus> {
       env: buildServerEnv(),
     }
   );
-  child.on("error", () => {});
+  // spawn() reports a missing or non-executable binary asynchronously, and a
+  // server can exit on its own: both must clear the pid, or a recycled pid would
+  // later be reported as managed and signalled by stop.
+  let spawnError: NodeJS.ErrnoException | null = null;
+  let exited = false;
+  const childPid = child.pid ?? null;
+  child.on("error", (error: NodeJS.ErrnoException) => {
+    spawnError = error;
+  });
+  child.on("exit", () => {
+    exited = true;
+    if (state.pid === childPid) state.pid = null;
+  });
   child.unref();
-  state.pid = child.pid ?? null;
+  state.pid = childPid;
   if (stdoutFd !== null) closeSync(stdoutFd);
   if (stderrFd !== null) closeSync(stderrFd);
 
-  const health = await waitForHealth(url);
-  if (!health) {
+  const health = await waitForHealth(url, () => spawnError !== null || exited);
+  if (health) return statusOf(url, health);
+
+  if (state.pid === childPid) state.pid = null;
+  const failure = spawnError as NodeJS.ErrnoException | null;
+  if (failure) {
     throw new Error(
-      `[opencode-server] opencode serve did not become healthy on ${url} (pid ${state.pid ?? "?"}); see opencode-serve.err.log`
+      failure.code === "ENOENT"
+        ? `[opencode-server] opencode binary not found: ${binary} (set OPENCODE_SERVER_BIN)`
+        : `[opencode-server] could not start ${binary}: ${failure.code || failure.message}`
     );
   }
-  return statusOf(url, health);
+  if (exited) {
+    throw new Error(
+      `[opencode-server] opencode serve exited before it became healthy on ${url}; see opencode-serve.err.log`
+    );
+  }
+  // Timed out with the child still running: stop it, or it could turn healthy
+  // later as an orphan that the next start would not know about.
+  if (pidAlive(childPid)) terminateServer(childPid as number);
+  throw new Error(
+    `[opencode-server] opencode serve did not become healthy on ${url} (pid ${childPid ?? "?"}); see opencode-serve.err.log`
+  );
 }
 
 /** Starts `opencode serve` unless a server already answers on the configured URL. */
@@ -193,20 +244,7 @@ export async function stopOpencodeServer(): Promise<OpencodeServerStatus> {
   const url = await currentUrl();
   const pid = state.pid;
   if (pidAlive(pid)) {
-    // A cmd.exe shim owns the real node child on Windows, so terminate the
-    // whole tree; everywhere else the pid is the server itself.
-    if (process.platform === "win32") {
-      spawn("taskkill", ["/pid", String(pid), "/T", "/F"], {
-        windowsHide: true,
-        stdio: "ignore",
-      }).on("error", () => {});
-    } else {
-      try {
-        process.kill(pid as number, "SIGTERM");
-      } catch {
-        /* already gone */
-      }
-    }
+    terminateServer(pid as number);
     // Give it a moment to release the port so the reported status is the real one.
     for (let i = 0; i < 15 && pidAlive(pid); i++) await sleep(200);
   }

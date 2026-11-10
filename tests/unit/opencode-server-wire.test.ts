@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   OpencodeTurnCollector,
+  buildParts,
   buildTurns,
   collectFiles,
   createSseSink,
@@ -400,3 +401,36 @@ function dataChoiceDelta(frame: string): unknown {
   const parsed = frameData(frame) as { choices: Array<{ delta: unknown }> };
   return parsed.choices[0].delta;
 }
+
+test("buildTurns: assistant tool calls are replayed and tool results name their function", () => {
+  const { turns } = buildTurns({
+    messages: [
+      { role: "user", content: "weather in Paris?" },
+      {
+        role: "assistant",
+        content: null,
+        tool_calls: [
+          {
+            id: "call_1",
+            type: "function",
+            function: { name: "get_weather", arguments: '{"city":"Paris"}' },
+          },
+        ],
+      },
+      { role: "tool", tool_call_id: "call_1", content: "sunny" },
+      { role: "tool", tool_call_id: "call_unknown", content: "orphan" },
+    ],
+  });
+  assert.deepEqual(turns, [
+    { role: "user", text: "weather in Paris?", files: [] },
+    {
+      role: "assistant",
+      text: '{"tool_calls":[{"name":"get_weather","arguments":{"city":"Paris"}}]}',
+      files: [],
+    },
+    { role: "tool", text: "get_weather -> sunny", files: [] },
+    { role: "tool", text: "orphan", files: [] },
+  ]);
+  const prompt = buildParts(turns)[0] as { text?: string };
+  assert.match(String(prompt.text), /\[assistant\] \{"tool_calls":\[\{"name":"get_weather"/);
+});

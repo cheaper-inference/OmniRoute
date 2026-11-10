@@ -13,7 +13,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const executorModule = await import("../../open-sse/executors/opencodeServer.ts");
-const { buildServerEnv } = await import("../../open-sse/services/opencodeServerSafety.ts");
+const { buildServerEnv, isForwardableFileUrl } =
+  await import("../../open-sse/services/opencodeServerSafety.ts");
 
 // Every handle must be released or the node:test process never exits: the shared
 // /event stream has a reconnect loop that otherwise keeps retrying a dead fake.
@@ -44,17 +45,18 @@ type Captured = { method: string; url: string; body: Json | null };
  * whole point of this suite is the wire translation (OpenAI chat/Responses in,
  * session/parts out) and that is fully described by these four endpoints.
  */
-async function startFakeServer(): Promise<{
+async function startFakeServer(options: { eventDelayMs?: number } = {}): Promise<{
   url: string;
   close: () => Promise<void>;
   calls: Captured[];
   lastPrompt: () => Captured | undefined;
   setAssistantText: (text: string) => void;
   failWith: (route: "session" | "prompt_async", status: number, body: string) => void;
+  failTurn: (error: Json) => void;
 }> {
   const calls: Captured[] = [];
-  const eventLog = new Map<string, Json[]>();
   let assistantText = "OK";
+  let turnError: Json | null = null;
   let sessionSeq = 0;
   const failures = new Map<string, { status: number; body: string }>();
 
@@ -63,15 +65,17 @@ async function startFakeServer(): Promise<{
 
     // The shared /event stream is long-lived and must be claimed before any
     // body/route handling, otherwise the catch-all below would 404 it.
+    // Like the real server, events are never replayed: a client only sees what
+    // is published after it connected (announced by `server.connected`).
     if (url.startsWith("/event")) {
-      res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache" });
-      res.write(`data: ${JSON.stringify({ type: "server.connected", properties: {} })}\n\n`);
-      // Replay: the executor opens the shared stream lazily, so frames emitted
-      // before it connected would otherwise be lost and the turn would hang.
-      for (const frames of eventLog.values()) {
-        for (const frame of frames) res.write(`data: ${JSON.stringify(frame)}\n\n`);
-      }
-      eventClients.add(res);
+      const connect = () => {
+        if (res.destroyed) return;
+        res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache" });
+        res.write(`data: ${JSON.stringify({ type: "server.connected", properties: {} })}\n\n`);
+        eventClients.add(res);
+      };
+      if (options.eventDelayMs) setTimeout(connect, options.eventDelayMs);
+      else connect();
       req.on("close", () => eventClients.delete(res));
       return;
     }
@@ -135,6 +139,17 @@ async function startFakeServer(): Promise<{
 
       const messageMatch = /^\/session\/([^/]+)\/message$/.exec(url);
       if (messageMatch && req.method === "POST") {
+        if (turnError) {
+          return json(200, {
+            info: {
+              id: "msg_assistant",
+              role: "assistant",
+              sessionID: messageMatch[1],
+              error: turnError,
+            },
+            parts: [{ type: "step-start", id: "prt_1", messageID: "msg_assistant" }],
+          });
+        }
         return json(200, {
           info: {
             id: "msg_assistant",
@@ -175,24 +190,33 @@ async function startFakeServer(): Promise<{
 
   const eventClients = new Set<http.ServerResponse>();
   function broadcast(sessionID: string): void {
-    const frames = [
+    const failed = [
       {
         type: "message.updated",
         properties: { info: { id: "msg_assistant", role: "assistant", sessionID } },
       },
-      {
-        type: "message.part.delta",
-        properties: {
-          sessionID,
-          messageID: "msg_assistant",
-          partID: "prt_2",
-          field: "text",
-          delta: assistantText,
-        },
-      },
+      { type: "session.error", properties: { sessionID, error: turnError } },
       { type: "session.idle", properties: { sessionID } },
     ];
-    eventLog.set(sessionID, frames);
+    const frames = turnError
+      ? failed
+      : [
+          {
+            type: "message.updated",
+            properties: { info: { id: "msg_assistant", role: "assistant", sessionID } },
+          },
+          {
+            type: "message.part.delta",
+            properties: {
+              sessionID,
+              messageID: "msg_assistant",
+              partID: "prt_2",
+              field: "text",
+              delta: assistantText,
+            },
+          },
+          { type: "session.idle", properties: { sessionID } },
+        ];
     for (const client of eventClients) {
       for (const frame of frames) client.write(`data: ${JSON.stringify(frame)}\n\n`);
     }
@@ -210,6 +234,9 @@ async function startFakeServer(): Promise<{
     },
     failWith: (route, status, body) => {
       failures.set(route, { status, body });
+    },
+    failTurn: (error: Json) => {
+      turnError = error;
     },
     close: () =>
       new Promise<void>((resolve) => {
@@ -510,10 +537,9 @@ test("opencode-server: the CLI binary is not a settings key", async () => {
     opencode_server_url: "http://127.0.0.1:4096",
     opencode_server_bin: "/tmp/evil",
   });
-  if (parsed.success) {
-    assert.equal(parsed.data.opencode_server_url, "http://127.0.0.1:4096");
-    assert.equal("opencode_server_bin" in parsed.data, false);
-  }
+  assert.equal(parsed.success, true);
+  assert.equal(parsed.data?.opencode_server_url, "http://127.0.0.1:4096");
+  assert.equal("opencode_server_bin" in (parsed.data ?? {}), false);
 });
 
 // A loopback port with nothing listening (bound, then released).
@@ -731,6 +757,102 @@ test("opencode-server: a v2 server is a clear unsupported-version error, never a
       "a v2 server must not receive v1 session or catalog calls"
     );
   } finally {
+    await fake.close();
+  }
+});
+
+test("opencode-server: file URLs on reserved or disguised internal hosts are not forwarded", () => {
+  for (const url of [
+    "https://localhost./secret.png",
+    "https://LOCALHOST../secret.png",
+    "https://[::ffff:127.0.0.1]/secret.png",
+    "https://[::ffff:10.0.0.1]/secret.png",
+    "https://[::]/secret.png",
+    "https://100.64.0.1/secret.png",
+    "https://100.127.255.254/secret.png",
+    "https://metadata.google.internal/computeMetadata/v1/",
+  ]) {
+    assert.equal(isForwardableFileUrl(url), false, url);
+  }
+  for (const url of ["https://example.com/ok.png", "https://100.128.0.1/ok.png"]) {
+    assert.equal(isForwardableFileUrl(url), true, url);
+  }
+});
+
+test("opencode-server: a streamed turn waits for the /event stream before prompting", async () => {
+  // A fresh bus against a server whose /event answers late: opencode does not
+  // replay events, so a prompt sent before the stream is live loses the turn.
+  executorModule.closeOpencodeServerEventBus();
+  const fake = await startFakeServer({ eventDelayMs: 400 });
+  fake.setAssistantText("after-connect");
+  process.env.OPENCODE_SERVER_URL = fake.url;
+  process.env.OPENCODE_SERVER_TIMEOUT_MS = "4000";
+  executorModule.clearOpencodeServerSettingsCache();
+  try {
+    const executor = new executorModule.OpencodeServerExecutor();
+    const result = await executor.execute({
+      model: "opencode-server/test-model",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: true,
+      credentials: {},
+    });
+    const raw = await result.response.text();
+    assert.match(raw, /"content":"after-connect"/);
+    assert.doesNotMatch(raw, /streaming timeout/);
+  } finally {
+    delete process.env.OPENCODE_SERVER_TIMEOUT_MS;
+    await fake.close();
+  }
+});
+
+const UPSTREAM_TURN_ERROR = {
+  name: "APIError",
+  data: { message: "free limit for key SECRET at /srv/app/auth.json", statusCode: 429 },
+};
+
+test("opencode-server: a failed blocking turn is an error, not an empty completion", async () => {
+  const fake = await startFakeServer();
+  fake.failTurn(UPSTREAM_TURN_ERROR);
+  process.env.OPENCODE_SERVER_URL = fake.url;
+  executorModule.clearOpencodeServerSettingsCache();
+  try {
+    const executor = new executorModule.OpencodeServerExecutor();
+    const result = await executor.execute({
+      model: "opencode-server/test-model",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(result.response.status, 429);
+    const raw = await result.response.text();
+    assert.match(raw, /turn failed \(APIError\)/);
+    assert.doesNotMatch(raw, /SECRET|auth\.json|\/srv\/app|chat\.completion/);
+  } finally {
+    await fake.close();
+  }
+});
+
+test("opencode-server: a session.error during a streamed turn ends in an SSE error", async () => {
+  const fake = await startFakeServer();
+  fake.failTurn(UPSTREAM_TURN_ERROR);
+  process.env.OPENCODE_SERVER_URL = fake.url;
+  process.env.OPENCODE_SERVER_TIMEOUT_MS = "4000";
+  executorModule.clearOpencodeServerSettingsCache();
+  try {
+    const executor = new executorModule.OpencodeServerExecutor();
+    const result = await executor.execute({
+      model: "opencode-server/test-model",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: true,
+      credentials: {},
+    });
+    const raw = await result.response.text();
+    assert.match(raw, /"error":/);
+    assert.match(raw, /turn failed \(APIError\)/);
+    assert.doesNotMatch(raw, /"finish_reason":"stop"/);
+    assert.doesNotMatch(raw, /SECRET|auth\.json|\/srv\/app/);
+  } finally {
+    delete process.env.OPENCODE_SERVER_TIMEOUT_MS;
     await fake.close();
   }
 });

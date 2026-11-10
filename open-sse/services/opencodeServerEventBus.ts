@@ -9,6 +9,8 @@ export type OpencodeMessageInfo = {
   providerID?: string;
   modelID?: string;
   finish?: string;
+  /** Set on an assistant message whose turn failed: `{ name, data: { message, statusCode? } }`. */
+  error?: unknown;
   tokens?: {
     input?: number;
     output?: number;
@@ -47,6 +49,7 @@ export type EventProperties = {
   delta?: unknown;
   part?: OpencodePart & { sessionID?: string; state?: { status?: string } };
   info?: OpencodeMessageInfo;
+  error?: unknown;
 };
 export type EventLike = { type?: string; properties?: Record<string, unknown> };
 
@@ -62,6 +65,8 @@ export class OpencodeEventBus {
   private generation = 0;
   private controller: AbortController | null = null;
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  private connected = false;
+  private readonly readyWaiters = new Set<() => void>();
 
   subscribe(sessionID: string, handler: (event: EventLike) => void): () => void {
     this.cancelIdleClose();
@@ -77,6 +82,34 @@ export class OpencodeEventBus {
   }
 
   /**
+   * Resolves once the shared /event stream is live: it has delivered its first
+   * frame (the server sends `server.connected` right after subscribing the
+   * client). opencode does not replay events, so a turn started before that would
+   * lose its first frames and either answer empty or hang until the timeout.
+   * Also resolves on `timeoutMs` or abort, leaving the caller's own timeout in charge.
+   */
+  ready(timeoutMs: number, signal?: AbortSignal | null): Promise<void> {
+    if (this.connected || signal?.aborted) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      const done = (): void => {
+        clearTimeout(timer);
+        this.readyWaiters.delete(done);
+        signal?.removeEventListener("abort", done);
+        resolve();
+      };
+      const timer = setTimeout(done, timeoutMs);
+      timer.unref?.();
+      this.readyWaiters.add(done);
+      signal?.addEventListener("abort", done, { once: true });
+    });
+  }
+
+  private setConnected(connected: boolean): void {
+    this.connected = connected;
+    if (connected) for (const done of [...this.readyWaiters]) done();
+  }
+
+  /**
    * Stops the shared /event connection and its reconnect loop. Safe to call more
    * than once; a later subscribe() opens a fresh connection. Tests must call this
    * in test.after(), otherwise the reconnect loop keeps the process alive.
@@ -87,6 +120,8 @@ export class OpencodeEventBus {
     this.listeners.clear();
     this.controller?.abort();
     this.controller = null;
+    this.connected = false;
+    for (const done of [...this.readyWaiters]) done();
   }
 
   // The connection is kept for a short grace period after the last request so a
@@ -132,6 +167,8 @@ export class OpencodeEventBus {
         await this.consume(response.body);
       } catch {
         if (generation !== this.generation) return;
+      } finally {
+        if (generation === this.generation) this.connected = false;
       }
       if (generation !== this.generation) return;
       attempt += 1;
@@ -153,6 +190,7 @@ export class OpencodeEventBus {
         buffer = buffer.slice(index + 2);
         const dataLine = frame.split("\n").find((line) => line.startsWith("data:"));
         if (!dataLine) continue;
+        if (!this.connected) this.setConnected(true);
         let event: EventLike;
         try {
           event = JSON.parse(dataLine.slice(5).trim()) as EventLike;

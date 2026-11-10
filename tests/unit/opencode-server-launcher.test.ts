@@ -189,3 +189,54 @@ test("start spawns the env binary with `serve --port --hostname` and stop termin
     delete process.env.OPENCODE_SERVER_START_TIMEOUT_MS;
   }
 });
+
+async function freeLoopbackUrl(): Promise<string> {
+  const probe = http.createServer();
+  await new Promise<void>((resolve) => probe.listen(0, "127.0.0.1", resolve));
+  const { port } = probe.address() as AddressInfo;
+  await new Promise<void>((resolve) => probe.close(() => resolve()));
+  return `http://127.0.0.1:${port}`;
+}
+
+test("start fails fast and clearly when the binary does not exist", async () => {
+  process.env.OPENCODE_SERVER_URL = await freeLoopbackUrl();
+  process.env.OPENCODE_SERVER_BIN = path.join(TEST_DATA_DIR, "no-such-opencode");
+  process.env.OMNIROUTE_LOG_DIR = TEST_DATA_DIR;
+  process.env.OPENCODE_SERVER_START_TIMEOUT_MS = "20000";
+  clearOpencodeServerSettingsCache();
+  const startedAt = Date.now();
+  try {
+    await assert.rejects(launcher.startOpencodeServer(), /opencode binary not found/);
+    assert.ok(Date.now() - startedAt < 10_000, "must not wait for the whole start timeout");
+    const status = await launcher.getOpencodeServerStatus();
+    assert.deepEqual({ managed: status.managed, pid: status.pid }, { managed: false, pid: null });
+  } finally {
+    delete process.env.OPENCODE_SERVER_BIN;
+    delete process.env.OPENCODE_SERVER_URL;
+    delete process.env.OMNIROUTE_LOG_DIR;
+    delete process.env.OPENCODE_SERVER_START_TIMEOUT_MS;
+  }
+});
+
+test("a server that exits before it is healthy is reported, and its pid is forgotten", async () => {
+  if (process.platform === "win32") return; // the marker stand-in is a POSIX shell script
+  const { bin, marker } = writeMarkerBin("exits");
+  process.env.OPENCODE_SERVER_URL = await freeLoopbackUrl();
+  process.env.OPENCODE_SERVER_BIN = bin;
+  process.env.OMNIROUTE_LOG_DIR = TEST_DATA_DIR;
+  process.env.OPENCODE_SERVER_START_TIMEOUT_MS = "20000";
+  clearOpencodeServerSettingsCache();
+  const startedAt = Date.now();
+  try {
+    await assert.rejects(launcher.startOpencodeServer(), /exited before it became healthy/);
+    assert.ok(Date.now() - startedAt < 10_000, "must not wait for the whole start timeout");
+    assert.equal(fs.existsSync(marker), true);
+    const status = await launcher.getOpencodeServerStatus();
+    assert.deepEqual({ managed: status.managed, pid: status.pid }, { managed: false, pid: null });
+  } finally {
+    delete process.env.OPENCODE_SERVER_BIN;
+    delete process.env.OPENCODE_SERVER_URL;
+    delete process.env.OMNIROUTE_LOG_DIR;
+    delete process.env.OPENCODE_SERVER_START_TIMEOUT_MS;
+  }
+});

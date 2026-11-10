@@ -50,12 +50,32 @@ export type NormalizedTools = {
   choice: unknown;
 };
 
+/** A failed turn: the opencode error name and the HTTP status to answer with. */
+export type TurnError = { name: string; status: number };
+
 export type TurnResult = {
   info: OpencodeMessageInfo;
   text: string;
   reasoning: string;
-  error?: string | null;
+  error?: TurnError | null;
 };
+
+/**
+ * The opencode error of a failed turn (`{ name, data: { statusCode? } }` on the
+ * assistant message or a `session.error` event), or null. Only the error name and
+ * an upstream HTTP status are kept: the message text can carry local paths or
+ * credentials and never reaches the client (Hard Rule 12).
+ */
+export function turnErrorOf(error: unknown): TurnError | null {
+  if (!error || typeof error !== "object") return null;
+  const record = error as { name?: unknown; data?: { statusCode?: unknown } };
+  const rawName = typeof record.name === "string" ? record.name : "";
+  const name = /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(rawName) ? rawName : "UnknownError";
+  const statusCode = Number(record.data?.statusCode);
+  const status =
+    Number.isInteger(statusCode) && statusCode >= 400 && statusCode <= 599 ? statusCode : 502;
+  return { name, status };
+}
 
 export type WireFormat = "chat" | "responses";
 
@@ -329,6 +349,44 @@ function toTurn(record: PartRecord, role: string, text: string): Turn {
   return { role, text, files: collectFiles(record.content) };
 }
 
+type ChatToolCall = { id?: unknown; function?: { name?: unknown; arguments?: unknown } };
+
+// Chat Completions `arguments` is a JSON string; the envelope the model is told to
+// emit carries an object, so a parseable string is replayed as one.
+function replayedArguments(value: unknown): unknown {
+  if (typeof value !== "string") return value ?? {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+// An assistant turn that called tools usually has `content: null`. Its calls are
+// replayed in the same envelope the model was told to emit (see TOOL_PROTOCOL),
+// otherwise the next turn shows a bare tool result with no record of the call.
+function assistantToolCallTurn(
+  record: PartRecord,
+  text: string,
+  toolNames: Map<string, string>
+): Turn | null {
+  if (!Array.isArray(record.tool_calls) || record.tool_calls.length === 0) return null;
+  const calls = (record.tool_calls as ChatToolCall[]).map((call) => {
+    const name = String(call?.function?.name || "");
+    if (call?.id !== undefined && name) toolNames.set(String(call.id), name);
+    return { name, arguments: replayedArguments(call?.function?.arguments) };
+  });
+  const envelope = JSON.stringify({ tool_calls: calls });
+  return { role: "assistant", text: text ? `${text}\n${envelope}` : envelope, files: [] };
+}
+
+// A Chat Completions tool result names its call only by `tool_call_id`; label it
+// with the function name, like a Responses function output.
+function toolResultTurn(record: PartRecord, text: string, toolNames: Map<string, string>): Turn {
+  const name = toolNames.get(String(record.tool_call_id ?? "")) || record.name;
+  return { role: "tool", text: name ? `${String(name)} -> ${text}` : text, files: [] };
+}
+
 // opencode's message API carries a single role per message, and the executor is
 // stateless (the client replays history, exactly like the OpenAI API). Turns are
 // therefore flattened into one user message with explicit role labels.
@@ -338,6 +396,7 @@ export function buildTurns(body: Record<string, unknown>): {
 } {
   const systemChunks: string[] = [];
   const turns: Turn[] = [];
+  const toolNames = new Map<string, string>();
   for (const message of rawMessages(body)) {
     if (!message || typeof message !== "object") continue;
     const record = message as PartRecord;
@@ -347,7 +406,10 @@ export function buildTurns(body: Record<string, unknown>): {
       if (text) systemChunks.push(text);
       continue;
     }
-    turns.push(toTurn(record, role, text));
+    const callTurn = role === "assistant" ? assistantToolCallTurn(record, text, toolNames) : null;
+    if (callTurn) turns.push(callTurn);
+    else if (role === "tool") turns.push(toolResultTurn(record, text, toolNames));
+    else turns.push(toTurn(record, role, text));
   }
   return { systemChunks, turns };
 }
@@ -522,6 +584,7 @@ export function turnResultFromParts(
   parts: OpencodePart[] | undefined
 ): TurnResult {
   const list = parts || [];
+  const error = turnErrorOf(info?.error);
   const joinText = (keep: (part: OpencodePart) => boolean): string =>
     list
       .filter(keep)
@@ -531,6 +594,7 @@ export function turnResultFromParts(
     info: info || {},
     text: joinText((part) => part.type === "text"),
     reasoning: joinText((part) => isReasoningType(part.type)),
+    ...(error ? { error } : {}),
   };
 }
 
@@ -667,6 +731,7 @@ export class OpencodeTurnCollector {
   private readonly deltaText: string[] = [];
   private readonly assistantMessages = new Set<string>();
   private info: OpencodeMessageInfo = {};
+  private error: TurnError | null = null;
 
   constructor(private readonly sinks: TurnSinks = {}) {}
 
@@ -675,15 +740,19 @@ export class OpencodeTurnCollector {
     if (event.type === "message.updated") this.onMessageUpdated(properties);
     else if (event.type === "message.part.delta") this.onPartDelta(properties);
     else if (event.type === "message.part.updated") this.onPartUpdated(properties);
+    else if (event.type === "session.error")
+      this.error = turnErrorOf(properties.error) || this.error;
   }
 
   result(): TurnResult {
+    const error = turnErrorOf(this.info.error) || this.error;
     const joined = (map: Map<string, string>): string =>
       [...map.values()].filter((value) => value.length > 0).join("");
     return {
       info: this.info,
       text: joined(this.textParts) || this.deltaText.join(""),
       reasoning: joined(this.reasoningParts),
+      ...(error ? { error } : {}),
     };
   }
 

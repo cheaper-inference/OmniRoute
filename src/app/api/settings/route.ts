@@ -526,6 +526,23 @@ export async function PATCH(request: Request) {
       }
     }
 
+    // The opencode server URL is checked BEFORE the write: the saved value reaches
+    // the executor through applyRuntimeSettings() (run by updateSettings), so a
+    // rejected URL must never be persisted, nor any other key of the same request.
+    // Clearing it back to the default applies at once. Only the URL is a setting;
+    // the CLI binary is env-only (see services/opencodeServerSettings.ts).
+    const ocsUrl = rawBody.opencode_server_url as string | undefined;
+    if (typeof ocsUrl === "string" && ocsUrl.trim() !== "") {
+      const urlValidation = validateProxyUrl(ocsUrl.trim());
+      if (urlValidation.valid === false) {
+        emitSettingsFailureAudit(request, actor, "OPENCODE_SERVER_URL_INVALID", attemptedKeys);
+        return NextResponse.json(
+          { error: `Invalid opencode server URL: ${urlValidation.error}` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Password rotation: hash the new value AFTER the gate has accepted the
     // currentPassword (or the cold-boot exception fired). The gate already
     // included `newPassword` in SECURITY_IMPACTING_SETTINGS_KEYS, so no separate
@@ -580,22 +597,6 @@ export async function PATCH(request: Request) {
       }
       // Invalidate the executor's URL cache so it picks up the new URL immediately
       clearCliproxyapiUrlCache();
-    }
-
-    // Same validation for the opencode server URL. The saved value reaches the
-    // executor through applyRuntimeSettings() (run by updateSettings), so an edit,
-    // including clearing it back to the default, applies at once. Only the URL is a
-    // setting; the CLI binary is env-only (see services/opencodeServerSettings.ts).
-    const ocsUrl = rawBody.opencode_server_url as string | undefined;
-    if (typeof ocsUrl === "string" && ocsUrl.trim() !== "") {
-      const urlValidation = validateProxyUrl(ocsUrl.trim());
-      if (urlValidation.valid === false) {
-        emitSettingsFailureAudit(request, actor, "OPENCODE_SERVER_URL_INVALID", attemptedKeys);
-        return NextResponse.json(
-          { error: `Invalid opencode server URL: ${urlValidation.error}` },
-          { status: 400 }
-        );
-      }
     }
 
     const cpaModelMapping = rawBody.cliproxyapi_model_mapping as Record<string, string> | undefined;
