@@ -795,13 +795,16 @@ export async function withEarlyStreamKeepalive(
             // change. Frame the (already-sanitized) body as an in-band error event
             // instead of forwarding raw JSON, which would be malformed SSE.
             const text = response.body ? await response.text().catch(() => "") : "";
+            // Only a real error is reshaped and terminated here (#18557): a late
+            // non-SSE success keeps its body rather than turning into a stream_error.
+            const isLateChatError = errorFrameFormat === "chat" && response.status >= 400;
             const dataLine =
               errorFrameFormat === "responses"
                 ? buildResponsesErrorDataLine(text, {
                     status: response.status,
                     retryAfterSeconds: readRetryAfterSeconds(response.headers),
                   })
-                : errorFrameFormat === "chat"
+                : isLateChatError
                   ? buildChatErrorDataLine(text, {
                       status: response.status,
                       retryAfterSeconds: readRetryAfterSeconds(response.headers),
@@ -815,7 +818,7 @@ export async function withEarlyStreamKeepalive(
             const framedBytes = ENCODER.encode(framed);
             controller.enqueue(framedBytes);
             recordClientBytes(framedBytes);
-            if (errorFrameFormat === "chat") {
+            if (isLateChatError) {
               const done = ENCODER.encode("data: [DONE]\n\n");
               controller.enqueue(done);
               recordClientBytes(done);

@@ -604,6 +604,39 @@ test("fast Chat JSON errors remain verbatim HTTP errors", async () => {
   });
 });
 
+test("a late non-error JSON body on the Chat route is not rewritten as an error", async () => {
+  const completion = {
+    id: "chatcmpl-late",
+    object: "chat.completion",
+    choices: [{ index: 0, message: { role: "assistant", content: "hello" } }],
+  };
+  const slowSuccess = new Promise<Response>((resolve) => {
+    setTimeout(
+      () =>
+        resolve(
+          new Response(JSON.stringify(completion), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          })
+        ),
+      35
+    );
+  });
+  const result = await withEarlyStreamKeepalive(slowSuccess, {
+    thresholdMs: 5,
+    intervalMs: 250,
+    errorFrame: OPENAI_CHAT_ERROR_FRAME,
+  });
+  const body = await readAll(result);
+  const frame = body
+    .split("\n")
+    .find((line) => line.startsWith("data: {") && line.includes("chatcmpl-late"));
+  assert.ok(frame, "the successful body must still reach the client");
+  assert.deepEqual(JSON.parse(frame.slice("data: ".length)), completion);
+  assert.doesNotMatch(body, /stream_error/, "a successful body must not become an error");
+  assert.doesNotMatch(body, /data: \[DONE\]/, "the error terminator applies to errors only");
+});
+
 test("late Anthropic and Responses errors retain their existing terminal framing", async () => {
   const makeLateFailure = () =>
     new Promise<Response>((resolve) => {
