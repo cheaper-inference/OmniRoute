@@ -5,7 +5,7 @@ import {
   getTeam,
   getTeamBudgetWindowStart,
 } from "@/lib/db/teams";
-import { computeCostFromPricing, getPricingLookupModels } from "./costCalculator";
+import { computeCostFromPricing, resolvePricingRow } from "./costCalculator";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { toNumber } from "@/shared/utils/numeric";
 import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
@@ -47,18 +47,9 @@ function roundUsd(value: number): number {
 
 type PricingMemo = Map<string, Promise<Record<string, unknown> | null>>;
 
-// Same lookup order as resolvePricingRow in costCalculator.ts (private there). Run once per
-// provider/model for one budget check; the memo is local to the check, so a price change
-// shows in the next check. shortcut: copy of that chain, export it from costCalculator.ts to share.
-async function resolvePricing(provider: string, model: string) {
-  const { getPricingForModel } = await import("@/lib/db/settings");
-  for (const key of getPricingLookupModels(provider, model)) {
-    const pricing = await getPricingForModel(provider, key);
-    if (pricing) return pricing;
-  }
-  return null;
-}
-
+// The pricing row is resolved once per provider/model for one budget check, with the same
+// lookup chain as calculateCostDetailed (resolvePricingRow). The memo is local to the check,
+// so a price change shows in the next check.
 // A failed lookup reads as unpriced, so the budget check fails closed as it did before.
 async function priceShape(
   memo: PricingMemo,
@@ -68,7 +59,7 @@ async function priceShape(
   const memoKey = `${row.provider}\n${row.model}`;
   let lookup = memo.get(memoKey);
   if (!lookup) {
-    lookup = resolvePricing(row.provider, row.model).catch((error) => {
+    lookup = resolvePricingRow(row.provider, row.model).catch((error) => {
       console.error("Error calculating cost:", error);
       return null;
     });
