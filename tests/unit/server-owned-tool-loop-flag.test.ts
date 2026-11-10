@@ -106,8 +106,9 @@ describe("feature-flags-settings count update", () => {
     // CODEBUDDY_TELEMETRY_ENABLED (#18398, opt-in turn reports for the
     // `codebuddy-intl` executor, default off) to 89.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 114;
-    // the release flags listed above plus CODEBUDDY_TELEMETRY_ENABLED take it to 121.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 121);
+    // the release flags listed above (through CODEX_SEARCH_AUTO_FALLBACK_ENABLED, #17933)
+    // plus CODEBUDDY_TELEMETRY_ENABLED take it to 122.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 122);
   });
 });
 
