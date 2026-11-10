@@ -233,6 +233,7 @@ test("#18345: Actions workflow SHA is runner-owned build provenance", () => {
     codeMissingEnv: [],
     envMissingDoc: [],
     docMissingEnv: [],
+    duplicateDocDefinitions: [],
   });
 });
 
@@ -257,6 +258,7 @@ test("#18345: unknown product and GitHub-prefixed variables still fail", () => {
     ],
     envMissingDoc: [],
     docMissingEnv: [],
+    duplicateDocDefinitions: [],
   });
 });
 
@@ -325,7 +327,12 @@ test("OS home-directory fallback context does not require app .env entries", () 
     envOnlyAllowlist: new Set(),
   });
   assert.equal(result.ok, true);
-  assert.deepEqual(result.problems, { codeMissingEnv: [], envMissingDoc: [], docMissingEnv: [] });
+  assert.deepEqual(result.problems, {
+    codeMissingEnv: [],
+    envMissingDoc: [],
+    docMissingEnv: [],
+    duplicateDocDefinitions: [],
+  });
   assert.deepEqual([...parseEnvDocVars(homeFallbackDoc)].sort(), [
     "HOME",
     "USERPROFILE",
