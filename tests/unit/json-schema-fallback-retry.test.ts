@@ -188,3 +188,33 @@ for (const provider of PROVIDERS) {
     assert.equal(countInstructions(out.messages), 0);
   });
 }
+
+// providerSpecificData.nativeJsonSchema opts a connection out of the downgrade: upstreams
+// with native Structured Output that reject `json_object` get json_schema verbatim.
+for (const provider of PROVIDERS) {
+  test(`${provider.name}: nativeJsonSchema forwards json_schema unchanged`, () => {
+    const executor = new DefaultExecutor(provider.id);
+    const body = {
+      model: "m",
+      messages: [{ role: "user", content: "hello" }],
+      response_format: { type: "json_schema", json_schema: { name: "s", schema: SCHEMA } },
+    };
+    const snapshot = structuredClone(body);
+    const credentials = {
+      ...provider.credentials,
+      providerSpecificData: {
+        ...("providerSpecificData" in provider.credentials
+          ? provider.credentials.providerSpecificData
+          : {}),
+        nativeJsonSchema: true,
+      },
+    };
+
+    const out = executor.transformRequest("m", body, false, credentials) as Out;
+
+    assert.deepStrictEqual(body, snapshot, "caller body was mutated");
+    assert.deepStrictEqual(out.response_format, snapshot.response_format);
+    assert.deepStrictEqual(out.messages, snapshot.messages);
+    assert.equal(countInstructions(out.messages), 0);
+  });
+}

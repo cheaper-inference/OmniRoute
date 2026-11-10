@@ -295,6 +295,14 @@ export function validateProviderSpecificData(
     }
   }
 
+  if (data.nativeJsonSchema !== undefined && typeof data.nativeJsonSchema !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.nativeJsonSchema must be a boolean",
+      path: ["nativeJsonSchema"],
+    });
+  }
+
   const preserveEncryptedReasoning = data.preserveEncryptedReasoning;
   if (preserveEncryptedReasoning !== undefined && typeof preserveEncryptedReasoning !== "boolean") {
     ctx.addIssue({

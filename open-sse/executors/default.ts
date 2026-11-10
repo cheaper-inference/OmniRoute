@@ -717,9 +717,15 @@ export class DefaultExecutor extends BaseExecutor {
    * DeepSeek V4 Flash rejects it with HTTP 400 `Invalid input: response_format`,
    * verified live 2026-08-15 — same class as #9992's opencode fix). Gated so
    * providers with native Structured Output support keep the native
-   * `json_schema` path.
+   * `json_schema` path. A connection whose upstream does support native
+   * `json_schema` (and may reject `json_object`) opts out per connection via
+   * `providerSpecificData.nativeJsonSchema: true`.
    */
-  applyJsonSchemaFallback<T>(body: T): T {
+  applyJsonSchemaFallback<T>(
+    body: T,
+    credentials?: { providerSpecificData?: Record<string, unknown> | null } | null
+  ): T {
+    if (credentials?.providerSpecificData?.nativeJsonSchema === true) return body;
     const provider = this.provider ?? "";
     const isOpenAiCompatible = provider.startsWith("openai-compatible-");
     const isDeepSeek = provider === "deepseek";
@@ -822,7 +828,7 @@ export class DefaultExecutor extends BaseExecutor {
       withDefaults = ensureToolMessageNames(withDefaults as Record<string, unknown>);
     }
 
-    withDefaults = this.applyJsonSchemaFallback(withDefaults);
+    withDefaults = this.applyJsonSchemaFallback(withDefaults, credentials);
     withDefaults = this.defaultResponsesTextFormat(withDefaults, credentials);
     if (this.provider === "perplexity-agent") {
       withDefaults = defaultPerplexityAgentMaxOutputTokens(withDefaults);

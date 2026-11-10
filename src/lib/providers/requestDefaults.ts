@@ -243,6 +243,10 @@ export function normalizeProviderSpecificData(
     delete normalized.preserveEncryptedReasoning;
   }
 
+  if ("nativeJsonSchema" in normalized && typeof normalized.nativeJsonSchema !== "boolean") {
+    delete normalized.nativeJsonSchema;
+  }
+
   if ("blockExtraUsage" in normalized && typeof normalized.blockExtraUsage !== "boolean") {
     delete normalized.blockExtraUsage;
   }
