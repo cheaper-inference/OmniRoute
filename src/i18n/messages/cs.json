@@ -11920,6 +11920,7 @@
     "description": "Sledujte a spravujte sémantickou mezipaměť odpovědí, míru úspěšnosti a úsporu tokenů.",
     "refresh": "Obnovit",
     "clearAll": "Vymazat vše",
+    "clearAllConfirm": "Všechny položky v této mezipaměti budou smazány. Tuto akci nelze vrátit zpět.",
     "memoryEntries": "Položky v paměti",
     "memoryEntriesSub": "V paměti (LRU)",
     "dbEntries": "Položky v databázi",

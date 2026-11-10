@@ -11920,6 +11920,7 @@
     "description": "Kula da ingancin ma'ajiyar wucin gadi ta umarnin mai samarwa da sake amfani da amsoshi bisa ma'ana na cikin gida.",
     "refresh": "Sabunta",
     "clearAll": "Share Ma'ajiyar Wucin Gadi ta Ma'ana",
+    "clearAllConfirm": "Za a goge duk shigarwar da ke cikin wannan ma'ajiyar cache. Ba za a iya sokewa ba.",
     "memoryEntries": "Shigarwar Ƙwaƙwalwa",
     "memoryEntriesSub": "LRU na cikin ƙwaƙwalwa",
     "dbEntries": "Abubuwan da ke cikin DB",

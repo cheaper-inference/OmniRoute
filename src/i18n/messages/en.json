@@ -11920,6 +11920,7 @@
     "description": "Monitor provider prompt cache efficiency and local semantic response reuse.",
     "refresh": "Refresh",
     "clearAll": "Clear Semantic Cache",
+    "clearAllConfirm": "Every entry in this cache will be deleted. This cannot be undone.",
     "memoryEntries": "Memory Entries",
     "memoryEntriesSub": "In-memory LRU",
     "dbEntries": "DB Entries",

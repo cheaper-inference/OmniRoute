@@ -11920,6 +11920,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "רענון",
     "clearAll": "Clear All",
+    "clearAllConfirm": "כל הרשומות במטמון זה יימחקו. לא ניתן לבטל פעולה זו.",
     "memoryEntries": "רשומות בזיכרון",
     "memoryEntriesSub": "LRU בזיכרון",
     "dbEntries": "רשומות במסד הנתונים",

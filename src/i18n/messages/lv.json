@@ -11920,6 +11920,7 @@
     "description": "Uzraugiet nodrošinātāja uzvednes kešatmiņas efektivitāti un lokālo semantisko atbilžu atkārtotu izmantošanu.",
     "refresh": "Atsvaidzināt",
     "clearAll": "Notīrīt semantisko kešatmiņu",
+    "clearAllConfirm": "Visi šīs kešatmiņas ieraksti tiks dzēsti. Šo darbību nevar atsaukt.",
     "memoryEntries": "Ieraksti atmiņā",
     "memoryEntriesSub": "Atmiņā glabāts LRU",
     "dbEntries": "DB ieraksti",

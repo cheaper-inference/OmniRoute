@@ -11920,6 +11920,7 @@
     "description": "Monitorowanie wydajności prompt cache u provider oraz lokalnego ponownego użycia semantycznego.",
     "refresh": "Odśwież",
     "clearAll": "Wyczyść cache semantyczny",
+    "clearAllConfirm": "Wszystkie wpisy w tej pamięci podręcznej zostaną usunięte. Tej operacji nie można cofnąć.",
     "memoryEntries": "Wpisy w pamięci",
     "memoryEntriesSub": "LRU w pamięci",
     "dbEntries": "Wpisy w bazie danych",

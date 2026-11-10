@@ -11920,6 +11920,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "새로 고침",
     "clearAll": "Clear All",
+    "clearAllConfirm": "이 캐시의 모든 항목이 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
     "memoryEntries": "메모리 항목",
     "memoryEntriesSub": "인메모리 LRU",
     "dbEntries": "DB 항목",

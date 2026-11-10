@@ -11920,6 +11920,7 @@
     "description": "Immonitorja l-effiċjenza tal-cache tal-prompts tal-fornitur u l-użu mill-ġdid lokali ta’ tweġibiet semantiċi.",
     "refresh": "Aġġorna",
     "clearAll": "Ħassar il-Cache Semantika",
+    "clearAllConfirm": "L-entrati kollha f'dan il-cache se jitħassru. Dan ma jistax jitreġġa' lura.",
     "memoryEntries": "Entrati fil-Memorja",
     "memoryEntriesSub": "LRU fil-memorja",
     "dbEntries": "Entrati fid-DB",

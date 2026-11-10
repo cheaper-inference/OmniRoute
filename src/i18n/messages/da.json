@@ -11920,6 +11920,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Opdater",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Alle poster i denne cache bliver slettet. Dette kan ikke fortrydes.",
     "memoryEntries": "Hukommelsesposter",
     "memoryEntriesSub": "LRU i hukommelsen",
     "dbEntries": "Databaseposter",

@@ -11920,6 +11920,7 @@
     "description": "Supervisa la eficiencia de la caché de prompts del proveedor y la reutilización local de respuestas semánticas.",
     "refresh": "Actualizar",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Se eliminarán todas las entradas de esta caché. Esta acción no se puede deshacer.",
     "memoryEntries": "Entradas en memoria",
     "memoryEntriesSub": "LRU en memoria",
     "dbEntries": "Entradas de la base de datos",

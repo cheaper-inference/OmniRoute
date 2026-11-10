@@ -11920,6 +11920,7 @@
     "description": "Déan monatóireacht ar éifeachtúlacht thaisce prompt an tsoláthraí agus ar athúsáid áitiúil freagraí séimeantacha.",
     "refresh": "Athnuachan",
     "clearAll": "Glan an Taisce Shéimeantach",
+    "clearAllConfirm": "Scriosfar gach iontráil sa taisce seo. Ní féidir é seo a chealú.",
     "memoryEntries": "Iontrálacha Cuimhne",
     "memoryEntriesSub": "LRU sa chuimhne",
     "dbEntries": "Iontrálacha DB",

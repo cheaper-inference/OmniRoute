@@ -11920,6 +11920,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "รีเฟรช",
     "clearAll": "Clear All",
+    "clearAllConfirm": "รายการทั้งหมดในแคชนี้จะถูกลบ และไม่สามารถยกเลิกได้",
     "memoryEntries": "รายการในหน่วยความจำ",
     "memoryEntriesSub": "LRU ในหน่วยความจำ",
     "dbEntries": "รายการในฐานข้อมูล",

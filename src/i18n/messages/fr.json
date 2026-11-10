@@ -11920,6 +11920,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Actualiser",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Toutes les entrées de ce cache seront supprimées. Cette action est irréversible.",
     "memoryEntries": "Entrées en mémoire",
     "memoryEntriesSub": "LRU en mémoire",
     "dbEntries": "Entrées de la base de données",

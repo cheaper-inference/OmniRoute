@@ -11920,6 +11920,7 @@
     "description": "Giám sát hiệu quả cache prompt của nhà cung cấp và việc tái sử dụng phản hồi ngữ nghĩa cục bộ.",
     "refresh": "Làm mới",
     "clearAll": "Xóa Cache ngữ nghĩa",
+    "clearAllConfirm": "Tất cả mục trong bộ nhớ đệm này sẽ bị xóa. Không thể hoàn tác thao tác này.",
     "memoryEntries": "Bản ghi bộ nhớ",
     "memoryEntriesSub": "LRU trong bộ nhớ",
     "dbEntries": "Bản ghi cơ sở dữ liệu",

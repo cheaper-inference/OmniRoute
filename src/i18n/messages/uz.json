@@ -11920,6 +11920,7 @@
     "description": "Provayder koʻrsatmalar keshi samaradorligi va lokal semantik javoblardan qayta foydalanishni kuzating.",
     "refresh": "Yangilash",
     "clearAll": "Semantik keshni tozalash",
+    "clearAllConfirm": "Ushbu keshdagi barcha yozuvlar o‘chiriladi. Bu amalni ortga qaytarib bo‘lmaydi.",
     "memoryEntries": "Xotiradagi yozuvlar",
     "memoryEntriesSub": "Xotiradagi LRU",
     "dbEntries": "DB yozuvlari",

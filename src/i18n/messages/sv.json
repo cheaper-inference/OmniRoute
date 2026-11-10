@@ -11920,6 +11920,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Uppdatera",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Alla poster i den här cachen raderas. Det går inte att ångra.",
     "memoryEntries": "Poster i minnet",
     "memoryEntriesSub": "LRU i minnet",
     "dbEntries": "Databasposter",
