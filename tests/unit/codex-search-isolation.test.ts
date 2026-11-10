@@ -2,6 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
+const BRAVE_URL = "https://api.search.brave.com/res/v1/web/search";
+const DUCKDUCKGO_URL = "https://lite.duckduckgo.com/lite/";
+const SERPER_URL = "https://google.serper.dev/search";
+function matchesSearchEndpoint(value: string, endpoint: string): boolean {
+  const actual = new URL(value);
+  const expected = new URL(endpoint);
+  return actual.origin === expected.origin && actual.pathname === expected.pathname;
+}
+
 process.env.API_KEY_SECRET = "codex-search-isolation-test-secret";
 // These isolation checks exercise the opted-in automatic Codex fallback
 // (CODEX_SEARCH_AUTO_FALLBACK_ENABLED, default off); routing tests cover the default.
@@ -96,13 +105,13 @@ test.beforeEach(async () => {
     const url = String(input);
     calls.push(url);
     if (url === CODEX_URL) return new Response(fixture);
-    if (url.includes("api.search.brave.com")) {
+    if (matchesSearchEndpoint(url, BRAVE_URL)) {
       return braveFails
         ? new Response("Unavailable", { status: 503 })
         : Response.json({ web: { results: [] } });
     }
-    if (url.includes("duckduckgo.com")) return new Response("<html></html>");
-    if (url.includes("google.serper.dev")) return Response.json({ organic: [] });
+    if (matchesSearchEndpoint(url, DUCKDUCKGO_URL)) return new Response("<html></html>");
+    if (matchesSearchEndpoint(url, SERPER_URL)) return Response.json({ organic: [] });
     throw new Error(`No network permitted: ${url}`);
   };
 });
@@ -191,13 +200,16 @@ for (const blocked of ["codex-search", "codex_search", "duckduckgo-free", "serpe
     await settings.updateSettings({ blockedProviders: [blocked, "context7"] });
     braveFails = true;
     const response = await post();
-    const forbiddenHost = blocked.startsWith("codex")
-      ? "chatgpt.com"
+    const forbiddenEndpoint = blocked.startsWith("codex")
+      ? CODEX_URL
       : blocked === "serper-search"
-        ? "google.serper.dev"
-        : "duckduckgo.com";
-    assert.ok(calls.some((url) => url.includes("api.search.brave.com")));
-    assert.ok(!calls.some((url) => url.includes(forbiddenHost)), JSON.stringify(calls));
+        ? SERPER_URL
+        : DUCKDUCKGO_URL;
+    assert.ok(calls.some((url) => matchesSearchEndpoint(url, BRAVE_URL)));
+    assert.ok(
+      !calls.some((url) => matchesSearchEndpoint(url, forbiddenEndpoint)),
+      JSON.stringify(calls)
+    );
     if (blocked === "duckduckgo-free") assert.equal(response.status, 503);
     else {
       assert.equal(response.status, 200);
@@ -221,7 +233,9 @@ for (const target of ["route", "mirror"]) {
         assert.equal(result.data.provider, expected);
       }
       assert.ok(calls.length > 0);
-      assert.ok(calls.every((url) => url.includes(codex ? "chatgpt.com" : "duckduckgo.com")));
+      assert.ok(
+        calls.every((url) => matchesSearchEndpoint(url, codex ? CODEX_URL : DUCKDUCKGO_URL))
+      );
     });
   }
 
@@ -237,7 +251,7 @@ for (const target of ["route", "mirror"]) {
       const result = await executeWebSearch({ query: `paid mirror ${sequence++}` });
       assert.equal(result.data.provider, "brave-search");
     }
-    assert.ok(calls.every((url) => url.includes("api.search.brave.com")));
+    assert.ok(calls.every((url) => matchesSearchEndpoint(url, BRAVE_URL)));
   });
 
   test(`${target}: search-scoped backoff skips Codex on the next search, not chat`, async () => {
@@ -257,7 +271,7 @@ for (const target of ["route", "mirror"]) {
       const result = await executeWebSearch({ query: `backoff mirror ${sequence++}` });
       assert.equal(result.data.provider, "duckduckgo-free");
     }
-    assert.ok(!calls.includes(CODEX_URL));
+    assert.ok(!calls.some((url) => url === CODEX_URL));
   });
 }
 
@@ -270,5 +284,18 @@ test("scope excluding Codex keeps base keyless opt-in with tokenless AnySearch",
   const response = await post(key.key as string);
   assert.equal(response.status, 200);
   assert.equal((await response.json()).provider, "duckduckgo-free");
-  assert.ok(calls.length > 0 && calls.every((url) => url.includes("duckduckgo.com")));
+  assert.ok(calls.length > 0 && calls.every((url) => matchesSearchEndpoint(url, DUCKDUCKGO_URL)));
 });
+
+for (const [reason, url] of [
+  ["suffix host", "https://api.search.brave.com.attacker.invalid/res/v1/web/search"],
+  ["hostname in userinfo", "https://api.search.brave.com@attacker.invalid/res/v1/web/search"],
+  ["hostname in query", "https://attacker.invalid/?next=duckduckgo.com"],
+  ["unexpected path", "https://lite.duckduckgo.com/unexpected"],
+  ["unexpected scheme", "http://api.search.brave.com/res/v1/web/search"],
+  ["unexpected port", "https://api.search.brave.com:444/res/v1/web/search"],
+] as const) {
+  test(`mock rejects lookalike URL: ${reason}`, async () => {
+    await assert.rejects(fetch(url), /No network permitted/);
+  });
+}
