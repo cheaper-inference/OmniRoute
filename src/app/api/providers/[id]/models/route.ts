@@ -7,7 +7,6 @@ import {
   isClaudeCodeCompatibleProvider,
   isAnthropicCompatibleProvider,
   isOpenAICompatibleProvider,
-  NOAUTH_PROVIDERS,
 } from "@/shared/constants/providers";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { getModelsByProviderId } from "@/shared/constants/models";
@@ -168,7 +167,12 @@ import { maybeHandleDevinDesktopModelDiscovery } from "./devinDesktopDiscovery";
 import { maybeHandleMuseCodeModelDiscovery } from "./museCodeDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
 import { maybeHandleCodeBuddyIntlModelDiscovery } from "./codebuddyIntlDiscovery";
-import { buildNoAuthModelsResponse, filterModelsForRoute } from "./modelRouteProjection";
+import { buildChatGptModelsResponse } from "./chatgptModels";
+import {
+  buildNoAuthModelsResponse,
+  filterModelsForRoute,
+  resolveNoAuthProviderId,
+} from "./modelRouteProjection";
 
 /**
  * GET /api/providers/[id]/models - Get models list from provider
@@ -196,14 +200,7 @@ export async function GET(
       typeof connection?.provider === "string" && connection.provider.trim().length > 0
         ? connection.provider
         : null;
-    const noAuthProviderId =
-      (NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>)[id]?.noAuth === true
-        ? id
-        : connectionProvider &&
-            (NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>)[connectionProvider]
-              ?.noAuth === true
-          ? connectionProvider
-          : null;
+    const noAuthProviderId = resolveNoAuthProviderId(id, connectionProvider);
 
     // No-auth providers may persist a connection row solely for fingerprints
     // and account-proxy metadata. That row must not turn public model discovery
@@ -236,6 +233,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid connection provider" }, { status: 400 });
     }
     const usesCuratedModelsOnly = providerUsesCuratedModelsOnly(provider);
+    if (provider === "chatgpt") return buildChatGptModelsResponse(connection, excludeHidden);
 
     // Resolve proxy for this provider (provider-level → global → direct)
     const proxy = await resolveProxyForProvider(provider);
