@@ -134,9 +134,6 @@ function mergeTrailingTextIntoFunctionResponses(contents: GeminiContent[]) {
 const MAX_TOOL_RESULT_IMAGES = 5;
 const TOOL_RESULT_IMAGE_PLACEHOLDER = "[Earlier tool result image omitted to bound request size]";
 
-// Spelled out so the any-budget gate (check-t11-any-budget) does not count the literal.
-const TOOL_CHOICE_ANY = ["a", "n", "y"].join("");
-
 type ToolUseOccurrence = { name: string; signature: string | null };
 
 /**
@@ -486,7 +483,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
     }
   } else if (
     declaredNames.length > 0 &&
-    (choiceType === TOOL_CHOICE_ANY || (choiceType === "tool" && !forcesServerTool))
+    (choiceType === "any" || (choiceType === "tool" && !forcesServerTool))
   ) {
     const functionCallingConfig: Record<string, unknown> = { mode: "ANY" };
     if (choiceType === "tool") {
