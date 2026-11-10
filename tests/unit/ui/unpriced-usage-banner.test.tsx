@@ -64,7 +64,7 @@ describe("UnpricedUsageBanner", () => {
     expect(container.querySelector('svg[data-icon="price_change"]')).not.toBeNull();
     expect(
       container.querySelector('button[aria-label="unpricedUsageDismiss"]')?.className
-    ).toContain("ci-button");
+    ).toContain("ci-alert__dismiss");
     expect(container.querySelector('[role="status"]')).not.toBeNull();
     expect(container.querySelector('[role="alert"]')).toBeNull();
     expect(container.textContent).not.toContain("unpricedUsageFailClosed");

@@ -19,6 +19,8 @@ vi.mock("@/store/notificationStore", () => ({
 }));
 vi.mock("@/shared/components", async () => ({
   Button: (await import("@/shared/components/Button")).default,
+  Checkbox: (await import("@/shared/components/Checkbox")).default,
+  Select: (await import("@/shared/components/Select")).default,
   Input: (await import("@/shared/components/Input")).default,
   Modal: (await import("@/shared/components/Modal")).default,
 }));
@@ -310,7 +312,12 @@ describe("dashboard kit repair behavior", () => {
         <button data-testid="outside">Outside</button>
       </>
     );
-    await click(container.querySelector("button"));
+    const trigger = container.querySelector<HTMLButtonElement>("button")!;
+    // HTMLElement.click() does not focus the trigger in jsdom. Model the user
+    // leaving a focused control; a focus event with no origin has a different policy.
+    trigger.focus();
+    await click(trigger);
+    expect(document.activeElement).toBe(trigger);
     expect(document.querySelector('[data-slot="popover-content"]')).not.toBeNull();
     const outside = container.querySelector<HTMLButtonElement>('[data-testid="outside"]')!;
     await act(async () => outside.focus());
