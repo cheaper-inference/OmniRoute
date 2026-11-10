@@ -54,6 +54,19 @@ import { orderCapabilityTargets } from "./combo/capabilityTargetOrder.ts";
 /**
  * Execute a full combo strategy for a video generation request.
  */
+/** Resolve targets once and keep only the ones a video provider can serve. */
+async function resolveVideoCapableTargets(targets: Array<{ modelStr?: string; weight?: number }>) {
+  const videoTargets: Array<{ modelStr: string; weight?: number; resolved: VideoModelTarget }> = [];
+  for (const t of targets) {
+    if (!t.modelStr) continue;
+    const resolved = await resolveVideoModelTarget(t.modelStr);
+    if (resolved.provider) {
+      videoTargets.push({ modelStr: t.modelStr, weight: t.weight, resolved });
+    }
+  }
+  return videoTargets;
+}
+
 /** Load a combo, project it onto video generation and apply the caller key's scope. */
 async function loadScopedVideoComboTargets(comboName: string, keyScope?: ComboKeyScope) {
   const combo = await getComboByName(comboName);
@@ -104,18 +117,7 @@ export async function executeVideoCombo(
   // and filter to video-capable ones. Resolving up front (rather than in the
   // execution loop below) lets prompt validation run against the real
   // expanded target set instead of the unresolved combo name.
-  const videoTargets: Array<{
-    modelStr: string;
-    weight?: number;
-    resolved: VideoModelTarget;
-  }> = [];
-  for (const t of targets) {
-    if (!t.modelStr) continue;
-    const resolved = await resolveVideoModelTarget(t.modelStr);
-    if (resolved.provider) {
-      videoTargets.push({ modelStr: t.modelStr, weight: t.weight, resolved });
-    }
-  }
+  const videoTargets = await resolveVideoCapableTargets(targets);
 
   if (videoTargets.length === 0) {
     return errorResponse(
