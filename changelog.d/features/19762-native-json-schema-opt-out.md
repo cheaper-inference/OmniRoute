@@ -1,0 +1,1 @@
+- **feat(executors):** Per-connection `nativeJsonSchema` toggle forwards `response_format: json_schema` unchanged for OpenAI-compatible upstreams that reject the `json_object` downgrade ([#19762](https://github.com/cheaper-inference/OmniRoute/pull/19762))
