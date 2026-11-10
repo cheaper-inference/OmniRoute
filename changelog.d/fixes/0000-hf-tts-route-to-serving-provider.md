@@ -1,0 +1,1 @@
+- **fix(audio):** the Hugging Face text-to-speech models Orpheus, Chatterbox and Kokoro now go to the provider that serves them on the Hugging Face router (the deepinfra route), not to hf-inference, which serves no text-to-speech model. Requests for these models no longer fail on the wrong route. Custom Hugging Face model ids keep the hf-inference route.
