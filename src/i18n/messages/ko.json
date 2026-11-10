@@ -2689,7 +2689,7 @@
     "templateCodexServiceMode": "Codex 서비스 등급 모드",
     "templateCombosDenyAllBanner": "제한 모드에서 선택된 콤보가 0개이면 모든 콤보 요청이 거부됩니다.",
     "templateConnectionIdPlaceholder": "connectionId",
-    "templateDeleteConfirm": "템플릿 '{name}'을(를) 삭제할까요? 이 템플릿으로 만든 기존 API 키에는 이미 적용된 권한이 유지됩니다.",
+    "templateDeleteConfirm": "템플릿 “{name}”을(를) 삭제할까요? 이 템플릿으로 만든 기존 API 키에는 이미 적용된 권한이 유지됩니다.",
     "templateDeleteFailed": "템플릿을 삭제하지 못했습니다.",
     "templateDomainBudgetDesc": "사용자 지정 재설정 간격과 경고 임계값으로 일일·주간·월간 예산 추적을 설정합니다.",
     "templateDomainBudgetTitle": "도메인 예산 일정 및 경고 임계값",

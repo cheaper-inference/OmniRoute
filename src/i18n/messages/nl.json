@@ -2774,7 +2774,7 @@
     "templateTokenMaxTokens": "Max. aantal tokens",
     "templateRuleDescription": "Beschrijving",
     "templateSummaryCombosCount": "{count} combinaties",
-    "templateDeleteConfirm": "Sjabloon '{name}' verwijderen? Bestaande API-sleutels die met dit sjabloon zijn aangemaakt, behouden hun toegepaste machtigingen.",
+    "templateDeleteConfirm": "Sjabloon “{name}” verwijderen? Bestaande API-sleutels die met dit sjabloon zijn aangemaakt, behouden hun toegepaste machtigingen.",
     "templateSetBudget": "Budget instellen",
     "templateRemoveTag": "Label verwijderen",
     "templateUnitSeconds": "Seconden",
