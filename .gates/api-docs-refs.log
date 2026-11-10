@@ -1,7 +1,0 @@
-npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
-
-> omniroute@3.8.54 check:api-docs-refs
-> node scripts/check/check-api-docs-refs.mjs
-
-[openapi-routes] OK — 765 paths na spec, todos com rota real (795 rotas)
-[check-docs-symbols] OK — 201 docs canônicas, 795 rotas conhecidas, 0 stale congeladas

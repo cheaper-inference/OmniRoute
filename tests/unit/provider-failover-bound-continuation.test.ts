@@ -43,12 +43,27 @@ for (const [label, body] of [
   ["_omniroutePreviousResponseResumed", { _omniroutePreviousResponseResumed: true }],
   ["encrypted reasoning", { input: [{ type: "reasoning", encrypted_content: "gAAAA-x" }] }],
   ["item_reference", { input: [{ type: "item_reference", id: "item_1" }] }],
-  ["tool call id", { input: [{ type: "function_call", call_id: "call_1", name: "f" }] }],
+  ["a tool call with no call_id", { input: [{ type: "function_call", name: "f" }] }],
 ] as const) {
   test(`${label} is a bound continuation`, () => {
     assert.equal(bodyCarriesBoundContinuation(body as Record<string, unknown>), true);
   });
 }
+
+test("plain tool history stays adoptable, so it does not pin the provider", () => {
+  // The ownership claim can adopt a call that carries its `call_id`; failover must
+  // keep the same boundary or an agentic request could never fail over at all.
+  assert.equal(
+    bodyCarriesBoundContinuation({
+      input: [
+        { type: "function_call", call_id: "call_1", name: "read" },
+        { type: "function_call_output", call_id: "call_1", output: "ok" },
+      ],
+      messages: [{ role: "tool", tool_call_id: "call_1", content: "ok" }],
+    }),
+    false
+  );
+});
 
 test("a Muse API-key install is never ownership-pinned", async () => {
   // "Preserve the existing unpinned behavior for Muse API-key connections."

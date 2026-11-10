@@ -1,6 +1,0 @@
-npm warn Unknown project config "onnxruntime-node-install". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
-
-> omniroute@3.8.54 check:provider-consistency
-> bun scripts/check/check-provider-consistency.ts
-
-[provider-consistency] OK — 296 entradas REGISTRY, 381 providers canônicos, 0 exceção(ões) registry-only, 32 catalog-only

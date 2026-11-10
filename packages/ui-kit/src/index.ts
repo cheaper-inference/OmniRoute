@@ -20,6 +20,7 @@ export {
 export { brandTintVars, type BrandTintVars } from "./brand-tint";
 export { Button, buttonVariants, type ButtonProps, type ButtonSize, type ButtonVariant } from "./button";
 export { GuardedAction, type GuardedActionProps } from "./guarded-action";
+export { StickyRegion, type StickyRegionProps } from "./sticky-region";
 export { Badge, badgeVariants, type BadgeProps, type BadgeShape, type BadgeTone, type BadgeVariant } from "./badge";
 export { Kbd, KbdGroup, type KbdGroupProps, type KbdProps, type KbdSize } from "./kbd";
 export { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, type AlertDialogActionProps, type AlertDialogCancelProps, type AlertDialogContentProps, type AlertDialogProps, type AlertDialogTone } from "./alert-dialog";
