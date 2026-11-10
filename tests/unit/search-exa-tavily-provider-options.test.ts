@@ -184,6 +184,7 @@ test("Tavily: forwards allow-listed provider_options.tavily fields", async () =>
         exact_match: true,
         include_usage: true,
         safe_search: true,
+        max_age_hours: 24,
       },
     },
   });
@@ -202,6 +203,7 @@ test("Tavily: forwards allow-listed provider_options.tavily fields", async () =>
   assert.equal(body.exact_match, true);
   assert.equal(body.include_usage, true);
   assert.equal(body.safe_search, true);
+  assert.equal(body.max_age_hours, 24);
   assert.equal(body.topic, "general");
 });
 
@@ -220,6 +222,7 @@ test("Tavily: generic contract wins over provider_options and bad values are dro
         country: "de",
         search_depth: "ludicrous",
         chunks_per_source: 50,
+        max_age_hours: 721,
         api_key: "attacker",
       },
     },
@@ -232,6 +235,7 @@ test("Tavily: generic contract wins over provider_options and bad values are dro
   assert.equal(body.country, "us");
   assert.equal(body.search_depth, undefined);
   assert.equal(body.chunks_per_source, undefined);
+  assert.equal(body.max_age_hours, undefined);
   assert.equal(body.api_key, undefined);
 });
 
