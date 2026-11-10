@@ -17,7 +17,8 @@ for (const filename of [
   "224_proxy_logs_egress_ip_families.sql",
   "226_request_cost_ledger_read_indexes.sql",
   "228_purge_orphaned_provider_catalogs.sql",
-  "236_codex_connection_fences.sql",
+  "236_key_templates.sql",
+  "237_codex_connection_fences.sql",
 ]) {
   fs.copyFileSync(
     new URL(`../../../src/lib/db/migrations/${filename}`, import.meta.url),
@@ -75,43 +76,49 @@ test("every old Codex slot is guarded by version and name", () => {
       {
         fromVersion: "215",
         fromName: "codex_connection_fences",
-        toVersion: "236",
+        toVersion: "237",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "217",
         fromName: "codex_connection_fences",
-        toVersion: "236",
+        toVersion: "237",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "218",
         fromName: "codex_connection_fences",
-        toVersion: "236",
+        toVersion: "237",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "223",
         fromName: "codex_connection_fences",
-        toVersion: "236",
+        toVersion: "237",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "224",
         fromName: "codex_connection_fences",
-        toVersion: "236",
+        toVersion: "237",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "226",
         fromName: "codex_connection_fences",
-        toVersion: "236",
+        toVersion: "237",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "228",
         fromName: "codex_connection_fences",
-        toVersion: "236",
+        toVersion: "237",
+        toName: "codex_connection_fences",
+      },
+      {
+        fromVersion: "236",
+        fromName: "codex_connection_fences",
+        toVersion: "237",
         toName: "codex_connection_fences",
       },
     ]
@@ -126,6 +133,7 @@ for (const previous of [
   "codex-224",
   "codex-226",
   "codex-228",
+  "codex-236",
   "quota",
   "team",
   "queue",
@@ -138,7 +146,7 @@ for (const previous of [
       db.exec(schema);
       let fenceBefore: unknown;
       if (previous.startsWith("codex-")) {
-        apply(db, "236_codex_connection_fences.sql");
+        apply(db, "237_codex_connection_fences.sql");
         db.exec("UPDATE codex_connection_fences SET failure_revision = 7");
         db.prepare(
           "INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES (?, 'codex_connection_fences', '2026-10-28 00:00:00')"
@@ -169,7 +177,7 @@ for (const previous of [
           VALUES ('217', 'quota_recovery_tickets', '2026-10-28 00:00:00');`);
       }
 
-      assert.equal(runMigrations(db), previous === "fresh" ? 9 : 8);
+      assert.equal(runMigrations(db), previous === "fresh" ? 10 : 9);
       assert.deepEqual(
         db.prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version").all(),
         [
@@ -181,7 +189,8 @@ for (const previous of [
           { version: "224", name: "proxy_logs_egress_ip_families" },
           { version: "226", name: "request_cost_ledger_read_indexes" },
           { version: "228", name: "purge_orphaned_provider_catalogs" },
-          { version: "236", name: "codex_connection_fences" },
+          { version: "236", name: "key_templates" },
+          { version: "237", name: "codex_connection_fences" },
         ]
       );
       if (previous.startsWith("codex-")) {
@@ -189,7 +198,7 @@ for (const previous of [
       }
       if (previous !== "fresh") {
         const version = previous.startsWith("codex-")
-          ? "236"
+          ? "237"
           : previous === "team"
             ? "215"
             : previous === "queue"

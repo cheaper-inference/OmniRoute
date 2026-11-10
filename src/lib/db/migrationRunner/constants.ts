@@ -166,49 +166,55 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
-  // Earlier PR heads used 215, 217, 218, 223, 224, 226 and 228 before canonical release
+  // Earlier PR heads used 215, 217, 218, 223, 224, 226, 228 and 236 before canonical release
   // migrations claimed those slots. Preserve both the durable fence and the pending features.
   // Rehome only exact Codex ledger rows; the canonical release features keep their slots.
   {
     fromVersion: "215",
     fromName: "codex_connection_fences",
-    toVersion: "236",
+    toVersion: "237",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "217",
     fromName: "codex_connection_fences",
-    toVersion: "236",
+    toVersion: "237",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "218",
     fromName: "codex_connection_fences",
-    toVersion: "236",
+    toVersion: "237",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "223",
     fromName: "codex_connection_fences",
-    toVersion: "236",
+    toVersion: "237",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "224",
     fromName: "codex_connection_fences",
-    toVersion: "236",
+    toVersion: "237",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "226",
     fromName: "codex_connection_fences",
-    toVersion: "236",
+    toVersion: "237",
     toName: "codex_connection_fences",
   },
   {
     fromVersion: "228",
     fromName: "codex_connection_fences",
-    toVersion: "236",
+    toVersion: "237",
+    toName: "codex_connection_fences",
+  },
+  {
+    fromVersion: "236",
+    fromName: "codex_connection_fences",
+    toVersion: "237",
     toName: "codex_connection_fences",
   },
   // Vacate feature slot 215 before Team history is rehomed there.
