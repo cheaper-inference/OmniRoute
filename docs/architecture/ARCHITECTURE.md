@@ -17,7 +17,7 @@ It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic acr
 
 Core capabilities:
 
-- OpenAI-compatible API surface for CLI/tools (380 providers, 159 executor modules)
+- OpenAI-compatible API surface for CLI/tools (388 providers, 159 executor modules)
 - Request/response translation across provider formats
 - Model combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`
@@ -445,7 +445,13 @@ have to assemble lockout/budget/fallback logic themselves.
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Model availability snapshots: `src/domain/modelAvailability.ts`
 - Provider expiration tracking: `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI
+  dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter
+  attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's
+  full window set: a window known earlier but absent from it is retired, in the cache, in the
+  `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted
+  Codex quota state and in Claude's saturation buckets. Partial evidence (response headers,
+  stale copies) only updates the windows it carries.
 - Degradation state: `src/domain/degradation.ts`
 - Configuration audit: `src/domain/configAudit.ts`
 - OmniRoute response metadata builder: `src/domain/omnirouteResponseMeta.ts`

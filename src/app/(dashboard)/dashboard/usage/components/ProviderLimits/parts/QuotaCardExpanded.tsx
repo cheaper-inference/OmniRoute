@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { buildGrokBillingCardRows } from "@/shared/utils/grokBilling";
 import { buildKimiBillingCardRows } from "@/shared/utils/kimiBilling";
 import {
@@ -32,6 +33,7 @@ import KiloPassMeter from "./KiloPassMeter";
 import QuotaCardSpeed from "./QuotaCardSpeed";
 import { hasCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 import AntigravityQuotaGroups, { resolveAntigravityQuotaGroups } from "../AntigravityQuotaGroups";
+import CursorModelUsageTable from "../CursorModelUsageTable";
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: "$",
@@ -165,6 +167,8 @@ interface Props {
   onShowQuota?: (quota: any) => void;
   /** Read-time decode-speed stats from the usage API (`speed` payload). */
   speed?: unknown;
+  /** Cursor only: per-model tokens + billed cost rows (`raw.modelUsage`); absent → no table. */
+  cursorModelUsage?: unknown;
 }
 
 function QuotaDetailRow({
@@ -224,9 +228,7 @@ function QuotaDetailRow({
           className="h-6 min-h-6 shrink-0 gap-1 px-1.5 text-[12px] font-bold leading-none tabular-nums"
           style={{ color: colors.text }}
         >
-          {loadingResetCredits && (
-            <Icon name="progress_activity" size={12} className="animate-spin" />
-          )}
+          {loadingResetCredits && <Spinner decorative size="xs" />}
           {count.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           <Icon name="chevron_right" size={13} />
         </Button>
@@ -351,6 +353,7 @@ export default function QuotaCardExpanded({
   onHideQuota,
   onShowQuota,
   speed,
+  cursorModelUsage,
 }: Props) {
   const t = useTranslations("usage");
   const tr = (key: string, fallback: string, values?: UsageTranslationValues) =>
@@ -390,8 +393,8 @@ export default function QuotaCardExpanded({
   return (
     <div className="border-t border-border bg-bg-subtle/30 px-3 py-2.5 flex flex-col gap-1.5">
       {shouldShowLoadingPlaceholder(loading, sortedQuotas.length, message) ? (
-        <div className="text-[11px] text-text-muted flex items-center gap-1.5">
-          <Icon name="progress_activity" size={13} className="animate-spin" />
+        <div role="status" className="text-[11px] text-text-muted flex items-center gap-1.5">
+          <Spinner decorative size="xs" />
           {t("loadingQuotas")}
         </div>
       ) : error ? (
@@ -440,6 +443,8 @@ export default function QuotaCardExpanded({
           </span>
         </div>
       )}
+
+      {providerId === "cursor" && !error && <CursorModelUsageTable rows={cursorModelUsage} />}
 
       {!error && <QuotaCardSpeed speed={speed} />}
 
@@ -511,7 +516,7 @@ export default function QuotaCardExpanded({
             }}
             className="ml-auto inline-flex size-7 shrink-0 min-h-7"
           >
-            <Icon name="refresh" size={12} className={loading ? "animate-spin" : undefined} />
+            {loading ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={12} />}
           </Button>
         </div>
         <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,5rem),1fr))] gap-1.5">
@@ -526,13 +531,11 @@ export default function QuotaCardExpanded({
               }}
               className="h-auto min-h-0 min-w-0 gap-1 whitespace-normal break-words border-primary/40 px-1.5 py-1.5 text-[11px] text-primary"
             >
-              <Icon
-                name={
-                  redeemingResetCredit || loadingResetCredits ? "progress_activity" : "restart_alt"
-                }
-                size={12}
-                className={redeemingResetCredit || loadingResetCredits ? "animate-spin" : undefined}
-              />
+              {redeemingResetCredit || loadingResetCredits ? (
+                <Spinner decorative size="xs" />
+              ) : (
+                <Icon name="restart_alt" size={12} />
+              )}
               <span className="min-w-0">{tr("manageResetCredits", "View credits")}</span>
             </Button>
           )}

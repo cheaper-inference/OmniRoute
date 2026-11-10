@@ -61,11 +61,10 @@ test("globals.css no longer overrides the kit's warning colour", () => {
 test("warning badge, warning button and text-warning read the warning ink", () => {
   assert.match(globals, /:root\s*\{\s*--color-warning-ink:\s*var\(--ci-color-warning\);/);
   assert.match(globals, /--text-color-warning:\s*var\(--color-warning-ink\);/);
-  assert.match(
-    globals,
-    /\.ci-badge\[data-tone="warning"\]\s*\{\s*color:\s*var\(--color-warning-ink\);/
-  );
-  assert.match(globals, /\.ci-button--warning\s*\{\s*color:\s*var\(--color-warning-ink\);/);
+  // The badge tone and the button are kit rules on the same token the alias points at.
+  const kitUi = fs.readFileSync(path.join(root, "packages/ui-kit/src/ci-ui.css"), "utf8");
+  assert.match(kitUi, /\.ci-badge--tone-warning\s*\{[^}]*color:\s*var\(--ci-color-warning\);/);
+  assert.match(kitUi, /\.ci-button--warning\s*\{\s*color:\s*var\(--ci-color-warning\);/);
 });
 
 test("without data-theme, a dark system preference keeps the kit's dark warning ink", () => {

@@ -1,1 +1,0 @@
-- **test(api): keep the rate limiter's Redis fallback test inside one fixed window**: each failed Redis call takes about 0.7 s, so the two requests could straddle a minute boundary, and the second landed in a fresh window and was allowed. The test now freezes the clock.

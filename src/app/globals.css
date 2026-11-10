@@ -23,10 +23,6 @@
 @import "@fontsource/vazirmatn/500.css";
 @import "@fontsource/vazirmatn/600.css";
 @import "@fontsource/vazirmatn/700.css";
-/* react18-json-view (request/response JSON tree in RequestLoggerDetail) — imported here
-   instead of in the component so node:test / esbuild never see a .css import. */
-@import "react18-json-view/src/style.css";
-@import "react18-json-view/src/dark.css";
 
 :root,
 .ci-theme {
@@ -191,6 +187,13 @@ html:root[data-ci-appearance="editions"] {
   --color-primary-ink: var(--ci-color-accent-active);
 }
 
+/* Inside a brand tint the kit moves secondary text to the brand ink, the only ink it guarantees on
+   an arbitrary tint. The alias above resolved on .ci-theme and would keep the neutral, so
+   `text-text-muted` is pointed back at the tinted value here. */
+.ci-brand-tint {
+  --color-text-muted: var(--ci-color-text-muted);
+}
+
 /* Warning text. Badges, warning buttons and `text-warning` read the warning ink through this alias.
    Since kit 0.0.88 (upstream #155) the kit's own light Editions warning (#8c5a1b) reaches AA on its
    tinted background, the canvas and the surface, so the alias is just the kit value. */
@@ -218,6 +221,9 @@ html:root[data-ci-appearance="editions"] {
   --text-color-accent: var(--color-primary-ink);
   /* text-warning gets the readable warning ink; bg-/border-warning keep the kit colour. */
   --text-color-warning: var(--color-warning-ink);
+  /* Fumadocs (/docs): the active nav link and inline accents use `text-fd-primary`; read the same
+     primary ink, while bg-/border-fd-primary keep the accent (#18078). */
+  --text-color-fd-primary: var(--color-primary-ink);
 
   /* Accent */
   --color-accent: var(--color-accent);
@@ -447,20 +453,6 @@ body.electron-macos {
       min-width: 0;
     }
   }
-}
-
-/* react18-json-view fold control: the SVG chevron itself is ~14px, too small
-   a touch target on mobile. Padding + a matching negative margin grows the
-   hit area without shifting sibling layout -- unlike the row-level icon this
-   replaces (see the reverted react-json-view-lite alignment attempt), this
-   click target is a trailing decoration appended after the object/array's
-   opening brace, not a leading element sibling keys align against, so
-   padding it here cannot reproduce that regression. */
-.jv-size-chevron {
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 4px;
-  margin: -10px -4px;
 }
 
 /* Animations */
@@ -852,84 +844,5 @@ html[dir="rtl"] :where(.react-flow) {
   }
   .orchestration-canvas .orch-edge-particle {
     display: none;
-  }
-}
-
-/* ── Adapter extensions (OmniRoute-side; never patch packages/ui-kit) ────────────────────── */
-@layer components {
-  /* Button variant="warning" (spec §3.6): kit has no warning button; outline + warning ink. */
-  .ci-button--warning {
-    color: var(--color-warning-ink);
-    border-color: var(--ci-color-warning);
-    background: var(--ci-color-warning-bg);
-  }
-  .ci-button--warning:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--ci-color-warning) 16%, var(--ci-color-warning-bg));
-  }
-  /* Badge status tones (spec §3.6): kit Badge has default/secondary/destructive/outline/live;
-     OmniRoute's success/warning/error/info/primary map to an outline badge with a tone. */
-  .ci-badge[data-tone="success"] {
-    color: var(--ci-color-success);
-    background: var(--ci-color-success-bg);
-    border-color: transparent;
-  }
-  .ci-badge[data-tone="warning"] {
-    color: var(--color-warning-ink);
-    background: var(--ci-color-warning-bg);
-    border-color: transparent;
-  }
-  .ci-badge[data-tone="danger"] {
-    color: var(--ci-color-danger);
-    background: var(--ci-color-danger-bg);
-    border-color: transparent;
-  }
-  .ci-badge[data-tone="info"] {
-    color: var(--ci-color-info);
-    background: var(--ci-color-info-bg);
-    border-color: transparent;
-  }
-  .ci-badge[data-tone="primary"] {
-    color: var(--ci-color-accent-foreground);
-    background: var(--ci-color-accent-surface-strong);
-    border-color: transparent;
-  }
-  /* Dark: the surface is a 14–22 % accent tint over the dark background, so the near-black
-     accent foreground vanished ("8 features" on the translator, F4); the accent itself is the
-     ink (Classic lime, Editions copper). */
-  :root[data-theme="dark"] .ci-badge[data-tone="primary"] {
-    color: var(--ci-color-accent);
-  }
-}
-
-/* === OmniRoute kit extensions: trilha C === */
-@layer components {
-  /* Native <select> fallback for callers that pass <option> children (Select adapter). */
-  .ci-select-native {
-    width: 100%;
-    height: var(--ci-control-height-lg);
-    /* logical: the chevron room follows the inline end, so RTL locales mirror it */
-    padding-block: 0;
-    padding-inline: 0.75rem 2rem;
-    border: var(--ci-border-default) solid var(--ci-field-border);
-    border-radius: var(--ci-radius-control);
-    background: var(--ci-field-bg);
-    color: var(--ci-field-fg);
-    font: inherit;
-    font-size: var(--ci-font-size-sm);
-  }
-  .ci-select-native--sm {
-    height: var(--ci-control-height-md);
-    font-size: var(--ci-font-size-sm);
-  }
-  .ci-select-native--error {
-    border-color: var(--ci-color-danger);
-  }
-  .ci-select-native:focus-visible {
-    outline: 2px solid var(--ci-color-focus-ring);
-    outline-offset: 1px;
-  }
-  .ci-select-native:disabled {
-    opacity: 0.48;
-    cursor: not-allowed;
   }
 }

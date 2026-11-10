@@ -201,5 +201,3 @@ export const freebuff = {
     },
   }),
 };
-
-export default freebuff;

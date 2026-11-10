@@ -1,1 +1,0 @@
-- **feat(dashboard):** the home page gets two cards with host and OmniRoute process CPU and memory, served by the new management-tier `GET /api/system/metrics`; the cards poll every 3.5 s and pause while the tab is hidden ([#18393](https://github.com/cheaper-inference/OmniRoute/pull/18393)) — thanks @rafacpti23

@@ -11,6 +11,8 @@ const { handleComboChat, resolveShadowTargets } = await import("../../open-sse/s
 const core = await import("../../src/lib/db/core.ts");
 const contextHandoffsDb = await import("../../src/lib/db/contextHandoffs.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
+const { scopeHandoffSessionId } =
+  await import("../../open-sse/services/combo/handoffSessionScope.ts");
 
 const noop = (..._args: unknown[]) => {};
 const log = { info: noop, warn: noop, error: noop, debug: noop };
@@ -170,13 +172,15 @@ test("handleComboChat drops a context-cache pin when the pinned model becomes hi
   const sessionId = "hidden-pin-session";
   const comboName = "hidden-pin-combo";
   modelsDb.mergeModelCompatOverride("openai", "hidden-pinned-leaf", { isHidden: true });
+  // Pins are stored under the caller-scoped id; this call has no API key.
   contextHandoffsDb.recordSessionModelUsage(
-    sessionId,
+    scopeHandoffSessionId(sessionId, null)!,
     comboName,
     "openai/hidden-pinned-leaf",
     "openai"
   );
   const calls: string[] = [];
+  const infoLines: string[] = [];
 
   const result = await handleComboChat({
     body: { messages: [{ role: "user", content: "continue" }] },
@@ -191,13 +195,17 @@ test("handleComboChat drops a context-cache pin when the pinned model becomes hi
       return okResponse();
     },
     isModelAvailable: async () => true,
-    log,
+    log: { ...log, info: (...args: unknown[]) => infoLines.push(args.join(" ")) },
     settings: null,
     relayOptions: { sessionId },
     allCombos: null,
   });
 
   assert.equal(result.ok, true);
+  assert.ok(
+    infoLines.some((line) => line.includes("pinned model=openai/hidden-pinned-leaf")),
+    "the seeded pin was never read, so this test would not guard the hidden-pin path"
+  );
   assert.deepEqual(calls, ["openai/visible-pinned-leaf"]);
 });
 

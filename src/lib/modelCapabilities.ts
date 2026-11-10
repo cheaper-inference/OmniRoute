@@ -13,9 +13,11 @@ import {
   getAuthoritativeContextWindow,
   getAuthoritativeProviderContextWindow,
   getModelSpec,
+  type GeminiThinkingLevel,
   type ModelSpec,
 } from "@/shared/constants/modelSpecs";
 import { getSyncedCapability } from "@/lib/modelsDevSync";
+import { ciTransportSupportsInput } from "@omniroute/open-sse/utils/ciTransportInput.ts";
 import { knownReasoningEffortTiers, MODELS_DEV_PROVIDER_MAP } from "@/lib/modelsDevSync/transform";
 import { isModelsDevEffortTiersEnabled } from "@/shared/utils/featureFlags";
 import { getModelContextOverride } from "@/lib/db/modelContextOverrides";
@@ -40,11 +42,28 @@ import {
 } from "@/lib/modelCapabilityLimits";
 import { getNoAuthHydrationProviderIds } from "@/sse/services/noAuthProviderSiblings";
 
+export type { GeminiThinkingLevel } from "@/shared/constants/modelSpecs";
+
+/** Native Gemini thinking levels from the static catalog, without a new SSE-to-src import. */
+export function getNativeGeminiThinkingSpec(model: string): {
+  levels: readonly GeminiThinkingLevel[];
+  defaultLevel: GeminiThinkingLevel | undefined;
+} {
+  const spec = getModelSpec(model);
+  return {
+    levels: spec?.geminiThinkingLevels ?? [],
+    defaultLevel: spec?.defaultGeminiThinkingLevel,
+  };
+}
+
 export type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 export { createModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 export { resolveAudioCapability } from "@/lib/modelCapabilityModalities";
 export type { ModelLimitSources } from "@/lib/modelCapabilityLimits";
-import { isVisionModelId } from "@/shared/constants/visionModels";
+import { isTextOnlyChatTransport, isVisionModelId } from "@/shared/constants/visionModels";
+import { getInputModalities } from "@/lib/db/models/inputModalities";
+
+export { getInputModalities, isTextOnlyChatTransport };
 import { getUnsupportedParams } from "@omniroute/open-sse/config/providerRegistry.ts";
 import {
   getLearnedThinkingCap,
@@ -155,6 +174,8 @@ export interface ResolvedModelCapabilities {
   supportsVision: boolean | null;
   supportsAudio: boolean | null;
   supportsVideo: boolean | null;
+  supportsPdf?: boolean | null;
+  supportsFiles?: boolean | null;
   supportsMaxTokens: boolean;
   attachment: boolean | null;
   structuredOutput: boolean | null;
@@ -869,6 +890,7 @@ function resolveSyncedEffortTierFallback(
   return isModelsDevEffortTiersEnabled() ? knownReasoningEffortTiers(syncedEfforts) : null;
 }
 
+/** Resolve model capabilities with executor transport limits ahead of advertised catalog claims. */
 export function getResolvedModelCapabilities(
   input: CapabilityInput,
   options?: ResolveModelCapabilitiesOptions,
@@ -1029,17 +1051,27 @@ export function getResolvedModelCapabilities(
         )
       : null;
 
-  const supportsVision = resolveVisionCapability(
-    visionSpec,
-    registryModel,
-    synced,
-    modalitiesInput,
-    modalitiesOutput,
-    lookupKey,
-    customVisionOverride,
-    compatVisionOverride,
-    syncedAvailableModelVision
+  // Executor transport limits outrank model-family, synced and operator metadata:
+  // enabling a model's vision flag cannot teach a text-only wire format images.
+  const textOnlyTransport = isTextOnlyChatTransport(resolved.provider);
+  const inputDeclarations = getInputModalities(
+    resolved.provider,
+    resolved.model,
+    snapshot ? (snapshot.inputModalities ?? new Map()) : undefined
   );
+  const supportsVision = textOnlyTransport
+    ? false
+    : resolveVisionCapability(
+        visionSpec,
+        registryModel,
+        synced,
+        modalitiesInput,
+        modalitiesOutput,
+        lookupKey,
+        customVisionOverride,
+        compatVisionOverride,
+        syncedAvailableModelVision
+      );
   // #17289: WorkBuddy's DeepSeek Flash endpoint was observed to accept image_url
   // (unlike other gateways serving the same upstream id). Provider-scoped, not a
   // global DeepSeek name heuristic, and only applied while the verdict is still
@@ -1050,12 +1082,45 @@ export function getResolvedModelCapabilities(
     /^(?:global:|cn:)?deepseek-v4\.1-flash$/i.test(resolved.model ?? "")
       ? true
       : supportsVision;
-  const supportsAudio = resolveAudioCapability(spec, registryModel, modalitiesInput);
-  const supportsVideo = resolveVideoCapability(spec, registryModel, modalitiesInput);
+  const supportsAudio =
+    textOnlyTransport ||
+    !ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", "audio")
+      ? false
+      : inputDeclarations
+        ? inputDeclarations.includes("audio")
+        : resolveAudioCapability(spec, registryModel, modalitiesInput);
+  const supportsVideo =
+    textOnlyTransport ||
+    !ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", "video")
+      ? false
+      : inputDeclarations
+        ? inputDeclarations.includes("video")
+        : resolveVideoCapability(spec, registryModel, modalitiesInput);
+  const supportsFiles = textOnlyTransport
+    ? false
+    : inputDeclarations
+      ? inputDeclarations.includes("file")
+      : modalitiesInput.includes("file")
+        ? true
+        : null;
+  const supportsPdf =
+    textOnlyTransport ||
+    !ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", "pdf")
+      ? false
+      : inputDeclarations
+        ? inputDeclarations.includes("pdf") || inputDeclarations.includes("file")
+        : modalitiesInput.includes("pdf") || modalitiesInput.includes("application/pdf")
+          ? true
+          : supportsVision === true &&
+              ["openai", "claude", "anthropic", "gemini", "vertex"].includes(
+                resolved.provider ?? ""
+              )
+            ? true
+            : null;
 
   // #8250: when resolve promoted vision over a contradictory attachment=false,
   // expose attachment=true so catalog / Vision Bridge / clients see one verdict.
-  let attachment = synced?.attachment ?? null;
+  let attachment = textOnlyTransport ? false : (synced?.attachment ?? null);
   if (supportsVision === true && attachment === false) {
     attachment = true;
   }
@@ -1076,6 +1141,8 @@ export function getResolvedModelCapabilities(
     supportsVision: effectiveSupportsVision,
     supportsAudio,
     supportsVideo,
+    supportsPdf,
+    supportsFiles,
     supportsMaxTokens: heuristicMaxTokens(lookupKey),
     attachment,
     structuredOutput: synced?.structured_output ?? null,
@@ -1095,8 +1162,16 @@ export function getResolvedModelCapabilities(
     knowledgeCutoff: synced?.knowledge_cutoff ?? null,
     releaseDate: synced?.release_date ?? null,
     lastUpdated: synced?.last_updated ?? null,
-    modalitiesInput,
-    modalitiesOutput,
+    modalitiesInput: textOnlyTransport
+      ? ["text"]
+      : inputDeclarations
+        ? inputDeclarations.filter((kind) =>
+            ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", kind)
+          )
+        : modalitiesInput.filter((kind) =>
+            ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", kind)
+          ),
+    modalitiesOutput: textOnlyTransport ? ["text"] : modalitiesOutput,
     interleavedField:
       synced?.interleaved_field ??
       (typeof registryModel?.interleavedField === "string" ? registryModel.interleavedField : null),

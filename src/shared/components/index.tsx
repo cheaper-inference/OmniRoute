@@ -8,7 +8,7 @@ export { default as Textarea } from "./Textarea";
 export { default as Card } from "./Card";
 export { default as Collapsible } from "./Collapsible";
 export { default as Modal, ConfirmModal, TALL_MODAL_PROPS } from "./Modal";
-export { default as Loading, Spinner, PageLoading, Skeleton, CardSkeleton } from "./Loading";
+export { Spinner, PageLoading, Skeleton, CardSkeleton } from "./Loading";
 export { default as Avatar } from "./Avatar";
 export { default as Badge } from "./Badge";
 export { default as Toggle } from "./Toggle";

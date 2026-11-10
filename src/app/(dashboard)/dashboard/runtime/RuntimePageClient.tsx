@@ -16,6 +16,7 @@ import {
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Select from "@/shared/components/Select";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import ModelCooldownsCard from "./components/ModelCooldownsCard";
@@ -569,7 +570,7 @@ export default function RuntimePageClient() {
               title={t("refreshNow")}
               aria-label={t("refreshNow")}
             >
-              <Icon name="refresh" size={16} className={loading ? "animate-spin" : undefined} />
+              {loading ? <Spinner decorative size="sm" /> : <Icon name="refresh" size={16} />}
             </Button>
           </>
         }

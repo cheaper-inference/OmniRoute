@@ -40,22 +40,17 @@ deja aleasă. Aceasta poate modifica numai efortul și bugetul.
 
 ## Efort și buget
 
-`sourceEffort` acceptă `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` și
-`ultra`. `missing` înseamnă că solicitarea nu conține nici un nivel discret de efort, nici un comutator pentru gândire
-sau un buget de gândire. Prin urmare, un semnal exclusiv de buget este identificat numai de `any`.
+`sourceEffort` acceptă `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` și `ultra`. `missing` înseamnă că cererea nu conține nici un efort discret, nici o comutare de gândire sau un buget de gândire. Prin urmare, un semnal numai pentru buget este potrivit doar de `any`.
 
 `effortMode` are trei variante:
 
-- `inherit` păstrează efortul clientului, permițând în continuare schimbarea modelului sau a combinației.
+- `inherit` menține efortul clientului, permițând în același timp schimbarea modelului sau combo-ului.
 - `default` setează `targetEffort` numai atunci când nu este prezent niciun semnal explicit de raționament.
-- `force` înlocuiește nivelul discret de efort cu `targetEffort`.
+- `force` înlocuiește efortul discret cu `targetEffort`.
 
-Independent, `budgetAction` poate fi `preserve`, `remove` sau `set`. `force` cu `none` elimină
-toate câmpurile recunoscute pentru efort și buget. Utilizarea `none` împreună cu `set` nu este validă.
+În mod independent, `budgetAction` poate fi `preserve`, `remove` sau `set`. `force` cu `none` elimină toate câmpurile de efort și buget recunoscute, apoi setează `reasoning_effort: "none"`, deoarece unii furnizori activează gândirea atunci când câmpul este absent. Furnizorii care resping literalul `none` sunt ajustați la expediere în `open-sse/executors/base/reasoningEffort.ts`. Codul de comandă îl mapează la `low`, cu excepția solicitărilor în formă de răspunsuri (`input` fără `messages`), unde păstrează `none`. Pe Cloudflare Workers AI (`cloudflare-ai`), modelele care resping `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) primesc `low`; alte modele Muncitori AI păstrează `none`. Eliminarea câmpului nu este o opțiune acolo, deoarece un efort absent rulează nivelul implicit al modelului. `none` împreună cu `set` este nevalid.
 
-Solicitările care vizează modele cunoscute ca fiind incompatibile sunt respinse înainte de apelul în amonte. Pentru țintele de tip combinație,
-intrările incompatibile sunt eliminate; dacă nu mai rămâne niciuna, solicitarea returnează starea `400`.
-Datele necunoscute privind capabilitățile generează un avertisment și lasă regula activă.
+Solicitările care vizează modele cunoscute incompatibile sunt respinse înainte de apelul din amonte. Pentru ținte combinate, intrările incompatibile sunt eliminate; dacă nu rămâne niciuna, cererea returnează starea `400`. Datele de capacitate necunoscute generează un avertisment și lasă regula activă.
 
 ## Securitate și transporturi
 

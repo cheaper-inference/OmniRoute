@@ -24,7 +24,9 @@ import { useState, useMemo } from "react";
 import {
   formatProviderModelsErrorResponse,
   providerText,
-  testAllResultsText,
+  recordTestAllOutcome,
+  type TestAllTally,
+  testAllSummaryMessages,
   evaluateTestAllEntry,
   shouldSwitchToVisibleFilter,
   type ProviderMessageTranslator,
@@ -164,10 +166,15 @@ export function useModelVisibilityHandlers({
               Array.isArray(c.supportedEndpoints) && (c.supportedEndpoints as unknown[]).length
                 ? c.supportedEndpoints
                 : ["chat"],
+            // Keep an unset flag unset (JSON drops undefined) so a provider-level
+            // runtime default (mistral, #19338) is not pinned to false by an edit
+            // of an unrelated compat flag.
             normalizeToolCallId:
               patch.normalizeToolCallId !== undefined
                 ? patch.normalizeToolCallId
-                : Boolean(c.normalizeToolCallId),
+                : Object.prototype.hasOwnProperty.call(c, "normalizeToolCallId")
+                  ? Boolean(c.normalizeToolCallId)
+                  : undefined,
             preserveOpenAIDeveloperRole:
               patch.preserveOpenAIDeveloperRole !== undefined
                 ? patch.preserveOpenAIDeveloperRole
@@ -360,8 +367,7 @@ export function useModelVisibilityHandlers({
     setTestingAll(true);
     setTestProgress({ done: 0, total: targets.length });
 
-    let ok = 0;
-    let error = 0;
+    const tally: TestAllTally = { ok: 0, error: 0, skipped: 0 };
     let hiddenCount = 0;
 
     const CHUNK_SIZE = 3;
@@ -377,6 +383,7 @@ export function useModelVisibilityHandlers({
                   status?: "ok" | "error" | "slow";
                   rateLimited?: boolean;
                   isTimeout?: boolean;
+                  skipped?: boolean;
                   error?: string;
                 }
               >;
@@ -392,26 +399,25 @@ export function useModelVisibilityHandlers({
 
             const entry = result.results?.[fullModel];
             const outcome = evaluateTestAllEntry(entry, autoHideFailed);
-            // #9511: paint "quota" status for quota-exhausted models (amber badge),
-            // "ok" for healthy, "error" for genuine failures.
-            setModelTestStatus((prev) => ({
-              ...prev,
-              [modelId]: outcome.isQuota ? "quota" : outcome.status,
-            }));
-            if (outcome.status === "ok") {
-              ok++;
-            } else {
-              error++;
-              if (outcome.shouldHide) {
-                // Hidden flag keyed by providerId — same as the manual eye toggle and the read
-                // (fetchProviderModelMeta). providerStorageAlias wrote it under the alias while the
-                // read looked under the canonical id, so auto-hide never reflected.
-                await handleToggleModelHidden(providerId, modelId, true);
-                hiddenCount++;
-              }
+            recordTestAllOutcome(tally, outcome, entry?.error);
+            // A skipped probe never ran — neither healthy nor broken, so no status icon.
+            if (!outcome.skipped) {
+              // #9511: paint "quota" status for quota-exhausted models (amber badge),
+              // "ok" for healthy, "error" for genuine failures.
+              setModelTestStatus((prev) => ({
+                ...prev,
+                [modelId]: outcome.isQuota ? "quota" : outcome.status,
+              }));
+            }
+            if (outcome.shouldHide) {
+              // Hidden flag keyed by providerId — same as the manual eye toggle and the read
+              // (fetchProviderModelMeta). providerStorageAlias wrote it under the alias while the
+              // read looked under the canonical id, so auto-hide never reflected.
+              await handleToggleModelHidden(providerId, modelId, true);
+              hiddenCount++;
             }
           } catch (e) {
-            error++;
+            tally.error++;
             setModelTestStatus((prev) => ({ ...prev, [modelId]: "error" }));
           }
           setTestProgress((prev) => (prev ? { done: prev.done + 1, total: prev.total } : null));
@@ -419,7 +425,9 @@ export function useModelVisibilityHandlers({
       );
     }
 
-    notify.info(testAllResultsText(t, ok, ok + error));
+    for (const message of testAllSummaryMessages(t, tally)) {
+      notify.info(message);
+    }
     if (hiddenCount > 0) {
       notify.info(providerText(t, "testAllFailedHidden", "{count} hidden", { count: hiddenCount }));
       // Bug #4887: switch to "visible" so the models we just auto-hid disappear

@@ -1,1 +1,0 @@
-- **fix(translator):** Preserve Responses developer instructions when translating requests to Gemini and Antigravity ([#18704](https://github.com/diegosouzapw/OmniRoute/pull/18704)) — thanks @AiCaptain357

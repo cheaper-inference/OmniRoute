@@ -37,7 +37,7 @@ function installFetch(routes: Record<string, unknown>): FetchCall[] {
 }
 
 function confirmDialog() {
-  return screen.getByRole("dialog", { name: messages.common.confirmTitle });
+  return screen.getByRole("alertdialog", { name: messages.common.confirmTitle });
 }
 
 afterEach(() => {

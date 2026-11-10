@@ -245,7 +245,7 @@ describe("ModelSelectModal — Test Selected Providers", () => {
     });
     // Above the select-all threshold the kit confirm dialog asks first; accept it.
     const accept = [
-      ...document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+      ...document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button'),
     ].find((b) => b.textContent?.trim() === "confirmAction");
     if (accept) {
       await act(async () => {

@@ -26,7 +26,9 @@ export function jobMinutes(job, now = Date.now()) {
   const label = [job?.runner_name ?? "", ...(job?.labels ?? [])].find((l) =>
     /^blacksmith-\d+vcpu/.test(l)
   );
-  if (!label || !job.started_at) return 0;
+  // GitHub fills started_at while a job still waits in the queue, so only a job a runner took
+  // counts: run 41843820512's amd64 job sat queued for 13 h and read as 1,596 spent minutes.
+  if (!label || !job.started_at || !job.runner_name) return 0;
   const vcpu = Number(label.match(/^blacksmith-(\d+)vcpu/)[1]);
   const end = job.completed_at ? Date.parse(job.completed_at) : now;
   const minutes = Math.max(0, Math.ceil((end - Date.parse(job.started_at)) / 60000));

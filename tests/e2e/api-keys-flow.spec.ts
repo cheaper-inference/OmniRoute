@@ -190,7 +190,7 @@ test.describe("API keys flow", () => {
 
     // #19066: the delete asks through the kit ConfirmModal, not the native confirm().
     await keyRow.locator("button[title]").last().click({ force: true });
-    const deleteDialog = page.getByRole("dialog").filter({ hasText: /delete this api key/i });
+    const deleteDialog = page.getByRole("alertdialog").filter({ hasText: /delete this api key/i });
     await expect(deleteDialog).toBeVisible();
     await deleteDialog.getByRole("button", { name: /^delete$/i }).click();
 

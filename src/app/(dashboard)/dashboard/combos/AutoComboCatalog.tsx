@@ -2,6 +2,7 @@
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -10,7 +11,6 @@ import { buttonVariants } from "@omniroute/ui-kit/button";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
-import { cn } from "@/shared/utils/cn";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useNotificationStore } from "@/store/notificationStore";
 import { AUTO_COMBO_TEMPLATES, type AutoComboTemplate } from "@/domain/assessment/types";
@@ -102,11 +102,7 @@ function CatalogItemActions({
           title={t("testCombo")}
           aria-label={t("testCombo")}
         >
-          <Icon
-            name={testing ? "progress_activity" : "play_arrow"}
-            size={14}
-            className={cn(testing && "animate-spin")}
-          />
+          {testing ? <Spinner decorative size="xs" /> : <Icon name="play_arrow" size={14} />}
         </Button>
       )}
       {item.id !== "auto" && (
@@ -119,11 +115,11 @@ function CatalogItemActions({
           title={t("duplicateAutoComboTitle", { name: item.id })}
           aria-label={t("duplicateAutoComboTitle", { name: item.id })}
         >
-          <Icon
-            name={duplicatingName === item.id ? "progress_activity" : "content_copy"}
-            size={14}
-            className={cn(duplicatingName === item.id && "animate-spin")}
-          />
+          {duplicatingName === item.id ? (
+            <Spinner decorative size="xs" />
+          ) : (
+            <Icon name="content_copy" size={14} />
+          )}
         </Button>
       )}
     </div>

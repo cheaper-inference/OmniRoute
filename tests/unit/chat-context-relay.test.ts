@@ -8,6 +8,8 @@ const { BaseExecutor, buildRequest, combosDb, handleChat, resetStorage, waitFor,
   harness as any;
 const providersDb = await import("../../src/lib/db/providers.ts");
 const handoffDb = await import("../../src/lib/db/contextHandoffs.ts");
+const { scopeHandoffSessionId } =
+  await import("../../open-sse/services/combo/handoffSessionScope.ts");
 
 function buildResponsesResponse(text = "ok", model = "gpt-5.6-sol") {
   return new Response(
@@ -167,7 +169,7 @@ test("handleChat generates and injects context-relay handoffs across Codex accou
   assert.equal(firstResponse.status, 200);
   assert.equal(firstJson.choices[0].message.content, "relay-success");
 
-  const sessionId = "ext:relay-session";
+  const sessionId = scopeHandoffSessionId("ext:relay-session", null)!;
   const savedHandoff = await waitFor(() => handoffDb.getHandoff(sessionId, "relay-combo"), 2000);
   assert.ok(savedHandoff);
   assert.equal(savedHandoff.fromAccount, primary.id);
@@ -300,7 +302,7 @@ test("handleChat injects context-relay handoffs during live failover for Respons
 
   assert.equal(firstResponse.status, 200);
 
-  const sessionId = "ext:relay-live-session";
+  const sessionId = scopeHandoffSessionId("ext:relay-live-session", null)!;
   const savedHandoff = await waitFor(
     () => handoffDb.getHandoff(sessionId, "relay-live-combo"),
     2000

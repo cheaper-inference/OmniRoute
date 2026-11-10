@@ -8,6 +8,9 @@ import {
   compareDisplayAccounts,
   matchesDisplayFilter,
   displayStatus,
+  reportedPercent,
+  isCooldownKind,
+  DISPLAY_KINDS,
 } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/availabilityDisplay.ts";
 const now = Date.parse("2099-01-01T00:00:00Z");
 const H = 3_600_000;
@@ -150,4 +153,26 @@ test("sort is green first, partial after ordinary green, descending fill, stable
     assert.equal(matchesDisplayFilter(a, "critical"), ["cd5", "cdw", "act"].includes(a.kind));
     assert.equal(matchesDisplayFilter(a, "ok"), a.kind === "ok");
   }
+});
+
+const cell = (percent: number) => ({
+  name: "weekly",
+  percent,
+  resetAt: null,
+  scope: "account" as const,
+  window: null,
+  awaitingSync: false,
+});
+
+test("reportedPercent keeps the lowest finite cell percentage and ignores the rest", () => {
+  assert.equal(reportedPercent([]), null);
+  assert.equal(reportedPercent([cell(30), cell(10), cell(20)]), 10);
+  assert.equal(reportedPercent([cell(Number.NaN), cell(Number.POSITIVE_INFINITY)]), null);
+  assert.equal(reportedPercent([cell(Number.NaN), cell(45)]), 45);
+});
+
+test("isCooldownKind covers exactly the cooldown kinds", () => {
+  const cooling = new Set<string>(["cd5", "cdw"]);
+  for (const kind of DISPLAY_KINDS)
+    assert.equal(isCooldownKind(kind), cooling.has(kind), `unexpected verdict for ${kind}`);
 });

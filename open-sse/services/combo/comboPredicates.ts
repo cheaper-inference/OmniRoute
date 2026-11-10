@@ -6,6 +6,7 @@
  * predicates are re-exported from combo.ts for backward compatibility.
  */
 
+import { isMarkedLocalProcessPressureResponse } from "../../utils/localPressureResponse.ts";
 import {
   EXECUTOR_CONTRACT_VIOLATION_CODE,
   LOCAL_CONFIGURATION_ERROR_CODES,
@@ -184,6 +185,45 @@ export function clampGlobalAttempts(value: unknown): number {
   return Math.min(n, MAX_GLOBAL_ATTEMPTS_HARD_CAP);
 }
 
+/**
+ * Opt-in sub-budget for READINESS-DEADLINE failures across one combo run,
+ * controlled by OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES. The global-attempts
+ * cap is calibrated for fast failures (429/5xx swap-outs that cost seconds);
+ * a stream-readiness deadline failure instead burns a full readiness window
+ * (tens of seconds to minutes) plus a heavyweight body re-dispatch each
+ * time, so a handful of them already multiplies user latency and gateway
+ * memory footprint while the combo rotates through every remaining target.
+ * Unset / 0 / invalid → 0 = disabled (the default: current rotation
+ * behavior, no behavior change). A positive integer caps how many
+ * readiness-deadline failures a single combo run tolerates before
+ * terminating with a clean 504 instead of rotating further.
+ */
+export function clampDeadlineFailureBudget(value: unknown): number {
+  if (value === undefined || value === null || value === "") return 0;
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n) || n < 1) return 0;
+  return Math.min(n, MAX_GLOBAL_ATTEMPTS_HARD_CAP);
+}
+
+/**
+ * Classify a failed combo attempt as a stream-readiness deadline failure.
+ * Reads the STRUCTURED `error.code` of the failure body (`structuredError.code`
+ * from readAttemptFailure), never the human message: the readiness watchdog
+ * (open-sse/utils/streamReadiness.ts) puts the STREAM_READINESS_TIMEOUT marker
+ * only in `error.code`, while `errorText` carries `error.message`
+ * ("Stream produced no non-ping SSE event within …"). The same code also
+ * covers a source stream that failed before its first non-ping event (an
+ * executor watchdog giving up on a stalled upstream) — both are stalls.
+ * Distinct from fast upstream rejections (429/5xx), from other 504 shapes and
+ * from STREAM_EARLY_EOF (a fast close, which keeps its own retry path).
+ */
+export function isReadinessDeadlineFailure(
+  status: number,
+  code: string | null | undefined
+): boolean {
+  return status === 504 && code === "STREAM_READINESS_TIMEOUT";
+}
+
 /** Minimum recorded requests before the predictive-TTFT breaker trusts the average. */
 export const PREDICTIVE_TTFT_MIN_SAMPLES = 5;
 
@@ -285,6 +325,15 @@ export function shouldRecordProviderBreakerFailure(args: {
   );
 }
 
+const CREDENTIAL_AUTH_ERROR_CODES = new Set([
+  "token_expired",
+  "expired_token",
+  "invalid_token",
+  "invalid_api_key",
+  "authentication_error",
+  "unauthorized",
+]);
+
 const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   context_length_exceeded: true,
   context_window_exceeded: true,
@@ -351,6 +400,14 @@ export function isRequestScopedUpstreamFailure(error?: {
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+
+  // OpenAI/Codex wraps some credential failures in the generic
+  // `invalid_request_error` type (notably `code=token_expired`). Those are
+  // connection-scoped auth failures: the current account must be excluded so
+  // sibling-account fallback can continue. Letting the generic type win here
+  // stops rotation after the first such account and leaks its 401 to the client.
+  if (CREDENTIAL_AUTH_ERROR_CODES.has(code)) return false;
+
   return (
     REQUEST_SCOPED_UPSTREAM_ERROR_CODES[code] === true ||
     isContentPolicyRefusal(error) ||
@@ -398,6 +455,17 @@ export function isAccountSemaphoreCapacityFailure(error?: {
     code === "semaphore_queue_full" ||
     type === "account_semaphore_capacity"
   );
+}
+
+/** Process-wide shedding cannot recover by retrying another combo target. Only a shed this
+ * process created is terminal: an upstream can return the same 503 body and keeps fallback. */
+export function isLocalProcessPressureResponse(response: Response, body: unknown): boolean {
+  if (response.status !== 503 || !isMarkedLocalProcessPressureResponse(response)) return false;
+  if (!body || typeof body !== "object") return false;
+  const error = (body as Record<string, unknown>).error;
+  if (!error || typeof error !== "object") return false;
+  const code = (error as Record<string, unknown>).code;
+  return code === "resource_pressure" || code === "heap_pressure";
 }
 
 export function isComboTargetTimeoutFailure(error?: {

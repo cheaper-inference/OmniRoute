@@ -147,7 +147,7 @@ src/
 | `app/api/tools/traffic-inspector/`                                           | ट्रैफिक इंस्पेक्टर REST + WS API — 16 + मार्ग (अनुरोध, सत्र, होस्ट, कैप्चर-मोड, निर्यात, डब्ल्यूएस)। LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` देखें।                                                                                                                                   |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 प्रवेश बिंदु (`POST /a2a`)                                                                                                                                                                                                                                                                         |
 | `app/.well-known/agent.json/`                                                | A2A एजेंट कार्ड (खोज)                                                                                                                                                                                                                                                                                               |
-| `app/(dashboard)/dashboard/`                                                 | डैशबोर्ड UI पेज (50 + अनुभाग, ~ 118 page.tsx फ़ाइलें: प्रदाता, कॉम्बो, सेटिंग्स, मेमोरी, कौशल, वेबहुक, इवैल्स, ऑडिट, बैच, कैश, लागत, स्वास्थ्य, सिस्टम, गतिविधि, आदि)                                                                                                                                               |
+| `app/(dashboard)/dashboard/`                                                 | डैशबोर्ड UI पृष्ठ (50 + अनुभाग, ~ 118 page.tsx फ़ाइलें: प्रदाता, कॉम्बो, सेटिंग्स, मेमोरी, कौशल, वेबहुक, इवैल्स, ऑडिट, बैच, कैश, लागत, स्वास्थ्य, सिस्टम, गतिविधि, आदि)                                                                                                                                             |
 | `app/(dashboard)/dashboard/search-tools/`                                    | खोज उपकरण स्टूडियो UI (3 टैब: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — देखें `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                         |
 | `app/(dashboard)/dashboard/memory/`                                          | मेमोरी स्टूडियो (योजना 21): `page.tsx` (3-टैब शेल), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge डैशबोर्ड पेज — सर्वर कार्ड, 9 एजेंट कार्ड, सेटअप विज़ार्ड, मॉडल मैपिंग, बाईपास सूची। i18n पीटी-बीआर + EN। `docs/frameworks/AGENTBRIDGE.md` देखें।                                                                                                                                                       |
@@ -186,11 +186,11 @@ src/
 | `embeddings/`                            | एंबेडिंग सेवा सहायक                                                                                                                                                                                                                                                                                             |
 | `env/`                                   | Env वेरिएबल पार्सिंग + सत्यापन                                                                                                                                                                                                                                                                                  |
 | `evals/`                                 | इवल फ्रेमवर्क (सुइट्स, रनर, रनटाइम) — `docs/frameworks/EVALS.md` देखें                                                                                                                                                                                                                                          |
-| `guardrails/`                            | PII मास्कर, प्रॉम्प्ट इंजेक्शन, विज़न ब्रिज — `docs/security/GUARDRAILS.md` देखें                                                                                                                                                                                                                               |
+| `guardrails/`                            | PII मास्कर, शीघ्र इंजेक्शन, विजन ब्रिज — `docs/security/GUARDRAILS.md` देखें                                                                                                                                                                                                                                    |
 | `jobs/`                                  | पृष्ठभूमि नौकरियाँ (क्रोन-जैसी)                                                                                                                                                                                                                                                                                 |
 | `memory/`                                | संवादी स्मृति (SQLite FTS5 + sqlite-vec हाइब्रिड RRF + Qdrant टियर 2) — `docs/frameworks/MEMORY.md`                                                                                                                                                                                                             |
 | `memory/embedding/`                      | बहु-स्रोत एम्बेडिंग परत: `index.ts` (रिज़ॉल्वर), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (योजना 21)                                                                                                                                                                      |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 रैपर — KNN ब्रूट-फोर्स + हाइब्रिड RRF (FTS5 + वेक्टर, k = 60)। आलसी-इनिट, एसक्लाइट-वेक अनुपलब्ध होने पर शानदार ढंग से खराब हो जाता है। (योजना 21)                                                                                                                                             |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 रैपर — KNN ब्रूट-फोर्स + हाइब्रिड RRF (FTS5 + वेक्टर, k = 60)। आलसी-इनिट, एसक्लाइट-वीईसी अनुपलब्ध होने पर शानदार ढंग से खराब हो जाता है। (योजना 21)                                                                                                                                           |
 | `memory/reindex.ts`                      | `runReindexBatch()` — पृष्ठभूमि में `needs_reindex=1` के साथ स्मृतियों को संसाधित करता है; `POST /api/memory/reindex` और आलसी-बैकफ़िल पथ द्वारा बुलाया गया। (योजना 21)                                                                                                                                          |
 | `monitoring/`                            | स्वास्थ्य जांच, मेट्रिक्स उत्सर्जन                                                                                                                                                                                                                                                                              |
 | `oauth/`                                 | OAuth/import 22 प्रदाता मॉड्यूल के लिए प्रवाहित होता है (agy, एंटीग्रेविटी, क्लाउड, क्लाइन, कोडबडी-सीएन, कोडेक्स, कर्सर, डेविन-डेस्कटॉप, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, किलोकोड, किमी-कोडिंग, किरो, ओपनफेरेंस, क्यूडर, ट्राई, xai-oauth, ज़ेड-होस्टेड, ज़ेड)                        |
@@ -238,23 +238,23 @@ src/
 
 ### `src/shared/`
 
-| मॉड्यूल                          | उद्देश्य                                                                              |
-| -------------------------------- | ------------------------------------------------------------------------------------- |
-| `components/`                    | डैशबोर्ड घटक API: `packages/ui-kit` पर एडेप्टर — `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: स्क्रीन द्वारा उपयोग किए जाने वाले आइकन नाम → ल्यूसिड घटक (`<Icon>`)      |
-| `constants/providers.ts`         | **380 प्रदाता** Zod सत्यापन के साथ (सच्चाई का स्रोत)                                  |
-| `constants/cliTools.ts`          | बाहरी CLI टूल रजिस्ट्री                                                               |
-| `constants/routingStrategies.ts` | **20 रूटिंग रणनीतियाँ** प्राथमिकताओं के साथ                                           |
-| `constants/publicApiRoutes.ts`   | वे रूट जिनके लिए बियरर (बनाम प्रबंधन) प्राधिकरण की आवश्यकता होती है                   |
-| `constants/upstreamHeaders.ts`   | अपस्ट्रीम अनुरोधों के लिए हेडर अस्वीकरण सूची                                          |
-| `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API अनुबंधों के लिए सत्य का एकल स्रोत)                              |
-| `validation/helpers.ts`          | Zod सत्यापन सहायक (`validateBody`, आदि)                                               |
-| `types/`                         | साझा TS प्रकार                                                                        |
-| `contracts/`                     | सार्वजनिक API अनुबंध ( `package.json` में `files:` द्वारा उपभोग)                      |
-| `utils/circuitBreaker.ts`        | प्रदाता सर्किट ब्रेकर ( `docs/architecture/RESILIENCE_GUIDE.md` देखें)                |
-| `utils/apiAuth.ts`               | API कुंजी सत्यापन, दायरा जाँच                                                         |
-| `utils/fetchTimeout.ts`          | अपस्ट्रीम फ़ेच के लिए Timeout/abort रैपर                                              |
-| `utils/releaseNotes.ts`          | बंद v2/legacy घोषणा पार्सर, स्थानीयकरण और ID बर्खास्तगी                               |
+| मॉड्यूल                          | उद्देश्य                                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| `components/`                    | डैशबोर्ड घटक API: `packages/ui-kit` — एडाप्टर `docs/architecture/DESIGN_SYSTEM.md` देखें |
+| `constants/iconMap.ts`           | `ICON_MAP`: स्क्रीन द्वारा उपयोग किए जाने वाले आइकन नाम → ल्यूसिड घटक (`<Icon>`)         |
+| `constants/providers.ts`         | **381 प्रदाता** Zod सत्यापन के साथ (सच्चाई का स्रोत)                                     |
+| `constants/cliTools.ts`          | बाहरी CLI टूल रजिस्ट्री                                                                  |
+| `constants/routingStrategies.ts` | **20 रूटिंग रणनीतियाँ** प्राथमिकताओं के साथ                                              |
+| `constants/publicApiRoutes.ts`   | वे रूट जिनके लिए बियरर (बनाम प्रबंधन) प्रमाणीकरण की आवश्यकता होती है                     |
+| `constants/upstreamHeaders.ts`   | अपस्ट्रीम अनुरोधों के लिए हेडर अस्वीकरण सूची                                             |
+| `validation/schemas.ts`          | ~ 80 Zod स्कीमा ( API अनुबंधों के लिए सत्य का एकल स्रोत)                                 |
+| `validation/helpers.ts`          | Zod सत्यापन सहायक (`validateBody`, आदि)                                                  |
+| `types/`                         | साझा TS प्रकार                                                                           |
+| `contracts/`                     | सार्वजनिक API अनुबंध ( `package.json` में `files:` द्वारा उपभोग)                         |
+| `utils/circuitBreaker.ts`        | प्रदाता सर्किट ब्रेकर ( `docs/architecture/RESILIENCE_GUIDE.md` देखें)                   |
+| `utils/apiAuth.ts`               | API कुंजी सत्यापन, दायरा जाँच                                                            |
+| `utils/fetchTimeout.ts`          | अपस्ट्रीम फ़ेच के लिए Timeout/abort रैपर                                                 |
+| `utils/releaseNotes.ts`          | बंद v2/legacy घोषणा पार्सर, स्थानीयकरण और ID बर्खास्तगी                                  |
 
 ---
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाहरी CLI एकीकरण + आंतरिक OmniRoute CLI                                           |
 | `I18N.md`                   | i18n आर्किटेक्चर, एक भाषा, 67 स्थान जोड़ना                                        |
 | `UNINSTALL.md`              | अनइंस्टॉल चरण साफ़ करें                                                           |
-| `PROVIDER_REFERENCE.md`     | **स्वतः उत्पन्न** 380 प्रदाताओं की सूची (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **स्वतः उत्पन्न** 381 प्रदाताओं की सूची (regen: `npm run gen:provider-reference`) |
 
 ### सबसिस्टम गहराई से गोता लगाता है
 

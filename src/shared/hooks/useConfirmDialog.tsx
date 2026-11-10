@@ -10,8 +10,8 @@ import type { ButtonVariant } from "@/shared/components/Button";
  * `const { requestConfirm, confirmDialog } = useConfirmDialog();` — render `{confirmDialog}`
  * once in the component, then `if (!(await requestConfirm({ message }))) return;` where the
  * native call used to be. The promise resolves `true` only when the confirm button is
- * pressed; Cancel, Escape, the close button and unmount all resolve `false`, so the guarded
- * action keeps running only after an explicit confirmation.
+ * pressed; Cancel, Escape and unmount all resolve `false`, so the guarded action keeps running
+ * only after an explicit confirmation.
  */
 export interface ConfirmDialogOptions {
   message: ReactNode;

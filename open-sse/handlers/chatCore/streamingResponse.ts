@@ -60,7 +60,11 @@ import {
   sanitizeUpstreamDetails,
 } from "../../utils/error.ts";
 
-import { HTTP_STATUS, ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
+import {
+  HTTP_STATUS,
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE,
+} from "../../config/constants.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
 import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 
@@ -151,6 +155,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     connectionId,
     contextEditingEnabled,
     credentials,
+    forcedConnectionId,
     effectiveModel,
     executeRefreshCredentials,
     executor,
@@ -222,7 +227,11 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       upstreamHttpRejection: rejection,
       getNextFamilyFallback: familyFallback.getNext,
       policy: {
-        allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
+        // The connection pin is strict (API_REFERENCE: "used exclusively", cooldown on
+        // failure, no sibling rotation). The outer retry loop honours it; the in-pipeline
+        // account rotation must too, or a pinned 429 is silently answered by another account.
+        allowAccountRotation:
+          !managedLease && comboStrategy !== "context-relay" && !forcedConnectionId,
         allowModelFallback: true,
         expectedConnectionId: managedLease
           ? String(getCurrentConnectionId() || connectionId || "") || undefined
@@ -527,11 +536,13 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       failureStatus === HTTP_STATUS.GATEWAY_TIMEOUT &&
       (errorMetadata.name === "TimeoutError" || errorMetadata.name === "BodyTimeoutError");
     const upstreamErrorType =
-      upstreamErrorCode === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE || isOwnDeadlineTimeout
-        ? "upstream_timeout"
-        : failureStatus === 401
-          ? "authentication_error"
-          : undefined;
+      upstreamErrorCode === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE
+        ? "request_timeout"
+        : upstreamErrorCode === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE || isOwnDeadlineTimeout
+          ? "upstream_timeout"
+          : failureStatus === 401
+            ? "authentication_error"
+            : undefined;
     appendRequestLog({
       model,
       provider,
@@ -643,7 +654,9 @@ export async function runStreamingResponse(deps: StreamingDeps) {
   // that may be from the modification rather than a genuine auth failure, so we
   // skip the credential refresh attempt in that case.
   const hadStreamOptions =
-    targetFormat === FORMATS.OPENAI_RESPONSES && "stream_options" in translatedBody;
+    provider !== "codex" &&
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    "stream_options" in translatedBody;
   if (hadStreamOptions) {
     delete translatedBody.stream_options;
   }

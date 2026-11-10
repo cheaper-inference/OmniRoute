@@ -5,7 +5,11 @@ import { CORS_HEADERS } from "../utils/cors.ts";
  * Handles POST /v1/moderations (OpenAI Moderations API format).
  */
 
-import { getModerationProvider, parseModerationModel } from "../config/moderationRegistry.ts";
+import {
+  getModerationProvider,
+  parseModerationModel,
+  MODERATION_PROVIDERS,
+} from "../config/moderationRegistry.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { buildSanitizedUpstreamErrorResponse } from "../utils/upstreamErrorResponse.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
@@ -34,7 +38,7 @@ export async function handleModeration({ body, credentials }) {
   if (!providerConfig) {
     return errorResponse(
       400,
-      `No moderation provider found for model "${model}". Available: openai`
+      `No moderation provider found for model "${model}". Available: ${Object.keys(MODERATION_PROVIDERS).join(", ")}`
     );
   }
 

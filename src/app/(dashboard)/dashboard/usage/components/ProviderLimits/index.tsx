@@ -17,6 +17,7 @@ import {
 } from "./utils";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
 import Select from "@/shared/components/Select";
 import { CardSkeleton } from "@/shared/components/Loading";
@@ -217,6 +218,18 @@ function FilterChip({
       {children}
     </Button>
   );
+}
+
+/**
+ * SIWC exposes usage management in ChatGPT settings, not a quota polling API; automatic
+ * requests also wait until a live request is allowed.
+ */
+function skipsQuotaFetch(
+  provider: string,
+  automatic: boolean | undefined,
+  canRequestLive: () => boolean
+): boolean {
+  return provider === "chatgpt" || (automatic === true && !canRequestLive());
 }
 
 export default function ProviderLimits({
@@ -420,7 +433,7 @@ export default function ProviderLimits({
       provider: string,
       options: { force?: boolean; automatic?: boolean } = {}
     ) => {
-      if (options.automatic && !canRequestLive()) return;
+      if (skipsQuotaFetch(provider, options.automatic, canRequestLive)) return;
       const force = options?.force === true;
       const now = Date.now();
       const lastFetch = lastFetchTimeRef.current[connectionId] || 0;
@@ -569,7 +582,7 @@ export default function ProviderLimits({
       connections.filter(
         (conn) =>
           isProviderQuotaVisible(conn) &&
-          supportsProviderQuota(conn.provider, conn) &&
+          (conn.provider === "chatgpt" || supportsProviderQuota(conn.provider, conn)) &&
           (conn.authType === "oauth" || conn.authType === "apikey")
       ),
     [connections]
@@ -871,11 +884,11 @@ export default function ProviderLimits({
               autoRefreshIntervalMs > 0 ? tr("autoRefreshing", "Auto-refreshing") : t("refreshAll")
             }
           >
-            <Icon
-              name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-              size={16}
-              className={refreshingAll ? "animate-spin" : undefined}
-            />
+            {refreshingAll ? (
+              <Spinner decorative size="sm" />
+            ) : (
+              <Icon name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"} size={16} />
+            )}
             {refreshingAll
               ? tr("refreshing", "Refreshing")
               : autoRefreshIntervalMs > 0

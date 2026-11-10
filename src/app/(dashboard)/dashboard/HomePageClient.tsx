@@ -9,6 +9,7 @@ import { SectionHeader } from "@omniroute/ui-kit/page-header";
 import { WorkflowGuide } from "@omniroute/ui-kit/workflow-guide";
 import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { CardSkeleton, Button, Modal } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { AI_PROVIDERS, NOAUTH_PROVIDERS, OAUTH_PROVIDERS } from "@/shared/constants/providers";
@@ -812,8 +813,8 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       {showUpdateOverlay && (
         <div className="fixed inset-0 z-[999] bg-[var(--ci-color-overlay)] backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-bg-main border border-border rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <Icon name="progress_activity" size={28} className="text-primary animate-spin" />
+            <div role="status" className="flex items-center gap-3 mb-5">
+              <Spinner decorative size="md" className="text-primary" />
               <div>
                 <h3 className="text-lg font-bold">
                   {updatePhase === "done"
@@ -850,11 +851,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                     }`}
                   >
                     {s.status === "running" ? (
-                      <Icon
-                        name="progress_activity"
-                        size={18}
-                        className="text-primary animate-spin"
-                      />
+                      <Spinner size="sm" />
                     ) : s.status === "done" ? (
                       <Icon name="check_circle" size={18} className="text-success" />
                     ) : s.status === "failed" ? (
@@ -981,11 +978,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                   )}
                   {electronUpdateStatus.status === "downloading" && (
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/20">
-                      <Icon
-                        name="progress_activity"
-                        size={16}
-                        className="text-primary animate-spin"
-                      />
+                      <Spinner size="sm" />
                       <span className="text-xs font-semibold">
                         {electronUpdateStatus.percent || 0}%
                       </span>

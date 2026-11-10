@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
 import { FileDropZone } from "@/shared/components/FileInput";
@@ -88,7 +89,7 @@ export default function UploadFileModal({ onClose, onUploaded }: Props) {
           >
             {uploading ? (
               <>
-                <Icon name="progress_activity" size={16} className="animate-spin" />
+                <Spinner decorative size="sm" />
                 {t("uploadFileModalUploading")}
               </>
             ) : (

@@ -87,6 +87,7 @@ import {
   fixToolAdjacency,
   stripTrailingAssistantOrphanToolUse,
   stripTrailingAssistantForProvider,
+  stripTrailingAssistantInputForProvider,
 } from "../services/contextManager.ts";
 import {
   requiresUserLastMessage,
@@ -122,6 +123,7 @@ import { applyPeerTraceHeader } from "@/shared/resilience/peerRouting";
 import { applyClineProtocolHeaders } from "@/shared/utils/clineAuth";
 import { isProbeContext } from "@/shared/utils/probeOrigin";
 import { assertDispatchUrlAllowed, dispatchGuarded } from "./dispatchPin.ts";
+import { dispatchWithGzipBody } from "./base/gzipRequestBody.ts";
 // Header helpers extracted to a pure leaf; re-exported for external importers
 // (executors + tests) that import them from "./base.ts".
 export {
@@ -329,6 +331,15 @@ export class BaseExecutor {
   constructor(provider: string, config: ProviderConfig) {
     this.provider = provider;
     this.config = config;
+  }
+
+  /** Provider-specific wire transport, after validation and serialization. */
+  protected dispatchRequest(
+    url: string,
+    init: RequestInit,
+    credentials: ProviderCredentials
+  ): Promise<Response> {
+    return dispatchGuarded(this.provider, url, init, credentials);
   }
 
   getProvider() {
@@ -745,6 +756,7 @@ export class BaseExecutor {
     }
   }
 
+  /** Dispatch a validated provider request through its recovery loop and transport hook. */
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
     const {
       model,
@@ -880,7 +892,7 @@ export class BaseExecutor {
     let reasoningEffortClamped = false; // reasoning_effort 4xx clamp-and-retry below.
     let maxTokensCeilingRecovered = false; // max_tokens ceiling 400 clamp-and-retry below.
     let advisorResultsReplaced = false;
-    const applyCopilotIdentityFallback = createCopilotIdentityFallback(this.provider, log);
+    const copilotIdentity = createCopilotIdentityFallback(this.provider, log);
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
       const requestCredentials = withForcedResponsesUpstream(
@@ -966,6 +978,21 @@ export class BaseExecutor {
       if (advisorResultsReplaced) {
         transformedBody = replaceRedactedAdvisorResults(transformedBody).body;
       }
+      // Fields an upstream already rejected with a 400 in this execute() stay stripped
+      // on a re-run or fallback URL; strippedFields blocks a second strip-and-retry.
+      if (strippedFields.size > 0 && transformedBody && typeof transformedBody === "object") {
+        const record = transformedBody as Record<string, unknown>;
+        const msgFields = [...strippedFields].filter((f) => f.startsWith("messages.*."));
+        for (const f of strippedFields) if (!f.startsWith("messages.*.")) delete record[f];
+        if (msgFields.length > 0 && Array.isArray(record.messages)) {
+          record.messages = record.messages.map((m) => {
+            if (!m || typeof m !== "object") return m;
+            const copy = { ...(m as Record<string, unknown>) };
+            for (const f of msgFields) delete copy[f.slice("messages.*.".length)];
+            return copy;
+          });
+        }
+      }
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
       syncSkillsBeta(headers, this.provider, transformedBody, usesClaudeCodeProtocol);
@@ -992,6 +1019,7 @@ export class BaseExecutor {
       }
 
       try {
+        /** Bound connection startup while using the provider-specific wire transport. */
         const fetchWithStartTimeout = async (requestUrl: string, requestOptions: RequestInit) => {
           // GHSA-4f49: guard here (not only next to the first buildUrl) so retries
           // and fallback URLs are validated too, before any bytes leave the host.
@@ -1026,17 +1054,20 @@ export class BaseExecutor {
               model,
               requestCredentials,
               (url, init) =>
-                observeProviderHttpSend(
-                  {
-                    provider: this.provider,
-                    model:
-                      typeof (serializedBody as Record<string, unknown> | null)?.model === "string"
-                        ? String((serializedBody as Record<string, unknown>).model)
-                        : model,
-                    connectionId: requestCredentials?.connectionId ?? null,
-                    endpoint: "unknown",
-                  },
-                  () => dispatchGuarded(this.provider, url, init, requestCredentials)
+                dispatchWithGzipBody(this.provider, url, init, (gzipUrl, gzipInit) =>
+                  observeProviderHttpSend(
+                    {
+                      provider: this.provider,
+                      model:
+                        typeof (serializedBody as Record<string, unknown> | null)?.model ===
+                        "string"
+                          ? String((serializedBody as Record<string, unknown>).model)
+                          : model,
+                      connectionId: requestCredentials?.connectionId ?? null,
+                      endpoint: "unknown",
+                    },
+                    () => this.dispatchRequest(gzipUrl, gzipInit, requestCredentials)
+                  )
                 )
             )(requestUrl, optionsWithSignal);
           } finally {
@@ -1349,8 +1380,13 @@ export class BaseExecutor {
             mergeCcHeaders(headers, ccHeaders);
             if (usesCcWireImage(this.provider) && usesClaudeCodeProtocol) {
               delete headers["Authorization"];
+              // Keep the rotated key buildHeaders set (selectedKeyId names it); a second
+              // resolveEffectiveKey() call would advance the rotator.
               headers["x-api-key"] =
-                activeCredentials?.apiKey || activeCredentials?.accessToken || "";
+                headers["x-api-key"] ||
+                activeCredentials?.apiKey ||
+                activeCredentials?.accessToken ||
+                "";
             }
             delete headers["X-Stainless-Helper-Method"];
             applyStainlessHeaders(headers, { arch: stainlessArch(), os: stainlessOS() });
@@ -1403,13 +1439,17 @@ export class BaseExecutor {
         // user message. Both are idempotent on clean histories.
         {
           const tb = transformedBody as Record<string, unknown>;
+          if (Array.isArray(tb?.input)) {
+            tb.input = stripTrailingAssistantInputForProvider(tb.input, this.provider);
+          }
           if (Array.isArray(tb?.messages)) {
             const fixed = fixToolPairs(tb.messages as Record<string, unknown>[]);
             // fixToolAdjacency enforces Claude's strict adjacency rule
             // (tool_result must be in immediately next message).
             // Only apply for Claude/Claude-compatible — OpenAI allows results
             // spread across multiple subsequent messages.
-            const isClaude = this.provider === "claude" || usesClaudeCodeProtocol;
+            const isClaude =
+              this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol;
             // For Claude, fixToolAdjacency may strip tool_use blocks whose
             // tool_result isn't in the next message; re-run fixToolPairs to
             // drop any tool_result orphaned by that strip (discussion #2410).
@@ -1442,7 +1482,7 @@ export class BaseExecutor {
         // at this final dispatch point — the single chokepoint every Claude
         // routing mode (grouped/raw/combo) and the native passthrough share,
         // before fingerprinting and CCH signing serialize the body.
-        if (this.provider === "claude" || usesClaudeCodeProtocol) {
+        if (this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol) {
           finalizeClaudeBodyConstraints(transformedBody as Record<string, unknown>);
         }
 
@@ -1542,6 +1582,7 @@ export class BaseExecutor {
             });
           }
         }
+        copilotIdentity.pin(finalHeaders);
         const fetchOptions: RequestInit = {
           method: "POST",
           headers: finalHeaders,
@@ -1572,13 +1613,14 @@ export class BaseExecutor {
           correctFromRateLimitHeaders(openrouterFreeWindowAccountKey, response.headers);
         }
 
-        ({ response, finalHeaders } = await applyCopilotIdentityFallback({
+        ({ response, finalHeaders } = await copilotIdentity.apply({
           response,
           url,
           fetchOptions,
           clientHeaders,
           fetchWithStartTimeout,
         }));
+        fetchOptions.headers = finalHeaders; // later recoveries reuse fetchOptions
 
         // Context Editing 400-fallback for Claude-compatible relays.
         if (

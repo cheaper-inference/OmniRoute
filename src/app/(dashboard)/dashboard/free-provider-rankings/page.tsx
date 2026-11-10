@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import type { CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
@@ -27,7 +28,7 @@ import {
 // client component must never take a runtime value from it. The page used to
 // keep its own copy of this shape, which had already drifted past the API.
 import type { FreeProviderRanking } from "@/lib/freeProviderRankings";
-import { brandTintStyle } from "@/shared/utils/brandTint";
+import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 
 /**
  * Convert a normalized task-fit score (0.4–0.98) to a human-readable label.
@@ -222,8 +223,8 @@ export default function FreeProviderRankingsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <div
-                          className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-text-main"
-                          style={brandTintStyle(provider.color)}
+                          className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-text-main"
+                          style={brandTintVars(provider.color) as CSSProperties}
                         >
                           {provider.textIcon || provider.name.charAt(0)}
                         </div>
@@ -278,8 +279,8 @@ export default function FreeProviderRankingsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div
-                            className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-text-main"
-                            style={brandTintStyle(provider.color)}
+                            className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-text-main"
+                            style={brandTintVars(provider.color) as CSSProperties}
                           >
                             {provider.textIcon || provider.name.charAt(0)}
                           </div>

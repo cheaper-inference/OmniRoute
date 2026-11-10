@@ -1,1 +1,0 @@
-- **fix(claude-thinking):** skip the signed-thinking restore for assistant turns whose tool_call id appears more than once in the client history (a retried turn re-sends the same id for a different generation), which made Anthropic answer 400 "thinking or redacted_thinking blocks in the latest assistant message cannot be modified" (#18688).

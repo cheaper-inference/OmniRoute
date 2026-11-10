@@ -33,6 +33,7 @@ const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 const runtimePorts = await import("../../src/lib/runtime/ports.ts");
 const route = await import("../../src/app/api/combos/test/route.ts");
+const { SELF_HOP_HEADER, isOwnListenerSelfHop } = await import("../../open-sse/utils/selfHop.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -144,6 +145,7 @@ test("combo test route marks a model healthy only when it returns assistant text
   assert.equal(fetchCalls.length, 1);
   assert.equal(fetchCalls[0].url, expectedInternalUrl("/v1/chat/completions"));
   assert.equal(fetchCalls[0].init.headers["X-Internal-Test"], "combo-health-check");
+  assert.ok(isOwnListenerSelfHop(fetchCalls[0].init.headers[SELF_HOP_HEADER]));
   assert.equal(fetchCalls[0].init.headers["X-OmniRoute-No-Cache"], "true");
   assert.match(fetchCalls[0].init.headers["X-Request-Id"], /^combo-test-/);
   assert.equal(forwardedBody.model, "openrouter/openai/gpt-5.4");

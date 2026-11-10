@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
@@ -457,7 +458,7 @@ export default function BatchListTab({
               <TableRow>
                 <TableCell colSpan={10} className="py-10 text-center text-text-muted">
                   <div role="status" className="flex items-center justify-center gap-2">
-                    <Icon name="progress_activity" size={20} className="animate-spin text-accent" />
+                    <Spinner decorative size="sm" className="text-accent" />
                     {t("batchListLoading")}
                   </div>
                 </TableCell>
@@ -519,7 +520,7 @@ export default function BatchListTab({
                     <TableCell className="min-w-[140px]">
                       {batch.status === "validating" ? (
                         <div className="flex items-center gap-2 text-xs text-warning">
-                          <Icon name="hourglass_top" size={14} className="animate-spin" />
+                          <Spinner decorative size="xs" />
                           {t("batchListValidating")}
                         </div>
                       ) : total > 0 ? (

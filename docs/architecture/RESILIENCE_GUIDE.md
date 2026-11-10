@@ -236,6 +236,69 @@ connection** (Edit connection → Claude section → `lowPriorityMode` / `autoLi
 Regression guards: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
+### Auto-apply banked resets
+
+**Scope:** Codex and Claude subscription (OAuth) connections. **Opt-in**: the
+`bankedResetAutoApply` setting is off and in `dry-run` mode by default
+(Settings → AI → Auto-apply banked resets).
+
+**Purpose:** spend banked resets on their own when an account hits a usage wall, instead of
+waiting for an operator to press "Redeem" on the Provider Limits page.
+
+| Credit type (`creditTypes`) | What is redeemed                          | Where it runs                                                   |
+| --------------------------- | ----------------------------------------- | --------------------------------------------------------------- |
+| `codexCredits`              | Codex reset credits                       | background job, every 60 s                                      |
+| `claudeCredits`             | Claude banked grants (`GRANT` credits)    | background job, every 60 s                                      |
+| `claudeSessionReset`        | Claude weekly session-limit reset (above) | request path, through the same policy as the per-account toggle |
+
+**Implementation:**
+
+- Pure decision (one rule set for both paths): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Background job: `src/lib/services/bankedResetAutoApply.ts` (started in `src/instrumentation-node.ts`)
+- Claude request-path gate: `src/lib/usage/claudeSessionResetPolicy.ts`, registered through
+  `setClaudeLimitResetPolicy()` in `open-sse/services/claudeLimitReset.ts`
+- History, caps and webhook: `src/lib/usage/bankedResetAudit.ts`
+- History API: `GET /api/settings/banked-reset-auto/history?limit=50` (management auth)
+
+**Decision order** (the first failing rule is the recorded reason):
+
+1. Feature off, credit type off, or account out of scope (`accountScope` `all` / `selected`
+   plus the per-account `connections` map).
+2. Outside the optional UTC schedule (`startHourUtc` > `endHourUtc` crosses midnight).
+3. Caps over the last 24 h: `maxPerAccountPerDay` (1), `maxPerDay` (3), and
+   `minSpacingMinutes` (30) between any two redemptions.
+4. Trigger: a walled `session` or `weekly` window (read from
+   `getQuotaWindowStatus().reachedThreshold`, not `isAccountQuotaExhausted()`, which only
+   reports an account with every window spent), or a credit expiring within
+   `expiringCreditHours` (24) on an account that has used at least
+   `expiringCreditMinUsedPercent` (50).
+5. Natural-reset guard: skip when the walled 5-hour window resets within
+   `sessionResetGuardMinutes` (90), or the walled weekly window within
+   `weeklyResetGuardHours` (12).
+6. Weekly floor: skip a 5-hour reset when weekly remaining is below `weeklyFloorPercent` (10).
+7. `last-resort` mode: skip while another in-scope account of the same provider has at least
+   `poolHeadroomPercent` (10) left in both windows. Expiring-credit triggers bypass this.
+8. `dry-run` records a row and redeems nothing; `last-resort` and `eager` redeem.
+
+Missing quota data never unlocks a redemption: an unknown reset time or weekly usage skips.
+
+**Claude session reset:** with the feature off, or `claudeSessionReset` off, the per-account
+`autoLimitReset` toggle decides exactly as before. With both on, the feature replaces the
+per-account toggles: an in-scope account may claim only when the policy allows it, and in
+`dry-run` mode no claim is made.
+
+**Safety:** the job redeems at most one credit per tick, decides before listing credits (a
+skipped account is never listed), uses idempotency keys
+`auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, and backs an account off for 1 h after a
+failed listing or redemption. Every redemption, failure and dry-run decision is written to
+`audit_log` (`action: "bankedReset.redeem"`, no tokens or credit ids); the caps are counted
+from those rows, so they survive restarts. Successful redemptions also fire the
+`provider.reset_redeemed` webhook.
+
+Regression guards: `tests/unit/banked-reset-policy.test.ts`,
+`tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`,
+`tests/unit/banked-reset-history-route.test.ts`.
+
 ### Session affinity (#7274)
 
 **Scope:** one client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) pinned to one connection, for **any** provider.
@@ -341,6 +404,12 @@ and edits the most-tuned cooldown rules: `streamStallCooldown.enabled` and the O
 `connectionCooldown` base cooldown and maximum backoff steps (saved through
 `PATCH /api/resilience`). Terminal states (`banned`, `expired`, `credits_exhausted`) are
 listed but never cleared here.
+
+The **Error cooldown rules** card on the same page edits the operator error rules
+(`settings.providerErrorRules`) and the per-provider catch-all defaults
+(`settings.providerErrorDefaults`) through `PATCH /api/settings` — see "Operator-declared
+rules" under §7 for how they match. Durations are Default (no explicit cooldown), 30 min,
+1 h, 5 h, 24 h, or a custom 1 to 43,200 minutes (30 days).
 
 **REST API** (`src/lib/resilience/cooldownManager.ts`, auth: management):
 
@@ -808,6 +877,34 @@ opt-in. `resolveRuleMatchBody()` and `honorsRuleLockScope()` both check
 `hasOperatorRuleForProvider()` first: a provider with an operator rule gets
 the raw error text and has its declared `scope` honored, regardless of
 whether it also appears in either allowlist.
+
+**Operator-declared rules** (`OperatorProviderErrorRule`): each rule has an
+optional `status` and an optional `match` (a plain, case-insensitive substring
+of the error text, never a RegExp, so it cannot cause ReDoS), and must set at
+least one of the two. When both are set they are AND-ed; an omitted field
+matches anything, so `{match: "insufficient_quota"}` matches any status that
+carries that code. The first matching rule wins. `cooldownMs` accepts up to
+30 days; at most 50 rules in total.
+
+**Catch-all defaults** (`settings.providerErrorDefaults`, opt-in, set through
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+with `cooldownMs` from 1 minute to 30 days. A default applies only when no
+operator rule and no built-in catalog rule matched, and only to 402, 403, 408,
+429 and 5xx errors. Request-shape errors (400, 404, 409, 413, 422) and bare
+401s keep their own handling. With no explicit `reason`, the reason comes from
+the status, the same way `classifyError` does it. Declaring a default counts as
+an operator rule for `hasOperatorRuleForProvider()`, so its `scope` (default
+`"connection"`) is honored. The effective cooldown of a default is the longer
+of its `cooldownMs` and the provider's own retry hint (`Retry-After`,
+`x-ratelimit-reset` or a reset hint in the body, the same hint the engine
+honors when the connection-cooldown setting "use upstream retry hints" is on),
+so a default can stretch a short upstream hint but never cut a real reset
+short. An explicit operator rule keeps its exact `cooldownMs`. Neither a rule nor a default bypasses the
+connection-cooldown guards in `markAccountUnavailable`: an active, longer
+cooldown is never shortened and a terminal status is never overwritten. The
+built-in text detectors that run earlier in `checkFallbackError` (credits
+exhausted, daily quota, account deactivated) still take precedence for their
+own phrases.
 
 **Known gap — `providerRuleRegistry` is never consulted for HTTP 400.**
 `checkFallbackError`'s `BAD_REQUEST` branch classifies status 400 entirely

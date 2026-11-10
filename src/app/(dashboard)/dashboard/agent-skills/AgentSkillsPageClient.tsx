@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import EmptyState from "@/shared/components/EmptyState";
@@ -239,11 +240,11 @@ export function AgentSkillsPageClient(): JSX.Element {
                 className="gap-1.5 border-primary/30 bg-primary/10 text-xs text-primary hover:bg-primary/15"
                 data-testid="generate-button"
               >
-                <Icon
-                  name={generatingSkills ? "refresh" : "auto_fix_high"}
-                  size={14}
-                  className={generatingSkills ? "animate-spin" : undefined}
-                />
+                {generatingSkills ? (
+                  <Spinner decorative size="xs" />
+                ) : (
+                  <Icon name="auto_fix_high" size={14} />
+                )}
                 {generatingSkills ? t("regenerateRunning") : t("generateButton")}
               </Button>
             )}

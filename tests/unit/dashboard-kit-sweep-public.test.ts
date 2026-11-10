@@ -187,32 +187,12 @@ function staleKitClaims(reason: string): string[] {
 
 type Allow = Record<string, { max: number; reason: string }>;
 
-const BRAND_GAP = `partner brand hex until the kit derives a brand tint/ink (keak-ai/cheaper-inference-ui-kit#160) — ${TRACKED}`;
-
-const ARBITRARY_HEX_ALLOWED: Allow = {
-  "src/app/(dashboard)/dashboard/CheaperInferenceSponsorBanner.tsx": { max: 5, reason: BRAND_GAP },
-  "src/app/(dashboard)/dashboard/KimiSponsorBanner.tsx": { max: 5, reason: BRAND_GAP },
-  "src/app/(dashboard)/dashboard/VscodeCopilotBanner.tsx": { max: 5, reason: BRAND_GAP },
-  "src/app/(dashboard)/dashboard/combos/KimiComboPresetCard.tsx": { max: 5, reason: BRAND_GAP },
-  "src/app/(dashboard)/dashboard/providers/components/ProviderCard.tsx": {
-    max: 12,
-    reason: BRAND_GAP,
-  },
-  "src/shared/components/ConsoleLogViewer.tsx": {
-    max: 33,
-    reason: `always-dark console log-level inks (DESIGN_SYSTEM §2.1 exception; kit gap keak-ai/cheaper-inference-ui-kit#168) — ${TRACKED}`,
-  },
-};
+const ARBITRARY_HEX_ALLOWED: Allow = {};
 
 const RGB_HSL_ALLOWED: Allow = {
-  "src/app/(dashboard)/dashboard/combos/KimiComboPresetCard.tsx": { max: 1, reason: BRAND_GAP },
   "src/app/(dashboard)/dashboard/providers/components/ProviderCard.tsx": {
-    max: 6,
-    reason: BRAND_GAP,
-  },
-  "src/app/(dashboard)/dashboard/compression/studio/SaliencyHeatmap.tsx": {
     max: 2,
-    reason: `red/green saliency ramp until the kit ships sequential/diverging ramps (keak-ai/cheaper-inference-ui-kit#166) — ${TRACKED}`,
+    reason: `blue flash of the locate-card highlight animation — ${TRACKED}`,
   },
   "src/app/(dashboard)/dashboard/providers/[id]/components/ConnectionQuotaPanel.tsx": {
     max: 3,
@@ -252,7 +232,7 @@ const STYLE_LITERAL_ALLOWED: Allow = {
   },
   "src/app/(dashboard)/dashboard/providers/components/ProviderCard.tsx": {
     max: 1,
-    reason: BRAND_GAP,
+    reason: `neutral fallback of the provider icon tile when the catalog has no colour — ${TRACKED}`,
   },
   "src/shared/components/NavigationProgress.tsx": {
     max: 1,
@@ -286,7 +266,6 @@ const STALE_KIT_EXCEPTION_ALLOWED: Allow = Object.fromEntries(
     ["src/app/(dashboard)/dashboard/batch/components/wizard/InputStep.tsx", 1],
     ["src/app/(dashboard)/dashboard/combos/AutoComboCatalog.tsx", 1],
     ["src/app/(dashboard)/dashboard/combos/ComboHeaderActions.tsx", 1],
-    ["src/app/(dashboard)/dashboard/combos/page.tsx", 2],
     ["src/app/(dashboard)/dashboard/context/rtk/RtkTomlImportCard.tsx", 1],
     ["src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab.tsx", 1],
     ["src/app/(dashboard)/dashboard/omni-skills/OmniSkillsPageClient.tsx", 1],
@@ -298,7 +277,6 @@ const STALE_KIT_EXCEPTION_ALLOWED: Allow = Object.fromEntries(
     ["src/app/(dashboard)/dashboard/settings/components/ProviderTransferPanel.tsx", 1],
     ["src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx", 1],
     ["src/app/(dashboard)/dashboard/webhooks/components/shared/IntegrationCard.tsx", 1],
-    ["src/shared/components/Sidebar.tsx", 1],
   ].map(([file, max]) => [
     file,
     {
@@ -440,7 +418,7 @@ test("style scan: catches hex, rgb()/hsl() and named colours in style objects on
       [
         '<span style={{ backgroundColor: "var(--ci-chart-3-subtle)", color: pc.text }} />',
         "<span style={{ width: `${progress}%`, opacity: 1 }} />",
-        "<span style={brandTintStyle(provider.color)} />",
+        "<span style={brandTintVars(provider.color)} />",
         'const PROVIDERS = [{ id: "openai", color: "#10A37F" }]; // data, not a style object',
         'type T = { color: "purple" | "blue" };',
       ].join("\n")

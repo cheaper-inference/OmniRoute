@@ -28,7 +28,7 @@ const cleanupCallbacks: Array<() => void> = [];
 // "cancel"); answer it the way a user would.
 async function answerConfirm(label: "confirmAction" | "cancel") {
   const button = [
-    ...document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+    ...document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button'),
   ].find((b) => b.textContent?.trim() === label);
   expect(button, `expected the confirm dialog "${label}" button`).toBeTruthy();
   await act(async () => {
@@ -299,8 +299,8 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
     await expand(container);
     const geminiCard = findCard(container, "auto/gemini");
     const testButton = geminiCard?.querySelector('button[title="testCombo"]');
-    // KEA-7886: icons are Lucide <svg data-icon> instead of Material ligature text.
-    expect(testButton?.querySelector('[data-icon="progress_activity"]')).toBeTruthy();
+    // The running state swaps the play glyph for the kit Spinner.
+    expect(testButton?.querySelector('[data-slot="spinner"]')).toBeTruthy();
     expect((testButton as HTMLButtonElement | null)?.disabled).toBe(true);
   });
 

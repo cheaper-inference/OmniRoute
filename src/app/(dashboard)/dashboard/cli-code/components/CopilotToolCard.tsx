@@ -2,7 +2,9 @@
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useState, useEffect } from "react";
+import type { CSSProperties } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
@@ -11,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import { cn } from "@/shared/utils/cn";
-import { brandTintStyle } from "@/shared/utils/brandTint";
+import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 import Checkbox from "@/shared/components/Checkbox";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
@@ -250,8 +252,8 @@ export default function CopilotToolCard({
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <div
-                    className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
-                    style={brandTintStyle(tool.color)}
+                    className="ci-brand-tint bg-[var(--ci-brand-subtle)] size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
+                    style={brandTintVars(tool.color) as CSSProperties}
                   >
                     1
                   </div>
@@ -276,8 +278,8 @@ export default function CopilotToolCard({
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div
-                    className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
-                    style={brandTintStyle(tool.color)}
+                    className="ci-brand-tint bg-[var(--ci-brand-subtle)] size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
+                    style={brandTintVars(tool.color) as CSSProperties}
                   >
                     {cloudEnabled && apiKeys?.length > 0 ? "2" : "1"}
                   </div>
@@ -310,8 +312,8 @@ export default function CopilotToolCard({
               </div>
 
               {!modelsLoaded && allModels.length === 0 ? (
-                <div className="flex items-center gap-2 p-3 text-text-muted text-sm">
-                  <Icon name="progress_activity" size={16} className="animate-spin" />
+                <div role="status" className="flex items-center gap-2 p-3 text-text-muted text-sm">
+                  <Spinner decorative size="sm" />
                   <span>{t("loadingModels")}</span>
                 </div>
               ) : availableModels.length === 0 && allModels.length === 0 ? (
@@ -376,8 +378,8 @@ export default function CopilotToolCard({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div
-                      className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
-                      style={brandTintStyle(tool.color)}
+                      className="ci-brand-tint bg-[var(--ci-brand-subtle)] size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
+                      style={brandTintVars(tool.color) as CSSProperties}
                     >
                       {cloudEnabled && apiKeys?.length > 0 ? "3" : "2"}
                     </div>

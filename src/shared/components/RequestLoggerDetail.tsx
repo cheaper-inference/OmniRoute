@@ -5,15 +5,11 @@ import { sortRelatedLogs } from "./requestLoggerGroups";
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { JsonView } from "@/shared/components/jsonView";
+import JsonTree from "@/shared/components/JsonTree";
 import { PROVIDER_COLORS, getProtocolColor, neutralBadge } from "@/shared/constants/colors";
 import { formatDuration, formatApiKeyLabel, maskAccount } from "@/shared/utils/formatting";
 import { formatErrorForDisplay, formatReasoningStat } from "@/shared/utils/formatting";
-import { useTheme } from "@/shared/hooks/useTheme";
-import {
-  useTimestampTitles,
-  timestampMarkerCustomizeNode,
-} from "@/shared/hooks/useTimestampTitles";
+import { useTimestampTitles } from "@/shared/hooks/useTimestampTitles";
 import { JsonTreeExpandControls } from "@/shared/components/JsonTreeExpandControls";
 import { CallContentProvenanceBadges } from "@/shared/components/CallContentProvenanceBadges";
 import { useJsonTreeExpandLevel } from "@/store/jsonTreeExpandStore";
@@ -207,7 +203,6 @@ function StreamSection({ title, sectionId, json, onCopy }) {
     }
   });
   const ref = useRef(null);
-  const { isDark } = useTheme();
   const resolvedSectionId = sectionId || title;
   const expandLevel = useJsonTreeExpandLevel(resolvedSectionId);
   const segments = useMemo(() => parseStreamIntoSegments(json), [json]);
@@ -317,12 +312,11 @@ function StreamSection({ title, sectionId, json, onCopy }) {
             segments.map((segment, i) =>
               segment.type === "json" ? (
                 <div key={i} className="my-1">
-                  <JsonView
-                    src={segment.value}
-                    dark={isDark}
-                    collapsed={expandLevel}
-                    customizeNode={timestampMarkerCustomizeNode}
-                    displaySize
+                  <JsonTree
+                    value={segment.value}
+                    expandDepth={expandLevel}
+                    showControls={false}
+                    aria-label={title}
                   />
                 </div>
               ) : (
