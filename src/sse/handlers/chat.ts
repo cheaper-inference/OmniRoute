@@ -188,6 +188,7 @@ import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTel
 import { generateRequestId } from "../../shared/utils/requestId";
 import { logAuditEvent } from "../../lib/compliance/index";
 import { enforceApiKeyPolicy } from "../../shared/utils/apiKeyPolicy";
+import { bindKeyQuotaReservation } from "../../domain/keyQuota";
 import { rejectIfMeteredBudgetExceeded } from "@/lib/usage/meteredBudgetPolicy";
 import { hasProviderQuotaBypassScope } from "../../shared/constants/apiKeyPolicyScopes";
 import { isMicrosoftDesignerWebProviderRetiredError } from "../../shared/constants/designerWebRetirement";
@@ -736,7 +737,16 @@ async function handleChatImplementation(
 
   // Pipeline: API key policy enforcement (model restrictions + budget limits)
   telemetry.startPhase("policy");
-  const policy = await enforceApiKeyPolicy(request, modelStr, DEFER_METERED_BUDGET);
+  const policy = await enforceApiKeyPolicy(request, modelStr, {
+    ...DEFER_METERED_BUDGET,
+    reserveKeyQuota: true,
+  });
+  if (policy.keyQuotaReservation) {
+    // Same tick as the policy result: the wrapper releases the slot on every exit, and the usage
+    // recorders find it through apiKeyInfo to turn it into the recorded call.
+    admissionContext.holdKeyQuota(policy.keyQuotaReservation);
+    if (policy.apiKeyInfo) bindKeyQuotaReservation(policy.apiKeyInfo, policy.keyQuotaReservation);
+  }
   if (policy.rejection) {
     log.warn(
       "POLICY",
@@ -2567,10 +2577,7 @@ async function handleSingleModelChat(
           // Retry spent and nothing emitted yet: one hop to a sibling (routing only, no mark).
           log.warn("STREAM", `${provider}/${model} early-EOF retry exhausted — trying one sibling`);
           noteAccountFallback("stream_early_eof", credentials.connectionId);
-          earlyEofOriginal = withRoutingTelemetry(
-            result.response,
-            credentials.connectionId
-          );
+          earlyEofOriginal = withRoutingTelemetry(result.response, credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           continue;
         }

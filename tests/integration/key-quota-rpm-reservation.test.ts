@@ -133,22 +133,100 @@ test("E5: a policy deny after the quota gate gives the slot back", async () => {
   );
 });
 
-test("E6: a streamed call holds its slot until the stream ends, then gives it back", async () => {
+test("E6: a streamed call holds its slot until the stream ends, then converts it", async () => {
   const key = await keyWithRpm(2);
+  const chunk = (payload: Record<string, unknown>) =>
+    `data: ${JSON.stringify({ id: "c", object: "chat.completion.chunk", model: "gpt-4o-mini", ...payload })}\n\n`;
+  const enc = new TextEncoder();
+  let finishUpstream!: () => void;
+  const upstreamMayFinish = new Promise<void>((resolve) => (finishUpstream = resolve));
   h.installRecordingFetch(
     () =>
       new Response(
-        `data: ${JSON.stringify({ id: "c", object: "chat.completion.chunk", model: "gpt-4o-mini", choices: [{ index: 0, delta: { role: "assistant", content: "ok" } }] })}\n\n` +
-          `data: ${JSON.stringify({ id: "c", object: "chat.completion.chunk", model: "gpt-4o-mini", choices: [{ index: 0, delta: {}, finish_reason: "stop" }] })}\n\n` +
-          "data: [DONE]\n\n",
+        new ReadableStream<Uint8Array>({
+          async start(controller) {
+            controller.enqueue(
+              enc.encode(
+                chunk({ choices: [{ index: 0, delta: { role: "assistant", content: "ok" } }] })
+              )
+            );
+            await upstreamMayFinish; // the stream stays open until the test lets it end
+            controller.enqueue(
+              enc.encode(chunk({ choices: [{ index: 0, delta: {}, finish_reason: "stop" }] }))
+            );
+            controller.enqueue(enc.encode("data: [DONE]\n\n"));
+            controller.close();
+          },
+        }),
         { status: 200, headers: { "Content-Type": "text/event-stream" } }
       )
   );
   const response = await handleChat(buildRequest({ body: body(true), authKey: key.key }));
   assert.equal(response.status, 200);
   assert.equal(quota.countKeyQuotaReservations(key.id), 1, "held while the stream is open");
+  assert.equal(
+    quota.checkKeyQuota(key.id, { reserve: false }).allowed,
+    true,
+    "1 held of 2: a second call still fits"
+  );
+  finishUpstream();
   await response.text();
+  await h.waitFor(() => keyQuotaDb.getKeyQuotaCounters(key.id).rpmUsed === 1);
   assert.equal(quota.countKeyQuotaReservations(key.id), 0);
+  assert.equal(keyQuotaDb.getKeyQuotaCounters(key.id).rpmUsed, 1, "recorded once, not twice");
+});
+
+test("E6a: the recorder converts the slot when the usage is recorded, not when the client reads the last byte", async () => {
+  const key = await keyWithRpm(2);
+  const chunk = (payload: Record<string, unknown>) =>
+    `data: ${JSON.stringify({ id: "c", object: "chat.completion.chunk", model: "gpt-4o-mini", ...payload })}\n\n`;
+  h.installRecordingFetch(
+    () =>
+      new Response(
+        chunk({ choices: [{ index: 0, delta: { role: "assistant", content: "ok" } }] }) +
+          chunk({ choices: [{ index: 0, delta: {}, finish_reason: "stop" }] }) +
+          "data: [DONE]\n\n",
+        { status: 200, headers: { "Content-Type": "text/event-stream" } }
+      )
+  );
+  const response = await handleChat(buildRequest({ body: body(true), authKey: key.key }));
+  // The client has not read the body yet, so the response lifecycle has not ended.
+  assert.equal(keyQuotaDb.getKeyQuotaCounters(key.id).rpmUsed, 1, "usage recorded");
+  assert.equal(quota.countKeyQuotaReservations(key.id), 0, "slot converted: not counted twice");
+  await response.text();
+});
+
+test("E6b: a client abort while a stream is open gives the slot back", async () => {
+  const key = await keyWithRpm(1);
+  const enc = new TextEncoder();
+  const abort = new AbortController();
+  h.installRecordingFetch(
+    () =>
+      new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(
+              enc.encode(
+                `data: ${JSON.stringify({ id: "c", object: "chat.completion.chunk", model: "gpt-4o-mini", choices: [{ index: 0, delta: { role: "assistant", content: "ok" } }] })}\n\n`
+              )
+            ); // never ends
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "text/event-stream" } }
+      )
+  );
+  const request = new Request("http://localhost/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key.key}` },
+    body: JSON.stringify(body(true)),
+    signal: abort.signal,
+  });
+  const response = await handleChat(request, null, null, undefined, abort.signal);
+  assert.equal(quota.countKeyQuotaReservations(key.id), 1, "held while the stream is open");
+  abort.abort();
+  await h.waitFor(() => quota.countKeyQuotaReservations(key.id) === 0);
+  assert.equal(quota.countKeyQuotaReservations(key.id), 0);
+  await response.body?.cancel().catch(() => undefined);
 });
 
 test("E7: a route that never records usage (not chat) takes no reservation, so it cannot lock the key", async () => {
@@ -162,4 +240,30 @@ test("E7: a route that never records usage (not chat) takes no reservation, so i
     assert.equal(policy.keyQuotaReservation, undefined);
   }
   assert.equal(quota.countKeyQuotaReservations(key.id), 0);
+});
+
+test("E8: a throw inside the policy after the quota gate gives the slot back", async () => {
+  // The throttle delay runs after the quota gate took the slot. Make exactly that timer throw.
+  const key = await keyWithRpm(1, { throttleDelayMs: 25 });
+  const realSetTimeout = globalThis.setTimeout;
+  const spy = test.mock.method(
+    globalThis,
+    "setTimeout",
+    (...args: Parameters<typeof setTimeout>) => {
+      if (args[1] === 25) throw new Error("timer backend down");
+      return realSetTimeout(...args);
+    }
+  );
+  try {
+    await assert.rejects(
+      enforceApiKeyPolicy(buildRequest({ body: body(), authKey: key.key }), MODEL, {
+        reserveKeyQuota: true,
+      }),
+      /timer backend down/
+    );
+  } finally {
+    spy.mock.restore();
+  }
+  assert.equal(quota.countKeyQuotaReservations(key.id), 0, "the slot must not stay held");
+  assert.equal(quota.checkKeyQuota(key.id, { reserve: false }).allowed, true);
 });
