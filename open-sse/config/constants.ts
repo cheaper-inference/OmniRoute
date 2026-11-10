@@ -153,10 +153,12 @@ export const OAUTH_ENDPOINTS = {
     token: "https://api.anthropic.com/v1/oauth/token",
     auth: "https://api.anthropic.com/v1/oauth/authorize",
   },
+  // Legacy browser OAuth only (operator-configured). The device-code sign-in uses
+  // QODER_DEVICE_* (src/lib/oauth/constants/oauth.ts) and refreshes drt- tokens on
+  // its own endpoint, so this must not default to the device refresh URL.
   qoder: {
-    token:
-      process.env.QODER_OAUTH_TOKEN_URL || "https://center.qoder.sh/api/v1/deviceToken/refresh",
-    auth: process.env.QODER_OAUTH_AUTHORIZE_URL || "https://qoder.com/device/selectAccounts",
+    token: process.env.QODER_OAUTH_TOKEN_URL || "",
+    auth: process.env.QODER_OAUTH_AUTHORIZE_URL || "",
   },
   github: {
     token: "https://github.com/login/oauth/access_token",

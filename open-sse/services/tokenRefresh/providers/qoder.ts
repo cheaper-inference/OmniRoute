@@ -10,9 +10,9 @@ import { getQoderMachineId } from "../../../utils/qoderDevice.ts";
  * Specialized refresh for Qoder OAuth / Device Flow tokens
  */
 export async function refreshQoderToken(refreshToken, log, proxyConfig: unknown = null) {
-  const isDeviceToken =
-    typeof refreshToken === "string" &&
-    (refreshToken.startsWith("drt-") || !PROVIDERS.qoder?.clientSecret);
+  // Only device-flow refresh tokens (drt-) belong to the device endpoint. A legacy
+  // OAuth refresh token must never be sent there, even without a client secret.
+  const isDeviceToken = typeof refreshToken === "string" && refreshToken.startsWith("drt-");
 
   if (isDeviceToken) {
     const refreshUrl =

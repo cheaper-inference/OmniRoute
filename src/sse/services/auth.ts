@@ -1,6 +1,9 @@
 import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
-import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
+import {
+  qoderConnectionCanServeChat,
+  qoderSupportsCallerTools,
+} from "@omniroute/open-sse/services/qoderCapabilities";
 import { randomUUID } from "crypto";
 import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
 import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
@@ -1136,8 +1139,10 @@ export async function getProviderCredentials(
         connections = connections.filter((conn) => conn.id === forcedConnectionId);
       }
     }
-    if (resolvedId === "qoder" && options.requireToolCalling) {
-      connections = connections.filter(qoderSupportsCallerTools);
+    if (resolvedId === "qoder") {
+      // #18737: device-code sign-in accounts are sign-in only — never route chat to them.
+      connections = connections.filter(qoderConnectionCanServeChat);
+      if (options.requireToolCalling) connections = connections.filter(qoderSupportsCallerTools);
     }
     const activeConnectionsCount = connections.length;
     logCredentialPoolState(provider, {
@@ -1189,8 +1194,11 @@ export async function getProviderCredentials(
       if (forcedConnectionId) {
         allConnections = allConnections.filter((conn) => conn.id === forcedConnectionId);
       }
-      if (resolvedId === "qoder" && options.requireToolCalling) {
-        allConnections = allConnections.filter(qoderSupportsCallerTools);
+      if (resolvedId === "qoder") {
+        allConnections = allConnections.filter(qoderConnectionCanServeChat);
+        if (options.requireToolCalling) {
+          allConnections = allConnections.filter(qoderSupportsCallerTools);
+        }
       }
       // An ineligible Codex plan cannot make a paid-only model appear rate-limited.
       allConnections = filterCodexPlanEligible(provider, allConnections, requestedModel);

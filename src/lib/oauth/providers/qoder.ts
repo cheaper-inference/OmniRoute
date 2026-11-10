@@ -1,8 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { getQoderMachineId } from "@omniroute/open-sse/utils/qoderDevice.ts";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import {
+  isQoderDeviceToken,
+  QODER_DEVICE_AUTH_METHOD,
+} from "@omniroute/open-sse/services/qoderCapabilities.ts";
 import { QODER_CONFIG } from "../constants/oauth";
 import { generateCodeChallenge, generateCodeVerifier } from "../utils/pkce";
 
+/**
+ * Qoder account sign-in (device code). SIGN-IN ONLY: the resulting `dt-`/`drt-`
+ * tokens identify the account, but no supported Qoder endpoint accepts them for
+ * chat, so these connections are refused by the executor and skipped by
+ * connection selection (open-sse/services/qoderCapabilities.ts). Chat needs a
+ * Personal Access Token (local qodercli) or a DashScope API key.
+ */
 export const qoder = {
   config: QODER_CONFIG,
   flowType: "device_code",
@@ -119,10 +131,11 @@ export const qoder = {
 
       return { ok: false, data: { error: "authorization_pending" } };
     } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : String(err);
+      // Hard Rule #12: the route returns error_description to the browser verbatim.
+      const errorMsg = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));
       return {
         ok: false,
-        data: { error: "network_error", error_description: errorMsg },
+        data: { error: "network_error", error_description: errorMsg || "Network error" },
       };
     }
   },
@@ -169,10 +182,11 @@ export const qoder = {
       (user?.username as string) ||
       email ||
       "Qoder User";
-    const apiKey =
-      (user?.apiKey as string) ||
-      (user?.api_key as string) ||
-      (typeof tokens.access_token === "string" ? tokens.access_token : null);
+    // #18737: never mirror the device access token into apiKey — the executor
+    // sends apiKey upstream as a Bearer credential. The device token stays in
+    // accessToken/refreshToken (encrypted at rest) for refresh and identity only.
+    const reportedApiKey = (user?.apiKey as string) || (user?.api_key as string) || null;
+    const apiKey = reportedApiKey && !isQoderDeviceToken(reportedApiKey) ? reportedApiKey : null;
 
     return {
       accessToken: tokens.access_token as string | undefined,
@@ -188,6 +202,9 @@ export const qoder = {
         email,
         name,
         accountType: (user?.accountType || user?.type || null) as string | null,
+        // Sign-in only: connection selection and the executor refuse chat for it.
+        authMethod: QODER_DEVICE_AUTH_METHOD,
+        chatSupported: false,
       },
     };
   },
