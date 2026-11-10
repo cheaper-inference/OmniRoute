@@ -11195,6 +11195,8 @@
       "refreshFailures": "Открити са неуспехи при обновяване на токена",
       "unknown": "Статус на здравето неизвестен"
     },
+    "tokenHealthRefreshAll": "Опресни всички",
+    "tokenHealthRefreshResult": "{refreshed} обновени, {failed} неуспешни, {skipped} пропуснати",
     "systemMonitor": {
       "metricsAriaLabel": "Системни метрики",
       "memory": "Памет",

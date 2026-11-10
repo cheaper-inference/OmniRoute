@@ -11195,6 +11195,8 @@
       "refreshFailures": "ตรวจพบความล้มเหลวในการรีเฟรชโทเค็น",
       "unknown": "สถานะสุขภาพไม่ทราบ"
     },
+    "tokenHealthRefreshAll": "รีเฟรชทั้งหมด",
+    "tokenHealthRefreshResult": "รีเฟรช {refreshed} รายการ, ล้มเหลว {failed} รายการ, ข้าม {skipped} รายการ",
     "systemMonitor": {
       "metricsAriaLabel": "เมตริกระบบ",
       "memory": "หน่วยความจำ",

@@ -11195,6 +11195,8 @@
       "refreshFailures": "ටෝකන නැවුම් කිරීමේ අසාර්ථකවීම් අනාවරණය විය",
       "unknown": "සෞඛ්ය තත්ත්වය නොදනී"
     },
+    "tokenHealthRefreshAll": "සියල්ල නැවුම් කරන්න",
+    "tokenHealthRefreshResult": "{refreshed} යාවත්කාලීන කරන ලදි, {failed} අසාර්ථක විය, {skipped} මඟ හැරිණි",
     "systemMonitor": {
       "metricsAriaLabel": "පද්ධති ප්රමිතික",
       "memory": "මතකය",

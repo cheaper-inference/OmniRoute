@@ -11195,6 +11195,8 @@
       "refreshFailures": "ടോക്കൺ പുതുക്കൽ പരാജയങ്ങൾ കണ്ടെത്തി",
       "unknown": "ആരോഗ്യനില അജ്ഞാതമാണ്"
     },
+    "tokenHealthRefreshAll": "എല്ലാം പുതുക്കുക",
+    "tokenHealthRefreshResult": "{refreshed} പുതുക്കി, {failed} പരാജയപ്പെട്ടു, {skipped} ഒഴിവാക്കി",
     "systemMonitor": {
       "metricsAriaLabel": "സിസ്റ്റം മെട്രിക്കുകൾ",
       "memory": "മെമ്മറി",

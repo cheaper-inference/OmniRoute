@@ -11195,6 +11195,8 @@
       "refreshFailures": "ટોકન રિફ્રેશ નિષ્ફળતાઓ શોધાઈ છે",
       "unknown": "આરોગ્ય સ્થિતિ અજ્ઞાત"
     },
+    "tokenHealthRefreshAll": "બધું રિફ્રેશ કરો",
+    "tokenHealthRefreshResult": "{refreshed} રિફ્રેશ થયું, {failed} નિષ્ફળ, {skipped} સ્કિપ થયું",
     "systemMonitor": {
       "metricsAriaLabel": "સિસ્ટમ મેટ્રિક્સ",
       "memory": "મેમરી",

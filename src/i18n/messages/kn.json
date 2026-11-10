@@ -11195,6 +11195,8 @@
       "refreshFailures": "ಟೋಕನ್ ರಿಫ್ರೆಶ್ ವೈಫಲ್ಯಗಳು ಪತ್ತೆಯಾಗಿವೆ",
       "unknown": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ ತಿಳಿದಿಲ್ಲ"
     },
+    "tokenHealthRefreshAll": "ಎಲ್ಲವನ್ನೂ ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "tokenHealthRefreshResult": "{refreshed} ಪುನರ್ನವೀಕರಿಸಲಾಗಿದೆ, {failed} ವಿಫಲವಾಗಿದೆ, {skipped} ಬಿಟ್ಟುಹೋಗಿದೆ",
     "systemMonitor": {
       "metricsAriaLabel": "ಸಿಸ್ಟಂ ಮೆಟ್ರಿಕ್ಗಳು",
       "memory": "ಮೆಮೊರಿ",

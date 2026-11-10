@@ -11195,6 +11195,8 @@
       "refreshFailures": "Token oppfriskningsfeil oppdaget",
       "unknown": "Helsesituasjon ukjent"
     },
+    "tokenHealthRefreshAll": "Oppdater alle",
+    "tokenHealthRefreshResult": "{refreshed} oppdatert, {failed} feilet, {skipped} hoppet over",
     "systemMonitor": {
       "metricsAriaLabel": "Systemmetrikker",
       "memory": "Minne",

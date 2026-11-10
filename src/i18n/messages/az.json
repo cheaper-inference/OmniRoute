@@ -11195,6 +11195,8 @@
       "refreshFailures": "Token yeniləmə xətaları aşkar edildi",
       "unknown": "Sağlamlıq vəziyyəti məlum deyil"
     },
+    "tokenHealthRefreshAll": "Hamısını yenilə",
+    "tokenHealthRefreshResult": "{refreshed} yeniləndi, {failed} uğursuz oldu, {skipped} keçildi",
     "systemMonitor": {
       "metricsAriaLabel": "Sistem metrikaları",
       "memory": "Yaddaş",

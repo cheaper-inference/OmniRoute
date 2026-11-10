@@ -11195,6 +11195,8 @@
       "refreshFailures": "检测到令牌刷新失败",
       "unknown": "健康状态未知"
     },
+    "tokenHealthRefreshAll": "全部刷新",
+    "tokenHealthRefreshResult": "{refreshed} 已刷新, {failed} 失败, {skipped} 已跳过",
     "systemMonitor": {
       "metricsAriaLabel": "系统指标",
       "memory": "内存",

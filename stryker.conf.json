@@ -184,6 +184,7 @@
       "tests/unit/chat-correlation-id-exhaustion.test.ts",
       "tests/unit/combo-pin-implicit-allowlist.test.ts",
       "tests/unit/combo-predicates-epoch-cooldown.test.ts",
+      "tests/unit/combo-deadline-failure-budget.test.ts",
       "tests/unit/combo/execute-target-gates.test.ts",
       "tests/unit/daily-reset-tz-threading.test.ts",
       "tests/unit/moonshot-quota-writeback.test.ts",

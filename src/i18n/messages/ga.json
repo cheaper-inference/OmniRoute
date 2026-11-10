@@ -11195,6 +11195,8 @@
       "refreshFailures": "Braitheadh teipeanna athnuachana ceadchomharthaí",
       "unknown": "Stádas sláinte anaithnid"
     },
+    "tokenHealthRefreshAll": "Athnuashonraigh iad Uile",
+    "tokenHealthRefreshResult": "{refreshed} athnuadaithe, {failed} theip, {skipped} fágtha amuigh",
     "systemMonitor": {
       "metricsAriaLabel": "Méadrachtaí an chórais",
       "memory": "Cuimhne",

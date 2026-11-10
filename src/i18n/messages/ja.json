@@ -11195,6 +11195,8 @@
       "refreshFailures": "トークンのリフレッシュ失敗が検出されました",
       "unknown": "健康状態不明"
     },
+    "tokenHealthRefreshAll": "すべて更新",
+    "tokenHealthRefreshResult": "{refreshed} 件更新、{failed} 件失敗、{skipped} 件スキップ",
     "systemMonitor": {
       "metricsAriaLabel": "システムメトリクス",
       "memory": "メモリ",

@@ -11195,6 +11195,8 @@
       "refreshFailures": "A ṣàwárí àwọn ìkùnà ìmúdójúìwọ̀n tóókì",
       "unknown": "Ipò ìlera jẹ́ àìmọ̀"
     },
+    "tokenHealthRefreshAll": "Tún gbogbo rẹ̀ ṣe",
+    "tokenHealthRefreshResult": "{refreshed} ti tuntun si, {failed} kùṣẹ́, {skipped} ti kọ̀",
     "systemMonitor": {
       "metricsAriaLabel": "Àwọn ìwọ̀n ètò",
       "memory": "Ìrántí",

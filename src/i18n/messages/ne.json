@@ -11195,6 +11195,8 @@
       "refreshFailures": "टोकन रिफ्रेस विफलताहरू पत्ता लागे",
       "unknown": "स्वास्थ्य स्थिति अज्ञात छ"
     },
+    "tokenHealthRefreshAll": "सबै रिफ्रेस गर्नुहोस्",
+    "tokenHealthRefreshResult": "{refreshed} रिफ्रेस गरियो, {failed} असफल, {skipped} छोडियो",
     "systemMonitor": {
       "metricsAriaLabel": "प्रणाली मेट्रिक्स",
       "memory": "मेमोरी",
