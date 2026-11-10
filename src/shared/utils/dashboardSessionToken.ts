@@ -74,10 +74,13 @@ export function addRevokedSession(
  */
 async function isDashboardSessionEnded(payload: JWTPayload, token: string): Promise<boolean> {
   try {
-    const { getSettings } = await import("@/lib/db/settings");
-    const settings = (await getSettings()) as Record<string, unknown>;
+    // The per-session record is read directly so a sign-out is never delayed by a cache TTL.
+    // The password cutoff and the legacy revoked list are written through updateSettings(),
+    // which busts the settings read cache, so the cached read keeps this hot path cheap.
     const { isDashboardSessionRevoked } = await import("@/lib/db/dashboardSessions");
     if (isDashboardSessionRevoked(payload, token)) return true;
+    const { getCachedSettings } = await import("@/lib/db/readCache");
+    const settings = (await getCachedSettings()) as Record<string, unknown>;
 
     const validAfter = settings[SESSIONS_VALID_AFTER_SETTING];
     if (typeof validAfter === "number" && (payload.iat ?? 0) < validAfter) return true;
@@ -178,7 +181,7 @@ export async function verifyMfaPendingToken(
       return null;
     }
     // A password change since the first factor was accepted voids the pending login too.
-    return (await isDashboardSessionEnded(payload)) ? null : payload;
+    return (await isDashboardSessionEnded(payload, token)) ? null : payload;
   } catch {
     return null;
   }

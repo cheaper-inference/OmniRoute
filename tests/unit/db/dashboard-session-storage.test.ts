@@ -102,6 +102,26 @@ test("expired records alone are pruned, including fractional expiry boundaries",
   assert.equal(store.isDashboardSessionRevoked({ jti: future }, "public-fixture"), true);
 });
 
+test("verification reuses the settings read cache but still sees a sign-out at once", async () => {
+  const token = await sessions.mintDashboardSessionToken(secret);
+  const db = core.getDbInstance();
+  const originalPrepare = db.prepare;
+  let settingsScans = 0;
+  db.prepare = function (sql: string) {
+    if (sql.includes("namespace = 'settings'")) settingsScans += 1;
+    return originalPrepare.call(this, sql);
+  } as typeof db.prepare;
+  try {
+    for (let n = 0; n < 5; n++)
+      assert.ok(await sessions.verifyDashboardSessionToken(token, secret));
+    assert.ok(settingsScans <= 1, `expected cached settings reads, saw ${settingsScans} scans`);
+    store.revokeDashboardSession(decodeJwt(token), token);
+    assert.equal(await sessions.verifyDashboardSessionToken(token, secret), null);
+  } finally {
+    db.prepare = originalPrepare;
+  }
+});
+
 test("sql.js revocations reach an independent reader before the debounce timer and propagate disk failure", async () => {
   const original = core.getDbInstance();
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-session-sqljs-"));

@@ -19,8 +19,14 @@ export async function POST(request) {
 
   // Clearing the cookie only ends the session in this browser. A copy of the token would stay
   // valid for the rest of its 30 days, so the session id is also revoked on the server.
+  // A cookie that cannot be read is not a session: it is cleared and nothing is revoked.
+  let token: string | undefined;
   try {
-    const token = cookieStore.get(DASHBOARD_SESSION_COOKIE)?.value;
+    token = cookieStore.get(DASHBOARD_SESSION_COOKIE)?.value;
+  } catch {
+    token = undefined;
+  }
+  try {
     const payload = await readSignedDashboardSessionToken(token);
     if (payload && token) {
       logoutRouteInternals.revokeSession(payload, token);
