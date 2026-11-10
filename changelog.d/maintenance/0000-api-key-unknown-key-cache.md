@@ -1,1 +1,0 @@
-- **perf(auth):** a request with an unknown API key is answered from a 30-second in-memory entry, so a client that retries a bad key no longer costs one database lookup per request.
