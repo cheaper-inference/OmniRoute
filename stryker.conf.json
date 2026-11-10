@@ -775,7 +775,9 @@
       "tests/unit/issue-18600-muse-request-dispatch.test.ts",
       "tests/unit/issue-18600-muse-followup-isolation.test.ts",
       "tests/unit/universal-handoff-api-key-scope.test.ts",
-      "tests/unit/combo-avoid-stalled-account.test.ts"
+      "tests/unit/combo-avoid-stalled-account.test.ts",
+      "tests/unit/error-classifier-cached-content-403.test.ts",
+      "tests/unit/post-output-failure-streak-sweep.test.ts"
     ],
     "nodeArgs": [
       "--import",
