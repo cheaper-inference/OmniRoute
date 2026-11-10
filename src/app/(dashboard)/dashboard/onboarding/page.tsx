@@ -43,6 +43,7 @@ export default function OnboardingWizard() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [skipSecurity, setSkipSecurity] = useState(false);
+  const [hasExistingPassword, setHasExistingPassword] = useState(false);
 
   // #14296: fresh Docker/NAT-forwarded installs (peer isn't 127.0.0.1) hit a
   // 401 on the bootstrap writes below until the operator supplies the
@@ -60,16 +61,25 @@ export default function OnboardingWizard() {
   const [testStatus, setTestStatus] = useState("idle"); // idle, testing, success, error
   const [testMessage, setTestMessage] = useState("");
 
-  // Check if setup is already complete
+  // Check if setup is already complete and if a password is already configured (#19211)
   useEffect(() => {
     const checkSetup = async () => {
       try {
-        const res = await fetch("/api/settings");
-        if (res.ok) {
-          const settings = await res.json();
+        const [settingsRes, requireLoginRes] = await Promise.all([
+          fetch("/api/settings").catch(() => null),
+          fetch("/api/settings/require-login").catch(() => null),
+        ]);
+        if (settingsRes && settingsRes.ok) {
+          const settings = await settingsRes.json();
           if (settings.setupComplete) {
             router.replace("/dashboard");
             return;
+          }
+        }
+        if (requireLoginRes && requireLoginRes.ok) {
+          const loginData = await requireLoginRes.json().catch(() => ({}));
+          if (loginData.hasPassword) {
+            setHasExistingPassword(true);
           }
         }
       } catch {
@@ -118,6 +128,10 @@ export default function OnboardingWizard() {
 
   const handleSetPassword = async () => {
     setErrorMessage("");
+    if (hasExistingPassword) {
+      handleNext();
+      return;
+    }
     if (skipSecurity) {
       // (#574) Explicitly disable requireLogin when skipping password setup
       try {
@@ -160,6 +174,7 @@ export default function OnboardingWizard() {
         setErrorMessage(data.error || t("connectionError"));
         return;
       }
+      setHasExistingPassword(true);
       handleNext();
     } catch {
       setErrorMessage(t("connectionError"));
@@ -402,40 +417,54 @@ export default function OnboardingWizard() {
             {/* Security */}
             {currentStep.id === "security" && (
               <div className="space-y-4">
-                <p className="text-sm text-text-muted text-center">{t("securityDesc")}</p>
-                <Checkbox
-                  label={t("skipPassword")}
-                  checked={skipSecurity}
-                  onChange={(e) => setSkipSecurity(e.target.checked)}
-                />
-                {skipSecurity && (
-                  <p className="text-xs text-warning text-center animate-in fade-in duration-200">
-                    {t("securityDescSkipWarning")}
-                  </p>
-                )}
-                {!skipSecurity && (
+                {hasExistingPassword ? (
                   <div className="space-y-3">
-                    {/* Caps Lock warning comes from the Input adapter (common.capsLockOn). */}
-                    <Input
-                      type="password"
-                      placeholder={t("enterPassword")}
-                      aria-label={t("enterPassword")}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <Input
-                      type="password"
-                      placeholder={t("confirmPasswordPlaceholder")}
-                      aria-label={t("confirmPasswordPlaceholder")}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      error={
-                        password && confirmPassword && password !== confirmPassword
-                          ? t("passwordsMismatch")
-                          : undefined
-                      }
-                    />
+                    <div className="rounded-xl border border-success/30 bg-success/10 p-5 text-center">
+                      <Icon name="verified_user" size={32} className="mx-auto text-success mb-2" />
+                      <p className="text-sm font-medium text-text-main">{t("security")}</p>
+                      <p className="text-xs text-text-muted mt-1">
+                        Password is already configured for this instance.
+                      </p>
+                    </div>
                   </div>
+                ) : (
+                  <>
+                    <p className="text-sm text-text-muted text-center">{t("securityDesc")}</p>
+                    <Checkbox
+                      label={t("skipPassword")}
+                      checked={skipSecurity}
+                      onChange={(e) => setSkipSecurity(e.target.checked)}
+                    />
+                    {skipSecurity && (
+                      <p className="text-xs text-warning text-center animate-in fade-in duration-200">
+                        {t("securityDescSkipWarning")}
+                      </p>
+                    )}
+                    {!skipSecurity && (
+                      <div className="space-y-3">
+                        {/* Caps Lock warning comes from the Input adapter (common.capsLockOn). */}
+                        <Input
+                          type="password"
+                          placeholder={t("enterPassword")}
+                          aria-label={t("enterPassword")}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <Input
+                          type="password"
+                          placeholder={t("confirmPasswordPlaceholder")}
+                          aria-label={t("confirmPasswordPlaceholder")}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          error={
+                            password && confirmPassword && password !== confirmPassword
+                              ? t("passwordsMismatch")
+                              : undefined
+                          }
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -444,7 +473,7 @@ export default function OnboardingWizard() {
             {currentStep.id === "provider" && (
               <div className="space-y-4">
                 <p className="text-sm text-text-muted text-center">{t("providerDesc")}</p>
-                {skipSecurity && (
+                {skipSecurity && !hasExistingPassword && (
                   <p
                     role="status"
                     className="rounded-lg border border-warning/30 bg-warning-bg p-3 text-center text-sm text-warning animate-in fade-in duration-200"
@@ -452,15 +481,15 @@ export default function OnboardingWizard() {
                     {t("providerRequiresPassword")}
                   </p>
                 )}
-                {!skipSecurity && <FreeProviderOnboardingCard />}
-                {!skipSecurity && (
+                {(!skipSecurity || hasExistingPassword) && <FreeProviderOnboardingCard />}
+                {(!skipSecurity || hasExistingPassword) && (
                   <div className="flex items-center gap-3 text-[11px] text-text-muted">
                     <span className="h-px flex-1 bg-border" />
                     <span>{t("freeProviders.orUseApiKey")}</span>
                     <span className="h-px flex-1 bg-border" />
                   </div>
                 )}
-                {!skipSecurity && (
+                {(!skipSecurity || hasExistingPassword) && (
                   <RadioGroup
                     aria-label={t("providerDesc")}
                     value={selectedProvider ?? ""}
@@ -586,13 +615,21 @@ export default function OnboardingWizard() {
               {currentStep.id === "security" && (
                 <Button
                   variant="primary"
-                  onClick={handleSetPassword}
-                  disabled={!skipSecurity && (!password || password !== confirmPassword)}
+                  onClick={hasExistingPassword ? handleNext : handleSetPassword}
+                  disabled={
+                    !hasExistingPassword &&
+                    !skipSecurity &&
+                    (!password || password !== confirmPassword)
+                  }
                 >
-                  {skipSecurity ? t("skipAndContinue") : t("setPassword")}
+                  {hasExistingPassword
+                    ? t("continue")
+                    : skipSecurity
+                      ? t("skipAndContinue")
+                      : t("setPassword")}
                 </Button>
               )}
-              {currentStep.id === "provider" && !skipSecurity ? (
+              {currentStep.id === "provider" && (!skipSecurity || hasExistingPassword) ? (
                 <Button
                   variant="primary"
                   onClick={handleAddProvider}
