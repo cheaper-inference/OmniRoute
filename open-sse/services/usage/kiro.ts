@@ -212,14 +212,6 @@ function buildKiroUsageAttempts(opts: {
           headers: authHeaders,
         }),
     },
-    {
-      name: "q-get",
-      run: () =>
-        fetch(`${qBaseUrl}/getUsageLimits?${qParams.toString()}`, {
-          method: "GET",
-          headers: authHeaders,
-        }),
-    },
   ];
 }
 

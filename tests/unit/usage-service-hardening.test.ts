@@ -850,7 +850,7 @@ test("usage service covers Codex auth failures, Kiro hard failures and Kimi no-q
         accessToken: "kiro-broken",
         providerSpecificData: { profileArn: "arn:test:broken" },
       }),
-    /Failed to fetch Kiro usage: (Kiro API error \(400\): bad request|q-post:.*bad request)/
+    /Failed to fetch Kiro usage: Kiro API error \(400\): bad request/
   );
 
   globalThis.fetch = async (url) => {

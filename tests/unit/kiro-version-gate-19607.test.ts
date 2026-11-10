@@ -194,6 +194,11 @@ test("kiro catalog fingerprint UA carries a supported IDE version", async () => 
 test("kiro usage fetches never target the retired codewhisperer host in us-east-1", async () => {
   // GetUsageLimits routed its primary attempt to the legacy codewhisperer host for
   // us-east-1 profiles; with the 2026-11-09 gate that host 403s every request (#19607).
+  // The usage module captures OMNIROUTE_CODEWHISPERER_BASE_URL at load time — clear
+  // it before importing so an operator-exported legacy override cannot mask the
+  // default-routing regression this test pins (restored afterwards).
+  const savedOverride = process.env.OMNIROUTE_CODEWHISPERER_BASE_URL;
+  delete process.env.OMNIROUTE_CODEWHISPERER_BASE_URL;
   const { __testing } = await import("@omniroute/open-sse/services/usage.ts");
   const { getKiroUsage } = __testing as {
     getKiroUsage: typeof import("../../open-sse/services/usage/kiro.ts").getKiroUsage;
@@ -225,6 +230,9 @@ test("kiro usage fetches never target the retired codewhisperer host in us-east-
     });
   } finally {
     globalThis.fetch = originalFetch;
+    if (savedOverride !== undefined) {
+      process.env.OMNIROUTE_CODEWHISPERER_BASE_URL = savedOverride;
+    }
   }
   assert.ok(captured.length > 0, "usage fetcher must have issued at least one request");
   assert.ok(
