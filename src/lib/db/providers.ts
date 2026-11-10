@@ -19,6 +19,8 @@ import { createLazyRowProxy } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
 import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
+import { findChatGptConnectionByRegistration } from "./chatgpt";
+import { sanitizeMergedConnectionOverrides } from "./providers/connectionUpdateSanitize";
 import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
 import { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
 import { registerConnectionStore } from "@omniroute/open-sse/utils/registeredConnectionStore.ts";
@@ -502,7 +504,9 @@ export async function createProviderConnection(data: JsonRecord) {
   const workspaceId = toStringOrNull(providerSpecificData.workspaceId);
   const chatgptUserId = toStringOrNull(providerSpecificData.chatgptUserId);
 
-  if (data.authType === "oauth" && data.provider === "copilot-m365-web") {
+  if (data.authType === "oauth" && data.provider === "chatgpt") {
+    existing = findChatGptConnectionByRegistration(providerSpecificData);
+  } else if (data.authType === "oauth" && data.provider === "copilot-m365-web") {
     const candidates = db
       .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth'")
       .all(data.provider) as JsonRecord[];
@@ -1052,11 +1056,15 @@ export async function updateProviderConnection(
   opts?: ProviderConnectionUpdateOpts
 ) {
   const db = getDbInstance() as unknown as DbLike;
+
   // The incoming value only. A connection that already holds the password has
   // to stay editable, or an operator cannot repair the one this guard exists
   // to prevent -- and re-checking the merged value would spend a bcrypt round
   // on every unrelated field edit.
   await assertApiKeyIsNotManagementPassword(data.apiKey);
+  // Read only after asynchronous validation, inside the write transaction.
+  // Otherwise a metadata update can snapshot old credentials, yield to a rotation,
+  // and then write the consumed refresh token back over its replacement.
   // Version checks, read/merge and write share one lock. A newer failure may
   // arrive during validation; it must survive even when a valid token rotates.
   const applied = db.transaction(() => {
@@ -1078,6 +1086,7 @@ export async function updateProviderConnection(
         existingCamel.providerSpecificData
       )
     );
+    sanitizeMergedConnectionOverrides(merged);
     // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
     // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
     // so that sweep never retests it, whenever the flag is turned on.
@@ -1092,28 +1101,6 @@ export async function updateProviderConnection(
           permanentBan: opts?.permanentBan === true,
         }
       );
-    }
-    // Mirror the sanitization the create path applies — keep the returned
-    // object in lockstep with what we persist.
-    if ("quotaWindowThresholds" in merged) {
-      const result = sanitizeQuotaWindowThresholds(merged.quotaWindowThresholds);
-      if (result.rejected.length > 0) {
-        throw new Error(
-          `Refusing to persist quotaWindowThresholds with rejected keys: ${result.rejected.join(", ")}`
-        );
-      }
-      // For updates we always carry the key forward (even as null) so the read
-      // path surfaces the cleared state to callers that merged it.
-      merged.quotaWindowThresholds = result.sanitized;
-    }
-    if ("rateLimitOverrides" in merged) {
-      const result = sanitizeRateLimitOverrides(merged.rateLimitOverrides);
-      if (result.rejected.length > 0) {
-        throw new Error(
-          `Refusing to persist rateLimitOverrides with rejected keys: ${result.rejected.join(", ")}`
-        );
-      }
-      merged.rateLimitOverrides = result.sanitized;
     }
     const existingRecord = toRecord(existing);
 

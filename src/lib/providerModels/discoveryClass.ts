@@ -7,6 +7,7 @@ export type DiscoveryClass = "account-live" | "openai-compat" | "static-only";
 export const ACCOUNT_LIVE_PROVIDER_IDS = [
   "claude",
   "codex",
+  "chatgpt",
   "github",
   "ghe-copilot",
   "agy",
