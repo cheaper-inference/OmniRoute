@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { getDbInstance } from "./core";
 import type { FalDefinition, FalRecord } from "@omniroute/open-sse/handlers/fal/schema";
 
@@ -76,6 +77,11 @@ function canonicalInput(value: unknown): unknown {
   return value;
 }
 
+/** Lookup key of an Idempotency-Key reservation; same bytes as the historical sha256 hex. */
+function falIdempotencyLookupKey(owner: string, idempotencyKey: string) {
+  return opaqueTokenFingerprint(`${owner}:${idempotencyKey}`);
+}
+
 function falInputFingerprint(endpoint: string, input: FalRecord) {
   return createHash("sha256")
     .update(JSON.stringify(canonicalInput({ endpoint, input })))
@@ -88,7 +94,7 @@ export function findFalReservation(
   endpoint: string,
   input: FalRecord
 ): FalJob | null {
-  const key = createHash("sha256").update(`${owner}:${idempotencyKey}`).digest("hex");
+  const key = falIdempotencyLookupKey(owner, idempotencyKey);
   const existing = read<{ id: string; fingerprint: string }>("falIdempotency", key);
   if (!existing) return null;
   if (existing.fingerprint !== falInputFingerprint(endpoint, input)) {
@@ -108,9 +114,7 @@ export function reserveFalJob(
   idempotencyKey?: string | null
 ): { job: FalJob; fresh: boolean } {
   const fingerprint = falInputFingerprint(endpoint, input);
-  const key = idempotencyKey
-    ? createHash("sha256").update(`${owner}:${idempotencyKey}`).digest("hex")
-    : null;
+  const key = idempotencyKey ? falIdempotencyLookupKey(owner, idempotencyKey) : null;
   return getDbInstance().transaction(() => {
     if (key) {
       const existing = findFalReservation(owner, idempotencyKey!, endpoint, input);
