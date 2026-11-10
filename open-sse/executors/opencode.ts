@@ -65,7 +65,6 @@ import {
 import {
   attemptFor,
   isGatedFreeTierRequest,
-  isGoGeminiWire,
   isPremiumOpencodeModel,
   noteFreeTierOutcome,
   opencodeEndpointUrl,
@@ -103,6 +102,7 @@ import {
   normalizeResponsesReasoningField,
   normalizeResponsesTokenFields,
 } from "./opencodeResponsesFields.ts";
+import { setOpencodeAuthHeaders } from "./opencodeAuthHeaders.ts";
 import { probeFreeTierRefusalEgress } from "./opencodeFreeTierEgressProbe.ts";
 import { trimOversizedToolEnums } from "./opencodeEnumTrim.ts";
 
@@ -1600,18 +1600,12 @@ export class OpencodeExecutor extends BaseExecutor {
     );
 
     if (key) {
-      if (this._requestFormat === "claude") {
-        headers["x-api-key"] = key;
-      } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
-        headers["x-goog-api-key"] = key;
-      } else if (gatedScope && this.usesZenApiKeyAuth()) {
-        headers["x-api-key"] = key;
-      } else {
-        headers["Authorization"] = `Bearer ${key}`;
-        if (this.usesZenApiKeyAuth()) {
-          headers["x-api-key"] = key;
-        }
-      }
+      setOpencodeAuthHeaders(headers, key, {
+        requestFormat: this._requestFormat,
+        surface: this._surface(),
+        zenResponses: this.usesZenApiKeyAuth(),
+        gatedScope,
+      });
     }
 
     if (this._requestFormat === "claude") {
