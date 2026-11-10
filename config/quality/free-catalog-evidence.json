@@ -490,11 +490,11 @@
       "modelId": "openai/gpt-oss-20b",
       "catalogHash": "530f96440a244cc6b680997519e2d5e99383e7cd5012d1171842d5da9ca52454",
       "sourceType": "public-page",
-      "sourceUrl": "https://github.com/mnfst/awesome-free-llm-apis",
-      "checkedAt": "2026-10-30",
+      "sourceUrl": "https://build.nvidia.com/openai/gpt-oss-20b",
+      "checkedAt": "2026-11-10",
       "claim": "recurring-free-access",
-      "verifiedBy": "OmniRoute maintainers",
-      "summary": "The maintained free-API reference lists GPT OSS 20B under NVIDIA NIM's NVIDIA Developer Program free tier and reports 40 RPM / 10,000 RPD per model; NVIDIA's exact model page confirms the hosted endpoint.",
+      "verifiedBy": "KytranKatarn",
+      "summary": "NVIDIA's model page (https://build.nvidia.com/openai/gpt-oss-20b) hosts the endpoint under the NVIDIA API Trial Terms of Service and shows no deprecation or end-of-life notice. The community free-API list (https://github.com/mnfst/awesome-free-llm-apis) reports 40 RPM / 10,000 RPD per model under the NVIDIA Developer Program free tier.",
       "limitations": "The endpoint is governed by NVIDIA API Trial Terms; the trial notice prohibits personal/confidential submissions and says prompts are logged to improve products. The listed quota is request-based, not a token allowance. Account eligibility and current quota must be checked in NVIDIA's console; no billing hard stop is established here. This is for development/evaluation, not production traffic."
     }
   ]
