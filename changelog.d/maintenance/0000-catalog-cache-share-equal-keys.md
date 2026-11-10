@@ -1,1 +1,0 @@
-- **perf(models):** API keys with identical catalog permissions now share one cached `/v1/models` response instead of each key rebuilding and storing its own copy, so many equal keys no longer push each other out of the cache.
