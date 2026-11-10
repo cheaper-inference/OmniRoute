@@ -82,7 +82,8 @@ export default function OnboardingWizard() {
         const res = await fetch("/api/settings/require-login");
         if (res.ok) {
           const loginSettings = await res.json();
-          setPasswordAlreadySet(loginSettings?.hasPassword === true);
+          // One-way: a password set earlier in this run must not be "unset" by a later read.
+          if (loginSettings?.hasPassword === true) setPasswordAlreadySet(true);
         }
       } catch {
         // Unknown: keep the password form, as before
@@ -162,6 +163,8 @@ export default function OnboardingWizard() {
         setErrorMessage(data.error || t("failedSetPassword"));
         return;
       }
+      // The password exists from here on: going Back must not offer to set it again (#19211).
+      setPasswordAlreadySet(true);
       const loginRes = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

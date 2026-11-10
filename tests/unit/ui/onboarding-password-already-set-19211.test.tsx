@@ -69,6 +69,9 @@ function stubFetch(requireLogin: Record<string, unknown> | Error): void {
       if (url === "/api/settings/require-login" && method === "POST") {
         return jsonResponse({ success: true });
       }
+      if (url === "/api/auth/login" && method === "POST") {
+        return jsonResponse({ success: true });
+      }
       throw new Error(`Unexpected request: ${method} ${url}`);
     })
   );
@@ -99,6 +102,19 @@ async function clickButton(label: string): Promise<void> {
   if (!button) throw new Error(`Button not found: ${label}`);
   await act(async () => {
     button.click();
+  });
+}
+
+/**
+ * Type into a controlled input the way React observes it (native setter + input event).
+ * @param input - the target input element
+ * @param value - text to enter
+ */
+async function typeInto(input: HTMLInputElement, value: string): Promise<void> {
+  const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+  await act(async () => {
+    setValue?.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
   });
 }
 
@@ -158,6 +174,29 @@ it("still offers the password form and the skip option on a first run", async ()
   expect(container.querySelectorAll('input[type="password"]')).toHaveLength(2);
   expect(container.textContent).toContain("skipPassword");
   expect(container.textContent).toContain("setPassword");
+});
+
+it("does not offer to set the password again after it was set earlier in the same run", async () => {
+  stubFetch({ hasPassword: false, requireLogin: true, setupComplete: false });
+  await openSecurityStep();
+
+  const [password, confirm] = Array.from(
+    container.querySelectorAll<HTMLInputElement>('input[type="password"]')
+  );
+  await typeInto(password, "correct horse battery");
+  await typeInto(confirm, "correct horse battery");
+  await clickButton("setPassword");
+  await waitForText("providerDesc");
+
+  await clickButton("back");
+  await waitForText("passwordAlreadySet");
+  expect(container.querySelectorAll('input[type="password"]')).toHaveLength(0);
+
+  await clickButton("continue");
+  await waitForText("providerDesc");
+  expect(
+    calls.filter((call) => call.url === "/api/settings/require-login" && call.method === "POST")
+  ).toHaveLength(1);
 });
 
 it("falls back to the password form when the login settings cannot be read", async () => {
