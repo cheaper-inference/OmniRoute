@@ -1294,7 +1294,7 @@ process එක මඟින් සපයන බැවින්, දැනට ව
   <tr><td nowrap><b>ධාවන කාලය</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>භාෂාව</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> සහ <code>open-sse/</code> හරහා (v2.0 සිට හරයේ ශුන්‍ය <code>any</code> )</td></tr>
   <tr><td nowrap><b>රාමුව</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON උරුමය) — වසම් මොඩියුල 147, සංක්‍රමණ 232</td></tr>
+  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON උරුමය) — වසම් මොඩියුල 147, සංක්‍රමණ 233</td></tr>
   <tr><td nowrap><b>මතකය</b></td><td>SQLite FTS5 සම්පූර්ණ පෙළ + int8-quantized දෛශික කාවැද්දීම, ටයිප් කළ ක්ෂය</td></tr>
   <tr><td nowrap><b>යෝජනා ක්රම</b></td><td>Zod 4 — MCP මෙවලම I/O වලංගු කිරීම + API ගිවිසුම්</td></tr>
   <tr><td nowrap><b>ප්රොටෝකෝල</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
