@@ -63,6 +63,7 @@ import {
   isOpencodeUserBlocked,
 } from "./opencodeGeoBlock.ts";
 import {
+  applyZenResponsesAuth,
   attemptFor,
   isGatedFreeTierRequest,
   isGoGeminiWire,
@@ -1605,10 +1606,7 @@ export class OpencodeExecutor extends BaseExecutor {
       if (this._requestFormat === "claude") {
         headers["x-api-key"] = key;
       } else if (this.usesZenApiKeyAuth()) {
-        headers["x-api-key"] = key;
-        if (!gatedScope) {
-          headers["Authorization"] = `Bearer ${key}`;
-        }
+        applyZenResponsesAuth(headers, key, gatedScope);
       } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
         headers["x-goog-api-key"] = key;
       } else {
