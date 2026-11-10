@@ -1,4 +1,45 @@
 {
+  "chatgptSignIn": {
+    "signIn": "በChatGPT ይግቡ",
+    "title": "ChatGPTን ያገናኙ",
+    "continue": "በChatGPT ይቀጥሉ",
+    "description": "ይፋዊ በChatGPT መግቢያ · ቅድመ ዕይታ። የChatGPT ዕቅድዎን በይፋዊው OpenAI API በኩል ይጠቀማል። ይህ ከCodex አቅራቢ የተለየ ሲሆን ወደ ውይይቶችዎ መዳረሻ አይሰጥም።",
+    "eligibility": "ለግልዎ በራስዎ አገልጋይ ላይ ለሚያስተናግዱት ኢንስታንስ። የOpenAI ብቁነት መስፈርቶች እና ለመተግበሪያው የተወሰኑ የአጠቃቀም ገደቦች ተግባራዊ ይሆናሉ። የጋራ ወይም የንግድ አገልግሎቶች የተለየ ፈቃድ ሊያስፈልጋቸው ይችላል።",
+    "connected": "ChatGPT ተገናኝቷል።",
+    "done": "ተጠናቋል",
+    "signInStep": "1. በChatGPT ይግቡ",
+    "signInHelp": "የመግቢያ ገጹን በአዲስ ትር ይክፈቱ እና የChatGPT ዕቅድ አጠቃቀምን ይፍቀዱ። ይህን የመገናኛ ሳጥን ክፍት ያድርጉት።",
+    "callbackStep": "2. የመልሶ ጥሪ URLን ይቅዱ",
+    "callbackHelp": "ከገቡ በኋላ አሳሽዎ ወደ {redirectUri} ይመራዎታል። “መገናኘት አልተቻለም” የሚል ገጽ መታየቱ የሚጠበቅ ነው፦ ከጥያቄ ምልክቱ በኋላ ያለውን ሁሉ ጨምሮ ሙሉውን URL ከአድራሻ አሞሌው ቀድተው ከታች ይለጥፉ። ምንም ረዳት፣ SSH tunnel ወይም ክፍት የአገልጋይ port አያስፈልግም። ይህን የአንድ ጊዜ URL አያጋሩ።",
+    "callbackLabel": "የመልሶ ጥሪ URL",
+    "complete": "መግባቱን ያጠናቅቁ",
+    "expires": "ይህ ሙከራ ከ10 ደቂቃዎች በኋላ ጊዜው ያልፋል።",
+    "startOver": "እንደገና ይጀምሩ",
+    "connectionError": "ከOmniRoute ጋር መገናኘት አልተቻለም።",
+    "startError": "መግባቱን መጀመር አልተቻለም።",
+    "callbackError": "ከዚህ የመግባት ሙከራ የተገኘውን ሙሉ የመልሶ ጥሪ URL ይለጥፉ። መዳረሻው ከተከለከለ፣ እንደገና ይጀምሩ እና መዳረሻውን ይፍቀዱ።",
+    "completeError": "መግባቱን ማጠናቀቅ አልተቻለም።",
+    "completing": "ወደ ChatGPT መግባት በማጠናቀቅ ላይ…",
+    "incomplete": "መግባቱ ተሰርዟል ወይም የመልሶ ጥሪው መረጃ ያልተሟላ ነው። በChatGPT ቅንብሮች ውስጥ እንደገና ይጀምሩ።",
+    "returnToTab": "ChatGPT ተገናኝቷል። ወደ መጀመሪያው ትር መመለስ ይችላሉ።",
+    "failed": "መግባቱ አልተሳካም። ከዳሽቦርድዎ እንደገና ይጀምሩ።",
+    "unreachable": "OmniRouteን ማግኘት አልተቻለም። መግባቱን እንደገና ይጀምሩ።",
+    "back": "ወደ ChatGPT ተመለስ",
+    "continueToDashboard": "ወደ OmniRoute ይቀጥሉ",
+    "confirmDashboard": "ይህ የእርስዎ OmniRoute ዳሽቦርድ ከሆነ ብቻ ይቀጥሉ፦",
+    "invalidCallback": "ልክ ያልሆነ የChatGPT መልሶ ጥሪ። መግባቱን እንደገና ይጀምሩ።"
+  },
+  "accountPreferences": {
+    "title": "የመለያ ምርጫዎች",
+    "description": "ለዚህ የማዘዋወር ውቅር ብዙ መለያዎችን ቅድሚያ ይስጡ ወይም በተጠባባቂነት ያቆዩ። ራስ-ሰር ማዘዋወር በእያንዳንዱ ደረጃ ውስጥ መለያዎችን በደረጃ ያስቀምጣል። ያልተዘረዘሩ መለያዎች መደበኛ ናቸው። ፈቃዶች፣ የኮታ ገደቦች እና ነባር የተራ ትስስሮች አሁንም ተፈጻሚ ናቸው።",
+    "preferred": "ቅድሚያ የሚሰጠው",
+    "normal": "መደበኛ",
+    "reserve": "ተጠባባቂ",
+    "excluded": "የተገለለ",
+    "loading": "መለያዎች በመጫን ላይ…",
+    "error": "መለያዎችን መጫን አልተቻለም። እንደገና ለመሞከር አርታዒውን እንደገና ይክፈቱ።",
+    "missing": "የማይገኝ መለያ ({id})"
+  },
   "teamCosts": {
     "title": "የቡድን ወጪዎች",
     "subtitle": "የጋራ ለስላሳ በጀቶችን እና የካታሎግ ወጪ ግምቶችን ያስተዳድሩ።",
@@ -861,6 +902,13 @@
     "batchDetailWindow": "የጊዜ መስኮት",
     "batchDetailCreated": "የተፈጠረበት ጊዜ",
     "providerTopologyEmpty": "እስካሁን የተገናኘ አቅራቢ የለም",
+    "topologyModels": "ሞዴሎች",
+    "topologyModelsOn": "አብራ",
+    "topologyModelsOnHint": "የቀጥታ ወይም የቅርብ ጊዜ ጥያቄዎች ያላቸውን ሞዴሎች አሳይ",
+    "topologyModelsAuto": "ራስ-ሰር",
+    "topologyModelsAutoHint": "በሂደት ላይ ያለ ጥያቄ ያላቸውን ሞዴሎች ብቻ አሳይ",
+    "topologyModelsOff": "አጥፋ",
+    "topologyModelsOffHint": "የሞዴል ኖዶችን ደብቅ",
     "badgeToastUnlocked": "ባጅ አግኝተዋል!",
     "batchListSearchPlaceholder": "በID፣ በመገናኛ ነጥብ፣ በሞዴል… ይፈልጉ",
     "batchListDeleteAllCompletedTitle": "የተጠናቀቁ ባችዎችን በሙሉ ሰርዝ",
@@ -993,6 +1041,8 @@
     "batchListTitle": "ባችዎች",
     "batchListCount": "{count} ባችዎች",
     "batchListRemovingCompleted": "በማስወገድ ላይ…",
+    "batchListRemoveCompletedPartial": "ብዙ ባችዎች ተወግደዋል። የቀሩትን ለማጽዳት እንደገና ጠቅ ያድርጉ።",
+    "batchListRemoveCompletedFailed": "ባችዎችን በማስወገድ ላይ ሳለ ስህተት ተከስቷል።",
     "batchListRemoveCompleted": "የተጠናቀቁትን አስወግድ",
     "batchListTableStatus": "ሁኔታ",
     "batchListTableId": "ID",
@@ -1031,6 +1081,12 @@
     "batchListRefreshing": "በማደስ ላይ…",
     "batchListRefresh": "አድስ",
     "uploadFileModalRemove": "አስወግድ",
+    "fileInputChoose": "ፋይል ይምረጡ",
+    "fileInputChooseMultiple": "ፋይሎችን ይምረጡ",
+    "fileInputEmpty": "ምንም ፋይል አልተመረጠም",
+    "fileInputSelectedCount": "{count, plural, one {# ፋይል ተመርጧል} other {# ፋይሎች ተመርጠዋል}}",
+    "fileDropLabel": "ፋይል እዚህ ይጣሉ ወይም አንድ ይምረጡ",
+    "fileDropLabelMultiple": "ፋይሎችን እዚህ ይጣሉ ወይም ፋይሎችን ይምረጡ",
     "uploadFileModalUploading": "በመስቀል ላይ…",
     "wizardInputReading": "ፋይሉን በማንበብ ላይ…",
     "wizardInputReady": "ዝግጁ",
@@ -1105,7 +1161,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "በOpenCode Zen/Go ጥያቄዎች ላይ የOpenCode v2 CLI ደንበኛ አሻራን ይላኩ፦ opencode/latest/<2.x>/cli User-Agent እና x-opencode-client cli፤ እንዲሁም በነፃ ዕቅድ ጥያቄዎች ላይ የv2 ክፍለ-ጊዜ ራስጌዎችን፣ የv2 CLI read/shell መሣሪያ መርሃግብሮችን እና tool_choice \"none\" እንዳይኖር ያድርጉ። በነባሪነት ጠፍቷል፦ እያንዳንዱ የOpenCode ጥያቄ አሁን ያለውን ማንነት፣ ራስጌዎች እና የጥያቄ አካል ሳይለውጥ ይጠብቃል።",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "የauto combo የዕጩዎች ስብስብ የመሣሪያ ጥሪ ቅድመ-ማጣሪያው ከመስራቱ በፊት ባዶ ከሆነ (ሁሉም ዒላማዎች በcooldowns፣ lockouts ወይም exhaustion ምክንያት ሲዘለሉ)፣ ከቀድሞው 400 \"ምንም ዒላማ የመሣሪያ ጥሪን አይደግፍም\" capability_mismatch ይልቅ 503 no_eligible_targets ይመልሳል። በነባሪነት ጠፍቷል፦ ባዶው ስብስብ ቀድሞውን 400 ይዞ ይቆያል።",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "የታመኑ የሞዴል መጨረሻ ነጥብ መለያዎችን (በአቅራቢው ካታሎግ የተገለጹ፣ ከልዩ ሞዴል መታወቂያ የተገመቱ፣ ወይም በኦፕሬተሩ የተዘጋጁ) በግዴታ ተግብር፦ ሞዴሉ ወደማያገለግለው መጨረሻ ነጥብ የተላከን ጥያቄ ወደ /v1/chat/completions፣ /v1/embeddings፣ /v1/rerank፣ /v1/images/generations፣ /v1/videos/generations፣ /v1/music/generations እና /v1/audio/* ከማሰራጨት በፊት በHTTP 400 ውድቅ አድርግ፤ መለያ የተሰጣቸው መጨረሻ ነጥቦች የOmniRoute አስማሚ የሌላቸውን ሞዴሎች ከ/v1/models ደብቅ፤ እና ለእነዚህ ሞዴሎች የዳሽቦርድ ሞዴል ሙከራን በ422 መልስ። በነባሪ ጠፍቷል፦ የመጨረሻ ነጥብ መለያዎች ለመረጃ ብቻ ሆነው ይቆያሉ፣ እና ጥያቄዎች ልክ እንደበፊቱ ይሰራጫሉ።",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "በመደበኛ anthropic-ተኳሃኝ ሪሌዎች ላይ፣ የተሸጎጠው የፕሮምፕት ቅድመ ቅጥያ በየተራው የተረጋጋ ሆኖ እንዲቆይ፣ በውይይት መካከል ያሉ የስርዓት ተራዎችን ወደ ከፍተኛ ደረጃው የስርዓት ፕሮምፕት ከማዛወር ይልቅ በመልዕክት ዝርዝሩ ውስጥ ያቆዩ። ይህ የሚሠራው ደንበኛው ራሱ mid-conversation-system-2026-04-07 ቤታን ሲልክ ብቻ ነው። በነባሪነት ጠፍቷል፦ ያ ቤታ የሌላቸው ሪሌዎች በመልዕክት ዝርዝሩ ውስጥ ያሉ የስርዓት ተራዎችን ስለማይቀበሉ፣ እያንዳንዱ የስርዓት ተራ ልክ እንደበፊቱ ወደ የስርዓት ፕሮምፕቱ ይዛወራል።",
   "featureFlagModelsDevEffortTiersEnabledDescription": "ኦፕሬተር መሻርም ሆነ የአቅራቢው መዝገብ ምንም ደረጃዎችን ባላወጀበት ጊዜ models.dev የሚያትማቸውን የማመዛዘን ጥረት ደረጃዎች ይጠቀሙ፤ የታወቁ የጥረት ደረጃዎችን ብቻ ያስቀሩ፣ እና ባዶ የታወጀ የደረጃዎች ዝርዝርን \"ምንም ደረጃዎች የሉም\" ብለው ይቁጠሩ። በነባሪ ጠፍቷል፦ የሞዴል ካታሎጉ እና በመጨረሻ የተወሰኑት የጥረት ደረጃዎች ልክ እንደበፊቱ ይቆያሉ።",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* ጥያቄዎች የእጩ ስብስቡን በተፈቱ የሞዴል ችሎታዎች (ራዕይ፣ ምክንያታዊነት፣ አስተሳሰብ) እና በተስተዋሉ የጥራት ውጤቶች በአንድ የጅምላ ንባብ እንዲገነቡ ያስችላል። በነባሪ ጠፍቷል፦ በጥያቄ ጊዜ የእጩዎች ክብደቶች ልክ እንደበፊቱ ይቆያሉ። ሲበራ፦ እነዚህ ምልክቶች የቅጽበታዊ ክብደቶችን ይመግባሉ፣ ስለዚህ የእጩዎች ክብደቶች እና ምርጫ ሊቀየሩ ይችላሉ።",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "የምስክርነት መረጃ ጤንነት ቅኝቱ፣ ጌትዌዩ በራሱ ያጠፋቸውን ግንኙነቶች (እያንዳንዳቸውን ቢበዛ በየ6 ሰዓቱ አንድ ጊዜ፣ በእያንዳንዱ ቅኝት 5) እንደገና እንዲፈትሽ እና ዳግም ፍተሻቸውን ሲያልፉ መልሶ እንዲያበራቸው ፍቀድ። በነባሪነት ጠፍቷል፦ እንዲህ ያሉ ግንኙነቶች ኦፕሬተር እርምጃ እስኪወስድ ድረስ ጠፍተው ይቆያሉ። በኦፕሬተር የተሰናከሉ እና በቋሚነት የታገዱ ግንኙነቶች ፈጽሞ ዳግም አይፈተሹም።",
@@ -2009,7 +2064,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ጥያቄ} other {# ጥያቄዎች}}, {keys, plural, one {# የጥቅም ገደብ ያለ ቁልፍ} other {# የጥቅም ገደብ ያሉ ቁልፎች}}",
     "unpricedUsageMore": "…እና {count} ተጨማሪ",
     "unpricedUsageConfigure": "ዋጋን ያቀናብሩ",
-    "unpricedUsageDismiss": "ዝጋ"
+    "unpricedUsageDismiss": "ዝጋ",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ትንታኔ",
@@ -2576,7 +2640,191 @@
     "preferredConnectionsDesc": "በቁልፍ የተወሰነ የቅድሚያ ቅደም ተከተል። ተመራጭ ግንኙነት ካልተገኘ፣ ማዘዋወሩ ወደሚቀጥለው ብቁ ግንኙነት ይሸጋገራል።",
     "preferredConnectionsNone": "ምንም ምርጫ አልተዘጋጀም — ነባሪው የማዘዋወር ስልት ጥቅም ላይ ይውላል።",
     "preferredConnectionsClear": "አጽዳ",
-    "removeSelection": "{name}ን አስወግድ"
+    "removeSelection": "{name}ን አስወግድ",
+    "templateStaleReferencesBlockingDesc": "አንድ ወይም ከዚያ በላይ የተጠቀሱ ግንኙነቶች፣ ቡድኖች ወይም ፕሮክሲዎች ከአሁን በኋላ የሉም። ቁልፉን ከማስቀመጥዎ ወይም ከመፍጠርዎ በፊት ያስወግዷቸው ወይም ይተኩዋቸው።",
+    "templateInvalidResetTime": "የዳግም ማስጀመሪያ ጊዜ በHH:MM ቅርጸት አስገባ።",
+    "templateNamePlaceholder": "ለምሳሌ. የተገደበ የምርት አንባቢ",
+    "editTemplateAction": "አብነት አርትዕ",
+    "editTemplateModalTitle": "አብነት አርትዕ፡ {name}",
+    "templateMatchAll": "ሁሉም መለያዎች",
+    "templateDeleteFailed": "አብነት መሰረዝ አልተሳካም።",
+    "templateTokenLimitsTitle": "ወሰን ማስመሰያ ገደቦች",
+    "templateListingOnlyBadge": "መዘርዘር ብቻ (/v1/models)",
+    "templateStaleReferencesWarningDesc": "አንዳንድ የተጠቀሱ ንጥሎች አሁን ካለው ካታሎግ አንጻር ሊረጋገጡ አልቻሉም።",
+    "templateAdditionalScopePlaceholder": "ብጁ ወሰን አክል...",
+    "templateUnitMinutes": "ደቂቃዎች",
+    "keyTemplatesDesc": "እንደገና ጥቅም ላይ ሊውል የሚችል መዳረሻ፣ ካታሎግ፣ በጀት እና የማዞሪያ መመሪያ ቅጽበተ-ፎቶዎች። ከአብነት ቁልፍ መፍጠር ያለ ምንም ለውጦች የነጥብ-ጊዜ ቅጽበተ-ፎቶን ይተገበራል።",
+    "templateAllowedQuotaPoolsDesc": "ይህን ቁልፍ ለተወሰኑ የኮታ ገንዳ መታወቂያዎች ገድብ። ለመደበኛ ገንዳ ያልሆኑ ቁልፎች ባዶ ይተዉ።",
+    "templateRelativeTtl": "ከቲቲኤል ዘመድ በኋላ ጊዜው ያበቃል",
+    "staleReferenceBlockingError": "እባክዎ ቁልፉን ከመፍጠርዎ በፊት የጎደሉትን ማጣቀሻዎች ይፍቱ ወይም ያስወግዱ።",
+    "invalidPolicyError": "ቁልፉን ከመፍጠርዎ በፊት እባክዎ የፖሊሲ ማረጋገጫ ስህተቶችን ያስተካክሉ።",
+    "templateDescriptionPlaceholder": "ኦፕሬተሮች ይህንን አብነት መቼ መጠቀም እንዳለባቸው ያብራሩ...",
+    "templateDynamicModelPatternsNote": "ተለዋዋጭ የሞዴል ቅጦች (ለምሳሌ provider/*) በጥያቄ ጊዜ ይገመገማሉ እና በአብነት ውስጥ ተጠብቀዋል።",
+    "templateNoLogDesc": "ለዚህ ቁልፍ በምዝግብ ማስታወሻዎች ውስጥ የሚጫኑትን ጥያቄዎች/ምላሾችን አትቀጥሉ ።",
+    "deleteTemplateAction": "አብነት ሰርዝ",
+    "templatePickerHint": "አብነቶች በቁልፍ አፈጣጠር ላይ ቅጽበታዊ ገጽ እይታን ይተገብራሉ; በኋላ የአብነት አርትዖቶች ነባር ቁልፎችን ወደ ኋላ አይለውጡም።",
+    "templateDomainDailyUsd": "ዕለታዊ ገደብ (USD)",
+    "templateTokenScopeType": "የወሰን አይነት",
+    "templateCatalogListingDesc": "የማስፈጸሚያ መዳረሻን ሳይሰጥ በ/v1/models ምላሾች ላይ የሚታየውን ይቆጣጠራል።",
+    "templatePickerNone": "የለም (ነባሪ ፖሊሲ)",
+    "fullPolicyEditorDesc": "ምስጢሩን ከማፍለቅዎ በፊት ሞዴሎችን ፣ ጥንብሮችን ፣ ግንኙነቶችን ፣ ጊዜው ያለፈበት TTL ፣ በጀት ፣ የማስመሰያ ገደቦች እና የማዘዋወር ህጎችን ያዋቅሩ።",
+    "templateListFailed": "የአብነት ቤተ-መጽሐፍቱን መጫን አልተቻለም። ሁኔታውን ለማደስ እንደገና ይሞክሩ።",
+    "templateKeyGroupsDesc": "በዚህ መመሪያ የተፈጠሩ ቁልፎችን ለቁልፍ ቡድኖች ለጋራ ድርጅት መድብ።",
+    "templateQuotaLimitsDesc": "አማራጭ ማስመሰያ በደቂቃ፣ ጥያቄ-በደቂቃ እና ወርሃዊ USD ጣሪያ በኮታ ሞተር ተፈጻሚ ነው።",
+    "policyCustomizedBadge": "ከመፈጠሩ በፊት ብጁ የተደረገ",
+    "scopeProvider": "አቅራቢ",
+    "templateBannedStatusDesc": "ከዚህ ቁልፍ የተከለከሉትን ሁሉንም ጥያቄዎች ወዲያውኑ ውድቅ ያድርጉ።",
+    "templateSummaryBudgetsConfigured": "በጀቶች እና ገደቦች",
+    "templateModelsDenyAllBanner": "የተገደበ ሁነታ ከ 0 የተመረጡ ደንቦች ጋር እያንዳንዱን ቀጥተኛ የጥሬ-ሞዴል ጥያቄ ውድቅ ያደርጋል። ጥንብሮች ከተፈቀዱ፣ ይህ የኤፒአይ ቁልፍ ጥንብሮችን ብቻ መጥራት ይችላል።",
+    "templateKeepTarget": "የአሁኑን ኢላማ አቆይ",
+    "templateNonBlockingReferenceIssue": "ምክር",
+    "templateBlockedModelsDesc": "የሞዴል መዳረሻ ሁሉንም ፍቀድ ቢሆንም እንኳን እዚህ ከየትኛውም ስርዓተ-ጥለት ጋር የሚዛመዱ ሞዴሎች ውድቅ ይደረጋሉ።",
+    "templateTtlDuration": "የቲቲኤል ቆይታ",
+    "templateSaveFailed": "የቁልፍ አብነት ማስቀመጥ አልተሳካም።",
+    "templateBoundProxy": "የወጪ ተኪ መሻር",
+    "templateAddTag": "የጥያቄ መለያ ያክሉ",
+    "templateNameConflictError": "ይህ ስም ያለው አብነት አስቀድሞ አለ። ሌላ ስም ይምረጡ።",
+    "templateModelTarget": "ሞዴል",
+    "templateRuleSourceEffort": "ምንጭ የማመዛዘን ጥረት",
+    "templateTokenLimitsDesc": "ማስመሰያ ጣሪያዎችን በእያንዳንዱ ሞዴል፣ አቅራቢ ወይም በአለምአቀፍ ዳግም ማስጀመሪያ መስኮት ላይ ያስፈጽሙ።",
+    "templateAddScope": "ወሰን አክል",
+    "templateReasoningRuleEffortBudgetConflict": "የዒላማ ጥረት 'ምንም' ከአስተሳሰብ በጀት ማውጣት ጋር ሊጣመር አይችልም።",
+    "templateReferenceMissing": "ማጣቀሻ በአሁኑ ካታሎግ ውስጥ አይደለም።",
+    "templateQuotaLimitsTitle": "የትርፍ ጊዜ እና ወርሃዊ የኮታ ገደቦች (TPM / RPM)",
+    "templateDomainWeeklyUsd": "ሳምንታዊ ገደብ (USD)",
+    "failedLoadTemplateDetail": "የአብነት መመሪያ ዝርዝሮችን መጫን አልተሳካም።",
+    "templateExclusionsNote": "ማንነት፣ ሚስጥር፣ የአጠቃቀም ቆጣሪዎች እና የጥያቄ ታሪክ በጭራሽ በአብነት ውስጥ አይቀመጡም።",
+    "saveAsTemplate": "እንደ አብነት አስቀምጥ",
+    "templateMatchAny": "ማንኛውም መለያ",
+    "templateUnitHours": "ሰዓታት",
+    "templateNoReference": "ምንም",
+    "templateStaleReferencesWarningTitle": "የማጣቀሻ ማስጠንቀቂያዎች",
+    "templateRuleSourceCombo": "ጥምር ማጣቀሻ",
+    "templateRuleConnection": "የግንኙነት ማጣቀሻ",
+    "newTemplateModalTitle": "የቁልፍ አብነት ይፍጠሩ",
+    "scopeGlobal": "ዓለም አቀፍ",
+    "templatePreviewFailed": "ለአብነት ማውጣት ቁልፍ ፖሊሲን መመርመር አልተሳካም።",
+    "templateReasoningRuleBudgetInvalid": "እርምጃ ሲዘጋጅ የማመዛዘን ደንብ አስተሳሰብ በጀት አዎንታዊ ኢንቲጀር መሆን አለበት።",
+    "templateResetTime": "ዳግም ማስጀመር ጊዜ (HH:MM)",
+    "templateExecAndListingBadge": "አፈጻጸም እና ዝርዝር ላይ ተጽእኖ ያሳድራል።",
+    "templatePreviewRefusedTitle": "የአብነት ፖሊሲ ማውጣት አልተቻለም",
+    "templateBoundProxyPlaceholder": "ነባሪ/የአቅራቢ ተኪ ተጠቀም",
+    "templateComboTarget": "ጥምር",
+    "templateRuleKeyScopeNotice": "ይህ የማዘዋወር ህግ የሚመለከተው በዚህ ኤፒአይ ቁልፍ ላይ ብቻ ነው።",
+    "templateAllowedQuotaPools": "የተፈቀዱ የኮታ ገንዳዎች (qtSd)",
+    "templateSummaryReasoningRulesCount": "{count} የማመዛዘን ህጎች",
+    "templateUnitDays": "ቀናት",
+    "templatePreserveBudget": "በጀት ይቆጥቡ",
+    "templatePickerLabel": "አብነት",
+    "templatePreviewReferenceIssuesTitle": "የቆዩ ማጣቀሻዎች በምንጭ ቁልፍ ላይ ተገኝተዋል",
+    "templateAutoCandidateOverridesDesc": "ለዚህ ቁልፍ የተወሰኑ የአቅራቢዎች ግንኙነቶችን ከራስ-ኮምቦ እጩ ምርጫ አያካትቱ።",
+    "templateDescriptionLabel": "መግለጫ (አማራጭ)",
+    "templateInvalidRelativeExpiry": "አንጻራዊ የማብቂያ ጊዜ TTL ከ0 በላይ መሆን አለበት።",
+    "templateReferenceReloadRequired": "ይህን ማጣቀሻ ከማስወገድዎ በፊት ይህን አብነት እንደገና ይጫኑ። ዋናው እሴቱ አይገኝም።",
+    "saveAsTemplateDesc": "የዚህን ቁልፍ ፈቃዶች፣ የመተላለፊያ ደንቦች፣ በጀቶች እና ኮታዎች እንደ በድጋሚ ጥቅም ላይ ሊውል የሚችል የመመሪያ ቅጽበታዊ ገጽ እይታ ይያዙ።",
+    "templateReloadAction": "የቅርብ ጊዜውን ክለሳ እንደገና ጫን",
+    "templateAddIp": "IP/CIDR አክል",
+    "templateTokenEnabled": "ማስመሰያ ገደብ ነቅቷል።",
+    "templateDomainWarningPct": "የማስጠንቀቂያ ገደብ (%)",
+    "templateTokenScopeValue": "ሞዴል / አቅራቢ",
+    "templateBlockingReferenceIssue": "ማገድ",
+    "templateAutoChannelPlaceholder": "ራስ-ሰር ሰርጥ (ለምሳሌ ነባሪ)",
+    "templateSummaryModelsDenyAll": "0 ሞዴሎች (ሁሉንም መካድ)",
+    "templateAddBlockedPattern": "የታገደ ስርዓተ ጥለት ጨምር",
+    "templateInvalidTokenLimit": "የማስመሰያ ገደብ አወንታዊ ኢንቲጀር መሆን አለበት።",
+    "noTemplatesYet": "እስካሁን ምንም ቁልፍ አብነቶች የሉም",
+    "templateRuleTagMatch": "ተዛማጅ ጥያቄ መለያዎች",
+    "templateRemoveLastQuotaConfirm": "የመጨረሻውን የኮታ ገንዳ ገደብ ማስወገድ ለሁሉም የኮታ ገንዳዎች መዳረሻ ይፈቅዳል። ይቀጥሉ?",
+    "templateRemoveBudget": "በጀት አስወግድ",
+    "loadingTemplatePolicy": "የአብነት መመሪያን በመጫን ላይ...",
+    "templateReasoningRulesDesc": "ጥያቄዎች ከተወሰኑ ሁኔታዎች ጋር ሲዛመዱ የማመዛዘን ጥረትን፣ የአስተሳሰብ በጀትን ወይም የዒላማ ሞዴል/ ጥምርን ይሽሩ።",
+    "templateSummaryCombosDenyAll": "0 ጥንብሮች (ሁሉንም መካድ)",
+    "templateSummaryPublicModelsExecAndList": "የህዝብ ሞዴሎች ብቻ",
+    "templateRevisionConflictError": "ይህ አብነት በሌላ ክፍለ ጊዜ ዘምኗል። አብነቱን እንደገና ይጫኑ እና ለውጦችዎን እንደገና ይተግብሩ።",
+    "monthlyLimitUsdLabel": "ወርሃዊ ገደብ (USD)",
+    "templateCacheDefaultMode": "ፈጣን መሸጎጫ ነባሪ ሁነታ",
+    "templateAddModelPattern": "ስርዓተ ጥለት ጨምር",
+    "templateCodexServiceMode": "የኮዴክስ አገልግሎት ደረጃ ሁነታ",
+    "templateRemoveStaleRef": "የጎደለውን ማጣቀሻ ያስወግዱ",
+    "catalogScopeCombos": "ጥንብሮችን ብቻ ይዘርዝሩ (ኮምቦስ)",
+    "templateLoadingPreview": "ቁልፍ ፈቃዶችን እና ተዛማጅ ፖሊሲዎችን በመፈተሽ ላይ...",
+    "switchTemplateConfirmTitle": "ብጁ ፖሊሲ ይተካ?",
+    "templateStaleReferencesBlockingTitle": "የቆዩ ማጣቀሻዎችን ማገድ",
+    "templateExpirationPolicyDesc": "አብነቶች አንጻራዊ TTLን ይጠቀማሉ ስለዚህ ከአብነት የተፈጠረ እያንዳንዱ ቁልፍ አዲስ የማለቂያ መስኮት ይቀበላል።",
+    "templateConnectionIdPlaceholder": "የግንኙነት መታወቂያ",
+    "saveAsTemplateTitle": "እንደ አብነት አስቀምጥ፡ {name}",
+    "templateBoundProxyDesc": "በዚህ ቁልፍ የሚደረጉ የላይ ዥረት ጥያቄዎችን በተወሰነ የተመዘገበ ፕሮክሲ በኩል ያዙሩ።",
+    "noTemplatesYetDesc": "ከባዶ እንደገና ጥቅም ላይ ሊውል የሚችል የፖሊሲ አብነት ይፍጠሩ ወይም በማንኛውም ነባር የኤፒአይ ቁልፍ ላይ እንደ አብነት አስቀምጥን ጠቅ ያድርጉ።",
+    "templateExecutionAccessDesc": "ይህ ቁልፍ በጥያቄ በሚላክበት ጊዜ የትኞቹ ጥሬ አቅራቢዎች ሞዴል እንደሆኑ ይቆጣጠራል።",
+    "templateIpAllowlistDesc": "ለተወሰኑ የደንበኛ አይፒዎች ወይም CIDRs ጥያቄዎችን ይገድቡ። ባዶ ማለት ያልተገደበ የአይፒ መዳረሻ ማለት ነው።",
+    "useTemplateAction": "አብነት ይጠቀሙ",
+    "templateReasoningTagsInvalid": "የጥያቄ መለያዎች ባዶ ሊሆኑ አይችሉም።",
+    "templateTtlUnit": "የቲቲኤል ክፍል",
+    "templateCapturedSnapshotHeading": "የተቀረጸ የፖሊሲ ቅጽበታዊ ገጽ እይታ",
+    "templateAddReasoningRule": "የማመዛዘን ህግን ጨምር",
+    "newTemplateAction": "አዲስ አብነት",
+    "templateRuleRequestTag": "መለያ ጠይቅ",
+    "templateExecutionAccessHeading": "የማስፈጸሚያ ሞዴል መዳረሻ",
+    "templateTokenResetTime": "ጊዜ ዳግም አስጀምር",
+    "keyTemplatesTitle": "ቁልፍ አብነቶች",
+    "saveAsTemplateAction": "አብነት አስቀምጥ",
+    "templateSnapshotBadge": "የቅጽበት ቅጂ ክለሳ {revision}",
+    "templateMaxRequestsPerDay": "ከፍተኛ ጥያቄዎች / ቀን",
+    "templateCombosDenyAllBanner": "0 የተመረጡ ጥንብሮች ያለው የተገደበ ሁነታ ሁሉንም ጥምር ጥያቄዎችን ይክዳል።",
+    "templateReasoningRulesTitle": "የፔር-ቁልፍ ማመራመር እና የሞዴል ማዞሪያ ህጎች",
+    "switchTemplateConfirmAction": "ፖሊሲን ተካ",
+    "templateTokenUseDefaultTime": "ነባሪ ዳግም ማስጀመሪያ ጊዜን ተጠቀም",
+    "templateAddCandidateOverride": "የእጩ መሻርን ያክሉ",
+    "templateWarningsHeading": "የፖሊሲ ማውጣት ማስጠንቀቂያዎች",
+    "templateSummaryModelsRestricted": "{count} የሞዴል ደንቦች",
+    "templateRulePriority": "ቅድሚያ",
+    "templateReasoningTargetRequired": "ለማመዛዘን ደንቡ የማዞሪያ ኢላማን ይምረጡ።",
+    "templateSummaryAllCombos": "ሁሉም ጥንብሮች",
+    "templateDomainBudgetDesc": "የተዋቀረ ዕለታዊ/ሳምንት/ወርሃዊ የበጀት ክትትልን በብጁ ዳግም ማስጀመሪያ ክፍተቶች እና የማንቂያ ገደቦች ያዋቅሩ።",
+    "templateAcknowledgeWarningLabel": "ተረድቻለሁ እና ይህን አብነት በማስቀመጥ መቀጠል እፈልጋለሁ",
+    "templateMaxRequestsPerMinute": "ከፍተኛ ጥያቄዎች/ደቂቃ",
+    "templateCatalogListingHeading": "ካታሎግ ዝርዝር እና ግኝት (/v1/models)",
+    "templateAddRateLimit": "የዋጋ ገደብ ያክሉ",
+    "hideFullPolicyEditor": "ባለ 6-ታብ ፖሊሲን ደብቅ",
+    "templateNameLabel": "የአብነት ስም",
+    "templateRuleTargetCombo": "የዒላማ ጥምር",
+    "templateKeyGroupsTitle": "ቁልፍ ቡድኖች",
+    "templateSummaryCatalogListingOnly": "ካታሎግ፡ {scope} (ዝርዝር ብቻ)",
+    "customizeFullPolicy": "ባለ 6-ታብ ፖሊሲን አብጅ",
+    "templateSummaryConnectionsCount": "{count} ግንኙነቶች",
+    "templateRuleTargetKind": "የማዞሪያ ኢላማ",
+    "templateResetInterval": "ክፍተቱን ዳግም አስጀምር",
+    "catalogScopeAll": "የተፈቀዱ ሞዴሎችን እና ጥንብሮችን ይዘርዝሩ (ሁሉም)",
+    "templateBlockedModelsTitle": "የታገዱ የሞዴል ንድፎች (የተከለከሉ ዝርዝር)",
+    "templateDomainBudgetTitle": "የጎራ በጀት መርሐግብር እና የማስጠንቀቂያ ገደብ",
+    "templateSummaryGroupsCount": "{count} ቡድኖች",
+    "templateUnreadableStatus": "የማይነበብ ፖሊሲ ​​- መሰረዝ ብቻ; ይህ አብነት ጥቅም ላይ ሊውል ወይም ሊስተካከል አይችልም።",
+    "templateAddModelPatternPlaceholder": "የዱር ምልክት ወይም ተለዋዋጭ ስርዓተ-ጥለት ያክሉ፣ ለምሳሌ openai/* ወይም *-preview",
+    "templateIpAllowlist": "የአይፒ ፍቃድ ዝርዝር (CIDR ወይም IP)",
+    "templateTokenMaxTokens": "ከፍተኛ ቶከኖች",
+    "templateRuleDescription": "መግለጫ",
+    "templateSummaryCombosCount": "{count} ጥንብሮች",
+    "templateDeleteConfirm": "አብነት \"{name}\" ይሰረዝ? ከዚህ አብነት የተፈጠሩ ነባር የኤፒአይ ቁልፎች የተተገበሩ ፈቃዶቻቸውን ያቆያሉ።",
+    "templateSetBudget": "በጀት አዘጋጅ",
+    "templateRemoveTag": "መለያን ያስወግዱ",
+    "templateUnitSeconds": "ሰከንዶች",
+    "templateRuleTargetModel": "የዒላማ ሞዴል መታወቂያ",
+    "templateExpirationPolicy": "የማለቂያ ፖሊሲ",
+    "templateRuleBudgetAction": "የማመዛዘን በጀት",
+    "templateAddTokenLimit": "የማስመሰያ ገደብ ያክሉ",
+    "templateDomainMonthlyUsd": "ወርሃዊ ገደብ (USD)",
+    "rpmLimitLabel": "ጥያቄዎች በደቂቃ (RPM)",
+    "templateAutoCandidateOverridesTitle": "ራስ-ጥምር እጩ አለመካተት",
+    "templateTokenLimitScopeRequired": "ለሞዴል ወይም ለአቅራቢ ማስመሰያ ገደቦች የቦታ ዋጋ ያስፈልጋል።",
+    "tpmLimitLabel": "ማስመሰያዎች በደቂቃ (TPM)",
+    "templateReasoningRuleNameRequired": "እያንዳንዱ የማመዛዘን መመሪያ ደንብ ስም ያስፈልገዋል።",
+    "templateRuleModelPattern": "ሞዴል ስርዓተ-ጥለት",
+    "fullPolicyEditorTitle": "ሙሉ መዳረሻ፣ ገደቦች እና የማዞሪያ መመሪያ",
+    "templateRuleBudgetTokens": "የበጀት ማስመሰያዎች",
+    "catalogScopeModels": "ጥሬ ሞዴሎችን ብቻ ይዘርዝሩ (ሞዴሎች)",
+    "templateSummaryBlockedModels": "{count} ታግዷል",
+    "saveKeyAsTemplateAria": "{name}ን እንደ አብነት ያስቀምጡ",
+    "switchTemplateConfirmMessage": "ለዚህ ቁልፍ ብጁ የመመሪያ መስኮች አሎት። አብነቶችን መቀየር ያልተቀመጡ የመመሪያ ለውጦችዎን ይተካል።"
   },
   "auditLog": {
     "title": "የኦዲት መዝገብ",
@@ -3379,12 +3627,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi ከሚያሄደው ማሽን URL ሊደረስበት የሚችለውን ይጠቀሙ። የOpenAI-ተኳሃኝ/v1 የመጨረሻ ነጥብ በራስ-ሰር ይታከላል።",
     "piManualMergeHint": "ቅድመ እይታ ብቻ። ሌሎች አቅራቢዎችዎ እና ቅንብሮችዎ ሳይበላሹ እንዲቆዩ ይህን providers.omniroute ግቤት ወደ models.json ያዋህዱ።",
-    "removeMapping": "ማዛመዱን አስወግድ",
     "customUrl": "ግሌባ URL",
     "customEndpointAria": "ግሌባ ጫፍ ነጥብ",
     "useDefaultKey": "የOmniRoute ድምፅ ቁልፍ ይጠቀሙ",
     "mainModelAria": "ዋና ሞዴል",
-    "manualConfigTitle": "Grok Build የራስ-ሰር ኮንፊግ"
+    "manualConfigTitle": "Grok Build የራስ-ሰር ኮንፊግ",
+    "removeMapping": "ማዛመዱን አስወግድ"
   },
   "modelCatalog": {
     "title": "ሞዴሎች እና ኮምቦዎች",
@@ -3576,6 +3824,19 @@
     "autoComboTestTruncated": "{total} የተሞክሮ ካንደይት ውስጥ {tested} ተመን በተመለከተ ይታወቃል (ከፍተኛ ክብደቶች በመጀመሪያ).",
     "controlCenter": "የመቆጣጠሪያ ማዕከል",
     "createCombo": "ጥምረት ፍጠር",
+    "exportCombos": "ወደ ውጭ ላክ",
+    "exportCombosFailed": "ጥምረቶችን ወደ ውጭ መላክ አልተሳካም",
+    "importCombos": "አስገባ",
+    "importCombosTitle": "ጥምረቶችን አስገባ",
+    "importCombosInvalidFile": "ይህ ፋይል ትክክለኛ የጥምረቶች ወጪ ፋይል አይደለም።",
+    "importCombosSummary": "በፋይሉ ውስጥ ያሉ ጥምረቶች፦ {total} ({fresh} አዲስ፣ {conflicting} ስማቸው አስቀድሞ ያለ)።",
+    "importCombosMergeHint": "ማዋሃድ ሁሉንም ነባር ጥምረቶች ይጠብቃል እና ስማቸው አስቀድሞ ያሉትን ይዘላል። ግንኙነቶች እና የመግቢያ ምስክርነቶች በፍጹም አይገቡም።",
+    "importCombosReplaceHint": "ሁሉንም ተካ ነባር ጥምረቶችዎን ({current}) ይሰርዛል እና በምትኩ ፋይሉን ያስገባል። ይህ ሊቀለበስ አይችልም።",
+    "importCombosMerge": "አዋህድ",
+    "importCombosReplace": "ሁሉንም ተካ",
+    "importCombosDone": "የገቡ ጥምረቶች፦ {created}። የተዘለሉ፦ {skipped}።",
+    "importCombosFailed": "ጥምረቶችን ማስገባት አልተሳካም",
+    "importCombosWarnings": "ከማስጠንቀቂያዎች ጋር ገብቷል",
     "editCombo": "ጥምረት አርትዕ",
     "deleteCombo": "ጥምረት ሰርዝ",
     "noModels": "ምንም ሞዴሎች የሉም",
@@ -3618,6 +3879,7 @@
     "more": "+{count} ተጨማሪ",
     "reqs": "ጥያቄዎች",
     "success": "ስኬት",
+    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን",
     "proxyConfigured": "ፕሮክሲ ተዋቅሯል",
     "copyComboName": "የጥምረቱን ስም ቅዳ",
     "enableCombo": "ጥምረቱን አንቃ",
@@ -3683,6 +3945,8 @@
     "testStepRunning": "በመሞከር ላይ…",
     "testStepNotTestable": "መሞከር የሚቻለው ነጠላ-ሞዴል ደረጃዎችን ብቻ ነው",
     "saving": "በማስቀመጥ ላይ...",
+    "liveAccountLabel": "አክት {id}",
+    "liveAccountTooltip": "መለያ {id}",
     "liveNoProviders": "እስካሁን ምንም አቅራቢዎች አልታዩም።",
     "liveFleetDataHint": "የአቅራቢዎች ስብስብ ውሂብ በቀጥታ የኮምቦ ክስተቶች በኩል ይደርሳል።",
     "liveActiveCount": "ንቁ ({count})",
@@ -3694,6 +3958,10 @@
     "liveSelectCombo": "ኮምቦ ይምረጡ",
     "liveSelectComboPlaceholder": "— ኮምቦ ይምረጡ —",
     "liveTargetCount": "{count, plural, one {# ዒላማ} other {# ዒላማዎች}}",
+    "liveStatStrategy": "ስትራቴጂ",
+    "liveStatTargets": "ኢላማዎች",
+    "liveStatFailed": "ያልተሳኩ ሙከራዎች",
+    "liveStatOutcome": "ውጤት",
     "liveSingle": "ነጠላ",
     "liveFleet": "ስብስብ",
     "playgroundStatusAvailable": "ይገኛል",
@@ -5370,6 +5638,10 @@
       "disableAutoScroll": "ራስ-ሰር ማሸብለልን አሰናክል",
       "enableAutoScroll": "ራስ-ሰር ማሸብለልን አንቃ",
       "autoScroll": "ራስ-ሰር ማሸብለል",
+      "pauseLogs": "ዝማኔዎችን ባለበት አቁም",
+      "resumeLogs": "ዝማኔዎችን ከቆመበት ቀጥል",
+      "paused": "ባለበት ቆሟል",
+      "scanLimited": "የፍተሻ ገደብ ላይ ደርሷል",
       "entryCount": "{count, plural, one {# ግቤት} other {# ግቤቶች}}",
       "lastHour": "ያለፈው 1 ሰዓት",
       "updatedAt": "በ{time} ተዘምኗል",
@@ -5756,6 +6028,7 @@
     "filterError": "ስህተት",
     "filterBanned": "ታግዷል",
     "filterCreditsExhausted": "ክሬዲቶች አልቀዋል",
+    "filterVerificationRequired": "ማረጋገጫ ያስፈልጋል",
     "accountSearchPlaceholder": "መለያዎችን ፈልግ…",
     "noFilteredConnections": "ከአሁኑ ማጣሪያ ጋር የሚዛመዱ ግንኙነቶች የሉም።",
     "failedSetAlias": "ተለዋጭ ስሙን ማዘጋጀት አልተሳካም",
@@ -6071,6 +6344,7 @@
     "perModelQuotaDescription": "ሲነቃ፣ የ429/404 ስህተቶች የሚቆልፉት መላውን ግንኙነት ሳይሆን የተወሰነውን ሞዴል ብቻ ነው። ለእያንዳንዱ ሞዴል የተለየ የአጠቃቀም ፍጥነት ገደብ ላላቸው አቅራቢዎች ይጠቀሙበት (ለምሳሌ ModelScope)።",
     "importFreeModelsOnlyLabel": "ነፃ ሞዴሎችን ብቻ አስመጣ",
     "importFreeModelsOnlyHint": "ሲነቃ፣ የዚህ አቅራቢ ነፃ ሞዴሎች ብቻ ይገባሉ። የሚከፈልባቸው ሞዴሎች ይታለፋሉ።",
+    "importFreeModelsOnlyCompatibleHint": "ሲነቃ፣ የዚህ endpoint /models ዝርዝር ነፃ ብሎ የሚያመለክታቸው ሞዴሎች ብቻ ይመጣሉ (:free መለያ፣ የነፃ ምልክት ወይም ዜሮ ዋጋ)። የሚከፈልባቸው ሞዴሎች እና የዋጋ መረጃ የሌላቸው ሞዴሎች ይዘለላሉ።",
     "perModelQuotaToggle": "የእያንዳንዱ ሞዴል ኮታ መቀየሪያ",
     "modelId": "የሞዴል መታወቂያ",
     "customModelPlaceholder": "ለምሳሌ gpt-4.5-turbo",
@@ -6129,6 +6403,53 @@
     "applyClaudeAuthLocal": "የማረጋገጫ መረጃውን ተግብር",
     "exportClaudeAuthFile": "የማረጋገጫ መረጃውን ወደ ውጭ ላክ",
     "importClaudeAuth": "የማረጋገጫ መረጃውን አስመጣ",
+    "importAgyAuth": "የማረጋገጫ መረጃውን አስመጣ",
+    "agyImportTitle": "Antigravity (Google Cloud Code) ያገናኙ",
+    "agyImportTabLocal": "1- የአካባቢ CLI ጠቅ ያድርጉ",
+    "agyImportTabSingle": "ፋይል / ለጥፍ ማስመሰያ",
+    "agyImportTabBulk": "የጅምላ ማስመጣት",
+    "agyImportLocalHeading": "ገባሪውን ክፍለ ጊዜ በራስ-ሰር ያግኙ",
+    "agyImportLocalIntro": "ንቁ Google Cloud Code / Antigravity CLI ከሚከተለው መግባትን ያገኛል።",
+    "agyImportLocalSourceEnv": "በ AGY_TOKEN_FILE አካባቢ ተለዋዋጭ የተሰየመው የማስመሰያ ፋይል",
+    "agyImportLocalSourceKeyring": "Linux Secret Service / ኪይንግ (service=gemini፣ user=antigravity)",
+    "agyImportLocalSourceCli": "የአካባቢ CLI ማስመሰያ መገለጫዎች (~/.gemini/antigravity-cli/)",
+    "agyImportLocalNote": "ምንም የአሳሽ መግቢያ፣ ብቅ ባይ ወይም በእጅ OAuth ኮድ ቅጂ አያስፈልግም። ምንም እንኳን ከ CLI ቢወጡም ምልክቱ በ OmniRoute ውስጥ ይቆያል።",
+    "agyImportLocalOverwrite": "ቀድሞ ከመጣ ያለውን ግንኙነት ይተኩ/አድስ",
+    "agyImportLocalSubmit": "ከአካባቢው Antigravity አስመጣ",
+    "agyImportLocalNotFound": "ምንም የአካባቢ Antigravity CLI መግቢያ አልተገኘም።",
+    "agyImportLocalCreated": "Antigravity መለያ ከአካባቢው ክፍለ ጊዜ ተገናኝቷል።",
+    "agyImportLocalRefreshed": "የአካባቢ Antigravity ግንኙነት ታደሰ።",
+    "agyImportLocalFailed": "የአካባቢውን Antigravity ክፍለ ጊዜ ማገናኘት አልተሳካም።",
+    "agyImportInvalidToken": "ልክ ያልሆነ የማስመሰያ ቅርጸት (የጠፋ access_token ወይም refresh_token)",
+    "agyImportParseFileFailed": "ፋይሉን እንደ JSON መተንተን አልተቻለም",
+    "agyImportParsePasteFailed": "እንደ JSON የተለጠፈውን ይዘት መተንተን አልተቻለም",
+    "agyImportDuplicate": "መለያ አስቀድሞ አለ። ለመተካት \"ነባሩን ተካ\" የሚለውን ምልክት አድርግ።",
+    "agyImportFailed": "Antigravity ምስክርነቶችን ማስመጣት አልተሳካም።",
+    "agyImportSuccess": "Antigravity መለያ ከውጭ ገብቷል።",
+    "agyImportInvalidJson": "ልክ ያልሆነ JSON",
+    "agyImportAccountN": "መለያ #{index}",
+    "agyImportNoValidEntries": "ምንም የሚገቡ ትክክለኛ ግቤቶች የሉም",
+    "agyImportBulkFailed": "የጅምላ ማስመጣት አልተሳካም።",
+    "agyImportBulkSuccess": "Antigravity መለያዎች ከውጪ ገብተዋል {count}",
+    "agyImportBulkRunFailed": "የጅምላ ማስመጣቱን ማስኬድ አልተሳካም።",
+    "agyImportUploadFile": "ፋይል ስቀል",
+    "agyImportPasteJson": "ዝቃን JSON",
+    "agyImportFileHint": "የ antigravity-oauth-token ፋይልን ወይም ወደ ውጭ የተላከ ማስመሰያ JSON ፋይል ይምረጡ",
+    "agyImportValidToken": "ትክክለኛ ማስመሰያ ተገኝቷል፡-",
+    "agyImportConnectionName": "የግንኙነት ስም (አማራጭ)",
+    "agyImportConnectionNamePlaceholder": "ለምሳሌ የስራ መለያ",
+    "agyImportEmailLabel": "ኢሜይል (አማራጭ መሻር)",
+    "agyImportReplaceSingle": "ኢሜይሉ ካለ ነባሩን ግንኙነት ይተኩ",
+    "agyImportSubmitSingle": "መለያ አስመጣ",
+    "agyImportUploadFiles": "ፋይሎችን ይስቀሉ",
+    "agyImportPasteJsonArray": "JSON ድርድር ለጥፍ",
+    "agyImportBulkFileHint": "አንድ ወይም ከዚያ በላይ JSON token ፋይሎችን ይምረጡ",
+    "agyImportStaged": "የተደረደሩ ፋይሎች {count}",
+    "agyImportValid": "የሚሰራ",
+    "agyImportResults": "የውጪ ውጤቶች",
+    "agyImportResultsSummary": "ተሳክቷል {success} · አልተሳካም {failed} · ጠቅላላ {total}",
+    "agyImportReplaceBulk": "በኢሜል ግጥሚያ ላይ ያሉትን ግንኙነቶች ይተኩ",
+    "agyImportSubmitBulk": "ሁሉንም አስመጣ",
     "claudeApplyModalTitle": "በአካባቢያዊ Claude Code ላይ ተግብር",
     "claudeApplyTargetLabel": "የመድረሻ ዱካ",
     "claudeApplyBackupLabel": "ምትኬዎች",
@@ -6266,6 +6587,10 @@
     "hideEmails": "ሁሉንም ኢሜይሎች ደብቅ",
     "a": "A",
     "accountConcurrencyCapHint": "ይህ ግንኙነት/መለያ በአንድ ጊዜ ሊያስተናግዳቸው የሚችላቸው ከፍተኛው የጥያቄዎች ብዛት። የደንበኝነት ምዝገባ መለያዎች ብዙውን ጊዜ ጥቂት ብቻ (1–3) ይፈቅዳሉ፤ ከዚህ ገደብ ማለፍ 429 ስህተቶችን እና የማቀዝቀዣ ጊዜያትን ያስከትላል። ነባሪውን ለመጠቀም ባዶ ይተዉት።",
+    "aiCreditsLimit": "በክፍያ ጊዜ የAI ክሬዲቶች ገደብ",
+    "aiCreditsLimitPlaceholder": "አካባቢያዊ ገደብ የለም",
+    "aiCreditsLimitHint": "በGitHub የተዘገቡት AI ክሬዲቶች ይህን እሴት ሲደርሱ ይህ ግንኙነት ይዘለላል፣ ማዘዋወሩም ወደ ሌሎች ግንኙነቶችዎ ይመለሳል። ባዶ ማድረግ ያሰናክለዋል፤ 0 ሁልጊዜ ይዘልለዋል። የጎደለ ወይም ያረጀ የአጠቃቀም ንባብ በፍጹም አያግድም — ይህ የተረጋገጠ የወጪ ጣሪያ አይደለም።",
+    "aiCreditsLimitInvalid": "የAI ክሬዲቶች ገደብ አሉታዊ ያልሆነ ቁጥር መሆን አለበት፣ ወይም ለማሰናከል ባዶ ይተዉት።",
     "accountConcurrencyCapLabel": "የመለያ በአንድ ጊዜ ጥያቄዎች ገደብ",
     "accountIdHint": "ከAPI ቶከኑ ጋር በአንዳንድ አቅራቢዎች (ለምሳሌ፦ Cloudflare Workers AI) ይፈለጋል።",
     "accountIdLabel": "የመለያ መታወቂያ",
@@ -6310,6 +6635,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ይህ ግንኙነት ሊታረሙ ከሚችሉ ስህተቶች በኋላም ብቁ ሆኖ እንዲቆይ ጊዜያዊውን የማቀዝቀዝ ጊዜ ይዝለሉ (እንደ የታገደ/ጊዜው ያለፈ ያሉ የመጨረሻ ሁኔታዎች አሁንም ተፈጻሚ ናቸው)።",
     "disableCoolingLabel": "ለዚህ ግንኙነት የማቀዝቀዝ ጊዜን አሰናክል",
+    "keepMidConversationSystemDescription": "ወደ ከፍተኛ ደረጃ የስርዓት መጠየቂያ ከማስገባት ይልቅ በመልእክት ዝርዝሩ ውስጥ የተላኩትን የስርዓት መልእክቶች መካከለኛ ውይይት ውስጥ ይተው፣ ስለዚህ የጥያቄው መሸጎጫ ተራ በተራ መምታቱን ይቀጥላል። ይህ የላይኛው ዥረት በመልእክቶች ውስጥ ሚና \"ስርዓት\" የሚቀበል ከሆነ ብቻ ያንቁ (አለበለዚያ 400 ይመልሳል)።",
+    "keepMidConversationSystemLabel": "የመሃል የውይይት ስርዓት መልዕክቶችን በቦታቸው ያቆዩ",
+    "requireUserLastMessageDescription": "ለላይ ዥረቶች የረዳት ቅድመ ሙሌትን አይቀበሉም፡ ከመላክዎ በፊት ተከታይ ረዳት ተራዎችን ጣል (የመሳሪያ_አጠቃቀም የለም)። ሞዴሉ የቀደመውን መልስ ሊያድስ ይችላል።",
+    "requireUserLastMessageLabel": "በተጠቃሚ መልእክት ለመጨረስ ውይይት ጠይቅ",
     "bulkPasteAdded": "{count, plural, one {1 ቁልፍ ታክሏል} other {# ቁልፎች ታክለዋል}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 የተደገመ ቁልፍ ታልፏል} other {# የተደገሙ ቁልፎች ታልፈዋል}}",
     "bulkPasteHint": "በእያንዳንዱ መስመር አንድ API ቁልፍ ይለጥፉ። ባዶ መስመሮች ችላ ይባላሉ፣ የተደገሙ ቁልፎችም ይዘለላሉ።",
@@ -6346,6 +6675,8 @@
     "newApiUserIdLabel": "የNew-API ተጠቃሚ መለያ",
     "newApiUserIdPlaceholder": "ለምሳሌ 12345",
     "newApiUserIdHint": "የAgentRouter New-Api-User ራስጌ እሴት፤ የኮታ ቀሪ ሂሳብን ለማምጣት ከኮንሶል API ቁልፍ ጋር አብሮ ጥቅም ላይ ይውላል።",
+    "tokenrouterManagementKeyLabel": "የአስተዳደር ቁልፍ (አማራጭ)",
+    "tokenrouterManagementKeyHint": "ከTokenRouter ዳሽቦርድ የሚገኝ የመለያ ቁልፍ (Settings → Management Key)። ኮታን እና ቀሪ ሂሳብን ለማንበብ ብቻ ያገለግላል፣ ለጥያቄዎች በፍጹም አይውልም። የተቀመጠው ቁልፍ አይታይም፤ ለማቆየት ባዶ ይተዉት።",
     "newApiAggregatorToggleLabel": "የአግሪጌተር ጌትዌይ",
     "newApiAggregatorToggleHint": "ለNew-API / One-API / Sub2API አግሪጌተር ኖዶች የቀሪ ሂሳብ ማወቂያን አንቃ። ዳሽቦርዱ የቀሪ ሂሳብ ባጅን ያሳያል፣ እንዲሁም ከኮታ ቅድመ-ማረጋገጫ ጋር የሚደረግ ማዘዋወር ኮታቸው ያለቀባቸውን መለያዎች ይዘላል።",
     "newApiAggregatorConsoleApiKeyHint": "ለአግሪጌተሩ /api/user/self የመዳረሻ ነጥብ የስርዓት መዳረሻ ቶከን። ይህ የማዘዋወሪያ API ቁልፍ አይደለም።",
@@ -6359,6 +6690,8 @@
     "customUserAgentLabel": "ብጁ User Agent መለያ",
     "huggingfaceBillToHint": "አማራጭ። ለወጪ መመደቢያ እንደ X-HF-Bill-To ራስጌ የሚላከው የHugging Face የክፍያ መለያዎ መለያ ቁጥር።",
     "huggingfaceBillToLabel": "የHugging Face Bill-To መለያ",
+    "commandCodeZdrLabel": "ዜሮ የውሂብ ማቆያ (ZDR) ጠይቅ",
+    "commandCodeZdrHint": "በዚህ የAPI ቁልፍ በሚደረግ እያንዳንዱ ጥያቄ x-cmd-zdr: 1 ይልካል። ZDR የሚደግፍ upstream የሌላቸው ሞዴሎች ላይገኙ ይችላሉ።",
     "databricksBaseUrlHint": "የDatabricks መሠረታዊ URL ፍንጭ",
     "defaultThinkingStrengthHint": "ጥያቄው የማመዛዘን ጥረትን ካልገለጸ ጥቅም ላይ ይውላል።",
     "defaultThinkingStrengthLabel": "ነባሪ የማሰብ ጥንካሬ",
@@ -6405,6 +6738,9 @@
     "localProviders": "አካባቢያዊ አቅራቢዎች",
     "maxConcurrentWholeNumberError": "ከፍተኛው በአንድ ጊዜ የሚከናወን ብዛት ሙሉ ቁጥር መሆን አለበት",
     "m365TierLabel": "የCopilot ደረጃ",
+    "m365RefreshTokenLabel": "አድስ ማስመሰያ (አማራጭ)",
+    "m365RefreshTokenHint": "የ Microsoft 365 መዳረሻ ማስመሰያ በራስ ሰር ለማደስ ስራ ላይ ይውላል።",
+    "m365RefreshTokenEditHint": "ያለውን ማስመሰያ ለማቆየት ባዶ ይተውት። እሱን ለመተካት አዲስ ማስመሰያ ይለጥፉ።",
     "m365TierHint": "ይህ ግንኙነት የትኛውን Microsoft 365 Copilot በይነገጽ እንደሚጠቀም ይምረጡ። ግለሰብ ነባሪው የተጠቃሚ BizChat ነው፤ ትምህርት እና ድርጅት (ሥራ) የየተከራያቸውን በይነገጾች ያነቃሉ።",
     "m365TierIndividualOption": "ግለሰብ (ነባሪ)",
     "m365TierEduOption": "ትምህርት",
@@ -6444,6 +6780,37 @@
     "rateLimitOverridesTpmHint": "ለዚህ ግንኙነት በደቂቃ የሚፈቀዱ ከፍተኛ ቶከኖች። የአቅራቢውን ነባሪ ይተካል።",
     "rateLimitOverridesTpmLabel": "TPM (ቶከኖች/ደቂቃ)",
     "refreshOauthTokenTitle": "የOauth ቶከን ማደሻ ርዕስ",
+    "chatgptRefreshToken": "መግባቱን ያድሱ",
+    "chatgptRefreshTokenTitle": "የChatGPT መዳረሻ tokenን ያድሱ። ይህ የአጠቃቀም ገደቦችን ዳግም አያስጀምርም።",
+    "chatgptTokenRenewsTitle": "የመዳረሻ ቶከኑ በግምት በ{minutes} ደቂቃዎች ውስጥ ጊዜው ያበቃል፣ የማብቂያ ጊዜው ሲቃረብም በራስ-ሰር ይታደሳል። ይህ የእርስዎ የChatGPT አጠቃቀም ፈቃድ አይደለም።",
+    "chatgptManageUsage": "አጠቃቀምን ያስተዳድሩ",
+    "chatgptUsePlan": "የChatGPT ዕቅድዎን ይጠቀሙ",
+    "chatgptUsingPlan": "የChatGPT ዕቅድዎን በመጠቀም ላይ",
+    "chatgptPlanDescription": "ብቁ የሆኑ ጥያቄዎች፣ OpenAI ለዚህ መተግበሪያ ባስቀመጣቸው ገደቦች መሠረት፣ የChatGPT ዕቅድዎን ወይም የክሬዲት ቀሪ ሂሳብዎን ይጠቀማሉ።",
+    "chatgptPlanUsage": "የChatGPT ዕቅድ አጠቃቀም",
+    "chatgptPlanLinked": "ዕቅዱ ተገናኝቷል",
+    "chatgptPlanNotAuthorized": "ዕቅዱ ፈቃድ አላገኘም",
+    "chatgptPlanBadgeHint": "ይህ ምዝገባ የዕቅድ አጠቃቀም ፈቃድ ነው፤ የPlus/Pro ደረጃ ወይም ቀሪ ፈቃድ አይደለም።",
+    "chatgptLocalUsage": "በOmniRoute የተመዘገበ አጠቃቀም",
+    "chatgptLocalUsageDescription": "ይህ ግንኙነት · ዛሬን ጨምሮ ያለፉት 30 የUTC የቀን መቁጠሪያ ቀናት። በተቀመጠው የአካባቢያዊ ጥያቄ ታሪክ ላይ ብቻ የተመሠረተ።",
+    "chatgptLocalUsageCaveat": "ይህ የመለያዎ አጠቃላይ የChatGPT አጠቃቀም ወይም ቀሪ ፈቃድ አይደለም። ቶከኖች ግምቶችን ሊያካትቱ ይችላሉ፤ የተሰረዘ ወይም የተጠቃለለ ታሪክ ለዚህ ግንኙነት አይመደብም።",
+    "chatgptUsageRequests": "ጥያቄዎች",
+    "chatgptUsageTokens": "የተመዘገቡ ቶከኖች",
+    "chatgptLocalUsageLoading": "አካባቢያዊ አጠቃቀምን በመጫን ላይ…",
+    "chatgptLocalUsageError": "አካባቢያዊ አጠቃቀምን መጫን አልተቻለም። ይህ የChatGPT መግቢያ ወይም የኮታ ስህተት መኖሩን አያመለክትም።",
+    "chatgptLocalUsageRefresh": "አካባቢያዊ አጠቃቀምን ያድሱ",
+    "chatgptUsageUnavailable": "የመለያው አጠቃላይ የአጠቃቀም ድምር በዚህ ግንኙነት በኩል አይገኝም። አጠቃቀምዎን እና ገደቦችዎን በChatGPT ቅንብሮች ይመልከቱ።",
+    "chatgptUsageNotAvailable": "አይገኝም",
+    "chatgptUsageTotal": "ጠቅላላ",
+    "chatgptUsagePeak": "ከፍተኛው / በቀን",
+    "chatgptUsageDays": "ንቁ ቀናት",
+    "chatgptViewUsage": "የChatGPT አጠቃቀምዎን ይመልከቱ እና ያስተዳድሩ",
+    "chatgptUsageLimitReached": "የአጠቃቀም ገደብ ላይ ደርሷል",
+    "chatgptUsageLimitHint": "ዕቅድዎን ወይም የዚህን መተግበሪያ ገደብ በChatGPT ቅንብሮች ይመልከቱ።",
+    "chatgptWelcomeTitle": "የChatGPT ዕቅድዎን እየተጠቀሙ ነው",
+    "chatgptWelcomeDescription": "በዚህ መተግበሪያ ውስጥ ያለ ብቁ አጠቃቀም የChatGPT ዕቅድዎን ይጠቀማል። አጠቃቀምዎን በChatGPT ቅንብሮች ያስተዳድሩ።",
+    "chatgptGotIt": "ገባኝ",
+    "chatgptManageUsageTitle": "ዕቅድዎን እና የዚህን መተግበሪያ የአጠቃቀም ገደቦች በChatGPT ቅንብሮች ይመልከቱ (በአዲስ ትር ይከፈታል)።",
     "regionHint": "የክልል ፍንጭ",
     "regionLabel": "የክልል መለያ",
     "removeThisKey": "ይህን ቁልፍ አስወግድ",
@@ -6937,6 +7304,15 @@
     "codexPoolUsed": "ጥቅም ላይ ውሏል",
     "codexPoolUntil": "እስከ {value}",
     "quotaNoData": "እስካሁን የአጠቃቀም መረጃ የለም",
+    "quotaRefreshCurrent": "የአሁኑን ኮታ አድስ",
+    "quotaRefreshCurrentHint": "የዳግም ማስጀመሪያ ክሬዲቶችን ሳይጠቀም የዚህን መለያ የአሁኑን ኮታ ይጠይቃል።",
+    "quotaRefreshing": "ኮታ እየተፈተሸ ነው…",
+    "quotaRefreshFresh": "ኮታው ተፈትሿል። መለያው ለአገልግሎት ዝግጁ መሆኑን አገልጋዩ ይወስናል።",
+    "quotaRefreshFailed": "የኮታ ፍተሻው አልተሳካም። ያለፈው ውሂብ አልተለወጠም።",
+    "quotaRefreshStale": "አገልጋዩ የቆየ የኮታ ውሂብ መልሷል። ይህ አዲስ መረጃ አይደለም።",
+    "quotaRefreshPartial": "ከኮታው ውሂብ የተወሰነ ክፍል ብቻ ይገኛል።",
+    "quotaWindowUnavailable": "የ{window} ኮታ አይገኝም",
+    "quotaConnectionRefreshFailed": "የኮታ ፍተሻው ተጠናቋል፣ ግን የመለያዎቹን ዝርዝር ማደስ አልተቻለም።",
     "quotaRefresh": "አጠቃቀም አድስ",
     "quotaCredits": "{count} ክሬዲቶች",
     "quotaUnlimited": "ያልተወሰነ",
@@ -6946,11 +7322,19 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "የአጠቃቀም ዝርዝሮች",
     "quotaPlanBadge": "የምዝገባ ዕቅድ (ከአጠቃቀም መረጃ)",
+    "codexAccountPersonal": "የግል",
+    "codexAccountBusiness": "የንግድ",
+    "codexAccountRole": "ሚና፦ {role}",
     "anonymousFallbackTitle": "ስም-አልባ ተተኪ",
     "anonymousFallbackDesc": "ሁሉም የተዋቀሩ ግንኙነቶች ሲያልቁ (በኮታ፣ በክሬዲት ወይም በጊዜ ማብቂያ ምክንያት)፣ ለጊዜው የዚህን አቅራቢ ቁልፍ የማያስፈልገውን ደረጃ ይጠቀሙ። ስም-አልባ ጥያቄዎችን ከመላክ ይልቅ ይህን አቅራቢ ለመዝለል ያጥፉት — ቁልፍ የማያስፈልገው ደረጃ ጥያቄዎቹን ውድቅ ሲያደርግ (401) ይመከራል።",
     "anonymousFallbackEnabled": "ስም-አልባ ተተኪ ለ{provider} ነቅቷል",
     "anonymousFallbackDisabled": "ስም-አልባ ተተኪ ለ{provider} ተሰናክሏል — ያለቁ ግንኙነቶች ይህን አቅራቢ ይዘሉታል",
     "anonymousFallbackUpdateFailed": "የስም-አልባ ተተኪ ቅንብርን ማዘመን አልተሳካም",
+    "retryDelayTitle": "የዳግም ሙከራ መዘግየት",
+    "retryDelayDesc": "አቅራቢው መቼ እንደገና መሞከር እንዳለበት ካልገለጸ ከፍጥነት ገደብ ስህተት በኋላ ግንኙነቱ ምን ያህል ጊዜ እንደሚያርፍ። ራስ-ሰር አብሮ የተሰራውን የመመለሻ ጊዜ ይጠቀማል፤ አቅራቢው የሚልከው የዳግም ማስጀመሪያ ጊዜ ሁልጊዜ ይቀድማል።",
+    "retryDelayAuto": "ራስ-ሰር",
+    "retryDelaySaved": "የዳግም ሙከራ መዘግየት ተቀምጧል",
+    "retryDelayUpdateFailed": "የዳግም ሙከራ መዘግየትን ማዘመን አልተሳካም",
     "batchDeleteFailed": "በቡድን መሰረዝ አልተሳካም",
     "batchDeleteNetworkError": "በቡድን ስረዛ ወቅት የአውታረ መረብ ስህተት ተከስቷል",
     "batchUpdateFailed": "በቡድን ማዘመን አልተሳካም",
@@ -7053,6 +7437,31 @@
     "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "በዚህ ሂደት ውስጥ የውሂብ ትራፊኩ አንድ ክፍል ሊቀመጥ አልቻለም። የተቀመጡት ድምሮች ያልተሟሉ ናቸው፤ የአገልጋዩን የምርመራ መረጃ ይመልከቱ።",
+      "title": "የOmniRoute ዋና ውሂብ ትራፊክ",
+      "description": "ለመላክ የቀረቡ የስቀላ ይዘቶች እና OmniRoute ያነበባቸው የማውረድ ባይቶች። ይህ በግንኙነቱ ላይ ያለው የኔትወርክ ትራፊክ ወይም የአቅራቢው የክፍያ ሂሳብ አይደለም። አጠቃላይ ድምሩ በተለየ ምልክት የተገለጹ ቀጥታ ትራፊክን እና ምንጫቸው ያልተመደበ ትራፊክን ያካትታል።",
+      "coverageNote": "መለኪያው ከጀመረበት ጊዜ ጀምሮ የተጠራቀሙ ድምሮች። መጠናቸው ያልታወቀ ስቀላዎች (ፍሰቶች፣ FormData፣ የRequest ይዘቶች) በባይት ድምር ውስጥ አይካተቱም። ያልተነበቡ ወይም ያልተጠናቀቁ ውርዶች ያልተሟሉ ናቸው፤ መላክ አለመሳካቱ ስቀላው መድረሱን አያረጋግጥም። በማጓጓዣው ውስጥ የሚደረጉ አቅጣጫ ለውጦች/ድጋሚ ሙከራዎች እና መለኪያውን የሚያልፉ ማጓጓዣዎች በተናጠል አይለኩም።",
+      "refresh": "አድስ",
+      "overall": "አጠቃላይ (ሁሉም የታዩ መንገዶች)",
+      "proxied": "የፕሮክሲ ንዑስ ድምር (ቀጥታ/ያልተመደበ ትራፊክን ሳይጨምር)",
+      "direct": "ቀጥታ (ያለ ፕሮክሲ)",
+      "unattributed": "ምንጩ ያልተመደበ አስተላላፊ",
+      "removed": "የተወገደ ፕሮክሲ ({id})",
+      "legacy": "የቀድሞ/የአካባቢ ቅንብር ፕሮክሲ ({id})",
+      "route": "መንገድ",
+      "upload": "ለመላክ የቀረበ ስቀላ",
+      "download": "የተነበበ ውርድ",
+      "attempts": "ሙከራዎች",
+      "knownUpload": "መጠናቸው የታወቀ ስቀላዎች / ሙከራዎች",
+      "completed": "የተጠናቀቁ ውርዶች / ሙከራዎች",
+      "failed": "ያልተሳኩ መላኮች",
+      "cancelled": "የተሰረዙ ውርዶች",
+      "errored": "የማውረድ ስህተቶች",
+      "loading": "የዋና ውሂብ ትራፊክ በመጫን ላይ…",
+      "empty": "የዋና ውሂብ ትራፊክ እስካሁን አልተለካም።",
+      "error": "የዋና ውሂብ ትራፊክ ሊጫን አልቻለም። ማደስን ይሞክሩ።"
+    },
     "title": "ቅንብሮች",
     "general": "አጠቃላይ",
     "security": "ደህንነት",
@@ -7134,6 +7543,7 @@
     "proxySubTabsAria": "የፕሮክሲ ክፍሎች",
     "requestBodyLimitTitle": "የጥያቄ ይዘት ገደብ",
     "requestBodyLimitDescription": "የጥያቄው ይዘት ከመተንተኑ በፊት ተቀባይነት የሚያገኘው ከፍተኛው የAPI ጭነት መጠን። ልዩ የሰቀላ መስመሮች ቢያንስ አብሮገነብ የ100 MB ገደባቸውን ይይዛሉ።",
+    "requestBodyLimitChatHint": "እዚህ ገደብ እስኪያስቀምጡ ድረስ Chat Completions እና Responses እስከ 50 MB ይቀበላሉ። ያስቀመጡት ገደብ ዝቅተኛም ሆነ ከፍተኛ ለእነሱም ይተገበራል።",
     "requestBodyLimitInputLabel": "የጥያቄ ይዘት ገደብ በMB",
     "requestBodyLimitEmptyError": "ገደቡን በMB ያስገቡ",
     "requestBodyLimitWholeNumberError": "ሙሉ ቁጥር ይጠቀሙ",
@@ -7284,6 +7694,8 @@
     "enableThinking": "ማሰብን አንቃ",
     "maxThinkingTokens": "ከፍተኛው የማሰብ ቶከኖች ብዛት",
     "enableProxy": "ፕሮክሲን አንቃ",
+    "defaultNewConnectionProxyEnabled": "ለአዲስ ግንኙነቶች ፕሮክሲን በነባሪ አንቃ",
+    "defaultNewConnectionProxyEnabledDesc": "ሌላ ምርጫ በግልጽ ካልተወሰነ የአዲስ አቅራቢ መለያዎችን የመጀመሪያ ፕሮክሲ ሁኔታ ይወስናል። ያሉ ግንኙነቶች አይቀየሩም። የትራፊክ መንገድ አሁንም በአጠቃላይ ቅንብሮች እና በፕሮክሲ ውቅር ላይ ይመሰረታል። እያንዳንዱን መለያ በኋላ መቀየር ይችላሉ።",
     "perKeyProxyEnabled": "ለእያንዳንዱ ቁልፍ የፕሮክሲ ምደባን አንቃ",
     "perKeyProxyEnabledDesc": "ሲነቃ እያንዳንዱ የአቅራቢ ግንኙነት የራሱን የፕሮክሲ ምደባ መጠቀም ይችላል",
     "proxyUrl": "የፕሮክሲ URL",
@@ -7319,6 +7731,13 @@
     "themeLight": "ብርሃን",
     "themeDark": "ጨለማ",
     "themeSystem": "ስርዓት",
+    "paletteTitle": "የቀለም ስብስብ",
+    "paletteDesc": "Editions ነባሪው ገጽታ ነው። Classic የቀድሞውን የላይም አጽንዖት ይመልሳል።",
+    "paletteSelectionAria": "የቀለም ስብስብ ምርጫ",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "ሞቅ ያሉ ገለልተኛ ቀለሞች ከመዳብ አጽንዖት ጋር",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "ቀዝቃዛ ገለልተኛ ቀለሞች ከላይም አጽንዖት ጋር",
     "endpointTunnelVisibility": "የEndpoint ቱነል ታይነት",
     "endpointTunnelVisibilityDesc": "የቱነሉን ሁኔታ ሳይቀይሩ የቱነል መቆጣጠሪያዎችን ከEndpoint ገጽ ደብቅ።",
     "showCloudflareTunnel": "Cloudflare ፈጣን ቱነል",
@@ -7739,6 +8158,7 @@
     "systemActor": "ስርዓት",
     "ipAccessControl": "የIP መዳረሻ ቁጥጥር",
     "ipAccessControlDesc": "የተወሰኑ IP አድራሻዎችን አግድ ወይም ፍቀድ",
+    "ipAccessMode": "የመዳረሻ ሁነታ",
     "ipModeDisabled": "ተሰናክሏል",
     "ipModeBlacklist": "ጥቁር ዝርዝር",
     "ipModeWhitelist": "የተፈቀዱ ዝርዝር",
@@ -7932,6 +8352,11 @@
     "pricingShowingProviders": "ከ{total} ውስጥ {visible} በማሳየት ላይ",
     "pricingFilteredFrom": "(ከ{count} የተጣራ)",
     "pricingShowMoreProviders": "ተጨማሪ {count} አሳይ ({remaining} ቀርቷል)",
+    "pricingView": "እይታ",
+    "pricingViewByProvider": "በአቅራቢ",
+    "pricingViewCompare": "ሞዴሎችን አነጻጽር",
+    "pricingUnpriced": "ዋጋ ያልተገለጸ",
+    "pricingCompareEmpty": "ከእነዚህ አቅራቢዎች ከአንድ በላይ የሚቀርብ ሞዴል የለም። ነጠላ ቅናሾችን ለማየት ሞዴልን ይፈልጉ።",
     "modelOverridesTitle": "የሞዴል ማሻሻያዎች",
     "modelOverridesDesc": "ለማዘዋወር እና የጥያቄዎችን ቅርጽ ለማስተካከል ጥቅም ላይ የሚውሉትን የአቅራቢ/ሞዴል ብቃቶች ይቀይሩ። ዒላማዎቹ እንደ ጥምረቶቹ ተመሳሳይ provider/model ቅርጽ ይጠቀማሉ።",
     "searchModelOverrideTargets": "provider/model ፈልግ...",
@@ -8457,6 +8882,7 @@
     "compressionAdaptivePolicyPercentage": "የመስኮቱ መቶኛ",
     "compressionAdaptivePolicyAbsolute": "ቋሚ የቶከን በጀት",
     "compressionOutputStylesDescription": "የአቅራቢውን ውጤት እንደገና ሳይጽፉ የምላሽ ቅርጽ መመሪያዎችን ያክሉ። በነፃነት ያጣምሩ።",
+    "compressionOutputStylesPreviewNote": "ጥያቄ አንድ ቋንቋ ብቻ ነው የሚያስገባው፡ የተገኘውን ቋንቋ፣ ካልሆነ ደግሞ የመጀመሪያውን ጥቅል። ከላይ ያሉት ማገጃዎች በአንድ ጥቅል ውስጥ ያሉት ልዩነቶች እንጂ የተዋሃዱ መርፌ አይደሉም።",
     "mcpAccessibilityDescription": "የMCP መሣሪያ ውጤቶችን ወሰን ይወስናል (በተለየ ማከማቻ)።",
     "compressionStylesTileSummary": "{tokens, number} ቶከኖች ተቆጥበዋል · {runs, plural, one {# ቅጥ የተሰጠው ሂደት} other {# ቅጥ የተሰጣቸው ሂደቶች}}",
     "compressionStylesTileEmpty": "እስካሁን ቅጥ የተሰጣቸው ሂደቶች የሉም።",
@@ -8630,6 +9056,86 @@
     "codexAutoPingWarning": "እያንዳንዱ ፒንግ አነስተኛ መጠን ያለውን ትክክለኛ የCodex ኮታ ይጠቀማል። በነባሪነት ጠፍቷል — በንቃት ለሚመኩባቸው ግንኙነቶች ብቻ ያንቁት።",
     "codexAutoPingSaveError": "የCodex ራስ-ሰር ፒንግ ቅንብርን ማዘመን አልተሳካም",
     "codexAutoPingToggleAria": "ለ{connection} የCodex ኮታ ራስ-ሰር ፒንግን አብራ/አጥፋ",
+    "bankedResetAutoApplyTitle": "የባንክ ዳግም ማስጀመሪያዎችን በራስ-ተግብር",
+    "bankedResetAutoApplyDesc": "መርጦ ግባ Codex ዳግም ማስጀመሪያ ክሬዲቶችን፣ ክላውድ የባንክ ድጎማዎችን እና የክላውድ ሳምንታዊ ክፍለ ጊዜ ከኮታ ውጪ ለሆኑ መለያዎች ዳግም ያስጀምራል፣ ከታች ባሉት ጥበቃዎች እና ገደቦች ውስጥ።",
+    "bankedResetAutoApplyWarning": "ዳግም ማስጀመር መመለስ የማይመለስ ክሬዲት ይጠቀማል። በነባሪ ጠፍቷል፣ እና ደረቅ አሂድ ሁነታ ምን እንደሚሰራ ብቻ ይመዘግባል።",
+    "bankedResetAutoApplySaveError": "በራስ-የተተገበረ የባንክ ዳግም ማስጀመሪያ ቅንብሩን ማዘመን አልተሳካም።",
+    "bankedResetAutoApplyLoadError": "በራስ-የተተገበረ የባንክ ዳግም ማስጀመሪያ ቅንብሩን መጫን አልተሳካም።",
+    "bankedResetAutoApplyModeTitle": "ቀይር እና ሁነታ",
+    "bankedResetAutoApplyEnabledLabel": "በራስ ሰር የሚተገብሩ የባንክ ዳግም ማስጀመሪያዎችን አንቃ",
+    "bankedResetAutoApplyEnabledHelp": "ዋና መቀየሪያ። ሲጠፋ ምንም ነገር በራስ-ሰር አይወሰድም።",
+    "bankedResetAutoApplyModeDryRun": "ደረቅ መሮጥ",
+    "bankedResetAutoApplyModeDryRunHelp": "ከዚህ በታች ባለው ታሪክ ውስጥ ምን እንደሚቤዠው ይመዘግባል፣ ነገር ግን በጭራሽ ምንም ነገር አይዋጅም።",
+    "bankedResetAutoApplyModeLastResort": "የመጨረሻ አማራጭ",
+    "bankedResetAutoApplyModeLastResortHelp": "በገንዳው ውስጥ ያለ ሌላ መለያ የጭንቅላት ክፍል ሲቀረው ብቻ ይዋጃል።",
+    "bankedResetAutoApplyModeEager": "ጉጉት።",
+    "bankedResetAutoApplyModeEagerHelp": "ምንም እንኳን ሌሎች መለያዎች ዋና ክፍል ቢኖራቸውም አንድ መለያ ገደብ እንደደረሰ ወይም ክሬዲት ጊዜው ሊያበቃ እንደሆነ ይመለሳሉ።",
+    "bankedResetAutoApplyCreditTypesTitle": "የብድር ዓይነቶች",
+    "bankedResetAutoApplyCreditTypesDesc": "የትኛዎቹ ዳግም ማስጀመሪያዎች በራስ ሰር ሊወሰዱ ይችላሉ።",
+    "bankedResetAutoApplyCreditCodex": "Codex ክሬዲቶችን ዳግም ማስጀመር",
+    "bankedResetAutoApplyCreditCodexHelp": "በ Codex መለያዎች ላይ የባንክ ዳግም ማስጀመር ክሬዲቶች።",
+    "bankedResetAutoApplyCreditClaude": "ክላውድ የባንክ ድጎማዎች",
+    "bankedResetAutoApplyCreditClaudeHelp": "በክላውድ ሂሳቦች ላይ የባንክ ዳግም ማስጀመሪያ ድጋፎች።",
+    "bankedResetAutoApplyCreditClaudeSession": "ክላውድ ሳምንታዊ ክፍለ ጊዜ ዳግም ማስጀመር",
+    "bankedResetAutoApplyCreditClaudeSessionHelp": "የክላውድ መለያዎች በሳምንት አንድ ጊዜ ለታሸገ የክፍለ ጊዜ መስኮት የሚያገኙት ዳግም ማስጀመር።",
+    "bankedResetAutoApplyClaudeSessionNote": "ሲበራ ይህ ባህሪ በእያንዳንዱ መለያ \"ራስ-ሰር ገደብ ዳግም ማስጀመር\" መቀየሪያዎችን ይተካል። በደረቅ አሂድ ሁነታ ምን እንደሚሰራ ብቻ ይመዘግባል.",
+    "bankedResetAutoApplyScopeTitle": "የመለያ ስፋት",
+    "bankedResetAutoApplyScopeDesc": "በየትኛው Codex እና Claude OAuth መለያዎች በራስ-ሰር ሊተገበሩ ይችላሉ።",
+    "bankedResetAutoApplyScopeAll": "ሁሉም መለያዎች",
+    "bankedResetAutoApplyScopeAllHelp": "እያንዳንዱ መለያ ተሸፍኗል። መለያውን ለማስቀረት ከዚህ በታች ያጥፉት።",
+    "bankedResetAutoApplyScopeSelected": "የተመረጡ መለያዎች",
+    "bankedResetAutoApplyScopeSelectedHelp": "ከዚህ በታች የበሩ መለያዎች ብቻ የተሸፈኑ ናቸው።",
+    "bankedResetAutoApplyNoConnections": "ምንም Codex ወይም Claude OAuth መለያዎች አልተገናኙም።",
+    "bankedResetAutoApplyConnectionAria": "በራስ-የተተገበሩ የባንክ ዳግም ማስጀመሪያዎች ውስጥ {connection} ያካትቱ",
+    "bankedResetAutoApplyTimingTitle": "የጊዜ ጠባቂዎች",
+    "bankedResetAutoApplyTimingDesc": "መጠበቅ ጥሩ በሚሆንበት ጊዜ ወይም ክሬዲቱን በሚያባክንበት ጊዜ ቤዛን ይዝለሉ።",
+    "bankedResetAutoApplySessionGuardLabel": "የ5-ሰዓት ዳግም ማስጀመሪያ ጠባቂ (ደቂቃዎች)",
+    "bankedResetAutoApplySessionGuardHint": "በዚህ ብዙ ደቂቃዎች ውስጥ የ5-ሰዓት መስኮቱ በራሱ ሲጀምር ይዝለሉ።",
+    "bankedResetAutoApplyWeeklyGuardLabel": "ሳምንታዊ ዳግም ማስጀመር ጠባቂ (ሰዓታት)",
+    "bankedResetAutoApplyWeeklyGuardHint": "በዚህ ብዙ ሰዓታት ውስጥ ሳምንታዊው መስኮት በራሱ ሲጀምር ይዝለሉ።",
+    "bankedResetAutoApplyWeeklyFloorLabel": "ሳምንታዊ ወለል (%)",
+    "bankedResetAutoApplyWeeklyFloorHint": "ሳምንታዊው መስኮት ከዚህ መቶኛ ያነሰ ሲቀረው የ5-ሰዓት ዳግም ማስጀመር ይዝለሉ።",
+    "bankedResetAutoApplyExpiringHoursLabel": "ጊዜው ያለፈበት የብድር መስኮት (ሰዓታት)",
+    "bankedResetAutoApplyExpiringHoursHint": "በዚህ ብዙ ሰዓታት ውስጥ የሚያልቅ ክሬዲት ያለገደብ ግድግዳ እንኳን ማስመለስ ይችላል።",
+    "bankedResetAutoApplyExpiringUsedLabel": "ጊዜው ያለፈበት የብድር አነስተኛ አጠቃቀም (%)",
+    "bankedResetAutoApplyExpiringUsedHint": "ጊዜው የሚያበቃበት ክሬዲት መለያው ቢያንስ ይህን በጣም ስራ ከሚበዛበት መስኮት መቶኛ ተጠቅሞ መሆን አለበት።",
+    "bankedResetAutoApplyPoolTitle": "ገንዳ",
+    "bankedResetAutoApplyPoolDesc": "በመጨረሻው ሪዞርት ሁነታ ላይ ብቻ ጥቅም ላይ ይውላል።",
+    "bankedResetAutoApplyPoolHeadroomLabel": "ገንዳ ዋና ክፍል (%)",
+    "bankedResetAutoApplyPoolHeadroomHint": "በሁለቱም መስኮቶች ውስጥ ቢያንስ ይህ መቶኛ ሲቀረው ሌላ መለያ እንደ ዋና ክፍል ይቆጠራል። በመጨረሻው ሪዞርት ሁነታ ላይ ብቻ ነው የሚመለከተው።",
+    "bankedResetAutoApplyLimitsTitle": "የደህንነት ገደቦች",
+    "bankedResetAutoApplyLimitsDesc": "ዳግም ማስጀመሪያዎች ምን ያህል ጊዜ እንደሚዋጁ ላይ ያሉ ጠንካራ ሽፋኖች፣ ከታሪክ ተቆጥረዋል።",
+    "bankedResetAutoApplyMaxPerAccountLabel": "በቀን ከፍተኛው በሂሳብ",
+    "bankedResetAutoApplyMaxPerAccountHint": "በ24 ሰአታት ውስጥ በአንድ ሂሳብ ውስጥ ማስመለስ ይፈቀዳል።",
+    "bankedResetAutoApplyMaxPerDayLabel": "ከፍተኛ በቀን",
+    "bankedResetAutoApplyMaxPerDayHint": "በ24 ሰዓታት ውስጥ በሁሉም መለያዎች ላይ ማስመለስ ይፈቀዳል።",
+    "bankedResetAutoApplyMinSpacingLabel": "ዝቅተኛ ክፍተት (ደቂቃዎች)",
+    "bankedResetAutoApplyMinSpacingHint": "በማናቸውም ሁለት ቤዛዎች መካከል ያለው ዝቅተኛ ጊዜ።",
+    "bankedResetAutoApplyScheduleTitle": "መርሐግብር",
+    "bankedResetAutoApplyScheduleDesc": "እንደአማራጭ ቤዛዎችን ወደ ዕለታዊ መስኮት ይገድቡ፣ በ UTC ውስጥ።",
+    "bankedResetAutoApplyScheduleEnabledLabel": "በዕለታዊ መስኮት ውስጥ ብቻ ማስመለስ",
+    "bankedResetAutoApplyScheduleStartLabel": "የመስኮት መጀመሪያ (ሰዓት፣ UTC፣ 0-24)",
+    "bankedResetAutoApplyScheduleEndLabel": "የመስኮት መጨረሻ (ሰዓት፣ UTC፣ 0-24)",
+    "bankedResetAutoApplyScheduleEndHint": "ከመጨረሻው በኋላ ያለው ጅምር እኩለ ሌሊት ይሻገራል.",
+    "bankedResetAutoApplyHistoryTitle": "ታሪክ",
+    "bankedResetAutoApplyHistoryDesc": "የቅርብ ጊዜ አውቶማቲክ ቤዛዎች እና የደረቁ ውሳኔዎች።",
+    "bankedResetAutoApplyHistoryCounts": "ያለፉት 24 ሰዓታት {success} ተሳክቷል፣ {failed} አልተሳካም፣ {dryRun} ደረቅ ሩጫ።",
+    "bankedResetAutoApplyHistoryRefresh": "አድስ",
+    "bankedResetAutoApplyHistoryEmpty": "እስካሁን ምንም አውቶማቲክ ቤዛዎች ወይም የደረቁ ውሳኔዎች የሉም።",
+    "bankedResetAutoApplyHistoryError": "ታሪኩን መጫን አልተሳካም።",
+    "bankedResetAutoApplyHistoryTime": "ጊዜ",
+    "bankedResetAutoApplyHistoryAccount": "መለያ",
+    "bankedResetAutoApplyHistoryCreditType": "የብድር ዓይነት",
+    "bankedResetAutoApplyHistoryReason": "ቀስቅሴ / ምክንያት",
+    "bankedResetAutoApplyHistoryResult": "ውጤት",
+    "bankedResetAutoApplyTriggerSession": "በግድግዳ የተሸፈነ የ 5-ሰዓት መስኮት",
+    "bankedResetAutoApplyTriggerWeekly": "በግድግዳ የተሸፈነ ሳምንታዊ መስኮት",
+    "bankedResetAutoApplyTriggerExpiring": "ጊዜው ያለፈበት ክሬዲት",
+    "bankedResetAutoApplyResultSuccess": "ስኬት",
+    "bankedResetAutoApplyResultFailed": "አልተሳካም።",
+    "bankedResetAutoApplyResultDryRun": "ደረቅ መሮጥ",
+    "bankedResetAutoApplyResultUnknown": "ያልታወቀ ውጤት (በገደብ ተቆጥሯል)",
+    "bankedResetAutoApplyRedeemNowLink": "አሁን በአቅራቢ ገደቦች ላይ በእጅ ይውሰዱ",
     "codexWakeups": {
       "title": "የታቀዱ ማንቂያዎች",
       "desc": "በተመረጡ መለያዎች ላይ በመርሐግብር ping ይልካል፣ ስለዚህ የኮታ መስኮታቸው በሚፈልጉት ጊዜ ይጀምራል። እያንዳንዱ ሩጫ ትንሽ እውነተኛ የCodex ኮታ ይጠቀማል።",
@@ -9143,6 +9649,17 @@
     "resilienceTokenRefreshScopeConnection": "አገናኝ (እያንዳንዱ መለያ የራሱ መበረታቸው አለው)",
     "resilienceTokenRefreshThreshold": "ማቆሚያዎ ከመጠበቅ በፊት የሚደረጉ መሳሮች",
     "resilienceTokenRefreshCooldown": "ከመዘጋት በኋላ ይታቀኑ",
+    "mfaTitle": "ባለሁለት ደረጃ ማረጋገጫ",
+    "mfaDesc": "ወደ ዳሽቦርዱ ለመግባት ወይም CLI ን ለማገናኘት ከይለፍ ቃሉ በተጨማሪ ከማረጋገጫ መተግበሪያ የሚመጣ ኮድ ይጠይቁ።",
+    "mfaScanQr": "ይህን QR ኮድ በማረጋገጫ መተግበሪያዎ ይቃኙ (ወይም የማዋቀሪያ ቁልፉን በእጅ ያስገቡ)፣ ከዚያ የሚያሳየውን ባለ 6 አሃዝ ኮድ ይተይቡ።",
+    "mfaManualKey": "የማዋቀሪያ ቁልፍ",
+    "mfaCodeLabel": "የማረጋገጫ ኮድ",
+    "mfaBackupCodesTitle": "የመልሶ ማግኛ ኮዶችዎን ያስቀምጡ",
+    "mfaBackupCodesDesc": "የማረጋገጫ መተግበሪያዎን መድረስ ካልቻሉ እያንዳንዱ ኮድ አንድ ጊዜ ያስገባዎታል። ዳግም አይታዩም።",
+    "mfaBackupCodesRemaining": "የቀሩ የመልሶ ማግኛ ኮዶች፦ {count}",
+    "mfaDisableDesc": "ባለሁለት ደረጃ ማረጋገጫን ለማጥፋት የይለፍ ቃልዎን እና የአሁኑን ኮድ (ወይም የመልሶ ማግኛ ኮድ) ያስገቡ።",
+    "mfaRecoveryHint": "የጠፋ መሣሪያ መልሶ ማግኛ፦ አገልጋዩን በ OMNIROUTE_DISABLE_MFA=true ያስጀምሩ እና ከራሱ አስተናጋጅ ይግቡ።",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ተቀናብሯል፦ ከዚህ አስተናጋጅ የሚደረጉ መግቢያዎች ሁለተኛውን ደረጃ ይዘላሉ። ተመልሰው ከገቡ በኋላ ያስወግዱት።",
     "piiMasking": {
       "title": "የግል መረጃ መደበቅ",
       "description": "የትኞቹ የግል መረጃ ዓይነቶች እንደሚደበቁ ይምረጡ እና የራስዎን ቅጦች ያክሉ። ከታች የሚታዩትን የባህሪ ባንዲራዎች እስኪያበሩ ድረስ መደበቁ ጠፍቶ ይቆያል።",
@@ -9155,9 +9672,9 @@
         "financial": "ፋይናንስ",
         "brazilian": "ብራዚላዊ",
         "usa": "አሜሪካ",
-        "full": "ሙሉ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (ደቡብ አፍሪካ)"
+        "popia": "POPIA (ደቡብ አፍሪካ)",
+        "full": "ሙሉ"
       },
       "builtinTypes": "አብሮ የተሰሩ ዓይነቶች",
       "types": {
@@ -9201,7 +9718,12 @@
       "statsTitle": "ዳግም ከተጀመረ ወዲህ የተገኙ",
       "statsEmpty": "እስካሁን የተገኘ የለም።",
       "statsRequest": "ጥያቄዎች"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "የተገኙ የቪዲዮ ፍሬሞችን ያቆዩ",
+    "modalityBridgeVideoDrilldownEnabledDesc": "የተረጋገጠው ጥያቄ drilldown: true ን ሲያቀናብር ብቻ ጊዜያዊ የJPEG ማቆየትን ይፍቀዱ። ጥሬ ቪዲዮዎች በፍጹም አይቆዩም።",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "የተረጋገጠ የፍሬም ዝርዝር እይታን ይፍቀዱ",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "የAPI ቁልፎች የራሳቸውን ግልጽ ያልሆኑ መያዣዎች ብቻ እንዲያነቡና እንዲሰርዙ ይፍቀዱ። ማንነት ያልተገለጸ ወይም በተለያዩ ቁልፎች መካከል የሚደረግ መዳረሻ አይፈቀድም።",
+    "modalityBridgeVideoDrilldownUsage": "የተቆዩ JPEGዎች / ባይቶች"
   },
   "contextRtk": {
     "title": "RTK ሞተር",
@@ -10090,6 +10612,14 @@
     "streamTransformFailed": "ዥረቱን መለወጥ አልተሳካም"
   },
   "usage": {
+    "cursorModelUsageTitle": "የAPI ቶከኖች (በዚህ ዑደት)",
+    "cursorModelUsageBilledHint": "በCursor የተከፈለ",
+    "cursorModelUsageModel": "ሞዴል",
+    "cursorModelUsageInput": "ግቤት",
+    "cursorModelUsageOutput": "ውጤት",
+    "cursorModelUsageCacheRead": "የመሸጎጫ ንባብ",
+    "cursorModelUsageCacheWrite": "ወደ መሸጎጫ መጻፍ",
+    "cursorModelUsageCost": "ወጪ",
     "healthExtraUsageBypass": "ኮታው አልቋል፤ ተጨማሪ አጠቃቀም ስለተፈቀደ አገልግሎቱ ይቀጥላል።",
     "healthPaidCreditsBypass": "ኮታው አልቋል፤ ያሉት የተከፈሉ ክሬዲቶች አገልግሎቱ እንዲቀጥል ያስችላሉ።",
     "healthFilteringBypass": "ኮታው አልቋል፤ የአካባቢ ኮታ ማጣሪያ ስለጠፋ አገልግሎቱ ይቀጥላል።",
@@ -10318,6 +10848,7 @@
     "purchaseOauthFree": "OAuth ነፃ",
     "purchaseApiKey": "API ቁልፍ",
     "creditsLabel": "ክሬዲቶች",
+    "aiCreditsUsed": "{count} AI ክሬዲቶች ጥቅም ላይ ውለዋል",
     "creditBalanceHint": "ቀሪ ሂሳብ",
     "unlimitedLabel": "ያልተገደበ",
     "refreshing": "በመታደስ ላይ",
@@ -10675,6 +11206,8 @@
       "refreshFailures": "የቶከን እድሳት አለመሳካቶች ተገኝተዋል",
       "unknown": "የጤንነት ሁኔታው አይታወቅም"
     },
+    "tokenHealthRefreshAll": "ሁሉንም አድስ",
+    "tokenHealthRefreshResult": "{refreshed} ታድሷል፣ {failed} አልተሳካም፣ {skipped} ተዘለለ",
     "systemMonitor": {
       "metricsAriaLabel": "የስርዓት መለኪያዎች",
       "memory": "ማህደረ ትውስታ",
@@ -10827,7 +11360,11 @@
     "deleteAndRelaunch": "ይሰርዙ",
     "settingsJson": "settings.json",
     "fromDataDir": "ከውሂብ ማውጫው",
-    "relaunchApp": "የOmniRoute ዴስክቶፕ መተግበሪያን እንደገና ያስጀምሩ"
+    "relaunchApp": "የOmniRoute ዴስክቶፕ መተግበሪያን እንደገና ያስጀምሩ",
+    "mfaPrompt": "ከማረጋገጫ መተግበሪያዎ ያለውን ኮድ ያስገቡ",
+    "mfaCodeLabel": "የማረጋገጫ ኮድ",
+    "mfaCodePlaceholder": "ባለ 6 አሃዝ ኮድ ወይም የመልሶ ማግኛ ኮድ",
+    "mfaBackupCodeHint": "መሣሪያዎን አጥተዋል? በምትኩ ከመልሶ ማግኛ ኮዶችዎ አንዱን ያስገቡ።"
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -11692,7 +12229,30 @@
     "copilotPolicyAcknowledge": "ተረድቻለሁ፣ ተገናኝ",
     "tabPasteSetupToken": "የማዋቀሪያ ቶከን",
     "claudeSetupTokenDescription": "በተርሚናል ውስጥ `claude setup-token` ያሂዱ እና የሚያሳየውን ቶከን ይለጥፉ። ለአንድ ዓመት ያገለግላል እና የማደሻ ቶከን የለውም። OmniRoute ከማስቀመጡ በፊት አንድ የሙከራ ጥያቄ ወደ Anthropic ይልካል።",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "አድስ ማስመሰያ",
+    "antigravityRefreshTokenDescription": "ለ Antigravity የእርስዎን Google OAuth አድስ ማስመሰያ ይለጥፉ። OmniRoute ከማስቀመጡ በፊት አረጋግጦ ይለውጠዋል።",
+    "antigravityRefreshTokenPlaceholder": "1//...",
+    "m365Title": "በMicrosoft 365 Copilot መግባት",
+    "m365UrlExpiredHint": "ሳይጨርሱ ጊዜው ካለፈ አዲስ ሙከራ ይጀምሩ።",
+    "m365UrlExpires": "የዚህ የፈቃድ URL ጊዜ የሚያበቃው በ",
+    "m365AuthUrlCopyHint": "ሙሉውን የፈቃድ URL ይምረጡና በCtrl+C (በMac ላይ Command+C) ይገልብጡት፣ ወይም የአሳሽዎን የመገልበጫ ምናሌ ይጠቀሙ። Preserve log ካነቁ በኋላ ብቻ በባዶው ትር ውስጥ ይለጥፉት።",
+    "m365AuthUrlLabel": "የፈቃድ URL (ወደ ተዘጋጀው ትር ይገልብጡ)",
+    "m365StepNavigate": "ከታች ያለውን የፈቃድ URL ገልብጠው በተዘጋጀው ትር የአድራሻ አሞሌ ውስጥ ይለጥፉ፣ ከዚያም ለመግባት Enter ይጫኑ።",
+    "m365StepPrepare": "አዲስ ሙከራ ለመፍጠር በMicrosoft መግባትን ያዘጋጁ።",
+    "m365StepOpen": "ከታች ያለውን አገናኝ በመጠቀም በራስዎ አሳሽ ውስጥ ባዶ ትር ይክፈቱ። ገና ወደ Microsoft አይሂዱ።",
+    "m365StepNetwork": "በዚያ ባዶ ትር ውስጥ DevTools → Network ይክፈቱና ወደ ሌላ ገጽ ከመሄድዎ በፊት Preserve log ያንቁ። DevTools ክፍት ያቆዩ።",
+    "m365StepCopy": "ከገቡ በኋላ፣ በNetwork ውስጥ ወደ https://login.microsoftonline.com/common/oauth2/nativeclient የተላከውን ጥያቄ ያግኙና ሙሉውን Request URL ይገልብጡ። በአድራሻ አሞሌው ውስጥ ያለውን የመጨረሻውን wrongplace URL አይገልብጡ።",
+    "m365PrivateUrlHint": "የጥያቄው URL ለአንድ ጊዜ ብቻ የሚያገለግል የማረጋገጫ መረጃ ይዟል። እዚህ ብቻ ይለጥፉት፤ በፍጹም ለሌሎች አያጋሩት ወይም በምዝግቦች ውስጥ አያካትቱት።",
+    "m365Prepare": "በMicrosoft መግባትን ያዘጋጁ",
+    "m365Preparing": "መግባትን በማዘጋጀት ላይ…",
+    "m365OpenSignIn": "ባዶ ትር ይክፈቱ",
+    "m365CallbackLabel": "ሙሉው የnativeclient Request URL",
+    "m365Connecting": "በማገናኘት ላይ…",
+    "m365NewAttempt": "አዲስ ሙከራ ይጀምሩ",
+    "m365PrepareError": "በMicrosoft መግባትን ማዘጋጀት አልተቻለም። እንደገና ይሞክሩ።",
+    "m365ExchangeError": "በMicrosoft መግባትን ማጠናቀቅ አልተቻለም። አዲስ ሙከራ ይጀምሩ።",
+    "m365InvalidCallback": "ከዚህ ሙከራ አንድ code እና ተዛማጁን state የያዘውን ሙሉ nativeclient Request URL ይለጥፉ። ኮዶች ብቻቸውን እና wrongplace URLዎች አይቀበሉም።"
   },
   "cursorAuthModal": {
     "title": "Cursorን አገናኝ",
@@ -12204,6 +12764,10 @@
     "messageInputAria": "መልዕክት"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+    "upstreamStatus": "የላይኛው አገልጋይ {status}",
+    "noHttpResponse": "የHTTP ምላሽ አልታየም",
+    "transportError": "የማጓጓዣ ስህተት",
     "recording": "በመቅዳት ላይ",
     "paused": "ለጊዜው ቆሟል",
     "pipelineLogsOn": "የፓይፕላይን ምዝግብ ማስታወሻዎች በርተዋል",
@@ -12287,6 +12851,8 @@
       "increase": "ክፍተቱን ጨምር"
     },
     "status": {
+      "recoveredAttemptsTitle": "ጥያቄው በ{count} ሙከራዎች ተሳክቷል",
+      "latestOutcomeFailed": "የመጨረሻው ጥያቄ ውጤት አልተሳካም",
       "inProgress": "በሂደት ላይ",
       "recoveredByRetry": "በድጋሚ ሙከራ ተስተካክሏል",
       "goToParent": "ወደ ዋናው ጥያቄ ሂድ",
@@ -12299,6 +12865,9 @@
     },
     "attempts": "ሙከራዎች",
     "detail": {
+      "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+      "noHttpResponse": "የHTTP ምላሽ አልታየም",
+      "transportError": "የማጓጓዣ ስህተት",
       "collapse": "{title}ን ሰብስብ",
       "expand": "{title}ን ዘርጋ",
       "copyTitle": "{title}ን ቅዳ",
@@ -14170,6 +14739,14 @@
         "label": "የጋራ መውጫ ስብስብ ቅደም ተከተል",
         "description": "ኮታቸው በመውጫ አድራሻ ለተከፋፈለ አቅራቢዎች፣ በቅርቡ ውድቅ የተደረገውን አባል የታየበትን የመውጫ አድራሻ የሚጋራ የስብስብ አባልን ከጤናማ አባላት በታች ደረጃ ይስጡ። ቅደም ተከተል ብቻ ነው፣ በጭራሽ አይገለልም። የሚያነበውን የውድቅ ማድረጊያ ምልክት የሚያመነጨውን PROXY_SKIP_RECENTLY_FAILED ይፈልጋል። በነባሪነት ጠፍቷል፦ የመምረጫ ቅደም ተከተል ልክ እንደ መደበኛው ዝውውር ነው።"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "በሞዴል የተቀመጡ የኮታ ውድቀቶች",
+        "description": "opencode ኮታ 429ን ለተመታው ሞዴል ብቻ ይተግብሩ፣ ስለዚህ ያው ኢግሬስ ሌሎች ሞዴሎችን ማገልገሉን ይቀጥላል እና ያ ሞዴል ሲሳካ ብቻ ያፅዱት። ምንም ሞዴል የሌላቸው ሸማቾች (የገንዳ ማሽከርከር፣ ፓርክ እና መልሶ ማጫወት፣ የአስተዳዳሪ ታይነት፣ የመራጭ ቀስቃሽ፣ የጤና ጠረግ) አሁንም ያዩታል። እምቢታውን የሚያመጣው PROXY_SKIP_RECENTLY_FAILED ያስፈልገዋል. በነባሪ ጠፍቷል፡ የአንድ ሞዴል ኮታ 429 ለእያንዳንዱ ሞዴል መውጣቱን ያስቀምጣል።"
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "ተኪ ማምጣት፡ ጥብቅ POST እንደገና መጫወት",
+        "description": "ጥንካሬ ላልሆነ ጥያቄ (POST, PUT, PATCH, DELETE) ከትራንስፖርት ስህተት በኋላ እንደገና ላክ (ትኩስ ሶኬት፣ ተኪ ውድቀት፣ ቤተኛ መውደቅ) ስህተቱ ምንም እንዳልተላከ ሲያረጋግጥ ብቻ ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ወይም የግንኙነት ጊዜ ማብቂያ። ከጽሁፉ በኋላ የተፈጠረ የሶኬት ስህተት ወደላይ ያለው ሰው ጥያቄውን ተቀብሏል፣ ስለዚህ እንደገና መላክ ሁለት ጊዜ ማመንጨት እና ማስከፈል ይችላል። በነባሪነት ጠፍቷል፡ በማንኛውም የትራንስፖርት ስህተት ዳግም ሊጫወት የሚችል አካል አንድ ጊዜ ይናደዳል፣ ይህ ደግሞ የቆየ የተጠቀለለ ሶኬት ይመልሳል።"
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "የዝውውር አበርክቶ ምዝገባ",
         "description": "የOpencode ዝውውር የትኛው መለያ እንዳገለገለ ወይም እንደተዘለለ ይመዘግባል (የተሸፈኑ መታወቂያዎች ብቻ፣ በጭራሽ ሙሉ የመለያ መታወቂያዎች አይደሉም) እና ኦፕሬተሩ የተዘለሉ መለያዎችን ካልተጠቀሙባቸው ለይቶ ማወቅ እንዲችል የፕሮክሲ ምዝግብ ግቤቶችን ከጥያቄያቸው ጋር ያገናኛል። በነባሪነት ጠፍቷል፦ ምንም ተጨማሪ የምዝግብ መስመሮች፣ ምንም ተጨማሪ አምዶች አይጻፉም።"
@@ -14221,6 +14798,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 የፑል ድጋሚ ምርጫ",
         "description": "ለOpenCode ባለብዙ መለያ ቅብብሎሽ፣ በአካባቢ ፑል (ambient pool) አውድ ስር ፕሮክሲ በሌለው መለያ ላይ ከ egress-bucketed አቅራቢ 429 ከተቀበለ በኋላ፣ ተመሳሳዩን የ egress አድራሻ እንደገና ከመሞከር ይልቅ ለቀጣዩ ሙከራ የግንኙነት ፑሉን ሌላ አባል ይጠይቁ። ቅደም ተከተል ያስይዛል እንጂ በጭራሽ አያገልልም፦ የተሟጠጠ ፑል አሁን ያለውን ባህሪ ጠብቆ ያቆያል። በነባሪ ጠፍቷል፡ እያንዳንዱ 429 ልክ እንደበፊቱ ወደ ቀጣዩ መለያ ይሽከረከራል።"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode ነፃ-ደረጃ ኢግረስ ምርመራ",
+        "description": "ለ OpenCode ፈጻሚ፣ የተኪ ጥያቄ 403 ወይም 451 FreeTierError ሲመለስ እና የተስተዋሉ መሳሪያዎች ድጋሚ ሲሞክሩ ወይም ሳይተገበሩ ሲቀሩ፣ ጥያቄውን አንድ ጊዜ በተለያየ ፕሮክሲ በኩል ይላኩ (ሌላ የመለያ ፕሮክሲ ወይም ሌላ ገንዳ አባል፣ በጭራሽ ቀጥተኛ ግንኙነት)። ያ ፍተሻ 200 ሲመልስ ብቻ በፕሮክሲ እምቢታ ማህደረ ትውስታ ውስጥ የተቀመጠው የመጀመሪያው መውጣት እና የፍተሻ ምላሹ አገልግሎት ይሰጣል። ሁለቱም እምቢ ሲሉ, ዋናው እምቢታ ይመለሳል እና ምንም ነገር አይመዘገብም. ተመሳሳዩ የእምቢታ ጽሑፍ ባንዲራ የተደረገ egress IP እና ውድቅ የተደረገ የጥያቄ ቅርፅን ይሸፍናል፣ ስለዚህ መርማሪው በማስረጃ ይለያቸዋል። በነባሪ ጠፍቷል፡ እምቢታው ሳይለወጥ ይመለሳል።"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "የOpenCode v2 ደንበኛ የጣት አሻራ",
@@ -14401,6 +14982,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo፦ የይዘት ፖሊሲ እምቢታ ሲያጋጥም አቁም",
         "description": "አንድ የ Combo ዒላማ በትክክለኛ የይዘት ፖሊሲ እምቢታ (ኮድ ወይም ዓይነት cyber_policy / content_policy_violation) ምላሽ ሲሰጥ፣ ወደ ቀጣዩ ዒላማ ከማለፍ ይልቅ የቀሩት ዒላማዎች የተለያዩ ሞዴሎች ቢሆኑም እንኳ Comboውን ያቁሙ እና ያንን እምቢታ ይመልሱ። በነባሪነት ጠፍቷል፦ እምቢታው መለያውን በፍጹም cooldown ውስጥ አያስገባም ወይም provider breakerን አያስነሳም፣ እንዲሁም Comboው ልክ እንደቀድሞው ወደ ቀጣዩ ዒላማው ያልፋል።"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "ምላሾች፡- በትራንስፖርት ላይ ብቻ ይኑር",
+        "description": "ምላሾችን ጠባቂዎችን ከ response.in_progress ክስተት ይልቅ እንደ ባዶ መስመር ይላኩ፣ ስለዚህ ሰው ሰራሽ የሆነ ቅጽበተ-ፎቶ በይፋዊው SDK ውስጥ ትክክለኛውን ምላሽ በጭራሽ ሊተካ አይችልም። ባዶ መስመር ምንም SSE ክስተት አይልክም፣ ስለዚህ በክስተቶች ላይ ብቻ ዳግም የሚያስጀምር የደንበኛ ጠባቂ በፀጥታ ረጅም ጊዜ ውስጥ ዳግም አይጀምርም። በነባሪ ጠፍቷል፡ የሰዓት ቆጣሪዎች ልዩ የሆነውን response.in_progress ክስተት ይልካሉ።"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",
@@ -14409,270 +14994,6 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "ያልተዋጋ የአጠቃቀም የበጀት ፖሊሲ",
         "description": "የእያንዳንዱ ቁልፍ የዕለታዊ/የሳምንታዊ USD ገደቦች ለአቅራቢው/ሞዴሉ የዋጋ መዝገብ የሌለው ተጠቃሚነትን እንዴት እንደሚያነካ ይገልፃል። fail_closed (ነባር) መድብን እንደ ተበላሸ ይምልከታል፣ ስለዚህ ያልታወቀ ወጪ ከጥንቃቄ የተደረገ ከፍ አይላላም። count_as_zero እንዲሁ እንደ $0 ይቆጠራል እና የተዋጋ ወጪን መቆጣጠር ይቀጥላል። በሁለቱም ሁኔታዎች ያልተዋጋ ሞዴሎች በዳሽቦርድ መነጽር ገጽ ላይ ይታያሉ።"
-      },
-      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
-        "label": "የመለያ መታወቂያዎችን መዝግብ",
-        "description": "በAUTH ምዝግብ መስመሮች ውስጥ የመለያ ቅድመ-ቅጥያን ያካትቱ (ለምሳሌ \"'<provider>' መለያን በመጠቀም: abc12345...\"). በነባሪነት ጠፍቷል፣ በዚህም የመለያ መታወቂያዎች ከተጋሩ/ባለብዙ ተከራይ የሂደት ምዝግቦች ይደበቃሉ። ከDebug Mode ነጻ ነው፤ Debug Modeን መቀየር ይህንን አይገልጠውም።"
-      },
-      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
-        "label": "በOIDC የይለፍ ቃል መግቢያን አሰናክል",
-        "description": "OIDC ሲነቃ፣ ተጠቃሚዎች በOIDC Single Sign-On ብቻ ማረጋገጥ እንዲችሉ የይለፍ ቃል መግቢያን ያሰናክሉ። ሲሰናከል (ነባሪ)፣ ሁለቱም የይለፍ ቃል መግቢያ እና OIDC ይገኛሉ።"
-      },
-      "AUDIO_REMOTE_PROVIDER_NODES": {
-        "label": "የርቀት የድምጽ አቅራቢ ኖዶች",
-        "description": "የ /v1/audio/* መስመሮች ከlocalhost ውጭ የተስተናገዱ ከOpenAI-ጋር የሚጣጣሙ የአቅራቢ ኖዶችን እንዲጠቀሙ ፍቀድ። በነባሪነት ጠፍቷል — ድምጽን ወደ ሩቅ አስተናጋጅ ማስተላለፍ የመውጫ ማንነትን ስለሚቀይር ግልጽ የአስኬጅ ውሳኔ መሆን አለበት። የLoopback ኖዶች ሁልጊዜ የተፈቀዱ ናቸው እና ምንም ተጽዕኖ አይደርስባቸውም።"
-      },
-      "RERANK_REMOTE_PROVIDER_NODES": {
-        "label": "የርቀት የRerank አቅራቢ ኖዶች",
-        "description": "POST /v1/rerank (እና በloopback በኩል የሚጠራውን የማህደረ-ትውስታ ሞተር የrerank ደረጃ) ከlocalhost ውጭ የተስተናገዱ ከOpenAI-ጋር የሚጣጣሙ የአቅራቢ ኖዶችን እንዲጠቀም ፍቀድ — TEI፣ Infinity፣ vLLM ወዘተ የሚያስኬድ የLAN ሳጥን ወይም Tailscale peer። በነባሪነት ጠፍቷል — ወደ ሩቅ አስተናጋጅ ማስተላለፍ የመውጫ ማንነትን ስለሚቀይር ግልጽ የአስኬጅ ውሳኔ መሆን አለበት። የLoopback ኖዶች ሁልጊዜ የተፈቀዱ ናቸው እና ምንም ተጽዕኖ አይደርስባቸውም። የርቀት ኖዶች የአቅራቢውን የወጪ URL ፖሊሲ ማለፍ አለባቸው።"
-      },
-      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
-        "label": "የኔትወርክ ዝውውር የጋራ-መውጫ ጥበቃ",
-        "description": "በባለብዙ መለያ ዝውውር አስፈጻሚ ላይ የኔትወርክ ስህተት (timeout፣ connection refused/reset) ሲያጋጥም፣ ያልተሳካለት መለያ የተለየ ፕሮክሲ ከሌለው፣ አጭር የማቀዝቀዣ ጊዜ (cooldown) ይተግብሩ እና እያንዳንዳቸውን እንደገና ከመሞከር ይልቅ ለቀሪው የጥያቄ ሂደት ሌሎች ፕሮክሲ የሌላቸውን መለያዎች ይዝለሉ። በነባሪነት በርቷል (ደህንነቱ የተጠበቀ፦ ምንም የegress IP ለውጥ የለም፣ በጋራ መውጫ ባላቸው መለያዎች ላይ የመዘግየት/የcooldown አደጋን ብቻ ይቀንሳል)። በመጀመሪያው ፕሮክሲ-አልባ ስህተት ላይ ፈጣን ስርጭትን ወደነበረበት ለመመለስ ያጥፉት።"
-      },
-      "PROXY_SKIP_RECENTLY_FAILED": {
-        "label": "በቅርቡ ያልተሳኩ ፕሮክሲዎችን ዝለል",
-        "description": "የፕሮክሲ ስብስቦች እና የopencode የመለያ-ተኮር ዝውውር ገደብ እስኪደርስ ድረስ በእያንዳንዱ ድግግሞሽ እጥፍ ለሚሆን የሂደት-ተኮር ጊዜ አሁን ያልተሳካለትን ፕሮክሲ (የተከለከለ የTCP ፍተሻ፣ ወይም በእሱ በኩል 429 የተቀበለ) እንደገና ማቅረብ ያቆማሉ። ምንም የፕሮክሲ ሁኔታ አይጻፍም፤ እያንዳንዱ እጩ ወደ ጎን ሲቀመጥ ምርጫው ሳይለወጥ ይቆያል። በነባሪነት በርቷል፦ የመምረጫ ቅደም ተከተል ልክ እንደ መደበኛው ዝውውር የሚሆነው በPROXY_SKIP_RECENTLY_FAILED=false ብቻ ነው።"
-      },
-      "PROXY_POOL_SHARED_EGRESS_ORDER": {
-        "label": "የጋራ መውጫ ስብስብ ቅደም ተከተል",
-        "description": "ኮታቸው በመውጫ አድራሻ ለተከፋፈለ አቅራቢዎች፣ በቅርቡ ውድቅ የተደረገውን አባል የታየበትን የመውጫ አድራሻ የሚጋራ የስብስብ አባልን ከጤናማ አባላት በታች ደረጃ ይስጡ። ቅደም ተከተል ብቻ ነው፣ በጭራሽ አይገለልም። የሚያነበውን የውድቅ ማድረጊያ ምልክት የሚያመነጨውን PROXY_SKIP_RECENTLY_FAILED ይፈልጋል። በነባሪነት ጠፍቷል፦ የመምረጫ ቅደም ተከተል ልክ እንደ መደበኛው ዝውውር ነው።"
-      },
-      "ROTATION_ATTRIBUTION": {
-        "label": "የዝውውር አበርክቶ ምዝገባ",
-        "description": "የOpencode ዝውውር የትኛው መለያ እንዳገለገለ ወይም እንደተዘለለ ይመዘግባል (የተሸፈኑ መታወቂያዎች ብቻ፣ በጭራሽ ሙሉ የመለያ መታወቂያዎች አይደሉም) እና ኦፕሬተሩ የተዘለሉ መለያዎችን ካልተጠቀሙባቸው ለይቶ ማወቅ እንዲችል የፕሮክሲ ምዝግብ ግቤቶችን ከጥያቄያቸው ጋር ያገናኛል። በነባሪነት ጠፍቷል፦ ምንም ተጨማሪ የምዝግብ መስመሮች፣ ምንም ተጨማሪ አምዶች አይጻፉም።"
-      },
-      "PROXY_POOL_EGRESS_OBSERVATION": {
-        "label": "የፕሮክሲ ፑል Egress ምልከታ",
-        "description": "በዳሽቦርዱ ውስጥ ባለ የፕሮክሲ ፑል ሥር፣ ባለፉት 24 ሰዓታት ውስጥ ምን ያህል የታዩ የegress IPዎች አባላቱን እንዳገለገሉ፣ ምን ያህል ግንኙነቶች እንደተጠቀሙባቸው እና በአንድ IP ጀርባ በብዛት የታየውን ያሳዩ። ለንባብ ብቻ፣ ከፕሮክሲ ሎግ የሚሰላ፣ ለማዘዋወር ፈጽሞ ጥቅም ላይ የማይውል። በነባሪ ጠፍቷል፡ የፑል አራሚው አይለወጥም እና የobservation route null መልስ ይሰጣል።"
-      },
-      "PROXY_OPERATOR_EGRESS_ENABLED": {
-        "label": "የፕሮክሲ ኦፕሬተር Egress",
-        "description": "በኦፕሬተር የተላኩ የቀን ማህተም ያላቸው የታዩ አድራሻዎችን ለእያንዳንዱ የፑል አባል ይቀበሉ እና ለእይታ እንዲሁም ለፑል ቅደም ተከተል ከጆርናል ንባብ ጋር ያዋህዷቸው። በነባሪ ጠፍቷል፡ የpush route 404 መልስ ይሰጣል እና የፑል ንባቦች ልክ እንደበፊቱ ይሰራሉ።"
-      },
-      "OPENCODE_RESPONSES_STALL_ROTATION": {
-        "label": "የOpenCode Responses Stall ዝውውር",
-        "description": "ለOpenCode አስፈጻሚ፣ የሚለቀቅ የResponses ምላሽ የመጀመሪያውን የbody ባይት ይከታተሉ (መስኮት፦ RESPONSES_FIRST_BYTE_TIMEOUT_MS፣ ነባሪ 15000)። ከመስኮቱ የጊዜ ገደብ በላይ ዝም ያለ የ2xx Responses ዥረት እንደቆመ ይቆጠራል፡ መለያው እንዲቀዘቅዝ ይደረጋል እና ጥያቄው አንድ ጊዜ ወደሚቀጥለው መለያ ይዘዋወራል፤ ሁለተኛ መቆም ወዲያውኑ ይከሽፋል። በነባሪ ጠፍቷል፡ የቆሙ ዥረቶች የstream readiness timeout እስኪያበቃ ድረስ የዛሬውን የጥበቃ ጊዜ ያቆያሉ።"
-      },
-      "OPENCODE_USER_BLOCKED_ROTATION": {
-        "label": "የOpenCode user_blocked ዝውውር",
-        "description": "ለOpenCode አስፈጻሚ፣ upstream የuser_blocked እምቢታን የያዘ የ403 ወይም 451 ምላሽ ሲሰጥ (የአካባቢ እገዳ ያልሆነ፣ የCloudflare fingerprint ውድቅ ማድረግ ያልሆነ)፣ ውድቅ የተደረገውን መለያ ያቀዝቅዙ እና በአንድ ጥያቄ ቢበዛ አንድ ጊዜ ወደሚቀጥለው መለያ ያዘዋውሩ፤ ሁለተኛው እምቢታ ያለስኬት ምልክት እንዳለ ይመለሳል። በነባሪ ጠፍቷል፦ በupstream የተጠቃሚ እገዳ ዙሪያ ማዘዋወር እንደ ማምለጥ ሊቆጠር እና ምልክቱን በመለያዎች ስብስብ ላይ ሊያሰራጭ ስለሚችል፣ ኦፕሬተሩ ካልፈቀደ በስተቀር እምቢታው ሳይለወጥ ይመለሳል።"
-      },
-      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
-        "label": "የOpenCode ጊዜያዊ የፌይልኦቨር ማዘግያ (Backoff)",
-        "description": "ለOpenCode ባለብዙ መለያ ዝውውር፣ ሁለት ተከታታይ ሙከራዎች በጊዜያዊ የupstream ስህተት (5xx ወይም ባዶ 400 ውድቅ ማድረጊያ) ካልተሳኩ ወደ ቀጣዩ መለያ ከመላክዎ በፊት ለአፍታ ያቁሙ። ማቆያው በ1.5s ይጀምራል፣ በእያንዳንዱ ተጨማሪ ተከታታይ ውድቀት እጥፍ ይሆናል፣ በእያንዳንዱ ማቆም በ6s እና በእያንዳንዱ ጥያቄ በ10s የተገደበ ነው፣ ደንበኛው ሲቋረጥ ይታለፋል፣ እንዲሁም ያልተሳካው የምላሽ አካል ከመጠበቁ በፊት ይለቀቃል። በነባሪነት ጠፍቷል፡ ፌይልኦቨር ወዲያውኑ እንደነበረ ይቀጥላል።"
-      },
-      "FLUSH_EMPTY_RETRY_ENABLED": {
-        "label": "የባዶ ዙር ዳግም ሙከራ ፍላሽ",
-        "description": "በተተረጎሙ የዥረት ዙሮች ላይ፣ የupstream ዙሩ ምንም ጥቅም ላይ የሚውል ይዘት በማይይዝበት ጊዜ (reasoning-only ማጠናቀቂያ ወይም ዜሮ ጠቃሚ chunks)፣ ምንም ነገር ለደንበኛው ከመታየቱ በፊት በመደበኛው የመረጃ ማረጋገጫ መንገድ የተገደቡ ዳግም ሙከራዎችን (እስከ `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` ድረስ) ያከናውኑ። በነባሪነት ጠፍቷል፡ ባዶ ዙሮች አሁን ያለውን ባህሪ ጠብቀው ይቆያሉ (ባዶ 200 ወይም empty-content 502)።"
-      },
-      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
-        "label": "የባዶ ዥረት አቻ ማገገሚያ",
-        "description": "የClaude/Codex ዥረት፦ ከመጀመሪያው የሕይወት ዑደት ክስተት በኋላ፣ ጠቃሚ ውጤት መኖሩን ለአጭር ጊዜ (እስከ 1s / 64 KiB ድረስ) ይፈትሹ፤ ያለ ምንም ይዘት የሚያበቃ ዥረት አሁን ያለውን የተገደበ ዳግም ሙከራ በሌላ ብቁ ግንኙነት ላይ የሚያጠፋ (ምንም cooldown የለም፣ ምንም model lockout የለም) የempty_content ውድቀት ይሆናል፣ እንዲሁም ደንበኛው ግንኙነቱን ሲያቋርጥ የround-robin ቅንጅቶች ዳግም መሞከራቸውን ያቆማሉ። በተጨማሪም በምርመራው ውስጥ refusal፣ pause_turn እና model_context_window_exceeded እንደ ህጋዊ ባዶ መቋጫዎች ይቆጠራሉ። በነባሪነት ጠፍቷል፡ ዝግጁነት፣ የempty-content አያያዝ እና የቅንጅት ዳግም ሙከራዎች ልክ እንደበፊቱ እንዳሉ ይቀጥላሉ።"
-      },
-      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
-        "label": "የዘገየ የዥረት ውጤት ምርመራ",
-        "description": "የዥረት ውጤት ምርመራ፦ የመጀመሪያዎቹ 64 የተላለፉ chunks ካለፉ በኋላ፣ ለመጀመሪያው የሚታይ ውጤት ከ16 አንዱን chunk ናሙና መውሰድዎን ይቀጥሉ፤ በዚህም ዘግይቶ የሚጀምር ውጤት ዥረቱ ውጤት እንዳወጣ ምልክት እንዲደረግበት ያደርጋል። ከዚያ ነጥብ በኋላ የሚከሰት ነጠላ 5xx የmodel-only lockout ከመመዝገብ ይልቅ በrequest-scoped የተገደበ ሆኖ ይቆያል፣ እንዲሁም firstOutputMs አሁን ባለው የናሙና ክፍተት የመጀመሪያው የውጤት chunk ላይ መልሶ ይሞላል። በነባሪነት ጠፍቷል፡ ልክ እንደበፊቱ የመጀመሪያዎቹ 64 የተላለፉ chunks ብቻ ይመረመራሉ።"
-      },
-      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
-        "label": "የOpenCode የልክ ገደብ 429 ቅድመ-ማቆሚያ",
-        "description": "ለOpenCode ባለብዙ መለያ ቅብብሎሽ፣ እያንዳንዱን ቀሪ መለያ ከመሞከር ይልቅ የመለያ ዙሩን እንደ እውነተኛ የልክ ገደብ በተመደበው የመጀመሪያው 429 (ሊተነተን የሚችል የ Retry-After ራስጌ፣ ወይም የልክ/የአጠቃቀም ገደብን የሚገልጽ አካል) ላይ ያቁሙ እና ያንን upstream 429 ሳይቀይሩ (ሁኔታ፣ አካል፣ Retry-After እና የኮታ ራስጌዎች) ይመልሱ። ያልተመደቡ 429ዎች መሽከርከራቸውን ይቀጥላሉ። በነባሪ ጠፍቷል፡ ነፃው እርከን በእያንዳንዱ የ egress IP (#9611) የተገደበ ነው፣ ስለዚህ እያንዳንዱ 429 ወደ ቀጣዩ መለያ ይሽከረከራል፣ እና ያለቀ ዙር የመጨረሻውን upstream 429 ይመልሳል።"
-      },
-      "OPENCODE_PARK_AND_RESUME": {
-        "label": "OpenCode 429 ማቆም እና ማስቀጠል",
-        "description": "ለOpenCode ባለብዙ መለያ ቅብብሎሽ፣ ከተደጋጋሚ ጊዜያዊ 429ዎች (ወይም ከአዲስ የ pool-strain ምልክት) በኋላ ጥያቄውን በ heartbeat ያቁሙ፣ ከዚያም መላውን ስብስብ በስፋት ከማሰራጨት ይልቅ እስከ 3 ተከታታይ መለያዎች ድረስ የተገደበ አንድ ዙር እንደገና ያሂዱ። በነባሪ ጠፍቷል፡ እያንዳንዱ 429 ልክ እንደበፊቱ ወደ ቀጣዩ መለያ ይሽከረከራል።"
-      },
-      "STREAM_READINESS_STALL_RETRY": {
-        "label": "የዥረት ዝግጁነት መቆም ድጋሚ ሙከራ",
-        "description": "ለዥረት ውይይት ጥያቄዎች፣ የመጀመሪያው የ upstream አካል ጥቅም ላይ ሊውል የሚችል ክስተት ሳያመጣ ሲቆም፣ በተመሳሳይ የመተላለፊያ መንገድ፣ በተመሳሳይ የዝግጁነት በጀት እና ያለምንም የመለያ ቅጣት አንድ የተገደበ ሁለተኛ ሙከራ ያድርጉ። በነባሪ ጠፍቷል፡ የቆመ የመጀመሪያ አካል ያለ ምንም ድጋሚ ሙከራ ጥያቄውን ውድቅ ያደርገዋል።"
-      },
-      "OPENCODE_POOL_RESELECT": {
-        "label": "OpenCode 429 የፑል ድጋሚ ምርጫ",
-        "description": "ለOpenCode ባለብዙ መለያ ቅብብሎሽ፣ በአካባቢ ፑል (ambient pool) አውድ ስር ፕሮክሲ በሌለው መለያ ላይ ከ egress-bucketed አቅራቢ 429 ከተቀበለ በኋላ፣ ተመሳሳዩን የ egress አድራሻ እንደገና ከመሞከር ይልቅ ለቀጣዩ ሙከራ የግንኙነት ፑሉን ሌላ አባል ይጠይቁ። ቅደም ተከተል ያስይዛል እንጂ በጭራሽ አያገልልም፦ የተሟጠጠ ፑል አሁን ያለውን ባህሪ ጠብቆ ያቆያል። በነባሪ ጠፍቷል፡ እያንዳንዱ 429 ልክ እንደበፊቱ ወደ ቀጣዩ መለያ ይሽከረከራል።"
-      },
-      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
-        "label": "የOpenCode v2 ደንበኛ የጣት አሻራ",
-        "description": "በOpenCode Zen/Go ጥያቄዎች ላይ የOpenCode v2 CLI ደንበኛ የጣት አሻራን ይላኩ (#16571)፦ User-Agent opencode/latest/<2.x>/cli እና x-opencode-client cli፣ የደንበኛ User-Agent የሚቀመጠው የ2.x OpenCode ደንበኛ ሲሆን ብቻ ነው፣ እና በተገደቡ የነጻ-እርከን ጥያቄዎች ላይ ምንም x-opencode-request የለም፣ ክፍለ-ጊዜው ወደ x-opencode-session-id/x-session-affinity/x-session-id ተንጸባርቋል፣ በተከተቱ የቦታ ያዥ መሣሪያዎች ላይ ያሉ የv2 CLI read/shell ስኪማዎች እና የ\"none\" tool_choice ተጥለዋል። በነባሪነት ጠፍቷል፦ እያንዳንዱ የOpenCode ጥያቄ የአሁኑን ማንነት፣ ራስጌዎች እና አካል ባይት በባይት እንዳለ ይጠብቃል።"
-      },
-      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
-        "label": "የOpenCode Zen Egress-IP እገዳ",
-        "description": "OpenCode Zen (opencode-zen)ን ወደ ነባሪው የegress-IP እገዳ ቤተሰብ ያክሉ፤ በዚህም በአንድ Zen ግንኙነት ላይ የሚፈጠር 429 የእሱን egress IP የሚጋሩ ማናቸውንም አጋር የZen ግንኙነቶች ያበርዳል። በነባሪነት ጠፍቷል፦ Zen በቁልፍ የሚለይ ሲሆን እያንዳንዱ ግንኙነት ልክ እንደበፊቱ በራሱ ይበርዳል። ግልጽ የOMNIROUTE_EGRESS_IP_LOCK_PROVIDERS እሴት ሁልጊዜም ከዚህ ባንዲራ ይቀድማል።"
-      },
-      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "የOpenCode ሙሉ-ጽሑፍ የስህተት ደንቦች",
-        "description": "አብሮ የተሰሩት የOpenCode የስህተት ደንቦች (opencode-zen፣ opencode-go፣ opencode-cli) ከሙሉ የupstream ስህተት ጽሑፍ ጋር እንዲመሳሰሉ ይፍቀዱ፤ በዚህም እንደ organization_quota_exceeded ወይም \"monthly usage limit reached\" ያሉ የአካል ጠቋሚዎች 429ን ከግንኙነት-ወሰን መቆለፊያ ጋር እንደ ኮታ መጠናቀቅ ይመድቡታል። በነባሪነት ጠፍቷል፦ እነዚያ ደንቦች የተዋቀረውን የስህተት ኮድ ብቻ የሚያዩ ሲሆን እንደዚህ ያለው 429 ልክ እንደበፊቱ አጭር የደረጃ ገደብ (rate limit) ሆኖ ይቆያል።"
-      },
-      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "የCloudflare Workers AI ሙሉ-ጽሑፍ የስህተት ደንቦች",
-        "description": "አብሮ የተሰራው የCloudflare Workers AI የስህተት ደንብ ከሙሉ የupstream ስህተት ጽሑፍ ጋር እንዲመሳሰል ያድርጉ፤ በዚህም የ429 \"daily free allocation\" አካል ከአጭር የደረጃ ገደብ (rate limit) ይልቅ እንደ ኮታ መጠናቀቅ ይመደባል። በነባሪነት ጠፍቷል፦ ደንቡ ልክ እንደበፊቱ የተዋቀረውን የስህተት ኮድ ብቻ ያያል።"
-      },
-      "CAPABILITY_FILTER_ENABLED": {
-        "label": "የአቅም ማጣሪያ",
-        "description": "የታለመው ሞዴል አስፈላጊዎቹ አቅሞች (እይታ፣ መሣሪያዎች፣ የተዋቀረ ውፅዓት፣ የዐውድ መስኮት) ሲጎድሉት ጥያቄዎችን ከመላካቸው በፊት ውድቅ ያድርጉ። የcombo-layer የተኳኋኝነት ማጣሪያን የሚያልፉ ቀጥተኛ ነጠላ-አቅራቢ ጥያቄዎችን ይጠብቃል።"
-      },
-      "USAGE_LIMIT_IGNORE_UNPRICED": {
-        "label": "በUSD ኮታዎች ውስጥ ዋጋ ያልተቆረጠለትን አጠቃቀም ችላ በል",
-        "description": "ኮታው እንደተጠናቀቀ ከመቁጠር ይልቅ፣ ዋጋ የሌላቸውን ሞዴሎች አጠቃቀም በእያንዳንዱ ቁልፍ የUSD አጠቃቀም ኮታዎች ውስጥ እንደ $0 ይቁጠሩ። በነባሪነት ጠፍቷል፦ ዋጋ ያልተቆረጠለት ሞዴል ወይም የማዘዋወሪያ ተለዋጭ ስም (routing alias) ትክክለኛውን ወጪ ሊደብቅ ስለሚችል ኮታው እንዳያልፍ ተዘግቶ ይቆያል (fails closed)።"
-      },
-      "RADAR_ENABLED": {
-        "label": "ራዳር",
-        "description": "የOmniRoute Radar ሞጁልን ያንቁ (የካታሎግ ፊድ ስክሪኖች እና ማመሳሰል)። በነባሪነት ጠፍቷል፤ ማብራት UIውን ብቻ ይከፍታል — የውሂብ ማመሳሰል እንደ ተለየ ምርጫ (opt-in) ሆኖ ይቆያል።"
-      },
-      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
-        "label": "የሞዴል Endpoint የአቅም በር",
-        "description": "የታመኑ የሞዴል endpoint መለያዎችን ያስገድዱ (በአቅራቢው ካታሎግ የታወጁ፣ ከልዩ የሞዴል id የተረዱ፣ ወይም በኦፕሬተሩ የተመደቡ)፦ በ/v1/chat/completions፣ /v1/embeddings፣ /v1/rerank፣ /v1/images/generations፣ /v1/videos/generations፣ /v1/music/generations እና /v1/audio/* ላይ ከመላኩ በፊት፣ ሞዴሉ ለማያገለግለው endpoint የተላከን ጥያቄ በHTTP 400 ውድቅ ያድርጉ፤ መለያ የተሰጣቸው endpoints የOmniRoute adapter የሌላቸውን ሞዴሎች ከ/v1/models ይደብቁ፤ እና ለእነዚህ ሞዴሎች የዳሽቦርድ ሞዴል ሙከራን በ422 ይመልሱ። በነባሪነት ጠፍቷል፦ የendpoint መለያዎች ለመረጃ ያህል ብቻ ሆነው ይቆያሉ እንዲሁም ጥያቄዎች ልክ እንደበፊቱ ይላካሉ።"
-      },
-      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
-        "label": "ሁለንተናዊ የአውድ ርክክብ",
-        "description": "የኮምቦ ራውቲንግ ሞዴሎችን ሲቀይር የውይይት ማጠቃለያዎችን ያመንጩ እና ያስገቡ። የሞዴል ቅያሬዎችን ራሳቸውን ችለው እንዲስተናገዱ ለማድረግ እና ለሁሉም ነባር እንዲሁም የወደፊት ኮምቦዎች የጀርባ ርክክብ ጥያቄዎችን ለመከላከል ያሰናክሉ።"
-      },
-      "REASONING_REPLAY_ENABLED": {
-        "label": "የአመክንዮ ድጋሚ ማጫወት",
-        "description": "በበርካታ ዙር ውይይቶች ውስጥ የሞዴል አመክንዮን ያሸጉጡ እና መልሰው ያጫውቱ። አመክንዮን ማከማቸት እና ዳግም ማስገባትን ለማቆም ያሰናክሉ።"
-      },
-      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
-        "label": "የCodex App-Server ትራንስፖርት",
-        "description": "Codex የአካባቢውን app-server WebSocket JSON-RPC ትራንስፖርት (codexTransport=app-server) እንዲጠቀም ይፍቀዱ። ሲጠፋ፣ ወደ app-server የተመረጡ ግንኙነቶች ወደ ሌሎች የCodex ትራንስፖርቶች ይመለሳሉ።"
-      },
-      "EXPOSE_CC_DISCOVERY_ALIASES": {
-        "label": "የClaude Code መለያ ቅራጮች",
-        "description": "claude/'<provider>'/'<model>' የቅጽል መለያዎችን በ/v1/models ላይ እንደገጸጥፍ እና በClaude Code ገጸጥ ወገን የመለያ ቅጽል ቅጥል ለማክፈል ያስፈልጋል። ማስታወቂያ: በጎጅ ህገስ ሁሉም ዶሪታዎች ላይ ሁሉንም ህገስ ብዛት ባስገጥፈላታል።"
-      },
-      "NO_THINKING_ALIAS_ENABLED": {
-        "label": "የመላካያ ሞዴል ቅጽል መለያዎች",
-        "description": "Master switch for the no-think/'<provider>'/'<model>' gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on."
-      },
-      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
-        "label": "የማሰብ ደረጃ ተለዋጮችን አሰናክል",
-        "description": "በ /v1/models ካታሎግ ውስጥ የማሰብ ደረጃ ተለዋጮች (ለምሳሌ -low, -medium, -high) ማመንጨትን አሰናክል።"
-      },
-      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
-        "label": "ተጣጣሚ ምናባዊ የመግቢያ መስመሮች",
-        "description": "ለአቅራቢ ስርጭት በየተከራዩ ተጣጣሚ ምናባዊ የመግቢያ መስመሮችን አንቃ (#9654)፦ የአንድ ተከራይ ድንገተኛ ጭነት ሌላውን 503 አያደርግም። የ OMNIROUTE_CHAT_VIRTUAL_LANES env var ከዚህ የዳሽቦርድ መሻሪያ ቅድሚያ ያገኛል፤ ለውጦች አገልጋዩ ዳግም ሲነሳ ተግባራዊ ይሆናሉ።"
-      },
-      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
-        "label": "Functional Gateway Mirrors",
-        "description": "ቀኖናዊ ባለቤታቸው ንቁ የመግቢያ ማስረጃ የሌለው ነገር ግን ንቁ የመግቢያ ማስረጃ ያለው passthrough gateway የሚያስተላልፋቸው ሞዴሎች '<gateway-alias>'/'<model>' የመስታወት id-ዎችን በ/v1/models ላይ ያስተዋውቁ። ማስጠንቀቂያ፦ በአጠቃላይ ሲነቃ ለሁሉም ደንበኞች የካታሎግ ግቤቶችን ይጨምራል።"
-      },
-      "NEWAPI_AGGREGATOR_BALANCE": {
-        "label": "የNew-API አግሪጌተር ቀሪ ሂሳብ",
-        "description": "ለNew-API / One-API / Sub2API አግሪጌተር ተስማሚ ለሆኑ ኖዶች የቀሪ ሂሳብ ማወቂያን ያንቁ። ሲነቃ፣ የአግሪጌተር ፍላግ የተቀናበረላቸው ተስማሚ ኖዶች ቀሪ ሂሳባቸውን በዳሽቦርዱ እና በquota-preflight ራውቲንግ ውስጥ ሪፖርት ያደርጋሉ።"
-      },
-      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
-        "label": "የተሰረዙ የፍለጋ ግንኙነቶችን ደብቅ",
-        "description": "የፍለጋ ስታቲስቲክስ እና የቅርብ ጊዜ ፍለጋዎች አሁንም የቀጥታ ግንኙነት ያላቸውን አቅራቢዎች ብቻ ይቆጥራሉ (እንደ duckduckgo-free ያሉ ቁልፍ አልባ አቅራቢዎች ሁልጊዜ ይቆጠራሉ)። ማጥፋት ከአቅራቢ መታወቂያ (provider id) ጋር የተቀመጠ እያንዳንዱን የፍለጋ ረድፍ ያቆያል።"
-      },
-      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
-        "label": "ጥብቅ የFree ባጅ",
-        "description": "የዳሽቦርድ አቅራቢ ገጾች፡ የFree ባጅን አቅራቢው በሚያከብራቸው ሲግናሎች ላይ ብቻ አሳይ — የተመዘገበ የነጻ ደረጃ (free tier) በሌላቸው የተመዘገቡ አቅራቢዎች ላይ የdisplay-name ሂዩሪስቲክን፣ ቡሊያን ያልሆኑ የfree መስኮችን እና የ:free ቅጥያዎችን ያስወግዳል። ማጥፋት የቀደመውን የባጅ ደንብ ያቆያል።"
-      },
-      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
-        "label": "Auto Combo፡ ባዶ ፑል በ503 ይመልሳል",
-        "description": "የtool-calling ቅድመ-ማጣሪያ ከመካሄዱ በፊት የአንድ auto combo የእጩዎች ፑል አስቀድሞ ባዶ በሚሆንበት ጊዜ (እያንዳንዱ ዒላማ በcooldowns፣ lockouts ወይም exhaustion ምክንያት ሲዘለል)፣ ከቀደመው 400 \"No target supports tool calling\" capability_mismatch ይልቅ 503 no_eligible_targets ይመልሱ። በነባሪ ጠፍቷል፡ ባዶ ፑል የቀደመውን 400 ያቆያል።"
-      },
-      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
-        "label": "Mistral በማይገለጽ 401 ላይ ቀላል መጠፊያ",
-        "description": "A bare Mistral 401 ('{\"detail\":\"Unauthorized\"}', no explicit auth signal) is byte-identical for a revoked key and for exhausted quota. When enabled, such a 401 cools the connection down instead of parking it as expired, up to 3 times within an hour; the next one still parks it as expired, so a revoked key converges. Off by default: every bare Mistral 401 parks the connection as expired, as before."
-      },
-      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
-        "label": "የBatch እና ፋይል ራስ-ሰር ጽዳት",
-        "description": "ራስ-ሰር ጽዳቱ ከOMNIROUTE_BATCH_RETENTION_DAYS በላይ የቆዩ የመጨረሻ ደረጃ ላይ የደረሱ (የተጠናቀቁ/ያልተሳኩ/የተሰረዙ/ጊዜያቸው ያለፈባቸው) የBatch API ስራዎችን ከእያንዳንዱ-መስመር የፍተሻ ነጥቦቻቸው ጋር እንዲሰርዝ፣ እና ከተሰቀሉ ፋይሎች የራሳቸው expires_at ካለፈባቸው በኋላ የBLOB ይዘታቸውን እንዲያጸዳ ያድርጉ። በነባሪነት ጠፍቷል፡ አንድ ኦፕሬተር እስካልመረጠ ድረስ እያንዳንዱ ነባር ጭነት ይህንን ውሂብ ልክ እንደ ቀድሞው ይይዛል። በኦፕሬተር የሚቀሰቀሰው የDELETE /api/v1/batches/delete-completed ራውት በየትኛውም መንገድ አይነካም -- እሱ የተለየ እና ቅድመ-ሁኔታ የሌለው ይፋዊ የAPI ውል ነው።"
-      },
-      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
-        "label": "የAntigravity መለያ ኪራይ",
-        "description": "የተመረጠውን የAntigravity መለያ ለመረጠው ጥያቄ የዥረት የህይወት ዑደት ያስይዙ፣ በዚህም በአንድ ጊዜ የሚደረግ ዳግም ሙከራ ወይም የማረጋገጫ ምስክርነት ማስተላለፍ ቀድሞውኑ በመካሄድ ላይ ላለ ዥረት የተመደበውን መለያ ዳግም መምረጥ አይችልም። ቦታ ማስያዙ ወሰኑ በ(connection, callable upstream model) የተገደበ ነው፣ ስለዚህ አንድ መለያ አሁንም ሁለት የተለያዩ ሞዴሎችን በአንድ ጊዜ ማገልገል ይችላል። ለዚያ ሞዴል ብቁ የሆኑ ሁሉም መለያዎች ቀድመው ሲያዙ፣ ጥያቄው ስራ በሚበዛበት መለያ ላይ ከመጨናነቅ ይልቅ የተወሰነ Retry-After ያለው የተቀናበረ 503 POOL_BUSY ይመልሳል። በነባሪነት ጠፍቷል፡ የመለያ ምርጫ ልክ እንደ ቀድሞው ይቆያል፣ እና ምንም ቦታ ማስያዝ አይደረግም።"
-      },
-      "COMBO_AUTO_PRUNE_STALE_STEPS": {
-        "label": "ጊዜ ያለፈባቸውን የCombo ደረጃዎች በራስ-ሰር ማጽዳት",
-        "description": "ከአስተማማኝ የቀጥታ ካታሎግ ጋር የተሳካ የሞዴል ማመሳሰል ከተከናወነ በኋላ፣ ካታሎጉ ከአሁን በኋላ ለማይዘረዝራቸው ሞዴሎች የተሰኩ የcombo ደረጃዎችን ያስወግዱ፣ ለእያንዳንዱ ለተወገደ ደረጃ አንድ የኦዲት ግቤት ይመዘገባል። ባልተሳካ፣ በተዳከመ ወይም ነፃ-ብቻ በሆነ ማመሳሰል ላይ በጭራሽ አያጸዳም፣ እንዲሁም comboን ፈጽሞ ባዶ አያደርግም። በነባሪነት ጠፍቷል፡ ጊዜ ያለፈባቸው ደረጃዎች ምልክት ብቻ ይደረግባቸዋል።"
-      },
-      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
-        "label": "የClaude OAuth የተጠቃለለ የማሰብ ሂደት",
-        "description": "ሊነበብ የሚችል የማሰብ ሂደት (thinking.display \"summarized\") የሚጠይቅ የClaude OAuth ጥያቄ የredact-thinking-2026-02-12 Anthropic ቤታን እንዲያስቀር ይፍቀዱ፤ ይህ ካልሆነ Anthropic ባዶ እና ፊርማ ብቻ ያላቸውን thinking blocks እንዲመልስ ያደርገዋል። በነባሪነት ጠፍቷል፦ ያ ቤታ የClaude Code OAuth wire fingerprint አካል ነው፣ ስለዚህ የOAuth ጥያቄዎች ሳይለውጡ ያቆዩታል። በAPI ቁልፍ የሚደረጉ የClaude ጥያቄዎች ያለዚህ flag የተጠቃለለ የማሰብ ሂደትን አስቀድመው ያከብራሉ፤ OMNIROUTE_REDACT_THINKING=false ወደ OAuth የሚደርሰው ይህ flag ሲበራ ብቻ ነው።"
-      },
-      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
-        "label": "የKiro Tool Call ጥገና",
-        "description": "የሚተላለፍ (streaming) የKiro ምላሽ ከማንኛውም የሚታይ ውጤት በፊት የተበላሸ tool_call መጠቅለያ (input.name ወይም input.arguments የጎደለው) ሲያወጣ፣ ዙሩን በinvalid_kiro_tool_call ከማጠናቀቅ ይልቅ ያግዱትና ጥያቄውን ከማረሚያ መመሪያ ጋር እንደገና አንድ ጊዜ ይላኩ። እንደገና መሞከሩ አንድ ተጨማሪ የKiro ጥያቄ ያስወጣል፤ ሁለተኛ ውድቀት ዙሩን በkiro_tool_call_repair_retry_failed ያጠናቅቀዋል። በነባሪነት በርቷል። በመጀመሪያው የተበላሸ መጠቅለያ ላይ ዙሩ እንዲከሽፍ ወደ false ያቀናብሩት።"
-      },
-      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
-        "label": "የmodels.dev የEffort ደረጃዎች",
-        "description": "የኦፕሬተር መሻር ወይም የአቅራቢው መዝገብ ምንም ሳያሳውቁ ሲቀሩ models.dev የሚያትማቸውን የreasoning effort ደረጃዎች (በሚታወቀው የeffort ቃላት ዝርዝር የተገደቡ) ይጠቀሙ፣ እና የታወጀ ባዶ የደረጃ ዝርዝርን በ/v1/models effort_tiers እና combo tier intersections ውስጥ እንደ \"no tiers\" አድርገው ይቁጠሩት። በነባሪነት ጠፍቷል፦ effort_tiers እና የተፈቱት supportedThinkingEfforts ልክ እንደበፊቱ ሳይለወጡ ይቆያሉ።"
-      },
-      "LMARENA_SYNTHESIZED_CX_ENABLED": {
-        "label": "የArena የተቀናበረ cx ቴሌሜትሪ",
-        "description": "በኦፕሬተር የቀረበ providerSpecificData.cx ለሌለው ለእያንዳንዱ የArena (lmarena) create-evaluation ጥያቄ፣ የተቀናበረ የፕሮግራም cx የደንበኛ-ግንኙነት blob (arena.ai ራሱ ምንም የተቀዳ ግንኙነት ለሌለው ገጽ የሚልከውን እሴት) ያያይዙ። በነባሪነት ጠፍቷል፦ የcx መስክ የArena ፀረ-አውቶሜሽን ሲግናል ነው፣ ስለዚህ OmniRoute ኦፕሬተሩ ከእውነተኛ የአሳሽ ክፍለ-ጊዜ የያዘውን እሴት (providerSpecificData.cx) ብቻ ያስተላልፋል፣ ካልሆነ ግን ምንም cx አይልክም። ያልተረጋገጠ የupstream ጥቅም፤ Arena ያለ cx ጥያቄዎችን ውድቅ ማድረግ ከጀመረ ብቻ ያብሩት።"
-      },
-      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
-        "label": "የNative Codex ምላሽ ሰጪ ማመቅ",
-        "description": "ምላሽ ሰጪ (threshold) እና የመጨረሻ አማራጭ የዐውድ ማመቅ (context compaction) ሒደቶች የዐውድ በጀቱን በሚያልፉበት ጊዜ የResponses input[] adapterን በመጠቀም የnative Codex የማለፊያ ታሪኮችን (POST /v1/responses ወደ codex provider) እንደገና እንዲጽፉ ይፍቀዱ። በነባሪ ጠፍቷል፦ የnative Codex ታሪኮች በCodex client ባለቤትነት የተያዙ ናቸው እና በማመቅ በጭራሽ እንደገና አይጻፉም፤ ከመጠን በላይ የሆኑ ጥያቄዎች ልክ እንደበፊቱ የዐውድ በጀት ፍተሻን ማለፍ ያቅታቸዋል። ዓለም አቀፍ መጨመቅ የበራ መሆንን እና ሞዴሉ ያልተገለለ መሆኑን ይጠይቃል።"
-      },
-      "QUOTA_WINDOW_BOUNDED_PARK": {
-        "label": "የኮታ መስኮት፦ Bounded Parkን ማክበር",
-        "description": "የየመስኮት የኮታ ፖሊሲ (በመለያ ምርጫ ጥቅም ላይ የሚውሉ የክፍለ-ጊዜ/ሳምንታዊ thresholds) ወሰን የተገደበለትን የማለቂያ park (bounded exhaustion park) እንዲያከብር ይፍቀዱ፦ አንዴ የተገደበው የpark የማለቂያ ጊዜ ካለፈ፣ ወይም በካሽ የተቀመጠው የኮታ ምልከታ ከpark ገደቡ በላይ የቆየ ከሆነ፣ አዲስ የኮታ ማምጣት እስኪከናወን ድረስ መስኮቱ መለያውን ማግለል ያቆማል። በነባሪ ጠፍቷል፦ በካሽ የተቀመጠ መስኮት የራሱ ዳግም ማስጀመሪያ ጊዜ እስኪደርስ ድረስ በመጨረሻው ሪፖርት በተደረገው መቶኛ ላይ ማገዱን ይቀጥላል።"
-      },
-      "IMAGE_GENERATION_LONG_JOBS": {
-        "label": "የምስል ማመንጨት፦ ረጅም ስራዎች",
-        "description": "ለOpenAI-ተኳኋኝ የምስል ማመንጨት፦ ከተወሰነው የ120 s የምስል በጀት ይልቅ የግንኙነቱን የማለቂያ ጊዜ (providerSpecificData.timeoutMs)፣ ካልሆነም ማዕከላዊውን የupstream fetch የማለቂያ ጊዜ (FETCH_TIMEOUT_MS፣ ከዚያም REQUEST_TIMEOUT_MS፣ ነባሪ 600 s) ይጠቀሙ፤ ጠሪው የሰረዘውን ጥያቄ በ499 ያቁሙ፤ እና Playground ረጅም የምስል ስራዎችን በkeepalive heartbeats የታጀበ የSSE ዥረት አድርጎ እንዲቀበል ይፍቀዱ። በነባሪ ጠፍቷል፦ የተወሰነው በጀት ተፈጻሚ ይሆናል እንዲሁም የጠሪ ስረዛ አይተላለፍም። የምላሽ አካል ንባብን የሚሸፍነው የጊዜ ገደብ ሁልጊዜ የበራ ነው።"
-      },
-      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
-        "label": "የካታሎግ ማንጸባረቂያ ማሻሻያዎች",
-        "description": "በ/v1/models ላይ ያሉትን የclaude/ discovery እና functional-gateway ማንጸባረቂያዎችን ያሻሽሉ። በነባሪ ጠፍቷል፦ ሁለቱም የማንጸባረቂያ ሒደቶች ልክ እንደበፊቱ ይሰራሉ። በርቷል፦ የclaude/ discovery ማንጸባረቂያዎች የተዘረዘሩትን የreasoning-effort ተለዋጮች (-low/-medium/-high/-xhigh) ይሸፍናሉ፣ የጥያቄው ዱካ ወደ እውን ሊለውጣቸው የማይችላቸውን ውስጠ-ግንቡ auto/* ids ይዘላሉ እና አስቀድሞ የተዘረዘረ aliasን ይዘላሉ፤ functional-gateway ማንጸባረቂያዎች combosን እና በOmniRoute የተፈጠሩ idsን (claude/፣ no-think/) ይዘላሉ፣ ባለቤቱን ከowned_by ይወስዳሉ፣ ባለቤቱን እንደ ራሱ gateway በጭራሽ አይጠቀሙም፣ በblockedProviders ውስጥ የተሰናከሉ gatewaysን እና ከgatewayው አስተማማኝ የቀጥታ ካታሎግ ውጪ ያሉ ሞዴሎችን ይዘላሉ።"
-      },
-      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
-        "label": "የፕሮክሲ ጤና፦ እምቢታ ተከታታይ ውድቀትን ዳግም ያስጀምራል",
-        "description": "በፕሮክሲ ጤና ፍተሻ ወቅት፣ ኢላማው እምቢ ያለው ፍተሻ (401/403/429: ፕሮክሲው አስተላልፏል፣ መዳረሻው ይህንን egress IP አልተቀበለም) ልክ እንደተስተናገደ ፍተሻ የፕሮክሲውን ተከታታይ ውድቀት ዳግም እንዲያስጀምር ያድርጉ። በነባሪነት ጠፍቷል፦ እምቢታ ገለልተኛ ሆኖ ይቆያል እንዲሁም ተከታታይ ውድቀቱን ጠብቆ ያቆየዋል (#10654)። 5xx በየትኛውም መንገድ ያልተረጋገጠ ሆኖ ይቆያል፤ እንዲሁም እምቢታ ፕሮክሲን በጭራሽ አያስወግድም፣ አያሰናክልም ወይም ዳግም አያንቀሳቅስም።"
-      },
-      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
-        "label": "የGrok የደንበኝነት ምዝገባ ምስሎች",
-        "description": "የxai-oauth (xao) እና grok-cli የምስል መስመሮችን ይመዝግቡ እና የOpenAI ጥራት high/hd ወደ xAI medium ያዛምዱ። በነባሪነት ጠፍቷል፦ የAPI-key xAI ምስል ዱካ ባለው የOpenAI-compatible ጥያቄ ላይ ይቆያል እንዲሁም የምዝገባ መስመሮቹ አይመዘገቡም።"
-      },
-      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
-        "label": "የxAI OAuth የቀጥታ ሞዴል ግኝት",
-        "description": "ከቀዘቀዘው ስታቲክ seed ይልቅ የOAuth bearer token በመጠቀም ለxai-oauth ግንኙነቶች የቀጥታ የxAI ሞዴል ካታሎግን ከ https://api.x.ai/v1/models ያምጡ። በነባሪነት በርቷል። ስታቲክ seed ማቅረብን ለመቀጠል ፍላጉን ወደ false ያቀናብሩ። በdiscovery መስመር ውስጥ ያሉ የHTTP ውድቀቶች ወደ seed ይመለሳሉ፤ flag getter ራሱ ግን HTTP አያወጣም።"
-      },
-      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
-        "label": "Anthropic-Compatible በውይይት መሃል ያሉ የስርዓት ተራዎች",
-        "description": "በቀላል anthropic-compatible-* ማስተላለፊያዎች (claude → claude passthrough) ላይ፣ የተሸጎጠው የprompt prefix በተራዎች መካከል የተረጋጋ ሆኖ እንዲቆይ፣ በውይይት መሃል ያሉ role:system ተራዎችን ወደ ላይኛው ደረጃ system ግቤት ከማውጣት ይልቅ በmessages[] ውስጥ ያቆዩዋቸው። ተፈጻሚ የሚሆነው ደንበኛው ራሱ mid-conversation-system-2026-04-07 anthropic-beta (እንደነበረው ወደ upstream የተላለፈ) ሲልክ ብቻ ነው። በነባሪነት ጠፍቷል፦ ቤታውን የማይደግፉ ማስተላለፊያዎች role:system መልዕክቶችን በ400 ውድቅ ስለሚያደርጉ እያንዳንዱ የስርዓት ተራ ልክ እንደበፊቱ ወደ ላይኛው ደረጃ ይወጣል።"
-      },
-      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
-        "label": "የDB ጤና ፍተሻ፦ የማስጀመሪያ ቅኝትን ማዘግየት",
-        "description": "የመነሻ የDB ትክክለኛነት/ጤና ፍተሻ እስኪጠናቀቅ ድረስ ማስጀመርን ከማገድ ይልቅ፣ አገልጋዩ ጥያቄዎችን መቀበል ከጀመረ በኋላ (በsetImmediate በኩል) ያሂዱ። በነባሪነት ጠፍቷል፦ ልክ ከ#13717 በፊት እንደነበረው ማስጀመር በፍተሻው ላይ ይታገዳል፣ ስለዚህ የመጀመሪያው ጥያቄ ከመስተናገዱ በፊት የተበላሸ የውሂብ ጎታ አሁንም ተለይቶ ይታወቃል። በርቷል፦ ማስጀመር ወዲያውኑ ምላሽ ይሰጣል እንዲሁም ፍተሻው (አሁን ወሰን ያለው/በገጽ የተከፋፈለ እና ለእውነተኛ በፋይል ለተደገፈ DB፣ ሊሰረዝ በሚችል ንዑስ ሂደት ውስጥ የተነጠለ) ወዲያውኑ ይሰራል።"
-      },
-      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
-        "label": "የOpenCode የታተመ ካታሎግ ራውቲንግ",
-        "description": "ግልጽ የሆነ የregistry endpoint የሌላቸው የOpenCode Zen እና OpenCode Go ሞዴሎች የጥያቄ ገጻቸውን (ለ@ai-sdk/openai Responses፣ ለ@ai-sdk/anthropic Messages) በየ6 h ከበስተጀርባ ከሚነበበው ከታተመው models.opencode.ai ካታሎግ እንዲወስዱ ያድርጉ። በነባሪነት ጠፍቷል፦ endpoint ልክ እንደበፊቱ በትክክል ከregistry heuristics የሚመጣ ሲሆን ካታሎጉ ፈጽሞ አይወሰድም።"
-      },
-      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
-        "label": "የAuto ጥያቄዎች፦ የተለዩ የአቅም ክብደቶች",
-        "description": "የauto/* ጥያቄዎች (resolveModelOrError እና የauto-routing wrapper) ልክ እንደ /v1/models ካታሎግ በአንድ የጅምላ ንባብ በሚገኙ፣ በተለዩ የሞዴል አቅሞች (vision፣ reasoning፣ thinking) እና በተስተዋሉ የጥራት ውጤቶች የእጩዎችን ስብስብ እንዲገነቡ ይፍቀዱ። በነባሪነት ጠፍቷል፦ የጥያቄ ጊዜ snapshot ክብደቶች ልክ እንደበፊቱ እንዳሉ ይቆያሉ (አቅሞች በሚፈለጉበት ጊዜ የሚለዩ ሲሆን ክብደቶቹን አይመግቡም)። በርቷል፦ እነዚያ ምልክቶች የsnapshot ክብደቶችን ይመግባሉ፣ ስለዚህ የእጩዎች ክብደት እና በዚህም ምክንያት ምርጫው ሊለወጥ ይችላል።"
-      },
-      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
-        "label": "አውቶ-ኮምቦ፡ ቁልፍ የሌለው ትራንስፖርት ግባት",
-        "description": "ቁልፍ የሌላቸው (የላሊ-ማጣቀሻ) አቅራሪዎችን፣ የትራንስፖርታቸውን ባህርያዊ ብራውዘር (browserBacked) ወይም በአካላዊ ማዕከል የተጫነ CLI (isLocalCli) የሚያስፈልጉትን፣ ከ-auto/* ካንዲዴይት ጋራ ለይቦ ማቆም፣ ስለዚህ የተዘገገ አባል auto ጥያቄ እስከ የግብት ጊዜ-መቆጣጠሪያ (#17036) እንዳይቆም. በነባሪነት ጠፍቷል፡ ሁሉም ስነ-ምግባ ካለው የግልባጭ መሣሪያ ትግባ አቅራሪ ወደፊት እንደ ማፍሰስ በጋራው ውስጥ ይቀራል። ቀጥታ '<alias>'/'<model>' ጥራቶች ሁለቱንም ጊዜ ይሰራሉ።"
-      },
-      "CODEBUDDY_CN_INLINE_REASONING": {
-        "label": "CodeBuddy CN፡ በቀጥታ ምክንያታዊ ማሳወቂያ ማግኘት",
-        "description": "ለ-codebuddy-cn ምክንያታዊ ሞዴሎች (DeepSeek-V4 / Kimi-K2 ስድራ-ቤቶች ውስጥ ምክንያታዊ ማግኘት ግዴታ ያላቸው)፣ እያንዳንዱን ተመላሽ ምክንያታዊ reasoning_content እንደ ተዘክሯል በመግለጫ ይዞ ወደ መልእክት ይዞች ፊት በነጭ ጽሕፈት '<thought>' ቦታ ገልብጦ፣ ምክንያታዊ reasoning_content መስክን የሚያጠቃ ግቤን ሊገዛ ይችላል (#13632)። በነባሪነት ጠፍቷል፡ codebuddy-cn ጥያቆች ሳይተካ ይላካሉ፤ የreasoning_content መስኩ ወደፊት ከፈታ ይቆዳል።"
-      },
-      "PROVIDER_SAFETY_STOPS_TERMINAL": {
-        "label": "የአቅራቢ ደህንነት ማቆሚያዎች: ተርሚናል",
-        "description": "ግልጽ የአቅራቢ ደህንነት ማቆሚያን (misalignment_policy_violation፣ content_policy_violation ወይም provider_safety_rejection የሚል ስያሜ የተሰጠውን ትክክለኛ የቀድሞ 'blocked by our safety systems' ውድቅ ማድረግ) እንደ ተርሚናል እና በጥያቄ-ወሰን የተገደበ እምቢታ አድርገህ ያዝ፦ ኮዱ በ HTTP፣ Responses፣ WebSocket እና በተጠናቀቀ-ዥረት ስህተቶች ውስጥ ተጠብቆ ይቆያል፣ እንዲሁም አንድ combo ሌሎች ኢላማዎችን ዳግም ከመሞከር ይልቅ እዛው ላይ ይቆማል፣ ይህም የተቀበላቸውን እህትማማቾች ይሰርዛል (#17049)። በነባሪነት ጠፍቷል፦ እነዚህ ስህተቶች ነባር አያያዛቸውን ይጠብቃሉ እንዲሁም የ combo መስመር ዝርጋታ ሳይለወጥ ይቆያል።"
-      },
-      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
-        "label": "የምስክርነት መረጃ ጤና: በራስ-ሰር የተሰናከሉ ግንኙነቶችን ዳግም ፈትሽ",
-        "description": "የምስክርነት መረጃ ጤና ፍተሻ ጌትዌዩ በራሱ ያጠፋቸውን ግንኙነቶች (autoDisabledAt ተብለው ምልክት የተደረገባቸው፤ ለእያንዳንዳቸው ቢበዛ በየ 6 ሰዓቱ አንድ ጊዜ እና በአንድ ፍተሻ 5) ዳግም እንዲፈትሽ እና ዳግም ፍተሻው ሲያልፍ ግንኙነቱን መልሶ እንዲያበራ ፍቀድ (#16190)። በነባሪነት ጠፍቷል፦ የተጠፉ ግንኙነቶች አንድ ኦፕሬተር መልሶ እስኪያነቃቸው ወይም ዳግም እስኪፈትሻቸው ድረስ ልክ እንደቀድሞው ጠፍተው ይቆያሉ። በኦፕሬተር የተሰናከሉ ግንኙነቶች እና ከቋሚ እገዳ በኋላ የተጠፉ ግንኙነቶች በጭራሽ ዳግም አይፈተሹም።"
-      },
-      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
-        "label": "የምስክርነት መረጃ በር: የ Auth ምርመራዎች ብቻ",
-        "description": "በመሸጎጫ የተቀመጠ ያልተሳካ የምስክርነት መረጃ probe አንድን ግንኙነት የሚያግደው ምርመራው መጥፎ ምስክርነቶችን ሲያረጋግጥ ብቻ እንዲሆን የ combo ምስክርነት በርን አጥብብ (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required)። ያልተረጋገጡ ውድቀቶች (timeouts, rate limits, መቋረጦች, ያልተደገፉ probes እና ያልተገለጹ የ scheduler ስህተቶች) እንደ ያልታወቁ ይቆጠራሉ እና ግንኙነቱ ትራፊክ መቀበሉን ይቀጥላል። በነባሪነት ጠፍቷል፦ ማንኛውም በመሸጎጫ የተቀመጠ የ probe ስህተት ግንኙነቱን ለመሸጎጫው TTL (5 ደቂቃዎች) ያግደዋል።"
-      },
-      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
-        "label": "Combo፦ የይዘት ፖሊሲ እምቢታ ሲያጋጥም አቁም",
-        "description": "አንድ የ Combo ዒላማ በትክክለኛ የይዘት ፖሊሲ እምቢታ (ኮድ ወይም ዓይነት cyber_policy / content_policy_violation) ምላሽ ሲሰጥ፣ ወደ ቀጣዩ ዒላማ ከማለፍ ይልቅ የቀሩት ዒላማዎች የተለያዩ ሞዴሎች ቢሆኑም እንኳ Comboውን ያቁሙ እና ያንን እምቢታ ይመልሱ። በነባሪነት ጠፍቷል፦ እምቢታው መለያውን በፍጹም cooldown ውስጥ አያስገባም ወይም provider breakerን አያስነሳም፣ እንዲሁም Comboው ልክ እንደቀድሞው ወደ ቀጣዩ ዒላማው ያልፋል።"
-      },
-      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
-        "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",
-        "description": "ሁሉም መለያዎች በ cooldown ላይ ሲሆኑ እና መጀመሪያ የሚያበቃው cooldown በ 403 (access refused) ወይም በ 410 (gone) የተከሰተ ከሆነ፣ የ cooldown ጊዜ እስኪያበቃ ከመጠበቅ እና ጥያቄውን በድጋሚ ከመላክ ይልቅ ያንን እምቢታ ወዲያውኑ ይመልሱ፤ የሚታደስ agentrouter connection-scoped quota 403 ዳግም ሊሞከር የሚችል ሆኖ እንዲቀጥል ከ errorCode 429 ጋር ይቀመጣል። በነባሪነት ጠፍቷል፦ ጥበቃውን የሚዘለው 401 ብቻ ነው፣ እንዲሁም እያንዳንዱ እምቢታ በመጣበት status ይቀመጣል።"
       }
     }
   },
@@ -14771,6 +15092,8 @@
     "usdUsageQuotaDescription": "የዚህ ቁልፍ አካባቢያዊ የUSD ወጪ የተዋቀረው ዕለታዊ ወይም ሳምንታዊ ኮታ ላይ ከደረሰ በኋላ፣ በ400 API ስህተት ያግደዋል።",
     "dailyQuotaUsd": "ዕለታዊ ኮታ (USD)",
     "weeklyQuotaUsd": "ሳምንታዊ ኮታ (USD)",
+    "fiveHourQuotaUsd": "የ5 ሰዓት ኮታ (USD)",
+    "fiveHourQuotaHint": "ተንቀሳቃሽ መስኮት፦ የእያንዳንዱ ጥያቄ ወጪ ለ5 ሰዓታት ይቆጠራል፣ ከዚያ ይለቀቃል።",
     "quotaWindowDescription": "ሳምንታዊ ኮታው ሲገኝ በመሸጎጫ የተያዘውን የClaude ሳምንታዊ ዳግም ማስጀመሪያ ይከተላል፤ ካልሆነ ተንከባላይ የ7 ቀናት ጊዜ መስኮትን ይጠቀማል። ዕለታዊ ኮታው የFortaleza የቀን መቁጠሪያ ቀንን ይጠቀማል።",
     "apiKeyUsdQuota": "የAPI ቁልፍ USD ኮታ",
     "apiKeyUsdQuotaDescription": "ሲነቃ፣ @@om-usage ዕለታዊ ኮታን፣ ሳምንታዊ ኮታን፣ ዕለታዊ ወጪን እና ሳምንታዊ ወጪን በUSD ይመልሳል። ሳምንታዊው ሲገኝ በመሸጎጫ የተያዘውን የClaude ዳግም ማስጀመሪያ ይከተላል።",
@@ -15374,6 +15697,63 @@
       "saved": "የማቆያ ጊዜ ደንቦች ተቀምጠዋል",
       "saveFailed": "የማቆያ ጊዜ ደንቦችን ማስቀመጥ አልተቻለም"
     },
+    "errorRules": {
+      "title": "የስህተት የማቆያ ጊዜ ደንቦች",
+      "subtitle": "የአቅራቢውን ስህተቶች በHTTP ሁኔታ፣ በስህተት ጽሑፍ ወይም በሁለቱም ይለዩ፣ ምን እና ለምን ያህል ጊዜ እንደሚቆም ይምረጡ። እነዚህ ደንቦች ከአብሮገነብ ደንቦች በፊት ይሠራሉ።",
+      "rulesHeading": "ደንቦች",
+      "rulesEmpty": "እስካሁን ምንም ደንብ የለም።",
+      "addRule": "ደንብ አክል",
+      "provider": "አቅራቢ",
+      "providerPlaceholder": "ለምሳሌ openai",
+      "status": "የHTTP ሁኔታ",
+      "statusPlaceholder": "ማንኛውም",
+      "match": "የስህተት ጽሑፍ ይዟል",
+      "matchPlaceholder": "ማንኛውም ጽሑፍ",
+      "matchHint": "መጀመሪያ የሚዛመደው ደንብ ይተገበራል። የስህተት ጽሑፍ የፊደል መጠን ልዩነት የማይለይ ተራ ጽሑፍ ነው፣ መደበኛ አገላለጽ አይደለም። ባዶ መስክ ከማንኛውም ነገር ጋር ይዛመዳል።",
+      "scope": "አቁም",
+      "scopes": {
+        "connection": "ይህ ግንኙነት",
+        "model": "ይህ ሞዴል ብቻ",
+        "provider": "መላው አቅራቢ"
+      },
+      "reason": "ምክንያት",
+      "reasonAuto": "ራስ-ሰር",
+      "reasons": {
+        "quota_exhausted": "ኮታ አልቋል",
+        "rate_limit_exceeded": "የፍጥነት ገደብ ታልፏል",
+        "auth_error": "የማረጋገጫ ስህተት",
+        "model_capacity": "የሞዴሉ አቅም ሞልቷል",
+        "server_error": "የአገልጋይ ስህተት",
+        "unknown": "ሌላ"
+      },
+      "duration": "የቆይታ ጊዜ",
+      "durations": {
+        "auto": "ነባሪ",
+        "30m": "30 ደቂቃ",
+        "1h": "1 ሰዓት",
+        "5h": "5 ሰዓት",
+        "24h": "24 ሰዓት",
+        "custom": "ብጁ"
+      },
+      "customMinutes": "ደቂቃዎች (ከ1 እስከ 43200)",
+      "remove": "አስወግድ",
+      "defaultsHeading": "ላልተዛመዱ ውድቀቶች ነባሪ",
+      "defaultsHint": "አማራጭ፣ ለእያንዳንዱ አቅራቢ። የሚተገበረው የትኛውም ደንብ ከ402፣ 403፣ 408፣ 429 ወይም 5xx ስህተት ጋር ካልተዛመደ ብቻ ነው። እንደ 400 ያሉ የጥያቄ ስህተቶች በፍጹም አይነኩም።",
+      "defaultsEmpty": "ነባሪ አልተዘጋጀም። ያልተዛመዱ ስህተቶች አብሮገነብ ባህሪውን ይይዛሉ።",
+      "addDefault": "ነባሪ አክል",
+      "errors": {
+        "provider": "አቅራቢ ያስገቡ።",
+        "condition": "የHTTP ሁኔታ፣ የስህተት ጽሑፍ ወይም ሁለቱንም ያዘጋጁ።",
+        "status": "ከ100 እስከ 599 ያለ ሁኔታ ይጠቀሙ።",
+        "duration": "ከ1 እስከ 43200 ደቂቃ ያስገቡ።",
+        "duplicateDefault": "ይህ አቅራቢ አስቀድሞ ነባሪ አለው።",
+        "tooMany": "ቢበዛ 50 ደንቦች።"
+      },
+      "save": "የስህተት ደንቦችን አስቀምጥ",
+      "saved": "የስህተት ደንቦች ተቀምጠዋል",
+      "saveFailed": "የስህተት ደንቦችን ማስቀመጥ አልተቻለም",
+      "loadFailed": "የስህተት ደንቦችን መጫን አልተቻለም"
+    },
     "list": {
       "title": "ከመስመር ውጭ የሆኑ ግንኙነቶች",
       "subtitle": "የማቆያ ጊዜዎች እና የሞዴል መቆለፎች በራሳቸው ጊዜ ያበቃሉ። ግንኙነትን አሁን ወደ መስመር ለመመለስ ያጽዷቸው።",
@@ -15707,6 +16087,7 @@
     "upstreamStatus": "ከላይ የሚገኝ ሁኔታ",
     "noResponse": "አንድ እንደማይመልስ",
     "egressIp": "ወጣት አይፒ",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "አርከቶች በኋላ",
     "firstChunkAfter": "የመጀመሪያ ቁርጽ በኋ�",
     "servedBy": "የተሰጠ በ",
@@ -16129,5 +16510,28 @@
     "greetingFallbackName": "እዚህ",
     "errNoReply": "⚠️ ከ gateway መልስ የለም።",
     "btnSend": "ላክ"
+  },
+  "falNative": {
+    "title": "የFal የራሱ ሞዴሎች",
+    "description": "የመገናኛ ነጥብ ይፈልጉ፣ የውሂብ መዋቅሩን ይጫኑ እና በሰነዱ የተገለጹትን ግቤቶች በመጠቀም ያስኪዱ። የወረፋ ሁኔታ እና የFal ቀጥታ የውሂብ ፍሰት ተለያይተው ይቆያሉ።",
+    "connectionRequired": "በመጀመሪያ የFal API ቁልፍ ግንኙነት ያክሉ።",
+    "category": "ምድብ",
+    "endpoint": "የመገናኛ ነጥብ መለያ",
+    "reasoning": "የማመዛዘን ቁጥጥር",
+    "input": "በFal ቅርጸት የJSON ግቤት (ድርድሮች ቅደም ተከተላቸውን ይጠብቃሉ)",
+    "transport": "የማስተላለፊያ ዘዴ",
+    "run": "ሞዴሉን አስኪድ",
+    "job": "የተቀመጠ የሥራ መለያ",
+    "register": "የመገናኛ ነጥብ ወይም ተተኪ የውሂብ መዋቅር ይመዝግቡ",
+    "schema": "የOpenAPI 3 የውሂብ መዋቅር",
+    "download": "የውጤት ፋይል አውርድ",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
+import type { JSX } from "react";
 
 // SSR-safe origin via useSyncExternalStore.
 // Server snapshot returns "" (avoids hydration mismatch).

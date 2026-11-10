@@ -27,57 +27,61 @@ OmniRoute 會將權杖數量乘以模型的定價費率，為每個補全請求�
 
 ---
 
-## 成本如何估算
+## 如何估算成本
 
 ### 定價來源
 
-成本來自按以下優先順序解析的定價表
-（[`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)）：
+成本來自[`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts)中的合併定價表，依優先順序排列（**最高的第一個**）：
 
-1. **使用者覆寫值**——你在儀表板中或透過 `PATCH /api/pricing` 設定的價格。
-2. **同步的外部定價**——啟用同步時，從 LiteLLM 的公開
-   `model_prices_and_context_window.json` 擷取（儲存在獨立的
-   `pricing_synced` 命名空間中，因此絕不會覆蓋你的覆寫值）。
-3. **硬編碼預設值**——隨 OmniRoute 一併提供。
+1. **使用者覆蓋**—價格在儀表板中或透過`PATCH /api/pricing` （ `pricing`命名空間）設定。
+2. **models.dev 同步**—定價從`https://models.dev/api.json` （ `models_dev_pricing`命名空間）取得。
+3. **LiteLLM同步**—價格從LiteLLM的公共`model_prices_and_context_window.json` （ `pricing_synced`命名空間）取得。
+4. **硬編碼預設值**—費率以[`src/shared/constants/pricing/`](../../src/shared/constants/pricing/)出貨。
 
-外部定價同步是**選用功能**，預設為停用。相關環境變數
-（請參閱 [`.env.example`](../../.env.example)）：
+對於相同的provider/model，來自較高優先層的值會覆寫較低層中的匹配欄位；上層缺少的欄位仍然可以來自下層。即使兩個獨立的同步作業同時運行，順序也是固定的。 `GET /api/pricing?includeSources=1`傳回`pricing`和`sourceMap`，其每個模型標籤（`user`、 `modelsDev`、 `litellm`、 `default`）標識包含該模型的最高優先權層。
 
-| 環境變數                | 預設值    | 用途                                           |
+**LiteLLM同步**是選擇加入，預設為停用。它的環境變數（參見[`.env.example`](../../.env.example) ）是：
+
+| 環境變數                | 預設      | 目的                                           |
 | ----------------------- | --------- | ---------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | 啟用啟動時的背景 LiteLLM 定價同步。            |
-| `PRICING_SYNC_INTERVAL` | `86400`   | 同步間隔，以**秒**為單位（預設為每日）。       |
-| `PRICING_SYNC_SOURCES`  | `litellm` | 以逗號分隔的來源清單（目前僅支援 `litellm`）。 |
+| `PRICING_SYNC_ENABLED`  | `false`   | 啟用後台LiteLLM定價同步。                      |
+| `PRICING_SYNC_INTERVAL` | `86400`   | 同步間隔以秒為單位（每天）。                   |
+| `PRICING_SYNC_SOURCES`  | `litellm` | 僅用於此同步的來源選擇；目前僅支援`litellm` 。 |
+
+**models.dev 同步**與LiteLLM同步是分開的，預設也是停用的。在設定（models.dev 同步）中啟用它或使用這些變數：
+
+| 環境變數                   | 預設         | 目的                                                                                              |
+| -------------------------- | ------------ | ------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _（未設定）_ | 取消設定遵循設定切換； `1/true/on/yes`強制打開， `0/false/off/no`強制關閉（即使「設定」啟用它）。 |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | 預設 models.dev 同步間隔（以秒為單位）（每日）。                                                  |
+
+`PRICING_SYNC_SOURCES`確實**不是**啟用 models.dev；它僅控制LiteLLM同步。刪除使用者覆蓋不會清除同步的命名空間；下一個可用的定價層將生效。對於未定價的型號，請在新增手動覆蓋之前檢查同步設定和`sourceMap` 。
 
 ### 成本公式
 
-成本會根據權杖數量及每百萬權杖費率，按請求個別計算。相關程式碼位於
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-（`computeCostFromPricing` / `calculateCost`）：
+成本是根據[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) 中的代幣計數和每百萬代幣費率計算每個請求的成本：
 
-- **輸入權杖**（扣除快取讀取及快取建立權杖）× `input` 費率。
-- **快取讀取權杖** × `cached` 費率（若無則回退使用輸入費率）。
-- **快取建立權杖** × `cache_creation` 費率（若無則回退使用輸入費率）。
-- **輸出權杖** × `output` 費率。
-- **推理權杖** × `reasoning` 費率（若無則回退使用輸出費率）。
+- **輸入令牌**（減去快取讀取和快取創建令牌） × `input`速率。
+- **快取讀取令牌**× `cached`速率（回落到輸入速率）。
+- **快取創建令牌**× `cache_creation`速率（回落到輸入速率）。
+- **輸出代幣**× `output`率。
+- **推理標記**× `reasoning`速率（回落到輸出速率）。
 
-所有費率均解讀為每 1,000,000 個權杖的美元價格。Codex 的「fast」／「priority」或「flex」服務層級會套用成本乘數（`getCodexFastCostMultiplier`）——例如 flex 會以權杖費用五折計費，並在儀表板中顯示為 **flex 節省金額**。
+所有費率均解釋為每 1,000,000 個代幣的USD 。 Codex 「快速」/「優先」或「flex」服務層應用成本乘數 (`getCodexFastCostMultiplier`) —例如，flex 以 50% 代幣折扣計費，表現為**彈性儲蓄**在儀表板中。
 
-模型名稱會先經過正規化（移除 `openai/` 或
-`accounts/fireworks/models/` 等提供者路徑前綴），讓歷史資料列仍能與價格相符。
+模型名稱首先被規範化（提供者路徑前綴，例如`openai/`或`accounts/fireworks/models/`被刪除），因此歷史行仍然與價格相符。
 
-### 支出如何記錄
+### 如何記錄支出
 
-- 每個請求的成本會在回應後計算，並以「送出後不等待」的方式記錄，因此絕不會增加用戶端延遲。共享配額的消耗會透過 [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)，排程至下一個事件迴圈刻度執行。
-- API 金鑰支出會先緩衝，再由
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) 批次寫入（預設清理間隔為 60 秒，緩衝區容量為 1,000 筆）。可透過以下變數調整：
+- 每個請求的成本是在回應後計算的，並記錄“即發即棄”，因此不會為客戶端增加延遲。共享配額消耗透過[`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)安排在下一個事件循環標記上。
+- API 金鑰支出由[`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts)批次緩衝和刷新（預設 60 秒刷新間隔，1,000 個條目緩衝區）。可透過以下方式調整：
 
-  | 環境變數                            | 預設值  | 用途                       |
+  | 環境變數                            | 預設    | 目的                       |
   | ----------------------------------- | ------- | -------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 清理間隔，以毫秒為單位。   |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 清理前可緩衝的項目數上限。 |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 刷新間隔（以毫秒為單位）。 |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 刷新前的最大緩衝條目。     |
 
-儀表板上的成本數字**並非**讀取每筆資料列中儲存的美元金額——每次分析端點執行時，都會根據權杖數量及目前的定價表即時計算。這表示修正錯誤價格（並重新同步）後，歷史成本估算也會隨之回溯更新。
+儀表板的成本數字是**不是**從儲存的每行美元金額—中讀取，每次分析端點運行時，它們都會根據令牌計數和當前定價表動態重新計算。這意味著修正錯誤的價格（並重新同步）可追溯更新歷史成本估算。
 
 ---
 
@@ -123,52 +127,50 @@ OmniRoute 會將權杖數量乘以模型的定價費率，為每個補全請求�
 
 ---
 
-## API 端點
+## API端點
 
-除非另有註明，以下所有端點皆需要管理驗證（loopback/JWT，透過 `requireManagementAuth`）。
+除非另有說明，所有這些都需要管理身份驗證（loopback/JWT，透過`requireManagementAuth`）。
 
-### 用量與成本分析
+### 使用情況和成本分析
 
-| 方法  | 端點                     | 用途                                                                                                                                                      |
-| ----- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | 完整的成本／用量分析：摘要、每日趨勢，以及依提供者／模型／API 金鑰／帳戶／層級分類的資料。查詢：`range`、`startDate`、`endDate`、`apiKeyIds`、`presets`。 |
-| `GET` | `/api/usage/utilization` | 各提供者隨時間變化的配額使用率。查詢：`range`（`1h`/`24h`/`7d`/`30d`）、`provider`。                                                                      |
-| `GET` | `/api/usage/history`     | 原始用量歷史記錄。                                                                                                                                        |
-| `GET` | `/api/usage/call-logs`   | 各請求的呼叫記錄（模型、權杖、成本、延遲、狀態）。                                                                                                        |
-| `GET` | `/api/usage/quota`       | 提供者配額狀態。                                                                                                                                          |
-| `GET` | `/api/usage/proxy-logs`  | Proxy 請求記錄。                                                                                                                                          |
+| 方法  | 端點                     | 目的                                                                                                                                                  |
+| ----- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | 完整的cost/usage分析：摘要、每日趨勢，作者： provider/model/API key/account/tier.查詢： `range`、 `startDate`、 `endDate`、 `apiKeyIds`、 `presets`。 |
+| `GET` | `/api/usage/utilization` | 隨著時間的推移，每個提供者的配額利用率。查詢： `range` （`1h`/`24h`/`7d`/`30d`）， `provider`。                                                       |
+| `GET` | `/api/usage/history`     | 原始使用歷史記錄行。                                                                                                                                  |
+| `GET` | `/api/usage/call-logs`   | 每個請求的呼叫日誌（模型、令牌、成本、延遲、狀態）。                                                                                                  |
+| `GET` | `/api/usage/quota`       | 提供者配額狀態。                                                                                                                                      |
+| `GET` | `/api/usage/proxy-logs`  | 代理請求日誌。                                                                                                                                        |
 
 ### 預算
 
-| 方法   | 端點                     | 用途                                                            |
-| ------ | ------------------------ | --------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | 單一 API 金鑰的成本摘要與預算檢查（需要 `apiKeyId` 查詢參數）。 |
-| `POST` | `/api/usage/budget`      | 設定 API 金鑰的每日／每週／每月美元上限及警告閾值。             |
-| `GET`  | `/api/usage/budget/bulk` | 跨 API 金鑰的批次預算摘要。                                     |
+| 方法   | 端點                     | 目的                                                     |
+| ------ | ------------------------ | -------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | 成本摘要+預算檢查一個API金鑰（需要`apiKeyId`查詢參數）。 |
+| `POST` | `/api/usage/budget`      | 設定daily/weekly/monthly USD限制API密鑰的+警告閾值。     |
+| `GET`  | `/api/usage/budget/bulk` | 跨API鍵的批次預算摘要。                                  |
 
-> 預算 API 的範圍是各個 **API 金鑰**（`apiKeyId`）。由
-> `GET /api/usage/budget` 傳回的上限包括 `dailyLimitUsd`、`weeklyLimitUsd`、`monthlyLimitUsd`、
-> `warningThreshold`，以及累計總額（`totalCostToday`、`totalCostMonth` 等）。
+> 預算API範圍為**API鍵**（`apiKeyId`）。 `GET /api/usage/budget`回傳的限制包括`dailyLimitUsd`、 `weeklyLimitUsd`、 `monthlyLimitUsd`、 a `warningThreshold`和運行總計（`totalCostToday`、 `totalCostMonth`…）。
 
 ### 定價
 
-| 方法     | 端點                    | 用途                                                                                      |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | 目前合併後的定價（使用者 + 已同步 + 預設值）。使用 `?includeSources=1` 查看各項目的來源。 |
-| `PATCH`  | `/api/pricing`          | 覆寫 `{ provider: { model: { input, output, cached, … } } }` 的定價。                     |
-| `DELETE` | `/api/pricing`          | 將定價重設為預設值（可選擇透過 `?provider=&model=` 限定範圍）。                           |
-| `GET`    | `/api/pricing/defaults` | 顯示每 1M 的預設後援費率。                                                                |
-| `GET`    | `/api/pricing/models`   | 以模型為索引的定價。                                                                      |
-| `POST`   | `/api/pricing/sync`     | 觸發從外部來源（LiteLLM）進行手動同步。                                                   |
-| `GET`    | `/api/pricing/sync`     | 目前的同步狀態。                                                                          |
-| `DELETE` | `/api/pricing/sync`     | 清除所有已同步的定價資料。                                                                |
+| 方法     | 端點                    | 目的                                                                                                    |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | 合併四層定價（使用者、models.dev、 LiteLLM、預設值）。 `?includeSources=1`返回`pricing` + `sourceMap`。 |
+| `PATCH`  | `/api/pricing`          | 覆蓋`{ provider: { model: { input, output, cached, … } } }`的定價。                                     |
+| `DELETE` | `/api/pricing`          | 刪除使用者價格覆蓋（可選範圍由`?provider=&model=`決定）；同步利率或內建預設值仍作為後備。               |
+| `GET`    | `/api/pricing/defaults` | 顯示預設per-1M回退率。                                                                                  |
+| `GET`    | `/api/pricing/models`   | 定價按型號決定。                                                                                        |
+| `POST`   | `/api/pricing/sync`     | 從外部來源觸發手動同步 (LiteLLM)。                                                                      |
+| `GET`    | `/api/pricing/sync`     | 目前同步狀態。                                                                                          |
+| `DELETE` | `/api/pricing/sync`     | 僅清除 LiteLLM 同步定價 (`pricing_synced`)； models.dev 資料是單獨的。                                  |
 
-### 其他與成本相關的端點
+### 其他與成本相關的終點
 
-| 方法  | 端點                          | 用途                                               |
-| ----- | ----------------------------- | -------------------------------------------------- |
-| `GET` | `/api/free-tier/summary`      | 免費模型的權杖總量、本月已用量，以及剩餘免費額度。 |
-| `GET` | `/api/quota/pools/[id]/usage` | 共用配額集區的使用量。                             |
+| 方法  | 端點                          | 目的                                           |
+| ----- | ----------------------------- | ---------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | 本月使用的免費模型代幣總數以及剩餘的免費配額。 |
+| `GET` | `/api/quota/pools/[id]/usage` | 共享配額池的使用。                             |
 
 ---
 

@@ -20,10 +20,15 @@ CI in koraki usklajevanja.
 - **Node.js** `>=22.22.2 <23` ali `>=24.0.0 <27` (priporočeno: 24 LTS)
 - **npm** 10+
 
-> **Uporabniki npm v11+ (Node 24+):** Po ukazu `npm install` preverite, ali so bili nativni moduli nameščeni:
-> `node -e "require('better-sqlite3')"`. Če ukaz ne uspe z napako `MODULE_NOT_FOUND`,
-> zaženite `npm approve-scripts better-sqlite3 && npm install`. Glejte
-> [Odpravljanje težav](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Windows z Node 24:** uporabite trenutno izdajo popravkov 24 LTS (vsaj 24.20.0).
+> Starejše izdaje lahko po uspešnih testih prekinejo izvajanje, ko `--test-force-exit` zapre
+> proces. Node-jev [popravek Windows libuv](https://github.com/nodejs/node/pull/61999) odpravlja
+> to sesutje izvajalnega okolja; preverjanja trditev testov in izhoda izvajalnika naj ostanejo omogočena.
+
+> **Uporabniki npm v11+ (Node 24+):** po `npm install` preverite, ali so bili nameščeni izvorni moduli:
+> `node -e "require('better-sqlite3')"`. Če se izvede z napako `MODULE_NOT_FOUND`,
+> zaženite `npm approve-scripts better-sqlite3 && npm install`. Oglejte si
+> [odpravljanje težav](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -38,7 +43,7 @@ npm install
 ### Spremenljivke okolja
 
 ```bash
-# Ustvarite svojo datoteko .env iz predloge
+# Ustvarite svoj .env iz predloge
 cp .env.example .env
 
 # Ustvarite zahtevane skrivnosti
@@ -48,77 +53,78 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Ključne spremenljivke za razvoj:
 
-| Spremenljivka          | Privzeta razvojna vrednost | Opis                               |
-| ---------------------- | -------------------------- | ---------------------------------- |
-| `PORT`                 | `20128`                    | Vrata strežnika                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Osnovni URL za uporabniški vmesnik |
-| `JWT_SECRET`           | (ustvarite zgoraj)         | Skrivnost za podpisovanje JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | Geslo za prvo prijavo              |
-| `APP_LOG_LEVEL`        | `info`                     | Raven podrobnosti dnevnika         |
+| Spremenljivka          | Privzeta razvojna vrednost | Opis                          |
+| ---------------------- | -------------------------- | ----------------------------- |
+| `PORT`                 | `20128`                    | Vrata strežnika               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Osnovni URL za čelni del      |
+| `JWT_SECRET`           | (ustvarite zgoraj)         | Skrivnost za podpisovanje JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Geslo za prvo prijavo         |
+| `APP_LOG_LEVEL`        | `info`                     | Raven podrobnosti dnevnika    |
 
 ### Nastavitve nadzorne plošče
 
-Nadzorna plošča zagotavlja stikala uporabniškega vmesnika za funkcije, ki jih je mogoče nastaviti tudi prek spremenljivk okolja:
+Nadzorna plošča ponuja preklopne gumbe uporabniškega vmesnika za funkcije, ki jih je mogoče konfigurirati tudi prek spremenljivk okolja:
 
-| Mesto nastavitve      | Stikalo                     | Opis                                               |
-| --------------------- | --------------------------- | -------------------------------------------------- |
-| Nastavitve → Napredno | Način za odpravljanje napak | Omogoči dnevnike zahtev za odpravljanje napak (UI) |
-| Nastavitve → Splošno  | Vidnost stranske vrstice    | Prikaži/skrij razdelke stranske vrstice            |
+| Mesto nastavitve      | Preklopni gumb           | Opis                                           |
+| --------------------- | ------------------------ | ---------------------------------------------- |
+| Nastavitve → Napredno | Način razhroščevanja     | Omogoči dnevnike zahtev za razhroščevanje (UI) |
+| Nastavitve → Splošno  | Vidnost stranske vrstice | Prikaži/skrij razdelke stranske vrstice        |
 
-Te nastavitve so shranjene v podatkovni zbirki in se ohranijo med ponovnimi zagoni, pri čemer po nastavitvi preglasijo privzete vrednosti spremenljivk okolja.
+Te nastavitve so shranjene v zbirki podatkov in se ohranijo po ponovnih zagonih ter ob nastavitvi preglasijo privzete vrednosti spremenljivk okolja.
 
 ### Lokalni zagon
 
 ```bash
-# Razvojni način (samodejno ponovno nalaganje)
+# Razvojni način (samodejno osveževanje)
 npm run dev
 
 # Produkcijska gradnja
-npm run build    # next build → .build/next/, nato assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Hitra gradnja samo zaledja/API-ja za spremembe sodelujočih
+# Hiter prevod samo zaledja/API za spremembe sodelavcev
 npm run build:contributor
 
-# Izdajna gradnja (čista ponovna gradnja + kontrolna oznaka HEAD — zahtevano za uvajanje)
-npm run build:release   # rm -rf .build dist && gradnja + zapiše dist/BUILD_SHA
+# Gradnja izdaje (čista ponovna gradnja + oznaka HEAD — zahtevano za namestitev)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Običajna konfiguracija vrat
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Gradnja za sodelujoče izvede samo preverjanje prevajanja: ne sestavi samostojne
-distribucije in ne zgradi izbirnih nativnih sredstev za pakiranje. Običajno produkcijsko gradnjo
-uporabite, kadar morate preveriti paket, pripravljen za distribucijo.
+Gradnja za sodelavce izvaja preverjanje samo s prevajanjem: ne sestavi samostojne
+distribucije in ne zgradi izbirnih izvornih paketnih sredstev. Kadar morate preveriti
+paket, pripravljen za izdajo, uporabite običajno produkcijsko gradnjo.
 
-### Razporeditev izhoda gradnje
+### Struktura izhodnih datotek gradnje
 
-| Imenik    | Vsebina                                                                     | Sleden |
-| --------- | --------------------------------------------------------------------------- | ------ |
-| `src/`    | Izvorna koda aplikacije (TypeScript / TSX)                                  | Da     |
-| `.build/` | Vmesni rezultati — izhod `next build` (gitignored, `distDir = .build/next`) | Ne     |
-| `dist/`   | Paket za distribucijo — sestavi ga `assembleStandalone` (gitignored)        | Ne     |
+| Imenik    | Vsebina                                                                     | Sledenje |
+| --------- | --------------------------------------------------------------------------- | -------- |
+| `src/`    | Izvorna koda aplikacije (TypeScript / TSX)                                  | Da       |
+| `.build/` | Vmesni rezultati — izhod `next build` (gitignored, `distDir = .build/next`) | Ne       |
+| `dist/`   | Paket, pripravljen za izdajo — sestavi ga `assembleStandalone` (gitignored) | Ne       |
 
-Cevovod gradnje se izvede v enem prehodu:
+Cevovod gradnje je izveden v enem prehodu:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (izhod Next.js)
-  └─ assembleStandalone()                 (kopira standalone + static + public + nativna sredstva)
-       └─ izhod: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (kopira standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` poleg tega najprej počisti oba imenika in zapiše
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kot kontrolno oznako celovitosti uvajanja.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kot označbo celovitosti za namestitev.
 
-`npm run build:contributor` uporablja profil gradnje samo za zaledje. Med gradnjo začasno nadomesti
-datoteke uporabniškega vmesnika nadzorne plošče z nadomestnimi datotekami, ohrani obdelovalnike poti API-ja in po gradnji obnovi izvirne datoteke.
-Za spremembe, ki vplivajo na uporabniški vmesnik nadzorne plošče, ali za celovito preverjanje izdaje uporabite `npm run build`;
-profil za sodelujoče ni nadomestilo za izdajno gradnjo.
+`npm run build:contributor` uporablja profil gradnje samo za zaledje. Med gradnjo začasno
+ustvari nadomestne datoteke uporabniškega vmesnika nadzorne plošče, ohrani obravnavalnike
+poti API-ja in po končani gradnji obnovi izvirne datoteke. Za spremembe, ki vplivajo na
+uporabniški vmesnik nadzorne plošče, ali za popolno preverjanje izdaje uporabite
+`npm run build`; profil za sodelavce ni nadomestilo za gradnjo izdaje.
 
-> **Opomba za uvajanje na VPS:** oddaljeni imenik slike `/usr/lib/node_modules/omniroute/app/`
-> ostaja nespremenjen. Orodja za uvajanje z ukazom rsync vanj sinhronizirajo vsebino imenika `dist/`.
-> Spremenila se je samo pot izhoda gradnje znotraj repozitorija (`app/` → `dist/`).
+> **Opomba za namestitev na VPS:** oddaljeni imenik s sliko `/usr/lib/node_modules/omniroute/app/`
+> ostane nespremenjen. Orodja za namestitev vanj z rsync kopirajo vsebino imenika `dist/`.
+> Premaknjena je bila samo izhodna pot gradnje znotraj repozitorija (`app/` → `dist/`).
 
 Privzeti URL-ji:
 

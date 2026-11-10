@@ -100,7 +100,7 @@ Kataloglangan vositalarning hammasini ham aniqlash, sozlash yoki ishga tushirish
 
 ---
 
-## 1. CLI Code katalogi (27 ta asbob)
+## 1. CLI Code katalogi (28 ta asbob)
 
 `/dashboard/cli-code` paydo bo'ladigan barcha vositalar. `baseUrlSupport: none` ega bo'lganlar MITM yoki maxsus URL bazasi o'rniga qo'lda qo'llanma orqali ulanadi:
 
@@ -127,6 +127,7 @@ Kataloglangan vositalarning hammasini ham aniqlash, sozlash yoki ishga tushirish
 | grok-qurilish     | Grok qurish                | xAI                   | to'la          | odatiy      | yolg'on      |
 | maydalash         | Ezmoq                      | OSS (joziba)          | to'la          | odatiy      | yolg'on      |
 | qwen              | Qwen kodi                  | Alibaba               | to'la          | hidoyat     | rost         |
+| ochiq klod        | OpenClaude                 | Gitlawb (OSS)         | to'la          | hidoyat     | yolg'on      |
 | zed               | Zed                        | Zed Industries        | to'la          | hidoyat     | yolg'on      |
 | kursor            | Cursor                     | Har qanday shar       | yo'q           | hidoyat     | yolg'on      |
 | antigravitatsiya  | Antigravity                | Google                | yo'q           | mitm        | yolg'on      |
@@ -212,22 +213,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Yangi vositalar uchun sozlamalar ishlov beruvchilari
+## 6. Yangi asboblar uchun sozlash ishlov beruvchilari
 
-`configType: "custom"` ga ega yangi vositalar uchun maxsus sozlamalar API marshrutlari mavjud:
+Yangi `configType: "custom"` vositalarida API marshrutlarining maxsus sozlamalari mavjud:
 
-| Marshrut                                    | Vosita                                                               |
-| ------------------------------------------- | -------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                              |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url bayrogʻi)                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, eski usul)                            |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, asosiy + eski `~/.deepseek` sinxronlash) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                |
-| `POST /api/cli-tools/pi-settings`           | Pi dasturlash agenti                                                 |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + maxsus `.env` kaliti)           |
+| Marshrut                                    | Asbob                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url bayrog'i)                                            |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, meros)                                  |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, asosiy + legacy `~/.deepseek` sinxronlash) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                  |
+| `POST /api/cli-tools/pi-settings`           | Pi kodlash agenti (`~/.pi/agent/models.json`, `providers.omniroute`)   |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                  |
+| `POST /api/cli-tools/qwen-settings`         | Qwen kodi (`~/.qwen/settings.json` + ajratilgan `.env` kaliti)         |
 
-Barcha marshrutlar xato javoblari uchun `sanitizeErrorMessage()` dan foydalanadi (Qatʼiy qoida #12).
+Barcha marshrutlar xato javoblari uchun `sanitizeErrorMessage()` foydalanadi (Qattiq qoida №12).
 
 ---
 
@@ -284,21 +285,21 @@ Toʻliq PT-BR va EN tarjimalari taqdim etilgan. Qolgan 39 ta lokal `src/i18n/req
 
 ---
 
-## 9. Tezkor boshlash
+## 9. Tez boshlash
 
-### 1-qadam — OmniRoute API kalitini olish
+### 1-qadam — OmniRoute API kalitini oling
 
-1. `/dashboard/api-manager` sahifasini oching → **API kalitini yaratish**
+1. `/dashboard/api-manager` → ni oching** API kalitini yarating**
 2. Unga nom bering (masalan, `cli-tools`) va barcha ruxsatlarni tanlang
-3. Kalitdan nusxa oling — u quyidagi har bir CLI uchun kerak boʻladi
+3. Quyidagi har bir CLI uchun kerak bo'ladigan — kalitidan nusxa oling
 
-> Kalitingiz quyidagicha koʻrinadi: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Sizning kalitingiz quyidagicha ko'rinadi: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### 2-qadam — CLI vositalarini oʻrnatish
+### 2-qadam — CLI Tools-ni o'rnating
 
-npm asosidagi barcha vositalar Node.js 22.22.2+ yoki 24.x versiyasini talab qiladi:
+Barcha npm-ga asoslangan vositalar Node.js 22.22.2 + yoki 24.x ni talab qiladi:
 
 ```bash
 # Claude Code (Anthropic)
@@ -319,58 +320,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (`omniroute run gemini` orqali ishga tushiriladi → /v1beta interfeysi)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust asosida
+cargo install smelt  # Rust-based
 
-# Pi dasturlash agenti
-# o‘rnatish uchun https://github.com/zechnerj/pi-coding-agent sahifasiga qarang
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# o‘rnatish uchun https://github.com/1jehuang/jcode sahifasiga qarang
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### 3-qadam — Boshqaruv paneli orqali sozlash
+### 3-qadam — Boshqaruv paneli orqali sozlang
 
-1. `http://localhost:20128/dashboard/cli-code` manziliga oʻting
-2. Vositalar toʻplamidan kerakli vositani toping
-3. Vosita tafsilotlari sahifasini ochish uchun kartani bosing
-4. API kalitingiz va asosiy URL manzilini tanlang
-5. **Sozlamani qoʻllash** tugmasini bosing yoki qoʻlda sozlash parchasidan nusxa oling
+1. `http://localhost:20128/dashboard/cli-code`
+2. Asbobingizni tarmoq ichida toping
+3. Asbob tafsilotlari sahifasini ochish uchun kartani bosing
+4. API kalitini va URL bazasini tanlang
+5. bosing** Konfiguratsiyani qo'llash** yoki qo'lda sozlash parchasini nusxalash
 
 ---
 
-### 4-qadam — Global muhit oʻzgaruvchilarini oʻrnatish
+### 4-qadam — Global muhit o'zgaruvchilarini o'rnating
 
 ```bash
-# OmniRoute universal yakuniy nuqtasi
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI GOOGLE_GEMINI_BASE_URL qiymatini ILDIZDAN o‘qiydi (uning SDK’si /v1beta/... qismini o‘zi qo‘shadi)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **Masofaviy server** uchun `localhost:20128` qiymatini server IP manzili yoki domeni bilan almashtiring,
-> masalan, `http://<your-server-ip>:20128`.
+> a uchun** masofaviy server** `localhost:20128` server IP yoki domen bilan almashtiring, masalan, `http://<your-server-ip>:20128`.
 
 ---
 
-### 4-qadam — Har bir vositani sozlash
+### 4-qadam — Har bir asbobni sozlash
 
-#### Claude Code
+#### Claude kodi
 
 ```bash
-# ~/.claude/settings.json faylini yarating:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -381,7 +381,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code uchun birlashtirilgan Anthropic shlyuzining ildiz manzilidan foydalaning. Bu yerda `/v1` qoʻshmang.
+Claude Code uchun birlashtirilgan Anthropic shlyuz ildizidan foydalaning. Bu yerga `/v1` qo'shmang.
 
 **Sinov:** `claude "say hello"`
 
@@ -389,9 +389,7 @@ Claude Code uchun birlashtirilgan Anthropic shlyuzining ildiz manzilidan foydala
 
 #### OpenAI Codex
 
-Zamonaviy Codex (v0.137+) faqat `~/.codex/config.toml` faylini oʻqiydi — eski
-`config.yaml` avvalgi npm CLI vositasiga tegishli va indamay eʼtiborsiz qoldiriladi. API
-kaliti fayl ichida emas, doimo `OMNIROUTE_API_KEY` muhit oʻzgaruvchisida (`env_key`) saqlanadi:
+Zamonaviy Codex (v0.137 +) `~/.codex/config.toml` faqat — o'qiydi eski `config.yaml` npm CLI merosiga tegishli va jimgina e'tiborga olinmaydi. API kaliti `OMNIROUTE_API_KEY` muhit o'zgaruvchisida (`env_key`) qoladi, hech qachon fayl ichida bo'lmaydi:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -406,7 +404,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Toʻliq maʼlumotnoma (profillar, `wire_api`, kontekst oynalari): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+To'liq ma'lumotnoma (profillar, `wire_api`, kontekst oynalari): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Sinov:** `codex "what is 2+2?"`
 
@@ -439,13 +437,42 @@ EOF
 
 **Sinov:** `opencode`
 
-> Fikrlash variantlarini yuborish uchun
-> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> buyrugʻidan foydalaning.
+> Fikrlash variantlarini yuborish uchun `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` foydalaning.
 
 ---
 
-#### Cline (CLI yoki VS Code)
+#### Pi kodlash agenti
+
+Rasmiy Pi Coding Agent paketini `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` bilan o'rnating. Pi `~/.pi/agent/models.json` dan maxsus provayderlarni o'qiydi; butun agent katalogini ko'chirish uchun `PI_CODING_AGENT_DIR` o'rnating. Boshqaruv paneli bu bekor qilishdan keyin keladi. Pi maxsus so'nggi nuqtalardan modellarni topmaydi, shuning uchun OmniRoute tanlangan modelni Pi ning `openai-completions` API va OmniRoute OpenAI-ga mos keladigan `/v1` so'nggi nuqtasi yordamida `models[]` da yozadi.
+
+In**CLI asboblari → Pi** , so‘nggi nuqta, API kaliti va modelni tanlang, provayderni oldindan ko‘rishni ko‘rib chiqing, so‘ng amal qiling. Oldindan ko'rish provayder bo'lagidir: boshqa provayderlar va sozlamalar saqlanib qolishi uchun Pi-ni qo'lda sozlashda `providers.omniroute` mavjud `models.json` ga birlashtiring.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model` ochganingizda Pi `models.json` qayta yuklaydi. Siz tanlagan provayder identifikatori va model identifikatori bilan sozlangan marshrutni sinab ko'ring:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Ma'lumotnomalar: [Pi modellari va maxsus provayderlar](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi muhit o'zgaruvchilari](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi o'rnatish ko'rsatmalari](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI yoki VS kodi)
 
 **CLI rejimi:**
 
@@ -459,14 +486,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code rejimi:**
-Cline kengaytmasi sozlamalari → API provayderi: `OpenAI Compatible` → Asosiy URL: `http://localhost:20128/v1`
+**VS kod rejimi:** Cline kengaytma sozlamalari → API Provayder: `OpenAI Compatible` → Asosiy URL: `http://localhost:20128/v1`
 
-Yoki OmniRoute boshqaruv panelidan foydalaning → **CLI vositalari → Cline → Sozlamani qoʻllash**.
+Yoki OmniRoute boshqaruv paneli → dan foydalaning**CLI Asboblar → Cline → Konfiguratsiyani qo‘llash** .
 
 ---
 
-#### KiloCode (CLI yoki VS Code)
+#### KiloCode (CLI yoki VS kodi)
 
 **CLI rejimi:**
 
@@ -483,13 +509,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Yoki OmniRoute boshqaruv panelidan foydalaning → **CLI vositalari → KiloCode → Sozlamani qoʻllash**.
+Yoki OmniRoute boshqaruv paneli → dan foydalaning**CLI Asboblar → KiloCode → Konfiguratsiyani qo‘llash** .
 
 ---
 
-#### Continue (VS Code kengaytmasi)
+#### Davom etish (VS kod kengaytmasi)
 
-`~/.continue/config.yaml` faylini tahrirlang:
+`~/.continue/config.yaml` ni tahrirlash:
 
 ```yaml
 models:
@@ -501,20 +527,20 @@ models:
     default: true
 ```
 
-Tahrirlashdan keyin VS Code dasturini qayta ishga tushiring.
+Tahrirlashdan keyin VS kodini qayta ishga tushiring.
 
 ---
 
-#### VS Code Insiders (`chatLanguageModels.json`)
+#### VS Code Insayderlari (`chatLanguageModels.json`)
 
-VS Code Insiders maxsus yakuniy nuqta modellari uchun sozlangan boʻlsa va OmniRoute maxsus sarlavha maydonisiz ishlashini istasangiz, bundan foydalaning.
+Bundan VS Code Insiderlar maxsus so‘nggi nuqta modellari uchun sozlangan va siz OmniRoute maxsus sarlavha maydonisiz ishlashini istasangiz foydalaning.
 
-**Tavsiya etilgan joylashuv:**
+**Tavsiya etilgan joy:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Tokenlashtirilgan OmniRoute taxallusidan foydalanish misoli:**
+**Tokenlashtirilgan OmniRoute taxallusidan foydalanishga misol:**
 
 ```json
 [
@@ -538,27 +564,26 @@ VS Code Insiders maxsus yakuniy nuqta modellari uchun sozlangan boʻlsa va OmniR
 
 **Eslatmalar:**
 
-- `sk-your-omniroute-key` o‘rniga OmniRoute’da yaratilgan API kalitini kiriting.
-- `url` maydoni `/api/v1/vscode/{token}/chat/completions` manziliga yo‘naltirilishi kerak.
-- `modelsUrl` maydoni `/api/v1/vscode/{token}/models` manziliga yo‘naltirilishi kerak.
-- Mijoz maxsus sarlavhalarni qo‘llab-quvvatlasa, odatiy `/v1` + Bearer sarlavhasi usulini afzal ko‘ring.
-- URL ichiga joylashtirilgan tokenlar moslik uchun zaxira usul bo‘lib, muharrir jurnallarida yoki proksi tarixida ko‘rinishi mumkin.
+- `sk-your-omniroute-key` OmniRoute da yaratilgan API kaliti bilan almashtiring.
+- `url` maydoni `/api/v1/vscode/{token}/chat/completions` ga ishora qilishi kerak.
+- `modelsUrl` maydoni `/api/v1/vscode/{token}/models` ga ishora qilishi kerak.
+- Mijoz maxsus sarlavhalarni qo'llab-quvvatlasa, oddiy `/v1` + Bearer sarlavhalari oqimini afzal ko'ring.
+- URL-ko'milgan tokenlar moslik zaxirasi bo'lib, muharrir jurnallarida yoki proksi-server tarixida paydo bo'lishi mumkin.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# AWS/Kiro hisobingizga kiring:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI o‘z autentifikatsiyasidan foydalanadi — Kiro CLI’ning o‘zi uchun OmniRoute backend sifatida kerak emas.
-# Boshqa vositalar uchun kiro-cli’dan OmniRoute bilan birga foydalaning.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** ish stoli ilovasi uchun OmniRoute tomonidan taqdim etilgan MITM endpointidan
-`/dashboard/cli-tools → Kiro` ostida foydalaning.
+uchun**Kiro IDE** ish stoli ilovasi uchun `/dashboard/cli-tools → Kiro` ostida OmniRoute tomonidan ochilgan MITM oxirgi nuqtasidan foydalaning.
 
 ---
 

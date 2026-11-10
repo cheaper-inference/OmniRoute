@@ -14,7 +14,7 @@ OmniRoute je místní směrovací brána AI a řídicí panel postavený na Next
 
 Základní schopnosti:
 
-- Povrch API kompatibilní s OpenAI pro CLI/tools (377 poskytovatelů, 156 spouštěcích modulů)
+- Povrch API kompatibilní s OpenAI pro CLI/tools (381 poskytovatelů, 159 spouštěcích modulů)
 - překlad Request/response napříč formáty poskytovatelů
 - Záložní kombinace modelu (sekvence více modelů)
 - Strukturované kombinované kroky (`provider + model + connection`) s řazením za běhu podle `compositeTiers`
@@ -78,7 +78,7 @@ Základní schopnosti:
 
 Primární runtime model:
 
-- Trasy aplikací Next.js pod `src/app/api/*` implementují řídicí panel APIs i kompatibilitu APIs
+- Trasy aplikací Next.js pod `src/app/api/*` implementují jak řídicí panel APIs, tak kompatibilitu APIs
 - Sdílené jádro SSE/routing v `src/sse/*` + `open-sse/*` se stará o spouštění poskytovatele, překlad, streamování, záložní řešení a používání
 
 ## Referenční diagramy
@@ -369,7 +369,7 @@ Automatické kombo dynamicky hodnotí a vybírá cíle směrování v okamžiku 
 
 Klíčové schopnosti:
 
-- **20 směrovacích strategií** (priorita, vážený, vyplňte nejprve, cyklicky, P2C, náhodný, nejméně používaný, nákladově optimalizovaný, reset-aware, reset-window, rezerva, kvóta-vážený, striktně náhodný,** auto** , lkgp, kontextově optimalizované, mezipaměť optimalizované, kontextové relé,** fúze** , pipeline) — auto je titulek ve verzi 3.8.0; `fusion` (panel fan-out + soudce syntéza, `open-sse/services/fusion.ts`) je novinka ve verzi 3.8.36.
+- **20 směrovacích strategií** (priorita, vážený, vyplňte nejprve, cyklicky, P2C, náhodný, nejméně používaný, nákladově optimalizovaný, reset-aware, reset-window, rezerva, kvóta-vážený, striktně náhodný,** auto** , lkgp, kontextově optimalizované, mezipaměť optimalizované, kontextové relé,** fúze** , pipeline) — auto je titulek ve verzi 3.8.0; `fusion` (panel fan-out + rozhodčí syntéza, `open-sse/services/fusion.ts`) je novinka ve verzi 3.8.36.
 - **16faktorové bodování** : kvóta, zdraví, inverzní náklady, inverzní latence, přizpůsobení úkolu a deset dalších. Kanonická tabulka faktorů a jejich výchozí váhy žije v [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — pokud ji zde znovu zopakujeme, dostane se na druhé místo, kde bude zastaralá.
 - **Virtuální továrna** zhmotňuje pomíjivá komba, když neexistuje žádná odpovídající pojmenovaná komba, získává kandidáty ze zdravých aktivních připojení poskytovatelů.
 - **Automatické předpony** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — každý podpořený vyladěným hmotnostním profilem.
@@ -379,7 +379,7 @@ Klíčové schopnosti:
 
 ### B. Cloud Agenti
 
-Cloud Agents zahrnuje platformy kódových agentů hostované třetími stranami (Codex Cloud, Devin, Jules) do jednotného životního cyklu úloh podporovaných DB. Všechny koncové body úkolu creation/inspection vyžadují autentizaci pro správu.
+Cloud Agents zahaluje platformy kódových agentů hostované třetími stranami (Codex Cloud, Devin, Jules) do jednotného životního cyklu úloh podporovaných DB. Všechny koncové body úkolu creation/inspection vyžadují autentizaci pro správu.
 
 - Kořen modulu: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plus podadresáře pro jednotlivé agenty pod `agents/`)
 - Implementace na agenty: `agents/codex/`, `agents/devin/`, `agents/jules/`
@@ -403,7 +403,7 @@ Pro vytváření sady pravidel a ladění prahů viz [`docs/security/GUARDRAILS.
 
 ### D. Doménová vrstva
 
-Jmenný prostor `src/domain/` centralizuje rozhodnutí o politice, takže obslužné rutiny rout nemusí samy sestavovat logiku lockout/budget/fallback.
+Jmenný prostor `src/domain/` centralizuje rozhodnutí o politice, takže obslužné rutiny směrování nemusejí samy sestavovat logiku lockout/budget/fallback.
 
 - Modul zásad: `src/domain/policyEngine.ts` — jediný vstupní bod pro vyhodnocení před provedením (uzamčení → budget → záložní objednávání)
 - Pravidla pro náklady: `src/domain/costRules.ts`
@@ -414,7 +414,7 @@ Jmenný prostor `src/domain/` centralizuje rozhodnutí o politice, takže obslu�
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Snímky dostupnosti modelu: `src/domain/modelAvailability.ts`
 - Sledování vypršení platnosti poskytovatele: `src/domain/providerExpiration.ts`
-- Mezipaměť kvót: `src/domain/quotaCache.ts`
+- Mezipaměť kvót: `src/domain/quotaCache.ts`. Poskytovatelé přidávají a odebírají okna kvót (OpenAI u některých plánů upustilo od 5hodinového okna Codex ), takže použití čtení adaptéru poskytovatele potvrzuje jako dokončené (`quotasComplete`, viz `src/lib/usage/usageReading.ts`) je úplná sada oken účtu: okno známé dříve, ale chybí v něm, je vyřazeno, v mezipaměti, v `quota_snapshots` se restartuje (připojený záznam Codex vyřazení kvóty), v saturaci Claude. kbelíky. Částečný důkaz (záhlaví odpovědí, zastaralé kopie) aktualizuje pouze okna, která nese.
 - Stav degradace: `src/domain/degradation.ts`
 - Audit konfigurace: `src/domain/configAudit.ts`
 - Tvůrce metadat odpovědi OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -426,7 +426,7 @@ Autorizační kanál před odesláním klasifikuje každý příchozí požadave
 
 - Vstup potrubí: `src/server/authz/pipeline.ts`
 - Klasifikátor požadavků: `src/server/authz/classify.ts` — rozlišuje veřejné cesty kompatibility od cest správy
-- Inventář veřejné trasy: `src/shared/constants/publicApiRoutes.ts`
+- Seznam veřejných tras: `src/shared/constants/publicApiRoutes.ts`
 - Zásady: `src/server/authz/policies/` — skládací predikáty (`requireApiKey`, `requireManagement`, `requireFreshAuth` atd.)
 - Nástroje záhlaví: `src/server/authz/headers.ts`
 - Aserenční pomocník: `src/server/authz/assertAuth.ts`

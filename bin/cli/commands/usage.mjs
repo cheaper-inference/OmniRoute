@@ -114,6 +114,7 @@ export function registerUsage(program) {
     .action(runUsageProxyLogs);
 }
 
+/** Fetches provider usage analytics and maps current API token totals, retaining legacy aliases. */
 export async function runUsageAnalytics(opts, cmd) {
   const globalOpts = cmd.optsWithGlobals();
   const p = new URLSearchParams({ range: opts.period ?? "30d" });
@@ -123,8 +124,8 @@ export async function runUsageAnalytics(opts, cmd) {
   const rows = toArray(data.byProvider ?? data.providers ?? []).map((r) => ({
     provider: r.provider ?? r.providerId ?? "",
     requests: r.totalRequests ?? r.requests ?? 0,
-    tokensIn: r.totalTokensIn ?? r.tokensIn ?? 0,
-    tokensOut: r.totalTokensOut ?? r.tokensOut ?? 0,
+    tokensIn: r.promptTokens ?? r.totalTokensIn ?? r.tokensIn ?? 0,
+    tokensOut: r.completionTokens ?? r.totalTokensOut ?? r.tokensOut ?? 0,
     costUsd: r.totalCost ?? r.cost ?? r.costUsd ?? 0,
   }));
   emit(rows, globalOpts, analyticsSchema);
@@ -201,7 +202,13 @@ export async function runUsageQuota(opts, cmd) {
       used: r.used ?? r.tokensUsed ?? null,
       remaining: r.remaining ?? r.percentRemaining ?? null,
       resetAt: r.resetAt ?? r.nextReset ?? null,
-      state: r.state ?? (r.percentRemaining > 0 ? "available" : "exhausted"),
+      state:
+        r.state ??
+        (r.percentRemaining == null
+          ? "unknown"
+          : r.percentRemaining > 0
+            ? "available"
+            : "exhausted"),
     })
   );
   emit(rows, globalOpts, quotaSchema);

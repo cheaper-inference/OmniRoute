@@ -120,39 +120,40 @@ $20 վճարելու և սահմանափակումներին բախվելու փ
 
 ## 📖 Մատակարարի կարգավորում
 
-CSV կամ JSON ֆայլից API բանալիով կապեր զանգվածաբար ավելացնելու համար օգտագործեք **Կառավարման վահանակ → Մատակարարներ → Ներմուծել ֆայլից**։ Սյունակների հերթականությունը ֆիքսված է (`provider,name,apiKey,baseUrl,priority`)․ `provider`-ը պետք է արդեն գոյություն ունենա որպես կառավարվող մատակարար կամ համատեղելի հանգույց։ Տե՛ս [Մատակարարների ներմուծում CSV կամ JSON ֆայլից](../providers/CSV-IMPORT.md)։
+CSV կամ JSON ֆայլից API-բանալիով կապերը զանգվածաբար ավելացնելու համար օգտագործեք **Վահանակ → Մատակարարներ → Ներմուծել ֆայլից**։ Սյունակները դիրքային են (`provider,name,apiKey,baseUrl,priority`), իսկ `provider`-ը պետք է արդեն գոյություն ունենա որպես կառավարվող մատակարար կամ համատեղելի հանգույց։ Տեսեք [Մատակարարների ներմուծում CSV կամ JSON ֆայլից](../providers/CSV-IMPORT.md)։
 
 ### 🔐 Բաժանորդագրությամբ մատակարարներ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել Claude Code-ը
-→ OAuth մուտք → Թոքենի ավտոմատ թարմացում
+Վահանակ → Մատակարարներ → Միացնել Claude Code-ը
+→ Մուտք OAuth-ով → Նշանի ավտոմատ թարմացում
 → 5-ժամյա + շաբաթական քվոտայի հետևում
 
-Մոդելներ՝
+Մոդելներ:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Մասնագիտական խորհուրդ․** Բարդ առաջադրանքների համար օգտագործեք Opus-ը, իսկ արագության համար՝ Sonnet-ը։ OmniRoute-ը հետևում է յուրաքանչյուր մոդելի քվոտային։
+**Մասնագիտական խորհուրդ․** Բարդ առաջադրանքների համար օգտագործեք Opus-ը, իսկ արագության համար՝ Sonnet-ը։ OmniRoute-ը հետևում է քվոտային ըստ մոդելի։
 
-OmniRoute-ի հոսթում դիտարկիչ չկա՞։ Գործարկեք `claude setup-token`-ը ցանկացած միջավայրում, որտեղ մուտք եք գործել Claude Code, և մեկ տարվա թոքենը տեղադրեք **Setup Token** ներդիրում։ Տե՛ս [Claude Code-ի օգտագործումը setup token-ով](../providers/CLAUDE_CODE_SETUP_TOKEN.md)։
+OmniRoute-ի հոսքերը, որոնք համատեղելի են Claude-ի և Claude Code-ի հետ, Opus և Sonnet
+մոդելների համար պահպանում են մտածողության `max` ջանքը։ Haiku մոդելները չեն ընդունում
+`max` ջանքի մակարդակը, ուստի OmniRoute-ը այդ հարցումը դեպի վերին հոսք ուղարկելուց առաջ
+իջեցնում է մինչև բարձր մտածողության բյուջե։
 
-Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները պահպանում են Opus և Sonnet
-մոդելների մտածողության `max` ջանքը։ Haiku մոդելները չեն ընդունում `max` ջանքի մակարդակը, ուստի OmniRoute-ն այդ
-հարցումը փոխարկում է մտածողության բարձր բյուջեի՝ նախքան այն վերին հոսք ուղարկելը։
+OmniRoute-ի հոսթում զննարկիչ չկա՞։ Ցանկացած վայրում, որտեղ Claude Code-ը մուտք է գործած, գործարկեք `claude setup-token` և մեկ տարվա նշանը տեղադրեք **Կարգավորման նշան** ներդիրում։ Տեսեք [Claude Code-ը կարգավորման նշանով](../providers/CLAUDE_CODE_SETUP_TOKEN.md)։
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել Codex-ը
-→ OAuth մուտք (պորտ 1455)
-→ 5-ժամյա + շաբաթական վերակայում
+Վահանակ → Մատակարարներ → Միացնել Codex-ը
+→ Մուտք OAuth-ով (պորտ 1455)
+→ 5-ժամյա + շաբաթական վերականգնում
 
-Մոդելներ՝
+Մոդելներ:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,11 +163,11 @@ Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները �
 #### GitHub Copilot
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել GitHub-ը
-→ OAuth՝ GitHub-ի միջոցով
-→ Ամսական վերակայում (ամսվա 1-ին օրը)
+Վահանակ → Մատակարարներ → Միացնել GitHub-ը
+→ OAuth GitHub-ի միջոցով
+→ Ամսական վերականգնում (ամսվա 1-ին օրը)
 
-Մոդելներ՝
+Մոդելներ:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -174,47 +175,66 @@ Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները �
   gh/gemini-3.1-pro-preview
 ```
 
+**AI կրեդիտներ (նշանների վրա հիմնված հաշվարկ)։** Երբ GitHub-ը հաշվի համար հաղորդում է
+`credits_used`, Մատակարարի սահմանաչափերի քարտում ցուցադրվում է **AI կրեդիտներ** տողը՝
+ընթացիկ հաշվարկային ժամանակահատվածում սպառված կրեդիտներով, այդ թվում՝ անսահմանափակ
+կազմակերպությունների պլաններում։
+
+**AI կրեդիտների տեղական սահմանաչափ։** Խմբագրեք GitHub-ի կապը և սահմանեք **AI կրեդիտների
+սահմանաչափը յուրաքանչյուր հաշվարկային ժամանակահատվածի համար** (`providerSpecificData.githubCreditLimit`)։
+Դատարկ արժեքը անջատում է այն, իսկ `0`-ն միշտ բաց է թողնում այդ կապը։ Երբ օգտագործման
+վերջին ընթերցված արժեքը հավասար է կամ գերազանցում է սահմանաչափը, հաշվի ընտրությունը բաց է
+թողնում այդ կապը, իսկ երթուղավորումը անցնում է ձեր մյուս կապերին՝ նույն կերպ, ինչպես
+քվոտայի քաղաքականության դադարեցման դեպքում։ Ստուգումն օգտագործում է այն օգտագործման
+տվյալները, որոնք պարբերական քվոտայի թարմացումն արդեն հավաքում է. այն երբեք GitHub-ին չի
+դիմում հարցման ճանապարհին, և գործում է թույլատրող ռեժիմով․ բացակայող կամ հնացած ընթերցված
+արժեքը (15 րոպեից ավելի հին, կամ արդեն վերականգնված հաշվարկային ժամանակահատվածից) չի
+արգելափակում կապը։ Սա տեղական պաշտպանիչ մեխանիզմ է, **ոչ թե ծախսերի երաշխավորված
+առաստաղ**․ GitHub-ի հաղորդման ուշացումները, թարմացման պարբերականությունը, ընթացքի մեջ
+գտնվող հարցումները և OmniRoute-ից դուրս կատարված օգտագործումը կարող են գերազանցել այն։
+Կոշտ սահմանաչափի համար օգտագործեք GitHub-ի սեփական ծախսերի վերահսկման գործիքները։
+
 ### 💰 Էժան մատակարարներ
 
-#### GLM-4.7 (օրական վերակայում, $0.6/1M)
+#### GLM-4.7 (օրական վերականգնում, $0.6/1M)
 
 1. Գրանցվեք՝ [Zhipu AI](https://open.bigmodel.cn)
-2. Ստացեք API բանալին Coding Plan-ից
-3. Կառավարման վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `glm`, API բանալի՝ `your-key`
+2. Coding Plan-ից ստացեք API բանալի
+3. Վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `glm`, API բանալի՝ `your-key`
 
-**Օգտագործում․** `glm/glm-4.7` — **Մասնագիտական խորհուրդ․** Coding Plan-ն առաջարկում է 3× քվոտա՝ 1/7 գնով։ Վերակայվում է ամեն օր՝ առավոտյան ժամը 10:00-ին։
+**Օգտագործում․** `glm/glm-4.7` — **Մասնագիտական խորհուրդ․** Coding Plan-ն առաջարկում է 3× քվոտա՝ արժեքի 1/7-ի դիմաց։ Վերականգնումն ամեն օր ժամը 10:00-ին է։
 
-#### MiniMax M2.1 (5-ժամյա վերակայում, $0.20/1M)
+#### MiniMax M2.1 (5-ժամյա վերականգնում, $0.20/1M)
 
 1. Գրանցվեք՝ [MiniMax](https://www.minimax.io)
-2. Ստացեք API բանալին → Կառավարման վահանակ → Ավելացնել API բանալի
+2. Ստացեք API բանալի → Վահանակ → Ավելացնել API բանալի
 
-**Օգտագործում․** `minimax/MiniMax-M2.1` — **Մասնագիտական խորհուրդ․** Երկար համատեքստի համար ամենաէժան տարբերակն է (1M թոքեն)։
+**Օգտագործում․** `minimax/MiniMax-M2.1` — **Մասնագիտական խորհուրդ․** Երկար կոնտեքստի համար ամենաէժան տարբերակն է (1M նշան)։
 
-#### Kimi K2 (ֆիքսված $9/ամիս)
+#### Kimi K2 ($9/ամիս հաստատագրված)
 
 1. Բաժանորդագրվեք՝ [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Ստացեք API բանալին → Կառավարման վահանակ → Ավելացնել API բանալի
+2. Ստացեք API բանալի → Վահանակ → Ավելացնել API բանալի
 
-**Օգտագործում․** `kimi/kimi-k2.5` — **Մասնագիտական խորհուրդ․** Ֆիքսված $9/ամիս՝ 10M թոքենի համար = $0.90/1M փաստացի արժեք։
+**Օգտագործում․** `kimi/kimi-k2.5` — **Մասնագիտական խորհուրդ․** Հաստատագրված $9/ամիս՝ 10M նշանի համար = $0.90/1M արդյունավետ արժեք։
 
 #### Baidu Qianfan / ERNIE
 
 1. Գրանցվեք՝ [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Ստեղծեք Qianfan API բանալի → Կառավարման վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `qianfan`
+2. Ստեղծեք Qianfan API բանալի → Վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `qianfan`
 
-**Օգտագործում․** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` կամ Qianfan-ի՝ OpenAI-ի հետ համատեղելի մեկ այլ մոդելի ID։
+**Օգտագործում․** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` կամ Qianfan-ի հետ OpenAI-ի համատեղելի մեկ այլ մոդելի ID։
 
 ### 🆓 ԱՆՎՃԱՐ մատակարարներ
 
-Նույնականացում չպահանջող անվճար մատակարարների էջում **Նույնականացում չի պահանջվում** դաշտի կողքին կա փոխարկիչ։
-Այն անջատելու դեպքում տվյալ մատակարարը կանջատվի, կհեռացվի Մատակարարների կազմաձևված/կոմպակտ տեսքերից, իսկ
-նրա մոդելները կհեռացվեն `/v1/models`-ից։
+Առանց նույնականացման անվճար մատակարարների էջում **Նույնականացում չի պահանջվում** ընտրանքի կողքին կա անջատիչ։
+Այն անջատելը անջատում է տվյալ մատակարարին, հեռացնում է այն Կազմաձևված մատակարարների/կոմպակտ տեսքերից
+և հեռացնում է դրա մոդելները `/v1/models`-ից։
 
 #### Qoder (9 ԱՆՎՃԱՐ մոդել)
 
 ```bash
-Կառավարման վահանակ → Միացնել Qoder-ը → OAuth մուտք → Հասանելիությունը ենթակա է մատակարարի ընթացիկ սահմանափակումներին
+Վահանակ → Միացնել Qoder-ը → Մուտք OAuth-ով → Մատչելիությունը կախված է մատակարարի ընթացիկ սահմանաչափերից
 
 Մոդելներ՝ if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -222,7 +242,7 @@ Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները �
 #### Kiro (Claude ԱՆՎՃԱՐ)
 
 ```bash
-Կառավարման վահանակ → Միացնել Kiro-ն → AWS Builder ID կամ Google/GitHub → ~50 կրեդիտ/ամիս
+Վահանակ → Միացնել Kiro-ն → AWS Builder ID կամ Google/GitHub → մոտ 50 կրեդիտ/ամիս
 
 Մոդելներ՝ kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -337,65 +357,65 @@ API բանալի՝ [կառավարման վահանակից]
 
 ---
 
-## 🚀 Տեղակայում
+## 🚀 տեղակայում
 
-### npm-ի գլոբալ տեղադրում (խորհուրդ է տրվում)
+### Համաշխարհային npm տեղադրում (Առաջարկվում է)
 
 ```bash
 npm install -g omniroute
 
-# Ստեղծել կազմաձևման պանակը
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ստեղծել .env ֆայլը (տե՛ս .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Գործարկել սերվերը
+# Start server
 omniroute
-# Կամ հատուկ պորտով՝
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-ն ավտոմատ կերպով բեռնում է `.env`-ը `~/.omniroute/.env`-ից կամ `./.env`-ից։
+CLI ավտոմատ կերպով բեռնում է `.env` `~/.omniroute/.env` ից կամ `./.env`: Աշխատանքային գրացուցակում `./.env` կարող է սահմանել ստեղների միայն կարճ թույլատրելի ցուցակ (պորտ, `REQUIRE_API_KEY`, տեղայնություն և գույնի կարգավորումներ); մնացած ամեն ինչ դրեք `~/.omniroute/.env` ում: Տես [CLI գործարկման պայմանագրերը](CLI-LAUNCH-CONTRACTS.md#working-directory-env) :
 
-### Համակարգային դարակի ռեժիմ
+### Սկուտեղի ռեժիմ
 
-Գործարկեք OmniRoute-ը համակարգային դարակում․
+Սկսեք OmniRoute համակարգի սկուտեղում.
 
 ```bash
 omniroute serve --tray
 ```
 
-Հրամանի կատարումն ավարտվում է սերվերի և համակարգային դարակի պատրաստ լինելուց հետո։
+Հրամանը վերադառնում է սերվերի և սկուտեղի պատրաստ լինելուց հետո:
 
-Սերվերը շարունակում է աշխատել առանց տերմինալի։
+Սերվերը շարունակում է առանց տերմինալի:
 
-Համակարգային դարակի ռեժիմն աջակցում է macOS-ը, Windows-ը և գրաֆիկական Linux աշխատաշրջանները։ Համակարգային դարակի ռեժիմը կառավարման վահանակն ավտոմատ չի բացում։
+Սկուտեղի ռեժիմն աջակցում է macOS, Windows և գրաֆիկական Linux նիստերին: Սկուտեղի ռեժիմը ավտոմատ կերպով չի բացում վահանակը:
 
-Օգտագործեք համակարգային դարակի ընտրացանկը հետևյալ գործողությունների համար․
+Օգտագործեք սկուտեղի ընտրացանկը հետևյալ գործողությունների համար.
 
-- Բացել կառավարման վահանակը։
-- Բացել `/dashboard/logs`-ը։
-- Փոխել ավտոմատ գործարկման կարգավորումը։
-- Կանգնեցնել OmniRoute-ը։
+- Բացեք վահանակը:
+- Բացեք `/dashboard/logs`.
+- Փոխել ավտոմատ մեկնարկը:
+- Stop OmniRoute.
 
-Մի՛ համակցեք `--tray`-ը հետևյալ ընտրանքների հետ․
+Մի համատեղեք `--tray` այս տարբերակների հետ.
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Այս ռեժիմները պահանջում են գործընթացների կառավարման տարբեր եղանակներ։
+Այս ռեժիմները պահանջում են տարբեր գործընթացների սեփականություն:
 
-Միացրեք գործարկումը համակարգ հաջորդ մուտք գործելիս․
+Միացնել գործարկումը հաջորդ մեքենայի մուտքի ժամանակ.
 
 ```bash
 omniroute autostart enable
 ```
 
-Ավտոմատ գործարկումն օգտագործում է համակարգային դարակի ռեժիմը macOS-ում, Windows-ում և գրաֆիկական Linux աշխատաշրջաններում։ Առանց գրաֆիկական միջավայրի Linux-ն օգտագործում է գոյություն ունեցող systemd օգտատիրոջ ծառայությունը։
+Ավտոմատ մեկնարկը օգտագործում է սկուտեղի ռեժիմը macOS, Windows և գրաֆիկական Linux նիստերում: Headless Linux օգտագործում է առկա systemd օգտվողի ծառայությունը:
 
-Անջատեք մուտք գործելիս ավտոմատ գործարկումը․
+Անջատել գործարկումը մուտքի ժամանակ.
 
 ```bash
 omniroute autostart disable
@@ -403,16 +423,16 @@ omniroute autostart disable
 
 ### Ապատեղադրում
 
-Երբ OmniRoute-ն այլևս անհրաժեշտ չէ, մաքուր հեռացման համար տրամադրում ենք երկու արագ սկրիպտ․
+Երբ դուք այլևս OmniRoute կարիք չունեք, մենք տրամադրում ենք երկու արագ սցենար մաքուր հեռացման համար.
 
-| Հրաման                   | Գործողություն                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | Հեռացնում է համակարգային հավելվածը, բայց **պահպանում է ձեր ՏԲ-ն և կազմաձևումները** `~/.omniroute`-ում։ |
-| `npm run uninstall:full` | Հեռացնում է հավելվածը ԵՎ ընդմիշտ **ջնջում է բոլոր կազմաձևումները, բանալիներն ու տվյալների բազաները**։  |
+| Հրաման                   | Գործողություն                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Հեռացնում է համակարգի հավելվածը, բայց** պահպանում է ձեր DB և կոնֆիգուրացիաները** `~/.omniroute`.        |
+| `npm run uninstall:full` | Ընդմիշտ հեռացնում է AND հավելվածը** ջնջում է բոլոր կոնֆիգուրացիաները, ստեղները և տվյալների բազաները** . |
 
-> Նշում․ այս հրամանները գործարկելու համար անցեք OmniRoute նախագծի պանակ (եթե կլոնավորել եք այն) և գործարկեք դրանք։ Որպես այլընտրանք, եթե այն տեղադրված է գլոբալ կերպով, կարող եք պարզապես գործարկել `npm uninstall -g omniroute`։
+> Նշում. Այս հրամանները գործարկելու համար անցեք OmniRoute նախագծի թղթապանակ (եթե այն կլոնավորել եք) և գործարկեք դրանք: Այլապես, եթե գլոբալ տեղադրման դեպքում, կարող եք պարզապես գործարկել `npm uninstall -g omniroute`:
 
-### Տեղակայում VPS-ում
+### VPS տեղակայում
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,25 +448,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Կամ՝ pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 տեղակայում (քիչ հիշողությամբ)
+### PM2 տեղակայում (ցածր հիշողություն)
 
-Սահմանափակ RAM ունեցող սերվերների համար օգտագործեք հիշողության սահմանաչափի ընտրանքը․
+Սահմանափակ RAM ունեցող սերվերների համար օգտագործեք հիշողության սահմանաչափի տարբերակը.
 
 ```bash
-# 512MB սահմանաչափով (լռելյայն)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Կամ հիշողության հատուկ սահմանաչափով
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Կամ՝ օգտագործելով ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Ստեղծեք `ecosystem.config.js`․
+Ստեղծել `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -471,24 +491,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Կառուցել պատկերը (լռելյայն = runner-cli՝ նախապես տեղադրված codex/claude/droid-ով)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Դյուրակիր ռեժիմ (խորհուրդ է տրվում)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI բինար ֆայլերով հոսթին ինտեգրված ռեժիմի համար տե՛ս հիմնական փաստաթղթերի Docker բաժինը։
+Հոսթին ինտեգրված ռեժիմի համար CLI երկուական սարքերով տե՛ս Docker բաժինը հիմնական փաստաթղթերում:
 
-### Void Linux (xbps-src)
+### Անվավեր Linux (xbps-src)
 
-Void Linux-ի օգտատերերը կարող են փաթեթավորել և տեղադրել OmniRoute-ը բնիկ եղանակով՝ օգտագործելով `xbps-src` խաչաձև կոմպիլյացիայի շրջանակը։ Այն ավտոմատացնում է Node.js-ի ինքնուրույն հավաքումը՝ անհրաժեշտ `better-sqlite3` բնիկ կապակցումների հետ միասին։
+Void Linux օգտվողները կարող են փաթեթավորել և տեղադրել OmniRoute ՝ օգտագործելով `xbps-src` խաչաձև կոմպիլյացիայի շրջանակը: Սա ավտոմատացնում է Node.js ինքնուրույն կառուցումը անհրաժեշտ `better-sqlite3` մայրենի կապակցումների հետ միասին:
 
 <details>
-<summary><b>Դիտել xbps-src ձևանմուշը</b></summary>
+<summary><b>Դիտեք xbps-src ձևանմուշը</b></summary>
 
 ```bash
-# «omniroute»-ի ձևանմուշի ֆայլ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +529,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Որոշել node-gyp-ի նպատակային պրոցեսորի ճարտարապետությունը
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +538,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Տեղադրել բոլոր կախվածությունները՝ բաց թողնելով սկրիպտները
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Հավաքել Next.js-ի ինքնուրույն փաթեթը
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Պատճենել ստատիկ ռեսուրսներն ինքնուրույն փաթեթի մեջ
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Կոմպիլացնել better-sqlite3-ի բնիկ կապակցումը
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Կոմպիլացված կապակցումը տեղադրել ինքնուրույն փաթեթի մեջ
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Հեռացնել ճարտարապետությանը հատուկ sharp փաթեթները
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Պատճենել Next.js-ի ստատիկ վերլուծության կողմից բաց թողնված pino-ի կատարման միջավայրի կախվածությունները.
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +574,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Կանխել Next.js հավելվածի երթուղիչի դատարկ պանակների հեռացումը հետտեղադրման մշակիչի կողմից
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,32 +600,32 @@ post_install() {
 
 </details>
 
-### Միջավայրի փոփոխականներ
+### Շրջակա միջավայրի փոփոխականներ
 
-| Փոփոխական                               | Լռելյայն արժեք                       | Նկարագրություն                                                                                                                                                          |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT ստորագրման գաղտնիք (**փոխեք արտադրական միջավայրում**)                                                                                                               |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Առաջին մուտքի գաղտնաբառ                                                                                                                                                 |
-| `DATA_DIR`                              | `~/.omniroute`                       | Տվյալների գրացուցակ (տվյալների բազա, օգտագործման տվյալներ, մատյաններ)                                                                                                   |
-| `PORT`                                  | ֆրեյմվորկի լռելյայն արժեք            | Ծառայության միացք (օրինակներում՝ `20128`)                                                                                                                               |
-| `HOSTNAME`                              | ֆրեյմվորկի լռելյայն արժեք            | Կապակցման հոսթ (Docker-ի լռելյայն արժեքը՝ `0.0.0.0`)                                                                                                                    |
-| `NODE_ENV`                              | գործարկման միջավայրի լռելյայն արժեք  | Տեղակայման համար սահմանեք `production`                                                                                                                                  |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Հանրային բազային URL, որը հասանելի է կառավարման վահանակին և սերվերին (փոխարինում է հնացած `BASE_URL`-ը)                                                                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Ամպային համաժամացման վերջնակետի բազային URL (փոխարինում է հնացած `CLOUD_URL`-ը)                                                                                         |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC գաղտնիք՝ API բանալիներ ստեղծելու համար                                                                                                                             |
-| `REQUIRE_API_KEY`                       | `false`                              | Պահանջել Bearer API բանալի `/v1/*` հասցեների համար                                                                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Թույլատրել նույնականացված կառավարման վահանակի օգտատերերին ըստ պահանջի ցուցադրել պահված API բանալիների ամբողջական արժեքները                                              |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Քեշավորված մատակարարների սահմանաչափերի տվյալների՝ սերվերի կողմից թարմացման հաճախականություն․ միջերեսի թարմացման կոճակները շարունակում են գործարկել ձեռքով համաժամացումը |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Անջատել SQLite-ի ավտոմատ պատճենահանումը գրառումից, ներմուծումից կամ վերականգնումից առաջ․ ձեռքով պատճենահանումը շարունակում է աշխատել                                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | Միացնում է հավելվածի և աուդիտի մատյանների գրանցումը սկավառակի վրա                                                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Պարտադրել նույնականացման `Secure` cookie-ի օգտագործումը (HTTPS հակադարձ պրոքսիի հետևում)                                                                                |
-| `CLOUDFLARED_BIN`                       | սահմանված չէ                         | Կառավարվող ներբեռնման փոխարեն օգտագործել առկա `cloudflared` երկուական ֆայլը                                                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Կառավարվող Quick Tunnels-ի փոխանցման արձանագրություն (`http2`, `quic` կամ `auto`)                                                                                       |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-ի heap հիշողության սահմանաչափը՝ MB-ով                                                                                                                           |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Հուշումների քեշի գրառումների առավելագույն քանակը                                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Իմաստային քեշի գրառումների առավելագույն քանակը                                                                                                                          |
+| Փոփոխական                               | Կանխադրված                   | Նկարագրություն                                                                                                                                                   |
+| --------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ավտոգեներացված)_           | JWT ստորագրման գաղտնի — ավտոմատ ստեղծվել է առաջին գործարկման ժամանակ և շարունակվել է `server.env` ին: սահմանել այն հստակ, երբ տվյալների գրացուցակը ժամանակավոր է |
+| `INITIAL_PASSWORD`                      | _(չսահմանված)_               | Առաջին մուտքի գաղտնաբառը: npm/source տեղադրումը սկսվում է `CHANGEME` ով. փոխարինեք այն: Չկարգավորված՝ միացման հրաշագործ                                          |
+| `DATA_DIR`                              | `~/.omniroute`               | Տվյալների գրացուցակ (db, օգտագործում, տեղեկամատյաններ)                                                                                                           |
+| `PORT`                                  | շրջանակի լռելյայն            | Սպասարկման նավահանգիստ (`20128` օրինակներով)                                                                                                                     |
+| `HOSTNAME`                              | շրջանակի լռելյայն            | Կապել հոսթին (Docker կանխադրված է `0.0.0.0` ին)                                                                                                                  |
+| `NODE_ENV`                              | գործարկման ժամանակի լռելյայն | Սահմանել `production` տեղակայման համար                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Հանրային URL բազան հայտնվել է վահանակի վրա և ենթարկվել սերվերին (փոխարինում է հին `BASE_URL`)                                                                    |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | Cloud sync վերջնական կետի բազային URL (փոխարինում է ժառանգված `CLOUD_URL`)                                                                                       |
+| `API_KEY_SECRET`                        | _(ավտոգեներացված)_           | HMAC գաղտնիքը գեներացված API ստեղների համար — ավտոմատ ստեղծվել է առաջին գործարկման ժամանակ և պահպանվել է `server.env` ում                                        |
+| `REQUIRE_API_KEY`                       | `false`                      | Կիրառեք կրող API բանալին `/v1/*` ում                                                                                                                             |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                      | Թույլատրել վավերացված վահանակի օգտատերերին՝ ըստ պահանջի, բացահայտել ամբողջական պահպանված API հիմնական արժեքները                                                  |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                         | Սերվերի կողմից թարմացման արագություն քեշավորված Մատակարարի սահմանաչափերի տվյալների համար; UI թարմացման կոճակները դեռ գործարկում են ձեռքով համաժամացումը          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                      | Անջատել ավտոմատ SQLite snapshot-ները writes/import/restore ից առաջ; ձեռքով կրկնօրինակումները դեռ աշխատում են                                                     |
+| `APP_LOG_TO_FILE`                       | `true`                       | Միացնում է հավելվածի և աուդիտի գրանցամատյանի ելքը սկավառակի վրա                                                                                                  |
+| `AUTH_COOKIE_SECURE`                    | `false`                      | Ստիպել `Secure` auth քուքի ( HTTPS հակադարձ պրոքսիի հետևում)                                                                                                     |
+| `CLOUDFLARED_BIN`                       | չկարգավորված                 | Օգտագործեք գոյություն ունեցող `cloudflared` երկուական տարբերակը կառավարվող ներբեռնման փոխարեն                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                      | Տրանսպորտ կառավարվող արագ թունելների համար (`http2`, `quic` կամ `auto`)                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                        | Node.js կույտի սահմանը MB ում                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                         | Առավելագույն հուշում քեշի գրառումները                                                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                        | Առավելագույն իմաստային քեշի մուտքերը                                                                                                                             |
 
-Միջավայրի փոփոխականների ամբողջական տեղեկատուի համար տե՛ս [README](../README.md)-ն։
+Շրջակա միջավայրի փոփոխականի ամբողջական հղումի համար տե՛ս [README](../README.md) :
 
 ---
 
@@ -614,55 +634,55 @@ post_install() {
 <details>
 <summary><b>Դիտել բոլոր հասանելի մոդելները</b></summary>
 
-> Ստորև բերված ցանկը կազմվել է `open-sse/config/providerRegistry.ts`-ից՝ v3.8.0-ի համար։ Ամպային կատալոգները (Gemini, OpenRouter և այլն) համաժամեցվում են դինամիկ կերպով — ամբողջական ակտիվ կատալոգի համար բացեք **Վահանակ → Մատակարարներ → [provider] → Հասանելի մոդելներ** կամ կանչեք `GET /api/models/catalog`։
+> Ստորև բերված ցանկը կազմված է `open-sse/config/providerRegistry.ts`-ից՝ v3.8.0-ի համար։ Ամպային կատալոգները (Gemini, OpenRouter և այլն) համաժամացվում են դինամիկ եղանակով — ամբողջական ընթացիկ կատալոգը բացելու համար անցեք **Dashboard → Providers → [provider] → Available Models** կամ կանչեք `GET /api/models/catalog`։
 >
-> Եթե մատակարարի ներկառուցված ցանկը հնացել է, օգտագործեք այդ էջի **Ներմուծել /models-ից** տարբերակը (կամ միացրեք **Ավտոհամաժամեցումը**)՝ վերին աղբյուրի ակտիվ կատալոգը քաղելու համար։ Սա ստուգվել է v3.8.50-ում LLM7.io-ի (`gemini-3.1-flash-lite`) և UncloseAI-ի (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) համար. Pollinations-ի անանուն հասանելիությունը նույն փորձարկման ընթացքում մնացել է սահմանափակված վերին աղբյուրի կողմից։
+> Եթե մատակարարի ներկառուցված ցանկը հնացել է, այդ էջում օգտագործեք **Import from /models** (կամ միացրեք **Auto-Sync**)՝ ընթացիկ upstream կատալոգը ներբեռնելու համար։ Սա ստուգվել է v3.8.50-ում՝ LLM7.io-ի (`gemini-3.1-flash-lite`) և UncloseAI-ի (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) համար․ նույն փորձարկման ընթացքում Pollinations-ի անանուն հասանելիությունը մնացել էր upstream-ի կողմից սահմանափակված։
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth․ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ջանքի մակարդակներ. `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth․ `cx/gpt-5.5` (+ ջանքի մակարդակներ․ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth․ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ԱՆՎՃԱՐ OAuth: օգտագործեք **Վահանակ → Մատակարարներ → Kiro → Հասանելի մոդելներ** բաժնում ցուցադրվող ակտիվ կատալոգը։ Հասանելիությունը կախված է հաշվից և պլանից։
+**Kiro (`kr/`)** — ԱՆՎՃԱՐ OAuth․ օգտագործեք ընթացիկ կատալոգը, որը ցուցադրվում է **Dashboard → Providers → Kiro → Available Models** բաժնում։ Հասանելիությունը կախված է հաշվից և պլանից։
 
-**Qoder (`if/`)** — ԱՆՎՃԱՐ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ԱՆՎՃԱՐ OAuth․ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M․ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M․ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ամիս ֆիքսված կամ ըստ օգտագործման. `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ամիս հաստատագրված կամ ըստ օգտագործման․ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API բանալի. `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API բանալի․ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Գերհարաճ. `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Գերարագ․ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Բնիկ Grok. `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-ի բնիկ աջակցություն․ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Տեղակայված ԵՄ-ում. `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Հոսթինգ ԵՄ-ում․ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Որոնմամբ ընդլայնված. `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Որոնմամբ ընդլայնված․ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Բաց կոդով. `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (անվճար), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Բաց կոդով․ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (անվճար), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Արագ ինֆերենս. `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Արագ inference․ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale. `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Վաֆերային մասշտաբով․ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-կենտրոն. `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Կենտրոնացած RAG-ի վրա․ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Կորպորատիվ. `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Կորպորատիվ․ `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE․ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**՝ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Համաժամեցվում է ակտիվ ռեժիմում Google-ից՝ ըստ յուրաքանչյուր API բանալու — ստատիկ ցանկ չկա։ Միացրեք բանալին **Վահանակ → Մատակարարներ** բաժնում, ապա օգտագործեք **Հասանելի մոդելներ**՝ ընթացիկ կատալոգը ներմուծելու համար (օր. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)։
+**Gemini (Google Cloud `gemini/`)**՝ համաժամացվում է ընթացիկ վիճակով՝ ըստ Google-ի API բանալու․ ստատիկ ցանկ չկա։ Միացրեք բանալին **Dashboard → Providers** բաժնում, այնուհետև օգտագործեք **Available Models**-ը՝ ընթացիկ կատալոգը ներմուծելու համար (օրինակ՝ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)։
 
-**Այլ համատեղելի մատակարարներ** (ընտրված). `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough կատալոգ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`։ Յուրաքանչյուրը պահում է մոդելների իր սեփական ցանկը `providerRegistry.ts`-ում և կարող է ավտոմատ համաժամեցվել, երբ մատակարարը տրամադրում է `/models` վերջակետ։
+**Այլ համատեղելի մատակարարներ** (ընտրված)՝ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-ի միջոցով), `azure-ai`, `openrouter` (passthrough կատալոգ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`։ Յուրաքանչյուրը պահպանում է իր մոդելների ցանկը `providerRegistry.ts`-ում և կարող է ավտոմատ համաժամացվել, երբ մատակարարը տրամադրում է `/models` վերջնակետ։
 
-**Նշում մոդելների ID-ների մասին.** OmniRoute-ը օգտագործում է մատակարարի բնիկ ID-ներ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)։ Որոշ ID-ներում տարբերակները գրվում են կետով, քանի որ վերին աղբյուրի API-ն այդ ձևով է սպասում դրանց։ Եթե մոդելը նշված չէ վերևում, գործարկեք `omniroute models --search <term>` կամ դիմեք `GET /api/models/catalog`-ին՝ հասանելիությունը հաստատելու համար։
+**Նշում մոդելների ID-ների վերաբերյալ․** OmniRoute-ն օգտագործում է մատակարարների բնիկ ID-ները (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)։ Որոշ ID-ներ պարունակում են կետով գրված տարբերակներ, քանի որ upstream API-ն հենց այդ ձևաչափն է ակնկալում։ Եթե որևէ մոդել վերևում նշված չէ, գործարկեք `omniroute models --search <term>` կամ ուղարկեք `GET /api/models/catalog` հարցումը՝ հասանելիությունը հաստատելու համար։
 
 </details>
 

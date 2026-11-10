@@ -12,7 +12,7 @@ import {
   normalizeCliVersion,
   normalizeCliVersionOverrides,
   setCliVersionOverrides,
-} from "../../src/shared/constants/cliVersions.ts";
+} from "../../open-sse/config/cliVersions.ts";
 
 // Every `await import` MUST precede the first test(): node:test only registers
 // tests declared before the first top-level await in the module.

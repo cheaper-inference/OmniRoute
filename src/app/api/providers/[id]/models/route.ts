@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { FalClient } from "@omniroute/open-sse/handlers/fal/client";
+import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
+import { isFalNativeEnabled } from "@/shared/utils/featureFlags";
 import {
   getProviderConnectionFamilyIds,
   isClaudeCodeCompatibleProvider,
   isAnthropicCompatibleProvider,
   isOpenAICompatibleProvider,
-  NOAUTH_PROVIDERS,
 } from "@/shared/constants/providers";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { getModelsByProviderId } from "@/shared/constants/models";
@@ -103,12 +105,14 @@ import {
   getCachedDiscoveredModels,
   isAutoFetchModelsEnabled,
   persistDiscoveredModels,
+  persistNonEmptyDiscoveredModels,
 } from "@/lib/providerModels/modelDiscovery";
 import { buildProviderModelsUrl, getDiscoveryClientVersionOptions } from "./discoveryClientVersion";
 import { getAdobeModels } from "./adobeFireflyDiscovery";
 import { getSyncedAvailableModels, getCustomModels, getModelIsHidden } from "@/lib/db/models";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
+import { isModelSyncLocalSpawnDenied } from "@/shared/services/modelSyncScheduler";
 import { fetchCursorAgentModels } from "@/lib/providerModels/cursorAgent";
 import { fetchCursorAvailableModels } from "@/lib/providerModels/cursorAvailableModels";
 import { ensureCursorAutoCatalogEntry } from "@/lib/providerModels/cursorAutoCatalog";
@@ -159,8 +163,15 @@ import { fetchClaudeDiscoveryModels } from "./discovery/claude";
 import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeaders";
 import { maybeHandleConolOrSyntxModelDiscovery } from "./webSessionDiscovery";
 import { maybeHandleTwinmindModelDiscovery } from "./twinmindDiscovery";
+import { maybeHandleDevinDesktopModelDiscovery } from "./devinDesktopDiscovery";
+import { maybeHandleMuseCodeModelDiscovery } from "./museCodeDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
-import { buildNoAuthModelsResponse, filterModelsForRoute } from "./modelRouteProjection";
+import { buildChatGptModelsResponse } from "./chatgptModels";
+import {
+  buildNoAuthModelsResponse,
+  filterModelsForRoute,
+  resolveNoAuthProviderId,
+} from "./modelRouteProjection";
 
 /**
  * GET /api/providers/[id]/models - Get models list from provider
@@ -188,14 +199,7 @@ export async function GET(
       typeof connection?.provider === "string" && connection.provider.trim().length > 0
         ? connection.provider
         : null;
-    const noAuthProviderId =
-      (NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>)[id]?.noAuth === true
-        ? id
-        : connectionProvider &&
-            (NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>)[connectionProvider]
-              ?.noAuth === true
-          ? connectionProvider
-          : null;
+    const noAuthProviderId = resolveNoAuthProviderId(id, connectionProvider);
 
     // No-auth providers may persist a connection row solely for fingerprints
     // and account-proxy metadata. That row must not turn public model discovery
@@ -228,6 +232,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid connection provider" }, { status: 400 });
     }
     const usesCuratedModelsOnly = providerUsesCuratedModelsOnly(provider);
+    if (provider === "chatgpt") return buildChatGptModelsResponse(connection, excludeHidden);
 
     // Resolve proxy for this provider (provider-level → global → direct)
     const proxy = await resolveProxyForProvider(provider);
@@ -295,6 +300,40 @@ export async function GET(
     const connectionId = typeof connection.id === "string" ? connection.id : id;
     const apiKey = typeof connection.apiKey === "string" ? connection.apiKey : "";
     const accessToken = typeof connection.accessToken === "string" ? connection.accessToken : "";
+    if (provider === "fal-ai" && isFalNativeEnabled()) {
+      const falProxy = await resolveProxyForConnection(connectionId, undefined, "fal-ai");
+      const client = new FalClient(apiKey || accessToken, (url, init) =>
+        runWithProxyContext(falProxy.proxy, () => fetch(url, init))
+      );
+      const query = new URLSearchParams();
+      for (const field of ["q", "category", "cursor", "limit"]) {
+        const value = searchParams.get(field);
+        if (value !== null) query.set(field, value);
+      }
+      const page = await client.discover(query, request.signal);
+      const models = (
+        page.models as Array<{
+          endpoint_id: string;
+          metadata?: { display_name?: string; category?: string };
+        }>
+      ).map((model) => ({
+        id: model.endpoint_id,
+        name: model.metadata?.display_name || model.endpoint_id,
+        category: model.metadata?.category ?? null,
+        execution_path: "/v1/fal/run",
+        verification: "discovered",
+        capabilitySource: "fal-catalog",
+      }));
+      // Do not label a catalog-only entry as chat-compatible or schema-validated.
+      return buildResponse({
+        provider,
+        connectionId,
+        models,
+        source: "api",
+        next_cursor: page.next_cursor,
+        has_more: page.has_more,
+      });
+    }
     const codexDiscoveryMode =
       provider === "codex" ? getCodexDiscoveryMode(connection.providerSpecificData) : "off";
     const autoFetchModels =
@@ -450,7 +489,11 @@ export async function GET(
       warning?: string,
       extraPayload: Record<string, unknown> = {}
     ) => {
-      const discoveredModels = await persistDiscoveredModels(provider, connectionId, models);
+      const discoveredModels = await persistNonEmptyDiscoveredModels(
+        provider,
+        connectionId,
+        models
+      );
       if (discoveredModels.length > 0) {
         // #6976 — merge curated embedding/rerank specialty entries (e.g.
         // OpenRouter's embeddingRegistry catalog) into the live-discovery
@@ -467,48 +510,24 @@ export async function GET(
         });
       }
 
-      // Empty discovery just cleared THIS connection's synced cache (via
-      // persistDiscoveredModels([])). `providerSyncedModels` was read at the top
-      // of the handler and is now stale, so it must not leak the just-cleared
-      // models back into the response (#3148 made synced authoritative for the
-      // normal path; here we re-read the current state instead). Re-derive the
-      // local catalog from the provider's remaining synced models (union across
-      // its other connections) or the static catalog when none remain.
-      let freshSynced: Awaited<ReturnType<typeof getSyncedAvailableModels>> = [];
-      try {
-        freshSynced = filterModelsForRoute(
-          provider,
-          await getSyncedAvailableModels(provider),
-          chatOnly
-        );
-      } catch {
-        /* DB unavailable — fall through to static catalog */
-      }
-      const freshRegistry = freshSynced.length
-        ? freshSynced.map((model) => toDiscoveryCatalogModel(model))
-        : getModelsByProviderId(provider) || [];
-      const freshSpecialty = freshSynced.length ? [] : getStaticModelsForProvider(provider) || [];
-      const freshLocal = mergeLocalCatalogModels(freshRegistry, freshSpecialty).map((model) =>
-        toDiscoveryCatalogModel(model, freshRegistry.length > 0 ? provider : undefined)
-      );
-      if (freshLocal.length > 0) {
-        return buildResponse({
+      // #19143: the upstream answered but offered no usable model. Nothing was written,
+      // and the degraded answer makes model-sync stop before it imports or cleans up.
+      const failure: DiscoveryFailure = { code: "EMPTY_CATALOG" };
+      return (
+        buildDiscoveryFallbackResponse({
+          cacheWarning: "No remote models discovered, using cached catalog",
+          localWarning: "No remote models discovered, using local catalog",
+          failure,
+        }) ??
+        buildResponse({
           provider,
           connectionId,
-          models: freshLocal,
+          models: [],
           source: "local_catalog",
-          warning: "No remote models discovered — using local catalog",
-          // The upstream answered but offered no usable model.
-          failure: { code: "EMPTY_CATALOG" },
-        });
-      }
-
-      return buildResponse({
-        provider,
-        connectionId,
-        models: [],
-        source: "api",
-      });
+          warning: "No remote models discovered",
+          failure,
+        })
+      );
     };
 
     if (provider === "reka") {
@@ -715,6 +734,12 @@ export async function GET(
       refreshToken: (connection as { refreshToken?: unknown }).refreshToken,
     });
     if (twinmindResponse) return twinmindResponse;
+
+    const devinDesktopResponse = await maybeHandleDevinDesktopModelDiscovery(webDiscoveryArgs);
+    if (devinDesktopResponse) return devinDesktopResponse;
+
+    const museCodeResponse = await maybeHandleMuseCodeModelDiscovery(webDiscoveryArgs);
+    if (museCodeResponse) return museCodeResponse;
 
     if (provider === "bedrock") {
       const cachedResponse = maybeReturnCachedDiscovery();
@@ -1510,14 +1535,17 @@ export async function GET(
         // TCP peer (never the spoofable Host header), mirroring cursorAgentImage.ts. Fail closed:
         // an absent/unrecognized locality skips the spawn and serves the cached/local catalog, or an
         // explicit 403 when neither exists — it never falls through to executing a child process.
-        if (request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) !== "loopback") {
+        if (
+          request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) !== "loopback" ||
+          isModelSyncLocalSpawnDenied(request)
+        ) {
           warnings.push(
             "cursor-agent model discovery requires a local request; using cached catalog"
           );
           const localFallback = buildDiscoveryFallbackResponse({
             cacheWarning: `${warnings.join("; ")} — using cached catalog`,
             localWarning: `${warnings.join("; ")} — using local catalog`,
-            // The discovery needs a local request that this request is not.
+            // Local CLI discovery is not permitted for this request.
             failure: { code: "LOCALITY_REFUSED" },
           });
           if (localFallback) return localFallback;
@@ -1603,8 +1631,9 @@ export async function GET(
 
         const modelsResp = await safeOutboundFetch(
           "https://platformapi.innerai.com/api/v1/ai_models",
-          { headers: innerAiHeaders },
-          getProviderOutboundGuard(provider)
+          // The guard is an option, not a third positional argument; passing it
+          // separately left this request running under the default "none".
+          { headers: innerAiHeaders, guard: getProviderOutboundGuard() }
         );
         if (!modelsResp.ok) {
           throw new Error(`Inner.ai models API returned HTTP ${modelsResp.status}`);
@@ -2485,6 +2514,7 @@ export async function GET(
     let pageCount = 0;
     const MAX_PAGES = 20; // Safety limit
     const seenTokens = new Set<string>();
+    const seenPageUrls = new Set<string>([url]);
 
     while (pageUrl && pageCount < MAX_PAGES) {
       pageCount++;
@@ -2529,6 +2559,14 @@ export async function GET(
       }
       allModels = allModels.concat(pageModels);
 
+      if (config.nextPageUrl) {
+        const nextUrl = config.nextPageUrl(data, pageUrl);
+        if (!nextUrl || seenPageUrls.has(nextUrl)) break;
+        seenPageUrls.add(nextUrl);
+        pageUrl = nextUrl;
+        continue;
+      }
+
       const nextPageToken = data.nextPageToken;
       if (!nextPageToken) break;
       if (seenTokens.has(nextPageToken)) {
@@ -2540,6 +2578,16 @@ export async function GET(
       if (config.authQuery) {
         pageUrl += `&${config.authQuery}=${token}`;
       }
+    }
+
+    if (config.nextPageUrl && pageCount > 1) {
+      // Page-numbered listings can shift while being walked; keep the first row per id.
+      const seenIds = new Set<unknown>();
+      allModels = allModels.filter((model) => {
+        if (seenIds.has(model?.id)) return false;
+        seenIds.add(model?.id);
+        return true;
+      });
     }
 
     if (pageCount > 1) {

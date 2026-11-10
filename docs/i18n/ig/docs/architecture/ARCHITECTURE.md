@@ -14,7 +14,7 @@ OmniRoute bụ okporo ụzọ AI mpaghara yana dashboard arụnyere na Next.js. 
 
 Ikike isi:
 
-- OpenAI-dakọtara API elu maka CLI/tools (ndị na-enye 377, modul 156 mmebe)
+- OpenAI-dakọtara API elu maka CLI/tools (ndị na-enye 381, modul 159 mmebe)
 - ntụgharị asụsụ Request/response n'ofe ụdị ndị na-eweta
 - Nlereanya combo ọdịda (usoro ihe nlere ọtụtụ)
 - Nzọụkwụ ngwakọta ahaziri ahazi (`provider + model + connection`) yana ịtụ oge ojiri aga site na `compositeTiers`
@@ -27,13 +27,13 @@ Ikike isi:
 - Ederede gaa na-okwu site na `/v1/audio/speech` (ndị na-eweta arụrụ n'ime 24)
 - Ọgbọ vidiyo site na `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Ọgbọ egwu site na `/v1/music/generations` (ComfyUI)
-- Ọchụchọ webụ site na `/v1/search` (ndị na-eweta 20)
+- Web search via `/v1/search` (20 providers)
 - Mgbanwe site na `/v1/moderations`
 - Ntughari site na `/v1/rerank`
 - Chee echiche mkpado mkpado (`<think>...</think>`) maka ụdị echiche
 - Idocha nzaghachi maka ndakọrịta OpenAI SDK siri ike
 - Nhazi nke ọrụ (usoro → onye nrụpụta, onye ọrụ → sistemụ) maka ndakọrịta ndị na-eweta obe
-- Ntugharị mmepụta ahaziri (json_schema → Gemini nzaghachiSchema)
+- Ntugharị mmepụta ahaziri (json_schema → Gemini responseSchema)
 - Nkwụsi ike mpaghara maka ndị na-eweta, igodo, utu aha, combos, ntọala, ọnụahịa (modul DB 122)
 - Usage/cost nsuso na ịrịọ ndekọ
 - Mmekọrịta igwe ojii nhọrọ maka mmekọrịta multi-device/state
@@ -42,9 +42,9 @@ Ikike isi:
 - Usoro ịgba ọgwụ mgbochi ọrịa zuru ụwa ọnụ
 - Nleba anya na akara mkpịsị aka oge
 - Na-eji profaịlụ ndị na-eweta ndị na-eweta ihe na-eme ka mmachi ọnụego kwa-akaụntụ kwalite
-- Usoro ihe nkesa sekit maka nkwụsi ike nke onye na-eweta ya
+- Usoro ihe nkesa sekit maka nkwụsi ike nke ndị na-eweta ya
 - Nchekwa igwe mgbochi égbè eluigwe nwere mkpọchi mutex
-- cache mbinye aka dabere na mbinye aka
+- cache mwepu arịrịọ dabere mbinye aka
 - Ngalaba oyi akwa: iwu ọnụ ahịa, amụma ọdịda, amụma mkpọchi
 - Ntugharị ihe dị na ya: nchịkọta aka nke oge maka ngbanwe akaụntụ
 - Nkwụsi ike nke steeti ngalaba (SQLite dee-site na cache maka ndaghachi azụ, mmefu ego, mkpọchi, ndị na-emebi sekit)
@@ -60,7 +60,7 @@ Ikike isi:
 - Sistemụ ebe nchekwa (mwepụta, ịgba ọgwụ, iweghachi, nchịkọta)
 - Sistemụ nka (ndebanye aha, onye mmebe, igbe ájá, nka arụnyere n'ime)
 - MITM proxy nwere njikwa akwụkwọ yana njikwa DNS
-- Ngwa ngwa ịgba ọgwụ mgbochi etiti
+- Prompt injection guard middleware
 - Pipeline mkpakọ ngwa ngwa na Caveman, RTK, pipeline ekpokọtara, combos mkpakọ, ngwugwu asụsụ, na nyocha.
 - ACP (Agent Communication Protocol) ndekọ
 - Ndị na-enye OAuth modular (modul 22 n'okpuru `src/lib/oauth/providers/`)
@@ -79,7 +79,7 @@ Ikike isi:
 Ụdị oge ojiri agba agba:
 
 - Ụzọ ngwa Next.js n'okpuru `src/app/api/*` mejuputa ma dashboard APIs yana ndakọrịta APIs
-- Isi SSE/routing kekọrịtara na `src/sse/*` + `open-sse/*` na-ejikwa ogbugbu ndị na-eweta, ntụgharị asụsụ, nkwanye ugwu, ndaghachi azụ na ojiji.
+- Isi SSE/routing kekọrịtara na `src/sse/*` + `open-sse/*` na-ejikwa ogbugbu ndị na-eweta, ntụgharị asụsụ, nkwanye, ndaghachi azụ na ojiji.
 
 ## Eserese Nrụtụaka
 
@@ -413,7 +413,7 @@ The `src/domain/` namespace centralizes mkpebi amụma ka ndị na-ahụ maka �
 - Connection/model ọchịchị njikọ: `src/domain/connectionModelRules.ts`
 - Ihe onyonyo nnweta ụdị: `src/domain/modelAvailability.ts`
 - Nleba njedebe onye na-eweta: `src/domain/providerExpiration.ts`
-- cache oke: `src/domain/quotaCache.ts`
+- cache oke: `src/domain/quotaCache.ts`. Ndị na-enye ihe na-agbakwụnye ma wepụ windo quota (OpenAI wepụrụ windo Codex nke awa 5 maka ụfọdụ atụmatụ), yabụ ojiji nke na-agụ ihe nkwụnye ihe na-enye ọrụ na-egosi na zuru ezu (`quotasComplete`, lee `src/lib/usage/usageReading.ts`) bụ windo zuru ezu nke akaụntụ ahụ: windo a maara na mbụ ma ọ na-anọghị na ya bụ ezumike nká, na cache, na `quota_snapshots` a malitegharịa rehydrates na ndebanye aha Codex (ngwa ezumike nká) bọket saturation nke Claude. Ihe akaebe na-ezighi ezi (ndị isi nzaghachi, mbipụta ochie) na-emelite naanị windo ọ na-ebu.
 - Ala nbibi: `src/domain/degradation.ts`
 - Nyocha nhazi: `src/domain/configAudit.ts`
 - OmniRoute nzaghachi metadata na-ewu: `src/domain/omnirouteResponseMeta.ts`
@@ -431,7 +431,7 @@ Pipeline ikike na-ahazi arịrịọ ọ bụla na-abata ma tinye n'agbụ amụ
 - Enyemaka nkwuputa: `src/server/authz/assertAuth.ts`
 - Ọnọdụ arịrịọ: `src/server/authz/context.ts`
 
-Ụzọ nchịkwa nke ọha na nke ọha bụ oke siri ike: agent/cooldown APIs na mgbanwe ndị na-eweta ọrụ chọrọ njikwa njikwa (HTTP 401 ma ọ bụrụ na-efu).
+Ụzọ nlekọta ọha na nke ọha bụ oke siri ike: agent/cooldown APIs na mgbanwe ndị na-eweta ọrụ chọrọ njikwa njikwa (HTTP 401 ma ọ bụrụ na-efu).
 
 Maka iwu nhazi ụzọ zuru oke, lee [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 

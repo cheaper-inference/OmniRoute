@@ -11,55 +11,75 @@ OmniRoute hurekodi vitendo vya kiutawala, matukio ya uthibitishaji, mabadiliko y
 
 Utekelezaji unapatikana katika `src/lib/compliance/index.ts` (T-43 — "Udhibiti wa Uzingatiaji") na `src/lib/compliance/providerAudit.ts`. Uandikaji wa ukaguzi hautoi hitilafu kamwe: ikitokea hitilafu yoyote, mwito huo hupuuzwa kimya kimya ili uwekaji wa kumbukumbu za ukaguzi usivuruge mtiririko mkuu wa ombi.
 
-## Kinachowekwa Kwenye Kumbukumbu
+## Kinachorekodiwa
 
 ### Matukio ya ukaguzi wa kiutawala (`audit_log`)
 
-Kila mwito kwa `logAuditEvent({ action, actor, target, details, ... })` hutengeneza safu moja. Mifuatano ya vitendo hufuata muundo wa `domain.verb` (au `domain.verb.outcome`). Aina za vitendo zilizothibitishwa katika msimbo ni pamoja na:
+Kila mwito wa `logAuditEvent({ action, actor, target, details, ... })` huzalisha
+safu moja. Mifuatano ya vitendo hufuata muundo wa
+`domain.verb` (au `domain.verb.outcome`). Aina za vitendo zilizothibitishwa
+kwenye mti wa msimbo ni pamoja na:
 
-| Kitendo                              | Chanzo                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Kitendo                              | Chanzo                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Kila ingizo hunasa `action`, `actor` (chaguo-msingi ni `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id`, na `timestamp`. Funguo nyeti (`apiKey`, `accessToken`, `refreshToken`, `password`, chochote kinacholingana na `*token`/`*secret`/`*apikey`, n.k.) hufichwa kwa kujirudia na kuwekwa thamani ya `"[redacted]"` kabla ya safu kuandikwa.
+Kila ingizo huhifadhi `action`, `actor` (chaguo-msingi ni `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, na `timestamp`. Vifunguo nyeti (`apiKey`, `accessToken`,
+`refreshToken`, `password`, chochote kinacholingana na
+`*token`/`*secret`/`*apikey`, n.k.) hufichwa kwa kujirudia na kubadilishwa kuwa
+`"[redacted]"` kabla safu haijaandikwa.
+
+Safu za `api_key.auth.touch` hurekodi metadata ya funguo za API iliyofanikiwa
+na usomaji wa ugunduzi (GET/HEAD) ambao haufikii kumbukumbu ya maombi: ufunguo
+gani, lini, na njia iliyosanifishwa, zikijumuishwa pamoja na kuwekwa kikomo cha
+safu 1,000. Funguo zilizo na `noLog` pamoja na ufunguo wa mazingira hurukwa.
+Anwani ya IP na wakala wa mtumiaji wa mpigaji huongezwa tu wakati alama ya
+kipengele ya `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` imewashwa (imezimwa kwa
+chaguo-msingi).
 
 ### Miito ya zana za MCP (`mcp_tool_audit`)
 
-Kila mwito wa zana ya MCP huandika safu kupitia `open-sse/mcp-server/audit.ts`. Muundo (kutoka `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Kila mwito wa zana ya MCP huandika safu kupitia
+`open-sse/mcp-server/audit.ts`. Muundo wa hifadhidata (kutoka
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`) ni:
 
-| Safu             | Maelezo                                       |
-| ---------------- | --------------------------------------------- |
-| `id`             | huongezeka kiotomatiki                        |
-| `tool_name`      | kitambulishi cha zana ya MCP                  |
-| `input_hash`     | sha256 ya ingizo (hakuna data iliyohifadhiwa) |
-| `output_summary` | muhtasari mfupi uliokatwa                     |
-| `duration_ms`    | muda halisi uliopita                          |
-| `api_key_id`     | mwitaji (inaweza kuwa tupu)                   |
-| `success`        | `1` / `0`                                     |
-| `error_code`     | msimbo wa mwisho wa hitilafu ikishindikana    |
-| `created_at`     | muhuri wa muda wa ISO                         |
+| Safu             | Maelezo                                          |
+| ---------------- | ------------------------------------------------ |
+| `id`             | huongezeka kiotomatiki                           |
+| `tool_name`      | kitambulisho cha zana ya MCP                     |
+| `input_hash`     | sha256 ya ingizo (data ya mzigo haihifadhiwi)    |
+| `output_summary` | muhtasari mfupi, uliopunguzwa                    |
+| `duration_ms`    | muda halisi uliopita                             |
+| `api_key_id`     | mpigaji (inaweza kuwa tupu)                      |
+| `success`        | `1` / `0`                                        |
+| `error_code`     | msimbo wa hitilafu wa mwisho wakati wa kushindwa |
+| `created_at`     | muhuri wa muda wa ISO                            |
 
 ### Kumbukumbu za maombi / matumizi
 
-Hizi ni data za ufuatiliaji wa uendeshaji (si ukaguzi wa kiutawala pekee), lakini zinatumia mchakato uleule wa uhifadhi:
+Hizi ni telemetry ya uendeshaji (si ukaguzi wa kiutawala kabisa), lakini
+hutumia njia ileile ya kuhifadhi kwa muda:
 
 - `usage_history` — muhtasari wa matumizi kwa kila ombi
-- `call_logs` — kumbukumbu kamili kwa kila ombi (inategemea kikomo cha safu, tazama hapa chini)
+- `call_logs` — kumbukumbu kamili ya kila ombi (inategemea kikomo cha safu, tazama hapa chini)
 - `proxy_logs` — kumbukumbu ya trafiki ya proksi (inategemea kikomo cha safu)
-- `request_detail_logs` — kumbukumbu ya zamani yenye maelezo ya kina ya maombi (bado hupunguzwa ikiwa ipo)
+- `request_detail_logs` — kumbukumbu ya zamani ya maelezo ya ombi (bado husafishwa ikiwa ipo)
 
 ## Muundo wa Hifadhi
 

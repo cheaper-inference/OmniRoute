@@ -10,35 +10,30 @@
 
 ## Quraşdırma
 
-OmniRoute MCP daxildə mövcuddur. Onu belə başladın:
+OmniRoute MCP quraşdırılmışdır. Buna başlayın:
 
 ```bash
 omniroute --mcp
 ```
 
-Yaxud open-sse nəqliyyatı vasitəsilə:
+Və ya açıq nəqliyyat vasitəsi ilə:
 
 ```bash
-# HTTP axınlı nəqliyyat (port 20130)
-omniroute --dev  # MCP /mcp son nöqtəsində avtomatik başlayır
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP nəqliyyatları (`sse` / `streamable-http`, idarə paneli serveri tərəfindən proses daxilində təqdim olunur)
-standart olaraq deaktivdir və əvvəllər yalnız `/dashboard/mcp` səhifəsindən dəyişdirilə bilirdi. v3.8.51-dən
-etibarən CLI də eyni imkanlara malikdir:
+HTTP nəqlləri (`sse` / `streamable-http`, idarə paneli serveri tərəfindən prosesdə xidmət edilir) defolt olaraq söndürülür və əvvəllər yalnız `/dashboard/mcp` səhifəsindən dəyişdirilə bilirdi. v3.8.51-dən etibarən CLI paritetə malikdir:
 
 ```bash
-omniroute mcp status                                  # aktiv/onlayn vəziyyəti, nəqliyyat, alət sayı
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # aktiv sse/streamable-http sessiyalarını sıfırlayır
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable`, idarə panelinin `/api/settings` vasitəsilə dəyişdirdiyi eyni `mcpEnabled`
-(və istəyə görə `mcpTransport`) parametrini PATCH edir. `mcp restart`, `POST /api/mcp/restart` çağırır: növbəti
-sorğunun təmiz şəkildə yenidən başladılması üçün aktiv `sse`/`streamable-http` sessiyalarını dayandırır, MCP
-deaktivdirsə `409`, `stdio` nəqliyyatı üçün isə `501` qaytarır (stdio klientləri öz alt proseslərinə sahibdir —
-yenidən başlatmaq üçün prosesdaxili idarəetmə mexanizmi yoxdur).
+`mcp enable`/`mcp disable` PATCH eyni `mcpEnabled` (və istəyə görə `mcpTransport`) tablosunu `/api/settings` vasitəsilə dəyişdirir. `mcp restart` `POST /api/mcp/restart` çağırır: o, aktiv `sse`/`streamable-http` seanslarını sıradan çıxarır, beləliklə, növbəti sorğu təmiz şəkildə yenidən işə salınır, MCP qeyri-aktivdirsə `409` qaytarır və `stdio` nəqli üçün `501` (stdio müştəriləri öz alt prosesinə malikdir — yenidən başlamaq üçün prosesdaxili idarə yoxdur).
 
 ## Nəqliyyatlar
 
@@ -130,54 +125,42 @@ Claude Desktop, Cursor, Cline və uyğun MCP klientlərinin qurulması üçün [
 | `omniroute_cache_stats` | `read:cache`   | Semantik keş, sorğu keşi və idempotentlik statistikası |
 | `omniroute_cache_flush` | `write:cache`  | Keşi qlobal şəkildə və ya imza/model üzrə təmizləyir   |
 
-## Sıxışdırma Alətləri (13)
+## Sıxılma Alətləri (13)
 
-| Alət                                | İcazə sahələri      | Təsvir                                                                                                                                                   |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Sıxışdırma parametrləri, analitika xülasəsi və keş nəzərə alınmaqla statistika (`analytics.mcpDescriptionCompression` metadatasını ehtiva edir)          |
-| `omniroute_compression_configure`   | `write:compression` | Sıxışdırma rejimini, həddi, hədəf nisbətini, sistem sorğusunun qorunmasını və MCP təsviri sıxışdırma keçidini konfiqurasiya edir                         |
-| `omniroute_set_compression_engine`  | `write:compression` | Aktiv mühərriki (off/caveman/rtk/stacked) və Caveman/RTK intensivliyini seçir                                                                            |
-| `omniroute_list_compression_combos` | `read:compression`  | Adlandırılmış sıxışdırma kombinasiyalarını və onların mühərrik konveyerlərini sadalayır                                                                  |
-| `omniroute_compression_combo_stats` | `read:compression`  | Sıxışdırma kombinasiyası və mühərrik üzrə qruplaşdırılmış analitika                                                                                      |
-| `omniroute_ccr_store`               | `write:compression` | Çağıran tərəfə görə təcrid olunmuş məzmunu ölçüsü məhdudlaşdırılmış yaddaşdaxili CCR yaddaşında saxlayır və markerlə birlikdə `ccr://` istinadı qaytarır |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR məzmununu tam şəkildə və ya başlanğıc, sonluq, sətirlər, grep və statistika rejimləri ilə əldə edir                                                  |
-| `omniroute_ccr_inspect`             | `read:compression`  | Məzmunu qaytarmadan çağıran tərəfə məxsus CCR metadatasını yoxlayır                                                                                      |
-| `omniroute_ccr_list`                | `read:compression`  | Çağıran tərəfə məxsus CCR blokları üçün səhifələnmiş metadatanı sadalayır                                                                                |
-| `omniroute_ccr_delete`              | `write:compression` | Çağıran tərəfə məxsus CCR blokunu silir                                                                                                                  |
-| `omniroute_ccr_stats`               | `read:compression`  | Çağıran tərəf üzrə yaddaş istifadəsini, həyat dövrü sayğaclarını və yaddaş məhdudiyyətlərini bildirir                                                    |
-| `omniroute_rtk_discover`            | `read:compression`  | İştirakı könüllü seçilmiş RTK çıxış nümunələrində təkrarlanan küyü aşkarlayır                                                                            |
-| `omniroute_rtk_learn`               | `read:compression`  | İştirakı könüllü seçilmiş nümunələrdən nəzərdən keçirilə bilən RTK filtri qaralaması yaradır                                                             |
+| Alət                                | Əhatə dairələri     | Təsvir                                                                                                                                   |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Sıxılma parametrləri, analitika xülasəsi və keşdən xəbərdar olan statistika ( `analytics.mcpDescriptionCompression` metadatası daxildir) |
+| `omniroute_compression_configure`   | `write:compression` | Sıxılma rejimini, həddi, hədəf nisbətini, sistem operativ qorunmasını, MCP təsviri sıxılma keçidini konfiqurasiya edin                   |
+| `omniroute_set_compression_engine`  | `write:compression` | Aktiv mühərriki (off/caveman/rtk/stacked) və Caveman/RTK intensivliyini seçin                                                            |
+| `omniroute_list_compression_combos` | `read:compression`  | Adlandırılmış sıxılma kombinlərini və onların mühərrik boru kəmərlərini sadalayın                                                        |
+| `omniroute_compression_combo_stats` | `read:compression`  | Sıxılma kombisi və mühərrikə görə qruplaşdırılmış analitika                                                                              |
+| `omniroute_ccr_store`               | `write:compression` | Zəng edən tərəfindən təcrid olunmuş məzmunu məhdud yaddaşdaxili CCR mağazasında saxlayın və marker və `ccr://` arayışı qaytarın          |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR məzmununu tam və ya baş, quyruq, xətlər, grep və statistika rejimləri ilə əldə edin                                                  |
+| `omniroute_ccr_inspect`             | `read:compression`  | Məzmunu qaytarmadan zəng edənə məxsus CCR metadatasını yoxlayın                                                                          |
+| `omniroute_ccr_list`                | `read:compression`  | Zəng edənə məxsus CCR blokları üçün səhifələnmiş metadata siyahıları                                                                     |
+| `omniroute_ccr_delete`              | `write:compression` | Zəng edənə məxsus CCR blokunu silin                                                                                                      |
+| `omniroute_ccr_stats`               | `read:compression`  | Zəng edənin əhatə etdiyi yaddaş istifadəsini, həyat dövrü sayğaclarını və mağaza limitlərini bildirin                                    |
+| `omniroute_rtk_discover`            | `read:compression`  | Seçilmiş RTK çıxış nümunələrində təkrarlanan səs-küyü kəşf edin                                                                          |
+| `omniroute_rtk_learn`               | `read:compression`  | Seçilmiş nümunələrdən nəzərdən keçirilə bilən RTK filtr layihəsi yaradın                                                                 |
 
-CCR qeydləri yalnız yaddaş daxilində saxlanılır və yenidən başladıldıqda yox olur. Hər blok 2 MiB, hər
-əsas subyekt 16 MiB, qlobal yaddaş isə 64 MiB ilə məhdudlaşdırılıb. Qeydlər üçün standart TTL 24 saatdır (maksimum
-yeddi gün). Tam MCP əldəetməsi 256 KiB ilə məhdudlaşdırılıb; daha böyük bloklar diapazon və grep rejimləri vasitəsilə
-əlçatan qalır. Saxlama, əldəetmə, siyahılama, yoxlama, silmə və statistika autentifikasiya edilmiş
-API açarının əsas subyektinə görə təcrid olunur. Audit qeydlərində yalnız heşlər və ölçü metadatası saxlanılır, məzmun isə heç vaxt saxlanılmır.
+CCR girişləri iki səviyyəli mağazadan istifadə edir: yerli qeyri-bulud iş vaxtlarında, davamlı SQLite səviyyəsi ilə dəstəklənən isti yaddaşdaxili səviyyə (`ccr_blocks`, standart olaraq aktivdir), beləliklə blok 512 — KB dən çox bloklar və buludda işləyən bloklar istisna olmaqla, TTL bitənə qədər çıxarılmadan və ya yenidən işə salınmadan sağ qalır. Hər blok 2 MiB, hər bir əsas 16 MiB və qlobal mağaza 64 MiB ilə məhdudlaşır . Girişlər standart olaraq 24 saatlıq TTL (maksimum yeddi gün). Tam MCP axtarışı 256 KiB ilə məhdudlaşır; diapazonlu və grep rejimləri vasitəsilə daha böyük bloklar əlçatan qalır. Saxlama, axtarış, siyahı, yoxlama, silinmə və statistik məlumatlar təsdiqlənmiş API açarı prinsipi ilə təcrid olunur. Audit qeydlərində heşlər və ölçü metadataları var, heç vaxt məzmun yoxdur. Operatorla bağlı təfərrüatlar (iki marker, müştəri ilkin şərtləri, `codemode:false`, alət üzrə əhatə dairəsi, səhifələşdirmə və diaqnostik matrisa) [Sıxılma Mühərrikləri → İlkin şərtlər / operator təlimatında](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) mövcuddur.
 
-`omniroute_compression_status` MCP təsvir sıxılmasını ayrıca
-`analytics.mcpDescriptionCompression` altında bildirir. Bu dəyərlər MCP-də siyahılana bilən
-təsvirlər (`tools`, `prompts`, `resources` və `resourceTemplates`) üçün metadata ölçüsü təxminləridir;
-onlar provayder istifadə qəbzləri deyil və `source: "mcp_metadata_estimate"` ilə işarələnir.
+`omniroute_compression_status` ayrıca `analytics.mcpDescriptionCompression` altında MCP təsvirinin sıxılmasını bildirir. Bu dəyərlər MCP siyahıya alına bilən təsvirlər üçün metadata ölçüsündə təxminlərdir (`tools`, `prompts`, `resources` və `resourceTemplates`); onlar provayderin istifadə qəbzi deyil və `source: "mcp_metadata_estimate"` ilə qeyd olunur.
 
-### MCP Əlçatanlıq Ağacı Filtri (v3.8.0)
+### MCP Əlçatımlılıq Ağacı Filtri (v3.8.0)
 
-Yuxarıdakı sıxılma alətlərindən ayrı olaraq, OmniRoute MCP brauzer/əlçatanlıq alətlərinin
-**alət nəticələrini** agentə qaytarmazdan əvvəl sıxan icradan sonrakı filtr ehtiva edir. Bu filtr özü
-alət deyil — geniş həcmli əlçatanlıq ağacı və ya brauzer ani görüntüsü mətni (≥2000 simvol) ehtiva
-edən istənilən alət nəticəsi üzərində şəffaf şəkildə işləyir.
+Yuxarıdakı sıxılma vasitələrindən ayrı olaraq, OmniRoute -ya sıxışdıran icradan sonrakı filtr daxildir** alət nəticələri** MCP browser/accessibility alətlərinin agentə qaytarılmasından əvvəl. Bu filtr özü alət deyil — o, ətraflı əlçatanlıq ağacı və ya brauzerin snapshot mətni (≥ 2000 simvol) olan istənilən alət nəticəsində şəffaf şəkildə işləyir.
 
 Əsas davranışlar:
 
-- Ardıcıl təkrarlanan ≥30 qonşu sətri başlanğıc + son xülasə formasında yığcamlaşdırır
-- Playwright/computer-use üçün tələb olunan `[ref=eXX]` lövbərlərini qoruyur
-- Həddindən artıq böyük mətni (>50,000 simvol) naviqasiya ipucu ilə məcburi şəkildə qısaldır
-- Gözlənilən qənaət: brauzer ani görüntüsü faydalı yüklərində **60–80%**
+- ≥ 30 ardıcıl təkrarlanan qardaş sətirləri baş + quyruq xülasəsinə yığır
+- Playwright/computer-use tərəfindən tələb olunan `[ref=eXX]` lövbərlərini qoruyur
+- Naviqasiya işarəsi ilə böyük ölçülü mətni (> 50.000 simvol) sərt şəkildə kəsir
+- Gözlənilən qənaət:** 60-80%** brauzer snapshot yüklərində
 
-Konfiqurasiya: qlobal parametrlərdə `compression.mcpAccessibility` (miqrasiya 056).
-İmplementasiya: `open-sse/services/compression/engines/mcpAccessibility/`.
-Tam sənədlər: [Sıxılma Mühərrikləri — MCP Əlçatanlıq Ağacı Filtri](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiqurasiya: qlobal parametrlərdə `compression.mcpAccessibility` (miqrasiya 056). İcra: `open-sse/services/compression/engines/mcpAccessibility/`. Tam sənədlər: [Sıxılma Mühərrikləri — MCP Əlçatanlıq Ağacı Filtri](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Bu alətlərin arxasındakı icra vaxtı sıxılma modeli üçün [Sıxılma Mühərrikləri](../compression/COMPRESSION_ENGINES.md) və [RTK Sıxılması](../compression/RTK_COMPRESSION.md) sənədlərinə baxın.
+Bu alətlərin arxasında işləmə zamanı sıxılma modeli üçün [Sıxılma Mühərriklərinə](../compression/COMPRESSION_ENGINES.md) və [RTK Sıxılmaya](../compression/RTK_COMPRESSION.md) baxın.
 
 ## 1Proxy Alətləri (3)
 
@@ -297,156 +280,119 @@ Həm SSE, həm də Axınlı HTTP nəqliyyatları MCP serveri Parametrlərdə (`m
 
 ---
 
-## Autentifikasiya & Scope-lar
+## Doğrulama və Əhatə dairələri
 
-MCP alət çağırışları çağıran tərəfdən scope mətnlərini oxuyur. Bu yoxlama üç müstəqil ad sahəsindən (namespace) biridir. Bir yoxlayıcının keçməsi digərlərinin keçməsi demək deyil.
-Qaydalar [Üç scope ad sahəsi](#three-scope-namespaces) bölməsindədir.
-Alət kataloqu [MCP alət scope-ları](#mcp-tool-scopes) bölməsindədir.
+MCP aləti zəng edənin əhatə dairəsini oxuyur. Bu yoxlama üç müstəqil ad sahəsindən biridir. Bir dama keçidi digərlərinin keçidi deyil. Qaydalar [Üç əhatə dairəsi ad](#three-scope-namespaces) sahəsidir. Alətlər kataloqu [MCP alət dairələridir](#mcp-tool-scopes).
 
-### Üç scope ad sahəsi
+### Üç əhatə dairəsi ad sahəsi
 
-API açarında `manage`, MCP alətində `read:compression` və `oma_live_…` giriş tokenində `read` — bunlar üç fərqli icazədir. Dəyişdirici idarəetmə marşrutuna `read` giriş tokeni göndərən çağıranlar HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-alırlar. Bu dərəcə `scopeSatisfies` ilə müəyyən edilir. O, MCP cədvəlinə baxmır və MCP uyğunlaşdırıcısı da onu nəzərə almır.
+API açarında `manage`, MCP alətində `read:compression` və `oma_live_…` giriş nişanında `read` üç fərqli qrantdır. Mutasyona uğrayan idarəetmə marşrutuna `read` giriş nişanı göndərən zəng edənlər HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` alırlar. Bu dərəcə `scopeSatisfies` dir. O, MCP cədvəli ilə məsləhətləşmir və MCP uyğunlayıcısı onunla məsləhətləşmir.
 
-| Ad sahəsi                               | Kimlik vəsiqəsi                                                                      | Yoxlayıcı                    | Keçmə nəyə icazə verir                                     |
-| :-------------------------------------- | :----------------------------------------------------------------------------------- | :--------------------------- | :--------------------------------------------------------- |
-| API açarının idarəetməsi                | `api_keys.scopes`                                                                    | `hasManageScope`             | Həmin Bearer açar üçün idarəetmə REST                      |
-| API açarının əlavə (additiv) scope-ları | eyni massiv, bir dəqiq mətn                                                          | aşağıda adlandırılan köməkçi | Yalnız həmin bir imkan                                     |
-| MCP alət scope-ları                     | eyni massiv, yoxdursa MCP `_meta` (yalnız HTTP/SSE), yoxdursa `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | Hüququn tətbiqi aktiv olduqda həmin alət                   |
-| Giriş tokeni                            | `oma_live_…`                                                                         | `scopeSatisfies`             | Metod və yolu həmin dərəcəni tələb edən idarəetmə marşrutu |
+| Ad sahəsi                   | Etibarnamə                                                                      | Dama                       | Bir keçid icazə verir                                      |
+| :-------------------------- | :------------------------------------------------------------------------------ | :------------------------- | :--------------------------------------------------------- |
+| API açarının idarə edilməsi | `api_keys.scopes`                                                               | `hasManageScope`           | Həmin Daşıyıcı açarı üçün idarəetmə REST                   |
+| API açarı əlavəsi           | eyni massiv, bir dəqiq sətir                                                    | aşağıda göstərilən köməkçi | Yalnız bu qabiliyyət                                       |
+| MCP alət dairələri          | eyni massiv, başqa MCP `_meta` (yalnız HTTP/SSE ), başqa `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Bu alət, icra işə salındıqdan sonra                        |
+| Giriş nişanı                | `oma_live_…`                                                                    | `scopeSatisfies`           | Metod və yolu həmin dərəcəni tələb edən idarəetmə marşrutu |
 
-Hər kimlik vəsiqəsinin yaradılması
-[İdarəetmə autentifikasiyası](../guides/MANAGEMENT-AUTH.md) bölməsində əhatə olunur.
+Hər bir etimadnamənin çıxarılması [İdarəetmə Doğrulamasında](../guides/MANAGEMENT-AUTH.md) əhatə olunur.
 
-#### API açarı scope-ları
+#### API açarının əhatə dairəsi
 
-Bir `api_keys.scopes` massivi iki işə xidmət edir. Onlar müxtəlif funksiyalardan istifadə edir.
+Bir `api_keys.scopes` massivi iki işi qidalandırır. Onlar müxtəlif funksiyalardan istifadə edirlər.
 
-**İdarəetmə REST.** `manage` və `admin` `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) massivinin üzvləridir.
-`hasManageScope` həmin açar üçün idarəetmə marşrutlarını səlahiyyətləndirən funksiyadır. `admin` həmin marşrutlarda idarəetmə imkanına malikdir. Burada `admin` sözü giriş tokeni dərəcəsi deyil və MCP alət scope-larına genişlənmir.
+**İdarəetmə REST.** `manage` və `admin` `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) üzvləridir. `hasManageScope` bu açar üçün idarəetmə marşrutlarına icazə verən şeydir. `admin` həmin marşrutlarda idarəetmə qabiliyyətinə malikdir. Buradakı `admin` sözü giriş-token dərəcəsi deyil və MCP alətlərinin əhatə dairəsinə genişlənmir.
 
-**Aditiv mətnlər.** Hər biri dəqiq üzvlük yoxlamasıdır və hər biri `MANAGEMENT_API_KEY_SCOPES`-dən kənarda qalır.
+**Əlavə sətirlər.** Hər biri dəqiq üzvlük testidir və hər biri `MANAGEMENT_API_KEY_SCOPES` xaricində qalır.
 
-| Scope                          | Keçmə nəyə icazə verir                                                                                                                                                       |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Yalnız loopback olmayan `/api/mcp/` LOCAL_ONLY istisnası (`hasMcpConnectOrManageScope`). `manage` və ya `admin` olan açar həmin istisnadan keçməyə davam edir.               |
-| `self:usage`                   | Bu açar üçün `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` yaradılma zamanı bu scope-u əlavə edir (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Həmin status yükünün daxilində yuxarı axın hesab kvotaları (`src/lib/usage/apiKeySelfService.ts`). Status marşrutu hələ də `self:usage` tələb edir.                          |
-| `policy:bypass-provider-quota` | Bu açarın inference çağırışları təchizatçı kvotası siyasətini ötürür (`src/sse/handlers/chat.ts` daxilində `hasProviderQuotaBypassScope`).                                   |
+| Əhatə dairəsi                  | Bir keçid icazə verir                                                                                                                                                          |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Geri dönməyən `/api/mcp/` LOCAL_ONLY yalnız kəsilir (`hasMcpConnectOrManageScope`). `manage` və ya `admin` olan açar hələ də həmin kəsməni keçir.                              |
+| `self:usage`                   | bu açar üçün `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` bu əhatə dairəsini yaratmaqda əlavə edir (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Həmin status yükü daxilində yuxarı axın hesab kvotaları (`src/lib/usage/apiKeySelfService.ts`). Status marşrutu hələ də `self:usage` tələb edir.                               |
+| `policy:bypass-provider-quota` | Bu açarın nəticə çıxarma çağırışları provayder-kvota siyasətini (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`) keçir.                                           |
 
-#### Uyğunlaşdırma
+#### Uyğunluq
 
-Katalog [MCP alət scope-ları](#mcp-tool-scopes) bölməsinin altındakı cədvəldir.
-`src/shared/constants/mcpScopes.ts` faylındakı `MCP_SCOPE_LIST`-i həmin katalog kimi
-qəbul etməyin: bu, ilkin tipizə edilmiş alt yığımıdır. Sonrakı alətlər onun yanında
-əlavə scope-lar təyin edir (`read:notion`, `read:skills`, `read:local-corpus` və cədvəlin
-qalan hissəsi).
+Kataloq [MCP alətlərinin əhatə dairəsi](#mcp-tool-scopes) altındakı cədvəldir. `src/shared/constants/mcpScopes.ts` -də `MCP_SCOPE_LIST` həmin kataloq kimi qəbul etməyin: bu, orijinal yazılmış alt dəstdir. Sonrakı alətlər onun yanında əlavə əhatə dairələri elan edir (`read:notion`, `read:skills`, `read:local-corpus`, və cədvəlin qalan hissəsi).
 
-`open-sse/mcp-server/scopeEnforcement.ts` faylındakı `evaluateToolScopes` hər tələb
-olunan scope hər hansı verilmiş scope-a uyğun gəldiyi halda çağırışa icazə verir:
+`open-sse/mcp-server/scopeEnforcement.ts` -də `evaluateToolScopes` hər tələb olunan əhatə dairəsi verilmiş bəzi əhatə dairəsinə uyğun gələndə zəng etməyə imkan verir:
 
-- `*` hər tələb olunan scope-a uyğundur.
-- `*` ilə bitən verilmiş scope, ulduzdan əvvəlki prefiks ilə başlayan tələb olunan
-  scope-a uyğundur. `read:*` `read:compression`-a uyğundur.
-- Digər bütün verilmiş scope-lar yalnız identik tələb olunan mətnə uyğundur.
+- `*` hər tələb olunan əhatə dairəsinə uyğun gəlir.
+- `*` ilə bitən verilmiş əhatə dairəsi ulduzdan əvvəl prefikslə başlayan tələb olunan əhatə dairəsinə uyğun gəlir. `read:*` `read:compression` uyğun gəlir.
+- Hər bir digər verilmiş əhatə dairəsi yalnız eyni tələb olunan sətirə uyğun gəlir.
 
-Scope-ları `["manage"]` olan açar `read:compression` üçün `scopeMatches`-dən keçmir.
-Eyni çağırış yalnız verilmiş mətnlər bunlar olduqda `admin`, `mcp:connect`, `read`
-və `write` üçün də keçmir. MCP alət scope-ları arasında sondakı `*`-dan başqa heç bir
-iyerarxiya yoxdur.
+Əhatə dairəsi `["manage"]` olan açar `read:compression` üçün `scopeMatches` uğursuz olur. Eyni çağırış `admin`, `mcp:connect`, `read` və `write` üçün uğursuz olarsa, bunlar yeganə verilmiş sətirlərdir. Arxadakı `*` dən kənar MCP alət dairələri arasında heç bir iyerarxiya yoxdur.
 
-Hüququn tətbiqi `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olmayan halda söndürülür
-(standart `false`). O söndürülüb ikən, `evaluateToolScopes` çağırışa icazə verir və
-kataloqu keçir. Aktiv ikən, HTTP Bearer açarın `api_keys.scopes` dəyərini
-`authInfo` kimi istifadə edir (bax:
-[Hər açar üçün HTTP scope binding-i](#per-key-http-scope-binding-7895)). Heç bir açar
-scope-u həll olunmasa, verilmiş dəstə MCP `_meta`-ya (yalnız HTTP/SSE çağıranlar
-üçün, HTTP autentifikasiya kontekstində nəzərə alınır; stdio çağıranının `_meta`-sı
-nəzərə alınmır, çünki onu klient idarə edir və o, çağıran üzrə şəxsiyyət daşımır),
-sonra isə `OMNIROUTE_MCP_SCOPES`-ə keçir.
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` (defolt `false`) olmadıqda, icra deaktivdir. Söndürüldükdə, `evaluateToolScopes` zəng etməyə icazə verir və kataloqu atlayır. Aktiv olduqda, HTTP Daşıyıcı açarının `api_keys.scopes` `authInfo` kimi istifadə edir (bax: [Hər düymə üçün HTTP əhatə dairəsi bağlama](#per-key-http-scope-binding-7895) ). Heç bir əsas əhatə dairəsi həll edilmədikdə, verilən dəst MCP `_meta` -yə keçir (yalnız HTTP auth kontekstində HTTP/SSE zəng edənlər üçün layiqdir; stdio zəng edənin `_meta` nəzərə alınmır, çünki müştəri ona nəzarət edir və o, hər zəng edənin şəxsiyyətini daşımır), sonra `OMNIROUTE_MCP_SCOPES`.
 
-#### Giriş tokeni scope-ları
+#### Access-token əhatə dairələri
 
-`oma_live_…` tokenləri (`src/lib/accessTokens/scopes.ts`) `read`, `write` və ya
-`admin` daşıyır. `scopeSatisfies` bir dərəcədir: `admin` `write` və `read`-i əhatə
-edir, `write` isə `read`-i. Naməlum scope-lar heç nəni əhatə etmir.
+`oma_live_…` tokenləri (`src/lib/accessTokens/scopes.ts`) `read`, `write` və ya `admin` daşıyır . `scopeSatisfies` rütbədir: `admin` `write` və `read`, `write` isə `read` əhatə edir. Naməlum əhatə dairələri heç nəyi əhatə etmir.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) həmin dərəcəni
-`inferRequiredScope` (`src/server/authz/accessScopes.ts`) ilə müqayisə edir:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) həmin dərəcəni `inferRequiredScope` (`src/server/authz/accessScopes.ts`) ilə müqayisə edir:
 
-- `GET`, `HEAD` və `OPTIONS` `read` tələb edir.
-- Digər bütün metodlar `write` tələb edir.
-- `ADMIN_SCOPE_PREFIXES` siyahısındakı yollar bütün metodlar üçün `admin` tələb edir. `/api/mcp`
-  bu siyahıdadır, ona görə `write` giriş tokeni belə MCP HTTP səthini çağıra bilmir.
-- `ADMIN_MUTATION_PREFIXES` siyahısındakı yollar yalnız mutasiyalar üçün `admin` tələb edir.
-- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) siyahısındakı yollar yalnız mutasiyalar üçün və yalnız həmin
-  dəqiq yolda `admin` tələb edir — digər `/api/settings/*` alt-yolları `write` saxlayır.
+- `GET`, `HEAD` və `OPTIONS` `read` tələb edir .
+- Hər bir digər üsul `write` tələb edir.
+- `ADMIN_SCOPE_PREFIXES` -dakı yollar hər bir metod üçün `admin` tələb edir. `/api/mcp` həmin siyahıdadır, ona görə də `write` giriş nişanı hələ də MCP HTTP səthini çağıra bilməz.
+- `ADMIN_MUTATION_PREFIXES` -da yollar yalnız mutasiyalar üçün `admin` tələb edir.
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) içərisindəki yollar yalnız mutasiyalar üçün `admin` tələb edir və yalnız həmin dəqiq yolda — digər `/api/settings/*` alt marşrutları `write` saxlayır.
 
-`PATCH /api/keys/{id}` bir mutasiyadır və həmin admin siyahılarında yer almır, ona görə `read`
-tokeni 403 alır
-`Access token scope 'read' is insufficient; 'write' required.`
-`write` və ya `admin` giriş tokeni həmin marşrutu qarşılayır. İdarə paneli JWT-si, loopback CLI
-maşın-id tokeni və `manage` və ya `admin` səviyyəli API açarı isə digər qolları tutur və bu
-sıra ilə məhdudlaşdırılmır.
+`PATCH /api/keys/{id}` mutasiyadır və həmin admin siyahılarında yoxdur, ona görə də `read` tokeni 403 `Access token scope 'read' is insufficient; 'write' required.` alır A `write` və ya `admin` giriş nişanı həmin marşrutu təmin edir. İdarə paneli JWT, geri döngə CLI maşın identifikatoru nişanı və `manage` və ya `admin` ilə API açarı digər filialları götürür və bu dərəcə ilə daralmır.
 
-`/api/mcp` üçün `scopeSatisfies` yoxlamasından keçən giriş tokeni yalnız idarəetmə qapısını
-keçib. Alət çağırışları hələ də API açarı səviyyələrinə görə `scopeMatches` işlədir. Giriş
-tokeni sırası `scopeMatches` üçün giriş parametri deyil.
+`/api/mcp` üçün `scopeSatisfies` dan keçən giriş nişanı yalnız idarəetmə qapısını təmizlədi. Alət çağırışları hələ də API açarının əhatə dairəsinə qarşı `scopeMatches` işləyir. Giriş işarəsi dərəcəsi `scopeMatches` üçün giriş deyil.
 
-### MCP alət səviyyələri
+### MCP alət dairələri
 
-Səviyyə tətbiqi mərkəzləşdirilib: `open-sse/mcp-server/scopeEnforcement.ts`. Hər alət xüsusi
-səviyyələr tələb edir:
+Əhatə dairəsinin tətbiqi `open-sse/mcp-server/scopeEnforcement.ts`-da mərkəzləşdirilmişdir. Hər bir alət xüsusi əhatə dairəsi tələb edir:
 
-| Sahə                  | Alətlər                                                                                                                                                                       |
-| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                             |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                     |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                        |
-| `read:quota`          | `check_quota`                                                                                                                                                                 |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                        |
-| `read:models`         | `list_models_catalog`                                                                                                                                                         |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                 |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                         |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                            |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                   |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                |
-| `read:cache`          | `cache_stats`                                                                                                                                                                 |
-| `write:cache`         | `cache_flush`                                                                                                                                                                 |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                    |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                             |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                         |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                              |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                        |
-| `read:memory`         | `memory_search`                                                                                                                                                               |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                  |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                            |
-| `write:skills`        | `skills_enable`                                                                                                                                                               |
-| `execute:skills`      | `skills_execute`                                                                                                                                                              |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                              |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                       |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                     |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                              |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                            |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                               |
-| `read:obsidian`       | 13 oxuma aləti — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 yazma aləti — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                             |
+| Əhatə dairəsi         | Alətlər                                                                                                                                                                     |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                           |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                   |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                      |
+| `read:quota`          | `check_quota`                                                                                                                                                               |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                      |
+| `read:models`         | `list_models_catalog`                                                                                                                                                       |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                               |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                       |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                          |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                 |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                              |
+| `read:cache`          | `cache_stats`                                                                                                                                                               |
+| `write:cache`         | `cache_flush`                                                                                                                                                               |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                  |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                           |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                       |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                            |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                      |
+| `read:memory`         | `memory_search`                                                                                                                                                             |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                          |
+| `write:skills`        | `skills_enable`                                                                                                                                                             |
+| `execute:skills`      | `skills_execute`                                                                                                                                                            |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                            |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                     |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                   |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                            |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                              |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                          |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                             |
+| `read:obsidian`       | 13 oxu aləti — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 yazma alətləri — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …           |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                           |
 
-Vildkard scope-lər dəstəklənir: `read:*` bütün oxuma scope-larını, `*` isə tam girişi verir.
+Wildcard əhatə dairələri dəstəklənir: `read:*` bütün oxuma sahələrini, `*` tam girişi təmin edir.
 
-### `mcp:connect` — dar yol imkanı (#7895)
+### `mcp:connect` — dar marşrut qabiliyyəti (#7895)
 
-Qeyri-loopback mühitdən HTTP/SSE MCP transportuna (`/api/mcp/*`) çatmaq üçün `/api/mcp/` LOCAL_ONLY istisnası tələb olunur (bax: `docs/security/ROUTE_GUARD_TIERS.md`). Tarixən bu istisna yalnız tam `manage`/`admin` scope-a malik API açarını qəbul edirdi — yalnız MCP ilə danışmaq lazım olan çağıran üçün çox geniş idi. İndi `src/shared/constants/managementScopes.ts` faylı `MCP_CONNECT_SCOPE = "mcp:connect"` ixrac edir: əlavə, dar scope (eyni precedent `SELF_USAGE_SCOPE`) ki, `src/server/authz/policies/management.ts` faylında yalnız `/api/mcp/` bypass-ına icazə verir — o, digər heç bir idarəetmə yolu girişinə icazə vermir və qəsdən `MANAGEMENT_API_KEY_SCOPES` siyahısından KƏNAR saxlanılır. `manage`/`admin` scope-a malik açar istisna keçidini dəyişmədən hələ də keçir; `mcp:connect` isə yalnız uzaq MCP çağıranları üçün daha aşağı imtiyazlı alternativdir və `hasMcpConnectOrManageScope()` vasitəsilə yoxlanılır.
+Qeyri-döngüdən HTTP/SSE MCP nəqlinə (`/api/mcp/*`) çatmaq `/api/mcp/` LOCAL_ONLY -nin kəsilməsini tələb edir (bax `docs/security/ROUTE_GUARD_TIERS.md`). Tarixən bu kəsmə yalnız tam `manage`/`admin` -scope API açarı — qəbul etdi ki, zəng edən üçün yalnız MCP danışmaq lazımdır. `src/shared/constants/managementScopes.ts` indi `MCP_CONNECT_SCOPE = "mcp:connect"` ixrac edir: əlavə, dar əhatə dairəsi ( `SELF_USAGE_SCOPE` ilə eyni presedent), `src/server/authz/policies/management.ts` — `/api/mcp/` bypassına ONLY icazə verir, başqa heç bir idarəetmə marşrutuna giriş vermir və qəsdən `MANAGEMENT_API_KEY_SCOPES`-nin OUT saxlanılır. `manage`/`admin` düyməsi olan açar hələ də kəsilməni dəyişmədən keçir; `mcp:connect`, `hasMcpConnectOrManageScope()` vasitəsilə yoxlanılan yalnız uzaq MCP-yə zəng edənlər üçün aşağı imtiyazlı alternativdir.
 
-### Açar başına HTTP scope bağlanması (#7895)
+### Hər düymə üçün HTTP əhatə dairəsi bağlanması (#7895)
 
-HTTP/SSE üzərində `open-sse/mcp-server/httpTransport.ts` indi çağıranın həqiqi `api_keys.scopes` dəyərini `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) vasitəsilə həll edir və onu MCP SDK-nın `transport.handleRequest(req, { authInfo })` çağırışına ötürür, beləliklə hər alət çağırışına çatan `extra.authInfo.scopes` dəyəri Bearer açarın öz scope-larını əks etdirir. `scopeEnforcement.ts` faylının `resolveCallerScopeContext()` funksiyası artıq `authInfo`-nu `_meta` və `OMNIROUTE_MCP_SCOPES` mühit fallback-inə nisbətən prioritetlə tərəf tuturdu — bu dəyişiklik yalnız həmin birinci, ən yüksək prioritetli mənbəni doldurur, hansı ki əvvəllər HTTP üzərində doldurulmurdu. Hər hansı API açarı həll olunmadıqda (başlıq yoxdur, açar etibarsızdır), `authInfo` `undefined` qalır və həll mövcud `meta`/mühit zəncirinə dəyişmədən keçir. stdio-nun çağıran başına şəxsiyyəti yoxdur (bax: `mcpCallerIdentity.ts`) və açar başına bağlanmadan təsirlənmir — o, `_meta` addımını keçir (`_meta` yalnız HTTP auth kontekstində nəzərə alınır, #15159) və yalnız `OMNIROUTE_MCP_SCOPES` mühit açarından həll olunur.
+HTTP/SSE üzərindən `open-sse/mcp-server/httpTransport.ts` indi zəng edənin real `api_keys.scopes` `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) vasitəsilə həll edir və onu MCP SDK-nin `transport.handleRequest(req, { authInfo })` a ötürür, beləliklə, hər alət çağırışına çatan `extra.authInfo.scopes` Daşıyıcı açarının öz əhatə dairəsini əks etdirir. `scopeEnforcement.ts`'s `resolveCallerScopeContext()` artıq `authInfo` `_meta` və `OMNIROUTE_MCP_SCOPES` env backback — üzərində prioritetləşdirib, bu, yalnız əvvəllər HTTP üzərindən qidalanmayan birinci, ən yüksək prioritet mənbəni doldurur. Heç API açarı həll edilmədikdə (başlıq yoxdur, etibarsız açar), `authInfo` `undefined` qalır və qətnamə dəyişməz olaraq mövcud `meta`/env zəncirinə düşür. stdio-nun hər bir zəng edən şəxsiyyəti yoxdur ( `mcpCallerIdentity.ts` ya baxın) və hər düymənin bağlanmasından təsirlənmir — o, `_meta` addımını atlayır (`_meta` yalnız HTTP auth kontekstində qeyd olunur, #15159) və yalnız `OMNIROUTE_MCP_SCOPES` env açarından həll edir.
 
-**Tənzimləmə dar scope-a malik HTTP/SSE çağıranları üçün `OMNIROUTE_MCP_ENFORCE_SCOPES`-dən asılı olmayaraq qətiyən işə salınır.** `OMNIROUTE_MCP_ENFORCE_SCOPES`-in `false` default olması yalnız lokal/stdio tək operator axını üçün təhlükəsizdir, burada scope-a müqayisə etmək üçün çağıran başına şəxsiyyət mövcud deyil. `open-sse/mcp-server/server.ts::withScopeEnforcement()` alət başına scope tənzimləməsini hər şəraitdə aktivləşdirir (`scopeEnforcement.ts` faylında `shouldForceScopeEnforcement()`), hər hansı vaxt `resolveCallerScopeContext()` `source === "authInfo"` həll etdi (yəni həqiqi açar başına HTTP Authorization başlığı, yalnız HTTP/SSE) VƏ həmin açar tam `manage`/`admin` scope-a malik deyil. Bu, boşluğu bağlayır: yalnız dar `mcp:connect` bypass scope-a malik açar — yuxarıda heç bir şeyə, yalnız `/api/mcp/` LOCAL_ONLY istisnasına icazə verdiyi kimi sənədlənmiş — operator uzaq/qeyri-loopback MCP girişini aktivləşdirdikdən sonra bütün MCP alətlərini çağıra bilərdi, sadəcə ona görə ki, `OMNIROUTE_MCP_ENFORCE_SCOPES` standart olaraq `false` gəlib çatır. HTTP üzərində tam `manage`/`admin` açarı və hər bir stdio/lokal çağıran mövcud `OMNIROUTE_MCP_ENFORCE_SCOPES`-ə bağlı davranışı dəyişmədən saxlayır.
+**Enforcement is forced on for narrow-scoped HTTP/SSE callers regardless of `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` defaulting to `false` is only safe for the local/stdio single-operator flow, where there is no per-caller identity to scope against. `open-sse/mcp-server/server.ts::withScopeEnforcement()` turns per-tool scope enforcement on unconditionally (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) whenever `resolveCallerScopeContext()` resolved `source === "authInfo"` (i.e. a real per-key HTTP Authorization header, HTTP/SSE-only) AND that key does not hold full `manage`/`admin` scope. This closes the gap where a key holding ONLY the narrow `mcp:connect` bypass scope — documented above as authorizing nothing but the `/api/mcp/` LOCAL_ONLY carve-out — could otherwise invoke every MCP tool once an operator enabled remote/non-loopback MCP access, simply because `OMNIROUTE_MCP_ENFORCE_SCOPES` ships `false` by default. A full `manage`/`admin` key over HTTP, and every stdio/local caller, keep the existing `OMNIROUTE_MCP_ENFORCE_SCOPES`-gated behavior unchanged.
 
 ---
 

@@ -39,8 +39,8 @@ Objektiivinen ominaisuusvertailu suosittuihin avoimen lähdekoodin tekoälyreiti
 
 ## Milloin valita OmniRoute
 
-- Isäntät itse ja haluat** palveluntarjoajan enimmäiskattavuus** (377 palveluntarjoajaa, 155 free/no-auth -luettelomerkintää)
-- Tarvitset a** sisäänrakennettu MCP -palvelin** (LLM työkalut, muisti, työkaluina paljastetut taidot)
+- Isäntät itse ja haluat** palveluntarjoajan enimmäiskattavuus** (381 palveluntarjoajaa, 155 free/no-auth -luettelomerkintää)
+- Tarvitset a** sisäänrakennettu MCP -palvelin** (LLM työkalut, muisti, työkaluina näkyvät taidot)
 - Tarvitset**A2A protokolla** agenttien välisiä työnkulkuja varten
 - Haluat** sormenjälkien salailu** (JA3/JA4) välttääksesi ylävirran CAPTCHAs havaitsemisen
 - Tarvitset** yrityksen ominaisuuksia** (suojakaiteet, evals, kirjausketju) ilman SaaS -laskua

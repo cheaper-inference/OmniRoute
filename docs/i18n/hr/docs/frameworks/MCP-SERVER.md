@@ -8,37 +8,32 @@
 >
 > Izvor istine: `open-sse/mcp-server/server.ts` izračunava **110 jedinstvenih alata** pomoću funkcije `countUniqueMcpTools()`: 45 kanonskih definicija (uključujući šest CCR alata za životni ciklus, trio agent-skills, `omniroute_radar_catalog` i `omniroute_x_search`), uz alate za memoriju (3), vještine (4), GitHub vještine (3), skup (6), gamifikaciju (8), dodatke (8), Notion (6), Obsidian (22), lokalni korpus (3) i dva alata za kompresiju namijenjena isključivo RTK-u.
 
-## Instalacija
+## Montaža
 
-OmniRoute MCP je ugrađen. Pokrenite ga pomoću:
+OmniRoute MCP je ugrađen. Započnite s:
 
 ```bash
 omniroute --mcp
 ```
 
-Ili putem transporta open-sse:
+Ili otvorenim prijevozom:
 
 ```bash
-# HTTP transport sa strujanjem (port 20130)
-omniroute --dev  # MCP se automatski pokreće na krajnjoj točki /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transporti (`sse` / `streamable-http`, koje unutar procesa poslužuje poslužitelj nadzorne ploče)
-prema zadanim su postavkama isključeni, a prethodno su se mogli uključivati i isključivati samo na stranici `/dashboard/mcp`. Od verzije v3.8.51
-CLI nudi iste mogućnosti:
+HTTP prijenosi (`sse` / `streamable-http`, koje u procesu poslužuje poslužitelj nadzorne ploče) isključeni su prema zadanim postavkama i prije su se mogli prebacivati samo sa stranice `/dashboard/mcp`. Od v3.8.51 CLI ima paritet:
 
 ```bash
-omniroute mcp status                                  # omogućeno/na mreži, transport, broj alata
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # ponovno postavlja aktivne sse/streamable-http sesije
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` putem metode PATCH mijenjaju istu postavku `mcpEnabled` (i opcionalno `mcpTransport`)
-koju nadzorna ploča uključuje i isključuje putem `/api/settings`. `mcp restart` poziva `POST /api/mcp/restart`: prekida
-aktivne `sse`/`streamable-http` sesije kako bi se sljedeći zahtjev ponovno ispravno inicijalizirao, vraća
-`409` ako je MCP onemogućen i `501` za transport `stdio` (stdio klijenti upravljaju vlastitim
-podprocesom — ne postoji ručka unutar procesa koja bi se mogla ponovno pokrenuti).
+`mcp enable`/`mcp disable` PATCH isti `mcpEnabled` (i po izboru `mcpTransport`) podešavanje nadzorne ploče se prebacuje preko `/api/settings`. `mcp restart` poziva `POST /api/mcp/restart`: ruši aktivne `sse`/`streamable-http` sesije tako da se sljedeći zahtjev čisto ponovno inicijalizira, vraća `409` ako je MCP onemogućen i `501` za `stdio` prijenos (stdio klijenti posjeduju vlastiti podproces — ne postoji ručka unutar procesa za ponovno pokretanje).
 
 ## Transporti
 
@@ -131,54 +126,42 @@ Cursor-a, Cline-a i kompatibilnih MCP klijenata.
 | `omniroute_cache_stats` | `read:cache`  | Statistike semantičke predmemorije, predmemorije upita i idempotentnosti |
 | `omniroute_cache_flush` | `write:cache` | Ispražnjavanje predmemorije globalno ili prema potpisu/modelu            |
 
-## Alati za Kompresiju (13)
+## Alati za kompresiju (13)
 
-| Alat                                | Opsezi              | Opis                                                                                                                                             |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Postavke kompresije, sažetak analitike i statistike uzimajući u obzir predmemoriju (uključuje metapodatke `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | Konfiguriranje načina kompresije, praga, ciljnog omjera, očuvanja sistemskog upita i prekidača za kompresiju MCP opisa                           |
-| `omniroute_set_compression_engine`  | `write:compression` | Odabir aktivnog mehanizma (off/caveman/rtk/stacked) i intenziteta Caveman/RTK                                                                    |
-| `omniroute_list_compression_combos` | `read:compression`  | Popis imenovanih kombinacija kompresije i njihovih cjevovoda mehanizama                                                                          |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analitika grupirana prema kombinaciji kompresije i mehanizmu                                                                                     |
-| `omniroute_ccr_store`               | `write:compression` | Pohrana izoliranog sadržaja pozivatelja u ograničenom CCR spremniku u memoriji i vraćanje oznake te `ccr://` reference                           |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Dohvaćanje CCR sadržaja u cijelosti ili u modusima glave, repa, redaka, grep-a i statistike                                                      |
-| `omniroute_ccr_inspect`             | `read:compression`  | Inspekcija CCR metapodataka u vlasništvu pozivatelja bez vraćanja sadržaja                                                                       |
-| `omniroute_ccr_list`                | `read:compression`  | Popis straničnih metapodataka za CCR blokove u vlasništvu pozivatelja                                                                            |
-| `omniroute_ccr_delete`              | `write:compression` | Brisanje CCR bloka u vlasništvu pozivatelja                                                                                                      |
-| `omniroute_ccr_stats`               | `read:compression`  | Izvješće o korištenju memorije ograničenom na pozivatelja, životnim brojačima i ograničenjima pohrane                                            |
-| `omniroute_rtk_discover`            | `read:compression`  | Otkrivanje ponavljajućeg šuma u uzorcima RTK izlaza s uključenim pristankom                                                                      |
-| `omniroute_rtk_learn`               | `read:compression`  | Generiranje preglednog nacrta RTK filtra iz uzoraka s uključenim pristankom                                                                      |
+| Alat                                | Opsezi              | Opis                                                                                                                                    |
+| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Postavke kompresije, analitički sažetak i statistika svjesna predmemorije (uključuje `analytics.mcpDescriptionCompression` metapodatke) |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurirajte način kompresije, prag, ciljni omjer, očuvanje odzivnika sustava, prekidač kompresije MCP opisa                          |
+| `omniroute_set_compression_engine`  | `write:compression` | Odaberite aktivni motor (off/caveman/rtk/stacked) i Caveman/RTK intenzitet                                                              |
+| `omniroute_list_compression_combos` | `read:compression`  | Navedite imenovane kombinacije kompresije i njihove cjevovode motora                                                                    |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analitika grupirana prema kombinaciji kompresije i mehanizmu                                                                            |
+| `omniroute_ccr_store`               | `write:compression` | Pohranite sadržaj izoliran od pozivatelja u ograničenu CCR pohranu u memoriji i vratite marker plus `ccr://` referencu                  |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Dohvatite CCR sadržaj u cijelosti ili s načinima glave, repa, linija, grepa i statistike                                                |
+| `omniroute_ccr_inspect`             | `read:compression`  | Pregledajte CCR metapodatke u vlasništvu pozivatelja bez vraćanja sadržaja                                                              |
+| `omniroute_ccr_list`                | `read:compression`  | Popis paginiranih metapodataka za CCR blokove u vlasništvu pozivatelja                                                                  |
+| `omniroute_ccr_delete`              | `write:compression` | Izbrišite CCR blok u vlasništvu pozivatelja                                                                                             |
+| `omniroute_ccr_stats`               | `read:compression`  | Izvještaj o korištenju memorije u opsegu pozivatelja, brojačima životnog ciklusa i ograničenjima pohrane                                |
+| `omniroute_rtk_discover`            | `read:compression`  | Otkrijte ponavljajući šum u opt-in RTK izlaznim uzorcima                                                                                |
+| `omniroute_rtk_learn`               | `read:compression`  | Generirajte nacrt RTK filtra koji se može pregledati iz uzoraka za uključivanje                                                         |
 
-CCR unosi postoje isključivo u memoriji i nestaju pri ponovnom pokretanju. Svaki blok ograničen je na 2 MiB, svaki
-nositelj na 16 MiB, a globalna pohrana na 64 MiB. Zadani TTL unosa je 24 sata (maksimalno
-sedam dana). Puno MCP dohvaćanje ograničeno je na 256 KiB; veći blokovi ostaju dostupni putem
-modusa raspona i grep-a. Pohrana, dohvaćanje, listanje, inspekcija, brisanje i statistike izolirani su prema
-autentificiranom nositelju API ključa. Zapisi revizije sadrže hasheve i metapodatke veličine, nikada sadržaj.
+CCR unosi koriste dvoslojnu pohranu: vrući sloj u memoriji podržan, na lokalnim runtimeima koji nisu u oblaku, izdržljivim SQLite slojem (`ccr_blocks`, uključeno prema zadanim postavkama) tako da blok preživi izbacivanje ili ponovno pokretanje dok njegov TTL ne istekne — osim blokova preko 512 KB i runtimea u oblaku, koji ostaju samo u memoriji. Svaki blok ograničen je na 2 MiB, svaki principal na 16 MiB, a globalna trgovina na 64 MiB. Zadani unosi su 24-satni TTL (maksimalno sedam dana). Potpuno MCP dohvaćanje ograničeno je na 256 KiB; veći blokovi ostaju dostupni kroz ranged i grep modove. Pohranjivanje, dohvaćanje, popis, inspekcija, brisanje i statistika izolirani su autoriziranim glavnim ključem API-ja. Revizijski zapisi sadrže hashove i metapodatke o veličini, a ne sadržaj. Pojedinosti okrenute operateru (dva markera, preduvjeti klijenta, `codemode:false`, opseg po alatu, paginacija i dijagnostička matrica) žive u [Compression Engines → Preduvjeti / vodič za operatera](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` zasebno prikazuje kompresiju MCP opisa pod
-`analytics.mcpDescriptionCompression`. Te vrijednosti su procjene veličine metapodataka za MCP opisive
-opise (`tools`, `prompts`, `resources` i `resourceTemplates`); nisu potvrde korištenja pružatelja
-i označene su s `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` zasebno izvještava o kompresiji opisa MCP pod `analytics.mcpDescriptionCompression`. Te vrijednosti su procjene veličine metapodataka za MCP popisljive opise (`tools`, `prompts`, `resources` i `resourceTemplates`); nisu potvrde o korištenju pružatelja usluga i označene su sa `source: "mcp_metadata_estimate"`.
 
-### MCP Filtar Stabla Pristupačnosti (v3.8.0)
+### MCP filtar stabla pristupačnosti (v3.8.0)
 
-Odvojeno od gore navedenih alata za kompresiju, OmniRoute uključuje filtar koji se izvodi nakon izvođenja i
-komprimira **rezultate alata** MCP alata za preglednik/pristupačnost prije nego što se vrate agentu.
-Ovaj filtar sam po sebi nije alat — transparentno se izvodi na svakom rezultatu alata koji sadrži
-opširni tekst stabla pristupačnosti ili snimke preglednika (≥2000 znakova).
+Odvojeno od gore navedenih alata za kompresiju, OmniRoute uključuje filtar nakon izvršenja koji komprimira** rezultati alata** MCP browser/accessibility alata prije nego što se vrate agentu. Ovaj filtar sam po sebi nije alat — on radi transparentno na bilo kojem rezultatu alata koji sadrži opširni tekst stabla dostupnosti ili snimke preglednika (≥ 2000 znakova).
 
 Ključna ponašanja:
 
-- Sažima ≥30 uzastopnih ponavljajućih redaka istih podređenih elemenata u sažetak glave + repa
-- Čuva sidra `[ref=eXX]` koja zahtijevaju Playwright/computer-use
-- Tvrdo skraćuje preopsežan tekst (>50.000 znakova) s navigacijskim savjetom
-- Očekivane uštedine: **60–80%** na korisnim opterećenjima snimki preglednika
+- Sažima ≥ 30 uzastopnih ponovljenih istorodnih redaka u sažetak glave + repa
+- Čuva `[ref=eXX]` sidra koja zahtijeva Playwright/computer-use
+- Teško skraćuje preveliki tekst (> 50.000 znakova) s navigacijskim savjetom
+- Očekivana ušteda:** 60–80%** na korisnim sadržajima snimke preglednika
 
-Konfiguracija: `compression.mcpAccessibility` u globalnim postavkama (migracija 056).
-Implementacija: `open-sse/services/compression/engines/mcpAccessibility/`.
-Potpuna dokumentacija: [Mehanizmi Kompresije — MCP Filtar Stabla Pristupačnosti](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiguracija: `compression.mcpAccessibility` u globalnim postavkama (migracija 056). Implementacija: `open-sse/services/compression/engines/mcpAccessibility/`. Potpuni dokumenti: [Motori za kompresiju — MCP Filtar stabla pristupačnosti](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Za detalje o modelu kompresije koji stoji iza ovih alata pogledajte [Mehanizme Kompresije](../compression/COMPRESSION_ENGINES.md) i [RTK Kompresiju](../compression/RTK_COMPRESSION.md).
+Pogledajte [Engines za kompresiju](../compression/COMPRESSION_ENGINES.md) i [RTK Compression](../compression/RTK_COMPRESSION.md) za model kompresije vremena izvođenja iza ovih alata.
 
 ## 1Proxy Alati (3)
 
@@ -298,107 +281,71 @@ I SSE i Streamable HTTP transporti su blokirani dok MCP poslužitelj nije omogu�
 
 ---
 
-## Autentifikacija i opsezi
+## Autentifikacija i opseg
 
-MCP pozivi alata čitaju nizove opsega od pozivača. Ta provjera pripada jednom od triju neovisnih imenskih prostora. Prolaz jedne provjere ne znači prolaz druge. Pravila su [Tri imenska prostora opsega](#three-scope-namespaces). Katalog alata je [Osezi MCP alata](#mcp-tool-scopes).
+MCP alat poziva nizove opsega čitanja od pozivatelja. Ta je provjera jedan od tri neovisna imenska prostora. Dodavanje jednog igrača nije dodavanje ostalih. Pravila su [Tri imenska prostora opsega](#three-scope-namespaces). Katalog alata je [MCP tool scopes](#mcp-tool-scopes).
 
-### Tri imenska prostora opsega
+### Tri prostora imena opsega
 
-`manage` na API ključu, `read:compression` na MCP alatu i `read` na `oma_live_…` pristupnom tokenu tri su različita odobrenja. Pozivači koji pošalju `read` pristupni token na upravljačku rutu koja mijenja stanje dobiju HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Taj rang provjerava `scopeSatisfies`. Ne konzultira MCP tablicu, a ni MCP podudaranje ne konzultira nju.
+`manage` na API ključu, `read:compression` na MCP alatu i `read` na `oma_live_…` pristupnom tokenu tri su različita odobrenja. Pozivatelji koji pošalju `read` pristupni token na rutu upravljanja koja mutira dobivaju HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Taj rang je `scopeSatisfies`. Ne konzultira MCP tablicu, a MCP matcher je ne konzultira.
 
-| Namespace               | Credential                                                                | Checker                     | A pass allows                                           |
-| :---------------------- | :------------------------------------------------------------------------ | :-------------------------- | :------------------------------------------------------ |
-| Upravljanje API ključem | `api_keys.scopes`                                                         | `hasManageScope`            | Upravljački REST za taj Bearer ključ                    |
-| Dopunski za API ključ   | isti niz, jedan točan niz                                                 | pomoćnik naveden u nastavku | Samo ta jedna mogućnost                                 |
-| Osezi MCP alata         | isti niz, inače MCP `_meta` (samo HTTP/SSE), inače `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | Taj alat, kada je uključeno provjeravanje               |
-| Pristupni token         | `oma_live_…`                                                              | `scopeSatisfies`            | Upravljačka ruta čija metoda i put zahtijevaju taj rang |
+| Imenski prostor         | Uvjerenje                                                                  | Dama                        | Propusnica dopušta                                     |
+| :---------------------- | :------------------------------------------------------------------------- | :-------------------------- | :----------------------------------------------------- |
+| Upravljanje API ključem | `api_keys.scopes`                                                          | `hasManageScope`            | Upravljanje REST za taj ključ nositelja                |
+| API-ključni aditiv      | isti niz, jedan točan niz                                                  | pomoćnik naveden u nastavku | Samo ta jedna sposobnost                               |
+| MCP alata               | isti niz, inače MCP `_meta` (samo HTTP/SSE ), inače `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | Taj alat, nakon što je ovrha uključena                 |
+| Pristupni token         | `oma_live_…`                                                               | `scopeSatisfies`            | Put upravljanja čija metoda i put zahtijevaju taj rang |
 
-Izdavanje svakog vjerodajnice opisano je u
-[Upravljačka autentifikacija](../guides/MANAGEMENT-AUTH.md).
+Kovanje svake vjerodajnice pokriveno je u [Autentifikaciji upravljanja](../guides/MANAGEMENT-AUTH.md).
 
-#### Osezi API ključa
+#### Opseg API-ključeva
 
-Jedan niz `api_keys.scopes` hrani dva zadatka. Koriste različite funkcije.
+Jedno `api_keys.scopes` polje hrani dva posla. Koriste različite funkcije.
 
-**Upravljački REST.** `manage` i `admin` članovi su niza
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` je ono što autorizira upravljačke rute za taj ključ. `admin` je
-sposoban za upravljanje na tim rutama. Riječ `admin` ovdje nije rang pristupnog
-tokena i ne širi se na osege MCP alata.
+**Upravljanje REST.** `manage` i `admin` su članovi `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` je ono što autorizira rute upravljanja za taj ključ. `admin` je sposoban upravljati na tim rutama. Riječ `admin` ovdje nije rang tokena pristupa i ne proširuje se na opseg MCP alata.
 
-**Dodatni nizovi.** Svaki je točna provjera članstva i svaki ostaje izvan
-`MANAGEMENT_API_KEY_SCOPES`.
+**Aditivni nizovi.** Svaki je točan test članstva i svaki ostaje izvan `MANAGEMENT_API_KEY_SCOPES`.
 
-| Scope                          | A pass allows                                                                                                                                                          |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Samo izuzetak za `/api/mcp/` LOCAL_ONLY izvan loopbacka (`hasMcpConnectOrManageScope`). Ključ s `manage` ili `admin` i dalje prolazi kroz taj izuzetak.                |
-| `self:usage`                   | `GET /api/v1/me/status` za ovaj ključ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` dodaje ovaj opseg pri stvaranju (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Kvote nadređenih računa unutar tog statusnog sadržaja (`src/lib/usage/apiKeySelfService.ts`). Statusna ruta i dalje zahtijeva `self:usage`.                            |
-| `policy:bypass-provider-quota` | Inference pozivi ovog ključa zaobilaze politiku kvota davatelja (`hasProviderQuotaBypassScope` u `src/sse/handlers/chat.ts`).                                          |
+| Opseg                          | Propusnica dopušta                                                                                                                                                          |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Samo izdvojeni `/api/mcp/` LOCAL_ONLY bez petlje (`hasMcpConnectOrManageScope`). Ključ sa `manage` ili `admin` i dalje prolazi taj izrez.                                   |
+| `self:usage`                   | `GET /api/v1/me/status` za ovaj ključ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` dodaje ovaj opseg prilikom stvaranja (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Kvote uzvodnog računa unutar tog nosivosti statusa (`src/lib/usage/apiKeySelfService.ts`). Statusna ruta i dalje zahtijeva `self:usage`.                                    |
+| `policy:bypass-provider-quota` | Pozivi zaključivanja ovog ključa preskaču pravilo kvote pružatelja (`hasProviderQuotaBypassScope` u `src/sse/handlers/chat.ts`).                                            |
 
 #### Podudaranje
 
-Katalog je tablica pod [Osezi MCP alata](#mcp-tool-scopes). Nemoj
-`MCP_SCOPE_LIST` u `src/shared/constants/mcpScopes.ts` smatrati tim katalogom:
-to je izvorni tipizirani podskup. Kasniji alati deklariraju dodatne oseze uz njega
-(`read:notion`, `read:skills`, `read:local-corpus` i ostatak tablice).
+Katalog je tablica pod [opsegom MCP alata](#mcp-tool-scopes). Ne tretirajte `MCP_SCOPE_LIST` u `src/shared/constants/mcpScopes.ts` kao taj katalog: to je originalni tipizirani podskup. Kasniji alati deklariraju daljnje opsege pored njega (`read:notion`, `read:skills`, `read:local-corpus` i ostatak tablice).
 
-`evaluateToolScopes` u `open-sse/mcp-server/scopeEnforcement.ts` dopušta poziv
-kad se svaki potrebni opseg podudara s nekim odobrenim opsegom:
+`evaluateToolScopes` u `open-sse/mcp-server/scopeEnforcement.ts` dopušta poziv kada svaki zahtijevani opseg odgovara nekom dodijeljenom opsegu:
 
-- `*` podudara se sa svakim potrebnim opsegom.
-- Odobreni opseg koji završava s `*` podudara se s potrebnim opsegom koji počinje
-  prefiksom prije zvjezdice. `read:*` podudara se s `read:compression`.
-- Svaki drugi odobreni opseg podudara se samo s identičnim potrebnim nizom.
+- `*` odgovara svakom potrebnom opsegu.
+- Dodijeljeni opseg koji završava na `*` odgovara potrebnom opsegu koji počinje prefiksom ispred zvjezdice. `read:*` odgovara `read:compression`.
+- Svaki drugi dodijeljeni opseg odgovara samo identičnom traženom nizu.
 
-Ključ čiji su opsezi `["manage"]` ne zadovoljava `scopeMatches` za
-`read:compression`. Isti poziv ne prolazi za `admin`, `mcp:connect`, `read` i
-`write` kad su to jedini odobreni nizovi. Među opsezima MCP alata nema
-hijerarhije osim završne `*`.
+Ključ čiji je opseg `["manage"]` ne uspijeva `scopeMatches` za `read:compression`. Isti poziv ne uspijeva za `admin`, `mcp:connect`, `read` i `write` kada su to jedini odobreni nizovi. Ne postoji hijerarhija među opsegom MCP alata izvan `*` na kraju.
 
-Provjeravanje je isključeno osim ako je `OMNIROUTE_MCP_ENFORCE_SCOPES=true`
-(zadano `false`). Dok je isključeno, `evaluateToolScopes` dopušta poziv i
-preskače katalog. Dok je uključeno, HTTP koristi `api_keys.scopes` Bearer ključa
-kao `authInfo` (vidi [Vezivanje HTTP opsega po ključu](#per-key-http-scope-binding-7895)).
-Kada se opsezi ključa ne mogu razriješiti, odobreni skup prelazi na MCP `_meta`
-(poštovan samo za HTTP/SSE pozivače, unutar HTTP konteksta autentifikacije;
-`_meta` stdio pozivača se zanemaruje jer ga kontrolira klijent i ne nosi identitet
-po pozivaču), zatim `OMNIROUTE_MCP_SCOPES`.
+Provedba je isključena osim ako `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (zadano `false`). Dok je isključen, `evaluateToolScopes` dopušta poziv i preskače katalog. Dok je uključen, HTTP koristi `api_keys.scopes` ključa nositelja kao `authInfo` (pogledajte [Povezivanje HTTP opsega po ključu](#per-key-http-scope-binding-7895) ). Kada se nijedan opseg ključa ne razriješi, dodijeljeni skup pada na MCP `_meta` (poštuje se samo za HTTP/SSE pozivatelje, unutar konteksta HTTP autentifikacije; `_meta` stdio pozivatelja se zanemaruje jer ga kontrolira klijent i ne nosi identitet po pozivatelju), zatim `OMNIROUTE_MCP_SCOPES`.
 
-#### Osezi pristupnog tokena
+#### Opseg tokena pristupa
 
-Tokeni `oma_live_…` (`src/lib/accessTokens/scopes.ts`) nose `read`, `write` ili
-`admin`. `scopeSatisfies` je rang: `admin` pokriva `write` i `read`, a `write`
-pokriva `read`. Nepoznati opsezi ne pokrivaju ništa.
+`oma_live_…` tokeni (`src/lib/accessTokens/scopes.ts`) nose `read`, `write` ili `admin`. `scopeSatisfies` je rang: `admin` pokriva `write` i `read`, a `write` pokriva `read`. Nepoznati opseg ne pokriva ništa.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) uspoređuje taj
-rang s `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) uspoređuje taj rang sa `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` i `OPTIONS` zahtijevaju `read`.
 - Svaka druga metoda zahtijeva `write`.
-- Putovi u `ADMIN_SCOPE_PREFIXES` zahtijevaju `admin` za svaku metodu. `/api/mcp`
-  je na tom popisu, pa access token s `write` i dalje ne može pozivati MCP HTTP
-  površinu.
+- Staze u `ADMIN_SCOPE_PREFIXES` zahtijevaju `admin` za svaku metodu. `/api/mcp` je na tom popisu, tako da `write` pristupni token još uvijek ne može pozvati MCP HTTP površinu.
 - Putovi u `ADMIN_MUTATION_PREFIXES` zahtijevaju `admin` samo za mutacije.
-- Putovi u `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) zahtijevaju `admin` samo za mutacije i samo na
-  tom točnom putu — druge podrute `/api/settings/*` zadržavaju `write`.
+- Staze u `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) zahtijevaju `admin` samo za mutacije, a samo na toj točnoj stazi — druge `/api/settings/*` podrute zadržavaju `write`.
 
-`PATCH /api/keys/{id}` je mutacija i ne nalazi se na tim admin popisima, pa
-token s `read` dobiva 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Access token s `write` ili `admin` zadovoljava tu rutu. Dashboard JWT,
-loopback CLI machine-id token i API ključ s `manage` ili `admin` uzimaju
-druge grane i nisu ograničeni tim rangom.
+`PATCH /api/keys/{id}` je mutacija i nije na tim popisima administratora, tako da `read` token prima 403 `Access token scope 'read' is insufficient; 'write' required.` `write` ili `admin` pristupni token zadovoljava tu rutu. Nadzorna ploča JWT, povratna petlja CLI strojni id token i API ključ sa `manage` ili `admin` imaju druge grane i nisu suženi ovim rangom.
 
-Access token koji zadovoljava `scopeSatisfies` za `/api/mcp` prošao je samo
-upravljačku provjeru. Pozivi alata i dalje se izvršavaju `scopeMatches` nad
-opsegima API ključeva. Rang access tokena nije ulaz u `scopeMatches`.
+Pristupni token koji prosljeđuje `scopeSatisfies` za `/api/mcp` očistio je samo upravljačka vrata. Pozivi alata i dalje pokreću `scopeMatches` prema opsegu API-ključa. Rang tokena pristupa nije ulaz u `scopeMatches`.
 
-### MCP opsezi alata
+### MCP alata
 
-Primjena opsega centralizirana je u `open-sse/mcp-server/scopeEnforcement.ts`.
-Svaki alat zahtijeva specifične opsege:
+Provedba opsega je centralizirana u `open-sse/mcp-server/scopeEnforcement.ts`. Svaki alat zahtijeva određene opsege:
 
 | Opseg                 | Alati                                                                                                                                                                              |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -436,17 +383,19 @@ Svaki alat zahtijeva specifične opsege:
 | `write:obsidian`      | 9 alata za pisanje — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                  |
 
-Podržani su i wildcard opsegi: `read:*` dodjeljuje sve opsege za čitanje, `*` dodjeljuje puni pristup.
+Podržani su opsezi zamjenskih znakova: `read:*` odobrava sve opsege čitanja, `*` daje puni pristup.
 
-### `mcp:connect` — uska mogućnost pristupa ruti (#7895)
+### `mcp:connect` — mogućnost uske rute (#7895)
 
-Pristupanje HTTP/SSE MCP transportu (`/api/mcp/*`) s adresa koje nisu loopback zahtijeva izuzetak `/api/mcp/` LOCAL_ONLY (vidi `docs/security/ROUTE_GUARD_TIERS.md`). Ranije je taj izuzetak prihvaćao samo API ključ s punim opsegom `manage`/`admin` — preširoko za pozivača kojemu treba samo razgovor s MCP-om. `src/shared/constants/managementScopes.ts` sada izvozi `MCP_CONNECT_SCOPE = "mcp:connect"`: dodatni, uski opseg (isti presedan kao `SELF_USAGE_SCOPE`) koji ovlašćuje SAMO zaobilaženje `/api/mcp/` u `src/server/authz/policies/management.ts` — ne dodjeljuje nikakav drugi pristup management rutama i namjerno je izostavljen iz `MANAGEMENT_API_KEY_SCOPES`. Ključ s opsegom `manage`/`admin` i dalje prolazi kroz izuzetak bez promjena; `mcp:connect` je alternativa s manjim privilegijama za udaljene pozivače koji koriste samo MCP, provjerena putem `hasMcpConnectOrManageScope()`.
+Dosezanje HTTP/SSE MCP prijenosa (`/api/mcp/*`) iz ne-povratne petlje zahtijeva `/api/mcp/` LOCAL_ONLY izdvajanje (pogledajte `docs/security/ROUTE_GUARD_TIERS.md`). Povijesno gledano, to izdvajanje prihvaćalo je samo puni `manage`/`admin` -scope API ključ — preširok za pozivatelja koji treba samo govoriti MCP. `src/shared/constants/managementScopes.ts` sada izvozi `MCP_CONNECT_SCOPE = "mcp:connect"`: aditivni, uski opseg (isti presedan kao `SELF_USAGE_SCOPE`) koji autorizira ONLY `/api/mcp/` premosnicu u `src/server/authz/policies/management.ts` — ne dopušta nikakav drugi pristup upravljačkoj ruti i namjerno se čuva OUT od `MANAGEMENT_API_KEY_SCOPES`. Ključ koji drži `manage`/`admin` i dalje prolazi izrez nepromijenjen; `mcp:connect` je alternativa s nižim privilegijama za udaljene samo MCP pozivatelje, provjerava se putem `hasMcpConnectOrManageScope()`.
 
-### Vezivanje opsega po ključu preko HTTP-a (#7895)
+### Vezanje HTTP opsega po ključu (#7895)
 
-Putem HTTP/SSE-a, `open-sse/mcp-server/httpTransport.ts` sada razrješava stvarne `api_keys.scopes` pozivača putem `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) i prosljeđuje ih MCP SDK-ovoj `transport.handleRequest(req, { authInfo })`, tako da `extra.authInfo.scopes` koji dolazi do svakog poziva alata odražava vlastite opsege Bearer ključa. `resolveCallerScopeContext()` iz `scopeEnforcement.ts` već je davao prednost `authInfo` u odnosu na `_meta` i rezervni `OMNIROUTE_MCP_SCOPES` iz okruženja — ovo samo popunjava taj prvi, najviši izvor prioriteta, koji ranije nije bio napunjen preko HTTP-a. Kada se ne razrješi nijedan API ključ (nema zaglavlja, nevaljani ključ), `authInfo` ostaje `undefined` i razrješavanje nesmetano prelazi na postojeći lanac `meta`/env. stdio nema identitet pozivača (vidi `mcpCallerIdentity.ts`) i ne utječe na vezivanje po ključu — preskače korak `_meta` (`_meta` se uvažava samo unutar HTTP auth konteksta, #15159) i razrješava se isključivo iz env ključa `OMNIROUTE_MCP_SCOPES`.
+Preko HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` sada razrješava stvarni `api_keys.scopes` pozivatelja preko `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) i prosljeđuje ga MCP SDK-ovom `transport.handleRequest(req, { authInfo })`, tako da `extra.authInfo.scopes` koji dosegne svaki poziv alata odražava vlastite opsege ključa nositelja. `scopeEnforcement.ts`-ov `resolveCallerScopeContext()` već je dao prioritet `authInfo` u nad `_meta` i `OMNIROUTE_MCP_SCOPES` env rezervnim — ovo samo popunjava onaj prvi izvor s najvišim prioritetom, koji je prethodno bio neuhranjen preko HTTP. Kada se nijedan API ključ ne razriješi (nema zaglavlja, nevažeći ključ), `authInfo` ostaje `undefined` i razrješenje prelazi na postojeći `meta`/env lanac nepromijenjen. stdio nema identitet po pozivatelju (pogledajte `mcpCallerIdentity.ts`) i na njega ne utječe vezanje po ključu — on preskače korak `_meta` (`_meta` se poštuje samo unutar konteksta autentifikacije HTTP, #15159) i rješava se samo iz ključa `OMNIROUTE_MCP_SCOPES` env.
 
-**Nametanje je prisilno uključeno za HTTP/SSE pozivače s uskim opsegom, bez obzira na `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` s podrazumijevanom vrijednošću `false` siguran je samo za lokalni/stdio tijek s jednim operatorom, gdje nema identiteta pozivača prema kojem bi se opseg odredio. `open-sse/mcp-server/server.ts::withScopeEnforcement()` bezuvjetno uključuje nametanje opsega po alatu (`shouldForceScopeEnforcement()` u `scopeEnforcement.ts`) kad god `resolveCallerScopeContext()` razrješi `source === "authInfo"` (tj. stvarno HTTP Authorization zaglavlje po ključu, samo HTTP/SSE) I taj ključ nema puni opseg `manage`/`admin`. Time se zatvara praznina u kojoj bi ključ koji posjeduje SAMO uski opseg zaobilaženja `mcp:connect` — gore opisan kao ovlaštenje ni za što osim izuzetka `/api/mcp/` LOCAL_ONLY — mogao svejedno pozvati svaki MCP alat nakon što je operator omogućio udaljeni/ne-loopback pristup MCP-u, samo zato što `OMNIROUTE_MCP_ENFORCE_SCOPES` zadano stiže s `false`. Puni ključ `manage`/`admin` preko HTTP-a, kao i svaki stdio/lokalni pozivač, zadržavaju postojeće ponašanje regulirano `OMNIROUTE_MCP_ENFORCE_SCOPES`.
+**Provedba je prisilno uključena za HTTP/SSE pozivatelje uskog opsega bez obzira na `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` zadana vrijednost `false` sigurna je samo za local/stdio tijek s jednim operatorom, gdje ne postoji identitet pozivatelja prema kojemu se može promatrati. `open-sse/mcp-server/server.ts::withScopeEnforcement()` bezuvjetno uključuje provedbu opsega po alatu (`shouldForceScopeEnforcement()` u `scopeEnforcement.ts`) kad `resolveCallerScopeContext()` razriješi `source === "authInfo"` (tj. stvarno zaglavlje autorizacije HTTP po ključu, HTTP/SSE-only) AND taj ključ ne sadrži puni opseg `manage`/`admin`. Time se zatvara praznina u kojoj bi ključ koji drži ONLY uski opseg `mcp:connect` zaobilaženja — dokumentiran gore kao ovlaštenje za ništa osim `/api/mcp/` LOCAL_ONLY izrezivanja — inače mogao pozvati svaki MCP alat nakon što operater omogući pristup remote/non-loopback MCP, jednostavno zato što `OMNIROUTE_MCP_ENFORCE_SCOPES` isporučuje `false` prema zadanim postavkama. Puni `manage`/`admin` ključ preko HTTP i svaki stdio/local pozivatelj, zadržava postojeće `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated ponašanje nepromijenjenim.
+
+---
 
 ## Varijable okruženja
 

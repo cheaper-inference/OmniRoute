@@ -10,8 +10,9 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "any",
-    // The manifest holds one colour: the kit's default (light) background. Dark-scheme
-    // browsers get the dark one from the per-media viewport theme-color in layout.tsx.
+    // The manifest holds one colour: the default (Editions) light background. It is fetched
+    // once per install, without the visitor's palette (stored in localStorage, not a cookie), so
+    // it can't follow Classic; the live viewport theme-color in layout.tsx does, per mode.
     background_color: PWA_THEME_COLORS.light,
     theme_color: PWA_THEME_COLORS.light,
     categories: ["developer-tools", "productivity", "utilities"],

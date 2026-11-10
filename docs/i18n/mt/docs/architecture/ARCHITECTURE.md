@@ -14,7 +14,7 @@ OmniRoute huwa gateway u dashboard lokali AI routing mibnija fuq Next.js. Jippro
 
 Kapaċitajiet ewlenin:
 
-- Wiċċ API kompatibbli ma' OpenAI għal CLI/tools (377 fornitur, 156 modulu eżekutur)
+- Wiċċ API kompatibbli ma' OpenAI għal CLI/tools (381 fornitur, 159 modulu eżekutur)
 - Request/response traduzzjoni madwar formati tal-fornitur
 - Fallback combo tal-mudell (sekwenza multi-mudell)
 - Passi combo strutturati (`provider + model + connection`) b'ordni ta' runtime minn `compositeTiers`
@@ -415,7 +415,7 @@ L-ispazju tal-isem `src/domain/` jiċċentralizza d-deċiżjonijiet tal-politika
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Snapshots tad-disponibbiltà tal-mudell: `src/domain/modelAvailability.ts`
 - It-traċċar tal-iskadenza tal-fornitur: `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Il-fornituri jżidu u jneħħu t-twieqi tal-kwota (OpenAI waqgħet it-tieqa Codex ’ 5 sigħat għal xi pjanijiet), għalhekk l-użu li qari l-adapter tal-fornitur jattesta bħala komplut (`quotasComplete`, ara `src/lib/usage/usageReading.ts`) huwa s-sett sħiħ ta’ tieqa tal-kont: tieqa magħrufa qabel iżda assenti minnha hija rtirata, fil-cache, fl- `quota_snapshots` irtirata mill-ġdid (irtirar ir-rekord) Codex stat tal-kwota u fil-bramel ta 'saturazzjoni ta' Claude. L-evidenza parzjali (headers tar-rispons, kopji skaduti) taġġorna biss it-twieqi li ġġorr.
 - Stat ta' degradazzjoni: `src/domain/degradation.ts`
 - Verifika tal-konfigurazzjoni: `src/domain/configAudit.ts`
 - bennej tal-metadata tar-rispons OmniRoute : `src/domain/omnirouteResponseMeta.ts`

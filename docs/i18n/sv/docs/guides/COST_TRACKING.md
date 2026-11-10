@@ -36,65 +36,61 @@ Eftersom siffran är en uppskattning:
 
 ---
 
-## Hur kostnader uppskattas
+## Hur kostnaderna beräknas
 
-### Priskällan
+### Prissättningskällan
 
-Kostnaderna hämtas från en pristabell som väljs enligt följande prioritetsordning
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Kostnaderna kommer från den sammanslagna pristabellen i [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), i denna prioritetsordning (** högst först** ):
 
-1. **Användaråsidosättningar** – priser som du anger i kontrollpanelen/via `PATCH /api/pricing`.
-2. **Synkroniserade externa priser** – hämtas från LiteLLM:s offentliga
-   `model_prices_and_context_window.json` när synkronisering är aktiverad (lagras i ett separat
-   `pricing_synced`-namnområde så att dina åsidosättningar aldrig skrivs över).
-3. **Hårdkodade standardvärden** – levereras med OmniRoute.
+1. **Användaren åsidosätter** — priser som anges i instrumentpanelen eller via `PATCH /api/pricing` (namnområdet `pricing` ).
+2. **models.dev sync** — -prissättning hämtad från `https://models.dev/api.json` ( `models_dev_pricing` namnområdet).
+3. **LiteLLM synk** — priser hämtade från LiteLLM offentliga `model_prices_and_context_window.json` (namnområdet `pricing_synced` ).
+4. **Hårdkodade standardinställningar** — priser skickas i [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Extern prissynkronisering är **frivillig** och inaktiverad som standard. Relevanta miljövariabler
-(se [`.env.example`](../../.env.example)):
+För samma provider/model skriver värden från högre prioriterade lager över matchande fält i lägre lager; fält som saknas i ett övre lager kan fortfarande komma från ett lägre lager. Ordningen är fast även när båda oberoende synkroniseringsjobben körs samtidigt. `GET /api/pricing?includeSources=1` returnerar `pricing` och `sourceMap`, vars etiketter per modell (`user`, `modelsDev`, `litellm`, `default`) identifierar det högsta prioriterade lagret som innehåller den modellen.
 
-| Miljövariabel           | Standard  | Syfte                                                            |
-| ----------------------- | --------- | ---------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Aktivera LiteLLM:s prissynkronisering i bakgrunden vid start.    |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Synkroniseringsintervall i **sekunder** (dagligen som standard). |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Kommaseparerad källista (endast `litellm` stöds för närvarande). |
+**LiteLLM synk** är opt-in, inaktiverad som standard. Dess miljövariabler (se [`.env.example`](../../.env.example) ) är:
+
+| Env var                 | Standard  | Ändamål                                                                         |
+| ----------------------- | --------- | ------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Aktivera bakgrundssynkronisering av LiteLLM prissättning.                       |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Synkintervall i sekunder (dagligen).                                            |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Källval endast för denna synkronisering; för närvarande stöds endast `litellm`. |
+
+**models.dev sync** är separat från LiteLLM synkroniseringen och är också inaktiverad som standard. Aktivera det i Inställningar (models.dev sync) eller använd dessa variabler:
+
+| Env var                    | Standard     | Ändamål                                                                                                                                    |
+| -------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(avstängd)_ | Avaktivera följer inställningsväxlingen; `1/true/on/yes` tvingar på och `0/false/off/no` tvingar av (även om Inställningar aktiverar det). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Standard synkintervall för models.dev i sekunder (dagligen).                                                                               |
+
+`PRICING_SYNC_SOURCES` gör det** inte** aktivera models.dev; den kontrollerar endast LiteLLM synkroniseringen. Att ta bort en användaröverstyrning rensar inte någon av de synkroniserade namnområdena; nästa tillgängliga prislager träder i kraft. För en oprismodell, kontrollera både synkinställningar och `sourceMap` innan du lägger till en manuell åsidosättning.
 
 ### Kostnadsformeln
 
-Kostnaden beräknas per begäran utifrån antal token och priser per miljon token i
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Kostnaden beräknas per begäran från token-antal och per miljon token-priser i [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Indatatoken** (minus cacheläsningar och token för cacheskapande) × priset `input`.
-- **Token för cacheläsning** × priset `cached` (använder indatapriset om detta saknas).
-- **Token för cacheskapande** × priset `cache_creation` (använder indatapriset om detta saknas).
-- **Utdatatoken** × priset `output`.
-- **Resonemangstoken** × priset `reasoning` (använder utdatapriset om detta saknas).
+- **Mata in tokens** (minus cacheläsningar och tokens för skapande av cache) × `input` hastighet.
+- **Cachelästa tokens** × `cached` hastighet (faller tillbaka till inmatningshastigheten).
+- **Cache-skapande tokens** × `cache_creation` hastighet (faller tillbaka till inmatningshastigheten).
+- **Utdatapolletter** × `output` hastighet.
+- **Resonerande tokens** × `reasoning` hastighet (faller tillbaka till utgångshastigheten).
 
-Alla priser tolkas som USD per 1 000 000 token. En Codex-tjänstenivå av typen ”fast”/”priority” eller
-”flex” tillämpar en kostnadsmultiplikator (`getCodexFastCostMultiplier`) – exempelvis
-debiteras flex med 50 % tokenrabatt, vilket visas som **flexbesparingar** i kontrollpanelen.
+Alla priser tolkas som USD per 1 000 000 tokens. En Codex "snabb"/"prioritet"- eller "flex"-tjänstnivå tillämpar en kostnadsmultiplikator (`getCodexFastCostMultiplier`) — t.ex. flex faktureras med 50 % tokenrabatt, visas som** flex besparingar** i instrumentpanelen.
 
-Modellnamnen normaliseras först (leverantörssökvägsprefix som `openai/` eller
-`accounts/fireworks/models/` tas bort) så att historiska rader fortfarande matchar ett pris.
+Modellnamn normaliseras först (leverantörssökvägsprefix som `openai/` eller `accounts/fireworks/models/` tas bort) så historiska rader matchar fortfarande ett pris.
 
-### Hur utgifter registreras
+### Hur utgifterna registreras
 
-- Kostnaden per begäran beräknas efter svaret och registreras asynkront utan att invänta resultatet, så att den
-  aldrig ökar svarstiden för klienten. Förbrukning av delad kvot schemaläggs till nästa
-  händelseloopscykel via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Utgifter för API-nycklar buffras och skrivs i batchar av
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (som standard ett skrivintervall på 60 sekunder
-  och en buffert med 1 000 poster). Kan justeras via:
+- Kostnaden per begäran beräknas efter svaret och registreras brand-and-forget så att det aldrig lägger till latens till klienten. Förbrukning av delad kvot schemaläggs vid nästa evenemangsslinga via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- API-nyckelutgifter buffras och rensas i omgångar av [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standard 60-tals spolningsintervall, 1 000 ingångars buffert). Kan justeras via:
 
-  | Miljövariabel                       | Standard | Syfte                                          |
-  | ----------------------------------- | -------- | ---------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Skrivintervall i millisekunder.                |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Maximalt antal buffrade poster före skrivning. |
+  | Env var                             | Standard | Ändamål                             |
+  | ----------------------------------- | -------- | ----------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Spolningsintervall i millisekunder. |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Max buffrade poster före spolning.  |
 
-Kontrollpanelens kostnadssiffror läses **inte** från ett lagrat dollarbelopp per rad – de
-räknas om direkt från antalet token och den aktuella pristabellen varje gång
-analys-slutpunkten körs. Det innebär att om ett felaktigt pris korrigeras (och synkroniseras på nytt) uppdateras
-historiska kostnadsuppskattningar retroaktivt.
+Instrumentpanelens kostnadssiffror är** inte** läs från ett lagrat per rad dollarbelopp — de beräknas om i farten från token-antal och den aktuella pristabellen varje gång analytics endpoint körs. Det innebär att korrigering av ett felaktigt pris (och omsynkronisering) uppdaterar historiska kostnadsuppskattningar retroaktivt.
 
 ---
 
@@ -140,53 +136,50 @@ Området Kostnader innehåller även följande (alla under `/dashboard/costs/`):
 
 ---
 
-## API-slutpunkter
+## API slutpunkter
 
-Alla dessa kräver autentisering för administration (loopback/JWT, via `requireManagementAuth`) om inget
-annat anges.
+Alla dessa kräver hanteringsbehörighet (loopback/JWT, via `requireManagementAuth`) om inget annat anges.
 
 ### Användnings- och kostnadsanalys
 
-| Metod | Slutpunkt                | Syfte                                                                                                                                                                               |
-| ----- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | Fullständig kostnads-/användningsanalys: sammanfattning, daglig trend, per leverantör/modell/API-nyckel/konto/nivå. Fråga: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET` | `/api/usage/utilization` | Kvotanvändning per leverantör över tid. Fråga: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                         |
-| `GET` | `/api/usage/history`     | Råa rader med användningshistorik.                                                                                                                                                  |
-| `GET` | `/api/usage/call-logs`   | Anropsloggar per förfrågan (modell, tokens, kostnad, latens, status).                                                                                                               |
-| `GET` | `/api/usage/quota`       | Status för leverantörskvoter.                                                                                                                                                       |
-| `GET` | `/api/usage/proxy-logs`  | Loggar över proxyförfrågningar.                                                                                                                                                     |
+| Metod | Slutpunkt                | Ändamål                                                                                                                                                               |
+| ----- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | Fullständig cost/usage -analys: sammanfattning, daglig trend, av provider/model/API key/account/tier. Fråga: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | Per leverantörs kvotanvändning över tid. Fråga: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                          |
+| `GET` | `/api/usage/history`     | Rader för rå användningshistorik.                                                                                                                                     |
+| `GET` | `/api/usage/call-logs`   | Samtalsloggar per begäran (modell, tokens, kostnad, latens, status).                                                                                                  |
+| `GET` | `/api/usage/quota`       | Leverantörskvotstatus.                                                                                                                                                |
+| `GET` | `/api/usage/proxy-logs`  | Loggar för proxyförfrågningar.                                                                                                                                        |
 
 ### Budgetar
 
-| Metod  | Slutpunkt                | Syfte                                                                                         |
-| ------ | ------------------------ | --------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Kostnadssammanfattning + budgetkontroll för en API-nyckel (frågeparametern `apiKeyId` krävs). |
-| `POST` | `/api/usage/budget`      | Ange dagliga/veckovisa/månatliga USD-gränser + varningströskel för en API-nyckel.             |
-| `GET`  | `/api/usage/budget/bulk` | Sammanfattningar av budgetar för flera API-nycklar.                                           |
+| Metod  | Slutpunkt                | Ändamål                                                                             |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Kostnadsöversikt + budgetkontroll för en API nyckel (`apiKeyId` -frågeparam krävs). |
+| `POST` | `/api/usage/budget`      | Ställ in daily/weekly/monthly USD gränser + varningströskeln för en API nyckel.     |
+| `GET`  | `/api/usage/budget/bulk` | Massbudgetsammanfattningar över API nycklar.                                        |
 
-> Budget-API:t är avgränsat per **API-nyckel** (`apiKeyId`). Gränser som returneras av
-> `GET /api/usage/budget` omfattar `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> ett `warningThreshold` och de löpande totalerna (`totalCostToday`, `totalCostMonth`, …).
+> Budgeten API är omfattning per**API nyckel** (`apiKeyId`). Gränser som returneras av `GET /api/usage/budget` inkluderar `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` och löpande summor (`totalCostToday`, `totalCostMonth`, …).
 
 ### Prissättning
 
-| Metod    | Slutpunkt               | Syfte                                                                                                                      |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Aktuell sammanslagen prissättning (användare + synkroniserad + standardvärden). `?includeSources=1` visar källan per post. |
-| `PATCH`  | `/api/pricing`          | Åsidosätt prissättning för `{ provider: { model: { input, output, cached, … } } }`.                                        |
-| `DELETE` | `/api/pricing`          | Återställ prissättningen till standardvärden (kan valfritt avgränsas med `?provider=&model=`).                             |
-| `GET`    | `/api/pricing/defaults` | Visa standardiserade reservpriser per 1 miljon.                                                                            |
-| `GET`    | `/api/pricing/models`   | Prissättning indexerad efter modell.                                                                                       |
-| `POST`   | `/api/pricing/sync`     | Utlös en manuell synkronisering från externa källor (LiteLLM).                                                             |
-| `GET`    | `/api/pricing/sync`     | Aktuell synkroniseringsstatus.                                                                                             |
-| `DELETE` | `/api/pricing/sync`     | Rensa alla synkroniserade prisuppgifter.                                                                                   |
+| Metod    | Slutpunkt               | Ändamål                                                                                                                                                      |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Sammanslagen prissättning i fyra lager (användare, models.dev, LiteLLM, standardvärden). `?includeSources=1` returnerar `pricing` + `sourceMap`.             |
+| `PATCH`  | `/api/pricing`          | Åsidosätt prissättning för `{ provider: { model: { input, output, cached, … } } }`.                                                                          |
+| `DELETE` | `/api/pricing`          | Ta bort åsidosättningar av användarpriser (valfritt omfång av `?provider=&model=`); synkroniserade priser eller inbyggda standardvärden kvarstår som reserv. |
+| `GET`    | `/api/pricing/defaults` | Visa förinställda per-1M reservfrekvenser.                                                                                                                   |
+| `GET`    | `/api/pricing/models`   | Priset styrs efter modell.                                                                                                                                   |
+| `POST`   | `/api/pricing/sync`     | Utlösa en manuell synkronisering från externa källor (LiteLLM).                                                                                              |
+| `GET`    | `/api/pricing/sync`     | Aktuell synkroniseringsstatus.                                                                                                                               |
+| `DELETE` | `/api/pricing/sync`     | Rensa endast LiteLLM-synkroniserad prissättning (`pricing_synced`); models.dev-data är separata.                                                             |
 
 ### Andra kostnadsrelevanta slutpunkter
 
-| Metod | Slutpunkt                     | Syfte                                                                                  |
-| ----- | ----------------------------- | -------------------------------------------------------------------------------------- |
-| `GET` | `/api/free-tier/summary`      | Totalt antal token för gratismodeller, använda denna månad och återstående gratiskvot. |
-| `GET` | `/api/quota/pools/[id]/usage` | Användning för en pool med delad kvot.                                                 |
+| Metod | Slutpunkt                     | Ändamål                                                                                      |
+| ----- | ----------------------------- | -------------------------------------------------------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | Totalt antal token för gratismodeller, använd-den här månaden och återstående gratistillägg. |
+| `GET` | `/api/quota/pools/[id]/usage` | Användning för en delad kvotpool.                                                            |
 
 ---
 

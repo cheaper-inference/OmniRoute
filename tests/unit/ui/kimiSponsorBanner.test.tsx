@@ -78,10 +78,14 @@ describe("KimiSponsorBanner", () => {
     // Was text-[9px] text-text-muted/70 (axe color-contrast on /dashboard).
     expect(note?.className).toContain("text-text-muted");
     expect(note?.className).not.toMatch(/text-\[9px\]|text-text-muted\/\d+/);
-    // Brand blue stays; white ink on it was 3.66:1, the dark ink is 5.3:1.
+    // The brand is the tint behind the banner, never the CTA fill: the CTA is a kit button, whose
+    // ink the kit keeps AA. White ink on the brand blue was 3.66:1.
+    const banner = container.querySelector<HTMLElement>("[role='complementary']");
+    expect(banner?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(banner?.style.getPropertyValue("--ci-brand")).toBe("#1783ff");
     const cta = container.querySelector("a[href]");
-    expect(cta?.className).toContain("bg-[#1783FF]");
-    expect(cta?.className).toContain("text-[#040d10]");
+    expect(cta?.className).toContain("ci-button");
+    expect(cta?.className).not.toMatch(/#[0-9a-fA-F]{3,8}/);
     expect(cta?.className).not.toContain("text-white");
   });
 

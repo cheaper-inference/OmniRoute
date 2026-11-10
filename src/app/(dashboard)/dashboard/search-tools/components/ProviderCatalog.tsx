@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
-import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
 
 interface ProviderCatalogProps {
@@ -181,7 +181,7 @@ export default function ProviderCatalog({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8" data-testid="catalog-loading">
-        <Icon name="progress_activity" size={20} className="text-primary animate-spin" />
+        <Spinner size="sm" />
       </div>
     );
   }

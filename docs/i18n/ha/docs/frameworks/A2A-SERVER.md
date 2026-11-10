@@ -163,7 +163,7 @@ OmniRoute ta fallasa ƙwarewar A2A guda 6 da aka haɗa cikin `src/lib/a2a/taskEx
 | Rahoton Lafiya   | `health-report`      | Haɗa mai watsewar kewayawa, sanyi, yanayin kulle kowane mai bayarwa                                                                                       | lafiya, juriya          | "Nuna halin kiwon lafiya na duk masu bayarwa"                |
 | Ƙarfin Lissafi   | `list-capabilities`  | Yana dawo da cikakken katalogin Ƙwararrun Agent 45 (23 API + 21 CLI + 1 config) azaman tebur mai alamar tare da danyen SKILL.md URLs don allurar mahallin | catalog, ganowa, basira | "Jera duk damar OmniRoute "                                  |
 
-> Katin Wakilin ya kamata a kiyaye shi daidai da kundin mai ba da 377 mai rai; Ƙididdigar masu badawa da free/no-auth metadata an samo su daga wurin yin rajistar lokacin aiki.
+> Katin Wakilin ya kamata a kiyaye shi daidai da kundin mai ba da 381 mai rai; Ƙididdigar masu badawa da free/no-auth metadata an samo su daga wurin yin rajistar lokacin aiki.
 
 ### `list-capabilities` Skill Detail
 
@@ -180,56 +180,64 @@ Kowane jere ya ƙunshi ginshiƙin `rawUrl` don haka nan da nan wakilai za su iya
 
 ---
 
-## REST API (na taimako)
+## REST API (auxiliary)
 
-Matsayar JSON-RPC ta `/a2a` ita ce babbar mashigar A2A. Matsayoyin REST da ke ƙasa suna samar da damar taimako ga allunan sa ido da kayan aikin waje:
+Ƙarshen JSON-RPC `/a2a` ita ce wurin shiga A2A canonical. Wuraren ƙarshen REST da ke ƙasa suna ba da damar taimako don dashboards da kayan aiki na waje:
 
-| Matsaya                      | Hanya | Bayani                                                                | Tantancewa                                   |
-| :--------------------------- | :---- | :-------------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET   | Matsayin sabar, ƙwarewar da aka yi wa rajista                         | (na jama'a)                                  |
-| `/api/a2a/tasks`             | GET   | Jera ayyuka tare da matatu                                            | gudanarwa                                    |
-| `/api/a2a/tasks/[id]`        | GET   | Samo aiki ta ID                                                       | gudanarwa                                    |
-| `/api/a2a/tasks/[id]/cancel` | POST  | Soke aikin da ke gudana                                               | gudanarwa                                    |
-| `/.well-known/agent.json`    | GET   | Katin Wakili (gano A2A)                                               | (na jama'a, an adana na 3600s)               |
-| `/api/a2a/tasks`             | POST  | Miƙa aiki mai shigowa zuwa rundunar OmniConductor (Conductor PRD RF5) | Bearer da `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Ƙarshen Ƙarshe               | Hanya | Bayani                                                                  | Gaskiya                                                                                                       |
+| :--------------------------- | :---- | :---------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET   | Matsayin uwar garken, ƙwarewar rijista                                  | (jama'a)                                                                                                      |
+| `/api/a2a/tasks`             | GET   | Jerin ayyuka tare da tacewa                                             | gudanarwa ko maɓallin API (duba ƙasa)                                                                         |
+| `/api/a2a/tasks/[id]`        | GET   | Samun aiki ta ID                                                        | gudanarwa ko maɓallin API (duba ƙasa)                                                                         |
+| `/api/a2a/tasks/[id]/cancel` | POST  | Soke aikin gudu                                                         | gudanarwa ko maɓallin API (duba ƙasa)                                                                         |
+| `/.well-known/agent.json`    | GET   | Katin Agent ( gano A2A )                                                | (jama'a, cache 3600s)                                                                                         |
+| `/api/a2a/tasks`             | POST  | Tawagar mai shigowa zuwa rundunar OmniConductor (Mai gudanarwa PRD RF5) | daidai da `GET`, da `OMNIROUTE_API_KEY` idan an saita shi yayin da aka kashe `REQUIRE_API_KEY` ; `a2aEnabled` |
 
-**Miƙa aiki mai shigowa na Conductor (`POST /api/a2a/tasks`):** wakilan A2A na waje suna miƙa aikin rubuta lamba ga rundunar OmniConductor ta hanyar OmniRoute. Jiki: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ƙwarewar rundunar Conductor kaɗai (waɗanda aka sanar a Katin Wakili) ake iya miƙa wa aiki; ana buƙatar `metadata.conductor.repo.url` (rundunar tana aiki a kan ma'ajin git). Hanyar tana fassara buƙatar zuwa `POST /v1/tasks` na hub ta amfani da `CONDUCTOR_ORCHESTRATOR_TOKEN` na gefen sabar (madadinsa `CONDUCTOR_HUB_TOKEN`) sannan ta mayar da `201 { conductor_task_id, state: "submitted" }`; matsayin ayyuka yana komawa ta madubin SSE→A2A (RF1), kuma ana iya ganinsa ta `GET /api/a2a/tasks?skill=conductor`.
+Wanene ya shiga hanyoyin `/api/a2a/tasks*` ya dogara da shiga da saitunan API-key:
+
+- `requireLogin=true` (tsoho): tsakiyar kayan aiki kawai suna yarda da takaddun gudanarwa (zaman dashboard, maɓallin `manage` -scope API, alamar shiga `oma_` ) da `OMNIROUTE_API_KEY`. Maɓalli bayyananne yana samun `403`. A cikin bugun kai `Authorization` tsakiyar kayan aiki suna ɗaukar `OMNIROUTE_API_KEY` azaman `Bearer <key>`; danda key ko tab bayan `Bearer` samun `401`.
+- `requireLogin=false`, ko taga madauki kafin a hau: tare da `REQUIRE_API_KEY=true` duk wani maɓalli OmniRoute API mai inganci ko kuma shaidar gudanarwa ana karɓa kuma masu kiran da ba a san su ba suna samun `401`; tare da `REQUIRE_API_KEY` kashe hanyoyin suna buɗe.
+- Hakanan `POST /api/a2a/tasks` yana buƙatar `OMNIROUTE_API_KEY` a cikin taken `Authorization` lokacin da aka saita wannan canjin kuma `REQUIRE_API_KEY` ya kashe. Sauran rubutun kai, irin su `x-api-key`, ba sa ƙirga a can. Tare da kashewa ko kafin shiga maɓallin yana wucewa tare da ko ba tare da prefix `Bearer` ; tare da shiga, `Bearer <key>` ne kawai ya wuce tsakiya.
+
+Inda ake buƙatar takaddun shaida, alamar `read` -scope `oma_` tana aiki don `GET` kawai.
+
+**Tawagar Jagora mai shigowa (`POST /api/a2a/tasks`):** Wakilan A2A na waje suna ba da aikin coding zuwa rundunar OmniConductor ta hanyar OmniRoute. Jiki: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — kawai Ƙwararrun jiragen ruwa na Gudanarwa (waɗanda aka sanar akan Katin Agent) ana iya wakilta; Ana buƙatar `metadata.conductor.repo.url` (jirgin ruwa yana aiki akan git repos). Hanyar tana fassara zuwa `POST /v1/tasks` na cibiyar ta amfani da `CONDUCTOR_ORCHESTRATOR_TOKEN` ta gefen uwar garke (fallback `CONDUCTOR_HUB_TOKEN`) kuma ta dawo da `201 { conductor_task_id, state: "submitted" }`; jihohin ɗawainiya suna komawa ta cikin madubin SSE→A2A (RF1) kuma ana iya gani ta hanyar `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
 ## Ƙara Sabuwar Ƙwarewa
 
-1. **Ƙirƙiri fayil ɗin ƙwarewa:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Ƙirƙiri fayil ɗin fasaha:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Fitar da aikin async mai sigar `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Bi tsarin ƙwarewar da ake da su kamar `smartRouting.ts`.
+   Fitar da aikin async `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Bi siffar basirar data kasance kamar `smartRouting.ts`. Idan gwanin ya sake kira zuwa OmniRoute akan HTTP, gina masu kai da `buildSelfLoopHeaders(caller)` daga `src/lib/a2a/selfLoopAuth.ts` don haka kiran ya gudana tare da maɓallin A2A mai kira, ba `OMNIROUTE_API_KEY`, kuma ya wuce `redirect: "error"` zuwa `fetch` don haka turawa baya samun maɓalli. Mai taimako yana gina masu kai kawai; kowace fasaha tana saita manufofin turawa kanta. Yana jefa `UnsafeSelfLoopTargetError` maimakon haɗa maɓalli lokacin da tushen tushen URL ya bayyana a sarari http a waje da cibiyar sadarwar masu zaman kansu (loopback, akwati ko sunan sabis, da adiresoshin masu zaman kansu suna da kyau) ko kuma suna riƙe da takaddun shaida, don haka ƙwarewar da ta haɗiye kiran da aka ƙi dole ne ta sake dawo da wannan kuskuren.
 
-2. **Yi rajistar mai sarrafawa:** a cikin `src/lib/a2a/taskExecution.ts`, ƙara shigarwa zuwa `A2A_SKILL_HANDLERS`:
+2. **Mai kula da rajista:** a cikin `src/lib/a2a/taskExecution.ts`, ƙara shigarwa zuwa `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ƙwarewar da ake da su
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Bayyana a cikin Katin Wakili:** a cikin `src/lib/a2a/agentCardMetadata.ts` (wanda `/.well-known/agent.json` da `/.well-known/agent-card.json` suke amfani da shi tare), ƙara zuwa jerin `skills`:
+3. **Bayyana a Katin Agent:** a cikin `src/lib/a2a/agentCardMetadata.ts` (wanda `/.well-known/agent.json` da `/.well-known/agent-card.json` suka raba), haɗa zuwa tsararrun `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Ƙwarewarku",
-     "description": "Taƙaitaccen bayani mai mayar da hankali kan manufa",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Misalin kiran umarni ta harshen ɗan Adam"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Rubuta gwaje-gwaje:** `tests/unit/a2a-<your-skill>.test.ts`. Gwada yanayin nasara + yanayin kuskure.
+4. **Rubuta gwaje-gwaje:** `tests/unit/a2a-<your-skill>.test.ts`. Rufe hanyar farin ciki hanyar kuskure +.
 
-5. **Rubuta bayanin** sabuwar ƙwarewar a cikin jadawalin `Available Skills` na wannan fayil.
+5. **Takardu** sabuwar fasaha a cikin teburin `Available Skills` na fayil ɗin.
 
 ---
 
@@ -266,7 +274,7 @@ an gabatar → ana aiki → an kammala
 
 ---
 
-## Misalan Haɗawa
+## Misalan Haɗin Kai
 
 ### Python (buƙatun)
 

@@ -12,17 +12,22 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Forudsætninger
 
-- **Node.js** `>=22.22.2 <23` eller `>=24.0.0 <27` (anbefalet: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (anbefalet: 24 LTS)
 - **npm** 10+
 
-> **Brugere af npm v11+ (Node 24+):** Efter `npm install` skal du kontrollere, at de native moduler blev installeret:
-> `node -e "require('better-sqlite3')"`. Hvis kommandoen mislykkes med `MODULE_NOT_FOUND`,
-> skal du køre `npm approve-scripts better-sqlite3 && npm install`. Se
+> **Windows med Node 24:** brug den aktuelle 24 LTS-patchudgivelse (mindst 24.20.0).
+> Tidligere udgivelser kan afslutte efter vellykkede tests, når `--test-force-exit` lukker
+> processen. Node's [Windows libuv-rettelse](https://github.com/nodejs/node/pull/61999) afhjælper
+> dette runtime-nedbrud; behold testpåstandene og kontrollerne af runnerens afslutning aktiveret.
+
+> **Brugere af npm v11+ (Node 24+):** Efter `npm install` skal du kontrollere, at native moduler blev installeret:
+> `node -e "require('better-sqlite3')"`. Hvis det mislykkes med `MODULE_NOT_FOUND`,
+> kør `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Fejlfinding](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Kloning og installation
+### Klon og installation
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -36,84 +41,84 @@ npm install
 # Opret din .env ud fra skabelonen
 cp .env.example .env
 
-# Generer de påkrævede hemmeligheder
+# Generer de nødvendige hemmeligheder
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Vigtige variabler til udvikling:
 
-| Variabel               | Standardværdi til udvikling | Beskrivelse                    |
-| ---------------------- | --------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                     | Serverport                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Basis-URL til frontend         |
-| `JWT_SECRET`           | (generer ovenfor)           | Hemmelighed til JWT-signering  |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Adgangskode til første login   |
-| `APP_LOG_LEVEL`        | `info`                      | Detaljeringsniveau for logning |
+| Variabel               | Standard for udvikling   | Beskrivelse                  |
+| ---------------------- | ------------------------ | ---------------------------- |
+| `PORT`                 | `20128`                  | Serverport                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL for frontend       |
+| `JWT_SECRET`           | (generer ovenfor)        | JWT-signeringshemmelighed    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Adgangskode til første login |
+| `APP_LOG_LEVEL`        | `info`                   | Logningsdetaljeringsniveau   |
 
-### Indstillinger i dashboardet
+### Dashboard-indstillinger
 
-Dashboardet indeholder kontakter til funktioner, der også kan konfigureres via miljøvariabler:
+Dashboardet indeholder UI-knapper til funktioner, der også kan konfigureres via miljøvariabler:
 
-| Placering af indstilling  | Kontakt                | Beskrivelse                              |
-| ------------------------- | ---------------------- | ---------------------------------------- |
-| Indstillinger → Avanceret | Fejlfindingstilstand   | Aktivér logning af debuganmodninger (UI) |
-| Indstillinger → Generelt  | Sidebjælkens synlighed | Vis/skjul sektioner i sidebjælken        |
+| Indstillingsplacering     | Kontakt                | Beskrivelse                                     |
+| ------------------------- | ---------------------- | ----------------------------------------------- |
+| Indstillinger → Avanceret | Fejlsøgningstilstand   | Aktivér logning af fejlfindingsanmodninger (UI) |
+| Indstillinger → Generelt  | Synlighed af sidepanel | Vis/skjul sektioner i sidepanelet               |
 
-Disse indstillinger gemmes i databasen og bevares på tværs af genstarter. Når de er angivet, tilsidesætter de miljøvariablernes standardværdier.
+Disse indstillinger gemmes i databasen og bevares på tværs af genstarter, hvor de tilsidesætter standardværdierne for miljøvariabler, når de er angivet.
 
-### Lokal kørsel
+### Kørsel lokalt
 
 ```bash
-# Udviklingstilstand (automatisk genindlæsning)
+# Udviklingstilstand (hot reload)
 npm run dev
 
 # Produktionsbuild
-npm run build    # next build → .build/next/ og derefter assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Hurtig kompilering kun af backend/API til ændringer fra bidragydere
+# Hurtig backend/API-only-kompilering til bidragyderændringer
 npm run build:contributor
 
-# Release-build (ren genopbygning + HEAD-kontrolfil — påkrævet til udrulning)
-npm run build:release   # rm -rf .build dist && build + skriver dist/BUILD_SHA
+# Release-build (ren genopbygning + HEAD-sentinel — påkrævet til deployment)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Almindelig portkonfiguration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bidragyder-buildet udfører kun validering ved kompilering: Det samler ikke den selvstændige
-distribution og bygger heller ikke valgfrie native pakkeartefakter. Brug det almindelige produktionsbuild, når
-du skal validere den distributionsklare pakke.
+Bidragyder-buildet udfører kun kompileringstest: det samler ikke den selvstændige
+distribution eller bygger valgfrie native-pakkeressourcer. Brug det almindelige produktionsbuild, når
+du har brug for at validere den pakke, der skal leveres.
 
-### Struktur for build-output
+### Layout for buildoutput
 
-| Mappe     | Indhold                                                                               | Versionsstyret |
-| --------- | ------------------------------------------------------------------------------------- | -------------- |
-| `src/`    | Applikationens kildekode (TypeScript / TSX)                                           | Ja             |
-| `.build/` | Mellemprodukter — output fra `next build` (ignoreret af Git, `distDir = .build/next`) | Nej            |
-| `dist/`   | Distributionsklar pakke — samlet af `assembleStandalone` (ignoreret af Git)           | Nej            |
+| Mappe     | Indhold                                                                     | Versionsstyret |
+| --------- | --------------------------------------------------------------------------- | -------------- |
+| `src/`    | Applikationskildekode (TypeScript / TSX)                                    | Ja             |
+| `.build/` | Mellemprodukter — `next build`-output (gitignored, `distDir = .build/next`) | Nej            |
+| `dist/`   | Leveringsklar pakke — samlet af `assembleStandalone` (gitignored)           | Nej            |
 
-Build-pipelinen består af én gennemgang:
+Build-pipelinen er et enkelt gennemløb:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output fra Next.js)
-  └─ assembleStandalone()                 (kopierer standalone + static + public + native aktiver)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` rydder desuden begge mapper først og skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrolfil for udrulningens integritet.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en sentinel til kontrol af deployment-integritet.
 
-`npm run build:contributor` bruger build-profilen kun til backend. Den erstatter midlertidigt
-dashboardets UI-filer med stubbe under buildet, beholder API-routehandlers og gendanner de oprindelige filer
+`npm run build:contributor` bruger backend-only-buildprofilen. Den opretter midlertidigt stubs for
+dashboardets UI-filer under buildet, beholder API-routehandlerne og gendanner de oprindelige filer
 efter buildet. Brug `npm run build` til ændringer, der påvirker dashboardets UI, eller til fuld
-release-validering. Bidragyderprofilen erstatter ikke release-buildet.
+release-validering; bidragyderprofilen er ikke en erstatning for release-buildet.
 
-> **Bemærkning om VPS-udrulning:** Den eksterne image-mappe `/usr/lib/node_modules/omniroute/app/`
-> er uændret. Udrulningsfunktionerne bruger rsync til at kopiere indholdet af `dist/` til den.
-> Kun stien til build-outputtet i repositoryet er ændret (`app/` → `dist/`).
+> **Bemærkning om VPS-deployment:** Den eksterne billedmappe `/usr/lib/node_modules/omniroute/app/`
+> er uændret. Deployment-færdighederne rsync'er indholdet af `dist/` til den.
+> Kun buildoutputstien i repositoryet er flyttet (`app/` → `dist/`).
 
 Standard-URL'er:
 
