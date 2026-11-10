@@ -1,1 +1,0 @@
-- **fix(db):** Preserve unknown backup-directory formats instead of deleting them as orphans; retain `.sqlite.zst` archives and their dated preservation receipts as one count/age-retention family, while keeping detached receipts.

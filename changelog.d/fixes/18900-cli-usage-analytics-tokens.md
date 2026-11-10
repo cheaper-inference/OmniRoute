@@ -1,1 +1,0 @@
-- **fix(cli):** Usage analytics now shows prompt and completion tokens returned by the current API, while retaining compatibility with older server field names ([#18900](https://github.com/cheaper-inference/OmniRoute/pull/18900)) — thanks @fabioKoruja00

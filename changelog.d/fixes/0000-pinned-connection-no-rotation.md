@@ -1,1 +1,0 @@
-- **fix(sse):** A request pinned to one connection with `x-omniroute-connection` is no longer retried on a sibling account by the in-pipeline rotation (Codex 429, Antigravity 422). The pin is strict, as the API reference documents.

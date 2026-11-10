@@ -209,7 +209,7 @@ export async function POST(request: Request) {
     forbiddenMessage: CREDENTIAL_IMPORT_FORBIDDEN_MESSAGE,
   });
   if (operatorVerdict.ok === false) return operatorVerdict.response;
-  let tmpPath: string | null = null;
+  let tmpDir: string | null = null;
 
   try {
     const upload = await readUpload(request);
@@ -219,9 +219,14 @@ export async function POST(request: Request) {
     const shapeError = validateUploadShape(fileName, fileBuffer.length);
     if (shapeError) return shapeError;
 
-    // Write uploaded file to temp location
-    tmpPath = path.join(os.tmpdir(), `omniroute-import-${Date.now()}.sqlite`);
-    fs.writeFileSync(tmpPath, fileBuffer);
+    // Stage the upload in a fresh private directory (mkdtemp: random name, mode 0700),
+    // like the export routes. A fixed name under the shared tmpdir could be guessed and
+    // pre-created or symlinked by another local user; "wx" refuses to reuse or follow
+    // anything already at the final path component, and 0600 keeps the copied
+    // credentials private.
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-import-"));
+    const tmpPath = path.join(tmpDir, "import.sqlite");
+    fs.writeFileSync(tmpPath, fileBuffer, { mode: 0o600, flag: "wx" });
 
     const summary = await inspectCandidate(tmpPath);
     if (summary instanceof Response) return summary;
@@ -246,10 +251,10 @@ export async function POST(request: Request) {
     console.error("[API] Error importing database:", error);
     return NextResponse.json({ error: sanitizeErrorMessage(error) }, { status: 500 });
   } finally {
-    // Cleanup temp file
-    if (tmpPath && fs.existsSync(tmpPath)) {
+    // Remove the staging directory and everything in it.
+    if (tmpDir) {
       try {
-        fs.unlinkSync(tmpPath);
+        fs.rmSync(tmpDir, { recursive: true, force: true });
       } catch {
         /* best effort */
       }

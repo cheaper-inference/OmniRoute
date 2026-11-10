@@ -1,0 +1,1 @@
+- **fix(deepseek-web):** browser login no longer captures the anonymous `{"value":null}` userToken placeholder, and an empty JSON wrapper is never sent upstream as the Bearer token ([#18298](https://github.com/cheaper-inference/OmniRoute/pull/18298)) — thanks @scursel

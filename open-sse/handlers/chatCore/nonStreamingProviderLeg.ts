@@ -24,12 +24,20 @@ import type {
 import { bufferedResponsesFailure } from "./bufferedResponsesFailure.ts";
 import { translateNonStreamingClientResponse } from "./nonStreamingClientTranslate.ts";
 import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
+import {
+  NonStreamingResponseTooLargeError,
+  readResponseTextWithinCap,
+} from "./nonStreamingResponseBody.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
+import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
-import { ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
+import {
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE,
+} from "../../config/constants.ts";
 import { unwrapClinepassEnvelope } from "../../utils/clinepassEnvelope.ts";
 import { unwrapClineNonStreamingEnvelope } from "./clineResponseEnvelope.ts";
 import {
@@ -156,12 +164,16 @@ function extractUsage(
   responseBody: Record<string, unknown>,
   provider: string
 ): ProviderLegUsage | null {
-  const raw = extractUsageFromResponse(responseBody, provider);
+  return summarizeUsage(extractUsageFromResponse(responseBody, provider));
+}
+
+function summarizeUsage(raw: unknown): ProviderLegUsage | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const pt = typeof r.prompt_tokens === "number" ? r.prompt_tokens : 0;
   const ct = typeof r.completion_tokens === "number" ? r.completion_tokens : 0;
   return {
+    ...cacheCreationFields(raw),
     prompt_tokens: pt,
     completion_tokens: ct,
     total_tokens: typeof r.total_tokens === "number" ? r.total_tokens : pt + ct,
@@ -292,7 +304,12 @@ function finishOk(
     params.transformedBody || params.requestBody,
     params.responsePayloadFormat
   );
-  const usage = extractUsage(body, params.provider);
+  // Full provider usage, read BEFORE translateNonStreamingClientResponse rewrites the
+  // body for the client (applyClientUsageBuffer folds in the #8331 context buffer and
+  // can swap in an estimate). Billing needs this object, not the token-only summary:
+  // it also carries provider-reported cost/credit fields and the estimate marker.
+  const billingUsage = extractUsageFromResponse(body, params.provider);
+  const usage = summarizeUsage(billingUsage);
   const clientTranslate = translateNonStreamingClientResponse({
     responseBody: body,
     responsePayloadFormat: params.responsePayloadFormat,
@@ -340,6 +357,7 @@ function finishOk(
     providerBody: body,
     providerRequest: input.translatedBody ?? {},
     usage,
+    billingUsage,
     responsePayloadFormat: params.responsePayloadFormat,
     looksLikeSSE: params.looksLikeSSE,
     connectionId: params.connectionId,
@@ -540,15 +558,25 @@ export async function runNonStreamingProviderLeg(
     // The old non-streaming path reduced every TimeoutError to a bare 504.
     // Preserve only the explicit Antigravity pre-response marker, not arbitrary
     // upstream 504s: the outer account router needs the original failure type.
+    const requestScopedTimeout =
+      failureStatus === 504 &&
+      !!error &&
+      typeof error === "object" &&
+      (error as { code?: unknown }).code === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
     const preResponseTimeout =
       provider === "antigravity" &&
       failureStatus === 504 &&
       !!error &&
       typeof error === "object" &&
       (error as { code?: unknown }).code === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
+    const timeoutType = requestScopedTimeout
+      ? "request_timeout"
+      : preResponseTimeout
+        ? "upstream_timeout"
+        : undefined;
     const receipt = buildReceipt(input, {
       httpStatus: failureStatus,
-      errorType: preResponseTimeout ? "upstream_timeout" : null,
+      errorType: timeoutType ?? null,
       usage: null,
       termination: "provider_error",
       latencyMs: Date.now() - startMs,
@@ -562,8 +590,12 @@ export async function runNonStreamingProviderLeg(
       failureMessage,
       error,
       null,
-      preResponseTimeout ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE : undefined,
-      preResponseTimeout ? "upstream_timeout" : undefined
+      requestScopedTimeout
+        ? REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE
+        : preResponseTimeout
+          ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE
+          : undefined,
+      timeoutType
     );
     return {
       kind: "error",
@@ -621,7 +653,7 @@ export async function runNonStreamingProviderLeg(
     let parsedErrorBody: Record<string, unknown> = {};
 
     try {
-      const errorBodyText = await providerResponse.text();
+      const errorBodyText = await readResponseTextWithinCap(providerResponse);
       try {
         parsedErrorBody = JSON.parse(errorBodyText) as Record<string, unknown>;
       } catch {
@@ -635,8 +667,11 @@ export async function runNonStreamingProviderLeg(
         "Provider request failed";
       upstreamErrorCode = typeof errObj?.code === "string" ? errObj.code : undefined;
       upstreamErrorType = typeof errObj?.type === "string" ? errObj.type : undefined;
-    } catch {
-      message = "Provider request failed";
+    } catch (readErr) {
+      message =
+        readErr instanceof NonStreamingResponseTooLargeError
+          ? "Provider error body exceeded response size limit"
+          : "Provider request failed";
     }
 
     // Parse Retry-After from upstream response headers

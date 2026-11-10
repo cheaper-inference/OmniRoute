@@ -558,6 +558,24 @@
       "kind": "dependabot",
       "subject": "fix(mimocode): handle 400 with cooldown + account rotation (#6648)",
       "reason": "dependabot[bot] dependency bump (Signed-off-by/Co-authored-by written by GitHub itself)"
+    },
+    "ea6aab34eaeefad79b5bc6e52b4b06223e4db8e6": {
+      "pr": 18957,
+      "kind": "bot",
+      "subject": "chore(dashboard): sync the vendored CI UI Kit to 0.0.89 (#18957)",
+      "reason": "Already merged into release/v3.8.53: GitHub wrote the github-actions[bot] co-author on the automated kit sync; history cannot be rewritten"
+    },
+    "8e58decb5c0e3551326de138fb8c4ba2e9c44a29": {
+      "pr": 18914,
+      "kind": "bot",
+      "subject": "chore(dashboard): sync the vendored CI UI Kit to 0.0.87 (#18914)",
+      "reason": "Already merged into release/v3.8.53: GitHub wrote the github-actions[bot] co-author on the automated kit sync; history cannot be rewritten"
+    },
+    "f2070a84fde166e90d58ba0a95f619bda0e66099": {
+      "pr": 17321,
+      "kind": "ai-trailer",
+      "subject": "test(sse): pin spec reporter in the Perplexity stream boundary test (#17321)",
+      "reason": "Already merged into release/v3.8.53 with an AI co-author trailer before it was caught; history cannot be rewritten, and the squash to main does not carry it"
     }
   }
 }

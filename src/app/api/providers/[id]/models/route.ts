@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { FalClient } from "@omniroute/open-sse/handlers/fal/client";
+import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
+import { isFalNativeEnabled } from "@/shared/utils/featureFlags";
 import {
   getProviderConnectionFamilyIds,
   isClaudeCodeCompatibleProvider,
   isAnthropicCompatibleProvider,
   isOpenAICompatibleProvider,
-  NOAUTH_PROVIDERS,
 } from "@/shared/constants/providers";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { getModelsByProviderId } from "@/shared/constants/models";
@@ -103,6 +105,7 @@ import {
   getCachedDiscoveredModels,
   isAutoFetchModelsEnabled,
   persistDiscoveredModels,
+  persistNonEmptyDiscoveredModels,
 } from "@/lib/providerModels/modelDiscovery";
 import { buildProviderModelsUrl, getDiscoveryClientVersionOptions } from "./discoveryClientVersion";
 import { getAdobeModels } from "./adobeFireflyDiscovery";
@@ -161,8 +164,14 @@ import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeader
 import { maybeHandleConolOrSyntxModelDiscovery } from "./webSessionDiscovery";
 import { maybeHandleTwinmindModelDiscovery } from "./twinmindDiscovery";
 import { maybeHandleDevinDesktopModelDiscovery } from "./devinDesktopDiscovery";
+import { maybeHandleMuseCodeModelDiscovery } from "./museCodeDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
-import { buildNoAuthModelsResponse, filterModelsForRoute } from "./modelRouteProjection";
+import { buildChatGptModelsResponse } from "./chatgptModels";
+import {
+  buildNoAuthModelsResponse,
+  filterModelsForRoute,
+  resolveNoAuthProviderId,
+} from "./modelRouteProjection";
 
 /**
  * GET /api/providers/[id]/models - Get models list from provider
@@ -190,14 +199,7 @@ export async function GET(
       typeof connection?.provider === "string" && connection.provider.trim().length > 0
         ? connection.provider
         : null;
-    const noAuthProviderId =
-      (NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>)[id]?.noAuth === true
-        ? id
-        : connectionProvider &&
-            (NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>)[connectionProvider]
-              ?.noAuth === true
-          ? connectionProvider
-          : null;
+    const noAuthProviderId = resolveNoAuthProviderId(id, connectionProvider);
 
     // No-auth providers may persist a connection row solely for fingerprints
     // and account-proxy metadata. That row must not turn public model discovery
@@ -230,6 +232,7 @@ export async function GET(
       return NextResponse.json({ error: "Invalid connection provider" }, { status: 400 });
     }
     const usesCuratedModelsOnly = providerUsesCuratedModelsOnly(provider);
+    if (provider === "chatgpt") return buildChatGptModelsResponse(connection, excludeHidden);
 
     // Resolve proxy for this provider (provider-level → global → direct)
     const proxy = await resolveProxyForProvider(provider);
@@ -297,6 +300,40 @@ export async function GET(
     const connectionId = typeof connection.id === "string" ? connection.id : id;
     const apiKey = typeof connection.apiKey === "string" ? connection.apiKey : "";
     const accessToken = typeof connection.accessToken === "string" ? connection.accessToken : "";
+    if (provider === "fal-ai" && isFalNativeEnabled()) {
+      const falProxy = await resolveProxyForConnection(connectionId, undefined, "fal-ai");
+      const client = new FalClient(apiKey || accessToken, (url, init) =>
+        runWithProxyContext(falProxy.proxy, () => fetch(url, init))
+      );
+      const query = new URLSearchParams();
+      for (const field of ["q", "category", "cursor", "limit"]) {
+        const value = searchParams.get(field);
+        if (value !== null) query.set(field, value);
+      }
+      const page = await client.discover(query, request.signal);
+      const models = (
+        page.models as Array<{
+          endpoint_id: string;
+          metadata?: { display_name?: string; category?: string };
+        }>
+      ).map((model) => ({
+        id: model.endpoint_id,
+        name: model.metadata?.display_name || model.endpoint_id,
+        category: model.metadata?.category ?? null,
+        execution_path: "/v1/fal/run",
+        verification: "discovered",
+        capabilitySource: "fal-catalog",
+      }));
+      // Do not label a catalog-only entry as chat-compatible or schema-validated.
+      return buildResponse({
+        provider,
+        connectionId,
+        models,
+        source: "api",
+        next_cursor: page.next_cursor,
+        has_more: page.has_more,
+      });
+    }
     const codexDiscoveryMode =
       provider === "codex" ? getCodexDiscoveryMode(connection.providerSpecificData) : "off";
     const autoFetchModels =
@@ -452,7 +489,11 @@ export async function GET(
       warning?: string,
       extraPayload: Record<string, unknown> = {}
     ) => {
-      const discoveredModels = await persistDiscoveredModels(provider, connectionId, models);
+      const discoveredModels = await persistNonEmptyDiscoveredModels(
+        provider,
+        connectionId,
+        models
+      );
       if (discoveredModels.length > 0) {
         // #6976 — merge curated embedding/rerank specialty entries (e.g.
         // OpenRouter's embeddingRegistry catalog) into the live-discovery
@@ -469,48 +510,24 @@ export async function GET(
         });
       }
 
-      // Empty discovery just cleared THIS connection's synced cache (via
-      // persistDiscoveredModels([])). `providerSyncedModels` was read at the top
-      // of the handler and is now stale, so it must not leak the just-cleared
-      // models back into the response (#3148 made synced authoritative for the
-      // normal path; here we re-read the current state instead). Re-derive the
-      // local catalog from the provider's remaining synced models (union across
-      // its other connections) or the static catalog when none remain.
-      let freshSynced: Awaited<ReturnType<typeof getSyncedAvailableModels>> = [];
-      try {
-        freshSynced = filterModelsForRoute(
-          provider,
-          await getSyncedAvailableModels(provider),
-          chatOnly
-        );
-      } catch {
-        /* DB unavailable — fall through to static catalog */
-      }
-      const freshRegistry = freshSynced.length
-        ? freshSynced.map((model) => toDiscoveryCatalogModel(model))
-        : getModelsByProviderId(provider) || [];
-      const freshSpecialty = freshSynced.length ? [] : getStaticModelsForProvider(provider) || [];
-      const freshLocal = mergeLocalCatalogModels(freshRegistry, freshSpecialty).map((model) =>
-        toDiscoveryCatalogModel(model, freshRegistry.length > 0 ? provider : undefined)
-      );
-      if (freshLocal.length > 0) {
-        return buildResponse({
+      // #19143: the upstream answered but offered no usable model. Nothing was written,
+      // and the degraded answer makes model-sync stop before it imports or cleans up.
+      const failure: DiscoveryFailure = { code: "EMPTY_CATALOG" };
+      return (
+        buildDiscoveryFallbackResponse({
+          cacheWarning: "No remote models discovered, using cached catalog",
+          localWarning: "No remote models discovered, using local catalog",
+          failure,
+        }) ??
+        buildResponse({
           provider,
           connectionId,
-          models: freshLocal,
+          models: [],
           source: "local_catalog",
-          warning: "No remote models discovered — using local catalog",
-          // The upstream answered but offered no usable model.
-          failure: { code: "EMPTY_CATALOG" },
-        });
-      }
-
-      return buildResponse({
-        provider,
-        connectionId,
-        models: [],
-        source: "api",
-      });
+          warning: "No remote models discovered",
+          failure,
+        })
+      );
     };
 
     if (provider === "reka") {
@@ -720,6 +737,9 @@ export async function GET(
 
     const devinDesktopResponse = await maybeHandleDevinDesktopModelDiscovery(webDiscoveryArgs);
     if (devinDesktopResponse) return devinDesktopResponse;
+
+    const museCodeResponse = await maybeHandleMuseCodeModelDiscovery(webDiscoveryArgs);
+    if (museCodeResponse) return museCodeResponse;
 
     if (provider === "bedrock") {
       const cachedResponse = maybeReturnCachedDiscovery();

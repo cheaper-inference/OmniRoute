@@ -1,0 +1,1 @@
+- **fix(sse):** A cached or forced-non-stream reply with two or more tool calls now streams every tool call. Before, the calls had no `index`, so streaming clients and the Responses wrapper merged them into one call. ([#19003](https://github.com/cheaper-inference/OmniRoute/pull/19003))

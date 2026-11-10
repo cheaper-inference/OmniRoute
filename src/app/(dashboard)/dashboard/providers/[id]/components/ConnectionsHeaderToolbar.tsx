@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import ChatGptSignInButton from "@/shared/components/ChatGptSignInButton";
 
 import { ActionBar, Button, DistributeProxiesButton, Select, Toggle } from "@/shared/components";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
@@ -54,6 +55,7 @@ type ConnectionsHeaderToolbarProps = {
   onOpenCodexCliGuide: () => void;
   onOpenImportCodex: () => void;
   onOpenImportClaude: () => void;
+  onOpenImportAgy?: () => void;
   onOpenImportGemini: () => void;
   onOpenImportGrokCli: () => void;
   t: ProviderMessageTranslator;
@@ -104,6 +106,7 @@ export default function ConnectionsHeaderToolbar({
   onOpenCodexCliGuide,
   onOpenImportCodex,
   onOpenImportClaude,
+  onOpenImportAgy,
   onOpenImportGemini,
   onOpenImportGrokCli,
   t,
@@ -322,9 +325,20 @@ export default function ConnectionsHeaderToolbar({
               </>
             ) : (
               <>
-                <Button size="sm" icon="add" onClick={() => gateConnectionFlow(openPrimaryAddFlow)}>
-                  {providerSupportsPat ? providerText(t, "addPat", "Add PAT") : t("add")}
-                </Button>
+                {providerId === "chatgpt" ? (
+                  <ChatGptSignInButton
+                    opensDialog
+                    onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
+                  />
+                ) : (
+                  <Button
+                    size="sm"
+                    icon="add"
+                    onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
+                  >
+                    {providerSupportsPat ? providerText(t, "addPat", "Add PAT") : t("add")}
+                  </Button>
+                )}
                 {(providerId === "volcengine-agent-plan" ||
                   providerId === "volcengine-coding-plan") &&
                   connectVolcengineAccount && (
@@ -395,6 +409,16 @@ export default function ConnectionsHeaderToolbar({
                     onClick={() => gateConnectionFlow(onOpenImportGrokCli)}
                   >
                     {providerText(t, "importGrokAuth", "Import auth")}
+                  </Button>
+                )}
+                {providerId === "agy" && onOpenImportAgy && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    icon="upload_file"
+                    onClick={() => gateConnectionFlow(onOpenImportAgy)}
+                  >
+                    {providerText(t, "importAgyAuth", "Import auth")}
                   </Button>
                 )}
               </>

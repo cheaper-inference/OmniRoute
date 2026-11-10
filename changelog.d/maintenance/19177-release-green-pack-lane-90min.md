@@ -1,1 +1,0 @@
-- **chore(release): raise the Release-Green package lane limit to 90 minutes**: `build:cli` now takes about 52 minutes and `check:pack-artifact` about 8, and they share one deadline, so a run hit the 60-minute limit mid-pack and the green run before it passed by 40 seconds.

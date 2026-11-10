@@ -1,7 +1,10 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
+import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
+import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
   getProviderConnectionById,
   getProviderConnections,
+  mergeConnectionProviderSpecificData,
   updateProviderConnection,
 } from "@/lib/db/providers";
 import { getSettings, resolveProxyForConnection, updateSettings } from "@/lib/db/settings";
@@ -1037,7 +1040,8 @@ async function fetchLiveProviderLimitsWithOptions(
         connectionId,
         connection.provider,
         usage.quotas,
-        isRecord(usage.modelQuotas) ? usage.modelQuotas : {}
+        isRecord(usage.modelQuotas) ? usage.modelQuotas : {},
+        { complete: isCompleteUsageReading(usage) }
       );
     }
     connection = await syncExpiredStatusIfNeeded(connection, usage);
@@ -1098,8 +1102,20 @@ async function fetchLiveProviderLimitsWithOptions(
         }
       }
 
+      // Display-only workspace label (personal plan vs. Business seat), fetched once
+      // the token has just proven itself on the usage request.
+      if (conn.provider === "codex" && !usageData?.message) {
+        // Merged in one transaction onto the row as stored now, so fields another
+        // path wrote during the lookup are not overwritten by this snapshot.
+        conn = await syncCodexWorkspaceInfoIfNeeded(conn, {
+          persist: mergeConnectionProviderSpecificData,
+        });
+      }
+
       // Only the dashboard's on-demand refresh lists credits; background polls keep
-      // their base usage request and never trigger reset-credit activity.
+      // their base usage request and never trigger reset-credit activity. The only
+      // background exception is the opt-in, capped sweep in
+      // src/lib/services/codexResetCreditAutospend.ts, and it runs outside this path.
       if (options.includeResetCredits && conn.provider === "claude" && conn.accessToken) {
         await fetchAndSeedClaudeResetCreditUsage(conn.id, conn.accessToken);
       }
@@ -1178,7 +1194,8 @@ async function fetchLiveProviderLimitsWithOptions(
       connectionId,
       connection.provider,
       result.usage.quotas,
-      isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {}
+      isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {},
+      { complete: isCompleteUsageReading(result.usage) }
     );
   }
   connection = await syncExpiredStatusIfNeeded(connection, result.usage);

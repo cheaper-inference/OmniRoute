@@ -144,11 +144,6 @@
       "count": 2
     }
   },
-  "open-sse/executors/opencode.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 2
-    }
-  },
   "open-sse/executors/perplexity-web/protocol.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -298,11 +293,6 @@
   },
   "open-sse/mcp-server/tools/pluginTools.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 1
-    }
-  },
-  "open-sse/services/__tests__/claudeTlsClient.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -588,11 +578,6 @@
       "count": 1
     }
   },
-  "open-sse/types.d.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "open-sse/utils/bypassHandler.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -616,11 +601,6 @@
   "src/app/(dashboard)/dashboard/HomePageClient.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 2
-    }
-  },
-  "src/app/(dashboard)/dashboard/analytics/CompressionAnalyticsTab.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "src/app/(dashboard)/dashboard/batch/components/wizard/InputStep.tsx": {
@@ -716,11 +696,6 @@
   "src/app/(dashboard)/dashboard/providers/[id]/components/ConnectionsListPanel.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 3
-    }
-  },
-  "src/app/(dashboard)/dashboard/providers/[id]/components/EmptyConnectionsPlaceholder.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "src/app/(dashboard)/dashboard/providers/[id]/components/PassthroughModelsSection.tsx": {
@@ -984,11 +959,6 @@
     }
   },
   "src/app/api/tools/traffic-inspector/ws/route.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/app/api/usage/analytics/route.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
@@ -1263,11 +1233,6 @@
       "count": 1
     }
   },
-  "src/lib/db/usageAnalytics/sources.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/lib/guardrails/promptInjection.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 2
@@ -1443,18 +1408,8 @@
       "count": 1
     }
   },
-  "src/lib/usage/apiKeySelfService.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
   "src/lib/usage/apiKeyUsageLimits.ts": {
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/usage/callLogs.ts": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
@@ -1870,11 +1825,6 @@
   "tests/integration/combo-routing-e2e.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 7
-    }
-  },
-  "tests/integration/compression-pipeline.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
     }
   },
   "tests/integration/fingerprint-expansion.test.ts": {
