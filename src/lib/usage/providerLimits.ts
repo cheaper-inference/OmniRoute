@@ -50,6 +50,7 @@ import {
 } from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { onUsageRecorded } from "./usageEvents";
+import { getProviderLimitsDisplayMap } from "./quotaDisplay";
 import {
   isRecord,
   isUsageQuotaKeyAllowed,
@@ -951,7 +952,7 @@ export function getCachedProviderLimitsMap(): Record<string, ProviderLimitsCache
 export async function getSanitizedCachedProviderLimitsMap(): Promise<
   Record<string, ProviderLimitsCacheEntry>
 > {
-  const caches = getAllProviderLimitsCache();
+  const caches = getProviderLimitsDisplayMap();
   // Sanitization only rewrites Antigravity/agy quota keys; every other provider's cache
   // entry is returned untouched (see sanitizeProviderLimitsCacheForConnection). The
   // dashboard polls this on an auto-refresh interval, so avoid the unconditional

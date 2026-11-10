@@ -1,0 +1,1 @@
+- Fix cached quota health displays using newer per-window runtime observations and durable snapshots without changing request selection. Mark reset windows without fresh evidence as unknown rather than drawing the old percentage.

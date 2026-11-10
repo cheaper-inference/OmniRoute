@@ -36,6 +36,16 @@ export function CapsuleWater({
   const height = fill !== null && Number.isFinite(fill) ? Math.max(0, Math.min(100, fill)) : null;
   return (
     <>
+      {kind === "ok" && height === null && (
+        <span
+          data-quota-unknown
+          className="absolute inset-0"
+          style={{
+            background:
+              "repeating-linear-gradient(135deg, transparent 0 3px, var(--color-text-muted) 3px 4px)",
+          }}
+        />
+      )}
       {height !== null && (
         <span
           data-fill
