@@ -1,1 +1,0 @@
-- **fix(skills):** The `omni-tunnels`, `omni-proxies`, `omni-github-skills` and `omni-db-backups` agent skills now list their real API endpoints (they were empty or incomplete), and three endpoint verbs in the API spec now match the server (PUT).
