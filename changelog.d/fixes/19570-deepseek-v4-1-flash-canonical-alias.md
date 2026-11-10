@@ -1,1 +1,0 @@
-- **fix(routing):** A request for `deepseek/deepseek-v4-1-flash` now resolves to the DeepSeek `deepseek-flash` model, like the dotted names do. Before, the unknown hyphen name went to the upstream API as it was. ([#19570](https://github.com/cheaper-inference/OmniRoute/pull/19570))
