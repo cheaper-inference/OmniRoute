@@ -5,7 +5,7 @@
  * returns response with routing_explanation, cost_envelope, resilience_trace, policy_verdict.
  */
 
-import type { A2ATask, TaskArtifact } from "../taskManager";
+import { getTaskManager, type A2ATask, type TaskArtifact } from "../taskManager";
 import { buildSelfLoopHeaders, type A2ACallerContext } from "../selfLoopAuth";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 import { resolveRequestedComboModel } from "@omniroute/open-sse/utils/resolveRequestedComboModel";
@@ -22,7 +22,10 @@ async function routeFetch(
   const res = await fetch(url, {
     ...options,
     headers,
-    signal: AbortSignal.timeout(30000),
+    // Stop the upstream call when the task is cancelled (orsurf-20), not only after 30 s.
+    signal: options.signal
+      ? AbortSignal.any([AbortSignal.timeout(30000), options.signal])
+      : AbortSignal.timeout(30000),
     // Never follow a redirect while carrying the caller's API key.
     redirect: "error",
   });
@@ -60,7 +63,7 @@ export async function executeSmartRouting(
 
   const raw = await routeFetch(
     "/v1/chat/completions",
-    { method: "POST", body: JSON.stringify(body) },
+    { method: "POST", body: JSON.stringify(body), signal: getTaskManager().getTaskSignal(task.id) },
     caller
   );
   const latencyMs = Date.now() - start;
