@@ -360,6 +360,18 @@ function workingSetBytes(cgroup: ResourceSignals["cgroup"]): number | null {
  * memory PSI confirms that reclaim is cheap. Missing/host-only PSI, a new
  * memory.max event, or a significant stall all preserve the critical guard.
  */
+function cacheDominatesWorkingSet(
+  currentBytes: number,
+  highBytes: number,
+  fileBytes: number,
+  recoveryRatio: number
+): boolean {
+  if (currentBytes <= 0 || highBytes <= 0 || fileBytes <= 0 || fileBytes > currentBytes) {
+    return false;
+  }
+  return fileBytes >= currentBytes * 0.4 && currentBytes - fileBytes <= highBytes * recoveryRatio;
+}
+
 function isCacheDominatedHigh(
   signals: ResourceSignals,
   thresholds: ResourcePressureThresholds,
@@ -372,10 +384,6 @@ function isCacheDominatedHigh(
     currentBytes == null ||
     highBytes == null ||
     fileBytes == null ||
-    currentBytes <= 0 ||
-    highBytes <= 0 ||
-    fileBytes <= 0 ||
-    fileBytes > currentBytes ||
     events?.max == null ||
     psi?.psiSource !== "cgroup" ||
     psi.someAvg10 == null ||
@@ -384,8 +392,7 @@ function isCacheDominatedHigh(
     return false;
   }
   if (
-    fileBytes < currentBytes * 0.4 ||
-    currentBytes - fileBytes > highBytes * thresholds.recoveryRatio ||
+    !cacheDominatesWorkingSet(currentBytes, highBytes, fileBytes, thresholds.recoveryRatio) ||
     psi.someAvg10 > 1 ||
     psi.fullAvg10 > 1
   ) {
