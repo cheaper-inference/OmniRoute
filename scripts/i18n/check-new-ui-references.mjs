@@ -130,9 +130,16 @@ export function inspectNewUiReferences({ cwd, snapshot, env = process.env } = {}
       "--",
     ]);
     const inventory = parseChangeInventory(inventoryRaw);
-    const changes = inventory.filter(
-      (row) => SOURCE.test(row.path) || (row.previousPath && SOURCE.test(row.previousPath))
-    );
+    const changes = inventory.flatMap((row) => {
+      const inSource = SOURCE.test(row.path);
+      if (row.status !== "R") return inSource ? [row] : [];
+      const wasSource = SOURCE.test(row.previousPath);
+      // A scope transition is a removal or an addition to the analyzed source tree.
+      // Inbound code must not inherit reference exemptions from fixtures or archives.
+      if (wasSource && !inSource) return [{ status: "D", path: row.previousPath }];
+      if (!wasSource && inSource) return [{ status: "A", path: row.path }];
+      return inSource ? [row] : [];
+    });
     insist(
       changes.every(
         (row) =>
