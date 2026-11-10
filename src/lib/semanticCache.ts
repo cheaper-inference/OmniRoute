@@ -584,11 +584,14 @@ export function isCacheableForWrite(body, headers) {
  * for every later identical request — the caller sees a mid-sentence reply that
  * no retry clears, because each retry is served the same poisoned entry.
  *
- * Only `length` (and its Claude-side spelling `max_tokens`) is treated as
- * truncation. `stop`, `tool_calls`, and a missing/unknown reason are complete
- * responses and stay cacheable, so this never narrows the cache beyond the bug.
+ * `length` (and its Claude-side spelling `max_tokens`) is treated as
+ * truncation. A moderation block (`content_filter`, Claude-side `refusal`) is
+ * refused for the same reason: upstream re-asks it, and a false-positive block
+ * can clear on retry, but a cached one is served for the whole TTL. `stop`,
+ * `tool_calls`, and a missing/unknown reason are complete responses and stay
+ * cacheable, so this never narrows the cache beyond the bug.
  */
-const TRUNCATED_FINISH_REASONS = new Set(["length", "max_tokens"]);
+const TRUNCATED_FINISH_REASONS = new Set(["length", "max_tokens", "content_filter", "refusal"]);
 
 export function isTruncatedCompletion(response: unknown): boolean {
   if (!response || typeof response !== "object") return false;
