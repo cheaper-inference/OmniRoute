@@ -1127,6 +1127,7 @@
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "xai-oauth 接続では、固定された静的シードの代わりに、OAuth ベアラートークンを使用して https://api.x.ai/v1/models から最新の xAI モデルカタログを取得します。デフォルトではオフです。オフの場合、xai-oauth は従来どおり静的シードを提供します。解決エラーが発生した場合、ディスカバリーはシードにフォールバックします。",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "起動時のデータベース整合性／ヘルスチェックが完了するまで起動をブロックする代わりに、サーバーがリクエストの受け付けを開始した後でチェックを実行します。デフォルトではオフです。オフの場合、この変更前とまったく同様に、チェックが完了するまで起動がブロックされるため、破損したデータベースは引き続き最初のリクエストが処理される前に検出されます。",
   "featureFlagCatalogMirrorRefinementsEnabledDescription": "/v1/models における claude/ ディスカバリーと functional-gateway ミラーを改善します。デフォルトでは無効です。無効時は、どちらのミラー処理も従来とまったく同じように動作します。有効時は、claude/ ディスカバリーミラーの対象に、一覧に含まれる推論労力バリアント（-low/-medium/-high/-xhigh）も追加します。また、リクエストパスで具現化できない組み込みの auto/* ID と、すでに一覧に含まれているエイリアスはスキップします。functional-gateway ミラーでは、コンボと OmniRoute が合成した ID（claude/、no-think/）をスキップし、owned_by から所有者を取得します。所有者自体をその所有者のゲートウェイとして使用することはありません。また、blockedProviders で無効化されているゲートウェイと、ゲートウェイの正式なライブカタログに含まれないモデルをスキップします。",
+  "featureFlagCatalogPricingFieldMergeEnabledDescription": "__MISSING__:Show /v1/models pricing the way cost tracking resolves it. Off by default: the catalog uses the first source that prices the model (models.dev, then LiteLLM, then built-in defaults) and omits user and synced reasoning rates. On: fields merge per field with defaults below LiteLLM below models.dev below user overrides, and reasoning rates are listed, so a model can show fields its top source does not price.",
   "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "明示的なレジストリエンドポイントがない OpenCode Zen および OpenCode Go モデルでは、バックグラウンドで 6 時間ごとに読み込まれる公開済みの models.opencode.ai カタログから、リクエスト形式（@ai-sdk/openai では Responses、@ai-sdk/anthropic では Messages）を取得します。デフォルトでは無効です。無効の場合、エンドポイントは従来どおりレジストリのヒューリスティックから決定され、カタログが取得されることはありません。",
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go リクエストで OpenCode v2 CLI クライアントフィンガープリントを送信します。具体的には、opencode/latest/<2.x>/cli User-Agent と x-opencode-client cli を送信し、無料枠のリクエストでは v2 セッションヘッダーと v2 CLI の read/shell ツールスキーマを使用し、tool_choice \"none\" は使用しません。デフォルトではオフです。すべての OpenCode リクエストで、現在の ID、ヘッダー、本文が変更されずに維持されます。",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "自動コンボの候補プールがツール呼び出しの事前フィルター実行前にすでに空の場合（クールダウン、ロックアウト、または枯渇によりすべてのターゲットがスキップされた場合）、従来の 400「ツール呼び出しをサポートするターゲットがありません」という capability_mismatch の代わりに、503 no_eligible_targets を返します。デフォルトではオフです。オフの場合、候補プールが空でも従来の 400 が維持されます。",
@@ -14869,6 +14870,10 @@
       "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
         "label": "カタログミラーの改善",
         "description": "/v1/models における claude/ ディスカバリおよび functional-gateway ミラーを改善します。デフォルトはオフ: 両方のミラーパスは従来とまったく同じように動作します。オンの場合: claude/ ディスカバリミラーはリストされた reasoning-effort バリアント（-low/-medium/-high/-xhigh）も対象とし、リクエストパスで実体化できない組み込みの auto/* ID をスキップし、すでにリストされているエイリアスをスキップします。functional-gateway ミラーはコンボおよび OmniRoute が合成した ID（claude/、no-think/）をスキップし、owned_by から所有者を取得し、所有者自身をゲートウェイとして使用せず、blockedProviders で無効化されたゲートウェイやゲートウェイの正式なライブカタログに含まれないモデルをスキップします。"
+      },
+      "CATALOG_PRICING_FIELD_MERGE_ENABLED": {
+        "label": "__MISSING__:Catalog Pricing Field Merge",
+        "description": "__MISSING__:Show /v1/models pricing the way cost tracking resolves it. Off by default: the catalog uses the first source that prices the model (models.dev, then LiteLLM, then built-in defaults) and omits user and synced reasoning rates. On: fields merge per field with defaults below LiteLLM below models.dev below user overrides, and reasoning rates are listed, so a model can show fields its top source does not price."
       },
       "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
         "label": "プロキシヘルス: 拒否時に連続失敗をリセット",

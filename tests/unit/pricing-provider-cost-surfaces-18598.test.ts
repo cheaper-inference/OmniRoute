@@ -17,6 +17,10 @@ import { saveRequestUsage, getUsageHistory } from "../../src/lib/usage/usageHist
 import { getUsageStats } from "../../src/lib/usage/usageStats.ts";
 import { getApiKeyUsageLimitStatus } from "../../src/lib/usage/apiKeyUsageLimits.ts";
 
+// The catalog-parity assertions below describe the opt-in per-field merge; the default
+// first-source catalog is pinned by catalog-pricing-field-merge-18641.test.ts.
+process.env.CATALOG_PRICING_FIELD_MERGE_ENABLED = "true";
+
 const GLM = { input: 1.4, output: 4.4, cached: 0.26 };
 const TOKENS = { input: 1_000, output: 100 };
 

@@ -29,7 +29,7 @@ export function readUserPricingMemoized(): UserPricingByProvider {
 
 type PricingFields = Record<string, number>;
 
-const PRICING_FIELDS = ["input", "output", "cached", "reasoning", "cache_creation"] as const;
+const PRICING_FIELDS = ["input", "output", "cached", "cache_creation"] as const;
 
 /** Bulk-load the user `pricing` namespace once (sync, no per-entry SQLite). */
 export function readUserPricingSync(): UserPricingByProvider {
@@ -61,7 +61,8 @@ export function lookupUserCatalogPricing(
   user: UserPricingByProvider | null | undefined,
   provider: string,
   model: string,
-  findKey: Finder
+  findKey: Finder,
+  includeReasoning = false
 ): PricingFields | null {
   if (!user) return null;
   const providerPricing = findKey(user, provider) || findKey(user, provider.replace(/-cn$/, ""));
@@ -73,7 +74,7 @@ export function lookupUserCatalogPricing(
     findKey(providerPricing, tail);
   if (!modelPricing || typeof modelPricing !== "object") return null;
   const fields: PricingFields = {};
-  for (const name of PRICING_FIELDS) {
+  for (const name of includeReasoning ? [...PRICING_FIELDS, "reasoning"] : PRICING_FIELDS) {
     const value = modelPricing[name];
     if (typeof value === "number") fields[name] = value;
   }

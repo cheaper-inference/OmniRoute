@@ -1127,6 +1127,7 @@
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "对于 xai-oauth 连接，使用 OAuth 持有者令牌从 https://api.x.ai/v1/models 获取实时 xAI 模型目录，而不是使用固定不变的静态种子数据。默认关闭：xai-oauth 将继续原样提供静态种子数据。出现任何解析错误时，发现功能都会回退到种子数据。",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "在服务器开始接受请求后运行启动时数据库完整性/健康检查，而不是阻塞启动直至检查完成。默认关闭：启动过程会像此更改之前一样等待检查完成，因此损坏的数据库仍会在处理第一个请求之前被发现。",
   "featureFlagCatalogMirrorRefinementsEnabledDescription": "优化 /v1/models 上的 claude/ 发现机制和功能网关镜像。默认关闭：两种镜像处理的行为与之前完全一致。开启后：claude/ 发现镜像还会覆盖已列出的推理强度变体（-low/-medium/-high/-xhigh），跳过请求路径无法实例化的内置 auto/* ID，并跳过已列出的别名；功能网关镜像会跳过组合项和 OmniRoute 合成的 ID（claude/、no-think/），从 owned_by 获取所有者，绝不将所有者本身用作其网关，跳过 blockedProviders 中已禁用的网关，以及不在网关权威实时目录中的模型。",
+  "featureFlagCatalogPricingFieldMergeEnabledDescription": "__MISSING__:Show /v1/models pricing the way cost tracking resolves it. Off by default: the catalog uses the first source that prices the model (models.dev, then LiteLLM, then built-in defaults) and omits user and synced reasoning rates. On: fields merge per field with defaults below LiteLLM below models.dev below user overrides, and reasoning rates are listed, so a model can show fields its top source does not price.",
   "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "允许没有显式注册表端点的 OpenCode Zen 和 OpenCode Go 模型从已发布的 models.opencode.ai 目录中获取其请求接口（@ai-sdk/openai 使用 Responses，@ai-sdk/anthropic 使用 Messages）；该目录每 6 小时在后台读取一次。默认关闭：端点仍与以前完全一样通过注册表启发式规则确定，并且绝不会获取该目录。",
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "在 OpenCode Zen/Go 请求中发送 OpenCode v2 CLI 客户端指纹：opencode/latest/<2.x>/cli User-Agent 和 x-opencode-client cli；在免费套餐请求中发送 v2 会话标头和 v2 CLI read/shell 工具架构，且不发送 tool_choice \"none\"。默认关闭：每个 OpenCode 请求均保持当前身份、标头和请求正文不变。",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "当自动组合的候选池在工具调用预筛选运行前已为空时（所有目标都因冷却、锁定或耗尽而被跳过），返回 503 no_eligible_targets，而不是旧版的 400“没有目标支持工具调用” capability_mismatch。默认关闭：候选池为空时仍返回旧版 400。",
@@ -14869,6 +14870,10 @@
       "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
         "label": "目录镜像细化",
         "description": "细化 /v1/models 上的 claude/ 发现和功能网关镜像。默认关闭：两个镜像通道与之前行为完全一致。开启：claude/ 发现镜像还覆盖列出的推理档位变体（-low/-medium/-high/-xhigh），跳过请求路径无法实体化的内置 auto/* id，跳过已列出的别名；功能网关镜像跳过组合和 OmniRoute 合成的 id（claude/、no-think/），从 owned_by 取属主，绝不把属主当自己的网关，跳过在 blockedProviders 中禁用的网关和不在网关权威实时目录中的模型。"
+      },
+      "CATALOG_PRICING_FIELD_MERGE_ENABLED": {
+        "label": "__MISSING__:Catalog Pricing Field Merge",
+        "description": "__MISSING__:Show /v1/models pricing the way cost tracking resolves it. Off by default: the catalog uses the first source that prices the model (models.dev, then LiteLLM, then built-in defaults) and omits user and synced reasoning rates. On: fields merge per field with defaults below LiteLLM below models.dev below user overrides, and reasoning rates are listed, so a model can show fields its top source does not price."
       },
       "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
         "label": "代理健康：被拒重置失败连击",
