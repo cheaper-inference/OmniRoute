@@ -1,1 +1,0 @@
-- **fix(usage):** A non-streaming reply with no usage object now writes its estimated token counts to usage history and the call log, as a stream already does, so per-key USD limits count that spend.
