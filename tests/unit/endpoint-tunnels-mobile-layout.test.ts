@@ -18,14 +18,14 @@ test("endpoint tunnel rows wrap and keep minimum title width on mobile (#19553)"
   // Tailscale Funnel row
   assert.match(
     source,
-    /className="w-full flex flex-wrap items-center gap-3 py-3 hover:bg-surface\/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"[\s\S]*?<Icon name="vpn_lock" size=\{18\} className="text-chart-3 shrink-0" \/>\s*<div className="flex-1 min-w-\[12rem\]">/,
+    /className="w-full flex flex-wrap items-center gap-3 py-3 hover:bg-surface\/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"\s*onClick=\{\(\) => toggleTunnelRow\("ts"\)\}\s*>\s*<div className="flex-1 min-w-\[12rem\]">[\s\S]*?<Icon name="vpn_lock" size=\{18\} className="text-chart-3 shrink-0" \/>/,
     "Tailscale Funnel row must wrap on mobile and give the title a min-w floor"
   );
 
   // ngrok Tunnel row
   assert.match(
     source,
-    /className="w-full flex flex-wrap items-center gap-3 py-3 hover:bg-surface\/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"[\s\S]*?<Icon name="public" size=\{18\} className="text-chart-3 shrink-0" \/>\s*<div className="flex-1 min-w-\[12rem\]">/,
+    /className="w-full flex flex-wrap items-center gap-3 py-3 hover:bg-surface\/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"\s*onClick=\{\(\) => toggleTunnelRow\("ngrok"\)\}\s*>\s*<div className="flex-1 min-w-\[12rem\]">[\s\S]*?<Icon name="public" size=\{18\} className="text-chart-3 shrink-0" \/>/,
     "ngrok Tunnel row must wrap on mobile and give the title a min-w floor"
   );
 });
