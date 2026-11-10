@@ -1,0 +1,1 @@
+- **feat(providers):** add ParalonCloud API-key provider (chat + embeddings) ([#18356](https://github.com/cheaper-inference/OmniRoute/pull/18356)) — thanks @robertjitaru

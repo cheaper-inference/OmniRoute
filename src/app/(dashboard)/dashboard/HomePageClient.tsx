@@ -14,8 +14,10 @@ import { CardSkeleton, Button, Modal } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { AI_PROVIDERS, NOAUTH_PROVIDERS, OAUTH_PROVIDERS } from "@/shared/constants/providers";
 import {
+  getProviderHealth,
   isProviderConnectionConnected,
   isProviderConnectionErrored,
+  type ProviderHealth,
 } from "@/shared/utils/providerConnectionStatus";
 import { useNotificationStore } from "@/store/notificationStore";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
@@ -477,7 +479,6 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
   }, [selectedProvider, models]);
 
   const topologyProviders = useMemo(() => {
-    type ProviderHealth = "active" | "error" | "idle";
     const byProvider = new Map<
       string,
       { id: string; provider: string; name?: string; status: ProviderHealth }
@@ -488,17 +489,30 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     // at rest (green healthy / red error) instead of going blank between requests. A
     // provider with ≥1 healthy connection is "active"; if none are healthy but some are
     // errored it is "error"; otherwise "idle". Live/recent traffic still overrides this.
+    //
+    // Health is derived from the actual connections, not from `providerStats`: that list
+    // only enumerates the static AI_PROVIDERS catalog, so custom provider nodes
+    // (`openai-compatible-chat-<uuid>`, `anthropic-compatible-<uuid>`, …) never got an
+    // entry and stayed "idle" forever — a grey border in the topology even though their
+    // connection was healthy.
     const healthByProvider = new Map<string, ProviderHealth>();
-    for (const stat of providerStats) {
-      const canonical = normalizeProviderId(stat.id);
-      if (!canonical) continue;
-      const health: ProviderHealth =
-        stat.connected > 0 ? "active" : stat.errors > 0 ? "error" : "idle";
+    const noteProviderHealth = (providerId?: string | null) => {
+      const canonical = normalizeProviderId(providerId);
+      if (!canonical || healthByProvider.has(canonical)) return;
+
+      const connections = providerConnections.filter(
+        (connection) => normalizeProviderId(connection.provider) === canonical
+      );
       // An enabled no-auth provider has no connections to test and is always reachable.
       const noAuthHealthy =
-        stat.total === 0 && isEnabledNoAuthProvider(canonical, blockedProviders) ? "active" : null;
-      healthByProvider.set(canonical, noAuthHealthy ?? health);
-    }
+        connections.length === 0 && isEnabledNoAuthProvider(canonical, blockedProviders)
+          ? "active"
+          : null;
+      healthByProvider.set(canonical, noAuthHealthy ?? getProviderHealth(connections));
+    };
+
+    providerStats.forEach((stat) => noteProviderHealth(stat.id));
+    providerConnections.forEach((connection) => noteProviderHealth(connection.provider));
 
     const addProvider = (providerId?: string | null, name?: string) => {
       const rawProviderId = typeof providerId === "string" ? providerId.trim() : "";

@@ -30,7 +30,7 @@ export const comboModelStepInputSchema = z.object({
   providerId: z.string().trim().min(1).max(120).optional(),
   model: z.string().trim().min(1).max(300),
   connectionId: z.string().trim().min(1).max(200).nullable().optional(),
-  allowedConnectionIds: z.array(z.string().trim().min(1).max(200)).max(50).optional(),
+  allowedConnectionIds: z.array(z.string().trim().min(1).max(200)).max(250).optional(),
   tags: z.array(z.string().trim().min(1).max(100)).max(20).optional(),
   // Pipeline strategy (open-sse/services/pipeline.ts): an optional per-step
   // instruction. Steps run in `models` order — each step's output feeds the next
@@ -232,6 +232,13 @@ export const comboRuntimeConfigSchema = z
     relayMode: z.enum(["schema-locked", "standard"]).optional(),
     // Auto-Combo / LKGP Extensions
     candidatePool: z.array(z.string().min(1)).optional(),
+    accountPreferences: z
+      .record(
+        z.string().trim().min(1).max(200),
+        z.enum(["preferred", "normal", "reserve", "excluded"])
+      )
+      .refine((entries) => Object.keys(entries).length <= 500, "At most 500 account preferences")
+      .optional(),
     weights: scoringWeightsSchema.optional(),
     modePack: z.string().max(100).optional(),
     budgetCap: z.number().positive().optional(),
@@ -256,6 +263,7 @@ export const comboRuntimeConfigSchema = z
     resetAwareWeeklyWeight: z.coerce.number().min(0).max(100).optional(),
     resetAwareTieBandPercent: z.coerce.number().min(0).max(100).optional(),
     resetAwareExhaustionGuardPercent: z.coerce.number().min(0).max(100).optional(),
+    resetAwareNoQuotaFloor: z.coerce.number().min(0).max(1).optional(),
     quotaWeightedFloorPercent: z.coerce.number().min(0).max(100).optional(),
     quotaWeightedScoring: z.enum(["leftover", "pace"]).optional(),
     resetAwareQuotaCacheTtlMs: z.coerce.number().int().min(0).max(300_000).optional(),

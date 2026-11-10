@@ -267,6 +267,95 @@ Les combinaisons de compression sont des profils de compression nommés qui peuv
 
 Interface du tableau de bord : `Tableau de bord -> Contexte et cache -> Combinaisons de compression`.
 
+## Prérequis / guide de l'opérateur (CCR & session-dedup)
+
+CCR (`ccr`) et `session-dedup` remplacent ou suppriment le texte et laissent un** marqueur** derrière. Cette section est la référence de l'opérateur pour câbler un client, lire les deux marqueurs et récupérer ou diagnostiquer le contenu élidé. La mécanique de chaque moteur est couverte ci-dessus ; c'est la couche "comment puis-je l'exécuter".
+
+### Transports et points de terminaison
+
+Le serveur MCP qui expose les outils CCR peut être atteint de trois manières. La base par défaut URL est `http://localhost:20128` (`OMNIROUTE_BASE_URL`) :
+
+| Transport                            | URL / commande                          | Remarques                                                                                                                                        |
+| ------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| HTTP diffusable (client, recommandé) | `http://localhost:20128/api/mcp/stream` | Le point de terminaison auquel les clients MCP actuels parlent.                                                                                  |
+| Héritage de SSE Singleton            | `http://localhost:20128/api/mcp/sse`    | Transport simple plus ancien. Il** ferme** sessions diffusables ; utilisez les clients `streamable-http` contre `/api/mcp/stream`, pas celui-ci. |
+| stdio                                | `omniroute --mcp`                       | Pour la configuration IDE MCP qui génère le processus. Il n'y a pas d'indicateur `--dev` ; `omniroute --mcp` est le point d'entrée stdio.        |
+
+### Niveaux de stockage (ce qui survit à un redémarrage)
+
+CCR est un** à deux niveaux** stocker, pas en mémoire uniquement :
+
+- **Niveau de mémoire chaud** — par bloc cap 2 MiB, par principal 16 MiB, global 64 MiB. Les entrées par défaut sont de 24 TTL (maximum 7 jours). La récupération complète MCP depuis la mémoire est limitée à 256 KiB; tout ce qui est plus grand est toujours accessible via les modes ranged/grep.
+- **Niveau SQLite durable** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, activé par défaut) — sauvegarde le niveau en mémoire afin qu'un bloc survive à l'expulsion LRU, à un redémarrage ou à un atterrissage de récupération sur une autre instance. La ligne conserve le TTL du bloc, donc un bloc au-delà de son TTL disparaît des deux niveaux.
+
+Trois gardes maintiennent le niveau durable délimité — un bloc reste en mémoire uniquement lorsque :
+
+1. le bloc est terminé** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. le runtime est un runtime cloud (pas de disque local) ;
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Ainsi, « le bloc a disparu » n'est pas une histoire de redémarrage général : un bloc sub-512 KB sur un environnement d'exécution local non cloud survit à un redémarrage via le niveau durable jusqu'à ce que son TTL soit épuisé. Voir [Référence d'environnement](../reference/ENVIRONMENT.md) pour la variable.
+
+### Les deux marqueurs
+
+| Marqueur                              | Signification                                                                                                                                                        | Ce que le modèle doit faire                                                                                                                                                                                                        |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Un gros bloc a été stocké avec un contenu adressé.                                                                                                                   | Appelez `omniroute_ccr_retrieve` avec le** Hachage de 24 hexadécimaux copié textuellement** pour récupérer le texte original.                                                                                                      |
+| `[dedup:ref sha=…]`                   | `session-dedup` a élidé le texte déjà envoyé lors d'un tour précédent de la même session. C'est un** retour en arrière intentionnel** , pas une perte ou une erreur. | Faire** pas** appelle n'importe quel outil et fais** pas** essayez de le "reconstruire". La première occurrence du texte est la copie canonique ; le tour en cours n'est jamais réécrit, il est dédoublé lors d'un tour ultérieur. |
+
+Le retour en arrière `[dedup:ref]` est une décision délibérée du protocole — il n'y a pas de reconstruction avant l'envoi. Traitez-le comme « ce texte exact était déjà diffusé plus tôt au cours de cette session ».
+
+### Pré-requis clients
+
+- **Clé (stdio) :** un appelant stdio ne porte aucune identité par requête, il s'authentifie donc avec `OMNIROUTE_API_KEY` (défini dans le `env` du serveur MCP ). Sans cela, l'appelant est anonyme et les outils qui nécessitent un principal peuvent se dégrader.
+- **`tools[]` est la condition préalable à l'injection.** L'instruction de protocole de récupération CCR (#8033) est injectée** seulement** lorsque le `tools[]` annoncé dans la requête prouve que le client peut réellement atteindre `omniroute_ccr_retrieve`. La correspondance est une correspondance de segment final délimitée par un séparateur (`__`, `.`, `/`, `:`) — jamais une sous-chaîne nue — donc un nom avec espace de noms tel que `mcp__gateway__omniroute_ccr_retrieve` compte toujours. Un `tools[]` absent ou ne correspondant pas signifie que l'instruction n'est _pas_ injectée, de par sa conception.
+- **`codemode:false` (clients OpenCode ).** OpenCode est par défaut en mode Code, qui annonce uniquement ses outils natifs au modèle et** ne fait pas** placez les outils MCP sur la liste `tools[]` native. Définissez `codemode: false` sur l'entrée du serveur MCP afin que les outils `omniroute_ccr_*` soient annoncés. C'est un** client** réglage, pas un OmniRoute. L'instruction CCR n'est pas encore injectée : OpenCode nomme un outil `<server>_<tool>`, donc un serveur appelé `omniroute` expose `omniroute_omniroute_ccr_retrieve`, et `_` n'est pas l'un des séparateurs correspondants.
+- **Principes.** Le stockage et la récupération sont isolés par principal authentifié (par clé API ). Une clé ne voit que ses propres blocs.
+
+### Portées par outil
+
+L’application de la portée est toujours activée pour les appelants HTTP/SSE à portée limitée. Les outils `omniroute_` CCR nécessitent :
+
+| Outil                    | Portée              |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Une portée manquante renvoie un** résultat d'erreur de l'outil MCP** (`isError: true`, pas un HTTP 403 — le `403 LOCAL_ONLY` est l'authentification de garde de route de bouclage séparée) : `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Une clé distante minimale peut contenir `mcp:connect` (autorise la suppression `/api/mcp/` uniquement en local) ainsi que la portée read/write spécifique dont elle a besoin.
+
+### Matrice client
+
+| Client            | Transport                                    | Configuration à utiliser                                                                                                                                                                                                                                        | `tools[]` annoncé ? (instruction → CCR injectée)                                                                                                                                                          |
+| ----------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Code Claude       | streamable-http                              | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                               | Oui — compatible MCP ; injecté.                                                                                                                                                                           |
+| Cursor / Cline    | `stdio`** ou** `streamable-http`             | stdio : `omniroute --mcp` avec `OMNIROUTE_API_KEY` dans `env`; ou une entrée MCP distante pointant vers `http://localhost:20128/api/mcp/stream` (voir [le Guide d'installation → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Oui, — fait la publicité des outils `omniroute_ccr_*`.                                                                                                                                                    |
+| OpenCode          | streamable-http                              | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                                | Outils annoncés uniquement avec `codemode: false`; l'instruction n'est toujours pas injectée, car `omniroute_omniroute_ccr_retrieve` ne correspond pas (voir [Prérequis client](#client-prerequisites) ). |
+| Compatible OpenAI | HTTP compatible OpenAI (achèvements de chat) | client de complétion de chat standard par rapport au point de terminaison compatible OpenAI                                                                                                                                                                     | **Jamais** — un appelant simple compatible OpenAI n'est jamais invité à appeler l'outil et l'instruction n'est pas injectée.                                                                              |
+
+### Limites de récupération et pagination
+
+Les résultats du texte de l'outil MCP sont découpés autour de `mcpAccessibility.maxTextChars` ( `50000` par défaut). Une récupération `full` d'un bloc est plafonnée à 256 KiB —** il n'y a pas de récupération complète illimitée** . Lorsque `chars=N` d'un bloc est grand, pagez-le au lieu de tout extraire :
+
+- Règle générale :**`chars > 40000` → utiliser un `mode`** , jamais plein.
+- `mode:"grep"` — regex `pattern` correspond ligne par ligne, jusqu'à 1 000 lignes correspondantes (`unique: true` supprime les répétitions), le moins cher pour "trouver la ligne dont j'ai besoin".
+- `mode:"lines"` — une plage de lignes indexées à 1 ; a besoin à la fois `start` et `end`.
+- Lignes `mode:"head"` / `mode:"tail"` — first/last `n`.
+- `mode:"stats"` — compte les lignes, les caractères et les octets sans le corps.
+
+Utilisez `mode:"lines"` avec `start`/`end` pour parcourir un long bloc de pages plutôt que de demander le tout en même temps.
+
+### Dénomination des outils
+
+L'outil de récupération s'appelle actuellement `omniroute_ccr_retrieve` (le préfixe `omniroute_` est une solution de contournement obsolète pour les collisions de noms entre serveurs). Un nom d'outil de suffixe délimité plus propre et un correctif pour les résultats MCP JSON tronqués au milieu de la chaîne sont suivis en tant que suivis en amont ; cette page documente uniquement le comportement actuel expédié.
+
+### Cycle de vie des sessions
+
+Les sessions HTTP diffusables s'arrêtent et le serveur les récupère ; la fenêtre d'inactivité est définie par `OMNIROUTE_MCP_SESSION_IDLE_MS` (par défaut 5 minutes ; référencée par un nom, pas une valeur codée en dur, donc cette page ne dérive pas lorsqu'elle change). Le symptôme d'une session inactive est un HTTP 404 avec `Unknown Mcp-Session-Id` — le remède est de se reconnecter ou de redémarrer la session,** pas** pour faire pivoter une clé, modifier une portée ou renommer un outil.
+
 ## Surface de l’API
 
 | Route                                  | Objectif                                                                       |
@@ -350,7 +439,7 @@ sensibles au cache, etc.).
 
 ## Validation
 
-Les portes ciblées pour ce domaine sont :
+Les portes ciblées pour cette zone sont :
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts
