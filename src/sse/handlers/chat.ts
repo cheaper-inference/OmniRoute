@@ -1111,7 +1111,12 @@ async function handleChatImplementation(
     }
   }
 
-  const virtualCombo = await createVirtualAutoCombo(autoRouting, combo, apiKeyInfo?.id);
+  const virtualCombo = await createVirtualAutoCombo(
+    autoRouting,
+    combo,
+    apiKeyInfo?.id,
+    new URL(request.url).pathname
+  );
   if (virtualCombo instanceof Response) return virtualCombo;
   combo = virtualCombo;
   if (combo) {

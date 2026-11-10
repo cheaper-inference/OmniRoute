@@ -23,6 +23,7 @@ import {
   startComboTrace,
 } from "@omniroute/open-sse/services/combo/decisionTrace.ts";
 import * as log from "../utils/logger";
+import { unknownModelResponse } from "./chatHelpers";
 
 export type AutoRoutingState = {
   model: string;
@@ -125,13 +126,14 @@ export async function resolveAutoRoutingState(model: string): Promise<AutoRoutin
 export async function createVirtualAutoCombo(
   state: AutoRoutingState,
   combo: any,
-  apiKeyId?: string
+  apiKeyId?: string,
+  endpointPath: string = ""
 ): Promise<any | Response> {
   if (!state.isAutoRouting || combo !== null) return combo;
   if (!state.recognizedBuiltInAuto) {
-    return errorResponse(
-      HTTP_STATUS.BAD_REQUEST,
-      `Model '${state.model}' is not a valid combo or provider. Unknown built-in auto combo.`
+    return unknownModelResponse(
+      `Model '${state.model}' is not a valid combo or provider. Unknown built-in auto combo.`,
+      endpointPath
     );
   }
 

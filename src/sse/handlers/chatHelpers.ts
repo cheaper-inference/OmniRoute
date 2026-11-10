@@ -128,7 +128,7 @@ async function hasOnlyActiveCodexAccount() {
  * Anthropic for any /messages route, OpenAI otherwise. Clients key on the 404 status
  * (Claude Code offers a model switch on it); a malformed or ambiguous model stays a 400.
  */
-function unknownModelResponse(message: string, endpointPath: string): Response {
+export function unknownModelResponse(message: string, endpointPath: string): Response {
   const path = String(endpointPath || "");
   const safe = sanitizeErrorMessage(message);
   if (/(?:^|\/)v1beta(?:\/|$)/i.test(path)) {
