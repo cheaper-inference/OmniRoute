@@ -15,7 +15,7 @@
 
 **Creat de [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nu te opri niciodată din programat. Fiecare instrument AI → 381 de furnizori — peste 150 gratuit — printr-un singur endpoint. Claude Code, Codex, Cursor, Cline, Copilot și Antigravity către Claude / GPT / Gemini GRATUITE, cu fallback automat. Compresia combinată RTK + Caveman economisește 15–95% din tokenuri (aprox. 89% în medie) — nu atinge niciodată limitele. 381 de furnizori AI · peste 150 de niveluri gratuite · aprox. 1,62 miliarde de tokenuri gratuite/lună · 20 de strategii de rutare · începe de la 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nu te opri niciodată din programat. Fiecare instrument AI → 387 de furnizori — peste 150 gratuit — printr-un singur endpoint. Claude Code, Codex, Cursor, Cline, Copilot și Antigravity către Claude / GPT / Gemini GRATUITE, cu fallback automat. Compresia combinată RTK + Caveman economisește 15–95% din tokenuri (aprox. 89% în medie) — nu atinge niciodată limitele. 387 de furnizori AI · peste 150 de niveluri gratuite · aprox. 1,62 miliarde de tokenuri gratuite/lună · 20 de strategii de rutare · începe de la 0 $."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                   |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 Furnizori                      |            352             |   **358**   |          381          |
+| 🌐 Furnizori                      |            352             |   **358**   |          387          |
 | 🧠 ID-uri unice de modele de chat |            1320            |  **1374**   |         1491          |
 | 🖼️ Punte de modalități            | 🆕 viziune + audio + video |      ✓      |           ✓           |
 | 📡 Catalog gratuit Radar          |         🆕 opt-in          |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Funcționalități</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combinații</a></td>
-    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Furnizori</a></td>
+    <td align="center"><a href="#-387-ai-providers--153-catalog-marked-free">🌐 Furnizori</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 381 de furnizori. Fallback-ul automat menține direcționarea atât timp cât este disponibilă o altă țintă funcțională. Șase piloni: fallback rezilient între 381 de furnizori · economii de până la 95% la tokenuri pentru sarcinile eligibile · 0 $ pentru început, cu peste 150 de niveluri gratuite și 52 de furnizori recurenți/fără cheie, gratuiți pentru totdeauna · 39 de integrări CLI/agent printr-o singură configurație · compatibilitate cu API-urile OpenAI, Claude, Gemini și Responses la /v1 · controale pentru producție, inclusiv întrerupătoare de circuit, discreție TLS, 110 instrumente MCP, A2A, memorie, guardrails, evaluări și peste 56.000 de declarații statice de testare în peste 7.800 de fișiere de testare urmărite."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 387 de furnizori. Fallback-ul automat menține direcționarea atât timp cât este disponibilă o altă țintă funcțională. Șase piloni: fallback rezilient între 387 de furnizori · economii de până la 95% la tokenuri pentru sarcinile eligibile · 0 $ pentru început, cu peste 150 de niveluri gratuite și 52 de furnizori recurenți/fără cheie, gratuiți pentru totdeauna · 39 de integrări CLI/agent printr-o singură configurație · compatibilitate cu API-urile OpenAI, Claude, Gemini și Responses la /v1 · controale pentru producție, inclusiv întrerupătoare de circuit, discreție TLS, 110 instrumente MCP, A2A, memorie, guardrails, evaluări și peste 56.000 de declarații statice de testare în peste 7.800 de fișiere de testare urmărite."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Toate cele **20** de strategii — combină-le după preferință pentru fiecare
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce diferențiază OmniRoute — o prezentare comparativă actualizată a funcționalităților față de 9router, OpenRouter, CLIProxyAPI și LiteLLM pentru 13 capabilități. OmniRoute: 381 de furnizori, peste 150 de niveluri gratuite integrate, 20 de strategii de rutare, compresia tokenurilor prin 12 motoare, server MCP integrat cu 110 instrumente, protocol pentru agenți A2A, memorie persistentă, mecanisme de protecție, agenți cloud, metode de evitare a detectării prin amprenta TLS, Desktop/Termux/PWA și 67 de localizări i18n ale interfeței. OmniRoute este licențiat sub MIT și poate fi găzduit autonom. Capabilitățile și numărul acestora pentru concurenți se pot schimba; consultați metodologia din link."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce diferențiază OmniRoute — o prezentare comparativă actualizată a funcționalităților față de 9router, OpenRouter, CLIProxyAPI și LiteLLM pentru 13 capabilități. OmniRoute: 387 de furnizori, peste 150 de niveluri gratuite integrate, 20 de strategii de rutare, compresia tokenurilor prin 12 motoare, server MCP integrat cu 110 instrumente, protocol pentru agenți A2A, memorie persistentă, mecanisme de protecție, agenți cloud, metode de evitare a detectării prin amprenta TLS, Desktop/Termux/PWA și 67 de localizări i18n ale interfeței. OmniRoute este licențiat sub MIT și poate fi găzduit autonom. Capabilitățile și numărul acestora pentru concurenți se pot schimba; consultați metodologia din link."/>
 
 <sub>📊 Metodologia completă &amp; detalii pentru fiecare funcționalitate față de 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -613,7 +613,7 @@ catalogul actual la **[radar.omniroute.online/planos](https://radar.omniroute.on
 - **🖼️ Endpoint-uri noi** — `/v1/ocr` (Mistral OCR) și `/v1/audio/translations` (de tip Whisper) completează suprafața media. → [Referință API](docs/reference/API_REFERENCE.md)
 - **🎨 Generare de imagini / videoclipuri / audio** — un singur API pentru media: xAI Grok Imagine și videoclipuri Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind și furnizori de vorbire precum ElevenLabs. → [Referință API](docs/reference/API_REFERENCE.md)
 - **🌍 Implementare și operațiuni** — `basePath` pentru proxy invers, detectarea automată a limbii browserului, urmărirea dispozitivelor per cheie, încredere MITM fără privilegii root, localizare zh-TW. → [Mediu](docs/reference/ENVIRONMENT.md)
-- **🤝 Mai mulți furnizori și agenți** — agenți cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) cu autentificare în browser + OAuth, card de primă clasă pentru Ollama, Claude Opus 5 și Sonnet 5, parteneriat oficial Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… și un **catalog cu 381 de furnizori** actualizat. → [Furnizori](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Mai mulți furnizori și agenți** — agenți cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) cu autentificare în browser + OAuth, card de primă clasă pentru Ollama, Claude Opus 5 și Sonnet 5, parteneriat oficial Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… și un **catalog cu 387 de furnizori** actualizat. → [Furnizori](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparența rutării** — fiecare răspuns include un antet `X-OmniRoute-Decision` care indică strategia/furnizorul/latența care l-au deservit, o nouă strategie combo `cache-optimized` + factorul de rutare Auto-Combo `cacheAffinity` redirecționează solicitările repetate către conexiunea care deține prefixul memorat în cache, iar un endpoint numai pentru citire `/v1/auto-combo/{channel}/candidates` expune grupul de candidați activi al unui canal `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Performanță locală și infrastructură** — Redis local cu un singur clic, deployere pentru relee Cloudflare Workers / Deno Deploy, Bifrost și Mux ca servicii încorporate supervizate. → [Servicii încorporate](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Inclus în pachet** — framework pentru pluginuri + marketplace, frameworkuri de skill-uri Omni/Agent/GitHub, integrare cu vault-uri Obsidian (22 de instrumente MCP), API-uri Batch și Files compatibile cu OpenAI, cache semantic pentru răspunsuri, gamificare cu clasamente, descoperirea agenților ACP (15 agenți încorporați), export programat al jurnalelor în BigQuery, distribuire paralelă multi-model `auto/chaos`, o punte pentru boți Telegram, un manager de versiuni în aplicație și clasamente LMArena-ELO ale furnizorilor gratuiți. → [Documentație](docs/README.md)
@@ -697,11 +697,11 @@ previzualizează exact env/args fără a executa, iar `--api-key-env NAME` păst
 
 <div align="center">
 
-## 🌐 381 de furnizori AI — 153 marcați ca gratuiți în catalog
+## 🌐 387 de furnizori AI — 153 marcați ca gratuiți în catalog
 
 </div>
 
-> **381 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, locale, agenți cloud și sistem, inclusiv **153 care au metadatele de descoperire `hasFree: true`**. Registrul modelelor de chat acoperă **239 de furnizori / 3.059 de perechi distincte furnizor-model / 1.475 de ID-uri brute de modele**; catalogul separat cu buget gratuit are **471 de rânduri per model**, **34 de pool-uri recurente** și **52 de furnizori recurenți/gratuiți permanent, fără cheie**. Aceștia sunt numitori diferiți în mod intenționat; definițiile și calculele deduplicate la nivel de pool se găsesc în [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Niveluri gratuite](docs/reference/FREE_TIERS.md).
+> **387 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, locale, agenți cloud și sistem, inclusiv **153 care au metadatele de descoperire `hasFree: true`**. Registrul modelelor de chat acoperă **239 de furnizori / 3.059 de perechi distincte furnizor-model / 1.475 de ID-uri brute de modele**; catalogul separat cu buget gratuit are **471 de rânduri per model**, **34 de pool-uri recurente** și **52 de furnizori recurenți/gratuiți permanent, fără cheie**. Aceștia sunt numitori diferiți în mod intenționat; definițiile și calculele deduplicate la nivel de pool se găsesc în [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Niveluri gratuite](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1303,7 +1303,7 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Limbaj</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> în <code>src/</code> și <code>open-sse/</code> (zero <code>any</code> în nucleu începând cu v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bază de date</b></td><td>better-sqlite3 (SQLite, jurnalizare WAL) + LowDB (JSON legacy) — 147 de module de domeniu, 230 de migrări</td></tr>
+  <tr><td nowrap><b>Bază de date</b></td><td>better-sqlite3 (SQLite, jurnalizare WAL) + LowDB (JSON legacy) — 147 de module de domeniu, 233 de migrări</td></tr>
   <tr><td nowrap><b>Memorie</b></td><td>Căutare full-text SQLite FTS5 + înglobări vectoriale cuantizate int8, cu degradare tipizată</td></tr>
   <tr><td nowrap><b>Scheme</b></td><td>Zod 4 — validarea I/O a instrumentelor MCP + contracte API</td></tr>
   <tr><td nowrap><b>Protocoale</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
