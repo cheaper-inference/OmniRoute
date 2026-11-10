@@ -484,6 +484,19 @@ test("geminiHelper converts content, safely parses JSON and cleans complex schem
   assert.equal(cleaned.default, undefined);
   assert.equal(cleaned.examples, undefined);
 
+  // An object node keeps its merged allOf members: the old asserts for that merge live here.
+  const merged = geminiHelper.cleanJSONSchemaForAntigravity({
+    type: "object",
+    allOf: [
+      { properties: { a: { type: "string", minLength: 2 } }, required: ["a"] },
+      { properties: { b: { const: "fixed" } }, required: ["b"] },
+    ],
+  });
+  assert.equal(merged.type, "object");
+  assert.deepEqual(merged.required.sort(), ["a", "b"]);
+  assert.equal(merged.properties.a.minLength, undefined);
+  assert.deepEqual(merged.properties.b.enum, ["fixed"]);
+
   const placeholder = geminiHelper.cleanJSONSchemaForAntigravity({
     type: "object",
     properties: {},
