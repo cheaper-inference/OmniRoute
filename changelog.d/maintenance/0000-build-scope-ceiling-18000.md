@@ -1,1 +1,0 @@
-- **chore(quality):** the `check:build-scope` ceiling moves from 13500 to 18000 in-scope source files. `release/v3.8.54` reached 13510 through test growth (9173 test files), which turned the gate red on the release branch and in the Quality fast gates of every PR; a leaked worktree or vendored copy (~12k files) still exceeds the new ceiling
