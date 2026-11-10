@@ -212,21 +212,32 @@ function stripDraftMeta(obj: unknown): void {
     return;
   }
   const record = obj as JsonRecord;
-  for (const key of Object.keys(record)) {
-    if (DRAFT_META_KEYS.has(key) || key.startsWith("x-")) {
-      delete record[key];
-    }
-  }
+  removeDraftMetaKeys(record);
   for (const [key, value] of Object.entries(record)) {
-    if (!value || typeof value !== "object") continue;
-    if (key === "properties" && !Array.isArray(value)) {
-      // The keys of a `properties` map are parameter names, not keywords (#18972): a tool
-      // parameter named `title`, `const` or `x-...` must survive. Clean each child schema only.
-      for (const child of Object.values(value as JsonRecord)) stripDraftMeta(child);
-      continue;
-    }
-    stripDraftMeta(value);
+    if (key === "properties") stripPropertiesMap(value);
+    else stripDraftMeta(value);
   }
+}
+
+/** Delete `DRAFT_META_KEYS` and `x-*` keywords from one schema node, in place. */
+function removeDraftMetaKeys(record: JsonRecord): void {
+  for (const key of Object.keys(record)) {
+    if (DRAFT_META_KEYS.has(key) || key.startsWith("x-")) delete record[key];
+  }
+}
+
+/**
+ * Clean the child schemas of a `properties` map without touching its keys.
+ * The keys are parameter names, not keywords (#18972): a tool parameter named
+ * `title`, `const` or `x-...` must survive. A non-map value is cleaned as a node.
+ * @param value - the value of a schema node's `properties` keyword.
+ */
+function stripPropertiesMap(value: unknown): void {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    stripDraftMeta(value);
+    return;
+  }
+  for (const child of Object.values(value as JsonRecord)) stripDraftMeta(child);
 }
 
 // Preserve `required` even when referenced fields were stripped from constraint blocks.
