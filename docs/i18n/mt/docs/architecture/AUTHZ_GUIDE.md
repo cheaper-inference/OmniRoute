@@ -155,15 +155,15 @@ jattivah (`src/server/auth/dashboardMfa.ts`).
 
 ## Klassijiet tar-Rotot
 
-`src/server/authz/types.ts` jiddefinixxi tliet klassijiet; kull rotta li ma tistax tiġi kklassifikata b'mod determinat tirrikorri għal `MANAGEMENT`.
+`src/server/authz/types.ts` jiddefinixxi tliet klassijiet; kwalunkwe rotta li ma tistax tiġi kklassifikata b'mod deterministiku taqa' lura għal `MANAGEMENT`.
 
-| Klassi       | Deskrizzjoni                                                                                                                                                           | Awtentikazzjoni meħtieġa                                               |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `PUBLIC`     | Rotot tassew sikuri: login, logout, status, init, health, bootstrap tal-onboarding.                                                                                    | Xejn                                                                   |
-| `CLIENT_API` | Endpoints għas-servizz tal-mudelli: `/api/v1/*`, `/api/v1beta/*`, flimkien mal-aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key meta l-feature flag effettiv `REQUIRE_API_KEY` ikun attivat |
-| `MANAGEMENT` | Paġni tad-dashboard, settings, providers, ċwievet, endpoints tal-amministrazzjoni u d-dijanjostika.                                                                    | Sessjoni tad-dashboard JEW Bearer bl-iskop `manage`                    |
+| Klassi       | Deskrizzjoni                                                                                                                                                             | Awth meħtieġa                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `PUBLIC`     | Rotot espliċitament sikuri — login, logout, status, saħħa, onboarding bootstrap.                                                                                         | Xejn                                                                                    |
+| `CLIENT_API` | Punti finali li jservu l-mudelli — `/api/v1/*`, `/api/v1beta/*`, flimkien ma' psewdonimi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key meta l-bandiera effettiva tal-karatteristika `REQUIRE_API_KEY` tkun attivata |
+| `MANAGEMENT` | Paġni tad-dashboard, settings, fornituri, ċwievet, endpoints ta’ amministrazzjoni u dijanjostiċi.                                                                        | Sessjoni tad-dashboard OR Bearer with `manage` scope                                    |
 
-Xi azzjonijiet ta' `MANAGEMENT` huma **tal-operatur biss**: ċavetta `manage` ma tibqax biżżejjed. L-esportazzjoni ta' credentials maħżuna (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ir-restawr ta' backup fuq id-dejta ħajja (`POST /api/db-backups/import` inkluż `dryRun=true`, `POST /api/db-backups` restore permezz tal-id, `POST /api/settings/import-json`), u l-qerda ta' punti ta' restawr (`DELETE /api/db-backups` cleanup, u `PATCH /api/db-backups` għax ir-retention li jippersisti hija dik li tmexxi l-pruning awtomatiku wara kull backup) jeħtieġu sessjoni tad-dashboard, is-suġġett tas-CLI lokali, jew login diżattivat. Il-ħruġ ta' sync token (`POST /api/sync/tokens`) u l-minting ta' token ta' aċċess CLI `admin` (`POST /api/cli/tokens`) jeħtieġu sessjoni tad-dashboard jew is-suġġett tas-CLI lokali f'kull modalità ta' login. Iċ-ċwievet tal-API ta' kull skop u t-tokens ta' aċċess `oma_` mhumiex credentials tal-operatur: jirċievu `403` kull meta jkun meħtieġ wieħed. Il-verifika tinsab f'`src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Il-bidla tas-settings tal-login hija wkoll tal-operatur biss: `POST /api/settings/require-login` (issettja l-password tal-ġestjoni / ittoggle `requireLogin`) jaċċetta biss dawk il-credentials ladarba jkun hemm password. It-tieqa tal-bootstrap tal-ewwel tmexxija (għadha m'hemmx password) ma tinbidilx, u sessjoni tad-dashboard trid tibgħat `currentPassword` biex tissostitwixxi l-password (`403` meta tkun nieqsa jew ħażina, u tiġi awditjata bħala `settings.update_failed`). Is-CLI lokali u istanza b'login diżattivat iżommu r-rotta tar-rkupru u jistgħu jissettjaw password mingħajrha, għax it-tnejn huma marbuta mal-host li jippossjedi d-data directory.
+Ftit azzjonijiet `MANAGEMENT` huma** operatur biss** : ċavetta `manage` mhix biżżejjed. L-esportazzjoni ta' kredenzjali maħżuna (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ir-restawr ta' backup fuq id-data ħaj (`POST /api/db-backups/import` inkluż `dryRun=true`, `POST /api/db-backups` restore b'id, `POST /api/settings/import-json`), il-qerda ta' punti ta' restawr (`DELETE /api/db-backups` cleanup, u `PATCH /api/db-backups` minħabba li ż-żamma li tippersisti tmexxi ż-żbir awtomatiku wara kull sessjoni ta' dashboard, teħtieġ is-suġġett CLI awtomatiku wara kull sessjoni ta' dashboard) b'diżabilità. Il-ħruġ ta’ token ta’ sinkronizzazzjoni (`POST /api/sync/tokens`) u l-ikkupjar ta’ token ta’ aċċess CLI `admin` (`POST /api/cli/tokens`) jeħtieġu sessjoni ta’ dashboard jew is-suġġett CLI lokali f’kull mod ta’ login. Ċwievet API ta 'kwalunkwe skop u tokens ta' aċċess `oma_` mhumiex kredenzjali tal-operatur: huma jiksbu `403` kull meta jkun meħtieġ wieħed. Il-kontroll jgħix fi `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). It-tibdil tas-settings tal-login huwa wkoll għall-operatur biss: `POST /api/settings/require-login` (issettja l-password tal-ġestjoni / toggle `requireLogin`) jaċċetta biss dawk il-kredenzjali ladarba teżisti password — it-tieqa tal-bootstrap tal-ewwel run (għadha l-ebda password) mhix mibdula — u sessjoni tad-dashboard trid tibgħat `currentPassword` biex tissostitwixxi l-password (`403` meta tkun mitlufa jew verifikata `settings.update_failed`). CLI lokali u l-istanza bil-login diżattivat iżommu l-mogħdija ta 'rkupru u jistgħu jistabbilixxu password mingħajrha, peress li t-tnejn huma marbuta mal-host li jippossjedi d-direttorju tad-dejta.
 
 ## Pipeline
 
@@ -196,50 +196,47 @@ Poliza ta suċċess tirritorna `AuthSubject` ma `kind ∈ { client_api_key, dash
 
 ## Lista tar-Rotot Pubbliċi
 
-`src/shared/constants/publicApiRoutes.ts` hija l-lista espliċita ta’ permessi:
+`src/shared/constants/publicApiRoutes.ts` hija l-lista ta' permessi espliċita:
 
-Il-lista hija maqsuma skont il-**forma**, u din il-qasma hija kritika għall-funzjonament (GHSA-74g9-q8f6-793h): prefiss jiġi mqabbel b’`startsWith()`, għalhekk jaqbel ukoll ma’ kull mogħdija maġenbu li taqsam l-istess karattri inizjali.
-`/api/usage/om-usage` bħala prefiss timmarka `/api/usage/om-usage<anything>` bħala PUBLIC, u Next jirriżolviha għal
-`/api/usage/[connectionId]` — handler mingħajr awtentikazzjoni tiegħu stess.
+Il-lista hija maqsuma minn** forma** , u l-qasma hija li ġġorr it-tagħbija (GHSA-74g9-q8f6-793h): prefiss huwa mqabbel ma ' `startsWith()`, għalhekk jaqbel ukoll ma' kull mogħdija adjaċenti li taqsam il-karattri ewlenin tagħha. `/api/usage/om-usage` bħala prefiss immarkat `/api/usage/om-usage<anything>` PUBLIC, u Sussegwentement isolvi li biex `/api/usage/[connectionId]` — handler mingħajr awtorizzazzjoni tiegħu stess.
 
 ```ts
-// Subsiġar ġenwini. Kull entrata TRID tispiċċa b’"/" (ivverifikat minn unit test).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // ittrattat bħala CLIENT_API fi classify, mhux bħala "pubbliku mingħajr awtentikazzjoni"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Rotot singoli, imqabbla EŻATTAMENT (bi slash fl-aħħar jew mingħajru).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // it-tieni pass tal-login għal TOTP fakultattiv; jeħtieġ il-cookie pendenti tal-MFA
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Rotot singoli li jinqraw biss u li jieħdu wkoll ir-rilassament tal-oriġini CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Rotta singola li tinqara biss MINGĦAJR ir-rilassament tal-CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Ir-rotot li jinqraw biss huma pubbliċi **biss** għal metodi sikuri. Nota: `classifyRoute()` jeskludi `/api/v1/*` u `/api/v1beta/*` mill-fall-through PUBLIC — dawn dejjem huma `CLIENT_API`, għalhekk il-politika taċ-ċavetta Bearer tibqa’ tapplika.
+Ir-rotot li jinqraw biss huma pubbliċi** biss** għal metodi sikuri. Nota: `classifyRoute()` jeskludi `/api/v1/*` u `/api/v1beta/*` miż- PUBLIC fall-through — dawk huma dejjem `CLIENT_API` għalhekk il-politika Bearer-key għadha tapplika.
 
 ## Kif Iżżid Rotta Ġdida
 
@@ -303,15 +300,15 @@ Katalogu u regoli ta' tqabbil (string identika, jew scope mogħti li jispiċċa 
 
 `read` / `write` / `admin` fuq tokens `oma_live_…`, ikklassifikati minn `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Din il-klassifikazzjoni tapplika għall-kredenzjali tal-access token biss. Ara [Awtentikazzjoni tal-Ġestjoni](../guides/MANAGEMENT-AUTH.md).
 
-## Toggle tal-Awtentikazzjoni Meħtieġa
+## Awth Meħtieġa Toggle
 
-`isAuthRequired()` f'`src/shared/utils/apiAuth.ts` hija dik li tiddeċiedi jekk awtentikazzjoni **kwalunkwe** tiġix infurzata għal talba:
+`isAuthRequired()` `src/shared/utils/apiAuth.ts` jiddeċiedi jekk** kwalunkwe** auth hija infurzata għal talba:
 
-- `settings.requireLogin === false` → l-awtentikazzjoni hija diżattivata globalment, ħlief għall-livell dejjem protett (ara [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) u s-sejħiet li jagħtu credential li hija taċċetta, li jeħtieġu l-istess credential bħal meta l-login ikun attivat: il-ħruġ ta' sync tokens, il-minting ta' tokens ta' aċċess CLI fi kwalunkwe skop, u l-ħolqien ta' ċavetta API bl-iskop `manage`/`admin`, l-għoti ta' dak l-iskop lil ċavetta, jew l-iġġenerar mill-ġdid jew l-uri ta' ċavetta bħal din (`requireCredentialForManagementScopedKey()` f'`src/lib/api/requireManagementAuth.ts`). Iċ-ċwievet inference biss jibqgħu miftuħa.
-- Ebda password ma hi kkonfigurata **u** ebda varjabbli tal-ambjent `INITIAL_PASSWORD` → modalità bootstrap: tippermetti l-onboarding wizard u t-talbiet loopback, iżda t-talbiet tan-network esposti xorta jeħtieġu credentials.
-- Kull DB error → jifalli fil-mod sikur (secure-by-default).
+- `settings.requireLogin === false` → auth hija diżattivata globalment, ħlief għall-livell dejjem protett (ara [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) u s-sejħiet li jagħtu kredenzjali li jaċċetta, li jeħtieġu l-istess kredenzjali bħal meta login fuq: ħruġ ta’ tokens ta’ sinkronizzazzjoni, ħolqien ta’ tokens ta’ aċċess CLI fi kwalunkwe ambitu, u ħolqien ta’ ċavetta API /`admin` l-ambitu `manage` ċavetta, jew tirriġenera jew tiżvela tali ċavetta (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Iċ-ċwievet għall-inferenza biss jibqgħu miftuħa. Il-kitba ta 'bandiera ta' karatteristika protetta (`REQUIRE_API_KEY`, il-bnadar tas-Sigurtà l-oħra, u l-bnadar SSRF / TLS / MCP-scope / sandbox elenkati fil- [Bnadar tal-Karatteristiċi](../reference/FEATURE_FLAGS.md#rest-api) ) u s-salvataġġ tas-settings tal-masking PII (`PUT /api/settings/pii`) jibqgħu jeħtieġu wkoll kredenzjali.
+- Ebda password kkonfigurata** u** l-ebda mod `INITIAL_PASSWORD` env var → bootstrap jippermetti l-onboarding wizard u talbiet loopback, iżda t-talbiet tan-netwerk esposti għadhom jeħtieġu kredenzjali. Eċċezzjoni: il-kitba ta 'bandiera ta' karatteristika protetta u l-iffrankar tas-settings tal-masking PII (`PUT /api/settings/pii`) jeħtieġu kredenzjali anke minn loopback, għalhekk loopback waħdu mhuwiex biżżejjed hemmhekk.
+- Kwalunkwe żball DB → ma jagħlaq (secure-by-default).
 
-L-infurzar tač-ċavetta tal-API tal-klijent juża `isRequireApiKeyEnabled()` f'`src/shared/utils/featureFlags.ts`, mhux qari dirett ta' `process.env.REQUIRE_API_KEY`. Dan huwa importanti għal istanzi mqiegħda f'produzzjoni: it-tibdil ta' `REQUIRE_API_KEY` fid-Dashboard → Feature Flags jaħżen DB override u immedjatament jaffettwa `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, u l-kontrolli l-oħra tal-awtentikazzjoni tal-client-API li jaqsmu dan l-helper. Jekk il-feature flag store ma jkunx jista' jinqara, l-awtentikazzjoni tal-client API tifalli fil-mod sikur u titlob ċavetta.
+L-infurzar taċ-ċavetta tal-klijent API juża `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts`, mhux qari `process.env.REQUIRE_API_KEY` dirett. Dan huwa importanti għal każijiet skjerati: it-toggling `REQUIRE_API_KEY` f'Dashboard → Feature Flags jaħżen DB override u taffettwa immedjatament `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, u kontrolli oħra ta' awtifikazzjoni tal-klijent-API li jaqsmu dan l-helper. Jekk il-maħżen tal-bandiera tal-karatteristika ma jistax jinqara, il-klijent API auth ma jagħlaqx u jeħtieġ ċavetta.
 
 ## Bidla li Tkisser il-Kompatibbiltà — v3.8.0
 

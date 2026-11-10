@@ -59,7 +59,7 @@ function invoke(id: string, stream = false) {
   return harness.handleChat(
     harness.buildRequest({
       url: "http://localhost/v1/responses",
-      headers: { "x-omniroute-connection-id": id },
+      headers: { "x-omniroute-connection": id },
       body: { model: "codex/gpt-5.6-sol", input: "offline stale selection", stream },
     })
   );
@@ -168,6 +168,33 @@ for (const [stage, frame] of [
   }
 }
 
+for (const replacedOwner of [false, true]) {
+  for (const stream of [false, true]) {
+    test(`a late 429 reselects ${replacedOwner ? "a replacement owner" : "a rotated token"} (${stream ? "stream" : "JSON"})`, async () => {
+      const connection = await seed();
+      const tokens = recordDispatches(async (attempt) => {
+        if (attempt > 1) return stream ? streamSuccess() : success();
+        await providers.updateProviderConnection(connection.id, {
+          accessToken: "synthetic-current",
+          ...(replacedOwner ? { email: "b@example.invalid" } : {}),
+        });
+        return Response.json(
+          { error: { message: "rate limit exceeded" } },
+          {
+            status: 429,
+            headers: { "Retry-After": "120" },
+          }
+        );
+      });
+      const response = await invoke(connection.id, stream);
+      assert.equal(response.status, 200);
+      await response.text();
+      assert.deepEqual(tokens, ["Bearer synthetic-a", "Bearer synthetic-current"]);
+      await assertAccountUntouched(connection.id);
+    });
+  }
+}
+
 test("a replaced owner never receives the old account's token or a cooldown", async () => {
   const connection = await seed();
   const tokens = recordDispatches();
@@ -184,6 +211,27 @@ test("a replaced owner never receives the old account's token or a cooldown", as
   assert.equal(response.status, 200);
   await response.text();
   assert.deepEqual(tokens, ["Bearer synthetic-b"]);
+  await assertAccountUntouched(connection.id);
+});
+
+test("late-error reselection is bounded and never cools the current credentials", async () => {
+  const connection = await seed();
+  const tokens = recordDispatches(async (attempt) => {
+    await providers.updateProviderConnection(connection.id, {
+      accessToken: `synthetic-new-${attempt}`,
+    });
+    return Response.json(
+      { error: { message: "rate limit exceeded" } },
+      {
+        status: 429,
+        headers: { "Retry-After": "120" },
+      }
+    );
+  });
+  const response = await invoke(connection.id);
+  assert.equal(response.status, 409);
+  await response.text();
+  assert.deepEqual(tokens, ["Bearer synthetic-a", "Bearer synthetic-new-1"]);
   await assertAccountUntouched(connection.id);
 });
 

@@ -26,12 +26,12 @@ afterEach(() => {
 });
 
 describe("MaintenanceBanner", () => {
-  it("shows a token-coloured warning after two failed pings and the ghost close button hides it", async () => {
+  // #18068: the banner was a hand-made `div role="status"`; it is the kit warning Alert now
+  // (inline layout, dismiss button named by the catalog), still a polite status region.
+  it("shows the kit warning Alert after two failed pings; dismissing keeps it hidden until recovery", async () => {
     vi.useFakeTimers();
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => json({}, false))
-    );
+    const ping = vi.fn(async () => json({}, false));
+    vi.stubGlobal("fetch", ping);
     const { default: MaintenanceBanner } = await import("@/shared/components/MaintenanceBanner");
     const { container } = render(<MaintenanceBanner />);
     await act(async () => {
@@ -39,13 +39,22 @@ describe("MaintenanceBanner", () => {
     });
     const banner = container.querySelector<HTMLElement>('[role="status"]')!;
     expect(banner).not.toBeNull();
-    expect(banner.className).toContain("bg-warning-bg");
+    expect(banner.getAttribute("data-slot")).toBe("alert");
+    expect(banner.getAttribute("data-variant")).toBe("warning");
+    expect(banner.getAttribute("data-layout")).toBe("inline");
+    expect(banner.className).toContain("ci-alert--warning");
     expect(banner.className).not.toMatch(/amber-\d/);
+    expect(banner.textContent).toContain("maintenanceServerIssues");
     expect(banner.querySelector('svg[data-icon="warning"]')).not.toBeNull();
     expect(banner.querySelector(".material-symbols-outlined")).toBeNull();
     const close = screen.getByRole("button", { name: "close" });
-    expect(close.className).toContain("ci-button");
+    expect(close.className).toContain("ci-alert__dismiss");
     act(() => fireEvent.click(close));
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    // still failing: the dismissed banner does not come back on the next polls
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(20_050);
+    });
     expect(container.querySelector('[role="status"]')).toBeNull();
   });
 });

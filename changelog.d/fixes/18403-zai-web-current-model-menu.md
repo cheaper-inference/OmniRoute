@@ -1,0 +1,1 @@
+- **fix(providers):** restore Z.ai Web requests on the current model-menu layout by configuring its Effort slider, preserving legacy controls, and rejecting mismatched model or feature settings before forwarding.

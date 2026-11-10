@@ -13,7 +13,11 @@ for (const filename of [
   "216_team_cost_shapes.sql",
   "217_quota_recovery_tickets.sql",
   "218_proxy_subscription_mirror_urls.sql",
-  "228_codex_connection_fences.sql",
+  "223_call_logs_queue_wait_ms.sql",
+  "224_proxy_logs_egress_ip_families.sql",
+  "226_request_cost_ledger_read_indexes.sql",
+  "228_purge_orphaned_provider_catalogs.sql",
+  "236_codex_connection_fences.sql",
 ]) {
   fs.copyFileSync(
     new URL(`../../../src/lib/db/migrations/${filename}`, import.meta.url),
@@ -41,6 +45,11 @@ const schema = `
   );
   CREATE TABLE api_keys (id TEXT PRIMARY KEY);
   CREATE TABLE proxy_subscriptions (id TEXT PRIMARY KEY);
+  CREATE TABLE call_logs (id TEXT PRIMARY KEY);
+  CREATE TABLE proxy_logs (id TEXT PRIMARY KEY);
+  CREATE TABLE request_cost_ledger (
+    api_key_id TEXT, timestamp TEXT, success INTEGER, service_tier TEXT, amount_usd REAL, request_id TEXT
+  );
   CREATE TABLE usage_history (
     id INTEGER PRIMARY KEY, billing_team_id TEXT,
     team_rollup_processed_at TEXT, timestamp TEXT
@@ -66,50 +75,83 @@ test("every old Codex slot is guarded by version and name", () => {
       {
         fromVersion: "215",
         fromName: "codex_connection_fences",
-        toVersion: "228",
+        toVersion: "236",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "217",
         fromName: "codex_connection_fences",
-        toVersion: "228",
+        toVersion: "236",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "218",
         fromName: "codex_connection_fences",
-        toVersion: "228",
+        toVersion: "236",
+        toName: "codex_connection_fences",
+      },
+      {
+        fromVersion: "223",
+        fromName: "codex_connection_fences",
+        toVersion: "236",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "224",
         fromName: "codex_connection_fences",
-        toVersion: "228",
+        toVersion: "236",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "226",
         fromName: "codex_connection_fences",
-        toVersion: "228",
+        toVersion: "236",
+        toName: "codex_connection_fences",
+      },
+      {
+        fromVersion: "228",
+        fromName: "codex_connection_fences",
+        toVersion: "236",
         toName: "codex_connection_fences",
       },
     ]
   );
 });
 
-for (const previous of ["codex-215", "codex-217", "codex-218", "quota", "team", "fresh"] as const) {
+for (const previous of [
+  "codex-215",
+  "codex-217",
+  "codex-218",
+  "codex-223",
+  "codex-224",
+  "codex-226",
+  "codex-228",
+  "quota",
+  "team",
+  "queue",
+  "egress",
+  "fresh",
+] as const) {
   test(`migration runner preserves ${previous} databases and applies the remaining features`, () => {
     const db = new Database(":memory:");
     try {
       db.exec(schema);
       let fenceBefore: unknown;
       if (previous.startsWith("codex-")) {
-        apply(db, "228_codex_connection_fences.sql");
+        apply(db, "236_codex_connection_fences.sql");
         db.exec("UPDATE codex_connection_fences SET failure_revision = 7");
         db.prepare(
           "INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES (?, 'codex_connection_fences', '2026-10-28 00:00:00')"
         ).run(previous.slice("codex-".length));
         fenceBefore = db.prepare("SELECT * FROM codex_connection_fences").all();
+      } else if (previous === "queue" || previous === "egress") {
+        const version = previous === "queue" ? "223" : "224";
+        const name =
+          previous === "queue" ? "call_logs_queue_wait_ms" : "proxy_logs_egress_ip_families";
+        apply(db, `${version}_${name}.sql`);
+        db.prepare(
+          "INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES (?, ?, '2026-10-28 00:00:00')"
+        ).run(version, name);
       } else if (previous === "team") {
         apply(db, "215_team_cost_centers.sql");
         db.exec(`INSERT INTO teams (id, name, created_at, updated_at)
@@ -127,7 +169,7 @@ for (const previous of ["codex-215", "codex-217", "codex-218", "quota", "team", 
           VALUES ('217', 'quota_recovery_tickets', '2026-10-28 00:00:00');`);
       }
 
-      assert.equal(runMigrations(db), previous === "fresh" ? 5 : 4);
+      assert.equal(runMigrations(db), previous === "fresh" ? 9 : 8);
       assert.deepEqual(
         db.prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version").all(),
         [
@@ -135,14 +177,26 @@ for (const previous of ["codex-215", "codex-217", "codex-218", "quota", "team", 
           { version: "216", name: "team_cost_shapes" },
           { version: "217", name: "quota_recovery_tickets" },
           { version: "218", name: "proxy_subscription_mirror_urls" },
-          { version: "228", name: "codex_connection_fences" },
+          { version: "223", name: "call_logs_queue_wait_ms" },
+          { version: "224", name: "proxy_logs_egress_ip_families" },
+          { version: "226", name: "request_cost_ledger_read_indexes" },
+          { version: "228", name: "purge_orphaned_provider_catalogs" },
+          { version: "236", name: "codex_connection_fences" },
         ]
       );
       if (previous.startsWith("codex-")) {
         assert.deepEqual(db.prepare("SELECT * FROM codex_connection_fences").all(), fenceBefore);
       }
       if (previous !== "fresh") {
-        const version = previous.startsWith("codex-") ? "228" : previous === "team" ? "215" : "217";
+        const version = previous.startsWith("codex-")
+          ? "236"
+          : previous === "team"
+            ? "215"
+            : previous === "queue"
+              ? "223"
+              : previous === "egress"
+                ? "224"
+                : "217";
         assert.equal(
           (
             db

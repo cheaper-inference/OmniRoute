@@ -123,6 +123,89 @@ test("batch quota observations survive a newer same-owner cooldown without clear
   );
 });
 
+for (const batch of [false, true]) {
+  test(`a live ${batch ? "batch" : "single"} quota observation survives an in-flight same-owner 429`, async () => {
+    const connection = await providers.createProviderConnection({
+      provider: "codex",
+      authType: "oauth",
+      isActive: true,
+      testStatus: "active",
+      ...owner("a"),
+    });
+    const started = deferred<void>();
+    const release = deferred<Response>();
+    setCodexUsageFetchForTests(async () => {
+      started.resolve();
+      return release.promise;
+    });
+    const operation = batch
+      ? limits.syncAllProviderLimits({ source: "manual" })
+      : limits.fetchAndPersistProviderLimits(connection.id);
+    await Promise.race([
+      started.promise,
+      operation.then(() => {
+        throw new Error("poll did not reach mocked usage request");
+      }),
+    ]);
+    const until = new Date(Date.now() + 60_000).toISOString();
+    await providers.updateProviderConnection(connection.id, {
+      testStatus: "unavailable",
+      rateLimitedUntil: until,
+      lastError: "newer upstream 429",
+      errorCode: "429",
+      lastErrorType: "rate_limit",
+    });
+    release.resolve(usage(15));
+    await operation;
+    assert.ok(limits.getCachedProviderLimitsMap()[connection.id]?.quotas);
+    assert.ok(quotaCache.getQuotaCache(connection.id));
+    const persisted = await providers.getProviderConnectionById(connection.id);
+    assert.equal(persisted?.testStatus, "unavailable");
+    assert.equal(persisted?.rateLimitedUntil, until);
+    assert.equal(persisted?.lastError, "newer upstream 429");
+    assert.equal(persisted?.errorCode, "429");
+  });
+}
+
+test("quota recovery respects failure ordering even when the legacy CAS fields did not change", async () => {
+  const connection = await providers.createProviderConnection({
+    provider: "codex",
+    authType: "oauth",
+    isActive: true,
+    testStatus: "unavailable",
+    lastError: "old quota failure",
+    errorCode: "429",
+    ...owner("a"),
+  });
+  const started = deferred<void>();
+  const release = deferred<Response>();
+  setCodexUsageFetchForTests(async () => {
+    started.resolve();
+    return release.promise;
+  });
+  const operation = limits.fetchAndPersistProviderLimits(connection.id);
+  await Promise.race([
+    started.promise,
+    operation.then(() => {
+      throw new Error("poll did not reach mocked usage request");
+    }),
+  ]);
+  // testStatus, lastErrorAt and rateLimitedUntil remain identical to the read snapshot.
+  // The failure revision, not the legacy three-field CAS, must prevent recovery.
+  await providers.updateProviderConnection(connection.id, {
+    lastError: "newer quota failure",
+    backoffLevel: 2,
+  });
+  release.resolve(usage(15));
+  await operation;
+  assert.ok(limits.getCachedProviderLimitsMap()[connection.id]?.quotas);
+  const after = await providers.getProviderConnectionById(connection.id);
+  assert.equal(after?.testStatus, "unavailable");
+  assert.equal(after?.lastError, "newer quota failure");
+  assert.equal(after?.errorCode, "429");
+  assert.equal(after?.backoffLevel, 2);
+});
+
 test("owner replacement invalidates already-hydrated routing quota rather than blocking the new owner", async () => {
   const c = await providers.createProviderConnection({
     provider: "codex",

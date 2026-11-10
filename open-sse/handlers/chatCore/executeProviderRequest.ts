@@ -159,6 +159,7 @@ export type ExecuteProviderRequestDeps = {
   settings: Record<string, unknown> | null | undefined;
   toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
+  requestUpstreamStartTimeoutMs?: number;
   stream: boolean;
   streamController: { signal: AbortSignal };
   targetFormat: string;
@@ -206,6 +207,7 @@ export async function executeProviderRequest(
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    requestUpstreamStartTimeoutMs,
     stream,
     streamController,
     targetFormat,
@@ -296,6 +298,9 @@ export async function executeProviderRequest(
             provider === "codex"
               ? captureCodexConnectionFence(execCreds ?? {}, String(attemptConnectionId || ""))
               : null;
+          const fencedCredentialsRefreshed: typeof onCredentialsRefreshed = onCredentialsRefreshed
+            ? (next) => runWithCodexConnectionFence(ownerFence, () => onCredentialsRefreshed(next))
+            : undefined;
           const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
             execCreds,
             typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
@@ -385,6 +390,7 @@ export async function executeProviderRequest(
                   provider,
                   model: modelToCall,
                   connectionTimeoutMs: resolveConnectionTimeoutMs(execCreds?.providerSpecificData),
+                  requestTimeoutMs: requestUpstreamStartTimeoutMs,
                   signal: streamController.signal,
                   log,
                   execute: (signal) =>
@@ -401,12 +407,7 @@ export async function executeProviderRequest(
                         upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                         clientHeaders: getExecutorClientHeaders(),
                         clientResponseFormat,
-                        onCredentialsRefreshed: onCredentialsRefreshed
-                          ? (next) =>
-                              runWithCodexConnectionFence(ownerFence, () =>
-                                onCredentialsRefreshed(next)
-                              )
-                          : undefined,
+                        onCredentialsRefreshed: fencedCredentialsRefreshed,
                         skipUpstreamRetry,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
@@ -592,6 +593,7 @@ export async function executeProviderRequest(
                 ): Promise<ReadableStream<Uint8Array> | null> => {
                   try {
                     assertManagedLeaseFence(attemptConnectionId);
+                    if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence)) return null;
                     const retryRaw = await executeWithUpstreamStartTimeout({
                       executor,
                       provider,
@@ -599,6 +601,7 @@ export async function executeProviderRequest(
                       connectionTimeoutMs: resolveConnectionTimeoutMs(
                         execCreds?.providerSpecificData
                       ),
+                      requestTimeoutMs: requestUpstreamStartTimeoutMs,
                       signal: streamController.signal,
                       log,
                       execute: (signal) =>
@@ -615,7 +618,7 @@ export async function executeProviderRequest(
                             upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                             clientHeaders: getExecutorClientHeaders(),
                             clientResponseFormat,
-                            onCredentialsRefreshed,
+                            onCredentialsRefreshed: fencedCredentialsRefreshed,
                             skipUpstreamRetry,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,

@@ -1127,7 +1127,9 @@ async function fetchLiveProviderLimitsWithOptions(
       }
 
       // Only the dashboard's on-demand refresh lists credits; background polls keep
-      // their base usage request and never trigger reset-credit activity.
+      // their base usage request and never trigger reset-credit activity. The only
+      // background exception is the opt-in, capped sweep in
+      // src/lib/services/codexResetCreditAutospend.ts, and it runs outside this path.
       if (options.includeResetCredits && conn.provider === "claude" && conn.accessToken) {
         await fetchAndSeedClaudeResetCreditUsage(conn.id, conn.accessToken);
       }
@@ -1193,46 +1195,47 @@ async function fetchLiveProviderLimitsWithOptions(
     result = await fetchUsageWithContext(null);
   }
 
-  return runWithCodexConnectionFence(
-    codexFence,
-    async () => {
-      assertCodexOperationCurrent(connectionId);
-      if (connection.provider === "codex") {
-        const data = await syncCodexQuotaObservation(
-          connection.id,
-          result.usage,
-          connection.providerSpecificData
-        );
-        if (data) connection = { ...connection, providerSpecificData: data };
-      }
-      if (isRecord(result.usage.quotas)) {
-        setQuotaCache(
-          connectionId,
-          connection.provider,
-          result.usage.quotas,
-          isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {},
-          { complete: isCompleteUsageReading(result.usage) }
-        );
-      }
-      connection = await syncExpiredStatusIfNeeded(connection, result.usage);
-      connection = await syncClaudeExtraUsageStateIfNeeded(connection, result.usage);
-      connection = await syncClaudeBootstrapIfNeeded(connection, result.usage);
-      connection = await syncAntigravitySubscriptionIfNeeded(connection, result.usage);
-      connection = await maybeClearRecoveredQuotaState(connection, result.usage);
+  return runWithCodexConnectionFence(codexFence, async () => {
+    assertCodexOperationCurrent(connectionId);
+    if (connection.provider === "codex") {
+      const data = await syncCodexQuotaObservation(
+        connection.id,
+        result.usage,
+        connection.providerSpecificData
+      );
+      if (data) connection = { ...connection, providerSpecificData: data };
+    }
+    if (isRecord(result.usage.quotas)) {
+      setQuotaCache(
+        connectionId,
+        connection.provider,
+        result.usage.quotas,
+        isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {},
+        { complete: isCompleteUsageReading(result.usage) }
+      );
+    }
+    connection = await syncExpiredStatusIfNeeded(connection, result.usage);
+    connection = await syncClaudeExtraUsageStateIfNeeded(connection, result.usage);
+    connection = await syncClaudeBootstrapIfNeeded(connection, result.usage);
+    connection = await syncAntigravitySubscriptionIfNeeded(connection, result.usage);
+    // Observations remain valid across a newer same-owner failure; recovery does not.
+    connection = await runWithCodexConnectionFence(
+      codexFence,
+      () => maybeClearRecoveredQuotaState(connection, result.usage),
+      true
+    );
 
-      return {
-        connection,
-        // Claude's banked reset-credit count is invisible to the regular usage poll; attach the
-        // count the user-opened list (or the opt-in auto-reset) last seeded, or omit it (unknown).
-        usage:
-          connection.provider === "claude"
-            ? withClaudeResetCreditCount(connection.id, result.usage)
-            : result.usage,
-        codexFence,
-      };
-    },
-    true
-  );
+    return {
+      connection,
+      // Claude's banked reset-credit count is invisible to the regular usage poll; attach the
+      // count the user-opened list (or the opt-in auto-reset) last seeded, or omit it (unknown).
+      usage:
+        connection.provider === "claude"
+          ? withClaudeResetCreditCount(connection.id, result.usage)
+          : result.usage,
+      codexFence,
+    };
+  });
 }
 
 function cacheReadObservedAt(
@@ -1260,69 +1263,65 @@ export async function fetchAndPersistProviderLimits(
     allowRotatingRefresh: opts.allowRotatingRefresh,
     includeResetCredits: opts.includeResetCredits,
   });
-  return runWithCodexConnectionFence(
-    codexFence ?? null,
-    () => {
-      assertCodexOperationCurrent(connectionId);
-      const newCache = toProviderLimitsCacheEntry(
-        usage,
-        source,
-        cacheReadObservedAt(connection, usage, readStartedAt)
-      );
-      const previous = getProviderLimitsCache(connectionId);
-      const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
+  return runWithCodexConnectionFence(codexFence ?? null, () => {
+    assertCodexOperationCurrent(connectionId);
+    const newCache = toProviderLimitsCacheEntry(
+      usage,
+      source,
+      cacheReadObservedAt(connection, usage, readStartedAt)
+    );
+    const previous = getProviderLimitsCache(connectionId);
+    const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
 
-      // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
-      // Serve the prior entry instead; only successful fetches update the cache.
-      if (cache === previous && newCache.message) {
-        // Claude's banked count lives in the list-seeded memo (already on `usage` when known),
-        // so a cached count — e.g. from before a redeem — must not come back through here.
-        const isClaude = connection.provider === "claude";
-        const bankedResetCredits = isClaude
-          ? newCache.bankedResetCredits
-          : previous.bankedResetCredits;
-        let served = previous;
-        if (isClaude && previous.bankedResetCredits !== bankedResetCredits) {
-          const { bankedResetCredits: _cached, ...rest } = previous;
-          served = setProviderLimitsCache(
-            connectionId,
-            bankedResetCredits === undefined ? rest : { ...rest, bankedResetCredits }
-          );
-        }
-        const staleUsage: JsonRecord = {
-          ...usage,
-          quotas: previous.quotas,
-          modelQuotas: previous.modelQuotas,
-          plan: previous.plan ?? usage.plan ?? null,
-          bankedResetCredits,
-          paidCredits: previous.paidCredits,
-          billing: previous.billing,
-          message: null,
-          _stale: true,
-          _staleSince: previous.fetchedAt,
-          _staleReason: newCache.message,
-        };
-        if (bankedResetCredits === undefined) delete staleUsage.bankedResetCredits;
-        return { connection, usage: staleUsage, cache: served };
+    // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
+    // Serve the prior entry instead; only successful fetches update the cache.
+    if (cache === previous && newCache.message) {
+      // Claude's banked count lives in the list-seeded memo (already on `usage` when known),
+      // so a cached count — e.g. from before a redeem — must not come back through here.
+      const isClaude = connection.provider === "claude";
+      const bankedResetCredits = isClaude
+        ? newCache.bankedResetCredits
+        : previous.bankedResetCredits;
+      let served = previous;
+      if (isClaude && previous.bankedResetCredits !== bankedResetCredits) {
+        const { bankedResetCredits: _cached, ...rest } = previous;
+        served = setProviderLimitsCache(
+          connectionId,
+          bankedResetCredits === undefined ? rest : { ...rest, bankedResetCredits }
+        );
       }
-
-      const mergedUsage: JsonRecord = {
+      const staleUsage: JsonRecord = {
         ...usage,
-        ...(cache.billing ? { billing: cache.billing } : {}),
+        quotas: previous.quotas,
+        modelQuotas: previous.modelQuotas,
+        plan: previous.plan ?? usage.plan ?? null,
+        bankedResetCredits,
+        paidCredits: previous.paidCredits,
+        billing: previous.billing,
+        message: null,
+        _stale: true,
+        _staleSince: previous.fetchedAt,
+        _staleReason: newCache.message,
       };
-      setProviderLimitsCache(connectionId, cache);
-      if (connection.provider === "codex") {
-        const current = getProviderLimitsCache(connectionId) ?? cache;
-        return {
-          connection,
-          usage: { ...mergedUsage, quotas: current.quotas, fetchedAt: current.fetchedAt },
-          cache: current,
-        };
-      }
-      return { connection, usage: mergedUsage, cache };
-    },
-    true
-  );
+      if (bankedResetCredits === undefined) delete staleUsage.bankedResetCredits;
+      return { connection, usage: staleUsage, cache: served };
+    }
+
+    const mergedUsage: JsonRecord = {
+      ...usage,
+      ...(cache.billing ? { billing: cache.billing } : {}),
+    };
+    setProviderLimitsCache(connectionId, cache);
+    if (connection.provider === "codex") {
+      const current = getProviderLimitsCache(connectionId) ?? cache;
+      return {
+        connection,
+        usage: { ...mergedUsage, quotas: current.quotas, fetchedAt: current.fetchedAt },
+        cache: current,
+      };
+    }
+    return { connection, usage: mergedUsage, cache };
+  });
 }
 
 type FetchedLimitsCache = {
