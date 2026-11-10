@@ -49,3 +49,29 @@ test("-max without a listed stem is a model name, and non-thinking rows declare 
   assert.deepEqual(qwen.metadata.supported_reasoning_levels, ["low", "high"]);
   assert.deepEqual(flash.metadata, { display_name: "Gemini 3.6 Flash Low", reasoning: false });
 });
+
+test("a row with no name gets no display_name, so names stay off when the flag strips them", () => {
+  const [bare, pinned] = withClientReasoningMetadata([
+    { id: "cc/claude-opus-5-5", capabilities: thinking(["low", "medium"]) },
+    { id: "cc/claude-opus-5-5-high", capabilities: thinking(["low", "medium"]) },
+  ]);
+  assert.deepEqual(bare.metadata, {
+    supported_reasoning_levels: ["low", "medium"],
+    default_reasoning_level: "medium",
+  });
+  assert.deepEqual(pinned.metadata, {
+    supported_reasoning_levels: ["high"],
+    default_reasoning_level: "high",
+    reasoning_required: true,
+  });
+});
+
+test("a row with nothing to advertise is returned as is, and existing metadata survives", () => {
+  const silent = { id: "x/plain", capabilities: {} };
+  const [row, merged] = withClientReasoningMetadata([
+    silent,
+    { id: "x/named", name: "Named", metadata: { family: "x" }, capabilities: {} },
+  ]);
+  assert.equal(row, silent);
+  assert.deepEqual(merged.metadata, { family: "x", display_name: "Named" });
+});

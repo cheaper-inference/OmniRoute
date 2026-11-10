@@ -132,60 +132,86 @@ export function withCatalogDisplayName<T extends Record<string, unknown>>(model:
 const FIXED_EFFORT_SUFFIX_RE = /-(minimal|xhigh|high|medium|low|max)$/;
 const TRAILING_EFFORT_LABEL_RE = /\s*\(?\s*(?:minimal|xhigh|high|medium|low|max)\s*\)?$/i;
 
+type CatalogRow = Record<string, unknown>;
+type PinnedEffortVariant = { effort: string; stem: string };
+
+function catalogStringField(model: CatalogRow, key: "id" | "name"): string {
+  const value = model[key];
+  return typeof value === "string" ? value : "";
+}
+
+function catalogObjectField(model: CatalogRow, key: "capabilities" | "metadata"): CatalogRow {
+  const value = model[key];
+  return value && typeof value === "object" ? (value as CatalogRow) : {};
+}
+
+function cleanCatalogName(model: CatalogRow): string | undefined {
+  const id = catalogStringField(model, "id");
+  const name = catalogStringField(model, "name").trim();
+  const prefix = id.slice(0, id.indexOf("/") + 1);
+  return (prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name) || undefined;
+}
+
+function findPinnedEffortVariant(
+  id: string,
+  capabilities: CatalogRow,
+  namesById: Map<unknown, string | undefined>
+): PinnedEffortVariant | null {
+  const effort = FIXED_EFFORT_SUFFIX_RE.exec(id)?.[1];
+  if (!effort || capabilities.supportsThinking !== true) return null;
+  const stem = id.slice(0, -effort.length - 1);
+  return effort !== "max" || namesById.has(stem) ? { effort, stem } : null;
+}
+
+function pinnedEffortMetadata(
+  { effort, stem }: PinnedEffortVariant,
+  name: string | undefined,
+  namesById: Map<unknown, string | undefined>
+): CatalogRow {
+  const baseName = namesById.get(stem) ?? name?.replace(TRAILING_EFFORT_LABEL_RE, "");
+  const label = effort === "xhigh" ? "XHigh" : effort[0].toUpperCase() + effort.slice(1);
+  return {
+    ...(baseName ? { display_name: `${baseName} ${label}` } : {}),
+    supported_reasoning_levels: [effort],
+    default_reasoning_level: effort,
+    reasoning_required: true,
+  };
+}
+
+function selectableReasoningMetadata(capabilities: CatalogRow): CatalogRow {
+  if (capabilities.supportsThinking === false) return { reasoning: false };
+  const tiers = capabilities.effort_tiers;
+  if (capabilities.supportsThinking !== true) return {};
+  if (!Array.isArray(tiers) || tiers.length === 0) return {};
+  return {
+    supported_reasoning_levels: tiers,
+    ...(tiers.includes("medium") ? { default_reasoning_level: "medium" } : {}),
+  };
+}
+
 /**
  * Add codex-registry style `metadata` (`display_name`, `supported_reasoning_levels`,
  * `default_reasoning_level`, `reasoning_required`, `reasoning`) — the fields catalog
  * clients such as oh-my-pi read instead of `capabilities.effort_tiers`. A `-{effort}` id
  * is a fixed-effort route: its name carries the tier and its ladder is that one tier, so
  * clients offer no effort picker. A bare reasoning model keeps its selectable tiers.
- * `display_name` never carries the `disambiguateCatalogModelNames` provider prefix.
+ * `display_name` never carries the `disambiguateCatalogModelNames` provider prefix, and a
+ * row without a `name` (MODEL_CATALOG_INCLUDE_NAMES=false) gets no `display_name` either.
  */
-export function withClientReasoningMetadata<T extends Record<string, unknown>>(models: T[]): T[] {
-  const cleanName = (model: Record<string, unknown>): string | undefined => {
-    const id = typeof model.id === "string" ? model.id : "";
-    const name = typeof model.name === "string" ? model.name.trim() : "";
-    const prefix = id.slice(0, id.indexOf("/") + 1);
-    return (prefix && name.startsWith(prefix) ? name.slice(prefix.length) : name) || undefined;
-  };
+export function withClientReasoningMetadata<T extends CatalogRow>(models: T[]): T[] {
   const namesById = new Map<unknown, string | undefined>(
-    models.map((model) => [model.id, cleanName(model)])
+    models.map((model) => [model.id, cleanCatalogName(model)])
   );
   return models.map((model) => {
-    const id = typeof model.id === "string" ? model.id : "";
-    const capabilities = (
-      model.capabilities && typeof model.capabilities === "object" ? model.capabilities : {}
-    ) as Record<string, unknown>;
+    const id = catalogStringField(model, "id");
+    const capabilities = catalogObjectField(model, "capabilities");
     const name = namesById.get(id);
-    const suffix = FIXED_EFFORT_SUFFIX_RE.exec(id)?.[1];
-    const stem = suffix ? id.slice(0, -suffix.length - 1) : "";
-    const metadata: Record<string, unknown> = {};
-    if (
-      suffix &&
-      capabilities.supportsThinking === true &&
-      (suffix !== "max" || namesById.has(stem))
-    ) {
-      const baseName = namesById.get(stem) ?? name?.replace(TRAILING_EFFORT_LABEL_RE, "");
-      const label = suffix === "xhigh" ? "XHigh" : suffix[0].toUpperCase() + suffix.slice(1);
-      if (baseName) metadata.display_name = `${baseName} ${label}`;
-      metadata.supported_reasoning_levels = [suffix];
-      metadata.default_reasoning_level = suffix;
-      metadata.reasoning_required = true;
-    } else {
-      if (name) metadata.display_name = name;
-      const tiers = capabilities.effort_tiers;
-      if (capabilities.supportsThinking === false) {
-        metadata.reasoning = false;
-      } else if (capabilities.supportsThinking === true && Array.isArray(tiers) && tiers.length) {
-        metadata.supported_reasoning_levels = tiers;
-        if (tiers.includes("medium")) metadata.default_reasoning_level = "medium";
-      }
-    }
+    const pinned = findPinnedEffortVariant(id, capabilities, namesById);
+    const metadata = pinned
+      ? pinnedEffortMetadata(pinned, name, namesById)
+      : { ...(name ? { display_name: name } : {}), ...selectableReasoningMetadata(capabilities) };
     if (Object.keys(metadata).length === 0) return model;
-    const existing =
-      model.metadata && typeof model.metadata === "object"
-        ? (model.metadata as Record<string, unknown>)
-        : {};
-    return { ...model, metadata: { ...existing, ...metadata } };
+    return { ...model, metadata: { ...catalogObjectField(model, "metadata"), ...metadata } };
   });
 }
 
