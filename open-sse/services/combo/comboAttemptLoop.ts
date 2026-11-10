@@ -274,6 +274,7 @@ export async function dispatchWithCooldownRetry(opts: {
       // too — it equals the index of the target that ends up serving, i.e. the
       // value exposed as `X-OmniRoute-Fallback-Attempts`.
       state.fallbackCount = 0;
+      state.deadlineFailures = 0;
       state.recordedAttempts = 0;
       state.comboErrors = [];
 
@@ -416,6 +417,18 @@ export async function dispatchWithCooldownRetry(opts: {
         const task = (async () => {
           try {
             const res = await executeTarget(i);
+            if (anySuccess) {
+              if (res?.ok && res.response) {
+                // A sibling may win while this target is in response-quality validation,
+                // after its timeout runner returned the streaming response. Abort already
+                // reached the upstream; cancel its original body too so the losing stream
+                // cannot continue generating or hold an unread tee branch.
+                void res.response.body
+                  ?.cancel(new Error(COMBO_HEDGE_CANCELLED_REASON))
+                  .catch(() => {});
+              }
+              return;
+            }
             if (res && !anySuccess) {
               if (res.ok) {
                 anySuccess = true;

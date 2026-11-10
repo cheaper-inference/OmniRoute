@@ -16,6 +16,7 @@ import {
 // that owns it.
 import type { ProxyConfigLevel } from "@/shared/components/ProxyConfigModal";
 import RiskNoticeModal from "../../components/RiskNoticeModal";
+import ChatGptOAuthModal from "@/shared/components/ChatGptOAuthModal";
 import CodexCliGuideModal from "../../components/CodexCliGuideModal";
 import SiliconFlowEndpointModal from "./SiliconFlowEndpointModal";
 import KimiCodeAuthMethodModal from "./KimiCodeAuthMethodModal";
@@ -274,6 +275,13 @@ export default function ProviderModalsPanel({
             isOpen={showOAuthModal}
             reauthConnection={reauthConnection}
             providerInfo={{ ...providerInfo, id: providerId }}
+            onSuccess={handleOAuthSuccess}
+            onClose={() => setShowOAuthModal(false)}
+          />
+        ) : providerId === "chatgpt" ? (
+          <ChatGptOAuthModal
+            isOpen={showOAuthModal}
+            reauthConnection={reauthConnection}
             onSuccess={handleOAuthSuccess}
             onClose={() => setShowOAuthModal(false)}
           />

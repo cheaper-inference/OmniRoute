@@ -26,6 +26,7 @@ import {
   type ProviderErrorRuleMatch,
 } from "../config/providerErrorRules.ts";
 import * as rot from "./rotationConfig.ts";
+import { getM365FailureScope } from "./m365ErrorPolicy.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
 import { isRequestScopedMisalignmentRefusal } from "../utils/providerSafety.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
@@ -1485,8 +1486,9 @@ export function parseRetryAfterFromBody(responseBody: unknown): {
   for (const detail of Array.isArray(details) ? details : []) {
     const detailRecord = toJsonRecord(detail);
     if (detailRecord.retryDelay) {
+      const delayMs = parseDelayString(detailRecord.retryDelay);
       return {
-        retryAfterMs: parseDelayString(detailRecord.retryDelay),
+        retryAfterMs: delayMs === null ? null : Math.min(delayMs, MAX_PROVIDER_COOLDOWN_MS),
         reason: RateLimitReason.RATE_LIMIT_EXCEEDED,
       };
     }
@@ -1905,7 +1907,10 @@ export function checkFallbackError(
     const resetTime = parseResetFromHeaders(headers);
     if (resetTime) {
       const waitMs = Math.max(resetTime - Date.now(), 0);
-      if (waitMs > 0) return { retryAfterMs: waitMs, provenance: "header" };
+      // Header hints bypass maxCooldownMs downstream, so clamp them here: an
+      // epoch-like Retry-After must not lock the connection for decades.
+      if (waitMs > 0)
+        return { retryAfterMs: Math.min(waitMs, MAX_PROVIDER_COOLDOWN_MS), provenance: "header" };
     }
 
     const detailedJsonHint = parseDetailedRetryHintFromJsonBody(errorStr, MAX_PROVIDER_COOLDOWN_MS);
@@ -1997,6 +2002,27 @@ export function checkFallbackError(
     };
   }
 
+  const m365Scope = getM365FailureScope(provider, status, errorText, structuredError);
+  if (m365Scope) {
+    const reason = status === 403 ? "forbidden" : RateLimitReason.RATE_LIMIT_EXCEEDED;
+    // Native throttles announce their reset even when generic retry hints are disabled.
+    const hint = detectRetryHint();
+    const fallback = buildRetryableFallback(reason);
+    return {
+      ...fallback,
+      ...(hint
+        ? {
+            cooldownMs: hint.retryAfterMs,
+            baseCooldownMs: hint.retryAfterMs,
+            usedUpstreamRetryHint: true,
+            retryHintSource: hint.provenance,
+            newBackoffLevel: 0,
+          }
+        : {}),
+      ruleScope: m365Scope,
+      skipProviderBreaker: true,
+    };
+  }
   const isRateLimitStatus = status === HTTP_STATUS.RATE_LIMITED;
   const preserveQuota429 = shouldPreserveQuotaSignals(provider, errorText);
   const shouldUseQuotaSignal = !isRateLimitStatus || preserveQuota429;
@@ -2153,7 +2179,8 @@ export function checkFallbackError(
         } else {
           return {
             shouldFallback: true,
-            cooldownMs: tpdMs,
+            // A Retry-After header wins over the node clock; clamp it like detectRetryHint does.
+            cooldownMs: Math.min(tpdMs, MAX_PROVIDER_COOLDOWN_MS),
             reason: RateLimitReason.QUOTA_EXHAUSTED,
             dailyQuotaExhausted: true,
           };

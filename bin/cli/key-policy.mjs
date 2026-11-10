@@ -53,6 +53,7 @@ export function publicKeyPolicy(data) {
     "usageLimitEnabled",
     "dailyUsageLimitUsd",
     "weeklyUsageLimitUsd",
+    "fiveHourUsageLimitUsd",
     "allowAutoCombos",
     "disableNonPublicModels",
   ];

@@ -62,6 +62,7 @@ const MODEL_TO_PROVIDERS = new Map<string, string[]>();
 for (const [aliasOrId, models] of Object.entries(PROVIDER_MODELS)) {
   const providerId = ALIAS_TO_PROVIDER_ID[aliasOrId] || aliasOrId;
   for (const modelEntry of models || []) {
+    if (modelEntry?.requiresProviderPrefix) continue;
     // Registry aliases are routable ids too: a client pinned to a legacy id must
     // still infer the provider that declares it, even when the catalog dropped
     // the standalone row (e.g. opencode-zen's deepseek-v4-flash-free alias).
