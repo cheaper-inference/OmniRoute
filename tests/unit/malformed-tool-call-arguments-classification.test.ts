@@ -11,7 +11,7 @@ import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.t
 // and combo fallback to the next target without counting a provider failure.
 
 const harness = await createChatPipelineHarness("malformed-tool-args");
-const { BaseExecutor, buildClaudeResponse, combosDb, getLatestCallLog, resetStorage, settingsDb } =
+const { BaseExecutor, buildClaudeResponse, callLogsDb, combosDb, resetStorage, settingsDb } =
   harness;
 const providersDb = await import("../../src/lib/db/providers.ts");
 const { getCircuitBreaker, STATE } = await import("../../src/shared/utils/circuitBreaker.ts");
@@ -292,7 +292,13 @@ test("a malformed tool call returns a structured, content-free 502", async () =>
   assert.ok(!text.includes(MARKER), "the response must not echo tool-call argument content");
   assert.ok(!text.includes("rm -rf"), "the response must not echo tool-call argument content");
 
-  const log = (await getLatestCallLog()) as Record<string, unknown> | null;
+  // Call-log persistence is fire-and-forget, and the provider's 200 send gets its own
+  // upstream_http_attempt row: drain the saves and read the logical row explicitly.
+  assert.equal(await callLogsDb.waitForCallLogSaves(30_000), true);
+  const rows = await callLogsDb.getCallLogs({ limit: 10 });
+  const logical = rows.find((row) => row.requestType !== "upstream_http_attempt");
+  assert.ok(logical, "the request must persist a logical call-log row");
+  const log = (await callLogsDb.getCallLogById(logical.id)) as Record<string, unknown> | null;
   assert.equal(log?.status, 502);
   assert.ok(!String(log?.error ?? "").includes(MARKER));
 
