@@ -1,0 +1,1 @@
+- **fix(call-logs):** a call-log detail whose artifact file changed on disk since it was written (disk rot, a partial restore) now shows as unreadable instead of serving the changed content. The dashboard and the log export both check the stored checksum on read. Rows with no stored checksum stay readable.

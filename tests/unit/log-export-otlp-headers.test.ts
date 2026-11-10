@@ -622,8 +622,8 @@ async function exerciseExportChild(compiled = false, langfuseMapping = false) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "otlp-header-child-"));
   const db = new DatabaseSync(path.join(dir, "storage.sqlite"));
   db.exec(`CREATE TABLE call_logs (id TEXT, timestamp TEXT, model TEXT, status INTEGER, path TEXT,
-    provider TEXT, account TEXT, connection_id TEXT, artifact_relpath TEXT, detail_state TEXT,
-    error_summary TEXT, has_pipeline_details INTEGER);
+    provider TEXT, account TEXT, connection_id TEXT, artifact_relpath TEXT, artifact_sha256 TEXT,
+    detail_state TEXT, error_summary TEXT, has_pipeline_details INTEGER);
     CREATE TABLE provider_nodes (id TEXT, name TEXT, prefix TEXT);
     CREATE TABLE provider_connections (id TEXT, name TEXT, email TEXT);`);
   fs.mkdirSync(path.join(dir, "call_logs"));
