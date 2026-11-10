@@ -215,7 +215,6 @@ test("maxContextWindow rejecting every target returns a 404 context_requirements
   assert.equal(body.diagnostics?.excluded?.length, 2);
 });
 
-
 test("single-account prompt-cache expansion remains account-bound even without a reorder", async () => {
   const providersDb = await import("../../src/lib/db/providers.ts");
   const account = await providersDb.createProviderConnection({
@@ -252,7 +251,6 @@ test("single-account prompt-cache expansion remains account-bound even without a
   assert.equal(result.orderedTargets[0]?.connectionId, account.id);
   assert.match(result.orderedTargets[0]?.executionKey ?? "", /@/);
 });
-
 
 test("weighted prompt-cache expansion maps an account-bound target to its sticky step", async () => {
   const providersDb = await import("../../src/lib/db/providers.ts");

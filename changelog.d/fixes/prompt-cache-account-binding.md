@@ -1,1 +1,0 @@
-- **fix(combo):** Preserve account-bound targets after prompt-cache expansion even when no affinity reordering is necessary, so a single eligible account stays pinned through dispatch.

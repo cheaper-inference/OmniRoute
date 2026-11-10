@@ -112,12 +112,13 @@ test("cache expansion respects the caller API-key connection scope", () => {
   const connections = new Map([
     ["codex", [{ id: "account-a" }, { id: "account-b" }, { id: "account-c" }]],
   ]);
-  const scoped = expandPromptCacheAffinityTargetsFromConnections(
-    [unbound],
-    connections,
+  const scoped = expandPromptCacheAffinityTargetsFromConnections([unbound], connections, [
+    "account-b",
+  ]);
+  assert.deepEqual(
+    scoped.map((entry) => entry.connectionId),
     ["account-b"]
   );
-  assert.deepEqual(scoped.map((entry) => entry.connectionId), ["account-b"]);
   assert.equal(scoped[0]?.executionKey, "step-a@account-b");
 
   const intersected = expandPromptCacheAffinityTargetsFromConnections(
@@ -125,7 +126,10 @@ test("cache expansion respects the caller API-key connection scope", () => {
     connections,
     ["account-b", "account-c"]
   );
-  assert.deepEqual(intersected.map((entry) => entry.connectionId), ["account-b"]);
+  assert.deepEqual(
+    intersected.map((entry) => entry.connectionId),
+    ["account-b"]
+  );
 });
 
 test("expanded auto candidates receive exactly one concrete account cache score", () => {

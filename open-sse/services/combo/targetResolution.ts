@@ -373,12 +373,15 @@ function buildWeightedStepKeyMapper(
     const exact = weightedResolution.orderedSteps.find(
       (entry) => target.executionKey === entry.executionKey
     );
-    const step = exact ?? weightedResolution.orderedSteps
-      .filter((entry) =>
-        target.executionKey.startsWith(entry.executionKey + ">") ||
-        target.executionKey.startsWith(entry.executionKey + "@")
-      )
-      .sort((left, right) => right.executionKey.length - left.executionKey.length)[0];
+    const step =
+      exact ??
+      weightedResolution.orderedSteps
+        .filter(
+          (entry) =>
+            target.executionKey.startsWith(entry.executionKey + ">") ||
+            target.executionKey.startsWith(entry.executionKey + "@")
+        )
+        .sort((left, right) => right.executionKey.length - left.executionKey.length)[0];
     return step?.executionKey || null;
   };
 }

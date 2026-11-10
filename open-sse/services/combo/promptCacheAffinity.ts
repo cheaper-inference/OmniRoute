@@ -225,9 +225,8 @@ export function expandPromptCacheAffinityTargetsFromConnections(
 ): ResolvedComboTarget[] {
   const expandedTargets: ResolvedComboTarget[] = [];
   // Cache affinity must never introduce account candidates outside the caller's key scope.
-  const apiKeyScope = apiKeyAllowedConnectionIds === null
-    ? null
-    : new Set(apiKeyAllowedConnectionIds);
+  const apiKeyScope =
+    apiKeyAllowedConnectionIds === null ? null : new Set(apiKeyAllowedConnectionIds);
   for (const target of targets) {
     if (target.connectionId) {
       const provider =
