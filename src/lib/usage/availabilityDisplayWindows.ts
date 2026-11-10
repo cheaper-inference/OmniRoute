@@ -20,14 +20,21 @@ export function reconcileDisplayWindows(
     quotas[name] = { ...window, observedAt: observed };
     changed = true;
   }
+  const retired = retireDisplayWindows(quotas, normalized, fetchedAt, cached.fetchedAt);
+  return changed || retired ? quotas : null;
+}
+function retireDisplayWindows(
+  quotas: Record<string, QuotaInfo>,
+  normalized: Record<string, QuotaInfo>,
+  fetchedAt: number,
+  priorFetchedAt: number
+): boolean {
+  let retired = false;
   for (const name of Object.keys(quotas)) {
-    if (
-      Object.hasOwn(normalized, name) ||
-      fetchedAt <= (quotas[name].observedAt ?? cached.fetchedAt)
-    )
+    if (Object.hasOwn(normalized, name) || fetchedAt <= (quotas[name].observedAt ?? priorFetchedAt))
       continue;
     delete quotas[name];
-    changed = true;
+    retired = true;
   }
-  return changed ? quotas : null;
+  return retired;
 }
