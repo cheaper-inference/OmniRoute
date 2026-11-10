@@ -51,12 +51,19 @@ function azureProtocol(actual: URL): NativeProtocol | null {
 function executionProtocol(response: Response, requestUrl: string): NativeProtocol | null {
   try {
     const actual = new URL(response.url || requestUrl);
+    // #19009: Codex's Responses-over-WebSocket transport reports the wss twin
+    // of its https endpoint (same host, path and native events). Only Codex
+    // has that transport, so only its entry accepts the wss form.
+    const websocket = actual.protocol === "wss:";
+    if (websocket) actual.protocol = "https:";
     if (actual.protocol !== "https:" || actual.username || actual.password) return null;
-    const azure = azureProtocol(actual);
+    const azure = websocket ? null : azureProtocol(actual);
     if (azure) return azure;
     // These are protocol-native endpoints already used by the executors. A
     // compatible node or overridden base URL does not inherit their policy.
-    for (const id of ["openai", "anthropic", "codex", "openrouter"]) {
+    for (const id of websocket
+      ? ["codex"]
+      : ["openai", "anthropic", "codex", "openrouter", "mistral"]) {
       const entry = getRegistryEntry(id);
       if (!entry?.baseUrl) continue;
       const expected = new URL(entry.baseUrl);
