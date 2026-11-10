@@ -58,6 +58,13 @@ for (const model of ["claude-sonnet-5-5", "claude-haiku-5-5"]) {
       true
     );
   });
+  for (const tools of [undefined, []]) {
+    test(`${model} preserves system chronology with ${tools ? "empty" : "missing"} tools`, () => {
+      const body = { ...agentBody(model), tools };
+      assert.equal(shouldUseMidConversationSystem(body), true);
+      assert.ok(selectBetaFlags(body).includes("mid-conversation-system-2026-04-07"));
+    });
+  }
 }
 
 for (const model of ["claude-sonnet-5", "claude-sonnet-4-6", "claude-haiku-4-5", "gpt-6"]) {
