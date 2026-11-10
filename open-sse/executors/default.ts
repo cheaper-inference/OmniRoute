@@ -1131,7 +1131,7 @@ export class DefaultExecutor extends BaseExecutor {
       this.provider?.startsWith?.("openai-compatible-") &&
       isCustomJsonProviderData(input.credentials?.providerSpecificData)
     ) {
-      return executeCustomJson(input);
+      return executeCustomJson(input, this.provider);
     }
     rejectStrictPool(input.validationDispatch, this.poolConfig);
     // #6846 Phase 1: per-connection nvidia concurrency cap — no-op for other providers.

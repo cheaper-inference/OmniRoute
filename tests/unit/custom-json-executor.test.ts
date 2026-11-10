@@ -210,6 +210,16 @@ test("the outbound URL guard runs on every call (cloud metadata is refused)", as
   assert.equal(calls.length, 0);
 });
 
+test("a redirect is never followed: one request, reported as 502", async () => {
+  stubFetch(
+    () => new Response(null, { status: 307, headers: { location: "http://169.254.169.254/" } })
+  );
+  const { response } = await run();
+  assert.equal(response.status, 502);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].init.redirect, "manual");
+});
+
 test("an invalid stored template fails with 400 before any request", async () => {
   stubFetch(() => Response.json({}));
   const { response } = await run({
