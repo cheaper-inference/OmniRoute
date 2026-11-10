@@ -1,1 +1,0 @@
-- **perf(guardrails):** Requests and responses no longer pay for a PII scan, a response clone and two JSON stringifies when PII redaction is off (the default). ([#19566](https://github.com/cheaper-inference/OmniRoute/pull/19566))

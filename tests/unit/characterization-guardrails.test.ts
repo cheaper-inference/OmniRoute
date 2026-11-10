@@ -119,9 +119,9 @@ test("pii-masker with the PII flags OFF never mutates the request payload", asyn
   const result = await guard.preCall(payload, { log: silentLog });
   assert.equal(result.block, false);
   assert.equal(result.modifiedPayload, undefined);
-  // Masking off is a no-op: the payload is not scanned, so there is no detection count.
-  assert.equal(result.meta?.detections, undefined);
-  assert.equal(result.meta?.redacted, undefined);
+  // Detection still runs (meta reports the count) — only mutation is opt-in.
+  assert.ok(result.meta && typeof result.meta.detections === "number");
+  assert.ok((result.meta.detections as number) > 0);
   assert.deepEqual(payload, snapshot);
 });
 

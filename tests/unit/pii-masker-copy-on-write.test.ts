@@ -41,7 +41,7 @@ test("PII masker guardrail", async (t) => {
     const result = await guardrail.preCall(body, CONTEXT);
     assert.equal(result.block, false);
     assert.equal((result as { modifiedPayload?: unknown }).modifiedPayload, undefined);
-    assert.equal(result.meta ?? null, null, "masking off does not scan, so no detection count");
+    assert.ok(result.meta && (result.meta as { detections: number }).detections >= 1);
     assert.equal(
       (body.messages[0].content[0] as { text: string }).text,
       `my ssn is ${SSN}`,
