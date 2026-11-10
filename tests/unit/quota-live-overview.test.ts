@@ -170,6 +170,44 @@ for (const [previous, latest] of [
   });
 }
 
+test("a sparse runtime session cannot age out an independently observed weekly constraint", async () => {
+  const c = await account();
+  const now = Date.now();
+  const state = getQuotaCacheState();
+  state.cache.set(c.id, {
+    connectionId: c.id,
+    provider: "claude",
+    fetchedAt: now,
+    quotas: { session: { remainingPercentage: 57, resetAt } },
+    modelQuotas: {},
+    exhausted: false,
+    nextResetAt: null,
+  });
+  save(c.id, "weekly", 0);
+  // Make the durable sibling older than the session but newer than scheduled storage.
+  core
+    .getDbInstance()
+    .prepare("UPDATE quota_snapshots SET created_at = ? WHERE connection_id = ?")
+    .run(new Date(now - 1000).toISOString(), c.id);
+  const before = structuredClone(state.cache.get(c.id));
+  const entry = (await usage.getSanitizedCachedProviderLimitsMap())[c.id];
+  assert.equal(quotas(entry).weekly.remainingPercentage, 0);
+  const result = buildConnectionQuotaAvailability(
+    {
+      id: c.id,
+      provider: "claude",
+      isActive: true,
+      providerSpecificData: {
+        limitPolicy: { enabled: true, windows: ["weekly"], thresholdPercent: 80 },
+      },
+    },
+    entry,
+    { enabled: false, defaultThresholdPercent: 2, providerWindowDefaults: {} }
+  );
+  assert.equal(result.account.usable, false);
+  assert.deepEqual(state.cache.get(c.id), before);
+});
+
 test("an unreported limiting window does not borrow its known sibling percentage", () => {
   const now = Date.now();
   const a = buildHealthAccount(

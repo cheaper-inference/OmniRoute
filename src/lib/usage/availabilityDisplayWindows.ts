@@ -14,7 +14,8 @@ export function reconcileDisplayWindows(
   for (const [name, window] of Object.entries(normalized)) {
     const raw = usage.quotas?.[name] as { observedAt?: string } | undefined;
     const observed = Date.parse(raw?.observedAt || "") || fetchedAt;
-    const prior = cached.quotas[name]?.observedAt ?? cached.fetchedAt;
+    const priorWindow = cached.quotas[name];
+    const prior = priorWindow ? (priorWindow.observedAt ?? cached.fetchedAt) : -Infinity;
     if (observed > Date.now() || observed <= prior) continue;
     quotas[name] = { ...window, observedAt: observed };
     changed = true;
