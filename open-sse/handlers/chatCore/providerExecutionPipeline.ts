@@ -4,7 +4,10 @@ import type {
 } from "../../utils/providerHttpAttempts.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
-import type { getProviderCredentials } from "@/sse/services/auth.ts";
+import type {
+  getProviderCredentials,
+  getProviderCredentialsWithQuotaPreflight,
+} from "@/sse/services/auth.ts";
 import type { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
 import type { writeTerminalStatus } from "@/shared/utils/terminalStatus.ts";
 import type { updateProviderConnection } from "@/lib/db/providers.ts";
@@ -87,6 +90,12 @@ export interface PipelineConnectionContext {
   onCredentialsRefreshed: (next: Record<string, unknown>) => void | Promise<void>;
   assertManagedLeaseFence: (connectionId: string) => void;
   getProviderCredentials: typeof getProviderCredentials;
+  /**
+   * Quota-preflight-aware selector used for the Codex 429 in-request rotation (#18425),
+   * so the replacement account is chosen with the same quota cutoff as primary selection.
+   * Falls back to `getProviderCredentials` when not wired.
+   */
+  getProviderCredentialsWithQuotaPreflight?: typeof getProviderCredentialsWithQuotaPreflight;
   /**
    * Connection allowlist the request was routed under (API key allowlist ∩ combo
    * step allowlist ∩ quota pool). Account rotation must stay inside it; null means
@@ -474,11 +483,15 @@ export async function runProviderExecutionPipeline(
         }
         await state.onClearSessionAffinity?.({ failedConnectionId: failedId });
       }
-      const nextCreds = await connection
-        .getProviderCredentials("codex", null, allowedConnections, wire.currentModel, {
-          excludeConnectionIds: [...excludedIds],
-        })
-        .catch(() => null);
+      const selectCodexFailover =
+        connection.getProviderCredentialsWithQuotaPreflight ?? connection.getProviderCredentials;
+      const nextCreds = await selectCodexFailover(
+        "codex",
+        null,
+        allowedConnections,
+        wire.currentModel,
+        { excludeConnectionIds: [...excludedIds] }
+      ).catch(() => null);
       if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
         await state.onAuditAccountRotation?.({
           action: "codex.account_rotation",

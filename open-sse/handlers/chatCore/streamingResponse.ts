@@ -94,7 +94,11 @@ import {
   relogFallbackDiagnostic,
 } from "../../executors/antigravityUpstreamError.ts";
 
-import { getProviderCredentials, extractSessionAffinityKey } from "@/sse/services/auth";
+import {
+  getProviderCredentials,
+  getProviderCredentialsWithQuotaPreflight,
+  extractSessionAffinityKey,
+} from "@/sse/services/auth";
 
 import { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
 import * as localLimiterErrors from "../../services/rateLimitManager/errors.ts";
@@ -255,6 +259,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         refreshCredentials: executeRefreshCredentials,
         assertManagedLeaseFence: (id) => assertManagedLeaseFence(id),
         getProviderCredentials,
+        getProviderCredentialsWithQuotaPreflight,
         allowedConnections: deps.allowedConnections ?? null,
       },
       wire: {
