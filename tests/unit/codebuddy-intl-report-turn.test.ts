@@ -19,6 +19,7 @@ import {
   CODEBUDDY_REPORT_PATH,
   CODEBUDDY_TRACES_PATH,
 } from "../../open-sse/executors/codebuddy-intl/telemetryTransport.ts";
+import { registerFeatureFlagResolver } from "../../src/shared/utils/featureFlagResolverBridge.ts";
 
 /**
  * Telemetry is opt-in, so every test that asserts an outbound report turns the
@@ -185,6 +186,30 @@ test("the default resolution of the flag is disabled", async () => {
   try {
     assert.equal(isCodeBuddyTelemetryEnabled(), false);
   } finally {
+    if (previous !== undefined) process.env[CODEBUDDY_TELEMETRY_FLAG] = previous;
+  }
+});
+
+test("the flag resolves through the server-registered resolver, not a direct src import", () => {
+  // open-sse must not import src/ (boundary ratchet): the gate reads the
+  // resolver that src/shared/utils/featureFlags.ts publishes on globalThis, so a
+  // dashboard (DB) override still wins over an unset environment variable.
+  const previous = process.env[CODEBUDDY_TELEMETRY_FLAG];
+  delete process.env[CODEBUDDY_TELEMETRY_FLAG];
+  const seen: string[] = [];
+  registerFeatureFlagResolver((key) => {
+    seen.push(key);
+    return key === CODEBUDDY_TELEMETRY_FLAG;
+  });
+  try {
+    assert.equal(isCodeBuddyTelemetryEnabled(), true);
+    assert.deepEqual(seen, [CODEBUDDY_TELEMETRY_FLAG]);
+    registerFeatureFlagResolver(() => {
+      throw new Error("flag store down");
+    });
+    assert.equal(isCodeBuddyTelemetryEnabled(), false);
+  } finally {
+    registerFeatureFlagResolver(null);
     if (previous !== undefined) process.env[CODEBUDDY_TELEMETRY_FLAG] = previous;
   }
 });

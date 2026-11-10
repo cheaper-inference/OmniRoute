@@ -22,7 +22,10 @@ import {
  *    switch, so it can be flipped from the dashboard per install.
  */
 
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+// Read through the resolver src/shared/utils/featureFlags.ts publishes on
+// globalThis (DB override > env > definition default): open-sse must not gain a
+// src import (boundary ratchet).
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 
 /** Feature flag gating the outbound reports. Default: disabled. */
 export const CODEBUDDY_TELEMETRY_FLAG = "CODEBUDDY_TELEMETRY_ENABLED";
@@ -49,7 +52,7 @@ export interface ReportTurnInput {
  * The `enabled` parameter is a test seam only.
  */
 export function isCodeBuddyTelemetryEnabled(
-  enabled: () => boolean = () => isFeatureFlagEnabled(CODEBUDDY_TELEMETRY_FLAG)
+  enabled: () => boolean = () => isRegisteredFeatureFlagEnabled(CODEBUDDY_TELEMETRY_FLAG)
 ): boolean {
   try {
     return enabled();
