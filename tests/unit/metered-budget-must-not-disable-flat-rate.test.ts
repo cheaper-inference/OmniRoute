@@ -160,6 +160,7 @@ test("a BUDGET_EXCEEDED 429 must not put the provider in the transient rate-limi
     connectionId: "conn-budget",
   } as Parameters<typeof applyComboTargetExhaustion>[0];
   const base = {
+    errorText: "Daily budget exceeded",
     rawModel: "m1",
     allAccountsRateLimited: false,
     requestScopedFailure: false,
@@ -173,18 +174,15 @@ test("a BUDGET_EXCEEDED 429 must not put the provider in the transient rate-limi
   const local = makeSets();
   applyComboTargetExhaustion(target, {
     ...base,
-    errorText: "Daily budget exceeded",
     isTokenLimitBreach: comboPredicates.isLocalKeyPolicyBreachErrorBody(budgetBody),
     sets: local,
   });
   assert.equal(local.transientRateLimitedProviders.size, 0);
 
-  // Control: a real upstream 429 is still classified as one. Its error text is the upstream
-  // body's own; a spent-budget text would read as quota exhaustion, not as a rate limit.
+  // Control: a real upstream 429 is still classified as one.
   const upstream = makeSets();
   applyComboTargetExhaustion(target, {
     ...base,
-    errorText: "slow down",
     isTokenLimitBreach: comboPredicates.isLocalKeyPolicyBreachErrorBody(upstreamBody),
     sets: upstream,
   });

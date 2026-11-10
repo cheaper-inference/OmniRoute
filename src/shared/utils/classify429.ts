@@ -50,8 +50,10 @@ const QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
   /hard.?limit/i,
   /plan.*limit/i,
   // LiteLLM spent key: "Budget has been exceeded! Key=..., Max budget: ...". A bare
-  // "Rate limit exceeded" has no "budget" and stays a rate limit.
-  /budget.{0,32}(?:exceeded|exhausted)/i,
+  // "Rate limit exceeded" has no "budget" and stays a rate limit. OmniRoute's own refusal
+  // ("Daily budget exceeded: $x / $y", "Budget limit exceeded") must not match: it is a local
+  // 429, not an upstream quota signal.
+  /budget has been (?:exceeded|exhausted)|budget (?:is )?exhausted/i,
 
   // Antigravity / Cloud Code quota exhaustion ("Individual quota reached.
   // Contact your administrator to enable overages. Resets in 164h27m24s.").

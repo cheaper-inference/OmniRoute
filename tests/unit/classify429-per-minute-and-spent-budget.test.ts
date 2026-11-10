@@ -117,3 +117,17 @@ test("classify429: a spent budget with a short retry hint is a rate limit, with 
     "quota_exhausted"
   );
 });
+
+// OmniRoute's own metered-budget refusal is a local 429 (code BUDGET_EXCEEDED, text
+// "<interval> budget exceeded: $x / $y"). It is no upstream quota signal: the spent-budget
+// pattern must not read it as one, or the combo marks a provider exhausted that nothing upstream
+// refused.
+test("classify429: OmniRoute's own budget refusal wording stays a rate limit", () => {
+  for (const body of [
+    "daily budget exceeded: $10.0000 / $10.00",
+    { error: { code: "BUDGET_EXCEEDED", message: "Budget limit exceeded" } },
+  ]) {
+    assert.equal(classify429({ status: 429, body }), "rate_limit");
+    assert.equal(looksLikeQuotaExhausted(body), false);
+  }
+});
