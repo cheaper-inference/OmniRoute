@@ -78,9 +78,12 @@ test("event stream shows only when debugEnabled and its tab comes before the leg
     -1,
     "Legacy response payload should be present"
   );
+  const eventStreamTab = eventsHtml.indexOf(">Event Stream<");
+  const payloadsTab = eventsHtml.indexOf(">Payloads<");
+  assert.notEqual(eventStreamTab, -1, "Event Stream tab should be present when debugEnabled");
+  assert.notEqual(payloadsTab, -1, "Payloads tab should be present");
   assert(
-    eventsHtml.indexOf('role="tab"') !== -1 &&
-      eventsHtml.indexOf(">Event Stream<") < eventsHtml.indexOf(">Payloads<"),
+    eventStreamTab < payloadsTab,
     "Event Stream tab should come before the tab holding Response Payload (Legacy)"
   );
 });
