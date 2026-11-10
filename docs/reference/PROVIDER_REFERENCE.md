@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.54
-lastUpdated: 2026-11-09
+lastUpdated: 2026-11-10
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-09
+> **Last generated:** 2026-11-10
 
-Total providers: **382**. See category breakdown below.
+Total providers: **388**. See category breakdown below.
 
 ## Categories
 
@@ -49,7 +49,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `veoaifree-web` | `veo-free` | Veo AI Free | No-auth, video | [link](https://veoaifree.com) | No auth required. Rate limited to 6 requests/hour per IP. | — |
 | `zcode` | `zc` | ZCode (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | No API key stored by OmniRoute. The local ZCode app-server uses the existing builtin:zai-coding-plan login. | — |
 
-## OAuth Providers (29)
+## OAuth Providers (31)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -74,9 +74,11 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `kilocode` | `kc` | Kilo Code | OAuth | — | Sign in with your Kilo Code account (device-code OAuth), or paste a direct API key from app.kilo.ai → Settings → API Keys. Multiple API keys are supported and rotated automatically — add each as a separate connection. Without any connection, free anonymous models are available via the anonymousFallback. |
 | `kimi-coding` | `kmc` | Kimi Code CLI | OAuth | [link](https://www.kimi.ai/code?aff=omniroute) | Sign in with the same Kimi account used by Kimi Code CLI. OmniRoute uses the CLI OAuth flow and Kimi Coding Plan endpoints. |
 | `kiro` | `kr` | Kiro AI | OAuth | — | Free tier: 50 credits/month (~25K–100K tokens). ⚠️ Kiro ToS prohibits third-party proxy/harness use. |
+| `megabrain` | `mb` | MegaBrain | OAuth | [link](https://getmegabrain.com) | Sign in with your MegaBrain account (device code), or paste an mb-v1-… MegaBrain API key (add each key as a separate connection to rotate them). A paid plan covers the included models (Auto, GLM, Kimi, MiniMax, Grok, DeepSeek, Qwen) within its session and weekly limits; Claude, GPT and Gemini are paid from the account's credits, from Pro up or with Extra Usage turned on. Address models as mb/<model> or megabrain/<model>. |
 | `muse-code` | `mc` | Muse Code (Meta) | OAuth | [link](https://ai.developer.meta.com/docs/muse-code/auth) | Sign in with the Muse Code device flow (same as `muse login` / CLIProxyAPI `-meta-login`) to use a Muse subscription, or paste a META_API_KEY. Device login keeps the durable dca token and mints the inference key; a 401 remints that key. Wire format is OpenAI Responses (POST /responses). |
 | `openference` | `of` | Openference | OAuth | [link](https://openference.com) | Sign in with your Openference account to route requests through api.openference.com. Includes free-tier access to Qwen3.8 27b and Llama 3.2 3B — see openference.com/pricing for current plan terms. |
 | `qoder` | `if` | Qoder | OAuth | — | PAT (pt-): requires local qodercli; plain chat only, no caller tools, buffered streaming and a 45-second chat limit. HTTP keys use DashScope; browser OAuth requires administrator configuration. |
+| `renderhour` | — | RenderHour | OAuth | [link](https://renderhour.com) | Sign in with your RenderHour account to spend its subscription credits on images (Nano Banana Pro, GPT Image 2, Seedream), video (Seedance, Kling, Veo) and speech, or paste an rh_… API key from renderhour.com/developers to pay from the API's dollar balance. Address models as renderhour/<model>. |
 | `trae` | `tr` | Trae | OAuth | [link](https://trae.ai) | Trae is an AI-native IDE by ByteDance (SOLO remote agent). Authorize via trae.ai in the popup, or sign in at solo.trae.ai and paste the Cloud-IDE-JWT (sent as 'Authorization: Cloud-IDE-JWT <token>', ~14-day lifetime) as the access token; web_id/biz_user_id/user_unique_id/scope/tenant/region propagate via providerSpecificData. No headless refresh for pasted tokens — re-paste on expiry. |
 | `workbuddy` | `wb` | WorkBuddy | OAuth | [link](https://www.workbuddy.ai) | Tencent WorkBuddy (www.workbuddy.ai). Authorize the CLI device flow in the popup; OmniRoute then polls for the token and attaches the required X-Product: SaaS header. The model roster is served by the authenticated catalogue, so it is discovered live rather than listed here. WorkBuddy only accepts streaming requests, which OmniRoute accumulates back into a JSON response for non-streaming callers. |
 | `xai-oauth` | `xao` | xAI OAuth (Grok) | OAuth | [link](https://x.ai) | Sign in with xAI to use api.x.ai models such as Grok 4.5. This is separate from Grok Build JWT sessions, which use cli-chat-proxy.grok.com and grok-build model aliases. |
@@ -125,7 +127,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zai-web` | `zw` | Z.ai Web | Web cookie | [link](https://chat.z.ai) | Copy the "token" value from chat.z.ai → DevTools → Application → Local Storage. Do not copy cookies; OmniRoute handles the per-request CAPTCHA through its browser transport. | — |
 | `zenmux-free` | `zmf` | ZenMux Free (Web) | Web cookie | [link](https://zenmux.ai) | Login at zenmux.ai, then export all cookies using EditThisCookie or Cookie-Editor and paste the full Cookie header string here. Refresh every ~30 days. | — |
 
-## API Key Providers (paid / paid-with-free-credits) (255)
+## API Key Providers (paid / paid-with-free-credits) (258)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -184,6 +186,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `daoxe` | `daoxe` | DaoXE | API key, aggregator | [link](https://daoxe.com) | — |
 | `databricks` | `databricks` | Databricks | API key, enterprise | [link](https://www.databricks.com) | — |
 | `datarobot` | `datarobot` | DataRobot | API key, enterprise | [link](https://docs.datarobot.com) | Use your DataRobot API token. Optional Base URL can be the account root (for LLM Gateway) or a deployment URL under /api/v2/deployments/<id>. |
+| `deapi` | `deapi` | deAPI | API key, image, video | [link](https://deapi.ai) | Use your deAPI API key (sk-dp-<id>-<secret>) from deapi.ai. OmniRoute sends it as Authorization: Bearer <key>. |
 | `deepai` | `deepai` | DeepAI | API key, image | [link](https://deepai.org) | Use your DeepAI API key. Get one at deepai.org — requires a Pro subscription ($9.99/mo). |
 | `deepinfra` | `deepinfra` | DeepInfra | API key | [link](https://deepinfra.com) | Free signup credits for API testing and model exploration |
 | `deepseek` | `ds` | DeepSeek | API key | [link](https://platform.deepseek.com) | 5M free tokens on signup - no credit card required |
@@ -195,6 +198,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `doubao` | `doubao` | Doubao | API key | [link](https://doubao.com) | Get API key at console.volcengine.com |
 | `dxnt` | `dxnt` | DXNT / DX Token | API key, aggregator | [link](https://www.dxnt.com) | Free accounts are documented at 100 calls/day; the quota may increase through invitations and can vary by account. |
 | `electronhub` | `electronhub` | Electron Hub | API key, aggregator | [link](https://www.electronhub.ai) | Free plan: 5 RPM, $0.25 weekly credits and 10 Neutrinos/day for :free models; family budgets also apply. |
+| `empiriolabs` | `empiriolabs` | EmpirioLabs AI | API key | [link](https://empiriolabs.ai) | Create an API key at https://platform.empiriolabs.ai/dashboard/api-keys, then paste it here. |
 | `empower` | `empower` | Empower | API key, aggregator | [link](https://docs.empower.dev) | Bearer API key for the Empower OpenAI-compatible endpoint. |
 | `eurouter` | `eurouter` | EURouter | API key, aggregator | [link](https://eurouter.ai) | — |
 | `factory` | `factory` | Factory | API key | [link](https://factory.ai) | Bearer API key for the Factory OpenAI-compatible gateway. |
@@ -302,6 +306,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `opper` | `opper` | Opper | API key, aggregator | [link](https://opper.ai) | — |
 | `orcarouter` | `orcarouter` | OrcaRouter | API key | [link](https://www.orcarouter.ai) | — |
 | `ovhcloud` | `ovh` | OVHcloud AI | API key | [link](https://www.ovhcloud.com) | — |
+| `paraloncloud` | `paralon` | ParalonCloud | API key | [link](https://paraloncloud.com) | — |
 | `perplexity` | `pplx` | Perplexity | API key | [link](https://www.perplexity.ai) | — |
 | `perplexity-agent` | `pplx-agent` | Perplexity Agent | API key | [link](https://www.perplexity.ai) | Use your Perplexity API key. OmniRoute routes Agent API model IDs through Perplexity's Responses-compatible endpoint. |
 | `piapi` | `pi` | PiAPI | API key, aggregator | [link](https://piapi.ai) | — |
@@ -404,12 +409,13 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `vllm` | `vllm` | vLLM | Local, self-hosted | [link](https://github.com/vllm-project/vllm) | API key optional. Configure the local vLLM OpenAI-compatible base URL (default: http://localhost:8000/v1). |
 | `xinference` | `xinference` | XInference | Local, self-hosted | [link](https://inference.readthedocs.io) | API key optional. Configure the local XInference OpenAI-compatible base URL (default: http://localhost:9997/v1). |
 
-## Search Providers (19)
+## Search Providers (20)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
 | `anysearch-search` | `anysearch` | AnySearch | Search | [link](https://anysearch.com) | Optional API key from anysearch.com (as_sk_...) - free 1000/day; keyless tier has lower limits |
 | `brave-search` | `brave-search` | Brave Search | Search | [link](https://brave.com/search/api) | Subscription token from Brave Search API dashboard |
+| `codex-search` | `codex_search` | Codex Web Search (ChatGPT) | Search | [link](https://chatgpt.com) | Uses your connected OpenAI Codex (ChatGPT) accounts — no separate key. Each search spends Codex subscription quota (~10k input tokens) and takes ~10–40 s. |
 | `context7` | `context7` | Context7 (library docs) | Search | [link](https://context7.com) | API key optional (ctx7sk-...) — anonymous tier works without a key; a key raises the rate limit |
 | `exa-search` | `exa-search` | Exa Search | Search | [link](https://exa.ai) | API key from dashboard.exa.ai |
 | `firecrawl` | `fc` | Firecrawl | Search | [link](https://firecrawl.dev) | API key from firecrawl.dev/app/api-keys (or set your self-hosted Firecrawl base URL) |
@@ -470,7 +476,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (172 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (174 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also

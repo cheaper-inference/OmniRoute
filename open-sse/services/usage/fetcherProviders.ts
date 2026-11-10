@@ -117,6 +117,9 @@ export const USAGE_FETCHER_PROVIDERS = [
   // InfCode (Token Infinity) seat credit balance
   // (GET {userCenter}/api/user_center/v1/dashboard/personal/quotas, bearer OAuth token)
   "inf-code",
+  // MegaBrain plan session + weekly limits (GET /api/profile/limits)
+  "megabrain",
+  "mb",
   // Devin CLI agentic quota (Codeium seat-management GetUserStatus, protobuf)
   "devin-cli",
   // ChatPlayground subscription and daily credits (GET /api/user)

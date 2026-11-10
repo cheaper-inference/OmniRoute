@@ -61,6 +61,8 @@ export const STREAM_READINESS_MAX_TIMEOUT_MS = upstreamTimeouts.streamReadinessM
 // headers are returned. Keep it shared so executor, core normalization and
 // account fallback detection cannot drift.
 export const ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE = "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT";
+// A trusted caller shortened this request only; do not cool shared provider accounts.
+export const REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE = "REQUEST_SCOPED_UPSTREAM_TIMEOUT";
 
 // Heartbeat interval for synthetic SSE keepalive emission toward the downstream
 // client (Capy, Claude Code, OpenAI SDK, etc). Keeps strict proxies from
@@ -179,6 +181,11 @@ export const OAUTH_ENDPOINTS = {
     token: process.env.INF_CODE_OAUTH_REFRESH_URL || `${INF_CODE_AUTH_BASE}/acode/v1/refresh_token`,
     auth: process.env.INF_CODE_OAUTH_AUTHORIZE_URL || `${INF_CODE_AUTH_BASE}/infcode/login`,
     clientId: process.env.INF_CODE_OAUTH_CLIENT_ID || resolvePublicCred("infcode_id"),
+  },
+  renderhour: {
+    token: "https://renderhour.com/api/oauth/token",
+    auth: "https://renderhour.com/oauth/authorize",
+    clientId: resolvePublicCred("renderhour_id"),
   },
 };
 
