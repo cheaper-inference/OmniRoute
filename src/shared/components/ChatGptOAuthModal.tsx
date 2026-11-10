@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { parseChatGptManualCallback } from "@/shared/utils/chatgptCallback";
+import { Alert } from "@omniroute/ui-kit/alert";
 import Modal from "./Modal";
 import Button from "./Button";
+import Textarea from "./Textarea";
 import ChatGptSignInButton from "./ChatGptSignInButton";
 import { ChatGptPlanWelcome } from "./ChatGptPlanUi";
 import { acknowledgeChatGptPlan, shouldWelcomeChatGptPlan } from "@/shared/utils/chatgptPlanUi";
@@ -96,7 +98,8 @@ function ChatGptSignInDone({
   return (
     <div className="space-y-4">
       <p role="status">{t("connected")}</p>
-      {warning && <p className="rounded-lg border border-amber-500 p-3">{warning}</p>}
+      {/* role="note": the connected line above is the dialog's one live status. */}
+      {warning && <Alert variant="warning" role="note" dismissible={false} description={warning} />}
       {showWelcome ? (
         <ChatGptPlanWelcome onDismiss={onFinish} />
       ) : (
@@ -161,22 +164,20 @@ function ChatGptCallbackStep({
           onSubmit();
         }}
       >
-        <label className="block space-y-2">
-          <span>{t("callbackLabel")}</span>
-          <textarea
-            className="w-full rounded-lg border border-border bg-bg-input p-3 font-mono text-sm"
-            value={callbackUrl}
-            onChange={(event) => onCallbackUrlChange(event.target.value)}
-            placeholder={redirectUri + "?code=…&state=…&client_id=…"}
-            aria-describedby="chatgpt-callback-help"
-            autoComplete="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            maxLength={16384}
-            rows={4}
-            disabled={!attempt || busy}
-          />
-        </label>
+        <Textarea
+          label={t("callbackLabel")}
+          className="w-full font-mono text-sm"
+          value={callbackUrl}
+          onChange={(event) => onCallbackUrlChange(event.target.value)}
+          placeholder={redirectUri + "?code=…&state=…&client_id=…"}
+          aria-describedby="chatgpt-callback-help"
+          autoComplete="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          maxLength={16384}
+          rows={4}
+          disabled={!attempt || busy}
+        />
         <Button
           type="submit"
           disabled={!attempt || busy || !callbackUrl.trim()}
@@ -287,11 +288,7 @@ function ChatGptOAuthDialog({ isOpen, onClose, onSuccess, reauthConnection }: Pr
               onStartOver={startOver}
               t={t}
             />
-            {error && (
-              <p role="alert" className="rounded-lg border border-red-500 p-3 text-red-400">
-                {error}
-              </p>
-            )}
+            {error && <Alert variant="critical" dismissible={false} description={error} />}
           </>
         )}
       </div>

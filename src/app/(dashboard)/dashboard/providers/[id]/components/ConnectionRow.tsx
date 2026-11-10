@@ -747,7 +747,6 @@ export default function ConnectionRow({
       </div>
       <div className="basis-full min-w-0 xl:basis-auto">
         <div className="flex w-full flex-wrap items-center justify-between gap-0.5 sm:gap-1 xl:justify-end [&>button]:grow-0">
-          {isChatGpt && <ChatGptManageUsageButton />}
           <ConnectionTestButton
             connectionId={connection.id}
             disabled={connection.isActive === false}
@@ -765,6 +764,7 @@ export default function ConnectionRow({
           >
             <span className="hidden sm:inline">{t("retest")}</span>
           </Button>
+          {isChatGpt && <ChatGptManageUsageButton />}
           {/* T12: Manual token refresh for OAuth accounts */}
           {onRefreshToken && (
             <Button
@@ -778,9 +778,11 @@ export default function ConnectionRow({
               aria-label={isChatGpt ? t("chatgptRefreshToken") : t("tokenShort")}
               title={isChatGpt ? t("chatgptRefreshTokenTitle") : t("refreshOauthTokenTitle")}
             >
-              <span className="hidden sm:inline">
-                {isChatGpt ? t("chatgptRefreshToken") : t("tokenShort")}
-              </span>
+              {isChatGpt ? (
+                <span className="hidden sm:inline">{t("chatgptRefreshToken")}</span>
+              ) : (
+                <span className="hidden sm:inline">{t("tokenShort")}</span>
+              )}
             </Button>
           )}
           {isCodex && isOAuth && connection.provider === "codex" && (

@@ -1,7 +1,9 @@
 "use client";
 
-import type { ButtonHTMLAttributes } from "react";
 import { useTranslations } from "next-intl";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import Button from "./Button";
+import ChatGptLogo from "./ChatGptLogo";
 
 type Props = {
   href?: string;
@@ -13,7 +15,8 @@ type Props = {
 };
 
 // Official SIWC wording and logo: https://developers.openai.com/siwc/website
-// Deliberately independent of OmniRoute's gradient/primary-color button styling.
+// Rendered as the kit primary button (KEA-7886); the inline logo follows the button ink, so the
+// same markup works under every palette and theme.
 export default function ChatGptSignInButton({
   href,
   onClick,
@@ -23,49 +26,34 @@ export default function ChatGptSignInButton({
   intent = "signin",
 }: Props) {
   const t = useTranslations("chatgptSignIn");
-  const className =
-    "inline-flex min-h-11 max-w-full items-center justify-center gap-2.5 rounded-xl border border-black bg-black px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current disabled:cursor-not-allowed disabled:opacity-50 dark:border-white dark:bg-white dark:text-black dark:hover:bg-neutral-200";
   const content = (
     <>
-      {/* eslint-disable-next-line @next/next/no-img-element -- bundled official SVGs, no image optimization needed */}
-      <img
-        src="/providers/chatgpt-logo-white.svg"
-        alt=""
-        width={21}
-        height={21}
-        className="shrink-0 dark:hidden"
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element -- matching official asset for the dark theme */}
-      <img
-        src="/providers/chatgpt-logo-black.svg"
-        alt=""
-        width={21}
-        height={21}
-        className="hidden shrink-0 dark:block"
-      />
+      <ChatGptLogo className="shrink-0" />
       <span>{t(intent === "continue" ? "continue" : "signIn")}</span>
     </>
   );
   if (href) {
     return (
-      <a className={className} href={href} target="_blank" rel="noreferrer">
+      <a
+        className={buttonVariants({ size: "lg", className: "max-w-full" })}
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+      >
         {content}
       </a>
     );
   }
-  const popup: ButtonHTMLAttributes<HTMLButtonElement>["aria-haspopup"] = opensDialog
-    ? "dialog"
-    : undefined;
   return (
-    <button
-      type="button"
-      className={className}
+    <Button
+      size="lg"
+      className="max-w-full"
       onClick={onClick}
-      disabled={disabled || busy}
-      aria-busy={busy || undefined}
-      aria-haspopup={popup}
+      disabled={disabled}
+      loading={busy}
+      aria-haspopup={opensDialog ? "dialog" : undefined}
     >
       {content}
-    </button>
+    </Button>
   );
 }

@@ -4,7 +4,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { generateKeyPair, exportJWK, createLocalJWKSet, SignJWT } from "jose";
+import { generateKeyPair, exportJWK, createLocalJWKSet, SignJWT, UnsecuredJWT } from "jose";
 
 const dataDir = mkdtempSync(join(tmpdir(), "omniroute-siwc-"));
 process.env.DATA_DIR = dataDir;
@@ -582,6 +582,36 @@ test("OIDC validates signature, issuer, audience, expiration and nonce", async (
       "nonce",
       createLocalJWKSet({ keys: [{ ...(await exportJWK(other.publicKey)), kid: "test" }] })
     )
+  );
+});
+
+test("OIDC pins RS256: unsecured (alg none) and non-RS256 ID tokens are rejected", async () => {
+  const claims = { nonce: "nonce" };
+  const unsecured = new UnsecuredJWT(claims)
+    .setIssuer("https://auth.openai.com")
+    .setAudience("oaiapp_test")
+    .setSubject("subject")
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .encode();
+  const { publicKey } = await generateKeyPair("RS256");
+  const rsKey = createLocalJWKSet({ keys: [{ ...(await exportJWK(publicKey)), kid: "test" }] });
+  await assert.rejects(verifyChatGptIdentity(unsecured, "oaiapp_test", "nonce", rsKey));
+
+  const es = await generateKeyPair("ES256");
+  const esToken = await new SignJWT(claims)
+    .setProtectedHeader({ alg: "ES256", kid: "es" })
+    .setIssuer("https://auth.openai.com")
+    .setAudience("oaiapp_test")
+    .setSubject("subject")
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(es.privateKey);
+  const esKey = createLocalJWKSet({ keys: [{ ...(await exportJWK(es.publicKey)), kid: "es" }] });
+  await assert.rejects(
+    verifyChatGptIdentity(esToken, "oaiapp_test", "nonce", esKey),
+    /alg/i,
+    "a validly signed ES256 token must still fail the RS256 pin"
   );
 });
 

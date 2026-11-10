@@ -116,7 +116,9 @@ describe("ChatGPT sign-in branding", () => {
         if (providerId === "chatgpt") {
           expect(html).toContain("Sign in with ChatGPT");
           expect(html).toContain('aria-haspopup="dialog"');
-          expect(html).toContain("chatgpt-logo-white.svg");
+          // Official mark, inlined in the kit primary button (follows the button ink).
+          expect(html).toContain("data-chatgpt-logo");
+          expect(html).toContain("ci-button--default");
           expect(html).not.toContain(">addConnection<");
           expect(html).not.toContain(">add<");
         } else {

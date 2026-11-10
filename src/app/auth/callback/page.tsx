@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * /auth/callback — OAuth callback endpoint for providers that use the
  * `/auth/callback` path (including the Devin PKCE compatibility flow).
@@ -10,10 +12,10 @@
  * On true localhost the random-port callback server intercepts this path first,
  * so this page is only reached in the LAN / popup-without-callback-server case.
  */
-"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { buttonVariants } from "@omniroute/ui-kit/button";
 import CallbackPage from "@/app/callback/page";
 import { chatGptCallbackLink } from "@/shared/utils/chatgptCallback";
 
@@ -34,16 +36,14 @@ export default function AuthCallbackPage() {
   if (!callback.siwc) return <CallbackPage />;
   return (
     <main className="mx-auto max-w-xl space-y-5 p-8">
-      <h1 className="text-2xl font-semibold">{t("continueToDashboard")}</h1>
+      <h1 className="ci-heading text-2xl font-semibold text-text-main">
+        {t("continueToDashboard")}
+      </h1>
       {callback.link ? (
         <>
           <p>{t("confirmDashboard")}</p>
-          <p className="break-all font-mono">{new URL(callback.link).origin}</p>
-          <a
-            className="inline-block rounded-lg bg-primary px-4 py-3 text-white"
-            rel="noreferrer"
-            href={callback.link}
-          >
+          <p className="break-all font-mono text-text-main">{new URL(callback.link).origin}</p>
+          <a className={buttonVariants({ size: "lg" })} rel="noreferrer" href={callback.link}>
             {t("continueToDashboard")}
           </a>
         </>

@@ -30,6 +30,7 @@ export type ChatGptAttempt = {
   origin: string;
   expiresAt: number;
 };
+// Official OpenAI JWKS, derived from the pinned issuer constant — never from token or request data.
 const jwks = createRemoteJWKSet(new URL(`${CHATGPT_ISSUER}/.well-known/jwks.json`));
 
 export function createChatGptAttempt(
@@ -83,6 +84,9 @@ export async function verifyChatGptIdentity(
   const { payload } = await jwtVerify(idToken, key, {
     issuer: CHATGPT_ISSUER,
     audience: clientId,
+    // Pinned: OpenAI signs ID tokens with RS256; accepting whatever the header asks for
+    // (HS256 with the public key, `none`) is how algorithm-substitution attacks get in.
+    algorithms: ["RS256"],
     requiredClaims: ["sub", "exp", "iat", "nonce"],
   });
   if (payload.nonce !== nonce || !payload.sub)

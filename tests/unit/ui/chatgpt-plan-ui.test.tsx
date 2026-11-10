@@ -21,14 +21,15 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-it("renders the outlined pill with an accessible label and decorative arrow", () => {
+it("renders the kit outline button with an accessible label and decorative arrow", () => {
   render(<ChatGptManageUsageButton />);
   const link = screen.getByRole("link", { name: "Manage usage" });
   expect(link).toHaveAttribute("href", "https://chatgpt.com/settings/usage");
   expect(link).toHaveAttribute("rel", "noopener noreferrer");
   expect(link).toHaveAttribute("target", "_blank");
-  expect(link.className).toContain("rounded-full");
-  expect(link.className).toContain("dark:border-neutral-600");
+  // Kit outline button (KEA-7886): themed by the kit tokens, no hand-rolled palette.
+  expect(link.className).toContain("ci-button--outline");
+  expect(link.className).not.toMatch(/\bdark:|neutral-\d/);
   expect(link.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
 });
 
@@ -60,7 +61,9 @@ it("shows plan permission without guessing a subscription tier", () => {
 it("makes usage management primary for a confirmed limit, with no app-credit sales", () => {
   render(<ChatGptUsageSummary limitReached />);
   expect(screen.getByRole("status")).toHaveTextContent("Usage limit reached");
-  expect(screen.getAllByRole("link", { name: "Manage usage" })[0].className).toContain("w-full");
+  const primary = screen.getAllByRole("link", { name: "Manage usage" })[0];
+  expect(primary.className).toContain("w-full");
+  expect(primary.className).toContain("ci-button--default");
   expect(screen.queryByText("Buy app credits")).toBeNull();
 });
 

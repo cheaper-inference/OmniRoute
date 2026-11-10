@@ -3,7 +3,7 @@
     "signIn": "使用 ChatGPT 登录",
     "title": "连接 ChatGPT",
     "continue": "使用 ChatGPT 继续",
-    "description": "官方 ChatGPT 登录 · 预览版。通过公共 OpenAI API 使用您的 ChatGPT 套餐。此功能与 Codex 提供商相互独立，且不会授予访问您聊天记录的权限。",
+    "description": "官方 ChatGPT 登录 · 预览版。通过公共 OpenAI API 使用您的 ChatGPT 套餐。此功能与 Codex 提供者相互独立，且不会授予访问您聊天记录的权限。",
     "eligibility": "适用于您的个人自托管实例。需遵守 OpenAI 资格要求和应用专属使用限制。共享或商业服务可能需要另行获得批准。",
     "connected": "ChatGPT 已连接。",
     "done": "完成",

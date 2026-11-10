@@ -108,6 +108,11 @@ export class ChatGptExecutor extends BaseExecutor {
     return getAccessToken("chatgpt", credentials, log);
   }
 
+  /**
+   * @executorRecovery native
+   * @executorRecoveryReason Only gates the request before dispatch (session refresh, plan-usage scope, unsupported input or tools); every accepted payload delegates to the base recovery loop unchanged.
+   * @executorRecoveryTest tests/unit/chatgpt-siwc.test.ts
+   */
   async execute(input: ExecuteInput) {
     // Re-check the granted scope after rotation; a refresh can narrow permissions.
     let credentials = input.credentials;
