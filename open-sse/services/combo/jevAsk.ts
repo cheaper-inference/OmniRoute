@@ -1,6 +1,5 @@
 /** Shared TypeSafe System One ask port for the Jev model and runtime-unit paths (opt-in). */
 
-import { getProviderCredentials } from "../../../src/sse/services/auth.ts";
 import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 import {
   evaluateSystemOneChoice,
@@ -9,6 +8,7 @@ import {
 } from "../typesafe/systemOne.ts";
 import type { ComboLogger } from "./types.ts";
 import type { JevAsk } from "./jevOrdering.ts";
+import { getProviderCredentials } from "./autoStrategy.ts";
 
 export function createJevAsk(args: {
   apiKeyAllowedConnections?: string[] | null;

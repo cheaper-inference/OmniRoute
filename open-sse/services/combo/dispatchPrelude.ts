@@ -56,6 +56,7 @@ import {
 } from "./rrState.ts";
 import { executeRuntimeUnitCombo } from "./runtimeUnits.ts";
 import { orderJevRuntimeUnits } from "./jevRuntimeUnits.ts";
+import type { JevResilienceSettings } from "./jevBlockChecker.ts";
 import {
   releaseQualityClone,
   releaseRejectedQualityResponse,
@@ -907,6 +908,8 @@ type RuntimeUnitDispatchArgs = {
   isModelAvailable?: IsModelAvailable;
   log: ComboLogger;
   settings?: Record<string, unknown> | null;
+  /** Combo-setup resilience settings; the `jev` runtime-unit gates read them. */
+  resilienceSettings: JevResilienceSettings;
   relayOptions?: HandleComboChatOptions["relayOptions"];
   signal?: AbortSignal | null;
   apiKeyAllowedConnections?: string[] | null;
@@ -937,7 +940,7 @@ async function orderRuntimeUnitsForStrategy(
     body,
     comboName: combo.name,
     config,
-    settings,
+    resilienceSettings: args.resilienceSettings,
     allCombos: allCombos ?? [],
     apiKeyAllowedConnections: args.apiKeyAllowedConnections,
     hiddenModelsByProvider: args.hiddenModelsByProvider,

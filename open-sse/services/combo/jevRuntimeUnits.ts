@@ -10,9 +10,8 @@ import {
   promptCacheTargetIdentity,
   resolvePromptCacheAffinityKey,
 } from "./promptCacheAffinity.ts";
-import { partitionJevTargetsForAsk } from "./jevBlockChecker.ts";
+import { partitionJevTargetsForAsk, type JevResilienceSettings } from "./jevBlockChecker.ts";
 import { normalizeStickinessMessages, peekSessionStickinessBinding } from "./sessionStickiness.ts";
-import { resolveResilienceSettings } from "../../../src/lib/resilience/settings.ts";
 import type {
   ComboCollectionLike,
   ComboLogger,
@@ -32,7 +31,8 @@ type JevRuntimeUnitArgs = {
   body: Record<string, unknown>;
   comboName: string;
   config: Record<string, unknown>;
-  settings?: Record<string, unknown> | null;
+  /** Resolved by the caller (combo setup) so this module needs no import edge into src/. */
+  resilienceSettings: JevResilienceSettings;
   allCombos: ComboCollectionLike;
   apiKeyAllowedConnections?: string[] | null;
   hiddenModelsByProvider?: HiddenModelsByProvider;
@@ -167,7 +167,7 @@ export async function orderJevRuntimeUnits(
   const modelPartition = await partitionJevTargetsForAsk(modelUnits, {
     body: args.body,
     config: args.config,
-    resilienceSettings: resolveResilienceSettings(args.settings),
+    resilienceSettings: args.resilienceSettings,
     log: args.log,
     comboName: args.comboName,
     isModelAvailable: args.isModelAvailable,

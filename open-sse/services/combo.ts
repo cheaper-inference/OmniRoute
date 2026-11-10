@@ -978,6 +978,7 @@ async function handleComboChatInner({
     isModelAvailable,
     log,
     settings,
+    resilienceSettings,
     relayOptions,
     signal,
     apiKeyAllowedConnections,
