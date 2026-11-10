@@ -655,8 +655,9 @@ export function createErrorResult(
      */
     rawMessage: string;
     /**
-     * The parsed upstream error JSON, for internal classifiers only (it has the fields the
-     * client-safe `response` body drops: `status`, `details`). Never part of the HTTP response.
+     * The parsed upstream error JSON, for internal classifiers only (the client-safe `error`
+     * object drops its `status` and `details`). This result field is never serialized; the HTTP
+     * body is built from `body` above, which adds only a sanitized `upstream_details` copy.
      */
     upstreamErrorBody?: unknown;
     errorType?: string;
