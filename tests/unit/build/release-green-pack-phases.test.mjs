@@ -40,15 +40,15 @@ function fixture(durations, fault = {}) {
 }
 
 test("near-ceiling successful preparation leaves a complete independent policy budget", async () => {
-  const fake = fixture([1_000, 2_373_217, 109, 156_848]);
-  const result = await observer.runPackArtifactGate(2_400_000, {
+  const fake = fixture([1_000, 5_193_217, 109, 156_848]);
+  const result = await observer.runPackArtifactGate(5_400_000, {
     ...fake,
     independentPolicy: true,
   });
   assert.equal(result.code, 0);
   assert.deepEqual(
     fake.calls.map((call) => call.options.timeout),
-    [2_400_000, 2_399_000, 25_783, 180_000]
+    [5_220_000, 5_219_000, 25_783, 180_000]
   );
   assert.deepEqual(fake.calls[3].args, ["run", "check:pack-artifact", "--", "--require-staging"]);
   assert.deepEqual(
@@ -68,14 +68,14 @@ test("quick with build retains its shared twenty-minute budget", async () => {
 });
 
 for (const [name, durations, expectedCalls, phase] of [
-  ["producer cannot borrow policy time", [2_400_001, 1, 1, 1], 1, "build-next"],
-  ["build cannot borrow policy time", [1_000, 2_399_001, 1, 1], 2, "build-cli"],
-  ["stamp remains inside preparation time", [1_000, 2_398_990, 100, 1], 3, "stamp-build-sha"],
+  ["producer cannot borrow policy time", [5_220_001, 1, 1, 1], 1, "build-next"],
+  ["build cannot borrow policy time", [1_000, 5_219_001, 1, 1], 2, "build-cli"],
+  ["stamp remains inside preparation time", [1_000, 5_218_990, 100, 1], 3, "stamp-build-sha"],
   ["policy remains bounded at three minutes", [1, 1, 1, 180_001], 4, "validate-pack-artifact"],
 ]) {
   test(name, async () => {
     const fake = fixture(durations);
-    const result = await observer.runPackArtifactGate(2_400_000, {
+    const result = await observer.runPackArtifactGate(5_400_000, {
       ...fake,
       independentPolicy: true,
     });
@@ -96,7 +96,7 @@ for (const outcome of [
 ]) {
   test(`${outcome} never permits package success or a later command`, async () => {
     const fake = fixture([1, 1, 1, 1], { index: 0, outcome, code: 0 });
-    const result = await observer.runPackArtifactGate(2_400_000, {
+    const result = await observer.runPackArtifactGate(5_400_000, {
       ...fake,
       independentPolicy: true,
     });
@@ -108,14 +108,14 @@ for (const outcome of [
 test("missing command receipt remains blocking", async () => {
   const fake = fixture([1, 1, 1, 1], { index: 0, outcome: "PASS", missingReceipt: true });
   assert.notEqual(
-    (await observer.runPackArtifactGate(2_400_000, { ...fake, independentPolicy: true })).code,
+    (await observer.runPackArtifactGate(5_400_000, { ...fake, independentPolicy: true })).code,
     0
   );
   assert.equal(fake.calls.length, 1);
 });
 
 test("independent policy cannot expand the build ceiling or change quick", async () => {
-  for (const timeout of [0, 1_200_000, 2_400_001, Infinity, NaN]) {
+  for (const timeout of [0, 1_200_000, 2_400_000, 5_400_001, Infinity, NaN]) {
     await assert.rejects(observer.runPackArtifactGate(timeout, { independentPolicy: true }));
   }
 });
@@ -149,7 +149,7 @@ function phase(overrides = {}) {
     phaseId: "validate-pack-artifact",
     mode: "independent-policy",
     budgetMs: 180_000,
-    preparationBudgetMs: 2_400_000,
+    preparationBudgetMs: 5_220_000,
     ...overrides,
   };
 }
@@ -227,7 +227,7 @@ test("different or missing UUIDs never merge independent failures", () => {
   assert.equal(observer.summarizeExecutionIncidents(checks).incidentCount, 4);
 });
 
-test("full wiring changes only policy allocation and keeps boot conditional at fifteen minutes", () => {
+test("full wiring changes only policy allocation and keeps boot conditional at forty minutes", () => {
   const source = readFileSync(
     new URL("../../../scripts/quality/validate-release-green.mjs", import.meta.url),
     "utf8"
@@ -235,7 +235,7 @@ test("full wiring changes only policy allocation and keeps boot conditional at f
   assert.match(source, /runPackArtifactGate\(timeout, \{ independentPolicy: FULL_CI \}\)/);
   assert.match(source, /runPackArtifactGate\(20 \* 60 \* 1000\)/);
   assert.match(source, /if \(!packArtifactResult \|\| packArtifactResult\.code !== 0\)/);
-  assert.match(source, /\["run", "check:pack-boot"\],[\s\S]{0,100}timeout: 15 \* 60 \* 1000/);
+  assert.match(source, /\["run", "check:pack-boot"\],[\s\S]{0,100}timeout: 40 \* 60 \* 1000/);
 });
 
 test("incident aggregation preserves the strict report verifier and all blocking checks", async () => {
@@ -270,12 +270,12 @@ test("incident aggregation preserves the strict report verifier and all blocking
 // Inspect the bounded callback argument without evaluating observer source. The
 // fake clock and runner below exercise the real allocator and receipt propagation.
 for (const [profile, budget, durations, expectedTimeouts, expectedCode] of [
-  ["full", 2_400_000, [1_000, 2_373_217, 109, 156_848], [2_400_000, 2_399_000, 25_783, 180_000], 0],
+  ["full", 5_400_000, [1_000, 5_193_217, 109, 156_848], [5_220_000, 5_219_000, 25_783, 180_000], 0],
   [
     "standard",
-    2_400_000,
-    [1_000, 2_373_217, 109, 156_848],
-    [2_400_000, 2_399_000, 25_783, 25_674],
+    5_400_000,
+    [1_000, 5_373_217, 109, 156_848],
+    [5_400_000, 5_399_000, 25_783, 25_674],
     124,
   ],
   ["quick", 1_200_000, [1_000, 1_189_000, 1, 20_000], [1_200_000, 1_199_000, 10_000, 9_999], 124],
@@ -302,6 +302,8 @@ for (const [profile, budget, durations, expectedTimeouts, expectedCode] of [
     const independentPolicy =
       profile === "quick" ? false : callbacks[0][1] === "FULL_CI" ? fullCiFlag : true;
     const expectedIndependent = profile === "full";
+    // The full lane reserves its three policy minutes inside the public budget.
+    const preparationBudget = expectedIndependent ? budget - 180_000 : budget;
     const fake = fixture(durations);
     const result = await observer.runPackArtifactGate(budget, { ...fake, independentPolicy });
     assert.deepEqual(
@@ -319,7 +321,7 @@ for (const [profile, budget, durations, expectedTimeouts, expectedCode] of [
         call.options.packPhase.mode,
         expectedIndependent ? "independent-policy" : "shared"
       );
-      assert.equal(call.options.packPhase.preparationBudgetMs, budget);
+      assert.equal(call.options.packPhase.preparationBudgetMs, preparationBudget);
       const identity = observer.makePackPhaseReference(
         call.options.packPhase,
         uuid(index + 1),
@@ -327,7 +329,7 @@ for (const [profile, budget, durations, expectedTimeouts, expectedCode] of [
       );
       assert.equal(identity.budgetMs, expectedTimeouts[index]);
       assert.equal(identity.mode, call.options.packPhase.mode);
-      assert.equal(identity.preparationBudgetMs, budget);
+      assert.equal(identity.preparationBudgetMs, preparationBudget);
     }
     if (expectedCode !== 0) {
       assert.equal(result.phaseId, "validate-pack-artifact");

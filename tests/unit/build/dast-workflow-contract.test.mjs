@@ -110,6 +110,20 @@ test("an applicable DAST cancellation, skip, missing or failed execution blocks 
   assert.deepEqual(policy.profiles.ci.jobs["dast-smoke"], {
     when: "code",
     disposition: "required",
+    domains: [
+      "build",
+      "catalog",
+      "cli",
+      "core",
+      "db",
+      "docs",
+      "i18n",
+      "provider",
+      "routing",
+      "tests",
+      "ui",
+      "workflow",
+    ],
   });
   assert.ok(ci.jobs["admission-verdict"].needs.includes("dast-smoke"));
   const context = {
