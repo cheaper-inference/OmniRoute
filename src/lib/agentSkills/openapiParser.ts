@@ -58,6 +58,7 @@ const PATH_AREA_MAP: Array<[string, SkillArea]> = [
   ["/api/keys", "api-keys"],
   // Usage logs
   ["/api/usage", "usage-logs"],
+  ["/api/log-export", "usage-logs"],
   // Budget / rate limit
   ["/api/rate-limit", "budget"],
   ["/api/budget", "budget"],

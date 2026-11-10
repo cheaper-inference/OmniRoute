@@ -7570,6 +7570,7 @@ paths:
         "200":
           description: Backup list
     post:
+      x-agent-skill-excluded: true
       tags: [System]
       summary: Restore a database backup by id
       description: >-
@@ -11506,6 +11507,7 @@ paths:
             and `oma_` access tokens get 403.
   /api/db-backups/import:
     post:
+      x-agent-skill-excluded: true
       tags:
         - Db backups
       summary: "POST db backups › import"
