@@ -771,7 +771,11 @@
       "tests/unit/issue-18600-muse-request-dispatch.test.ts",
       "tests/unit/issue-18600-muse-followup-isolation.test.ts",
       "tests/unit/universal-handoff-api-key-scope.test.ts",
-      "tests/unit/combo-avoid-stalled-account.test.ts"
+      "tests/unit/combo-avoid-stalled-account.test.ts",
+      "tests/unit/combo-lone-target-model-lock.test.ts",
+      "tests/unit/combo-sorters-narrow-metrics-read.test.ts",
+      "tests/unit/vertex-shared-capacity-429-combo-lockout.test.ts",
+      "tests/unit/vertex-shared-capacity-429-no-lockout.test.ts"
     ],
     "nodeArgs": [
       "--import",
