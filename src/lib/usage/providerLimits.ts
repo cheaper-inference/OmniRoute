@@ -3,10 +3,8 @@ import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
 import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
   captureCodexConnectionFence,
-  adoptCodexConnectionFence,
   runWithCodexConnectionFence,
   assertCodexOperationCurrent,
-  isCodexConnectionFenceCurrent,
   type CodexConnectionFence,
 } from "@/lib/db/codexConnectionFences";
 import {
@@ -68,6 +66,12 @@ import {
 } from "./providerLimits/quotaNormalize";
 import { getCachedLiveModelIds, refreshLiveModelIds } from "./providerLimits/liveModelIds";
 import { syncInChunksWithSpacing } from "./providerLimits/chunkedSpacingSync";
+import {
+  currentQuotaBatchEntries,
+  refreshedCodexFence,
+  type FetchedLimitsCache,
+  type PendingLimitsCacheEntry,
+} from "./providerLimits/codexQuotaFence";
 import {
   refreshAndUpdateCredentialsWithResolver,
   type CredentialRefreshOptions,
@@ -1004,22 +1008,6 @@ export async function fetchLiveProviderLimits(connectionId: string): Promise<{
   return fetchLiveProviderLimitsWithOptions(connectionId, { forceRefresh: false });
 }
 
-function refreshedCodexFence(
-  fence: CodexConnectionFence | null,
-  connection: ProviderConnectionLike,
-  result: { connection: ProviderConnectionLike; refreshed: boolean; adopted?: boolean }
-): CodexConnectionFence | null {
-  if (!fence || !(result.refreshed || result.adopted)) return fence;
-  return result.adopted
-    ? adoptCodexConnectionFence(
-        fence,
-        connection as unknown as JsonRecord,
-        result.connection as unknown as JsonRecord,
-        connection.id
-      )
-    : captureCodexConnectionFence(result.connection as unknown as JsonRecord, connection.id);
-}
-
 async function fetchLiveProviderLimitsWithOptions(
   connectionId: string,
   options: {
@@ -1333,31 +1321,6 @@ export async function fetchAndPersistProviderLimits(
       };
     }
     return { connection, usage: mergedUsage, cache };
-  });
-}
-
-type FetchedLimitsCache = {
-  connectionId: string;
-  cache: ProviderLimitsCacheEntry;
-  codexFence?: CodexConnectionFence | null;
-};
-type PendingLimitsCacheEntry = {
-  connectionId: string;
-  entry: ProviderLimitsCacheEntry;
-  codexFence?: CodexConnectionFence | null;
-};
-
-function currentQuotaBatchEntries(
-  entries: PendingLimitsCacheEntry[],
-  caches: Record<string, ProviderLimitsCacheEntry>,
-  errors: Record<string, string>
-): PendingLimitsCacheEntry[] {
-  // A later account can keep this batch open after an earlier response finished.
-  return entries.filter(({ connectionId, codexFence }) => {
-    if (!codexFence || isCodexConnectionFenceCurrent(codexFence)) return true;
-    delete caches[connectionId];
-    errors[connectionId] = "Codex connection changed while the quota batch was running";
-    return false;
   });
 }
 
