@@ -1,1 +1,0 @@
-- **perf(claude):** The last tool-result turn of a translated Claude tool loop now gets the 5m cache marker (when fewer than 4 markers are used), so the next call reads those tool results from cache instead of paying the full input price again. A single request that ends with a tool result and has no follow-up pays a one-time 0.25x write premium on those tokens.
