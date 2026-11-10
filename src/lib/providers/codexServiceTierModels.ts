@@ -5,5 +5,4 @@ export {
   CODEX_ULTRAFAST_MODEL_LABEL,
   CODEX_ULTRAFAST_SUPPORTED_MODELS,
   isCodexUltrafastModel,
-  scopeCodexServiceTierDefault,
 } from "@omniroute/open-sse/config/codexServiceTierModels.ts";
