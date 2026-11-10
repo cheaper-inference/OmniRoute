@@ -84,6 +84,7 @@
       "tests/unit/combo-safety-stop.test.ts",
       "tests/unit/combo-live-connection-id-18374.test.ts",
       "tests/unit/combo-authorized-retry-cooldown-18257.test.ts",
+      "tests/unit/combo-allowed-connections-limit.test.ts",
       "tests/unit/model-family-fallback-eligibility.test.ts",
       "tests/unit/noauth-autocombo-lockout-7623.test.ts",
       "tests/unit/auth-opencode-zen-noauth-fallback.test.ts",
