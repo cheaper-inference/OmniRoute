@@ -197,6 +197,8 @@ export default function UsageStats() {
         <div className="flex items-center gap-2">
           {/* View Toggle */}
           <SegmentedControl
+            semantics="radio"
+            aria-label={t("usageOverview")}
             size="sm"
             value={viewMode}
             onChange={(next) => setViewMode(next as typeof viewMode)}

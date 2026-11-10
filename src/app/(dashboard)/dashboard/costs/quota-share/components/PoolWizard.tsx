@@ -756,6 +756,7 @@ export default function PoolWizard({
                   {t("policyLabel")}
                 </span>
                 <SegmentedControl
+                  semantics="radio"
                   aria-label={t("policyLabel")}
                   size="sm"
                   value={defaultPolicy}

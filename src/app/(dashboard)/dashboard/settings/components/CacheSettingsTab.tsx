@@ -512,6 +512,8 @@ export default function CacheSettingsTab() {
                   {t("semanticCacheStorage")}
                 </p>
                 <SegmentedControl
+                  semantics="radio"
+                  aria-label={t("semanticCacheStorage")}
                   value={semBackend}
                   onChange={(val) => setSemBackend(val as "memory" | "redis")}
                   options={[

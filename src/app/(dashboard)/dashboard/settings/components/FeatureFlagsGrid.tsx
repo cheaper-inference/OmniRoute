@@ -327,6 +327,7 @@ export default function FeatureFlagsGrid() {
             {/* Description view: compact with hover tooltip vs always full text */}
             <div title={t("descriptionModeHint")}>
               <SegmentedControl
+                semantics="radio"
                 size="sm"
                 aria-label={t("descriptionModeLabel")}
                 value={descriptionMode}

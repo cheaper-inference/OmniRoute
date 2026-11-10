@@ -134,6 +134,7 @@ export default function FreeProviderRankingsPage() {
 
       {/* Filters */}
       <SegmentedControl
+        semantics="radio"
         aria-label={t("categoryFilter")}
         value={filter}
         onChange={setFilter}

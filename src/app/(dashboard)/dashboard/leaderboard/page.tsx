@@ -136,6 +136,7 @@ export default function LeaderboardPage() {
 
       {/* Scope selector */}
       <SegmentedControl
+        semantics="radio"
         aria-label={tg("scope")}
         value={scope}
         onChange={(next) => {

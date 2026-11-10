@@ -589,6 +589,8 @@ export default function CostOverviewTab() {
               </div>
             )}
             <SegmentedControl
+              semantics="radio"
+              aria-label={tc("timeRange")}
               options={RANGE_OPTIONS.map((option) => ({
                 value: option.value,
                 label: t(option.labelKey),
@@ -1076,6 +1078,8 @@ function CostExplorerCard({
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <SegmentedControl
+            semantics="radio"
+            aria-label={t("costExplorerTitle")}
             options={groupOptions}
             value={groupBy}
             onChange={(value) => onGroupByChange(value as CostExplorerGroupBy)}
