@@ -20,7 +20,7 @@ interface ModelGate {
   max: number;
   queue: QueueItem[];
   rateLimitedUntil: number | null;
-  /** Tracked timeouts for cooldown drain to allow cleanup on shutdown. */
+  /** Pending cooldown drain timeouts, tracked so resetAll() can clear them. */
   cooldownTimers?: ReturnType<typeof setTimeout>[];
 }
 
@@ -210,6 +210,8 @@ export function markRateLimited(modelStr: string, cooldownMs: number): void {
       if (idx >= 0) gate.cooldownTimers.splice(idx, 1);
     }
   }, cooldownMs + 50); // +50ms buffer
+  // A long cooldown must not keep the process alive on its own.
+  timer.unref?.();
   gate.cooldownTimers?.push(timer);
 }
 
@@ -251,16 +253,4 @@ export function resetAll(): void {
     }
   }
   gates.clear();
-}
-
-/** Stops all rate limit cooldown timers. Useful for testing and graceful shutdown. */
-export function stopRateLimitTimers(): void {
-  for (const [, gate] of gates) {
-    if (gate.cooldownTimers) {
-      for (const timer of gate.cooldownTimers) {
-        clearTimeout(timer);
-      }
-      gate.cooldownTimers = [];
-    }
-  }
 }

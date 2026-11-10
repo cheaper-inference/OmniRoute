@@ -1,8 +1,8 @@
 /**
- * #18669 — background timers and Codex WebSocket listeners must be releasable.
+ * #18669 — rate-limit cooldown timers and Codex WebSocket listeners must be releasable.
  *
- * - accountFallback, reasoningCache and rateLimitSemaphore own module-level timers; each now
- *   exposes a stop helper so tests and graceful shutdown can clear them.
+ * - rateLimitSemaphore tracks the cooldown drain timeouts it schedules, so resetAll() clears
+ *   them, and each drain timeout is unref'd so a long cooldown cannot keep a process alive.
  * - The Codex Responses-over-WebSocket stream detaches its socket listeners once it finishes,
  *   so a late frame or close event can no longer reach a finished stream.
  * - Guards for two accountSemaphore behaviours the original PR changed and that stay as on
@@ -20,23 +20,6 @@ const savedDataDir = process.env.DATA_DIR;
 process.env.DATA_DIR = dataDir;
 
 type TimerHandle = ReturnType<typeof setInterval>;
-
-/** Records every interval created while `fn` runs. */
-async function captureIntervals(fn: () => unknown): Promise<TimerHandle[]> {
-  const created: TimerHandle[] = [];
-  const realSetInterval = globalThis.setInterval;
-  globalThis.setInterval = ((...args: Parameters<typeof setInterval>) => {
-    const handle = realSetInterval(...args);
-    created.push(handle);
-    return handle;
-  }) as typeof setInterval;
-  try {
-    await fn();
-  } finally {
-    globalThis.setInterval = realSetInterval;
-  }
-  return created;
-}
 
 /** Records every handle passed to clearInterval/clearTimeout while `fn` runs. */
 function captureClears(fn: () => void): unknown[] {
@@ -70,74 +53,13 @@ after(async () => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-describe("#18669 timer stop helpers", () => {
-  it("accountFallback stops the connection-failure sweep it starts on load", async () => {
-    let mod: typeof import("../../open-sse/services/accountFallback.ts") | undefined;
-    const created = await captureIntervals(async () => {
-      mod = await import("../../open-sse/services/accountFallback.ts");
-    });
-    assert.ok(mod);
-    assert.ok(created.length > 0, "loading accountFallback starts its sweep interval");
-
-    const cleared = captureClears(() => mod!.stopConnectionFailureSweep());
-    assert.ok(
-      cleared.some((handle) => created.includes(handle as TimerHandle)),
-      "stopConnectionFailureSweep clears the interval created on load"
-    );
-  });
-
-  it("accountFallback stops the model-lockout cleanup timer and can restart it", async () => {
-    const mod = await import("../../open-sse/services/accountFallback.ts");
-    mod.stopModelLockoutCleanupTimer();
-
-    const first = await captureIntervals(() =>
-      mod.lockModel("openai", "conn-18669", "gpt-test", "rate_limit_exceeded", 1_000)
-    );
-    assert.equal(first.length, 1, "the first lockout starts the cleanup timer");
-
-    const cleared = captureClears(() => mod.stopModelLockoutCleanupTimer());
-    assert.deepEqual(cleared, [first[0]]);
-    assert.deepEqual(
-      captureClears(() => mod.stopModelLockoutCleanupTimer()),
-      [],
-      "a second stop is a no-op"
-    );
-
-    const second = await captureIntervals(() =>
-      mod.lockModel("openai", "conn-18669", "gpt-test-2", "rate_limit_exceeded", 1_000)
-    );
-    assert.equal(second.length, 1, "a lockout after stop starts a fresh cleanup timer");
-    mod.stopModelLockoutCleanupTimer();
-    mod.clearModelLock("openai", "conn-18669", "gpt-test");
-    mod.clearModelLock("openai", "conn-18669", "gpt-test-2");
-  });
-
-  it("reasoningCache stops the auto-cleanup interval it starts on load", async () => {
-    let mod: typeof import("../../open-sse/services/reasoningCache.ts") | undefined;
-    const created = await captureIntervals(async () => {
-      mod = await import("../../open-sse/services/reasoningCache.ts");
-    });
-    assert.ok(mod);
-    assert.ok(created.length > 0, "loading reasoningCache starts its cleanup interval");
-
-    const cleared = captureClears(() => mod!.stopReasoningCacheCleanupTimer());
-    assert.equal(cleared.length, 1);
-    assert.ok(created.includes(cleared[0] as TimerHandle));
-    assert.deepEqual(
-      captureClears(() => mod!.stopReasoningCacheCleanupTimer()),
-      [],
-      "a second stop is a no-op"
-    );
-  });
-});
-
 describe("#18669 rateLimitSemaphore cooldown timers", () => {
   afterEach(async () => {
     const mod = await import("../../open-sse/services/rateLimitSemaphore.ts");
     mod.resetAll();
   });
 
-  it("without stop, the cooldown timer admits the queued waiter", async () => {
+  it("the cooldown timer admits the queued waiter", async () => {
     const mod = await import("../../open-sse/services/rateLimitSemaphore.ts");
     const model = "provider-18669/model-a";
     const release = await mod.acquire(model, { maxConcurrency: 1, timeoutMs: 1_000 });
@@ -148,40 +70,22 @@ describe("#18669 rateLimitSemaphore cooldown timers", () => {
     releaseWaiter();
   });
 
-  it("stopRateLimitTimers cancels the pending cooldown drain", async () => {
-    const mod = await import("../../open-sse/services/rateLimitSemaphore.ts");
-    const model = "provider-18669/model-b";
-    const release = await mod.acquire(model, { maxConcurrency: 1, timeoutMs: 1_000 });
-    release();
-    mod.markRateLimited(model, 20);
-    let settled = false;
-    const waiter = mod.acquire(model, { maxConcurrency: 1, timeoutMs: 1_000 }).then(
-      (rel) => {
-        settled = true;
-        rel();
-      },
-      () => {
-        settled = true;
-      }
-    );
-
-    const cleared = captureClears(() => mod.stopRateLimitTimers());
-    assert.equal(cleared.length, 1, "the one scheduled cooldown timer is cleared");
-
-    await sleep(150);
-    assert.equal(settled, false, "no cooldown drain ran after the timers were stopped");
-    assert.equal(mod.getStats()[model].queued, 1);
-
-    mod.resetAll();
-    await waiter;
-  });
-
   it("resetAll clears pending cooldown timers", async () => {
     const mod = await import("../../open-sse/services/rateLimitSemaphore.ts");
     const model = "provider-18669/model-c";
     mod.markRateLimited(model, 5_000);
     const cleared = captureClears(() => mod.resetAll());
     assert.equal(cleared.length, 1);
+  });
+
+  it("the cooldown drain timeout does not keep the process alive", async () => {
+    const mod = await import("../../open-sse/services/rateLimitSemaphore.ts");
+    const model = "provider-18669/model-d";
+    mod.markRateLimited(model, 60_000);
+    const cleared = captureClears(() => mod.resetAll());
+    assert.equal(cleared.length, 1);
+    const timer = cleared[0] as ReturnType<typeof setTimeout>;
+    assert.equal(timer.hasRef(), false, "the drain timeout is unref'd");
   });
 });
 

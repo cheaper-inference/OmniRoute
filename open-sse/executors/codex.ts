@@ -999,8 +999,6 @@ export class CodexExecutor extends BaseExecutor {
     let closed = false;
     let ws: WreqWebSocket | null = null;
     let streamController: ReadableStreamDefaultController<Uint8Array> | null = null;
-    // Track terminal state to prevent enqueue after close
-    let terminalReceived = false;
 
     const closeUpstream = (reason: string) => {
       try {
@@ -1039,7 +1037,6 @@ export class CodexExecutor extends BaseExecutor {
     }) => {
       if (closed) return;
       closed = true;
-      terminalReceived = true;
       removeAbortListener();
       cleanupWsListeners();
       if (closeSocket) closeUpstream(reason);
@@ -1104,13 +1101,13 @@ export class CodexExecutor extends BaseExecutor {
             return;
           }
           ws.onmessage = (event) => {
-            if (closed || terminalReceived) return;
+            if (closed) return;
             const raw =
               typeof event.data === "string"
                 ? event.data
                 : Buffer.from(event.data as Buffer).toString("utf8");
             const sseEvent = encodeResponseSseEvent(raw);
-            if (closed || terminalReceived) return;
+            if (closed) return;
             // Filtered events (codex.* / empty payload) return an empty `sse` —
             // skip them so no empty frame reaches the client.
             if (sseEvent.sse) {
@@ -1126,7 +1123,6 @@ export class CodexExecutor extends BaseExecutor {
               }
             }
             if (sseEvent.terminal) {
-              terminalReceived = true;
               finishStream({ reason: "terminal_event" });
             }
           };
@@ -1141,7 +1137,7 @@ export class CodexExecutor extends BaseExecutor {
             // A close before any terminal event means the upstream died mid-response:
             // emit a terminal response.failed instead of ending the client stream as
             // if it completed normally (silent truncation).
-            if (closed || terminalReceived) return;
+            if (closed) return;
             cleanupWsListeners();
             const closeDetail = event
               ? ` (code ${event.code ?? "unknown"}${event.reason ? `: ${event.reason}` : ""})`
@@ -1163,12 +1159,7 @@ export class CodexExecutor extends BaseExecutor {
         }
       },
       cancel() {
-        finishStream({
-          reason: "client_cancelled",
-          emitDone: false,
-          closeController: false,
-          closeSocket: true,
-        });
+        finishStream({ reason: "client_cancelled", emitDone: false, closeController: false });
       },
     });
 
