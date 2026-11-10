@@ -3401,6 +3401,29 @@
       "stream": "https://api.inceptionlabs.ai/v1/chat/completions"
     }
   },
+  "inf-code": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://www.tokensinfinity.com/acode/v1/chat/completions",
+      "stream": "https://www.tokensinfinity.com/acode/v1/chat/completions"
+    }
+  },
   "inference-net": {
     "format": "openai",
     "headers": {
