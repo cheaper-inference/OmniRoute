@@ -253,7 +253,6 @@ import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.
 import { resolveUsageAgentContext } from "./chatCore/agentContext.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
 import { extractSessionAffinityKey } from "@/sse/services/auth";
-import { adoptCommittedCodexRefresh, persistCodexRefresh } from "@/sse/services/tokenRefresh";
 import { createManagedLeaseFence } from "./chatCore/managedLeaseFence.ts";
 
 import { getCacheControlSettings } from "@/lib/cacheControlSettings";
@@ -336,6 +335,10 @@ import {
   StaleCodexOperationError,
   type CodexConnectionFence,
 } from "../services/codexAccount/fences.ts";
+import {
+  adoptCommittedCodexRefresh,
+  persistCodexRefresh,
+} from "../services/codexAccount/refreshPersistence.ts";
 import { handleToolCallExecution } from "@/lib/skills/interception";
 import { buildClaudeCodeBridgeBody } from "./chatCore/claudeCodeBridgeBody.ts";
 import { setGeminiThoughtSignatureMode } from "../services/geminiThoughtSignatureStore.ts";

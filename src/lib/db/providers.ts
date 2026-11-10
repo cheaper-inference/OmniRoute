@@ -1050,6 +1050,44 @@ function canApplyCodexConnectionUpdate(
   return true;
 }
 
+function buildMergedConnectionUpdate(
+  data: JsonRecord,
+  existingCamel: JsonRecord,
+  opts?: ProviderConnectionUpdateOpts
+): JsonRecord {
+  const merged: JsonRecord = {
+    ...existingCamel,
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
+    data,
+    normalizeConnectionProviderSpecificData(
+      toStringOrNull(merged.provider),
+      merged.providerSpecificData,
+      merged,
+      existingCamel.providerSpecificData
+    )
+  );
+  sanitizeMergedConnectionOverrides(merged);
+  // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
+  // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
+  // so that sweep never retests it, whenever the flag is turned on.
+  if (typeof data.isActive === "boolean") {
+    merged.providerSpecificData = applyAutomaticDisableMarker(
+      merged.providerSpecificData,
+      existingCamel.isActive,
+      data.isActive,
+      undefined,
+      {
+        stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+        permanentBan: opts?.permanentBan === true,
+      }
+    );
+  }
+  return merged;
+}
+
 export async function updateProviderConnection(
   id: string,
   data: JsonRecord,
@@ -1072,36 +1110,7 @@ export async function updateProviderConnection(
     if (!existing) return null;
 
     const existingCamel = toRecord(rowToCamel(existing));
-    const merged: JsonRecord = {
-      ...existingCamel,
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
-    merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
-      data,
-      normalizeConnectionProviderSpecificData(
-        toStringOrNull(merged.provider),
-        merged.providerSpecificData,
-        merged,
-        existingCamel.providerSpecificData
-      )
-    );
-    sanitizeMergedConnectionOverrides(merged);
-    // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
-    // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
-    // so that sweep never retests it, whenever the flag is turned on.
-    if (typeof data.isActive === "boolean") {
-      merged.providerSpecificData = applyAutomaticDisableMarker(
-        merged.providerSpecificData,
-        existingCamel.isActive,
-        data.isActive,
-        undefined,
-        {
-          stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
-          permanentBan: opts?.permanentBan === true,
-        }
-      );
-    }
+    const merged = buildMergedConnectionUpdate(data, existingCamel, opts);
     const existingRecord = toRecord(existing);
 
     if (!canApplyCodexConnectionUpdate(id, merged, existingCamel, opts?.expectedCodexFence)) {

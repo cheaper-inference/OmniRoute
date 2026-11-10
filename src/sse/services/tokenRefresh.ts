@@ -3,6 +3,7 @@ import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
+import { registerCodexRefreshPersistence } from "@omniroute/open-sse/services/codexAccount/refreshPersistence.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import {
   captureCodexConnectionFence,
@@ -523,6 +524,8 @@ async function checkAndRefreshTokenInner(provider: string, credentials: any) {
 
 // Local-specific: Refresh GitHub and Copilot tokens together
 registerCredentialRefresher(checkAndRefreshToken);
+// The engine persists and adopts fenced Codex rotations through this seam (no open-sse -> src import).
+registerCodexRefreshPersistence({ adoptCommittedCodexRefresh, persistCodexRefresh });
 
 export async function refreshGitHubAndCopilotTokens(credentials: any) {
   const newGitHubCredentials = await refreshGitHubToken(credentials.refreshToken, credentials);
