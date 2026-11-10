@@ -93,3 +93,9 @@ test("gemini API-key provider lists gemini-4-carbon", () => {
 test("Carbon shares the Gemini 4 quota family with Argon", () => {
   for (const id of TIERS) assert.equal(getAntigravityQuotaFamily(`agy/${id}`), "argon");
 });
+
+test("Antigravity executor caps Carbon tiers at the declared 65535, not the 16384 fallback", async () => {
+  const { resolveAntigravityOutputCap } =
+    await import("../../open-sse/executors/antigravityOutputCap.ts");
+  for (const id of TIERS) assert.equal(resolveAntigravityOutputCap(id), 65535, id);
+});
