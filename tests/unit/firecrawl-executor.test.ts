@@ -5,7 +5,7 @@ const { firecrawlFetch } = await import("../../open-sse/executors/firecrawl-fetc
 
 // ── firecrawlFetch tests ──────────────────────────────────────────────────────
 
-test("firecrawlFetch calls api.firecrawl.dev/v1/scrape with Bearer auth", async () => {
+test("firecrawlFetch calls api.firecrawl.dev/v2/scrape with Bearer auth", async () => {
   const originalFetch = globalThis.fetch;
   let captured: { url: string; headers: Record<string, string>; body: Record<string, unknown> } = {
     url: "",
@@ -35,7 +35,7 @@ test("firecrawlFetch calls api.firecrawl.dev/v1/scrape with Bearer auth", async 
     });
 
     assert.equal(result.success, true);
-    assert.equal(captured.url, "https://api.firecrawl.dev/v1/scrape");
+    assert.equal(captured.url, "https://api.firecrawl.dev/v2/scrape");
     assert.equal(captured.headers["Authorization"], "Bearer fc-test-key");
     assert.deepEqual(captured.body.formats, ["markdown"]);
     assert.equal(captured.body.url, "https://example.com");
@@ -178,7 +178,40 @@ test("firecrawlFetch forwards depth and wait_for_selector", async () => {
     });
 
     assert.equal(capturedBody.maxDepth, 1, "should set maxDepth");
-    assert.equal(capturedBody.waitFor, "article", "should set waitFor");
+    assert.deepEqual(
+      capturedBody.actions,
+      [{ type: "wait", selector: "article" }],
+      "should set actions wait selector"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("firecrawlFetch forwards numeric wait_for_selector as waitFor milliseconds", async () => {
+  const originalFetch = globalThis.fetch;
+  let capturedBody: Record<string, unknown> = {};
+
+  globalThis.fetch = async (_url, init = {}) => {
+    capturedBody = JSON.parse(String((init as RequestInit).body ?? "{}"));
+    return new Response(JSON.stringify({ data: { markdown: "" } }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  };
+
+  try {
+    await firecrawlFetch({
+      url: "https://example.com",
+      format: "markdown",
+      depth: 0,
+      waitForSelector: "1500",
+      includeMetadata: false,
+      credentials: { apiKey: "fc-key" },
+    });
+
+    assert.equal(capturedBody.waitFor, 1500, "should set numeric waitFor ms");
+    assert.equal(capturedBody.actions, undefined, "should not set actions for numeric delay");
   } finally {
     globalThis.fetch = originalFetch;
   }

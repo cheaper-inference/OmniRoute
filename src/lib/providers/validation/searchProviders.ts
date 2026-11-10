@@ -265,7 +265,7 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
       headers["Authorization"] = `Bearer ${apiKey}`;
     }
     return {
-      url: `${baseUrl}/v1/scrape`,
+      url: `${baseUrl}/v2/scrape`,
       init: {
         method: "POST",
         headers,

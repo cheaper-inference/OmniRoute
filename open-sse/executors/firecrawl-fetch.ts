@@ -2,7 +2,7 @@
  * Firecrawl Web Fetch Executor
  *
  * Fetches content from a URL using the Firecrawl scrape API.
- * POST https://api.firecrawl.dev/v1/scrape
+ * POST https://api.firecrawl.dev/v2/scrape
  *
  * Free tier: 1,000 credits/month, no credit card required.
  * Docs: https://docs.firecrawl.dev/api-reference/endpoint/scrape
@@ -24,7 +24,8 @@ function getFirecrawlBaseUrl(credentials?: WebFetchCredentials): string {
   const envBase = process.env.FIRECRAWL_BASE_URL?.trim();
   if (envBase) return envBase.replace(/\/+$/, "");
   const providerData = credentials?.providerSpecificData;
-  const credBase = typeof credentials?.baseUrl === "string" ? credentials.baseUrl : providerData?.baseUrl;
+  const credBase =
+    typeof credentials?.baseUrl === "string" ? credentials.baseUrl : providerData?.baseUrl;
   if (typeof credBase === "string" && credBase.trim()) {
     return credBase.trim().replace(/\/+$/, "");
   }
@@ -102,7 +103,18 @@ export async function firecrawlFetch(opts: FirecrawlScrapeOptions): Promise<WebF
   }
 
   if (waitForSelector) {
-    requestBody.waitFor = waitForSelector;
+    const trimmed = waitForSelector.trim();
+    const asNum = Number(trimmed);
+    if (Number.isFinite(asNum) && asNum >= 0) {
+      requestBody.waitFor = asNum;
+    } else {
+      requestBody.actions = [
+        {
+          type: "wait",
+          selector: trimmed,
+        },
+      ];
+    }
   }
 
   const controller = new AbortController();
@@ -119,7 +131,7 @@ export async function firecrawlFetch(opts: FirecrawlScrapeOptions): Promise<WebF
       headers.Authorization = `Bearer ${credentials.apiKey}`;
     }
 
-    const response = await fetch(`${baseUrl}/v1/scrape`, {
+    const response = await fetch(`${baseUrl}/v2/scrape`, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
