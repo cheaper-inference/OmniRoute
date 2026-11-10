@@ -309,6 +309,7 @@
       "tests/unit/claude-passthrough-empty-response.test.ts",
       "tests/unit/claude-passthrough-stream-boolean.test.ts",
       "tests/unit/claude-passthrough-thinking-2454.test.ts",
+      "tests/unit/openclaw-auto-order-domain-read.test.ts",
       "tests/unit/cli-simulate.test.ts",
       "tests/unit/cline-response-envelope.test.ts",
       "tests/unit/clinepass-provider.test.ts",
