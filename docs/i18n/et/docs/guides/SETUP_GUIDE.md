@@ -198,11 +198,11 @@ Täieliku tabeli (mida iga käsk kirjutab, kõik lipud, kohalik või kaugühendu
 
 ---
 
-## Protokollide seadistamine (MCP + A2A)
+## Protokolli seadistamine (MCP + A2A)
 
-### MCP seadistamine (Model Context Protocol)
+### MCP seadistamine (mudeli kontekstiprotokoll)
 
-Käivitage MCP-transport stdio-režiimis:
+Käivitage MCP transport stdio režiimis:
 
 ```bash
 omniroute --mcp
@@ -211,28 +211,28 @@ omniroute --mcp
 Soovitatav valideerimisvoog:
 
 ```bash
-# 1. Käivitage MCP-server
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Kutsuge oma MCP-kliendist välja:
-omniroute_get_health        # Peaks tagastama süsteemi seisundi
-omniroute_list_combos       # Peaks tagastama aktiivsed kombinatsioonid
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Või käivitage täielik E2E-testikomplekt:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP-kliendi seadistamine
+#### MCP kliendi konfiguratsioon
 
-**Claude Code:**
+**Claude kood:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Lisage oma MCP-sätetesse:
+Lisage oma MCP seadetesse (stdio, klahviga, et helistajal oleks põhiline):
 
 ```json
 {
@@ -240,23 +240,30 @@ Lisage oma MCP-sätetesse:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Täielik MCP-dokumentatsioon:** [MCP-serveri README](../../open-sse/mcp-server/README.md) — 110 tööriista, IDE konfiguratsioonid, Pythoni/TS-i/Go kliendid.
+Või kui `mcpTransport` on `streamable-http` (seadke see `/dashboard/mcp` või `omniroute mcp enable --transport streamable-http`-le), suunake kliendi kaug- MCP serveri kirje `http://localhost:20128/api/mcp/stream`.
 
-### A2A seadistamine (agentidevaheline protokoll)
+Võti liigub `Authorization: Bearer <api-key>` (vt [MCP Server → Kaughostide kaugjuurdepääs](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ; kaugvõti vajab `mcp:connect` ja selle read/write ulatuseid).
 
-Kontrollige agendikaarti:
+**Täielik MCP dokumentatsioon:** [MCP server README](../../open-sse/mcp-server/README.md) — 110 tööriistad, IDE konfiguratsioonid, Python/TS/Go kliendid. Operaatori viide CCR/dedup tihendustööriistadele (markerid, eeltingimused, tööriistapõhised ulatused, otsingu leheküljed, diagnostika): [Compression Engines → Eeltingimused / kasutaja juhend](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A seadistamine (agent-agendi protokoll)
+
+Kinnitage agendikaart:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Saatke ülesanne:
+Saada ülesanne:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Täielik A2A-dokumentatsioon:** [A2A-serveri README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, oskused, voogedastus, ülesande elutsükkel.
+**Täielik A2A dokumentatsioon:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, oskused, voogesitus, ülesannete elutsükkel.
 
 ---
 
@@ -323,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linuxi (xbps-src) mall
+## Kehtetu Linux (xbps-src) mall
 
-Void Linuxi kasutajad saavad luua omapaketi tööriistaga `xbps-src`. Salvesta see plokk failina `srcpkgs/omniroute/template`:
+Void Linux kasutajad saavad luua natiivse paketi `xbps-src` abil. Salvestage see plokk `srcpkgs/omniroute/template`:
 
 ```bash
-# Mallifail paketile „omniroute“
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Genereeri iga väljalaske jaoks kontrollsumma uuesti käsuga:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"
