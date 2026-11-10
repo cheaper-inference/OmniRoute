@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-123 flags across 6 categories. **Default** is the definition default — the value
+124 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (11)
@@ -123,7 +123,7 @@ Invalid enum values and unreadable feature-flag storage fail closed. Neither opt
 priced spend or a failed pricing lookup. Enforcement and the administrator report resolve the
 same effective policy.
 
-### Runtime (60)
+### Runtime (61)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -189,6 +189,7 @@ same effective policy.
 | `SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED`         | boolean | `false` |         | Let `POST /v1/systemone` serve the `cloudflare-ai/<jev\|clef\|clef-flash>` decisions models (alias `cf/`) on Cloudflare Workers AI through the existing `cloudflare-ai` connection (#16676). Jev on Cloudflare draws AI Gateway credits; Clef draws Workers AI neurons. Off by default: those model ids are refused with a 400 and no upstream call.                                                                                                                                                                                                                                                                                            |
 | `SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED`       | boolean | `false` |         | Let `POST /v1/systemone` serve `ollama-local/<model>` decisions models on the local Ollama configured in the existing `ollama-local` connection (its base URL, never a request field) (#14667). Ollama's own limits apply before any upstream call: 2-26 candidates per choice/score question, at most 64 questions, no chat sampling fields, raw base64 images only. Off by default: those model ids are refused with a 400 and no upstream call.                                                                                                                                                                                              |
 | `COMBO_JEV_STRATEGY_ENABLED`                   | boolean | `false` |         | Let combos that use the `jev` strategy ask TypeSafe System One (Jev) which of their models should answer each request (#15279). Every routed request then sends a bounded excerpt of the conversation to api.typesafe.ai and draws paid TypeSafe usage on the configured `typesafe` connection; a stored TypeSafe key alone never turns it on. Off by default: jev combos make no TypeSafe call and keep the operator's preference order.                                                                                                                                                                                                       |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Let an automatic web search (no explicit `provider`) use a connected Codex (ChatGPT) account through `codex-search`: as the last resort ahead of the keyless providers when no credentialed search provider is usable, and as the failover alternate (#17933). Each such search spends ChatGPT subscription quota and takes about 10–40 s. Off by default: `codex-search` runs only when a request names it explicitly.                                                                                                                                                                                                                         |
 
 ### CLI (5)
 
@@ -286,10 +287,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 123 flags
+    // ... all 124 flags
   ],
   "summary": {
-    "total": 123,
+    "total": 124,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

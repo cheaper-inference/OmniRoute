@@ -20,9 +20,18 @@ import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { FilterSelect, HeroStat, SyncMini } from "./PricingTabHelpers";
 import {
-  collectConnectedProviderIds,
+  fetchPricingBundle,
+  hasPricingConfiguration,
+  type PricingBundle,
+  type PricingCatalogModel,
+  type PricingCatalogProvider,
+  type PricingSource,
+  type SyncStatus,
+} from "./pricingBundle";
+import {
   isPricingProviderConfigured,
   modelsMatchingSearch,
+  pricingDisplayModeOptions,
   providersForComparison,
   type PricingDisplayMode,
 } from "./pricingTabFilters";
@@ -47,33 +56,6 @@ const FIELD_LABEL_KEYS: Record<(typeof PRICING_FIELDS)[number], string> = {
 };
 
 type PricingField = (typeof PRICING_FIELDS)[number];
-type PricingSource = "default" | "litellm" | "modelsDev" | "user";
-
-interface SyncStatus {
-  enabled: boolean;
-  lastSync: string | null;
-  lastSyncModelCount: number;
-  nextSync: string | null;
-  intervalMs: number;
-  sources: string[];
-}
-
-interface PricingCatalogModel {
-  id: string;
-  name: string;
-  custom?: boolean;
-}
-
-interface PricingCatalogProvider {
-  id: string;
-  alias: string;
-  authType: string;
-  format: string;
-  modelCount: number;
-  models: PricingCatalogModel[];
-  /** Original pricing namespace (e.g. public prefix) when it differs from `alias`. */
-  pricingKey?: string;
-}
 
 function getSourceTone(source: PricingSource): string {
   switch (source) {
@@ -88,51 +70,6 @@ function getSourceTone(source: PricingSource): string {
   }
 }
 
-type PricingBundle = {
-  catalog?: Record<string, PricingCatalogProvider>;
-  pricing?: Record<string, Record<string, Record<string, number>>>;
-  sources?: Record<string, Record<string, PricingSource>>;
-  sync?: SyncStatus;
-  connectedProviderIds?: Set<string>;
-  blockedProviders?: string[];
-};
-
-async function fetchPricingBundle(): Promise<PricingBundle> {
-  const [catalogRes, pricingRes, syncRes, connectionsRes, settingsRes] = await Promise.all([
-    fetch("/api/pricing/models"),
-    fetch("/api/pricing?includeSources=1"),
-    fetch("/api/pricing/sync"),
-    fetch("/api/providers"),
-    fetch("/api/settings", { cache: "no-store" }),
-  ]);
-  const bundle: PricingBundle = {};
-  if (catalogRes.ok) {
-    bundle.catalog = (await catalogRes.json()) as Record<string, PricingCatalogProvider>;
-  }
-  if (pricingRes.ok) {
-    const pricingPayload = (await pricingRes.json()) as {
-      pricing?: Record<string, Record<string, Record<string, number>>>;
-      sourceMap?: Record<string, Record<string, PricingSource>>;
-    };
-    bundle.pricing = pricingPayload.pricing || {};
-    bundle.sources = pricingPayload.sourceMap || {};
-  }
-  if (syncRes.ok) {
-    bundle.sync = (await syncRes.json()) as SyncStatus;
-  }
-  if (connectionsRes.ok) {
-    const { connections } = (await connectionsRes.json()) as { connections?: unknown };
-    bundle.connectedProviderIds = collectConnectedProviderIds(
-      Array.isArray(connections) ? connections : []
-    );
-  }
-  if (settingsRes.ok) {
-    const { blockedProviders } = (await settingsRes.json()) as { blockedProviders?: unknown };
-    bundle.blockedProviders = Array.isArray(blockedProviders) ? blockedProviders : [];
-  }
-  return bundle;
-}
-
 export default function PricingTab() {
   const [catalog, setCatalog] = useState<Record<string, PricingCatalogProvider>>({});
   const [pricingData, setPricingData] = useState<
@@ -144,6 +81,8 @@ export default function PricingTab() {
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [connectedProviderIds, setConnectedProviderIds] = useState<Set<string>>(new Set());
   const [blockedProviders, setBlockedProviders] = useState<string[]>([]);
+  // Stays true once the Configured inputs have loaded; a later failed reload keeps them.
+  const [configurationLoaded, setConfigurationLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -177,6 +116,7 @@ export default function PricingTab() {
     if (bundle.sync) setSyncStatus(bundle.sync);
     if (bundle.connectedProviderIds) setConnectedProviderIds(bundle.connectedProviderIds);
     if (bundle.blockedProviders) setBlockedProviders(bundle.blockedProviders);
+    if (hasPricingConfiguration(bundle)) setConfigurationLoaded(true);
     setLoading(false);
   }, []);
 
@@ -291,15 +231,18 @@ export default function PricingTab() {
 
   // #18642: model-centric view — the providers the auth and Configured filters keep,
   // grouped by model with each offer's price, cheapest first.
-  const compareGroups = useMemo(() => {
-    if (viewMode !== "compare") return [];
+  const { compareGroups, compareProviderCount } = useMemo(() => {
+    if (viewMode !== "compare") return { compareGroups: [], compareProviderCount: 0 };
     const providers = providersForComparison(allProviders, {
       authFilter,
       displayMode,
       connectedProviderIds,
       blockedProviders,
     });
-    return buildModelComparison(providers, pricingData, { searchQuery });
+    return {
+      compareGroups: buildModelComparison(providers, pricingData, { searchQuery }),
+      compareProviderCount: providers.length,
+    };
   }, [
     viewMode,
     allProviders,
@@ -746,13 +689,11 @@ export default function PricingTab() {
             label={t("providers")}
             value={displayMode}
             onChange={(v) => setDisplayMode(v as PricingDisplayMode)}
-            options={[
-              { value: "all", label: `${t("pricingAll")} (${allProviders.length})` },
-              {
-                value: "configured",
-                label: `${tGlobal("providers.showConfiguredOnly")} (${configuredCount})`,
-              },
-            ]}
+            options={pricingDisplayModeOptions(
+              `${t("pricingAll")} (${allProviders.length})`,
+              `${tGlobal("providers.showConfiguredOnly")} (${configuredCount})`,
+              configurationLoaded
+            )}
           />
 
           <FilterSelect
@@ -834,6 +775,8 @@ export default function PricingTab() {
       {viewMode === "compare" && (
         <PricingCompareView
           groups={compareGroups}
+          searchQuery={searchQuery}
+          providerCount={compareProviderCount}
           visibleCount={visibleCount}
           onShowMore={() => setVisibleCount((c) => c + VISIBLE_INCREMENT)}
           showMoreIncrement={VISIBLE_INCREMENT}

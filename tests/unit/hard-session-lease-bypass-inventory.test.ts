@@ -234,7 +234,12 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/settings/export-json/route.ts": 1,
     "src/app/api/settings/qdrant/embedding-models/route.ts": 1,
     "src/app/api/settings/route.ts": 1,
-    "src/app/api/token-health/route.ts": 1,
+    // 18666 (token bulk refresh wave): the POST /api/token-health refresh-all
+    // endpoint reads the active OAuth connection rows once to build the wave
+    // (exclusions + per-connection ids). Read-only lookup behind
+    // requireManagementAuth; it never selects a connection to serve a
+    // request, so it stays class C.
+    "src/app/api/token-health/route.ts": 2,
     "src/app/api/translator/send/route.ts": 1,
     "src/app/api/translator/translate/route.ts": 1,
     "src/app/api/usage/call-logs/route.ts": 1,

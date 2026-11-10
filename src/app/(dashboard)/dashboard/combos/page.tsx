@@ -3468,12 +3468,20 @@ function ComboFormModal({
                             ? usesIntelligentBuilderStage
                             : builderStageChecks.strategy;
 
+                  const stageStatus =
+                    index < currentStageIndex
+                      ? getI18nOrFallback(t, "builderStageVisited", "Visited")
+                      : isActive
+                        ? getI18nOrFallback(t, "builderStageCurrent", "Current")
+                        : canVisitStage
+                          ? getI18nOrFallback(t, "builderStagePending", "Pending")
+                          : getI18nOrFallback(t, "builderStageLocked", "Locked");
+
                   return (
-                    // kit-exception: a stage tile of the builder stepper (icon, label,
-                    // description, status line); the kit Button is a single-line pill.
-                    <button
+                    // A stage of the builder stepper: a kit Tile (action), with the current
+                    // stage marked by aria-current="step" rather than a pressed toggle.
+                    <Tile
                       key={stageMeta.id}
-                      type="button"
                       aria-current={isActive ? "step" : undefined}
                       data-testid={`combo-builder-stage-${stageMeta.id}`}
                       onClick={() => {
@@ -3481,15 +3489,10 @@ function ComboFormModal({
                         setBuilderStage(stageMeta.id);
                       }}
                       disabled={!canVisitStage}
-                      className={`text-start rounded-lg border px-3 py-2 transition-all ${
-                        isActive
-                          ? "border-primary bg-primary/8"
-                          : canVisitStage
-                            ? "border-border bg-surface hover:border-primary/40"
-                            : "border-border bg-bg-subtle opacity-60 cursor-not-allowed"
+                      className={`gap-2 px-3 py-2 ${
+                        isActive ? "border-primary bg-primary/8 hover:border-primary" : ""
                       }`}
-                    >
-                      <div className="flex items-center gap-1.5">
+                      icon={
                         <Icon
                           name={isCompleted && !isActive ? "check_circle" : stageMeta.icon}
                           size={14}
@@ -3501,31 +3504,22 @@ function ComboFormModal({
                                 : "text-text-muted"
                           }
                         />
-                        <span className="text-[11px] font-semibold text-text-main">
-                          {getI18nOrFallback(
-                            t,
-                            `builderStage.${stageMeta.id}.label`,
-                            stageMeta.fallbackLabel
-                          )}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-text-muted mt-1 leading-[1.45]">
-                        {getI18nOrFallback(
-                          t,
-                          `builderStage.${stageMeta.id}.description`,
-                          stageMeta.fallbackDescription
-                        )}
-                      </p>
-                      <p className="text-[9px] uppercase tracking-wide mt-1 text-text-muted">
-                        {index < currentStageIndex
-                          ? getI18nOrFallback(t, "builderStageVisited", "Visited")
-                          : isActive
-                            ? getI18nOrFallback(t, "builderStageCurrent", "Current")
-                            : canVisitStage
-                              ? getI18nOrFallback(t, "builderStagePending", "Pending")
-                              : getI18nOrFallback(t, "builderStageLocked", "Locked")}
-                      </p>
-                    </button>
+                      }
+                      title={getI18nOrFallback(
+                        t,
+                        `builderStage.${stageMeta.id}.label`,
+                        stageMeta.fallbackLabel
+                      )}
+                      description={getI18nOrFallback(
+                        t,
+                        `builderStage.${stageMeta.id}.description`,
+                        stageMeta.fallbackDescription
+                      )}
+                    >
+                      <span className="text-xs uppercase tracking-wide text-text-muted">
+                        {stageStatus}
+                      </span>
+                    </Tile>
                   );
                 })}
               </div>

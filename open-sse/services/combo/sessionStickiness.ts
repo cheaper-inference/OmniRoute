@@ -65,7 +65,10 @@ import type { ResolvedComboTarget } from "./types.ts";
  */
 export const STICKINESS_HEADROOM_THRESHOLD = 0.15;
 
-/** TTL aligned with sessionManager.ts SESSION_TTL_MS (15 min). */
+/**
+ * TTL matching the sessionManager.ts SESSION_TTL_MS default (15 min). Fixed here:
+ * OMNIROUTE_SESSION_TTL_MIN only changes the sessionManager map, not combo bindings.
+ */
 const TTL_MS = 15 * 60 * 1000;
 
 /** Cap to prevent unbounded memory growth. */
