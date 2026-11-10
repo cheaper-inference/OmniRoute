@@ -1,1 +1,0 @@
-- **fix(db):** operators on Linux and macOS can set `OMNIROUTE_SQLITE_CHILD_PROBE=1` to test the better-sqlite3 addon in a child process at boot, so an addon that crashes on load falls back to another SQLite driver instead of killing the server. Off by default.

@@ -1,1 +1,0 @@
-- **perf(scripts):** `npm run perf:lts-baseline` can measure time to the first text, reasoning or tool event of a real streaming request (OpenAI chat, Claude Messages or Responses) next to the first body byte, with `--stream-url`, `--stream-model` and `--stream-format`.

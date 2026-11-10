@@ -1,0 +1,1 @@
+- **perf(quota):** credential selection no longer repeats the same empty quota-snapshot query for every candidate on every request; connections without snapshots are looked up once per 30 seconds. ([#19764](https://github.com/cheaper-inference/OmniRoute/pull/19764))
