@@ -73,7 +73,7 @@
 
 |                          |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------ | :--------------------: | :---------: | :-------------------: |
-| 🌐 প্রোভাইডার            |          352           |   **358**   |          387          |
+| 🌐 প্রোভাইডার            |          352           |   **358**   |          388          |
 | 🧠 অনন্য চ্যাট মডেল আইডি |          1320          |  **1374**   |         1491          |
 | 🖼️ মোডালিটি ব্রিজ        | 🆕 ভিশন + অডিও + ভিডিও |      ✓      |           ✓           |
 | 📡 Radar ফ্রি ক্যাটালগ   |       🆕 অপ্ট-ইন       |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ বৈশিষ্ট্য</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 কম্বো</a></td>
-    <td align="center"><a href="#-387-ai-providers--153-catalog-marked-free">🌐 প্রদানকারী</a></td>
+    <td align="center"><a href="#-388-ai-providers--153-catalog-marked-free">🌐 প্রদানকারী</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ওamp; MCP</a></td>
   </tr>
   <tr>
@@ -605,7 +605,7 @@ Radar ব্যবহার ঐচ্ছিক এবং এটি কেবল 
 - **🖼️ নতুন endpoint** — `/v1/ocr` (Mistral OCR) এবং `/v1/audio/translations` (Whisper-style) media surface সম্পূর্ণ করে। → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Image / video / audio generation** — media-এর জন্য একটি API: xAI Grok Imagine ও Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind এবং ElevenLabs-এর মতো speech provider। → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment ও ops** — reverse-proxy `basePath`, browser-language auto-detect, প্রতি-কী device tracking, root-less MITM trust, zh-TW localization। → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 আরও প্রোভাইডার ও এজেন্ট** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login-সহ Grok Build (xAI), Ollama first-class card, Claude Opus 5 ও Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… এবং নতুন করে সাজানো **387-provider catalog**। → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 আরও প্রোভাইডার ও এজেন্ট** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login-সহ Grok Build (xAI), Ollama first-class card, Claude Opus 5 ও Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… এবং নতুন করে সাজানো **388-provider catalog**। → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 রাউটিং স্বচ্ছতা** — প্রতিটি response-এ একটি `X-OmniRoute-Decision` header থাকে, যা এটি পরিবেশন করা strategy/provider/latency-এর নাম জানায়; নতুন `cache-optimized` combo strategy এবং Auto-Combo `cacheAffinity` factor পুনরাবৃত্তি হওয়া অনুরোধগুলোকে cached prefix ধারণকারী connection-এ ফেরত পাঠায়; আর একটি read-only `/v1/auto-combo/{channel}/candidates` endpoint কোনো `auto/*` channel-এর live candidate pool প্রকাশ করে। → [Auto-Combo](docs/routing/AUTO-COMBO.md)।
 - **⚡ স্থানীয় পারফরম্যান্স ও অবকাঠামো** — এক-ক্লিকে স্থানীয় Redis, Cloudflare Workers / Deno Deploy রিলে ডিপ্লয়মেন্টকারী, এবং তত্ত্বাবধানে চলা এমবেডেড পরিষেবা হিসেবে Bifrost ও Mux। → [এমবেডেড পরিষেবা](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 আরও যা অন্তর্ভুক্ত রয়েছে** — প্লাগইন ফ্রেমওয়ার্ক ও মার্কেটপ্লেস, Omni/Agent/GitHub স্কিলস ফ্রেমওয়ার্ক, Obsidian ভল্ট ইন্টিগ্রেশন (22টি MCP টুল), OpenAI-সামঞ্জস্যপূর্ণ Batch ও Files API, সেমান্টিক রেসপন্স ক্যাশ, লিডারবোর্ডসহ গ্যামিফিকেশন, ACP এজেন্ট আবিষ্কার (15টি বিল্ট-ইন এজেন্ট), BigQuery-তে নির্ধারিত সময়ে লগ এক্সপোর্ট, `auto/chaos` সমান্তরাল মাল্টি-মডেল ফ্যান-আউট, একটি Telegram বট ব্রিজ, ইন-অ্যাপ ভার্সন ম্যানেজার এবং LMArena-ELO বিনামূল্যের প্রোভাইডার র্যাঙ্কিং। → [ডকুমেন্টেশন](docs/README.md)
