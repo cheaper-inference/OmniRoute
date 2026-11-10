@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "It-trasformazzjoni tal-fluss falliet"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokens tal-API (dan iċ-ċiklu)",
+    "cursorModelUsageBilledHint": "Iffatturat minn Cursor",
+    "cursorModelUsageModel": "Mudell",
+    "cursorModelUsageInput": "Dħul",
+    "cursorModelUsageOutput": "Riżultat",
+    "cursorModelUsageCacheRead": "Qari mill-cache",
+    "cursorModelUsageCacheWrite": "Kitba fil-Cache",
+    "cursorModelUsageCost": "Spiża",
     "healthExtraUsageBypass": "Il-kwota ntużat kollha; l-użu żejjed huwa permess, għalhekk is-servizz ikompli.",
     "healthPaidCreditsBypass": "Il-kwota ntużat kollha; il-krediti mħallsa disponibbli jippermettu li s-servizz ikompli.",
     "healthFilteringBypass": "Il-kwota ntużat kollha; il-filtrazzjoni lokali tal-kwoti hija diżattivata, għalhekk is-servizz ikompli.",

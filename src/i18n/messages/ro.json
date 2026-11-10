@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Eșec la transformarea fluxului"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokenuri API (acest ciclu)",
+    "cursorModelUsageBilledHint": "Facturat de Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Intrare",
+    "cursorModelUsageOutput": "Ieșire",
+    "cursorModelUsageCacheRead": "Citire din cache",
+    "cursorModelUsageCacheWrite": "Scriere în cache",
+    "cursorModelUsageCost": "Cost",
     "healthExtraUsageBypass": "Cota este epuizată; utilizarea suplimentară este permisă, deci serviciul continuă.",
     "healthPaidCreditsBypass": "Cota este epuizată; creditele plătite disponibile permit continuarea serviciului.",
     "healthFilteringBypass": "Cota este epuizată; filtrarea locală a cotelor este dezactivată, deci serviciul continuă.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Transformace streamu se nezdařila"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokeny (tento cyklus)",
+    "cursorModelUsageBilledHint": "Účtováno službou Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Vstup",
+    "cursorModelUsageOutput": "Výstup",
+    "cursorModelUsageCacheRead": "Čtení z mezipaměti",
+    "cursorModelUsageCacheWrite": "Zápis do mezipaměti",
+    "cursorModelUsageCost": "Náklady",
     "healthExtraUsageBypass": "Kvóta je vyčerpána; dodatečné využití je povoleno, takže služba pokračuje.",
     "healthPaidCreditsBypass": "Kvóta je vyčerpána; dostupné placené kredity umožňují pokračování služby.",
     "healthFilteringBypass": "Kvóta je vyčerpána; místní filtrování kvót je vypnuto, takže služba pokračuje.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "ストリームの変換に失敗しました"
   },
   "usage": {
+    "cursorModelUsageTitle": "APIトークン（今期）",
+    "cursorModelUsageBilledHint": "Cursor による請求額",
+    "cursorModelUsageModel": "モデル",
+    "cursorModelUsageInput": "入力",
+    "cursorModelUsageOutput": "出力",
+    "cursorModelUsageCacheRead": "キャッシュ読み取り",
+    "cursorModelUsageCacheWrite": "キャッシュ書き込み",
+    "cursorModelUsageCost": "コスト",
     "healthExtraUsageBypass": "割り当てを使い切りましたが、追加使用が許可されているためサービスを継続します。",
     "healthPaidCreditsBypass": "割り当てを使い切りましたが、利用可能な有料クレジットでサービスを継続できます。",
     "healthFilteringBypass": "割り当てを使い切りましたが、ローカルの割り当てフィルタリングが無効なためサービスを継続します。",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Gagal mengubah strim"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (kitaran ini)",
+    "cursorModelUsageBilledHint": "Dibilkan oleh Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Input",
+    "cursorModelUsageOutput": "Output",
+    "cursorModelUsageCacheRead": "Bacaan cache",
+    "cursorModelUsageCacheWrite": "Tulis Cache",
+    "cursorModelUsageCost": "Kos",
     "healthExtraUsageBypass": "Kuota telah habis; penggunaan tambahan dibenarkan, jadi perkhidmatan diteruskan.",
     "healthPaidCreditsBypass": "Kuota telah habis; kredit berbayar yang tersedia membolehkan perkhidmatan diteruskan.",
     "healthFilteringBypass": "Kuota telah habis; penapisan kuota setempat dilumpuhkan, jadi perkhidmatan diteruskan.",

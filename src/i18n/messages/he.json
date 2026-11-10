@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "המרת הזרם נכשלה"
   },
   "usage": {
+    "cursorModelUsageTitle": "אסימוני API (המחזור הנוכחי)",
+    "cursorModelUsageBilledHint": "מחויב על ידי Cursor",
+    "cursorModelUsageModel": "דגם",
+    "cursorModelUsageInput": "קלט",
+    "cursorModelUsageOutput": "פלט",
+    "cursorModelUsageCacheRead": "קריאה מהמטמון",
+    "cursorModelUsageCacheWrite": "כתוב מטמון",
+    "cursorModelUsageCost": "עלות",
     "healthExtraUsageBypass": "המכסה נוצלה; שימוש נוסף מותר, ולכן השירות נמשך.",
     "healthPaidCreditsBypass": "המכסה נוצלה; יתרת קרדיטים בתשלום מאפשרת את המשך השירות.",
     "healthFilteringBypass": "המכסה נוצלה; סינון המכסות המקומי כבוי, ולכן השירות נמשך.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Stream konnte nicht transformiert werden"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-Token (dieser Zyklus)",
+    "cursorModelUsageBilledHint": "Von Cursor abgerechnet",
+    "cursorModelUsageModel": "Modell",
+    "cursorModelUsageInput": "Eingabe",
+    "cursorModelUsageOutput": "Ausgabe",
+    "cursorModelUsageCacheRead": "Cache-Lesevorgang",
+    "cursorModelUsageCacheWrite": "Cache-Schreiben",
+    "cursorModelUsageCost": "Kosten",
     "healthExtraUsageBypass": "Kontingent aufgebraucht; zusätzliche Nutzung ist erlaubt, daher läuft der Dienst weiter.",
     "healthPaidCreditsBypass": "Kontingent aufgebraucht; verfügbare bezahlte Guthaben ermöglichen den weiteren Betrieb.",
     "healthFilteringBypass": "Kontingent aufgebraucht; die lokale Kontingentfilterung ist deaktiviert, daher läuft der Dienst weiter.",

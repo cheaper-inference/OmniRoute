@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Nepavyko transformuoti srauto"
   },
   "usage": {
+    "cursorModelUsageTitle": "API žetonai (šis ciklas)",
+    "cursorModelUsageBilledHint": "Apmokestino Cursor",
+    "cursorModelUsageModel": "Modelis",
+    "cursorModelUsageInput": "Įvestis",
+    "cursorModelUsageOutput": "Išvestis",
+    "cursorModelUsageCacheRead": "Talpyklos skaitymas",
+    "cursorModelUsageCacheWrite": "Įrašymas į talpyklą",
+    "cursorModelUsageCost": "Kaina",
     "healthExtraUsageBypass": "Kvota išnaudota; papildomas naudojimas leidžiamas, todėl paslauga tęsiama.",
     "healthPaidCreditsBypass": "Kvota išnaudota; turimi mokami kreditai leidžia tęsti paslaugą.",
     "healthFilteringBypass": "Kvota išnaudota; vietinis kvotų filtravimas išjungtas, todėl paslauga tęsiama.",

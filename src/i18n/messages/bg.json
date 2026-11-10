@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Неуспешно преобразуване на потока"
   },
   "usage": {
+    "cursorModelUsageTitle": "API токени (този цикъл)",
+    "cursorModelUsageBilledHint": "Таксувано от Cursor",
+    "cursorModelUsageModel": "Модел",
+    "cursorModelUsageInput": "Входни данни",
+    "cursorModelUsageOutput": "Резултат",
+    "cursorModelUsageCacheRead": "Четене от кеша",
+    "cursorModelUsageCacheWrite": "Кеш запис",
+    "cursorModelUsageCost": "Цена",
     "healthExtraUsageBypass": "Квотата е изчерпана; допълнителното потребление е разрешено, затова услугата продължава.",
     "healthPaidCreditsBypass": "Квотата е изчерпана; наличните платени кредити позволяват услугата да продължи.",
     "healthFilteringBypass": "Квотата е изчерпана; локалното филтриране на квоти е изключено, затова услугата продължава.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Nie udało się przekształcić strumienia"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokeny API (ten cykl)",
+    "cursorModelUsageBilledHint": "Rozliczane przez Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Wejście",
+    "cursorModelUsageOutput": "Wyjście",
+    "cursorModelUsageCacheRead": "Odczyt z cache",
+    "cursorModelUsageCacheWrite": "Zapis w pamięci podręcznej",
+    "cursorModelUsageCost": "Koszt",
     "healthExtraUsageBypass": "Limit wyczerpany; dodatkowe użycie jest dozwolone, więc usługa działa dalej.",
     "healthPaidCreditsBypass": "Limit wyczerpany; dostępne płatne kredyty pozwalają kontynuować usługę.",
     "healthFilteringBypass": "Limit wyczerpany; lokalne filtrowanie limitów jest wyłączone, więc usługa działa dalej.",

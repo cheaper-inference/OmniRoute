@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Pretvorba toka nije uspjela"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokeni (ovaj ciklus)",
+    "cursorModelUsageBilledHint": "Naplaćuje Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Ulaz",
+    "cursorModelUsageOutput": "Izlaz",
+    "cursorModelUsageCacheRead": "Čitanje iz predmemorije",
+    "cursorModelUsageCacheWrite": "Pisanje u predmemoriju",
+    "cursorModelUsageCost": "Trošak",
     "healthExtraUsageBypass": "Kvota je iscrpljena; dodatna potrošnja je dopuštena pa se usluga nastavlja.",
     "healthPaidCreditsBypass": "Kvota je iscrpljena; raspoloživi plaćeni krediti omogućuju nastavak usluge.",
     "healthFilteringBypass": "Kvota je iscrpljena; lokalno filtriranje kvota je isključeno pa se usluga nastavlja.",

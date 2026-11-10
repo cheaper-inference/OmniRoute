@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Nem sikerült átalakítani az adatfolyamot"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokenek (ez a ciklus)",
+    "cursorModelUsageBilledHint": "A Cursor számlázta",
+    "cursorModelUsageModel": "Modell",
+    "cursorModelUsageInput": "Bemenet",
+    "cursorModelUsageOutput": "Kimenet",
+    "cursorModelUsageCacheRead": "Gyorsítótár-olvasás",
+    "cursorModelUsageCacheWrite": "Gyorsítótár írás",
+    "cursorModelUsageCost": "Költség",
     "healthExtraUsageBypass": "A keret kimerült; a többlethasználat engedélyezett, így a szolgáltatás folytatódik.",
     "healthPaidCreditsBypass": "A keret kimerült; az elérhető fizetett kreditek lehetővé teszik a szolgáltatás folytatását.",
     "healthFilteringBypass": "A keret kimerült; a helyi keretszűrés ki van kapcsolva, így a szolgáltatás folytatódik.",

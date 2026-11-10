@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "ਸਟ੍ਰੀਮ ਨੂੰ ਰੂਪਾਂਤਰਿਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ਟੋਕਨ (ਇਹ ਚੱਕਰ)",
+    "cursorModelUsageBilledHint": "Cursor ਵੱਲੋਂ ਬਿੱਲ ਕੀਤਾ",
+    "cursorModelUsageModel": "ਮਾਡਲ",
+    "cursorModelUsageInput": "ਇਨਪੁੱਟ",
+    "cursorModelUsageOutput": "ਆਉਟਪੁੱਟ",
+    "cursorModelUsageCacheRead": "ਕੈਸ਼ ਰੀਡ",
+    "cursorModelUsageCacheWrite": "ਕੈਸ਼ ਲਿਖਾਈ",
+    "cursorModelUsageCost": "ਲਾਗਤ",
     "healthExtraUsageBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਵਾਧੂ ਵਰਤੋਂ ਦੀ ਇਜਾਜ਼ਤ ਹੈ, ਇਸ ਲਈ ਸੇਵਾ ਜਾਰੀ ਹੈ।",
     "healthPaidCreditsBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਉਪਲਬਧ ਭੁਗਤਾਨ ਕੀਤੇ ਕ੍ਰੈਡਿਟ ਨਾਲ ਸੇਵਾ ਜਾਰੀ ਰਹਿ ਸਕਦੀ ਹੈ।",
     "healthFilteringBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਸਥਾਨਕ ਕੋਟਾ ਫਿਲਟਰ ਬੰਦ ਹੈ, ਇਸ ਲਈ ਸੇਵਾ ਜਾਰੀ ਹੈ।",

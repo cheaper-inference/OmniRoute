@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Nabigong i-transform ang stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "Mga token ng API (siklong ito)",
+    "cursorModelUsageBilledHint": "Siningil ng Cursor",
+    "cursorModelUsageModel": "Modelo",
+    "cursorModelUsageInput": "Input",
+    "cursorModelUsageOutput": "Output",
+    "cursorModelUsageCacheRead": "Pagbasa ng cache",
+    "cursorModelUsageCacheWrite": "Pagsulat sa Cache",
+    "cursorModelUsageCost": "Gastos",
     "healthExtraUsageBypass": "Ubos na ang quota; pinapayagan ang dagdag na paggamit kaya nagpapatuloy ang serbisyo.",
     "healthPaidCreditsBypass": "Ubos na ang quota; maaaring magpatuloy ang serbisyo gamit ang magagamit na bayad na kredito.",
     "healthFilteringBypass": "Ubos na ang quota; naka-off ang lokal na pagsala ng quota kaya nagpapatuloy ang serbisyo.",

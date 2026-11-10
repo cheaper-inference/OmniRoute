@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "스트림 변환 실패"
   },
   "usage": {
+    "cursorModelUsageTitle": "API 토큰(이번 주기)",
+    "cursorModelUsageBilledHint": "Cursor 청구 금액",
+    "cursorModelUsageModel": "모델",
+    "cursorModelUsageInput": "입력",
+    "cursorModelUsageOutput": "출력",
+    "cursorModelUsageCacheRead": "캐시 읽기",
+    "cursorModelUsageCacheWrite": "캐시 쓰기",
+    "cursorModelUsageCost": "비용",
     "healthExtraUsageBypass": "할당량을 소진했지만 추가 사용이 허용되어 서비스를 계속합니다.",
     "healthPaidCreditsBypass": "할당량을 소진했지만 사용 가능한 유료 크레딧으로 서비스를 계속합니다.",
     "healthFilteringBypass": "할당량을 소진했지만 로컬 할당량 필터링이 꺼져 있어 서비스를 계속합니다.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Akış dönüştürülemedi"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokenları (bu dönem)",
+    "cursorModelUsageBilledHint": "Cursor tarafından faturalandırıldı",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Girdi",
+    "cursorModelUsageOutput": "Çıktı",
+    "cursorModelUsageCacheRead": "Önbellek okuma",
+    "cursorModelUsageCacheWrite": "Önbellek Yazımı",
+    "cursorModelUsageCost": "Maliyet",
     "healthExtraUsageBypass": "Kota tükendi; ek kullanıma izin verildiği için hizmet devam ediyor.",
     "healthPaidCreditsBypass": "Kota tükendi; kullanılabilir ücretli krediler hizmetin sürmesini sağlıyor.",
     "healthFilteringBypass": "Kota tükendi; yerel kota filtreleme kapalı olduğu için hizmet devam ediyor.",

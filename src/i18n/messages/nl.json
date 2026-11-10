@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Transformeren van stream mislukt"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokens (deze cyclus)",
+    "cursorModelUsageBilledHint": "Gefactureerd door Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Invoer",
+    "cursorModelUsageOutput": "Uitvoer",
+    "cursorModelUsageCacheRead": "Cache-lezen",
+    "cursorModelUsageCacheWrite": "Cache schrijven",
+    "cursorModelUsageCost": "Kosten",
     "healthExtraUsageBypass": "Quotum verbruikt; extra gebruik is toegestaan, dus de dienst gaat door.",
     "healthPaidCreditsBypass": "Quotum verbruikt; beschikbare betaalde credits maken voortzetting van de dienst mogelijk.",
     "healthFilteringBypass": "Quotum verbruikt; lokale quotumfiltering is uitgeschakeld, dus de dienst gaat door.",

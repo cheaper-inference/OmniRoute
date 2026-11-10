@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Pretvorba toka ni uspela"
   },
   "usage": {
+    "cursorModelUsageTitle": "Žetoni API (ta cikel)",
+    "cursorModelUsageBilledHint": "Zaračunal Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Vnos",
+    "cursorModelUsageOutput": "Izhod",
+    "cursorModelUsageCacheRead": "Branje iz predpomnilnika",
+    "cursorModelUsageCacheWrite": "Zapis v predpomnilnik",
+    "cursorModelUsageCost": "Strošek",
     "healthExtraUsageBypass": "Kvota je izčrpana; dodatna uporaba je dovoljena, zato se storitev nadaljuje.",
     "healthPaidCreditsBypass": "Kvota je izčrpana; razpoložljivi plačani krediti omogočajo nadaljevanje storitve.",
     "healthFilteringBypass": "Kvota je izčrpana; lokalno filtriranje kvot je izklopljeno, zato se storitev nadaljuje.",

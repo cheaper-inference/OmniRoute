@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "ප්රවාහය පරිණාමනය කිරීමට අසමත් විය"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ටෝකන (මෙම චක්‍රය)",
+    "cursorModelUsageBilledHint": "Cursor විසින් බිල් කළ",
+    "cursorModelUsageModel": "මාදිලිය",
+    "cursorModelUsageInput": "ආදානය",
+    "cursorModelUsageOutput": "ප්රතිදානය",
+    "cursorModelUsageCacheRead": "කෑෂ් කියවීම",
+    "cursorModelUsageCacheWrite": "කෑෂයට ලිවීම",
+    "cursorModelUsageCost": "පිරිවැය",
     "healthExtraUsageBypass": "කෝටාව අවසන් වී ඇත; අමතර භාවිතයට අවසර ඇති බැවින් සේවාව දිගටම ක්‍රියාත්මක වේ.",
     "healthPaidCreditsBypass": "කෝටාව අවසන් වී ඇත; පවතින ගෙවූ බැර මඟින් සේවාව දිගටම පවත්වාගත හැක.",
     "healthFilteringBypass": "කෝටාව අවසන් වී ඇත; දේශීය කෝටා පෙරීම අක්‍රිය බැවින් සේවාව දිගටම ක්‍රියාත්මක වේ.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "స్ట్రీమ్‌ను మార్చడం విఫలమైంది"
   },
   "usage": {
+    "cursorModelUsageTitle": "API టోకెన్లు (ఈ చక్రం)",
+    "cursorModelUsageBilledHint": "Cursor బిల్ చేసింది",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ఇన్పుట్",
+    "cursorModelUsageOutput": "అవుట్పుట్",
+    "cursorModelUsageCacheRead": "కాష్ రీడ్",
+    "cursorModelUsageCacheWrite": "క్యాష్ రైట్",
+    "cursorModelUsageCost": "ఖర్చు",
     "healthExtraUsageBypass": "కోటా అయిపోయింది; అదనపు వినియోగానికి అనుమతి ఉంది కాబట్టి సేవ కొనసాగుతుంది.",
     "healthPaidCreditsBypass": "కోటా అయిపోయింది; అందుబాటులో ఉన్న చెల్లింపు క్రెడిట్‌లతో సేవ కొనసాగుతుంది.",
     "healthFilteringBypass": "కోటా అయిపోయింది; స్థానిక కోటా వడపోత నిలిపివేయబడింది కాబట్టి సేవ కొనసాగుతుంది.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Kunne ikke transformere stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokens (denne cyklus)",
+    "cursorModelUsageBilledHint": "Faktureret af Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Input",
+    "cursorModelUsageOutput": "Output",
+    "cursorModelUsageCacheRead": "Cache-læsning",
+    "cursorModelUsageCacheWrite": "Cache skriv",
+    "cursorModelUsageCost": "Pris",
     "healthExtraUsageBypass": "Kvoten er opbrugt; ekstra forbrug er tilladt, så tjenesten fortsætter.",
     "healthPaidCreditsBypass": "Kvoten er opbrugt; tilgængelige betalte kreditter gør det muligt at fortsætte tjenesten.",
     "healthFilteringBypass": "Kvoten er opbrugt; lokal kvotefiltrering er deaktiveret, så tjenesten fortsætter.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "स्ट्रीम रूपांतरित करण्यात अयशस्वी"
   },
   "usage": {
+    "cursorModelUsageTitle": "API टोकन (हे चक्र)",
+    "cursorModelUsageBilledHint": "Cursor द्वारे बिल केलेले",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "इनपुट",
+    "cursorModelUsageOutput": "आउटपुट",
+    "cursorModelUsageCacheRead": "कॅशे रीड",
+    "cursorModelUsageCacheWrite": "कॅश लेखन",
+    "cursorModelUsageCost": "खर्च",
     "healthExtraUsageBypass": "कोटा संपला आहे; अतिरिक्त वापराला परवानगी असल्यामुळे सेवा सुरू राहते.",
     "healthPaidCreditsBypass": "कोटा संपला आहे; उपलब्ध सशुल्क क्रेडिटमुळे सेवा सुरू ठेवता येते.",
     "healthFilteringBypass": "कोटा संपला आहे; स्थानिक कोटा फिल्टर बंद असल्यामुळे सेवा सुरू राहते.",

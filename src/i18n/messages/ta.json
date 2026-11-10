@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "ஸ்ட்ரீமை மாற்ற முடியவில்லை"
   },
   "usage": {
+    "cursorModelUsageTitle": "API டோக்கன்கள் (இந்தச் சுழற்சி)",
+    "cursorModelUsageBilledHint": "Cursor வசூலித்தது",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "உள்ளீடு",
+    "cursorModelUsageOutput": "வெளியீடு",
+    "cursorModelUsageCacheRead": "கேச் வாசிப்பு",
+    "cursorModelUsageCacheWrite": "தற்காலிகச் சேமிப்பக எழுதுதல்",
+    "cursorModelUsageCost": "செலவு",
     "healthExtraUsageBypass": "ஒதுக்கீடு தீர்ந்துவிட்டது; கூடுதல் பயன்பாடு அனுமதிக்கப்பட்டுள்ளதால் சேவை தொடர்கிறது.",
     "healthPaidCreditsBypass": "ஒதுக்கீடு தீர்ந்துவிட்டது; கிடைக்கும் கட்டணக் கிரெடிட்களால் சேவை தொடரலாம்.",
     "healthFilteringBypass": "ஒதுக்கீடு தீர்ந்துவிட்டது; உள்ளூர் ஒதுக்கீட்டு வடிகட்டல் முடக்கப்பட்டுள்ளதால் சேவை தொடர்கிறது.",

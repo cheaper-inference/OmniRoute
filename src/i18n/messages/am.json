@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "ዥረቱን መለወጥ አልተሳካም"
   },
   "usage": {
+    "cursorModelUsageTitle": "የAPI ቶከኖች (በዚህ ዑደት)",
+    "cursorModelUsageBilledHint": "በCursor የተከፈለ",
+    "cursorModelUsageModel": "ሞዴል",
+    "cursorModelUsageInput": "ግቤት",
+    "cursorModelUsageOutput": "ውጤት",
+    "cursorModelUsageCacheRead": "የመሸጎጫ ንባብ",
+    "cursorModelUsageCacheWrite": "ወደ መሸጎጫ መጻፍ",
+    "cursorModelUsageCost": "ወጪ",
     "healthExtraUsageBypass": "ኮታው አልቋል፤ ተጨማሪ አጠቃቀም ስለተፈቀደ አገልግሎቱ ይቀጥላል።",
     "healthPaidCreditsBypass": "ኮታው አልቋል፤ ያሉት የተከፈሉ ክሬዲቶች አገልግሎቱ እንዲቀጥል ያስችላሉ።",
     "healthFilteringBypass": "ኮታው አልቋል፤ የአካባቢ ኮታ ማጣሪያ ስለጠፋ አገልግሎቱ ይቀጥላል።",

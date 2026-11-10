@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Не вдалося перетворити потік"
   },
   "usage": {
+    "cursorModelUsageTitle": "Токени API (цей цикл)",
+    "cursorModelUsageBilledHint": "Нараховано Cursor",
+    "cursorModelUsageModel": "Модель",
+    "cursorModelUsageInput": "Вхідні дані",
+    "cursorModelUsageOutput": "Вивід",
+    "cursorModelUsageCacheRead": "Читання з кешу",
+    "cursorModelUsageCacheWrite": "Запис кешу",
+    "cursorModelUsageCost": "Вартість",
     "healthExtraUsageBypass": "Квоту вичерпано; додаткове використання дозволено, тому обслуговування триває.",
     "healthPaidCreditsBypass": "Квоту вичерпано; доступні платні кредити дозволяють продовжити обслуговування.",
     "healthFilteringBypass": "Квоту вичерпано; локальне фільтрування квот вимкнено, тому обслуговування триває.",

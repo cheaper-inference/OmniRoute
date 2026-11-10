@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Virran muuntaminen epäonnistui"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokenit (tämä jakso)",
+    "cursorModelUsageBilledHint": "Cursorin laskuttama",
+    "cursorModelUsageModel": "Malli",
+    "cursorModelUsageInput": "Syöte",
+    "cursorModelUsageOutput": "Tuloste",
+    "cursorModelUsageCacheRead": "Välimuistin luku",
+    "cursorModelUsageCacheWrite": "Välimuistin kirjoitus",
+    "cursorModelUsageCost": "Hinta",
     "healthExtraUsageBypass": "Kiintiö on käytetty; lisäkäyttö on sallittu, joten palvelu jatkuu.",
     "healthPaidCreditsBypass": "Kiintiö on käytetty; saatavilla olevat maksulliset krediitit mahdollistavat palvelun jatkumisen.",
     "healthFilteringBypass": "Kiintiö on käytetty; paikallinen kiintiösuodatus on pois käytöstä, joten palvelu jatkuu.",

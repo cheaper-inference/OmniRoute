@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Falha ao transformar o stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokens de API (este ciclo)",
+    "cursorModelUsageBilledHint": "Cobrado pelo Cursor",
+    "cursorModelUsageModel": "Modelo",
+    "cursorModelUsageInput": "Entrada",
+    "cursorModelUsageOutput": "Saída",
+    "cursorModelUsageCacheRead": "Leitura de cache",
+    "cursorModelUsageCacheWrite": "Escrita em Cache",
+    "cursorModelUsageCost": "Custo",
     "healthExtraUsageBypass": "Cota esgotada; o uso extra está permitido, então o serviço continua.",
     "healthPaidCreditsBypass": "Cota esgotada; os créditos pagos disponíveis permitem continuar o serviço.",
     "healthFilteringBypass": "Cota esgotada; a filtragem local de cotas está desativada, então o serviço continua.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "تبدیل استریم ناموفق بود"
   },
   "usage": {
+    "cursorModelUsageTitle": "توکن‌های API (این دوره)",
+    "cursorModelUsageBilledHint": "صورتحساب توسط Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ورودی",
+    "cursorModelUsageOutput": "خروجی",
+    "cursorModelUsageCacheRead": "خواندن از کش",
+    "cursorModelUsageCacheWrite": "نوشتن در حافظه نهان",
+    "cursorModelUsageCost": "هزینه",
     "healthExtraUsageBypass": "سهمیه تمام شده است؛ مصرف اضافه مجاز است، بنابراین سرویس ادامه دارد.",
     "healthPaidCreditsBypass": "سهمیه تمام شده است؛ اعتبار پولی موجود امکان ادامه سرویس را می‌دهد.",
     "healthFilteringBypass": "سهمیه تمام شده است؛ فیلتر محلی سهمیه غیرفعال است، بنابراین سرویس ادامه دارد.",

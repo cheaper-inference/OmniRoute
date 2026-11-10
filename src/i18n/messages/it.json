@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Impossibile trasformare lo stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (questo ciclo)",
+    "cursorModelUsageBilledHint": "Fatturato da Cursor",
+    "cursorModelUsageModel": "Modello",
+    "cursorModelUsageInput": "Input",
+    "cursorModelUsageOutput": "Output",
+    "cursorModelUsageCacheRead": "Lettura cache",
+    "cursorModelUsageCacheWrite": "Scrittura nella cache",
+    "cursorModelUsageCost": "Costo",
     "healthExtraUsageBypass": "Quota esaurita; l’utilizzo aggiuntivo è consentito, quindi il servizio continua.",
     "healthPaidCreditsBypass": "Quota esaurita; i crediti a pagamento disponibili consentono di continuare il servizio.",
     "healthFilteringBypass": "Quota esaurita; il filtro locale delle quote è disattivato, quindi il servizio continua.",

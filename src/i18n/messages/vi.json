@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Không thể chuyển đổi luồng"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (chu kỳ này)",
+    "cursorModelUsageBilledHint": "Do Cursor tính phí",
+    "cursorModelUsageModel": "Mô hình",
+    "cursorModelUsageInput": "Đầu vào",
+    "cursorModelUsageOutput": "Đầu ra",
+    "cursorModelUsageCacheRead": "Đọc cache",
+    "cursorModelUsageCacheWrite": "Ghi cache",
+    "cursorModelUsageCost": "Chi phí",
     "healthExtraUsageBypass": "Đã hết hạn mức; cho phép sử dụng thêm nên dịch vụ vẫn tiếp tục.",
     "healthPaidCreditsBypass": "Đã hết hạn mức; tín dụng trả phí khả dụng cho phép dịch vụ tiếp tục.",
     "healthFilteringBypass": "Đã hết hạn mức; bộ lọc hạn mức cục bộ đã tắt nên dịch vụ vẫn tiếp tục.",

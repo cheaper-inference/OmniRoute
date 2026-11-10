@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "មិនអាចបំប្លែងទិន្នន័យបន្តបន្ទាប់បានទេ"
   },
   "usage": {
+    "cursorModelUsageTitle": "ថូខឹន API (វដ្តនេះ)",
+    "cursorModelUsageBilledHint": "គិតថ្លៃដោយ Cursor",
+    "cursorModelUsageModel": "ម៉ូដែល",
+    "cursorModelUsageInput": "ទិន្នន័យបញ្ចូល",
+    "cursorModelUsageOutput": "លទ្ធផល",
+    "cursorModelUsageCacheRead": "ការអានពីឃ្លាំងសម្ងាត់",
+    "cursorModelUsageCacheWrite": "ការសរសេរឃ្លាំងសម្ងាត់",
+    "cursorModelUsageCost": "ថ្លៃចំណាយ",
     "healthExtraUsageBypass": "កូតាអស់ហើយ ប៉ុន្តែអនុញ្ញាតឱ្យប្រើប្រាស់បន្ថែម ដូច្នេះសេវាបន្តដំណើរការ។",
     "healthPaidCreditsBypass": "កូតាអស់ហើយ ប៉ុន្តែឥណទានដែលបានបង់ប្រាក់នៅសល់អនុញ្ញាតឱ្យសេវាបន្តដំណើរការ។",
     "healthFilteringBypass": "កូតាអស់ហើយ ប៉ុន្តែការត្រងកូតាក្នុងមូលដ្ឋានត្រូវបានបិទ ដូច្នេះសេវាបន្តដំណើរការ។",

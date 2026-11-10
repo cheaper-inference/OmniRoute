@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Neizdevās pārveidot straumi"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokeni (šis cikls)",
+    "cursorModelUsageBilledHint": "Rēķinu izrāda Cursor",
+    "cursorModelUsageModel": "Modelis",
+    "cursorModelUsageInput": "Ievade",
+    "cursorModelUsageOutput": "Izvade",
+    "cursorModelUsageCacheRead": "Kešatmiņas nolasīšana",
+    "cursorModelUsageCacheWrite": "Kešatmiņas rakstīšana",
+    "cursorModelUsageCost": "Izmaksas",
     "healthExtraUsageBypass": "Kvota izsmelta; papildu lietojums ir atļauts, tāpēc pakalpojums turpinās.",
     "healthPaidCreditsBypass": "Kvota izsmelta; pieejamie apmaksātie kredīti ļauj turpināt pakalpojumu.",
     "healthFilteringBypass": "Kvota izsmelta; lokālā kvotu filtrēšana ir izslēgta, tāpēc pakalpojums turpinās.",

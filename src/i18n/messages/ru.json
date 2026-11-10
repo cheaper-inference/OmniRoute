@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Не удалось преобразовать поток"
   },
   "usage": {
+    "cursorModelUsageTitle": "Токены API (текущий цикл)",
+    "cursorModelUsageBilledHint": "Списано Cursor",
+    "cursorModelUsageModel": "Модель",
+    "cursorModelUsageInput": "Ввод",
+    "cursorModelUsageOutput": "Вывод",
+    "cursorModelUsageCacheRead": "Чтение кэша",
+    "cursorModelUsageCacheWrite": "Запись в кэш",
+    "cursorModelUsageCost": "Стоимость",
     "healthExtraUsageBypass": "Квота исчерпана; дополнительное использование разрешено, поэтому обслуживание продолжается.",
     "healthPaidCreditsBypass": "Квота исчерпана; доступные платные кредиты позволяют продолжить обслуживание.",
     "healthFilteringBypass": "Квота исчерпана; локальная фильтрация квот отключена, поэтому обслуживание продолжается.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "স্ট্রিম রূপান্তর করতে ব্যর্থ হয়েছে"
   },
   "usage": {
+    "cursorModelUsageTitle": "API টোকেন (এই চক্র)",
+    "cursorModelUsageBilledHint": "Cursor দ্বারা বিল করা",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ইনপুট",
+    "cursorModelUsageOutput": "আউটপুট",
+    "cursorModelUsageCacheRead": "ক্যাশ রিড",
+    "cursorModelUsageCacheWrite": "ক্যাশ লেখা",
+    "cursorModelUsageCost": "খরচ",
     "healthExtraUsageBypass": "কোটা শেষ; অতিরিক্ত ব্যবহার অনুমোদিত, তাই পরিষেবা চলতে থাকে।",
     "healthPaidCreditsBypass": "কোটা শেষ; উপলব্ধ প্রদত্ত ক্রেডিট দিয়ে পরিষেবা চালিয়ে যাওয়া যায়।",
     "healthFilteringBypass": "কোটা শেষ; স্থানীয় কোটা ফিল্টার বন্ধ, তাই পরিষেবা চলতে থাকে।",

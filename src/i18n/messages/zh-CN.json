@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "转换流失败"
   },
   "usage": {
+    "cursorModelUsageTitle": "API 令牌（本周期）",
+    "cursorModelUsageBilledHint": "Cursor 计费",
+    "cursorModelUsageModel": "模型",
+    "cursorModelUsageInput": "输入",
+    "cursorModelUsageOutput": "输出",
+    "cursorModelUsageCacheRead": "缓存读取",
+    "cursorModelUsageCacheWrite": "缓存写入",
+    "cursorModelUsageCost": "成本",
     "healthExtraUsageBypass": "额度已用完；已允许额外用量，仍可继续服务。",
     "healthPaidCreditsBypass": "额度已用完；有可用的付费额度，仍可继续服务。",
     "healthFilteringBypass": "额度已用完；已关闭本地额度过滤，仍可继续服务。",

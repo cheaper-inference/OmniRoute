@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Трансформација стрима није успела"
   },
   "usage": {
+    "cursorModelUsageTitle": "API токени (овај циклус)",
+    "cursorModelUsageBilledHint": "Наплаћује Cursor",
+    "cursorModelUsageModel": "Модел",
+    "cursorModelUsageInput": "Улаз",
+    "cursorModelUsageOutput": "Излаз",
+    "cursorModelUsageCacheRead": "Читање из кеша",
+    "cursorModelUsageCacheWrite": "Упис у кеш",
+    "cursorModelUsageCost": "Cena",
     "healthExtraUsageBypass": "Квота је исцрпљена; додатна потрошња је дозвољена, па се услуга наставља.",
     "healthPaidCreditsBypass": "Квота је исцрпљена; расположиви плаћени кредити омогућавају наставак услуге.",
     "healthFilteringBypass": "Квота је исцрпљена; локално филтрирање квота је искључено, па се услуга наставља.",

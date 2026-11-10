@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Theip ar chlaochlú an tsrutha"
   },
   "usage": {
+    "cursorModelUsageTitle": "Comharthaí API (an timthriall seo)",
+    "cursorModelUsageBilledHint": "Billeáilte ag Cursor",
+    "cursorModelUsageModel": "Samhail",
+    "cursorModelUsageInput": "Ionchur",
+    "cursorModelUsageOutput": "Aschur",
+    "cursorModelUsageCacheRead": "Léamh taisce",
+    "cursorModelUsageCacheWrite": "Taisce a Scríobh",
+    "cursorModelUsageCost": "Costas",
     "healthExtraUsageBypass": "Tá an cuóta ídithe; ceadaítear úsáid bhreise, mar sin leanann an tseirbhís ar aghaidh.",
     "healthPaidCreditsBypass": "Tá an cuóta ídithe; ceadaíonn na creidmheasanna íoctha atá ar fáil don tseirbhís leanúint ar aghaidh.",
     "healthFilteringBypass": "Tá an cuóta ídithe; tá scagadh áitiúil cuótaí díchumasaithe, mar sin leanann an tseirbhís ar aghaidh.",

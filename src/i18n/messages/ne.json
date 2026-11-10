@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "स्ट्रिम रूपान्तरण गर्न असफल भयो"
   },
   "usage": {
+    "cursorModelUsageTitle": "API टोकनहरू (यो चक्र)",
+    "cursorModelUsageBilledHint": "Cursor द्वारा बिल गरिएको",
+    "cursorModelUsageModel": "मोडेल",
+    "cursorModelUsageInput": "इनपुट",
+    "cursorModelUsageOutput": "आउटपुट",
+    "cursorModelUsageCacheRead": "क्यास रिड",
+    "cursorModelUsageCacheWrite": "क्यास लेखन",
+    "cursorModelUsageCost": "लागत",
     "healthExtraUsageBypass": "कोटा सकिएको छ; थप प्रयोगको अनुमति भएकाले सेवा जारी रहन्छ।",
     "healthPaidCreditsBypass": "कोटा सकिएको छ; उपलब्ध सशुल्क क्रेडिटले सेवा जारी राख्न सकिन्छ।",
     "healthFilteringBypass": "कोटा सकिएको छ; स्थानीय कोटा फिल्टर बन्द भएकाले सेवा जारी रहन्छ।",

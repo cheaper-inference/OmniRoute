@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Axını çevirmək mümkün olmadı"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokenləri (bu dövr)",
+    "cursorModelUsageBilledHint": "Cursor tərəfindən hesablanıb",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Giriş",
+    "cursorModelUsageOutput": "Çıxış",
+    "cursorModelUsageCacheRead": "Keş oxunması",
+    "cursorModelUsageCacheWrite": "Keşə yazma",
+    "cursorModelUsageCost": "Xərc",
     "healthExtraUsageBypass": "Kvota tükənib; əlavə istifadəyə icazə verildiyi üçün xidmət davam edir.",
     "healthPaidCreditsBypass": "Kvota tükənib; mövcud ödənişli kreditlər xidmətin davam etməsinə imkan verir.",
     "healthFilteringBypass": "Kvota tükənib; yerli kvota filtrləməsi söndürüldüyü üçün xidmət davam edir.",

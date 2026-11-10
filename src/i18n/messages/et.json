@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Voo teisendamine nurjus"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokenid (see tsükkel)",
+    "cursorModelUsageBilledHint": "Arveldab Cursor",
+    "cursorModelUsageModel": "Mudel",
+    "cursorModelUsageInput": "Sisend",
+    "cursorModelUsageOutput": "Väljund",
+    "cursorModelUsageCacheRead": "Vahemälust lugemine",
+    "cursorModelUsageCacheWrite": "Vahemällu kirjutamine",
+    "cursorModelUsageCost": "Maksumus",
     "healthExtraUsageBypass": "Kvoot on ammendunud; lisakasutus on lubatud, seega teenus jätkub.",
     "healthPaidCreditsBypass": "Kvoot on ammendunud; saadaolevad tasulised krediidid võimaldavad teenust jätkata.",
     "healthFilteringBypass": "Kvoot on ammendunud; kohalik kvoodifiltreerimine on välja lülitatud, seega teenus jätkub.",

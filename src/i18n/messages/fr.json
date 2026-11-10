@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Échec de la transformation du flux"
   },
   "usage": {
+    "cursorModelUsageTitle": "Jetons API (ce cycle)",
+    "cursorModelUsageBilledHint": "Facturé par Cursor",
+    "cursorModelUsageModel": "Modèle",
+    "cursorModelUsageInput": "Entrée",
+    "cursorModelUsageOutput": "Sortie",
+    "cursorModelUsageCacheRead": "Lecture cache",
+    "cursorModelUsageCacheWrite": "Écriture du cache",
+    "cursorModelUsageCost": "Coût",
     "healthExtraUsageBypass": "Quota épuisé ; l’utilisation supplémentaire est autorisée, le service continue donc.",
     "healthPaidCreditsBypass": "Quota épuisé ; les crédits payants disponibles permettent de poursuivre le service.",
     "healthFilteringBypass": "Quota épuisé ; le filtrage local des quotas est désactivé, le service continue donc.",

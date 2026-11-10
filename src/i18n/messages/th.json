@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "แปลงสตรีมล้มเหลว"
   },
   "usage": {
+    "cursorModelUsageTitle": "โทเค็น API (รอบนี้)",
+    "cursorModelUsageBilledHint": "เรียกเก็บโดย Cursor",
+    "cursorModelUsageModel": "รุ่น",
+    "cursorModelUsageInput": "อินพุต",
+    "cursorModelUsageOutput": "ผลลัพธ์",
+    "cursorModelUsageCacheRead": "การอ่านแคช",
+    "cursorModelUsageCacheWrite": "แคชเขียน",
+    "cursorModelUsageCost": "ค่าใช้จ่าย",
     "healthExtraUsageBypass": "ใช้โควตาหมดแล้ว แต่อนุญาตให้ใช้งานเพิ่มเติม จึงให้บริการต่อได้",
     "healthPaidCreditsBypass": "ใช้โควตาหมดแล้ว แต่มีเครดิตแบบชำระเงินที่ใช้ได้ จึงให้บริการต่อได้",
     "healthFilteringBypass": "ใช้โควตาหมดแล้ว แต่ปิดการกรองโควตาในเครื่อง จึงให้บริการต่อได้",

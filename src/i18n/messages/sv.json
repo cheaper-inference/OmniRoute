@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "Misslyckades med att transformera strömmen"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokens (denna cykel)",
+    "cursorModelUsageBilledHint": "Fakturerat av Cursor",
+    "cursorModelUsageModel": "Modell",
+    "cursorModelUsageInput": "Indata",
+    "cursorModelUsageOutput": "Utdata",
+    "cursorModelUsageCacheRead": "Cacheläsning",
+    "cursorModelUsageCacheWrite": "Cache Skriv",
+    "cursorModelUsageCost": "Kostnad",
     "healthExtraUsageBypass": "Kvoten är slut; extra användning är tillåten, så tjänsten fortsätter.",
     "healthPaidCreditsBypass": "Kvoten är slut; tillgängliga betalda krediter gör att tjänsten kan fortsätta.",
     "healthFilteringBypass": "Kvoten är slut; lokal kvotfiltrering är avstängd, så tjänsten fortsätter.",

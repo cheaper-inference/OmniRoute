@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "An kasa canza rafi"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokunan API (wannan zagaye)",
+    "cursorModelUsageBilledHint": "Cursor ne ya caje",
+    "cursorModelUsageModel": "Samfuri",
+    "cursorModelUsageInput": "Shigarwa",
+    "cursorModelUsageOutput": "Sakamako",
+    "cursorModelUsageCacheRead": "Karatu daga cache",
+    "cursorModelUsageCacheWrite": "Rubutawa a Ma'ajiyar Wucin Gadi",
+    "cursorModelUsageCost": "Kuɗi",
     "healthExtraUsageBypass": "Iyakar amfani ta ƙare; an yarda da ƙarin amfani, don haka sabis yana ci gaba.",
     "healthPaidCreditsBypass": "Iyakar amfani ta ƙare; kuɗaɗen amfani da aka biya da suke akwai suna ba da damar ci gaba da sabis.",
     "healthFilteringBypass": "Iyakar amfani ta ƙare; an kashe tace iyakar amfani ta gida, don haka sabis yana ci gaba.",

@@ -10551,6 +10551,14 @@
     "streamTransformFailed": "ဒေတာစီးကြောင်းကို ပြောင်းလဲ၍ မရပါ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API တိုကင်များ (ဤစက်ဝန်း)",
+    "cursorModelUsageBilledHint": "Cursor မှ ငွေတောင်းခံထားသည်",
+    "cursorModelUsageModel": "မော်ဒယ်",
+    "cursorModelUsageInput": "ထည့်သွင်းချက်",
+    "cursorModelUsageOutput": "အထွက်ရလဒ်",
+    "cursorModelUsageCacheRead": "Cache ဖတ်ရှုမှု",
+    "cursorModelUsageCacheWrite": "ကက်ရှ်သို့ ရေးသားခြင်း",
+    "cursorModelUsageCost": "ကုန်ကျစရိတ်",
     "healthExtraUsageBypass": "ခွဲတမ်းကုန်သွားသော်လည်း အပိုအသုံးပြုခွင့်ရှိသဖြင့် ဝန်ဆောင်မှု ဆက်လက်ပေးနေသည်။",
     "healthPaidCreditsBypass": "ခွဲတမ်းကုန်သွားသော်လည်း အသုံးပြုနိုင်သော အခပေးခရက်ဒစ်များဖြင့် ဝန်ဆောင်မှု ဆက်ပေးနိုင်သည်။",
     "healthFilteringBypass": "ခွဲတမ်းကုန်သွားသော်လည်း စက်တွင်းခွဲတမ်းစစ်ထုတ်မှု ပိတ်ထားသဖြင့် ဝန်ဆောင်မှု ဆက်လက်ပေးနေသည်။",
