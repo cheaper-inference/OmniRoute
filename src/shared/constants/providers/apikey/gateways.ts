@@ -110,6 +110,24 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     freeNote: "Free models at $0/token with :free suffix - 20 RPM / 200 RPD",
     serviceKinds: ["llm", "imageToText"],
   },
+  // fal.ai's OpenRouter router — OpenAI-compatible chat endpoint serving the
+  // OpenRouter catalog, billed through the fal account. fal has no /models
+  // route, so discovery reads OpenRouter's public list (see providerModelsConfig).
+  "fal-openrouter": {
+    id: "fal-openrouter",
+    serviceKinds: ["llm"],
+    name: "fal.ai (OpenRouter router)",
+    icon: "router",
+    color: "#7C3AED",
+    textIcon: "FAL",
+    passthroughModels: true,
+    website: "https://fal.ai",
+    authHint: "Create an API key at https://fal.ai/dashboard/keys, then paste it here.",
+    apiHint:
+      "OpenAI-compatible endpoint at https://fal.run/openrouter/router/openai/v1. " +
+      "Models are addressed as fal-openrouter/<openrouter-id>, e.g. " +
+      "fal-openrouter/anthropic/claude-sonnet-5.5 or fal-openrouter/z-ai/glm-4.6.",
+  },
   opper: {
     id: "opper",
     serviceKinds: ["llm"],

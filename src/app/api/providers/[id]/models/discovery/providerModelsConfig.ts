@@ -192,6 +192,13 @@ export type ProviderModelsConfigEntry = {
    * one, or null on the last page. Without it only `nextPageToken` is followed.
    */
   nextPageUrl?: (data: any, currentUrl: string) => string | null;
+  /**
+   * Do not forward `providerSpecificData.customHeaders` on this discovery
+   * request. Set when the catalog URL belongs to a third party that must never
+   * receive the connection's headers (e.g. `fal-openrouter` reading OpenRouter's
+   * public catalog: those headers were configured for fal, not openrouter.ai).
+   */
+  skipConnectionCustomHeaders?: boolean;
 };
 
 export function assembleProviderModelsHeaders(
@@ -203,7 +210,9 @@ export function assembleProviderModelsHeaders(
   if (!config.buildHeaders && config.authHeader && !config.authQuery) {
     headers[config.authHeader] = (config.authPrefix || "") + token;
   }
-  applyConnectionCustomHeaders(headers, context?.providerSpecificData);
+  if (!config.skipConnectionCustomHeaders) {
+    applyConnectionCustomHeaders(headers, context?.providerSpecificData);
+  }
   return headers;
 }
 
@@ -631,6 +640,16 @@ export function getXaiOauthLiveModelsConfig(): ProviderModelsConfigEntry | undef
   }
 }
 
+// OpenRouter's /api/v1/models is public (200 with or without a key) and is also
+// the catalog served by fal.ai's OpenRouter router. Shared so both entries stay
+// in sync; only the real OpenRouter connection authenticates the probe.
+const OPENROUTER_PUBLIC_MODELS_CONFIG: ProviderModelsConfigEntry = {
+  url: "https://openrouter.ai/api/v1/models",
+  method: "GET",
+  headers: { "Content-Type": "application/json" },
+  parseResponse: (data) => data.data || [],
+};
+
 // Provider models endpoints configuration
 export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> = {
   alibaba: ALIBABA_MODEL_STUDIO_MODELS_CONFIG,
@@ -720,12 +739,16 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     parseResponse: parseGrokBuildModels,
   },
   openrouter: {
-    url: "https://openrouter.ai/api/v1/models",
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
+    ...OPENROUTER_PUBLIC_MODELS_CONFIG,
     authHeader: "Authorization",
     authPrefix: "Bearer ",
-    parseResponse: (data) => data.data || [],
+  },
+  // fal's router serves the OpenRouter catalog but has no /models endpoint of
+  // its own. Deliberately no authHeader, and no connection custom headers
+  // either: the connection's fal key and headers must never reach openrouter.ai.
+  "fal-openrouter": {
+    ...OPENROUTER_PUBLIC_MODELS_CONFIG,
+    skipConnectionCustomHeaders: true,
   },
   aimlapi: {
     // #5570: AI/ML API's live catalog lives at the public, auth-free /models

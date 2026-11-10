@@ -21,6 +21,7 @@ export const HARDCODED_MODELS_CONFIG_IDS: ReadonlySet<string> = new Set([
   "cpl",
   "deepseek",
   "empiriolabs",
+  "fal-openrouter",
   "fenayai",
   "fireworks",
   "gemini",
