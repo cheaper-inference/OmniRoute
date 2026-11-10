@@ -763,6 +763,7 @@ export async function cleanupExpiredLogs() {
   const mcpCutoff = new Date(Date.now() - mcpAuditRetentionDays * day).toISOString();
 
   let deletedUsage = 0;
+  let usageRollupFailed = false;
   let deletedCallLogs = 0;
   let deletedProxyLogs = 0;
   let deletedRequestDetailLogs = 0;
@@ -780,6 +781,7 @@ export async function cleanupExpiredLogs() {
     const rollup = await rollupUsageHistoryBeforeDate(usageCutoffDate);
     if (rollup.errors > 0) {
       console.error("[Compliance] Skipping usage_history deletion: pre-delete rollup failed.");
+      usageRollupFailed = true;
     } else {
       const r1 = db.prepare("DELETE FROM usage_history WHERE timestamp < ?").run(usageCutoffDate);
       deletedUsage = r1.changes;
@@ -864,8 +866,9 @@ export async function cleanupExpiredLogs() {
     actor: "system",
     target: "log-retention",
     resourceType: "maintenance",
-    status: "success",
+    status: usageRollupFailed ? "partial" : "success",
     details: {
+      usageRollupFailed,
       deletedUsage,
       deletedCallLogs,
       deletedProxyLogs,

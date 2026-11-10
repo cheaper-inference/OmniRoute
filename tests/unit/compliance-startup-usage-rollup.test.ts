@@ -61,4 +61,23 @@ test("startup cleanup keeps usage_history rows when the pre-delete rollup fails"
 
   assert.equal(result.deletedUsage, 0);
   assert.equal((db.prepare("SELECT COUNT(*) AS n FROM usage_history").get() as { n: number }).n, 2);
+
+  const cleanup = compliance.getAuditLog().find((entry) => entry.action === "compliance.cleanup");
+  assert.ok(cleanup, "the cleanup is audited");
+  assert.equal(
+    cleanup.status,
+    "partial",
+    "a skipped usage deletion must not be audited as success"
+  );
+  assert.equal((cleanup.details as Record<string, unknown>).usageRollupFailed, true);
+});
+
+test("startup cleanup is audited as success when the rollup works", async () => {
+  compliance.initAuditLog();
+  seedOldUsage(core.getDbInstance());
+
+  await compliance.cleanupExpiredLogs();
+
+  const cleanup = compliance.getAuditLog().find((entry) => entry.action === "compliance.cleanup");
+  assert.equal(cleanup?.status, "success");
 });
