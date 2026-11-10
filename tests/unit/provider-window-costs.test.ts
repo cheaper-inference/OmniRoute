@@ -389,7 +389,7 @@ test("provider window costs cut at an observed same-resetAt quota reset", async 
   assert.equal(result.rows[0].requests, 1);
 });
 
-test("provider window costs prefer recorded USD history over repricing usage tokens", async () => {
+test("provider window API value ignores unrelated key budget ledger entries", async () => {
   await localDb.updatePricing({
     claude: {
       "claude-opus-4-8": { input: 1, output: 1, cached: 0.1, cache_creation: 1, reasoning: 1 },
@@ -446,11 +446,11 @@ test("provider window costs prefer recorded USD history over repricing usage tok
     now: Date.parse("2026-06-25T12:00:00.000Z"),
   });
 
-  assert.equal(result.totalCostUsd, 17);
-  assert.equal(result.estimatedFullQuotaUsd, 34);
+  assert.equal(result.totalCostUsd, 0.2);
+  assert.equal(result.estimatedFullQuotaUsd, 0.4);
   assert.equal(result.rows.length, 1);
   assert.equal(result.rows[0].apiKeyName, "Recorded USD Key");
-  assert.equal(result.rows[0].costUsd, 17);
+  assert.equal(result.rows[0].costUsd, 0.2);
 });
 
 test("provider window costs aggregate many usage rows in SQL without per-row scans", async () => {
@@ -486,4 +486,145 @@ test("provider window costs aggregate many usage rows in SQL without per-row sca
   assert.equal(result.rows[0].costUsd, 0.25);
   assert.equal(result.rows[0].models.length, 1);
   assert.equal(result.rows[0].models[0].requests, 250);
+});
+
+// Illustrative synthetic fixtures; no account or production usage data.
+const fixtureNow = Date.parse("2026-06-28T12:00:00.000Z");
+async function saveFixture(model: string, tokens: Record<string, number>, cost?: number) {
+  await usageHistory.saveRequestUsage(
+    {
+      provider: "claude",
+      model,
+      connectionId: "illustrative-connection",
+      tokens,
+      timestamp: "2026-06-27T12:00:00.000Z",
+    },
+    { deduplicate: false }
+  );
+  if (cost !== undefined) {
+    core
+      .getDbInstance()
+      .prepare(
+        "UPDATE usage_history SET provider_cost_usd = ? WHERE id = (SELECT MAX(id) FROM usage_history)"
+      )
+      .run(cost);
+  }
+}
+const fixtureBreakdown = () =>
+  getProviderWindowCostBreakdown({
+    provider: "claude",
+    connectionId: "illustrative-connection",
+    now: fixtureNow,
+  });
+
+test("missing models fall back to the declared alias, but explicit zero prices win", async () => {
+  await localDb.updatePricing({
+    claude: { "illustrative-free": { input: 0, output: 0 } },
+    cc: {
+      "illustrative-free": { input: 9, output: 9 },
+      "illustrative-alias-only": { input: 4, output: 20 },
+    },
+  });
+  await saveFixture("illustrative-free", { input: 1_000_000 });
+  await saveFixture("illustrative-alias-only", { input: 1_000_000 });
+  const result = await fixtureBreakdown();
+  assert.equal(result.totalCostUsd, 4);
+  assert.equal(result.unpricedRequests, 0);
+});
+
+test("long-context tiers price one request, not the window token sum", async () => {
+  await localDb.updatePricing({
+    claude: {
+      "illustrative-tier": {
+        input: 1,
+        output: 2,
+        long_context: { threshold: 200_000, input: 3, output: 4 },
+      },
+    },
+  });
+  await saveFixture("illustrative-tier", { input: 150_000, output: 10_000 });
+  await saveFixture("illustrative-tier", { input: 150_000, output: 10_000 });
+  await saveFixture("illustrative-tier", { input: 250_000, output: 10_000 });
+  const result = await fixtureBreakdown();
+  assert.equal(result.totalCostUsd, 1.13);
+  assert.equal(result.rows[0].requests, 3);
+  assert.equal(result.rows[0].models.length, 1);
+});
+
+test("cache clipping and separate reasoning buckets remain request-local", async () => {
+  await localDb.updatePricing({
+    claude: {
+      "illustrative-clipping": {
+        input: 1,
+        output: 2,
+        cached: 0.1,
+        cache_creation: 0.5,
+        reasoning: 3,
+      },
+    },
+  });
+  await saveFixture("illustrative-clipping", {
+    input: 100,
+    cacheRead: 200,
+    output: 10,
+    reasoning: 20,
+  });
+  await saveFixture("illustrative-clipping", { input: 100, output: 100, reasoning: 10 });
+  const result = await fixtureBreakdown();
+  assert.equal(result.totalCostUsd, 0.00041);
+});
+
+test("only unreported requests with missing prices are unpriced and prevent extrapolation", async () => {
+  providerLimits.setProviderLimitsCache("illustrative-connection", {
+    quotas: { weekly: { remainingPercentage: 50, resetAt: "2026-07-02T23:00:00.000Z" } },
+    plan: null,
+    message: null,
+    fetchedAt: "2026-06-28T12:00:00.000Z",
+  });
+  await saveFixture("illustrative-unknown", { input: 1_000_000 }, 0);
+  await saveFixture("illustrative-unknown", { input: 1_000_000 }, 2);
+  await saveFixture("illustrative-unknown", { input: 1_000_000 });
+  const result = await fixtureBreakdown();
+  assert.equal(result.totalCostUsd, 2);
+  assert.equal(result.unpricedRequests, 1);
+  assert.equal(result.rows[0].unpricedRequests, 1);
+  assert.equal(result.rows[0].models[0].unpricedRequests, 1);
+  assert.equal(result.estimatedFullQuotaUsd, null);
+});
+
+test("reported cost including zero overrides configured pricing", async () => {
+  await localDb.updatePricing({ claude: { "illustrative-exact": { input: 50, output: 50 } } });
+  await saveFixture("illustrative-exact", { input: 1_000_000 }, 0);
+  await saveFixture("illustrative-exact", { input: 1_000_000 }, 2);
+  assert.equal((await fixtureBreakdown()).totalCostUsd, 2);
+});
+
+test("pricing-store failures remain unpriced without retrying the provider alias", async (t) => {
+  await saveFixture("illustrative-failure", { input: 1_000_000 });
+  const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
+  invalidateDbCache("pricing");
+  const db = core.getDbInstance();
+  const prepare = db.prepare.bind(db);
+  let failures = 0;
+  t.mock.method(console, "error", () => {});
+  t.mock.method(db, "prepare", (sql: string) => {
+    if (/SELECT key, value FROM key_value WHERE namespace = \?/i.test(sql)) {
+      failures++;
+      throw new Error("illustrative pricing store unavailable");
+    }
+    return prepare(sql);
+  });
+  const result = await fixtureBreakdown();
+  assert.equal(failures, 1, "a failed lookup must not retry the alias");
+  assert.equal(result.unpricedRequests, 1);
+  assert.equal(result.totalCostUsd, 0);
+  assert.equal(result.estimatedFullQuotaUsd, null);
+});
+
+test("small request-vector costs accumulate before six-decimal rounding", async () => {
+  await localDb.updatePricing({ claude: { "illustrative-small": { input: 0.1, output: 0 } } });
+  for (const input of [1, 2, 3, 4]) await saveFixture("illustrative-small", { input });
+  const result = await fixtureBreakdown();
+  assert.equal(result.totalCostUsd, 0.000001);
+  assert.equal(result.rows[0].models[0].costUsd, 0.000001);
 });

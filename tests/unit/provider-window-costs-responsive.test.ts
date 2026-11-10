@@ -13,7 +13,7 @@ const core = await import("../../src/lib/db/core.ts");
 const { getProviderWindowCostBreakdown } =
   await import("../../src/lib/usage/providerWindowCosts.ts");
 const { updatePricing } = await import("../../src/lib/db/settings.ts");
-const { RecordedCostMatcher } = await import("../../src/lib/usage/recordedCostMatcher.ts");
+
 const now = Date.parse("2026-06-28T12:00:00Z");
 
 async function seed(count: number, extraCost: boolean) {
@@ -22,18 +22,18 @@ async function seed(count: number, extraCost: boolean) {
   await updatePricing({ codex: { "test-model": { input: 1, output: 1 } } });
   const usage = db.prepare(`INSERT INTO usage_history
     (provider, model, connection_id, api_key_id, api_key_name, tokens_input, timestamp)
-    VALUES ('codex', 'test-model', 'synthetic-connection', 'synthetic-key', 'Synthetic', 1000000, ?)`);
+    VALUES ('codex', 'test-model', 'synthetic-connection', 'synthetic-key', 'Synthetic', ?, ?)`);
   const cost = db.prepare(
     "INSERT INTO domain_cost_history (api_key_id, cost, timestamp) VALUES ('synthetic-key', 2, ?)"
   );
   db.transaction(() => {
     for (let i = 0; i < count; i++) {
       const at = now - 86400000 + i * 1000;
-      usage.run(new Date(at).toISOString());
+      // Distinct vectors exercise batch pricing yields rather than ledger matching.
+      usage.run(1_000_000 + i, new Date(at).toISOString());
       cost.run(at);
     }
-    // The same key can have costs from another provider/connection. Force the
-    // detailed branch without creating an extra usage row in this selection.
+    // An unrelated budget entry must not affect this connection's API value.
     if (extraCost) cost.run(now - 1000);
   })();
 }
@@ -50,15 +50,12 @@ test.after(() => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("mismatched cost counts yield to an HTTP heartbeat before analytics completes", async () => {
+test("request-vector pricing yields to an HTTP heartbeat before analytics completes", async () => {
   await seed(4096, true);
   let completed = false;
   let servedBeforeCompletion = false;
-  let matches = 0;
-  let matchesAtHeartbeat = 0;
   const server = http.createServer((_request, response) => {
     servedBeforeCompletion = !completed;
-    matchesAtHeartbeat = matches;
     response.end("healthy");
   });
   server.listen(0, "127.0.0.1");
@@ -76,53 +73,47 @@ test("mismatched cost counts yield to an HTTP heartbeat before analytics complet
       request.setTimeout(5000, () => request.destroy(new Error("heartbeat timed out")));
     };
   });
-  const originalTake = RecordedCostMatcher.prototype.takeClosest;
-  RecordedCostMatcher.prototype.takeClosest = function (timestamp, tolerance) {
-    if (++matches === 1) sendHeartbeat();
-    return originalTake.call(this, timestamp, tolerance);
-  };
   try {
+    sendHeartbeat();
     const result = await breakdown();
     completed = true;
-    assert.ok(matches > 0, "fixture must exercise the detailed matching path");
     await heartbeat;
-    assert.equal(result.totalCostUsd, 8192);
+    assert.equal(result.totalCostUsd, 4104.38656);
     assert.equal(result.rows[0].requests, 4096);
     assert.ok(
       servedBeforeCompletion,
-      "HTTP must make progress while cost matching is still running"
-    );
-    assert.ok(
-      matchesAtHeartbeat > 0 && matchesAtHeartbeat < 4096,
-      "yield during matching, not just before it"
+      "HTTP must make progress while request-vector pricing is still running"
     );
   } finally {
-    RecordedCostMatcher.prototype.takeClosest = originalTake;
     server.closeAllConnections();
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
 });
 
-test("aggregate-only calculation never loads detailed cost records", async () => {
+test("API value never loads ledger allocations or detailed usage records", async () => {
   await seed(16, false);
   const db = core.getDbInstance();
   const originalPrepare = db.prepare;
   const detailedQueries: string[] = [];
   db.prepare = (sql) => {
-    if (/id as rowId/i.test(sql) && /FROM domain_cost_history/i.test(sql))
+    // getCostSummary may still read budget metadata; allocation queries must not run.
+    if (
+      (/FROM domain_cost_history/i.test(sql) && /api_key_id as apiKeyId/i.test(sql)) ||
+      /ORDER BY timestamp ASC, id ASC/i.test(sql)
+    )
       detailedQueries.push(sql);
     return originalPrepare.call(db, sql);
   };
   try {
     const result = await breakdown();
-    assert.equal(result.totalCostUsd, 32);
+    assert.equal(result.totalCostUsd, 16.00012);
     assert.equal(detailedQueries.length, 0);
   } finally {
     db.prepare = originalPrepare;
   }
 });
 
-test("partial recorded history falls back to pricing only for the unmatched usage row", async () => {
+test("partial budget history cannot replace any request's API price", async () => {
   await seed(2, false);
   core
     .getDbInstance()
@@ -130,10 +121,10 @@ test("partial recorded history falls back to pricing only for the unmatched usag
     .run(now - 86400000 + 1000);
   const result = await breakdown();
   assert.equal(result.rows[0].requests, 2);
-  assert.equal(result.totalCostUsd, 3); // recorded $2 once, then calculated $1
+  assert.equal(result.totalCostUsd, 2.000001);
 });
 
-test("matching is request-local and respects the selected provider connection", async () => {
+test("concurrent pricing respects the selected provider connection", async () => {
   await seed(4, true);
   core
     .getDbInstance()
@@ -146,7 +137,7 @@ test("matching is request-local and respects the selected provider connection", 
   const [first, second] = await Promise.all([breakdown(), breakdown()]);
   for (const result of [first, second]) {
     assert.equal(result.rows[0].requests, 4);
-    assert.equal(result.totalCostUsd, 8);
+    assert.equal(result.totalCostUsd, 4.000006);
   }
   const other = await getProviderWindowCostBreakdown({
     provider: "codex",
@@ -154,5 +145,5 @@ test("matching is request-local and respects the selected provider connection", 
     now,
   });
   assert.equal(other.rows[0].requests, 1);
-  assert.equal(other.totalCostUsd, 2);
+  assert.equal(other.totalCostUsd, 1);
 });
