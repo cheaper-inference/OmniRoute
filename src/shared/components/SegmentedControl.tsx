@@ -67,6 +67,8 @@ const PREVIOUS_KEYS = new Set(["ArrowLeft", "ArrowUp"]);
 
 /** Radio pattern: the arrows move the selection, not just the focus, and wrap around. */
 function onRadioKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+  // Alt/Ctrl/Cmd + arrow belong to the browser (history, word jumps): leave them alone.
+  if (event.altKey || event.ctrlKey || event.metaKey) return;
   const group = event.currentTarget.closest('[role="radiogroup"]');
   if (!group) return;
   const radios = Array.from(group.querySelectorAll<HTMLButtonElement>('[role="radio"]'));

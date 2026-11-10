@@ -118,6 +118,28 @@ describe("Collapsible / CollapsibleSection / SegmentedControl adapters", () => {
     expect(radio("C").getAttribute("aria-checked")).toBe("true");
   });
 
+  it("leaves modified arrows to the browser (Alt+Left is history back)", () => {
+    const onChange = vi.fn();
+    render(
+      <SegmentedControl
+        semantics="radio"
+        aria-label="Range"
+        value="b"
+        onChange={onChange}
+        options={[
+          { value: "a", label: "A" },
+          { value: "b", label: "B" },
+        ]}
+      />
+    );
+    const checked = screen.getByRole("radio", { name: "B" });
+    for (const modifier of ["altKey", "ctrlKey", "metaKey"] as const) {
+      const notCancelled = fireEvent.keyDown(checked, { key: "ArrowLeft", [modifier]: true });
+      expect(notCancelled).toBe(true);
+    }
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("a radio group with no matching value stays reachable from the keyboard", () => {
     render(
       <SegmentedControl
