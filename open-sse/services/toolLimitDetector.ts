@@ -6,7 +6,13 @@ const DEFAULT_LIMIT = MAX_TOOLS_LIMIT;
 
 const PROVIDER_TOOL_LIMITS: Record<string, number> = {
   "grok-cli": 200,
-  "nvidia": 1536,
+  nvidia: 1536,
+  // OpenCode Go accepts far more than the speculative 128 default. A live
+  // deepseek-v4.1-flash request with 2048 distinct tools returned 200 and the
+  // model named the last one. Without this entry every non-OpenCode client
+  // (Codex through Responses -> Chat, generic OpenAI clients) silently lost
+  // every tool past index 128, e.g. whole MCP namespaces.
+  "opencode-go": 2048,
 };
 
 const _detectedLimitsSweep = setInterval(() => {

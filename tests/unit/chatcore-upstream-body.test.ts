@@ -689,6 +689,41 @@ test("preserves the full tool list when within the grok-cli limit", async () => 
   assert.equal(out.tools.length, 150);
 });
 
+// OpenCode Go has a measured ceiling well above the generic 128 default. A Codex client
+// (no OpenCode headers) with a large MCP catalog must reach the model with every tool.
+test("keeps a large tool list for opencode-go without the OpenCode client bypass", async () => {
+  const tools = Array.from({ length: 300 }, (_, i) => ({
+    type: "function",
+    function: { name: `tool_${i}`, parameters: {} },
+  }));
+  const out = await prepareUpstreamBody({
+    translatedBody: { model: "deepseek-v4.1-flash", messages: [], tools },
+    modelToCall: "deepseek-v4.1-flash",
+    provider: "opencode-go",
+    targetFormat: "openai",
+    credentials: null,
+  });
+  assert.ok(Array.isArray(out.tools));
+  assert.equal(out.tools.length, 300);
+});
+
+test("still truncates opencode-go above its measured ceiling", async () => {
+  const tools = Array.from({ length: 2100 }, (_, i) => ({
+    type: "function",
+    function: { name: `tool_${i}`, parameters: {} },
+  }));
+  const out = await prepareUpstreamBody({
+    translatedBody: { model: "deepseek-v4.1-flash", messages: [], tools },
+    modelToCall: "deepseek-v4.1-flash",
+    provider: "opencode-go",
+    targetFormat: "openai",
+    credentials: null,
+    bypassDefaultToolLimit: true,
+  });
+  assert.ok(Array.isArray(out.tools));
+  assert.equal(out.tools.length, 2048);
+});
+
 // #13190: bypassDefaultToolLimit is the OpenCode *client* signal, not an operator override.
 // It lifts the generic default cap, but a provider's known hard limit (grok-cli 200, nvidia
 // 1536, or one learned from a real upstream 400) must still truncate — otherwise OpenCode

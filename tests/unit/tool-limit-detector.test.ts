@@ -113,6 +113,11 @@ describe("toolLimitDetector", () => {
     assert.strictEqual(getEffectiveToolLimit("nvidia"), 1536);
   });
 
+  it("should return proactive limit for opencode-go (2048) without any detection", () => {
+    assert.strictEqual(getKnownToolLimit("opencode-go"), 2048);
+    assert.strictEqual(getEffectiveToolLimit("opencode-go"), 2048);
+  });
+
   it("should still return default (128) for unknown providers", () => {
     assert.strictEqual(getEffectiveToolLimit("some-new-provider"), 128);
   });
