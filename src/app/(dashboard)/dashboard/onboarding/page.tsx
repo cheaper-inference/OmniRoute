@@ -74,6 +74,11 @@ export default function OnboardingWizard() {
 
   // Check if setup is already complete
   useEffect(() => {
+    /**
+     * Redirect to the dashboard when setup is already complete; otherwise learn whether a
+     * management password already exists (fail-safe or failed reads keep the password form).
+     * @returns resolves once loading can end
+     */
     const checkSetup = async () => {
       try {
         const res = await fetch("/api/settings");
@@ -141,6 +146,11 @@ export default function OnboardingWizard() {
     return false;
   };
 
+  /**
+   * Security step submit: set the first management password and sign in, or, when skipping,
+   * turn the login requirement off. Marks the password as set once the write succeeds.
+   * @returns resolves after the step advanced or an error message was shown
+   */
   const handleSetPassword = async () => {
     setErrorMessage("");
     if (skipSecurity) {
