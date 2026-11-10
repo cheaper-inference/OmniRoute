@@ -2179,7 +2179,8 @@ export function checkFallbackError(
         } else {
           return {
             shouldFallback: true,
-            cooldownMs: tpdMs,
+            // A Retry-After header wins over the node clock; clamp it like detectRetryHint does.
+            cooldownMs: Math.min(tpdMs, MAX_PROVIDER_COOLDOWN_MS),
             reason: RateLimitReason.QUOTA_EXHAUSTED,
             dailyQuotaExhausted: true,
           };

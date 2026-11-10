@@ -52,3 +52,30 @@ test("a normal body retryDelay is kept as sent", () => {
   const r = parseRetryAfterFromBody({ error: { details: [{ retryDelay: "33s" }] } });
   assert.equal(r.retryAfterMs, 33_000);
 });
+
+test("a TPD 429 with a 100-year Retry-After is capped at 30 days", () => {
+  const res = checkFallbackError(
+    429,
+    "[429]: Your account org-x / proj-y request reached organization TPD rate limit, current: 1537190, limit: 1500000",
+    0,
+    null,
+    "openai-compatible-chat-e2971611-bc02-4c37-8fc5-39b8e3906fdf",
+    { "retry-after": "3153600000" }
+  );
+  assert.equal(res.dailyQuotaExhausted, true);
+  assert.equal(res.cooldownMs, THIRTY_DAYS_MS);
+  assert.doesNotThrow(() => getUnavailableUntil(res.cooldownMs));
+});
+
+test("a TPD 429 with a normal Retry-After keeps the header wait", () => {
+  const res = checkFallbackError(
+    429,
+    "[429]: Your account org-x / proj-y request reached organization TPD rate limit, current: 1537190, limit: 1500000",
+    0,
+    null,
+    "openai-compatible-chat-e2971611-bc02-4c37-8fc5-39b8e3906fdf",
+    { "retry-after": "3600" }
+  );
+  assert.equal(res.dailyQuotaExhausted, true);
+  assert.ok(res.cooldownMs > 3_590_000 && res.cooldownMs <= 3_600_000, `got ${res.cooldownMs}`);
+});
