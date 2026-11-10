@@ -25,7 +25,7 @@ test("inf-code is registered in REGISTRY under its id", () => {
   assert.equal(entry.id, "inf-code");
   assert.equal(entry.alias, "infc");
   assert.equal(entry.format, "openai");
-  assert.equal(entry.executor, "default");
+  assert.equal(entry.executor, "inf-code");
   assert.equal(entry.authType, "oauth");
   assert.equal(entry.authHeader, "bearer");
 });

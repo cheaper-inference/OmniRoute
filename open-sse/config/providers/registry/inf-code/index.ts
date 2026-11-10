@@ -60,7 +60,7 @@ export const inf_codeProvider: RegistryEntry = {
   id: "inf-code",
   alias: "infc",
   format: "openai",
-  executor: "default",
+  executor: "inf-code",
   baseUrl: resolveInfCodeChatPath(resolveInfCodeBase()),
   authType: "oauth",
   authHeader: "bearer",
