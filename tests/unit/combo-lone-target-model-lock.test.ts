@@ -13,6 +13,7 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-combo-lon
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "combo-lone-lock-test-secret";
 
+const core = await import("../../src/lib/db/core.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const { clearAllModelLockouts, isModelLocked } =
   await import("../../open-sse/services/accountFallback.ts");
@@ -22,6 +23,8 @@ test.beforeEach(() => {
 });
 
 test.after(() => {
+  // handleComboChat opens the SQLite singleton: close it before the directory goes away.
+  core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
