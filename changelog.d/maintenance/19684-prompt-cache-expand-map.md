@@ -1,0 +1,1 @@
+- **perf(combo):** Prompt-cache account expansion now indexes the accounts of a provider once, not with a linear search per account, so combos over large account pools expand in linear time. ([#19684](https://github.com/cheaper-inference/OmniRoute/pull/19684))

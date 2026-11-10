@@ -1,1 +1,0 @@
-- **perf(gemini):** Gemini rate-limit tracking no longer copies its per-model request and token windows on every request, and drops the window of a model once all its entries expire.

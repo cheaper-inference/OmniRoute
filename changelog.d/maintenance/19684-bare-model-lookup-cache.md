@@ -1,0 +1,1 @@
+- **perf(routing):** a request with an unprefixed model name no longer scans every connection's model catalog in the database; the answer is reused until a connection or model list changes. ([#19684](https://github.com/cheaper-inference/OmniRoute/pull/19684))
