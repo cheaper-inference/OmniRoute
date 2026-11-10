@@ -1,4 +1,5 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
+import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
 import { PII_REVERSIBLE_VAULT_FLAG } from "./piiVaultFeatureFlag";
 
@@ -1435,4 +1436,5 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  ...SEARCH_FEATURE_FLAG_DEFINITIONS,
 ];

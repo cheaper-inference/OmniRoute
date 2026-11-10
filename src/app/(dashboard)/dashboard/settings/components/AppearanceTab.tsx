@@ -151,7 +151,8 @@ export default function AppearanceTab() {
         <div className="pt-4 border-t border-border">
           <RadioGroup
             aria-label={t("themeSelectionAria")}
-            orientation="horizontal"
+            columns={3}
+            minItemWidth="9rem"
             value={theme}
             onValueChange={(next) => setTheme(next)}
           >
@@ -187,7 +188,8 @@ export default function AppearanceTab() {
           </div>
           <RadioGroup
             aria-label={t("paletteSelectionAria")}
-            orientation="horizontal"
+            columns={2}
+            minItemWidth="9rem"
             value={palette}
             onValueChange={(next) => setPalette(normalizeAppearancePalette(next))}
           >
@@ -352,7 +354,7 @@ export default function AppearanceTab() {
 
           <RadioGroup
             aria-label={getSettingsLabel("comboConfigMode", "Combo configuration mode")}
-            orientation="horizontal"
+            columns={2}
             value={comboConfigMode}
             onValueChange={(next) => updateSetting(COMBO_CONFIG_MODE_SETTING_KEY, next)}
             disabled={loading}
