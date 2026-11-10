@@ -15,6 +15,8 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 import { KiroExecutor } from "../../open-sse/executors/kiro.ts";
 import { kiroRuntimeHost } from "../../open-sse/services/kiroRegion.ts";
@@ -47,6 +49,38 @@ function atLeast(version: number[], floor: number[]): boolean {
     if (v < f) return false;
   }
   return true;
+}
+
+const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
+
+/** Runtime keys a tsx child process still needs (same allowlist as the adapta fixture). */
+const CHILD_RUNTIME_ENV_KEYS = [
+  "PATH",
+  "TMPDIR",
+  "TMP",
+  "TEMP",
+  "SystemRoot",
+  "ComSpec",
+  "PATHEXT",
+  "LANG",
+  "LC_ALL",
+  "TZ",
+] as const;
+
+/** Minimal child env: no OMNIROUTE_CODEWHISPERER_BASE_URL, no NODE_TEST_CONTEXT. */
+function buildIsolatedChildEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {
+    NODE_ENV: "test",
+    APP_LOG_TO_FILE: "false",
+    DISABLE_SQLITE_AUTO_BACKUP: "true",
+  };
+  for (const key of CHILD_RUNTIME_ENV_KEYS) {
+    const value = process.env[key];
+    if (value !== undefined) env[key] = value;
+  }
+  // A nested test runner must receive its own context instead of inheriting the parent's.
+  delete env.NODE_TEST_CONTEXT;
+  return env;
 }
 
 type Credentials = Record<string, unknown>;
@@ -191,52 +225,33 @@ test("kiro catalog fingerprint UA carries a supported IDE version", async () => 
   );
 });
 
-test("kiro usage fetches never target the retired codewhisperer host in us-east-1", async () => {
+test("kiro usage fetches never target the retired codewhisperer host in us-east-1", () => {
   // GetUsageLimits routed its primary attempt to the legacy codewhisperer host for
   // us-east-1 profiles; with the 2026-11-09 gate that host 403s every request (#19607).
-  // The usage module captures OMNIROUTE_CODEWHISPERER_BASE_URL at load time — clear
-  // it before importing so an operator-exported legacy override cannot mask the
-  // default-routing regression this test pins (restored afterwards).
-  const savedOverride = process.env.OMNIROUTE_CODEWHISPERER_BASE_URL;
-  delete process.env.OMNIROUTE_CODEWHISPERER_BASE_URL;
-  const { __testing } = await import("@omniroute/open-sse/services/usage.ts");
-  const { getKiroUsage } = __testing as {
-    getKiroUsage: typeof import("../../open-sse/services/usage/kiro.ts").getKiroUsage;
-  };
-  const captured: string[] = [];
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = (async (url: URL | string) => {
-    captured.push(String(url));
-    // Valid usage payload so the attempt chain stops on the first success.
-    return new Response(
-      JSON.stringify({
-        usageBreakdownList: [
-          {
-            resourceType: "AGENTIC_REQUEST",
-            currentUsageWithPrecision: 1,
-            usageLimitWithPrecision: 50,
-          },
-        ],
-        nextDateReset: "2026-12-01T00:00:00Z",
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  }) as typeof fetch;
-  try {
-    await getKiroUsage("idc-token", {
-      authMethod: "idc",
-      region: "us-east-1",
-      profileArn: "arn:aws:codewhisperer:us-east-1:111111111111:profile/X",
-    });
-  } finally {
-    globalThis.fetch = originalFetch;
-    if (savedOverride !== undefined) {
-      process.env.OMNIROUTE_CODEWHISPERER_BASE_URL = savedOverride;
-    }
-  }
-  assert.ok(captured.length > 0, "usage fetcher must have issued at least one request");
-  assert.ok(
-    captured.every((u) => !u.includes("codewhisperer.")),
-    `usage fetches must not target the retired codewhisperer host; got ${JSON.stringify(captured)}`
+  //
+  // The usage module captures OMNIROUTE_CODEWHISPERER_BASE_URL at module load, and
+  // `test:unit:fast` runs with --test-isolation=none — ~60 alphabetically-earlier test
+  // files load services/usage.ts before this one, so the parent process's module
+  // cache would freeze whatever env those tests ran under. Run the assertion in an
+  // isolated child process (repo's fixture+spawnSync pattern) with the variable
+  // deleted from a minimal env: no module-cache reuse, no operator-exported legacy
+  // override can mask the default-routing regression this test pins.
+  const fixture = fileURLToPath(
+    new URL("../fixtures/kiro-usage-host-isolation.fixture.ts", import.meta.url)
   );
+  const result = spawnSync(
+    process.execPath,
+    ["--import", "tsx/esm", "--test", "--test-force-exit", fixture],
+    {
+      cwd: REPO_ROOT,
+      encoding: "utf8",
+      // Minimal child env: runtime essentials only. OMNIROUTE_CODEWHISPERER_BASE_URL
+      // is deliberately absent so the usage module's load-time capture resolves the
+      // default (regional Q host) — the fixture also sets it deliberately to the
+      // legacy value *after* its own import to prove default routing stands.
+      env: buildIsolatedChildEnv(),
+      timeout: 60_000,
+    }
+  );
+  assert.equal(result.status, 0, `fixture failed:\n${result.stdout}\n${result.stderr}`);
 });
