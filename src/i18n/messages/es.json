@@ -5461,6 +5461,7 @@
     "usageTracking": "Seguimiento de uso",
     "securityDesc": "Establezca una contraseña para proteger su panel u omítala por ahora.",
     "securityDescSkipWarning": "⚠️ Sin una contraseña, no podrás añadir proveedores durante la configuración. Puedes añadirlos más adelante desde el panel después de establecer una contraseña.",
+    "passwordAlreadySet": "Ya hay una contraseña configurada para el panel. Puedes cambiarla más tarde en Configuración.",
     "providerDesc": "Conecte su primer proveedor de IA. Puedes agregar más más tarde.",
     "providerRequiresPassword": "Primero debes establecer una contraseña para añadir proveedores. Vuelve al paso de seguridad y establece una contraseña, o añade los proveedores más adelante desde el panel.",
     "apiKeyRequired": "Clave API (obligatoria)",

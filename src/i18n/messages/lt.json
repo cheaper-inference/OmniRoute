@@ -5461,6 +5461,7 @@
     "usageTracking": "Naudojimo sekimas",
     "securityDesc": "Nustatykite slaptažodį, kad apsaugotumėte savo skydelį, arba praleiskite šį žingsnį.",
     "securityDescSkipWarning": "⚠️ Neturint slaptažodžio, sąrankos metu negalėsite pridėti teikėjų. Galėsite juos pridėti vėliau iš skydelio, nustatę slaptažodį.",
+    "passwordAlreadySet": "Valdymo skydelio slaptažodis jau nustatytas. Vėliau jį galite pakeisti nustatymuose.",
     "providerDesc": "Prijunkite savo pirmą AI teikėją. Daugiau galėsite pridėti vėliau.",
     "providerRequiresPassword": "Norėdami pridėti teikėjų, pirmiausia turite nustatyti slaptažodį. Grįžkite į saugumo žingsnį ir nustatykite slaptažodį, arba pridėkite teikėjus vėliau iš skydelio.",
     "apiKeyRequired": "API raktas (būtinas)",

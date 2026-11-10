@@ -5461,6 +5461,7 @@
     "usageTracking": "Nsuso Ojiji",
     "securityDesc": "Tọọ okwuntughe iji chekwaa ogwe njikwa gị, ma ọ bụ mafere ya ugbu a.",
     "securityDescSkipWarning": "⚠️ Enweghị okwuntughe, ị gaghị enwe ike itinye ndị na-enye ọrụ n'oge ntọala. Ị nwere ike itinye ha ma emechaa site na ogwe njikwa mgbe ịtọsịrị okwuntughe.",
+    "passwordAlreadySet": "Edoziela okwuntughe dashboard. Ị nwere ike ịgbanwe ya ma emechaa na Ntọala.",
     "providerDesc": "Jikọọ onye na-enye ọrụ AI mbụ gị. Ị nwere ike itinyekwu ndị ọzọ ma emechaa.",
     "providerRequiresPassword": "Ị ga-ebu ụzọ tọọ okwuntughe tupu ị tinye ndị na-enye ọrụ. Biko laghachi na nzọụkwụ nchekwa wee tọọ okwuntughe, ma ọ bụ tinye ndị na-enye ọrụ ma emechaa site na ogwe njikwa.",
     "apiKeyRequired": "API Key (achọrọ)",

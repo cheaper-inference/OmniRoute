@@ -5461,6 +5461,7 @@
     "usageTracking": "Śledzenie użycia",
     "securityDesc": "Ustaw hasło, aby zabezpieczyć dashboard, lub pomiń na razie.",
     "securityDescSkipWarning": "⚠️ Bez hasła nie będzie można dodać dostawców podczas konfiguracji. Można ich dodać później z poziomu panelu po ustawieniu hasła.",
+    "passwordAlreadySet": "Hasło do panelu jest już ustawione. Możesz je później zmienić w Ustawieniach.",
     "providerDesc": "Połącz pierwszego AI provider. Więcej można dodać później.",
     "providerRequiresPassword": "Aby dodać dostawców, należy najpierw ustawić hasło. Wróć do kroku zabezpieczeń i ustaw hasło albo dodaj dostawców później z poziomu panelu.",
     "apiKeyRequired": "Klucz API (wymagany)",

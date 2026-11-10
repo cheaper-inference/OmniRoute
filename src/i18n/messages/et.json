@@ -5461,6 +5461,7 @@
     "usageTracking": "Kasutuse jälgimine",
     "securityDesc": "Määra töölaua kaitsmiseks parool või jäta see praegu vahele.",
     "securityDescSkipWarning": "⚠️ Ilma paroolita ei saa sa seadistamise ajal teenusepakkujaid lisada. Saad need hiljem töölaualt lisada pärast parooli määramist.",
+    "passwordAlreadySet": "Juhtpaneeli parool on juba määratud. Saate seda hiljem seadetes muuta.",
     "providerDesc": "Ühenda oma esimene tehisintellekti teenusepakkuja. Hiljem saad neid juurde lisada.",
     "providerRequiresPassword": "Teenusepakkujate lisamiseks pead esmalt määrama parooli. Mine tagasi turvalisuse etappi ja määra parool või lisa teenusepakkujad hiljem töölaualt.",
     "apiKeyRequired": "API-võti (nõutav)",

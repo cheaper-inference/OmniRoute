@@ -5461,6 +5461,7 @@
     "usageTracking": "Pagsubaybay sa Paggamit",
     "securityDesc": "Magtakda ng password para protektahan ang iyong dashboard, o laktawan muna.",
     "securityDescSkipWarning": "⚠️ Kung walang password, hindi ka makakapagdagdag ng mga provider habang nagsasagawa ng paunang pag-setup. Maaari mong idagdag ang mga ito sa ibang pagkakataon mula sa dashboard pagkatapos magtakda ng password.",
+    "passwordAlreadySet": "May nakatakda nang password para sa dashboard. Maaari mo itong palitan mamaya sa Settings.",
     "providerDesc": "Ikonekta ang iyong unang AI provider. Maaari kang magdagdag ng higit pa sa ibang pagkakataon.",
     "providerRequiresPassword": "Kailangan mo munang magtakda ng password para makapagdagdag ng mga provider. Bumalik sa hakbang sa seguridad at magtakda ng password, o magdagdag ng mga provider sa ibang pagkakataon mula sa dashboard.",
     "apiKeyRequired": "API Key (kinakailangan)",

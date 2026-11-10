@@ -5461,6 +5461,7 @@
     "usageTracking": "Àtẹ̀lé Lílò",
     "securityDesc": "Ṣètò ọ̀rọ̀ìgbaniwọlé láti dáàbò bo pátákó ìṣàkóso rẹ, tàbí fò ó fún ìsinsìnyí.",
     "securityDescSkipWarning": "⚠️ Láìsí ọ̀rọ̀ìgbaniwọlé, o kò ní lè ṣàfikún àwọn olùpèsè nígbà ìṣètò. O lè ṣàfikún wọn nígbà míì láti inú pátákó ìṣàkóso lẹ́yìn tí o bá ṣètò ọ̀rọ̀ìgbaniwọlé.",
+    "passwordAlreadySet": "Ọ̀rọ̀ aṣínà dashboard ti wà tẹ́lẹ̀. O lè yí i padà nígbà míì nínú Ètò.",
     "providerDesc": "So olùpèsè AI àkọ́kọ́ rẹ pọ̀. O lè ṣàfikún sí i nígbà míì.",
     "providerRequiresPassword": "O ní láti kọ́kọ́ ṣètò ọ̀rọ̀ìgbaniwọlé kí o tó lè ṣàfikún àwọn olùpèsè. Jọ̀wọ́ padà sí ìgbésẹ̀ ààbò kí o sì ṣètò ọ̀rọ̀ìgbaniwọlé, tàbí ṣàfikún àwọn olùpèsè nígbà míì láti inú pátákó ìṣàkóso.",
     "apiKeyRequired": "Kọ́kọ́rọ́ API (ọ̀ranyàn)",

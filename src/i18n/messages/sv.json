@@ -5461,6 +5461,7 @@
     "usageTracking": "Användningsspårning",
     "securityDesc": "Ställ in ett lösenord för att skydda din instrumentpanel, eller hoppa över nu.",
     "securityDescSkipWarning": "⚠️ Utan ett lösenord kan du inte lägga till leverantörer under konfigurationen. Du kan lägga till dem senare från kontrollpanelen efter att du har angett ett lösenord.",
+    "passwordAlreadySet": "Ett lösenord för instrumentpanelen är redan angivet. Du kan ändra det senare under Inställningar.",
     "providerDesc": "Anslut din första AI-leverantör. Du kan lägga till mer senare.",
     "providerRequiresPassword": "Du måste först ange ett lösenord för att kunna lägga till leverantörer. Gå tillbaka till säkerhetssteget och ange ett lösenord, eller lägg till leverantörer senare från kontrollpanelen.",
     "apiKeyRequired": "API-nyckel (krävs)",

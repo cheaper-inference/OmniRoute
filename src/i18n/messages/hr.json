@@ -5461,6 +5461,7 @@
     "usageTracking": "Praćenje korištenja",
     "securityDesc": "Postavite lozinku za zaštitu vaše nadzorne ploče ili to preskočite za sada.",
     "securityDescSkipWarning": "⚠️ Bez lozinke nećete moći dodavati pružatelje tijekom postavljanja. Možete ih dodati kasnije s nadzorne ploče nakon što postavite lozinku.",
+    "passwordAlreadySet": "Lozinka za nadzornu ploču već je postavljena. Kasnije je možete promijeniti u Postavkama.",
     "providerDesc": "Povežite svog prvog AI pružatelja. Možete dodati više kasnije.",
     "providerRequiresPassword": "Prvo morate postaviti lozinku kako biste dodali pružatelje. Molimo vratite se na korak sigurnosti i postavite lozinku ili dodajte pružatelje kasnije s nadzorne ploče.",
     "apiKeyRequired": "API ključ (obavezno)",

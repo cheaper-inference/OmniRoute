@@ -5461,6 +5461,7 @@
     "usageTracking": "Foydalanishni kuzatish",
     "securityDesc": "Boshqaruv panelingizni himoyalash uchun parol oʻrnating yoki hozircha oʻtkazib yuboring.",
     "securityDescSkipWarning": "⚠️ Parolsiz sozlash vaqtida provayderlarni qoʻsha olmaysiz. Parol oʻrnatganingizdan soʻng ularni boshqaruv panelidan qoʻshishingiz mumkin.",
+    "passwordAlreadySet": "Boshqaruv paneli paroli allaqachon o'rnatilgan. Uni keyinroq Sozlamalarda o'zgartirishingiz mumkin.",
     "providerDesc": "Birinchi AI provayderingizni ulang. Keyinroq yana qoʻshishingiz mumkin.",
     "providerRequiresPassword": "Provayderlarni qoʻshish uchun avval parol oʻrnatishingiz kerak. Xavfsizlik bosqichiga qaytib, parol oʻrnating yoki provayderlarni keyinroq boshqaruv panelidan qoʻshing.",
     "apiKeyRequired": "API kaliti (majburiy)",

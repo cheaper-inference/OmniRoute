@@ -5461,6 +5461,7 @@
     "usageTracking": "Sledování využití",
     "securityDesc": "Nastavte heslo pro ochranu nástěnky nebo to teď přeskočte.",
     "securityDescSkipWarning": "⚠️ Bez hesla nebudete moci během nastavení přidat poskytovatele. Můžete je přidat později z řídicího panelu po nastavení hesla.",
+    "passwordAlreadySet": "Heslo k řídicímu panelu je již nastaveno. Později ho můžete změnit v Nastavení.",
     "providerDesc": "Připojte svého prvního AI poskytovatele. Další můžete přidat později.",
     "providerRequiresPassword": "Chcete-li přidat poskytovatele, musíte nejprve nastavit heslo. Vraťte se prosím ke kroku zabezpečení a nastavte heslo, nebo přidejte poskytovatele později z řídicího panelu.",
     "apiKeyRequired": "API klíč (povinný)",

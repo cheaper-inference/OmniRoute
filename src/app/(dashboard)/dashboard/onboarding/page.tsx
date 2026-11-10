@@ -43,6 +43,9 @@ export default function OnboardingWizard() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [skipSecurity, setSkipSecurity] = useState(false);
+  // #19211: a password set on an earlier, unfinished run of the wizard. The step then only
+  // confirms it; replacing it needs the current password, which Settings asks for.
+  const [passwordAlreadySet, setPasswordAlreadySet] = useState(false);
 
   // #14296: fresh Docker/NAT-forwarded installs (peer isn't 127.0.0.1) hit a
   // 401 on the bootstrap writes below until the operator supplies the
@@ -74,6 +77,15 @@ export default function OnboardingWizard() {
         }
       } catch {
         // Continue with setup
+      }
+      try {
+        const res = await fetch("/api/settings/require-login");
+        if (res.ok) {
+          const loginSettings = await res.json();
+          setPasswordAlreadySet(loginSettings?.hasPassword === true);
+        }
+      } catch {
+        // Unknown: keep the password form, as before
       }
       setLoading(false);
     };
@@ -400,7 +412,18 @@ export default function OnboardingWizard() {
             {currentStep.id === "tiers" && <TierTour />}
 
             {/* Security */}
-            {currentStep.id === "security" && (
+            {currentStep.id === "security" && passwordAlreadySet && (
+              <div className="space-y-4">
+                <p className="text-sm text-text-muted text-center">{t("securityDesc")}</p>
+                <p
+                  role="status"
+                  className="rounded-lg border border-success/30 bg-success-bg p-3 text-center text-sm text-success"
+                >
+                  {t("passwordAlreadySet")}
+                </p>
+              </div>
+            )}
+            {currentStep.id === "security" && !passwordAlreadySet && (
               <div className="space-y-4">
                 <p className="text-sm text-text-muted text-center">{t("securityDesc")}</p>
                 <Checkbox
@@ -583,7 +606,12 @@ export default function OnboardingWizard() {
                   {t("continue")}
                 </Button>
               )}
-              {currentStep.id === "security" && (
+              {currentStep.id === "security" && passwordAlreadySet && (
+                <Button variant="primary" onClick={handleNext}>
+                  {t("continue")}
+                </Button>
+              )}
+              {currentStep.id === "security" && !passwordAlreadySet && (
                 <Button
                   variant="primary"
                   onClick={handleSetPassword}

@@ -5461,6 +5461,7 @@
     "usageTracking": "Gebruik volgen",
     "securityDesc": "Stel een wachtwoord in om uw dashboard te beschermen, of sla dit voorlopig over.",
     "securityDescSkipWarning": "⚠️ Zonder wachtwoord kun je tijdens de configuratie geen providers toevoegen. Je kunt ze later vanuit het dashboard toevoegen nadat je een wachtwoord hebt ingesteld.",
+    "passwordAlreadySet": "Er is al een dashboardwachtwoord ingesteld. Je kunt het later wijzigen in Instellingen.",
     "providerDesc": "Sluit uw eerste AI-provider aan. Je kunt later meer toevoegen.",
     "providerRequiresPassword": "Je moet eerst een wachtwoord instellen om providers toe te voegen. Ga terug naar de beveiligingsstap en stel een wachtwoord in, of voeg providers later vanuit het dashboard toe.",
     "apiKeyRequired": "API-sleutel (vereist)",

@@ -5461,6 +5461,7 @@
     "usageTracking": "使用情况追踪",
     "securityDesc": "设置密码以保护您的仪表板，或暂时跳过。",
     "securityDescSkipWarning": "⚠️ 如果未设置密码，你将无法在设置过程中添加提供者。设置密码后，你可以稍后从仪表板添加提供者。",
+    "passwordAlreadySet": "已设置仪表板密码。你可以稍后在设置中更改。",
     "providerDesc": "连接你的第一个 AI 提供者。你之后还可以继续添加。",
     "providerRequiresPassword": "你需要先设置密码才能添加提供者。请返回安全设置步骤并设置密码，或稍后从仪表板添加提供者。",
     "apiKeyRequired": "API 密钥（必填）",

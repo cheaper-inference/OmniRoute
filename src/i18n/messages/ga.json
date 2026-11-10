@@ -5461,6 +5461,7 @@
     "usageTracking": "Rianú Úsáide",
     "securityDesc": "Socraigh pasfhocal chun do dheais a chosaint, nó fág ar lár é anois.",
     "securityDescSkipWarning": "⚠️ Gan pasfhocal, ní bheidh tú in ann soláthraithe a chur leis le linn an tsocraithe. Is féidir leat iad a chur leis níos déanaí ón ndeais tar éis pasfhocal a shocrú.",
+    "passwordAlreadySet": "Tá pasfhocal an phainéil socraithe cheana féin. Is féidir leat é a athrú níos déanaí sna Socruithe.",
     "providerDesc": "Ceangail do chéad sholáthraí AI. Is féidir leat níos mó a chur leis níos déanaí.",
     "providerRequiresPassword": "Caithfidh tú pasfhocal a shocrú ar dtús chun soláthraithe a chur leis. Téigh ar ais go dtí an chéim slándála agus socraigh pasfhocal, nó cuir soláthraithe leis níos déanaí ón ndeais.",
     "apiKeyRequired": "Eochair API (riachtanach)",

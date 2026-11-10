@@ -5461,6 +5461,7 @@
     "usageTracking": "Spremljanje porabe",
     "securityDesc": "Nastavite geslo, da zaščitite nadzorno ploščo, ali pa ta korak za zdaj preskočite.",
     "securityDescSkipWarning": "⚠️ Brez gesla med nastavitvijo ne boste mogli dodati ponudnikov. Dodate jih lahko pozneje na nadzorni plošči, ko nastavite geslo.",
+    "passwordAlreadySet": "Geslo za nadzorno ploščo je že nastavljeno. Pozneje ga lahko spremenite v Nastavitvah.",
     "providerDesc": "Povežite svojega prvega ponudnika umetne inteligence. Več jih lahko dodate pozneje.",
     "providerRequiresPassword": "Če želite dodati ponudnike, morate najprej nastaviti geslo. Vrnite se na korak za varnost in nastavite geslo ali pa ponudnike dodajte pozneje na nadzorni plošči.",
     "apiKeyRequired": "Ključ API-ja (obvezno)",

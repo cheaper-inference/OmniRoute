@@ -5461,6 +5461,7 @@
     "usageTracking": "Traċċar tal-Użu",
     "securityDesc": "Issettja password biex tipproteġi d-dashboard tiegħek, jew aqbeż għalissa.",
     "securityDescSkipWarning": "⚠️ Mingħajr password, ma tkunx tista' żżid fornituri waqt l-issettjar. Tista' żżidhom aktar tard mid-dashboard wara li tissettja password.",
+    "passwordAlreadySet": "Il-password tad-dashboard diġà ġiet issettjata. Tista' tbiddilha aktar tard fis-Settings.",
     "providerDesc": "Qabbad l-ewwel fornitur tal-AI tiegħek. Tista' żżid aktar aktar tard.",
     "providerRequiresPassword": "L-ewwel trid tissettja password biex iżżid il-fornituri. Jekk jogħġbok mur lura għall-pass tas-sigurtà u ssettja password, jew żid il-fornituri aktar tard mid-dashboard.",
     "apiKeyRequired": "Ċavetta tal-API (meħtieġa)",

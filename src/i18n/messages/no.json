@@ -5461,6 +5461,7 @@
     "usageTracking": "Brukssporing",
     "securityDesc": "Angi et passord for å beskytte dashbordet ditt, eller hopp over nå.",
     "securityDescSkipWarning": "⚠️ Uten et passord kan du ikke legge til leverandører under oppsettet. Du kan legge dem til senere fra kontrollpanelet etter at du har angitt et passord.",
+    "passwordAlreadySet": "Et passord for dashbordet er allerede angitt. Du kan endre det senere under Innstillinger.",
     "providerDesc": "Koble til din første AI-leverandør. Du kan legge til flere senere.",
     "providerRequiresPassword": "Du må angi et passord før du kan legge til leverandører. Gå tilbake til sikkerhetstrinnet og angi et passord, eller legg til leverandører senere fra kontrollpanelet.",
     "apiKeyRequired": "API-nøkkel (påkrevd)",

@@ -5461,6 +5461,7 @@
     "usageTracking": "Praćenje upotrebe",
     "securityDesc": "Postavite lozinku kako biste zaštitili svoj dashboard, ili preskočite za sada.",
     "securityDescSkipWarning": "⚠️ Bez lozinke nećete moći dodavati provajdere tokom postavke. Možete ih dodati kasnije putem dashboarda nakon što postavite lozinku.",
+    "passwordAlreadySet": "Lozinka za kontrolnu ploču je već postavljena. Možete je kasnije promijeniti u Postavkama.",
     "providerDesc": "Povežite svog prvog AI provajdera. Više njih možete dodati kasnije.",
     "providerRequiresPassword": "Prvo morate postaviti lozinku da biste dodali provajdere. Vratite se na korak sigurnosti i postavite lozinku, ili dodajte provajdere kasnije putem kontrolne ploče.",
     "apiKeyRequired": "API ključ (obavezno)",

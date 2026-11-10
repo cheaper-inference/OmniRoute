@@ -5461,6 +5461,7 @@
     "usageTracking": "İstifadənin izlənməsi",
     "securityDesc": "İdarəetmə panelinizi qorumaq üçün parol təyin edin və ya hələlik keçin.",
     "securityDescSkipWarning": "⚠️ Parol olmadan quraşdırma zamanı provayder əlavə edə bilməyəcəksiniz. Parol təyin etdikdən sonra onları idarəetmə panelindən əlavə edə bilərsiniz.",
+    "passwordAlreadySet": "İdarə paneli üçün parol artıq təyin edilib. Onu sonra Parametrlərdə dəyişə bilərsiniz.",
     "providerDesc": "İlk AI provayderinizə qoşulun. Daha sonra başqa provayderlər əlavə edə bilərsiniz.",
     "providerRequiresPassword": "Provayder əlavə etmək üçün əvvəlcə parol təyin etməlisiniz. Təhlükəsizlik mərhələsinə qayıdıb parol təyin edin və ya provayderləri daha sonra idarəetmə panelindən əlavə edin.",
     "apiKeyRequired": "API açarı (tələb olunur)",
