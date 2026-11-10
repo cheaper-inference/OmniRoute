@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-process.env.DATA_DIR = mkdtempSync(join(process.env.TMPDIR ?? ".", "L06-context-overflow-"));
+process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "L06-context-overflow-"));
 
 const { isContextOverflowText } = await import("../../open-sse/services/accountFallback.ts");
 const { isContextOverflow400 } = await import("../../open-sse/services/combo/comboPredicates.ts");

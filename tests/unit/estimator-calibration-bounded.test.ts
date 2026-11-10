@@ -4,8 +4,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-estimator-lru-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
+// Keep a shared-process DATA_DIR; own one only when none is set (see learned-caps-bounded).
+const OWN_DATA_DIR = process.env.DATA_DIR
+  ? null
+  : fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-estimator-lru-"));
+if (OWN_DATA_DIR) process.env.DATA_DIR = OWN_DATA_DIR;
+// off|0|false would skip recording and break the eviction check: run with calibration enabled.
+const PREVIOUS_CALIBRATION = process.env.OMNIROUTE_ESTIMATOR_CALIBRATION;
+delete process.env.OMNIROUTE_ESTIMATOR_CALIBRATION;
 
 const {
   getEstimatorCalibrationBucketForTests,
@@ -26,7 +32,12 @@ function record(model: string): void {
 
 test.after(() => {
   resetEstimatorCalibrationForTests();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  if (PREVIOUS_CALIBRATION === undefined) delete process.env.OMNIROUTE_ESTIMATOR_CALIBRATION;
+  else process.env.OMNIROUTE_ESTIMATOR_CALIBRATION = PREVIOUS_CALIBRATION;
+  if (OWN_DATA_DIR) {
+    fs.rmSync(OWN_DATA_DIR, { recursive: true, force: true });
+    delete process.env.DATA_DIR;
+  }
 });
 
 test("estimator buckets evict old client model names and can learn them again", () => {

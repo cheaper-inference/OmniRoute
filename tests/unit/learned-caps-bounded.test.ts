@@ -4,8 +4,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-learned-caps-lru-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
+// Shared-process runs (--test-isolation=none) already isolate DATA_DIR: keep theirs, and only
+// create and remove a directory when none is set.
+const OWN_DATA_DIR = process.env.DATA_DIR
+  ? null
+  : fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-learned-caps-lru-"));
+if (OWN_DATA_DIR) process.env.DATA_DIR = OWN_DATA_DIR;
 
 const maxTokens = await import("../../open-sse/services/learnedMaxTokensCaps.ts");
 const thinking = await import("../../open-sse/services/learnedThinkingCaps.ts");
@@ -15,7 +19,10 @@ test.after(() => {
   maxTokens.__test_resetLearnedMaxTokensCaps();
   thinking.__test_resetLearnedThinkingCaps();
   effort.__test_resetLearnedReasoningEffortCaps();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  if (OWN_DATA_DIR) {
+    fs.rmSync(OWN_DATA_DIR, { recursive: true, force: true });
+    delete process.env.DATA_DIR;
+  }
 });
 
 // Model names come from client requests, so each map needs a cap (same 1,000 as the estimator).
