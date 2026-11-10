@@ -32,6 +32,8 @@ import {
   getReasoningTokens,
 } from "./tokenAccounting";
 import { backfillDuplicateUsageEntry } from "./usageHistory/duplicateEntry";
+import { recordAgentSession } from "./usageHistory/agentSessionUsage";
+import type { AgentSessionUsage } from "../db/agentSessions";
 import type { UsageEntry } from "./usageHistory";
 
 /** Delay before the single deferred attempt. Internal, not user-facing. */
@@ -67,9 +69,14 @@ function isLockMessage(message: string): boolean {
   return /database(?: table| schema)? is (?:locked|busy)|SQLITE_BUSY|SQLITE_LOCKED/i.test(message);
 }
 
-/** Legacy natural-key dedup stays on unless the caller owns a physical attempt. */
-type UsageWriteOptions = {
+/**
+ * Legacy natural-key dedup stays on unless the caller owns a physical attempt.
+ * `agentSession` holds the request's agent-session counters, priced by the caller before
+ * the write; the session is upserted in the same transaction as the row it is linked to.
+ */
+export type UsageWriteOptions = {
   deduplicate?: boolean;
+  agentSession?: AgentSessionUsage | null;
 };
 
 /**
@@ -81,7 +88,7 @@ type UsageWriteOptions = {
  */
 export function attemptWrite(entry: UsageEntry, options: UsageWriteOptions = {}): void {
   const db = getDbInstance();
-  const prepared = prepareEntry(db, entry);
+  const prepared = prepareEntry(db, entry, options.agentSession ?? null);
   let inserted = false;
   const deduplicate = options.deduplicate !== false;
 
@@ -109,6 +116,7 @@ type PreparedEntry = {
   billingTeamId: string | null;
   tokensInput: number;
   tokensOutput: number;
+  agentSession: AgentSessionUsage | null;
   accountIdentity: {
     accountKey: string | null;
     accountLabel: string | null;
@@ -116,7 +124,11 @@ type PreparedEntry = {
   };
 };
 
-function prepareEntry(db: ReturnType<typeof getDbInstance>, entry: UsageEntry): PreparedEntry {
+function prepareEntry(
+  db: ReturnType<typeof getDbInstance>,
+  entry: UsageEntry,
+  agentSession: AgentSessionUsage | null
+): PreparedEntry {
   const timestamp = entry.timestamp || new Date().toISOString();
   const connection = entry.connectionId
     ? (db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(entry.connectionId) as
@@ -131,6 +143,7 @@ function prepareEntry(db: ReturnType<typeof getDbInstance>, entry: UsageEntry): 
     billingTeamId: resolveBillingTeamIdForApiKeyAt(entry.apiKeyId, timestamp),
     tokensInput: getLoggedInputTokens(entry.tokens),
     tokensOutput: getLoggedOutputTokens(entry.tokens),
+    agentSession,
     accountIdentity: connection
       ? resolveUsageAccountIdentity(connection)
       : resolveOrphanedUsageAccountIdentity(entry.provider, entry.connectionId),
@@ -168,14 +181,17 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     accountIdentity,
   } = prepared;
   const { providerCredits, providerCostUsd } = readReportedCost(entry.provider, entry.tokens);
+  // Only a row that is actually inserted counts toward its session (dedup no-ops do not).
+  // A lock fails the whole write, so the deferred retry replays the row and its session.
+  const agentSessionId = recordAgentSession(db, prepared.agentSession, isWriteLockError);
   db.prepare(
     `
     INSERT INTO usage_history (provider, model, connection_id, account_key, account_label,
       account_label_priority, api_key_id, api_key_name, billing_team_id,
       tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
       service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, endpoint,
-      cpa_auth_index, timestamp, provider_credits, provider_cost_usd)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      cpa_auth_index, agent_session_id, timestamp, provider_credits, provider_cost_usd)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
   ).run(
     entry.provider ? resolveProviderId(entry.provider) : null,
@@ -201,6 +217,7 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
     entry.comboStrategy || entry.combo_strategy || null,
     entry.endpoint || null,
     entry.cpaAuthIndex || null,
+    agentSessionId,
     timestamp,
     providerCredits,
     providerCostUsd
