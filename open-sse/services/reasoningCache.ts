@@ -14,6 +14,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "../utils/opaqueTokenFingerprint.ts";
 import {
   clearAllReasoningCache,
   cleanupExpiredReasoning,
@@ -319,12 +320,7 @@ export function buildToolCallCacheKey(
 ): string {
   const normalizedScope = scope?.trim();
   if (!normalizedScope || !toolCallId) return toolCallId;
-  const digest = createHash("sha256")
-    .update(normalizedScope)
-    .update("\x1f")
-    .update(toolCallId)
-    .digest("hex");
-  return `tool-call:${digest}`;
+  return `tool-call:${opaqueTokenFingerprint(`${normalizedScope}\x1f${toolCallId}`)}`;
 }
 
 export function buildAssistantMessageCacheKey(
