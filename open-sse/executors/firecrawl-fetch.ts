@@ -2,7 +2,7 @@
  * Firecrawl Web Fetch Executor
  *
  * Fetches content from a URL using the Firecrawl scrape API.
- * POST https://api.firecrawl.dev/v1/scrape
+ * POST https://api.firecrawl.dev/v2/scrape
  *
  * Free tier: 1,000 credits/month, no credit card required.
  * Docs: https://docs.firecrawl.dev/api-reference/endpoint/scrape
@@ -97,11 +97,16 @@ export async function firecrawlFetch(opts: FirecrawlScrapeOptions): Promise<WebF
   // The `includeMetadata` flag only controls whether we surface metadata
   // in our response (see response parsing below).
 
-  if (depth > 0) {
+  // `depth` and `wait_for_selector` stay on our own request schema, but the
+  // Firecrawl v2 scrape endpoint cannot express either: maxDepth moved to the
+  // crawl endpoint as maxDiscoveryDepth, and waitFor is a millisecond delay,
+  // not a CSS selector. Sending the selector string there fails v2 validation.
+  // A self-hosted base URL still speaks v1, which accepts both fields.
+  if (!isDefaultBaseUrl && depth > 0) {
     requestBody.maxDepth = depth;
   }
 
-  if (waitForSelector) {
+  if (!isDefaultBaseUrl && waitForSelector) {
     requestBody.waitFor = waitForSelector;
   }
 
@@ -119,7 +124,8 @@ export async function firecrawlFetch(opts: FirecrawlScrapeOptions): Promise<WebF
       headers.Authorization = `Bearer ${credentials.apiKey}`;
     }
 
-    const response = await fetch(`${baseUrl}/v1/scrape`, {
+    const scrapePath = isDefaultBaseUrl ? "/v2/scrape" : "/v1/scrape";
+    const response = await fetch(`${baseUrl}${scrapePath}`, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),

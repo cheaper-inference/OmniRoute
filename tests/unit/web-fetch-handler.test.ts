@@ -138,7 +138,7 @@ test("handleWebFetch wraps fetch errors via buildErrorBody (no raw stack)", asyn
   }
 });
 
-test("handleWebFetch passes depth and wait_for_selector to firecrawl", async () => {
+test("handleWebFetch drops depth and wait_for_selector on the firecrawl cloud endpoint", async () => {
   const originalFetch = globalThis.fetch;
   let captured: { body: Record<string, unknown> } = { body: {} };
 
@@ -157,8 +157,8 @@ test("handleWebFetch passes depth and wait_for_selector to firecrawl", async () 
       "firecrawl"
     );
 
-    assert.equal(captured.body.maxDepth, 2, "should forward depth");
-    assert.equal(captured.body.waitFor, "main", "should forward wait_for_selector");
+    assert.equal(captured.body.maxDepth, undefined, "v2 scrape has no maxDepth");
+    assert.equal(captured.body.waitFor, undefined, "v2 waitFor is a delay, not a selector");
   } finally {
     globalThis.fetch = originalFetch;
   }

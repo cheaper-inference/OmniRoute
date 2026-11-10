@@ -264,8 +264,9 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
     if (apiKey) {
       headers["Authorization"] = `Bearer ${apiKey}`;
     }
+    const isDefaultBaseUrl = baseUrl === "https://api.firecrawl.dev";
     return {
-      url: `${baseUrl}/v1/scrape`,
+      url: `${baseUrl}${isDefaultBaseUrl ? "/v2/scrape" : "/v1/scrape"}`,
       init: {
         method: "POST",
         headers,
