@@ -1366,10 +1366,14 @@
   }
   .ci-table-loading-overlay__indicator {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: var(--ci-space-2);
+    padding-inline: var(--ci-space-4);
     height: min(240px, 35vh, 100%);
   }
+  .ci-table-loading-overlay__label { color: var(--ci-color-text-muted); font-size: var(--ci-font-size-xs); line-height: var(--ci-type-body-leading); text-align: center; overflow-wrap: anywhere; }
   .ci-table-loading-state {
     min-height: 18rem;
     overflow: hidden;
@@ -3054,6 +3058,24 @@
   .ci-brand-loader svg { display: block; width: 100%; height: auto; overflow: visible; }
   .ci-brand-loader__percentage { font-family: var(--ci-font-mono); font-size: 17px; font-variant-numeric: tabular-nums; }
   .ci-brand-loader__status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+  /* Indeterminate motion never schedules React renders, including in Suspense. */
+  .ci-brand-loader[data-animated]:not([data-reduced-motion]) [data-progress-fill] { animation: ci-brand-progress 1.8s linear infinite; }
+  .ci-brand-loader[data-animated]:not([data-reduced-motion]) [data-orbit] { transform-box: fill-box; transform-origin: center; animation: ci-brand-orbit 3.6s linear infinite; }
+  .ci-brand-loader[data-animated]:not([data-reduced-motion]) [data-pulse-dot] { animation: ci-brand-pulse 1.35s ease-in-out infinite; animation-delay: calc(var(--ci-brand-index) * 190ms); }
+  .ci-brand-loader[data-animated]:not([data-reduced-motion]) [data-axis-segment] { animation: ci-brand-pulse 1.8s ease-in-out infinite; animation-delay: calc(var(--ci-brand-index) * 150ms); }
+  .ci-brand-loader[data-animated][data-paused] [data-progress-fill],
+  .ci-brand-loader[data-animated][data-paused] [data-orbit],
+  .ci-brand-loader[data-animated][data-paused] [data-pulse-dot],
+  .ci-brand-loader[data-animated][data-paused] [data-axis-segment] { animation-play-state: paused; }
+  @keyframes ci-brand-progress { from { transform: translateX(0); } to { transform: translateX(268px); } }
+  @keyframes ci-brand-orbit { from { transform: rotate(-63deg); } to { transform: rotate(297deg); } }
+  @keyframes ci-brand-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .14; } }
+  @media (prefers-reduced-motion: reduce) {
+    .ci-brand-loader[data-animated]:not([data-reduced-motion]) [data-progress-fill],
+    .ci-brand-loader[data-animated]:not([data-reduced-motion]) [data-orbit],
+    .ci-brand-loader[data-animated]:not([data-reduced-motion]) [data-pulse-dot],
+    .ci-brand-loader[data-animated]:not([data-reduced-motion]) [data-axis-segment] { animation: none; }
+  }
 }
 
 /* Grouped catalog variant; compact Playground rows in a rectangular form field. */
@@ -3797,4 +3819,10 @@
   .ci-status-matrix__legend i[data-tone="danger"] { border-color: var(--ci-color-danger); background: var(--ci-color-danger); }
   .ci-status-matrix__legend i[data-tone="info"] { border-color: var(--ci-color-info); background: var(--ci-color-info); }
   .ci-status-matrix__legend i[data-tone="neutral"] { border-style: dashed; border-color: var(--ci-color-text-muted); }
+}
+
+/* A measured fit keeps the whole sticky region, including its controls, reachable. */
+@layer components {
+  .ci-sticky-region { min-width: 0; align-self: start; position: static; }
+  .ci-sticky-region[data-sticky] { position: sticky; }
 }

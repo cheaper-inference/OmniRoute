@@ -196,6 +196,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
     "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
+    // #15201: the ChatGPT sign-in session route reads the target connection row twice
+    // (existing-registration check on start, and again on completion) behind management
+    // auth — state reads, never connection selection or dispatch (class C).
+    "src/app/api/oauth/chatgpt/session/route.ts": 2,
     "src/app/api/oauth/codex/import/route.ts": 1,
     "src/app/api/oauth/kiro/api-key/route.ts": 1,
     "src/app/api/oauth/kiro/auto-import/route.ts": 2,
@@ -227,7 +231,12 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/settings/export-json/route.ts": 1,
     "src/app/api/settings/qdrant/embedding-models/route.ts": 1,
     "src/app/api/settings/route.ts": 1,
-    "src/app/api/token-health/route.ts": 1,
+    // 18666 (token bulk refresh wave): the POST /api/token-health refresh-all
+    // endpoint reads the active OAuth connection rows once to build the wave
+    // (exclusions + per-connection ids). Read-only lookup behind
+    // requireManagementAuth; it never selects a connection to serve a
+    // request, so it stays class C.
+    "src/app/api/token-health/route.ts": 2,
     "src/app/api/translator/send/route.ts": 1,
     "src/app/api/translator/translate/route.ts": 1,
     "src/app/api/usage/call-logs/route.ts": 1,
@@ -237,6 +246,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // the handlers it delegates to carry the auxiliary-lease fence themselves. It
     // never selects a connection to serve a request, so it stays class C.
     "src/app/api/usage/codex-reset-credit/route.ts": 1,
+    // #15201: connection-local usage summary looks the row up by id behind management
+    // auth to bound the result to a real ChatGPT connection — a state read (class C).
+    "src/app/api/usage/local-summary/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,

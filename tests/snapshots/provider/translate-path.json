@@ -980,6 +980,29 @@
       "stream": "https://api.chatanywhere.org/v1/chat/completions"
     }
   },
+  "chatgpt": {
+    "format": "openai-responses",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.openai.com/v1/responses",
+      "stream": "https://api.openai.com/v1/responses"
+    }
+  },
   "chatgpt-web": {
     "format": "openai",
     "headers": {
@@ -2241,6 +2264,29 @@
     "url": {
       "nonStream": "https://api.electronhub.ai/v1/chat/completions",
       "stream": "https://api.electronhub.ai/v1/chat/completions"
+    }
+  },
+  "empiriolabs": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.empiriolabs.ai/v1/chat/completions",
+      "stream": "https://api.empiriolabs.ai/v1/chat/completions"
     }
   },
   "eurouter": {
@@ -3995,6 +4041,35 @@
       "stream": "https://api.maxai.me"
     }
   },
+  "megabrain": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json",
+        "X-KILOCODE-EDITORNAME": "OmniRoute",
+        "X-KILOCODE-FEATURE": "omniroute"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json",
+        "X-KILOCODE-EDITORNAME": "OmniRoute",
+        "X-KILOCODE-FEATURE": "omniroute"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json",
+        "X-KILOCODE-EDITORNAME": "OmniRoute",
+        "X-KILOCODE-FEATURE": "omniroute"
+      }
+    },
+    "url": {
+      "nonStream": "https://api.getmegabrain.com/api/openrouter/chat/completions",
+      "stream": "https://api.getmegabrain.com/api/openrouter/chat/completions"
+    }
+  },
   "meganova-ai": {
     "format": "openai",
     "headers": {
@@ -5095,6 +5170,29 @@
     "url": {
       "nonStream": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions",
       "stream": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions"
+    }
+  },
+  "paraloncloud": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://paraloncloud.com/v1/chat/completions",
+      "stream": "https://paraloncloud.com/v1/chat/completions"
     }
   },
   "perplexity": {
