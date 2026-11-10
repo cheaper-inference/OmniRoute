@@ -10,7 +10,7 @@ lastUpdated: 2026-11-09
 > Regenerate with: `npm run gen:provider-reference`
 > **Last generated:** 2026-11-09
 
-Total providers: **384**. See category breakdown below.
+Total providers: **385**. See category breakdown below.
 
 ## Categories
 
@@ -49,7 +49,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `veoaifree-web` | `veo-free` | Veo AI Free | No-auth, video | [link](https://veoaifree.com) | No auth required. Rate limited to 6 requests/hour per IP. | — |
 | `zcode` | `zc` | ZCode (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | No API key stored by OmniRoute. The local ZCode app-server uses the existing builtin:zai-coding-plan login. | — |
 
-## OAuth Providers (28)
+## OAuth Providers (29)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -73,6 +73,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `kilocode` | `kc` | Kilo Code | OAuth | — | Sign in with your Kilo Code account (device-code OAuth), or paste a direct API key from app.kilo.ai → Settings → API Keys. Multiple API keys are supported and rotated automatically — add each as a separate connection. Without any connection, free anonymous models are available via the anonymousFallback. |
 | `kimi-coding` | `kmc` | Kimi Code CLI | OAuth | [link](https://www.kimi.ai/code?aff=omniroute) | Sign in with the same Kimi account used by Kimi Code CLI. OmniRoute uses the CLI OAuth flow and Kimi Coding Plan endpoints. |
 | `kiro` | `kr` | Kiro AI | OAuth | — | Free tier: 50 credits/month (~25K–100K tokens). ⚠️ Kiro ToS prohibits third-party proxy/harness use. |
+| `megabrain` | `mb` | MegaBrain | OAuth | [link](https://getmegabrain.com) | Sign in with your MegaBrain account (device code), or paste an mb-v1-… MegaBrain API key (add each key as a separate connection to rotate them). A paid plan covers the included models (Auto, GLM, Kimi, MiniMax, Grok, DeepSeek, Qwen) within its session and weekly limits; Claude, GPT and Gemini are paid from the account's credits, from Pro up or with Extra Usage turned on. Address models as mb/<model> or megabrain/<model>. |
 | `muse-code` | `mc` | Muse Code (Meta) | OAuth | [link](https://ai.developer.meta.com/docs/muse-code/auth) | Sign in with the Muse Code device flow (same as `muse login` / CLIProxyAPI `-meta-login`) to use a Muse subscription, or paste a META_API_KEY. Device login keeps the durable dca token and mints the inference key; a 401 remints that key. Wire format is OpenAI Responses (POST /responses). |
 | `openference` | `of` | Openference | OAuth | [link](https://openference.com) | Sign in with your Openference account to route requests through api.openference.com. Includes free-tier access to Qwen3.8 27b and Llama 3.2 3B — see openference.com/pricing for current plan terms. |
 | `qoder` | `if` | Qoder | OAuth | — | Browser sign-in (device code) adds your Qoder account, but these accounts cannot serve chat yet. For chat, use a PAT (pt-): requires local qodercli; plain chat only, no caller tools, buffered streaming and a 45-second chat limit. HTTP keys use DashScope. |
