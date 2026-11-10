@@ -124,7 +124,7 @@ import {
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
-import { isVertexSharedCapacityResponse } from "../../../src/sse/services/vertexErrorClassifier.ts";
+import { isVertexSharedCapacityResponse } from "../vertexSharedCapacity.ts";
 
 /**
  * Executes an admitted target with configured retries and response validation. Returns a

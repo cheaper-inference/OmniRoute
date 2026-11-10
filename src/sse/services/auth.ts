@@ -205,10 +205,8 @@ import { resolveAccountProxiesFromRegistry } from "./noAuthProxyResolution";
 import { getNoAuthHydrationProviderIds } from "./noAuthProviderSiblings";
 import { loadOptionalNoAuthApiKeyCredentials } from "./noAuthOptionalApiKey";
 import { getResource404Bypass } from "./requestResourceHealth";
-import {
-  isVertexConnectionWidePermissionDenied,
-  isVertexSharedCapacity429,
-} from "./vertexErrorClassifier";
+import { isVertexConnectionWidePermissionDenied } from "./vertexErrorClassifier";
+import { isVertexSharedCapacity429 } from "@omniroute/open-sse/services/vertexSharedCapacity.ts";
 import { maybeAutoDisableBannedAccount } from "./autoDisableBannedAccount";
 import {
   buildAntigravityRoutingFields,
