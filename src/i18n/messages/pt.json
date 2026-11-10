@@ -6075,7 +6075,7 @@
     "compareModelsTitle": "Compare inteligência",
     "intelligenceTitle": "Inteligência do modelo — {name}",
     "intelligenceClose": "Fechar painel",
-    "intelligenceLoading": "Carregando pontuações de inteligência…",
+    "intelligenceLoading": "A carregar pontuações de inteligência…",
     "intelligenceLoadFailed": "Falha ao carregar pontuações de inteligência.",
     "intelligenceRetry": "Tentar novamente",
     "intelligenceSelectAll": "Selecionar tudo",
