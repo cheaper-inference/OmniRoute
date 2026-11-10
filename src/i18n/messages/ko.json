@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} 요청 · {success} 성공 · {latency} · 할당량 {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "공급자가 보고한 비용이 우선하며, 그 외에는 현재 설정된 API 가격으로 요청을 환산합니다. 구독 요금이나 키 예산 차감액이 아닙니다. 할당량 전망은 추정치이며 고정된 구독 제공량이 아닙니다.",
     "usdUsageQuota": "USD 사용량 할당량",
     "usdUsageQuotaDescription": "로컬 USD 지출이 설정된 일일 또는 주간 할당량에 도달하면 400 API 오류와 함께 이 키를 차단합니다.",
     "dailyQuotaUsd": "일일 할당량 (USD)",

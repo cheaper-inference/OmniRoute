@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} talbiet · {success} suċċessi · {latency} · kwota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "L-ispejjeż irrappurtati mill-fornitur għandhom prijorità; inkella jintużaw il-prezzijiet API kkonfigurati bħalissa. Din mhijiex tariffa ta’ abbonament jew tnaqqis mill-baġit taċ-ċavetta. Il-projezzjoni tal-kwota hija stima, mhux allokazzjoni fissa tal-abbonament.",
     "usdUsageQuota": "Kwota tal-użu f'USD",
     "usdUsageQuotaDescription": "Jimblokka din iċ-ċavetta bi żball API 400 wara li l-infiq lokali tagħha f'USD jilħaq il-kwota kkonfigurata ta' kuljum jew ta' kull ġimgħa.",
     "dailyQuotaUsd": "Kwota ta' kuljum (USD)",

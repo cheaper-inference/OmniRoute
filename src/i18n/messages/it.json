@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} successi · {latency} · quota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "I costi comunicati dal fornitore hanno la precedenza; altrimenti si usano i prezzi API attualmente configurati. Non è un addebito dell’abbonamento né una detrazione dal budget della chiave. La proiezione della quota è una stima, non una disponibilità fissa dell’abbonamento.",
     "usdUsageQuota": "Quota di utilizzo in USD",
     "usdUsageQuotaDescription": "Blocca questa chiave con un errore API 400 dopo che la spesa locale in USD raggiunge la quota giornaliera o settimanale configurata.",
     "dailyQuotaUsd": "Quota giornaliera (USD)",

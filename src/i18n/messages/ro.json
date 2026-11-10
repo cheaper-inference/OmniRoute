@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} succes · {latency} · cotă {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Costurile raportate de furnizor au prioritate; altfel se folosesc prețurile API configurate în prezent. Aceasta nu este o taxă de abonament sau o deducere din bugetul cheii. Proiecția cotei este o estimare, nu o alocare fixă a abonamentului.",
     "usdUsageQuota": "Cotă de utilizare USD",
     "usdUsageQuotaDescription": "Blochează această cheie cu o eroare API 400 după ce cheltuielile locale în USD ating cota zilnică sau săptămânală configurată.",
     "dailyQuotaUsd": "Cotă zilnică (USD)",

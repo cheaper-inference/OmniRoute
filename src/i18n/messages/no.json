@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} foresp. · {success} suksess · {latency} · kvote {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Kostnader rapportert av leverandøren har prioritet; ellers brukes gjeldende konfigurerte API-priser. Dette er ikke en abonnementsavgift eller et trekk fra nøkkelbudsjettet. Kvoteprognosen er et anslag, ikke en fast abonnementskvote.",
     "usdUsageQuota": "USD-brukskvote",
     "usdUsageQuotaDescription": "Blokkerer denne nøkkelen med en 400 API-feil etter at det lokale USD-forbruket når den konfigurerte daglige eller ukentlige kvoten.",
     "dailyQuotaUsd": "Daglig kvote (USD)",

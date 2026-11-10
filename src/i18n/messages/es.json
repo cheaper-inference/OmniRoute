@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} solicitudes · {success} correctas · {latency} · cuota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Los costes informados por el proveedor tienen prioridad; en caso contrario, se usan los precios de API configurados actualmente. No es un cargo de suscripción ni una deducción del presupuesto de la clave. La proyección de cuota es una estimación, no una asignación fija de la suscripción.",
     "usdUsageQuota": "Cuota de uso en USD",
     "usdUsageQuotaDescription": "Bloquea esta clave con un error 400 de la API cuando su gasto local en USD alcanza la cuota diaria o semanal configurada.",
     "dailyQuotaUsd": "Cuota diaria (USD)",

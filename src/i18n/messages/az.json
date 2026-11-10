@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} sorğu · {success} uğurlu · {latency} · kvota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Təchizatçının bildirdiyi xərclərə üstünlük verilir; əks halda hazırda qurulmuş API qiymətləri istifadə olunur. Bu, abunə haqqı və ya açar büdcəsindən çıxılma deyil. Kvota proqnozu təxmindir, sabit abunə limiti deyil.",
     "usdUsageQuota": "USD istifadə kvotası",
     "usdUsageQuotaDescription": "Lokal USD xərci konfiqurasiya edilmiş gündəlik və ya həftəlik kvotaya çatdıqdan sonra bu açarı 400 API xətası ilə bloklayır.",
     "dailyQuotaUsd": "Gündəlik kvota (USD)",

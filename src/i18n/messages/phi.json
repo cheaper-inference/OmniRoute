@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} tagumpay · {latency} · quota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Prayoridad ang mga gastos na iniulat ng provider; kung wala, ginagamit ang kasalukuyang naka-configure na presyo ng API. Hindi ito singil sa subscription o bawas sa badyet ng key. Ang projection ng quota ay pagtatantya, hindi nakapirming alokasyon ng subscription.",
     "usdUsageQuota": "Quota sa paggamit ng USD",
     "usdUsageQuotaDescription": "Bina-block ang key na ito gamit ang isang 400 API error pagkatapos maabot ng lokal na nagastos nitong USD ang na-configure na pang-araw-araw o lingguhang quota.",
     "dailyQuotaUsd": "Pang-araw-araw na quota (USD)",

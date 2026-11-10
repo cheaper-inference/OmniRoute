@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} piepr. · {success} veiksmīgi · {latency} · kvota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Pakalpojuma sniedzēja ziņotajām izmaksām ir prioritāte; citādi izmanto pašlaik konfigurētās API cenas. Tā nav abonēšanas maksa vai atskaitījums no atslēgas budžeta. Kvotas prognoze ir aplēse, nevis fiksēts abonementa apjoms.",
     "usdUsageQuota": "USD izmantošanas kvota",
     "usdUsageQuotaDescription": "Bloķē šo atslēgu, atgriežot API kļūdu ar kodu 400, kad tās lokālie izdevumi USD sasniedz konfigurēto dienas vai nedēļas kvotu.",
     "dailyQuotaUsd": "Dienas kvota (USD)",

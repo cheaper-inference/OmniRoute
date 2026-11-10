@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} anrop · {success} lyckade · {latency} · kvot {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Kostnader som leverantören rapporterar prioriteras; annars används aktuella konfigurerade API-priser. Detta är inte en abonnemangsavgift eller ett avdrag från nyckelns budget. Kvotprognosen är en uppskattning, inte en fast abonnemangspott.",
     "usdUsageQuota": "USD-användningskvot",
     "usdUsageQuotaDescription": "Blockerar denna nyckel med ett 400 API-fel efter att dess lokala USD-förbrukning når den konfigurerade dagliga eller veckovisa kvoten.",
     "dailyQuotaUsd": "Daglig kvot (USD)",

@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} soʻrov · {success} muvaffaqiyatli · {latency} · kvota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Provayder bildirgan xarajatlar ustuvor; aks holda hozir sozlangan API narxlari ishlatiladi. Bu obuna to‘lovi yoki kalit byudjetidan chegirma emas. Kvota prognozi taxmin bo‘lib, obunaning qat’iy ajratmasi emas.",
     "usdUsageQuota": "USD sarf-xarajat kvotasi",
     "usdUsageQuotaDescription": "Mahalliy USD xarajati sozlangan kunlik yoki haftalik kvotaga yetgach, ushbu kalitni 400 API xatosi bilan bloklaydi.",
     "dailyQuotaUsd": "Kunlik kvota (USD)",

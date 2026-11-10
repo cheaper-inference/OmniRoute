@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} żąd. · {success} udanych · {latency} · limit {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Koszty zgłoszone przez dostawcę mają pierwszeństwo; w pozostałych przypadkach używane są obecnie skonfigurowane ceny API. Nie jest to opłata za subskrypcję ani potrącenie z budżetu klucza. Prognoza limitu jest szacunkiem, a nie stałą pulą subskrypcji.",
     "usdUsageQuota": "Limit użycia w USD",
     "usdUsageQuotaDescription": "Blokuje ten klucz błędem API 400, gdy lokalne wydatki w USD osiągną skonfigurowany limit dzienny lub tygodniowy.",
     "dailyQuotaUsd": "Limit dzienny (USD)",

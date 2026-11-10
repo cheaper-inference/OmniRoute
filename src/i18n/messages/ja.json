@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} 成功 · {latency} · クォータ {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "プロバイダーが報告した費用を優先し、それ以外は現在設定されている API 価格でリクエストを換算します。サブスクリプション料金やキーの予算からの差し引きではありません。クォータの外挿は推定であり、サブスクリプションの固定利用枠ではありません。",
     "usdUsageQuota": "USD使用量クォータ",
     "usdUsageQuotaDescription": "ローカルのUSD消費額が設定された日次または週次のクォータに達すると、このキーを400 APIエラーでブロックします。",
     "dailyQuotaUsd": "日次クォータ (USD)",

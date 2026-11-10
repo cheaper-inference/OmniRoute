@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} úspešných · {latency} · kvóta {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Náklady hlásené poskytovateľom majú prednosť; inak sa použijú aktuálne nastavené ceny API. Nejde o poplatok za predplatné ani o odpočet z rozpočtu kľúča. Projekcia kvóty je odhad, nie pevný prídel predplatného.",
     "usdUsageQuota": "Kvóta využitia v USD",
     "usdUsageQuotaDescription": "Zablokuje tento kľúč s chybou API 400 po tom, čo jeho lokálne výdavky v USD dosiahnu nakonfigurovanú dennú alebo týždennú kvótu.",
     "dailyQuotaUsd": "Denná kvóta (USD)",

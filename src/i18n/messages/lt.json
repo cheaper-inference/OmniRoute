@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} užkl. · {success} sėkmingų · {latency} · kvota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Pirmenybė teikiama teikėjo nurodytoms išlaidoms; kitu atveju naudojamos dabartinės sukonfigūruotos API kainos. Tai nėra prenumeratos mokestis ar atskaitymas iš rakto biudžeto. Kvotos prognozė yra įvertis, o ne fiksuotas prenumeratos kiekis.",
     "usdUsageQuota": "Naudojimo kvota USD",
     "usdUsageQuotaDescription": "Užblokuoja šį raktą, grąžinant 400 API klaidą, kai jo vietoje apskaičiuotos išlaidos USD pasiekia nustatytą dienos arba savaitės kvotą.",
     "dailyQuotaUsd": "Dienos kvota (USD)",

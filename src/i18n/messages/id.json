@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} sukses · {latency} · kuota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Biaya yang dilaporkan penyedia diutamakan; jika tidak, permintaan memakai harga API yang saat ini dikonfigurasi. Ini bukan biaya langganan atau pengurangan anggaran kunci. Proyeksi kuota adalah perkiraan, bukan jatah langganan tetap.",
     "usdUsageQuota": "Kuota penggunaan USD",
     "usdUsageQuotaDescription": "Memblokir kunci ini dengan error API 400 setelah pengeluaran USD lokalnya mencapai kuota harian atau mingguan yang dikonfigurasi.",
     "dailyQuotaUsd": "Kuota harian (USD)",

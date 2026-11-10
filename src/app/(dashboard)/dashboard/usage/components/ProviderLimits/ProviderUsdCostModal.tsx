@@ -36,6 +36,7 @@ interface ProviderWindowCostPayload {
   quotaUsedPercent: number | null;
   quotaRemainingPercent: number | null;
   totalCostUsd: number;
+  unpricedRequests?: number;
   estimatedFullQuotaUsd: number | null;
   rows: ProviderWindowCostRow[];
 }
@@ -85,6 +86,7 @@ export default function ProviderUsdCostModal({
   accountLabel,
 }: Props) {
   const t = useTranslations("usageLimits");
+  const tCosts = useTranslations("teamCosts");
   const [payload, setPayload] = useState<ProviderWindowCostPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,6 +154,12 @@ export default function ProviderUsdCostModal({
           </div>
         ) : payload ? (
           <div className="flex flex-col gap-4">
+            <p className="text-xs text-text-muted">{t("apiValueNotice")}</p>
+            {(payload.unpricedRequests ?? 0) > 0 && (
+              <p role="status" className="text-xs text-warning">
+                {tCosts("unpricedReport")} ({payload.unpricedRequests})
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
               <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
                 <div className="text-[10px] uppercase tracking-wide text-text-muted">

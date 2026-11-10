@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "arịrịọ {requests} · ihe ịga nke ọma {success} · {latency} · oke {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "A na-ebute ego onye na-eweta ọrụ kọrọ ụzọ; ma ọ bụghị ya, a na-eji ọnụahịa API ahaziri ugbu a. Nke a abụghị ụgwọ ndebanye aha ma ọ bụ mwepụ na mmefu ego igodo. Amụma oke bụ atụmatụ, ọ bụghị oke ndebanye aha a kapịrị ọnụ.",
     "usdUsageQuota": "Oke ojiji USD",
     "usdUsageQuotaDescription": "Na-egbochi igodo a site na njehie 400 API mgbe mmefu USD mpaghara ya ruru oke kwa ụbọchị ma ọ bụ kwa izu ahaziri.",
     "dailyQuotaUsd": "Oke kwa ụbọchị (USD)",

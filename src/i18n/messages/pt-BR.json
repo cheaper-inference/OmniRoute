@@ -15014,6 +15014,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} sucesso · {latency} · cota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Custos informados pelo provedor têm prioridade; caso contrário, as solicitações usam os preços de API configurados atualmente. Não é uma cobrança de assinatura nem uma dedução do orçamento da chave. A projeção da cota é uma estimativa, não uma franquia fixa da assinatura.",
     "usdUsageQuota": "Cota de uso em USD",
     "usdUsageQuotaDescription": "Bloqueia esta chave com um erro de API 400 depois que o gasto local em USD atinge a cota diária ou semanal configurada.",
     "dailyQuotaUsd": "Cota diária (USD)",
