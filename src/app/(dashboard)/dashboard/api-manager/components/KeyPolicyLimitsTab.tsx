@@ -443,7 +443,7 @@ function DomainBudgetToggle() {
 }
 
 function UsageBudgets() {
-  const { tc, formState, updateState } = useKeyPolicyEditor();
+  const { formState, updateState } = useKeyPolicyEditor();
   return (
     <div className="p-3.5 rounded-lg border border-border bg-surface/40">
       <UsageLimitSettings
@@ -451,8 +451,6 @@ function UsageBudgets() {
         dailyLimitUsd={formState.dailyUsageLimitUsd}
         weeklyLimitUsd={formState.weeklyUsageLimitUsd}
         fiveHourLimitUsd={formState.fiveHourUsageLimitUsd}
-        enabledLabel={tc("enabled")}
-        disabledLabel={tc("disabled")}
         onEnabledChange={(enabled) => updateState((p) => ({ ...p, usageLimitEnabled: enabled }))}
         onDailyLimitUsdChange={(val) => updateState((p) => ({ ...p, dailyUsageLimitUsd: val }))}
         onWeeklyLimitUsdChange={(val) => updateState((p) => ({ ...p, weeklyUsageLimitUsd: val }))}
