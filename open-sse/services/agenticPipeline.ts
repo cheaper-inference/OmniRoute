@@ -308,7 +308,7 @@ async function dispatchExecutors(
 function createCompactingDispatch(
   handleSingleModel: HandleSingleModel,
   log: ComboLogger,
-  config: AgenticOrchestrationConfig | undefined
+  config: AgenticOrchestrationConfig | null | undefined
 ): HandleSingleModel {
   const compaction = config?.contextCompaction;
   return async (request, model, target) => {
