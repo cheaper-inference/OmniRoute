@@ -566,7 +566,17 @@ export class GeminiWebExecutor extends BaseExecutor {
         m.role === "user" && Boolean(flattenGeminiTextContent(m.content)?.trim())
     );
 
-    if (!prompt || !hasUserMessage) {
+    // Tool mode sends only the LAST user turn as the current ask. If that turn is an array
+    // with no readable text (an image), an earlier readable user turn must not let it through.
+    const lastUserContent = messages
+      .filter((m: { role: string }) => m.role === "user")
+      .pop()?.content;
+    const unreadableLastUserArray =
+      hasTools &&
+      Array.isArray(lastUserContent) &&
+      !flattenGeminiTextContent(lastUserContent)?.trim();
+
+    if (!prompt || !hasUserMessage || unreadableLastUserArray) {
       return {
         response: new Response(JSON.stringify({ error: "No user message found" }), {
           status: 400,
