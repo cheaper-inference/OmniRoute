@@ -10,8 +10,9 @@
  *   rate limits, timeouts, network errors, 5xx and exhausted quota; never auth,
  *   permission or invalid-request errors. At most `maxProviderAttempts` providers.
  * - Only a failed response moves on, so nothing fails over after the first
- *   streamed byte (a started stream is a 2xx response), and a request that
- *   continues another provider's session is pinned to it.
+ *   streamed byte (a started stream is a 2xx response), a request that
+ *   continues another provider's session is pinned to it, and a session-ownership
+ *   fail-close (`markProviderBoundResponse`) is returned unchanged.
  * - Every attempt but the last runs with `providerFailoverPending`: no
  *   cooldown-wait restart, no same-account transport retry and no emergency
  *   model swap while another provider of the requested model is still queued.
@@ -28,6 +29,7 @@ import {
 import { classifyProviderFailure } from "@/lib/resilience/failureClassification";
 import { getModelInfo } from "../../services/model";
 import * as log from "../../utils/logger";
+import { isProviderBoundResponse } from "./providerBoundResponse.ts";
 import { createVisibleResolvedModelGate } from "./resolvedModelPolicy.ts";
 
 export interface ProviderFailoverAttemptOptions {
@@ -159,6 +161,8 @@ export async function dispatchWithProviderFailover(opts: {
       attemptOptions(attempts, index, opts.modelStr)
     );
     if (response.ok || index === attempts.length - 1 || opts.signal?.aborted) return response;
+    // A session-ownership fail-close refuses this body on purpose: never replay it.
+    if (isProviderBoundResponse(response)) return response;
     const failure = await failureOf(response, attempts[index]);
     if (!shouldFailover(failure, policy)) return response;
     log.warn(

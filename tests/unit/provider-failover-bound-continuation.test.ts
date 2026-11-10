@@ -108,3 +108,85 @@ test("a Muse OAuth session with a served owner is pinned", async () => {
   assert.ok(owner && !(owner instanceof Response), "expected a claimed Muse owner");
   assert.equal(await museSessionIsOwned({ body, headers, apiKeyId: null }), true);
 });
+
+// Served by both fireworks and cerebras in the static catalogs: a bare id with an alternate.
+const FAILOVER_MODEL = "gpt-oss-120b";
+
+async function dispatchBareModel(firstAttempt: () => Response) {
+  const { dispatchWithProviderFailover } =
+    await import("../../src/sse/handlers/chat/providerFailover.ts");
+  await seedConnection("fireworks");
+  await seedConnection("cerebras");
+  const dispatched: string[] = [];
+  const response = await dispatchWithProviderFailover({
+    modelStr: FAILOVER_MODEL,
+    apiKeyInfo: null,
+    request: null,
+    pins: {},
+    dispatch: async (target) => {
+      dispatched.push(target);
+      return dispatched.length === 1 ? firstAttempt() : Response.json({ ok: true });
+    },
+  });
+  return { response, dispatched };
+}
+
+test("a plain 503 on a bare id still fails over to the other provider", async () => {
+  const { response, dispatched } = await dispatchBareModel(() =>
+    Response.json({ error: { message: "Service unavailable" } }, { status: 503 })
+  );
+  assert.equal(response.status, 200);
+  assert.equal(dispatched.length, 2, `expected one failover, got ${dispatched.join(", ")}`);
+});
+
+test("a Muse owner-unavailable 503 is returned as is and never failed over", async () => {
+  const { museOwnerUnavailable } = await import("../../src/sse/handlers/chat/museOwnership.ts");
+  const owner = {
+    scope: "ses_owner_unavailable",
+    connectionId: "conn-owner",
+    emptyRetries: 0,
+    emptyOriginal: null,
+  } as unknown as Parameters<typeof museOwnerUnavailable>[0];
+  const { response, dispatched } = await dispatchBareModel(() => {
+    const failClose = museOwnerUnavailable(owner, { allRateLimited: true });
+    assert.ok(failClose, "a credential set without the owner must fail closed");
+    return failClose;
+  });
+  assert.equal(response.status, 503);
+  assert.match(await response.text(), /cross-account continuation is forbidden/);
+  assert.deepEqual(dispatched, [FAILOVER_MODEL]);
+});
+
+test("a Muse ownership-claim 503 is returned as is and never failed over", async () => {
+  // Not every ownership fail-close says "forbidden": this 503 reads like any outage, so
+  // only an explicit marker keeps the dispatcher from replaying it on another provider.
+  const { claimMuseOwner } = await import("../../src/sse/handlers/chat/museOwnership.ts");
+  await providersDb.createProviderConnection({
+    provider: "muse-code",
+    authType: "oauth",
+    name: "muse-oauth-claim",
+    accessToken: "ya29.test-claim",
+    refreshToken: "1//test-claim",
+    expiresAt: new Date(Date.now() + 3600_000).toISOString(),
+    isActive: true,
+    testStatus: "active",
+  });
+  const claimed = await claimMuseOwner({
+    provider: "muse-code",
+    model: "muse-spark-1.3-contributor",
+    body: { model: "muse-spark-1.3-contributor" },
+    headers: new Headers({ "x-session-id": "ses_claim_503" }),
+    apiKeyId: null,
+    forcedConnectionId: null,
+    // The key admits no Muse OAuth account, so the claim has no candidate.
+    allowedConnections: ["conn-not-muse"],
+    allowUnavailable: false,
+  });
+  assert.ok(claimed instanceof Response, "expected the claim to fail closed");
+  assert.equal(claimed.status, 503);
+
+  const { response, dispatched } = await dispatchBareModel(() => claimed);
+  assert.equal(response.status, 503);
+  assert.match(await response.text(), /No native OAuth Muse account is available/);
+  assert.deepEqual(dispatched, [FAILOVER_MODEL]);
+});

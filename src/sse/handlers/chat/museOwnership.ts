@@ -12,6 +12,7 @@ import { getProviderConnections } from "@/lib/db/providers";
 import { museScopeHasRecordedItems, readMuseOwnershipValue } from "@/lib/db/museSessionOwnership";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as log from "../../utils/logger";
+import { markProviderBoundResponse } from "./providerBoundResponse.ts";
 import {
   MuseOwnershipError,
   MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS,
@@ -99,7 +100,8 @@ export async function claimMuseOwner(args: ClaimArgs): Promise<MuseOwner | Respo
     const owner = claimMuseSession(scope, args.body, candidates, args.forcedConnectionId);
     return { scope, ...owner, emptyRetries: 0, emptyOriginal: null };
   } catch (error) {
-    if (error instanceof MuseOwnershipError) return errorResponse(error.status, error.message);
+    if (error instanceof MuseOwnershipError)
+      return markProviderBoundResponse(errorResponse(error.status, error.message));
     throw error;
   }
 }
@@ -135,9 +137,11 @@ export function museOwnerUnavailable(owner: MuseOwner, credentials: Creds): Resp
     credentials.connectionId === owner.connectionId;
   return usable
     ? null
-    : errorResponse(
-        503,
-        "Muse session owner is unavailable; cross-account continuation is forbidden."
+    : markProviderBoundResponse(
+        errorResponse(
+          503,
+          "Muse session owner is unavailable; cross-account continuation is forbidden."
+        )
       );
 }
 
@@ -171,7 +175,8 @@ export function bindMuseOwner(
     return null;
   } catch (error) {
     onFailure();
-    if (error instanceof MuseOwnershipError) return errorResponse(error.status, error.message);
+    if (error instanceof MuseOwnershipError)
+      return markProviderBoundResponse(errorResponse(error.status, error.message));
     throw error;
   }
 }
