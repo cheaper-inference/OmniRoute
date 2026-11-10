@@ -93,6 +93,8 @@ const MIGRATED_FILES = [
   "open-sse/services/combo/handoffSessionScope.ts",
   // Sign in with ChatGPT (#15201): the attempt owner is a fingerprint of the dashboard session.
   "src/app/api/oauth/chatgpt/session/route.ts",
+  "src/lib/db/agentSessions.ts",
+  "src/lib/db/proxyTraffic.ts",
 ];
 
 test("migrated call sites import the helper instead of hashing inline", () => {

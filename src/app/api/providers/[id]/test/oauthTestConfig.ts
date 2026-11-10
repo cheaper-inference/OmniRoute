@@ -384,6 +384,14 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     refreshable: true,
     acceptStatuses: [402],
   },
+  // RenderHour: the account's balance is a free authenticated read (credits and dollars).
+  renderhour: {
+    url: "https://renderhour.com/v1/balance",
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    refreshable: true,
+  },
   // MegaBrain: the plan's usage limits are a free authenticated read that accepts both the
   // device-code token and an mb-v1 API key (its public /models route needs no auth).
   megabrain: {
