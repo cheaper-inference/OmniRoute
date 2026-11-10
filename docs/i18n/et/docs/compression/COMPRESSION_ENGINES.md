@@ -402,7 +402,7 @@ Tootmistööriist kannab praegu nime `omniroute_ccr_retrieve` (eesliide `omnirou
 
 ### Seansi elutsükkel
 
-Voogesitatavad HTTP-seansid on tühikäigul ja server võtab need ära; jõudeaken on `MCP_SESSION_IDLE_MS` konstant (viidatud nime järgi, mitte kõvakoodiga väärtus, nii et see leht ei triivi, kui see muutub). Tühiseansi sümptomiks on HTTP 404 koos `Unknown Mcp-Session-Id` — Abinõu on seansi taasühendamine või taaskäivitamine,** mitte** klahvi pööramiseks, ulatuse muutmiseks või tööriista ümbernimetamiseks.
+Voogesitatavad HTTP-seansid on tühikäigul ja server võtab need ära; jõudeoleku aken on seatud `OMNIROUTE_MCP_SESSION_IDLE_MS` (vaikimisi 5 minutit; viidatud nime järgi, mitte kodeeritud väärtus, nii et see leht ei triivi, kui see muutub). Tühiseansi sümptomiks on HTTP 404 koos `Unknown Mcp-Session-Id` — Abinõu on seansi taasühendamine või taaskäivitamine,** mitte** klahvi pööramiseks, ulatuse muutmiseks või tööriista ümbernimetamiseks.
 
 ## API-liides
 
