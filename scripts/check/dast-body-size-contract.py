@@ -1,4 +1,4 @@
-"""Constrain the one operation-specific 413 expected by the DAST smoke."""
+"""Constrain the measured operation-specific 413 responses in the DAST smoke."""
 
 import re
 from urllib.parse import urlsplit
@@ -9,7 +9,10 @@ import schemathesis
 # The smoke does not override MAX_BODY_SIZE_BYTES. Keep this tied to its real
 # proxy/bodySizeGuard regression; this is not a general HTTP 413 exception.
 BODY_LIMIT = 10 * 1024 * 1024
-OPERATION_PATH = "/api/keys/{id}/access"
+OPERATION_PATHS = {
+    "/api/keys/{id}/access": r"/api/keys/[^/]+/access",
+    "/api/keys/import": r"/api/keys/import",
+}
 EXPECTED_BODY = {
     "error": {
         "message": "Request body too large. Maximum allowed: 10 MB",
@@ -46,14 +49,14 @@ def body_size_rejection_contract(ctx, response, case):
     if response.status_code != 413:
         return
     _require(
-        case.operation.path == OPERATION_PATH
+        case.operation.path in OPERATION_PATHS
         and case.operation.method.upper() == "POST"
         and case.method.upper() == "POST"
         and response.request.method == "POST",
         "BODY_LIMIT_OPERATION_MISMATCH",
     )
     _require(
-        re.fullmatch(r"/api/keys/[^/]+/access", urlsplit(response.request.url).path)
+        re.fullmatch(OPERATION_PATHS[case.operation.path], urlsplit(response.request.url).path)
         is not None,
         "BODY_LIMIT_SENT_PATH_MISMATCH",
     )

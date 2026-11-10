@@ -7,3 +7,9 @@ include-name = "POST /api/keys/{id}/access"
 checks.negative_data_rejection.expected-statuses = [
   400, 401, 403, 404, 405, 406, 409, 413, 415, 422, 428, 429, "5xx",
 ]
+
+[[operations]]
+include-name = "POST /api/keys/import"
+checks.negative_data_rejection.expected-statuses = [
+  400, 401, 403, 404, 405, 406, 409, 413, 415, 422, 428, 429, "5xx",
+]

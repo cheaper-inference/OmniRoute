@@ -190,5 +190,13 @@ class DastBodySizeContract(unittest.TestCase):
             status_code_conformance(*args)
 
 
+class DastImportBodySizeContract(DastBodySizeContract):
+    """The import operation must satisfy the same strict positive and negative controls."""
+
+    def fixture(self, **kwargs):
+        kwargs.setdefault("path", "/api/keys/import")
+        return super().fixture(**kwargs)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -6,6 +6,8 @@ const HIGH_RISK_METHOD_RULES = [
   [/^\/api\/auth\/login\/?$/, ["POST"]],
   [/^\/api\/auth\/logout\/?$/, ["POST"]],
   [/^\/api\/auth\/status\/?$/, ["GET", "HEAD"]],
+  [/^\/api\/auth\/mfa\/(setup|enable|disable|verify)\/?$/, ["POST"]],
+  [/^\/api\/auth\/mfa\/status\/?$/, ["GET", "HEAD"]],
   [/^\/api\/keys\/?$/, ["GET", "POST"]],
   // Must precede the generic /api/keys/{id} rule: "import" is a static segment, not a key id.
   [/^\/api\/keys\/import\/?$/, ["POST"]],
@@ -15,6 +17,7 @@ const HIGH_RISK_METHOD_RULES = [
   [/^\/api\/keys\/[^/]+\/?$/, ["GET", "PATCH", "DELETE"]],
   [/^\/api\/keys\/[^/]+\/devices\/?$/, ["GET"]],
   [/^\/api\/keys\/[^/]+\/access\/?$/, ["POST"]],
+  [/^\/api\/keys\/[^/]+\/self-service\/?$/, ["GET", "HEAD", "PUT"]],
 ];
 
 let installed = false;

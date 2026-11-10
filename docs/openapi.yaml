@@ -3046,6 +3046,29 @@ paths:
           description: Invalid management API key or insufficient API-key/access-token scope
         "409":
           description: ID/value conflict, duplicate value or reserved credential; no other ID disclosed
+        "413":
+          description: Declared request body exceeds the configured limit; rejected before authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [error]
+                properties:
+                  error:
+                    type: object
+                    additionalProperties: false
+                    required: [message, type, code]
+                    properties:
+                      message:
+                        type: string
+                        minLength: 1
+                      type:
+                        type: string
+                        enum: [payload_too_large]
+                      code:
+                        type: string
+                        enum: [PAYLOAD_TOO_LARGE]
         "500":
           description: Sanitized import/storage failure; transaction rolls back on insertion failure
         "503":

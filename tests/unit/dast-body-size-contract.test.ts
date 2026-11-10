@@ -97,11 +97,12 @@ function jsonBody(bytes: number): string {
 
 function request(
   body: string,
-  declaredLength: string | null = String(Buffer.byteLength(body))
+  declaredLength: string | null = String(Buffer.byteLength(body)),
+  pathname: string = route
 ): NextRequest {
   const headers: Record<string, string> = { "content-type": "application/json" };
   if (declaredLength !== null) headers["content-length"] = declaredLength;
-  return new NextRequest(`http://localhost:20128${route}`, { method: "POST", body, headers });
+  return new NextRequest(`http://localhost:20128${pathname}`, { method: "POST", body, headers });
 }
 
 function recorder() {
@@ -242,6 +243,63 @@ test("key-access OpenAPI declares the actual 413 envelope and rejects malformed 
     { error: { message: "too large", type: "payload_too_large", code: "OTHER" } },
     { error: { type: "payload_too_large", code: "PAYLOAD_TOO_LARGE" } },
     { error: { ...body.error, stack: "must not be accepted" } },
+    { ...body, accepted: true },
+  ])
+    assert.equal(validate(invalid), false);
+});
+
+test("key import returns the real body-size 413 before authentication", async () => {
+  const pathname = "/api/keys/import";
+  assert.equal(
+    unstable_doesMiddlewareMatch({
+      config,
+      url: `http://localhost:20128${pathname}`,
+      nextConfig: { basePath: "" },
+    }),
+    true
+  );
+  assert.equal(getBodySizeLimit(pathname, { maxBodySizeMb: 10 }), limit);
+  const req = request("{}", String(limit + 1), pathname);
+  assert.equal(maybeHandleDisallowedMethod({ method: "POST", url: pathname }, recorder()), false);
+  const expected = checkBodySize(req, limit);
+  assert.ok(expected);
+  const response = await proxy(req);
+  assert.equal(response.status, 413);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+  assert.deepEqual(await response.json(), await expected.json());
+  assert.equal(req.bodyUsed, false);
+});
+
+test("key import at or below the body limit still requires authentication", async () => {
+  for (const declared of [null, "invalid", "2", String(limit)]) {
+    const req = request("{}", declared, "/api/keys/import");
+    assert.equal(checkBodySize(req, limit), null);
+    const response = await proxy(req);
+    assert.equal(response.status, 401);
+    assert.equal((await response.json()).error.code, "AUTH_001");
+    assert.equal(req.bodyUsed, false);
+  }
+});
+
+test("key-import OpenAPI describes the measured 413 and rejects malformed envelopes", async () => {
+  const spec = parse(fs.readFileSync(new URL("docs/openapi.yaml", root), "utf8"));
+  const responseSchema =
+    spec.paths["/api/keys/import"].post.responses["413"]?.content?.["application/json"]?.schema;
+  assert.ok(
+    responseSchema,
+    "the real pre-auth import body limit needs an explicit response contract"
+  );
+  const validate = new Ajv({ strict: true, allErrors: true }).compile(responseSchema);
+  const actual = checkBodySize(request("{}", String(limit + 1), "/api/keys/import"), limit);
+  assert.ok(actual);
+  const body = await actual.json();
+  assert.equal(validate(body), true);
+  for (const invalid of [
+    { error: "too large" },
+    { error: { message: "too large", type: "other", code: "PAYLOAD_TOO_LARGE" } },
+    { error: { message: "too large", type: "payload_too_large", code: "OTHER" } },
+    { error: { type: "payload_too_large", code: "PAYLOAD_TOO_LARGE" } },
+    { error: { ...body.error, stack: "forbidden" } },
     { ...body, accepted: true },
   ])
     assert.equal(validate(invalid), false);
