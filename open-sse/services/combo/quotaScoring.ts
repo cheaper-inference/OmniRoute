@@ -523,6 +523,15 @@ function resolveWindowReset(
   return { msLeft: msLeft + periodMs * (Math.floor(-msLeft / periodMs) + 1), lapsed: true };
 }
 
+/**
+ * How much of a window can still be spent. An unreported fraction caps nothing, and
+ * neither does a lapsed window: it has refilled, so its stale fraction no longer applies.
+ */
+function windowUsableCap(window: QuotaWindowSnapshot, lapsed: boolean): number {
+  if (window.fractionReported === false || lapsed) return 1;
+  return clamp01(1 - (window.percentUsed ?? 0.5));
+}
+
 function resolveUsableAndReset(
   windows: ExpiryWindow[],
   nowMs: number,
@@ -539,10 +548,7 @@ function resolveUsableAndReset(
     const capOnly = session && hasLongerWindow;
     // A lapsed session has refilled: inside a longer window it caps nothing.
     if (capOnly && lapsed) continue;
-    // A lapsed longer window has refilled: its stale fraction caps nothing.
-    if (window.fractionReported !== false && !lapsed) {
-      usable = Math.min(usable, clamp01(1 - (window.percentUsed ?? 0.5)));
-    }
+    usable = Math.min(usable, windowUsableCap(window, lapsed));
     if (capOnly) msUntilSessionReset = Math.min(msUntilSessionReset, msLeft);
     else msUntilReset = Math.min(msUntilReset, msLeft);
   }
