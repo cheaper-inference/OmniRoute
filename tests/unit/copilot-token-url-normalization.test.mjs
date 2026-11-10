@@ -9,6 +9,13 @@ const providerUrl = new URL(
   "../../open-sse/services/tokenRefresh/providers/copilot.ts",
   import.meta.url
 ).href;
+const credentialRefresherUrl = new URL(
+  "../../open-sse/utils/registeredCredentialRefresher.ts",
+  import.meta.url
+).href;
+const { getRegisteredCredentialRefresher, registerCredentialRefresher } = await import(
+  credentialRefresherUrl
+);
 const sanitizerUrl = new URL("../../open-sse/utils/urlSanitize.ts", import.meta.url).href;
 
 // Load the real URL builders while isolating unrelated DB, proxy and OAuth dependencies.
@@ -60,6 +67,9 @@ function isolatedDependencies() {
       if (specifier.endsWith("/utils/urlSanitize.ts")) {
         return { url: sanitizerUrl, shortCircuit: true };
       }
+      if (specifier === "@omniroute/open-sse/utils/registeredCredentialRefresher.ts") {
+        return { url: credentialRefresherUrl, shortCircuit: true };
+      }
       const source = stubs.get(specifier);
       assert.notEqual(source, undefined, `unreviewed dependency: ${specifier}`);
       return { url: `data:text/javascript,${encodeURIComponent(source)}`, shortCircuit: true };
@@ -70,6 +80,7 @@ function isolatedDependencies() {
 async function checkBuilder(kind, base) {
   const hooks = isolatedDependencies();
   const originalFetch = globalThis.fetch;
+  const previousRefresher = getRegisteredCredentialRefresher();
   globalThis.fetch = async () => {
     throw new Error("unexpected network call in URL normalization test");
   };
@@ -91,6 +102,7 @@ async function checkBuilder(kind, base) {
     return calls[0].url;
   } finally {
     globalThis.fetch = originalFetch;
+    registerCredentialRefresher(previousRefresher);
     hooks.deregister();
   }
 }
