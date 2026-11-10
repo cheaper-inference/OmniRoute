@@ -125,7 +125,7 @@ describe("plugin-v2 P2 parity: per-endpoint timeouts", () => {
 
   it("startupDebug silences the boot line at default, shows it with startupDebug", async () => {
     const plugin = (await import("../src/index.js")).default as unknown as {
-      setup: (ctx: unknown) => Promise<void>;
+      setup: (ctx: unknown) => Promise<() => void>;
     };
     async function bootLogLines(options: Record<string, unknown>): Promise<string[]> {
       const warns: string[] = [];
