@@ -2566,7 +2566,11 @@ export function createSSEStream(options: StreamOptions = {}) {
                 // messages) in the SSE stream that would break downstream JSON decoders.
                 // Remember it, though: if the stream ends on this line with no terminal
                 // event, flush() reports one error frame instead of a clean success.
-                if (parsedPassthroughData == null && !passthroughSawTerminalEvent) {
+                if (
+                  parsedPassthroughData == null &&
+                  !passthroughSawTerminalEvent &&
+                  isUnparsableDataLine(trimmed)
+                ) {
                   passthroughUnparsableDataTail = true;
                 }
                 continue;

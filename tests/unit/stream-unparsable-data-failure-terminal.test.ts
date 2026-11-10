@@ -135,3 +135,16 @@ test("a bad data line after the finish chunk does not turn a finished answer int
   assert.equal(r.completes.length, 1);
   assert.equal(r.completes[0].status, 200);
 });
+
+test("a bare data: heartbeat line that ends the stream is not an unparsable tail", async () => {
+  const r = await run([chunk("Hello "), "data:\n\n"]);
+
+  assert.equal(r.errorFrames.length, 0, `no error frame for an empty data line, got:\n${r.text}`);
+  assert.equal(r.failures.length, 0);
+  assert.equal(r.completes.length, 1);
+  assert.equal(
+    r.completes[0].status,
+    200,
+    "an empty data line is noise, as in isUnparsableDataLine"
+  );
+});
