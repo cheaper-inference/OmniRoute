@@ -4,32 +4,85 @@ import { randomUUID } from "node:crypto";
 import { runtimeDiagnosticsLog } from "./runtimeDiagnosticsLog.mjs";
 const MAX_BYTES = 10 * 1024 * 1024;
 const FILE = /^cache-[0-9]+-[0-9a-f-]+\.jsonl$/;
-/** Atomic startup rotation; a busy or stale lock disables diagnostics instead of blocking inference. */
-function openRun(directory) {
+/** Only an explicit, matching closed-run lease proves that a writer relinquished this file.
+ * Never infer ownership or death from a PID or an old mtime: both can be reused. */
+function closedRun(directory, name) {
+  const file = path.join(directory, name),
+    marker = file + ".closed";
+  try {
+    if (fs.existsSync(file + ".active")) return null;
+    const stat = fs.lstatSync(file),
+      leaseStat = fs.lstatSync(marker);
+    if (
+      !stat.isFile() ||
+      stat.isSymbolicLink() ||
+      !leaseStat.isFile() ||
+      leaseStat.isSymbolicLink() ||
+      leaseStat.size > 512
+    )
+      return null;
+    const lease = JSON.parse(fs.readFileSync(marker, "utf8"));
+    if (
+      lease.version !== 1 ||
+      lease.file !== name ||
+      typeof lease.run !== "string" ||
+      name !== `cache-${lease.pid}-${lease.run}.jsonl`
+    )
+      return null;
+    return { file, marker, time: leaseStat.mtimeMs };
+  } catch {
+    return null;
+  }
+}
+
+function withRotationLock(directory, work) {
   const lock = path.join(directory, ".rotation.lock");
   const lockFd = fs.openSync(lock, "wx", 0o600);
   try {
-    const existing = fs
-      .readdirSync(directory)
-      .filter((name) => FILE.test(name))
-      .map((name) => {
-        const file = path.join(directory, name),
-          stat = fs.lstatSync(file);
-        return { file, time: stat.mtimeMs, regular: stat.isFile() && !stat.isSymbolicLink() };
-      })
-      .filter((row) => row.regular)
-      .sort((a, b) => b.time - a.time);
-    for (const row of existing.slice(3)) fs.unlinkSync(row.file);
-    const file = path.join(directory, `cache-${process.pid}-${randomUUID()}.jsonl`);
-    const fd = fs.openSync(file, "wx", 0o600);
-    return { file, fd };
+    return work();
   } finally {
     fs.closeSync(lockFd);
     fs.unlinkSync(lock);
   }
 }
 
-/** Private unique files, bounded writes/backpressure and at most four retained diagnostic runs. */
+function rotateClosedRuns(directory) {
+  const closed = fs
+    .readdirSync(directory)
+    .filter((name) => FILE.test(name))
+    .map((name) => closedRun(directory, name))
+    .filter(Boolean)
+    .sort((a, b) => b.time - a.time);
+  for (const row of closed.slice(4)) {
+    fs.unlinkSync(row.file);
+    fs.unlinkSync(row.marker);
+  }
+}
+
+/** Busy/stale locks fail open for inference; active and unknown runs are never rotated. */
+function openRun(directory) {
+  return withRotationLock(directory, () => {
+    rotateClosedRuns(directory);
+    const run = randomUUID(),
+      name = `cache-${process.pid}-${run}.jsonl`;
+    const file = path.join(directory, name),
+      active = file + ".active";
+    const fd = fs.openSync(file, "wx", 0o600);
+    try {
+      fs.writeFileSync(active, JSON.stringify({ version: 1, file: name, run, pid: process.pid }), {
+        flag: "wx",
+        mode: 0o600,
+      });
+    } catch (error) {
+      fs.closeSync(fd);
+      fs.unlinkSync(file);
+      throw error;
+    }
+    return { file, fd, active };
+  });
+}
+
+/** Private bounded files; four closed runs plus all active/unknown runs (10 MiB each). */
 export function createCacheDiagnosticsSink(
   dataDir,
   { maxBytes = MAX_BYTES, log = runtimeDiagnosticsLog } = {}
@@ -39,7 +92,7 @@ export function createCacheDiagnosticsSink(
   const info = fs.lstatSync(directory);
   if (!info.isDirectory() || info.isSymbolicLink())
     throw new Error("Invalid diagnostics directory");
-  const { file, fd } = openRun(directory);
+  const { file, fd, active } = openRun(directory);
   const stream = fs.createWriteStream(file, { fd, autoClose: true, highWaterMark: 65536 });
   let size = 0,
     blocked = false,
@@ -67,11 +120,17 @@ export function createCacheDiagnosticsSink(
     async close() {
       if (ended) return;
       ended = true;
-      if (failed || stream.destroyed) return;
-      await new Promise((resolve) => {
-        stream.once("error", resolve);
-        stream.end(resolve);
-      });
+      if (!stream.closed)
+        await new Promise((resolve) => {
+          stream.once("close", resolve);
+          if (!stream.destroyed) stream.end();
+        });
+      try {
+        fs.renameSync(active, file + ".closed");
+        withRotationLock(directory, () => rotateClosedRuns(directory));
+      } catch {
+        log("WARNING", "Closed diagnostic run retention deferred");
+      }
     },
   };
 }

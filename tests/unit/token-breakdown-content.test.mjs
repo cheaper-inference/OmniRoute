@@ -6,6 +6,77 @@ import {
   createTokenBreakdown,
 } from "../../bin/cli/runtime/tokenBreakdown.mjs";
 const encode = (text) => Array.from(text);
+const customHistory = {
+  input: [
+    { type: "custom_tool_call", call_id: "c1", name: "read_file", input: "synthetic command" },
+    {
+      type: "custom_tool_call_output",
+      call_id: "c1",
+      output: [
+        { type: "input_text", text: "فارسی 😀" },
+        { type: "input_image", image_url: "data:synthetic-private-image" },
+      ],
+    },
+    { type: "function_call", call_id: "f1", name: "search", arguments: "{}" },
+    { type: "function_call_output", call_id: "f1", output: "search result" },
+    { type: "custom_tool_call", call_id: "m1", name: "mcp__filesystem__read_file", input: "{}" },
+    { type: "custom_tool_call_output", call_id: "m1", output: "MCP result" },
+  ],
+};
+function assertCustom(out) {
+  assert.equal(validateTokenBreakdown(out).status, "ok");
+  assert.ok(out.categories.toolCalls.tokens > 0);
+  assert.equal(out.categories.toolCalls.parts, 3);
+  assert.equal(out.categories.toolOutputs.parts, 3);
+  assert.equal(out.sources.fileReads.bytes, Buffer.byteLength("فارسی 😀"));
+  assert.equal(out.sources.localSearch.parts, 1);
+  assert.equal(out.sources.mcpResults.parts, 1);
+  assert.equal(out.omittedMedia, 1);
+}
+test("native custom tools count visible content once and preserve source/category parity", () => {
+  assertCustom(countTokenBreakdown(customHistory, encode));
+  const chat = countTokenBreakdown(
+    {
+      messages: [
+        {
+          role: "assistant",
+          tool_calls: [
+            { id: "chat", type: "custom", custom: { name: "read_file", input: "read" } },
+          ],
+        },
+        { role: "tool", tool_call_id: "chat", content: "visible" },
+      ],
+    },
+    encode
+  );
+  assert.equal(chat.sources.fileReads.bytes, 7);
+});
+test("custom tool correlation remains conservative for missing, future and duplicate IDs", () => {
+  const out = countTokenBreakdown(
+    {
+      input: [
+        { type: "custom_tool_call_output", output: "missing" },
+        { type: "custom_tool_call_output", call_id: "later", output: "future" },
+        { type: "custom_tool_call", call_id: "later", name: "read_file", input: "{}" },
+        { type: "custom_tool_call", call_id: "dup", name: "read_file", input: "{}" },
+        { type: "custom_tool_call_output", call_id: "dup", output: "ambiguous" },
+        { type: "function_call", call_id: "dup", name: "search", arguments: "{}" },
+      ],
+    },
+    encode
+  );
+  assert.equal(out.sources.otherOrUnknown.parts, 3);
+  assert.equal(out.sources.fileReads.parts, 0);
+  assert.equal(validateTokenBreakdown(out).status, "ok");
+});
+test("the real disposable worker includes custom tool content", async () => {
+  const counter = createTokenBreakdown();
+  try {
+    assertCustom(await counter.submit(JSON.stringify(customHistory)));
+  } finally {
+    await counter.stop();
+  }
+});
 for (const [format, body] of [
   [
     "Chat",

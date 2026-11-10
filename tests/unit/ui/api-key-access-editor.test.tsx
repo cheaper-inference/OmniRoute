@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import React from "react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
@@ -100,6 +101,67 @@ describe("ApiKeyAccessEditorClient", () => {
   let patchCalls: Array<{ url: string; body: Record<string, unknown> }> = [];
   let fetchUrls: string[] = [];
   let keyGetCount = 0;
+
+  it("edits independent MCP scopes, retains failed input, and reloads saved explicit grants", async () => {
+    installFetch(
+      { patch: () => jsonResponse({ error: "Synthetic save failure" }, 500) },
+      {
+        ...sampleKey,
+        scopes: ["self:usage", "custom:keep"],
+      }
+    );
+    await renderLoaded();
+    const connect = screen.getByRole("switch", { name: "Connect to MCP" }) as HTMLInputElement;
+    const read = screen.getByRole("switch", { name: "Read CCR content" }) as HTMLInputElement;
+    expect(connect.checked).toBe(false);
+    expect(read.checked).toBe(false);
+    connect.focus();
+    expect(document.activeElement).toBe(connect);
+    await userEvent.setup().keyboard(" ");
+    fireEvent.click(read);
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+    await waitFor(() => expect(patchCalls.length).toBe(1));
+    await waitFor(() =>
+      expect(screen.getByRole("switch", { name: "Connect to MCP" }).hasAttribute("disabled")).toBe(
+        false
+      )
+    );
+    expect(
+      (screen.getByRole("switch", { name: "Connect to MCP" }) as HTMLInputElement).checked
+    ).toBe(true);
+    expect(patchCalls[0].body.scopes).toEqual([
+      "self:usage",
+      "custom:keep",
+      "mcp:connect",
+      "read:compression",
+    ]);
+    cleanup();
+    installFetch(
+      {},
+      {
+        ...sampleKey,
+        scopes: ["admin", "self:usage", "custom:keep", "mcp:connect", "read:compression"],
+      }
+    );
+    await renderLoaded();
+    expect(
+      (screen.getByRole("switch", { name: "Read CCR content" }) as HTMLInputElement).checked
+    ).toBe(true);
+    fireEvent.click(screen.getByRole("switch", { name: "Connect to MCP" }));
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+    await waitFor(() => expect(patchCalls.length).toBe(2));
+    expect(patchCalls[1].body.scopes).toEqual([
+      "admin",
+      "self:usage",
+      "custom:keep",
+      "read:compression",
+    ]);
+    await waitFor(() =>
+      expect(
+        (screen.getByRole("switch", { name: "Connect to MCP" }) as HTMLInputElement).checked
+      ).toBe(false)
+    );
+  });
 
   function installFetch(options: FetchOptions = {}, initialKey: KeyRecord = sampleKey) {
     let serverKey: KeyRecord = { ...initialKey };

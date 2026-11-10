@@ -108,7 +108,16 @@ try {
   }
   assert.ok(response, "Packaged fixture did not become ready");
   assert.equal(response.status, 200, `Emitted pool failed its real worker job: ${errors}`);
-  assert.deepEqual(await response.json(), { shrunk: true, neutral: false, stacked: true });
+  const result = await response.json();
+  assert.equal(result.shrunk, true);
+  assert.equal(result.neutral, false);
+  assert.equal(result.stacked, true);
+  assert.deepEqual(result.steps, [
+    { engine: "rtk", state: "done" },
+    { engine: "caveman", state: "done" },
+  ]);
+  assert.deepEqual(result.neutralBody, result.neutralExpected);
+  assert.equal(result.preservedStructure, true);
   assert.doesNotMatch(
     errors,
     /worker path failed open|MODULE_NOT_FOUND|gateway preload reached worker/

@@ -9,7 +9,7 @@ on:
       - "scripts/build/runtime-env.mjs"
       - "scripts/test/check-compression-packaged-runtime.mjs"
       - "tests/fixtures/compression-packaged-runtime/**"
-      - "tests/unit/cache-diagnostics-runtime.test.mjs"
+      - "tests/unit/cache-diagnostics-*.test.mjs"
       - "tests/unit/token-breakdown-*.test.mjs"
       - "package*.json"
       - ".github/workflows/compression-integrity.yml"
@@ -20,6 +20,26 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  diagnostics-runtime:
+    name: Diagnostics Node ${{ matrix.node }} (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ["22.22.2", "24.21.0"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - uses: ./.github/actions/npm-ci-retry
+      - name: Real local fetch, private leases and disposable workers
+        run: node --test tests/unit/cache-diagnostics-fetch.test.mjs tests/unit/cache-diagnostics-runtime.test.mjs tests/unit/cache-diagnostics-leases.test.mjs tests/unit/token-breakdown-content.test.mjs tests/unit/token-breakdown-lifecycle.test.mjs
   packaged-runtime:
     name: Packaged compression (${{ matrix.os }})
     strategy:
@@ -38,6 +58,6 @@ jobs:
           cache: npm
       - uses: ./.github/actions/npm-ci-retry
       - name: Private diagnostics and disposable-worker regressions
-        run: node --test tests/unit/cache-diagnostics-runtime.test.mjs tests/unit/token-breakdown-content.test.mjs tests/unit/token-breakdown-lifecycle.test.mjs
+        run: node --test tests/unit/cache-diagnostics-fetch.test.mjs tests/unit/cache-diagnostics-runtime.test.mjs tests/unit/cache-diagnostics-leases.test.mjs tests/unit/token-breakdown-content.test.mjs tests/unit/token-breakdown-lifecycle.test.mjs
       - name: Real Turbopack pool in an installation path with spaces
         run: npm run test:compression:packaged

@@ -9,6 +9,14 @@ export async function POST() {
   try {
     const body = {
       messages: [
+        { role: "system", content: "Keep this synthetic instruction unchanged." },
+        {
+          role: "user",
+          content:
+            "Please provide a detailed explanation of the synthetic changes. Thank you so much. ".repeat(
+              6
+            ),
+        },
         {
           role: "assistant",
           tool_calls: [
@@ -23,15 +31,36 @@ export async function POST() {
         { role: "user", content: "What changed?" },
       ],
     };
+    const originalBody = structuredClone(body);
     const shrunk = await pool.run(body, "rtk");
-    const neutral = await pool.run({ messages: [{ role: "user", content: "Hello" }] }, "rtk");
-    const stacked = await pool.run(body, "stacked", {
-      config: { stackedPipeline: [{ engine: "rtk" }, { engine: "caveman", intensity: "full" }] },
-    });
+    const neutralBody = {
+      messages: [
+        { role: "system", content: "Synthetic base" },
+        { role: "user", content: "Hello" },
+      ],
+    };
+    const neutralExpected = structuredClone(neutralBody);
+    const neutral = await pool.run(neutralBody, "rtk");
+    const steps: Array<{ engine: string; state: string }> = [];
+    const stacked = await pool.run(
+      body,
+      "stacked",
+      {
+        config: { stackedPipeline: [{ engine: "rtk" }, { engine: "caveman", intensity: "full" }] },
+      },
+      (step) => steps.push({ engine: step.engine, state: step.state })
+    );
     return Response.json({
       shrunk: shrunk.compressed,
       neutral: neutral.compressed,
       stacked: stacked.compressed,
+      steps,
+      neutralBody: neutral.body,
+      neutralExpected,
+      preservedStructure:
+        stacked.body.messages[0].content === originalBody.messages[0].content &&
+        JSON.stringify(stacked.body.messages[2]) === JSON.stringify(originalBody.messages[2]) &&
+        stacked.body.messages[3].tool_call_id === "synthetic",
     });
   } finally {
     await pool.close();

@@ -9,9 +9,10 @@ import Toggle from "@/shared/components/Toggle";
 import { ENDPOINT_CATEGORIES } from "@/shared/constants/endpointCategories";
 
 import { useKeyPolicyEditor } from "./KeyPolicyEditorContext";
+import McpPermissionControls from "./McpPermissionControls";
 
 export default function KeyPolicyGeneralTab() {
-  const { t, formState, updateState } = useKeyPolicyEditor();
+  const { t, formState, updateState, disabled } = useKeyPolicyEditor();
   return (
     <div className="flex flex-col gap-4">
       {/* Lifecycle: Active & Banned */}
@@ -59,6 +60,11 @@ export default function KeyPolicyGeneralTab() {
       </div>
 
       {/* Self-service Visibility */}
+      <McpPermissionControls
+        state={formState}
+        disabled={disabled}
+        onChange={(field, enabled) => updateState((p) => ({ ...p, [field]: enabled }))}
+      />
       <SelfServicePermissions />
 
       {/* Extra Scopes (e.g. lease:exclusive or custom scopes) */}

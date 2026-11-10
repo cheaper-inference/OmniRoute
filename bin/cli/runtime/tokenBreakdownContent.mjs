@@ -64,7 +64,7 @@ function* units(body) {
   if (typeof body.input === "string") yield { category: "userMessages", text: body.input };
   for (const entry of entries) {
     const item = record(entry);
-    if (["function_call", "tool_call"].includes(item.type)) {
+    if (["function_call", "tool_call", "custom_tool_call"].includes(item.type)) {
       yield {
         category: "toolCalls",
         text: serialized(item),
@@ -73,7 +73,7 @@ function* units(body) {
       };
       continue;
     }
-    if (item.type === "function_call_output") {
+    if (["function_call_output", "custom_tool_call_output"].includes(item.type)) {
       yield* contentParts(item.output, "toolOutputs", id(item.call_id));
       continue;
     }
@@ -96,7 +96,7 @@ function* units(body) {
         category: "toolCalls",
         text: serialized(call),
         call: id(call.id),
-        name: call.function?.name,
+        name: call.function?.name ?? call.custom?.name,
       };
   }
 }

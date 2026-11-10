@@ -6,7 +6,10 @@ import test from "node:test";
 import { spawnSync } from "node:child_process";
 import { channel } from "node:diagnostics_channel";
 import { fileURLToPath } from "node:url";
-import { startCacheDiagnostics } from "../../bin/cli/runtime/cacheDiagnostics.mjs";
+import {
+  startCacheDiagnostics,
+  supportsCacheBodyDiagnostics,
+} from "../../bin/cli/runtime/cacheDiagnostics.mjs";
 import {
   rawCacheUsage,
   createCacheUsageParser,
@@ -98,7 +101,10 @@ test("the passive observer ignores unrelated endpoints and reports encoded bodie
   await new Promise((resolve) => setImmediate(resolve));
   await observer.stop();
   assert.equal(rows.length, 1);
-  assert.equal(rows[0].status, "unsupported_encoding");
+  assert.equal(
+    rows[0].status,
+    supportsCacheBodyDiagnostics() ? "unsupported_encoding" : "unsupported_body_diagnostics"
+  );
   assert.equal(rows[0].cacheReadTokens, null);
 });
 test("real launcher preload uses explicit and default CLI data dirs and never persists prompts or credentials", () => {
@@ -132,12 +138,14 @@ test("real launcher preload uses explicit and default CLI data dirs and never pe
         explicit || process.platform !== "win32"
           ? data
           : path.join(home, "AppData", "Roaming", "omniroute");
-      const files = fs.readdirSync(path.join(resolved, "cache-diagnostics"));
+      const files = fs
+        .readdirSync(path.join(resolved, "cache-diagnostics"))
+        .filter((file) => file.endsWith(".jsonl"));
       assert.equal(files.length, 1);
       const content = fs.readFileSync(path.join(resolved, "cache-diagnostics", files[0]), "utf8");
       const row = JSON.parse(content.trim());
-      assert.equal(row.cacheReadTokens, 0);
-      assert.equal(row.cacheWriteTokens, 5);
+      assert.equal(row.cacheReadTokens, supportsCacheBodyDiagnostics() ? 0 : null);
+      assert.equal(row.cacheWriteTokens, supportsCacheBodyDiagnostics() ? 5 : null);
       assert.doesNotMatch(content, /PRIVATE PROMPT|synthetic-secret|synthetic-model|فارسی/);
     }
   } finally {
@@ -153,7 +161,11 @@ test("private sink bounds disk use, retains four files and safely closes", async
       assert.equal(sink.write({ value: "x".repeat(300) }), false);
       await sink.close();
     }
-    assert.equal(fs.readdirSync(path.join(data, "cache-diagnostics")).length, 4);
+    assert.equal(
+      fs.readdirSync(path.join(data, "cache-diagnostics")).filter((file) => file.endsWith(".jsonl"))
+        .length,
+      4
+    );
   } finally {
     fs.rmSync(data, { recursive: true, force: true });
   }

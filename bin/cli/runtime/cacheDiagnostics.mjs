@@ -8,6 +8,13 @@ import { runtimeDiagnosticsLog } from "./runtimeDiagnosticsLog.mjs";
 const MAX_BODY = 8 * 1024 * 1024;
 const noop = { async stop() {} };
 
+/** Bundled fetch body channels first shipped in Undici 7.11; Node 22 bundles 6.x.
+ * Channel subscription alone is not a publisher capability check. */
+export function supportsCacheBodyDiagnostics(version = process.versions.undici) {
+  const match = /^(\d+)\.(\d+)\.(\d+)/.exec(version ?? "");
+  return Boolean(match && (+match[1] > 7 || (+match[1] === 7 && +match[2] >= 11)));
+}
+
 /** Only the two known HTTPS transports are observed; never persist URLs, headers or raw bodies. */
 function endpoint(request) {
   try {
@@ -46,6 +53,8 @@ export function startCacheDiagnostics({
   log = runtimeDiagnosticsLog,
   pendingTimeoutMs = 120000,
   tokenCounter,
+  // Internal test seam for an owned local fetch service; the CLI always uses endpoint().
+  requestClassifier = endpoint,
 } = {}) {
   if (env.OMNIROUTE_CACHE_DIAGNOSTICS !== "1") return noop;
   let sink;
@@ -55,13 +64,21 @@ export function startCacheDiagnostics({
     log("WARNING", "Private cache diagnostics could not initialize");
     return noop;
   }
+  const bodySupported = supportsCacheBodyDiagnostics();
+  if (!bodySupported)
+    log(
+      "WARNING",
+      "Cache body diagnostics unavailable with bundled fetch; body and token observations are unsupported"
+    );
   const key = randomBytes(32),
     pending = new Map(),
     groups = new Map(),
     subscriptions = [];
   const fingerprint = (value) => createHmac("sha256", key).update(value).digest("hex");
   const counter =
-    env.OMNIROUTE_TOKEN_BREAKDOWN === "1" ? (tokenCounter ?? createTokenBreakdown()) : null;
+    bodySupported && env.OMNIROUTE_TOKEN_BREAKDOWN === "1"
+      ? (tokenCounter ?? createTokenBreakdown())
+      : null;
   let stopped = false;
   function listen(name, fn) {
     const target = channel(`undici:request:${name}`);
@@ -110,19 +127,20 @@ export function startCacheDiagnostics({
         ?.diagnosticsOptOut === true
     )
       return;
-    const provider = endpoint(request);
+    const provider = requestClassifier(request);
     if (!provider || pending.size >= 8) return;
     pending.set(request, {
       provider,
       started: Date.now(),
       chunks: [],
       bytes: 0,
-      requestState: "unavailable",
+      requestState: bodySupported ? "unavailable" : "unsupported_body_diagnostics",
+      responseState: bodySupported ? undefined : "unsupported_body_diagnostics",
     });
   });
   listen("bodyChunkSent", ({ request, chunk }) => {
     const entry = pending.get(request);
-    if (!entry || entry.requestState === "oversized") return;
+    if (!bodySupported || !entry || entry.requestState === "oversized") return;
     const bytes = Buffer.from(chunk);
     entry.bytes += bytes.length;
     if (entry.bytes > MAX_BODY) {
@@ -134,7 +152,7 @@ export function startCacheDiagnostics({
   });
   listen("bodySent", ({ request }) => {
     const entry = pending.get(request);
-    if (!entry || entry.requestState === "oversized" || !entry.bytes) return;
+    if (!bodySupported || !entry || entry.requestState === "oversized" || !entry.bytes) return;
     const bytes = Buffer.concat(entry.chunks);
     entry.chunks = [];
     const work = setImmediate(() => {
@@ -196,7 +214,7 @@ export function startCacheDiagnostics({
   });
   listen("headers", ({ request, response }) => {
     const entry = pending.get(request);
-    if (!entry) return;
+    if (!entry || !bodySupported) return;
     const encoding = header(response.headers, "content-encoding");
     if (encoding && encoding.toLowerCase() !== "identity") {
       entry.responseState = "unsupported_encoding";
@@ -222,7 +240,7 @@ export function startCacheDiagnostics({
     Math.min(1000, pendingTimeoutMs)
   );
   timer.unref();
-  log("INFO", "Private cache diagnostics enabled");
+  if (bodySupported) log("INFO", "Private cache diagnostics enabled");
   return {
     async stop() {
       if (stopped) return;
