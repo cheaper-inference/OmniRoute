@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Naudojimo išsami informacija",
     "quotaPlanBadge": "Prenumeratos planas (pagal naudojimo duomenis)",
+    "codexAccountPersonal": "Asmeninis",
+    "codexAccountBusiness": "Verslui",
+    "codexAccountRole": "Vaidmuo: {role}",
     "anonymousFallbackTitle": "Anoniminis atsarginis režimas",
     "anonymousFallbackDesc": "Kai visi sukonfigūruoti ryšiai tampa nebetinkami (išnaudojus kvotą ar kreditus arba pasibaigus jų galiojimui), laikinai naudoti šio teikėjo pakopą be rakto. Išjunkite, kad šis teikėjas būtų praleistas, užuot siuntus anonimines užklausas — rekomenduojama, kai pakopa be rakto jas atmeta (401).",
     "anonymousFallbackEnabled": "Anoniminis atsarginis režimas įjungtas teikėjui {provider}",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "Nepavyko transformuoti srauto"
   },
   "usage": {
+    "cursorModelUsageTitle": "API žetonai (šis ciklas)",
+    "cursorModelUsageBilledHint": "Apmokestino Cursor",
+    "cursorModelUsageModel": "Modelis",
+    "cursorModelUsageInput": "Įvestis",
+    "cursorModelUsageOutput": "Išvestis",
+    "cursorModelUsageCacheRead": "Talpyklos skaitymas",
+    "cursorModelUsageCacheWrite": "Įrašymas į talpyklą",
+    "cursorModelUsageCost": "Kaina",
     "healthExtraUsageBypass": "Kvota išnaudota; papildomas naudojimas leidžiamas, todėl paslauga tęsiama.",
     "healthPaidCreditsBypass": "Kvota išnaudota; turimi mokami kreditai leidžia tęsti paslaugą.",
     "healthFilteringBypass": "Kvota išnaudota; vietinis kvotų filtravimas išjungtas, todėl paslauga tęsiama.",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "Aptikta žetonų atnaujinimo klaidų",
       "unknown": "Būklė nežinoma"
     },
+    "tokenHealthRefreshAll": "Atnaujinti viską",
+    "tokenHealthRefreshResult": "{refreshed} atnaujinta, {failed} nepavyko, {skipped} praleista",
     "systemMonitor": {
       "metricsAriaLabel": "Sistemos metrikos",
       "memory": "Atmintis",

@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Detail penggunaan",
     "quotaPlanBadge": "Paket langganan (dari data penggunaan)",
+    "codexAccountPersonal": "Pribadi",
+    "codexAccountBusiness": "Bisnis",
+    "codexAccountRole": "Peran: {role}",
     "anonymousFallbackTitle": "Fallback anonim",
     "anonymousFallbackDesc": "Ketika semua koneksi yang dikonfigurasi habis (kuota, kredit, atau masa berlaku), gunakan sementara tingkat tanpa kunci penyedia ini. Matikan untuk melewati penyedia ini alih-alih mengirim permintaan anonim — disarankan ketika tingkat tanpa kunci menolak permintaan tersebut (401).",
     "anonymousFallbackEnabled": "Fallback anonim diaktifkan untuk {provider}",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "Gagal mentransformasi stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (siklus ini)",
+    "cursorModelUsageBilledHint": "Ditagih oleh Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Masukan",
+    "cursorModelUsageOutput": "Keluaran",
+    "cursorModelUsageCacheRead": "Pembacaan cache",
+    "cursorModelUsageCacheWrite": "Tulis Cache",
+    "cursorModelUsageCost": "Biaya",
     "healthExtraUsageBypass": "Kuota habis; penggunaan tambahan diizinkan, sehingga layanan berlanjut.",
     "healthPaidCreditsBypass": "Kuota habis; kredit berbayar yang tersedia memungkinkan layanan berlanjut.",
     "healthFilteringBypass": "Kuota habis; penyaringan kuota lokal dinonaktifkan, sehingga layanan berlanjut.",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "Kegagalan penyegaran token terdeteksi",
       "unknown": "Status kesehatan tidak diketahui"
     },
+    "tokenHealthRefreshAll": "Segarkan Semua",
+    "tokenHealthRefreshResult": "{refreshed} disegarkan, {failed} gagal, {skipped} dilewati",
     "systemMonitor": {
       "metricsAriaLabel": "Metrik sistem",
       "memory": "Memori",

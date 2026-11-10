@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Mionsonraí úsáide",
     "quotaPlanBadge": "Plean síntiúis (ó shonraí úsáide)",
+    "codexAccountPersonal": "Pearsanta",
+    "codexAccountBusiness": "Gnó",
+    "codexAccountRole": "Ról: {role}",
     "anonymousFallbackTitle": "Cúltaca gan ainm",
     "anonymousFallbackDesc": "Nuair a bhíonn na naisc chumraithe go léir ídithe (cuóta, creidmheasanna nó dul in éag), bain úsáid go sealadach as leibhéal gan eochair an tsoláthraí seo. Múch é chun an soláthraí seo a scipeáil in ionad iarratais gan ainm a sheoladh — moltar é sin nuair a dhiúltaíonn an leibhéal gan eochair dóibh (401).",
     "anonymousFallbackEnabled": "Cúltaca gan ainm cumasaithe do {provider}",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "Theip ar chlaochlú an tsrutha"
   },
   "usage": {
+    "cursorModelUsageTitle": "Comharthaí API (an timthriall seo)",
+    "cursorModelUsageBilledHint": "Billeáilte ag Cursor",
+    "cursorModelUsageModel": "Samhail",
+    "cursorModelUsageInput": "Ionchur",
+    "cursorModelUsageOutput": "Aschur",
+    "cursorModelUsageCacheRead": "Léamh taisce",
+    "cursorModelUsageCacheWrite": "Taisce a Scríobh",
+    "cursorModelUsageCost": "Costas",
     "healthExtraUsageBypass": "Tá an cuóta ídithe; ceadaítear úsáid bhreise, mar sin leanann an tseirbhís ar aghaidh.",
     "healthPaidCreditsBypass": "Tá an cuóta ídithe; ceadaíonn na creidmheasanna íoctha atá ar fáil don tseirbhís leanúint ar aghaidh.",
     "healthFilteringBypass": "Tá an cuóta ídithe; tá scagadh áitiúil cuótaí díchumasaithe, mar sin leanann an tseirbhís ar aghaidh.",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "Braitheadh teipeanna athnuachana ceadchomharthaí",
       "unknown": "Stádas sláinte anaithnid"
     },
+    "tokenHealthRefreshAll": "Athnuashonraigh iad Uile",
+    "tokenHealthRefreshResult": "{refreshed} athnuadaithe, {failed} theip, {skipped} fágtha amuigh",
     "systemMonitor": {
       "metricsAriaLabel": "Méadrachtaí an chórais",
       "memory": "Cuimhne",

@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "အသုံးပြုမှု အသေးစိတ်",
     "quotaPlanBadge": "စာရင်းသွင်းမှုအစီအစဉ် (အသုံးပြုမှုဒေတာမှ)",
+    "codexAccountPersonal": "ကိုယ်ရေးကိုယ်တာ",
+    "codexAccountBusiness": "လုပ်ငန်း",
+    "codexAccountRole": "အခန်းကဏ္ဍ: {role}",
     "anonymousFallbackTitle": "အမည်မဖော် အရန်စနစ်",
     "anonymousFallbackDesc": "သတ်မှတ်ထားသော ချိတ်ဆက်မှုအားလုံး ကုန်ဆုံးသွားသောအခါ (ခွဲတမ်း၊ ခရက်ဒစ် သို့မဟုတ် သက်တမ်းကုန်ဆုံးမှုကြောင့်) ဤဝန်ဆောင်မှုပေးသူ၏ keyless အဆင့်ကို ယာယီအသုံးပြုပါ။ အမည်မဖော် တောင်းဆိုမှုများ ပို့မည့်အစား ဤဝန်ဆောင်မှုပေးသူကို ကျော်ရန် ပိတ်ထားပါ — keyless အဆင့်က ၎င်းတို့ကို ပယ်ချသည့်အခါ (401) ပိတ်ထားရန် အကြံပြုသည်။",
     "anonymousFallbackEnabled": "{provider} အတွက် အမည်မဖော် အရန်စနစ်ကို ဖွင့်ထားသည်",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "ဒေတာစီးကြောင်းကို ပြောင်းလဲ၍ မရပါ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API တိုကင်များ (ဤစက်ဝန်း)",
+    "cursorModelUsageBilledHint": "Cursor မှ ငွေတောင်းခံထားသည်",
+    "cursorModelUsageModel": "မော်ဒယ်",
+    "cursorModelUsageInput": "ထည့်သွင်းချက်",
+    "cursorModelUsageOutput": "အထွက်ရလဒ်",
+    "cursorModelUsageCacheRead": "Cache ဖတ်ရှုမှု",
+    "cursorModelUsageCacheWrite": "ကက်ရှ်သို့ ရေးသားခြင်း",
+    "cursorModelUsageCost": "ကုန်ကျစရိတ်",
     "healthExtraUsageBypass": "ခွဲတမ်းကုန်သွားသော်လည်း အပိုအသုံးပြုခွင့်ရှိသဖြင့် ဝန်ဆောင်မှု ဆက်လက်ပေးနေသည်။",
     "healthPaidCreditsBypass": "ခွဲတမ်းကုန်သွားသော်လည်း အသုံးပြုနိုင်သော အခပေးခရက်ဒစ်များဖြင့် ဝန်ဆောင်မှု ဆက်ပေးနိုင်သည်။",
     "healthFilteringBypass": "ခွဲတမ်းကုန်သွားသော်လည်း စက်တွင်းခွဲတမ်းစစ်ထုတ်မှု ပိတ်ထားသဖြင့် ဝန်ဆောင်မှု ဆက်လက်ပေးနေသည်။",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "တိုကင်ပြန်လည်ဆန်းသစ်မှု မအောင်မြင်ခြင်းများ တွေ့ရှိထားသည်",
       "unknown": "အခြေအနေကို မသိရှိရပါ"
     },
+    "tokenHealthRefreshAll": "အားလုံးကို ပြန်လည်စစ်ဆေးရန်",
+    "tokenHealthRefreshResult": "{refreshed} ပြန်လည်ဆွဲယူပြီး၊ {failed} မအောင်မြင်၊ {skipped} ကျော်လွှာ",
     "systemMonitor": {
       "metricsAriaLabel": "စနစ်တိုင်းတာချက်များ",
       "memory": "မှတ်ဉာဏ်",

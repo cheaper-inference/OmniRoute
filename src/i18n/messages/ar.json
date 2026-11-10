@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "تفاصيل الاستخدام",
     "quotaPlanBadge": "خطة الاشتراك (من بيانات الاستخدام)",
+    "codexAccountPersonal": "شخصي",
+    "codexAccountBusiness": "الأعمال",
+    "codexAccountRole": "الدور: {role}",
     "anonymousFallbackTitle": "التراجع المجهول",
     "anonymousFallbackDesc": "عند استنفاد جميع الاتصالات المكونة (الحصة، الاعتمادات، أو انتهاء الصلاحية)، استخدم مؤقتًا المستوى بدون مفتاح لهذا المزود. قم بإيقاف التشغيل لتخطي هذا المزود بدلاً من إرسال طلبات مجهولة — يُوصى بذلك عندما يرفض المستوى بدون مفتاح هذه الطلبات (401).",
     "anonymousFallbackEnabled": "تم تمكين النسخة الاحتياطية المجهولة لـ {provider}",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "فشل تحويل التدفق"
   },
   "usage": {
+    "cursorModelUsageTitle": "الرموز المميزة لـ API (هذه الدورة)",
+    "cursorModelUsageBilledHint": "مفوتر بواسطة Cursor",
+    "cursorModelUsageModel": "نموذج",
+    "cursorModelUsageInput": "الإدخال",
+    "cursorModelUsageOutput": "الإخراج",
+    "cursorModelUsageCacheRead": "قراءة ذاكرة التخزين المؤقت",
+    "cursorModelUsageCacheWrite": "كتابة ذاكرة التخزين المؤقت",
+    "cursorModelUsageCost": "التكلفة",
     "healthExtraUsageBypass": "نفدت الحصة؛ الاستخدام الإضافي مسموح، لذا تستمر الخدمة.",
     "healthPaidCreditsBypass": "نفدت الحصة؛ تتيح الأرصدة المدفوعة المتاحة استمرار الخدمة.",
     "healthFilteringBypass": "نفدت الحصة؛ تصفية الحصة المحلية معطلة، لذا تستمر الخدمة.",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "تم الكشف عن فشل في تحديث الرمز",
       "unknown": "حالة الصحة غير معروفة"
     },
+    "tokenHealthRefreshAll": "تحديث الكل",
+    "tokenHealthRefreshResult": "{refreshed} تم التحديث، {failed} فشل، {skipped} تم التخطي",
     "systemMonitor": {
       "metricsAriaLabel": "مقاييس النظام",
       "memory": "ذاكرة",

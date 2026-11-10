@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "รายละเอียดการใช้งาน",
     "quotaPlanBadge": "แพ็กเกจสมาชิก (จากข้อมูลการใช้งาน)",
+    "codexAccountPersonal": "ส่วนบุคคล",
+    "codexAccountBusiness": "ธุรกิจ",
+    "codexAccountRole": "บทบาท: {role}",
     "anonymousFallbackTitle": "การสำรองข้อมูลแบบไม่ระบุชื่อ",
     "anonymousFallbackDesc": "เมื่อการเชื่อมต่อที่กำหนดทั้งหมดหมดลง (โควตา, เครดิต, หรือหมดอายุ) ให้ใช้ชั้นที่ไม่มีคีย์ของผู้ให้บริการนี้ชั่วคราว ปิดเพื่อข้ามผู้ให้บริการนี้แทนที่จะส่งคำขอแบบไม่ระบุชื่อ — แนะนำเมื่อชั้นที่ไม่มีคีย์ปฏิเสธคำขอเหล่านั้น (401).",
     "anonymousFallbackEnabled": "เปิดใช้งานการสำรองข้อมูลแบบไม่ระบุชื่อสำหรับ {provider}",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "แปลงสตรีมล้มเหลว"
   },
   "usage": {
+    "cursorModelUsageTitle": "โทเค็น API (รอบนี้)",
+    "cursorModelUsageBilledHint": "เรียกเก็บโดย Cursor",
+    "cursorModelUsageModel": "รุ่น",
+    "cursorModelUsageInput": "อินพุต",
+    "cursorModelUsageOutput": "ผลลัพธ์",
+    "cursorModelUsageCacheRead": "การอ่านแคช",
+    "cursorModelUsageCacheWrite": "แคชเขียน",
+    "cursorModelUsageCost": "ค่าใช้จ่าย",
     "healthExtraUsageBypass": "ใช้โควตาหมดแล้ว แต่อนุญาตให้ใช้งานเพิ่มเติม จึงให้บริการต่อได้",
     "healthPaidCreditsBypass": "ใช้โควตาหมดแล้ว แต่มีเครดิตแบบชำระเงินที่ใช้ได้ จึงให้บริการต่อได้",
     "healthFilteringBypass": "ใช้โควตาหมดแล้ว แต่ปิดการกรองโควตาในเครื่อง จึงให้บริการต่อได้",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "ตรวจพบความล้มเหลวในการรีเฟรชโทเค็น",
       "unknown": "สถานะสุขภาพไม่ทราบ"
     },
+    "tokenHealthRefreshAll": "รีเฟรชทั้งหมด",
+    "tokenHealthRefreshResult": "รีเฟรช {refreshed} รายการ, ล้มเหลว {failed} รายการ, ข้าม {skipped} รายการ",
     "systemMonitor": {
       "metricsAriaLabel": "เมตริกระบบ",
       "memory": "หน่วยความจำ",

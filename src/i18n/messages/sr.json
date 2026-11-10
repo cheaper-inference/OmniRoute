@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Детаљи коришћења",
     "quotaPlanBadge": "План претплате (из података о коришћењу)",
+    "codexAccountPersonal": "Лично",
+    "codexAccountBusiness": "Пословно",
+    "codexAccountRole": "Улога: {role}",
     "anonymousFallbackTitle": "Анонимни резервни режим",
     "anonymousFallbackDesc": "Када су све конфигурисане везе исцрпљене (квота, кредити или истек), привремено користите ниво овог провајдера који не захтева кључ. Искључите ово да бисте прескочили овог провајдера уместо слања анонимних захтева — препоручује се када ниво без кључа одбија такве захтеве (401).",
     "anonymousFallbackEnabled": "Анонимни резервни режим омогућен за {provider}",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "Трансформација стрима није успела"
   },
   "usage": {
+    "cursorModelUsageTitle": "API токени (овај циклус)",
+    "cursorModelUsageBilledHint": "Наплаћује Cursor",
+    "cursorModelUsageModel": "Модел",
+    "cursorModelUsageInput": "Улаз",
+    "cursorModelUsageOutput": "Излаз",
+    "cursorModelUsageCacheRead": "Читање из кеша",
+    "cursorModelUsageCacheWrite": "Упис у кеш",
+    "cursorModelUsageCost": "Cena",
     "healthExtraUsageBypass": "Квота је исцрпљена; додатна потрошња је дозвољена, па се услуга наставља.",
     "healthPaidCreditsBypass": "Квота је исцрпљена; расположиви плаћени кредити омогућавају наставак услуге.",
     "healthFilteringBypass": "Квота је исцрпљена; локално филтрирање квота је искључено, па се услуга наставља.",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "Откривене су грешке при обнови токена",
       "unknown": "Стање није познато"
     },
+    "tokenHealthRefreshAll": "Освежи све",
+    "tokenHealthRefreshResult": "{refreshed} osveženo, {failed} neuspešno, {skipped} preskočeno",
     "systemMonitor": {
       "metricsAriaLabel": "Системске метрике",
       "memory": "Меморија",

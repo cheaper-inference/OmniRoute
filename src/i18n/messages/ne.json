@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "प्रयोग विवरण",
     "quotaPlanBadge": "सदस्यता योजना (प्रयोग डाटाबाट)",
+    "codexAccountPersonal": "व्यक्तिगत",
+    "codexAccountBusiness": "व्यावसायिक",
+    "codexAccountRole": "भूमिका: {role}",
     "anonymousFallbackTitle": "बेनामी फलब्याक",
     "anonymousFallbackDesc": "कन्फिगर गरिएका सबै जडानहरू सकिएपछि (कोटा, क्रेडिट वा म्याद सकिँदा), अस्थायी रूपमा यस प्रदायकको keyless टियर प्रयोग गर्नुहोस्। बेनामी अनुरोधहरू पठाउनुको सट्टा यस प्रदायकलाई छोड्न यसलाई बन्द गर्नुहोस् — keyless टियरले ती अनुरोधहरू अस्वीकार गर्दा (401) यसो गर्न सिफारिस गरिन्छ।",
     "anonymousFallbackEnabled": "{provider} का लागि बेनामी फलब्याक सक्षम गरियो",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "स्ट्रिम रूपान्तरण गर्न असफल भयो"
   },
   "usage": {
+    "cursorModelUsageTitle": "API टोकनहरू (यो चक्र)",
+    "cursorModelUsageBilledHint": "Cursor द्वारा बिल गरिएको",
+    "cursorModelUsageModel": "मोडेल",
+    "cursorModelUsageInput": "इनपुट",
+    "cursorModelUsageOutput": "आउटपुट",
+    "cursorModelUsageCacheRead": "क्यास रिड",
+    "cursorModelUsageCacheWrite": "क्यास लेखन",
+    "cursorModelUsageCost": "लागत",
     "healthExtraUsageBypass": "कोटा सकिएको छ; थप प्रयोगको अनुमति भएकाले सेवा जारी रहन्छ।",
     "healthPaidCreditsBypass": "कोटा सकिएको छ; उपलब्ध सशुल्क क्रेडिटले सेवा जारी राख्न सकिन्छ।",
     "healthFilteringBypass": "कोटा सकिएको छ; स्थानीय कोटा फिल्टर बन्द भएकाले सेवा जारी रहन्छ।",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "टोकन रिफ्रेस विफलताहरू पत्ता लागे",
       "unknown": "स्वास्थ्य स्थिति अज्ञात छ"
     },
+    "tokenHealthRefreshAll": "सबै रिफ्रेस गर्नुहोस्",
+    "tokenHealthRefreshResult": "{refreshed} रिफ्रेस गरियो, {failed} असफल, {skipped} छोडियो",
     "systemMonitor": {
       "metricsAriaLabel": "प्रणाली मेट्रिक्स",
       "memory": "मेमोरी",

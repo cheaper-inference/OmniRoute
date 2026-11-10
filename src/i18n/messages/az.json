@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "İstifadə təfərrüatları",
     "quotaPlanBadge": "Abunəlik planı (istifadə məlumatından)",
+    "codexAccountPersonal": "Şəxsi",
+    "codexAccountBusiness": "Biznes",
+    "codexAccountRole": "Rol: {role}",
     "anonymousFallbackTitle": "Anonim ehtiyat",
     "anonymousFallbackDesc": "Bütün konfiqurasiya olunmuş bağlantılar tükəndikdə (kvota, kreditlər və ya müddət), müvəqqəti olaraq bu təminatçının açarsız səviyyəsini istifadə edin. Anonim sorğular göndərmək əvəzinə bu təminatçını atlamaq üçün söndürün — açarsız səviyyə onları rədd etdikdə (401) tövsiyə olunur.",
     "anonymousFallbackEnabled": "{provider} üçün anonim ehtiyat aktivdir",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "Axını çevirmək mümkün olmadı"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokenləri (bu dövr)",
+    "cursorModelUsageBilledHint": "Cursor tərəfindən hesablanıb",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Giriş",
+    "cursorModelUsageOutput": "Çıxış",
+    "cursorModelUsageCacheRead": "Keş oxunması",
+    "cursorModelUsageCacheWrite": "Keşə yazma",
+    "cursorModelUsageCost": "Xərc",
     "healthExtraUsageBypass": "Kvota tükənib; əlavə istifadəyə icazə verildiyi üçün xidmət davam edir.",
     "healthPaidCreditsBypass": "Kvota tükənib; mövcud ödənişli kreditlər xidmətin davam etməsinə imkan verir.",
     "healthFilteringBypass": "Kvota tükənib; yerli kvota filtrləməsi söndürüldüyü üçün xidmət davam edir.",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "Token yeniləmə xətaları aşkar edildi",
       "unknown": "Sağlamlıq vəziyyəti məlum deyil"
     },
+    "tokenHealthRefreshAll": "Hamısını yenilə",
+    "tokenHealthRefreshResult": "{refreshed} yeniləndi, {failed} uğursuz oldu, {skipped} keçildi",
     "systemMonitor": {
       "metricsAriaLabel": "Sistem metrikaları",
       "memory": "Yaddaş",

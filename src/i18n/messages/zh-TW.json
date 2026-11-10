@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "用量詳細資訊",
     "quotaPlanBadge": "訂閱方案（來自用量資料）",
+    "codexAccountPersonal": "個人",
+    "codexAccountBusiness": "商務",
+    "codexAccountRole": "角色：{role}",
     "anonymousFallbackTitle": "匿名後備",
     "anonymousFallbackDesc": "當所有配置的連接耗盡（配額、積分或到期）時，暫時使用此提供者的無密鑰層級。關閉以跳過此提供者，而不是發送匿名請求 — 當無密鑰層級拒絕它們（401）時建議這樣做。",
     "anonymousFallbackEnabled": "為 {provider} 啟用匿名後備",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "轉換串流失敗"
   },
   "usage": {
+    "cursorModelUsageTitle": "API 權杖（本週期）",
+    "cursorModelUsageBilledHint": "由 Cursor 計費",
+    "cursorModelUsageModel": "模型",
+    "cursorModelUsageInput": "輸入",
+    "cursorModelUsageOutput": "輸出",
+    "cursorModelUsageCacheRead": "快取讀取",
+    "cursorModelUsageCacheWrite": "快取寫入",
+    "cursorModelUsageCost": "成本",
     "healthExtraUsageBypass": "額度已用完；已允許額外用量，仍可繼續服務。",
     "healthPaidCreditsBypass": "額度已用完；有可用的付費額度，仍可繼續服務。",
     "healthFilteringBypass": "額度已用完；已關閉本機額度篩選，仍可繼續服務。",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "檢測到令牌刷新失敗",
       "unknown": "健康狀態未知"
     },
+    "tokenHealthRefreshAll": "全部重新整理",
+    "tokenHealthRefreshResult": "{refreshed} 已重新整理，{failed} 失敗，{skipped} 已跳過",
     "systemMonitor": {
       "metricsAriaLabel": "系統指標",
       "memory": "記憶體",

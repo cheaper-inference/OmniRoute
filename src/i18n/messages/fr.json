@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Détails d'utilisation",
     "quotaPlanBadge": "Formule d'abonnement (selon les données d'utilisation)",
+    "codexAccountPersonal": "Personnel",
+    "codexAccountBusiness": "Professionnel",
+    "codexAccountRole": "Rôle : {role}",
     "anonymousFallbackTitle": "Fallback anonyme",
     "anonymousFallbackDesc": "Lorsque toutes les connexions configurées sont épuisées (quota, crédits ou expiration), utilisez temporairement le niveau sans clé de ce fournisseur. Désactivez cette option pour ignorer ce fournisseur au lieu d'envoyer des requêtes anonymes — recommandé lorsque le niveau sans clé les rejette (401).",
     "anonymousFallbackEnabled": "Fallback anonyme activé pour {provider}",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "Échec de la transformation du flux"
   },
   "usage": {
+    "cursorModelUsageTitle": "Jetons API (ce cycle)",
+    "cursorModelUsageBilledHint": "Facturé par Cursor",
+    "cursorModelUsageModel": "Modèle",
+    "cursorModelUsageInput": "Entrée",
+    "cursorModelUsageOutput": "Sortie",
+    "cursorModelUsageCacheRead": "Lecture cache",
+    "cursorModelUsageCacheWrite": "Écriture du cache",
+    "cursorModelUsageCost": "Coût",
     "healthExtraUsageBypass": "Quota épuisé ; l’utilisation supplémentaire est autorisée, le service continue donc.",
     "healthPaidCreditsBypass": "Quota épuisé ; les crédits payants disponibles permettent de poursuivre le service.",
     "healthFilteringBypass": "Quota épuisé ; le filtrage local des quotas est désactivé, le service continue donc.",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "Échecs d’actualisation des jetons détectés",
       "unknown": "État de santé inconnu"
     },
+    "tokenHealthRefreshAll": "Actualiser tout",
+    "tokenHealthRefreshResult": "{refreshed} actualisés, {failed} échoués, {skipped} ignorés",
     "systemMonitor": {
       "metricsAriaLabel": "Métriques système",
       "memory": "Mémoire",

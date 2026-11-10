@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Bruksdetaljer",
     "quotaPlanBadge": "Abonnementsplan (fra bruksdata)",
+    "codexAccountPersonal": "Privat",
+    "codexAccountBusiness": "Bedrift",
+    "codexAccountRole": "Rolle: {role}",
     "anonymousFallbackTitle": "Anonym fallback",
     "anonymousFallbackDesc": "Når alle konfigurerte tilkoblinger er brukt opp (kvote, kreditter eller utløp), bruk midlertidig denne leverandørens nøkkelløse nivå. Slå av for å hoppe over denne leverandøren i stedet for å sende anonyme forespørsel — anbefales når det nøkkelløse nivået avviser dem (401).",
     "anonymousFallbackEnabled": "Anonym fallback aktivert for {provider}",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "Kunne ikke transformere strømmen"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokener (denne syklusen)",
+    "cursorModelUsageBilledHint": "Fakturert av Cursor",
+    "cursorModelUsageModel": "Modell",
+    "cursorModelUsageInput": "Inndata",
+    "cursorModelUsageOutput": "Utdata",
+    "cursorModelUsageCacheRead": "Cache-lesing",
+    "cursorModelUsageCacheWrite": "Cache-skriving",
+    "cursorModelUsageCost": "Kostnad",
     "healthExtraUsageBypass": "Kvoten er brukt opp; ekstra bruk er tillatt, så tjenesten fortsetter.",
     "healthPaidCreditsBypass": "Kvoten er brukt opp; tilgjengelige betalte kreditter gjør at tjenesten kan fortsette.",
     "healthFilteringBypass": "Kvoten er brukt opp; lokal kvotefiltrering er deaktivert, så tjenesten fortsetter.",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "Token oppfriskningsfeil oppdaget",
       "unknown": "Helsesituasjon ukjent"
     },
+    "tokenHealthRefreshAll": "Oppdater alle",
+    "tokenHealthRefreshResult": "{refreshed} oppdatert, {failed} feilet, {skipped} hoppet over",
     "systemMonitor": {
       "metricsAriaLabel": "Systemmetrikker",
       "memory": "Minne",

@@ -7261,6 +7261,9 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "ਵਰਤੋਂ ਵੇਰਵਾ",
     "quotaPlanBadge": "ਮੈਂਬਰਸ਼ਿਪ ਪਲਾਨ (ਵਰਤੋਂ ਡੇਟਾ ਤੋਂ)",
+    "codexAccountPersonal": "ਨਿੱਜੀ",
+    "codexAccountBusiness": "ਕਾਰੋਬਾਰ",
+    "codexAccountRole": "ਭੂਮਿਕਾ: {role}",
     "anonymousFallbackTitle": "ਅਗਿਆਤ ਫਾਲਬੈਕ",
     "anonymousFallbackDesc": "ਜਦੋਂ ਸਾਰੇ ਸੰਰਚਿਤ ਕਨੈਕਸ਼ਨ ਖ਼ਤਮ ਹੋ ਜਾਣ (ਕੋਟਾ, ਕ੍ਰੈਡਿਟ ਜਾਂ ਮਿਆਦ), ਤਾਂ ਅਸਥਾਈ ਤੌਰ 'ਤੇ ਇਸ ਪ੍ਰਦਾਤਾ ਦਾ ਕੁੰਜੀ-ਰਹਿਤ ਟੀਅਰ ਵਰਤੋ। ਅਗਿਆਤ ਬੇਨਤੀਆਂ ਭੇਜਣ ਦੀ ਬਜਾਏ ਇਸ ਪ੍ਰਦਾਤਾ ਨੂੰ ਛੱਡਣ ਲਈ ਇਸਨੂੰ ਬੰਦ ਕਰੋ — ਜਦੋਂ ਕੁੰਜੀ-ਰਹਿਤ ਟੀਅਰ ਉਨ੍ਹਾਂ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦਾ ਹੈ (401), ਤਾਂ ਇਹ ਸਿਫ਼ਾਰਸ਼ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।",
     "anonymousFallbackEnabled": "{provider} ਲਈ ਅਗਿਆਤ ਫਾਲਬੈਕ ਸਮਰੱਥ ਕੀਤਾ ਗਿਆ",
@@ -10548,6 +10551,14 @@
     "streamTransformFailed": "ਸਟ੍ਰੀਮ ਨੂੰ ਰੂਪਾਂਤਰਿਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ਟੋਕਨ (ਇਹ ਚੱਕਰ)",
+    "cursorModelUsageBilledHint": "Cursor ਵੱਲੋਂ ਬਿੱਲ ਕੀਤਾ",
+    "cursorModelUsageModel": "ਮਾਡਲ",
+    "cursorModelUsageInput": "ਇਨਪੁੱਟ",
+    "cursorModelUsageOutput": "ਆਉਟਪੁੱਟ",
+    "cursorModelUsageCacheRead": "ਕੈਸ਼ ਰੀਡ",
+    "cursorModelUsageCacheWrite": "ਕੈਸ਼ ਲਿਖਾਈ",
+    "cursorModelUsageCost": "ਲਾਗਤ",
     "healthExtraUsageBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਵਾਧੂ ਵਰਤੋਂ ਦੀ ਇਜਾਜ਼ਤ ਹੈ, ਇਸ ਲਈ ਸੇਵਾ ਜਾਰੀ ਹੈ।",
     "healthPaidCreditsBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਉਪਲਬਧ ਭੁਗਤਾਨ ਕੀਤੇ ਕ੍ਰੈਡਿਟ ਨਾਲ ਸੇਵਾ ਜਾਰੀ ਰਹਿ ਸਕਦੀ ਹੈ।",
     "healthFilteringBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਸਥਾਨਕ ਕੋਟਾ ਫਿਲਟਰ ਬੰਦ ਹੈ, ਇਸ ਲਈ ਸੇਵਾ ਜਾਰੀ ਹੈ।",
@@ -11134,6 +11145,8 @@
       "refreshFailures": "ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼ ਅਸਫਲਤਾਵਾਂ ਮਿਲੀਆਂ",
       "unknown": "ਸਿਹਤ ਸਥਿਤੀ ਅਣਜਾਣ ਹੈ"
     },
+    "tokenHealthRefreshAll": "ਸਭ ਨੂੰ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ",
+    "tokenHealthRefreshResult": "{refreshed} ਤਾਜ਼ਾ ਕੀਤੇ, {failed} ਅਸਫਲ, {skipped} ਛੱਡੇ",
     "systemMonitor": {
       "metricsAriaLabel": "ਸਿਸਟਮ ਮੈਟ੍ਰਿਕਸ",
       "memory": "ਮੈਮੋਰੀ",
