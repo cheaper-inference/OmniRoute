@@ -22,6 +22,7 @@ import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import CompressionHub from "./CompressionHub";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 type PipelineStep = { engine: string; intensity?: string };
 type OutputStyleSelection = { id: string; level: "lite" | "full" | "ultra" };
@@ -56,6 +57,7 @@ function NamedCombosManager() {
   const t = useTranslations("contextCombos");
   const tSettings = useTranslations("settings");
   const tCommon = useTranslations("common");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [combos, setCombos] = useState<CompressionCombo[]>([]);
   const [routingCombos, setRoutingCombos] = useState<RoutingCombo[]>([]);
   const [languagePacks, setLanguagePacks] = useState<LanguagePack[]>([]);
@@ -202,7 +204,7 @@ function NamedCombosManager() {
   };
 
   const deleteCombo = async (combo: CompressionCombo) => {
-    if (!confirm(t("deleteNamedConfirm", { name: combo.name }))) return;
+    if (!(await requestConfirm(t("deleteNamedConfirm", { name: combo.name })))) return;
     const res = await fetch(`/api/context/combos/${combo.id}`, { method: "DELETE" });
     if (res.ok) refresh();
   };
@@ -269,7 +271,7 @@ function NamedCombosManager() {
           variant="warning"
           role="alert"
           data-testid="compression-master-switch-warning"
-          className="[&>.ci-alert__dismiss]:hidden"
+          dismissible={false}
         >
           {t("activeProfileMasterSwitchOffWarning")}{" "}
           <Link href="/dashboard/context/settings" className="font-medium underline">
@@ -355,7 +357,7 @@ function NamedCombosManager() {
                         combo={{ id, config: combo.config }}
                         disabled={!compressionEnabled}
                         title={t("compressionOverride")}
-                        className="ci-select-native--sm w-24 shrink-0 text-xs"
+                        className="w-24 shrink-0 text-xs"
                       />
                     </div>
                   );
@@ -381,16 +383,17 @@ function NamedCombosManager() {
               const selected = outputStyles.find((style) => style.id === id);
               return (
                 <div key={id} className="flex items-center justify-between gap-2">
-                  <label className="flex min-w-0 items-center gap-2 text-sm text-text-main">
-                    <input
-                      type="checkbox"
-                      data-testid={`combo-output-style-toggle-${id}`}
-                      checked={Boolean(selected)}
-                      onChange={(event) => setOutputStyle(id, { enabled: event.target.checked })}
-                    />
-                    <span className="truncate">{styleLabel}</span>
-                  </label>
-                  <select
+                  <Checkbox
+                    className="min-w-0 flex-1"
+                    data-testid={`combo-output-style-toggle-${id}`}
+                    label={<span className="truncate">{styleLabel}</span>}
+                    checked={Boolean(selected)}
+                    onChange={(event) => setOutputStyle(id, { enabled: event.target.checked })}
+                  />
+                  <Select
+                    compact
+                    className="w-24 shrink-0"
+                    selectClassName="text-xs"
                     value={selected?.level ?? "full"}
                     aria-label={`${styleLabel} level`}
                     disabled={!selected}
@@ -400,12 +403,11 @@ function NamedCombosManager() {
                         level: event.target.value as OutputStyleSelection["level"],
                       })
                     }
-                    className="w-24 shrink-0 rounded-lg border border-border bg-bg px-2 py-1 text-xs text-text-main disabled:opacity-50"
                   >
                     <option value="lite">{tSettings("compressionLevel.lite")}</option>
                     <option value="full">{tSettings("compressionLevel.full")}</option>
                     <option value="ultra">{tSettings("compressionLevel.ultra")}</option>
-                  </select>
+                  </Select>
                 </div>
               );
             })}
@@ -494,6 +496,7 @@ function NamedCombosManager() {
           </Card>
         ))}
       </section>
+      {confirmDialog}
     </div>
   );
 }

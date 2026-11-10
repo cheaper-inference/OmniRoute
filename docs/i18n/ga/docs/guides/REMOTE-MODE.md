@@ -47,35 +47,39 @@ do ríomhaire glúine                       OmniRoute cianda (VPS)
 
 ## Ag nascadh
 
-### Leis an bpasfhocal bainistíochta (tosú)
+### Leis an bhfocal faire bainistíochta (tosú)
 
 ```bash
 omniroute connect 192.168.0.15
-# Pasfhocal bainistíochta do http://192.168.0.15:20128: ********
+# Focal faire bainistíochta do http://192.168.0.15:20128: ********
 # ✔ Ceangailte le http://192.168.0.15:20128 — comhthéacs '192.168.0.15' (raon feidhme: admin)
 ```
 
-Eisíonn sreabhadh an phasfhocail comhartha **admin** de réir réamhshocraithe (tá an pasfhocal agat, mar sin
-tá smacht iomlán agat cheana féin). Laghdaigh an raon feidhme le `--scope`:
+Cruthaíonn sreabhadh an fhocail faire comhartha **admin** de réir réamhshocraithe (tá an focal faire agat, mar sin tá smacht iomlán agat cheana féin). Laghdaigh an raon feidhme le `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Roghanna: `--port <p>` (nuair nach bhfuil port ag an óstach), `--name <ctx>` (ainm an chomhthéacs),
-`--scope read|write|admin`. Cloítear le URL iomlán díreach mar atá:
+Roghanna: `--port <p>` (nuair nach bhfuil ceann ag an óstach), `--name <ctx>` (ainm an chomhthéacs),
+`--scope read|write|admin`. Glactar le URL iomlán mar atá:
 `omniroute connect https://omni.example.com`.
+
+Nuair atá fíordheimhniú dhá fhachtóir don deais cumasaithe ag an bhfreastalaí (Socruithe →
+Slándáil), diúltaítear don fhocal faire leis féin: iarrann an CLI an cód ón
+aip fhíordheimhnitheora (nó cód aisghabhála) ansin. Cuir ar aghaidh é roimh ré le
+`--totp <code>` le húsáid neamh-idirghníomhach.
 
 ### Le comhartha réamhghinte
 
 Gin comhartha a bhfuil raon feidhme aige sa deais (nó le `omniroute tokens create`) agus
-greamaigh é — níl pasfhocal ag teastáil:
+greamaigh isteach é — níl focal faire ag teastáil:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-Bailíochtaíonn an CLI é trí `GET /api/cli/whoami` agus sábhálann sé mar an comhthéacs gníomhach é.
+Déanann an CLI é a bhailíochtú trí `GET /api/cli/whoami` agus sábhálann sé é mar an comhthéacs gníomhach.
 
 ---
 
@@ -443,12 +447,12 @@ omniroute contexts remove 192-168-0-15 --yes   # bain an comhthéacs logánta (f
 
 ## Críochphointí API (tagairt)
 
-| Modh   | Bealach               | Fíordheimhniú           | Scóip                                |
-| ------ | --------------------- | ----------------------- | ------------------------------------ |
-| POST   | `/api/cli/connect`    | pasfhocal bainistíochta | — (poiblí, faoi chosaint pasfhocail) |
-| GET    | `/api/cli/whoami`     | comhartha rochtana      | léamh                                |
-| GET    | `/api/cli/tokens`     | comhartha rochtana      | riarachán                            |
-| POST   | `/api/cli/tokens`     | comhartha rochtana      | riarachán                            |
-| DELETE | `/api/cli/tokens/:id` | comhartha rochtana      | riarachán                            |
+| Modh   | Bealach               | Fíordheimhniú                      | Raon                             |
+| ------ | --------------------- | ---------------------------------- | -------------------------------- |
+| POST   | `/api/cli/connect`    | pasfhocal; 2FA má tá sé cumasaithe | — (poiblí, cosanta le pasfhocal) |
+| GET    | `/api/cli/whoami`     | comhartha rochtana                 | léamh                            |
+| GET    | `/api/cli/tokens`     | comhartha rochtana                 | riarthóir                        |
+| POST   | `/api/cli/tokens`     | comhartha rochtana                 | riarthóir                        |
+| DELETE | `/api/cli/tokens/:id` | comhartha rochtana                 | riarthóir                        |
 
-Féach [openapi.yaml](../openapi.yaml) le haghaidh na scéimeanna iomlána.
+Féach ar [openapi.yaml](../openapi.yaml) le haghaidh na scéimeanna iomlána.

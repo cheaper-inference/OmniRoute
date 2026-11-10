@@ -242,19 +242,18 @@ Visuose MITM galiniuose taškuose privalomas valdymo autentifikavimas (`requireC
 
 ---
 
-## User-Agent perrašymas — aplinkos kintamieji (`.env.example` 12 skyrius)
+## Vartotojo agentas nepaiso — env vars (`.env.example` 12 skirsnis)
 
-| Kintamasis               | Numatytoji reikšmė                                              |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Kintamasis          | Numatytoji                                    |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Naudojama `open-sse/executors/base.ts::buildHeaders()` atliekant dinaminę paiešką. **Atnaujinkite šias reikšmes, kai paslaugų teikėjai išleidžia naujas CLI versijas** — pasenusios UA eilutės pradedamos atmesti kaip pasenusių klientų.
+Naudoja `open-sse/executors/base.ts::buildHeaders()` per dinaminę paiešką.** Sugadinkite juos, kai paslaugų teikėjai išleidžia naujas CLI versijas** — pasenusios UA eilutės pradedamos atmesti kaip pasenę klientai.
 
 ## CLI suderinamumo režimo perjungikliai (`.env.example` 13 skyrius)
 

@@ -237,19 +237,18 @@ Zaidi ya hayo, `updateNssDatabases()` husakinisha kwenye hifadhidata za NSS za k
 
 Vituo vyote vya ufikiaji vya MITM vinahitaji uthibitishaji wa usimamizi (`requireCliToolsAuth`). Nenosiri la sudo huhifadhiwa kwenye akiba ndani ya upeo wa moduli (kamwe si `globalThis`) na huondolewa wakati wa `stopMitm()`.
 
-## Ubatilishaji wa User-Agent — vibadala vya mazingira (`.env.example` sehemu ya 12)
+## Wakala wa Mtumiaji Anabatilisha — env vars (`.env.example` sehemu ya 12)
 
-| Kibadala                 | Chaguo-msingi                                                   |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Inaweza kubadilika  | Chaguomsingi                                  |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Hutumiwa na `open-sse/executors/base.ts::buildHeaders()` kupitia utafutaji unaobadilika. **Ongeza matoleo haya watoa huduma wanapotoa matoleo mapya ya CLI** — mifuatano ya UA iliyopitwa na wakati huanza kukataliwa kama viteja vilivyopitwa na wakati.
+Inatumiwa na `open-sse/executors/base.ts::buildHeaders()` kupitia utaftaji wa nguvu.** Bomba hizi wakati watoa huduma wanatoa matoleo mapya CLI** — stale UA strings kuanza kukataliwa kama wateja waliopitwa na wakati.
 
 ## Vigeuzi vya Hali ya Upatanifu wa CLI (`.env.example` sehemu ya 13)
 

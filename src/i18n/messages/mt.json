@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferenzi tal-kontijiet",
+    "description": "Agħżel diversi kontijiet bħala preferuti jew żommhom bħala riżerva għal din il-konfigurazzjoni tar-rotta. Ir-rotta awtomatika tikklassifika l-kontijiet f’kull kategorija. Il-kontijiet mhux elenkati jitqiesu normali. Il-permessi, il-limiti tal-kwota u r-rabtiet eżistenti mat-turni jibqgħu japplikaw.",
+    "preferred": "Preferut",
+    "normal": "Normali",
+    "reserve": "Riżerva",
+    "excluded": "Eskluż",
+    "loading": "Qed jitgħabbew il-kontijiet…",
+    "error": "Ma setgħux jitgħabbew il-kontijiet. Iftaħ mill-ġdid l-editur biex terġa’ tipprova.",
+    "missing": "Kont mhux disponibbli ({id})"
+  },
   "teamCosts": {
     "title": "Spejjeż tat-tim",
     "subtitle": "Immaniġġja baġits artab maqsuma u stimi tal-ispiża tal-katalgu.",
@@ -861,6 +872,13 @@
     "batchDetailWindow": "Tieqa",
     "batchDetailCreated": "Maħluq",
     "providerTopologyEmpty": "Għad m’hemm l-ebda fornitur konness",
+    "topologyModels": "Mudelli",
+    "topologyModelsOn": "Mixgħul",
+    "topologyModelsOnHint": "Uri l-mudelli b'talbiet attivi jew riċenti",
+    "topologyModelsAuto": "Awtomatiku",
+    "topologyModelsAutoHint": "Uri biss il-mudelli b'talba għaddejja",
+    "topologyModelsOff": "Mitfi",
+    "topologyModelsOffHint": "Aħbi n-nodi tal-mudelli",
     "badgeToastUnlocked": "Badge żblukkat!",
     "batchListSearchPlaceholder": "Fittex skont l-ID, l-endpoint, il-mudell…",
     "batchListDeleteAllCompletedTitle": "Ħassar il-lottijiet kompluti kollha",
@@ -993,6 +1011,8 @@
     "batchListTitle": "Lottijiet",
     "batchListCount": "{count} lottijiet",
     "batchListRemovingCompleted": "Qed jitneħħew…",
+    "batchListRemoveCompletedPartial": "Tneħħew għadd kbir ta' lottijiet. Ikklikkja mill-ġdid biex tneħħi l-bqija.",
+    "batchListRemoveCompletedFailed": "Seħħ żball waqt it-tneħħija tal-lottijiet.",
     "batchListRemoveCompleted": "Neħħi dawk kompluti",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -1031,6 +1051,12 @@
     "batchListRefreshing": "Qed jiġi aġġornat…",
     "batchListRefresh": "Aġġorna",
     "uploadFileModalRemove": "Neħħi",
+    "fileInputChoose": "Agħżel fajl",
+    "fileInputChooseMultiple": "Agħżel fajls",
+    "fileInputEmpty": "Ma ntgħażel l-ebda fajl",
+    "fileInputSelectedCount": "{count, plural, one {# fajl magħżul} other {# fajls magħżula}}",
+    "fileDropLabel": "Waqqa' fajl hawn jew agħżel wieħed",
+    "fileDropLabelMultiple": "Waqqa' fajls hawn jew agħżel fajls",
     "uploadFileModalUploading": "Qed jittella’…",
     "wizardInputReading": "Qed jinqara l-fajl…",
     "wizardInputReady": "Lest",
@@ -1105,7 +1131,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Ibgħat il-marki ta’ identifikazzjoni tal-klijent OpenCode v2 CLI fuq it-talbiet OpenCode Zen/Go: il-User-Agent opencode/latest/<2.x>/cli u x-opencode-client cli, u fuq it-talbiet tal-livell bla ħlas, l-intestaturi tas-sessjoni v2, l-iskemi tal-għodod read/shell tal-v2 u l-ebda tool_choice \"none\". Mitfi b’mod awtomatiku: kull talba OpenCode żżomm l-identità, l-intestaturi u l-korp attwali mingħajr tibdil.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Meta l-ġabra ta’ kandidati ta’ combo awtomatiku tkun diġà vojta qabel ma jitħaddem il-pre-filter tas-sejħa tal-għodod (kull mira tkun inqabżet minħabba cooldowns, lockouts jew eżawriment), wieġeb b’503 no_eligible_targets minflok il-400 legat \"L-ebda mira ma tappoġġja s-sejħa tal-għodod\" capability_mismatch. Mitfi b’mod awtomatiku: il-ġabra vojta żżomm il-400 legat.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Infurza t-tikketti fdati tal-punti finali tal-mudell (iddikjarati mill-katalgu tal-fornitur, inferiti minn ID ta’ mudell speċjalizzat, jew issettjati mill-operatur): irrifjuta b’HTTP 400, qabel id-dispaċċ, talba mibgħuta lil punt finali li l-mudell ma jservix fuq /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations u /v1/audio/*; aħbi minn /v1/models il-mudelli li l-punti finali ttikkettati tagħhom ma għandhomx adattatur OmniRoute; u wieġeb b’422 għat-test tal-mudell tad-dashboard għal mudelli bħal dawn. Mitfi b’mod awtomatiku: it-tikketti tal-punti finali jibqgħu informattivi u t-talbiet jintbagħtu eżattament bħal qabel.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Fuq relays sempliċi kompatibbli ma’ Anthropic, żomm it-turns tas-sistema f’nofs il-konverżazzjoni fil-lista tal-messaġġi minflok tmexxihom lejn il-prompt tas-sistema fl-ogħla livell, sabiex il-prefiss tal-prompt fil-cache jibqa’ stabbli bejn it-turns. Dan japplika biss meta l-klijent innifsu jkun bagħat il-beta mid-conversation-system-2026-04-07. Diżattivat b’mod awtomatiku: kull turn tas-sistema jitmexxa lejn il-prompt tas-sistema eżattament bħal qabel, għax relays mingħajr dik il-beta jirrifjutaw turns tas-sistema fil-lista tal-messaġġi.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Uża l-livelli ta’ sforz ta’ raġunament li jippubblika models.dev meta la override tal-operatur u lanqas ir-reġistru tal-fornitur ma jiddikjaraw livelli, filwaqt li żżomm biss livelli ta’ sforz magħrufa, u tqis lista ddikjarata vojta ta’ livelli bħala \"l-ebda livell\". Diżattivat b’mod awtomatiku: il-katalgu tal-mudelli u l-livelli ta’ sforz riżolti jibqgħu eżatt kif kienu qabel.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Jippermetti lit-talbiet auto/* jibnu l-grupp ta' kandidati b'kapaċitajiet tal-mudell solvuti (viżjoni, raġunament, ħsieb) u punteġġi tal-kwalità osservati, moqrija f'qari wieħed bil-massa. Mitfi b'mod awtomatiku: il-piżijiet tal-kandidati fil-ħin tat-talba jibqgħu eżattament bħal qabel. Mixgħul: dawk is-sinjali jidħlu fil-piżijiet tal-istantanja, għalhekk il-piżijiet tal-kandidati u l-għażla jistgħu jinbidlu.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Ħalli l-iskann tal-istat tal-kredenzjali jerġa’ jittestja l-konnessjonijiet li l-gateway ikun tefa waħdu (mhux aktar minn darba kull 6 sigħat għal kull waħda, 5 għal kull skann) u jerġa’ jixgħel konnessjoni meta t-test mill-ġdid tagħha jirnexxi. Mitfi awtomatikament: konnessjonijiet bħal dawn jibqgħu mitfija sakemm jieħu azzjoni operatur. Konnessjonijiet diżattivati minn operatur u dawk ipprojbiti b’mod permanenti qatt ma jerġgħu jiġu ttestjati.",
@@ -2009,7 +2034,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# talba} other {# talbiet}}, {keys, plural, one {# ċavetta limitata} other {# ċwievet limitati}}",
     "unpricedUsageMore": "…u {count} aktar",
     "unpricedUsageConfigure": "Ikkonfigura prezzijiet",
-    "unpricedUsageDismiss": "Għalaq"
+    "unpricedUsageDismiss": "Għalaq",
+    "systemMetricsTitle": "Metriċi tas-sistema",
+    "systemMetricsActive": "Monitoraġġ attiv",
+    "systemMetricsLoading": "Tagħbija...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memorja",
+    "systemMetricsHost": "VPS / Ospitanti",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",
@@ -2576,7 +2610,191 @@
     "preferredConnectionsDesc": "Ordni ta' prijorità għal kull ċavetta. Jekk konnessjoni preferuta mhix disponibbli, ir-rotta tgħaddi għall-konnessjoni eliġibbli li jmiss.",
     "preferredConnectionsNone": "Ebda preferenza ma ġiet issettjata — tintuża l-istrateġija tar-rotta awtomatika.",
     "preferredConnectionsClear": "Ħassar",
-    "removeSelection": "Neħħi {name}"
+    "removeSelection": "Neħħi {name}",
+    "templateStaleReferencesBlockingDesc": "Konnessjoni, grupp jew proxy wieħed jew aktar imsemmija m’għadhomx jeżistu. Neħħihom jew ibdilhom qabel issalva jew toħloq ċavetta.",
+    "templateInvalidResetTime": "Daħħal ħin tar-reset fil-format HH:MM.",
+    "templateNamePlaceholder": "eż. Qarrej ta’ Produzzjoni Ristrett",
+    "editTemplateAction": "Editja l-mudell",
+    "editTemplateModalTitle": "Editja l-mudell: {name}",
+    "templateMatchAll": "It-tags kollha",
+    "templateDeleteFailed": "Ma setax jitħassar il-mudell.",
+    "templateTokenLimitsTitle": "Limiti tat-tokens skont l-ambitu",
+    "templateListingOnlyBadge": "Elenkar biss (/v1/models)",
+    "templateStaleReferencesWarningDesc": "Xi oġġetti msemmija ma setgħux jiġu vverifikati fil-katalogu attwali.",
+    "templateAdditionalScopePlaceholder": "Żid ambitu personalizzat...",
+    "templateUnitMinutes": "Minuti",
+    "keyTemplatesDesc": "Kopji li jistgħu jerġgħu jintużaw tal-politiki tal-aċċess, katalogu, baġit u rotot. Ċavetta maħluqa minn mudell tirċievi kopja ta’ dak il-mument mingħajr bidliet retroattivi.",
+    "templateAllowedQuotaPoolsDesc": "Illimita din iċ-ċavetta għal IDs speċifiċi tal-pools tal-kwota. Ħalli vojt għaċ-ċwievet normali mingħajr pool.",
+    "templateRelativeTtl": "Tiskadi wara TTL relattiv",
+    "staleReferenceBlockingError": "Irrisolvi jew neħħi r-referenzi nieqsa qabel toħloq iċ-ċavetta.",
+    "invalidPolicyError": "Irranġa l-iżbalji fil-validazzjoni tal-politika qabel toħloq iċ-ċavetta.",
+    "templateDescriptionPlaceholder": "Iddeskrivi meta l-operaturi għandhom jużaw dan il-mudell...",
+    "templateDynamicModelPatternsNote": "Mudelli dinamiċi ta’ tqabbil (eż. provider/*) jiġu evalwati meta tasal it-talba u jinżammu fil-mudelli.",
+    "templateNoLogDesc": "Taħżinx il-kontenut tat-talbiet u t-tweġibiet għal din iċ-ċavetta fir-reġistri.",
+    "deleteTemplateAction": "Ħassar il-mudell",
+    "templatePickerHint": "Il-mudelli japplikaw kopja tal-politika fil-mument tal-ħolqien taċ-ċavetta; bidliet sussegwenti ma jbiddlux iċ-ċwievet eżistenti b’mod retroattiv.",
+    "templateDomainDailyUsd": "Limitu ta’ Kuljum (USD)",
+    "templateTokenScopeType": "Tip ta’ ambitu",
+    "templateCatalogListingDesc": "Jikkontrolla x’jidher fit-tweġibiet ta’ /v1/models mingħajr ma jagħti aċċess għall-eżekuzzjoni.",
+    "templatePickerNone": "Xejn (politika default)",
+    "fullPolicyEditorDesc": "Ikkonfigura mudelli, kombinazzjonijiet, konnessjonijiet, skadenza TTL, baġits, limiti tat-tokens u regoli tar-rotot qabel tiġġenera s-sigriet.",
+    "templateListFailed": "Ma setgħetx titgħabba l-librerija tal-mudelli. Erġa’ pprova biex taġġorna l-istat tagħha.",
+    "templateKeyGroupsDesc": "Assenja ċwievet maħluqa b’din il-politika lil gruppi taċ-ċwievet għal organizzazzjoni kondiviża.",
+    "templateQuotaLimitsDesc": "Limiti fakultattivi ta’ tokens kull minuta, talbiet kull minuta u massimu ta’ USD fix-xahar infurzati mis-sistema tal-kwoti.",
+    "policyCustomizedBadge": "Personalizzata qabel il-ħolqien",
+    "scopeProvider": "Fornitur",
+    "templateBannedStatusDesc": "Irrifjuta minnufih it-talbiet kollha minn din iċ-ċavetta bi status ta’ projbizzjoni.",
+    "templateSummaryBudgetsConfigured": "Baġits u limiti",
+    "templateModelsDenyAllBanner": "Modalità ristretta b’0 regoli magħżula tirrifjuta t-talbiet diretti kollha għal mudelli diretti (ċavetta għal kombinazzjonijiet biss, jekk permessi).",
+    "templateKeepTarget": "Żomm il-mira attwali",
+    "templateNonBlockingReferenceIssue": "Konsultattiv",
+    "templateBlockedModelsDesc": "Mudelli li jaqblu ma’ kwalunkwe mudell ta’ tqabbil hawn jiġu rrifjutati anki meta l-aċċess għall-mudelli jkun Ippermetti Kollha.",
+    "templateTtlDuration": "Tul tat-TTL",
+    "templateSaveFailed": "Ma setax jiġi ssejvjat il-mudell taċ-ċavetta.",
+    "templateBoundProxy": "Sostituzzjoni tal-proxy tal-ħruġ",
+    "templateAddTag": "Żid tag tat-talba",
+    "templateNameConflictError": "Diġà jeżisti mudell b’dan l-isem. Agħżel isem ieħor.",
+    "templateModelTarget": "Mudell",
+    "templateRuleSourceEffort": "Sors tal-isforz tar-raġunament",
+    "templateTokenLimitsDesc": "Infurza massimu ta’ tokens għal kull mudell, fornitur jew globalment f’perjodu ta’ reset.",
+    "templateAddScope": "Żid ambitu",
+    "templateReasoningRuleEffortBudgetConflict": "L-isforz fil-mira 'none' ma jistax jiġi kkombinat ma’ baġit tal-ħsieb issettjat.",
+    "templateReferenceMissing": "Ir-referenza mhix fil-katalogu attwali",
+    "templateQuotaLimitsTitle": "Limiti tal-fluss u tal-kwoti ta’ kull xahar (TPM / RPM)",
+    "templateDomainWeeklyUsd": "Limitu ta’ kull ġimgħa (USD)",
+    "failedLoadTemplateDetail": "Ma setgħux jitgħabbew id-dettalji tal-politika tal-mudell.",
+    "templateExclusionsNote": "L-identità, is-sigriet, l-għadd tal-użu u l-istorja tat-talbiet qatt ma jinħażnu fil-mudelli.",
+    "saveAsTemplate": "Issejvja bħala mudell",
+    "templateMatchAny": "Kwalunkwe tag",
+    "templateUnitHours": "Sigħat",
+    "templateNoReference": "Xejn",
+    "templateStaleReferencesWarningTitle": "Twissijiet dwar referenzi",
+    "templateRuleSourceCombo": "Referenza għall-kombinazzjoni",
+    "templateRuleConnection": "Referenza għall-konnessjoni",
+    "newTemplateModalTitle": "Oħloq mudell taċ-ċavetta",
+    "scopeGlobal": "Globali",
+    "templatePreviewFailed": "Ma setgħetx tiġi spezzjonata l-politika taċ-ċavetta biex jinħareġ il-mudell.",
+    "templateReasoningRuleBudgetInvalid": "Il-baġit tal-ħsieb tar-regola tar-raġunament għandu jkun numru sħiħ pożittiv meta l-azzjoni tkun Issettja.",
+    "templateResetTime": "Ħin tar-reset (HH:MM)",
+    "templateExecAndListingBadge": "Jaffettwa l-eżekuzzjoni u l-elenkar",
+    "templatePreviewRefusedTitle": "Ma tistax tinħareġ il-politika tal-mudell",
+    "templateBoundProxyPlaceholder": "Uża l-proxy default / tal-fornitur",
+    "templateComboTarget": "Kombinazzjoni",
+    "templateRuleKeyScopeNotice": "Din ir-regola tar-rotot tapplika għal din iċ-ċavetta API biss.",
+    "templateAllowedQuotaPools": "Pools tal-kwota permessi (qtSd)",
+    "templateSummaryReasoningRulesCount": "{count} regoli tar-raġunament",
+    "templateUnitDays": "Jiem",
+    "templatePreserveBudget": "Żomm il-baġit",
+    "templatePickerLabel": "Mudell",
+    "templatePreviewReferenceIssuesTitle": "Referenzi skaduti misjuba fiċ-ċavetta tas-sors",
+    "templateAutoCandidateOverridesDesc": "Eskludi konnessjonijiet speċifiċi tal-fornitur mill-għażla tal-kandidati tal-kombinazzjonijiet awtomatiċi għal din iċ-ċavetta.",
+    "templateDescriptionLabel": "Deskrizzjoni (mhux obbligatorja)",
+    "templateInvalidRelativeExpiry": "It-TTL relattiv tal-iskadenza għandu jkun akbar minn 0.",
+    "templateReferenceReloadRequired": "Erġa’ tella’ dan il-mudell qabel tneħħi din ir-referenza. Il-valur oriġinali tagħha mhuwiex disponibbli.",
+    "saveAsTemplateDesc": "Aqbad il-permessi, ir-regoli tar-rotot, il-baġits u l-kwoti ta’ din iċ-ċavetta bħala kopja tal-politika li tista’ terġa’ tintuża.",
+    "templateReloadAction": "Erġa’ tella’ l-aħħar reviżjoni",
+    "templateAddIp": "Żid IP / CIDR",
+    "templateTokenEnabled": "Limitu tat-tokens attivat",
+    "templateDomainWarningPct": "Limitu ta' Twissija (%)",
+    "templateTokenScopeValue": "Mudell / Fornitur",
+    "templateBlockingReferenceIssue": "Imblukkar",
+    "templateAutoChannelPlaceholder": "Kanal awtomatiku (eż. default)",
+    "templateSummaryModelsDenyAll": "0 mudelli (irrifjuta kollha)",
+    "templateAddBlockedPattern": "Żid mudell imblukkat",
+    "templateInvalidTokenLimit": "Il-limitu tat-tokens għandu jkun numru sħiħ pożittiv.",
+    "noTemplatesYet": "Għad m’hemmx mudelli taċ-ċwievet",
+    "templateRuleTagMatch": "Qabbel it-tags tat-talba",
+    "templateRemoveLastQuotaConfirm": "Jekk tneħħi l-aħħar restrizzjoni fuq il-pools tal-kwota, jingħata aċċess għall-pools kollha tal-kwota. Tkompli?",
+    "templateRemoveBudget": "Neħħi l-baġit",
+    "loadingTemplatePolicy": "Qed titgħabba l-politika tal-mudell...",
+    "templateReasoningRulesDesc": "Ibdel l-isforz tar-raġunament, il-baġit tal-ħsieb jew il-mudell/kombinazzjoni fil-mira meta t-talbiet jaqblu ma’ ċerti kundizzjonijiet.",
+    "templateSummaryCombosDenyAll": "0 kombinazzjonijiet (irrifjuta kollha)",
+    "templateSummaryPublicModelsExecAndList": "Mudelli pubbliċi biss",
+    "templateRevisionConflictError": "Dan il-mudell ġie aġġornat f’sessjoni oħra. Erġa’ tellgħu u applika l-bidliet tiegħek mill-ġdid.",
+    "monthlyLimitUsdLabel": "Limitu ta’ Kull Xahar (USD)",
+    "templateCacheDefaultMode": "Modalità default tal-cache tal-prompts",
+    "templateAddModelPattern": "Żid mudell ta’ tqabbil",
+    "templateCodexServiceMode": "Modalità tal-livell tas-servizz Codex",
+    "templateRemoveStaleRef": "Neħħi referenza nieqsa",
+    "catalogScopeCombos": "Elenka l-kombinazzjonijiet biss (kombinazzjonijiet)",
+    "templateLoadingPreview": "Qed jiġu spezzjonati l-permessi taċ-ċavetta u l-politiki relatati...",
+    "switchTemplateConfirmTitle": "Tissostitwixxi l-politika personalizzata?",
+    "templateStaleReferencesBlockingTitle": "Referenzi skaduti li jimblukkaw",
+    "templateExpirationPolicyDesc": "Il-mudelli jużaw TTL relattiv sabiex kull ċavetta ġdida tirċievi perjodu ġdid qabel l-iskadenza.",
+    "templateConnectionIdPlaceholder": "ID tal-Konnessjoni",
+    "saveAsTemplateTitle": "Issejvja bħala mudell: {name}",
+    "templateBoundProxyDesc": "Idderieġi t-talbiet upstream magħmula b’din iċ-ċavetta permezz ta’ proxy irreġistrat speċifiku.",
+    "noTemplatesYetDesc": "Oħloq mudell tal-politika li jista’ jerġa’ jintuża jew agħżel Issejvja bħala mudell fuq ċavetta API eżistenti.",
+    "templateExecutionAccessDesc": "Jikkontrolla liema mudelli diretti tal-fornituri din iċ-ċavetta tista’ tuża waqt id-direzzjoni tat-talbiet.",
+    "templateIpAllowlistDesc": "Illimita t-talbiet għal IPs tal-klijenti jew firxiet CIDR speċifiċi. Vojt ifisser aċċess mingħajr restrizzjoni skont l-IP.",
+    "useTemplateAction": "Uża l-mudell",
+    "templateReasoningTagsInvalid": "It-tags tat-talba ma jistgħux ikunu vojta.",
+    "templateTtlUnit": "Unità tat-TTL",
+    "templateCapturedSnapshotHeading": "Kopja tal-politika maqbuda",
+    "templateAddReasoningRule": "Żid regola tar-raġunament",
+    "newTemplateAction": "Mudell ġdid",
+    "templateRuleRequestTag": "Tag tat-talba",
+    "templateExecutionAccessHeading": "Aċċess għall-eżekuzzjoni tal-mudelli",
+    "templateTokenResetTime": "Ħin tar-reset",
+    "keyTemplatesTitle": "Mudelli taċ-Ċwievet",
+    "saveAsTemplateAction": "Issejvja l-mudell",
+    "templateSnapshotBadge": "Kopja tar-reviżjoni {revision}",
+    "templateMaxRequestsPerDay": "Massimu ta’ talbiet / jum",
+    "templateCombosDenyAllBanner": "Modalità ristretta b’0 kombinazzjonijiet magħżula tirrifjuta t-talbiet kollha għall-kombinazzjonijiet.",
+    "templateReasoningRulesTitle": "Regoli tar-raġunament u tar-rotot tal-mudelli għal kull ċavetta",
+    "switchTemplateConfirmAction": "Issostitwixxi l-politika",
+    "templateTokenUseDefaultTime": "Uża l-ħin default tar-reset",
+    "templateAddCandidateOverride": "Żid esklużjoni ta’ kandidat",
+    "templateWarningsHeading": "Twissijiet waqt l-estrazzjoni tal-politika",
+    "templateSummaryModelsRestricted": "{count} regoli tal-mudelli",
+    "templateRulePriority": "Prijorità",
+    "templateReasoningTargetRequired": "Agħżel mira tar-rotot għar-regola tar-raġunament.",
+    "templateSummaryAllCombos": "Il-combos kollha",
+    "templateDomainBudgetDesc": "Ikkonfigura segwitu strutturat tal-baġits ta’ kuljum, kull ġimgħa u kull xahar b’intervalli ta’ reset u limiti ta’ twissija personalizzati.",
+    "templateAcknowledgeWarningLabel": "Nifhem u nixtieq inkompli nsalva dan il-mudell",
+    "templateMaxRequestsPerMinute": "Massimu ta’ talbiet / minuta",
+    "templateCatalogListingHeading": "Elenkar u skoperta tal-katalogu (/v1/models)",
+    "templateAddRateLimit": "Żid limitu tar-rata",
+    "hideFullPolicyEditor": "Aħbi l-politika b’6 tabs",
+    "templateNameLabel": "Isem il-mudell",
+    "templateRuleTargetCombo": "Kombinazzjoni fil-mira",
+    "templateKeyGroupsTitle": "Gruppi taċ-ċwievet",
+    "templateSummaryCatalogListingOnly": "Katalogu: {scope} (elenkar biss)",
+    "customizeFullPolicy": "Ippersonalizza l-politika b’6 tabs",
+    "templateSummaryConnectionsCount": "{count} konnessjonijiet",
+    "templateRuleTargetKind": "Mira tad-direzzjonar",
+    "templateResetInterval": "Intervall ta’ Risettjar",
+    "catalogScopeAll": "Elenka l-mudelli u l-kombinazzjonijiet permessi (kollha)",
+    "templateBlockedModelsTitle": "Mudelli ta’ tqabbil imblukkati (lista ta’ projbizzjoni)",
+    "templateDomainBudgetTitle": "Skeda tal-baġit u limitu ta’ twissija",
+    "templateSummaryGroupsCount": "{count} gruppi",
+    "templateUnreadableStatus": "Politika li ma tistax tinqara — tista’ titħassar biss; dan il-mudell ma jistax jintuża jew jiġi editjat.",
+    "templateAddModelPatternPlaceholder": "Żid mudell b’wildcard jew dinamiku, eż. openai/* jew *-preview",
+    "templateIpAllowlist": "Lista ta’ IPs permessi (CIDR jew IP)",
+    "templateTokenMaxTokens": "Massimu ta’ Tokens",
+    "templateRuleDescription": "Deskrizzjoni",
+    "templateSummaryCombosCount": "{count} kombinazzjonijiet",
+    "templateDeleteConfirm": "Tħassar il-mudell \"{name}\"? Iċ-ċwievet API eżistenti maħluqa minnu jżommu l-permessi applikati tagħhom.",
+    "templateSetBudget": "Issettja l-baġit",
+    "templateRemoveTag": "Neħħi t-tag",
+    "templateUnitSeconds": "Sekondi",
+    "templateRuleTargetModel": "ID tal-mudell fil-mira",
+    "templateExpirationPolicy": "Politika tal-iskadenza",
+    "templateRuleBudgetAction": "Baġit tar-raġunament",
+    "templateAddTokenLimit": "Żid limitu tat-tokens",
+    "templateDomainMonthlyUsd": "Limitu ta’ Kull Xahar (USD)",
+    "rpmLimitLabel": "Talbiet kull minuta (RPM)",
+    "templateAutoCandidateOverridesTitle": "Esklużjonijiet tal-kandidati għal kombinazzjonijiet awtomatiċi",
+    "templateTokenLimitScopeRequired": "Valur tal-ambitu huwa meħtieġ għal-limiti tat-tokens għal kull mudell jew fornitur.",
+    "tpmLimitLabel": "Tokens kull minuta (TPM)",
+    "templateReasoningRuleNameRequired": "Kull regola tar-rotot għar-raġunament teħtieġ isem.",
+    "templateRuleModelPattern": "Mudell ta’ tqabbil għall-mudell",
+    "fullPolicyEditorTitle": "Politika Sħiħa tal-Aċċess, Limiti u Rotot",
+    "templateRuleBudgetTokens": "Tokens tal-baġit",
+    "catalogScopeModels": "Elenka l-mudelli diretti biss (mudelli)",
+    "templateSummaryBlockedModels": "{count} imblukkati",
+    "saveKeyAsTemplateAria": "Issejvja {name} bħala mudell",
+    "switchTemplateConfirmMessage": "Personalizzajt l-oqsma tal-politika għal din iċ-ċavetta. Jekk tbiddel il-mudell, il-bidliet mhux issejvjati fil-politika jiġu sostitwiti."
   },
   "auditLog": {
     "title": "Reġistru tal-Awditjar",
@@ -3379,12 +3597,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Uża l- URL li tintlaħaq mill-magna li taħdem Pi. L-endpoint /v1 kompatibbli mal-OpenAI huwa miżjud awtomatikament.",
     "piManualMergeHint": "Preview biss. Għaqqad din id-dħul providers.omniroute models.json sabiex il-fornituri l-oħra tiegħek u s-settings jibqgħu intatti.",
-    "removeMapping": "Neħħi l-immappjar",
     "customUrl": "URL personalizzata",
     "customEndpointAria": "Punt tal-app ta' personalizzazzjoni",
     "useDefaultKey": "Uża l-ħaġa predefinita ta' OmniRoute",
     "mainModelAria": "Il-mudell ewlieni",
-    "manualConfigTitle": "Konfigurazzjoni manwali tal-Grok Build"
+    "manualConfigTitle": "Konfigurazzjoni manwali tal-Grok Build",
+    "removeMapping": "Neħħi l-immappjar"
   },
   "modelCatalog": {
     "title": "Mudelli u Combos",
@@ -3576,6 +3794,19 @@
     "autoComboTestTruncated": "Testati {tested} minn {total} kandidati live (l-ogħla piżijiet l-ewwel).",
     "controlCenter": "Ċentru ta' Kontroll",
     "createCombo": "Oħloq Kombinazzjoni",
+    "exportCombos": "Esporta",
+    "exportCombosFailed": "L-esportazzjoni tal-kombinazzjonijiet falliet",
+    "importCombos": "Importa",
+    "importCombosTitle": "Importa kombinazzjonijiet",
+    "importCombosInvalidFile": "Dan il-fajl mhuwiex esportazzjoni valida ta' kombinazzjonijiet.",
+    "importCombosSummary": "Kombinazzjonijiet fil-fajl: {total} ({fresh} ġodda, {conflicting} b'isem li diġà jeżisti).",
+    "importCombosMergeHint": "Għaqqad iżomm il-kombinazzjonijiet eżistenti kollha u jaqbeż dawk li isimhom diġà jeżisti. Il-konnessjonijiet u l-kredenzjali qatt ma jiġu importati.",
+    "importCombosReplaceHint": "Ibdel kollox iħassar il-kombinazzjonijiet eżistenti tiegħek ({current}) u jimporta l-fajl minflokhom. Dan ma jistax jitreġġa' lura.",
+    "importCombosMerge": "Għaqqad",
+    "importCombosReplace": "Ibdel kollox",
+    "importCombosDone": "Kombinazzjonijiet importati: {created}. Maqbuża: {skipped}.",
+    "importCombosFailed": "L-importazzjoni tal-kombinazzjonijiet falliet",
+    "importCombosWarnings": "Importat b'twissijiet",
     "editCombo": "Editja l-Kombinazzjoni",
     "deleteCombo": "Ħassar il-Kombinazzjoni",
     "noModels": "Ebda mudell",
@@ -3618,6 +3849,7 @@
     "more": "+{count} oħra",
     "reqs": "talbiet",
     "success": "suċċess",
+    "fallbackSummary": "{rate}% tal-bitiet wasslu għal fallback, ċaże mhux medja ~{skips} objettivi salta",
     "proxyConfigured": "Il-proxy ġie kkonfigurat",
     "copyComboName": "Ikkopja isem il-kombinazzjoni",
     "enableCombo": "Attiva l-kombinazzjoni",
@@ -3683,6 +3915,8 @@
     "testStepRunning": "Qed jiġi ttestjat…",
     "testStepNotTestable": "Jistgħu jiġu ttestjati biss passi b'mudell wieħed",
     "saving": "Qed jiġi ssejvjat...",
+    "liveAccountLabel": "acct: {id}",
+    "liveAccountTooltip": "Kont: {id}",
     "liveNoProviders": "Għadu ma ġie osservat l-ebda fornitur.",
     "liveFleetDataHint": "Id-data tal-flotta tasal permezz ta' avvenimenti diretti tal-combo.",
     "liveActiveCount": "Attivi ({count})",
@@ -3694,6 +3928,10 @@
     "liveSelectCombo": "Agħżel combo",
     "liveSelectComboPlaceholder": "— agħżel combo —",
     "liveTargetCount": "{count, plural, one {# mira} other {# miri}}",
+    "liveStatStrategy": "Strateġija",
+    "liveStatTargets": "Miri",
+    "liveStatFailed": "Tentattivi falluti",
+    "liveStatOutcome": "Riżultat",
     "liveSingle": "Individwali",
     "liveFleet": "Flotta",
     "playgroundStatusAvailable": "Disponibbli",
@@ -5370,6 +5608,10 @@
       "disableAutoScroll": "Itfi l-iskrolljar awtomatiku",
       "enableAutoScroll": "Ixgħel l-iskrolljar awtomatiku",
       "autoScroll": "Skrolljar awtomatiku",
+      "pauseLogs": "Waqqaf l-aġġornamenti",
+      "resumeLogs": "Ibda l-aġġornamenti",
+      "paused": "Waqfa qasira",
+      "scanLimited": "Limitu tal-iskanjar milħuq",
       "entryCount": "{count, plural, one {# entrata} other {# entrati}}",
       "lastHour": "L-aħħar siegħa",
       "updatedAt": "Aġġornat {time}",
@@ -5756,6 +5998,7 @@
     "filterError": "Żball",
     "filterBanned": "Ipprojbit",
     "filterCreditsExhausted": "Il-krediti ġew eżawriti",
+    "filterVerificationRequired": "Teħtieġ verifika",
     "accountSearchPlaceholder": "Fittex fil-kontijiet…",
     "noFilteredConnections": "L-ebda konnessjoni ma taqbel mal-filtru attwali.",
     "failedSetAlias": "Ma rnexxiex l-issettjar tal-isem alternattiv",
@@ -6071,6 +6314,7 @@
     "perModelQuotaDescription": "Meta din tkun attivata, l-iżbalji 429/404 jimblukkaw biss il-mudell speċifiku, mhux il-konnessjoni kollha. Użaha għal fornituri b'limiti tar-rata għal kull mudell (eż., ModelScope).",
     "importFreeModelsOnlyLabel": "Importa biss mudelli bla ħlas",
     "importFreeModelsOnlyHint": "Meta din tkun attivata, jiġu importati biss il-mudelli bla ħlas ta' dan il-fornitur. Il-mudelli bi ħlas jinqabżu.",
+    "importFreeModelsOnlyCompatibleHint": "Meta jkun attivat, jiġu importati biss il-mudelli li l-lista /models ta' dan l-endpoint timmarka bħala b'xejn (id :free, bandiera b'xejn jew prezzijiet żero). Il-mudelli bi ħlas u l-mudelli mingħajr data tal-prezzijiet jinqabżu.",
     "perModelQuotaToggle": "Swiċċ tal-Kwota għal Kull Mudell",
     "modelId": "ID tal-Mudell",
     "customModelPlaceholder": "eż. gpt-4.5-turbo",
@@ -6129,6 +6373,53 @@
     "applyClaudeAuthLocal": "Applika l-awtentikazzjoni",
     "exportClaudeAuthFile": "Esporta l-awtentikazzjoni",
     "importClaudeAuth": "Importa l-awtentikazzjoni",
+    "importAgyAuth": "Importa l-awtentikazzjoni",
+    "agyImportTitle": "Qabbad Antigravity (Google Cloud Code)",
+    "agyImportTabLocal": "1-Ikklikkja CLI Lokali",
+    "agyImportTabSingle": "File / Paste Token",
+    "agyImportTabBulk": "Importazzjoni bl-ingrossa",
+    "agyImportLocalHeading": "Issib awtomatikament is-sessjoni attiva",
+    "agyImportLocalIntro": "Jiskopri login Google Cloud Code / Antigravity CLI attiv minn:",
+    "agyImportLocalSourceEnv": "Il-fajl token imsemmi mill-varjabbli ambjentali AGY_TOKEN_FILE",
+    "agyImportLocalSourceKeyring": "Linux Secret Service / keyring (service=gemini, user=antigravity)",
+    "agyImportLocalSourceCli": "Profili tat-token CLI lokali (~/.gemini/antigravity-cli/)",
+    "agyImportLocalNote": "L-ebda login tal-browser, popup jew kopja manwali tal-kodiċi OAuth meħtieġa. It-token jibqa' OmniRoute anki jekk tilloggja miż- CLI.",
+    "agyImportLocalOverwrite": "Ibdel / aġġorna l-konnessjoni eżistenti jekk tkun diġà importata",
+    "agyImportLocalSubmit": "Importazzjoni minn Antigravity lokali",
+    "agyImportLocalNotFound": "Ebda login Antigravity CLI lokali misjuba.",
+    "agyImportLocalCreated": "Antigravity kont konness mis-sessjoni lokali.",
+    "agyImportLocalRefreshed": "Konnessjoni Antigravity lokali aggornata.",
+    "agyImportLocalFailed": "Naqas milli jikkonnettja s-sessjoni Antigravity lokali",
+    "agyImportInvalidToken": "Format tat-token invalidu ( access_token jew refresh_token nieqsa)",
+    "agyImportParseFileFailed": "Ma setax janalizza l-fajl bħala JSON",
+    "agyImportParsePasteFailed": "Ma setax jinnaliża l-kontenut pasted bħala JSON",
+    "agyImportDuplicate": "Kont diġà jeżisti. Iċċekkja \"Ibdel eżistenti\" biex tikteb fuqha.",
+    "agyImportFailed": "Naqas milli jimporta kredenzjali Antigravity",
+    "agyImportSuccess": "Kont Antigravity importat.",
+    "agyImportInvalidJson": "Invalida JSON",
+    "agyImportAccountN": "Kont #{index}",
+    "agyImportNoValidEntries": "L-ebda daħliet validi għall-importazzjoni",
+    "agyImportBulkFailed": "L-importazzjoni bl-ingrossa falliet",
+    "agyImportBulkSuccess": "Antigravity kontijiet importati: {count}",
+    "agyImportBulkRunFailed": "Naqset milli tmexxi l-importazzjoni bl-ingrossa",
+    "agyImportUploadFile": "Tella' fajl",
+    "agyImportPasteJson": "Paste JSON",
+    "agyImportFileHint": "Agħżel il-fajl antigravity-oauth-token jew fajl token JSON esportat",
+    "agyImportValidToken": "Instab token validu:",
+    "agyImportConnectionName": "Isem tal-konnessjoni (mhux obbligatorju)",
+    "agyImportConnectionNamePlaceholder": "eż. Kont tax-xogħol",
+    "agyImportEmailLabel": "Email (override fakultattiv)",
+    "agyImportReplaceSingle": "Ibdel il-konnessjoni eżistenti jekk l-email diġà teżisti",
+    "agyImportSubmitSingle": "Kont tal-importazzjoni",
+    "agyImportUploadFiles": "Tella' fajls",
+    "agyImportPasteJsonArray": "Paste JSON array",
+    "agyImportBulkFileHint": "Agħżel fajl token JSON wieħed jew aktar",
+    "agyImportStaged": "Files staged: {count}",
+    "agyImportValid": "Validu",
+    "agyImportResults": "Riżultati tal-importazzjoni:",
+    "agyImportResultsSummary": "Suċċess: {success} · Fallit: {failed} · Total: {total}",
+    "agyImportReplaceBulk": "Ibdel il-konnessjonijiet eżistenti fuq il-logħba tal-email",
+    "agyImportSubmitBulk": "Importa kollha",
     "claudeApplyModalTitle": "Applika għal Claude Code Lokali",
     "claudeApplyTargetLabel": "Mogħdija fil-mira",
     "claudeApplyBackupLabel": "Kopji ta’ riżerva",
@@ -6266,6 +6557,10 @@
     "hideEmails": "Aħbi l-indirizzi elettroniċi kollha",
     "a": "A",
     "accountConcurrencyCapHint": "L-għadd massimu ta’ talbiet simultanji li din il-konnessjoni jew dan il-kont jista’ jimmaniġġja. Il-kontijiet b’abbonament normalment jippermettu biss ftit (1–3) — jekk taqbeż dan il-limitu jiġu attivati żbalji 429 u perjodi ta’ stennija. Ħalli vojt biex tuża l-valur predefinit.",
+    "aiCreditsLimit": "Limitu ta’ AI Credits għal kull perjodu ta’ kontijiet",
+    "aiCreditsLimitPlaceholder": "L-ebda limitu lokali",
+    "aiCreditsLimitHint": "Jaqbeż din il-konnessjoni meta l-AI Credits irrappurtati minn GitHub jilħqu dan il-valur, biex ir-rotta tmur għall-konnessjonijiet l-oħra tiegħek. Vojt jiddiżattivah; 0 dejjem jaqbiżha. Qari tal-użu nieqes jew skadut qatt ma jimblokka — dan mhuwiex limitu tal-infiq garantit.",
+    "aiCreditsLimitInvalid": "Il-limitu ta’ AI Credits irid ikun numru mhux negattiv, jew vojt biex jiġi diżattivat.",
     "accountConcurrencyCapLabel": "Limitu tal-konkorrenza tal-kont",
     "accountIdHint": "Meħtieġ minn xi fornituri (eż. Cloudflare Workers AI) flimkien mat-token tal-API.",
     "accountIdLabel": "ID tal-kont",
@@ -6308,8 +6603,21 @@
     "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
     "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "quotaRefreshCurrent": "Aġġorna l-kwota attwali",
+    "quotaRefreshCurrentHint": "Jiċċekkja l-kwota attwali ta’ dan il-kont mingħajr ma jonfoq krediti tar-risettjar.",
+    "quotaRefreshing": "Qed tiġi ċċekkjata l-kwota…",
+    "quotaRefreshFresh": "Il-kwota ġiet iċċekkjata. Is-server jiddetermina d-disponibbiltà tal-kont.",
+    "quotaRefreshFailed": "Il-verifika tal-kwota falliet. Id-data preċedenti ma nbidlitx.",
+    "quotaRefreshStale": "Is-server irritorna data antika tal-kwota. Din mhijiex osservazzjoni ġdida.",
+    "quotaRefreshPartial": "Parti biss mid-data tal-kwota hija disponibbli.",
+    "quotaWindowUnavailable": "Il-kwota għal {window} mhijiex disponibbli",
+    "quotaConnectionRefreshFailed": "Il-verifika tal-kwota ntemmet, iżda l-lista tal-kontijiet ma setgħetx tiġi aġġornata.",
     "disableCoolingDescription": "Aqbeż il-perjodu ta’ stennija temporanju sabiex din il-konnessjoni tibqa’ eliġibbli anke wara żbalji li jistgħu jiġu rkuprati (l-istati terminali bħal ipprojbiti jew skaduti xorta jibqgħu japplikaw).",
     "disableCoolingLabel": "Iddiżattiva l-perjodu ta’ stennija għal din il-konnessjoni",
+    "keepMidConversationSystemDescription": "Ħalli l-messaġġi tas-sistema mibgħuta f'nofs il-konversazzjoni ġewwa l-lista tal-messaġġi minflok iċċaqlaqhom fil-pront tas-sistema tal-ogħla livell, sabiex il-cache fil-pront jibqa' jolqot minn dawriet. Ippermetta biss jekk dan upstream jaċċetta rwol \"sistema\" ġewwa messaġġi (inkella twieġeb 400).",
+    "keepMidConversationSystemLabel": "Żomm il-messaġġi tas-sistema ta’ nofs il-konversazzjoni f’posthom",
+    "requireUserLastMessageDescription": "Għal upstreams li jirrifjutaw il-mili minn qabel tal-assistent: waqqa' dawriet tal-assistent ta' wara (l-ebda tool_use) qabel ma tibgħat. Il-mudell jista' jirriġenera t-tweġiba preċedenti tiegħu.",
+    "requireUserLastMessageLabel": "Jeħtieġ li l-konversazzjoni tintemm b'messaġġ tal-utent",
     "bulkPasteAdded": "{count, plural, one {Żdiedet ċavetta waħda} other {Żdiedu # ċwievet}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Inqabeż duplikat wieħed} other {Inqabżu # duplikati}}",
     "bulkPasteHint": "Waħħal ċavetta tal-API waħda f’kull linja. Il-linji vojta jiġu injorati u ċ-ċwievet duplikati jinqabżu.",
@@ -6346,6 +6654,8 @@
     "newApiUserIdLabel": "ID tal-utent ta’ New-API",
     "newApiUserIdPlaceholder": "eż. 12345",
     "newApiUserIdHint": "Il-valur tal-intestazzjoni AgentRouter New-Api-User, użat flimkien maċ-ċavetta API tal-console biex jinkiseb il-bilanċ tal-kwota.",
+    "tokenrouterManagementKeyLabel": "Ċavetta tal-ġestjoni (mhux obbligatorja)",
+    "tokenrouterManagementKeyHint": "Ċavetta tal-kont mid-dashboard ta’ TokenRouter (Settings → Management Key). Tintuża biss biex jinqraw il-kwota u l-bilanċ, qatt għal talbiet. Iċ-ċavetta salvata ma tintweriex; ħalliha vojta biex iżżommha.",
     "newApiAggregatorToggleLabel": "Gateway tal-aggregatur",
     "newApiAggregatorToggleHint": "Ippermetti l-identifikazzjoni tal-bilanċ għan-nodi aggregaturi New-API / One-API / Sub2API. Id-dashboard se juri l-badge tal-bilanċ u r-routing tal-verifika preliminari tal-kwota se jaqbeż il-kontijiet eżawriti.",
     "newApiAggregatorConsoleApiKeyHint": "Token ta’ Aċċess tas-Sistema għall-endpoint /api/user/self tal-aggregatur. Mhuwiex iċ-ċavetta API tar-routing.",
@@ -6359,6 +6669,8 @@
     "customUserAgentLabel": "Tikketta tal-Aġent tal-Utent Personalizzat",
     "huggingfaceBillToHint": "Mhux obbligatorju. L-identifikatur tal-kont tal-kontijiet Hugging Face tiegħek, mibgħut bħala l-intestatura X-HF-Bill-To għall-attribuzzjoni tal-ispejjeż.",
     "huggingfaceBillToLabel": "Kont Bill-To ta’ Hugging Face",
+    "commandCodeZdrLabel": "Itlob żamma żero tad-data (ZDR)",
+    "commandCodeZdrHint": "Jibgħat x-cmd-zdr: 1 ma' kull talba magħmula b'din iċ-ċavetta API. Mudelli mingħajr upstream ZDR jistgħu ma jkunux disponibbli.",
     "databricksBaseUrlHint": "Ħjiel għall-URL Bażi ta’ Databricks",
     "defaultThinkingStrengthHint": "Jintuża meta talba ma tispeċifikax il-livell ta’ sforz ta’ raġunament.",
     "defaultThinkingStrengthLabel": "Intensità predefinita tal-ħsieb",
@@ -6405,6 +6717,9 @@
     "localProviders": "Fornituri lokali",
     "maxConcurrentWholeNumberError": "Żball: in-numru massimu ta’ talbiet simultanji jrid ikun numru sħiħ",
     "m365TierLabel": "Livell ta’ Copilot",
+    "m365RefreshTokenLabel": "Aġġorna token (mhux obbligatorju)",
+    "m365RefreshTokenHint": "Użat biex jġedded it-token ta' aċċess Microsoft 365 awtomatikament.",
+    "m365RefreshTokenEditHint": "Ħalli vojt biex iżżomm it-token eżistenti. Paste token ġdid biex tissostitwiha.",
     "m365TierHint": "Agħżel liema ambjent ta’ Microsoft 365 Copilot tuża din il-konnessjoni. Individual huwa l-BizChat standard għall-konsumaturi; Education u Enterprise (work) jużaw l-ambjenti tat-tenant rispettivi tagħhom.",
     "m365TierIndividualOption": "Individwali (predefinit)",
     "m365TierEduOption": "Edukazzjoni",
@@ -6946,11 +7261,19 @@
     "quotaWindowSpark": "Spark",
     "quotaDetails": "Dettalji ta' użu",
     "quotaPlanBadge": "Pjan ta' abbonament (mid-data ta' użu)",
+    "codexAccountPersonal": "Personali",
+    "codexAccountBusiness": "Negozju",
+    "codexAccountRole": "Rwol: {role}",
     "anonymousFallbackTitle": "Alternattiva anonima",
     "anonymousFallbackDesc": "Meta l-konnessjonijiet konfigurati kollha jkunu eżawriti (minħabba l-kwota, il-krediti jew l-iskadenza), uża temporanjament il-livell mingħajr ċavetta ta’ dan il-fornitur. Itfi din l-għażla biex taqbeż lil dan il-fornitur minflok ma tibgħat talbiet anonimi — dan huwa rakkomandat meta l-livell mingħajr ċavetta jirrifjutahom (401).",
     "anonymousFallbackEnabled": "L-alternattiva anonima ġiet attivata għal {provider}",
     "anonymousFallbackDisabled": "L-alternattiva anonima ġiet diżattivata għal {provider} — meta l-konnessjonijiet jiġu eżawriti, dan il-fornitur se jinqabeż",
     "anonymousFallbackUpdateFailed": "Ma rnexxiex l-aġġornament tal-issettjar tal-alternattiva anonima",
+    "retryDelayTitle": "Dewmien qabel tentattiv ieħor",
+    "retryDelayDesc": "Kemm idum jistrieħ kollegament wara żball ta' limitu tar-rata meta l-fornitur ma jgħidx meta għandu jerġa' jipprova. Il-mod awtomatiku juża l-backoff integrat; il-ħin ta' reset mibgħut mill-fornitur dejjem jirbaħ.",
+    "retryDelayAuto": "Awtomatiku",
+    "retryDelaySaved": "Id-dewmien qabel tentattiv ieħor ġie ssejvjat",
+    "retryDelayUpdateFailed": "Ma rnexxiex jiġi aġġornat id-dewmien qabel tentattiv ieħor",
     "batchDeleteFailed": "It-tħassir f’lott falla",
     "batchDeleteNetworkError": "Żball tan-network waqt it-tħassir f’lott",
     "batchUpdateFailed": "L-aġġornament f’lott falla",
@@ -7053,6 +7376,31 @@
     "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Xi traffiku ma setax jiġi ssejvjat f'dan il-proċess. It-totali ssejvjati mhumiex kompluti; iċċekkja d-dijanjostika tas-server.",
+      "title": "Traffiku tad-dejta utli ta' OmniRoute",
+      "description": "Kontenut ta' uploads ippreżentat biex jintbagħat u bytes ta' downloads li nqraw minn OmniRoute. Dan mhuwiex traffiku tan-netwerk fuq il-konnessjoni jew kontijiet tal-fornitur. It-total jinkludi traffiku dirett u mhux attribwit, immarkati separatament.",
+      "coverageNote": "Totali akkumulati minn meta beda l-kejl. Uploads ta' daqs mhux magħruf (streams, FormData, kontenut ta' Request) mhumiex inklużi fit-totali tal-bytes. Downloads mhux moqrija jew mhux lesti mhumiex kompluti; tentattivi ta' tibgħat li fallew ma jippruvawx li l-upload twassal. Ir-ridirezzjonijiet/tentattivi mill-ġdid interni tat-trasport u t-trasporti li jevitaw il-kejl ma jitkejlux separatament.",
+      "refresh": "Aġġorna",
+      "overall": "Kollox (ir-rotot kollha osservati)",
+      "proxied": "Subtotal tal-proxies (mingħajr traffiku dirett/mhux attribwit)",
+      "direct": "Dirett (mingħajr proxy)",
+      "unattributed": "Dispaċċatur mhux attribwit",
+      "removed": "Proxy imneħħi ({id})",
+      "legacy": "Proxy antik/tal-ambjent ({id})",
+      "route": "Rotta",
+      "upload": "Upload ippreżentat biex jintbagħat",
+      "download": "Download moqri",
+      "attempts": "Tentattivi",
+      "knownUpload": "Uploads ta' daqs magħruf / tentattivi",
+      "completed": "Downloads kompluti / tentattivi",
+      "failed": "Trażmissjonijiet li fallew",
+      "cancelled": "Downloads ikkanċellati",
+      "errored": "Żbalji fid-downloads",
+      "loading": "Qed jitgħabba t-traffiku tad-dejta utli…",
+      "empty": "Għadu ma tkejjel ebda traffiku tad-dejta utli.",
+      "error": "Ma setax jitgħabba t-traffiku tad-dejta utli. Ipprova aġġorna."
+    },
     "title": "Issettjar",
     "general": "Ġenerali",
     "security": "Sigurtà",
@@ -7134,6 +7482,7 @@
     "proxySubTabsAria": "Sezzjonijiet tal-proxy",
     "requestBodyLimitTitle": "Limitu tal-Korp tat-Talba",
     "requestBodyLimitDescription": "Id-daqs massimu tal-payload tal-API aċċettat qabel ma jiġi analizzat il-korp tat-talba. Ir-rotot dedikati għat-tlugħ tal-fajls iżommu mill-inqas il-limitu integrat tagħhom ta’ 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions u Responses jaċċettaw sa 50 MB sakemm issalva limitu hawn. Il-limitu salvat japplika għalihom ukoll, kemm jekk ikun aktar baxx kif ukoll jekk ikun ogħla.",
     "requestBodyLimitInputLabel": "Limitu tal-korp tat-talba f’MB",
     "requestBodyLimitEmptyError": "Daħħal limitu f’MB",
     "requestBodyLimitWholeNumberError": "Uża numru sħiħ",
@@ -7284,6 +7633,8 @@
     "enableThinking": "Attiva l-Ħsieb",
     "maxThinkingTokens": "Għadd Massimu ta’ Tokens għall-Ħsieb",
     "enableProxy": "Attiva l-Proxy",
+    "defaultNewConnectionProxyEnabled": "Attiva l-proxy b’mod predefinit għal konnessjonijiet ġodda",
+    "defaultNewConnectionProxyEnabledDesc": "Jissettja l-istat inizjali tal-proxy għal kontijiet ġodda tal-fornituri sakemm ma jintgħażilx mod ieħor b’mod espliċitu. Il-konnessjonijiet eżistenti ma jinbidlux. Ir-routing jiddependi mis-settings globali u l-konfigurazzjoni tal-proxy. Kull kont jista’ jinbidel aktar tard.",
     "perKeyProxyEnabled": "Attiva l-assenjazzjoni ta’ proxy għal kull ċavetta",
     "perKeyProxyEnabledDesc": "Meta jkun attivat, kull konnessjoni tal-fornitur tista’ tuża l-assenjazzjoni ta’ proxy tagħha stess",
     "proxyUrl": "URL tal-Proxy",
@@ -7319,6 +7670,13 @@
     "themeLight": "Ċara",
     "themeDark": "Skura",
     "themeSystem": "Sistema",
+    "paletteTitle": "Paletta tal-kuluri",
+    "paletteDesc": "Editions hija d-dehra predefinita. Classic iġġib lura l-aċċent aħdar ċar ta’ qabel.",
+    "paletteSelectionAria": "Għażla tal-paletta tal-kuluri",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "Kuluri newtrali sħan b’aċċent rammi",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "Kuluri newtrali kesħin b’aċċent aħdar ċar",
     "endpointTunnelVisibility": "Viżibbiltà tat-tunnel tal-Endpoint",
     "endpointTunnelVisibilityDesc": "Aħbi l-kontrolli tat-tunnel mill-paġna tal-Endpoint mingħajr ma tbiddel l-istat tat-tunnel.",
     "showCloudflareTunnel": "Cloudflare Quick Tunnel",
@@ -7739,6 +8097,7 @@
     "systemActor": "sistema",
     "ipAccessControl": "Kontroll tal-Aċċess bl-IP",
     "ipAccessControlDesc": "Imblokka jew ippermetti indirizzi IP speċifiċi",
+    "ipAccessMode": "Modalità ta' aċċess",
     "ipModeDisabled": "Diżattivat",
     "ipModeBlacklist": "Lista Sewda",
     "ipModeWhitelist": "Lista ta' Permessi",
@@ -7932,6 +8291,11 @@
     "pricingShowingProviders": "Qed jintwerew {visible} minn {total}",
     "pricingFilteredFrom": "(iffiltrati minn {count})",
     "pricingShowMoreProviders": "Uri {count} oħrajn ({remaining} fadal)",
+    "pricingView": "Ara",
+    "pricingViewByProvider": "Skont il-fornitur",
+    "pricingViewCompare": "Qabbel il-mudelli",
+    "pricingUnpriced": "Mhux ipprezzat",
+    "pricingCompareEmpty": "Ebda mudell mhuwiex offrut minn aktar minn wieħed minn dawn il-fornituri. Fittex għal mudell biex tara offerti singoli.",
     "modelOverridesTitle": "Sostituzzjonijiet tal-Mudell",
     "modelOverridesDesc": "Issostitwixxi l-kapaċitajiet tal-fornitur/mudell użati għar-routing u t-tiswir tat-talbiet. Il-miri jużaw l-istess format fornitur/mudell bħall-kombinazzjonijiet.",
     "searchModelOverrideTargets": "Fittex fornitur/mudell...",
@@ -8631,6 +8995,86 @@
     "codexAutoPingWarning": "Jikkonsma ammont żgħir mill-kwota reali ta’ Codex ma’ kull ping. Huwa diżattivat b’mod predefinit — attivah biss għal konnessjonijiet li tuża regolarment.",
     "codexAutoPingSaveError": "Ma rnexxiex jiġi aġġornat l-issettjar tal-Ping Awtomatiku ta’ Codex",
     "codexAutoPingToggleAria": "Aqleb il-ping awtomatiku tal-kwota ta’ Codex għal {connection}",
+    "bankedResetAutoApplyTitle": "Awto-Applika Banked Resets",
+    "bankedResetAutoApplyDesc": "Opt-in: tifdi awtomatikament Codex reset credits, Claude banked grants u s-sessjoni Claude ta' kull ġimgħa reset għal kontijiet li huma barra mill-kwota, fil-gwardji u l-limiti hawn taħt.",
+    "bankedResetAutoApplyWarning": "Il-fidwa ta' reset juża kreditu li ma jistax jiġi rritornat. Mitfi b'mod awtomatiku, u l-modalità dry-run jirreġistra biss dak li jagħmel.",
+    "bankedResetAutoApplySaveError": "Naqas milli jaġġorna l-issettjar ta' resets banked tal-applikazzjoni awtomatika",
+    "bankedResetAutoApplyLoadError": "Naqas milli jgħabbi l-issettjar ta' resets banked tal-applikazzjoni awtomatika",
+    "bankedResetAutoApplyModeTitle": "Swiċċ u l-mod",
+    "bankedResetAutoApplyEnabledLabel": "Ippermetti l-applikazzjoni awtomatika ta' resets banked",
+    "bankedResetAutoApplyEnabledHelp": "Swiċċ ewlieni. Meta mitfi, xejn qatt ma jinfeda awtomatikament.",
+    "bankedResetAutoApplyModeDryRun": "Dry-run",
+    "bankedResetAutoApplyModeDryRunHelp": "Jirreġistra dak li jkun mifdi fl-istorja hawn taħt, iżda qatt ma jifdi xejn.",
+    "bankedResetAutoApplyModeLastResort": "L-aħħar għażla",
+    "bankedResetAutoApplyModeLastResortHelp": "Jifdi biss meta l-ebda kont ieħor fil-pool ma jkun fadal spazju għar-ras.",
+    "bankedResetAutoApplyModeEager": "Ħerqana",
+    "bankedResetAutoApplyModeEagerHelp": "Jifdi hekk kif kont jilħaq limitu jew kreditu jkun wasal biex jiskadi, anki jekk kontijiet oħra jkollhom spazju għal ras.",
+    "bankedResetAutoApplyCreditTypesTitle": "Tipi ta' kreditu",
+    "bankedResetAutoApplyCreditTypesDesc": "Liema tipi ta' resets jistgħu jiġu mifdija awtomatikament.",
+    "bankedResetAutoApplyCreditCodex": "Codex reset credits",
+    "bankedResetAutoApplyCreditCodexHelp": "Banked reset credits fuq kontijiet Codex.",
+    "bankedResetAutoApplyCreditClaude": "Claude banked għotjiet",
+    "bankedResetAutoApplyCreditClaudeHelp": "Għotjiet ta' reset banked fuq kontijiet Claude.",
+    "bankedResetAutoApplyCreditClaudeSession": "Issettja mill-ġdid tas-sessjoni ta' Claude kull ġimgħa",
+    "bankedResetAutoApplyCreditClaudeSessionHelp": "Ir-reset li l-kontijiet Claude jiksbu darba fil-ġimgħa għal tieqa tas-sessjoni b'ħitan.",
+    "bankedResetAutoApplyClaudeSessionNote": "Meta tkun mixgħula, din il-karatteristika tissostitwixxi t-toggles ta '\"reset awtomatiku tal-limitu\" għal kull kont. Fil-modalità dry-run jirreġistra biss dak li jagħmel.",
+    "bankedResetAutoApplyScopeTitle": "L-ambitu tal-kont",
+    "bankedResetAutoApplyScopeDesc": "Liema kontijiet Codex u Claude OAuth japplikaw awtomatikament jistgħu jaġixxu fuqhom.",
+    "bankedResetAutoApplyScopeAll": "Il-kontijiet kollha",
+    "bankedResetAutoApplyScopeAllHelp": "Kull kont huwa kopert. Itfi kont hawn taħt biex teskludih.",
+    "bankedResetAutoApplyScopeSelected": "Kontijiet magħżula",
+    "bankedResetAutoApplyScopeSelectedHelp": "Il-kontijiet mixgħula hawn taħt biss huma koperti.",
+    "bankedResetAutoApplyNoConnections": "L-ebda kont Codex jew Claude OAuth mhu konness.",
+    "bankedResetAutoApplyConnectionAria": "Inkludi {connection} f'resets banked ta' applikazzjoni awtomatika",
+    "bankedResetAutoApplyTimingTitle": "Gwardji tal-ħin",
+    "bankedResetAutoApplyTimingDesc": "Aqbeż fidwa meta l-istennija tkun kważi tajba, jew meta tkun taħli l-kreditu.",
+    "bankedResetAutoApplySessionGuardLabel": "Gwardja ta' reset ta' 5 sigħat (minuti)",
+    "bankedResetAutoApplySessionGuardHint": "Aqbeż meta t-tieqa ta' 5 sigħat tirrisettja waħedha f'dawn il-ħafna minuti.",
+    "bankedResetAutoApplyWeeklyGuardLabel": "Gwardja mill-ġdid ta' kull ġimgħa (sigħat)",
+    "bankedResetAutoApplyWeeklyGuardHint": "Aqbeż meta t-tieqa ta' kull ġimgħa tirrisettja waħedha f'dawn il-ħafna sigħat.",
+    "bankedResetAutoApplyWeeklyFloorLabel": "Art ta' kull ġimgħa (%)",
+    "bankedResetAutoApplyWeeklyFloorHint": "Aqbeż reset ta' 5 sigħat meta t-tieqa ta' kull ġimgħa fadal inqas minn dan il-perċentwali.",
+    "bankedResetAutoApplyExpiringHoursLabel": "Tieqa tal-kreditu li tiskadi (sigħat)",
+    "bankedResetAutoApplyExpiringHoursHint": "Kreditu li jiskadi f'dawn il-bosta sigħat jista' jinfeda anki mingħajr ħajt ta' limitu.",
+    "bankedResetAutoApplyExpiringUsedLabel": "Użu minimu tal-kreditu li jiskadi (%)",
+    "bankedResetAutoApplyExpiringUsedHint": "Għal krediti li jiskadu, il-kont irid ikun uża mill-inqas dan il-perċentwal tat-tieqa l-aktar traffikuża tiegħu.",
+    "bankedResetAutoApplyPoolTitle": "Pool",
+    "bankedResetAutoApplyPoolDesc": "Użat biss fil-modalità tal-aħħar riżors.",
+    "bankedResetAutoApplyPoolHeadroomLabel": "L-ispazju tal-pool (%)",
+    "bankedResetAutoApplyPoolHeadroomHint": "Kont ieħor jgħodd bħala li għandu headroom meta jkun fadal mill-inqas dan il-perċentwal fiż-żewġ twieqi. Japplika biss fil-modalità tal-aħħar riżors.",
+    "bankedResetAutoApplyLimitsTitle": "Limiti tas-sigurtà",
+    "bankedResetAutoApplyLimitsDesc": "Limiti iebsin dwar kemm-il darba jiġu mifdija resets, magħduda mill-istorja.",
+    "bankedResetAutoApplyMaxPerAccountLabel": "Max għal kull kont kuljum",
+    "bankedResetAutoApplyMaxPerAccountHint": "Fidwa permessa għal kull kont f'24 siegħa.",
+    "bankedResetAutoApplyMaxPerDayLabel": "Max kuljum",
+    "bankedResetAutoApplyMaxPerDayHint": "Fidwa permessa fil-kontijiet kollha f'24 siegħa.",
+    "bankedResetAutoApplyMinSpacingLabel": "Spazjar minimu (minuti)",
+    "bankedResetAutoApplyMinSpacingHint": "Żmien minimu bejn kwalunkwe żewġ fidwa.",
+    "bankedResetAutoApplyScheduleTitle": "Skeda",
+    "bankedResetAutoApplyScheduleDesc": "B'għażla tirrestrinġi l-fidwa għal tieqa ta' kuljum, UTC.",
+    "bankedResetAutoApplyScheduleEnabledLabel": "Ifdi biss ġewwa t-tieqa ta 'kuljum",
+    "bankedResetAutoApplyScheduleStartLabel": "Bidu tat-tieqa (siegħa, UTC, 0-24)",
+    "bankedResetAutoApplyScheduleEndLabel": "Tarf tat-tieqa (siegħa, UTC, 0-24)",
+    "bankedResetAutoApplyScheduleEndHint": "Bidu aktar tard mit-tmiem jaqsam nofsillejl.",
+    "bankedResetAutoApplyHistoryTitle": "Storja",
+    "bankedResetAutoApplyHistoryDesc": "Fidwa awtomatika riċenti u deċiżjonijiet dry-run.",
+    "bankedResetAutoApplyHistoryCounts": "L-aħħar 24 siegħa: {success} rnexxielu, {failed} falla, {dryRun} dry-run.",
+    "bankedResetAutoApplyHistoryRefresh": "Aġġorna",
+    "bankedResetAutoApplyHistoryEmpty": "Għadu l-ebda tifdija awtomatika jew deċiżjonijiet dry-run.",
+    "bankedResetAutoApplyHistoryError": "Naqas milli jgħabbi l-istorja",
+    "bankedResetAutoApplyHistoryTime": "Ħin",
+    "bankedResetAutoApplyHistoryAccount": "Kont",
+    "bankedResetAutoApplyHistoryCreditType": "Tip ta' kreditu",
+    "bankedResetAutoApplyHistoryReason": "Trigger / raġuni",
+    "bankedResetAutoApplyHistoryResult": "Riżultat",
+    "bankedResetAutoApplyTriggerSession": "Tieqa ta' 5 sigħat b'ħitan",
+    "bankedResetAutoApplyTriggerWeekly": "Tieqa ta' kull ġimgħa b'ħitan",
+    "bankedResetAutoApplyTriggerExpiring": "Kreditu li jiskadi",
+    "bankedResetAutoApplyResultSuccess": "Suċċess",
+    "bankedResetAutoApplyResultFailed": "Falliet",
+    "bankedResetAutoApplyResultDryRun": "Dry-run",
+    "bankedResetAutoApplyResultUnknown": "Riżultat mhux magħruf (magħdud lejn il-limiti)",
+    "bankedResetAutoApplyRedeemNowLink": "Ifdi issa manwalment fuq Limiti tal-Fornitur",
     "codexWakeups": {
       "title": "Qawmien skedati",
       "desc": "Jibgħat ping lill-kontijiet magħżula skont skeda biex it-tieqa tal-kwota tagħhom tibda meta trid int. Kull tħaddim juża ftit kwota reali ta’ Codex.",
@@ -9144,6 +9588,17 @@
     "resilienceTokenRefreshScopeConnection": "Konnessjoni (kull kont għandu l-breaker tiegħu)",
     "resilienceTokenRefreshThreshold": "Fallimenti qabel ma jieqaf",
     "resilienceTokenRefreshCooldown": "Waqqaf wara li tinstab",
+    "mfaTitle": "Awtentikazzjoni b'żewġ fatturi",
+    "mfaDesc": "Itlob kodiċi minn app tal-awtentikazzjoni, flimkien mal-password, biex tidħol fid-dashboard jew tqabbad is-CLI.",
+    "mfaScanQr": "Skennja dan il-kodiċi QR bl-app tal-awtentikazzjoni tiegħek (jew daħħal iċ-ċavetta tas-setup manwalment), imbagħad ikteb il-kodiċi ta' 6 ċifri li turi.",
+    "mfaManualKey": "Ċavetta tas-setup",
+    "mfaCodeLabel": "Kodiċi ta' verifika",
+    "mfaBackupCodesTitle": "Issejvja l-kodiċijiet ta' rkupru tiegħek",
+    "mfaBackupCodesDesc": "Kull kodiċi jdaħħlek darba waħda jekk titlef l-aċċess għall-awtentikatur tiegħek. Mhumiex se jintwerew mill-ġdid.",
+    "mfaBackupCodesRemaining": "Kodiċijiet ta' rkupru li fadal: {count}",
+    "mfaDisableDesc": "Daħħal il-password tiegħek u kodiċi kurrenti (jew kodiċi ta' rkupru) biex titfi l-awtentikazzjoni b'żewġ fatturi.",
+    "mfaRecoveryHint": "Irkupru ta' apparat mitluf: ibda s-server b'OMNIROUTE_DISABLE_MFA=true u idħol mill-host innifsu.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA huwa ssettjat: id-dħul minn dan il-host jaqbeż it-tieni fattur. Neħħih ladarba terġa' tidħol.",
     "piiMasking": {
       "title": "Mascherament tad-data personali",
       "description": "Agħżel liema tipi ta' data personali jiġu mgħottija u żid il-mudelli tiegħek. Il-mascherament jibqa' mitfi sakemm tixgħel il-feature flags murija hawn taħt.",
@@ -9156,9 +9611,9 @@
         "financial": "Finanzjarju",
         "brazilian": "Brażiljan",
         "usa": "Stati Uniti",
-        "full": "Sħiħ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Afrika t'Isfel)"
+        "popia": "POPIA (Afrika t'Isfel)",
+        "full": "Sħiħ"
       },
       "builtinTypes": "Tipi integrati",
       "types": {
@@ -9202,7 +9657,12 @@
       "statsTitle": "Sejbiet mill-bidu mill-ġdid",
       "statsEmpty": "Għad m'hemm l-ebda sejba.",
       "statsRequest": "Talbiet"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Żomm il-frejms derivati mill-vidjo",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Ippermetti ż-żamma temporanja ta’ JPEGs biss meta t-talba awtentikata tissettja wkoll drilldown: true. Il-vidjows mhux ipproċessati qatt ma jinżammu.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Ippermetti analiżi dettaljata awtentikata tal-frejms",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Ippermetti liċ-ċwievet tal-API jaqraw u jħassru biss l-identifikaturi opaki tagħhom stess. Ebda aċċess anonimu jew bejn ċwievet differenti.",
+    "modalityBridgeVideoDrilldownUsage": "JPEGs miżmuma / bytes"
   },
   "contextRtk": {
     "title": "Magna RTK",
@@ -10091,9 +10551,21 @@
     "streamTransformFailed": "It-trasformazzjoni tal-fluss falliet"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokens tal-API (dan iċ-ċiklu)",
+    "cursorModelUsageBilledHint": "Iffatturat minn Cursor",
+    "cursorModelUsageModel": "Mudell",
+    "cursorModelUsageInput": "Dħul",
+    "cursorModelUsageOutput": "Riżultat",
+    "cursorModelUsageCacheRead": "Qari mill-cache",
+    "cursorModelUsageCacheWrite": "Kitba fil-Cache",
+    "cursorModelUsageCost": "Spiża",
     "healthExtraUsageBypass": "Il-kwota ntużat kollha; l-użu żejjed huwa permess, għalhekk is-servizz ikompli.",
     "healthPaidCreditsBypass": "Il-kwota ntużat kollha; il-krediti mħallsa disponibbli jippermettu li s-servizz ikompli.",
     "healthFilteringBypass": "Il-kwota ntużat kollha; il-filtrazzjoni lokali tal-kwoti hija diżattivata, għalhekk is-servizz ikompli.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Użu",
     "grokExtraUsageCredits": "Krediti Addizzjonali għall-Użu",
     "grokAutoTopUp": "Rikarga Awtomatika",
@@ -10315,6 +10787,7 @@
     "purchaseOauthFree": "OAuth B'xejn",
     "purchaseApiKey": "Ċavetta tal-API",
     "creditsLabel": "Krediti",
+    "aiCreditsUsed": "Intużaw {count} AI Credits",
     "creditBalanceHint": "Bilanċ li fadal",
     "unlimitedLabel": "Bla limitu",
     "refreshing": "Qed jiġi aġġornat",
@@ -10550,10 +11023,6 @@
     "confirmRedeemClaudeResetCredit": "It-tifdija tirrisettja immedjatament il-limiti eliġibbli tal-użu ta' Claude u tikkonsma dan il-kreditu b'mod permanenti.",
     "claudeResetCreditsModalTitle": "Krediti għall-irrisettjar ta' Claude",
     "claudeResetCreditsModalExplainer": "Krediti disponibbli għall-irrisettjar ta' Claude u rrisettjar ta' sessjonijiet ta' kull ġimgħa għal dan il-kont.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Ibbażat fuq osservazzjonijiet reċenti, mhux test dirett. Agħżel kont għad-dettalji.",
     "healthRecovery": "Irkupru mistenni",
     "healthAvailable": "Disponibbli",
@@ -10676,6 +11145,8 @@
       "refreshFailures": "Instabu fallimenti fit-tiġdid tat-tokens",
       "unknown": "L-istatus tas-saħħa mhux magħruf"
     },
+    "tokenHealthRefreshAll": "Aġġorna kollox",
+    "tokenHealthRefreshResult": "{refreshed} aġġornati, {failed} fallati, {skipped} mwarrfa",
     "systemMonitor": {
       "metricsAriaLabel": "Metriċi tas-sistema",
       "memory": "Memorja",
@@ -10828,7 +11299,11 @@
     "deleteAndRelaunch": "Ħassar",
     "settingsJson": "settings.json",
     "fromDataDir": "mid-direttorju tad-data",
-    "relaunchApp": "Erġa’ niedi l-app tad-desktop OmniRoute"
+    "relaunchApp": "Erġa’ niedi l-app tad-desktop OmniRoute",
+    "mfaPrompt": "Daħħal il-kodiċi mill-app tal-awtentikazzjoni tiegħek",
+    "mfaCodeLabel": "Kodiċi ta' verifika",
+    "mfaCodePlaceholder": "Kodiċi ta' 6 ċifri jew kodiċi ta' rkupru",
+    "mfaBackupCodeHint": "Tlift l-apparat tiegħek? Minflok daħħal wieħed mill-kodiċijiet ta' rkupru tiegħek."
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -11693,7 +12168,30 @@
     "copilotPolicyAcknowledge": "Nifhem, qabbad",
     "tabPasteSetupToken": "Token tas-setup",
     "claudeSetupTokenDescription": "Ħaddem `claude setup-token` f'terminal u waħħal it-token li jistampa. Huwa validu għal sena u m'għandux token ta' aġġornament. OmniRoute jibgħat talba waħda ta' test lil Anthropic qabel ma jsalvah.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Aġġorna Token",
+    "antigravityRefreshTokenDescription": "Paste Google OAuth token ta' aġġornament tiegħek għal Antigravity. OmniRoute jivvalidaha u tiskambjaha qabel issalva.",
+    "antigravityRefreshTokenPlaceholder": "1//...",
+    "m365Title": "Dħul f’Microsoft 365 Copilot",
+    "m365UrlExpiredHint": "Ibda tentattiv ġdid jekk jiskadi qabel ma tlesti.",
+    "m365UrlExpires": "Dan il-URL tal-awtorizzazzjoni jiskadi fil-ħin",
+    "m365AuthUrlCopyHint": "Agħżel il-URL sħiħ tal-awtorizzazzjoni u kkopjah b’Ctrl+C (Command+C fuq Mac), jew uża l-menu Ikkopja tal-brawżer tiegħek. Waħħlu fit-tab vojta biss wara li tattiva Preserve log.",
+    "m365AuthUrlLabel": "URL tal-awtorizzazzjoni (ikkopjah fit-tab ippreparata)",
+    "m365StepNavigate": "Ikkopja l-URL tal-awtorizzazzjoni hawn taħt u waħħlu fil-bar tal-indirizzi tat-tab ippreparata, imbagħad agħfas Enter biex tidħol.",
+    "m365StepPrepare": "Ipprepara d-dħul b’Microsoft biex tibda tentattiv ġdid.",
+    "m365StepOpen": "Iftaħ tab vojta fil-brawżer tiegħek stess billi tuża l-link hawn taħt. Għadek tmurx fuq Microsoft.",
+    "m365StepNetwork": "F’dik it-tab vojta, iftaħ DevTools → Network u attiva Preserve log qabel ma tmur fuq paġna oħra. Żomm DevTools miftuħ.",
+    "m365StepCopy": "Wara li tidħol, sib it-talba lil https://login.microsoftonline.com/common/oauth2/nativeclient f’Network u kkopja l-valur sħiħ ta’ Request URL tagħha. Tikkopjax il-URL finali ta’ wrongplace mill-bar tal-indirizzi.",
+    "m365PrivateUrlHint": "Il-URL tat-talba fih kredenzjal li jintuża darba biss. Waħħlu hawn biss; qatt taqsmu ma’ ħaddieħor jew tinkludih fir-reġistri.",
+    "m365Prepare": "Ipprepara d-dħul b’Microsoft",
+    "m365Preparing": "Qed jitħejja d-dħul…",
+    "m365OpenSignIn": "Iftaħ tab vojta",
+    "m365CallbackLabel": "Request URL sħiħ ta’ nativeclient",
+    "m365Connecting": "Qed jaqbad…",
+    "m365NewAttempt": "Ibda tentattiv ġdid",
+    "m365PrepareError": "Ma setax jitħejja d-dħul b’Microsoft. Erġa’ pprova.",
+    "m365ExchangeError": "Ma setax jitlesta d-dħul b’Microsoft. Ibda tentattiv ġdid.",
+    "m365InvalidCallback": "Waħħal il-valur sħiħ ta’ Request URL ta’ nativeclient b’code wieħed u bl-istate korrispondenti minn dan it-tentattiv. Kodiċijiet waħedhom u URLs ta’ wrongplace mhumiex aċċettati."
   },
   "cursorAuthModal": {
     "title": "Qabbad Cursor",
@@ -12205,6 +12703,10 @@
     "messageInputAria": "Messaġġ"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
+    "upstreamStatus": "Server upstream {status}",
+    "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
+    "transportError": "Żball fit-trasport",
     "recording": "Qed jirreġistra",
     "paused": "Mwaqqaf temporanjament",
     "pipelineLogsOn": "Ir-reġistri tal-pipeline mixgħulin",
@@ -12288,6 +12790,8 @@
       "increase": "Żid l-intervall"
     },
     "status": {
+      "recoveredAttemptsTitle": "It-talba rkuprat wara {count} tentattivi",
+      "latestOutcomeFailed": "L-aħħar riżultat tat-talba falla",
       "inProgress": "Għaddej",
       "recoveredByRetry": "Irkuprat permezz ta' tentattiv mill-ġdid",
       "goToParent": "Mur fit-talba prinċipali",
@@ -12300,6 +12804,9 @@
     },
     "attempts": "tentattivi",
     "detail": {
+      "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
+      "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
+      "transportError": "Żball fit-trasport",
       "collapse": "Ikkollassa {title}",
       "expand": "Espandi {title}",
       "copyTitle": "Ikkopja {title}",
@@ -14171,6 +14678,14 @@
         "label": "Ordni tal-Pool b'Egress Kondiviż",
         "description": "Għal fornituri li l-kwota tagħhom hija raggruppata skont l-indirizz tal-egress, ikklassifika membru tal-pool li jikkondividi l-indirizz tal-egress osservat ta' membru miċħud riċentement eżatt taħt membri f'saħħithom. Ordni biss, qatt ma jiġi eskluż. Jeħtieġ PROXY_SKIP_RECENTLY_FAILED, li jipproduċi s-sinjal ta' rifjut li jaqra. Mitfi b'mod awtomatiku: l-ordni tal-għażla tkun eżattament ir-rotazzjoni ordinarja."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Ċaħdiet ta' kwoti b'ambitu ta' mudell",
+        "description": "Applika kwota ta opencode 429 biss fuq il-mudell li laqtuha, sabiex l-istess egress tibqa' sservi mudelli ohra, u kklerjaha biss meta dak il-mudell jirnexxi. Konsumaturi li m'għandhom l-ebda mudell (rotazzjoni tal-pool, park u replay, viżibilità tal-amministratur, trigger selettur, sweep tas-saħħa) għadhom jarawha. Bżonnijiet PROXY_SKIP_RECENTLY_FAILED, li jipproduċi r-rifjut. Mitfi b'mod awtomatiku: kwota 429 ta' mudell wieħed iwarrab il-ħruġ għal kull mudell."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy fetch: stretta POST replay",
+        "description": "Għal talba mhux idempotenti (POST, PUT, PATCH, DELETE), ibgħat mill-ġdid wara żball tat-trasport (socket frisk, proxy fallback, native fallback) biss meta l-iżball juri li ma ntbagħat xejn: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH jew timeout tal-konnessjoni. Żball tas-socket wara l-kitba jista 'jfisser li l-upstream aċċetta t-talba, għalhekk resend jista' jiġġenera u jħallasha darbtejn. Mitfi b'mod awtomatiku: korp replayable jiġi resent darba fuq kwalunkwe żball tat-trasport, li jirkupra wkoll socket miġbura mqassam."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logging tal-Attribuzzjoni tar-Rotazzjoni",
         "description": "Ir-rotazzjoni ta' Opencode tirreġistra liema kont serva jew ġie maqbuż (IDs moħbija biss, qatt IDs sħaħ tal-kont) u tgħaqqad l-entrati tal-log tal-proxy mat-talba tagħhom, sabiex l-operatur ikun jista' jiddistingwi bejn kontijiet maqbuża u dawk mhux użati. Mitfi b'mod awtomatiku: l-ebda linji żejda fil-log, l-ebda kolonni żejda miktuba."
@@ -14222,6 +14737,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Għażla mill-Ġdid tal-Pool f'429 ta' OpenCode",
         "description": "Għar-rotazzjoni ta' diversi kontijiet ta' OpenCode, wara 429 minn fornitur egress-bucketed fuq kont mingħajr proxy taħt kuntest ta' ambient pool, itlob membru ieħor mill-connection pool għat-tentattiv li jmiss minflok ma terġa' tipprova l-istess indirizz ta' egress. Tordna, qatt ma teskludi: pool eżawrita żżomm l-imġiba attwali. Mitfi b'mod awtomatiku: kull 429 iddur għall-kont li jmiss eżattament bħal qabel."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Sonda tal-egress tal-livell b'xejn ta' OpenCode",
+        "description": "Għall-eżekutur OpenCode, meta talba bi prokura tiġi mwieġba 403 jew 451 FreeTierError u l-għodda osservat mill-ġdid fallew jew ma applikawx, ibgħat it-talba darba permezz ta' prokura differenti (prokura ta' kont ieħor jew membru ieħor tal-grupp, qatt konnessjoni diretta). Biss meta dik is-sonda twieġeb 200 hija l-ewwel ħruġ mwarrba fil-memorja tar-rifjut tal-prokura u r-rispons tas-sonda moqdija; meta t-tnejn jirrifjutaw, ir-rifjut oriġinali jintbagħat lura u xejn ma jiġi rreġistrat. L-istess test ta' rifjut ikopri IP ta' ħruġ b'marka u forma ta' talba miċħuda, għalhekk is-sonda tgħarrafhom b'evidenza. Mitfi b'mod awtomatiku: ir-rifjut jiġi rritornat mhux mibdul."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint tal-Klijent OpenCode v2",
@@ -14402,6 +14921,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Ieqaf fuq Rifjut tal-Politika tal-Kontenut",
         "description": "Meta mira ta' combo twieġeb b'rifjut eżatt tal-politika tal-kontenut (kodiċi jew tip cyber_policy / content_policy_violation), waqqaf il-combo u rritorna dak ir-rifjut anke meta l-miri li jifdal ikunu mudelli differenti, minflok ma tkompli għall-mira li jmiss. Mitfi b'mod awtomatiku: ir-rifjut qatt ma jberred il-kont u lanqas ma jattiva l-breaker tal-fornitur, u l-combo tkompli għall-mira li jmiss tagħha eżattament bħal qabel."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Tweġibiet: keepalive fuq it-trasport biss",
+        "description": "Ibgħat il-keepalives taż Responses API bħala linja vojta minflok avveniment response.in_progress, għalhekk snapshot sintetiku qatt ma jista 'jissostitwixxi r-rispons reali SDK uffiċjali. Linja vojta ma tibgħat l-ebda avveniment SSE, għalhekk watchdog tal-klijent li reset biss fuq avvenimenti ma jkunx reset matul fażi twila siekta. Mitfi b'mod awtomatiku: it-tajmers jibagħtu l-avveniment response.in_progress spec-valid."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Pruwa mill-Ġdid tal-Cooldown: Aqbeż ir-Rifjuti 403/410",
@@ -14410,270 +14933,6 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Politika tal-baġit għall-użu mingħajr prezz",
         "description": "Kif il-limiti USD ta’ kuljum/ta’ kull ġimgħa għal kull ċavetta jitrattaw użu b’suċċess li l-fornitur/mudell tiegħu m’għandux riga ta’ prezz. fail_closed (predefinit) jimmarka l-perjodu bħala mgħaddija mill-limitu, sabiex spiża mhux magħrufa qatt ma tista’ tgħaddi mill-limitu strett. count_as_zero jikkontabilizza dak l-użu bħala $0 u jkompli jissalvagwardja l-ispejjeż b’prezz. Il-mudelli mingħajr prezz huma elenkati fil-paġna ewlenija tad-dashboard f’kull każ."
-      },
-      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
-        "label": "Reġistra l-IDs tal-Kontijiet",
-        "description": "Inkludi l-prefix tal-kont fil-linji tal-log tal-AUTH (eż. \"Għaddi l-kont ta '<provider>': abc12345...\"). Mitfi b'mod awtomatiku biex l-identifikaturi tal-kontijiet jiġu rrifjutati mill-log ta' proċessi kondiviżi/multi-tenant. Indipendenti minn Debug Mode; il-bidla ta' Debug Mode ma tagħżilx dan."
-      },
-      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
-        "label": "Iddiżattiva l-Login bil-Password b'OIDC",
-        "description": "Meta OIDC ikun attivat, iddiżattiva l-login bil-password sabiex l-utenti jkunu jistgħu jawtentikaw biss permezz ta' OIDC Single Sign-On. Meta jkun iddiżattivat (awtomatiku), kemm il-login bil-password kif ukoll OIDC ikunu disponibbli."
-      },
-      "AUDIO_REMOTE_PROVIDER_NODES": {
-        "label": "Nodi Remoti tal-Provider tal-Awdjo",
-        "description": "Ħalli r-rotot /v1/audio/* jużaw nodi ta' provider kompatibbli ma' OpenAI ospitati barra minn localhost. Mitfi b'mod awtomatiku — ir-routing tal-awdjo lejn host remot ibiddel l-identità tal-egress u għandu jkun deċiżjoni espliċita tal-operatur. In-nodi loopback huma dejjem permessi u mhux affettwati."
-      },
-      "RERANK_REMOTE_PROVIDER_NODES": {
-        "label": "Nodi Remoti tal-Provider ta' Rerank",
-        "description": "Ħalli POST /v1/rerank (u l-pass ta' rerank tal-magna tal-memorja, li jsejħilha fuq loopback) jużaw nodi ta' provider kompatibbli ma' OpenAI ospitati barra minn localhost — apparat LAN jew peer ta' Tailscale li jħaddem TEI, Infinity, vLLM, eċċ. Mitfi b'mod awtomatiku — ir-routing lejn host remot ibiddel l-identità tal-egress u għandu jkun deċiżjoni espliċita tal-operatur. In-nodi loopback huma dejjem permessi u mhux affettwati. In-nodi remoti jridu jgħaddu wkoll mill-politika tal-URL outbound tal-provider."
-      },
-      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
-        "label": "Protezzjoni tal-Egress Kondiviż fir-Rotazzjoni tan-Netwerk",
-        "description": "F'każ ta' eċċezzjoni tan-netwerk (timeout, konnessjoni miċħuda/irrisettjata) għal eżekutur ta' rotazzjoni b'ħafna kontijiet, meta l-kont li jkun qed ifalli ma jkollux proxy dedikat, applika cooldown qasir u aqbeż kontijiet oħra mingħajr proxy għall-bqija tat-talba minflok ma terġa' tipprova kull wieħed. Attivat b'mod awtomatiku (sikur: l-ebda bidla fl-IP tal-egress, inaqqas biss ir-riskju ta' latenza/cooldown fuq kontijiet b'egress kondiviż). Iddiżattiva biex tirrestawra l-propagazzjoni immedjata mal-ewwel throw mingħajr proxy."
-      },
-      "PROXY_SKIP_RECENTLY_FAILED": {
-        "label": "Aqbeż Proxies li Fallew Riċentement",
-        "description": "Il-pools tal-proxy u r-rotazzjoni għal kull kont ta' opencode jieqfu milli jerġgħu jservu proxy li għadu kemm falla (probe tat-TCP miċħud, jew 429 riċevut permezz tiegħu) għal perjodu għal kull proċess li jirdoppja ma' kull ripetizzjoni, sa limitu massimu. L-ebda status ta' proxy ma jinkiteb; b'kull kandidat imwarrab l-għażla tibqa' l-istess. Attivat b'mod awtomatiku: l-ordni tal-għażla tkun eżattament ir-rotazzjoni ordinarja biss b'PROXY_SKIP_RECENTLY_FAILED=false."
-      },
-      "PROXY_POOL_SHARED_EGRESS_ORDER": {
-        "label": "Ordni tal-Pool b'Egress Kondiviż",
-        "description": "Għal fornituri li l-kwota tagħhom hija raggruppata skont l-indirizz tal-egress, ikklassifika membru tal-pool li jikkondividi l-indirizz tal-egress osservat ta' membru miċħud riċentement eżatt taħt membri f'saħħithom. Ordni biss, qatt ma jiġi eskluż. Jeħtieġ PROXY_SKIP_RECENTLY_FAILED, li jipproduċi s-sinjal ta' rifjut li jaqra. Mitfi b'mod awtomatiku: l-ordni tal-għażla tkun eżattament ir-rotazzjoni ordinarja."
-      },
-      "ROTATION_ATTRIBUTION": {
-        "label": "Logging tal-Attribuzzjoni tar-Rotazzjoni",
-        "description": "Ir-rotazzjoni ta' Opencode tirreġistra liema kont serva jew ġie maqbuż (IDs moħbija biss, qatt IDs sħaħ tal-kont) u tgħaqqad l-entrati tal-log tal-proxy mat-talba tagħhom, sabiex l-operatur ikun jista' jiddistingwi bejn kontijiet maqbuża u dawk mhux użati. Mitfi b'mod awtomatiku: l-ebda linji żejda fil-log, l-ebda kolonni żejda miktuba."
-      },
-      "PROXY_POOL_EGRESS_OBSERVATION": {
-        "label": "Osservazzjoni tal-Egress tal-Pool tal-Proxy",
-        "description": "Uri, taħt proxy pool fid-dashboard, kemm IPs tal-egress osservati servew lill-membri tiegħu matul l-aħħar 24 siegħa, kemm konnessjonijiet użawhom u l-ogħla numru li deher wara IP wieħed. Jinqara biss, ikkalkolat mil-log tal-proxy, qatt ma jintuża għar-routing. Mitfi b'mod awtomatiku: l-editur tal-pool ma jinbidilx u r-rotta tal-osservazzjoni tirrispondi null."
-      },
-      "PROXY_OPERATOR_EGRESS_ENABLED": {
-        "label": "Egress tal-Operatur tal-Proxy",
-        "description": "Aċċetta indirizzi osservati bid-data mibgħuta mill-operatur għal kull membru tal-pool u għaqqadhom mal-qari tal-ġurnal għall-wiri u l-ordni tal-pool. Mitfi b'mod awtomatiku: ir-rotta tal-push tirrispondi 404 u l-qari tal-pool jaġixxi eżattament bħal qabel."
-      },
-      "OPENCODE_RESPONSES_STALL_ROTATION": {
-        "label": "Rotazzjoni f'Waqfien ta' Responses ta' OpenCode",
-        "description": "Għall-eżekutur ta' OpenCode, osserva l-ewwel byte tal-body ta' tweġiba fi streaming ta' Responses (tieqa: RESPONSES_FIRST_BYTE_TIMEOUT_MS, default 15000). Stream ta' Responses 2xx li jibqa' sieket lil hinn mit-tieqa jiġi ttrattat bħala wieqaf: il-kont jitqiegħed f'cooldown u t-talba ddur darba għall-kont li jmiss; it-tieni waqfien ifalli minnufih. Mitfi b'mod awtomatiku: streams li jieqfu jżommu l-istennija attwali sat-timeout ta' tħejjija tal-istream."
-      },
-      "OPENCODE_USER_BLOCKED_ROTATION": {
-        "label": "Rotazzjoni ta' user_blocked ta' OpenCode",
-        "description": "Għall-eżekutur ta' OpenCode, meta upstream iwieġeb b'403 jew 451 li jġorr rifjut ta' user_blocked (mhux blokk ġeografiku, mhux ċaħda ta' fingerprint ta' Cloudflare), poġġi l-kont miċħud f'cooldown u aqleb għall-kont li jmiss mhux aktar minn darba għal kull talba; it-tieni rifjut jintbagħat lura kif inhu mingħajr marka ta' suċċess. Mitfi b'mod awtomatiku: ir-routing madwar blokk ta' utent upstream jista' jidher bħala evażjoni u jxerred il-flag mal-flotta tal-kontijiet, għalhekk ir-rifjut jintbagħat lura kif inhu sakemm l-operatur ma jagħżilx li jattivah."
-      },
-      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
-        "label": "Backoff ta' Failover Transitorju ta' OpenCode",
-        "description": "Għar-rotazzjoni ta' diversi kontijiet ta' OpenCode, stenna ftit qabel ma tibgħat lill-kont li jmiss hekk kif żewġ tentattivi konsekuttivi jfallu bi żball transitorju ta' upstream (5xx jew ċaħda 400 vojta). Il-pawża tibda f'1.5s, tirdoppja għal kull falliment konsekuttiv sussegwenti, hija limitata għal 6s għal kull pawża u 10s għal kull talba, tinqabeż meta l-klijent jiskonnettja, u l-body tat-tweġiba falluta jiġi rrilaxxat qabel l-istennija. Mitfi b'mod awtomatiku: il-failover jibqa' immedjat."
-      },
-      "FLUSH_EMPTY_RETRY_ENABLED": {
-        "label": "Riprova ta' Turn Vojt bi Flush",
-        "description": "F'turns ta' streaming tradotti, meta t-turn ta' upstream ma jkun fih l-ebda kontenut utli (tlestija ta' raġunament biss jew żero chunks ta' valur), wettaq tentattivi limitati mill-ġdid permezz tal-passaġġ normali tal-kredenzjali (sa `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) qabel ma jintwera kwalunkwe ħaġa lill-klijent. Mitfi b'mod awtomatiku: turns vojta jżommu l-imġiba attwali (200 vojt jew 502 b'kontenut vojt)."
-      },
-      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
-        "label": "Irkupru ta' Sibling għal Stream Vojt",
-        "description": "Streaming ta' Claude/Codex: wara l-ewwel avveniment taċ-ċiklu tal-ħajja, agħmel sondaġġ qasir (sa 1s / 64 KiB) għal output utli; stream li jintemm mingħajr kontenut isir falliment ta' empty_content li juża t-tentattiv mill-ġdid limitat eżistenti fuq konnessjoni eliġibbli oħra (l-ebda cooldown, l-ebda imblokk tal-mudell), u l-kombinazzjonijiet ta' round-robin jieqfu jippruvaw mill-ġdid malli l-klijent jiskonnettja. Jittratta wkoll refusal, pause_turn u model_context_window_exceeded bħala terminals vojta leġittimi ġewwa s-sondaġġ. Mitfi b'mod awtomatiku: it-tħejjija, l-immaniġġjar ta' kontenut vojt u t-tentattivi mill-ġdid tal-combos jibqgħu eżattament kif kienu qabel."
-      },
-      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
-        "label": "Sonda għall-Output Tardiv tal-Istream",
-        "description": "Sonda tal-output tal-istreaming: wara l-ewwel 64 chunk mgħoddija, kompli ħu kampjun ta' chunk waħda minn kull 16 għall-ewwel output viżibbli, sabiex output li jibda tard xorta jimmarka l-istream bħala li ħareġ output. 5xx waħdu wara dak il-punt imbagħad jibqa' limitat għat-talba minflok ma jirreġistra lockout tal-mudell biss, u firstOutputMs jimtela b'mod retroattiv għall-ewwel chunk tal-output tal-intervall attwali tat-teħid tal-kampjuni. Mitfi b'mod awtomatiku: l-ewwel 64 chunk mgħoddija biss jiġu vverifikati mis-sonda, eżattament bħal qabel."
-      },
-      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
-        "label": "Waqfien Bikri f'429 b'Limitu ta' Rata f'OpenCode",
-        "description": "Għar-rotazzjoni ta' diversi kontijiet ta' OpenCode, waqqaf il-mewġa ta' kontijiet fl-ewwel 429 ikklassifikata bħala limitu ta' rata reali (header Retry-After li jista' jiġi analizzat, jew body li jsemmi limitu ta' rata/użu) u rritorna dik il-429 upstream mingħajr tibdil (status, body, headers Retry-After u ta' kwota), minflok ma tipprova kull kont li jkun fadal. Il-429s mhux ikklassifikati jkomplu jduru. Mitfi b'mod awtomatiku: il-livell bla ħlas huwa limitat għal kull IP ta' egress (#9611), għalhekk kull 429 iddur għall-kont li jmiss, u mewġa eżawrita tirritorna l-aħħar 429 upstream."
-      },
-      "OPENCODE_PARK_AND_RESUME": {
-        "label": "Ipparkjar u Tkomplija f'429 ta' OpenCode",
-        "description": "Għar-rotazzjoni ta' diversi kontijiet ta' OpenCode, ipparkja t-talba wara 429s temporanji ripetuti (jew indikatur ġdid ta' tensjoni fil-pool) b'heartbeat, imbagħad erġa' pprova fergħa waħda limitata ta' sa 3 kontijiet sekwenzjali minflok ma tqassam fuq il-flotta kollha. Mitfi b'mod awtomatiku: kull 429 iddur għall-kont li jmiss eżattament bħal qabel."
-      },
-      "STREAM_READINESS_STALL_RETRY": {
-        "label": "Pruwa mill-Ġdid f'Waqfien tar-Readiness tal-Istream",
-        "description": "Għal talbiet ta' chat bi streaming, meta l-ewwel body upstream jistagna qabel ma jipproduċi avveniment li jista' jintuża, ibgħat it-tieni tentattiv limitat permezz tal-istess mogħdija ta' routing bl-istess baġit ta' readiness u mingħajr l-ebda penali fuq il-kont. Mitfi b'mod awtomatiku: l-ewwel body li jistagna jfalli t-talba mingħajr prova mill-ġdid."
-      },
-      "OPENCODE_POOL_RESELECT": {
-        "label": "Għażla mill-Ġdid tal-Pool f'429 ta' OpenCode",
-        "description": "Għar-rotazzjoni ta' diversi kontijiet ta' OpenCode, wara 429 minn fornitur egress-bucketed fuq kont mingħajr proxy taħt kuntest ta' ambient pool, itlob membru ieħor mill-connection pool għat-tentattiv li jmiss minflok ma terġa' tipprova l-istess indirizz ta' egress. Tordna, qatt ma teskludi: pool eżawrita żżomm l-imġiba attwali. Mitfi b'mod awtomatiku: kull 429 iddur għall-kont li jmiss eżattament bħal qabel."
-      },
-      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
-        "label": "Fingerprint tal-Klijent OpenCode v2",
-        "description": "Ibgħat il-fingerprint tal-klijent CLI ta' OpenCode v2 fuq talbiet ta' OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli u x-opencode-client cli, User-Agent tal-klijent miżmum biss meta jkun klijent OpenCode 2.x, u fuq talbiet gated free-tier l-ebda x-opencode-request, is-sessjoni riflessa fuq x-opencode-session-id/x-session-affinity/x-session-id, l-iskemi v2 CLI read/shell fuq placeholder tools injettati u tool_choice ta' \"none\" imwaqqgħa. Mitfi b'mod awtomatiku: kull talba ta' OpenCode żżomm l-identità, l-intestaturi u l-korp attwali byte b'byte."
-      },
-      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
-        "label": "Lockout tal-Egress-IP ta' OpenCode Zen",
-        "description": "Żid OpenCode Zen (opencode-zen) mal-familja awtomatika tal-lockout tal-egress-IP, sabiex 429 fuq konnessjoni Zen waħda tkessaħ ukoll kull konnessjoni Zen oħra li taqsam l-egress IP tagħha. Mitfi b'mod awtomatiku: Zen huwa keyed u kull konnessjoni tiksaħ għaliha nfisha, eżattament bħal qabel. Valur espliċitu ta' OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS dejjem jieħu preċedenza fuq din il-flag."
-      },
-      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "Regoli tal-Iżbalji Full-Text ta' OpenCode",
-        "description": "Ħalli r-regoli tal-iżbalji integrati ta' OpenCode (opencode-zen, opencode-go, opencode-cli) jaqblu mat-test sħiħ tal-iżball upstream, sabiex markaturi fil-korp bħal organization_quota_exceeded jew \"monthly usage limit reached\" jikklassifikaw 429 bħala kwota eżawrita b'lock b'ambitu ta' konnessjoni. Mitfi b'mod awtomatiku: dawk ir-regoli jaraw biss il-kodiċi tal-iżball strutturat u tali 429 jibqa' limitu ta' rata qasir, eżattament bħal qabel."
-      },
-      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "Regoli tal-Iżbalji Full-Text ta' Cloudflare Workers AI",
-        "description": "Ħalli r-regola tal-iżbalji integrata ta' Cloudflare Workers AI taqbel mat-test sħiħ tal-iżball upstream, sabiex il-korp 429 \"daily free allocation\" jiġi kklassifikat bħala kwota eżawrita minflok limitu ta' rata qasir. Mitfi b'mod awtomatiku: ir-regola tara biss il-kodiċi tal-iżball strutturat, eżattament bħal qabel."
-      },
-      "CAPABILITY_FILTER_ENABLED": {
-        "label": "Filtru tal-Kapaċitajiet",
-        "description": "Irrifjuta t-talbiet qabel ma jintbagħtu meta l-mudell fil-mira jonqsu l-kapaċitajiet meħtieġa (vision, tools, structured output, context window). Jipproteġi talbiet diretti ta' fornitur wieħed li jevitaw il-filtru tal-kompatibilità tal-combo-layer."
-      },
-      "USAGE_LIMIT_IGNORE_UNPRICED": {
-        "label": "Injora l-Użu Mingħajr Prezz fil-Kwoti f'USD",
-        "description": "Għodd l-użu ta' mudelli li m'għandhomx prezz bħala $0 fil-kwoti tal-użu f'USD għal kull ċavetta minflok ma tqis li l-kwota nqabżet. Mitfi b'mod awtomatiku: mudell mingħajr prezz jew routing alias jista' jaħbi nfiq reali, għalhekk il-kwota tfalli magħluqa."
-      },
-      "RADAR_ENABLED": {
-        "label": "Radar",
-        "description": "Ippermetti l-modulu OmniRoute Radar (skrins tal-feed tal-katalgu u sinkronizzazzjoni). Mitfi b'mod awtomatiku; l-attivazzjoni tiftaħ biss l-UI — is-sinkronizzazzjoni tad-dejta tibqa' opt-in separata."
-      },
-      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
-        "label": "Gate tal-Kapaċità tal-Endpoint tal-Mudell",
-        "description": "Infurza tags fdati tal-endpoint tal-mudell (iddikjarati mill-katalgu tal-fornitur, dedotti minn id ta' mudell speċjalizzat, jew stabbiliti mill-operatur): irrifjuta talba mibgħuta lil endpoint li l-mudell ma jservix b'HTTP 400 qabel id-dispatch fuq /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations u /v1/audio/*; aħbi mudelli li l-endpoints immarkati tagħhom m'għandhomx adapter ta' OmniRoute minn /v1/models; u wieġeb it-test tal-mudell fid-dashboard b'422 għal mudelli bħal dawn. Mitfi b'mod awtomatiku: it-tags tal-endpoint jibqgħu informattivi u t-talbiet jintbagħtu eżattament bħal qabel."
-      },
-      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
-        "label": "Handoff Universali tal-Kuntest",
-        "description": "Iġġenera u injetta sommarji tal-konversazzjoni meta l-combo routing jaqleb il-mudelli. Iddiżattiva biex tittratta l-bdil tal-mudelli b'mod indipendenti u tevita talbiet ta' handoff fl-isfond għall-combos eżistenti u futuri kollha."
-      },
-      "REASONING_REPLAY_ENABLED": {
-        "label": "Replay tar-Raġunament",
-        "description": "Aħżen fil-cache u rriproduċi r-raġunament tal-mudell f'konversazzjonijiet multi-turn. Iddiżattiva biex twaqqaf il-ħażna u l-injezzjoni mill-ġdid tar-raġunament."
-      },
-      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
-        "label": "Trasport tal-App-Server ta' Codex",
-        "description": "Ippermetti lil Codex juża t-trasport lokali tal-app-server WebSocket JSON-RPC (codexTransport=app-server). Meta jkun mitfi, konnessjonijiet li għażlu l-app-server jaqilbu lura għat-trasporti l-oħra ta' Codex."
-      },
-      "EXPOSE_CC_DISCOVERY_ALIASES": {
-        "label": "Aliases tad-Diskoperta ta' Claude Code",
-        "description": "Xjajr jiddikjaraw IDs ta mirror ta claude/'<provider>'/'<model>' fuq /v1/models biex l-elucazzjoni tal-mudelli tal-gateway ta Claude Code tistieden mudelli mhux ta Claude. Aħtis: jiddeċupla d-dokumenti tal-katallu għal klijenti kollha meta mfakkar globalment."
-      },
-      "NO_THINKING_ALIAS_ENABLED": {
-        "label": "Aliases ta' Mudelli Bla-Fekir",
-        "description": "Intiċ ġenerali għal aliases ta gateway ta no-think/'<provider>'/'<model>'. Mixgħul (awtomatiku): /v1/models xjajr jiddikjaraw varjant bla-fekir għal kull mudell Claude li jista jiġi żviluppat bħala raċoċkjan, u ID ta no-think/ mibgħut f'reċiż jirrilu lura għall-mudell veru b'reċoċjoni suppressed. Mitfi: varjanti mhumiex muddi, u ID ta' no-think/ jittrattat bħala kwalunkwe ID ta' mudell mhux magħruf ieħor. L-intiċ ta' ModelSpec.noThinkingAlias għal kull mudell japplika għall-intiċ/intiċ minn dan filwaqt li dan mixgħul."
-      },
-      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
-        "label": "Iddiżattiva l-Varjanti tal-Livell tal-Ħsieb",
-        "description": "Iddiżattiva l-ġenerazzjoni ta' varjanti tal-livell tal-ħsieb (eż. -low, -medium, -high) fil-katalgu ta' /v1/models."
-      },
-      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
-        "label": "Korsiji Virtwali Adattivi tal-Ammissjoni",
-        "description": "Ippermetti korsiji virtwali adattivi tal-ammissjoni għal kull tenant għad-dispaċċ tal-fornitur (#9654): żieda f'daqqa fit-traffiku ta' tenant wieħed ma tibqax tikkawża żbalji 503 lil ieħor. Il-varjabbli tal-ambjent OMNIROUTE_CHAT_VIRTUAL_LANES għandha preċedenza fuq din il-bidla fid-dashboard; il-bidliet jidħlu fis-seħħ meta jerġa' jinbeda s-server."
-      },
-      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
-        "label": "Mirrors ta' Gateway Funzjonali",
-        "description": "Xjajr jiddikjaraw IDs ta mirror ta '<gateway-alias>'/'<model>' fuq /v1/models għal mudelli li l-propjetarju oriġinali tagħhom mgħandu ebda kredenzjali attiv, iżda gateway ta passthrough b'kredenzjali attiv irjeda għalihom. Aħtis: jiżdiedu d-dokumenti tal-katallu għal klijenti kollha meta mfakkar globalment."
-      },
-      "NEWAPI_AGGREGATOR_BALANCE": {
-        "label": "Bilanċ tal-Aggregatur New-API",
-        "description": "Attiva d-detezzjoni tal-bilanċ għal nodi kompatibbli mal-aggregaturi New-API / One-API / Sub2API. Meta tkun attivata, nodi kompatibbli bil-flag tal-aggregatur issettjat jirrappurtaw il-bilanċ tagħhom fid-dashboard u fir-routing tal-preflight tal-kwota."
-      },
-      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
-        "label": "Aħbi l-Konnessjonijiet tat-Tiftix Imħassra",
-        "description": "L-istatistika tat-tiftix u t-tiftixiet riċenti jgħoddu biss fornituri li għad għandhom konnessjoni attiva (fornituri keyless bħal duckduckgo-free dejjem jgħoddu). Meta mitfija, tinżamm kull ringiela ta' tiftix miżmuma b'id tal-fornitur."
-      },
-      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
-        "label": "Badge Free Stretta",
-        "description": "Paġni tal-fornitur fid-dashboard: uri l-badge Free biss fuq sinjali li l-fornitur jirrispetta — tinjora l-ewristika tad-display-name, oqsma free mhux boolean u s-suffissi :free fuq fornituri rreġistrati mingħajr tier b'xejn dokumentat. Meta mitfija, tinżamm ir-regola storika tal-badge."
-      },
-      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
-        "label": "Auto Combo: Pool Vojt Iwieġeb 503",
-        "description": "Meta l-pool ta' kandidati ta' auto combo jkun diġà vojt qabel ma jaħdem il-pre-filter ta' tool-calling (kull mira tinqabeż minħabba cooldowns, lockouts jew eżawriment), wieġeb b'503 no_eligible_targets minflok il-400 legat \"No target supports tool calling\" capability_mismatch. Mitfi b'mod awtomatiku: il-pool vojt iżomm il-400 legat."
-      },
-      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
-        "label": "Soft Lockout Ambiguu ta' Mistral 401",
-        "description": "Mistral 401 li ma jfisser xejn ('{\"detail\":\"Unauthorized\"}', mingħajr sinjal tal-autentikazzjoni espiku) huwa identiku fil-bajta għal-key revokata u għal-koŋsuma ta' kwota. Meta mfakkar, tali 401 jeċċenta l-konnessioni minflok ma jseħħhux bħala eskord, sa tliet drabi f'ġieħu; l-ieħor għadha jseħħhuh bħala eskord, u ftak key revokata konvergġa. Mitfi b'mod awtomatiku: kull Mistral 401 li ma jfisser xejn jeċċenta l-konnessione bħala eskord, bħal qabel."
-      },
-      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
-        "label": "Tindif Awtomatiku ta' Batch u Fajls",
-        "description": "Ħalli l-proċess tat-tindif awtomatiku jħassar xogħlijiet terminali (completed/failed/cancelled/expired) tal-Batch API li huma eqdem minn OMNIROUTE_BATCH_RETENTION_DAYS, flimkien maċ-checkpoints tagħhom għal kull linja, u jneħħi l-kontenut BLOB ta' fajls imtella' li qabżu l-expires_at tagħhom. Mitfija b'mod awtomatiku: kull installazzjoni eżistenti żżomm din id-dejta eżattament bħal qabel sakemm operatur jagħżel li jattivaha. Ir-rotta DELETE /api/v1/batches/delete-completed mibdija mill-operatur mhijiex affettwata bl-ebda mod -- hija kuntratt tal-API pubbliku separat u inkondizzjonat."
-      },
-      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
-        "label": "Lease tal-Kont ta' Antigravity",
-        "description": "Irriżerva l-kont ta' Antigravity magħżul għaċ-ċiklu tal-ħajja tal-istreaming tat-talba li għażlitu, sabiex prova mill-ġdid konkurrenti jew it-trasferiment tal-kredenzjali ma jkunux jistgħu jerġgħu jagħżlu kont li diġà huwa impenjat fi stream attiv. Ir-riżervazzjoni hija limitata għal (connection, callable upstream model), sabiex kont wieħed xorta jkun jista' jservi żewġ mudelli differenti f'daqqa. Meta kull kont eliġibbli jkun diġà mikri għal dak il-mudell, it-talba tirritorna 503 POOL_BUSY strutturat b'Retry-After limitat minflok ma żżid tagħbija ma' kont okkupat. Mitfija b'mod awtomatiku: l-għażla tal-kont tibqa' eżattament bħal qabel, u ma tittieħed l-ebda riżervazzjoni."
-      },
-      "COMBO_AUTO_PRUNE_STALE_STEPS": {
-        "label": "Tneħħija Awtomatika ta' Passi Combo Mhux Aġġornati",
-        "description": "Wara sinkronizzazzjoni b'suċċess tal-mudell ma' katalgu dirett awtorevoli, neħħi l-passi tal-combo marbuta ma' mudelli li l-katalgu m'għadux jelenka, b'entrata waħda ta' verifika għal kull pass imneħħi. Qatt ma tneħħi waqt sinkronizzazzjoni falluta, degradata jew b'xejn biss (free-only), u qatt ma tbattal combo għalkollox. Mitfija b'mod awtomatiku: passi skaduti jiġu mmarkati biss."
-      },
-      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
-        "label": "Summarized Thinking ta' Claude OAuth",
-        "description": "Ħalli talba ta' Claude OAuth li titlob thinking li jinqara (thinking.display \"summarized\") twaqqa' l-beta redact-thinking-2026-02-12 ta' Anthropic, li mod ieħor iġġiegħel lil Anthropic tirritorna blokki ta' thinking vojta u b'firma biss. Mitfija b'mod awtomatiku: dik il-beta hija parti mill-wire fingerprint ta' Claude Code OAuth, għalhekk it-talbiet ta' OAuth iħalluha kif inhi. Talbiet ta' Claude b'ċavetta API diġà jirrispettaw summarized thinking mingħajr din il-flag; OMNIROUTE_REDACT_THINKING=false japplika wkoll għal OAuth biss meta din il-flag tkun mixgħula."
-      },
-      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
-        "label": "Tiswija ta' Tool Call ta' Kiro",
-        "description": "Meta rispons ta' streaming ta' Kiro jemetti wrapper ta' tool_call malformat (nieqes minn input.name jew input.arguments) qabel kwalunkwe output viżibbli, issoprimih u erġa' ibgħat it-talba darba bi struzzjoni korrettiva minflok ma ttemm id-dawra b'invalid_kiro_tool_call. L-attentat mill-ġdid jiswa talba żejda waħda ta' Kiro; it-tieni falliment itemm id-dawra b'kiro_tool_call_repair_retry_failed. Attivat b'mod awtomatiku. Issettja għal false biex id-dawra tfalli fl-ewwel wrapper malformat."
-      },
-      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
-        "label": "Livelli ta' Sforz ta' models.dev",
-        "description": "Uża l-livelli ta' sforz ta' raġunament li jippubblika models.dev (imnaqqsa għall-vokabolarju ta' sforz magħruf) meta la override tal-operatur u lanqas ir-reġistru tal-fornitur ma jiddikjara xejn, u ttratta lista ta' livelli vojta ddikjarata bħala \"l-ebda livell\" f'/v1/models effort_tiers u f'intersezzjonijiet ta' livelli combo. Diżattivat b'mod awtomatiku: effort_tiers u supportedThinkingEfforts solvuti jibqgħu eżattament kif kienu qabel."
-      },
-      "LMARENA_SYNTHESIZED_CX_ENABLED": {
-        "label": "Telemetrija cx Sintetizzata ta' Arena",
-        "description": "Ehmeż blob programmatiku sintetizzat ta' interazzjoni tal-klijent cx (il-valur li arena.ai stess jibgħat għal paġna mingħajr l-ebda interazzjoni rreġistrata) ma' kull talba create-evaluation ta' Arena (lmarena) li m'għandhiex providerSpecificData.cx fornut mill-operatur. Diżattivat b'mod awtomatiku: il-qasam cx huwa sinjal kontra l-awtomazzjoni ta' Arena, għalhekk OmniRoute jibgħat biss valur li l-operatur qabad minn sessjoni reali tal-brawżer (providerSpecificData.cx) u inkella ma jibgħat l-ebda cx. Benefiċċju upstream mhux ippruvat; attiva biss jekk Arena tibda tirrifjuta talbiet mingħajr cx."
-      },
-      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
-        "label": "Kompattazzjoni Reattiva ta' Codex Nattiv",
-        "description": "Ħalli l-passi ta' kompattazzjoni tal-kuntest reattivi (threshold) u tal-aħħar riżorsa jerġgħu jiktbu wkoll l-istorji passthrough nattivi ta' Codex (POST /v1/responses lill-fornitur codex) meta jaqbżu l-baġit tal-kuntest, bl-użu tal-adapter Responses input[]. Diżattivat b'mod awtomatiku: l-istorji nattivi ta' Codex huma proprjetà tal-klijent Codex u qatt ma jinkitbu mill-ġdid mill-kompattazzjoni; talbiet ta' daqs eċċessiv ikomplu jfallu l-kontroll tal-baġit tal-kuntest eżattament bħal qabel. Jirrikjedi li l-kompressjoni globali tkun attivata u li l-mudell ma jkunx eskluż."
-      },
-      "QUOTA_WINDOW_BOUNDED_PARK": {
-        "label": "Tieqa tal-Kwota: Irrispetta Bounded Park",
-        "description": "Ħalli l-politika tal-kwota għal kull tieqa (limiti ta' sessjoni/kull ġimgħa użati mill-għażla tal-kont) tirrispetta l-bounded exhaustion park: ladarba l-iskadenza limitata tal-park tkun għaddiet, jew l-osservazzjoni tal-kwota fil-cache tkun eqdem mil-limitu tal-park, it-tieqa tieqaf teskludi l-kont sakemm tinġieb kwota ġdida. Diżattivat b'mod awtomatiku: tieqa fil-cache tibqa' timblokka fuq l-aħħar persentaġġ irrapportat tagħha sal-ħin ta' reset tagħha stess."
-      },
-      "IMAGE_GENERATION_LONG_JOBS": {
-        "label": "Ġenerazzjoni ta' Immaġnijiet: Xogħlijiet Twal",
-        "description": "Għall-ġenerazzjoni ta' immaġnijiet kompatibbli ma' OpenAI: uża t-timeout tal-konnessjoni (providerSpecificData.timeoutMs), inkella t-timeout ċentrali upstream fetch (FETCH_TIMEOUT_MS, imbagħad REQUEST_TIMEOUT_MS, awtomatikament 600 s) minflok il-baġit fiss ta' 120 s għall-immaġnijiet; temm b'499 talba li l-caller ikkanċella; u ħalli l-Playground jirċievi xogħlijiet twal ta' immaġnijiet bħala stream ta' SSE b'keepalive heartbeats. Mitfi b'mod awtomatiku: japplika l-baġit fiss u l-kanċellazzjoni mill-caller ma tiġix ippropagata. L-iskadenza li tkopri l-qari tal-body tar-rispons tkun dejjem attiva."
-      },
-      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
-        "label": "Irfinar tal-Mirrors tal-Katalgu",
-        "description": "Irrifina l-mirrors ta' skoperta ta' claude/ u functional-gateway fuq /v1/models. Mitfi b'mod awtomatiku: iż-żewġ passes tal-mirror jaġixxu eżattament bħal qabel. Mixgħul: il-mirrors ta' skoperta ta' claude/ ikopru wkoll il-varjanti elenkati ta' reasoning-effort (-low/-medium/-high/-xhigh), jaqbżu IDs inkorporati ta' auto/* li l-mogħdija tat-talba ma tistax timmaterjalizza u jaqbżu alias diġà elenkat; il-mirrors ta' functional-gateway jaqbżu combos u IDs sintetizzati minn OmniRoute (claude/, no-think/), jieħdu s-sid minn owned_by, qatt ma jużaw lis-sid bħala l-gateway tiegħu stess, jaqbżu gateways diżattivati f'blockedProviders u mudelli barra mill-katalgu live awtorevoli ta' gateway."
-      },
-      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
-        "label": "Saħħa tal-Proxy: Rifjut Jirrisettja s-Sensiela ta' Fallimenti",
-        "description": "Fl-isweep tas-saħħa tal-proxy, ħalli probe li l-mira rrifjutat (401/403/429: il-proxy għadda t-talba, id-destinazzjoni rrifjutat dan l-egress IP) tirrisettja s-sensiela ta' fallimenti konsekuttivi tal-proxy, bħal probe servuta. Mitfi b'mod awtomatiku: rifjut jibqa' newtrali u jżomm is-sensiela (#10654). 5xx jibqa' inkonklussiv fi kwalunkwe każ, u rifjut qatt ma jneħħi, jiddiżattiva jew jerġa' jattiva proxy."
-      },
-      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
-        "label": "Immaġnijiet tal-Abbonament ta' Grok",
-        "description": "Irreġistra r-rotot tal-immaġnijiet ta' xai-oauth (xao) u grok-cli u mmappja l-kwalità OpenAI high/hd għal xAI medium. Mitfi b'mod awtomatiku: il-mogħdija tal-immaġnijiet ta' xAI bl-API-key tibqa' fuq it-talba eżistenti kompatibbli ma' OpenAI u r-rotot tal-abbonament ma jiġux irreġistrati."
-      },
-      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
-        "label": "Skoperta Live tal-Mudelli ta' xAI OAuth",
-        "description": "Ġib il-katalgu live tal-mudelli ta' xAI għal konnessjonijiet xai-oauth minn https://api.x.ai/v1/models billi tuża l-bearer token ta' OAuth, minflok is-seed statiku ffriżat. Mixgħul b'mod awtomatiku. Issettja l-flag għal false biex tkompli sservi s-seed statiku. Fallimenti ta' HTTP jaqgħu lura fuq is-seed fir-rotta ta' skoperta; il-getter tal-flag innifsu ma joħroġx HTTP."
-      },
-      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
-        "label": "Dawriet tas-Sistema f'Nofs il-Konversazzjoni Kompatibbli ma' Anthropic",
-        "description": "Fuq relays sempliċi anthropic-compatible-* (claude → claude passthrough), żomm id-dawriet ta' role:system f'nofs il-konversazzjoni ġewwa messages[] minflok ma tgħollihom fil-parametru system tal-ogħla livell, sabiex il-prefiss tal-prompt fil-cache jibqa' stabbli bejn id-dawriet. Japplika biss meta l-klijent stess ikun bagħat l-anthropic-beta mid-conversation-system-2026-04-07 (mgħoddi upstream kif inhu). Mitfi b'mod awtomatiku: kull dawra tas-sistema tiġi mgħollija eżattament bħal qabel, minħabba li relays li ma jappoġġjawx il-beta jirrifjutaw messaġġi ta' role:system b'400."
-      },
-      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
-        "label": "Kontroll tas-Saħħa tad-DB: Iddeferixxi l-Iskanjar tal-Istartjar",
-        "description": "Ħaddem il-kontroll tal-integrità/saħħa tad-DB tal-istartjar wara li s-server jibda jaċċetta t-talbiet (permezz ta' setImmediate) minflok ma jimblokka l-istartjar sakemm jitlesta. Mitfi b'mod awtomatiku: l-istartjar jimblokka fuq il-kontroll eżattament bħal qabel #13717, sabiex database korrotta xorta tinqabad qabel ma tiġi moqdija l-ewwel talba. Mixgħul: l-istartjar jirritorna immedjatament u l-kontroll (issa limitat/bil-paġni u, għal DB reali bbażata fuq fajl, iżolat fi proċess wild li jista' jiġi kkanċellat) jaħdem eżatt wara."
-      },
-      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
-        "label": "Routing tal-Katalgu Pubblikat ta' OpenCode",
-        "description": "Ħalli l-mudelli OpenCode Zen u OpenCode Go mingħajr endpoint espliċitu ta' reġistru jieħdu s-superfiċje tat-talba tagħhom (Responses għal @ai-sdk/openai, Messages għal @ai-sdk/anthropic) mill-katalgu ppubblikat models.opencode.ai, moqri fl-isfond kull 6 sigħat. Mitfi b'mod awtomatiku: l-endpoint jiġi mill-ewristika tar-reġistru eżattament bħal qabel u l-katalgu qatt ma jinġabar."
-      },
-      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
-        "label": "Talbiet Auto: Piżijiet tal-Kapaċitajiet Riżolti",
-        "description": "Ħalli t-talbiet auto/* (resolveModelOrError u l-wrapper tal-auto-routing) jibnu l-grupp ta' kandidati b'kapaċitajiet tal-mudell riżolti (vision, reasoning, thinking) u punteġġi ta' kwalità osservati, moqrija f'passaġġ wieħed f'daqqa bħall-katalgu /v1/models. Mitfi b'mod awtomatiku: il-piżijiet tas-snapshot waqt it-talba jibqgħu eżattament bħal qabel (il-kapaċitajiet jiġu riżolti skont il-bżonn u ma jikkontribwixxux għall-piżijiet). Mixgħul: dawk is-sinjali jikkontribwixxu għall-piżijiet tas-snapshot, u għalhekk il-piżijiet tal-kandidati, u konsegwentement l-għażla, jistgħu jinbidlu."
-      },
-      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
-        "label": "Auto-Combo: Għodfa tal-Moviment bla Ċwievet",
-        "description": "Iżomm l-provvituri bla ċwievet (no-auth) li jridu browser lokali (browserBacked) jew CLI installat lokalment (isLocalCli) barra l-pużil tal-kandidati auto/*, biex membru mwaqqaf ma jista'x joqgħod ir-rikwest auto sakemm ma jmissx il-ħin tal-ġbir għall-ogħla (per-target timeout) (#17036). Mitfi b'mod awtomatiku: kull provvitur bla awtentikazzjoni b'ċjamar ta' għodod emulati jibqa fil-pużil eżatt kif qabel. Cjamer diretta '<alias>'/'<model>' taħdem fkull każ."
-      },
-      "CODEBUDDY_CN_INLINE_REASONING": {
-        "label": "CodeBuddy CN: Ri-Plaja ta' Raċġunament inline",
-        "description": "Għal mudelli ta' raċġunament ta codebuddy-cn (fammijiet DeepSeek-V4 / Kimi-K2 li jridu ri-plaja ta raċġunament), inżewgħi kull ri-plaja ta reasoning_content tal-assistent bħala blokk viżibbli '<thought>' fil-bidu tal-kontenut tal-messaġġ, biex jibqa għal gateway li jitlaq il-qasam reasoning_content (#13632). Mitfi b'mod awtomatiku: ir-rikwesti ta codebuddy-cn jintbagħtu bla bidla; il-qasam reasoning_content innifsu dejjem jinżamm."
-      },
-      "PROVIDER_SAFETY_STOPS_TERMINAL": {
-        "label": "Waqfiet tas-Sigurtà tal-Fornitur: Terminali",
-        "description": "Żomm waqfa espliċita tas-sigurtà tal-fornitur (misalignment_policy_violation, content_policy_violation, jew ir-rifjut legat eżatt 'blocked by our safety systems' bit-tikketta provider_safety_rejection) bħala rifjut terminali bl-ambitu tat-talba: il-kodiċi tiegħu jiġi kkonservat permezz ta' żbalji ta' HTTP, Responses, WebSocket u completed-stream, u combo tieqaf miegħu minflok ma terġa' tipprova miri oħra, filwaqt li tikkanċella siblings ammessi (#17049). Mitfi b'mod awtomatiku: dawn l-iżbalji jżommu l-immaniġġjar eżistenti tagħhom u r-routing tal-combo jibqa' ma jinbidilx."
-      },
-      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
-        "label": "Saħħa tal-Kredenzjali: Ittestja mill-Ġdid Konnessjonijiet Diżattivati Awtomatikament",
-        "description": "Ħalli l-isweep tas-saħħa tal-kredenzjali jittestja mill-ġdid konnessjonijiet li l-gateway iddiżattiva waħdu (immarkati autoDisabledAt; l-aktar darba kull 6 sigħat kull waħda u 5 għal kull sweep) u jerġa' jattiva konnessjoni meta t-test mill-ġdid tagħha jgħaddi (#16190). Mitfi b'mod awtomatiku: konnessjonijiet mitfija jibqgħu mitfija sakemm operatur jerġa' jattivahom jew jerġa' jittestjahom, eżattament bħal qabel. Konnessjonijiet diżattivati minn operatur u konnessjonijiet mitfija wara projbizzjoni permanenti qatt ma jerġgħu jiġu ttestjati."
-      },
-      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
-        "label": "Gate tal-Kredenzjali: Dijanjostika tal-Awtentikazzjoni Biss",
-        "description": "Istrinġi l-gate tal-kredenzjali tal-combo sabiex sonda tal-kredenzjali falluta fil-cache tibblokkja konnessjoni biss meta d-dijanjostika tagħha tipprova kredenzjali ħżiena (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Fallimenti mhux konklużivi (timeouts, rate limits, qtugħ fis-servizz, sondi mhux appoġġjati u żbalji ta' scheduler bla tip) imbagħad jiġu ttrattati bħala mhux magħrufa u l-konnessjoni tkompli tirċievi traffiku. Mitfi b'mod awtomatiku: kwalunkwe żball ta' sonda fil-cache jibblokkja l-konnessjoni għat-TTL tal-cache (5 minuti)."
-      },
-      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
-        "label": "Combo: Ieqaf fuq Rifjut tal-Politika tal-Kontenut",
-        "description": "Meta mira ta' combo twieġeb b'rifjut eżatt tal-politika tal-kontenut (kodiċi jew tip cyber_policy / content_policy_violation), waqqaf il-combo u rritorna dak ir-rifjut anke meta l-miri li jifdal ikunu mudelli differenti, minflok ma tkompli għall-mira li jmiss. Mitfi b'mod awtomatiku: ir-rifjut qatt ma jberred il-kont u lanqas ma jattiva l-breaker tal-fornitur, u l-combo tkompli għall-mira li jmiss tagħha eżattament bħal qabel."
-      },
-      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
-        "label": "Pruwa mill-Ġdid tal-Cooldown: Aqbeż ir-Rifjuti 403/410",
-        "description": "Meta kull kont ikun f'cooldown u l-cooldown li jintemm l-ewwel kien ikkawżat minn 403 (aċċess irrifjutat) jew 410 (m'għadux jeżisti), irritorna dak ir-rifjut minnufih minflok ma tistenna li jintemm il-cooldown u terġa' tibgħat it-talba; 403 ta' kwota b'ambitu ta' konnessjoni ta' agentrouter li qed tiġġedded imbagħad jiġi ppersistit b'errorCode 429 sabiex jibqa' jista' jerġa' jiġi ppruvat. Iddiżattivat b'mod awtomatiku: 401 biss jaqbeż l-istennija, u kull rifjut jiġi ppersistit bl-istatus li jkun wasal bih."
       }
     }
   },
@@ -14772,6 +15031,8 @@
     "usdUsageQuotaDescription": "Jimblokka din iċ-ċavetta bi żball API 400 wara li l-infiq lokali tagħha f'USD jilħaq il-kwota kkonfigurata ta' kuljum jew ta' kull ġimgħa.",
     "dailyQuotaUsd": "Kwota ta' kuljum (USD)",
     "weeklyQuotaUsd": "Kwota ta' kull ġimgħa (USD)",
+    "fiveHourQuotaUsd": "Kwota ta' 5 sigħat (USD)",
+    "fiveHourQuotaHint": "Tieqa li timxi: l-infiq ta' kull talba jgħodd għal 5 sigħat, imbagħad jinħeles.",
     "quotaWindowDescription": "Il-kwota ta' kull ġimgħa ssegwi r-reset ta' kull ġimgħa ta' Claude miżmum fil-cache meta dan ikun disponibbli; inkella tuża perjodu mobbli ta' 7 ijiem. Il-kwota ta' kuljum tuża l-jum kalendarju ta' Fortaleza.",
     "apiKeyUsdQuota": "Kwota f'USD taċ-ċavetta API",
     "apiKeyUsdQuotaDescription": "Meta tkun attivata, @@om-usage jirritorna l-kwota ta' kuljum, il-kwota ta' kull ġimgħa, l-infiq ta' kuljum u l-infiq ta' kull ġimgħa f'USD. Il-kwota ta' kull ġimgħa ssegwi r-reset ta' Claude miżmum fil-cache meta dan ikun disponibbli.",
@@ -15375,6 +15636,63 @@
       "saved": "Ir-regoli tal-cooldown ġew salvati",
       "saveFailed": "Ma setgħux jiġu salvati r-regoli tal-cooldown"
     },
+    "errorRules": {
+      "title": "Regoli tal-cooldown għall-iżbalji",
+      "subtitle": "Agħraf l-iżbalji tal-fornitur skont l-istatus HTTP, it-test tal-iżball jew it-tnejn, u agħżel x'għandu jitwaqqaf u għal kemm żmien. Dawn ir-regoli jaħdmu qabel dawk integrati.",
+      "rulesHeading": "Regoli",
+      "rulesEmpty": "Għad m'hemmx regoli.",
+      "addRule": "Żid regola",
+      "provider": "Fornitur",
+      "providerPlaceholder": "eż. openai",
+      "status": "Status HTTP",
+      "statusPlaceholder": "Kwalunkwe",
+      "match": "It-test tal-iżball fih",
+      "matchPlaceholder": "Kwalunkwe test",
+      "matchHint": "L-ewwel regola li taqbel tapplika. It-test tal-iżball huwa test sempliċi li ma jagħmilx distinzjoni bejn ittri kbar u żgħar, mhux espressjoni regolari. Qasam vojt jaqbel ma' kollox.",
+      "scope": "Waqqaf",
+      "scopes": {
+        "connection": "Din il-konnessjoni",
+        "model": "Dan il-mudell biss",
+        "provider": "Il-fornitur kollu"
+      },
+      "reason": "Raġuni",
+      "reasonAuto": "Awtomatika",
+      "reasons": {
+        "quota_exhausted": "Kwota eżawrita",
+        "rate_limit_exceeded": "Limitu tar-rata maqbuż",
+        "auth_error": "Żball fl-awtentikazzjoni",
+        "model_capacity": "Il-mudell mimli",
+        "server_error": "Żball tas-server",
+        "unknown": "Oħrajn"
+      },
+      "duration": "Tul ta' żmien",
+      "durations": {
+        "auto": "Default",
+        "30m": "30 minuta",
+        "1h": "Siegħa",
+        "5h": "5 sigħat",
+        "24h": "24 siegħa",
+        "custom": "Personalizzat"
+      },
+      "customMinutes": "Minuti (minn 1 sa 43200)",
+      "remove": "Neħħi",
+      "defaultsHeading": "Default għal fallimenti mingħajr regola",
+      "defaultsHint": "Mhux obbligatorju, għal kull fornitur. Japplika biss meta l-ebda regola ma taqbel ma' żball 402, 403, 408, 429 jew 5xx. L-iżbalji tat-talba bħal 400 qatt ma jintlaqtu.",
+      "defaultsEmpty": "M'hemm l-ebda default issettjat. L-iżbalji mingħajr regola jżommu l-imġiba integrata.",
+      "addDefault": "Żid default",
+      "errors": {
+        "provider": "Daħħal fornitur.",
+        "condition": "Issettja status HTTP, test tal-iżball jew it-tnejn.",
+        "status": "Uża status bejn 100 u 599.",
+        "duration": "Daħħal minn 1 sa 43200 minuta.",
+        "duplicateDefault": "Dan il-fornitur diġà għandu default.",
+        "tooMany": "L-iktar 50 regola."
+      },
+      "save": "Issejvja r-regoli tal-iżbalji",
+      "saved": "Ir-regoli tal-iżbalji ġew issejvjati",
+      "saveFailed": "Ma kienx possibbli li jiġu ssejvjati r-regoli tal-iżbalji",
+      "loadFailed": "Ma kienx possibbli li jittellgħu r-regoli tal-iżbalji"
+    },
     "list": {
       "title": "Konnessjonijiet barra mir-routing",
       "subtitle": "Il-cooldowns u l-lockouts tal-mudelli jispiċċaw waħedhom. Neħħihom biex terġa' tpoġġi konnessjoni fir-routing issa.",
@@ -15708,6 +16026,7 @@
     "upstreamStatus": "Stat tas-sors",
     "noResponse": "Ebda risposta",
     "egressIp": "IP Egress",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Intestaturi wara",
     "firstChunkAfter": "L-ewwel biċċa wara",
     "servedBy": "Servut minn",
@@ -16130,5 +16449,28 @@
     "greetingFallbackName": "hemm",
     "errNoReply": "⚠️ L-ebda rispost mill-gateway.",
     "btnSend": "Ibgħat"
+  },
+  "falNative": {
+    "title": "Mudelli nattivi ta’ Fal",
+    "description": "Sib punt tat-tmiem, għabbi l-iskema tiegħu u ħaddmu bl-inputs dokumentati. L-istatus tal-kju u l-istreaming nattiv jibqgħu separati.",
+    "connectionRequired": "L-ewwel żid konnessjoni b’ċavetta API ta’ Fal.",
+    "category": "Kategorija",
+    "endpoint": "ID tal-punt tat-tmiem",
+    "reasoning": "Kontroll tar-raġunament",
+    "input": "Input JSON fil-format nattiv (l-elementi fl-arrays jibqgħu fl-istess ordni)",
+    "transport": "Metodu ta’ trasport",
+    "run": "Ħaddem il-mudell",
+    "job": "ID tal-kompitu ssejvjat",
+    "register": "Irreġistra punt tat-tmiem jew issostitwixxi l-iskema",
+    "schema": "Skema OpenAPI 3",
+    "download": "Niżżel il-fajl tal-output",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

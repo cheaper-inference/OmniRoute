@@ -14,7 +14,7 @@ OmniRoute - Next.js-da qurilgan mahalliy AI marshrutlash shlyuzi va asboblar pan
 
 Asosiy qobiliyatlar:
 
-- CLI/tools uchun OpenAI-mos API yuzasi (377 provayder, 156 ijrochi modul)
+- CLI/tools uchun OpenAI-mos API yuzasi (381 ta provayder, 159 ta ijrochi modul)
 - provayder formatlari bo'ylab Request/response tarjimasi
 - Model kombinatsiyasi (ko'p modelli ketma-ketlik)
 - Strukturaviy kombinatsiyalangan qadamlar (`provider + model + connection`) `compositeTiers` tomonidan ish vaqti tartibi
@@ -33,12 +33,12 @@ Asosiy qobiliyatlar:
 - Fikrlash modellari uchun tegni tahlil qilish (`<think>...</think>`) haqida o'ylang
 - Qattiq OpenAI SDK muvofiqligi uchun javob sanitarizatsiyasi
 - Provayderlararo muvofiqligi uchun rolni normallashtirish (ishlab chiquvchi → tizimi, tizim → foydalanuvchisi)
-- Strukturaviy chiqish konvertatsiyasi (json_schema → Gemini respondSchema)
+- Strukturaviy chiqish konvertatsiyasi (json_schema → Gemini responseSchema)
 - Provayderlar, kalitlar, taxalluslar, kombinatsiyalar, sozlamalar, narxlar uchun mahalliy barqarorlik (122 DB moduli)
 - Usage/cost kuzatuvi va so'rovlar jurnali
 - multi-device/state sinxronlash uchun ixtiyoriy bulutli sinxronlash
 - API kirishni boshqarish uchun IP allowlist/blocklist
-- Byudjetni o'ylash (passthrough/auto/custom/adaptive)
+- Fikrlash byudjetini boshqarish (passthrough/auto/custom/adaptive)
 - Global tizim tezkor in'ektsiya
 - Seansni kuzatish va barmoq izlari
 - Provayderga xos profillar bilan har bir hisob uchun kengaytirilgan tarif chegarasi
@@ -52,9 +52,9 @@ Asosiy qobiliyatlar:
 - p50/p95/p99 kechikish yig‘indisi bilan telemetriyani so‘rang
 - `combo_execution_key` / `combo_step_id` orqali birlashtirilgan maqsadli telemetriya va tarixiy kombinatsiyalangan maqsadli sog'liq
 - Oxir-oqibat kuzatish uchun korrelyatsiya ID (X-Request-Id).
-- Har bir API kalitidan voz kechish bilan muvofiqlik auditi jurnali
+- Har bir API kaliti uchun rad etish bilan muvofiqlik auditi jurnali
 - LLM sifatini ta'minlash uchun asosni baholash
-- Haqiqiy vaqtda provayderning o'chirgich holatiga ega sog'liqni saqlash paneli
+- Haqiqiy vaqtda provayderning elektron to'xtatuvchisi holatiga ega sog'liqni saqlash paneli
 - 3 ta transportga ega MCP Server (110 ta asbob) (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) ko'nikmalar va vazifalarning hayot aylanishiga ega
 - Xotira tizimi (ekstraktsiya, in'ektsiya, qidirish, umumlashtirish)
@@ -69,7 +69,7 @@ Asosiy qobiliyatlar:
 - OpenAI-ga mos keladigan WS mijozlari uchun WebSocket ko'prigi (`/v1/ws`)
 - Sinxronlash tokenini boshqarish (issue/revoke, ETag versiyasidagi konfiguratsiya paketini yuklab olish)
 - GLM Thinking (`glmt`) birinchi darajali provayder oldindan o'rnatilgan
-- Gibrid tokenlarni hisoblash (provayder tomonidagi `/messages/count_tokens` hisob-kitobi bilan)
+- Gibrid tokenlarni hisoblash (provayder tomonidagi `/messages/count_tokens` hisob-kitoblarni qaytarish bilan)
 - Model taxallusni avtomatik ekish (boshlang‘ichda 30 + o‘zaro proksi dialektini normallashtirish)
 - SSRF himoyasi, shaxsiy URL blokirovkasi va sozlanishi mumkin bo'lgan qayta urinish bilan xavfsiz chiqish
 - Sozlanishi mumkin bo'lgan `requestRetry` va `maxRetryIntervalSec` bilan sovish vaqtini hisobga olgan holda chat qayta uriladi
@@ -78,7 +78,7 @@ Asosiy qobiliyatlar:
 
 Asosiy ish vaqti modeli:
 
-- `src/app/api/*` ostidagi Next.js ilova marshrutlari asboblar paneli APIs va moslik APIs ham amalga oshiradi
+- `src/app/api/*` ostidagi Next.js ilova marshrutlari asboblar paneli APIs va APIs mosligini amalga oshiradi
 - `src/sse/*` + `open-sse/*` -dagi umumiy SSE/routing yadrosi provayderning bajarilishi, tarjimasi, strimingi, qaytarilishi va foydalanishini boshqaradi.
 
 ## Maʼlumotnoma diagrammalari
@@ -412,9 +412,9 @@ Qoidalar toʻplamini yaratish va chegarani sozlash uchun [`docs/security/GUARDRA
 - Tegga asoslangan marshrutlash: `src/domain/tagRouter.ts`
 - Combo-resolver: `src/domain/comboResolver.ts` — kombinatsiyalangan nomlar, auto/\* prefikslari va joker belgilar model maqsadlarini aniq bajarish rejalariga hal qiladi.
 - Connection/model qoidasini birlashtiruvchi: `src/domain/connectionModelRules.ts`
-- Model mavjudligi haqidagi lavhalar: `src/domain/modelAvailability.ts`
+- Model mavjudligi haqidagi oniy suratlar: `src/domain/modelAvailability.ts`
 - Provayderning amal qilish muddatini kuzatish: `src/domain/providerExpiration.ts`
-- Kvota keshi: `src/domain/quotaCache.ts`
+- Kvota keshi: `src/domain/quotaCache.ts`. Provayderlar kvota oynalarini qo'shadi va olib tashlaydi (OpenAI ba'zi rejalar uchun 5 soatlik Codex oynasini o'chirib qo'ydi), shuning uchun provayder adapteridan foydalanish to'liq ekanligini tasdiqlaydi (`quotasComplete`, `src/lib/usage/usageReading.ts` ga qarang) hisobning to'liq oynasi to'plamidir: ilgari ma'lum bo'lgan, lekin unda mavjud bo'lmagan oyna o'chirilgan, keshda, `quota_snapshots` (rehidrqfda, rehidrtanzda) doimiy Codex kvota holati va Claude ning to'yinganlik chelaklarida. Qisman dalillar (javob sarlavhalari, eskirgan nusxalar) faqat o'zi olib yuradigan oynalarni yangilaydi.
 - Degradatsiya holati: `src/domain/degradation.ts`
 - Konfiguratsiya auditi: `src/domain/configAudit.ts`
 - OmniRoute javob metadata quruvchisi: `src/domain/omnirouteResponseMeta.ts`
@@ -426,13 +426,13 @@ Avtorizatsiya quvuri har bir kiruvchi so'rovni tasniflaydi va jo'natishdan oldin
 
 - Quvur liniyasiga kirish: `src/server/authz/pipeline.ts`
 - So'rov klassifikatori: `src/server/authz/classify.ts` — umumiy muvofiqlik yo'nalishlarini boshqaruv yo'nalishlaridan ajratib turadi
-- Umumiy marshrut inventarizatsiyasi: `src/shared/constants/publicApiRoutes.ts`
+- Umumiy foydalanish yo'llari inventarizatsiyasi: `src/shared/constants/publicApiRoutes.ts`
 - Qoidalar: `src/server/authz/policies/` — tuziladigan predikatlar (`requireApiKey`, `requireManagement`, `requireFreshAuth` va boshqalar)
 - Sarlavha yordam dasturlari: `src/server/authz/headers.ts`
 - Tasdiqlash yordamchisi: `src/server/authz/assertAuth.ts`
 - So'rov konteksti: `src/server/authz/context.ts`
 
-Ommaviy va boshqaruv marshrutlari qattiq chegara hisoblanadi: agent/cooldown APIs va provayder mutatsiyalari boshqaruv authini talab qiladi (agar yoʻq boʻlsa HTTP 401).
+Ommaviy va boshqaruv marshrutlari qattiq chegara: agent/cooldown APIs va provayder mutatsiyalari boshqaruv authini talab qiladi (agar yoʻq boʻlsa HTTP 401).
 
 To'liq marshrutni tasniflash qoidalari uchun [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) qarang.
 

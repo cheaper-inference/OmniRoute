@@ -4,56 +4,47 @@
 
 ---
 
-> 需主动启用，默认关闭（`modelVisibilityAllowlist`/`modelVisibilityDenylist` 均为空时，
-> `/v1/models` 目录以及每个 `auto/*` 候选池均保持逐字节完全一致）。这是
-> `hidePaidModels`/`hideAutoCombos`（`src/lib/db/settings.ts`）的同级设置，适用于那些出于
-> 与成本无关的原因，希望使用精选模型列表的运维人员。
+> 选择加入，默认关闭（`modelVisibilityAllowlist`/`modelVisibilityDenylist`都为空，使`/v1/models`目录AND每个`auto/*`候选池字节相同）。 `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) 的同级产品，适用于因与成本无关的原因而需要精选模型列表的运营商。
 
-## 存在原因
+## 为什么存在这个
 
-`hidePaidModels` 回答的是“这个模型是否免费？”，而 `hideAutoCombos` 回答的是“是否应当公布
-`auto/*` 虚拟 ID？”——两者都无法让运维人员筛选任意模型子集（例如，无论定价如何，只展示
-特定 Claude Code / OpenCode 客户端应看到的模型）。#11481 通过两个相互独立、需主动启用的
-字符串数组设置实现了这一功能。
+`hidePaidModels`回答“这个模型是免费的吗？” `hideAutoCombos`回答“ `auto/*`虚拟 ID 是否应该进行广告？” —也不允许操作员策划模型的任意子集（例如，准确地呈现给定Claude代码/ OpenCode客户端应该看到的模型，与定价无关）。 #11481 将其添加为两个独立的、可选的字符串数组设置。
 
 ## 设置
 
-| 键                         | 类型       | 默认值 | 含义                                             |
-| -------------------------- | ---------- | ------ | ------------------------------------------------ |
-| `modelVisibilityDenylist`  | `string[]` | `[]`   | 与候选项匹配的条目会将其从目录/候选池中隐藏。    |
-| `modelVisibilityAllowlist` | `string[]` | `[]`   | 非空时，只有与其中条目匹配的候选项才会保持公开。 |
+| 钥匙                       | 类型       | 默认 | 意义                                                |
+| -------------------------- | ---------- | ---- | --------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]` | 与候选者匹配的条目将其隐藏在catalog/candidate池中。 |
+| `modelVisibilityAllowlist` | `string[]` | `[]` | 当非空时，与候选者匹配的ONLY条目保持暴露状态。      |
 
-两者最多均可接受 500 个条目，每个条目最多 200 个字符（在
-`src/shared/validation/settingsSchemas.ts` 中通过 Zod 验证）。条目可以是：
+两者都接受最多 500 个条目，每个条目最多 200 个字符（在`src/shared/validation/settingsSchemas.ts`中经过 Zod 验证）。条目可以是：
 
-- 精确的目录 ID——`"gpt-4o"`（不含提供者的模型 ID）或 `"openai/gpt-4o"`（带提供者前缀），或者
-- 使用 `*`/`?` 的 glob 模式——例如 `"openai/gpt-4*"` 或 `"anthropic/*"`——通过共享的
-  `globToRegex()` 匹配器（`src/shared/utils/globPattern.ts`）解析；该匹配器已用于
-  `ModelRoutingSection` 的逐模型组合映射和 `freeModels.ts::matchesOnlyPaidModels`。
+- 精确的目录 ID — `"gpt-4o"` （裸模型 ID）或`"openai/gpt-4o"` （提供者前缀），或者
+- 使用`*`/`?` —的 glob 模式，例如`"openai/gpt-4*"`或`"anthropic/*"` —通过`ModelRoutingSection`的每模型组合映射和`freeModels.ts::matchesOnlyPaidModels`已使用的相同共享`globToRegex()`匹配器（`src/shared/utils/globPattern.ts`）解析。
 
-优先级：先检查拒绝列表（被拒绝的条目始终隐藏，即使它也与允许列表匹配）；当允许列表非空时，
-只有与其中条目匹配的候选项才会保留。
+优先级：首先检查拒绝列表（被拒绝的条目始终隐藏，即使它也与允许列表匹配）；当允许列表非空时，只有与其匹配的条目才能生存。
 
-## 两个关键控制点，而非一个
+## 两个阻塞点，不是一个
 
-#6512 的经验同样适用于此处（仅通过 `hidePaidModels` 过滤目录仍会让 `auto/*` 路由到付费模型，
-因为组合候选池是独立构建的）。匹配谓词 `isModelExposureAllowed()`
-（`src/shared/utils/modelExposureList.ts`）会在以下两处调用：
+#6512 中的教训（ `hidePaidModels` -only目录过滤器仍然让`auto/*`路由到付费模型，因为组合候选池是独立构建的）在这里同样适用。匹配谓词`isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) 是从BOTH调用的：
 
-- `src/app/api/v1/models/catalog.ts`——`/v1/models` 列表本身，与 `shouldHidePaid()` 已设置关卡的
-  5 个逐来源关键控制点相同（静态 `PROVIDER_MODELS`、已同步的提供者行、自定义行、由别名支持的行、
-  托管回退行）。
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()`——由
-  `virtualFactory.ts::buildPreparedPool` 调用，紧跟在对应的
-  `filterPaidOnlyCandidates()` 调用之后，因此被拒绝的模型也绝不可能被选入 `auto/*` 候选池。
+- `src/app/api/v1/models/catalog.ts` — `/v1/models`列表本身，在相同的 5 个每个源阻塞点`shouldHidePaid()`已经有门（静态`PROVIDER_MODELS`、同步提供程序行、自定义行、别名支持行、托管回退行）。
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` —在等效的`filterPaidOnlyCandidates()`调用之后立即从`virtualFactory.ts::buildPreparedPool`调用，因此被拒绝的模型也永远不能被选入`auto/*`候选池。
 
-## 不会过滤的内容
+## NOT过滤了什么
 
-与 `hideAutoCombos` 的现有行为一致：**显式**发送的模型 ID（不通过 `auto/*`，也不是通过目录列表发现）
-永远不会在分发时被阻止——仅过滤其公布状态/候选池成员资格。这与 `hidePaidModels` 无关；运维人员可能会
-出于与成本无关的原因需要精选模型集合，因此这两项设置会作为相互独立且以 AND 关系组合的过滤器，
-与 `catalog.ts` 中现有的多标志组合方式相同。
+镜像`hideAutoCombos`的现有行为：发送模型 ID**明确地**（不是通过`auto/*`，也不是通过目录列表发现）在调度—时永远不会被阻止，只有advertisement/candidate-pool成员资格被过滤。这与`hidePaidModels`无关；操作员可能出于与成本无关的原因想要一个精选集，因此这两个设置都构成独立的 AND 过滤器，与`catalog.ts`中现有的多标志组合相同。
 
-设置导出（`GET /api/settings/export-json`）会像其他设置字段一样，原样包含这两个数组——与
-`hidePaidModels` 的组合步骤导出过滤器不同，此处不存在重新导入风险：嵌入在已导出组合步骤中的被拒绝 ID，
-是运维人员自己明确作出的路由选择，并非导出边界需要剔除的内容。
+设置导出 (`GET /api/settings/export-json`) 逐字包含两个数组，与任何其他设置字段—不同，与`hidePaidModels`的组合步骤导出过滤器不同，这里不存在重新水合风险：导出组合步骤中嵌入的拒绝 id 是操作员自己的显式路由选择，而不是导出边界需要剥离的内容。
+
+## 仅组合列表 (`exposeCombosOnly`)
+
+一个单独的布尔值，默认情况下也选择加入和`false` ，用于组合是公共模型表面而提供程序只是后端的部署。当它是`true`时，公共列表（`GET /v1/models`、 `GET /v1`和基于`getUnifiedModelsResponse()`构建的其他`/v1`发现路由）仅保留带有`owned_by: "combo"`行：用户组合加上内置`auto/*`组合（除非`hideAutoCombos`隐藏它们）。它使用与每个键`catalogScope: "combos"`相同的行测试，并且键自己的allow/deny/scope过滤器仍然适用于顶部。
+
+切换它**设置→路由→型号API列表**，或使用`PATCH /api/settings {"exposeCombosOnly": true}`。
+
+与上面的列表一样，它仅更改广告：
+
+- 显式的`provider/model` id 仍会调度， `GET /v1/models/{id}`仍会解析它；
+- 仪表板目录（`GET /api/models/catalog`，由模型选择器使用）没有缩小；
+- 它不会镜像到`auto/*`候选池中，因此`auto/*`组合保留其完整池。

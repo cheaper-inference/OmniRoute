@@ -13,8 +13,12 @@ on:
     types: [checks_requested]
   workflow_dispatch:
 
+  # A description edit on a Mergify queue draft (Mergify writes its queue summary there, and
+  # the Blacksmith app appends its footer, ~4 edits in the first 30 s) gets its own group and
+  # skips the matrix: in the shared group it cancelled the candidate's real run, and Mergify
+  # dequeued the PR on the cancelled checks ("checks interrupted", #18853/#18858 on 2026-11-03).
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && format('-queue-edit-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -32,6 +36,7 @@ jobs:
   # path filters share existence reasons: code / docs / i18n / workflow.
   changes:
     name: Change Classification
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     outputs:
       code: ${{ steps.classify.outputs.code }}
@@ -157,12 +162,11 @@ jobs:
           # stale per-file verdicts, which is exactly how 215 pre-existing errors stayed
           # invisible for a whole cycle. Exact key or a cold full lint (~13 min) — never a
           # partial cache from another configuration.
-      # Security scanners — same hardened install as ci.yml quality-extended
+      # Other security scanners use the same install as ci.yml quality-extended.
       # (gh release download = authenticated, 5000 req/hr; curl to api.github.com
       # is rate-limited to 60/hr and silently no-ops when throttled). The blocking
-      # gates below SKIP (exit 0) when their binary is absent — only a measured
-      # regression vs config/quality/quality-baseline.json blocks.
-      - name: Install security scanners (gitleaks/osv/actionlint/zizmor/oasdiff)
+      # workflow audit has its own required, verified installation below.
+      - name: Install security scanners (gitleaks/osv/oasdiff)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -174,8 +178,6 @@ jobs:
           # red (or green) caused by whatever "latest" served that morning.
           GITLEAKS_VERSION=v8.30.1
           OSV_SCANNER_VERSION=v2.3.8
-          ACTIONLINT_VERSION=v1.7.12
-          ZIZMOR_VERSION=1.25.2
           OASDIFF_VERSION=v1.19.1
           # gitleaks — pinned linux x64 tarball via gh (authed), extract binary
           rm -rf /tmp/gl && mkdir -p /tmp/gl
@@ -185,10 +187,6 @@ jobs:
           rm -rf /tmp/osv && mkdir -p /tmp/osv
           gh release download "$OSV_SCANNER_VERSION" --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
           install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
-          # actionlint — official installer from a pinned release tag (never main)
-          bash <(curl -fsSL "https://raw.githubusercontent.com/rhysd/actionlint/${ACTIONLINT_VERSION}/scripts/download-actionlint.bash") "${ACTIONLINT_VERSION#v}" "$HOME/.local/bin"
-          # zizmor — pinned PyPI package (same version as ci.yml quality-extended)
-          pipx install "zizmor==$ZIZMOR_VERSION" || pip install --user "zizmor==$ZIZMOR_VERSION"
           # oasdiff — pinned linux amd64 tarball via gh (authed), extract binary
           rm -rf /tmp/oasd && mkdir -p /tmp/oasd
           gh release download "$OASDIFF_VERSION" --repo Tufin/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
@@ -196,10 +194,14 @@ jobs:
           # ALWAYS export the bin dir (even if any step above failed)
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/gitleaks" version || true
-          "$HOME/.local/bin/actionlint" -version || true
           "$HOME/.local/bin/osv-scanner" --version || true
           "$HOME/.local/bin/oasdiff" --version || true
-          zizmor --version || true
+      # Required auditors use verified, pinned artifacts in a fresh PATH directory.
+      # Installation failure is INCOMPLETE, never a skipped or zero-finding audit.
+      - name: Prepare pinned workflow scanners
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci/install-workflow-scanners.sh
       - name: Forgotten sibling tests (advisory)
         env:
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -294,6 +296,9 @@ jobs:
           echo "::endgroup::"
           echo "::group::check:dashboard-typecheck"
           npm run check:dashboard-typecheck || failed+=("check:dashboard-typecheck")
+          echo "::endgroup::"
+          echo "::group::check:build-typecheck"
+          npm run check:build-typecheck || failed+=("check:build-typecheck")
           echo "::endgroup::"
           # #10134: TS7 zero-new-diagnostics ratchet — folded into this non-fail-fast
           # loop (never a separate blocking step) so an earlier red gate cannot abort
@@ -512,8 +517,13 @@ jobs:
         run: npm run check:agent-skills-sync
 
   admission-verdict:
-    name: Gate / Quality
-    if: ${{ always() }}
+    # A queue-draft edit run must not leave a check named "Gate / Quality" on the draft: Mergify
+    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
+    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / Quality (queue-draft edit)' || 'Gate / Quality' }}
+    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
+    # workflow concurrency note): that draft is never what branch protection merges.
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:

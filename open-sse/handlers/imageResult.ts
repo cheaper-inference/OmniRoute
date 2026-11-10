@@ -1,6 +1,10 @@
 import { saveCallLog } from "@/lib/usageDb";
 import { stringifyImageErrorForLog } from "./imageErrorLog.ts";
 
+// imageGeneration.ts takes saveCallLog from here so this is the one image-result module
+// that depends on the app's usage store.
+export { saveCallLog };
+
 export function saveImageSuccessResult({
   provider,
   model,

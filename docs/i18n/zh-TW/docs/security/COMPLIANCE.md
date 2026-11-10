@@ -15,51 +15,67 @@ OmniRoute 會將管理操作、驗證事件、提供者憑證生命週期變更�
 
 ### 管理稽核事件（`audit_log`）
 
-每次呼叫 `logAuditEvent({ action, actor, target, details, ... })` 都會產生一列記錄。動作字串遵循 `domain.verb`（或 `domain.verb.outcome`）模式。已確認存在於原始碼樹狀結構中的動作類型包括：
+每次呼叫 `logAuditEvent({ action, actor, target, details, ... })` 都會產生
+一列。Action 字串遵循 `domain.verb`（或 `domain.verb.outcome`）
+模式。已在程式碼樹中確認的 action 類型包括：
 
-| 動作                                 | 來源                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | 來源                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-每筆項目都會擷取 `action`、`actor`（預設為 `"system"`）、`target`、`details`/`metadata`（JSON）、`ip_address`、`resource_type`、`status`、`request_id` 與 `timestamp`。敏感鍵值（`apiKey`、`accessToken`、`refreshToken`、`password`、任何符合 `*token`/`*secret`/`*apikey` 的項目等）會在資料列寫入前遞迴遮蔽為 `"[redacted]"`。
+每筆記錄都會擷取 `action`、`actor`（預設為 `"system"`）、`target`、
+`details`/`metadata`（JSON）、`ip_address`、`resource_type`、`status`、
+`request_id` 和 `timestamp`。敏感金鑰（`apiKey`、`accessToken`、
+`refreshToken`、`password`、任何符合 `*token`/`*secret`/`*apikey` 的項目等）
+都會在寫入資料列前遞迴重新整理為 `"[redacted]"`。
+
+`api_key.auth.touch` 資料列會記錄成功的 API 金鑰中繼資料和探索性讀取
+（GET/HEAD），這些請求不會進入請求記錄：包括使用哪個金鑰、時間，以及
+正規化後的路徑；記錄會合併，且上限為 1,000 列。具有 `noLog` 的金鑰和環境
+金鑰會略過。只有在 `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` 功能旗標開啟時，
+才會加入呼叫端的 IP 位址和 user-agent（預設為關閉）。
 
 ### MCP 工具呼叫（`mcp_tool_audit`）
 
-每次 MCP 工具叫用都會透過 `open-sse/mcp-server/audit.ts` 寫入一列記錄。結構描述（來自 `src/lib/db/migrations/002_mcp_a2a_tables.sql`）：
+每次 MCP 工具呼叫都會透過
+`open-sse/mcp-server/audit.ts` 寫入一列。結構描述（來自
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`）：
 
-| 欄位             | 說明                            |
-| ---------------- | ------------------------------- |
-| `id`             | 自動遞增                        |
-| `tool_name`      | MCP 工具識別碼                  |
-| `input_hash`     | 輸入的 sha256（不儲存承載資料） |
-| `output_summary` | 簡短且經截斷的摘要              |
-| `duration_ms`    | 實際經過時間                    |
-| `api_key_id`     | 呼叫者（可為 null）             |
-| `success`        | `1` / `0`                       |
-| `error_code`     | 失敗時的終止錯誤代碼            |
-| `created_at`     | ISO 時間戳記                    |
+| 欄位             | 備註                                |
+| ---------------- | ----------------------------------- |
+| `id`             | 自動遞增                            |
+| `tool_name`      | MCP 工具識別碼                      |
+| `input_hash`     | 輸入內容的 sha256（不儲存承載內容） |
+| `output_summary` | 簡短、截斷後的摘要                  |
+| `duration_ms`    | 實際經過時間                        |
+| `api_key_id`     | 呼叫端（可為 null）                 |
+| `success`        | `1` / `0`                           |
+| `error_code`     | 失敗時的終端錯誤碼                  |
+| `created_at`     | ISO 時間戳                          |
 
 ### 請求／使用量記錄
 
-這些屬於營運遙測資料（嚴格來說並非管理稽核），但共用相同的保留流程：
+這些是作業遙測資料（並非嚴格意義上的管理稽核），但共用相同的
+保留管線：
 
 - `usage_history` — 每個請求的使用量彙總
-- `call_logs` — 每個請求的完整記錄（受資料列上限限制，請參閱下文）
+- `call_logs` — 每個請求的完整記錄（受資料列上限限制，請參閱下方）
 - `proxy_logs` — Proxy 流量記錄（受資料列上限限制）
-- `request_detail_logs` — 舊版詳細請求記錄（若存在仍會遭到清除）
+- `request_detail_logs` — 舊版詳細請求記錄（若存在仍會進行清理）
 
 ## 儲存結構
 

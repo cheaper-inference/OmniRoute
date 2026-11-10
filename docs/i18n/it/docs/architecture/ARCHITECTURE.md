@@ -14,7 +14,7 @@ OmniRoute è un gateway di routing AI locale e un dashboard basato su Next.js. F
 
 Funzionalità principali:
 
-- Superficie API compatibile con OpenAI per CLI/tools (377 provider, 156 moduli esecutori)
+- Superficie API compatibile con OpenAI per CLI/tools (381 provider, 159 moduli esecutori)
 - Traduzione Request/response tra i formati dei fornitori
 - Fallback combinato di modelli (sequenza multi-modello)
 - Passaggi combinati strutturati (`provider + model + connection`) con ordinamento di runtime tramite `compositeTiers`
@@ -33,7 +33,7 @@ Funzionalità principali:
 - Pensa all'analisi dei tag (`<think>...</think>`) per i modelli di ragionamento
 - Sanificazione della risposta per una rigorosa compatibilità OpenAI SDK
 - Normalizzazione dei ruoli (sistema → dello sviluppatore, utente del sistema →) per la compatibilità tra provider
-- Conversione dell'output strutturato (json_schema → Gemini ResponseSchema)
+- Conversione dell'output strutturato (json_schema → Gemini responseSchema)
 - Persistenza locale per provider, chiavi, alias, combo, impostazioni, prezzi (122 moduli DB )
 - monitoraggio Usage/cost e registrazione delle richieste
 - Sincronizzazione cloud opzionale per la sincronizzazione multi-device/state
@@ -371,7 +371,7 @@ Funzionalità chiave:
 
 - **20 strategie di routing** (priorità, ponderato, riempimento prima, round robin, P2C, casuale, meno utilizzato, ottimizzato in termini di costi, sensibile al ripristino, finestra di ripristino, headroom, ponderato in quota, casuale rigoroso,** auto** , lkgp, ottimizzato per il contesto, ottimizzato per la cache, inoltro per il contesto,** fusione** , pipeline) — auto è l'aggiunta principale nella v3.8.0; `fusion` (sintesi giudice + fan-out del pannello, `open-sse/services/fusion.ts`) è nuovo nella v3.8.36.
 - **Punteggio a 16 fattori** : quota, integrità, costo inverso, latenza inversa, adattamento dell'attività e altri dieci. La tabella canonica dei fattori e i relativi pesi predefiniti si trova in [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — riformularla qui le darebbe un secondo posto in cui potrebbe diventare stantia.
-- **Fabbrica virtuale** materializza combo effimere quando non esiste alcuna combinazione con nome corrispondente, reperendo candidati da connessioni attive e sane dei fornitori.
+- **Fabbrica virtuale** materializza combo effimere quando non esiste alcuna combinazione con nome corrispondente, reperendo candidati da connessioni attive e sane di fornitori.
 - **Prefissi automatici** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — ciascuno supportato da un profilo di peso ottimizzato.
 - **6 pacchetti modalità** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` e `chaos-mode` — configurazioni di peso preimpostate richiamabili dal dashboard. (Da non confondere con i prefissi `auto/*` sopra, che sono varianti del tempo di richiesta.)
 
@@ -414,13 +414,13 @@ Lo spazio dei nomi `src/domain/` centralizza le decisioni politiche in modo che 
 - Connection/model regola falegnameria: `src/domain/connectionModelRules.ts`
 - Istantanee della disponibilità del modello: `src/domain/modelAvailability.ts`
 - Monitoraggio della scadenza del fornitore: `src/domain/providerExpiration.ts`
-- Cache delle quote: `src/domain/quotaCache.ts`
+- Cache delle quote: `src/domain/quotaCache.ts`. I provider aggiungono e rimuovono finestre di quota (OpenAI ha eliminato la finestra Codex di 5 ore per alcuni piani), quindi un utilizzo che legge l'adattatore del provider attesta come completo (`quotasComplete`, vedere `src/lib/usage/usageReading.ts`) è il set completo di finestre dell'account: una finestra conosciuta in precedenza ma assente da essa viene ritirata, nella cache, in `quota_snapshots` al riavvio reidrata (un record di ritiro aggiunto), nello stato di quota Codex persistente e nei bucket di saturazione di Claude. Le prove parziali (intestazioni di risposta, copie non aggiornate) aggiornano solo le finestre che trasporta.
 - Stato di degrado: `src/domain/degradation.ts`
 - Controllo della configurazione: `src/domain/configAudit.ts`
 - Generatore di metadati di risposta OmniRoute : `src/domain/omnirouteResponseMeta.ts`
 - Sottosistema di valutazione: lavori di valutazione periodica `src/domain/assessment/` —
 
-### E. Pipeline di autorizzazione
+### E. Condotto di autorizzazione
 
 La pipeline di autorizzazione classifica ogni richiesta in entrata e applica la catena di policy appropriata prima dell'invio.
 

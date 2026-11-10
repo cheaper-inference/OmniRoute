@@ -118,17 +118,17 @@ Ufikiaji kupitia: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Usanidi wa Watoa Huduma
+## 📖 Usanidi wa Mtoa Huduma
 
-Ili kuongeza kwa wingi miunganisho ya funguo za API kutoka kwenye faili la CSV au JSON, tumia **Dashibodi → Watoa Huduma → Leta kutoka kwenye faili**. Safu wima hufuata mpangilio maalum (`provider,name,apiKey,baseUrl,priority`); `provider` lazima iwe tayari ipo kama mtoa huduma anayesimamiwa au nodi inayooana. Tazama [Kuleta watoa huduma kutoka kwenye faili la CSV au JSON](../providers/CSV-IMPORT.md).
+Ili kuongeza kwa wingi miunganisho ya funguo za API kutoka kwenye faili la CSV au JSON, tumia **Dashboard → Providers → Import from file**. Safu wima hutegemea mpangilio (`provider,name,apiKey,baseUrl,priority`); `provider` lazima awe tayari mtoa huduma anayesimamiwa au nodi inayooana. Tazama [Leta watoa huduma kutoka kwenye faili la CSV au JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Watoa Huduma wa Usajili
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha Claude Code
-→ Kuingia kwa OAuth → Uonyeshaji upya wa tokeni kiotomatiki
+Dashboard → Providers → Connect Claude Code
+→ Kuingia kupitia OAuth → Usasishaji otomatiki wa tokeni
 → Ufuatiliaji wa mgao wa saa 5 + wa kila wiki
 
 Miundo:
@@ -137,18 +137,20 @@ Miundo:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Kidokezo cha Kitaalamu:** Tumia Opus kwa kazi changamano, na Sonnet kwa kasi. OmniRoute hufuatilia mgao kwa kila muundo!
+**Dokezo la kitaalamu:** Tumia Opus kwa kazi changamano, na Sonnet kwa kasi. OmniRoute hufuatilia mgao kwa kila modeli!
 
-Hakuna kivinjari kwenye seva pangishi ya OmniRoute? Endesha `claude setup-token` mahali popote ambapo Claude Code imeingia, kisha ubandike tokeni ya mwaka mmoja kwenye kichupo cha **Setup Token**. Tazama [Claude Code kwa kutumia tokeni ya usanidi](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Je, huna kivinjari kwenye mwenyeji wa OmniRoute? Tekeleza `claude setup-token` mahali popote Claude Code ilipoingia na ubandike tokeni ya mwaka mmoja kwenye kichupo cha **Setup Token**. Tazama [Claude Code yenye tokeni ya usanidi](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Njia zinazooana na Claude na Claude Code huhifadhi kiwango cha juhudi ya kufikiri cha `max` kwa miundo ya Opus na Sonnet. Miundo ya Haiku haikubali kiwango cha juhudi cha `max`, kwa hivyo OmniRoute hushusha ombi hilo hadi kwenye bajeti ya juu ya kufikiri kabla ya kulituma kwa mtoa huduma wa juu.
+Njia zinazooana na Claude na Claude Code huhifadhi juhudi za kufikiri za `max` kwa
+miundo ya Opus na Sonnet. Miundo ya Haiku haikubali kiwango cha juhudi cha `max`, hivyo OmniRoute hushusha
+ombi hilo hadi bajeti ya juu ya kufikiri kabla ya kulituma kwenye huduma ya juu.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha Codex
-→ Kuingia kwa OAuth (bandari 1455)
-→ Uwekaji upya baada ya saa 5 + kila wiki
+Dashboard → Providers → Connect Codex
+→ Kuingia kupitia OAuth (bandari 1455)
+→ Kuweka upya baada ya saa 5 + kila wiki
 
 Miundo:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Miundo:
 #### GitHub Copilot
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth kupitia GitHub
-→ Uwekaji upya wa kila mwezi (tarehe 1 ya mwezi)
+→ Kuweka upya kila mwezi (tarehe 1 ya mwezi)
 
 Miundo:
   gh/gpt-5.5
@@ -172,47 +174,63 @@ Miundo:
   gh/gemini-3.1-pro-preview
 ```
 
+**Mikopo ya AI (utozaji unaotegemea tokeni).** GitHub inaporipoti `credits_used` kwa
+akaunti, kadi ya Mipaka ya Mtoa Huduma huonyesha safu ya **Mikopo ya AI** yenye mikopo
+iliyotumika katika kipindi cha sasa cha utozaji, hata kwenye mipango ya mashirika isiyo na kikomo.
+
+**Kikomo cha ndani cha Mikopo ya AI.** Hariri muunganisho wa GitHub na uweke **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Kuacha wazi kunakizima; `0`
+huruka muunganisho huo kila wakati. Usomaji wa mwisho wa matumizi unapokuwa sawa na au juu ya kikomo,
+uteuzi wa akaunti huruka muunganisho huo na uelekezaji hurudi kwenye miunganisho yako mingine,
+kwa njia ileile ambayo ukomo wa sera ya mgao hufanya. Ukaguzi huu husoma matumizi ambayo
+usasishaji wa mara kwa mara wa mgao tayari hukusanya — hauiiti GitHub kwenye njia ya ombi —
+na huruhusu muunganisho endapo hakuna kizuizi: usomaji ambao haupo au umechakaa (wa zaidi ya dakika 15,
+au kutoka kwenye kipindi cha utozaji ambacho tayari kiliwekwa upya) hauzuii muunganisho. Hii ni kinga ya ndani,
+**si dari ya matumizi iliyohakikishwa**: ucheleweshaji wa ripoti za GitHub, muda wa kusasisha,
+maombi yanayoendelea na matumizi nje ya OmniRoute vinaweza kuzidi kikomo hicho. Tumia vidhibiti
+vya matumizi vya GitHub kwa kikomo kisichoweza kuzidi.
+
 ### 💰 Watoa Huduma wa Bei Nafuu
 
-#### GLM-4.7 (Uwekaji upya wa kila siku, $0.6/1M)
+#### GLM-4.7 (Hujiweka upya kila siku, $0.6/1M)
 
 1. Jisajili: [Zhipu AI](https://open.bigmodel.cn)
-2. Pata ufunguo wa API kutoka Coding Plan
-3. Dashibodi → Ongeza Ufunguo wa API: Mtoa Huduma: `glm`, Ufunguo wa API: `your-key`
+2. Pata ufunguo wa API kutoka kwenye Coding Plan
+3. Dashboard → Add API Key: Mtoa huduma: `glm`, Ufunguo wa API: `your-key`
 
-**Matumizi:** `glm/glm-4.7` — **Kidokezo cha Kitaalamu:** Coding Plan hutoa mgao mara 3 kwa gharama ya 1/7! Huwekwa upya kila siku saa 10:00 asubuhi.
+**Tumia:** `glm/glm-4.7` — **Dokezo la kitaalamu:** Coding Plan inatoa mgao mara 3 kwa 1/7 ya gharama! Hujiweka upya kila siku saa 10:00 AM.
 
-#### MiniMax M2.1 (Uwekaji upya baada ya saa 5, $0.20/1M)
+#### MiniMax M2.1 (Hujiweka upya baada ya saa 5, $0.20/1M)
 
 1. Jisajili: [MiniMax](https://www.minimax.io)
-2. Pata ufunguo wa API → Dashibodi → Ongeza Ufunguo wa API
+2. Pata ufunguo wa API → Dashboard → Add API Key
 
-**Matumizi:** `minimax/MiniMax-M2.1` — **Kidokezo cha Kitaalamu:** Chaguo la bei nafuu zaidi kwa muktadha mrefu (tokeni 1M)!
+**Tumia:** `minimax/MiniMax-M2.1` — **Dokezo la kitaalamu:** Chaguo la bei nafuu zaidi kwa muktadha mrefu (tokeni milioni 1)!
 
-#### Kimi K2 ($9/mwezi kwa kiwango kisichobadilika)
+#### Kimi K2 ($9/mwezi bila kubadilika)
 
 1. Jisajili: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Pata ufunguo wa API → Dashibodi → Ongeza Ufunguo wa API
+2. Pata ufunguo wa API → Dashboard → Add API Key
 
-**Matumizi:** `kimi/kimi-k2.5` — **Kidokezo cha Kitaalamu:** Kiwango kisichobadilika cha $9/mwezi kwa tokeni 10M = gharama halisi ya $0.90/1M!
+**Tumia:** `kimi/kimi-k2.5` — **Dokezo la kitaalamu:** $9/mwezi bila kubadilika kwa tokeni milioni 10 = gharama halisi ya $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Jisajili: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Unda ufunguo wa API wa Qianfan → Dashibodi → Ongeza Ufunguo wa API: Mtoa Huduma: `qianfan`
+2. Unda ufunguo wa API wa Qianfan → Dashboard → Add API Key: Mtoa huduma: `qianfan`
 
-**Matumizi:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, au kitambulisho kingine cha muundo wa Qianfan kinachooana na OpenAI.
+**Tumia:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, au kitambulisho kingine cha modeli kinachooana na OpenAI cha Qianfan.
 
 ### 🆓 Watoa Huduma BILA MALIPO
 
-Watoa huduma wasiolipishwa ambao hawahitaji uthibitishaji wana swichi kando ya **Hakuna uthibitishaji unaohitajika** kwenye ukurasa wao wa mtoa huduma.
-Kuizima humlemaza mtoa huduma huyo, humwondoa kwenye mionekano ya Watoa Huduma iliyosanidiwa/iliyofupishwa, na
-huondoa miundo yake kutoka `/v1/models`.
+Watoa huduma wasiolipishwa wasiohitaji uthibitishaji wana swichi iliyo kando ya **No authentication required** kwenye ukurasa wao wa mtoa huduma.
+Kuizima humlemaza mtoa huduma huyo, humwondoa kwenye mwonekano wa Watoa Huduma waliowekwa/configured na wa kubana/compact,
+na huondoa miundo yake kwenye `/v1/models`.
 
 #### Qoder (miundo 9 BILA MALIPO)
 
 ```bash
-Dashibodi → Unganisha Qoder → Kuingia kwa OAuth → Ufikiaji unategemea vikomo vya sasa vya mtoa huduma
+Dashboard → Connect Qoder → Kuingia kupitia OAuth → Ufikiaji unategemea mipaka ya sasa ya mtoa huduma
 
 Miundo: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +238,7 @@ Miundo: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/
 #### Kiro (Claude BILA MALIPO)
 
 ```bash
-Dashibodi → Unganisha Kiro → AWS Builder ID au Google/GitHub → ~salio 50/mwezi
+Dashboard → Connect Kiro → AWS Builder ID au Google/GitHub → takriban mikopo 50/mwezi
 
 Miundo: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -335,82 +353,82 @@ Muundo: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Usambazaji
+## 🚀 Upelekaji
 
-### Usakinishaji wa kimataifa wa npm (Unapendekezwa)
+### Usakinishaji wa npm wa kimataifa (Inapendekezwa)
 
 ```bash
 npm install -g omniroute
 
-# Unda saraka ya usanidi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Unda faili la .env (angalia .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Anzisha seva
+# Start server
 omniroute
-# Au kwa port maalum:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`.
+CLI hupakia `.env` kiotomatiki kutoka `~/.omniroute/.env` au `./.env`. `./.env` katika saraka ya kufanya kazi inaweza kuweka tu orodha fupi ya ruhusa ya funguo (bandari, `REQUIRE_API_KEY`, eneo na mipangilio ya rangi); weka kila kitu kingine `~/.omniroute/.env`. Tazama [mikataba ya uzinduzi CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Hali ya trei
 
-Anzisha OmniRoute katika trei ya mfumo:
+Anzisha OmniRoute kwenye tray ya mfumo:
 
 ```bash
 omniroute serve --tray
 ```
 
-Amri hukamilika baada ya seva na trei kuwa tayari.
+Amri inarudi baada ya seva na tray kuwa tayari.
 
-Seva huendelea kufanya kazi bila terminali.
+Seva inaendelea bila terminal.
 
-Hali ya trei inatumia macOS, Windows na vipindi vya Linux vyenye kiolesura cha picha. Hali ya trei haifungui dashibodi kiotomatiki.
+Hali ya trei inasaidia macOS, Windows, na vipindi vya picha Linux. Hali ya trei haifungui dashibodi kiotomatiki.
 
-Tumia menyu ya trei kutekeleza vitendo hivi:
+Tumia menyu ya trei kwa vitendo hivi:
 
 - Fungua dashibodi.
 - Fungua `/dashboard/logs`.
-- Badilisha uanzishaji otomatiki.
-- Simamisha OmniRoute.
+- Badilisha kuanza-otomatiki.
+- Acha OmniRoute.
 
-Usichanganye `--tray` na chaguo hizi:
+Usichanganye `--tray` na chaguzi hizi:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Hali hizi zinahitaji umiliki tofauti wa mchakato.
+Njia hizi zinahitaji umiliki tofauti wa mchakato.
 
-Washa uanzishaji wakati wa kuingia kwenye mashine mara inayofuata:
+Washa uanzishaji kwa kuingia kwa mashine inayofuata:
 
 ```bash
 omniroute autostart enable
 ```
 
-Uanzishaji otomatiki hutumia hali ya trei kwenye macOS, Windows na vipindi vya Linux vyenye kiolesura cha picha. Linux isiyo na kiolesura cha picha hutumia huduma iliyopo ya mtumiaji ya systemd.
+Kuanzisha kiotomatiki hutumia hali ya trei kwenye macOS, Windows, na vipindi vya picha Linux. Linux isiyo na kichwa hutumia huduma ya mtumiaji iliyopo ya mfumo.
 
-Zima uanzishaji wakati wa kuingia:
+Lemaza kuanza wakati wa kuingia:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Kuondoa Usakinishaji
+### Inaondoa
 
-Usipohitaji tena OmniRoute, tunatoa hati mbili za haraka za kuiondoa kabisa:
+Wakati hauitaji tena OmniRoute, tunatoa hati mbili za haraka za uondoaji safi:
 
-| Amri                     | Kitendo                                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Huondoa programu ya mfumo lakini **huhifadhi DB na usanidi wako** katika `~/.omniroute`. |
-| `npm run uninstall:full` | Huondoa programu NA **hufuta kabisa usanidi, funguo na hifadhidata zote**.               |
+| Amri                     | Kitendo                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Huondoa programu ya mfumo lakini** huweka DB na usanidi wako** katika `~/.omniroute`. |
+| `npm run uninstall:full` | Huondoa programu AND kabisa** hufuta usanidi, funguo na hifadhidata zote** .          |
 
-> Kumbuka: Ili kutekeleza amri hizi, nenda kwenye folda ya mradi wa OmniRoute (ikiwa uliinakili kwa clone) na uzitekeleze. Vinginevyo, ikiwa ilisakinishwa kimataifa, unaweza kutekeleza tu `npm uninstall -g omniroute`.
+> Kumbuka: Ili kutekeleza amri hizi, nenda kwenye folda ya mradi wa OmniRoute (ikiwa umeiunda) na uiendeshe. Vinginevyo, ikiwa imewekwa kimataifa, unaweza kukimbia tu `npm uninstall -g omniroute`.
 
-### Usambazaji wa VPS
+### VPS Upelekaji
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -426,21 +444,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Au: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Usambazaji wa PM2 (Kumbukumbu Ndogo)
+### Usambazaji wa PM2 (Kumbukumbu ya Chini)
 
-Kwa seva zenye RAM ndogo, tumia chaguo la kikomo cha kumbukumbu:
+Kwa seva zilizo na kikomo RAM, tumia chaguo la kikomo cha kumbukumbu:
 
 ```bash
-# Kwa kikomo cha 512MB (chaguomsingi)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Au kwa kikomo maalum cha kumbukumbu
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Au ukitumia ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -469,30 +487,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Unda image (chaguomsingi = runner-cli yenye codex/claude/droid zilizosakinishwa mapema)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Hali inayohamishika (inapendekezwa)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Kwa hali iliyounganishwa na mfumo mwenyeji pamoja na faili tekelezi za CLI, angalia sehemu ya Docker katika nyaraka kuu.
+Kwa hali iliyounganishwa ya seva pangishi na jozi za CLI, angalia sehemu ya Docker katika hati kuu.
 
-### Void Linux (xbps-src)
+### Linux tupu (xbps-src)
 
-Watumiaji wa Void Linux wanaweza kufungasha na kusakinisha OmniRoute kwa njia asilia kwa kutumia mfumo wa ukalimani mtambuka wa `xbps-src`. Hii huendesha kiotomatiki uundaji wa pekee wa Node.js pamoja na viunganishi asilia vinavyohitajika vya `better-sqlite3`.
+Watumiaji wa Linux tupu wanaweza kufunga na kusakinisha OmniRoute asili kwa kutumia mfumo mtambuka `xbps-src`. Hii inaboresha muundo wa Node.js unaojitegemea pamoja na vifungo asilia `better-sqlite3` vinavyohitajika.
 
 <details>
 <summary><b>Tazama kiolezo cha xbps-src</b></summary>
 
 ```bash
-# Faili ya kiolezo ya 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Lango jumuishi la AI lenye uelekezaji mahiri kwa watoa huduma wengi wa LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -507,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Tambua usanifu lengwa wa CPU kwa node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -516,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Sakinisha vitegemezi vyote – ruka hati
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Unda kifurushi cha pekee cha Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Nakili rasilimali tuli kwenye kifurushi cha pekee
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kalimani kiunganishi asilia cha better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Weka kiunganishi kilichokalimaniwa kwenye kifurushi cha pekee
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Ondoa vifurushi vya sharp vinavyotegemea usanifu
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Nakili vitegemezi vya wakati wa utekelezaji vya pino vilivyoachwa na uchanganuzi tuli wa Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -552,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Zuia uondoaji wa saraka tupu za kipanga njia cha programu cha Next.js na kitendo cha baada ya usakinishaji
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,87 +598,87 @@ post_install() {
 
 ### Vigezo vya Mazingira
 
-| Kigezo                                  | Chaguo-msingi                             | Maelezo                                                                                                                                                  |
-| --------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me`      | Siri ya kusaini JWT (**ibadilishe katika mazingira ya uzalishaji**)                                                                                      |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                                | Nenosiri la kuingia kwa mara ya kwanza                                                                                                                   |
-| `DATA_DIR`                              | `~/.omniroute`                            | Saraka ya data (hifadhidata, matumizi, kumbukumbu)                                                                                                       |
-| `PORT`                                  | chaguo-msingi la mfumo                    | Porti ya huduma (`20128` katika mifano)                                                                                                                  |
-| `HOSTNAME`                              | chaguo-msingi la mfumo                    | Seva pangishi ya kuunganisha (chaguo-msingi la Docker ni `0.0.0.0`)                                                                                      |
-| `NODE_ENV`                              | chaguo-msingi la mazingira ya utekelezaji | Weka `production` kwa ajili ya upelekaji                                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`                  | URL ya msingi ya umma inayoonyeshwa kwenye dashibodi na kufichuliwa kwa seva (inachukua nafasi ya `BASE_URL` ya zamani)                                  |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`                   | URL ya msingi ya kituo cha usawazishaji wa wingu (inachukua nafasi ya `CLOUD_URL` ya zamani)                                                             |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`           | Siri ya HMAC kwa funguo za API zinazozalishwa                                                                                                            |
-| `REQUIRE_API_KEY`                       | `false`                                   | Lazimisha ufunguo wa API wa Bearer kwenye `/v1/*`                                                                                                        |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                                   | Ruhusu watumiaji wa dashibodi waliothibitishwa kufichua thamani kamili za funguo za API zilizohifadhiwa wanapohitaji                                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                      | Ratiba ya kuonyesha upya data iliyohifadhiwa ya Provider Limits upande wa seva; vitufe vya kuonyesha upya kwenye UI bado huanzisha usawazishaji mwenyewe |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                                   | Zima vijipicha vya kiotomatiki vya SQLite kabla ya uandishi/uletaji/urejeshaji; hifadhi rudufu za mikono bado hufanya kazi                               |
-| `APP_LOG_TO_FILE`                       | `true`                                    | Huwezesha kuandika kumbukumbu za programu na ukaguzi kwenye diski                                                                                        |
-| `AUTH_COOKIE_SECURE`                    | `false`                                   | Lazimisha kidakuzi cha uthibitishaji cha `Secure` (nyuma ya proksi geuzi ya HTTPS)                                                                       |
-| `CLOUDFLARED_BIN`                       | haijawekwa                                | Tumia faili tekelezi iliyopo ya `cloudflared` badala ya upakuaji unaodhibitiwa                                                                           |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                                   | Usafirishaji kwa Quick Tunnels zinazodhibitiwa (`http2`, `quic`, au `auto`)                                                                              |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                     | Kikomo cha heap cha Node.js katika MB                                                                                                                    |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                      | Idadi ya juu zaidi ya maingizo ya akiba ya prompt                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                     | Idadi ya juu zaidi ya maingizo ya akiba ya kisemantiki                                                                                                   |
+| Inaweza kubadilika                      | Chaguomsingi                        | Maelezo                                                                                                                                                              |
+| --------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(iliyotengenezwa kiotomatiki)_     | JWT ya kutia saini kwa siri — ilitolewa kiotomatiki kwa mara ya kwanza na kuendelea hadi `server.env`; iweke kwa uwazi wakati saraka ya data ni ya muda mfupi        |
+| `INITIAL_PASSWORD`                      | _(haijawekwa)_                      | Nenosiri la kwanza la kuingia. usakinishaji wa npm/source huanza na `CHANGEME`: ubadilishe. Haijawekwa: mchawi wa kuabiri                                            |
+| `DATA_DIR`                              | `~/.omniroute`                      | Saraka ya data (db, matumizi, kumbukumbu)                                                                                                                            |
+| `PORT`                                  | msingi wa mfumo                     | Bandari ya huduma (`20128` katika mifano)                                                                                                                            |
+| `HOSTNAME`                              | msingi wa mfumo                     | Unganisha seva pangishi (Docker chaguomsingi kwa `0.0.0.0`)                                                                                                          |
+| `NODE_ENV`                              | chaguo-msingi ya wakati wa kukimbia | Weka `production` kwa kupelekwa                                                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`            | Msingi wa umma URL ulijitokeza kwenye dashibodi na kufichuliwa kwa seva (inachukua nafasi ya legacy `BASE_URL`)                                                      |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`             | URL ya msingi ya usawazishaji wa wingu (inachukua nafasi `CLOUD_URL` ya urithi)                                                                                      |
+| `API_KEY_SECRET`                        | _(iliyotengenezwa kiotomatiki)_     | Siri HMAC ya funguo za API zinazozalishwa — zinazozalishwa kiotomatiki mara ya kwanza na kuendelea hadi `server.env`                                                 |
+| `REQUIRE_API_KEY`                       | `false`                             | Tekeleza kitufe cha Bearer API kwenye `/v1/*`                                                                                                                        |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                             | Ruhusu watumiaji wa dashibodi walioidhinishwa kufichua thamani kamili za API zilizohifadhiwa wanapohitaji                                                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                | Mwanguko wa kuonyesha upya upande wa seva kwa data iliyohifadhiwa ya Vikomo vya Mtoa Huduma; UI vibonye vya kuonyesha upya bado vinasababisha usawazishaji wa mikono |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                             | Zima vijipicha otomatiki SQLite kabla ya writes/import/restore; chelezo za mikono bado zinafanya kazi                                                                |
+| `APP_LOG_TO_FILE`                       | `true`                              | Huwasha matokeo ya programu na ukaguzi wa kumbukumbu kwenye diski                                                                                                    |
+| `AUTH_COOKIE_SECURE`                    | `false`                             | Lazimisha kidakuzi cha `Secure` auth (nyuma ya proksi HTTPS ya kinyume)                                                                                              |
+| `CLOUDFLARED_BIN`                       | haijawekwa                          | Tumia `cloudflared` binary iliyopo badala ya upakuaji unaodhibitiwa                                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                             | Usafiri wa Njia za Haraka zinazosimamiwa (`http2`, `quic`, au `auto`)                                                                                                |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                               | kikomo cha lundo la Node.js katika MB                                                                                                                                |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                | Maingizo ya akiba ya haraka zaidi                                                                                                                                    |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                               | Maingizo ya juu zaidi ya akiba ya semantic                                                                                                                           |
 
-Kwa marejeleo kamili ya vigezo vya mazingira, angalia [README](../README.md).
+Kwa rejeleo kamili la kutofautisha la mazingira, angalia [README](../README.md).
 
 ---
 
-## 📊 Mifano Inayopatikana
+## 📊 Miundo Inayopatikana
 
 <details>
-<summary><b>Tazama mifano yote inayopatikana</b></summary>
+<summary><b>Angalia miundo yote inayopatikana</b></summary>
 
-> Orodha iliyo hapa chini imekusanywa kutoka `open-sse/config/providerRegistry.ts` kwa v3.8.0. Katalogi za wingu (Gemini, OpenRouter, n.k.) husawazishwa kiotomatiki — kwa katalogi kamili ya moja kwa moja fungua **Dashibodi → Watoa Huduma → [mtoa huduma] → Mifano Inayopatikana** au piga `GET /api/models/catalog`.
+> Orodha iliyo hapa chini imetayarishwa kutoka `open-sse/config/providerRegistry.ts` kwa v3.8.0. Katalogi za wingu (Gemini, OpenRouter, n.k.) husawazishwa kwa nguvu — ili kuona katalogi kamili ya moja kwa moja, fungua **Dashibodi → Watoa huduma → [mtoa huduma] → Miundo Inayopatikana** au piga simu kwa `GET /api/models/catalog`.
 >
-> Ikiwa orodha iliyojengwa ndani ya mtoa huduma imechelewa, tumia **Ingiza kutoka /models** kwenye ukurasa huo (au washa **Usawazishaji Kiotomatiki**) kuvuta katalogi ya moja kwa moja ya upstream. Hii ilithibitishwa katika v3.8.50 kwa LLM7.io (`gemini-3.1-flash-lite`) na UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ufikiaji wa Pollinations bila kujitambulisha uliendelea kuwa na vikwazo vya upstream wakati wa kipindi hicho hicho cha majaribio.
+> Ikiwa orodha iliyojengewa ndani ya mtoa huduma imepitwa na wakati, tumia **Ingiza kutoka /models** kwenye ukurasa huo (au wezesha **Usawazishaji Otomatiki**) ili kupata katalogi ya moja kwa moja kutoka chanzo cha juu. Hili lilithibitishwa katika v3.8.50 kwa LLM7.io (`gemini-3.1-flash-lite`) na UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ufikiaji usiojulikana wa Pollinations uliendelea kuwa na kikomo kutoka chanzo cha juu wakati wa mfululizo huo huo wa majaribio.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth ya Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ngazi za juhudi: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth ya Plus/Pro: `cx/gpt-5.5` (+ viwango vya juhudi: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth BURE: tumia katalogi ya moja kwa moja inayoonyeshwa chini ya **Dashibodi → Watoa Huduma → Kiro → Mifano Inayopatikana**. Upatikanaji unategemea akaunti na mpango.
+**Kiro (`kr/`)** — OAuth BILA MALIPO: tumia katalogi ya moja kwa moja iliyoonyeshwa chini ya **Dashibodi → Watoa huduma → Kiro → Miundo Inayopatikana**. Upatikanaji hutegemea akaunti na mpango.
 
-**Qoder (`if/`)** — OAuth BURE: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth BILA MALIPO: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mwezi (bei ya kudumu) au kwa matumizi: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9 kwa mwezi bila kikomo au kwa kila matumizi: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — ufunguo wa API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Ufunguo wa API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Kasi ya juu sana: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok asilia: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Inahifadhiwa EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Inapangishwa katika EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Imeimarishwa na utafutaji: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Imeongezewa utafutaji: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Chanzo huria: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bure), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Chanzo huria: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bila malipo), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Inferensi ya haraka: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Utekelezaji wa haraka: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Kiwango cha wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Kiwango cha kaki: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Inayolenga RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Imeelekezwa kwenye RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Kiwango cha biashara: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Kwa biashara: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Inasawazishwa moja kwa moja kwa kila ufunguo wa API kutoka Google — hakuna orodha tuli. Unganisha ufunguo katika **Dashibodi → Watoa Huduma** kisha tumia **Mifano Inayopatikana** kuingiza katalogi ya sasa (k.m. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Husawazishwa moja kwa moja kwa kila ufunguo wa API kutoka Google — hakuna orodha tuli. Unganisha ufunguo katika **Dashibodi → Watoa huduma**, kisha utumie **Miundo Inayopatikana** kuleta katalogi ya sasa (kwa mfano `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Watoa huduma wengine wanaoendana** (waliouchaguliwa): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (kupitia `aws-bedrock`), `azure-ai`, `openrouter` (katalogi ya kupitisha), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kila mmoja hutunza orodha yake ya mifano katika `providerRegistry.ts` na inaweza kusawazishwa kiotomatiki wakati mtoa huduma anatoa endpoint ya `/models`.
+**Watoa huduma wengine wanaooana** (waliochaguliwa): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (kupitia `aws-bedrock`), `azure-ai`, `openrouter` (katalogi inayopitishwa), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kila mmoja hudumisha orodha yake ya miundo katika `providerRegistry.ts` na anaweza kusawazishwa kiotomatiki wakati mtoa huduma anatoa mwisho wa `/models`.
 
-**Kumbuka kuhusu vitambulisho vya mifano:** OmniRoute hutumia vitambulisho vya asili vya mtoa huduma (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Baadhi ya vitambulisho vinajumuisha matoleo yenye nukta kwa sababu ndivyo API ya upstream inavyovitarajia. Ikiwa mfano haujaorodheshwa hapo juu, endesha `omniroute models --search <term>` au tumia `GET /api/models/catalog` kuthibitisha upatikanaji.
+**Dokezo kuhusu vitambulisho vya miundo:** OmniRoute hutumia vitambulisho asilia vya watoa huduma (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Baadhi ya vitambulisho vina matoleo yenye nukta kwa sababu hivyo ndivyo API ya chanzo cha juu inavyovitarajia. Ikiwa muundo haujaorodheshwa hapo juu, endesha `omniroute models --search <term>` au piga `GET /api/models/catalog` ili kuthibitisha upatikanaji.
 
 </details>
 

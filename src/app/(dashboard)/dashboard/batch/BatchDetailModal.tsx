@@ -6,6 +6,7 @@ import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useBatchActions } from "./components/useBatchActions";
 import { batchStatusTone } from "./components/batchStatusTone";
 
@@ -168,6 +169,7 @@ export default function BatchDetailModal({
     downloadHrefOutput,
     downloadHrefErrors,
   } = useBatchActions({ onRefresh: onActionDone, t });
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   // ── Status flags ──────────────────────────────────────────────────────────────
   const isTerminal = ["completed", "failed", "cancelled", "expired"].includes(batch.status);
@@ -238,10 +240,12 @@ export default function BatchDetailModal({
                 size="sm"
                 onClick={async () => {
                   if (
-                    window.confirm(
-                      t("batchDetailActionRetry") +
-                        ` (${batch.requestCountsFailed} ${t("batchActionRetry")})?`
-                    )
+                    await requestConfirm({
+                      message:
+                        t("batchDetailActionRetry") +
+                        ` (${batch.requestCountsFailed} ${t("batchActionRetry")})?`,
+                      variant: "primary",
+                    })
                   ) {
                     const result = await retry({
                       id: batch.id,
@@ -266,7 +270,7 @@ export default function BatchDetailModal({
                 variant="warning"
                 size="sm"
                 onClick={async () => {
-                  if (window.confirm(t("batchDetailCancelConfirm"))) {
+                  if (await requestConfirm(t("batchDetailCancelConfirm"))) {
                     await cancel(batch.id);
                     onClose();
                   }
@@ -485,6 +489,7 @@ export default function BatchDetailModal({
           </div>
         </div>
       )}
+      {confirmDialog}
     </Modal>
   );
 }

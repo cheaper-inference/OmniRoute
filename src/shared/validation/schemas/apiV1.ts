@@ -525,6 +525,27 @@ export const v1SegmentSchema = z
   })
   .catchall(z.unknown());
 
+// POST /v1/systemone — System One typed decisions (#13987). One `state` plus
+// typed `questions` (noul / choice / score); the backend is selected by the model id — `typesafe/…` or a bare `jev-*` alias
+// routes to native api.typesafe.ai, an `openrouter/…` prefix routes to
+// OpenRouter's alpha decisions endpoint.
+export const v1SystemOneSchema = z
+  .object({
+    model: modelIdSchema.optional(),
+    state: z.union([nonEmptyStringSchema, z.record(z.string(), z.unknown())]),
+    questions: z.record(z.string().min(1), z.unknown()),
+  })
+  .catchall(z.unknown())
+  .superRefine((value, ctx) => {
+    if (Object.keys(value.questions).length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "questions must contain at least one question",
+        path: ["questions"],
+      });
+    }
+  });
+
 export const providerChatCompletionSchema = z
   .object({
     model: modelIdSchema,
@@ -588,6 +609,7 @@ export const v1SearchSchema = z.preprocess(
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
     const o = { ...(raw as Record<string, unknown>) };
     if (o.provider === "x_search") o.provider = "x-search";
+    if (o.provider === "codex_search") o.provider = "codex-search";
     if (o.provider === "xquik" || o.provider === "xquik_search") o.provider = "xquik-search";
     if (o.provider === "anysearch" || o.provider === "anysearch_search")
       o.provider = "anysearch-search";

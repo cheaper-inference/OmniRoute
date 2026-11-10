@@ -107,39 +107,40 @@ omniroute setup-whycodes
 
 ---
 
-## 1. CLI代码目录（27个工具）
+## 1. CLI代码目录（28个工具）
 
 `/dashboard/cli-code`中出现的所有工具。那些带有`baseUrlSupport: none`连接通过MITM或手动指南而不是自定义基础URL：
 
-| ID           | 姓名                 | 小贩                  | 基本Url支持 | 配置类型   | acp可生成 |
-| ------------ | -------------------- | --------------------- | ----------- | ---------- | --------- |
-| 克劳德       | Claude代码           | Anthropic             | 满的        | 环境       | 真的      |
-| 法典         | OpenAI Codex CLI     | OpenAI                | 满的        | 风俗       | 真的      |
-| 零码         | ZCode（GLM编码计划） | 爱                    | 没有任何    | 风俗       | 错误的    |
-| 克莱因       | Cline                | OSS （前克劳德·戴夫） | 满的        | 风俗       | 真的      |
-| 公斤         | 基洛代码             | 基洛组织              | 满的        | 风俗       | 错误的    |
-| 袋鼠         | 袋鼠代码             | 袋鼠 (OSS)            | 满的        | 指导       | 错误的    |
-| 继续         | 继续                 | 继续.dev              | 满的        | 指导       | 错误的    |
-| 助手         | 艾德尔               | OSS （P.高蒂尔）      | 满的        | 指导       | 真的      |
-| 锻造         | ForgeCode            | HQ                    | 满的        | 风俗       | 真的      |
-| 代码         | 代码                 | 1杰黄 (OSS)           | 满的        | 风俗       | 错误的    |
-| 深度搜索-tui | DeepSeek TUI         | 猎人弓 (OSS)          | 满的        | 风俗       | 错误的    |
-| 码鲸         | CodeWhale            | 赫姆本 (OSS)          | 满的        | 风俗       | 错误的    |
-| 开放代码     | OpenCode             | 异常（前 SST）        | 满的        | 指导       | 真的      |
-| 机器人       | 工厂机器人           | 工厂AI                | 部分的      | 指导       | 错误的    |
-| 副驾驶       | GitHub Copilot CLI   | GitHub/MS             | 满的        | 风俗       | 错误的    |
-| 光标 CLI     | Cursor CLI           | 任何领域              | 部分的      | 指导       | 真的      |
-| 冶炼         | 冶炼                 | 伦纳德塞尔 (OSS)      | 满的        | 风俗       | 错误的    |
-| 圆周率       | Pi（pi 编码代理）    | M.泽克纳（OSS）       | 满的        | 风俗       | 错误的    |
-| 格罗克构建   | Grok构建             | 人工智能              | 满的        | 风俗       | 错误的    |
-| 压碎         | 压碎                 | OSS （魅力）          | 满的        | 风俗       | 错误的    |
-| 曲文         | Qwen代码             | Alibaba               | 满的        | 指导       | 真的      |
-| 泽德         | Zed                  | Zed实业               | 满的        | 指导       | 错误的    |
-| 光标         | Cursor               | 任何领域              | 没有任何    | 指导       | 错误的    |
-| 反重力       | Antigravity          | Google                | 没有任何    | 中间人     | 错误的    |
-| 爱马仕       | 赫尔墨斯             | 诺斯研究              | 没有任何    | 指导       | 错误的    |
-| 基罗         | Kiro AI              | Amazon                | 没有任何    | 中间人     | 错误的    |
-| 风俗         | 定制CLI              | —                     | 满的        | 定制建造者 | 错误的    |
+| ID           | 姓名                  | 小贩                  | baseUrlSupport | configType | acpSpawnable |
+| ------------ | --------------------- | --------------------- | -------------- | ---------- | ------------ |
+| 克劳德       | Claude代码            | Anthropic             | 满的           | 环境       | 真的         |
+| 法典         | OpenAI Codex CLI      | OpenAI                | 满的           | 风俗       | 真的         |
+| 零码         | ZCode （GLM编码计划） | 爱                    | 没有任何       | 风俗       | 错误的       |
+| 克莱因       | Cline                 | OSS （前克劳德·戴夫） | 满的           | 风俗       | 真的         |
+| 公斤         | 基洛代码              | 基洛组织              | 满的           | 风俗       | 错误的       |
+| 袋鼠         | 袋鼠代码              | 袋鼠 (OSS)            | 满的           | 指导       | 错误的       |
+| 继续         | 继续                  | 继续.dev              | 满的           | 指导       | 错误的       |
+| 助手         | 艾德尔                | OSS （P.高蒂尔）      | 满的           | 指导       | 真的         |
+| 锻造         | ForgeCode             | HQ                    | 满的           | 风俗       | 真的         |
+| 代码         | 代码                  | 1杰黄 (OSS)           | 满的           | 风俗       | 错误的       |
+| 深度搜索-tui | DeepSeek TUI          | 猎人弓 (OSS)          | 满的           | 风俗       | 错误的       |
+| 码鲸         | CodeWhale             | 赫姆本 (OSS)          | 满的           | 风俗       | 错误的       |
+| 开放代码     | OpenCode              | 异常（前 SST）        | 满的           | 指导       | 真的         |
+| 机器人       | 工厂机器人            | 工厂AI                | 部分的         | 指导       | 错误的       |
+| 副驾驶       | GitHub Copilot CLI    | GitHub/MS             | 满的           | 风俗       | 错误的       |
+| 光标 CLI     | Cursor CLI            | 任何领域              | 部分的         | 指导       | 真的         |
+| 冶炼         | 冶炼                  | 伦纳德塞尔 (OSS)      | 满的           | 风俗       | 错误的       |
+| 圆周率       | Pi（pi 编码代理）     | M.泽克纳（OSS）       | 满的           | 风俗       | 错误的       |
+| 格罗克构建   | Grok构建              | xAI                   | 满的           | 风俗       | 错误的       |
+| 压碎         | 压碎                  | OSS （魅力）          | 满的           | 风俗       | 错误的       |
+| 曲文         | Qwen代码              | Alibaba               | 满的           | 指导       | 真的         |
+| 开放克劳德   | OpenClaude            | 吉特劳布（OSS）       | 满的           | 指导       | 错误的       |
+| 泽德         | Zed                   | Zed实业               | 满的           | 指导       | 错误的       |
+| 光标         | Cursor                | 任何领域              | 没有任何       | 指导       | 错误的       |
+| 反重力       | Antigravity           | Google                | 没有任何       | 中间人     | 错误的       |
+| 爱马仕       | 赫尔墨斯              | 诺斯研究              | 没有任何       | 指导       | 错误的       |
+| 基罗         | Kiro AI               | Amazon                | 没有任何       | 中间人     | 错误的       |
+| 风俗         | 定制CLI               | —                     | 满的           | 定制建造者 | 错误的       |
 
 使用`baseUrlSupport: "partial"`的工具会在仪表板卡中显示徽章“⚠ Base URL parcial”。
 ---
@@ -221,20 +222,20 @@ interface ToolBatchStatus {
 
 ## 6. 新工具的设置处理程序
 
-具有 `configType: "custom"` 的新工具拥有专用的设置 API 路由：
+`configType: "custom"`的新工具有专门的设置API路由：
 
-| 路由                                        | 工具                                                             |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode（--base-url 标志）                                         |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI（OPENAI_BASE_URL，旧版）                            |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale（OPENAI_BASE_URL，主要配置 + 旧版 `~/.deepseek` 同步） |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi 编码智能体                                                    |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build（~/.grok/config.toml，`[model.omniroute]`）           |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code（`~/.qwen/settings.json` + 专用 `.env` 键）            |
+| 路线                                        | 工具                                                          |
+| ------------------------------------------- | ------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                       |
+| `POST /api/cli-tools/jcode-settings`        | jcode（--base-url标志）                                       |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI （OPENAI_BASE_URL，遗留）                        |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale （OPENAI_BASE_URL、主要+遗留`~/.deepseek`同步）     |
+| `POST /api/cli-tools/smelt-settings`        | 冶炼                                                          |
+| `POST /api/cli-tools/pi-settings`           | Pi编码剂（`~/.pi/agent/models.json`， `providers.omniroute`） |
+| `POST /api/cli-tools/grok-build-settings`   | Grok构建 (~grok/config.toml, `[model.omniroute]`)             |
+| `POST /api/cli-tools/qwen-settings`         | Qwen代码（`~/.qwen/settings.json` +专用`.env`密钥）           |
 
-所有路由都使用 `sanitizeErrorMessage()` 处理错误响应（硬性规则 #12）。
+所有路由都使用`sanitizeErrorMessage()`进行错误响应（硬规则 #12）。
 
 ---
 
@@ -291,21 +292,21 @@ interface ToolBatchStatus {
 
 ---
 
-## 9. 快速开始
+## 9. 快速启动
 
-### 第 1 步 — 获取 OmniRoute API 密钥
+### 步骤 1 —获取OmniRoute API密钥
 
-1. 打开 `/dashboard/api-manager` → **创建 API 密钥**
-2. 为其命名（例如 `cli-tools`），并选择所有权限
-3. 复制密钥 — 后续每个 CLI 都需要使用它
+1. 打开`/dashboard/api-manager` →**创建API密钥**
+2. 为其命名（例如`cli-tools`）并选择所有权限
+3. 复制密钥—下面的每个CLI都需要它
 
-> 你的密钥格式如下：`sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> 您的密钥如下所示： `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### 第 2 步 — 安装 CLI 工具
+### 步骤2 —安装CLI工具
 
-所有基于 npm 的工具都需要 Node.js 22.22.2+ 或 24.x：
+所有基于 npm 的工具都需要Node.js 22.22.2 +或 24.x：
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI（可通过 `omniroute run gemini` 启动 → /v1beta 接口）
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # 基于 Rust
+cargo install smelt  # Rust-based
 
-# Pi 编码代理
-# 安装方法请参阅 https://github.com/zechnerj/pi-coding-agent
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# 安装方法请参阅 https://github.com/1jehuang/jcode
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### 第 3 步 — 通过仪表板配置
+### 步骤 3 —通过仪表板配置
 
-1. 前往 `http://localhost:20128/dashboard/cli-code`
-2. 在网格中找到你的工具
-3. 点击卡片打开工具详情页
-4. 选择你的 API 密钥和基础 URL
-5. 点击 **应用配置**，或复制手动配置代码片段
+1. 前往`http://localhost:20128/dashboard/cli-code`
+2. 在网格中找到您的工具
+3. 点击卡片打开工具详情页面
+4. 选择您的API密钥和基础URL
+5. 点击**应用配置**或复制手动配置片段
 
 ---
 
-### 第 4 步 — 设置全局环境变量
+### 步骤4 —设置全局环境变量
 
 ```bash
-# OmniRoute 通用端点
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI 从根地址读取 GOOGLE_GEMINI_BASE_URL（其 SDK 会自行追加 /v1beta/...）
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> 对于**远程服务器**，请将 `localhost:20128` 替换为服务器 IP 或域名，
-> 例如 `http://<your-server-ip>:20128`。
+> 对于一个**远程服务器**将`localhost:20128`替换为服务器IP或域，例如`http://<your-server-ip>:20128`。
 
 ---
 
-### 第 4 步 — 配置每个工具
+### 步骤 4 —配置每个工具
 
-#### Claude Code
+#### Claude代码
 
 ```bash
-# 创建 ~/.claude/settings.json：
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-为 Claude Code 使用统一的 Anthropic 网关根地址。此处不要追加 `/v1`。
+Claude代码使用统一的Anthropic网关根。不要在此处附加`/v1` 。
 
 **测试：** `claude "say hello"`
 
@@ -396,10 +396,7 @@ EOF
 
 #### OpenAI Codex
 
-现代版 Codex（v0.137+）仅会读取 `~/.codex/config.toml` — 旧的
-`config.yaml` 属于旧版 npm CLI，会被静默忽略。API
-密钥应保存在 `OMNIROUTE_API_KEY` 环境变量（`env_key`）中，绝不能
-写入文件：
+现代Codex (v0.137 +) 仅读取`~/.codex/config.toml` —旧`config.yaml`属于旧版 npm CLI并被默默忽略。 API密钥保留在`OMNIROUTE_API_KEY`环境变量 (`env_key`) 中，而不是在文件中：
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,7 +411,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-完整参考（配置文件、`wire_api`、上下文窗口）：[CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md)。
+完整参考（配置文件、 `wire_api`、上下文窗口）： [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md) 。
 
 **测试：** `codex "what is 2+2?"`
 
@@ -447,14 +444,44 @@ EOF
 
 **测试：** `opencode`
 
-> 使用 `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> 发送思考变体。
+> 使用`opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`发送思维变体。
 
 ---
 
-#### Cline（CLI 或 VS Code）
+#### Pi编码剂
 
-**CLI 模式：**
+使用`npm install -g --ignore-scripts @earendil-works/pi-coding-agent`安装官方 Pi Coding Agent 包。 Pi 从`~/.pi/agent/models.json`读取自定义提供程序；设置`PI_CODING_AGENT_DIR`移动整个代理目录。仪表板遵循该覆盖。 Pi 不会从自定义端点发现模型，因此OmniRoute使用 Pi 的`openai-completions` API和OmniRoute OpenAI 兼容`/v1`端点在`models[]`中写入所选模型。
+
+在**CLI工具→ Pi** ，选择端点、 API密钥和模型，查看提供程序预览，然后应用。预览是一个提供程序片段：在手动配置 Pi 时将`providers.omniroute`合并到现有的`models.json`中，以便其他提供程序和设置保持不变。
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+当您打开`/model`时，Pi 会重新加载`models.json` 。使用您选择的提供者 ID 和模型 ID 测试配置的路由：
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+参考资料： [Pi 模型和自定义提供程序](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)、 [Pi 环境变量](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)、 [Pi 安装说明](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)。
+
+---
+
+#### Cline （CLI或VS代码）
+
+**CLI模式：**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -466,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code 模式：**
-Cline 扩展设置 → API 提供者：`OpenAI Compatible` → 基础 URL：`http://localhost:20128/v1`
+**VS代码模式：** Cline扩展设置→ API提供者： `OpenAI Compatible` →基础URL： `http://localhost:20128/v1`
 
-或者使用 OmniRoute 仪表板 → **CLI 工具 → Cline → 应用配置**。
+或者使用OmniRoute仪表板→**CLI工具→ Cline →应用配置**。
 
 ---
 
-#### KiloCode（CLI 或 VS Code）
+#### KiloCode （CLI或VS代码）
 
-**CLI 模式：**
+**CLI模式：**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code 设置：**
+**VS代码设置：**
 
 ```json
 {
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-或者使用 OmniRoute 仪表板 → **CLI 工具 → KiloCode → 应用配置**。
+或者使用OmniRoute仪表板→**CLI工具→ KiloCode →应用配置**。
 
 ---
 
-#### Continue（VS Code 扩展）
+#### 继续（VS代码扩展）
 
-编辑 `~/.continue/config.yaml`：
+编辑`~/.continue/config.yaml`：
 
 ```yaml
 models:
@@ -508,20 +534,20 @@ models:
     default: true
 ```
 
-编辑后重启 VS Code。
+编辑完成后重启VS代码。
 
 ---
 
-#### VS Code Insiders（`chatLanguageModels.json`）
+#### VS代码内部人士 (`chatLanguageModels.json`)
 
-当 VS Code Insiders 配置为使用自定义端点模型，并且你希望 OmniRoute 无需自定义请求头字段即可工作时，请使用此配置。
+当VS Code Insiders 配置为自定义端点模型并且您希望OmniRoute在没有自定义标头字段的情况下工作时，请使用此选项。
 
-**推荐位置：**
+**推荐地点：**
 
-- Linux：`~/.config/Code - Insiders/User/chatLanguageModels.json`
-- Windows：`%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
+- Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
+- Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**使用令牌化 OmniRoute 别名的示例：**
+**使用标记化OmniRoute别名的示例：**
 
 ```json
 [
@@ -543,29 +569,28 @@ models:
 ]
 ```
 
-**注意事项：**
+**笔记：**
 
-- 将 `sk-your-omniroute-key` 替换为在 OmniRoute 中创建的 API 密钥。
-- `url` 字段应指向 `/api/v1/vscode/{token}/chat/completions`。
-- `modelsUrl` 字段应指向 `/api/v1/vscode/{token}/models`。
-- 当客户端支持自定义请求头时，优先使用常规的 `/v1` + Bearer 请求头流程。
-- URL 中嵌入令牌是一种兼容性后备方案，令牌可能会出现在编辑器日志或代理历史记录中。
+- 将`sk-your-omniroute-key`替换为OmniRoute中创建的API密钥。
+- `url`字段应指向`/api/v1/vscode/{token}/chat/completions`。
+- `modelsUrl`字段应指向`/api/v1/vscode/{token}/models`。
+- 当客户端支持自定义标头时，首选正常的`/v1` +承载标头流。
+- URL 嵌入令牌是一种兼容性回退，可能会出现在编辑器日志或代理历史记录中。
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# 登录您的 AWS/Kiro 账户：
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI 使用自身的身份验证——Kiro CLI 本身不需要将 OmniRoute 用作后端。
-# 可将 kiro-cli 与 OmniRoute 一起用于其他工具。
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-对于 **Kiro IDE** 桌面应用，请使用 OmniRoute 在
-`/dashboard/cli-tools → Kiro` 下公开的 MITM 端点。
+对于**Kiro IDE**桌面应用程序，使用OmniRoute在`/dashboard/cli-tools → Kiro`下公开的MITM端点。
 
 ---
 

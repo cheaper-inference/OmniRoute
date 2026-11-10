@@ -544,11 +544,13 @@ export function injectEmptyReasoningContentForToolCalls(
  * `"[MaxDepth]"`, or an index-keyed object (`{"0":"a","1":"b"}`) where an array
  * is expected. Anthropic rejects these with
  * `tools.N.custom.input_schema: JSON schema is invalid` (surfaced as a
- * misleading `400 out of extra usage` placeholder when streaming). Non-Anthropic
+ * misleading `400 out of extra usage` placeholder when streaming). Lenient
  * targets (OpenAI/Codex) tolerate them, which is why the same request succeeds
- * on a fallback provider. This sanitizer coerces or drops the invalid
- * constructs so legitimate native-Claude-OAuth traffic is not spuriously
- * rejected. See Spec E (Claude Code OAuth wire compatibility).
+ * on a fallback provider, but strict OpenAI-compatible validators do not
+ * (Ollama Cloud, #18679), so the Responses -> Chat translator runs it too.
+ * This sanitizer coerces or drops the invalid constructs so legitimate
+ * traffic is not spuriously rejected. See Spec E (Claude Code OAuth wire
+ * compatibility).
  */
 const SCHEMA_PLACEHOLDER_PATTERN = /^\[(?:MaxDepth|Truncated|Circular|Object|Array)\]$/;
 const ARRAY_SCHEMA_KEYS = ["enum", "required", "anyOf", "oneOf", "allOf", "prefixItems"];

@@ -444,7 +444,7 @@ Rozděleno do účelově zaměřených podadresářů:
 
 ---
 
-## 4. `open-sse/` — Pracovní prostor streamovacího modulu
+## 4. `open-sse/` — Pracovní plocha streamovacího motoru
 
 Samostatný pracovní prostor npm publikovaný jako `@omniroute/open-sse`. Vlastní zpracování požadavků, vykonavatele, překladatele, služby, transformátor a server MCP.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 spouštěcích modulů nejvyšší úrovně (`*.ts` minus `base.ts`, `index.ts` a testy — počet měření `npm run check:docs-counts` ). Každá třída exekutorů rozšiřuje `BaseExecutor` (`base.ts`), přímo nebo prostřednictvím `DefaultExecutor` nebo jiného exekutoru; zbývající moduly jsou pomocníci pro jednotlivé poskytovatele (schémata nástrojů, adaptéry fetch/TTS, quirk handlery). Mezi exekutory patří:
+159 spouštěcích modulů nejvyšší úrovně (`*.ts` minus `base.ts`, `index.ts` a testy — počet měření `npm run check:docs-counts` ). Každá třída exekutorů rozšiřuje `BaseExecutor` (`base.ts`), přímo nebo prostřednictvím `DefaultExecutor` nebo jiného exekutoru; zbývající moduly jsou pomocníci pro jednotlivé poskytovatele (schémata nástrojů, adaptéry fetch/TTS, ovladače quirk). Mezi exekutory patří:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, identita plus `claudeIdentity.ts` `index.ts` (registr).
 
-> Poznámka: Poskytovatelé, kteří zde nejsou uvedeni, jsou obsluhováni `default.ts` pomocí generického spouštěče kompatibilního s OpenAI. Úplný katalog poskytovatelů (377 poskytovatelů) žije v `src/shared/constants/providers.ts`.
+> Poznámka: Poskytovatelé, kteří zde nejsou uvedeni, jsou obsluhováni `default.ts` pomocí generického spouštěče kompatibilního s OpenAI. Úplný katalog poskytovatelů (381 poskytovatelů) žije v `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Hub-and-spoke překlad (OpenAI je rozbočovač).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Responses API ↔ Konvertor dokončení chatu (používá se univerzálním zachytáváním trasy `responses/` ).
+- `responsesTransformer.ts` — `TransformStream` -based Odpovědi API ↔ Konvertor dokončení chatu (používá se univerzálním zachytáváním trasy `responses/` ).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ Nejdůležitější (úplný seznam pod `open-sse/services/`):
 | Ukládání do mezipaměti | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Směrovací inteligence  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Manipulace s modelem   | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Komprese               | `compression/` — kompletní kabeláž kompresního motoru                                                                                                                                                                                                    |
+| Komprese               | `compression/` — kabeláž plně kompresního motoru                                                                                                                                                                                                         |
 | Token relace +         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Úroveň / manifest      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / síť               | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,9 +528,9 @@ Nejdůležitější (úplný seznam pod `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unikátních nástrojů** zapojené v `server.ts` (45 kanonických v `schemas/tools.ts` + paměti, dovednostech, dovednostech GitHub, pool, gamifikace, plugin, Notion, Obsidian, lokální korpus a kompresní moduly – sjednocení počítáno `countUniqueMcpTools`).
+- **110 unikátních nástrojů** zapojené v `server.ts` (45 kanonických v paměti `schemas/tools.ts` +, dovednosti, dovednosti GitHub, pool, gamifikace, plugin, Notion, Obsidian, lokální korpus a kompresní moduly — union počítané podle `countUniqueMcpTools`).
 - **3 transporty** : stdio, HTTP Streamable, SSE.
-- **33 rozsahů** vynuceno za běhu — základní seznam v `src/shared/constants/mcpScopes.ts`, úplná sada je sjednocením rozsahů deklarovaných každým modulem nástroje.
+- **33 rozsahů** vynucený za běhu základního seznamu — v `src/shared/constants/mcpScopes.ts`, úplná sada je sjednocením rozsahů deklarovaných každým modulem nástroje.
 - Tabulka auditu: `mcp_tool_audit` (vyplněná `audit.ts`).
 - Soubory: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus testy pod `__tests__/`.
 - Úplný katalog nástrojů naleznete [MCP-SERVER.md](../frameworks/MCP-SERVER.md).

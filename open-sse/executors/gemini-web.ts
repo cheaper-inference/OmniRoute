@@ -609,8 +609,27 @@ export class GeminiWebExecutor extends BaseExecutor {
       // Capture first StreamGenerate response
       let responseText = "";
       let captured = false;
+      // #19073: remember which endpoints answered while we waited (origin + path only,
+      // never the query string), so a "No response" 502 says whether the page posted
+      // nowhere, somewhere else, or to StreamGenerate with an unreadable body. Collection
+      // starts at submission: the navigation document and page-load assets would otherwise
+      // fill the cap and make "the page never posted" impossible to read from the list.
+      const seenResponseUrls: string[] = [];
+      const MAX_SEEN_RESPONSE_URLS = 20;
+      let promptSubmitted = false;
       const responsePromise = new Promise<void>((resolve) => {
         page.on("response", async (resp: any) => {
+          try {
+            const seen = new URL(resp.url());
+            const bare = `${seen.origin}${seen.pathname}`;
+            if (
+              promptSubmitted &&
+              !seenResponseUrls.includes(bare) &&
+              seenResponseUrls.length < MAX_SEEN_RESPONSE_URLS
+            ) {
+              seenResponseUrls.push(bare);
+            }
+          } catch {} // a non-URL (about:blank, data:) is not worth reporting
           if (!resp.url().includes("StreamGenerate")) return;
           if (captured) return;
           // Resolve even if reading the body throws, so the flow falls through
@@ -713,6 +732,7 @@ export class GeminiWebExecutor extends BaseExecutor {
       // cost that made long prompts race the 30s response-wait timeout.
       await page.keyboard.insertText(prompt);
       await page.waitForTimeout(300);
+      promptSubmitted = true;
       await page.keyboard.press("Enter");
 
       await Promise.race([responsePromise, page.waitForTimeout(resolveResponseTimeoutMs(modelId))]);
@@ -722,10 +742,19 @@ export class GeminiWebExecutor extends BaseExecutor {
 
       if (!responseText) {
         return {
-          response: new Response(JSON.stringify({ error: "No response from Gemini" }), {
-            status: 502,
-            headers: { "Content-Type": "application/json" },
-          }),
+          response: new Response(
+            JSON.stringify({
+              error: "No response from Gemini",
+              // Distinguish a StreamGenerate body the parser could not read from no
+              // StreamGenerate response at all (#19073).
+              code: captured ? "gemini_web_unparseable_response" : "gemini_web_no_response",
+              seen_response_urls: seenResponseUrls,
+            }),
+            {
+              status: 502,
+              headers: { "Content-Type": "application/json" },
+            }
+          ),
           url: GEMINI_URL,
           headers: {},
           transformedBody: body,

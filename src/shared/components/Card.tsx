@@ -14,13 +14,15 @@ interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> 
   children?: React.ReactNode;
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** Material Symbols name, rendered through <Icon> in the header chip. */
+  /** ICON_MAP name, rendered through <Icon> in the header chip. */
   icon?: string;
   action?: React.ReactNode;
   padding?: "none" | "xs" | "sm" | "md" | "lg";
   hover?: boolean;
   /** Kit surface: `subtle` is the neutral gradient for grouped secondary actions (spec §3.6). */
   surface?: "default" | "subtle";
+  /** A third-party brand as a tint: `#rgb` or `#rrggbb`. The kit derives the AA ink and border. */
+  brandColor?: string;
   className?: string;
 }
 
