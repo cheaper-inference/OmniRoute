@@ -329,6 +329,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // lookup behind the health endpoint, never connection selection or dispatch (class C).
     "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
+    // #18864: after a confirmed GLM reset-card redemption (whose caller already passed the
+    // auxiliary-lease gate) the row is re-read only to confirm the captured cooldown is
+    // unchanged before the compare-and-clear — a state read, never connection selection or
+    // dispatch, so class C (same shape as resetCreditCooldownRelease.ts).
+    "src/lib/usage/glmResetCardRecovery.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same
     // shape — isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an
