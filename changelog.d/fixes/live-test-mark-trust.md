@@ -1,0 +1,1 @@
+- **fix(sse):** the internal live-test mark now only counts on requests OmniRoute sends to itself, proven by the per-process token, so every other request follows the normal cooldown, breaker and quota checks. The dashboard model test and combo test keep their behavior; the token no longer reaches the client header record, and request logs redact it

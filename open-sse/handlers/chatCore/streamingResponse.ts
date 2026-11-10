@@ -1,4 +1,9 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../../utils/providerHttpAttempts.ts";
 import { projectFailureUsageErrorCode } from "./failureUsage.ts";
+import { isHedgeCancelledReasonError } from "../../services/combo/comboAbortReasons.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages } from "./claudeSystemRole.ts";
@@ -28,8 +33,6 @@ export {
   stripStaleForwardingHeaders,
 };
 
-import { normalizeHeaders } from "../../utils/headers.ts";
-
 import { FORMATS } from "../../translator/formats.ts";
 
 import { COLORS } from "../../utils/stream.ts";
@@ -57,7 +60,11 @@ import {
   sanitizeUpstreamDetails,
 } from "../../utils/error.ts";
 
-import { HTTP_STATUS, ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
+import {
+  HTTP_STATUS,
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE,
+} from "../../config/constants.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
 import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 
@@ -148,6 +155,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     connectionId,
     contextEditingEnabled,
     credentials,
+    forcedConnectionId,
     effectiveModel,
     executeRefreshCredentials,
     executor,
@@ -211,12 +219,19 @@ export async function runStreamingResponse(deps: StreamingDeps) {
   providerUrl = deps.providerUrl;
   translatedBody = deps.translatedBody;
   // #3229: diagnostic of the response `providerResponse` holds; replacing it must replace this.
+  let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let upstreamDiagnostic: Record<string, unknown> | undefined;
+  const rejection: HttpAttemptRejectionSlot = { selection: null };
   try {
     const pipelineOutcome = await runProviderExecutionPipeline({
+      upstreamHttpRejection: rejection,
       getNextFamilyFallback: familyFallback.getNext,
       policy: {
-        allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
+        // The connection pin is strict (API_REFERENCE: "used exclusively", cooldown on
+        // failure, no sibling rotation). The outer retry loop honours it; the in-pipeline
+        // account rotation must too, or a pinned 429 is silently answered by another account.
+        allowAccountRotation:
+          !managedLease && comboStrategy !== "context-relay" && !forcedConnectionId,
         allowModelFallback: true,
         expectedConnectionId: managedLease
           ? String(getCurrentConnectionId() || connectionId || "") || undefined
@@ -304,8 +319,8 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           });
         },
       },
-      sendProviderAttempt: (modelToCall, allowDedup) =>
-        executeProviderRequest(modelToCall, allowDedup),
+      sendProviderAttempt: (modelToCall, allowDedup, rejected) =>
+        executeProviderRequest(modelToCall, allowDedup, undefined, rejected),
       getLastOutboundBody: () => providerRequestCapture.latest()?.body,
       onSignatureFailure: reportSignatureFailure,
     });
@@ -313,11 +328,13 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     pipelineRecovered = true;
     currentModel = pipelineOutcome.model;
     upstreamDiagnostic = pipelineOutcome.upstreamDiagnostic;
+    upstreamHttpSelection = pipelineOutcome.upstreamHttpSelection ?? null;
     if (pipelineOutcome.kind === "error") {
       providerResponse = pipelineOutcome.result.response;
-      providerUrl = "";
-      providerHeaders = normalizeHeaders(pipelineOutcome.result.response.headers);
-      finalBody = translatedBody;
+      const lastRequest = providerRequestCapture.latest();
+      providerUrl = lastRequest?.url;
+      providerHeaders = lastRequest?.headers;
+      finalBody = lastRequest?.body;
     } else {
       const result = {
         response: pipelineOutcome.response,
@@ -339,13 +356,17 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       clientRawRequest?.headers
     );
 
-    // Log target request (final request to provider)
-    reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-    updatePendingScope(pendingScope, {
-      providerRequest: finalBody,
-      providerUrl,
-      stage: "provider_response_started",
-    });
+    // Keep the captured request on failure; outcome metadata may describe the response.
+    if (pipelineOutcome.kind === "response") {
+      reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
+      updatePendingScope(pendingScope, {
+        providerRequest: finalBody,
+        providerUrl,
+        stage: "provider_response_started",
+      });
+    } else {
+      updatePendingScope(pendingScope, { stage: "provider_response_started" });
+    }
     // Update rate limiter from response headers (learn limits dynamically)
     updateFromHeaders(
       provider,
@@ -367,13 +388,21 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       // fail-open: saturation signal is best-effort
     }
   } catch (error) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)
       return {
         response: managedLeaseFenceErrorResult(managedLeaseFenceCode),
         carry: {
+          upstreamHttpSelection,
           translatedBody,
           currentModel,
           effectiveServiceTier,
@@ -396,9 +425,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       }).catch(() => {});
       const failureMessage = sanitizeErrorMessage(errorMetadata.message) || "Semaphore timeout";
       persistAttemptLogs({
+        upstreamHttpSelection,
         status: HTTP_STATUS.RATE_LIMITED,
         error: failureMessage,
-        providerRequest: finalBody || translatedBody,
+        providerRequest: providerRequestCapture.latest()?.body,
         clientResponse: buildErrorBody(HTTP_STATUS.RATE_LIMITED, failureMessage),
         claudeCacheMeta: claudePromptCacheLogMeta,
         cacheSource: "upstream",
@@ -413,6 +443,32 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           errorType: "account_semaphore_capacity",
           errorCode: semaphoreCode,
         },
+        carry: {
+          upstreamHttpSelection,
+          translatedBody,
+          currentModel,
+          effectiveServiceTier,
+          finalBody,
+          pipelineRecovered,
+          providerHeaders,
+          providerResponse,
+          providerUrl,
+        },
+      };
+    }
+    // A hedge-cancelled attempt was superseded by a sibling target (see
+    // COMBO_HEDGE_CANCELLED_REASON): the request it belonged to is served by
+    // the winner, so this attempt is neither a client abort nor an upstream
+    // failure. Falling through would persist it as 499 "Request aborted",
+    // making every status-keyed dashboard count internal hedge cancellations
+    // as client disconnects. Mirror the per-model timeout loser semantics
+    // (targetTimeoutRunner's status-599 sentinel): tear down quietly, persist
+    // nothing — the combo loop ignores this result, a sibling has already
+    // resolved the execution.
+    if (isHedgeCancelledReasonError(error)) {
+      streamController.handleError(createSafeAbortError());
+      return {
+        response: createErrorResult(599, "Superseded by hedge sibling", null, "hedge_cancelled"),
         carry: {
           translatedBody,
           currentModel,
@@ -436,6 +492,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         // A hostile Proxy must not escape the provider-error boundary during classification.
       }
     }
+    upstreamHttpSelection = isRequestAborted ? null : rejection.selection;
     // #8376: proxyFetch tags unreachable transport failures so they remain
     // distinguishable from ordinary provider 5xx responses.
     const isProxyUnreachableFailure =
@@ -479,11 +536,13 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       failureStatus === HTTP_STATUS.GATEWAY_TIMEOUT &&
       (errorMetadata.name === "TimeoutError" || errorMetadata.name === "BodyTimeoutError");
     const upstreamErrorType =
-      upstreamErrorCode === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE || isOwnDeadlineTimeout
-        ? "upstream_timeout"
-        : failureStatus === 401
-          ? "authentication_error"
-          : undefined;
+      upstreamErrorCode === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE
+        ? "request_timeout"
+        : upstreamErrorCode === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE || isOwnDeadlineTimeout
+          ? "upstream_timeout"
+          : failureStatus === 401
+            ? "authentication_error"
+            : undefined;
     appendRequestLog({
       model,
       provider,
@@ -491,9 +550,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       status: `FAILED ${failureStatus}`,
     }).catch(() => {});
     persistAttemptLogs({
+      upstreamHttpSelection,
       status: failureStatus,
       error: safeFailureMessage,
-      providerRequest: finalBody || translatedBody,
+      providerRequest: providerRequestCapture.latest()?.body,
       // On a client-abort (AbortError), the client already disconnected before
       // we ever got here — this body is what we WOULD have sent, not what was
       // actually delivered. Logging it as `clientResponse` is misleading (the
@@ -511,6 +571,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       return {
         response: createErrorResult(499, "Request aborted"),
         carry: {
+          upstreamHttpSelection,
           translatedBody,
           currentModel,
           effectiveServiceTier,
@@ -548,6 +609,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           errorCode: upstreamErrorCode,
         },
         carry: {
+          upstreamHttpSelection,
           translatedBody,
           currentModel,
           effectiveServiceTier,
@@ -570,6 +632,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     return {
       response: result,
       carry: {
+        upstreamHttpSelection,
         translatedBody,
         currentModel,
         effectiveServiceTier,
@@ -591,7 +654,9 @@ export async function runStreamingResponse(deps: StreamingDeps) {
   // that may be from the modification rather than a genuine auth failure, so we
   // skip the credential refresh attempt in that case.
   const hadStreamOptions =
-    targetFormat === FORMATS.OPENAI_RESPONSES && "stream_options" in translatedBody;
+    provider !== "codex" &&
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    "stream_options" in translatedBody;
   if (hadStreamOptions) {
     delete translatedBody.stream_options;
   }
@@ -729,6 +794,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         upstreamDiagnostic = retryResult.upstreamDiagnostic;
         if (retryResult.response.ok) {
           providerResponse = retryResult.response;
+          upstreamHttpSelection = retryResult.upstreamHttpSelection ?? null;
           providerUrl = retryResult.url;
           providerHeaders = new Headers(retryResult.headers || {});
           finalBody = providerRequestCapture.body(retryResult.transformedBody);
@@ -741,6 +807,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           upstreamErrorParsed = false; // Reset since new response is OK
         } else {
           providerResponse = retryResult.response;
+          upstreamHttpSelection = retryResult.upstreamHttpSelection ?? null;
           upstreamErrorParsed = false; // Let it be parsed downstream
         }
       } catch (retryErr) {
@@ -751,6 +818,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           return {
             response: managedLeaseFenceErrorResult(retryLeaseFenceCode),
             carry: {
+              upstreamHttpSelection,
               translatedBody,
               currentModel,
               effectiveServiceTier,
@@ -802,7 +870,14 @@ export async function runStreamingResponse(deps: StreamingDeps) {
 
   // Check provider response - return error info for fallback handling
   providerFailure: if (!providerResponse.ok) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
 
     let statusCode = providerResponse.status;
     let message = "";
@@ -858,6 +933,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         ? { attempted: false, succeeded: false, execution: null, error: null, recoveryBody: null }
         : await recoverAnthropicThinkingSignature({
             provider,
+            model: currentModel,
             statusCode,
             message,
             body: translatedBody,
@@ -885,6 +961,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     }
     if (!pipelineRecovered && signatureRecovery.attempted && signatureRecovery.execution) {
       providerResponse = signatureRecovery.execution.response;
+      upstreamHttpSelection = signatureRecovery.execution.upstreamHttpSelection ?? null;
       upstreamDiagnostic = signatureRecovery.execution.upstreamDiagnostic;
       if (signatureRecovery.succeeded) {
         providerUrl = signatureRecovery.execution.url;
@@ -987,8 +1064,8 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       log?.debug?.("RETRY", `Antigravity quota reset in ${retrySeconds}s (${retryAfterMs}ms)`);
     }
 
-    // Log error with full request body for debugging
-    reqLogger.logError(new Error(message), finalBody || translatedBody);
+    // Log only a captured outgoing request body with provider errors.
+    reqLogger.logError(new Error(message), providerRequestCapture.latest()?.body);
     const persistedProviderErrorBody = logTerminalProviderResponse(
       reqLogger,
       provider,
@@ -1016,6 +1093,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           const fallbackResult = await executeProviderRequest(nextModel, false);
           if (fallbackResult.response.ok) {
             providerResponse = fallbackResult.response;
+            upstreamHttpSelection = fallbackResult.upstreamHttpSelection ?? null;
             adoptFallbackDiagnostic(fallbackResult.upstreamDiagnostic);
             providerUrl = fallbackResult.url;
             providerHeaders = fallbackResult.headers;
@@ -1033,9 +1111,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           } else {
             // Fallback also failed — return original error
             persistAttemptLogs({
+              upstreamHttpSelection,
               status: statusCode,
               error: safeErrMsg,
-              providerRequest: finalBody || translatedBody,
+              providerRequest: providerRequestCapture.latest()?.body,
               providerResponse: persistedProviderErrorBody,
               clientResponse: buildErrorBody(statusCode, errMsg),
               cacheSource: "upstream",
@@ -1052,6 +1131,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
                 { passthrough: sourceFormat === FORMATS.CLAUDE }
               ),
               carry: {
+                upstreamHttpSelection,
                 translatedBody,
                 currentModel,
                 effectiveServiceTier,
@@ -1065,9 +1145,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           }
         } catch {
           persistAttemptLogs({
+            upstreamHttpSelection,
             status: statusCode,
             error: safeErrMsg,
-            providerRequest: finalBody || translatedBody,
+            providerRequest: providerRequestCapture.latest()?.body,
             providerResponse: persistedProviderErrorBody,
             clientResponse: buildErrorBody(statusCode, errMsg),
             cacheSource: "upstream",
@@ -1084,6 +1165,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
               { passthrough: sourceFormat === FORMATS.CLAUDE }
             ),
             carry: {
+              upstreamHttpSelection,
               translatedBody,
               currentModel,
               effectiveServiceTier,
@@ -1097,9 +1179,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         }
       } else {
         persistAttemptLogs({
+          upstreamHttpSelection,
           status: statusCode,
           error: safeErrMsg,
-          providerRequest: finalBody || translatedBody,
+          providerRequest: providerRequestCapture.latest()?.body,
           providerResponse: persistedProviderErrorBody,
           clientResponse: buildErrorBody(statusCode, errMsg),
           cacheSource: "upstream",
@@ -1116,6 +1199,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
             { passthrough: sourceFormat === FORMATS.CLAUDE }
           ),
           carry: {
+            upstreamHttpSelection,
             translatedBody,
             currentModel,
             effectiveServiceTier,
@@ -1138,6 +1222,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           const fallbackResult = await executeProviderRequest(nextModel, false);
           if (fallbackResult.response.ok) {
             providerResponse = fallbackResult.response;
+            upstreamHttpSelection = fallbackResult.upstreamHttpSelection ?? null;
             adoptFallbackDiagnostic(fallbackResult.upstreamDiagnostic);
             providerUrl = fallbackResult.url;
             providerHeaders = fallbackResult.headers;
@@ -1154,9 +1239,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
             );
           } else {
             persistAttemptLogs({
+              upstreamHttpSelection,
               status: statusCode,
               error: safeErrMsg,
-              providerRequest: finalBody || translatedBody,
+              providerRequest: providerRequestCapture.latest()?.body,
               providerResponse: persistedProviderErrorBody,
               clientResponse: buildErrorBody(statusCode, errMsg),
               cacheSource: "upstream",
@@ -1173,6 +1259,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
                 { passthrough: sourceFormat === FORMATS.CLAUDE }
               ),
               carry: {
+                upstreamHttpSelection,
                 translatedBody,
                 currentModel,
                 effectiveServiceTier,
@@ -1186,9 +1273,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           }
         } catch {
           persistAttemptLogs({
+            upstreamHttpSelection,
             status: statusCode,
             error: safeErrMsg,
-            providerRequest: finalBody || translatedBody,
+            providerRequest: providerRequestCapture.latest()?.body,
             providerResponse: persistedProviderErrorBody,
             clientResponse: buildErrorBody(statusCode, errMsg),
             cacheSource: "upstream",
@@ -1205,6 +1293,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
               { passthrough: sourceFormat === FORMATS.CLAUDE }
             ),
             carry: {
+              upstreamHttpSelection,
               translatedBody,
               currentModel,
               effectiveServiceTier,
@@ -1218,9 +1307,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         }
       } else {
         persistAttemptLogs({
+          upstreamHttpSelection,
           status: statusCode,
           error: safeErrMsg,
-          providerRequest: finalBody || translatedBody,
+          providerRequest: providerRequestCapture.latest()?.body,
           providerResponse: persistedProviderErrorBody,
           clientResponse: buildErrorBody(statusCode, errMsg),
           cacheSource: "upstream",
@@ -1237,6 +1327,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
             { passthrough: sourceFormat === FORMATS.CLAUDE }
           ),
           carry: {
+            upstreamHttpSelection,
             translatedBody,
             currentModel,
             effectiveServiceTier,
@@ -1250,9 +1341,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       }
     } else {
       persistAttemptLogs({
+        upstreamHttpSelection,
         status: statusCode,
         error: safeErrMsg,
-        providerRequest: finalBody || translatedBody,
+        providerRequest: providerRequestCapture.latest()?.body,
         providerResponse: persistedProviderErrorBody,
         clientResponse: buildErrorBody(statusCode, errMsg),
         cacheSource: "upstream",
@@ -1276,6 +1368,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           { passthrough: sourceFormat === FORMATS.CLAUDE }
         ),
         carry: {
+          upstreamHttpSelection,
           translatedBody,
           currentModel,
           effectiveServiceTier,
@@ -1291,6 +1384,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
   }
   return {
     carry: {
+      upstreamHttpSelection,
       translatedBody,
       currentModel,
       effectiveServiceTier,

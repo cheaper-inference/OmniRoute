@@ -12,6 +12,7 @@ import {
   runComboStepTest,
   subscribeComboStepTests,
 } from "./comboStepTest";
+import { Spinner } from "@/shared/components/Loading";
 
 const STATE_STYLES = {
   idle: { icon: "science", tone: "text-text-muted border-transparent" },
@@ -52,11 +53,11 @@ export default function ComboStepTestButton({ entry }: { entry: unknown }) {
       title={title}
       aria-label={title}
     >
-      <Icon
-        name={style.icon}
-        size={12}
-        className={state === "running" ? "animate-spin" : undefined}
-      />
+      {state === "running" ? (
+        <Spinner decorative size="xs" />
+      ) : (
+        <Icon name={style.icon} size={12} />
+      )}
     </Button>
   );
 }

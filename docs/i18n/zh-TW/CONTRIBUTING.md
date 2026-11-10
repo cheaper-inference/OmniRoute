@@ -13,15 +13,20 @@ UI/UX、i18n、CLI、資料庫和建置/部署變更對應到其合約、重點�
 
 ---
 
-## 開發環境設定
+## 開發設定
 
 ### 先決條件
 
 - **Node.js** `>=22.22.2 <23`，或 `>=24.0.0 <27`（建議：24 LTS）
 - **npm** 10+
 
-> **npm v11+ 使用者（Node 24+）：** 執行 `npm install` 後，請確認原生模組已安裝：
-> `node -e "require('better-sqlite3')"`。若執行失敗並顯示 `MODULE_NOT_FOUND`，
+> **使用 Node 24 的 Windows：** 使用目前的 24 LTS 修補版本（至少 24.20.0）。
+> 較早的版本可能會在測試成功後，由 `--test-force-exit` 關閉程序時中止。
+> Node 的 [Windows libuv 修正](https://github.com/nodejs/node/pull/61999) 可解決
+> 此執行階段當機問題；請保持測試判斷和執行器結束檢查啟用。
+
+> **npm v11+ 使用者（Node 24+）：** 執行 `npm install` 後，確認原生模組已安裝：
+> `node -e "require('better-sqlite3')"`。如果因 `MODULE_NOT_FOUND` 而失敗，
 > 請執行 `npm approve-scripts better-sqlite3 && npm install`。請參閱
 > [疑難排解](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)。
 
@@ -46,26 +51,26 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-開發環境的主要變數：
+開發所需的主要變數：
 
-| 變數                   | 開發環境預設值           | 說明           |
-| ---------------------- | ------------------------ | -------------- |
-| `PORT`                 | `20128`                  | 伺服器連接埠   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端的基礎 URL |
-| `JWT_SECRET`           | （於上方產生）           | JWT 簽署密鑰   |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼   |
-| `APP_LOG_LEVEL`        | `info`                   | 日誌詳細程度   |
+| 變數                   | 開發預設值               | 說明         |
+| ---------------------- | ------------------------ | ------------ |
+| `PORT`                 | `20128`                  | 伺服器連接埠 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端基礎 URL |
+| `JWT_SECRET`           | （如上方所示產生）       | JWT 簽署密鑰 |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼 |
+| `APP_LOG_LEVEL`        | `info`                   | 記錄詳細程度 |
 
 ### 儀表板設定
 
-儀表板提供可切換功能的 UI 選項，這些功能也可以透過環境變數設定：
+儀表板提供可透過環境變數設定之功能的 UI 切換開關：
 
-| 設定位置    | 切換選項     | 說明                   |
+| 設定位置    | 切換開關     | 說明                   |
 | ----------- | ------------ | ---------------------- |
-| 設定 → 進階 | 偵錯模式     | 啟用偵錯請求日誌（UI） |
+| 設定 → 進階 | 偵錯模式     | 啟用偵錯要求記錄（UI） |
 | 設定 → 一般 | 側邊欄可見性 | 顯示／隱藏側邊欄區段   |
 
-這些設定會儲存在資料庫中，並在重新啟動後持續保留；設定後會覆寫環境變數的預設值。
+這些設定儲存在資料庫中，並在重新啟動後持續生效；設定後會覆寫環境變數的預設值。
 
 ### 在本機執行
 
@@ -73,51 +78,46 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 # 開發模式（熱重新載入）
 npm run dev
 
-# 正式環境建置
-npm run build    # next build → .build/next/，接著 assembleStandalone → dist/
+# 生產環境建置
+npm run build    # next build → .build/next/ 然後 assembleStandalone → dist/
 npm run start
 
-# 針對貢獻者變更的快速後端／僅 API 編譯
+# 供貢獻者變更使用的快速後端／API 專用編譯
 npm run build:contributor
 
-# 發行建置（全新重建 + HEAD 哨兵檔案——部署時必要）
-npm run build:release   # rm -rf .build dist && 建置 + 寫入 dist/BUILD_SHA
+# 發行版本建置（清除後重新建置 + HEAD 完整性標記 — 部署所需）
+npm run build:release   # rm -rf .build dist && build + 寫入 dist/BUILD_SHA
 
 # 常用連接埠設定
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-貢獻者建置只會執行編譯驗證：它不會組裝獨立執行版發行內容，
-也不會建置選用的原生封裝資產。需要驗證可交付套件時，
-請使用一般的正式環境建置。
+貢獻者建置會執行僅限編譯的驗證：不會組裝獨立發行版本，也不會建置選用的原生封裝資產。需要驗證可交付套件時，請使用一般的生產環境建置。
 
 ### 建置輸出配置
 
-| 目錄      | 內容                                                                | 是否追蹤 |
-| --------- | ------------------------------------------------------------------- | -------- |
-| `src/`    | 應用程式原始碼（TypeScript / TSX）                                  | 是       |
-| `.build/` | 中間產物——`next build` 輸出（由 git 忽略，`distDir = .build/next`） | 否       |
-| `dist/`   | 可交付套件——由 `assembleStandalone` 組裝（由 git 忽略）             | 否       |
+| 目錄      | 內容                                                                | 已追蹤 |
+| --------- | ------------------------------------------------------------------- | ------ |
+| `src/`    | 應用程式原始碼（TypeScript / TSX）                                  | 是     |
+| `.build/` | 中間檔案 — `next build` 輸出（gitignored，`distDir = .build/next`） | 否     |
+| `dist/`   | 可交付套件 — 由 `assembleStandalone` 組裝（gitignored）             | 否     |
 
-建置管線只會執行一輪：
+建置管線是單一流程：
 
 ```
 npm run build
   └─ next build → .build/next/standalone  （Next.js 輸出）
-  └─ assembleStandalone()                 （複製獨立執行版 + 靜態檔案 + 公開檔案 + 原生資產）
+  └─ assembleStandalone()                 （複製 standalone + static + public + native assets）
        └─ 輸出：dist/                     （server.js、.next/static/、public/、node_modules/）
 ```
 
-`npm run build:release` 還會先清除這兩個目錄，並寫入
-`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性哨兵檔案。
+`npm run build:release` 會先額外清除兩個目錄，並寫入
+`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性標記。
 
-`npm run build:contributor` 使用僅限後端的建置設定檔。它會在建置期間暫時以替代檔案取代
-儀表板 UI 檔案、保留 API 路由處理常式，並在建置後還原原始檔案。
-若變更會影響儀表板 UI，或需要進行完整的發行驗證，請使用 `npm run build`；
-貢獻者設定檔不能取代發行建置。
+`npm run build:contributor` 使用僅限後端的建置設定檔。建置期間會暫時替換儀表板 UI 檔案，保留 API 路由處理常式，並在建置後還原原始檔案。對於會影響儀表板 UI 的變更或完整的發行版本驗證，請使用 `npm run build`；貢獻者設定檔不能取代發行版本建置。
 
-> **VPS 部署注意事項：** 遠端映像目錄 `/usr/lib/node_modules/omniroute/app/`
-> 維持不變。部署技能會使用 rsync 將 `dist/` 的內容同步至該目錄。
+> **VPS 部署注意事項：** 遠端映像檔目錄 `/usr/lib/node_modules/omniroute/app/`
+> 維持不變。部署技能會將 `dist/` 的內容 rsync 至該目錄。
 > 只有儲存庫內的建置輸出路徑有所變更（`app/` → `dist/`）。
 
 預設 URL：

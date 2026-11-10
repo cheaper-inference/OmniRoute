@@ -101,13 +101,17 @@ test("synced endpoint kinds remain usable in the VS Code model catalog", async (
   }
 });
 
-test("chat-capable and metadata-free GPT models keep Chat Completions", async () => {
-  for (const model of ["gpt-6-chat", "gpt-6-dual", "gpt-6-unknown"]) {
+test("chat-capable GPT models keep Chat Completions while metadata-free GPT-6/5.5+ rows infer Responses", async () => {
+  for (const model of ["gpt-6-chat", "gpt-6-dual"]) {
     assert.deepEqual(await resolveRouting(model), {
       targetFormat: "openai",
       url: "https://api.githubcopilot.com/chat/completions",
     });
   }
+  assert.deepEqual(await resolveRouting("gpt-6-unknown"), {
+    targetFormat: "openai-responses",
+    url: "https://api.githubcopilot.com/responses",
+  });
 });
 
 test("discovery cannot route Gemini or Claude to the Copilot Responses endpoint", async () => {

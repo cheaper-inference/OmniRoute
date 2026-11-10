@@ -245,6 +245,12 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
       "gemini-3.8-flash-high",
       "gemini-3.8-flash-medium",
       "gemini-3.8-flash-low",
+      "claude-sonnet-5-5-low",
+      "claude-sonnet-5-5-medium",
+      "claude-sonnet-5-5-high",
+      "claude-opus-5-5-low",
+      "claude-opus-5-5-medium",
+      "claude-opus-5-5-high",
       "claude-opus-4-6-thinking",
       "claude-sonnet-4-6",
       "gemini-pro-agent",
@@ -257,6 +263,13 @@ export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
       createCliModel("gemini-3.8-flash-low", "Gemini 3.8 Flash Low"),
       createCliModel("gemini-pro-agent", "Gemini 3.1 Pro High"),
       createCliModel("gemini-3.1-pro-low", "Gemini 3.1 Pro Low"),
+      // Antigravity serves Claude 5.5 as one upstream id per tier — no bare `claude-*-5-5`.
+      createCliModel("claude-sonnet-5-5-low", "Claude Sonnet 5.5 Low"),
+      createCliModel("claude-sonnet-5-5-medium", "Claude Sonnet 5.5 Medium"),
+      createCliModel("claude-sonnet-5-5-high", "Claude Sonnet 5.5 High"),
+      createCliModel("claude-opus-5-5-low", "Claude Opus 5.5 Low"),
+      createCliModel("claude-opus-5-5-medium", "Claude Opus 5.5 Medium"),
+      createCliModel("claude-opus-5-5-high", "Claude Opus 5.5 High"),
       createCliModel("claude-sonnet-4-6", "Claude Sonnet 4.6"),
       createCliModel("claude-opus-4-6-thinking", "Claude Opus 4.6 Thinking"),
       createCliModel("gpt-oss-120b-medium", "GPT OSS 120B Medium"),
@@ -735,6 +748,28 @@ openclaude --provider openai
     acpSpawnable: false,
     baseUrlSupport: "full",
     defaultCommand: "pi",
+    // Pi loads custom providers from <agent-dir>/models.json; agent-dir defaults
+    // to ~/.pi/agent and moves wholesale with PI_CODING_AGENT_DIR. See
+    // src/shared/services/piConfig.ts.
+    settingsFile: "~/.pi/agent/models.json",
+    // Hand-edit fallback shown by the guided card's manual-configuration block.
+    codeBlock: {
+      language: "json",
+      code: [
+        "{",
+        '  "providers": {',
+        '    "omniroute": {',
+        '      "baseUrl": "http://127.0.0.1:20128/v1",',
+        '      "api": "openai-completions",',
+        '      "apiKey": "sk_omniroute",',
+        '      "models": [',
+        '        { "id": "auto/best-coding", "name": "OmniRoute best-coding" }',
+        "      ]",
+        "    }",
+        "  }",
+        "}",
+      ].join("\n"),
+    },
   },
 
   /** Added — ported from upstream decolua/9router#1233 (dashboard catalog entry for Crush). */

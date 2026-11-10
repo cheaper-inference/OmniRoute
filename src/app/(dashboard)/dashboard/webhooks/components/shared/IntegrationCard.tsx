@@ -1,5 +1,6 @@
 "use client";
 
+import { Tile } from "@omniroute/ui-kit/tile";
 import Badge from "@/shared/components/Badge";
 import Icon from "@/shared/components/Icon";
 
@@ -37,6 +38,12 @@ interface IntegrationCardProps {
   comingSoonLabel?: string;
 }
 
+/** Kind glyph. A component of its own so the icon-name scanner (icon-map-object-values) reads
+ *  only KIND_ICONS as names in the Tile's `icon` slot, not the KIND_COLORS classes. */
+function KindGlyph({ kind }: { kind: AnyKind }) {
+  return <Icon name={KIND_ICONS[kind]} className={KIND_COLORS[kind]} />;
+}
+
 export function IntegrationCard({
   kind,
   name,
@@ -46,37 +53,18 @@ export function IntegrationCard({
   disabled,
   comingSoonLabel,
 }: IntegrationCardProps) {
-  // kit-exception: A multi-line choice tile (icon, name, description, "coming soon" badge, check mark): the kit
-  // Button is a single-line pill, so this stays a native <button> on kit tokens, with aria-pressed.
+  // Kit Tile as a toggle (aria-pressed + the kit check indicator); a "coming soon" kind is a
+  // disabled tile with no pressed state, as before.
   return (
-    <button
-      type="button"
-      aria-pressed={!disabled ? selected : undefined}
+    <Tile
+      layout="stacked"
+      pressed={!disabled ? selected : undefined}
       onClick={!disabled && onSelect ? () => onSelect(kind as WebhookKind) : undefined}
       disabled={disabled}
-      className={`relative flex w-full flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
-        disabled
-          ? "border-border bg-surface"
-          : selected
-            ? "border-primary bg-primary/5 shadow-sm"
-            : "border-border bg-surface hover:border-primary/40 hover:bg-primary/5"
-      }`}
-    >
-      {comingSoonLabel && (
-        <Badge size="sm" className="absolute right-2 top-2">
-          {comingSoonLabel}
-        </Badge>
-      )}
-      <Icon name={KIND_ICONS[kind]} size={28} className={KIND_COLORS[kind]} />
-      <div>
-        <p className="text-sm font-semibold text-text-main">{name}</p>
-        <p className="mt-0.5 text-xs text-text-muted">{description}</p>
-      </div>
-      {selected && !disabled && (
-        <span className="ml-auto mt-auto flex size-5 items-center justify-center rounded-full bg-primary">
-          <Icon name="check" size={14} className="text-accent-foreground" />
-        </span>
-      )}
-    </button>
+      icon={<KindGlyph kind={kind} />}
+      title={name}
+      description={description}
+      meta={comingSoonLabel ? <Badge size="sm">{comingSoonLabel}</Badge> : undefined}
+    />
   );
 }

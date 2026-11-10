@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # OmniRoute හරහා glm/glm-5.2 භාව
 
 ---
 
-## Claude Code ද්වාරයකට සම්බන්ධ වන ආකාරය
+## Claude කේතය ද්වාරයකට සම්බන්ධ වන ආකාරය
 
-Claude Code **Anthropic Messages API** සමඟ සන්නිවේදනය කරන අතර, පරිසර විචල්ය භාවිතයෙන් අභිරුචි
-අන්ත ලක්ෂ්යයක් වෙත යොමු කරනු ලැබේ (එයට `--base-url` සලකුණක් නොමැත):
+Claude කේතය කතා කරයි**Anthropic පණිවිඩ API** සහ පරිසර විචල්‍යයන් සහිත අභිරුචි අන්ත ලක්ෂ්‍යයකට යොමු කර ඇත (එයට `--base-url` ධජයක් නොමැත):
 
-| විචල්යය                                      | අරමුණ                                                                                                 |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | ද්වාර මූල URL එක (Claude Code විසින් `/v1/messages` අගට එක් කරයි). **`/v1` උපසර්ගයක් නොතිබිය යුතුය.** |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` ලෙස යවනු ලැබේ — ඔබේ OmniRoute ප්රවේශ ටෝකනය / API යතුර භාවිත කරන්න           |
-| `ANTHROPIC_API_KEY`                          | විකල්පය: `x-api-key` ලෙස යවනු ලැබේ. දෙකම සකසා ඇත්නම්, `ANTHROPIC_AUTH_TOKEN` ප්රමුඛ වේ                |
-| `ANTHROPIC_MODEL`                            | නිශ්චිත මාදිලියක් බලහත්කාරයෙන් භාවිත කරයි (`/model` තේරීම්කාරකයේ පෙරනිමිය අභිබවා යයි)                 |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ස්වදේශීය `/model` තේරීම්කාරකය `/v1/models` වෙතින් `claude*`/`anthropic*` මාදිලි ලැයිස්තුගත කරයි |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | එක් ප්රතිචාරයක ප්රතිදාන ටෝකන සීමා කරයි (උදා. `65536`)                                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ස්වයංක්රීය සංක්ෂිප්ත කිරීම සඳහා ටෝකන සීමාව                                                            |
+| විචල්ය                                       | අරමුණ                                                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude කේතය `/v1/messages` එකතු කරයි).** `/v1` උපසර්ගයක් නැත.**              |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — ලෙස යවන ලද ඔබගේ OmniRoute ප්‍රවේශ ටෝකනය / API යතුර භාවිතා කරන්න    |
+| `ANTHROPIC_API_KEY`                          | විකල්ප: `x-api-key` ලෙස යවනු ලැබේ. දෙකම සෙට් උනොත් `ANTHROPIC_AUTH_TOKEN` දිනනවා               |
+| `ANTHROPIC_MODEL`                            | නිශ්චිත ආකෘතියක් බල කරන්න ( `/model` පිකර් පෙරනිමිය අභිබවා යයි)                                |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ස්වදේශීය `/model` පිකර් `/v1/models` වෙතින් `claude*`/`anthropic*` ආකෘති ලැයිස්තුගත කරයි |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ප්‍රතිචාරයකට කැප් ප්‍රතිදාන ටෝකන (උදා: `65536`)                                                |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ස්වයං සංයුක්ත කිරීම සඳහා ටෝකන සීමාව                                                            |
 
-> පරිසර විචල්ය කියවනු ලබන්නේ **ආරම්භයේදී එක් වරක් පමණි** — ඒවා වෙනස් කිරීමෙන් පසු Claude Code නැවත ආරම්භ කරන්න.
+> Env vars කියවනු ලැබේ** ආරම්භයේදී වරක්** — ඒවා වෙනස් කිරීමෙන් පසු Claude කේතය නැවත ආරම්භ කරන්න.
 
-`omniroute launch` මේ සියල්ල ඔබ වෙනුවෙන් සකසයි: එය සක්රිය සන්දර්භයෙන් මූල URL එක + ටෝකනය
-විසඳා ගනී (එබැවින් `omniroute connect <vps>` පසු `omniroute launch`
-සෘජුවම ක්රියා කරයි), සේවාදායකයේ සෞඛ්ය පරීක්ෂා කර, `claude` ක්රියාත්මක කරයි.
+ස්ථාවර තන්තුවක් වෙනුවට භ්‍රමණය වන අක්තපත්‍රයක් සඳහා, වත්මන් අක්තපත්‍රය stdout වෙත මුද්‍රණය කරන විධානයකට `~/.claude/settings.json` හි `apiKeyHelper` සකසන්න. Claude කේතය පෙරනිමියෙන් මිනිත්තු පහක් එහි ප්‍රතිදානය හැඹිලි කරයි (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` එය අභිබවා යයි) සහ අගය `Authorization: Bearer` සහ `x-api-key` දෙකෙහිම යවයි. ස්ක්‍රිප්ටය අක්තපත්‍රය මුද්‍රණය කළ යුතු අතර වෙන කිසිවක් — එය සමඟ බැනරයක් v2.1.227 + හි සහායකයා අසමත් වේ.
+
+Entra ID SSO ක්‍රියා කරන ආකාරය මෙයයි: `scripts/cli/omniroute-sso.mjs token` API යතුරක් වෙනුවට OmniRoute සත්‍යාපනය කරන කෙටි කාලීන Entra ප්‍රවේශ ටෝකනයක් මුද්‍රණය කරයි. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) බලන්න.
+
+`omniroute launch` ඔබට මේ සියල්ල සකසයි: එය සක්‍රිය සන්දර්භය වෙතින් URL + ටෝකනය නිරාකරණය කරයි (එබැවින් `omniroute connect <vps>` පසුව `omniroute launch` ක්‍රියා කරයි), සේවාදායකය සෞඛ්‍ය පරීක්ෂා කරයි, සහ `claude` execs .
 
 ---
 

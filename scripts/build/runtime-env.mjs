@@ -206,3 +206,92 @@ export function spawnWithForwardedSignals(command, args, options = {}) {
 
   return child;
 }
+
+const SELF_PING_DEFAULT_PATH = "/api/monitoring/health";
+const SELF_PING_DEFAULT_INTERVAL_SECONDS = 180;
+const SELF_PING_MIN_INTERVAL_SECONDS = 30;
+const SELF_PING_FIRST_DELAY_MS = 60_000; // give the server time to boot
+const SELF_PING_TIMEOUT_MS = 15_000;
+
+/**
+ * Resolve the self-pinger config. Inert ("off") unless SELF_PING_URL or RENDER_EXTERNAL_URL is set,
+ * so local, docker-compose and npm installs are unchanged. SELF_PING_PATH must be a path on that
+ * URL: an absolute or protocol-relative value would otherwise replace the host.
+ * @param {NodeJS.ProcessEnv | Record<string, string | undefined>} env
+ * @returns {{ status: "off" } | { status: "invalid" } | { status: "on", target: URL, intervalSeconds: number }}
+ */
+export function resolveSelfPingConfig(env) {
+  const flag = String(env.SELF_PING_ENABLED ?? "")
+    .trim()
+    .toLowerCase();
+  if (["0", "false", "off", "no"].includes(flag)) return { status: "off" };
+
+  const baseUrl = String(env.SELF_PING_URL || env.RENDER_EXTERNAL_URL || "").trim();
+  if (!baseUrl) return { status: "off" };
+
+  const path = String(env.SELF_PING_PATH || SELF_PING_DEFAULT_PATH).trim();
+  if (!path.startsWith("/") || path.startsWith("//")) return { status: "invalid" };
+
+  let target;
+  try {
+    target = new URL(path, baseUrl);
+  } catch {
+    return { status: "invalid" };
+  }
+  if (target.protocol !== "https:" && target.protocol !== "http:") return { status: "invalid" };
+
+  const requested = Number.parseInt(String(env.SELF_PING_INTERVAL_SECONDS ?? ""), 10);
+  const intervalSeconds =
+    Number.isFinite(requested) && requested >= SELF_PING_MIN_INTERVAL_SECONDS
+      ? requested
+      : SELF_PING_DEFAULT_INTERVAL_SECONDS;
+  return { status: "on", target, intervalSeconds };
+}
+
+/**
+ * Keep a Render free web service awake. Render spins these down after about 15 minutes without
+ * INBOUND traffic, and pinging localhost would not count, so this requests the service's own PUBLIC
+ * URL: the request travels through Render's edge and registers as real traffic. Runs in the
+ * launcher, never in the Next server. Logs only when the status changes, to stay out of the way.
+ * @param {NodeJS.ProcessEnv | Record<string, string | undefined>} env
+ * @param {typeof fetch} [fetchImpl]
+ */
+export function startSelfPinger(env, fetchImpl = fetch) {
+  const config = resolveSelfPingConfig(env);
+  if (config.status === "invalid") {
+    console.warn("[self-pinger] invalid SELF_PING_URL/RENDER_EXTERNAL_URL or path; disabled");
+    return;
+  }
+  if (config.status !== "on") return;
+  const { target, intervalSeconds } = config;
+
+  let lastOutcome = null;
+  const report = (outcome, log) => {
+    if (outcome !== lastOutcome) log(`[self-pinger] GET ${target.pathname} -> ${outcome}`);
+    lastOutcome = outcome;
+  };
+  const ping = async () => {
+    try {
+      const res = await fetchImpl(target, {
+        method: "GET",
+        headers: { "user-agent": "omniroute-self-pinger" },
+        signal: AbortSignal.timeout(SELF_PING_TIMEOUT_MS),
+      });
+      await res.body?.cancel();
+      // Any HTTP status means the request reached the service through Render's edge.
+      report(res.status, console.log);
+    } catch (err) {
+      report(err?.name === "TimeoutError" ? "timeout" : "failed", console.warn);
+    }
+  };
+
+  console.log(
+    `[self-pinger] enabled: ${target.origin}${target.pathname} every ${intervalSeconds}s`
+  );
+  // unref() so the timers never keep the launcher alive on their own; the spawned server child does
+  // that, and the launcher exits with it.
+  setTimeout(() => {
+    void ping();
+    setInterval(ping, intervalSeconds * 1000).unref();
+  }, SELF_PING_FIRST_DELAY_MS).unref();
+}

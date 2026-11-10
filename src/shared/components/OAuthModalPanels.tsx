@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import type { GoogleLoopbackHint } from "@/lib/oauth/utils/googleLoopbackHint";
 import type { PkceLoopbackMismatchHint } from "@/lib/oauth/utils/pkceLoopbackWarning";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
@@ -78,8 +79,11 @@ export function OAuthDeviceCodePanel({
         </div>
       </div>
       {polling && (
-        <div className="flex items-center justify-center gap-2 text-sm text-text-muted">
-          <Icon name="progress_activity" className="animate-spin" />
+        <div
+          role="status"
+          className="flex items-center justify-center gap-2 text-sm text-text-muted"
+        >
+          <Spinner decorative size="sm" />
           {t("deviceCodeWaiting")}
         </div>
       )}

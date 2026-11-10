@@ -25,6 +25,9 @@ function resolveChangelogHref(href: string | undefined): string | null {
   }
 }
 
+/** A machine-readable release date ("2026-10-19"), marked up as <time dateTime> like NewsViewer. */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
 /** "[3.8.52] — 2026-10-19" → { version: "3.8.52", date: "2026-10-19" } (date is optional). */
 export function splitReleaseHeading(text: string): { version: string; date: string | null } {
   const match = /^\[?([^\]]+?)\]?(?:\s+[—–-]\s+(.+))?$/.exec(text.trim());
@@ -58,7 +61,14 @@ const markdownComponents: Components = {
           <Icon name="sell" size={20} className="text-text-muted" />
           {version}
         </h2>
-        {date && <span className="ci-eyebrow">{date}</span>}
+        {date &&
+          (ISO_DATE.test(date) ? (
+            <time className="ci-eyebrow" dateTime={date}>
+              {date}
+            </time>
+          ) : (
+            <span className="ci-eyebrow">{date}</span>
+          ))}
       </header>
     );
   },

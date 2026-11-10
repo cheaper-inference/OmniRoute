@@ -1,7 +1,9 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 import {
   DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
   EXECUTOR_CONTRACT_VIOLATION_CODE,
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE,
   FETCH_TIMEOUT_MS,
   HTTP_STATUS,
   MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
@@ -274,6 +276,7 @@ export function normalizeExecutorResult(result: unknown): {
   /** Wire model id the executor actually sent upstream (undefined if unknown). */
   model?: unknown;
   upstreamDiagnostic?: Record<string, unknown>;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
 } {
   if (isResponseLike(result)) {
     return { response: result, url: "", headers: {}, transformedBody: null };
@@ -294,6 +297,7 @@ export function normalizeExecutorResult(result: unknown): {
     transport?: string;
     model?: unknown;
     upstreamDiagnostic?: Record<string, unknown>;
+    upstreamHttpSelection?: HttpAttemptSelection | null;
   };
   return {
     response: normalized.response,
@@ -306,6 +310,7 @@ export function normalizeExecutorResult(result: unknown): {
     // describes so a later retry/recovery/fallback that replaces the response also
     // replaces (or clears) the diagnostic instead of mislabelling the new one.
     upstreamDiagnostic: normalized.upstreamDiagnostic,
+    upstreamHttpSelection: normalized.upstreamHttpSelection ?? null,
   };
 }
 
@@ -327,11 +332,49 @@ function settledResultHasLiveBody(result: unknown): boolean {
   return body != null && bodyUsed !== true;
 }
 
+/**
+ * A trusted caller may only shorten the provider's configured header deadline.
+ * Keep the provenance separate so a local 504 does not cool shared accounts.
+ */
+function resolveEffectiveResponseStartBudget(
+  executor: unknown,
+  provider: string,
+  model: string,
+  connectionTimeoutMs?: number,
+  requestTimeoutMs?: number
+): { timeoutMs: number; requestScoped: boolean } {
+  const configuredMs = getExecutorTimeoutMs(executor, provider, model, connectionTimeoutMs);
+  const validCap =
+    typeof requestTimeoutMs === "number" &&
+    Number.isFinite(requestTimeoutMs) &&
+    requestTimeoutMs > 0;
+  if (!validCap) return { timeoutMs: configuredMs, requestScoped: false };
+  const capMs = Math.max(1, Math.floor(requestTimeoutMs!));
+  return {
+    timeoutMs: configuredMs > 0 ? Math.min(configuredMs, capMs) : capMs,
+    requestScoped: configuredMs <= 0 || capMs < configuredMs,
+  };
+}
+
+function createResponseStartDeadlineError(
+  timeoutMs: number,
+  provider: string,
+  model: string,
+  requestScoped: boolean
+): Error {
+  const error = createUpstreamStartTimeoutError(timeoutMs, provider, model);
+  if (requestScoped) {
+    (error as Error & { code?: string }).code = REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
+  }
+  return error;
+}
+
 export async function executeWithUpstreamStartTimeout<T>({
   executor,
   provider,
   model,
   connectionTimeoutMs,
+  requestTimeoutMs,
   signal,
   log,
   execute,
@@ -340,17 +383,24 @@ export async function executeWithUpstreamStartTimeout<T>({
   provider: string;
   model: string;
   connectionTimeoutMs?: number;
+  requestTimeoutMs?: number;
   signal: AbortSignal;
   log?: { warn?: (tag: string, message: string) => void } | null;
   execute: (signal: AbortSignal) => Promise<T>;
 }): Promise<T> {
-  const timeoutMs = getExecutorTimeoutMs(executor, provider, model, connectionTimeoutMs);
+  const { timeoutMs, requestScoped } = resolveEffectiveResponseStartBudget(
+    executor,
+    provider,
+    model,
+    connectionTimeoutMs,
+    requestTimeoutMs
+  );
   if (timeoutMs <= 0) return execute(signal);
   if (signal.aborted) throw createAbortError(signal);
 
   const timeoutController = new AbortController();
   const combinedController = new AbortController();
-  const timeoutError = createUpstreamStartTimeoutError(timeoutMs, provider, model);
+  const timeoutError = createResponseStartDeadlineError(timeoutMs, provider, model, requestScoped);
 
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let abortListener: (() => void) | null = null;

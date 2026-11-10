@@ -6,7 +6,12 @@ import {
 
 import type { JsonRecord, ResilienceSettings, ResilienceSettingsPatch } from "./settings/types";
 import {
+  normalizePreferredFailoverSettings,
+  readPreferredFailoverSettings,
+} from "@/sse/services/preferredConnectionFailover";
+import {
   asRecord,
+  toBoolean,
   toInteger,
   resolveStreamRecoveryDefaults,
   normalizeLegacyConnectionCooldownProfile,
@@ -50,7 +55,6 @@ export type {
   WaitForCooldownSettings,
   ComboCooldownWaitSettings,
   QuotaShareConcurrencyLimitSettings,
-  P2CLatencySettings,
   ProviderCooldownSettings,
   QuotaPreflightSettings,
   StreamRecoverySettings,
@@ -84,6 +88,10 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 })();
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+  preferredAccountFailover: readPreferredFailoverSettings(),
+  antigravityTimingTelemetry: {
+    enabled: process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY === "true",
+  },
   requestQueue: {
     autoEnableApiKeyProviders: true,
     requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
@@ -228,6 +236,37 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   },
 };
 
+// Normalize legacy and modern opt-in flags without inflating the large resolvers.
+function normalizeAntigravityToggle(
+  section: unknown,
+  legacyEnabled: unknown,
+  fallback: boolean
+): { enabled: boolean } {
+  return { enabled: toBoolean(asRecord(section).enabled, toBoolean(legacyEnabled, fallback)) };
+}
+
+function normalizeCooldownProfiles(
+  source: unknown,
+  fallback: ResilienceSettings["connectionCooldown"]
+): ResilienceSettings["connectionCooldown"] {
+  const sections = asRecord(source);
+  return {
+    oauth: normalizeConnectionCooldownProfile(sections.oauth, fallback.oauth),
+    apikey: normalizeConnectionCooldownProfile(sections.apikey, fallback.apikey),
+  };
+}
+
+function normalizeBreakerProfiles(
+  source: unknown,
+  fallback: ResilienceSettings["providerBreaker"]
+): ResilienceSettings["providerBreaker"] {
+  const sections = asRecord(source);
+  return {
+    oauth: normalizeProviderBreakerProfile(sections.oauth, fallback.oauth),
+    apikey: normalizeProviderBreakerProfile(sections.apikey, fallback.apikey),
+  };
+}
+
 function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
   const profiles = asRecord(settings.providerProfiles);
   const defaults = asRecord(settings.rateLimitDefaults);
@@ -330,6 +369,8 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
+    preferredAccountFailover: DEFAULT_RESILIENCE_SETTINGS.preferredAccountFailover,
+    antigravityTimingTelemetry: DEFAULT_RESILIENCE_SETTINGS.antigravityTimingTelemetry,
   };
 }
 
@@ -365,30 +406,25 @@ export function resolveResilienceSettings(
   if (cached) return cached;
 
   const current = asRecord(record.resilienceSettings);
+  const legacyAntigravitySettings = asRecord(current.antigravity);
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
+    preferredAccountFailover: normalizePreferredFailoverSettings(
+      current.preferredAccountFailover,
+      fallback.preferredAccountFailover
+    ),
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      current.antigravityTimingTelemetry,
+      legacyAntigravitySettings.timingTelemetryEnabled,
+      fallback.antigravityTimingTelemetry.enabled
+    ),
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
-    connectionCooldown: {
-      oauth: normalizeConnectionCooldownProfile(
-        asRecord(current.connectionCooldown).oauth,
-        fallback.connectionCooldown.oauth
-      ),
-      apikey: normalizeConnectionCooldownProfile(
-        asRecord(current.connectionCooldown).apikey,
-        fallback.connectionCooldown.apikey
-      ),
-    },
-    providerBreaker: {
-      oauth: normalizeProviderBreakerProfile(
-        asRecord(current.providerBreaker).oauth,
-        fallback.providerBreaker.oauth
-      ),
-      apikey: normalizeProviderBreakerProfile(
-        asRecord(current.providerBreaker).apikey,
-        fallback.providerBreaker.apikey
-      ),
-    },
+    connectionCooldown: normalizeCooldownProfiles(
+      current.connectionCooldown,
+      fallback.connectionCooldown
+    ),
+    providerBreaker: normalizeBreakerProfiles(current.providerBreaker, fallback.providerBreaker),
     tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
       current.tokenRefreshBreaker,
       fallback.tokenRefreshBreaker
@@ -441,27 +477,21 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
+    preferredAccountFailover: normalizePreferredFailoverSettings(
+      updates.preferredAccountFailover,
+      current.preferredAccountFailover
+    ),
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      updates.antigravityTimingTelemetry,
+      undefined,
+      current.antigravityTimingTelemetry.enabled
+    ),
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
-    connectionCooldown: {
-      oauth: normalizeConnectionCooldownProfile(
-        updates.connectionCooldown?.oauth,
-        current.connectionCooldown.oauth
-      ),
-      apikey: normalizeConnectionCooldownProfile(
-        updates.connectionCooldown?.apikey,
-        current.connectionCooldown.apikey
-      ),
-    },
-    providerBreaker: {
-      oauth: normalizeProviderBreakerProfile(
-        updates.providerBreaker?.oauth,
-        current.providerBreaker.oauth
-      ),
-      apikey: normalizeProviderBreakerProfile(
-        updates.providerBreaker?.apikey,
-        current.providerBreaker.apikey
-      ),
-    },
+    connectionCooldown: normalizeCooldownProfiles(
+      updates.connectionCooldown,
+      current.connectionCooldown
+    ),
+    providerBreaker: normalizeBreakerProfiles(updates.providerBreaker, current.providerBreaker),
     tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
       updates.tokenRefreshBreaker,
       current.tokenRefreshBreaker

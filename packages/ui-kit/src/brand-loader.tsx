@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import type { ComponentProps } from "react";
+import type { ComponentProps, CSSProperties } from "react";
 import { cn } from "./lib/utils";
 import { BRAND_PATHS, clamp, mix, phase } from "./lib/brand-loader-geometry";
 
@@ -25,6 +25,7 @@ export interface BrandLoaderProps extends Omit<ComponentProps<"div">, "children"
 }
 interface Frame { time: number; progress: number; finish: number | null; }
 
+/** Combine an explicit static treatment with the reader's live OS preference. */
 function useReducedMotion(force: boolean) {
   const [preferred, setPreferred] = useState(false);
   useEffect(() => {
@@ -36,6 +37,7 @@ function useReducedMotion(force: boolean) {
   return force || preferred;
 }
 
+/** Paint the brand mark and treatments; CSS owns their continuous motion. */
 function Artwork({ frame, variant, id, reduced, indeterminate }: { frame: Frame; variant: BrandLoaderVariant; id: string; reduced: boolean; indeterminate: boolean }) {
   const elapsed = reduced ? 0 : frame.time;
   const scale = 132 / 160;
@@ -58,7 +60,7 @@ function Artwork({ frame, variant, id, reduced, indeterminate }: { frame: Frame;
             <rect x="256" y="343" width="208" height="3" rx="1.5" opacity=".14"/>
             {indeterminate && finish === null ? <>
               <defs><clipPath id={`${id}-bar`}><rect x="256" y="343" width="208" height="3" rx="1.5"/></clipPath></defs>
-              <rect data-progress-fill="" x={196+268*travel} y="343" width="60" height="3" rx="1.5" clipPath={`url(#${id}-bar)`}/>
+              <g clipPath={`url(#${id}-bar)`}><rect data-progress-fill="" x={196+268*travel} y="343" width="60" height="3" rx="1.5"/></g>
             </> : <><rect data-progress-fill="" x="256" y="343" width={208*value} height="3" rx="1.5"/><text x="360" y="380" className="ci-brand-loader__percentage" textAnchor="middle" opacity=".6">{Math.round(value*100)}%</text></>}
           </>}
           {variant === "orbit" && <>
@@ -67,11 +69,11 @@ function Artwork({ frame, variant, id, reduced, indeterminate }: { frame: Frame;
           </>}
           {variant === "pulse" && [0,1,2].map(k => {
             const wave = reduced ? (k===1?1:.18) : Math.pow(.5+.5*Math.cos((elapsed-k*.19)*2*Math.PI/1.35),3);
-            return <circle key={k} cx={340+k*20} cy="344" r="4" opacity={finish===null?.14+.86*wave:mix(.14+.86*wave,1,phase(finish,0,.5))}/>;
+            return <circle key={k} data-pulse-dot="" style={{ "--ci-brand-index": k } as CSSProperties} cx={340+k*20} cy="344" r="4" opacity={finish===null?.14+.86*wave:mix(.14+.86*wave,1,phase(finish,0,.5))}/>;
           })}
           {variant === "axis" && Array.from({length:12},(_,k) => {
             const fill = indeterminate && finish===null ? reduced ? (k===5?1:.14) : Math.pow(.5+.5*Math.cos((elapsed/1.8-k/12)*Math.PI*2),6) : phase(value*12,k,k+1);
-            return <path key={k} d={`M${266+16*k} 352 l12 -16`} fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" opacity={.14+.86*fill}/>;
+            return <path key={k} data-axis-segment="" style={{ "--ci-brand-index": k } as CSSProperties} d={`M${266+16*k} 352 l12 -16`} fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" opacity={.14+.86*fill}/>;
           })}
         </g>
       </g>
@@ -79,9 +81,17 @@ function Artwork({ frame, variant, id, reduced, indeterminate }: { frame: Frame;
   );
 }
 
+/** Show real progress or indeterminate CSS motion, with bounded completion transitions. */
 export function BrandLoader({ variant="progress", progress, complete=false, intro: _intro = false, paused=false, reducedMotion=false, size=280, label="Loading", completionLabel="Ready", onComplete, className, style, ...props }: BrandLoaderProps) {
   const id = `ci-brand-${useId().replace(/[^a-zA-Z0-9_-]/g,"")}`;
   const reduced = useReducedMotion(reducedMotion);
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    const update = () => setHidden(document.hidden);
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
   const safeProgress = progress === undefined ? undefined : clamp(progress/100);
   const determinate = (variant === "progress" || variant === "axis") && safeProgress !== undefined;
   const clock = useRef({ time: 0, completedAt: null as number|null, notified:false, progress:safeProgress??0 });
@@ -100,7 +110,10 @@ export function BrandLoader({ variant="progress", progress, complete=false, intr
       setFrame({time:state.time,progress:state.progress,finish});
       if(finish!==null&&finish>=1.4&&!state.notified){state.notified=true;callback.current?.();}
     };
-    const moving=()=>!paused&&!reduced&&!document.hidden&&(state.completedAt!==null ? state.time-state.completedAt<1.4 : variant==="orbit"||variant==="pulse"||!determinate||state.time-tweenAt<.25);
+    // Continuous loading motion belongs to CSS. React frame updates in a Suspense
+    // fallback can repeatedly preempt the retry that would replace that fallback.
+    // Only bounded progress/completion transitions need to update React state.
+    const moving=()=>!paused&&!reduced&&!document.hidden&&(state.completedAt!==null ? state.time-state.completedAt<1.4 : determinate&&state.progress!==target&&state.time-tweenAt<.25);
     const schedule=()=>{if(!disposed&&raf===null&&moving())raf=requestAnimationFrame(tick)};
     const tick=(now:number)=>{raf=null;if(disposed)return;if(moving())state.time+=Math.max(0,(now-last)/1000);last=now;render();schedule();};
     const visibility=()=>{if(raf!==null){cancelAnimationFrame(raf);raf=null;}last=performance.now();schedule();};
@@ -108,7 +121,7 @@ export function BrandLoader({ variant="progress", progress, complete=false, intr
     return ()=>{disposed=true;if(raf!==null)cancelAnimationFrame(raf);document.removeEventListener("visibilitychange",visibility);};
   },[complete,paused,reduced,safeProgress,variant,determinate]);
   return (
-    <div {...props} data-slot="brand-loader" data-variant={variant} data-phase={complete?"complete":"loading"} className={cn("ci-brand-loader",className)} style={{width:Number.isFinite(size)?Math.max(1,size):280,...style}} role={determinate?"progressbar":"status"} aria-label={complete?completionLabel:label} aria-busy={!complete} aria-valuemin={determinate?0:undefined} aria-valuemax={determinate?100:undefined} aria-valuenow={determinate?(complete?100:(safeProgress??0)*100):undefined}>
+    <div {...props} data-slot="brand-loader" data-variant={variant} data-phase={complete?"complete":"loading"} data-animated={!complete&&!determinate?"":undefined} data-paused={paused||hidden?"":undefined} data-reduced-motion={reduced?"":undefined} className={cn("ci-brand-loader",className)} style={{width:Number.isFinite(size)?Math.max(1,size):280,...style}} role={determinate?"progressbar":"status"} aria-label={complete?completionLabel:label} aria-busy={!complete} aria-valuemin={determinate?0:undefined} aria-valuemax={determinate?100:undefined} aria-valuenow={determinate?(complete?100:(safeProgress??0)*100):undefined}>
       <Artwork frame={frame} variant={variant} id={id} reduced={reduced} indeterminate={!determinate}/>
       <span className="ci-brand-loader__status">{complete?completionLabel:label}</span>
     </div>

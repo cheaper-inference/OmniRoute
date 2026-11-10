@@ -46,6 +46,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { GITLAB_DUO_OAUTH_SETUP_MESSAGE } from "@/shared/constants/gitlabDuoSetupMessage";
 import { keychainImportOnlyGuard } from "./keychainImportOnly";
 import { buildRemoteOAuthHint } from "./remoteOAuthHint";
+import { authorizeM365, exchangeM365 } from "./m365Auth";
 
 // Persist one callback server per provider across Next.js HMR reloads.
 if (!globalThis.__pkceCallbackStates) {
@@ -53,7 +54,13 @@ if (!globalThis.__pkceCallbackStates) {
 }
 
 /** Providers that use the PKCE browser callback flow (like Codex). */
-const PKCE_CALLBACK_PROVIDERS = new Set(["codex", "xai-oauth", "grok-cli", "openference"]);
+const PKCE_CALLBACK_PROVIDERS = new Set([
+  "codex",
+  "xai-oauth",
+  "grok-cli",
+  "openference",
+  "devin-desktop",
+]);
 
 /**
  * Providers whose device flow runs in the user's browser (auth.openai.com blocks
@@ -67,6 +74,7 @@ const NO_PKCE_DEVICE_CODE_PROVIDERS = new Set([
   "github",
   "kimi-coding",
   "kilocode",
+  "megabrain",
   "codebuddy-cn",
   "freebuff",
   "codebuddy-intl",
@@ -80,12 +88,20 @@ const NO_PKCE_DEVICE_CODE_PROVIDERS = new Set([
  * Providers whose PKCE flow has been retired but whose import-token path is
  * still active. Returning 410 Gone on `authorize` / `start-callback-server` /
  * `poll-callback` (instead of 400) tells callers the action is permanently
- * gone and points them at /import-token.
+ * gone and points them at /import-token. Devin Desktop left this set when it gained the
+ * Devin CLI browser sign-in; Devin CLI owns its own login and stays import-only.
  */
-const RETIRED_PKCE_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
+const RETIRED_PKCE_PROVIDERS = new Set(["devin-cli"]);
 
 /** Providers that allow direct import of a raw API token (no OAuth exchange). */
-const IMPORT_TOKEN_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
+const IMPORT_TOKEN_PROVIDERS = new Set([
+  "devin-desktop",
+  "devin-cli",
+  "grok-cli",
+  "claude",
+  "antigravity",
+  "agy",
+]);
 
 /**
  * #10143: re-importing a token onto an existing connection must keep its persisted
@@ -183,6 +199,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
 
     if (action === "authorize") {
+      if (provider === "copilot-m365-web") return authorizeM365(searchParams);
       const requestedRedirectUri =
         searchParams.get("redirect_uri") || "http://localhost:8080/callback";
       const redirectUri = resolveBrowserOAuthRedirectUri(provider, requestedRedirectUri);
@@ -442,7 +459,7 @@ export async function POST(
     const { provider, action } = await params;
 
     // Phase 1 hotfix (2026-05-29): retired PKCE flows return 410 Gone before
-    // body parsing. Devin Desktop/CLI `poll-callback` is permanently retired;
+    // body parsing. Devin CLI `poll-callback` is permanently retired;
     // use /import-token (handled later in this same handler) instead.
     if (RETIRED_PKCE_PROVIDERS.has(provider) && action === "poll-callback") {
       return NextResponse.json(
@@ -474,6 +491,9 @@ export async function POST(
     }
 
     let body: any = rawBody;
+    // This provider requires the exact full redirect URL and its server-issued
+    // transaction. Do not normalize it through the generic raw-code exchange.
+    if (provider === "copilot-m365-web" && action === "exchange") return exchangeM365(rawBody);
     if (action === "exchange") {
       const validation = validateBody(oauthExchangeSchema, rawBody);
       if (isValidationFailure(validation)) {
@@ -855,9 +875,13 @@ export async function POST(
       try {
         // Map the raw token via the provider's mapTokens() — skips the HTTP exchange entirely.
         // Providers that must verify the token upstream first expose an async importToken().
+        // That upstream check carries the token, so it goes through the provider's proxy
+        // like the code exchange above (provider-level → global → direct).
         const providerData = getProvider(provider);
         const tokenData = providerData.importToken
-          ? await providerData.importToken(token)
+          ? await runWithProxyContextOrDirect(await resolveProxyForProvider(provider), () =>
+              providerData.importToken(token)
+            )
           : providerData.mapTokens({ accessToken: token });
 
         // Normalize: if name is missing, use email as fallback display label
@@ -868,6 +892,8 @@ export async function POST(
         const expiresAt = tokenData.expiresIn
           ? new Date(Date.now() + tokenData.expiresIn * 1000).toISOString()
           : null;
+
+        const degradedProject = antigravityDegradedProjectState(provider, tokenData);
 
         // Tokens without an identity (e.g. a Claude setup-token) match on the token itself,
         // so re-pasting the same token updates its connection instead of duplicating it.
@@ -884,13 +910,13 @@ export async function POST(
         if (matchId) {
           connection = await updateProviderConnection(matchId, {
             ...buildOAuthTokenUpdate(keepDeviceIdentity(tokenData, match), expiresAt),
-            testStatus: "active",
+            ...antigravityPersistStatus(degradedProject),
             isActive: true,
           });
         }
         if (!connection) {
           connection = await createProviderConnection(
-            buildOAuthConnectionCreatePayload(provider, tokenData, expiresAt)
+            buildOAuthConnectionCreatePayload(provider, tokenData, expiresAt, degradedProject)
           );
         }
 
@@ -898,6 +924,7 @@ export async function POST(
 
         return NextResponse.json({
           success: true,
+          ...(degradedProject ? { warning: degradedProject.warning } : {}),
           connection: {
             id: connection.id,
             provider: connection.provider,

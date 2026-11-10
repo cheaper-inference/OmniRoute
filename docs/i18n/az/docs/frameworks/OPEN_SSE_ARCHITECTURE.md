@@ -486,13 +486,13 @@ Bu, aşağıdakıları emal edir:
 
 `open-sse/config/` konfiqurasiya qatını saxlayır:
 
-| Fayl                          | Məqsəd                                              |
-| ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | 377 provayder kataloqu üzərində chat-model reyestri |
-| `providerModels.ts`           | Model ləqəbləri, formatın xəritəsi                  |
-| `constants.ts`                | Taymoutlar, limitlər, status kodları                |
-| `defaultThinkingSignature.ts` | Defolt Claude düşüncə imzası                        |
-| `modelStrip.ts` (xidmətlərdə) | Hər provayder üçün sahənin soyulması                |
+| Fayl                          | Məqsəd                                                |
+| ----------------------------- | ----------------------------------------------------- |
+| `providerRegistry.ts`         | 381-provayder kataloqu üzərində söhbət modeli reyestr |
+| `providerModels.ts`           | Model ləqəbləri, formatın xəritəsi                    |
+| `constants.ts`                | Taymoutlar, limitlər, status kodları                  |
+| `defaultThinkingSignature.ts` | Defolt Claude düşüncə imzası                          |
+| `modelStrip.ts` (xidmətlərdə) | Hər provayder üçün sahənin soyulması                  |
 
 ### Provayder Reyestrinin Sxemi
 

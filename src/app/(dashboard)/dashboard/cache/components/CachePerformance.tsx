@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { Skeleton as KitSkeleton } from "@/shared/components/Loading";
@@ -19,28 +20,17 @@ interface CachePerformanceProps {
 }
 
 function HitRateBar({ hitRate, label }: { hitRate: number; label: string }) {
-  const colorClass = hitRate >= 70 ? "bg-success" : hitRate >= 40 ? "bg-warning" : "bg-error";
+  const tone = hitRate >= 70 ? "success" : hitRate >= 40 ? "warning" : "danger";
   const textClass = hitRate >= 70 ? "text-success" : hitRate >= 40 ? "text-warning" : "text-error";
+  const valueText = `${hitRate.toFixed(1)}%`;
 
   return (
-    <div
-      className="w-full"
-      role="progressbar"
-      aria-label={label}
-      aria-valuenow={hitRate}
-      aria-valuemin={0}
-      aria-valuemax={100}
-    >
-      <div className="flex justify-between text-xs mb-1.5">
+    <div className="w-full">
+      <div className="flex justify-between text-xs mb-1.5" aria-hidden="true">
         <span className="text-text-muted">{label}</span>
-        <span className={`font-semibold tabular-nums ${textClass}`}>{hitRate.toFixed(1)}%</span>
+        <span className={`font-semibold tabular-nums ${textClass}`}>{valueText}</span>
       </div>
-      <div className="w-full h-2 rounded-full bg-border/60 overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${colorClass}`}
-          style={{ width: `${Math.min(hitRate, 100)}%` }}
-        />
-      </div>
+      <Progress aria-label={label} aria-valuetext={valueText} value={hitRate} tone={tone} />
     </div>
   );
 }

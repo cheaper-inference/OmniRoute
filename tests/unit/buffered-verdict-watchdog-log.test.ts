@@ -138,7 +138,7 @@ test("cutoff on a silent stream uses the empty format", async () => {
 test("stream with real content never trips the content watchdog", async () => {
   const source = new ReadableStream({
     async start(controller) {
-      controller.enqueue(encoder.encode('data: {"type":"response.in_progress","response":{}}'));
+      controller.enqueue(encoder.encode('data: {"type":"response.in_progress","response":{}}\n\n'));
       await new Promise((r) => setTimeout(r, 30));
       controller.enqueue(
         encoder.encode('data: {"type":"response.output_text.delta","delta":"Hello"}\n\n')

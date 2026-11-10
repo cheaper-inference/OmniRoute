@@ -444,7 +444,7 @@ server/
 
 ---
 
-## 4. `open-sse/` - የዥረት ሞተር የስራ ቦታ
+## 4. `open-sse/` — ዥረት ሞተር የስራ ቦታ
 
 የተለየ npm የስራ ቦታ እንደ `@omniroute/open-sse` ታትሟል። የጥያቄ ሂደት፣ አስፈፃሚዎች፣ ተርጓሚዎች፣ አገልግሎቶች፣ ትራንስፎርመር እና የ MCP አገልጋይ ባለቤት ነው።
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ከፍተኛ-ደረጃ አስፈፃሚ ሞጁሎች (`*.ts` ሲቀነስ `base.ts`, `index.ts` እና ፈተናዎች - የቁጥር `npm run check:docs-counts` መለኪያዎች). እያንዳንዱ አስፈፃሚ ክፍል `BaseExecutor` (`base.ts`)፣ በቀጥታ ወይም በ `DefaultExecutor` ወይም በሌላ ፈፃሚ ይዘልቃል። የተቀሩት ሞጁሎች በአቅራቢዎች ረዳቶች (የመሳሪያዎች ንድፎች, fetch/TTS አስማሚዎች, ኩዊክ ተቆጣጣሪዎች) ናቸው. ፈጻሚዎች የሚከተሉትን ያካትታሉ:
+159 top-level executor modules (`*.ts` minus `base.ts`, `index.ts` and tests — the count `npm run check:docs-counts` measures). Every executor class extends `BaseExecutor` (`base.ts`), directly or through `DefaultExecutor` or another executor; the remaining modules are per-provider helpers (tool schemas, fetch/TTS adapters, quirk handlers). Executors include:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, zqg , zqh , zqi , `claudeIdentity.ts`, zqk , `index.ts` ዝቅም
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> ማሳሰቢያ፡ እዚህ ያልተዘረዘሩ አቅራቢዎች አጠቃላይ የOpenAI-ተኳሃኝ ፈጻሚን በመጠቀም በ `default.ts` ያገለግላሉ። የሙሉ አቅራቢ ካታሎግ (377 አቅራቢዎች) በ `src/shared/constants/providers.ts` ውስጥ ይኖራሉ።
+> ማሳሰቢያ፡ እዚህ ያልተዘረዘሩ አቅራቢዎች አጠቃላይ የOpenAI-ተኳሃኝ ፈጻሚን በመጠቀም በ `default.ts` ያገለግላሉ። የሙሉ አቅራቢ ካታሎግ (381 አቅራቢዎች) በ `src/shared/constants/providers.ts` ውስጥ ይኖራሉ።
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based ምላሾች API ↔ የውይይት ማጠናቀቂያ መቀየሪያ (በ `responses/` መንገድ የሚይዝ-ሁሉንም ይጠቀማል)።
+- `responsesTransformer.ts` — `TransformStream` -based ምላሾች API ↔ ቻት ማጠናቀቂያ መቀየሪያ (በ `responses/` መንገድ የሚይዝ-ሁሉንም መጠቀም)።
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ open-sse/
 | መሸጎጫ           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | የማሰብ ችሎታ       | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | ሞዴል አያያዝ       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| መጨናነቅ          | `compression/` - ሙሉ የመጭመቂያ ሞተር ሽቦ                                                                                                                                                                                                                        |
+| መጨናነቅ          | `compression/` — ሙሉ የማመቂያ ሞተር ሽቦ                                                                                                                                                                                                                         |
 | ማስመሰያ + ክፍለ ጊዜ | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | ደረጃ / አንጸባራቂ   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / አውታረ መረብ  | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,20 +528,20 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ልዩ መሳሪያዎች** ባለገመድ በ `server.ts` (45 ቀኖናዊ በ `schemas/tools.ts` + ማህደረ ትውስታ፣ ችሎታዎች፣ GitHub-skills፣ ፑል፣ gamification፣ ፕለጊን፣ Notion፣ Obsidian፣ አካባቢያዊ-ኮርፐስ እና መጭመቂያ ሞጁሎች - ህብረት በ `countUniqueMcpTools` ተቆጥሯል።
+- **110 ልዩ መሳሪያዎች** ባለገመድ በ `server.ts` (45 ቀኖናዊ በ `schemas/tools.ts` + ማህደረ ትውስታ፣ ችሎታዎች፣ GitHub-ችሎታ፣ ፑል፣ gamification፣ ተሰኪ፣ Notion፣ Obsidian፣ የአካባቢ-ኮርፐስ እና የማመቂያ ሞጁሎች — ህብረት በ `countUniqueMcpTools` ተቆጥሯል።
 - **3 ማጓጓዣዎች** : stdio, HTTP Streamable, SSE.
-- **33 ወሰኖች** በ runtime ላይ ተፈጻሚነት ያለው - በ `src/shared/constants/mcpScopes.ts` ውስጥ የመሠረት ዝርዝር ፣ ሙሉ ስብስብ በእያንዳንዱ መሣሪያ ሞጁል የታወጀው የቦታዎች ጥምረት ነው።
+- **33 ወሰኖች** በ `src/shared/constants/mcpScopes.ts` ውስጥ በ runtime — ቤዝ ዝርዝር ውስጥ ተፈጻሚነት ያለው ፣ ሙሉ ስብስብ በእያንዳንዱ የመሳሪያ ሞጁል የታወጀው የቦታዎች ህብረት ነው።
 - የኦዲት ሰንጠረዥ `mcp_tool_audit` (በ `audit.ts` ተሞልቷል)።
 - ፋይሎች `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus tests under `__tests__/`.
 - ለሙሉ መሳሪያ ካታሎግ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ይመልከቱ።
 
 ### 4.7 `open-sse/config/`
 
-የአቅራቢ መዝገቦች (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), በቅርጸት ሞዴል መመዝገቢያ (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), የማንነት ረዳቶች (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, zqnti, crasede, `cliFingerprints.ts`, zqr, zqt, crus, cras, cras, `antigravityModelAliases.ts`, zqr, zqt, crus, cras, cras, crucide, zqr, zqt, crucide, sqr, zqnti `bedrock.ts` `maritalk.ts` `runway.ts` `codexClient.ts` `toolCloaking.ts` `defaultThinkingSignature.ts` `azureAi.ts` `credentialLoader.ts` `datarobot.ts` `glmProvider.ts` `oci.ts` `petals.ts` `sap.ts` `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-የዥረት `thinkTagParser.ts` `kieTask.ts` `cursorAgentProtobuf.ts` ረዳቶች `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts` `ollamaTransform.ts` `proxyDispatcher.ts` `sleep.ts` `tlsClient.ts` `networkProxy.ts` `awsSigV4.ts` `cacheControlPolicy.ts` `error.ts` `cursorChecksum.ts` `requestLogger.ts` `cursorVersionDetector.ts` `comfyuiClient.ts` `progressTracker.ts` `bypassHandler.ts` `cors.ts` `aiSdkCompat.ts` `logger.ts` `urlSanitize.ts` `usageTracking.ts`
+`sleep.ts` `thinkTagParser.ts` `comfyuiClient.ts` `ollamaTransform.ts` `proxyDispatcher.ts` `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts` `cors.ts` `streamReadiness.ts` `logger.ts` `sseHeartbeat.ts` `error.ts` `proxyFetch.ts` `tlsClient.ts` `cursorVersionDetector.ts` `cacheControlPolicy.ts` `awsSigV4.ts` `cursorChecksum.ts` `networkProxy.ts` `cursorAgentProtobuf.ts` `bypassHandler.ts` `kieTask.ts` `requestLogger.ts` `aiSdkCompat.ts` `progressTracker.ts` `urlSanitize.ts` `usageTracking.ts`
 
 ---
 
