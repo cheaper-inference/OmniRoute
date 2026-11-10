@@ -40,6 +40,7 @@ import { normalizeRoles, resolvePreserveDeveloperRole } from "../services/roleNo
 import { hoistLeadingSystemMessage } from "./helpers/strictSystemHoist.ts";
 import { ensurePoeUserTurnHasText } from "./helpers/poeImageOnlyUserTurn.ts";
 import { acceptsInlineToolAdditions, hoistToolAdditions } from "./helpers/claudeDeferredTools.ts";
+import { isStrictResponsesToolHistoryEnabled } from "./helpers/responsesToolHistory.ts";
 import {
   buildAssistantMessageCacheKey,
   lookupReasoning,
@@ -344,7 +345,10 @@ const OPENAI_INCOMPATIBLE_ECHO_FIELDS = [
   "cache_control",
 ];
 
-/** Translate request formats and enforce attachment preservation for CI dispatch. */
+/**
+ * Translate a request between protocols, applying target-specific compatibility rules and
+ * enforcing attachment preservation for CI dispatch.
+ */
 export function translateRequest(
   sourceFormat,
   targetFormat,
@@ -404,8 +408,13 @@ export function translateRequest(
     ["opencode-go", "opencode-zen"].includes(normalizedProvider) ||
     /glm|zhipu|z-ai/i.test(normalizedModel);
 
-  // Phase 2: Apply thinking budget control before normalization
-  result = applyThinkingBudget(result);
+  // Phase 2: Apply thinking budget control before normalization. Gemini targets receive
+  // the model so a native thinkingLevel reaches the translator instead of a lossy budget.
+  // Claude -> Antigravity is excluded: claude-to-openai drops the level on the hub path.
+  const readsNativeGeminiLevel =
+    targetFormat === FORMATS.GEMINI ||
+    (targetFormat === FORMATS.ANTIGRAVITY && sourceFormat !== FORMATS.CLAUDE);
+  result = applyThinkingBudget(result, null, readsNativeGeminiLevel ? normalizedModel : undefined);
   // Explicit reasoning-routing policies are final. The marker is internal and is
   // consumed here before any provider translation can see it.
   result = applyReasoningRuleDirective(result);
@@ -436,17 +445,23 @@ export function translateRequest(
   });
   const preserveResponsesReasoning = sourceFormat === FORMATS.OPENAI_RESPONSES && isReasoner;
 
+  // In strict tool-history mode the Responses translator validates the history, so do not
+  // normalize malformed arguments or synthesize empty outputs before that boundary. Reordering
+  // a displaced tool result next to its call invents nothing, so it applies in both modes.
+  const strictResponsesHistory =
+    targetFormat === FORMATS.OPENAI_RESPONSES && isStrictResponsesToolHistoryEnabled();
+
   // Ensure tool_calls have id; optionally normalize to 9-char for providers like Mistral
-  ensureToolCallIds(result, { use9CharId });
+  if (!strictResponsesHistory) ensureToolCallIds(result, { use9CharId });
 
   // Fix missing tool responses (insert empty tool_result if needed)
   repairDisplacedToolResults(result);
-  fixMissingToolResponses(result);
+  if (!strictResponsesHistory) fixMissingToolResponses(result);
 
   // Claude reconciliation preserves orphaned tool output as labelled user text.
   // Keep the raw result carriers until the target translator can perform that
   // lossless conversion; other target formats retain the strict orphan filter.
-  if (targetFormat !== FORMATS.CLAUDE) {
+  if (targetFormat !== FORMATS.CLAUDE && !strictResponsesHistory) {
     stripOrphanedToolResults(result);
   }
 

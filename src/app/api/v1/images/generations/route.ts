@@ -1,3 +1,4 @@
+import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -191,6 +192,7 @@ async function postHandler(request, context) {
         body.model as string,
         body,
         {
+          prepareFalInput: getFalCompatibilityPreparer(),
           request,
           policy,
           keyScope: {
@@ -398,6 +400,7 @@ async function postHandler(request, context) {
           },
           () =>
             handleImageGeneration({
+              prepareFalInput: getFalCompatibilityPreparer(),
               body,
               credentials: attemptCredentials,
               log,

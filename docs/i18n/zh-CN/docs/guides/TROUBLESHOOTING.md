@@ -802,6 +802,30 @@ omniroute serve --ready-timeout 180000
 
 ---
 
+## CCR / 重复数据删除问题
+
+压缩CCR (`ccr`) 和`session-dedup`工具的诊断矩阵。有关完整的运算符参考（标记、先决条件、每个工具范围、检索分页），请参阅[压缩引擎→先决条件/运算符指南](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)。
+
+| 症状                                                                            | 可能的原因                                                                                                      | 核实                                                                                                   | 使固定                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                  | 路由保护环回身份验证，不是传输错误。没有`Bearer`或没有`mcp:connect`/`manage`/`admin`的密钥到达`/api/mcp/`路线。 | 该请求携带no/invalid `Authorization` header。                                                          | 发送有效的`Bearer`密钥。远程密钥可以保存`mcp:connect` （授权`/api/mcp/`仅本地剥离）及其所需的特定read/write范围。                                                                               |
+| **未找到块**— `omniroute_ccr_retrieve`拒绝哈希                                  | 哈希值不是 24 十六进制值或复制错误，或块已过期/被驱逐。                                                         | 将哈希值与`[CCR retrieve hash=…]`标记中的 24 十六进制值进行比较；检查`omniroute_ccr_stats`的存储状态。 | 从标记中逐字复制 24 十六进制哈希值。如果该块确实消失了，则它已超过其TTL或从未到达持久存储（超过 512 KB块，以及云运行时上的每个块，仅保留内存，并且无法在重新启动后幸存）。                      |
+| **CCR无操作**—块未压缩（文本返回不变）                                          | 阻止低于压缩阈值，或者CCR引擎/模式处于非活动状态。                                                              | 检查主动压缩`strategy`/`enabled`以及块大小与阈值。                                                     | 启用CCR （或运行它的堆栈模式）并确认该块足够大以至于值得存储。无操作不是错误—它是“没有可压缩的内容”。                                                                                           |
+| **去重标记**— `[dedup:ref sha=…]`出现在输出中                                   | **有意回头看**，不是损失或错误。 `session-dedup`删除了在同一会话的较早回合中已发送的文本。                      | 确认会话早期出现了相同的文本。                                                                         | —什么都不做，不调用工具，也不尝试重建它。第一次出现的是规范副本；当前回合永远不会被重写，它会在以后的回合中进行重复数据删除。                                                                   |
+| **代码模式**`tools[]` / CCR指令中缺少— `omniroute_ccr_*`工具，未注入 (OpenCode) | OpenCode代码模式（默认）仅向模型通告本机工具，对`tools[]`隐藏MCP工具。                                          | 检查OpenCode MCP服务器条目中的`codemode`。                                                             | 在服务器条目上设置`codemode: false` （a**客户**设置），以便宣传MCP工具。 CCR -protocol 指令保持关闭状态：名为`omniroute`服务器公开`omniroute_omniroute_ccr_retrieve`，并且`_`不是匹配的分隔符。 |
+
+更多症状：
+
+| 症状                                                                         | 可能的原因                                                                                                                  | 使固定                                                                                                                                                    |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                      | MCP工具错误结果 (`isError: true`)，而不是HTTP 403。调用者的密钥缺少所需的范围。                                             | 从每个工具表中添加范围（请参阅操作员指南）。例如`omniroute_ccr_retrieve`需要`read:compression`。                                                          |
+| `Unknown Mcp-Session-Id`                                                     | Streamable-HTTP 会话闲置并被收获 (`OMNIROUTE_MCP_SESSION_IDLE_MS`)；服务器回答HTTP 404。                                    | 重新连接或重新启动会话— do**不是**旋转密钥、更改范围或重命名工具。这不是401/403.                                                                          |
+| 工具结果中的`JSON Parse error` / `Unterminated string`                       | MCP工具文本剪辑在`mcpAccessibility.maxTextChars` （默认`50000`）中间 JSON 周围。                                            | 使用分页`mode`而不是裸露的完整： `mode:"grep"`、 `mode:"lines"`、 `mode:"head"`、 `mode:"tail"`或`mode:"stats"`。经验法则： `chars > 40000` →使用`mode`。 |
+| `Failed to open SSE stream`                                                  | 当传输为`streamable`时，客户端使用旧版`/api/mcp/sse`单例。                                                                  | 将客户端指向`/api/mcp/stream` （可流式传输端点）而不是`/api/mcp/sse`。                                                                                    |
+| **死 stdio 心跳**— `mcp-heartbeat.json`在HTTP传输启动时显示`pidAlive: false` | 心跳文件是 stdio 剩余的文件（过时的PID或不同的版本）； HTTP传输正在进行中，并从`getMcpHttpStatus()`报告状态（无文件写入）。 | 没有采取任何行动—运输是健康的。事实是来自`/api/mcp/status` `httpTransport.online` / `startedAt` ，而不是心跳文件。不要重新启动服务器或轮换密钥。          |
+
+---
+
 ## 仍然无法解决？
 
 - **GitHub Issues**：[github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
