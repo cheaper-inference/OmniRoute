@@ -555,7 +555,7 @@
     "joi": "^18.2.9",
     "onnxruntime-node": "1.30.0",
     "eslint-plugin-react-hooks": "7.1.1",
-    "fast-xml-parser": "^5.10.1",
+    "fast-xml-parser": "^5.12.0",
     "sharp": "^0.35.5",
     "postcss": "^8.5.18",
     "ip-address": "^10.7.4",
@@ -629,6 +629,7 @@
     },
     "get-uri": {
       "basic-ftp": "^6.2.3"
-    }
+    },
+    "mongoose": "^9.11.4"
   }
 }

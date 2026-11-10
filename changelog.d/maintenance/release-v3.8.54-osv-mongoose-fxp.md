@@ -1,0 +1,1 @@
+- **deps:** lift transitive `mongoose` to 9.12.1 and `fast-xml-parser` to 5.12.0 through overrides, clearing the advisories published on 2026-11-10 that pushed the OSV vulnerability ratchet from 7 to 13
