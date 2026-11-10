@@ -77,8 +77,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 94 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 94);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 99 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 99);
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "agent_sessions"),
       ["190", "197", "198", "208", "214", "229", "230"].map((fromVersion) => ({
@@ -97,6 +97,15 @@ describe("migrationRunner/constants — large-table integrity", () => {
         fromName: "usage_history_agent_session_id",
         toVersion: "235",
         toName: "usage_history_agent_session_id",
+      }))
+    );
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "key_templates"),
+      ["228", "230", "231", "232", "234"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "key_templates",
+        toVersion: "236",
+        toName: "key_templates",
       }))
     );
     assert.deepEqual(
