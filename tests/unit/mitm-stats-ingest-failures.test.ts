@@ -113,6 +113,12 @@ child = spawn(process.execPath, [serverPath], {
   },
   stdio: "ignore",
 });
+// A proxy that dies at start (port taken, cert setup failed) must fail the test at once, not
+// after the 30 s start timeout, and must say that it exited.
+let childExit: string | null = null;
+child.on("exit", (code, signal) => {
+  childExit = `code ${code}, signal ${signal}`;
+});
 
 test.after(async () => {
   clientAgent.destroy();
@@ -122,7 +128,8 @@ test.after(async () => {
 });
 
 test("stats.json starts with a zero ingest failure count", async () => {
-  await waitFor(() => typeof readStats().startedAt === "string", 30_000);
+  await waitFor(() => typeof readStats().startedAt === "string" || childExit !== null, 30_000);
+  assert.equal(childExit, null, `proxy exited before it started (${childExit})`);
   assert.equal(typeof readStats().startedAt, "string", "proxy did not start");
   assert.equal(readStats().ingestFailures, 0);
 });
