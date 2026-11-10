@@ -541,7 +541,7 @@ test("provider asset provenance gate binds auditedCommit to the physical provide
   }
 });
 
-test("repository provider asset manifest covers the audited 145-file snapshot", (t) => {
+test("repository provider asset manifest covers the audited 147-file snapshot", (t) => {
   const manifestPath = join(REPO_ROOT, "config/quality/provider-assets-provenance.jsonl");
   const { auditedCommit } = JSON.parse(readFileSync(manifestPath, "utf8").split("\n")[0]);
   if (!gitHasCommit(auditedCommit) && isShallowRepository()) {
@@ -558,9 +558,10 @@ test("repository provider asset manifest covers the audited 145-file snapshot", 
     result.stdout,
     // runcrate (#18061) adds one unresolved contributor-supplied logomark: 142 → 143.
     // gisoo (#18112) adds one unresolved contributor-supplied logomark: 143 → 144.
+    // ChatGPT sign-in (#15201) adds two probable official SIWC logomarks: 144 → 146.
     // inf-code adds one unresolved logomark built from the official Token
-    // Infinity InfCode vector logo: 144 → 145, unresolved 3 → 4.
-    /145\/145 registered; proven=72 probable=69 unresolved=4; duplicate-groups=1/
+    // Infinity InfCode vector logo: 146 → 147, unresolved 3 → 4.
+    /147\/147 registered; proven=72 probable=71 unresolved=4; duplicate-groups=1/
   );
 });
 

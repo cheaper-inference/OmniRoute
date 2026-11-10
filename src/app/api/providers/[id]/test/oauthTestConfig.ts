@@ -171,6 +171,14 @@ export function classifyOAuthProbeInconclusive(
 }
 
 export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
+  chatgpt: {
+    // Sign in with ChatGPT (#15201): testOAuthConnection() runs the live-catalog probe
+    // (chatgptTest.ts) first, which reports expired/revoked registrations precisely. This
+    // entry is the registered capability and the fallback contract: token present and not
+    // expired, refreshable through the refresh token.
+    checkExpiry: true,
+    refreshable: true,
+  },
   claude: {
     // Claude doesn't have userinfo, we verify token exists and not expired
     checkExpiry: true,
