@@ -93,8 +93,9 @@ for (const fallback of [false, true]) {
       assert.equal(result.result.error, scenario.error.message);
       const body = await result.result.response.json();
       assert.equal(body.error.message, scenario.error.message);
-      // The internal parser category is projected to the public 502 identifier.
-      assert.equal(body.error.code, "bad_gateway");
+      // A safe explicit classification wins over the generic status-code fallback.
+      assert.equal(body.error.code, "invalid_sse_payload");
+      assert.equal(body.error.type, "invalid_sse_payload");
       assert.equal(result.receipt.httpStatus, 502);
       assert.equal(result.receipt.termination, "provider_error");
     });
