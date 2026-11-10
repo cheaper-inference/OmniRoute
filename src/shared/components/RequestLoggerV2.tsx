@@ -767,9 +767,12 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
         const isCurrent = () => !cancelled && detailRequestRef.current === requestToken;
         inFlight = true;
         try {
-          const res = await fetch(`/api/usage/call-logs?correlationId=${encodeURIComponent(cid)}`, {
-            cache: "no-store",
-          });
+          const res = await fetch(
+            `/api/usage/call-logs?correlationIdExact=${encodeURIComponent(cid)}`,
+            {
+              cache: "no-store",
+            }
+          );
           if (!isCurrent() || !res.ok) return;
           const snapshot = relatedLogsSchema.safeParse(await res.json());
           if (!isCurrent() || !snapshot.success) return;
