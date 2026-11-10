@@ -27,30 +27,57 @@ const LEGACY_ANCHOR = '"x-anthropic-billing-header":"';
 const SYSTEM_TEXT_ANCHOR = '"text":"x-anthropic-billing-header';
 const CCH_PLACEHOLDER = "cch=00000;";
 
-/** [start, end) of the value of the top-level `system` key in a JSON object string. */
-function systemValueRange(json: string): [number, number] | null {
+/** Index of the closing quote of the JSON string that opens at `open`. */
+function stringEnd(json: string, open: number): number {
+  let end = open + 1;
+  while (end < json.length && json[end] !== '"') end += json[end] === "\\" ? 2 : 1;
+  return end;
+}
+
+/** Index of the first non-whitespace character at or after `from`. */
+function skipWhitespace(json: string, from: number): number {
+  let i = from;
+  while (i < json.length && " \n\t".includes(json[i])) i++;
+  return i;
+}
+
+/** The key a string token is, when a colon follows it: its name and where its value starts. */
+function objectKeyAt(
+  json: string,
+  open: number,
+  close: number
+): { name: string; valueStart: number } | null {
+  const colon = skipWhitespace(json, close + 1);
+  return json[colon] === ":" ? { name: json.slice(open + 1, close), valueStart: colon + 1 } : null;
+}
+
+const BRACKET_DEPTH: Record<string, number> = { "{": 1, "[": 1, "}": -1, "]": -1 };
+
+/** Top-level keys of a JSON object string, and the index of its closing brace (-1 if unclosed). */
+function scanTopLevelKeys(json: string) {
+  const keys: Array<{ name: string; keyStart: number; valueStart: number }> = [];
   let depth = 0;
-  let start = -1;
   for (let i = 0; i < json.length; i++) {
-    const c = json[i];
-    if (c === '"') {
-      let end = i + 1;
-      while (end < json.length && json[end] !== '"') end += json[end] === "\\" ? 2 : 1;
-      let next = end + 1;
-      while (json[next] === " " || json[next] === "\n" || json[next] === "\t") next++;
-      if (depth === 1 && json[next] === ":") {
-        if (start >= 0) return [start, i];
-        if (json.slice(i + 1, end) === "system") start = next + 1;
-      }
+    if (json[i] === '"') {
+      const end = stringEnd(json, i);
+      const key = depth === 1 ? objectKeyAt(json, i, end) : null;
+      if (key) keys.push({ ...key, keyStart: i });
       i = end;
-    } else if (c === "{" || c === "[") {
-      depth++;
-    } else if (c === "}" || c === "]") {
-      depth--;
-      if (depth === 0 && start >= 0) return [start, i];
+    } else {
+      depth += BRACKET_DEPTH[json[i]] ?? 0;
+      if (depth === 0 && json[i] === "}") return { keys, end: i };
     }
   }
-  return null;
+  return { keys, end: -1 };
+}
+
+/** [start, end) of the value of the top-level `system` key in a JSON object string. */
+function systemValueRange(json: string): [number, number] | null {
+  const { keys, end } = scanTopLevelKeys(json);
+  const at = keys.findIndex((key) => key.name === "system");
+  if (at < 0) return null;
+  const stop = keys[at + 1]?.keyStart ?? end;
+  return stop >= 0 ? [keys[at].valueStart, stop] : null;
 }
 
 /** Index of the billing header's `cch=00000;` placeholder, or -1. */
