@@ -64,6 +64,14 @@ for (const successful of [true, false]) {
     const request = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url === "/api/services/managed-proxy") {
+        if (init?.method === "PATCH") {
+          expect(JSON.parse(String(init.body))).toEqual({
+            action: "test",
+            core: "singbox",
+            sourceLink: source,
+          });
+          return Response.json({ success: true, publicIp: "203.0.113.5", latencyMs: 10 });
+        }
         expect(init?.method).toBe("POST");
         expect(JSON.parse(String(init?.body))).toEqual({
           core: "singbox",
@@ -96,6 +104,10 @@ for (const successful of [true, false]) {
     expect(request.mock.calls.length).toBe(beforeTyping);
     const core = screen.getByLabelText("Proxy core");
     expect((core as HTMLSelectElement).value).toBe("");
+    const testConnection = screen.getByRole("button", {
+      name: /Test Connection/i,
+    }) as HTMLButtonElement;
+    expect(testConnection.disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
     expect(
       await screen.findByText("Select sing-box or Xray before saving this tunnel")
@@ -103,14 +115,23 @@ for (const successful of [true, false]) {
     expect(request.mock.calls.length).toBe(beforeTyping);
     fireEvent.change(core, { target: { value: "singbox" } });
     expect(request.mock.calls.length).toBe(beforeTyping);
+    expect(testConnection.disabled).toBe(false);
+    fireEvent.click(testConnection);
+    await screen.findByText("203.0.113.5", {}, { timeout: 2000 });
+    expect(request.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
     expect(
-      (screen.getByRole("button", { name: /Test Connection/i }) as HTMLButtonElement).disabled
-    ).toBe(true);
+      request.mock.calls.filter(([, init]) => ["POST", "PUT"].includes(init?.method || "GET"))
+    ).toHaveLength(0);
+    expect((host as HTMLInputElement).value).toBe(source);
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: /^Save$/i }));
     await waitFor(
       () =>
         expect(
-          request.mock.calls.filter(([url]) => url === "/api/services/managed-proxy")
+          request.mock.calls.filter(
+            ([url, init]) => url === "/api/services/managed-proxy" && init?.method === "POST"
+          )
         ).toHaveLength(1),
       { timeout: 2000 }
     );
