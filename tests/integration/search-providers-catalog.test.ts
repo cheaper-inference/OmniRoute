@@ -2,7 +2,7 @@
  * Integration tests for GET /api/search/providers — extended catalog (F4).
  *
  * Tests:
- * - Returns 31 items total (23 search + 8 fetch providers).
+ * - Returns 32 items total (24 search + 8 fetch providers).
  * - Each item carries the correct `kind` field.
  * - Status reflects actual DB credential state:
  *   - "configured"  when an active, non-rate-limited connection exists.
@@ -48,11 +48,11 @@ const route = await import("../../src/app/api/search/providers/route.ts");
 // Constants
 // ---------------------------------------------------------------------------
 
-// 23 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
+// 24 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
 // google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search, anysearch-search,
 // context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search, kimi-search,
-// keenable-search.
-const EXPECTED_SEARCH_COUNT = 23;
+// keenable-search, codex-search.
+const EXPECTED_SEARCH_COUNT = 24;
 const EXPECTED_FETCH_COUNT = 8;
 const EXPECTED_TOTAL = EXPECTED_SEARCH_COUNT + EXPECTED_FETCH_COUNT;
 
@@ -139,7 +139,7 @@ test("search-providers-catalog: returns 401 for unauthenticated requests when au
   assert.ok(!bodyStr.includes(" at /"), "error body must not contain stack trace");
 });
 
-test("search-providers-catalog: returns 31 providers (23 search + 8 fetch)", async () => {
+test("search-providers-catalog: returns 32 providers (24 search + 8 fetch)", async () => {
   const req = await buildAuthRequest();
   const res = await route.GET(req);
 
@@ -419,4 +419,14 @@ test("search-providers-catalog: perplexity-search uses credential fallback", asy
     "configured",
     "perplexity-search should be 'configured' via fallback to perplexity credentials"
   );
+});
+
+test("search-providers-catalog: codex-search is configured via a connected Codex account", async () => {
+  await seedActiveConnection("codex");
+  const res = await route.GET(await buildAuthRequest());
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  const codex = body.providers.find((p: { id: string }) => p.id === "codex-search");
+  assert.equal(codex?.status, "configured");
+  assert.deepEqual(codex.searchTypes, ["web", "news"]);
 });

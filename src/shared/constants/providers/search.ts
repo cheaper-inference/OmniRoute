@@ -3,6 +3,18 @@
  * Pure data literal; re-exported by the providers.ts barrel. No behavior change.
  */
 export const SEARCH_PROVIDERS = {
+  "codex-search": {
+    id: "codex-search",
+    alias: "codex_search",
+    name: "Codex Web Search (ChatGPT)",
+    icon: "search",
+    color: "#10A37F",
+    textIcon: "CS",
+    website: "https://chatgpt.com",
+    authHint:
+      "Uses your connected OpenAI Codex (ChatGPT) accounts — no separate key. Each search spends Codex subscription quota (~10k input tokens) and takes ~10–40 s.",
+    serviceKinds: ["webSearch"],
+  },
   "perplexity-search": {
     id: "perplexity-search",
     serviceKinds: ["webSearch"],
