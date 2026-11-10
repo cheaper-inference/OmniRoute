@@ -300,6 +300,26 @@ test("pollToken network errors are sanitized before they reach the route", async
   );
 });
 
+test("pollToken maps denied, expired, failing and token-less responses", async () => {
+  const cases: Array<[number, unknown, string]> = [
+    [403, {}, "access_denied"],
+    [410, {}, "expired_token"],
+    [500, {}, "poll_failed"],
+    [200, { data: {} }, "authorization_pending"],
+    [200, null, "authorization_pending"],
+  ];
+  for (const [status, body, expected] of cases) {
+    await withRecordedFetch(
+      async () => {
+        const result = await qoder.pollToken(QODER_CONFIG, "nonce-1", "verifier-1");
+        assert.equal(result.ok, false, `status ${status}`);
+        assert.equal(result.data.error, expected, `status ${status}`);
+      },
+      () => new Response(JSON.stringify(body), { status })
+    );
+  }
+});
+
 test("the Qoder auth hint says device sign-in accounts cannot serve chat yet", () => {
   const hint = String(OAUTH_PROVIDERS.qoder.authHint || "");
   assert.match(hint, /cannot serve chat/i);

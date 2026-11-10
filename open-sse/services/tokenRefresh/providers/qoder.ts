@@ -6,78 +6,70 @@ import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { buildFormParams, extractOAuthErrorCode } from "../shared.ts";
 import { getQoderMachineId } from "../../../utils/qoderDevice.ts";
 
-/**
- * Specialized refresh for Qoder OAuth / Device Flow tokens
- */
-export async function refreshQoderToken(refreshToken, log, proxyConfig: unknown = null) {
-  // Only device-flow refresh tokens (drt-) belong to the device endpoint. A legacy
-  // OAuth refresh token must never be sent there, even without a client secret.
-  const isDeviceToken = typeof refreshToken === "string" && refreshToken.startsWith("drt-");
+const QODER_DEVICE_DEFAULT_EXPIRES_IN = 2592000;
+const QODER_DEVICE_UNRECOVERABLE_STATUSES = new Set([400, 401, 403, 404, 410]);
 
-  if (isDeviceToken) {
-    const refreshUrl =
-      process.env.QODER_DEVICE_REFRESH_URL || "https://center.qoder.sh/api/v1/deviceToken/refresh";
-    const machineId = getQoderMachineId();
+function toQoderDeviceCredentials(json, previousRefreshToken) {
+  const nested = json?.data;
+  const payload = (nested && typeof nested === "object" ? nested : json) || {};
+  return {
+    accessToken: payload.token || payload.access_token,
+    refreshToken: payload.refresh_token || payload.refreshToken || previousRefreshToken,
+    expiresIn: payload.expires_in || payload.expiresIn || QODER_DEVICE_DEFAULT_EXPIRES_IN,
+  };
+}
 
-    try {
-      const response = await runWithProxyContext(proxyConfig, () =>
-        fetch(refreshUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            refresh_token: refreshToken,
-            machine_id: machineId,
-          }),
-        })
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        log?.error?.("TOKEN_REFRESH", "Failed to refresh Qoder device token", {
-          status: response.status,
-          error: errorText,
-        });
-        if (
-          response.status === 400 ||
-          response.status === 401 ||
-          response.status === 403 ||
-          response.status === 404 ||
-          response.status === 410
-        ) {
-          return { error: "unrecoverable_refresh_error", code: "invalid_grant" };
-        }
-        return null;
-      }
-
-      const json = await response.json();
-      const payload = json?.data && typeof json.data === "object" ? json.data : json;
-      const newAccessToken = payload?.token || payload?.access_token;
-      const newRefreshToken = payload?.refresh_token || payload?.refreshToken || refreshToken;
-      const expiresIn = payload?.expires_in || payload?.expiresIn || 2592000;
-
-      log?.info?.("TOKEN_REFRESH", "Successfully refreshed Qoder device token", {
-        hasNewAccessToken: !!newAccessToken,
-        hasNewRefreshToken: !!newRefreshToken,
-        expiresIn,
-      });
-
-      return {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-        expiresIn,
-      };
-    } catch (err: unknown) {
-      log?.error?.("TOKEN_REFRESH", "Network error refreshing Qoder device token", {
-        error: err instanceof Error ? err.message : String(err),
-      });
-      return null;
-    }
+async function handleQoderDeviceRefreshFailure(response, log) {
+  const errorText = await response.text();
+  log?.error?.("TOKEN_REFRESH", "Failed to refresh Qoder device token", {
+    status: response.status,
+    error: errorText,
+  });
+  if (QODER_DEVICE_UNRECOVERABLE_STATUSES.has(response.status)) {
+    return { error: "unrecoverable_refresh_error", code: "invalid_grant" };
   }
+  return null;
+}
 
-  // Legacy OAuth fallback with basic auth
+async function refreshQoderDeviceToken(refreshToken, log, proxyConfig) {
+  const refreshUrl =
+    process.env.QODER_DEVICE_REFRESH_URL || "https://center.qoder.sh/api/v1/deviceToken/refresh";
+  const machineId = getQoderMachineId();
+
+  try {
+    const response = await runWithProxyContext(proxyConfig, () =>
+      fetch(refreshUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          refresh_token: refreshToken,
+          machine_id: machineId,
+        }),
+      })
+    );
+
+    if (!response.ok) return handleQoderDeviceRefreshFailure(response, log);
+
+    const credentials = toQoderDeviceCredentials(await response.json(), refreshToken);
+    log?.info?.("TOKEN_REFRESH", "Successfully refreshed Qoder device token", {
+      hasNewAccessToken: !!credentials.accessToken,
+      hasNewRefreshToken: !!credentials.refreshToken,
+      expiresIn: credentials.expiresIn,
+    });
+    return credentials;
+  } catch (err: unknown) {
+    log?.error?.("TOKEN_REFRESH", "Network error refreshing Qoder device token", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
+}
+
+/** Legacy OAuth fallback with basic auth (operator-configured QODER_OAUTH_*). */
+async function refreshQoderLegacyToken(refreshToken, log, proxyConfig) {
   if (!OAUTH_ENDPOINTS.qoder.token || !PROVIDERS.qoder.clientId || !PROVIDERS.qoder.clientSecret) {
     log?.warn?.(
       "TOKEN_REFRESH",
@@ -131,4 +123,16 @@ export async function refreshQoderToken(refreshToken, log, proxyConfig: unknown 
     refreshToken: tokens.refresh_token || refreshToken,
     expiresIn: tokens.expires_in,
   };
+}
+
+/**
+ * Specialized refresh for Qoder OAuth / Device Flow tokens.
+ * Only device-flow refresh tokens (drt-) belong to the device endpoint; a legacy
+ * OAuth refresh token must never be sent there, even without a client secret.
+ */
+export async function refreshQoderToken(refreshToken, log, proxyConfig: unknown = null) {
+  const isDeviceToken = typeof refreshToken === "string" && refreshToken.startsWith("drt-");
+  return isDeviceToken
+    ? refreshQoderDeviceToken(refreshToken, log, proxyConfig)
+    : refreshQoderLegacyToken(refreshToken, log, proxyConfig);
 }

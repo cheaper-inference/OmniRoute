@@ -8,6 +8,59 @@ import {
 import { QODER_CONFIG } from "../constants/oauth";
 import { generateCodeChallenge, generateCodeVerifier } from "../utils/pkce";
 
+const QODER_DEVICE_DEFAULT_EXPIRES_IN = 2592000;
+
+/** Poll statuses center.qoder.sh uses for a not-yet-successful device authorization. */
+const QODER_POLL_STATUS_ERRORS: Record<number, { error: string; error_description?: string }> = {
+  // While waiting for user approval in the browser, center.qoder.sh returns HTTP 404.
+  404: { error: "authorization_pending" },
+  429: { error: "slow_down" },
+  403: { error: "access_denied", error_description: "Authorization denied by user" },
+  410: { error: "expired_token", error_description: "Authorization code expired" },
+};
+
+function qoderPollStatusError(response: Response) {
+  const known = QODER_POLL_STATUS_ERRORS[response.status];
+  if (known) return { ...known };
+  if (!response.ok) {
+    return { error: "poll_failed", error_description: `Poll failed: ${response.status}` };
+  }
+  return null;
+}
+
+/** Qoder wraps most responses in `{ data: {...} }`; accept both shapes. */
+function unwrapQoderData(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  const nested = record.data;
+  return nested && typeof nested === "object" ? (nested as Record<string, unknown>) : record;
+}
+
+function firstQoderField(record: Record<string, unknown> | null, keys: string[]): unknown {
+  for (const key of keys) {
+    const value = record?.[key];
+    if (value) return value;
+  }
+  return null;
+}
+
+function toQoderPollResult(body: unknown) {
+  const payload = unwrapQoderData(body);
+  const accessToken = firstQoderField(payload, ["token", "access_token"]);
+  if (!accessToken) return { ok: false, data: { error: "authorization_pending" } };
+  return {
+    ok: true,
+    data: {
+      access_token: accessToken as string,
+      refresh_token: (firstQoderField(payload, ["refresh_token", "refreshToken"]) || "") as string,
+      expires_in: (firstQoderField(payload, ["expires_in", "expiresIn"]) ||
+        QODER_DEVICE_DEFAULT_EXPIRES_IN) as number,
+      token_type: "Bearer",
+      _userEmail: (firstQoderField(payload, ["email", "userEmail"]) || "") as string,
+    },
+  };
+}
+
 /**
  * Qoder account sign-in (device code). SIGN-IN ONLY: the resulting `dt-`/`drt-`
  * tokens identify the account, but no supported Qoder endpoint accepts them for
@@ -54,7 +107,6 @@ export const qoder = {
 
   /**
    * Poll for approval of the device authorization code.
-   * While waiting for user approval in the browser, center.qoder.sh returns HTTP 404.
    */
   pollToken: async (config: typeof QODER_CONFIG, deviceCode: string, codeVerifier?: string) => {
     const pollBase = config?.pollUrl || "https://center.qoder.sh/api/v1/deviceToken/poll";
@@ -73,63 +125,10 @@ export const qoder = {
         },
       });
 
-      if (response.status === 404) {
-        return { ok: false, data: { error: "authorization_pending" } };
-      }
+      const statusError = qoderPollStatusError(response);
+      if (statusError) return { ok: false, data: statusError };
 
-      if (response.status === 429) {
-        return { ok: false, data: { error: "slow_down" } };
-      }
-
-      if (response.status === 403) {
-        return {
-          ok: false,
-          data: { error: "access_denied", error_description: "Authorization denied by user" },
-        };
-      }
-
-      if (response.status === 410) {
-        return {
-          ok: false,
-          data: { error: "expired_token", error_description: "Authorization code expired" },
-        };
-      }
-
-      if (!response.ok) {
-        return {
-          ok: false,
-          data: { error: "poll_failed", error_description: `Poll failed: ${response.status}` },
-        };
-      }
-
-      const data = (await response.json()) as Record<string, unknown>;
-      const payload =
-        data &&
-        typeof data === "object" &&
-        "data" in data &&
-        data.data &&
-        typeof data.data === "object"
-          ? (data.data as Record<string, unknown>)
-          : data;
-
-      const accessToken = (payload?.token || payload?.access_token) as string | undefined;
-      const refreshToken = (payload?.refresh_token || payload?.refreshToken || "") as string;
-      const expiresIn = (payload?.expires_in || payload?.expiresIn || 2592000) as number;
-
-      if (accessToken) {
-        return {
-          ok: true,
-          data: {
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            expires_in: expiresIn,
-            token_type: "Bearer",
-            _userEmail: (payload?.email || payload?.userEmail || "") as string,
-          },
-        };
-      }
-
-      return { ok: false, data: { error: "authorization_pending" } };
+      return toQoderPollResult(await response.json());
     } catch (err: unknown) {
       // Hard Rule #12: the route returns error_description to the browser verbatim.
       const errorMsg = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));
@@ -166,26 +165,16 @@ export const qoder = {
    * Map token response and optional profile metadata to OmniRoute connection format.
    */
   mapTokens: (tokens: Record<string, unknown>, extra: Record<string, unknown> | null = null) => {
-    const rawUser = extra && typeof extra === "object" ? extra : null;
-    const user =
-      rawUser && "data" in rawUser && rawUser.data && typeof rawUser.data === "object"
-        ? (rawUser.data as Record<string, unknown>)
-        : rawUser;
-
+    const user = unwrapQoderData(extra);
     const email =
-      (user?.email as string) ||
-      (user?.mail as string) ||
+      (firstQoderField(user, ["email", "mail"]) as string) ||
       (typeof tokens._userEmail === "string" ? tokens._userEmail : null);
     const name =
-      (user?.nickname as string) ||
-      (user?.name as string) ||
-      (user?.username as string) ||
-      email ||
-      "Qoder User";
+      (firstQoderField(user, ["nickname", "name", "username"]) as string) || email || "Qoder User";
     // #18737: never mirror the device access token into apiKey — the executor
     // sends apiKey upstream as a Bearer credential. The device token stays in
     // accessToken/refreshToken (encrypted at rest) for refresh and identity only.
-    const reportedApiKey = (user?.apiKey as string) || (user?.api_key as string) || null;
+    const reportedApiKey = firstQoderField(user, ["apiKey", "api_key"]) as string | null;
     const apiKey = reportedApiKey && !isQoderDeviceToken(reportedApiKey) ? reportedApiKey : null;
 
     return {
@@ -198,10 +187,10 @@ export const qoder = {
       name,
       displayName: name,
       providerSpecificData: {
-        userId: (user?.id || user?.userId || null) as string | null,
+        userId: firstQoderField(user, ["id", "userId"]) as string | null,
         email,
         name,
-        accountType: (user?.accountType || user?.type || null) as string | null,
+        accountType: firstQoderField(user, ["accountType", "type"]) as string | null,
         // Sign-in only: connection selection and the executor refuse chat for it.
         authMethod: QODER_DEVICE_AUTH_METHOD,
         chatSupported: false,

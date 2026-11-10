@@ -535,6 +535,7 @@
       "tests/unit/public-stream-error-codes.test.ts",
       "tests/unit/publicCreds.test.ts",
       "tests/unit/qoder-oauth-config.test.ts",
+      "tests/unit/qoder-device-signin-only.test.ts",
       "tests/unit/qoder-pat-tools-13697.test.ts",
       "tests/unit/quota-exhaustion-cutoff-opencode.test.ts",
       "tests/unit/quota-groups-route.test.ts",
