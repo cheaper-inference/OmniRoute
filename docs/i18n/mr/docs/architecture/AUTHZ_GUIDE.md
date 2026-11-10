@@ -148,33 +148,32 @@ Settings → Security मधून नोंदणी केली जाते;
   4. `OMNIROUTE_DISABLE_MFA` unset करा, सर्व्हर पुन्हा सुरू करा आणि आवश्यक असल्यास
      पुन्हा नोंदणी करा.
 
-## राउट वर्ग
+## मार्ग वर्ग
 
-`src/server/authz/types.ts` तीन वर्ग परिभाषित करतो; जो राउट निश्चितपणे वर्गीकृत करता येत नाही तो `MANAGEMENT` वर परत जातो.
+`src/server/authz/types.ts` मध्ये तीन वर्ग परिभाषित केले आहेत; ज्या मार्गाचे निश्चितपणे वर्गीकरण करता येत नाही ते `MANAGEMENT` वर परततात.
 
-| वर्ग         | वर्णन                                                                                                                                                  | आवश्यक प्रमाणीकरण                                                |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `PUBLIC`     | स्पष्टपणे सुरक्षित राउट — लॉगिन, लॉगआउट, स्थिती, init, health, onboarding bootstrap.                                                                   | काहीही नाही                                                      |
-| `CLIENT_API` | मॉडेल-सर्व्हिंग एंडपॉइंट्स — `/api/v1/*`, `/api/v1beta/*`, तसेच उपनावे `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | प्रभावी `REQUIRE_API_KEY` फीचर फ्लॅग सक्षम असेल तेव्हा Bearer की |
-| `MANAGEMENT` | डॅशबोर्ड पृष्ठे, सेटिंग्ज, प्रदाते, की, प्रशासन आणि डायग्नोस्टिक्स एंडपॉइंट्स.                                                                         | डॅशबोर्ड सत्र किंवा `manage` स्कोप असलेला Bearer                 |
+| वर्ग         | वर्णन                                                                                                                                                  | प्रमाणीकरण आवश्यक                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `PUBLIC`     | स्पष्टपणे सुरक्षित मार्ग — लॉगिन, लॉगआउट, स्थिती, आरोग्य, ऑनबोर्डिंग बूटस्ट्रॅप.                                                                       | काहीही नाही                                                  |
+| `CLIENT_API` | मॉडेल-सर्व्हिंग एंडपॉइंट्स — `/api/v1/*`, `/api/v1beta/*`, तसेच उपनावे `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | प्रभावी `REQUIRE_API_KEY` फीचर फ्लॅग सक्षम असल्यास Bearer की |
+| `MANAGEMENT` | डॅशबोर्ड पृष्ठे, सेटिंग्ज, प्रदाते, कीज, प्रशासकीय आणि निदानात्मक एंडपॉइंट्स.                                                                          | डॅशबोर्ड सत्र किंवा `manage` स्कोपसह Bearer                  |
 
-काही `MANAGEMENT` क्रिया **केवळ-ऑपरेटर** आहेत: `manage` की पुरेशी नाही. साठवलेल्या क्रेडेंशियल्सची निर्यात
-(`GET /api/settings/export-json`, `GET /api/db-backups/export`,
-`GET /api/db-backups/exportAll`), थेट डेटावर बॅकअप रिस्टोअर
-(`POST /api/db-backups/import` यात `dryRun=true` समाविष्ट, `POST /api/db-backups` id द्वारे रिस्टोअर,
-`POST /api/settings/import-json`), रिस्टोअर पॉइंट्स नष्ट करणे (`DELETE /api/db-backups` सफाई,
-आणि `PATCH /api/db-backups` कारण ते जतन करत असलेली retention प्रत्येक बॅकअपनंतर आपोआप prune करते) —
-या सर्वांसाठी डॅशबोर्ड सत्र, स्थानिक CLI subject, किंवा लॉगिन अक्षम असणे आवश्यक आहे. sync टोकन जारी करणे
-(`POST /api/sync/tokens`) आणि `admin` CLI एक्सेस टोकन तयार करणे (`POST /api/cli/tokens`) प्रत्येक लॉगिन
-मोडमध्ये डॅशबोर्ड सत्र किंवा स्थानिक CLI subject मागतात. कोणत्याही स्कोपच्या API की आणि `oma_` एक्सेस टोकन
-ऑपरेटर क्रेडेंशियल नाहीत: जेव्हा असे क्रेडेंशियल आवश्यक असते तेव्हा त्यांना `403` मिळते. ही तपासणी
+काही `MANAGEMENT` क्रिया **केवळ ऑपरेटरसाठी** आहेत: `manage` की पुरेशी नाही. साठवलेली
+प्रमाणपत्रे निर्यात करणे (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), लाइव्ह डेटावर बॅकअप पुनर्संचयित करणे
+(`POST /api/db-backups/import`, ज्यामध्ये `dryRun=true` देखील समाविष्ट आहे, `POST /api/db-backups` आयडीद्वारे पुनर्संचयित करणे,
+`POST /api/settings/import-json`), पुनर्संचयित बिंदू हटवणे (`DELETE /api/db-backups` क्लीनअप,
+आणि `PATCH /api/db-backups`, कारण त्याद्वारे जतन केलेला retention प्रत्येक बॅकअपनंतर होणाऱ्या
+स्वयंचलित pruning ला नियंत्रित करतो) यासाठी डॅशबोर्ड सत्र, स्थानिक CLI subject किंवा लॉगिन अक्षम असणे आवश्यक आहे. सिंक टोकन जारी करणे (`POST /api/sync/tokens`) आणि `admin` CLI access token तयार करणे
+(`POST /api/cli/tokens`) यासाठी प्रत्येक लॉगिन मोडमध्ये डॅशबोर्ड सत्र किंवा स्थानिक CLI subject आवश्यक आहे.
+कोणत्याही स्कोपच्या API की आणि `oma_` access tokens ही ऑपरेटरची प्रमाणपत्रे नाहीत: जेव्हा त्यापैकी एक आवश्यक असते तेव्हा त्यांना `403`
+मिळतो. ही तपासणी
 `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
-`requireOperatorCredential()`) मध्ये आहे. लॉगिन सेटिंग्ज बदलणेही केवळ-ऑपरेटर आहे:
-`POST /api/settings/require-login` (व्यवस्थापन पासवर्ड सेट करा / `requireLogin` टॉगल करा) एकदा पासवर्ड अस्तित्वात
-असेल की फक्त तेच क्रेडेंशियल्स स्वीकारतो — पहिल्या-वेळच्या बूटस्ट्रॅप खिडकीत (पासवर्ड नसताना) काहीही बदलत नाही —
-आणि डॅशबोर्ड सत्राने पासवर्ड बदलण्यासाठी `currentPassword` पाठवणे आवश्यक आहे (गहाळ किंवा चुकीचा असल्यास
-`403`, `settings.update_failed` म्हणून ऑडिट). स्थानिक CLI आणि लॉगिन-अक्षम इन्स्टन्स रिकव्हरी मार्ग राखतात आणि
-त्याशिवाय पासवर्ड सेट करू शकतात, कारण दोघेही डेटा डिरेक्टरीचा मालक असलेल्या होस्टशी बांधलेले आहेत.
+`requireOperatorCredential()`) मध्ये आहे. लॉगिन सेटिंग्ज बदलणे देखील केवळ ऑपरेटरसाठी आहे:
+`POST /api/settings/require-login` (व्यवस्थापन पासवर्ड सेट करणे / `requireLogin` टॉगल करणे) पासवर्ड अस्तित्वात आल्यानंतर
+फक्त तीच प्रमाणपत्रे स्वीकारते — पहिल्यांदा चालू करण्याची बूटस्ट्रॅप विंडो (अद्याप पासवर्ड नसताना)
+बदललेली नाही — आणि पासवर्ड बदलण्यासाठी डॅशबोर्ड सत्राने `currentPassword` पाठवणे आवश्यक आहे
+(ते नसल्यास किंवा चुकीचे असल्यास `403`, आणि `settings.update_failed` म्हणून ऑडिट केले जाते). स्थानिक CLI आणि लॉगिन अक्षम असलेले इंस्टन्स पुनर्प्राप्ती मार्ग कायम ठेवतात आणि त्याशिवाय पासवर्ड सेट करू शकतात, कारण दोन्ही डेटा डिरेक्टरीच्या मालकीच्या होस्टशी जोडलेले आहेत.
 
 ## पाइपलाइन
 
@@ -205,17 +204,17 @@ Incoming request → src/proxy.ts
 
 यशस्वी पॉलिसी `AuthSubject` सह `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` परत करते. डाउनस्ट्रीम हँडलर्स ऑथ लॉजिक पुन्हा चालवण्याऐवजी `src/server/authz/assertAuth.ts` मध्ये `assertAuth(request, "CLIENT_API")` द्वारे वाचू शकतात.
 
-## सार्वजनिक मार्गांची सूची
+## सार्वजनिक मार्गांची यादी
 
 `src/shared/constants/publicApiRoutes.ts` ही स्पष्ट allowlist आहे:
 
-ही सूची **आकारानुसार** विभागलेली आहे आणि हे विभाजन अत्यंत महत्त्वाचे आहे (GHSA-74g9-q8f6-793h): उपसर्ग
-`startsWith()` सह जुळवला जातो, त्यामुळे सुरुवातीची अक्षरे समान असलेल्या प्रत्येक लगतच्या मार्गाशीही तो जुळतो.
-`/api/usage/om-usage` हा उपसर्ग `/api/usage/om-usage<anything>` ला PUBLIC म्हणून चिन्हांकित करतो, आणि Next त्याचे निराकरण
-`/api/usage/[connectionId]` येथे करतो — स्वतःचे प्रमाणीकरण नसलेला handler.
+ही यादी **आकारानुसार** विभागलेली आहे आणि हा विभाग महत्त्वाचा आहे (GHSA-74g9-q8f6-793h): prefix चे जुळणारे परीक्षण
+`startsWith()` वापरून केले जाते, त्यामुळे सुरुवातीची अक्षरे समान असलेला प्रत्येक संलग्न मार्गही जुळतो.
+`/api/usage/om-usage` ला prefix म्हणून चिन्हांकित केल्याने `/api/usage/om-usage<anything>` PUBLIC होते आणि Next त्याचे निराकरण
+`/api/usage/[connectionId]` वर करते — स्वतःचे प्रमाणीकरण नसलेला handler.
 
 ```ts
-// वास्तविक उपवृक्ष. प्रत्येक नोंदीचा शेवट "/" ने होणे MUST आहे (unit test द्वारे तपासले जाते).
+// वास्तविक उपवृक्ष. प्रत्येक नोंद "/" ने संपलीच पाहिजे (unit test द्वारे तपासले जाते).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
   "/api/v1/", // classify मध्ये CLIENT_API म्हणून हाताळले जाते, "no-auth public" म्हणून नाही
@@ -225,33 +224,32 @@ PUBLIC_API_ROUTE_PREFIXES = [
   "/api/cursor-cli/",
 ];
 
-// स्वतंत्र मार्ग, शेवटी slash असो वा नसो, EXACTLY जुळवले जातात.
+// स्वतंत्र मार्ग, trailing slash असो वा नसो, EXACTLY जुळवले जातात.
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP साठी login ची पायरी 2; MFA-pending cookie आवश्यक आहे
-  "/api/init",
+  "/api/auth/mfa/verify", // opt-in TOTP साठी login ची पायरी 2; MFA-pending cookie आवश्यक
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// केवळ-वाचनासाठीचे स्वतंत्र मार्ग, ज्यांना CORS origin relaxation देखील लागू होते.
+// CORS origin सवलतही लागू होणारे केवळ-वाचन स्वतंत्र मार्ग.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS relaxation शिवाय केवळ-वाचनासाठीचा स्वतंत्र मार्ग.
+// CORS सवलत लागू न होणारा केवळ-वाचन स्वतंत्र मार्ग.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-केवळ-वाचनासाठीचे मार्ग फक्त सुरक्षित पद्धतींसाठी सार्वजनिक असतात. नोंद: `classifyRoute()` `/api/v1/*` आणि `/api/v1beta/*` यांना PUBLIC fall-through मधून वगळते — ते नेहमी `CLIENT_API` असतात, त्यामुळे Bearer-key धोरण लागू राहते.
+केवळ-वाचन मार्ग सुरक्षित पद्धतींसाठीच सार्वजनिक असतात. नोंद: `classifyRoute()` PUBLIC fall-through मधून `/api/v1/*` आणि `/api/v1beta/*` वगळते — त्यामुळे ते नेहमी `CLIENT_API` असतात आणि Bearer-की धोरण अद्याप लागू राहते.
 
 ## नवीन रूट जोडणे
 
@@ -326,15 +324,33 @@ API की मध्ये `scopes` ॲरे असतो (JSON म्हणू
 (`src/lib/accessTokens/scopes.ts`). ही रँक फक्त ॲक्सेस-टोकन क्रेडेंशियलला लागू होते.
 [व्यवस्थापन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) पहा.
 
-## Auth Required टॉगल
+## प्रमाणीकरण आवश्यक टॉगल
 
-`src/shared/utils/apiAuth.ts` मधील `isAuthRequired()` ठरवतो की विनंतीसाठी **कोणताही** प्रमाणीकरण लागू करायचा का:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` विनंतीसाठी **कोणतेही प्रमाणीकरण** लागू आहे की नाही हे ठरवते:
 
-- `settings.requireLogin === false` → प्रमाणीकरण जागतिक स्तरावर अक्षम आहे, फक्त नेहमी-संरक्षित टियर (पहा [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) आणि जे कॉल्स ते स्वीकारते ते क्रेडेंशियल देतात त्यांच्याशिवाय, आणि त्यांना लॉगिन चालू असतानाचेच क्रेडेंशियल लागते: sync टोकन जारी करणे, कोणत्याही स्कोपवर CLI एक्सेस टोकन तयार करणे, आणि `manage`/`admin` स्कोप असलेली API की तयार करणे, की ला तो स्कोप देणे, किंवा अशी की पुन्हा तयार करणे किंवा उघड करणे (`src/lib/api/requireManagementAuth.ts` मधील `requireCredentialForManagementScopedKey()`). केवळ-inference की खुल्या राहतात.
-- कोणताही पासवर्ड कॉन्फिगर नाही **आणि** `INITIAL_PASSWORD` env var नाही → bootstrap मोड onboarding wizard आणि loopback विनंत्यांना परवानगी देतो, पण उघड नेटवर्क विनंत्यांना अजूनही क्रेडेंशियल्स लागतात.
-- कोणतीही DB त्रुटी → बंद होऊन अपयशी (डीफॉल्टनेच सुरक्षित).
+- `settings.requireLogin === false` → प्रमाणीकरण जागतिक स्तरावर अक्षम केले जाते; मात्र नेहमी-संरक्षित
+  स्तर (पहा [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) आणि ते स्वीकारणारे क्रेडेन्शियल
+  वितरित करणाऱ्या कॉल्सना अपवाद आहे. अशा कॉल्सना लॉगिन सुरू असताना लागणारेच क्रेडेन्शियल आवश्यक असते:
+  सिंक टोकन जारी करणे, कोणत्याही स्कोपवर CLI अॅक्सेस टोकन तयार करणे, आणि `manage`/`admin` स्कोपसह
+  API की तयार करणे, तो स्कोप एखाद्या कीला देणे, किंवा अशी की पुन्हा तयार करणे अथवा उघड करणे
+  (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`).
+  केवळ inference साठीच्या की खुल्या राहतात. संरक्षित फीचर फ्लॅग लिहिणे (`REQUIRE_API_KEY`, इतर
+  Security फ्लॅग्स, तसेच [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) मध्ये सूचीबद्ध
+  SSRF / TLS / MCP-scope / sandbox फ्लॅग्स) आणि PII masking सेटिंग्ज जतन करणे
+  (`PUT /api/settings/pii`) यांसाठीही क्रेडेन्शियल आवश्यक राहते.
+- कोणताही पासवर्ड कॉन्फिगर केलेला नाही **आणि** `INITIAL_PASSWORD` env var देखील नाही → बूटस्ट्रॅप मोड
+  onboarding wizard आणि loopback विनंत्यांना अनुमती देतो, परंतु उघड्या नेटवर्कवरील विनंत्यांसाठी
+  अजूनही क्रेडेन्शियल आवश्यक असते. अपवाद: संरक्षित फीचर फ्लॅग लिहिणे आणि PII masking सेटिंग्ज जतन करणे
+  (`PUT /api/settings/pii`) यांसाठी loopback वरूनही क्रेडेन्शियल आवश्यक असते; त्यामुळे केवळ loopback
+  पुरेसे नाही.
+- कोणतीही DB त्रुटी → प्रवेश नाकारला जातो (secure-by-default).
 
-क्लायंट API की अंमलबजावणी `src/shared/utils/featureFlags.ts` मधील `isRequireApiKeyEnabled()` वापरते, थेट `process.env.REQUIRE_API_KEY` वाचत नाही. तैनात इन्स्टन्ससाठी हे महत्त्वाचे आहे: डॅशबोर्ड → Feature Flags मध्ये `REQUIRE_API_KEY` टॉगल केल्याने DB override साठवला जातो आणि तो लगेच `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, आणि या हेल्परचा वापर करणाऱ्या इतर क्लायंट-API प्रमाणीकरण तपासण्यांवर परिणाम करतो. फीचर फ्लॅग स्टोअर वाचता आला नाही तर क्लायंट API प्रमाणीकरण बंद होऊन अपयशी ठरते आणि की आवश्यक करते.
+क्लायंट API कीची अंमलबजावणी `src/shared/utils/featureFlags.ts` मधील `isRequireApiKeyEnabled()` वापरते,
+थेट `process.env.REQUIRE_API_KEY` वाचत नाही. डिप्लॉय केलेल्या इन्स्टन्ससाठी हे महत्त्वाचे आहे:
+Dashboard → Feature Flags मध्ये `REQUIRE_API_KEY` टॉगल केल्यास DB override साठवला जातो आणि
+`/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` तसेच हा helper
+सामायिक करणाऱ्या इतर client-API प्रमाणीकरण तपासण्यांवर त्वरित परिणाम होतो. फीचर फ्लॅग स्टोअर वाचता
+न आल्यास, क्लायंट API प्रमाणीकरण सुरक्षिततेच्या दृष्टीने प्रवेश नाकारते आणि की आवश्यक ठरवते.
 
 ## ब्रेकिंग बदल — v3.8.0
 

@@ -36,6 +36,7 @@ import {
   upstreamErrorResponse,
 } from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
+import { handleRenderhourSpeech } from "./renderhourSpeech.ts";
 import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
@@ -1072,6 +1073,10 @@ export async function handleAudioSpeech({
       return handleTortoiseSpeech(providerConfig, body);
     }
 
+    if (providerConfig.format === "renderhour-tts") {
+      return handleRenderhourSpeech({ providerConfig, body, modelId, credentials });
+    }
+
     if (providerConfig.format === "syntx-audio") {
       return handleSyntxSpeech({
         model: modelId,
@@ -1093,6 +1098,10 @@ export async function handleAudioSpeech({
         voice: body.voice || providerConfig.defaultVoice || "alloy",
         response_format: normalizeSpeechResponseFormat(body.response_format),
         speed: body.speed || 1.0,
+        // OpenAI's voice-steering field (gpt-4o-mini-tts, deAPI VoiceDesign); only sent when given.
+        ...(typeof body.instructions === "string" && body.instructions
+          ? { instructions: body.instructions }
+          : {}),
       }),
     });
 

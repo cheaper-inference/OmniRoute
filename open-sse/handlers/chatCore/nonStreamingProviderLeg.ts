@@ -30,10 +30,14 @@ import {
 } from "./nonStreamingResponseBody.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
+import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
-import { ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
+import {
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE,
+} from "../../config/constants.ts";
 import { unwrapClinepassEnvelope } from "../../utils/clinepassEnvelope.ts";
 import { unwrapClineNonStreamingEnvelope } from "./clineResponseEnvelope.ts";
 import {
@@ -169,6 +173,7 @@ function summarizeUsage(raw: unknown): ProviderLegUsage | null {
   const pt = typeof r.prompt_tokens === "number" ? r.prompt_tokens : 0;
   const ct = typeof r.completion_tokens === "number" ? r.completion_tokens : 0;
   return {
+    ...cacheCreationFields(raw),
     prompt_tokens: pt,
     completion_tokens: ct,
     total_tokens: typeof r.total_tokens === "number" ? r.total_tokens : pt + ct,
@@ -553,15 +558,25 @@ export async function runNonStreamingProviderLeg(
     // The old non-streaming path reduced every TimeoutError to a bare 504.
     // Preserve only the explicit Antigravity pre-response marker, not arbitrary
     // upstream 504s: the outer account router needs the original failure type.
+    const requestScopedTimeout =
+      failureStatus === 504 &&
+      !!error &&
+      typeof error === "object" &&
+      (error as { code?: unknown }).code === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
     const preResponseTimeout =
       provider === "antigravity" &&
       failureStatus === 504 &&
       !!error &&
       typeof error === "object" &&
       (error as { code?: unknown }).code === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
+    const timeoutType = requestScopedTimeout
+      ? "request_timeout"
+      : preResponseTimeout
+        ? "upstream_timeout"
+        : undefined;
     const receipt = buildReceipt(input, {
       httpStatus: failureStatus,
-      errorType: preResponseTimeout ? "upstream_timeout" : null,
+      errorType: timeoutType ?? null,
       usage: null,
       termination: "provider_error",
       latencyMs: Date.now() - startMs,
@@ -575,8 +590,12 @@ export async function runNonStreamingProviderLeg(
       failureMessage,
       error,
       null,
-      preResponseTimeout ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE : undefined,
-      preResponseTimeout ? "upstream_timeout" : undefined
+      requestScopedTimeout
+        ? REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE
+        : preResponseTimeout
+          ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE
+          : undefined,
+      timeoutType
     );
     return {
       kind: "error",
