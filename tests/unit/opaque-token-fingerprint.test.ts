@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { opaqueTokenFingerprint } from "../../open-sse/utils/opaqueTokenFingerprint.ts";
 import { hashClaudeCredential } from "../../open-sse/services/claudeUsageCooldown.ts";
+import { scopeHandoffSessionId } from "../../open-sse/services/combo/handoffSessionScope.ts";
 
 // Vectors computed once with node:crypto so the test never has to hash a
 // secret-looking value itself (which would re-create the CodeQL sink in tests/).
@@ -68,6 +69,11 @@ test("migrated call sites stay byte-identical to the helper", () => {
     hashClaudeCredential("sk-ant-oat01-raw-secret-token"),
     opaqueTokenFingerprint("sk-ant-oat01-raw-secret-token")
   );
+  // Persisted context_handoffs / session_model_history rows are keyed by this scoped id, so
+  // the owner prefix must stay the first 16 hex chars of the historical sha256(apiKeyId).
+  assert.equal(scopeHandoffSessionId("sess-1", "abc"), `k:${SHA256_ABC.slice(0, 16)}:sess-1`);
+  assert.equal(scopeHandoffSessionId("sess-1", null), "anon:sess-1");
+  assert.equal(scopeHandoffSessionId(null, "abc"), null);
 });
 
 // Regression guard: once a call site has moved to the helper it must not grow its own
@@ -83,6 +89,10 @@ const MIGRATED_FILES = [
   "open-sse/services/tokenRefresh/passiveCodex.ts",
   "src/sse/services/museSessionOwnership.ts",
   "src/server/authz/entra/evaluate.ts",
+  "open-sse/executors/m365ImageGeneration.ts",
+  "open-sse/services/combo/handoffSessionScope.ts",
+  // Sign in with ChatGPT (#15201): the attempt owner is a fingerprint of the dashboard session.
+  "src/app/api/oauth/chatgpt/session/route.ts",
 ];
 
 test("migrated call sites import the helper instead of hashing inline", () => {

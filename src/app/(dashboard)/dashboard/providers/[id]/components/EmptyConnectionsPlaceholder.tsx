@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@omniroute/ui-kit/empty-state";
 import Icon from "@/shared/components/Icon";
 
 // Phase 1t.6 extraction — Issue #3501
@@ -56,6 +57,28 @@ function PrimaryAddButton({
 export default function EmptyConnectionsPlaceholder({
   isOAuth,
   isCompatible,
+  t,
+  ...actionProps
+}: EmptyConnectionsPlaceholderProps) {
+  // Kit EmptyState (#18070), compact because it sits inside the connections card: it owns
+  // the icon well, heading, hint and the actions row.
+  return (
+    <EmptyState
+      compact
+      icon={<Icon name={isOAuth ? "lock" : "key"} size={32} />}
+      title={t("noConnectionsYet")}
+      description={t("addFirstConnectionHint")}
+      actions={isCompatible ? undefined : <EmptyConnectionsActions t={t} {...actionProps} />}
+    />
+  );
+}
+
+type EmptyConnectionsActionsProps = Omit<
+  EmptyConnectionsPlaceholderProps,
+  "isOAuth" | "isCompatible"
+>;
+
+function EmptyConnectionsActions({
   isCommandCode,
   providerId,
   supportsDualAuth,
@@ -69,104 +92,92 @@ export default function EmptyConnectionsPlaceholder({
   onOpenImportCodex,
   onOpenImportClaude,
   onOpenImportAgy,
-  onOpenImportGemini,
   onOpenImportGrokCli,
   t,
-}: EmptyConnectionsPlaceholderProps) {
+}: EmptyConnectionsActionsProps) {
   return (
-    <div className="text-center py-12">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-        <Icon name={isOAuth ? "lock" : "key"} size={32} />
-      </div>
-      <p className="text-text-main font-medium mb-1">{t("noConnectionsYet")}</p>
-      <p className="text-sm text-text-muted mb-4">{t("addFirstConnectionHint")}</p>
-      {!isCompatible && (
-        <div className="flex items-center justify-center gap-2">
-          {isCommandCode || supportsDualAuth ? (
-            <>
-              <Button
-                icon="open_in_new"
-                loading={
-                  isCommandCode &&
-                  (commandCodeAuthState.phase === "starting" ||
-                    commandCodeAuthState.phase === "polling" ||
-                    commandCodeAuthState.phase === "applying")
-                }
-                onClick={() =>
-                  gateConnectionFlow(
-                    isCommandCode ? handleOpenCommandCodeConnect : openPrimaryAddFlow
-                  )
-                }
-              >
-                Connect
-              </Button>
-              <Button
-                variant="secondary"
-                icon="add"
-                onClick={() => gateConnectionFlow(openApiKeyAddFlow)}
-              >
-                Manual API key
-              </Button>
-            </>
-          ) : (
-            <>
-              <PrimaryAddButton
-                providerId={providerId}
-                providerSupportsPat={providerSupportsPat}
-                onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
-                t={t}
-              />
-              {providerId === "qoder" && (
-                <Button variant="secondary" onClick={() => gateConnectionFlow(onOpenOAuthModal)}>
-                  Experimental OAuth
-                </Button>
-              )}
-              {providerId === "codex" && (
-                <Button
-                  variant="secondary"
-                  icon="upload_file"
-                  onClick={() => gateConnectionFlow(onOpenImportCodex)}
-                >
-                  {typeof t.has === "function" && t.has("importCodexAuth")
-                    ? t("importCodexAuth")
-                    : "Import auth"}
-                </Button>
-              )}
-              {providerId === "claude" && (
-                <Button
-                  variant="secondary"
-                  icon="upload_file"
-                  onClick={() => gateConnectionFlow(onOpenImportClaude)}
-                >
-                  {typeof t.has === "function" && t.has("importClaudeAuth")
-                    ? t("importClaudeAuth")
-                    : "Import auth"}
-                </Button>
-              )}
-              {providerId === "grok-cli" && (
-                <Button
-                  variant="secondary"
-                  icon="upload_file"
-                  onClick={() => gateConnectionFlow(onOpenImportGrokCli)}
-                >
-                  Import auth
-                </Button>
-              )}
-              {providerId === "agy" && onOpenImportAgy && (
-                <Button
-                  variant="secondary"
-                  icon="upload_file"
-                  onClick={() => gateConnectionFlow(onOpenImportAgy)}
-                >
-                  {typeof t.has === "function" && t.has("importAgyAuth")
-                    ? t("importAgyAuth")
-                    : "Import auth"}
-                </Button>
-              )}
-            </>
+    <>
+      {isCommandCode || supportsDualAuth ? (
+        <>
+          <Button
+            icon="open_in_new"
+            loading={
+              isCommandCode &&
+              (commandCodeAuthState.phase === "starting" ||
+                commandCodeAuthState.phase === "polling" ||
+                commandCodeAuthState.phase === "applying")
+            }
+            onClick={() =>
+              gateConnectionFlow(isCommandCode ? handleOpenCommandCodeConnect : openPrimaryAddFlow)
+            }
+          >
+            Connect
+          </Button>
+          <Button
+            variant="secondary"
+            icon="add"
+            onClick={() => gateConnectionFlow(openApiKeyAddFlow)}
+          >
+            Manual API key
+          </Button>
+        </>
+      ) : (
+        <>
+          <PrimaryAddButton
+            providerId={providerId}
+            providerSupportsPat={providerSupportsPat}
+            onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
+            t={t}
+          />
+          {providerId === "qoder" && (
+            <Button variant="secondary" onClick={() => gateConnectionFlow(onOpenOAuthModal)}>
+              Experimental OAuth
+            </Button>
           )}
-        </div>
+          {providerId === "codex" && (
+            <Button
+              variant="secondary"
+              icon="upload_file"
+              onClick={() => gateConnectionFlow(onOpenImportCodex)}
+            >
+              {typeof t.has === "function" && t.has("importCodexAuth")
+                ? t("importCodexAuth")
+                : "Import auth"}
+            </Button>
+          )}
+          {providerId === "claude" && (
+            <Button
+              variant="secondary"
+              icon="upload_file"
+              onClick={() => gateConnectionFlow(onOpenImportClaude)}
+            >
+              {typeof t.has === "function" && t.has("importClaudeAuth")
+                ? t("importClaudeAuth")
+                : "Import auth"}
+            </Button>
+          )}
+          {providerId === "grok-cli" && (
+            <Button
+              variant="secondary"
+              icon="upload_file"
+              onClick={() => gateConnectionFlow(onOpenImportGrokCli)}
+            >
+              Import auth
+            </Button>
+          )}
+          {providerId === "agy" && onOpenImportAgy && (
+            <Button
+              variant="secondary"
+              icon="upload_file"
+              onClick={() => gateConnectionFlow(onOpenImportAgy)}
+            >
+              {typeof t.has === "function" && t.has("importAgyAuth")
+                ? t("importAgyAuth")
+                : "Import auth"}
+            </Button>
+          )}
+        </>
       )}
-    </div>
+    </>
   );
 }

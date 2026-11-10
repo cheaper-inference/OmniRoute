@@ -48,10 +48,11 @@ export default function SegmentedControl({
       onValueChange={(next) => onChange?.(next)}
       className={cn("max-w-full", className)}
     >
-      {/* Phones: full width, segments share the line; from sm up, natural width (legacy). */}
+      {/* Phones: full width, segments share the line; from sm up, natural width (legacy). A set
+          too long for the line scrolls sideways inside the capsule instead of wrapping it. */}
       <TabsList
         aria-label={ariaLabel}
-        className="w-full flex-wrap sm:w-auto [&>*]:flex-1 sm:[&>*]:flex-none"
+        className="w-full flex-nowrap overflow-x-auto sm:w-auto [&>*]:flex-1 sm:[&>*]:flex-none"
       >
         {options.map((option) => (
           <TabsTrigger

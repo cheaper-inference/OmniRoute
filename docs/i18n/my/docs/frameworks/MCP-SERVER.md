@@ -8,38 +8,32 @@
 >
 > တရားဝင်အရင်းအမြစ်ဖြစ်သော `open-sse/mcp-server/server.ts` သည် `countUniqueMcpTools()` ဖြင့် **ထပ်တူမရှိသော tool 110 ခု**ကို တွက်ချက်သည်။ ၎င်းတို့တွင် canonical definition 45 ခု (CCR lifecycle tool ခြောက်ခု၊ agent-skills tool သုံးခု၊ `omniroute_radar_catalog` နှင့် `omniroute_x_search` အပါအဝင်)၊ memory (3)၊ skills (4)၊ GitHub skills (3)၊ pool (6)၊ gamification (8)၊ plugins (8)၊ Notion (6)၊ Obsidian (22)၊ local corpus (3) နှင့် RTK အတွက်သာဖြစ်သော compression tool နှစ်ခုတို့ ပါဝင်သည်။
 
-## ထည့်သွင်းခြင်း
+## တပ်ဆင်ခြင်း။
 
-OmniRoute MCP ကို အသင့်ထည့်သွင်းပေးထားသည်။ အောက်ပါ command ဖြင့် စတင်ပါ:
+OmniRoute MCP သည် built-in ဖြစ်သည်။ ၎င်းကိုစတင်ပါ-
 
 ```bash
 omniroute --mcp
 ```
 
-သို့မဟုတ် open-sse transport မှတစ်ဆင့် စတင်နိုင်သည်:
+သို့မဟုတ် open-sse သယ်ယူပို့ဆောင်ရေးမှတဆင့်-
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP သည် /mcp endpoint တွင် အလိုအလျောက် စတင်သည်
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transport များ (`sse` / `streamable-http`၊ dashboard server က process အတွင်းမှ ဝန်ဆောင်မှုပေးသည်) ကို
-မူလအားဖြင့် ပိတ်ထားပြီး ယခင်က `/dashboard/mcp` စာမျက်နှာမှသာ ဖွင့်/ပိတ် ပြောင်းလဲနိုင်ခဲ့သည်။ v3.8.51
-မှစ၍ CLI တွင်လည်း အလားတူ လုပ်ဆောင်နိုင်ပြီဖြစ်သည်:
+HTTP သယ်ယူပို့ဆောင်ရေးများ (`sse` / `streamable-http`၊ ဒက်ရှ်ဘုတ်ဆာဗာမှ လုပ်ငန်းစဉ်အတွင်း ဆောင်ရွက်ပေးသည်) ကို မူရင်းအတိုင်း ပိတ်ထားပြီး ယခင်က `/dashboard/mcp` စာမျက်နှာမှသာ ပြောင်းနိုင်သည်။ v3.8.51 တွင် CLI တွင် parity ရှိသည်-
 
 ```bash
-omniroute mcp status                                  # ဖွင့်ထားမှု/အွန်လိုင်းဖြစ်မှု၊ transport၊ tool အရေအတွက်
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # လက်ရှိအသုံးပြုနေသော sse/streamable-http session များကို ပြန်လည်သတ်မှတ်သည်
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` သည် dashboard က `/api/settings` မှတစ်ဆင့် ပြောင်းလဲသည့် တူညီသော
-`mcpEnabled` setting (နှင့် ရွေးချယ်နိုင်သော `mcpTransport`) ကို PATCH လုပ်သည်။ `mcp restart` သည်
-`POST /api/mcp/restart` ကို ခေါ်ဆိုသည်။ ၎င်းသည် နောက် request တွင် အစမှ သန့်ရှင်းစွာ ပြန်လည်စတင်နိုင်ရန်
-လက်ရှိအသုံးပြုနေသော `sse`/`streamable-http` session များကို ပိတ်သိမ်းပြီး၊ MCP ပိတ်ထားပါက
-`409` ကို ပြန်ပေးကာ `stdio` transport အတွက် `501` ကို ပြန်ပေးသည် (stdio client များသည် ၎င်းတို့၏
-ကိုယ်ပိုင် subprocess ကို စီမံကြသည် — ပြန်လည်စတင်ရန် process အတွင်းရှိ handle မရှိပါ)။
+`mcp enable`/`mcp disable` PATCH တူညီသော `mcpEnabled` (ရွေးချယ်နိုင်သည် `mcpTransport`) ကို `/api/settings` မှတဆင့် dashboard toggles ဆက်တင်။ `mcp restart` `POST /api/mcp/restart` ကိုခေါ်ဆိုသည် : ၎င်းသည် တက်ကြွသော `sse`/`streamable-http` ဆက်ရှင်များကို ဖြိုဖျက်သွားသောကြောင့် နောက်တောင်းဆိုချက်သည် သန့်ရှင်းစွာ ပြန်လည်စတင်ကာ MCP ကိုပိတ်ထားပါက `409` ပြန်ပေးကာ `stdio` ပို့ဆောင်မှုအတွက် `501` (stdio client များသည် ၎င်းတို့၏ကိုယ်ပိုင်လုပ်ငန်းခွဲ — ပိုင်ဆိုင်ထားပြီး ပြန်လည်စတင်ရန် လုပ်ငန်းစဉ်အတွင်း လက်ကိုင်မရှိပါ)။
 
 ## Transports
 
@@ -131,55 +125,42 @@ Claude Desktop၊ Cursor၊ Cline နှင့် ကိုက်ညီသော
 | `omniroute_cache_stats` | `read:cache`  | Semantic cache၊ prompt-cache နှင့် idempotency စာရင်းအင်းများ                |
 | `omniroute_cache_flush` | `write:cache` | Cache ကို စနစ်တစ်ခုလုံးအတွက် သို့မဟုတ် signature/model အလိုက် ရှင်းလင်းခြင်း |
 
-## Compression ကိရိယာများ (13)
+## Compression Tools (၁၃) ခု၊
 
-| Tool                                | Scopes              | Description                                                                                                                                                              |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Compression ဆက်တင်များ၊ analytics အနှစ်ချုပ်နှင့် cache ကို ထည့်သွင်းစဉ်းစားထားသော စာရင်းအင်းများ (`analytics.mcpDescriptionCompression` metadata ပါဝင်သည်)              |
-| `omniroute_compression_configure`   | `write:compression` | Compression mode၊ threshold၊ ပစ်မှတ်အချိုး၊ system-prompt ထိန်းသိမ်းမှုနှင့် MCP description compression အဖွင့်အပိတ်ကို ပြင်ဆင်သတ်မှတ်ခြင်း                              |
-| `omniroute_set_compression_engine`  | `write:compression` | လက်ရှိအသုံးပြုမည့် engine (off/caveman/rtk/stacked) နှင့် Caveman/RTK ပြင်းအားကို ရွေးချယ်ခြင်း                                                                          |
-| `omniroute_list_compression_combos` | `read:compression`  | အမည်ပေးထားသော compression combos နှင့် ၎င်းတို့၏ engine pipelines ကို စာရင်းပြုစုခြင်း                                                                                   |
-| `omniroute_compression_combo_stats` | `read:compression`  | Compression combo နှင့် engine အလိုက် အုပ်စုဖွဲ့ထားသော analytics                                                                                                         |
-| `omniroute_ccr_store`               | `write:compression` | ခေါ်ဆိုသူအလိုက် သီးခြားထားသည့် အကြောင်းအရာကို အရွယ်အစားကန့်သတ်ထားသော memory အတွင်းရှိ CCR store တွင် သိမ်းဆည်းပြီး marker တစ်ခုနှင့် `ccr://` reference ကို ပြန်ပေးခြင်း |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR အကြောင်းအရာကို အပြည့်အစုံ သို့မဟုတ် head၊ tail၊ lines၊ grep နှင့် stats modes များဖြင့် ရယူခြင်း                                                                     |
-| `omniroute_ccr_inspect`             | `read:compression`  | အကြောင်းအရာကို ပြန်မပေးဘဲ ခေါ်ဆိုသူပိုင် CCR metadata ကို စစ်ဆေးခြင်း                                                                                                    |
-| `omniroute_ccr_list`                | `read:compression`  | ခေါ်ဆိုသူပိုင် CCR blocks များအတွက် စာမျက်နှာခွဲထားသော metadata ကို စာရင်းပြုစုခြင်း                                                                                     |
-| `omniroute_ccr_delete`              | `write:compression` | ခေါ်ဆိုသူပိုင် CCR block တစ်ခုကို ဖျက်ခြင်း                                                                                                                              |
-| `omniroute_ccr_stats`               | `read:compression`  | ခေါ်ဆိုသူအလိုက် memory အသုံးပြုမှု၊ lifecycle counters နှင့် store ကန့်သတ်ချက်များကို အစီရင်ခံခြင်း                                                                      |
-| `omniroute_rtk_discover`            | `read:compression`  | ပါဝင်ရန်ရွေးချယ်ထားသော RTK output နမူနာများအတွင်း ထပ်တလဲလဲဖြစ်သော noise ကို ရှာဖွေခြင်း                                                                                  |
-| `omniroute_rtk_learn`               | `read:compression`  | ပါဝင်ရန်ရွေးချယ်ထားသော နမူနာများမှ ပြန်လည်သုံးသပ်နိုင်သည့် RTK filter မူကြမ်းကို ထုတ်လုပ်ခြင်း                                                                           |
+| ကိရိယာ                              | နယ်ပယ်များ          | ဖော်ပြချက်                                                                                                                                               |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | ဖိသိပ်မှုဆက်တင်များ၊ ခွဲခြမ်းစိတ်ဖြာချက်အကျဉ်းချုပ်နှင့် ကက်ရှ်သတိထားရသည့် ကိန်းဂဏန်းများ ( `analytics.mcpDescriptionCompression` မက်တာဒေတာများ အပါအဝင်) |
+| `omniroute_compression_configure`   | `write:compression` | ဖိသိပ်မှုမုဒ်၊ အတိုင်းအတာ၊ ပစ်မှတ်အချိုး၊ စနစ်အပေးအယူ ထိန်းသိမ်းမှု၊ MCP ဖော်ပြချက် ချုံ့ခလုတ်ကို စီစဉ်သတ်မှတ်ပါ                                         |
+| `omniroute_set_compression_engine`  | `write:compression` | တက်ကြွသောအင်ဂျင် (off/caveman/rtk/stacked) နှင့် Caveman/RTK ပြင်းထန်မှုကို ရွေးပါ။                                                                      |
+| `omniroute_list_compression_combos` | `read:compression`  | compression combos နှင့် ၎င်းတို့၏အင်ဂျင်ပိုက်လိုင်းများကို စာရင်းပြုစုပါ။                                                                               |
+| `omniroute_compression_combo_stats` | `read:compression`  | ခွဲခြမ်းစိတ်ဖြာမှုများကို ကွန်ဘိုနှင့် အင်ဂျင်ဖြင့် အုပ်စုဖွဲ့ထားသည်။                                                                                    |
+| `omniroute_ccr_store`               | `write:compression` | ကန့်သတ်ထားသော in-memory CCR စတိုးတွင် ခေါ်ဆိုသူ- သီးခြားအကြောင်းအရာကို သိမ်းဆည်းပြီး အမှတ်အသားတစ်ခုနှင့် `ccr://` ရည်ညွှန်းချက်ကို ပြန်ပေးသည်            |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR အကြောင်းအရာကို အပြည့်အစုံ သို့မဟုတ် ခေါင်း၊ အမြီး၊ လိုင်းများ၊ grep နှင့် stats မုဒ်များဖြင့် ရယူပါ                                                  |
+| `omniroute_ccr_inspect`             | `read:compression`  | အကြောင်းအရာမပြန်ဘဲ ခေါ်ဆိုသူပိုင် CCR မက်တာဒေတာကို စစ်ဆေးပါ။                                                                                             |
+| `omniroute_ccr_list`                | `read:compression`  | ခေါ်ဆိုသူပိုင် CCR လုပ်ကွက်များအတွက် paginated metadata ကို စာရင်းပြုစုပါ။                                                                               |
+| `omniroute_ccr_delete`              | `write:compression` | ခေါ်ဆိုသူပိုင် CCR ဘလောက်ကို ဖျက်ပါ။                                                                                                                     |
+| `omniroute_ccr_stats`               | `read:compression`  | ခေါ်ဆိုသူ-သတ်မှတ်မှတ်ဉာဏ်အသုံးပြုမှု၊ ဘဝသံသရာကောင်တာများနှင့် စတိုးဆိုင်ကန့်သတ်ချက်များကို အစီရင်ခံပါ။                                                   |
+| `omniroute_rtk_discover`            | `read:compression`  | ရွေးချယ်မှုတွင် RTK အထွက်နမူနာများတွင် ထပ်တလဲလဲ ဆူညံသံများကို ရှာဖွေပါ။                                                                                  |
+| `omniroute_rtk_learn`               | `read:compression`  | ရွေးချယ်နိုင်သောနမူနာများမှ ပြန်လည်သုံးသပ်နိုင်သော RTK စစ်ထုတ်မှုမူကြမ်းကို ဖန်တီးပါ။                                                                    |
 
-CCR entries များကို memory အတွင်း၌သာ သိမ်းဆည်းထားပြီး restart လုပ်ပါက ပျောက်ကွယ်သွားသည်။ Block တစ်ခုစီကို 2 MiB၊
-principal တစ်ခုစီကို 16 MiB နှင့် global store ကို 64 MiB အထိ ကန့်သတ်ထားသည်။ Entries များ၏ မူလ TTL သည် 24 နာရီဖြစ်သည် (အများဆုံး
-ခုနစ်ရက်)။ MCP မှ အပြည့်အစုံရယူမှုကို 256 KiB အထိ ကန့်သတ်ထားသည်။ ပိုကြီးသော blocks များကို
-အပိုင်းအခြားသတ်မှတ်ထားသော mode နှင့် grep modes များမှတစ်ဆင့် ဆက်လက်ရယူနိုင်သည်။ သိမ်းဆည်းခြင်း၊ ရယူခြင်း၊ စာရင်းပြုစုခြင်း၊ စစ်ဆေးခြင်း၊ ဖျက်ခြင်းနှင့် စာရင်းအင်းများကို
-အထောက်အထားစိစစ်ထားသော API-key principal အလိုက် သီးခြားခွဲထားသည်။ Audit records များတွင် hashes နှင့် အရွယ်အစား metadata သာပါဝင်ပြီး အကြောင်းအရာ လုံးဝမပါဝင်ပါ။
+CCR ထည့်သွင်းမှုများသည် နှစ်ဆင့်စတိုးကို အသုံးပြုသည်- 512 SQLite နှင့် cloud memory ပိတ်ဆို့ခြင်းများမှလွဲ၍ ကျန်ရှိသော 512 KB နှင့် cloud memory-runtimes မှလွဲ၍ TTL မကုန်နိုင်သော hot in-memory အဆင့်တွင် ကျောထောက်နောက်ခံပြုထားသော၊ စက်တွင်းမဟုတ်သောအဆင့်များတွင်၊`ccr_blocks` ထည့်သွင်းမှုများတွင် နှစ် — တိုးကို အသုံးပြုပါသည်။ ဘလောက်တစ်ခုစီသည် 2 MiB၊ တစ်ခုစီတွင် 16 MiB နှင့် ကမ္ဘာ့စတိုးဆိုင်ကို 64 MiB အထိကန့်သတ်ထားသည်။ 24 နာရီ TTL (အမြင့်ဆုံး ခုနစ်ရက်) သို့ ပုံသေထည့်သွင်းထားသည်။ MCP အပြည့်အစုံကို 256 KiB တွင် ကန့်သတ်ထားသည်။ အကွာအဝေးနှင့် grep မုဒ်များမှတစ်ဆင့် ပိုမိုကြီးမားသော ပိတ်ဆို့မှုများကို ဆက်လက်ရရှိနိုင်ပါသည်။ သိမ်းဆည်းခြင်း၊ ပြန်လည်ရယူခြင်း၊ စာရင်းသွင်းခြင်း၊ စစ်ဆေးခြင်း၊ ဖျက်ခြင်း နှင့် ကိန်းဂဏာန်းများကို စစ်မှန်ကြောင်းသက်သေပြထားသော API သော့ကျောင်းအုပ်မှ သီးခြားခွဲထားသည်။ စာရင်းစစ်မှတ်တမ်းများတွင် ဟက်ရှ်နှင့် အရွယ်အစား မက်တာဒေတာပါ၀င်သည်၊ မည်သည့်အကြောင်းအရာမှ ပါဝင်မည်မဟုတ်ပါ။ အော်ပရေတာမျက်နှာစာအသေးစိတ်များ (အမှတ်အသားနှစ်ခု၊ ကလိုင်းယင့်ကြိုတင်လိုအပ်ချက်များ၊ `codemode:false`၊ ကိရိယာတစ်ခုစီအတိုင်းအတာများ၊ pagination နှင့် ရောဂါရှာဖွေရေးမက်ထရစ်) သည် [Compression Engines → ကြိုတင်လိုအပ်ချက်များ/အော်ပရေတာလမ်းညွှန်](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) တွင် နေထိုင်ပါသည်။
 
-`omniroute_compression_status` သည် MCP ဖော်ပြချက်ချုံ့ခြင်းကို
-`analytics.mcpDescriptionCompression` အောက်တွင် သီးခြားအစီရင်ခံပါသည်။ အဆိုပါတန်ဖိုးများသည် MCP တွင် စာရင်းပြုစုနိုင်သော
-ဖော်ပြချက်များ (`tools`, `prompts`, `resources` နှင့် `resourceTemplates`) အတွက် မက်တာဒေတာအရွယ်အစား ခန့်မှန်းချက်များဖြစ်ပြီး၊ ပံ့ပိုးသူအသုံးပြုမှု
-ပြေစာများမဟုတ်ပါ။ ၎င်းတို့ကို `source: "mcp_metadata_estimate"` ဖြင့် အမှတ်အသားပြုထားပါသည်။
+`omniroute_compression_status` MCP ဖော်ပြချက်ချုံ့မှုကို `analytics.mcpDescriptionCompression` အောက်တွင် သီးခြားစီဖော်ပြသည်။ ထိုတန်ဖိုးများသည် MCP စာရင်းဝင်ဖော်ပြချက်များအတွက် မက်တာဒေတာအရွယ်အစား ခန့်မှန်းချက်များ (`tools`၊ `prompts`၊ `resources`၊ နှင့် `resourceTemplates`); ၎င်းတို့သည် ဝန်ဆောင်မှုပေးသူအသုံးပြုမှုပြေစာများမဟုတ်သည့်အပြင် `source: "mcp_metadata_estimate"` ဖြင့် အမှတ်အသားပြုထားသည်။
 
-### MCP လက်လှမ်းမီနိုင်မှု Tree Filter (v3.8.0)
+### MCP အသုံးပြုနိုင်စွမ်းသစ်ပင် စစ်ထုတ်ခြင်း (v3.8.0)
 
-အထက်ပါ ချုံ့ရေးကိရိယာများနှင့် သီးခြားစီအဖြစ် OmniRoute တွင် MCP ဘရောက်ဇာ/လက်လှမ်းမီနိုင်မှု ကိရိယာများ၏ **ကိရိယာရလဒ်များ** ကို
-အေးဂျင့်ထံ ပြန်မပို့မီ ချုံ့ပေးသည့် လုပ်ဆောင်ပြီးနောက် စစ်ထုတ်ကိရိယာတစ်ခု ပါဝင်ပါသည်။
-ဤစစ်ထုတ်ကိရိယာသည် ကိုယ်တိုင် ကိရိယာတစ်ခုမဟုတ်ပါ — အသေးစိတ်များလွန်းသော လက်လှမ်းမီနိုင်မှု tree သို့မဟုတ် ဘရောက်ဇာ snapshot စာသား
-(≥2000 chars) ပါရှိသည့် မည်သည့်ကိရိယာရလဒ်မဆို ၎င်းက ပွင့်လင်းမြင်သာစွာ လုပ်ဆောင်ပါသည်။
+အထက်ဖော်ပြပါ ချုံ့ချဲ့ကိရိယာများနှင့် သီးခြား၊ OmniRoute တွင် ၎င်းကို ချုံ့ပေးသည့် လုပ်ဆောင်ချက်အပြီး စစ်ထုတ်မှုတစ်ခု ပါဝင်သည်။** ကိရိယာရလဒ်များ** MCP browser/accessibility ကိရိယာများ၏ အေးဂျင့်ထံ မပြန်မီ။ ဤ filter သည် — ကိရိယာတစ်ခုမဟုတ်ပါ၊ ၎င်းသည် verbose accessibility-tree သို့မဟုတ် browser-snapshot စာသား (≥ 2000 chars) ပါရှိသော မည်သည့် tool ရလဒ်တွင်မဆို ပွင့်လင်းမြင်သာစွာ လုပ်ဆောင်ပါသည်။
 
-အဓိကလုပ်ဆောင်ပုံများ-
+အဓိက အပြုအမူများ
 
-- ဆက်တိုက်ထပ်နေသော တူညီအဆင့်ရှိ စာကြောင်း ≥30 ကြောင်းကို အစပိုင်း + အဆုံးပိုင်း အကျဉ်းချုပ်အဖြစ် ခေါက်သိမ်းပေးသည်
-- Playwright/computer-use အတွက် လိုအပ်သော `[ref=eXX]` anchor များကို ထိန်းသိမ်းထားသည်
-- အရွယ်အစားအလွန်ကြီးသော စာသား (>50,000 chars) ကို လမ်းညွှန်ချက်တစ်ခုနှင့်အတူ မဖြစ်မနေ ဖြတ်တောက်သည်
-- မျှော်မှန်းထားသော ချွေတာနိုင်မှု- ဘရောက်ဇာ snapshot payload များတွင် **60–80%**
+- ≥ 30 ဆက်တိုက် ထပ်ခါတလဲလဲ ပေါက်ဖော်လိုင်းများကို ဦးခေါင်း + အမြီးအကျဉ်းသို့ ခေါက်သိမ်းပါ။
+- Playwright/computer-use လိုအပ်သော `[ref=eXX]` ကျောက်ဆူးများကို ထိန်းသိမ်းသည်။
+- လမ်းကြောင်းပြမှု အရိပ်အမြွက်ဖြင့် ကြီးကြီးကျယ်ကျယ် စာသား (> 50,000) ကို ခက်ခက်ခဲခဲ ဖြတ်တောက်ပေးသည်
+- မျှော်လင့်ထားသော စုဆောင်းငွေ-** 60-80%** ဘရောက်ဆာ snapshot payloads ပေါ်တွင်
 
-စီစဉ်သတ်မှတ်မှု- ကမ္ဘာလုံးဆိုင်ရာ ဆက်တင်များရှိ `compression.mcpAccessibility` (migration 056)။
-အကောင်အထည်ဖော်မှု- `open-sse/services/compression/engines/mcpAccessibility/`။
-စာရွက်စာတမ်းအပြည့်အစုံ- [ချုံ့ရေးအင်ဂျင်များ — MCP လက်လှမ်းမီနိုင်မှု Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)။
+ဖွဲ့စည်းမှု- ကမ္ဘာလုံးဆိုင်ရာ ဆက်တင်များတွင် `compression.mcpAccessibility` (migration 056)။ အကောင်အထည်ဖော်မှု- `open-sse/services/compression/engines/mcpAccessibility/` စာရွက်စာတမ်းအပြည့်အစုံ- [Compression Engines — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter) ။
 
-ဤကိရိယာများ၏ နောက်ကွယ်ရှိ runtime ချုံ့ရေးမော်ဒယ်အကြောင်းကို [ချုံ့ရေးအင်ဂျင်များ](../compression/COMPRESSION_ENGINES.md) နှင့် [RTK ချုံ့ခြင်း](../compression/RTK_COMPRESSION.md) တွင်
-ကြည့်ရှုပါ။
+ဤကိရိယာများ၏နောက်ကွယ်ရှိ runtime compression model အတွက် [Compression Engines](../compression/COMPRESSION_ENGINES.md) နှင့် [RTK Compression ကို](../compression/RTK_COMPRESSION.md) ကြည့်ပါ။
 
 ## 1Proxy ကိရိယာများ (3)
 

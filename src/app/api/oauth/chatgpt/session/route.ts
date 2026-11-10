@@ -1,5 +1,5 @@
-import { createHash } from "node:crypto";
 import { z } from "zod";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getChatGptHostId } from "@/lib/db/chatgpt";
 import { isEncryptionEnabled } from "@/lib/db/encryption";
@@ -92,7 +92,7 @@ function resolveAttemptOwner(request: Request): string | null {
     .find((c) => c.startsWith(`${DASHBOARD_SESSION_COOKIE}=`));
   const identity = cookie || request.headers.get("authorization");
   if (!identity) return null;
-  return createHash("sha256").update(identity).digest("hex");
+  return opaqueTokenFingerprint(identity);
 }
 
 async function startAttempt(
