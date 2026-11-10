@@ -77,8 +77,9 @@ describe("feature-flags-settings count update", () => {
     // REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
-    // FAL_NATIVE_ENABLED (#18849, schema-driven Fal gateway, default off) adds the 120th flag.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 121);
+    // FAL_NATIVE_ENABLED (#18849) adds the 120th flag; CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933) the 121st;
+    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060) the 122nd.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 122);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
@@ -88,7 +89,6 @@ describe("feature-flags-settings count update", () => {
     // PROXY_STRICT_POST_REPLAY_ENABLED + RESPONSES_TRANSPORT_KEEPALIVE_ENABLED (#18312, default off) to 117.
     // OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) to 118.
     // PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) to 119.
-    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) to 121.
     // OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED (#16571, default off) to 87.
     // COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED (#16256, default off) to 87.
     // OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED (#16797, default off) to 87;

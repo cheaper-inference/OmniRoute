@@ -1,5 +1,7 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
+import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
+import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
 
 export type { FeatureFlagDefinition };
 
@@ -1433,16 +1435,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
-  {
-    key: "CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER",
-    label: "Code Assist: Legacy Tier for Ineligible Onboarding",
-    description:
-      "For Antigravity / Code Assist onboarding, an account whose loadCodeAssist answer lists ineligibleTiers and marks no allowed tier as default onboards with legacy-tier instead of its currentTier (#18060), matching the Antigravity-Manager fetch_project_id order. Not yet confirmed on a real restricted account. Off by default: such an account keeps onboarding with its currentTier.",
-    descriptionI18nKey: "featureFlagCodeAssistIneligibleOnboardLegacyTierDescription",
-    category: "runtime",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
+  ...SEARCH_FEATURE_FLAG_DEFINITIONS,
+  CODE_ASSIST_LEGACY_TIER_FLAG,
 ];
