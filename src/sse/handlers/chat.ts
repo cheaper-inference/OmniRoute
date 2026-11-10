@@ -79,6 +79,7 @@ import {
   PROVIDER_ID_TO_ALIAS,
 } from "@omniroute/open-sse/config/providerModels.ts";
 import { getPassthroughProviders } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import * as log from "../utils/logger";
 import { checkAndRefreshToken } from "../services/tokenRefresh";
 import {
@@ -2317,6 +2318,16 @@ async function handleSingleModelChat(
         );
       else agyLease.release(leaseId);
       const staleCodexFailure = !result.success && !isCodexResponseCurrent(result.response);
+      if (
+        staleCodexFailure &&
+        isPassiveCodex(provider) &&
+        (result.status === 401 || result.status === 403)
+      ) {
+        // Passive auth recovery already tried an eligible synchronized token below. Restarting
+        // the whole request loses its rejection history and can replay an expired or rejected
+        // token after an A -> B -> A rollback. Do not cool/exclude the replacement account.
+        return result.response;
+      }
       if (result.errorCode === STALE_CODEX_OPERATION_CODE || staleCodexFailure) {
         if (staleCodexReselected) {
           return staleCodexFailure

@@ -30,7 +30,7 @@ function invoke(id: string, stream = false) {
   return harness.handleChat(
     harness.buildRequest({
       url: "http://localhost/v1/responses",
-      headers: { "x-omniroute-connection-id": id },
+      headers: { "x-omniroute-connection": id },
       body: { model: "codex/gpt-5.6-sol", input: "offline owner race", stream },
     })
   );
@@ -91,11 +91,14 @@ for (const status of [401, 429]) {
       const connection = await seed();
       const started = deferred<void>();
       const release = deferred<Response>();
-      globalThis.fetch = async (url) => {
+      const dispatchedTokens: string[] = [];
+      globalThis.fetch = async (url, init) => {
         assert.ok(
           String(url).includes("/codex/responses"),
           "only the mocked generation is authorized"
         );
+        dispatchedTokens.push(new Headers(init?.headers).get("authorization") ?? "");
+        if (dispatchedTokens.length > 1) return success();
         started.resolve();
         return release.promise;
       };
@@ -130,7 +133,12 @@ for (const status of [401, 429]) {
         )
       );
       const response = await operation;
+      assert.equal(response.status, 200);
       await response.text();
+      assert.deepEqual(dispatchedTokens, [
+        "Bearer synthetic-a",
+        `Bearer synthetic-${aba ? "a" : "b"}`,
+      ]);
       await harness.callLogsDb.waitForCallLogSaves(10_000);
       await unchanged(connection.id, before);
     });
