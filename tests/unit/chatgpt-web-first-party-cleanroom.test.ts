@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
+import { isChatGptWebBridgeFailure } from "../../open-sse/utils/chatgptWebBridgeFailure.ts";
 import {
+  buildChatGptWebBridgeInstallerSource,
   buildChatGptWebIntegrityResolutionSource,
   collectChatGptWebFirstPartyAssetCandidates,
   collectPageAssetCandidates,
@@ -513,14 +515,18 @@ describe("ChatGPT Web browser asset inventory during navigation", () => {
       evaluate: async () => {
         attempts += 1;
         if (attempts === 1) {
-          throw new Error("page.evaluate: Execution context was destroyed, most likely because of a navigation");
+          throw new Error(
+            "page.evaluate: Execution context was destroyed, most likely because of a navigation"
+          );
         }
         return {
           modulePreloadUrls: ["https://chatgpt.com/cdn/assets/demo.abc.js"],
           resourceUrls: ["https://other.example/script.js"],
         };
       },
-      waitForLoadState: async () => { loadWaits += 1; },
+      waitForLoadState: async () => {
+        loadWaits += 1;
+      },
     } as unknown as import("playwright").Page;
     const result = await collectPageAssetCandidates(page);
     assert.deepEqual(result, ["https://chatgpt.com/cdn/assets/demo.abc.js"]);
@@ -529,18 +535,22 @@ describe("ChatGPT Web browser asset inventory during navigation", () => {
   });
 
   test("does not retry unrelated failures or silently ignore permanent redirects", async () => {
-    const fail = (message: string) => ({
-      evaluate: async () => { throw new Error(message); },
-      waitForLoadState: async () => {},
-    } as unknown as import("playwright").Page);
+    const fail = (message: string) =>
+      ({
+        evaluate: async () => {
+          throw new Error(message);
+        },
+        waitForLoadState: async () => {},
+      }) as unknown as import("playwright").Page;
     await assert.rejects(collectPageAssetCandidates(fail("Page crashed")), /Page crashed/);
     await assert.rejects(
-      collectPageAssetCandidates(fail("Execution context was destroyed, most likely because of a navigation")),
+      collectPageAssetCandidates(
+        fail("Execution context was destroyed, most likely because of a navigation")
+      ),
       /Execution context was destroyed/
     );
   });
 });
-
 
 describe("ChatGPT Web cleanroom stored session preflight", () => {
   test("accepts an authenticated session without exposing user identity", async () => {
@@ -562,12 +572,277 @@ describe("ChatGPT Web cleanroom stored session preflight", () => {
     const page = {
       evaluate: async () => {
         count++;
-        if (count === 1) throw new Error("Execution context was destroyed, most likely because of a navigation");
+        if (count === 1)
+          throw new Error("Execution context was destroyed, most likely because of a navigation");
         return { ready: true, httpStatus: 200 };
       },
       waitForLoadState: async () => {},
     } as unknown as import("playwright").Page;
     await assert.doesNotReject(assertChatGptWebSignedIn(page));
     assert.equal(count, 2);
+  });
+});
+
+describe("ChatGPT Web navigation retry is limited to a destroyed context", () => {
+  test("does not retry a navigation timeout, which is not a destroyed context", async () => {
+    let attempts = 0;
+    const page = {
+      evaluate: async () => {
+        attempts += 1;
+        throw new Error("page.evaluate: Navigation timeout of 30000 ms exceeded");
+      },
+      waitForLoadState: async () => {},
+    } as unknown as import("playwright").Page;
+    await assert.rejects(collectPageAssetCandidates(page), /Navigation timeout/);
+    await assert.rejects(assertChatGptWebSignedIn(page), /Navigation timeout/);
+    assert.equal(attempts, 2);
+  });
+});
+
+describe("ChatGPT Web session preflight keeps transient failures local", () => {
+  const sessionPage = (session: Record<string, unknown>) =>
+    ({ evaluate: async () => session }) as unknown as import("playwright").Page;
+
+  test("a 401 from the session endpoint is a credential failure", async () => {
+    await assert.rejects(
+      assertChatGptWebSignedIn(sessionPage({ ready: false, httpStatus: 401 })),
+      /credentials require an authenticated browser session/
+    );
+  });
+
+  for (const httpStatus of [403, 429, 503]) {
+    test(`HTTP ${httpStatus} from the session endpoint stays a local bridge failure`, async () => {
+      const error = await assertChatGptWebSignedIn(sessionPage({ ready: false, httpStatus })).then(
+        () => null,
+        (rejection: unknown) => rejection
+      );
+      assert.ok(error instanceof Error);
+      assert.match(
+        error.message,
+        new RegExp(`session check is unavailable \\(HTTP ${httpStatus}\\)`)
+      );
+      assert.equal(isChatGptWebBridgeFailure("chatgpt-web", error), true);
+    });
+  }
+
+  test("a 200 challenge page that is not JSON is not reported as an expired login", async () => {
+    const error = await assertChatGptWebSignedIn(
+      sessionPage({ ready: false, httpStatus: 200, unparsable: true })
+    ).then(
+      () => null,
+      (rejection: unknown) => rejection
+    );
+    assert.ok(error instanceof Error);
+    assert.doesNotMatch(error.message, /credentials require/);
+    assert.equal(isChatGptWebBridgeFailure("chatgpt-web", error), true);
+  });
+
+  test("a signed-out session is not swallowed as a bridge failure", () => {
+    assert.equal(
+      isChatGptWebBridgeFailure(
+        "chatgpt-web",
+        "ChatGPT Web credentials require an authenticated browser session; re-import a complete Playwright storage state"
+      ),
+      false
+    );
+  });
+});
+
+describe("ChatGPT Web bridge installer (strict CSP, no blob module)", () => {
+  const ASSET = "https://chatgpt.com/cdn/assets/upstream-abc.js";
+  const legacyContract: ChatGptWebFirstPartyModuleContract = {
+    finalizeRequirements: "fr",
+    proofManager: "pm",
+    turnstileManager: "tm",
+    requestClient: "rc",
+    buildSentinelHeaders: "bs",
+  };
+  const integrityContract: ChatGptWebFirstPartyModuleContract = {
+    ...legacyContract,
+    resolveIntegrity: "f",
+    resolveIntegrityModule: "lXE",
+  };
+
+  type Installer = (
+    importChunk: (url: string) => Promise<Record<string, unknown>>
+  ) => Promise<void>;
+  type ViolationListener = (event: { violatedDirective: string; blockedURI: string }) => void;
+
+  let installerCount = 0;
+
+  // The installer is page-side source text; the test loads it as a real ES module and runs
+  // it against a minimal `document` that only tracks the CSP violation listener.
+  async function loadInstaller(source: string): Promise<Installer> {
+    installerCount += 1;
+    const code = `// installer ${installerCount}\nexport default ${source};`;
+    const url = `data:text/javascript;base64,${Buffer.from(code).toString("base64")}`;
+    return ((await import(url)) as { default: Installer }).default;
+  }
+
+  async function withPageGlobals<T>(
+    run: (violations: Set<ViolationListener>) => Promise<T>
+  ): Promise<T> {
+    const root = globalThis as typeof globalThis & Record<string, unknown>;
+    const previousBridge = root[BRIDGE_KEY];
+    const hadDocument = "document" in root;
+    const previousDocument = root.document;
+    const violations = new Set<ViolationListener>();
+    const previousFetch = globalThis.fetch;
+    // The integrity bridge opens its session request at install time; answer it locally.
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ accessToken: "token" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })) as typeof fetch;
+    delete root[BRIDGE_KEY];
+    root.document = {
+      addEventListener: (type: string, listener: ViolationListener) => {
+        if (type === "securitypolicyviolation") violations.add(listener);
+      },
+      removeEventListener: (type: string, listener: ViolationListener) => {
+        if (type === "securitypolicyviolation") violations.delete(listener);
+      },
+    };
+    try {
+      return await run(violations);
+    } finally {
+      globalThis.fetch = previousFetch;
+      if (previousBridge === undefined) delete root[BRIDGE_KEY];
+      else root[BRIDGE_KEY] = previousBridge;
+      if (hadDocument) root.document = previousDocument;
+      else delete root.document;
+    }
+  }
+
+  test("is plain source text with no blob module, script element or bundler helper", () => {
+    for (const contract of [legacyContract, integrityContract]) {
+      const source = buildChatGptWebBridgeInstallerSource(ASSET, contract, [ASSET]);
+      assert.equal(typeof source, "string");
+      assert.match(source, /^async importChunk => \{/);
+      assert.doesNotMatch(
+        source,
+        /createObjectURL|new Blob|createElement|__name|__webpack_require__\(/
+      );
+      assert.doesNotMatch(source, /^import /m);
+    }
+  });
+
+  test("refuses an asset URL outside chatgpt.com before it reaches the page", () => {
+    assert.throws(
+      () =>
+        buildChatGptWebBridgeInstallerSource(
+          "https://evil.example/cdn/assets/upstream-abc.js",
+          legacyContract
+        ),
+      /invalid first-party asset URL/
+    );
+  });
+
+  test("legacy contract imports exactly the validated asset and maps its exports", async () => {
+    const installer = await loadInstaller(
+      buildChatGptWebBridgeInstallerSource(ASSET, legacyContract)
+    );
+    await withPageGlobals(async (violations) => {
+      const imported: string[] = [];
+      await installer(async (url) => {
+        imported.push(url);
+        return { fr: "finalize", pm: "proof", tm: "turnstile", rc: "client", bs: "headers" };
+      });
+      assert.deepEqual(imported, [ASSET]);
+      const bridge = (globalThis as Record<string, unknown>)[BRIDGE_KEY] as Record<string, unknown>;
+      assert.deepEqual(
+        {
+          finalizeRequirements: bridge.finalizeRequirements,
+          proofManager: bridge.proofManager,
+          turnstileManager: bridge.turnstileManager,
+          requestClient: bridge.requestClient,
+          buildSentinelHeaders: bridge.buildSentinelHeaders,
+          resolveIntegrity: bridge.resolveIntegrity,
+        },
+        {
+          finalizeRequirements: "finalize",
+          proofManager: "proof",
+          turnstileManager: "turnstile",
+          requestClient: "client",
+          buildSentinelHeaders: "headers",
+          resolveIntegrity: undefined,
+        }
+      );
+      assert.equal(violations.size, 0, "the CSP listener is detached after install");
+    });
+  });
+
+  test("integrity contract installs lazily and resolves through validated chunks only", async () => {
+    const installer = await loadInstaller(
+      buildChatGptWebBridgeInstallerSource(ASSET, integrityContract, [
+        "https://evil.example/cdn/assets/runtime-chunk.js",
+        "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+        "https://chatgpt.com/cdn/assets/runtime-chunk.js",
+      ])
+    );
+    await withPageGlobals(async () => {
+      const imported: string[] = [];
+      await installer(async (url) => {
+        imported.push(url);
+        return { __webpack_require__: () => ({ f: async (proof: unknown) => ({ proof }) }) };
+      });
+      assert.deepEqual(imported, [], "no chunk is imported until a proof is needed");
+      const bridge = (globalThis as Record<string, unknown>)[BRIDGE_KEY] as {
+        requestClient: { safePost: unknown };
+        resolveIntegrity: (proof: unknown) => Promise<unknown>;
+      };
+      assert.equal(typeof bridge.requestClient.safePost, "function");
+      assert.deepEqual(await bridge.resolveIntegrity("p"), { proof: "p" });
+      assert.deepEqual(imported, ["https://chatgpt.com/cdn/assets/runtime-chunk.js"]);
+    });
+  });
+
+  test("keeps an already installed bridge and imports nothing", async () => {
+    const installer = await loadInstaller(
+      buildChatGptWebBridgeInstallerSource(ASSET, legacyContract)
+    );
+    await withPageGlobals(async () => {
+      const existing = { requestClient: "existing" };
+      (globalThis as Record<string, unknown>)[BRIDGE_KEY] = existing;
+      let imports = 0;
+      await installer(async () => {
+        imports += 1;
+        return {};
+      });
+      assert.equal(imports, 0);
+      assert.equal((globalThis as Record<string, unknown>)[BRIDGE_KEY], existing);
+    });
+  });
+
+  test("names the CSP directive when the page refuses the first-party import", async () => {
+    const installer = await loadInstaller(
+      buildChatGptWebBridgeInstallerSource(ASSET, legacyContract)
+    );
+    await withPageGlobals(async (violations) => {
+      await assert.rejects(
+        installer(async (url) => {
+          for (const listener of violations) {
+            listener({ violatedDirective: "script-src-elem", blockedURI: url });
+          }
+          throw new TypeError("Failed to fetch dynamically imported module");
+        }),
+        new RegExp(`^Error: csp: script-src-elem blocked ${ASSET.replace(/\./g, "\\.")}$`)
+      );
+      assert.equal(violations.size, 0);
+    });
+  });
+
+  test("passes a non-CSP import failure through unchanged", async () => {
+    const installer = await loadInstaller(
+      buildChatGptWebBridgeInstallerSource(ASSET, legacyContract)
+    );
+    await withPageGlobals(async () => {
+      await assert.rejects(
+        installer(async () => {
+          throw new TypeError("Failed to fetch dynamically imported module");
+        }),
+        /Failed to fetch dynamically imported module/
+      );
+    });
   });
 });
