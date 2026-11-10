@@ -153,9 +153,73 @@ test("requestDeviceCode accepts numeric epoch timestamp for expiresAt", async ()
     const decoded = decodeFreebuffLoginState(device.device_code);
     assert.ok(decoded);
     assert.equal(decoded.fingerprintHash, "fh-numeric");
-    assert.equal(decoded.expiresAt, new Date(epochMs).toISOString());
+    // The login state keeps the upstream value verbatim (its digits): the poll echoes it.
+    assert.equal(decoded.expiresAt, String(epochMs));
   } finally {
     restore();
+  }
+});
+
+test("a numeric expiresAt goes back to the status endpoint exactly as received", async () => {
+  // The official CLI echoes expiresAt unchanged; a reformatted value (ISO) could stop
+  // the server from matching the fingerprintHash it issued for the original one.
+  const epochMs = Date.now() + 240 * 1000;
+  let stub = stubFetch(() =>
+    json({
+      loginUrl: "https://freebuff.com/login?auth_code=abc",
+      fingerprintHash: "fh-numeric",
+      expiresAt: epochMs,
+    })
+  );
+  let device: Awaited<ReturnType<typeof freebuff.requestDeviceCode>>;
+  try {
+    device = await freebuff.requestDeviceCode(FREEBUFF_CONFIG);
+  } finally {
+    stub.restore();
+  }
+  stub = stubFetch(() => new Response("", { status: 401 }));
+  try {
+    const result = await freebuff.pollToken(FREEBUFF_CONFIG, device.device_code);
+    assert.deepEqual(result, { ok: false, data: { error: "authorization_pending" } });
+    const url = new URL(stub.calls[0].url);
+    assert.equal(url.searchParams.get("expiresAt"), String(epochMs));
+    assert.equal(url.searchParams.get("fingerprintHash"), "fh-numeric");
+  } finally {
+    stub.restore();
+  }
+});
+
+test("pollToken reports expired_token for a numeric epoch in the past", async () => {
+  const { restore } = stubFetch(() => new Response("", { status: 401 }));
+  try {
+    const result = await freebuff.pollToken(FREEBUFF_CONFIG, loginState(String(Date.now() - 1000)));
+    assert.deepEqual(result, {
+      ok: false,
+      data: { error: "expired_token", error_description: "Freebuff login expired" },
+    });
+  } finally {
+    restore();
+  }
+});
+
+test("requestDeviceCode rejects a numeric expiresAt that is not a valid date", async () => {
+  for (const expiresAt of [1e20, -1, Number.MAX_VALUE]) {
+    const { restore } = stubFetch(() =>
+      json({
+        loginUrl: "https://freebuff.com/login?auth_code=abc",
+        fingerprintHash: "fh-numeric",
+        expiresAt,
+      })
+    );
+    try {
+      await assert.rejects(
+        () => freebuff.requestDeviceCode(FREEBUFF_CONFIG),
+        /missing required fields/,
+        `expiresAt ${expiresAt}`
+      );
+    } finally {
+      restore();
+    }
   }
 });
 

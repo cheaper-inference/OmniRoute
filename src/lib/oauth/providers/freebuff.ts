@@ -77,8 +77,26 @@ export function decodeFreebuffLoginState(deviceCode: unknown): FreebuffLoginStat
   return null;
 }
 
+const EPOCH_DIGITS = /^\d+(\.\d+)?$/;
+
+/** Epoch ms of a login expiresAt: an ISO date, or an epoch-ms number kept as its digits. */
+function expiresAtMs(expiresAt: string): number {
+  return EPOCH_DIGITS.test(expiresAt) ? Number(expiresAt) : Date.parse(expiresAt);
+}
+
+/**
+ * The upstream expiresAt as the poll must echo it: a string unchanged, a numeric epoch
+ * as its own digits. A number that is not a valid date yields null (missing field).
+ */
+function upstreamExpiresAt(value: unknown): string | null {
+  if (typeof value === "string") return value || null;
+  if (typeof value !== "number" || !Number.isFinite(new Date(value).getTime())) return null;
+  const digits = String(value);
+  return EPOCH_DIGITS.test(digits) ? digits : null;
+}
+
 function secondsUntil(expiresAt: string, fallback: number): number {
-  const ms = Date.parse(expiresAt) - Date.now();
+  const ms = expiresAtMs(expiresAt) - Date.now();
   if (!Number.isFinite(ms)) return fallback;
   return Math.max(1, Math.floor(ms / 1000));
 }
@@ -109,12 +127,7 @@ export const freebuff = {
       fingerprintHash?: unknown;
       expiresAt?: unknown;
     };
-    const expiresAt =
-      typeof data.expiresAt === "number" && Number.isFinite(data.expiresAt)
-        ? new Date(data.expiresAt).toISOString()
-        : typeof data.expiresAt === "string" && data.expiresAt
-          ? data.expiresAt
-          : null;
+    const expiresAt = upstreamExpiresAt(data.expiresAt);
 
     if (
       typeof data.loginUrl !== "string" ||
@@ -159,7 +172,7 @@ export const freebuff = {
       headers: { Accept: "application/json" },
     });
 
-    const expired = Date.parse(state.expiresAt) <= Date.now();
+    const expired = expiresAtMs(state.expiresAt) <= Date.now();
     if (!response.ok) {
       if (expired) return EXPIRED_RESULT;
       // 401 is the upstream "not approved yet" signal; the official CLI keeps
