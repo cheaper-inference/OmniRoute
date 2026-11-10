@@ -4,7 +4,7 @@ import Icon from "@/shared/components/Icon";
 import { cn } from "@/shared/utils/cn";
 
 interface CapabilityBadgeProps {
-  /** Material Symbols name shown before the label (rendered through <Icon>). */
+  /** ICON_MAP name shown before the label (rendered through <Icon>). */
   icon?: string;
   /** Tone classes, e.g. "bg-chart-3/15 text-chart-3" (utilities win over the kit badge). */
   className?: string;
