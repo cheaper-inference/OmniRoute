@@ -5713,6 +5713,7 @@
     "stepProgress": "Progress tal-konfigurazzjoni"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Limitu tar-rotta għal sessjonijiet ġodda (0 = mitfi)",
     "tosAvoidNoticeTitle": "Dan il-fornitur huwa eskluż minn auto awtomatikament",
     "tosAvoidNoticeDescription": "L-istatus ToS tiegħu huwa mmarkat avoid. Il-konnessjoni ta’ kont ma tbiddilx din il-politika. Aqra t-termini tal-fornitur qabel tattiva l-għażla globali għall-combos auto kollha.",
     "tosAvoidNoticeAction": "Ara l-politika auto",

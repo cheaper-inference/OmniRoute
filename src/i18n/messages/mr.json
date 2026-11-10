@@ -5713,6 +5713,7 @@
     "stepProgress": "सेटअपची प्रगती"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "नवीन सत्राची रूटिंग मर्यादा (0 = बंद)",
     "tosAvoidNoticeTitle": "हा प्रदाता मूलतः auto मधून वगळलेला आहे",
     "tosAvoidNoticeDescription": "याची ToS स्थिती avoid आहे. खाते जोडल्याने हे धोरण बदलत नाही. सर्व auto कॉम्बोंसाठी जागतिक पर्याय सुरू करण्यापूर्वी प्रदात्याच्या अटी वाचा.",
     "tosAvoidNoticeAction": "auto धोरण पाहा",

@@ -5713,6 +5713,7 @@
     "stepProgress": "设置进度"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "新会话路由阈值（0 = 关闭）",
     "tosAvoidNoticeTitle": "此提供者默认被排除在 auto 之外",
     "tosAvoidNoticeDescription": "其 ToS 状态标记为 avoid。连接账户不会改变此策略。在为所有 auto 组合启用全局选项之前，请查阅提供者的条款。",
     "tosAvoidNoticeAction": "查看 auto 策略",

@@ -5713,6 +5713,7 @@
     "stepProgress": "Напредак подешавања"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Праг усмеравања нових сесија (0 = искључено)",
     "tosAvoidNoticeTitle": "Овај добављач је подразумевано искључен из auto",
     "tosAvoidNoticeDescription": "Његов ToS статус је означен као avoid. Повезивање налога не мења ова правила. Прочитајте услове добављача пре укључивања глобалне опције за све auto комбинације.",
     "tosAvoidNoticeAction": "Погледајте auto правила",

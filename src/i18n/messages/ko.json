@@ -5713,6 +5713,7 @@
     "stepProgress": "설정 진행률"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "새 세션 라우팅 임계값 (0 = 끄기)",
     "tosAvoidNoticeTitle": "이 제공자는 기본적으로 auto에서 제외됩니다",
     "tosAvoidNoticeDescription": "서비스 약관 상태가 avoid로 표시되어 있습니다. 계정을 연결해도 이 정책은 바뀌지 않습니다. 모든 auto 콤보에 대한 전역 허용을 활성화하기 전에 제공자의 약관을 검토하세요.",
     "tosAvoidNoticeAction": "auto 정책 검토",

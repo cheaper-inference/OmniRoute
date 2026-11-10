@@ -5713,6 +5713,7 @@
     "stepProgress": "Iestatīšanas progress"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Jaunu sesiju maršrutēšanas slieksnis (0 = izslēgts)",
     "tosAvoidNoticeTitle": "Šis pakalpojumu sniedzējs pēc noklusējuma ir izslēgts no auto",
     "tosAvoidNoticeDescription": "Tā pakalpojuma noteikumu statuss ir atzīmēts kā avoid. Konta pievienošana nemaina šo politiku. Pirms kopīgās atļaujas ieslēgšanas visām auto kombinācijām pārskatiet pakalpojuma sniedzēja noteikumus.",
     "tosAvoidNoticeAction": "Pārskatīt auto politiku",

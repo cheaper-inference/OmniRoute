@@ -5713,6 +5713,7 @@
     "stepProgress": "Beállítási folyamat"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Új munkamenetek útválasztási küszöbe (0 = kikapcsolva)",
     "tosAvoidNoticeTitle": "Ez a szolgáltató alapértelmezés szerint ki van zárva az auto használatából",
     "tosAvoidNoticeDescription": "A felhasználási feltételek állapota avoid jelölésű. Egy fiók csatlakoztatása nem módosítja ezt a szabályzatot. Az összes auto kombinációra érvényes közös engedély bekapcsolása előtt tekintse át a szolgáltató feltételeit.",
     "tosAvoidNoticeAction": "Az auto szabályzatának áttekintése",

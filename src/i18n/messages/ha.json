@@ -5713,6 +5713,7 @@
     "stepProgress": "Ci gaban saiti"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Iyakar karkatar da sabon zama (0 = a kashe)",
     "tosAvoidNoticeTitle": "An ware wannan mai ba da sabis daga auto ta tsohuwa",
     "tosAvoidNoticeDescription": "An yi wa matsayin sharuddan sabis ɗinsa alamar avoid. Haɗa asusu ba ya canza wannan manufa. Duba sharuddan mai ba da sabis kafin ka kunna izini na gama-gari ga duk haɗuwar auto.",
     "tosAvoidNoticeAction": "Duba manufar auto",

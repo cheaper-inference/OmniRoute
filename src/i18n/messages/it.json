@@ -5713,6 +5713,7 @@
     "stepProgress": "Avanzamento della configurazione"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Soglia di instradamento delle nuove sessioni (0 = disattivata)",
     "tosAvoidNoticeTitle": "Questo provider è escluso da auto per impostazione predefinita",
     "tosAvoidNoticeDescription": "Il suo stato dei termini di servizio è contrassegnato come avoid. Collegare un account non modifica questa politica. Consulta i termini del provider prima di attivare il consenso globale per tutte le combinazioni auto.",
     "tosAvoidNoticeAction": "Consulta la politica di auto",

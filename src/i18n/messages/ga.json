@@ -5713,6 +5713,7 @@
     "stepProgress": "Dul chun cinn an tsocraithe"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Tairseach ródaithe do sheisiúin nua (0 = as)",
     "tosAvoidNoticeTitle": "Tá an soláthraí seo eisiata ó auto de réir réamhshocraithe",
     "tosAvoidNoticeDescription": "Tá a stádas téarmaí seirbhíse marcáilte avoid. Ní athraíonn nascadh cuntais an polasaí seo. Léigh téarmaí an tsoláthraí sula gcumasaíonn tú an rogha dhomhanda do gach teaglaim auto.",
     "tosAvoidNoticeAction": "Athbhreithnigh polasaí auto",

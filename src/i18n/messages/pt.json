@@ -5713,6 +5713,7 @@
     "stepProgress": "Progresso da configuração"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Limiar de encaminhamento de novas sessões (0 = desativado)",
     "tosAvoidNoticeTitle": "Este fornecedor é excluído do auto por predefinição",
     "tosAvoidNoticeDescription": "O seu estado de ToS está marcado como avoid. Ligar uma conta não altera esta política. Consulte os termos do fornecedor antes de ativar a opção global para todos os combos auto.",
     "tosAvoidNoticeAction": "Consultar a política do auto",

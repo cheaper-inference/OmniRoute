@@ -5713,6 +5713,7 @@
     "stepProgress": "ସେଟଅପ୍ର ଅଗ୍ରଗତି"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "ନୂଆ ଅଧିବେଶନ ରାଉଟିଂ ସୀମା (0 = ବନ୍ଦ)",
     "tosAvoidNoticeTitle": "ଏହି ପ୍ରଦାନକାରୀଙ୍କୁ ଡିଫଲ୍ଟ ଭାବେ auto ରୁ ବାଦ୍ ଦିଆଯାଇଛି",
     "tosAvoidNoticeDescription": "ଏହାର ToS ସ୍ଥିତି avoid ଭାବେ ଚିହ୍ନିତ। ଆକାଉଣ୍ଟ ସଂଯୋଗ କଲେ ଏହି ନୀତି ବଦଳେ ନାହିଁ। ସମସ୍ତ auto କମ୍ବୋ ପାଇଁ ସାର୍ବଜନୀନ ବିକଳ୍ପ ସକ୍ରିୟ କରିବା ପୂର୍ବରୁ ପ୍ରଦାନକାରୀଙ୍କ ସର୍ତ୍ତ ପଢ଼ନ୍ତୁ।",
     "tosAvoidNoticeAction": "auto ନୀତି ଦେଖନ୍ତୁ",

@@ -5713,6 +5713,7 @@
     "stepProgress": "Kurulum ilerlemesi"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Yeni oturum yönlendirme eşiği (0 = kapalı)",
     "tosAvoidNoticeTitle": "Bu sağlayıcı varsayılan olarak auto'dan hariç tutulur",
     "tosAvoidNoticeDescription": "ToS durumu avoid olarak işaretlenmiştir. Hesap bağlamak bu politikayı değiştirmez. Tüm auto kombinasyonları için genel seçeneği açmadan önce sağlayıcının koşullarını inceleyin.",
     "tosAvoidNoticeAction": "auto politikasını incele",

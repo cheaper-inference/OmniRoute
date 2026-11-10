@@ -5713,6 +5713,7 @@
     "stepProgress": "Määrityksen edistyminen"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Uusien istuntojen reitityskynnys (0 = pois)",
     "tosAvoidNoticeTitle": "Tämä palveluntarjoaja on oletuksena suljettu pois auto-valinnasta",
     "tosAvoidNoticeDescription": "Sen käyttöehtotilaksi on merkitty avoid. Tilin yhdistäminen ei muuta tätä käytäntöä. Tarkista palveluntarjoajan ehdot ennen kaikille auto-yhdistelmille yhteisen suostumuksen antamista.",
     "tosAvoidNoticeAction": "Tarkista auto-käytäntö",

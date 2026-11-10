@@ -5713,6 +5713,7 @@
     "stepProgress": "সেটআপের অগ্রগতি"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "নতুন সেশনের রাউটিং সীমা (0 = বন্ধ)",
     "tosAvoidNoticeTitle": "এই প্রদানকারী ডিফল্টভাবে auto থেকে বাদ থাকে",
     "tosAvoidNoticeDescription": "এর পরিষেবার শর্তাবলির অবস্থা avoid হিসেবে চিহ্নিত। একটি অ্যাকাউন্ট সংযুক্ত করলে এই নীতি পরিবর্তন হয় না। সব auto কম্বোর জন্য সম্মিলিত অনুমতি চালু করার আগে প্রদানকারীর শর্তাবলি পর্যালোচনা করুন।",
     "tosAvoidNoticeAction": "auto নীতি পর্যালোচনা করুন",

@@ -5713,6 +5713,7 @@
     "stepProgress": "Průběh nastavení"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Práh směrování nových relací (0 = vypnuto)",
     "tosAvoidNoticeTitle": "Tento poskytovatel je ve výchozím nastavení z auto vyloučen",
     "tosAvoidNoticeDescription": "Jeho stav podmínek služby je označen jako avoid. Připojení účtu tyto zásady nezmění. Před zapnutím společného souhlasu pro všechny kombinace auto si přečtěte podmínky poskytovatele.",
     "tosAvoidNoticeAction": "Zkontrolovat zásady auto",

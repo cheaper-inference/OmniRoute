@@ -5713,6 +5713,7 @@
     "stepProgress": "ਸੈੱਟਅੱਪ ਦੀ ਪ੍ਰਗਤੀ"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "ਨਵੇਂ ਸੈਸ਼ਨ ਦੀ ਰੂਟਿੰਗ ਸੀਮਾ (0 = ਬੰਦ)",
     "tosAvoidNoticeTitle": "ਇਹ ਪ੍ਰਦਾਤਾ ਮੂਲ ਰੂਪ ਵਿੱਚ auto ਤੋਂ ਬਾਹਰ ਹੈ",
     "tosAvoidNoticeDescription": "ਇਸ ਦੀ ToS ਸਥਿਤੀ avoid ਵਜੋਂ ਨਿਸ਼ਾਨਬੱਧ ਹੈ। ਖਾਤਾ ਜੋੜਨ ਨਾਲ ਇਹ ਨੀਤੀ ਨਹੀਂ ਬਦਲਦੀ। ਸਾਰੇ auto ਕੰਬੋ ਲਈ ਗਲੋਬਲ ਵਿਕਲਪ ਚਾਲੂ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪ੍ਰਦਾਤਾ ਦੀਆਂ ਸ਼ਰਤਾਂ ਪੜ੍ਹੋ।",
     "tosAvoidNoticeAction": "auto ਨੀਤੀ ਵੇਖੋ",

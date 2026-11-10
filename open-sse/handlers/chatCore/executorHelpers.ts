@@ -52,6 +52,19 @@ export function resolveAccountSemaphoreMaxConcurrency(
   return toFiniteNumberOrNull(credentials?.maxConcurrent);
 }
 
+/** Keep opt-in unlimited accounts counted in the existing gate, not a second semaphore. */
+export function resolveTrackedAccountSemaphoreMaxConcurrency(
+  credentials: Record<string, unknown> | null | undefined,
+  rateLimitProtectionEnabled = true
+): number | null {
+  const hard = resolveAccountSemaphoreMaxConcurrency(credentials, rateLimitProtectionEnabled);
+  if (hard != null && hard > 0) return hard;
+  const fresh = credentials?.newSessionMaxConcurrent;
+  return typeof fresh === "number" && Number.isInteger(fresh) && fresh > 0 && fresh <= 10_000
+    ? Number.MAX_SAFE_INTEGER
+    : hard;
+}
+
 /**
  * Resolve the per-model concurrency cap for one execution attempt.
  *

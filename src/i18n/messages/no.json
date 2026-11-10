@@ -5713,6 +5713,7 @@
     "stepProgress": "Oppsettsfremdrift"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Rutingterskel for nye økter (0 = av)",
     "tosAvoidNoticeTitle": "Denne leverandøren er som standard utelatt fra auto",
     "tosAvoidNoticeDescription": "ToS-statusen er merket avoid. Tilkobling av en konto endrer ikke denne policyen. Les leverandørens vilkår før du aktiverer det globale valget for alle auto-kombinasjoner.",
     "tosAvoidNoticeAction": "Se auto-policyen",

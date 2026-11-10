@@ -5713,6 +5713,7 @@
     "stepProgress": "ความคืบหน้าของการตั้งค่า"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "เกณฑ์การกำหนดเส้นทางเซสชันใหม่ (0 = ปิด)",
     "tosAvoidNoticeTitle": "ผู้ให้บริการนี้ถูกยกเว้นจาก auto โดยค่าเริ่มต้น",
     "tosAvoidNoticeDescription": "สถานะ ToS ถูกระบุว่า avoid การเชื่อมต่อบัญชีไม่เปลี่ยนนโยบายนี้ โปรดอ่านข้อกำหนดของผู้ให้บริการก่อนเปิดตัวเลือกส่วนกลางสำหรับคอมโบ auto ทั้งหมด",
     "tosAvoidNoticeAction": "ดูนโยบาย auto",

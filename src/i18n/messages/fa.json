@@ -5713,6 +5713,7 @@
     "stepProgress": "پیشرفت راهاندازی"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "آستانه مسیریابی نشست‌های جدید (0 = خاموش)",
     "tosAvoidNoticeTitle": "این ارائه‌دهنده به‌طور پیش‌فرض از auto کنار گذاشته شده است",
     "tosAvoidNoticeDescription": "وضعیت شرایط استفادهٔ آن با avoid مشخص شده است. اتصال یک حساب این سیاست را تغییر نمی‌دهد. پیش از فعال‌کردن اجازهٔ سراسری برای همهٔ ترکیب‌های auto، شرایط ارائه‌دهنده را بررسی کنید.",
     "tosAvoidNoticeAction": "بررسی سیاست auto",

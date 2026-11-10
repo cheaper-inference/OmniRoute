@@ -5713,6 +5713,7 @@
     "stepProgress": "సెటప్ పురోగతి"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "కొత్త సెషన్ రూటింగ్ పరిమితి (0 = ఆఫ్)",
     "tosAvoidNoticeTitle": "ఈ ప్రొవైడర్ డిఫాల్ట్‌గా auto నుండి మినహాయించబడింది",
     "tosAvoidNoticeDescription": "దీని ToS స్థితి avoidగా గుర్తించబడింది. ఖాతాను కనెక్ట్ చేయడం ఈ విధానాన్ని మార్చదు. అన్ని auto కాంబోల కోసం గ్లోబల్ ఎంపికను ప్రారంభించే ముందు ప్రొవైడర్ నిబంధనలను చదవండి.",
     "tosAvoidNoticeAction": "auto విధానాన్ని చూడండి",

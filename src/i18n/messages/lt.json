@@ -5713,6 +5713,7 @@
     "stepProgress": "Sąrankos eiga"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Naujų seansų maršruto parinkimo slenkstis (0 = išjungta)",
     "tosAvoidNoticeTitle": "Šis teikėjas pagal numatytuosius nustatymus neįtrauktas į auto",
     "tosAvoidNoticeDescription": "Jo paslaugų teikimo sąlygų būsena pažymėta avoid. Paskyros prijungimas šios politikos nekeičia. Prieš įjungdami bendrą leidimą visiems auto deriniams, peržiūrėkite teikėjo sąlygas.",
     "tosAvoidNoticeAction": "Peržiūrėti auto politiką",

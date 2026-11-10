@@ -5713,6 +5713,7 @@
     "stepProgress": "Opsætningsstatus"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Routingtærskel for nye sessioner (0 = fra)",
     "tosAvoidNoticeTitle": "Denne udbyder er som standard udelukket fra auto",
     "tosAvoidNoticeDescription": "Udbyderens status for tjenestevilkår er markeret avoid. Tilslutning af en konto ændrer ikke denne politik. Læs udbyderens vilkår, før du aktiverer det fælles tilvalg for alle auto-kombinationer.",
     "tosAvoidNoticeAction": "Gennemgå politikken for auto",

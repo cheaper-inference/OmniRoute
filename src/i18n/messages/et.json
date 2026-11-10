@@ -5713,6 +5713,7 @@
     "stepProgress": "Seadistamise edenemine"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Uute seansside marsruutimise lävi (0 = väljas)",
     "tosAvoidNoticeTitle": "See pakkuja on vaikimisi auto-valikust välja jäetud",
     "tosAvoidNoticeDescription": "Tema teenustingimuste olek on märgitud avoid. Konto ühendamine neid reegleid ei muuda. Enne kõigi auto-kombinatsioonide jaoks üldise nõusoleku andmist vaadake pakkuja tingimused üle.",
     "tosAvoidNoticeAction": "Vaata auto reegleid",

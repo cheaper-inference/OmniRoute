@@ -5713,6 +5713,7 @@
     "stepProgress": "Progres penyiapan"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Ambang perutean sesi baru (0 = nonaktif)",
     "tosAvoidNoticeTitle": "Penyedia ini dikecualikan dari auto secara bawaan",
     "tosAvoidNoticeDescription": "Status ketentuan layanannya ditandai avoid. Menghubungkan akun tidak mengubah kebijakan ini. Tinjau ketentuan penyedia sebelum mengaktifkan persetujuan global untuk semua kombinasi auto.",
     "tosAvoidNoticeAction": "Tinjau kebijakan auto",

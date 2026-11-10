@@ -5713,6 +5713,7 @@
     "stepProgress": "Progresso da configuração"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Limite de roteamento de novas sessões (0 = desativado)",
     "tosAvoidNoticeTitle": "Este provedor é excluído do auto por padrão",
     "tosAvoidNoticeDescription": "O status de ToS está marcado como avoid. Conectar uma conta não altera esta política. Consulte os termos do provedor antes de ativar a opção global para todos os combos auto.",
     "tosAvoidNoticeAction": "Consultar a política do auto",

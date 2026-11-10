@@ -5713,6 +5713,7 @@
     "stepProgress": "सेटअप प्रगति"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "नयाँ सत्रको राउटिङ सीमा (0 = बन्द)",
     "tosAvoidNoticeTitle": "यो प्रदायक पूर्वनिर्धारित रूपमा auto बाट हटाइएको छ",
     "tosAvoidNoticeDescription": "यसको ToS स्थिति avoid छ। खाता जोड्दा यो नीति परिवर्तन हुँदैन। सबै auto कम्बोका लागि विश्वव्यापी विकल्प सक्रिय गर्नुअघि प्रदायकका सर्तहरू पढ्नुहोस्।",
     "tosAvoidNoticeAction": "auto नीति हेर्नुहोस्",

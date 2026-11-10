@@ -5713,6 +5713,7 @@
     "stepProgress": "Progression de la configuration"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Seuil de routage des nouvelles sessions (0 = désactivé)",
     "tosAvoidNoticeTitle": "Ce fournisseur est exclu de auto par défaut",
     "tosAvoidNoticeDescription": "Son statut relatif aux conditions d’utilisation est marqué avoid. Connecter un compte ne modifie pas cette politique. Consultez les conditions du fournisseur avant d’activer l’autorisation globale pour toutes les combinaisons auto.",
     "tosAvoidNoticeAction": "Consulter la politique de auto",

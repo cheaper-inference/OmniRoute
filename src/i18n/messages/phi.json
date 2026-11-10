@@ -5713,6 +5713,7 @@
     "stepProgress": "Progreso ng pag-setup"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Hangganan ng pagruruta ng bagong sesyon (0 = naka-off)",
     "tosAvoidNoticeTitle": "Hindi kasama sa auto ang provider na ito bilang default",
     "tosAvoidNoticeDescription": "May markang avoid ang ToS status nito. Hindi nagbabago ang patakarang ito kapag nagkonekta ng account. Basahin ang mga tuntunin ng provider bago paganahin ang global na opsyon para sa lahat ng auto combo.",
     "tosAvoidNoticeAction": "Tingnan ang patakaran ng auto",

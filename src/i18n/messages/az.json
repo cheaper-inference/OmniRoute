@@ -5713,6 +5713,7 @@
     "stepProgress": "Quraşdırma gedişatı"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Yeni sessiyaların yönləndirmə həddi (0 = bağlı)",
     "tosAvoidNoticeTitle": "Bu provayder standart olaraq auto-dan çıxarılıb",
     "tosAvoidNoticeDescription": "Onun xidmət şərtləri statusu avoid kimi işarələnib. Hesab qoşmaq bu siyasəti dəyişmir. Bütün auto kombinasiyaları üçün ümumi razılığı aktivləşdirməzdən əvvəl provayderin şərtlərini nəzərdən keçirin.",
     "tosAvoidNoticeAction": "auto siyasətini nəzərdən keçir",

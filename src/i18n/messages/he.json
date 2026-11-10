@@ -5713,6 +5713,7 @@
     "stepProgress": "התקדמות ההגדרה"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "סף ניתוב הפעלות חדשות (0 = כבוי)",
     "tosAvoidNoticeTitle": "ספק זה מוחרג מ-auto כברירת מחדל",
     "tosAvoidNoticeDescription": "מצב תנאי השירות שלו מסומן avoid. חיבור חשבון אינו משנה מדיניות זו. יש לעיין בתנאי הספק לפני הפעלת ההרשאה הכללית לכל שילובי auto.",
     "tosAvoidNoticeAction": "עיון במדיניות auto",
