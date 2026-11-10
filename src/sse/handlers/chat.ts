@@ -182,6 +182,7 @@ import * as agyLease from "../services/antigravityLeaseLifecycle";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { getCircuitBreaker, isLocalStreamLifecycleError } from "../../shared/utils/circuitBreaker";
 import { maybeMarkChatAccountExhaustedFrom429 } from "../services/chatQuotaExhaustion";
+import { recordClaudeScopeHeaders } from "@omniroute/open-sse/services/claudeScopeHeaders.ts";
 import { markQuotaHealthy } from "../../domain/quotaCache";
 import { resolveForcedConnectionForCredentialPool } from "../services/sessionAffinityPin.ts";
 import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTelemetry";
@@ -2319,6 +2320,8 @@ async function handleSingleModelChat(
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
       if (!result.success) releaseOAuthSession();
+      // The combo only gets the sanitized response: carry the raw Claude scope headers on it.
+      if (!result.success) recordClaudeScopeHeaders(result.response, result.upstreamHeaders);
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
           result.response,
@@ -2829,7 +2832,7 @@ async function handleSingleModelChat(
           model,
           passthroughModels: credentials.providerSpecificData?.passthroughModels,
           failureKind,
-          headers: result.response.headers,
+          headers: result.upstreamHeaders,
         });
       }
 
@@ -2915,6 +2918,7 @@ async function handleSingleModelChat(
               ),
               isCombo,
               headers: result.response.headers,
+              quotaScopeHeaders: result.upstreamHeaders,
               isAvalancheRisk: avalancheRisk?.isAvalancheRisk ?? false,
               avalancheCooldownMs: avalancheRisk?.suggestedCooldownMs,
               suppressFallback: avalancheRisk?.shouldSuppressFallback ?? false,

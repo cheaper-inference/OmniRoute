@@ -2487,6 +2487,8 @@ export async function markAccountUnavailable(
     /** Caller is the combo engine — it records its own model-level lockouts. */
     isCombo?: boolean;
     headers?: Headers | Record<string, string> | null;
+    /** Raw upstream headers. Read by the Claude quota-scope decision only, never by retry hints. */
+    quotaScopeHeaders?: Headers | Record<string, string> | null;
     correlationId?: string | null;
     streamOutputEmitted?: boolean;
     isAvalancheRisk?: boolean;
@@ -2810,7 +2812,7 @@ export async function markAccountUnavailable(
       status,
       errorText,
       model,
-      headers: options.headers,
+      headers: options.quotaScopeHeaders ?? options.headers,
     });
     const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
     // #18296: headroom-scoped decisions carry no cached reset, so they use the 429's own hint

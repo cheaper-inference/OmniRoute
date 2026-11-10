@@ -43,6 +43,7 @@ import { isVertexConnectionWidePermissionDenied } from "@/sse/services/vertexErr
 import { isSharedWalletCredits402 } from "../accountFallback/sharedWalletCredits.ts";
 import { isClaudeMinuteRateLimitText, isExplicitClaudeQuota429Text } from "../usage/claudeQuota.ts";
 import { getCachedClaudeQuotaScopeDecision } from "../claudeQuotaScopeBridge.ts";
+import { readClaudeScopeHeaders } from "../claudeScopeHeaders.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { LOCAL_MODEL_COOLDOWN_HEADER } from "../../utils/localCooldownHeader.ts";
 import { isExplicitModelCapacityFailure } from "../accountFallback/perModelFailureScope.ts";
@@ -209,7 +210,7 @@ function deriveTargetFailure(
     status: opts.result.status,
     errorText: opts.errorText,
     model: opts.rawModel,
-    headers: opts.result.headers,
+    headers: readClaudeScopeHeaders(opts.result) ?? opts.result.headers,
   });
   const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
   const isConnectionScopedClaudeQuota =

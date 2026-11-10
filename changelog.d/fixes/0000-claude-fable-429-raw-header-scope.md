@@ -1,0 +1,1 @@
+- **fix(claude):** A Claude quota 429 that rejects only an overage claim (Fable) now stays model scoped on the main chat path and in combos, also when the usage cache is cold. The scope decision reads the raw upstream rate-limit headers. Retry-hint cooldowns still read the sanitized headers and do not change for any provider.
