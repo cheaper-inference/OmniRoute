@@ -29,9 +29,8 @@ const {
   clearAllModelLockouts,
   isModelLocked,
 } = await import("../../open-sse/services/accountFallback.ts");
-const { clearMultiKeyLockExemptingUpstreamResets } = await import(
-  "../../open-sse/services/accountFallback/exactModelLock.ts"
-);
+const { clearMultiKeyLockExemptingUpstreamResets } =
+  await import("../../open-sse/services/accountFallback/exactModelLock.ts");
 import type {
   ModelFailureState,
   ModelLockoutEntry,
@@ -42,9 +41,41 @@ const REASON = "rate_limited";
 test("exempting clear keeps a future upstream-reset lock, clears expired and unstamped ones", () => {
   const now = Date.now();
   const lockouts = new Map<string, ModelLockoutEntry>([
-    ["k-stamped-live", { reason: REASON, until: now + 3_600_000, lockedAt: now, failureCount: 1, lastFailureAt: now, resetAfterMs: 300_000, upstreamReset: true }],
-    ["k-stamped-dead", { reason: REASON, until: now - 1_000, lockedAt: now, failureCount: 1, lastFailureAt: now, resetAfterMs: 300_000, upstreamReset: true }],
-    ["k-plain", { reason: REASON, until: now + 3_600_000, lockedAt: now, failureCount: 1, lastFailureAt: now, resetAfterMs: 300_000 }],
+    [
+      "k-stamped-live",
+      {
+        reason: REASON,
+        until: now + 3_600_000,
+        lockedAt: now,
+        failureCount: 1,
+        lastFailureAt: now,
+        resetAfterMs: 300_000,
+        upstreamReset: true,
+      },
+    ],
+    [
+      "k-stamped-dead",
+      {
+        reason: REASON,
+        until: now - 1_000,
+        lockedAt: now,
+        failureCount: 1,
+        lastFailureAt: now,
+        resetAfterMs: 300_000,
+        upstreamReset: true,
+      },
+    ],
+    [
+      "k-plain",
+      {
+        reason: REASON,
+        until: now + 3_600_000,
+        lockedAt: now,
+        failureCount: 1,
+        lastFailureAt: now,
+        resetAfterMs: 300_000,
+      },
+    ],
   ]);
   const failures = new Map<string, ModelFailureState>([
     ["k-stamped-live", { failureCount: 1, lastFailureAt: now, resetAfterMs: 300_000 }],
@@ -62,7 +93,11 @@ test("exempting clear keeps a future upstream-reset lock, clears expired and uns
   assert.equal(cleared, true, "something was cleared");
   assert.equal(lockouts.has("k-stamped-live"), true, "a still-open upstream reset stays armed");
   assert.equal(failures.has("k-stamped-live"), true);
-  assert.equal(lockouts.has("k-stamped-dead"), false, "an expired stamp clears like everything else");
+  assert.equal(
+    lockouts.has("k-stamped-dead"),
+    false,
+    "an expired stamp clears like everything else"
+  );
   assert.equal(failures.has("k-stamped-dead"), false);
   assert.equal(lockouts.has("k-plain"), false, "an unstamped lock clears exactly as before");
   assert.equal(failures.has("k-plain"), false);
