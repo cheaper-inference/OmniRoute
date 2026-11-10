@@ -272,6 +272,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "structured_output",
   "structured_output_validation_failed",
   "subscription_required",
+  "thread_unsupported_request",
   "timeout",
   "timeout_error",
   "tls_circuit_open",

@@ -107,7 +107,30 @@ test("handleChatCore answers 400 and never calls the upstream for a thread reque
 
   assert.equal(result.success, false);
   assert.equal(result.status, 400);
-  const payload = (await result.response!.json()) as { error?: { type?: string } };
+  const payload = (await result.response!.json()) as {
+    error?: { type?: string; details?: { error_code?: string } };
+  };
   assert.equal(payload.error?.type, "invalid_request_error");
+  // Anthropic SDK clients that opt into continue_unthreaded read this code to resend unthreaded.
+  assert.equal(payload.error?.details?.error_code, "thread_unsupported_request");
   assert.equal(fetchCalls, 0, "the upstream must not receive a history-less delta");
+});
+
+test("a translation failure forwards only a public-safe detail code", async () => {
+  const { createTranslationFailureResult } =
+    await import("../../open-sse/handlers/chatCore/translationFailure.ts");
+  const forwarded = createTranslationFailureResult(
+    400,
+    "no threads here",
+    "invalid_request_error",
+    "thread_unsupported_request"
+  );
+  const withCode = (await forwarded.response.json()) as { error: { details?: Json } };
+  assert.deepEqual(withCode.error.details, { error_code: "thread_unsupported_request" });
+
+  for (const unsafe of ["has spaces and\nnewline", "x".repeat(200), "not_in_the_public_list"]) {
+    const dropped = createTranslationFailureResult(400, "m", "invalid_request_error", unsafe);
+    const body = (await dropped.response.json()) as { error: { details?: Json } };
+    assert.equal(body.error.details, undefined, unsafe.slice(0, 20));
+  }
 });
