@@ -84,6 +84,21 @@ test("custom import refuses a missing trust acknowledgement", async () => {
   expect((await PATCH(request(input))).status).toBe(400);
   expect(mocks.custom).not.toHaveBeenCalled();
 });
+
+test("unsaved test trims pasted source whitespace just like Save", async () => {
+  mocks.probe.mockResolvedValue({ success: true, publicIp: "192.0.2.1", latencyMs: 1 });
+  const response = await PATCH(
+    request({ action: "test", core: "xray", sourceLink: " \nvless://synthetic\n " })
+  );
+  expect(response.status).toBe(200);
+  expect(mocks.probe).toHaveBeenCalledWith(
+    "xray",
+    "vless://synthetic",
+    undefined,
+    undefined,
+    undefined
+  );
+});
 test("authorized custom import selects only the verified imported snapshot", async () => {
   const response = await PATCH(request(operations[4]));
   expect(response.status).toBe(200);

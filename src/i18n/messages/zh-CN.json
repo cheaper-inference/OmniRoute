@@ -16231,7 +16231,7 @@
     "fragmentHint": "仅适用于通过 TCP 或 WebSocket 传输的 TLS 或 REALITY。长度为 1–4096 字节；间隔为 0–1000 毫秒。请使用单个值或递增范围。这不保证能够穿透过滤。",
     "fragmentLength": "分片长度（字节）",
     "fragmentInterval": "分片间隔（毫秒）",
-    "testHint": "测试可能会准备所选核心，并通过临时代理使用 HTTPS 连接 api.ipify.org。不会保存或分配任何内容。此操作不会测试任何 AI 提供商。",
+    "testHint": "测试可能会准备所选核心，并通过临时代理使用 HTTPS 连接 api.ipify.org。不会保存或分配任何内容。此操作不会测试任何 AI 提供者。",
     "testSource": "保存前测试",
     "testSuccess": "HTTPS 测试通过。出口 IP：{ip}；延迟：{ms} ms。"
   }

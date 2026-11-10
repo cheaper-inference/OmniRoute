@@ -27,7 +27,28 @@ async function loadCoreMetadata(loadError: string): Promise<CoreState[]> {
   return payload.cores || [];
 }
 
-export default function ManagedProxyTab() {
+function useInitialCoreMetadata(
+  loadError: string,
+  setCores: (cores: CoreState[]) => void,
+  setError: (error: string) => void
+) {
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/services/managed-proxy", { signal: controller.signal })
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error?.message || loadError);
+        if (!controller.signal.aborted) setCores(payload.cores || []);
+      })
+      .catch((failure: Error) => {
+        if (!controller.signal.aborted) setError(failure.message);
+      });
+    return () => controller.abort();
+  }, [loadError, setCores, setError]);
+}
+
+/** Keep requests and metadata refresh isolated from form layout. */
+function useManagedProxyState() {
   const t = useTranslations("managedProxy");
   const loadError = t("loadError");
   const [cores, setCores] = useState<CoreState[]>([]);
@@ -45,22 +66,7 @@ export default function ManagedProxyTab() {
     core === "xray" && fragmentEnabled
       ? { packets: "tlshello", length: fragmentLength, interval: fragmentInterval }
       : undefined;
-  async function load() {
-    setCores(await loadCoreMetadata(loadError));
-  }
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/services/managed-proxy", { signal: controller.signal })
-      .then(async (response) => {
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error?.message || loadError);
-        if (!controller.signal.aborted) setCores(payload.cores || []);
-      })
-      .catch((failure: Error) => {
-        if (!controller.signal.aborted) setError(failure.message);
-      });
-    return () => controller.abort();
-  }, [loadError]);
+  useInitialCoreMetadata(loadError, setCores, setError);
   async function operation(
     method: "POST" | "PATCH",
     body: Record<string, unknown>
@@ -84,7 +90,7 @@ export default function ManagedProxyTab() {
         !["test", "releases", "subscription"].includes(String(body.action))
       ) {
         try {
-          await load();
+          setCores(await loadCoreMetadata(loadError));
         } catch {
           setError(loadError);
         }
@@ -98,6 +104,48 @@ export default function ManagedProxyTab() {
       setBusy(false);
     }
   }
+  return {
+    cores,
+    core,
+    setCore,
+    name,
+    setName,
+    sourceLink,
+    setSourceLink,
+    error,
+    busy,
+    testResult,
+    setTestResult,
+    fragmentEnabled,
+    setFragmentEnabled,
+    fragmentLength,
+    setFragmentLength,
+    fragmentInterval,
+    setFragmentInterval,
+    fragment,
+    operation,
+  };
+}
+
+/** Compose the managed-core form without mixing transport and layout state. */
+export default function ManagedProxyTab() {
+  const t = useTranslations("managedProxy");
+  const state = useManagedProxyState();
+  const {
+    cores,
+    core,
+    setCore,
+    name,
+    setName,
+    sourceLink,
+    setSourceLink,
+    error,
+    busy,
+    testResult,
+    setTestResult,
+    setFragmentEnabled,
+    operation,
+  } = state;
   return (
     <section className="flex flex-col gap-4 max-w-2xl">
       <h3 className="text-base font-medium text-text-primary">{t("title")}</h3>
@@ -140,42 +188,7 @@ export default function ManagedProxyTab() {
           />
         </>
       )}
-      {core === "xray" && (
-        <>
-          <Checkbox
-            label={t("fragmentEnable")}
-            checked={fragmentEnabled}
-            disabled={busy}
-            onChange={(event) => {
-              setFragmentEnabled(event.target.checked);
-              setTestResult("");
-            }}
-          />
-          {fragmentEnabled && (
-            <>
-              <p className="text-xs text-text-muted">{t("fragmentHint")}</p>
-              <Input
-                label={t("fragmentLength")}
-                value={fragmentLength}
-                disabled={busy}
-                onChange={(event) => {
-                  setFragmentLength(event.target.value);
-                  setTestResult("");
-                }}
-              />
-              <Input
-                label={t("fragmentInterval")}
-                value={fragmentInterval}
-                disabled={busy}
-                onChange={(event) => {
-                  setFragmentInterval(event.target.value);
-                  setTestResult("");
-                }}
-              />
-            </>
-          )}
-        </>
-      )}
+      {core === "xray" && <ManagedFragmentControls state={state} />}
       <p className="text-xs text-text-muted">{t("saveHint")}</p>
       <p className="text-xs text-text-muted">{t("testHint")}</p>
       {testResult && (
@@ -188,32 +201,92 @@ export default function ManagedProxyTab() {
           {error}
         </p>
       )}
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant="secondary"
-          disabled={busy || !core || !sourceLink.trim()}
-          onClick={async () => {
-            setTestResult("");
-            const result = await operation("PATCH", { action: "test", core, sourceLink, fragment });
-            if (result)
-              setTestResult(
-                t("testSuccess", { ip: String(result.publicIp), ms: Number(result.latencyMs) })
-              );
-          }}
-        >
-          {t("testSource")}
-        </Button>
-        <Button
-          size="sm"
-          loading={busy}
-          disabled={busy || !core || !name.trim() || !sourceLink.trim()}
-          onClick={() => operation("POST", { core, name, sourceLink, fragment })}
-        >
-          {t("saveActivate")}
-        </Button>
-      </div>
+      <ManagedSourceActions state={state} />
     </section>
+  );
+}
+
+/** Fragmentation stays opt-in and edits invalidate the previous test result. */
+function ManagedFragmentControls({ state }: { state: ReturnType<typeof useManagedProxyState> }) {
+  const t = useTranslations("managedProxy");
+  const {
+    busy,
+    fragmentEnabled,
+    setFragmentEnabled,
+    fragmentLength,
+    setFragmentLength,
+    fragmentInterval,
+    setFragmentInterval,
+    setTestResult,
+  } = state;
+  return (
+    <>
+      <Checkbox
+        label={t("fragmentEnable")}
+        checked={fragmentEnabled}
+        disabled={busy}
+        onChange={(event) => {
+          setFragmentEnabled(event.target.checked);
+          setTestResult("");
+        }}
+      />
+      {fragmentEnabled && (
+        <>
+          <p className="text-xs text-text-muted">{t("fragmentHint")}</p>
+          <Input
+            label={t("fragmentLength")}
+            value={fragmentLength}
+            disabled={busy}
+            onChange={(event) => {
+              setFragmentLength(event.target.value);
+              setTestResult("");
+            }}
+          />
+          <Input
+            label={t("fragmentInterval")}
+            value={fragmentInterval}
+            disabled={busy}
+            onChange={(event) => {
+              setFragmentInterval(event.target.value);
+              setTestResult("");
+            }}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+/** Test and Save are separate explicit actions; testing never persists the source. */
+function ManagedSourceActions({ state }: { state: ReturnType<typeof useManagedProxyState> }) {
+  const t = useTranslations("managedProxy");
+  const { busy, core, sourceLink, fragment, name, operation, setTestResult } = state;
+  return (
+    <div className="flex gap-2">
+      <Button
+        size="sm"
+        variant="secondary"
+        disabled={busy || !core || !sourceLink.trim()}
+        onClick={async () => {
+          setTestResult("");
+          const result = await operation("PATCH", { action: "test", core, sourceLink, fragment });
+          if (result)
+            setTestResult(
+              t("testSuccess", { ip: String(result.publicIp), ms: Number(result.latencyMs) })
+            );
+        }}
+      >
+        {t("testSource")}
+      </Button>
+      <Button
+        size="sm"
+        loading={busy}
+        disabled={busy || !core || !name.trim() || !sourceLink.trim()}
+        onClick={() => operation("POST", { core, name, sourceLink, fragment })}
+      >
+        {t("saveActivate")}
+      </Button>
+    </div>
   );
 }
 

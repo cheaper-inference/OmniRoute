@@ -141,31 +141,15 @@ function isPublicAddress(address: string): boolean {
   );
 }
 
-/** Explicit preview only: URL and node credentials are never persisted or logged. */
-export async function previewManagedSubscription(
-  core: ManagedCore,
-  input: string,
-  dependencies: { lookup?: DnsLookup; pinnedFetch?: typeof createPinnedFetch } = {}
-) {
-  const url = new URL(input);
-  if (
-    url.protocol !== "https:" ||
-    url.username ||
-    url.password ||
-    url.hash ||
-    !isSubscriptionFetchUrlAllowed(input, { allowLocal: false })
-  )
-    throw new Error("Managed subscription requires a public HTTPS URL without URL credentials");
+/** Bound DNS resolution separately while sharing the caller's total fetch deadline. */
+async function publicSubscriptionAddresses(url: URL, lookup?: DnsLookup) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_resolve, reject) => {
     timer = setTimeout(() => reject(new Error("Managed subscription resolution timed out")), 10000);
   });
   let addresses: Awaited<ReturnType<typeof resolveHostnameAddresses>>;
   try {
-    addresses = await Promise.race([
-      resolveHostnameAddresses(url.hostname, dependencies.lookup),
-      timeout,
-    ]);
+    addresses = await Promise.race([resolveHostnameAddresses(url.hostname, lookup), timeout]);
   } finally {
     clearTimeout(timer);
   }
@@ -175,17 +159,59 @@ export async function previewManagedSubscription(
     addresses.some(({ address }) => !isPublicAddress(address))
   )
     throw new Error("Managed subscription host is blocked");
-  const response = await (dependencies.pinnedFetch || createPinnedFetch)(
-    addresses[0].address,
-    addresses[0].family
-  )(url, {
-    redirect: "error",
-    signal: AbortSignal.timeout(15000),
-    headers: {
-      Accept: "text/plain, application/json, application/yaml",
-      "User-Agent": "OmniRoute-ManagedProxy",
-    },
-  });
+  return addresses;
+}
+
+/** Retry only connection failures, never redirects, HTTP failures, TLS verification or aborts. */
+function isConnectionFailure(error: unknown): boolean {
+  const codes = new Set([
+    "ENETUNREACH",
+    "EHOSTUNREACH",
+    "ECONNREFUSED",
+    "ECONNRESET",
+    "ETIMEDOUT",
+    "ENOTFOUND",
+    "EAI_AGAIN",
+    "UND_ERR_CONNECT_TIMEOUT",
+    "UND_ERR_SOCKET",
+  ]);
+  let current = error;
+  for (let depth = 0; current && typeof current === "object" && depth < 4; depth++) {
+    if ("code" in current && codes.has(String(current.code))) return true;
+    current = "cause" in current ? current.cause : null;
+  }
+  return false;
+}
+
+/** Pin every attempted connection to an already-validated public address. */
+async function fetchPinnedSubscription(
+  url: URL,
+  addresses: Awaited<ReturnType<typeof resolveHostnameAddresses>>,
+  signal: AbortSignal,
+  pinnedFetch = createPinnedFetch
+): Promise<Response> {
+  for (let index = 0; index < addresses.length; index++) {
+    signal.throwIfAborted();
+    const { address, family } = addresses[index];
+    try {
+      return await pinnedFetch(address, family)(url, {
+        redirect: "error",
+        signal,
+        headers: {
+          Accept: "text/plain, application/json, application/yaml",
+          "User-Agent": "OmniRoute-ManagedProxy",
+        },
+      });
+    } catch (error) {
+      if (signal.aborted || !isConnectionFailure(error) || index === addresses.length - 1)
+        throw error;
+    }
+  }
+  throw new Error("Managed subscription has no public addresses");
+}
+
+/** Read only bounded response content; cancelling also releases the pinned dispatcher. */
+async function subscriptionContent(response: Response): Promise<string> {
   if (!response.ok || !response.body) throw new Error("Managed subscription download failed");
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
@@ -201,5 +227,26 @@ export async function previewManagedSubscription(
   } finally {
     await reader.cancel();
   }
-  return managedSubscriptionNodes(core, Buffer.concat(chunks).toString("utf8"));
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+/** Explicit preview only: URL and node credentials are never persisted or logged. */
+export async function previewManagedSubscription(
+  core: ManagedCore,
+  input: string,
+  dependencies: { lookup?: DnsLookup; pinnedFetch?: typeof createPinnedFetch } = {}
+) {
+  const url = new URL(input);
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    url.hash ||
+    !isSubscriptionFetchUrlAllowed(input, { allowLocal: false })
+  )
+    throw new Error("Managed subscription requires a public HTTPS URL without URL credentials");
+  const signal = AbortSignal.timeout(15000);
+  const addresses = await publicSubscriptionAddresses(url, dependencies.lookup);
+  const response = await fetchPinnedSubscription(url, addresses, signal, dependencies.pinnedFetch);
+  return managedSubscriptionNodes(core, await subscriptionContent(response));
 }

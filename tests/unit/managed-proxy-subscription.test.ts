@@ -6,6 +6,71 @@ import {
 } from "../../src/lib/services/managedProxy/subscription.ts";
 const source =
   "vless://11111111-1111-4111-8111-111111111111@example.invalid:443?security=tls#First";
+
+test("a failed public IPv6 connection falls back to validated IPv4 with the same deadline", async () => {
+  const attempted: string[] = [];
+  const signals: AbortSignal[] = [];
+  const result = await previewManagedSubscription("xray", "https://example.invalid/sub", {
+    lookup: async () => [
+      { address: "2606:4700:4700::1111", family: 6 },
+      { address: "93.184.216.34", family: 4 },
+    ],
+    pinnedFetch: (address) => async (_url, init) => {
+      attempted.push(address);
+      signals.push(init!.signal!);
+      assert.equal(init?.redirect, "error");
+      if (attempted.length === 1)
+        throw new TypeError("fetch failed", {
+          cause: Object.assign(new Error("unreachable"), { code: "ENETUNREACH" }),
+        });
+      return new Response(source);
+    },
+  });
+  assert.equal(result.nodes.length, 1);
+  assert.deepEqual(attempted, ["2606:4700:4700::1111", "93.184.216.34"]);
+  assert.equal(signals[0], signals[1]);
+});
+
+for (const status of [302, 403, 500]) {
+  test(`HTTP ${status} does not try another pinned address`, async () => {
+    let attempts = 0;
+    await assert.rejects(
+      previewManagedSubscription("xray", "https://example.invalid/sub", {
+        lookup: async () => [
+          { address: "1.1.1.1", family: 4 },
+          { address: "8.8.8.8", family: 4 },
+        ],
+        pinnedFetch: () => async () => {
+          attempts++;
+          return new Response("rejected", { status });
+        },
+      }),
+      /download failed/
+    );
+    assert.equal(attempts, 1);
+  });
+}
+for (const code of ["CERT_HAS_EXPIRED", "ABORT_ERR"]) {
+  test(`${code} does not retry another pinned address`, async () => {
+    let attempts = 0;
+    await assert.rejects(
+      previewManagedSubscription("xray", "https://example.invalid/sub", {
+        lookup: async () => [
+          { address: "1.1.1.1", family: 4 },
+          { address: "8.8.8.8", family: 4 },
+        ],
+        pinnedFetch: () => async () => {
+          attempts++;
+          throw new TypeError("fetch failed", {
+            cause: Object.assign(new Error("rejected"), { code }),
+          });
+        },
+      }),
+      /fetch failed/
+    );
+    assert.equal(attempts, 1);
+  });
+}
 test("plain and base64 feeds preserve selected source and deduplicate nodes", () => {
   for (const body of [source + "\n" + source, Buffer.from(source).toString("base64")]) {
     const result = managedSubscriptionNodes("xray", body);

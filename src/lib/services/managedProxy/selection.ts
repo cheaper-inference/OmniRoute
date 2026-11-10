@@ -115,12 +115,26 @@ export async function importCustomBinary(
   if (createHash("sha256").update(bytes).digest("hex") !== sha256)
     throw new Error("Managed custom core SHA-256 does not match the supplied digest");
   const destination = customPath(core, sha256, root);
-  try {
-    await fs.writeFile(destination, bytes, { mode: 0o700, flag: "wx" });
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-  }
   const selection: CustomSelection = { source: "custom", sha256 };
+  try {
+    const info = await fs.lstat(destination);
+    if (!info.isFile() || info.isSymbolicLink())
+      throw new Error("Managed custom destination must be a regular file, not a link");
+    if (info.size > 0 && info.size <= MAX_BINARY) {
+      const existing = await readRegularBinary(destination);
+      if (createHash("sha256").update(existing).digest("hex") === sha256) return selection;
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  const temporary = await fs.mkdtemp(path.join(path.dirname(destination), ".import-"));
+  try {
+    const copy = path.join(temporary, "core");
+    await fs.writeFile(copy, bytes, { mode: 0o700, flag: "wx" });
+    await fs.rename(copy, destination);
+  } finally {
+    await fs.rm(temporary, { recursive: true, force: true });
+  }
   await verifyCustomBinary(core, selection, root);
   return selection;
 }

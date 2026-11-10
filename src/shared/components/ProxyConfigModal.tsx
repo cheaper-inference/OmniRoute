@@ -17,6 +17,7 @@ import {
 } from "./proxyConfigPersistence";
 import ProxyCustomFields, { isManagedProxySource } from "./ProxyCustomFields";
 import { saveManagedSource } from "./managedProxySave";
+import { probeManagedSource } from "./managedProxyProbe";
 import { isSameScopeAssignment, selectScopeAssignment } from "./proxyAssignment";
 
 const ALL_PROXY_TYPES = [
@@ -478,17 +479,11 @@ export default function ProxyConfigModal({
           setFormError(t("errorSelectManagedCore"));
           return;
         }
-        const response = await fetch("/api/services/managed-proxy", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "test",
-            core: managedCore,
-            sourceLink: String(host).trim(),
-          }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error?.message || t("connectionFailed"));
+        const result = await probeManagedSource(
+          managedCore,
+          String(host).trim(),
+          t("connectionFailed")
+        );
         setTestResult(result);
         return;
       }

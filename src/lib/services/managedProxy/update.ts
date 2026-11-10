@@ -48,14 +48,16 @@ export async function changeManagedCore(
       if (running) await deps.start(core, executable, config, listeners);
       writeCoreSelection(core, selection, root);
     } catch {
-      try {
-        if (running) await deps.stop(core);
-        if (previous) writeCoreSelection(core, previous, root);
-        else await clearCoreSelection(core, root);
-        if (running) await deps.start(core, oldExecutable, config, listeners);
-      } catch {
-        throw new Error("Managed core update failed and previous runtime could not be restored");
-      }
+      await restorePreviousCore(
+        core,
+        root,
+        previous,
+        running,
+        oldExecutable,
+        config,
+        listeners,
+        deps
+      );
       throw new Error("Managed core update failed; the previous selection was restored");
     }
   });
@@ -72,4 +74,25 @@ async function defaultDependencies(): Promise<ActivationDependencies> {
     allocate: allocatePort,
     running: isManagedRunning,
   };
+}
+
+/** Roll back both the persisted selection and prior activation without changing listeners. */
+async function restorePreviousCore(
+  core: ManagedCore,
+  root: string,
+  previous: CoreSelection | null,
+  running: boolean,
+  executable: string,
+  config: string,
+  listeners: ReturnType<typeof managedListeners>,
+  deps: ActivationDependencies
+): Promise<void> {
+  try {
+    if (running) await deps.stop(core);
+    if (previous) writeCoreSelection(core, previous, root);
+    else await clearCoreSelection(core, root);
+    if (running) await deps.start(core, executable, config, listeners);
+  } catch {
+    throw new Error("Managed core update failed and previous runtime could not be restored");
+  }
 }

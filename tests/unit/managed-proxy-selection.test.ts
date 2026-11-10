@@ -48,6 +48,20 @@ test("custom source must be absolute and must not be a symbolic link", async () 
   await assert.rejects(importCustomBinary("xray", link, hash, true, root), /regular|link/);
 });
 
+test("reimport repairs a damaged owned copy without changing selection or the supplied source", async () => {
+  fs.writeFileSync(source, bytes);
+  const selected = await importCustomBinary("xray", source, hash, true, root);
+  const executable = await verifyCustomBinary("xray", selected, root);
+  const before = readCoreSelection("xray", root);
+  for (const damage of ["incomplete copy", ""]) {
+    fs.writeFileSync(executable, damage);
+    await importCustomBinary("xray", source, hash, true, root);
+    assert.deepEqual(fs.readFileSync(await verifyCustomBinary("xray", selected, root)), bytes);
+  }
+  assert.deepEqual(fs.readFileSync(source), bytes);
+  assert.deepEqual(readCoreSelection("xray", root), before);
+});
+
 test("persisted selection rejects arbitrary URL, traversal and unknown fields", () => {
   assert.throws(() =>
     writeCoreSelection("xray", { source: "custom", sha256: "../../secret" }, root)

@@ -158,13 +158,8 @@ async function restoreSave(snapshot: SaveSnapshot, deps: ActivationDependencies)
   }
 }
 
-/** Registry callback MUST be one transaction and is the last fallible activation operation. */
-export async function saveManagedProxy<T>(
-  input: ManagedSave,
-  commit: (entry: { id: string; name: string; port: number; core: ManagedCore }) => Promise<T>,
-  root = managedRoot(),
-  dependencies?: ActivationDependencies
-): Promise<T> {
+/** Validate all source options before writes and refuse unencrypted persistence. */
+function encryptManagedSource(input: ManagedSave): string {
   // Reject unsupported source options before any download or config write.
   const outbound = sourceOutbound(input.core, input.sourceLink);
   renderManagedConfig(input.core, [
@@ -180,6 +175,25 @@ export async function saveManagedProxy<T>(
   const sourceEnc = encrypt(input.sourceLink);
   if (typeof sourceEnc !== "string" || !looksEncrypted(sourceEnc))
     throw new Error("Managed proxy source encryption failed");
+  return sourceEnc;
+}
+
+/** An explicit ID must already belong to the selected core. */
+function existingManagedEntry(id: string | undefined, entries: Entry[]): Entry | undefined {
+  if (!id) return undefined;
+  const entry = entries.find((item) => item.id === id);
+  if (!entry) throw new Error("Managed proxy not found for selected core");
+  return entry;
+}
+
+/** Registry callback MUST be one transaction and is the last fallible activation operation. */
+export async function saveManagedProxy<T>(
+  input: ManagedSave,
+  commit: (entry: { id: string; name: string; port: number; core: ManagedCore }) => Promise<T>,
+  root = managedRoot(),
+  dependencies?: ActivationDependencies
+): Promise<T> {
+  const sourceEnc = encryptManagedSource(input);
   const deps = dependencies || (await runtimeDependencies());
   return withManagedLock(input.core, root, async () => {
     ensureManagedDirectory(root);
@@ -192,8 +206,7 @@ export async function saveManagedProxy<T>(
     const activationPath = path.join(directory, "activation.json");
     const oldActivation = readOptional(activationPath);
     const entries = readManagedManifest(oldManifest);
-    const existing = input.id ? entries.find((entry) => entry.id === input.id) : undefined;
-    if (input.id && !existing) throw new Error("Managed proxy not found for selected core");
+    const existing = existingManagedEntry(input.id, entries);
     const priorListeners = entries.length ? managedListeners(input.core, entries) : [];
     const wasRunning = deps.running?.(input.core) ?? false;
     const id = existing?.id || randomUUID();

@@ -438,7 +438,9 @@
     "xxhash-wasm": "^1.1.0",
     "yazl": "^3.3.1",
     "zod": "^4.5.4",
-    "zustand": "^5.0.15"
+    "zustand": "^5.0.15",
+    "adm-zip": "^0.6.1",
+    "tar": "^7.5.21"
   },
   "optionalDependencies": {
     "@atjsh/llmlingua-2": "3.0.0",

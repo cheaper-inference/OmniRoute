@@ -61,7 +61,7 @@ const LifecycleSchema = z.discriminatedUnion("action", [
     .object({
       core: CoreSchema,
       action: z.literal("test"),
-      sourceLink: z.string().min(1).max(65536),
+      sourceLink: z.string().trim().min(1).max(65536),
       fragment: FragmentSchema.optional(),
     })
     .strict(),

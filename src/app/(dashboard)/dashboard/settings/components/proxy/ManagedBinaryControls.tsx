@@ -13,6 +13,24 @@ export type ManagedRequest = (
   body: Record<string, unknown>
 ) => Promise<Record<string, unknown> | null>;
 
+function useReleaseCatalog(core: Core) {
+  const [distribution, setDistribution] = useState<string>(core);
+  const [versions, setVersions] = useState<string[]>([]);
+  const [version, setVersion] = useState("");
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
+  return {
+    distribution,
+    setDistribution,
+    versions,
+    setVersions,
+    version,
+    setVersion,
+    catalogLoaded,
+    setCatalogLoaded,
+  };
+}
+
+/** Show verified release choices without starting a core on selection. */
 export default function ManagedBinaryControls({
   core,
   busy,
@@ -23,13 +41,16 @@ export default function ManagedBinaryControls({
   operation: ManagedRequest;
 }) {
   const t = useTranslations("managedProxy");
-  const [distribution, setDistribution] = useState<string>(core);
-  const [versions, setVersions] = useState<string[]>([]);
-  const [version, setVersion] = useState("");
-  const [binaryPath, setBinaryPath] = useState("");
-  const [sha256, setSha256] = useState("");
-  const [trusted, setTrusted] = useState(false);
-  const [catalogLoaded, setCatalogLoaded] = useState(false);
+  const {
+    distribution,
+    setDistribution,
+    versions,
+    setVersions,
+    version,
+    setVersion,
+    catalogLoaded,
+    setCatalogLoaded,
+  } = useReleaseCatalog(core);
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
       <h4 className="text-sm font-medium">{t("binaryTitle")}</h4>
@@ -76,28 +97,80 @@ export default function ManagedBinaryControls({
         <p className="text-xs text-text-muted">{t("noVerifiedReleases")}</p>
       )}
       {!!versions.length && (
-        <>
-          <Select
-            label={t("version")}
-            value={version}
-            disabled={busy}
-            onChange={(event) => setVersion(event.target.value)}
-          >
-            {versions.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </Select>
-          <Button
-            size="sm"
-            disabled={busy || !version}
-            onClick={() => operation("PATCH", { action: "update", core, distribution, version })}
-          >
-            {t("installVersion")}
-          </Button>
-        </>
+        <ManagedReleaseSelection
+          core={core}
+          busy={busy}
+          operation={operation}
+          distribution={distribution}
+          versions={versions}
+          version={version}
+          setVersion={setVersion}
+        />
       )}
+      <CustomBinaryControls core={core} busy={busy} operation={operation} />
+    </div>
+  );
+}
+
+function ManagedReleaseSelection({
+  core,
+  busy,
+  operation,
+  distribution,
+  versions,
+  version,
+  setVersion,
+}: {
+  core: Core;
+  busy: boolean;
+  operation: ManagedRequest;
+  distribution: string;
+  versions: string[];
+  version: string;
+  setVersion: (value: string) => void;
+}) {
+  const t = useTranslations("managedProxy");
+  return (
+    <>
+      <Select
+        label={t("version")}
+        value={version}
+        disabled={busy}
+        onChange={(event) => setVersion(event.target.value)}
+      >
+        {versions.map((item) => (
+          <option key={item} value={item}>
+            {item}
+          </option>
+        ))}
+      </Select>
+      <Button
+        size="sm"
+        disabled={busy || !version}
+        onClick={() => operation("PATCH", { action: "update", core, distribution, version })}
+      >
+        {t("installVersion")}
+      </Button>
+    </>
+  );
+}
+
+/** Explicit trust belongs to the current path/hash pair and resets on either edit. */
+function CustomBinaryControls({
+  core,
+  busy,
+  operation,
+}: {
+  core: Core;
+  busy: boolean;
+  operation: ManagedRequest;
+}) {
+  const t = useTranslations("managedProxy");
+  const [binaryPath, setBinaryPath] = useState("");
+  const [sha256, setSha256] = useState("");
+  const [trusted, setTrusted] = useState(false);
+  return (
+    <>
       <Input
         label={t("customPath")}
         value={binaryPath}
@@ -146,7 +219,7 @@ export default function ManagedBinaryControls({
       >
         {t("useCustom")}
       </Button>
-    </div>
+    </>
   );
 }
 

@@ -3,6 +3,7 @@ import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { sweepFixtureChildren } from "./managed-proxy-fixture-children.mjs";
 
 assert.equal(process.env.GITHUB_ACTIONS, "true", "Managed runtime verification is hosted-only");
 const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -41,69 +42,6 @@ for (const key of [
 env.SQLITE_FILE = env.OMNIROUTE_SQLITE_FILE = path.join(env.DATA_DIR, "storage.sqlite");
 
 let cleanupVerified = true;
-async function waitForExit(pid) {
-  const deadline = Date.now() + 5000;
-  while (Date.now() < deadline) {
-    try {
-      process.kill(pid, 0);
-    } catch (error) {
-      if (error.code === "ESRCH") return;
-      throw error;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-  throw new Error("Owned synthetic child did not exit after termination");
-}
-async function sweepFixtureChildren() {
-  let survivors = 0;
-  for (const name of fs.readdirSync(root).filter((file) => /^child-\d+\.json$/.test(file))) {
-    const record = JSON.parse(fs.readFileSync(path.join(root, name), "utf8"));
-    assert.ok(record.startedAt && Number.isInteger(record.pid));
-    try {
-      process.kill(record.pid, 0);
-      // Verify executable arguments before touching a potentially recycled PID.
-      const inspected =
-        process.platform === "win32"
-          ? spawnSync(
-              "pwsh",
-              [
-                "-NoProfile",
-                "-Command",
-                "$p=Get-CimInstance Win32_Process -Filter ('ProcessId=' + $env:FIXTURE_PID); if($p){ $p.CommandLine; $p.CreationDate.ToUniversalTime().ToString('o') }",
-              ],
-              {
-                env: { ...env, FIXTURE_PID: String(record.pid) },
-                encoding: "utf8",
-                timeout: 5000,
-                windowsHide: true,
-              }
-            )
-          : spawnSync("ps", ["-p", String(record.pid), "-o", "args="], {
-              encoding: "utf8",
-              timeout: 5000,
-            });
-      assert.equal(inspected.status, 0, "Cannot verify owned child survivor");
-      assert.ok(
-        inspected.stdout.includes("managedProxyChild.mjs"),
-        "PID no longer belongs to fixture"
-      );
-      if (process.platform === "win32") {
-        const created = Date.parse(inspected.stdout.trim().split(/\r?\n/).at(-1));
-        assert.ok(
-          created <= Date.parse(record.startedAt) && Date.parse(record.startedAt) - created < 30000,
-          "PID creation time does not match fixture"
-        );
-      }
-      survivors++;
-      process.kill(record.pid, "SIGKILL");
-      await waitForExit(record.pid);
-    } catch (error) {
-      if (error.code !== "ESRCH") throw error;
-    }
-  }
-  assert.equal(survivors, 0, "Owned synthetic children survived test cleanup and were terminated");
-}
-
 async function run(args, wallMs = 120000) {
   const child = spawn(process.execPath, args, {
     cwd: project,
@@ -163,7 +101,7 @@ async function run(args, wallMs = 120000) {
       }
     }
     try {
-      await sweepFixtureChildren();
+      await sweepFixtureChildren(root, env);
     } catch (error) {
       cleanupVerified = false;
       throw error;

@@ -58,6 +58,7 @@ const adapters: Record<string, string> = {
   "src/lib/db/proxies": `
     export async function getProxyById(id){return id==="missing"?null:{id,notes:
       id.startsWith("managed")?JSON.stringify({managedProxyId:id,managedCore:"singbox"}):null};}
+    export async function getProxyWhereUsed(){return {count:0,connections:[],combos:[],apiKeys:[]};}
     export async function deleteProxyById(id){return id!=="missing";}`,
   "src/lib/services/managedProxy/remove": `
     export async function removeManagedProxy(core,id,commit){
