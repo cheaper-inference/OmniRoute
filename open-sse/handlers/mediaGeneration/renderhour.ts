@@ -82,7 +82,9 @@ export function renderhourToken(credentials: unknown): string {
 export function renderhourBaseUrl(credentials: unknown, configured = RENDERHOUR_BASE_URL): string {
   const override = (credentials as RenderhourCredentials | null)?.providerSpecificData?.baseUrl;
   const base = typeof override === "string" && override.trim() ? override.trim() : configured;
-  return base.replace(/\/+$/, "");
+  let end = base.length;
+  while (end > 0 && base.charCodeAt(end - 1) === 47) end--;
+  return base.slice(0, end);
 }
 
 function firstString(...values: unknown[]): string | undefined {

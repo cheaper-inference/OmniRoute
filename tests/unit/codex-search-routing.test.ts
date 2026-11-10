@@ -2,6 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
+const BRAVE_URL = "https://api.search.brave.com/res/v1/web/search";
+const DUCKDUCKGO_URL = "https://lite.duckduckgo.com/lite/";
+
+function matchesSearchEndpoint(value: string, endpoint: string): boolean {
+  const actual = new URL(value);
+  const expected = new URL(endpoint);
+  return actual.origin === expected.origin && actual.pathname === expected.pathname;
+}
+
 process.env.API_KEY_SECRET = "codex-search-test-crc-secret";
 
 // Automatic use of the ChatGPT subscription for search is opt-in (default off).
@@ -70,8 +79,8 @@ async function stub<T>(
     const url = String(input);
     calls.push(url);
     if (url === "https://chatgpt.com/backend-api/codex/responses") return new Response(fixture);
-    if (url.includes("duckduckgo.com")) return new Response("<html></html>");
-    if (url.includes("api.search.brave.com")) {
+    if (matchesSearchEndpoint(url, DUCKDUCKGO_URL)) return new Response("<html></html>");
+    if (matchesSearchEndpoint(url, BRAVE_URL)) {
       if (options.braveFails) return new Response("upstream down", { status: 500 });
       return Response.json({ web: { results: [] } });
     }
@@ -89,7 +98,7 @@ test("without Codex credentials last-resort search still uses DuckDuckGo", async
     const response = await request();
     assert.equal(response.status, 200);
     assert.equal((await response.json()).provider, "duckduckgo-free");
-    assert.ok(calls.length > 0 && calls.every((url) => url.includes("duckduckgo.com")));
+    assert.ok(calls.length > 0 && calls.every((url) => matchesSearchEndpoint(url, DUCKDUCKGO_URL)));
   });
 });
 
@@ -99,7 +108,7 @@ test("flag off (default): a usable Codex connection is never auto-selected, Duck
     const response = await request();
     assert.equal(response.status, 200);
     assert.equal((await response.json()).provider, "duckduckgo-free");
-    assert.ok(calls.length > 0 && calls.every((url) => url.includes("duckduckgo.com")));
+    assert.ok(calls.length > 0 && calls.every((url) => matchesSearchEndpoint(url, DUCKDUCKGO_URL)));
   });
 });
 
@@ -108,7 +117,7 @@ test("flag off (default): chat/MCP execution mirror never auto-selects Codex", a
   await stub(async (calls) => {
     const result = await executeWebSearch({ query: `mirror codex flag off ${sequence++}` });
     assert.equal(result.data.provider, "duckduckgo-free");
-    assert.ok(!calls.includes("https://chatgpt.com/backend-api/codex/responses"));
+    assert.ok(!calls.some((url) => url === "https://chatgpt.com/backend-api/codex/responses"));
   });
 });
 
@@ -130,8 +139,8 @@ test("flag off (default): a failing paid provider fails over to DuckDuckGo, not 
       const response = await request();
       assert.equal(response.status, 200);
       assert.equal((await response.json()).provider, "duckduckgo-free");
-      assert.ok(calls.some((url) => url.includes("api.search.brave.com")));
-      assert.ok(!calls.includes("https://chatgpt.com/backend-api/codex/responses"));
+      assert.ok(calls.some((url) => matchesSearchEndpoint(url, BRAVE_URL)));
+      assert.ok(!calls.some((url) => url === "https://chatgpt.com/backend-api/codex/responses"));
     },
     { braveFails: true }
   );
@@ -153,8 +162,8 @@ test("flag on: a failing paid provider fails over to Codex before DuckDuckGo", a
       const response = await request();
       assert.equal(response.status, 200);
       assert.equal((await response.json()).provider, "codex-search");
-      assert.ok(calls.includes("https://chatgpt.com/backend-api/codex/responses"));
-      assert.ok(!calls.some((url) => url.includes("duckduckgo.com")));
+      assert.ok(calls.some((url) => url === "https://chatgpt.com/backend-api/codex/responses"));
+      assert.ok(!calls.some((url) => matchesSearchEndpoint(url, DUCKDUCKGO_URL)));
     },
     { braveFails: true }
   );
@@ -187,7 +196,7 @@ test("connection scope excluding Codex allows DuckDuckGo only with the existing 
     const response = await request({}, key.key as string);
     assert.equal(response.status, 200);
     assert.equal((await response.json()).provider, "duckduckgo-free");
-    assert.ok(calls.every((url) => url.includes("duckduckgo.com")));
+    assert.ok(calls.every((url) => matchesSearchEndpoint(url, DUCKDUCKGO_URL)));
   });
   const deniedKey = await apiKeys.createApiKey(
     "codex-search-no-keyless",
@@ -237,7 +246,7 @@ test("flag on: blocked codex-search is still not auto-selected", async () => {
       const response = await request();
       assert.equal(response.status, 200);
       assert.equal((await response.json()).provider, "duckduckgo-free");
-      assert.ok(calls.every((url) => url.includes("duckduckgo.com")));
+      assert.ok(calls.every((url) => matchesSearchEndpoint(url, DUCKDUCKGO_URL)));
     });
   } finally {
     await settings.updateSettings({ blockedProviders: [] });
@@ -260,7 +269,7 @@ test("flag on: configured paid search remains primary even with Codex available"
       const response = await request();
       assert.equal(response.status, 200);
       assert.equal((await response.json()).provider, "brave-search");
-      assert.ok(calls.every((url) => url.includes("api.search.brave.com")));
+      assert.ok(calls.every((url) => matchesSearchEndpoint(url, BRAVE_URL)));
     });
   } finally {
     await providers.deleteProviderConnection(connection.id as string);
@@ -294,5 +303,20 @@ for (const [budget, expected] of [
       JSON.stringify(delays)
     );
     t.mock.restoreAll();
+  });
+}
+
+for (const [reason, url] of [
+  ["suffix host", "https://api.search.brave.com.attacker.invalid/res/v1/web/search"],
+  ["hostname in userinfo", "https://api.search.brave.com@attacker.invalid/res/v1/web/search"],
+  ["hostname in query", "https://attacker.invalid/?next=duckduckgo.com"],
+  ["unexpected path", "https://lite.duckduckgo.com/unexpected"],
+  ["unexpected scheme", "http://api.search.brave.com/res/v1/web/search"],
+  ["unexpected port", "https://api.search.brave.com:444/res/v1/web/search"],
+] as const) {
+  test(`mock rejects lookalike URL: ${reason}`, async () => {
+    await stub(async () => {
+      await assert.rejects(fetch(url), /Unexpected mocked fetch/);
+    });
   });
 }
