@@ -4,17 +4,20 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { MockAgent, setGlobalDispatcher } from "undici";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "provider-binding-15970-"));
 Object.assign(process.env, {
   DATA_DIR: dataDir,
   OMNIROUTE_PLUGINS_DIR: path.join(dataDir, "plugins"),
   APP_LOG_TO_FILE: "false",
+  OMNIROUTE_HIDE_HEALTHCHECK_LOGS: "true",
   DISABLE_SQLITE_AUTO_BACKUP: "true",
   API_KEY_SECRET: "provider-binding-fixture-secret",
   JWT_SECRET: "provider-binding-fixture-session-secret",
 });
+const originalDispatcher = getGlobalDispatcher();
+const originalFetch = globalThis.fetch;
 const network = new MockAgent();
 network.disableNetConnect();
 setGlobalDispatcher(network);
@@ -22,10 +25,16 @@ const core = await import("../../src/lib/db/core.ts");
 const nodes = await import("../../src/lib/db/providers/nodes.ts");
 const connections = await import("../../src/lib/db/providers.ts");
 const { POST } = await import("../../src/app/api/providers/route.ts");
+const { waitForCallLogSaves, closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
+const { clearProxyLogs } = await import("../../src/lib/proxyLogger.ts");
 const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
 const fetchCalls: string[] = [];
+let probeDelayMs = 0;
 globalThis.fetch = async (input) => {
   fetchCalls.push(String(input instanceof Request ? input.url : input));
+  if (probeDelayMs > 0) {
+    await new Promise<void>((resolve) => setTimeout(resolve, probeDelayMs));
+  }
   return Response.json({ data: [], models: [] });
 };
 
@@ -34,13 +43,48 @@ test.beforeEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(dataDir, { recursive: true });
   fetchCalls.length = 0;
+  probeDelayMs = 0;
+});
+test.afterEach(async () => {
+  await waitForAutomaticProbes();
+  assert.ok(await waitForCallLogSaves(5_000), "call-log writes must settle before DB reset");
+  // Proxy logs are queued on a separate timer even when health-check logs are hidden.
+  // Discard the fixture queue and invalidate retries before deleting its database.
+  clearProxyLogs();
 });
 test.after(async () => {
-  await new Promise<void>((resolve) => setTimeout(resolve, 20));
+  await closeCallLogSaves();
+  globalThis.fetch = originalFetch;
+  setGlobalDispatcher(originalDispatcher);
   core.resetDbInstance();
   await network.close();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
+
+// POST starts testSingleConnection without awaiting it. Wait for its persisted health
+// result, not elapsed time or fetch entry, before resetting the DB and call counter.
+// Unsupported validators (Cloudflare here) skip lastTested but activate the new row.
+// afterEach also covers assertions that fail before post() finishes settling.
+async function waitForAutomaticProbes() {
+  const deadline = Date.now() + 5_000;
+  while (true) {
+    const pending = (await connections.getProviderConnections()).filter(
+      (connection) => !connection.lastTested && connection.isActive !== true
+    );
+    if (pending.length === 0) {
+      // These API-key fixtures neither refresh OAuth nor clear Antigravity state.
+      // With health-check logging hidden, the remaining continuations only enqueue
+      // proxy logs. Drain those microtasks here; afterEach clears the proxy queue.
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      return;
+    }
+    assert.ok(
+      Date.now() < deadline,
+      `Automatic credential probes did not settle: ${pending.map((row) => row.id).join(", ")}`
+    );
+    await new Promise<void>((resolve) => setTimeout(resolve, 10));
+  }
+}
 
 async function makeNode(type = "openai-compatible-chat") {
   return nodes.createProviderNode({
@@ -70,7 +114,7 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
       },
     })
   );
-  await new Promise<void>((resolve) => setTimeout(resolve, 20));
+  if (result.status === 201) await waitForAutomaticProbes();
   return result;
 }
 
@@ -195,4 +239,16 @@ test("Cloudflare preserves accountId in the documented nested location", async (
     (await connections.getProviderConnections())[0].providerSpecificData.accountId,
     "fixture-account"
   );
+});
+
+// Keep the synthetic response pending longer than the former 20 ms fixture sleep.
+test("accepted POST settles a slow automatic credential probe before fixture reuse", async () => {
+  probeDelayMs = 100;
+  await makeNode();
+  const result = await post("openai-compatible-chat");
+  assert.equal(result.status, 201);
+  const [connection] = await connections.getProviderConnections();
+  assert.ok(connection.lastTested, "the automatic probe must persist its result before reuse");
+  assert.equal(connection.testStatus, "active");
+  assert.ok(fetchCalls.length > 0, "the real automatic validation path must run");
 });
