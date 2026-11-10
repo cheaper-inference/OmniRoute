@@ -30,13 +30,7 @@ Wanneer osv of Trivy rood wordt vanwege een nieuw bekendgemaakte CVE, is de oplo
 
 1. **Werk de getroffen afhankelijkheid bij** (voorkeur) — upgrade naar de gepatchte versie via `package.json`
    `overrides` (transitieve afhankelijkheden) of bouw de image opnieuw op basis van een gepatchte basisimage.
-2. **Als er geen upstream-fix beschikbaar is:**
-   - **osv:** stel de baseline voor `metrics.vulnCount` opnieuw in `config/quality/quality-baseline.json` vast
-     (`npm run quality:ratchet -- --update` dekt afzonderlijke gates niet — bewerk de waarde
-     handmatig, `direction:down`) met een onderbouwing en een tracking-issue.
-   - **Trivy:** voeg een vermelding toe aan `.trivyignore` (één CVE-ID per regel) met een onderbouwende
-     opmerking en een tracking-issue. `ignore-unfixed: true` dekt CVE's zonder
-     patches al automatisch af.
+2. **Als er geen herstel beschikbaar is:** bewaar de gemeten bevinding en volg de getroffen afhankelijkheid of het imago. Verhoog de kwetsbaarheidsbasis niet om een falende kandidaat te laten slagen. Trivy's `ignore-unfixed: true` sluit kwetsbaarheden in afbeeldingen al uit zonder een upstream-patch. Voor elke uitzondering is een beoordeelde kwetsbaarheid ID, het exacte pakketpad, de vervaldatum en het trackingprobleem in het beleid vereist; het is geen automatisch gevolg van een mislukte scan.
 
 Verplichte OSV-uitvoeringen (`check:vuln-ratchet -- --ratchet`) sluiten bij fouten en mislukken met
 `INCOMPLETE` en exitcode 2 wanneer de scanner, het rapport of de baseline niet kan worden gevalideerd.
@@ -44,6 +38,12 @@ Een gemeten regressie resulteert in exitcode 1. Een adviserende uitvoering kan n
 exitcode 0, maar dat toont niet aan dat de afhankelijkheden de scan hebben doorstaan. De blokkerende
 Trivy-stap vereist eveneens een geslaagde meting: niet-beschikbare tools, mislukte jobs
 en ontbrekend bewijs voor de image kunnen niet certificeren dat een image schoon is.
+
+## Beleid voor het scannen van afbeeldingen
+
+De huidige `.trivyignore.yaml` bevat geen kwetsbaarheidsuitzonderingen. `npm run check:trivy-ignore-policy` valideert het gestructureerde beleid in lokale scanprofielen, CI en Kwaliteit. Onbekende IDs, bredere paden, dubbele vermeldingen en verlopen uitzonderingen worden afgewezen; de oude `.trivyignore` is geen invoer voor de gemigreerde scans.
+
+Docker checkt de beleidstools van `github.workflow_sha` en het afbeeldingsbronbeleid uit met dezelfde bronkiezer als de build. De beleidsselector wijst incompatibele bereiken af en bereidt één bestand voor beide Trivy-scans voor. Een historische bron zonder gestructureerd beleid kent geen uitzonderingen. Beide scans pin Trivy `v0.70.0`. Beleidsvalidatie bewijst configuratieconsistentie; de afbeelding heeft nog steeds een succesvolle scan nodig.
 
 ## Risico van uitgefaseerde afhankelijkheid
 

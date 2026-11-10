@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/shared/components";
+
 import { useTranslations } from "next-intl";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 
@@ -19,19 +21,18 @@ export default function ConnectionIdChip({ connectionId }: { connectionId?: stri
   const isCopied = copied === connectionId;
   const title = t("copyConnectionId", { header: CONNECTION_PIN_HEADER });
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
+      icon={isCopied ? "check" : "content_copy"}
       data-testid="connection-id-chip"
       onClick={() => void copy(connectionId, connectionId)}
       title={title}
       aria-label={title}
-      className="inline-flex items-center gap-0.5 rounded font-mono text-[11px] text-text-muted transition-colors hover:text-primary"
+      className="h-auto min-h-0 gap-0.5 rounded px-1 font-mono text-[11px] text-text-muted"
     >
-      <span className="material-symbols-outlined text-xs" aria-hidden="true">
-        {isCopied ? "check" : "content_copy"}
-      </span>
       {isCopied ? t("connectionIdCopied") : `${connectionId.slice(0, 8)}…`}
-    </button>
+    </Button>
   );
 }
 

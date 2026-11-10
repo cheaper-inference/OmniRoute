@@ -38,13 +38,7 @@ Gdy osv lub Trivy zgłasza błąd z powodu nowo ujawnionej luki CVE, należy:
 1. **Zaktualizować dotkniętą zależność** (preferowane) — przejść na poprawioną wersję za pomocą
    `overrides` w `package.json` (zależności przechodnie) lub ponownie zbudować obraz na poprawionej
    wersji obrazu bazowego.
-2. **Jeśli poprawka nie jest dostępna w projekcie źródłowym:**
-   - **osv:** ponownie ustawić wartość bazową `metrics.vulnCount` w `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` nie obejmuje dedykowanych bramek — edytować wartość
-     ręcznie, `direction:down`), dodając uzasadnienie i zgłoszenie śledzące.
-   - **Trivy:** dodać wpis do `.trivyignore` (jeden identyfikator CVE w każdym wierszu) wraz z komentarzem
-     zawierającym uzasadnienie i zgłoszeniem śledzącym. `ignore-unfixed: true` już automatycznie
-     uwzględnia luki CVE bez dostępnych poprawek.
+2. **Jeśli rozwiązanie zaradcze jest niedostępne:** zachowaj zmierzony wynik i śledź zależność lub obraz, którego dotyczy problem. Nie podnoś poziomu bazowego podatności, aby kandydat, który nie zdał egzaminu, przeszedł pomyślnie. `ignore-unfixed: true` firmy Trivy wyklucza już luki w zabezpieczeniach obrazu bez wcześniejszej łatki. Każdy wyjątek wymaga sprawdzenia podatności ID, dokładnej ścieżki pakietu, wygaśnięcia i śledzenia w polityce; nie jest to automatyczna konsekwencja nieudanego skanowania.
 
 Wymagane wykonania OSV (`check:vuln-ratchet -- --ratchet`) kończą się bezpiecznym niepowodzeniem ze
 statusem `INCOMPLETE` i kodem wyjścia 2, gdy nie można zweryfikować skanera, raportu lub wartości bazowej.
@@ -52,6 +46,12 @@ Zmierzona regresja powoduje zakończenie z kodem 1. Wykonanie doradcze może nad
 z kodem wyjścia 0, co nie potwierdza, że zależności pomyślnie przeszły skanowanie. Blokujący
 krok Trivy również wymaga pomyślnego wykonania pomiaru: niedostępne narzędzia, nieudane zadania
 i brak dowodów dotyczących obrazu nie pozwalają poświadczyć, że obraz jest wolny od luk.
+
+## Polityka skanowania obrazu
+
+Obecna `.trivyignore.yaml` nie zawiera żadnych wyjątków podatności na zagrożenia. `npm run check:trivy-ignore-policy` sprawdza ustrukturyzowaną politykę w lokalnych profilach skanowania, CI i jakości. Nieznane IDs, szersze ścieżki, zduplikowane wpisy i wygasłe wyjątki są odrzucane; starsze `.trivyignore` nie stanowi danych wejściowych dla migrowanych skanów.
+
+Docker sprawdza narzędzia zasad z `github.workflow_sha` i zasady źródła obrazu przy użyciu tego samego selektora źródła, co kompilacja. Selektor zasad odrzuca niezgodne zakresy i przygotowuje jeden plik dla obu skanowań Trivy. Źródło historyczne nieposiadające ustrukturyzowanej polityki nie podlega żadnym wyjątkom. Obydwa skany przypinają Trivy `v0.70.0`. Walidacja polityki potwierdza spójność konfiguracji; obraz nadal wymaga pomyślnego skanowania.
 
 ## Ryzyko związane z wycofaną zależnością
 

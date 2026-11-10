@@ -66,6 +66,19 @@ De `electron/`-workspace biedt ook:
 - `npm run build:mac-x64` / `build:mac-arm64` — macOS-builds voor één architectuur
 - `npm run pack` — alleen een directorybuild voor lokaal testen (geen installatieprogramma)
 
+## Optionele runtimepakketten
+
+Desktopbuilds kunnen naast hun installatieprogramma's optionele runtimearchieven publiceren. De geïnstalleerde serverinhoud bevat `optional-packs.index.json` (onder `resources/app` op Windows en Linux). Lees voor de vermelding `browser-runtime` de waarde `packs[].tarball` en download **precies die bestandsnaam uit dezelfde release**. Archiefnamen bevatten een SHA-256-digest; verschillende builds kunnen verschillende archieven vereisen. Laat de gedownloade bestandsnaam ongewijzigd.
+
+Kopieer de index van de geïnstalleerde app en het geselecteerde archief naar één map en gebruik vervolgens de CLI uit dezelfde release:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` toont de installatie- en verificatiestatus, niet de archiefnaam. De meegeleverde index selecteert het archief. De installatie controleert de archiefcontrolesom vóór het uitpakken en de pakketcontrolesommen vóór het vervangen van een geïnstalleerd pakket. Ze leest lokale bestanden; ontbrekende archieven worden niet gedownload. Herstart de toepassing na installatie. Als de release geen passend bestand bevat, is het optionele pakket niet beschikbaar via de bestanden van die release.
+
 ## Mapindeling
 
 ```

@@ -5,8 +5,8 @@
 ---
 
 > **Ụdị:** v3.8.44
-> **Emelitere ikpeazụ:** 2026-09-16
-> **Ndị e zubere maka ha:** Ndị injinia na-agbakwunye, na-elekọta, ma ọ bụ na-achọ ma na-edozi nsogbu n’ọrụ ndị agbakwunyere n’ime sistemụ (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Emelitere ikpeazụ:** 2026-10-28
+> **Ndị e dere ya maka ha:** Ndị injinia na-agbakwunye, na-elekọta, ma ọ bụ na-achọpụta ma na-edozi njehie n’ọrụ agbakwunyere (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Ọrụ ndị agbakwunyere n’ime sistemụ bụ ngwa process sidecar a rụnyere na kọmputa ahụ nke OmniRoute na-arụnye, na-elekọta, ma na-eme ka ha bụrụ ebumnuche routing zuru oke. N’adịghị ka ndị na-eweta ọrụ mpụga (ndị a na-enweta site n’ịntanetị
 site na API keys), ọrụ ndị agbakwunyere n’ime sistemụ na-arụ ọrụ n’otu kọmputa ahụ OmniRoute nọ na ya ma na-ekwurịta okwu site na loopback.
@@ -30,7 +30,7 @@ site na API keys), ọrụ ndị agbakwunyere n’ime sistemụ na-arụ ọrụ
 
 ### Gịnị mere e ji eji ọrụ ndị agbakwunyere?
 
-E tinyere ọrụ asaa:
+A gbakwunyere ọrụ asatọ:
 
 | Ọrụ             | Ngwugwu npm                                        | Ọdụ ụgbọ ndabara | Ebumnuche                                                                                                                                                                                                                                                                                                                                                             |
 | --------------- | -------------------------------------------------- | :--------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -41,8 +41,9 @@ E tinyere ọrụ asaa:
 | **Dario**       | `@askalf/dario`                                    |       3456       | Proxy ndenye aha Claude — nhọrọ ọzọ/usoro ndabere nye CLIProxyAPI maka okporo ụzọ yiri nke Claude-Code; igodo e tinyere na-aghọ `DARIO_ADMIN_TOKEN`, nke na-echekwa control plane OAuth ya dị na `/admin/*`                                                                                                                                                           |
 | **open-wa**     | `@open-wa/wa-automate`                             |       8323       | Akpaaka WhatsApp Web (Chromium na-enweghị UI site na Puppeteer). Naanị usoro ndụ ya ka a na-achịkwa — ọ bụghị ebe a na-eziga arịrịọ.                                                                                                                                                                                                                                  |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                               |      20135       | Sidecar mkpakọ prompt — ezigbo ụdịdị ONNX LLMLingua-2 (mbufe JS/TS nke algọridim Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` na-eziga `/compress` site na HTTP gaa na ya, ma na-alaghachi na backend worker-thread nke dị n'ime usoro ahụ mgbe sidecar anaghị arụ ọrụ. Naanị usoro ndụ ya ka a na-achịkwa — ọ bụghị ebe a na-eziga arịrịọ. |
+| **sing-box**    | Faịlụ binary nke ntọhapụ GitHub (`singbox`)        |      20140       | Usoro enyemaka TPROXY na-akwado ijide okporo ụzọ site na proxy doro anya nke `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Ihe nrụnye na-ebudata ntọhapụ a kpọchiri nsụgharị ya ma nyochaa checksum ya. A na-elekọta naanị usoro ndụ ya: ọ bụghị ebe routing na-eziga arịrịọ, ọ naghịkwa eme proxy maka LLM.                                                          |
 
-Ha asaa niile na-agbaso otu usoro nlekọta a:
+Ha asatọ niile na-agbaso otu usoro nlekọta:
 
 - OmniRoute na-etinye ha n'okpuru `DATA_DIR/services/{name}/` (e kewapụrụ ha na `package.json` nke OmniRoute n'onwe ya)
 - OmniRoute na-amalite ma na-enyocha ha dịka child processes
@@ -577,7 +578,27 @@ na-enweghị mgbanwe) na-alaghachi na backend worker-thread dị n’ime usoro (
 
 ---
 
-### 4.8 Proxy ntụgharị (ntinye dashboard 9Router)
+### 4.8 Endpoint sing-box (ụzọ 8)
+
+sing-box nwere otu nhazi endpoint dị ka Mux: enweghị ụzọ `rotate-key`, enweghịkwa itinye igodo API (`needsApiKey: false` n’ime `bootstrap.ts`). A na-elekọta naanị usoro ndụ ya; ọ dịghị mgbe ọ bụ onye na-enye routing ma ọ bụ LLM. `install()` na-ebudata binary ntọhapụ GitHub sitere n’aka ndị na-elekọta sing-box (`SagerNet/sing-box`) maka nsụgharị a kpọchiri (`SINGBOX_PINNED_VERSION` n’ime `src/lib/services/installers/singbox.ts`). Tupu e dee ya na disk, ọ na-atụnyere SHA256 ya na checksum e tinyere n’otu faịlụ ahụ. A na-ajụ arịrịọ maka nsụgharị ọ bụla ọzọ.
+
+| Usoro  | Ụzọ                                          | Nkọwa                                                                                             |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Budata ma nyochaa ntọhapụ sing-box a kpọchiri                                                     |
+| `POST` | `/api/services/singbox/start`                | Malite sing-box (`sing-box run -c config.json`)                                                   |
+| `POST` | `/api/services/singbox/stop`                 | Kwụsị sing-box                                                                                    |
+| `POST` | `/api/services/singbox/restart`              | Malite sing-box ọzọ                                                                               |
+| `POST` | `/api/services/singbox/update`               | Nyochaa ọzọ ma ọ bụ wụnyeghachi ntọhapụ a kpọchiri                                                |
+| `GET`  | `/api/services/singbox/status`               | Ọnọdụ ọrụ ugbu a na ọnọdụ dị na DB                                                                |
+| `POST` | `/api/services/singbox/auto-start`           | Gbanye ma ọ bụ gbanyụọ ịmalite na-akpaghị aka                                                     |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Gbanye ma ọ bụ gbanyụọ ịmaliteghachi na-akpaghị aka maka usoro dịbu adị nke e weghaara nlekọta ya |
+| `GET`  | `/api/services/singbox/logs`                 | Soro ndekọ ọhụrụ site na SSE, n’ụzọ na-agbanwe agbanwe a na-ekekọrịta `[name]/logs`               |
+
+**Njikọ TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) na-ede `config.json` ma malite onye nlekọta tupu `applyTproxy()` etinye iwu firewall TPROXY. Ọ bụrụ na onye nlekọta adịghị ma ọ bụ na ọ naghị erute ọnọdụ `running`, a na-edekọzi ya n’ogo njehie kama ileghara ọdịda ahụ anya nwayọọ. Nke a na-eme ka onye na-ahụ maka ọrụ mata na e tinyela iwu TPROXY n’enweghị listener na-arụ ọrụ n’azụ ha.
+
+---
+
+### 4.9 Proxy ntụgharị (ntinye dashboard 9Router)
 
 Dashboard ahụ na-etinye UI webụ 9Router n’ime iframe site na proxy ntụgharị dị n’ime
 na:

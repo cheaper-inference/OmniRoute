@@ -11,6 +11,9 @@
 import { useState, useEffect } from "react";
 import { useRef } from "react";
 import { useTranslations } from "next-intl";
+import Button from "./Button";
+import Icon from "./Icon";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 
 export default function MaintenanceBanner() {
   const [show, setShow] = useState(false);
@@ -56,32 +59,32 @@ export default function MaintenanceBanner() {
       }
     };
 
-    // Run immediately on mount, then every 10 seconds
-    checkHealth();
-    const interval = setInterval(checkHealth, 10000);
-    return () => clearInterval(interval);
+    // Run on mount, then every 10 seconds while the tab is visible
+    return startVisiblePolling(checkHealth, 10000);
   }, [t]);
 
   if (!show) return null;
 
   return (
-    <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex items-center justify-between gap-3 animate-in slide-in-from-top">
+    <div
+      role="status"
+      className="bg-warning-bg border-b border-warning/30 px-4 py-2.5 flex items-center justify-between gap-3 animate-in slide-in-from-top"
+    >
       <div className="flex items-center gap-2.5">
-        <span className="material-symbols-outlined text-amber-500 text-[18px] animate-pulse">
-          warning
-        </span>
-        <span className="text-sm text-amber-200">{message}</span>
+        <Icon name="warning" size={18} className="text-warning animate-pulse" />
+        <span className="text-sm text-text-main">{message}</span>
       </div>
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => {
           dismissedUntilRecoveryRef.current = true;
           setShow(false);
         }}
-        className="p-1 rounded hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
         aria-label={t("close")}
       >
-        <span className="material-symbols-outlined text-[16px]">close</span>
-      </button>
+        <Icon name="close" size={16} />
+      </Button>
     </div>
   );
 }

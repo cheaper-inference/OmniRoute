@@ -4,11 +4,13 @@
 
 ---
 
-OmniRoute மூன்று தனித்துவமான, ஆனால் ஒன்றுக்கொன்று தொடர்புடைய மீள்திறன் வழிமுறைகளைக் கொண்டுள்ளது. ஒவ்வொன்றுக்கும் வெவ்வேறு செயல்பரப்பும் நோக்கமும் உள்ளன. வழித்தட நடத்தையைப் பிழைத்திருத்தும்போது அவற்றைத் தனித்தனியாகக் கருதவும்.
+OmniRoute மூன்று வேறுபட்ட ஆனால் தொடர்புடைய பின்னடைவு வழிமுறைகளைக் கொண்டுள்ளது. ஒவ்வொன்றும் வெவ்வேறு நோக்கமும் நோக்கமும் கொண்டது. ரூட்டிங் நடத்தை பிழைத்திருத்தம் செய்யும் போது அவற்றை தனித்தனியாக வைத்திருங்கள்.
 
-![3-அடுக்கு மீள்திறன் மாதிரி](../diagrams/exported/resilience-3layers.svg)
+![3-layer resilience model](../diagrams/exported/resilience-3layers.svg)
 
-> மூலம்: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+> ஆதாரம்: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+
+> **மீள்தன்மை நிலைமாற்றத்திற்கான Env-vs-டாஷ்போர்டு முன்னுரிமை.** — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — க்கு மட்டுமே _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) ஐ மட்டுமே வழங்கும் தேர்வு-இன் மீள்தன்மை சூழலில் இருந்து விதைக்கப்படுகிறது. ஒரு பூலியன் `resilienceSettings` (டாஷ்போர்டு →** அமைப்புகள் → மீள்தன்மை** / `PATCH /api/resilience`, `key_value` இல் சேமிக்கப்பட்டது ) env மதிப்பை வெல்லும்: இயல்பாக்கம் (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) சேமிக்கப்பட்ட பூலியன் இருக்கும் போதெல்லாம் வைத்திருக்கும். டாஷ்போர்டு ஏற்கனவே `false` சேமித்து வைத்திருக்கும் ஒரு வரிசைப்படுத்தலில், அத்தகைய env var ஐ `true` ஆக அமைப்பதால், — எதையும் மாற்றாது** அமைப்புகள் → மீள்தன்மை** (அல்லது சேமிக்கப்பட்ட புலத்தை அழிக்கவும்) அதற்கு பதிலாக.
 
 ## 1. வழங்குநர் சுற்று முறிப்பான்
 
@@ -67,182 +69,220 @@ OmniRoute மூன்று தனித்துவமான, ஆனால் 
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 பின்னடைவு பாதுகாப்புச் சோதனை: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. இணைப்பு குளிர்வு
+## 2. இணைப்பு குளிர்விப்பு
 
-**வரம்பு:** ஒற்றை வழங்குநர் இணைப்பு/கணக்கு/சாவி.
+**வாய்ப்பு:** ஒற்றை provider இணைப்பு/கணக்கு/சாவி.
 
-**நோக்கம்:** ஒரு மோசமான சாவியைத் தவிர்த்து, அதே வழங்குநருக்கான மற்ற இணைப்புகள் சேவை செய்வதைத் தொடர அனுமதிக்கும்.
+**நோக்கம்:** அதே provider-க்கான பிற இணைப்புகள் தொடர்ந்து சேவை வழங்கும் நிலையில், செயலிழந்த ஒரு சாவியைத் தவிர்ப்பது.
 
 **செயலாக்கம்:**
 
-- கிடைக்காததாகக் குறி: `src/sse/services/auth.ts::markAccountUnavailable()`
-- தேர்வு: அதே கோப்பில் `getProviderCredentials*`
-- குளிர்வு கணக்கீடு: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- கிடைக்கவில்லை எனக் குறிக்க: `src/sse/services/auth.ts::markAccountUnavailable()`
+- தேர்வு: அதே கோப்பில் உள்ள `getProviderCredentials*`
+- குளிர்விப்பு கணக்கீடு: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - அமைப்புகள்: `src/lib/resilience/settings.ts`
 
-**ஒரு இணைப்புக்கான புலங்கள்:**
+**ஒவ்வொரு இணைப்பிற்குமான புலங்கள்:**
 
-- `rateLimitedUntil` — குளிர்வு காலாவதியாகும் வரையிலான நேர முத்திரை
+- `rateLimitedUntil` — குளிர்விப்பு முடிவடையும் வரையிலான நேரமுத்திரை
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — அடுக்குக்குறி பின்னடைவு எண்ணி
+- `backoffLevel` — அதிவேக பின்வாங்கல் எண்ணிக்கை
 
-**இயல்புநிலை குளிர்வுகள்:**
+**இயல்புநிலை குளிர்விப்பு காலங்கள்:**
 
 - OAuth அடிப்படை: 5s
 - API-key அடிப்படை: 3s
-- API-key 429: மேல்நிலை `Retry-After`/மீட்டமைப்பு தலைப்புகள்/பாகுபடுத்தக்கூடிய மீட்டமைப்பு உரையை விரும்புகிறது
-- பின்னடைவு: `baseCooldownMs * 2 ** failureIndex`
+- API-key 429: upstream `Retry-After`/reset தலைப்புகள்/பகுக்கக்கூடிய reset உரைக்கு முன்னுரிமை அளிக்கிறது
+- பின்வாங்கல்: `baseCooldownMs * 2 ** failureIndex`
 
-**எதிர்-இடி-மந்தை காப்பு:** ஒพร้อม நிகழும் தோல்விகள் குளிர்வை அதிகமாக நீட்டுவதையோ `backoffLevel` ஐ இரட்டை அதிகரிப்பதையோ தடுக்கிறது.
+**Provider-க்கு தனிப்பட்ட மீண்டும் முயற்சி தாமதம்.** Provider விவரப் பக்கத்தில் **Retry delay** தேர்வு உள்ளது (Auto,
+15s முதல் 1h வரை). இது `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+(1–21600, `PATCH /api/resilience` வழியாக) சேமிக்கிறது. Rate-limit பிழையில் upstream மீண்டும் முயற்சி
+குறிப்பு எதுவும் இல்லாதபோது, அந்த மதிப்பு provider-க்கான அளவிடப்பட்ட பின்வாங்கலை மாற்றி,
+`backoffLevel`-ஐ 0 ஆக மீட்டமைக்கிறது (`open-sse/services/rotationConfig.ts::overrideFor`). Rate-limited
+பிழைக்கான முன்னுரிமை வரிசை, அதிகமானதிலிருந்து குறைவானது வரை: upstream மீண்டும் முயற்சி குறிப்பு,
+அதன் பின் ஒவ்வொரு இணைப்பிற்குமான `providerSpecificData.rotationOverrides.rateLimitResetSeconds`,
+அதன் பின் provider-க்கான மீண்டும் முயற்சி தாமதம், அதன் பின் env
+`OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, இறுதியாக அளவிடப்பட்ட பின்வாங்கல். Auto புலத்தை
+நீக்குகிறது. இது rate-limit காரணத்தை மட்டுமே பாதிக்கும்; terminal நிலைகளை ஒருபோதும் பாதிக்காது.
 
-**ஒพร้อม-வரம்பு 429கள் பின்னடைவு ஏணியில் ஏறாது.** ஒரு `429` இன் உடல் ஒரு ஒพร้อม வரம்பைத் தெரிவிக்கும்போது ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) கணக்கு ஆரோக்கியமாக உள்ளது ஆனால் பிஸியாக உள்ளது என்பதை அர்த்தப்படுத்துகிறது. `checkFallbackError()` காரணம் `concurrency_limited` ஐத் திருப்பித் தருகிறது: இப்போது அடுத்த இணைப்புக்கு மாற்றவும், இதை நிலையான `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) அல்லது மேல்நிலை மீண்டும்-முயற்சி குறிப்புக்கு குளிர்விக்கவும், `backoffLevel` ஐ மாறாமல் வைத்திருக்கவும், மேலும் `skipProviderBreaker` ஐ அமைக்கவும். வெளிப்படையான ஒதுக்கீட்டு உடல் இன்னும் வெல்லும், எனவே ஒதுக்கீட்டு முறையமைப்புடன் பொருந்தும் உடலும் ஒதுக்கீட்டு தீர்ப்பாகவே இருக்கும். கண்டறிதல்: `src/shared/utils/classify429.ts` இல் `looksLikeConcurrencyLimit()`; தீர்ப்பு: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (பிரேக்கரின் `FailureKind`) மாறாமல் உள்ளது மற்றும் இந்த உடல்களுக்கு இன்னும் `rate_limit` ஐப் படிக்கிறது.
+**Anti-thundering-herd பாதுகாப்பு:** ஒரே நேரத்தில் ஏற்படும் தோல்விகள் குளிர்விப்பு காலத்தை
+அளவுக்கு மீறி நீட்டிப்பதையும் `backoffLevel`-ஐ இருமுறை அதிகரிப்பதையும் தடுக்கிறது.
 
-**ஸ்ட்ரீம் உள்ளடக்க நிறுத்தங்கள் கணக்கைக் குளிர்விக்காது.** உள்ளடக்க-நிறுத்த காவலன் (`open-sse/utils/streamHandler.ts`) சரியான நேரத்தில் மாதிரி வெளியீட்டை அனுப்பாத ஸ்ட்ரீமைக் கைவிடும்போது, `markAccountUnavailable()` பிழையை இணைப்பில் பதிவு செய்கிறது ஆனால் குளிர்வை அமைக்கவில்லை: நிறுத்தம் அந்தக் கோரிக்கைக்கே சொந்தமானது, பெரும்பாலும் இன்னும் வெளியீடு இல்லாத நீண்ட பகுத்தறிவு சுற்று. இயக்குபவர்கள் `resilienceSettings.streamStallCooldown.enabled` (இயல்புநிலை `false`) மூலம் மீண்டும் தேர்வு செய்யலாம்.
+**Concurrency-limit 429-கள் பின்வாங்கல் படிநிலையை அதிகரிக்காது.** அதன் body concurrency limit-ஐ
+("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`) தெரிவிக்கும் `429`, கணக்கு ஆரோக்கியமாக இருந்தாலும் தற்போது அதிகப்
+பணிச்சுமையில் இருப்பதைக் குறிக்கிறது. `checkFallbackError()` `concurrency_limited` காரணத்தைத்
+திருப்பி வழங்குகிறது: அடுத்த இணைப்புக்கு உடனடியாக fail over செய்து, இதை நிலையான
+`CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) அல்லது upstream மீண்டும் முயற்சி குறிப்புக்கான காலத்திற்கு
+குளிர்விக்கிறது, `backoffLevel`-ஐ மாற்றாமல் வைத்திருந்து, `skipProviderBreaker`-ஐ அமைக்கிறது.
+வெளிப்படையான quota body-க்கே முன்னுரிமை உண்டு; ஆகவே quota pattern-க்கும் பொருந்தும் body
+quota verdict ஆகவே இருக்கும். கண்டறிதல்:
+`src/shared/utils/classify429.ts`-ல் உள்ள `looksLikeConcurrencyLimit()`; verdict:
+`open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (breaker-இன்
+`FailureKind`) மாற்றமின்றி இருந்து, இத்தகைய body-களுக்கு `rate_limit`-ஐத் தொடர்ந்து படிக்கிறது.
 
-**பகுத்தறிவு சட்டகங்கள் உள்ளடக்க-நிறுத்த பட்ஜெட்டை மீண்டும் தொடங்குகின்றன.** ஒரு பகுத்தறிவு மாதிரி அதன் முதல் தெரியும் டோக்கனுக்கு முன் நிமிடங்கள் சிந்திக்க முடியும்: Claude அதன் சிந்தனை உரை காலியாக இருக்கக்கூடிய `thinking_delta` சட்டகங்களை ஸ்ட்ரீம் செய்கிறது, மேலும் Responses API ஒரு பகுத்தறிவு உருப்படியை அடுத்தடுத்து ஸ்ட்ரீம் செய்கிறது. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) இந்த சட்டகங்களை அங்கீகரிக்கிறது, மேலும் காவலன் சுற்றை ரத்து செய்வதற்குப் பதிலாக ஒவ்வொன்றிலும் அதன் பட்ஜெட்டை மீண்டும் தொடங்குகிறது. அவை இன்னும் மாதிரி வெளியீடு அல்ல, எனவே பகுத்தறிவுடன் மட்டுமே முடியும் சுற்று இன்னும் காலியாக அறிவிக்கப்படுகிறது, மேலும் பகுத்தறிவை நிறுத்தி இதயத்துடிப்புகளை மட்டும் அனுப்பும் சுற்று இன்னும் காவலனைத் தூண்டுகிறது.
+**Stream content stall கணக்கை குளிர்விக்காது.** Content-stall watchdog
+(`open-sse/utils/streamHandler.ts`) காலத்திற்குள் எந்த model output-ஐயும் அனுப்பாத stream-ஐ
+கைவிடும்போது, `markAccountUnavailable()` இணைப்பில் பிழையைப் பதிவு செய்கிறது; ஆனால்
+குளிர்விப்பை அமைப்பதில்லை: stall என்பது அந்த request-க்குச் சொந்தமானது, மேலும் பெரும்பாலும்
+output இன்னும் வராத நீண்ட reasoning turn ஆகும். Operators `resilienceSettings.streamStallCooldown.enabled`
+மூலம் இதை விருப்பமாக மீண்டும் இயக்கலாம் (இயல்புநிலை `false`).
 
-வெற்று அல்லாத கையொப்பத்துடன் Kiro இன் பைனரி `reasoningContentEvent` சட்டகங்கள் இந்த பகுத்தறிவு செயல்பாட்டை செயலாக்கி மூலம் காலியான `reasoning_content` டெல்டாவாகப் பாதுகாக்கின்றன. கையொப்பம் முன்னனுப்பப்படவில்லை. மெட்டாடேட்டா, முழுமையற்ற சட்டகங்கள் மற்றும் காலியான கையொப்பங்கள் உள்ளடக்க பட்ஜெட்டை மீண்டும் தொடங்காது; சுயாதீன செயலில்-ஸ்ட்ரீம் நேரம் முடிதல் மற்றும் கிளையன்ட் ரத்து இன்னும் பொருந்தும் (`open-sse/executors/kiro/reasoning.ts`).
+**`p2c` கணக்கு தேர்வுக்கான விருப்ப latency signal.** அனுப்பப்படும் ஒவ்வொரு முயற்சியும்,
+ஒவ்வொரு இணைப்பிற்கும் (மேலும் ஒவ்வொரு இணைப்பு + model-க்கும்) அதன் time-to-first-byte மற்றும்
+விளைவை in-memory rolling window-ல் பதிவு செய்கிறது: 15 நிமிடங்களுக்குள் உள்ள கடைசி 20 மாதிரிகள்
+(`open-sse/services/connectionLatencyTracker.ts`, `src/sse/handlers/chatHelpers.ts`-ல் உள்ள
+`safeLogEvents()` மூலம் பதிவு செய்யப்படுகிறது). `resilienceSettings.p2cLatency.weight` `0`-ஐ
+விட அதிகமாக இருக்கும்போது (வரம்பு 0-20, இயல்புநிலை `0` = முடக்கப்பட்டது),
+`src/sse/services/auth.ts`-ல் உள்ள `compareP2CConnections()` இணைப்பு ஜோடியின் ஒவ்வொரு
+candidate-க்கும் அதிகபட்சம் `weight` புள்ளிகளைச் சேர்க்கிறது. இதில் பாதி, வேகமான candidate-ஐ
+ஒப்பிடும் latency விகிதத்திலிருந்து வருகிறது (இருமடங்கு மெதுவாக இருப்பது முழுப் பாதியையும்
+பெறும்); மற்ற பாதி rolling error rate-இலிருந்து வருகிறது. இரு candidates-க்கும் குறைந்தது
+3 மாதிரிகள் இருக்கும்போது மட்டுமே இந்த term பயன்படுத்தப்படும்; ஆகவே புதிய கணக்குகள்
+தண்டிக்கப்படாது. இதன் உச்சவரம்பு quota-blocked மற்றும் quota-exhausted penalties-களைவிடக்
+குறைவாகவே இருக்கும். இது தனிப்பட்ட circuit எதையும் உருவாக்காது: தோல்வியடையும் கணக்குகள்
+cooldown, lockout மற்றும் breaker அடுக்குகளால் தொடர்ந்து கையாளப்படும். இதை
+`PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }` மூலம் அமைக்கவும்.
 
-**இறுதி நிலைகள் (குளிர்வுகள் அல்ல):**
+**Reasoning frames content-stall budget-ஐ மீண்டும் தொடங்கும்.** ஒரு reasoning model தனது
+முதல் வெளிப்படையான token-ஐ அனுப்புவதற்கு முன் பல நிமிடங்கள் சிந்திக்கலாம்: Claude
+`thinking_delta` frames-ஐ அனுப்புகிறது; அவற்றின் thinking text காலியாக இருக்கலாம், மேலும்
+Responses API தொடர்ச்சியாக ஒன்றன் பின் ஒன்றாக reasoning item-களை அனுப்புகிறது.
+`isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) இந்த frames-ஐ
+அடையாளம் காண்கிறது; watchdog ஒவ்வொரு frame-லும் turn-ஐ cancel செய்வதற்குப் பதிலாக தனது
+budget-ஐ மீண்டும் தொடங்குகிறது. அவை இன்னும் model output அல்ல; ஆகவே reasoning மட்டும்
+கொண்டு ஒரு turn முடிந்தால் அது இன்னும் empty எனப் புகாரளிக்கப்படும், மேலும் reasoning
+நிறுத்தப்பட்டு heartbeats மட்டும் அனுப்பப்பட்டால் watchdog இன்னும் செயல்படும்.
 
-- `banned` — தடைசெய்யப்பட்ட-முக்கியச்சொல் / கணக்கு-தடை கண்டறிதல் மூலம் அமைக்கப்படுகிறது (பார்க்க [BAN_DETECTION](../security/BAN_DETECTION.md)), மேலும் தொடர்ச்சியான மூன்று மேல்நிலை ஒரு-கோரிக்கை மறுப்புகளால் (`request_rejected`, எ.கா. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ஒரு மறுப்பு மட்டும் இணைப்பைக் குளிர்விக்கிறது
-- `expired` (வரம்புடைய மறுமுயற்சிகளுக்குப் பிறகு இறுதி நிலைக்கு மாறுகிறது — அடுக்குக்குறி பின்னடைவுடன் `EXPIRED_RETRY_MAX = 3` — எனவே நிலையற்ற OAuth பிழைகள் கணக்கு நிரந்தரமாக செயலிழக்கப்படும் முன் தானாகக் குணமடைய முடியும்)
+Kiro-வின் binary `reasoningContentEvent` frames, non-empty signature-ஐக் கொண்டிருக்கும்போது,
+executor வழியாக இந்த reasoning செயல்பாட்டை empty `reasoning_content` delta ஆகப் பாதுகாக்கின்றன.
+Signature forward செய்யப்படாது. Metadata, incomplete frames மற்றும் empty signatures content
+budget-ஐ மீண்டும் தொடங்காது; தனித்த active-stream timeout மற்றும் client cancellation
+இன்னும் பொருந்தும் (`open-sse/executors/kiro/reasoning.ts`).
+
+**Terminal நிலைகள் (குளிர்விப்புகள் அல்ல):**
+
+- `banned` — banned-keyword / account-ban detection மூலம் அமைக்கப்படுகிறது
+  ([BAN_DETECTION](../security/BAN_DETECTION.md)-ஐப் பார்க்கவும்). Upstream per-request refusals
+  (`request_rejected`, எடுத்துக்காட்டாக Anthropic OAuth 403 "Request not allowed") இதை ஒருபோதும்
+  அமைக்காது: அவை ஒவ்வொரு இணைப்பு மற்றும் model அடிப்படையில் எண்ணப்பட்டு, அதிகரிக்கும்
+  குளிர்விப்புடன் அந்த model-ஐ rotation-இலிருந்து நீக்குகின்றன; இந்தக் குளிர்விப்பு
+  `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h)-ல் வரையறுக்கப்படுகிறது. அல்லது model அறியப்படாதபோது
+  இணைப்பைக் குளிர்விக்கின்றன — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (வரையறுக்கப்பட்ட மீண்டும் முயற்சிகளுக்குப் பிறகு terminal நிலைக்கு மாறுகிறது —
+  exponential backoff உடன் `EXPIRED_RETRY_MAX = 3`; இதனால் transient OAuth பிழைகள் கணக்கு
+  நிரந்தரமாக செயலிழக்கப்படுவதற்கு முன் தாமாகச் சரியாகிக் கொள்ள முடியும்)
 - `credits_exhausted`
 
-இவை சான்றுகள் மாறும் வரை அல்லது ஒரு இயக்குபவர் அவற்றை மீட்டமைக்கும் வரை நீடிக்கும். நிலையற்ற குளிர்வு நிலையுடன் இறுதி நிலைகளை மேலெழுத வேண்டாம்.
+இவை நற்சான்றுகள் மாற்றப்படும் வரை அல்லது ஒரு ஆபரேட்டர் அவற்றை மீட்டமைக்கும் வரை நீடிக்கும். தற்காலிக cooldown நிலையால் terminal நிலைகளை மேலெழுத வேண்டாம்.
 
-**தாமதமான மீட்பு:** `rateLimitedUntil` கடந்ததும், இணைப்பு மீண்டும் தகுதியுடையதாகிறது. வெற்றிகரமான பயன்பாட்டில், `clearAccountError()` அனைத்து பிழை புலங்களையும் அழிக்கிறது.
+**Lazy recovery:** `rateLimitedUntil` கடந்தவுடன், இணைப்பு மீண்டும் தகுதியுடையதாகிறது. வெற்றிகரமான பயன்பாட்டில், `clearAccountError()` அனைத்து பிழைப் புலங்களையும் அழிக்கிறது.
 
-### Claude OAuth பயன்பாட்டு சுவர்: குறைந்த-முன்னுரிமை பாதை + அமர்வு-வரம்பு மீட்டமைப்பு
+### Claude OAuth பயன்பாட்டு வரம்புச் சுவர்: குறைந்த முன்னுரிமை வழி + அமர்வு-வரம்பு மீட்டமைப்பு
 
-**வரம்பு:** ஒரு Claude சந்தா (OAuth) இணைப்பு. இரு அம்சங்களும் **ஒரு இணைப்புக்கு தேர்வு-செய்யக்கூடியவை** (இணைப்பைத் திருத்து → Claude பிரிவு → `providerSpecificData` இல் `lowPriorityMode` / `autoLimitReset`, இரண்டும் இயல்பாக அணைக்கப்பட்டுள்ளன) மற்றும் Claude Code இன் `/low-priority` மற்றும் `/limit-reset` கட்டளைகளைப் பிரதிபலிக்கின்றன (Claude Code 2.1.263 இலிருந்து பிடிக்கப்பட்ட wire contract).
+**நோக்கம்:** ஒரு Claude subscription (OAuth) இணைப்பு. இரண்டு அம்சங்களும் **ஒவ்வொரு
+இணைப்பிற்கும் opt-in** ஆகும் (Edit connection → Claude section → `lowPriorityMode` / `autoLimitReset` in
+`providerSpecificData`, இரண்டும் இயல்பாக முடக்கப்பட்டவை) மேலும் Claude Code-இன் `/low-priority` மற்றும் `/limit-reset`
+கட்டளைகளைப் பிரதிபலிக்கின்றன (wire contract Claude Code 2.1.263 இலிருந்து பதிவு செய்யப்பட்டது).
 
-**செயலாக்கம்:**
+**செயல்படுத்தல்:**
 
-- நில இயந்திரம் + பதில் வகைப்பாடு: `open-sse/services/claudeLowPriority.ts`
-- மீட்டமைப்பு நிலை/உரிமை கிளையண்ட்: `open-sse/services/claudeLimitReset.ts`
-- செயலாக்கி கொக்கி (தலைப்பு ஊசி + அதே-கணக்கு மறுமுயற்சி): `open-sse/executors/base.ts::execute()`
-- தேர்வு-செயல் நிலைத்தன்மை: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- நிலை இயந்திரம் + பதில் வகைப்பாடு: `open-sse/services/claudeLowPriority.ts`
+- மீட்டமைப்பு நிலை/claim கிளையண்ட்: `open-sse/services/claudeLimitReset.ts`
+- Executor hook (header injection + same-account retry): `open-sse/executors/base.ts::execute()`
+- Opt-in persistence: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**தூண்டுதல்:** 5-மணி நேர பயன்பாட்டு சுவர் — தலைப்புகள் `anthropic-ratelimit-unified-status: rejected` ஐக் கொண்டிருக்கும் ஒரு `429`, மேலும் கணக்கு தகுதியுடையதாக இருக்கும்போது, `anthropic-ratelimit-unified-slow-offer: treatment`. அந்த முதல் சுவர் 429 க்கு முன் எதுவும் அனுப்பப்படாது; ஒருங்கிணைந்த தலைப்புகள் இல்லாத வெடிப்பு 429 சாதாரண குளிர்வு பாதையைக் கடந்து செல்கிறது.
+**தூண்டுதல்:** 5-மணி நேர பயன்பாட்டு வரம்புச் சுவர் — headers-ல்
+`anthropic-ratelimit-unified-status: rejected` மற்றும், account தகுதியுடையதாக இருக்கும்போது,
+`anthropic-ratelimit-unified-slow-offer: treatment` ஆகியவற்றைக் கொண்ட `429`. அந்த முதல் wall
+`429` வருவதற்கு முன் எதுவும் அனுப்பப்படாது; unified headers இல்லாத burst `429` வழக்கமான cooldown பாதையில் செல்கிறது.
 
-**குறைந்த-முன்னுரிமை பாதை** (`lowPriorityMode`):
+**குறைந்த முன்னுரிமை வழி** (`lowPriorityMode`):
 
-- வரம்புச் சுவரில் 429 கிடைக்கும்போது, செயலாக்கி சலுகையை ஏற்று உடனடியாக **அதே**
-  கணக்கை `anthropic-usage-limit: slow` உடன் மீண்டும் முயற்சிக்கிறது; அறிவிக்கப்பட்ட
-  `anthropic-ratelimit-unified-reset` (+60s சலுகைக் காலம்) வரை பாதை செயலில் இருக்கும்,
-  மேலும் அந்தக் காலச்சாளரத்தில் உள்ள ஒவ்வொரு கோரிக்கையும் அந்தத் தலைப்பைக் கொண்டிருக்கும்.
-  இடைமறிக்கப்பட்ட 429 ஒருபோதும் `handleChatCore`-ஐ அடையாது, எனவே இணைப்பு
-  காத்திருப்புக் காலத்துக்கு அனுப்பப்படுவதும் **இல்லை**, வேறொரு இணைப்புக்கு மாற்றப்படுவதும் இல்லை.
-- பிந்தைய பதில்களில் `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed`
-  பாதையைத் தொடரச் செய்கின்றன; `slot_busy` (429) அல்லது ஒரு `529`, சேவையகத்தின்
-  `anthropic-ratelimit-unified-slow-retry-after` நேரம் வரை காத்திருந்து (இயல்புநிலை 20s,
-  5–600s வரம்புக்குள் கட்டுப்படுத்தப்பட்டு, ±30% சீரற்ற மாறுபாட்டுடன்) மீண்டும் முயற்சிக்கும்;
-  இது `anthropic-ratelimit-unified-slow-max-wait` மூலம் வரம்பிடப்படுகிறது (இயல்புநிலை
-  20 நிமிடம், 1 நிமிடம்–6 மணி வரை கட்டுப்படுத்தப்படும்) — அதைத் தாண்டினால் பாதை முடிவடைந்து,
-  10 நிமிட ஓய்வுக் காலம் அதை மீண்டும் ஏற்றுக்கொள்வதைத் தடுக்கும். கோரிக்கையின் சொந்த
-  மேல்நிலை-தொடக்கக் காலக்கெடுவில் (`resolveFetchStartTimeout`, இயல்பாக 10 நிமிடம்)
-  மீதமுள்ள நேரத்திலிருந்து 5 s விளிம்பைக் கழித்த அளவாலும் காத்திருப்பு கூடுதலாக
-  வரம்பிடப்படுகிறது: அந்த வரம்பு இல்லையெனில், இயல்புநிலை 20 நிமிட அதிகபட்சக் காத்திருப்பு
-  கோரிக்கையைவிட நீண்ட நேரம் நீடிக்கும்; காத்திருப்பின் நடுவில் உறக்கம் நிறுத்தப்பட்டு,
-  சீரான `max_wait` முடிவு + ஓய்வுக் காலத்துக்குப் பதிலாக `TimeoutError` வெளிப்படும்.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5h-காலச்சாளர மாற்றம், அல்லது
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (கட்டண மிகைப்பயன்பாடு
-  இப்போது வரம்புச் சுவரை ஈடுசெய்வதால், எந்த நிலையிலும் இது `extra_usage` ஆக முடிவடைகிறது)
-  ஆகியவை பாதையை முடிவுக்குக் கொண்டுவருகின்றன; பின்னர் பதில் வழக்கமான காத்திருப்புக் காலப்
-  பாதையில் செல்கிறது. அறிவிக்கப்பட்ட பட்ஜெட் மீட்டமைப்பு வரை (≤ 8 நாட்கள்)
-  `budget_exhausted` நினைவில் வைக்கப்படுகிறது.
-- செயலாக்கியின் சொந்த 400-ஆல் தூண்டப்படும் ஒரே-முயற்சிக்குள்ளான மறுமுயற்சிகளுக்குப்
-  (சூழல் திருத்தம், சிந்தனை/முயற்சிக் கட்டுப்பாடுகள், அளவுருத் தானியங்கு-கற்றல்) பிறகு
-  வரம்புச் சுவர் சரிபார்ப்பு இயங்குகிறது; எனவே அந்த மறுமுயற்சிகளில் ஒன்றில் மட்டும்
-  வெளிப்படும் வரம்புச் சுவர் 429 கூட காத்திருப்புக் காலப் பாதையை அடைவதற்குப் பதிலாக
-  இடைமறிக்கப்படுகிறது.
-- நிலை ஒவ்வொரு இணைப்புக்கும் நினைவகத்தில் வைக்கப்படுகிறது (மறுதொடக்கம் செய்தால் மீண்டும்
-  ஏற்றுக்கொள்ள ஒரு கூடுதல் வரம்புச் சுவர் 429 தேவைப்படும்).
+- wall `429` ஏற்பட்டவுடன் executor offer-ஐ ஏற்று, அதே account-க்கு
+  `anthropic-usage-limit: slow` உடன் உடனடியாக அதே request-ஐ மீண்டும் முயற்சிக்கிறது; அறிவிக்கப்பட்ட
+  `anthropic-ratelimit-unified-reset` (+60s grace) வரை lane செயல்பாட்டில் இருக்கும், மேலும் அந்த window-இல்
+  ஒவ்வொரு request-உம் header-ஐ ஏந்தும். இடைமறிக்கப்பட்ட `429`, `handleChatCore`-ஐ ஒருபோதும் சென்றடையாது; ஆகவே connection
+  **cooldown-க்கு மாற்றப்படாது**, மேலும் வேறு connection-க்கு சுழற்றப்படாது.
+- பின்னர் வரும் responses-ல் `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed`
+  lane-ஐத் தொடர வைக்கும்; `slot_busy` (429) அல்லது `529`, server-ன்
+  `anthropic-ratelimit-unified-slow-retry-after`-க்காகக் காத்திருந்து (இயல்புநிலை 20s, clamp 5–600s, ±30% jitter)
+  மீண்டும் முயற்சிக்கும்; இது `anthropic-ratelimit-unified-slow-max-wait`-ஆல் (இயல்புநிலை 20 min, clamp
+  1 min–6 h) வரையறுக்கப்படும் — அதைத் தாண்டியதும் lane முடிவடைந்து, 10-minute cool-off மீண்டும் ஏற்றுக்கொள்வதைத் தடுக்கும். இந்த
+  காத்திருப்பு, request-ன் சொந்த upstream-start timeout-ல் மீதமுள்ள நேரத்தாலும்
+  (`resolveFetchStartTimeout`, இயல்புநிலை 10 min) 5 s margin கழித்துப் பின்னர் கூடுதல் வரம்புக்குட்படும்:
+  அந்த வரம்பு இல்லையெனில், 20-minute இயல்புநிலை max-wait request-ஐ விட நீண்டதாகி, sleep நடுவே நிறுத்தப்படும்; இதனால் graceful
+  `max_wait` முடிவு + cool-off க்கு பதிலாக `TimeoutError` வெளிப்படும்.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5h-window rollover, அல்லது
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (paid overage இப்போது wall-ஐ
+  ஈடுசெய்வதால், எந்த status-இலும் இதனால் `extra_usage` ஆக முடிவடையும்) lane-ஐ முடிவுக்குக் கொண்டுவரும்; அதன் பிறகு
+  response வழக்கமான cooldown பாதைக்குச் செல்கிறது. அறிவிக்கப்பட்ட budget reset வரை (≤ 8 days)
+  `budget_exhausted` நினைவில் வைக்கப்படும்.
+- executor-ன் சொந்த 400-ஆல் தூண்டப்படும் intra-attempt retries (context editing, thinking/effort clamps, param auto-learn)
+  முடிந்த பிறகு wall check இயங்கும்; எனவே அந்த retries-ல் ஒன்றில் மட்டுமே wall `429` தோன்றினாலும், அது cooldown பாதைக்குச்
+  செல்வதற்குப் பதிலாக இன்னும் இடைமறிக்கப்படும்.
+- நிலை ஒவ்வொரு connection-க்கும் in-memory ஆகும் (ஒரு restart-ல் மீண்டும் ஏற்றுக்கொள்ள ஒரு கூடுதல் wall `429` தேவைப்படும்).
 
-**அமர்வு-வரம்பு மீட்டமைப்பு** (`autoLimitReset`, பாதையும் இதுவும் இயக்கப்பட்டிருக்கும்போது பாதைக்கு முன் முயற்சிக்கப்படும்):
+**Session-limit reset** (`autoLimitReset`, இரண்டும் இயக்கப்பட்டிருக்கும்போது lane-க்கு முன் முயற்சிக்கப்படும்):
 
 - `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
-  தொகுதி; `arm: "reset"` மற்றும் `available: true` ஆக இருக்கும்போது,
+  block; `arm: "reset"` மற்றும் `available: true` இருக்கும்போது,
   `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` உடன்
-  `{ "program": "juniper_tide" }` (நிறுவன UUID ஆனது
-  `providerSpecificData.organizationUUID`-இலிருந்து பெறப்படும்; துவக்கநிலை மாற்றுவழியும் உண்டு).
-- `result: reset|not_limited` → கோரிக்கை முழு வேகத்தில் மீண்டும் முயற்சிக்கப்படும்
-  (மெதுவாக்கத் தலைப்பு இல்லை). `already_used` / `not_offered` ஆகியவை
-  `next_available_at`-ஐ நினைவில் வைக்கின்றன (இயல்பாக ஒரு வாரம்); எந்தத் தோல்வியும்
-  15 நிமிட பின்வாங்கலை ஏற்படுத்தும். மீட்டமைப்பு வாரத்திற்கு ஒருமுறை மட்டுமே கிடைக்கும்,
-  மேலும் அது வாராந்திர வரம்பில் தொடர்ந்து கணக்கிடப்படும்.
+  `{ "program": "juniper_tide" }` (organization UUID `providerSpecificData.organizationUUID`-இலிருந்து,
+  bootstrap fallback).
+- `result: reset|not_limited` → request full speed-ல் மீண்டும் முயற்சிக்கப்படும் (slow header இல்லாமல்).
+  `already_used` / `not_offered`, `next_available_at`-ஐ memoise செய்கின்றன (இயல்புநிலை one week); ஏதேனும்
+  failure 15 நிமிடங்களுக்கு back off செய்யும். Reset வாரத்திற்கு ஒருமுறை மட்டுமே, மேலும் weekly limit-ல்
+  கணக்கிடப்படும்.
 
-பின்னடைவு பாதுகாப்புகள்: `tests/unit/claude-low-priority-mode.test.ts`,
+Regression guards: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
-### அமர்வுப் பிணைப்பு (#7274)
+### Session affinity (#7274)
 
-**வரம்பு:** ஒரு கிளையன்ட் அமர்வு (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` தலைப்பு), **எந்த** வழங்குநருக்கும் ஒரு இணைப்புடன் பிணைக்கப்படும்.
+**நோக்கம்:** எந்த provider-க்கும், ஒரு client session (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header)
+ஒரே connection-க்கு pin செய்யப்படுகிறது.
 
-**நோக்கம்:** பல-சுற்று முகவரை (Claude Code, aider, தனிப்பயன் முகவர்கள்) கோரிக்கைகள் முழுவதும்
-அதே கணக்கில் வைத்திருப்பதன் மூலம், கணக்குகளுக்கிடையிலான சூழல் இழப்பையும், ஒவ்வொரு கணக்கிற்குமான
-அமர்வு நிலையைக் கொண்ட வழங்குநர்களில் மீண்டும் மீண்டும் ஏற்படும் குளிர்-தொடக்க 429-களையும் குறைத்தல்.
+**நோக்கம்:** பல turn-களைக் கொண்ட agent-ஐ (Claude Code, aider, custom agents) requests முழுவதும் அதே account-ல் வைத்திருத்தல்;
+இதனால் cross-account context இழப்பு மற்றும் per-account session state கொண்ட providers-ல் மீண்டும் மீண்டும் ஏற்படும் cold-start 429s குறைகின்றன.
 
-**செயலாக்கம்:**
+**செயல்படுத்தல்:**
 
-- TTL தீர்மானம்: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- பிணைப்புத் தேர்வு/உருவாக்கம்: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- தலைப்புப் பிரித்தெடுப்பு (பொதுவானது, எந்த வழங்குநருக்கும்): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- நிலையாகச் சேமிக்கப்படும் பிணைப்பு அட்டவணை: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- அமைப்பு: `sessionAffinityTtlMs` (ms-இல் உலகளாவிய TTL, `0` முடக்கும்) — `src/lib/db/settings.ts`. Codex-க்கு மட்டுமான `codexSessionAffinityTtlMs` இலிருந்து `124_generic_session_affinity_ttl.sql` இடமாற்றம் மூலம் மறுபெயரிடப்பட்டது; முன்பு கட்டமைக்கப்பட்டிருந்த Codex TTL ஏதேனும் இருந்தால், அதை இது புதிய இயல்புநிலையாக எடுத்துச் செல்கிறது.
+- TTL resolution: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Header extraction (generic, any provider): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Persisted pin table: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Setting: `sessionAffinityTtlMs` (global TTL in ms, `0` disables) — `src/lib/db/settings.ts`. Migration
+  `124_generic_session_affinity_ttl.sql` மூலம் Codex-க்கு மட்டுமே இருந்த `codexSessionAffinityTtlMs` இலிருந்து பெயர் மாற்றப்பட்டது;
+  முன்பு கட்டமைக்கப்பட்டிருந்த Codex TTL ஏதேனும் இருந்தால், அதை புதிய இயல்புநிலையாக எடுத்துச் செல்கிறது.
 
-#7274-க்கு முன்பு, `codex` தவிர மற்ற ஒவ்வொரு வழங்குநருக்கும் `resolveSessionAffinityTtlMs()`
-உடனடியாக `0`-ஐ வழங்கி வெளியேறியது; எனவே பிணைப்பு இயங்குமுறையும் தலைப்புப் பிரித்தெடுப்பும்
-ஏற்கனவே வழங்குநர்-சார்பற்றவையாக இருந்தபோதிலும், TTL அமைப்பும் அமர்வுத் தலைப்புகளும் வேறு
-எங்கும் எந்த விளைவையும் ஏற்படுத்தவில்லை. இந்தத் திருத்தம் அந்த முன்கூட்டிய வெளியேற்றத்தை
-நீக்கியது; TTL உலகளவில் `0`-க்கு மேல் அமைக்கப்பட்டவுடன், அது இப்போது ஒவ்வொரு வழங்குநருக்கும்
-ஒரே விதமாகப் பொருந்துகிறது.
+#7274-க்கு முன்பு, `resolveSessionAffinityTtlMs()` `codex` தவிர ஒவ்வொரு provider-க்கும் `0` ஆக hard-bail செய்தது; எனவே
+pinning mechanism மற்றும் header extraction ஏற்கனவே provider-agnostic ஆக இருந்தபோதிலும், TTL setting (மற்றும் session headers)
+வேறு எங்கும் எந்த விளைவையும் ஏற்படுத்தவில்லை. அந்த early-return-ஐ fix நீக்கியது; இப்போது globally `0`-க்கு மேல் அமைக்கப்பட்டவுடன்,
+TTL ஒவ்வொரு provider-க்கும் ஒரே விதமாகப் பொருந்துகிறது.
 
-இந்த மூன்று அமர்வுப் பிணைப்புத் தலைப்புகளும் ஒருபோதும் மேல்நிலைக்கு அனுப்பப்படுவதில்லை —
-கிளையன்ட் தலைப்புகளை அப்படியே அனுப்புவதற்குப் பதிலாக, செயலாக்கிகள் தங்களின் மேல்நிலைத்
-தலைப்புகளைப் புதிதாக உருவாக்குகின்றன; எனவே இது ஓர் உள் தொடர்புறுத்தல் ID ஆக மட்டுமே இருக்கும்.
+மூன்று session-affinity headers-உம் upstream-க்கு ஒருபோதும் forward செய்யப்படாது — executors client headers-ஐ pass through செய்வதற்குப்
+பதிலாக தங்களுடைய upstream headers-ஐ புதிதாக உருவாக்குகின்றன; எனவே இது internal correlation id ஆக மட்டுமே இருக்கும்.
 
-### பிரத்யேகமாக நிர்வகிக்கப்படும் அமர்வு இணைப்புக் குத்தகைகள்
+### Exclusive managed session connection leases
 
-**வரம்பு:** செயலில் உள்ள ஒரு நிர்வகிக்கப்பட்ட HTTP கிளையன்ட்/அமர்வு, தகுதியுள்ள ஒரு
-OmniRoute இணைப்பைச் சொந்தமாகக் கொண்டிருக்கும்.
+**நோக்கம்:** ஒரு செயலில் உள்ள நிர்வகிக்கப்படும் HTTP client/session, ஒரு தகுதியுள்ள OmniRoute இணைப்பைத் தனியாகக் கொண்டிருக்கும்.
 
-**நோக்கம்:** கோரிக்கைகள் முழுவதும் கடுமையான வழிப்படுத்தல் எல்லை தேவைப்படும் கிளையன்டுகளுக்கு,
-நீடித்த பிரத்யேக இணைப்பு உரிமையை வழங்குதல். இது மென்மையான தொடர்ச்சி முன்னுரிமையாக இருக்கும்
-அமர்வுப் பிணைப்பிலிருந்து வேறுபடுகிறது: பிரத்யேகக் குத்தகை வாழ்க்கைச்சுழற்சி நிலையை SQLite-இல்
-நிலையாகச் சேமித்து, உலகளாவிய செயலில்-உள்ள உரிமையாளர் மற்றும் செயலில்-உள்ள இணைப்பு
-தனித்துவத்தைச் செயல்படுத்துகிறது; மேலும் வழங்குநருக்கு அனுப்புவதற்கு முன் காலாவதியான
-தலைமுறையை நிராகரிக்கிறது.
+**பயன்:** கோரிக்கைகள் முழுவதும் கடுமையான வழித்தட எல்லை தேவைப்படும் clients-க்கு நீடித்த பிரத்யேக இணைப்பு உரிமையை வழங்குதல். இது session affinity-யிலிருந்து மாறுபட்டது; session affinity என்பது மென்மையான தொடர்ச்சி விருப்பமாகும்: ஒரு பிரத்யேக lease, lifecycle நிலையை SQLite-ல் நிலைத்திருக்கச் செய்கிறது, உலகளாவிய செயலில் உள்ள owner மற்றும் செயலில் உள்ள connection ஆகியவற்றின் தனித்துவத்தை அமல்படுத்துகிறது, மேலும் provider dispatch-க்கு முன் காலாவதியான generation-ஐ நிராகரிக்கிறது.
 
-இந்த அம்சம் ஒவ்வொரு API விசைக்கும் தனித்தனியாகத் தேர்வுசெய்து இயக்கப்பட வேண்டும். நிர்வகிக்கப்பட்ட
-விசைக்கு `lease:exclusive` வரம்பும், வெளிப்படையாகக் குறிப்பிடப்பட்ட காலியாக இல்லாத
-`allowedConnections` பட்டியலும் இருக்க வேண்டும். எந்த HTTP கிளையன்டும் வாழ்க்கைச்சுழற்சி
-முனையத்தைப் பயன்படுத்தலாம்; கிளையன்ட் பெயர், பயனர்-முகவர், வழங்குநர், OAuth முறை அல்லது மாதிரி
-எதுவும் தேவையில்லை. குத்தகை ஒரு இணைப்பைச் சொந்தமாகக் கொண்டிருக்கும், மாதிரியை அல்ல; எனவே
-இணைப்பு வழக்கமான முறையில் தகுதியுடன் இருக்கும் வரை, மாதிரி மாற்றப்பட்டாலும் பிணைப்பு தொடரும்.
-வழக்கமான மாதிரி, ஒதுக்கீடு, ஆரோக்கியம், காத்திருப்புக் காலம் மற்றும் அனுமதிப்பட்டியல் விதிகள்
-தொடர்ந்து அதிகாரப்பூர்வமானவையாக இருக்கும்; அவை அதே தலைமுறையைத் தகுதியுள்ள மற்றொரு காலியான
-இணைப்புக்கு மாற்றக்கூடும்.
+இந்த அம்சம் ஒவ்வொரு API key-க்கும் opt-in முறையில் செயல்படும். நிர்வகிக்கப்படும் key-க்கு `lease:exclusive` scope மற்றும் காலியாக இல்லாத வெளிப்படையான `allowedConnections` பட்டியல் இருக்க வேண்டும். எந்த HTTP client-மும் lifecycle endpoint-ஐப் பயன்படுத்தலாம்; client name, user-agent, provider, OAuth method அல்லது model எதுவும் தேவையில்லை. Lease ஒரு model-ஐ அல்ல, ஒரு connection-ஐக் கொண்டிருக்கும்; ஆகவே connection வழக்கமாகத் தகுதியுடன் இருக்கும் வரை, model மாற்றம் binding-ஐத் தக்கவைக்கும். வழக்கமான model, quota, health, cooldown மற்றும் allowlist விதிகள் தொடர்ந்து அதிகாரப்பூர்வமாக இருக்கும்; மேலும் அவை அதே generation-ஐ மற்றொரு இலவசமான தகுதியுள்ள connection-க்கு மாற்றக்கூடும்.
 
-வாழ்க்கைச்சுழற்சி `POST /api/v1/session-leases` ஆகும்; இதில் JSON செயல்களான `acquire`, `renew`, மற்றும் `release` உள்ளன.
-Managed inference requests ஒளிபுகாத `X-OmniRoute-Lease-Owner` மதிப்பையும் சரியான
-`X-OmniRoute-Lease-Generation` மதிப்பையும் வழங்குகின்றன. உரிமையாளர் `vlo_` என்பதைத் தொடர்ந்து 43 base64url எழுத்துகளைப் பயன்படுத்துகிறார்; அதன்
-SHA-256 hash மட்டுமே சேமிக்கப்படுகிறது. ஒவ்வொரு இறுதி dispatch fence-உம் அங்கீகரிக்கப்பட்ட API key ID மற்றும்
-active connection ID-ஐயும் பிணைக்கிறது. Lease கட்டுப்பாட்டு headers, logs, தக்கவைக்கப்பட்ட request snapshots மற்றும்
-upstream executor headers ஆகியவற்றிலிருந்து நீக்கப்படுகின்றன.
+Lifecycle என்பது `POST /api/v1/session-leases`; இதில் JSON actions `acquire`, `renew`, மற்றும் `release` ஆகியவை உள்ளன. நிர்வகிக்கப்படும் inference requests, opaque `X-OmniRoute-Lease-Owner` மதிப்பையும் சரியான `X-OmniRoute-Lease-Generation`-ஐயும் வழங்கும். Owner, `vlo_`-ஐத் தொடர்ந்து 43 base64url எழுத்துகளைக் கொண்டிருக்கும்; அதன் SHA-256 hash மட்டுமே சேமிக்கப்படும். ஒவ்வொரு இறுதி dispatch fence-உம் அங்கீகரிக்கப்பட்ட API key ID மற்றும் செயலில் உள்ள connection ID ஆகியவற்றுடன் binding செய்யப்படும். Lease control headers, logs மற்றும் தக்கவைக்கப்பட்ட request snapshots-லிருந்து அகற்றப்பட்டு, upstream executor headers-லிலும் சேர்க்கப்படாது.
 
-சாதாரண routing-இல் தகுதியுள்ள managed candidates இருந்தும், ஒவ்வொரு free candidate-உம்
-வேற்று active lease-ஆல் ஆக்கிரமிக்கப்பட்டிருந்தால், OmniRoute HTTP `429`, lease-capacity-unavailable code, ஒரு
-waiting-for-capacity state, மற்றும் மிக முந்தைய தொடர்புடைய expiry-இலிருந்து பெறப்பட்ட வரம்புடைய `Retry-After` ஆகியவற்றைத் திருப்பித் தருகிறது.
-சாதாரண வெற்று தகுதிநிலை lease போட்டி அல்ல; அதன் தற்போதைய routing error semantics-ஐத் தக்கவைத்துக்கொள்கிறது.
+வழக்கமான routing-ல் தகுதியுள்ள நிர்வகிக்கப்படும் candidates இருந்தும், ஒவ்வொரு இலவச candidate-மும் வேறு உரிமையாளரின் செயலில் உள்ள lease-ஆல் பயன்படுத்தப்பட்டிருந்தால், OmniRoute HTTP `429`, lease-capacity-unavailable code, waiting-for-capacity state மற்றும் தொடர்புடைய earliest expiry-யிலிருந்து கணக்கிடப்பட்ட வரையறுக்கப்பட்ட `Retry-After` ஆகியவற்றைத் திருப்பி வழங்கும். வழக்கமான தகுதியுள்ள candidates இல்லாத நிலை lease contention அல்ல; அது ஏற்கனவே உள்ள routing error semantics-ஐத் தொடரும்.
 
-தொடர்புடைய இயக்கமுறைகள் தனித்தனியாகவே இருக்கும்:
+தொடர்புடைய mechanisms தனித்தனியாகவே இருக்கும்:
 
-- OAuth session occupancy என்பது OAuth கணக்குகளுக்கான process-local soft distribution ஆகும்.
-- Account semaphores request-concurrency permits-ஐ வழங்கி, ஒரு request முடிந்ததும் முடிவடைகின்றன.
-- Exclusive managed session leases என்பவை generation fence உடன் கூடிய durable lifecycle ownership ஆகும்.
+- OAuth session occupancy என்பது OAuth accounts-க்கான process-local மென்மையான distribution ஆகும்.
+- Account semaphores, request-concurrency permits-ஐ வழங்கி, ஒரு request நிறைவடைந்ததும் முடிவடைகின்றன.
+- Exclusive managed session leases என்பது generation fence உடன் கூடிய நிலைத்த lifecycle ownership ஆகும்.
 
 ---
 
@@ -319,25 +359,26 @@ UI: கண்காணிப்பு → குளிர்வுக் கா�
 
 ---
 
-## 4. ஒதுக்கீடு-பகிர்வு ஒருங்குநிகழ்வுக் கட்டுப்பாடு (v3.8.36)
+## 4. Quota-Share ஒரேநேரக் கோரிக்கை கட்டுப்பாடு (v3.8.36)
 
-சந்தாக் கணக்குகள் (GLM, MiniMax போன்றவை) பெரும்பாலும் ஒரே நேரத்தில் ~1–3
-கோரிக்கைகளை மட்டுமே ஏற்கும்; அதை மீறுவது 429 பிழைகளையும் குளிர்வுக் காலங்களையும் தூண்டும். பல API
-விசைகள் ஒரே மேல்நிலை கணக்கைப் பகிரும் **ஒதுக்கீடு-பகிர்வு** (`qtSd/…`)
-சேர்க்கைகளில் இது தீவிரமானது. பகிரப்பட்ட கணக்கில் அளவுக்கு அதிகமான கோரிக்கைகள் குவிவதை மூன்று அடுக்குகள் தடுக்கின்றன.
+சந்தா கணக்குகள் (GLM, MiniMax போன்றவை) பெரும்பாலும் ~1–3 ஒரேநேரக்
+கோரிக்கைகளை மட்டுமே ஏற்கின்றன; வரம்பை மீறினால் 429 பிழைகளும் cooldown-களும்
+தூண்டப்படும். பல API விசைகள் ஒரே upstream கணக்கைப் பகிர்ந்து கொள்ளும்
+**quota-share** (`qtSd/…`) சேர்க்கைகளில் இது குறிப்பாகக் கடுமையாகும். பகிரப்பட்ட
+கணக்கு அதிகப்படியாக கோரிக்கைகளைப் பெறாமல் இருக்க மூன்று அடுக்குகள் செயல்படுகின்றன.
 
-### இணைப்பு-வாரியான ஒருங்குநிகழ்வு உச்சவரம்பு (`max_concurrent`)
+### ஒவ்வொரு இணைப்புக்குமான ஒரேநேரக் கோரிக்கை வரம்பு (`max_concurrent`)
 
-ஒவ்வொரு வழங்குநர் இணைப்பும் ஒரு `max_concurrent` உச்சவரம்பை அறிவிக்கலாம்
-(`provider_connections.max_concurrent`, இணைப்பு மாதிரி உரையாடல் / API / DB-இல் அமைக்கப்படுகிறது).
-வரம்பு தேவையில்லை எனில் இதை காலியாக விடவும். கீழே உள்ள வரிசைப்படுத்தல் அடுக்கை இயக்கும்
-ஒற்றைக் கட்டுப்பாடு இதுதான் — கணக்கின் உண்மையான ஒருங்குநிகழ்வு அளவுக்கு இதை அமைக்கவும்
-(எ.கா. GLM ~1, MiniMax ~2).
+ஒவ்வொரு provider இணைப்பும் `max_concurrent` உச்சவரம்பை அறிவிக்கலாம்
+(`provider_connections.max_concurrent`, connection modal / API / DB-இல் அமைக்கப்படுகிறது).
+வரம்பு வேண்டாம் என்றால் இதை காலியாக விடவும். கீழே உள்ள serialization
+அடுக்கை இயக்கும் ஒற்றை அமைப்பு இதுவாகும் — கணக்கின் உண்மையான ஒரேநேரக் கோரிக்கை
+எண்ணிக்கைக்கு அமைக்கவும் (எ.கா. GLM ~1, MiniMax ~2).
 
-### மாதிரி-வாரியான ஒருங்குநிகழ்வு உச்சவரம்புகள் (`modelConcurrency`)
+### ஒவ்வொரு மாதிரிக்குமான ஒரேநேரக் கோரிக்கை வரம்புகள் (`modelConcurrency`)
 
-ஓர் இணைப்பு, அதன் `rateLimitOverrides` வரைபடத்திற்குள் துல்லியமான
-மாதிரி-வாரியான ஒருங்குநிகழ்வு உச்சவரம்புகளையும் கூடுதலாக அறிவிக்கலாம்:
+ஒரு இணைப்பு தனது `rateLimitOverrides` map-இல், ஒவ்வொரு மாதிரிக்கும் துல்லியமான
+ஒரேநேரக் கோரிக்கை உச்சவரம்புகளையும் அறிவிக்கலாம்:
 
 ```json
 {
@@ -348,74 +389,88 @@ UI: கண்காணிப்பு → குளிர்வுக் கா�
 }
 ```
 
-இணைப்பு மாதிரி உரையாடலில் (**விகித வரம்பு மேலெழுதல்கள் → மாதிரி-வாரியான
-ஒருங்குநிகழ்வு உச்சவரம்புகள்**, ஒவ்வொரு வரியிலும் ஒரு `model=cap`) அல்லது அதே JSON
-வடிவத்துடன் `PATCH /api/providers/[id]` வழியாக இதை அமைக்கவும். விசைகளின் பொருளியல்:
+இதை connection modal-இல் (**Rate limit overrides → Per-model
+concurrency caps**, ஒவ்வொரு வரியிலும் ஒன்று `model=cap`) அல்லது
+`PATCH /api/providers/[id]` மூலம் அதே JSON வடிவத்தில் அமைக்கலாம். முக்கிய
+விதிகள்:
 
-- **இணைப்பு முழுவதற்குமானது மற்றும் மாதிரி-சார்ந்தது:** `maxConcurrent` என்பது பகிரப்பட்ட
-  இணைப்பு முழுவதற்குமான உச்சவரம்பாகவே இருக்கும். இரண்டும் பொருந்தும்போது, ஒரே கூட்டுக் கட்டுப்பாட்டில்
-  இரண்டு வாயில்களும் அணுப் பிரிக்கமுடியாத வகையில் பெறப்படும்
-  (`global → provider → account → model`); பொருந்தக்கூடிய வரம்புகளில் கடுமையானதே
-  நடைமுறை நடத்தையாக இருக்கும்.
-- **துல்லியமான மாதிரி-விசைப் பொருத்தம்:** வழிச்செலுத்தல் தீர்மானத்திற்குப் பிறகு
-  செயலாக்கிக்குக் கடத்தப்படும் மாதிரி சரமே விசையாகும் — பொதுவாக வெறும் மேல்நிலை மாதிரி id
-  (`glm-5`), கிளையன்ட்-பக்க `provider/model` மாற்றுப்பெயர் அல்ல (`zai/glm-5` என்பது
-  `glm-5` உடன் பொருந்தாது). மதிப்புகள் ஒரே நேரத்தில் இயங்கும் கோரிக்கைகளுக்கான நேர்மறை முழு-எண் உச்சவரம்புகள்.
-- **உள்ளூர் வரிசைப்படுத்தல், கண்டறிதல் இல்லை:** ஏற்கெனவே உள்ள
-  வரிசை/காலாவதி பொருளியலுடன் அதிகப்படியான கோரிக்கைகள் உள்ளூரிலேயே வரிசையில் காத்திருக்கும் (வகைப்படுத்தப்பட்ட
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` சேர்க்கைப் பிழைகள்). OmniRoute மேல்நிலைக்
-  கொள்கையைக் கண்டறியவோ ஊகிக்கவோ செய்யாது — இயக்குநர் உள்ளமைத்த துல்லியமான
-  உச்சவரம்புகளையே அது செயல்படுத்துகிறது. நிரம்பிய மாதிரி வாயில் வழங்குநரை ஒருபோதும்
-  முடக்காது; நிரந்தரமான மாதிரிப் பூட்டையும் உருவாக்காது; மேல்நிலை 429/குளிர்வுக் காலம்/மாற்றுவழி நடத்தை
-  பிழைகளுக்கான இறுதிப் பாதுகாப்பாகத் தொடரும்.
-- **இணைப்பு-வாரியான, செயல்முறை-வாரியான வரம்பு:** உச்சவரம்புகள் ஒவ்வொரு தரவுத்தள இணைப்பிற்கும்
-  தனித்தனியாகவும் நினைவகத்திலேயே பராமரிக்கப்படுபவையாகவும் உள்ளன; எனவே ஒரே மேல்நிலை API விசையை மீண்டும் பயன்படுத்தும் இரண்டு
-  இணைப்புகள் ஒன்றோடொன்று ஒருங்கிணையாது.
-- **உள்ளமைக்கப்படாதது என்பது மாற்றமில்லாதது:** வரைபடத்தைத் தவிர்ப்பது (அல்லது
-  கட்டுப்பாட்டுப் பலகைப் புலத்தைக் காலியாக விடுவது) எந்த மாதிரி வாயிலையும் சேர்க்காது. அனைவருக்கும் பொதுவான வழங்குநர்
-  வரம்பு எதையும் உறுதிப்படுத்தாமல் வழங்கப்படும் எடுத்துக்காட்டு உள்ளமைவு:
+- **இணைப்பு-முழுவதற்குமானது vs மாதிரி-குறிப்பிட்டது:** `maxConcurrent` பகிரப்பட்ட
+  இணைப்பு-முழுவதற்குமான உச்சவரம்பாகத் தொடர்கிறது. இரண்டும் பொருந்தும்போது,
+  ஒரே composite gate-இல் (`global → provider → account → model`) இரு gate-களும்
+  அணு முறையில் பெறப்படுகின்றன; நடைமுறையில் பொருந்தக்கூடிய வரம்புகளில்
+  கடுமையானதே அமலாகும்.
+- **துல்லியமான மாதிரி-key பொருத்தம்:** routing resolution-க்குப் பிறகு executor-க்கு
+  அனுப்பப்படும் model string-தான் key — பொதுவாக upstream-இன் அடிப்படை model id
+  (`glm-5`), client-side `provider/model` alias அல்ல (`zai/glm-5`, `glm-5`-க்கு
+  பொருந்தாது). மதிப்புகள் நேர்ம முழு-எண் ஒரேநேரக் கோரிக்கை உச்சவரம்புகளாக இருக்க
+  வேண்டும்.
+- **உள்ளமை queueing, discovery இல்லை:** அதிகப்படியான கோரிக்கைகள் ஏற்கனவே உள்ள
+  queue/timeout semantics-க்கு ஏற்ப உள்ளூரில் queue-வில் காத்திருக்கும் (வகைப்படுத்தப்பட்ட
+  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` admission errors). OmniRoute
+  upstream policy-யைக் கண்டறியவோ ஊகிக்கவோாது — operator கட்டமைத்த துல்லியமான
+  உச்சவரம்புகளையே அது அமல்படுத்துகிறது. நிரம்பிய model gate provider-ஐ ஒருபோதும்
+  முடக்காது; நிரந்தர model lockout-ஐயும் உருவாக்காது; upstream 429/cooldown/fallback
+  நடத்தை error backstop-ஆகத் தொடரும்.
+- **ஒவ்வொரு இணைப்பு, ஒவ்வொரு process வரம்பு:** caps database connection
+  ஒன்றுக்கு எனவும் memory-யில் வைத்திருக்கப்படுவதாகவும் இருக்கும்; ஆகவே ஒரே
+  upstream API key-ஐ மீண்டும் பயன்படுத்தும் இரண்டு இணைப்புகள் ஒன்றுடன் ஒன்று
+  ஒருங்கிணைக்கப்படாது.
+- **கட்டமைக்கப்படாதது என்றால் மாற்றமில்லை:** map-ஐ விடுபடுத்துவது (அல்லது
+  dashboard field-ஐ காலியாக விடுவது) எந்த model gate-ஐயும் சேர்க்காது. எந்த
+  universal provider limit-ஐயும் வலியுறுத்தாத எடுத்துக்காட்டு கட்டமைப்பு:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### ஒதுக்கீடு-பகிர்வுக் கோரிக்கை வரிசைப்படுத்தல்
+### Quota-share கோரிக்கை serialization
 
-நேர்மறையான `max_concurrent` மதிப்பை அறிவிக்கும் ஓர் இணைப்பை ஒதுக்கீடு-பகிர்வு அனுப்புகை
-இலக்காகக் கொள்ளும்போது, அந்த **கணக்கிற்கான** ஒருங்குநிகழ் கோரிக்கைகள் ஒவ்வொரு இணைப்பிற்குமான
-செமஃபோர் வழியாக வரிசைப்படுத்தப்படும் (விசை `qsconn:<connectionId>`): அதிகப்படியான கோரிக்கைகள்
-கணக்கில் குவிவதற்குப் பதிலாக **வரிசையில் காத்திருக்கும்**. இது **தோல்வியின்போதும் அனுமதிக்கும்** —
-நிரம்பிய வரிசை அல்லது காலாவதி ஏற்பட்டால், அனுப்பத்தக்க கோரிக்கையை நிராகரிப்பதற்குப் பதிலாக
-இடம் இல்லாமலேயே தொடரும். **அமைப்புகள் → மீட்சித்திறன் → ஒதுக்கீடு-பகிர்வு இணைப்பு-வாரியான
-ஒருங்குநிகழ்வு** என்பதில் மாற்றி அமைக்கவும் (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, இயல்பாக
-இயக்கப்பட்டிருக்கும்). `max_concurrent` உச்சவரம்பு இல்லையெனில் நடத்தையில் மாற்றமில்லை.
+ஒரு quota-share dispatch, நேர்ம `max_concurrent`-ஐ அறிவித்திருக்கும் இணைப்பை
+இலக்காகக் கொள்ளும்போது, அந்த **கணக்கிற்கான** ஒரேநேரக் கோரிக்கைகள்
+ஒவ்வொரு இணைப்புக்குமான semaphore (`qsconn:<connectionId>`) வழியாக
+serialized செய்யப்படும்: அதிகப்படியான கோரிக்கைகள் கணக்கை flood செய்வதற்குப்
+பதிலாக **queue-வில் காத்திருக்கும்**. இது **fail-open** — queue நிரம்பியிருந்தாலும்
+அல்லது timeout ஆனாலும், dispatch செய்யக்கூடிய கோரிக்கையை ஒருபோதும் நிராகரிப்பதற்குப்
+பதிலாக slot இல்லாமலேயே தொடரும். இதை **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, இயல்புநிலை
+on) இல் மாற்றலாம். `max_concurrent` cap இல்லையெனில் நடத்தை மாற்றமின்றி இருக்கும்.
 
-> ஒதுக்கீடு-பகிர்வு வழிச்செலுத்தல் வாயில் (`selectQuotaShareTarget`, DRR + P2C) தானாகவே
-> தோல்வியின்போதும் அனுமதிக்கும் தன்மையுடையது; மேலும் உச்சவரம்பை எட்டிய இணைப்பிற்கு
-> _குறைந்த முன்னுரிமை_ மட்டுமே அளிக்கும் — ஓர் ஒற்றை-இணைப்புத் தொகுப்பில் அதனால் கடுமையான வரம்பை விதிக்க முடியாது;
-> எனவே வெள்ளமெனக் குவியும் கோரிக்கைகளை உண்மையில் கட்டுப்படுத்துவது இந்தச் செமஃபோர்தான்.
+> quota-share routing gate (`selectQuotaShareTarget`, DRR + P2C) தானும்
+> fail-open ஆகும்; cap-ஐ எட்டிய இணைப்பிற்கு குறைந்த முன்னுரிமை மட்டுமே
+> அளிக்கும் — ஒரே-இணைப்பு pool-இல் இது கடுமையான வரம்பை விதிக்க முடியாது.
+> எனவே உண்மையில் flood-ஐக் கட்டுப்படுத்துவது இந்த semaphore-தான்.
 
-### குளிர்வுக் காலத்தை உணரும் சேர்க்கை மறுமுயற்சி
+### Combo cooldown-aware retry
 
-ஒவ்வொரு சேர்க்கை உத்திக்கும் (இயக்கப்பட்டிருக்கும்போது), குறுகிய தற்காலிகக் குளிர்வுக் காலத்திற்காக
-429 பிழையை இறுதிப்படுத்தவிருந்த ஒரு கோரிக்கை, அந்தக் காலம் முடியும் வரை காத்திருந்து 429-ஐத்
-திருப்பித் தருவதற்குப் பதிலாக மீண்டும் அனுப்பப்படும் — இது பல-மாதிரிச் சேர்க்கைகளில் Gemini-வகை
-TPM/RPM சாளரங்களை (~60வி. மறுமுயற்சி-பிறகு) கையாள்கிறது; எ.கா. 2-மாதிரிச் சேர்க்கையின் இரு
-இலக்குகளும் மாதிரி-வாரியான விகித வரம்பை எட்டுவது. **அமைப்புகள் → மீட்சித்திறன்** என்பதில் உள்ள
-`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) மூலம் இது
-வரம்பிடப்படுகிறது. `quota_exhausted` (நள்ளிரவு வரை பூட்டப்பட்டது) அல்லது அங்கீகாரம்/கிடைக்கவில்லை
-காரணங்களுக்காக இது ஒருபோதும் காத்திருக்காது.
+ஒவ்வொரு combo strategy-க்கும் (இயக்கப்பட்டிருக்கும்போது), SHORT transient cooldown-க்கு
+429 உருவாகக்கூடிய கோரிக்கை, 429-ஐத் திருப்பி அனுப்புவதற்குப் பதிலாக cooldown முடியும்
+வரை காத்திருந்து மீண்டும் dispatch செய்யும் — பல மாதிரி combo-களில் Gemini-class
+TPM/RPM windows (~60s retry-after) இதன் கீழ் வருகின்றன; எடுத்துக்காட்டாக, 2-model
+combo-வின் இரு இலக்குகளும் ஒவ்வொரு மாதிரிக்குமான rate limit-ஐ எட்டும்போது.
+இதற்கு **Settings → Resilience** இல் உள்ள `comboCooldownWait` (`enabled`,
+`maxWaitMs`, `maxAttempts`, `budgetMs`) வரம்புகளை நிர்ணயிக்கிறது. இது
+`quota_exhausted` (நள்ளிரவு வரை lock செய்யப்பட்டவை) அல்லது auth/not-found
+காரணங்களுக்காக ஒருபோதும் காத்திருக்காது.
 
-இதே வாயில் அனுப்புகைக்கு முந்தைய நிலையையும் (#16319) கையாள்கிறது: எந்த முயற்சியும்
-செய்யப்படுவதற்கு முன்பே, சேர்க்கையின் ஒவ்வொரு இலக்கும் அதன் மாதிரி குறுகிய தற்காலிகப் பூட்டில்
-இருப்பதால் தவிர்க்கப்படும்போது, பூச்சிய-முயற்சிப் பாதை குறிப்பில்லாத
-`503 ALL_TARGETS_SKIPPED` பதிலை வழங்குவதற்குப் பதிலாக, அதே உச்சவரம்புகளின் கீழ் பூட்டு
-நீங்கும் வரை காத்திருந்து மீண்டும் அனுப்புகிறது. காத்திருத்தல் அனுமதிக்கப்படாதபோது (உச்சவரம்பு,
-முயற்சி அல்லது செலவுத்திட்டம் தீர்ந்திருந்தால், அல்லது அம்சம் முடக்கப்பட்டிருந்தால்), இறுதிப் பதில்
-`429 rate_limit_error` ஆக மேம்படுத்தப்பட்டு, மிக முன்னதாக முடிவடையும் தற்காலிகப் பூட்டிலிருந்து
-`retry_after` / `reset_at` மதிப்புகளை ஏந்தும்; ஒதுக்கீடு, அங்கீகாரம் மற்றும் கிடைக்கவில்லை பூட்டுகள்
-குறிப்பில்லாத 503 பதிலையே தக்கவைத்துக்கொள்ளும்.
+ஒரு combo, `config.comboCooldownWaitEnabled: false` மூலம் opt out செய்யலாம்.
+literal `false` மட்டுமே இந்தப் பகிரப்பட்ட combo waits-ஐ (post-dispatch cooldown மற்றும்
+pre-dispatch circuit-open/model-lock waits) மற்றும் அவற்றின் wait-budget
+timeout-floor extension-ஐ முடக்கும். விடுபட்டிருந்தாலோ `true` ஆக இருந்தாலோ global
+policy தொடரும்; globally disabled waiting-ஐ `true` இயக்க முடியாது. வெளிப்படையாக
+அமைக்கப்பட்ட `targetTimeoutMs` எப்போதும் முன்னுரிமை பெறும். இந்த opt-out,
+தனித்த native-Codex turn-pin pre-dispatch wait-ஐ மாற்றாது.
+
+அதே gate pre-dispatch சூழலையும் உள்ளடக்குகிறது (#16319): ஒரு combo-வின் ஒவ்வொரு
+இலக்கும் எந்த முயற்சியும் தொடங்குவதற்கு முன்பே skip செய்யப்படும்போது, ஏனெனில் அதன்
+model short transient lockout-இல் இருப்பதால், zero-attempt path அதே
+ceilings-ன் கீழ் lockout முடியும் வரை காத்திருந்து மீண்டும் dispatch செய்யும்;
+hint இல்லாத `503 ALL_TARGETS_SKIPPED` பதிலை வழங்காது. காத்திருப்புக்கு அனுமதி
+இல்லாதபோது (ceiling, attempt அல்லது budget முடிந்திருந்தால், அல்லது feature
+off ஆக இருந்தால்), terminal response `429 rate_limit_error` ஆக மேம்படுத்தப்பட்டு,
+மிக விரைவாக முடியும் transient lock expiry-யிலிருந்து `retry_after` /
+`reset_at`-ஐக் கொண்டிருக்கும்; quota, auth மற்றும் not-found locks hint இல்லாத
+503-ஐத் தொடரும்.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -570,34 +625,13 @@ prompt-compression / translation பணிக்கும் முன்பே 
 
 ---
 
-## 6. மெதுவான ஸ்ட்ரீம் செயல்திறன் கண்காணிப்பான் (#9709)
+## 6. ஸ்லோ-ஸ்ட்ரீம் த்ரோபுட் வாட்ச்டாக் (#9709)
 
-விருப்பத்தேர்வான `resilienceSettings.streamRecovery.throughputWatchdog` பாதுகாப்பு,
-தொடர்ந்து துண்டுகளை அனுப்பிக்கொண்டிருந்தாலும், உள்ளமைக்கப்பட்ட பயனுள்ள வெளியீட்டு
-விகிதத்திற்குக் குறைவாக உதவியாளர் வெளியீட்டை உருவாக்கும் அப்ஸ்ட்ரீமை கண்டறிகிறது.
-இது செயலற்ற நேரமுடிவிலிருந்து வேண்டுமென்றே வேறுபடுத்தப்பட்டுள்ளது: இதயத்துடிப்புகளும்
-மெட்டாடேட்டாவும் எந்த நேரமானியையும் மீட்டமைப்பதில்லை; அவை முன்னேற்றமாகவும்
-கணக்கிடப்படுவதில்லை. வெளியீட்டின் தரத்தைப் பொருட்படுத்தாமல் முழுமையான பாதுகாப்பு
-உச்சவரம்பாகத் தொடரும் கடின முயற்சி காலக்கெடுவிலிருந்தும் (#9153) இது வேறுபட்டது.
+விருப்பமான `resilienceSettings.streamRecovery.throughputWatchdog` கார்டு இன்னும் துகள்களை அனுப்பும் ஆனால் உள்ளமைக்கப்பட்ட பயனுள்ள-வெளியீட்டு விகிதத்திற்குக் கீழே உதவி வெளியீட்டை உருவாக்கும் அப்ஸ்ட்ரீமைக் கண்டறிகிறது. இது செயலற்ற காலக்கெடுவிலிருந்து வேண்டுமென்றே வேறுபட்டது: இதயத் துடிப்புகள் மற்றும் மெட்டாடேட்டா ஆகியவை டைமரை மீட்டமைக்கவில்லை, மேலும் முன்னேற்றமாகக் கருதப்படாது. இது கடினமான முயற்சி காலக்கெடுவிலிருந்து (#9153) வேறுபட்டது, இது வெளியீட்டுத் தரத்தைப் பொருட்படுத்தாமல் முழுமையான பாதுகாப்பு உச்சவரம்பாக உள்ளது.
 
-கண்காணிப்பான் முயற்சியை நிறுத்துவதற்கு முன், ஒரு தொடக்கத் தயார்நிலைக் காலத்தையும்
-அதற்குப் பிறகு ஒரு முழுமையான சுழலும் சாளரத்தையும் தேவைப்படுத்துகிறது. இது Chat
-Completions மற்றும் Responses API வெளியீட்டு நிகழ்வுகளிலிருந்து உரை மாற்றங்களைக்
-கணக்கிடுகிறது (பாதுகாப்பான UTF-8 பைட் தோராய மதிப்பீடாக), பயன்பாட்டு விவரங்கள்
-மட்டுமே கொண்ட மற்றும் காலியான நிகழ்வுகளைப் புறக்கணிக்கிறது, மேலும் கருவி அழைப்பு
-அல்லது காரணமறிதல் நிகழ்வுகள் செயல்பாட்டில் இருக்கும்போது மதிப்பீட்டை இடைநிறுத்துகிறது.
-இது இயல்பாக முடக்கப்பட்டிருக்கும்; `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` மூலம்
-இதை இயக்கலாம். சாளரம், தொடக்கத் தயார்நிலைக் காலம், குறைந்தபட்ச விகிதம் மற்றும்
-அளவிடக்கூடிய குறைந்தபட்ச வெளியீடு ஆகியவை வழக்கமான நிலைத்தன்மை அமைப்புகள்
-இயல்பாக்க அடுக்கால் வரம்பிடப்படுகின்றன.
+வாட்ச்டாக் கலைக்கப்படுவதற்கு முன் ஒரு முழுமையான உருட்டல் சாளரத்தைத் தொடர்ந்து வெப்பமயமாதல் காலம் தேவைப்படுகிறது. இது அரட்டை நிறைவுகள் மற்றும் பதில்கள் API வெளியீட்டு நிகழ்வுகளிலிருந்து உரை டெல்டாக்களைக் கணக்கிடுகிறது (ஒரு பழமைவாத UTF-8 பைட் ப்ராக்ஸி), பயன்பாடு-மட்டும் மற்றும் வெற்று நிகழ்வுகளை புறக்கணிக்கிறது, மேலும் கருவி அழைப்பு அல்லது பகுத்தறிவு நிகழ்வுகள் விமானத்தில் இருக்கும்போது தீர்ப்பை இடைநிறுத்துகிறது. இது முன்னிருப்பாக முடக்கப்பட்டுள்ளது மற்றும் `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` உடன் இயக்கப்படலாம் (என்வி மதிப்பு இயல்புநிலை — ஐ சேமித்த `resilienceSettings.streamRecovery.throughputWatchdog.enabled` பூலியன் வெற்றியை மட்டுமே விதைக்கிறது; இந்த வழிகாட்டியின் மேலே உள்ள env-vs-டாஷ்போர்டு முன்னுரிமைக் குறிப்பைப் பார்க்கவும்); சாளரம், வார்ம்-அப், குறைந்தபட்ச வீதம் மற்றும் குறைந்தபட்ச அளவிடக்கூடிய வெளியீடு ஆகியவை சாதாரண பின்னடைவு-அமைப்புகள் இயல்பாக்கம் அடுக்கு மூலம் கட்டுப்படுத்தப்படுகின்றன.
 
-இயக்கப்பட்டிருக்கும்போது, கண்காணிப்பானின் நிறுத்தம் செயலில் உள்ள அப்ஸ்ட்ரீம்
-முயற்சிக்கு மட்டுமே பயன்படுத்தப்படும். கிளையன்டுக்குத் தெரியும் பைட்டுகள் எதுவும்
-அனுப்பப்படுவதற்கு முன், ஏற்கனவே உள்ள அதே-கணக்கு தொடக்கநிலை மீட்புப் பாதை முயற்சியை
-மீண்டும் திறக்கலாம். உறுதிப்படுத்தப்பட்ட பிறகு, ஸ்ட்ரீம் ஒருபோதும் கண்மூடித்தனமாக
-மீண்டும் இயக்கப்படாது; ஏற்கனவே உள்ள பாதுகாப்பான நடு-ஸ்ட்ரீம் தொடர்ச்சி ஒப்பந்தம்
-மட்டுமே ஒரு பின்னொட்டை இணைக்க முடியும். இறுதிப்படுத்தல் ஒற்றைமுறை செயலாகவே
-இருப்பதால், பயன்பாட்டுக் கணக்கீடும் செமஃபோர் விடுவிப்பும் நகலெடுக்கப்படுவதில்லை.
+இயக்கப்பட்டால், செயலில் உள்ள அப்ஸ்ட்ரீம் முயற்சிக்கு மட்டுமே கண்காணிப்பு நிறுத்தம் பயன்படுத்தப்படும். கிளையன்ட்-பார்க்கும் பைட்டுகளுக்கு முன், ஏற்கனவே இருக்கும் அதே கணக்கின் ஆரம்ப-மீட்பு பாதை முயற்சியை மீண்டும் திறக்கலாம். உறுதியளித்த பிறகு, ஸ்ட்ரீம் ஒருபோதும் கண்மூடித்தனமாக மீண்டும் இயக்கப்படாது; தற்போதுள்ள பாதுகாப்பான மிட்-ஸ்ட்ரீம் தொடர்ச்சி ஒப்பந்தம் மட்டுமே பின்னொட்டை தைக்க முடியும். இறுதிப்படுத்தல் ஒற்றை-ஷாட் ஆகும், எனவே பயன்பாட்டு கணக்கியல் மற்றும் செமாஃபோர் வெளியீடு நகல் செய்யப்படவில்லை.
 
 ---
 

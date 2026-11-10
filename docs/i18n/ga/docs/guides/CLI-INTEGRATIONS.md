@@ -17,11 +17,11 @@ cibé áit a dtacaíonn an uirlis leis sin. Luaitear thíos na horduithe a stór
 timpeallachta áitiúil don uirlis go buan.
 
 Tá tosaitheoir cineálach ann freisin — `omniroute run <target>` — a thosaíonn
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` nó `gemini` agus na hathróga
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` nó `whycodes` agus na hathróga
 timpeallachta cearta curtha isteach, gan aon chumraíocht a scríobh ar chor ar bith. Tagann
 na spriocanna agus a n-ailiasanna ón léiriúchán canónach `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), agus cuireann `omniroute completion` na
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), agus cuireann `omniroute completion` na
 spriocfhocail chéanna a dhíorthaítear ón léiriúchán ar fáil. Tá na seantosaitheoirí
 ar leith do gach uirlis — `omniroute launch` (Claude Code) agus
 `omniroute launch-codex` (Codex) — fós ar fáil.
@@ -86,7 +86,8 @@ bhfreastalaí sin agus scríobhann sé an chumraíocht go logánta.
 | `omniroute setup-aider`    | Aider                              | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + priontálann sé oideas timpeallachta                                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | An dá cheann      |
 | `omniroute setup-qwen`     | Qwen Code                          | `~/.qwen/settings.json` — eagar V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` in `~/.qwen/.env`                                                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | An dá cheann      |
 | `omniroute setup-5dive`    | 5dive (flít gníomhairí)            | Faic faoi `$HOME` — scríobhann sé **próifíl fíordheimhnithe** 5dive (`/var/lib/5dive/auth-profiles/<name>/`) trí `5dive agent auth set`; don fhréamhúsáideoir amháin, ritheann sé ar óstríomhaire an fhlít | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | An dá cheann      |
-| `omniroute run <target>`   | Seoladh ag am rite (ginearálta)    | Faic — sceitheann sé `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` leis an timpeallacht agus na hargóintí cearta; úsáideann Qwen agus Gemini baile sealadach leithlisithe                    | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | An dá cheann      |
+| `omniroute setup-whycodes` | WhyCodes                           | `config.toml` WhyCodes (`[providers.omniroute]` + `[default_model]`); is é `$WHYCODES_HOME/config.toml` nó `~/.whycodes/config.toml` an chonair                                                            | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | An dá cheann      |
+| `omniroute run <target>`   | Seoladh ag am rite (ginearálta)    | Faic — sceitheann sé `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` leis an timpeallacht agus na hargóintí cearta; úsáideann Qwen agus Gemini baile sealadach leithlisithe         | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | An dá cheann      |
 | `omniroute launch`         | Claude Code                        | Faic — sceitheann sé `claude` agus `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` insteallta ann                                                                                                              | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | An dá cheann      |
 | `omniroute launch-codex`   | OpenAI Codex CLI                   | Faic — sceitheann sé `codex` agus an soláthraí `omniroute` insteallta trí bhratacha `-c`                                                                                                                   | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | An dá cheann      |
 
@@ -102,14 +103,15 @@ Nótaí faoi bhratacha (fíoraithe i bhfoinse an ordaithe):
   gcóras comhad. Ar fáil ar gach ordú `setup-*` **seachas** `setup-cursor`
   (nach scríobhann comhad riamh).
 - `--model <id>` — riachtanach (nó roghnaítear go hidirghníomhach é) do na huirlisí nach bhfuil
-  uathaimsiú samhlacha acu: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Glacann na huirlisí sin
+  uathaimsiú samhlacha acu: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Glacann na huirlisí sin
   le `--yes` freisin le haghaidh rite neamh-idirghníomhacha (agus bíonn `--model` riachtanach ansin).
   Glacann `setup-opencode` le `--model` chun an tsamhail réamhshocraithe ardleibhéil a shocrú.
 - Leanann `--model <id>` ar `omniroute run` sreangú de réir sprice na forógra
   (`bin/cli/cli-manifest.mjs`): faigheann **aider** `--model openai/<id>` agus
   faigheann **opencode** `--model omniroute/<id>` (ní chuirtear an réimír leis ach amháin mura bhfuil sé
   san aitheantas cheana); faigheann **qwen** agus **gemini** an t-aitheantas focal ar fhocal;
-  faigheann **claude** é trí `ANTHROPIC_MODEL`, **goose** trí `GOOSE_MODEL`, agus
+  faigheann **claude** é trí `ANTHROPIC_MODEL`, **goose** trí `GOOSE_MODEL`,
+  **whycodes** trí `-P omniroute -m <id>`, agus
   **codex** trí argóintí `-c model_providers.omniroute.*`. **Is é Qwen an t-aon sprioc rite
   a éilíonn `--model` go docht** — scoireann `omniroute run qwen` gan é le cód
   `2` agus earráid shainráite.
@@ -260,18 +262,19 @@ Cuireann OmniRoute comhéadan OpenAI ar fáil ag `/v1`, comhéadan Anthropic ag 
 agus comhéadan dúchasach Gemini ag `/v1beta`. Tá gach comhtháthú cumraithe de réir na foirme a
 mbíonn a uirlis ag súil léi (deimhnithe i bhfoinse an ordaithe):
 
-| Comhtháthú                                                                 | URL bonn scríofa | `/v1`?                                             |
-| -------------------------------------------------------------------------- | ---------------- | -------------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | fréamh           | Níl — cuireann Cline `/v1/chat/completions` leis   |
-| `setup-goose` (`OPENAI_HOST`)                                              | fréamh           | Níl — cuireann Goose an chonair leis               |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | fréamh           | Níl — cuireann LiteLLM `/v1/chat/completions` leis |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | le `/v1`         | Tá                                                 |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | le `/v1`         | Tá                                                 |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | fréamh           | Níl — cuireann Claude Code `/v1/messages` leis     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | le `/v1`         | Tá                                                 |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | le `/v1`         | Tá                                                 |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | fréamh           | Níl — cuireann an SDK `/v1beta/models/…` leis      |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` sa phróifíl fíordheimhnithe)           | fréamh           | Níl — cuireann Claude Code `/v1/messages` leis     |
+| Comhtháthú                                                                 | URL bonn scríofa | `/v1`?                                                         |
+| -------------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | fréamh           | Níl — cuireann Cline `/v1/chat/completions` leis               |
+| `setup-goose` (`OPENAI_HOST`)                                              | fréamh           | Níl — cuireann Goose an chonair leis                           |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | fréamh           | Níl — cuireann LiteLLM `/v1/chat/completions` leis             |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | le `/v1`         | Tá                                                             |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | le `/v1`         | Tá                                                             |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | fréamh           | Níl — cuireann Claude Code `/v1/messages` leis                 |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | le `/v1`         | Tá                                                             |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | le `/v1`         | Tá                                                             |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | fréamh           | Níl — cuireann an SDK `/v1beta/models/…` leis                  |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` sa phróifíl fíordheimhnithe)           | fréamh           | Níl — cuireann Claude Code `/v1/messages` leis                 |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | le `/v1`         | Tá — Seolann WhyCodes iarratais POST chuig `/chat/completions` |
 
 ---
 

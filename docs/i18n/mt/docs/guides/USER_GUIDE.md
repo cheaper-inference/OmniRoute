@@ -118,18 +118,18 @@ Aċċess permezz ta': WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Konfigurazzjoni tal-Providers
+## 📖 Konfigurazzjoni tal-fornituri
 
-Biex iżżid għadd kbir ta’ konnessjonijiet b’ċavetta API minn fajl CSV jew JSON, uża **Dashboard → Providers → Import from file**. Il-kolonni huma pożizzjonali (`provider,name,apiKey,baseUrl,priority`); `provider` irid ikun diġà jeżisti bħala provider immaniġġjat jew node kompatibbli. Ara [Importazzjoni ta’ providers minn fajl CSV jew JSON](../providers/CSV-IMPORT.md).
+Biex iżżid konnessjonijiet taċ-ċwievet tal-API minn fajl CSV jew JSON, uża **Dashboard → Providers → Import from file**. Il-kolonni huma pożizzjonali (`provider,name,apiKey,baseUrl,priority`); `provider` għandu jkun diġà jeżisti bħala fornitur ġestit jew node kompatibbli. Ara [Importa fornituri minn fajl CSV jew JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Providers b’Abbonament
+### 🔐 Fornituri tal-abbonamenti
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Qabbad Claude Code
+Dashboard → Providers → Connect Claude Code
 → Login OAuth → Aġġornament awtomatiku tat-token
-→ Monitoraġġ tal-kwota ta’ 5 sigħat + ta’ kull ġimgħa
+→ Traċċar tal-kwota ta’ 5 sigħat + ta’ kull ġimgħa
 
 Mudelli:
   cc/claude-opus-4-7
@@ -137,18 +137,18 @@ Mudelli:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Parir Professjonali:** Uża Opus għal kompiti kumplessi u Sonnet għall-veloċità. OmniRoute jimmonitorja l-kwota għal kull mudell!
+**Parir professjonali:** Uża Opus għal kompiti kumplessi, u Sonnet għall-veloċità. OmniRoute isegwi l-kwota għal kull mudell!
 
-M’hemmx browser fuq il-host ta’ OmniRoute? Ħaddem `claude setup-token` kull fejn tkun illoggjat fi Claude Code u waħħal it-token ta’ sena fit-tab **Setup Token**. Ara [Claude Code b’token ta’ konfigurazzjoni](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+M’hemmx browser fuq il-host ta’ OmniRoute? Eżegwixxi `claude setup-token` kullimkien fejn Claude Code ikun illoggjat u waħħal it-token ta’ sena fit-tab **Setup Token**. Ara [Claude Code b’token ta’ setup](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Ir-rotot kompatibbli ma’ Claude u Claude Code jippreservaw il-livell ta’ sforz ta’ ħsieb `max` għall-mudelli Opus u Sonnet. Il-mudelli Haiku ma jaċċettawx il-livell ta’ sforz `max`, għalhekk OmniRoute jbaxxi dik it-talba għal baġit għoli ta’ ħsieb qabel jibgħatha lis-servizz upstream.
+Ir-rotot kompatibbli ma’ Claude u Claude Code jippreservaw l-isforz ta’ ħsieb `max` għall-mudelli Opus u Sonnet. Il-mudelli Haiku ma jaċċettawx il-livell ta’ sforz `max`, għalhekk OmniRoute ibaxxi dik it-talba għal baġit għoli ta’ ħsieb qabel jibgħatha lis-servizz upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Qabbad Codex
+Dashboard → Providers → Connect Codex
 → Login OAuth (port 1455)
-→ Irrisettjar kull 5 sigħat + kull ġimgħa
+→ Reset ta’ 5 sigħat + ta’ kull ġimgħa
 
 Mudelli:
   cx/gpt-5.5
@@ -160,9 +160,9 @@ Mudelli:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Qabbad GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth permezz ta’ GitHub
-→ Irrisettjar kull xahar (fl-1 tax-xahar)
+→ Reset kull xahar (l-1 tax-xahar)
 
 Mudelli:
   gh/gpt-5.5
@@ -172,46 +172,49 @@ Mudelli:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Providers Irħas
+**Krediti tal-AI (fatturazzjoni bbażata fuq it-tokens).** Meta GitHub jirrapporta `credits_used` għall-kont, il-karta Provider Limits turi ringiela **AI Credits** bil-krediti kkunsmati fil-perjodu ta’ fatturazzjoni attwali, inkluż fuq pjanijiet ta’ organizzazzjoni illimitati.
 
-#### GLM-4.7 (Irrisettjar kuljum, $0.6/1M)
+**Limitu lokali tal-krediti tal-AI.** Editja konnessjoni ta’ GitHub u ssettja **AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`). Jekk titħalla vojta, il-limitu jiġi diżattivat; `0` dejjem jaqbeż il-konnessjoni. Meta l-aħħar qari tal-użu jkun daqs jew ogħla mil-limitu, l-għażla tal-kont taqbeż dik il-konnessjoni u r-routing jaqa’ lura fuq il-konnessjonijiet l-oħra tiegħek, bl-istess mod bħal qtugħ ibbażat fuq politika tal-kwota. Il-kontroll jaqra l-użu li l-aġġornament perjodiku tal-kwota diġà jiġbor — qatt ma jsejjaħ lil GitHub fil-mogħdija tat-talba — u jaħdem b’mod permissiv: qari nieqes jew antik (eqdem minn 15-il minuta, jew minn perjodu ta’ fatturazzjoni li diġà ġie rrisettjat) ma jimblokkax il-konnessjoni. Din hija salvagwardja lokali, **mhux limitu garantit tal-infiq**: dewmien fir-rappurtar ta’ GitHub, l-intervall tal-aġġornament, talbiet li jkunu għaddejjin u użu barra minn OmniRoute jistgħu jaqbżuha. Uża l-kontrolli tal-infiq proprji ta’ GitHub għal limitu assolut.
+
+### 💰 Fornituri rħas
+
+#### GLM-4.7 (reset ta’ kuljum, $0.6/1M)
 
 1. Irreġistra: [Zhipu AI](https://open.bigmodel.cn)
-2. Ikseb ċavetta API minn Coding Plan
-3. Dashboard → Żid Ċavetta API: Provider: `glm`, Ċavetta API: `your-key`
+2. Ikseb iċ-ċavetta tal-API mill-Coding Plan
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Uża:** `glm/glm-4.7` — **Parir Professjonali:** Coding Plan joffri kwota 3× akbar bi 1/7 tal-ispiża! Jirrisettja kuljum fl-10:00 AM.
+**Użu:** `glm/glm-4.7` — **Parir professjonali:** Coding Plan joffri kwota 3× akbar bi spiża ta’ 1/7! Reset kuljum fl-10:00 ta’ filgħodu.
 
-#### MiniMax M2.1 (Irrisettjar kull 5 sigħat, $0.20/1M)
+#### MiniMax M2.1 (reset ta’ 5 sigħat, $0.20/1M)
 
 1. Irreġistra: [MiniMax](https://www.minimax.io)
-2. Ikseb ċavetta API → Dashboard → Żid Ċavetta API
+2. Ikseb iċ-ċavetta tal-API → Dashboard → Add API Key
 
-**Uża:** `minimax/MiniMax-M2.1` — **Parir Professjonali:** L-orħos għażla għal kuntest twil (1M tokens)!
+**Użu:** `minimax/MiniMax-M2.1` — **Parir professjonali:** L-orħos għażla għal kuntest twil (1M tokens)!
 
 #### Kimi K2 ($9/xahar b’rata fissa)
 
 1. Abbona: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Ikseb ċavetta API → Dashboard → Żid Ċavetta API
+2. Ikseb iċ-ċavetta tal-API → Dashboard → Add API Key
 
-**Uża:** `kimi/kimi-k2.5` — **Parir Professjonali:** Prezz fiss ta’ $9/xahar għal 10M tokens = spiża effettiva ta’ $0.90/1M!
+**Użu:** `kimi/kimi-k2.5` — **Parir professjonali:** $9/xahar b’rata fissa għal 10M tokens = spiża effettiva ta’ $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Irreġistra: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Oħloq ċavetta API ta’ Qianfan → Dashboard → Żid Ċavetta API: Provider: `qianfan`
+2. Oħloq ċavetta tal-API ta’ Qianfan → Dashboard → Add API Key: Provider: `qianfan`
 
-**Uża:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, jew ID ieħor ta’ mudell Qianfan kompatibbli ma’ OpenAI.
+**Użu:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, jew ID ieħor ta’ mudell kompatibbli ma’ OpenAI ta’ Qianfan.
 
-### 🆓 Providers B’XEJN
+### 🆓 Fornituri B’XEJN
 
-Il-providers b’xejn li ma jeħtiġux awtentikazzjoni għandhom swiċċ ħdejn **Ma hija meħtieġa l-ebda awtentikazzjoni** fil-paġna tal-provider tagħhom.
-Meta titfih, dak il-provider jiġi diżattivat, jitneħħa mill-veduti konfigurati/kompatti ta’ Providers, u l-mudelli tiegħu jitneħħew minn `/v1/models`.
+Il-fornituri b’xejn li ma jeħtiġux awtentikazzjoni għandhom swiċċ ħdejn **No authentication required** fil-paġna tal-fornitur tagħhom. Meta titfih, dak il-fornitur jiġi diżattivat, jitneħħa mill-veduti Providers configured/compact, u l-mudelli tiegħu jitneħħew minn `/v1/models`.
 
 #### Qoder (9 mudelli B’XEJN)
 
 ```bash
-Dashboard → Qabbad Qoder → Login OAuth → L-aċċess huwa soġġett għal-limiti attwali tal-provider
+Dashboard → Connect Qoder → Login OAuth → L-aċċess huwa soġġett għal-limiti attwali tal-fornitur
 
 Mudelli: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -219,7 +222,7 @@ Mudelli: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if
 #### Kiro (Claude B’XEJN)
 
 ```bash
-Dashboard → Qabbad Kiro → AWS Builder ID jew Google/GitHub → ~50 kreditu/xahar
+Dashboard → Connect Kiro → AWS Builder ID jew Google/GitHub → ~50 kreditu/xahar
 
 Mudelli: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -336,24 +339,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Twaqqif
 
-### npm globali install (Rikomandat)
+### Installa npm globali (Rakkomandat)
 
 ```bash
 npm install -g omniroute
 
-# Oħloq direttorju tal-konfigurazzjoni
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Oħloq fajl .env (ara .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Beda s-server
+# Start server
 omniroute
-# Jew b'port abbinali:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-L-CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`.
+CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`.
 
 ### Triq il-tray
 
@@ -607,57 +610,57 @@ Għar-riferenza sħiħa tal-varjabbli tal-ambjent, ara l-[README](../README.md).
 ## 📊 Mudelli Disponibbli
 
 <details>
-<summary><b>Uri l-mudelli kollha disponibbli</b></summary>
+<summary><b>Ara l-mudelli kollha disponibbli</b></summary>
 
-> Il-lista ta' hawn taħt ġiet magħżula minn `open-sse/config/providerRegistry.ts` għal v3.8.0. Il-katalaġi tal-cloud (Gemini, OpenRouter, eċċ.) jiġu ssinkronizzati b'mod dinamiku — għall-katalaġi sħiħ ħaj issir miftuħ il- **Dashboard → Providers → [provider] → Available Models** jew sejjaħ `GET /api/models/catalog`.
+> Il-lista hawn taħt hija kkurata minn `open-sse/config/providerRegistry.ts` għal v3.8.0. Il-katalgi tal-cloud (Gemini, OpenRouter, eċċ.) jiġu sinkronizzati b’mod dinamiku — għall-katalgu sħiħ attwali iftaħ **Dashboard → Providers → [provider] → Available Models** jew sejjaħ `GET /api/models/catalog`.
 >
-> Jekk il-lista interna ta' provajder mmur, uża **Import from /models** fuq dik il-paġna (jew ippermetti **Auto-Sync**) biex tġib il-katalaġi tal-upstream ħaj. Dan ġie vverifikat fil-v3.8.50 għal LLM7.io (`gemini-3.1-flash-lite`) u UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); l-aċċess anonimu ta' Pollinations baqa' limited mill-upstream waqt l-istess test pass.
+> Jekk il-lista integrata ta’ provider tkun inbidlet, uża **Import from /models** f’dik il-paġna (jew attiva **Auto-Sync**) biex tiġbed il-katalgu attwali upstream. Dan ġie vverifikat f’v3.8.50 għal LLM7.io (`gemini-3.1-flash-lite`) u UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); l-aċċess anonimu għal Pollinations baqa’ limitat minn upstream matul l-istess test.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ livelli ta' sforz: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ livelli ta’ sforz: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — FREE OAuth: uża l-katalaġi ħaj murien taħt **Dashboard → Providers → Kiro → Available Models**. Il-disponibbiltà tiddependi fuq il-kont u l-pjan.
+**Kiro (`kr/`)** — OAuth B’XEJN: uża l-katalgu attwali muri taħt **Dashboard → Providers → Kiro → Available Models**. Id-disponibbiltà tiddependi mill-kont u mill-pjan.
 
-**Qoder (`if/`)** — FREE OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth B’XEJN: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/xahar flat jew per-use: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/xahar b’rata fissa jew skont l-użu: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Ċavetta API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultra-fast: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultra-veloċi: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok nattiv: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Hosted fl-UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Ospitat fl-UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Bis-searċi: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — B’titjibiet imsaħħa bit-tfittxija: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (b'xejn), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (b’xejn), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Inferrenzi veloċi: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Inferenza veloċi: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Fuq skala ta’ wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Fokus fuq RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Iffukat fuq RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Għall-intrapriżi: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Issinkronizzat ħaj skont il-API key minn Google — ebda lista statika. Qabbad key fil- **Dashboard → Providers** imbagħad uża **Available Models** biex timporta l-katalaġi attwali (pereż. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Sinkronizzat live għal kull ċavetta API minn Google — m’hemmx lista statika. Qabbad ċavetta f’**Dashboard → Providers** u mbagħad uża **Available Models** biex timporta l-katalgu attwali (eż. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Provajderi kompatibbli oħra** (magħżula): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (permezz ta' `aws-bedrock`), `azure-ai`, `openrouter` (katalaġi pass-through), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kull wieħed iżomm il-lista tal-mudelli tiegħu stess fil-`providerRegistry.ts` u jista' jiġi ssinkronizzat awtomatikament meta l-provajder jiżvela endpoint `/models`.
+**Providers kompatibbli oħra** (magħżula): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (permezz ta’ `aws-bedrock`), `azure-ai`, `openrouter` (katalgu passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kull wieħed iżomm il-lista tal-mudelli tiegħu f’`providerRegistry.ts` u jista’ jiġi sinkronizzat awtomatikament meta l-provider jipprovdi endpoint `/models`.
 
-**Nota dwar l-IDs tal-mudelli:** OmniRoute juża IDs nattivi tal-provajder (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Xi IDs jinkludu versjonijiet bil-punti għaliex hekk qed tistenna l-API ta' fuq. Jekk mudelli mhux elenkat hawn fuq, ħdimt `omniroute models --search <term>` jew sejjaħ `GET /api/models/catalog` biex tikkonferma d-disponibbiltà.
+**Nota dwar l-IDs tal-mudelli:** OmniRoute juża IDs nattivi tal-provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Xi IDs jinkludu verżjonijiet b’punti għaliex hekk tistennihom l-API upstream. Jekk mudell ma jkunx elenkat hawn fuq, ħaddem `omniroute models --search <term>` jew agħmel talba lil `GET /api/models/catalog` biex tikkonferma d-disponibbiltà.
 
 </details>
 
@@ -722,6 +725,31 @@ Agħżel prefiss distint (`mygw`, `acme-proxy`). Jekk talbiet lil node personali
 żball li jsemmi fornitur inkorporat jew il-kredenzjali tiegħu, iċċekkja jekk il-prefiss tan-node huwiex
 riżervat: nodes issejvjati qabel ma kienet teżisti din ir-regola għadhom maħżuna, iżda l-prefiss tagħhom jibgħat it-traffiku
 lill-fornitur inkorporat. Editja n-node u agħtih prefiss ġdid.
+
+#### Għażliet tal-gateway għal kull konnessjoni
+
+Dawn il-keys jitqiegħdu fil-`providerSpecificData` ta’ konnessjoni (pereżempju permezz ta’
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (numru sħiħ, 1–1024) — għal konnessjonijiet kompatibbli mal-format taċ-chat ta’ OpenAI li
+  l-gateway tagħhom jirrifjuta ismijiet twal tal-għodod. Ismijiet itwal jintbagħtu bħala psewdonimi qosra u jiġu rrestawrati fit-
+  tweġiba.
+- `quotaEndpoint` — l-endpoint tal-kwota/krediti tal-gateway, li jinqara għall-istrixxa tal-kwota fid-dashboard u
+  għar-routing konxju mill-kwota. Jaħdem kemm fuq konnessjonijiet kompatibbli ma’ OpenAI kif ukoll ma’ Anthropic; il-forma sħiħa
+  hija ddokumentata f’`open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### Katina ta’ Peers ta’ OmniRoute
 

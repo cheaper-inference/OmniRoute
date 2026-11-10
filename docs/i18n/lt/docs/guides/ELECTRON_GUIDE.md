@@ -64,6 +64,19 @@ Patvirtinta pagal `electron/package.json`:
 - `npm run build:mac-x64` / `build:mac-arm64` — vienos architektūros macOS versijos
 - `npm run pack` — sukuria tik katalogą vietiniam testavimui (be diegimo programos)
 
+## Pasirenkamieji vykdymo paketai
+
+Darbalaukio versijos gali publikuoti pasirenkamus vykdymo archyvus kartu su diegimo programomis. Įdiegtame serverio turinyje yra `optional-packs.index.json` (Windows ir Linux sistemose po `resources/app`). Įrašui `browser-runtime` perskaitykite `packs[].tarball` ir atsisiųskite **būtent šio pavadinimo failą iš tos pačios laidos**. Archyvų pavadinimai apima SHA-256 maišą; skirtingiems komponavimams gali reikėti skirtingų archyvų. Nekeiskite atsisiųsto failo pavadinimo.
+
+Nukopijuokite įdiegtos programos indeksą ir pasirinktą archyvą į vieną katalogą, tada naudokite tos pačios laidos CLI:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` rodo diegimo ir patikrinimo būseną, o ne archyvo failo pavadinimą. Archyvą parenka pridėtas indeksas. Diegimas tikrina archyvo kontrolinę sumą prieš išskleidimą ir paketų kontrolines sumas prieš pakeisdamas įdiegtą paketą. Jis skaito vietinius failus; trūkstamų archyvų neatsisiunčia. Po diegimo paleiskite programą iš naujo. Jei laidoje nėra atitinkamo failo, pasirenkamo paketo tos laidos failuose nėra.
+
 ## Katalogų struktūra
 
 ```

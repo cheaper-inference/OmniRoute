@@ -184,6 +184,12 @@ server process-ஐ நிறுத்தவோ முடியும் என�
 | `/api/providers/health-autopilot/actions` | Autopilot remediation செயல்களை இயக்குகிறது                                             |
 | `/api/settings/obsidian`                  | எந்த vault root-க்கும் மீண்டும் பயன்படுத்தக்கூடிய WebDAV credential-களை உருவாக்குகிறது |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                           |
+| `/api/cli-tools/apply`                    | ஹோஸ்டில் ஆபரேட்டரின் CLI அமைப்பை மீண்டும் எழுதுகிறது                                   |
+| `/api/cli-tools/guide-settings`           | வழிகாட்டி அடிப்படையிலான CLI அமைப்புக் கோப்புகளை எழுதுகிறது                             |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes முகவரின் அமைப்பை எழுதுகிறது                                                     |
+| `/api/cli-tools/backups`                  | CLI அமைப்புக் காப்புப்பிரதிகளை மீட்டமைக்கிறது மற்றும் நீக்குகிறது                      |
+| `/api/log-export`                         | அமைக்கப்பட்ட இலக்குக்கு அழைப்புப் பதிவுகளை அனுப்புகிறது                                |
+| `/api/restart`                            | சேவையகச் செயல்முறையை மீண்டும் தொடங்குகிறது                                             |
 
 **மீறலுக்கான response:** `401 Authentication required`
 

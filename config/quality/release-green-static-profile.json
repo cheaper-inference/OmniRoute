@@ -215,6 +215,13 @@
       "command": "node scripts/check/check-dashboard-typecheck.mjs"
     },
     {
+      "id": "check:build-typecheck",
+      "job": "lint",
+      "args": ["run", "check:build-typecheck"],
+      "kind": "hard",
+      "command": "node scripts/check/check-build-typecheck.mjs"
+    },
+    {
       "id": "check:duplication",
       "job": "quality-gate",
       "args": ["run", "check:duplication"],

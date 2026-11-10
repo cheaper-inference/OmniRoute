@@ -1060,3 +1060,77 @@ test("chatCore integration: caveman output mode injected when both compression a
     globalThis.fetch = originalFetch;
   }
 });
+
+// The active profile (activeComboId) resolves only its PIPELINE through
+// buildNamedComboLookup(); its outputMode/outputStyles were dropped, so an operator who
+// selected a combo with styles and left the global toggles off got no injection at all.
+test("chatCore integration: active profile combo injects its own outputStyles", async () => {
+  const provider = "openai";
+  const model = "gpt-4";
+
+  await compressionDb.updateCompressionSettings({
+    enabled: true,
+    defaultMode: "off",
+    autoTriggerTokens: 0,
+    outputStyles: [],
+    cavemanOutputMode: { enabled: false, intensity: "full", autoClarity: true },
+  });
+  const combo = compressionCombosDb.createCompressionCombo({
+    name: "active-profile-styles",
+    pipeline: [{ engine: "session-dedup", intensity: "standard" }],
+    languagePacks: ["en"],
+    outputMode: false,
+    outputStyles: [{ id: "terse-prose", level: "full" }],
+  });
+  await compressionDb.updateCompressionSettings({ activeComboId: combo.id });
+
+  const connection = await providersDb.createProviderConnection({
+    provider,
+    apiKey: "test-key",
+    isActive: true,
+  });
+
+  let capturedBody: { messages?: Array<{ role?: string; content?: string }> } | null = null;
+  globalThis.fetch = async (_url: string | URL | Request, init?: RequestInit) => {
+    if (init?.body) {
+      capturedBody = JSON.parse(init.body as string) as typeof capturedBody;
+    }
+    return new Response(
+      JSON.stringify({
+        choices: [{ message: { role: "assistant", content: "ok" } }],
+        usage: { prompt_tokens: 20, completion_tokens: 4, total_tokens: 24 },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  };
+
+  try {
+    const result = await handleChatCore({
+      body: {
+        model,
+        stream: false,
+        messages: [{ role: "user", content: "Summarize this implementation." }],
+      },
+      modelInfo: { provider, model },
+      credentials: { apiKey: "test-key" },
+      log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
+      clientRawRequest: { endpoint: "/v1/chat/completions", headers: new Map() },
+      connectionId: connection.id,
+      onCredentialsRefreshed: () => {},
+      onRequestSuccess: () => {},
+      onStreamFailure: () => {},
+      onDisconnect: () => {},
+      userAgent: "test-agent",
+      comboName: null,
+    });
+
+    assert.ok(result.success, "Request should succeed");
+    assert.match(
+      capturedBody?.messages?.at(-1)?.content ?? "",
+      /Output Styles/,
+      "the active profile's output styles must reach the upstream request"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

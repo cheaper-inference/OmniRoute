@@ -5,6 +5,7 @@
 import {
   GPT_6_ASTRA_PRICING,
   CLAUDE_FABLE_5_1_PRICING,
+  CLAUDE_HAIKU_5_PRICING,
   CLAUDE_OPUS_5_5_PRICING,
   CLAUDE_OPUS_5_PRICING,
   CLAUDE_SONNET_5_PRICING,
@@ -171,6 +172,7 @@ export const DEFAULT_PRICING_OAUTH = {
       reasoning: 15.0,
       cache_creation: 3.75,
     },
+    "claude-sonnet-5-5": CLAUDE_SONNET_5_PRICING,
     "claude-opus-4-5-20251101": {
       input: 5.0,
       output: 25.0,
@@ -192,6 +194,7 @@ export const DEFAULT_PRICING_OAUTH = {
       reasoning: 5.0,
       cache_creation: 1.25,
     },
+    "claude-haiku-5-5": CLAUDE_HAIKU_5_PRICING,
   },
   cx: {
     "gpt-6-astra": GPT_6_ASTRA_CODEX_PRICING,

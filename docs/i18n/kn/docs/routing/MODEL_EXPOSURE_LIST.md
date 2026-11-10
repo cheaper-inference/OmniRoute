@@ -61,3 +61,15 @@
 ಯಥಾವತ್ತಾಗಿ ಒಳಗೊಂಡಿರುತ್ತದೆ — `hidePaidModels` ನ ಕಾಂಬೊ-ಹಂತದ ರಫ್ತು ಫಿಲ್ಟರ್ಗಿಂತ ಭಿನ್ನವಾಗಿ, ಇಲ್ಲಿ ಮರು-ಹೈಡ್ರೇಶನ್
 ಅಪಾಯವಿಲ್ಲ: ರಫ್ತು ಮಾಡಿದ ಕಾಂಬೊ ಹಂತದಲ್ಲಿ ಅಡಕವಾಗಿರುವ ನಿರಾಕರಿಸಲಾದ ಐಡಿ ನಿರ್ವಾಹಕರ ಸ್ವಂತ ಸ್ಪಷ್ಟ ರೂಟಿಂಗ್
 ಆಯ್ಕೆಯಾಗಿದ್ದು, ರಫ್ತು ಗಡಿಯು ತೆಗೆದುಹಾಕಬೇಕಾದ ಯಾವುದೂ ಅಲ್ಲ.
+
+## Combo ಗಳನ್ನು ಮಾತ್ರ ಪಟ್ಟಿ ಮಾಡುವುದು (`exposeCombosOnly`)
+
+Combo ಗಳು ಸಾರ್ವಜನಿಕ model ಮುಖವಾಗಿ ಮತ್ತು provider ಗಳು backend ಗಳಾಗಿ ಮಾತ್ರ ಇರುವ deployment ಗಳಿಗಾಗಿ ಪ್ರತ್ಯೇಕ boolean ಆಯ್ಕೆ; ಇದನ್ನೂ ಆಯ್ದು ಸಕ್ರಿಯಗೊಳಿಸಬೇಕು ಮತ್ತು ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ `false`. ಇದು `true` ಆಗಿದ್ದಾಗ ಸಾರ್ವಜನಿಕ ಪಟ್ಟಿ (`GET /v1/models`, `GET /v1` ಮತ್ತು `getUnifiedModelsResponse()` ಆಧಾರಿತ ಇತರ `/v1` discovery route ಗಳು) `owned_by: "combo"` ಹೊಂದಿರುವ ಸಾಲುಗಳನ್ನು ಮಾತ್ರ ಉಳಿಸುತ್ತದೆ: ಬಳಕೆದಾರರ combo ಗಳು ಮತ್ತು built-in `auto/*` combo ಗಳು (`hideAutoCombos` ಅವನ್ನು ಮರೆಮಾಡದಿದ್ದರೆ). ಇದು ಪ್ರತಿ key ಯ `catalogScope: "combos"` ಬಳಸುವ ಅದೇ row ಪರೀಕ್ಷೆ ಬಳಸುತ್ತದೆ; key ಯ ಸ್ವಂತ allow/deny/scope filter ಗಳು ಇದರ ಮೇಲೂ ಅನ್ವಯಿಸುತ್ತವೆ.
+
+**Settings → Routing → Models API listing** ಯಲ್ಲಿ ಅಥವಾ `PATCH /api/settings {"exposeCombosOnly": true}` ಮೂಲಕ ಇದನ್ನು ಬದಲಿಸಿ.
+
+ಮೇಲಿನ ಪಟ್ಟಿಗಳಂತೆ, ಇದು ಲಭ್ಯತೆಯನ್ನು ಪ್ರಕಟಿಸುವುದನ್ನು ಮಾತ್ರ ಬದಲಿಸುತ್ತದೆ:
+
+- ಸ್ಪಷ್ಟವಾಗಿ ನೀಡಿದ `provider/model` ID ಇನ್ನೂ dispatch ಆಗುತ್ತದೆ ಮತ್ತು `GET /v1/models/{id}` ಇನ್ನೂ ಅದನ್ನು resolve ಮಾಡುತ್ತದೆ;
+- dashboard catalog (`GET /api/models/catalog`, model picker ಗಳು ಬಳಸುವುದು) ಚಿಕ್ಕದಾಗುವುದಿಲ್ಲ;
+- ಇದು `auto/*` candidate pool ಗಳಿಗೆ ಪ್ರತಿಬಿಂಬಿಸುವುದಿಲ್ಲ; ಆದ್ದರಿಂದ `auto/*` combo ಗಳು ತಮ್ಮ ಪೂರ್ಣ pool ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ.

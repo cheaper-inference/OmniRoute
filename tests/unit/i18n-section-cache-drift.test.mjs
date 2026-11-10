@@ -131,7 +131,7 @@ test("CLI accepts absent legacy caches and reports equal caches as consistent", 
   assert.deepEqual(matching.report[bucket], []);
 });
 
-test("CLI blocks new cache inconsistencies while preserving global and inherited warnings", (t) => {
+test("CLI blocks absolute cache inconsistencies and permits exact inherited preparation", (t) => {
   const f = fixture(t);
   const cleanBase = f.run().report;
   f.record.section_hashes = sectionHashes(["## Storage\n\nRequests are saved to the database."]);
@@ -141,15 +141,15 @@ test("CLI blocks new cache inconsistencies while preserving global and inherited
   assert.equal(introduced.report.ok, false);
   assert.equal(introduced.report.fresh[bucket].length, 1);
   const global = f.run();
-  assert.equal(global.status, 0);
-  assert.equal(global.report.ok, true);
+  assert.equal(global.status, 1);
+  assert.equal(global.report.ok, false);
   assert.equal(global.report[bucket][0].reason, "section-hashes-mismatch");
   assert.deepEqual(global.report.driftedSources, []);
   assert.deepEqual(global.report.driftedTargets, []);
   assert.deepEqual(global.report.staleTargets, []);
   const human = f.invoke();
   assert.match(human.stdout, /inconsistent section caches/);
-  assert.match(human.stdout, /translation-provenance warnings remain advisory/);
+  assert.match(human.stdout, /blocking for absolute admission/);
   const inherited = f.run(...f.baseline(global.report));
   assert.equal(inherited.status, 0);
   assert.deepEqual(inherited.report.inherited[bucket], global.report[bucket]);
@@ -180,7 +180,7 @@ test("CLI reports malformed caches as unverified and does not inherit them", (t)
   f.record.section_hashes = null;
   f.save();
   const global = f.run();
-  assert.equal(global.status, 0);
+  assert.equal(global.status, 1);
   assert.equal(global.report[bucket][0].reason, "section-hashes-unverified");
   assert.equal(f.run(...f.baseline(global.report)).status, 1);
 });

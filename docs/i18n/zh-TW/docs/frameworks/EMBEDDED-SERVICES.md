@@ -5,8 +5,8 @@
 ---
 
 > **版本：** v3.8.44
-> **最後更新：** 2026-09-16
-> **適用對象：** 新增、維護或偵錯嵌入式服務（9Router、CLIProxyAPI、Mux、Bifrost、open-wa、LLMLingua）的工程師。
+> **最後更新：** 2026-10-28
+> **讀者：** 新增、維護或偵錯內嵌服務的工程師（9Router、CLIProxyAPI、Mux、Bifrost、open-wa、LLMLingua、sing-box）。
 
 嵌入式服務是安裝於本機的行程伴隨工具，由 OmniRoute 負責安裝、監督，並將其公開為一級路由目標。不同於外部提供者（透過網際網路使用 API 金鑰連線），嵌入式服務與 OmniRoute 在同一台機器上執行，並透過迴送介面進行通訊。
 
@@ -29,7 +29,7 @@
 
 ### 為什麼使用嵌入式服務？
 
-內嵌了七項服務：
+共內嵌八項服務：
 
 | 服務            | npm 套件                            | 預設連接埠 | 用途                                                                                                                                                                                                                                                                    |
 | --------------- | ----------------------------------- | :--------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -40,8 +40,9 @@
 | **Dario**       | `@askalf/dario`                     |    3456    | Claude 訂閱代理——針對 Claude-Code 形式的流量，作為 CLIProxyAPI 的替代方案／容錯移轉；注入的金鑰會成為 `DARIO_ADMIN_TOKEN`，用以保護其 `/admin/*` OAuth 控制平面                                                                                                         |
 | **open-wa**     | `@open-wa/wa-automate`              |    8323    | WhatsApp Web 自動化（透過 Puppeteer 使用無介面的 Chromium）。僅管理生命週期——不是路由目標。                                                                                                                                                                             |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                |   20135    | 提示詞壓縮輔助服務——真正的 LLMLingua-2 ONNX 模型（Microsoft 演算法的 JS/TS 移植版）。`open-sse/services/compression/engines/llmlingua/index.ts` 會透過 HTTP 將 `/compress` 分派至該服務；當輔助服務停機時，則改用程序內的工作執行緒後端。僅管理生命週期——不是路由目標。 |
+| **sing-box**    | GitHub 發行版二進位檔（`singbox`）  |   20140    | TPROXY 輔助程序，支援 `applyTproxy()` 的透明代理攔截（`src/mitm/tproxy/setup.ts`）。安裝程式下載固定版本且通過檢查碼驗證的發行套件。僅管理其生命週期；它不是路由目標，也不代理 LLM 請求。                                                                               |
 
-這七項服務皆採用相同的監管模型：
+這八項服務都採用相同的程序監管模型：
 
 - OmniRoute 會將它們安裝於 `DATA_DIR/services/{name}/` 下（與 OmniRoute 自身的 `package.json` 隔離）
 - OmniRoute 會將它們作為子程序啟動並加以監控
@@ -571,7 +572,27 @@ ONNX 權杖分類模型，會在首次呼叫 `/compress` 時從 Hugging Face
 
 ---
 
-### 4.8 反向代理（9Router 儀表板嵌入）
+### 4.8 sing-box 端點（8 條路由）
+
+sing-box 的端點結構與 Mux 相同：沒有 `rotate-key` 路由，也不注入 API 金鑰（`bootstrap.ts` 中為 `needsApiKey: false`）。它僅接受生命週期管理，絕不作為路由或 LLM 提供者。`install()` 下載固定版本的官方 GitHub 發行版二進位檔（`SagerNet/sing-box`）；版本由 `src/lib/services/installers/singbox.ts` 中的 `SINGBOX_PINNED_VERSION` 指定。在寫入磁碟前，它會以同一原始碼檔案中內建的檢查碼驗證 SHA256；要求任何其他版本都會遭到拒絕。
+
+| 方法   | 路徑                                         | 說明                                                    |
+| ------ | -------------------------------------------- | ------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | 下載並驗證固定版本的 sing-box 發行套件                  |
+| `POST` | `/api/services/singbox/start`                | 啟動 sing-box（`sing-box run -c config.json`）          |
+| `POST` | `/api/services/singbox/stop`                 | 停止 sing-box                                           |
+| `POST` | `/api/services/singbox/restart`              | 重新啟動 sing-box                                       |
+| `POST` | `/api/services/singbox/update`               | 重新驗證或重新安裝固定版本                              |
+| `GET`  | `/api/services/singbox/status`               | 即時狀態與資料庫狀態                                    |
+| `POST` | `/api/services/singbox/auto-start`           | 開啟或關閉自動啟動                                      |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | 開啟或關閉已接管之既有程序的自動重新啟動                |
+| `GET`  | `/api/services/singbox/logs`                 | 透過 SSE 持續追蹤日誌（使用共用動態路由 `[name]/logs`） |
+
+**TPROXY 串接：** `ensureSingboxTproxy()`（`src/mitm/tproxy/setup.ts`）先寫入 `config.json` 並啟動監管程式，接著 `applyTproxy()` 才安裝 TPROXY 防火牆規則。如果監管程式缺失或未能進入 `running` 狀態，現在會記錄錯誤層級日誌，而不是默默忽略失敗。如此，操作人員就能辨識 TPROXY 規則已套用、卻沒有正常接聽程序支援的情況。
+
+---
+
+### 4.9 反向代理（9Router 儀表板嵌入）
 
 儀表板透過位於以下位置的內部反向代理，將 9Router Web UI 嵌入 iframe：
 

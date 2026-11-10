@@ -30,13 +30,7 @@ osv au Trivy zinapoonyesha hali nyekundu kwa sababu ya CVE iliyofichuliwa hivi k
 
 1. **Sasisha kitegemezi kilichoathiriwa** (inapendekezwa) — pandisha hadi toleo lenye kiraka kupitia `package.json`
    `overrides` (vitegemezi visivyo vya moja kwa moja) au jenga upya taswira ukitumia msingi wenye kiraka.
-2. **Ikiwa hakuna suluhisho kutoka kwa chanzo cha kitegemezi:**
-   - **osv:** weka upya kiwango cha msingi cha `metrics.vulnCount` katika `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` haishughulikii vizuizi maalumu — hariri thamani
-     mwenyewe, `direction:down`) pamoja na maelezo ya kuhalalisha + suala la ufuatiliaji.
-   - **Trivy:** ongeza ingizo katika `.trivyignore` (CVE-ID moja kwa kila mstari) pamoja na maoni
-     ya kuhalalisha + suala la ufuatiliaji. `ignore-unfixed: true` tayari hushughulikia kiotomatiki CVE zisizo na
-     viraka.
+2. **Ikiwa urekebishaji haupatikani:** kuhifadhi matokeo yaliyopimwa na kufuatilia utegemezi au picha iliyoathiriwa. Usiongeze uwezekano wa kuathiriwa ili kumfanya mgombea aliyefeli kupita. `ignore-unfixed: true` ya Trivy tayari haijumuishi udhaifu wa picha bila kiraka cha juu. Isipokuwa chochote kinahitaji uwezekano wa kuathiriwa ID, njia kamili ya kifurushi, kumalizika kwa muda na suala la ufuatiliaji katika sera; sio tokeo la kiotomatiki la tambazo iliyofeli.
 
 Utekelezaji unaohitajika wa OSV (`check:vuln-ratchet -- --ratchet`) hushindwa kwa hali iliyofungwa kwa
 `INCOMPLETE` na msimbo wa kutoka 2 wakati kichanganuzi, ripoti au kiwango cha msingi hakiwezi kuthibitishwa.
@@ -44,6 +38,12 @@ Kuzorota kulikopimwa hutoka kwa msimbo 1. Utekelezaji wa ushauri bado unaweza ku
 msimbo wa kutoka 0, jambo ambalo halithibitishi kuwa vitegemezi vilifaulu uchanganuzi. Hatua inayozuia ya
 Trivy pia inahitaji kipimo kilichofaulu: zana zisizopatikana, kazi zilizoshindwa
 na ushahidi unaokosekana wa taswira haviwezi kuthibitisha kuwa taswira haina udhaifu.
+
+## Sera ya kuchanganua picha
+
+`.trivyignore.yaml` ya sasa haina vighairi vya kuathiriwa. `npm run check:trivy-ignore-policy` inathibitisha sera iliyoundwa katika wasifu wa skanisho wa ndani, CI na Ubora. IDs isiyojulikana , njia pana, maingizo yanayorudiwa na vighairi vilivyopitwa na wakati vimekataliwa; `.trivyignore` ya urithi sio pembejeo kwa skanisho zilizohamishwa.
+
+Docker hukagua zana za sera kutoka `github.workflow_sha` na sera ya chanzo cha picha yenye kiteuzi cha chanzo sawa na muundo. Kiteuzi cha sera kinakataa mawanda yasiyooana na hutayarisha faili moja kwa ajili ya utafutaji wa Trivy. Chanzo cha kihistoria bila sera iliyoundwa hakipokei vizuizi. Vichanganuzi vyote viwili vinabandika Trivy `v0.70.0`. Uthibitishaji wa sera unathibitisha uthabiti wa usanidi; picha bado inahitaji utambazaji uliofanikiwa.
 
 ## Hatari ya utegemezi uliostaafishwa
 

@@ -140,16 +140,22 @@ Tunnel, Tailscale, Ngrok) പിന്നിലാണ് പ്രവർത്�
 
 ഈ റൂട്ടുകൾ നാശകരമോ തിരിച്ചെടുക്കാനാകാത്തതോ ആണ്. "പാസ്വേഡ് ഇല്ലാത്ത" ഒരു installation-ൽ ഇവ അനുവദിക്കുന്നത് ഒരേ LAN-ലുള്ള ആർക്കും database മായ്ക്കാനോ server process നിർത്താനോ കഴിയുമെന്നർത്ഥമാണ്.
 
-| പാത്ത്                                    | കാരണം                                                              |
-| ----------------------------------------- | ------------------------------------------------------------------ |
-| `/api/shutdown`                           | server process അവസാനിപ്പിക്കുന്നു                                  |
-| `/api/settings/database`                  | database export, import, wipe                                      |
-| `/api/db-backups`                         | പൂർണ്ണ database backup archive-ലേക്കുള്ള access                    |
-| `/api/settings/export-json`               | പൂർണ്ണ settings blob export ചെയ്യുന്നു (രഹസ്യങ്ങൾ ഉൾപ്പെടെ)        |
-| `/api/settings/import-json`               | പൂർണ്ണ settings blob മാറ്റിസ്ഥാപിക്കുന്നു                          |
-| `/api/providers/health-autopilot/actions` | autopilot remediation actions നടപ്പാക്കുന്നു                       |
-| `/api/settings/obsidian`                  | ഏത് vault root-നും പുനരുപയോഗിക്കാവുന്ന WebDAV creds സൃഷ്ടിക്കുന്നു |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                       |
+| പാത്ത്                                    | കാരണം                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------- |
+| `/api/shutdown`                           | server process അവസാനിപ്പിക്കുന്നു                                   |
+| `/api/settings/database`                  | database export, import, wipe                                       |
+| `/api/db-backups`                         | പൂർണ്ണ database backup archive-ലേക്കുള്ള access                     |
+| `/api/settings/export-json`               | പൂർണ്ണ settings blob export ചെയ്യുന്നു (രഹസ്യങ്ങൾ ഉൾപ്പെടെ)         |
+| `/api/settings/import-json`               | പൂർണ്ണ settings blob മാറ്റിസ്ഥാപിക്കുന്നു                           |
+| `/api/providers/health-autopilot/actions` | autopilot remediation actions നടപ്പാക്കുന്നു                        |
+| `/api/settings/obsidian`                  | ഏത് vault root-നും പുനരുപയോഗിക്കാവുന്ന WebDAV creds സൃഷ്ടിക്കുന്നു  |
+| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                        |
+| `/api/cli-tools/apply`                    | ഹോസ്റ്റിലെ ഓപ്പറേറ്ററുടെ CLI കോൺഫിഗറേഷൻ വീണ്ടും എഴുതുന്നു           |
+| `/api/cli-tools/guide-settings`           | ഗൈഡ് അടിസ്ഥാനമാക്കിയ CLI കോൺഫിഗറേഷൻ ഫയലുകൾ എഴുതുന്നു                |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes ഏജന്റിന്റെ കോൺഫിഗറേഷൻ എഴുതുന്നു                              |
+| `/api/cli-tools/backups`                  | CLI കോൺഫിഗറേഷൻ ബാക്കപ്പുകൾ പുനഃസ്ഥാപിക്കുകയും നീക്കുകയും ചെയ്യുന്നു |
+| `/api/log-export`                         | ക്രമീകരിച്ച ലക്ഷ്യസ്ഥാനത്തേക്ക് കോൾ ലോഗുകൾ അയയ്ക്കുന്നു             |
+| `/api/restart`                            | സെർവർ പ്രക്രിയ വീണ്ടും ആരംഭിക്കുന്നു                                |
 
 **ലംഘനത്തിനുള്ള പ്രതികരണം:** `401 Authentication required`
 

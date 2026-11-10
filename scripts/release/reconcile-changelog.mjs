@@ -406,7 +406,7 @@ const gh = (args) => execFileSync("gh", args, { encoding: "utf8", maxBuffer: 1 <
 export function repoSlug(cwd = ROOT) {
   const url = git(["remote", "get-url", "origin"], cwd);
   const m = url.match(/github\.com[:/]([^/]+\/[^/.]+)/);
-  return m ? m[1] : "diegosouzapw/OmniRoute";
+  return m ? m[1] : "cheaper-inference/OmniRoute";
 }
 
 /** Non-merge commits in `base..head` with mailmap identities, PR number and co-author trailers. */

@@ -30,13 +30,7 @@ Ha az osv vagy a Trivy egy újonnan közzétett CVE miatt pirosra vált, a megol
 
 1. **Frissítse az érintett függőséget** (előnyben részesített) — frissítsen a javított verzióra a `package.json`
    `overrides` mezőjén keresztül (tranzitív függőségek esetén), vagy építse újra az image-et egy javított alapra.
-2. **Ha nem érhető el upstream javítás:**
-   - **osv:** állítsa be újra a `metrics.vulnCount` alapértékét a `config/quality/quality-baseline.json`
-     fájlban (az `npm run quality:ratchet -- --update` nem terjed ki a dedikált ellenőrzésekre — az értéket
-     kézzel módosítsa, `direction:down`), indoklással és nyomon követési hibajeggyel együtt.
-   - **Trivy:** adjon hozzá egy bejegyzést a `.trivyignore` fájlhoz (soronként egy CVE-ID), indokló
-     megjegyzéssel és nyomon követési hibajeggyel együtt. Az `ignore-unfixed: true` már automatikusan
-     kezeli a javítással nem rendelkező CVE-ket.
+2. **Ha a javítás nem elérhető:** megőrzi a mért leletet, és nyomon követi az érintett függőséget vagy képet. Ne emelje meg a sebezhetőség alapértékét, hogy a sikertelen jelölt megfeleljen. A Trivy `ignore-unfixed: true` már upstream javítás nélkül is kizárja a képi sebezhetőségeket. Minden kivételhez szükség van egy felülvizsgált ID sebezhetőségre, pontos csomagútvonalra, lejárati és nyomon követési problémára a házirendben; ez nem automatikus következménye a sikertelen vizsgálatnak.
 
 A kötelező OSV-futtatások (`check:vuln-ratchet -- --ratchet`) zárt hibakezeléssel
 `INCOMPLETE` állapotot és 2-es kilépési kódot adnak, ha a szkenner, a jelentés vagy az alapérték nem ellenőrizhető.
@@ -44,6 +38,12 @@ A mért regresszió 1-es kilépési kódot eredményez. A tájékoztató jelleg�
 0-s kilépési kóddal, ami nem igazolja, hogy a függőségek átmentek a vizsgálaton. A blokkoló
 Trivy-lépéshez is sikeres mérés szükséges: a nem elérhető eszközök, a sikertelen feladatok
 és a hiányzó image-bizonyítékok alapján az image nem minősíthető tisztának.
+
+## Képbeolvasási szabályzat
+
+A jelenlegi `.trivyignore.yaml` nem tartalmaz sebezhetőségi kivételeket. `npm run check:trivy-ignore-policy` érvényesíti a strukturált házirendet a helyi vizsgálati profilokban, CI és a minőségben. Ismeretlen IDs, szélesebb elérési utak, ismétlődő bejegyzések és lejárt kivételek elutasítva; az örökölt `.trivyignore` nem bemeneti adat az áttelepített vizsgálatokhoz.
+
+Docker ellenőrzi `github.workflow_sha` házirend-eszközeit és a képforrás-házirendet ugyanazzal a forrásválasztóval, mint a build. A házirend-választó elutasítja az inkompatibilis hatóköröket, és egy fájlt készít elő mindkét Trivy-vizsgálathoz. A strukturált politika nélküli történelmi forrás nem kap kivételt. Mindkét szkennelés rögzíti a Trivy `v0.70.0`. A házirend érvényesítése bizonyítja a konfiguráció konzisztenciáját; a képnek még sikeres beolvasásra van szüksége.
 
 ## Kivezetett függőség kockázata
 

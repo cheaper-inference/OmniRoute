@@ -763,15 +763,20 @@ test("keeps the fallback tools in flat Responses and prefixed Claude shapes", as
     {
       targetFormat: "openai-responses",
       provider: "at428-flat",
+      limit: 128,
       tool: (name) => ({ type: "function", name, parameters: {} }),
     },
     {
       targetFormat: "claude",
       provider: "at428-claude",
+      // Claude-format targets have no default cap (#18120): exercise the learned-limit path.
+      limit: 100,
       tool: (name) => ({ name: `proxy_${name}`, input_schema: {} }),
     },
   ];
+  const { setDetectedToolLimit } = await import("../../open-sse/services/toolLimitDetector.ts");
   for (const shape of shapes) {
+    if (shape.limit < 128) setDetectedToolLimit(shape.provider, shape.limit);
     const tools = [
       ...Array.from({ length: 200 }, (_, i) =>
         shape.tool(`mcp__jira__tool_${String(i).padStart(3, "0")}`)
@@ -785,7 +790,7 @@ test("keeps the fallback tools in flat Responses and prefixed Claude shapes", as
       targetFormat: shape.targetFormat,
       credentials: null,
     });
-    assert.equal(out.tools.length, 128, shape.targetFormat);
+    assert.equal(out.tools.length, shape.limit, shape.targetFormat);
     assert.deepEqual(out.tools.at(-1), tools.at(-1), shape.targetFormat);
   }
 });

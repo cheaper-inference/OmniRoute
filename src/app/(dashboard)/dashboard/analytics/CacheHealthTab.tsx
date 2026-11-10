@@ -8,6 +8,14 @@ import { Skeleton } from "@/shared/components/Loading";
 import TimeRangeSelector from "@/shared/components/analytics/TimeRangeSelector";
 import type { UtilizationTimeRange } from "@/shared/types/utilization";
 import { cn } from "@/shared/utils/cn";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 
 type CacheHealthVerdict = "healthy" | "degraded" | "thrash" | "no-data";
 
@@ -196,7 +204,7 @@ export default function CacheHealthTab() {
                 <div
                   className={cn(
                     "h-full rounded-full",
-                    data.heavyWriteTokenShare > 0.75 ? "bg-red-500" : "bg-amber-500"
+                    data.heavyWriteTokenShare > 0.75 ? "bg-error" : "bg-warning"
                   )}
                   style={{ width: `${Math.min(100, data.heavyWriteTokenShare * 100)}%` }}
                 />
@@ -214,59 +222,65 @@ export default function CacheHealthTab() {
             <h3 className="mb-3 text-sm font-semibold text-text-main">
               {text(t, "cacheHealthByModel", "By model (worst ratio first)")}
             </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase text-text-muted">
-                    <th className="pb-2 pr-4 font-medium">
-                      {text(t, "cacheHealthModel", "Model")}
-                    </th>
-                    <th className="pb-2 pr-4 text-right font-medium">
-                      {text(t, "cacheHealthCalls", "Calls")}
-                    </th>
-                    <th className="pb-2 pr-4 text-right font-medium">
-                      {text(t, "cacheHealthRead", "Read")}
-                    </th>
-                    <th className="pb-2 pr-4 text-right font-medium">
-                      {text(t, "cacheHealthWrite", "Written")}
-                    </th>
-                    <th className="pb-2 pr-4 text-right font-medium">W/R</th>
-                    <th className="pb-2 text-right font-medium">
-                      {text(t, "cacheHealthHeavy", "Heavy")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.byModel.map((m) => (
-                    <tr key={m.model} className="border-b border-border/50 last:border-0">
-                      <td className="py-2 pr-4 font-mono text-xs text-text-main">{m.model}</td>
-                      <td className="py-2 pr-4 text-right text-text-muted">{compact(m.calls)}</td>
-                      <td className="py-2 pr-4 text-right text-text-muted">
-                        {compact(m.cacheReadTotal)}
-                      </td>
-                      <td className="py-2 pr-4 text-right text-text-muted">
-                        {compact(m.cacheWriteTotal)}
-                      </td>
-                      <td
-                        className={cn(
-                          "py-2 pr-4 text-right font-medium",
-                          m.writeReadRatio > 1
-                            ? "text-red-500"
-                            : m.writeReadRatio > 0.2
-                              ? "text-amber-500"
-                              : "text-text-main"
-                        )}
-                      >
-                        {m.writeReadRatio.toFixed(2)}
-                      </td>
-                      <td className="py-2 text-right text-text-muted">
-                        {compact(m.heavyWriteCalls)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table
+              className="min-w-[560px] text-sm"
+              containerClassName="rounded-none border-0"
+              scrollbarLabel={text(t, "cacheHealthByModel", "By model (worst ratio first)")}
+            >
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pb-2 pr-4 font-medium">
+                    {text(t, "cacheHealthModel", "Model")}
+                  </TableHead>
+                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                    {text(t, "cacheHealthCalls", "Calls")}
+                  </TableHead>
+                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                    {text(t, "cacheHealthRead", "Read")}
+                  </TableHead>
+                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                    {text(t, "cacheHealthWrite", "Written")}
+                  </TableHead>
+                  <TableHead className="pb-2 pr-4 text-right font-medium">W/R</TableHead>
+                  <TableHead className="pb-2 text-right font-medium">
+                    {text(t, "cacheHealthHeavy", "Heavy")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.byModel.map((m) => (
+                  <TableRow key={m.model}>
+                    <TableCell className="py-2 pr-4 font-mono text-xs text-text-main">
+                      {m.model}
+                    </TableCell>
+                    <TableCell className="py-2 pr-4 text-right text-text-muted">
+                      {compact(m.calls)}
+                    </TableCell>
+                    <TableCell className="py-2 pr-4 text-right text-text-muted">
+                      {compact(m.cacheReadTotal)}
+                    </TableCell>
+                    <TableCell className="py-2 pr-4 text-right text-text-muted">
+                      {compact(m.cacheWriteTotal)}
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "py-2 pr-4 text-right font-medium",
+                        m.writeReadRatio > 1
+                          ? "text-error"
+                          : m.writeReadRatio > 0.2
+                            ? "text-warning"
+                            : "text-text-main"
+                      )}
+                    >
+                      {m.writeReadRatio.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="py-2 text-right text-text-muted">
+                      {compact(m.heavyWriteCalls)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Card>
         </>
       )}

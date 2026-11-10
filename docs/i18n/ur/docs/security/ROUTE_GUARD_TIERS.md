@@ -181,6 +181,12 @@ LOCAL_ONLY قرار دیا جاتا ہے۔
 | `/api/providers/health-autopilot/actions` | autopilot remediation actions چلاتا ہے                   |
 | `/api/settings/obsidian`                  | کسی بھی vault root کے لیے reusable WebDAV creds بناتا ہے |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens             |
+| `/api/cli-tools/apply`                    | ہوسٹ پر آپریٹر کی CLI ترتیب دوبارہ لکھتا ہے              |
+| `/api/cli-tools/guide-settings`           | رہنما پر مبنی CLI ترتیب کی فائلیں لکھتا ہے               |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes ایجنٹ کی ترتیب لکھتا ہے                           |
+| `/api/cli-tools/backups`                  | CLI ترتیب کے بیک اپ بحال اور حذف کرتا ہے                 |
+| `/api/log-export`                         | کال لاگز کو مقررہ منزل پر بھیجتا ہے                      |
+| `/api/restart`                            | سرور کے عمل کو دوبارہ شروع کرتا ہے                       |
 
 **خلاف ورزی پر response:** `401 Authentication required`
 

@@ -2,7 +2,7 @@
 // Family: haiper | Module: haiper | Lines: 3315-3426 (112 LOC)
 // Ref: see open-sse/handlers/imageGeneration.ts top-of-file comment for split rationale
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sleep } from "../../../utils/sleep.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
@@ -117,4 +117,3 @@ export async function handleHaiperImageGeneration({
     };
   }
 }
-

@@ -60,3 +60,15 @@ allowlist가 비어 있지 않으면 allowlist와 일치하는 항목만 남습�
 그대로 포함됩니다. `hidePaidModels`의 combo 단계 내보내기 필터와 달리 여기에는 재수화
 위험이 없습니다. 내보낸 combo 단계에 포함된 거부 id는 운영자가 직접 명시한 라우팅
 선택이지, 내보내기 경계에서 제거해야 할 항목이 아닙니다.
+
+## 콤보만 나열하기(`exposeCombosOnly`)
+
+콤보를 공개 모델 인터페이스로 사용하고 제공자는 백엔드로만 사용하는 배포를 위한 별도의 불리언 설정입니다. 이 설정도 명시적으로 활성화해야 하며 기본값은 `false`입니다. `true`이면 공개 목록(`GET /v1/models`, `GET /v1` 및 `getUnifiedModelsResponse()`를 기반으로 하는 기타 `/v1` 검색 경로)은 `owned_by: "combo"`인 행만 유지합니다. 여기에는 사용자 콤보와 기본 제공 `auto/*` 콤보가 포함됩니다(`hideAutoCombos`로 숨긴 경우 제외). 키별 `catalogScope: "combos"`와 같은 행 판별 기준을 사용하며, 각 키 자체의 허용/거부/범위 필터도 그 위에 계속 적용됩니다.
+
+**설정 → 라우팅 → Models API 목록** 또는 `PATCH /api/settings {"exposeCombosOnly": true}`로 전환하세요.
+
+위 목록 설정과 마찬가지로 공개적으로 나열되는 항목만 바뀝니다.
+
+- 명시적인 `provider/model` ID는 여전히 디스패치되며 `GET /v1/models/{id}`도 이를 해석합니다.
+- 대시보드 카탈로그(모델 선택기에서 사용하는 `GET /api/models/catalog`)는 축소되지 않습니다.
+- 이 설정은 `auto/*` 후보 풀에 반영되지 않으므로 `auto/*` 콤보는 전체 풀을 유지합니다.

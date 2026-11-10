@@ -5,8 +5,8 @@
 ---
 
 > **Ẹ̀yà:** v3.8.44
-> **Ìgbà ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-09-16
-> **Àwọn olùkà:** Àwọn onímọ̀-ẹ̀rọ tó ń ṣàfikún, tọ́jú, tàbí ṣàtúnṣe àṣìṣe àwọn iṣẹ́ tó wà nínú ètò (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Ìgbà ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-10-28
+> **Àwọn tí a kọ ọ́ fún:** Àwọn onímọ̀ ẹ̀rọ tí ń fi àwọn iṣẹ́ tí a fi sínú ètò kún un, tí ń tọ́jú wọn tàbí tí ń tún àṣìṣe wọn ṣe (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Àwọn iṣẹ́ tó wà nínú ètò jẹ́ àwọn irinṣẹ́ sidecar tó ń ṣiṣẹ́ gẹ́gẹ́ bí process, tí a fi sórí ẹ̀rọ náà fúnra rẹ̀, tí OmniRoute sì ń fi sórí ẹ̀rọ, ń ṣàbójútó, tí ó sì ń mú kí wọ́n ṣeé lò gẹ́gẹ́ bí àwọn ibi-afẹ́ ìdarí ọ̀nà àkọ́kọ́. Yàtọ̀ sí àwọn olùpèsè òde (tí a máa ń dé ọ̀dọ̀ wọn lórí íńtánẹ́ẹ̀tì nípasẹ̀ àwọn API keys), àwọn iṣẹ́ tó wà nínú ètò ń ṣiṣẹ́ lórí ẹ̀rọ kan náà pẹ̀lú OmniRoute, wọ́n sì ń bá ara wọn sọ̀rọ̀ nípasẹ̀ loopback.
 
@@ -29,19 +29,20 @@
 
 ### Kí nìdí tí a fi ń lo àwọn iṣẹ́ tí a fi sínú ètò?
 
-Àwọn iṣẹ́ méje ni a fi sínú ètò:
+Iṣẹ́ mẹ́jọ ni a fi sínú ètò:
 
-| Iṣẹ́             | Package npm                        | Port àìyípadà | Ète                                                                                                                                                                                                                                                                                                                                            |
-| --------------- | ---------------------------------- | :-----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                          |     20130     | Olùdarí AI tí OmniRoute lè lò gẹ́gẹ́ bí olùpèsè abẹ́lé. Àwọn model ni a fi hàn gẹ́gẹ́ bí `9router/{sub}/{model}`                                                                                                                                                                                                                                    |
-| **CLIProxyAPI** | Binary ìtújáde GitHub (`cliproxy`) |     8317      | Adapter proxy agbègbè fún àwọn ìṣàn ìfàṣẹsí Anthropic CLI. Ó ń pèsè ìdarí àfẹ́yìntì nígbà tí àwọn token OAuth bá parí                                                                                                                                                                                                                           |
-| **Mux**         | `mux` (`mux server` aláìní UI)     |     8322      | Daemon agbègbè fún ìṣètò àwọn agent (coder/mux). Ìgbésí-ayé rẹ̀ nìkan ni a ń ṣàkóso — kì í ṣe ibi-àfojúsùn ìdarí (kò sí proxy LLM).                                                                                                                                                                                                             |
-| **Bifrost**     | `@maximhq/bifrost`                 |     8080      | Backend relay ẹnu-ọ̀nà AI Go. Nígbà tí ó bá ń ṣiṣẹ́, ipa-ọ̀nà relay (`/v1/relay/`) yóò yàn án fúnra rẹ̀                                                                                                                                                                                                                                            |
-| **Dario**       | `@askalf/dario`                    |     3456      | Proxy subscription Claude — àṣàyàn mìíràn/àfẹ́yìntì sí CLIProxyAPI fún traffic tó ní ìrísí Claude-Code; key tí a fi sínú rẹ̀ di `DARIO_ADMIN_TOKEN`, tí ó ń dáàbò bo pẹ̀tẹ́lẹ̀ ìṣàkóso OAuth `/admin/*` rẹ̀                                                                                                                                          |
-| **open-wa**     | `@open-wa/wa-automate`             |     8323      | Àdáṣiṣẹ́ WhatsApp Web (Chromium aláìní UI nípasẹ̀ Puppeteer). Ìgbésí-ayé rẹ̀ nìkan ni a ń ṣàkóso — kì í ṣe ibi-àfojúsùn ìdarí.                                                                                                                                                                                                                    |
-| **LLMLingua**   | `@atjsh/llmlingua-2`               |     20135     | Sidecar fún fífún prompt pọ̀ — model ONNX LLMLingua-2 gidi (port JS/TS ti algorithm Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` ń fi `/compress` ránṣẹ́ sí i lórí HTTP, ó sì ń padà sí backend worker-thread inú process nígbà tí sidecar kò bá ṣiṣẹ́. Ìgbésí-ayé rẹ̀ nìkan ni a ń ṣàkóso — kì í ṣe ibi-àfojúsùn ìdarí. |
+| Iṣẹ́             | Package npm                                         | Port àìyípadà | Ète                                                                                                                                                                                                                                                                                                                                            |
+| --------------- | --------------------------------------------------- | :-----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                           |     20130     | Olùdarí AI tí OmniRoute lè lò gẹ́gẹ́ bí olùpèsè abẹ́lé. Àwọn model ni a fi hàn gẹ́gẹ́ bí `9router/{sub}/{model}`                                                                                                                                                                                                                                    |
+| **CLIProxyAPI** | Binary ìtújáde GitHub (`cliproxy`)                  |     8317      | Adapter proxy agbègbè fún àwọn ìṣàn ìfàṣẹsí Anthropic CLI. Ó ń pèsè ìdarí àfẹ́yìntì nígbà tí àwọn token OAuth bá parí                                                                                                                                                                                                                           |
+| **Mux**         | `mux` (`mux server` aláìní UI)                      |     8322      | Daemon agbègbè fún ìṣètò àwọn agent (coder/mux). Ìgbésí-ayé rẹ̀ nìkan ni a ń ṣàkóso — kì í ṣe ibi-àfojúsùn ìdarí (kò sí proxy LLM).                                                                                                                                                                                                             |
+| **Bifrost**     | `@maximhq/bifrost`                                  |     8080      | Backend relay ẹnu-ọ̀nà AI Go. Nígbà tí ó bá ń ṣiṣẹ́, ipa-ọ̀nà relay (`/v1/relay/`) yóò yàn án fúnra rẹ̀                                                                                                                                                                                                                                            |
+| **Dario**       | `@askalf/dario`                                     |     3456      | Proxy subscription Claude — àṣàyàn mìíràn/àfẹ́yìntì sí CLIProxyAPI fún traffic tó ní ìrísí Claude-Code; key tí a fi sínú rẹ̀ di `DARIO_ADMIN_TOKEN`, tí ó ń dáàbò bo pẹ̀tẹ́lẹ̀ ìṣàkóso OAuth `/admin/*` rẹ̀                                                                                                                                          |
+| **open-wa**     | `@open-wa/wa-automate`                              |     8323      | Àdáṣiṣẹ́ WhatsApp Web (Chromium aláìní UI nípasẹ̀ Puppeteer). Ìgbésí-ayé rẹ̀ nìkan ni a ń ṣàkóso — kì í ṣe ibi-àfojúsùn ìdarí.                                                                                                                                                                                                                    |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                                |     20135     | Sidecar fún fífún prompt pọ̀ — model ONNX LLMLingua-2 gidi (port JS/TS ti algorithm Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` ń fi `/compress` ránṣẹ́ sí i lórí HTTP, ó sì ń padà sí backend worker-thread inú process nígbà tí sidecar kò bá ṣiṣẹ́. Ìgbésí-ayé rẹ̀ nìkan ni a ń ṣàkóso — kì í ṣe ibi-àfojúsùn ìdarí. |
+| **sing-box**    | Fáìlì aláṣẹ láti inú ẹ̀dà ìtúsílẹ̀ GitHub (`singbox`) |     20140     | Ìlànà olùrànlọ́wọ́ TPROXY tí ń ṣe àtìlẹ́yìn fún dídi ìrìnàjò dátà mú nípasẹ̀ proxy tí kò hàn ti `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Olùfifi-sọ́rí-ẹ̀rọ ń gba ẹ̀dà tí a ti dì mọ́lẹ̀ tí a sì ti ṣàyẹ̀wò checksum rẹ̀. Ìyípo ìgbésí-ayé rẹ̀ nìkan ni a ń ṣàkóso — kì í ṣe ibi tí a ń darí ìbéèrè sí, kò sì ń ṣe proxy fún LLM.                     |
 
-Gbogbo àwọn méje náà ń tẹ̀lé àwòṣe àbójútó kan náà:
+Gbogbo mẹ́jọ ń tẹ̀lé àwòṣe ìṣàbójútó kan náà:
 
 - OmniRoute ń fi wọ́n sí abẹ́ `DATA_DIR/services/{name}/` (tí a yà sọ́tọ̀ kúrò nínú `package.json` ti OmniRoute fúnra rẹ̀)
 - OmniRoute ń dá wọn sílẹ̀, ó sì ń ṣàbójútó wọn gẹ́gẹ́ bí child processes
@@ -575,7 +576,27 @@ tí kò ṣe ohunkóhun) yóò padà sí backend worker-thread inú-process (`./
 
 ---
 
-### 4.8 Proxy ìdàkejì (fífì dashboard 9Router sínú)
+### 4.8 Àwọn endpoint sing-box (ọ̀nà 8)
+
+sing-box ní ìṣètò endpoint kan náà bí Mux — kò ní ọ̀nà `rotate-key`, kò sì ní fífi kọ́kọ́rọ́ API sínú ìbéèrè (`needsApiKey: false` nínú `bootstrap.ts`). Ìyípo ìgbésí-ayé rẹ̀ nìkan ni a ń ṣàkóso; kì í ṣe olùpèsè ìdarí ìbéèrè tàbí LLM rárá. `install()` ń gba fáìlì aláṣẹ ìtúsílẹ̀ GitHub tí iṣẹ́ náà fọwọ́ sí (`SagerNet/sing-box`) fún ẹ̀dà tí a dì mọ́lẹ̀ (`SINGBOX_PINNED_VERSION` nínú `src/lib/services/installers/singbox.ts`), ó sì ń fi SHA256 rẹ̀ wé checksum tí a ti fi sínú fáìlì kan náà kí ó tó kọ ọ́ sí disiki. A kọ gbogbo ìbéèrè fún ẹ̀dà mìíràn sílẹ̀.
+
+| Ọ̀nà ìbéèrè | Ibi                                          | Àpèjúwe                                                                           |
+| ---------- | -------------------------------------------- | --------------------------------------------------------------------------------- |
+| `POST`     | `/api/services/singbox/install`              | Gba ẹ̀dà sing-box tí a dì mọ́lẹ̀ kí o sì ṣàyẹ̀wò rẹ̀                                   |
+| `POST`     | `/api/services/singbox/start`                | Bẹ̀rẹ̀ sing-box (`sing-box run -c config.json`)                                     |
+| `POST`     | `/api/services/singbox/stop`                 | Dá sing-box dúró                                                                  |
+| `POST`     | `/api/services/singbox/restart`              | Tún sing-box bẹ̀rẹ̀                                                                 |
+| `POST`     | `/api/services/singbox/update`               | Ṣàyẹ̀wò tàbí fi ẹ̀dà tí a dì mọ́lẹ̀ sílẹ̀ lẹ́ẹ̀kan sí i                                  |
+| `GET`      | `/api/services/singbox/status`               | Ipò lọwọlọwọ àti ipò nínú ibi ìpamọ́ dátà                                          |
+| `POST`     | `/api/services/singbox/auto-start`           | Tan tàbí pa ìbẹ̀rẹ̀ aládàáṣiṣẹ́                                                      |
+| `POST`     | `/api/services/singbox/auto-restart-adopted` | Tan tàbí pa ìtúnbẹ̀rẹ̀ aládàáṣiṣẹ́ fún ìlànà tí ó ti wà tẹ́lẹ̀ tí a gba lábẹ́ ìṣàbójútó |
+| `GET`      | `/api/services/singbox/logs`                 | Tẹ̀lé àwọn àkọsílẹ̀ tuntun nípasẹ̀ SSE (ọ̀nà aláyípadà tí a jọ ń lò, `[name]/logs`)   |
+
+**Ìsopọ̀ TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) ń kọ `config.json`, ó sì ń bẹ̀rẹ̀ alábòójútó ṣáájú kí `applyTproxy()` tó fi àwọn òfin ogiri ààbò TPROXY sílẹ̀. Bí alábòójútó kò bá sí tàbí kò bá dé ipò `running`, a máa ń kọ ọ́ sí àkọsílẹ̀ ní ìpele àṣìṣe báyìí dípò kí a kọ ìkùnà náà sílẹ̀ láìsọ̀rọ̀. Èyí jẹ́ kí olùṣiṣẹ́ mọ̀ pé a ti lo àwọn òfin TPROXY láìsí olùgbọ́ tó ń ṣiṣẹ́ lẹ́yìn wọn.
+
+---
+
+### 4.9 Proxy ìdàkejì (fífì dashboard 9Router sínú)
 
 Dashboard náà ń fi UI wẹ́ẹ̀bù 9Router sínú iframe nípasẹ̀ proxy ìdàkejì abẹ́nú
 ní:

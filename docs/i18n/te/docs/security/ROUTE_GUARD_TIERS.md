@@ -181,6 +181,12 @@ LOCAL_ONLYగా వర్గీకరించబడాలి.
 | `/api/providers/health-autopilot/actions` | ఆటోపైలట్ పరిష్కార చర్యలను అమలు చేస్తుంది                                 |
 | `/api/settings/obsidian`                  | ఏ vault రూట్కైనా పునర్వినియోగించగల WebDAV క్రెడెన్షియల్లను సృష్టిస్తుంది |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                             |
+| `/api/cli-tools/apply`                    | హోస్ట్‌లో ఆపరేటర్ CLI కాన్ఫిగరేషన్‌ను మళ్లీ రాస్తుంది                    |
+| `/api/cli-tools/guide-settings`           | మార్గదర్శకాల ఆధారంగా CLI కాన్ఫిగరేషన్ ఫైళ్లను రాస్తుంది                  |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes ఏజెంట్ కాన్ఫిగరేషన్‌ను రాస్తుంది                                  |
+| `/api/cli-tools/backups`                  | CLI కాన్ఫిగరేషన్ బ్యాకప్‌లను పునరుద్ధరిస్తుంది మరియు తొలగిస్తుంది        |
+| `/api/log-export`                         | కాన్ఫిగర్ చేసిన గమ్యానికి కాల్ లాగ్‌లను పంపుతుంది                        |
+| `/api/restart`                            | సర్వర్ ప్రక్రియను మళ్లీ ప్రారంభిస్తుంది                                  |
 
 **ఉల్లంఘనపై ప్రతిస్పందన:** `401 Authentication required`
 

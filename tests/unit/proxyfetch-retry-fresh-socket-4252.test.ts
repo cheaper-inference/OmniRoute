@@ -20,10 +20,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { proxyFetch } from "../../open-sse/utils/proxyFetch.ts";
-import {
-  getDefaultDispatcher,
-  getRetryDispatcher,
-} from "../../open-sse/utils/proxyDispatcher.ts";
+import { getDefaultDispatcher, getRetryDispatcher } from "../../open-sse/utils/proxyDispatcher.ts";
 
 function undErrSocket(): Error {
   const err = new Error("fetch failed") as Error & { code?: string };

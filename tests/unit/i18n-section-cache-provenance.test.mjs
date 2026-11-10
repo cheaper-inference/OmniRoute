@@ -105,3 +105,61 @@ for (const mode of [
     }
   });
 }
+
+// Merge contract: public section alignment must keep the private provenance/output guards.
+test("a verified old snapshot still aligns sections after an insertion", () => {
+  const details = "## Details\n\nCurrent information.";
+  const previous = [recordedSection, details];
+  const result = planSectionReuse({
+    previousHashes: sectionHashes(previous),
+    previousSections: previous,
+    sections: ["## Introduction\n\nA newly documented feature.", ...previous],
+    mirrorSections: [mirrorSection, "## Detalhes\n\nInformações atuais."],
+  });
+  assert.deepEqual(result?.translate, [0]);
+  assert.deepEqual([...result.reuse.keys()], [1, 2]);
+  assert.equal(result.reuse.get(1), mirrorSection);
+});
+
+test("a verified old snapshot still aligns surviving sections after a removal", () => {
+  const retired = "## Retired\n\nThis section was removed.";
+  const previous = [retired, recordedSection];
+  const result = planSectionReuse({
+    previousHashes: sectionHashes(previous),
+    previousSections: previous,
+    sections: [recordedSection],
+    mirrorSections: ["## Retirado\n\nEsta seção foi removida.", mirrorSection],
+  });
+  assert.deepEqual(result?.translate, []);
+  assert.deepEqual([...result.reuse.entries()], [[0, mirrorSection]]);
+});
+
+test("section insertion cannot hide contradictory exact-source cache provenance", () => {
+  const result = planSectionReuse({
+    previousHashes: sectionHashes([oldSection]),
+    previousSections: [recordedSection],
+    sections: ["## Introduction\n\nA newly documented feature.", oldSection],
+    mirrorSections: [mirrorSection],
+  });
+  assert.equal(result, null);
+});
+
+test("a shifted reusable section still requires every source code literal", () => {
+  const literal = "`npm run check:docs-all`";
+  const previous = [recordedSection, `## Checks\n\nRun ${literal}.`];
+  const input = {
+    previousHashes: sectionHashes(previous),
+    previousSections: previous,
+    sections: ["## Introduction\n\nA newly documented feature.", ...previous],
+    mirrorSections: [mirrorSection, "## Verificações\n\nExecute as verificações."],
+  };
+  const rejected = planSectionReuse(input);
+  assert.deepEqual(rejected?.translate, [0, 2]);
+  assert.deepEqual([...rejected.reuse.keys()], [1]);
+  const valid = planSectionReuse({
+    ...input,
+    mirrorSections: [mirrorSection, `## Verificações\n\nExecute ${literal}.`],
+  });
+  assert.deepEqual(valid?.translate, [0]);
+  assert.deepEqual([...valid.reuse.keys()], [1, 2]);
+});

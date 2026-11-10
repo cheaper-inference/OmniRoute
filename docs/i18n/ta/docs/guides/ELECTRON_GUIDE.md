@@ -61,6 +61,19 @@ OmniRoute, **Electron 41** + **electron-builder 26.10** அடிப்படை
 - `npm run build:mac-x64` / `build:mac-arm64` — ஒற்றைக் கட்டமைப்பு வகைக்கான macOS கட்டமைப்புகள்
 - `npm run pack` — உள்ளூர் சோதனைக்கான கோப்பகம்-மட்டும் கொண்ட கட்டமைப்பு (நிறுவி இல்லை)
 
+## விருப்ப runtime pack கள்
+
+Desktop build கள் installer களுடன் விருப்ப runtime archive களையும் வெளியிடலாம். நிறுவப்பட்ட server payload இல் `optional-packs.index.json` உள்ளது (Windows மற்றும் Linux இல் `resources/app` கீழ்). `browser-runtime` entry க்கு `packs[].tarball` ஐ வாசித்து, **அதே release இலிருந்து துல்லியமாக அந்த filename ஐப் பதிவிறக்கவும்**. Archive பெயர்களில் SHA-256 digest உள்ளது; வெவ்வேறு build களுக்கு வெவ்வேறு archive கள் தேவைப்படலாம். பதிவிறக்கிய filename ஐ மாற்ற வேண்டாம்.
+
+நிறுவப்பட்ட app இன் index மற்றும் தேர்ந்தெடுத்த archive ஐ ஒரே directory இல் நகலெடுத்து, அதே release இன் CLI ஐப் பயன்படுத்தவும்:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` installation மற்றும் verification நிலைகளைக் காட்டும்; archive filename ஐ அல்ல. இணைக்கப்பட்ட index archive ஐத் தேர்ந்தெடுக்கும். Installation, extraction க்கு முன் archive checksum ஐயும் நிறுவப்பட்ட pack ஐ மாற்றுமுன் package checksum களையும் சரிபார்க்கும். இது local file களை வாசிக்கும்; காணாத archive களைப் பதிவிறக்காது. நிறுவிய பிறகு application ஐ மறுதொடக்கம் செய்யவும். Release இல் பொருத்தமான asset இல்லையெனில், அந்த release இன் asset கள் வழியாக விருப்ப pack கிடைக்காது.
+
 ## அடைவு அமைப்பு
 
 ```

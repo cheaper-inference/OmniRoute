@@ -182,6 +182,12 @@ Tunnel, Tailscale, Ngrok), लूपबॅक तपासणी तरीही
 | `/api/providers/health-autopilot/actions` | ऑटोपायलट उपचारात्मक कृती अंमलात आणतो                                       |
 | `/api/settings/obsidian`                  | कोणत्याही vault रूटसाठी पुन्हा वापरता येणारी WebDAV क्रेडेन्शियल तयार करतो |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                               |
+| `/api/cli-tools/apply`                    | होस्टवरील ऑपरेटरचे CLI कॉन्फिगरेशन पुन्हा लिहिते                           |
+| `/api/cli-tools/guide-settings`           | मार्गदर्शकावर आधारित CLI कॉन्फिगरेशन फाइल्स लिहिते                         |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes एजंटचे कॉन्फिगरेशन लिहिते                                           |
+| `/api/cli-tools/backups`                  | CLI कॉन्फिगरेशनचे बॅकअप पुनर्स्थापित करते आणि हटवते                        |
+| `/api/log-export`                         | कॉन्फिगर केलेल्या गंतव्यावर कॉल लॉग पाठवते                                 |
+| `/api/restart`                            | सर्व्हर प्रक्रिया पुन्हा सुरू करते                                         |
 
 **उल्लंघन झाल्यास प्रतिसाद:** `401 Authentication required`
 

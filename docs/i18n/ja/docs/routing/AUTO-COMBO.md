@@ -422,22 +422,22 @@ Auto Combo エンジンでは、事前定義されたコンボは必要ありま
 
 ## API
 
-**専用の `POST /api/combos/auto` エンドポイントはありません** — Auto-Combo は次の2つの方法で利用します。
+**専用の `POST /api/combos/auto` エンドポイントはありません** — Auto-Combo は次の 2 つの方法で利用できます。
 
-1. **ゼロコンフィグ（推奨）:** `model: "auto"` または `model: "auto/<variant>"` を指定して、任意のチャット補完リクエストを送信します。仮想ファクトリーがリクエストごとにコンボを構築するため、永続化も API 呼び出しも不要です。
+1. **ゼロ設定（推奨）:** `model: "auto"` または `model: "auto/<variant>"` を指定して、任意のチャット補完リクエストを送信します。仮想ファクトリーがリクエストごとにコンボを構築するため、永続化も API 呼び出しも不要です。
 
-2. **`strategy: "auto"` を指定した永続化コンボ:** `POST /api/combos` を使用して通常のコンボを作成し、`strategy: "auto"` と `config.auto.weights` / `config.auto.candidatePool` を設定します。同じスコアリングエンジンが使用され、コンボは `combos` に保存され、ID で再利用できます。
+2. **`strategy: "auto"` を使用した永続化コンボ:** `POST /api/combos` を使用して通常のコンボを作成し、`strategy: "auto"` と `config.auto.weights` / `config.auto.candidatePool` を設定します。同じスコアリングエンジンが使用され、コンボは `combos` に保存されて ID で再利用できます。
 
-検出用の `GET /api/combos/auto` は、解決済みの候補プールに加え、候補プール内のウィンドウにおける最大値である `context_length` / `max_output_tokens` とともに、すべてのバリアントを一覧表示します。クライアント（例: opencode プラグイン）は、`0` ではなくこれらの値を通知する必要があります。コンテキストがゼロの場合、opencode の自動コンパクションが完全に無効になり、ゲートウェイによる履歴削除でコンテキストが失われるまでセッションが増大し続けます。Auto-Combo のコンテキスト事前フィルターは、サイズ超過のリクエストを大きなウィンドウを持つ候補へルーティングするため、最大値を通知しても安全です。
+検出用の `GET /api/combos/auto` は、解決済みの候補プールと、候補プール内のウィンドウ全体における最大値である `context_length` / `max_output_tokens` を含むすべてのバリアントを一覧表示します。クライアント（opencode プラグインなど）は、`0` ではなくこれらの値を公開する必要があります。コンテキストがゼロの場合、opencode の自動圧縮が完全に無効になり、ゲートウェイによる履歴削除でコンテキストが失われるまでセッションが増大し続けます。自動コンボのコンテキスト事前フィルターによって、サイズ超過のリクエストは大きなウィンドウを持つ候補へルーティングされるため、最大値を公開しても安全です。
 
 ```bash
-# ゼロコンフィグでの使用（コンボの作成不要）
+# ゼロ設定での使用（コンボ作成なし）
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# 通常のコンボエンドポイントを介した永続化 Auto-Combo
+# 通常のコンボエンドポイントを介した永続化自動コンボ
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
@@ -445,31 +445,31 @@ curl -X POST http://localhost:20128/api/combos \
 
 ### 自動ルーター戦略
 
-永続化された `strategy: "auto"` コンボでは、`config.routerStrategy`（または旧形式の
+永続化された `strategy: "auto"` コンボでは、`config.routerStrategy`（またはレガシーの
 `config.auto.routerStrategy`）を次のいずれかに設定できます。
 
 - `rules` — デフォルトの重み付きスコアリング
-- `score` — 設定された重み付きスコアが最も高い候補を選択します。スコアが完全に同じ場合は、設定された
-  候補順序が維持されます。既存の `explorationRate` は、ランク付けされたプール全体からサンプリングします。
+- `score` — 設定された重み付きスコアが最も高い候補を選択します。完全に同点の場合は、設定された
+  候補の順序が維持されます。既存の `explorationRate` は、ランク付けされたプール全体からサンプリングします。
 - `cost` / `eco` — 最も安価で正常なプロバイダー
 - `latency` / `fast` — 信頼性ペナルティを考慮した最小の p95 レイテンシ
-- `sla-aware` / `sla` — p95 レイテンシ、エラー率、および任意の
+- `sla-aware` / `sla` — p95 レイテンシ、エラー率、およびオプションの
   コスト SLO を満たす候補を優先
-- `lkgp` — 最後に正常だった既知のプロバイダーを優先
-- `nadir` — [Nadir](https://getnadir.com) の意思決定 API に、プール内のどのモデルが
-  プロンプトに必要かを問い合わせます。オプトイン方式で、失敗時は `rules` にフォールバックします
+- `lkgp` — 最後に正常であることが確認されたプロバイダーを最優先
+- `nadir` — プール内のどのモデルがプロンプトに必要かを [Nadir](https://getnadir.com) の判定 API に
+  問い合わせます。オプトイン方式で、障害時には `rules` にフォールバックします
 
 ### ルーター戦略の詳細
 
-Auto-Combo エンジンは、`config.routerStrategy`（または旧形式の `config.auto.routerStrategy`）
-を介して切り替え可能な、7つのプラガブルな **RouterStrategy** 実装を公開しています。
-各戦略は、`RoutingContext`（タスクタイプ、ツール／ビジョンのヒント、推定トークン数、任意の SLA ポリシー、
-任意の最後に正常だった既知のプロバイダー）を基に、候補プールから1つのプロバイダーを選択します。
+自動コンボエンジンは、`config.routerStrategy`（またはレガシーの `config.auto.routerStrategy`）
+を介して切り替え可能な、7 つのプラグイン可能な **RouterStrategy** 実装を公開しています。
+各戦略は、`RoutingContext`（タスクタイプ、ツール／ビジョンのヒント、トークン推定値、オプションの SLA ポリシー、オプションの
+最後に正常であることが確認されたプロバイダー）に基づいて、候補プールから 1 つのプロバイダーを選択します。
 
-#### 1. `rules`（デフォルト）— 16要素の重み付きスコアリング
+#### 1. `rules`（デフォルト）— 16 要素の重み付きスコアリング
 
-既存のスコアリングエンジンをラップします。`OPEN` 状態のサーキットブレーカー候補を除外した後、
-現在のタスクタイプと `getTaskFitness()` を使用して `scorePool()` を実行し、
+既存のスコアリングエンジンをラップします。`OPEN` 状態のサーキットブレーカーを持つ
+候補を除外した後、現在のタスクタイプと `getTaskFitness()` を使用して `scorePool()` を実行し、
 最高スコアのプロバイダーを選択します。
 
 ```ts
@@ -490,7 +490,7 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**使用する場面**: デフォルト。すべてのシグナル間でバランスの取れたトレードオフが必要な場合に使用します。
+**使用する場面**: デフォルトです。すべてのシグナル間でバランスの取れたトレードオフが必要な場合に使用します。
 
 **エイリアス**: `rules`（エイリアスなし）
 
@@ -522,8 +522,8 @@ class CostStrategyImpl implements RouterStrategy {
 
 #### 3. `latency` / `fast` — 信頼性ペナルティを考慮した最小の p95 レイテンシ
 
-`p95LatencyMs + (errorRate * 1000)` によって並べ替えます。エラー率のペナルティにより、
-公称レイテンシが低い場合でも、信頼性の低いプロバイダーは低い順位になります。
+`p95LatencyMs + (errorRate * 1000)` に基づいて並べ替えます。エラー率ペナルティにより、
+公称レイテンシが低い場合でも、信頼性の低いプロバイダーは下位にランク付けされます。
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -540,8 +540,8 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**使用する場面**: リアルタイムチャット、オートコンプリート、対話型コーディングアシスタントなど、
-レイテンシが重要なワークロード。
+**使用する場面**: リアルタイムチャット、オートコンプリート、または
+対話型コーディングアシスタントなど、レイテンシに敏感なワークロード。
 
 **エイリアス**: `latency`、`fast`
 
@@ -549,7 +549,7 @@ class LatencyStrategyImpl implements RouterStrategy {
 
 #### 4. `sla-aware` / `sla` — レイテンシ／エラー／コスト SLO への準拠
 
-設定された SLO ポリシーを各候補がどの程度満たしているかに基づいてスコアリングします。
+設定された SLO ポリシーをどの程度満たしているかに基づいて、各候補をスコアリングします。
 
 | 要素             | 重み | 計算式                                            |
 | ---------------- | ---- | ------------------------------------------------- |
@@ -560,8 +560,8 @@ class LatencyStrategyImpl implements RouterStrategy {
 | 安定性スコア     | 5%   | レイテンシ標準偏差の逆正規化                      |
 
 `hardConstraints: true` の場合、候補は主に**違反スコア**
-（SLO をどの程度超過しているか）でソートされ、次に複合スコアでソートされます。それ以外の場合は、
-複合スコアのみでソートされます。
+（いずれかの SLO をどの程度超過しているか）で並べ替えられ、その後に複合スコアで並べ替えられます。それ以外の場合は、
+複合スコアのみが使用されます。
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -570,12 +570,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... 各候補をポリシーに照らしてスコアリング: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... 各候補をポリシーと照合してスコアリングします: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA フィールド**（combo 設定で指定）:
+**SLA フィールド**（コンボ設定に指定）:
 
 ```json
 {
@@ -599,8 +599,8 @@ class SLAStrategyImpl implements RouterStrategy {
 #### 5. `lkgp` — 最後に正常だったプロバイダーを優先
 
 **最後に正常だったプロバイダー**（設定されている場合）を最初に試し、その後
-`rules` ストラテジーにフォールバックします。セッションのスティッキネスに便利です。同じプロバイダーが
-会話内の後続リクエストを処理します。
+`rules` ストラテジーにフォールバックします。セッションのスティッキネス、つまり会話内の
+後続リクエストを同じプロバイダーで処理する場合に便利です。
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -627,21 +627,21 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**使用する場面**: 同じプロバイダーに後続リクエストを処理させたい複数ターンの会話
-（例: キャッシュ、コンテキストの連続性、料金の一貫性を維持する場合）。
+**使用する場面**: 同じプロバイダーで後続リクエストを処理したい
+マルチターン会話（例: キャッシュ、コンテキストの連続性、料金の一貫性を確保する場合）。
 
 **エイリアス**: `lkgp`（エイリアスなし）
 
 ---
 
-#### 6. `nadir` — Nadir によるプロンプト対応のモデル選択
+#### 6. `nadir` — Nadir によるプロンプト認識型のモデル選択
 
 上記の各ストラテジーは、それぞれ独自のテレメトリに基づいて候補をランク付けしますが、リクエストの内容は
 読み取りません。`nadir` は、最後のユーザーターンとプール内のモデル ID を
-[Nadir](https://getnadir.com) の決定 API（`POST /v1/bucket`）に送信し、その候補一覧から Nadir が
-選択したモデルへルーティングします（`simple` → 対応可能な最も安価なモデル、`complex` →
-フロンティアモデル）。そのモデルを提供する接続は引き続き `rules` によって選択されるため、クォータ、
-ヘルス、コストに基づいて使用するアカウントが決定されます。
+[Nadir](https://getnadir.com) の決定 API（`POST /v1/bucket`）に送信し、その候補から Nadir が選択したモデル
+（`simple` → 要件を満たす最も安価なモデル、`complex` → フロンティアモデル）にルーティングします。
+そのモデルを提供する接続は引き続き `rules` によって選択されるため、クォータ、
+ヘルス、およびコストに基づいて、使用するアカウントが決定されます。
 
 ```json
 {
@@ -657,23 +657,26 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` と `OMNIROUTE_NADIR_BASE_URL` は、この 2 つの文字列に対する環境変数の
-フォールバックです。`baseUrl` が必要なのは、セルフホスト型の Nadir を使用する場合のみです（末尾の `/v1` も許容されます）。
-キーなしの呼び出しは、IP ごとにレート制限される Nadir の匿名ティアに送られます。
+`OMNIROUTE_NADIR_API_KEY` と `OMNIROUTE_NADIR_BASE_URL` は、この 2 つの
+文字列に対する環境変数のフォールバックです。`baseUrl` が必要なのは、セルフホスト型の Nadir を使用する場合のみです（末尾の `/v1` は許容されます）。
+キーなしの呼び出しは Nadir の匿名ティアに送られ、IP ごとにレート制限されます。キーを使用すると
+（[こちらで作成](https://app.getnadir.com/dashboard/api-keys)）、各決定が
+Nadir ダッシュボードに記録されます。完全なセットアップおよび検証手順:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)。
 
-外部へ送信される内容: 最後のユーザーメッセージのテキスト（先頭 16k 文字）、候補の
+外部に送信される内容: 最後のユーザーメッセージのテキスト（先頭 16,000 文字）、候補の
 モデル ID、および `source: "omniroute"` チャネルタグ。システムプロンプト、履歴、ツール、または
 ヘッダーは送信されません。
 
-障害時はフェイルオープンで動作します。タイムアウト（デフォルトは 2000 ms）、非 2xx、到達不能な
-ホスト、不正な形式のレスポンス、またはプール外の選択が発生した場合は `rules` の
-決定に切り替わり、理由の先頭に `NadirStrategy: fallback (…)` が付加されます。呼び出しが失敗すると、
-ストラテジーは 30 秒間ネットワークアクセスをスキップするため、障害時のタイムアウト発生回数は
-リクエストごとに 1 回ではなく、30 秒ごとに 1 回になります。Nadir が実際に選択を行った場合のみ、
-ルーティングイベントで `strategy: "nadir"` が報告されます。
+障害時の動作はフェイルオープンです。タイムアウト（デフォルトは 2000 ms）、非 2xx 応答、到達不能な
+ホスト、不正な形式の応答、またはプール外の選択が発生した場合は `rules` の
+決定にフォールバックし、理由には `NadirStrategy: fallback (…)` というプレフィックスが付きます。呼び出しに失敗すると、
+ストラテジーは 30 秒間ネットワークアクセスをスキップするため、障害発生時のタイムアウトはリクエストごとではなく
+30 秒ごとに 1 回だけ発生します。ルーティングイベントで `strategy: "nadir"` が報告されるのは、Nadir が実際に
+選択を行った場合のみです。
 
-**使用する場面**: 複数のモデルティア（小規模、中規模、フロンティアモデル）で構成されたプールに対する、
-難易度が混在するトラフィックで、常にフロンティアモデルを使用するコストを削減したい場合。
+**使用する場面**: モデルのティアが複数（小規模、中規模、
+フロンティアモデル）にまたがるプールで難易度が混在するトラフィックを処理し、常にフロンティアモデルを使用するコストを削減したい場合。
 
 **エイリアス**: `nadir`（エイリアスなし）
 
@@ -694,7 +697,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // ここにルーティングロジックを記述
+    // ここにルーティングロジックを記述します
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -724,16 +727,16 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ### ルーターストラテジー選択ガイド
 
-| ユースケース           | ストラテジー | 理由                                     |
-| ---------------------- | ------------ | ---------------------------------------- |
-| バランス型ワークロード | `rules`      | デフォルト — すべての要素を考慮          |
-| コストの最小化         | `cost`       | 常に最も安価なものを選択                 |
-| レイテンシの最小化     | `latency`    | 最も高速で信頼性の高いプロバイダーを選択 |
-| 厳格な SLO             | `sla-aware`  | p95、エラー、コストのしきい値で絞り込み  |
-| 複数ターンのチャット   | `lkgp`       | セッションスティッキネス                 |
-| 難易度が混在           | `nadir`      | プロンプトごとにモデルティアを選択       |
+| ユースケース                 | 戦略        | 理由                                            |
+| ---------------------------- | ----------- | ----------------------------------------------- |
+| バランスの取れたワークロード | `rules`     | デフォルト — すべての要因を考慮                 |
+| コストの最小化               | `cost`      | 常に最も安価なものを選択                        |
+| レイテンシーの最小化         | `latency`   | 最も高速で信頼性の高いプロバイダーを選択        |
+| 厳格なSLO                    | `sla-aware` | p95、エラー率、コストのしきい値でフィルタリング |
+| マルチターンチャット         | `lkgp`      | セッションの固定性                              |
+| 難易度が混在する場合         | `nadir`     | プロンプトごとにモデル階層を選択                |
 
-SLA 対応フィールド:
+SLA対応フィールド:
 
 ```json
 {

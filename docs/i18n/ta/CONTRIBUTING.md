@@ -8,17 +8,20 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## உருவாக்கச் சூழல் அமைப்பு
+## மேம்பாட்டு அமைப்பு
 
 ### முன்தேவைகள்
 
-- **Node.js** `>=22.22.2 <23`, அல்லது `>=24.0.0 <27` (பரிந்துரைக்கப்படுவது: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, அல்லது `>=24.0.0 <27` (பரிந்துரைக்கப்படுகிறது: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ பயனர்கள் (Node 24+):** `npm install`-க்குப் பிறகு, நேட்டிவ் தொகுதிகள் நிறுவப்பட்டுள்ளனவா என்பதைச் சரிபார்க்கவும்:
-> `node -e "require('better-sqlite3')"`. இது `MODULE_NOT_FOUND` பிழையுடன் தோல்வியடைந்தால்,
-> `npm approve-scripts better-sqlite3 && npm install` என்பதை இயக்கவும். மேலும் அறிய
-> [சிக்கல் தீர்த்தல்](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) என்பதைப் பார்க்கவும்.
+> **Node 24 உடன் Windows:** தற்போதைய 24 LTS patch வெளியீட்டை (குறைந்தது 24.20.0) பயன்படுத்தவும்.\
+> முந்தைய வெளியீடுகளில் `--test-force-exit` செயல்முறையை மூடிய பிறகு, வெற்றிகரமான சோதனைகளுக்குப் பின்னரும் செயல்முறை நிறுத்தப்படலாம். Node இன் [Windows libuv திருத்தம்](https://github.com/nodejs/node/pull/61999) இந்த runtime செயலிழப்பைத் தீர்க்கிறது; சோதனை assertions மற்றும் runner exit checks ஆகியவை இயக்கப்பட்ட நிலையிலேயே இருக்கட்டும்.
+
+> **npm v11+ பயனர்கள் (Node 24+):** `npm install` இயக்கிய பிறகு, native modules நிறுவப்பட்டுள்ளனவா என்பதைச் சரிபார்க்கவும்:\
+> `node -e "require('better-sqlite3')"` . இது `MODULE_NOT_FOUND` பிழையுடன் தோல்வியடைந்தால்,\
+> `npm approve-scripts better-sqlite3 && npm install` இயக்கவும்.\
+> [Troubleshooting](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) பார்க்கவும்.
 
 - **Git**
 
@@ -33,91 +36,86 @@ npm install
 ### சூழல் மாறிகள்
 
 ```bash
-# வார்ப்புருவிலிருந்து உங்கள் .env கோப்பை உருவாக்கவும்
+# உங்கள் .env கோப்பை வார்ப்புருவிலிருந்து உருவாக்கவும்
 cp .env.example .env
 
-# தேவையான இரகசியங்களை உருவாக்கவும்
+# தேவையான ரகசியங்களை உருவாக்கவும்
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-உருவாக்கத்திற்கான முக்கிய மாறிகள்:
+மேம்பாட்டிற்கான முக்கிய மாறிகள்:
 
-| மாறி                   | இயல்புநிலை உருவாக்க மதிப்பு | விளக்கம்                       |
-| ---------------------- | --------------------------- | ------------------------------ |
-| `PORT`                 | `20128`                     | சேவையகப் போர்ட்                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | முன்பக்கத்திற்கான அடிப்படை URL |
-| `JWT_SECRET`           | (மேலே உருவாக்கவும்)         | JWT கையொப்ப இரகசியம்           |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | முதல் உள்நுழைவுக் கடவுச்சொல்   |
-| `APP_LOG_LEVEL`        | `info`                      | பதிவேட்டின் விரிவுநிலை         |
+| Variable               | Development Default      | Description                 |
+| ---------------------- | ------------------------ | --------------------------- |
+| `PORT`                 | `20128`                  | சேவையகப் போர்ட்             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | frontend-க்கான அடிப்படை URL |
+| `JWT_SECRET`           | (மேலே உருவாக்கவும்)      | JWT கையொப்பமிடும் ரகசியம்   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | முதல் உள்நுழைவு கடவுச்சொல்  |
+| `APP_LOG_LEVEL`        | `info`                   | பதிவு விரிவாக்க நிலை        |
 
-### கட்டுப்பாட்டுப் பலகை அமைப்புகள்
+### Dashboard அமைப்புகள்
 
-சூழல் மாறிகள் வழியாகவும் உள்ளமைக்கக்கூடிய அம்சங்களுக்கான UI நிலைமாற்றிகளை கட்டுப்பாட்டுப் பலகை வழங்குகிறது:
+சூழல் மாறிகள் வழியாகவும் கட்டமைக்கக்கூடிய அம்சங்களுக்கான UI மாற்றிகளை dashboard வழங்குகிறது:
 
-| அமைவு இருப்பிடம்        | நிலைமாற்றி               | விளக்கம்                                           |
-| ----------------------- | ------------------------ | -------------------------------------------------- |
-| அமைப்புகள் → மேம்பட்டவை | பிழைத்திருத்தப் பயன்முறை | பிழைத்திருத்தக் கோரிக்கைப் பதிவுகளை இயக்குதல் (UI) |
-| அமைப்புகள் → பொது       | பக்கப்பட்டைத் தெரிவுநிலை | பக்கப்பட்டைப் பிரிவுகளைக் காட்டுதல்/மறைத்தல்       |
+| Setting Location    | Toggle             | Description                              |
+| ------------------- | ------------------ | ---------------------------------------- |
+| Settings → Advanced | Debug Mode         | debug request பதிவுகளை இயக்கவும் (UI)    |
+| Settings → General  | Sidebar Visibility | sidebar பிரிவுகளைக் காட்டவும்/மறைக்கவும் |
 
-இந்த அமைப்புகள் தரவுத்தளத்தில் சேமிக்கப்பட்டு, மறுதொடக்கங்களுக்குப் பிறகும் நீடிக்கும்; அமைக்கப்பட்டிருந்தால் சூழல் மாறிகளின் இயல்புநிலைகளை மீறும்.
+இந்த அமைப்புகள் database-ல் சேமிக்கப்பட்டு, மறுதொடக்கங்களுக்குப் பிறகும் நிலைத்திருக்கும்; அமைக்கப்பட்டபோது env var இயல்புநிலைகளை மீறுகின்றன.
 
 ### உள்ளூரில் இயக்குதல்
 
 ```bash
-# உருவாக்கப் பயன்முறை (உடனடி மறுஏற்றம்)
+# மேம்பாட்டு முறை (hot reload)
 npm run dev
 
-# தயாரிப்புக் கட்டமைப்பு
+# Production build
 npm run build    # next build → .build/next/ பின்னர் assembleStandalone → dist/
 npm run start
 
-# பங்களிப்பாளர் மாற்றங்களுக்கான வேகமான பின்தளம்/API-மட்டும் தொகுத்தல்
+# பங்களிப்பாளர்களின் மாற்றங்களுக்கான விரைவான backend/API-only compile
 npm run build:contributor
 
-# வெளியீட்டுக் கட்டமைப்பு (தூய மறுகட்டமைப்பு + HEAD காவல் குறி — பயன்படுத்தலுக்குத் தேவை)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA-ஐ எழுதுகிறது
+# Release build (சுத்தமான rebuild + HEAD sentinel — deploy-க்கு தேவை)
+npm run build:release   # rm -rf .build dist பின்னர் build + dist/BUILD_SHA எழுதுகிறது
 
-# பொதுவான போர்ட் உள்ளமைவு
+# பொதுவான போர்ட் கட்டமைப்பு
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-பங்களிப்பாளர் கட்டமைப்பு தொகுத்தல்-மட்டும் சரிபார்ப்பைச் செய்கிறது: இது தனித்தியங்கும்
-விநியோகத்தை ஒன்றுசேர்க்காது அல்லது விருப்பமான நேட்டிவ் தொகுப்பாக்கச் சொத்துகளை உருவாக்காது. அனுப்பக்கூடிய தொகுப்பைச்
-சரிபார்க்க வேண்டியபோது வழக்கமான தயாரிப்புக் கட்டமைப்பைப் பயன்படுத்தவும்.
+பங்களிப்பாளர் build compile-only சரிபார்ப்பைச் செய்கிறது: இது standalone distribution-ஐ assemble செய்யாது அல்லது விருப்ப native packaging assets-ஐ build செய்யாது. deploy செய்யக்கூடிய bundle-ஐச் சரிபார்க்க வேண்டும்போது வழக்கமான production build-ஐப் பயன்படுத்தவும்.
 
-### கட்டமைப்பு வெளியீட்டு அமைப்பு
+### Build வெளியீட்டு அமைப்பு
 
-| கோப்பகம்  | உள்ளடக்கங்கள்                                                                         | கண்காணிக்கப்படுவது |
-| --------- | ------------------------------------------------------------------------------------- | ------------------ |
-| `src/`    | பயன்பாட்டு மூலக்குறியீடு (TypeScript / TSX)                                           | ஆம்                |
-| `.build/` | இடைநிலை வெளியீடுகள் — `next build` வெளியீடு (gitignored, `distDir = .build/next`)     | இல்லை              |
-| `dist/`   | அனுப்பக்கூடிய தொகுப்பு — `assembleStandalone` மூலம் ஒன்றுசேர்க்கப்பட்டது (gitignored) | இல்லை              |
+| Directory | Contents                                                                  | Tracked |
+| --------- | ------------------------------------------------------------------------- | ------- |
+| `src/`    | Application source (TypeScript / TSX)                                     | ஆம்     |
+| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | இல்லை   |
+| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | இல்லை   |
 
-கட்டமைப்புச் செயல்முறை ஒரே சுற்றில் நடைபெறுகிறது:
+Build pipeline ஒரே கட்டமாகும்:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js வெளியீடு)
-  └─ assembleStandalone()                 (தனித்தியங்கும் வெளியீடு + static + public + நேட்டிவ் சொத்துகளை நகலெடுக்கிறது)
-       └─ வெளியீடு: dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (standalone + static + public + native assets-ஐ நகலெடுக்கிறது)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` கூடுதலாக முதலில் இரண்டு கோப்பகங்களையும் சுத்தம் செய்து,
-பயன்படுத்தல் ஒருமைப்பாட்டுக் காவல் குறியாக `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) என்பதை எழுதுகிறது.
+`npm run build:release` கூடுதலாக முதலில் இரு directories-ஐயும் சுத்தம் செய்து, deploy integrity sentinel ஆக\
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) எழுதுகிறது.
 
-`npm run build:contributor` பின்தளம்-மட்டும் கட்டமைப்புச் சுயவிவரத்தைப் பயன்படுத்துகிறது. கட்டமைக்கும்போது இது
-கட்டுப்பாட்டுப் பலகை UI கோப்புகளைத் தற்காலிகமாக போலியாக்கி, API வழித்தடக் கையாளிகளைத் தக்கவைத்து, கட்டமைப்புக்குப்
-பிறகு அசல் கோப்புகளை மீட்டமைக்கிறது. கட்டுப்பாட்டுப் பலகை UI-ஐப் பாதிக்கும் மாற்றங்களுக்கோ அல்லது முழுமையான
-வெளியீட்டுச் சரிபார்ப்புக்கோ `npm run build` என்பதைப் பயன்படுத்தவும்; பங்களிப்பாளர் சுயவிவரம் வெளியீட்டுக் கட்டமைப்புக்கு மாற்றாகாது.
+`npm run build:contributor` backend-only build profile-ஐப் பயன்படுத்துகிறது. Build செய்யும்போது dashboard UI கோப்புகளைத் தற்காலிகமாக stub செய்து, API route handlers-ஐ வைத்திருந்து, build முடிந்ததும் அசல் கோப்புகளை மீட்டமைக்கிறது. Dashboard UI-ஐ பாதிக்கும் மாற்றங்களுக்கு அல்லது முழுமையான release validation-க்கு `npm run build` பயன்படுத்தவும்; contributor profile, release build-க்கு மாற்றாகாது.
 
-> **VPS பயன்படுத்தல் குறிப்பு:** தொலைநிலைப் படக் கோப்பகம் `/usr/lib/node_modules/omniroute/app/`
-> மாறாமல் உள்ளது. பயன்படுத்தல் திறன்கள் `dist/`-இன் உள்ளடக்கங்களை அதில் rsync செய்கின்றன.
-> களஞ்சியத்திற்குள் உள்ள கட்டமைப்பு வெளியீட்டுப் பாதை மட்டுமே மாற்றப்பட்டுள்ளது (`app/` → `dist/`).
+> **VPS deploy குறிப்பு:** remote image directory `/usr/lib/node_modules/omniroute/app/`\
+> மாற்றமின்றி உள்ளது. deploy skills, `dist/` உள்ளடக்கங்களை அதில் rsync செய்கின்றன.\
+> repository-க்குள் உள்ள build output path மட்டும் மாற்றப்பட்டது (`app/` → `dist/`).
 
-இயல்புநிலை URL-கள்:
+இயல்புநிலை URLs:
 
-- **கட்டுப்பாட்டுப் பலகை**: `http://localhost:20128/dashboard`
+- **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -175,12 +173,12 @@ npm run test:all
 # ஒற்றைச் சோதனைக் கோப்பு (Node.js நேட்டிவ் சோதனை இயக்கி — பெரும்பாலான சோதனைகள் இதைப் பயன்படுத்துகின்றன)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# உங்கள் மாற்றத்தால் பாதிக்கப்பட்ட unit சோதனைகள் மட்டும் (CI gate, #8084 பயன்படுத்தும் அதே TIA selector)
+# உங்கள் மாற்றத்தால் பாதிக்கப்பட்ட unit சோதனைகள் மட்டும் (CI gate-இல் உள்ள அதே TIA selector, #8084)
 npm run test:scoped            # கடைசி commit-இல் உள்ள மாற்றங்கள் (அல்லது working tree)
 npm run test:scoped:staged     # staged மாற்றங்கள் மட்டும் — pre-commit இயக்கத்துடன் நன்றாகப் பொருந்தும்
 npm run test:scoped:full       # முதலில் import-graph map-ஐ மீண்டும் உருவாக்கும் (கோப்புகளைச் சேர்த்த/நகர்த்திய பிறகு)
-# Exit 1 + "run the full suite" என்பது ஒரு hub கோப்பு (tsconfig, package.json, …) அல்லது
-# map செய்யப்படாத source மாறியுள்ளது என்பதைக் குறிக்கும் — selector பாதுகாப்பாகத் தோல்வியடையும்; எதையும் அமைதியாகத் தவிர்க்காது.
+# Exit 1 + "முழு suite-ஐ இயக்கவும்" என்பது hub கோப்பு (tsconfig, package.json, …) அல்லது map செய்யப்படாத
+# source மாறியுள்ளது என்பதைக் குறிக்கும் — selector பாதுகாப்பான முறையில் தோல்வியடையும்; அது ஒருபோதும் அமைதியாகத் தவிர்க்காது.
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
@@ -194,7 +192,7 @@ npm run test:protocols:e2e
 # Ecosystem இணக்கத்தன்மைச் சோதனைகள்
 npm run test:ecosystem
 
-# Coverage gate: statements/lines/functions/branches ஆகியவற்றுக்கு 60%
+# Coverage gate: statements/lines/functions/branches-க்கு 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -202,14 +200,14 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gate செய்யப்பட்ட உண்மையான-upstream combo smoke சோதனை (VPS அணுகல் + உண்மையான provider credits தேவை)
-# இது உண்மையான providers-ஐ அணுகும் — சிறிதளவு செலவாகும். CI-இல் ஒருபோதும் இயங்காது. Gate இல்லையெனில் முறையாகத் தவிர்க்கப்படும்.
-# தேவை: ssh root@192.168.0.15 அணுகல் (VPS-இலிருந்து read-only DB snapshot-ஐப் பெறும்).
+# Gate செய்யப்பட்ட உண்மையான upstream combo smoke சோதனை (VPS அணுகல் + உண்மையான provider credits தேவை)
+# உண்மையான providers-ஐ அணுகும் — சிறிதளவு செலவாகும். CI-இல் ஒருபோதும் இயங்காது. Gate இல்லையெனில் பிழையின்றித் தவிர்க்கப்படும்.
+# தேவை: ssh root@192.168.0.15 அணுகல் (VPS-இலிருந்து படிக்க மட்டும் இயலும் DB snapshot-ஐ source செய்கிறது).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS நேரடி smoke சோதனை — எளிய Node ESM scripts, நேரடி .15 server-ஐ அணுகும்.
-# தேவை: ssh root@192.168.0.15 அணுகல் (combos, SSH sqlite வழியாக உருவாக்கப்பட்டு/அகற்றப்படும்).
-# உண்மையான providers-ஐ அணுகும் (சிறிய செலவு). __live_test__* combos-ஐ மட்டும் உருவாக்கும்/நீக்கும். CI-இல் ஒருபோதும் இயங்காது.
+# Phase-3 VPS live smoke — சாதாரண Node ESM scripts, live .15 server-ஐ நேரடியாக அணுகும்.
+# தேவை: ssh root@192.168.0.15 அணுகல் (SSH sqlite வழியாக combos உருவாக்கப்பட்டு/அகற்றப்படும்).
+# உண்மையான providers-ஐ அணுகும் (சிறிய செலவு). __live_test__* combos-ஐ மட்டுமே உருவாக்கும்/நீக்கும். CI-இல் ஒருபோதும் இயங்காது.
 # .15-இல் REQUIRE_API_KEY=false என்பதால் API key தேவையில்லை; ஆனால் அமைக்கப்பட்டிருந்தால் COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY மதிக்கப்படும்.
 npm run test:combo:live:vps              # 7 HTTP சூழல்கள் (priority/round-robin/weighted/cost/fusion/auto + health)
 npm run test:combo:live:vps:failover     # உண்மையான cross-provider failover சூழலைச் சேர்க்கும் (மொத்தம் 8)
@@ -217,27 +215,28 @@ npm run test:combo:live:vps:failover     # உண்மையான cross-provid
 
 Coverage குறிப்புகள்:
 
-- `npm run test:coverage`, முதன்மையான unit சோதனைத் தொகுப்புக்கான source coverage-ஐ அளவிடுகிறது, `tests/**`-ஐ விலக்குகிறது, மேலும் `open-sse/**`-ஐ உள்ளடக்குகிறது
-- Pull request-கள் statements/lines/functions/branches ஆகியவற்றுக்கான coverage gate-ஐ **60%+** அளவில் பராமரிக்க வேண்டும்
-- ஒரு PR, `src/`, `open-sse/`, `electron/`, அல்லது `bin/` ஆகியவற்றில் production code-ஐ மாற்றினால், அதே PR-இல் automated tests-ஐச் சேர்க்கவோ புதுப்பிக்கவோ வேண்டும்
-- `npm run coverage:report`, சமீபத்திய coverage இயக்கத்திலிருந்து விரிவான கோப்பு-வாரியான அறிக்கையை அச்சிடுகிறது
-- `npm run test:coverage:legacy`, வரலாற்று ஒப்பீட்டிற்காகப் பழைய metric-ஐப் பாதுகாக்கிறது
-- கட்டப்படியான coverage மேம்பாட்டு roadmap-க்கு `docs/ops/COVERAGE_PLAN.md`-ஐப் பார்க்கவும்
+- `npm run test:coverage` முதன்மை unit test suite-க்கான source coverage-ஐ அளவிடுகிறது, `tests/**`-ஐ விலக்குகிறது, மேலும் `open-sse/**`-ஐ உள்ளடக்குகிறது
+- Pull requests, statements/lines/functions/branches-க்கான coverage gate-ஐ **60%+** அளவில் வைத்திருக்க வேண்டும்
+- ஒரு PR, `src/`, `open-sse/`, `electron/`, அல்லது `bin/`-இல் உள்ள production code-ஐ மாற்றினால், அதே PR-இல் automated tests-ஐச் சேர்க்கவோ புதுப்பிக்கவோ வேண்டும்
+- `npm run coverage:report` சமீபத்திய coverage இயக்கத்திலிருந்து விரிவான கோப்பு-வாரியான அறிக்கையை அச்சிடுகிறது
+- `npm run test:coverage:legacy` வரலாற்று ஒப்பீட்டிற்காகப் பழைய metric-ஐப் பாதுகாக்கிறது
+- கட்டம் வாரியான coverage மேம்பாட்டு roadmap-க்கு `docs/ops/COVERAGE_PLAN.md`-ஐப் பார்க்கவும்
 
 ### Pull Request தேவைகள்
 
-ஒரு PR-ஐத் திறப்பதற்கு முன், நீங்கள் மாற்றியவற்றிற்கான கவனம் செலுத்தப்பட்ட சுழற்சியை இயக்க
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)-ஐப் பயன்படுத்தவும். முழுமையான unit தொகுப்பு (4 CI shards), Vitest, **60%+** coverage gate மற்றும்
-production build ஆகியவை CI-இன் பொறுப்பு — அவற்றை உள்ளூரில் இயக்குவது, PR
-சரிபார்ப்புகள் ஏற்கெனவே வழங்காத எந்தக் கூடுதல் தகவலையும் வழங்காது; மேலும் சிறிய கணினிகளில் அது host-ஐ முழுமையாகச் சுமைப்படுத்தக்கூடும் (#8084):
+PR ஒன்றைத் திறப்பதற்கு முன், நீங்கள் மாற்றியவற்றுக்கான focused loop-ஐ இயக்க
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)-ஐப் பயன்படுத்தவும். முழுமையான unit suite (4 CI shards), Vitest, **60%+** coverage gate மற்றும்
+production build ஆகியவை CI-யின் பொறுப்பு — அவற்றை உள்ளூரில் இயக்குவது, PR
+சரிபார்ப்புகள் ஏற்கெனவே வழங்காத கூடுதல் தகவலை வழங்காது; மேலும் குறைந்த திறனுள்ள கணினிகளில் host-ஐ முழுமையாகப் பயன்படுத்திவிடலாம் (#8084):
 
-- உங்கள் மாற்றத்தை உள்ளடக்கும் சோதனைக் கோப்புகளை இயக்கவும்: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- உங்கள் மாற்றத்தை உள்ளடக்கும் test files-ஐ இயக்கவும்: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint`-ஐ இயக்கவும்
-- production code மாறும் ஒவ்வொரு முறையும், அதே PR-இல் automated tests-ஐச் சேர்க்கவும் அல்லது புதுப்பிக்கவும்
-- production code மாறியிருந்தால், மாற்றப்பட்ட அல்லது சேர்க்கப்பட்ட சோதனைக் கோப்புகளை PR விளக்கத்தில் சேர்க்கவும்
-- project secrets, CI-இல் configure செய்யப்பட்டிருந்தால், PR-இல் SonarQube முடிவைச் சரிபார்க்கவும்
+- production code மாறும் ஒவ்வொரு முறையும், அதே PR-இல் automated tests-ஐச் சேர்க்கவோ புதுப்பிக்கவோ செய்யவும்
+- `node:test` கோப்புகளில், ஒவ்வொரு top-level `await`-ஐயும் (`await import(...)` போன்றவை) முதல் `test()` / `describe()`-க்கு முன் வைக்கவும்: `--test-force-exit`-இன் கீழ், அதற்குப் பிறகு பதிவு செய்யப்பட்ட tests அமைதியாக இயங்காமலேயே போகலாம் (#18045; `npm run check:test-tla-order` மூலம் அமல்படுத்தப்படுகிறது)
+- production code மாறியிருந்தால், மாற்றப்பட்ட அல்லது சேர்க்கப்பட்ட test files-ஐ PR விளக்கத்தில் சேர்க்கவும்
+- CI-இல் project secrets கட்டமைக்கப்பட்டிருக்கும்போது, PR-இன் SonarQube முடிவைச் சரிபார்க்கவும்
 
-தற்போதைய சோதனை நிலை: பின்வருவனவற்றை உள்ளடக்கும் **122 unit சோதனைக் கோப்புகள்**:
+தற்போதைய சோதனை நிலை: **122 unit test files**, இவற்றை உள்ளடக்குகின்றன:
 
 - Provider translators மற்றும் format conversion
 - Rate limiting, circuit breaker மற்றும் resilience

@@ -16,34 +16,34 @@ AgentBridge là proxy MITM (Man-in-the-Middle — trung gian) của OmniRoute, c
 
 ### AgentBridge là gì?
 
-Khi một agent của IDE (ví dụ: GitHub Copilot, Cursor, Claude Code) thực hiện một lệnh gọi API, nó sẽ kết nối trực tiếp tới nhà cung cấp AI upstream (OpenAI, Anthropic, v.v.). AgentBridge chặn kết nối đó một cách trong suốt ở tầng TLS — mà không yêu cầu thay đổi cấu hình nào của agent — và viết lại request để đi qua OmniRoute.
+Khi một tác nhân IDE (ví dụ: GitHub Copilot, Cursor, Claude Code) thực hiện cuộc gọi API, nó sẽ kết nối trực tiếp với nhà cung cấp AI ngược dòng (OpenAI, Anthropic, v.v.). AgentBridge chặn kết nối đó một cách minh bạch ở cấp độ TLS — mà không yêu cầu bất kỳ thay đổi cấu hình tác nhân nào — và ghi lại yêu cầu thông qua OmniRoute.
 
 Điều này có nghĩa là bạn có thể:
 
-- **Định tuyến lại bất kỳ agent nào tới bất kỳ provider nào**: Copilot đang giao tiếp với OpenAI? Hãy chuyển hướng nó sang Anthropic Claude, Gemini, hoặc bất kỳ provider nào trong số 375 provider của OmniRoute.
-- **Áp dụng ánh xạ model**: `gemini-3-flash` → `claude-sonnet-4.7` một cách trong suốt ở tầng handler.
-- **Quan sát toàn bộ lưu lượng agent**: mọi request bị chặn đều được đưa lên [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Áp dụng khả năng phục hồi của OmniRoute**: combo routing, circuit breaker, fallback và theo dõi chi phí cũng hoạt động với lưu lượng agent của IDE.
+- **Định tuyến lại bất kỳ đại lý nào đến bất kỳ nhà cung cấp nào** : Copilot đang nói chuyện với OpenAI? Chuyển hướng nó tới Anthropic Claude, Gemini hoặc bất kỳ nhà cung cấp nào trong số 380 nhà cung cấp của OmniRoute.
+- **Áp dụng ánh xạ mô hình** : `gemini-3-flash` → `claude-sonnet-4.7` một cách minh bạch ở cấp độ xử lý.
+- **Quan sát tất cả lưu lượng đại lý** : mọi yêu cầu bị chặn sẽ được công bố tới [Thanh tra giao thông](./TRAFFIC_INSPECTOR.md).
+- **Áp dụng khả năng phục hồi OmniRoute** : định tuyến kết hợp, bộ ngắt mạch, dự phòng và theo dõi chi phí cũng hoạt động đối với lưu lượng tác nhân IDE.
 
 ### Định vị so với thị trường
 
-| Tính năng             | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| --------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity           |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot        |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)            |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex          |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE            |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries        |    —    |    ✓     |        —        |             ✓             |
-| Claude Code           |    —    |    —     |        ✓        |             ✓             |
-| Open Code             |    —    |    —     |        ✓        |             ✓             |
-| Trae                  |    —    |    —     |        —        |     🔍 Đang điều tra      |
-| Giao diện Dashboard   |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector     |    ✗    |    ✗     |        ✓        |             ✓             |
-| Định tuyến OmniRoute  |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI ánh xạ model       |    ✗    |    ✗     |        ✗        |             ✓             |
-| Danh sách bypass      |    ✗    |    ✗     |        ✓        |             ✓             |
-| Chứng chỉ CA upstream |    ✗    |    ✗     |        ✓        |             ✓             |
+| Tính năng               | 9 bộ định tuyến | chống api | llm-đánh chặn | **OmniRoute AgentBridge** |
+| ----------------------- | :-------------: | :-------: | :-----------: | :-----------------------: |
+| Antigravity             |        ✓        |     ✓     |       —       |             ✓             |
+| GitHub Copilot          |        ✓        |     ✓     |       —       |             ✓             |
+| Kiro (AWS)              |        ✓        |     ✓     |       —       |             ✓             |
+| OpenAI Codex            |        —        |     ✓     |       —       |             ✓             |
+| Cursor IDE              |        ✓        |     ✓     |       —       |             ✓             |
+| công nghiệp Zed         |        —        |     ✓     |       —       |             ✓             |
+| Claude                  |        —        |     —     |       ✓       |             ✓             |
+| Mã mở                   |        —        |     —     |       ✓       |             ✓             |
+| Trà                     |        —        |     —     |       —       |        🔍 điều tra        |
+| Trang tổng quan UI      |        ✓        |     ✗     |       ✗       |             ✓             |
+| Thanh tra giao thông    |        ✗        |     ✗     |       ✓       |             ✓             |
+| định tuyến OmniRoute    |        ✗        |     ✗     |       ✗       |             ✓             |
+| Ánh xạ mô hình UI       |        ✗        |     ✗     |       ✗       |             ✓             |
+| Bỏ qua danh sách        |        ✗        |     ✗     |       ✓       |             ✓             |
+| Chứng chỉ CA ngược dòng |        ✗        |     ✗     |       ✓       |             ✓             |
 
 ---
 
@@ -554,7 +554,7 @@ Trae là một trợ lý lập trình AI tương đối mới. Trước khi tri�
 3. Xác định cơ chế xác thực
 4. Đánh giá nên tiếp tục hay dừng lại dựa trên TOS và khả năng khám phá API
 
-Cho đến khi quá trình khảo sát hoàn tất, thẻ Trae trên dashboard sẽ hiển thị huy hiệu "Đang khảo sát" cùng liên kết "Báo cáo tính khả thi". Stub của handler tại `src/mitm/handlers/trae.ts` sẽ đưa ra lỗi có cấu trúc `Not yet implemented`.
+Cho đến khi quá trình khảo sát hoàn tất, thẻ Trae trên dashboard sẽ hiển thị huy hiệu "Đang khảo sát" cùng liên kết "Báo cáo tính khả thi". Stub của handler tại `src/mitm/handlers/trae.ts` sẽ đưa ra lỗi có cấu trúc `Chưa được triển khai`.
 
 ### Các agent tồn đọng (bắt buộc dùng MITM — không hỗ trợ base URL tùy chỉnh)
 

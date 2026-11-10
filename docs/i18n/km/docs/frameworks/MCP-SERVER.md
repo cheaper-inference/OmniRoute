@@ -72,6 +72,16 @@ curl -i \
 
 គន្លឹះដែលមិនមែនជាការគ្រប់គ្រង (ឬគ្មាន Bearer) ត្រឡប់ `403 LOCAL_ONLY`។ បុព្វបទបងប្អូន `/api/cli-tools/runtime/*` មិនអាចរំលងបានដោយចេតនា — សូមមើល [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)។
 
+### ការផ្ទៀងផ្ទាត់ Origin
+
+បន្ទាប់ពីការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ រាល់សំណើទៅកាន់ `/api/mcp/*` — transport និងផ្លូវគ្រប់គ្រងដូចជា `status`, `tools`, `audit`, `restart` — ត្រូវបានផ្ទៀងផ្ទាត់ header `Origin` មិនថាអ្នកហៅជានរណាទេ (API key, token CLI, វគ្គ dashboard ឬ loopback អនាមិកនៅពេលបិទការចូល)។ នេះគឺជាការការពារ DNS rebinding ដែលលក្ខណៈបច្ចេកទេស MCP Streamable HTTP តម្រូវ។
+
+- **គ្មាន header `Origin`** → អនុញ្ញាត។ OmniRoute CLI, SDK និងម៉ាស៊ីនភ្ញៀវ IDE មិនផ្ញើវាទេ។
+- **`Origin` ដែលអនុញ្ញាត** → `localhost` / `127.0.0.1` / `[::1]` លើ port ណាមួយ ឬ origin សាធារណៈរបស់ OmniRoute ផ្ទាល់៖ `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin ដែល reverse proxy ដែលទុកចិត្តបានបញ្ជូនបន្ត (`OMNIROUTE_TRUST_PROXY` តែនៅពេលមិនបានកំណត់ base URL), ឬម៉ាស៊ីន IP loopback/LAN ដែលចូលដោយផ្ទាល់។ header `Host` តែឯងមិនដែលធ្វើឱ្យ origin ណាមួយក្លាយជាគួរទុកចិត្តឡើយ។
+- **`Origin` ផ្សេងទៀតណាមួយ រួមទាំង `null`** → `403` ជាមួយតួកំហុស JSON-RPC៖ `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`។ វគ្គ dashboard ដែលបង្ហាញ token CSRF ត្រឹមត្រូវ នៅតែត្រូវបានទទួលយក ដូចការសរសេរ dashboard ផ្សេងទៀត។
+
+ម៉ាស៊ីនភ្ញៀវ MCP លើកម្មវិធីរុករកដែលបម្រើនៅពីក្រោយ reverse proxy ត្រូវការ `OMNIROUTE_PUBLIC_BASE_URL`; គ្មានបញ្ជីអនុញ្ញាតសម្រាប់ origin ផ្សេងទៀតទេ។ សំណើ preflight CORS (`OPTIONS`) មិនត្រូវបានពិនិត្យ Origin ទេ តែសំណើបន្ទាប់ត្រូវបានពិនិត្យ។
+
 ## ការកំណត់រចនាសម្ព័ន្ធ IDE
 
 សូមមើល [ការកំណត់រចនាសម្ព័ន្ធម៉ាស៊ីនភ្ញៀវ MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) សម្រាប់ Claude Desktop, Cursor, Cline, និងការដំឡើងម៉ាស៊ីនភ្ញៀវ MCP ដែលត្រូវគ្នា។
@@ -287,106 +297,71 @@ guardrail **មុន** វាទៅដល់ស្រទាប់អនុវ�
 
 ---
 
-## ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ & វិសាលភាព
+## ការផ្ទៀងផ្ទាត់ និងវិសាលភាព
 
-ការហៅឧបករណ៍ MCP អានខ្សែអក្សរវិសាលភាពពីអ្នកហៅ។ ការត្រួតពិនិត្យនោះគឺជាលំហឈ្មោះឯករាជ្យមួយក្នុងចំណោមបី។
-ការឆ្លងកាត់ពីកម្មវិធីត្រួតពិនិត្យមួយ មិនមែនជាការឆ្លងកាត់ពីកម្មវិធីផ្សេងទៀតទេ។
-ច្បាប់មាននៅ [លំហឈ្មោះវិសាលភាពទាំងបី](#three-scope-namespaces)។
-កាតាឡុកឧបករណ៍មាននៅ [វិសាលភាពឧបករណ៍ MCP](#mcp-tool-scopes)។
+ឧបករណ៍MCP ហៅអានខ្សែវិសាលភាពពីអ្នកហៅចូល។ ធីកនោះគឺជាលំហឈ្មោះឯករាជ្យមួយក្នុងចំណោមឈ្មោះទាំងបី។ សំបុត្រឆ្លងពីអ្នកត្រួតពិនិត្យម្នាក់ មិនមែនជាសំបុត្រពីអ្នកផ្សេងទេ។ ច្បាប់គឺ [វិសាលភាពឈ្មោះបី](#three-scope-namespaces) ។ កាតាឡុកឧបករណ៍គឺជា [វិសាលភាពឧបករណ៍MCP](#mcp-tool-scopes) ។
 
-### លំហឈ្មោះវិសាលភាពទាំងបី
+### វិសាលភាពចំនួនបី
 
-`manage` នៅលើ API key, `read:compression` នៅលើឧបករណ៍ MCP និង `read` នៅលើ
-access token `oma_live_…` គឺជាសិទ្ធិផ្តល់ឱ្យបីផ្សេងគ្នា។ អ្នកហៅដែលផ្ញើ access token `read`
-ទៅកាន់ route គ្រប់គ្រងដែលកែប្រែទិន្នន័យ នឹងទទួលបាន HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-លំដាប់នោះគឺ `scopeSatisfies`។ វាមិនពិនិត្យមើលតារាង MCP ទេ ហើយកម្មវិធីផ្គូផ្គង MCP
-ក៏មិនពិនិត្យមើលវាដែរ។
+`manage` នៅលើគ្រាប់ចុច API, `read:compression` នៅលើឧបករណ៍ MCP និង `read` នៅលើនិមិត្តសញ្ញាចូលប្រើ `oma_live_…` គឺជាជំនួយបីផ្សេងគ្នា។ អ្នកហៅទូរសព្ទដែលផ្ញើសញ្ញាសម្ងាត់ចូលប្រើ `read` ទៅកាន់ផ្លូវគ្រប់គ្រងដែលផ្លាស់ប្តូរទទួលបាន HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` ចំណាត់ថ្នាក់នោះគឺ `scopeSatisfies`។ វាមិនពិគ្រោះជាមួយតារាង MCP ហើយអ្នកផ្គូផ្គង MCP មិនពិគ្រោះជាមួយវាទេ។
 
-| លំហឈ្មោះ             | ព័ត៌មានបញ្ជាក់អត្តសញ្ញាណ                                                     | កម្មវិធីត្រួតពិនិត្យ       | ការឆ្លងកាត់អនុញ្ញាតឱ្យ                                         |
-| :------------------- | :--------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------------------- |
-| ការគ្រប់គ្រង API-key | `api_keys.scopes`                                                            | `hasManageScope`           | Management REST សម្រាប់ Bearer key នោះ                         |
-| API-key បន្ថែម       | អារេដូចគ្នា និងខ្សែអក្សរដែលត្រូវគ្នាពិតប្រាកដមួយ                             | helper ដែលមានឈ្មោះខាងក្រោម | សមត្ថភាពតែមួយនោះប៉ុណ្ណោះ                                       |
-| វិសាលភាពឧបករណ៍ MCP   | អារេដូចគ្នា បើមិនដូច្នោះទេ MCP `_meta` បើមិនដូច្នោះទេ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | ឧបករណ៍នោះ នៅពេលការអនុវត្តបង្ខំត្រូវបានបើក                      |
-| Access token         | `oma_live_…`                                                                 | `scopeSatisfies`           | route គ្រប់គ្រងដែល method និង path របស់វាតម្រូវឱ្យមានលំដាប់នោះ |
+| Namespace            | លិខិតសម្គាល់                                                                             | អ្នកត្រួតពិនិត្យ            | សំបុត្រអនុញ្ញាត                                               |
+| :------------------- | :--------------------------------------------------------------------------------------- | :-------------------------- | :------------------------------------------------------------ |
+| ការគ្រប់គ្រង API-key | `api_keys.scopes`                                                                        | `hasManageScope`            | ការគ្រប់គ្រង REST សម្រាប់សោអ្នកកាន់នោះ។                       |
+| សារធាតុបន្ថែម API    | អារេដូចគ្នា ខ្សែអក្សរពិតប្រាកដមួយ។                                                       | ជំនួយការដែលមានឈ្មោះខាងក្រោម | សមត្ថភាពតែមួយគត់                                              |
+| វិសាលភាពឧបករណ៍MCP    | អារេដូចគ្នា, ផ្សេងទៀត MCP `_meta` (HTTP/SSE តែប៉ុណ្ណោះ), ផ្សេងទៀត `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | ឧបករណ៍នោះនៅពេលមានការអនុវត្តច្បាប់                             |
+| សញ្ញាសម្ងាត់ចូលប្រើ  | `oma_live_…`                                                                             | `scopeSatisfies`            | ផ្លូវគ្រប់គ្រងដែលវិធីសាស្រ្ត និងផ្លូវត្រូវការចំណាត់ថ្នាក់នោះ។ |
 
-ការបង្កើតព័ត៌មានបញ្ជាក់អត្តសញ្ញាណនីមួយៗត្រូវបានរៀបរាប់ក្នុង
-[ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណសម្រាប់ការគ្រប់គ្រង](../guides/MANAGEMENT-AUTH.md)។
+ការកំណត់អត្តសញ្ញាណនីមួយៗត្រូវបានគ្របដណ្តប់នៅក្នុង [ការគ្រប់គ្រងការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ](../guides/MANAGEMENT-AUTH.md) ។
 
-#### វិសាលភាព API-key
+#### វិសាលភាពគន្លឹះ API
 
-អារេ `api_keys.scopes` មួយផ្តល់ទិន្នន័យឱ្យការងារពីរ។ ពួកវាប្រើ function ផ្សេងគ្នា។
+អារេ `api_keys.scopes` មួយផ្តល់ការងារពីរ។ ពួកគេប្រើមុខងារផ្សេងៗគ្នា។
 
-**Management REST។** `manage` និង `admin` គឺជាសមាជិកនៃ
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`)។
-`hasManageScope` គឺជាអ្វីដែលផ្តល់សិទ្ធិឱ្យ route គ្រប់គ្រងសម្រាប់ key នោះ។ `admin`
-មានសមត្ថភាពគ្រប់គ្រងនៅលើ route ទាំងនោះ។ ពាក្យ `admin` នៅទីនេះមិនមែនជា
-លំដាប់ access-token ទេ ហើយវាមិនពង្រីកទៅជាវិសាលភាពឧបករណ៍ MCP ទេ។
+**ការគ្រប់គ្រង REST។** `manage` និង `admin` គឺជាសមាជិកនៃ `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) ។ `hasManageScope` គឺជាអ្វីដែលផ្តល់សិទ្ធិឱ្យផ្លូវគ្រប់គ្រងសម្រាប់សោនោះ។ `admin` គឺអាចគ្រប់គ្រងបាននៅលើផ្លូវទាំងនោះ។ ពាក្យ `admin` នៅទីនេះមិនមែនជាចំណាត់ថ្នាក់សញ្ញាសម្ងាត់ចូលប្រើទេ ហើយវាមិនពង្រីកទៅក្នុងវិសាលភាពឧបករណ៍ MCP ទេ។
 
-**ខ្សែអក្សរបន្ថែម។** ខ្សែអក្សរនីមួយៗជាការធ្វើតេស្តសមាជិកភាពដែលត្រូវគ្នាពិតប្រាកដ ហើយខ្សែអក្សរនីមួយៗនៅតែ
-ស្ថិតនៅក្រៅ `MANAGEMENT_API_KEY_SCOPES`។
+**ខ្សែអក្សរបន្ថែម។** នីមួយៗគឺជាការធ្វើតេស្តសមាជិកភាពពិតប្រាកដ ហើយម្នាក់ៗស្នាក់នៅខាងក្រៅ `MANAGEMENT_API_KEY_SCOPES`។
 
-| វិសាលភាព                       | ការឆ្លងកាត់អនុញ្ញាតឱ្យ                                                                                                                                                |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | តែការលើកលែង LOCAL_ONLY សម្រាប់ `/api/mcp/` ដែលមិនមែនជា loopback ប៉ុណ្ណោះ (`hasMcpConnectOrManageScope`)។ key ដែលមាន `manage` ឬ `admin` នៅតែឆ្លងកាត់ការលើកលែងនោះ។      |
-| `self:usage`                   | `GET /api/v1/me/status` សម្រាប់ key នេះ (`src/app/api/v1/me/status/route.ts`)។ `POST /api/keys` បន្ថែមវិសាលភាពនេះនៅពេលបង្កើត (`normalizeSelfServiceScopesForCreate`)។ |
-| `self:account-quota`           | កូតាគណនី upstream នៅក្នុង payload ស្ថានភាពនោះ (`src/lib/usage/apiKeySelfService.ts`)។ route ស្ថានភាពនៅតែតម្រូវឱ្យមាន `self:usage`។                                    |
-| `policy:bypass-provider-quota` | ការហៅ inference របស់ key នេះរំលងគោលការណ៍ provider-quota (`hasProviderQuotaBypassScope` ក្នុង `src/sse/handlers/chat.ts`)។                                             |
+| វិសាលភាព                       | សំបុត្រអនុញ្ញាត                                                                                                                                                      |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | មិនមែនរង្វិលជុំវិញ `/api/mcp/` LOCAL_ONLY ឆ្លាក់ចេញតែប៉ុណ្ណោះ (`hasMcpConnectOrManageScope`) ។ សោដែលមាន `manage` ឬ `admin` នៅតែឆ្លងកាត់ការឆ្លាក់នោះ។                 |
+| `self:usage`                   | `GET /api/v1/me/status` សម្រាប់សោនេះ (`src/app/api/v1/me/status/route.ts`) ។ `POST /api/keys` បន្ថែមវិសាលភាពនេះលើការបង្កើត (`normalizeSelfServiceScopesForCreate`) ។ |
+| `self:account-quota`           | កូតាគណនីខាងលើនៅក្នុងបន្ទុកស្ថានភាពនោះ (`src/lib/usage/apiKeySelfService.ts`) ។ ផ្លូវស្ថានភាពនៅតែទាមទារ `self:usage`។                                                 |
+| `policy:bypass-provider-quota` | ការហៅតាមការសន្និដ្ឋានរបស់គន្លឹះនេះរំលងគោលការណ៍កូតាអ្នកផ្តល់សេវា (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`)។                                       |
 
 #### ការផ្គូផ្គង
 
-កាតាឡុកគឺជាតារាងក្រោម [វិសាលភាពឧបករណ៍ MCP](#mcp-tool-scopes)។ កុំ
-ចាត់ទុក `MCP_SCOPE_LIST` ក្នុង `src/shared/constants/mcpScopes.ts` ជាកាតាឡុកនោះ៖
-វាគឺជាសំណុំរង typed ដើម។ ឧបករណ៍ដែលបន្ថែមនៅពេលក្រោយប្រកាសវិសាលភាពបន្ថែមនៅក្បែរវា
-(`read:notion`, `read:skills`, `read:local-corpus` និងវិសាលភាពផ្សេងទៀតក្នុងតារាង)។
+កាតាឡុកគឺជាតារាងក្រោម [វិសាលភាពឧបករណ៍MCP](#mcp-tool-scopes) ។ កុំចាត់ទុក `MCP_SCOPE_LIST` ក្នុង `src/shared/constants/mcpScopes.ts` ជាកាតាឡុកនោះ៖ វាគឺជាសំណុំរងដែលបានវាយដើម។ ឧបករណ៍ក្រោយៗទៀតប្រកាសវិសាលភាពបន្ថែមទៀតនៅក្បែរវា (`read:notion`, `read:skills`, `read:local-corpus`, និងតារាងដែលនៅសល់)។
 
-`evaluateToolScopes` ក្នុង `open-sse/mcp-server/scopeEnforcement.ts` អនុញ្ញាតការហៅ
-នៅពេលវិសាលភាពដែលត្រូវការទាំងអស់ផ្គូផ្គងនឹងវិសាលភាពដែលបានផ្តល់ឱ្យណាមួយ៖
+`evaluateToolScopes` ក្នុង `open-sse/mcp-server/scopeEnforcement.ts` អនុញ្ញាតឱ្យមានការហៅទូរស័ព្ទនៅពេលដែលគ្រប់វិសាលភាពតម្រូវការត្រូវគ្នានឹងវិសាលភាពដែលបានផ្តល់មួយចំនួន:
 
-- `*` ផ្គូផ្គងនឹងវិសាលភាពដែលត្រូវការទាំងអស់។
-- វិសាលភាពដែលបានផ្តល់ឱ្យដែលបញ្ចប់ដោយ `*` ផ្គូផ្គងនឹងវិសាលភាពដែលត្រូវការដែលចាប់ផ្តើមដោយ
-  បុព្វបទនៅមុនសញ្ញាផ្កាយ។ `read:*` ផ្គូផ្គងនឹង `read:compression`។
-- វិសាលភាពដែលបានផ្តល់ឱ្យផ្សេងទៀតទាំងអស់ ផ្គូផ្គងតែខ្សែអក្សរដែលត្រូវការដូចគ្នាបេះបិទប៉ុណ្ណោះ។
+- `*` ផ្គូផ្គងគ្រប់វិសាលភាពដែលត្រូវការ។
+- វិសាលភាពដែលបានអនុញ្ញាតដែលបញ្ចប់ដោយ `*` ត្រូវនឹងវិសាលភាពដែលត្រូវការដែលចាប់ផ្តើមដោយបុព្វបទមុនផ្កាយ។ `read:*` ផ្គូផ្គង `read:compression`។
+- រាល់វិសាលភាពដែលបានផ្តល់ផ្សេងទៀតត្រូវគ្នាតែខ្សែអក្សរដែលត្រូវការដូចគ្នា។
 
-key ដែលវិសាលភាពរបស់វាគឺ `["manage"]` មិនឆ្លងកាត់ `scopeMatches` សម្រាប់ `read:compression` ទេ។
-ការហៅដូចគ្នាក៏មិនឆ្លងកាត់សម្រាប់ `admin`, `mcp:connect`, `read` និង `write` ដែរ នៅពេលខ្សែអក្សរទាំងនោះ
-ជាខ្សែអក្សរដែលបានផ្តល់ឱ្យតែមួយគត់។ មិនមានឋានានុក្រមរវាងវិសាលភាពឧបករណ៍ MCP ទេ
-ក្រៅពី `*` នៅខាងចុង។
+សោដែលវិសាលភាពគឺ `["manage"]` បរាជ័យ `scopeMatches` សម្រាប់ `read:compression`។ ការហៅដូចគ្នានេះបរាជ័យសម្រាប់ `admin`, `mcp:connect`, `read`, និង `write` នៅពេលដែលខ្សែទាំងនោះគឺជាខ្សែដែលបានផ្តល់តែមួយគត់។ មិនមានឋានានុក្រមក្នុងចំណោមវិសាលភាពឧបករណ៍ MCP លើសពី `*` ដែលនៅពីក្រោយនោះទេ។
 
-ការអនុវត្តបង្ខំត្រូវបានបិទ លុះត្រាតែ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (តម្លៃលំនាំដើម
-`false`)។ ខណៈពេលវាត្រូវបានបិទ `evaluateToolScopes` អនុញ្ញាតការហៅ និងរំលង
-កាតាឡុក។ ខណៈពេលវាត្រូវបានបើក HTTP ប្រើ `api_keys.scopes` របស់ Bearer key ជា
-`authInfo` (សូមមើល [ការចងវិសាលភាព HTTP តាម key](#per-key-http-scope-binding-7895))។
-នៅពេលគ្មានវិសាលភាព key ត្រូវបានដោះស្រាយ សំណុំដែលបានផ្តល់ឱ្យនឹងបន្តទៅ MCP `_meta` បន្ទាប់មក
-`OMNIROUTE_MCP_SCOPES`។
+ការអនុវត្តត្រូវបានបិទ លុះត្រាតែ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ( `false` លំនាំដើម)។ ខណៈពេលដែលវាបិទ `evaluateToolScopes` អនុញ្ញាតឱ្យហៅចេញ ហើយរំលងកាតាឡុក។ ខណៈពេលដែលវាបើក HTTP ប្រើ `api_keys.scopes` របស់ Bearer key ជា `authInfo` (សូមមើល [Per-key HTTP scope binding](#per-key-http-scope-binding-7895) )។ នៅពេលដែលគ្មានវិសាលភាពគន្លឹះដោះស្រាយ សំណុំដែលបានផ្តល់នឹងធ្លាក់ដល់ MCP `_meta` (កិត្តិយសសម្រាប់តែអ្នកហៅ HTTP/SSE ប៉ុណ្ណោះនៅក្នុងបរិបទ HTTP auth; `_meta` របស់អ្នកហៅ stdio មិនត្រូវបានអើពើទេ ពីព្រោះម៉ាស៊ីនភ្ញៀវគ្រប់គ្រងវា ហើយវាមិនមានអត្តសញ្ញាណអ្នកហៅចូលម្នាក់) បន្ទាប់មក `OMNIROUTE_MCP_SCOPES`។
 
-#### វិសាលភាព Access-token
+#### វិសាលភាពនៃសញ្ញាសម្ងាត់ចូលប្រើ
 
-token `oma_live_…` (`src/lib/accessTokens/scopes.ts`) មាន `read`, `write`
-ឬ `admin`។ `scopeSatisfies` គឺជាលំដាប់៖ `admin` គ្របដណ្តប់ `write` និង `read` ហើយ
-`write` គ្របដណ្តប់ `read`។ វិសាលភាពដែលមិនស្គាល់មិនគ្របដណ្តប់អ្វីទាំងអស់។
+`oma_live_…` tokens (`src/lib/accessTokens/scopes.ts`) អនុវត្ត `read`, `write`, ឬ `admin`។ `scopeSatisfies` គឺជាចំណាត់ថ្នាក់៖ `admin` គ្របដណ្តប់ `write` និង `read` ហើយ `write` គ្របដណ្តប់ `read`។ វិសាលភាពដែលមិនស្គាល់គ្របដណ្តប់អ្វីទាំងអស់។
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ប្រៀបធៀបលំដាប់នោះ
-ជាមួយ `inferRequiredScope` (`src/server/authz/accessScopes.ts`)៖
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ប្រៀបធៀបចំណាត់ថ្នាក់នោះជាមួយ `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD` និង `OPTIONS` តម្រូវឱ្យមាន `read`។
-- method ផ្សេងទៀតទាំងអស់តម្រូវឱ្យមាន `write`។
-- path ក្នុង `ADMIN_SCOPE_PREFIXES` តម្រូវឱ្យមាន `admin` សម្រាប់គ្រប់ method។ `/api/mcp`
-  ស្ថិតក្នុងបញ្ជីនោះ ដូច្នេះ access token `write` នៅតែមិនអាចហៅផ្ទៃ HTTP របស់ MCP បាន។
-- path ក្នុង `ADMIN_MUTATION_PREFIXES` តម្រូវឱ្យមាន `admin` តែសម្រាប់ mutation ប៉ុណ្ណោះ។
-- path ក្នុង `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) តម្រូវឱ្យមាន `admin` តែសម្រាប់ mutation ប៉ុណ្ណោះ និងតែចំពោះ
-  path ពិតប្រាកដនោះ — sub-route `/api/settings/*` ផ្សេងទៀតនៅតែរក្សា `write`។
+- `GET`, `HEAD`, និង `OPTIONS` ទាមទារ `read`។
+- រាល់វិធីសាស្រ្តផ្សេងទៀតទាមទារ `write`។
+- ផ្លូវនៅក្នុង `ADMIN_SCOPE_PREFIXES` ទាមទារ `admin` សម្រាប់គ្រប់វិធីសាស្រ្ត។ `/api/mcp` ស្ថិតនៅក្នុងបញ្ជីនោះ ដូច្នេះ សញ្ញាសម្ងាត់ចូលប្រើ `write` នៅតែមិនអាចហៅផ្ទៃ MCP HTTP បានទេ។
+- ផ្លូវនៅក្នុង `ADMIN_MUTATION_PREFIXES` ត្រូវការ `admin` សម្រាប់តែការផ្លាស់ប្តូរប៉ុណ្ណោះ។
+- ផ្លូវនៅក្នុង `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) ត្រូវការ `admin` សម្រាប់ការផ្លាស់ប្តូរតែប៉ុណ្ណោះ ហើយមានតែនៅលើផ្លូវពិតប្រាកដនោះ — ផ្លូវរង `/api/settings/*` ផ្សេងទៀតរក្សា `write`។
 
-`PATCH /api/keys/{id}` គឺជាប្រតិបត្តិការកែប្រែ ហើយមិនស្ថិតនៅក្នុងបញ្ជី admin ទាំងនោះទេ ដូច្នេះ token ដែលមាន scope `read` នឹងទទួលបាន 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Access token ដែលមាន scope `write` ឬ `admin` អាចបំពេញលក្ខខណ្ឌសម្រាប់ route នោះ។ dashboard JWT, loopback CLI machine-id token និង API key ដែលមាន scope `manage` ឬ `admin` ប្រើសាខាផ្សេងទៀត ហើយមិនត្រូវបានកម្រិតដោយលំដាប់នេះទេ។
+`PATCH /api/keys/{id}` គឺជាការផ្លាស់ប្តូរមួយ ហើយមិនមាននៅក្នុងបញ្ជីអ្នកគ្រប់គ្រងទាំងនោះទេ ដូច្នេះសញ្ញា `read` ទទួលបាន 403 `Access token scope 'read' is insufficient; 'write' required.` A `write` ឬ `admin` access token បំពេញផ្លូវនោះ។ ផ្ទាំងគ្រប់គ្រង JWT និមិត្តសញ្ញាលេខសម្គាល់ម៉ាស៊ីនរង្វិលជុំថយក្រោយ CLI និងគ្រាប់ចុច API ដែលមាន `manage` ឬ `admin` យកសាខាផ្សេងទៀត ហើយមិនត្រូវបានរួមតូចដោយចំណាត់ថ្នាក់នេះទេ។
 
-Access token ដែលឆ្លងកាត់ `scopeSatisfies` សម្រាប់ `/api/mcp` គ្រាន់តែបានឆ្លងកាត់ច្រកត្រួតពិនិត្យការគ្រប់គ្រងប៉ុណ្ណោះ។ ការហៅ tool នៅតែដំណើរការ `scopeMatches` ដើម្បីផ្ទៀងផ្ទាត់ជាមួយ scope របស់ API key។ លំដាប់របស់ access token មិនមែនជា input សម្រាប់ `scopeMatches` ទេ។
+សញ្ញាសម្ងាត់ចូលប្រើដែលឆ្លងកាត់ `scopeSatisfies` សម្រាប់ `/api/mcp` បានសម្អាតច្រកគ្រប់គ្រងតែប៉ុណ្ណោះ។ ការហៅឧបករណ៍នៅតែដំណើរការ `scopeMatches` ប្រឆាំងនឹងវិសាលភាព API-key ។ ចំណាត់ថ្នាក់សញ្ញាសម្ងាត់ចូលប្រើមិនមែនជាធាតុបញ្ចូលទៅ `scopeMatches` ទេ។
 
-### Scope របស់ MCP tool
+### វិសាលភាពឧបករណ៍MCP
 
-ការអនុវត្ត scope ត្រូវបានគ្រប់គ្រងជាកណ្តាលនៅក្នុង `open-sse/mcp-server/scopeEnforcement.ts`។ tool នីមួយៗតម្រូវឱ្យមាន scope ជាក់លាក់៖
+ការអនុវត្តវិសាលភាពត្រូវបានដាក់កណ្តាលនៅក្នុង `open-sse/mcp-server/scopeEnforcement.ts`។ ឧបករណ៍នីមួយៗទាមទារវិសាលភាពជាក់លាក់៖
 
 | វិសាលភាព              | ឧបករណ៍                                                                                                                                                                      |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -420,51 +395,21 @@ Access token ដែលឆ្លងកាត់ `scopeSatisfies` សម្រា�
 | `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                              |
 | `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                          |
 | `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                             |
-| `read:obsidian`       | ឧបករណ៍អាន 13 — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | ឧបករណ៍សរសេរ 9 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
+| `read:obsidian`       | 13 ឧបករណ៍អាន — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 ឧបករណ៍សរសេរ — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                           |
 
-វិសាលភាពជំនួសដោយតួអក្សរជំនួសត្រូវបានគាំទ្រ៖ `read:*` ផ្តល់វិសាលភាពអានទាំងអស់ ហើយ `*` ផ្តល់សិទ្ធិចូលប្រើពេញលេញ។
+វិសាលភាពតួអក្សរជំនួសត្រូវបានគាំទ្រ៖ `read:*` ផ្តល់វិសាលភាពអានទាំងអស់ `*` ផ្តល់សិទ្ធិចូលប្រើពេញលេញ។
 
-### `mcp:connect` — សមត្ថភាពផ្លូវដែលមានវិសាលភាពចង្អៀត (#7895)
+### `mcp:connect` — សមត្ថភាពផ្លូវតូចចង្អៀត (#7895)
 
-ការចូលទៅកាន់ដំណឹកជញ្ជូន HTTP/SSE MCP (`/api/mcp/*`) ពីអាសយដ្ឋានដែលមិនមែនជា loopback តម្រូវឱ្យមាន
-ការលើកលែង LOCAL_ONLY សម្រាប់ `/api/mcp/` (សូមមើល `docs/security/ROUTE_GUARD_TIERS.md`)។ កន្លងមក
-ការលើកលែងនោះទទួលយកតែ API key ដែលមានវិសាលភាព `manage`/`admin` ពេញលេញប៉ុណ្ណោះ — ដែលទូលំទូលាយពេកសម្រាប់
-អ្នកហៅដែលគ្រាន់តែត្រូវការទំនាក់ទំនងជាមួយ MCP។ ឥឡូវនេះ `src/shared/constants/managementScopes.ts`
-នាំចេញ `MCP_CONNECT_SCOPE = "mcp:connect"`៖ ជាវិសាលភាពបន្ថែមដែលមានកម្រិតចង្អៀត (អនុវត្តតាមគំរូដូច
-`SELF_USAGE_SCOPE`) ដែលអនុញ្ញាតតែការរំលង `/api/mcp/` នៅក្នុង
-`src/server/authz/policies/management.ts` ប៉ុណ្ណោះ — វាមិនផ្តល់សិទ្ធិចូលប្រើផ្លូវគ្រប់គ្រងផ្សេងទៀតទេ
-ហើយត្រូវបានដកចេញពី `MANAGEMENT_API_KEY_SCOPES` ដោយចេតនា។ Key ដែលមាន `manage`/`admin`
-នៅតែអាចឆ្លងកាត់ការលើកលែងនេះដូចដើម។ `mcp:connect` គឺជាជម្រើសដែលមានសិទ្ធិទាបជាង សម្រាប់
-អ្នកហៅ MCP ពីចម្ងាយតែប៉ុណ្ណោះ ដែលត្រូវបានផ្ទៀងផ្ទាត់តាមរយៈ `hasMcpConnectOrManageScope()`។
+ការឈានដល់ការដឹកជញ្ជូន HTTP/SSE MCP (`/api/mcp/*`) ពី non-loopback តម្រូវឱ្យមានការឆ្លាក់ `/api/mcp/` LOCAL_ONLY (សូមមើល `docs/security/ROUTE_GUARD_TIERS.md`) ។ ជាប្រវត្តិសាស្ត្រដែលការឆ្លាក់ចេញបានទទួលយកតែ `manage`/`admin` -scope API គ្រាប់ចុច — ទូលំទូលាយពេកសម្រាប់អ្នកហៅចូលដែលត្រូវការនិយាយ MCP ប៉ុណ្ណោះ។ ឥឡូវនេះ `src/shared/constants/managementScopes.ts` នាំចេញ `MCP_CONNECT_SCOPE = "mcp:connect"`: សារធាតុបន្ថែម វិសាលភាពតូចចង្អៀត (ដូចមុនដូច `SELF_USAGE_SCOPE`) ដែលអនុញ្ញាត ONLY ផ្លូវវាង `/api/mcp/` ក្នុង `src/server/authz/policies/management.ts` — វាផ្តល់ការចូលប្រើផ្លូវគ្រប់គ្រងផ្សេងទៀត ហើយត្រូវបានរក្សាទុកដោយចេតនា OUT នៃ `MANAGEMENT_API_KEY_SCOPES`។ គ្រាប់ចុចដែលកាន់ `manage`/`admin` នៅតែឆ្លងកាត់ការឆ្លាក់មិនផ្លាស់ប្តូរ។ `mcp:connect` គឺជាជម្រើសដែលមានសិទ្ធិទាបសម្រាប់អ្នកហៅទូរស័ព្ទសម្រាប់តែ MCP ពីចម្ងាយ ដែលបានពិនិត្យតាមរយៈ `hasMcpConnectOrManageScope()`។
 
-### ការចងវិសាលភាព HTTP តាម key នីមួយៗ (#7895)
+### ការចងវិសាលភាព HTTP ក្នុងមួយគន្លឹះ (#7895)
 
-តាមរយៈ HTTP/SSE ឥឡូវនេះ `open-sse/mcp-server/httpTransport.ts` ដោះស្រាយ
-`api_keys.scopes` ពិតប្រាកដរបស់អ្នកហៅ តាមរយៈ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-ហើយបញ្ជូនវាទៅ `transport.handleRequest(req, { authInfo })` របស់ MCP SDK ដូច្នេះ
-`extra.authInfo.scopes` ដែលទៅដល់ការហៅឧបករណ៍នីមួយៗ ឆ្លុះបញ្ចាំងពីវិសាលភាពផ្ទាល់ខ្លួនរបស់ Bearer key។
-`resolveCallerScopeContext()` របស់ `scopeEnforcement.ts` បានផ្តល់អាទិភាពដល់ `authInfo` រួចហើយ លើស
-`_meta` និងជម្រើសបម្រុង env `OMNIROUTE_MCP_SCOPES` — ការផ្លាស់ប្តូរនេះគ្រាន់តែបំពេញប្រភពទីមួយ
-ដែលមានអាទិភាពខ្ពស់បំផុតនោះ ដែលពីមុនមិនត្រូវបានផ្តល់ទិន្នន័យតាម HTTP។ នៅពេលគ្មាន API key ដែលអាចដោះស្រាយបាន
-(គ្មាន header ឬ key មិនត្រឹមត្រូវ) `authInfo` នៅតែជា `undefined` ហើយការដោះស្រាយនឹងបន្តទៅកាន់
-ខ្សែសង្វាក់ `meta`/env ដែលមានស្រាប់ដោយមិនផ្លាស់ប្តូរ។ stdio មិនមានអត្តសញ្ញាណតាមអ្នកហៅនីមួយៗទេ (សូមមើល
-`mcpCallerIdentity.ts`) ហើយមិនរងផលប៉ះពាល់ឡើយ — វានៅតែប្រើខ្សែសង្វាក់ជម្រើសបម្រុង `_meta`/env ដដែល។
+លើសពី HTTP/SSE ឥឡូវនេះ `open-sse/mcp-server/httpTransport.ts` ដោះស្រាយ `api_keys.scopes` ពិតប្រាកដរបស់អ្នកហៅតាមរយៈ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ហើយបញ្ជូនវាទៅ MCP SDK របស់ `transport.handleRequest(req, { authInfo })` ដូច្នេះ `extra.authInfo.scopes` ឈានដល់ការហៅឧបករណ៍នីមួយៗឆ្លុះបញ្ចាំងពីវិសាលភាពផ្ទាល់ខ្លួនរបស់អ្នកកាន់សោ។ `resolveCallerScopeContext()` របស់ `scopeEnforcement.ts` បានផ្តល់អាទិភាពដល់ `authInfo` រួចហើយលើ `_meta` និង `OMNIROUTE_MCP_SCOPES` env fallback — នេះបង្ហាញតែប្រភពដែលមានអាទិភាពខ្ពស់បំផុតដំបូងប៉ុណ្ណោះ ដែលពីមុនមិនត្រូវបានបញ្ចូលលើសពី HTTP. នៅពេលដែលគ្មាន API key ដោះស្រាយ (គ្មានបឋមកថា កូនសោមិនត្រឹមត្រូវ) `authInfo` នៅតែ `undefined` ហើយដំណោះស្រាយធ្លាក់ទៅខ្សែសង្វាក់ `meta`/env ដែលមានស្រាប់មិនផ្លាស់ប្តូរ។ stdio មិនមានអត្តសញ្ញាណអ្នកហៅចូលម្នាក់ទេ (មើល `mcpCallerIdentity.ts`) ហើយមិនរងផលប៉ះពាល់ដោយការចងលេខមួយ — វារំលងជំហាន `_meta` (`_meta` ត្រូវបានផ្តល់កិត្តិយសតែនៅក្នុងបរិបទ HTTP auth, #15159) ហើយដោះស្រាយពី `OMNIROUTE_MCP_SCOPES` env key តែម្នាក់ឯង។
 
-**ការអនុវត្តបង្ខំត្រូវបានបើកសម្រាប់អ្នកហៅ HTTP/SSE ដែលមានវិសាលភាពចង្អៀត ដោយមិនគិតពី
-`OMNIROUTE_MCP_ENFORCE_SCOPES` ឡើយ។** ការកំណត់លំនាំដើមរបស់ `OMNIROUTE_MCP_ENFORCE_SCOPES` ជា `false` មានសុវត្ថិភាពតែ
-សម្រាប់លំហូរ local/stdio ដែលមានប្រតិបត្តិករតែម្នាក់ប៉ុណ្ណោះ ដែលក្នុងនោះមិនមានអត្តសញ្ញាណតាមអ្នកហៅនីមួយៗសម្រាប់កំណត់វិសាលភាពទេ។
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` បើកការអនុវត្តវិសាលភាពតាមឧបករណ៍នីមួយៗ
-ដោយគ្មានលក្ខខណ្ឌ (`shouldForceScopeEnforcement()` នៅក្នុង `scopeEnforcement.ts`)
-នៅពេលណាដែល `resolveCallerScopeContext()` ដោះស្រាយបាន
-`source === "authInfo"` (មានន័យថា ជា header HTTP Authorization ពិតប្រាកដតាម key នីមួយៗ សម្រាប់តែ HTTP/SSE) ហើយ
-key នោះមិនមានវិសាលភាព `manage`/`admin` ពេញលេញ។ វាបិទចន្លោះប្រហោងដែល key ដែលមានតែ
-វិសាលភាពរំលងចង្អៀត `mcp:connect` — ដែលបានពិពណ៌នាខាងលើថា មិនអនុញ្ញាតអ្វីក្រៅពី
-ការលើកលែង LOCAL_ONLY សម្រាប់ `/api/mcp/` — បើមិនដូច្នោះទេ អាចហៅឧបករណ៍ MCP ទាំងអស់បាន នៅពេលប្រតិបត្តិករ
-បើកសិទ្ធិចូលប្រើ MCP ពីចម្ងាយ/មិនមែន loopback ដោយសារតែ `OMNIROUTE_MCP_ENFORCE_SCOPES` ត្រូវបានចែកចាយ
-ដោយមានតម្លៃលំនាំដើមជា `false`។ Key ដែលមាន `manage`/`admin` ពេញលេញតាម HTTP និងអ្នកហៅ stdio/local ទាំងអស់ នៅតែរក្សា
-ឥរិយាបថដែលត្រូវបានគ្រប់គ្រងដោយ `OMNIROUTE_MCP_ENFORCE_SCOPES` ដូចដែលមានស្រាប់ ដោយមិនផ្លាស់ប្តូរ។
+**Enforcement is forced on for narrow-scoped HTTP/SSE callers regardless of `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` defaulting to `false` is only safe for the local/stdio single-operator flow, where there is no per-caller identity to scope against. `open-sse/mcp-server/server.ts::withScopeEnforcement()` turns per-tool scope enforcement on unconditionally (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) whenever `resolveCallerScopeContext()` resolved `source === "authInfo"` (i.e. a real per-key HTTP Authorization header, HTTP/SSE-only) AND that key does not hold full `manage`/`admin` scope. This closes the gap where a key holding ONLY the narrow `mcp:connect` bypass scope — documented above as authorizing nothing but the `/api/mcp/` LOCAL_ONLY carve-out — could otherwise invoke every MCP tool once an operator enabled remote/non-loopback MCP access, simply because `OMNIROUTE_MCP_ENFORCE_SCOPES` ships `false` by default. A full `manage`/`admin` key over HTTP, and every stdio/local caller, keep the existing `OMNIROUTE_MCP_ENFORCE_SCOPES`-gated behavior unchanged.
 
 ---
 

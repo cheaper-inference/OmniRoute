@@ -1,5 +1,8 @@
 "use client";
 
+import { Input as KitInput } from "@omniroute/ui-kit/input";
+import { Button, Card, Select } from "@/shared/components";
+
 /**
  * ProviderCcAliasSection — operator control for the Claude Code discovery-alias
  * gate (`claude/&lt;provider&gt;/&lt;model&gt;` mirror ids on /v1/models — see
@@ -193,10 +196,10 @@ function useProviderCcAliasState(providerId: string, t: ProviderMessageTranslato
 
 function CcAliasSectionSkeleton() {
   return (
-    <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
-      <div className="h-5 w-64 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-      <div className="mt-4 h-16 animate-pulse rounded bg-zinc-100 dark:bg-zinc-900" />
-    </div>
+    <Card padding="sm" className="p-5">
+      <div className="h-5 w-64 animate-pulse rounded bg-bg-subtle" />
+      <div className="mt-4 h-16 animate-pulse rounded bg-bg-subtle" />
+    </Card>
   );
 }
 
@@ -223,17 +226,19 @@ interface TriStateSelectProps {
 
 function TriStateSelect({ t, value, disabled, onChange, ariaLabel }: TriStateSelectProps) {
   return (
-    <select
+    <Select
+      compact
       aria-label={ariaLabel}
       disabled={disabled}
       value={toTriState(value)}
       onChange={(e) => onChange(fromTriState(e.target.value as TriState))}
-      className="rounded-md border border-border bg-sidebar/50 px-2 py-1 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+      className="w-auto"
+      selectClassName="text-xs"
     >
       <option value="inherit">{providerText(t, "ccAliasStateInherit", "Inherit")}</option>
       <option value="on">{providerText(t, "ccAliasStateOn", "On")}</option>
       <option value="off">{providerText(t, "ccAliasStateOff", "Off")}</option>
-    </select>
+    </Select>
   );
 }
 
@@ -258,7 +263,7 @@ export default function ProviderCcAliasSection({ providerId }: ProviderCcAliasSe
   const modelEntries = Object.entries(state.models);
 
   return (
-    <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
+    <Card padding="sm" className="p-5">
       <h2 className="text-base font-semibold text-text-main mb-1">
         {providerText(t, "ccAliasSectionTitle", "Expose in Claude Code (claude/…)")}
       </h2>
@@ -297,7 +302,7 @@ export default function ProviderCcAliasSection({ providerId }: ProviderCcAliasSe
         onSubmit={handleAddModelOverride}
         disabled={savingModelId !== null}
       />
-    </div>
+    </Card>
   );
 }
 
@@ -353,8 +358,9 @@ function AddOverrideRow({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <input
+      <KitInput
         type="text"
+        size="sm"
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
         onKeyDown={(e) => {
@@ -363,16 +369,12 @@ function AddOverrideRow({
           onSubmit();
         }}
         placeholder={providerText(t, "ccAliasAddModelPlaceholder", "Model id (e.g. gpt-4o)")}
-        className="flex-1 rounded-lg border border-border bg-sidebar/50 px-3 py-1.5 text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+        aria-label={providerText(t, "ccAliasAddModelPlaceholder", "Model id (e.g. gpt-4o)")}
+        className="flex-1 text-xs"
       />
-      <button
-        type="button"
-        onClick={onSubmit}
-        disabled={!value.trim() || disabled}
-        className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-main hover:border-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <Button size="sm" variant="outline" onClick={onSubmit} disabled={!value.trim() || disabled}>
         {providerText(t, "ccAliasAddModelButton", "Add override")}
-      </button>
+      </Button>
     </div>
   );
 }

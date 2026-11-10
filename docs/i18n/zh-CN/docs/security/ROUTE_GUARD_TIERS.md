@@ -194,6 +194,12 @@ LOCAL_ONLY。
 | `/api/providers/health-autopilot/actions` | 执行自动驾驶修复操作                           |
 | `/api/settings/obsidian`                  | 为任意保险库根目录签发可重复使用的 WebDAV 凭据 |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens   |
+| `/api/cli-tools/apply`                    | 重写操作员主机上的 CLI 配置                    |
+| `/api/cli-tools/guide-settings`           | 写入由指南驱动的 CLI 配置文件                  |
+| `/api/cli-tools/hermes-agent-settings`    | 写入 Hermes 代理配置                           |
+| `/api/cli-tools/backups`                  | 恢复和删除 CLI 配置备份                        |
+| `/api/log-export`                         | 将调用日志发送到已配置的目标                   |
+| `/api/restart`                            | 重启服务器进程                                 |
 
 **违规时的响应：** `401 Authentication required`
 

@@ -5,8 +5,8 @@
 ---
 
 > **Bersyon:** v3.8.44
-> **Huling na-update:** 2026-09-16
-> **Mambabasa:** Mga engineer na nagdaragdag, nagpapanatili, o nagde-debug ng mga naka-embed na serbisyo (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Huling na-update:** 2026-10-28
+> **Para kanino:** Mga engineer na nagdaragdag, nagpapanatili, o nagde-debug ng mga naka-embed na serbisyo (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Ang mga naka-embed na serbisyo ay mga lokal na naka-install na sidecar tool ng proseso na ini-install, pinangangasiwaan, at
 inilalantad ng OmniRoute bilang mga pangunahing target sa pagruruta. Hindi tulad ng mga panlabas na provider (na ina-access sa internet
@@ -31,19 +31,20 @@ gamit ang mga API key), tumatakbo ang mga naka-embed na serbisyo sa parehong mac
 
 ### Bakit mga naka-embed na serbisyo?
 
-Pitong serbisyo ang naka-embed:
+Walong serbisyo ang naka-embed:
 
-| Serbisyo        | npm package                                | Default na port | Layunin                                                                                                                                                                                                                                                                                                                                                                         |
-| --------------- | ------------------------------------------ | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                  |      20130      | AI router na maaaring gamitin ng OmniRoute bilang sub-provider. Inilalantad ang mga modelo bilang `9router/{sub}/{model}`                                                                                                                                                                                                                                                       |
-| **CLIProxyAPI** | Binary mula sa GitHub release (`cliproxy`) |      8317       | Lokal na proxy adapter para sa mga daloy ng Anthropic CLI auth. Nagbibigay ng fallback routing kapag nag-expire ang mga OAuth token                                                                                                                                                                                                                                             |
-| **Mux**         | `mux` (headless `mux server`)              |      8322       | Lokal na daemon para sa agent orchestration (coder/mux). Lifecycle-managed lamang — hindi routing target (walang LLM proxying).                                                                                                                                                                                                                                                 |
-| **Bifrost**     | `@maximhq/bifrost`                         |      8080       | Go AI-gateway relay backend. Kapag tumatakbo, awtomatikong pinipili ng relay route (`/v1/relay/`)                                                                                                                                                                                                                                                                               |
-| **Dario**       | `@askalf/dario`                            |      3456       | Proxy ng Claude subscription — alternatibo/failover sa CLIProxyAPI para sa trapikong hugis-Claude-Code; ang ini-inject na key ay nagiging `DARIO_ADMIN_TOKEN` na kumokontrol sa access sa `/admin/*` OAuth control plane nito                                                                                                                                                   |
-| **open-wa**     | `@open-wa/wa-automate`                     |      8323       | Automation ng WhatsApp Web (headless Chromium sa pamamagitan ng Puppeteer). Lifecycle-managed lamang — hindi routing target.                                                                                                                                                                                                                                                    |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                       |      20135      | Sidecar para sa prompt compression — tunay na LLMLingua-2 ONNX model (JS/TS port ng algorithm ng Microsoft). Nagpapadala ang `open-sse/services/compression/engines/llmlingua/index.ts` ng `/compress` sa pamamagitan ng HTTP papunta rito, at bumabalik sa in-process worker-thread backend kapag hindi gumagana ang sidecar. Lifecycle-managed lamang — hindi routing target. |
+| Serbisyo        | npm package                                  | Default na port | Layunin                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------- | -------------------------------------------- | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                    |      20130      | AI router na maaaring gamitin ng OmniRoute bilang sub-provider. Inilalantad ang mga modelo bilang `9router/{sub}/{model}`                                                                                                                                                                                                                                                       |
+| **CLIProxyAPI** | Binary mula sa GitHub release (`cliproxy`)   |      8317       | Lokal na proxy adapter para sa mga daloy ng Anthropic CLI auth. Nagbibigay ng fallback routing kapag nag-expire ang mga OAuth token                                                                                                                                                                                                                                             |
+| **Mux**         | `mux` (headless `mux server`)                |      8322       | Lokal na daemon para sa agent orchestration (coder/mux). Lifecycle-managed lamang — hindi routing target (walang LLM proxying).                                                                                                                                                                                                                                                 |
+| **Bifrost**     | `@maximhq/bifrost`                           |      8080       | Go AI-gateway relay backend. Kapag tumatakbo, awtomatikong pinipili ng relay route (`/v1/relay/`)                                                                                                                                                                                                                                                                               |
+| **Dario**       | `@askalf/dario`                              |      3456       | Proxy ng Claude subscription — alternatibo/failover sa CLIProxyAPI para sa trapikong hugis-Claude-Code; ang ini-inject na key ay nagiging `DARIO_ADMIN_TOKEN` na kumokontrol sa access sa `/admin/*` OAuth control plane nito                                                                                                                                                   |
+| **open-wa**     | `@open-wa/wa-automate`                       |      8323       | Automation ng WhatsApp Web (headless Chromium sa pamamagitan ng Puppeteer). Lifecycle-managed lamang — hindi routing target.                                                                                                                                                                                                                                                    |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                         |      20135      | Sidecar para sa prompt compression — tunay na LLMLingua-2 ONNX model (JS/TS port ng algorithm ng Microsoft). Nagpapadala ang `open-sse/services/compression/engines/llmlingua/index.ts` ng `/compress` sa pamamagitan ng HTTP papunta rito, at bumabalik sa in-process worker-thread backend kapag hindi gumagana ang sidecar. Lifecycle-managed lamang — hindi routing target. |
+| **sing-box**    | Binary mula sa release sa GitHub (`singbox`) |      20140      | TPROXY sidecar na sumusuporta sa transparent-proxy interception ng `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Dina-download ng installer ang nakapirming release na sinusuri ang checksum. Lifecycle lamang ang pinamamahalaan: hindi ito routing target at hindi nagpo-proxy ng mga LLM request.                                                                            |
 
-Iisa ang supervisory model na sinusunod ng lahat ng pitong serbisyo:
+Pare-pareho ang modelo ng pangangasiwa ng lahat ng walo:
 
 - Ini-install sila ng OmniRoute sa ilalim ng `DATA_DIR/services/{name}/` (nakahiwalay sa sariling `package.json` ng OmniRoute)
 - Sinisimulan at mino-monitor sila ng OmniRoute bilang mga child process
@@ -579,7 +580,27 @@ na tugon) ay bumabalik sa in-process worker-thread backend (`./worker.ts`).
 
 ---
 
-### 4.8 Reverse proxy (naka-embed na dashboard ng 9Router)
+### 4.8 Mga endpoint ng sing-box (8 ruta)
+
+Kapareho ng Mux ang estruktura ng mga endpoint ng sing-box: walang rutang `rotate-key` at walang paglalagay ng API key (`needsApiKey: false` sa `bootstrap.ts`). Lifecycle lamang ang pinamamahalaan; hindi ito kailanman routing o LLM provider. Dina-download ng `install()` ang opisyal na release binary sa GitHub (`SagerNet/sing-box`) para sa nakapirming bersiyon (`SINGBOX_PINNED_VERSION` sa `src/lib/services/installers/singbox.ts`) at sinusuri ang SHA256 nito laban sa checksum na nakapaloob sa parehong file bago ito isulat sa disk. Tinatanggihan ang anumang hiling para sa ibang bersiyon.
+
+| Paraan | Path                                         | Paglalarawan                                                                                                  |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | I-download at suriin ang nakapirming release ng sing-box                                                      |
+| `POST` | `/api/services/singbox/start`                | Simulan ang sing-box (`sing-box run -c config.json`)                                                          |
+| `POST` | `/api/services/singbox/stop`                 | Ihinto ang sing-box                                                                                           |
+| `POST` | `/api/services/singbox/restart`              | Simulang muli ang sing-box                                                                                    |
+| `POST` | `/api/services/singbox/update`               | Suriing muli o muling i-install ang nakapirming release                                                       |
+| `GET`  | `/api/services/singbox/status`               | Kasalukuyang status at status sa DB                                                                           |
+| `POST` | `/api/services/singbox/auto-start`           | I-on o i-off ang awtomatikong pagsisimula                                                                     |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | I-on o i-off ang awtomatikong pag-restart ng dati nang umiiral na prosesong isinama sa pamamahala             |
+| `GET`  | `/api/services/singbox/logs`                 | Subaybayan ang mga bagong log gamit ang SSE sa pamamagitan ng pinagsasaluhang dynamic na rutang `[name]/logs` |
+
+**Pagkakabit ng TPROXY:** Isinusulat ng `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) ang `config.json` at sinisimulan ang supervisor bago ilagay ng `applyTproxy()` ang mga tuntunin ng TPROXY firewall. Kung wala ang supervisor o hindi nito maabot ang estadong `running`, itinatala na ngayon ang problema sa error level sa halip na tahimik itong balewalain. Dahil dito, malalaman ng operator kung nailapat ang mga tuntunin ng TPROXY nang walang gumaganang listener sa likod ng mga ito.
+
+---
+
+### 4.9 Reverse proxy (naka-embed na dashboard ng 9Router)
 
 Ini-embed ng dashboard ang web UI ng 9Router sa loob ng isang iframe sa pamamagitan ng internal reverse
 proxy sa:

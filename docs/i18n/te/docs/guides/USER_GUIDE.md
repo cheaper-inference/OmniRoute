@@ -120,15 +120,15 @@
 
 ## 📖 ప్రొవైడర్ సెటప్
 
-CSV లేదా JSON ఫైల్ నుండి API-key కనెక్షన్లను పెద్ద మొత్తంలో జోడించడానికి, **డ్యాష్బోర్డ్ → ప్రొవైడర్లు → ఫైల్ నుండి దిగుమతి చేయండి** ఉపయోగించండి. కాలమ్లు స్థానాధారితమైనవి (`provider,name,apiKey,baseUrl,priority`); `provider` ఇప్పటికే నిర్వహిత ప్రొవైడర్గా లేదా అనుకూల నోడ్గా ఉనికిలో ఉండాలి. [CSV లేదా JSON ఫైల్ నుండి ప్రొవైడర్లను దిగుమతి చేయడం](../providers/CSV-IMPORT.md) చూడండి.
+CSV లేదా JSON ఫైల్ నుండి API-కీ కనెక్షన్లను పెద్ద మొత్తంలో జోడించడానికి **Dashboard → Providers → Import from file** ఉపయోగించండి. కాలమ్లు స్థాన ఆధారితంగా ఉంటాయి (`provider,name,apiKey,baseUrl,priority`); `provider` ఇప్పటికే నిర్వహిత ప్రొవైడర్గా లేదా అనుకూల నోడ్గా ఉండాలి. [CSV లేదా JSON ఫైల్ నుండి ప్రొవైడర్లను దిగుమతి చేయడం](../providers/CSV-IMPORT.md) చూడండి.
 
 ### 🔐 సబ్స్క్రిప్షన్ ప్రొవైడర్లు
 
 #### Claude Code (Pro/Max)
 
 ```bash
-డ్యాష్బోర్డ్ → ప్రొవైడర్లు → Claude Codeను కనెక్ట్ చేయండి
-→ OAuth లాగిన్ → ఆటోమేటిక్ టోకెన్ రిఫ్రెష్
+డ్యాష్బోర్డ్ → ప్రొవైడర్లు → Claude Codeని కనెక్ట్ చేయండి
+→ OAuth లాగిన్ → టోకెన్ స్వయంచాలక రిఫ్రెష్
 → 5-గంటల + వారపు కోటా ట్రాకింగ్
 
 మోడల్లు:
@@ -137,11 +137,14 @@ CSV లేదా JSON ఫైల్ నుండి API-key కనెక్షన
   cc/claude-haiku-4-5-20251001
 ```
 
-**ప్రో చిట్కా:** సంక్లిష్టమైన పనుల కోసం Opusను, వేగం కోసం Sonnetను ఉపయోగించండి. OmniRoute ప్రతి మోడల్కు కోటాను ట్రాక్ చేస్తుంది!
+**ప్రొఫెషనల్ సూచన:** క్లిష్టమైన పనులకు Opusను, వేగం కోసం Sonnetను ఉపయోగించండి. OmniRoute ప్రతి మోడల్కు కోటాను ట్రాక్ చేస్తుంది!
 
-OmniRoute హోస్ట్లో బ్రౌజర్ లేదా? Claude Codeలో లాగిన్ అయి ఉన్న ఏ ప్రదేశంలోనైనా `claude setup-token` అమలు చేసి, ఒక సంవత్సరం టోకెన్ను **Setup Token** ట్యాబ్లో అతికించండి. [సెటప్ టోకెన్తో Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) చూడండి.
+OmniRoute హోస్ట్లో బ్రౌజర్ లేకపోతే, Claude Codeలో లాగిన్ చేసిన ఎక్కడైనా `claude setup-token` అమలు చేసి, ఒక సంవత్సరం చెల్లుబాటు అయ్యే టోకెన్ను **Setup Token** ట్యాబ్లో పేస్ట్ చేయండి. [సెటప్ టోకెన్తో Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) చూడండి.
 
-Claude మరియు Claude Code-అనుకూల రూట్లు Opus మరియు Sonnet మోడల్ల కోసం `max` ఆలోచనా శ్రమ స్థాయిని అలాగే ఉంచుతాయి. Haiku మోడల్లు `max` శ్రమ స్థాయిని అంగీకరించవు, కాబట్టి OmniRoute ఆ అభ్యర్థనను అప్స్ట్రీమ్కు పంపే ముందు అధిక ఆలోచనా బడ్జెట్కు తగ్గిస్తుంది.
+Claude మరియు Claude Code-అనుకూల రూట్లు Opus మరియు Sonnet
+మోడల్ల కోసం `max` థింకింగ్ ప్రయత్న స్థాయిని అలాగే ఉంచుతాయి. Haiku మోడల్లు `max`
+ప్రయత్న స్థాయిని అంగీకరించవు, కాబట్టి OmniRoute ఆ అభ్యర్థనను అప్స్ట్రీమ్కు పంపే ముందు
+అధిక థింకింగ్ బడ్జెట్కు తగ్గిస్తుంది.
 
 #### OpenAI Codex (Plus/Pro)
 
@@ -172,47 +175,64 @@ Claude మరియు Claude Code-అనుకూల రూట్లు Opus �
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 చవకైన ప్రొవైడర్లు
+**AI క్రెడిట్లు (టోకెన్-ఆధారిత బిల్లింగ్).** ఖాతా కోసం GitHub `credits_used`ను నివేదించినప్పుడు,
+Provider Limits కార్డ్ ప్రస్తుత బిల్లింగ్ వ్యవధిలో వినియోగించిన క్రెడిట్లతో కూడిన
+**AI Credits** వరుసను చూపిస్తుంది; అపరిమిత సంస్థ ప్లాన్లలో కూడా ఇది కనిపిస్తుంది.
+
+**స్థానిక AI క్రెడిట్ల పరిమితి.** GitHub కనెక్షన్ను సవరించి, ప్రతి బిల్లింగ్ వ్యవధికి
+**AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`) సెట్ చేయండి. ఖాళీగా ఉంచితే ఇది నిలిపివేయబడుతుంది; `0`
+ఉంటే కనెక్షన్ ఎల్లప్పుడూ దాటవేయబడుతుంది. చివరి వినియోగ పఠనం పరిమితికి సమానంగా లేదా
+అంతకంటే ఎక్కువగా ఉన్నప్పుడు, ఖాతా ఎంపిక ఆ కనెక్షన్ను దాటవేసి, కోటా-పాలసీ కట్ఆఫ్
+విధంగానే రూటింగ్ మీ ఇతర కనెక్షన్లకు తిరిగి వెళ్తుంది. ఈ తనిఖీ కాలానుగుణ కోటా
+రిఫ్రెష్ ఇప్పటికే సేకరించే వినియోగ డేటాను చదువుతుంది — అభ్యర్థన మార్గంలో ఇది ఎప్పుడూ
+GitHubను కాల్ చేయదు — మరియు ఇది ఫెయిల్-ఓపెన్ విధానాన్ని అనుసరిస్తుంది: పఠనం అందుబాటులో
+లేకపోయినా లేదా పాతదైనా (15 నిమిషాల కంటే పాతది, లేదా ఇప్పటికే రీసెట్ అయిన బిల్లింగ్
+వ్యవధికి చెందినది), కనెక్షన్ను నిరోధించదు. ఇది స్థానిక రక్షణ మాత్రమే, **ఖర్చు పరిమితికి
+హామీ కాదు**: GitHub నివేదికల ఆలస్యం, రిఫ్రెష్ వ్యవధి, ప్రాసెస్లో ఉన్న అభ్యర్థనలు మరియు
+OmniRoute వెలుపల వినియోగం దీనిని మించవచ్చు. ఖచ్చితమైన గరిష్ఠ పరిమితి కోసం GitHub స్వంత
+ఖర్చు నియంత్రణలను ఉపయోగించండి.
+
+### 💰 చౌకైన ప్రొవైడర్లు
 
 #### GLM-4.7 (రోజువారీ రీసెట్, $0.6/1M)
 
 1. సైన్ అప్ చేయండి: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan నుండి API కీని పొందండి
-3. డ్యాష్బోర్డ్ → API కీని జోడించండి: ప్రొవైడర్: `glm`, API కీ: `your-key`
+2. Coding Plan నుండి API కీ పొందండి
+3. డ్యాష్బోర్డ్ → API కీ జోడించండి: ప్రొవైడర్: `glm`, API కీ: `your-key`
 
-**ఉపయోగం:** `glm/glm-4.7` — **ప్రో చిట్కా:** Coding Plan 1/7 ఖర్చుతో 3× కోటాను అందిస్తుంది! ప్రతిరోజూ ఉదయం 10:00 గంటలకు రీసెట్ అవుతుంది.
+**ఉపయోగం:** `glm/glm-4.7` — **ప్రొఫెషనల్ సూచన:** Coding Plan 1/7 ఖర్చుతో 3× కోటాను అందిస్తుంది! ప్రతిరోజూ ఉదయం 10:00 గంటలకు రీసెట్ అవుతుంది.
 
-#### MiniMax M2.1 (5గం. రీసెట్, $0.20/1M)
+#### MiniMax M2.1 (5 గంటల రీసెట్, $0.20/1M)
 
 1. సైన్ అప్ చేయండి: [MiniMax](https://www.minimax.io)
-2. API కీని పొందండి → డ్యాష్బోర్డ్ → API కీని జోడించండి
+2. API కీ పొందండి → డ్యాష్బోర్డ్ → API కీ జోడించండి
 
-**ఉపయోగం:** `minimax/MiniMax-M2.1` — **ప్రో చిట్కా:** సుదీర్ఘ కాంటెక్స్ట్ కోసం అత్యంత చవకైన ఎంపిక (1M టోకెన్లు)!
+**ఉపయోగం:** `minimax/MiniMax-M2.1` — **ప్రొఫెషనల్ సూచన:** దీర్ఘ కాంటెక్స్ట్కు అత్యంత చౌకైన ఎంపిక (1M టోకెన్లు)!
 
-#### Kimi K2 (నెలకు స్థిరంగా $9)
+#### Kimi K2 ($9/నెల స్థిర ధర)
 
 1. సబ్స్క్రైబ్ చేయండి: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API కీని పొందండి → డ్యాష్బోర్డ్ → API కీని జోడించండి
+2. API కీ పొందండి → డ్యాష్బోర్డ్ → API కీ జోడించండి
 
-**ఉపయోగం:** `kimi/kimi-k2.5` — **ప్రో చిట్కా:** 10M టోకెన్లకు నెలకు స్థిరంగా $9 = 1Mకు $0.90 ప్రభావవంతమైన ఖర్చు!
+**ఉపయోగం:** `kimi/kimi-k2.5` — **ప్రొఫెషనల్ సూచన:** 10M టోకెన్లకు స్థిరంగా $9/నెల = ప్రభావవంతమైన ఖర్చు $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. సైన్ అప్ చేయండి: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API కీని సృష్టించండి → డ్యాష్బోర్డ్ → API కీని జోడించండి: ప్రొవైడర్: `qianfan`
+2. Qianfan API కీ సృష్టించండి → డ్యాష్బోర్డ్ → API కీ జోడించండి: ప్రొవైడర్: `qianfan`
 
 **ఉపయోగం:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, లేదా మరొక Qianfan OpenAI-అనుకూల మోడల్ ID.
 
 ### 🆓 ఉచిత ప్రొవైడర్లు
 
-ఆథెంటికేషన్ అవసరం లేని ఉచిత ప్రొవైడర్ల ప్రొవైడర్ పేజీలో **ఆథెంటికేషన్ అవసరం లేదు** పక్కన ఒక స్విచ్ ఉంటుంది.
-దాన్ని ఆఫ్ చేయడం వలన ఆ ప్రొవైడర్ నిలిపివేయబడుతుంది, ప్రొవైడర్ల కాన్ఫిగర్ చేసిన/కాంపాక్ట్ వీక్షణల నుండి అది తొలగించబడుతుంది మరియు
+ప్రామాణీకరణ అవసరం లేని ఉచిత ప్రొవైడర్లకు, వారి ప్రొవైడర్ పేజీలో **No authentication required** పక్కన ఒక స్విచ్ ఉంటుంది.
+దాన్ని ఆఫ్ చేస్తే ఆ ప్రొవైడర్ నిలిపివేయబడుతుంది, Providers configured/compact వీక్షణల నుండి తొలగించబడుతుంది, అలాగే
 దాని మోడల్లు `/v1/models` నుండి తొలగించబడతాయి.
 
 #### Qoder (9 ఉచిత మోడల్లు)
 
 ```bash
-డ్యాష్బోర్డ్ → Qoderను కనెక్ట్ చేయండి → OAuth లాగిన్ → యాక్సెస్ ప్రస్తుత ప్రొవైడర్ పరిమితులకు లోబడి ఉంటుంది
+డ్యాష్బోర్డ్ → Qoderను కనెక్ట్ చేయండి → OAuth లాగిన్ → ప్రస్తుత ప్రొవైడర్ పరిమితులకు లోబడి యాక్సెస్
 
 మోడల్లు: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +240,7 @@ Claude మరియు Claude Code-అనుకూల రూట్లు Opus �
 #### Kiro (Claude ఉచితం)
 
 ```bash
-డ్యాష్బోర్డ్ → Kiroను కనెక్ట్ చేయండి → AWS Builder ID లేదా Google/GitHub → నెలకు ~50 క్రెడిట్లు
+డ్యాష్బోర్డ్ → Kiroను కనెక్ట్ చేయండి → AWS Builder ID లేదా Google/GitHub → నెలకు సుమారు 50 క్రెడిట్లు
 
 మోడల్లు: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -342,19 +362,19 @@ API కీ: [డ్యాష్బోర్డ్ నుండి]
 ```bash
 npm install -g omniroute
 
-# కాన్ఫిగ్ డైరెక్టరీని సృష్టించండి
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ఫైల్ను సృష్టించండి (.env.example చూడండి)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# సర్వర్ను ప్రారంభించండి
+# Start server
 omniroute
-# లేదా అనుకూల పోర్ట్తో:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env`ను లోడ్ చేస్తుంది.
+CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env` లోడ్ చేస్తుంది.
 
 ### ట్రే మోడ్
 
@@ -607,22 +627,22 @@ post_install() {
 
 ---
 
-## 📊 అందుబాటులో ఉన్న మోడల్లు
+## 📊 అందుబాటులో ఉన్న మోడళ్లు
 
 <details>
-<summary><b>అందుబాటులో ఉన్న అన్ని మోడల్లను చూడండి</b></summary>
+<summary><b>అందుబాటులో ఉన్న అన్ని మోడళ్లను చూడండి</b></summary>
 
-> దిగువ జాబితా v3.8.0 కోసం `open-sse/config/providerRegistry.ts` నుండి ఎంపిక చేయబడింది. క్లౌడ్ కేటలాగ్లు (Gemini, OpenRouter మొదలైనవి) డైనమిక్గా సమకాలీకరించబడతాయి — పూర్తి లైవ్ కేటలాగ్ కోసం **Dashboard → Providers → [provider] → Available Models** తెరవండి లేదా `GET /api/models/catalog` కాల్ చేయండి.
+> దిగువ జాబితా v3.8.0 కోసం `open-sse/config/providerRegistry.ts` నుండి ఎంపిక చేయబడింది. క్లౌడ్ కేటలాగ్లు (Gemini, OpenRouter మొదలైనవి) డైనమిక్గా సమకాలీకరించబడతాయి — పూర్తి లైవ్ కేటలాగ్ కోసం **డ్యాష్బోర్డ్ → ప్రొవైడర్లు → [ప్రొవైడర్] → అందుబాటులో ఉన్న మోడళ్లు** తెరవండి లేదా `GET /api/models/catalog` ను కాల్ చేయండి.
 >
-> ప్రొవైడర్లో అంతర్నిర్మితంగా ఉన్న జాబితా తాజా స్థితికి భిన్నంగా ఉంటే, లైవ్ అప్స్ట్రీమ్ కేటలాగ్ను పొందడానికి ఆ పేజీలోని **Import from /models** ఉపయోగించండి (లేదా **Auto-Sync** ప్రారంభించండి). ఇది LLM7.io (`gemini-3.1-flash-lite`) మరియు UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) కోసం v3.8.50లో ధృవీకరించబడింది; అదే పరీక్షా సమయంలో Pollinations అనామక యాక్సెస్ అప్స్ట్రీమ్ పరిమితులతోనే కొనసాగింది.
+> ఒక ప్రొవైడర్లోని అంతర్నిర్మిత జాబితా మారిపోయి ఉంటే, లైవ్ అప్స్ట్రీమ్ కేటలాగ్ను పొందడానికి ఆ పేజీలోని **/models నుండి దిగుమతి చేయి** ఉపయోగించండి (లేదా **ఆటో-సింక్** ప్రారంభించండి). ఇది LLM7.io (`gemini-3.1-flash-lite`) మరియు UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) కోసం v3.8.50లో ధృవీకరించబడింది; అదే పరీక్షా దశలో Pollinations అనామక యాక్సెస్ అప్స్ట్రీమ్ పరిమితుల్లోనే కొనసాగింది.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ శ్రమ స్థాయులు: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ప్రయత్న స్థాయిలు: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ఉచిత OAuth: **Dashboard → Providers → Kiro → Available Models** కింద చూపబడే లైవ్ కేటలాగ్ను ఉపయోగించండి. లభ్యత ఖాతా మరియు ప్లాన్పై ఆధారపడి ఉంటుంది.
+**Kiro (`kr/`)** — ఉచిత OAuth: **డ్యాష్బోర్డ్ → ప్రొవైడర్లు → Kiro → అందుబాటులో ఉన్న మోడళ్లు** కింద చూపిన లైవ్ కేటలాగ్ను ఉపయోగించండి. అందుబాటు ఖాతా మరియు ప్లాన్పై ఆధారపడి ఉంటుంది.
 
 **Qoder (`if/`)** — ఉచిత OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +650,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — నెలకు స్థిరంగా $9 లేదా వినియోగం ఆధారంగా: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — నెలకు $9 స్థిర రుసుము లేదా వినియోగానుసారం: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API కీ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — అత్యంత వేగవంతమైనది: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — అతి వేగవంతమైనది: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — స్థానిక Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok స్థానిక మద్దతు: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EUలో హోస్ట్ చేయబడింది: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EUలో హోస్ట్ చేయబడినది: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — శోధనతో విస్తరించబడింది: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — శోధనతో మెరుగుపరచబడినది: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — ఓపెన్ సోర్స్: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ఉచితం), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — వేగవంతమైన ఇన్ఫరెన్స్: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — వేఫర్ స్థాయి: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — వేఫర్-స్థాయి: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAGపై దృష్టి కేంద్రీకరించబడింది: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAGపై దృష్టి: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ఎంటర్ప్రైజ్: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ఎంటర్ప్రైజ్: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google నుండి ప్రతి API కీకి లైవ్గా సమకాలీకరించబడుతుంది — స్థిరమైన జాబితా లేదు. **Dashboard → Providers**లో ఒక కీని కనెక్ట్ చేసి, ఆపై ప్రస్తుత కేటలాగ్ను దిగుమతి చేయడానికి **Available Models** ఉపయోగించండి (ఉదా. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google నుండి API కీ ఆధారంగా లైవ్గా సమకాలీకరించబడుతుంది — స్థిరమైన జాబితా లేదు. **డ్యాష్బోర్డ్ → ప్రొవైడర్లు** లో ఒక కీని కనెక్ట్ చేసి, ప్రస్తుత కేటలాగ్ను దిగుమతి చేసుకోవడానికి **అందుబాటులో ఉన్న మోడళ్లు** ఉపయోగించండి (ఉదా. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**ఇతర అనుకూల ప్రొవైడర్లు** (ఎంపిక చేసినవి): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ద్వారా), `azure-ai`, `openrouter` (పాస్త్రూ కేటలాగ్), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ప్రతి ఒక్కటి `providerRegistry.ts`లో దాని స్వంత మోడల్ జాబితాను నిర్వహిస్తుంది మరియు ప్రొవైడర్ `/models` ఎండ్పాయింట్ను అందించినప్పుడు స్వయంచాలకంగా సమకాలీకరించవచ్చు.
+**ఇతర అనుకూల ప్రొవైడర్లు** (ఎంపిక): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ద్వారా), `azure-ai`, `openrouter` (పాస్త్రూ కేటలాగ్), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ప్రతి ఒక్కటి `providerRegistry.ts` లో స్వంత మోడల్ జాబితాను నిర్వహిస్తుంది; ప్రొవైడర్ `/models` ఎండ్పాయింట్ను అందించినప్పుడు ఆటో-సింక్ చేయవచ్చు.
 
-**మోడల్ IDలపై గమనిక:** OmniRoute ప్రొవైడర్కు స్థానికమైన IDలను (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ఉపయోగిస్తుంది. అప్స్ట్రీమ్ API వాటిని ఆ విధంగానే ఆశిస్తుంది కాబట్టి కొన్ని IDలలో చుక్కలతో కూడిన వెర్షన్లు ఉంటాయి. ఒక మోడల్ పైన జాబితా చేయబడకపోతే, లభ్యతను నిర్ధారించడానికి `omniroute models --search <term>` అమలు చేయండి లేదా `GET /api/models/catalog` అభ్యర్థించండి.
+**మోడల్ IDల గురించి గమనిక:** OmniRoute ప్రొవైడర్-స్థానిక IDలను ఉపయోగిస్తుంది (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). కొన్ని IDలలో డాట్తో కూడిన సంస్కరణలు ఉంటాయి, ఎందుకంటే అప్స్ట్రీమ్ API వాటిని ఆ విధంగానే ఆశిస్తుంది. ఒక మోడల్ పై జాబితాలో లేకపోతే, అందుబాటును నిర్ధారించడానికి `omniroute models --search <term>` ను అమలు చేయండి లేదా `GET /api/models/catalog` ను ఉపయోగించండి.
 
 </details>
 
@@ -727,6 +747,27 @@ prefix: "<prefix>" అనేది రిజర్వ్ చేసిన ప్�
 రిజర్వ్ చేయబడిందో లేదో తనిఖీ చేయండి: ఈ నియమం అమల్లోకి రాకముందు సేవ్ చేసిన నోడ్లు ఇప్పటికీ
 నిల్వలో ఉంటాయి, కానీ వాటి ప్రిఫిక్స్ అంతర్నిర్మిత ప్రొవైడర్కు రూట్ అవుతుంది. నోడ్ను సవరించి,
 దానికి కొత్త ప్రిఫిక్స్ ఇవ్వండి.
+
+#### ప్రతి-కనెక్షన్ గేట్వే ఎంపికలు
+
+ఈ కీలు కనెక్షన్కు చెందిన `providerSpecificData`లో ఉంచబడతాయి (ఉదాహరణకు,
+`PUT /api/providers/{id}` ద్వారా):
+
+- `toolNameMaxLength` (పూర్ణాంకం, 1–1024) — పొడవైన టూల్ పేర్లను తిరస్కరించే గేట్వే కలిగిన OpenAI చాట్-ఫార్మాట్ అనుకూల కనెక్షన్ల కోసం. పొడవైన పేర్లు సంక్షిప్త మారుపేర్లుగా పంపబడతాయి మరియు ప్రతిస్పందనలో పునరుద్ధరించబడతాయి.
+- `quotaEndpoint` — గేట్వే యొక్క కోటా/క్రెడిట్ల ఎండ్పాయింట్; ఇది డ్యాష్బోర్డ్ కోటా స్ట్రిప్ మరియు కోటా-ఆధారిత రూటింగ్ కోసం చదవబడుతుంది. ఇది OpenAI- మరియు Anthropic-అనుకూల కనెక్షన్లు రెండింటిలోనూ పనిచేస్తుంది; పూర్తి నిర్మాణం `open-sse/services/usage/openaiCompatible.ts`లో డాక్యుమెంట్ చేయబడింది.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### OmniRoute పీర్లను చైన్ చేయడం
 

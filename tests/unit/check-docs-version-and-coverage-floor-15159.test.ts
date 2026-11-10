@@ -126,7 +126,13 @@ test("G-06: prose with no version claim at all is accepted", () => {
 
 test("G-06: README.md and llm.txt carry no stale version claim", () => {
   const root = path.resolve(import.meta.dirname, "..", "..");
-  const validator = validateVersion(VERSION);
+  // The REAL files are judged against the REAL package.json, not the fixture constant above:
+  // pinning "3.8.52" here made this test red on every new cycle at the exact moment the README
+  // was bumped correctly (release/v3.8.53, 2026-10-20) and green while it was stale.
+  const realVersion = String(
+    JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")).version
+  );
+  const validator = validateVersion(realVersion);
 
   for (const rel of ["README.md", "llm.txt"]) {
     const result = validator(fs.readFileSync(path.join(root, rel), "utf8"));

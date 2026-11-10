@@ -17,7 +17,7 @@ const {
   reconcile,
 } = mod;
 
-const REPO = "diegosouzapw/OmniRoute";
+const REPO = "cheaper-inference/OmniRoute";
 const link = (n: number) => `[#${n}](https://github.com/${REPO}/pull/${n})`;
 
 test("primaryRefs: /pull links and the LAST #N count, incidental mentions do not", () => {

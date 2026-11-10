@@ -64,6 +64,19 @@ Pracovný priestor `electron/` sprístupňuje aj:
 - `npm run build:mac-x64` / `build:mac-arm64` — zostavenia systému macOS pre jednu architektúru
 - `npm run pack` — zostavenie iba do adresára na lokálne testovanie (bez inštalátora)
 
+## Voliteľné runtime balíky
+
+Desktopové zostavy môžu popri inštalátoroch publikovať voliteľné runtime archívy. Nainštalovaný serverový obsah zahŕňa `optional-packs.index.json` (vo Windows a Linuxe pod `resources/app`). Pri položke `browser-runtime` prečítajte `packs[].tarball` a stiahnite **presne tento názov súboru z rovnakého vydania**. Názvy archívov obsahujú odtlačok SHA-256; rôzne zostavy môžu vyžadovať rôzne archívy. Názov stiahnutého súboru nemeňte.
+
+Skopírujte index nainštalovanej aplikácie a vybraný archív do jedného adresára a potom použite CLI z rovnakého vydania:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` zobrazuje stav inštalácie a overenia, nie názov archívu. Archív vyberá pribalený index. Inštalácia pred rozbalením overí kontrolný súčet archívu a pred nahradením nainštalovaného balíka jeho kontrolné súčty balíkov. Číta lokálne súbory; chýbajúce archívy nesťahuje. Po inštalácii reštartujte aplikáciu. Ak vydanie nemá zodpovedajúci súbor na stiahnutie, voliteľný balík nie je dostupný cez súbory tohto vydania.
+
 ## Štruktúra adresárov
 
 ```

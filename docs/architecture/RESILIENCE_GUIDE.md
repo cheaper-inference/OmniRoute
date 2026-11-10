@@ -12,6 +12,19 @@ OmniRoute has three distinct but related resilience mechanisms. Each has a diffe
 
 > Source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Env-vs-dashboard precedence for resilience toggles.** The opt-in
+> resilience toggles seeded from the environment — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`,
+> `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`,
+> `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` —
+> only supply the _default_ (`DEFAULT_RESILIENCE_SETTINGS`,
+> `src/lib/resilience/settings.ts`). A boolean persisted in `resilienceSettings`
+> (Dashboard → **Settings → Resilience** / `PATCH /api/resilience`, stored in
+> `key_value`) wins over the env value: normalization (`toBoolean`,
+> `src/lib/resilience/settings/normalize.ts`) keeps the stored boolean whenever
+> one exists. Setting such an env var to `true` on a deployment where the
+> dashboard already saved `false` therefore changes nothing — flip the toggle
+> in **Settings → Resilience** (or clear the stored field) instead.
+
 ## 1. Provider Circuit Breaker
 
 **Scope:** entire provider (e.g., `glm`, `openai`, `anthropic`).
@@ -96,6 +109,15 @@ Regression guard: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-key 429: prefers upstream `Retry-After`/reset headers/parseable reset text
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
 
+**Per-provider retry delay.** The provider detail page has a **Retry delay** select (Auto,
+15s up to 1h). It saves `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+(1–21600, through `PATCH /api/resilience`). When a rate-limit error carries no upstream retry
+hint, that value replaces the scaled backoff for the provider and resets `backoffLevel` to 0
+(`open-sse/services/rotationConfig.ts::overrideFor`). Precedence for a rate-limited error, highest
+first: upstream retry hint, then per-connection `providerSpecificData.rotationOverrides.rateLimitResetSeconds`,
+then the per-provider retry delay, then env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, then the
+scaled backoff. Auto removes the field. It only affects the rate-limit reason, never terminal states.
+
 **Anti-thundering-herd guard:** prevents concurrent failures from over-extending cooldown or double-incrementing `backoffLevel`.
 
 **Concurrency-limit 429s do not climb the backoff ladder.** A `429` whose body reports a
@@ -116,6 +138,19 @@ cooldown: the stall belongs to that request, most often a long reasoning turn wi
 output yet. Operators can opt back in with `resilienceSettings.streamStallCooldown.enabled`
 (default `false`).
 
+**Opt-in latency signal for `p2c` account selection.** Each dispatched attempt records its
+time-to-first-byte and outcome per connection (and per connection + model) in an in-memory
+rolling window: the last 20 samples within 15 minutes
+(`open-sse/services/connectionLatencyTracker.ts`, recorded from `safeLogEvents()` in
+`src/sse/handlers/chatHelpers.ts`). When `resilienceSettings.p2cLatency.weight` is above `0`
+(range 0-20, default `0` = off), `compareP2CConnections()` in `src/sse/services/auth.ts` adds
+up to `weight` points to each candidate of the pair. Half of that comes from latency as a ratio to
+the faster candidate (twice as slow takes the full half) and half from the rolling error rate.
+The term applies only when both candidates have at least 3 samples, so new accounts are not
+penalized, and its ceiling stays below the quota-blocked and quota-exhausted penalties. It
+adds no circuit of its own: failing accounts are still handled by the cooldown, lockout and
+breaker layers. Set it with `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+
 **Reasoning frames restart the content-stall budget.** A reasoning model can think for
 minutes before its first visible token: Claude streams `thinking_delta` frames whose
 thinking text may be empty, and the Responses API streams one reasoning item after
@@ -133,7 +168,7 @@ apply (`open-sse/executors/kiro/reasoning.ts`).
 
 **Terminal states (NOT cooldowns):**
 
-- `banned` — set by banned-keyword / account-ban detection (see [BAN_DETECTION](../security/BAN_DETECTION.md)), and by three consecutive upstream per-request refusals (`request_rejected`, e.g. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); a single refusal only cools the connection down
+- `banned` — set by banned-keyword / account-ban detection (see [BAN_DETECTION](../security/BAN_DETECTION.md)). Upstream per-request refusals (`request_rejected`, e.g. Anthropic OAuth 403 "Request not allowed") never set it: they are counted per connection and model and take that model out of rotation with a growing cooldown capped at `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), or cool the connection when no model is known — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (transitions to terminal after bounded retries — `EXPIRED_RETRY_MAX = 3` with exponential backoff — so transient OAuth errors can self-heal before the account is permanently deactivated)
 - `credits_exhausted`
 
@@ -444,6 +479,13 @@ rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts
 `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted`
 (locked until midnight) or auth/not-found reasons.
 
+A combo can opt out with `config.comboCooldownWaitEnabled: false`. Only literal
+`false` disables these shared combo waits (post-dispatch cooldown and pre-dispatch
+circuit-open/model-lock waits) and their wait-budget timeout-floor extension.
+Missing or `true` preserves the global policy; `true` cannot enable globally
+disabled waiting. An explicit `targetTimeoutMs` still wins. This opt-out does not
+change the separate native-Codex turn-pin pre-dispatch wait.
+
 The same gate covers the pre-dispatch case (#16319): when every target of a
 combo is skipped before any attempt is made because its model sits in a short
 transient lockout, the zero-attempt path waits the lock out under the same
@@ -597,7 +639,10 @@ The watchdog requires a warm-up period followed by a complete rolling window bef
 it can abort. It counts text deltas from Chat Completions and Responses API output
 events (a conservative UTF-8 byte proxy), ignores usage-only and empty events, and
 suspends judgement while tool-call or reasoning events are in flight. It is disabled
-by default and can be enabled with `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; the
+by default and can be enabled with `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`
+(that env value only seeds the default — a saved
+`resilienceSettings.streamRecovery.throughputWatchdog.enabled` boolean wins;
+see the env-vs-dashboard precedence note at the top of this guide); the
 window, warm-up, minimum rate, and minimum measurable output are bounded by the
 normal resilience-settings normalization layer.
 

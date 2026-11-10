@@ -697,7 +697,15 @@ does not switch masking on: that is still `PII_REDACTION_ENABLED` (request) and
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Unset means every
   type (the behaviour before this setting existed). The request engine's
   `ssn_us` pattern maps to `ssn`. Templates (Minimal, Standard, Financial,
-  Brazilian, USA, Full) only fill the checkboxes in the UI.
+  Brazilian, USA, GDPR, POPIA, Full) only fill the checkboxes in the UI.
+- **GDPR and POPIA identifiers** — twelve built-in ids covering EU and South
+  African personal identifiers (table below). Their regexes, validators and
+  jurisdiction tags live in one table, `src/shared/utils/piiPatterns.ts`, which
+  both the response sanitizer (`src/lib/piiSanitizer.ts`) and the request
+  masker (`src/shared/utils/inputSanitizer.ts`) consume. A match is redacted
+  only when its validator accepts it; a bare run of digits is never enough. An
+  operator who saved a narrowed selection before these ids existed keeps the
+  behaviour it had until the new ids are ticked.
 - **Custom patterns** — up to 20 regex or wildcard patterns (`*` = up to 64
   non-whitespace characters, `?` = one). Matches become `[CUSTOM_REDACTED]`.
   Every pattern goes through `compilePiiCustomPattern()`
@@ -722,6 +730,33 @@ The settings live in the `key_value` table (namespace `pii_settings`,
 
 All three require management auth and validate the body with Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR (EU) and POPIA (South Africa) identifiers
+
+| Id                  | Identifier               | Validation                                                                           |
+| ------------------- | ------------------------ | ------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                     | Known country, exact length for that country, ISO 13616 MOD-97-10                    |
+| `eu_vat`            | EU VAT number            | Known member-state prefix and that state's number format (no VIES lookup)            |
+| `es_dni_nie`        | Spanish DNI / NIE        | Control letter (value mod 23); NIE is `X/Y/Z` + 7 digits                             |
+| `it_codice_fiscale` | Italian Codice Fiscale   | Control letter from the odd/even position tables                                     |
+| `pl_pesel`          | Polish PESEL             | Weighted checksum and an encoded birth date that exists                              |
+| `nl_bsn`            | Dutch BSN                | 11-proof (weights 9..2, -1)                                                          |
+| `de_steuer_id`      | German Steuer-ID         | ISO 7064 Mod 11,10 plus the digit-structure rules (no leading 0)                     |
+| `se_personnummer`   | Swedish personnummer     | Luhn over the last ten digits and a plausible birth date (10 or 12 digits)           |
+| `za_id`             | South African ID number  | Luhn over all 13 digits, valid birth month/day, citizenship digit 0 or 1             |
+| `za_phone`          | South African phone      | `+27` / `27` prefix, or the national `0..` form written with a space or hyphen       |
+| `za_vat`            | South African VAT number | 10 digits starting with `4` **and** "VAT" / "BTW" in the 48 characters before        |
+| `za_tax_ref`        | South African tax ref.   | 10 digits starting `0`-`3`, Luhn, **and** "tax" / "SARS" in the 48 characters before |
+
+Because the digit-only formats collide with order numbers, build numbers and
+timestamps, the weakest ones (`za_vat`, `za_tax_ref`) need the keyword cue, and
+a bare ten-digit `0..` number is not treated as a South African phone number.
+Spaced IBANs (`GB29 NWBK ...`) are not matched. On the streaming path the cue is
+looked up inside the current chunk only. The ids sit ahead of the generic phone
+patterns, so a validated identifier keeps its own placeholder
+(`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). The `gdpr` and `popia` templates
+select the EU and South African ids respectively. Masking itself stays opt-in
+(Hard Rule #20): nothing here changes a feature-flag default.
 
 ### Prompt Injection (`promptInjection.ts`)
 

@@ -5,8 +5,8 @@
 ---
 
 > **Wersja:** v3.8.44
-> **Ostatnia aktualizacja:** 2026-09-16
-> **Odbiorcy:** Inżynierowie dodający, utrzymujący lub debugujący usługi wbudowane (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Ostatnia aktualizacja:** 2026-10-28
+> **Odbiorcy:** Inżynierowie dodający, utrzymujący lub diagnozujący usługi osadzone (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Usługi wbudowane to instalowane lokalnie narzędzia typu sidecar działające jako osobne procesy, które OmniRoute instaluje, nadzoruje i
 udostępnia jako pełnoprawne cele routingu. W przeciwieństwie do zewnętrznych dostawców (z którymi połączenie odbywa się przez internet
@@ -31,7 +31,7 @@ przy użyciu kluczy API) usługi wbudowane działają na tej samej maszynie co O
 
 ### Dlaczego usługi osadzone?
 
-Osadzonych jest siedem usług:
+Osadzonych jest osiem usług:
 
 | Usługa          | Pakiet npm                                 | Domyślny port | Przeznaczenie                                                                                                                                                                                                                                                                                                                                                                                                        |
 | --------------- | ------------------------------------------ | :-----------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Osadzonych jest siedem usług:
 | **Dario**       | `@askalf/dario`                            |     3456      | Proxy subskrypcji Claude — alternatywa lub rozwiązanie awaryjne względem CLIProxyAPI dla ruchu o strukturze Claude Code; wstrzyknięty klucz staje się `DARIO_ADMIN_TOKEN`, zabezpieczając jego płaszczyznę sterowania OAuth `/admin/*`                                                                                                                                                                               |
 | **open-wa**     | `@open-wa/wa-automate`                     |     8323      | Automatyzacja WhatsApp Web (bezinterfejsowy Chromium za pośrednictwem Puppeteer). Zarządzany jest wyłącznie jej cykl życia — nie jest celem routingu.                                                                                                                                                                                                                                                                |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                       |     20135     | Usługa pomocnicza do kompresji promptów — rzeczywisty model ONNX LLMLingua-2 (port algorytmu firmy Microsoft do JS/TS). `open-sse/services/compression/engines/llmlingua/index.ts` przekazuje `/compress` do niej przez HTTP, a gdy usługa pomocnicza nie działa, przełącza się na zapasowy backend wątku roboczego działający w ramach procesu. Zarządzany jest wyłącznie jej cykl życia — nie jest celem routingu. |
+| **sing-box**    | Plik binarny z wydania GitHub (`singbox`)  |     20140     | Proces pomocniczy TPROXY obsługujący przezroczyste przechwytywanie ruchu przez `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Instalator pobiera przypięte wydanie zweryfikowane sumą kontrolną. Zarządzany jest wyłącznie cykl życia — to nie jest cel routingu ani proxy LLM.                                                                                                                                       |
 
-Wszystkie siedem usług korzysta z tego samego modelu nadzoru:
+Wszystkie osiem korzysta z tego samego modelu nadzorowania:
 
 - OmniRoute instaluje je w `DATA_DIR/services/{name}/` (w izolacji od własnego pliku `package.json` OmniRoute)
 - OmniRoute uruchamia je jako procesy potomne i je monitoruje
@@ -586,7 +587,27 @@ powoduje użycie zapasowego backendu działającego w wątku roboczym procesu
 
 ---
 
-### 4.8 Odwrotne proxy (osadzenie panelu 9Router)
+### 4.8 Punkty końcowe sing-box (8 tras)
+
+sing-box udostępnia taki sam zestaw punktów końcowych jak Mux — bez trasy `rotate-key` i bez wstrzykiwania klucza API (`needsApiKey: false` w `bootstrap.ts`). Zarządzany jest wyłącznie jego cykl życia; nigdy nie jest dostawcą routingu ani LLM. `install()` pobiera oficjalny plik binarny wydania GitHub (`SagerNet/sing-box`) dla przypiętej wersji (`SINGBOX_PINNED_VERSION` w `src/lib/services/installers/singbox.ts`) i przed zapisaniem go na dysku weryfikuje SHA256 względem sumy kontrolnej zapisanej w tym samym pliku. Żądania każdej innej wersji są odrzucane.
+
+| Metoda | Ścieżka                                      | Opis                                                                                        |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Pobranie i weryfikacja przypiętego wydania sing-box                                         |
+| `POST` | `/api/services/singbox/start`                | Uruchomienie sing-box (`sing-box run -c config.json`)                                       |
+| `POST` | `/api/services/singbox/stop`                 | Zatrzymanie sing-box                                                                        |
+| `POST` | `/api/services/singbox/restart`              | Ponowne uruchomienie sing-box                                                               |
+| `POST` | `/api/services/singbox/update`               | Ponowna weryfikacja lub instalacja przypiętego wydania                                      |
+| `GET`  | `/api/services/singbox/status`               | Stan bieżący i stan w bazie danych                                                          |
+| `POST` | `/api/services/singbox/auto-start`           | Włączenie lub wyłączenie automatycznego startu                                              |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Włączenie lub wyłączenie automatycznego restartu przejętego, wcześniej istniejącego procesu |
+| `GET`  | `/api/services/singbox/logs`                 | Strumień nowych wpisów dziennika przez SSE (wspólna trasa dynamiczna `[name]/logs`)         |
+
+**Integracja TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) zapisuje `config.json` i uruchamia nadzorcę, zanim `applyTproxy()` zainstaluje reguły zapory TPROXY. Jeśli nadzorcy brakuje lub nie osiągnie stanu `running`, zdarzenie jest teraz zapisywane na poziomie błędu zamiast cichego pomijania awarii. Operator może dzięki temu rozpoznać, że reguły TPROXY zostały zastosowane, ale nie obsługuje ich działający proces nasłuchujący.
+
+---
+
+### 4.9 Odwrotne proxy (osadzenie panelu 9Router)
 
 Panel osadza interfejs WWW 9Router w elemencie iframe za pośrednictwem wewnętrznego
 odwrotnego proxy dostępnego pod adresem:

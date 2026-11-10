@@ -64,6 +64,19 @@ Oghere ọrụ `electron/` na-ewepụtakwa:
 - `npm run build:mac-x64` / `build:mac-arm64` — owuwu macOS nke otu architecture
 - `npm run pack` — owuwu naanị-directory maka nnwale mpaghara (enweghị installer)
 
+## Runtime pack nhọrọ
+
+Desktop build nwere ike ibipụta runtime archive nhọrọ n'akụkụ installer ha. Server payload etinyere nwere `optional-packs.index.json` (n'okpuru `resources/app` na Windows na Linux). Maka entry `browser-runtime`, gụọ `packs[].tarball`, budata **aha faịlụ ahụ kpọmkwem site n'otu release ahụ**. Aha archive nwere SHA-256 digest; build dị iche nwere ike ịchọ archive dị iche. Ahapụ aha faịlụ ebudatara ka ọ dị.
+
+Detuo index nke app etinyere na archive a họọrọ n'otu directory, wee jiri CLI si n'otu release:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` na-egosi ọnọdụ nrụnye na nkwenye, ọ bụghị aha faịlụ archive. Index e tinyere na-ahọrọ archive. Nrụnye na-enyocha checksum archive tupu iwepụta ihe dị n'ime ya, na checksum package tupu idochi pack etinyere. Ọ na-agụ faịlụ mpaghara; ọ naghị ebudata archive furu efu. Malite application ọzọ mgbe nrụnye gasịrị. Ọ bụrụ na release enweghị asset dabara, pack nhọrọ ahụ adịghị site na asset release ahụ.
+
 ## Nhazi Ndekọ
 
 ```

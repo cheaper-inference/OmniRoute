@@ -61,6 +61,19 @@ OmniRoute는 **Electron 41** + **electron-builder 26.10**을 기반으로 구축
 - `npm run build:mac-x64` / `build:mac-arm64` — 단일 아키텍처용 macOS 빌드
 - `npm run pack` — 로컬 테스트용 디렉터리 전용 빌드(설치 프로그램 없음)
 
+## 선택적 런타임 팩
+
+데스크톱 빌드는 설치 프로그램과 함께 선택적 런타임 아카이브를 게시할 수 있습니다. 설치된 서버 페이로드에는 `optional-packs.index.json`가 포함됩니다(Windows와 Linux에서는 `resources/app` 아래). `browser-runtime` 항목의 `packs[].tarball`를 읽고 **동일한 릴리스에서 그 정확한 파일명**으로 다운로드하세요. 아카이브 이름에는 SHA-256 다이제스트가 포함됩니다. 빌드가 다르면 필요한 아카이브도 다를 수 있습니다. 다운로드한 파일 이름은 변경하지 마세요.
+
+설치된 앱의 인덱스와 선택한 아카이브를 하나의 디렉터리에 복사한 뒤 같은 릴리스의 CLI를 사용하세요.
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list`는 아카이브 파일명이 아니라 설치 및 검증 상태를 표시합니다. 포함된 인덱스가 아카이브를 선택합니다. 설치 과정에서는 압축을 풀기 전에 아카이브 체크섬을 검증하고, 설치된 팩을 교체하기 전에 패키지 체크섬을 검증합니다. 로컬 파일을 읽으며 없는 아카이브를 다운로드하지 않습니다. 설치 후 애플리케이션을 다시 시작하세요. 릴리스에 일치하는 자산이 없으면 그 릴리스의 자산을 통해 해당 선택적 팩을 구할 수 없습니다.
+
 ## 디렉터리 구조
 
 ```

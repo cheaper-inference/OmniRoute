@@ -15,6 +15,7 @@ export const HARDCODED_MODELS_CONFIG_IDS: ReadonlySet<string> = new Set([
   "cline",
   "clinepass",
   "cloudflare-ai",
+  "codebuddy-cn",
   "cohere",
   "command-code",
   "cpl",

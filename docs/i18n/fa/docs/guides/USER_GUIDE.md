@@ -118,18 +118,18 @@
 
 ---
 
-## 📖 راهاندازی ارائهدهنده
+## 📖 راهاندازی Provider
 
-برای افزودن انبوه اتصالهای کلید API از یک فایل CSV یا JSON، از مسیر **داشبورد ← ارائهدهندگان ← درونریزی از فایل** استفاده کنید. ستونها موقعیتی هستند (`provider,name,apiKey,baseUrl,priority`)؛ مقدار `provider` باید از قبل بهعنوان یک ارائهدهنده مدیریتشده یا یک گره سازگار وجود داشته باشد. به [درونریزی ارائهدهندگان از فایل CSV یا JSON](../providers/CSV-IMPORT.md) مراجعه کنید.
+برای افزودن گروهی اتصالهای کلید API از یک فایل CSV یا JSON، از **Dashboard → Providers → Import from file** استفاده کنید. ستونها ترتیبی هستند (`provider,name,apiKey,baseUrl,priority`)؛ مقدار `provider` باید از قبل بهعنوان یک ارائهدهنده مدیریتشده یا یک نود سازگار وجود داشته باشد. به [وارد کردن ارائهدهندهها از فایل CSV یا JSON](../providers/CSV-IMPORT.md) مراجعه کنید.
 
-### 🔐 ارائهدهندگان اشتراکی
+### 🔐 ارائهدهندههای اشتراکی
 
 #### Claude Code (Pro/Max)
 
 ```bash
-داشبورد ← ارائهدهندگان ← اتصال Claude Code
-← ورود با OAuth ← نوسازی خودکار توکن
-← پیگیری سهمیه ۵ ساعته + هفتگی
+Dashboard → Providers → Connect Claude Code
+→ ورود با OAuth → تازهسازی خودکار توکن
+→ رهگیری سهمیه ۵ ساعته + هفتگی
 
 مدلها:
   cc/claude-opus-4-7
@@ -137,20 +137,18 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**نکته حرفهای:** برای وظایف پیچیده از Opus و برای سرعت از Sonnet استفاده کنید. OmniRoute سهمیه را بهازای هر مدل پیگیری میکند!
+**نکته حرفهای:** برای کارهای پیچیده از Opus و برای سرعت بیشتر از Sonnet استفاده کنید. OmniRoute سهمیه را برای هر مدل رهگیری میکند!
 
-روی میزبان OmniRoute مرورگر ندارید؟ دستور `claude setup-token` را در هر جایی که Claude Code وارد حساب شده است اجرا کنید و توکن یکساله را در زبانه **Setup Token** جایگذاری کنید. به [استفاده از Claude Code با setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md) مراجعه کنید.
+به میزبان OmniRoute دسترسی به مرورگر ندارید؟ هر جا که Claude Code در آن وارد شده است، `claude setup-token` را اجرا کنید و توکن یکساله را در زبانه **Setup Token** وارد کنید. به [Claude Code با توکن راهاندازی](../providers/CLAUDE_CODE_SETUP_TOKEN.md) مراجعه کنید.
 
-مسیرهای سازگار با Claude و Claude Code، میزان تلاش تفکر `max` را برای مدلهای Opus و Sonnet
-حفظ میکنند. مدلهای Haiku سطح تلاش `max` را نمیپذیرند؛ بنابراین OmniRoute پیش از ارسال درخواست
-به سرویس بالادستی، آن را به بودجه تفکر بالا کاهش میدهد.
+مسیریابیهای سازگار با Claude و Claude Code، سطح تلاش فکری `max` را برای مدلهای Opus و Sonnet حفظ میکنند. مدلهای Haiku سطح تلاش `max` را نمیپذیرند؛ بنابراین OmniRoute پیش از ارسال درخواست به سرویس بالادستی، آن را به بودجه فکری زیاد کاهش میدهد.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-داشبورد ← ارائهدهندگان ← اتصال Codex
-← ورود با OAuth (درگاه 1455)
-← بازنشانی ۵ ساعته + هفتگی
+Dashboard → Providers → Connect Codex
+→ ورود با OAuth (درگاه ۱۴۵۵)
+→ بازنشانی ۵ ساعته + هفتگی
 
 مدلها:
   cx/gpt-5.5
@@ -162,9 +160,9 @@
 #### GitHub Copilot
 
 ```bash
-داشبورد ← ارائهدهندگان ← اتصال GitHub
-← OAuth از طریق GitHub
-← بازنشانی ماهانه (روز اول ماه)
+Dashboard → Providers → Connect GitHub
+→ OAuth از طریق GitHub
+→ بازنشانی ماهانه (روز اول ماه)
 
 مدلها:
   gh/gpt-5.5
@@ -174,47 +172,49 @@
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 ارائهدهندگان ارزان
+**اعتبارهای AI (صورتحساب مبتنی بر توکن).** هنگامی که GitHub مقدار `credits_used` را برای حساب گزارش میکند، کارت محدودیتهای ارائهدهنده یک ردیف **اعتبارهای AI** را با اعتبارهای مصرفشده در دوره صورتحساب فعلی نشان میدهد؛ این مورد شامل طرحهای سازمانی نامحدود نیز میشود.
 
-#### GLM-4.7 (بازنشانی روزانه، $0.6/1M)
+**محدودیت محلی اعتبارهای AI.** یک اتصال GitHub را ویرایش کنید و گزینه **محدودیت اعتبارهای AI در هر دوره صورتحساب** (`providerSpecificData.githubCreditLimit`) را تنظیم کنید. خالی گذاشتن آن، این محدودیت را غیرفعال میکند؛ مقدار `0` باعث میشود اتصال همیشه نادیده گرفته شود. هنگامی که آخرین مقدار استفاده برابر یا بیشتر از محدودیت باشد، انتخاب حساب این اتصال را نادیده میگیرد و مسیریابی به سایر اتصالهای شما بازمیگردد؛ درست مانند زمانی که سیاست سهمیه به حد قطع برسد. این بررسی از مقدار استفادهای میخواند که تازهسازی دورهای سهمیه از قبل جمعآوری کرده است — و هرگز در مسیر درخواست با GitHub تماس نمیگیرد — و بهصورت باز عمل میکند: مقدار گمشده یا قدیمی (قدیمیتر از ۱۵ دقیقه، یا مربوط به دوره صورتحسابی که قبلاً بازنشانی شده است) اتصال را مسدود نمیکند. این یک محافظ محلی است، **نه سقف تضمینی هزینه**: تأخیر در گزارشدهی GitHub، فاصله زمانی تازهسازی، درخواستهای در حال اجرا و استفاده خارج از OmniRoute میتوانند باعث عبور از این مقدار شوند. برای تعیین سقف قطعی، از کنترلهای هزینه خود GitHub استفاده کنید.
 
-1. ثبتنام کنید: [Zhipu AI](https://open.bigmodel.cn)
-2. کلید API را از Coding Plan دریافت کنید
-3. داشبورد ← افزودن کلید API: ارائهدهنده: `glm`، کلید API: `your-key`
+### 💰 ارائهدهندههای ارزان
 
-**استفاده:** `glm/glm-4.7` — **نکته حرفهای:** Coding Plan با یکهفتم هزینه، ۳ برابر سهمیه ارائه میدهد! بازنشانی روزانه در ساعت ۱۰:۰۰ صبح انجام میشود.
+#### GLM-4.7 (بازنشانی روزانه، ۰٫۶ دلار/۱ میلیون)
 
-#### MiniMax M2.1 (بازنشانی ۵ ساعته، $0.20/1M)
+1. ثبتنام: [Zhipu AI](https://open.bigmodel.cn)
+2. دریافت کلید API از Coding Plan
+3. Dashboard → Add API Key: ارائهدهنده: `glm`، کلید API: `your-key`
 
-1. ثبتنام کنید: [MiniMax](https://www.minimax.io)
-2. کلید API را دریافت کنید ← داشبورد ← افزودن کلید API
+**استفاده:** `glm/glm-4.7` — **نکته حرفهای:** Coding Plan با هزینه یکهفتم، سهمیهای ۳ برابر ارائه میدهد! بازنشانی روزانه ساعت ۱۰:۰۰ صبح.
+
+#### MiniMax M2.1 (بازنشانی ۵ ساعته، ۰٫۲۰ دلار/۱ میلیون)
+
+1. ثبتنام: [MiniMax](https://www.minimax.io)
+2. دریافت کلید API → Dashboard → Add API Key
 
 **استفاده:** `minimax/MiniMax-M2.1` — **نکته حرفهای:** ارزانترین گزینه برای زمینه طولانی (۱ میلیون توکن)!
 
-#### Kimi K2 (ماهانه ثابت $9)
+#### Kimi K2 (ماهانه ۹ دلار ثابت)
 
-1. مشترک شوید: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. کلید API را دریافت کنید ← داشبورد ← افزودن کلید API
+1. اشتراک: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. دریافت کلید API → Dashboard → Add API Key
 
-**استفاده:** `kimi/kimi-k2.5` — **نکته حرفهای:** ماهانه $9 ثابت برای ۱۰ میلیون توکن، یعنی هزینه مؤثر $0.90/1M!
+**استفاده:** `kimi/kimi-k2.5` — **نکته حرفهای:** ۹ دلار ثابت در ماه برای ۱۰ میلیون توکن = هزینه مؤثر ۰٫۹۰ دلار بهازای هر ۱ میلیون!
 
 #### Baidu Qianfan / ERNIE
 
-1. ثبتنام کنید: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. یک کلید API برای Qianfan ایجاد کنید ← داشبورد ← افزودن کلید API: ارائهدهنده: `qianfan`
+1. ثبتنام: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. ایجاد کلید API برای Qianfan → Dashboard → Add API Key: ارائهدهنده: `qianfan`
 
-**استفاده:** `qianfan/ernie-5.1`، `qianfan/ernie-x1.1`، یا شناسه یک مدل دیگر Qianfan که با OpenAI سازگار است.
+**استفاده:** `qianfan/ernie-5.1`، `qianfan/ernie-x1.1` یا شناسه مدل دیگری سازگار با OpenAI در Qianfan.
 
-### 🆓 ارائهدهندگان رایگان
+### 🆓 ارائهدهندههای رایگان
 
-ارائهدهندگان رایگانِ بدون نیاز به احراز هویت، در صفحه ارائهدهنده خود کلیدی در کنار **نیازی به احراز هویت نیست** دارند.
-خاموش کردن آن، ارائهدهنده را غیرفعال میکند، آن را از نماهای پیکربندیشده/فشرده ارائهدهندگان حذف میکند و
-مدلهایش را از `/v1/models` حذف میکند.
+ارائهدهندههای رایگان بدون احراز هویت، در صفحه ارائهدهنده خود در کنار گزینه **احراز هویت لازم نیست** یک کلید تغییر وضعیت دارند. خاموش کردن آن، ارائهدهنده را غیرفعال میکند، آن را از نماهای پیکربندیشده/فشرده ارائهدهندهها حذف میکند و مدلهای آن را از `/v1/models` حذف میکند.
 
 #### Qoder (۹ مدل رایگان)
 
 ```bash
-داشبورد ← اتصال Qoder ← ورود با OAuth ← دسترسی تابع محدودیتهای فعلی ارائهدهنده است
+Dashboard → Connect Qoder → ورود با OAuth → دسترسی تابع محدودیتهای فعلی ارائهدهنده است
 
 مدلها: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -222,7 +222,7 @@
 #### Kiro (Claude رایگان)
 
 ```bash
-داشبورد ← اتصال Kiro ← AWS Builder ID یا Google/GitHub ← حدود ۵۰ اعتبار در ماه
+Dashboard → Connect Kiro → AWS Builder ID یا Google/GitHub → حدود ۵۰ اعتبار در ماه
 
 مدلها: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -339,24 +339,24 @@ codex "your prompt"
 
 ## 🚀 استقرار
 
-### نصب سراسری npm (توصیهشده)
+### نصب جهانی npm (توصیه می شود)
 
 ```bash
 npm install -g omniroute
 
-# ایجاد پوشهٔ پیکربندی
+# Create config directory
 mkdir -p ~/.omniroute
 
-# ایجاد فایل .env (به .env.example مراجعه کنید)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# راهاندازی سرور
+# Start server
 omniroute
-# یا با درگاه سفارشی:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI بهطور خودکار `.env` را از `~/.omniroute/.env` یا `./.env` بارگذاری میکند.
+CLI به طور خودکار `.env` از `~/.omniroute/.env` یا `./.env` بارگیری می کند.
 
 ### حالت سینی سیستم
 
@@ -614,25 +614,25 @@ post_install() {
 <details>
 <summary><b>مشاهده همه مدلهای موجود</b></summary>
 
-> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 گردآوری شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کامل کاتالوگ زنده، به **داشبورد → ارائهدهندگان → [ارائهدهنده] → مدلهای موجود** بروید یا `GET /api/models/catalog` را فراخوانی کنید.
+> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 تهیه شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کاتالوگ کامل و زنده، **داشبورد → ارائهدهندگان → [ارائهدهنده] → مدلهای موجود** را باز کنید یا `GET /api/models/catalog` را فراخوانی کنید.
 >
-> اگر فهرست داخلی یک ارائهدهنده قدیمی شده است، در همان صفحه از **وارد کردن از ‎/models** استفاده کنید (یا **همگامسازی خودکار** را فعال کنید) تا کاتالوگ زنده بالادستی دریافت شود. این قابلیت در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شده است؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان از سمت سرویس بالادستی محدود بود.
+> اگر فهرست داخلی یک ارائهدهنده بهروز نیست، از گزینه `Import from /models` در همان صفحه استفاده کنید (یا **همگامسازی خودکار** را فعال کنید) تا کاتالوگ زنده بالادستی دریافت شود. این مورد در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شده است؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان به محدودیتهای بالادستی وابسته بود.
 
-**Claude Code (`cc/`)** — OAuth پلن Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — احراز هویت OAuth برای Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth پلن Plus/Pro: `cx/gpt-5.5` (+ سطوح تلاش: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — احراز هویت OAuth برای Plus/Pro: `cx/gpt-5.5` (بهعلاوه سطوح تلاش: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — احراز هویت OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth رایگان: از کاتالوگ زنده نمایشدادهشده در **داشبورد → ارائهدهندگان → Kiro → مدلهای موجود** استفاده کنید. دسترسپذیری به حساب و پلن بستگی دارد.
+**Kiro (`kr/`)** — احراز هویت OAuth رایگان: از کاتالوگ زندهای که در **داشبورد → ارائهدهندگان → Kiro → مدلهای موجود** نمایش داده میشود استفاده کنید. دسترسپذیری به حساب و طرح بستگی دارد.
 
-**Qoder (`if/`)** — OAuth رایگان: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
+**Qoder (`if/`)** — احراز هویت OAuth رایگان: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — ۰٫۲ تا ۰٫۶ دلار بهازای هر ۱ میلیون: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
+**GLM (`glm/`، `glm-cn/`، `zai/`، `glmt/`)** — ۰٫۲ تا ۰٫۶ دلار بهازای هر ۱ میلیون: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — ۰٫۲ دلار بهازای هر ۱ میلیون: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`، `minimax-cn/`)** — ۰٫۲ دلار بهازای هر ۱ میلیون: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ماهانه ۹ دلار ثابت یا پرداخت بر اساس مصرف: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
+**Kimi (`kimi/`، `kimi-coding/`، `kimi-coding-apikey/`)** — اشتراک ثابت ۹ دلار در ماه یا پرداخت بهازای مصرف: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — کلید API: `ds/deepseek-v4-pro`، `ds/deepseek-v4-flash`
 
@@ -640,7 +640,7 @@ post_install() {
 
 **xAI (`xai/`)** — Grok بومی: `xai/grok-4.3`، `xai/grok-4.20-multi-agent-0309`، `xai/grok-4.20-0309-reasoning`، `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — میزبانیشده در اتحادیه اروپا: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/devstral-latest`، `mistral/codestral-latest`
+**Mistral (`mistral/`)** — میزبانیشده در اتحادیه اروپا: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — تقویتشده با جستوجو: `pplx/sonar-deep-research`، `pplx/sonar-reasoning-pro`، `pplx/sonar-pro`، `pplx/sonar`
 
@@ -652,17 +652,17 @@ post_install() {
 
 **Cohere (`cohere/`)** — متمرکز بر RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — سازمانی: `nvidia/z-ai/glm-5.1`، `nvidia/minimaxai/minimax-m2.7`، `nvidia/google/gemma-4-31b-it`، `nvidia/mistralai/mistral-small-4-119b-2603`، `nvidia/mistralai/mistral-large-3-675b-instruct-2512`، `nvidia/qwen/qwen3.5-397b-a17b`، `nvidia/deepseek-ai/deepseek-v4-pro`، `nvidia/openai/gpt-oss-120b`، `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — سازمانی: `nvidia/google/gemma-4-31b-it`، `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`، `nvidia/nvidia/nemotron-3-ultra-550b-a55b`، `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`، `qianfan/ernie-5.0-thinking-latest`، `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`، `ollama-cloud/deepseek-v4-flash`، `ollama-cloud/kimi-k2.6`، `ollama-cloud/glm-5.1`، `ollama-cloud/minimax-m2.7`، `ollama-cloud/gemma4:31b`، `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: بهصورت زنده و بر اساس کلید API با Google همگامسازی میشود — فهرست ثابتی وجود ندارد. در **داشبورد → ارائهدهندگان** یک کلید متصل کنید، سپس برای وارد کردن کاتالوگ فعلی از **مدلهای موجود** استفاده کنید (برای نمونه، `gemini/gemini-3-pro` و `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: بر اساس کلید API از Google بهصورت زنده همگامسازی میشود — فهرست ثابتی وجود ندارد. یک کلید را در **داشبورد → ارائهدهندگان** متصل کنید، سپس برای وارد کردن کاتالوگ فعلی از **مدلهای موجود** استفاده کنید (برای مثال `gemini/gemini-3-pro`، `gemini/gemini-3-flash`).
 
-**سایر ارائهدهندگان سازگار** (منتخب): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (از طریق `aws-bedrock`)، `azure-ai`، `openrouter` (کاتالوگ عبوری)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و هنگامی که ارائهدهنده یک نقطه پایانی `/models` ارائه دهد، امکان همگامسازی خودکار وجود دارد.
+**سایر ارائهدهندگان سازگار** (منتخب): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (از طریق `aws-bedrock`)، `azure-ai`، `openrouter` (کاتالوگ عبوری)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و زمانی که ارائهدهنده نقطه پایانی `/models` ارائه دهد، میتوان آن را بهصورت خودکار همگامسازی کرد.
 
-**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومی ارائهدهنده (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`) استفاده میکند. برخی شناسهها شامل نسخههای نقطهدار هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در بالا فهرست نشده است، برای تأیید دسترسپذیری `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید.
+**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومی ارائهدهنده استفاده میکند (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`). برخی شناسهها شامل نسخههای دارای نقطه هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در فهرست بالا وجود ندارد، برای تأیید دسترسپذیری آن، `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید.
 
 </details>
 
@@ -727,6 +727,31 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 خطایی مواجه میشوند که نام یک ارائهدهندهٔ داخلی یا اطلاعات احراز هویت آن را ذکر میکند، بررسی کنید آیا پیشوند گره
 رزروشده است یا خیر: گرههایی که پیش از وضع این قانون ذخیره شدهاند همچنان نگهداری میشوند، اما پیشوند آنها به
 ارائهدهندهٔ داخلی مسیریابی میشود. گره را ویرایش کنید و پیشوند جدیدی به آن بدهید.
+
+#### گزینههای درگاه برای هر اتصال
+
+این کلیدها در `providerSpecificData` یک اتصال قرار میگیرند (برای مثال از طریق
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (عدد صحیح، 1–1024) — برای اتصالهای سازگار با قالب چت OpenAI که
+  درگاه آنها نامهای طولانی ابزارها را رد میکند. نامهای طولانیتر بهصورت نامهای مستعار کوتاه ارسال میشوند و در
+  پاسخ به حالت اصلی بازگردانده میشوند.
+- `quotaEndpoint` — نقطه پایانی سهمیه/اعتبار درگاه که برای نوار سهمیه داشبورد و
+  مسیریابی آگاه از سهمیه خوانده میشود. این گزینه روی اتصالهای سازگار با OpenAI و Anthropic کار میکند؛ ساختار کامل
+  آن در `open-sse/services/usage/openaiCompatible.ts` مستند شده است.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### زنجیرهکردن همتایان OmniRoute
 

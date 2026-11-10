@@ -200,6 +200,12 @@ avslutte serverprosessen.
 | `/api/providers/health-autopilot/actions` | Utfører autopilotens utbedringstiltak                                                    |
 | `/api/settings/obsidian`                  | Utsteder gjenbrukbare WebDAV-legitimasjonsopplysninger for en hvilken som helst hvelvrot |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                             |
+| `/api/cli-tools/apply`                    | Skriver om operatørens CLI-konfigurasjon på verten                                       |
+| `/api/cli-tools/guide-settings`           | Skriver veiledningsbaserte CLI-konfigurasjonsfiler                                       |
+| `/api/cli-tools/hermes-agent-settings`    | Skriver konfigurasjonen til Hermes-agenten                                               |
+| `/api/cli-tools/backups`                  | Gjenoppretter og sletter sikkerhetskopier av CLI-konfigurasjonen                         |
+| `/api/log-export`                         | Sender anropslogger til et konfigurert mål                                               |
+| `/api/restart`                            | Starter serverprosessen på nytt                                                          |
 
 **Respons ved brudd:** `401 Authentication required`
 

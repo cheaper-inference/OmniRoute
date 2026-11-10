@@ -145,6 +145,12 @@ Tunnel, Tailscale, Ngrok) पछाडि चलाउनुहुन्छ भ�
 | `/api/providers/health-autopilot/actions` | autopilot remediation action हरू कार्यान्वयन गर्छ                        |
 | `/api/settings/obsidian`                  | कुनै पनि vault root का लागि पुनः प्रयोगयोग्य WebDAV credential जारी गर्छ |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                             |
+| `/api/cli-tools/apply`                    | होस्टमा अपरेटरको CLI कन्फिगरेसन पुनःलेखन गर्छ                            |
+| `/api/cli-tools/guide-settings`           | निर्देशिकामा आधारित CLI कन्फिगरेसन फाइलहरू लेख्छ                         |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes एजेन्टको कन्फिगरेसन लेख्छ                                         |
+| `/api/cli-tools/backups`                  | CLI कन्फिगरेसनका ब्याकअप पुनर्स्थापना र मेटाउँछ                          |
+| `/api/log-export`                         | कन्फिगर गरिएको गन्तव्यमा कल लग पठाउँछ                                    |
+| `/api/restart`                            | सर्भर प्रक्रिया पुनःसुरु गर्छ                                            |
 
 **उल्लङ्घन हुँदा प्रतिक्रिया:** `401 Authentication required`
 

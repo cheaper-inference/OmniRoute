@@ -58,3 +58,15 @@
 የቅንብሮች መስክ ሁለቱንም ድርድሮች ሳይለውጥ ያካትታል — ከ`hidePaidModels` የcombo-ደረጃ ወደ ውጭ መላኪያ ማጣሪያ በተለየ፣ እዚህ የመልሶ-ማስገባት
 አደጋ የለም፦ በወደ ውጭ በተላከ combo ደረጃ ውስጥ የተካተተ የተከለከለ id የኦፕሬተሩ የራሱ ግልጽ የማዞሪያ
 ምርጫ ነው፣ የወደ ውጭ መላኪያ ወሰኑ ሊያስወግደው የሚገባ ነገር አይደለም።
+
+## Combo-ዎችን ብቻ መዘርዘር (`exposeCombosOnly`)
+
+combo-ዎች የህዝብ model-ዎች ሲሆኑ provider-ዎች የውስጥ backend ብቻ ለሆኑ መጫኛዎች የተለየ boolean ነው፤ እሱም በምርጫ የሚነቃ ሲሆን ነባሪው `false` ነው። `true` ሲሆን የህዝብ ዝርዝሩ (`GET /v1/models`፣ `GET /v1` እና በ`getUnifiedModelsResponse()` ላይ የተገነቡ ሌሎች የ`/v1` ማግኛ መንገዶች) `owned_by: "combo"` ያላቸውን ረድፎች ብቻ ይይዛል፤ የተጠቃሚ combo-ዎችና አብረው የመጡ `auto/*` combo-ዎች (`hideAutoCombos` ካልደበቃቸው)። ከእያንዳንዱ ቁልፍ `catalogScope: "combos"` ጋር ተመሳሳይ የረድፍ ምርመራ ይጠቀማል፣ የቁልፉም የራሱ allow/deny/scope ማጣሪያዎች በላዩ አሁንም ይተገበራሉ።
+
+በ**Settings → Routing → Models API listing** ወይም በ`PATCH /api/settings {"exposeCombosOnly": true}` ያብሩት/ያጥፉት።
+
+እንደ ላይ ያሉት ዝርዝሮች፣ የሚቀይረው የሚታወጀውን ብቻ ነው፦
+
+- በግልጽ የተወሰነ `provider/model` id አሁንም ይላካል፣ `GET /v1/models/{id}` አሁንም ያገኘዋል፤
+- የdashboard ካታሎግ (`GET /api/models/catalog`፣ በmodel መራጮች የሚጠቀሙበት) አይጠብም፤
+- ወደ `auto/*` የእጩ ስብስቦች አይቀዳም፣ ስለዚህ `auto/*` combo-ዎች ሙሉ ስብስባቸውን ይይዛሉ።

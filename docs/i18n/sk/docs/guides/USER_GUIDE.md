@@ -120,16 +120,16 @@ Prístup cez: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Nastavenie poskytovateľov
 
-Ak chcete hromadne pridať pripojenia s API kľúčmi zo súboru CSV alebo JSON, použite **Dashboard → Providers → Import from file**. Stĺpce sú pozičné (`provider,name,apiKey,baseUrl,priority`); `provider` už musí existovať ako spravovaný poskytovateľ alebo kompatibilný uzol. Pozrite si [Import poskytovateľov zo súboru CSV alebo JSON](../providers/CSV-IMPORT.md).
+Ak chcete hromadne pridať pripojenia pomocou kľúča API zo súboru CSV alebo JSON, použite **Ovládací panel → Poskytovatelia → Importovať zo súboru**. Stĺpce sú pozičné (`provider,name,apiKey,baseUrl,priority`); `provider` už musí existovať ako spravovaný poskytovateľ alebo kompatibilný uzol. Pozrite si [Import poskytovateľov zo súboru CSV alebo JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Poskytovatelia s predplatným
+### 🔐 Poskytovatelia predplatného
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Connect Claude Code
-→ Prihlásenie cez OAuth → Automatické obnovenie tokenu
-→ Sledovanie 5-hodinovej a týždennej kvóty
+Ovládací panel → Poskytovatelia → Pripojiť Claude Code
+→ Prihlásenie OAuth → Automatické obnovovanie tokenu
+→ Sledovanie 5-hodinového a týždenného limitu
 
 Modely:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modely:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profesionálny tip:** Opus používajte na komplexné úlohy a Sonnet na rýchlosť. OmniRoute sleduje kvótu pre každý model!
+**Tip:** Opus používajte na zložité úlohy, Sonnet na rýchlosť. OmniRoute sleduje limit pre každý model!
 
-Na hostiteľovi OmniRoute nie je prehliadač? Spustite `claude setup-token` kdekoľvek, kde ste prihlásení do Claude Code, a vložte jednoročný token na kartu **Setup Token**. Pozrite si [Claude Code s nastavovacím tokenom](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Nemáte na hostiteľovi OmniRoute prehliadač? Spustite `claude setup-token` kdekoľvek, kde ste prihlásení do Claude Code, a jednoročný token vložte na kartu **Setup Token**. Pozrite si [Claude Code s tokenom nastavenia](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Trasy kompatibilné s Claude a Claude Code zachovávajú úroveň úsilia pri uvažovaní `max` pre modely Opus a Sonnet. Modely Haiku nepodporujú úroveň úsilia `max`, preto OmniRoute pred odoslaním požiadavky nadradenému poskytovateľovi zmení túto požiadavku na vysoký rozpočet na uvažovanie.
+Trasy kompatibilné s Claude a Claude Code zachovávajú úroveň premýšľania `max` pre
+modely Opus a Sonnet. Modely Haiku úroveň úsilia `max` neprijímajú, takže OmniRoute túto
+požiadavku pred odoslaním upstreamu zníži na vysoký rozpočet premýšľania.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Connect Codex
-→ Prihlásenie cez OAuth (port 1455)
-→ Obnovenie po 5 hodinách a po týždni
+Ovládací panel → Poskytovatelia → Pripojiť Codex
+→ Prihlásenie OAuth (port 1455)
+→ 5-hodinový a týždenný reset
 
 Modely:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Modely:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Connect GitHub
+Ovládací panel → Poskytovatelia → Pripojiť GitHub
 → OAuth cez GitHub
-→ Mesačné obnovenie (1. deň v mesiaci)
+→ Mesačný reset (1. deň v mesiaci)
 
 Modely:
   gh/gpt-5.5
@@ -172,55 +174,71 @@ Modely:
   gh/gemini-3.1-pro-preview
 ```
 
+**Kredity AI (účtovanie podľa tokenov).** Keď GitHub nahlási pre účet `credits_used`,
+karta Limitov poskytovateľa zobrazí riadok **Kredity AI** s počtom kreditov
+spotrebovaných v aktuálnom fakturačnom období vrátane neobmedzených organizačných plánov.
+
+**Lokálny limit kreditov AI.** Upravte pripojenie GitHub a nastavte **Limit kreditov AI na
+fakturačné obdobie** (`providerSpecificData.githubCreditLimit`). Prázdna hodnota ho deaktivuje; `0`
+pripojenie vždy preskočí. Keď je posledná hodnota využitia rovná limitu alebo ho prekročí,
+výber účtu toto pripojenie preskočí a smerovanie prejde na vaše ostatné
+pripojenia, rovnako ako pri prerušení podľa pravidiel limitu. Kontrola používa údaje o využití,
+ktoré už zhromažďuje pravidelné obnovovanie limitu — na ceste požiadavky nikdy nevolá GitHub —
+a pri chýbajúcich alebo neaktuálnych údajoch sa vykoná bez blokovania: chýbajúca alebo neaktuálna
+hodnota (staršia než 15 minút alebo z fakturačného obdobia, ktoré sa už resetovalo) pripojenie
+nezablokuje. Ide o lokálnu ochranu, **nie o zaručený strop výdavkov**: oneskorenie pri
+nahlasovaní GitHubom, interval obnovovania, prebiehajúce požiadavky a využitie mimo OmniRoute
+môžu spôsobiť prekročenie limitu. Na pevný strop používajte vlastné ovládacie prvky výdavkov GitHubu.
+
 ### 💰 Lacní poskytovatelia
 
-#### GLM-4.7 (denné obnovenie, $0.6/1M)
+#### GLM-4.7 (denný reset, $0.6/1M)
 
 1. Zaregistrujte sa: [Zhipu AI](https://open.bigmodel.cn)
-2. Získajte API kľúč z plánu Coding Plan
-3. Dashboard → Add API Key: Poskytovateľ: `glm`, API kľúč: `your-key`
+2. Získajte kľúč API z Coding Plan
+3. Ovládací panel → Pridať kľúč API: Poskytovateľ: `glm`, Kľúč API: `your-key`
 
-**Použitie:** `glm/glm-4.7` — **Profesionálny tip:** Coding Plan ponúka 3-násobnú kvótu za 1/7 ceny! Obnovuje sa denne o 10:00.
+**Použitie:** `glm/glm-4.7` — **Tip:** Coding Plan ponúka 3× väčší limit za 1/7 ceny! Reset každý deň o 10:00.
 
-#### MiniMax M2.1 (obnovenie po 5 h, $0.20/1M)
+#### MiniMax M2.1 (5-hodinový reset, $0.20/1M)
 
 1. Zaregistrujte sa: [MiniMax](https://www.minimax.io)
-2. Získajte API kľúč → Dashboard → Add API Key
+2. Získajte kľúč API → Ovládací panel → Pridať kľúč API
 
-**Použitie:** `minimax/MiniMax-M2.1` — **Profesionálny tip:** Najlacnejšia možnosť pre dlhý kontext (1M tokenov)!
+**Použitie:** `minimax/MiniMax-M2.1` — **Tip:** Najlacnejšia možnosť pre dlhý kontext (1M tokenov)!
 
-#### Kimi K2 (pevne $9/mesiac)
+#### Kimi K2 (paušálne $9/mesiac)
 
-1. Predplaťte si službu: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Získajte API kľúč → Dashboard → Add API Key
+1. Predplaťte si: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Získajte kľúč API → Ovládací panel → Pridať kľúč API
 
-**Použitie:** `kimi/kimi-k2.5` — **Profesionálny tip:** Pevných $9/mesiac za 10M tokenov = efektívna cena $0.90/1M!
+**Použitie:** `kimi/kimi-k2.5` — **Tip:** Pevná cena $9/mesiac za 10M tokenov = efektívna cena $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Zaregistrujte sa: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Vytvorte API kľúč Qianfan → Dashboard → Add API Key: Poskytovateľ: `qianfan`
+2. Vytvorte kľúč API Qianfan → Ovládací panel → Pridať kľúč API: Poskytovateľ: `qianfan`
 
-**Použitie:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` alebo iné ID modelu Qianfan kompatibilného s OpenAI.
+**Použitie:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` alebo iný identifikátor modelu kompatibilný s OpenAI od Qianfan.
 
 ### 🆓 BEZPLATNÍ poskytovatelia
 
-Bezplatní poskytovatelia bez overenia majú na svojej stránke prepínač vedľa položky **No authentication required**.
-Jeho vypnutím daného poskytovateľa deaktivujete, odstránite ho z nakonfigurovaného/kompaktného zobrazenia poskytovateľov
-a jeho modely odstránite z `/v1/models`.
+Bezplatní poskytovatelia bez autentifikácie majú na stránke poskytovateľa prepínač vedľa možnosti **Autentifikácia nie je potrebná**.
+Jeho vypnutím poskytovateľa deaktivujete, odstránite ho zo zobrazení nakonfigurovaných poskytovateľov/kompaktných zobrazení
+a odstránite jeho modely z `/v1/models`.
 
-#### Qoder (9 BEZPLATNÝCH modelov)
+#### Qoder (9 bezplatných modelov)
 
 ```bash
-Dashboard → Connect Qoder → Prihlásenie cez OAuth → Prístup podlieha aktuálnym limitom poskytovateľa
+Ovládací panel → Pripojiť Qoder → Prihlásenie OAuth → Prístup podlieha aktuálnym limitom poskytovateľa
 
 Modely: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude BEZPLATNE)
+#### Kiro (BEZPLATNÝ Claude)
 
 ```bash
-Dashboard → Connect Kiro → AWS Builder ID alebo Google/GitHub → ~50 kreditov/mesiac
+Ovládací panel → Pripojiť Kiro → AWS Builder ID alebo Google/GitHub → približne 50 kreditov/mesiac
 
 Modely: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -337,24 +355,24 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Nasadenie
 
-### Globálna inštalácia cez npm (odporúčané)
+### Globálna inštalácia npm (odporúča sa)
 
 ```bash
 npm install -g omniroute
 
-# Vytvorenie konfiguračného adresára
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Vytvorenie súboru .env (pozrite si .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Spustenie servera
+# Start server
 omniroute
-# Alebo s vlastným portom:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automaticky načíta súbor `.env` z `~/.omniroute/.env` alebo `./.env`.
+CLI automaticky načíta `.env` zo `~/.omniroute/.env` alebo `./.env`.
 
 ### Režim systémovej lišty
 
@@ -612,55 +630,55 @@ post_install() {
 <details>
 <summary><b>Zobraziť všetky dostupné modely</b></summary>
 
-> Zoznam nižšie je zostavený zo súboru `open-sse/config/providerRegistry.ts` pre v3.8.0. Cloudové katalógy (Gemini, OpenRouter atď.) sa synchronizujú dynamicky — úplný aktuálny katalóg otvoríte cez **Dashboard → Providers → [provider] → Available Models** alebo volaním `GET /api/models/catalog`.
+> Zoznam nižšie je zostavený zo súboru `open-sse/config/providerRegistry.ts` pre v3.8.0. Cloudové katalógy (Gemini, OpenRouter atď.) sa synchronizujú dynamicky — úplný aktuálny katalóg otvoríte cez **Dashboard → Providers → [provider] → Available Models** alebo zavolaním `GET /api/models/catalog`.
 >
-> Ak vstavaný zoznam poskytovateľa prestal byť aktuálny, použite na danej stránke možnosť **Import from /models** (alebo povoľte **Auto-Sync**) a načítajte aktuálny katalóg z nadradeného zdroja. Toto bolo overené vo v3.8.50 pre LLM7.io (`gemini-3.1-flash-lite`) a UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonymný prístup k Pollinations zostal počas rovnakého testovania obmedzený na strane nadradeného zdroja.
+> Ak sa vstavaný zoznam poskytovateľa nezhoduje s aktuálnym stavom, použite na tejto stránke možnosť **Import from /models** (alebo povoľte **Auto-Sync**) a načítajte aktuálny katalóg od upstreamu. Toto bolo overené vo v3.8.50 pre LLM7.io (`gemini-3.1-flash-lite`) a UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonymný prístup Pollinations zostal počas rovnakého testovania obmedzený upstreamom.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ úrovne úsilia: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ úrovne náročnosti: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — BEZPLATNÝ OAuth: použite aktuálny katalóg zobrazený v časti **Dashboard → Providers → Kiro → Available Models**. Dostupnosť závisí od účtu a plánu.
+**Kiro (`kr/`)** — OAuth ZDARMA: použite aktuálny katalóg zobrazený v časti **Dashboard → Providers → Kiro → Available Models**. Dostupnosť závisí od účtu a tarify.
 
-**Qoder (`if/`)** — BEZPLATNÝ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth ZDARMA: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 $/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — paušál $9/mesiac alebo platba podľa používania: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/mesiac paušálne alebo podľa využitia: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — kľúč API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Kľúč API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ultrarýchly: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Mimoriadne rýchly: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — natívny Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Natívny Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — hostovaný v EÚ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Hostované v EÚ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — rozšírený o vyhľadávanie: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Rozšírené o vyhľadávanie: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — otvorený zdrojový kód: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bezplatný), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (zadarmo), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — rýchla inferencia: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Rýchla inferencia: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — na úrovni waferov: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — V mierke waferov: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — zameraný na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Zamerané na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — podnikové riešenie: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Podnikové: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synchronizuje sa priebežne z Google podľa kľúča API — bez statického zoznamu. Pripojte kľúč v časti **Dashboard → Providers** a potom pomocou možnosti **Available Models** importujte aktuálny katalóg (napr. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synchronizuje sa priebežne podľa kľúča API zo služby Google — neexistuje žiadny statický zoznam. Pripojte kľúč v časti **Dashboard → Providers** a potom použite **Available Models** na import aktuálneho katalógu (napr. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Ďalší kompatibilní poskytovatelia** (výber): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (cez `aws-bedrock`), `azure-ai`, `openrouter` (priechodný katalóg), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Každý udržiava vlastný zoznam modelov v súbore `providerRegistry.ts` a možno ho automaticky synchronizovať, keď poskytovateľ sprístupňuje koncový bod `/models`.
+**Ďalší kompatibilní poskytovatelia** (vybraní): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (cez `aws-bedrock`), `azure-ai`, `openrouter` (katalóg passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Každý z nich spravuje vlastný zoznam modelov v súbore `providerRegistry.ts` a možno ho automaticky synchronizovať, ak poskytovateľ sprístupňuje koncový bod `/models`.
 
-**Poznámka k ID modelov:** OmniRoute používa natívne ID poskytovateľov (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Niektoré ID obsahujú verzie s bodkami, pretože ich v tejto podobe očakáva nadradené API. Ak model nie je uvedený vyššie, spustite `omniroute models --search <term>` alebo zavolajte `GET /api/models/catalog`, aby ste overili jeho dostupnosť.
+**Poznámka k ID modelov:** OmniRoute používa natívne ID poskytovateľov (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Niektoré ID obsahujú verzie s bodkami, pretože tak ich očakáva upstreamové API. Ak model nie je uvedený vyššie, spustite `omniroute models --search <term>` alebo zavolajte `GET /api/models/catalog` a overte jeho dostupnosť.
 
 </details>
 
@@ -725,6 +743,31 @@ Vyberte odlišnú predponu (`mygw`, `acme-proxy`). Ak požiadavky na vlastný uz
 chybou, ktorá uvádza vstavaného poskytovateľa alebo jeho prihlasovacie údaje, skontrolujte, či predpona uzla nie je
 vyhradená: uzly uložené pred zavedením tohto pravidla sú stále uložené, ale ich predpona smeruje k
 vstavanému poskytovateľovi. Upravte uzol a prideľte mu novú predponu.
+
+#### Možnosti brány pre jednotlivé pripojenia
+
+Tieto kľúče patria do `providerSpecificData` pripojenia (napríklad prostredníctvom
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (celé číslo, 1–1024) — pre pripojenia kompatibilné s formátom chatu OpenAI, ktorých
+  brána odmieta dlhé názvy nástrojov. Dlhšie názvy sa odosielajú ako krátke aliasy a obnovia sa v
+  odpovedi.
+- `quotaEndpoint` — koncový bod brány pre kvóty/kredity, ktorý sa načítava pre panel kvót na riadiacom paneli a
+  smerovanie zohľadňujúce kvóty. Funguje s pripojeniami kompatibilnými s OpenAI aj Anthropic; úplná štruktúra
+  je zdokumentovaná v `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### Reťazenie partnerských uzlov OmniRoute
 

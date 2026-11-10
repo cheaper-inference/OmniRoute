@@ -198,6 +198,12 @@ tiến trình máy chủ.
 | `/api/providers/health-autopilot/actions` | Thực thi các hành động khắc phục tự động                                          |
 | `/api/settings/obsidian`                  | Tạo thông tin xác thực WebDAV có thể tái sử dụng cho bất kỳ thư mục gốc vault nào |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                      |
+| `/api/cli-tools/apply`                    | Ghi lại cấu hình CLI của người vận hành trên máy chủ                              |
+| `/api/cli-tools/guide-settings`           | Ghi các tệp cấu hình CLI dựa trên hướng dẫn                                       |
+| `/api/cli-tools/hermes-agent-settings`    | Ghi cấu hình của tác nhân Hermes                                                  |
+| `/api/cli-tools/backups`                  | Khôi phục và xóa bản sao lưu cấu hình CLI                                         |
+| `/api/log-export`                         | Gửi nhật ký cuộc gọi đến đích đã cấu hình                                         |
+| `/api/restart`                            | Khởi động lại tiến trình máy chủ                                                  |
 
 **Phản hồi khi vi phạm:** `401 Authentication required`
 

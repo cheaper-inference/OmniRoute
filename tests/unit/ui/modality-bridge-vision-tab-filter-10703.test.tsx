@@ -2,6 +2,9 @@
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { kitSelectOptions } from "../../helpers/kitSelect";
 
 import ModalityBridgeVisionTab from "@/app/(dashboard)/dashboard/settings/components/modalityBridge/ModalityBridgeVisionTab";
 
@@ -83,13 +86,15 @@ describe("ModalityBridgeVisionTab — model filtering (#10703)", () => {
 
   it("only lists vision-capable models in the Vision model select", async () => {
     const el = await render();
-    const modelLabel = Array.from(el.querySelectorAll("label")).find((label) =>
-      label.textContent?.includes("modalityBridgeVisionModel")
-    );
-    const modelSelect = modelLabel?.parentElement?.querySelector("select") ?? null;
-    expect(modelSelect).toBeTruthy();
-    await waitFor(() => (modelSelect?.options.length ?? 0) > 1, "model options to load");
-    const optionValues = Array.from(modelSelect?.options ?? []).map((o) => o.value);
+    // re-query: the picker re-mounts when the catalog finishes loading
+    const modelSelect = () =>
+      Array.from(el.querySelectorAll("label"))
+        .find((label) => label.textContent?.includes("modalityBridgeVisionModel"))
+        ?.parentElement?.querySelector<HTMLButtonElement>("[data-slot=select-trigger]") ?? null;
+    expect(modelSelect()).toBeTruthy();
+    // the picker is disabled until its catalog has loaded
+    await waitFor(() => modelSelect()?.disabled === false, "model options to load");
+    const optionValues = kitSelectOptions(modelSelect()!).map((o) => o.value);
     expect(optionValues).toContain("openai/gpt-4o-mini");
     expect(optionValues).not.toContain("cmd/gpt-5.3-codex");
   });

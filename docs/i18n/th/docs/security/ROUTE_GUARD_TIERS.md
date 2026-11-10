@@ -198,6 +198,12 @@ Tunnel, Tailscale, Ngrok) การตรวจสอบลูปแบ็กย
 | `/api/providers/health-autopilot/actions` | ดำเนินการแก้ไขปัญหาโดย autopilot                                  |
 | `/api/settings/obsidian`                  | สร้างข้อมูลประจำตัว WebDAV ที่ใช้ซ้ำได้สำหรับรากของ vault ใดก็ได้ |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                      |
+| `/api/cli-tools/apply`                    | เขียนการตั้งค่า CLI ของผู้ดูแลระบบบนโฮสต์ใหม่                     |
+| `/api/cli-tools/guide-settings`           | เขียนไฟล์การตั้งค่า CLI ตามคู่มือ                                 |
+| `/api/cli-tools/hermes-agent-settings`    | เขียนการตั้งค่าของเอเจนต์ Hermes                                  |
+| `/api/cli-tools/backups`                  | กู้คืนและลบข้อมูลสำรองการตั้งค่า CLI                              |
+| `/api/log-export`                         | ส่งบันทึกการเรียกไปยังปลายทางที่กำหนดไว้                          |
+| `/api/restart`                            | เริ่มกระบวนการเซิร์ฟเวอร์ใหม่                                     |
 
 **การตอบกลับเมื่อมีการละเมิด:** `401 Authentication required`
 

@@ -61,6 +61,19 @@ OmniRoute, **Electron 41** + **electron-builder 26.10** ଉପରେ ନିର�
 - `npm run build:mac-x64` / `build:mac-arm64` — ଏକକ-ଆର୍କିଟେକ୍ଚର୍ macOS ବିଲ୍ଡ୍ଗୁଡ଼ିକ
 - `npm run pack` — ସ୍ଥାନୀୟ ପରୀକ୍ଷଣ ପାଇଁ କେବଳ-ଡିରେକ୍ଟୋରି ବିଲ୍ଡ୍ (କୌଣସି ଇନଷ୍ଟଲର୍ ନାହିଁ)
 
+## ଇଚ୍ଛାଧୀନ runtime pack
+
+Desktop build ନିଜ installer ସହ ଇଚ୍ଛାଧୀନ runtime archive ପ୍ରକାଶ କରିପାରେ। Install ହୋଇଥିବା server payload ରେ `optional-packs.index.json` ଥାଏ (Windows ଏବଂ Linux ରେ `resources/app` ତଳେ)। `browser-runtime` entry ପାଇଁ `packs[].tarball` ପଢ଼ନ୍ତୁ ଏବଂ **ସେହି release ରୁ ଠିକ୍ ସେହି filename ଡାଉନଲୋଡ୍ କରନ୍ତୁ**। Archive ନାମରେ SHA-256 digest ଥାଏ; ଭିନ୍ନ build ପାଇଁ ଭିନ୍ନ archive ଦରକାର ହୋଇପାରେ। ଡାଉନଲୋଡ୍ କରାଯାଇଥିବା filename ବଦଳାନ୍ତୁ ନାହିଁ।
+
+Install ହୋଇଥିବା app ର index ଏବଂ ବଛାଯାଇଥିବା archive କୁ ଗୋଟିଏ directory ରେ copy କରି, ସେହି release ର CLI ବ୍ୟବହାର କରନ୍ତୁ:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` installation ଏବଂ verification ସ୍ଥିତି ଦେଖାଏ, archive filename ନୁହେଁ। ସାଙ୍ଗରେ ଥିବା index archive ବାଛେ। Installation, extraction ପୂର୍ବରୁ archive checksum ଏବଂ install ହୋଇଥିବା pack ବଦଳାଇବା ପୂର୍ବରୁ package checksum ଯାଞ୍ଚ କରେ। ଏହା local file ପଢ଼େ; ନଥିବା archive ଡାଉନଲୋଡ୍ କରେ ନାହିଁ। Installation ପରେ application ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ। Release ରେ ମେଳଖାଉଥିବା asset ନଥିଲେ, ସେହି release ର asset ଦ୍ୱାରା optional pack ଉପଲବ୍ଧ ନୁହେଁ।
+
 ## ଡିରେକ୍ଟୋରୀ ବିନ୍ୟାସ
 
 ```

@@ -80,15 +80,84 @@ test("planSectionReuse gives up when the mirror does not have the same section c
     planSectionReuse({ previousHashes: undefined, sections: ["p"], mirrorSections: ["p"] }),
     null
   );
-  // An inserted section shifts the count: the plan falls back to a full translation.
+  // The recorded hashes describe a mirror with another section count (a hand edit, or a mirror
+  // written by an older pipeline): nothing can be lined up, whatever the source looks like now.
   assert.equal(
     planSectionReuse({
       previousHashes: prev,
       sections: ["p", "## New", "## A"],
-      mirrorSections: ["p", "## A"],
+      mirrorSections: ["p", "## A", "## Extra"],
     }),
     null
   );
+});
+
+// A source that gains or loses a `## ` section no longer has the section count the hashes were
+// recorded for. Matching by index would then throw every section away (ENVIRONMENT.md, 697 KB,
+// was heading for a full retranslation in 66 locales over one appended 794-byte section on
+// 2026-11-05), so the two lists are lined up by hash instead.
+test("planSectionReuse translates only the section that was inserted", () => {
+  const prev = sectionHashes(["p", "## A\n\na", "## B\n\nb"]);
+  const now = ["p", "## A\n\na", "## New\n\nnew", "## B\n\nb"];
+  const mirror = ["p-pt", "## A-pt\n\na-pt", "## B-pt\n\nb-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual(
+    [...plan.reuse.entries()],
+    [
+      [0, "p-pt"],
+      [1, "## A-pt\n\na-pt"],
+      [3, "## B-pt\n\nb-pt"],
+    ]
+  );
+  assert.deepEqual(plan.translate, [2]);
+});
+
+test("planSectionReuse translates only the section appended at the end", () => {
+  const prev = sectionHashes(["p", "## A\n\na", "## B\n\nb"]);
+  const now = ["p", "## A\n\na", "## B\n\nb", "## Tail\n\ntail"];
+  const mirror = ["p-pt", "## A-pt\n\na-pt", "## B-pt\n\nb-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual([...plan.reuse.keys()], [0, 1, 2]);
+  assert.deepEqual(plan.translate, [3]);
+});
+
+test("planSectionReuse keeps every surviving section when one was removed", () => {
+  const prev = sectionHashes(["p", "## A\n\na", "## B\n\nb", "## C\n\nc"]);
+  const now = ["p", "## A\n\na", "## C\n\nc"];
+  const mirror = ["p-pt", "## A-pt\n\na-pt", "## B-pt\n\nb-pt", "## C-pt\n\nc-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual(
+    [...plan.reuse.entries()],
+    [
+      [0, "p-pt"],
+      [1, "## A-pt\n\na-pt"],
+      [2, "## C-pt\n\nc-pt"],
+    ]
+  );
+  assert.deepEqual(plan.translate, []);
+});
+
+test("planSectionReuse: an inserted section next to a changed one translates both and nothing else", () => {
+  const prev = sectionHashes(["p", "## A\n\na", "## B\n\nb"]);
+  const now = ["p", "## A\n\na CHANGED", "## New\n\nnew", "## B\n\nb"];
+  const mirror = ["p-pt", "## A-pt\n\na-pt", "## B-pt\n\nb-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual([...plan.reuse.keys()], [0, 3]);
+  assert.deepEqual(plan.translate, [1, 2]);
+});
+
+test("planSectionReuse still refuses an English copy when the section count changed", () => {
+  const prev = sectionHashes(["p", "## A\n\nalpha text here", "## B\n\nbeta"]);
+  const now = ["p", "## A\n\nalpha text here", "## B\n\nbeta", "## Tail\n\ntail"];
+  const mirror = ["p-pt", "## A\n\nalpha text here", "## B-pt\n\nbeta-pt"];
+  const plan = planSectionReuse({ previousHashes: prev, sections: now, mirrorSections: mirror });
+  assert.ok(plan);
+  assert.deepEqual([...plan.reuse.keys()], [0, 2]);
+  assert.deepEqual(plan.translate, [1, 3]);
 });
 
 test("extractMirrorBody strips the heading, the language bar and the separator", () => {

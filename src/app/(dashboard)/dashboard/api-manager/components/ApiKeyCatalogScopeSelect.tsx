@@ -1,6 +1,9 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useTranslations } from "next-intl";
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
 
 export type CatalogScope = "all" | "combos" | "models";
 
@@ -32,25 +35,25 @@ export function ApiKeyCatalogScopeSelect({
         <p className="text-sm font-medium text-text-main">{tSettings("catalogScopeTitle")}</p>
         <p className="text-xs text-text-muted">{tSettings("catalogScopeDesc")}</p>
       </div>
-      <div className="flex items-center gap-1 p-1 rounded-lg bg-black/5 dark:bg-white/5">
+      <RadioGroup
+        orientation="horizontal"
+        aria-label={tSettings("catalogScopeTitle")}
+        value={value}
+        onValueChange={(next) => onChange(next as CatalogScope)}
+      >
         {OPTIONS.map((opt) => (
-          <button
+          <RadioGroupItem
             key={opt.value}
-            type="button"
-            role="radio"
-            aria-checked={value === opt.value}
-            onClick={() => onChange(opt.value)}
-            className={`flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-              value === opt.value
-                ? "bg-primary text-white"
-                : "text-text-muted hover:bg-black/5 dark:hover:bg-white/5"
-            }`}
-          >
-            <span className="material-symbols-outlined text-[14px]">{opt.icon}</span>
-            {tSettings(opt.labelKey)}
-          </button>
+            value={opt.value}
+            label={
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold">
+                <Icon name={opt.icon} size={14} />
+                {tSettings(opt.labelKey)}
+              </span>
+            }
+          />
         ))}
-      </div>
+      </RadioGroup>
     </div>
   );
 }

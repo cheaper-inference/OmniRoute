@@ -37,13 +37,7 @@ Apabila osv atau Trivy menjadi merah disebabkan CVE yang baru didedahkan, penyel
 
 1. **Naik taraf kebergantungan yang terjejas** (diutamakan) — naik taraf kepada versi yang telah ditampal melalui `package.json`
    `overrides` (kebergantungan transitif) atau bina semula imej berasaskan imej asas yang telah ditampal.
-2. **Jika tiada pembaikan huluan:**
-   - **osv:** tetapkan semula garis dasar `metrics.vulnCount` dalam `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` tidak merangkumi get khusus — edit nilai tersebut secara
-     manual, `direction:down`) dengan nota justifikasi + isu penjejakan.
-   - **Trivy:** tambahkan entri dalam `.trivyignore` (CVE-ID setiap baris) dengan komen
-     justifikasi + isu penjejakan. `ignore-unfixed: true` sudah merangkumi CVE tanpa
-     tampalan secara automatik.
+2. **Jika pemulihan tidak tersedia:** mengekalkan penemuan yang diukur dan menjejaki pergantungan atau imej yang terjejas. Jangan tingkatkan garis dasar kerentanan untuk membuat calon yang gagal lulus. `ignore-unfixed: true` Trivy sudah mengecualikan kelemahan imej tanpa tampung huluan. Sebarang pengecualian memerlukan ID kerentanan yang disemak, laluan pakej tepat, tamat tempoh dan isu penjejakan dalam dasar; ia bukan akibat automatik daripada imbasan yang gagal.
 
 Pelaksanaan OSV yang diwajibkan (`check:vuln-ratchet -- --ratchet`) akan gagal secara tertutup dengan
 `INCOMPLETE` dan kod keluar 2 apabila pengimbas, laporan atau garis dasar tidak dapat disahkan.
@@ -51,6 +45,12 @@ Regresi yang diukur menghasilkan kod keluar 1. Pelaksanaan berbentuk nasihat mas
 kod keluar 0, yang tidak membuktikan bahawa kebergantungan telah lulus imbasan. Langkah
 Trivy yang menyekat juga memerlukan pengukuran yang berjaya: alat yang tidak tersedia, tugas yang gagal
 dan bukti imej yang tiada tidak boleh memperakui imej sebagai bersih.
+
+## Dasar imbasan imej
+
+`.trivyignore.yaml` semasa tidak mengandungi pengecualian kerentanan. `npm run check:trivy-ignore-policy` mengesahkan dasar berstruktur dalam profil imbasan tempatan, CI dan Kualiti. IDs tidak diketahui, laluan yang lebih luas, entri pendua dan pengecualian tamat tempoh ditolak; `.trivyignore` warisan bukan input kepada imbasan yang dipindahkan.
+
+Docker menyemak alat dasar daripada `github.workflow_sha` dan dasar sumber imej dengan pemilih sumber yang sama seperti binaan. Pemilih dasar menolak skop yang tidak serasi dan menyediakan satu fail untuk kedua-dua imbasan Trivy. Sumber sejarah tanpa dasar berstruktur tidak menerima pengecualian. Kedua-dua imbasan menyematkan Trivy `v0.70.0`. Pengesahan dasar membuktikan ketekalan konfigurasi; imej masih memerlukan imbasan yang berjaya.
 
 ## Risiko kebergantungan yang ditamatkan
 

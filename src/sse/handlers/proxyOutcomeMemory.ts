@@ -1,4 +1,7 @@
-import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
+import {
+  isEgressBucketedLockScope,
+  rotatesEgressOnQuotaRefusal,
+} from "@omniroute/open-sse/config/providerErrorRules.ts";
 import {
   hasProxyRefusals,
   noteProxyRecovered,
@@ -19,6 +22,12 @@ import { maybeSwitchOnSetAside } from "@/lib/proxySubscription/selectorTrigger";
  * its key is null) or a direct request writes nothing. Never reads result.status: several
  * failures are generated locally.
  *
+ * The 429 write serves the IP-bucketed family by default and every provider when the
+ * operator widens the scope (OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS=all — the free and
+ * keyless providers answer 429 per IP, having no key to bucket by). The scope stays narrow
+ * on the paths that widen blast radius instead of narrowing it: the clear-on-success arm
+ * and the sibling-connection lockout are unchanged.
+ *
  * Synchronous on purpose: the caller runs it as soon as the upstream status is known, so
  * a request picking from the pool right after already sees the member set aside. The flag
  * is read only for a refusal (a write); a success only clears what an earlier opt-in wrote.
@@ -30,7 +39,7 @@ export function noteProxyOutcome(
   const status = proxyInfo?.upstreamStatus;
   if (typeof status !== "number") return;
   const inRefusalScope = isEgressBucketedLockScope(provider);
-  if (status === 429 && inRefusalScope) {
+  if (status === 429 && rotatesEgressOnQuotaRefusal(provider)) {
     const key = proxyEgressKey(proxyInfo?.proxy);
     if (key === null || !isProxySkipRecentlyFailedEnabled()) return;
     const period = noteProxyRefusal(key, "ip_quota_429");

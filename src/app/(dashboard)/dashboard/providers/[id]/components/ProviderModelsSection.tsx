@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 /**
  * ProviderModelsSection — Issue #3501 Phase 1m
  *
@@ -58,6 +60,8 @@ export interface ProviderModelsSectionProps {
     endpointAdapters?: Record<string, "available" | "unavailable" | "unknown">;
   };
   modelAliases: Record<string, string>;
+  /** model id → combo names that reference it, for the "used in combo" badge. */
+  comboUsage?: Record<string, string[]>;
   syncedAvailableModels: any[];
   syncedCatalogAuthoritative?: boolean;
   compatibleFallbackModels: any[];
@@ -140,6 +144,7 @@ export default function ProviderModelsSection({
   models,
   modelMeta,
   modelAliases,
+  comboUsage,
   syncedAvailableModels,
   syncedCatalogAuthoritative = false,
   compatibleFallbackModels,
@@ -194,42 +199,46 @@ export default function ProviderModelsSection({
     (connection) => connection.isActive !== false && typeof connection.id === "string"
   );
   const autoFetchModelsToggle = canConfigureAutoFetchModels && (
-    <button
+    <Button
+      size="sm"
+      variant="outline"
       onClick={handleToggleAutoFetchModels}
       disabled={togglingAutoFetchModels}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border bg-transparent cursor-pointer text-[12px] disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-pressed={isAutoFetchModelsEnabled}
+      className="text-[12px]"
       title={providerText(
         t,
         "autoFetchModelsTooltip",
         "Fetch and cache upstream models when needed"
       )}
     >
-      <span
-        className="material-symbols-outlined text-[16px]"
-        style={{ color: isAutoFetchModelsEnabled ? "#22c55e" : "var(--color-text-muted)" }}
-      >
-        {isAutoFetchModelsEnabled ? "toggle_on" : "toggle_off"}
-      </span>
+      <Icon
+        name={isAutoFetchModelsEnabled ? "toggle_on" : "toggle_off"}
+        size={16}
+        className={isAutoFetchModelsEnabled ? "text-success" : "text-text-muted"}
+      />
       <span className="text-text-main">
         {providerText(t, "autoFetchModels", "Auto-fetch upstream models")}
       </span>
-    </button>
+    </Button>
   );
   const autoSyncToggle = allowModelImport && compatibleSupportsModelImport && canImportModels && (
-    <button
+    <Button
+      size="sm"
+      variant="outline"
       onClick={handleToggleAutoSync}
       disabled={togglingAutoSync}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border bg-transparent cursor-pointer text-[12px] disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-pressed={isAutoSyncEnabled}
+      className="text-[12px]"
       title={t("autoSyncTooltip")}
     >
-      <span
-        className="material-symbols-outlined text-[16px]"
-        style={{ color: isAutoSyncEnabled ? "#22c55e" : "var(--color-text-muted)" }}
-      >
-        {isAutoSyncEnabled ? "toggle_on" : "toggle_off"}
-      </span>
+      <Icon
+        name={isAutoSyncEnabled ? "toggle_on" : "toggle_off"}
+        size={16}
+        className={isAutoSyncEnabled ? "text-success" : "text-text-muted"}
+      />
       <span className="text-text-main">{t("autoSync")}</span>
-    </button>
+    </Button>
   );
   const modelDiscoveryControls = (
     <>
@@ -238,16 +247,21 @@ export default function ProviderModelsSection({
     </>
   );
 
-  const clearAllButton = (modelMeta.customModels.length > 0 || providerAliasEntries.length > 0) && (
-    <button
+  const clearAllButton = (modelMeta.customModels.length > 0 ||
+    providerAliasEntries.length > 0 ||
+    syncedAvailableModels.length > 0 ||
+    (modelMeta.modelCompatOverrides?.length ?? 0) > 0) && (
+    <Button
+      size="sm"
+      variant="danger"
+      icon="delete_sweep"
       onClick={handleClearAllModels}
       disabled={clearingModels}
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-red-300 dark:border-red-800 bg-transparent cursor-pointer text-[12px] text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
       title={t("clearAllModels")}
+      className="text-[12px]"
     >
-      <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
       <span>{t("clearAllModels")}</span>
-    </button>
+    </Button>
   );
 
   if (isManagedAvailableModelsProvider) {
@@ -279,6 +293,7 @@ export default function ProviderModelsSection({
           providerStorageAlias={providerStorageAlias}
           providerDisplayAlias={providerDisplayAlias}
           modelAliases={modelAliases}
+          comboUsage={comboUsage}
           availableModels={syncedAvailableModels}
           syncedCatalogAuthoritative={syncedCatalogAuthoritative}
           customModels={modelMeta.customModels}
@@ -361,6 +376,7 @@ export default function ProviderModelsSection({
         <PassthroughModelsSection
           providerAlias={providerAlias}
           modelAliases={modelAliases}
+          comboUsage={comboUsage}
           catalogModels={models}
           syncedCatalogAuthoritative={syncedCatalogAuthoritative}
           availableModels={syncedAvailableModels}
@@ -400,23 +416,27 @@ export default function ProviderModelsSection({
     );
   }
 
-  const importButton = allowModelImport ? (
-    <ActionBar align="start" className="mb-4">
-      <Button
-        size="sm"
-        variant="secondary"
-        icon="download"
-        onClick={handleImportModels}
-        disabled={!canImportModels || importingModels}
-      >
-        {importingModels ? t("importingModels") : t("importFromModels")}
-      </Button>
-      {modelDiscoveryControls}
-      {!canImportModels && (
-        <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
-      )}
-    </ActionBar>
-  ) : null;
+  const importButton =
+    allowModelImport || clearAllButton ? (
+      <ActionBar align="start" className="mb-4">
+        {allowModelImport && (
+          <Button
+            size="sm"
+            variant="secondary"
+            icon="download"
+            onClick={handleImportModels}
+            disabled={!canImportModels || importingModels}
+          >
+            {importingModels ? t("importingModels") : t("importFromModels")}
+          </Button>
+        )}
+        {allowModelImport && modelDiscoveryControls}
+        {clearAllButton}
+        {allowModelImport && !canImportModels && (
+          <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
+        )}
+      </ActionBar>
+    ) : null;
 
   if (models.length === 0) {
     return (
@@ -539,6 +559,7 @@ export default function ProviderModelsSection({
               fullModel={`${providerDisplayAlias}/${model.id}`}
               provider={providerId}
               alias={aliasByModelId[model.id]}
+              combos={comboUsage?.[model.id]}
               copied={copied}
               onCopy={onCopy}
               onSetAlias={(a) => onSetAlias(model.id, a, providerDisplayAlias)}

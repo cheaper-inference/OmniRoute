@@ -51,8 +51,8 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
   {
     id: "elevenlabs",
     label: "ElevenLabs Voice",
-    description: "Native ElevenLabs speech-to-text, text-to-speech and voices",
-    prefixes: ["/v1/speech-to-text", "/v1/text-to-speech", "/v1/voices"],
+    description: "Native ElevenLabs speech-to-text, text-to-speech, voices and sound effects",
+    prefixes: ["/v1/speech-to-text", "/v1/text-to-speech", "/v1/voices", "/v1/sound-generation"],
   },
   {
     id: "video",
@@ -71,6 +71,12 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
     label: "Rerank",
     description: "Document reranking",
     prefixes: ["/v1/rerank"],
+  },
+  {
+    id: "decisions",
+    label: "Decisions",
+    description: "System One typed decisions (Jev)",
+    prefixes: ["/v1/systemone"],
   },
   {
     id: "models",

@@ -204,6 +204,12 @@ serverio procesą.
 | `/api/providers/health-autopilot/actions` | Vykdo automatinio valdymo taisomuosius veiksmus                                      |
 | `/api/settings/obsidian`                  | Sugeneruoja pakartotinai naudojamus WebDAV kredencialus bet kuriai saugyklos šakniai |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                         |
+| `/api/cli-tools/apply`                    | Perrašo operatoriaus CLI konfigūraciją pagrindiniame kompiuteryje                    |
+| `/api/cli-tools/guide-settings`           | Rašo vedliais pagrįstus CLI konfigūracijos failus                                    |
+| `/api/cli-tools/hermes-agent-settings`    | Rašo Hermes agento konfigūraciją                                                     |
+| `/api/cli-tools/backups`                  | Atkuria ir ištrina CLI konfigūracijos atsargines kopijas                             |
+| `/api/log-export`                         | Siunčia iškvietimų žurnalus į sukonfigūruotą paskirties vietą                        |
+| `/api/restart`                            | Paleidžia serverio procesą iš naujo                                                  |
 
 **Atsakymas pažeidimo atveju:** `401 Authentication required`
 

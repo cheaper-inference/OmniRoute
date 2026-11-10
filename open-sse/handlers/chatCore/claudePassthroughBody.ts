@@ -14,7 +14,11 @@
 import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
 import { ensureCacheControlOnLastUserMessage } from "../../services/claudeCodeConstraints.ts";
 import { hoistDeferredToolsForTarget } from "../../translator/helpers/claudeDeferredTools.ts";
-import { splitMisplacedToolResults } from "../../translator/helpers/claudeHelper.ts";
+import {
+  disableManualThinkingWithoutFinalBlock,
+  splitMisplacedToolResults,
+  type ClaudeRequestBody,
+} from "../../translator/helpers/claudeHelper.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { sanitizeAnthropicPassthroughHistory } from "./anthropicPassthroughHistory.ts";
 import {
@@ -74,6 +78,9 @@ export function buildClaudePassthroughBody({
     translatedBody.messages = sanitizeAnthropicPassthroughHistory(
       translatedBody.messages
     ) as typeof translatedBody.messages;
+    // Manual `enabled` thinking needs a thinking block on the final tool_use turn; with none
+    // left (unsigned ones were dropped) turn thinking off instead of injecting a placeholder.
+    disableManualThinkingWithoutFinalBlock(translatedBody as ClaudeRequestBody);
 
     stripClaudeRejectedTopLevelFields(translatedBody, clientHeaders);
   }

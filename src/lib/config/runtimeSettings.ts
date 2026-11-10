@@ -5,6 +5,11 @@ import {
   type OperatorProviderErrorRule,
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+import {
+  normalizeCliVersionOverrides,
+  setCliVersionOverrides,
+  type CliVersionOverrides,
+} from "@omniroute/open-sse/config/cliVersions.ts";
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 
 type JsonRecord = Record<string, unknown>;
@@ -24,7 +29,8 @@ export type RuntimeReloadSection =
   | "systemTransforms"
   | "systemPrompt"
   | "authzBypass"
-  | "bannedSignals";
+  | "bannedSignals"
+  | "cliVersionOverrides";
 
 export interface RuntimeReloadChange {
   section: RuntimeReloadSection;
@@ -54,6 +60,7 @@ interface RuntimeSettingsSnapshot {
   authzBypass: AuthzBypassSnapshot;
   customBannedSignals: string[];
   providerErrorRules: Record<string, OperatorProviderErrorRule[]> | null;
+  cliVersionOverrides: CliVersionOverrides;
 }
 
 // Default bypass policy: kill-switch on, `/api/mcp/` bypassable. Mirrors the
@@ -82,6 +89,7 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   authzBypass: DEFAULT_AUTHZ_BYPASS_SNAPSHOT,
   customBannedSignals: [],
   providerErrorRules: null,
+  cliVersionOverrides: {},
 };
 
 let lastAppliedSnapshot: RuntimeSettingsSnapshot | null = null;
@@ -311,6 +319,7 @@ export function buildRuntimeSettingsSnapshot(
     authzBypass: normalizeAuthzBypass(settings),
     customBannedSignals: normalizeStringArray(settings.customBannedSignals),
     providerErrorRules: normalizeOperatorProviderErrorRules(settings.providerErrorRules),
+    cliVersionOverrides: normalizeCliVersionOverrides(settings.cliVersionOverrides),
   };
 }
 
@@ -632,6 +641,23 @@ export async function applyRuntimeSettings(
     hasChanged(currentSnapshot.providerErrorRules, previousSnapshot.providerErrorRules)
   ) {
     setOperatorProviderErrorRules(currentSnapshot.providerErrorRules ?? undefined);
+  }
+
+  // CLI client-version overrides: swap the shared leaf store the Claude Code /
+  // Codex identity presets read on every request. Cheap and idempotent, so it is
+  // safe on every settings write (dashboard edit, import-json, config restore).
+  //
+  // An ABSENT field is not the same as an empty one here. Both production
+  // callers pass getSettings() output, where the key is always present (default
+  // `{}`), but a caller holding a PARTIAL settings object must never be able to
+  // silently drop a value that goes onto the wire as a client fingerprint —
+  // unlike the visible toggles above, this one failing is invisible.
+  if (
+    settings.cliVersionOverrides !== undefined &&
+    (force || hasChanged(currentSnapshot.cliVersionOverrides, previousSnapshot.cliVersionOverrides))
+  ) {
+    setCliVersionOverrides(currentSnapshot.cliVersionOverrides);
+    markChanged("cliVersionOverrides");
   }
 
   lastAppliedSnapshot = currentSnapshot;

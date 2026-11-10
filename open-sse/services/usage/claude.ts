@@ -225,6 +225,8 @@ async function fetchClaudeUsage(
           typeof data.tier === "string" ? data.tier : null,
           typeof data.plan === "string" ? data.plan : null,
           typeof data.subscription_type === "string" ? data.subscription_type : null,
+          // A Team seat's own tier (e.g. max_5x) before the org's base tier (raven).
+          bootstrap?.user_rate_limit_tier,
           bootstrap?.organization_rate_limit_tier
         ) ?? undefined;
 
@@ -270,6 +272,20 @@ async function fetchClaudeUsage(
       );
       const legacy = await getClaudeUsageLegacy(accessToken, connectionId);
       return { ...legacy, bootstrap: await bootstrapPromise };
+    }
+
+    if (oauthResponse.status === 403) {
+      const body = toRecord(await oauthResponse.json().catch(() => null));
+      const errorCode = toRecord(toRecord(body.error).details).error_code;
+      // The org refuses OAuth for this account on every call, inference included.
+      // Measured cause on a Team: the member has no seat assigned.
+      if (errorCode === "oauth_not_allowed_for_organization") {
+        return {
+          message:
+            "Claude organization does not allow OAuth for this account (oauth_not_allowed_for_organization); on a Team this usually means the member has no seat assigned.",
+          bootstrap: await bootstrapPromise,
+        };
+      }
     }
 
     return {

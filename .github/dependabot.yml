@@ -74,6 +74,40 @@ updates:
       # development group PRs, e.g. #12220). Remove this ignore in the adoption PR
       # together with the pin test.
       - dependency-name: "eslint-plugin-react-hooks"
+      # The four entries below came out of the development group #17197 (26 updates),
+      # which could not land because these bumps break contracts or need a migration.
+      # Each one has to move in its own PR; the rest of the group stays automatic.
+      #
+      # promptfoo is an exact pin mirrored by the nightly LLM-security workflow
+      # (`npx --yes promptfoo@X.Y.Z` in nightly-llm-security.yml). The contract test
+      # tests/unit/build/llm-security-nightly-promptfoo-pin.test.ts requires the workflow
+      # pin to equal package.json and rejects releases proven broken (KNOWN_BROKEN:
+      # 0.123.1 and 0.124.1, promptfoo/promptfoo#10866 — the guard-validation step exits
+      # 100 on the guard's 4xx JSON body). Dependabot only edits package.json, so every
+      # bump reds that test. Bump by hand: package.json + workflow pin together, after
+      # re-running guard-validation against the new release.
+      - dependency-name: "promptfoo"
+      # fumadocs-mdx 15.4.7 imports `embedSource` from fumadocs-core/mdx-plugins/stringifier,
+      # which the fumadocs-core on this branch (16.15.x) does not export yet: the Build job
+      # dies loading next.config.mjs (#17197). fumadocs-core/fumadocs-ui ride the
+      # production group and fumadocs-mdx the development group, so dependabot can never
+      # move them together. Remove this ignore in the PR that bumps fumadocs-core,
+      # fumadocs-ui and fumadocs-mdx as one set.
+      - dependency-name: "fumadocs-mdx"
+        versions: [">=15.4.7"]
+      # @playwright/test must equal the runtime `playwright` / `playwright-core` exact pin
+      # (one Playwright in the tree — tests/unit/playwright-runner-args.test.ts). The
+      # runtime pair is a production dependency and @playwright/test a development one,
+      # so a solo bump from the development group always breaks that contract. Bump it by
+      # hand in the same PR that moves playwright and playwright-core.
+      - dependency-name: "@playwright/test"
+      # bun is an exact devDependency pin documented in AGENTS.md (Environment) and
+      # docs/ops/BUILD_WARNINGS.md: it runs only allow-listed gate/generator scripts, and
+      # any new Bun version must be validated byte-identical against the
+      # `node --import tsx` output first. @types/bun is its paired type package and moves
+      # with it. Bump both by hand, together with the docs that name the version.
+      - dependency-name: "bun"
+      - dependency-name: "@types/bun"
 
   - package-ecosystem: "github-actions"
     directory: "/"

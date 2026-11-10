@@ -197,6 +197,12 @@ server processକୁ ବନ୍ଦ କରିପାରିବେ।
 | `/api/providers/health-autopilot/actions` | autopilot remediation actionଗୁଡ଼ିକୁ execute କରେ                     |
 | `/api/settings/obsidian`                  | ଯେକୌଣସି vault root ପାଇଁ ପୁନଃବ୍ୟବହାରଯୋଗ୍ୟ WebDAV credential ଜାରି କରେ |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                        |
+| `/api/cli-tools/apply`                    | ହୋଷ୍ଟରେ ଅପରେଟରଙ୍କ CLI ବିନ୍ୟାସ ପୁନର୍ଲିଖନ କରେ                         |
+| `/api/cli-tools/guide-settings`           | ମାର୍ଗଦର୍ଶିକା ଆଧାରିତ CLI ବିନ୍ୟାସ ଫାଇଲ୍ ଲେଖେ                          |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes ଏଜେଣ୍ଟର ବିନ୍ୟାସ ଲେଖେ                                         |
+| `/api/cli-tools/backups`                  | CLI ବିନ୍ୟାସ ବ୍ୟାକଅପ୍ ପୁନରୁଦ୍ଧାର ଓ ହଟାଏ                              |
+| `/api/log-export`                         | ବିନ୍ୟାସିତ ଗନ୍ତବ୍ୟକୁ କଲ୍ ଲଗ୍ ପଠାଏ                                    |
+| `/api/restart`                            | ସର୍ଭର ପ୍ରକ୍ରିୟା ପୁଣି ଆରମ୍ଭ କରେ                                      |
 
 **ଉଲ୍ଲଂଘନ ସମୟରେ response:** `401 Authentication required`
 

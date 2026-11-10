@@ -201,6 +201,12 @@ usoro server ahụ.
 | `/api/providers/health-autopilot/actions` | Na-eme autopilot remediation actions                          |
 | `/api/settings/obsidian`                  | Na-emepụta nzere WebDAV a pụrụ iji ọzọ maka vault root ọ bụla |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                  |
+| `/api/cli-tools/apply`                    | Na-edegharị nhazi CLI onye ọrụ njikwa na host                 |
+| `/api/cli-tools/guide-settings`           | Na-ede faịlụ nhazi CLI dabere na ntuziaka                     |
+| `/api/cli-tools/hermes-agent-settings`    | Na-ede nhazi onye nnọchi anya Hermes                          |
+| `/api/cli-tools/backups`                  | Na-eweghachi ma na-ehichapụ ndabere nhazi CLI                 |
+| `/api/log-export`                         | Na-eziga ndekọ oku na ebe a haziri                            |
+| `/api/restart`                            | Na-amalitegharị usoro sava                                    |
 
 **Nzaghachi mgbe e mebiri iwu:** `401 Authentication required`
 

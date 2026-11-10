@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { betterSqlite3AliasFor } from "./scripts/build/better-sqlite3-stub-flag.mjs";
 import { mitmManagerAliasFor } from "./scripts/build/mitm-stub-flag.mjs";
 import { normalizeBasePath } from "./scripts/build/normalizeBasePath.mjs";
+import { macosDevExperimentalOverrides } from "./scripts/build/macosDevWorkaround.mjs";
 import {
   buildSecurityHeaderRules,
   nonPageRoutePrefixes,
@@ -17,6 +18,7 @@ import {
 } from "./scripts/build/knownBuildWarnings.mjs";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+const LOCALE_MESSAGES_JSON = /[\\/]src[\\/]i18n[\\/]messages[\\/][^\\/]+\.json$/;
 const distDir = process.env.NEXT_DIST_DIR || ".build/next";
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 const scriptSrc =
@@ -200,6 +202,9 @@ const nextConfig = {
   // accept for image-bearing requests; tune via env if a deployment needs
   // more.
   experimental: {
+    // macOS development only: avoid the EBADF spawn failures of Next's TypeScript
+    // CLI and static-path worker (see scripts/build/macosDevWorkaround.mjs).
+    ...macosDevExperimentalOverrides(),
     serverActions: {
       bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
     },
@@ -229,14 +234,17 @@ const nextConfig = {
     // runaway that OOM'd even at a 28 GB --max-old-space-size (RSS pinned at the
     // ceiling in a GC death-spiral). Removing it keeps the build's heap bounded.
     // optimizePackageImports is designed for external libs, not workspaces.
+    // Exception: `@omniroute/ui-kit` (KEA-7886) — a flat barrel (62 exports over
+    // 73 files, no deep re-export graph); the spike and Task 2 production builds
+    // stayed at the base's 232 warnings with no heap growth. open-sse stays out.
     optimizePackageImports: [
       "lobehub/icons",
       "@lobehub/icons",
       "lucide-react",
+      "@omniroute/ui-kit",
       "date-fns",
       "lodash",
       "lodash-es",
-      "material-symbols",
       "next-intl",
     ],
   },
@@ -350,16 +358,48 @@ const nextConfig = {
     "util",
     "process",
   ],
-  transpilePackages: ["@omniroute/open-sse", "@lobehub/icons", "fumadocs-ui", "fumadocs-core"],
+  transpilePackages: [
+    "@omniroute/open-sse",
+    "@lobehub/icons",
+    "fumadocs-ui",
+    "fumadocs-core",
+    "@omniroute/ui-kit",
+  ],
   allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.0.250"],
   typescript: {
     // TODO: Re-enable after fixing all sub-component useTranslations scope issues
     ignoreBuildErrors: true,
   },
   webpack(config, { dev, webpack }) {
+    // Production webpack builds skip the persistent filesystem cache unless
+    // OMNIROUTE_WEBPACK_BUILD_CACHE=1. With the cache on, webpack keeps every
+    // module's build and codegen result in memory and then serializes the whole
+    // graph to .build/next/cache/webpack; measured on this repo that adds about
+    // 2.5 GB to peak build RSS at a 6144 MB heap cap. A clean CI or Docker build
+    // starts with an empty cache and never reads it back; only repeat builds on the
+    // same tree or BuildKit host do.
+    if (!dev && process.env.OMNIROUTE_WEBPACK_BUILD_CACHE !== "1") {
+      config.cache = false;
+    }
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       isNextIntlExtractorDynamicImportWarning,
+    ];
+    // Locale catalogs (src/i18n/messages/*.json) are only ever read whole, through
+    // the dynamic import in src/i18n/request.ts. As `json` modules webpack keeps
+    // every catalog as an object tree, tracks an export for every nested key and
+    // generates code from it, about 1 GB of server compile heap for 67 catalogs.
+    // As `asset/source` each catalog stays a string (validated and minified by
+    // the loader) and request.ts parses it on first use. Turbopack does not read
+    // this hook and still imports the catalogs as JSON.
+    config.module = config.module || {};
+    config.module.rules = [
+      ...(config.module.rules || []),
+      {
+        test: LOCALE_MESSAGES_JSON,
+        type: "asset/source",
+        use: [{ loader: join(projectRoot, "scripts/build/localeMessagesLoader.cjs") }],
+      },
     ];
     const infrastructureLogging = config.infrastructureLogging || {};
     config.infrastructureLogging = {
@@ -721,6 +761,12 @@ const nextConfig = {
       {
         source: "/v1",
         destination: "/api/v1",
+      },
+      // CLIProxyAPI management compatibility (T3 Code `cliproxy` usage source and other
+      // CLIProxyAPI management clients). Authz: src/proxy.ts matcher + classify.ts alias.
+      {
+        source: "/v0/management/:path*",
+        destination: "/api/v0/management/:path*",
       },
       {
         source: "/v1beta/:path*",

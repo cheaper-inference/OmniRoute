@@ -1,11 +1,19 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button, Input, Badge } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Input from "@/shared/components/Input";
+import { cn } from "@/shared/utils/cn";
 
 export default function ObsidianSourceCard() {
   const t = useTranslations("endpoint");
+  const tc = useTranslations("common");
   const DEFAULT_URL = "http://127.0.0.1:27123";
   const [connected, setConnected] = useState(false);
   const [token, setToken] = useState("");
@@ -190,17 +198,21 @@ export default function ObsidianSourceCard() {
   return (
     <Card>
       <div className="p-5">
-        <button
+        <Button
+          variant="ghost"
           onClick={() => setExpanded(!expanded)}
-          className="w-full flex items-center gap-3 text-left"
+          aria-expanded={expanded}
+          className="w-full h-auto justify-start gap-3 p-0 text-left font-normal whitespace-normal hover:bg-transparent"
         >
-          <div className="flex items-center justify-center size-10 rounded-lg bg-purple-500/10 shrink-0">
+          <div className="flex items-center justify-center size-10 rounded-lg bg-chart-3/10 shrink-0">
             <svg
               width="20"
               height="20"
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
-              fill="#C084FC"
+              fill="currentColor"
+              className="text-chart-3"
+              aria-hidden="true"
             >
               <path d="M19.355 18.538a68.967 68.959 0 0 0 1.858-2.954.81.81 0 0 0-.062-.9c-.516-.685-1.504-2.075-2.042-3.362-.553-1.321-.636-3.375-.64-4.377a1.707 1.707 0 0 0-.358-1.05l-3.198-4.064a3.744 3.744 0 0 1-.076.543c-.106.503-.307 1.004-.536 1.5-.134.29-.29.6-.446.914l-.31.626c-.516 1.068-.997 2.227-1.132 3.59-.124 1.26.046 2.73.815 4.481.128.011.257.025.386.044a6.363 6.363 0 0 1 3.326 1.505c.916.79 1.744 1.922 2.415 3.5zM8.199 22.569c.073.012.146.02.22.02.78.024 2.095.092 3.16.29.87.16 2.593.64 4.01 1.055 1.083.316 2.198-.548 2.355-1.664.114-.814.33-1.735.725-2.58l-.01.005c-.67-1.87-1.522-3.078-2.416-3.849a5.295 5.295 0 0 0-2.778-1.257c-1.54-.216-2.952.19-3.84.45.532 2.218.368 4.829-1.425 7.531zM5.533 9.938c-.023.1-.056.197-.098.29L2.82 16.059a1.602 1.602 0 0 0 .313 1.772l4.116 4.24c2.103-3.101 1.796-6.02.836-8.3-.728-1.73-1.832-3.081-2.55-3.831zM9.32 14.01c.615-.183 1.606-.465 2.745-.534-.683-1.725-.848-3.233-.716-4.577.154-1.552.7-2.847 1.235-3.95.113-.235.223-.454.328-.664.149-.297.288-.577.419-.86.217-.47.379-.885.46-1.27.08-.38.08-.72-.014-1.043-.095-.325-.297-.675-.68-1.06a1.6 1.6 0 0 0-1.475.36l-4.95 4.452a1.602 1.602 0 0 0-.513.952l-.427 2.83c.672.59 2.328 2.316 3.335 4.711.09.21.175.43.253.653z" />
             </svg>
@@ -211,48 +223,36 @@ export default function ObsidianSourceCard() {
               <Badge variant={connected ? "success" : "default"}>
                 {connected ? t("obsidianConnected") : t("obsidianNotConnected")}
               </Badge>
-              {webdavEnabled && (
-                <Badge
-                  variant="success"
-                  className="bg-blue-500/20 text-blue-400 border-blue-500/30"
-                >
-                  {t("obsidianWebdavSync")}
-                </Badge>
-              )}
+              {webdavEnabled && <Badge variant="info">{t("obsidianWebdavSync")}</Badge>}
             </div>
             <p className="text-xs text-text-muted mt-0.5">{t("obsidianDescription")}</p>
           </div>
-          <span
-            className={`material-symbols-outlined text-text-muted text-lg transition-transform ${expanded ? "rotate-180" : ""}`}
-          >
-            expand_more
-          </span>
-        </button>
+          <Icon
+            name="expand_more"
+            size={18}
+            className={cn("text-text-muted transition-transform", expanded && "rotate-180")}
+          />
+        </Button>
 
         {expanded && (
           <div className="mt-4 pt-4 border-t border-border/50 flex flex-col gap-3">
             {message && (
-              <div
-                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
-                  message.type === "success"
-                    ? "border-green-500/30 bg-green-500/10 text-green-400"
-                    : "border-red-500/30 bg-red-500/10 text-red-400"
-                }`}
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {message.type === "success" ? "check_circle" : "error"}
-                </span>
-                <span className="flex-1">{message.text}</span>
-              </div>
+              <Alert
+                variant={message.type === "success" ? "success" : "critical"}
+                icon={
+                  <Icon name={message.type === "success" ? "check_circle" : "error"} size={18} />
+                }
+                description={message.text}
+                dismissLabel={tc("close")}
+                onDismiss={() => setMessage(null)}
+              />
             )}
 
             {!connected ? (
               <div className="flex flex-col gap-2">
-                <label className="text-xs text-text-muted font-medium">
-                  {t("obsidianRestToken")}
-                </label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-end">
                   <Input
+                    label={t("obsidianRestToken")}
                     type="password"
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
@@ -264,10 +264,8 @@ export default function ObsidianSourceCard() {
                     {t("obsidianConnect")}
                   </Button>
                 </div>
-                <label className="text-xs text-text-muted font-medium mt-1">
-                  {t("obsidianBaseUrlOptional")}
-                </label>
                 <Input
+                  label={t("obsidianBaseUrlOptional")}
                   type="text"
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
@@ -276,8 +274,8 @@ export default function ObsidianSourceCard() {
                   className="font-mono text-sm"
                 />
                 {baseUrl.includes(":27124") && (
-                  <div className="flex items-center gap-1.5 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-2.5 py-1.5 text-[10px] text-yellow-300">
-                    <span className="material-symbols-outlined text-[14px]">warning</span>
+                  <div className="flex items-center gap-1.5 rounded-lg border border-warning/30 bg-warning/10 px-2.5 py-1.5 text-[10px] text-warning">
+                    <Icon name="warning" size={14} />
                     <span>{t("obsidianPortWarning")}</span>
                   </div>
                 )}
@@ -291,13 +289,7 @@ export default function ObsidianSourceCard() {
                   <span className="text-xs text-text-muted flex-1">
                     {t("obsidianTokenConfigured")}
                   </span>
-                  <Button
-                    onClick={handleDisconnect}
-                    loading={busy}
-                    variant="secondary"
-                    size="sm"
-                    className="border-red-500/30! text-red-400! hover:bg-red-500/10!"
-                  >
+                  <Button onClick={handleDisconnect} loading={busy} variant="danger" size="sm">
                     {t("obsidianDisconnect")}
                   </Button>
                 </div>
@@ -312,11 +304,9 @@ export default function ObsidianSourceCard() {
 
                   {!webdavEnabled ? (
                     <div className="flex flex-col gap-2">
-                      <label className="text-xs text-text-muted font-medium">
-                        {t("obsidianVaultDirectoryPath")}
-                      </label>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-end">
                         <Input
+                          label={t("obsidianVaultDirectoryPath")}
                           type="text"
                           value={vaultPath}
                           onChange={(e) => setVaultPath(e.target.value)}
@@ -336,15 +326,13 @@ export default function ObsidianSourceCard() {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2">
-                        <span className="material-symbols-outlined text-[18px] text-blue-400">
-                          cloud_sync
-                        </span>
+                      <div className="flex items-center gap-2 rounded-lg border border-info/30 bg-info/10 px-3 py-2">
+                        <Icon name="cloud_sync" size={18} className="text-info" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-blue-300 font-medium">
+                          <p className="text-xs text-info font-medium">
                             {t("obsidianWebdavEnabled")}
                           </p>
-                          <p className="text-[10px] text-blue-400/70 font-mono truncate">
+                          <p className="text-[10px] text-info/70 font-mono truncate">
                             {getWebdavUrl()}
                           </p>
                         </div>
@@ -353,13 +341,13 @@ export default function ObsidianSourceCard() {
                           loading={webdavBusy}
                           variant="secondary"
                           size="sm"
-                          className="border-red-500/30! text-red-400! hover:bg-red-500/10! shrink-0"
+                          className="border-error/30! text-error! hover:bg-error/10! shrink-0"
                         >
                           {t("obsidianDisable")}
                         </Button>
                       </div>
 
-                      <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-black/10 p-3">
+                      <div className="flex flex-col gap-2 rounded-lg border border-border/50 bg-surface-2 p-3">
                         <p className="text-[11px] text-text-muted font-medium">
                           {t("obsidianConfigureMobile")}
                         </p>
@@ -368,10 +356,10 @@ export default function ObsidianSourceCard() {
                         </p>
 
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] text-text-muted font-medium">
+                          <p className="text-[10px] text-text-muted font-medium">
                             {t("obsidianWebdavUrl")}
-                          </label>
-                          <div className="flex items-center gap-1.5 rounded border border-border/30 bg-black/20 px-2.5 py-1.5">
+                          </p>
+                          <div className="flex items-center gap-1.5 rounded border border-border/30 bg-surface-2 px-2.5 py-1.5">
                             <code className="text-[10px] text-text-muted font-mono flex-1 break-all select-all">
                               {getWebdavUrl()}
                             </code>
@@ -379,10 +367,10 @@ export default function ObsidianSourceCard() {
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] text-text-muted font-medium">
+                          <p className="text-[10px] text-text-muted font-medium">
                             {t("obsidianUsername")}
-                          </label>
-                          <div className="flex items-center gap-1.5 rounded border border-border/30 bg-black/20 px-2.5 py-1.5">
+                          </p>
+                          <div className="flex items-center gap-1.5 rounded border border-border/30 bg-surface-2 px-2.5 py-1.5">
                             <code className="text-[10px] text-text-muted font-mono flex-1 select-all">
                               {webdavUsername ?? "—"}
                             </code>
@@ -390,11 +378,11 @@ export default function ObsidianSourceCard() {
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] text-text-muted font-medium">
+                          <p className="text-[10px] text-text-muted font-medium">
                             {t("obsidianPassword")}
-                          </label>
+                          </p>
                           <div className="flex items-center gap-1.5">
-                            <div className="flex items-center gap-1.5 rounded border border-border/30 bg-black/20 px-2.5 py-1.5 flex-1">
+                            <div className="flex items-center gap-1.5 rounded border border-border/30 bg-surface-2 px-2.5 py-1.5 flex-1">
                               <code className="text-[10px] text-text-muted font-mono flex-1 select-all">
                                 {showPassword ? (webdavPassword ?? "—") : "••••••••••••"}
                               </code>
@@ -402,13 +390,12 @@ export default function ObsidianSourceCard() {
                             <Button
                               onClick={() => setShowPassword(!showPassword)}
                               variant="secondary"
-                              size="sm"
+                              size="icon-sm"
                               className="shrink-0"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">
-                                {showPassword ? "visibility_off" : "visibility"}
-                              </span>
-                            </Button>
+                              aria-label={t("obsidianPassword")}
+                              aria-pressed={showPassword}
+                              icon={showPassword ? "visibility_off" : "visibility"}
+                            />
                           </div>
                         </div>
 

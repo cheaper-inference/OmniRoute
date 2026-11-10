@@ -426,7 +426,8 @@ test("same-packet content and error preserve the prefix across repeated readines
 
 test("a delayed success hook cannot erase same-packet content before terminal failure", async () => {
   const partialAnswer = "prefix must survive delayed success bookkeeping";
-  // A registered model distinct from earlier cases keeps the persistence proof isolated.
+  // A mapped model other than pplx-auto keeps the persisted-failure lookup below
+  // separate from the earlier pplx-auto test. Unmapped names get a local 404 (#17822).
   const model = "pplx-sonar";
   const requestStartedAt = new Date(Date.now() - 1_000);
   let finalizedFailure: StreamFailure | null = null;

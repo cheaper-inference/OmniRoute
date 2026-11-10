@@ -197,6 +197,12 @@ LOCAL_ONLY로 분류됩니다.
 | `/api/providers/health-autopilot/actions` | 오토파일럿 복구 작업 실행                            |
 | `/api/settings/obsidian`                  | 모든 볼트 루트에 재사용 가능한 WebDAV 자격 증명 발급 |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens         |
+| `/api/cli-tools/apply`                    | 호스트에 있는 운영자의 CLI 설정을 다시 씀            |
+| `/api/cli-tools/guide-settings`           | 가이드 기반 CLI 설정 파일을 기록함                   |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes 에이전트 설정을 기록함                        |
+| `/api/cli-tools/backups`                  | CLI 설정 백업을 복원하고 삭제함                      |
+| `/api/log-export`                         | 호출 로그를 설정된 대상으로 전송함                   |
+| `/api/restart`                            | 서버 프로세스를 다시 시작함                          |
 
 **위반 시 응답:** `401 Authentication required`
 

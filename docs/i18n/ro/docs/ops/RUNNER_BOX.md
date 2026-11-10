@@ -4,37 +4,27 @@
 
 ---
 
-Pool-ul self-hosted rulează pe serverul **.113** (`tomni-proxmox-113`). Începând cu 2026-10-18, fiecare
-runner OmniRoute are **un singur rol**, o singură etichetă și un buget de memorie/CPU dimensionat în funcție de valorile măsurate pentru sarcina sa de lucru.
-Slotul Turbopack primește resursele necesare compilării; celelalte sloturi sunt dimensionate în funcție de
-vârfurile lor măsurate. Serverul face overcommit doar atunci când o compilare Turbopack coincide cu o compilare
-webpack Release-Green și cu un job de lint; swap-ul gazdei (16 GB) absoarbe acest surplus și, deoarece compilările pentru pull request-uri rulează
-pe infrastructură găzduită, slotul Turbopack este inactiv în cea mai mare parte a timpului:
+Piscina auto-găzduită rulează pe **.113** caseta (`tomni-proxmox-113`). Din 2026-10-18 fiecare alergător OmniRoute are **un singur rol** , o etichetă și un buget memory/CPU dimensionat la volumul de lucru măsurat. Slotul Turbopack primește ceea ce are nevoie construcția; celelalte sloturi sunt dimensionate la vârfurile lor măsurate. Cutia se supraangajează numai atunci când o construcție Turbopack coincide cu o construcție a pachetului web Release-Green și o lucrare de scame; Schimbul de gazdă (16 GB) absoarbe acest lucru și, deoarece Build-urile de solicitare de tip pull rulează găzduite, slotul Turbopack este inactiv de cele mai multe ori:
 
-| runner               | etichetă                        | rol                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
-| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Compilări Turbopack: `ci.yml` `Build` (doar push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, compilarea a11y nocturnă | 56 GB / 60 GB (swap 0)     | 1600 %        |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), compilare webpack                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
-| `omniroute-113-2`    | `omni-light`                    | joburi nocturne (Schemathesis, promptfoo, garak, k6) și `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
-| `omniroute-113`      | `omni-light`                    | același pool ca mai sus                                                                                                                                   | 8 GB / 12 GB               | 400 %         |
-| OmniHeuris, OmniMind | (repo-urile lor)                | doar Dependabot (vârf de 155 MB fiecare, 2026-10-18)                                                                                                      | 4 GB / 6 GB                | 200 % fiecare |
+| runner               | etichetă                        | rol                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Compilări Turbopack: `ci.yml` `Build` (doar push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, compilarea a11y nocturnă | 56 GB / 60 GB (swap 0)     | 1600 %       |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), compilare webpack                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
+| `omniroute-113-2`    | `omni-light`                    | joburi nocturne (Schemathesis, promptfoo, garak, k6) și `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
+| `omniroute-113`      | `omni-light`                    | același pool ca mai sus                                                                                                                                   | 8 GB / 12 GB               | 400 %        |
+| OmniHeuris, OmniMind | (recuperările lor)              | Numai Dependabot (vârf 155 MB fiecare, 2026-10-18)                                                                                                        | 4 GB / 6 GB                | 200% fiecare |
 
-Măsurători din 2026-10-18:
+Măsurat 2026-10-18:
 
-| resursă   | valoare                              | implicații pentru planificare                                                                                                                                                                                                                                                                                                                                                                  |
-| --------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 de nuclee**             | o compilare Turbopack de producție a atins un vârf de 49 GB fără limitare (`tests/unit/ci-build-bundler-webpack.test.ts`); pe Next 16.3.8, numai faza de compilare ocupă ~40 GB (36 GB RSS în `next-build` plus 17 workeri loader la 3 GB, măsurat la 2026-10-18); o compilare webpack ocupă ~14–16 GB. O compilare Turbopack și una webpack încap împreună; două compilări Turbopack nu încap |
-| swap      | 16 GB                                | `omniroute-113-5` rulează cu swap-ul dezactivat (`MemorySwapMax=0`), astfel încât o compilare scăpată de sub control este oprită la atingerea limitei sale, în loc să trimită serverul în swap                                                                                                                                                                                                 |
-| `/tmp`    | **12 GB tmpfs = RAM**                | orice este stocat acolo ocupă memorie; fișierele rămase sunt eliminate după 3 h                                                                                                                                                                                                                                                                                                                |
-| CPU       | sarcină 60 observată pe 32 de nuclee | înainte de aplicarea cotelor, o compilare Turbopack (~1166 % CPU) împreună cu o suită de coverage rulată pe același server au privat de resurse heartbeat-urile celorlalți listeneri (`The self-hosted runner lost communication`, #16853)                                                                                                                                                     |
-| runneri   | **6 listeneri**                      | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` sunt dezactivați (`systemctl enable --now` reactivează unul)                                                                                                                                                                                                                                                                   |
+| resursă    | valoare                              | implicații pentru planificare                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU  | **78 GB / 32 de nuclee**             | o construcție de producție Turbopack a atins vârful la 49 GB nelimitat (`tests/unit/ci-build-bundler-webpack.test.ts`); în Următorul 16.3.8, numai faza de compilare deține ~ 40 GB (36 GB RSS în `next-build` plus 17 lucrători la încărcător la 3 GB, măsurat 2026-10-18); un pachet web construit la ~ 14–16 GB. Un Turbopack + un pachet web se potrivesc împreună; două versiuni Turbopack nu |
+| schimb     | 16 GB                                | `omniroute-113-5` rulează cu schimbarea dezactivată (`MemorySwapMax=0`), astfel încât o construcție fugitivă este tăiată la capac în loc să schimbe cutia                                                                                                                                                                                                                                          |
+| `/tmp`     | **12 GB tmpfs = RAM**                | orice este stocat acolo ocupă memorie; fișierele rămase sunt eliminate după 3 h                                                                                                                                                                                                                                                                                                                    |
+| CPU        | sarcina 60 pe 32 de nuclee observate | înainte de cote, o versiune Turbopack (~ 1166 % CPU) plus o suită de acoperire pe aceeași casetă a înfometat bătăile inimii celorlalți ascultători (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                           |
+| alergători | **7 ascultători** (28.10.2026)       | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` poartă, de asemenea, `omni-build`; `omniroute-113-3/-4/-8` au fost șterse din repo (2026-10-28)                                                                                                                                                                                                                                             |
 
-Limitele se află în fișierul `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` al fiecărei unități
-(valorile anterioare sunt păstrate în `override.conf.bak-20261018`) și au fost aplicate în timp real cu
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — fără repornire, astfel încât niciun
-job aflat în execuție nu a fost afectat. Etichetele sunt modificate prin API-ul runnerilor
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), tot în timp real.
+Limitele trăiesc în `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` fiecărei unități (valorile anterioare păstrate ca `override.conf.bak-20261018`) și au fost aplicate live cu `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — fără repornire, deci nu a fost atinsă nicio sarcină de rulare. Etichetele sunt schimbate prin alergătorii API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), de asemenea în direct.
 
 ## Instalați procesul de curățare (o singură dată, pe server)
 
@@ -42,7 +32,7 @@ job aflat în execuție nu a fost afectat. Etichetele sunt modificate prin API-u
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): la fiecare 30 min, jurnal în /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` este obligatoriu: procesul de curățare confirmă că o cale este inactivă printr-un instantaneu al fișierelor deschise înainte de a o elimina, iar fără acest instrument nu elimină nimic și raportează acest lucru (exit 1). Testați mai întâi orice modificare cu `--dry-run` — acesta afișează exact ce ar face și nu modifică nimic.
@@ -100,9 +90,17 @@ Valoarea implicită `KillMode=process` a runnerului lasă procesele `Runner.Work
   compilarea promptfoo a petrecut 54 de minute recuperând memorie acolo; 8 GB elimină limitarea.
 - **Mai puține procese listener în mod intenționat.** Patru unități OmniRoute au fost dezactivate
   pe 2026-08-29 — fiecare listener suplimentar este încă un consumator al bugetului de memorie de
-  mai sus. Limita serviciului de curățare este 6 (`MAX_ACTIVE_RUNNERS=6` în cron): acesta numără
-  fiecare `Runner.Listener` de pe server, iar OmniHeuris + OmniMind adaugă două la cele patru ale
+  mai sus. Limita serviciului de curățare este 8 (`MAX_ACTIVE_RUNNERS=8` în cron): acesta numără
+  fiecare `Runner.Listener` de pe server, iar OmniHeuris + OmniMind adaugă două la cele cinci ale
   noastre.
+- **Joburile Unit și Vitest rămân găzduite.** `ci.yml` trimite fragmentele unit și jobul Vitest către
+  `[self-hosted, omni-ci]` numai când variabila de depozit `vars.USE_VPS_TEST_RUNNER` este
+  `true`, și chiar și atunci doar pentru rulările `pull_request` din același depozit; fork-urile, `merge_group` și push-urile
+  rămân pe `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Variabila este
+  `false`. Pe 2026-10-28, trei listeneri `omni-ci` cu 4 nuclee au avut nevoie de 250–270 s pentru `npm ci`, iar fiecare
+  fragment unit a atins limita de 30 de minute a jobului, față de ~634 s pentru un fragment găzduit, cu serverul la o
+  încărcare de 17–24. Listenerii au fost șterși. Nu reactivați variabila fără listeneri dimensionați pentru
+  un fragment unit.
 - **Nu curățați niciodată manual `/tmp` sau `_work` cât timp vreun runner este ocupat.** O
   verificare urmată de ștergere, cu un interval între cele două operațiuni, este motivul pentru
   care un job `Build` activ și-a pierdut directorul `_work` pe 2026-08-27. Serviciul de curățare
@@ -118,8 +116,10 @@ Valoarea implicită `KillMode=process` a runnerului lasă procesele `Runner.Work
 
 ## Culoarul găzduit (agenți de execuție găzduiți de GitHub)
 
-Contul este pe planul **Pro**: **40 de joburi găzduite simultan**, partajate de fiecare verificare PR,
-de fiecare flux de lucru declanșat de un push și de configurația implicită CodeQL. Măsurat la 2026-10-18 în timpul unei
+Depozitul aparține organizației `cheaper-inference`, pe planul **Team**: **60 de
+joburi găzduite simultan**, partajate de fiecare depozit din organizație, de fiecare verificare PR,
+de fiecare flux de lucru declanșat de un push și de configurația implicită CodeQL. Cifrele de mai jos au fost măsurate pe
+planul **Pro** (40 de joburi găzduite simultan). Măsurat la 2026-10-18 în timpul unei
 campanii de îmbinare (~10 îmbinări/oră pe `release/v3.8.52`): **2.500 de rulări ale fluxurilor de lucru create în
 24 h**, 44 de push-uri către ramură în 6 h, **106 joburi găzduite în coadă**, în timp ce verificările PR au așteptat
 ore întregi, iar PR-urile au fost îmbinate fără acestea. Nouă fluxuri de lucru au fost declanșate la fiecare push către ramură:

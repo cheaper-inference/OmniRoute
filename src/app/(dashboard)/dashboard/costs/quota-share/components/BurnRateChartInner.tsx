@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { chartTheme } from "@omniroute/ui-kit/chart-theme";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
 
 export interface BurnRateChartInnerProps {
@@ -56,26 +57,22 @@ export default function BurnRateChartInner({ usage }: BurnRateChartInnerProps) {
     <div className="space-y-1">
       <div className="flex items-center justify-between text-[10px] text-text-muted">
         <span className="font-semibold uppercase tracking-wide">{t("burnRateTitle")}</span>
-        {exhaustionLabel && <span className="text-amber-400 font-semibold">{exhaustionLabel}</span>}
+        {exhaustionLabel && <span className="text-warning font-semibold">{exhaustionLabel}</span>}
       </div>
       <div className="h-24">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <XAxis dataKey="time" tick={{ fontSize: 9 }} tickLine={false} axisLine={false} />
-            <YAxis hide />
-            <Tooltip
-              contentStyle={{
-                background: "var(--bg-surface, #1e1e2e)",
-                border: "1px solid var(--border)",
-                fontSize: 10,
-              }}
+            <XAxis
+              {...chartTheme.xAxis}
+              dataKey="time"
+              tick={{ ...chartTheme.xAxis.tick, fontSize: 9 }}
             />
+            <YAxis hide />
+            <Tooltip {...chartTheme.tooltip} />
             <Line
-              type="monotone"
+              {...chartTheme.line}
               dataKey="consumed"
-              stroke="#a78bfa"
-              strokeWidth={2}
-              dot={false}
+              stroke="var(--color-chart-3)"
               strokeDasharray="4 2"
             />
           </LineChart>

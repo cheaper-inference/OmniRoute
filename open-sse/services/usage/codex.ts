@@ -8,7 +8,8 @@
  * imports getCodexUsage (dispatcher). Behavior-preserving move.
  */
 
-import { buildCodexUsageQuotas } from "../codexUsageQuotas.ts";
+import { buildCodexUsageQuotas, findCodexSparkRateLimit } from "../codexUsageQuotas.ts";
+import { isCodexLimitReached } from "../codexQuotaSignals.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { throttleQuotaFetch } from "../quotaFetchThrottle.ts";
 import { getCodexBackendIdentityHeaders } from "../../config/codexClient.ts";
@@ -95,10 +96,16 @@ export async function getCodexUsage(
 
     const { rateLimit, quotas, bankedResetCredits, rateLimitReachedType, paidCredits } =
       buildCodexUsageQuotas(data);
+    const sparkLimitReached = getFieldValue(
+      findCodexSparkRateLimit(data).rateLimit,
+      "limit_reached",
+      "limitReached"
+    );
 
     return {
+      ...(typeof sparkLimitReached === "boolean" ? { sparkLimitReached } : {}),
       plan: String(getFieldValue(data, "plan_type", "planType") || "unknown"),
-      limitReached: Boolean(getFieldValue(rateLimit, "limit_reached", "limitReached")),
+      limitReached: isCodexLimitReached(rateLimit),
       quotas,
       // Banked reset credits (display-only, eligibility-gated — issue #5199).
       // Absent for most accounts; never throws when the upstream omits it.

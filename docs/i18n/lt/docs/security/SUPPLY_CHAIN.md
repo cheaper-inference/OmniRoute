@@ -37,13 +37,7 @@ Kai osv arba Trivy patikra tampa raudona dėl naujai paskelbtos CVE, reikia:
 
 1. **Atnaujinti paveiktą priklausomybę** (pageidautina) — atnaujinti iki pataisytos versijos naudojant `package.json`
    `overrides` (tranzityviosioms priklausomybėms) arba iš naujo sukurti atvaizdą naudojant pataisytą bazinį atvaizdą.
-2. **Jei pataisos iš pirminio šaltinio nėra:**
-   - **osv:** iš naujo nustatyti bazinę `metrics.vulnCount` reikšmę faile `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` neapima specializuotų patikrų — reikšmę redaguokite
-     rankiniu būdu, `direction:down`), pridėdami pagrindimo pastabą ir sekimo užduotį.
-   - **Trivy:** pridėti įrašą į `.trivyignore` (po vieną CVE-ID eilutėje) su pagrindimo
-     komentaru ir sekimo užduotimi. `ignore-unfixed: true` jau automatiškai apima CVE, kurioms
-     pataisų nėra.
+2. **Jei ištaisymas nepasiekiamas:** išsaugoti išmatuotą radinį ir stebėti paveiktą priklausomybę arba vaizdą. Nedidinkite pažeidžiamumo pradinio lygio, kad nesėkmingas kandidatas būtų išlaikytas. „Trivy“ `ignore-unfixed: true` jau pašalina vaizdo pažeidžiamumą be ankstesnio pataiso. Bet kuriai išimčiai reikia peržiūrėti pažeidžiamumo ID, tikslaus paketo kelio, galiojimo pabaigos ir stebėjimo problemos politikoje; tai nėra automatinė nesėkmingo nuskaitymo pasekmė.
 
 Privalomi OSV vykdymai (`check:vuln-ratchet -- --ratchet`) baigiami nesėkmingai su
 `INCOMPLETE` ir išėjimo kodu 2, kai nepavyksta patikrinti skaitytuvo, ataskaitos arba bazinės reikšmės.
@@ -51,6 +45,12 @@ Išmatuotos regresijos atveju grąžinamas išėjimo kodas 1. Patariamasis vykdy
 išėjimo kodu 0, tačiau tai nepatvirtina, kad priklausomybės sėkmingai praėjo nuskaitymą. Blokuojančiam
 Trivy veiksmui taip pat būtinas sėkmingas matavimas: nepasiekiami įrankiai, nepavykusios užduotys
 ir trūkstami atvaizdo patikros duomenys negali patvirtinti, kad atvaizdas yra švarus.
+
+## Vaizdo nuskaitymo politika
+
+Dabartinėje `.trivyignore.yaml` pažeidžiamumo išimčių nėra. `npm run check:trivy-ignore-policy` patvirtina struktūrinę politiką vietiniuose nuskaitymo profiliuose, CI ir kokybės. Nežinomas IDs, platesni keliai, pasikartojantys įrašai ir pasibaigusios išimtys atmetami; senas `.trivyignore` nėra įvestis į perkeltus nuskaitymus.
+
+Docker tikrina politikos įrankius iš `github.workflow_sha` ir vaizdo šaltinio politiką naudodamas tą patį šaltinio parinkiklį kaip ir kūrimas. Politikos parinkiklis atmeta nesuderinamas sritis ir paruošia vieną failą abiem Trivy nuskaitymams. Istorinis šaltinis be struktūrinės politikos negauna jokių išimčių. Abu nuskaitymai prisega Trivy `v0.70.0`. Politikos patvirtinimas įrodo konfigūracijos nuoseklumą; vaizdą vis tiek reikia sėkmingai nuskaityti.
 
 ## Nebenaudojamos priklausomybės rizika
 

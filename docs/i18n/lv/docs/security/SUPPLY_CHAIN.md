@@ -37,13 +37,7 @@ Ja osv vai Trivy kļūst sarkans jaunatklātas CVE dēļ, risinājums ir šāds:
 
 1. **Atjauniniet skarto atkarību** (ieteicams) — jauniniet uz izlaboto versiju, izmantojot `package.json`
    `overrides` (tranzitīvajām atkarībām), vai no jauna izveidojiet attēlu uz izlabātas bāzes.
-2. **Ja augšupējā projektā nav labojuma:**
-   - **osv:** no jauna iestatiet `metrics.vulnCount` bāzes vērtību failā `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` neaptver specializētās pārbaudes — rediģējiet vērtību
-     manuāli, `direction:down`), pievienojot pamatojuma piezīmi un izsekošanas pieteikumu.
-   - **Trivy:** pievienojiet ierakstu failā `.trivyignore` (viens CVE-ID katrā rindā) kopā ar pamatojuma
-     komentāru un izsekošanas pieteikumu. `ignore-unfixed: true` jau automātiski aptver CVE,
-     kurām nav labojumu.
+2. **Ja atlīdzināšana nav pieejama:** saglabāt izmērīto atradumu un izsekot ietekmētajai atkarībai vai attēlam. Nepalieliniet ievainojamības pamatlīmeni, lai izturētu nesekmīgu kandidātu. Trivy's `ignore-unfixed: true` jau izslēdz attēla ievainojamības bez augšpus ielāpa. Jebkuru izņēmumu gadījumā politikā ir nepieciešama pārskatīta ievainojamība ID, precīzs pakotnes ceļš, derīguma termiņš un izsekošanas problēma; tās nav automātiskas neveiksmīgas skenēšanas sekas.
 
 Obligātās OSV izpildes (`check:vuln-ratchet -- --ratchet`) drošības nolūkā beidzas ar
 `INCOMPLETE` un izejas kodu 2, ja skeneri, pārskatu vai bāzes vērtību nevar validēt.
@@ -51,6 +45,12 @@ Izmērīta regresija beidzas ar izejas kodu 1. Konsultatīva izpilde joprojām v
 izejas kodu 0, taču tas neapliecina, ka atkarības ir sekmīgi izturējušas skenēšanu. Arī bloķējošajai
 Trivy darbībai ir nepieciešams sekmīgs mērījums: nepieejami rīki, neizdevušies uzdevumi
 un trūkstoši attēla pārbaudes dati nevar apliecināt, ka attēls ir tīrs.
+
+## Attēlu skenēšanas politika
+
+Pašreizējā `.trivyignore.yaml` nesatur ievainojamības izņēmumus. `npm run check:trivy-ignore-policy` apstiprina strukturēto politiku lokālajos skenēšanas profilos, CI un Kvalitātē. Nezināms IDs, plašāki ceļi, dublēti ieraksti un izņēmumi, kuriem beidzies derīguma termiņš, tiek noraidīti; mantotais `.trivyignore` nav ievade migrētajiem skenējumiem.
+
+Docker pārbauda politikas rīkus no `github.workflow_sha` un attēla avota politiku, izmantojot to pašu avota atlasītāju kā būvei. Politikas atlasītājs noraida nesaderīgus tvērumus un sagatavo vienu failu abām Trivy skenācijām. Vēstures avots bez strukturētas politikas nesaņem izņēmumus. Abas skenēšanas piesprauž Trivy `v0.70.0`. Politikas validācija pierāda konfigurācijas konsekvenci; attēlam joprojām ir nepieciešama veiksmīga skenēšana.
 
 ## Izņemtas atkarības risks
 

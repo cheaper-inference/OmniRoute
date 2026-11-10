@@ -31,6 +31,7 @@ export const MODEL_SYNC_STARTUP_DELAY_MS = 90_000;
 export const MODEL_SYNC_STAGGER_OFFSET_MS = 45 * 60 * 1000; // 45 minutes
 const MODEL_SYNC_SETTING_KEY = "model_sync_last_run";
 const MODEL_SYNC_INTERNAL_AUTH_HEADER = "x-model-sync-internal-auth";
+export const MODEL_SYNC_LOCAL_SPAWN_DENIED_HEADER = "x-model-sync-local-spawn-denied";
 
 function normalizeInternalBasePath(value: string | undefined): string {
   const trimmed = value?.trim();
@@ -148,8 +149,13 @@ export function getModelSyncInternalAuthHeaderName(): string {
   return MODEL_SYNC_INTERNAL_AUTH_HEADER;
 }
 
-export function buildModelSyncInternalHeaders(): Record<string, string> {
-  return { [MODEL_SYNC_INTERNAL_AUTH_HEADER]: getInternalAuthToken() };
+export function buildModelSyncInternalHeaders(
+  options: { denyLocalSpawn?: boolean } = {}
+): Record<string, string> {
+  return {
+    [MODEL_SYNC_INTERNAL_AUTH_HEADER]: getInternalAuthToken(),
+    ...(options.denyLocalSpawn ? { [MODEL_SYNC_LOCAL_SPAWN_DENIED_HEADER]: "1" } : {}),
+  };
 }
 
 export function isModelSyncInternalRequest(request: { headers: Headers }): boolean {
@@ -159,6 +165,13 @@ export function isModelSyncInternalRequest(request: { headers: Headers }): boole
   const headerToken = request.headers.get(MODEL_SYNC_INTERNAL_AUTH_HEADER);
   return Boolean(
     headerToken && internalAuthToken && timingSafeCompare(headerToken, internalAuthToken)
+  );
+}
+
+export function isModelSyncLocalSpawnDenied(request: { headers: Headers }): boolean {
+  return (
+    isModelSyncInternalRequest(request) &&
+    request.headers.get(MODEL_SYNC_LOCAL_SPAWN_DENIED_HEADER) === "1"
   );
 }
 

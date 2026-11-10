@@ -3,18 +3,15 @@
 // schemas shared a cache key — the second was served the first's stored body
 // under a 200, violating the schema it asked for. The signature now folds an
 // "output contract" (response_format, text.format, tools, tool_choice) into the
-// digest when present, and stays byte-identical to the legacy key when absent
-// so existing plain-chat cache entries survive the upgrade.
+// digest when present. The current key schema versions all entries.
 import test from "node:test";
 import assert from "node:assert/strict";
 
 const { generateSignature, outputContractOf } = await import("../../src/lib/semanticCache.ts");
-const { storeSemanticCacheResponse } = await import(
-  "../../open-sse/handlers/chatCore/semanticCacheStore.ts"
-);
-const { storeStreamingSemanticCacheResponse } = await import(
-  "../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts"
-);
+const { storeSemanticCacheResponse } =
+  await import("../../open-sse/handlers/chatCore/semanticCacheStore.ts");
+const { storeStreamingSemanticCacheResponse } =
+  await import("../../open-sse/handlers/chatCore/streamingSemanticCacheStore.ts");
 
 const MESSAGES = [{ role: "user", content: "Describe a red bicycle." }];
 
@@ -24,15 +21,30 @@ const schemaOf = (properties: Record<string, unknown>) => ({
 });
 
 test("different response schemas over identical messages produce different signatures", () => {
-  const a = generateSignature("m", MESSAGES, 0, 1, "key",
-    outputContractOf({ response_format: schemaOf({ value: { type: "string" } }) }));
-  const b = generateSignature("m", MESSAGES, 0, 1, "key",
-    outputContractOf({ response_format: schemaOf({ color: { type: "string" }, wheels: { type: "integer" } }) }));
+  const a = generateSignature(
+    "m",
+    MESSAGES,
+    0,
+    1,
+    "key",
+    outputContractOf({ response_format: schemaOf({ value: { type: "string" } }) })
+  );
+  const b = generateSignature(
+    "m",
+    MESSAGES,
+    0,
+    1,
+    "key",
+    outputContractOf({
+      response_format: schemaOf({ color: { type: "string" }, wheels: { type: "integer" } }),
+    })
+  );
   assert.notEqual(a, b);
 });
 
 test("identical response schemas still share a signature", () => {
-  const contract = () => outputContractOf({ response_format: schemaOf({ value: { type: "string" } }) });
+  const contract = () =>
+    outputContractOf({ response_format: schemaOf({ value: { type: "string" } }) });
   assert.equal(
     generateSignature("m", MESSAGES, 0, 1, "key", contract()),
     generateSignature("m", MESSAGES, 0, 1, "key", contract())
@@ -40,15 +52,28 @@ test("identical response schemas still share a signature", () => {
 });
 
 test("tools presence splits the signature from a tool-less request", () => {
-  const withTools = generateSignature("m", MESSAGES, 0, 1, "key",
-    outputContractOf({ tools: [{ type: "function", function: { name: "f", parameters: {} } }] }));
+  const withTools = generateSignature(
+    "m",
+    MESSAGES,
+    0,
+    1,
+    "key",
+    outputContractOf({ tools: [{ type: "function", function: { name: "f", parameters: {} } }] })
+  );
   const without = generateSignature("m", MESSAGES, 0, 1, "key", outputContractOf({}));
   assert.notEqual(withTools, without);
 });
 
-test("plain chat keeps the legacy signature — existing cache entries stay valid", () => {
+test("plain chat and transport-only variants share the current signature", () => {
   const legacy = generateSignature("m", MESSAGES, 0, 1, "key");
-  const withNullContract = generateSignature("m", MESSAGES, 0, 1, "key", outputContractOf({ stream: true }));
+  const withNullContract = generateSignature(
+    "m",
+    MESSAGES,
+    0,
+    1,
+    "key",
+    outputContractOf({ stream: true })
+  );
   assert.equal(legacy, withNullContract);
 });
 
@@ -82,9 +107,21 @@ function recordingDeps() {
 
 test("non-streaming store path forwards the output contract to the signature", () => {
   const { calls, deps } = recordingDeps();
-  const body = { messages: MESSAGES, temperature: 0, top_p: 1, response_format: schemaOf({ v: { type: "string" } }) };
+  const body = {
+    messages: MESSAGES,
+    temperature: 0,
+    top_p: 1,
+    response_format: schemaOf({ v: { type: "string" } }),
+  };
   storeSemanticCacheResponse(
-    { enabled: true, body, headers: {}, translatedResponse: { ok: true }, model: "m", apiKeyId: "key" },
+    {
+      enabled: true,
+      body,
+      headers: {},
+      translatedResponse: { ok: true },
+      model: "m",
+      apiKeyId: "key",
+    },
     deps as never
   );
   assert.equal(calls.length, 1);
@@ -93,7 +130,12 @@ test("non-streaming store path forwards the output contract to the signature", (
 
 test("streaming store path forwards the output contract to the signature", () => {
   const { calls, deps } = recordingDeps();
-  const body = { messages: MESSAGES, temperature: 0, top_p: 1, response_format: schemaOf({ v: { type: "string" } }) };
+  const body = {
+    messages: MESSAGES,
+    temperature: 0,
+    top_p: 1,
+    response_format: schemaOf({ v: { type: "string" } }),
+  };
   storeStreamingSemanticCacheResponse(
     {
       enabled: true,

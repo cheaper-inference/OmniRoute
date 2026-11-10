@@ -5,8 +5,8 @@
 ---
 
 > **Versiya:** v3.8.44
-> **Son yenilənmə:** 2026-09-16
-> **Auditoriya:** Daxili xidmətləri (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua) əlavə edən, texniki xidmət göstərən və ya sazlayan mühəndislər.
+> **Son yenilənmə:** 2026-10-28
+> **Auditoriya:** Daxili xidmətləri əlavə edən, saxlayan və ya xətalarını araşdıran mühəndislər (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Daxili xidmətlər OmniRoute-un quraşdırdığı, nəzarət etdiyi və birinci dərəcəli marşrutlaşdırma hədəfləri kimi
 təqdim etdiyi, lokal olaraq quraşdırılan köməkçi proses alətləridir. Xarici provayderlərdən (internet üzərindən
@@ -31,19 +31,20 @@ API açarları vasitəsilə qoşulan) fərqli olaraq, daxili xidmətlər OmniRou
 
 ### Niyə daxili xidmətlər?
 
-Yeddi xidmət daxil edilib:
+Səkkiz xidmət daxil edilib:
 
-| Xidmət          | npm paketi                           | Standart port | Məqsəd                                                                                                                                                                                                                                                                                                                                                          |
-| --------------- | ------------------------------------ | :-----------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                            |     20130     | OmniRoute-un alt-provayder kimi istifadə edə biləcəyi süni intellekt marşrutlaşdırıcısı. Modellər `9router/{sub}/{model}` şəklində təqdim olunur                                                                                                                                                                                                                |
-| **CLIProxyAPI** | GitHub buraxılış binarı (`cliproxy`) |     8317      | Anthropic CLI autentifikasiya axınları üçün lokal proksi adapteri. OAuth tokenlərinin müddəti bitdikdə ehtiyat marşrutlaşdırma təmin edir                                                                                                                                                                                                                       |
-| **Mux**         | `mux` (başsız `mux server`)          |     8322      | Lokal agent orkestrasiya demonu (coder/mux). Yalnız həyat dövrü idarə olunur — marşrutlaşdırma hədəfi deyil (LLM proksiləşdirilməsi yoxdur).                                                                                                                                                                                                                    |
-| **Bifrost**     | `@maximhq/bifrost`                   |     8080      | Go əsaslı süni intellekt şlüzünün relay backend-i. İşlədiyi zaman relay marşrutu (`/v1/relay/`) tərəfindən avtomatik seçilir                                                                                                                                                                                                                                    |
-| **Dario**       | `@askalf/dario`                      |     3456      | Claude abunəlik proksisi — Claude-Code formatlı trafik üçün CLIProxyAPI-yə alternativ/ehtiyat variant; daxil edilən açar onun `/admin/*` OAuth idarəetmə müstəvisinə girişi məhdudlaşdıran `DARIO_ADMIN_TOKEN` olur                                                                                                                                             |
-| **open-wa**     | `@open-wa/wa-automate`               |     8323      | WhatsApp Web avtomatlaşdırması (Puppeteer vasitəsilə başsız Chromium). Yalnız həyat dövrü idarə olunur — marşrutlaşdırma hədəfi deyil.                                                                                                                                                                                                                          |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                 |     20135     | Sorğu sıxışdırma yan xidməti — həqiqi LLMLingua-2 ONNX modeli (Microsoft alqoritminin JS/TS portu). `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` sorğularını HTTP üzərindən ona yönləndirir, yan xidmət işləmədikdə isə prosesdaxili worker-thread backend-inə keçir. Yalnız həyat dövrü idarə olunur — marşrutlaşdırma hədəfi deyil. |
+| Xidmət          | npm paketi                                   | Standart port | Məqsəd                                                                                                                                                                                                                                                                                                                                                          |
+| --------------- | -------------------------------------------- | :-----------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                    |     20130     | OmniRoute-un alt-provayder kimi istifadə edə biləcəyi süni intellekt marşrutlaşdırıcısı. Modellər `9router/{sub}/{model}` şəklində təqdim olunur                                                                                                                                                                                                                |
+| **CLIProxyAPI** | GitHub buraxılış binarı (`cliproxy`)         |     8317      | Anthropic CLI autentifikasiya axınları üçün lokal proksi adapteri. OAuth tokenlərinin müddəti bitdikdə ehtiyat marşrutlaşdırma təmin edir                                                                                                                                                                                                                       |
+| **Mux**         | `mux` (başsız `mux server`)                  |     8322      | Lokal agent orkestrasiya demonu (coder/mux). Yalnız həyat dövrü idarə olunur — marşrutlaşdırma hədəfi deyil (LLM proksiləşdirilməsi yoxdur).                                                                                                                                                                                                                    |
+| **Bifrost**     | `@maximhq/bifrost`                           |     8080      | Go əsaslı süni intellekt şlüzünün relay backend-i. İşlədiyi zaman relay marşrutu (`/v1/relay/`) tərəfindən avtomatik seçilir                                                                                                                                                                                                                                    |
+| **Dario**       | `@askalf/dario`                              |     3456      | Claude abunəlik proksisi — Claude-Code formatlı trafik üçün CLIProxyAPI-yə alternativ/ehtiyat variant; daxil edilən açar onun `/admin/*` OAuth idarəetmə müstəvisinə girişi məhdudlaşdıran `DARIO_ADMIN_TOKEN` olur                                                                                                                                             |
+| **open-wa**     | `@open-wa/wa-automate`                       |     8323      | WhatsApp Web avtomatlaşdırması (Puppeteer vasitəsilə başsız Chromium). Yalnız həyat dövrü idarə olunur — marşrutlaşdırma hədəfi deyil.                                                                                                                                                                                                                          |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                         |     20135     | Sorğu sıxışdırma yan xidməti — həqiqi LLMLingua-2 ONNX modeli (Microsoft alqoritminin JS/TS portu). `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` sorğularını HTTP üzərindən ona yönləndirir, yan xidmət işləmədikdə isə prosesdaxili worker-thread backend-inə keçir. Yalnız həyat dövrü idarə olunur — marşrutlaşdırma hədəfi deyil. |
+| **sing-box**    | GitHub buraxılışının ikili faylı (`singbox`) |     20140     | `applyTproxy()` funksiyasının şəffaf proksi müdaxiləsini təmin edən TPROXY köməkçi prosesi (`src/mitm/tproxy/setup.ts`). Quraşdırıcı versiyası sabitlənmiş və yoxlama cəmi təsdiqlənmiş buraxılışı yükləyir. Yalnız həyat dövrü idarə olunur; yönləndirmə hədəfi deyil və LLM proksisi kimi işləmir.                                                            |
 
-Yeddi xidmətin hamısı eyni nəzarət modelinə əməl edir:
+Səkkizinin hamısı eyni nəzarət modelinə əməl edir:
 
 - OmniRoute onları `DATA_DIR/services/{name}/` altında quraşdırır (OmniRoute-un öz `package.json` faylından təcrid olunmuş şəkildə)
 - OmniRoute onları alt proseslər kimi işə salır və izləyir
@@ -587,7 +588,27 @@ aşımı, heç bir əməliyyat etməyən cavab) prosesdaxili işçi axını arxa
 
 ---
 
-### 4.8 Əks proksi (9Router idarəetmə panelinin daxilə yerləşdirilməsi)
+### 4.8 sing-box son nöqtələri (8 marşrut)
+
+sing-box Mux ilə eyni son nöqtə quruluşuna malikdir: `rotate-key` marşrutu yoxdur və API açarı yeridilmir (`bootstrap.ts` daxilində `needsApiKey: false`). Yalnız həyat dövrü idarə olunur; heç vaxt yönləndirmə və ya LLM provayderi deyil. `install()` rəsmi GitHub buraxılışının ikili faylını (`SagerNet/sing-box`) sabitlənmiş versiya üçün (`src/lib/services/installers/singbox.ts` daxilində `SINGBOX_PINNED_VERSION`) yükləyir və diskə yazmazdan əvvəl onun SHA256 dəyərini həmin faylda yerləşdirilmiş yoxlama cəmi ilə tutuşdurur. İstənilən başqa versiya sorğusu rədd edilir.
+
+| Metod  | Yol                                          | Təsvir                                                                                        |
+| ------ | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Sabitlənmiş sing-box buraxılışını yüklə və yoxla                                              |
+| `POST` | `/api/services/singbox/start`                | sing-box-u başlat (`sing-box run -c config.json`)                                             |
+| `POST` | `/api/services/singbox/stop`                 | sing-box-u dayandır                                                                           |
+| `POST` | `/api/services/singbox/restart`              | sing-box-u yenidən başlat                                                                     |
+| `POST` | `/api/services/singbox/update`               | Sabitlənmiş buraxılışı yenidən yoxla/quraşdır                                                 |
+| `GET`  | `/api/services/singbox/status`               | Canlı vəziyyət və verilənlər bazasındakı vəziyyət                                             |
+| `POST` | `/api/services/singbox/auto-start`           | Avtomatik başlanmanı aç və ya söndür                                                          |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Nəzarətə götürülmüş, əvvəldən mövcud proses üçün avtomatik yenidən başlanmanı aç və ya söndür |
+| `GET`  | `/api/services/singbox/logs`                 | SSE jurnalının sonunu izlə (ortaq dinamik `[name]/logs` marşrutu vasitəsilə)                  |
+
+**TPROXY bağlantısı:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` faylını yazır və `applyTproxy()` TPROXY təhlükəsizlik divarı qaydalarını quraşdırmazdan əvvəl nəzarətçini başladır. Nəzarətçi yoxdursa və ya `running` vəziyyətinə çata bilmirsə, xəta artıq səssizcə udulmur, xəta səviyyəsində jurnala yazılır. Beləliklə, operator TPROXY qaydalarının arxalarında işlək dinləyici olmadan tətbiq edildiyini görə bilir.
+
+---
+
+### 4.9 Əks proksi (9Router idarəetmə panelinin daxilə yerləşdirilməsi)
 
 İdarəetmə paneli 9Router veb interfeysini aşağıdakı ünvandakı daxili əks
 proksi vasitəsilə iframe daxilində yerləşdirir:

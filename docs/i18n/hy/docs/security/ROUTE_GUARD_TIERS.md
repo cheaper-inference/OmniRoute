@@ -197,6 +197,12 @@ Tunnel, Tailscale, Ngrok) հետևում, loopback ստուգումը շարու
 | `/api/providers/health-autopilot/actions` | Կատարում է autopilot-ի վերականգնման գործողությունները                           |
 | `/api/settings/obsidian`                  | Ստեղծում է բազմակի օգտագործման WebDAV հավատարմագրեր ցանկացած vault root-ի համար |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                    |
+| `/api/cli-tools/apply`                    | Վերագրում է օպերատորի CLI կարգավորումները հոսթում                               |
+| `/api/cli-tools/guide-settings`           | Գրում է ուղեցույցներով կառավարվող CLI կարգավորման ֆայլերը                       |
+| `/api/cli-tools/hermes-agent-settings`    | Գրում է Hermes գործակալի կարգավորումները                                        |
+| `/api/cli-tools/backups`                  | Վերականգնում և ջնջում է CLI կարգավորումների պահուստային պատճենները              |
+| `/api/log-export`                         | Կանչերի մատյաններն ուղարկում է կարգավորված նպատակակետ                           |
+| `/api/restart`                            | Վերագործարկում է սերվերի գործընթացը                                             |
 
 **Պատասխան խախտման դեպքում՝** `401 Authentication required`
 

@@ -106,19 +106,19 @@ test("a complete zero-drift base produces a successful receipt", (t) => {
   assert.equal(result.status, 0, result.stderr);
 });
 
-test("a stale locale fails base health even when the drift checker exits zero", (t) => {
+test("a stale locale fails both absolute drift checking and base health", (t) => {
   const f = fixture(t);
   f.state.sources["README.md"].locales.es.source_hash = "a".repeat(64);
   f.save();
-  const legacy = spawnSync(
+  const checker = spawnSync(
     process.execPath,
     [path.join(f.root, "scripts/i18n/check-translation-drift.mjs"), "--json"],
     { cwd: f.root, env: { PATH: process.env.PATH }, encoding: "utf8" }
   );
-  assert.equal(legacy.status, 0, legacy.stderr);
-  assert.equal(JSON.parse(legacy.stdout).staleTargets.length, 1);
+  assert.equal(checker.status, 1, checker.stderr);
+  assert.equal(JSON.parse(checker.stdout).staleTargets.length, 1);
   const result = observe(f);
-  assert.equal(result.status, 1, "the base observer must not inherit the checker advisory verdict");
+  assert.equal(result.status, 1);
 });
 
 for (const [name, context] of [
@@ -200,7 +200,7 @@ for (const bucket of [
     report[bucket] = [
       { rel: "README.md", ...(bucket === "driftedSources" ? {} : { locale: "es" }) },
     ];
-    report.ok = ["staleTargets", "inconsistentSectionCaches"].includes(bucket);
+    report.ok = false;
     replaceChecker(f, JSON.stringify(report), report.ok ? 0 : 1);
     const result = observe(f);
     assert.equal(result.status, 1);
@@ -235,14 +235,14 @@ for (const [name, text, code] of [
   });
 }
 
-test("a current source with a wrong section cache fails despite legacy exit zero", (t) => {
+test("a current source with a wrong section cache fails both checker and observer", (t) => {
   const f = fixture(t);
   f.state.sources["README.md"].locales.es.section_hashes = ["a".repeat(12)];
   f.save();
   const result = observe(f);
   assert.equal(result.status, 1);
   assert.equal(result.report.verdict, "FAIL");
-  assert.equal(result.report.checker.exitCode, 0);
+  assert.equal(result.report.checker.exitCode, 1);
   assert.equal(result.report.counts.inconsistentSectionCaches, 1);
 });
 

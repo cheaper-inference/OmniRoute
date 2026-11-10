@@ -72,4 +72,4 @@ skill-ଗୁଡ଼ିକ ସହିତ ଆସୁଥିବା ଡିଫଲ୍ଟ�
 କୌଣସି branch କାଟିବା କିମ୍ବା PR ଖୋଲିବା ପୂର୍ବରୁ, base-green ଯାଞ୍ଚ ଚଲାନ୍ତୁ (`AGENTS.md` → Git Workflow →
 "Base-green check"; ପ୍ରକଳ୍ପ skill-ଗୁଡ଼ିକ ଏହାକୁ `.agents/skills/_shared/base-green.md` ଭାବେ ସନ୍ଦର୍ଭ କରନ୍ତି)। base tip red ଥିବାବେଳେ
 ଖୋଲାଯାଇଥିବା PR-ର body-ରେ `⚠️ base-red inherited: #<issue>` ରହିବା ଆବଶ୍ୟକ। ସଞ୍ଚିତ red ଅବସ୍ଥା (base tip + red PR-ଗୁଡ଼ିକ) ନିଷ୍କାସନ କରିବାକୁ,
-`/sweep-reds` skill ବ୍ୟବହାର କରନ୍ତୁ।
+/sweep-reds skill ବ୍ୟବହାର କରନ୍ତୁ।

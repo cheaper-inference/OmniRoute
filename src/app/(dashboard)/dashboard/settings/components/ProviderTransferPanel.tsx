@@ -2,7 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Badge, Button, Checkbox, Input, Modal, TALL_MODAL_PROPS } from "@/shared/components";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  Input,
+  Modal,
+  Select,
+  TALL_MODAL_PROPS,
+} from "@/shared/components";
+import { FileInput } from "@/shared/components/FileInput";
+import Icon from "@/shared/components/Icon";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import {
@@ -62,9 +73,9 @@ async function postJson(url: string, body: unknown): Promise<Response> {
 
 function StatusLine({ status }: { status: Status }) {
   if (!status.message) return null;
-  const tone = status.type === "error" ? "text-red-500" : "text-green-600 dark:text-green-400";
+  const tone = status.type === "error" ? "text-error" : "text-success";
   return (
-    <p role="status" className={`text-xs ${tone}`}>
+    <p role={status.type === "error" ? "alert" : "status"} className={`text-xs ${tone}`}>
       {status.message}
     </p>
   );
@@ -112,13 +123,15 @@ function AccountPicker({
   return (
     <>
       <Input
+        type="search"
+        aria-label={t("searchPlaceholder")}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t("searchPlaceholder")}
         icon="search"
       />
-      <div className="flex items-center gap-2 text-xs text-text-muted">
-        <span>{t("selectedCount", { count: selected.size })}</span>
+      <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
+        <span role="status">{t("selectedCount", { count: selected.size })}</span>
         <Button
           variant="ghost"
           size="sm"
@@ -130,10 +143,10 @@ function AccountPicker({
           {t("clearSelection")}
         </Button>
       </div>
-      <div className="max-h-64 overflow-y-auto rounded-lg border border-border/50 divide-y divide-border/40">
+      <div className="max-h-64 overflow-y-auto rounded-lg border border-border divide-y divide-border">
         {visible.length === 0 && <p className="p-3 text-xs text-text-muted">{t("noAccounts")}</p>}
         {visible.map((entry) => (
-          <div key={entry.id} className="flex items-center gap-2 px-3 py-2">
+          <div key={entry.id} className="flex flex-wrap items-center gap-2 px-3 py-2">
             <Checkbox
               id={`transfer-${entry.id}`}
               checked={selected.has(entry.id)}
@@ -231,7 +244,10 @@ function ExportView({ entries, loadError }: { entries: CatalogEntry[]; loadError
         onPassphraseChange={setPassphrase}
         onConfirmChange={setConfirm}
       />
-      <p className="text-xs text-amber-600 dark:text-amber-400">{t("oauthWarning")}</p>
+      <p className="flex items-start gap-1.5 text-xs text-warning">
+        <Icon name="warning" size={14} className="mt-0.5" />
+        {t("oauthWarning")}
+      </p>
       <Checkbox
         id="transfer-acknowledge"
         checked={acknowledged}
@@ -286,19 +302,15 @@ function PlanRows({
           <Badge size="sm" variant={STATUS_VARIANT[item.status]}>
             {statusLabel[item.status]}
           </Badge>
-          <select
+          <Select
+            compact
             aria-label={item.label}
-            className="ml-auto rounded-md border border-border bg-surface px-2 py-1 text-xs"
+            className="ml-auto w-auto"
             value={decisions[item.key] ?? item.recommended}
             onChange={(e) => onChange(item.key, e.target.value as ProviderTransferAction)}
             disabled={item.actions.length < 2}
-          >
-            {item.actions.map((action) => (
-              <option key={action} value={action}>
-                {actionLabel[action]}
-              </option>
-            ))}
-          </select>
+            options={item.actions.map((action) => ({ value: action, label: actionLabel[action] }))}
+          />
         </div>
       ))}
     </>
@@ -354,7 +366,7 @@ function PlanReview({
           nodes: plan.summary.providerNodes,
         })}
       </p>
-      <div className="max-h-72 overflow-y-auto rounded-lg border border-border/50 divide-y divide-border/40">
+      <div className="max-h-72 overflow-y-auto rounded-lg border border-border divide-y divide-border">
         <PlanRows items={plan.providerNodes} decisions={decisions} onChange={onDecision} />
         <PlanRows items={plan.providerConnections} decisions={decisions} onChange={onDecision} />
       </div>
@@ -386,21 +398,24 @@ async function readTransferFile(file: File): Promise<unknown> {
   }
 }
 
-function FileChooser({
-  label,
-  onChange,
+function BundleFilePicker({
+  fileName,
+  onFile,
 }: {
-  label: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  fileName: string;
+  onFile: (file: File | undefined) => void;
 }) {
+  const t = useTranslations("providerTransfer");
+  const tc = useTranslations("common");
   return (
-    <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm">
-      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-        upload_file
-      </span>
-      {label}
-      <input type="file" accept=".json" className="hidden" onChange={onChange} />
-    </label>
+    <FileInput
+      accept=".json"
+      chooseLabel={t("chooseFile")}
+      // The status line names the bundle only once it parsed; an invalid file shows the error.
+      selectedLabel={() => fileName || tc("fileInputEmpty")}
+      onFilesChange={(files) => onFile(files[0])}
+      onFilesRejected={(rejections) => onFile(rejections[0]?.file)}
+    />
   );
 }
 
@@ -413,9 +428,7 @@ function ImportView() {
   const [decisions, setDecisions] = useState<Record<string, ProviderTransferAction>>({});
   const { busy, status, setStatus, run } = useTransferRequest();
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
+  const handleFile = async (file: File | undefined) => {
     setPlan(null);
     setDecisions({});
     setStatus({ type: "", message: "" });
@@ -454,7 +467,7 @@ function ImportView() {
 
   return (
     <div className="flex flex-col gap-3">
-      <FileChooser label={fileName || t("chooseFile")} onChange={handleFile} />
+      <BundleFilePicker fileName={fileName} onFile={(file) => void handleFile(file)} />
       <Input
         type="password"
         autoComplete="off"
@@ -513,10 +526,7 @@ export default function ProviderTransferPanel() {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={handleOpen}>
-        <span className="material-symbols-outlined text-[14px] mr-1" aria-hidden="true">
-          move_up
-        </span>
+      <Button variant="outline" size="sm" icon="move_up" onClick={handleOpen}>
         {t("open")}
       </Button>
       <Modal
@@ -527,21 +537,22 @@ export default function ProviderTransferPanel() {
         {...TALL_MODAL_PROPS}
       >
         <p className="mb-3 text-xs text-text-muted">{t("description")}</p>
-        <div className="mb-3 flex gap-2" role="tablist">
-          {(["export", "import"] as const).map((value) => (
-            <Button
-              key={value}
-              role="tab"
-              aria-selected={tab === value}
-              variant={tab === value ? "primary" : "ghost"}
-              size="sm"
-              onClick={() => setTab(value)}
-            >
-              {value === "export" ? t("exportTab") : t("importTab")}
-            </Button>
-          ))}
-        </div>
-        {tab === "export" ? <ExportView entries={entries} loadError={loadError} /> : <ImportView />}
+        <Tabs
+          variant="capsule"
+          value={tab}
+          onValueChange={(value) => setTab(value === "import" ? "import" : "export")}
+        >
+          <TabsList aria-label={t("title")}>
+            <TabsTrigger value="export">{t("exportTab")}</TabsTrigger>
+            <TabsTrigger value="import">{t("importTab")}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="export" className="mt-3">
+            <ExportView entries={entries} loadError={loadError} />
+          </TabsContent>
+          <TabsContent value="import" className="mt-3">
+            <ImportView />
+          </TabsContent>
+        </Tabs>
       </Modal>
     </>
   );

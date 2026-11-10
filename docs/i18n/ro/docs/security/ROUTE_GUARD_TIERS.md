@@ -201,6 +201,12 @@ procesul serverului.
 | `/api/providers/health-autopilot/actions` | Execută acțiuni de remediere automată                                          |
 | `/api/settings/obsidian`                  | Emite date de autentificare WebDAV reutilizabile pentru orice rădăcină de seif |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                   |
+| `/api/cli-tools/apply`                    | Rescrie configurația CLI a operatorului pe gazdă                               |
+| `/api/cli-tools/guide-settings`           | Scrie fișiere de configurare CLI bazate pe ghiduri                             |
+| `/api/cli-tools/hermes-agent-settings`    | Scrie configurația agentului Hermes                                            |
+| `/api/cli-tools/backups`                  | Restaurează și șterge copiile configurației CLI                                |
+| `/api/log-export`                         | Trimite jurnalele apelurilor la o destinație configurată                       |
+| `/api/restart`                            | Repornește procesul serverului                                                 |
 
 **Răspuns la încălcare:** `401 Authentication required`
 

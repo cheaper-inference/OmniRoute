@@ -57,6 +57,7 @@ const providerImagesRoute =
 const webFetchRoute = await import("../../src/app/api/v1/web/fetch/route.ts");
 const webMapRoute = await import("../../src/app/api/v1/web/map/route.ts");
 const voicesRoute = await import("../../src/app/api/v1/voices/route.ts");
+const { nativeGenerationRoutes } = await import("./helpers/elevenLabsGenerationRoutes.ts");
 const providerVoicesRoute =
   await import("../../src/app/api/v1/providers/[provider]/voices/route.ts");
 
@@ -370,6 +371,23 @@ const ROUTE_CASES: RouteCase[] = [
     provider: "firecrawl",
     call: (bearer) =>
       webMapRoute.POST(jsonRequest("/v1/web/map", bearer, { url: "https://example.com/" })),
+  },
+  ...nativeGenerationRoutes.map(({ path: routePath, route, body }) => ({
+    name: `POST ${routePath} (ElevenLabs proxy)`,
+    provider: "elevenlabs",
+    call: (bearer: string) => route.POST(jsonRequest(routePath, bearer, body)),
+  })),
+  {
+    name: "POST /v1/music/generations (ElevenLabs)",
+    provider: "elevenlabs",
+    call: (bearer: string) =>
+      musicRoute.POST(
+        jsonRequest("/v1/music/generations", bearer, {
+          model: "elevenlabs/music_v1",
+          prompt: "calm piano",
+        }),
+        noContext
+      ),
   },
   {
     name: "GET /v1/voices (ElevenLabs proxy)",

@@ -5,8 +5,8 @@
 ---
 
 > **Versioon:** v3.8.44
-> **Viimati uuendatud:** 2026-09-16
-> **Sihtrühm:** Insenerid, kes lisavad, hooldavad või siluvad manustatud teenuseid (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Viimati uuendatud:** 2026-10-28
+> **Sihtrühm:** Insenerid, kes lisavad või hooldavad sisseehitatud teenuseid või otsivad neist vigu (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Manustatud teenused on kohalikult installitud protsesside kaastööriistad, mida OmniRoute installib, jälgib ja
 pakub täieõiguslike marsruutimissihtmärkidena. Erinevalt välistest teenusepakkujatest (millega luuakse interneti kaudu
@@ -31,19 +31,20 @@ pakub täieõiguslike marsruutimissihtmärkidena. Erinevalt välistest teenusepa
 
 ### Miks manustatud teenused?
 
-Manustatud on seitse teenust:
+Sisseehitatud teenuseid on kaheksa:
 
-| Teenus          | npm-pakett                            | Vaikimisi port | Otstarve                                                                                                                                                                                                                                                                                                                                                                                    |
-| --------------- | ------------------------------------- | :------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                             |     20130      | AI-ruuter, mida OmniRoute saab kasutada alampakkujana. Mudelid avaldatakse kujul `9router/{sub}/{model}`                                                                                                                                                                                                                                                                                    |
-| **CLIProxyAPI** | GitHubi väljalaskebinaar (`cliproxy`) |      8317      | Kohalik puhverserveri adapter Anthropic CLI autentimisvoogude jaoks. Pakub varumarsruutimist OAuthi lubade aegumisel                                                                                                                                                                                                                                                                        |
-| **Mux**         | `mux` (taustal töötav `mux server`)   |      8322      | Kohalik agentide orkestreerimise deemon (coder/mux). Hallatakse ainult elutsüklit — see pole marsruutimise sihtmärk (LLM-i puhverserverdamine puudub).                                                                                                                                                                                                                                      |
-| **Bifrost**     | `@maximhq/bifrost`                    |      8080      | Go AI-lüüsi vahendustaustsüsteem. Töötamise ajal valitakse automaatselt vahendusmarsruudile (`/v1/relay/`)                                                                                                                                                                                                                                                                                  |
-| **Dario**       | `@askalf/dario`                       |      3456      | Claude'i tellimuse puhverserver — alternatiiv/varuvariant CLIProxyAPI-le Claude-Code'i vormingus liikluse jaoks; sisestatud võtmest saab `DARIO_ADMIN_TOKEN`, mis kaitseb selle `/admin/*` OAuthi juhtimistasandit                                                                                                                                                                          |
-| **open-wa**     | `@open-wa/wa-automate`                |      8323      | WhatsApp Webi automatiseerimine (taustal töötav Chromium Puppeteeri kaudu). Hallatakse ainult elutsüklit — see pole marsruutimise sihtmärk.                                                                                                                                                                                                                                                 |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                  |     20135      | Viipade tihendamise kõrvalteenus — tegelik LLMLingua-2 ONNX-mudel (Microsofti algoritmi JS/TS-port). `open-sse/services/compression/engines/llmlingua/index.ts` saadab `/compress` päringud sellele HTTP kaudu ning kasutab kõrvalteenuse mittetöötamise korral varuvariandina protsessisisest töötlejalõime taustsüsteemi. Hallatakse ainult elutsüklit — see pole marsruutimise sihtmärk. |
+| Teenus          | npm-pakett                                | Vaikimisi port | Otstarve                                                                                                                                                                                                                                                                                                                                                                                    |
+| --------------- | ----------------------------------------- | :------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                 |     20130      | AI-ruuter, mida OmniRoute saab kasutada alampakkujana. Mudelid avaldatakse kujul `9router/{sub}/{model}`                                                                                                                                                                                                                                                                                    |
+| **CLIProxyAPI** | GitHubi väljalaskebinaar (`cliproxy`)     |      8317      | Kohalik puhverserveri adapter Anthropic CLI autentimisvoogude jaoks. Pakub varumarsruutimist OAuthi lubade aegumisel                                                                                                                                                                                                                                                                        |
+| **Mux**         | `mux` (taustal töötav `mux server`)       |      8322      | Kohalik agentide orkestreerimise deemon (coder/mux). Hallatakse ainult elutsüklit — see pole marsruutimise sihtmärk (LLM-i puhverserverdamine puudub).                                                                                                                                                                                                                                      |
+| **Bifrost**     | `@maximhq/bifrost`                        |      8080      | Go AI-lüüsi vahendustaustsüsteem. Töötamise ajal valitakse automaatselt vahendusmarsruudile (`/v1/relay/`)                                                                                                                                                                                                                                                                                  |
+| **Dario**       | `@askalf/dario`                           |      3456      | Claude'i tellimuse puhverserver — alternatiiv/varuvariant CLIProxyAPI-le Claude-Code'i vormingus liikluse jaoks; sisestatud võtmest saab `DARIO_ADMIN_TOKEN`, mis kaitseb selle `/admin/*` OAuthi juhtimistasandit                                                                                                                                                                          |
+| **open-wa**     | `@open-wa/wa-automate`                    |      8323      | WhatsApp Webi automatiseerimine (taustal töötav Chromium Puppeteeri kaudu). Hallatakse ainult elutsüklit — see pole marsruutimise sihtmärk.                                                                                                                                                                                                                                                 |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                      |     20135      | Viipade tihendamise kõrvalteenus — tegelik LLMLingua-2 ONNX-mudel (Microsofti algoritmi JS/TS-port). `open-sse/services/compression/engines/llmlingua/index.ts` saadab `/compress` päringud sellele HTTP kaudu ning kasutab kõrvalteenuse mittetöötamise korral varuvariandina protsessisisest töötlejalõime taustsüsteemi. Hallatakse ainult elutsüklit — see pole marsruutimise sihtmärk. |
+| **sing-box**    | GitHubi väljalaske binaarfail (`singbox`) |     20140      | TPROXY abiprotsess, mis toetab `applyTproxy()` läbipaistva puhverserveri liikluse püüdmist (`src/mitm/tproxy/setup.ts`). Paigaldaja laadib alla fikseeritud versiooniga väljalaske ja kontrollib selle kontrollsummat. Hallatakse ainult elutsüklit; see ei ole marsruutimise sihtkoht ega LLM-puhverserver.                                                                                |
 
-Kõik seitse järgivad sama järelevalvemudelit:
+Kõik kaheksa järgivad sama järelevalvemudelit:
 
 - OmniRoute installib need asukohta `DATA_DIR/services/{name}/` (OmniRoute'i enda failist `package.json` eraldatuna)
 - OmniRoute käivitab ja jälgib neid alamprotsessidena
@@ -579,7 +580,27 @@ vastus) kasutatakse varuvariandina protsessisisest töötlejalõime taustateenus
 
 ---
 
-### 4.8 Pöördproksi (9Routeri töölaua manustus)
+### 4.8 sing-boxi lõpp-punktid (8 marsruuti)
+
+sing-boxil on sama lõpp-punktide struktuur kui Muxil: puudub `rotate-key` marsruut ning API võtit ei sisestata (`needsApiKey: false` failis `bootstrap.ts`). Hallatakse ainult selle elutsüklit; see ei ole kunagi marsruutimis- ega LLM-pakkuja. `install()` laadib GitHubist alla ametliku väljalaske binaarfaili (`SagerNet/sing-box`) fikseeritud versioonile (`SINGBOX_PINNED_VERSION` failis `src/lib/services/installers/singbox.ts`) ja kontrollib selle SHA256 väärtust samasse faili lisatud kontrollsumma vastu enne binaarfaili kettale kirjutamist. Kõik muud soovitud versioonid lükatakse tagasi.
+
+| Meetod | Tee                                          | Kirjeldus                                                                                  |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `POST` | `/api/services/singbox/install`              | Laadi alla ja kontrolli sing-boxi fikseeritud väljalaset                                   |
+| `POST` | `/api/services/singbox/start`                | Käivita sing-box (`sing-box run -c config.json`)                                           |
+| `POST` | `/api/services/singbox/stop`                 | Peata sing-box                                                                             |
+| `POST` | `/api/services/singbox/restart`              | Taaskäivita sing-box                                                                       |
+| `POST` | `/api/services/singbox/update`               | Kontrolli või paigalda fikseeritud väljalase uuesti                                        |
+| `GET`  | `/api/services/singbox/status`               | Hetkeolek ja andmebaasis olev olek                                                         |
+| `POST` | `/api/services/singbox/auto-start`           | Lülita automaatne käivitamine sisse või välja                                              |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Lülita üle võetud, varem olemas olnud protsessi automaatne taaskäivitamine sisse või välja |
+| `GET`  | `/api/services/singbox/logs`                 | Jälgi SSE logi lõppu ühise dünaamilise `[name]/logs` marsruudi kaudu                       |
+
+**TPROXY ühendamine:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) kirjutab `config.json` faili ja käivitab järelevalveprotsessi enne, kui `applyTproxy()` paigaldab TPROXY tulemüürireeglid. Kui järelevalveprotsess puudub või ei jõua olekusse `running`, logitakse see nüüd veatasemel, mitte ei jäeta tõrget vaikides tähelepanuta. Nii saab operaator näha, et TPROXY reeglid rakendati ilma nende taga töötava kuulajata.
+
+---
+
+### 4.9 Pöördproksi (9Routeri töölaua manustus)
 
 Töölaud manustab 9Routeri veebiliidese iframe'i sisemise pöördproksi kaudu
 aadressil:

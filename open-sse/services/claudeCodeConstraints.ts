@@ -25,9 +25,17 @@
 export function enforceThinkingTemperature(body: Record<string, unknown>): void {
   const thinking = body.thinking as Record<string, unknown> | undefined;
   if (thinking?.type === "enabled" || thinking?.type === "adaptive") {
-    body.temperature = 1;
-    if (body.top_p !== undefined) {
-      delete body.top_p;
+    // #18636: normalize only a sampling attempt the body actually carries. Pinning
+    // unconditionally re-adds `temperature` after an operator param filter or
+    // built-in strip rule removed it, and temperature-retired models then 400
+    // ("temperature is deprecated"); a body with neither sampling param must stay
+    // on Anthropic's "unset" branch. A lone top_p is still converted to the
+    // pinned branch (established behavior, see claude-code-parity tests).
+    if (body.temperature !== undefined || body.top_p !== undefined) {
+      body.temperature = 1;
+      if (body.top_p !== undefined) {
+        delete body.top_p;
+      }
     }
   }
 }

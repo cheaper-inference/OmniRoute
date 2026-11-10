@@ -23,6 +23,7 @@ export { looksLikeJwt, resolveSyntxToken };
 export const SYNTX_MEDIA_POLL_TIMEOUT_MS = 600_000;
 export const SYNTX_MEDIA_POLL_INTERVAL_MS = 5_000;
 export const SYNTX_TRANSCRIBE_MAX_BYTES = 52_428_800;
+export const SYNTX_MEDIA_MAX_BYTES = 50 * 1024 * 1024;
 
 const MEDIA_OBJECT_TYPES = new Set(["image", "video", "audio", "file"]);
 
@@ -793,18 +794,106 @@ export async function transcribeSyntxAudio(options: {
 
 export async function fetchSyntxMediaBytes(
   url: string,
-  fetchImpl: FetchImpl = fetch
+  fetchImpl: FetchImpl = fetch,
+  options: { maxBytes?: number; signal?: AbortSignal | null } = {}
 ): Promise<{ bytes: Buffer; contentType: string }> {
-  const response = await fetchImpl(url);
+  const maxBytes = options.maxBytes ?? SYNTX_MEDIA_MAX_BYTES;
+  const signal = options.signal ?? null;
+  if (signal?.aborted) {
+    throw new SyntxMediaError("SYNTX media download cancelled", 499);
+  }
+  let response: Response;
+  try {
+    response = await fetchImpl(url, signal ? { signal } : undefined);
+  } catch (error) {
+    mapAbortOrRethrow(error, signal);
+  }
   if (!response.ok) {
     throw new SyntxMediaError(
       `Failed to download SYNTX media HTTP ${response.status}`,
       response.status
     );
   }
-  const bytes = Buffer.from(await response.arrayBuffer());
+  let bytes: Buffer;
+  try {
+    bytes = await readSyntxMediaBodyBounded(response, maxBytes, signal);
+  } catch (error) {
+    mapAbortOrRethrow(error, signal);
+  }
   const contentType = response.headers.get("content-type") || "application/octet-stream";
   return { bytes, contentType };
+}
+
+// Only a transport abort is remapped to 499; a SyntxMediaError raised on the same tick
+// (e.g. 413 over the size limit) or any other error is rethrown so its status survives.
+function mapAbortOrRethrow(error: unknown, signal: AbortSignal | null): never {
+  if (signal?.aborted && !(error instanceof SyntxMediaError)) {
+    throw new SyntxMediaError("SYNTX media download cancelled", 499);
+  }
+  throw error;
+}
+
+async function readSyntxMediaBodyBounded(
+  response: Response,
+  maxBytes: number,
+  signal: AbortSignal | null
+): Promise<Buffer> {
+  const declared = Number.parseInt(response.headers.get("content-length") ?? "", 10);
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    throw new SyntxMediaError(`SYNTX media exceeds ${maxBytes} byte limit`, 413);
+  }
+  if (!response.body) {
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.byteLength > maxBytes) {
+      throw new SyntxMediaError(`SYNTX media exceeds ${maxBytes} byte limit`, 413);
+    }
+    return bytes;
+  }
+  const reader = response.body.getReader();
+  const chunks: Buffer[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      if (signal?.aborted) {
+        throw new SyntxMediaError("SYNTX media download cancelled", 499);
+      }
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = Buffer.from(value);
+      total += chunk.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel();
+        throw new SyntxMediaError(`SYNTX media exceeds ${maxBytes} byte limit`, 413);
+      }
+      chunks.push(chunk);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks, total);
+}
+
+const DATA_URL_RE = /^data:([^;,]+);base64,(.+)$/i;
+
+function decodedBase64ByteLength(b64: string): number {
+  // Decoded byte length of a base64 string. Exact for well-formed base64
+  // (length % 4 === 0): each group of 4 chars decodes to 3 bytes, minus the
+  // trailing padding. A safe bound for out-of-contract input.
+  const pad = b64.endsWith("==") ? 2 : b64.endsWith("=") ? 1 : 0;
+  return Math.floor((b64.length * 3) / 4) - pad;
+}
+
+export function decodeDataUrlBounded(
+  dataUrl: string,
+  maxBytes: number = SYNTX_MEDIA_MAX_BYTES
+): { bytes: Buffer; mime: string } | null {
+  const match = DATA_URL_RE.exec(dataUrl.trim());
+  if (!match) return null;
+  const b64 = match[2];
+  if (decodedBase64ByteLength(b64) > maxBytes) {
+    throw new SyntxMediaError(`SYNTX media data URL exceeds ${maxBytes} byte limit`, 400);
+  }
+  return { bytes: Buffer.from(b64, "base64"), mime: match[1] || "image/png" };
 }
 
 export function firstMediaUrl(result: SyntxGenerateResult, type?: string): string {

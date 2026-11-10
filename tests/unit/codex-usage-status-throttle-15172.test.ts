@@ -68,8 +68,22 @@ function installUsageFetch(clock: FakeClock | null) {
   };
 }
 
+// The throttle's contract is the spacing of the slots it grants. A fetch starts later than its
+// slot, after the per-connection proxy lookup, and that lookup's latency varies per call, so
+// timing the fetch itself measures the lookup (193-218 ms gaps on an idle box), not the throttle.
+class RecordingThrottle extends MinIntervalThrottle {
+  readonly grants: number[] = [];
+
+  override async acquire(): Promise<void> {
+    await super.acquire();
+    this.grants.push(Date.now());
+  }
+}
+
 test("#15172 concurrent Codex usage fetches start at least one interval apart", async () => {
-  const restoreThrottle = installSharedThrottle(null);
+  const throttle = new RecordingThrottle({ minIntervalMs: INTERVAL_MS, jitterMs: 0 });
+  setQuotaFetchThrottleForTests(throttle);
+  const restoreThrottle = () => resetQuotaFetchThrottle();
   const { starts, restore } = installUsageFetch(null);
 
   try {
@@ -82,8 +96,9 @@ test("#15172 concurrent Codex usage fetches start at least one interval apart", 
     await Promise.all(connections.map((connection) => getUsageForProvider(connection)));
 
     assert.equal(starts.length, 4);
-    for (let i = 1; i < starts.length; i++) {
-      const gap = starts[i] - starts[i - 1];
+    assert.equal(throttle.grants.length, 4, "every fetch must pass through the throttle");
+    for (let i = 1; i < throttle.grants.length; i++) {
+      const gap = throttle.grants[i] - throttle.grants[i - 1];
       assert.ok(
         gap >= INTERVAL_MS - 30,
         `gap ${gap}ms between fetch ${i - 1} and ${i} is below one interval`

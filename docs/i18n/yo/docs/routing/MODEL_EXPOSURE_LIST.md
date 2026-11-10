@@ -60,3 +60,15 @@ lé ara wọn, bí àkójọpọ̀ àsìá-púpọ̀ tó wà tẹ́lẹ̀ nínú
 ààyè ètò mìíràn èyíkéyìí — yàtọ̀ sí àsẹ̀ ìkójáde ìgbésẹ̀ combo ti `hidePaidModels`, kò sí ewu ìmúpadà
 sí ipò tẹ́lẹ̀ níbí: id tí a kọ̀ tí a fi sínú ìgbésẹ̀ combo tí a kójáde jẹ́ yíyan ìtọ́sọ́nà ní tààràtà ti olùṣàkóso
 fúnra rẹ̀, kì í ṣe ohun tí ààlà ìkójáde ní láti yọ kúrò.
+
+## Àkójọ combo nìkan (`exposeCombosOnly`)
+
+Boolean ọ̀tọ̀ ni, tí ẹni náà tún gbọ́dọ̀ yàn láti mú ṣiṣẹ́, tí `false` sì jẹ́ ìṣètò àkọ́kọ́, fún deployment tí combo jẹ́ model gbangba, provider sì jẹ́ backend nìkan. Bí ó bá jẹ́ `true`, àkójọ gbangba (`GET /v1/models`, `GET /v1`, àti àwọn discovery route `/v1` míì tí a kọ́ lórí `getUnifiedModelsResponse()`) ń pa row tó ní `owned_by: "combo"` nìkan mọ́: combo oníṣe àti combo `auto/*` tí a kọ́ sínú rẹ̀ (àfi bí `hideAutoCombos` bá fi wọ́n pamọ́). Ó ń lo ìdánwò row kan náà pẹ̀lú `catalogScope: "combos"` fún key kọ̀ọ̀kan, allow/deny/scope filter ti key fúnra rẹ̀ sì ṣì ń ṣiṣẹ́ lé e lórí.
+
+Tan-an tàbí pa á nínú **Settings → Routing → Models API listing**, tàbí pẹ̀lú `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Bí àwọn àkójọ tó wà lókè, ohun tí a ń kéde nìkan ló ń yí padà:
+
+- id `provider/model` tí a sọ ní kedere ṣì ń rán request, `GET /v1/models/{id}` sì ṣì ń rí i;
+- a kò dín dashboard catalog (`GET /api/models/catalog`, tí model picker ń lò) kù;
+- a kò da á sínú candidate pool `auto/*`, nítorí náà combo `auto/*` ń pa gbogbo pool wọn mọ́.

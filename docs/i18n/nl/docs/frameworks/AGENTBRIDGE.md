@@ -16,16 +16,16 @@ AgentBridge is de MITM-proxy (Man-in-the-Middle) van OmniRoute die HTTPS-verkeer
 
 ### Wat is AgentBridge?
 
-Wanneer een IDE-agent (bijv. GitHub Copilot, Cursor, Claude Code) een API-aanroep doet, maakt deze rechtstreeks verbinding met de upstream AI-provider (OpenAI, Anthropic, enz.). AgentBridge onderschept die verbinding transparant op TLS-niveau — zonder dat er een wijziging in de agentconfiguratie nodig is — en herschrijft het verzoek via OmniRoute.
+Wanneer een IDE agent (bijv. GitHub Copilot, Cursor, Claude Code) een API aanroep doet, maakt deze rechtstreeks verbinding met de upstream AI provider (OpenAI, Anthropic, enz.). AgentBridge onderschept die verbinding transparant op het TLS -niveau — zonder dat er een agentconfiguratiewijziging — nodig is en herschrijft het verzoek via OmniRoute.
 
-Dit betekent dat je:
+Dit betekent dat u:
 
-- **Elke agent kunt omleiden naar elke provider**: Copilot die met OpenAI praat? Leid hem om naar Anthropic Claude, Gemini of een van de 375 providers van OmniRoute.
-- **Modelmappings kunt toepassen**: `gemini-3-flash` → `claude-sonnet-4.7` transparant op handlerniveau.
-- **Al het agentverkeer kunt bekijken**: elk onderschept verzoek wordt gepubliceerd naar de [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **De veerkracht van OmniRoute kunt toepassen**: comborouting, circuit breakers, fallbacks en kostenregistratie werken ook voor IDE-agentverkeer.
+- **Leid elke agent om naar elke provider** : Copilot praat met OpenAI? Stuur het door naar Anthropic Claude, Gemini of een van de 380 providers van OmniRoute.
+- **Modeltoewijzingen toepassen** : `gemini-3-flash` → `claude-sonnet-4.7` transparant op handlerniveau.
+- **Observeer al het agentverkeer** : elk onderschept verzoek wordt gepubliceerd aan de [Verkeersinspecteur](./TRAFFIC_INSPECTOR.md).
+- **Pas OmniRoute veerkracht toe** : combo-routing, stroomonderbrekers, fallbacks en kostenregistratie werken ook voor IDE agentverkeer.
 
-### Positionering ten opzichte van de markt
+### Positionering versus de markt
 
 | Functie                 | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
@@ -35,15 +35,15 @@ Dit betekent dat je:
 | OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
 | Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
 | Zed Industries          |    —    |    ✓     |        —        |             ✓             |
-| Claude Code             |    —    |    —     |        ✓        |             ✓             |
-| Open Code               |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |    🔍 Wordt onderzocht    |
-| Dashboard-UI            |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector       |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute-routing       |    ✗    |    ✗     |        ✗        |             ✓             |
-| Modelmapping-UI         |    ✗    |    ✗     |        ✗        |             ✓             |
-| Bypasslijst             |    ✗    |    ✗     |        ✓        |             ✓             |
-| Upstream CA-certificaat |    ✗    |    ✗     |        ✓        |             ✓             |
+| Claude -code            |    —    |    —     |        ✓        |             ✓             |
+| Opencode                |    —    |    —     |        ✓        |             ✓             |
+| Trae                    |    —    |    —     |        —        |      🔍 Onderzoeken       |
+| Dashboard UI            |    ✓    |    ✗     |        ✗        |             ✓             |
+| Verkeersinspecteur      |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute -routering    |    ✗    |    ✗     |        ✗        |             ✓             |
+| Modeltoewijzing UI      |    ✗    |    ✗     |        ✗        |             ✓             |
+| Lijst omzeilen          |    ✗    |    ✗     |        ✓        |             ✓             |
+| Upstream CA certificaat |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -555,7 +555,7 @@ Trae is een relatief nieuwe AI-codeerassistent. Voordat een handler wordt geïmp
 3. Bepaal het authenticatiemechanisme
 4. Beoordeel go/no-go op basis van de TOS en de vindbaarheid van de API
 
-Totdat het onderzoek is afgerond, toont de Trae-kaart in het dashboard een badge 'In onderzoek' met een link 'Haalbaarheid rapporteren'. De handlerstub in `src/mitm/handlers/trae.ts` genereert een gestructureerde fout `Not yet implemented`.
+Totdat het onderzoek is afgerond, toont de Trae-kaart in het dashboard een badge 'In onderzoek' met een link 'Haalbaarheid rapporteren'. De handlerstub in `src/mitm/handlers/trae.ts` genereert een gestructureerde fout `Nog niet geïmplementeerd`.
 
 ### Agents in de backlog (MITM vereist — geen ondersteuning voor aangepaste basis-URL)
 

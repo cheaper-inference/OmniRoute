@@ -645,10 +645,33 @@ test("provider models route does NOT flag a degraded remote-fetch fallback as in
   const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
   globalThis.fetch = async () => new Response("upstream down", { status: 500 });
 
-  const body = (await (await callRoute(connection.id)).json()) as any;
+  // refresh=true is the live attempt; without it the discovery never leaves the
+  // operator's "auto-fetch off" setting (see the next test).
+  const body = (await (await callRoute(connection.id, "?refresh=true")).json()) as any;
 
   assert.equal(body.source, "local_catalog");
   assert.notEqual(body.intentional, true, "degraded fallback must not be flagged intentional");
+  assert.equal(body.degraded, true, "a failed live discovery is a degraded discovery");
+  assert.equal(body.error, "HTTP 500", "the degraded fallback reports the reason");
+});
+
+test("provider models route flags a discovery the operator turned off as intentional", async () => {
+  // Auto-fetch is opt-in: with it off, the built-in catalog is the expected
+  // source, so the response is NOT a degraded discovery.
+  const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
+  globalThis.fetch = async () => new Response("upstream down", { status: 500 });
+
+  const body = (await (await callRoute(connection.id)).json()) as {
+    source?: string;
+    intentional?: unknown;
+    degraded?: unknown;
+    error?: unknown;
+  };
+
+  assert.equal(body.source, "local_catalog");
+  assert.equal(body.intentional, true, "a discovery the operator turned off is not a failure");
+  assert.notEqual(body.degraded, true);
+  assert.equal(body.error, undefined);
 });
 
 test("provider models route returns the local catalog for Runway video models", async () => {

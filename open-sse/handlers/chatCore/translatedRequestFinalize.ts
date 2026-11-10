@@ -10,6 +10,7 @@
  * together with the two tool maps the response path needs.
  */
 
+import { aliasMuseToolNames } from "../../executors/museToolNameAliases.ts";
 import { applyResponsesPreviousResponseIdPolicy } from "../../utils/responsesStatePolicy.ts";
 import { sanitizeKiroTools } from "../../utils/kiroSanitizer.ts";
 import { FORMATS } from "../../translator/formats.ts";
@@ -62,6 +63,14 @@ export function finalizeTranslatedRequest({
   toolNameMap: Map<string, string> | null;
 } {
   let translatedBody = translatedBodyInput;
+  // Muse's Responses endpoint reserves several builtin function names. Rewrite only
+  // this exact resolved provider/target pair before consuming the helper's two
+  // non-enumerable metadata channels. JSON and streaming response restoration are
+  // already wired at the upstream Responses boundary.
+  if (provider === "muse-code" && targetFormat === FORMATS.OPENAI_RESPONSES) {
+    translatedBody = aliasMuseToolNames(translatedBody) as Record<string, unknown>;
+  }
+
   // Keep the request translator's namespace identities separate from toolNameMap:
   // the latter is a Kiro/Claude passthrough alias channel with string values,
   // while namespace identities carry `{namespace, name}` for the #7936 response

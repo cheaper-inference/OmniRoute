@@ -148,6 +148,12 @@ Tunnel, Tailscale, Ngrok) ಹಿಂದೆ ಚಲಾಯಿಸಿದರೆ, ಮೇ
 | `/api/providers/health-autopilot/actions` | ಆಟೋಪೈಲಟ್ ಪರಿಹಾರಾತ್ಮಕ ಕ್ರಿಯೆಗಳನ್ನು ಕಾರ್ಯಗತಗೊಳಿಸುತ್ತದೆ                         |
 | `/api/settings/obsidian`                  | ಯಾವುದೇ ವಾಲ್ಟ್ ರೂಟ್ಗಾಗಿ ಮರುಬಳಕೆ ಮಾಡಬಹುದಾದ WebDAV ರುಜುವಾತುಗಳನ್ನು ಸೃಷ್ಟಿಸುತ್ತದೆ |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                 |
+| `/api/cli-tools/apply`                    | ಹೋಸ್ಟ್‌ನಲ್ಲಿನ ಆಪರೇಟರ್‌ನ CLI ಸಂರಚನೆಯನ್ನು ಮತ್ತೆ ಬರೆಯುತ್ತದೆ                     |
+| `/api/cli-tools/guide-settings`           | ಮಾರ್ಗದರ್ಶಿ ಆಧಾರಿತ CLI ಸಂರಚನಾ ಫೈಲ್‌ಗಳನ್ನು ಬರೆಯುತ್ತದೆ                          |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes ಏಜೆಂಟ್‌ನ ಸಂರಚನೆಯನ್ನು ಬರೆಯುತ್ತದೆ                                       |
+| `/api/cli-tools/backups`                  | CLI ಸಂರಚನಾ ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸುತ್ತದೆ ಮತ್ತು ಅಳಿಸುತ್ತದೆ                  |
+| `/api/log-export`                         | ಸಂರಚಿಸಿದ ಗಮ್ಯಸ್ಥಾನಕ್ಕೆ ಕರೆ ಲಾಗ್‌ಗಳನ್ನು ಕಳುಹಿಸುತ್ತದೆ                          |
+| `/api/restart`                            | ಸರ್ವರ್ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮರುಪ್ರಾರಂಭಿಸುತ್ತದೆ                                     |
 
 **ಉಲ್ಲಂಘನೆಯಾಗುವಾಗ ಪ್ರತಿಕ್ರಿಯೆ:** `401 Authentication required`
 

@@ -80,6 +80,9 @@ const MIGRATED_FILES = [
   "src/lib/db/registeredKeys.ts",
   "src/lib/db/jsonMigration/apiKeysImport.ts",
   "src/sse/services/credentialSelectionDiagnostics.ts",
+  "open-sse/services/tokenRefresh/passiveCodex.ts",
+  "src/sse/services/museSessionOwnership.ts",
+  "src/server/authz/entra/evaluate.ts",
 ];
 
 test("migrated call sites import the helper instead of hashing inline", () => {
@@ -95,4 +98,15 @@ test("migrated call sites import the helper instead of hashing inline", () => {
       `${rel} is expected to use opaqueTokenFingerprint()`
     );
   }
+});
+
+test("the Z Code per-key state map is keyed through the helper", () => {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+  const source = readFileSync(
+    path.join(root, "open-sse/executors/zcode/nativeProtocol.ts"),
+    "utf8"
+  );
+  // The file keeps createHash for the upstream proof-of-work; only the key fingerprint moves.
+  assert.ok(source.includes("opaqueTokenFingerprint(apiKey)"));
+  assert.ok(!/createHash\("sha256"\)\.update\(apiKey\)/.test(source));
 });

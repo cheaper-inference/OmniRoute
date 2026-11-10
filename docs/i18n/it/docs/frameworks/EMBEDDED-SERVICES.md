@@ -5,8 +5,8 @@
 ---
 
 > **Versione:** v3.8.44
-> **Ultimo aggiornamento:** 2026-09-16
-> **Destinatari:** Ingegneri che aggiungono, mantengono o eseguono il debug di servizi integrati (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Ultimo aggiornamento:** 2026-10-28
+> **Destinatari:** Ingegneri che aggiungono, mantengono o diagnosticano servizi integrati (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 I servizi integrati sono strumenti di processo sidecar installati localmente che OmniRoute installa, supervisiona ed
 espone come destinazioni di routing di prima classe. A differenza dei provider esterni (raggiunti tramite Internet
@@ -31,7 +31,7 @@ utilizzando chiavi API), i servizi integrati vengono eseguiti sulla stessa macch
 
 ### Perché i servizi incorporati?
 
-Sono incorporati sette servizi:
+Sono integrati otto servizi:
 
 | Servizio        | Pacchetto npm                             | Porta predefinita | Scopo                                                                                                                                                                                                                                                                                                                                                                                                          |
 | --------------- | ----------------------------------------- | :---------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Sono incorporati sette servizi:
 | **Dario**       | `@askalf/dario`                           |       3456        | Proxy per l'abbonamento Claude — alternativa/failover a CLIProxyAPI per il traffico nel formato Claude Code; la chiave inserita diventa `DARIO_ADMIN_TOKEN` e protegge il relativo piano di controllo OAuth `/admin/*`                                                                                                                                                                                         |
 | **open-wa**     | `@open-wa/wa-automate`                    |       8323        | Automazione di WhatsApp Web (Chromium headless tramite Puppeteer). Viene gestito solo il ciclo di vita — non è una destinazione di instradamento.                                                                                                                                                                                                                                                              |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                      |       20135       | Servizio sidecar per la compressione dei prompt — modello ONNX LLMLingua-2 reale (porting JS/TS dell'algoritmo di Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` inoltra `/compress` al servizio tramite HTTP, passando al backend interno basato su worker thread quando il sidecar non è disponibile. Viene gestito solo il ciclo di vita — non è una destinazione di instradamento. |
+| **sing-box**    | Binario della release GitHub (`singbox`)  |       20140       | Sidecar TPROXY che supporta l'intercettazione tramite proxy trasparente di `applyTproxy()` (`src/mitm/tproxy/setup.ts`). L'installer scarica la release fissata e verificata tramite checksum. È gestito solo nel ciclo di vita: non è una destinazione di routing e non inoltra richieste LLM.                                                                                                                |
 
-Tutti e sette seguono lo stesso modello di supervisione:
+Tutti e otto seguono lo stesso modello di supervisione:
 
 - OmniRoute li installa in `DATA_DIR/services/{name}/` (isolati dal `package.json` di OmniRoute)
 - OmniRoute li avvia e li monitora come processi figlio
@@ -583,7 +584,27 @@ al backend in-process basato su thread worker (`./worker.ts`).
 
 ---
 
-### 4.8 Proxy inverso (incorporamento della dashboard di 9Router)
+### 4.8 Endpoint sing-box (8 route)
+
+sing-box ha la stessa struttura degli endpoint di Mux: nessuna route `rotate-key` e nessuna iniezione di chiave API (`needsApiKey: false` in `bootstrap.ts`). È gestito soltanto nel ciclo di vita e non è mai un provider di routing/LLM. `install()` scarica il binario della release ufficiale GitHub (`SagerNet/sing-box`) per la versione fissata (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) e ne verifica lo SHA256 rispetto al checksum incorporato nello stesso file prima di scriverlo su disco. Qualsiasi altra versione richiesta viene rifiutata.
+
+| Metodo | Percorso                                     | Descrizione                                                                     |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Scarica e verifica la release fissata di sing-box                               |
+| `POST` | `/api/services/singbox/start`                | Avvia sing-box (`sing-box run -c config.json`)                                  |
+| `POST` | `/api/services/singbox/stop`                 | Arresta sing-box                                                                |
+| `POST` | `/api/services/singbox/restart`              | Riavvia sing-box                                                                |
+| `POST` | `/api/services/singbox/update`               | Verifica nuovamente o reinstalla la release fissata                             |
+| `GET`  | `/api/services/singbox/status`               | Stato in tempo reale e nel DB                                                   |
+| `POST` | `/api/services/singbox/auto-start`           | Attiva o disattiva l'avvio automatico                                           |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Attiva o disattiva il riavvio automatico di un processo adottato, già esistente |
+| `GET`  | `/api/services/singbox/logs`                 | Segui i log tramite SSE, attraverso la route dinamica condivisa `[name]/logs`   |
+
+**Collegamento TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) scrive `config.json` e avvia il supervisore prima che `applyTproxy()` installi le regole firewall TPROXY. Se il supervisore manca o non raggiunge lo stato `running`, ora viene registrato un errore, invece di ignorare silenziosamente il problema. L'operatore può così riconoscere che le regole TPROXY sono state applicate senza un listener funzionante a supportarle.
+
+---
+
+### 4.9 Proxy inverso (incorporamento della dashboard di 9Router)
 
 La dashboard incorpora l'interfaccia web di 9Router all'interno di un iframe
 tramite un proxy inverso interno disponibile all'indirizzo:

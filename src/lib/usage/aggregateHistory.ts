@@ -153,6 +153,109 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
   };
 
   try {
+    const rollupStartedAt = new Date().toISOString();
+    const teamAggregateQuery = `
+      WITH shape_counts AS (
+        SELECT billing_team_id AS team_id,
+          COALESCE(NULLIF(api_key_id, ''), 'unknown') AS api_key_id,
+          MAX(NULLIF(api_key_name, '')) AS api_key_name,
+          COALESCE(NULLIF(LOWER(provider), ''), '__unknown_provider__') AS provider,
+          COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__') AS model,
+          COALESCE(NULLIF(service_tier, ''), 'standard') AS service_tier,
+          DATE(timestamp) AS date,
+          json_array(COALESCE(tokens_input,0), COALESCE(tokens_output,0), COALESCE(tokens_cache_read,0), COALESCE(tokens_cache_creation,0), COALESCE(tokens_reasoning,0)) AS shape,
+          COUNT(*) AS count_all,
+          SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) AS count_success
+        FROM usage_history
+        WHERE timestamp < ? AND billing_team_id IS NOT NULL AND billing_team_id != ''
+          AND team_rollup_processed_at IS NULL
+        GROUP BY billing_team_id, COALESCE(NULLIF(api_key_id, ''), 'unknown'),
+          COALESCE(NULLIF(LOWER(provider), ''), '__unknown_provider__'),
+          COALESCE(NULLIF(LOWER(model), ''), '__unknown_model__'),
+          COALESCE(NULLIF(service_tier, ''), 'standard'), DATE(timestamp), shape
+      ), grouped_shapes AS (
+        SELECT team_id, api_key_id, api_key_name, provider, model, service_tier, date,
+          json_group_object(shape, count_all) AS token_shapes_json,
+          json_group_object(shape, count_success) AS successful_token_shapes_json
+        FROM shape_counts
+        GROUP BY team_id, api_key_id, provider, model, service_tier, date
+      )
+      INSERT INTO daily_team_usage_summary (
+        team_id, api_key_id, api_key_name, provider, model, service_tier, date,
+        total_requests, successful_requests, total_input_tokens, total_output_tokens,
+        total_cache_read_tokens, total_cache_creation_tokens, total_reasoning_tokens,
+        successful_input_tokens, successful_output_tokens, successful_cache_read_tokens,
+        successful_cache_creation_tokens, successful_reasoning_tokens,
+        token_shapes_json, successful_token_shapes_json
+      )
+      SELECT
+        uh.billing_team_id,
+        COALESCE(NULLIF(uh.api_key_id, ''), 'unknown'),
+        MAX(NULLIF(uh.api_key_name, '')),
+        COALESCE(NULLIF(LOWER(uh.provider), ''), '__unknown_provider__'),
+        COALESCE(NULLIF(LOWER(uh.model), ''), '__unknown_model__'),
+        COALESCE(NULLIF(uh.service_tier, ''), 'standard'),
+        DATE(uh.timestamp),
+        COUNT(*),
+        COALESCE(SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END), 0),
+        COALESCE(SUM(uh.tokens_input), 0),
+        COALESCE(SUM(uh.tokens_output), 0),
+        COALESCE(SUM(uh.tokens_cache_read), 0),
+        COALESCE(SUM(uh.tokens_cache_creation), 0),
+        COALESCE(SUM(uh.tokens_reasoning), 0),
+        COALESCE(SUM(CASE WHEN uh.success = 1 THEN uh.tokens_input ELSE 0 END), 0),
+        COALESCE(SUM(CASE WHEN uh.success = 1 THEN uh.tokens_output ELSE 0 END), 0),
+        COALESCE(SUM(CASE WHEN uh.success = 1 THEN uh.tokens_cache_read ELSE 0 END), 0),
+        COALESCE(SUM(CASE WHEN uh.success = 1 THEN uh.tokens_cache_creation ELSE 0 END), 0),
+        COALESCE(SUM(CASE WHEN uh.success = 1 THEN uh.tokens_reasoning ELSE 0 END), 0),
+        grouped_shapes.token_shapes_json, grouped_shapes.successful_token_shapes_json
+      FROM usage_history AS uh
+      JOIN grouped_shapes ON grouped_shapes.team_id = uh.billing_team_id
+        AND grouped_shapes.api_key_id = COALESCE(NULLIF(uh.api_key_id, ''), 'unknown')
+        AND grouped_shapes.provider = COALESCE(NULLIF(LOWER(uh.provider), ''), '__unknown_provider__')
+        AND grouped_shapes.model = COALESCE(NULLIF(LOWER(uh.model), ''), '__unknown_model__')
+        AND grouped_shapes.service_tier = COALESCE(NULLIF(uh.service_tier, ''), 'standard')
+        AND grouped_shapes.date = DATE(uh.timestamp)
+      WHERE uh.timestamp < ?
+        AND uh.billing_team_id IS NOT NULL AND uh.billing_team_id != ''
+        AND uh.team_rollup_processed_at IS NULL
+      GROUP BY uh.billing_team_id, COALESCE(NULLIF(uh.api_key_id, ''), 'unknown'),
+        COALESCE(NULLIF(LOWER(uh.provider), ''), '__unknown_provider__'),
+        COALESCE(NULLIF(LOWER(uh.model), ''), '__unknown_model__'),
+        COALESCE(NULLIF(uh.service_tier, ''), 'standard'), DATE(uh.timestamp)
+      ON CONFLICT(team_id, api_key_id, provider, model, service_tier, date) DO UPDATE SET
+        api_key_name = COALESCE(excluded.api_key_name, daily_team_usage_summary.api_key_name),
+        total_requests = daily_team_usage_summary.total_requests + excluded.total_requests,
+        successful_requests = daily_team_usage_summary.successful_requests + excluded.successful_requests,
+        total_input_tokens = daily_team_usage_summary.total_input_tokens + excluded.total_input_tokens,
+        total_output_tokens = daily_team_usage_summary.total_output_tokens + excluded.total_output_tokens,
+        total_cache_read_tokens = daily_team_usage_summary.total_cache_read_tokens + excluded.total_cache_read_tokens,
+        total_cache_creation_tokens = daily_team_usage_summary.total_cache_creation_tokens + excluded.total_cache_creation_tokens,
+        total_reasoning_tokens = daily_team_usage_summary.total_reasoning_tokens + excluded.total_reasoning_tokens,
+        successful_input_tokens = daily_team_usage_summary.successful_input_tokens + excluded.successful_input_tokens,
+        successful_output_tokens = daily_team_usage_summary.successful_output_tokens + excluded.successful_output_tokens,
+        successful_cache_read_tokens = daily_team_usage_summary.successful_cache_read_tokens + excluded.successful_cache_read_tokens,
+        successful_cache_creation_tokens = daily_team_usage_summary.successful_cache_creation_tokens + excluded.successful_cache_creation_tokens,
+        successful_reasoning_tokens = daily_team_usage_summary.successful_reasoning_tokens + excluded.successful_reasoning_tokens,
+        token_shapes_json = CASE WHEN daily_team_usage_summary.total_requests > 0
+          AND daily_team_usage_summary.token_shapes_json IS NULL THEN NULL ELSE (
+          SELECT json_group_object(shape, total) FROM (
+            SELECT key AS shape, SUM(value) AS total FROM (
+              SELECT key, value FROM json_each(COALESCE(daily_team_usage_summary.token_shapes_json, '{}'))
+              UNION ALL SELECT key, value FROM json_each(excluded.token_shapes_json)
+            ) GROUP BY key
+          )
+        ) END,
+        successful_token_shapes_json = CASE WHEN daily_team_usage_summary.successful_requests > 0
+          AND daily_team_usage_summary.successful_token_shapes_json IS NULL THEN NULL ELSE (
+          SELECT json_group_object(shape, total) FROM (
+            SELECT key AS shape, SUM(value) AS total FROM (
+              SELECT key, value FROM json_each(COALESCE(daily_team_usage_summary.successful_token_shapes_json, '{}'))
+              UNION ALL SELECT key, value FROM json_each(excluded.successful_token_shapes_json)
+            ) GROUP BY key
+          )
+        ) END
+    `;
     const rows = db
       .prepare(
         `SELECT
@@ -274,10 +377,10 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         total_output_tokens = excluded.total_output_tokens,
         total_cost = excluded.total_cost`
     );
-    const insertRows = db.transaction((items: typeof archivedRows) =>
-      items.reduce(
-        (changes, row) =>
-          changes +
+    const insertRows = db.transaction((items: typeof archivedRows) => {
+      const changes = items.reduce(
+        (total, row) =>
+          total +
           upsert.run(
             row.provider,
             row.model,
@@ -288,8 +391,19 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
             row.totalCost
           ).changes,
         0
-      )
-    );
+      );
+      // The Team upsert and raw-row processed marker are one transaction. If
+      // either fails, neither becomes visible and a retry cannot double count.
+      db.prepare(teamAggregateQuery).run(beforeDate, beforeDate);
+      db.prepare(
+        `UPDATE usage_history
+         SET team_rollup_processed_at = ?
+         WHERE timestamp < ?
+           AND billing_team_id IS NOT NULL AND billing_team_id != ''
+           AND team_rollup_processed_at IS NULL`
+      ).run(rollupStartedAt, beforeDate);
+      return changes;
+    });
 
     result.processed = rows.length;
     result.inserted = insertRows(archivedRows);

@@ -67,3 +67,15 @@ câmp de setări — spre deosebire de filtrul de export pentru pașii combinaț
 aici nu există niciun risc de rehidratare: un ID interzis încorporat într-un pas al combinației
 exportate reprezintă alegerea explicită de rutare a operatorului, nu ceva ce trebuie eliminat la
 limita de export.
+
+## Listare numai a combinațiilor (`exposeCombosOnly`)
+
+O setare booleană separată, tot cu activare explicită și valoare implicită `false`, pentru instalări în care combinațiile sunt suprafața publică de modele, iar furnizorii sunt doar backenduri. Când este `true`, lista publică (`GET /v1/models`, `GET /v1` și celelalte rute de descoperire `/v1` bazate pe `getUnifiedModelsResponse()`) păstrează doar rândurile cu `owned_by: "combo"`: combinațiile utilizatorilor plus combinațiile încorporate `auto/*` (dacă `hideAutoCombos` nu le ascunde). Folosește aceeași verificare a rândurilor ca `catalogScope: "combos"` pentru fiecare cheie, iar filtrele proprii de permitere/interzicere/domeniu ale cheii continuă să se aplice suplimentar.
+
+Comutați-o din **Setări → Rutare → Listare Models API** sau cu `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+La fel ca listele de mai sus, modifică doar publicarea în listă:
+
+- un ID explicit `provider/model` continuă să trimită cereri, iar `GET /v1/models/{id}` îl rezolvă în continuare;
+- catalogul panoului (`GET /api/models/catalog`, folosit de selectoarele de modele) nu este restrâns;
+- nu este oglindită în grupurile de candidați `auto/*`, deci combinațiile `auto/*` își păstrează grupul complet.

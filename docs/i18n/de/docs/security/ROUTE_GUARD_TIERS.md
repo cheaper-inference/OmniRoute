@@ -200,6 +200,12 @@ Serverprozess beenden.
 | `/api/providers/health-autopilot/actions` | Führt Autopilot-Korrekturmaßnahmen aus                                                   |
 | `/api/settings/obsidian`                  | Erstellt wiederverwendbare WebDAV-Anmeldedaten für ein beliebiges Vault-Stammverzeichnis |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                             |
+| `/api/cli-tools/apply`                    | Überschreibt die CLI-Konfiguration des Bedieners auf dem Host                            |
+| `/api/cli-tools/guide-settings`           | Schreibt anleitungsbasierte CLI-Konfigurationsdateien                                    |
+| `/api/cli-tools/hermes-agent-settings`    | Schreibt die Konfiguration des Hermes-Agenten                                            |
+| `/api/cli-tools/backups`                  | Stellt CLI-Konfigurationssicherungen wieder her und löscht sie                           |
+| `/api/log-export`                         | Sendet Aufrufprotokolle an ein konfiguriertes Ziel                                       |
+| `/api/restart`                            | Startet den Serverprozess neu                                                            |
 
 **Antwort bei Verstoß:** `401 Authentication required`
 

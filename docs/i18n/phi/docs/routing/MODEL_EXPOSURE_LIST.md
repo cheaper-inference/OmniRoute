@@ -61,3 +61,15 @@ Kasama sa settings export (`GET /api/settings/export-json`) ang parehong array n
 settings field — hindi tulad ng combo-step export filter ng `hidePaidModels`, walang panganib ng muling pag-hydrate
 dito: ang ipinagbabawal na id na naka-embed sa isang na-export na combo step ay sariling tahasang routing
 choice ng operator, at hindi isang bagay na kailangang alisin ng export boundary.
+
+## Listahan ng combo lamang (`exposeCombosOnly`)
+
+Isang hiwalay na boolean, na kailangan ding kusang paganahin at `false` bilang default, para sa mga deployment kung saan combo ang mga pampublikong model at backend lamang ang mga provider. Kapag `true`, pinananatili lamang ng pampublikong listahan (`GET /v1/models`, `GET /v1`, at iba pang `/v1` discovery route na gumagamit ng `getUnifiedModelsResponse()`) ang mga row na may `owned_by: "combo"`: mga combo ng user at ang mga built-in na `auto/*` combo (maliban kung itinago ng `hideAutoCombos`). Pareho ang row test nito at ng per-key na `catalogScope: "combos"`, at nalalapat pa rin sa ibabaw nito ang sariling allow/deny/scope filter ng key.
+
+I-toggle ito sa **Settings → Routing → Models API listing**, o gamit ang `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Tulad ng mga listahan sa itaas, ang ipinapahayag lamang nito ang binabago:
+
+- ipinapadala pa rin ang tahasang `provider/model` id, at nareresolba pa rin ito ng `GET /v1/models/{id}`;
+- hindi pinakikitid ang dashboard catalog (`GET /api/models/catalog`, na ginagamit ng mga model picker);
+- hindi ito kinokopya sa mga candidate pool ng `auto/*`, kaya nananatiling buo ang pool ng mga `auto/*` combo.

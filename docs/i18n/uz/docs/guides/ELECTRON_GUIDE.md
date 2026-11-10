@@ -61,6 +61,19 @@ OmniRoute **Electron 41** + **electron-builder 26.10** asosida yaratilgan, platf
 - `npm run build:mac-x64` / `build:mac-arm64` — bitta arxitektura uchun macOS yigʻmalari
 - `npm run pack` — mahalliy sinov uchun faqat katalogdan iborat yigʻma (oʻrnatuvchisiz)
 
+## Ixtiyoriy bajarilish paketlari
+
+Ish stoli yig‘ilmalari o‘rnatgichlari yonida ixtiyoriy bajarilish arxivlarini nashr etishi mumkin. O‘rnatilgan server tarkibida `optional-packs.index.json` bor (Windows va Linux’da `resources/app` ostida). `browser-runtime` yozuvi uchun `packs[].tarball` ni o‘qing va **aynan shu fayl nomini o‘sha relizdan** yuklab oling. Arxiv nomlari SHA-256 xeshini o‘z ichiga oladi; turli yig‘ilmalar turli arxiv talab qilishi mumkin. Yuklangan fayl nomini o‘zgartirmang.
+
+O‘rnatilgan ilova indeksini va tanlangan arxivni bitta katalogga ko‘chiring, keyin o‘sha reliz CLI’sidan foydalaning:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` arxiv fayli nomini emas, o‘rnatish va tekshirish holatini ko‘rsatadi. Qo‘shilgan indeks arxivni tanlaydi. O‘rnatish ochishdan oldin arxivning nazorat yig‘indisini, o‘rnatilgan paketni almashtirishdan oldin paketlar nazorat yig‘indilarini tekshiradi. U mahalliy fayllarni o‘qiydi; yo‘q arxivlarni yuklamaydi. O‘rnatgandan keyin ilovani qayta ishga tushiring. Relizda mos fayl bo‘lmasa, ixtiyoriy paket o‘sha reliz fayllari orqali mavjud emas.
+
 ## Katalog tuzilishi
 
 ```

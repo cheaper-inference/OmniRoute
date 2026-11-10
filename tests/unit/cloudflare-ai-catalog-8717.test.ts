@@ -53,3 +53,23 @@ test("Cloudflare Workers AI free catalog matches registry active models", () => 
     );
   }
 });
+
+// #17881: every chat model carries the Workers AI documented context window, so combos can
+// clamp their advertised window to the smallest member.
+test("Cloudflare Workers AI registry models carry their documented context window", () => {
+  const cfRegistry = REGISTRY["cloudflare-ai"];
+  const contextById = new Map(cfRegistry.models.map((m) => [m.id, m.contextLength]));
+
+  const expectedContext: Record<string, number> = {
+    "@cf/mistral/mistral-7b-instruct-v0.2-lora": 15000,
+    "@cf/qwen/qwen2.5-coder-32b-instruct": 32768,
+    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b": 80000,
+    "@cf/meta/llama-3.3-70b-instruct-fp8-fast": 24000,
+    "@cf/meta/llama-3.2-3b-instruct": 80000,
+    "@cf/qwen/qwq-32b": 24000,
+  };
+
+  for (const [id, contextLength] of Object.entries(expectedContext)) {
+    assert.equal(contextById.get(id), contextLength, `${id} contextLength`);
+  }
+});

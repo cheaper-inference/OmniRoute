@@ -1,6 +1,7 @@
 import {
   PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
   PROVIDER_SPECIFIC_SECRET_FIELDS,
+  providerSpecificSecretKeysIn,
 } from "@/lib/db/providers/providerSpecificDataSecrets";
 
 type JsonRecord = Record<string, unknown>;
@@ -92,6 +93,9 @@ export function summarizeProviderConnectionForAudit(connection: unknown) {
   if (Object.keys(providerSpecificData).length > 0) {
     const sanitizedProviderSpecificData = { ...providerSpecificData };
     for (const field of AUDIT_SENSITIVE_METADATA_FIELDS) {
+      delete sanitizedProviderSpecificData[field];
+    }
+    for (const field of providerSpecificSecretKeysIn(providerSpecificData)) {
       delete sanitizedProviderSpecificData[field];
     }
     if (sanitizedProviderSpecificData.browserCdpEndpoint) {

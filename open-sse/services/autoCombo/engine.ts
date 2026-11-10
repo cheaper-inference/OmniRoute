@@ -22,6 +22,7 @@ import { getModePack } from "./modePacks";
 import { getSelfHealingManager } from "./selfHealing";
 import { classifyPromptIntent } from "../intentClassifier";
 import { mapIntentToTaskFitnessKey } from "./intentTaskFitnessMap";
+import type { RoutingHint } from "../manifestAdapter";
 
 export interface AutoComboConfig {
   id: string;
@@ -42,6 +43,7 @@ export interface AutoComboConfig {
   budgetFallback?: "cheapest" | "strict";
   estimatedInputTokens?: number; // tokens the budget is computed against (default 1000)
   explorationRate: number; // 0.05 = 5% exploratory
+  manifestHint?: RoutingHint | null;
   /** If set, RouterStrategy name to use for selection ('rules' | 'cost' | 'latency') */
   routerStrategy?: string;
 }
@@ -287,7 +289,7 @@ export function selectProvider(
   }
 
   // Score all providers (using classified intent if available)
-  const scored = scorePool(pool, effectiveTaskType, weights, getTaskFitness);
+  const scored = scorePool(pool, effectiveTaskType, weights, getTaskFitness, config.manifestHint);
 
   // Apply self-healing re-evaluation with actual scores
   const finalCandidates = scored.filter((s) => {

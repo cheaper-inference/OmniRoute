@@ -198,6 +198,12 @@ palvelinprosessin.
 | `/api/providers/health-autopilot/actions` | Suorittaa autopilotin korjaustoimenpiteitä                                       |
 | `/api/settings/obsidian`                  | Luo uudelleenkäytettävät WebDAV-tunnukset mille tahansa holvin juurihakemistolle |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                     |
+| `/api/cli-tools/apply`                    | Kirjoittaa ylläpitäjän CLI-asetukset uudelleen isäntäkoneella                    |
+| `/api/cli-tools/guide-settings`           | Kirjoittaa ohjeisiin perustuvat CLI-asetustiedostot                              |
+| `/api/cli-tools/hermes-agent-settings`    | Kirjoittaa Hermes-agentin asetukset                                              |
+| `/api/cli-tools/backups`                  | Palauttaa ja poistaa CLI-asetusten varmuuskopioita                               |
+| `/api/log-export`                         | Lähettää kutsulokit määritettyyn kohteeseen                                      |
+| `/api/restart`                            | Käynnistää palvelinprosessin uudelleen                                           |
 
 **Vastaus rikkomukseen:** `401 Authentication required`
 

@@ -1,3 +1,4 @@
+import { modelPatternMatches } from "@/lib/db/apiKeys/modelPermissions";
 import { isComboNameAllowedForKey, type ApiKeyMetadata } from "@/shared/utils/apiKeyPolicy";
 
 type CatalogKeyFilterDeps = {
@@ -18,11 +19,17 @@ type CatalogKeyFilterDeps = {
  * `root = deepseek/deepseek-v4-flash`, which the permission check would read as the
  * deepseek provider's model and list for a key that never allowed cline (#15409).
  * A row whose `id` is blocked is never brought back through its root.
+ *
+ * The root fallback also requires a bare allowlist entry that matches the root. The
+ * permission check expands a bare `claude-*` name to `cc/<name>` when unprefixed
+ * Claude models prefer Claude Code, so without this a `cc/*` key listed every other
+ * provider's `claude-*` row (`dva/claude-opus-5-high`), and each of them was refused
+ * at dispatch, which checks only the requested id.
  */
 export async function isCatalogModelAllowedForKey(
   apiKey: string,
   model: { id?: unknown; root?: unknown },
-  blockedModels: string[] | null | undefined,
+  keyMeta: Pick<ApiKeyMetadata, "allowedModels" | "blockedModels">,
   deps?: CatalogKeyFilterDeps
 ): Promise<boolean> {
   deps ??= await import("@/lib/db/apiKeys");
@@ -31,8 +38,17 @@ export async function isCatalogModelAllowedForKey(
 
   const root = typeof model.root === "string" ? model.root : "";
   if (!root || root === id || root.includes("/")) return false;
-  if (await deps.isModelBlockedByPatterns(blockedModels, id)) return false;
+  if (!hasBareAllowlistMatch(keyMeta.allowedModels, root)) return false;
+  if (await deps.isModelBlockedByPatterns(keyMeta.blockedModels, id)) return false;
   return deps.isModelAllowedForKey(apiKey, root);
+}
+
+function hasBareAllowlistMatch(allowedModels: string[] | null | undefined, root: string): boolean {
+  return (
+    allowedModels?.some(
+      (pattern) => !pattern.includes("/") && modelPatternMatches(pattern, [root])
+    ) ?? false
+  );
 }
 
 /** Filter the ordered catalog using one permission module and the builder's yield cadence. */
@@ -41,7 +57,10 @@ export async function filterCatalogModelsForKey<
 >(
   apiKey: string,
   models: T[],
-  keyMeta: Pick<ApiKeyMetadata, "catalogScope" | "allowedCombos" | "blockedModels" | "forcedModel">,
+  keyMeta: Pick<
+    ApiKeyMetadata,
+    "catalogScope" | "allowedCombos" | "allowedModels" | "blockedModels" | "forcedModel"
+  >,
   deps: CatalogKeyFilterDeps,
   maybeYieldCatalogBuild: () => Promise<void>
 ): Promise<T[]> {
@@ -76,7 +95,7 @@ export async function filterCatalogModelsForKey<
       continue;
     }
     // m.id decides; a bare m.root also matches a bare allowlist entry (#781, #15409).
-    if (await isCatalogModelAllowedForKey(apiKey, m, keyMeta.blockedModels, deps)) {
+    if (await isCatalogModelAllowedForKey(apiKey, m, keyMeta, deps)) {
       filtered.push(m);
     }
   }

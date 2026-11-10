@@ -191,6 +191,12 @@ işlemini sonlandırabilmesi anlamına gelir.
 | `/api/providers/health-autopilot/actions` | Otomatik pilot iyileştirme eylemlerini yürütür                                       |
 | `/api/settings/obsidian`                  | Herhangi bir kasa kökü için yeniden kullanılabilir WebDAV kimlik bilgileri oluşturur |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                         |
+| `/api/cli-tools/apply`                    | Operatörün ana makinedeki CLI yapılandırmasını yeniden yazar                         |
+| `/api/cli-tools/guide-settings`           | Kılavuza dayalı CLI yapılandırma dosyalarını yazar                                   |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes aracısının yapılandırmasını yazar                                             |
+| `/api/cli-tools/backups`                  | CLI yapılandırma yedeklerini geri yükler ve siler                                    |
+| `/api/log-export`                         | Çağrı günlüklerini yapılandırılmış hedefe gönderir                                   |
+| `/api/restart`                            | Sunucu sürecini yeniden başlatır                                                     |
 
 **İhlal durumundaki yanıt:** `401 Authentication required`
 

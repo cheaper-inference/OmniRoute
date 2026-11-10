@@ -64,6 +64,19 @@ Ibi-iṣẹ́ `electron/` tún ń pèsè:
 - `npm run build:mac-x64` / `build:mac-arm64` — àwọn ìkọ́lé macOS fún ìrísí-ẹ̀rọ kan ṣoṣo
 - `npm run pack` — ìkọ́lé àkójọpọ̀ fáìlì nìkan fún ìdánwò agbègbè (kò sí afisípò)
 
+## Runtime pack àṣàyàn
+
+Desktop build lè tú runtime archive àṣàyàn jáde pẹ̀lú installer wọn. Server payload tí a fi sílẹ̀ ní `optional-packs.index.json` (lábẹ́ `resources/app` lórí Windows àti Linux). Fún entry `browser-runtime`, ka `packs[].tarball`, kí o sì gba **orúkọ fáìlì yẹn gan-an láti release kan náà**. Orúkọ archive ní SHA-256 digest; build tó yàtọ̀ lè nílò archive tó yàtọ̀. Má yí orúkọ fáìlì tí o gbà padà.
+
+Da index app tí a fi sílẹ̀ àti archive tí a yàn sínú directory kan, lẹ́yìn náà lo CLI láti release kan náà:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` ń fi ipò fífi sílẹ̀ àti ìfìdímúlẹ̀ hàn, kì í ṣe orúkọ fáìlì archive. Index tí a so mọ́ ọn ló ń yan archive. Fífi sílẹ̀ ń ṣàyẹ̀wò checksum archive kí ó tó tú ohun inú rẹ̀ jáde, àti checksum package kí ó tó rọ́pò pack tí a fi sílẹ̀. Ó ń ka fáìlì abẹ́lé; kò gba archive tó sọnù láti nẹ́tíwọ́ọ̀kì. Tún application bẹ̀rẹ̀ lẹ́yìn fífi sílẹ̀. Bí release kò bá ní asset tó bá a mu, pack àṣàyàn náà kò sí nínú asset release yẹn.
+
 ## Ìṣètò Àwọn Àpòjọ Ìwé
 
 ```

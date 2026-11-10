@@ -181,10 +181,28 @@ export function extractUsageFromResponse(responseBody, provider) {
     // Gemini reports thoughts outside candidates. Fold them into completion so
     // every provider keeps reasoning as a subset of completion tokens.
     const thoughts = usageMetadata.thoughtsTokenCount || 0;
+    const promptTokens = usageMetadata.promptTokenCount || 0;
+    const reportedCachedTokens = usageMetadata.cachedContentTokenCount;
+    const hasCachedCount = Object.prototype.hasOwnProperty.call(
+      usageMetadata,
+      "cachedContentTokenCount"
+    );
+    const hasValidCachedTokens =
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= promptTokens;
     return {
-      prompt_tokens: usageMetadata.promptTokenCount || 0,
+      prompt_tokens: promptTokens,
       completion_tokens: (usageMetadata.candidatesTokenCount || 0) + thoughts,
-      cached_tokens: usageMetadata.cachedContentTokenCount || 0,
+      ...(hasValidCachedTokens ? { cached_tokens: reportedCachedTokens } : {}),
+      cache_evidence: !hasCachedCount
+        ? "unreported"
+        : hasValidCachedTokens
+          ? reportedCachedTokens > 0
+            ? "hit"
+            : "miss"
+          : "invalid",
       reasoning_tokens: thoughts,
     };
   }

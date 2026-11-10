@@ -4,37 +4,27 @@
 
 ---
 
-Pool tí a gbàlejò fúnra wa ń ṣiṣẹ́ lórí ẹ̀rọ **.113** (`tomni-proxmox-113`). Láti 2026-10-18, runner
-OmniRoute kọ̀ọ̀kan ní **ipa kan**, label kan, àti ìpín memory/CPU tí a ṣe ní ìwọ̀n iṣẹ́ tí workload rẹ̀
-fi hàn. Slot Turbopack ń gba ohun tí build náà nílò; a ṣe àwọn slot yòókù ní ìwọ̀n peak tí a
-wọn fún wọn. Ẹ̀rọ náà máa ń ṣe overcommit nìkan nígbà tí build Turbopack bá ṣẹlẹ̀ lẹ́ẹ̀kan náà pẹ̀lú build
-webpack Release-Green àti iṣẹ́ lint kan; swap host (16 GB) ń gba èyí, àti nítorí pé àwọn Build pull-request ń ṣiṣẹ́
-lórí hosted runner, slot Turbopack kì í ṣiṣẹ́ ní ọ̀pọ̀ jù lọ àkókò:
+Awọn ara-ti gbalejo pool nṣiṣẹ lori awọn **.113** apoti (`tomni-proxmox-113`). Lati ọdun 2026-10-18 kọọkan olusare OmniRoute ni **ipa kan** , aami kan, ati isuna memory/CPU kan ti o ni iwọn si kini iwuwo iṣẹ rẹ. Iho Turbopack gba ohun ti Kọ aini; awọn iho miiran jẹ iwọn si awọn oke giga wọn. Awọn apoti nikan overcommits nigbati a Turbopack Kọ coincides pẹlu kan Tu-Green webpack Kọ ati ki o kan lint ise; swap agbalejo (16 GB) gba iyẹn, ati nitori fa-ibeere Kọ ṣiṣe ti gbalejo, Iho Turbopack ko ṣiṣẹ ni ọpọlọpọ igba:
 
-| runner               | label                           | ipa                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
-| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Àwọn build Turbopack: `ci.yml` `Build` (push/dispatch nìkan), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build a11y alẹ́ | 56 GB / 60 GB (swap 0)     | 1600 %       |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
-| `omniroute-113-2`    | `omni-light`                    | àwọn iṣẹ́ alẹ́ (Schemathesis, promptfoo, garak, k6) àti `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
-| `omniroute-113`      | `omni-light`                    | pool kan náà bí èyí tó wà lókè                                                                                                                    | 8 GB / 12 GB               | 400 %        |
-| OmniHeuris, OmniMind | (àwọn repo wọn)                 | Dependabot nìkan (peak 155 MB kọ̀ọ̀kan, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200 % kọ̀ọ̀kan |
+| runner               | label                           | ipa                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Àwọn build Turbopack: `ci.yml` `Build` (push/dispatch nìkan), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build a11y alẹ́ | 56 GB / 60 GB (swap 0)     | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | àwọn iṣẹ́ alẹ́ (Schemathesis, promptfoo, garak, k6) àti `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
+| `omniroute-113`      | `omni-light`                    | pool kan náà bí èyí tó wà lókè                                                                                                                    | 8 GB / 12 GB               | 400 %       |
+| OmniHeuris, OmniMind | (apakan wọn)                    | Dependabot nikan (tente 155 MB kọọkan, 2026-10-18)                                                                                                | 4 GB / 6 GB                | 200% kọọkan |
 
-A wọn ní 2026-10-18:
+Iwọn 2026-10-18:
 
-| ohun àmúlò | iye                        | ohun tí ó túmọ̀ sí fún ìṣètò àkókò iṣẹ́                                                                                                                                                                                                                                                                                                                                  |
-| ---------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU  | **78 GB / 32 cores**       | build production Turbopack kan dé peak 49 GB láìsí cap (`tests/unit/ci-build-bundler-webpack.test.ts`); lórí Next 16.3.8, phase compile nìkan ń di ~40 GB mú (36 GB RSS nínú `next-build` pẹ̀lú loader worker 17 ní 3 GB, tí a wọn ní 2026-10-18); build webpack kan wà ní ~14–16 GB. Build Turbopack kan + build webpack kan lè wọ̀ papọ̀; build Turbopack méjì kò lè wọ̀ |
-| swap       | 16 GB                      | `omniroute-113-5` ń ṣiṣẹ́ pẹ̀lú swap tí a pa (`MemorySwapMax=0`), nítorí náà build tí ó jáde kúrò ní ìṣàkóso ni a máa gé ní cap rẹ̀ dípò kí ó fi ẹ̀rọ náà ṣe swap                                                                                                                                                                                                          |
-| `/tmp`     | **12 GB tmpfs = RAM**      | ohunkóhun tí a fi síbẹ̀ jẹ́ memory; a máa ń pa àwọn ohun tó ṣẹ́kù rẹ́ lẹ́yìn 3 h                                                                                                                                                                                                                                                                                            |
-| CPU        | a rí load 60 lórí 32 cores | ṣáájú àwọn quota náà, build Turbopack kan (~1166 % CPU) pẹ̀lú suite coverage kan lórí ẹ̀rọ kan náà mú kí àwọn heartbeat listener yòókù má rí resource tó tó (`The self-hosted runner lost communication`, #16853)                                                                                                                                                        |
-| runners    | **6 listeners**            | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` wà ní disabled (`systemctl enable --now` máa ń mú ọ̀kan padà)                                                                                                                                                                                                                                           |
+| ohun àmúlò | iye                                   | ohun tí ó túmọ̀ sí fún ìṣètò àkókò iṣẹ́                                                                                                                                                                                                                                                                                                        |
+| ---------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU  | **78 GB / 32 ohun kohun**             | iṣelọpọ Turbopack ti o ga julọ ni 49 GB uncapped (`tests/unit/ci-build-bundler-webpack.test.ts`); lori Next 16.3.8 alakoso akopọ nikan ni o ni ~ 40 GB (36 GB RSS ni `next-build` pẹlu awọn oniṣẹ agberu 17 ni 3 GB, ti a ṣewọn 2026-10-18); apamọ wẹẹbu kan kọ ni ~ 14–16 GB. Ọkan Turbopack + ọkan webpack Kọ fit jọ; meji Turbopack kọ ko |
+| siwopu     | 16 GB                                 | `omniroute-113-5` nṣiṣẹ pẹlu swap pa (`MemorySwapMax=0`) nitori naa a ti ge ile ti o salọ ni fila rẹ dipo ti yi apoti naa pada.                                                                                                                                                                                                              |
+| `/tmp`     | **12 GB tmpfs = RAM**                 | ohunkóhun tí a fi síbẹ̀ jẹ́ memory; a máa ń pa àwọn ohun tó ṣẹ́kù rẹ́ lẹ́yìn 3 h                                                                                                                                                                                                                                                                  |
+| CPU        | fifuye 60 lori 32 ohun kohun šakiyesi | ṣaaju ki awọn ipin, ọkan Turbopack kọ (~ 1166% CPU) pẹlu kan agbegbe suite lori kanna apoti ebi pa awọn miiran awọn olutẹtisi' heartbeats (`The self-hosted runner lost communication`, #16853)                                                                                                                                              |
+| asare      | **7 awọn olutẹtisi** (2026-10-28)     | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` tun gbe `omni-build`; `omniroute-113-3/-4/-8` ti paarẹ lati ibi ipamọ (2026-10-28)                                                                                                                                                                                                    |
 
-Àwọn limit náà wà nínú `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ti unit kọ̀ọ̀kan
-(a pa àwọn iye tẹ́lẹ̀ mọ́ gẹ́gẹ́ bí `override.conf.bak-20261018`), a sì lò wọ́n láìdá iṣẹ́ dúró pẹ̀lú
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — kò sí restart, nítorí náà kò sí
-iṣẹ́ tó ń ṣiṣẹ́ tí a fọwọ́ kàn. A ń yí àwọn label padà nípasẹ̀ API àwọn runner
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), láìdá iṣẹ́ dúró pẹ̀lú.
+Awọn ifilelẹ naa n gbe ni `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` kọọkan (awọn iye iṣaaju ti a tọju bi `override.conf.bak-20261018`) ati pe wọn lo laaye pẹlu `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ko tun bẹrẹ, nitorinaa ko fi ọwọ kan iṣẹ ṣiṣe. Awọn aami ti wa ni iyipada nipasẹ awọn asare API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), tun gbe.
 
 ## Fi janitor sílẹ̀ (ẹ̀ẹ̀kan ṣoṣo, lórí ẹ̀rọ náà)
 
@@ -42,7 +32,7 @@ iṣẹ́ tó ń ṣiṣẹ́ tí a fọwọ́ kàn. A ń yí àwọn label pad�
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): ní gbogbo ìṣẹ́jú 30, kọ àkọsílẹ̀ sí /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 A nílò `lsof`: janitor náà máa ń fi àwòrán-ipò kan ṣoṣo ti àwọn fáìlì tí ó ṣí sílẹ̀
@@ -127,9 +117,17 @@ sí i — tún **runner kan ṣoṣo** bẹ̀rẹ̀ lẹ́ẹ̀kan, nígbà tí 
   `omniroute-113` ní `MemoryHigh=4G` títí di 2026-10-18 — ìkọ́ promptfoo fi ìṣẹ́jú 54 kọjá
   níbẹ̀ nípa jíjẹ́ kí a máa gba memory padà; 8 GB yọ ìdínwọ́ náà kúrò.
 - **Àwọn listener díẹ̀ ní ìmọ̀ọ́mọ̀.** A pa unit OmniRoute mẹ́rin ní 2026-08-29 — listener
-  àfikún kọ̀ọ̀kan jẹ́ tenant míràn fún ìṣúná memory tó wà lókè. Òpin janitor jẹ́ 6
-  (`MAX_ACTIVE_RUNNERS=6` nínú cron): ó ń ka gbogbo `Runner.Listener` lórí ẹ̀rọ náà,
-  OmniHeuris + OmniMind sì ń fi méjì kún mẹ́rin tiwa.
+  àfikún kọ̀ọ̀kan jẹ́ tenant míràn fún ìṣúná memory tó wà lókè. Òpin janitor jẹ́ 8
+  (`MAX_ACTIVE_RUNNERS=8` nínú cron): ó ń ka gbogbo `Runner.Listener` lórí ẹ̀rọ náà,
+  OmniHeuris + OmniMind sì ń fi méjì kún márùn-ún tiwa.
+- **Àwọn iṣẹ́ Unit àti Vitest ń wà lórí gbígbàlejò.** `ci.yml` máa ń fi àwọn shard unit rẹ̀ àti iṣẹ́ Vitest ránṣẹ́ sí
+  `[self-hosted, omni-ci]` kìkì nígbà tí oniyipada repository `vars.USE_VPS_TEST_RUNNER` bá jẹ́
+  `true`, àti nígbà náà pàápàá fún àwọn ìṣiṣẹ́ `pull_request` láti inú repository kan náà nìkan; àwọn fork, `merge_group`
+  àti àwọn push ń wà lórí `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Oniyipada náà jẹ́
+  `false`. Ní 2026-10-28, listeners `omni-ci` mẹ́ta tí ó ní core 4 gba 250–270 s fún `npm ci`, gbogbo
+  shard unit sì dé òpin iṣẹ́ ìṣẹ́jú 30, ní ìfiwéra pẹ̀lú ~634 s fún shard gbígbàlejò, nígbà tí ẹrù ẹ̀rọ náà wà ní
+  17–24. A ti pa àwọn listeners náà rẹ́. Má ṣe tan oniyipada náà padà láìsí listeners tí ìwọ̀n wọn tó fún
+  shard unit kan.
 - **Má ṣe fọ `/tmp` tàbí `_work` mọ́ pẹ̀lú ọwọ́ nígbà tí runner èyíkéyìí bá ń ṣiṣẹ́.**
   Ìlànà ṣíṣe àyẹ̀wò-lẹ́yìn-náà-píparẹ́ tó ní àlàfo láàárín àwọn ìgbésẹ̀ méjèèjì ni ó mú kí
   iṣẹ́ Build tó ń ṣiṣẹ́ pàdánù `_work` rẹ̀ ní 2026-08-27. Janitor ń ṣe àyẹ̀wò àti ìyọkúrò
@@ -144,8 +142,10 @@ sí i — tún **runner kan ṣoṣo** bẹ̀rẹ̀ lẹ́ẹ̀kan, nígbà tí 
 
 ## Ọ̀nà tí a gbàlejò (àwọn runner tí GitHub gbàlejò)
 
-Àkọọ́lẹ̀ náà wà lórí ètò **Pro**: **iṣẹ́ gbígbàlejò 40 tí ó lè ṣiṣẹ́ lẹ́ẹ̀kan náà**, tí gbogbo àyẹ̀wò PR,
-gbogbo ìṣàn-iṣẹ́ tí push ń mú ṣiṣẹ́ àti ètò àìrídìmú CodeQL ń pín. Gẹ́gẹ́ bí a ṣe wọn án ní 2026-10-18 nígbà
+Repository náà jẹ́ ti àjọ `cheaper-inference`, lórí ètò **Team**: **iṣẹ́ gbígbàlejò 60
+tí ó lè ṣiṣẹ́ lẹ́ẹ̀kan náà**, tí gbogbo repository nínú àjọ náà, gbogbo àyẹ̀wò PR,
+gbogbo ìṣàn-iṣẹ́ tí push ń mú ṣiṣẹ́ àti ètò àìrídìmú CodeQL ń pín. A wọn àwọn nọ́ńbà tó wà nísàlẹ̀ lórí
+ètò **Pro** (iṣẹ́ gbígbàlejò 40 tí ó lè ṣiṣẹ́ lẹ́ẹ̀kan náà). Gẹ́gẹ́ bí a ṣe wọn án ní 2026-10-18 nígbà
 ìpolongo ìdapọ̀ (~ìdapọ̀ 10/wákàtí lórí `release/v3.8.52`): **ìṣiṣẹ́ ìṣàn-iṣẹ́ 2,500 ni a ṣẹ̀dá láàárín
 24 h**, push 44 sí ẹ̀ka náà láàárín 6 h, **iṣẹ́ gbígbàlejò 106 dúró ní ìlà** nígbà tí àwọn àyẹ̀wò PR dúró fún
 ọ̀pọ̀ wákàtí tí a sì dapọ̀ àwọn PR láìsí wọn. Ìṣàn-iṣẹ́ mẹ́sàn-án bẹ̀rẹ̀ lórí gbogbo push sí ẹ̀ka náà:

@@ -118,18 +118,18 @@ Tilgang via: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Oppsett av leverandører
+## 📖 Leverandøroppsett
 
-For å masselegge til API-nøkkeltilkoblinger fra en CSV- eller JSON-fil bruker du **Kontrollpanel → Leverandører → Importer fra fil**. Kolonnene er posisjonsbaserte (`provider,name,apiKey,baseUrl,priority`); `provider` må allerede finnes som en administrert leverandør eller en kompatibel node. Se [Importer leverandører fra en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
+Hvis du vil legge til API-nøkkeltilkoblinger i bulk fra en CSV- eller JSON-fil, bruker du **Dashboard → Providers → Import from file**. Kolonnene er posisjonelle (`provider,name,apiKey,baseUrl,priority`); `provider` må allerede finnes som en administrert leverandør eller en kompatibel node. Se [Importer leverandører fra en CSV- eller JSON-fil](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abonnementsleverandører
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Kontrollpanel → Leverandører → Koble til Claude Code
-→ OAuth-innlogging → Automatisk oppdatering av token
-→ Sporing av kvoter per 5 timer + uke
+Dashboard → Providers → Connect Claude Code
+→ OAuth-pålogging → Automatisk tokenfornyelse
+→ Sporing av 5-timers- og ukeskvote
 
 Modeller:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modeller:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profftips:** Bruk Opus til komplekse oppgaver og Sonnet for hastighet. OmniRoute sporer kvoten per modell!
+**Profftips:** Bruk Opus til komplekse oppgaver og Sonnet når hastighet er viktig. OmniRoute sporer kvoten per modell!
 
-Ingen nettleser på OmniRoute-verten? Kjør `claude setup-token` hvor som helst der Claude Code er pålogget, og lim inn tokenet med ett års gyldighet i fanen **Setup Token**. Se [Claude Code med et oppsett-token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Har du ingen nettleser på OmniRoute-verten? Kjør `claude setup-token` hvor som helst der du er logget inn i Claude Code, og lim inn ettårstokenet i fanen **Setup Token**. Se [Claude Code med et oppsettstoken](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Ruter som er kompatible med Claude og Claude Code, beholder tenkeinnsatsen `max` for Opus- og Sonnet-modeller. Haiku-modeller godtar ikke innsatsnivået `max`, så OmniRoute nedgraderer denne forespørselen til et høyt tenkebudsjett før den sendes oppstrøms.
+Claude- og Claude Code-kompatible ruter bevarer `max`-tenkeinnsats for Opus- og Sonnet-
+modeller. Haiku-modeller godtar ikke `max`-innsatsnivået, så OmniRoute nedgraderer denne
+forespørselen til et høyt tenkebudsjett før den sendes videre.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Kontrollpanel → Leverandører → Koble til Codex
-→ OAuth-innlogging (port 1455)
-→ Tilbakestilling per 5 timer + uke
+Dashboard → Providers → Connect Codex
+→ OAuth-pålogging (port 1455)
+→ 5-timers- og ukentlig tilbakestilling
 
 Modeller:
   cx/gpt-5.5
@@ -160,7 +162,7 @@ Modeller:
 #### GitHub Copilot
 
 ```bash
-Kontrollpanel → Leverandører → Koble til GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth via GitHub
 → Månedlig tilbakestilling (den 1. i måneden)
 
@@ -172,55 +174,72 @@ Modeller:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI-kreditter (tokenbasert fakturering).** Når GitHub rapporterer `credits_used` for
+kontoen, viser kortet for leverandørgrenser en rad for **AI Credits** med antallet kreditter
+som er brukt i den gjeldende faktureringsperioden, også på ubegrensede organisasjonsabonnementer.
+
+**Lokal grense for AI-kreditter.** Rediger en GitHub-tilkobling og angi **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Et tomt felt deaktiverer den; `0`
+hopper alltid over tilkoblingen. Når den siste bruksavlesningen er lik eller høyere enn grensen,
+hopper kontovalg over tilkoblingen, og rutingen faller tilbake til de andre tilkoblingene dine,
+på samme måte som ved et avskjæringspunkt for en kvotepolicy. Kontrollene bruker bruken som den
+periodiske kvoteoppdateringen allerede samler inn — den kaller aldri GitHub under behandlingen av
+forespørselen — og er utformet for å tillate gjennomgang: en manglende eller foreldet avlesning
+(eldre enn 15 minutter, eller fra en faktureringsperiode som allerede er tilbakestilt) blokkerer
+ikke tilkoblingen. Dette er en lokal sikkerhetsmekanisme, **ikke en garantert øvre grense for
+forbruk**: Forsinkelser i GitHubs rapportering, oppdateringsintervallet, forespørsler som allerede
+er under behandling, og bruk utenfor OmniRoute kan føre til at grensen overskrides. Bruk GitHubs
+egne forbruksreguleringer for en absolutt grense.
+
 ### 💰 Rimelige leverandører
 
 #### GLM-4.7 (Daglig tilbakestilling, $0.6/1M)
 
 1. Registrer deg: [Zhipu AI](https://open.bigmodel.cn)
 2. Hent API-nøkkelen fra Coding Plan
-3. Kontrollpanel → Legg til API-nøkkel: Leverandør: `glm`, API-nøkkel: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
 **Bruk:** `glm/glm-4.7` — **Profftips:** Coding Plan tilbyr 3× kvote til 1/7 av kostnaden! Tilbakestilles daglig kl. 10:00.
 
-#### MiniMax M2.1 (Tilbakestilling hver 5. time, $0.20/1M)
+#### MiniMax M2.1 (5-timers tilbakestilling, $0.20/1M)
 
 1. Registrer deg: [MiniMax](https://www.minimax.io)
-2. Hent API-nøkkel → Kontrollpanel → Legg til API-nøkkel
+2. Hent API-nøkkelen → Dashboard → Add API Key
 
 **Bruk:** `minimax/MiniMax-M2.1` — **Profftips:** Det rimeligste alternativet for lang kontekst (1M tokens)!
 
 #### Kimi K2 ($9/måned fastpris)
 
 1. Abonner: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Hent API-nøkkel → Kontrollpanel → Legg til API-nøkkel
+2. Hent API-nøkkelen → Dashboard → Add API Key
 
 **Bruk:** `kimi/kimi-k2.5` — **Profftips:** Fastpris på $9/måned for 10M tokens = en effektiv kostnad på $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Registrer deg: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Opprett en Qianfan API-nøkkel → Kontrollpanel → Legg til API-nøkkel: Leverandør: `qianfan`
+2. Opprett en Qianfan API-nøkkel → Dashboard → Add API Key: Provider: `qianfan`
 
-**Bruk:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller en annen Qianfan-modell-ID som er kompatibel med OpenAI.
+**Bruk:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` eller en annen Qianfan OpenAI-kompatibel modell-ID.
 
-### 🆓 GRATIS leverandører
+### 🆓 GRATIS-leverandører
 
-Gratisleverandører uten autentisering har en bryter ved siden av **Ingen autentisering kreves** på leverandørsiden sin.
-Når den slås av, deaktiveres leverandøren, den fjernes fra de konfigurerte/kompakte leverandørvisningene, og
-modellene dens fjernes fra `/v1/models`.
+Leverandører uten autentisering har en bryter ved siden av **No authentication required** på leverandørsiden.
+Når den slås av, deaktiveres leverandøren, den fjernes fra visningene Providers configured/compact, og
+modellene fjernes fra `/v1/models`.
 
-#### Qoder (9 GRATIS modeller)
+#### Qoder (9 GRATIS-modeller)
 
 ```bash
-Kontrollpanel → Koble til Qoder → OAuth-innlogging → Tilgangen er underlagt leverandørens gjeldende grenser
+Dashboard → Connect Qoder → OAuth-pålogging → Tilgang avhenger av gjeldende leverandørgrenser
 
 Modeller: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude GRATIS)
+#### Kiro (GRATIS Claude)
 
 ```bash
-Kontrollpanel → Koble til Kiro → AWS Builder ID eller Google/GitHub → ~50 kreditter/måned
+Dashboard → Connect Kiro → AWS Builder ID eller Google/GitHub → ~50 kreditter/måned
 
 Modeller: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -342,19 +361,19 @@ Modell: cc/claude-opus-4-7
 ```bash
 npm install -g omniroute
 
-# Opprett konfigurasjonsmappe
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Opprett .env-fil (se .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Start serveren
+# Start server
 omniroute
-# Eller med egendefinert port:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-en laster automatisk `.env` fra `~/.omniroute/.env` eller `./.env`.
+CLI laster automatisk `.env` fra `~/.omniroute/.env` eller `./.env`.
 
 ### Systemstatusfeltmodus
 
@@ -612,9 +631,9 @@ Du finner en fullstendig oversikt over miljøvariabler i [README](../README.md).
 <details>
 <summary><b>Vis alle tilgjengelige modeller</b></summary>
 
-> Listen nedenfor er hentet fra `open-sse/config/providerRegistry.ts` for v3.8.0. Skyleverandørenes kataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — åpne **Kontrollpanel → Leverandører → [leverandør] → Tilgjengelige modeller** eller kall `GET /api/models/catalog` for å se hele den oppdaterte katalogen.
+> Listen nedenfor er kuratert fra `open-sse/config/providerRegistry.ts` for v3.8.0. Skykataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — åpne **Dashboard → Providers → [provider] → Available Models** for å se hele den oppdaterte katalogen, eller kall `GET /api/models/catalog`.
 >
-> Hvis den innebygde listen til en leverandør ikke lenger er oppdatert, bruker du **Importer fra /models** på denne siden (eller aktiverer **Automatisk synkronisering**) for å hente den oppdaterte katalogen fra oppstrømskilden. Dette ble verifisert i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym tilgang til Pollinations var fortsatt begrenset av oppstrømskilden under den samme testrunden.
+> Hvis en innebygd leverandørliste har kommet ut av synkronisering, kan du bruke **Import from /models** på denne siden (eller aktivere **Auto-Sync**) for å hente den oppdaterte katalogen fra oppstrømskilden. Dette ble verifisert i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym tilgang til Pollinations var fortsatt begrenset av oppstrømskilden under samme testrunde.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,7 +641,7 @@ Du finner en fullstendig oversikt over miljøvariabler i [README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — GRATIS OAuth: bruk den oppdaterte katalogen som vises under **Kontrollpanel → Leverandører → Kiro → Tilgjengelige modeller**. Tilgjengeligheten avhenger av kontoen og abonnementet.
+**Kiro (`kr/`)** — GRATIS OAuth: bruk den oppdaterte katalogen som vises under **Dashboard → Providers → Kiro → Available Models**. Tilgjengeligheten avhenger av kontoen og abonnementet.
 
 **Qoder (`if/`)** — GRATIS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +649,37 @@ Du finner en fullstendig oversikt over miljøvariabler i [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — fastpris på $9/mnd. eller betaling per bruk: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mnd fastpris eller etter bruk: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-nøkkel: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Ultrarask: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Innebygd Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-tilpasset: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Driftet i EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Driftet i EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Søkeforsterket: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Utvidet med søk: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Åpen kildekode: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Rask inferens: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — På wafer-skala: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-skala: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-fokusert: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Fokusert på RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — For virksomheter: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — For virksomheter: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkroniseres fortløpende fra Google for hver API-nøkkel — ingen statisk liste. Koble til en nøkkel under **Kontrollpanel → Leverandører**, og bruk deretter **Tilgjengelige modeller** for å importere den gjeldende katalogen (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkroniseres fortløpende per API-nøkkel fra Google — ingen statisk liste. Koble til en nøkkel i **Dashboard → Providers**, og bruk deretter **Available Models** for å importere den gjeldende katalogen (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andre kompatible leverandører** (utvalg): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (direktevidereformidlet katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver av dem vedlikeholder sin egen modelliste i `providerRegistry.ts` og kan synkroniseres automatisk når leverandøren tilbyr et `/models`-endepunkt.
+**Andre kompatible leverandører** (utvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (viderekoblet katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver av dem vedlikeholder sin egen modelliste i `providerRegistry.ts` og kan synkroniseres automatisk når leverandøren tilbyr et `/models`-endepunkt.
 
-**Merknad om modell-ID-er:** OmniRoute bruker leverandørens egne ID-er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Enkelte ID-er inneholder versjoner med punktum fordi det er formatet oppstrøms-API-et forventer. Hvis en modell ikke er oppført ovenfor, kjører du `omniroute models --search <term>` eller kaller `GET /api/models/catalog` for å bekrefte tilgjengeligheten.
+**Merknad om modell-ID-er:** OmniRoute bruker leverandørens opprinnelige ID-er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Noen ID-er inneholder versjoner med punktum fordi det er slik oppstrøms-API-et forventer dem. Hvis en modell ikke er oppført ovenfor, kan du kjøre `omniroute models --search <term>` eller sende en forespørsel til `GET /api/models/catalog` for å bekrefte tilgjengeligheten.
 
 </details>
 
@@ -725,6 +744,31 @@ Velg et unikt prefiks (`mygw`, `acme-proxy`). Hvis forespørsler til en egendefi
 feil som nevner en innebygd leverandør eller dens påloggingsopplysninger, må du kontrollere om nodens prefiks er
 reservert: Noder som ble lagret før denne regelen eksisterte, er fortsatt lagret, men prefikset deres ruter til
 den innebygde leverandøren. Rediger noden og gi den et nytt prefiks.
+
+#### Gateway-alternativer per tilkobling
+
+Disse nøklene legges i en tilkoblings `providerSpecificData` (for eksempel via
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (heltall, 1–1024) — for OpenAI-chatformatkompatible tilkoblinger der
+  gatewayen avviser lange verktøynavn. Lengre navn sendes som korte aliaser og gjenopprettes i
+  svaret.
+- `quotaEndpoint` — gatewayens endepunkt for kvoter/kreditter, som leses for kvotevisningen i kontrollpanelet og
+  kvotebevisst ruting. Fungerer både med OpenAI- og Anthropic-kompatible tilkoblinger. Hele strukturen
+  er dokumentert i `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### Sammenkobling av OmniRoute-noder
 

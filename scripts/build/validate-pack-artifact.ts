@@ -15,6 +15,7 @@ import {
 import { resolveNpmInvocation } from "./resolveNpmEntry.ts";
 import {
   PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
+  PACK_ARTIFACT_ALLOWED_PATH_MATCHERS,
   PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
   PACK_ARTIFACT_REQUIRED_PATHS,
   findMissingArtifactPaths,
@@ -147,6 +148,7 @@ try {
   const unexpectedPaths: string[] = findUnexpectedArtifactPaths(artifactPaths, {
     exactPaths: PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
     prefixPaths: PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
+    pathMatchers: PACK_ARTIFACT_ALLOWED_PATH_MATCHERS,
   });
   const missingRequiredPaths: string[] = POLICY_ONLY
     ? []

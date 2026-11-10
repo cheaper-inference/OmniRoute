@@ -12,7 +12,7 @@ const readJson = (name) => JSON.parse(read(name));
 const alias = "check:trivy-ignore-policy";
 const command = "node scripts/check/check-trivy-ignore-policy.mjs .trivyignore.yaml";
 const dockerCommand =
-  "node .ci-trivy-policy/scripts/ci/prepare-trivy-scan-policy.mjs .ci-trivy-policy/.trivyignore.yaml .trivyignore.yaml .ci-trivy-policy/effective.trivyignore.yaml";
+  "node .ci-trivy-policy/scripts/ci/prepare-trivy-scan-policy.mjs .ci-trivy-policy/.trivyignore.yaml .ci-trivy-candidate/.trivyignore.yaml .ci-trivy-policy/effective.trivyignore.yaml";
 const scripts = readJson("package.json").scripts;
 const manifest = readJson("config/quality/gate-manifest.json");
 const full = readJson("config/quality/release-green-static-profile.json");
@@ -131,4 +131,23 @@ test("removing the guard from the full inventory is detected against both workfl
 test("alias command drift cannot silently change what local profiles execute", () => {
   const changed = { ...scripts, [alias]: "node scripts/check/unreviewed-policy.mjs" };
   assert.ok(validateManifest(manifest, changed).length > 0);
+});
+
+test("historical scans select the image source policy independently of workflow tooling", () => {
+  const workflow = load(read(".github/workflows/docker-publish.yml"));
+  const source = workflow.jobs.build.steps.find(
+    (step) => step.name === "Checkout" && step.uses?.startsWith("actions/checkout@")
+  );
+  const steps = workflow.jobs.merge.steps;
+  const candidate = steps.findIndex((step) => step.with?.path === ".ci-trivy-candidate");
+  const tooling = steps.findIndex((step) => step.with?.path === ".ci-trivy-policy");
+  const guard = steps.findIndex((step) => step.run === dockerCommand);
+  assert.ok(candidate >= 0 && candidate < guard);
+  assert.ok(tooling >= 0 && tooling < guard);
+  assert.equal(steps[candidate].with.ref, source.with.ref.replace("|| ''", "|| github.sha"));
+  assert.equal(steps[tooling].with.ref, "${{ github.workflow_sha }}");
+  assert.equal(steps[candidate].with["persist-credentials"], false);
+  assert.equal(steps[candidate].with["sparse-checkout-cone-mode"], false);
+  assert.equal(steps[candidate].with["sparse-checkout"].trim(), "/.trivyignore.yaml");
+  assert.equal(steps[candidate].if, steps[guard].if);
 });

@@ -16,11 +16,11 @@ auto-fallback. Kowane umarni yana karanta kundin model na **live** daga OmniRout
 ke goyon bayansa. An bayyana a ƙasa umarnin da ke adana environment file na cikin kayan aikin har abada.
 
 Haka kuma akwai launcher na gama-gari — `omniroute run <target>` — wanda ke ƙaddamar da
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` ko `gemini` tare da shigar da
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` ko `whycodes` tare da shigar da
 env da ya dace, ba tare da rubuta wani config ko kaɗan ba. Targets da
 aliases nasu suna fitowa daga canonical manifest `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), sannan `omniroute completion` yana bayar da
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), sannan `omniroute completion` yana bayar da
 waɗannan target words da aka samo daga manifest. Tsofaffin launchers na kowane kayan aiki —
 `omniroute launch` (Claude Code) da `omniroute launch-codex` (Codex) — har yanzu suna
 nan.
@@ -83,7 +83,8 @@ uwar garken sannan ya rubuta daidaitawar a gida.
 | `omniroute setup-aider`    | Aider                                | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + yana buga tsarin umarnin env                                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Dukansu            |
 | `omniroute setup-qwen`     | Qwen Code                            | `~/.qwen/settings.json` — jerin V4 na `modelProviders.openai` + `OMNIROUTE_API_KEY` a cikin `~/.qwen/.env`                                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Dukansu            |
 | `omniroute setup-5dive`    | 5dive (rukunin agents)               | Babu komai a ƙarƙashin `$HOME` — yana rubuta **auth profile** na 5dive (`/var/lib/5dive/auth-profiles/<name>/`) ta hanyar `5dive agent auth set`; na root kawai, yana gudana a kan host ɗin rukunin | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Dukansu            |
-| `omniroute run <target>`   | Ƙaddamarwa a lokacin aiki (gabaɗaya) | Babu komai — yana ƙaddamar da `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` tare da env da args masu dacewa; Qwen da Gemini suna amfani da keɓantaccen home na wucin gadi             | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Dukansu            |
+| `omniroute setup-whycodes` | WhyCodes                             | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); path ɗin shi ne `$WHYCODES_HOME/config.toml` ko `~/.whycodes/config.toml`                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Dukansu            |
+| `omniroute run <target>`   | Ƙaddamarwa a lokacin aiki (gabaɗaya) | Babu komai — yana ƙaddamar da `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` tare da env da args masu dacewa; Qwen da Gemini suna amfani da keɓantaccen home na wucin gadi  | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Dukansu            |
 | `omniroute launch`         | Claude Code                          | Babu komai — yana ƙaddamar da `claude` tare da saka `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                     | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Dukansu            |
 | `omniroute launch-codex`   | OpenAI Codex CLI                     | Babu komai — yana ƙaddamar da `codex` tare da saka provider na `omniroute` ta hanyar flags na `-c`                                                                                                  | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Dukansu            |
 
@@ -99,14 +100,15 @@ Bayanan flags (an tabbatar da su a tushen command):
   filesystem ba. Akwai a kowane command na `setup-*` **sai** `setup-cursor`
   (wanda ba ya taɓa rubuta file).
 - `--model <id>` — wajibi ne (ko a zaɓa ta hulɗa) ga tools waɗanda ba su da
-  gano model ta atomatik: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Waɗannan tools
+  gano model ta atomatik: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Waɗannan tools
   kuma suna karɓar `--yes` don gudana ba tare da hulɗa ba (wanda a lokacin yake buƙatar `--model`).
   `setup-opencode` yana karɓar `--model` domin saita model na top-level na tsohuwa.
 - `--model <id>` a kan `omniroute run` yana bin haɗin kowane target na manifest
   (`bin/cli/cli-manifest.mjs`): **aider** yana karɓar `--model openai/<id>` sannan
   **opencode** `--model omniroute/<id>` (ana ƙara prefix ne kawai idan id
   bai riga yana ɗauke da shi ba); **qwen** da **gemini** suna karɓar id yadda yake;
-  **claude** yana samunsa ta `ANTHROPIC_MODEL`, **goose** ta `GOOSE_MODEL`, sannan
+  **claude** yana samunsa ta `ANTHROPIC_MODEL`, **goose** ta `GOOSE_MODEL`,
+  **whycodes** ta hanyar `-P omniroute -m <id>`, sannan
   **codex** ta args na `-c model_providers.omniroute.*`. **Qwen ne kaɗai run
   target da ke tilasta buƙatar `--model`** — `omniroute run qwen` ba tare da shi ba yana fita
   da `2` tare da kuskure bayyananne.
@@ -279,18 +281,19 @@ OmniRoute yana samar da mahadar OpenAI a `/v1`, mahadar Anthropic a tushen URL,
 da kuma mahadar Gemini ta asali a `/v1beta`. An saita kowace haɗawa bisa tsarin da
 kayan aikinta ke tsammani (an tabbatar da hakan a cikin lambar umarni):
 
-| Haɗawa                                                                     | Base URL da aka rubuta | `/v1`?                                         |
-| -------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | tushe                  | A'a — Cline yana ƙara `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | tushe                  | A'a — Goose yana ƙara hanyar                   |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | tushe                  | A'a — LiteLLM yana ƙara `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | tare da `/v1`          | E                                              |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | tare da `/v1`          | E                                              |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | tushe                  | A'a — Claude Code yana ƙara `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | tare da `/v1`          | E                                              |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | tare da `/v1`          | E                                              |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | tushe                  | A'a — SDK ɗin yana ƙara `/v1beta/models/…`     |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` a cikin bayanan tantancewa)            | tushe                  | A'a — Claude Code yana ƙara `/v1/messages`     |
+| Haɗawa                                                                     | Base URL da aka rubuta | `/v1`?                                                       |
+| -------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------ |
+| `setup-cline` (`openAiBaseUrl`)                                            | tushe                  | A'a — Cline yana ƙara `/v1/chat/completions`                 |
+| `setup-goose` (`OPENAI_HOST`)                                              | tushe                  | A'a — Goose yana ƙara hanyar                                 |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | tushe                  | A'a — LiteLLM yana ƙara `/v1/chat/completions`               |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | tare da `/v1`          | E                                                            |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | tare da `/v1`          | E                                                            |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | tushe                  | A'a — Claude Code yana ƙara `/v1/messages`                   |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | tare da `/v1`          | E                                                            |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | tare da `/v1`          | E                                                            |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | tushe                  | A'a — SDK ɗin yana ƙara `/v1beta/models/…`                   |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` a cikin bayanan tantancewa)            | tushe                  | A'a — Claude Code yana ƙara `/v1/messages`                   |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | tare da `/v1`          | E — WhyCodes yana aika buƙatun POST zuwa `/chat/completions` |
 
 ---
 

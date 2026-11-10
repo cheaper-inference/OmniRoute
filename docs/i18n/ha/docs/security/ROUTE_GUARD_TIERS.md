@@ -197,6 +197,12 @@ aikin server.
 | `/api/providers/health-autopilot/actions` | Yana aiwatar da matakan gyaran autopilot                          |
 | `/api/settings/obsidian`                  | Yana ƙirƙirar WebDAV creds masu sake amfani don kowace vault root |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                      |
+| `/api/cli-tools/apply`                    | Yana sake rubuta tsarin CLI na mai gudanarwa a kan host           |
+| `/api/cli-tools/guide-settings`           | Yana rubuta fayilolin tsarin CLI bisa jagora                      |
+| `/api/cli-tools/hermes-agent-settings`    | Yana rubuta tsarin wakilin Hermes                                 |
+| `/api/cli-tools/backups`                  | Yana dawo da kuma goge ajiyar tsarin CLI                          |
+| `/api/log-export`                         | Yana aika kundin kira zuwa wurin da aka saita                     |
+| `/api/restart`                            | Yana sake kunna aikin uwar garke                                  |
 
 **Amsa idan an karya doka:** `401 Authentication required`
 

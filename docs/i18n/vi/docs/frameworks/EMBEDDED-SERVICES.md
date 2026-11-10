@@ -5,8 +5,8 @@
 ---
 
 > **Phiên bản:** v3.8.44
-> **Cập nhật lần cuối:** 2026-09-16
-> **Đối tượng:** Các kỹ sư bổ sung, bảo trì hoặc gỡ lỗi các dịch vụ nhúng (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Cập nhật lần cuối:** 2026-10-28
+> **Đối tượng:** Kỹ sư thêm, bảo trì hoặc gỡ lỗi các dịch vụ nhúng (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Dịch vụ nhúng là các công cụ sidecar tiến trình được cài đặt cục bộ mà OmniRoute cài đặt, giám sát và
 cung cấp dưới dạng các đích định tuyến hạng nhất. Không giống các nhà cung cấp bên ngoài (được truy cập qua internet
@@ -31,7 +31,7 @@ bằng khóa API), dịch vụ nhúng chạy trên cùng máy với OmniRoute v�
 
 ### Tại sao cần các dịch vụ nhúng?
 
-Bảy dịch vụ được nhúng:
+Có tám dịch vụ nhúng:
 
 | Dịch vụ         | Gói npm                                           | Cổng mặc định | Mục đích                                                                                                                                                                                                                                                                                                                                              |
 | --------------- | ------------------------------------------------- | :-----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Bảy dịch vụ được nhúng:
 | **Dario**       | `@askalf/dario`                                   |     3456      | Proxy gói đăng ký Claude — phương án thay thế/dự phòng cho CLIProxyAPI đối với lưu lượng có định dạng Claude Code; khóa được chèn trở thành `DARIO_ADMIN_TOKEN`, bảo vệ mặt phẳng điều khiển OAuth `/admin/*` của dịch vụ                                                                                                                             |
 | **open-wa**     | `@open-wa/wa-automate`                            |     8323      | Tự động hóa WhatsApp Web (Chromium không giao diện qua Puppeteer). Chỉ được quản lý vòng đời — không phải mục tiêu định tuyến.                                                                                                                                                                                                                        |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                              |     20135     | Sidecar nén prompt — mô hình ONNX LLMLingua-2 thực (bản chuyển đổi JS/TS của thuật toán Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` gửi `/compress` đến dịch vụ này qua HTTP, rồi chuyển về backend luồng worker trong tiến trình khi sidecar ngừng hoạt động. Chỉ được quản lý vòng đời — không phải mục tiêu định tuyến. |
+| **sing-box**    | Tệp nhị phân từ bản phát hành GitHub (`singbox`)  |     20140     | Tiến trình phụ TPROXY hỗ trợ cơ chế chặn lưu lượng qua proxy trong suốt của `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Trình cài đặt tải bản phát hành đã ghim và xác minh tổng kiểm tra. Chỉ quản lý vòng đời — không phải đích định tuyến và không làm proxy LLM.                                                                                |
 
-Cả bảy dịch vụ đều tuân theo cùng một mô hình giám sát:
+Cả tám đều theo cùng một mô hình giám sát:
 
 - OmniRoute cài đặt chúng trong `DATA_DIR/services/{name}/` (cách ly với `package.json` của chính OmniRoute)
 - OmniRoute khởi chạy và giám sát chúng dưới dạng tiến trình con
@@ -579,7 +580,27 @@ phản hồi không tạo ra thay đổi) đều quay về backend worker-thread
 
 ---
 
-### 4.8 Proxy ngược (nhúng dashboard 9Router)
+### 4.8 Các endpoint sing-box (8 tuyến)
+
+sing-box có cấu trúc endpoint giống Mux — không có tuyến `rotate-key` và không chèn khóa API (`needsApiKey: false` trong `bootstrap.ts`). Nó chỉ được quản lý vòng đời, tuyệt đối không phải nhà cung cấp định tuyến hay LLM. `install()` tải tệp nhị phân chính thức từ bản phát hành GitHub (`SagerNet/sing-box`) cho phiên bản đã ghim (`SINGBOX_PINNED_VERSION` trong `src/lib/services/installers/singbox.ts`) và xác minh SHA256 bằng tổng kiểm tra nhúng trong cùng tệp mã nguồn trước khi ghi xuống đĩa. Mọi yêu cầu phiên bản khác đều bị từ chối.
+
+| Phương thức | Đường dẫn                                    | Mô tả                                                                          |
+| ----------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `POST`      | `/api/services/singbox/install`              | Tải và xác minh bản phát hành sing-box đã ghim                                 |
+| `POST`      | `/api/services/singbox/start`                | Khởi động sing-box (`sing-box run -c config.json`)                             |
+| `POST`      | `/api/services/singbox/stop`                 | Dừng sing-box                                                                  |
+| `POST`      | `/api/services/singbox/restart`              | Khởi động lại sing-box                                                         |
+| `POST`      | `/api/services/singbox/update`               | Xác minh lại hoặc cài lại bản phát hành đã ghim                                |
+| `GET`       | `/api/services/singbox/status`               | Trạng thái hiện tại và trạng thái trong cơ sở dữ liệu                          |
+| `POST`      | `/api/services/singbox/auto-start`           | Bật hoặc tắt tự động khởi động                                                 |
+| `POST`      | `/api/services/singbox/auto-restart-adopted` | Bật hoặc tắt tự động khởi động lại cho tiến trình đã tồn tại và được tiếp quản |
+| `GET`       | `/api/services/singbox/logs`                 | Theo dõi log mới qua SSE (bằng tuyến động dùng chung `[name]/logs`)            |
+
+**Kết nối TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) ghi `config.json` và khởi động trình giám sát trước khi `applyTproxy()` cài các quy tắc tường lửa TPROXY. Nếu thiếu trình giám sát hoặc nó không đạt trạng thái `running`, hệ thống giờ ghi log ở mức lỗi thay vì âm thầm bỏ qua thất bại. Nhờ đó, người vận hành nhận biết được rằng các quy tắc TPROXY đã được áp dụng nhưng không có tiến trình lắng nghe hoạt động phía sau.
+
+---
+
+### 4.9 Proxy ngược (nhúng dashboard 9Router)
 
 Dashboard nhúng giao diện web 9Router vào trong iframe thông qua một proxy ngược nội bộ
 tại:

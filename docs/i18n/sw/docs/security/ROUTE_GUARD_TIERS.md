@@ -195,6 +195,12 @@ mchakato wa seva.
 | `/api/providers/health-autopilot/actions` | Hutekeleza vitendo vya urekebishaji vya autopilot                                       |
 | `/api/settings/obsidian`                  | Hutengeneza vitambulisho vya WebDAV vinavyoweza kutumiwa tena kwa mzizi wowote wa vault |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                            |
+| `/api/cli-tools/apply`                    | Huandika upya usanidi wa CLI wa mwendeshaji kwenye mwenyeji                             |
+| `/api/cli-tools/guide-settings`           | Huandika faili za usanidi wa CLI kulingana na mwongozo                                  |
+| `/api/cli-tools/hermes-agent-settings`    | Huandika usanidi wa wakala wa Hermes                                                    |
+| `/api/cli-tools/backups`                  | Hurejesha na kufuta nakala za usanidi wa CLI                                            |
+| `/api/log-export`                         | Hutuma kumbukumbu za miito kwenye lengwa lililosanidiwa                                 |
+| `/api/restart`                            | Huanzisha upya mchakato wa seva                                                         |
 
 **Jibu ukiukaji unapotokea:** `401 Authentication required`
 

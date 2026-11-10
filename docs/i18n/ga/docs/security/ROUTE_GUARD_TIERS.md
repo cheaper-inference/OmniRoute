@@ -175,6 +175,12 @@ fhreastalaí a mharú.
 | `/api/providers/health-autopilot/actions` | Cuireann sé gníomhartha leasúcháin uathphíolóta i gcrích      |
 | `/api/settings/obsidian`                  | Gineann sé dintiúir WebDAV in-athúsáidte d'aon fhréamh boghta |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                  |
+| `/api/cli-tools/apply`                    | Athscríobhann sé cumraíocht CLI an oibreora ar an óstach      |
+| `/api/cli-tools/guide-settings`           | Scríobhann sé comhaid chumraíochta CLI bunaithe ar threoracha |
+| `/api/cli-tools/hermes-agent-settings`    | Scríobhann sé cumraíocht ghníomhaire Hermes                   |
+| `/api/cli-tools/backups`                  | Athchóiríonn agus scriosann sé cúltacaí chumraíocht CLI       |
+| `/api/log-export`                         | Seolann sé logaí glaonna chuig ceann scríbe cumraithe         |
+| `/api/restart`                            | Atosaíonn sé próiseas an fhreastalaí                          |
 
 **Freagra ar shárú:** `401 Authentication required`
 

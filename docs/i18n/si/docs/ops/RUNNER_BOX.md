@@ -4,37 +4,27 @@
 
 ---
 
-ස්වයං-සත්කාරක සංචිතය **.113** යන්ත්රයෙහි (`tomni-proxmox-113`) ක්රියාත්මක වේ. 2026-10-18 සිට සෑම
-OmniRoute runner එකකටම **එක් භූමිකාවක්**, එක් label එකක් සහ එහි workload සඳහා මනින ලද ප්රමාණයට
-ගැළපෙන memory/CPU සීමාවක් ඇත. Turbopack slot එකට build එකට අවශ්ය සම්පත් ලැබෙන අතර, අනෙක් slots ඒවායේ
-මනින ලද උපරිම භාවිතයන්ට අනුව සකසා ඇත. යන්ත්රය අධි-වෙන්කිරීමක් කරන්නේ Turbopack build එකක් Release-Green
-webpack build එකක් සහ lint job එකක් සමඟ එකවර ක්රියාත්මක වන විට පමණි; host swap (16 GB) එය දරාගන්නා අතර,
-pull-request Builds hosted runners මත ක්රියාත්මක වන බැවින් Turbopack slot එක බොහෝ වේලාවට නිෂ්ක්රීයව පවතී:
+ස්වයං-සත්කාරක සංචිතය මත ධාවනය වේ**.113** පෙට්ටිය (`tomni-proxmox-113`). 2026-10-18 සිට සෑම OmniRoute ධාවකයෙකුටම ඇත **එක් භූමිකාවක්** , එක් ලේබලයක්, සහ memory/CPU අයවැය එහි වැඩ ප්‍රමාණය මනින ප්‍රමාණයට. Turbopack slot එක ගොඩනැගීමට අවශ්‍ය දේ ලබා ගනී; අනෙක් තව් ඒවායේ මනින ලද මුදුන් දක්වා ප්‍රමාණ කර ඇත. Turbopack බිල්ඩ් එකක් Release-Green webpack build එකක් සහ lint job එකක් සමඟ සමපාත වූ විට පමණක් කොටුව ඉක්මවා යයි; host swap (16 GB) එය අවශෝෂණය කරයි, සහ pull-request Builds ධාරකයෙන් ධාවනය වන නිසා, Turbopack slot බොහෝ විට අක්‍රිය වේ:
 
-| runner               | label                           | භූමිකාව                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack builds: `ci.yml` `Build` (push/dispatch පමණි), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, රාත්රී a11y build එක | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`                    | රාත්රී jobs (Schemathesis, promptfoo, garak, k6) සහ `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`                    | ඉහත සඳහන් සංචිතයම                                                                                                                                  | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (ඒවායේ repos)                   | Dependabot පමණි (එකකට උපරිමය 155 MB, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | එකකට 200 % |
+| runner               | label                           | භූමිකාව                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack builds: `ci.yml` `Build` (push/dispatch පමණි), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, රාත්රී a11y build එක | 56 GB / 60 GB (swap 0)     | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | රාත්රී jobs (Schemathesis, promptfoo, garak, k6) සහ `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
+| `omniroute-113`      | `omni-light`                    | ඉහත සඳහන් සංචිතයම                                                                                                                                  | 8 GB / 12 GB               | 400 %       |
+| OmniHeuris, OmniMind | (ඔවුන්ගේ ගබඩා)                  | Dependabot පමණි (උච්චතම 155 MB බැගින්, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200% බැගින් |
 
-2026-10-18 දින මනින ලදී:
+2026-10-18 මනින ලදී:
 
-| සම්පත     | අගය                                   | scheduling සඳහා එහි අර්ථය                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RAM / CPU | **78 GB / cores 32ක්**                | සීමා නොකළ Turbopack production build එකක් 49 GB උපරිමයකට ළඟා විය (`tests/unit/ci-build-bundler-webpack.test.ts`); Next 16.3.8 මත compile phase එක පමණක් ~40 GB රඳවා ගනී (`next-build` තුළ 36 GB RSS සහ 3 GB බැගින් භාවිත කරන loader workers 17ක්, 2026-10-18 දින මනින ලදී); webpack build එකක් ~14–16 GB භාවිත කරයි. එක් Turbopack build එකක් සහ එක් webpack build එකක් එකවර ගැළපේ; Turbopack builds දෙකක් නොගැළපේ |
-| swap      | 16 GB                                 | `omniroute-113-5` swap අක්රියව (`MemorySwapMax=0`) ක්රියාත්මක වන නිසා පාලනයෙන් බැහැර වන build එකක් යන්ත්රය swap කිරීම වෙනුවට එහි සීමාවේදී නවත්වනු ලැබේ                                                                                                                                                                                                                                                             |
-| `/tmp`    | **12 GB tmpfs = RAM**                 | එහි තබන ඕනෑම දෙයක් memory භාවිත කරයි; ඉතිරි වූ දේවල් පැය 3කට පසු ඉවත් කෙරේ                                                                                                                                                                                                                                                                                                                                         |
-| CPU       | cores 32ක් මත load 60ක් නිරීක්ෂණය විය | quotas යෙදීමට පෙර, එක් Turbopack build එකක් (~1166 % CPU) සහ එම යන්ත්රයේම coverage suite එකක් අනෙක් listeners වල heartbeats සඳහා සම්පත් හිඟ කළේය (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                             |
-| runners   | **listeners 6ක්**                     | OmniRoute 4ක් + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` අක්රිය කර ඇත (`systemctl enable --now` මඟින් එකක් නැවත සක්රිය කළ හැක)                                                                                                                                                                                                                                                                            |
+| සම්පත         | අගය                                   | scheduling සඳහා එහි අර්ථය                                                                                                                                                                                                                                                                                                                                          |
+| ------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RAM / CPU     | **78 GB / 32 cores**                  | Turbopack නිෂ්පාදන ගොඩනැගීමක් 49 GB uncapped (`tests/unit/ci-build-bundler-webpack.test.ts`) දක්වා ඉහළ ගියේය; මීළඟ 16.3.8 හි සම්පාදනය කිරීමේ අදියර පමණක් ~ 40 GB ( `next-build` හි GB RSS 36 ක් සහ 3 GB හි ලෝඩර් කම්කරුවන් 17 ක්, 2026-10-18 මනින ලද); ~ 14-16 GB හි වෙබ් පැකේජයක් ගොඩනැගීම. එක Turbopack + එක webpack build එකට ගැලපේ; Turbopack බිල්ඩ් දෙකක් නැත |
+| හුවමාරු කරන්න | 16 GB                                 | `omniroute-113-5` swap off (`MemorySwapMax=0`) සමඟ ක්‍රියා කරයි, එබැවින් පෙට්ටිය මාරු කිරීම වෙනුවට එහි තොප්පියෙහි ධාවන පථය කපා ඇත.                                                                                                                                                                                                                                 |
+| `/tmp`        | **12 GB tmpfs = RAM**                 | එහි තබන ඕනෑම දෙයක් memory භාවිත කරයි; ඉතිරි වූ දේවල් පැය 3කට පසු ඉවත් කෙරේ                                                                                                                                                                                                                                                                                         |
+| CPU           | load 60 on cores 32 නිරීක්ෂණය         | කෝටා වලට පෙර, එක් Turbopack ගොඩනැගීම (~ 1166 % CPU) සහ එකම පෙට්ටියේ ආවරණ කට්ටලයක් අනෙක් සවන්දෙන්නන්ගේ හද ගැස්ම (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                               |
+| ධාවකයන්       | **සවන්දෙන්නන් 7 දෙනෙක්** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` ද `omni-build` දරයි ; `omniroute-113-3/-4/-8` repo වෙතින් මකා ඇත (2026-10-28)                                                                                                                                                                                                                               |
 
-සීමාවන් එක් එක් unit එකේ `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` තුළ ඇත
-(පෙර අගයන් `override.conf.bak-20261018` ලෙස තබා ඇත) සහ ඒවා
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` මඟින් සජීවීව යොදන ලදී — restart කිරීමක් සිදු නොවූ බැවින්
-ක්රියාත්මක වෙමින් තිබූ කිසිදු job එකකට බලපෑමක් නොවීය. Labels runners API එක හරහා වෙනස් කරනු ලැබේ
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), එයද සජීවීව සිදු වේ.
+සීමාවන් එක් එක් ඒකකයේ `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` (පෙර අගයන් `override.conf.bak-20261018` ලෙස තබා ඇත) තුළ සජීවීව පවතින අතර `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — සමඟ සජීවීව යොදන ලදී නැවත ආරම්භයක් නැත, එබැවින් ධාවන කාර්යයක් ස්පර්ශ නොකළේය. API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) ධාවකයන් හරහා ලේබල වෙනස් කරනු ලැබේ, සජීවීව.
 
 ## පිරිසිදුකාරකය ස්ථාපනය කිරීම (එක් වරක් පමණක්, යන්ත්රය මත)
 
@@ -42,7 +32,7 @@ pull-request Builds hosted runners මත ක්රියාත්මක වන 
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): සෑම මිනිත්තු 30කටම, /var/log/runner-janitor.log වෙත ලොග් කරන්න
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` අවශ්ය වේ: පිරිසිදුකාරකය මාර්ගයක් ඉවත් කිරීමට පෙර, විවෘත ගොනුවල එක් snapshot එකක් භාවිතයෙන් එය නිෂ්ක්රීය බව තහවුරු කරන අතර, මෙම මෙවලම නොමැති නම් එය කිසිවක් ඉවත් නොකර ඒ බව සඳහන් කරයි (exit 1). ඕනෑම වෙනසක් පළමුව `--dry-run` සමඟ අත්හදා බලන්න — එය සිදු කිරීමට නියමිත දේ හරියටම මුද්රණය කරන අතර කිසිවක් වෙනස් නොකරයි.
@@ -118,8 +108,16 @@ build එකක් RAM සහ CPU දිගටම භාවිත කරයි. 
   හි 2026-10-18 දක්වා `MemoryHigh=4G` තිබිණි — promptfoo build එක එහි මිනිත්තු 54ක් පුරා memory reclaim කරමින්
   ඉදිරියට ගියේය; 8 GB මඟින් එම throttling ඉවත් වේ.
 - **අඩු listener ගණනක් තබා ඇත්තේ හිතාමතාය.** OmniRoute unit හතරක් 2026-08-29 දින අක්රිය කරන ලදී — සෑම අමතර
-  listener එකක්ම ඉහත memory budget එකේ තවත් tenant එකකි. ස්වයංක්රීය පිරිසිදුකාරකයේ උපරිම සීමාව 6කි (`MAX_ACTIVE_RUNNERS=6` in cron): එය
-  යන්ත්රයේ ඇති සෑම `Runner.Listener` එකක්ම ගණන් කරන අතර, OmniHeuris + OmniMind අපගේ හතරට තවත් දෙකක් එක් කරයි.
+  listener එකක්ම ඉහත memory budget එකේ තවත් tenant එකකි. ස්වයංක්රීය පිරිසිදුකාරකයේ උපරිම සීමාව 8කි (`MAX_ACTIVE_RUNNERS=8` in cron): එය
+  යන්ත්රයේ ඇති සෑම `Runner.Listener` එකක්ම ගණන් කරන අතර, OmniHeuris + OmniMind අපගේ පහට තවත් දෙකක් එක් කරයි.
+- **Unit සහ Vitest jobs සත්කාරක runners මතම පවතී.** repository variable එක වන `vars.USE_VPS_TEST_RUNNER`
+  `true` වූ විට පමණක් `ci.yml` එහි unit shards සහ Vitest job එක `[self-hosted, omni-ci]` වෙත යවයි,
+  එවිට පවා එකම repository එකේ `pull_request` runs සඳහා පමණි; forks, `merge_group` සහ pushes
+  `ubuntu-latest` මතම පවතී (`tests/unit/vps-runner-variable-scope.test.ts`). variable එක
+  `false` වේ. 2026-10-28 දින 4-core `omni-ci` listeners තුනකට `npm ci` සඳහා 250–270 s ගත වූ අතර, සෑම
+  unit shard එකක්ම මිනිත්තු 30ක job සීමාවට ළඟා විය; සත්කාරක shard එකකට ගත වූයේ ~634 s පමණි, එවිට යන්ත්‍රයේ load එක
+  17–24 විය. එම listeners මකා දමන ලදී. unit shard එකකට සරිලන ප්‍රමාණයේ listeners නොමැතිව
+  variable එක නැවත සක්‍රිය නොකරන්න.
 - **කිසියම් runner එකක් කාර්යබහුලව සිටින විට `/tmp` හෝ `_work` කිසිවිටෙක අතින් පිරිසිදු නොකරන්න.**
   පරීක්ෂා කිරීම සහ මකා දැමීම අතර පරතරයක් ඇති check-then-delete ක්රියාවක් නිසා 2026-08-27 දින සජීවී Build job එකකට එහි
   `_work` අහිමි විය. ස්වයංක්රීය පිරිසිදුකාරකය පරීක්ෂාව සහ ඉවත් කිරීම එක් පියවරකින් සිදු කරයි;
@@ -133,7 +131,7 @@ build එකක් RAM සහ CPU දිගටම භාවිත කරයි. 
 
 ## සත්කාරක lane එක (GitHub-hosted runners)
 
-ගිණුම **Pro** සැලැස්මේ ඇත: සෑම PR පරීක්ෂාවක්, සෑම push මඟින් ක්රියාත්මක වන workflow එකක් සහ CodeQL හි පෙරනිමි සැකසුම අතර බෙදාගන්නා **සමගාමී සත්කාරක jobs 40ක්**. `release/v3.8.52` මත merge ව්යාපාරයක් (~පැයකට merges 10ක්) අතරතුර 2026-10-18 දින මනින ලද පරිදි: **පැය 24ක් තුළ workflow runs 2,500ක් නිර්මාණය කර ඇත**, පැය 6ක් තුළ branch එක වෙත pushes 44ක්, PR පරීක්ෂාවන් පැය ගණනක් බලා සිටියදී **සත්කාරක jobs 106ක් පෝලිම්ගතව තිබූ** අතර ඒවා නොමැතිව PRs merge කර ඇත. branch එක වෙත සිදු කළ සෑම push එකකදීම workflows නවයක් ක්රියාත්මක විය:
+repository එක `cheaper-inference` organization එකට අයත් වන අතර **Team** සැලැස්මේ ඇත: organization එකේ සෑම repository එකක්, සෑම PR පරීක්ෂාවක්, සෑම push මඟින් ක්‍රියාත්මක වන workflow එකක් සහ CodeQL හි පෙරනිමි සැකසුම අතර බෙදාගන්නා **සමගාමී සත්කාරක jobs 60ක්**. පහත සංඛ්‍යා මනින ලද්දේ **Pro** සැලැස්මේදීය (සමගාමී සත්කාරක jobs 40ක්). `release/v3.8.52` මත merge ව්යාපාරයක් (~පැයකට merges 10ක්) අතරතුර 2026-10-18 දින මනින ලද පරිදි: **පැය 24ක් තුළ workflow runs 2,500ක් නිර්මාණය කර ඇත**, පැය 6ක් තුළ branch එක වෙත pushes 44ක්, PR පරීක්ෂාවන් පැය ගණනක් බලා සිටියදී **සත්කාරක jobs 106ක් පෝලිම්ගතව තිබූ** අතර ඒවා නොමැතිව PRs merge කර ඇත. branch එක වෙත සිදු කළ සෑම push එකකදීම workflows නවයක් ක්රියාත්මක විය:
 
 | `release/v*` වෙත එක් push එකකට              | සත්කාරක jobs | අධික තදබදය යටතේ ප්රතිඵලය                                            | 2026-10-18 සිට                                                                     |
 | ------------------------------------------- | -----------: | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |

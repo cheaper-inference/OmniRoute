@@ -30,13 +30,7 @@ Kun osv tai Trivy muuttuu punaiseksi uuden CVE-julkistuksen vuoksi, korjaustapa 
 
 1. **Päivitä kyseinen riippuvuus** (ensisijainen vaihtoehto) — päivitä korjattuun versioon `package.json`-tiedoston
    `overrides`-määrityksen avulla (transitiiviset riippuvuudet) tai rakenna kuva uudelleen korjatun pohjakuvan päälle.
-2. **Jos upstream-korjausta ei ole:**
-   - **osv:** määritä `metrics.vulnCount`-perustaso uudelleen tiedostossa `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` ei kata erillisiä portteja — muokkaa arvoa
-     käsin, `direction:down`) ja lisää perusteluhuomautus sekä seurantaongelma.
-   - **Trivy:** lisää merkintä tiedostoon `.trivyignore` (yksi CVE-ID riviä kohden) sekä perustelukommentti
-     ja seurantaongelma. `ignore-unfixed: true` kattaa jo automaattisesti CVE:t, joihin
-     ei ole korjauksia.
+2. **Jos korjaus ei ole käytettävissä:** säilyttää mitatun löydön ja seurata vaikuttanutta riippuvuutta tai kuvaa. Älä nosta haavoittuvuuden perusarvoa saadaksesi epäonnistuneen ehdokkaan läpäisyn. Trivyn `ignore-unfixed: true` sulkee jo pois kuvan haavoittuvuudet ilman alkupään korjaustiedostoa. Kaikki poikkeukset edellyttävät tarkistetun haavoittuvuuden ID, tarkan pakettipolun, vanhenemis- ja seurantaongelman käytännössä; se ei ole automaattinen seuraus epäonnistuneesta skannauksesta.
 
 Pakolliset OSV-suoritukset (`check:vuln-ratchet -- --ratchet`) epäonnistuvat suljetusti tilalla
 `INCOMPLETE` ja palautuskoodilla 2, jos tarkistinta, raporttia tai perustasoa ei voida validoida.
@@ -44,6 +38,12 @@ Mitattu regressio palauttaa koodin 1. Neuvoa-antava suoritus voi silti ilmoittaa
 ja palautuskoodin 0, mikä ei osoita, että riippuvuudet läpäisivät tarkistuksen. Estävä
 Trivy-vaihe edellyttää myös onnistunutta mittausta: työkalujen puuttuminen, epäonnistuneet työt
 ja puuttuva näyttö kuvasta eivät voi vahvistaa kuvaa puhtaaksi.
+
+## Kuvan skannauskäytäntö
+
+Nykyinen `.trivyignore.yaml` ei sisällä haavoittuvuuksista poikkeuksia. `npm run check:trivy-ignore-policy` vahvistaa strukturoidun käytännön paikallisissa skannausprofiileissa, CI ja Qualityissa. Tuntematon IDs, laajemmat polut, kaksoismerkinnät ja vanhentuneet poikkeukset hylätään; vanha `.trivyignore` ei ole syöte siirretyille skannauksille.
+
+Docker tarkistaa `github.workflow_sha` :n käytäntötyökalut ja kuvan lähdekäytännön samalla lähteen valitsimella kuin koontiversio. Käytännön valitsin hylkää yhteensopimattomat laajuudet ja valmistelee yhden tiedoston molemmille Trivy-tarkistuksille. Historiallinen lähde ilman jäsenneltyä politiikkaa ei saa poikkeuksia. Molemmat skannaukset kiinnittävät Trivy `v0.70.0`. Käytännön validointi todistaa kokoonpanon johdonmukaisuuden; kuva vaatii vielä onnistuneen skannauksen.
 
 ## Poistetun riippuvuuden riski
 

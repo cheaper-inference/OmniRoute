@@ -180,6 +180,12 @@ server process එක නවතා දැමීමට හැකි වනු ඇ
 | `/api/providers/health-autopilot/actions` | Autopilot remediation actions ක්රියාත්මක කරයි                         |
 | `/api/settings/obsidian`                  | ඕනෑම vault root එකක් සඳහා නැවත භාවිත කළ හැකි WebDAV creds නිකුත් කරයි |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                          |
+| `/api/cli-tools/apply`                    | ධාරකයේ ක්‍රියාකරුගේ CLI වින්‍යාසය නැවත ලියයි                          |
+| `/api/cli-tools/guide-settings`           | මාර්ගෝපදේශ මත පදනම් වූ CLI වින්‍යාස ගොනු ලියයි                        |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes නියෝජිතයාගේ වින්‍යාසය ලියයි                                    |
+| `/api/cli-tools/backups`                  | CLI වින්‍යාස උපස්ථ ප්‍රතිසාධනය කරයි සහ මකා දමයි                       |
+| `/api/log-export`                         | වින්‍යාස කළ ගමනාන්තයට ඇමතුම් සටහන් යවයි                               |
+| `/api/restart`                            | සේවාදායක ක්‍රියාවලිය නැවත ආරම්භ කරයි                                  |
 
 **උල්ලංඝනයකදී response එක:** `401 Authentication required`
 

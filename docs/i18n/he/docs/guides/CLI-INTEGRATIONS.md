@@ -16,11 +16,11 @@ OmniRoute פועל (מקומי או מרוחק), וכותבת את קובץ הת
 תומך בכך. פקודות ששומרות קובץ סביבה מקומי של הכלי מצוינות להלן.
 
 קיים גם מפעיל כללי — `omniroute run <target>` — שמפעיל את
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` או `gemini` עם
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` או `whycodes` עם
 משתני הסביבה המתאימים שהוזרקו, בלי לכתוב תצורה כלשהי. היעדים והכינויים שלהם
 מגיעים מהמניפסט הקנוני `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), ו-`omniroute completion` מציעה את
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), ו-`omniroute completion` מציעה את
 אותן מילות יעד שמקורן במניפסט. המפעילים הוותיקים הייעודיים לכל כלי —
 `omniroute launch` (Claude Code) ו-`omniroute launch-codex` (Codex) — עדיין
 זמינים.
@@ -67,25 +67,26 @@ omniroute providers remove <connection-id> --yes
 עם `--remote` (או הקשר מרוחק פעיל), הפקודה מאחזרת את הקטלוג מאותו
 שרת וכותבת את התצורה באופן מקומי.
 
-| פקודה                      | כלי                     | מה נכתב                                                                                                                                                              | דגלים עיקריים                                                                                                                              | מקומי לעומת מרוחק |
-| -------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI        | `~/.codex/<name>.config.toml` — פרופיל אחד לכל מודל טקסט תואם (`codex --profile <name>`)                                                                             | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | שניהם             |
-| `omniroute setup-claude`   | Claude Code             | `~/.claude/profiles/<name>/settings.json` — פרופיל אחד לכל מודל תואם (`CLAUDE_CONFIG_DIR`)                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | שניהם             |
-| `omniroute setup-opencode` | OpenCode (תואם OpenAI)  | `~/.config/opencode/opencode.json` — ספק `omniroute` עם כל מודל בקטלוג (`opencode -m omniroute/<model>`)                                                             | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | שניהם             |
-| `omniroute setup-cline`    | Cline                   | `~/.cline/data/{globalState,secrets}.json` (מצב CLI) + הדפסת הגדרות ההרחבה של VS Code                                                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | שניהם             |
-| `omniroute setup-kilo`     | Kilo Code               | `~/.local/share/kilo/auth.json` (CLI) + מיזוג `kilocode.*` לתוך `settings.json` של VS Code, אם קיים                                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | שניהם             |
-| `omniroute setup-continue` | Continue / `cn` CLI     | `~/.continue/config.yaml` — מודלים עם `provider: openai`, מפתח דרך `${{ secrets.OMNIROUTE_API_KEY }}`                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | שניהם             |
-| `omniroute setup-cursor`   | Cursor                  | לא נכתב דבר — הדפסת השלבים לביצוע בתוך היישום (תצורת Cursor היא SQLite אטום)                                                                                         | `--remote` `--api-key` `--only` `--port`                                                                                                   | שניהם             |
-| `omniroute setup-roo`      | Roo Code                | `~/.omniroute/roo-settings.json` (מסמך לייבוא) + הגדרת `roo-cline.autoImportSettingsPath` אם קיים `settings.json` של VS Code                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | שניהם             |
-| `omniroute setup-crush`    | Crush                   | `~/.config/crush/crush.json` — ספק `openai-compat`, מפתח דרך `$OMNIROUTE_API_KEY`                                                                                    | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | שניהם             |
-| `omniroute setup-zed`      | Zed                     | `~/.config/zed/settings.json` — ספק `openai_compatible.omniroute` (עד 25 מודלים התומכים בכלים), מפתח דרך `$OMNIROUTE_API_KEY`                                        | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | שניהם             |
-| `omniroute setup-goose`    | Goose                   | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + הדפסת הוראות להגדרת משתני סביבה                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | שניהם             |
-| `omniroute setup-aider`    | Aider                   | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + הדפסת הוראות להגדרת משתני סביבה                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | שניהם             |
-| `omniroute setup-qwen`     | Qwen Code               | `~/.qwen/settings.json` — מערך V4 מסוג `modelProviders.openai` +‏ `OMNIROUTE_API_KEY` בתוך `~/.qwen/.env`                                                            | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | שניהם             |
-| `omniroute setup-5dive`    | 5dive (צי סוכנים)       | שום דבר תחת `$HOME` — כותב **פרופיל אימות** של 5dive (`/var/lib/5dive/auth-profiles/<name>/`) באמצעות `5dive agent auth set`; למשתמש root בלבד, פועל במארח הצי       | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | שניהם             |
-| `omniroute run <target>`   | הפעלה בזמן ריצה (כללית) | שום דבר — מפעיל את `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` עם משתני הסביבה והארגומנטים המתאימים; Qwen ו-Gemini משתמשים בתיקיית בית זמנית ומבודדת | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | שניהם             |
-| `omniroute launch`         | Claude Code             | שום דבר — מפעיל את `claude` עם `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` שהוזרקו                                                                                   | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | שניהם             |
-| `omniroute launch-codex`   | OpenAI Codex CLI        | שום דבר — מפעיל את `codex` עם הספק `omniroute` שהוזרק באמצעות דגלי `-c`                                                                                              | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | שניהם             |
+| פקודה                      | כלי                     | מה נכתב                                                                                                                                                                         | דגלים עיקריים                                                                                                                              | מקומי לעומת מרוחק |
+| -------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI        | `~/.codex/<name>.config.toml` — פרופיל אחד לכל מודל טקסט תואם (`codex --profile <name>`)                                                                                        | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | שניהם             |
+| `omniroute setup-claude`   | Claude Code             | `~/.claude/profiles/<name>/settings.json` — פרופיל אחד לכל מודל תואם (`CLAUDE_CONFIG_DIR`)                                                                                      | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | שניהם             |
+| `omniroute setup-opencode` | OpenCode (תואם OpenAI)  | `~/.config/opencode/opencode.json` — ספק `omniroute` עם כל מודל בקטלוג (`opencode -m omniroute/<model>`)                                                                        | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | שניהם             |
+| `omniroute setup-cline`    | Cline                   | `~/.cline/data/{globalState,secrets}.json` (מצב CLI) + הדפסת הגדרות ההרחבה של VS Code                                                                                           | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | שניהם             |
+| `omniroute setup-kilo`     | Kilo Code               | `~/.local/share/kilo/auth.json` (CLI) + מיזוג `kilocode.*` לתוך `settings.json` של VS Code, אם קיים                                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | שניהם             |
+| `omniroute setup-continue` | Continue / `cn` CLI     | `~/.continue/config.yaml` — מודלים עם `provider: openai`, מפתח דרך `${{ secrets.OMNIROUTE_API_KEY }}`                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | שניהם             |
+| `omniroute setup-cursor`   | Cursor                  | לא נכתב דבר — הדפסת השלבים לביצוע בתוך היישום (תצורת Cursor היא SQLite אטום)                                                                                                    | `--remote` `--api-key` `--only` `--port`                                                                                                   | שניהם             |
+| `omniroute setup-roo`      | Roo Code                | `~/.omniroute/roo-settings.json` (מסמך לייבוא) + הגדרת `roo-cline.autoImportSettingsPath` אם קיים `settings.json` של VS Code                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | שניהם             |
+| `omniroute setup-crush`    | Crush                   | `~/.config/crush/crush.json` — ספק `openai-compat`, מפתח דרך `$OMNIROUTE_API_KEY`                                                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | שניהם             |
+| `omniroute setup-zed`      | Zed                     | `~/.config/zed/settings.json` — ספק `openai_compatible.omniroute` (עד 25 מודלים התומכים בכלים), מפתח דרך `$OMNIROUTE_API_KEY`                                                   | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | שניהם             |
+| `omniroute setup-goose`    | Goose                   | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + הדפסת הוראות להגדרת משתני סביבה                                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | שניהם             |
+| `omniroute setup-aider`    | Aider                   | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + הדפסת הוראות להגדרת משתני סביבה                                                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | שניהם             |
+| `omniroute setup-qwen`     | Qwen Code               | `~/.qwen/settings.json` — מערך V4 מסוג `modelProviders.openai` +‏ `OMNIROUTE_API_KEY` בתוך `~/.qwen/.env`                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | שניהם             |
+| `omniroute setup-5dive`    | 5dive (צי סוכנים)       | שום דבר תחת `$HOME` — כותב **פרופיל אימות** של 5dive (`/var/lib/5dive/auth-profiles/<name>/`) באמצעות `5dive agent auth set`; למשתמש root בלבד, פועל במארח הצי                  | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | שניהם             |
+| `omniroute setup-whycodes` | WhyCodes                | קובץ התצורה `config.toml` של WhyCodes‏ (`[providers.omniroute]` + `[default_model]`); הנתיב הוא `$WHYCODES_HOME/config.toml` או `~/.whycodes/config.toml`                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | שניהם             |
+| `omniroute run <target>`   | הפעלה בזמן ריצה (כללית) | שום דבר — מפעיל את `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` עם משתני הסביבה והארגומנטים המתאימים; Qwen ו-Gemini משתמשים בתיקיית בית זמנית ומבודדת | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | שניהם             |
+| `omniroute launch`         | Claude Code             | שום דבר — מפעיל את `claude` עם `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` שהוזרקו                                                                                              | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | שניהם             |
+| `omniroute launch-codex`   | OpenAI Codex CLI        | שום דבר — מפעיל את `codex` עם הספק `omniroute` שהוזרק באמצעות דגלי `-c`                                                                                                         | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | שניהם             |
 
 הערות על דגלים (אומתו בקוד המקור של הפקודה):
 
@@ -99,14 +100,15 @@ omniroute providers remove <connection-id> --yes
   מערכת הקבצים. זמין בכל פקודת `setup-*` **למעט** `setup-cursor`
   (שאינה כותבת קובץ לעולם).
 - `--model <id>` — נדרש (או נבחר באופן אינטראקטיבי) עבור הכלים שאין להם
-  גילוי מודלים אוטומטי: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. כלים אלה
+  גילוי מודלים אוטומטי: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. כלים אלה
   מקבלים גם `--yes` להרצות לא אינטראקטיביות (שאז דורשות `--model`).
   `setup-opencode` מקבלת `--model` כדי להגדיר את מודל ברירת המחדל ברמה העליונה.
 - `--model <id>` ב-`omniroute run` פועל בהתאם לחיווט הייחודי לכל יעד במניפסט
   (`bin/cli/cli-manifest.mjs`): **aider** מקבל `--model openai/<id>` ו-
   **opencode** מקבל `--model omniroute/<id>` (הקידומת נוספת רק כאשר המזהה
   עדיין אינו כולל אותה); **qwen** ו-**gemini** מקבלים את המזהה כפי שהוא;
-  **claude** מקבל אותו באמצעות `ANTHROPIC_MODEL`, **goose** באמצעות `GOOSE_MODEL`, ו-
+  **claude** מקבל אותו באמצעות `ANTHROPIC_MODEL`, **goose** באמצעות `GOOSE_MODEL`,
+  **whycodes** באמצעות `-P omniroute -m <id>`, ו-
   **codex** באמצעות הארגומנטים `-c model_providers.omniroute.*`. **Qwen הוא יעד ההרצה היחיד
   שמחייב `--model`** — הפעלת `omniroute run qwen` בלעדיו מסתיימת
   בקוד `2` עם שגיאה מפורשת.
@@ -276,18 +278,19 @@ OmniRoute חושף את ממשק OpenAI תחת `/v1`, את ממשק Anthropic ב
 וממשק Gemini מקורי תחת `/v1beta`. כל אינטגרציה מוגדרת בהתאם לתבנית שהכלי
 מצפה לה (כפי שאומת בקוד המקור של הפקודה):
 
-| אינטגרציה                                                                  | כתובת URL בסיסית שנכתבת | `/v1`?                                    |
-| -------------------------------------------------------------------------- | ----------------------- | ----------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | שורש                    | לא — Cline מוסיף `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | שורש                    | לא — Goose מוסיף את הנתיב                 |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | שורש                    | לא — LiteLLM מוסיף `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | עם `/v1`                | כן                                        |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | עם `/v1`                | כן                                        |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | שורש                    | לא — Claude Code מוסיף `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | עם `/v1`                | כן                                        |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | עם `/v1`                | כן                                        |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | שורש                    | לא — ה-SDK מוסיף `/v1beta/models/…`       |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` בפרופיל האימות)                        | שורש                    | לא — Claude Code מוסיף `/v1/messages`     |
+| אינטגרציה                                                                  | כתובת URL בסיסית שנכתבת | `/v1`?                                               |
+| -------------------------------------------------------------------------- | ----------------------- | ---------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | שורש                    | לא — Cline מוסיף `/v1/chat/completions`              |
+| `setup-goose` (`OPENAI_HOST`)                                              | שורש                    | לא — Goose מוסיף את הנתיב                            |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | שורש                    | לא — LiteLLM מוסיף `/v1/chat/completions`            |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | עם `/v1`                | כן                                                   |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | עם `/v1`                | כן                                                   |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | שורש                    | לא — Claude Code מוסיף `/v1/messages`                |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | עם `/v1`                | כן                                                   |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | עם `/v1`                | כן                                                   |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | שורש                    | לא — ה-SDK מוסיף `/v1beta/models/…`                  |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` בפרופיל האימות)                        | שורש                    | לא — Claude Code מוסיף `/v1/messages`                |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | עם `/v1`                | כן — WhyCodes שולח בקשות POST אל `/chat/completions` |
 
 ---
 

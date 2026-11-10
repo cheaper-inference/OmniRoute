@@ -1,7 +1,11 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+import Toggle from "@/shared/components/Toggle";
+
+import { useId } from "react";
 import { useTranslations } from "next-intl";
-import { Input } from "@/shared/components";
+import Input from "@/shared/components/Input";
 import { UsageLimitSettings } from "@/app/(dashboard)/dashboard/api-manager/components/UsageLimitSettings";
 import type { ApiKeyAccessFormState } from "../useApiKeyAccessForm";
 import TabErrorList from "./TabErrorList";
@@ -40,6 +44,7 @@ function MaxSessionsField({ formState, setMaxSessions }: LimitsSectionProps<"set
           type="number"
           min={0}
           step={1}
+          aria-label={t("maxActiveSessions")}
           value={String(formState.maxSessions)}
           onChange={(e) => {
             const parsed = Number.parseInt(e.target.value || "0", 10);
@@ -69,6 +74,7 @@ function ThrottleDelayField({
           min={0}
           max={300000}
           step={100}
+          aria-label={t("throttleDelay")}
           value={String(formState.throttleDelayMs)}
           onChange={(e) => {
             const parsed = Number.parseInt(e.target.value || "0", 10);
@@ -98,14 +104,15 @@ function CustomRateLimits({
           <p className="text-sm font-medium text-text-main">{t("apiManagerCustomRateLimits")}</p>
           <p className="text-xs text-text-muted">{t("apiManagerCustomRateLimitsDesc")}</p>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="sm"
+          icon="add"
           onClick={addRateLimit}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
+          className="shrink-0"
         >
-          <span className="material-symbols-outlined text-[14px]">add</span>
           Add Limit
-        </button>
+        </Button>
       </div>
       {formState.rateLimits.length > 0 && (
         <div className="flex flex-col gap-2 pt-1">
@@ -120,6 +127,7 @@ function CustomRateLimits({
                   updateRateLimit(index, val, rl.window);
                 }}
                 placeholder={t("apiManagerRateLimitRequestsPlaceholder")}
+                aria-label={t("apiManagerRateLimitRequestsPlaceholder")}
               />
               <span className="text-sm text-text-muted shrink-0">
                 {t("apiManagerRateLimitReqPer")}
@@ -133,16 +141,18 @@ function CustomRateLimits({
                   updateRateLimit(index, rl.limit, val);
                 }}
                 placeholder={t("apiManagerRateLimitSecondsPlaceholder")}
+                aria-label={t("apiManagerRateLimitSecondsPlaceholder")}
               />
               <span className="text-sm text-text-muted shrink-0">sec</span>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => removeRateLimit(index)}
-                className="p-2 text-red-500 hover:bg-red-500/10 rounded transition-colors shrink-0"
+                className="text-error shrink-0"
                 title={t("apiManagerRemoveLimitTitle")}
-              >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
-              </button>
+                aria-label={t("apiManagerRemoveLimitTitle")}
+                icon="delete"
+              />
             </div>
           ))}
         </div>
@@ -153,11 +163,14 @@ function CustomRateLimits({
 
 function ScheduleDayPicker({ formState, setScheduleDays }: LimitsSectionProps<"setScheduleDays">) {
   const t = useTranslations("apiManager");
+  const labelId = useId();
 
   return (
     <div>
-      <label className="text-xs text-text-muted mb-1.5 block">{t("scheduleDays")}</label>
-      <div className="flex gap-1.5 flex-wrap">
+      <p className="text-xs text-text-muted mb-1.5" id={labelId}>
+        {t("scheduleDays")}
+      </p>
+      <div className="flex gap-1.5 flex-wrap" role="group" aria-labelledby={labelId}>
         {(
           [
             [0, t("daySun")],
@@ -171,9 +184,11 @@ function ScheduleDayPicker({ formState, setScheduleDays }: LimitsSectionProps<"s
         ).map(([dayIdx, label]) => {
           const selected = formState.scheduleDays.includes(dayIdx);
           return (
-            <button
+            <Button
+              size="sm"
+              variant={selected ? "primary" : "ghost"}
+              aria-pressed={selected}
               key={dayIdx}
-              type="button"
               onClick={() =>
                 setScheduleDays((prev) =>
                   prev.includes(dayIdx)
@@ -181,14 +196,10 @@ function ScheduleDayPicker({ formState, setScheduleDays }: LimitsSectionProps<"s
                     : [...prev, dayIdx].sort((a, b) => a - b)
                 )
               }
-              className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all ${
-                selected
-                  ? "bg-primary text-white"
-                  : "bg-surface border border-border text-text-muted hover:border-primary/50"
-              }`}
+              className="gap-1.5 text-xs"
             >
               {label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -211,37 +222,30 @@ function ScheduleDetails({
   return (
     <div className="flex flex-col gap-3 pt-1 border-t border-border/50">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-        <div>
-          <label className="text-xs text-text-muted mb-1 block">{t("scheduleFrom")}</label>
-          <input
-            type="time"
-            value={formState.scheduleFrom}
-            onChange={(e) => setScheduleFrom(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-sm border border-border rounded-md bg-background text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-        <div>
-          <label className="text-xs text-text-muted mb-1 block">{t("scheduleUntil")}</label>
-          <input
-            type="time"
-            value={formState.scheduleUntil}
-            onChange={(e) => setScheduleUntil(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-sm border border-border rounded-md bg-background text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
+        <Input
+          label={t("scheduleFrom")}
+          type="time"
+          value={formState.scheduleFrom}
+          onChange={(e) => setScheduleFrom(e.target.value)}
+        />
+        <Input
+          label={t("scheduleUntil")}
+          type="time"
+          value={formState.scheduleUntil}
+          onChange={(e) => setScheduleUntil(e.target.value)}
+        />
       </div>
       <ScheduleDayPicker formState={formState} setScheduleDays={setScheduleDays} />
-      <div>
-        <label className="text-xs text-text-muted mb-1 block">{t("scheduleTimezone")}</label>
-        <input
-          type="text"
-          value={formState.scheduleTz}
-          onChange={(e) => setScheduleTz(e.target.value)}
-          placeholder={t("apiManagerTimezonePlaceholder")}
-          className="w-full max-w-sm px-2.5 py-1.5 text-sm border border-border rounded-md bg-background text-text-main font-mono focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-        <p className="text-[10px] text-text-muted mt-1">{t("scheduleTimezoneHint")}</p>
-      </div>
+      <Input
+        label={t("scheduleTimezone")}
+        type="text"
+        value={formState.scheduleTz}
+        onChange={(e) => setScheduleTz(e.target.value)}
+        placeholder={t("apiManagerTimezonePlaceholder")}
+        hint={t("scheduleTimezoneHint")}
+        className="max-w-sm"
+        inputClassName="font-mono"
+      />
     </div>
   );
 }
@@ -255,7 +259,6 @@ function AccessScheduleSection({
   setScheduleTz,
 }: LimitsSectionProps<"setScheduleEnabled" | ScheduleDetailSetter>) {
   const t = useTranslations("apiManager");
-  const tc = useTranslations("common");
 
   return (
     <div className="flex flex-col gap-3 p-4 rounded-lg border border-border bg-surface/40">
@@ -264,20 +267,13 @@ function AccessScheduleSection({
           <p className="text-sm font-medium text-text-main">{t("accessSchedule")}</p>
           <p className="text-xs text-text-muted">{t("accessScheduleDesc")}</p>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={formState.scheduleEnabled}
-          onClick={() => setScheduleEnabled(!formState.scheduleEnabled)}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors shrink-0 ${
-            formState.scheduleEnabled
-              ? "bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30"
-              : "bg-black/5 dark:bg-white/5 text-text-muted border border-border"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[14px]">schedule</span>
-          {formState.scheduleEnabled ? tc("enabled") : tc("disabled")}
-        </button>
+        <Toggle
+          size="sm"
+          className="shrink-0"
+          checked={formState.scheduleEnabled}
+          onChange={() => setScheduleEnabled(!formState.scheduleEnabled)}
+          ariaLabel={t("accessSchedule")}
+        />
       </div>
       {formState.scheduleEnabled && (
         <ScheduleDetails

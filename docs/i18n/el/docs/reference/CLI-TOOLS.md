@@ -4,17 +4,17 @@
 
 ---
 
-Τελευταία ενημέρωση: 2026-08-23
+Τελευταία ενημέρωση: 23-08-2026
 
-Το OmniRoute ενσωματώνεται με τρεις κατηγορίες εργαλείων CLI, κατανεμημένες σε τρεις αποκλειστικές σελίδες του πίνακα ελέγχου:
+OmniRoute ενσωματώνεται με τρεις κατηγορίες εργαλείων CLI που κατανέμονται σε τρεις αποκλειστικές σελίδες του πίνακα ελέγχου:
 
-| Σελίδα         | Διαδρομή                | Έννοια                                                                                       | Πλήθος     |
-| -------------- | ----------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| **CLI Κώδικα** | `/dashboard/cli-code`   | Εργαλεία προγραμματισμού που κατευθύνετε στο OmniRoute (Πελάτης → CLI → OmniRoute → Πάροχος) | 26         |
-| **CLI Agents** | `/dashboard/cli-agents` | Αυτόνομοι agents που κατευθύνετε στο OmniRoute (ίδια ροή, ευρύτερο πεδίο εφαρμογής)          | 10         |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI που εκκινεί το OmniRoute ως backend μέσω stdio/ACP (αντίστροφη ροή)                      | βλ. μητρώο |
+| Σελίδα            | Διαδρομή                | Εννοια                                                                                      | Κόμης           |
+| ----------------- | ----------------------- | ------------------------------------------------------------------------------------------- | --------------- |
+| **Κώδικας CLI**   | `/dashboard/cli-code`   | Εργαλεία κωδικοποίησης που υποδεικνύετε σε OmniRoute (Πελάτης → CLI → OmniRoute → Provider) | 26              |
+| **Πράκτορες CLI** | `/dashboard/cli-agents` | Αυτόνομοι πράκτορες που υποδεικνύετε σε OmniRoute (ίδια ροή, ευρύτερο πεδίο εφαρμογής)      | 11              |
+| **Πράκτορες ACP** | `/dashboard/acp-agents` | CLIs που το OmniRoute δημιουργείται ως backend μέσω stdio/ACP (αντίστροφη ροή)              | δείτε το μητρώο |
 
-Οι παλαιότερες διαδρομές ανακατευθύνουν μέσω 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Οι διαδρομές παλαιού τύπου ανακατευθύνονται μέσω 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,11 +43,9 @@ ACP Agents (αντίστροφη ροή εκκίνησης):
 
 ---
 
-## Αυτόματη ρύθμιση με `setup-*`
+## Αυτόματη διαμόρφωση με `setup-*`
 
-Δεν χρειάζεται να γράψετε χειροκίνητα τη ρύθμιση κάθε εργαλείου. Το OmniRoute παρέχει μία εντολή `setup-*`
-ανά υποστηριζόμενο CLI, η οποία διαβάζει τον **ενεργό** κατάλογο μοντέλων από μια εκτελούμενη
-εγκατάσταση OmniRoute (τοπική ή απομακρυσμένη) και γράφει τη ρύθμιση του ίδιου του εργαλείου στον υπολογιστή σας:
+Δεν χρειάζεται να γράψετε τις ρυθμίσεις παραμέτρων κάθε εργαλείου με το χέρι. OmniRoute στέλνει μια εντολή `setup-*` ανά υποστηριζόμενη CLI που διαβάζει το** ζω** κατάλογος μοντέλων από ένα OmniRoute που εκτελείται (τοπικό ή απομακρυσμένο) και γράφει τη διαμόρφωση του εργαλείου στο μηχάνημά σας:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,54 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Καθεμία δέχεται `--remote <url> --api-key <key>` (ρύθμιση ενός τοπικού εργαλείου για χρήση με ένα
-απομακρυσμένο OmniRoute), `--dry-run` (προεπισκόπηση χωρίς εγγραφή) και `--port`. Τα εργαλεία
-χωρίς αυτόματη ανακάλυψη μοντέλων (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) δέχονται
-`--model <id>` (και `--yes` για μη διαδραστικές εκτελέσεις). Το `setup-5dive` είναι η μόνη
-διαδικασία που δεν γράφει κάτω από το `$HOME`: ρυθμίζει έναν στόλο πρακτόρων 5dive
-γράφοντας ένα προφίλ ελέγχου ταυτότητας που ανήκει στον root στον κεντρικό υπολογιστή του στόλου, επομένως επανεκτελείται μέσω `sudo`
-και δεν διαθέτει δική του απομακρυσμένη λειτουργία. Για να εκκινήσετε ένα CLI με τις
-σωστές μεταβλητές περιβάλλοντος και χωρίς να γραφτεί καμία ρύθμιση, χρησιμοποιήστε το γενικό
-πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — οι στόχοι και τα ψευδώνυμα προέρχονται από το `bin/cli/cli-manifest.mjs`)· τα παλαιότερα
-προγράμματα εκκίνησης ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex`
-(Codex) παραμένουν διαθέσιμα. Το Gemini CLI υποστηρίζει μόνο εκκίνηση: είναι στόχος του `omniroute run`,
-αλλά δεν διαθέτει διαδικασία `setup-*`/`configure`.
+Καθένα δέχεται `--remote <url> --api-key <key>` (διαμόρφωση τοπικού εργαλείου έναντι απομακρυσμένου OmniRoute), `--dry-run` (προεπισκόπηση χωρίς εγγραφή) και `--port`. Εργαλεία χωρίς αυτόματη ανακάλυψη μοντέλου (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) λαμβάνουν `--model <id>` (και `--yes` για μη διαδραστικές διαδρομές). `setup-5dive` είναι η μοναδική συνταγή που δεν γράφει κάτω από `$HOME`: διαμορφώνει έναν στόλο πρακτόρων 5 dive γράφοντας ένα προφίλ εξουσιοδότησης που ανήκει στο root στον κεντρικό υπολογιστή του στόλου, επομένως εκτελείται ξανά μέσω `sudo` και δεν έχει τη δική του απομακρυσμένη λειτουργία. Για να εκκινήσετε ένα CLI με το σωστό env και χωρίς καμία γραμμένη ρύθμιση παραμέτρων, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes — οι στόχοι και τα ψευδώνυμα προέρχονται από `bin/cli/cli-manifest.mjs`). οι παλαιού τύπου εκτοξευτές ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex` (Codex) παραμένουν διαθέσιμοι. Gemini CLI είναι μόνο για εκτόξευση: είναι στόχος `omniroute run` αλλά δεν έχει συνταγή `setup-*`/`configure`.
 
-> **Πλήρης αναφορά:** ο κεντρικός πίνακας — τι γράφει κάθε εντολή, όλες οι σημαίες,
-> τοπική έναντι απομακρυσμένης λειτουργίας και ποια εργαλεία απαιτούν κατάληξη `/v1` — βρίσκεται στις
-> **[Ενσωματώσεις CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Πλήρης αναφορά:** ο κύριος πίνακας - τι γράφει κάθε εντολή, κάθε σημαία, τοπικό έναντι απομακρυσμένου και ποια εργαλεία θέλουν επίθημα `/v1` - ζει σε** [Ενσωματώσεις CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### Εκτέλεση αυτών μέσα σε container
+### Τοποθετήστε τα μέσα σε ένα δοχείο
 
-Μια εντολή `setup-*` που εκτελείται μέσα στο container του OmniRoute γράφει στον
-προσωπικό κατάλογο του ίδιου του container, τον οποίο δεν διαβάζει κανένα CLI του κεντρικού υπολογιστή και ο οποίος εξαφανίζεται μαζί με το
-container. Το OmniRoute το ανιχνεύει και τερματίζεται με κωδικό `2`, παρέχοντας οδηγίες αντί να
-γράψει. Υπάρχουν δύο υποστηριζόμενοι τρόποι συνέχισης — εγκαταστήστε το CLI στον κεντρικό υπολογιστή και
-χρησιμοποιήστε `omniroute connect` για σύνδεση στο container ή προσαρτήστε με bind mount τους καταλόγους ρυθμίσεων και ορίστε
-το `CLI_CONFIG_HOME` (το προφίλ compose `host`). Κάθε εντολή `setup-*`, καθώς και οι
-`omniroute configure` και `omniroute config set`, δέχεται
-`--allow-container-write` όταν πράγματι σκοπεύετε να ρυθμίσετε τα CLI του ίδιου του container·
-το `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` κάνει το ίδιο για τον
-διακομιστή. Δείτε τον
-[Οδηγό Docker → Ρύθμιση εργαλείων CLI του κεντρικού υπολογιστή](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Μια εντολή `setup-*` που εκτελείται μέσα στο κοντέινερ OmniRoute γράφει στο σπίτι του ίδιου του κοντέινερ, την οποία κανένας κεντρικός υπολογιστής CLI δεν διαβάζει και η οποία εξαφανίζεται με το κοντέινερ. OmniRoute το εντοπίζει και βγαίνει από `2` με οδηγίες αντί για εγγραφή. Δύο υποστηριζόμενοι τρόποι προς τα εμπρός — εγκαταστήστε το CLI στον κεντρικό υπολογιστή και `omniroute connect` στο κοντέινερ ή συνδέστε-προσαρτήστε τα config dir και ορίστε `CLI_CONFIG_HOME` (το προφίλ σύνθεσης `host` ). Κάθε εντολή `setup-*`, συν `omniroute configure` και `omniroute config set`, δέχεται `--allow-container-write` κατά τη διαμόρφωση του CLIs του κοντέινερ είναι αυτό που στην πραγματικότητα εννοούσατε. `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` κάνει το ίδιο για τον διακομιστή. Ανατρέξτε [στον οδηγό Docker → Διαμόρφωση εργαλείων κεντρικού υπολογιστή CLI](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Το **τελικό σημείο εφαρμογής** του πίνακα ελέγχου (`POST /api/cli-tools/apply`) επιβάλλει την
-ίδια προστασία: μέσα σε container, μια εγγραφή της οποίας ο προορισμός δεν έχει προσαρτηθεί μέσω bind mount από τον
-κεντρικό υπολογιστή απαντά με **`422`**, με `containerEphemeralTarget: true`, το ασφαλές μήνυμα
-σφάλματος και — για τα εργαλεία που διαθέτουν διαδικασία στον κεντρικό υπολογιστή (claude, codex, opencode, cline,
-kilo, continue) — μια `hostSetupCommand` (π.χ. `omniroute setup-opencode`) προς εκτέλεση
-στον κεντρικό υπολογιστή· δεν γράφεται τίποτα. Το `dryRun: true` εξακολουθεί να λειτουργεί σε λειτουργία
-container και επιστρέφει μια προεπισκόπηση με απόκρυψη ευαίσθητων δεδομένων + τη διαδρομή προορισμού, χωρίς να τροποποιεί τον δίσκο. Το περιεχόμενο της
-προεπισκόπησης δεν αποτελεί ρύθμιση που περιέχει διαπιστευτήρια για αντιγραφή ή εισαγωγή. Εφαρμόστε τη ρύθμιση
-με τις αρχικές εισόδους εργαλείου/βασικού URL/κλειδιού API/μοντέλου στον κεντρικό υπολογιστή ή χρησιμοποιήστε την υποδεικνυόμενη
-εντολή ρύθμισης στον κεντρικό υπολογιστή. Δείτε την [Ασφάλεια ρύθμισης CLI](../security/CLI-CONFIGURATION.md)
-για την κεφαλίδα προεπισκόπησης και τη σύμβαση αιτήματος. Αυτή η συμπεριφορά είναι
-σκόπιμη και προστατεύεται από παλινδρομήσεις μέσω του
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — μην «διορθώσετε» ποτέ ένα 422
-αφαιρώντας την προστασία.
+Το ταμπλό** εφαρμόστε το τελικό σημείο** (`POST /api/cli-tools/apply`) επιβάλλει την ίδια προστασία: σε ένα κοντέινερ, απαντά μια εγγραφή της οποίας ο στόχος δεν είναι δεσμευμένος από τον κεντρικό υπολογιστή**`422`** με `containerEphemeralTarget: true`, το ασφαλές κείμενο σφάλματος και — για τα εργαλεία με συνταγή κεντρικού υπολογιστή (claude, codex, opencode, cline, kilo, συνέχεια) — ένα `hostSetupCommand` (π.χ. `omniroute setup-opencode`) για εκτέλεση στον κεντρικό υπολογιστή. τίποτα δεν είναι γραμμένο. `dryRun: true` συνεχίζει να εργάζεται σε λειτουργία κοντέινερ και επιστρέφει μια ανανεωμένη διαδρομή προεπισκόπησης + στόχου χωρίς να αγγίζει το δίσκο. Το περιεχόμενο της προεπισκόπησης δεν είναι μια διαμόρφωση που φέρει διαπιστευτήρια για αντιγραφή ή εισαγωγή. Εφαρμόστε με τις αρχικές εισόδους tool/base URL/API key/model στον κεντρικό υπολογιστή ή χρησιμοποιήστε την υποδεικνυόμενη εντολή εγκατάστασης από την πλευρά του κεντρικού υπολογιστή. Δείτε [την ασφάλεια διαμόρφωσης CLI](../security/CLI-CONFIGURATION.md) για την κεφαλίδα προεπισκόπησης και τη σύμβαση αιτήματος. Αυτή η συμπεριφορά είναι σκόπιμη και προστατεύεται από παλινδρόμηση από `tests/unit/api/cli-tools/apply-container-guard.test.ts` — ποτέ μην "διορθώσετε" ένα 422 αφαιρώντας το προστατευτικό.
 
 ---
 
@@ -145,59 +107,61 @@ runtime, ο κατάλογος UI και κάθε επιφάνεια καταν�
 
 ---
 
-## 1. Κατάλογος του CLI Code (27 εργαλεία)
+## 1. Κατάλογος κώδικα CLI (28 εργαλεία)
 
-Όλα τα εργαλεία που εμφανίζονται στο `/dashboard/cli-code`. Όσα έχουν `baseUrlSupport: none` συνδέονται μέσω MITM ή μέσω μη αυτόματου οδηγού, αντί για προσαρμοσμένο βασικό URL:
+Όλα τα εργαλεία που εμφανίζονται στο `/dashboard/cli-code`. Αυτά με `baseUrlSupport: none` συνδέονται μέσω MITM ή ενός χειροκίνητου οδηγού αντί για προσαρμοσμένη βάση URL:
 
-| id           | name                    | vendor                 | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic              | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                   | none           | custom         | false        |
-| cline        | Cline                   | OSS (πρώην Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org               | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)              | full           | guide          | false        |
-| continue     | Continue                | continue.dev           | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)      | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ            | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)         | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)      | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)           | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (πρώην SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI             | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS              | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere              | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)      | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)       | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries         | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
-| custom       | Custom CLI              | —                      | full           | custom-builder | false        |
+| ταυτότητα           | όνομα                             | πωλητής                | baseUrlSupport | configType                   | acpSpawnable |
+| ------------------- | --------------------------------- | ---------------------- | -------------- | ---------------------------- | ------------ |
+| Κλοντ               | Κωδικός Claude                    | Anthropic              | γεμάτος        | env                          | αληθής       |
+| κώδιξ               | OpenAI Codex CLI                  | OpenAI                 | γεμάτος        | έθιμο                        | αληθής       |
+| zcode               | ZCode (Σχέδιο κωδικοποίησης GLM ) | Ζ.αι                   | κανένας        | έθιμο                        | ψευδής       |
+| cline               | Cline                             | OSS (πρώην Claude Dev) | γεμάτος        | έθιμο                        | αληθής       |
+| κιλό                | Κωδικός κιλό                      | Κιλό-Οργ               | γεμάτος        | έθιμο                        | ψευδής       |
+| ροο                 | Roo Code                          | Roo (OSS)              | γεμάτος        | οδηγός                       | ψευδής       |
+| συνεχίζω            | Συνεχίζω                          | συνέχεια.dev           | γεμάτος        | οδηγός                       | ψευδής       |
+| βοηθός τεχνίτη      | Βοηθός τεχνίτη                    | OSS (P. Gauthier)      | γεμάτος        | οδηγός                       | αληθής       |
+| σιδηρουργείο        | ForgeCode                         | Αντινομία HQ           | γεμάτος        | έθιμο                        | αληθής       |
+| jcode               | jcode                             | 1jehuang (OSS)         | γεμάτος        | έθιμο                        | ψευδής       |
+| βαθιά αναζήτηση-tui | DeepSeek TUI                      | Hunter Bown (OSS)      | γεμάτος        | έθιμο                        | ψευδής       |
+| κωφάλαινα           | CodeWhale                         | Hmbown (OSS)           | γεμάτος        | έθιμο                        | ψευδής       |
+| ανοιχτός κώδικας    | OpenCode                          | Ανωμαλία (πρώην SST)   | γεμάτος        | οδηγός                       | αληθής       |
+| droid               | Factory Droid                     | Factory AI             | μερικός        | οδηγός                       | ψευδής       |
+| δεύτερος πιλότος    | GitHub Copilot CLI                | GitHub/MS              | γεμάτος        | έθιμο                        | ψευδής       |
+| δρομέας-cli         | Cursor CLI                        | Anysphere              | μερικός        | οδηγός                       | αληθής       |
+| αθερίνα             | Αθερίνα                           | leonardcser (OSS)      | γεμάτος        | έθιμο                        | ψευδής       |
+| πι                  | Pi (pi-coding-agent)              | M. Zechner (OSS)       | γεμάτος        | έθιμο                        | ψευδής       |
+| grok-build          | Grok Build                        | xAI                    | γεμάτος        | έθιμο                        | ψευδής       |
+| συντριβή            | Συντριβή                          | OSS (Γούρι)            | γεμάτος        | έθιμο                        | ψευδής       |
+| qwen                | Κωδικός Qwen                      | Alibaba                | γεμάτος        | οδηγός                       | αληθής       |
+| openclaude          | OpenClaude                        | Gitlawb (OSS)          | γεμάτος        | οδηγός                       | ψευδής       |
+| zed                 | Zed                               | Zed Industries         | γεμάτος        | οδηγός                       | ψευδής       |
+| δρομέας             | Cursor                            | Anysphere              | κανένας        | οδηγός                       | ψευδής       |
+| αντιβαρύτητα        | Antigravity                       | Google                 | κανένας        | mitm                         | ψευδής       |
+| Ερμής               | Ερμής                             | Nous Research          | κανένας        | οδηγός                       | ψευδής       |
+| kiro                | Kiro AI                           | Amazon                 | κανένας        | mitm                         | ψευδής       |
+| έθιμο               | Προσαρμοσμένο CLI                 | —                      | γεμάτος        | προσαρμοσμένος κατασκευαστής | ψευδής       |
 
-Τα εργαλεία με `baseUrlSupport: "partial"` εμφανίζουν ένα σήμα "⚠ Μερικό βασικό URL" στην κάρτα του πίνακα ελέγχου.
+Τα εργαλεία με `baseUrlSupport: "partial"` εμφανίζουν ένα σήμα "⚠ Base URL parcial" στην κάρτα του ταμπλό.
 ---
 
-## 2. Κατάλογος πρακτόρων CLI (10 εργαλεία)
+## 2. Κατάλογος πρακτόρων CLI (11 εργαλεία)
 
 Αυτόνομοι πράκτορες που εμφανίζονται στο `/dashboard/cli-agents`:
 
-| id           | όνομα            | προμηθευτής              | υποστήριξη baseUrl | δυνατότητα εκκίνησης μέσω ACP |
-| ------------ | ---------------- | ------------------------ | ------------------ | ----------------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full               | false                         |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full               | true                          |
-| goose        | Goose            | Block / Linux Foundation | full               | true                          |
-| interpreter  | Open Interpreter | OSS                      | full               | true                          |
-| warp         | Warp AI          | Warp Inc.                | partial            | true                          |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full               | false                         |
-| omp          | Oh My Pi         | OSS                      | full               | true                          |
-| letta        | Letta CLI        | Letta                    | full               | false                         |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                         |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                         |
+| ταυτότητα             | όνομα                 | πωλητής                  | baseUrlSupport | acpSpawnable |
+| --------------------- | --------------------- | ------------------------ | -------------- | ------------ |
+| ερμής-πράκτορας       | Πράκτορας Ερμής       | Έρευνα Nous              | γεμάτος        | ψευδής       |
+| ανοιχτό νύχι          | OpenClaw              | OSS (P. Steinberger)     | γεμάτος        | αληθής       |
+| χήνα                  | Χήνα                  | Block / Linux Foundation | γεμάτος        | αληθής       |
+| διερμηνέας            | Ανοίξτε τον Διερμηνέα | OSS                      | γεμάτος        | αληθής       |
+| στημόνι               | Warp AI               | Warp Inc.                | μερικός        | αληθής       |
+| πράκτορας-κατάστρωμα  | Agent Deck            | asheshgoplani (OSS)      | γεμάτος        | ψευδής       |
+| omp                   | Oh My Pi              | OSS                      | γεμάτος        | αληθής       |
+| λέτα                  | Letta CLI             | Λέτα                     | γεμάτος        | ψευδής       |
+| πρωταρχικός πράκτορας | Πρωθυπουργός          | Prime Intellect (OSS)    | γεμάτος        | ψευδής       |
+| 5 βουτιά              | 5 βουτιά              | OSS (5dive-ai)           | γεμάτος        | ψευδής       |
+| γιατί κωδικοί         | WhyCodes              | Γιατί Corporation        | γεμάτος        | ψευδής       |
 
 ---
 
@@ -256,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Χειριστές Ρυθμίσεων για Νέα Εργαλεία
+## 6. Προγράμματα χειρισμού ρυθμίσεων για νέα εργαλεία
 
-Τα νέα εργαλεία με `configType: "custom"` διαθέτουν αποκλειστικές διαδρομές API ρυθμίσεων:
+Τα νέα εργαλεία με `configType: "custom"` έχουν αποκλειστικές ρυθμίσεις για διαδρομές API :
 
-| Διαδρομή                                    | Εργαλείο                                                                       |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
-| `POST /api/cli-tools/jcode-settings`        | jcode (σημαία --base-url)                                                      |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, παλαιού τύπου)                                  |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, κύριος + συγχρονισμός παλαιού τύπου `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
-| `POST /api/cli-tools/pi-settings`           | Πράκτορας προγραμματισμού Pi                                                   |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + αποκλειστικό κλειδί `.env`)               |
+| Διαδρομή                                    | Εργαλείο                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                         |
+| `POST /api/cli-tools/jcode-settings`        | jcode (σημαία --base-url )                                                      |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, κληρονομιά)                                      |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, κύριος συγχρονισμός + παλαιού τύπου `~/.deepseek` ) |
+| `POST /api/cli-tools/smelt-settings`        | Αθερίνα                                                                         |
+| `POST /api/cli-tools/pi-settings`           | Πράκτορας κωδικοποίησης Pi (`~/.pi/agent/models.json`, `providers.omniroute`)   |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                           |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + αποκλειστικό κλειδί `.env` )               |
 
-Όλες οι διαδρομές χρησιμοποιούν τη `sanitizeErrorMessage()` για αποκρίσεις σφαλμάτων (Αυστηρός Κανόνας #12).
+Όλες οι διαδρομές χρησιμοποιούν `sanitizeErrorMessage()` για απαντήσεις σφαλμάτων (Σκληρός κανόνας #12).
 
 ---
 
@@ -330,11 +294,11 @@ interface ToolBatchStatus {
 
 ## 9. Γρήγορη εκκίνηση
 
-### Βήμα 1 — Αποκτήστε ένα κλειδί API του OmniRoute
+### Βήμα 1 — Αποκτήστε ένα κλειδί OmniRoute API
 
-1. Ανοίξτε το `/dashboard/api-manager` → **Δημιουργία κλειδιού API**
+1. Ανοίξτε `/dashboard/api-manager` →** Δημιουργία κλειδιού API**
 2. Δώστε του ένα όνομα (π.χ. `cli-tools`) και επιλέξτε όλα τα δικαιώματα
-3. Αντιγράψτε το κλειδί — θα το χρειαστείτε για κάθε CLI παρακάτω
+3. Αντιγράψτε το κλειδί — που θα το χρειάζεστε για κάθε CLI παρακάτω
 
 > Το κλειδί σας μοιάζει με: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
@@ -342,7 +306,7 @@ interface ToolBatchStatus {
 
 ### Βήμα 2 — Εγκαταστήστε τα εργαλεία CLI
 
-Όλα τα εργαλεία που βασίζονται στο npm απαιτούν Node.js 22.22.2+ ή 24.x:
+Όλα τα εργαλεία που βασίζονται σε npm απαιτούν Node.js 22.22.2 + ή 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -363,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (εκκινείται μέσω `omniroute run gemini` → επιφάνεια /v1beta)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Βασίζεται στη Rust
+cargo install smelt  # Rust-based
 
-# Πράκτορας προγραμματισμού Pi
-# δείτε το https://github.com/zechnerj/pi-coding-agent για την εγκατάσταση
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# δείτε το https://github.com/1jehuang/jcode για την εγκατάσταση
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Βήμα 3 — Διαμορφώστε μέσω του πίνακα ελέγχου
+### Βήμα 3 — Ρύθμιση παραμέτρων μέσω του πίνακα ελέγχου
 
-1. Μεταβείτε στο `http://localhost:20128/dashboard/cli-code`
+1. Πηγαίνετε στο `http://localhost:20128/dashboard/cli-code`
 2. Βρείτε το εργαλείο σας στο πλέγμα
-3. Κάντε κλικ στην κάρτα για να ανοίξετε τη σελίδα λεπτομερειών του εργαλείου
-4. Επιλέξτε το κλειδί API και τη βασική διεύθυνση URL
-5. Κάντε κλικ στο **Εφαρμογή διαμόρφωσης** ή αντιγράψτε το απόσπασμα χειροκίνητης διαμόρφωσης
+3. Κάντε κλικ στην κάρτα για να ανοίξετε τη σελίδα λεπτομερειών εργαλείου
+4. Επιλέξτε το κλειδί API και τη βάση URL
+5. Κλικ** Εφαρμογή Config** ή αντιγράψτε το απόσπασμα μη αυτόματης διαμόρφωσης
 
 ---
 
-### Βήμα 4 — Ορίστε καθολικές μεταβλητές περιβάλλοντος
+### Βήμα 4 — Ορισμός παγκόσμιων μεταβλητών περιβάλλοντος
 
 ```bash
-# Καθολικό τελικό σημείο του OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Το Gemini CLI διαβάζει το GOOGLE_GEMINI_BASE_URL στη ΡΙΖΑ (το SDK του προσθέτει μόνο του το /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Για έναν **απομακρυσμένο διακομιστή**, αντικαταστήστε το `localhost:20128` με τη διεύθυνση IP ή τον τομέα του διακομιστή,
-> π.χ. `http://<your-server-ip>:20128`.
+> Για ένα** απομακρυσμένος διακομιστής** αντικαταστήστε `localhost:20128` με τον διακομιστή IP ή τομέα, π.χ. `http://<your-server-ip>:20128`.
 
 ---
 
-### Βήμα 4 — Διαμορφώστε κάθε εργαλείο
+### Βήμα 4 — Ρύθμιση παραμέτρων κάθε εργαλείου
 
-#### Claude Code
+#### Κωδικός Claude
 
 ```bash
-# Δημιουργήστε το ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -425,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Χρησιμοποιήστε τη ρίζα της ενοποιημένης πύλης Anthropic για το Claude Code. Μην προσθέσετε το `/v1` εδώ.
+Χρησιμοποιήστε την ενοποιημένη ρίζα πύλης Anthropic για τον κώδικα Claude. Μην προσαρτήσετε εδώ `/v1`.
 
 **Δοκιμή:** `claude "say hello"`
 
@@ -433,10 +396,7 @@ EOF
 
 #### OpenAI Codex
 
-Το σύγχρονο Codex (v0.137+) διαβάζει μόνο το `~/.codex/config.toml` — το παλιό
-`config.yaml` ανήκει στο παλαιότερο npm CLI και αγνοείται χωρίς ειδοποίηση. Το κλειδί API
-παραμένει στη μεταβλητή περιβάλλοντος `OMNIROUTE_API_KEY` (`env_key`) και ποτέ
-μέσα στο αρχείο:
+Το σύγχρονο Codex (v0.137 +) διαβάζει `~/.codex/config.toml` μόνο — το παλιό `config.yaml` ανήκει στο κληρονομικό npm CLI και αγνοείται σιωπηλά. Το κλειδί API παραμένει στη μεταβλητή περιβάλλοντος `OMNIROUTE_API_KEY` (`env_key`), ποτέ μέσα στο αρχείο:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -484,14 +444,44 @@ EOF
 
 **Δοκιμή:** `opencode`
 
-> Χρησιμοποιήστε το `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> για να στείλετε παραλλαγές συλλογισμού.
+> Χρησιμοποιήστε `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` για να στείλετε παραλλαγές σκέψης.
 
 ---
 
-#### Cline (CLI ή VS Code)
+#### Pi Coding Agent
 
-**Λειτουργία CLI:**
+Εγκαταστήστε το επίσημο πακέτο Pi Coding Agent με `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Το Pi διαβάζει προσαρμοσμένους παρόχους από `~/.pi/agent/models.json`. ορίστε `PI_CODING_AGENT_DIR` για να μετακινήσετε ολόκληρο τον κατάλογο του πράκτορα. Το ταμπλό ακολουθεί αυτήν την παράκαμψη. Το Pi δεν ανακαλύπτει μοντέλα από προσαρμοσμένα τελικά σημεία, επομένως OmniRoute γράφει το επιλεγμένο μοντέλο σε `models[]` χρησιμοποιώντας `openai-completions` API του Pi και το τελικό σημείο `/v1` συμβατό με OmniRoute OpenAI.
+
+Σε**CLI Tools → Pi** , επιλέξτε τελικό σημείο, κλειδί API και μοντέλο, ελέγξτε την προεπισκόπηση του παρόχου και, στη συνέχεια, εφαρμόστε. Η προεπισκόπηση είναι ένα τμήμα παρόχου: συγχωνεύστε `providers.omniroute` στο υπάρχον `models.json` κατά τη μη αυτόματη διαμόρφωση του Pi, ώστε άλλοι πάροχοι και ρυθμίσεις να παραμείνουν άθικτες.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Το Pi φορτώνει ξανά `models.json` όταν ανοίγετε `/model`. Δοκιμάστε τη διαμορφωμένη διαδρομή με το αναγνωριστικό παρόχου και το αναγνωριστικό μοντέλου που επιλέξατε:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Παραπομπές: [Μοντέλα Pi και προσαρμοσμένοι πάροχοι](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [μεταβλητές περιβάλλοντος Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [οδηγίες εγκατάστασης Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (κωδικός CLI ή VS )
+
+**λειτουργία CLI :**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -503,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Λειτουργία VS Code:**
-Ρυθμίσεις επέκτασης Cline → Πάροχος API: `OpenAI Compatible` → Βασική διεύθυνση URL: `http://localhost:20128/v1`
+**Λειτουργία κωδικού VS :** Ρυθμίσεις επέκτασης Cline → API Πάροχος: `OpenAI Compatible` → Βάση URL: `http://localhost:20128/v1`
 
-Εναλλακτικά, χρησιμοποιήστε τον πίνακα ελέγχου του OmniRoute → **Εργαλεία CLI → Cline → Εφαρμογή διαμόρφωσης**.
+Ή χρησιμοποιήστε τον πίνακα εργαλείων OmniRoute →**CLI Εργαλεία → Cline → Εφαρμογή διαμόρφωσης** .
 
 ---
 
-#### KiloCode (CLI ή VS Code)
+#### KiloCode (κωδικός CLI ή VS )
 
-**Λειτουργία CLI:**
+**λειτουργία CLI :**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Ρυθμίσεις VS Code:**
+**Ρυθμίσεις κώδικα VS :**
 
 ```json
 {
@@ -527,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Εναλλακτικά, χρησιμοποιήστε τον πίνακα ελέγχου του OmniRoute → **Εργαλεία CLI → KiloCode → Εφαρμογή διαμόρφωσης**.
+Ή χρησιμοποιήστε τον πίνακα εργαλείων OmniRoute →**CLI Εργαλεία → KiloCode → Εφαρμογή διαμόρφωσης** .
 
 ---
 
-#### Continue (Επέκταση VS Code)
+#### Συνέχεια ( Επέκταση κώδικα VS )
 
-Επεξεργαστείτε το `~/.continue/config.yaml`:
+Επεξεργασία `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -545,20 +534,20 @@ models:
     default: true
 ```
 
-Επανεκκινήστε το VS Code μετά την επεξεργασία.
+Επανεκκινήστε τον κώδικα VS μετά την επεξεργασία.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Χρησιμοποιήστε αυτήν την επιλογή όταν το VS Code Insiders είναι διαμορφωμένο για μοντέλα προσαρμοσμένων τελικών σημείων και θέλετε το OmniRoute να λειτουργεί χωρίς προσαρμοσμένο πεδίο κεφαλίδας.
+Χρησιμοποιήστε το όταν VS Code Insiders έχει ρυθμιστεί για προσαρμοσμένα μοντέλα τελικού σημείου και θέλετε OmniRoute να λειτουργεί χωρίς προσαρμοσμένο πεδίο κεφαλίδας.
 
 **Προτεινόμενη τοποθεσία:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Παράδειγμα χρήσης του ψευδωνύμου OmniRoute με token:**
+**Παράδειγμα χρησιμοποιώντας το ψευδώνυμο OmniRoute :**
 
 ```json
 [
@@ -582,27 +571,26 @@ models:
 
 **Σημειώσεις:**
 
-- Αντικαταστήστε το `sk-your-omniroute-key` με ένα κλειδί API που δημιουργήθηκε στο OmniRoute.
-- Το πεδίο `url` θα πρέπει να παραπέμπει στο `/api/v1/vscode/{token}/chat/completions`.
-- Το πεδίο `modelsUrl` θα πρέπει να παραπέμπει στο `/api/v1/vscode/{token}/models`.
-- Προτιμήστε την κανονική ροή `/v1` + κεφαλίδα Bearer όταν ο client υποστηρίζει προσαρμοσμένες κεφαλίδες.
-- Τα token που είναι ενσωματωμένα σε URL αποτελούν εναλλακτική λύση συμβατότητας και ενδέχεται να εμφανίζονται στα αρχεία καταγραφής του editor ή στο ιστορικό του proxy.
+- Αντικαταστήστε `sk-your-omniroute-key` με ένα κλειδί API που δημιουργήθηκε στο OmniRoute.
+- Το πεδίο `url` πρέπει να δείχνει στο `/api/v1/vscode/{token}/chat/completions`.
+- Το πεδίο `modelsUrl` πρέπει να δείχνει στο `/api/v1/vscode/{token}/models`.
+- Προτιμήστε την κανονική ροή κεφαλίδων `/v1` + Bearer όταν ο πελάτης υποστηρίζει προσαρμοσμένες κεφαλίδες.
+- Τα διακριτικά ενσωματωμένα σε URL είναι εναλλακτική συμβατότητα και ενδέχεται να εμφανίζονται στα αρχεία καταγραφής του προγράμματος επεξεργασίας ή στο ιστορικό διακομιστή μεσολάβησης.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Συνδεθείτε στον λογαριασμό σας AWS/Kiro:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# Το CLI χρησιμοποιεί τον δικό του έλεγχο ταυτότητας — το OmniRoute δεν απαιτείται ως backend για το ίδιο το Kiro CLI.
-# Χρησιμοποιήστε το kiro-cli παράλληλα με το OmniRoute για άλλα εργαλεία.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Για την εφαρμογή desktop **Kiro IDE**, χρησιμοποιήστε το endpoint MITM που παρέχεται από το OmniRoute
-στη διαδρομή `/dashboard/cli-tools → Kiro`.
+Για το**Kiro IDE** εφαρμογή επιφάνειας εργασίας, χρησιμοποιήστε το τελικό σημείο MITM που εκτίθεται από OmniRoute κάτω από `/dashboard/cli-tools → Kiro`.
 
 ---
 

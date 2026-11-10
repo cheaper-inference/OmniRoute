@@ -61,6 +61,19 @@ OmniRoute በ**Electron 41** + **electron-builder 26.10** ላይ የተገነባ
 - `npm run build:mac-x64` / `build:mac-arm64` — ባለአንድ-አርክቴክቸር macOS ግንባታዎች
 - `npm run pack` — ለአካባቢያዊ ሙከራ ማውጫ-ብቻ ግንባታ (ጫኚ የለውም)
 
+## አማራጭ የruntime ጥቅሎች
+
+የdesktop build-ዎች ከመጫኛዎቻቸው ጋር አማራጭ የruntime ማህደሮችን ሊያወጡ ይችላሉ። የተጫነው የserver ይዘት `optional-packs.index.json` ይዟል (በWindows እና Linux ከ`resources/app` ስር)። ለ`browser-runtime` መዝገብ `packs[].tarball` ያንብቡ፣ **ያንኑ ትክክለኛ የፋይል ስም ከተመሳሳይ release** ያውርዱ። የማህደር ስሞች SHA-256 digest ይይዛሉ፤ የተለያዩ build-ዎች የተለያዩ ማህደሮች ሊፈልጉ ይችላሉ። የወረደውን የፋይል ስም አይቀይሩ።
+
+የተጫነውን መተግበሪያ መረጃ ጠቋሚና የተመረጠውን ማህደር ወደ አንድ ማውጫ ይቅዱ፣ ከዚያ ከተመሳሳይ release የመጣ CLI ይጠቀሙ፦
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` የመጫንና የማረጋገጥ ሁኔታን ያሳያል፣ የማህደሩን የፋይል ስም አይደለም። አብሮ የተሰጠው መረጃ ጠቋሚ ማህደሩን ይመርጣል። መጫን ከማውጣት በፊት የማህደሩን checksum፣ የተጫነ ጥቅል ከመተካት በፊትም የpackage checksum-ዎቹን ያረጋግጣል። አካባቢያዊ ፋይሎችን ያነባል፤ የጎደሉ ማህደሮችን አያወርድም። ከመጫን በኋላ መተግበሪያውን ዳግም ያስጀምሩ። release-ው የሚዛመድ asset ከሌለው፣ አማራጭ ጥቅሉ በዚያ release ንብረቶች አይገኝም።
+
 ## የማውጫ አቀማመጥ
 
 ```

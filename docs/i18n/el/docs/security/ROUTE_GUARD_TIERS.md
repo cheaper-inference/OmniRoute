@@ -197,6 +197,12 @@ Tunnel, Tailscale, Ngrok), ο έλεγχος loopback εξακολουθεί ν�
 | `/api/providers/health-autopilot/actions` | Εκτελεί ενέργειες αποκατάστασης του autopilot                                 |
 | `/api/settings/obsidian`                  | Εκδίδει επαναχρησιμοποιήσιμα διαπιστευτήρια WebDAV για οποιαδήποτε ρίζα vault |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                  |
+| `/api/cli-tools/apply`                    | Ξαναγράφει τη ρύθμιση CLI του διαχειριστή στον υπολογιστή φιλοξενίας          |
+| `/api/cli-tools/guide-settings`           | Γράφει αρχεία ρυθμίσεων CLI βάσει οδηγών                                      |
+| `/api/cli-tools/hermes-agent-settings`    | Γράφει τη ρύθμιση του πράκτορα Hermes                                         |
+| `/api/cli-tools/backups`                  | Επαναφέρει και διαγράφει αντίγραφα ρυθμίσεων CLI                              |
+| `/api/log-export`                         | Στέλνει αρχεία καταγραφής κλήσεων σε ρυθμισμένο προορισμό                     |
+| `/api/restart`                            | Επανεκκινεί τη διεργασία του διακομιστή                                       |
 
 **Απόκριση σε περίπτωση παραβίασης:** `401 Authentication required`
 

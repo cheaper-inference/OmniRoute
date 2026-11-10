@@ -12,14 +12,13 @@
 import { z } from "zod";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
-import { extractApiKey, isValidApiKey } from "@/sse/services/auth";
 import {
   getPlaygroundPreset,
   updatePlaygroundPreset,
   deletePlaygroundPreset,
 } from "@/lib/db/playgroundPresets";
+import { checkPlaygroundPresetAuth } from "@/lib/api/playgroundPresetAuth";
 import { PlaygroundPresetUpdateSchema } from "@/shared/schemas/playground";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
@@ -34,14 +33,8 @@ function errorResp(status: number, message: string): Response {
 }
 
 async function checkAuth(request: Request): Promise<Response | null> {
-  const apiKeyRaw = extractApiKey(request);
-  if (isRequireApiKeyEnabled() && !apiKeyRaw) {
-    return errorResp(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
-  }
-  if (apiKeyRaw && !(await isValidApiKey(apiKeyRaw))) {
-    return errorResp(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
-  }
-  return null;
+  const error = await checkPlaygroundPresetAuth(request);
+  return error ? errorResp(HTTP_STATUS.UNAUTHORIZED, error) : null;
 }
 
 function validateId(id: unknown): { valid: true; id: string } | { valid: false; error: Response } {

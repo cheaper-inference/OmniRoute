@@ -65,6 +65,19 @@ Il workspace `electron/` espone inoltre:
 - `npm run build:mac-x64` / `build:mac-arm64` — build macOS per una singola architettura
 - `npm run pack` — build della sola directory per i test locali (senza programma di installazione)
 
+## Pacchetti runtime facoltativi
+
+Le build desktop possono pubblicare archivi runtime facoltativi insieme ai propri programmi di installazione. Il contenuto del server installato comprende `optional-packs.index.json` (sotto `resources/app` in Windows e Linux). Per la voce `browser-runtime`, leggere `packs[].tarball` e scaricare **quel nome esatto di file dalla stessa release**. I nomi degli archivi includono un digest SHA-256; build diverse possono richiedere archivi diversi. Lasciare invariato il nome del file scaricato.
+
+Copiare l'indice dell'applicazione installata e l'archivio scelto in una stessa directory, quindi usare la CLI della stessa release:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` mostra lo stato di installazione e verifica, non il nome dell'archivio. L'indice incluso seleziona l'archivio. L'installazione verifica il checksum dell'archivio prima dell'estrazione e i checksum dei suoi pacchetti prima di sostituire un pack installato. Legge file locali; non scarica gli archivi mancanti. Riavviare l'applicazione dopo l'installazione. Se la release non ha una risorsa corrispondente, il pacchetto facoltativo non è disponibile tra le risorse di quella release.
+
 ## Struttura delle directory
 
 ```

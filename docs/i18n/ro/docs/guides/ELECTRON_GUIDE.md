@@ -65,6 +65,19 @@ Spațiul de lucru `electron/` expune, de asemenea:
 - `npm run build:mac-x64` / `build:mac-arm64` — compilări macOS pentru o singură arhitectură
 - `npm run pack` — compilare doar ca director pentru testare locală (fără program de instalare)
 
+## Pachete opționale pentru mediul de execuție
+
+Buildurile desktop pot publica arhive opționale pentru mediul de execuție alături de instalatoare. Fișierele serverului instalat conțin `optional-packs.index.json` (sub `resources/app` pe Windows și Linux). Pentru intrarea `browser-runtime`, citiți `packs[].tarball` și descărcați **exact acel nume de fișier din aceeași versiune**. Numele arhivelor includ un hash SHA-256; builduri diferite pot necesita arhive diferite. Păstrați neschimbat numele fișierului descărcat.
+
+Copiați indexul aplicației instalate și arhiva selectată într-un singur director, apoi folosiți CLI-ul din aceeași versiune:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` afișează starea instalării și verificării, nu numele arhivei. Indexul inclus selectează arhiva. Instalarea verifică suma de control a arhivei înainte de extragere și sumele de control ale pachetelor înainte de a înlocui un pachet instalat. Citește fișiere locale; nu descarcă arhive lipsă. Reporniți aplicația după instalare. Dacă versiunea nu are un fișier corespunzător, pachetul opțional nu este disponibil prin fișierele acelei versiuni.
+
 ## Structura directoarelor
 
 ```

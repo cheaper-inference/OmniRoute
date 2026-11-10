@@ -154,6 +154,8 @@ export function upsertKeyQuotaLimits(
        monthly_amount_usd = excluded.monthly_amount_usd,
        updated_at = excluded.updated_at`
   ).run(apiKeyId, tpm, rpm, monthly);
+  // Saving the quota is an operator action: a month closed by unpriced usage starts over.
+  deleteUnpricedQuotaMonthStart(apiKeyId);
 
   return { apiKeyId, tpmLimit: tpm, rpmLimit: rpm, monthlyAmountUsd: monthly };
 }
@@ -163,6 +165,41 @@ export function clearKeyQuotaLimits(apiKeyId: string): void {
   const db = getDbInstance();
   db.prepare("DELETE FROM api_key_quota_limits WHERE api_key_id = ?").run(apiKeyId);
   db.prepare("DELETE FROM api_key_quota_counters WHERE api_key_id = ?").run(apiKeyId);
+  deleteUnpricedQuotaMonthStart(apiKeyId);
+}
+
+// ---------------------------------------------------------------------------
+// Unpriced usage marker
+// ---------------------------------------------------------------------------
+
+/**
+ * The calendar month in which a key used a metered model it could not price (no
+ * pricing row and no provider-reported cost). That usage never reaches the
+ * ledger the monthly cap sums, so it is recorded here, in `key_value`, and needs
+ * no schema change.
+ */
+const UNPRICED_QUOTA_NAMESPACE = "keyQuotaUnpricedUsage";
+
+/** Start (UTC ms) of the month that recorded unpriced usage for a key, or null. */
+export function loadUnpricedQuotaMonthStart(apiKeyId: string): number | null {
+  if (!apiKeyId) return null;
+  const row = getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(UNPRICED_QUOTA_NAMESPACE, apiKeyId);
+  const monthStart = toNumber(asRecord(row).value, 0);
+  return monthStart > 0 ? monthStart : null;
+}
+
+export function saveUnpricedQuotaMonthStart(apiKeyId: string, monthStartMs: number): void {
+  getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(UNPRICED_QUOTA_NAMESPACE, apiKeyId, String(monthStartMs));
+}
+
+export function deleteUnpricedQuotaMonthStart(apiKeyId: string): void {
+  getDbInstance()
+    .prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?")
+    .run(UNPRICED_QUOTA_NAMESPACE, apiKeyId);
 }
 
 // ---------------------------------------------------------------------------

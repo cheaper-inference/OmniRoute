@@ -482,38 +482,38 @@ Ini bermakna **penambahan penyedia baharu dengan `auto/*` didayakan akan mengemb
 
 ## API
 
-**Tiada titik akhir khusus `POST /api/combos/auto`** — Auto-Combo digunakan dalam dua cara:
+**Tiada titik akhir khusus `POST /api/combos/auto`** — Auto-Combo digunakan melalui dua cara:
 
-1. **Konfigurasi sifar (disyorkan):** Hantar sebarang permintaan pelengkapan sembang dengan `model: "auto"` atau `model: "auto/<variant>"`. Kilang maya membina kombo bagi setiap permintaan — tiada pengekalan atau panggilan API diperlukan.
+1. **Konfigurasi sifar (disyorkan):** Hantar sebarang permintaan pelengkapan sembang dengan `model: "auto"` atau `model: "auto/<variant>"`. Kilang maya membina combo bagi setiap permintaan — tiada pengekalan dan tiada panggilan API diperlukan.
 
-2. **Kombo tersimpan dengan `strategy: "auto"`:** Cipta kombo biasa melalui `POST /api/combos` dan tetapkan `strategy: "auto"` bersama `config.auto.weights` / `config.auto.candidatePool`. Enjin pemarkahan yang sama digunakan; kombo disimpan dalam `combos` dan boleh digunakan semula melalui ID.
+2. **Combo tersimpan dengan `strategy: "auto"`:** Cipta combo biasa melalui `POST /api/combos` dan tetapkan `strategy: "auto"` serta `config.auto.weights` / `config.auto.candidatePool`. Enjin pemarkahan yang sama digunakan; combo disimpan dalam `combos` dan boleh digunakan semula melalui ID.
 
-Untuk penemuan, `GET /api/combos/auto` menyenaraikan setiap varian dengan kumpulan calonnya yang telah diselesaikan berserta `context_length` / `max_output_tokens` — nilai MAKSIMUM merentas tetingkap kumpulan calon. Klien (contohnya pemalam opencode) mesti mengiklankan nilai ini dan bukannya `0`: konteks sifar menyahdayakan pemadatan automatik opencode sepenuhnya, membolehkan sesi berkembang sehingga pembersihan sejarah get laluan memusnahkan konteks. Nilai MAKSIMUM selamat untuk diiklankan kerana prapenapis konteks auto-combo menghalakan permintaan bersaiz terlalu besar kepada calon dengan tetingkap besar.
+Untuk penemuan, `GET /api/combos/auto` menyenaraikan setiap varian dengan kumpulan calon yang telah ditentukan serta `context_length` / `max_output_tokens` — nilai MAX merentas tetingkap kumpulan calon. Klien (contohnya pemalam opencode) mesti mengiklankan nilai ini dan bukannya `0`: konteks sifar menyahdayakan pemadatan automatik opencode sepenuhnya, membolehkan sesi berkembang sehingga penghapusan sejarah oleh get laluan memusnahkan konteks. MAX selamat untuk diiklankan kerana pra-penapis konteks auto-combo menghalakan permintaan yang terlalu besar kepada calon dengan tetingkap besar.
 
 ```bash
-# Penggunaan konfigurasi sifar (tanpa penciptaan kombo)
+# Penggunaan konfigurasi sifar (tanpa penciptaan combo)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Kombo automatik tersimpan melalui titik akhir kombo biasa
+# Combo auto tersimpan melalui titik akhir combo biasa
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Strategi penghala automatik
+### Strategi penghala auto
 
-Kombo tersimpan dengan `strategy: "auto"` boleh menetapkan `config.routerStrategy` (atau `config.auto.routerStrategy` legasi) kepada salah satu daripada:
+Combo `strategy: "auto"` yang disimpan boleh menetapkan `config.routerStrategy` (atau `config.auto.routerStrategy` legasi) kepada salah satu daripada:
 
 - `rules` — pemarkahan berwajaran lalai
-- `score` — memilih skor berwajaran dikonfigurasikan yang tertinggi. Seri tepat mengekalkan susunan calon yang dikonfigurasikan; `explorationRate` sedia ada membuat pensampelan daripada keseluruhan kumpulan berperingkat.
+- `score` — memilih skor berwajaran tertinggi yang dikonfigurasikan. Ikatan tepat mengekalkan susunan calon yang dikonfigurasikan; `explorationRate` sedia ada membuat pensampelan daripada keseluruhan kumpulan berperingkat.
 - `cost` / `eco` — penyedia sihat yang paling murah
 - `latency` / `fast` — kependaman p95 terendah dengan penalti kebolehpercayaan
 - `sla-aware` / `sla` — mengutamakan calon yang memenuhi SLO kependaman p95, kadar ralat dan kos pilihan
 - `lkgp` — penyedia terakhir yang diketahui baik didahulukan
-- `nadir` — meminta API keputusan [Nadir](https://getnadir.com) menentukan model dalam kumpulan yang diperlukan oleh gesaan; memerlukan penyertaan, dan beralih secara terbuka kepada `rules` jika gagal
+- `nadir` — meminta API keputusan [Nadir](https://getnadir.com) menentukan model dalam kumpulan yang diperlukan oleh prom; ikut serta secara pilihan, dan beralih kepada `rules` jika gagal
 
 ### Strategi penghala secara terperinci
 
@@ -541,7 +541,7 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Bila hendak digunakan**: Lalai. Gunakan apabila anda mahukan pertukaran seimbang merentas semua isyarat.
+**Masa untuk digunakan**: Lalai. Gunakan apabila anda mahukan pertukaran seimbang antara semua isyarat.
 
 **Alias**: `rules` (tiada alias)
 
@@ -564,7 +564,7 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Bila hendak digunakan**: Beban kerja yang sensitif terhadap kos, pemprosesan kelompok atau tugas latar belakang.
+**Masa untuk digunakan**: Beban kerja yang sensitif terhadap kos, pemprosesan kelompok atau tugas latar belakang.
 
 **Alias**: `cost`, `eco`
 
@@ -572,7 +572,7 @@ class CostStrategyImpl implements RouterStrategy {
 
 #### 3. `latency` / `fast` — kependaman p95 terendah dengan penalti kebolehpercayaan
 
-Mengisih mengikut `p95LatencyMs + (errorRate * 1000)`. Penalti kadar ralat memastikan penyedia yang tidak boleh dipercayai diletakkan pada kedudukan lebih rendah walaupun kependaman nominal mereka rendah.
+Mengisih mengikut `p95LatencyMs + (errorRate * 1000)`. Penalti kadar ralat memastikan penyedia yang tidak boleh dipercayai diberi kedudukan lebih rendah walaupun kependaman nominal mereka rendah.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -589,7 +589,7 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Bila hendak digunakan**: Beban kerja yang sensitif terhadap kependaman seperti sembang masa nyata, pelengkapan automatik atau pembantu pengekodan interaktif.
+**Masa untuk digunakan**: Beban kerja yang sensitif terhadap kependaman seperti sembang masa nyata, pelengkapan automatik atau pembantu pengekodan interaktif.
 
 **Alias**: `latency`, `fast`
 
@@ -597,19 +597,19 @@ class LatencyStrategyImpl implements RouterStrategy {
 
 #### 4. `sla-aware` / `sla` — pematuhan SLO kependaman/ralat/kos
 
-Memberikan skor kepada setiap calon berdasarkan sejauh mana calon tersebut memenuhi dasar SLO yang dikonfigurasikan:
+Memberi skor kepada setiap calon berdasarkan sejauh mana calon tersebut memenuhi dasar SLO yang dikonfigurasikan:
 
 | Faktor          | Wajaran | Formula                                                      |
 | --------------- | ------- | ------------------------------------------------------------ |
 | Skor kependaman | 35%     | `threshold / max(value, ε)`                                  |
 | Skor ralat      | 35%     | `threshold / max(value, ε)`                                  |
 | Skor kesihatan  | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)            |
-| Skor kos        | 10%     | `threshold / max(value, ε)` atau normalisasi songsang        |
-| Skor kestabilan | 5%      | sisihan piawai kependaman yang dinormalisasi secara songsang |
+| Skor kos        | 10%     | `threshold / max(value, ε)` atau dinormalkan secara songsang |
+| Skor kestabilan | 5%      | sisihan piawai kependaman yang dinormalkan secara songsang   |
 
 Apabila `hardConstraints: true`, calon diisih terutamanya mengikut **skor pelanggaran**
-(sejauh mana mereka melebihi mana-mana SLO), kemudian mengikut skor komposit. Jika tidak,
-hanya skor komposit digunakan.
+(sejauh mana calon melebihi mana-mana SLO), kemudian mengikut skor komposit. Jika tidak,
+calon hanya diisih mengikut skor komposit.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -623,7 +623,7 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Medan SLA** (ditetapkan pada konfigurasi kombo):
+**Medan SLA** (ditetapkan pada konfigurasi gabungan):
 
 ```json
 {
@@ -638,16 +638,16 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Masa untuk digunakan**: Beban kerja pengeluaran dengan belanjawan kependaman, kadar ralat atau kos yang ketat.
+**Bila hendak digunakan**: Beban kerja pengeluaran dengan bajet kependaman, kadar ralat atau kos yang ketat.
 
 **Alias**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — utamakan penyedia terakhir yang diketahui baik
+#### 5. `lkgp` — penyedia terakhir yang diketahui baik didahulukan
 
-Mencuba **penyedia terakhir yang diketahui baik** (jika ditetapkan) terlebih dahulu, kemudian beralih kepada
-strategi `rules` sebagai sandaran. Berguna untuk kelekitan sesi — penyedia yang sama mengendalikan
+Mencuba **penyedia terakhir yang diketahui baik** (jika ditetapkan) terlebih dahulu, kemudian kembali kepada
+strategi `rules`. Berguna untuk kekekalan sesi — penyedia yang sama mengendalikan
 permintaan susulan dalam sesuatu perbualan.
 
 ```ts
@@ -669,26 +669,26 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Beralih kepada strategi rules sebagai sandaran
+    // Kembali kepada strategi rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Masa untuk digunakan**: Perbualan berbilang giliran apabila anda mahu penyedia yang sama mengendalikan
-permintaan susulan (contohnya, untuk caching, kesinambungan konteks atau konsistensi harga).
+**Bila hendak digunakan**: Perbualan berbilang giliran apabila anda mahu penyedia yang sama mengendalikan
+permintaan susulan (contohnya, untuk pencachean, kesinambungan konteks atau konsistensi harga).
 
 **Alias**: `lkgp` (tiada alias)
 
 ---
 
-#### 6. `nadir` — pemilihan model berasaskan gesaan melalui Nadir
+#### 6. `nadir` — pemilihan model peka gesaan melalui Nadir
 
 Setiap strategi di atas menyusun kedudukan calon berdasarkan telemetri masing-masing; tiada satu pun yang membaca
 permintaan. `nadir` menghantar giliran pengguna terakhir berserta ID model kumpulan kepada
 API keputusan [Nadir](https://getnadir.com) (`POST /v1/bucket`) dan menghalakan permintaan kepada model
-yang dipilih oleh Nadir daripada menu tersebut (`simple` → model berkeupayaan paling murah, `complex` → model
-termaju). Sambungan yang menyediakan model tersebut masih dipilih oleh `rules`, supaya kuota,
+yang dipilih oleh Nadir daripada menu tersebut (`simple` → model berkeupayaan yang paling murah, `complex` → model
+barisan hadapan). Sambungan yang menyediakan model tersebut masih dipilih oleh `rules`, jadi kuota,
 kesihatan dan kos terus menentukan akaun yang digunakan.
 
 ```json
@@ -706,22 +706,25 @@ kesihatan dan kos terus menentukan akaun yang digunakan.
 ```
 
 `OMNIROUTE_NADIR_API_KEY` dan `OMNIROUTE_NADIR_BASE_URL` ialah nilai sandaran persekitaran untuk kedua-dua
-rentetan tersebut. `baseUrl` hanya diperlukan untuk Nadir yang dihoskan sendiri (`/v1` di hujung dibenarkan).
-Panggilan tanpa kunci menggunakan peringkat tanpa nama Nadir, yang mempunyai had kadar bagi setiap IP.
+rentetan tersebut. `baseUrl` hanya diperlukan untuk Nadir yang dihoskan sendiri (`/v1` di hujungnya boleh diterima).
+Panggilan tanpa kunci akan menggunakan peringkat tanpa nama Nadir, yang mempunyai had kadar bagi setiap IP. Dengan kunci
+([cipta satu](https://app.getnadir.com/dashboard/api-keys)), setiap keputusan akan
+direkodkan ke papan pemuka Nadir anda. Persediaan dan pengesahan lengkap:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Maklumat yang dihantar keluar: teks mesej pengguna terakhir (16k aksara pertama), ID model
-calon dan tag saluran `source: "omniroute"`. Tiada gesaan sistem, sejarah, alat atau
+Perkara yang dihantar keluar: teks mesej pengguna terakhir (16 ribu aksara pertama), ID
+model calon dan tag saluran `source: "omniroute"`. Tiada gesaan sistem, sejarah, alat atau
 pengepala.
 
-Tingkah laku kegagalan adalah terbuka-selamat: tamat masa (lalai 2000 ms), respons bukan 2xx, hos yang tidak dapat
-dicapai, respons yang tidak sah atau pemilihan di luar kumpulan akan menggunakan keputusan `rules`
-dan sebabnya diawali dengan `NadirStrategy: fallback (…)`. Selepas panggilan gagal, strategi
-melangkau rangkaian selama 30 s, maka gangguan hanya menyebabkan satu tamat masa bagi setiap 30 s dan bukannya
+Gelagat kegagalan ialah terbuka semasa gagal: tamat masa (lalai 2000 ms), respons bukan 2xx, hos yang tidak dapat
+dicapai, respons yang tidak sah atau pilihan di luar kumpulan akan kembali kepada keputusan `rules`
+dan sebabnya diawali dengan `NadirStrategy: fallback (…)`. Selepas panggilan gagal,
+strategi akan melangkau rangkaian selama 30 s, supaya gangguan perkhidmatan hanya menyebabkan satu tamat masa bagi setiap 30 s dan bukannya
 satu bagi setiap permintaan. Peristiwa penghalaan melaporkan `strategy: "nadir"` hanya apabila Nadir benar-benar membuat
-pemilihan.
+pilihan tersebut.
 
-**Masa untuk digunakan**: trafik dengan tahap kesukaran bercampur pada kumpulan yang merangkumi beberapa peringkat model (model kecil, sederhana
-dan termaju), apabila anda mahu mengurangkan kos akibat sentiasa menggunakan model termaju.
+**Bila hendak digunakan**: trafik dengan tahap kesukaran bercampur pada kumpulan yang merangkumi beberapa aras model (model kecil, pertengahan
+dan barisan hadapan), apabila anda mahu mengurangkan kos akibat sentiasa menggunakan model barisan hadapan.
 
 **Alias**: `nadir` (tiada alias)
 
@@ -772,14 +775,14 @@ Kemudian gunakannya:
 
 ### Panduan pemilihan strategi penghala
 
-| Kes penggunaan            | Strategi    | Sebab                                            |
-| ------------------------- | ----------- | ------------------------------------------------ |
-| Beban kerja seimbang      | `rules`     | Lalai — mempertimbangkan semua faktor            |
-| Minimumkan kos            | `cost`      | Sentiasa memilih yang paling murah               |
-| Minimumkan kependaman     | `latency`   | Memilih penyedia terpantas yang boleh dipercayai |
-| SLO ketat                 | `sla-aware` | Menapis mengikut ambang p95/ralat/kos            |
-| Sembang berbilang giliran | `lkgp`      | Kelekitan sesi                                   |
-| Kesukaran bercampur       | `nadir`     | Memilih peringkat model bagi setiap gesaan       |
+| Kes penggunaan            | Strategi    | Sebab                                     |
+| ------------------------- | ----------- | ----------------------------------------- |
+| Beban kerja seimbang      | `rules`     | Lalai — mempertimbangkan semua faktor     |
+| Minimumkan kos            | `cost`      | Sentiasa memilih yang paling murah        |
+| Minimumkan kependaman     | `latency`   | Memilih penyedia andal yang paling pantas |
+| SLO yang ketat            | `sla-aware` | Menapis mengikut ambang p95/ralat/kos     |
+| Sembang berbilang giliran | `lkgp`      | Kelekatan sesi                            |
+| Kesukaran bercampur       | `nadir`     | Memilih tahap model bagi setiap gesaan    |
 
 Medan peka SLA:
 

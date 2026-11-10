@@ -196,6 +196,12 @@ Tunnel، Tailscale، Ngrok) اجرا میکنید، بررسی loopback همچن
 | `/api/providers/health-autopilot/actions` | اقدامهای اصلاحی autopilot را اجرا میکند                                        |
 | `/api/settings/obsidian`                  | برای هر root مربوط به vault، credentialهای قابل استفاده مجدد WebDAV صادر میکند |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                   |
+| `/api/cli-tools/apply`                    | پیکربندی CLI اپراتور را روی میزبان بازنویسی می‌کند                             |
+| `/api/cli-tools/guide-settings`           | فایل‌های پیکربندی CLI مبتنی بر راهنما را می‌نویسد                              |
+| `/api/cli-tools/hermes-agent-settings`    | پیکربندی عامل Hermes را می‌نویسد                                               |
+| `/api/cli-tools/backups`                  | نسخه‌های پشتیبان پیکربندی CLI را بازیابی و حذف می‌کند                          |
+| `/api/log-export`                         | گزارش فراخوانی‌ها را به مقصد پیکربندی‌شده می‌فرستد                             |
+| `/api/restart`                            | فرایند سرور را دوباره راه‌اندازی می‌کند                                        |
 
 **پاسخ در صورت نقض:** `401 Authentication required`
 

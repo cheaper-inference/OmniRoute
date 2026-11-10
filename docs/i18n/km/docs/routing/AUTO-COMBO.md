@@ -480,16 +480,16 @@ curl -X POST http://localhost:20128/api/combos \
 
 ## API
 
-**មិនមាន endpoint `POST /api/combos/auto` ដាច់ដោយឡែកទេ** — Auto-Combo ត្រូវបានប្រើប្រាស់តាមពីរវិធី៖
+មិនមាន **endpoint `POST /api/combos/auto` ដាច់ដោយឡែកទេ** — Auto-Combo ត្រូវបានប្រើតាមពីរវិធី៖
 
-1. **គ្មានការកំណត់រចនាសម្ព័ន្ធ (ត្រូវបានណែនាំ):** ផ្ញើសំណើ chat completion ណាមួយដោយប្រើ `model: "auto"` ឬ `model: "auto/<variant>"`។ virtual factory បង្កើត combo សម្រាប់សំណើនីមួយៗ — មិនត្រូវការការរក្សាទុកជាអចិន្ត្រៃយ៍ ហើយក៏មិនត្រូវការការហៅ API ដែរ។
+1. **មិនត្រូវការការកំណត់រចនាសម្ព័ន្ធ (បានណែនាំ)៖** ផ្ញើសំណើ chat completion ណាមួយជាមួយ `model: "auto"` ឬ `model: "auto/<variant>"`។ virtual factory នឹងបង្កើត combo សម្រាប់សំណើនីមួយៗ — មិនត្រូវការការរក្សាទុក និងមិនត្រូវការការហៅ API ទេ។
 
-2. **Combo ដែលបានរក្សាទុកជាមួយ `strategy: "auto"`:** បង្កើត combo ធម្មតាតាមរយៈ `POST /api/combos` ហើយកំណត់ `strategy: "auto"` រួមជាមួយ `config.auto.weights` / `config.auto.candidatePool`។ វាប្រើ scoring engine ដូចគ្នា; combo ត្រូវបានរក្សាទុកក្នុង `combos` ហើយអាចប្រើឡើងវិញតាម ID។
+2. **Combo ដែលបានរក្សាទុកជាមួយ `strategy: "auto"`៖** បង្កើត combo ធម្មតាតាមរយៈ `POST /api/combos` ហើយកំណត់ `strategy: "auto"` រួមជាមួយ `config.auto.weights` / `config.auto.candidatePool`។ scoring engine ដូចគ្នានឹងត្រូវបានប្រើ ហើយ combo ត្រូវបានរក្សាទុកក្នុង `combos` និងអាចប្រើឡើងវិញតាម ID។
 
-សម្រាប់ការស្វែងរក `GET /api/combos/auto` បង្ហាញ variant ទាំងអស់ជាមួយ candidate pool ដែលបានដោះស្រាយ ព្រមទាំង `context_length` / `max_output_tokens` — តម្លៃ MAX ក្នុងចំណោម window របស់ candidate pool។ Client (ឧ. opencode plugin) ត្រូវតែប្រកាសតម្លៃទាំងនេះជំនួសឱ្យ `0`៖ context សូន្យនឹងបិទ auto-compaction របស់ opencode ទាំងស្រុង ដែលអនុញ្ញាតឱ្យ session កើនឡើងរហូតដល់ការសម្អាត history របស់ gateway បំផ្លាញ context។ ការប្រកាស MAX មានសុវត្ថិភាព ព្រោះ context pre-filter របស់ auto-combo នឹងបញ្ជូនសំណើដែលមានទំហំធំពេកទៅកាន់ candidate ដែលមាន window ធំ។
+សម្រាប់ការស្វែងរក `GET /api/combos/auto` រាយបញ្ជី variant ទាំងអស់ជាមួយ candidate pool ដែលបានដោះស្រាយរបស់វា ព្រមទាំង `context_length` / `max_output_tokens` — តម្លៃ MAX ក្នុងចំណោម window របស់ candidate pool។ Client (ឧ. plugin របស់ opencode) ត្រូវតែផ្សព្វផ្សាយតម្លៃទាំងនេះជំនួសឱ្យ `0`៖ context សូន្យនឹងបិទ auto-compaction របស់ opencode ទាំងស្រុង ដោយអនុញ្ញាតឱ្យ session កើនឡើងរហូតដល់ការលុប history របស់ gateway បំផ្លាញ context។ ការផ្សព្វផ្សាយ MAX គឺមានសុវត្ថិភាព ពីព្រោះ context pre-filter របស់ auto-combo បញ្ជូនសំណើដែលមានទំហំធំពេកទៅកាន់ candidate ដែលមាន window ធំ។
 
 ```bash
-# ការប្រើប្រាស់ដោយគ្មានការកំណត់រចនាសម្ព័ន្ធ (មិនបង្កើត combo)
+# ការប្រើប្រាស់ដោយមិនត្រូវការការកំណត់រចនាសម្ព័ន្ធ (មិនបង្កើត combo)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
@@ -501,35 +501,35 @@ curl -X POST http://localhost:20128/api/combos \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### យុទ្ធសាស្ត្រ auto router
+### យុទ្ធសាស្ត្រ Auto router
 
 Combo `strategy: "auto"` ដែលបានរក្សាទុកអាចកំណត់ `config.routerStrategy` (ឬ
 `config.auto.routerStrategy` ចាស់) ទៅជាមួយក្នុងចំណោម៖
 
 - `rules` — weighted scoring លំនាំដើម
-- `score` — ជ្រើសរើស weighted score ដែលបានកំណត់រចនាសម្ព័ន្ធខ្ពស់បំផុត។ នៅពេលពិន្ទុស្មើគ្នាទាំងស្រុង វារក្សាលំដាប់
-  candidate ដែលបានកំណត់រចនាសម្ព័ន្ធ; `explorationRate` ដែលមានស្រាប់យក sample ពី ranked pool ទាំងមូល។
-- `cost` / `eco` — provider ដែលមានស្ថានភាពល្អ និងថោកបំផុត
-- `latency` / `fast` — p95 latency ទាបបំផុត ដោយមានពិន័យលើភាពអាចទុកចិត្តបាន
-- `sla-aware` / `sla` — ផ្តល់អាទិភាពដល់ candidate ដែលបំពេញតាម p95 latency, error-rate និង
+- `score` — ជ្រើសរើស configured weighted score ដែលខ្ពស់បំផុត។ ក្នុងករណីពិន្ទុស្មើគ្នាទាំងស្រុង លំដាប់
+  candidate ដែលបានកំណត់នឹងត្រូវបានរក្សាទុក ហើយ `explorationRate` ដែលមានស្រាប់នឹងយកគំរូពី ranked pool ទាំងមូល។
+- `cost` / `eco` — provider ដែលមានស្ថានភាពល្អ និងតម្លៃថោកបំផុត
+- `latency` / `fast` — latency p95 ទាបបំផុតជាមួយ reliability penalty
+- `sla-aware` / `sla` — ផ្តល់អាទិភាពដល់ candidate ដែលបំពេញតាម latency p95, error-rate និង
   cost SLO ជាជម្រើស
-- `lkgp` — provider ដែលបានដឹងថាល្អចុងក្រោយជាមុន
-- `nadir` — ស្នើឱ្យ decision API របស់ [Nadir](https://getnadir.com) កំណត់ថាតើ prompt ត្រូវការ model មួយណាក្នុង pool;
-  ត្រូវជ្រើសរើសបើកប្រើ និង fail-open ទៅ `rules`
+- `lkgp` — provider ដែលបានដឹងថាដំណើរការល្អចុងក្រោយមុនគេ
+- `nadir` — ស្នើឱ្យ decision API របស់ [Nadir](https://getnadir.com) សម្រេចថា model មួយណាក្នុង pool ដែល
+  prompt ត្រូវការ។ វាជាមុខងារ opt-in និង fail-open ទៅ `rules`
 
-### ព័ត៌មានលម្អិតអំពីយុទ្ធសាស្ត្រ router
+### យុទ្ធសាស្ត្រ Router លម្អិត
 
-Auto-combo engine ផ្តល់ implementation **RouterStrategy** ដែលអាចដោតប្ដូរបានចំនួន 7 ដែល
-អ្នកអាចប្ដូរតាមរយៈ `config.routerStrategy` (ឬ `config.auto.routerStrategy` ចាស់)។
+Auto-combo engine ផ្តល់ implementation **RouterStrategy** ដែលអាចដោតបន្ថែមបានចំនួន 7 ដែល
+អ្នកអាចប្តូរតាមរយៈ `config.routerStrategy` (ឬ `config.auto.routerStrategy` ចាស់)។
 យុទ្ធសាស្ត្រនីមួយៗជ្រើសរើស provider មួយពី candidate pool ដោយផ្អែកលើ `RoutingContext`
 (ប្រភេទ task, សញ្ញាបង្ហាញ tool/vision, ការប៉ាន់ស្មាន token, គោលការណ៍ SLA ជាជម្រើស និង
-provider ដែលបានដឹងថាល្អចុងក្រោយជាជម្រើស)។
+provider ដែលបានដឹងថាដំណើរការល្អចុងក្រោយជាជម្រើស)។
 
 #### 1. `rules` (លំនាំដើម) — weighted scoring ដែលមាន 16 កត្តា
 
-រុំ scoring engine ដែលមានស្រាប់។ ច្រោះ candidate ដែលមាន circuit-breaker
-`OPEN` ចេញ បន្ទាប់មកដំណើរការ `scorePool()` ជាមួយប្រភេទ task បច្ចុប្បន្ន និង `getTaskFitness()`
-ហើយជ្រើសរើស provider ដែលមានពិន្ទុខ្ពស់បំផុត។
+រុំជុំវិញ scoring engine ដែលមានស្រាប់។ ត្រង candidate របស់ circuit-breaker ដែលមានស្ថានភាព `OPEN`
+ចេញ បន្ទាប់មកដំណើរការ `scorePool()` ជាមួយប្រភេទ task បច្ចុប្បន្ន និង `getTaskFitness()`
+ដោយជ្រើសរើស provider ដែលមានពិន្ទុខ្ពស់បំផុត។
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -549,16 +549,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**ពេលគួរប្រើ**: លំនាំដើម។ ប្រើនៅពេលអ្នកចង់បានតុល្យភាពរវាងសញ្ញាទាំងអស់។
+**ពេលដែលគួរប្រើ**៖ លំនាំដើម។ ប្រើនៅពេលដែលអ្នកចង់បានតុល្យភាពរវាង signal ទាំងអស់។
 
-**ឈ្មោះជំនួស**: `rules` (គ្មានឈ្មោះជំនួស)
+**Alias**៖ `rules` (គ្មាន alias)
 
 ---
 
-#### 2. `cost` / `eco` — provider ដែលមានស្ថានភាពល្អ និងថោកបំផុត
+#### 2. `cost` / `eco` — provider ដែលមានស្ថានភាពល្អ និងតម្លៃថោកបំផុត
 
 តម្រៀប candidate pool តាម `costPer1MTokens` (ពីតូចទៅធំ) ហើយជ្រើសរើសតម្លៃថោកបំផុត។
-ច្រោះ candidate ដែលមាន `OPEN` ចេញជាមុន។
+ត្រង candidate ដែលមានស្ថានភាព `OPEN` ចេញជាមុន។
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -573,16 +573,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**ពេលគួរប្រើ**: Workload ដែលផ្តោតលើការសន្សំចំណាយ, batch processing ឬ background job។
+**ពេលដែលគួរប្រើ**៖ Workload ដែលយកចិត្តទុកដាក់លើថ្លៃចំណាយ, batch processing ឬ background job។
 
-**ឈ្មោះជំនួស**: `cost`, `eco`
+**Alias**៖ `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — p95 latency ទាបបំផុត ដោយមានពិន័យលើភាពអាចទុកចិត្តបាន
+#### 3. `latency` / `fast` — latency p95 ទាបបំផុតជាមួយ reliability penalty
 
-តម្រៀបតាម `p95LatencyMs + (errorRate * 1000)`។ ការពិន័យលើ error-rate ធានាថា
-provider ដែលមិនអាចទុកចិត្តបាននឹងមានចំណាត់ថ្នាក់ទាបជាង ទោះបី latency ដែលបានប្រកាសរបស់ពួកវាទាបក៏ដោយ។
+តម្រៀបតាម `p95LatencyMs + (errorRate * 1000)`។ Error-rate penalty ធានាថា
+provider ដែលមិនគួរឱ្យទុកចិត្តត្រូវបានដាក់ចំណាត់ថ្នាក់ទាបជាង បើទោះបីជា latency ធម្មតារបស់ពួកវាទាបក៏ដោយ។
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -599,28 +599,28 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**ពេលគួរប្រើ**: Workload ដែលផ្តោតលើ latency ដូចជា chat ពេលវេលាជាក់ស្តែង, autocomplete ឬ
-ជំនួយការសរសេរកូដអន្តរកម្ម។
+**ពេលដែលគួរប្រើ**៖ Workload ដែលយកចិត្តទុកដាក់លើ latency ដូចជា chat ក្នុងពេលជាក់ស្តែង, autocomplete ឬ
+ជំនួយការ coding អន្តរកម្ម។
 
-**ឈ្មោះជំនួស**: `latency`, `fast`
+**Alias**៖ `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — ការអនុលោមតាម latency/error/cost SLO
+#### 4. `sla-aware` / `sla` — ការអនុលោមតាម SLO សម្រាប់ latency/error/cost
 
-ផ្តល់ពិន្ទុឱ្យ candidate នីមួយៗដោយផ្អែកលើកម្រិតដែលវាបំពេញតាមគោលការណ៍ SLO ដែលបានកំណត់រចនាសម្ព័ន្ធ៖
+ដាក់ពិន្ទុឱ្យ candidate នីមួយៗដោយផ្អែកលើកម្រិតដែលវាបំពេញតាមគោលការណ៍ SLO ដែលបានកំណត់៖
 
-| កត្តា          | ទម្ងន់ | រូបមន្ត                                           |
-| -------------- | ------ | ------------------------------------------------- |
-| ពិន្ទុ latency | 35%    | `threshold / max(value, ε)`                       |
-| ពិន្ទុកំហុស    | 35%    | `threshold / max(value, ε)`                       |
-| ពិន្ទុសុខភាព   | 15%    | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| ពិន្ទុតម្លៃ    | 10%    | `threshold / max(value, ε)` ឬ inverse normalized  |
-| ពិន្ទុស្ថិរភាព | 5%     | inverse normalized latency stddev                 |
+| កត្តា           | ទម្ងន់ | រូបមន្ត                                                       |
+| --------------- | ------ | ------------------------------------------------------------- |
+| ពិន្ទុភាពយឺត    | 35%    | `threshold / max(value, ε)`                                   |
+| ពិន្ទុកំហុស     | 35%    | `threshold / max(value, ε)`                                   |
+| ពិន្ទុសុខភាព    | 15%    | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)             |
+| ពិន្ទុថ្លៃចំណាយ | 10%    | `threshold / max(value, ε)` ឬតម្លៃច្រាសដែលបានធ្វើប្រក្រតីកម្ម |
+| ពិន្ទុស្ថិរភាព  | 5%     | គម្លាតស្តង់ដារនៃភាពយឺតដែលបានធ្វើប្រក្រតីកម្មបញ្ច្រាស          |
 
-នៅពេល `hardConstraints: true` បេក្ខជនត្រូវបានតម្រៀបជាចម្បងតាម **ពិន្ទុបំពាន**
-(កម្រិតដែលពួកគេលើសពី SLO ណាមួយ) បន្ទាប់មកតាមពិន្ទុសមាស។ បើមិនដូច្នោះទេ វាគ្រាន់តែ
-តម្រៀបតាមពិន្ទុសមាសប៉ុណ្ណោះ។
+នៅពេល `hardConstraints: true` បេក្ខភាពត្រូវបានតម្រៀបជាចម្បងតាម **ពិន្ទុនៃការបំពាន**
+(ថាតើពួកវាលើសពី SLO ណាមួយប៉ុនណា) បន្ទាប់មកតាមពិន្ទុសមាស។ បើមិនដូច្នោះទេ វាប្រើតែ
+ពិន្ទុសមាសប៉ុណ្ណោះ។
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -629,12 +629,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... ដាក់ពិន្ទុឱ្យបេក្ខជននីមួយៗធៀបនឹងគោលការណ៍៖ { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... ដាក់ពិន្ទុបេក្ខភាពនីមួយៗធៀបនឹងគោលការណ៍៖ { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**វាល SLA** (កំណត់នៅក្នុង combo config)៖
+**វាល SLA** (កំណត់នៅលើការកំណត់រចនាសម្ព័ន្ធ combo)៖
 
 ```json
 {
@@ -649,17 +649,17 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**ពេលណាត្រូវប្រើ**៖ បន្ទុកការងារ production ដែលមានកម្រិតកំណត់តឹងរ៉ឹងលើ latency, អត្រាកំហុស ឬថវិកាចំណាយ។
+**ពេលដែលគួរប្រើ**៖ បន្ទុកការងារ production ដែលមានកម្រិតកំណត់តឹងរ៉ឹងលើភាពយឺត អត្រាកំហុស ឬថវិកាចំណាយ។
 
 **ឈ្មោះហៅក្រៅ**៖ `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — សាកល្បង provider ល្អដែលស្គាល់ចុងក្រោយជាមុន
+#### 5. `lkgp` — អ្នកផ្តល់សេវាដែលដំណើរការល្អចុងក្រោយជាមុន
 
-សាកល្បង **provider ល្អដែលស្គាល់ចុងក្រោយ** (ប្រសិនបើបានកំណត់) ជាមុន បន្ទាប់មកប្ដូរទៅប្រើ
-យុទ្ធសាស្ត្រ `rules`។ មានប្រយោជន៍សម្រាប់ការរក្សាភាពជាប់លាប់នៃ session — provider ដដែលគ្រប់គ្រង
-សំណើបន្តនៅក្នុងកិច្ចសន្ទនា។
+សាកល្បង **អ្នកផ្តល់សេវាដែលដំណើរការល្អចុងក្រោយ** (ប្រសិនបើបានកំណត់) ជាមុន បន្ទាប់មកត្រឡប់ទៅប្រើ
+យុទ្ធសាស្ត្រ `rules`។ វាមានប្រយោជន៍សម្រាប់ការរក្សាភាពជាប់លាប់នៃសម័យ — អ្នកផ្តល់សេវាដដែលគ្រប់គ្រង
+សំណើបន្តនៅក្នុងការសន្ទនា។
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -680,27 +680,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // ប្ដូរទៅប្រើយុទ្ធសាស្ត្រ rules
+    // ត្រឡប់ទៅប្រើយុទ្ធសាស្ត្រ rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**ពេលណាត្រូវប្រើ**៖ កិច្ចសន្ទនាច្រើនវេន ដែលអ្នកចង់ឱ្យ provider ដដែលគ្រប់គ្រង
-សំណើបន្ត (ឧ. សម្រាប់ caching, ភាពបន្តនៃ context ឬភាពស្របគ្នានៃតម្លៃ)។
+**ពេលដែលគួរប្រើ**៖ ការសន្ទនាច្រើនវេន ដែលអ្នកចង់ឱ្យអ្នកផ្តល់សេវាដដែលគ្រប់គ្រង
+សំណើបន្ត (ឧ. សម្រាប់ caching ភាពបន្តនៃបរិបទ ឬភាពស៊ីគ្នានៃតម្លៃ)។
 
 **ឈ្មោះហៅក្រៅ**៖ `lkgp` (គ្មានឈ្មោះហៅក្រៅ)
 
 ---
 
-#### 6. `nadir` — ជ្រើសរើស model ដោយយល់ដឹងពី prompt តាមរយៈ Nadir
+#### 6. `nadir` — ជម្រើសម៉ូដែលដែលយល់ដឹងអំពី prompt តាមរយៈ Nadir
 
-យុទ្ធសាស្ត្រទាំងអស់ខាងលើដាក់ចំណាត់ថ្នាក់បេក្ខជនតាម telemetry ផ្ទាល់ខ្លួនរបស់ពួកគេ ហើយគ្មានយុទ្ធសាស្ត្រណាមួយអាន
-សំណើនោះទេ។ `nadir` ផ្ញើវេនចុងក្រោយរបស់អ្នកប្រើ ព្រមទាំង model ids របស់ pool ទៅកាន់
-API សម្រេចចិត្តរបស់ [Nadir](https://getnadir.com) (`POST /v1/bucket`) ហើយបញ្ជូនទៅកាន់ model
-ដែល Nadir ជ្រើសរើសពីបញ្ជីនោះ (`simple` → model ដែលមានសមត្ថភាពគ្រប់គ្រាន់ និងថោកបំផុត, `complex` →
-model កម្រិត frontier)។ connection ដែលបម្រើ model នោះនៅតែត្រូវបានជ្រើសរើសដោយ `rules` ដូច្នេះ quota,
-សុខភាព និងតម្លៃនៅតែជាកត្តាកំណត់ថាត្រូវប្រើ account មួយណា។
+គ្រប់យុទ្ធសាស្ត្រខាងលើចាត់ចំណាត់ថ្នាក់បេក្ខភាពតាម telemetry របស់វាផ្ទាល់ ហើយគ្មានយុទ្ធសាស្ត្រណាមួយអាន
+សំណើនោះទេ។ `nadir` ផ្ញើវេនចុងក្រោយរបស់អ្នកប្រើ រួមជាមួយអត្តសញ្ញាណម៉ូដែលរបស់ pool ទៅកាន់
+API សម្រេចចិត្តរបស់ [Nadir](https://getnadir.com) (`POST /v1/bucket`) ហើយបញ្ជូនទៅម៉ូដែល
+ដែល Nadir ជ្រើសរើសពីម៉ឺនុយនោះ (`simple` → ម៉ូដែលសមត្ថភាពគ្រប់គ្រាន់ដែលថោកបំផុត, `complex` → ម៉ូដែល
+ជួរមុខ)។ ការតភ្ជាប់ដែលបម្រើម៉ូដែលនោះនៅតែត្រូវបានជ្រើសរើសដោយ `rules` ដូច្នេះកូតា
+សុខភាព និងថ្លៃចំណាយនៅតែជាកត្តាសម្រេចថាគណនីណាត្រូវប្រើ។
 
 ```json
 {
@@ -716,23 +716,26 @@ model កម្រិត frontier)។ connection ដែលបម្រើ model 
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` និង `OMNIROUTE_NADIR_BASE_URL` ជា env fallback សម្រាប់ string ទាំងពីរ។
-`baseUrl` ត្រូវការតែសម្រាប់ Nadir ដែល self-hosted ប៉ុណ្ណោះ (អាចមាន `/v1` នៅខាងចុងបាន)។
-ការហៅដោយគ្មាន key នឹងចូលទៅកាន់កម្រិត anonymous របស់ Nadir ដែលត្រូវបានកំណត់អត្រាតាម IP។
+`OMNIROUTE_NADIR_API_KEY` និង `OMNIROUTE_NADIR_BASE_URL` គឺជាតម្លៃជំនួសពី env សម្រាប់ខ្សែអក្សរទាំងពីរ។
+`baseUrl` ត្រូវការតែសម្រាប់ Nadir ដែលបង្ហោះដោយខ្លួនឯងប៉ុណ្ណោះ (អាចមាន `/v1` នៅខាងចុងបាន)។
+ការហៅដោយគ្មាន key នឹងចូលទៅកាន់កម្រិតអនាមិករបស់ Nadir ដែលត្រូវបានកំណត់អត្រាតាម IP។ ជាមួយ key
+([បង្កើតមួយ](https://app.getnadir.com/dashboard/api-keys)) រាល់ការសម្រេចចិត្តនឹងត្រូវបាន
+កត់ត្រាទៅក្នុងផ្ទាំងគ្រប់គ្រង Nadir របស់អ្នក។ ការដំឡើង និងការផ្ទៀងផ្ទាត់ពេញលេញ៖
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)។
 
-អ្វីដែលចាកចេញពីប្រព័ន្ធ៖ អត្ថបទសារចុងក្រោយរបស់អ្នកប្រើ (16k តួអក្សរដំបូង), model ids
-របស់បេក្ខជន និងស្លាក channel `source: "omniroute"`។ គ្មាន system prompt, history, tools ឬ
-headers ទេ។
+អ្វីដែលត្រូវបានផ្ញើចេញ៖ អត្ថបទសារចុងក្រោយរបស់អ្នកប្រើ (16k តួអក្សរដំបូង) អត្តសញ្ញាណម៉ូដែល
+បេក្ខភាព និងស្លាកឆានែល `source: "omniroute"`។ គ្មាន system prompt ប្រវត្តិ tools ឬ
+headers ឡើយ។
 
-ឥរិយាបថពេលបរាជ័យគឺ fail-open៖ timeout (លំនាំដើម 2000 ms), non-2xx, host ដែលមិនអាចតភ្ជាប់បាន,
-response ដែលមានទម្រង់មិនត្រឹមត្រូវ ឬជម្រើសដែលនៅក្រៅ pool នឹងប្ដូរទៅការសម្រេចចិត្តរបស់ `rules`
-ហើយ reason នឹងមានបុព្វបទ `NadirStrategy: fallback (…)`។ បន្ទាប់ពីការហៅបរាជ័យ យុទ្ធសាស្ត្រនេះ
-រំលង network រយៈពេល 30 s ដូច្នេះការដាច់ដំណើរការមួយចំណាយត្រឹមមួយ timeout ក្នុងរៀងរាល់ 30 s ជាជាង
-មួយក្នុងមួយសំណើ។ routing events រាយការណ៍ `strategy: "nadir"` តែនៅពេល Nadir ពិតជាបាន
-ធ្វើការជ្រើសរើសប៉ុណ្ណោះ។
+ឥរិយាបថពេលបរាជ័យគឺ fail-open៖ timeout (លំនាំដើម 2000 ms), ការឆ្លើយតបមិនមែន 2xx, host ដែលមិនអាច
+ចូលដំណើរការបាន, ការឆ្លើយតបមិនត្រឹមត្រូវ ឬជម្រើសដែលនៅក្រៅ pool នឹងត្រឡប់ទៅការសម្រេចចិត្តរបស់ `rules`
+ហើយហេតុផលនឹងត្រូវដាក់បុព្វបទ `NadirStrategy: fallback (…)`។ បន្ទាប់ពីការហៅបរាជ័យ យុទ្ធសាស្ត្រ
+នឹងរំលងបណ្ដាញរយៈពេល 30 s ដូច្នេះការដាច់សេវាមួយនឹងចំណាយ timeout មួយក្នុងរៀងរាល់ 30 s ជំនួសឱ្យ
+មួយក្នុងមួយសំណើ។ ព្រឹត្តិការណ៍បញ្ជូនផ្លូវរាយការណ៍ `strategy: "nadir"` តែនៅពេល Nadir ពិតជាបានធ្វើ
+ជម្រើសប៉ុណ្ណោះ។
 
-**ពេលណាត្រូវប្រើ**៖ traffic ដែលមានកម្រិតលំបាកចម្រុះនៅលើ pool ដែលមាន model ជាច្រើនកម្រិត (model តូច មធ្យម
-និង frontier) ដែលអ្នកចង់កាត់បន្ថយការចំណាយពីការប្រើ frontier ជានិច្ច។
+**ពេលដែលគួរប្រើ**៖ ចរាចរណ៍ដែលមានកម្រិតលំបាកចម្រុះនៅលើ pool ដែលគ្របដណ្ដប់ម៉ូដែលច្រើនកម្រិត (ម៉ូដែលតូច មធ្យម
+និងជួរមុខ) ដែលការប្រើម៉ូដែលជួរមុខជានិច្ចគឺជាថ្លៃចំណាយដែលអ្នកចង់កាត់បន្ថយ។
 
 **ឈ្មោះហៅក្រៅ**៖ `nadir` (គ្មានឈ្មោះហៅក្រៅ)
 
@@ -740,7 +743,7 @@ response ដែលមានទម្រង់មិនត្រឹមត្រ�
 
 ### យុទ្ធសាស្ត្រ router ផ្ទាល់ខ្លួន
 
-អ្នកអាចចុះឈ្មោះ implementation `RouterStrategy` ផ្ទាល់ខ្លួនតាមរយៈ API សាធារណៈ៖
+អ្នកអាចចុះឈ្មោះការអនុវត្ត `RouterStrategy` ផ្ទាល់ខ្លួនរបស់អ្នកតាមរយៈ API សាធារណៈ៖
 
 ```ts
 import {
@@ -753,7 +756,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // ឡូជីខល routing របស់អ្នកនៅទីនេះ
+    // ឡូជីខលបញ្ជូនផ្លូវរបស់អ្នកនៅទីនេះ
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -783,16 +786,16 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ### មគ្គុទ្ទេសក៍ជ្រើសរើសយុទ្ធសាស្ត្រ router
 
-| ករណីប្រើប្រាស់          | យុទ្ធសាស្ត្រ | មូលហេតុ                                    |
-| ----------------------- | ------------ | ------------------------------------------ |
-| បន្ទុកការងារមានតុល្យភាព | `rules`      | លំនាំដើម — ពិចារណាកត្តាទាំងអស់             |
-| កាត់បន្ថយតម្លៃ          | `cost`       | តែងតែជ្រើសរើសជម្រើសថោកបំផុត                |
-| កាត់បន្ថយ latency       | `latency`    | ជ្រើសរើស provider ដែលលឿន និងអាចទុកចិត្តបាន |
-| SLO តឹងរ៉ឹង             | `sla-aware`  | ត្រងតាមកម្រិតកំណត់ p95/កំហុស/តម្លៃ         |
-| ការជជែកច្រើនវេន         | `lkgp`       | ភាពជាប់លាប់នៃ session                      |
-| កម្រិតលំបាកចម្រុះ       | `nadir`      | ជ្រើសរើសកម្រិត model សម្រាប់ prompt នីមួយៗ |
+| ករណីប្រើប្រាស់          | យុទ្ធសាស្ត្រ | មូលហេតុ                                       |
+| ----------------------- | ------------ | --------------------------------------------- |
+| បន្ទុកការងារមានតុល្យភាព | `rules`      | លំនាំដើម — ពិចារណាកត្តាទាំងអស់                |
+| កាត់បន្ថយការចំណាយ       | `cost`       | តែងតែជ្រើសរើសជម្រើសដែលថោកបំផុត                |
+| កាត់បន្ថយភាពយឺតយ៉ាវ     | `latency`    | ជ្រើសរើសអ្នកផ្តល់សេវាដែលលឿន និងអាចទុកចិត្តបាន |
+| SLO តឹងរ៉ឹង             | `sla-aware`  | ច្រោះតាមកម្រិត p95/កំហុស/ការចំណាយ             |
+| ការជជែកច្រើនវេន         | `lkgp`       | ការរក្សាភាពជាប់លាប់ក្នុងសម័យ                  |
+| កម្រិតពិបាកចម្រុះ       | `nadir`      | ជ្រើសរើសកម្រិតម៉ូដែលតាមប្រយោគបញ្ចូលនីមួយៗ     |
 
-វាល SLA៖
+វាលសម្រាប់ SLA-aware៖
 
 ```json
 {

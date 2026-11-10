@@ -198,6 +198,12 @@ Tunnel أو Tailscale أو Ngrok)، فسيظل فحص العنوان الاست�
 | `/api/providers/health-autopilot/actions` | ينفّذ إجراءات المعالجة التلقائية                               |
 | `/api/settings/obsidian`                  | يُصدر بيانات اعتماد WebDAV قابلة لإعادة الاستخدام لأي جذر مخزن |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                   |
+| `/api/cli-tools/apply`                    | يعيد كتابة إعدادات CLI الخاصة بالمشغّل على المضيف              |
+| `/api/cli-tools/guide-settings`           | يكتب ملفات إعداد CLI المستندة إلى الأدلة                       |
+| `/api/cli-tools/hermes-agent-settings`    | يكتب إعدادات وكيل Hermes                                       |
+| `/api/cli-tools/backups`                  | يستعيد النسخ الاحتياطية لإعداد CLI ويحذفها                     |
+| `/api/log-export`                         | يرسل سجلات الاستدعاءات إلى وجهة مُعدّة                         |
+| `/api/restart`                            | يعيد تشغيل عملية الخادم                                        |
 
 **الاستجابة عند الانتهاك:** `401 Authentication required`
 

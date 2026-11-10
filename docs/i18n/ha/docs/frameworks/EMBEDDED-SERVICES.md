@@ -5,8 +5,8 @@
 ---
 
 > **Siga:** v3.8.44
-> **Sabuntawa na ƙarshe:** 2026-09-16
-> **Masu karantawa:** Injiniyoyin da ke ƙara, kula da, ko gano matsalolin ayyukan da aka haɗa cikin gida (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Sabuntawa na ƙarshe:** 2026-10-28
+> **Masu karatu:** Injiniyoyin da ke ƙara, kula da ko gano kurakuran sabis da aka saka a ciki (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Ayyukan da aka haɗa cikin gida kayan aikin tsari ne na gefe da ake girkawa a cikin na’ura, waɗanda OmniRoute ke girkawa, sa ido a kansu, kuma yake
 bayar da su a matsayin cikakkun wuraren da ake iya tura zirga-zirga zuwa gare su. Ba kamar masu samar da sabis na waje ba (waɗanda ake isa gare su ta intanet
@@ -31,7 +31,7 @@ ta amfani da maɓallan API), ayyukan da aka haɗa cikin gida suna gudana a kan n
 
 ### Me ya sa ake amfani da ayyukan da aka haɗa a ciki?
 
-An haɗa ayyuka guda bakwai:
+An saka sabis guda takwas a ciki:
 
 | Aiki            | Kunshin npm                                   | Tsohuwar tashar jirgi | Manufa                                                                                                                                                                                                                                                                                                                                                                      |
 | --------------- | --------------------------------------------- | :-------------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ An haɗa ayyuka guda bakwai:
 | **Dario**       | `@askalf/dario`                               |         3456          | Wakilin biyan kuɗin Claude — madadi/mafita idan CLIProxyAPI ya gaza don zirga-zirga mai tsarin Claude-Code; maɓallin da aka shigar ya zama `DARIO_ADMIN_TOKEN` wanda ke tsare tsarin sarrafa OAuth na `/admin/*`                                                                                                                                                            |
 | **open-wa**     | `@open-wa/wa-automate`                        |         8323          | Sarrafa WhatsApp Web ta atomatik (Chromium mara fuskar mai amfani ta hanyar Puppeteer). Ana sarrafa zagayowar rayuwarsa kawai — ba wurin isar da buƙatu ba ne.                                                                                                                                                                                                              |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                          |         20135         | Aikin gefe na matsa prompt — ainihin samfurin LLMLingua-2 ONNX (sigar JS/TS ta tsarin Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` yana aika `/compress` zuwa gare shi ta HTTP, sannan ya koma ga backend na worker-thread da ke cikin tsarin idan aikin gefen ba ya aiki. Ana sarrafa zagayowar rayuwarsa kawai — ba wurin isar da buƙatu ba ne. |
+| **sing-box**    | Fayil na binary daga sakin GitHub (`singbox`) |         20140         | Tsarin taimako na TPROXY da ke tallafa wa kama zirga-zirga ta transparent proxy na `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Mai sakawa yana sauke sakin sigar da aka ƙayyade tare da tantance checksum ɗinta. Ana sarrafa zagayen rayuwarsa kawai; ba manufa ce ta routing ba kuma ba ya zama proxy na LLM.                                                            |
 
-Dukkan ayyukan guda bakwai suna bin tsarin kulawa iri ɗaya:
+Dukkan takwas suna bin tsarin sa ido iri ɗaya:
 
 - OmniRoute yana girka su a ƙarƙashin `DATA_DIR/services/{name}/` (a keɓe daga `package.json` na OmniRoute)
 - OmniRoute yana ƙaddamar da su a matsayin child processes kuma yana sa ido a kansu
@@ -580,7 +581,27 @@ mai aiki a cikin process (`./worker.ts`).
 
 ---
 
-### 4.8 Reverse proxy (shigar da dashboard na 9Router)
+### 4.8 Wuraren karɓar buƙatu na sing-box (hanyoyi 8)
+
+sing-box yana da tsarin wuraren karɓar buƙatu iri ɗaya da Mux: babu hanyar `rotate-key` kuma ba a saka maɓallin API ba (`needsApiKey: false` a cikin `bootstrap.ts`). Ana sarrafa zagayen rayuwarsa kawai; ba ya taɓa zama mai ba da routing ko LLM. `install()` yana sauke binary na sakin GitHub na hukuma (`SagerNet/sing-box`) don sigar da aka ƙayyade (`SINGBOX_PINNED_VERSION` a cikin `src/lib/services/installers/singbox.ts`). Yana tabbatar da SHA256 ɗinsa da checksum da aka saka a wannan fayil ɗin kafin ya rubuta binary a faifai ko kaɗan. Ana ƙin duk wata sigar daban da aka nema.
+
+| Hanya  | Adireshin hanya                              | Bayani                                                                                                   |
+| ------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Sauke kuma tabbatar da sakin sing-box da aka ƙayyade                                                     |
+| `POST` | `/api/services/singbox/start`                | Fara sing-box (`sing-box run -c config.json`)                                                            |
+| `POST` | `/api/services/singbox/stop`                 | Dakatar da sing-box                                                                                      |
+| `POST` | `/api/services/singbox/restart`              | Sake fara sing-box                                                                                       |
+| `POST` | `/api/services/singbox/update`               | Sake tabbatarwa ko sake saka sakin da aka ƙayyade                                                        |
+| `GET`  | `/api/services/singbox/status`               | Matsayin yanzu da matsayin da ke cikin ma’ajiyar bayanai                                                 |
+| `POST` | `/api/services/singbox/auto-start`           | Kunna ko kashe farawa ta atomatik                                                                        |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Kunna ko kashe sake farawa ta atomatik ga tsarin da ake da shi tun farko kuma aka karɓa ƙarƙashin kulawa |
+| `GET`  | `/api/services/singbox/logs`                 | Bi ƙarshen rajistar SSE ta hanyar da aka raba mai sauyawa `[name]/logs`                                  |
+
+**Haɗin TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) yana rubuta `config.json` kuma yana fara mai sa ido kafin `applyTproxy()` ya saka ƙa’idojin firewall na TPROXY. Idan babu mai sa ido ko bai kai matsayin `running` ba, yanzu ana rubuta wannan a matakin kuskure maimakon ɓoye gazawar cikin shiru. Wannan yana ba mai kula damar gane cewa an aiwatar da ƙa’idojin TPROXY ba tare da mai sauraron buƙatu mai aiki a bayansu ba.
+
+---
+
+### 4.9 Reverse proxy (shigar da dashboard na 9Router)
 
 Dashboard yana saka web UI na 9Router a cikin iframe ta hanyar internal reverse
 proxy a:

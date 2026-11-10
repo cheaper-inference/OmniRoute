@@ -4,12 +4,7 @@
 
 ---
 
-Bwawa linalojiendesha lenyewe linaendeshwa kwenye seva ya **.113** (`tomni-proxmox-113`). Tangu 2026-10-18 kila
-runner ya OmniRoute ina **jukumu moja**, lebo moja, na bajeti ya kumbukumbu/CPU iliyowekwa kulingana na vipimo vya mzigo wake
-wa kazi. Nafasi ya Turbopack hupata rasilimali zinazohitajika na build; nafasi nyingine zimewekewa rasilimali kulingana na
-viwango vyao vya juu vilivyopimwa. Seva huzidisha mgao wa rasilimali pale tu ambapo build ya Turbopack inatokea wakati mmoja na build ya webpack ya Release-Green
-pamoja na kazi ya lint; swap ya seva mwenyeji (16 GB) hufidia hali hiyo, na kwa sababu Builds za pull-request zinaendeshwa
-kwenye miundombinu inayohostiwa, nafasi ya Turbopack huwa haitumiki wakati mwingi:
+Bwawa la kujiendesha linaendesha kwenye **.113** sanduku (`tomni-proxmox-113`). Tangu 2026-10-18 kila mwanariadha wa OmniRoute anayo **jukumu moja** , lebo moja, na bajeti ya memory/CPU yenye ukubwa wa kile ambacho mzigo wake wa kazi ulipimwa. Slot Turbopack inapata kile ambacho jengo linahitaji; maeneo mengine yana ukubwa wa vilele vilivyopimwa. Kisanduku hutosheleza tu wakati muundo wa Turbopack unalingana na muundo wa pakiti ya wavuti ya Release-Green na kazi ya pamba; ubadilishanaji wa mwenyeji (16 GB) huchukua hiyo, na kwa sababu Majengo ya ombi la kuvuta-ombi yanaendeshwa, nafasi ya Turbopack haifanyi kitu wakati mwingi:
 
 | runner               | lebo                            | jukumu                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
 | -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
@@ -17,24 +12,19 @@ kwenye miundombinu inayohostiwa, nafasi ya Turbopack huwa haitumiki wakati mwing
 | `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build ya webpack                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
 | `omniroute-113-2`    | `omni-light`                    | kazi za kila usiku (Schemathesis, promptfoo, garak, k6) na `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
 | `omniroute-113`      | `omni-light`                    | bwawa lilelile kama hapo juu                                                                                                                                 | 8 GB / 12 GB               | 400 %           |
-| OmniHeuris, OmniMind | (repo zao)                      | Dependabot pekee (kiwango cha juu cha 155 MB kila moja, 2026-10-18)                                                                                          | 4 GB / 6 GB                | 200 % kila moja |
+| OmniHeuris, OmniMind | (makazi yao)                    | Dependabot pekee (kilele 155 MB kila moja, 2026-10-18)                                                                                                       | 4 GB / 6 GB                | 200% kila mmoja |
 
-Vipimo vya 2026-10-18:
+Ilipimwa 2026-10-18:
 
-| rasilimali | thamani                                | maana yake kwa upangaji wa kazi                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU  | **78 GB / cores 32**                   | build ya uzalishaji ya Turbopack ilifikia kiwango cha juu cha 49 GB bila kikomo (`tests/unit/ci-build-bundler-webpack.test.ts`); kwenye Next 16.3.8, awamu ya compile pekee hushikilia ~40 GB (36 GB RSS katika `next-build` pamoja na michakato 17 ya loader yenye 3 GB, vilivyopimwa 2026-10-18); build ya webpack hutumia ~14–16 GB. Build moja ya Turbopack + build moja ya webpack zinaweza kutoshea pamoja; build mbili za Turbopack haziwezi |
-| swap       | 16 GB                                  | `omniroute-113-5` inaendeshwa bila swap (`MemorySwapMax=0`) ili build inayotumia rasilimali kupita kiasi ikatishwe inapofikia kikomo chake badala ya kusababisha seva kutumia swap                                                                                                                                                                                                                                                                  |
-| `/tmp`     | **12 GB tmpfs = RAM**                  | chochote kinachowekwa hapo hutumia kumbukumbu; masalio huondolewa baada ya saa 3                                                                                                                                                                                                                                                                                                                                                                    |
-| CPU        | mzigo wa 60 kwenye cores 32 ulionekana | kabla ya quota, build moja ya Turbopack (~1166 % CPU) pamoja na mkusanyiko wa majaribio ya coverage kwenye seva hiyo hiyo ilinyima heartbeat za visikilizi vingine rasilimali (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                 |
-| runners    | **visikilizi 6**                       | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` zimezimwa (`systemctl enable --now` hurejesha kimoja)                                                                                                                                                                                                                                                                                                                               |
+| rasilimali    | thamani                                  | maana yake kwa upangaji wa kazi                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU     | **78 GB / 32 cores**                     | ujenzi wa uzalishaji wa Turbopack ulifikia kilele cha GB 49 ambazo hazijafungwa (`tests/unit/ci-build-bundler-webpack.test.ts`); kwenye Ijayo 16.3.8 awamu ya kukusanya pekee inashikilia ~ 40 GB (36 GB RSS katika `next-build` pamoja na wafanyakazi 17 wa mizigo katika 3 GB, iliyopimwa 2026-10-18); muundo wa kifurushi cha wavuti katika ~ 14–16 GB. Kifurushi kimoja cha wavuti Turbopack + kinafaa pamoja; mbili Turbopack hujenga hawana |
+| kubadilishana | 16 GB                                    | `omniroute-113-5` inaendeshwa na swap off (`MemorySwapMax=0`) kwa hivyo jengo lililotoroka hukatwa kwenye kofia yake badala ya kubadilisha kisanduku.                                                                                                                                                                                                                                                                                             |
+| `/tmp`        | **12 GB tmpfs = RAM**                    | chochote kinachowekwa hapo hutumia kumbukumbu; masalio huondolewa baada ya saa 3                                                                                                                                                                                                                                                                                                                                                                  |
+| CPU           | mzigo 60 kwenye cores 32 zilizozingatiwa | kabla ya nafasi, jengo moja la Turbopack (~ 1166 % CPU) pamoja na chumba cha kufunika kwenye kisanduku kimoja kilisababisha njaa ya mapigo ya mioyo ya wasikilizaji wengine (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                 |
+| wakimbiaji    | **7 wasikilizaji** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` pia hubeba `omni-build`; `omniroute-113-3/-4/-8` ilifutwa kutoka kwa repo (2026-10-28)                                                                                                                                                                                                                                                                                                     |
 
-Vikomo vipo katika `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ya kila unit
-(thamani za awali zimehifadhiwa kama `override.conf.bak-20261018`) na vilitumika papo hapo kwa
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — bila kuwasha upya, kwa hivyo hakuna
-kazi iliyokuwa ikiendelea iliyoathiriwa. Lebo hubadilishwa kupitia API ya runners
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), pia papo hapo.
+Vikomo vinaishi katika `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ya kila kitengo (thamani za awali zilihifadhiwa kama `override.conf.bak-20261018`) na zilitumika moja kwa moja na `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — haikuanzishwa tena, kwa hivyo hakuna kazi ya kukimbia iliyoguswa. Lebo hubadilishwa kupitia wakimbiaji API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), pia huishi.
 
 ## Sakinisha janitor (mara moja, kwenye mashine)
 
@@ -42,7 +32,7 @@ kazi iliyokuwa ikiendelea iliyoathiriwa. Lebo hubadilishwa kupitia API ya runner
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): kila baada ya dakika 30, andika kumbukumbu kwenye /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` inahitajika: janitor huthibitisha kuwa njia haitumiki kwa picha moja ya hali ya faili
@@ -121,9 +111,8 @@ wakati mmoja, wakati tu haitumiki**, huku ukaguzi wa kutotumika na uanzishaji up
   `omniroute-113` ilikuwa na `MemoryHigh=4G` hadi 2026-10-18 — build ya promptfoo ilijikokota kwa
   kurejesha kumbukumbu kwa dakika 54 humo; GB 8 huondoa ubanaji huo.
 - **Listener chache kwa makusudi.** Unit nne za OmniRoute zilizimwa mnamo 2026-08-29 — kila listener
-  ya ziada ni mtumiaji mwingine wa bajeti ya kumbukumbu iliyo hapo juu. Kikomo cha janitor ni 6
-  (`MAX_ACTIVE_RUNNERS=6` katika cron): huhesabu kila `Runner.Listener` kwenye mashine, na OmniHeuris
-  - OmniMind huongeza mbili kwenye nne zetu.
+  ya ziada ni mtumiaji mwingine wa bajeti ya kumbukumbu iliyo hapo juu. Kikomo cha janitor ni 8 (`MAX_ACTIVE_RUNNERS=8` katika cron): huhesabu kila `Runner.Listener` kwenye mashine, na OmniHeuris + OmniMind huongeza mbili kwenye tano zetu.
+- **Jobs za unit na Vitest zinabaki kwenye runners zinazohudumiwa.** `ci.yml` hutuma shards zake za unit na job ya Vitest kwenda `[self-hosted, omni-ci]` tu pale kigezo cha repo `vars.USE_VPS_TEST_RUNNER` kikiwa `true`, na hata hapo kwa runs za `pull_request` kutoka repo ileile pekee; forks, `merge_group` na pushes zinabaki kwenye `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Kigezo hicho ni `false`. Mnamo 2026-10-28 listener tatu za `omni-ci` zenye core 4 zilichukua sekunde 250–270 kwa `npm ci` na kila shard ya unit iligonga kikomo cha job cha dakika 30, ikilinganishwa na ~sekunde 634 kwa shard inayohudumiwa, huku mashine ikiwa na mzigo wa 17–24. Listener hizo zilifutwa. Usiwashe tena kigezo hicho bila listener zenye ukubwa unaofaa kwa shard ya unit.
 - **Kamwe usisafishe `/tmp` au `_work` kwa mkono wakati runner yoyote ina shughuli.** Utaratibu wa
   kukagua-kisha-kufuta wenye pengo kati ya hatua hizo ndio uliosababisha job hai ya Build kupoteza
   `_work` yake mnamo 2026-08-27. Janitor hufanya ukaguzi na uondoaji katika hatua moja;
@@ -138,8 +127,7 @@ wakati mmoja, wakati tu haitumiki**, huku ukaguzi wa kutotumika na uanzishaji up
 
 ## Mkondo unaohudumiwa (runners zinazoendeshwa na GitHub)
 
-Akaunti iko kwenye mpango wa **Pro**: **kazi 40 zinazoweza kuendeshwa kwa wakati mmoja kwenye runners zinazohudumiwa**, zinazoshirikiwa na kila ukaguzi wa PR,
-kila workflow inayochochewa na push na usanidi chaguomsingi wa CodeQL. Ilipimwa tarehe 2026-10-18 wakati wa
+Repo ni mali ya shirika la `cheaper-inference`, lililo kwenye mpango wa **Team**: **kazi 60 zinazoweza kuendeshwa kwa wakati mmoja kwenye runners zinazohudumiwa**, zinazoshirikiwa na kila repo ya shirika, kila ukaguzi wa PR, kila workflow inayochochewa na push na usanidi chaguomsingi wa CodeQL. Takwimu zilizo hapa chini zilipimwa kwenye mpango wa **Pro** (kazi 40 kwa wakati mmoja). Ilipimwa tarehe 2026-10-18 wakati wa
 kampeni ya merge (~merge 10 kwa saa kwenye `release/v3.8.52`): **workflow runs 2,500 ziliundwa ndani ya
 saa 24**, push 44 kwenye branch ndani ya saa 6, **kazi 106 zinazohudumiwa zikiwa kwenye foleni** huku ukaguzi wa PR ukisubiri kwa
 saa nyingi na PR zikiunganishwa bila ukaguzi huo. Workflow tisa zilianzishwa kwa kila push kwenye branch hiyo:

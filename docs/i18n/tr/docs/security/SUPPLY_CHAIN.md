@@ -31,11 +31,15 @@ osv ve Trivy, bağımlılıkları **sürekli büyüyen** CVE veritabanlarıyla k
 osv veya Trivy yeni açıklanan bir CVE nedeniyle başarısız olduğunda çözüm şudur:
 
 1. **Etkilenen bağımlılığın sürümünü yükseltin** (tercih edilen) — `package.json` içindeki `overrides` aracılığıyla yamalı sürüme yükseltin (geçişli bağımlılıklar için) veya imajı yamalı bir temel üzerinde yeniden oluşturun.
-2. **Yukarı akışta bir düzeltme yoksa:**
-   - **osv:** `config/quality/quality-baseline.json` içindeki `metrics.vulnCount` için yeniden temel değer belirleyin (`npm run quality:ratchet -- --update`, özel kapıları kapsamaz — değeri gerekçe notu ve takip sorunuyla birlikte elle düzenleyin, `direction:down`).
-   - **Trivy:** `.trivyignore` dosyasına gerekçe yorumu ve takip sorunuyla birlikte bir kayıt ekleyin (satır başına CVE kimliği). `ignore-unfixed: true`, yaması olmayan CVE'leri zaten otomatik olarak kapsar.
+2. **Bir düzeltme mevcut değilse:** Ölçülen bulguyu koruyun ve etkilenen bağımlılığı veya görüntüyü izleyin. Başarısız bir adayın geçmesini sağlamak için güvenlik açığı temel çizgisini yükseltmeyin. Trivy'nin `ignore-unfixed: true` zaten bir yukarı akış yaması olmadan görüntüdeki güvenlik açıklarını hariç tutuyor. Herhangi bir istisna, incelenmiş bir güvenlik açığı ID, tam paket yolunu, politikadaki son kullanma tarihini ve izleme sorununu gerektirir; başarısız bir taramanın otomatik sonucu değildir.
 
 Zorunlu OSV yürütmeleri (`check:vuln-ratchet -- --ratchet`), tarayıcı, rapor veya temel değer doğrulanamadığında güvenli biçimde başarısız olur; `INCOMPLETE` ile çıkış kodu 2 döndürür. Ölçülen bir regresyon, çıkış kodu 1 döndürür. Tavsiye niteliğindeki yürütme yine de `SKIP` bildirip çıkış kodu 0 döndürebilir; bu, bağımlılıkların taramayı geçtiğini kanıtlamaz. Engelleyici Trivy adımı da başarılı bir ölçüm gerektirir: kullanılamayan araçlar, başarısız işler ve eksik imaj kanıtları, bir imajın temiz olduğunu doğrulayamaz.
+
+## Görüntü tarama politikası
+
+Mevcut `.trivyignore.yaml` hiçbir güvenlik açığı istisnası içermiyor. `npm run check:trivy-ignore-policy` yerel tarama profillerindeki, CI ve Kalitedeki yapılandırılmış politikayı doğrular. Bilinmeyen IDs, daha geniş yollar, yinelenen girişler ve süresi dolmuş istisnalar reddedilir; eski `.trivyignore` taşınan taramalara bir girdi değildir.
+
+Docker `github.workflow_sha` politika araçlarını ve görüntü kaynağı politikasını yapıyla aynı kaynak seçiciyle kontrol eder. Politika seçici, uyumsuz kapsamları reddeder ve her iki Trivy taraması için bir dosya hazırlar. Yapılandırılmış bir politikası olmayan tarihi bir kaynak hiçbir istisna kabul etmez. Her iki tarama da Trivy `v0.70.0` pinliyor. İlke doğrulaması yapılandırma tutarlılığını kanıtlar; görüntünün hâlâ başarılı bir taramaya ihtiyacı var.
 
 ## Kullanımdan kaldırılan bağımlılık riski
 

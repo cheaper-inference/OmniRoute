@@ -427,6 +427,12 @@ test("packaged ESM child bundles without server/Next imports and runs from a Com
       metafile: true,
     });
     assert.ok(
+      Object.keys(result.metafile!.inputs).some((file) =>
+        file.endsWith("logExport/destinations/otlpRequestHeaders.ts")
+      ),
+      "packaged child must include the request-header capture helper"
+    );
+    assert.ok(
       !Object.keys(result.metafile!.inputs).some((file) =>
         /db\/core|migration|featureFlags|proxyFetch\.ts|callLogs\.ts|next\//.test(file)
       ),

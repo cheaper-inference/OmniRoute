@@ -171,6 +171,12 @@ LAN 上的任何人都能清除資料庫或終止伺服器程序。
 | `/api/providers/health-autopilot/actions` | 執行 autopilot 修復動作                         |
 | `/api/settings/obsidian`                  | 為任何 Vault 根目錄簽發可重複使用的 WebDAV 認證 |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens    |
+| `/api/cli-tools/apply`                    | 重寫操作員主機上的 CLI 設定                     |
+| `/api/cli-tools/guide-settings`           | 寫入由指南引導的 CLI 設定檔                     |
+| `/api/cli-tools/hermes-agent-settings`    | 寫入 Hermes 代理程式設定                        |
+| `/api/cli-tools/backups`                  | 還原及刪除 CLI 設定備份                         |
+| `/api/log-export`                         | 將呼叫記錄傳送至已設定的目的地                  |
+| `/api/restart`                            | 重新啟動伺服器程序                              |
 
 **違規時的回應：** `401 Authentication required`
 

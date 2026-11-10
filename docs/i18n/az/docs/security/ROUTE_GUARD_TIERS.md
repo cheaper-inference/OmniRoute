@@ -187,6 +187,12 @@ prosesini dayandıra bilməsi demək olardı.
 | `/api/providers/health-autopilot/actions` | Avtopilotun düzəldici tədbirlərini icra edir                                        |
 | `/api/settings/obsidian`                  | İstənilən vault kökü üçün təkrar istifadə edilə bilən WebDAV etimadnamələri yaradır |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                        |
+| `/api/cli-tools/apply`                    | Operatorun hostdakı CLI konfiqurasiyasını yenidən yazır                             |
+| `/api/cli-tools/guide-settings`           | Təlimata əsaslanan CLI konfiqurasiya fayllarını yazır                               |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes agentinin konfiqurasiyasını yazır                                            |
+| `/api/cli-tools/backups`                  | CLI konfiqurasiyasının ehtiyat nüsxələrini bərpa edir və silir                      |
+| `/api/log-export`                         | Çağırış jurnallarını konfiqurasiya edilmiş ünvana göndərir                          |
+| `/api/restart`                            | Server prosesini yenidən başladır                                                   |
 
 **Pozuntu zamanı cavab:** `401 Authentication required`
 

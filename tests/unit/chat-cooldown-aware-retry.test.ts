@@ -1,4 +1,19 @@
+import { registerHooks } from "node:module";
+const cooldownWaitHook = registerHooks({
+  resolve(specifier, context, next) {
+    if (
+      context.parentURL?.endsWith("/src/sse/handlers/chat.ts") &&
+      specifier === "../services/cooldownAwareRetry"
+    )
+      return {
+        url: new URL("../fixtures/cooldown-wait-observer.mjs", import.meta.url).href,
+        shortCircuit: true,
+      };
+    return next(specifier, context);
+  },
+});
 import test from "node:test";
+import { setTimeout as realSetTimeout, clearTimeout as realClearTimeout } from "node:timers";
 import assert from "node:assert/strict";
 import pino from "pino";
 
@@ -8,6 +23,7 @@ process.env.STREAM_IDLE_TIMEOUT_MS = "50";
 process.env.STREAM_READINESS_TIMEOUT_MS = "50";
 
 const harness = await createChatPipelineHarness("chat-cooldown-aware-retry");
+const { setCooldownWaitObserver } = await import("../fixtures/cooldown-wait-observer.mjs");
 const auth = await import("../../src/sse/services/auth.ts");
 const { getProviderConnectionById, updateProviderConnection } =
   await import("../../src/lib/db/providers.ts");
@@ -71,6 +87,7 @@ test.afterEach(async () => {
 });
 
 test.after(async () => {
+  cooldownWaitHook.deregister();
   await harness.cleanup();
 });
 
@@ -117,33 +134,69 @@ test("handleChat does not probe Claude Web repeatedly after an upstream 429", as
   assert.equal(completionCalls, 1);
 });
 
-test("handleChat waits for a short cooldown and retries once within the configured budget", async (t) => {
-  // Setup and runner scheduling must not consume the cooldown before the request starts.
-  const cooldownMs = 950;
-  const now = Date.now();
-  const realSetTimeout = globalThis.setTimeout;
-  const requestedWaits: number[] = [];
-  const pendingTimers = new Set<ReturnType<typeof setTimeout>>();
-  t.mock.timers.enable({ apis: ["Date"], now });
-
-  try {
-    t.mock.method(globalThis, "setTimeout", (callback, delay, ...args) => {
-      if (delay === cooldownMs) {
-        requestedWaits.push(delay);
-        const timer = realSetTimeout(() => {
-          pendingTimers.delete(timer);
-          t.mock.timers.tick(delay);
-          callback(...args);
-        }, 0);
-        pendingTimers.add(timer);
-        return timer;
-      }
-      return realSetTimeout(callback, delay, ...args);
+test(
+  "handleChat waits for a short cooldown and retries once within the configured budget",
+  { timeout: 30_000 },
+  async (t) => {
+    let clock = Date.now();
+    let resumedAt: number | null = null;
+    t.mock.method(
+      Date,
+      "now",
+      () => clock + (resumedAt === null ? 0 : Math.floor(performance.now() - resumedAt))
+    );
+    let readyResolve;
+    const ready = new Promise((resolve) => {
+      readyResolve = resolve;
     });
-
+    const observation = {
+      calls: 0,
+      waitMs: 0,
+      done: false,
+      start: () => {
+        t.mock.timers.enable({ apis: ["setTimeout"] });
+        readyResolve();
+      },
+      complete: (ms) => {
+        clock += ms;
+        resumedAt = performance.now();
+        t.mock.timers.reset();
+      },
+    };
+    const controller = new AbortController();
+    let pending: Promise<Response> | undefined;
+    // Use real timers for test deadlines even while the production wait is under test.
+    async function bounded<T>(promise: Promise<T>, label: string): Promise<T> {
+      let timer;
+      try {
+        return await Promise.race([
+          promise,
+          new Promise<never>((_, reject) => {
+            timer = realSetTimeout(() => reject(new Error(label)), 5_000);
+          }),
+        ]);
+      } finally {
+        realClearTimeout(timer);
+      }
+    }
+    setCooldownWaitObserver(observation);
+    t.after(async () => {
+      controller.abort();
+      t.mock.timers.reset();
+      setCooldownWaitObserver(null);
+      if (pending) {
+        await bounded(
+          pending.then(
+            () => undefined,
+            () => undefined
+          ),
+          "aborted request did not settle"
+        );
+      }
+    });
     await seedConnection("openai", {
       apiKey: "sk-openai-cooldown-short",
-      rateLimitedUntil: new Date(Date.now() + cooldownMs).toISOString(),
+      rateLimitedUntil: new Date(Date.now() + 950).toISOString(),
       lastError: "short cooldown window",
       errorCode: 429,
     });
@@ -154,23 +207,38 @@ test("handleChat waits for a short cooldown and retries once within the configur
 
     let fetchCalls = 0;
     globalThis.fetch = async () => {
-      assert.deepEqual(requestedWaits, [cooldownMs]);
-      assert.equal(Date.now(), now + cooldownMs);
       fetchCalls += 1;
       return buildOpenAIResponse("recovered after cooldown");
     };
 
-    const startedAt = Date.now();
-    const response = await handleChat(
-      buildRequest({
-        body: {
+    pending = handleChat(
+      buildRequestWithSignal(
+        {
           model: "openai/gpt-4.1",
           stream: false,
           messages: [{ role: "user", content: "retry after short cooldown" }],
         },
-      })
+        controller.signal
+      )
     );
-    const elapsedMs = Date.now() - startedAt;
+    await bounded(
+      Promise.race([
+        ready,
+        pending.then(() => {
+          throw new Error("request completed without entering the cooldown wait");
+        }),
+      ]),
+      "request did not enter the cooldown wait"
+    );
+    assert.equal(observation.calls, 1);
+    assert.ok(observation.waitMs > 0 && observation.waitMs <= 1000);
+    assert.equal(fetchCalls, 0, "upstream must not be called before the cooldown wait");
+    assert.equal(observation.done, false);
+    t.mock.timers.tick(observation.waitMs - 1);
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(observation.done, false, "the actual wait must not finish before its deadline");
+    t.mock.timers.tick(1);
+    const response = await pending;
     const body = (await response.json()) as unknown as {
       choices: Array<{ message: { content: string } }>;
       error: { message: string };
@@ -178,15 +246,11 @@ test("handleChat waits for a short cooldown and retries once within the configur
 
     assert.equal(response.status, 200);
     assert.equal(fetchCalls, 1);
-    assert.deepEqual(requestedWaits, [cooldownMs]);
-    assert.ok(elapsedMs >= 250, `expected cooldown-aware retry wait, got ${elapsedMs}ms`);
+    assert.equal(observation.waitMs, 950);
+    assert.equal(observation.done, true);
     assert.equal(body.choices[0].message.content, "recovered after cooldown");
-  } finally {
-    // Restore before the harness afterEach runs, including assertion/setup failures.
-    for (const timer of pendingTimers) clearTimeout(timer);
-    t.mock.reset();
   }
-});
+);
 
 test("handleChat recovers from a real 429 once the connection cooldown expires", async () => {
   await seedConnection("openai", {

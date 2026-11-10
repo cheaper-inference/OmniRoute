@@ -7,7 +7,7 @@ set -uo pipefail
 
 PVE_HOST="${PVE_HOST:-192.168.0.100}"
 VM_ID="${VM_ID:-113}"
-REPO="${REPO:-diegosouzapw/OmniRoute}"
+REPO="${REPO:-cheaper-inference/OmniRoute}"
 SSH="ssh -o BatchMode=yes -o ConnectTimeout=8"
 
 # 0) Always-on mode. When the repo var VPS_ALWAYS_ON=true, the VM 113 is a DEDICATED,

@@ -1,5 +1,6 @@
 import { checkFallbackError, type ProviderProfile } from "../accountFallback.ts";
 import { classifyGeminiQuotaMetricFromText } from "../geminiRateLimitTracker.ts";
+import { readAttemptFailure, type AttemptFailure } from "./attemptFailure.ts";
 
 const TERMINAL_QUOTA_CODES = new Set([
   "billing_hard_limit_reached",
@@ -13,37 +14,6 @@ const TERMINAL_QUOTA_CODES = new Set([
 ]);
 
 const trustedClassifications = new WeakMap<Response, boolean>();
-
-type ParsedError = {
-  text: string;
-  structuredError: { code?: string; type?: string } | null;
-};
-
-async function parseError(response: Response): Promise<ParsedError> {
-  let text = response.statusText;
-  let structuredError: ParsedError["structuredError"] = null;
-  try {
-    const body = (await response.clone().json()) as {
-      error?: string | { message?: unknown; code?: unknown; type?: unknown };
-      message?: unknown;
-    };
-    if (typeof body.error === "string") text = body.error;
-    else if (body.error && typeof body.error === "object") {
-      if (typeof body.error.message === "string") text = body.error.message;
-      structuredError = {
-        ...(body.error.code == null ? {} : { code: String(body.error.code) }),
-        ...(body.error.type == null ? {} : { type: String(body.error.type) }),
-      };
-    } else if (typeof body.message === "string") text = body.message;
-  } catch {
-    try {
-      text = await response.clone().text();
-    } catch {
-      // The status and trusted in-process classification remain available.
-    }
-  }
-  return { text, structuredError };
-}
 
 export function recordQuotaExhaustionClassification(response: Response, exhausted: boolean): void {
   trustedClassifications.set(response, exhausted);
@@ -66,41 +36,62 @@ export async function isQuotaExhaustionResponse(
   const trusted = trustedClassifications.get(response);
   if (trusted !== undefined) return trusted;
 
-  // #10966: 403 is included alongside 402/429 — some upstreams (e.g. durable
-  // wallet/balance exhaustion) return a 403 for a terminal quota condition instead
-  // of the more common 402/429. The structured-code/text checks below still gate
-  // this to genuine quota signals (CREDITS_EXHAUSTED_SIGNALS / TERMINAL_QUOTA_CODES /
-  // checkFallbackError's own classification), so a generic auth-only 403 (invalid
-  // key, no matching quota signal) still falls through to `false`.
-  if (response.status !== 402 && response.status !== 429 && response.status !== 403) return false;
+  if (!isQuotaStatus(response.status)) return false;
+  return isQuotaExhaustionFailure(await readAttemptFailure(response), provider, model, profile);
+}
 
-  const { text, structuredError } = await parseError(response);
-  if (provider === "gemini" && response.status === 429) {
-    const metric = classifyGeminiQuotaMetricFromText(text);
-    if (metric === "rpm" || metric === "tpm") return false;
-    if (metric === "rpd") return true;
-  }
-  const normalizedCode = structuredError?.code?.toLowerCase();
-  const normalizedType = structuredError?.type?.toLowerCase();
-  if (
-    (normalizedCode && TERMINAL_QUOTA_CODES.has(normalizedCode)) ||
-    (normalizedType && TERMINAL_QUOTA_CODES.has(normalizedType))
-  ) {
-    return true;
-  }
+function isQuotaStatus(status: number): boolean {
+  // Durable quota depletion can be reported as 403; auth-only 403 still needs
+  // an actual quota signal. Other statuses never imply quota exhaustion.
+  return status === 402 || status === 429 || status === 403;
+}
 
-  if (
-    /\b(?:billing hard limit reached|credits? exhausted|subscription quota exhausted)\b/i.test(text)
-  ) {
-    return true;
-  }
+/** Gemini 429s: per-minute limits are transient, per-day limits are terminal, else undecided. */
+function geminiQuotaVerdict(provider: string | null, status: number, text: string): boolean | null {
+  if (provider !== "gemini" || status !== 429) return null;
+  const metric = classifyGeminiQuotaMetricFromText(text);
+  if (metric === "rpm" || metric === "tpm") return false;
+  return metric === "rpd" ? true : null;
+}
 
-  if (
-    provider?.startsWith("openai-compatible-") ||
-    provider?.startsWith("openai-compatible-chat-")
-  ) {
-    return false;
-  }
+function hasTerminalQuotaCode(
+  structuredError: AttemptFailure["quota"]["structuredError"]
+): boolean {
+  const code = structuredError?.code?.toLowerCase();
+  const type = structuredError?.type?.toLowerCase();
+  return Boolean(
+    (code && TERMINAL_QUOTA_CODES.has(code)) || (type && TERMINAL_QUOTA_CODES.has(type))
+  );
+}
+
+function hasTerminalQuotaText(text: string): boolean {
+  return /\b(?:billing hard limit reached|credits? exhausted|subscription quota exhausted)\b/i.test(
+    text
+  );
+}
+
+function isOpenAiCompatibleProvider(provider: string | null): boolean {
+  return Boolean(
+    provider?.startsWith("openai-compatible-") || provider?.startsWith("openai-compatible-chat-")
+  );
+}
+
+/** Classify the same decoded facts used by the combo retry/fallback policy. */
+export function isQuotaExhaustionFailure(
+  failure: AttemptFailure,
+  provider: string | null,
+  model: string | null,
+  profile: ProviderProfile | null = null
+): boolean {
+  const { response, quota } = failure;
+  const trusted = trustedClassifications.get(response);
+  if (trusted !== undefined) return trusted;
+  if (!isQuotaStatus(response.status)) return false;
+  const { text, structuredError } = quota;
+  const gemini = geminiQuotaVerdict(provider, response.status, text);
+  if (gemini !== null) return gemini;
+  if (hasTerminalQuotaCode(structuredError) || hasTerminalQuotaText(text)) return true;
+  if (isOpenAiCompatibleProvider(provider)) return false;
 
   return (
     checkFallbackError(

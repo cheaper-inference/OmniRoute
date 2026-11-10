@@ -64,6 +64,19 @@ OmniRoute, **Electron 41** + **electron-builder 26.10** üzerinde geliştirilmi�
 - `npm run build:mac-x64` / `build:mac-arm64` — tek mimarili macOS derlemeleri
 - `npm run pack` — yerel testler için yalnızca dizin oluşturan derleme (yükleyici yok)
 
+## İsteğe bağlı çalışma zamanı paketleri
+
+Masaüstü derlemeleri, yükleyicileriyle birlikte isteğe bağlı çalışma zamanı arşivleri yayımlayabilir. Kurulu sunucu içeriği `optional-packs.index.json` dosyasını içerir (Windows ve Linux'ta `resources/app` altında). `browser-runtime` girdisi için `packs[].tarball` değerini okuyun ve **tam olarak bu dosya adını aynı sürümden indirin**. Arşiv adları SHA-256 özeti içerir; farklı derlemeler farklı arşivler gerektirebilir. İndirilen dosyanın adını değiştirmeyin.
+
+Kurulu uygulamanın dizin dosyasını ve seçilen arşivi aynı dizine kopyalayın, ardından aynı sürümün CLI'sini kullanın:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` arşiv dosyasının adını değil, kurulum ve doğrulama durumunu gösterir. Arşivi birlikte gelen dizin dosyası seçer. Kurulum, çıkarmadan önce arşiv sağlama toplamını ve kurulu paketi değiştirmeden önce paket sağlama toplamlarını doğrular. Yerel dosyaları okur; eksik arşivleri indirmez. Kurulumdan sonra uygulamayı yeniden başlatın. Sürümde eşleşen bir varlık yoksa isteğe bağlı paket o sürümün varlıkları üzerinden kullanılamaz.
+
 ## Dizin Yapısı
 
 ```

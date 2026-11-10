@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useNotificationStore } from "@/store/notificationStore";
-import { Button, Modal } from "@/shared/components";
+import { Button, Input, Modal, SegmentedControl, Textarea } from "@/shared/components";
 
 interface ImportGrokCliAuthModalProps {
   onClose: () => void;
@@ -134,29 +134,25 @@ export default function ImportGrokCliAuthModal({
         </p>
 
         {/* Tab toggle */}
-        <div className="flex gap-2 border-b border-border pb-3">
-          <button
-            className={`text-sm px-3 py-1 rounded-t ${tab === "upload" ? "font-semibold border-b-2 border-primary text-primary" : "text-text-muted"}`}
-            onClick={() => setTab("upload")}
-          >
-            {t("grokUploadFile")}
-          </button>
-          <button
-            className={`text-sm px-3 py-1 rounded-t ${tab === "paste" ? "font-semibold border-b-2 border-primary text-primary" : "text-text-muted"}`}
-            onClick={() => setTab("paste")}
-          >
-            {t("grokPasteJson")}
-          </button>
-        </div>
+        <SegmentedControl
+          size="sm"
+          value={tab}
+          onChange={(next) => setTab(next as typeof tab)}
+          options={[
+            { value: "upload", label: t("grokUploadFile") },
+            { value: "paste", label: t("grokPasteJson") },
+          ]}
+        />
 
         {/* Upload tab */}
         {tab === "upload" && (
           <div className="flex flex-col gap-3">
-            <input
+            <Input
               type="file"
               accept=".json"
+              aria-label={t("grokUploadFile")}
               onChange={handleFileChange}
-              className="text-sm text-text-muted file:mr-3 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+              inputClassName="cursor-pointer py-1 file:mr-3 file:rounded file:border-0 file:bg-bg-subtle file:px-3 file:py-1 file:text-sm file:font-medium file:text-text-main"
             />
           </div>
         )}
@@ -164,8 +160,9 @@ export default function ImportGrokCliAuthModal({
         {/* Paste tab */}
         {tab === "paste" && (
           <div className="flex flex-col gap-3">
-            <textarea
-              className="w-full h-32 p-3 text-sm font-mono bg-input border border-border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+            <Textarea
+              className="h-32 resize-none font-mono text-sm"
+              aria-label={t("grokPasteJson")}
               placeholder='{"https://auth.x.ai::clientId": {"key": "eyJ...", ...}}'
               value={pasteText}
               onChange={(e) => handlePasteChange(e.target.value)}
@@ -174,35 +171,34 @@ export default function ImportGrokCliAuthModal({
         )}
 
         {/* Parse error */}
-        {parseError && <p className="text-sm text-red-500">{parseError}</p>}
+        {parseError && <p className="text-sm text-error">{parseError}</p>}
 
         {/* Detected info */}
         {parsedJson && (
           <div className="flex flex-col gap-3">
-            <div className="bg-green-500/10 border border-green-500/20 rounded-md p-3">
-              <p className="text-sm text-green-400">
+            <div className="bg-success/10 border border-success/20 rounded-md p-3">
+              <p className="text-sm text-success">
                 {t("grokValidToken")}
                 {detectedEmail ? ` (${detectedEmail})` : ""}
               </p>
               {hasRefreshToken && (
-                <p className="text-xs text-green-500 mt-1">{t("grokRefreshIncluded")}</p>
+                <p className="text-xs text-success mt-1">{t("grokRefreshIncluded")}</p>
               )}
               {!hasRefreshToken && (
-                <p className="text-xs text-amber-400 mt-1">{t("grokRefreshMissing")}</p>
+                <p className="text-xs text-warning mt-1">{t("grokRefreshMissing")}</p>
               )}
             </div>
-            <input
-              type="text"
+            <Input
               placeholder={t("grokConnectionName")}
+              aria-label={t("grokConnectionName")}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 text-sm bg-input border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         )}
 
         {/* Submit error */}
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
 
         {/* Buttons */}
         <div className="flex gap-2">

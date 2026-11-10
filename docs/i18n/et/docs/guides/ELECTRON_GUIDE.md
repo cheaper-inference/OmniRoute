@@ -64,6 +64,19 @@ Tööruum `electron/` pakub ka järgmisi skripte:
 - `npm run build:mac-x64` / `build:mac-arm64` — ühe arhitektuuriga macOS-i järgud
 - `npm run pack` — ainult kataloogi loov järk kohalikuks testimiseks (ilma installerita)
 
+## Valikulised käituspaketid
+
+Töölauajärgud võivad avaldada valikulised käitusarhiivid koos paigaldajatega. Paigaldatud serverisisu sisaldab `optional-packs.index.json`-i (Windowsis ja Linuxis asukohas `resources/app`). Kirje `browser-runtime` jaoks loe `packs[].tarball` ja laadi alla **täpselt selle nimega fail samast väljalaskest**. Arhiivinimed sisaldavad SHA-256 räsi; eri järgud võivad vajada eri arhiive. Hoia allalaaditud failinimi muutumatuna.
+
+Kopeeri paigaldatud rakenduse indeks ja valitud arhiiv ühte kataloogi ning kasuta sama väljalaske CLI-d:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` näitab paigalduse ja kontrollimise olekut, mitte arhiivi failinime. Arhiivi valib kaasapandud indeks. Paigaldus kontrollib arhiivi kontrollsummat enne lahtipakkimist ja pakettide kontrollsummasid enne paigaldatud paketi asendamist. See loeb kohalikke faile; puuduvaid arhiive ei laadita alla. Taaskäivita rakendus pärast paigaldust. Kui väljalaskel pole vastavat faili, ei ole valikuline pakett selle väljalaske failide kaudu saadaval.
+
 ## Kataloogistruktuur
 
 ```

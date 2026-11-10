@@ -145,6 +145,12 @@ route-গুলোকে সুরক্ষিত রাখে — যে reques
 | `/api/providers/health-autopilot/actions` | autopilot remediation action সম্পাদন করে                               |
 | `/api/settings/obsidian`                  | যেকোনো vault root-এর জন্য পুনর্ব্যবহারযোগ্য WebDAV credential তৈরি করে |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                           |
+| `/api/cli-tools/apply`                    | হোস্টে অপারেটরের CLI কনফিগারেশন পুনর্লিখন করে                          |
+| `/api/cli-tools/guide-settings`           | নির্দেশিকা-ভিত্তিক CLI কনফিগারেশন ফাইল লেখে                            |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes এজেন্টের কনফিগারেশন লেখে                                        |
+| `/api/cli-tools/backups`                  | CLI কনফিগারেশনের ব্যাকআপ পুনরুদ্ধার ও মুছে ফেলে                        |
+| `/api/log-export`                         | কনফিগার করা গন্তব্যে কল লগ পাঠায়                                      |
+| `/api/restart`                            | সার্ভার প্রক্রিয়া পুনরায় চালু করে                                    |
 
 **লঙ্ঘনের ক্ষেত্রে response:** `401 Authentication required`
 

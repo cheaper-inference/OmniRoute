@@ -43,7 +43,11 @@ function validateOneLine(
   // Anthropic native batch shape: { custom_id, params }
   // OpenAI batch shape: { custom_id, method, url, body }
   if ("params" in parsed) {
-    if (typeof parsed.params !== "object" || parsed.params === null) {
+    if (
+      typeof parsed.params !== "object" ||
+      parsed.params === null ||
+      Array.isArray(parsed.params)
+    ) {
       errors.push({
         lineNumber: lineNo,
         reason: "params must be an object (Anthropic batch shape)",

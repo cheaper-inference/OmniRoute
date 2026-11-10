@@ -192,12 +192,22 @@ function moveFunctionResponsesLast(parts: GeminiPart[]): GeminiPart[] {
   return [...others, ...responses];
 }
 
-export function mergeConsecutiveSameRoleContents(contents: GeminiContent[]): GeminiContent[] {
+export function mergeConsecutiveSameRoleContents(
+  contents: GeminiContent[],
+  model = ""
+): GeminiContent[] {
   const merged: GeminiContent[] = [];
   for (const entry of contents) {
     const last = merged[merged.length - 1];
     if (last && last.role === entry.role) {
-      last.parts = moveFunctionResponsesLast([...last.parts, ...entry.parts]);
+      // Claude requires tool results before user text; Gemini 4 requires them last.
+      const parts = [...last.parts, ...entry.parts];
+      last.parts = model.toLowerCase().includes("claude")
+        ? [
+            ...parts.filter(isFunctionResponsePart),
+            ...parts.filter((part) => !isFunctionResponsePart(part)),
+          ]
+        : moveFunctionResponsesLast(parts);
     } else {
       // Shallow-copy the entry and its `parts` array so a later same-role merge
       // (`last.parts.push(...)`) never mutates the caller's input objects.

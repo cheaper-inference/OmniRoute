@@ -200,6 +200,12 @@ bo‘lardi.
 | `/api/providers/health-autopilot/actions` | Avtopilotning tuzatish amallarini bajaradi                                            |
 | `/api/settings/obsidian`                  | Istalgan ombor ildizi uchun qayta ishlatiladigan WebDAV hisob ma’lumotlarini yaratadi |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                          |
+| `/api/cli-tools/apply`                    | Operatorning hostdagi CLI sozlamalarini qayta yozadi                                  |
+| `/api/cli-tools/guide-settings`           | Qo‘llanmaga asoslangan CLI sozlama fayllarini yozadi                                  |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes agentining sozlamalarini yozadi                                                |
+| `/api/cli-tools/backups`                  | CLI sozlamalari zaxiralarini tiklaydi va o‘chiradi                                    |
+| `/api/log-export`                         | Chaqiruv jurnallarini sozlangan manzilga yuboradi                                     |
+| `/api/restart`                            | Server jarayonini qayta ishga tushiradi                                               |
 
 **Buzilish holatidagi javob:** `401 Authentication required`
 

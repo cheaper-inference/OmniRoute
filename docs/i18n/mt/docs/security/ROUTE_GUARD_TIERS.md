@@ -200,6 +200,12 @@ proċess tas-server.
 | `/api/providers/health-autopilot/actions` | Jeżegwixxi azzjonijiet ta’ rimedju tal-autopilot                                    |
 | `/api/settings/obsidian`                  | Joħloq kredenzjali WebDAV li jistgħu jerġgħu jintużaw għal kwalunkwe root ta’ vault |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                        |
+| `/api/cli-tools/apply`                    | Jikteb mill-ġdid il-konfigurazzjoni CLI tal-operatur fuq il-host                    |
+| `/api/cli-tools/guide-settings`           | Jikteb fajls ta’ konfigurazzjoni CLI bbażati fuq gwidi                              |
+| `/api/cli-tools/hermes-agent-settings`    | Jikteb il-konfigurazzjoni tal-aġent Hermes                                          |
+| `/api/cli-tools/backups`                  | Jirrestawra u jħassar backups tal-konfigurazzjoni CLI                               |
+| `/api/log-export`                         | Jibgħat il-logs tas-sejħiet lejn destinazzjoni kkonfigurata                         |
+| `/api/restart`                            | Jerġa’ jibda l-proċess tas-server                                                   |
 
 **Rispons f’każ ta’ ksur:** `401 Authentication required`
 

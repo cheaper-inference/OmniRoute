@@ -195,6 +195,12 @@ szerverfolyamatot.
 | `/api/providers/health-autopilot/actions` | Végrehajtja az autopilot helyreállítási műveleteit                             |
 | `/api/settings/obsidian`                  | Újrafelhasználható WebDAV-hitelesítőadatokat hoz létre bármely vault-gyökérhez |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                   |
+| `/api/cli-tools/apply`                    | Felülírja az operátor CLI-konfigurációját a gazdagépen                         |
+| `/api/cli-tools/guide-settings`           | Útmutató alapján vezérelt CLI-konfigurációs fájlokat ír                        |
+| `/api/cli-tools/hermes-agent-settings`    | Kiírja a Hermes-ügynök konfigurációját                                         |
+| `/api/cli-tools/backups`                  | Visszaállítja és törli a CLI-konfiguráció mentéseit                            |
+| `/api/log-export`                         | Hívásnaplókat küld a beállított célhelyre                                      |
+| `/api/restart`                            | Újraindítja a kiszolgálófolyamatot                                             |
 
 **Válasz szabálysértés esetén:** `401 Authentication required`
 

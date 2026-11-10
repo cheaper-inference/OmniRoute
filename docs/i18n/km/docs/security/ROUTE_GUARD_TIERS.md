@@ -197,6 +197,12 @@ server process បានដែរ។
 | `/api/providers/health-autopilot/actions` | ប្រតិបត្តិសកម្មភាពកែតម្រូវរបស់ autopilot                        |
 | `/api/settings/obsidian`                  | បង្កើត WebDAV creds ដែលអាចប្រើឡើងវិញបានសម្រាប់ vault root ណាមួយ |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                    |
+| `/api/cli-tools/apply`                    | សរសេរការកំណត់ CLI របស់ប្រតិបត្តិករនៅលើម៉ាស៊ីនម្ចាស់ឡើងវិញ       |
+| `/api/cli-tools/guide-settings`           | សរសេរឯកសារកំណត់ CLI ដែលផ្អែកលើមគ្គុទ្ទេសក៍                      |
+| `/api/cli-tools/hermes-agent-settings`    | សរសេរការកំណត់ភ្នាក់ងារ Hermes                                   |
+| `/api/cli-tools/backups`                  | ស្ដារ និងលុបច្បាប់ចម្លងបម្រុងនៃការកំណត់ CLI                     |
+| `/api/log-export`                         | ផ្ញើកំណត់ហេតុការហៅទៅគោលដៅដែលបានកំណត់                            |
+| `/api/restart`                            | ចាប់ផ្ដើមដំណើរការម៉ាស៊ីនមេឡើងវិញ                                |
 
 **Response នៅពេលមានការបំពាន៖** `401 Authentication required`
 

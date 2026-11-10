@@ -4,6 +4,7 @@
     "tests/unit/account-fallback-retry-after-json.test.ts",
     "tests/unit/agent-bridge-repair-sudo-gate.test.ts",
     "tests/unit/agy-provider.test.ts",
+    "tests/unit/audio-transcriptions-combo-resolution.test.ts",
     "tests/unit/bailian-coding-plan-provider.test.ts",
     "tests/unit/batches-f9-helpers.test.ts",
     "tests/unit/calllogs-format-split.test.ts",

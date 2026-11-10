@@ -61,3 +61,15 @@ Sätete eksport (`GET /api/settings/export-json`) sisaldab mõlemat massiivi muu
 sätete välju — erinevalt `hidePaidModels`-i kombinatsioonisammu ekspordifiltrist puudub siin taastamisel
 risk: eksporditud kombinatsioonisammu manustatud keelatud ID on operaatori enda eksplitsiitne marsruutimisvalik,
 mitte miski, mida tuleks ekspordi piiril eemaldada.
+
+## Ainult kombinatsioonide loend (`exposeCombosOnly`)
+
+Eraldi tõeväärtus, samuti eraldi lubatav ja vaikimisi `false`, juurutustele, kus kombinatsioonid on avalik mudelipind ning pakkujad ainult taustateenused. Väärtusega `true` säilitab avalik loend (`GET /v1/models`, `GET /v1` ja muud `getUnifiedModelsResponse()`-il põhinevad `/v1` avastamismarsruudid) ainult read väärtusega `owned_by: "combo"`: kasutaja kombinatsioonid ja sisseehitatud `auto/*` kombinatsioonid (kui `hideAutoCombos` neid ei peida). See kasutab sama reakontrolli kui võtmepõhine `catalogScope: "combos"` ning võtme enda lubamis-/keelamis-/ulatusefiltrid kehtivad endiselt lisaks.
+
+Lülita seda vaates **Settings → Routing → Models API listing** või käsuga `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Nagu ülaltoodud loendid, muudab see ainult avalikustamist:
+
+- otsene `provider/model` ID suunatakse endiselt edasi ning `GET /v1/models/{id}` lahendab selle endiselt;
+- juhtpaneeli kataloogi (`GET /api/models/catalog`, mida kasutavad mudelivalijad) ei kitsendata;
+- seda ei peegeldata `auto/*` kandidaatide kogumitesse, seega säilitavad `auto/*` kombinatsioonid kogu oma kogumi.

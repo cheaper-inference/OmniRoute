@@ -2,12 +2,12 @@
  * Release the LOCAL quota cooldown left behind by a 429 once the operator has redeemed a
  * reset credit and upstream confirmed it.
  *
- * The usage poller never overrules a future cooldown (`maybeClearRecoveredQuotaState` treats
- * it as the 429 handler's hard statement), so without this step a redeemed account stayed
- * parked until the OLD window elapsed — days, for a weekly cap — even though its upstream
- * quota was already back. A redemption is an explicit operator action confirmed by a 2xx, so
- * it may lift that state, but only with positive evidence from the refreshed usage, and never
- * for terminal accounts (banned / expired / deactivated / credits_exhausted).
+ * Ordinary quota polling never overrules a future 429 cooldown. A confirmed reset
+ * credit can release Codex/Grok locks through these functions; the separate Claude
+ * recovery in providerLimits.ts (#17043) also accepts a persisted weekly reset event
+ * newer than the 429 plus fully refreshed positive quota windows. Both paths require
+ * positive evidence, not a successful auth probe or generic quota poll; terminal
+ * accounts (banned / expired / deactivated / credits_exhausted) remain locked.
  */
 
 import { getProviderConnectionById } from "@/lib/db/providers";

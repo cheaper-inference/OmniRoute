@@ -164,6 +164,12 @@ LOCAL_ONLY に分類します。
 | `/api/providers/health-autopilot/actions` | 自動修復アクションを実行する                                  |
 | `/api/settings/obsidian`                  | 任意の vault ルート用に再利用可能な WebDAV 認証情報を発行する |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                  |
+| `/api/cli-tools/apply`                    | ホスト上のオペレーターの CLI 設定を書き換える                 |
+| `/api/cli-tools/guide-settings`           | ガイドに基づく CLI 設定ファイルを書き込む                     |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes エージェントの設定を書き込む                           |
+| `/api/cli-tools/backups`                  | CLI 設定のバックアップを復元・削除する                        |
+| `/api/log-export`                         | 呼び出しログを設定済みの送信先へ送る                          |
+| `/api/restart`                            | サーバープロセスを再起動する                                  |
 
 **違反時のレスポンス:** `401 Authentication required`
 

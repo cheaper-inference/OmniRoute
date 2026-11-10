@@ -61,6 +61,19 @@ OmniRoute တွင် **Electron 41** + **electron-builder 26.10** ဖြင့
 - `npm run build:mac-x64` / `build:mac-arm64` — architecture တစ်မျိုးတည်းအတွက် macOS build များ
 - `npm run pack` — စက်တွင်းစမ်းသပ်မှုအတွက် directory သီးသန့် build (installer မပါဝင်ပါ)
 
+## ရွေးချယ်တပ်ဆင်နိုင်သော runtime pack များ
+
+Desktop build များသည် installer နှင့်အတူ ရွေးချယ်တပ်ဆင်နိုင်သော runtime archive များကို ထုတ်ဝေနိုင်သည်။ တပ်ဆင်ထားသော server payload တွင် `optional-packs.index.json` ပါဝင်သည် (Windows နှင့် Linux တွင် `resources/app` အောက်၌)။ `browser-runtime` entry အတွက် `packs[].tarball` ကို ဖတ်ပြီး **ထိုဖိုင်အမည်အတိအကျကို တူညီသော release မှ** ဒေါင်းလုဒ်လုပ်ပါ။ archive အမည်များတွင် SHA-256 digest ပါသည်။ build မတူလျှင် archive မတူနိုင်ပါ။ ဒေါင်းလုဒ်လုပ်ထားသောဖိုင်၏ အမည်ကို မပြောင်းပါနှင့်။
+
+တပ်ဆင်ထားသော app ၏ index နှင့် ရွေးထားသော archive ကို directory တစ်ခုတည်းသို့ ကူးပြီး တူညီသော release မှ CLI ကို သုံးပါ။
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` သည် တပ်ဆင်မှုနှင့် စစ်ဆေးအတည်ပြုမှုအခြေအနေကို ပြပြီး archive ဖိုင်အမည်ကို မပြပါ။ ပါလာသော index က archive ကို ရွေးသည်။ တပ်ဆင်မှုသည် archive ကို မဖြည်မီ ၎င်း၏ checksum ကို စစ်ပြီး တပ်ဆင်ထားသော pack ကို မအစားထိုးမီ package checksum များကို စစ်သည်။ local file များကို ဖတ်ခြင်းသာဖြစ်ပြီး မရှိသော archive များကို ဒေါင်းလုဒ်မလုပ်ပါ။ တပ်ဆင်ပြီးနောက် application ကို ပြန်စပါ။ release တွင် ကိုက်ညီသော asset မရှိလျှင် ထို release ၏ asset များမှ ရွေးချယ်တပ်ဆင်နိုင်သော pack ကို မရနိုင်ပါ။
+
 ## ဖိုင်လမ်းညွှန် ဖွဲ့စည်းပုံ
 
 ```

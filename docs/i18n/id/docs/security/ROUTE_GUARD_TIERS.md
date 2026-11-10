@@ -201,6 +201,12 @@ proses server.
 | `/api/providers/health-autopilot/actions` | Menjalankan tindakan remediasi autopilot                                          |
 | `/api/settings/obsidian`                  | Menerbitkan kredensial WebDAV yang dapat digunakan ulang untuk root vault apa pun |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                      |
+| `/api/cli-tools/apply`                    | Menulis ulang konfigurasi CLI operator pada host                                  |
+| `/api/cli-tools/guide-settings`           | Menulis berkas konfigurasi CLI berbasis panduan                                   |
+| `/api/cli-tools/hermes-agent-settings`    | Menulis konfigurasi agen Hermes                                                   |
+| `/api/cli-tools/backups`                  | Memulihkan dan menghapus cadangan konfigurasi CLI                                 |
+| `/api/log-export`                         | Mengirim log panggilan ke tujuan yang dikonfigurasi                               |
+| `/api/restart`                            | Memulai ulang proses server                                                       |
 
 **Respons saat terjadi pelanggaran:** `401 Authentication required`
 

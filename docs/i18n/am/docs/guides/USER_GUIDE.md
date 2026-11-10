@@ -120,15 +120,15 @@
 
 ## 📖 የአቅራቢ ማዋቀር
 
-ከCSV ወይም JSON ፋይል ብዙ API-key ግንኙነቶችን በአንድ ጊዜ ለመጨመር፣ **Dashboard → Providers → Import from file** ይጠቀሙ። ዓምዶቹ በቦታ ቅደም ተከተል ይወሰናሉ (`provider,name,apiKey,baseUrl,priority`)፤ `provider` አስቀድሞ እንደሚተዳደር አቅራቢ ወይም ተኳሃኝ ኖድ መኖር አለበት። [አቅራቢዎችን ከCSV ወይም JSON ፋይል ማስመጣት](../providers/CSV-IMPORT.md)ን ይመልከቱ።
+ከCSV ወይም JSON ፋይል የAPI ቁልፍ ግንኙነቶችን በጅምላ ለመጨመር **Dashboard → Providers → Import from file** ይጠቀሙ። ዓምዶቹ በቦታ ተመድበዋል (`provider,name,apiKey,baseUrl,priority`)፤ `provider` እንደ የሚተዳደር አቅራቢ ወይም ተኳሃኝ ኖድ አስቀድሞ መኖር አለበት። [አቅራቢዎችን ከCSV ወይም JSON ፋይል አስመጣ](../providers/CSV-IMPORT.md) ይመልከቱ።
 
-### 🔐 የደንበኝነት ምዝገባ አቅራቢዎች
+### 🔐 የምዝገባ አቅራቢዎች
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Claude Codeን ያገናኙ
-→ በOAuth ይግቡ → ቶከን በራስ-ሰር ይታደሳል
+Dashboard → Providers → Connect Claude Code
+→ የOAuth መግቢያ → ራስ-ሰር የቶከን እድሳት
 → የ5 ሰዓት + ሳምንታዊ ኮታ ክትትል
 
 ሞዴሎች:
@@ -137,19 +137,20 @@ Dashboard → Providers → Claude Codeን ያገናኙ
   cc/claude-haiku-4-5-20251001
 ```
 
-**የባለሙያ ምክር:** ለውስብስብ ተግባራት Opusን፣ ለፍጥነት Sonnetን ይጠቀሙ። OmniRoute ኮታውን በየሞዴሉ ይከታተላል!
+**የባለሙያ ምክር፦** ለውስብስብ ሥራዎች Opus፣ ለፍጥነት Sonnet ይጠቀሙ። OmniRoute ኮታን በሞዴል ይከታተላል!
 
-በOmniRoute ሆስት ላይ ብራውዘር የለም? Claude Code በገባበት በማንኛውም ቦታ `claude setup-token`ን ያስኪዱና የአንድ ዓመቱን ቶከን በ**Setup Token** ትር ውስጥ ይለጥፉ። [Claude Codeን በsetup token መጠቀም](../providers/CLAUDE_CODE_SETUP_TOKEN.md)ን ይመልከቱ።
+በOmniRoute አስተናጋጅ ላይ አሳሽ የለም? Claude Code የገባበትን ቦታ ሁሉ `claude setup-token` ያስኪዱና የአንድ ዓመት ቶከኑን ወደ **Setup Token** ትር ይለጥፉ። [Claude Code ከማዋቀሪያ ቶከን ጋር](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ይመልከቱ።
 
 ከClaude እና Claude Code ጋር ተኳሃኝ የሆኑ መስመሮች ለOpus እና Sonnet
-ሞዴሎች የ`max` የማሰብ ጥረትን እንዳለ ያቆያሉ። Haiku ሞዴሎች የ`max` ጥረት ደረጃን አይቀበሉም፤ ስለዚህ OmniRoute
-ጥያቄውን ወደ ላይኛው አቅራቢ ከመላኩ በፊት ወደ ከፍተኛ የማሰብ በጀት ዝቅ ያደርገዋል።
+ሞዴሎች `max` የአስተሳሰብ ጥረትን እንደተጠበቀ ያስቀምጣሉ። የHaiku ሞዴሎች
+የ`max` ጥረት ደረጃን አይቀበሉም፤ ስለዚህ OmniRoute ይህን ጥያቄ
+ወደ ከፍተኛ የአስተሳሰብ በጀት ዝቅ አድርጎ ወደ ላይኛው አገልግሎት ይልከዋል።
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Codexን ያገናኙ
-→ በOAuth ይግቡ (port 1455)
+Dashboard → Providers → Connect Codex
+→ የOAuth መግቢያ (ፖርት 1455)
 → የ5 ሰዓት + ሳምንታዊ ዳግም ማስጀመር
 
 ሞዴሎች:
@@ -162,9 +163,9 @@ Dashboard → Providers → Codexን ያገናኙ
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → GitHubን ያገናኙ
+Dashboard → Providers → Connect GitHub
 → በGitHub በኩል OAuth
-→ ወርሃዊ ዳግም ማስጀመር (በየወሩ 1ኛ ቀን)
+→ ወርሃዊ ዳግም ማስጀመር (በወሩ 1ኛ ቀን)
 
 ሞዴሎች:
   gh/gpt-5.5
@@ -174,55 +175,74 @@ Dashboard → Providers → GitHubን ያገናኙ
   gh/gemini-3.1-pro-preview
 ```
 
+**የAI ክሬዲቶች (በቶከን ላይ የተመሠረተ ክፍያ)።** GitHub ለመለያው
+`credits_used` ሲያሳውቅ፣ የአቅራቢ ገደቦች ካርዱ በአሁኑ የክፍያ ጊዜ ውስጥ
+የተጠቀሙትን ክሬዲቶች የሚያሳይ **የAI ክሬዲቶች** ረድፍ ያሳያል፤ ይህም
+ያልተገደቡ የድርጅት ዕቅዶችን ጨምሮ ይሠራል።
+
+**የአካባቢ የAI ክሬዲቶች ገደብ።** የGitHub ግንኙነትን ያርትዑና **በክፍያ
+ጊዜ ውስጥ የAI ክሬዲቶች ገደብ** (`providerSpecificData.githubCreditLimit`) ያዘጋጁ።
+ባዶ ከሆነ ያሰናክለዋል፤ `0` ከሆነ ግንኙነቱን ሁልጊዜ ይዘላል። የመጨረሻው
+የአጠቃቀም ንባብ ከገደቡ ጋር እኩል ወይም ከዚያ በላይ ሲሆን፣ የመለያ ምርጫ
+ይህን ግንኙነት ይዘላል፤ መስመራዊ ማድረግም ወደ ሌሎች ግንኙነቶችዎ ይመለሳል፣
+ልክ እንደ የኮታ ፖሊሲ መቁረጫ። ምርመራው በየጊዜው የኮታ እድሳት ቀድሞ
+የሚሰበስበውን አጠቃቀም ያነባል — በጥያቄ መንገድ ላይ GitHubን በፍጹም
+አይጠራም — እንዲሁም በክፍት ሁኔታ ይሰራል፦ የጎደለ ወይም ያረጀ ንባብ
+(ከ15 ደቂቃ በላይ የሆነ፣ ወይም ቀድሞ ዳግም ከተጀመረ የክፍያ ጊዜ የመጣ)
+ግንኙነቱን አይከለክልም። ይህ የአካባቢ ጥበቃ ዘዴ እንጂ **የተረጋገጠ
+የወጪ ጣሪያ አይደለም**፤ የGitHub ሪፖርት መዘግየቶች፣ የእድሳት ጊዜ ልዩነት፣
+በሂደት ላይ ያሉ ጥያቄዎች እና ከOmniRoute ውጭ ያለ አጠቃቀም ከዚህ ሊበልጡ
+ይችላሉ። ጠንካራ ገደብ ለማድረግ የGitHub የራሱን የወጪ ቁጥጥሮች ይጠቀሙ።
+
 ### 💰 ርካሽ አቅራቢዎች
 
 #### GLM-4.7 (በየቀኑ ዳግም ማስጀመር፣ $0.6/1M)
 
 1. ይመዝገቡ፦ [Zhipu AI](https://open.bigmodel.cn)
-2. ከCoding Plan API key ያግኙ
-3. Dashboard → Add API Key፦ Provider፦ `glm`፣ API Key፦ `your-key`
+2. ከCoding Plan የAPI ቁልፍ ያግኙ
+3. Dashboard → Add API Key: አቅራቢ፦ `glm`፣ API ቁልፍ፦ `your-key`
 
-**አጠቃቀም:** `glm/glm-4.7` — **የባለሙያ ምክር:** Coding Plan በ1/7 ወጪ 3× ኮታ ይሰጣል! በየቀኑ 10:00 AM ዳግም ይጀምራል።
+**አጠቃቀም፦** `glm/glm-4.7` — **የባለሙያ ምክር፦** Coding Plan በ1/7 ወጪ 3× ኮታ ያቀርባል! በየቀኑ 10:00 AM ዳግም ይጀምራል።
 
 #### MiniMax M2.1 (በ5 ሰዓት ዳግም ማስጀመር፣ $0.20/1M)
 
 1. ይመዝገቡ፦ [MiniMax](https://www.minimax.io)
-2. API key ያግኙ → Dashboard → Add API Key
+2. የAPI ቁልፍ ያግኙ → Dashboard → Add API Key
 
-**አጠቃቀም:** `minimax/MiniMax-M2.1` — **የባለሙያ ምክር:** ለረጅም አውድ (1M ቶከኖች) በጣም ርካሹ አማራጭ ነው!
+**አጠቃቀም፦** `minimax/MiniMax-M2.1` — **የባለሙያ ምክር፦** ለረጅም አውድ (1M ቶከኖች) በጣም ርካሹ አማራጭ ነው!
 
-#### Kimi K2 (ቋሚ $9/ወር)
+#### Kimi K2 ($9/ወር ቋሚ)
 
 1. ይመዝገቡ፦ [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key ያግኙ → Dashboard → Add API Key
+2. የAPI ቁልፍ ያግኙ → Dashboard → Add API Key
 
-**አጠቃቀም:** `kimi/kimi-k2.5` — **የባለሙያ ምክር:** ለ10M ቶከኖች ቋሚ $9/ወር = በተግባር $0.90/1M ወጪ!
+**አጠቃቀም፦** `kimi/kimi-k2.5` — **የባለሙያ ምክር፦** ለ10M ቶከኖች ቋሚ $9/ወር = በተግባር $0.90/1M ወጪ!
 
 #### Baidu Qianfan / ERNIE
 
 1. ይመዝገቡ፦ [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. የQianfan API key ይፍጠሩ → Dashboard → Add API Key፦ Provider፦ `qianfan`
+2. የQianfan API ቁልፍ ይፍጠሩ → Dashboard → Add API Key: አቅራቢ፦ `qianfan`
 
-**አጠቃቀም:** `qianfan/ernie-5.1`፣ `qianfan/ernie-x1.1`፣ ወይም ሌላ ከQianfan OpenAI ጋር ተኳሃኝ የሆነ የሞዴል ID።
+**አጠቃቀም፦** `qianfan/ernie-5.1`፣ `qianfan/ernie-x1.1`፣ ወይም ሌላ ከQianfan ጋር ተኳሃኝ የOpenAI ሞዴል ID።
 
 ### 🆓 ነፃ አቅራቢዎች
 
-ማረጋገጫ የማይፈልጉ ነፃ አቅራቢዎች በአቅራቢ ገጻቸው ላይ ከ**No authentication required** ጎን መቀየሪያ አላቸው።
-ማጥፋት ያንን አቅራቢ ያሰናክላል፣ ከProviders የተዋቀሩ/የታመቁ እይታዎች ያስወግደዋል፣ እንዲሁም
-ሞዴሎቹን ከ`/v1/models` ያስወግዳል።
+ማረጋገጫ የማይፈልጉ ነፃ አቅራቢዎች በአቅራቢ ገጻቸው ላይ **ማረጋገጫ አያስፈልግም** ከሚለው አጠገብ መቀያየሪያ አላቸው።
+ይህን ማጥፋት አቅራቢውን ያሰናክላል፣ ከተዋቀሩ አቅራቢዎች/አጭር እይታዎች ያስወግደዋል፣
+እንዲሁም ሞዴሎቹን ከ`/v1/models` ያስወግዳል።
 
 #### Qoder (9 ነፃ ሞዴሎች)
 
 ```bash
-Dashboard → Qoderን ያገናኙ → በOAuth ይግቡ → መዳረሻው አሁን ባሉት የአቅራቢው ገደቦች ይወሰናል
+Dashboard → Connect Qoder → የOAuth መግቢያ → መዳረሻው አሁን ባሉ የአቅራቢው ገደቦች ይወሰናል
 
 ሞዴሎች: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude በነፃ)
+#### Kiro (Claude ነፃ)
 
 ```bash
-Dashboard → Kiroን ያገናኙ → AWS Builder ID ወይም Google/GitHub → ~50 ክሬዲቶች/ወር
+Dashboard → Connect Kiro → AWS Builder ID ወይም Google/GitHub → በወር ወደ 50 ክሬዲቶች
 
 ሞዴሎች: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -339,24 +359,24 @@ API ቁልፍ፦ [ከዳሽቦርድ]
 
 ## 🚀 ማሰማራት
 
-### አጠቃላይ npm ጭነት (የሚመከር)
+### ዓለም አቀፍ npm መጫን (የሚመከር)
 
 ```bash
 npm install -g omniroute
 
-# የውቅር ማውጫ ይፍጠሩ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# የ.env ፋይል ይፍጠሩ (.env.exampleን ይመልከቱ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# አገልጋዩን ያስጀምሩ
+# Start server
 omniroute
-# ወይም ብጁ port በመጠቀም፦
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLIው `.env`ን ከ`~/.omniroute/.env` ወይም `./.env` በራስ-ሰር ይጭናል።
+CLI በቀጥታ `.env` ከ `~/.omniroute/.env` ወይም `./.env` ይጭናል.
 
 ### የማሳወቂያ ሳጥን ሁነታ
 
@@ -609,60 +629,60 @@ post_install() {
 
 ---
 
-## 📊 የሚገኙ ሞዴሎች
+## 📊 ያሉ ሞዴሎች
 
 <details>
-<summary><b>የሚገኙትን ሞዴሎች በሙሉ ይመልከቱ</b></summary>
+<summary><b>ያሉ ሁሉንም ሞዴሎች ይመልከቱ</b></summary>
 
-> ከታች ያለው ዝርዝር ለv3.8.0 ከ`open-sse/config/providerRegistry.ts` የተመረጠ ነው። የደመና ካታሎጎች (Gemini፣ OpenRouter፣ ወዘተ) በተለዋዋጭ ሁኔታ ይመሳሰላሉ — ሙሉውን የቀጥታ ካታሎግ ለማየት **Dashboard → Providers → [provider] → Available Models** ይክፈቱ ወይም `GET /api/models/catalog` ይጠቀሙ።
+> ከ `open-sse/config/providerRegistry.ts` ለ v3.8.0 የተመረጠ ዝርዝር ነው። የCloud ካታሎጎች (Gemini፣ OpenRouter፣ ወዘተ) በተለዋዋጭ ይመሳሰላሉ — ሙሉውን የቀጥታ ካታሎግ ለመክፈት **ዳሽቦርድ → አቅራቢዎች → [provider] → ያሉ ሞዴሎች** ይሂዱ ወይም `GET /api/models/catalog` ይጥሩ።
 >
-> የአቅራቢው አብሮገነብ ዝርዝር ከአሁኑ ሁኔታ ከተለየ፣ የቀጥታውን የላይኛው ምንጭ ካታሎግ ለማምጣት በዚያ ገጽ ላይ **Import from /models** ይጠቀሙ (ወይም **Auto-Sync**ን ያንቁ)። ይህ በv3.8.50 ለLLM7.io (`gemini-3.1-flash-lite`) እና UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ተረጋግጧል፤ በዚያው የሙከራ ዙር የPollinations ስም-አልባ መዳረሻ በላይኛው ምንጭ ገደብ ውስጥ ቀርቷል።
+> የአንድ አቅራቢ አብሮ የተሰራ ዝርዝር ከቀጥታ ካታሎጉ ጋር ካልተመሳሰለ፣ በዚያ ገጽ ላይ **ከ /models አስመጣ** የሚለውን ይጠቀሙ (ወይም **ራስ-ሰር ማመሳሰል**ን ያንቁ)፤ ይህም የቀጥታ የupstream ካታሎግን ያመጣል። ይህ በ v3.8.50 ለ LLM7.io (`gemini-3.1-flash-lite`) እና UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ተረጋግጧል፤ Pollinations የማይታወቅ መዳረሻ በዚያው የሙከራ ዙር ወቅት በupstream የተገደበ ሆኖ ቀርቷል።
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth፦ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ የጥረት ደረጃዎች፦ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth፦ `cx/gpt-5.5` (+ የጥረት ደረጃዎች፦ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth፦ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ነፃ OAuth፦ በ**Dashboard → Providers → Kiro → Available Models** ስር የሚታየውን የቀጥታ ካታሎግ ይጠቀሙ። ተገኝነቱ በመለያው እና በዕቅዱ ላይ ይመሰረታል።
+**Kiro (`kr/`)** — ነፃ OAuth፦ በ **ዳሽቦርድ → አቅራቢዎች → Kiro → ያሉ ሞዴሎች** ስር የሚታየውን የቀጥታ ካታሎግ ይጠቀሙ። ተገኝነቱ በመለያው እና በዕቅዱ ይወሰናል።
 
-**Qoder (`if/`)** — ነፃ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ነፃ OAuth፦ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M፦ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M፦ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/በወር ቋሚ ክፍያ ወይም በአጠቃቀም፦ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ወር ቋሚ ክፍያ ወይም በአጠቃቀም፦ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API ቁልፍ፦ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — የAPI ቁልፍ፦ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — እጅግ ፈጣን፦ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — ቤተኛ Grok፦ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — ተፈጥሯዊ Grok፦ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — በአውሮፓ ህብረት የተስተናገደ፦ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — በEU የሚስተናገድ፦ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — በፍለጋ የተጠናከረ፦ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — በፍለጋ የተጨመረ፦ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — ክፍት ምንጭ፦ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ነፃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — ፈጣን ኢንፈረንስ፦ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — በዌፈር ልኬት፦ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — በዋፈር ሚዛን፦ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — በRAG ላይ ያተኮረ፦ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ለድርጅቶች፦ `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ለድርጅቶች፦ `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE፦ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**፦ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**፦ ከGoogle በእያንዳንዱ API ቁልፍ መሠረት በቀጥታ ይመሳሰላል — የማይለወጥ ዝርዝር የለም። በ**Dashboard → Providers** ውስጥ ቁልፍ ያገናኙ፣ ከዚያም የአሁኑን ካታሎግ ለማስመጣት **Available Models**ን ይጠቀሙ (ለምሳሌ፦ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)።
+**Gemini (Google Cloud `gemini/`)**፦ በGoogle በኩል ለእያንዳንዱ API ቁልፍ በቀጥታ ይመሳሰላል — ቋሚ ዝርዝር የለውም። ቁልፍ በ **ዳሽቦርድ → አቅራቢዎች** ያገናኙ፣ ከዚያ **ያሉ ሞዴሎች**ን በመጠቀም የአሁኑን ካታሎግ ያስመጡ (ለምሳሌ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)።
 
-**ሌሎች ተኳኋኝ አቅራቢዎች** (የተመረጡ)፦ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (በ`aws-bedrock` በኩል), `azure-ai`, `openrouter` (የማለፊያ ካታሎግ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`። እያንዳንዱ በ`providerRegistry.ts` ውስጥ የራሱን የሞዴል ዝርዝር ይይዛል፣ እና አቅራቢው `/models` የመዳረሻ ነጥብ ሲያቀርብ በራስ-ሰር ሊመሳሰል ይችላል።
+**ሌሎች ተኳኋኝ አቅራቢዎች** (የተመረጡ)፦ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (በ `aws-bedrock` በኩል), `azure-ai`, `openrouter` (የሚያልፍ ካታሎግ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`። እያንዳንዱ በ `providerRegistry.ts` ውስጥ የራሱን የሞዴል ዝርዝር ያስተዳድራል፣ እና አቅራቢው `/models` የሚል endpoint ካቀረበ በራስ-ሰር ሊመሳሰል ይችላል።
 
-**ስለ ሞዴል መለያዎች ማስታወሻ፦** OmniRoute የአቅራቢውን ቤተኛ መለያዎች (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ይጠቀማል። የላይኛው ምንጭ API የሚጠብቃቸው በዚህ መልኩ ስለሆነ፣ አንዳንድ መለያዎች ነጥብ ያላቸውን ስሪቶች ያካትታሉ። አንድ ሞዴል ከላይ ካልተዘረዘረ፣ ተገኝነቱን ለማረጋገጥ `omniroute models --search <term>`ን ያሂዱ ወይም `GET /api/models/catalog`ን ይጠቀሙ።
+**ስለ ሞዴል መለያዎች ማስታወሻ፦** OmniRoute የአቅራቢውን ተፈጥሯዊ መለያዎች ይጠቀማል (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)። አንዳንድ መለያዎች ነጥብ የያዙ ስሪቶችን ያካትታሉ፤ ምክንያቱም የupstream API እንዲሁ እንዲሆኑ ስለሚጠብቅ ነው። አንድ ሞዴል ከላይ በተዘረዘረው ውስጥ ካልተካተተ፣ ተገኝነቱን ለማረጋገጥ `omniroute models --search <term>` ያስኪዱ ወይም `GET /api/models/catalog` ይጠቀሙ።
 
 </details>
 
@@ -728,6 +748,31 @@ prefix: "<prefix>" የተያዘ የአቅራቢ ቅድመ ቅጥያ ነው — �
 የአብሮ የተሰራ አቅራቢን ወይም ማረጋገጫዎቹን በሚጠቅስ ስህተት ከከሸፉ፣ የኖዱ ቅድመ ቅጥያ
 የተያዘ መሆኑን ያረጋግጡ፦ ይህ ደንብ ከመኖሩ በፊት የተቀመጡ ኖዶች አሁንም ተከማችተዋል፣
 ነገር ግን ቅድመ ቅጥያቸው ወደ አብሮ የተሰራው አቅራቢ ይዞራል። ኖዱን ያርትዑ እና አዲስ ቅድመ ቅጥያ ይስጡት።
+
+#### ለእያንዳንዱ ግንኙነት የጌትዌይ አማራጮች
+
+እነዚህ ቁልፎች በግንኙነቱ `providerSpecificData` ውስጥ ይቀመጣሉ (ለምሳሌ፣ በ
+`PUT /api/providers/{id}` በኩል)፦
+
+- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ጌትዌያቸው ረጅም የመሣሪያ ስሞችን ውድቅ ለሚያደርግ፣ ከOpenAI የውይይት ቅርጸት ጋር ተኳሃኝ ለሆኑ ግንኙነቶች።
+  ረዘም ያሉ ስሞች እንደ አጭር ተለዋጭ ስሞች ይላካሉ፣ ከዚያም በ
+  ምላሹ ውስጥ ወደ ዋናው ይመለሳሉ።
+- `quotaEndpoint` — የጌትዌዩ የኮታ/ክሬዲት መገልገያ ነጥብ ሲሆን፣ ለዳሽቦርዱ የኮታ አሞሌ እና
+  ኮታን ለሚያገናዝብ ማስተላለፍ ይነበባል። ከOpenAI እና ከAnthropic ጋር ተኳሃኝ በሆኑ ግንኙነቶች ላይ ይሰራል፤ ሙሉው
+  መዋቅር በ`open-sse/services/usage/openaiCompatible.ts` ውስጥ ተመዝግቧል።
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### የOmniRoute አቻዎችን ማገናኘት
 

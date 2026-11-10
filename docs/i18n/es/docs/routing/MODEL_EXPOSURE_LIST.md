@@ -62,3 +62,15 @@ La exportación de ajustes (`GET /api/settings/export-json`) incluye ambas matri
 campo de configuración. A diferencia del filtro de exportación de pasos de combinación de `hidePaidModels`, aquí no existe
 riesgo de rehidratación: un id denegado integrado en un paso de combinación exportado constituye la propia elección explícita de enrutamiento
 del operador, no algo que el límite de exportación deba eliminar.
+
+## Listado solo de combos (`exposeCombosOnly`)
+
+Un booleano independiente, también de activación explícita y `false` de forma predeterminada, para despliegues donde los combos son la interfaz pública de modelos y los proveedores solo son backends. Cuando es `true`, el listado público (`GET /v1/models`, `GET /v1` y las demás rutas de descubrimiento `/v1` construidas sobre `getUnifiedModelsResponse()`) conserva únicamente filas con `owned_by: "combo"`: combos del usuario y combos integrados `auto/*` (salvo que `hideAutoCombos` los oculte). Usa la misma comprobación de fila que `catalogScope: "combos"` por clave, y los filtros propios de permiso/denegación/ámbito de la clave se siguen aplicando encima.
+
+Actívelo o desactívelo en **Ajustes → Enrutamiento → Listado de la API de modelos**, o con `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Al igual que los listados anteriores, solo cambia lo que se anuncia:
+
+- un ID explícito `provider/model` se sigue enviando, y `GET /v1/models/{id}` lo sigue resolviendo;
+- el catálogo del panel (`GET /api/models/catalog`, usado por los selectores de modelos) no se reduce;
+- no se refleja en los conjuntos de candidatos `auto/*`, por lo que los combos `auto/*` conservan su conjunto completo.

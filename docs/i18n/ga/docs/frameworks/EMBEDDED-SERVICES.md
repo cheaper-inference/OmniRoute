@@ -5,8 +5,8 @@
 ---
 
 > **Leagan:** v3.8.44
-> **Nuashonrú deireanach:** 2026-09-16
-> **Lucht léitheoireachta:** Innealtóirí a chuireann seirbhísí leabaithe leis, a chothaíonn iad, nó a dhéanann dífhabhtú orthu (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Nuashonrú deireanach:** 2026-10-28
+> **Lucht léitheoireachta:** Innealtóirí a chuireann seirbhísí leabaithe leis, a dhéanann cothabháil orthu nó a dhífhabhtaíonn iad (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Is uirlisí taobhdathach próisis atá suiteáilte go háitiúil iad seirbhísí leabaithe, a shuiteálann agus a mhaoirsíonn OmniRoute agus a nochtann sé mar spriocanna ródúcháin den chéad scoth. Murab ionann agus soláthraithe seachtracha (a mbaintear amach iad thar an idirlíon trí eochracha API), ritheann seirbhísí leabaithe ar an meaisín céanna le OmniRoute agus déanann siad cumarsáid thar lúb-ais.
 
@@ -29,19 +29,20 @@ Is uirlisí taobhdathach próisis atá suiteáilte go háitiúil iad seirbhísí
 
 ### Cén fáth seirbhísí leabaithe?
 
-Tá seacht seirbhís leabaithe:
+Tá ocht seirbhís leabaithe ann:
 
-| Seirbhís        | Pacáiste npm                         | Port réamhshocraithe | Cuspóir                                                                                                                                                                                                                                                                                                                                                                         |
-| --------------- | ------------------------------------ | :------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                            |        20130         | Ródaire AI is féidir le OmniRoute a úsáid mar fho-sholáthraí. Nochtar samhlacha mar `9router/{sub}/{model}`                                                                                                                                                                                                                                                                     |
-| **CLIProxyAPI** | Dénártha eisiúna GitHub (`cliproxy`) |         8317         | Cuibheoir seachfhreastalaí áitiúil do shreabha fíordheimhnithe Anthropic CLI. Soláthraíonn sé ródú cúltaca nuair a théann comharthaí OAuth in éag                                                                                                                                                                                                                               |
-| **Mux**         | `mux` (`mux server` gan chomhéadan)  |         8322         | Deamhan áitiúil um cheolfhoireannú gníomhairí (coder/mux). Ní dhéantar ach a shaolré a bhainistiú — ní sprioc ródaithe é (gan seachfhreastal LLM).                                                                                                                                                                                                                              |
-| **Bifrost**     | `@maximhq/bifrost`                   |         8080         | Inneall sealaíochta tairsí AI in Go. Nuair a bhíonn sé ag rith, roghnaíonn an bealach sealaíochta (`/v1/relay/`) é go huathoibríoch                                                                                                                                                                                                                                             |
-| **Dario**       | `@askalf/dario`                      |         3456         | Seachfhreastalaí síntiúis Claude — rogha eile/cúltaca ar CLIProxyAPI do thrácht i bhformáid Claude Code; déantar `DARIO_ADMIN_TOKEN` den eochair insteallta, rud a gheataíonn a phlána rialaithe OAuth `/admin/*`                                                                                                                                                               |
-| **open-wa**     | `@open-wa/wa-automate`               |         8323         | Uathoibriú WhatsApp Web (Chromium gan chomhéadan trí Puppeteer). Ní dhéantar ach a shaolré a bhainistiú — ní sprioc ródaithe é.                                                                                                                                                                                                                                                 |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                 |        20135         | Taobhcharr comhbhrúite leid — fíorsamhail ONNX LLMLingua-2 (aistriú JS/TS d'algartam Microsoft). Seolann `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` chuige thar HTTP, agus filleann sé ar inneall an tsnáithe oibrí laistigh den phróiseas nuair nach mbíonn an taobhcharr ag obair. Ní dhéantar ach a shaolré a bhainistiú — ní sprioc ródaithe é. |
+| Seirbhís        | Pacáiste npm                                  | Port réamhshocraithe | Cuspóir                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------- | --------------------------------------------- | :------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                     |        20130         | Ródaire AI is féidir le OmniRoute a úsáid mar fho-sholáthraí. Nochtar samhlacha mar `9router/{sub}/{model}`                                                                                                                                                                                                                                                                     |
+| **CLIProxyAPI** | Dénártha eisiúna GitHub (`cliproxy`)          |         8317         | Cuibheoir seachfhreastalaí áitiúil do shreabha fíordheimhnithe Anthropic CLI. Soláthraíonn sé ródú cúltaca nuair a théann comharthaí OAuth in éag                                                                                                                                                                                                                               |
+| **Mux**         | `mux` (`mux server` gan chomhéadan)           |         8322         | Deamhan áitiúil um cheolfhoireannú gníomhairí (coder/mux). Ní dhéantar ach a shaolré a bhainistiú — ní sprioc ródaithe é (gan seachfhreastal LLM).                                                                                                                                                                                                                              |
+| **Bifrost**     | `@maximhq/bifrost`                            |         8080         | Inneall sealaíochta tairsí AI in Go. Nuair a bhíonn sé ag rith, roghnaíonn an bealach sealaíochta (`/v1/relay/`) é go huathoibríoch                                                                                                                                                                                                                                             |
+| **Dario**       | `@askalf/dario`                               |         3456         | Seachfhreastalaí síntiúis Claude — rogha eile/cúltaca ar CLIProxyAPI do thrácht i bhformáid Claude Code; déantar `DARIO_ADMIN_TOKEN` den eochair insteallta, rud a gheataíonn a phlána rialaithe OAuth `/admin/*`                                                                                                                                                               |
+| **open-wa**     | `@open-wa/wa-automate`                        |         8323         | Uathoibriú WhatsApp Web (Chromium gan chomhéadan trí Puppeteer). Ní dhéantar ach a shaolré a bhainistiú — ní sprioc ródaithe é.                                                                                                                                                                                                                                                 |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                          |        20135         | Taobhcharr comhbhrúite leid — fíorsamhail ONNX LLMLingua-2 (aistriú JS/TS d'algartam Microsoft). Seolann `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` chuige thar HTTP, agus filleann sé ar inneall an tsnáithe oibrí laistigh den phróiseas nuair nach mbíonn an taobhcharr ag obair. Ní dhéantar ach a shaolré a bhainistiú — ní sprioc ródaithe é. |
+| **sing-box**    | Comhad dénártha ó eisiúint GitHub (`singbox`) |        20140         | Próiseas cúnta TPROXY a thacaíonn le hidircheapadh seachfhreastalaí thrédhearcaigh `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Íoslódálann an suiteálaí an eisiúint a bhfuil a leagan socraithe agus a suim sheiceála fíoraithe. Ní bhainistítear ach an saolré; ní sprioc ródaithe é agus ní dhéanann sé seachfhreastal ar LLM.                                              |
 
-Leanann na seacht gcinn an tsamhail mhaoirseachta chéanna:
+Leanann gach ceann den ocht seirbhís an tsamhail mhaoirseachta chéanna:
 
 - Suiteálann OmniRoute iad faoi `DATA_DIR/services/{name}/` (scoite amach ó `package.json` OmniRoute féin)
 - Tosaíonn OmniRoute iad mar phróisis mhac agus déanann sé monatóireacht orthu
@@ -580,7 +581,27 @@ t-ionchur; i gcás aon teipe (gan a bheith ag rith, teorainn ama, freagra gan
 
 ---
 
-### 4.8 Seachfhreastalaí droim ar ais (leabú dheais 9Router)
+### 4.8 Críochphointí sing-box (8 mbealach)
+
+Tá an struchtúr críochphointí céanna ag sing-box agus atá ag Mux: níl bealach `rotate-key` ann agus ní instealltar eochair API (`needsApiKey: false` in `bootstrap.ts`). Ní bhainistítear ach a shaolré; ní soláthraí ródaithe ná LLM é riamh. Íoslódálann `install()` an comhad dénártha oifigiúil ó eisiúint GitHub (`SagerNet/sing-box`) don leagan socraithe (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) agus fíoraíonn sé a SHA256 i gcoinne suime seiceála atá leabaithe sa chomhad céanna sula scríobhann sé an comhad dénártha ar an diosca ar chor ar bith. Diúltaítear d’aon leagan eile a iarrtar.
+
+| Modh   | Conair                                       | Cur síos                                                                           |
+| ------ | -------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Íoslódáil agus fíoraigh an eisiúint shocraithe sing-box                            |
+| `POST` | `/api/services/singbox/start`                | Tosaigh sing-box (`sing-box run -c config.json`)                                   |
+| `POST` | `/api/services/singbox/stop`                 | Stop sing-box                                                                      |
+| `POST` | `/api/services/singbox/restart`              | Atosaigh sing-box                                                                  |
+| `POST` | `/api/services/singbox/update`               | Fíoraigh nó suiteáil an eisiúint shocraithe arís                                   |
+| `GET`  | `/api/services/singbox/status`               | Stádas beo agus stádas sa bhunachar sonraí                                         |
+| `POST` | `/api/services/singbox/auto-start`           | Cumasaigh nó díchumasaigh tosú uathoibríoch                                        |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Cumasaigh nó díchumasaigh atosú uathoibríoch do phróiseas glactha a bhí ann cheana |
+| `GET`  | `/api/services/singbox/logs`                 | Lean deireadh an loga SSE tríd an mbealach dinimiciúil comhroinnte `[name]/logs`   |
+
+**Ceangal TPROXY:** Scríobhann `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` agus tosaíonn sé an maoirseoir sula suiteálann `applyTproxy()` rialacha balla dóiteáin TPROXY. Má tá an maoirseoir ar iarraidh nó mura sroicheann sé staid `running`, logáiltear é anois ag leibhéal earráide in ionad neamhaird chiúin a dhéanamh den teip. Mar sin is féidir leis an oibreoir a aithint gur cuireadh rialacha TPROXY i bhfeidhm gan éisteoir feidhmiúil taobh thiar díobh.
+
+---
+
+### 4.9 Seachfhreastalaí droim ar ais (leabú dheais 9Router)
 
 Leabaíonn an deais comhéadan gréasáin 9Router laistigh de iframe trí
 sheachfhreastalaí droim ar ais inmheánach ag:

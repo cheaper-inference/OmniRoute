@@ -361,6 +361,10 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
     onSourceError?.(endpoint, reason instanceof Error ? reason.message : String(reason));
   };
   const out: OmniRouteEnrichmentMap = new Map();
+  // Keep management node IDs as-is, but use the runtime public prefix to
+  // index the served /v1/models names. No prefix guessing for stale IDs.
+  const catalogAliasByKey = new Map<string, string>();
+  const compatiblePublicPrefixes = new Set<string>();
   if (!baseURL || !apiKey) return out;
   const root = trimTrailingSlashes(baseURL.replace(/\/v1\/?$/, ""));
   const headers = {
@@ -385,15 +389,19 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
         (body as { providers?: Record<string, { models?: unknown[] }> })?.providers ??
         (body as Record<string, { models?: unknown[] }>);
       if (providers && typeof providers === "object") {
-        for (const [providerAlias, slot] of Object.entries(providers)) {
+        for (const [catalogKey, slot] of Object.entries(providers)) {
           if (!slot || typeof slot !== "object") continue;
+          const configuredPrefix = (slot as { displayPrefix?: unknown }).displayPrefix;
+          const publicPrefix = typeof configuredPrefix === "string" ? configuredPrefix.trim() : "";
+          const providerAlias = publicPrefix || catalogKey;
+          if (publicPrefix) compatiblePublicPrefixes.add(publicPrefix);
           const models = (slot as { models?: unknown[] }).models;
           if (!Array.isArray(models)) continue;
           const canonicalRaw = (slot as { id?: unknown }).id;
           const providerCanonical =
-            typeof canonicalRaw === "string" && canonicalRaw.length > 0
-              ? canonicalRaw
-              : providerAlias;
+            typeof canonicalRaw === "string" && canonicalRaw.length > 0 ? canonicalRaw : catalogKey;
+          catalogAliasByKey.set(catalogKey, providerAlias);
+          catalogAliasByKey.set(providerCanonical, providerAlias);
           const slotNameRaw = (slot as { name?: unknown }).name;
           const providerDisplayName =
             typeof slotNameRaw === "string" && slotNameRaw.trim().length > 0
@@ -410,13 +418,20 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
             };
             if (providerDisplayName) entry.providerDisplayName = providerDisplayName;
             if (typeof name === "string" && name.trim().length > 0) entry.name = name;
-            const namespaced = `${providerAlias}/${id}`;
+            // A compatible node ID can already carry the CURRENT public prefix.
+            // Canonical providers keep their upstream IDs intact.
+            // Never strip an arbitrary segment: upstream model IDs may contain /.
+            const modelId =
+              publicPrefix && id.startsWith(`${providerAlias}/`)
+                ? id.slice(providerAlias.length + 1)
+                : id;
+            const namespaced = `${providerAlias}/${modelId}`;
             if (!out.has(namespaced)) out.set(namespaced, entry);
             // The bare id is a fallback for ids that arrive unnamespaced. It
             // gets its OWN copy: sharing the object would let a later write
             // for one provider — a price, typically — land on another
             // provider's entry that happens to sell the same model id.
-            if (!out.has(id)) out.set(id, { ...entry });
+            if (!out.has(modelId)) out.set(modelId, { ...entry });
           }
         }
       }
@@ -452,9 +467,15 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
     if (res.ok) {
       const body = (await res.json()) as unknown;
       if (body && typeof body === "object" && !Array.isArray(body)) {
-        for (const [providerAlias, slot] of Object.entries(body as Record<string, unknown>)) {
+        for (const [pricingProviderKey, slot] of Object.entries(body as Record<string, unknown>)) {
           if (!slot || typeof slot !== "object" || Array.isArray(slot)) continue;
-          for (const [modelId, raw] of Object.entries(slot as Record<string, unknown>)) {
+          const providerAlias = catalogAliasByKey.get(pricingProviderKey) ?? pricingProviderKey;
+          for (const [rawModelId, raw] of Object.entries(slot as Record<string, unknown>)) {
+            const modelId =
+              compatiblePublicPrefixes.has(providerAlias) &&
+              rawModelId.startsWith(`${providerAlias}/`)
+                ? rawModelId.slice(providerAlias.length + 1)
+                : rawModelId;
             if (!raw || typeof raw !== "object") continue;
             const p = raw as Record<string, unknown>;
             const parsed: NonNullable<OmniRouteEnrichmentEntry["pricing"]> = {};

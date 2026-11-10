@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // #9156: macOS launchd autostart fails because the supervisor spawns the child
 // with bare "node", but launchd's PATH cannot resolve it. process.execPath is
@@ -14,7 +15,7 @@ import path from "node:path";
 //   2. Runtime test via mock.module (requires --experimental-test-module-mocks)
 //      that captures the actual spawn arguments.
 
-const __filename = new URL(import.meta.url).pathname;
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const SUPERVISOR_PATH = path.resolve(__dirname, "../../bin/cli/runtime/processSupervisor.mjs");

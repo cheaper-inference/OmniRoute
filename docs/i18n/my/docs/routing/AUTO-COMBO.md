@@ -445,55 +445,55 @@ Request များ၏ 5% (ပြင်ဆင်သတ်မှတ်နို�
 
 ## API
 
-**သီးသန့် `POST /api/combos/auto` endpoint မရှိပါ** — Auto-Combo ကို နည်းလမ်းနှစ်မျိုးဖြင့် အသုံးပြုနိုင်ပါသည်-
+**သီးသန့် `POST /api/combos/auto` endpoint မရှိပါ** — Auto-Combo ကို နည်းလမ်းနှစ်မျိုးဖြင့် အသုံးပြုနိုင်သည်-
 
-1. **Zero-config (အကြံပြုထားသည်)-** `model: "auto"` သို့မဟုတ် `model: "auto/<variant>"` ဖြင့် မည်သည့် chat completion request ကိုမဆို ပေးပို့ပါ။ Virtual factory သည် request တစ်ခုချင်းစီအတွက် combo ကို တည်ဆောက်ပေးသည် — persistence မလိုအပ်သလို API call များလည်း မလိုအပ်ပါ။
+1. **ပြင်ဆင်သတ်မှတ်မှုမလို (အကြံပြုထားသည်)-** `model: "auto"` သို့မဟုတ် `model: "auto/<variant>"` ပါဝင်သော မည်သည့် chat completion request ကိုမဆို ပေးပို့ပါ။ Virtual factory သည် request တစ်ခုချင်းစီအတွက် combo ကို တည်ဆောက်ပေးသည် — အမြဲတမ်းသိမ်းဆည်းထားရန်မလိုသလို API call များလည်း မလိုအပ်ပါ။
 
-2. **`strategy: "auto"` ပါဝင်သော persisted combo:** `POST /api/combos` မှတစ်ဆင့် ပုံမှန် combo တစ်ခု ဖန်တီးပြီး `strategy: "auto"` အပြင် `config.auto.weights` / `config.auto.candidatePool` ကို သတ်မှတ်ပါ။ တူညီသော scoring engine ကို အသုံးပြုသည်။ Combo ကို `combos` ထဲတွင် သိမ်းဆည်းထားပြီး ID ဖြင့် ပြန်လည်အသုံးပြုနိုင်သည်။
+2. **`strategy: "auto"` ဖြင့် အမြဲတမ်းသိမ်းဆည်းထားသော combo-** `POST /api/combos` မှတစ်ဆင့် ပုံမှန် combo တစ်ခုဖန်တီးပြီး `strategy: "auto"` နှင့်အတူ `config.auto.weights` / `config.auto.candidatePool` ကို သတ်မှတ်ပါ။ တူညီသော scoring engine ကို အသုံးပြုမည်ဖြစ်ပြီး combo ကို `combos` ထဲတွင် သိမ်းဆည်းကာ ID ဖြင့် ပြန်လည်အသုံးပြုနိုင်သည်။
 
-ရှာဖွေကြည့်ရှုရန်အတွက် `GET /api/combos/auto` သည် variant တစ်ခုချင်းစီကို ၎င်း၏ ဖြေရှင်းသတ်မှတ်ပြီးသား candidate pool နှင့်အတူ `context_length` / `max_output_tokens` တို့ဖြင့် စာရင်းပြုစုဖော်ပြသည် — ထိုတန်ဖိုးများသည် candidate pool ၏ window များအနက် အမြင့်ဆုံးတန်ဖိုးဖြစ်သည်။ Client များ (ဥပမာ opencode plugin) သည် `0` အစား ဤတန်ဖိုးများကို ကြေညာရမည်။ Context သုညဖြစ်ပါက opencode ၏ auto-compaction ကို လုံးဝပိတ်ထားသဖြင့် session များသည် gateway ၏ history purge ကြောင့် context ပျက်စီးသွားသည်အထိ ကြီးထွားလာနိုင်သည်။ MAX ကို ကြေညာခြင်းသည် ဘေးကင်းသည်၊ အကြောင်းမှာ auto-combo context pre-filter သည် အရွယ်အစားကျော်လွန်သော request များကို window အကြီးစား candidate များဆီ လမ်းကြောင်းပေးသောကြောင့်ဖြစ်သည်။
+ရှာဖွေကြည့်ရှုရန် `GET /api/combos/auto` သည် variant အားလုံးကို ၎င်းတို့၏ ဖြေရှင်းသတ်မှတ်ပြီးသော candidate pool နှင့်အတူ `context_length` / `max_output_tokens` တို့ဖြင့် စာရင်းပြုစုပေးသည် — ၎င်းတို့သည် candidate pool အတွင်းရှိ context window များထဲမှ အများဆုံးတန်ဖိုးဖြစ်သည်။ Client များ (ဥပမာ opencode plugin) သည် `0` အစား ဤတန်ဖိုးများကို အသိပေးကြေညာရမည်။ Context သုညဖြစ်ပါက opencode ၏ အလိုအလျောက်ချုံ့ခြင်းကို လုံးဝပိတ်ပစ်ပြီး gateway ၏ history purge က context ကို ဖျက်ဆီးသည့်အထိ session များကို ကြီးထွားခွင့်ပြုထားမည်ဖြစ်သည်။ Auto-combo ၏ context pre-filter က အရွယ်အစားကျော်လွန်သော request များကို context window ကြီးသည့် candidate များထံ route လုပ်ပေးသောကြောင့် အများဆုံးတန်ဖိုးကို အသိပေးကြေညာခြင်းသည် ဘေးကင်းသည်။
 
 ```bash
-# Zero-config အသုံးပြုမှု (combo ဖန်တီးရန်မလို)
+# ပြင်ဆင်သတ်မှတ်မှုမလိုဘဲ အသုံးပြုခြင်း (combo ဖန်တီးရန်မလို)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# ပုံမှန် combos endpoint မှတစ်ဆင့် persisted auto combo
+# ပုံမှန် combos endpoint မှတစ်ဆင့် အမြဲတမ်းသိမ်းဆည်းထားသော auto combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Auto router strategy များ
+### Auto router မဟာဗျူဟာများ
 
-Persisted `strategy: "auto"` combo များတွင် `config.routerStrategy` (သို့မဟုတ် အဟောင်း
-`config.auto.routerStrategy`) ကို အောက်ပါတို့အနက် တစ်ခုအဖြစ် သတ်မှတ်နိုင်သည်-
+အမြဲတမ်းသိမ်းဆည်းထားသော `strategy: "auto"` combo များသည် `config.routerStrategy` (သို့မဟုတ် အဟောင်းပုံစံ
+`config.auto.routerStrategy`) ကို အောက်ပါတို့ထဲမှ တစ်ခုအဖြစ် သတ်မှတ်နိုင်သည်-
 
 - `rules` — မူလ weighted scoring
-- `score` — configure လုပ်ထားသော weighted score အမြင့်ဆုံးကို ရွေးချယ်သည်။ Score အတိအကျတူညီပါက configure လုပ်ထားသော
-  candidate အစီအစဉ်ကို ထိန်းသိမ်းထားပြီး ရှိပြီးသား `explorationRate` သည် အဆင့်သတ်မှတ်ထားသော pool အပြည့်အစုံမှ နမူနာရွေးချယ်သည်။
-- `cost` / `eco` — ကျန်းမာရေးကောင်းမွန်သော provider များအနက် စျေးအသက်သာဆုံး
-- `latency` / `fast` — reliability penalty ပါဝင်သော အနိမ့်ဆုံး p95 latency
-- `sla-aware` / `sla` — p95 latency၊ error-rate နှင့် ရွေးချယ်နိုင်သော
-  cost SLO များကို ပြည့်မီသည့် candidate များအား ဦးစားပေးသည်
-- `lkgp` — နောက်ဆုံးအကြိမ် အလုပ်လုပ်ကြောင်း သိရှိထားသော provider ကို ဦးစွာရွေးချယ်သည်
-- `nadir` — prompt အတွက် pool ထဲရှိ မည်သည့် model လိုအပ်ကြောင်း [Nadir](https://getnadir.com) ၏ decision API ကို
-  မေးမြန်းသည်။ အသုံးပြုရန် ရွေးချယ်ဖွင့်ထားရပြီး မအောင်မြင်ပါက `rules` သို့ fail-open လုပ်သည်
+- `score` — ပြင်ဆင်သတ်မှတ်ထားသည့် weighted score အမြင့်ဆုံးကို ရွေးချယ်သည်။ Score အတိအကျတူညီပါက ပြင်ဆင်သတ်မှတ်ထားသည့်
+  candidate အစဉ်ကို ထိန်းသိမ်းထားပြီး လက်ရှိ `explorationRate` သည် အဆင့်စီထားသော pool အပြည့်အစုံမှ နမူနာရွေးချယ်သည်။
+- `cost` / `eco` — ကျန်းမာရေးကောင်းမွန်သည့် provider များအနက် စရိတ်အနည်းဆုံး
+- `latency` / `fast` — ယုံကြည်စိတ်ချရမှု penalty ပါဝင်သော အနိမ့်ဆုံး p95 latency
+- `sla-aware` / `sla` — p95 latency၊ error rate နှင့် ထည့်သွင်းနိုင်သည့်
+  cost SLO များကို ဖြည့်ဆည်းသော candidate များကို ဦးစားပေးသည်
+- `lkgp` — နောက်ဆုံးကောင်းမွန်ခဲ့ကြောင်း သိရှိထားသော provider ကို ဦးစွာရွေးချယ်သည်
+- `nadir` — pool ထဲရှိ မည်သည့် model ကို prompt က လိုအပ်ကြောင်း [Nadir](https://getnadir.com) ၏ ဆုံးဖြတ်ချက် API ကို
+  မေးမြန်းသည်။ ကိုယ်တိုင်ဖွင့်သုံးရပြီး မအောင်မြင်ပါက `rules` သို့ ပြန်သွားသည်
 
-### Router strategy များ၏ အသေးစိတ်
+### Router မဟာဗျူဟာများ၏ အသေးစိတ်
 
-Auto-combo engine သည် `config.routerStrategy` (သို့မဟုတ် အဟောင်း `config.auto.routerStrategy`)
-မှတစ်ဆင့် အပြန်အလှန်လဲလှယ်အသုံးပြုနိုင်သော **RouterStrategy** implementation 7 ခုကို ဖော်ထုတ်ပေးသည်။
-Strategy တစ်ခုချင်းစီသည် `RoutingContext`
-(task အမျိုးအစား၊ tool/vision hint များ၊ token ခန့်မှန်းချက်၊ ရွေးချယ်နိုင်သော SLA policy၊ ရွေးချယ်နိုင်သော
-နောက်ဆုံးအကြိမ် အလုပ်လုပ်ကြောင်း သိရှိထားသည့် provider) ကို အခြေခံ၍ candidate pool ထဲမှ provider တစ်ခုကို ရွေးချယ်သည်။
+Auto-combo engine တွင် `config.routerStrategy` (သို့မဟုတ် အဟောင်းပုံစံ `config.auto.routerStrategy`) မှတစ်ဆင့်
+အစားထိုးအသုံးပြုနိုင်သော ပေါင်းစပ်တပ်ဆင်နိုင်သည့် **RouterStrategy** implementation ၇ ခု ပါဝင်သည်။
+မဟာဗျူဟာတစ်ခုစီသည် `RoutingContext`
+(task အမျိုးအစား၊ tool/vision အချက်ပြမှုများ၊ ခန့်မှန်း token အရေအတွက်၊ ထည့်သွင်းနိုင်သည့် SLA policy နှင့် ထည့်သွင်းနိုင်သည့်
+နောက်ဆုံးကောင်းမွန်ခဲ့ကြောင်း သိရှိထားသော provider) ကို အခြေခံ၍ candidate pool မှ provider တစ်ခုကို ရွေးချယ်သည်။
 
-#### 1. `rules` (မူလ) — factor 16 ခုပါဝင်သော weighted scoring
+#### 1. `rules` (မူလ) — အချက် ၁၆ ချက်ပါ weighted scoring
 
-လက်ရှိ scoring engine ကို ထုပ်ပိုးအသုံးပြုသည်။ `OPEN` circuit-breaker
-candidate များကို ဖယ်ထုတ်ပြီး လက်ရှိ task အမျိုးအစားနှင့် `getTaskFitness()` ကို အသုံးပြု၍ `scorePool()` ကို လုပ်ဆောင်ကာ
+လက်ရှိ scoring engine ကို အထုပ်အပိုးပြုထားသည်။ `OPEN` circuit-breaker ဖြစ်နေသော
+candidate များကို စစ်ထုတ်ပြီးနောက် လက်ရှိ task အမျိုးအစားနှင့် `getTaskFitness()` ကို အသုံးပြု၍ `scorePool()` ကို လုပ်ဆောင်ကာ
 score အမြင့်ဆုံး provider ကို ရွေးချယ်သည်။
 
 ```ts
@@ -514,16 +514,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**အသုံးပြုသင့်သည့်အချိန်**: မူလရွေးချယ်မှုဖြစ်သည်။ Signal အားလုံးအကြား ဟန်ချက်ညီသော အပေးအယူကို လိုချင်သည့်အခါ အသုံးပြုပါ။
+**အသုံးပြုသင့်သည့်အချိန်**- အခြေခံရွေးချယ်မှုဖြစ်သည်။ Signal အားလုံးအကြား ဟန်ချက်ညီသည့် အပေးအယူကို လိုချင်သောအခါ အသုံးပြုပါ။
 
-**Alias**: `rules` (alias မရှိ)
+**အခြားအမည်**- `rules` (အခြားအမည်မရှိ)
 
 ---
 
-#### 2. `cost` / `eco` — ကျန်းမာရေးကောင်းမွန်သော provider များအနက် စျေးအသက်သာဆုံး
+#### 2. `cost` / `eco` — ကျန်းမာရေးကောင်းမွန်သည့် provider များအနက် စရိတ်အနည်းဆုံး
 
-Candidate pool ကို `costPer1MTokens` အလိုက် (ငယ်စဉ်ကြီးလိုက်) စီပြီး စျေးအသက်သာဆုံးကို ရွေးချယ်သည်။
-`OPEN` candidate များကို ဦးစွာ ဖယ်ထုတ်သည်။
+Candidate pool ကို `costPer1MTokens` အလိုက် (ငယ်စဉ်ကြီးလိုက်) စီပြီး စရိတ်အနည်းဆုံးကို ရွေးချယ်သည်။
+`OPEN` ဖြစ်နေသော candidate များကို ဦးစွာ စစ်ထုတ်သည်။
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -538,16 +538,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**အသုံးပြုသင့်သည့်အချိန်**: ကုန်ကျစရိတ်အထိခိုက်မခံနိုင်သော workload များ၊ batch processing သို့မဟုတ် background job များ။
+**အသုံးပြုသင့်သည့်အချိန်**- စရိတ်ကို အလေးထားသော workload များ၊ batch processing သို့မဟုတ် နောက်ခံ job များအတွက်။
 
-**Alias များ**: `cost`, `eco`
+**အခြားအမည်များ**- `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — reliability penalty ပါဝင်သော အနိမ့်ဆုံး p95 latency
+#### 3. `latency` / `fast` — ယုံကြည်စိတ်ချရမှု penalty ပါဝင်သော အနိမ့်ဆုံး p95 latency
 
-`p95LatencyMs + (errorRate * 1000)` အလိုက် စီသည်။ Error-rate penalty ကြောင့်
-ယုံကြည်စိတ်ချရမှုမရှိသော provider များ၏ nominal latency နည်းနေလျှင်ပင် အဆင့်နိမ့်သွားစေသည်။
+`p95LatencyMs + (errorRate * 1000)` ဖြင့် စီသည်။ Error rate penalty ကြောင့်
+ပုံမှန် latency နည်းသော်လည်း ယုံကြည်စိတ်ချ၍မရသော provider များကို အဆင့်နိမ့်စေသည်။
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -564,28 +564,28 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**အသုံးပြုသင့်သည့်အချိန်**: Real-time chat၊ autocomplete သို့မဟုတ်
-အပြန်အလှန်တုံ့ပြန်သည့် coding assistant ကဲ့သို့ latency အထိခိုက်မခံနိုင်သော workload များ။
+**အသုံးပြုသင့်သည့်အချိန်**- အချိန်နှင့်တစ်ပြေးညီ chat၊ autocomplete သို့မဟုတ်
+အပြန်အလှန်တုံ့ပြန်နိုင်သော coding assistant များကဲ့သို့ latency ကို အလေးထားသည့် workload များအတွက်။
 
-**Alias များ**: `latency`, `fast`
+**အခြားအမည်များ**- `latency`, `fast`
 
 ---
 
 #### 4. `sla-aware` / `sla` — latency/error/cost SLO လိုက်နာမှု
 
-Configure လုပ်ထားသော SLO policy ကို candidate တစ်ခုချင်းစီက မည်မျှကောင်းမွန်စွာ ပြည့်မီကြောင်းအပေါ် မူတည်၍ score သတ်မှတ်သည်-
+Candidate တစ်ခုစီသည် ပြင်ဆင်သတ်မှတ်ထားသော SLO policy ကို မည်မျှကောင်းမွန်စွာ ဖြည့်ဆည်းနိုင်သည်ဆိုသည့်အပေါ် မူတည်၍ score ပေးသည်-
 
-| အချက်               | အလေးချိန် | ဖော်မြူလာ                                                                |
-| ------------------- | --------- | ------------------------------------------------------------------------ |
-| တုံ့ပြန်ချိန် ရမှတ် | 35%       | `threshold / max(value, ε)`                                              |
-| အမှား ရမှတ်         | 35%       | `threshold / max(value, ε)`                                              |
-| ကျန်းမာရေး ရမှတ်    | 15%       | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)                        |
-| ကုန်ကျစရိတ် ရမှတ်   | 10%       | `threshold / max(value, ε)` သို့မဟုတ် ပြောင်းပြန် စံသတ်မှတ်ထားသောတန်ဖိုး |
-| တည်ငြိမ်မှု ရမှတ်   | 5%        | တုံ့ပြန်ချိန် စံသွေဖည်မှု၏ ပြောင်းပြန် စံသတ်မှတ်ထားသောတန်ဖိုး            |
+| အချက်           | အလေးချိန် | ဖော်မြူလာ                                                                  |
+| --------------- | --------- | -------------------------------------------------------------------------- |
+| Latency ရမှတ်   | 35%       | `threshold / max(value, ε)`                                                |
+| Error ရမှတ်     | 35%       | `threshold / max(value, ε)`                                                |
+| Health ရမှတ်    | 15%       | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)                          |
+| Cost ရမှတ်      | 10%       | `threshold / max(value, ε)` သို့မဟုတ် ပြောင်းပြန် ပုံမှန်ပြုထားသည့်တန်ဖိုး |
+| Stability ရမှတ် | 5%        | ပြောင်းပြန် ပုံမှန်ပြုထားသည့် latency စံသွေဖည်မှု                          |
 
-`hardConstraints: true` ဖြစ်သည့်အခါ၊ candidate များကို အဓိကအားဖြင့် **ချိုးဖောက်မှု ရမှတ်**
-(SLO တစ်ခုခုကို မည်မျှကျော်လွန်သည်) အလိုက် စီပြီးနောက် ပေါင်းစပ်ရမှတ်အလိုက် စီသည်။ မဟုတ်ပါက
-ပေါင်းစပ်ရမှတ်တစ်ခုတည်းကိုသာ အသုံးပြုသည်။
+`hardConstraints: true` ဖြစ်သည့်အခါ candidate များကို အဓိကအားဖြင့် **ချိုးဖောက်မှုရမှတ်**
+(SLO တစ်ခုခုကို မည်မျှကျော်လွန်သည်ကို တိုင်းတာသည့်ရမှတ်) အလိုက် စီပြီး၊ ထို့နောက် composite ရမှတ်အလိုက် စီသည်။ သို့မဟုတ်ပါက
+composite ရမှတ်တစ်ခုတည်းကိုသာ အသုံးပြုသည်။
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -594,12 +594,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... candidate တစ်ခုစီကို policy: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints } နှင့် နှိုင်းယှဉ်၍ ရမှတ်ပေးသည်
+    // candidate တစ်ခုစီကို မူဝါဒနှင့် နှိုင်းယှဉ်၍ ရမှတ်ပေးသည်: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA field များ** (combo config တွင် သတ်မှတ်ရန်):
+**SLA field များ** (combo config တွင် သတ်မှတ်ပါ):
 
 ```json
 {
@@ -614,17 +614,17 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**အသုံးပြုသင့်သည့်အချိန်**: တုံ့ပြန်ချိန်၊ အမှားနှုန်း သို့မဟုတ် ကုန်ကျစရိတ် budget များကို တင်းကျပ်စွာ ကန့်သတ်ထားသော production workload များ။
+**အသုံးပြုသင့်သည့်အချိန်**: latency၊ error-rate သို့မဟုတ် ကုန်ကျစရိတ် budget များကို တင်းကျပ်စွာ သတ်မှတ်ထားသည့် production workload များ။
 
 **Alias များ**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — နောက်ဆုံးသိရှိထားသော ကောင်းမွန်သည့် provider ကို ဦးစွာအသုံးပြုခြင်း
+#### 5. `lkgp` — နောက်ဆုံး အခြေအနေကောင်းခဲ့သည့် provider ကို ဦးစွာအသုံးပြုခြင်း
 
-သတ်မှတ်ထားပါက **နောက်ဆုံးသိရှိထားသော ကောင်းမွန်သည့် provider** ကို ဦးစွာ စမ်းသပ်ပြီးနောက်
+သတ်မှတ်ထားပါက **နောက်ဆုံး အခြေအနေကောင်းခဲ့သည့် provider** ကို ဦးစွာစမ်းသပ်ပြီး၊ ထို့နောက်
 `rules` strategy သို့ fallback လုပ်သည်။ Session stickiness အတွက် အသုံးဝင်ပြီး စကားဝိုင်းတစ်ခုရှိ
-နောက်ဆက်တွဲ request များကို provider တစ်ခုတည်းက ကိုင်တွယ်ပေးသည်။
+နောက်ဆက်တွဲ request များကို တူညီသည့် provider က ကိုင်တွယ်ပေးသည်။
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -651,21 +651,21 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**အသုံးပြုသင့်သည့်အချိန်**: နောက်ဆက်တွဲ request များကို provider တစ်ခုတည်းက ကိုင်တွယ်စေလိုသည့်
-အကြိမ်များစွာ အပြန်အလှန်ပြောဆိုသော စကားဝိုင်းများ (ဥပမာ caching၊ context ဆက်လက်တည်ရှိမှု သို့မဟုတ် ဈေးနှုန်းတည်ငြိမ်မှုအတွက်)။
+**အသုံးပြုသင့်သည့်အချိန်**: နောက်ဆက်တွဲ request များကို တူညီသည့် provider က
+ကိုင်တွယ်ပေးစေလိုသော အလှည့်များစွာပါသည့် စကားဝိုင်းများ (ဥပမာ caching၊ context ဆက်လက်တည်တံ့မှု သို့မဟုတ် ဈေးနှုန်း တသမတ်တည်းဖြစ်မှုအတွက်)။
 
-**Alias**: `lkgp` (alias မရှိပါ)
+**Alias**: `lkgp` (အခြား alias မရှိပါ)
 
 ---
 
-#### 6. `nadir` — Nadir မှတစ်ဆင့် prompt ကို အခြေခံသည့် model ရွေးချယ်မှု
+#### 6. `nadir` — Nadir မှတစ်ဆင့် prompt ကိုအခြေခံသည့် model ရွေးချယ်မှု
 
-အထက်ပါ strategy တိုင်းသည် မိမိတို့၏ telemetry အလိုက် candidate များကို အဆင့်သတ်မှတ်ပြီး ၎င်းတို့ထဲမှ မည်သည့် strategy ကမျှ
-request ကို မဖတ်ပါ။ `nadir` သည် နောက်ဆုံး user turn နှင့် pool ၏ model id များကို
-[Nadir](https://getnadir.com) ၏ ဆုံးဖြတ်ချက် API (`POST /v1/bucket`) သို့ ပေးပို့ပြီး ထိုစာရင်းမှ Nadir
-ရွေးချယ်သည့် model ဆီသို့ route လုပ်သည် (`simple` → လုပ်ဆောင်နိုင်သည့် ဈေးအသက်သာဆုံး model၊ `complex` →
-frontier model)။ ထို model ကို ဝန်ဆောင်မှုပေးသည့် connection ကို `rules` ကပင် ရွေးချယ်သောကြောင့် quota၊
-ကျန်းမာရေးအခြေအနေနှင့် ကုန်ကျစရိတ်တို့က မည်သည့် account ကို အသုံးပြုမည်ကို ဆက်လက်ဆုံးဖြတ်သည်။
+အထက်ပါ strategy တစ်ခုစီသည် candidate များကို ၎င်းတို့၏ telemetry ကိုသာ အခြေခံ၍ အဆင့်သတ်မှတ်ပြီး request ကို မဖတ်ပါ။
+`nadir` သည် နောက်ဆုံး user turn နှင့် pool ၏ model id များကို
+[Nadir](https://getnadir.com) ၏ decision API (`POST /v1/bucket`) သို့ ပေးပို့ပြီး ထိုစာရင်းထဲမှ Nadir
+ရွေးချယ်သည့် model သို့ route လုပ်သည် (`simple` → လိုအပ်ချက်ကို ဖြည့်ဆည်းနိုင်သည့် ဈေးအသက်သာဆုံး model၊ `complex` →
+စွမ်းဆောင်ရည်အမြင့်ဆုံး model)။ ထို model ကို ဝန်ဆောင်မှုပေးသည့် connection ကို `rules` က ဆက်လက်ရွေးချယ်သဖြင့် quota၊
+health နှင့် ကုန်ကျစရိတ်တို့က မည်သည့် account ကို အသုံးပြုမည်ကို ဆက်လက်ဆုံးဖြတ်ပေးသည်။
 
 ```json
 {
@@ -681,31 +681,34 @@ frontier model)။ ထို model ကို ဝန်ဆောင်မှု�
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` နှင့် `OMNIROUTE_NADIR_BASE_URL` တို့သည် string နှစ်ခုအတွက် env fallback များဖြစ်သည်။
-`baseUrl` သည် self-hosted Nadir အတွက်သာ လိုအပ်သည် (နောက်ဆုံးတွင် `/v1` ပါရှိခြင်းကို လက်ခံသည်)။
-Key မပါသော call များသည် IP တစ်ခုချင်းအလိုက် rate limit လုပ်ထားသည့် Nadir ၏ anonymous tier သို့ ရောက်ရှိသည်။
+String နှစ်ခုအတွက် `OMNIROUTE_NADIR_API_KEY` နှင့် `OMNIROUTE_NADIR_BASE_URL` ကို env fallback များအဖြစ် အသုံးပြုသည်။
+`baseUrl` သည် self-hosted Nadir အတွက်သာ လိုအပ်သည် (နောက်ဆုံးတွင် `/v1` ပါရှိခြင်းကိုလည်း လက်ခံသည်)။
+Key မပါသည့် call များသည် IP တစ်ခုချင်းစီအလိုက် rate limit သတ်မှတ်ထားသော Nadir ၏ anonymous tier သို့ ရောက်ရှိသည်။ Key တစ်ခုရှိပါက
+([တစ်ခုဖန်တီးရန်](https://app.getnadir.com/dashboard/api-keys)) decision တစ်ခုစီကို သင်၏ Nadir dashboard တွင်
+မှတ်တမ်းတင်ထားမည်။ အပြည့်အစုံ setup ပြုလုပ်ခြင်းနှင့် အတည်ပြုခြင်းအတွက်:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)။
 
-စက်အပြင်သို့ ထွက်သွားသည့်အရာများမှာ နောက်ဆုံး user message ၏ စာသား (ပထမ စာလုံးရေ 16k)၊ candidate
+ပြင်ပသို့ ပေးပို့သည့်အရာများမှာ နောက်ဆုံး user message ၏ စာသား (ပထမဆုံး စာလုံးရေ 16k)၊ candidate
 model id များနှင့် `source: "omniroute"` channel tag တို့ဖြစ်သည်။ System prompt၊ history၊ tool သို့မဟုတ်
-header များ မပါဝင်ပါ။
+header များကို မပေးပို့ပါ။
 
-Failure အပြုအမူသည် fail-open ဖြစ်သည်။ Timeout (မူလသတ်မှတ်ချက် 2000 ms)၊ non-2xx၊ ဆက်သွယ်၍မရသော
-host၊ ပုံစံမမှန်သည့် response သို့မဟုတ် pool ပြင်ပရှိ ရွေးချယ်မှုတစ်ခု ဖြစ်ပေါ်ပါက `rules`
-ဆုံးဖြတ်ချက်ကို အသုံးပြုပြီး အကြောင်းရင်း၏ရှေ့တွင် `NadirStrategy: fallback (…)` ကို ထည့်သွင်းသည်။ Call မအောင်မြင်ပြီးနောက်
-strategy သည် network ကို 30 s ကြာ ကျော်သွားမည်ဖြစ်သဖြင့် service ပြတ်တောက်မှုတစ်ခုသည် request တိုင်းအတွက် timeout တစ်ကြိမ်စီ ဖြစ်စေမည့်အစား
-30 s လျှင် timeout တစ်ကြိမ်သာ ဖြစ်စေသည်။ Nadir က အမှန်တကယ် ရွေးချယ်မှုပြုလုပ်ခဲ့သည့်အခါမှသာ routing event များက
-`strategy: "nadir"` ဟု အစီရင်ခံသည်။
+Failure ဖြစ်သည့်အခါ fail-open နည်းလမ်းဖြင့် ဆောင်ရွက်သည်။ timeout (မူလသတ်မှတ်ချက် 2000 ms)၊ non-2xx response၊ ဆက်သွယ်၍မရသည့်
+host၊ ပုံစံမမှန်သည့် response သို့မဟုတ် pool ပြင်ပမှ selection တစ်ခု ဖြစ်ပေါ်ပါက `rules`
+decision သို့ ပြောင်းလဲပြီး အကြောင်းပြချက်၏ အစတွင် `NadirStrategy: fallback (…)` ကို ထည့်သွင်းသည်။ Call တစ်ခု မအောင်မြင်ပြီးနောက်
+strategy သည် network ကို 30 s ကြာ ကျော်သွားမည်ဖြစ်သဖြင့် outage တစ်ခုတွင် request တစ်ခုစီအတွက် timeout ဖြစ်မည့်အစား
+30 s တိုင်းတွင် timeout တစ်ကြိမ်သာ ဖြစ်ပေါ်သည်။ Nadir က အမှန်တကယ် ရွေးချယ်မှုပြုလုပ်ခဲ့သည့်အခါမှသာ routing event များက
+`strategy: "nadir"` ဟု report လုပ်သည်။
 
-**အသုံးပြုသင့်သည့်အချိန်**: model tier များ (အသေးစား၊ အလယ်အလတ်နှင့် frontier model တစ်ခုစီ) ပါဝင်သော pool တွင်
-ခက်ခဲမှုအဆင့်မျိုးစုံရှိသည့် traffic ကို ကိုင်တွယ်ရာ၌ အမြဲတမ်း frontier model အသုံးပြုခြင်းကြောင့် ဖြစ်ပေါ်သည့် ကုန်ကျစရိတ်ကို လျှော့ချလိုသည့်အခါ။
+**အသုံးပြုသင့်သည့်အချိန်**: model tier အမျိုးမျိုး (အသေးစား model တစ်ခု၊ အလယ်အလတ် model တစ်ခုနှင့်
+စွမ်းဆောင်ရည်အမြင့်ဆုံး model တစ်ခု) ပါဝင်သော pool ပေါ်ရှိ ခက်ခဲမှုအဆင့် မတူညီသည့် traffic များတွင် အမြဲတမ်း စွမ်းဆောင်ရည်အမြင့်ဆုံး model ကို သုံးစွဲခြင်းကြောင့် ဖြစ်ပေါ်သည့် ကုန်ကျစရိတ်ကို လျှော့ချလိုသည့်အခါ။
 
-**Alias**: `nadir` (alias မရှိပါ)
+**Alias**: `nadir` (အခြား alias မရှိပါ)
 
 ---
 
 ### စိတ်ကြိုက် router strategy များ
 
-Public API မှတစ်ဆင့် သင်၏ကိုယ်ပိုင် `RouterStrategy` implementation ကို register လုပ်နိုင်သည်-
+Public API မှတစ်ဆင့် သင့်ကိုယ်ပိုင် `RouterStrategy` implementation ကို register လုပ်နိုင်သည်:
 
 ```ts
 import {
@@ -718,7 +721,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // သင်၏ routing logic ကို ဤနေရာတွင် ထည့်ပါ
+    // သင့် routing logic ကို ဤနေရာတွင် ထည့်ပါ
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -733,7 +736,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-ထို့နောက် ၎င်းကို အသုံးပြုပါ-
+ထို့နောက် အောက်ပါအတိုင်း အသုံးပြုပါ:
 
 ```json
 {
@@ -748,16 +751,16 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ### Router strategy ရွေးချယ်မှု လမ်းညွှန်
 
-| အသုံးပြုမှုအခြေအနေ                      | Strategy    | အကြောင်းရင်း                                              |
+| အသုံးပြုမှုအခြေအနေ                      | နည်းဗျူဟာ   | အကြောင်းရင်း                                              |
 | --------------------------------------- | ----------- | --------------------------------------------------------- |
-| မျှတသော workload                        | `rules`     | မူလသတ်မှတ်ချက် — အချက်အားလုံးကို ထည့်သွင်းစဉ်းစားသည်      |
-| ကုန်ကျစရိတ် အနည်းဆုံးဖြစ်စေရန်          | `cost`      | ဈေးအသက်သာဆုံးကို အမြဲရွေးချယ်သည်                          |
-| တုံ့ပြန်ချိန် အနည်းဆုံးဖြစ်စေရန်        | `latency`   | အမြန်ဆုံးနှင့် ယုံကြည်စိတ်ချရသော provider ကို ရွေးချယ်သည် |
-| တင်းကျပ်သော SLO များ                    | `sla-aware` | p95/error/cost threshold များအလိုက် စစ်ထုတ်သည်            |
-| အကြိမ်များစွာ အပြန်အလှန်ပြောဆိုသော chat | `lkgp`      | Session stickiness                                        |
-| ခက်ခဲမှုအဆင့်မျိုးစုံ                   | `nadir`     | Prompt တစ်ခုချင်းအလိုက် model tier ကို ရွေးချယ်သည်        |
+| မျှတသော အလုပ်ဝန်                        | `rules`     | မူလသတ်မှတ်ချက် — အချက်အားလုံးကို ထည့်သွင်းစဉ်းစားသည်      |
+| ကုန်ကျစရိတ် လျှော့ချရန်                 | `cost`      | စျေးအသက်သာဆုံးကို အမြဲရွေးချယ်သည်                         |
+| တုံ့ပြန်ချိန် လျှော့ချရန်               | `latency`   | အမြန်ဆုံးနှင့် ယုံကြည်စိတ်ချရသော provider ကို ရွေးချယ်သည် |
+| တင်းကျပ်သော SLO များ                    | `sla-aware` | p95/error/cost သတ်မှတ်ချက်များအရ စစ်ထုတ်သည်               |
+| အပြန်အလှန်ပြောဆိုမှု အကြိမ်များသော chat | `lkgp`      | Session တစ်လျှောက် တူညီမှုကို ထိန်းသိမ်းသည်               |
+| ခက်ခဲမှုအဆင့် မျိုးစုံ                  | `nadir`     | Prompt တစ်ခုချင်းစီအလိုက် model အဆင့်ကို ရွေးချယ်သည်      |
 
-SLA-aware field များ:
+SLA-aware အကွက်များ-
 
 ```json
 {

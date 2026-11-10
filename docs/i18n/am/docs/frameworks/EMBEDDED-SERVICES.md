@@ -5,8 +5,8 @@
 ---
 
 > **ስሪት:** v3.8.44
-> **ለመጨረሻ ጊዜ የዘመነው:** 2026-09-16
-> **ታዳሚዎች:** የተካተቱ አገልግሎቶችን (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua) የሚያክሉ፣ የሚጠግኑ ወይም ስህተት የሚያርሙ መሐንዲሶች።
+> **ለመጨረሻ ጊዜ የዘመነው:** 2026-10-28
+> **ታዳሚዎች:** የተካተቱ አገልግሎቶችን (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box) የሚያክሉ፣ የሚጠግኑ ወይም ስህተት የሚያርሙ መሐንዲሶች።
 
 የተካተቱ አገልግሎቶች OmniRoute የሚጭናቸው፣ የሚቆጣጠራቸው እና እንደ ቀዳሚ የማዘዋወሪያ ዒላማዎች የሚያቀርባቸው በአካባቢው የተጫኑ የሂደት sidecar መሣሪያዎች ናቸው። እንደ ውጫዊ አቅራቢዎች (በAPI ቁልፎች በኩል በበይነመረብ የሚደረስባቸው) ሳይሆን፣ የተካተቱ አገልግሎቶች ከOmniRoute ጋር በአንድ ማሽን ላይ ይሰራሉ እና በloopback በኩል ይገናኛሉ።
 
@@ -29,7 +29,7 @@
 
 ### የተካተቱ አገልግሎቶች ለምን?
 
-ሰባት አገልግሎቶች ተካተዋል፦
+ስምንት አገልግሎቶች ተካተዋል፦
 
 | አገልግሎት          | npm ጥቅል                            | ነባሪ ወደብ | ዓላማ                                                                                                                                                                                                                                                                      |
 | --------------- | ---------------------------------- | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -40,8 +40,9 @@
 | **Dario**       | `@askalf/dario`                    |  3456   | የClaude ምዝገባ ፕሮክሲ — ለClaude-Code ቅርጽ ላለው ትራፊክ ከCLIProxyAPI አማራጭ/ተተኪ፤ የሚያስገባው ቁልፍ `/admin/*` OAuth መቆጣጠሪያ ዕቅዱን የሚገድብ `DARIO_ADMIN_TOKEN` ይሆናል                                                                                                                             |
 | **open-wa**     | `@open-wa/wa-automate`             |  8323   | የWhatsApp Web አውቶሜሽን (በPuppeteer በኩል ያለ ግራፊክ በይነገጽ Chromium)። የሕይወት ዑደቱ ብቻ ይተዳደራል — የማዘዋወሪያ ዒላማ አይደለም።                                                                                                                                                                   |
 | **LLMLingua**   | `@atjsh/llmlingua-2`               |  20135  | የጥያቄ-መጭመቂያ ሳይድካር — እውነተኛው LLMLingua-2 ONNX ሞዴል (የMicrosoft አልጎሪዝም JS/TS ፖርት)። `open-sse/services/compression/engines/llmlingua/index.ts` `/compress`ን በHTTP ወደ እሱ ይልካል፤ ሳይድካሩ ሲቋረጥ ወደ በሂደት ውስጥ ወዳለው የworker-thread ባክኤንድ ይመለሳል። የሕይወት ዑደቱ ብቻ ይተዳደራል — የማዘዋወሪያ ዒላማ አይደለም። |
+| **sing-box**    | የGitHub ልቀት ሁለትዮሽ ፋይል (`singbox`)  |  20140  | በ`applyTproxy()` የሚደረገውን ግልጽ የፕሮክሲ ጣልቃ ገብነት (`src/mitm/tproxy/setup.ts`) የሚደግፍ የTPROXY ጎን ሂደት። ጫኚው ስሪቱ የተወሰነና በማረጋገጫ ድምር የተፈተሸ ልቀት ያወርዳል። የሕይወት ዑደቱ ብቻ ይተዳደራል፤ የማዘዋወሪያ ዒላማ አይደለም (የLLM ፕሮክሲ አያከናውንም)።                                                                    |
 
-ሰባቱም ተመሳሳይ የቁጥጥር ሞዴልን ይከተላሉ፦
+ስምንቱም ተመሳሳይ የቁጥጥር ሞዴልን ይከተላሉ፦
 
 - OmniRoute በ`DATA_DIR/services/{name}/` ስር ይጭናቸዋል (ከOmniRoute የራሱ `package.json` የተነጠሉ)
 - OmniRoute እንደ ልጅ ሂደቶች ያስነሳቸዋል እና ይከታተላቸዋል
@@ -577,7 +578,27 @@ LLMLingua `@atjsh/llmlingua-2`ን የሚጠቀልል የprompt-ማመቅ sidecar
 
 ---
 
-### 4.8 Reverse proxy (የ9Router dashboard embed)
+### 4.8 የsing-box መዳረሻ ነጥቦች (8 መስመሮች)
+
+sing-box ከMux ጋር ተመሳሳይ የመዳረሻ ነጥብ ቅርጽ አለው፤ `rotate-key` መስመር የለም፣ የAPI ቁልፍም አይገባም (በ`bootstrap.ts` ውስጥ `needsApiKey: false`)። የሕይወት ዑደቱ ብቻ ይተዳደራል፤ ፈጽሞ የማዘዋወሪያ/LLM አቅራቢ አይደለም። `install()` በGitHub ያለውን ይፋዊ የልቀት ሁለትዮሽ ፋይል (`SagerNet/sing-box`) ለተወሰነው ስሪት (በ`src/lib/services/installers/singbox.ts` ውስጥ `SINGBOX_PINNED_VERSION`) ያወርዳል። ወደ ዲስክ ከመጻፉ በፊት SHA256 ከዚያው ፋይል ውስጥ ከተካተተው የማረጋገጫ ድምር ጋር እንደሚዛመድ ያረጋግጣል፤ የተጠየቀ ሌላ ስሪት ሁሉ ውድቅ ይደረጋል።
+
+| ዘዴ     | መንገድ                                         | መግለጫ                                                |
+| ------ | -------------------------------------------- | --------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | የተወሰነውን የsing-box ልቀት አውርድና አረጋግጥ                   |
+| `POST` | `/api/services/singbox/start`                | sing-boxን አስጀምር (`sing-box run -c config.json`)     |
+| `POST` | `/api/services/singbox/stop`                 | sing-boxን አቁም                                       |
+| `POST` | `/api/services/singbox/restart`              | sing-boxን እንደገና አስጀምር                               |
+| `POST` | `/api/services/singbox/update`               | የተወሰነውን ልቀት እንደገና አረጋግጥ/ጫን                          |
+| `GET`  | `/api/services/singbox/status`               | የአሁኑና የውሂብ ጎታ ሁኔታ                                   |
+| `POST` | `/api/services/singbox/auto-start`           | ራስ-ሰር ጅምርን አብራ/አጥፋ                                  |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | ወደ ቁጥጥር የተወሰደ (ቀድሞ የነበረ) ሂደት ራስ-ሰር ዳግም ጅምርን አብራ/አጥፋ |
+| `GET`  | `/api/services/singbox/logs`                 | የSSE መዝገብ ጅራት (በጋራ ተለዋዋጭ `[name]/logs` መስመር)        |
+
+**የTPROXY ግንኙነት:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json`ን ይጽፋል፣ እና `applyTproxy()` የTPROXY ፋየርዎል ደንቦችን ከመጫኑ በፊት ተቆጣጣሪውን ያስጀምራል። ተቆጣጣሪው ከሌለ ወይም `running` ሁኔታ ላይ መድረስ ካልቻለ፣ ውድቀቱን በዝምታ ከመደበቅ ይልቅ አሁን በስህተት ደረጃ ይመዘግባል። በዚህም ኦፕሬተሩ የTPROXY ደንቦች ከጀርባቸው የሚሰራ አዳማጭ ሳይኖር መተግበራቸውን ማወቅ ይችላል።
+
+---
+
+### 4.9 Reverse proxy (የ9Router dashboard embed)
 
 dashboard የ9Router web UIን በiframe ውስጥ በውስጣዊ reverse
 proxy በኩል እዚህ ያካትታል፦

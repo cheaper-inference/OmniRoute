@@ -84,8 +84,8 @@ function readCheckerReport(result) {
     );
   }
   const counts = Object.fromEntries(BUCKETS.map((bucket) => [bucket, report[bucket].length]));
-  const fileHashesMatch = BUCKETS.slice(0, 3).every((bucket) => counts[bucket] === 0);
-  requireHealth(report.ok === fileHashesMatch, "contradictory-checker-verdict");
+  const allEvidenceMatches = BUCKETS.every((bucket) => counts[bucket] === 0);
+  requireHealth(report.ok === allEvidenceMatches, "contradictory-checker-verdict");
   requireHealth(result.status === (report.ok ? 0 : 1), "contradictory-checker-exit");
   return { report, counts };
 }

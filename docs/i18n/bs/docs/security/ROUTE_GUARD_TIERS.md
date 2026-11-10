@@ -199,6 +199,12 @@ serverski proces.
 | `/api/providers/health-autopilot/actions` | Izvršava autopilot radnje otklanjanja problema                                                |
 | `/api/settings/obsidian`                  | Izdaje višekratno upotrebljive WebDAV vjerodajnice za bilo koji korijenski direktorij trezora |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                                  |
+| `/api/cli-tools/apply`                    | Prepisuje operatorovu CLI konfiguraciju na hostu                                              |
+| `/api/cli-tools/guide-settings`           | Zapisuje CLI konfiguracijske datoteke na osnovu vodiča                                        |
+| `/api/cli-tools/hermes-agent-settings`    | Zapisuje konfiguraciju agenta Hermes                                                          |
+| `/api/cli-tools/backups`                  | Vraća i briše sigurnosne kopije CLI konfiguracije                                             |
+| `/api/log-export`                         | Šalje zapise poziva na konfigurirano odredište                                                |
+| `/api/restart`                            | Ponovo pokreće serverski proces                                                               |
 
 **Odgovor pri kršenju:** `401 Authentication required`
 

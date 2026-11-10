@@ -14,36 +14,36 @@ AgentBridge on OmniRouten MITM (Man-in-the-Middle) -välityspalvelin, joka siepp
 
 ## §1 Yleiskatsaus
 
-### Mikä AgentBridge on?
+### Mikä on AgentBridge?
 
-Kun IDE-agentti (esim. GitHub Copilot, Cursor, Claude Code) tekee API-kutsun, se muodostaa yhteyden suoraan ylävirran tekoälypalveluntarjoajaan (OpenAI, Anthropic jne.). AgentBridge sieppaa tämän yhteyden läpinäkyvästi TLS-tasolla — ilman että agentin määrityksiä tarvitsee muuttaa — ja kirjoittaa pyynnön uudelleen OmniRouten kautta.
+Kun IDE agentti (esim. GitHub Copilot, Cursor, Claude Code) soittaa API puhelun, se muodostaa yhteyden suoraan ylävirran AI toimittajaan (OpenAI, Anthropic jne.). AgentBridge katkaisee yhteyden läpinäkyvästi TLS tasolla — ilman agenttikokoonpanon vaihtamista — ja kirjoittaa pyynnön uudelleen OmniRoute kautta.
 
 Tämä tarkoittaa, että voit:
 
-- **Reitittää minkä tahansa agentin mille tahansa palveluntarjoajalle**: Copilot keskustelee OpenAI:n kanssa? Ohjaa se Anthropic Claudeen, Geminiin tai mihin tahansa OmniRouten 375 palveluntarjoajasta.
-- **Käyttää mallikartoituksia**: `gemini-3-flash` → `claude-sonnet-4.7` läpinäkyvästi käsittelijätasolla.
-- **Tarkkailla kaikkea agenttiliikennettä**: jokainen siepattu pyyntö julkaistaan [Traffic Inspectorissa](./TRAFFIC_INSPECTOR.md).
-- **Hyödyntää OmniRouten vikasietoisuutta**: yhdistelmäreititys, circuit breaker -katkaisijat, varareititykset ja kustannusseuranta toimivat myös IDE-agenttiliikenteelle.
+- **Ohjaa kaikki edustajat mille tahansa palveluntarjoajalle** : Copilot puhuu OpenAI:lle? Ohjaa se Anthropic Claude, Gemini tai johonkin OmniRoute:n 380-palveluntarjoajasta.
+- **Käytä mallikartoituksia** : `gemini-3-flash` → `claude-sonnet-4.7` läpinäkyvästi ohjaajan tasolla.
+- **Tarkkaile kaikkea agenttiliikennettä** : jokainen pysäytetty pyyntö julkaistaan [liikennetarkastajalle](./TRAFFIC_INSPECTOR.md).
+- **Käytä OmniRoute kimmoisuutta** : yhdistelmäreititys, katkaisijat, varaosat ja kustannusseurantatyöt myös IDE -agenttiliikenteelle.
 
-### Asemointi markkinoihin nähden
+### Asemointi vs. markkinat
 
-| Ominaisuus                       | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                      |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                   |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                       |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                     |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                       |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                   |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                      |    —    |    —     |        ✓        |             ✓             |
-| Open Code                        |    —    |    —     |        ✓        |             ✓             |
-| Trae                             |    —    |    —     |        —        |      🔍 Selvitetään       |
-| Hallintapaneelin käyttöliittymä  |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector                |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute-reititys               |    ✗    |    ✗     |        ✗        |             ✓             |
-| Mallikartoituksen käyttöliittymä |    ✗    |    ✗     |        ✗        |             ✓             |
-| Ohituslista                      |    ✗    |    ✗     |        ✓        |             ✓             |
-| Ylävirran CA-varmenne            |    ✗    |    ✗     |        ✓        |             ✓             |
+| Ominaisuus                 | 9 reititin | anti-api | llm-sieppaaja | **OmniRoute AgentBridge** |
+| -------------------------- | :--------: | :------: | :-----------: | :-----------------------: |
+| Antigravity                |     ✓      |    ✓     |       —       |             ✓             |
+| GitHub Copilot             |     ✓      |    ✓     |       —       |             ✓             |
+| Kiro (AWS)                 |     ✓      |    ✓     |       —       |             ✓             |
+| OpenAI Codex               |     —      |    ✓     |       —       |             ✓             |
+| Cursor IDE                 |     ✓      |    ✓     |       —       |             ✓             |
+| Zed Industries             |     —      |    ✓     |       —       |             ✓             |
+| Claude koodi               |     —      |    —     |       ✓       |             ✓             |
+| Avaa koodi                 |     —      |    —     |       ✓       |             ✓             |
+| Trae                       |     —      |    —     |       —       |         🔍 tutkii         |
+| Kojelauta UI               |     ✓      |    ✗     |       ✗       |             ✓             |
+| Liikennetarkastaja         |     ✗      |    ✗     |       ✓       |             ✓             |
+| OmniRoute reititys         |     ✗      |    ✗     |       ✗       |             ✓             |
+| Mallikartoitus UI          |     ✗      |    ✗     |       ✗       |             ✓             |
+| Ohituslista                |     ✗      |    ✗     |       ✓       |             ✓             |
+| Ylävirran CA sertifikaatti |     ✗      |    ✗     |       ✓       |             ✓             |
 
 ---
 
@@ -554,7 +554,7 @@ Trae on suhteellisen uusi tekoälyavusteinen ohjelmointiassistentti. Ennen käsi
 3. Selvitä todennusmekanismi
 4. Arvioi käyttöehtojen ja API:n löydettävyyden perusteella, jatketaanko toteutusta vai ei
 
-Kunnes selvitys valmistuu, hallintapaneelin Trae-kortissa näkyy "Selvitetään"-tunniste ja "Raportoi toteuttamiskelpoisuus" -linkki. Käsittelijän runko tiedostossa `src/mitm/handlers/trae.ts` antaa rakenteisen `Not yet implemented` -virheen.
+Kunnes selvitys valmistuu, hallintapaneelin Trae-kortissa näkyy "Selvitetään"-tunniste ja "Raportoi toteuttamiskelpoisuus" -linkki. Käsittelijän runko tiedostossa `src/mitm/handlers/trae.ts` antaa rakenteisen `Ei vielä toteutettu` -virheen.
 
 ### Työjonossa olevat agentit (MITM vaaditaan — ei mukautetun perus-URL-osoitteen tukea)
 

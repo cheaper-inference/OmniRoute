@@ -180,6 +180,12 @@ spawn ਨਾ ਕਰਨ ਵਾਲੇ ਸਰੋਤਾਂ (ਸੰਭਾਲੀ ਸ�
 | `/api/providers/health-autopilot/actions` | ਆਟੋਪਾਇਲਟ ਸੁਧਾਰਾਤਮਕ ਕਾਰਵਾਈਆਂ ਚਲਾਉਂਦਾ ਹੈ                           |
 | `/api/settings/obsidian`                  | ਕਿਸੇ ਵੀ vault ਰੂਟ ਲਈ ਮੁੜ ਵਰਤੋਂਯੋਗ WebDAV ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਬਣਾਉਂਦਾ ਹੈ |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                     |
+| `/api/cli-tools/apply`                    | ਹੋਸਟ ਉੱਤੇ ਓਪਰੇਟਰ ਦੀ CLI ਸੰਰਚਨਾ ਮੁੜ ਲਿਖਦਾ ਹੈ                      |
+| `/api/cli-tools/guide-settings`           | ਗਾਈਡ-ਆਧਾਰਿਤ CLI ਸੰਰਚਨਾ ਫਾਈਲਾਂ ਲਿਖਦਾ ਹੈ                           |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes ਏਜੰਟ ਦੀ ਸੰਰਚਨਾ ਲਿਖਦਾ ਹੈ                                   |
+| `/api/cli-tools/backups`                  | CLI ਸੰਰਚਨਾ ਦੇ ਬੈਕਅੱਪ ਬਹਾਲ ਅਤੇ ਮਿਟਾਉਂਦਾ ਹੈ                        |
+| `/api/log-export`                         | ਸੰਰਚਿਤ ਮੰਜ਼ਿਲ ਵੱਲ ਕਾਲ ਲੌਗ ਭੇਜਦਾ ਹੈ                               |
+| `/api/restart`                            | ਸਰਵਰ ਪ੍ਰਕਿਰਿਆ ਮੁੜ ਚਾਲੂ ਕਰਦਾ ਹੈ                                   |
 
 **ਉਲੰਘਣਾ ਉੱਤੇ ਜਵਾਬ:** `401 Authentication required`
 

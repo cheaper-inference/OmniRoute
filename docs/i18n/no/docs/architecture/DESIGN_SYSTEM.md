@@ -4,228 +4,93 @@
 
 ---
 
-> **Status:** referanse — standardiseringen som beskrives her, er **implementert** (fase 1–6: rutenettbakgrunn, primitiver, sentralisering av statusfarger, mono-token, tokenmigrering for DataTable, fokusring → aksent, Checkbox/Textarea-primitiver, `cn()` → tailwind-merge, rutenett på alle frittstående skjermbilder, flytende 4K-innholdsramme, ugjennomsiktige datatabellflater). Dette dokumentet er den kanoniske beskrivelsen av dashbordets designtokener, komponenter og konvensjoner. Faseinndelingen nedenfor er beholdt som begrunnelse for hver beslutning.
-> **Omfang:** OmniRoute-dashbordet (`src/`) og markedsføringsnettstedet (`_mono_repo/omnirouteSite/`) deler **én visuell identitet** — samme millimeterpapirlignende rutenettbakgrunn (32px), samme fargetokener og standardiserte komponenter.
->
-> Praktiske merknader for vedlikeholdere:
->
-> - Flere av de gjenværende hardkodede heksadesimalverdiene er **tilsiktede** (konsollterminal som alltid er mørk, ReactFlow SVG-streker) og må **IKKE** flyttes over til tokener.
-> - Et «større» rutenett i en kjørende instans skyldes et utdatert bygg, ikke koden — rutenettstørrelsen er 32px, identisk med nettstedet.
-> - Verdiene for `--table-*` i mørkt tema er byte-for-byte identiske med de hardkodede rgba-verdiene fra før migreringen. Det lyse temaet ble rettet (det var feilaktig alltid mørkt på grunn av døde `var()`-reserveløsninger).
+> **Status:** dashbordet er bygget på** Keak CI UI sett** (`@keak/cheaper-inference-ui-kit`), leverandør som arbeidsområdet `packages/ui-kit` (`@omniroute/ui-kit`; oppstrøms øyeblikksbildet er festet i `packages/ui-kit/UPSTREAM.md` og beskyttet av `npm run check:ui-kit-snapshot`). Lys er det kanoniske temaet; standardpreferansen er `system`. Standardpaletten er settets** Utgaver** utseende (nøytralt med varmt papir og kobberaksenten `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Innstillinger → Utseende → Fargepalett tilbyr** Klassisk** , settets base tokens med lime-aksent. Switzer er enkeltfamilien for UI, visning og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løser seg etter det), selvvertert av selve settet (`packages/ui-kit/src/ci-fonts.css`, importert av `ci-tokens.css`). Skript Switzer mangler fall gjennom glyph for glyph (`src/app/globals.css`): Inter for kyrillisk, gresk og vietnamesisk og, bare under `html[dir="rtl"]`, Vazirmatn for arabisk skrift. Hvert ikon er en Lucide-glyph.
 
----
+## 1. Hvor ting bor
 
-## 1. Formål
+- **Sett.** `packages/ui-kit/src` er en byte-for-byte-kopi av oppstrøms `src/` ved commit-festet i `packages/ui-kit/UPSTREAM.md` (som også registrerer lisensautorisasjonen); `PATCHES.md` viser lokale oppdateringer (ingen). Den forbrukes som kilde, uten build: `next.config.mjs` transpilerer den, og `tsconfig.json` kartlegger `@omniroute/ui-kit` → `packages/ui-kit/src` og `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` og `vitest.mcp.config.ts` har samme alias). Importer en settkomponent etter underbanen (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), aldri gjennom `@omniroute/ui-kit` tønnen: fatet trekker hver komponent (inkludert datovelgeren) inn i hver importør. Settet stilarket går inn gjennom `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, hele arket: kjernen `ci-ui.css` pluss hver mønsterfamilie).
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` erklærer `--ci-*` symbolene; `src/app/globals.css` kobler dem til de gamle OmniRoute navnene (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), slik at de eksisterende `var(--color-*)` -lesene og Tailwind verktøyene fortsetter å fungere. Ny kode bruker Tailwind -verktøyene (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) eller kit-klassene — aldri en hex-verdi (`tests/unit/design-kit-bridge.test.ts` håndhever broen). `text-primary` løses til `--color-primary-ink` til `--text-color-primary`, så primærteksten forblir lesbar mens `bg-primary`/`border-primary` beholder aksentoverflaten: under Editions er det settets `--ci-color-accent-active` (den dype kobber- `#99562f` i lys, kobberaksent i mørke); under Classic, lime-800 i lys og lime-aksent i mørke. Kartserier bruker `--color-chart-1` … `--color-chart-8`, hver med en tekstsikker `--color-chart-N-ink` og en ugjennomsiktig `--color-chart-N-subtle` brikketone, tildelt i settseriens rekkefølge (`ciChartSeriesOrder`).
+- **Temaer.** `<html className="ci-theme">` (`src/app/layout.tsx`) velger dokumentet til settetemaet. Preferansen er `light`, `dark` eller `system` (`THEME_CONFIG.defaultTheme = "system"` i `src/shared/constants/appConfig.ts`; `system` følger `prefers-color-scheme`). `applyTheme()` i `src/store/themeStore.ts` (speilet av `THEME_BOOT_SCRIPT`, innfelt i `src/app/layout.tsx`, som kjører før hydrering) setter `data-theme="dark"|"light"` og veksler `.dark` klassen på `<html>` sammen. Settets mørke token-sett er tastet inn på `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute sine egne mørke overstyringer ( `.dark` blokken i `globals.css`) og den eldre Tailwind `dark:` -verktøynøkkelen på `.dark` klassen. Det er ingen forhåndsinnstillinger for aksentfarge: aksenten kommer alltid fra settet, og en vedvarende forhåndsinnstilling fra en eldre konstruksjon droppes når butikken lastes inn.
+- **Paletter.** To, begge fra settet (`src/shared/constants/appearancePalette.ts`): `editions`, standarden og `classic`. Editions er settets `data-ci-appearance="editions"` attributt på `<html>`, som `ci-editions.css` (importert av `ci-ui.css`) kombineres med `data-theme`; Klassisk er attributtens fravær. Rotlayoutserveren gjengir attributtet, slik at en besøkende som ikke har noe lagret (eller ingen JS) får utgaver på hver overflate av — dashboard, login, `/status`, feilsider, `/docs` og PWA. Valget fortsetter ved siden av temaet i den samme `theme` butikken (`palette`, `setPalette()`, `applyPalette()` in `src/store/themeStore.ts`) og påføres før maling av `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, innfelt i layoutens `<head>`), som fjerner attributtet bare når den lagrede paletten er `"classic"`; `src/app/global-error.tsx`, utenfor rotoppsettet, bruker det fra samme butikk. Ikke legg `data-ci-appearance` på noe annet element: settet matcher det med `html:root:has([data-ci-appearance="editions"])`, så en etterkommer vil bytte hele dokumentet. Editions `data-ci-editions-variant="landing"` varianten er for markedsføringssider, ikke dashbordet. Nettleser chrome: serveren gjengir standard, Editions, i `viewport.themeColor` (én tag per `prefers-color-scheme`) og webmanifestet — `PWA_THEME_COLORS` i `src/shared/constants/pwaThemeColors.ts`, det ene speilet til Editions `--ci-color-background` (`#f3f1e9` / `#11120f`), festet til `ci-editions.css` av `tests/unit/pwa-theme-colors.test.ts`. Live `<meta name="theme-color">` følger deretter den lagrede paletten og modusen: `THEME_BOOT_SCRIPT` omskriver taggene før paint og temabutikkens handlinger gjør det ved hver endring (`resolveThemeColor()` / `applyThemeColor()` i `src/shared/utils/themeColorMeta.ts`, med `CLASSIC_PAGE_BACKGROUND` lest fra settets `ciTokens`). Et eksplisitt light/dark -tema setter hver tag til den modusen; `system` beholder én farge per skjema. Manifestet forblir utgaver: det hentes én gang per installasjon, uten preferanse. Monaco leser fargene av en sonde (`monacoKitTheme.ts`); under Editions snur sondelesingen roten `data-theme` for ett synkront pass, fordi settet løser Editions light/dark fra roten.
+- **Komponenter (adaptere).** `src/shared/components/index.tsx` beholder OmniRoute -komponenten API (samme navn, standard eksporter og rekvisitter), og primitivene bak den er adaptere over settet: skjemaer (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlegg og tilbakemeldinger (`Modal`, z `ConfirmModal`, zq, `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) og tabeller (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). En adapter importerer settkomponenten etter underbane og kartlegger de eldre rekvisittene på den — for eksempel er `Button variant="primary"` kit `default` knappen (`--ci-button-primary-*`: den omvendte overflaten i lys, aksenten med `--ci-color-accent-foreground` blekk i mørke), `danger` er `destructive`, og `warning` er kit `warning` knappen. `Badge` statusvarianter er setttoner, og `Select` med `<option>` barn gjengir settet `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` pin hver adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` gjengir `DashboardLayout`, som gjengir `src/shared/components/layouts/DashboardShell.tsx`: settet `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), med OmniRoute navigasjonslogikk i `src/shared/components/Sidebar.tsx`. En "hopp til innhold"-lenke til `#main-content` er det første fokuserbare elementet. `src/shared/components/Header.tsx` inneholder settet `SidebarTrigger` (skallets eneste sidefelt-veksling), Keak `ProductSwitcher` og kommandopalettåpneren; den viser rutetittelen bare mens ingen kit `PageHeader` (`.ci-page-header`) er montert inne i `#main-content`, så en side med sin egen `PageHeader` har en enkelt `h1`. `src/shared/components/CommandPalette.tsx` er et kit `Dialog`.
+- **Ikoner.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) løser navnet (Material Symbols-vokabularet skjermene bruker) gjennom `ICON_MAP` (`src/shared/constants/iconMap.ts`) til en Lucide-glyph. Materialsymbols-fonten og -pakken er borte: et navn som mangler på kartet gjengir en nøytral plassholderglyph (`data-icon-missing="true"`) og logger en konsolladvarsel utenfor produksjonen. `npm run gen:icon-map` skriver ut navnene i bruk som mangler på kartet (`tests/unit/icon-map-coverage.test.ts` feiler på et hvilket som helst navn uten et Lucide-ikon; `tests/unit/icon-map-object-values.test.ts` dekker navn som er lagret i oppslagsobjekter); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` omskriver bokstavelig `<span className="material-symbols-outlined">` -spenn til `<Icon>`.
+- **Merke.** `src/shared/components/OmniRouteLogo.tsx` pakker inn settet: standard eksport `OmniRouteLogo` gjengir `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) og `OmniRouteLockup` gjengir `ProductLockup product="omniroute"` (tilgjengelig navn "Keak OmniRoute") eller, for white-label-operatører, deres egne `name`/`logoSrc`. Produktbytterdestinasjoner lever i `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). De frittstående skjermene — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` og `src/shared/components/ErrorPageScaffold.tsx` — viser låsingen; `tests/unit/brand-pages-static.test.ts` vokter det.
 
-Markedsføringsnettstedet (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) og produktdashbordet skal se ut som **ett produkt**. Nettstedet har allerede hentet fargepaletten sin fra dashbordet — i `css/tokens.css` står det til og med _«Paletten gjenspeiler OmniRoute-dashbordet (src/app/globals.css)»_. De to er derfor allerede omtrent 80 % samkjørte når det gjelder farger. Dette mangler på dashbordet:
+## 2. Regler
 
-1. Den **millimeterpapirlignende rutenettbakgrunnen** som nettstedet bruker på hver side.
-2. Noen få **delte designtokener** som nettstedet har, men som dashbordet mangler (radiusskala, merkevaregradient, `surface-2`, monospace-skrift).
-3. **Konsistens på komponentnivå** — en rekke dashbordkomponenter omgår tematokenene med hardkodede hex-/rgba-verdier.
+1. Tokens, aldri bokstavelige. Unntak bevart med vilje: den alltid mørke konsollterminalen og `STATUS_HEX` (`src/shared/constants/statusColors.ts`), det oppløste sekskantspeilet i settstatuspaletten for innringere som trenger en bokstavelig sekskant. De kategoriske palettene er ikke lenger noe unntak: de kjører på settets åtte kart-tokens (`--color-chart-1..8`, pluss `-ink`/`-subtle`), i rekkefølgen på settserien, gjennom `src/shared/utils/categoricalPalette.ts` og, for rutingstrategier, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges og orkestreringslerretet leser de temabevisste `--orch-status-*` -variablene (`src/shared/components/flow/edgeStyles.ts`).
+2. Aldri lapp `packages/ui-kit/src` for hånd: synkroniser med `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit-porten `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) mislykkes på enhver byte som er forskjellig fra den festede oppstrøms-commit (den hopper over med en advarsel når oppstrømsklonen, `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, er fraværende). Når settet mangler noe, arbeid rundt det i adapteren eller skjermen og be oppstrøms om det.
+3. Standardinnstillingen for kittekst er engelsk (`label = "Loading"`, `loadingLabel = "Loading table"`…) — passerer oversatte strenger fra `useTranslations(...)` når en kit-komponent gjengir tekst.
+4. Tailwind -verktøy vinner over kit-komponentklasser (settet erklærer at `@layer theme, base, components, utilities` og reglene lever i `components`) — bruker verktøy for avstand og layout, ikke for å fargelegge kitkomponenter på nytt.
+5. Overskrifter: `.ci-heading` for side- og seksjonstitler; `.ci-dashboard-display` bare for stor, sparsom visningstekst som feilsidestatuskoden. Begge bruker Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` beskytter settet-adopsjonen: ingen materialligaturspenn under `src/app` eller `src/shared/components`; i dashbordtreet (`src/app/(dashboard)` og `src/shared/components`) ingen rå `<select>`, `<textarea>` eller `<table>` og ingen håndrullet `role="dialog"` utenfor de oppførte unntakene ( `Select` adapterens opprinnelige gren, `RequestLoggerDetail`); hver rå `<button>` eller `<input>` der trenger en kommentar som inneholder `kit-exception:` (med årsaken) som slutter på maksimalt 3 linjer over den; palettfarger og `dark:` varianter kun i filene testen viser.
+7. Bekreft begge temaene og visningsporten på 390 px før en PR (skjermbilder); `tests/e2e/a11y.spec.ts` kjører øks.
 
-Dette dokumentet inneholder analysen og planen.
+## 3. Legge til en skjerm
 
----
+1. Åpne siden med kitets `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` inne i
+   dashbordet) — tittel, beskrivelse og `actions`. Skall-headeren dropper da sin egen tittel.
+2. Bygg kontroller fra `@/shared/components` (adapterne) og bruk kit-komponenter via understi der det ikke
+   finnes noen adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Ikoner: `<Icon name="…" />`. Et nytt navn legges inn i `ICON_MAP` med den semantisk samsvarende Lucide-
+   komponenten; `npm run gen:icon-map` lister navnene som fortsatt mangler.
+4. Farger: semantiske hjelpeklasser (`text-success`, `bg-warning-bg`, `border-border`…) og
+   `var(--color-chart-N)` for diagramserier; ingen hex-verdier og ingen `dark:`-varianter som bare gjentar en farge.
+5. Tekst: hver streng, inkludert etikettene du sender til kit-komponenter, kommer fra `useTranslations`. Nye
+   nøkler legges inn i `src/i18n/messages/en.json`, `pt-BR.json` og `vi.json` (den vietnamesiske paritetstesten
+   fester hver engelske nøkkel); de andre språkene fylles inn av i18n-synkroniseringen.
+6. Kjør sjekkene før PR-en: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (den eneste sjekken som fanger opp en duplisert import i `iconMap.ts`),
+   `npm run check:ui-icu`, og skjermens egne tester.
 
-## 2. Prinsipper
+## 4. Legge til eller endre en adapter
 
-- **Én sannhetskilde = `src/app/globals.css`.** Nettstedet gjenspeiler dashbordet, aldri omvendt. Nye tokener legges først inn i `globals.css`.
-- **Tokener, aldri literalverdier.** Komponenter bruker semantiske tokener (`bg-surface`, `text-primary`, `border-border`), aldri rå `#hex`.
-- **Diskré, ikke prangende.** Rutenettet er en svak bakgrunn som ligger bak innholdet — det må aldri redusere tekstkontrasten eller konkurrere med brukergrensesnittet.
-- **Temabevisst.** Alt fungerer både i `.dark` (produktets karakteristiske uttrykk) og i lyst tema.
-- **Kirurgisk utrulling.** Lanser rutenettet og tokenene først (lav risiko, høy synlighet), og rydd deretter opp i komponentene i flere omganger.
+1. Behold det offentlige API-et til `src/shared/components/index.tsx`: samme eksportnavn,
+   standard-eksporter og aksepterte props. Map legacy-props til kit-et inne i adapteren (se `Button.tsx`:
+   `VARIANT_TO_KIT`, `SIZE_TO_KIT`).
+2. Importer kit-et via understi (`@omniroute/ui-kit/<component>`).
+3. Midlertidige løsninger for hull i kit-et hører hjemme i adapteren (eller i `globals.css`
+   `@layer components` når fiksen er en stil), aldri i `packages/ui-kit/src`.
+4. Legg til eller oppdater `tests/unit/ui/adapters/<name>.test.tsx`. For en adapter med mange kallere,
+   sammenlign rendret markup før og etter endringen — endringer i padding eller wrapper sprer seg til
+   hver skjerm.
 
----
+## 5. Oppdatering av settet
 
-## 3. Nåværende tilstand — hva som allerede er samkjørt, og hva som ikke er det
+`npm run check:ui-kit-upstream` sammenligner versjonen festet i `packages/ui-kit/UPSTREAM.md` med den nyeste `v*` taggen til oppstrøms repo og skriver ut synkroniseringskommandoen når en utgivelse er ute.
 
-### 3.1 Farger — allerede samkjørt ✅
+Den daglige `UI Kit upstream watch` -arbeidsflyten (`.github/workflows/ui-kit-upstream-watch.yml`) kjører den samme sjekken. Mens pinnen er bak, holder `scripts/ci/ui-kit-sync-pr.sh` en sync PR åpen mot den høyeste `release/vX.Y.Z` -grenen, på den rullende grenen `chore/ui-kit-sync-latest`. Den smelter aldri sammen: hver settutgivelse trenger fortsatt en visuell sjekk på den lokale VPS. Grenen bygges om når en nyere utgivelse er ute og står i fred ellers. En åpen PR med commits presset for hånd blir ikke overskrevet, og en PR for en versjon som en vedlikeholder lukket usammenslått forblir stengt til en nyere utgivelse.
 
-Alle merkevarefarger og flater samsvarer allerede med nettstedet **i verdi** (bare navnene er forskjellige — dashbordet bruker prefikset `--color-`). Verifisert i `src/app/globals.css:30-128`:
+Når ingen PR kan åpnes (målutgivelsen er frosset, PR har commits skjøvet for hånd, PR ble lukket, eller ingen PR token er satt) holder arbeidsflyten ett sporingsproblem åpent som sier hvorfor.
 
-| Konsept                           | Nettstedstoken (`tokens.css`)               | Dashbordtoken (`globals.css`)   | Samsvar     |
-| --------------------------------- | ------------------------------------------- | ------------------------------- | ----------- |
-| primær                            | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅          |
-| primær ved peker                  | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅          |
-| aksent                            | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅          |
-| aksent-2                          | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (omdøpt) |
-| aksent-3                          | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (omdøpt) |
-| suksess / advarsel / feil         | `#22c55e / #f59e0b / #ef4444`               | identisk                        | ✅          |
-| trafikklys                        | `#ff5f56 / #ffbd2e / #27c93f`               | identisk                        | ✅          |
-| mørk bakgrunn / flate / kantlinje | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identisk                        | ✅          |
-| lys bakgrunn / flate / tekst      | `#f9f9fb / #fff / #1a1a2e`                  | identisk                        | ✅          |
+Arbeidsflyten bruker to hemmeligheter:
 
-**Konklusjon:** Det er ingen fargemigrering som må utføres. Identiteten er allerede delt; vi _fullfører_ den, ikke bygger den på nytt.
+- `secrets.UI_KIT_READ_TOKEN`: et skrivebeskyttet token for den private oppstrøms repoen. Når arbeidsflyten ikke kan lese oppstrøms (ingen token, en token som sluttet å fungere, eller GitHub utilgjengelig) forblir kjøringen grønn, men skriver en advarsel og holder en separat sak åpen, som lukker seg selv når en senere kjøring kan lese oppstrøms igjen.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: et finkornet token på dette depotet med innholds- og pull-forespørsler om skrivetilgang. Standard `GITHUB_TOKEN` kan ikke lage PRs her, og en PR den åpnet ville ikke trigge CI. Uten dette symbolet skyver arbeidsflyten bare grenen.
 
-### 3.2 Mangler — dette mangler på dashbordet
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopierer oppstrøms `src/` ved den commit (`latest` = den nyeste `v*` taggen) til `packages/ui-kit/src`, bruker den enkelt tillatte transformasjonen (den dropper `.js` suffikset fra relativ import), og setter arbeidsområdeversjonen i `packages/ui-kit/package.json` og `package-lock.json` til den oppstrøms. Deretter: gjennomgå `git diff packages/ui-kit`, gjør en visuell pass på leverandører, innstillinger, kombinasjoner, bruk og endepunkt i begge temaene, kjør `npm run check:ui-kit-snapshot` og `npm run test:vitest:ui` og åpne PR med oppstrøms endringslogg.
 
-| Avvik                   | Nettstedet har                                                                     | Kontrollpanel                                                       | Tiltak                |
-| ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------- |
-| **Rutenettbakgrunn**    | `body::before` millimeterpapir, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ lagt til (fase 1)**                                            | **Del A**             |
-| **Radiusskala**         | `--radius 14px`, `--radius-sm 9px`                                                 | `--radius 14px` lagt til; `-sm` + omkobling av komponenter gjenstår | **Del B / fase 2**    |
-| **Merkevaregradient**   | `--grad-brand 135deg primary→accent-3`                                             | **✅ token lagt til (fase 1)**; tas i bruk i fase 2                 | **Del B**             |
-| **Nøstet flate**        | `--surface-2 #1c2230`                                                              | **✅ lagt til (fase 1)**                                            | **Del B**             |
-| **Fastbreddeskrift**    | `--font-mono` (ui-monospace-stakk)                                                 | gjenstår (fase 4, sammen med brukerne)                              | **Del B**             |
-| **`text-muted` (mørk)** | `#8b8b9e`                                                                          | `#a1a1aa` (zinc-400)                                                | samordnes — **Del B** |
+## 6. README diagrammer
 
-### 3.3 Temamekanismer (slik at vi ikke ødelegger noe)
+De tolv diagrammene roten `README.md` embeds (`docs/diagrams/*.svg`) er settet som brukes på et statisk bilde, og de genereres, ikke tegnet for hånd: 13 generatorfiler ved `scripts/docs/gen-readme-*.mjs` (tolv diagrammer pluss `gen-readme-diagrams.mjs` driveren) og 12 staleness-tester ved `tests/unit/docs/readme-*-svg.test.ts`, en per diagram, hver byte-sammenlignet med sin committ'qf-fil med `test-unit`-generatoren.
 
-- **Tailwind v4, CSS-først** (ingen `tailwind.config.*`). Tokens defineres i `:root`/`.dark` og gjøres tilgjengelige for hjelpeklasser via `@theme inline` (`globals.css:130-179`).
-- **Mørk modus via `.dark`-klassen** på `<html>` (`@custom-variant dark` i `globals.css:22`), styrt av en egendefinert Zustand-store (`src/store/themeStore.ts`), standardtema = `system` (`src/shared/constants/appConfig.ts:11`). Nettstedet bruker `html[data-theme="light"]` i stedet — **mekanismene er forskjellige, men møtes aldri** (separate opphav), så det oppstår ingen konflikt. Vi beholder kontrollpanelets `.dark`-mekanisme.
-- **Kjøretidsoverstyring av primærfargen** finnes (`themeStore.ts:85-97`, forhåndsinnstillinger i `COLOR_THEMES`) — brukere kan bytte ut `--color-primary`. Alle nye tokens (gradient osv.) som refererer til `--color-primary`, arver disse overstyringene automatisk. ✅
-- **Reserverte radiusnavn i Tailwind v4:** `--radius-sm/md/lg/...` ligger til grunn for `rounded-*`-hjelpeklassene. Hvis de redefineres, endres alle eksisterende `rounded-*` retroaktivt (f.eks. brukes `rounded-sm` i 12 filer). Derfor utsettes verdien for liten radius og omkoblingen av komponenter bevisst til fase 2, der brukerne endres samtidig.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierer Editions-paletten (standardutseendet) fra `packages/ui-kit/src/ci-editions.css` (festet mot den filen av `tests/unit/docs/readme-diagram-theme.test.ts`, som også sjekker WCAG AA for hver tekstfarge på hver overflate i begge skjemaene; det eneste unntaket, lys `warn`, er kit-advarselen som er mørkere 10 % fordi settverdien er 4,46:400/500/600 `ci-tokens.css` visning på 500) og sporing for alt, bortsett fra koderollene (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), som er IBM Plex Mono og er kun for kommandoer, URLs, identifikatorer og terminalskjermer. Lyse verdier sitter på `:root`, mørke verdier bak `prefers-color-scheme: dark`, inne i filen, så hvert bilde følger seerens skjema på GitHub.
+- **Fonter.** GitHub Markdown har ingen CSS og camo-proxyen blokkerer hver ekstern henting, så setttypen må reise inne i filen. `scripts/docs/readme-outline.mjs`, det siste trinnet i hver generator, former Switzer-rollene med HarfBuzz og tegner dem som vektorkonturer (`<defs>` -baner og `<use>`), med pilene og geometriske symbolene Switzer mangler tegnet på sine egne metrikker. Kontur, aldri en innebygd skrift: Switzers lisens (`packages/ui-kit/src/fonts/FFL.txt`) forbyr subsetting og formatkonvertering uten skriftlig samtykke og tillater vektortegninger, så ikke gjeninnfør en Switzer `@font-face` eller `data:` URI. Den ene fonten som er igjen i en fil er OFL IBM Plex Mono-delsettet for det som forblir ekte kodetekst (`scripts/docs/readme-fonts.mjs`), bygget fra disse tegnene; noen glyph det ikke kan legge inn kaster.
+- **Regenerer.** `npm run docs:readme-diagrams` omskriver alle tolv i README rekkefølge og skriver ut én linje per fil med størrelsen. En enkelt generator kjører også på egen hånd (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` trenger `node --import tsx/esm` fordi tallene kommer fra den levende kataloglasteren i `open-sse/config/freeModelCatalog.ts`; CI konsekvensen av en katalogendring er i `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Forplikt generatoren og SVG sammen.
+- **Bevis.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` gjengir en fil slik GitHub serverer den (en `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), fanger opp en lys og en mørk ramme og rapporterer de eksterne fontforespørslene siden laget (må være 0).
+- **Budsjett.** Under 200 KB per fil (hver staleness test hevder det); 500 KB er den harde capsen for ethvert README bilde (regelen for SVG studiovalidering).
+- **Kopi uendret, teller fra porten.** Rebrand endret type og palett, ikke ord: hver generator bærer sin diagramkopi i en `*_COPY` konstant (eller bygger den fra live-katalogen) som er både den tegnede teksten og inngangen til skisseringstrinnet. Kanoniske figurer forblir i `<text>` noder (usynlig en gang skissert, `fill-opacity:0`), lest av `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); staleness-testene til diagrammene som gate leser kjører også validatorene på den genererte filen, så en figur som driver fra koden mislykkes i testen — fikser kilden porten leser, aldri nummeret i generatoren.
 
----
+## 7. Referanseindeks
 
-## 4. Del A — Rutenettbakgrunnen (hovedønsket) — IMPLEMENTERT (fase 1)
-
-### 4.1 Hva den er
-
-Den nøyaktige oppskriften fra nettstedet (`_mono_repo/omnirouteSite/css/base.css`): et **fast pseudo-element som dekker hele visningsområdet**, og som tegner to linjegradienter på 1px, plassert ved `z-index:-1` bak alt innhold.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Hvorfor dette fungerer selv om `body` har en ugjennomsiktig `background-color`:** en `::before` med `z-index:-1` tegnes _over_ elementets egen bakgrunn, men _under_ innholdet i den normale flyten. Dermed er `--color-bg` grunnfargen, rutenettet legges oppå den, og appen gjengis over rutenettet.
-
-### 4.2 Presedens som allerede finnes i kodebasen
-
-`src/app/landing/page.tsx:16-26` **implementerer allerede det samme rutenettet per side** — men med **røde** linjer (`#E54D5E`, opasitet `0.06`) ved **50px**, i tillegg til animerte kuler. Mønsteret er dermed utprøvd i produktet. Dette arbeidet gjør det til et **globalt, tematilpasset** bakgrunnsbilde.
-
-### 4.3 Tokener som er lagt til (i `globals.css`)
-
-```css
-:root {
-  /* lyst — rutenettets opasitet er økt fra nettstedets 0.045, slik at bakgrunnen
-     faktisk er synlig i det tettpakkede kontrollpanelet (kort/grensesnitt dekker det meste av visningsområdet) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* mørkt — økt fra 0.035 av samme grunn */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Den eneste blokkeringen — fjernet
-
-Rutenettet er globalt gjennom selve konstruksjonen (det dekker panelet, `auth`/`login`, feilsider — alle ruter — samtidig). Nøyaktig **ett** element skjulte det inne i panelet:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — den ytre wrapperen tegnet en ugjennomsiktig `bg-bg`. Alt under den er allerede gjennomsiktig (`<main>`, rullebeholderen og det indre elementet med `max-w-7xl`), så ved å **fjerne `bg-bg`** blir rutenettet på body-elementet synlig gjennom innholdsområdet (body-elementets `--color-bg` forblir grunnfargen).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Samspill med grensesnittet (sidepanel / topptekst)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) og `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) forblir **ugjennomsiktige** → rutenettet vises bare i **innholdsområdet**, rammet inn av et ensfarget grensesnitt. Et rolig standardvalg som samsvarer med hvordan nettstedet skiller grensesnittet fra arbeidsflaten (beslutning D3 = ensfarget).
-
-### 4.6 Innloggings-, autentiserings- og feilsider
-
-Disse gjengis direkte under `<body>` (uten panelets grensesnitt), så det globale rutenettet skal vises automatisk bak dem. **Fase 5 — FULLFØRT:** Wrapperne som dekket hele skjermen på de frittstående sidene, var faktisk ugjennomsiktige (`min-h-screen … bg-bg`, der `bg-bg` er den samme ensfargede flaten som `<body>`), noe som skjulte rutenettet på alle skjermbilder utenfor kontrollpanelet — ikke bare innlogging. Alle er nå gjennomsiktige, slik at den delte bakgrunnen vises gjennom: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` og `ErrorPageScaffold` (dekker `400`/`401`). Dette fullfører **D4** (utvidet fra bare innlogging til alle frittstående skjermbilder). Sikret av `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Landingsside
-
-`landing/page.tsx` beholder sin mer innholdsrike animerte bakgrunn (kuler + vignett) — sin egen markedsføringsflate (beslutning D5 = beholdes som den er).
-
----
-
-## 5. Del B — Samordning av tokener
-
-Fase 1 legger til de inaktive, kollisjonsfrie identitetstokenene (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Fase 2 kobler radiusskalaen til Tailwind og peker komponentene på nytt; fase 4 legger til `--font-mono` og tilhørende brukere.
-
-| Token                        | Hvorfor                                                            | Fase                               |
-| ---------------------------- | ------------------------------------------------------------------ | ---------------------------------- |
-| `--radius` / `--radius-sm`   | Én radiusskala (14/9) i stedet for vilkårlige 6/8/12               | 1 (verdi) / 2 (koble til + ompeke) |
-| `--grad-brand`               | Merkevaregradient for primære CTA-er (rød→fiolett), lik nettstedet | 1 (token) / 2 (Button)             |
-| `--surface-2`                | Nestede paneler / tabelloverskrifter / innfelte rader              | 1                                  |
-| `--font-mono`                | Kodeblokker, terminal, ID-er, endepunkter                          | 4                                  |
-| Avstemming av `--text-muted` | Velg én verdi for nettsted↔panel (`#a1a1aa` anbefales)             | 2                                  |
-
-**D2 (text-muted):** nettsted `#8b8b9e` kontra kontrollpanel `#a1a1aa`. Det anbefales å beholde **kontrollpanelets `#a1a1aa`** og oppdatere _nettstedet_ slik at det samsvarer. Kosmetisk.
-
----
-
-## 6. Del C — Standardisering av komponenter (fase 2–4)
-
-Egendefinerte komponenter (ingen shadcn/Radix), Tailwind v4, semantiske tokener er **stort sett** tatt i bruk (195 filer importerer den delte samleeksporten). Arbeidet består i å fjerne **omgåelsene**. Plassering: `src/shared/components/`.
-
-| #   | Element                                   | Fil(er)                                                                                                                  | Problem → Mål                                                                                                                   | Fase |
-| --- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **Radiusjustering**                       | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | blandede 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                             | 2    |
-| C2  | **Knappgradient + `accent`-variant**      | `Button.tsx:5-12`                                                                                                        | primær er ensfarget rød→rød; juster til `--grad-brand`; legg til manglende `accent`-variant. ~195 importører — høyest synlighet | 2    |
-| C3  | **Tabeller**                              | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100 % hardkodet rgba direkte i koden + variabler som ikke finnes; migrer til tokener, fjern avvikende stiler                    | 3    |
-| C4  | **Sentraliser statusfarger**              | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | 6+ kopier av samme hex-verdi → én modul basert på `--color-success/warning/error`                                               | 3    |
-| C5  | **Kortramme**                             | `Card.tsx:39`                                                                                                            | `border-white/5` → merkevare `/8`                                                                                               | 2    |
-| C6  | **Samordning av fokusring** ✅ FERDIG     | `globals.css` `--focus-ring` (accent) kontra skjemakontrollenes `ring-primary/30`                                        | samlet rundt **accent (fiolett)** for å samsvare med den globale ringen + skille den fra den røde feilringen; feil forblir rødt | 4    |
-| C7  | **Legg til `Checkbox` + `Textarea`**      | rå `<input>`/`<textarea>` med innebygd `accentColor:#6366f1`                                                             | tokenstyrte primitiver                                                                                                          | 4    |
-| C8  | **Gjennomgang av hardkodede hex-verdier** | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal-prikker, ~14 diagramfiler                                   | litteraler → tokener                                                                                                            | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**        | `src/shared/utils/cn.ts`                                                                                                 | motstridende klasser stables; nødvendig for C1-overstyringer                                                                    | 2    |
-
-**Allerede i tråd med merkevaren (tokenstyrt, trenger bare radius):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Utrullingsplan
-
-- **Fase 1 — Rutenett + identitetstokener (DENNE PR-EN).** `globals.css`-rutenett + tokenene `--surface-2`/`--grad-brand`/`--radius`; `body::before`-bakgrunn; fjern `bg-bg`-blokkeringen; statisk sikringstest. Lav risiko, kan reverseres i én commit.
-- **Fase 2 — Primitiver (C1, C2, C5) — FULLFØRT i denne PR-en.** Semantiske radiusverktøy `rounded-card` (14px) / `rounded-control` (9px) lagt til via `@theme` (egendefinerte navn, slik at standardverdiene `rounded-sm/md/lg/xl` forblir urørt — ingen eksplosiv endring i 400 filer); Card/Modal → 14px, Button/Input/Select → 9px; primær Button → `--grad-brand` (rød→fiolett) + ny `accent`-variant; Card-kanter → tokenet `border-border` (0.08). **Utsatt:** `cn()`→tailwind-merge (C9) krever nye avhengigheter; den ad hoc-baserte gjennomgangen av `rounded-lg` (326 filer) er beholdt som den er, siden primitivene dekker hoveddelen av overflaten.
-- **Fase 3 — Statusfarger + tabeller (C3, C4) — FULLFØRT i denne PR-en.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` som én enkelt kilde; `flow/edgeStyles.ts` + `TokenHealthBadge` omkoblet, troverdig/samme hex). ✅ **`--font-mono`**-token. ✅ **C3 (DataTable)** — erstattet alle innebygde rgba-verdier + de ubrukte reserveverdiene `var(--bg-table-header)` / `var(--text-secondary)` med et `--table-*`-tokensett (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), der **de mørke verdiene er nøyaktig de samme som de gamle hardkodede rgba-verdiene** (mørk modus er byte-identisk), og der de lyse verdiene retter det tidligere alltid mørke lyse temaet. Topptekstramme → `--color-border`, sekundærtekst → `--color-text-muted`. **Ønsker en visuell gjennomgang før sammenslåing.** (Ikke endret: `logTableStyles.ts` og de eldre Ant-reglene for `.ant-table` — separat, lavere prioritet.)
-- **Fase 4 — Opprydding (C6, C7, C9 fullført; C8 gjenstår).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge lagt til som avhengigheter) — en kallers `className` _erstatter_ nå korrekt en primitivs motstridende klasse i stedet for å stable dem. ✅ **C7** nye `Checkbox`- og `Textarea`-primitiver (tokenstyrte, eksportert fra barrel-filen; additive — innføring for de 32 rå avkrysningsboksene / 41 rå tekstområdene kan skje gradvis). ✅ **C6** samordning av fokusring — skjemakontrollene (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) bruker nå **aksentfargen (fiolett)** som fokusring for å samsvare med den globale `--focus-ring` og unngå kollisjon med den røde feilringen; den røde feiltilstanden er uendret. ⏳ **C8-hexgjennomgangen er IKKE et blindt søk/erstatt** — bekreftede forekomster som er _tilsiktede_ og må beholdes: `ConsoleLogViewer.tsx:240` (terminal som alltid er mørk), `TokenHealthBadge`-popup, ReactFlow SVG-streker. Migrer bare hex-verdier som faktisk skal være tematilpassede.
-
-Hver fase: `npm run lint` + `npm run typecheck:core` + en visuell gjennomgang.
-
----
-
-## 8. Åpne beslutninger (anbefalinger)
-
-- **D1 — Primær Button:** behold rød→rød eller bytt til **rød→fiolett `--grad-brand`**? Anb.: **rød→fiolett** (fase 2).
-- **D2 — Farge på rutenettlinjer:** **nøytral** (nettstedets stil) — valgt — kontra merkevarerød. Størrelse **32px** (redusert med ~30 % fra de opprinnelige 46px etter tilbakemelding fra eieren — celler på 46px virket for store i dashbordoppsettet).
-- **D3 — Chrome-livlighet:** sidefelt/topptekst **heldekkende** — valgt.
-- **D4 — Rutenett for autentisering/innlogging:** ✅ **FULLFØRT (fase 5)** — ugjennomsiktig `bg-bg` fjernet fra alle frittstående fullskjerm-omslutninger (ikke bare innlogging), slik at rutenettet vises på alle skjermer. Se §4.6.
-- **D5 — Landingsside:** behold den animerte introen som den er. Valgt.
-- **D6 — Radius 14/9 for hele produktet:** Anb.: ja (fase 2).
-- **D7 — Fase 1 lanseres først:** Valgt.
-- **D8 — Oppsettsbredde (fase 5):** innholdsomslutningen i dashbordet var begrenset til `max-w-7xl` (1280px), sentrert med brede, tomme sidemarger på store skjermer. ✅ **FULLFØRT** — økt til en flytende `max-w-[3840px]` (ekte 4K): innholdet følger nå visningsområdet opp til ~4K og sentreres først når det blir bredere enn dette (`DashboardLayout.tsx`). Sider som med hensikt er smale, forblir smale (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Ugjennomsiktige datatabeller (fase 6):** siden innholdsområdet i dashbordet nå er gjennomsiktig (slik at rutenettbakgrunnen vises gjennom, fase 5), lot datatabeller med beholdere som _ikke_ var ugjennomsiktige overflater, rutenettet skinne gjennom de gjennomsiktige partallsradene / sebrastripene med lav alfaverdi. ✅ **FULLFØRT** — alle tabeller uten Card tegner nå `bg-surface` (eller, for `<DataTable>`-primitiven, `background: var(--color-surface)` på rullebeholderen). Rettet: `DataTable` (primitiv), `ProxyLogger`/`RequestLoggerV2` (`bg-black/5 dark:bg-black/20`-nyansen på deres `<Card>` overstyrte Card-komponentens `bg-surface` via tailwind-merge → ~95 % gjennomsiktig), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, i tillegg til de to CSS-rutenettbaserte «tabellene» i hurtigbuffervisningene (`bg-surface/35` → `bg-surface`). Tabeller som allerede befinner seg inne i en `<Card>`/Modal, ble kontrollert som ugjennomsiktige og med hensikt beholdt urørt (`bg-surface` ville vært en overflødig operasjon der). Selve rutenettet krevde **ingen endring** — dashbordets `body::before` er byte-identisk med nettstedet (`--grid-size: 32px`); eventuelle «større rutenett» som vises i en kjørende instans, skyldes en utdatert versjon fra før `#4143`, ikke koden. Sikret av `tests/unit/design-grid-background.test.ts` (fase 6-blokken).
-
----
-
-## 9. Utenfor omfang / risikoer
-
-- **Ingen endring av fargepaletten** — fargene samsvarer allerede; vi legger bare til manglende tokens. Ingen risiko for å endre fargene i produktet.
-- **Ingen endring av temamotoren** — behold `.dark` + Zustand-lageret.
-- **Endring av radius (fase 2) er omfattende** — berører alle kort/knapper/inndatafelt; inspiser visuelt travle skjermbilder (tabeller, modaler) før sammenslåing.
-- **Tabeller (C3)** har mest hardkodet styling og størst risiko for regresjoner — isoler dem i en egen PR.
-
----
-
-## 10. Referanseindeks
-
-| Område                          | Bane                                                                                                                 |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Kontrollpanel-tokens            | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Temalager                       | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Panelskall (rutenett åpnes her) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Grensesnitt-ramme               | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Presedens for rutenett          | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Grunnkomponenter                | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Kilder for statusfarger         | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn`-verktøy                    | `src/shared/utils/cn.ts`                                                                                             |
-| Beskyttelsestest for fase 1     | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Nettstedsreferanse              | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — token bridge, `.dark` overstyringer, OmniRoute `@layer components` utvidelser
+- `packages/ui-kit/UPSTREAM.md` — festet oppstrøms commit og lisensautorisasjon; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` og adaptere ved siden av; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

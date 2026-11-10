@@ -1,4 +1,5 @@
 import { SEARCH_PROVIDERS } from "../config/searchRegistry.ts";
+import { SearchProviderChatError } from "../utils/searchProviderChatError.ts";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertRuntimeProviderAvailable } from "@/shared/constants/providerRetirement";
 import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chatgptWebRetirement";
@@ -237,11 +238,7 @@ export async function getExecutor(provider: string): Promise<BaseExecutor> {
     throw err;
   }
   if (CHAT_UNSUPPORTED_SEARCH_PROVIDERS.has(provider)) {
-    const err = new Error(
-      `Provider "${provider}" is a search provider and does not support chat completions; use the /v1/search endpoint instead.`
-    );
-    (err as Error & { status?: number }).status = 400;
-    throw err;
+    throw new SearchProviderChatError(provider);
   }
   return getDefaultExecutor(provider);
 }

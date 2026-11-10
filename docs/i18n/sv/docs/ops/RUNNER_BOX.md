@@ -4,12 +4,7 @@
 
 ---
 
-Den självhostade poolen körs på **.113**-maskinen (`tomni-proxmox-113`). Sedan 2026-10-18 har varje
-OmniRoute-runner **en roll**, en etikett och en minnes-/CPU-budget dimensionerad efter den uppmätta
-arbetsbelastningen. Turbopack-platsen får de resurser som bygget behöver; de andra platserna är dimensionerade
-efter sina uppmätta toppar. Maskinen överallokerar endast när ett Turbopack-bygge sammanfaller med ett
-Release-Green-webpack-bygge och ett lint-jobb; värdens swap (16 GB) absorberar detta, och eftersom byggen för
-pull requests körs hostat är Turbopack-platsen inaktiv för det mesta:
+Poolen med egen värd går på **.113** box (`tomni-proxmox-113`). Sedan 2026-10-18 har varje OmniRoute löpare **en roll** , en etikett och en memory/CPU budget storleksanpassad till vad dess arbetsbelastning mätte. Turbopack sloten får vad bygget behöver; de andra slitsarna är dimensionerade till sina uppmätta toppar. Boxen övervinner bara när en Turbopack konstruktion sammanfaller med en Release-Green-webpack-konstruktion och ett luddjobb; host swap (16 GB) absorberar det, och eftersom pull-request Builds körs på värd, är Turbopack platsen inaktiv för det mesta:
 
 | runner               | etikett                         | roll                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
 | -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
@@ -17,24 +12,19 @@ pull requests körs hostat är Turbopack-platsen inaktiv för det mesta:
 | `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-bygge                                                                                            | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
 | `omniroute-113-2`    | `omni-light`                    | nattliga jobb (Schemathesis, promptfoo, garak, k6) och `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
 | `omniroute-113`      | `omni-light`                    | samma pool som ovan                                                                                                                                      | 8 GB / 12 GB               | 400 %         |
-| OmniHeuris, OmniMind | (deras repos)                   | endast Dependabot (topp på 155 MB vardera, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | 200 % vardera |
+| OmniHeuris, OmniMind | (deras repos)                   | Endast Dependabot (topp 155 MB vardera, 2026-10-18)                                                                                                      | 4 GB / 6 GB                | 200 % vardera |
 
 Uppmätt 2026-10-18:
 
-| resurs    | värde                        | vad det innebär för schemaläggningen                                                                                                                                                                                                                                                                                                                                                            |
-| --------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 kärnor**        | ett Turbopack-produktionsbygge nådde en topp på 49 GB utan begränsning (`tests/unit/ci-build-bundler-webpack.test.ts`); i Next 16.3.8 håller enbart kompileringsfasen kvar ~40 GB (36 GB RSS i `next-build` plus 17 loader-workers på 3 GB, uppmätt 2026-10-18); ett webpack-bygge använder ~14–16 GB. Ett Turbopack- och ett webpack-bygge ryms tillsammans; två Turbopack-byggen gör det inte |
-| swap      | 16 GB                        | `omniroute-113-5` körs med swap avstängt (`MemorySwapMax=0`), så ett skenande bygge stoppas vid sin gräns i stället för att få maskinen att använda swap                                                                                                                                                                                                                                        |
-| `/tmp`    | **12 GB tmpfs = RAM**        | allt som placeras där använder minne; kvarlämnade filer rensas efter 3 h                                                                                                                                                                                                                                                                                                                        |
-| CPU       | load 60 på 32 kärnor uppmätt | före kvoterna gjorde ett Turbopack-bygge (~1166 % CPU) tillsammans med en coverage-svit på samma maskin att de andra lyssnarnas hjärtslag inte fick resurser (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                              |
-| runners   | **6 lyssnare**               | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` är inaktiverade (`systemctl enable --now` återaktiverar en)                                                                                                                                                                                                                                                                     |
+| resurs    | värde                                   | vad det innebär för schemaläggningen                                                                                                                                                                                                                                                                                                                                        |
+| --------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 kärnor**                   | en Turbopack produktionsuppbyggnad nådde en topp på 49 GB uncapped (`tests/unit/ci-build-bundler-webpack.test.ts`); nästa 16.3.8 innehåller kompileringsfasen enbart ~ 40 GB (36 GB RSS i `next-build` plus 17 lastararbetare vid 3 GB, uppmätt 2026-10-18); ett webbpaket byggt på ~ 14–16 GB. En Turbopack + ett webbpaket byggs ihop; två Turbopack -byggen gör det inte |
+| byta      | 16 GB                                   | `omniroute-113-5` körs med swap off (`MemorySwapMax=0`) så en skenande konstruktion klipps vid dess lock istället för att byta lådan                                                                                                                                                                                                                                        |
+| `/tmp`    | **12 GB tmpfs = RAM**                   | allt som placeras där använder minne; kvarlämnade filer rensas efter 3 h                                                                                                                                                                                                                                                                                                    |
+| CPU       | belastning 60 på 32 kärnor observerades | före kvoterna svälter en Turbopack byggd (~ 1166 % CPU) plus en täckningssvit på samma box de andra lyssnarnas hjärtslag (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                              |
+| löpare    | **7 lyssnare** (2026-10-28)             | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` bär också `omni-build`; `omniroute-113-3/-4/-8` raderades från repan (2026-10-28)                                                                                                                                                                                                                                    |
 
-Gränserna finns i varje enhets `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
-(tidigare värden sparades som `override.conf.bak-20261018`) och tillämpades live med
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ingen omstart, så inget
-pågående jobb påverkades. Etiketterna ändras också live via runners-API:t
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`).
+Gränserna finns i varje enhets `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` (tidigare värden behölls som `override.conf.bak-20261018`) och tillämpades live med `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ingen omstart, så inget körande jobb berördes. Etiketter ändras genom löparna API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), även live.
 
 ## Installera rensningsskriptet (en gång, på maskinen)
 
@@ -42,7 +32,7 @@ pågående jobb påverkades. Etiketterna ändras också live via runners-API:t
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): var 30:e minut, logga till /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` krävs: rensningsskriptet verifierar att en sökväg är inaktiv med en ögonblicksbild av öppna
@@ -116,8 +106,16 @@ taget, endast när den är inaktiv**, med inaktivitetskontrollen och omstarten i
   hade `MemoryHigh=4G` fram till 2026-10-18 — promptfoo-bygget återtog minne under hela sin 54 minuter långa
   körning där; 8 GB eliminerar strypningen.
 - **Färre lyssnare avsiktligt.** Fyra OmniRoute-enheter inaktiverades 2026-08-29 — varje extra
-  lyssnare är ytterligare en konsument av minnesbudgeten ovan. Vaktmästarens tak är 6 (`MAX_ACTIVE_RUNNERS=6` i cron): den räknar
-  varje `Runner.Listener` på servern, och OmniHeuris + OmniMind lägger till två utöver våra fyra.
+  lyssnare är ytterligare en konsument av minnesbudgeten ovan. Vaktmästarens tak är 8 (`MAX_ACTIVE_RUNNERS=8` i cron): den räknar
+  varje `Runner.Listener` på servern, och OmniHeuris + OmniMind lägger till två utöver våra fem.
+- **Unit- och Vitest-jobb stannar värdbaserade.** `ci.yml` skickar sina unit-shards och Vitest-jobbet till
+  `[self-hosted, omni-ci]` endast när repovariabeln `vars.USE_VPS_TEST_RUNNER` är
+  `true`, och då bara för `pull_request`-körningar från samma repo; forkar, `merge_group` och pushar
+  stannar på `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Variabeln är
+  `false`. Den 2026-10-28 tog tre `omni-ci`-lyssnare med 4 kärnor 250–270 s för `npm ci`, och varje
+  unit-shard nådde jobbgränsen på 30 minuter, mot ~634 s för en värdbaserad shard, med serverns last på
+  17–24. Lyssnarna togs bort. Slå inte på variabeln igen utan lyssnare dimensionerade för
+  en unit-shard.
 - **Rensa aldrig `/tmp` eller `_work` manuellt medan någon runner är upptagen.** En
   kontroll följd av borttagning med ett mellanrum mellan de två gjorde att ett aktivt byggjobb förlorade sin
   `_work` 2026-08-27. Vaktmästaren utför kontrollen och borttagningen i ett enda steg;
@@ -131,8 +129,10 @@ taget, endast när den är inaktiv**, med inaktivitetskontrollen och omstarten i
 
 ## Värdbaserad kö (GitHub-värdbaserade körmiljöer)
 
-Kontot har **Pro**-planen: **40 samtidiga värdbaserade jobb**, som delas av varje PR-kontroll,
-varje arbetsflöde som utlöses av en push och CodeQL:s standardkonfiguration. Uppmätt 2026-10-18 under en
+Repot tillhör organisationen `cheaper-inference`, på **Team**-planen: **60
+samtidiga värdbaserade jobb**, som delas av varje repo i organisationen, varje PR-kontroll,
+varje arbetsflöde som utlöses av en push och CodeQL:s standardkonfiguration. Siffrorna nedan uppmättes på
+**Pro**-planen (40 samtidiga värdbaserade jobb). Uppmätt 2026-10-18 under en
 sammanslagningskampanj (~10 sammanslagningar/timme på `release/v3.8.52`): **2 500 arbetsflödeskörningar skapades under
 24 timmar**, 44 pushar till grenen under 6 timmar, **106 värdbaserade jobb köades** medan PR-kontroller väntade i
 timmar och PR:er slogs samman utan dem. Nio arbetsflöden utlöstes vid varje push till grenen:

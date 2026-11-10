@@ -201,6 +201,12 @@ procesu.
 | `/api/providers/health-autopilot/actions` | Izpilda autopilota koriģējošās darbības                                             |
 | `/api/settings/obsidian`                  | Ģenerē atkārtoti izmantojamus WebDAV akreditācijas datus jebkurai glabātuves saknei |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                        |
+| `/api/cli-tools/apply`                    | Pārraksta operatora CLI konfigurāciju resursdatorā                                  |
+| `/api/cli-tools/guide-settings`           | Raksta pēc ceļvežiem veidotus CLI konfigurācijas failus                             |
+| `/api/cli-tools/hermes-agent-settings`    | Raksta Hermes aģenta konfigurāciju                                                  |
+| `/api/cli-tools/backups`                  | Atjauno un dzēš CLI konfigurācijas rezerves kopijas                                 |
+| `/api/log-export`                         | Sūta izsaukumu žurnālus uz konfigurētu galamērķi                                    |
+| `/api/restart`                            | Pārstartē servera procesu                                                           |
 
 **Atbilde pārkāpuma gadījumā:** `401 Authentication required`
 

@@ -198,6 +198,12 @@ sulgeda.
 | `/api/providers/health-autopilot/actions` | Käivitab autopiloodi parandustoimingud                                         |
 | `/api/settings/obsidian`                  | Väljastab korduskasutatavad WebDAV-mandaadid mis tahes hoidla juurkausta jaoks |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                   |
+| `/api/cli-tools/apply`                    | Kirjutab operaatori hosti CLI-seadistuse üle                                   |
+| `/api/cli-tools/guide-settings`           | Kirjutab juhendipõhiseid CLI-seadistusfaile                                    |
+| `/api/cli-tools/hermes-agent-settings`    | Kirjutab Hermes-agendi seadistuse                                              |
+| `/api/cli-tools/backups`                  | Taastab ja kustutab CLI-seadistuse varukoopiaid                                |
+| `/api/log-export`                         | Saadab kõnelogid seadistatud sihtkohta                                         |
+| `/api/restart`                            | Taaskäivitab serveriprotsessi                                                  |
 
 **Vastus rikkumise korral:** `401 Authentication required`
 

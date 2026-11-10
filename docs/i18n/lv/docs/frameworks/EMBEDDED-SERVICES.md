@@ -5,8 +5,8 @@
 ---
 
 > **Versija:** v3.8.44
-> **Pēdējoreiz atjaunināts:** 2026-09-16
-> **Mērķauditorija:** Inženieri, kuri pievieno, uztur vai atkļūdo iegultos pakalpojumus (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Pēdējoreiz atjaunināts:** 2026-10-28
+> **Mērķauditorija:** Inženieri, kas pievieno, uztur vai atkļūdo iegultos pakalpojumus (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Iegultie pakalpojumi ir lokāli instalēti blakusprocesu rīki, kurus OmniRoute instalē, pārrauga un
 padara pieejamus kā pilnvērtīgus maršrutēšanas mērķus. Atšķirībā no ārējiem pakalpojumu sniedzējiem (kuri ir sasniedzami internetā,
@@ -31,7 +31,7 @@ izmantojot API atslēgas), iegultie pakalpojumi darbojas tajā pašā datorā, k
 
 ### Kāpēc iegultie pakalpojumi?
 
-Ir iegulti septiņi pakalpojumi:
+Ir iegulti astoņi pakalpojumi:
 
 | Pakalpojums     | npm pakotne                                 | Noklusējuma ports | Mērķis                                                                                                                                                                                                                                                                                                                                                                                                  |
 | --------------- | ------------------------------------------- | :---------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Ir iegulti septiņi pakalpojumi:
 | **Dario**       | `@askalf/dario`                             |       3456        | Claude abonementa starpniekserveris — CLIProxyAPI alternatīva/rezerves risinājums Claude-Code formāta datplūsmai; ievadītā atslēga kļūst par `DARIO_ADMIN_TOKEN`, kas ierobežo piekļuvi tā `/admin/*` OAuth vadības plaknei                                                                                                                                                                             |
 | **open-wa**     | `@open-wa/wa-automate`                      |       8323        | WhatsApp Web automatizācija (bezgalvas Chromium, izmantojot Puppeteer). Tiek pārvaldīts tikai dzīves cikls — tas nav maršrutēšanas mērķis.                                                                                                                                                                                                                                                              |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                        |       20135       | Uzvedņu saspiešanas blakuspakalpojums — īsts LLMLingua-2 ONNX modelis (Microsoft algoritma JS/TS ports). `open-sse/services/compression/engines/llmlingua/index.ts` nosūta `/compress` pieprasījumus tam, izmantojot HTTP, un, ja blakuspakalpojums nedarbojas, pārslēdzas uz procesā iebūvēto darbinieka pavediena aizmugursistēmu. Tiek pārvaldīts tikai dzīves cikls — tas nav maršrutēšanas mērķis. |
+| **sing-box**    | GitHub laidiena binārais fails (`singbox`)  |       20140       | TPROXY palīgprocess, kas nodrošina `applyTproxy()` caurspīdīgā starpniekservera pārtveršanu (`src/mitm/tproxy/setup.ts`). Instalētājs lejupielādē fiksēto laidienu un pārbauda kontrolsummu. Tiek pārvaldīts tikai dzīves cikls: tas nav maršrutēšanas mērķis un nepārsūta LLM pieprasījumus.                                                                                                           |
 
-Visi septiņi izmanto vienu un to pašu pārraudzības modeli:
+Visi astoņi izmanto vienādu pārraudzības modeli:
 
 - OmniRoute tos instalē mapē `DATA_DIR/services/{name}/` (izolēti no paša OmniRoute `package.json`)
 - OmniRoute tos palaiž kā bērnprocesus un uzrauga
@@ -579,7 +580,27 @@ aizmugursistēmas risinājums (`./worker.ts`).
 
 ---
 
-### 4.8 Reversais starpniekserveris (9Router informācijas paneļa iegulšana)
+### 4.8 sing-box galapunkti (8 maršruti)
+
+sing-box galapunktu struktūra ir tāda pati kā Mux: nav maršruta `rotate-key` un nav API atslēgas ievietošanas (`needsApiKey: false` failā `bootstrap.ts`). Tiek pārvaldīts tikai dzīves cikls; tas nekad nav maršrutēšanas vai LLM nodrošinātājs. `install()` lejupielādē oficiālā GitHub laidiena bināro failu (`SagerNet/sing-box`) fiksētajai versijai (`SINGBOX_PINNED_VERSION` failā `src/lib/services/installers/singbox.ts`) un pirms ierakstīšanas diskā pārbauda tā SHA256 pret tajā pašā failā iekļauto kontrolsummu. Jebkuras citas versijas pieprasījums tiek noraidīts.
+
+| Metode | Ceļš                                         | Apraksts                                                                                        |
+| ------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Lejupielādēt un pārbaudīt fiksēto sing-box laidienu                                             |
+| `POST` | `/api/services/singbox/start`                | Palaist sing-box (`sing-box run -c config.json`)                                                |
+| `POST` | `/api/services/singbox/stop`                 | Apturēt sing-box                                                                                |
+| `POST` | `/api/services/singbox/restart`              | Restartēt sing-box                                                                              |
+| `POST` | `/api/services/singbox/update`               | Atkārtoti pārbaudīt vai pārinstalēt fiksēto laidienu                                            |
+| `GET`  | `/api/services/singbox/status`               | Pašreizējais statuss un DB statuss                                                              |
+| `POST` | `/api/services/singbox/auto-start`           | Ieslēgt vai izslēgt automātisko palaišanu                                                       |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Ieslēgt vai izslēgt automātisko restartēšanu pārņemtam, jau pastāvošam procesam                 |
+| `GET`  | `/api/services/singbox/logs`                 | Sekot žurnāla jaunākajiem ierakstiem ar SSE, izmantojot kopīgo dinamisko maršrutu `[name]/logs` |
+
+**TPROXY savienojums:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) ieraksta `config.json` un palaiž pārraugu, pirms `applyTproxy()` uzstāda TPROXY ugunsmūra noteikumus. Ja pārrauga nav vai tas nesasniedz stāvokli `running`, tagad tas tiek reģistrēts kļūdas līmenī, nevis kļūme tiek noklusēta. Operators tādējādi var noteikt, ka TPROXY noteikumi ir piemēroti bez strādājoša klausītāja aiz tiem.
+
+---
+
+### 4.9 Reversais starpniekserveris (9Router informācijas paneļa iegulšana)
 
 Informācijas panelis iegulst 9Router tīmekļa lietotāja saskarni iframe elementā,
 izmantojot iekšēju reverso starpniekserveri šajā adresē:

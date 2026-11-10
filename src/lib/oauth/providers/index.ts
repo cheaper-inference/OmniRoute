@@ -24,11 +24,12 @@ import { cursor } from "./cursor";
 import { trae } from "./trae";
 import { kilocode } from "./kilocode";
 import { cline } from "./cline";
-import { devinDesktop } from "./devin-desktop";
+import { devinCli, devinDesktop } from "./devin-desktop";
 import { grokCli } from "./grok-cli";
 import { xaiOauth } from "./xai-oauth";
 import { openference } from "./openference";
 import { codebuddyCn } from "./codebuddy-cn";
+import { freebuff } from "./freebuff";
 import { codebuddyIntl } from "./codebuddy-intl";
 import { workbuddy } from "./workbuddy";
 import { zed } from "./zed";
@@ -56,14 +57,15 @@ export const PROVIDERS = {
   // subscription) models. See registry/clinepass/index.ts.
   clinepass: cline,
   "devin-desktop": devinDesktop,
-  // Devin CLI shares the same imported token format and upstream credential contract.
-  "devin-cli": devinDesktop,
+  // Devin CLI shares the imported token format and config, but not the browser sign-in.
+  "devin-cli": devinCli,
   // grok-cli carries BOTH the browser PKCE flow and the paste-token import flow
   // under this one entry (#7013) — see grok-cli.ts's mapTokens for the dispatch.
   "grok-cli": grokCli,
   "xai-oauth": xaiOauth,
   openference,
   "codebuddy-cn": codebuddyCn,
+  freebuff,
   "codebuddy-intl": codebuddyIntl,
   // WorkBuddy is a separate Tencent product from CodeBuddy CN (own host, own
   // account system, own catalog). It shares the plugin-auth protocol shape, so

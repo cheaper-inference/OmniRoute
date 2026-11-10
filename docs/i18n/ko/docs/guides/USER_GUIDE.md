@@ -118,17 +118,17 @@
 
 ---
 
-## 📖 제공자 설정
+## 📖 프로바이더 설정
 
-CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **대시보드 → 제공자 → 파일에서 가져오기**를 사용하세요. 열은 위치에 따라 구분됩니다(`provider,name,apiKey,baseUrl,priority`). `provider`는 관리형 제공자 또는 호환 노드로 이미 존재해야 합니다. [CSV 또는 JSON 파일에서 제공자 가져오기](../providers/CSV-IMPORT.md)를 참조하세요.
+CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **Dashboard → Providers → Import from file**을 사용하세요. 열은 위치에 따라 지정됩니다(`provider,name,apiKey,baseUrl,priority`). `provider`는 관리형 프로바이더 또는 호환 가능한 노드로 이미 존재해야 합니다. [CSV 또는 JSON 파일에서 프로바이더 가져오기](../providers/CSV-IMPORT.md)를 참조하세요.
 
-### 🔐 구독 제공자
+### 🔐 구독 프로바이더
 
 #### Claude Code (Pro/Max)
 
 ```bash
-대시보드 → 제공자 → Claude Code 연결
-→ OAuth 로그인 → 자동 토큰 갱신
+Dashboard → Providers → Connect Claude Code
+→ OAuth 로그인 → 토큰 자동 갱신
 → 5시간 + 주간 할당량 추적
 
 모델:
@@ -137,17 +137,20 @@ CSV 또는 JSON 파일에서 API 키 연결을 일괄 추가하려면 **대시�
   cc/claude-haiku-4-5-20251001
 ```
 
-**전문가 팁:** 복잡한 작업에는 Opus를, 속도가 중요할 때는 Sonnet을 사용하세요. OmniRoute는 모델별 할당량을 추적합니다!
+**Pro 팁:** 복잡한 작업에는 Opus를, 속도에는 Sonnet을 사용하세요. OmniRoute는 모델별로 할당량을 추적합니다!
 
-OmniRoute 호스트에 브라우저가 없나요? Claude Code에 로그인된 환경 어디에서든 `claude setup-token`을 실행하고 1년 유효 토큰을 **설정 토큰** 탭에 붙여 넣으세요. [설정 토큰으로 Claude Code 사용하기](../providers/CLAUDE_CODE_SETUP_TOKEN.md)를 참조하세요.
+OmniRoute 호스트에 브라우저가 없나요? Claude Code가 로그인된 어느 곳에서든 `claude setup-token`을 실행한 다음, 1년 토큰을 **Setup Token** 탭에 붙여넣으세요. [설정 토큰으로 Claude Code 사용하기](../providers/CLAUDE_CODE_SETUP_TOKEN.md)를 참조하세요.
 
-Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 노력을 유지합니다. Haiku 모델은 `max` 노력 단계를 허용하지 않으므로 OmniRoute는 요청을 업스트림으로 보내기 전에 높은 사고 예산으로 하향 조정합니다.
+Claude 및 Claude Code 호환 라우트는 Opus 및 Sonnet
+모델에 대해 `max` 사고 노력을 유지합니다. Haiku 모델은 `max` 노력 단계를
+허용하지 않으므로 OmniRoute는 업스트림으로 전송하기 전에 해당 요청을 높은 사고
+예산으로 낮춥니다.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-대시보드 → 제공자 → Codex 연결
-→ OAuth 로그인(포트 1455)
+Dashboard → Providers → Connect Codex
+→ OAuth 로그인 (포트 1455)
 → 5시간 + 주간 초기화
 
 모델:
@@ -160,9 +163,9 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
 #### GitHub Copilot
 
 ```bash
-대시보드 → 제공자 → GitHub 연결
+Dashboard → Providers → Connect GitHub
 → GitHub를 통한 OAuth
-→ 매월 초기화(매월 1일)
+→ 월간 초기화 (매월 1일)
 
 모델:
   gh/gpt-5.5
@@ -172,47 +175,49 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 저렴한 제공자
+**AI Credits(토큰 기반 청구).** GitHub가 계정에 대해 `credits_used`를 보고하면 Provider Limits 카드에 현재 청구 기간 동안 사용한 크레딧을 표시하는 **AI Credits** 행이 나타납니다. 무제한 조직 요금제에서도 표시됩니다.
+
+**로컬 AI Credits 한도.** GitHub 연결을 편집하고 **청구 기간별 AI Credits 한도**(`providerSpecificData.githubCreditLimit`)를 설정하세요. 비워 두면 비활성화되며, `0`으로 설정하면 항상 해당 연결을 건너뜁니다. 마지막 사용량 측정값이 한도 이상이면 계정 선택에서 해당 연결을 건너뛰고, 할당량 정책 차단과 동일하게 라우팅이 다른 연결로 대체됩니다. 이 확인은 주기적인 할당량 새로 고침에서 이미 수집하는 사용량을 읽으므로 요청 경로에서 GitHub를 호출하지 않습니다. 또한 fail-open 방식으로 동작합니다. 즉, 측정값이 없거나 오래된 경우(15분 초과 또는 이미 초기화된 청구 기간의 측정값)에는 연결을 차단하지 않습니다. 이는 로컬 안전장치이며, **지출 한도를 보장하는 기능이 아닙니다**. GitHub의 보고 지연, 새로 고침 간격, 진행 중인 요청 및 OmniRoute 외부에서 발생한 사용량으로 인해 한도를 초과할 수 있습니다. 확실한 상한이 필요하면 GitHub 자체 지출 제어 기능을 사용하세요.
+
+### 💰 저렴한 프로바이더
 
 #### GLM-4.7 (매일 초기화, $0.6/1M)
 
 1. 가입: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan에서 API 키 발급
-3. 대시보드 → API 키 추가: 제공자: `glm`, API 키: `your-key`
+2. Coding Plan에서 API 키 받기
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**사용:** `glm/glm-4.7` — **전문가 팁:** Coding Plan은 1/7의 비용으로 3배의 할당량을 제공합니다! 매일 오전 10시에 초기화됩니다.
+**사용:** `glm/glm-4.7` — **Pro 팁:** Coding Plan은 비용의 1/7로 3배의 할당량을 제공합니다! 매일 오전 10:00에 초기화됩니다.
 
-#### MiniMax M2.1 (5시간마다 초기화, $0.20/1M)
+#### MiniMax M2.1 (5시간 초기화, $0.20/1M)
 
 1. 가입: [MiniMax](https://www.minimax.io)
-2. API 키 발급 → 대시보드 → API 키 추가
+2. API 키 받기 → Dashboard → Add API Key
 
-**사용:** `minimax/MiniMax-M2.1` — **전문가 팁:** 긴 컨텍스트(1M 토큰)를 위한 가장 저렴한 옵션입니다!
+**사용:** `minimax/MiniMax-M2.1` — **Pro 팁:** 긴 컨텍스트(100만 토큰)에 가장 저렴한 옵션입니다!
 
 #### Kimi K2 (월 $9 정액)
 
 1. 구독: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API 키 발급 → 대시보드 → API 키 추가
+2. API 키 받기 → Dashboard → Add API Key
 
-**사용:** `kimi/kimi-k2.5` — **전문가 팁:** 10M 토큰에 월 $9 정액이므로 실질 비용은 $0.90/1M입니다!
+**사용:** `kimi/kimi-k2.5` — **Pro 팁:** 1,000만 토큰에 월 $9 정액이므로 실질 비용은 $0.90/1M입니다!
 
 #### Baidu Qianfan / ERNIE
 
 1. 가입: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API 키 생성 → 대시보드 → API 키 추가: 제공자: `qianfan`
+2. Qianfan API 키 생성 → Dashboard → Add API Key: Provider: `qianfan`
 
 **사용:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` 또는 다른 Qianfan OpenAI 호환 모델 ID.
 
-### 🆓 무료 제공자
+### 🆓 무료 프로바이더
 
-인증이 필요 없는 무료 제공자의 제공자 페이지에는 **인증 필요 없음** 옆에 스위치가 있습니다.
-스위치를 끄면 해당 제공자가 비활성화되고, 제공자 구성됨/축약 보기에서 제거되며,
-해당 모델도 `/v1/models`에서 제거됩니다.
+인증이 필요 없는 무료 프로바이더에는 프로바이더 페이지의 **No authentication required** 옆에 전환 스위치가 있습니다. 이 스위치를 끄면 해당 프로바이더가 비활성화되고, Providers 구성/간단 보기에서 제거되며, `/v1/models`에서 해당 모델이 제거됩니다.
 
 #### Qoder (무료 모델 9개)
 
 ```bash
-대시보드 → Qoder 연결 → OAuth 로그인 → 액세스에는 현재 제공자 제한이 적용됨
+Dashboard → Connect Qoder → OAuth 로그인 → 현재 프로바이더 한도에 따라 액세스 가능
 
 모델: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +225,7 @@ Claude 및 Claude Code 호환 경로는 Opus와 Sonnet 모델의 `max` 사고 �
 #### Kiro (Claude 무료)
 
 ```bash
-대시보드 → Kiro 연결 → AWS Builder ID 또는 Google/GitHub → 월 약 50크레딧
+Dashboard → Connect Kiro → AWS Builder ID 또는 Google/GitHub → 월 약 50크레딧
 
 모델: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -342,19 +347,19 @@ API 키: [대시보드에서 가져오기]
 ```bash
 npm install -g omniroute
 
-# 구성 디렉터리 생성
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env 파일 생성(.env.example 참조)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 서버 시작
+# Start server
 omniroute
-# 또는 사용자 지정 포트 사용:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI는 `~/.omniroute/.env` 또는 `./.env`에서 `.env`를 자동으로 로드합니다.
+CLI `~/.omniroute/.env` 또는 `./.env` 에서 `.env` 자동으로 로드합니다.
 
 ### 트레이 모드
 
@@ -612,17 +617,17 @@ post_install() {
 <details>
 <summary><b>사용 가능한 모든 모델 보기</b></summary>
 
-> 아래 목록은 v3.8.0의 `open-sse/config/providerRegistry.ts`를 기반으로 선별되었습니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다. 전체 실시간 카탈로그를 보려면 **Dashboard → Providers → [provider] → Available Models**를 열거나 `GET /api/models/catalog`을 호출하세요.
+> 아래 목록은 v3.8.0의 `open-sse/config/providerRegistry.ts`에서 선별한 것입니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다. 전체 실시간 카탈로그를 보려면 **Dashboard → Providers → [provider] → Available Models**를 열거나 `GET /api/models/catalog`을 호출하세요.
 >
-> 제공자의 기본 제공 목록이 최신 상태와 달라진 경우, 해당 페이지에서 **Import from /models**를 사용하거나 **Auto-Sync**를 활성화하여 업스트림의 실시간 카탈로그를 가져오세요. 이는 LLM7.io(`gemini-3.1-flash-lite`) 및 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 v3.8.50에서 검증되었습니다. 같은 테스트 과정에서 Pollinations의 익명 액세스는 여전히 업스트림 제한을 받았습니다.
+> 제공업체의 기본 제공 목록이 최신 상태와 달라진 경우, 해당 페이지에서 **Import from /models**를 사용하거나 **Auto-Sync**를 활성화하여 실시간 업스트림 카탈로그를 가져오세요. 이는 v3.8.50에서 LLM7.io(`gemini-3.1-flash-lite`) 및 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 확인되었습니다. 동일한 테스트 과정에서 Pollinations 익명 액세스는 업스트림 제한 상태로 유지되었습니다.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ 추론 노력 수준: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ 추론 단계: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — 무료 OAuth: **Dashboard → Providers → Kiro → Available Models** 아래에 표시되는 실시간 카탈로그를 사용하세요. 이용 가능 여부는 계정 및 요금제에 따라 달라집니다.
+**Kiro (`kr/`)** — 무료 OAuth: **Dashboard → Providers → Kiro → Available Models**에 표시되는 실시간 카탈로그를 사용하세요. 사용 가능 여부는 계정 및 요금제에 따라 달라집니다.
 
 **Qoder (`if/`)** — 무료 OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,7 +635,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 월 $9 정액제 또는 사용량 기반: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 월 $9 정액 또는 사용량 기준: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API 키: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -638,29 +643,29 @@ post_install() {
 
 **xAI (`xai/`)** — Grok 네이티브: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU 호스팅: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU 호스팅: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — 검색 보강형: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — 검색 보강: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — 오픈 소스: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (무료), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — 빠른 추론: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — 고속 추론: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — 웨이퍼 스케일: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — 웨이퍼 규모: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG 중심: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — 엔터프라이즈: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — 엔터프라이즈: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google에서 API 키별로 실시간 동기화되므로 정적 목록은 없습니다. **Dashboard → Providers**에서 키를 연결한 다음 **Available Models**를 사용하여 현재 카탈로그를 가져오세요(예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google에서 API 키별로 실시간 동기화되며, 정적 목록은 없습니다. **Dashboard → Providers**에서 키를 연결한 다음 **Available Models**를 사용하여 현재 카탈로그를 가져오세요(예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**기타 호환 제공자**(일부): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock`(`aws-bedrock`을 통해), `azure-ai`, `openrouter`(패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 제공자는 `providerRegistry.ts`에서 자체 모델 목록을 관리하며, 제공자가 `/models` 엔드포인트를 노출하는 경우 자동으로 동기화할 수 있습니다.
+**기타 호환 제공업체**(일부): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock`(`aws-bedrock`를 통해), `azure-ai`, `openrouter`(패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 제공업체는 `providerRegistry.ts`에서 자체 모델 목록을 관리하며, 제공업체가 `/models` 엔드포인트를 제공하는 경우 자동으로 동기화할 수 있습니다.
 
-**모델 ID 참고:** OmniRoute는 제공자 네이티브 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점으로 구분된 버전이 포함되는 이유는 업스트림 API가 해당 형식을 요구하기 때문입니다. 모델이 위에 나열되어 있지 않은 경우 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`을 호출하여 이용 가능 여부를 확인하세요.
+**모델 ID 참고:** OmniRoute는 제공업체 네이티브 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점이 포함된 버전이 있는 이유는 업스트림 API가 해당 형식을 요구하기 때문입니다. 모델이 위에 나열되어 있지 않다면 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`을 호출하여 사용 가능 여부를 확인하세요.
 
 </details>
 
@@ -725,6 +730,27 @@ prefix: "<prefix>"는 예약된 공급자 접두사입니다. 다른 접두사�
 공급자나 해당 자격 증명을 언급하는 오류와 함께 실패하는 경우, 노드의 접두사가 예약되어
 있는지 확인하세요. 이 규칙이 도입되기 전에 저장된 노드는 그대로 유지되지만 해당 접두사는
 기본 제공 공급자로 라우팅됩니다. 노드를 편집하고 새 접두사를 지정하세요.
+
+#### 연결별 게이트웨이 옵션
+
+이 키들은 연결의 `providerSpecificData`에 포함됩니다(예:
+`PUT /api/providers/{id}` 사용):
+
+- `toolNameMaxLength`(정수, 1–1024) — 게이트웨이가 긴 도구 이름을 거부하는 OpenAI 채팅 형식 호환 연결에 사용합니다. 긴 이름은 짧은 별칭으로 전송되고 응답에서 원래 이름으로 복원됩니다.
+- `quotaEndpoint` — 게이트웨이의 할당량/크레딧 엔드포인트로, 대시보드의 할당량 표시줄과 할당량 인식 라우팅에 사용하기 위해 읽습니다. OpenAI 및 Anthropic 호환 연결 모두에서 작동하며, 전체 구조는 `open-sse/services/usage/openaiCompatible.ts`에 문서화되어 있습니다.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### OmniRoute 피어 체이닝
 
@@ -1291,11 +1317,11 @@ OmniRoute는 클라우드 코딩 에이전트(**OpenAI Codex Cloud**, **Devin**,
 
 ---
 
-## 🛠️ 프로그래밍 방식 관리
+## 🛠️ 프로그래밍 방식의 관리
 
-**`manage` 범위가 지정된 Bearer 키**를 사용하여 HTTP를 통해 모든 OmniRoute 리소스(프로바이더, 콤보, 키, 설정)를 관리할 수 있습니다.
+**`manage` 범위가 있는 Bearer 키를 사용하여 HTTP를 통해 모든 OmniRoute 리소스(프로바이더, 콤보, 키, 설정)를 관리할 수 있습니다.**
 
-**Dashboard → API Keys → New Key → Scope: manage**에서 키를 생성한 후 다음과 같이 사용하세요.
+**Dashboard → API Keys → New Key → Scope: manage**에서 키를 생성한 다음:
 
 ```bash
 # 프로바이더 목록 조회
@@ -1320,7 +1346,7 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-전체 엔드포인트 목록과 요청/응답 스키마는 [API_REFERENCE.md](../reference/API_REFERENCE.md)를 참조하세요.
+전체 엔드포인트 카탈로그와 요청/응답 스키마는 [API_REFERENCE.md](../reference/API_REFERENCE.md)를 참조하세요.
 
 ---
 

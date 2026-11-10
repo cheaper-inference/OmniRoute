@@ -16,11 +16,11 @@ kompiuteryje. Kai įrankis tai palaiko, API raktas nurodomas naudojant aplinkos 
 Komandos, kurios išsaugo vietinį įrankio aplinkos failą, pažymėtos toliau.
 
 Taip pat yra universali paleidyklė — `omniroute run <target>` — kuri paleidžia
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` arba `gemini` su
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` arba `whycodes` su
 įterptais tinkamais aplinkos kintamaisiais, visiškai neįrašydama jokios konfigūracijos. Paskirties programos ir jų
 alternatyvūs pavadinimai gaunami iš kanoninio manifesto `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), o `omniroute completion` siūlo tuos pačius
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), o `omniroute completion` siūlo tuos pačius
 iš manifesto gautus paskirties programų pavadinimus. Ankstesnės atskirų įrankių paleidyklės —
 `omniroute launch` (Claude Code) ir `omniroute launch-codex` (Codex) — tebėra
 prieinamos.
@@ -83,7 +83,8 @@ serverio, o konfigūracija įrašoma vietoje.
 | `omniroute setup-aider`    | Aider                            | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + išspausdina aplinkos konfigūravimo instrukcijas                                                                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Abu                    |
 | `omniroute setup-qwen`     | Qwen Code                        | `~/.qwen/settings.json` — V4 `modelProviders.openai` masyvas + `OMNIROUTE_API_KEY` faile `~/.qwen/.env`                                                                                                           | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Abu                    |
 | `omniroute setup-5dive`    | 5dive (agentų parkas)            | Nieko po `$HOME` — naudojant `5dive agent auth set`, sukuriamas 5dive **autentifikavimo profilis** (`/var/lib/5dive/auth-profiles/<name>/`); skirta tik root naudotojui, vykdoma parko pagrindiniame kompiuteryje | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Abu                    |
-| `omniroute run <target>`   | Vykdymo paleidimas (bendrasis)   | Nieko — paleidžiama `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` su tinkama aplinka ir argumentais; Qwen ir Gemini naudoja laikiną izoliuotą namų katalogą                                         | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Abu                    |
+| `omniroute setup-whycodes` | WhyCodes                         | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); kelias yra `$WHYCODES_HOME/config.toml` arba `~/.whycodes/config.toml`                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Abu                    |
+| `omniroute run <target>`   | Vykdymo paleidimas (bendrasis)   | Nieko — paleidžiama `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` su tinkama aplinka ir argumentais; Qwen ir Gemini naudoja laikiną izoliuotą namų katalogą                              | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Abu                    |
 | `omniroute launch`         | Claude Code                      | Nieko — paleidžiama `claude`, įterpiant `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                                               | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Abu                    |
 | `omniroute launch-codex`   | OpenAI Codex CLI                 | Nieko — paleidžiama `codex`, įterpiant `omniroute` teikėją per `-c` vėliavėles                                                                                                                                    | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Abu                    |
 
@@ -99,14 +100,15 @@ Pastabos apie vėliavėles (patikrinta komandų šaltinio kode):
   sistemos. Pasiekiama kiekvienoje `setup-*` komandoje, **išskyrus** `setup-cursor`
   (ji niekada neįrašo failo).
 - `--model <id>` — būtina (arba pasirenkama interaktyviai) įrankiams, kurie neturi
-  automatinio modelių aptikimo: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Šie įrankiai
+  automatinio modelių aptikimo: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Šie įrankiai
   taip pat priima `--yes`, skirtą neinteraktyviam vykdymui (tuomet būtina nurodyti `--model`).
   `setup-opencode` priima `--model`, kad nustatytų numatytąjį aukščiausio lygio modelį.
 - `--model <id>` komandoje `omniroute run` vadovaujasi manifeste kiekvienam tikslui apibrėžta konfigūracija
   (`bin/cli/cli-manifest.mjs`): **aider** gauna `--model openai/<id>`, o
   **opencode** — `--model omniroute/<id>` (priešdėlis pridedamas tik tada, kai ID
   jo dar neturi); **qwen** ir **gemini** gauna ID nepakeistą;
-  **claude** jį gauna per `ANTHROPIC_MODEL`, **goose** — per `GOOSE_MODEL`, o
+  **claude** jį gauna per `ANTHROPIC_MODEL`, **goose** — per `GOOSE_MODEL`,
+  **whycodes** naudojant `-P omniroute -m <id>`, o
   **codex** — per `-c model_providers.omniroute.*` argumentus. **Qwen yra vienintelis vykdymo
   tikslas, kuriam privaloma `--model`** — `omniroute run qwen` be jos baigia darbą
   kodu `2` ir pateikia aiškią klaidą.
@@ -276,18 +278,19 @@ OmniRoute pateikia su OpenAI suderinamą sąsają adresu `/v1`, su Anthropic sud
 o savąją Gemini sąsają — adresu `/v1beta`. Kiekviena integracija sukonfigūruota naudoti jos
 įrankio reikalaujamą formatą (patikrinta komandų šaltinio kode):
 
-| Integracija                                                                | Įrašomas bazinis URL | `/v1`?                                      |
-| -------------------------------------------------------------------------- | -------------------- | ------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | šakninis adresas     | Ne — Cline prideda `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | šakninis adresas     | Ne — Goose prideda kelią                    |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | šakninis adresas     | Ne — LiteLLM prideda `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | su `/v1`             | Taip                                        |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | su `/v1`             | Taip                                        |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | šakninis adresas     | Ne — Claude Code prideda `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | su `/v1`             | Taip                                        |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | su `/v1`             | Taip                                        |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | šakninis adresas     | Ne — SDK prideda `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` autentifikavimo profilyje)             | šakninis adresas     | Ne — Claude Code prideda `/v1/messages`     |
+| Integracija                                                                | Įrašomas bazinis URL | `/v1`?                                                       |
+| -------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------ |
+| `setup-cline` (`openAiBaseUrl`)                                            | šakninis adresas     | Ne — Cline prideda `/v1/chat/completions`                    |
+| `setup-goose` (`OPENAI_HOST`)                                              | šakninis adresas     | Ne — Goose prideda kelią                                     |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | šakninis adresas     | Ne — LiteLLM prideda `/v1/chat/completions`                  |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | su `/v1`             | Taip                                                         |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | su `/v1`             | Taip                                                         |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | šakninis adresas     | Ne — Claude Code prideda `/v1/messages`                      |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | su `/v1`             | Taip                                                         |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | su `/v1`             | Taip                                                         |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | šakninis adresas     | Ne — SDK prideda `/v1beta/models/…`                          |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` autentifikavimo profilyje)             | šakninis adresas     | Ne — Claude Code prideda `/v1/messages`                      |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | su `/v1`             | Taip — WhyCodes siunčia POST užklausas į `/chat/completions` |
 
 ---
 

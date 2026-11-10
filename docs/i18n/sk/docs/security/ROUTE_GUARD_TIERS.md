@@ -204,6 +204,12 @@ ukončiť proces servera.
 | `/api/providers/health-autopilot/actions` | Vykoná nápravné akcie autopilota                                                    |
 | `/api/settings/obsidian`                  | Vytvorí opakovane použiteľné prihlasovacie údaje WebDAV pre ľubovoľný koreň trezora |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                        |
+| `/api/cli-tools/apply`                    | Prepisuje konfiguráciu CLI operátora na hostiteľovi                                 |
+| `/api/cli-tools/guide-settings`           | Zapisuje konfiguračné súbory CLI podľa sprievodcov                                  |
+| `/api/cli-tools/hermes-agent-settings`    | Zapisuje konfiguráciu agenta Hermes                                                 |
+| `/api/cli-tools/backups`                  | Obnovuje a odstraňuje zálohy konfigurácie CLI                                       |
+| `/api/log-export`                         | Odosiela záznamy volaní do nakonfigurovaného cieľa                                  |
+| `/api/restart`                            | Reštartuje proces servera                                                           |
 
 **Odpoveď pri porušení:** `401 Authentication required`
 

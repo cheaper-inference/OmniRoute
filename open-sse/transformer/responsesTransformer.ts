@@ -10,6 +10,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { plaintextCollaborationFields } from "../translator/response/openai-responses/collaborationPlaintextMarker.ts";
 import { finalizeResponsesTerminalStatus } from "../translator/helpers/responsesTerminalStatus.ts";
+import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
 
 // #10223: threshold for detecting corrupted request_id fields. Normal
 // request IDs are <100 chars. DeepSeek's SSE encoder bug produces 200+
@@ -613,7 +614,8 @@ export function createResponsesApiTransformStream(
       };
 
       if (state.usage) {
-        response.usage = state.usage;
+        // Keep aggregation in upstream units; only emitted Responses usage includes cache writes.
+        response.usage = normalizeResponsesContextUsage(state.usage);
       }
 
       const eventType = finalizeResponsesTerminalStatus(response, state.finishReason);
@@ -800,9 +802,9 @@ export function createResponsesApiTransformStream(
 
                 if (state.inThinking && content) {
                   emitReasoningDelta(controller, content);
-                  // Pre-existing behaviour (unrelated to #8081): a still-open
-                  // textual <think> block ends this message's handling early.
-                  continue;
+                  // Keep processing this chunk: reasoning text can arrive in
+                  // the same delta as a tool call and/or finish_reason.
+                  content = "";
                 }
               }
 

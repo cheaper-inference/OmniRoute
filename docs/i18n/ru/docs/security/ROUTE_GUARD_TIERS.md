@@ -201,6 +201,12 @@ Tunnel, Tailscale, Ngrok), проверка loopback-интерфейса по-�
 | `/api/providers/health-autopilot/actions` | Выполняет корректирующие действия автопилота                                     |
 | `/api/settings/obsidian`                  | Выпускает повторно используемые учётные данные WebDAV для любого корня хранилища |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                     |
+| `/api/cli-tools/apply`                    | Перезаписывает конфигурацию CLI оператора на хосте                               |
+| `/api/cli-tools/guide-settings`           | Записывает файлы конфигурации CLI по руководствам                                |
+| `/api/cli-tools/hermes-agent-settings`    | Записывает конфигурацию агента Hermes                                            |
+| `/api/cli-tools/backups`                  | Восстанавливает и удаляет резервные копии конфигурации CLI                       |
+| `/api/log-export`                         | Отправляет журналы вызовов в настроенное место назначения                        |
+| `/api/restart`                            | Перезапускает серверный процесс                                                  |
 
 **Ответ при нарушении:** `401 Authentication required`
 

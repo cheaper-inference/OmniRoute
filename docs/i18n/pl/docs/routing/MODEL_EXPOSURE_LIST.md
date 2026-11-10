@@ -60,3 +60,15 @@ Eksport ustawień (`GET /api/settings/export-json`) zawiera obie tablice bez zmi
 pole ustawień — w przeciwieństwie do filtra eksportu kroków kombinacji w `hidePaidModels` nie występuje tutaj ryzyko
 ponownego wczytania: zablokowany identyfikator osadzony w wyeksportowanym kroku kombinacji jest jawnym wyborem routingu
 dokonanym przez operatora, a nie czymś, co należy usunąć na granicy eksportu.
+
+## Lista tylko modeli combo (`exposeCombosOnly`)
+
+Osobna opcja logiczna, również włączana jawnie i domyślnie `false`, dla wdrożeń, w których combo stanowią publiczną ofertę modeli, a dostawcy są wyłącznie zapleczem. Gdy ma wartość `true`, publiczna lista (`GET /v1/models`, `GET /v1` i pozostałe trasy wykrywania `/v1` oparte na `getUnifiedModelsResponse()`) zachowuje tylko wiersze z `owned_by: "combo"`: combo użytkownika oraz wbudowane combo `auto/*` (chyba że ukrywa je `hideAutoCombos`). Stosuje ten sam test wiersza co `catalogScope: "combos"` dla danego klucza, a własne filtry zezwoleń, zakazów i zakresu klucza nadal obowiązują dodatkowo.
+
+Przełącz ją w **Settings → Routing → Models API listing** albo przez `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Tak jak powyższe listy zmienia tylko prezentowanie dostępności:
+
+- jawny identyfikator `provider/model` nadal jest obsługiwany, a `GET /v1/models/{id}` nadal go rozpoznaje;
+- katalog panelu (`GET /api/models/catalog`, używany przez selektory modeli) nie jest zawężany;
+- opcja nie jest odzwierciedlana w pulach kandydatów `auto/*`, więc combo `auto/*` zachowują pełną pulę.

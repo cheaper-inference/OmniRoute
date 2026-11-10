@@ -118,41 +118,41 @@
 
 ---
 
-## 📖 ପ୍ରଦାନକାରୀ ସେଟଅପ୍
+## 📖 প্রোভাইডার সেটআপ
 
-ଏକ CSV କିମ୍ବା JSON ଫାଇଲ୍ରୁ ଏକାଥରେ ଅନେକ API-key ସଂଯୋଗ ଯୋଡ଼ିବାକୁ, **Dashboard → Providers → Import from file** ବ୍ୟବହାର କରନ୍ତୁ। ସ୍ତମ୍ଭଗୁଡ଼ିକ ସ୍ଥାନ-ଭିତ୍ତିକ (`provider,name,apiKey,baseUrl,priority`); `provider` ପୂର୍ବରୁ ଏକ ପରିଚାଳିତ ପ୍ରଦାନକାରୀ କିମ୍ବା ସୁସଙ୍ଗତ ନୋଡ୍ ଭାବେ ଉପଲବ୍ଧ ଥିବା ଆବଶ୍ୟକ। [CSV କିମ୍ବା JSON ଫାଇଲ୍ରୁ ପ୍ରଦାନକାରୀ ଆମଦାନୀ କରନ୍ତୁ](../providers/CSV-IMPORT.md) ଦେଖନ୍ତୁ।
+CSV বা JSON ফাইল থেকে একসঙ্গে API-কী সংযোগ যোগ করতে **ড্যাশবোর্ড → প্রোভাইডার → ফাইল থেকে ইম্পোর্ট** ব্যবহার করুন। কলামগুলোর অবস্থানক্রম হলো (`provider,name,apiKey,baseUrl,priority`); `provider` অবশ্যই আগে থেকেই একটি পরিচালিত প্রোভাইডার বা সামঞ্জস্যপূর্ণ নোড হিসেবে থাকতে হবে। দেখুন [CSV বা JSON ফাইল থেকে প্রোভাইডার ইম্পোর্ট করুন](../providers/CSV-IMPORT.md)।
 
-### 🔐 ସବ୍ସ୍କ୍ରିପ୍ସନ୍ ପ୍ରଦାନକାରୀ
+### 🔐 সাবস্ক্রিপশন প্রোভাইডার
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Connect Claude Code
-→ OAuth ଲଗ୍ଇନ୍ → ସ୍ୱୟଂଚାଳିତ ଟୋକନ୍ ରିଫ୍ରେଶ୍
-→ 5-ଘଣ୍ଟା + ସାପ୍ତାହିକ କୋଟା ଟ୍ରାକିଂ
+ড্যাশবোর্ড → প্রোভাইডার → Claude Code সংযুক্ত করুন
+→ OAuth লগইন → টোকেন স্বয়ংক্রিয় রিফ্রেশ
+→ ৫-ঘণ্টা + সাপ্তাহিক কোটা ট্র্যাকিং
 
-ମଡେଲ୍ଗୁଡ଼ିକ:
+মডেল:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**ପ୍ରୋ ଟିପ୍ପଣୀ:** ଜଟିଳ କାର୍ଯ୍ୟ ପାଇଁ Opus ଏବଂ ଦ୍ରୁତତା ପାଇଁ Sonnet ବ୍ୟବହାର କରନ୍ତୁ। OmniRoute ପ୍ରତ୍ୟେକ ମଡେଲ୍ର କୋଟା ଟ୍ରାକ୍ କରେ!
+**প্রো টিপ:** জটিল কাজের জন্য Opus এবং দ্রুততার জন্য Sonnet ব্যবহার করুন। OmniRoute প্রতিটি মডেল অনুযায়ী কোটা ট্র্যাক করে!
 
-OmniRoute ହୋଷ୍ଟ୍ରେ ବ୍ରାଉଜର୍ ନାହିଁ? Claude Code ଲଗ୍ଇନ୍ ଥିବା ଯେକୌଣସି ସ୍ଥାନରେ `claude setup-token` ଚଲାନ୍ତୁ ଏବଂ ଏକ-ବର୍ଷିଆ ଟୋକନ୍କୁ **Setup Token** ଟ୍ୟାବ୍ରେ ପେଷ୍ଟ୍ କରନ୍ତୁ। [ଏକ ସେଟଅପ୍ ଟୋକନ୍ ସହିତ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ଦେଖନ୍ତୁ।
+OmniRoute হোস্টে ব্রাউজার না থাকলে, Claude Code-এ লগইন করা যেকোনো জায়গায় `claude setup-token` চালিয়ে এক-বছরের টোকেনটি **Setup Token** ট্যাবে পেস্ট করুন। দেখুন [সেটআপ টোকেনসহ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)।
 
-Claude ଏବଂ Claude Code-ସୁସଙ୍ଗତ ରୁଟ୍ଗୁଡ଼ିକ Opus ଓ Sonnet
-ମଡେଲ୍ଗୁଡ଼ିକ ପାଇଁ `max` ଚିନ୍ତନ ପ୍ରୟାସକୁ ସଂରକ୍ଷଣ କରନ୍ତି। Haiku ମଡେଲ୍ଗୁଡ଼ିକ `max` ପ୍ରୟାସ ସ୍ତର ଗ୍ରହଣ କରନ୍ତି ନାହିଁ, ତେଣୁ OmniRoute
-ସେହି ଅନୁରୋଧକୁ ଅପ୍ଷ୍ଟ୍ରିମ୍କୁ ପଠାଇବା ପୂର୍ବରୁ ଏକ ଉଚ୍ଚ ଚିନ୍ତନ ବଜେଟ୍କୁ ଡାଉନ୍ଗ୍ରେଡ୍ କରେ।
+Claude এবং Claude Code-সামঞ্জস্যপূর্ণ রুটগুলো Opus ও Sonnet
+মডেলের জন্য `max` চিন্তন-প্রয়াস সংরক্ষণ করে। Haiku মডেলগুলো `max` প্রয়াস স্তর গ্রহণ করে না, তাই OmniRoute
+আপস্ট্রিমে পাঠানোর আগে সেই অনুরোধকে উচ্চ চিন্তন বাজেটে নামিয়ে আনে।
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Connect Codex
-→ OAuth ଲଗ୍ଇନ୍ (ପୋର୍ଟ୍ 1455)
-→ 5-ଘଣ୍ଟା + ସାପ୍ତାହିକ ରିସେଟ୍
+ড্যাশবোর্ড → প্রোভাইডার → Codex সংযুক্ত করুন
+→ OAuth লগইন (পোর্ট 1455)
+→ ৫-ঘণ্টা + সাপ্তাহিক রিসেট
 
-ମଡେଲ୍ଗୁଡ଼ିକ:
+মডেল:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,11 +162,11 @@ Dashboard → Providers → Connect Codex
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Connect GitHub
-→ GitHub ମାଧ୍ୟମରେ OAuth
-→ ମାସିକ ରିସେଟ୍ (ମାସର 1 ତାରିଖ)
+ড্যাশবোর্ড → প্রোভাইডার → GitHub সংযুক্ত করুন
+→ GitHub-এর মাধ্যমে OAuth
+→ মাসিক রিসেট (মাসের ১ তারিখ)
 
-ମଡେଲ୍ଗୁଡ଼ିକ:
+মডেল:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -174,57 +174,73 @@ Dashboard → Providers → Connect GitHub
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 ଶସ୍ତା ପ୍ରଦାନକାରୀ
+**AI ক্রেডিট (টোকেন-ভিত্তিক বিলিং)।** GitHub যখন অ্যাকাউন্টের জন্য `credits_used` রিপোর্ট করে, তখন
+প্রোভাইডার সীমা কার্ডে একটি **AI ক্রেডিট** সারি দেখায়, যেখানে বর্তমান বিলিং সময়কালে ব্যবহৃত ক্রেডিট
+দেখানো হয়—এমনকি সীমাহীন সংস্থা প্ল্যানের ক্ষেত্রেও।
 
-#### GLM-4.7 (ଦୈନିକ ରିସେଟ୍, $0.6/1M)
+**স্থানীয় AI ক্রেডিট সীমা।** একটি GitHub সংযোগ সম্পাদনা করে প্রতি
+বিলিং সময়কালে **AI ক্রেডিট সীমা** নির্ধারণ করুন
+(`providerSpecificData.githubCreditLimit`)। ফাঁকা রাখলে এটি নিষ্ক্রিয় থাকে; `0`
+সবসময় সংযোগটি বাদ দেয়। সর্বশেষ ব্যবহারের রিডিং সীমার সমান বা বেশি হলে,
+অ্যাকাউন্ট নির্বাচন সেই সংযোগটি বাদ দেয় এবং রাউটিং আপনার অন্যান্য সংযোগে ফিরে যায়—যেভাবে কোটা-নীতির
+কাটঅফের ক্ষেত্রেও হয়। এই পরীক্ষা পর্যায়ক্রমিক কোটা রিফ্রেশে ইতিমধ্যে সংগৃহীত ব্যবহারের তথ্য পড়ে—অনুরোধের
+পথে কখনও GitHub-এ কল করে না—এবং এটি fail open পদ্ধতিতে কাজ করে: অনুপস্থিত বা পুরোনো রিডিং (১৫ মিনিটের
+বেশি পুরোনো, অথবা ইতিমধ্যে রিসেট হওয়া কোনো বিলিং সময়কাল থেকে) সংযোগটি ব্লক করে না। এটি একটি স্থানীয়
+সুরক্ষা ব্যবস্থা, **নিশ্চিত ব্যয়-সীমা নয়**: GitHub-এর রিপোর্টিং বিলম্ব, রিফ্রেশের ব্যবধান,
+চলমান অনুরোধ এবং OmniRoute-এর বাইরের ব্যবহার এই সীমা অতিক্রম করতে পারে। কঠোর সীমার জন্য GitHub-এর
+নিজস্ব ব্যয় নিয়ন্ত্রণ ব্যবহার করুন।
 
-1. ସାଇନ୍ ଅପ୍ କରନ୍ତୁ: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Planରୁ API key ପ୍ରାପ୍ତ କରନ୍ତୁ
-3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
+### 💰 সাশ্রয়ী প্রোভাইডার
 
-**ବ୍ୟବହାର:** `glm/glm-4.7` — **ପ୍ରୋ ଟିପ୍ପଣୀ:** Coding Plan 1/7 ମୂଲ୍ୟରେ 3× କୋଟା ପ୍ରଦାନ କରେ! ପ୍ରତିଦିନ ସକାଳ 10:00ଟାରେ ରିସେଟ୍ ହୁଏ।
+#### GLM-4.7 (দৈনিক রিসেট, $0.6/1M)
 
-#### MiniMax M2.1 (5h ରିସେଟ୍, $0.20/1M)
+1. নিবন্ধন করুন: [Zhipu AI](https://open.bigmodel.cn)
+2. Coding Plan থেকে API কী সংগ্রহ করুন
+3. ড্যাশবোর্ড → API কী যোগ করুন: প্রোভাইডার: `glm`, API কী: `your-key`
 
-1. ସାଇନ୍ ଅପ୍ କରନ୍ତୁ: [MiniMax](https://www.minimax.io)
-2. API key ପ୍ରାପ୍ତ କରନ୍ତୁ → Dashboard → Add API Key
+**ব্যবহার:** `glm/glm-4.7` — **প্রো টিপ:** Coding Plan ১/৭ খরচে ৩× কোটা দেয়! প্রতিদিন সকাল ১০:০০টায় রিসেট হয়।
 
-**ବ୍ୟବହାର:** `minimax/MiniMax-M2.1` — **ପ୍ରୋ ଟିପ୍ପଣୀ:** ଦୀର୍ଘ କଣ୍ଟେକ୍ସ୍ଟ (1M ଟୋକନ୍) ପାଇଁ ସବୁଠାରୁ ଶସ୍ତା ବିକଳ୍ପ!
+#### MiniMax M2.1 (৫ ঘণ্টা রিসেট, $0.20/1M)
 
-#### Kimi K2 (ମାସିକ ନିର୍ଦ୍ଧାରିତ $9)
+1. নিবন্ধন করুন: [MiniMax](https://www.minimax.io)
+2. API কী সংগ্রহ করুন → ড্যাশবোর্ড → API কী যোগ করুন
 
-1. ସବ୍ସ୍କ୍ରାଇବ୍ କରନ୍ତୁ: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key ପ୍ରାପ୍ତ କରନ୍ତୁ → Dashboard → Add API Key
+**ব্যবহার:** `minimax/MiniMax-M2.1` — **প্রো টিপ:** দীর্ঘ কনটেক্সটের জন্য সবচেয়ে সস্তা বিকল্প (১M টোকেন)!
 
-**ବ୍ୟବହାର:** `kimi/kimi-k2.5` — **ପ୍ରୋ ଟିପ୍ପଣୀ:** 10M ଟୋକନ୍ ପାଇଁ ମାସିକ ନିର୍ଦ୍ଧାରିତ $9 = ପ୍ରଭାବୀ ମୂଲ୍ୟ $0.90/1M!
+#### Kimi K2 ($9/মাস নির্দিষ্ট)
+
+1. সাবস্ক্রাইব করুন: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. API কী সংগ্রহ করুন → ড্যাশবোর্ড → API কী যোগ করুন
+
+**ব্যবহার:** `kimi/kimi-k2.5` — **প্রো টিপ:** ১০M টোকেনের জন্য নির্দিষ্ট $9/মাস = কার্যকর খরচ $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. ସାଇନ୍ ଅପ୍ କରନ୍ତୁ: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. ଏକ Qianfan API key ତିଆରି କରନ୍ତୁ → Dashboard → Add API Key: Provider: `qianfan`
+1. নিবন্ধন করুন: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. একটি Qianfan API কী তৈরি করুন → ড্যাশবোর্ড → API কী যোগ করুন: প্রোভাইডার: `qianfan`
 
-**ବ୍ୟବହାର:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, କିମ୍ବା ଅନ୍ୟ ଏକ Qianfan OpenAI-ସୁସଙ୍ଗତ ମଡେଲ୍ ID।
+**ব্যবহার:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, অথবা অন্য কোনো Qianfan OpenAI-সামঞ্জস্যপূর্ণ মডেল ID।
 
-### 🆓 ମାଗଣା ପ୍ରଦାନକାରୀ
+### 🆓 বিনামূল্যের প্রোভাইডার
 
-ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ ନଥିବା ମାଗଣା ପ୍ରଦାନକାରୀଙ୍କ ପ୍ରଦାନକାରୀ ପୃଷ୍ଠାରେ **No authentication required** ପାଖରେ ଏକ ସ୍ୱିଚ୍ ରହିଛି।
-ଏହାକୁ ବନ୍ଦ କଲେ ସେହି ପ୍ରଦାନକାରୀ ଅକ୍ଷମ ହୁଏ, Providersର କନ୍ଫିଗର୍ କରାଯାଇଥିବା/କମ୍ପାକ୍ଟ ଦୃଶ୍ୟରୁ ହଟିଯାଏ ଏବଂ
-ଏହାର ମଡେଲ୍ଗୁଡ଼ିକ `/v1/models`ରୁ ହଟିଯାଏ।
+কোনো-প্রমাণীকরণ-প্রয়োজন-নেই এমন বিনামূল্যের প্রোভাইডারগুলোর প্রোভাইডার পেজে **কোনো প্রমাণীকরণ প্রয়োজন নেই**-এর পাশে একটি সুইচ থাকে।
+এটি বন্ধ করলে সেই প্রোভাইডার নিষ্ক্রিয় হয়, Providers configured/compact ভিউ থেকে সরিয়ে দেওয়া হয় এবং
+`/v1/models` থেকে এর মডেলগুলো সরিয়ে দেওয়া হয়।
 
-#### Qoder (9ଟି ମାଗଣା ମଡେଲ୍)
+#### Qoder (৯টি বিনামূল্যের মডেল)
 
 ```bash
-Dashboard → Connect Qoder → OAuth ଲଗ୍ଇନ୍ → ଆକ୍ସେସ୍ ବର୍ତ୍ତମାନର ପ୍ରଦାନକାରୀ ସୀମାଗୁଡ଼ିକର ଅଧୀନ
+ড্যাশবোর্ড → Qoder সংযুক্ত করুন → OAuth লগইন → অ্যাক্সেস বর্তমান প্রোভাইডার সীমার অধীন
 
-ମଡେଲ୍ଗୁଡ଼ିକ: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+মডেল: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude ମାଗଣା)
+#### Kiro (Claude বিনামূল্যে)
 
 ```bash
-Dashboard → Connect Kiro → AWS Builder ID କିମ୍ବା Google/GitHub → ମାସିକ ~50 କ୍ରେଡିଟ୍
+ড্যাশবোর্ড → Kiro সংযুক্ত করুন → AWS Builder ID অথবা Google/GitHub → ~৫০ ক্রেডিট/মাস
 
-ମଡେଲ୍ଗୁଡ଼ିକ: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+মডেল: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -339,24 +355,24 @@ API କୀ: [ଡ୍ୟାଶବୋର୍ଡରୁ]
 
 ## 🚀 ଡିପ୍ଲୟମେଣ୍ଟ
 
-### ଗ୍ଲୋବାଲ୍ npm ଇନ୍‌ଷ୍ଟଲ୍ (ସୁପାରିଶକୃତ)
+### ଗ୍ଲୋବାଲ୍ npm ସଂସ୍ଥାପନ (ପରାମର୍ଶିତ)
 
 ```bash
 npm install -g omniroute
 
-# ବିନ୍ୟାସ ଡିରେକ୍ଟୋରି ସୃଷ୍ଟି କରନ୍ତୁ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ଫାଇଲ୍ ସୃଷ୍ଟି କରନ୍ତୁ (.env.example ଦେଖନ୍ତୁ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ସର୍ଭର ଆରମ୍ଭ କରନ୍ତୁ
+# Start server
 omniroute
-# କିମ୍ବା କଷ୍ଟମ୍ ପୋର୍ଟ ସହିତ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ସ୍ୱୟଂଚାଳିତ ଭାବରେ `~/.omniroute/.env` କିମ୍ବା `./.env`ରୁ `.env` ଲୋଡ୍ କରେ।
+CLI ସ୍ୱୟଂଚାଳିତ ଭାବରେ `~/.omniroute/.env` କିମ୍ବା `./.env` ରୁ `.env` ଧାରଣ କରିଥାଏ।
 
 ### ଟ୍ରେ ମୋଡ୍
 
@@ -609,22 +625,22 @@ post_install() {
 
 ---
 
-## 📊 ଉପଲବ୍ଧ ମଡେଲ୍‌ଗୁଡ଼ିକ
+## 📊 ଉପଲବ୍ଧ ମଡେଲଗୁଡ଼ିକ
 
 <details>
-<summary><b>ସମସ୍ତ ଉପଲବ୍ଧ ମଡେଲ୍ ଦେଖନ୍ତୁ</b></summary>
+<summary><b>ସମସ୍ତ ଉପଲବ୍ଧ ମଡେଲ ଦେଖନ୍ତୁ</b></summary>
 
-> ନିମ୍ନରେ ଥିବା ତାଲିକାଟି v3.8.0 ପାଇଁ `open-sse/config/providerRegistry.ts` ରୁ ସଂକଳିତ। କ୍ଲାଉଡ୍ କ୍ୟାଟାଲଗ୍‌ଗୁଡ଼ିକ (Gemini, OpenRouter ଇତ୍ୟାଦି) ଗତିଶୀଳ ଭାବରେ ସିଙ୍କ୍ ହୁଏ — ସମ୍ପୂର୍ଣ୍ଣ ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ପାଇଁ **Dashboard → Providers → [provider] → Available Models** ଖୋଲନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ।
+> ନିମ୍ନଲିଖିତ ତାଲିକା v3.8.0 ପାଇଁ `open-sse/config/providerRegistry.ts` ରୁ ସଂଗୃହୀତ ହୋଇଛି। କ୍ଲାଉଡ୍ କ୍ୟାଟାଲଗ୍ଗୁଡ଼ିକ (Gemini, OpenRouter ଇତ୍ୟାଦି) ଗତିଶୀଳ ଭାବରେ ସିଙ୍କ୍ ହୁଏ — ସମ୍ପୂର୍ଣ୍ଣ ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ପାଇଁ **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ → [provider] → ଉପଲବ୍ଧ ମଡେଲଗୁଡ଼ିକ** ଖୋଲନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କଲ୍ କରନ୍ତୁ।
 >
-> ଯଦି କୌଣସି ପ୍ରଦାନକାରୀଙ୍କ ବିଲ୍ଟ-ଇନ୍ ତାଲିକା ଅସଙ୍ଗତ ହୋଇଯାଇଛି, ତେବେ ଲାଇଭ୍ ଅପ୍‌ଷ୍ଟ୍ରିମ୍ କ୍ୟାଟାଲଗ୍ ଆଣିବା ପାଇଁ ସେହି ପୃଷ୍ଠାରେ **Import from /models** ବ୍ୟବହାର କରନ୍ତୁ (କିମ୍ବା **Auto-Sync** ସକ୍ଷମ କରନ୍ତୁ)। LLM7.io (`gemini-3.1-flash-lite`) ଏବଂ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ପାଇଁ ଏହା v3.8.50 ରେ ଯାଞ୍ଚ କରାଯାଇଥିଲା; ସେହି ପରୀକ୍ଷଣ ସମୟରେ Pollinations ର ଅଜ୍ଞାତ ପ୍ରବେଶ ଅପ୍‌ଷ୍ଟ୍ରିମ୍‌ରେ ସୀମିତ ରହିଥିଲା।
+> ଯଦି କୌଣସି ପ୍ରୋଭାଇଡର୍ର ବିଲ୍ଟ-ଇନ୍ ତାଲିକାରେ ପରିବର୍ତ୍ତନ ହୋଇଥାଏ, ତେବେ ଲାଇଭ୍ ଅପଷ୍ଟ୍ରିମ୍ କ୍ୟାଟାଲଗ୍ ଆଣିବା ପାଇଁ ସେହି ପୃଷ୍ଠାରେ **/models ରୁ ଇମ୍ପୋର୍ଟ କରନ୍ତୁ** ବ୍ୟବହାର କରନ୍ତୁ (କିମ୍ବା **ଅଟୋ-ସିଙ୍କ୍** ସକ୍ଷମ କରନ୍ତୁ)। ଏହା LLM7.io (`gemini-3.1-flash-lite`) ଏବଂ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ପାଇଁ v3.8.50 ରେ ଯାଞ୍ଚ କରାଯାଇଥିଲା; ସେହି ପରୀକ୍ଷଣ ସମୟରେ Pollinations ର ଅନାମିକ ପ୍ରବେଶ ଅପଷ୍ଟ୍ରିମ୍ ସୀମାବଦ୍ଧ ରହିଥିଲା।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ପ୍ରୟାସ ସ୍ତରଗୁଡ଼ିକ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ପ୍ରୟାସ ସ୍ତର: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ମାଗଣା OAuth: **Dashboard → Providers → Kiro → Available Models** ଅଧୀନରେ ଦେଖାଯାଇଥିବା ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ବ୍ୟବହାର କରନ୍ତୁ। ଉପଲବ୍ଧତା ଆକାଉଣ୍ଟ୍ ଏବଂ ପ୍ଲାନ୍ ଉପରେ ନିର୍ଭର କରେ।
+**Kiro (`kr/`)** — ମାଗଣା OAuth: **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ → Kiro → ଉପଲବ୍ଧ ମଡେଲଗୁଡ଼ିକ** ଅଧୀନରେ ଦେଖାଯାଉଥିବା ଲାଇଭ୍ କ୍ୟାଟାଲଗ୍ ବ୍ୟବହାର କରନ୍ତୁ। ଉପଲବ୍ଧତା ଆକାଉଣ୍ଟ ଏବଂ ପ୍ଲାନ୍ ଉପରେ ନିର୍ଭର କରେ।
 
 **Qoder (`if/`)** — ମାଗଣା OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,37 +648,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ମାସକୁ ନିର୍ଦ୍ଧାରିତ $9 କିମ୍ବା ବ୍ୟବହାର ଅନୁସାରେ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ମାସିକ $9 କିମ୍ବା ବ୍ୟବହାର ଅନୁଯାୟୀ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API କୀ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — ଅତ୍ୟନ୍ତ ଦ୍ରୁତ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — ମୂଳ Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ନେଟିଭ୍: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-ହୋଷ୍ଟେଡ୍: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-ହୋଷ୍ଟେଡ୍: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ସନ୍ଧାନ-ସମୃଦ୍ଧ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — ସର୍ଚ୍ଚ-ଅଗମେଣ୍ଟେଡ୍: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — ଓପନ୍-ସୋର୍ସ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ମାଗଣା), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ଦ୍ରୁତ ଇନ୍‌ଫରେନ୍ସ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — ଦ୍ରୁତ ଇନ୍ଫରେନ୍ସ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — ୱେଫର୍-ସ୍କେଲ୍: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-କେନ୍ଦ୍ରିତ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ଏଣ୍ଟର୍‌ପ୍ରାଇଜ୍: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ଏଣ୍ଟରପ୍ରାଇଜ୍: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google ରୁ ପ୍ରତ୍ୟେକ API କୀ ଅନୁସାରେ ଲାଇଭ୍ ସିଙ୍କ୍ ହୁଏ — କୌଣସି ସ୍ଥିର ତାଲିକା ନାହିଁ। **Dashboard → Providers** ରେ ଏକ କୀ ସଂଯୋଗ କରନ୍ତୁ, ତା’ପରେ ବର୍ତ୍ତମାନର କ୍ୟାଟାଲଗ୍ ଆମଦାନୀ କରିବା ପାଇଁ **Available Models** ବ୍ୟବହାର କରନ୍ତୁ (ଉଦାହରଣ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google ଠାରୁ API କୀ ଅନୁଯାୟୀ ଲାଇଭ୍ ସିଙ୍କ୍ ହୁଏ — କୌଣସି ସ୍ଥିର ତାଲିକା ନାହିଁ। **ଡ୍ୟାସବୋର୍ଡ → ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ** ରେ ଏକ କୀ ସଂଯୋଗ କରନ୍ତୁ, ତାପରେ ବର୍ତ୍ତମାନର କ୍ୟାଟାଲଗ୍ ଇମ୍ପୋର୍ଟ କରିବା ପାଇଁ **ଉପଲବ୍ଧ ମଡେଲଗୁଡ଼ିକ** ବ୍ୟବହାର କରନ୍ତୁ (ଉଦାହରଣ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
 
-**ଅନ୍ୟାନ୍ୟ ସୁସଙ୍ଗତ ପ୍ରଦାନକାରୀ** (ନିର୍ବାଚିତ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ମାଧ୍ୟମରେ), `azure-ai`, `openrouter` (ପାସ୍‌ଥ୍ରୁ କ୍ୟାଟାଲଗ୍), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। ପ୍ରତ୍ୟେକ ନିଜସ୍ୱ ମଡେଲ୍ ତାଲିକା `providerRegistry.ts` ରେ ପରିଚାଳନା କରେ ଏବଂ ପ୍ରଦାନକାରୀ ଏକ `/models` ଏଣ୍ଡପଏଣ୍ଟ୍ ଉପଲବ୍ଧ କରାଇଲେ ତାହା ସ୍ୱୟଂଚାଳିତ ଭାବରେ ସିଙ୍କ୍ ହୋଇପାରେ।
+**ଅନ୍ୟାନ୍ୟ ସୁସଙ୍ଗତ ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ** (ଚୟନିତ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ମାଧ୍ୟମରେ), `azure-ai`, `openrouter` (ପାସ୍ଥ୍ରୁ କ୍ୟାଟାଲଗ୍), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। ପ୍ରତ୍ୟେକ ନିଜସ୍ୱ ମଡେଲ ତାଲିକା `providerRegistry.ts` ରେ ରଖେ ଏବଂ ପ୍ରୋଭାଇଡର୍ ଏକ `/models` ଏଣ୍ଡପଏଣ୍ଟ୍ ପ୍ରଦାନ କଲେ ଅଟୋ-ସିଙ୍କ୍ କରାଯାଇପାରେ।
 
-**ମଡେଲ୍ ID ସମ୍ପର୍କିତ ଟିପ୍ପଣୀ:** OmniRoute ପ୍ରଦାନକାରୀଙ୍କ ମୂଳ ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ବ୍ୟବହାର କରେ। କିଛି ID ରେ ବିନ୍ଦୁଯୁକ୍ତ ସଂସ୍କରଣ ରହିଛି, କାରଣ ଅପ୍‌ଷ୍ଟ୍ରିମ୍ API ସେଗୁଡ଼ିକୁ ସେହି ରୂପରେ ଆଶା କରେ। ଯଦି କୌଣସି ମଡେଲ୍ ଉପରେ ତାଲିକାଭୁକ୍ତ ନାହିଁ, ଉପଲବ୍ଧତା ନିଶ୍ଚିତ କରିବା ପାଇଁ `omniroute models --search <term>` ଚଲାନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` କୁ ଅନୁରୋଧ ପଠାନ୍ତୁ।
+**ମଡେଲ ID ସମ୍ପର୍କିତ ଟିପ୍ପଣୀ:** OmniRoute ପ୍ରୋଭାଇଡର୍-ନେଟିଭ୍ ID ବ୍ୟବହାର କରେ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)। କେତେକ ID ରେ ଡଟେଡ୍ ଭର୍ସନ୍ ଥାଏ, କାରଣ ଅପଷ୍ଟ୍ରିମ୍ API ସେଗୁଡ଼ିକୁ ଏହିଭଳି ଆଶା କରେ। ଯଦି କୌଣସି ମଡେଲ୍ ଉପରେ ତାଲିକାଭୁକ୍ତ ନଥାଏ, ତେବେ ଉପଲବ୍ଧତା ନିଶ୍ଚିତ କରିବା ପାଇଁ `omniroute models --search <term>` ଚଲାନ୍ତୁ କିମ୍ବା `GET /api/models/catalog` ହିଟ୍ କରନ୍ତୁ।
 
 </details>
 
@@ -727,6 +743,31 @@ prefix: "<prefix>" ଏକ ସଂରକ୍ଷିତ ପ୍ରଦାତା ପ୍�
 ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାତା କିମ୍ବା ତାହାର ପ୍ରମାଣପତ୍ରର ନାମ ଉଲ୍ଲେଖ କରୁଥିବା ଏକ ତ୍ରୁଟି ସହିତ ବିଫଳ ହେଲେ, ନୋଡ୍ର ପ୍ରିଫିକ୍ସ
 ସଂରକ୍ଷିତ କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ: ଏହି ନିୟମ ଆସିବା ପୂର୍ବରୁ ସଂରକ୍ଷଣ କରାଯାଇଥିବା ନୋଡ୍ଗୁଡ଼ିକ ଏବେବି ସଂରକ୍ଷିତ ଅଛି, କିନ୍ତୁ ସେମାନଙ୍କ ପ୍ରିଫିକ୍ସ
 ବିଲ୍ଟ-ଇନ୍ ପ୍ରଦାତାଙ୍କ ପାଖକୁ ରାଉଟ୍ ହୁଏ। ନୋଡ୍ଟି ସମ୍ପାଦନ କରନ୍ତୁ ଏବଂ ଏହାକୁ ଏକ ନୂତନ ପ୍ରିଫିକ୍ସ ଦିଅନ୍ତୁ।
+
+#### ପ୍ରତି-ସଂଯୋଗ ଗେଟୱେ ବିକଳ୍ପଗୁଡ଼ିକ
+
+ଏହି କୀଗୁଡ଼ିକ ଗୋଟିଏ ସଂଯୋଗର `providerSpecificData` ଭିତରେ ରହେ (ଉଦାହରଣ ସ୍ୱରୂପ
+`PUT /api/providers/{id}` ମାଧ୍ୟମରେ):
+
+- `toolNameMaxLength` (ପୂର୍ଣ୍ଣସଂଖ୍ୟା, 1–1024) — OpenAI ଚାଟ୍-ଫର୍ମାଟ୍ ସୁସଙ୍ଗତ ସଂଯୋଗଗୁଡ଼ିକ ପାଇଁ, ଯାହାର
+  ଗେଟୱେ ଲମ୍ବା ଟୁଲ୍ ନାମଗୁଡ଼ିକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ। ଅଧିକ ଲମ୍ବା ନାମଗୁଡ଼ିକୁ ସଂକ୍ଷିପ୍ତ ଉପନାମ ଭାବେ ପଠାଯାଏ ଏବଂ
+  ପ୍ରତିକ୍ରିୟାରେ ପୁନଃସ୍ଥାପନ କରାଯାଏ।
+- `quotaEndpoint` — ଗେଟୱେର କୋଟା/କ୍ରେଡିଟ୍ ଏଣ୍ଡପଏଣ୍ଟ୍, ଯାହାକୁ ଡ୍ୟାସ୍ବୋର୍ଡ କୋଟା ଷ୍ଟ୍ରିପ୍ ଏବଂ
+  କୋଟା-ସଚେତନ ରାଉଟିଂ ପାଇଁ ପଢ଼ାଯାଏ। ଏହା OpenAI- ଏବଂ Anthropic-ସୁସଙ୍ଗତ ଉଭୟ ସଂଯୋଗରେ କାମ କରେ; ଏହାର ସମ୍ପୂର୍ଣ୍ଣ ଗଠନ
+  `open-sse/services/usage/openaiCompatible.ts` ରେ ଦଲିଲଭୁକ୍ତ ହୋଇଛି।
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### OmniRoute ପିଅର୍ଗୁଡ଼ିକୁ ଚେନ୍ କରିବା
 

@@ -118,39 +118,41 @@ Samun dama ta: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Saitin Masu Samarwa
+## 📖 Saitin Mai bayarwa
 
-Don ƙara haɗin maɓallan API da yawa daga fayil ɗin CSV ko JSON, yi amfani da **Dashboard → Providers → Import from file**. Ginshiƙai suna bin matsayi (`provider,name,apiKey,baseUrl,priority`); dole ne `provider` ya riga ya kasance a matsayin mai samarwa da ake gudanarwa ko kumburi mai jituwa. Duba [Shigo da masu samarwa daga fayil ɗin CSV ko JSON](../providers/CSV-IMPORT.md).
+Don ƙara haɗin API-key da yawa daga fayil ɗin CSV ko JSON, yi amfani da **Dashboard → Providers → Import from file**. Ginshiƙai suna bin matsayi (`provider,name,apiKey,baseUrl,priority`); `provider` dole ne ya riga ya kasance a matsayin mai bayarwa da ake sarrafawa ko node mai jituwa. Duba [Import providers from a CSV or JSON file](../providers/CSV-IMPORT.md).
 
-### 🔐 Masu Samarwa ta Biyan Kuɗin Rajista
+### 🔐 Masu Bayar da Biyan Kuɗi
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Haɗa Claude Code
+Dashboard → Providers → Connect Claude Code
 → Shiga ta OAuth → Sabunta token ta atomatik
-→ Bibiyar ƙayyadadden amfani na awa 5 + mako-mako
+→ Bibiyar keɓaɓɓen kaso na awa 5 + na mako-mako
 
-Samfura:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Shawarar Ƙwararru:** Yi amfani da Opus don ayyuka masu sarƙaƙiya, Sonnet kuma don sauri. OmniRoute yana bibiyar ƙayyadadden amfani ga kowane samfuri!
+**Shawara ta ƙwararru:** Yi amfani da Opus don ayyuka masu rikitarwa, Sonnet don sauri. OmniRoute yana bibiyar kaso ga kowane model!
 
-Babu burauza a kan na'urar da ke karɓar baƙuncin OmniRoute? Gudanar da `claude setup-token` a duk inda aka shiga Claude Code sannan a liƙa token na shekara ɗaya a cikin shafin **Setup Token**. Duba [Claude Code tare da setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Babu browser a kan host ɗin OmniRoute? Gudanar da `claude setup-token` a duk inda aka shiga Claude Code, sannan liƙa token ɗin shekara ɗaya a shafin **Setup Token**. Duba [Claude Code with a setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Hanyoyin Claude da masu jituwa da Claude Code suna kiyaye matakin ƙoƙarin tunani na `max` ga samfuran Opus da Sonnet. Samfuran Haiku ba sa karɓar matakin ƙoƙarin `max`, don haka OmniRoute yana saukar da wannan buƙatar zuwa babban kasafin tunani kafin aika ta zuwa sama.
+Hanyoyin Claude da masu jituwa da Claude Code suna kiyaye ƙoƙarin tunani na `max` don
+model na Opus da Sonnet. Model na Haiku ba sa karɓar matakin ƙoƙarin `max`, don haka OmniRoute yana rage
+wannan buƙatar zuwa babban kasafin tunani kafin aika ta zuwa sama.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Haɗa Codex
+Dashboard → Providers → Connect Codex
 → Shiga ta OAuth (port 1455)
-→ Sake saiti bayan awa 5 + mako-mako
+→ Sake saita bayan awa 5 + mako-mako
 
-Samfura:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +162,11 @@ Samfura:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Haɗa GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth ta GitHub
-→ Sake saiti kowane wata (ranar 1 ga wata)
+→ Sake saita kowane wata (ranar 1 ga wata)
 
-Samfura:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,56 +174,72 @@ Samfura:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Masu Samarwa Masu Araha
+**Kiredit ɗin AI (lissafin kuɗi bisa token).** Lokacin da GitHub ya bayar da `credits_used` na
+asusun, katin Iyakokin Mai bayarwa yana nuna layin **Kiredit ɗin AI** tare da kiredit ɗin
+da aka cinye a lokacin lissafin kuɗi na yanzu, har ma a tsare-tsaren ƙungiya marasa iyaka.
 
-#### GLM-4.7 (Sake saiti kullum, $0.6/1M)
+**Iyakar Kiredit ɗin AI ta gida.** Gyara haɗin GitHub sannan saita **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Barin filin babu komai yana kashe iyakar; `0`
+koyaushe yana tsallake haɗin. Lokacin da karatun amfani na ƙarshe ya kai ko ya wuce iyakar,
+zaɓin asusu yana tsallake wannan haɗin, kuma turawa tana koma wa sauran haɗin ku, kamar yadda
+yanke hukunci bisa ƙa'idar kaso ke yi. Binciken yana karanta amfani da sabunta kaso na lokaci-lokaci
+tuni yake tattarawa — ba ya taɓa kiran GitHub yayin hanyar buƙata — kuma yana barin komai a buɗe:
+karatun da ya ɓace ko ya tsufa (fiye da mintuna 15, ko daga lokacin lissafin kuɗi da aka riga aka
+sake saita) ba zai toshe haɗin ba. Wannan kariya ce ta gida, **ba tabbatacciyar iyakar kashe kuɗi ba**:
+jinkirin rahoton GitHub, tazarar sabuntawa, buƙatun da ke gudana da amfani a wajen OmniRoute na iya
+wuce ta. Yi amfani da sarrafa kashe kuɗi na GitHub da kansa don ƙayyadadden iyaka mai tsauri.
+
+### 💰 Masu Bayarwa Masu Arha
+
+#### GLM-4.7 (Sake saita kullum, $0.6/1M)
 
 1. Yi rajista: [Zhipu AI](https://open.bigmodel.cn)
-2. Sami maɓallin API daga Coding Plan
-3. Dashboard → Ƙara Maɓallin API: Mai samarwa: `glm`, Maɓallin API: `your-key`
+2. Samu API key daga Coding Plan
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Amfani:** `glm/glm-4.7` — **Shawarar Ƙwararru:** Coding Plan yana bayar da adadin amfani sau 3 a kan 1/7 na kuɗin! Ana sake saiti kullum da ƙarfe 10:00 na safe.
+**Amfani:** `glm/glm-4.7` — **Shawara ta ƙwararru:** Coding Plan yana ba da kaso sau 3 a kan kuɗin sau 1/7! Yana sake saitawa kullum da ƙarfe 10:00 na safe.
 
-#### MiniMax M2.1 (Sake saiti bayan awa 5, $0.20/1M)
+#### MiniMax M2.1 (Sake saita bayan awa 5, $0.20/1M)
 
 1. Yi rajista: [MiniMax](https://www.minimax.io)
-2. Sami maɓallin API → Dashboard → Ƙara Maɓallin API
+2. Samu API key → Dashboard → Add API Key
 
-**Amfani:** `minimax/MiniMax-M2.1` — **Shawarar Ƙwararru:** Zaɓi mafi araha don dogon mahallin bayanai (tokens miliyan 1)!
+**Amfani:** `minimax/MiniMax-M2.1` — **Shawara ta ƙwararru:** Zaɓi mafi arha don dogon mahallin bayanai (token miliyan 1)!
 
-#### Kimi K2 ($9/wata ƙayyadadden farashi)
+#### Kimi K2 ($9/wata a tsayayyen kuɗi)
 
-1. Yi rajistar biyan kuɗi: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Sami maɓallin API → Dashboard → Ƙara Maɓallin API
+1. Yi rajista: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. Samu API key → Dashboard → Add API Key
 
-**Amfani:** `kimi/kimi-k2.5` — **Shawarar Ƙwararru:** Ƙayyadadden $9/wata don tokens miliyan 10 = ingantaccen farashin $0.90/1M!
+**Amfani:** `kimi/kimi-k2.5` — **Shawara ta ƙwararru:** Tsayayyen $9/wata don token miliyan 10 = tasirin kuɗi $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Yi rajista: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Ƙirƙiri maɓallin API na Qianfan → Dashboard → Ƙara Maɓallin API: Mai samarwa: `qianfan`
+2. Ƙirƙiri Qianfan API key → Dashboard → Add API Key: Provider: `qianfan`
 
-**Amfani:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, ko wani ID na samfurin Qianfan mai jituwa da OpenAI.
+**Amfani:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, ko wani ID na model mai jituwa da Qianfan OpenAI.
 
-### 🆓 Masu Samarwa KYAUTA
+### 🆓 Masu Bayarwa Kyauta
 
-Masu samarwa kyauta waɗanda ba sa buƙatar tantancewa suna da maɓallin kunnawa a gefen **Ba a buƙatar tantancewa** a shafin mai samarwarsu.
-Kashe shi yana dakatar da wannan mai samarwa, yana cire shi daga jerin Masu Samarwa da aka saita/taƙaita, sannan yana cire samfuransa daga `/v1/models`.
+Masu bayarwa kyauta marasa buƙatar tantancewa suna da maɓalli kusa da **No authentication required** a shafin mai bayarwa.
+Kashe shi yana dakatar da mai bayarwar, ya cire shi daga kallon Providers configured/compact, sannan
+ya cire model ɗinsa daga `/v1/models`.
 
-#### Qoder (samfura 9 KYAUTA)
+#### Qoder (model 9 KYauta)
 
 ```bash
-Dashboard → Haɗa Qoder → Shiga ta OAuth → Samun dama yana ƙarƙashin iyakokin mai samarwa na yanzu
+Dashboard → Connect Qoder → Shiga ta OAuth → Samun dama yana ƙarƙashin iyakokin mai bayarwa na yanzu
 
-Samfura: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude KYAUTA)
 
 ```bash
-Dashboard → Haɗa Kiro → AWS Builder ID ko Google/GitHub → ~50 credits/wata
+Dashboard → Connect Kiro → AWS Builder ID ko Google/GitHub → kusan kiredit 50/wata
 
-Samfura: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -336,24 +354,24 @@ Samfuri: cc/claude-opus-4-7
 
 ## 🚀 Turawa
 
-### Shigarwa ta npm na gaba ɗaya (An Ba da Shawara)
+### Global npm shigar (An bada shawarar)
 
 ```bash
 npm install -g omniroute
 
-# Ƙirƙiri kundin daidaitawa
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ƙirƙiri fayil ɗin .env (duba .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Fara uwar garken
+# Start server
 omniroute
-# Ko tare da port na musamman:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI yana loda `.env` kai tsaye daga `~/.omniroute/.env` ko `./.env`.
+CLI yana ɗaukar `.env` ta atomatik daga `~/.omniroute/.env` ko `./.env`.
 
 ### Yanayin tray
 
@@ -606,60 +624,60 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 
 ---
 
-## 📊 Samfuran da Ake da Su
+## 📊 Samfuran da ake da su
 
 <details>
 <summary><b>Duba duk samfuran da ake da su</b></summary>
 
-> An tsara jerin da ke ƙasa daga `open-sse/config/providerRegistry.ts` don v3.8.0. Ana daidaita kundin girgije (Gemini, OpenRouter, da sauransu) kai tsaye — don cikakken kundin kai-tsaye, buɗe **Dashboard → Providers → [provider] → Available Models** ko kira `GET /api/models/catalog`.
+> An tsara jerin da ke ƙasa daga `open-sse/config/providerRegistry.ts` don v3.8.0. Ana daidaita kundin gajimare (Gemini, OpenRouter, da sauransu) kai tsaye — don cikakken kundin yanzu, buɗe **Dashboard → Providers → [provider] → Available Models** ko kira `GET /api/models/catalog`.
 >
-> Idan ginannen jerin wani mai samarwa ya sauya daga na yanzu, yi amfani da **Import from /models** a wannan shafin (ko kunna **Auto-Sync**) don jawo kundin kai-tsaye daga tushen sama. An tabbatar da wannan a v3.8.50 don LLM7.io (`gemini-3.1-flash-lite`) da UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); damar Pollinations ta ba-suna ta ci gaba da kasancewa ƙarƙashin iyakokin tushen sama yayin wannan zagayen gwajin.
+> Idan jerin da aka gina cikin mai bayarwa ya samu bambanci, yi amfani da **Import from /models** a wannan shafin (ko kunna **Auto-Sync**) don ɗauko kundin kai tsaye daga tushen sabis. An tabbatar da wannan a v3.8.50 don LLM7.io (`gemini-3.1-flash-lite`) da UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); samun damar Pollinations ba tare da tantancewa ba ya ci gaba da kasancewa mai iyaka daga tushen sabis yayin gwajin guda.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth na Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ matakan ƙoƙari: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth na Plus/Pro: `cx/gpt-5.5` (+ matakan ƙoƙari: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth KYAUTA: yi amfani da kundin kai-tsaye da aka nuna ƙarƙashin **Dashboard → Providers → Kiro → Available Models**. Samuwar ya dogara da asusun da tsarin biyan kuɗi.
+**Kiro (`kr/`)** — OAuth kyauta: yi amfani da kundin kai tsaye da ake nunawa ƙarƙashin **Dashboard → Providers → Kiro → Available Models**. Samuwar ya danganta da asusu da tsarin biyan kuɗi.
 
-**Qoder (`if/`)** — OAuth KYAUTA: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth kyauta: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/wata a dunƙule ko bisa amfani: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/wata ko bisa amfani: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — Maɓallin API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Mabudin API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Mai tsananin sauri: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Mai saurin gaske: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok na asali: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Ana masaukinsa a EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Ana karɓar bakunci a EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — An ƙarfafa shi da bincike: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Buɗaɗɗen tushe: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (kyauta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Hasashe mai sauri: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Ƙaddamarwa mai sauri: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — A sikelin wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — A ma’aunin wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Mai da hankali kan RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — An mayar da hankali kan RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Na kamfanoni: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Na kamfanoni: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Ana daidaita shi kai-tsaye bisa kowane maɓallin API daga Google — babu tsayayyen jeri. Haɗa maɓalli a **Dashboard → Providers**, sannan yi amfani da **Available Models** don shigo da kundin na yanzu (misali `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Ana daidaita shi kai tsaye bisa ga kowane mabudin API daga Google — babu tsayayyen jeri. Haɗa mabudi a **Dashboard → Providers**, sannan yi amfani da **Available Models** don shigo da kundin yanzu (misali `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Sauran masu samarwa masu jituwa** (zaɓaɓɓu): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ta hanyar `aws-bedrock`), `azure-ai`, `openrouter` (kundin da ake wucewa kai tsaye), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kowanne yana kula da nasa jerin samfura a cikin `providerRegistry.ts`, kuma ana iya daidaita shi kai-tsaye idan mai samarwar ya bayar da maƙurar `/models`.
+**Sauran masu bayarwa masu dacewa** (zaɓaɓɓu): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ta `aws-bedrock`), `azure-ai`, `openrouter` (kundin wucewa kai tsaye), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kowanne yana kula da jerin samfuransa a `providerRegistry.ts`, kuma ana iya daidaita shi ta atomatik idan mai bayarwar yana samar da hanyar `/models`.
 
-**Bayani kan ID ɗin samfura:** OmniRoute yana amfani da ID na asali na mai samarwa (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Wasu ID sun haɗa da nau'ukan da ke da ɗigo saboda haka API na tushen sama yake buƙatar su. Idan ba a jera wani samfuri a sama ba, gudanar da `omniroute models --search <term>` ko aika buƙata zuwa `GET /api/models/catalog` don tabbatar da samuwarsa.
+**Bayani game da ID na samfura:** OmniRoute yana amfani da ID na asali na mai bayarwa (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Wasu ID suna ɗauke da sigogi masu ɗigo saboda haka ne API na tushen sabis ke buƙatarsu. Idan ba a jera wani samfuri a sama ba, gudanar da `omniroute models --search <term>` ko buɗe `GET /api/models/catalog` don tabbatar da samuwarsa.
 
 </details>
 
@@ -724,6 +742,31 @@ Zaɓi prefix na daban (`mygw`, `acme-proxy`). Idan buƙatu zuwa kullin musamman 
 kuskuren da ya ambaci ginannen mai bayarwa ko bayanan shaidarsa, duba ko prefix na kullin
 an keɓe shi: kullayen da aka adana kafin wannan ƙa'ida su na nan a ajiye, amma prefix ɗinsu yana tura buƙatu zuwa
 ginannen mai bayarwa. Gyara kullin ka ba shi sabon prefix.
+
+#### Zaɓuɓɓukan mashiga na kowane haɗi
+
+Ana saka waɗannan maɓallan cikin `providerSpecificData` na wani haɗi (misali ta hanyar
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (lamba cikakkiya, 1–1024) — don haɗe-haɗe masu dacewa da tsarin tattaunawa na OpenAI waɗanda
+  mashigarsu ke ƙin dogayen sunayen kayan aiki. Ana aika dogayen sunaye a matsayin gajerun laƙabi, sannan a mayar da
+  su yadda suke a cikin amsar.
+- `quotaEndpoint` — ƙarshen API na iyakokin amfani/kiredit na mashigar, wanda ake karantawa don tsiri na iyakokin amfani a allon sarrafawa da kuma
+  zaɓin hanya bisa iyakokin amfani. Yana aiki a kan haɗe-haɗe masu dacewa da OpenAI da Anthropic; an rubuta cikakken
+  tsarinsa a cikin `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### Haɗa Abokan OmniRoute a Sarƙaƙƙiya
 

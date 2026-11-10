@@ -61,3 +61,15 @@ Chức năng xuất cài đặt (`GET /api/settings/export-json`) bao gồm nguy
 cài đặt nào khác — không giống bộ lọc xuất bước tổ hợp của `hidePaidModels`, ở đây không có rủi ro
 tái nạp dữ liệu: một id bị từ chối được nhúng trong bước tổ hợp đã xuất là lựa chọn định tuyến tường minh của chính
 nhà vận hành, không phải thứ mà ranh giới xuất dữ liệu cần loại bỏ.
+
+## Chỉ liệt kê combo (`exposeCombosOnly`)
+
+Đây là một giá trị boolean riêng, cũng phải chủ động bật và mặc định là `false`, dành cho các triển khai dùng combo làm giao diện mô hình công khai và chỉ dùng nhà cung cấp làm hệ thống phía sau. Khi đặt thành `true`, danh sách công khai (`GET /v1/models`, `GET /v1` và các tuyến khám phá `/v1` khác xây dựng trên `getUnifiedModelsResponse()`) chỉ giữ các hàng có `owned_by: "combo"`: combo của người dùng cùng các combo `auto/*` tích hợp, trừ khi `hideAutoCombos` ẩn chúng. Nó dùng cùng phép kiểm tra hàng như `catalogScope: "combos"` theo từng khóa, và các bộ lọc cho phép/từ chối/phạm vi riêng của khóa vẫn được áp dụng thêm.
+
+Bật hoặc tắt tại **Cài đặt → Định tuyến → Danh sách Models API**, hoặc bằng `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Giống các danh sách ở trên, thiết lập này chỉ thay đổi thông tin được công bố:
+
+- ID `provider/model` được chỉ định rõ vẫn được điều phối, và `GET /v1/models/{id}` vẫn phân giải được nó;
+- danh mục bảng điều khiển (`GET /api/models/catalog`, được các bộ chọn mô hình sử dụng) không bị thu hẹp;
+- thiết lập không được phản chiếu vào các nhóm ứng viên `auto/*`, nên combo `auto/*` giữ nguyên toàn bộ nhóm của mình.

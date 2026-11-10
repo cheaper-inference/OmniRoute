@@ -188,16 +188,22 @@ Dessa rutter är destruktiva eller oåterkalleliga. Om de tilläts i en installa
 ”utan lösenord” skulle vem som helst på samma LAN kunna radera databasen eller avsluta
 serverprocessen.
 
-| Sökväg                                    | Orsak                                                     |
-| ----------------------------------------- | --------------------------------------------------------- |
-| `/api/shutdown`                           | Avslutar serverprocessen                                  |
-| `/api/settings/database`                  | Export, import och radering av databasen                  |
-| `/api/db-backups`                         | Åtkomst till fullständiga databasbackup-arkiv             |
-| `/api/settings/export-json`               | Exporterar hela inställningsblobben (inkl. hemligheter)   |
-| `/api/settings/import-json`               | Ersätter hela inställningsblobben                         |
-| `/api/providers/health-autopilot/actions` | Utför autopilotens korrigeringsåtgärder                   |
-| `/api/settings/obsidian`                  | Skapar återanvändbara WebDAV-uppgifter för valfri valvrot |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens              |
+| Sökväg                                    | Orsak                                                          |
+| ----------------------------------------- | -------------------------------------------------------------- |
+| `/api/shutdown`                           | Avslutar serverprocessen                                       |
+| `/api/settings/database`                  | Export, import och radering av databasen                       |
+| `/api/db-backups`                         | Åtkomst till fullständiga databasbackup-arkiv                  |
+| `/api/settings/export-json`               | Exporterar hela inställningsblobben (inkl. hemligheter)        |
+| `/api/settings/import-json`               | Ersätter hela inställningsblobben                              |
+| `/api/providers/health-autopilot/actions` | Utför autopilotens korrigeringsåtgärder                        |
+| `/api/settings/obsidian`                  | Skapar återanvändbara WebDAV-uppgifter för valfri valvrot      |
+| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                   |
+| `/api/cli-tools/apply`                    | Skriver om operatörens CLI-konfiguration på värden             |
+| `/api/cli-tools/guide-settings`           | Skriver guidebaserade CLI-konfigurationsfiler                  |
+| `/api/cli-tools/hermes-agent-settings`    | Skriver Hermes-agentens konfiguration                          |
+| `/api/cli-tools/backups`                  | Återställer och raderar säkerhetskopior av CLI-konfigurationen |
+| `/api/log-export`                         | Skickar anropsloggar till en konfigurerad destination          |
+| `/api/restart`                            | Startar om serverprocessen                                     |
 
 **Svar vid överträdelse:** `401 Authentication required`
 

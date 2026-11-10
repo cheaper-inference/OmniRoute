@@ -64,6 +64,19 @@ Darbvieta `electron/` nodrošina arī:
 - `npm run build:mac-x64` / `build:mac-arm64` — vienas arhitektūras macOS būvējumi
 - `npm run pack` — būvējums tikai direktorijā lokālai testēšanai (bez instalētāja)
 
+## Izvēles izpildlaika pakotnes
+
+Darbvirsmas būvējumi līdzās instalētājiem var publicēt izvēles izpildlaika arhīvus. Instalētā servera saturs ietver `optional-packs.index.json` (Windows un Linux sistēmās zem `resources/app`). Ierakstam `browser-runtime` nolasiet `packs[].tarball` un lejupielādējiet **tieši šo faila nosaukumu no tā paša laidiena**. Arhīvu nosaukumos ir SHA-256 kopsavilkums; dažādiem būvējumiem var būt vajadzīgi atšķirīgi arhīvi. Nemainiet lejupielādētā faila nosaukumu.
+
+Kopējiet instalētās lietotnes indeksu un izvēlēto arhīvu vienā direktorijā un izmantojiet tā paša laidiena CLI:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` parāda instalēšanas un pārbaudes stāvokli, nevis arhīva faila nosaukumu. Arhīvu izvēlas komplektācijā iekļautais indekss. Instalēšana pārbauda arhīva kontrolsummu pirms izpakošanas un pakotņu kontrolsummas pirms instalētas pakotnes aizstāšanas. Tā lasa lokālus failus; tā nelejupielādē trūkstošus arhīvus. Pēc instalēšanas pārstartējiet lietotni. Ja laidienam nav atbilstoša faila, izvēles pakotne nav pieejama šī laidiena failos.
+
 ## Direktoriju izkārtojums
 
 ```

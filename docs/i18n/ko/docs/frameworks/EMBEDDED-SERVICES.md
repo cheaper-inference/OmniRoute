@@ -5,8 +5,8 @@
 ---
 
 > **버전:** v3.8.44
-> **최종 업데이트:** 2026-09-16
-> **대상:** 임베디드 서비스(9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua)를 추가, 유지 관리 또는 디버깅하는 엔지니어.
+> **최종 업데이트:** 2026-10-28
+> **대상 독자:** 내장 서비스의 추가, 유지 보수 또는 디버깅을 담당하는 엔지니어(9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 임베디드 서비스는 OmniRoute가 설치하고 감독하며 일급 라우팅 대상으로 노출하는, 로컬에 설치된 프로세스 사이드카 도구입니다. 외부 제공업체(API 키를 통해 인터넷으로 연결)와 달리, 임베디드 서비스는 OmniRoute와 동일한 머신에서 실행되며 루프백을 통해 통신합니다.
 
@@ -29,7 +29,7 @@
 
 ### 임베디드 서비스를 사용하는 이유
 
-다음 7개 서비스가 임베드됩니다.
+여덟 개 서비스가 내장되어 있습니다.
 
 | 서비스          | npm 패키지                         | 기본 포트 | 용도                                                                                                                                                                                                                                                                                                                                |
 | --------------- | ---------------------------------- | :-------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -40,8 +40,9 @@
 | **Dario**       | `@askalf/dario`                    |   3456    | Claude 구독 프록시로, Claude-Code 형식 트래픽에 대한 CLIProxyAPI의 대안/장애 조치 수단입니다. 주입된 키는 `/admin/*` OAuth 제어 영역에 대한 접근을 제한하는 `DARIO_ADMIN_TOKEN`이 됩니다.                                                                                                                                           |
 | **open-wa**     | `@open-wa/wa-automate`             |   8323    | WhatsApp Web 자동화(Puppeteer를 통한 헤드리스 Chromium)입니다. 수명 주기만 관리되며 라우팅 대상이 아닙니다.                                                                                                                                                                                                                         |
 | **LLMLingua**   | `@atjsh/llmlingua-2`               |   20135   | 프롬프트 압축 사이드카로, 실제 LLMLingua-2 ONNX 모델(Microsoft 알고리즘의 JS/TS 포트)을 사용합니다. `open-sse/services/compression/engines/llmlingua/index.ts`는 HTTP를 통해 `/compress` 요청을 이 서비스로 전달하며, 사이드카가 중단되면 프로세스 내 워커 스레드 백엔드로 대체됩니다. 수명 주기만 관리되며 라우팅 대상이 아닙니다. |
+| **sing-box**    | GitHub 릴리스 바이너리 (`singbox`) |   20140   | `applyTproxy()`의 투명 프록시 가로채기를 지원하는 TPROXY 사이드카(`src/mitm/tproxy/setup.ts`). 설치 프로그램은 버전이 고정된 릴리스를 다운로드하고 체크섬을 검증합니다. 수명 주기만 관리하며, 라우팅 대상이 아니고 LLM 프록시 처리를 하지 않습니다.                                                                                 |
 
-7개 서비스 모두 동일한 감독 모델을 따릅니다.
+여덟 서비스 모두 같은 감독 모델을 따릅니다.
 
 - OmniRoute는 서비스를 `DATA_DIR/services/{name}/` 아래에 설치합니다(OmniRoute 자체 `package.json`과 격리됨).
 - OmniRoute는 서비스를 자식 프로세스로 실행하고 모니터링합니다.
@@ -577,7 +578,27 @@ ONNX 토큰 분류 모델은 첫 번째
 
 ---
 
-### 4.8 리버스 프록시(9Router 대시보드 임베드)
+### 4.8 sing-box 엔드포인트(8개 경로)
+
+sing-box는 Mux와 같은 엔드포인트 구조를 사용합니다. `rotate-key` 경로가 없고 API 키를 주입하지도 않습니다(`bootstrap.ts`의 `needsApiKey: false`). 수명 주기만 관리하며 라우팅 또는 LLM 공급자가 되는 일은 없습니다. `install()`은 고정된 버전(`src/lib/services/installers/singbox.ts`의 `SINGBOX_PINNED_VERSION`)에 해당하는 공식 GitHub 릴리스 바이너리(`SagerNet/sing-box`)를 다운로드하고, 디스크에 쓰기 전에 같은 파일에 내장된 체크섬과 SHA256을 대조합니다. 다른 버전을 요청하면 모두 거부합니다.
+
+| 메서드 | 경로                                         | 설명                                                              |
+| ------ | -------------------------------------------- | ----------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | 고정된 sing-box 릴리스 다운로드 및 검증                           |
+| `POST` | `/api/services/singbox/start`                | sing-box 시작(`sing-box run -c config.json`)                      |
+| `POST` | `/api/services/singbox/stop`                 | sing-box 중지                                                     |
+| `POST` | `/api/services/singbox/restart`              | sing-box 다시 시작                                                |
+| `POST` | `/api/services/singbox/update`               | 고정된 릴리스 재검증 또는 재설치                                  |
+| `GET`  | `/api/services/singbox/status`               | 현재 실행 상태와 DB 상태                                          |
+| `POST` | `/api/services/singbox/auto-start`           | 자동 시작 켜기 또는 끄기                                          |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | 관리 대상으로 인계받은 기존 프로세스의 자동 재시작 켜기 또는 끄기 |
+| `GET`  | `/api/services/singbox/logs`                 | 공유 동적 경로 `[name]/logs`를 통해 SSE로 로그의 새 내용을 받기   |
+
+**TPROXY 연결:** `ensureSingboxTproxy()`(`src/mitm/tproxy/setup.ts`)는 `applyTproxy()`가 TPROXY 방화벽 규칙을 설치하기 전에 `config.json`을 쓰고 감독 프로세스를 시작합니다. 감독 프로세스가 없거나 `running` 상태에 도달하지 못하면 이제 실패를 조용히 무시하지 않고 오류 수준으로 기록합니다. 따라서 운영자는 작동하는 리스너 없이 TPROXY 규칙만 적용된 상황을 파악할 수 있습니다.
+
+---
+
+### 4.9 리버스 프록시(9Router 대시보드 임베드)
 
 대시보드는 다음 위치의 내부 리버스 프록시를 통해 iframe 안에 9Router 웹 UI를
 임베드합니다.

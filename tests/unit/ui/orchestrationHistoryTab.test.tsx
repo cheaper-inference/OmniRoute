@@ -6,7 +6,7 @@
  */
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (k: string, v?: Record<string, unknown>) =>
@@ -22,6 +22,16 @@ vi.mock("@/app/(dashboard)/dashboard/orchestration/drawer/OrchestrationDrawer", 
 }));
 
 import { HistoryTab } from "@/app/(dashboard)/dashboard/orchestration/tabs/HistoryTab";
+
+// The history grid is the kit Table (KEA-7886), whose persistent scrollbar measures the table
+// with ResizeObserver — jsdom does not implement it.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 function render(el: React.ReactElement) {
   const c = document.createElement("div");

@@ -15,7 +15,7 @@ import {
 // bumps the top-level source_hash while the interrupted locales keep the old
 // one. The drift gate compared only the top-level hash and reported PASS for
 // 45 stale mirrors; it must list every locale record behind its source (as a
-// warning — an interrupted refresh must not turn every PR's CI red).
+// blocking failure for absolute admission, while exact inherited PR evidence is separate).
 test("a locale whose record was written from an older source is stale", () => {
   const newest = "a".repeat(64);
   const older = "b".repeat(64);
@@ -95,7 +95,7 @@ test("PR stale inheritance requires the same locale and complete source-hash pai
   assert.equal(partitionAgainstBase(unverified, unverified).ok, false);
 });
 
-test("CLI blocks new stale provenance in PRs while keeping global and inherited warnings advisory", (t) => {
+test("CLI blocks absolute stale provenance while permitting exact inherited preparation", (t) => {
   const root = mkdtempSync(join(tmpdir(), "omniroute-i18n-stale-pr-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const hash = (text: string) => createHash("sha256").update(text).digest("hex");
@@ -148,8 +148,8 @@ test("CLI blocks new stale provenance in PRs while keeping global and inherited 
   state.sources["README.md"].locales["pt-BR"].source_hash = oldHash;
   save();
   const advisory = run();
-  assert.equal(advisory.status, 0);
-  assert.equal(advisory.report.ok, true);
+  assert.equal(advisory.status, 1);
+  assert.equal(advisory.report.ok, false);
   assert.deepEqual(advisory.report.staleTargets, [
     { rel: "README.md", locale: "pt-BR", recorded: oldHash, current: sourceHash },
   ]);
@@ -190,7 +190,7 @@ test("CLI blocks new stale provenance in PRs while keeping global and inherited 
   assert.deepEqual(unknown.report.driftedSources, []);
   assert.deepEqual(unknown.report.driftedTargets, []);
   const globalUnknown = invoke();
-  assert.equal(globalUnknown.status, 0);
-  assert.match(globalUnknown.stdout, /translation-provenance warnings remain advisory/);
+  assert.equal(globalUnknown.status, 1);
+  assert.match(globalUnknown.stdout, /blocking for absolute admission/);
   assert.match(globalUnknown.stdout, /source-hash-unverified/);
 });

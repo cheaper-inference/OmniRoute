@@ -404,3 +404,7 @@ export function removeModelCompatOverride(providerId: string, modelId: string) {
   if (filtered.length === list.length) return;
   writeCompatList(providerId, filtered);
 }
+
+export function clearModelCompatOverrides(providerId: string) {
+  writeCompatList(providerId, []);
+}

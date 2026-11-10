@@ -20,6 +20,7 @@ import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
 import { normalizeArrayContentChunk } from "../utils/arrayContentDelta.ts";
 import { assignAliasCacheWrite } from "../utils/pickCacheCreationTokens.ts";
 import { findBalancedJsonEnd } from "./responseSanitizer/balancedJson.ts";
+import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
 export {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -561,7 +562,7 @@ function sanitizeResponsesUsage(usage: unknown): unknown {
   sanitized.output_tokens = outputTokens;
   sanitized.total_tokens = totalTokens;
 
-  return sanitized;
+  return normalizeResponsesContextUsage(sanitized);
 }
 
 /**
@@ -773,6 +774,10 @@ function sanitizeResponsesStreamingEvent(parsedRecord: JsonRecord): JsonRecord {
     } else {
       delete sanitizedResponse.output_text;
     }
+    const responseUsage = toRecord(responseRecord.usage);
+    if (responseUsage) {
+      sanitizedResponse.usage = normalizeResponsesContextUsage(responseUsage);
+    }
     sanitized.response = sanitizedResponse;
   }
 
@@ -931,6 +936,41 @@ function extractResponsesOutputText(output: JsonRecord[]): string {
   return parts.join("");
 }
 
+/** Responses `incomplete_details.reason` for a Chat Completions finish_reason, or null. */
+function incompleteReasonForFinish(finishReason: unknown): string | null {
+  if (finishReason === "length") return "max_output_tokens";
+  return finishReason === "content_filter" ? "content_filter" : null;
+}
+
+/** Chat Completions tool_calls (or the legacy function_call) as Responses function_call items. */
+function buildFunctionCallOutputs(message: JsonRecord, choice: JsonRecord): JsonRecord[] {
+  const toolCalls = Array.isArray(message.tool_calls)
+    ? message.tool_calls
+    : message.function_call
+      ? [
+          {
+            id: toString(choice.id) || "call_0",
+            type: "function",
+            function: message.function_call,
+          },
+        ]
+      : [];
+  const items: JsonRecord[] = [];
+  for (let index = 0; index < toolCalls.length; index += 1) {
+    const toolCall = toRecord(toolCalls[index]) || {};
+    const fn = toRecord(toolCall.function) || {};
+    const callId = toString(toolCall.id) || `call_${index}`;
+    items.push({
+      id: `fc_${callId}`,
+      type: "function_call",
+      call_id: callId,
+      name: toString(fn.name) || "",
+      arguments: stripZeroWidthToolArgumentJson(fn.arguments),
+    });
+  }
+  return items;
+}
+
 function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecord {
   const responseId = normalizeResponsesId(openaiResponse.id);
   const createdAt = toNumber(openaiResponse.created) ?? Math.floor(Date.now() / 1000);
@@ -939,6 +979,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     ? (toRecord(openaiResponse.choices[0]) ?? {})
     : {};
   const message = toRecord(choice.message) || {};
+  const incompleteReason = incompleteReasonForFinish(choice.finish_reason);
   const output: JsonRecord[] = [];
 
   const reasoningContent =
@@ -959,6 +1000,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
       id: `msg_${responseId}_0`,
       type: "message",
       role: toString(message.role) || "assistant",
+      ...(incompleteReason ? { status: "incomplete" } : {}),
       content:
         messageContent.length > 0
           ? messageContent
@@ -966,37 +1008,15 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     });
   }
 
-  const toolCalls = Array.isArray(message.tool_calls)
-    ? message.tool_calls
-    : message.function_call
-      ? [
-          {
-            id: toString(choice.id) || "call_0",
-            type: "function",
-            function: message.function_call,
-          },
-        ]
-      : [];
-
-  for (let index = 0; index < toolCalls.length; index += 1) {
-    const toolCall = toRecord(toolCalls[index]) || {};
-    const fn = toRecord(toolCall.function) || {};
-    const callId = toString(toolCall.id) || `call_${index}`;
-    output.push({
-      id: `fc_${callId}`,
-      type: "function_call",
-      call_id: callId,
-      name: toString(fn.name) || "",
-      arguments: stripZeroWidthToolArgumentJson(fn.arguments),
-    });
-  }
+  output.push(...buildFunctionCallOutputs(message, choice));
 
   const sanitized: JsonRecord = {
     id: responseId,
     object: "response",
     created_at: createdAt,
     model,
-    status: "completed",
+    status: incompleteReason ? "incomplete" : "completed",
+    ...(incompleteReason ? { incomplete_details: { reason: incompleteReason } } : {}),
     background: false,
     error: null,
     output,
@@ -1098,7 +1118,7 @@ export function sanitizeStreamingChunk(parsed: unknown): unknown {
           if (deltaRecord.content !== undefined) {
             delta.content =
               typeof deltaRecord.content === "string"
-                ? collapseExcessiveNewlines(stripZeroWidthText(deltaRecord.content))
+                ? stripZeroWidthText(deltaRecord.content)
                 : deltaRecord.content;
           }
           copyOpenAICompatibleReasoningFields(deltaRecord, delta);

@@ -5,8 +5,8 @@
 ---
 
 > **Sürüm:** v3.8.44
-> **Son güncelleme:** 2026-09-16
-> **Hedef kitle:** Gömülü hizmetleri (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua) ekleyen, sürdüren veya hata ayıklayan mühendisler.
+> **Son güncelleme:** 2026-10-28
+> **Hedef kitle:** Gömülü hizmetleri ekleyen, bakımını yapan veya hatalarını ayıklayan mühendisler (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Gömülü hizmetler, OmniRoute'un yüklediği, denetlediği ve birinci sınıf yönlendirme hedefleri olarak
 sunduğu, yerel olarak yüklenen yardımcı işlem araçlarıdır. API anahtarları aracılığıyla internet üzerinden
@@ -31,19 +31,20 @@ erişilen harici sağlayıcıların aksine gömülü hizmetler, OmniRoute ile ay
 
 ### Neden gömülü hizmetler?
 
-Yedi hizmet gömülü olarak sunulur:
+Sekiz hizmet gömülüdür:
 
-| Hizmet          | npm paketi                              | Varsayılan port | Amaç                                                                                                                                                                                                                                                                                                                                                                                       |
-| --------------- | --------------------------------------- | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **9Router**     | `9router`                               |      20130      | OmniRoute'un alt sağlayıcı olarak kullanabileceği yapay zekâ yönlendiricisi. Modeller `9router/{sub}/{model}` biçiminde sunulur                                                                                                                                                                                                                                                            |
-| **CLIProxyAPI** | GitHub sürüm ikili dosyası (`cliproxy`) |      8317       | Anthropic CLI kimlik doğrulama akışları için yerel proxy bağdaştırıcısı. OAuth belirteçlerinin süresi dolduğunda yedek yönlendirme sağlar                                                                                                                                                                                                                                                  |
-| **Mux**         | `mux` (başsız `mux server`)             |      8322       | Yerel aracı orkestrasyon daemon'u (coder/mux). Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir (LLM proxy'leme yoktur).                                                                                                                                                                                                                                                     |
-| **Bifrost**     | `@maximhq/bifrost`                      |      8080       | Go tabanlı yapay zekâ ağ geçidi aktarma arka ucu. Çalışırken aktarma rotası (`/v1/relay/`) tarafından otomatik olarak seçilir                                                                                                                                                                                                                                                              |
-| **Dario**       | `@askalf/dario`                         |      3456       | Claude abonelik proxy'si — Claude-Code biçimli trafik için CLIProxyAPI'ye alternatif/yedek; enjekte edilen anahtar, `/admin/*` OAuth kontrol düzlemine erişimi kısıtlayan `DARIO_ADMIN_TOKEN` hâline gelir                                                                                                                                                                                 |
-| **open-wa**     | `@open-wa/wa-automate`                  |      8323       | WhatsApp Web otomasyonu (Puppeteer üzerinden başsız Chromium). Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir.                                                                                                                                                                                                                                                             |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                    |      20135      | İstem sıkıştırma yardımcı hizmeti — gerçek LLMLingua-2 ONNX modeli (Microsoft'un algoritmasının JS/TS uyarlaması). `open-sse/services/compression/engines/llmlingua/index.ts`, `/compress` isteklerini HTTP üzerinden bu hizmete yönlendirir ve yardımcı hizmet çalışmıyorsa süreç içi iş parçacığı arka ucuna geri döner. Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir. |
+| Hizmet          | npm paketi                                 | Varsayılan port | Amaç                                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | ------------------------------------------ | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **9Router**     | `9router`                                  |      20130      | OmniRoute'un alt sağlayıcı olarak kullanabileceği yapay zekâ yönlendiricisi. Modeller `9router/{sub}/{model}` biçiminde sunulur                                                                                                                                                                                                                                                            |
+| **CLIProxyAPI** | GitHub sürüm ikili dosyası (`cliproxy`)    |      8317       | Anthropic CLI kimlik doğrulama akışları için yerel proxy bağdaştırıcısı. OAuth belirteçlerinin süresi dolduğunda yedek yönlendirme sağlar                                                                                                                                                                                                                                                  |
+| **Mux**         | `mux` (başsız `mux server`)                |      8322       | Yerel aracı orkestrasyon daemon'u (coder/mux). Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir (LLM proxy'leme yoktur).                                                                                                                                                                                                                                                     |
+| **Bifrost**     | `@maximhq/bifrost`                         |      8080       | Go tabanlı yapay zekâ ağ geçidi aktarma arka ucu. Çalışırken aktarma rotası (`/v1/relay/`) tarafından otomatik olarak seçilir                                                                                                                                                                                                                                                              |
+| **Dario**       | `@askalf/dario`                            |      3456       | Claude abonelik proxy'si — Claude-Code biçimli trafik için CLIProxyAPI'ye alternatif/yedek; enjekte edilen anahtar, `/admin/*` OAuth kontrol düzlemine erişimi kısıtlayan `DARIO_ADMIN_TOKEN` hâline gelir                                                                                                                                                                                 |
+| **open-wa**     | `@open-wa/wa-automate`                     |      8323       | WhatsApp Web otomasyonu (Puppeteer üzerinden başsız Chromium). Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir.                                                                                                                                                                                                                                                             |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                       |      20135      | İstem sıkıştırma yardımcı hizmeti — gerçek LLMLingua-2 ONNX modeli (Microsoft'un algoritmasının JS/TS uyarlaması). `open-sse/services/compression/engines/llmlingua/index.ts`, `/compress` isteklerini HTTP üzerinden bu hizmete yönlendirir ve yardımcı hizmet çalışmıyorsa süreç içi iş parçacığı arka ucuna geri döner. Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir. |
+| **sing-box**    | GitHub sürümünün ikili dosyası (`singbox`) |      20140      | `applyTproxy()` işlevinin şeffaf proxy ile trafiği yakalamasını destekleyen TPROXY yardımcı süreci (`src/mitm/tproxy/setup.ts`). Yükleyici, sürümü sabitlenmiş ve sağlama toplamı doğrulanmış paketi indirir. Yalnızca yaşam döngüsü yönetilir — yönlendirme hedefi değildir ve LLM proxy işlevi görmez.                                                                                   |
 
-Yedi hizmetin tamamı aynı denetim modelini izler:
+Sekizi de aynı süreç gözetimi modelini izler:
 
 - OmniRoute bunları `DATA_DIR/services/{name}/` altına kurar (OmniRoute'un kendi `package.json` dosyasından yalıtılmıştır)
 - OmniRoute bunları alt süreçler olarak başlatır ve izler
@@ -585,7 +586,27 @@ arka ucuna (`./worker.ts`) geri döner.
 
 ---
 
-### 4.8 Ters proxy (9Router pano yerleştirmesi)
+### 4.8 sing-box uç noktaları (8 rota)
+
+sing-box, Mux ile aynı uç nokta yapısına sahiptir — `rotate-key` rotası ve API anahtarı ekleme yoktur (`bootstrap.ts` içinde `needsApiKey: false`). Yalnızca yaşam döngüsü yönetilir; hiçbir zaman yönlendirme veya LLM sağlayıcısı değildir. `install()`, sabitlenmiş sürümün (`src/lib/services/installers/singbox.ts` içindeki `SINGBOX_PINNED_VERSION`) resmi GitHub ikili dosyasını (`SagerNet/sing-box`) indirir ve diske yazmadan önce SHA256 değerini aynı dosyaya gömülü sağlama toplamıyla doğrular. İstenen diğer tüm sürümler reddedilir.
+
+| Yöntem | Yol                                          | Açıklama                                                                                    |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Sabitlenmiş sing-box sürümünü indir ve doğrula                                              |
+| `POST` | `/api/services/singbox/start`                | sing-box başlat (`sing-box run -c config.json`)                                             |
+| `POST` | `/api/services/singbox/stop`                 | sing-box durdur                                                                             |
+| `POST` | `/api/services/singbox/restart`              | sing-box yeniden başlat                                                                     |
+| `POST` | `/api/services/singbox/update`               | Sabitlenmiş sürümü yeniden doğrula veya yükle                                               |
+| `GET`  | `/api/services/singbox/status`               | Anlık durum ve veritabanı durumu                                                            |
+| `POST` | `/api/services/singbox/auto-start`           | Otomatik başlatmayı aç veya kapat                                                           |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Yönetimi devralınmış, önceden var olan süreç için otomatik yeniden başlatmayı aç veya kapat |
+| `GET`  | `/api/services/singbox/logs`                 | SSE ile yeni günlük kayıtlarını izle (ortak dinamik `[name]/logs` rotası üzerinden)         |
+
+**TPROXY bağlantısı:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`), `applyTproxy()` TPROXY güvenlik duvarı kurallarını yüklemeden önce `config.json` dosyasını yazar ve süreç gözeticisini başlatır. Gözetici yoksa veya `running` durumuna ulaşamazsa, hata sessizce yutulmak yerine artık hata düzeyinde günlüğe yazılır. Böylece operatör, TPROXY kurallarının arkalarında çalışan bir dinleyici olmadan uygulandığını anlayabilir.
+
+---
+
+### 4.9 Ters proxy (9Router pano yerleştirmesi)
 
 Pano, 9Router web kullanıcı arayüzünü şu adresteki dahili bir ters proxy
 aracılığıyla bir iframe içine yerleştirir:

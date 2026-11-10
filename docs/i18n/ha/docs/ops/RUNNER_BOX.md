@@ -4,37 +4,27 @@
 
 ---
 
-Pool ɗin da ake karɓar baƙuncinsa da kai yana aiki a kan na’urar **.113** (`tomni-proxmox-113`). Tun daga 2026-10-18, kowane
-runner na OmniRoute yana da **matsayi guda**, lakabi guda, da kasafin ƙwaƙwalwa/CPU da aka daidaita bisa abin da nauyin aikinsa
-ya nuna a ma’auni. Slot ɗin Turbopack yana samun abin da build ɗin ke buƙata; sauran slots kuwa an daidaita su bisa
-mafi girman amfani da aka auna. Na’urar tana yin overcommit ne kawai idan build na Turbopack ya zo lokaci guda da build na webpack na Release-Green
-da aikin lint; swap na host (16 GB) yana ɗaukar wannan, kuma saboda Builds na pull-request suna gudana a kan hosted runners,
-slot ɗin Turbopack ba ya aiki a mafi yawan lokaci:
+Wurin ruwa mai sarrafa kansa yana gudana akan **.113** akwatin (`tomni-proxmox-113`). Tun daga 2026-10-18 kowane mai gudu OmniRoute yana da **rawar daya** , lakabi ɗaya, da kasafin kuɗi memory/CPU wanda aka auna gwargwadon aikin sa. Ramin Turbopack yana samun abin da ginin ke buƙata; sauran ramummuka suna da girma zuwa ma'aunin ma'aunin su. Akwatin yana wucewa ne kawai lokacin da ginin Turbopack ya zo daidai da ginin fakitin yanar gizo na Saki-Green da aikin lint; swap mai watsa shiri (16 GB) yana ɗaukar hakan, kuma saboda buƙatun buƙatun Gina yana gudana, rukunin Turbopack ba shi da aiki mafi yawan lokaci:
 
-| runner               | lakabi                          | matsayi                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
-| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Builds na Turbopack: `ci.yml` `Build` (push/dispatch kawai), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build na a11y na dare | 56 GB / 60 GB (swap 0)     | 1600 %        |
-| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build na webpack                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
-| `omniroute-113-2`    | `omni-light`                    | ayyukan dare (Schemathesis, promptfoo, garak, k6) da `quality.yml` `lint-guard`                                                                         | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
-| `omniroute-113`      | `omni-light`                    | pool iri ɗaya da na sama                                                                                                                                | 8 GB / 12 GB               | 400 %         |
-| OmniHeuris, OmniMind | (repos nasu)                    | Dependabot kawai (kololuwa 155 MB kowanne, 2026-10-18)                                                                                                  | 4 GB / 6 GB                | 200 % kowanne |
+| runner               | lakabi                          | matsayi                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Builds na Turbopack: `ci.yml` `Build` (push/dispatch kawai), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build na a11y na dare | 56 GB / 60 GB (swap 0)     | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build na webpack                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | ayyukan dare (Schemathesis, promptfoo, garak, k6) da `quality.yml` `lint-guard`                                                                         | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
+| `omniroute-113`      | `omni-light`                    | pool iri ɗaya da na sama                                                                                                                                | 8 GB / 12 GB               | 400 %       |
+| OmniHeuris, OmniMind | (majalisin su)                  | Dependabot kawai (kololuwa 155 MB kowane, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | 200% kowane |
 
-An auna a 2026-10-18:
+An auna 2026-10-18:
 
-| albarkatu | ƙima                     | abin da yake nufi ga tsara gudanar da ayyuka                                                                                                                                                                                                                                                                                                                                                                                                  |
-| --------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / cores 32**     | build na production na Turbopack ya kai kololuwar 49 GB ba tare da iyaka ba (`tests/unit/ci-build-bundler-webpack.test.ts`); a Next 16.3.8, matakin compile kaɗai yana riƙe da kusan 40 GB (36 GB RSS a cikin `next-build` tare da loader workers 17 masu 3 GB, an auna 2026-10-18); build na webpack yana amfani da kusan 14–16 GB. Build ɗaya na Turbopack da ɗaya na webpack za su iya aiki tare; builds biyu na Turbopack ba za su iya ba |
-| swap      | 16 GB                    | `omniroute-113-5` yana aiki ba tare da swap ba (`MemorySwapMax=0`) domin a dakatar da build da ya fita daga iko a iyakarsa maimakon ya sa na’urar ta fara amfani da swap                                                                                                                                                                                                                                                                      |
-| `/tmp`    | **12 GB tmpfs = RAM**    | duk abin da aka ajiye a wurin yana cin ƙwaƙwalwa; ana share ragowar bayan awa 3                                                                                                                                                                                                                                                                                                                                                               |
-| CPU       | an ga load 60 a cores 32 | kafin a sanya quotas, build guda na Turbopack (~1166 % CPU) tare da coverage suite a kan na’ura ɗaya sun hana saƙonnin heartbeat na sauran listeners samun albarkatu (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                    |
-| runners   | **listeners 6**          | OmniRoute 4 + OmniHeuris + OmniMind; an kashe `omniroute-113-3/-4/-7/-8` (`systemctl enable --now` yana sake kunna ɗaya)                                                                                                                                                                                                                                                                                                                      |
+| albarkatu         | ƙima                            | abin da yake nufi ga tsara gudanar da ayyuka                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU         | **78 GB / 32 murdiya**          | wani ginin samar da Turbopack wanda ya kai kololuwar 49 GB wanda ba a rufe shi ba (`tests/unit/ci-build-bundler-webpack.test.ts`); a kan 16.3.8 na gaba na ƙaddamarwa kadai yana riƙe da ~ 40 GB (36 GB RSS a `next-build` da 17 loader ma'aikata a 3 GB, auna 2026-10-18); fakitin gidan yanar gizon ginawa a ~ 14–16 GB. Turbopack + ɗaya ginin fakitin gidan yanar gizo ɗaya ya dace tare; biyu Turbopack gina ba |
+| musanya           | 16 GB                           | `omniroute-113-5` yana gudana tare da musanyawa (`MemorySwapMax=0`) don haka ginin da ya gudu yana yanke a hularsa maimakon musanya akwatin.                                                                                                                                                                                                                                                                         |
+| `/tmp`            | **12 GB tmpfs = RAM**           | duk abin da aka ajiye a wurin yana cin ƙwaƙwalwa; ana share ragowar bayan awa 3                                                                                                                                                                                                                                                                                                                                      |
+| CPU               | load 60 akan 32 cores lura      | kafin adadin, Turbopack ɗaya ya gina (~ 1166 % CPU) tare da ɗaukar hoto akan akwatin guda ya kashe zuciyar sauran masu sauraro (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                                                 |
+| 'yan gudun hijira | **7 masu sauraro** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` kuma yana ɗaukar `omni-build`; An share `omniroute-113-3/-4/-8` daga repo (2026-10-28)                                                                                                                                                                                                                                                                        |
 
-Iyakokin suna cikin `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` na kowane unit
-(an adana tsoffin ƙimomi a matsayin `override.conf.bak-20261018`) kuma an yi amfani da su kai tsaye ta
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — babu sake kunnawa, don haka ba a taɓa
-wani aiki da ke gudana ba. Ana sauya lakabai ta runners API
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), shi ma kai tsaye.
+Iyakokin suna rayuwa a cikin kowane naúrar `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` (darajar da ta gabata ta kasance `override.conf.bak-20261018`) kuma an yi amfani da su kai tsaye tare da `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — ba a sake farawa ba, don haka ba a taɓa wani aikin gudu ba. Ana canza alamun ta hanyar masu gudu API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), kuma suna rayuwa.
 
 ## Shigar da mai tsaftacewa (sau ɗaya, a kan na’urar)
 
@@ -42,7 +32,7 @@ wani aiki da ke gudana ba. Ana sauya lakabai ta runners API
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): kowane minti 30, a rubuta log zuwa /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 Ana buƙatar `lsof`: mai tsaftacewar yana tabbatar da cewa babu abin da ke amfani da wata hanya ta hanyar ɗaukar hoto guda na fayilolin da suke buɗe
@@ -116,8 +106,16 @@ kowane lokaci, sai lokacin da ba ya aiki**, tare da binciken rashin aiki da sake
   yana da `MemoryHigh=4G` har zuwa 2026-10-18 — ginin promptfoo ya shafe minti 54 yana ta dawo da ƙwaƙwalwa
   a can; 8 GB yana kawar da rage saurin.
 - **An rage listeners da gangan.** An kashe units guda huɗu na OmniRoute a 2026-08-29 — kowane ƙarin
-  listener wani mai amfani ne ga kasafin ƙwaƙwalwar da ke sama. Iyakar janitor ita ce 6 (`MAX_ACTIVE_RUNNERS=6` a cikin cron): yana ƙirga
-  kowane `Runner.Listener` da ke kan na’urar, kuma OmniHeuris + OmniMind suna ƙara guda biyu a kan namu guda huɗu.
+  listener wani mai amfani ne ga kasafin ƙwaƙwalwar da ke sama. Iyakar janitor ita ce 8 (`MAX_ACTIVE_RUNNERS=8` a cikin cron): yana ƙirga
+  kowane `Runner.Listener` da ke kan na’urar, kuma OmniHeuris + OmniMind suna ƙara guda biyu a kan namu guda biyar.
+- **Ayyukan Unit da Vitest suna nan a kan masu gudanarwa da aka masauƙanta.** `ci.yml` yana tura shards na unit da aikin Vitest zuwa
+  `[self-hosted, omni-ci]` ne kawai idan canjin ma'ajiya `vars.USE_VPS_TEST_RUNNER` ya kasance
+  `true`, kuma ko a lokacin sai don gudanarwar `pull_request` daga ma'ajiya ɗaya; forks, `merge_group` da turawa
+  suna nan a kan `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Canjin yana
+  `false`. A 2026-10-28 listeners guda uku na `omni-ci` masu cores 4 sun ɗauki 250–270 s don `npm ci`, kuma kowane
+  shard na unit ya kai iyakar aiki ta mintuna 30, idan aka kwatanta da ~634 s ga shard da aka masauƙanta, yayin da nauyin na’urar ke
+  17–24. An goge listeners ɗin. Kada a sake kunna canjin ba tare da listeners da aka tsara girmansu don
+  shard na unit ba.
 - **Kada a taɓa tsaftace `/tmp` ko `_work` da hannu yayin da kowane runner ke aiki.** Yin
   dubawa-sannan-sharewa tare da tazara tsakanin matakan biyu shi ne yadda wani aikin Build mai gudana ya rasa
   `_work` ɗinsa a 2026-08-27. Janitor yana yin dubawa da cirewar a mataki ɗaya;
@@ -131,8 +129,10 @@ kowane lokaci, sai lokacin da ba ya aiki**, tare da binciken rashin aiki da sake
 
 ## Layin da aka masauƙanta (masu gudanarwa da GitHub ke masauƙanta)
 
-Asusun yana kan shirin **Pro**: **ayyukan da aka masauƙanta 40 masu gudana a lokaci guda**, waɗanda kowace duba ta PR,
-kowace workflow da turawa ke kunna wa da kuma saitin tsoho na CodeQL suke amfani da su tare. An auna a 2026-10-18 yayin
+Ma'ajiyar tana ƙarƙashin ƙungiyar `cheaper-inference`, a kan shirin **Team**: **ayyukan da aka masauƙanta 60
+masu gudana a lokaci guda**, waɗanda kowace ma'ajiya a cikin ƙungiyar, kowace duba ta PR,
+kowace workflow da turawa ke kunna wa da kuma saitin tsoho na CodeQL suke amfani da su tare. An auna alkaluman da ke ƙasa
+a kan shirin **Pro** (ayyukan da aka masauƙanta 40 masu gudana a lokaci guda). An auna a 2026-10-18 yayin
 gangamin haɗewa (~haɗewa 10/awa a kan `release/v3.8.52`): **an ƙirƙiri gudanarwar workflow 2,500 cikin
 sa'o'i 24**, turawa 44 zuwa reshen cikin sa'o'i 6, **ayyukan da aka masauƙanta 106 suna jiran layi** yayin da dubawar PR ke jira na
 sa'o'i kuma aka haɗe PR ba tare da su ba. Workflow tara ne suka kunna a duk lokacin turawa zuwa reshen:

@@ -175,6 +175,12 @@ server process બંધ કરી શકે.
 | `/api/providers/health-autopilot/actions` | autopilot remediation actions ચલાવે છે                          |
 | `/api/settings/obsidian`                  | કોઈપણ vault root માટે ફરી વાપરી શકાય તેવા WebDAV creds બનાવે છે |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                    |
+| `/api/cli-tools/apply`                    | હોસ્ટ પર ઑપરેટરનું CLI કનફિગરેશન ફરીથી લખે છે                   |
+| `/api/cli-tools/guide-settings`           | માર્ગદર્શિકા આધારિત CLI કનફિગરેશન ફાઇલો લખે છે                  |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes એજન્ટનું કનફિગરેશન લખે છે                                |
+| `/api/cli-tools/backups`                  | CLI કનફિગરેશનના બેકઅપ પુનઃસ્થાપિત કરે છે અને કાઢે છે            |
+| `/api/log-export`                         | કનફિગર કરેલા ગંતવ્ય પર કૉલ લૉગ મોકલે છે                         |
+| `/api/restart`                            | સર્વર પ્રક્રિયા ફરીથી શરૂ કરે છે                                |
 
 **ઉલ્લંઘન પર પ્રતિસાદ:** `401 Authentication required`
 

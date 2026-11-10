@@ -64,6 +64,19 @@ OmniRoute **Electron 41** + **electron-builder 26.10** પર બનેલી �
 - `npm run build:mac-x64` / `build:mac-arm64` — એકલ-આર્કિટેક્ચર macOS બિલ્ડ્સ
 - `npm run pack` — સ્થાનિક પરીક્ષણ માટે માત્ર-ડિરેક્ટરી બિલ્ડ (ઇન્સ્ટોલર વિના)
 
+## વૈકલ્પિક રનટાઇમ પૅક
+
+ડેસ્કટોપ build પોતાના installer સાથે વૈકલ્પિક રનટાઇમ archive પ્રકાશિત કરી શકે છે. ઇન્સ્ટૉલ કરેલા સર્વરની સામગ્રીમાં `optional-packs.index.json` હોય છે (Windows અને Linux પર `resources/app` હેઠળ). `browser-runtime` એન્ટ્રી માટે `packs[].tarball` વાંચો અને **તે જ રિલીઝમાંથી બરાબર તે જ નામની ફાઇલ ડાઉનલોડ કરો**. archive ના નામમાં SHA-256 digest હોય છે; જુદા build માટે જુદા archive જરૂરી થઈ શકે છે. ડાઉનલોડ કરેલી ફાઇલનું નામ બદલશો નહીં.
+
+ઇન્સ્ટૉલ કરેલી ઍપનો index અને પસંદ કરેલો archive એક જ ડિરેક્ટરીમાં કૉપી કરો, પછી તે જ રિલીઝનો CLI વાપરો:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` ઇન્સ્ટૉલેશન અને ચકાસણીની સ્થિતિ બતાવે છે, archive નું ફાઇલનામ નહીં. સાથે આપેલો index archive પસંદ કરે છે. ઇન્સ્ટૉલેશન extraction પહેલાં archive નો checksum અને ઇન્સ્ટૉલ કરેલા પૅકને બદલતાં પહેલાં તેના package checksum તપાસે છે. તે સ્થાનિક ફાઇલ વાંચે છે; ગેરહાજર archive ડાઉનલોડ કરતું નથી. ઇન્સ્ટૉલેશન પછી ઍપ્લિકેશન ફરી શરૂ કરો. રિલીઝમાં મેળ ખાતી ફાઇલ ન હોય તો વૈકલ્પિક પૅક તે રિલીઝની ફાઇલો દ્વારા ઉપલબ્ધ નથી.
+
 ## ડિરેક્ટરી લેઆઉટ
 
 ```

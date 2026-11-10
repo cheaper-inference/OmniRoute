@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Card, Toggle, Select } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import { Button, Card, Toggle, Select } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import {
   CODEX_FAST_TIER_DEFAULT_SUPPORTED_MODELS,
   resolveCodexGlobalFastServiceTier,
@@ -105,28 +107,23 @@ export default function CodexFastTierTab() {
   };
 
   return (
-    <Card>
-      <div className="flex items-center gap-3 mb-3">
-        <div className="p-2 rounded-lg bg-sky-500/10 text-sky-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            bolt
-          </span>
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("codexFastTierTitle")}</h3>
-          <p className="text-sm text-text-muted">{t("codexFastTierDesc")}</p>
-        </div>
+    <Card
+      icon="bolt"
+      title={t("codexFastTierTitle")}
+      subtitle={t("codexFastTierDesc")}
+      action={
         <div className="flex items-center gap-3">
           {status === "saved" && (
-            <span className="text-xs font-medium text-emerald-500 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">check_circle</span>{" "}
-              {t("saved")}
+            <span
+              role="status"
+              className="text-xs font-medium text-success flex items-center gap-1"
+            >
+              <Icon name="check_circle" size={14} /> {t("saved")}
             </span>
           )}
           {status === "error" && (
-            <span className="text-xs font-medium text-rose-500 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">error</span>{" "}
-              {t("codexFastTierSaveError")}
+            <span role="alert" className="text-xs font-medium text-error flex items-center gap-1">
+              <Icon name="error" size={14} /> {t("codexFastTierSaveError")}
             </span>
           )}
           <Toggle
@@ -136,10 +133,10 @@ export default function CodexFastTierTab() {
             ariaLabel={t("codexFastTierTitle")}
           />
         </div>
-      </div>
-
+      }
+    >
       {enabled && (
-        <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
+        <div className="flex flex-col gap-4 border-t border-border pt-4">
           <Select
             label={t("codexFastTierTierLabel")}
             value={tier}
@@ -153,45 +150,37 @@ export default function CodexFastTierTab() {
           />
 
           <div>
-            <button
-              type="button"
-              className="flex items-center gap-1.5 text-sm font-medium text-text-main hover:text-text-muted"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 px-1"
               onClick={() => setModelsOpen((open) => !open)}
               aria-expanded={modelsOpen}
             >
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                {modelsOpen ? "expand_less" : "expand_more"}
-              </span>
+              <Icon name={modelsOpen ? "expand_less" : "expand_more"} size={18} />
               {t("codexFastTierModelsLabel")}
               <span className="ml-1 text-xs text-text-muted">({supportedModels.length})</span>
-            </button>
+            </Button>
             {modelsOpen && (
-              <div className="mt-3 pl-6 flex flex-col gap-2">
-                <p className="text-xs text-text-muted/80">{t("codexFastTierModelsHint")}</p>
-                {allCatalogModels.map((slug) => {
-                  const checked = supportedModels.includes(slug);
-                  return (
-                    <label key={slug} className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4"
-                        checked={checked}
-                        disabled={loading || saving}
-                        onChange={(e) => toggleModel(slug, e.target.checked)}
-                        aria-label={t("codexFastTierModelCheckbox", { model: slug })}
-                      />
-                      <span className="font-mono text-xs">{slug}</span>
-                    </label>
-                  );
-                })}
-              </div>
+              <CheckboxGroup description={t("codexFastTierModelsHint")} className="mt-3 pl-6">
+                {allCatalogModels.map((slug) => (
+                  <Checkbox
+                    key={slug}
+                    checked={supportedModels.includes(slug)}
+                    disabled={loading || saving}
+                    onChange={(e) => toggleModel(slug, e.target.checked)}
+                    aria-label={t("codexFastTierModelCheckbox", { model: slug })}
+                    label={<span className="font-mono text-xs">{slug}</span>}
+                  />
+                ))}
+              </CheckboxGroup>
             )}
           </div>
         </div>
       )}
 
-      <p className="mt-4 text-xs text-text-muted/80 flex items-start gap-1.5 leading-relaxed">
-        <span className="material-symbols-outlined text-[14px] mt-0.5">info</span>
+      <p className="mt-4 text-xs text-text-muted flex items-start gap-1.5 leading-relaxed">
+        <Icon name="info" size={14} className="mt-0.5" />
         <span>{t("codexFastTierHint")}</span>
       </p>
     </Card>

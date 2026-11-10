@@ -1,8 +1,14 @@
 "use client";
 
+import { Field } from "@omniroute/ui-kit/field";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
+
 // src/app/(dashboard)/dashboard/playground/components/StudioConfigPane.tsx
 
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useId, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslations } from "next-intl";
 import ParamSliders, { type PlaygroundParams } from "./ParamSliders";
 import type { PlaygroundEndpoint } from "@/lib/playground/codeExport";
@@ -65,6 +71,8 @@ const ENDPOINT_OPTIONS: Array<{ value: PlaygroundEndpoint; labelKey: string }> =
 export default function StudioConfigPane({ configState, setConfigState }: StudioConfigPaneProps) {
   const t = useTranslations("common");
   const tp = useTranslations("playground");
+  const modelLabelId = useId();
+  const systemPromptId = useId();
   const [collapsed, setCollapsed] = useState(false);
   // #4086: search/filter query for the Model dropdown — flat provider catalogs (e.g.
   // 50+ OpenRouter models) made the plain <select> unusable without scrolling.
@@ -144,14 +152,15 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
   if (collapsed) {
     return (
       <div className="flex flex-col items-center w-8 shrink-0">
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => setCollapsed(false)}
-          className="mt-2 p-1.5 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
+          className="mt-2 text-text-muted"
           title={tp("expandConfig")}
           aria-label={tp("expandConfig")}
-        >
-          <span className="material-symbols-outlined text-[18px]">settings</span>
-        </button>
+          icon="settings"
+        />
       </div>
     );
   }
@@ -166,14 +175,15 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
         <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
           {tp("configPane")}
         </span>
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => setCollapsed(true)}
-          className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
+          className="text-text-muted"
           title={tp("collapseConfig")}
           aria-label={tp("collapseConfig")}
-        >
-          <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-        </button>
+          icon="chevron_right"
+        />
       </div>
 
       <div className="flex flex-col gap-5 p-4">
@@ -181,104 +191,100 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
         <PresetPicker configState={configState} setConfigState={setConfigState} />
 
         {/* Endpoint */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
-            {tp("endpointLabel")}
-          </label>
-          <select
-            value={configState.endpoint}
-            onChange={(e) => update("endpoint", e.target.value as PlaygroundEndpoint)}
-            className="w-full text-xs bg-surface border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main"
-          >
-            {ENDPOINT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {tp(`endpointOptions.${opt.labelKey}`)} — {endpointToPath(opt.value)}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label={tp("endpointLabel")}
+          value={configState.endpoint}
+          onChange={(e) => update("endpoint", e.target.value as PlaygroundEndpoint)}
+          selectClassName="text-xs"
+        >
+          {ENDPOINT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {tp(`endpointOptions.${opt.labelKey}`)} — {endpointToPath(opt.value)}
+            </option>
+          ))}
+        </Select>
 
         {/* Provider */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
-            {tp("provider")}
-          </label>
-          <select
-            value={provider}
-            onChange={(e) => {
-              const nextProvider = e.target.value;
-              setProvider(nextProvider);
-              setConfigState((current) => ({
-                ...current,
-                provider: nextProvider,
-                model: "",
-              }));
-            }}
-            disabled={loadingProviders}
-            className="w-full text-xs bg-surface border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main"
-          >
-            <option value="">{tp("autoProvider")}</option>
-            {providerOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select
+          label={tp("provider")}
+          value={provider}
+          onChange={(e) => {
+            const nextProvider = e.target.value;
+            setProvider(nextProvider);
+            setConfigState((current) => ({
+              ...current,
+              provider: nextProvider,
+              model: "",
+            }));
+          }}
+          disabled={loadingProviders}
+          selectClassName="text-xs"
+        >
+          <option value="">{tp("autoProvider")}</option>
+          {providerOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </Select>
 
         {/* Model */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
+          {/* Same typography as the kit Field labels of Endpoint/Provider/System prompt. */}
+          <span id={modelLabelId} className="ci-label">
             {tp("model")}
-          </label>
+          </span>
           {availableModels.length > 0 ? (
             <>
               {availableModels.length > 1 && (
-                <input
+                <Input
                   type="text"
                   value={modelQuery}
                   onChange={(e) => setModelQuery(e.target.value)}
                   placeholder={t("search")}
                   aria-label={t("search")}
-                  className="w-full text-xs bg-surface border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main"
+                  icon="search"
+                  inputClassName="text-xs"
                 />
               )}
-              <select
+              <Select
+                aria-labelledby={modelLabelId}
                 value={configState.model}
                 onChange={(e) => update("model", e.target.value)}
                 disabled={loadingModels}
-                className="w-full text-xs bg-surface border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main"
+                selectClassName="text-xs"
               >
                 {filteredModels.map((m) => (
                   <option key={m} value={m}>
                     {m}
                   </option>
                 ))}
-              </select>
+              </Select>
             </>
           ) : (
-            <input
+            <Input
               type="text"
+              aria-labelledby={modelLabelId}
               value={configState.model}
               onChange={(e) => update("model", e.target.value)}
               placeholder={tp("modelPlaceholder")}
-              className="w-full text-xs bg-surface border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main"
+              inputClassName="text-xs"
             />
           )}
         </div>
 
         {/* System prompt */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
-            {tp("systemPrompt")}
-          </label>
-          <textarea
-            value={configState.systemPrompt}
-            onChange={(e) => update("systemPrompt", e.target.value)}
-            placeholder={tp("systemPromptPlaceholder")}
-            rows={4}
-            className="w-full text-xs bg-surface border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main resize-y"
-          />
+          <Field label={tp("systemPrompt")} htmlFor={systemPromptId}>
+            <Textarea
+              id={systemPromptId}
+              value={configState.systemPrompt}
+              onChange={(e) => update("systemPrompt", e.target.value)}
+              placeholder={tp("systemPromptPlaceholder")}
+              rows={4}
+              className="text-xs resize-y"
+            />
+          </Field>
           {/* ImprovePromptButton — injected by F7 */}
           <ImprovePromptButton configState={configState} setConfigState={setConfigState} />
         </div>

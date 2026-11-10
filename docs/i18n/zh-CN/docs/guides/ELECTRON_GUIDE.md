@@ -61,6 +61,19 @@ OmniRoute 提供基于 **Electron 41** + **electron-builder 26.10** 构建的跨
 - `npm run build:mac-x64` / `build:mac-arm64` — 单架构 macOS 构建
 - `npm run pack` — 仅生成目录的构建，用于本地测试（不生成安装程序）
 
+## 可选运行时包
+
+桌面构建可在安装程序旁发布可选运行时归档。安装后的服务器内容包含 `optional-packs.index.json`（Windows 和 Linux 上位于 `resources/app`）。对于 `browser-runtime` 条目，读取 `packs[].tarball`，并下载**同一发布版本中该名称完全一致的文件**。归档名称包含 SHA-256 摘要；不同构建可能需要不同归档。请保持下载文件名不变。
+
+将已安装应用的索引和选定归档复制到同一目录，然后使用同一发布版本的 CLI：
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` 显示安装和验证状态，不显示归档文件名。随附索引负责选择归档。安装过程在解压前验证归档校验和，在替换已安装包之前验证各软件包的校验和。它读取本地文件，不会下载缺失的归档。安装后请重新启动应用。如果该发布版本没有匹配的资源文件，就无法通过该版本的发布资源获取此可选包。
+
 ## 目录布局
 
 ```

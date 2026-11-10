@@ -5,6 +5,13 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import MemoriesTab from "../../../src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab";
 
+// The kit Table measures itself with ResizeObserver (persistent scrollbar); jsdom lacks it.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
 vi.mock("next-intl", () => {
   const translate = (key: string, values?: Record<string, unknown>) => {
     if (values) return `${key}:${JSON.stringify(values)}`;

@@ -199,6 +199,12 @@ serverproces kunnen beëindigen.
 | `/api/providers/health-autopilot/actions` | Voert herstelacties van de autopilot uit                            |
 | `/api/settings/obsidian`                  | Genereert herbruikbare WebDAV-inloggegevens voor elke kluishoofdmap |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                        |
+| `/api/cli-tools/apply`                    | Herschrijft de CLI-configuratie van de operator op de host          |
+| `/api/cli-tools/guide-settings`           | Schrijft CLI-configuratiebestanden op basis van handleidingen       |
+| `/api/cli-tools/hermes-agent-settings`    | Schrijft de configuratie van de Hermes-agent                        |
+| `/api/cli-tools/backups`                  | Herstelt en verwijdert backups van CLI-configuraties                |
+| `/api/log-export`                         | Verstuurt aanroeplogboeken naar een ingestelde bestemming           |
+| `/api/restart`                            | Herstart het serverproces                                           |
 
 **Respons bij overtreding:** `401 Authentication required`
 

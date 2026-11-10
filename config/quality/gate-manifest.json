@@ -114,6 +114,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:build-typecheck",
+      "command": "node scripts/check/check-build-typecheck.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:db-rules",
       "command": "node scripts/check/check-db-rules.mjs",
       "disposition": "separately-invoked"
@@ -201,11 +206,6 @@
     {
       "name": "check:gate-manifest",
       "command": "node scripts/quality/gate-manifest.mjs",
-      "disposition": "separately-invoked"
-    },
-    {
-      "name": "check:trivy-ignore-policy",
-      "command": "node scripts/check/check-trivy-ignore-policy.mjs .trivyignore.yaml",
       "disposition": "separately-invoked"
     },
     {
@@ -394,6 +394,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:test-tla-order",
+      "command": "node scripts/check/check-test-tla-order.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:test-masking",
       "command": "node scripts/check/check-test-masking.mjs",
       "disposition": "separately-invoked"
@@ -565,7 +570,7 @@
     },
     {
       "name": "test:e2e",
-      "command": "node scripts/dev/run-playwright-tests.mjs test tests/e2e/*.spec.ts",
+      "command": "node scripts/dev/run-playwright-tests.mjs",
       "disposition": "separately-invoked"
     },
     {
@@ -699,6 +704,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "typecheck:build",
+      "command": "tsc --pretty false -p tsconfig.build.json",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "typecheck:noimplicit:core",
       "command": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
       "disposition": "separately-invoked"
@@ -706,6 +716,11 @@
     {
       "name": "check:free-catalog-evidence",
       "command": "node scripts/check/check-free-catalog-evidence.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:ui-kit-snapshot",
+      "command": "node scripts/check/check-ui-kit-snapshot.mjs",
       "disposition": "separately-invoked"
     },
     {
@@ -779,8 +794,18 @@
       "disposition": "separately-invoked"
     },
     {
-      "name": "check:test-tla-order",
-      "command": "node scripts/check/check-test-tla-order.mjs",
+      "name": "test:opencode:smoke",
+      "command": "node scripts/test/opencode-chatgpt-web-smoke.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:ui-kit-upstream",
+      "command": "node scripts/check/check-ui-kit-upstream.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:trivy-ignore-policy",
+      "command": "node scripts/check/check-trivy-ignore-policy.mjs .trivyignore.yaml",
       "disposition": "separately-invoked"
     }
   ],
@@ -789,7 +814,6 @@
       "description": "All gates of the static filesystem scan; excludes product tests, build and live GitHub checks.",
       "aliases": [
         "check:gate-manifest",
-        "check:trivy-ignore-policy",
         "check:tracked-artifacts",
         "check:any-budget:t11",
         "check:migration-numbering",
@@ -809,17 +833,18 @@
         "check:known-symbols",
         "check:route-guard-membership",
         "check:test-discovery",
+        "check:test-tla-order",
         "check:test-masking",
         "check:duplication",
         "check:cycles:ratchet",
-        "check:boundary:ratchet"
+        "check:boundary:ratchet",
+        "check:trivy-ignore-policy"
       ]
     },
     "quality-scan-fast": {
       "description": "Static filesystem scan excluding duplication and cycles; not full acceptance.",
       "aliases": [
         "check:gate-manifest",
-        "check:trivy-ignore-policy",
         "check:tracked-artifacts",
         "check:any-budget:t11",
         "check:migration-numbering",
@@ -839,7 +864,9 @@
         "check:known-symbols",
         "check:route-guard-membership",
         "check:test-discovery",
-        "check:test-masking"
+        "check:test-tla-order",
+        "check:test-masking",
+        "check:trivy-ignore-policy"
       ]
     }
   }

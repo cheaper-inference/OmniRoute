@@ -195,6 +195,12 @@ tàbí pa process server náà.
 | `/api/providers/health-autopilot/actions` | Ó ń ṣe àwọn ìgbésẹ̀ àtúnṣe autopilot                        |
 | `/api/settings/obsidian`                  | Ó ń ṣe creds WebDAV tí a lè tún lò fún root vault èyíkéyìí |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens               |
+| `/api/cli-tools/apply`                    | Ó tún ètò CLI olùṣàkóso kọ lórí ẹ̀rọ olùgbàlejò             |
+| `/api/cli-tools/guide-settings`           | Ó kọ àwọn fáìlì ètò CLI tó dá lórí ìtọ́sọ́nà                 |
+| `/api/cli-tools/hermes-agent-settings`    | Ó kọ ètò aṣojú Hermes                                      |
+| `/api/cli-tools/backups`                  | Ó mú ẹ̀dà ààbò ètò CLI padà, ó sì pa wọ́n rẹ́                 |
+| `/api/log-export`                         | Ó fi àkọsílẹ̀ ìpè ránṣẹ́ sí ibi tí a ṣètò                    |
+| `/api/restart`                            | Ó tún ìlànà olupin bẹ̀rẹ̀                                    |
 
 **Ìdáhùn sí ìrúfin:** `401 Authentication required`
 

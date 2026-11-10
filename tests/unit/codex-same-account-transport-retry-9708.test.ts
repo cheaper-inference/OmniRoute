@@ -107,6 +107,36 @@ test("#9708: quota, auth, and deterministic 400s never enter the same-account re
   );
 });
 
+test("Antigravity 504 rotates rather than replaying after a full header timeout", () => {
+  assert.equal(
+    shouldRetrySameAccountTransport({
+      provider: "antigravity",
+      status: 504,
+      errorText: "gateway timeout",
+      attempt: 0,
+    }),
+    false
+  );
+  assert.equal(
+    shouldRetrySameAccountTransport({
+      provider: "antigravity",
+      status: 503,
+      errorText: "connection reset",
+      attempt: 0,
+    }),
+    true
+  );
+  assert.equal(
+    shouldRetrySameAccountTransport({
+      provider: "codex",
+      status: 504,
+      errorText: "temporary gateway timeout",
+      attempt: 0,
+    }),
+    true
+  );
+});
+
 test("#9708: same-account retry is bounded to exactly one attempt", () => {
   assert.equal(
     shouldRetrySameAccountTransport({

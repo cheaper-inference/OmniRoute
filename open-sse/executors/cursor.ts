@@ -28,6 +28,8 @@ import {
   flattenMessages,
   messageContentToText,
   openAIToolsToMcpDefs,
+  decodeInteractionQuery,
+  encodeInteractionResponseFrame,
   type ChatMessage,
   type CursorTurnUsage,
   type EncodedImage,
@@ -81,6 +83,7 @@ import {
 } from "./cursor/composer.ts";
 import { CursorServerConfigError, resolveCursorAgentUrl } from "./cursor/agentEndpoint.ts";
 import { driveCursorH2 } from "./cursor/streamDriver.ts";
+import { projectCursorError } from "./cursor/errorProjection.ts";
 import { buildExecRejection } from "./cursor/execRejections.ts";
 import { openCursorH2 } from "./cursor/h2AgentStream.ts";
 import {
@@ -176,27 +179,10 @@ const debugLog = (...args: unknown[]) => {
 };
 
 function tryParseJsonError(payload: Buffer): { message: string; status: number } | null {
-  if (payload.length < 2 || payload[0] !== 0x7b) return null;
-  try {
-    const text = payload.toString("utf8");
-    if (!text.includes('"error"')) return null;
-    const parsed = JSON.parse(text);
-    const err = parsed?.error || {};
-    const rawMessage =
-      err?.details?.[0]?.debug?.details?.title ||
-      err?.details?.[0]?.debug?.details?.detail ||
-      err?.message ||
-      (typeof err?.code === "string" ? `${err.code}: ${text}` : text);
-    const codeHint =
-      typeof err?.code === "string" &&
-      !String(rawMessage).toLowerCase().includes(err.code.toLowerCase())
-        ? `${err.code}: ${rawMessage}`
-        : String(rawMessage);
-    const classified = classifyCursorError(codeHint);
-    return { message: classified.message, status: classified.status };
-  } catch {
-    return null;
-  }
+  const message = projectCursorError(payload);
+  if (!message) return null;
+  const classified = classifyCursorError(message);
+  return { message: sanitizeErrorMessage(classified.message), status: classified.status };
 }
 
 /**
@@ -418,8 +404,9 @@ export function emitCursorSseError(ctx: StreamCtx, classified: ClassifiedCursorE
     model: ctx.model,
     choices: [{ index: 0, delta: {}, finish_reason: "error" }],
     error: {
-      message: classified.message,
+      message: sanitizeErrorMessage(classified.message),
       type: classified.type,
+      status: classified.status,
     },
   };
   ctx.emit(`data: ${JSON.stringify(payload)}\n\n`);
@@ -824,6 +811,25 @@ export function processFrame(
           ctx.requiresColdResume = true;
         }
         ctx.endReason = "tool_calls";
+      }
+    }
+  }
+
+  // 2c. InteractionQuery responder: auto-reply to hosted tool queries
+  // (webSearch, askQuestion, switchMode, exaSearch, exaFetch, createPlan, webFetch)
+  // so turns don't stall.
+  const iq = decodeInteractionQuery(payload);
+  if (iq && opts.h2Req) {
+    const dk = `iq:${iq.id}`;
+    if (!ackedExecIds.has(dk)) {
+      ackedExecIds.add(dk);
+      const frame = encodeInteractionResponseFrame(iq.id, iq.variantField);
+      if (frame) {
+        try {
+          opts.h2Req.write(frame);
+        } catch (e) {
+          debugLog("[cursor-agent] interaction_query write failed:", (e as Error).message);
+        }
       }
     }
   }
@@ -1583,6 +1589,21 @@ export class CursorExecutor extends BaseExecutor {
                 return;
               }
               finishLifecycle(ctx, true);
+              // Before any partial output, use the same classification as the
+              // non-streaming catch. An errored body bypasses readiness's SSE
+              // error consumer and loses actionable Connect trailer failures.
+              if (
+                ctx.totalText.length === 0 &&
+                ctx.thinkingText.length === 0 &&
+                ctx.toolCalls.length === 0 &&
+                ctx.pendingToolCalls.size === 0 &&
+                ctx.pendingBuiltinExecs.size === 0
+              ) {
+                const message = err instanceof Error ? err.message : String(err);
+                emitCursorSseError(ctx, classifyCursorError(message));
+                controller.close();
+                return;
+              }
               controller.error(err);
             }
           },
@@ -1728,7 +1749,7 @@ export class CursorExecutor extends BaseExecutor {
       return new Response(
         JSON.stringify({
           error: {
-            message: classified.message,
+            message: sanitizeErrorMessage(classified.message),
             type: classified.type,
           },
         }),
@@ -1746,7 +1767,7 @@ export class CursorExecutor extends BaseExecutor {
       return new Response(
         JSON.stringify({
           error: {
-            message: empty.message,
+            message: sanitizeErrorMessage(empty.message),
             type: empty.type,
           },
         }),

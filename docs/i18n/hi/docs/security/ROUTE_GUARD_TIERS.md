@@ -182,6 +182,12 @@ LOCAL_ONLY के रूप में वर्गीकृत किया ज�
 | `/api/providers/health-autopilot/actions` | ऑटोपायलट सुधारात्मक कार्रवाइयाँ निष्पादित करता है                         |
 | `/api/settings/obsidian`                  | किसी भी वॉल्ट रूट के लिए पुनः उपयोग योग्य WebDAV क्रेडेंशियल जारी करता है |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                              |
+| `/api/cli-tools/apply`                    | होस्ट पर ऑपरेटर का CLI कॉन्फ़िगरेशन फिर से लिखता है                       |
+| `/api/cli-tools/guide-settings`           | गाइड-आधारित CLI कॉन्फ़िगरेशन फ़ाइलें लिखता है                             |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes एजेंट का कॉन्फ़िगरेशन लिखता है                                     |
+| `/api/cli-tools/backups`                  | CLI कॉन्फ़िगरेशन बैकअप बहाल करता और हटाता है                              |
+| `/api/log-export`                         | कॉन्फ़िगर किए गए गंतव्य पर कॉल लॉग भेजता है                               |
+| `/api/restart`                            | सर्वर प्रक्रिया को फिर से शुरू करता है                                    |
 
 **उल्लंघन पर रिस्पॉन्स:** `401 Authentication required`
 

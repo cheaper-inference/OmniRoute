@@ -205,6 +205,12 @@ serverprocessen.
 | `/api/providers/health-autopilot/actions` | Udfører autopilotens afhjælpningshandlinger                                  |
 | `/api/settings/obsidian`                  | Udsteder genanvendelige WebDAV-legitimationsoplysninger for enhver vault-rod |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                 |
+| `/api/cli-tools/apply`                    | Omskriver operatørens CLI-konfiguration på værten                            |
+| `/api/cli-tools/guide-settings`           | Skriver vejledningsstyrede CLI-konfigurationsfiler                           |
+| `/api/cli-tools/hermes-agent-settings`    | Skriver Hermes-agentens konfiguration                                        |
+| `/api/cli-tools/backups`                  | Gendanner og sletter backups af CLI-konfigurationen                          |
+| `/api/log-export`                         | Sender kaldelogfiler til en konfigureret destination                         |
+| `/api/restart`                            | Genstarter serverprocessen                                                   |
 
 **Svar ved overtrædelse:** `401 Authentication required`
 

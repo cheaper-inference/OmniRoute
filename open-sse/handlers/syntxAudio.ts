@@ -127,6 +127,7 @@ async function runSyntxMusicJob(options: {
   startTime: number;
   log?: { info?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void };
   fetchImpl: typeof fetch;
+  signal?: AbortSignal | null;
 }) {
   const { aiName, modelType } = resolveSyntxMediaTarget(options.model, "music");
   const settings = mapSyntxAudioRequestSettings(aiName, modelType, options.body);
@@ -150,7 +151,8 @@ async function runSyntxMusicJob(options: {
   const item = await musicItemFromUrl(
     url,
     String(options.body.response_format || "").toLowerCase() === "b64_json",
-    options.fetchImpl
+    options.fetchImpl,
+    options.signal ?? null
   );
   saveCallLog({
     method: "POST",
@@ -167,11 +169,12 @@ async function runSyntxMusicJob(options: {
 async function musicItemFromUrl(
   url: string,
   wantsBase64: boolean,
-  fetchImpl: typeof fetch
+  fetchImpl: typeof fetch,
+  signal: AbortSignal | null
 ): Promise<{ url?: string; b64_json?: string; format: string }> {
   if (!wantsBase64) return { url, format: "mp3" };
   return {
-    b64_json: (await fetchSyntxMediaBytes(url, fetchImpl)).bytes.toString("base64"),
+    b64_json: (await fetchSyntxMediaBytes(url, fetchImpl, { signal })).bytes.toString("base64"),
     format: "mp3",
   };
 }
@@ -183,6 +186,7 @@ export async function handleSyntxMusicGeneration({
   credentials,
   log,
   fetchImpl = fetch,
+  signal = null,
 }: {
   model: string;
   provider: string;
@@ -190,6 +194,7 @@ export async function handleSyntxMusicGeneration({
   credentials: Creds | null | undefined;
   log?: { info?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void };
   fetchImpl?: typeof fetch;
+  signal?: AbortSignal | null;
 }) {
   const startTime = Date.now();
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
@@ -215,6 +220,7 @@ export async function handleSyntxMusicGeneration({
       startTime,
       log,
       fetchImpl,
+      signal,
     });
   } catch (error) {
     const status = error instanceof SyntxMediaError ? error.status : 502;

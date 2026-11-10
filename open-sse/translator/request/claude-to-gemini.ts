@@ -507,7 +507,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   // Gemini strictly rejects requests containing consecutive messages with the same role
   // (400 INVALID_ARGUMENT: "Request contains consecutive messages with the same role").
   // Normalize adjacent same-role messages by concatenating their parts.
-  result.contents = mergeConsecutiveSameRoleContents(result.contents);
+  result.contents = mergeConsecutiveSameRoleContents(result.contents, model);
   mergeTrailingTextIntoFunctionResponses(result.contents);
   // Guard the one alternation violation the merge above cannot reach: history
   // that opens with a functionCall-bearing turn instead of a user turn.

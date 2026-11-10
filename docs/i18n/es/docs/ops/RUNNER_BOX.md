@@ -4,12 +4,7 @@
 
 ---
 
-El pool autohospedado se ejecuta en el equipo **.113** (`tomni-proxmox-113`). Desde el 2026-10-18, cada
-runner de OmniRoute tiene **un rol**, una etiqueta y un presupuesto de memoria/CPU dimensionado según lo medido
-para su carga de trabajo. El slot de Turbopack recibe los recursos que necesita la compilación; los demás slots están dimensionados según sus
-picos medidos. El equipo solo sobreasigna recursos cuando una compilación de Turbopack coincide con una compilación
-webpack de Release-Green y un trabajo de lint; el swap del host (16 GB) absorbe esa carga y, dado que las compilaciones de pull requests se ejecutan
-en runners alojados, el slot de Turbopack permanece inactivo la mayor parte del tiempo:
+El grupo autohospedado se ejecuta en el **.113** cuadro (`tomni-proxmox-113`). Desde el 18/10/2026 cada corredor OmniRoute tiene **un rol** , una etiqueta y un presupuesto memory/CPU adaptado a lo que medía su carga de trabajo. La ranura Turbopack obtiene lo que necesita la construcción; las otras ranuras tienen el tamaño de sus picos medidos. El cuadro solo se sobrecompromete cuando una compilación Turbopack coincide con una compilación de paquete web Release-Green y un trabajo de pelusa; El intercambio de host (16 GB) absorbe eso, y debido a que las compilaciones de solicitud de extracción se ejecutan alojadas, la ranura Turbopack está inactiva la mayor parte del tiempo:
 
 | runner               | etiqueta                        | rol                                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
 | -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
@@ -17,24 +12,19 @@ en runners alojados, el slot de Turbopack permanece inactivo la mayor parte del 
 | `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), compilación webpack                                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
 | `omniroute-113-2`    | `omni-light`                    | trabajos nocturnos (Schemathesis, promptfoo, garak, k6) y `quality.yml` `lint-guard`                                                                                    | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
 | `omniroute-113`      | `omni-light`                    | el mismo pool que el anterior                                                                                                                                           | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (sus repos)                     | Solo Dependabot (pico de 155 MB cada uno, 2026-10-18)                                                                                                                   | 4 GB / 6 GB                | 200 % cada uno |
+| OmniHeuris, OmniMind | (sus repositorios)              | Solo Dependabot (pico 155 MB cada uno, 2026-10-18)                                                                                                                      | 4 GB / 6 GB                | 200 % cada uno |
 
-Mediciones del 2026-10-18:
+Medido el 18/10/2026:
 
-| recurso   | valor                               | qué significa para la planificación                                                                                                                                                                                                                                                                                                                                                                                      |
-| --------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RAM / CPU | **78 GB / 32 núcleos**              | una compilación de producción de Turbopack alcanzó un pico de 49 GB sin límites (`tests/unit/ci-build-bundler-webpack.test.ts`); en Next 16.3.8, solo la fase de compilación mantiene ~40 GB (36 GB de RSS en `next-build` más 17 workers del loader a 3 GB, medido el 2026-10-18); una compilación webpack usa ~14–16 GB. Una compilación de Turbopack y una de webpack caben juntas; dos compilaciones de Turbopack no |
-| swap      | 16 GB                               | `omniroute-113-5` se ejecuta con el swap desactivado (`MemorySwapMax=0`), de modo que una compilación descontrolada se termina al alcanzar su límite en lugar de hacer que el equipo use swap                                                                                                                                                                                                                            |
-| `/tmp`    | **12 GB tmpfs = RAM**               | todo lo que se almacene allí consume memoria; los residuos se eliminan después de 3 h                                                                                                                                                                                                                                                                                                                                    |
-| CPU       | carga de 60 observada en 32 núcleos | antes de las cuotas, una compilación de Turbopack (~1166 % de CPU) más una suite de cobertura en el mismo equipo privaban de recursos a los latidos de los demás listeners (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                         |
-| runners   | **6 listeners**                     | 4 de OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` están deshabilitados (`systemctl enable --now` vuelve a activar uno)                                                                                                                                                                                                                                                                                  |
+| recurso     | valor                             | qué significa para la planificación                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RAM / CPU   | **78 GB / 32 núcleos**            | un aumento de la producción Turbopack alcanzó un máximo de 49 GB sin límite (`tests/unit/ci-build-bundler-webpack.test.ts`); en Next 16.3.8, solo la fase de compilación contiene ~ 40 GB (36 GB RSS en `next-build` más 17 trabajadores de carga en 3 GB, medido el 2026-10-18); un paquete web compilado en ~ 14–16 GB. Una compilación Turbopack + un paquete web encajan; dos compilaciones Turbopack no |
+| intercambio | 16 GB                             | `omniroute-113-5` se ejecuta con swap off (`MemorySwapMax=0`), por lo que una compilación desbocada se corta en su límite en lugar de cambiar la caja                                                                                                                                                                                                                                                        |
+| `/tmp`      | **12 GB tmpfs = RAM**             | todo lo que se almacene allí consume memoria; los residuos se eliminan después de 3 h                                                                                                                                                                                                                                                                                                                        |
+| CPU         | carga 60 en 32 núcleos observados | antes de las cuotas, una compilación Turbopack (~ 1166 % CPU) más un conjunto de cobertura en la misma caja privaron a los demás oyentes (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                               |
+| corredores  | **7 oyentes** (2026-10-28)        | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` también lleva `omni-build`; `omniroute-113-3/-4/-8` fueron eliminados del repositorio (28/10/2026)                                                                                                                                                                                                                                                    |
 
-Los límites se encuentran en el archivo `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
-de cada unidad (los valores anteriores se conservaron como `override.conf.bak-20261018`) y se aplicaron en vivo con
-`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…`, sin reiniciar, por lo que no se
-afectó ningún trabajo en ejecución. Las etiquetas se cambian mediante la API de runners
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
-`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), también en vivo.
+Los límites se encuentran en `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` de cada unidad (los valores anteriores se mantienen como `override.conf.bak-20261018`) y se aplicaron en vivo con `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — sin reinicio, por lo que no se tocó ningún trabajo en ejecución. El cambio de etiquetas se realiza a través de los corredores API (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` / `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), también en vivo.
 
 ## Instalar el janitor (una sola vez, en la máquina)
 
@@ -42,7 +32,7 @@ afectó ningún trabajo en ejecución. Las etiquetas se cambian mediante la API 
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): cada 30 min, registrar en /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 Se requiere `lsof`: el janitor comprueba que una ruta está inactiva mediante una instantánea de los archivos
@@ -124,8 +114,9 @@ la vez, solo cuando esté inactivo**, con la comprobación de inactividad y el r
   promptfoo pasó 54 minutos recuperando memoria allí; 8 GB eliminan la limitación.
 - **Menos listeners a propósito.** Cuatro unidades de OmniRoute se deshabilitaron el 2026-08-29:
   cada listener adicional es otro inquilino para el presupuesto de memoria anterior. El límite
-  del janitor es 6 (`MAX_ACTIVE_RUNNERS=6` en cron): cuenta cada `Runner.Listener` de la máquina,
-  y OmniHeuris + OmniMind añaden dos a nuestros cuatro.
+  del janitor es 8 (`MAX_ACTIVE_RUNNERS=8` en cron): cuenta cada `Runner.Listener` de la máquina,
+  y OmniHeuris + OmniMind añaden dos a nuestros cinco.
+- **Los trabajos de unit y Vitest siguen alojados.** `ci.yml` envía sus shards de unit y el trabajo de Vitest a `[self-hosted, omni-ci]` solo cuando la variable del repositorio `vars.USE_VPS_TEST_RUNNER` es `true`, y aun así solo para ejecuciones de `pull_request` del mismo repositorio; los forks, `merge_group` y los pushes se quedan en `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). La variable es `false`. El 2026-10-28, tres listeners `omni-ci` de 4 núcleos tardaron 250–270 s en `npm ci` y todos los shards de unit alcanzaron el límite de 30 minutos por trabajo, frente a ~634 s de un shard alojado, con la máquina a carga 17–24. Los listeners se eliminaron. No vuelvas a activar la variable sin listeners dimensionados para un shard de unit.
 - **Nunca limpies `/tmp` ni `_work` manualmente mientras algún runner esté ocupado.** Una
   comprobación seguida de una eliminación, con un intervalo entre ambas, provocó que un job
   `Build` activo perdiera su `_work` el 2026-08-27. El janitor realiza la comprobación y la
@@ -140,8 +131,7 @@ la vez, solo cuando esté inactivo**, con la comprobación de inactividad y el r
 
 ## Canal alojado (runners alojados en GitHub)
 
-La cuenta está en el plan **Pro**: **40 trabajos alojados simultáneos**, compartidos por todas las comprobaciones de PR,
-todos los workflows activados por push y la configuración predeterminada de CodeQL. Medido el 2026-10-18 durante una
+El repositorio pertenece a la organización `cheaper-inference`, en el plan **Team**: **60 trabajos alojados simultáneos**, compartidos por todos los repositorios de la organización, todas las comprobaciones de PR, todos los workflows activados por push y la configuración predeterminada de CodeQL. Las cifras siguientes se midieron en el plan **Pro** (40 trabajos alojados simultáneos). Medido el 2026-10-18 durante una
 campaña de fusiones (~10 fusiones/hora en `release/v3.8.52`): **2.500 ejecuciones de workflows creadas en
 24 h**, 44 pushes a la rama en 6 h, **106 trabajos alojados en cola** mientras las comprobaciones de PR esperaban durante
 horas y los PR se fusionaban sin ellas. Nueve workflows se activaban con cada push a la rama:

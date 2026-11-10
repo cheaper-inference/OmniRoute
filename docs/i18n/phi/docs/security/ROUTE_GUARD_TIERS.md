@@ -199,6 +199,12 @@ server process.
 | `/api/providers/health-autopilot/actions` | Isinasagawa ang mga autopilot remediation action                     |
 | `/api/settings/obsidian`                  | Gumagawa ng magagamit-muling WebDAV creds para sa anumang vault root |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                         |
+| `/api/cli-tools/apply`                    | Muling isinusulat ang CLI configuration ng operator sa host          |
+| `/api/cli-tools/guide-settings`           | Nagsusulat ng mga CLI configuration file batay sa gabay              |
+| `/api/cli-tools/hermes-agent-settings`    | Isinusulat ang configuration ng Hermes agent                         |
+| `/api/cli-tools/backups`                  | Nagre-restore at nagbubura ng mga backup ng CLI configuration        |
+| `/api/log-export`                         | Ipinapadala ang mga log ng tawag sa naka-configure na destinasyon    |
+| `/api/restart`                            | Muling pinapagana ang proseso ng server                              |
 
 **Response kapag may paglabag:** `401 Authentication required`
 

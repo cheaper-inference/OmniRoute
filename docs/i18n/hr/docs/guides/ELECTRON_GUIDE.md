@@ -64,6 +64,19 @@ Radni prostor `electron/` također nudi:
 - `npm run build:mac-x64` / `build:mac-arm64` — macOS izgradnje za pojedinačnu arhitekturu
 - `npm run pack` — izgradnja samo direktorija za lokalno testiranje (bez instalacijskog programa)
 
+## Neobavezni izvršni paketi
+
+Izdanja za stolna računala mogu uz instalacijske programe objaviti neobavezne izvršne arhive. Instalirani poslužiteljski sadržaj uključuje `optional-packs.index.json` (pod `resources/app` u Windowsu i Linuxu). Za stavku `browser-runtime` pročitajte `packs[].tarball` i preuzmite **upravo taj naziv datoteke iz istog izdanja**. Nazivi arhiva sadrže sažetak SHA-256; različite gradnje mogu zahtijevati različite arhive. Ne mijenjajte naziv preuzete datoteke.
+
+Kopirajte indeks instalirane aplikacije i odabranu arhivu u isti direktorij, a zatim koristite CLI iz istog izdanja:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` prikazuje stanje instalacije i provjere, a ne naziv arhive. Priloženi indeks odabire arhivu. Instalacija provjerava kontrolni zbroj arhive prije raspakiravanja i kontrolne zbrojeve paketa prije zamjene instaliranog paketa. Čita lokalne datoteke; ne preuzima arhive koje nedostaju. Ponovno pokrenite aplikaciju nakon instalacije. Ako izdanje nema odgovarajuću priloženu datoteku, neobavezni paket nije dostupan putem datoteka tog izdanja.
+
 ## Struktura direktorija
 
 ```

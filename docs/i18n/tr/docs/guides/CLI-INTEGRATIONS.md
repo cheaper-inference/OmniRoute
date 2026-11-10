@@ -17,11 +17,11 @@ sürece API anahtarına bir ortam değişkeni üzerinden başvurulur. Araca özg
 bir ortam dosyası oluşturan komutlar aşağıda belirtilmiştir.
 
 Ayrıca hiçbir yapılandırma yazmadan doğru ortam değişkenlerini ekleyerek `claude`,
-`codex`, `aider`, `goose`, `opencode`, `qwen` veya `gemini` süreçlerini başlatan
+`codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` veya `whycodes` süreçlerini başlatan
 genel bir başlatıcı da vardır: `omniroute run <target>`. Hedefler ve bunların
 takma adları, standart `bin/cli/cli-manifest.mjs` manifestinden gelir
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`) ve `omniroute completion` aynı şekilde
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`) ve `omniroute completion` aynı şekilde
 manifestten türetilen hedef sözcüklerini sunar. Araç başına eski başlatıcılar olan
 `omniroute launch` (Claude Code) ve `omniroute launch-codex` (Codex) kullanılmaya
 devam edilebilir.
@@ -85,7 +85,8 @@ sunucudan alınır ve yapılandırma yerel olarak yazılır.
 | `omniroute setup-aider`    | Aider                           | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + ortam değişkeni tarifini yazdırır                                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Her ikisi     |
 | `omniroute setup-qwen`     | Qwen Code                       | `~/.qwen/settings.json` — V4 `modelProviders.openai` dizisi + `~/.qwen/.env` içinde `OMNIROUTE_API_KEY`                                                                                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Her ikisi     |
 | `omniroute setup-5dive`    | 5dive (ajan filosu)             | `$HOME` altında hiçbir şey yok — `5dive agent auth set` aracılığıyla bir 5dive **kimlik doğrulama profili** (`/var/lib/5dive/auth-profiles/<name>/`) yazar; yalnızca root, filo ana makinesinde çalışır | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Her ikisi de  |
-| `omniroute run <target>`   | Çalışma zamanı başlatma (genel) | Hiçbir şey — doğru ortam ve bağımsız değişkenlerle `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` işlemini başlatır; Qwen ve Gemini geçici, yalıtılmış bir ana dizin kullanır              | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Her ikisi de  |
+| `omniroute setup-whycodes` | WhyCodes                        | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); dosya yolu `$WHYCODES_HOME/config.toml` veya `~/.whycodes/config.toml` şeklindedir                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Her ikisi     |
+| `omniroute run <target>`   | Çalışma zamanı başlatma (genel) | Hiçbir şey — doğru ortam ve bağımsız değişkenlerle `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` işlemini başlatır; Qwen ve Gemini geçici, yalıtılmış bir ana dizin kullanır   | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Her ikisi de  |
 | `omniroute launch`         | Claude Code                     | Hiçbir şey — `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` eklenmiş olarak `claude` işlemini başlatır                                                                                                     | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Her ikisi de  |
 | `omniroute launch-codex`   | OpenAI Codex CLI                | Hiçbir şey — `-c` bayrakları aracılığıyla `omniroute` sağlayıcısı eklenmiş olarak `codex` işlemini başlatır                                                                                             | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Her ikisi de  |
 
@@ -101,7 +102,7 @@ Bayraklarla ilgili notlar (komut kaynağında doğrulanmıştır):
   yazdırır. `setup-cursor` (**hiçbir zaman** dosya yazmaz)
   dışındaki tüm `setup-*` komutlarında kullanılabilir.
 - `--model <id>` — otomatik model keşfi olmayan araçlar için gereklidir
-  (veya etkileşimli olarak seçilir): Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Bu araçlar
+  (veya etkileşimli olarak seçilir): Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Bu araçlar
   etkileşimsiz çalıştırmalar için `--yes` seçeneğini de kabul eder (bu durumda `--model` gereklidir).
   `setup-opencode`, varsayılan üst düzey modeli ayarlamak için `--model` seçeneğini alır.
 - `omniroute run` üzerindeki `--model <id>`, manifestin hedef başına bağlantı yapılandırmasını
@@ -109,6 +110,7 @@ Bayraklarla ilgili notlar (komut kaynağında doğrulanmıştır):
   **opencode**, `--model omniroute/<id>` alır (önek yalnızca kimlik
   zaten bu öneki taşımıyorsa eklenir); **qwen** ve **gemini** kimliği olduğu gibi alır;
   **claude** bunu `ANTHROPIC_MODEL`, **goose** ise `GOOSE_MODEL` aracılığıyla,
+  **whycodes** `-P omniroute -m <id>` aracılığıyla,
   **codex** de `-c model_providers.omniroute.*` bağımsız değişkenleri aracılığıyla alır. **Qwen, `--model` seçeneğini
   kesin olarak gerektiren tek çalıştırma hedefidir** — bu seçenek olmadan `omniroute run qwen`,
   açık bir hatayla `2` koduyla sonlanır.
@@ -259,18 +261,19 @@ OmniRoute, OpenAI yüzeyini `/v1` konumunda, Anthropic yüzeyini kök dizinde
 ve yerel Gemini yüzeyini `/v1beta` konumunda sunar. Her entegrasyon, aracın
 beklediği biçime göre yapılandırılmıştır (komut kaynağında doğrulanmıştır):
 
-| Entegrasyon                                                                | Yazılan temel URL | `/v1`?                                       |
-| -------------------------------------------------------------------------- | ----------------- | -------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | kök               | Hayır — Cline `/v1/chat/completions` ekler   |
-| `setup-goose` (`OPENAI_HOST`)                                              | kök               | Hayır — Goose yolu ekler                     |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | kök               | Hayır — LiteLLM `/v1/chat/completions` ekler |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` ile         | Evet                                         |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1` ile         | Evet                                         |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | kök               | Hayır — Claude Code `/v1/messages` ekler     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` ile         | Evet                                         |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` ile         | Evet                                         |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | kök               | Hayır — SDK `/v1beta/models/…` ekler         |
-| `setup-5dive` (kimlik doğrulama profilindeki `ANTHROPIC_BASE_URL`)         | kök               | Hayır — Claude Code `/v1/messages` ekler     |
+| Entegrasyon                                                                | Yazılan temel URL | `/v1`?                                                                 |
+| -------------------------------------------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | kök               | Hayır — Cline `/v1/chat/completions` ekler                             |
+| `setup-goose` (`OPENAI_HOST`)                                              | kök               | Hayır — Goose yolu ekler                                               |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | kök               | Hayır — LiteLLM `/v1/chat/completions` ekler                           |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` ile         | Evet                                                                   |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1` ile         | Evet                                                                   |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | kök               | Hayır — Claude Code `/v1/messages` ekler                               |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` ile         | Evet                                                                   |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` ile         | Evet                                                                   |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | kök               | Hayır — SDK `/v1beta/models/…` ekler                                   |
+| `setup-5dive` (kimlik doğrulama profilindeki `ANTHROPIC_BASE_URL`)         | kök               | Hayır — Claude Code `/v1/messages` ekler                               |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1` ile         | Evet — WhyCodes, `/chat/completions` uç noktasına POST isteği gönderir |
 
 ---
 

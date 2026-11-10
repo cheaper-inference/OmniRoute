@@ -14,6 +14,20 @@ function fixture(t: test.TestContext) {
   return dir;
 }
 
+test("private writes request exclusive creation and private modes on every platform", (t) => {
+  const dir = fixture(t);
+  const target = path.join(dir, "config.json");
+  const open = t.mock.method(fs, "openSync", fs.openSync);
+  const chmod = t.mock.method(fs, "fchmodSync", fs.fchmodSync);
+  writePrivateConfigFile(target, "private-data");
+  const creation = open.mock.calls.find((call) => String(call.arguments[0]).endsWith(".tmp"));
+  assert.ok(creation, "the writer must create a separate temporary file");
+  assert.equal(Number(creation.arguments[1]) & fs.constants.O_EXCL, fs.constants.O_EXCL);
+  assert.equal(creation.arguments[2], 0o600);
+  assert.ok(chmod.mock.calls.some((call) => call.arguments[1] === 0o600));
+  assert.equal(readPrivateConfigFile(target), "private-data");
+});
+
 test("private writes replace permissive files without retaining the old inode", (t) => {
   const dir = fixture(t);
   const target = path.join(dir, "config.json");

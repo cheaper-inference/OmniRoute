@@ -21,7 +21,7 @@
 // NOTE: PROVIDER_REFERENCE.md is no longer blindly trusted — a STRICT check compares
 // the doc's `Total providers` against the live provider modules (the same collections
 // the generator reads), so a hand-stale doc is a red, not a silently propagated total.
-// Fix by running `npm run gen:provider-reference`. Additional STRICT coverage added in
+// Fix the coupled surfaces with `npm run docs:sync-counts -- --write`. Additional STRICT coverage added in
 // the 2026-08-12 hardening: llm.txt + package.json description (providers), migration
 // count (README/AGENTS/llm.txt), and canonical numbers inside the README SVG diagrams
 // (providers / MCP tools / routing strategies / free-tier pools).
@@ -32,6 +32,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildReadmeMigrationChecks } from "./lib/readmeMigrationCount.mjs";
+import { managedCountChecks } from "../docs/lib/count-sync.mjs";
 
 let _spawnSyncImpl = _spawnSync;
 export function __setSpawnSyncForTest(fn) {
@@ -181,8 +182,11 @@ export function tallyDrift(checks, getContent) {
     for (const f of c.files) {
       const content = getContent(f);
       if (c.validate) {
-        if (content == null) continue;
-        const v = c.validate(content);
+        if (content == null && !c.requiredFiles) continue;
+        const v =
+          content == null
+            ? { ok: false, detail: "required managed file is missing" }
+            : c.validate(content, f);
         lines.push(`  ${v.ok ? "✓" : c.strict ? "✗" : "⚠"} ${f} — ${v.detail}`);
         if (!v.ok) {
           if (c.strict) strict++;
@@ -224,6 +228,7 @@ function readCodeFacts() {
     'import {FREE_TIER_PROVIDER_SET} from "./open-sse/config/freeTierProviders.ts";',
     'import {generateProviderPluginManifestFromRegistry} from "./open-sse/config/providerPluginManifest.ts";',
     'import {readStaticCountMetadata} from "./scripts/check/lib/staticCountMetadata.mjs";',
+    'import {readChatModelCountSnapshot} from "./scripts/check/lib/staticChatModelMetadata.mjs";',
     'import fs2 from "node:fs";',
     'import path2 from "node:path";',
     'const __rtxt=fs2.readFileSync(path2.join(process.cwd(),"src/lib/freeProviderRankings.ts"),"utf8");',
@@ -237,27 +242,21 @@ function readCodeFacts() {
     // Live provider total — the SAME collections gen-provider-reference.ts unions, so the
     // doc-vs-live check below cannot drift from the generator's definition of "provider".
     'import * as PROV from "./src/shared/constants/providers.ts";',
-    "const provCols=[PROV.FREE_PROVIDERS,PROV.NOAUTH_PROVIDERS,PROV.OAUTH_PROVIDERS,",
-    "PROV.WEB_COOKIE_PROVIDERS,PROV.APIKEY_PROVIDERS,PROV.LOCAL_PROVIDERS,PROV.SEARCH_PROVIDERS,",
-    "PROV.AUDIO_ONLY_PROVIDERS,PROV.UPSTREAM_PROXY_PROVIDERS,PROV.CLOUD_AGENT_PROVIDERS,",
-    "PROV.SYSTEM_PROVIDERS];",
-    "const pids=new Set();",
-    "for(const c of provCols)for(const p of Object.values(c||{}))if(p&&p.id)pids.add(p.id);",
+    'import {measureCatalogCounts} from "./scripts/docs/lib/count-facts.mjs";',
     "const metadata=readStaticCountMetadata(process.cwd());const REGISTRY=metadata.registry;",
     "const t=computeFreeModelTotals();",
     // "Free forever" = every provider whose free access renews or needs no key at all.
     // one-time-initial (signup credits) and discontinued pools are excluded on purpose,
     // and so is every eligibility-gated row: a provider nobody can sign up for without
     // clearing a gate is not "free forever" for the reader of the headline.
-    "const FOREVER=new Set(['recurring-monthly','recurring-daily','recurring-uncapped',",
-    "'recurring-credit','keyless']);",
-    "const ff=new Set();for(const m of t.perModel)",
-    "if(FOREVER.has(m.freeType)&&!m.eligibilityGate)ff.add(m.provider);",
+    "const measured=measureCatalogCounts(PROV,t);",
+    "const chatModels=readChatModelCountSnapshot(process.cwd()).facts;",
     'console.log("@@"+JSON.stringify({freeSteady:t.steadyRecurringTokens,entries:t.perModel.length,',
     "freeFirst:t.firstMonthRealisticTokens,freeGated:t.gatedRecurringTokens,",
     "freePools:t.poolCount,engines:ENGINE_IDS.length,",
-    "cliTotal:metadata.cliTotal,cliCode:metadata.cliCode,cliAgent:metadata.cliAgent,",
-    "mcpTools:metadata.mcpTools,mcpScopes:metadata.mcpScopes,providers:pids.size,freeForever:ff.size,",
+    // Preserve the complete shared fact contract, including formatted budget units.
+    "...chatModels,...measured,cliTotal:metadata.cliTotal,cliCode:metadata.cliCode,cliAgent:metadata.cliAgent,",
+    "mcpTools:metadata.mcpTools,mcpScopes:metadata.mcpScopes,",
     "modePacks:Object.keys(MODE_PACKS),catalogDate:__cat,sortBy:__sb,intelligentKeys:__ik,",
     "hardStop:FREE_MODEL_BUDGETS.filter(e=>e.hardStopGuaranteed===true).length,",
     "trainsOnPrompts:FREE_MODEL_BUDGETS.filter(e=>e.trainsOnPrompts===true).length,",
@@ -822,6 +821,17 @@ export function buildChecks() {
       });
       const packs = Array.isArray(f.modePacks) ? f.modePacks : [];
       return [
+        ...managedCountChecks(
+          JSON.parse(
+            fs.readFileSync(path.join(ROOT, "scripts/docs/lib/count-claims.json"), "utf8")
+          ),
+          {
+            ...f,
+            migrations: countMigrations(),
+            strategies: countRoutingStrategies(),
+            catalogEntries: f.entries,
+          }
+        ),
         {
           // Two packs shipped after the docs were written and nothing noticed.
           // The count and the names are two different gates: a table can carry

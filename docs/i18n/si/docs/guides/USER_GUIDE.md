@@ -118,18 +118,18 @@ $20ක් ගෙවා සීමාවලට ළඟා වී කලකිරී
 
 ---
 
-## 📖 සපයන්නා සැකසීම
+## 📖 Provider සැකසුම
 
-CSV හෝ JSON ගොනුවකින් API-key සම්බන්ධතා තොග වශයෙන් එක් කිරීමට, **Dashboard → Providers → Import from file** භාවිත කරන්න. තීරු ස්ථානීය අනුපිළිවෙළට ඇත (`provider,name,apiKey,baseUrl,priority`); `provider` දැනටමත් කළමනාකරණය කළ සපයන්නෙකු හෝ අනුකූල node එකක් ලෙස පැවතිය යුතුය. [CSV හෝ JSON ගොනුවකින් සපයන්නන් ආයාත කිරීම](../providers/CSV-IMPORT.md) බලන්න.
+CSV හෝ JSON ගොනුවකින් API-key සම්බන්ධතා විශාල ප්රමාණයක් එක් කිරීමට **Dashboard → Providers → Import from file** භාවිත කරන්න. තීරු ස්ථානීය වේ (`provider,name,apiKey,baseUrl,priority`); `provider` දැනටමත් කළමනාකරණය කරන provider එකක් හෝ අනුකූල node එකක් ලෙස තිබිය යුතුය. [CSV හෝ JSON ගොනුවකින් providers ආයාත කිරීම](../providers/CSV-IMPORT.md) බලන්න.
 
-### 🔐 දායකත්ව සපයන්නන්
+### 🔐 Subscription Providers
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Connect Claude Code
-→ OAuth පිවිසුම → ස්වයංක්රීය token නැවුම් කිරීම
-→ පැය 5ක + සතිපතා quota ලුහුබැඳීම
+Dashboard → Providers → Claude Code සම්බන්ධ කරන්න
+→ OAuth පිවිසුම → ටෝකන ස්වයංක්රීයව නැවුම් කිරීම
+→ පැය 5 + සතිපතා quota නිරීක්ෂණය
 
 Models:
   cc/claude-opus-4-7
@@ -137,20 +137,21 @@ Models:
   cc/claude-haiku-4-5-20251001
 ```
 
-**වෘත්තීය ඉඟිය:** සංකීර්ණ කාර්යයන් සඳහා Opus ද, වේගය සඳහා Sonnet ද භාවිත කරන්න. OmniRoute එක් එක් model එක අනුව quota ලුහුබඳියි!
+**වෘත්තීය උපදෙස:** සංකීර්ණ කාර්ය සඳහා Opus ද, වේගය සඳහා Sonnet ද භාවිත කරන්න. OmniRoute එක් එක් model එක අනුව quota නිරීක්ෂණය කරයි!
 
-OmniRoute host එකෙහි browser එකක් නැද්ද? Claude Code වෙත පිවිසී ඇති ඕනෑම තැනක `claude setup-token` ධාවනය කර, වසරක token එක **Setup Token** tab එකට අලවන්න. [setup token එකක් සමඟ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) බලන්න.
+OmniRoute host එකේ browser එකක් නොමැතිද? Claude Code වෙත පිවිසී ඇති ඕනෑම ස්ථානයක `claude setup-token` ධාවනය කර, වසරක ටෝකනය **Setup Token** ටැබයට ඇතුළත් කරන්න. [Setup token එකක් සමඟ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) බලන්න.
 
 Claude සහ Claude Code-අනුකූල routes, Opus සහ Sonnet
-models සඳහා `max` thinking effort එක එලෙසම තබාගනී. Haiku models `max` effort tier එක පිළිනොගන්නා බැවින්, OmniRoute එම
-ඉල්ලීම upstream වෙත යැවීමට පෙර එය ඉහළ thinking budget එකකට පහත හෙළයි.
+models සඳහා `max` thinking effort එක එලෙසම පවත්වා ගනී. Haiku models `max`
+effort tier එක පිළි නොගන්නා බැවින්, OmniRoute එම ඉල්ලීම upstream වෙත යැවීමට පෙර
+ඉහළ thinking budget එකකට පහත හෙළයි.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Connect Codex
+Dashboard → Providers → Codex සම්බන්ධ කරන්න
 → OAuth පිවිසුම (port 1455)
-→ පැය 5ක + සතිපතා යළි සැකසීම
+→ පැය 5 + සතිපතා reset
 
 Models:
   cx/gpt-5.5
@@ -162,9 +163,9 @@ Models:
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → Connect GitHub
+Dashboard → Providers → GitHub සම්බන්ධ කරන්න
 → GitHub හරහා OAuth
-→ මාසික යළි සැකසීම (මාසයේ 1 වැනිදා)
+→ මාසික reset (මාසයේ 1 වැනිදා)
 
 Models:
   gh/gpt-5.5
@@ -174,29 +175,47 @@ Models:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 අඩු වියදම් සපයන්නන්
+**AI Credits (ටෝකන මත පදනම් වූ බිල්පත්කරණය).** GitHub ගිණුම සඳහා
+`credits_used` වාර්තා කරන විට, Provider Limits කාඩ්පතේ වත්මන් බිල්පත් කාලය තුළ
+භාවිත කළ credits පෙන්වන **AI Credits** පේළියක් දිස් වේ. මෙය unlimited organization plans සඳහාද අදාළ වේ.
 
-#### GLM-4.7 (දිනපතා යළි සැකසීම, $0.6/1M)
+**දේශීය AI Credits සීමාව.** GitHub connection එකක් සංස්කරණය කර, එක්
+බිල්පත් කාලයකට **AI Credits limit per billing period** සකසන්න
+(`providerSpecificData.githubCreditLimit`). හිස්ව තැබීමෙන් එය අක්රිය වේ; `0`
+සෑම විටම එම connection එක මඟ හරියි. අවසන් භාවිත කියවීම සීමාවට සමාන හෝ ඊට වැඩි වූ විට,
+account තේරීම එම connection එක මඟ හරින අතර quota-policy cutoff එකක් ක්රියා කරන
+ආකාරයටම routing ඔබේ අනෙකුත් connections වෙත fallback වේ. මෙම පරීක්ෂාව සිදු කරන්නේ
+periodic quota refresh එක දැනටමත් එකතු කරන භාවිත දත්ත කියවීමෙනි — request path එකේදී
+එය කිසිවිටෙක GitHub අමතන්නේ නැත — එමෙන්ම එය fail open ලෙස ක්රියා කරයි: කියවීමක්
+නොමැති නම් හෝ කල් ඉකුත් වූ කියවීමක් නම් (මිනිත්තු 15කට වඩා පැරණි, හෝ දැනටමත් reset වූ
+බිල්පත් කාලයකින් පැමිණි), connection එක අවහිර නොවේ. මෙය දේශීය ආරක්ෂණයකි,
+**නිශ්චිත වියදම් උපරිම සීමාවක් සහතික කරන ක්රමයක් නොවේ**: GitHub වාර්තාකරණ ප්රමාද,
+refresh interval, ක්රියාත්මක වෙමින් පවතින requests සහ OmniRoute වලින් පිටත භාවිතය
+එම සීමාව ඉක්මවා යා හැක. දැඩි සීමාවක් සඳහා GitHub හිමිකාර වියදම් පාලන භාවිත කරන්න.
+
+### 💰 අඩු වියදම් Providers
+
+#### GLM-4.7 (දෛනික reset, $0.6/1M)
 
 1. ලියාපදිංචි වන්න: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan වෙතින් API key එක ලබාගන්න
+2. Coding Plan වෙතින් API key ලබා ගන්න
 3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**භාවිතය:** `glm/glm-4.7` — **වෘත්තීය ඉඟිය:** Coding Plan මඟින් පිරිවැයෙන් 1/7කට 3× quota පිරිනමයි! දිනපතා පෙ.ව. 10:00ට යළි සැකසේ.
+**භාවිතය:** `glm/glm-4.7` — **වෘත්තීය උපදෙස:** Coding Plan මඟින් 1/7 වියදමකට 3× quota ලබා දෙයි! සෑම දිනකම පෙ.ව. 10:00ට reset වේ.
 
-#### MiniMax M2.1 (පැය 5කට වරක් යළි සැකසීම, $0.20/1M)
+#### MiniMax M2.1 (පැය 5 reset, $0.20/1M)
 
 1. ලියාපදිංචි වන්න: [MiniMax](https://www.minimax.io)
-2. API key එක ලබාගන්න → Dashboard → Add API Key
+2. API key ලබා ගන්න → Dashboard → Add API Key
 
-**භාවිතය:** `minimax/MiniMax-M2.1` — **වෘත්තීය ඉඟිය:** දිගු context සඳහා ලාභම විකල්පය (tokens 1M)!
+**භාවිතය:** `minimax/MiniMax-M2.1` — **වෘත්තීය උපදෙස:** දිගු context සඳහා අඩුම වියදම් විකල්පයයි (ටෝකන මිලියන 1ක්)!
 
-#### Kimi K2 (මසකට ස්ථාවර $9)
+#### Kimi K2 ($9/මාසික ස්ථාවර ගාස්තුව)
 
 1. දායක වන්න: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key එක ලබාගන්න → Dashboard → Add API Key
+2. API key ලබා ගන්න → Dashboard → Add API Key
 
-**භාවිතය:** `kimi/kimi-k2.5` — **වෘත්තීය ඉඟිය:** tokens 10M සඳහා මසකට ස්ථාවර $9 = 1Mකට ඵලදායී පිරිවැය $0.90!
+**භාවිතය:** `kimi/kimi-k2.5` — **වෘත්තීය උපදෙස:** ටෝකන මිලියන 10ක් සඳහා ස්ථාවර $9/මාසික ගාස්තුවක් = සැබෑ වියදම $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
@@ -205,16 +224,16 @@ Models:
 
 **භාවිතය:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, හෝ වෙනත් Qianfan OpenAI-අනුකූල model ID එකක්.
 
-### 🆓 නොමිලේ සපයන්නන්
+### 🆓 නොමිලේ Providers
 
-සත්යාපනය අවශ්ය නොවන නොමිලේ සපයන්නන්ගේ සපයන්නාගේ පිටුවෙහි **No authentication required** අසල switch එකක් ඇත.
-එය අක්රිය කිරීමෙන් එම සපයන්නා අක්රිය වී, Providers configured/compact දසුන්වලින් ඉවත් වන අතර,
-එහි models `/v1/models` වෙතින් ද ඉවත් වේ.
+සත්යාපනයක් අවශ්ය නොවන නොමිලේ providers සඳහා ඔවුන්ගේ provider පිටුවේ **No authentication required** අසල switch එකක් ඇත.
+එය අක්රිය කිරීමෙන් එම provider එක අක්රිය වන අතර, Providers configured/compact දසුන්වලින් එය ඉවත් කර,
+එහි models `/v1/models` වෙතින්ද ඉවත් කරයි.
 
 #### Qoder (නොමිලේ models 9ක්)
 
 ```bash
-Dashboard → Connect Qoder → OAuth පිවිසුම → ප්රවේශය වත්මන් සපයන්නාගේ සීමාවන්ට යටත් වේ
+Dashboard → Qoder සම්බන්ධ කරන්න → OAuth පිවිසුම → ප්රවේශය වත්මන් provider සීමාවන්ට යටත් වේ
 
 Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -222,7 +241,7 @@ Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/
 #### Kiro (Claude නොමිලේ)
 
 ```bash
-Dashboard → Connect Kiro → AWS Builder ID හෝ Google/GitHub → මසකට credits ~50ක්
+Dashboard → Kiro සම්බන්ධ කරන්න → AWS Builder ID හෝ Google/GitHub → මසකට credits ~50ක්
 
 Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -339,24 +358,24 @@ API යතුර: [උපකරණ පුවරුවෙන්]
 
 ## 🚀 යෙදවීම
 
-### ගෝලීය npm ස්ථාපනය (නිර්දේශිතයි)
+### ගෝලීය npm ස්ථාපනය (නිර්දේශිත)
 
 ```bash
 npm install -g omniroute
 
-# වින්යාස නාමාවලිය සාදන්න
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ගොනුව සාදන්න (.env.example බලන්න)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# සේවාදායකය ආරම්භ කරන්න
+# Start server
 omniroute
-# නැතහොත් අභිරුචි පෝට් එකක් සමඟ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI විසින් `~/.omniroute/.env` හෝ `./.env` වෙතින් `.env` ස්වයංක්රීයව පූරණය කරයි.
+CLI ස්වයංක්‍රීයව `~/.omniroute/.env` හෝ `./.env` වෙතින් `.env` පූරණය කරයි.
 
 ### පද්ධති තැටි ප්රකාරය
 
@@ -609,22 +628,22 @@ post_install() {
 
 ---
 
-## 📊 ලබාගත හැකි ආකෘති
+## 📊 පවතින ආකෘති
 
 <details>
-<summary><b>ලබාගත හැකි සියලුම ආකෘති බලන්න</b></summary>
+<summary><b>පවතින සියලුම ආකෘති බලන්න</b></summary>
 
-> පහත ලැයිස්තුව v3.8.0 සඳහා `open-sse/config/providerRegistry.ts` වෙතින් තෝරා සකස් කර ඇත. Cloud නාමාවලි (Gemini, OpenRouter ආදිය) ගතිකව සමමුහුර්ත කෙරේ — සම්පූර්ණ සජීවී නාමාවලිය සඳහා **Dashboard → Providers → [provider] → Available Models** විවෘත කරන්න හෝ `GET /api/models/catalog` අමතන්න.
+> පහත ලැයිස්තුව v3.8.0 සඳහා `open-sse/config/providerRegistry.ts` වෙතින් සකස් කර ඇත. Cloud catalog (Gemini, OpenRouter ආදිය) ගතිකව සමමුහුර්ත වේ — සම්පූර්ණ සජීවී catalog එක සඳහා **Dashboard → Providers → [provider] → Available Models** විවෘත කරන්න, නැතහොත් `GET /api/models/catalog` අමතන්න.
 >
-> සපයන්නෙකුගේ අන්තර්නිර්මිත ලැයිස්තුව යාවත්කාලීන නොවී ඇත්නම්, සජීවී upstream නාමාවලිය ලබාගැනීමට එම පිටුවේ **Import from /models** භාවිත කරන්න (හෝ **Auto-Sync** සක්රීය කරන්න). මෙය LLM7.io (`gemini-3.1-flash-lite`) සහ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) සඳහා v3.8.50 හි සත්යාපනය කරන ලදී; එම පරීක්ෂණ වාරයේදී Pollinations හි නිර්නාමික ප්රවේශය upstream සීමාවලට යටත්ව පැවතුණි.
+> Provider එකක අන්තර්ගත ලැයිස්තුව යාවත්කාලීන catalog එකෙන් වෙනස් වී ඇත්නම්, එම පිටුවේ **Import from /models** භාවිත කරන්න (හෝ සජීවී upstream catalog එක ලබාගැනීමට **Auto-Sync** සක්රීය කරන්න). මෙය LLM7.io (`gemini-3.1-flash-lite`) සහ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) සඳහා v3.8.50 හි සත්යාපනය කරන ලදී; එම පරීක්ෂණ වටයේදී Pollinations හි නිර්නාමික ප්රවේශය upstream මගින් සීමා කර තිබුණි.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ප්රයත්න මට්ටම්: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ උත්සාහ මට්ටම්: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — නොමිලේ OAuth: **Dashboard → Providers → Kiro → Available Models** යටතේ පෙන්වන සජීවී නාමාවලිය භාවිත කරන්න. ලබාගත හැකි බව ගිණුම සහ සැලැස්ම මත රඳා පවතී.
+**Kiro (`kr/`)** — නොමිලේ OAuth: **Dashboard → Providers → Kiro → Available Models** යටතේ පෙන්වන සජීවී catalog එක භාවිත කරන්න. පවතින බව ගිණුම සහ සැලසුම මත රඳා පවතී.
 
 **Qoder (`if/`)** — නොමිලේ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,7 +651,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — මසකට ස්ථාවර $9ක් හෝ භාවිතය අනුව: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — මාසිකව ස්ථාවර $9ක් හෝ භාවිතය අනුව: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API යතුර: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -640,29 +659,29 @@ post_install() {
 
 **xAI (`xai/`)** — ස්වදේශීය Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU තුළ සත්කාරකත්වය සපයන: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU හි සත්කාරකත්වය දරන: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — සෙවීමෙන් වැඩිදියුණු කළ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — සෙවුම්-වැඩිදියුණු කළ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — විවෘත මූලාශ්ර: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (නොමිලේ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — විවෘත-මූලාශ්ර: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (නොමිලේ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — වේගවත් අනුමානය: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — වේගවත් inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — වේෆර්-පරිමාණ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG කේන්ද්රගත: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ව්යවසාය: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ව්යවසාය: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google වෙතින් API යතුර අනුව සජීවීව සමමුහුර්ත කෙරේ — ස්ථිතික ලැයිස්තුවක් නොමැත. **Dashboard → Providers** තුළ යතුරක් සම්බන්ධ කර, වත්මන් නාමාවලිය ආයාත කිරීමට **Available Models** භාවිත කරන්න (උදා. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: API යතුර අනුව Google වෙතින් සජීවීව සමමුහුර්ත වේ — ස්ථාවර ලැයිස්තුවක් නොමැත. **Dashboard → Providers** තුළ යතුරක් සම්බන්ධ කර, වත්මන් catalog එක ආනයනය කිරීමට **Available Models** භාවිත කරන්න (උදාහරණයක් ලෙස `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**අනෙකුත් අනුකූල සපයන්නන්** (තෝරාගත්): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` හරහා), `azure-ai`, `openrouter` (සෘජු-යැවීම් නාමාවලිය), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. එක් එක් සපයන්නා `providerRegistry.ts` තුළ තමන්ගේම ආකෘති ලැයිස්තුව පවත්වාගෙන යන අතර, සපයන්නා `/models` අන්ත ලක්ෂ්යයක් නිරාවරණය කරන විට එය ස්වයංක්රීයව සමමුහුර්ත කළ හැක.
+**අනෙකුත් අනුකූල providers** (තෝරාගත්): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` හරහා), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. සෑම එකක්ම `providerRegistry.ts` තුළ තමන්ගේම ආකෘති ලැයිස්තුව පවත්වාගෙන යන අතර, provider එක `/models` endpoint එකක් ලබාදෙන විට ස්වයංක්රීයව සමමුහුර්ත කළ හැක.
 
-**ආකෘති ID පිළිබඳ සටහන:** OmniRoute සපයන්නාට ස්වදේශීය ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) භාවිත කරයි. upstream API ඒවා එලෙස අපේක්ෂා කරන බැවින් ඇතැම් ID තුළ තිත් සහිත අනුවාද අඩංගු වේ. යම් ආකෘතියක් ඉහත ලැයිස්තුගත කර නොමැති නම්, එහි ලබාගත හැකි බව තහවුරු කිරීමට `omniroute models --search <term>` ධාවනය කරන්න හෝ `GET /api/models/catalog` වෙත ඉල්ලීමක් යවන්න.
+**ආකෘති ID පිළිබඳ සටහන:** OmniRoute provider-native ID භාවිත කරයි (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). සමහර ID තුළ තිත් සහිත අනුවාද ඇතුළත් වේ, මන්ද upstream API ඒවා එලෙස අපේක්ෂා කරන බැවිනි. ඉහත ලැයිස්තුගත කර නොමැති ආකෘතියක් තිබේ නම්, පවතින බව තහවුරු කිරීමට `omniroute models --search <term>` ධාවනය කරන්න හෝ `GET /api/models/catalog` වෙත ඉල්ලීමක් යවන්න.
 
 </details>
 
@@ -727,6 +746,27 @@ prefix: "<prefix>" යනු වෙන් කර ඇති සැපයුම්
 පෙරනිමි සැපයුම්කරුවෙකු හෝ එහි අක්තපත්ර නම් කරන දෝෂයක් සමඟ අසාර්ථක වන්නේ නම්, නෝඩයේ උපසර්ගය
 වෙන් කර ඇත්දැයි පරීක්ෂා කරන්න: මෙම රීතිය ඇතිවීමට පෙර සුරැකූ නෝඩ තවමත් ගබඩා වී ඇති නමුත්, ඒවායේ උපසර්ගය
 පෙරනිමි සැපයුම්කරු වෙත මාර්ගගත වේ. නෝඩය සංස්කරණය කර එයට නව උපසර්ගයක් දෙන්න.
+
+#### සම්බන්ධතාවයකට අදාළ ගේට්වේ විකල්ප
+
+මෙම යතුරු සම්බන්ධතාවයක `providerSpecificData` තුළ ඇතුළත් වේ (උදාහරණයක් ලෙස
+`PUT /api/providers/{id}` හරහා):
+
+- `toolNameMaxLength` (පූර්ණ සංඛ්යාවක්, 1–1024) — දිගු මෙවලම් නාම ප්රතික්ෂේප කරන ගේට්වේ සහිත OpenAI කතාබස්-ආකෘතියට අනුකූල සම්බන්ධතා සඳහාය. දිගු නාම කෙටි අන්වර්ථ නාම ලෙස යවා, ප්රතිචාරයේදී නැවත මුල් තත්ත්වයට පත් කෙරේ.
+- `quotaEndpoint` — ගේට්වේහි කෝටා/ක්රෙඩිට් අන්ත ලක්ෂ්යයයි; උපකරණ පුවරුවේ කෝටා තීරුව සහ කෝටා-සැලකිල්ලට ගන්නා මාර්ගගත කිරීම සඳහා මෙය කියවනු ලැබේ. OpenAI- සහ Anthropic-අනුකූල සම්බන්ධතා දෙකෙහිම ක්රියා කරයි; සම්පූර්ණ ව්යුහය `open-sse/services/usage/openaiCompatible.ts` හි ලේඛනගත කර ඇත.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### OmniRoute සම-ද්වාර දාමගත කිරීම
 

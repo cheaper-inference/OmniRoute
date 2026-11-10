@@ -29,7 +29,7 @@ function getArg(name, fallbackValue = "") {
 }
 
 function runGit(args) {
-  return execFileSync("git", args, { encoding: "utf8" }).trim();
+  return execFileSync("git", args, { encoding: "utf8" });
 }
 
 function isSourceFile(filePath) {
@@ -78,14 +78,36 @@ if (!baseRef) {
 }
 
 const baseTarget = process.env.GITHUB_BASE_SHA || `origin/${baseRef}`;
-const changedFiles = runGit(["diff", "--name-only", "--diff-filter=ACMR", `${baseTarget}...HEAD`])
-  .split(/\r?\n/)
-  .map((line) => line.trim())
+// NUL separators preserve whitespace, Unicode and newlines in Git paths.
+const changedFiles = runGit([
+  "diff",
+  "--name-only",
+  "-z",
+  "--diff-filter=ACMR",
+  `${baseTarget}...HEAD`,
+])
+  .split("\0")
   .filter(Boolean);
+// A rename or copy introduces a new destination too. Existing misplaced tests
+// remain visible legacy debt; this rule prevents newly introduced locations.
+const addedFiles = runGit([
+  "diff",
+  "--no-renames",
+  "--name-only",
+  "-z",
+  "--diff-filter=A",
+  `${baseTarget}...HEAD`,
+])
+  .split("\0")
+  .filter(Boolean);
+const misplacedNewTests = addedFiles.filter(
+  (filePath) => isTestFile(filePath) && !filePath.startsWith("tests/")
+);
 
 const changedSourceFiles = changedFiles.filter(isSourceFile);
 const changedTestFiles = changedFiles.filter(isTestFile);
 const hasRequiredTests = changedSourceFiles.length === 0 || changedTestFiles.length > 0;
+const passesPolicy = hasRequiredTests && misplacedNewTests.length === 0;
 
 const reportLines = [
   "## PR Test Policy",
@@ -93,6 +115,7 @@ const reportLines = [
   `Base ref: \`${baseRef}\``,
   `Changed production files: ${changedSourceFiles.length}`,
   `Changed automated test files: ${changedTestFiles.length}`,
+  `New test files outside tests/: ${misplacedNewTests.length}`,
   "",
 ];
 
@@ -112,14 +135,24 @@ if (changedTestFiles.length > 0) {
   reportLines.push("");
 }
 
-if (hasRequiredTests) {
+if (passesPolicy) {
   reportLines.push("Result: PASS");
 } else {
-  reportLines.push(
-    "Result: FAIL",
-    "",
-    "This PR changes production code under `src/`, `open-sse/`, `electron/`, or `bin/` but does not add or update automated tests."
-  );
+  reportLines.push("Result: FAIL", "");
+  if (!hasRequiredTests) {
+    reportLines.push(
+      "This PR changes production code under `src/`, `open-sse/`, `electron/`, or `bin/` but does not add or update automated tests."
+    );
+  }
+  if (misplacedNewTests.length > 0) {
+    reportLines.push(
+      "New test files must be under `tests/`, including renamed or copied tests.",
+      ""
+    );
+    for (const filePath of misplacedNewTests.slice(0, 20)) {
+      reportLines.push(`- ${JSON.stringify(filePath)}`);
+    }
+  }
 }
 
 const report = buildReport(reportLines);
@@ -131,6 +164,6 @@ if (summaryFile) {
 
 process.stdout.write(report);
 
-if (!hasRequiredTests) {
+if (!passesPolicy) {
   process.exit(1);
 }

@@ -838,6 +838,7 @@ const runAsync = run;
  * relaxed: an unstamped dist/ or one built from another commit still fails.
  */
 export const PACK_POLICY_TIMEOUT_MS = 3 * 60 * 1000;
+export const PACK_LANE_TIMEOUT_MS = 90 * 60 * 1000;
 
 export function makePackPhaseReference(phase, invocationId, candidateSha, context = {}) {
   const phases = ["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"];
@@ -848,7 +849,10 @@ export function makePackPhaseReference(phase, invocationId, candidateSha, contex
     phase.budgetMs <= 0 ||
     !Number.isSafeInteger(phase.preparationBudgetMs) ||
     phase.preparationBudgetMs <= 0 ||
-    phase.preparationBudgetMs > 40 * 60 * 1000 ||
+    phase.preparationBudgetMs >
+      (phase.mode === "independent-policy"
+        ? PACK_LANE_TIMEOUT_MS - PACK_POLICY_TIMEOUT_MS
+        : PACK_LANE_TIMEOUT_MS) ||
     phase.budgetMs >
       (phase.phaseId === "validate-pack-artifact" && phase.mode === "independent-policy"
         ? PACK_POLICY_TIMEOUT_MS
@@ -910,13 +914,15 @@ export async function runPackArtifactGate(
   if (
     !Number.isSafeInteger(timeoutMs) ||
     timeoutMs <= 0 ||
-    timeoutMs > 40 * 60 * 1000 ||
+    timeoutMs > PACK_LANE_TIMEOUT_MS ||
     typeof independentPolicy !== "boolean" ||
-    (independentPolicy && timeoutMs !== 40 * 60 * 1000)
+    (independentPolicy && timeoutMs !== PACK_LANE_TIMEOUT_MS)
   ) {
-    throw new Error("Invalid package preparation budget");
+    throw new Error("Invalid package lane budget");
   }
-  const deadline = now() + timeoutMs;
+  // Reserve the checker inside the public 90-minute lane: preparation 87 + policy 3.
+  const preparationBudgetMs = independentPolicy ? timeoutMs - PACK_POLICY_TIMEOUT_MS : timeoutMs;
+  const deadline = now() + preparationBudgetMs;
   const steps = [
     // Match CI: npm runs prebuild/build/postbuild before the strict package consumer.
     // Both commands and the stamp spend the same preparation deadline.
@@ -951,7 +957,7 @@ export async function runPackArtifactGate(
         : deadline - now();
     if (remaining <= 0)
       return {
-        ...classifyRunError({ killed: true, signal: "SIGTERM" }, timeoutMs),
+        ...classifyRunError({ killed: true, signal: "SIGTERM" }, preparationBudgetMs),
         phaseId: step.phaseId,
       };
     const result = await runCommand(step.cmd, step.args, {
@@ -961,7 +967,7 @@ export async function runPackArtifactGate(
         phaseId: step.phaseId,
         mode: independentPolicy ? "independent-policy" : "shared",
         budgetMs: remaining,
-        preparationBudgetMs: timeoutMs,
+        preparationBudgetMs,
       },
     });
     out += result.out;
@@ -1286,7 +1292,7 @@ async function main() {
   if (!QUICK) {
     // These are the gates that catch inherited base-red tests from cycle PRs (the v3.8.42
     // release PR exploded with 15 such reds). Non-draft code PRs into release/** run the unit
-    // suite and test:vitest per PR (quality.yml fast-unit, fast-vitest); only integration is
+    // suite and test:vitest per PR (ci.yml test-unit, test-vitest); only integration is
     // absent. These gates run SILENTLY for many minutes; the announce line above + these
     // hard ceilings keep a long-but-healthy run from being mistaken for a hang (the ceiling also
     // converts a genuine DB-handle hang into a visible failure instead of an infinite block).
@@ -1423,10 +1429,20 @@ async function main() {
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
         run: (timeout) => runPackArtifactGate(timeout, { independentPolicy: FULL_CI }),
-        // Build + stamp retain 40 minutes. Only --full-ci gives the policy checker
-        // its own 3 minutes: observed complete checks took 113s / 157s (#18791).
-        // That mode requires prepared staging and cannot start another build.
-        timeout: 40 * 60 * 1000,
+        // Covers build:cli + check:pack-artifact. Measured 2026-10-31 on an idle runner and a
+        // stationary tip: next build compiles silently for ~12 min, keeps printing, and the old
+        // 20 min ceiling killed it on every scheduled run. 40 min still turns a genuine hang
+        // into a visible failure (same reasoning as the integration ceiling above).
+        // Measured 2026-11-02: build:cli took 2237 s and 2372 s on two sweeps of the same day and
+        // check:pack-artifact about 150 s, so the 40 min ceiling left seconds of headroom and
+        // killed the second run. 60 min restored the margin for a while.
+        // Measured 2026-11-05: build:cli now takes about 52 min and check:pack-artifact about
+        // 8 min. Run 42038590490 hit the shared 60 min deadline mid-pack (52.1 + 7.9) and the
+        // green run before it passed by 40 s (51.4 + 7.9). 90 min restores real headroom; a
+        // genuine hang still fails.
+        // Full CI reserves 3 of those 90 minutes for policy: preparation gets 87.
+        // Standard shares all 90; quick remains 20. Strict staging forbids a rebuild.
+        timeout: 90 * 60 * 1000,
       });
     }
     // With --suites-from only the build lane is left for this slot.
@@ -1473,8 +1489,10 @@ async function main() {
         });
       } else {
         announce(bootLabel);
+        // Packs and installs the real tarball, so it scales with the package: the translated
+        // docs mirrors (#18869) added 8,885 files, and 15 minutes stopped being enough.
         const { code, out } = await runAsync(npmCmd, ["run", "check:pack-boot"], {
-          timeout: 15 * 60 * 1000,
+          timeout: 40 * 60 * 1000,
         });
         saveGateLog("pack-boot", out);
         record({

@@ -60,3 +60,15 @@ Code / OpenCode 用戶端應該看到的模型，而不考量定價）。#11481 
 陣列——不同於 `hidePaidModels` 的組合步驟匯出篩選器，此處沒有重新載入的風險：
 嵌入已匯出組合步驟中的被拒絕 ID，是營運者自行明確指定的路由選擇，並非匯出邊界
 需要移除的內容。
+
+## 僅列出組合（`exposeCombosOnly`）
+
+這是獨立的布林設定，同樣需要主動啟用，預設值為 `false`，適用於以組合為公開模型介面、提供者僅作為後端的部署。設為 `true` 時，公開清單（`GET /v1/models`、`GET /v1`，以及基於 `getUnifiedModelsResponse()` 的其他 `/v1` 探索路由）只保留 `owned_by: "combo"` 的列：使用者組合加上內建 `auto/*` 組合（除非 `hideAutoCombos` 隱藏它們）。它採用與各金鑰的 `catalogScope: "combos"` 相同的列判斷，金鑰自身的允許/拒絕/範圍篩選仍會在此基礎上生效。
+
+可在 **設定 → 路由 → Models API 清單** 中切換，或使用 `PATCH /api/settings {"exposeCombosOnly": true}`。
+
+與上面的清單一樣，它僅改變對外公布的內容：
+
+- 明確的 `provider/model` ID 仍可分派請求，`GET /v1/models/{id}` 仍可解析它；
+- 控制台目錄（模型選擇器使用的 `GET /api/models/catalog`）不會縮小；
+- 它不會同步到 `auto/*` 候選集區，因此 `auto/*` 組合保留完整候選集區。

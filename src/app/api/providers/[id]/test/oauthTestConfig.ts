@@ -309,6 +309,14 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     // connectivity is proven by every chat/completions request.
     checkExpiry: true,
   },
+  freebuff: {
+    // Freebuff login yields a long-lived Codebuff session token with no refresh
+    // grant or advertised expiry. Validate presence only — the upstream session
+    // probe (/api/v1/freebuff/session) allocates a session, so it is not a
+    // side-effect-free test; real connectivity is proven by chat requests.
+    checkExpiry: true,
+    refreshable: false,
+  },
   "devin-desktop": {
     // Devin Desktop authentication is import-only: the copied API key has no
     // refresh token or known expiry. Validate token presence here; real

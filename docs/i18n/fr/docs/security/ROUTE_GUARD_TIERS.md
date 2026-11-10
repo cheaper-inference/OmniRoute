@@ -200,6 +200,12 @@ processus serveur.
 | `/api/providers/health-autopilot/actions` | Exécute les actions correctives du pilote automatique                               |
 | `/api/settings/obsidian`                  | Génère des identifiants WebDAV réutilisables pour n’importe quelle racine de coffre |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                        |
+| `/api/cli-tools/apply`                    | Réécrit la configuration CLI de l’opérateur sur l’hôte                              |
+| `/api/cli-tools/guide-settings`           | Écrit les fichiers de configuration CLI fondés sur des guides                       |
+| `/api/cli-tools/hermes-agent-settings`    | Écrit la configuration de l’agent Hermes                                            |
+| `/api/cli-tools/backups`                  | Restaure et supprime les sauvegardes de configuration CLI                           |
+| `/api/log-export`                         | Envoie les journaux d’appels vers une destination configurée                        |
+| `/api/restart`                            | Redémarre le processus serveur                                                      |
 
 **Réponse en cas de violation :** `401 Authentication required`
 

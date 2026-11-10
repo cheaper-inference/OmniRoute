@@ -63,3 +63,15 @@ Export nastavení (`GET /api/settings/export-json`) zahŕňa obe polia bezo zmen
 pole nastavení — na rozdiel od exportného filtra krokov kombinácie v `hidePaidModels` tu nehrozí riziko
 opätovnej hydratácie: zakázaný identifikátor vložený do exportovaného kroku kombinácie je vlastnou
 explicitnou voľbou smerovania operátora, nie niečím, čo musí hranica exportu odstrániť.
+
+## Výpis iba komb (`exposeCombosOnly`)
+
+Samostatná booleovská voľba, tiež voliteľne zapínaná a predvolene `false`, pre nasadenia, kde sú kombá verejným povrchom modelov a poskytovatelia iba backendmi. Pri `true` verejný výpis (`GET /v1/models`, `GET /v1` a ostatné objavovacie trasy `/v1` založené na `getUnifiedModelsResponse()`) ponechá iba riadky s `owned_by: "combo"`: používateľské kombá a vstavané kombá `auto/*` (pokiaľ ich neskryje `hideAutoCombos`). Používa rovnaký test riadkov ako `catalogScope: "combos"` pre jednotlivý kľúč; vlastné filtre povolenia, zákazu a rozsahu daného kľúča sa naďalej uplatnia navyše.
+
+Prepnite ju v **Settings → Routing → Models API listing** alebo pomocou `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Rovnako ako vyššie uvedené zoznamy mení iba zverejňovanie:
+
+- explicitné ID `provider/model` sa naďalej odošle a `GET /v1/models/{id}` ho naďalej vyhodnotí;
+- katalóg dashboardu (`GET /api/models/catalog`, používaný výbermi modelov) sa nezúži;
+- voľba sa nepremieta do skupín kandidátov `auto/*`, takže kombá `auto/*` si ponechajú úplnú skupinu.

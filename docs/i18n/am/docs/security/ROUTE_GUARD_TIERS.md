@@ -204,6 +204,12 @@ hostውን probe የሚያደርግ አዲስ read route ተመሳሳይ pattern
 | `/api/providers/health-autopilot/actions` | የautopilot remediation actionsን ያስፈጽማል                      |
 | `/api/settings/obsidian`                  | ለማንኛውም vault root እንደገና ጥቅም ላይ ሊውሉ የሚችሉ WebDAV credsን ይፈጥራል |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                |
+| `/api/cli-tools/apply`                    | በአስተናጋጁ ላይ የኦፕሬተሩን CLI ቅንብር እንደገና ይጽፋል                      |
+| `/api/cli-tools/guide-settings`           | በመመሪያ የተመሠረቱ CLI የቅንብር ፋይሎችን ይጽፋል                           |
+| `/api/cli-tools/hermes-agent-settings`    | የHermes ወኪልን ቅንብር ይጽፋል                                      |
+| `/api/cli-tools/backups`                  | የCLI ቅንብር ምትኬዎችን ይመልሳል እና ያጠፋል                              |
+| `/api/log-export`                         | የጥሪ መዝገቦችን ወደ ተዋቀረ መድረሻ ይልካል                                |
+| `/api/restart`                            | የአገልጋዩን ሂደት እንደገና ያስጀምራል                                    |
 
 **ጥሰት ሲኖር የሚሰጥ ምላሽ፦** `401 Authentication required`
 

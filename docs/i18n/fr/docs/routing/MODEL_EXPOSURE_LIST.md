@@ -72,3 +72,15 @@ quels, comme tout autre champ de paramètres — contrairement au filtre d'expor
 combinaison de `hidePaidModels`, il n'existe ici aucun risque de réhydratation : un identifiant
 exclu intégré à une étape de combinaison exportée représente le choix explicite de routage de
 l'opérateur, et non un élément que la limite d'exportation doit supprimer.
+
+## Liste limitée aux combos (`exposeCombosOnly`)
+
+Un booléen distinct, également sur activation explicite et `false` par défaut, pour les déploiements où les combos constituent l'interface publique des modèles et les fournisseurs ne sont que des backends. Lorsqu'il vaut `true`, la liste publique (`GET /v1/models`, `GET /v1` et les autres routes de découverte `/v1` construites sur `getUnifiedModelsResponse()`) ne conserve que les lignes avec `owned_by: "combo"` : les combos de l'utilisateur et les combos intégrés `auto/*` (sauf si `hideAutoCombos` les masque). Il utilise le même test de ligne que `catalogScope: "combos"` par clé, et les filtres propres à la clé d'autorisation/refus/périmètre continuent de s'appliquer en complément.
+
+Activez ou désactivez-le dans **Paramètres → Routage → Liste de l'API des modèles**, ou avec `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Comme les listes ci-dessus, cela ne change que ce qui est annoncé :
+
+- un ID explicite `provider/model` continue d'être envoyé, et `GET /v1/models/{id}` continue de le résoudre ;
+- le catalogue du tableau de bord (`GET /api/models/catalog`, utilisé par les sélecteurs de modèles) n'est pas réduit ;
+- cela n'est pas répercuté dans les pools de candidats `auto/*`, donc les combos `auto/*` conservent leur pool complet.

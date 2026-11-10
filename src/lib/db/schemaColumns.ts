@@ -145,6 +145,14 @@ export function ensureUsageHistoryColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE usage_history ADD COLUMN account_label_priority INTEGER DEFAULT 0");
       console.log("[DB] Added usage_history.account_label_priority column");
     }
+    if (!columnNames.has("billing_team_id")) {
+      db.exec("ALTER TABLE usage_history ADD COLUMN billing_team_id TEXT");
+      console.log("[DB] Added usage_history.billing_team_id column");
+    }
+    if (!columnNames.has("team_rollup_processed_at")) {
+      db.exec("ALTER TABLE usage_history ADD COLUMN team_rollup_processed_at TEXT");
+      console.log("[DB] Added usage_history.team_rollup_processed_at column");
+    }
     db.exec(
       "CREATE INDEX IF NOT EXISTS idx_uh_provider_model_timestamp ON usage_history(provider, model, timestamp)"
     );
@@ -263,6 +271,11 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE call_logs ADD COLUMN added_wait_ms INTEGER DEFAULT NULL");
       console.log("[DB] Added call_logs.added_wait_ms column");
     }
+    // The call-log INSERT names this column on every write (migration 224).
+    if (!columnNames.has("queue_wait_ms")) {
+      db.exec("ALTER TABLE call_logs ADD COLUMN queue_wait_ms INTEGER DEFAULT NULL");
+      console.log("[DB] Added call_logs.queue_wait_ms column");
+    }
     if (!columnNames.has("added_wait_cause")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN added_wait_cause TEXT DEFAULT NULL");
       console.log("[DB] Added call_logs.added_wait_cause column");
@@ -274,6 +287,12 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
     if (!columnNames.has("session_tag")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN session_tag TEXT DEFAULT NULL");
       console.log("[DB] Added call_logs.session_tag column");
+    }
+    // added by 214_call_logs_client_session_id; back-filled here because the call-log
+    // INSERT names it on every write.
+    if (!columnNames.has("client_session_id")) {
+      db.exec("ALTER TABLE call_logs ADD COLUMN client_session_id TEXT DEFAULT NULL");
+      console.log("[DB] Added call_logs.client_session_id column");
     }
     // added by 188_call_logs_reasoning_encrypted; back-filled here for
     // lineages that skipped the migration file — the call-log write path
@@ -329,6 +348,7 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
     );
     db.exec("CREATE INDEX IF NOT EXISTS idx_cl_correlation_id ON call_logs(correlation_id)");
     db.exec("CREATE INDEX IF NOT EXISTS idx_cl_session_tag ON call_logs(session_tag)");
+    db.exec("CREATE INDEX IF NOT EXISTS idx_cl_client_session_id ON call_logs(client_session_id)");
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.warn("[DB] Failed to verify call_logs schema:", message);
@@ -344,6 +364,14 @@ export function ensureProxyLogsColumns(db: SqliteDatabase) {
     if (!columnNames.has("egress_ip")) {
       db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip TEXT");
       console.log("[DB] Added proxy_logs.egress_ip column");
+    }
+    if (!columnNames.has("egress_ip_v4")) {
+      db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip_v4 TEXT");
+      console.log("[DB] Added proxy_logs.egress_ip_v4 column");
+    }
+    if (!columnNames.has("egress_ip_v6")) {
+      db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip_v6 TEXT");
+      console.log("[DB] Added proxy_logs.egress_ip_v6 column");
     }
     if (!columnNames.has("upstream_status")) {
       db.exec("ALTER TABLE proxy_logs ADD COLUMN upstream_status INTEGER");

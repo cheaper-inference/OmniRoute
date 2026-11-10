@@ -1,8 +1,19 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import EmptyState from "@/shared/components/EmptyState";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
+import { cn } from "@/shared/utils/cn";
 import { useDisplayBaseUrl } from "@/shared/hooks";
 import VscodeTokenAliasCard from "./VscodeTokenAliasCard";
 import { matchesSearch } from "@/shared/utils/turkishText";
@@ -41,45 +52,37 @@ interface TryItResult {
   contentType: string;
 }
 
-const METHOD_COLORS: Record<string, string> = {
-  GET: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
-  POST: "bg-blue-500/15 text-blue-500 border-blue-500/30",
-  PUT: "bg-amber-500/15 text-amber-500 border-amber-500/30",
-  PATCH: "bg-orange-500/15 text-orange-500 border-orange-500/30",
-  DELETE: "bg-red-500/15 text-red-500 border-red-500/30",
+const METHOD_VARIANTS: Record<string, "success" | "info" | "warning" | "error"> = {
+  GET: "success",
+  POST: "info",
+  PUT: "warning",
+  PATCH: "warning",
+  DELETE: "error",
 };
 
 /* ─── Main Component ─────────────────────────────────── */
 export default function ApiEndpointsTab() {
   const t = useTranslations("endpoint");
+  const tc = useTranslations("common");
   const baseUrl = useDisplayBaseUrl();
 
   function EndpointBadges({ ep }: { ep: Endpoint }) {
     return (
       <div className="flex items-center gap-1 shrink-0">
         {ep.loopbackOnly && (
-          <span
-            className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-500 border border-blue-500/30"
-            title={t("badgeLoopbackTooltip")}
-          >
+          <Badge size="sm" variant="info" title={t("badgeLoopbackTooltip")}>
             {t("badgeLocal")}
-          </span>
+          </Badge>
         )}
         {ep.alwaysProtected && (
-          <span
-            className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-500/15 text-red-500 border border-red-500/30"
-            title={t("badgeAlwaysProtectedTooltip")}
-          >
+          <Badge size="sm" variant="error" title={t("badgeAlwaysProtectedTooltip")}>
             {t("badgeProtected")}
-          </span>
+          </Badge>
         )}
         {ep.internal && (
-          <span
-            className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-500/15 text-gray-400 border border-gray-500/30"
-            title={t("badgeInternalTooltip")}
-          >
+          <Badge size="sm" title={t("badgeInternalTooltip")}>
             {t("badgeInternal")}
-          </span>
+          </Badge>
         )}
       </div>
     );
@@ -311,8 +314,8 @@ export default function ApiEndpointsTab() {
   if (loading) {
     return (
       <div className="animate-pulse space-y-4">
-        <div className="h-8 bg-white/5 rounded-lg w-1/3" />
-        <div className="h-64 bg-white/5 rounded-xl" />
+        <div className="h-8 bg-surface-2 rounded-lg w-1/3" />
+        <div className="h-64 bg-surface-2 rounded-xl" />
       </div>
     );
   }
@@ -325,7 +328,7 @@ export default function ApiEndpointsTab() {
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center size-10 rounded-xl bg-primary/10">
-                <span className="material-symbols-outlined text-primary text-[20px]">api</span>
+                <Icon name="api" size={20} className="text-primary" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -346,20 +349,18 @@ export default function ApiEndpointsTab() {
               <a
                 href="/docs/openapi.yaml"
                 download
-                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg
-                           bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                className={buttonVariants({ variant: "secondary", size: "sm" })}
               >
-                <span className="material-symbols-outlined text-[14px]">download</span>
+                <Icon name="download" size={14} />
                 YAML
               </a>
               <a
                 href="/api/openapi/spec"
                 target="_blank"
                 rel="noopener"
-                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg
-                           bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                className={buttonVariants({ variant: "secondary", size: "sm" })}
               >
-                <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                <Icon name="open_in_new" size={14} />
                 JSON
               </a>
             </div>
@@ -372,8 +373,8 @@ export default function ApiEndpointsTab() {
         <>
           <Card className="p-6">
             <div className="flex items-start gap-3">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-red-500/10">
-                <span className="material-symbols-outlined text-[20px] text-red-500">error</span>
+              <div className="flex size-10 items-center justify-center rounded-lg bg-error/10">
+                <Icon name="error" size={20} className="text-error" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-text-main">
@@ -386,10 +387,9 @@ export default function ApiEndpointsTab() {
                   href="/api/openapi/spec"
                   target="_blank"
                   rel="noopener"
-                  className="inline-flex items-center gap-1 mt-3 px-2.5 py-1.5 text-xs font-medium rounded-lg
-                           bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                  className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "mt-3")}
                 >
-                  <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+                  <Icon name="open_in_new" size={14} />
                   {t("openJsonResponse")}
                 </a>
               </div>
@@ -404,43 +404,35 @@ export default function ApiEndpointsTab() {
         <>
           {/* Search & filter */}
           <div className="flex items-center gap-2">
-            <div className="relative flex-1 max-w-md">
-              <span className="material-symbols-outlined text-[16px] text-text-muted absolute left-3 top-1/2 -translate-y-1/2">
-                search
-              </span>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t("apiEndpointsSearchPlaceholder")}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-black/10 dark:border-white/10
-                           bg-white dark:bg-black/20 focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-            </div>
+            <Input
+              icon="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("apiEndpointsSearchPlaceholder")}
+              aria-label={t("apiEndpointsSearchPlaceholder")}
+              className="flex-1 max-w-md"
+            />
             <div className="flex gap-1 flex-wrap">
-              <button
+              <Button
+                size="sm"
+                variant={!selectedTag ? "secondary" : "ghost"}
+                aria-pressed={!selectedTag}
                 onClick={() => setSelectedTag(null)}
-                className={`px-2 py-1 text-[10px] font-medium rounded-md transition-colors
-                  ${
-                    !selectedTag
-                      ? "bg-primary/10 text-primary"
-                      : "bg-black/5 dark:bg-white/5 text-text-muted hover:text-text-main"
-                  }`}
+                className="text-[10px]"
               >
                 {t("all")}
-              </button>
+              </Button>
               {allTags.slice(0, 8).map((tag) => (
-                <button
+                <Button
                   key={tag}
+                  size="sm"
+                  variant={selectedTag === tag ? "secondary" : "ghost"}
+                  aria-pressed={selectedTag === tag}
                   onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                  className={`px-2 py-1 text-[10px] font-medium rounded-md transition-colors
-                    ${
-                      selectedTag === tag
-                        ? "bg-primary/10 text-primary"
-                        : "bg-black/5 dark:bg-white/5 text-text-muted hover:text-text-main"
-                    }`}
+                  className="text-[10px]"
                 >
                   {tag}
-                </button>
+                </Button>
               ))}
               {allTags.length > 8 && (
                 <span className="px-2 py-1 text-[10px] text-text-muted">
@@ -449,17 +441,15 @@ export default function ApiEndpointsTab() {
               )}
             </div>
             {/* Security tier filter */}
-            <div className="flex items-center gap-1 ml-1 border-l border-black/10 dark:border-white/10 pl-2 flex-wrap">
+            <div className="flex items-center gap-1 ml-1 border-l border-border pl-2 flex-wrap">
               {(["all", "auth", "loopback", "always-protected", "public"] as const).map((tier) => (
-                <button
+                <Button
                   key={tier}
+                  size="sm"
+                  variant={securityTier === tier ? "secondary" : "ghost"}
+                  aria-pressed={securityTier === tier}
                   onClick={() => setSecurityTier(tier)}
-                  className={`px-2 py-1 text-[10px] font-medium rounded-md transition-colors
-                    ${
-                      securityTier === tier
-                        ? "bg-primary/10 text-primary"
-                        : "bg-black/5 dark:bg-white/5 text-text-muted hover:text-text-main"
-                    }`}
+                  className="text-[10px]"
                 >
                   {tier === "all"
                     ? t("tierAll")
@@ -470,20 +460,18 @@ export default function ApiEndpointsTab() {
                         : tier === "always-protected"
                           ? t("tierAlwaysProtected")
                           : t("tierPublic")}
-                </button>
+                </Button>
               ))}
-              <button
+              <Button
+                size="sm"
+                variant={showInternal ? "warning" : "ghost"}
+                aria-pressed={showInternal}
                 onClick={() => setShowInternal(!showInternal)}
-                className={`px-2 py-1 text-[10px] font-medium rounded-md transition-colors ml-1
-                  ${
-                    showInternal
-                      ? "bg-amber-500/10 text-amber-500"
-                      : "bg-black/5 dark:bg-white/5 text-text-muted hover:text-text-main"
-                  }`}
+                className="text-[10px] ml-1"
                 title={t("showInternalTooltip")}
               >
                 {showInternal ? t("hideInternal") : t("showInternal")}
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -492,17 +480,15 @@ export default function ApiEndpointsTab() {
           {/* Endpoint groups */}
           {Object.entries(groupedEndpoints).map(([tag, endpoints]) => (
             <Card key={tag} className="overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-black/5 dark:border-white/5">
-                <span className="material-symbols-outlined text-[14px] text-primary">folder</span>
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+                <Icon name="folder" size={14} className="text-primary" />
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                   {tag}
                 </h3>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-text-muted">
-                  {endpoints.length}
-                </span>
+                <Badge size="sm">{endpoints.length}</Badge>
                 <div className="flex-1 h-px bg-border/30" />
               </div>
-              <div className="divide-y divide-black/[0.03] dark:divide-white/[0.03]">
+              <div className="divide-y divide-border">
                 {endpoints.map((ep) => {
                   const key = `${ep.method}:${ep.path}`;
                   const isExpanded = expandedEndpoint === key;
@@ -510,17 +496,19 @@ export default function ApiEndpointsTab() {
 
                   return (
                     <div key={key}>
-                      <div
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]
-                                   cursor-pointer transition-colors"
+                      <Button
+                        variant="ghost"
+                        className="w-full h-auto justify-start gap-3 rounded-none px-4 py-2.5 text-left font-normal"
+                        aria-expanded={isExpanded}
                         onClick={() => setExpandedEndpoint(isExpanded ? null : key)}
                       >
-                        <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded border min-w-[42px] text-center font-mono
-                            ${METHOD_COLORS[ep.method] || "bg-gray-500/15 text-gray-500"}`}
+                        <Badge
+                          size="sm"
+                          variant={METHOD_VARIANTS[ep.method] ?? "default"}
+                          className="min-w-[42px] justify-center font-mono font-bold"
                         >
                           {ep.method}
-                        </span>
+                        </Badge>
                         <code className="text-xs font-mono text-text-main flex-1 truncate">
                           {ep.path}
                         </code>
@@ -529,23 +517,26 @@ export default function ApiEndpointsTab() {
                         </span>
                         <EndpointBadges ep={ep} />
                         {ep.security && (
-                          <span
-                            className="material-symbols-outlined text-[12px] text-amber-500"
-                            title={t("apiEndpointsRequiresAuth")}
-                          >
-                            lock
-                          </span>
+                          <Icon
+                            name="lock"
+                            size={12}
+                            className="text-warning"
+                            ariaLabel={t("apiEndpointsRequiresAuth")}
+                          />
                         )}
-                        <span
-                          className={`material-symbols-outlined text-[14px] text-text-muted transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                        >
-                          expand_more
-                        </span>
-                      </div>
+                        <Icon
+                          name="expand_more"
+                          size={14}
+                          className={cn(
+                            "text-text-muted transition-transform",
+                            isExpanded && "rotate-180"
+                          )}
+                        />
+                      </Button>
 
                       {/* Expanded detail */}
                       {isExpanded && (
-                        <div className="px-4 pb-3 space-y-3 bg-black/[0.01] dark:bg-white/[0.01]">
+                        <div className="px-4 pb-3 space-y-3 bg-surface-2">
                           <div className="flex items-start justify-between gap-4">
                             <div>
                               <p className="text-xs text-text-main font-medium">{ep.summary}</p>
@@ -555,17 +546,13 @@ export default function ApiEndpointsTab() {
                               <div className="flex items-center gap-3 mt-2 text-[10px] text-text-muted">
                                 {ep.security && (
                                   <span className="flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[12px] text-amber-500">
-                                      lock
-                                    </span>
+                                    <Icon name="lock" size={12} className="text-warning" />
                                     {t("bearerAuth")}
                                   </span>
                                 )}
                                 {ep.requestBody && (
                                   <span className="flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[12px]">
-                                      description
-                                    </span>
+                                    <Icon name="description" size={12} />
                                     {t("requestBody")}
                                   </span>
                                 )}
@@ -574,40 +561,35 @@ export default function ApiEndpointsTab() {
                                 </span>
                               </div>
                             </div>
-                            <button
+                            <Button
+                              size="sm"
+                              variant={isTrying ? "primary" : "secondary"}
+                              icon={isTrying ? "close" : "play_arrow"}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleTryIt(ep);
                               }}
-                              className={`flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold rounded-lg
-                                         transition-colors shrink-0
-                                ${
-                                  isTrying
-                                    ? "bg-primary text-white"
-                                    : "bg-primary/10 text-primary hover:bg-primary/20"
-                                }`}
+                              className="shrink-0 text-[10px]"
                             >
-                              <span className="material-symbols-outlined text-[12px]">
-                                {isTrying ? "close" : "play_arrow"}
-                              </span>
                               {isTrying ? t("close") : t("tryIt")}
-                            </button>
+                            </Button>
                           </div>
 
                           {/* curl example */}
-                          <div className="rounded-lg bg-black/5 dark:bg-black/30 p-3">
-                            <p className="text-[9px] font-semibold text-text-muted uppercase tracking-wider mb-1">
-                              {t("example")}
-                            </p>
-                            <code className="text-[11px] font-mono text-text-main break-all">
-                              curl -X {ep.method} {baseUrl}
-                              {ep.path}
-                              {ep.security ? ' -H "Authorization: Bearer YOUR_KEY"' : ""}
-                              {ep.requestBody
+                          <CodePreview
+                            variant="surface"
+                            filename={t("example")}
+                            language="cURL"
+                            copyLabel={tc("copy")}
+                            copiedLabel={tc("copied")}
+                            code={`curl -X ${ep.method} ${baseUrl}${ep.path}${
+                              ep.security ? ' -H "Authorization: Bearer YOUR_KEY"' : ""
+                            }${
+                              ep.requestBody
                                 ? " -H \"Content-Type: application/json\" -d '{...}'"
-                                : ""}
-                            </code>
-                          </div>
+                                : ""
+                            }`}
+                          />
 
                           {/* Try It panel */}
                           {isTrying && (
@@ -615,44 +597,43 @@ export default function ApiEndpointsTab() {
                               {ep.security && (
                                 <div>
                                   <div className="flex items-center justify-between mb-1">
-                                    <label className="text-[9px] font-semibold text-text-muted uppercase tracking-wider">
+                                    <p className="text-[9px] font-semibold text-text-muted uppercase tracking-wider">
                                       {t("apiKey")}
-                                    </label>
-                                    <button
-                                      type="button"
+                                    </p>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
                                       onClick={() => setUseManualKey(!useManualKey)}
-                                      className="text-[9px] text-primary hover:underline"
+                                      className="h-auto min-h-0 px-1 py-0 text-[10px]"
                                     >
                                       {useManualKey ? t("switchToSelection") : t("enterManually")}
-                                    </button>
+                                    </Button>
                                   </div>
 
                                   {useManualKey ? (
-                                    <input
+                                    <Input
                                       type="password"
                                       value={manualApiKey}
                                       onChange={(e) => setManualApiKey(e.target.value)}
                                       placeholder={t("pasteApiKey")}
-                                      className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-black/10
-                                               dark:border-white/10 bg-white dark:bg-black/30 focus:outline-none
-                                               focus:ring-1 focus:ring-primary"
+                                      aria-label={t("apiKey")}
+                                      inputClassName="font-mono text-xs"
                                     />
                                   ) : availableApiKeys.length > 0 ? (
-                                    <select
+                                    <Select
+                                      aria-label={t("apiKey")}
                                       value={selectedApiKeyId}
                                       onChange={(e) => setSelectedApiKeyId(e.target.value)}
-                                      className="w-full px-3 py-2 text-xs font-mono rounded-lg border border-black/10
-                                               dark:border-white/10 bg-white dark:bg-black/30 focus:outline-none
-                                               focus:ring-1 focus:ring-primary"
+                                      selectClassName="font-mono text-xs"
                                     >
                                       {availableApiKeys.map((apiKey) => (
                                         <option key={apiKey.id} value={apiKey.id}>
                                           {apiKey.key}
                                         </option>
                                       ))}
-                                    </select>
+                                    </Select>
                                   ) : (
-                                    <p className="text-[11px] text-amber-500">
+                                    <p className="text-[11px] text-warning">
                                       {apiKeyLoadError || t("noActiveApiKeys")}
                                     </p>
                                   )}
@@ -660,46 +641,43 @@ export default function ApiEndpointsTab() {
                               )}
                               {ep.method !== "GET" && (
                                 <div>
-                                  <label className="text-[9px] font-semibold text-text-muted uppercase tracking-wider">
+                                  <p className="text-[9px] font-semibold text-text-muted uppercase tracking-wider">
                                     {t("requestBodyJson")}
-                                  </label>
-                                  <textarea
+                                  </p>
+                                  <Textarea
+                                    aria-label={t("requestBodyJson")}
                                     value={tryBody}
                                     onChange={(e) => setTryBody(e.target.value)}
                                     rows={8}
-                                    className="w-full mt-1 px-3 py-2 text-xs font-mono rounded-lg border border-black/10
-                                             dark:border-white/10 bg-white dark:bg-black/30 focus:outline-none
-                                             focus:ring-1 focus:ring-primary resize-none"
+                                    className="mt-1 font-mono text-xs resize-none"
                                     placeholder='{ "model": "gpt-4o", "messages": [...] }'
                                   />
                                 </div>
                               )}
-                              <button
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                icon="send"
+                                loading={trying}
                                 onClick={() => executeTryIt(ep)}
-                                disabled={trying}
-                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg
-                                           bg-primary text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
                               >
-                                <span className="material-symbols-outlined text-[14px]">
-                                  {trying ? "hourglass_empty" : "send"}
-                                </span>
                                 {trying ? t("sending") : t("sendRequest")}
-                              </button>
+                              </Button>
 
                               {tryResult && (
-                                <div className="rounded-lg bg-black/5 dark:bg-black/30 p-3 space-y-2">
+                                <div className="rounded-lg bg-surface-2 p-3 space-y-2">
                                   <div className="flex items-center gap-3 text-xs">
-                                    <span
-                                      className={`px-2 py-0.5 rounded font-bold ${
+                                    <Badge
+                                      variant={
                                         tryResult.status >= 200 && tryResult.status < 300
-                                          ? "bg-emerald-500/15 text-emerald-500"
+                                          ? "success"
                                           : tryResult.status >= 400
-                                            ? "bg-red-500/15 text-red-500"
-                                            : "bg-amber-500/15 text-amber-500"
-                                      }`}
+                                            ? "error"
+                                            : "warning"
+                                      }
                                     >
                                       {tryResult.status} {tryResult.statusText}
-                                    </span>
+                                    </Badge>
                                     <span className="text-text-muted">{tryResult.latencyMs}ms</span>
                                   </div>
                                   <pre className="text-[11px] font-mono text-text-main overflow-auto max-h-[300px] whitespace-pre-wrap">
@@ -721,11 +699,8 @@ export default function ApiEndpointsTab() {
           ))}
 
           {filteredEndpoints.length === 0 && (
-            <Card className="p-8 text-center">
-              <span className="material-symbols-outlined text-[32px] text-text-muted">
-                search_off
-              </span>
-              <p className="text-sm text-text-muted mt-2">{t("apiEndpointsNoMatch")}</p>
+            <Card>
+              <EmptyState icon="search_off" title={t("apiEndpointsNoMatch")} />
             </Card>
           )}
 
@@ -733,13 +708,11 @@ export default function ApiEndpointsTab() {
           {catalog.schemas.length > 0 && (
             <Card className="p-4">
               <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-[14px] text-primary">
-                  data_object
-                </span>
+                <Icon name="data_object" size={14} className="text-primary" />
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                   {t("dataSchemas")}
                 </h3>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-black/5 dark:bg-white/5 text-text-muted">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-2 text-text-muted">
                   {catalog.schemas.length}
                 </span>
               </div>
@@ -747,7 +720,7 @@ export default function ApiEndpointsTab() {
                 {catalog.schemas.map((schema) => (
                   <span
                     key={schema}
-                    className="text-[10px] px-2 py-1 rounded-md bg-purple-500/10 text-purple-500 dark:text-purple-300 font-mono"
+                    className="text-[10px] px-2 py-1 rounded-md bg-chart-3/10 text-chart-3 font-mono"
                   >
                     {schema}
                   </span>

@@ -147,6 +147,12 @@ host ကို probe လုပ်သည့် read route အသစ်သည် �
 | `/api/providers/health-autopilot/actions` | autopilot ပြန်လည်ပြုပြင်ရေး လုပ်ဆောင်ချက်များကို လုပ်ဆောင်သည်                             |
 | `/api/settings/obsidian`                  | မည်သည့် vault root အတွက်မဆို ပြန်လည်အသုံးပြုနိုင်သော WebDAV credential များကို ထုတ်ပေးသည် |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                              |
+| `/api/cli-tools/apply`                    | ဟို့စ်ပေါ်ရှိ အော်ပရေတာ၏ CLI ဆက်တင်ကို ပြန်ရေးသည်                                         |
+| `/api/cli-tools/guide-settings`           | လမ်းညွှန်အခြေပြု CLI ဆက်တင်ဖိုင်များကို ရေးသည်                                            |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes အေးဂျင့်၏ ဆက်တင်ကို ရေးသည်                                                         |
+| `/api/cli-tools/backups`                  | CLI ဆက်တင် အရန်မိတ္တူများကို ပြန်ယူပြီး ဖျက်သည်                                           |
+| `/api/log-export`                         | ခေါ်ဆိုမှုမှတ်တမ်းများကို သတ်မှတ်ထားသည့် နေရာသို့ ပို့သည်                                 |
+| `/api/restart`                            | ဆာဗာလုပ်ငန်းစဉ်ကို ပြန်စတင်သည်                                                            |
 
 **ချိုးဖောက်သည့်အခါ response:** `401 Authentication required`
 

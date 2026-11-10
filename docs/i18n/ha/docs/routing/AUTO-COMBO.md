@@ -478,56 +478,56 @@ Ana tura 5% na requests (ana iya saita adadin) zuwa providers na bazata domin ex
 
 ## API
 
-Babu **keɓantacciyar mashigar `POST /api/combos/auto`** — ana amfani da Auto-Combo ta hanyoyi biyu:
+Babu **keɓantacciyar hanyar `POST /api/combos/auto`** — ana amfani da Auto-Combo ta hanyoyi biyu:
 
-1. **Ba tare da saiti ba (ana ba da shawara):** Aika kowace buƙatar kammala tattaunawa tare da `model: "auto"` ko `model: "auto/<variant>"`. Masana'antar kama-da-wane tana gina combo ɗin ga kowace buƙata — ba a buƙatar adanawa ko kiran API.
+1. **Ba tare da saitawa ba (ana ba da shawara):** Aika kowace buƙatar kammala tattaunawa da `model: "auto"` ko `model: "auto/<variant>"`. Masana'antar kama-da-wane tana gina combo ɗin ga kowace buƙata — ba a buƙatar adanawa na dindindin ko kiran API.
 
-2. **Combo da aka adana tare da `strategy: "auto"`:** Ƙirƙiri combo na yau da kullum ta hanyar `POST /api/combos`, sannan saita `strategy: "auto"` tare da `config.auto.weights` / `config.auto.candidatePool`. Ana amfani da injin ƙididdiga iri ɗaya; ana adana combo ɗin a cikin `combos` kuma za a iya sake amfani da shi ta ID.
+2. **Combo da aka adana tare da `strategy: "auto"`:** Ƙirƙiri combo na yau da kullum ta `POST /api/combos` sannan saita `strategy: "auto"` tare da `config.auto.weights` / `config.auto.candidatePool`. Ana amfani da injin ƙididdiga iri ɗaya; ana adana combo ɗin a cikin `combos` kuma ana iya sake amfani da shi ta ID.
 
-Don ganowa, `GET /api/combos/auto` yana jera kowane nau'i tare da tafkin 'yan takararsa da aka tantance, da kuma `context_length` / `max_output_tokens` — wato ƙimar MAX a dukkan tagogin tafkin 'yan takarar. Dole ne abokan hulɗa (misali, plugin na opencode) su tallata waɗannan ƙimomin maimakon `0`: mahallin sifili yana kashe matsewar atomatik ta opencode gaba ɗaya, yana barin zaman aiki ya ci gaba da girma har sai gogewar tarihin gateway ta lalata mahallin. Tallata MAX ba shi da haɗari saboda matatar mahalli ta auto-combo kafin routing tana tura buƙatun da suka wuce girman da aka yarda zuwa 'yan takara masu manyan tagogi.
+Don ganowa, `GET /api/combos/auto` yana jera kowane bambance-bambance tare da jerin 'yan takararsa da aka warware da kuma `context_length` / `max_output_tokens` — mafi girman ƙima a dukkan tagogin jerin 'yan takarar. Dole ne kwastomomi (misali, plugin na opencode) su sanar da waɗannan ƙimomin maimakon `0`: tsawon mahalli na sifili yana kashe matsewa ta atomatik na opencode gaba ɗaya, wanda ke barin zaman aiki ya ci gaba da girma har sai gogewar tarihin gateway ta lalata mahallin. Yana da aminci a sanar da mafi girman ƙimar saboda matatar mahalli ta auto-combo tana karkatar da buƙatun da suka fi girma zuwa 'yan takara masu manyan tagogi.
 
 ```bash
-# Amfani ba tare da saiti ba (ba a ƙirƙiri combo)
+# Amfani ba tare da saitawa ba (ba a ƙirƙiri combo)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Auto combo da aka adana ta hanyar mashigar combos ta yau da kullum
+# Combo na auto da aka adana ta hanyar endpoint na combos na yau da kullum
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Dabarun auto router
+### Dabarun router na auto
 
-Combo da aka adana mai `strategy: "auto"` zai iya saita `config.routerStrategy` (ko tsohon
+Combos da aka adana masu `strategy: "auto"` za su iya saita `config.routerStrategy` (ko tsohon
 `config.auto.routerStrategy`) zuwa ɗaya daga cikin:
 
-- `rules` — ƙididdigar nauyi ta tsohuwa
-- `score` — yana zaɓar ƙimar nauyi mafi girma da aka saita. Idan ƙimomi sun yi daidai ƙwarai, ana kiyaye
-  jerin 'yan takara da aka saita; `explorationRate` da ake da shi yana ɗaukar samfuri daga dukan tafkin da aka jera.
-- `cost` / `eco` — mai bayarwa mafi arha kuma lafiyayye
+- `rules` — ƙididdigar nauyi ta asali
+- `score` — yana zaɓar mafi girman ƙididdigar nauyi da aka saita. Daidaitattun ƙimomi suna kiyaye jerin
+  'yan takarar da aka saita; `explorationRate` da ake da shi yana ɗaukar samfur daga dukkan jerin da aka tsara.
+- `cost` / `eco` — mai samarwa mafi arha wanda ke cikin ƙoshin lafiya
 - `latency` / `fast` — mafi ƙarancin jinkirin p95 tare da hukuncin rashin amintuwa
-- `sla-aware` / `sla` — fifita 'yan takarar da suka cika jinkirin p95, ƙimar kuskure, da
-  SLO na kuɗi idan an saita
-- `lkgp` — fara da mai bayarwa na ƙarshe da aka sani yana aiki da kyau
-- `nadir` — tambayi API na yanke shawara na [Nadir](https://getnadir.com) wane model ne a cikin tafkin
-  prompt ɗin yake buƙata; sai an zaɓi shiga, kuma idan ya gaza sai a koma `rules`
+- `sla-aware` / `sla` — fifita 'yan takarar da suka cika SLO na jinkirin p95, ƙimar kuskure, da kuma
+  kuɗi idan an saita
+- `lkgp` — fara da mai samarwa na ƙarshe da aka sani yana aiki yadda ya kamata
+- `nadir` — tambayi API na yanke shawara na [Nadir](https://getnadir.com) wane model ne a cikin jerin
+  prompt ɗin ke buƙata; sai an zaɓi shiga, kuma idan ya gaza a koma ga `rules`
 
-### Dabarun router dalla-dalla
+### Cikakken bayani kan dabarun router
 
-Injin auto-combo yana samar da aiwatarwa 7 na **RouterStrategy** masu iya sauyawa waɗanda
-za ka iya musanya ta hanyar `config.routerStrategy` (ko tsohon `config.auto.routerStrategy`).
-Kowace dabara tana zaɓar mai bayarwa guda ɗaya daga tafkin 'yan takara, bisa wani `RoutingContext`
-(nau'in aiki, alamomin kayan aiki/hoto, kimar token, manufofin SLA na zaɓi, da kuma
-mai bayarwa na ƙarshe da aka sani yana aiki da kyau idan akwai).
+Injin auto-combo yana samar da aiwatarwar **RouterStrategy** guda 7 masu iya sauyawa waɗanda
+za ka iya musanyawa ta `config.routerStrategy` (ko tsohon `config.auto.routerStrategy`).
+Kowace dabara tana zaɓar mai samarwa guda ɗaya daga jerin 'yan takara, bisa wani `RoutingContext`
+(nau'in aiki, alamun kayan aiki/gani, kimanta token, manufar SLA idan an saita, da kuma
+mai samarwa na ƙarshe da aka sani yana aiki yadda ya kamata idan an saita).
 
-#### 1. `rules` (tsoho) — ƙididdigar nauyi mai dalilai 16
+#### 1. `rules` (na asali) — ƙididdigar nauyi mai abubuwa 16
 
-Yana naɗe injin ƙididdigar da ake da shi. Yana tace 'yan takarar circuit-breaker masu matsayin
-`OPEN`, sannan ya gudanar da `scorePool()` tare da nau'in aiki na yanzu da `getTaskFitness()`,
-yana zaɓar mai bayarwa da ya fi kowa samun ƙima.
+Yana naɗe injin ƙididdigar da ake da shi. Yana tace 'yan takarar circuit-breaker masu
+matsayin `OPEN`, sannan yana gudanar da `scorePool()` tare da nau'in aiki na yanzu da `getTaskFitness()`,
+yana zaɓar mai samarwa da ya samu ƙima mafi girma.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -547,16 +547,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Lokacin amfani**: Tsoho. Yi amfani da shi idan kana son daidaitaccen sasanci tsakanin dukkan alamomi.
+**Lokacin amfani**: Na asali. Yi amfani da shi idan kana son daidaitacciyar sassauci tsakanin dukkan sigina.
 
-**Sunan madadi**: `rules` (ba shi da sunan madadi)
+**Laƙabi**: `rules` (ba shi da wani laƙabi)
 
 ---
 
-#### 2. `cost` / `eco` — mai bayarwa mafi arha kuma lafiyayye
+#### 2. `cost` / `eco` — mai samarwa mafi arha wanda ke cikin ƙoshin lafiya
 
-Yana tsara tafkin 'yan takara bisa `costPer1MTokens` (daga ƙarami zuwa babba), sannan ya zaɓi mafi arha.
-Yana fara da tace 'yan takara masu matsayin `OPEN`.
+Yana tsara jerin 'yan takara bisa `costPer1MTokens` (daga ƙarami zuwa babba) sannan ya zaɓi mafi arha.
+Da farko yana cire 'yan takara masu `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -571,16 +571,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Lokacin amfani**: Ayyukan da ke kula da tsada, sarrafa rukuni, ko ayyukan baya.
+**Lokacin amfani**: Ayyukan da ke kula da tsada, sarrafa bayanai a rukuni, ko ayyukan bango.
 
-**Sunayen madadi**: `cost`, `eco`
+**Laƙabai**: `cost`, `eco`
 
 ---
 
 #### 3. `latency` / `fast` — mafi ƙarancin jinkirin p95 tare da hukuncin rashin amintuwa
 
-Yana tsarawa bisa `p95LatencyMs + (errorRate * 1000)`. Hukuncin ƙimar kuskure yana tabbatar da cewa
-ana sanya marasa samar da ingantaccen aiki a ƙasa, ko da jinkirinsu na asali ya yi ƙasa.
+Yana tsara bisa `p95LatencyMs + (errorRate * 1000)`. Hukuncin ƙimar kuskure yana tabbatar da cewa
+ana sanya masu samarwa marasa aminci a ƙasa ko da kuwa jinkirinsu na yau da kullum ya yi ƙasa.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -597,28 +597,28 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Lokacin amfani**: Ayyukan da ke kula da jinkiri kamar tattaunawa ta ainihin lokaci, autocomplete, ko
+**Lokacin amfani**: Ayyukan da jinkiri ke da muhimmanci a gare su kamar tattaunawa kai-tsaye, autocomplete, ko
 mataimakan rubuta lamba masu mu'amala.
 
-**Sunayen madadi**: `latency`, `fast`
+**Laƙabai**: `latency`, `fast`
 
 ---
 
 #### 4. `sla-aware` / `sla` — bin SLO na jinkiri/kuskure/kuɗi
 
-Yana ba kowane ɗan takara ƙima bisa yadda ya cika manufofin SLO da aka saita:
+Yana ƙididdige kowane ɗan takara bisa yadda yake cika manufar SLO da aka saita:
 
-| Ma'auni                 | Nauyi | Tsari                                             |
-| ----------------------- | ----- | ------------------------------------------------- |
-| Makin jinkiri           | 35%   | `threshold / max(value, ε)`                       |
-| Makin kuskure           | 35%   | `threshold / max(value, ε)`                       |
-| Makin lafiya            | 15%   | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| Makin kuɗi              | 10%   | `threshold / max(value, ε)` ko daidaitaccen akasi |
-| Makin kwanciyar hankali | 5%    | daidaitaccen akasin stddev na jinkiri             |
+| Ma'auni                 | Nauyi | Dabara                                             |
+| ----------------------- | ----- | -------------------------------------------------- |
+| Makin jinkiri           | 35%   | `threshold / max(value, ε)`                        |
+| Makin kuskure           | 35%   | `threshold / max(value, ε)`                        |
+| Makin lafiya            | 15%   | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)  |
+| Makin farashi           | 10%   | `threshold / max(value, ε)` ko daidaitawa ta akasi |
+| Makin kwanciyar hankali | 5%    | daidaitawar akasi ta ma'aunin karkatar jinkiri     |
 
-Lokacin da `hardConstraints: true`, ana jera 'yan takara da farko bisa **makin karya ƙa'ida**
-(yawan yadda suka zarce kowace SLO), sannan bisa haɗaɗɗen maki. In ba haka ba, haɗaɗɗen
-maki kawai ake amfani da shi.
+Lokacin da `hardConstraints: true`, ana jera zaɓuɓɓukan farko bisa **maki na karya ƙa'ida**
+(yadda suka wuce kowane SLO), sannan bisa jimillar maki. In ba haka ba, jimillar
+maki kaɗai ake amfani da ita.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -627,12 +627,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... yana ba kowane ɗan takara maki bisa manufa: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... yana ba kowane zaɓi maki bisa manufa: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Filayen SLA** (ana saita su a kan saitin combo):
+**Filayen SLA** (ana saita su a tsarin haɗin):
 
 ```json
 {
@@ -647,17 +647,17 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Lokacin amfani**: Ayyukan samarwa masu tsauraran iyakokin jinkiri, adadin kuskure, ko kuɗi.
+**Lokacin amfani**: Ayyukan samarwa masu tsauraran kasafin jinkiri, ƙimar kuskure, ko farashi.
 
-**Wasu sunaye**: `sla-aware`, `sla`
+**Sunayen madadi**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — mai samarwa na ƙarshe da aka san yana da kyau da farko
+#### 5. `lkgp` — mai samarwa na ƙarshe da aka san yana aiki da kyau da farko
 
-Yana fara gwada **mai samarwa na ƙarshe da aka san yana da kyau** (idan an saita shi), sannan ya koma ga
-dabarar `rules`. Yana da amfani don manne zaman aiki — mai samarwa ɗaya ne yake gudanar da
-buƙatun biyo baya a cikin tattaunawa.
+Yana fara gwada **mai samarwa na ƙarshe da aka san yana aiki da kyau** (idan an saita shi), sannan ya koma ga
+dabarar `rules`. Yana da amfani wajen manne zaman amfani — mai samarwa iri ɗaya ne ke sarrafa
+buƙatun da suka biyo baya a cikin tattaunawa.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -678,27 +678,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Koma ga dabarar rules
+    // Komawa ga dabarar rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Lokacin amfani**: Tattaunawa mai zagaye da yawa inda kake son mai samarwa ɗaya ya gudanar da
-buƙatun biyo baya (misali, don caching, ci gaban mahallin bayanai, ko daidaiton farashi).
+**Lokacin amfani**: Tattaunawa masu zagaye da yawa inda kake son mai samarwa iri ɗaya ya sarrafa
+buƙatun da suka biyo baya (misali, don adana bayanai na wucin gadi, ci gaban mahallin magana, ko daidaiton farashi).
 
-**Wani suna**: `lkgp` (ba shi da wani suna)
+**Sunan madadi**: `lkgp` (babu wani sunan madadi)
 
 ---
 
 #### 6. `nadir` — zaɓin samfuri bisa prompt ta hanyar Nadir
 
-Kowace dabara da ke sama tana jera 'yan takara ne bisa nata bayanan telemetry; babu wadda take karanta
-buƙatar. `nadir` yana aika saƙon mai amfani na ƙarshe tare da model ids na pool zuwa
+Kowace dabara da ke sama tana jera zaɓuɓɓuka bisa bayanan telemetry nata; babu wadda ke karanta
+buƙatar. `nadir` yana aika saƙon mai amfani na ƙarshe tare da ID ɗin samfuran da ke cikin rukunin zuwa
 API na yanke shawara na [Nadir](https://getnadir.com) (`POST /v1/bucket`), sannan ya tura zuwa samfurin
-da Nadir ya zaɓa daga jerin (`simple` → samfuri mafi arha da ke da ƙwarewar da ake buƙata, `complex` → samfurin
-frontier). Har yanzu `rules` ne ke zaɓar haɗin da ke hidimar wannan samfurin, don haka quota,
-lafiya, da kuɗi suna ci gaba da tantance asusun da za a yi amfani da shi.
+da Nadir ya zaɓa daga wannan jeri (`simple` → samfuri mafi arha da zai iya aikin, `complex` → samfurin
+mafi ci gaba). Har yanzu `rules` ne ke zaɓar haɗin da ke samar da wannan samfurin, don haka ƙayyadadden amfani,
+lafiya, da farashi suna ci gaba da tantance asusun da za a yi amfani da shi.
 
 ```json
 {
@@ -715,24 +715,27 @@ lafiya, da kuɗi suna ci gaba da tantance asusun da za a yi amfani da shi.
 ```
 
 `OMNIROUTE_NADIR_API_KEY` da `OMNIROUTE_NADIR_BASE_URL` su ne madadin env na waɗannan
-strings guda biyu. Ana buƙatar `baseUrl` ne kawai don Nadir da aka ɗora da kai (ana amincewa da `/v1` a ƙarshe).
-Kiran da ba shi da maɓalli yana shiga matakin Nadir na baƙi, wanda aka iyakance adadin kiransa ga kowane IP.
+ƙimomin rubutu guda biyu. Ana buƙatar `baseUrl` ne kawai ga Nadir da aka ɗauki nauyin kansa (ana amincewa da `/v1` a ƙarshe).
+Kiran da ba shi da maɓalli yana shiga matakin Nadir na masu amfani marasa suna, wanda ke da iyakancewar ƙimar kira ga kowane IP. Tare da maɓalli
+([ƙirƙiri ɗaya](https://app.getnadir.com/dashboard/api-keys)), ana rubuta kowane hukunci
+a dashboard ɗinka na Nadir. Cikakken saiti da tabbatarwa:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Abin da ke fita daga tsarin: rubutun saƙon mai amfani na ƙarshe (haruffa 16k na farko), model ids na 'yan takara,
-da alamar channel ta `source: "omniroute"`. Ba a aika system prompt, tarihi, tools, ko
+Abin da ke fita daga tsarin: rubutun saƙon mai amfani na ƙarshe (haruffa 16k na farko), ID ɗin
+samfuran da za a iya zaɓa, da alamar tashar `source: "omniroute"`. Ba a aika system prompt, tarihin tattaunawa, kayan aiki, ko
 headers.
 
-Halayen gazawa na fail-open ne: timeout (tsoho 2000 ms), martanin da ba 2xx ba, host
-da ba a iya kaiwa gare shi, gurɓataccen martani, ko zaɓin da ba ya cikin pool zai koma ga shawarar `rules`,
-kuma za a fara dalilin da `NadirStrategy: fallback (…)`. Bayan kiran da ya gaza, dabarar za ta
-tsallake network na tsawon 30 s, don haka katsewar sabis za ta jawo timeout guda ɗaya a kowane 30 s maimakon
-guda ɗaya ga kowace buƙata. Abubuwan da suka faru na routing suna bayar da rahoton `strategy: "nadir"` ne kawai lokacin da Nadir ya yi
-zaɓin da kansa.
+Halin gazawa shi ne fail-open: ƙarewar lokaci (tsoho 2000 ms), martani marar 2xx, host
+da ba za a iya isa gare shi ba, martani mara inganci, ko zaɓi da ba ya cikin rukunin zai koma ga hukuncin `rules`,
+kuma za a sa `NadirStrategy: fallback (…)` a farkon dalilin. Bayan kiran da ya gaza, dabarar
+tana tsallake hanyar sadarwa na tsawon 30 s, don haka katsewar sabis za ta jawo ƙarewar lokaci sau ɗaya a kowane 30 s maimakon
+sau ɗaya ga kowace buƙata. Abubuwan da suka faru na routing suna bayar da rahoton `strategy: "nadir"` ne kawai idan Nadir ne ya yi
+zaɓin a zahiri.
 
-**Lokacin amfani**: zirga-zirgar buƙatu masu matakan wahala daban-daban a kan pool da ya ƙunshi matakan samfura (ƙarami, matsakaici,
-da frontier), inda kake son rage kuɗin amfani da frontier koyaushe.
+**Lokacin amfani**: zirga-zirgar buƙatu masu matakan wahala daban-daban a kan rukuni da ya ƙunshi matakai daban-daban na samfura (ƙarami, matsakaici,
+da samfurin mafi ci gaba), inda kake son rage kuɗin amfani da samfurin mafi ci gaba a koyaushe.
 
-**Wani suna**: `nadir` (ba shi da wani suna)
+**Sunan madadi**: `nadir` (babu wani sunan madadi)
 
 ---
 
@@ -751,7 +754,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Dabararka ta routing a nan
+    // Dabarar routing ɗinka a nan
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -766,7 +769,7 @@ class MyCustomStrategy implements RouterStrategy {
 registerStrategy("my-custom", new MyCustomStrategy());
 ```
 
-Sannan yi amfani da ita:
+Sannan ka yi amfani da ita:
 
 ```json
 {
@@ -781,16 +784,16 @@ Sannan yi amfani da ita:
 
 ### Jagorar zaɓin dabarar router
 
-| Yanayin amfani                | Dabara      | Dalili                                           |
-| ----------------------------- | ----------- | ------------------------------------------------ |
-| Aikin daidaitacce             | `rules`     | Tsoho — yana la'akari da dukkan ma'aunai         |
-| Rage kuɗi                     | `cost`      | Kullum yana zaɓar mafi arha                      |
-| Rage jinkiri                  | `latency`   | Yana zaɓar mai samarwa mafi sauri kuma amintacce |
-| Tsauraran SLOs                | `sla-aware` | Yana tacewa bisa iyakokin p95/kuskure/kuɗi       |
-| Tattaunawa mai zagaye da yawa | `lkgp`      | Manne zaman aiki                                 |
-| Wahala iri-iri                | `nadir`     | Yana zaɓar matakin samfuri ga kowane prompt      |
+| Yanayin amfani           | Dabara      | Dalili                                                    |
+| ------------------------ | ----------- | --------------------------------------------------------- |
+| Daidaitaccen aiki        | `rules`     | Tsoho — yana la'akari da dukkan abubuwa                   |
+| Rage farashi             | `cost`      | Koyaushe yana zaɓar mafi arha                             |
+| Rage jinkiri             | `latency`   | Yana zaɓar mai samar da sabis mafi sauri kuma abin dogaro |
+| Tsauraran SLOs           | `sla-aware` | Yana tacewa bisa iyakokin p95/kuskure/farashi             |
+| Hira mai zantuka da yawa | `lkgp`      | Mannewar zaman                                            |
+| Wahala iri-iri           | `nadir`     | Yana zaɓar matakin samfurin da ya dace da kowace umarni   |
 
-Filayen SLA-aware:
+Filayen da suka dogara da SLA:
 
 ```json
 {

@@ -64,6 +64,19 @@ OmniRoute විසින් **Electron 41** + **electron-builder 26.10** මත
 - `npm run build:mac-x64` / `build:mac-arm64` — තනි-නිර්මාණ ශිල්පීය macOS ගොඩනැඟීම්
 - `npm run pack` — දේශීය පරීක්ෂාව සඳහා නාමාවලිය-පමණක් ගොඩනැඟීමක් (ස්ථාපකයක් නැත)
 
+## විකල්ප runtime pack
+
+Desktop build වලට installer සමඟ විකල්ප runtime archive පළ කළ හැක. ස්ථාපිත server payload තුළ `optional-packs.index.json` ඇත (Windows සහ Linux හි `resources/app` යටතේ). `browser-runtime` entry සඳහා `packs[].tarball` කියවා **එම release එකෙන් එම නිශ්චිත filename එකම බාගන්න**. Archive නම්වල SHA-256 digest අඩංගුය; වෙනස් build සඳහා වෙනස් archive අවශ්‍ය විය හැක. බාගත් filename වෙනස් නොකරන්න.
+
+ස්ථාපිත app හි index සහ තෝරාගත් archive එකම directory එකකට පිටපත් කර, එම release එකේම CLI භාවිත කරන්න:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` පෙන්වන්නේ installation සහ verification තත්ත්වයයි, archive filename නොවේ. එකතු කළ index එක archive තෝරයි. Installation මඟින් extraction ට පෙර archive checksum සහ ස්ථාපිත pack වෙනුවට යෙදීමට පෙර package checksum පරීක්ෂා කරයි. එය local file කියවයි; නොමැති archive බාගන්නේ නැත. Installation පසු application නැවත අරඹන්න. Release එකේ ගැළපෙන asset නොමැති නම් එම release හි asset හරහා විකල්ප pack ලබාගත නොහැක.
+
 ## ඩිරෙක්ටරි සැකැස්ම
 
 ```

@@ -25,6 +25,9 @@ const expectedWrapperSyntax = JSON.stringify(
   )
 );
 export const DEFAULT_LIMITS = Object.freeze({
+  // Distinct source paths across both revisions, including supporting sources.
+  // Each baseFiles/headFiles map has at most one snapshot per path. Byte and
+  // analysis-work limits still charge every snapshot, even for identical text.
   maxFiles: 128,
   maxFileBytes: 1024 * 1024,
   maxTotalBytes: 8 * 1024 * 1024,
@@ -122,7 +125,8 @@ function validateInput(input, budget) {
     );
   }
   const sources = [...Object.entries(input.baseFiles), ...Object.entries(input.headFiles)];
-  requireInput(sources.length <= budget.limits.maxFiles, "SOURCE_FILE_LIMIT");
+  const sourcePaths = new Set(sources.map(([file]) => file));
+  requireInput(sourcePaths.size <= budget.limits.maxFiles, "SOURCE_FILE_LIMIT");
   let total = 0;
   for (const [file, source] of sources) {
     requireInput(
@@ -171,7 +175,7 @@ function validateInput(input, budget) {
       row.path
     );
   }
-  return { sourceFiles: sources.length, sourceBytes: total };
+  return { sourceFiles: sources.length, sourcePaths: sourcePaths.size, sourceBytes: total };
 }
 
 function printed(node) {
@@ -218,6 +222,30 @@ function literal(node) {
   return node && (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
     ? node.text
     : null;
+}
+
+// Enumerate literal outcomes without evaluating the condition or importing product code.
+// Unknown branches remain incomplete; expansion uses the existing work/depth limits.
+function literalKeys(node, budget) {
+  const pending = [{ node, depth: 0 }];
+  const keys = new Set();
+  while (pending.length) {
+    const current = pending.pop();
+    budget.check(true);
+    requireInput(current.depth <= budget.limits.maxBindingDepth, "ANALYSIS_DEPTH_LIMIT");
+    const key = literal(current.node);
+    if (key !== null) {
+      keys.add(key);
+    } else if (current.node && ts.isParenthesizedExpression(current.node)) {
+      pending.push({ node: current.node.expression, depth: current.depth + 1 });
+    } else if (current.node && ts.isConditionalExpression(current.node)) {
+      pending.push({ node: current.node.whenFalse, depth: current.depth + 1 });
+      pending.push({ node: current.node.whenTrue, depth: current.depth + 1 });
+    } else {
+      return null;
+    }
+  }
+  return [...keys];
 }
 
 function programFor(files, budget) {
@@ -318,23 +346,39 @@ function targetDeclaration(node, checker) {
   return symbol?.declarations?.[0];
 }
 
+// Keep one bounded node index per immutable Program. Gathering syntax does not
+// bind JSX targets; that work remains lazy in jsxCallers(). Publish only a fully
+// traversed index, and never share nodes or symbols across base/head Programs.
+function indexedSourceNodes(context) {
+  if (context.nodeIndex) return context.nodeIndex;
+  const callsByFile = new Map();
+  const jsxNodes = [];
+  for (const [file, source] of context.sources) {
+    const calls = [];
+    function visit(node) {
+      context.budget?.check(true);
+      if (ts.isCallExpression(node)) calls.push(node);
+      if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) jsxNodes.push(node);
+      ts.forEachChild(node, visit);
+    }
+    visit(source);
+    callsByFile.set(file, calls);
+  }
+  context.nodeIndex = { callsByFile, jsxNodes };
+  return context.nodeIndex;
+}
+
 function jsxCallers(context, component) {
   if (!context.jsxCallers) {
     context.jsxCallers = new Map();
-    for (const source of context.sources.values()) {
-      function visit(node) {
-        context.budget?.check(true);
-        if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
-          const target = targetDeclaration(node.tagName, context.checker);
-          if (target) {
-            const callers = context.jsxCallers.get(target) || [];
-            callers.push(node);
-            context.jsxCallers.set(target, callers);
-          }
-        }
-        ts.forEachChild(node, visit);
+    for (const node of indexedSourceNodes(context).jsxNodes) {
+      context.budget?.check(true);
+      const target = targetDeclaration(node.tagName, context.checker);
+      if (target) {
+        const callers = context.jsxCallers.get(target) || [];
+        callers.push(node);
+        context.jsxCallers.set(target, callers);
       }
-      visit(source);
     }
   }
   return context.jsxCallers.get(component) || [];
@@ -597,7 +641,7 @@ function references(files, targets, budget, existingContext) {
   for (const file of targets) {
     const source = sources.get(file);
     if (!source) continue;
-    function visit(node) {
+    for (const node of indexedSourceNodes(context).callsByFile.get(file) || []) {
       budget.check(true);
       if (ts.isCallExpression(node)) {
         const wrapped = wrapperCall(node.expression, checker);
@@ -612,55 +656,58 @@ function references(files, targets, budget, existingContext) {
             new Set(),
             Boolean(wrapped)
           ) || (wrapped ? { reason: "UNRESOLVED_TRANSLATOR_BINDING" } : null);
-        const key = literal(node.arguments[wrapped ? 1 : 0]);
         if (binding && method !== "has") {
+          const keys =
+            binding.reason || method ? null : literalKeys(node.arguments[wrapped ? 1 : 0], budget);
           const position = source.getLineAndCharacterOfPosition(node.getStart(source));
           const reason =
             binding.reason ||
-            (method ? "UNSUPPORTED_TRANSLATION_METHOD" : key === null ? "DYNAMIC_KEY" : null);
-          result.push(
-            reason
-              ? {
-                  file,
-                  reason,
-                  expression: printed(node),
-                  baselineComparable:
-                    typeof binding.namespace === "string" || Boolean(binding.namespaceProof),
-                  syntaxFingerprint: createHash("sha256")
-                    .update(
-                      JSON.stringify({
-                        receiver: wrapped ? "reviewed-wrapper" : method || "direct",
-                        namespace: binding.namespace ?? null,
-                        namespaceProof: binding.namespaceProof || null,
-                        dependencyFingerprint: binding.dependencyFingerprint || null,
-                        key: node.arguments[wrapped ? 1 : 0]
-                          ? syntaxShape(node.arguments[wrapped ? 1 : 0])
-                          : null,
-                        values: node.arguments[wrapped ? 3 : 1]
-                          ? syntaxShape(node.arguments[wrapped ? 3 : 1])
-                          : null,
-                      })
-                    )
-                    .digest("hex"),
-                  namespace: binding.namespace,
-                  line: position.line + 1,
-                }
-              : {
-                  file,
-                  key: binding.namespace ? `${binding.namespace}.${key}` : key,
-                  binding: binding.binding,
-                  parameters: valueParameters(node.arguments[wrapped ? 3 : 1]),
-                  line: position.line + 1,
-                }
-          );
-          budget.references++;
+            (method ? "UNSUPPORTED_TRANSLATION_METHOD" : keys === null ? "DYNAMIC_KEY" : null);
+          const parameters = reason ? null : valueParameters(node.arguments[wrapped ? 3 : 1]);
+          for (const key of keys || [null]) {
+            result.push(
+              reason
+                ? {
+                    file,
+                    reason,
+                    expression: printed(node),
+                    baselineComparable:
+                      typeof binding.namespace === "string" || Boolean(binding.namespaceProof),
+                    syntaxFingerprint: createHash("sha256")
+                      .update(
+                        JSON.stringify({
+                          receiver: wrapped ? "reviewed-wrapper" : method || "direct",
+                          namespace: binding.namespace ?? null,
+                          namespaceProof: binding.namespaceProof || null,
+                          dependencyFingerprint: binding.dependencyFingerprint || null,
+                          key: node.arguments[wrapped ? 1 : 0]
+                            ? syntaxShape(node.arguments[wrapped ? 1 : 0])
+                            : null,
+                          values: node.arguments[wrapped ? 3 : 1]
+                            ? syntaxShape(node.arguments[wrapped ? 3 : 1])
+                            : null,
+                        })
+                      )
+                      .digest("hex"),
+                    namespace: binding.namespace,
+                    line: position.line + 1,
+                  }
+                : {
+                    file,
+                    key: binding.namespace ? `${binding.namespace}.${key}` : key,
+                    binding: binding.binding,
+                    parameters,
+                    line: position.line + 1,
+                  }
+            );
+            budget.references++;
+            budget.check();
+          }
         } else if (wrapped === false) {
           result.push({ file, reason: "WRAPPER_CONTRACT_CHANGED", expression: printed(node) });
         }
       }
-      ts.forEachChild(node, visit);
     }
-    visit(source);
   }
   return result;
 }

@@ -30,13 +30,7 @@ Nuair a éiríonn osv nó Trivy dearg de bharr CVE nuanochtaithe, seo a leanas a
 
 1. **Nuashonraigh an spleáchas lena mbaineann** (an rogha is fearr) — uasghrádaigh go dtí an leagan paisteáilte trí `package.json`
    `overrides` (spleáchais indíreacha) nó atóg an íomhá ar bhonn paisteáilte.
-2. **Mura bhfuil aon réiteach upstream ann:**
-   - **osv:** athshocraigh bunlíne `metrics.vulnCount` in `config/quality/quality-baseline.json`
-     (ní chumhdaíonn `npm run quality:ratchet -- --update` geataí tiomnaithe — cuir an luach in eagar
-     de láimh, `direction:down`) agus cuir nóta réasúnaithe + saincheist rianaithe leis.
-   - **Trivy:** cuir iontráil le `.trivyignore` (CVE-ID amháin in aghaidh na líne) mar aon le nóta
-     réasúnaithe + saincheist rianaithe. Cumhdaíonn `ignore-unfixed: true` CVEanna gan
-     phaistí go huathoibríoch cheana féin.
+2. **Mura bhfuil leasúchán ar fáil:** an toradh tomhaiste a choinneáil agus an spleáchas nó an íomhá lena mbaineann a rianú. Ná ardaigh an bonnlíne leochaileachta chun pas iarrthóra a dteipeann air a dhéanamh. Eisiatar cheana féin le `ignore-unfixed: true` Trivy leochaileachtaí íomhá gan paiste in aghaidh an tsrutha. Éilíonn aon eisceacht ID leochaileachta athbhreithnithe, cosán pacáiste beacht, dul in éag agus saincheist rianaithe sa pholasaí; ní iarmhairt uathoibríoch é ar scanadh ar theip air.
 
 Teipeann dúnta ar rití riachtanacha OSV (`check:vuln-ratchet -- --ratchet`) le
 `INCOMPLETE` agus cód scortha 2 nuair nach féidir an scanóir, an tuarascáil ná an bhunlíne a bhailíochtú.
@@ -44,6 +38,12 @@ Tugann cúlchéimniú tomhaiste cód scortha 1. Is féidir le rith comhairleach 
 cód scortha 0, ach ní chruthaíonn sé sin gur éirigh leis na spleáchais sa scanadh. Éilíonn céim bhlocála
 Trivy tomhas rathúil freisin: ní féidir le huirlisí nach bhfuil ar fáil, jabanna ar theip orthu
 ná fianaise íomhá atá in easnamh a dheimhniú go bhfuil íomhá glan.
+
+## Polasaí scanadh íomhánna
+
+Níl aon eisceachtaí leochaileachta sa `.trivyignore.yaml` reatha. Déanann `npm run check:trivy-ignore-policy` an beartas struchtúrtha i bpróifílí scanta áitiúla, CI agus Cáilíocht a bhailíochtú. IDs anaithnid, diúltaítear cosáin níos leithne, iontrálacha dúblacha agus eisceachtaí atá imithe in éag; ní ionchur é an oidhreacht `.trivyignore` sna scananna imirce.
+
+Seiceálann Docker uirlisí beartais ó `github.workflow_sha` agus an beartas foinse íomhá leis an roghnóir foinse céanna leis an bhfoinse. Diúltaíonn an roghnóir beartais scóip neamh-chomhoiriúnacha agus ullmhaíonn sé comhad amháin don dá scanadh Trivy. Ní fhaigheann foinse stairiúil gan polasaí struchtúrtha aon eisceacht. Bioráin an dá scanadh Trivy `v0.70.0`. Cruthaíonn bailíochtú beartais comhsheasmhacht cumraíochta; tá scanadh rathúil fós ag teastáil ón íomhá.
 
 ## Riosca spleáchais scortha
 

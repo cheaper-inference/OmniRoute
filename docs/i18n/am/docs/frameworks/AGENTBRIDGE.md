@@ -16,34 +16,34 @@ AgentBridge የOmniRoute MITM (Man-in-the-Middle) ፕሮክሲ ሲሆን፣ ከI
 
 ### AgentBridge ምንድን ነው?
 
-IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) API ጥሪ ሲያደርግ፣ በቀጥታ ከላይኛው (upstream) AI አቅራቢ (OpenAI፣ Anthropic፣ ወዘተ) ጋር ይገናኛል። AgentBridge ያንን ግንኙነት በTLS ደረጃ በግልጽ ሁኔታ ያግደዋል — ምንም የወኪል ማዋቀሪያ ለውጥ ሳይጠይቅ — እና ጥያቄውን በOmniRoute በኩል እንደገና ይጽፈዋል።
+IDE ወኪል (ለምሳሌ፣ GitHub Copilot፣ Cursor፣ Claude Code) የ API ጥሪ ሲያደርግ፣ በቀጥታ ወደ ላይኛው AI አቅራቢ (OpenAI፣ Anthropic፣ ወዘተ) ይገናኛል። AgentBridge ያንን ግንኙነት በ TLS ደረጃ — ምንም አይነት የወኪል ውቅር መቀየር ሳያስፈልገው — ጠልፎ በ OmniRoute በኩል ጥያቄውን እንደገና ይጽፋል።
 
-ይህ ማለት የሚከተሉትን መሥራት ይችላሉ ማለት ነው፦
+ይህ ማለት የሚከተሉትን ማድረግ ይችላሉ:
 
-- **ማንኛውንም ወኪል ወደ ማንኛውም አቅራቢ እንደገና ማስመራት**፦ Copilot ከOpenAI ጋር እየተነጋገረ ነው? ወደ Anthropic Claude፣ Gemini፣ ወይም ከOmniRoute 375 አቅራቢዎች ወደ ማንኛውም ያዞሩት።
-- **የሞዴል ማስማቶችን መተግበር**፦ `gemini-3-flash` → `claude-sonnet-4.7` በግልጽ ሁኔታ በአስተናጋጅ (handler) ደረጃ።
-- **የወኪሎችን ሁሉ ትራፊክ መከታተል**፦ እያንዳንዱ የተያዘ ጥያቄ ወደ [Traffic Inspector](./TRAFFIC_INSPECTOR.md) ይታተማል።
-- **የOmniRoute መቋቋምን መተግበር**፦ የተጣመረ መከፋፈል (combo routing)፣ የወሰን መቋረጫዎች (circuit breakers)፣ አማራጭ መንገዶች (fallbacks)፣ እና የወጪ ክትትል ለIDE ወኪል ትራፊክም ይሠራሉ።
+- **ማንኛውንም ወኪል ወደ ማንኛውም አገልግሎት አቅራቢ ያዙሩ** Copilot ማውራት OpenAI? ወደ Anthropic Claude, Gemini, ወይም ወደ ማንኛውም OmniRoute 380 አቅራቢዎች አዙረው።
+- **የሞዴል ካርታዎችን ተግብር** : `gemini-3-flash` → `claude-sonnet-4.7` በግልፅ በተቆጣጣሪው ደረጃ።
+- **ሁሉንም የወኪል ትራፊክ ይከታተሉ** እያንዳንዱ የተጠለፈ ጥያቄ [ለትራፊክ ተቆጣጣሪው](./TRAFFIC_INSPECTOR.md) ታትሟል።
+- **OmniRoute የመቋቋም ችሎታን ይተግብሩ** ለ IDE ወኪል ትራፊክም የኮምቦ ማዘዋወር፣ ወረዳ መግቻ፣ ውድቀት እና የወጪ መከታተያ ስራ።
 
-### ከገበያ ጋር ያለው አቀማመጥ
+### አቀማመጥ ከገበያ ጋር
 
-| ባህሪይ              | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity       |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot    |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)        |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex      |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE        |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries    |    —    |    ✓     |        —        |             ✓             |
-| Claude Code       |    —    |    —     |        ✓        |             ✓             |
-| Open Code         |    —    |    —     |        ✓        |             ✓             |
-| Trae              |    —    |    —     |        —        |        🔍 በምርመራ ላይ        |
-| የዳሽቦርድ UI         |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector |    ✗    |    ✗     |        ✓        |             ✓             |
-| የOmniRoute መከፋፈል  |    ✗    |    ✗     |        ✗        |             ✓             |
-| የሞዴል ማስማት UI      |    ✗    |    ✗     |        ✗        |             ✓             |
-| የማለፊያ ዝርዝር        |    ✗    |    ✗     |        ✓        |             ✓             |
-| የኋላኛ CA ምስክር ወረቀት |    ✗    |    ✗     |        ✓        |             ✓             |
+| ባህሪ            | 9 ራውተር | ፀረ-ኤፒ | LM-ጠላቂ | **OmniRoute AgentBridge** |
+| -------------- | :----: | :---: | :----: | :-----------------------: |
+| Antigravity    |   ✓    |   ✓   |   —    |             ✓             |
+| GitHub Copilot |   ✓    |   ✓   |   —    |             ✓             |
+| Kiro (AWS)     |   ✓    |   ✓   |   —    |             ✓             |
+| OpenAI Codex   |   —    |   ✓   |   —    |             ✓             |
+| Cursor IDE     |   ✓    |   ✓   |   —    |             ✓             |
+| Zed ኢንዱስትሪዎች   |   —    |   ✓   |   —    |             ✓             |
+| Claude ኮድ      |   —    |   —   |   ✓    |             ✓             |
+| ኮድ ክፈት         |   —    |   —   |   ✓    |             ✓             |
+| ትሪ             |   —    |   —   |   —    |         🔍 መመርመር          |
+| ዳሽቦርድ UI       |   ✓    |   ✗   |   ✗    |             ✓             |
+| የትራፊክ መርማሪ     |   ✗    |   ✗   |   ✓    |             ✓             |
+| OmniRoute ማዞሪያ |   ✗    |   ✗   |   ✗    |             ✓             |
+| የሞዴል ካርታ ስራ UI |   ✗    |   ✗   |   ✗    |             ✓             |
+| የማለፍ ዝርዝር      |   ✗    |   ✗   |   ✓    |             ✓             |
+| ወደላይ CA ማረጋገጫ  |   ✗    |   ✗   |   ✓    |             ✓             |
 
 ---
 
@@ -553,7 +553,7 @@ Trae በአንጻራዊነት አዲስ የAI ኮድ ማጎልበቻ ረዳት �
 3. የማረጋገጫ ዘዴውን ይወስኑ
 4. በTOS እና በAPI ተገኝነት ላይ በመመርኮዝ ለመቀጠል/ላለመቀጠል ይገምግሙ
 
-ምርመራው እስኪጠናቀቅ ድረስ፣ በዳሽቦርዱ ውስጥ ያለው የTrae ካርድ የ"በምርመራ ላይ" ባጅ ከ"የአዋጭነት ሪፖርት ያድርጉ" አገናኝ ጋር ያሳያል። `src/mitm/handlers/trae.ts` ላይ ያለው የማስተናገጃ አጽም የተዋቀረ `Not yet implemented` ስህተት ይጥላል።
+ምርመራው እስኪጠናቀቅ ድረስ፣ በዳሽቦርዱ ውስጥ ያለው የTrae ካርድ የ"በምርመራ ላይ" ባጅ ከ"የአዋጭነት ሪፖርት ያድርጉ" አገናኝ ጋር ያሳያል። `src/mitm/handlers/trae.ts` ላይ ያለው የማስተናገጃ አጽም የተዋቀረ `ገና አልተተገበረም` ስህተት ይጥላል።
 
 ### በወረፋ ላይ ያሉ ወኪሎች (MITM ያስፈልጋል — ብጁ base URL ድጋፍ የለም)
 

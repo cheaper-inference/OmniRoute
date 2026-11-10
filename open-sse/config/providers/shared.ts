@@ -6,7 +6,10 @@
  * is auto-generated from this registry.
  */
 
-import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "../antigravityUpstream.ts";
+import {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
+  ANTIGRAVITY_RUNTIME_BASE_URLS,
+} from "../antigravityUpstream.ts";
 import { ANTIGRAVITY_PUBLIC_MODELS } from "../antigravityModelAliases.ts";
 import { AGY_PUBLIC_MODELS } from "../agyModels.ts";
 import {
@@ -433,6 +436,14 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "deepseek-r1-671b",
     "llama3.3-70b-instruct-fp8",
     "qwen25-coder-32b-instruct",
+  ]),
+  runcrate: buildModels([
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+    "zai-org/GLM-5.3",
+    "zai-org/GLM-5.3-Flash",
+    "Qwen/Qwen3.8-Flash",
+    "openai/gpt-oss-120b",
   ]),
   sambanova: buildModels([
     "MiniMax-M2.7",
@@ -889,6 +900,7 @@ export function mapStainlessArch() {
 // ── Registry ──────────────────────────────────────────────────────────────
 
 export {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
   ANTIGRAVITY_RUNTIME_BASE_URLS,
   ANTIGRAVITY_PUBLIC_MODELS,
   AGY_PUBLIC_MODELS,

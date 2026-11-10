@@ -14,7 +14,9 @@
  *      the persisted settings layer.
  *
  * The middleware applies the resolved value via `applyCorsHeaders()`.
- * Per-route handlers no longer set `Access-Control-Allow-Origin` themselves.
+ * Per-route handlers no longer set `Access-Control-Allow-Origin` themselves,
+ * except for a 401 that refuses a presented API key
+ * (`credentialRejectionCorsHeaders()`).
  */
 const ENV_ALLOW_ALL = "CORS_ALLOW_ALL";
 const ENV_ALLOWED = "CORS_ALLOWED_ORIGINS";
@@ -202,6 +204,31 @@ export function applyCorsHeaders(
   if (requestedHeaders) {
     response.headers.set("Access-Control-Allow-Headers", requestedHeaders);
   }
+}
+
+/**
+ * Origin echo for a route-level credential rejection on the client API surface.
+ *
+ * With `REQUIRE_API_KEY=false`, `clientApiPolicy` serves a request whose key did
+ * not validate as anonymous, so the middleware keeps the fail-closed origin
+ * policy for it (no echo). A route that then refuses that key with its own 401
+ * (the `/v1/models` catalog when management auth is configured, the
+ * owner-scoped batches/files/media routes) would otherwise be unreadable to a
+ * browser/Electron client, which needs the 401 to report a mistyped or revoked
+ * key (#5242). The body is a fixed error envelope, so echoing the Origin here
+ * exposes nothing; a 2xx served to an anonymous caller never gets this header.
+ *
+ * Returns the extra headers for that 401: the caller's `Origin` plus
+ * `Vary: Origin`, only when the request carries a token credential. Never
+ * paired with `Access-Control-Allow-Credentials`. When the middleware already
+ * set `Access-Control-Allow-Origin` (allowlisted origin), Next.js keeps the
+ * middleware value and does not duplicate the header.
+ */
+export function credentialRejectionCorsHeaders(request: Request): Record<string, string> {
+  const requestOrigin = request.headers.get("origin");
+  if (!requestOrigin || request.method === "OPTIONS") return {};
+  if (!requestCarriesTokenOrPreflight(request)) return {};
+  return { "Access-Control-Allow-Origin": requestOrigin, Vary: "Origin" };
 }
 
 /**

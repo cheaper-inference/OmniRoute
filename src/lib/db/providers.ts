@@ -13,6 +13,8 @@ import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache"
 import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
 import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
+import { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
+import { registerConnectionStore } from "@omniroute/open-sse/utils/registeredConnectionStore.ts";
 import { applyAutomaticDisableMarker } from "@/lib/providers/operatorDisable";
 import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
 import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
@@ -1087,6 +1089,14 @@ export async function updateProviderConnection(
 }
 
 export { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
+
+// open-sse may not import this module (boundary ratchet). Code there that reads
+// one connection by id and patches its providerSpecificData gets both functions
+// from this registration instead (open-sse/utils/registeredConnectionStore.ts).
+registerConnectionStore({
+  getProviderConnectionById,
+  mergeConnectionProviderSpecificData,
+});
 
 export {
   updateCodexScopedQuotaState,

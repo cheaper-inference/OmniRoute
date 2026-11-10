@@ -200,6 +200,12 @@ Tunnel, Tailscale, Ngrok) უკან უშვებთ, ლუპბეკი
 | `/api/providers/health-autopilot/actions` | ასრულებს autopilot-ის გამოსასწორებელ მოქმედებებს                                           |
 | `/api/settings/obsidian`                  | ქმნის მრავალჯერადი გამოყენების WebDAV ავტორიზაციის მონაცემებს ნებისმიერი vault root-ისთვის |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                               |
+| `/api/cli-tools/apply`                    | ხელახლა წერს ოპერატორის CLI კონფიგურაციას ჰოსტზე                                           |
+| `/api/cli-tools/guide-settings`           | წერს სახელმძღვანელოზე დაფუძნებულ CLI კონფიგურაციის ფაილებს                                 |
+| `/api/cli-tools/hermes-agent-settings`    | წერს Hermes აგენტის კონფიგურაციას                                                          |
+| `/api/cli-tools/backups`                  | აღადგენს და შლის CLI კონფიგურაციის სარეზერვო ასლებს                                        |
+| `/api/log-export`                         | გამოძახებების ჟურნალებს აგზავნის მითითებულ დანიშნულებაზე                                   |
+| `/api/restart`                            | ხელახლა უშვებს სერვერის პროცესს                                                            |
 
 **პასუხი დარღვევისას:** `401 Authentication required`
 

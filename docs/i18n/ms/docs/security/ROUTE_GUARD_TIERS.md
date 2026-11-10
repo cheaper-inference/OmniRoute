@@ -202,6 +202,12 @@ mematikan proses pelayan.
 | `/api/providers/health-autopilot/actions` | Melaksanakan tindakan pemulihan autopilot                                  |
 | `/api/settings/obsidian`                  | Menjana kelayakan WebDAV boleh guna semula untuk sebarang akar bilik kebal |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                               |
+| `/api/cli-tools/apply`                    | Menulis semula konfigurasi CLI pengendali pada hos                         |
+| `/api/cli-tools/guide-settings`           | Menulis fail konfigurasi CLI berasaskan panduan                            |
+| `/api/cli-tools/hermes-agent-settings`    | Menulis konfigurasi ejen Hermes                                            |
+| `/api/cli-tools/backups`                  | Memulihkan dan memadam sandaran konfigurasi CLI                            |
+| `/api/log-export`                         | Menghantar log panggilan ke destinasi yang dikonfigurasi                   |
+| `/api/restart`                            | Memulakan semula proses pelayan                                            |
 
 **Respons apabila berlaku pelanggaran:** `401 Authentication required`
 

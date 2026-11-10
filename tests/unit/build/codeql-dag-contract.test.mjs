@@ -11,6 +11,7 @@ const quality = parse(read(".github/workflows/quality.yml"));
 const producer = parse(read(".github/workflows/codeql.yml"));
 const maintenance = parse(read(".github/workflows/codeql-maintenance.yml"));
 const policy = JSON.parse(read("config/quality/admission-policy.json"));
+const activeRelease = `release/v${JSON.parse(read("package.json")).version}`;
 
 test("admission depends on the complete producer matrix and the final Gate depends on both", () => {
   assert.equal(ci.jobs["codeql-scan"].uses, "./.github/workflows/codeql.yml");
@@ -65,7 +66,7 @@ test("Quality has no early duplicate API poll and the candidate command cannot w
 });
 
 test("maintenance covers the active release and weekly schedule without duplicate PR producers", () => {
-  assert.deepEqual(maintenance.on.push.branches, ["release/v3.8.53"]);
+  assert.deepEqual(maintenance.on.push.branches, [activeRelease]);
   assert.equal(maintenance.on.schedule.length, 1);
   assert.equal(maintenance.on.pull_request, undefined);
   assert.equal(maintenance.jobs.scan.with.admission, false);

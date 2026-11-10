@@ -16,11 +16,11 @@ koneellesi. API-avaimeen viitataan ympäristömuuttujalla aina, kun työkalu
 tukee sitä. Komennot, jotka tallentavat työkalukohtaisen ympäristötiedoston pysyvästi, on mainittu jäljempänä.
 
 Käytettävissä on myös yleinen käynnistin — `omniroute run <target>` — joka käynnistää
-ohjelman `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` tai `gemini` oikeat
+ohjelman `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` tai `whycodes` oikeat
 ympäristömuuttujat asetettuina kirjoittamatta lainkaan määrityksiä. Kohteet ja niiden
 aliakset tulevat kanonisesta manifestista `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), ja `omniroute completion` tarjoaa samat
+`open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`), ja `omniroute completion` tarjoaa samat
 manifestista johdetut kohdesanat. Vanhat työkalukohtaiset käynnistimet —
 `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) — ovat edelleen
 käytettävissä.
@@ -83,7 +83,8 @@ palvelimelta ja kirjoittaa määritykset paikallisesti.
 | `omniroute setup-aider`    | Aider                                    | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + tulostaa ympäristömuuttujien määritysohjeen                                                                                                    | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Molemmat            |
 | `omniroute setup-qwen`     | Qwen Code                                | `~/.qwen/settings.json` — V4:n `modelProviders.openai`-taulukko + `OMNIROUTE_API_KEY` tiedostossa `~/.qwen/.env`                                                                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Molemmat            |
 | `omniroute setup-5dive`    | 5dive (agenttilaivue)                    | Ei mitään `$HOME`-hakemistoon — kirjoittaa 5dive-**todennusprofiilin** (`/var/lib/5dive/auth-profiles/<name>/`) komennolla `5dive agent auth set`; vain root-käyttäjälle, suoritetaan tilaivueen isäntäkoneella | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Molemmat            |
-| `omniroute run <target>`   | Suorituksenaikainen käynnistys (yleinen) | Ei mitään — käynnistää `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` oikeilla ympäristömuuttujilla ja argumenteilla; Qwen ja Gemini käyttävät väliaikaista eristettyä kotihakemistoa              | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Molemmat            |
+| `omniroute setup-whycodes` | WhyCodes                                 | WhyCodesin `config.toml` (`[providers.omniroute]` + `[default_model]`); polku on `$WHYCODES_HOME/config.toml` tai `~/.whycodes/config.toml`                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Molemmat            |
+| `omniroute run <target>`   | Suorituksenaikainen käynnistys (yleinen) | Ei mitään — käynnistää `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` oikeilla ympäristömuuttujilla ja argumenteilla; Qwen ja Gemini käyttävät väliaikaista eristettyä kotihakemistoa   | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Molemmat            |
 | `omniroute launch`         | Claude Code                              | Ei mitään — käynnistää `claude`-prosessin ja lisää siihen `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                           | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Molemmat            |
 | `omniroute launch-codex`   | OpenAI Codex CLI                         | Ei mitään — käynnistää `codex`-prosessin ja lisää `omniroute`-palveluntarjoajan `-c`-valitsimilla                                                                                                               | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Molemmat            |
 
@@ -99,14 +100,15 @@ Huomautuksia valitsimista (vahvistettu komentojen lähdekoodista):
   tiedostojärjestelmään. Käytettävissä kaikissa `setup-*`-komennoissa **paitsi**
   `setup-cursor` (joka ei koskaan kirjoita tiedostoa).
 - `--model <id>` — pakollinen (tai valitaan vuorovaikutteisesti) työkaluissa, joissa
-  ei ole mallien automaattista löytämistä: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Nämä työkalut
+  ei ole mallien automaattista löytämistä: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. Nämä työkalut
   hyväksyvät myös `--yes`-valitsimen ei-vuorovaikutteisiin suorituksiin (jolloin `--model` vaaditaan).
   `setup-opencode` käyttää `--model`-valitsinta ylimmän tason oletusmallin määrittämiseen.
 - `--model <id>` komennossa `omniroute run` noudattaa manifestin kohdekohtaista kytkentää
   (`bin/cli/cli-manifest.mjs`): **aider** saa argumentin `--model openai/<id>` ja
   **opencode** argumentin `--model omniroute/<id>` (etuliite lisätään vain, jos tunnuksessa
   ei vielä ole sitä); **qwen** ja **gemini** saavat tunnuksen sellaisenaan;
-  **claude** saa sen muuttujan `ANTHROPIC_MODEL` kautta, **goose** muuttujan `GOOSE_MODEL` kautta ja
+  **claude** saa sen muuttujan `ANTHROPIC_MODEL` kautta, **goose** muuttujan `GOOSE_MODEL` kautta,
+  **whycodes** parametreilla `-P omniroute -m <id>` ja
   **codex** argumenttien `-c model_providers.omniroute.*` kautta. **Qwen on ainoa
   suorituskohde, jossa `--model` on ehdottomasti pakollinen** — `omniroute run qwen` ilman sitä päättyy
   koodilla `2` ja antaa yksiselitteisen virheilmoituksen.
@@ -275,18 +277,19 @@ OmniRoute tarjoaa OpenAI-rajapinnan polussa `/v1`, Anthropic-rajapinnan juuressa
 ja natiivin Gemini-rajapinnan polussa `/v1beta`. Jokainen integraatio on määritetty työkalun
 odottamaan muotoon (vahvistettu komentojen lähdekoodista):
 
-| Integraatio                                                                | Kirjoitettava perus-URL | `/v1`?                                    |
-| -------------------------------------------------------------------------- | ----------------------- | ----------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | juuri                   | Ei — Cline lisää `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | juuri                   | Ei — Goose lisää polun                    |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | juuri                   | Ei — LiteLLM lisää `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`:n kanssa          | Kyllä                                     |
-| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1`:n kanssa          | Kyllä                                     |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | juuri                   | Ei — Claude Code lisää `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`:n kanssa          | Kyllä                                     |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`:n kanssa          | Kyllä                                     |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | juuri                   | Ei — SDK lisää `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` todennusprofiilissa)                   | juuri                   | Ei — Claude Code lisää `/v1/messages`     |
+| Integraatio                                                                | Kirjoitettava perus-URL | `/v1`?                                                                      |
+| -------------------------------------------------------------------------- | ----------------------- | --------------------------------------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | juuri                   | Ei — Cline lisää `/v1/chat/completions`                                     |
+| `setup-goose` (`OPENAI_HOST`)                                              | juuri                   | Ei — Goose lisää polun                                                      |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | juuri                   | Ei — LiteLLM lisää `/v1/chat/completions`                                   |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`:n kanssa          | Kyllä                                                                       |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1`:n kanssa          | Kyllä                                                                       |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | juuri                   | Ei — Claude Code lisää `/v1/messages`                                       |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`:n kanssa          | Kyllä                                                                       |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`:n kanssa          | Kyllä                                                                       |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | juuri                   | Ei — SDK lisää `/v1beta/models/…`                                           |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` todennusprofiilissa)                   | juuri                   | Ei — Claude Code lisää `/v1/messages`                                       |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1`:n kanssa          | Kyllä — WhyCodes lähettää POST-pyyntöjä päätepisteeseen `/chat/completions` |
 
 ---
 

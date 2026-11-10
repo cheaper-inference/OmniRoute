@@ -12,6 +12,7 @@ import { finalizeResponsesTerminalStatus } from "../helpers/responsesTerminalSta
 import { shouldParseTextualReasoningTags } from "../../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../../utils/reasoningFields.ts";
 import { resolveResponsesCacheUsageDetails } from "../../utils/resolveResponsesCacheUsageDetails.ts";
+import { normalizeResponsesContextUsage } from "../../utils/normalizeResponsesContextUsage.ts";
 import { pickCacheCreationInPrompt } from "../../utils/pickCacheCreationTokens.ts";
 import {
   isInternalReasoningPlaceholder,
@@ -215,33 +216,26 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     };
   }
 
+  // OpenRouter errors can carry empty choices or a finish_reason:"error" choice.
+  // Handle the top-level error before choices so no accompanying delta becomes output.
+  if (chunk.error && typeof chunk.error === "object") {
+    const rawCode = chunk.error.code;
+    const status = typeof rawCode === "number" && rawCode >= 400 && rawCode <= 599 ? rawCode : 502;
+    state.upstreamError = {
+      status,
+      type: status === 429 ? "rate_limit_error" : "server_error",
+      code:
+        typeof chunk.error.metadata?.error_type === "string"
+          ? chunk.error.metadata.error_type
+          : status === 429
+            ? "rate_limit_exceeded"
+            : "bad_gateway",
+      message: typeof chunk.error.message === "string" ? chunk.error.message : "Upstream failure",
+    };
+    return [];
+  }
+
   if (!chunk.choices?.length) {
-    // Mid-stream aggregator error: OpenRouter (and similar OpenAI-compatible
-    // aggregators) can send an HTTP 200 SSE stream whose body carries a chunk with
-    // empty `choices` and a top-level `error` object instead of any delta — e.g. the
-    // underlying provider hitting its own capacity limit mid-request. Without this
-    // branch the chunk has no choices, so it falls into the awaitingTrailingUsage/
-    // no-op path below and the stream silently ends with a false "completed, empty
-    // output" response, masking the failure and skipping combo fallback. Surface it
-    // as state.upstreamError so stream.ts errors the stream out (mirrors the
-    // Gemini-to-OpenAI translator's #4177 fix).
-    if (chunk.error && typeof chunk.error === "object") {
-      const rawCode = chunk.error.code;
-      const status =
-        typeof rawCode === "number" && rawCode >= 400 && rawCode <= 599 ? rawCode : 502;
-      state.upstreamError = {
-        status,
-        type: status === 429 ? "rate_limit_error" : "server_error",
-        code:
-          typeof chunk.error.metadata?.error_type === "string"
-            ? chunk.error.metadata.error_type
-            : status === 429
-              ? "rate_limit_exceeded"
-              : "bad_gateway",
-        message: typeof chunk.error.message === "string" ? chunk.error.message : "Upstream failure",
-      };
-      return [];
-    }
     // #6906: a deferred finish_reason (awaitingTrailingUsage, see below) completes here —
     // the trailing usage-only chunk (choices: [], usage: {...}) is what real
     // stream_options.include_usage=true upstreams send after finish_reason (see the
@@ -348,9 +342,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
 
         if (state.inThinking && content) {
           emitReasoningDelta(state, emit, content);
-          // Pre-existing behaviour (unrelated to #8081): a still-open
-          // textual <think> block ends this chunk's handling early.
-          return events;
+          // Keep processing this chunk: reasoning text can arrive in the same
+          // delta as a tool call and/or finish_reason.
+          content = "";
         }
       }
 
@@ -870,7 +864,8 @@ function sendCompleted(state, emit) {
     }
 
     if (state.usage) {
-      response.usage = state.usage;
+      // Preserve upstream accounting in state; expose the full context only to Responses clients.
+      response.usage = normalizeResponsesContextUsage(state.usage);
     }
 
     const eventType = finalizeResponsesTerminalStatus(response, state.finishReason, !!upstreamErr);
@@ -906,8 +901,16 @@ function flushEvents(state) {
 // the terminal `response.output_item.done` snapshot for that item is NOT re-emitted
 // (which would duplicate the reasoning channel). Keyed by item_id when present, with a
 // global fallback for streams whose deltas carry no item_id.
-function markResponsesReasoningDeltaEmitted(state, itemId) {
+function markResponsesReasoningDeltaEmitted(state, itemId, outputIndex?) {
   state.reasoningDeltaEmitted = true;
+  // GitHub Copilot rotates the encrypted reasoning item id between events, so the
+  // id alone cannot pair a delta with its output_item.done. Record output_index too.
+  if (typeof outputIndex === "number") {
+    if (!(state.reasoningOutputIndexesWithDelta instanceof Set)) {
+      state.reasoningOutputIndexesWithDelta = new Set();
+    }
+    state.reasoningOutputIndexesWithDelta.add(outputIndex);
+  }
   const id = itemId != null ? String(itemId) : "";
   if (!id) return;
   if (!(state.reasoningItemsWithDelta instanceof Set)) {
@@ -1512,7 +1515,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   ) {
     const reasoningDelta = data.delta || "";
     if (!reasoningDelta) return null;
-    markResponsesReasoningDeltaEmitted(state, data.item_id);
+    markResponsesReasoningDeltaEmitted(state, data.item_id, data.output_index);
     return {
       id: state.chatId,
       object: "chat.completion.chunk",
@@ -1535,7 +1538,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   if (eventType === "response.reasoning_summary_text.delta") {
     const reasoningDelta = data.delta || "";
     if (!reasoningDelta) return null;
-    markResponsesReasoningDeltaEmitted(state, data.item_id);
+    markResponsesReasoningDeltaEmitted(state, data.item_id, data.output_index);
     const deltaText = buildResponsesReasoningSummaryDelta(state, data, reasoningDelta);
     return buildResponsesReasoningDeltaChunk(state, deltaText);
   }
@@ -1554,7 +1557,12 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     const emittedWithoutItemId =
       state.reasoningDeltaEmitted &&
       !(state.reasoningItemsWithDelta instanceof Set && state.reasoningItemsWithDelta.size > 0);
-    if (emittedForItem || emittedWithoutItemId) return null;
+    // Same reasoning item under a rotated id (GitHub Copilot): match by output_index.
+    const emittedForOutputIndex =
+      typeof data.output_index === "number" &&
+      state.reasoningOutputIndexesWithDelta instanceof Set &&
+      state.reasoningOutputIndexesWithDelta.has(data.output_index);
+    if (emittedForItem || emittedWithoutItemId || emittedForOutputIndex) return null;
 
     const replayableReasoning = extractReplayableResponsesReasoningText(item);
     if (replayableReasoning) {

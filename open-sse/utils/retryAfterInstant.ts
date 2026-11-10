@@ -4,16 +4,7 @@
  * `Retry-After` header. Re-exported from ./error.ts, which remains the public entry.
  */
 
-/**
- * Resolve a retryAfter hint (ISO string / epoch-ms number / seconds-duration
- * number / Date) into the error body's `retry_after` (integer seconds, rounded up,
- * minimum 1) + `reset_at` (ISO instant) pair. Returns null for anything that is
- * absent, unparseable, or already in the past — callers MUST omit both fields
- * rather than emit `retry_after: 0` for a past/invalid input.
- */
-export function resolveRetryAfterInstant(
-  retryAfter?: string | number | Date | null
-): { retry_after: number; reset_at: string } | null {
+function retryAfterMilliseconds(retryAfter?: string | number | Date | null): number | null {
   let ms: number | null = null;
   if (typeof retryAfter === "number") {
     if (!Number.isFinite(retryAfter) || retryAfter <= 0) return null;
@@ -26,6 +17,20 @@ export function resolveRetryAfterInstant(
     const parsed = retryAfter.getTime();
     ms = Number.isFinite(parsed) ? parsed : null;
   }
+  return ms;
+}
+
+/**
+ * Resolve a retryAfter hint (ISO string / epoch-ms number / seconds-duration
+ * number / Date) into the error body's `retry_after` (integer seconds, rounded up,
+ * minimum 1) + `reset_at` (ISO instant) pair. Returns null for anything that is
+ * absent, unparseable, or already in the past — callers MUST omit both fields
+ * rather than emit `retry_after: 0` for a past/invalid input.
+ */
+export function resolveRetryAfterInstant(
+  retryAfter?: string | number | Date | null
+): { retry_after: number; reset_at: string } | null {
+  const ms = retryAfterMilliseconds(retryAfter);
   if (ms === null) return null;
   const resetAt = new Date(ms);
   if (!Number.isFinite(resetAt.getTime())) return null;

@@ -65,7 +65,7 @@ test("recorded triage authenticates its internal chat call without importing mem
   const { executeRecordedTriageChatCompletion } =
     await import("../../src/lib/issueAgent/execution.ts");
   const run = createRecordedTriageRun({
-    issueUrl: "https://github.com/diegosouzapw/OmniRoute/issues/16593",
+    issueUrl: "https://github.com/cheaper-inference/OmniRoute/issues/16593",
     recordedContext: { title: "Internal authentication", body: "Recorded diagnostic context" },
   });
   let noMemory: string | null = null;

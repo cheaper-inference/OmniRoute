@@ -9,7 +9,7 @@ import { normalizePeakHourProtection } from "@/lib/providers/peakHourProtection"
 import { normalizeDetectedReasoningControl } from "@/shared/reasoning/reasoningControl";
 import {
   PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
-  PROVIDER_SPECIFIC_SECRET_FIELDS,
+  providerSpecificSecretKeysIn,
 } from "@/lib/db/providers/providerSpecificDataSecrets";
 import { maskStoredApiKey } from "@/shared/utils/apiKeyMask";
 
@@ -255,6 +255,22 @@ export function normalizeProviderSpecificData(
     delete normalized.disableCooling;
   }
 
+  // Assistant-prefill ban opt-in (open-sse/services/assistantPrefill.ts) — real booleans only.
+  if (
+    "requireUserLastMessage" in normalized &&
+    typeof normalized.requireUserLastMessage !== "boolean"
+  ) {
+    delete normalized.requireUserLastMessage;
+  }
+
+  // Mid-conversation system turns in place (open-sse/services/claudeMidConversationSystem.ts).
+  if (
+    "keepMidConversationSystem" in normalized &&
+    typeof normalized.keepMidConversationSystem !== "boolean"
+  ) {
+    delete normalized.keepMidConversationSystem;
+  }
+
   // Claude OAuth usage-wall opt-ins (open-sse/services/claudeLowPriority.ts) — only
   // persist real booleans; both default to off when absent.
   if ("lowPriorityMode" in normalized && typeof normalized.lowPriorityMode !== "boolean") {
@@ -394,7 +410,7 @@ export function sanitizeProviderSpecificDataForResponse(
   if (Object.keys(record).length === 0) return undefined;
 
   const sanitized: JsonRecord = { ...record };
-  for (const key of PROVIDER_SPECIFIC_SECRET_FIELDS) {
+  for (const key of providerSpecificSecretKeysIn(record)) {
     if (!MASKED_LIST_FIELD_SET.has(key)) delete sanitized[key];
   }
   for (const key of PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS) {

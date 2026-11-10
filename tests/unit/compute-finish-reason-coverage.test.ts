@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { computeFinishReason, withAssistantRoleOnFirstDelta } =
+const { computeFinishReason } =
   await import("../../open-sse/translator/response/openai-responses/synthesizeCompletedToolCalls.ts");
 
 // Pins the finish_reason contract: "tool_calls" iff the turn emitted at least one tool
@@ -34,28 +34,4 @@ test("computeFinishReason: incomplete terminals retain their reason unless a too
     computeFinishReason({ currentToolCallId: "call_pending", incompleteReason: "content_filter" }),
     "tool_calls"
   );
-});
-
-test("first assistant role preserves opaque results and only annotates an object delta", () => {
-  for (const result of [null, undefined, false, 42, "opaque"]) {
-    assert.equal(withAssistantRoleOnFirstDelta({}, result), result);
-  }
-
-  const state = { roleEmitted: false };
-  const result = [
-    null,
-    { choices: [{ delta: [] }] },
-    { choices: [{ delta: "opaque" }] },
-    { choices: [{ delta: { content: "first" } }] },
-    { choices: [{ delta: { content: "second" } }] },
-  ];
-  assert.equal(withAssistantRoleOnFirstDelta(state, result), result);
-  assert.equal(state.roleEmitted, true);
-  assert.deepEqual(result, [
-    null,
-    { choices: [{ delta: [] }] },
-    { choices: [{ delta: "opaque" }] },
-    { choices: [{ delta: { content: "first", role: "assistant" } }] },
-    { choices: [{ delta: { content: "second" } }] },
-  ]);
 });

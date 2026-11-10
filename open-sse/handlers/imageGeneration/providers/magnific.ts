@@ -7,7 +7,7 @@
 // Both come from providerConfig so a local override can still use the
 // legacy api.freepik.com / x-freepik-api-key pair if needed.
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sleep } from "../../../utils/sleep.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 

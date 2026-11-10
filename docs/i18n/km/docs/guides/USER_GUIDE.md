@@ -118,39 +118,41 @@
 
 ---
 
-## 📖 ការដំឡើងអ្នកផ្តល់សេវា
+## 📖 ការដំឡើង Provider
 
-ដើម្បីបន្ថែមការតភ្ជាប់ API key ជាច្រើនក្នុងពេលតែមួយពីឯកសារ CSV ឬ JSON សូមប្រើ **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → នាំចូលពីឯកសារ**។ ជួរឈរត្រូវបានកំណត់តាមលំដាប់ទីតាំង (`provider,name,apiKey,baseUrl,priority`); `provider` ត្រូវតែមានរួចហើយជាអ្នកផ្តល់សេវាដែលបានគ្រប់គ្រង ឬជា node ដែលឆបគ្នា។ សូមមើល [នាំចូលអ្នកផ្តល់សេវាពីឯកសារ CSV ឬ JSON](../providers/CSV-IMPORT.md)។
+ដើម្បីបន្ថែមការតភ្ជាប់ API key ជាច្រើនពីឯកសារ CSV ឬ JSON សូមប្រើ **ផ្ទាំងគ្រប់គ្រង → Providers → Import from file**។ ជួរឈរត្រូវរៀបតាមលំដាប់ (`provider,name,apiKey,baseUrl,priority`) ហើយ `provider` ត្រូវមានស្រាប់ជាអ្នកផ្តល់សេវាដែលបានគ្រប់គ្រង ឬជា node ដែលអាចប្រើជាមួយគ្នាបាន។ សូមមើល [នាំចូល providers ពីឯកសារ CSV ឬ JSON](../providers/CSV-IMPORT.md)។
 
-### 🔐 អ្នកផ្តល់សេវាតាមការជាវ
+### 🔐 Providers សម្រាប់ការជាវ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → ភ្ជាប់ Claude Code
-→ ចូលតាម OAuth → ផ្ទុក token ឡើងវិញដោយស្វ័យប្រវត្តិ
-→ តាមដានកូតារយៈពេល 5 ម៉ោង + ប្រចាំសប្ដាហ៍
+ផ្ទាំងគ្រប់គ្រង → Providers → ភ្ជាប់ Claude Code
+→ ចូលតាម OAuth → ធ្វើឱ្យ token refresh ដោយស្វ័យប្រវត្តិ
+→ តាមដានកូតា 5 ម៉ោង + ប្រចាំសប្តាហ៍
 
-ម៉ូដែល:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**គន្លឹះជំនាញ:** ប្រើ Opus សម្រាប់កិច្ចការស្មុគស្មាញ និង Sonnet សម្រាប់ល្បឿន។ OmniRoute តាមដានកូតាដោយឡែកសម្រាប់ម៉ូដែលនីមួយៗ!
+**គន្លឹះសម្រាប់អ្នកជំនាញ៖** ប្រើ Opus សម្រាប់កិច្ចការស្មុគស្មាញ និង Sonnet សម្រាប់ល្បឿន។ OmniRoute តាមដានកូតាតាម model នីមួយៗ!
 
-គ្មាន browser នៅលើ host របស់ OmniRoute មែនទេ? ដំណើរការ `claude setup-token` នៅទីណាក៏បានដែលបានចូល Claude Code រួច ហើយបិទភ្ជាប់ token ដែលមានសុពលភាពមួយឆ្នាំទៅក្នុងផ្ទាំង **Setup Token**។ សូមមើល [Claude Code ជាមួយ setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md)។
+មិនមាន browser នៅលើ host របស់ OmniRoute មែនទេ? សូមដំណើរការ `claude setup-token` នៅកន្លែងណាមួយដែលបានចូល Claude Code រួច ហើយបិទភ្ជាប់ token រយៈពេលមួយឆ្នាំទៅក្នុងផ្ទាំង **Setup Token**។ សូមមើល [Claude Code ជាមួយ setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md)។
 
-Route ដែលឆបគ្នាជាមួយ Claude និង Claude Code រក្សាកម្រិតការគិត `max` សម្រាប់ម៉ូដែល Opus និង Sonnet។ ម៉ូដែល Haiku មិនទទួលយកកម្រិតការគិត `max` ទេ ដូច្នេះ OmniRoute នឹងបន្ថយសំណើនោះទៅជាកញ្ចប់ថវិកាគិតកម្រិតខ្ពស់ មុនពេលផ្ញើវាទៅ upstream។
+Route ដែលឆបគ្នាជាមួយ Claude និង Claude Code រក្សាកម្រិតការគិត `max` សម្រាប់
+model Opus និង Sonnet។ Model Haiku មិនទទួលយកកម្រិត effort `max` ទេ ដូច្នេះ OmniRoute បន្ថយ
+សំណើនោះទៅជាថវិកាការគិតកម្រិតខ្ពស់ មុនពេលផ្ញើវាទៅ upstream។
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → ភ្ជាប់ Codex
-→ ចូលតាម OAuth (port 1455)
-→ កំណត់ឡើងវិញរៀងរាល់ 5 ម៉ោង + ប្រចាំសប្ដាហ៍
+ផ្ទាំងគ្រប់គ្រង → Providers → ភ្ជាប់ Codex
+→ ចូលតាម OAuth (ច្រក 1455)
+→ កំណត់ឡើងវិញរៀងរាល់ 5 ម៉ោង + ប្រចាំសប្តាហ៍
 
-ម៉ូដែល:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +162,11 @@ Route ដែលឆបគ្នាជាមួយ Claude និង Claude Code �
 #### GitHub Copilot
 
 ```bash
-ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → ភ្ជាប់ GitHub
+ផ្ទាំងគ្រប់គ្រង → Providers → ភ្ជាប់ GitHub
 → OAuth តាមរយៈ GitHub
 → កំណត់ឡើងវិញប្រចាំខែ (ថ្ងៃទី 1 នៃខែ)
 
-ម៉ូដែល:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,56 +174,73 @@ Route ដែលឆបគ្នាជាមួយ Claude និង Claude Code �
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 អ្នកផ្តល់សេវាតម្លៃថោក
+**ក្រេឌីត AI (ការគិតថ្លៃផ្អែកលើ token)។** នៅពេល GitHub រាយការណ៍ `credits_used` សម្រាប់
+គណនីនោះ កាតកម្រិត Provider នឹងបង្ហាញជួរ **ក្រេឌីត AI** ដែលមានចំនួនក្រេឌីត
+បានប្រើប្រាស់ក្នុងវគ្គគិតថ្លៃបច្ចុប្បន្ន រួមទាំងលើគម្រោងស្ថាប័នដែលមិនមានកំណត់។
 
-#### GLM-4.7 (កំណត់ឡើងវិញរាល់ថ្ងៃ, $0.6/1M)
+**ដែនកំណត់ក្រេឌីត AI ក្នុងស្រុក។** កែសម្រួលការតភ្ជាប់ GitHub ហើយកំណត់ **ដែនកំណត់ក្រេឌីត AI ក្នុងមួយ
+វគ្គគិតថ្លៃ** (`providerSpecificData.githubCreditLimit`)។ ទុកទទេដើម្បីបិទវា; `0`
+នឹងរំលងការតភ្ជាប់នេះជានិច្ច។ នៅពេលការអានការប្រើប្រាស់ចុងក្រោយស្មើ ឬលើសដែនកំណត់
+ការជ្រើសរើសគណនីនឹងរំលងការតភ្ជាប់នោះ ហើយការបញ្ជូននឹងប្តូរទៅការតភ្ជាប់ផ្សេងទៀតរបស់អ្នក
+ដូចគ្នានឹងពេលកាត់តាមគោលការណ៍កូតា។ ការត្រួតពិនិត្យនេះអានការប្រើប្រាស់ដែល
+ការធ្វើឱ្យកូតាស្រស់តាមកាលកំណត់បានប្រមូលរួចហើយ — វាមិនដែលហៅ GitHub នៅក្នុងផ្លូវសំណើទេ —
+ហើយវាបើកឱ្យដំណើរការបន្តនៅពេលមានបញ្ហា៖ ការអានដែលបាត់ ឬចាស់ (លើស 15 នាទី
+ឬមកពីវគ្គគិតថ្លៃដែលបានកំណត់ឡើងវិញរួច) នឹងមិនរារាំងការតភ្ជាប់ទេ។ នេះជាវិធានការការពារក្នុងស្រុក
+**មិនមែនជាពិដានចំណាយដែលធានាទេ**៖ ការពន្យារពេលក្នុងការរាយការណ៍របស់ GitHub ចន្លោះពេល
+refresh សំណើដែលកំពុងដំណើរការ និងការប្រើប្រាស់ក្រៅ OmniRoute អាចធ្វើឱ្យលើសដែនកំណត់នេះបាន។ សូមប្រើ
+ការគ្រប់គ្រងចំណាយផ្ទាល់របស់ GitHub ប្រសិនបើត្រូវការពិដានរឹងមាំ។
+
+### 💰 Providers តម្លៃថោក
+
+#### GLM-4.7 (កំណត់ឡើងវិញប្រចាំថ្ងៃ, $0.6/1M)
 
 1. ចុះឈ្មោះ៖ [Zhipu AI](https://open.bigmodel.cn)
-2. ទទួលយក API key ពី Coding Plan
-3. ផ្ទាំងគ្រប់គ្រង → បន្ថែម API Key៖ អ្នកផ្តល់សេវា៖ `glm`, API Key៖ `your-key`
+2. ទទួល API key ពី Coding Plan
+3. ផ្ទាំងគ្រប់គ្រង → បន្ថែម API Key៖ Provider: `glm`, API Key: `your-key`
 
-**ការប្រើប្រាស់:** `glm/glm-4.7` — **គន្លឹះជំនាញ:** Coding Plan ផ្ដល់កូតាច្រើនជាង 3 ដង ក្នុងតម្លៃត្រឹម 1/7! កំណត់ឡើងវិញរាល់ថ្ងៃនៅម៉ោង 10:00 ព្រឹក។
+**ការប្រើប្រាស់៖** `glm/glm-4.7` — **គន្លឹះសម្រាប់អ្នកជំនាញ៖** Coding Plan ផ្តល់កូតា 3 ដង ក្នុងតម្លៃត្រឹម 1/7! កំណត់ឡើងវិញរៀងរាល់ថ្ងៃម៉ោង 10:00 ព្រឹក។
 
 #### MiniMax M2.1 (កំណត់ឡើងវិញរៀងរាល់ 5 ម៉ោង, $0.20/1M)
 
 1. ចុះឈ្មោះ៖ [MiniMax](https://www.minimax.io)
-2. ទទួលយក API key → ផ្ទាំងគ្រប់គ្រង → បន្ថែម API Key
+2. ទទួល API key → ផ្ទាំងគ្រប់គ្រង → បន្ថែម API Key
 
-**ការប្រើប្រាស់:** `minimax/MiniMax-M2.1` — **គន្លឹះជំនាញ:** ជម្រើសថោកបំផុតសម្រាប់ context វែង (1M tokens)!
+**ការប្រើប្រាស់៖** `minimax/MiniMax-M2.1` — **គន្លឹះសម្រាប់អ្នកជំនាញ៖** ជាជម្រើសថោកបំផុតសម្រាប់ context វែង (1M tokens)!
 
 #### Kimi K2 ($9/ខែ តម្លៃថេរ)
 
 1. ជាវ៖ [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. ទទួលយក API key → ផ្ទាំងគ្រប់គ្រង → បន្ថែម API Key
+2. ទទួល API key → ផ្ទាំងគ្រប់គ្រង → បន្ថែម API Key
 
-**ការប្រើប្រាស់:** `kimi/kimi-k2.5` — **គន្លឹះជំនាញ:** តម្លៃថេរ $9/ខែ សម្រាប់ 10M tokens = ថ្លៃដើមជាក់ស្ដែង $0.90/1M!
+**ការប្រើប្រាស់៖** `kimi/kimi-k2.5` — **គន្លឹះសម្រាប់អ្នកជំនាញ៖** $9/ខែ ថេរសម្រាប់ 10M tokens = តម្លៃមានប្រសិទ្ធភាព $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. ចុះឈ្មោះ៖ [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. បង្កើត Qianfan API key → ផ្ទាំងគ្រប់គ្រង → បន្ថែម API Key៖ អ្នកផ្តល់សេវា៖ `qianfan`
+2. បង្កើត Qianfan API key → ផ្ទាំងគ្រប់គ្រង → បន្ថែម API Key៖ Provider: `qianfan`
 
-**ការប្រើប្រាស់:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ឬ ID របស់ម៉ូដែល Qianfan ផ្សេងទៀតដែលឆបគ្នាជាមួយ OpenAI។
+**ការប្រើប្រាស់៖** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ឬ model ID មួយផ្សេងទៀតដែលឆបគ្នាជាមួយ Qianfan OpenAI។
 
-### 🆓 អ្នកផ្តល់សេវាឥតគិតថ្លៃ
+### 🆓 Providers ឥតគិតថ្លៃ
 
-អ្នកផ្តល់សេវាឥតគិតថ្លៃដែលមិនត្រូវការការផ្ទៀងផ្ទាត់ មានប៊ូតុងបិទបើកនៅជាប់ **មិនតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់** នៅលើទំព័រអ្នកផ្តល់សេវារបស់ពួកគេ។
-ការបិទវានឹងបិទអ្នកផ្តល់សេវានោះ លុបវាចេញពីទិដ្ឋភាពអ្នកផ្តល់សេវាដែលបានកំណត់រចនាសម្ព័ន្ធ/បង្រួម និងលុបម៉ូដែលរបស់វាចេញពី `/v1/models`។
+Providers ឥតគិតថ្លៃដែលមិនត្រូវការការផ្ទៀងផ្ទាត់ មាន switch នៅជាប់ **មិនត្រូវការការផ្ទៀងផ្ទាត់** នៅលើទំព័រ provider របស់ពួកវា។
+ការបិទវានឹងបិទ provider នោះ ដកវាចេញពីទិដ្ឋភាព Providers ដែលបានកំណត់រចនាសម្ព័ន្ធ/ទិដ្ឋភាពបង្រួម និង
+ដក model របស់វាចេញពី `/v1/models`។
 
-#### Qoder (ម៉ូដែលឥតគិតថ្លៃ 9)
+#### Qoder (9 model ឥតគិតថ្លៃ)
 
 ```bash
-ផ្ទាំងគ្រប់គ្រង → ភ្ជាប់ Qoder → ចូលតាម OAuth → ការចូលប្រើប្រាស់ស្ថិតក្រោមដែនកំណត់បច្ចុប្បន្នរបស់អ្នកផ្តល់សេវា
+ផ្ទាំងគ្រប់គ្រង → ភ្ជាប់ Qoder → ចូលតាម OAuth → ការចូលប្រើស្ថិតក្រោមដែនកំណត់ provider បច្ចុប្បន្ន
 
-ម៉ូដែល: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude ឥតគិតថ្លៃ)
 
 ```bash
-ផ្ទាំងគ្រប់គ្រង → ភ្ជាប់ Kiro → AWS Builder ID ឬ Google/GitHub → ~50 credits/ខែ
+ផ្ទាំងគ្រប់គ្រង → ភ្ជាប់ Kiro → AWS Builder ID ឬ Google/GitHub → ប្រហែល 50 ក្រេឌីត/ខែ
 
-ម៉ូដែល: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -336,20 +355,20 @@ API Key: [ពីផ្ទាំងគ្រប់គ្រង]
 
 ## 🚀 ការដាក់ឱ្យដំណើរការ
 
-### ការដំឡើង npm ជាសកល (បានណែនាំ)
+### ការដំឡើង npm សកល (បានណែនាំ)
 
 ```bash
 npm install -g omniroute
 
-# បង្កើតថតកំណត់រចនាសម្ព័ន្ធ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# បង្កើតឯកសារ .env (សូមមើល .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ចាប់ផ្តើមម៉ាស៊ីនមេ
+# Start server
 omniroute
-# ឬប្រើច្រកផ្ទាល់ខ្លួន៖
+# Or with custom port:
 omniroute --port 3000
 ```
 
@@ -606,60 +625,60 @@ post_install() {
 
 ---
 
-## 📊 ម៉ូដែលដែលមាន
+## 📊 ម៉ូដែលដែលអាចប្រើបាន
 
 <details>
-<summary><b>មើលម៉ូដែលដែលមានទាំងអស់</b></summary>
+<summary><b>មើលម៉ូដែលដែលអាចប្រើបានទាំងអស់</b></summary>
 
-> បញ្ជីខាងក្រោមត្រូវបានជ្រើសរើស និងរៀបចំពី `open-sse/config/providerRegistry.ts` សម្រាប់ v3.8.0។ កាតាឡុកលើក្លោដ (Gemini, OpenRouter ជាដើម) ត្រូវបានធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ — ដើម្បីមើលកាតាឡុកពេញលេញបច្ចុប្បន្ន សូមបើក **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → [provider] → ម៉ូដែលដែលមាន** ឬហៅ `GET /api/models/catalog`។
+> បញ្ជីខាងក្រោមត្រូវបានរៀបចំពី `open-sse/config/providerRegistry.ts` សម្រាប់ v3.8.0។ កាតាឡុក Cloud (Gemini, OpenRouter ជាដើម) ត្រូវបានធ្វើសមកាលកម្មដោយថាមវន្ត — ដើម្បីមើលកាតាឡុកបន្តផ្ទាល់ពេញលេញ សូមបើក **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → [អ្នកផ្តល់សេវា] → ម៉ូដែលដែលអាចប្រើបាន** ឬហៅ `GET /api/models/catalog`។
 >
-> ប្រសិនបើបញ្ជីដែលភ្ជាប់មកជាមួយរបស់អ្នកផ្តល់សេវាលែងត្រូវគ្នានឹងបញ្ជីបច្ចុប្បន្ន សូមប្រើ **នាំចូលពី /models** នៅលើទំព័រនោះ (ឬបើក **ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ**) ដើម្បីទាញយកកាតាឡុកបច្ចុប្បន្នពីប្រភពដើម។ ចំណុចនេះត្រូវបានផ្ទៀងផ្ទាត់ក្នុង v3.8.50 សម្រាប់ LLM7.io (`gemini-3.1-flash-lite`) និង UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ការចូលប្រើ Pollinations ដោយអនាមិកនៅតែត្រូវបានកម្រិតដោយប្រភពដើម ក្នុងអំឡុងពេលធ្វើតេស្តដូចគ្នា។
+> ប្រសិនបើបញ្ជីដែលភ្ជាប់មកជាមួយអ្នកផ្តល់សេវាមួយមិនទាន់ស្របគ្នា សូមប្រើ **នាំចូលពី /models** នៅទំព័រនោះ (ឬបើក **ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ**) ដើម្បីទាញយកកាតាឡុក upstream បន្តផ្ទាល់។ វាត្រូវបានផ្ទៀងផ្ទាត់ក្នុង v3.8.50 សម្រាប់ LLM7.io (`gemini-3.1-flash-lite`) និង UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)។ ការចូលប្រើដោយអនាមិករបស់ Pollinations នៅតែមានដែនកំណត់ពី upstream ក្នុងអំឡុងពេលធ្វើតេស្តដដែល។
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth សម្រាប់ Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ កម្រិតការប្រឹងប្រែង: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth សម្រាប់ Plus/Pro: `cx/gpt-5.5` (+ កម្រិត effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth ឥតគិតថ្លៃ: ប្រើកាតាឡុកបច្ចុប្បន្នដែលបង្ហាញនៅក្រោម **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → Kiro → ម៉ូដែលដែលមាន**។ ភាពអាចប្រើបានអាស្រ័យលើគណនី និងគម្រោង។
+**Kiro (`kr/`)** — OAuth ឥតគិតថ្លៃ៖ ប្រើកាតាឡុកបន្តផ្ទាល់ដែលបង្ហាញនៅក្រោម **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → Kiro → ម៉ូដែលដែលអាចប្រើបាន**។ ភាពអាចប្រើបានអាស្រ័យលើគណនី និងគម្រោង។
 
-**Qoder (`if/`)** — OAuth ឥតគិតថ្លៃ: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth ឥតគិតថ្លៃ៖ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ខែ ថ្លៃថេរ ឬបង់តាមការប្រើប្រាស់: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ខែ ថ្លៃថេរ ឬគិតតាមការប្រើប្រាស់៖ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — កូនសោ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — គ្រាប់ចុច API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ល្បឿនលឿនខ្លាំង: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ល្បឿនលឿនខ្លាំង៖ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok ដើម: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ដើម៖ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — បង្ហោះនៅសហភាពអឺរ៉ុប: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — បង្ហោះនៅសហភាពអឺរ៉ុប៖ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — បន្ថែមសមត្ថភាពដោយការស្វែងរក: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — បន្ថែមសមត្ថភាពស្វែងរក៖ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ប្រភពបើកចំហ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ឥតគិតថ្លៃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ប្រភពកូដបើកចំហ៖ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ឥតគិតថ្លៃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ការអនុមានលឿន: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — ការសន្និដ្ឋានលឿន៖ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — មាត្រដ្ឋានវេហ្វឺរ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — មាត្រដ្ឋាន wafer៖ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — ផ្តោតលើ RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — ផ្តោតលើ RAG៖ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — សម្រាប់សហគ្រាស: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — សម្រាប់សហគ្រាស៖ `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**៖ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: ធ្វើសមកាលកម្មបច្ចុប្បន្នតាមកូនសោ API ពី Google — មិនមានបញ្ជីថេរទេ។ ភ្ជាប់កូនសោមួយនៅក្នុង **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា** បន្ទាប់មកប្រើ **ម៉ូដែលដែលមាន** ដើម្បីនាំចូលកាតាឡុកបច្ចុប្បន្ន (ឧ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)។
+**Gemini (Google Cloud `gemini/`)**៖ ធ្វើសមកាលកម្មបន្តផ្ទាល់តាម API key ពី Google — មិនមានបញ្ជីថេរទេ។ ភ្ជាប់ key នៅ **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា** បន្ទាប់មកប្រើ **ម៉ូដែលដែលអាចប្រើបាន** ដើម្បីនាំចូលកាតាឡុកបច្ចុប្បន្ន (ឧ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)។
 
-**អ្នកផ្តល់សេវាដែលត្រូវគ្នាផ្សេងទៀត** (បានជ្រើសរើស): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (តាមរយៈ `aws-bedrock`), `azure-ai`, `openrouter` (កាតាឡុកឆ្លងកាត់ដោយផ្ទាល់), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`។ អ្នកផ្តល់សេវានីមួយៗរក្សាបញ្ជីម៉ូដែលផ្ទាល់ខ្លួននៅក្នុង `providerRegistry.ts` ហើយអាចធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ នៅពេលអ្នកផ្តល់សេវាបង្ហាញ endpoint `/models`។
+**អ្នកផ្តល់សេវាដែលត្រូវគ្នាផ្សេងទៀត** (ជ្រើសរើស)៖ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (តាមរយៈ `aws-bedrock`), `azure-ai`, `openrouter` (កាតាឡុក passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`។ អ្នកផ្តល់សេវានីមួយៗរក្សាបញ្ជីម៉ូដែលផ្ទាល់ខ្លួននៅក្នុង `providerRegistry.ts` ហើយអាចធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ នៅពេលអ្នកផ្តល់សេវាបង្ហាញ endpoint `/models`។
 
-**កំណត់ចំណាំអំពីលេខសម្គាល់ម៉ូដែល:** OmniRoute ប្រើលេខសម្គាល់ដើមរបស់អ្នកផ្តល់សេវា (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)។ លេខសម្គាល់ខ្លះមានកំណែប្រើសញ្ញាចុច ពីព្រោះ API ប្រភពដើមតម្រូវឱ្យប្រើទម្រង់នោះ។ ប្រសិនបើម៉ូដែលមួយមិនមានក្នុងបញ្ជីខាងលើ សូមដំណើរការ `omniroute models --search <term>` ឬហៅ `GET /api/models/catalog` ដើម្បីបញ្ជាក់ភាពអាចប្រើបាន។
+**ចំណាំអំពីអត្តសញ្ញាណម៉ូដែល**៖ OmniRoute ប្រើអត្តសញ្ញាណដើមរបស់អ្នកផ្តល់សេវា (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)។ អត្តសញ្ញាណមួយចំនួនមានកំណែដែលបំបែកដោយចំណុច ព្រោះនោះជាទម្រង់ដែល API upstream រំពឹងទុក។ ប្រសិនបើម៉ូដែលមួយមិនមានក្នុងបញ្ជីខាងលើ សូមដំណើរការ `omniroute models --search <term>` ឬហៅ `GET /api/models/catalog` ដើម្បីបញ្ជាក់ភាពអាចប្រើបាន។
 
 </details>
 
@@ -724,6 +743,31 @@ prefix: "<prefix>" គឺជា prefix របស់ provider ដែលបាន�
 កំហុសដែលបង្ហាញឈ្មោះ provider ដែលមានស្រាប់ក្នុងប្រព័ន្ធ ឬព័ត៌មានសម្គាល់អត្តសញ្ញាណរបស់វា សូមពិនិត្យថាតើ prefix របស់ថ្នាំងនោះ
 ត្រូវបានបម្រុងទុកឬអត់៖ ថ្នាំងដែលបានរក្សាទុក មុនពេលមានច្បាប់នេះ នៅតែត្រូវបានរក្សាទុក ប៉ុន្តែ prefix របស់វាត្រូវបាន route ទៅកាន់
 provider ដែលមានស្រាប់ក្នុងប្រព័ន្ធ។ កែសម្រួលថ្នាំង ហើយផ្តល់ prefix ថ្មីឱ្យវា។
+
+#### ជម្រើស gateway សម្រាប់ connection នីមួយៗ
+
+key ទាំងនេះត្រូវដាក់នៅក្នុង `providerSpecificData` របស់ connection (ឧទាហរណ៍ តាមរយៈ
+`PUT /api/providers/{id}`)៖
+
+- `toolNameMaxLength` (ចំនួនគត់, 1–1024) — សម្រាប់ connection ដែលឆបគ្នាជាមួយទម្រង់ chat របស់ OpenAI ហើយ
+  gateway របស់វាបដិសេធឈ្មោះ tool វែងៗ។ ឈ្មោះវែងៗត្រូវបានផ្ញើជាឈ្មោះក្លែងកាត់ខ្លី ហើយត្រូវបានស្ដារឡើងវិញនៅក្នុង
+  response។
+- `quotaEndpoint` — endpoint សម្រាប់ quota/credits របស់ gateway ដែលត្រូវបានអានសម្រាប់របារ quota នៅលើ dashboard និង
+  routing ដែលគិតគូរពី quota។ វាដំណើរការលើ connection ដែលឆបគ្នាទាំងជាមួយ OpenAI និង Anthropic; រចនាសម្ព័ន្ធពេញលេញ
+  ត្រូវបានចងក្រងជាឯកសារនៅក្នុង `open-sse/services/usage/openaiCompatible.ts`។
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### ការតភ្ជាប់ OmniRoute Peer ជាខ្សែសង្វាក់
 

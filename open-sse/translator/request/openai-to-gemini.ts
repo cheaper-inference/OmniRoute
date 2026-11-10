@@ -693,7 +693,7 @@ function openaiToGeminiBase(
   }
 
   // Collapse any consecutive same-role contents Gemini would reject (9router#2191).
-  result.contents = mergeConsecutiveSameRoleContents(result.contents ?? []);
+  result.contents = mergeConsecutiveSameRoleContents(result.contents ?? [], model);
   // Guard the one alternation violation the merge above cannot reach: history
   // that opens with a functionCall-bearing turn instead of a user turn.
   result.contents = ensureHistoryDoesNotOpenWithFunctionCall(result.contents);
@@ -749,9 +749,11 @@ function openaiToGeminiBase(
     if (hasGoogleSearch && !hasCallableFunctionTools && !hasNativeGroundingTool) {
       result.tools.push({ googleSearch: {} });
     }
-    result.toolConfig = {
-      functionCallingConfig: convertOpenAIToolChoiceToGemini(body.tool_choice),
-    };
+    if (result.tools.some((tool) => (tool.functionDeclarations?.length ?? 0) > 0)) {
+      result.toolConfig = {
+        functionCallingConfig: convertOpenAIToolChoiceToGemini(body.tool_choice),
+      };
+    }
   } else if (hasGoogleSearch) {
     result.tools = [{ googleSearch: {} }];
   }
