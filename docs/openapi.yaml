@@ -1395,6 +1395,13 @@ paths:
         `xquik_search` resolve to the same provider.
         AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`)
         provides free fallback-only web search.
+        Codex Web Search (`codex-search`, alias `codex_search`) reuses connected
+        Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection
+        (a credentialed last resort before keyless search) needs the
+        `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag, off by default.
+        It spends subscription quota (not a free API), typically takes 10–40 seconds,
+        and uses a 60-second timeout unless the operator sets a lower search timeout.
+        Time range and domain filters are instruction hints, not hard filters.
       security:
         - BearerAuth: []
       requestBody:
@@ -2901,22 +2908,190 @@ paths:
     post:
       tags: [API Keys]
       summary: Create API key
+      description: |
+        Submit the legacy key settings, or name with a complete policy and optional
+        templateRef containing id and revision. Policy-based creation writes the key
+        and related settings atomically. Submitted edits are final; templateRef is
+        provenance and never replaces the policy. The fresh secret is returned once
+        with Cache-Control no-store. Blocking missing references return 422.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [label]
+              required: [name]
               properties:
-                label:
+                name:
                   type: string
+                policy:
+                  type: object
+                  description: Complete schemaVersion, key, related and expiry policy snapshot.
+                templateRef:
+                  type: object
+                  required: [id, revision]
+                  properties:
+                    id:
+                      type: string
+                    revision:
+                      type: integer
+                      minimum: 1
       responses:
         "201":
           description: Created API key (includes full key value)
         "401":
           description: Authentication required
 
+  /api/key-templates:
+    get:
+      tags: [API Keys]
+      summary: List reusable key policy templates
+      description: Requires management authentication. Responses never contain key credentials.
+      responses:
+        "200":
+          description: Healthy templates and unreadable identities; corrupt policies stay stored and deletable by id. Cache-Control is no-store.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [templates, unreadable]
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      type: object
+                  unreadable:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, revision, code]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        revision:
+                          type: integer
+                        code:
+                          type: string
+        "401":
+          description: Authentication required
+    post:
+      tags: [API Keys]
+      summary: Save a policy or an existing key as a template
+      description: |
+        Submit name, optional description, and either a complete policy or fromKeyId.
+        Existing-key capture may require acknowledge with warning codes. Policies include
+        schemaVersion, key, related and relative-or-unlimited expiry. Credentials, identity,
+        usage and history are excluded. Management-granting policies require a credential.
+        Remote CLI tokens need admin scope for mutations; read scope remains sufficient for GET.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                policy:
+                  type: object
+                fromKeyId:
+                  type: string
+                acknowledge:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Object containing template and warnings; Cache-Control is no-store.
+        "400":
+          description: Invalid policy or request
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "409":
+          description: Template name conflict or acknowledgement required
+        "422":
+          description: Existing source policy cannot be captured safely
+  /api/key-templates/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    get:
+      tags: [API Keys]
+      summary: Read a template and its reference issues
+      responses:
+        "200":
+          description: Object containing template and referenceIssues; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "404":
+          description: Template not found
+    patch:
+      tags: [API Keys]
+      summary: Edit a template with an optimistic revision check
+      description: Existing keys retain their applied policy snapshot. Remote CLI mutations require admin scope.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [revision]
+              properties:
+                revision:
+                  type: integer
+                  minimum: 1
+                name:
+                  type: string
+                description:
+                  type: string
+                policy:
+                  type: object
+      responses:
+        "200":
+          description: Object containing the updated template; Cache-Control is no-store.
+        "400":
+          description: Invalid policy or request
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "404":
+          description: Template not found
+        "409":
+          description: Revision or name conflict
+    delete:
+      tags: [API Keys]
+      summary: Delete a template without changing existing keys
+      responses:
+        "200":
+          description: Object containing success true; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "404":
+          description: Template not found
+  /api/keys/{id}/template-policy:
+    get:
+      tags: [API Keys]
+      summary: Preview a key policy without revealing its credential
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Object containing policy, warnings and referenceIssues; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "404":
+          description: Key not found
+        "422":
+          description: Source policy contains unreadable or unsupported values
   /api/keys/import:
     post:
       tags: [API Keys]
@@ -15803,6 +15978,131 @@ paths:
           description: The key lacks the self:usage scope
         "500":
           description: Status could not be built
+  /api/v1/me/sessions:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › sessions"
+      description: >-
+        List agent sessions opened by the calling API key (also served at /v1/me/sessions).
+        Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`. Every
+        filter applies on top of the calling key, so other keys' sessions are never listed.
+        Session `costUsd` is the list-price cost of the session's requests; flat-rate providers
+        are not counted as $0. It has the same meaning as `/v1/me/status` `listPriceUsd`, except
+        that sessions are priced when each request is recorded and status with the current
+        prices, so the two differ if prices changed in between. `unpricedCount` counts the
+        requests that used tokens but had no known price and are therefore missing from
+        `costUsd`, like status `unpricedRequests`.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: clientSessionId
+          in: query
+          description: >-
+            Only the session with this client session id (the id the coding agent sends, for
+            example `x-claude-code-session-id`), compared after trimming. A key has at most one
+            session per client session id, so the list holds zero or one session.
+          schema: { type: string, minLength: 1, maxLength: 128 }
+        - name: project
+          in: query
+          description: Only sessions with this project name.
+          schema: { type: string, minLength: 1 }
+        - name: client
+          in: query
+          description: Only sessions from this client, for example `claude-code` or `codex`.
+          schema: { type: string, minLength: 1 }
+        - name: from
+          in: query
+          description: Only sessions last seen at or after this time.
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          description: Only sessions last seen at or before this time.
+          schema: { type: string, format: date-time }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [lastSeen, firstSeen, requests, tokens, cost]
+            default: lastSeen
+        - name: order
+          in: query
+          schema: { type: string, enum: [asc, desc], default: desc }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        clientSessionId: { type: [string, "null"] }
+                        tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
+                        costUsd:
+                          type: number
+                          description: >-
+                            List-price cost of the session's requests in USD, same meaning as
+                            `/v1/me/status` `listPriceUsd`.
+                        unpricedCount:
+                          type: integer
+                          description: Requests that used tokens but had no known price.
+                  total: { type: integer, description: Number of matching sessions. }
+                  limit: { type: integer }
+                  offset: { type: integer }
+        "400":
+          description: Invalid query parameters
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
+        "500":
+          description: Sessions could not be listed
+  /api/v1/me/sessions/{id}:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › sessions › <id>"
+      description: Get details and recent requests of a session owned by the calling API key.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session:
+                    type: object
+                    properties:
+                      tokens: { $ref: "#/components/schemas/AgentSessionTokens" }
+                  recentRequests:
+                    type: array
+                    description: Latest requests of the session, newest first.
+                    items:
+                      type: object
+                      properties:
+                        timestamp: { type: string, format: date-time }
+                        provider: { type: [string, "null"] }
+                        model: { type: [string, "null"] }
+                        tokens: { $ref: "#/components/schemas/AgentSessionRequestTokens" }
+                        latencyMs: { type: integer }
+                        status: { type: [string, "null"] }
+                        success: { type: boolean }
+        "404":
+          description: Session not found
   /api/v1/models/{model}:
     get:
       tags:
@@ -17035,6 +17335,45 @@ components:
             requestId: 0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
 
   schemas:
+    AgentSessionTokens:
+      type: object
+      description: >-
+        Token counters of an agent session. `input` includes the cache reads and writes, as
+        providers report prompt tokens; do not add `cacheRead` or `cacheCreation` to it. The
+        three disjoint parts of the input are `uncachedInput`, `cacheRead` and `cacheCreation`.
+        Requests recorded before the usage extractor fix (#14878) by some non-streaming
+        Claude-format providers stored input without its cached part, so for them `input` and
+        `uncachedInput` may be under-reported.
+      required: [input, uncachedInput, cacheRead, cacheCreation, output, reasoning, total]
+      properties:
+        input: { type: integer, description: Input tokens including cache reads and writes. }
+        uncachedInput:
+          type: integer
+          description: >-
+            Input that was neither read from nor written to the prompt cache:
+            input - cacheRead - cacheCreation, clamped at 0.
+        cacheRead: { type: integer, description: Input tokens read from the prompt cache. }
+        cacheCreation: { type: integer, description: Input tokens written to the prompt cache. }
+        output: { type: integer, description: Output tokens, reasoning included. }
+        reasoning: { type: integer, description: Reasoning tokens, already part of output. }
+        total:
+          type: integer
+          description: input + output (cache reads and writes are already part of input).
+    AgentSessionRequestTokens:
+      type: object
+      description: >-
+        Token counters of one request, with the meaning of AgentSessionTokens, so the requests
+        of a session add up to the session.
+      required: [input, uncachedInput, cacheRead, cacheCreation, output, reasoning]
+      properties:
+        input: { type: integer, description: Input tokens including cache reads and writes. }
+        uncachedInput:
+          type: integer
+          description: input - cacheRead - cacheCreation, clamped at 0.
+        cacheRead: { type: integer }
+        cacheCreation: { type: integer }
+        output: { type: integer, description: Output tokens, reasoning included. }
+        reasoning: { type: integer }
     ImportedApiKey:
       type: object
       additionalProperties: false

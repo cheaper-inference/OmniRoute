@@ -76,9 +76,14 @@ export function createAbortError(signal: AbortSignal): Error {
 export function computeBillableTokens(usage: unknown): number {
   // Cache read/creation tokens are a BREAKDOWN already contained inside
   // getLoggedInputTokens (prompt_tokens / input_tokens). Adding them here would
-  // double-count. Canonical billable total = input + output + reasoning, matching
-  // the columns persisted by saveRequestUsage and seedWindowUsageFromHistory.
-  return getLoggedInputTokens(usage) + getLoggedOutputTokens(usage) + getReasoningTokens(usage);
+  // double-count. Reasoning tokens are a SUBSET of completion tokens for every shape the
+  // usage extractors fold (usageExtractor.ts, usageTracking.ts), so they are not added again.
+  // A reasoning count above completion can only be a provider that reports separate buckets;
+  // then both are billed - the same rule costCalculator.ts applies (#15496).
+  // Keep in sync with seedWindowUsageFromHistory (services/tokenLimitCounter.ts).
+  const output = getLoggedOutputTokens(usage);
+  const reasoning = getReasoningTokens(usage);
+  return getLoggedInputTokens(usage) + (reasoning > output ? output + reasoning : output);
 }
 
 /** Resolves the model-level `timeoutMs` registry override, when both
