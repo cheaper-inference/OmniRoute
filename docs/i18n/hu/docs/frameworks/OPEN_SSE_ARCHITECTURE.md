@@ -486,13 +486,13 @@ Ez a következőket kezeli:
 
 `open-sse/config/` tartalmazza a konfigurációs réteget:
 
-| Fájl                                | Cél                                                                    |
-| ----------------------------------- | ---------------------------------------------------------------------- |
-| `providerRegistry.ts`               | Csevegésmodell-nyilvántartás a 380-as szolgáltatókatalóguson keresztül |
-| `providerModels.ts`                 | Modell álnevek, formátumleképezés                                      |
-| `constants.ts`                      | Időtúllépések, korlátok, állapotkódok                                  |
-| `defaultThinkingSignature.ts`       | Alapértelmezett Claude gondolkodó aláírás                              |
-| `modelStrip.ts` (szolgáltatásokban) | Szolgáltatónkénti mezőcsupaszítás                                      |
+| Fájl                                | Cél                                                                     |
+| ----------------------------------- | ----------------------------------------------------------------------- |
+| `providerRegistry.ts`               | Csevegésmodell-nyilvántartás a 381-es szolgáltató katalógusán keresztül |
+| `providerModels.ts`                 | Modell álnevek, formátumleképezés                                       |
+| `constants.ts`                      | Időtúllépések, korlátok, állapotkódok                                   |
+| `defaultThinkingSignature.ts`       | Alapértelmezett Claude gondolkodó aláírás                               |
+| `modelStrip.ts` (szolgáltatásokban) | Szolgáltatónkénti mezőcsupaszítás                                       |
 
 ### Szolgáltatói regisztrációs séma
 

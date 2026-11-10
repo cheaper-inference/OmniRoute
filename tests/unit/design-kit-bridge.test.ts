@@ -200,12 +200,60 @@ test("the Button warning variant and Badge tones come from the kit, with no loca
   }
 });
 
+// `--color-accent` / `--color-primary` are the kit's lime (#d8ff00): white on it is ~1.1:1.
+// Solid token = `bg-accent` / `bg-primary` followed by whitespace, a quote or the end —
+// `bg-accent/10`, `bg-accent-light`, `bg-primary/20` are tints and stay out of scope.
+const SOLID_ACCENT = /(?<![\w/:-])bg-(?:accent|primary)(?=[\s"'`]|$)/;
+const WHITE_INK = /(?<![\w/:-])text-white(?=[\s"'`]|$)/;
+
+/**
+ * True when one class literal can render a solid accent background with white ink.
+ *
+ * A template literal is judged per branch: the static part plus at most one string from
+ * each `${…}`. Strings of the SAME expression are alternatives (`${c ? "a" : "b"}` renders
+ * one of them), so they never combine; strings of DIFFERENT expressions can render together,
+ * so every pair across two expressions is checked too (#18079). Two classes are enough for
+ * a violation, so pairs cover every case without enumerating the full product.
+ */
+function pairsAccentWithWhite(literal: string): boolean {
+  const units: string[] = [];
+  if (literal.startsWith("`") && literal.includes("${")) {
+    const stat = literal.replace(/\$\{[^}]*\}/g, " ");
+    const options = [...literal.matchAll(/\$\{[^}]*\}/g)].map(
+      (e) => e[0].match(/"[^"]*"|'[^']*'/g) ?? []
+    );
+    units.push(stat);
+    options.forEach((own, i) => {
+      for (const a of own) {
+        units.push(`${stat} ${a}`);
+        for (const other of options.slice(i + 1)) {
+          for (const b of other) units.push(`${stat} ${a} ${b}`);
+        }
+      }
+    });
+  } else units.push(literal);
+  return units.some((u) => SOLID_ACCENT.test(u) && WHITE_INK.test(u));
+}
+
+test("the accent-ink rule reads template branches, alone and across expressions", () => {
+  const flagged = [
+    '"bg-primary text-white"',
+    '`bg-accent ${big ? "text-white" : ""}`',
+    '`p-2 ${on ? "bg-primary" : "bg-muted"} ${loud ? "text-white" : "text-text-main"}`',
+    "`${a && \"bg-accent\"} gap-1 ${b && 'text-white'}`",
+  ];
+  const clean = [
+    '"bg-primary text-accent-foreground"',
+    '"bg-primary/10 text-white"',
+    '`${on ? "bg-primary text-accent-foreground" : "bg-red-500 text-white"}`',
+    '`p-2 ${on ? "bg-primary" : "text-white"}`',
+    '`${on ? "bg-accent" : ""} ${loud ? "text-text-main" : ""}`',
+  ];
+  for (const literal of flagged) assert.equal(pairsAccentWithWhite(literal), true, literal);
+  for (const literal of clean) assert.equal(pairsAccentWithWhite(literal), false, literal);
+});
+
 test("no class literal pairs a solid bg-accent/bg-primary with text-white (lime needs dark ink)", () => {
-  // `--color-accent` / `--color-primary` are the kit's lime (#d8ff00): white on it is ~1.1:1.
-  // Solid token = `bg-accent` / `bg-primary` followed by whitespace, a quote or the end —
-  // `bg-accent/10`, `bg-accent-light`, `bg-primary/20` are tints and stay out of scope.
-  const SOLID = /(?<![\w/:-])bg-(?:accent|primary)(?=[\s"'`]|$)/;
-  const WHITE = /(?<![\w/:-])text-white(?=[\s"'`]|$)/;
   const LITERAL = /"[^"]*"|'[^'\n]*'|`[^`]*`/g;
   const offenders: string[] = [];
   const walk = (dir: string) => {
@@ -215,19 +263,8 @@ test("no class literal pairs a solid bg-accent/bg-primary with text-white (lime 
       else if (entry.name.endsWith(".tsx")) {
         const src = fs.readFileSync(full, "utf8");
         for (const m of src.matchAll(LITERAL)) {
-          const line = src.slice(0, m.index).split("\n").length;
-          // A template literal is judged per branch: the static part plus ONE `${…}` branch at
-          // a time, so `${cond ? "bg-primary text-accent-foreground" : "bg-red-500 text-white"}`
-          // is fine while `bg-primary ${cond ? "text-white" : ""}` is not.
-          const units: string[] = [];
-          if (m[0].startsWith("`") && m[0].includes("${")) {
-            const stat = m[0].replace(/\$\{[^}]*\}/g, " ");
-            const branches = [...m[0].matchAll(/\$\{[^}]*\}/g)].flatMap(
-              (e) => e[0].match(/"[^"]*"|'[^']*'/g) ?? []
-            );
-            units.push(stat, ...branches.map((b) => `${stat} ${b}`));
-          } else units.push(m[0]);
-          if (units.some((u) => SOLID.test(u) && WHITE.test(u))) {
+          if (pairsAccentWithWhite(m[0])) {
+            const line = src.slice(0, m.index).split("\n").length;
             offenders.push(`${path.relative(ROOT, full)}:${line}`);
           }
         }
@@ -268,9 +305,17 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   const engine = read("src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx");
   const edges = read("src/shared/components/flow/edgeStyles.ts");
   const badge = read("src/shared/components/TokenHealthBadge.tsx");
-  for (const [name, src] of Object.entries({ combo, engine, edges })) {
+  for (const [name, src] of Object.entries({ engine, edges })) {
     assert.ok(src.includes("var(--orch-status-"), `${name} reads the status tokens`);
   }
+  // The Combo Studio run outcome is a kit Stat: its state colour is the Stat tone (kit status
+  // tokens), mapped per outcome, never a literal.
+  assert.match(
+    combo,
+    /tone=\{OUTCOME_TONE\[run\.outcome\]\}/,
+    "combo maps the outcome to a Stat tone"
+  );
+  assert.doesNotMatch(combo, /#[0-9a-fA-F]{6}\b/, "combo has no fixed hex");
   // TokenHealthBadge moved onto the kit (KEA-7886, lote 10): its state reads the same kit
   // status tokens through the semantic utilities (--color-success/warning/error → --ci-*).
   for (const tone of ["text-success", "text-warning", "text-error"]) {
@@ -325,9 +370,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   // Combo live studio: active/error provider pills + the run outcome tri-state.
   assert.ok(combo.includes("FLOW_EDGE_COLORS.active"), "combo active pill uses the flow palette");
   assert.ok(combo.includes("FLOW_EDGE_COLORS.error"), "combo error pill uses the flow palette");
-  assert.ok(combo.includes('"var(--orch-status-success)"'), "combo succeeded = success token");
-  assert.ok(combo.includes('"var(--orch-status-error)"'), "combo exhausted = error token");
-  assert.ok(combo.includes('"var(--orch-status-warning)"'), "combo pending = warning token");
+  // The run outcome is a kit Stat; its tone carries the kit status token (the kit Stat has no
+  // warning tone, so a running run stays neutral).
+  assert.match(combo, /succeeded: "positive"/, "combo succeeded = positive (success) tone");
+  assert.match(combo, /exhausted: "critical"/, "combo exhausted = critical (error) tone");
+  assert.match(combo, /running: "default"/, "combo running = neutral tone");
   assert.ok(!combo.includes('"#ef4444"'), "combo studio hardcodes no error hex");
   assert.ok(!combo.includes('"#f59e0b"'), "combo studio hardcodes no warning hex");
 
