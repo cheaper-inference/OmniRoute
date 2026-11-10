@@ -236,7 +236,8 @@ export function hasToolCallShim(name: string | undefined | null, schema?: ToolSc
  */
 export function applyToolCallShimToBuffer(name: string, raw: string, schema?: ToolSchema): string {
   const shim = resolveToolCallShim(name);
-  if (!shim) return repairToolArguments(raw, schema);
+  // An empty buffer is a zero-argument call: it must still be a JSON object, never "".
+  if (!shim) return raw ? repairToolArguments(raw, schema) : "{}";
   raw = repairToolArguments(raw, schema);
 
   let parsed: unknown;

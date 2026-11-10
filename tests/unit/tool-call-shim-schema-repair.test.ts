@@ -104,3 +104,14 @@ test("hasToolCallShim: a schema with array/object parameters opts a tool in", ()
     false
   );
 });
+
+test("applyToolCallShimToBuffer: a zero-argument call without a registered shim emits {}", () => {
+  // The buffer is empty when the model sent no arguments at all.
+  assert.equal(applyToolCallShimToBuffer("create_task", "", schema), "{}");
+  assert.equal(applyToolCallShimToBuffer("create_task", "", undefined), "{}");
+  assert.equal(
+    applyToolCallShimToBuffer("create_task", '{"title":"t"}', schema),
+    '{"title":"t"}',
+    "non-empty arguments are still returned as they were"
+  );
+});
