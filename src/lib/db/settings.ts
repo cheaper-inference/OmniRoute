@@ -26,6 +26,7 @@ import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
 import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
+import { createBankedResetAutoApplyDefaults } from "@/shared/constants/bankedResetAutoApply";
 import { DEFAULT_NEW_CONNECTION_PROXY_ENABLED } from "@/shared/constants/newConnectionProxy.mjs";
 
 /**
@@ -191,6 +192,11 @@ export async function getSettings() {
     // ProviderLimits/utils.tsx) — this is a personal view preference, not an
     // admin model-catalog edit. Ported from upstream decolua/9router#2371.
     quotaVisibility: {},
+    // Per-operator Quota Tracker provider group order (drag-to-reorder), written
+    // through by ProviderLimits/useProviderOrder. Empty = no server order (the
+    // dashboard keeps its localStorage order, else the built-in PROVIDER_ORDER).
+    // Display-only; never touches connection priority.
+    quotaProviderOrder: [],
     // #13917: operator-configurable ceiling for POST /api/settings/proxies/bulk-import.
     // Resolved through resolveProxyBulkImportLimit at both enforcement points.
     proxyBulkImportLimit: PROXY_BULK_IMPORT_LIMIT_DEFAULT,
@@ -320,6 +326,11 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    // Opt-in auto-apply of banked resets (Codex credits, Claude grants, Claude weekly
+    // session reset). OFF and dry-run by default — never redeems on the operator's behalf
+    // until enabled. Stored values are merged with these defaults by
+    // mergeBankedResetAutoApplySettings (src/lib/usage/bankedResetPolicy.ts).
+    bankedResetAutoApply: createBankedResetAutoApplyDefaults(),
     // Opt-in auto-spend of Codex reset credits that are about to expire. Spending a
     // credit mutates upstream account state, so this is off by default (Hard Rule #20
     // spirit: never consume on the operator's behalf until they opt in).

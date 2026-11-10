@@ -353,65 +353,65 @@ Modell: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Telepítés
+## 🚀 telepítés
 
-### Globális npm-telepítés (ajánlott)
+### Globális npm telepítés (ajánlott)
 
 ```bash
 npm install -g omniroute
 
-# Konfigurációs könyvtár létrehozása
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env fájl létrehozása (lásd: .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Kiszolgáló indítása
+# Start server
 omniroute
-# Vagy egyéni porttal:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-A CLI automatikusan betölti a `.env` fájlt a `~/.omniroute/.env` vagy a `./.env` helyről.
+A CLI automatikusan betölti `.env` `~/.omniroute/.env` ből vagy `./.env` ből. A munkakönyvtárban található `./.env` csak egy rövid engedélyezési listát állíthat be a kulcsokból (portok, `REQUIRE_API_KEY`, területi és színbeállítások); minden mást tegyél `~/.omniroute/.env`. Lásd [CLI indítási szerződéseket](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Tálcamód
+### Tálca mód
 
-Indítsd el az OmniRoute-ot a rendszertálcán:
+Indítsa el OmniRoute t a tálcán:
 
 ```bash
 omniroute serve --tray
 ```
 
-A parancs akkor tér vissza, amikor a kiszolgáló és a tálca készen áll.
+A parancs akkor tér vissza, ha a kiszolgáló és a tálca készen áll.
 
-A kiszolgáló a terminál nélkül is tovább fut.
+A szerver terminál nélkül is működik.
 
-A tálcamód támogatja a macOS, a Windows és a grafikus Linux-munkameneteket. A tálcamód nem nyitja meg automatikusan az irányítópultot.
+A tálca mód támogatja macOS, Windows és grafikus Linux munkameneteket. A tálca mód nem nyitja meg automatikusan a műszerfalat.
 
-A következő műveletekhez használd a tálcamenüt:
+Használja a tálca menüt a következő műveletekhez:
 
-- Az irányítópult megnyitása.
-- A `/dashboard/logs` megnyitása.
+- Nyissa meg a műszerfalat.
+- Nyissa meg `/dashboard/logs`.
 - Az automatikus indítás módosítása.
-- Az OmniRoute leállítása.
+- Állítsd meg OmniRoute.
 
-Ne használd a `--tray` kapcsolót a következő beállításokkal együtt:
+Ne kombinálja `--tray` ezekkel a lehetőségekkel:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Ezek a módok eltérő folyamattulajdonlást igényelnek.
+Ezek a módok eltérő folyamattulajdont igényelnek.
 
-Az indítás engedélyezése a gépre történő következő bejelentkezéskor:
+Indítás engedélyezése a következő gépbejelentkezéskor:
 
 ```bash
 omniroute autostart enable
 ```
 
-Az automatikus indítás tálcamódot használ macOS, Windows és grafikus Linux-munkamenetekben. A grafikus felület nélküli Linux a meglévő systemd felhasználói szolgáltatást használja.
+Az automatikus indítás tálcamódot használ macOS, Windows és grafikus Linux munkameneteken. A Headless Linux a meglévő systemd felhasználói szolgáltatást használja.
 
-Az indítás letiltása bejelentkezéskor:
+Indítás letiltása bejelentkezéskor:
 
 ```bash
 omniroute autostart disable
@@ -419,16 +419,16 @@ omniroute autostart disable
 
 ### Eltávolítás
 
-Ha már nincs szükséged az OmniRoute-ra, két gyors parancsfájlt biztosítunk a tiszta eltávolításhoz:
+Ha már nincs szüksége OmniRoute, két gyors szkriptet biztosítunk a tiszta eltávolításhoz:
 
-| Parancs                  | Művelet                                                                                                              |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Eltávolítja a rendszeralkalmazást, de **megtartja az adatbázist és a konfigurációkat** a `~/.omniroute` könyvtárban. |
-| `npm run uninstall:full` | Eltávolítja az alkalmazást, ÉS véglegesen **törli az összes konfigurációt, kulcsot és adatbázist**.                  |
+| Parancs                  | Akció                                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Eltávolítja a rendszeralkalmazást, de** megtartja DB és a konfigurációkat** a `~/.omniroute`.       |
+| `npm run uninstall:full` | Véglegesen eltávolítja a AND alkalmazást** törli az összes konfigurációt, kulcsot és adatbázist** . |
 
-> Megjegyzés: A parancsok futtatásához lépj az OmniRoute projektmappájába (ha klónoztad), majd futtasd őket. Ha globálisan telepítetted, egyszerűen futtathatod az `npm uninstall -g omniroute` parancsot.
+> Megjegyzés: A parancsok futtatásához keresse meg a OmniRoute projekt mappát (ha klónozta), és futtassa őket. Alternatív megoldásként, ha globálisan telepítve van, egyszerűen futtathatja `npm uninstall -g omniroute`.
 
-### VPS-telepítés
+### VPS telepítés
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Vagy: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-telepítés (kevés memória)
+### PM2 telepítés (alacsony memória)
 
-Korlátozott RAM-mal rendelkező kiszolgálók esetén használd a memóriakorlát beállítását:
+Korlátozott RAM rendelkező szerverek esetén használja a memóriakorlát beállítást:
 
 ```bash
-# 512 MB-os korláttal (alapértelmezett)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Vagy egyéni memóriakorláttal
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Vagy az ecosystem.config.js használatával
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Hozd létre az `ecosystem.config.js` fájlt:
+`ecosystem.config.js` létrehozása:
 
 ```javascript
 module.exports = {
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Rendszerkép létrehozása (alapértelmezett = runner-cli előtelepített codex/claude/droid eszközökkel)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Hordozható mód (ajánlott)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-A CLI-binárisokkal működő, gazdarendszerbe integrált módhoz lásd a fő dokumentáció Docker-szakaszát.
+CLI binárisokkal rendelkező gazdagépbe integrált módhoz lásd a fő dokumentumok Docker szakaszát.
 
-### Void Linux (xbps-src)
+### Érvénytelen Linux (xbps-src)
 
-A Void Linux felhasználói az `xbps-src` keresztfordítási keretrendszer használatával natív módon csomagolhatják és telepíthetik az OmniRoute-ot. Ez automatizálja az önálló Node.js-buildet, valamint a szükséges natív `better-sqlite3`-kötések létrehozását.
+A Void Linux felhasználók natív módon csomagolhatják és telepíthetik a OmniRoute a `xbps-src` keresztfordítási keretrendszer használatával. Ez automatizálja a Node.js önálló összeállítását a szükséges `better-sqlite3` natív kötésekkel együtt.
 
 <details>
-<summary><b>Az xbps-src-sablon megtekintése</b></summary>
+<summary><b>Tekintse meg az xbps-src sablont</b></summary>
 
 ```bash
-# Sablonfájl az „omniroute” csomaghoz
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# A célprocesszor architektúrájának meghatározása a node-gyp számára
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Az összes függőség telepítése – szkriptek kihagyásával
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Az önálló Next.js-csomag összeállítása
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) A statikus erőforrások bemásolása az önálló csomagba
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) A natív better-sqlite3-kötés lefordítása
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) A lefordított kötés elhelyezése az önálló csomagban
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Az architektúraspecifikus sharp-csomagok eltávolítása
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) A Next.js statikus elemzése által kihagyott pino futásidejű függőségek másolása:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Annak megakadályozása, hogy a telepítés utáni horog eltávolítsa az üres Next.js alkalmazásútválasztó-könyvtárakat
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### Környezeti változók
 
-| Változó                                 | Alapértelmezett érték                | Leírás                                                                                                                                                                     |
-| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT-aláírási titok (**éles környezetben módosítsa**)                                                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Első bejelentkezési jelszó                                                                                                                                                 |
-| `DATA_DIR`                              | `~/.omniroute`                       | Adatkönyvtár (adatbázis, használati adatok, naplók)                                                                                                                        |
-| `PORT`                                  | keretrendszer alapértelmezése        | Szolgáltatás portja (a példákban `20128`)                                                                                                                                  |
-| `HOSTNAME`                              | keretrendszer alapértelmezése        | Figyelési cím (a Docker alapértelmezése `0.0.0.0`)                                                                                                                         |
-| `NODE_ENV`                              | futtatókörnyezet alapértelmezése     | Telepítéshez állítsa `production` értékre                                                                                                                                  |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Az irányítópulton megjelenített és a kiszolgáló számára elérhető nyilvános alap-URL (a korábbi `BASE_URL` helyett)                                                         |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | A felhőszinkronizálási végpont alap-URL-je (a korábbi `CLOUD_URL` helyett)                                                                                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-titok a generált API-kulcsokhoz                                                                                                                                       |
-| `REQUIRE_API_KEY`                       | `false`                              | Bearer API-kulcs megkövetelése a `/v1/*` útvonalakon                                                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Annak engedélyezése, hogy a hitelesített irányítópult-felhasználók igény szerint felfedjék a tárolt API-kulcsok teljes értékét                                             |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | A gyorsítótárazott szolgáltatói korlátadatok kiszolgálóoldali frissítési gyakorisága; a felhasználói felület frissítési gombjai továbbra is kézi szinkronizálást indítanak |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Az írás, importálás és visszaállítás előtti automatikus SQLite-pillanatképek letiltása; a kézi biztonsági mentések továbbra is működnek                                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | Engedélyezi az alkalmazás- és auditnaplók lemezre írását                                                                                                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | A hitelesítési süti `Secure` attribútumának kikényszerítése (HTTPS fordított proxy mögött)                                                                                 |
-| `CLOUDFLARED_BIN`                       | nincs beállítva                      | Meglévő `cloudflared` bináris használata a felügyelt letöltés helyett                                                                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | A felügyelt gyors alagutak átviteli protokollja (`http2`, `quic` vagy `auto`)                                                                                              |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | A Node.js halommemória-korlátja MB-ban                                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | A prompt-gyorsítótár bejegyzéseinek maximális száma                                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | A szemantikus gyorsítótár bejegyzéseinek maximális száma                                                                                                                   |
+| Változó                                 | Alapértelmezett               | Leírás                                                                                                                                                      |
+| --------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automatikusan generált)_    | JWT aláírási titkos — automatikusan generálódik az első futtatáskor, és megmaradt `server.env` ben is; kifejezetten állítsa be, ha az adatkönyvtár átmeneti |
+| `INITIAL_PASSWORD`                      | _(unset)_                     | Első bejelentkezési jelszó. npm/source telepítése `CHANGEME`-vel kezdődik: cserélje ki. Nincs beállítva: bevezető varázsló                                  |
+| `DATA_DIR`                              | `~/.omniroute`                | Adatkönyvtár (db, használat, naplók)                                                                                                                        |
+| `PORT`                                  | keretrendszer alapértelmezett | Szervizport (példákban `20128` )                                                                                                                            |
+| `HOSTNAME`                              | keretrendszer alapértelmezett | Gazda kötése (Docker alapértelmezett értéke `0.0.0.0`)                                                                                                      |
+| `NODE_ENV`                              | futásidejű alapértelmezett    | Állítsa be `production` a telepítéshez                                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`      | Nyilvános alap URL megjelent a műszerfalon, és ki lett téve a szervernek (a régi `BASE_URL` helyére)                                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`       | Felhő szinkronizálási végpont alap URL (lecseréli a régi `CLOUD_URL`)                                                                                       |
+| `API_KEY_SECRET`                        | _(automatikusan generált)_    | HMAC titkos a generált API kulcsokhoz — automatikusan generálódik az első futtatáskor és megmaradt `server.env` ben                                         |
+| `REQUIRE_API_KEY`                       | `false`                       | A Bearer API kulcs érvényesítése a `/v1/*`                                                                                                                  |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                       | Lehetővé teszi a hitelesített irányítópult-felhasználók számára, hogy igény szerint felfedjék a teljes tárolt API kulcsértékeket                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                          | Szerveroldali frissítési ütem a gyorsítótárazott szolgáltatói korlátok adataihoz; UI frissítés gombjai továbbra is kézi szinkronizálást indítanak el        |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                       | Az automatikus SQLite pillanatképek letiltása writes/import/restore előtt; a kézi biztonsági mentések továbbra is működnek                                  |
+| `APP_LOG_TO_FILE`                       | `true`                        | Engedélyezi az alkalmazás- és auditnapló-kimenetet a lemezre                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                       | `Secure` hitelesítési cookie kényszerítése ( HTTPS fordított proxy mögött)                                                                                  |
+| `CLOUDFLARED_BIN`                       | nincs beállítva               | Felügyelt letöltés helyett használjon meglévő `cloudflared` bináris fájlt                                                                                   |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                       | Szállítás menedzselt gyors alagutakhoz (`http2`, `quic` vagy `auto`)                                                                                        |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                         | Node.js kupackorlát a MB                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                          | Max prompt gyorsítótár bejegyzések                                                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                         | Maximális szemantikai gyorsítótár bejegyzések                                                                                                               |
 
-A környezeti változók teljes referenciáját lásd a [README](../README.md) fájlban.
+A környezeti változók teljes hivatkozását lásd a [README](../README.md).
 
 ---
 

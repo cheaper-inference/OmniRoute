@@ -387,6 +387,61 @@ export type ClaudeLimitResetAttempt = {
   nextAvailableAt: string | null;
 };
 
+/** What the request path knows when a 5-hour wall could be reset by a claim. */
+export type ClaudeLimitResetPolicyInput = {
+  connectionId: string | null;
+  /** The wall's announced session reset (ISO), from the unified rate-limit headers. */
+  sessionResetAt: string | null;
+  now: number;
+};
+
+export type ClaudeLimitResetPolicyVerdict = {
+  /** true → claim the reset; false → do not claim. */
+  allow: boolean;
+  /** Receives the outcome of the claim this verdict allowed (only when a claim was made). */
+  onSettled?: (attempt: ClaudeLimitResetAttempt) => void;
+  /**
+   * Called once the allowed attempt has resolved, claim or not. Frees whatever the policy
+   * set aside for a claim that was never sent (memo, recent reset, a sibling's in-flight
+   * claim, reset not on offer). Must be idempotent and a no-op after onSettled.
+   */
+  release?: () => void;
+};
+
+/**
+ * Operator policy for the session-reset claim, registered at startup from `src/` (open-sse
+ * never imports `src/`). `null` = no opinion: the per-account `autoLimitReset` toggle decides.
+ */
+export type ClaudeLimitResetPolicy = (
+  input: ClaudeLimitResetPolicyInput
+) => Promise<ClaudeLimitResetPolicyVerdict | null>;
+
+let limitResetPolicy: ClaudeLimitResetPolicy | null = null;
+
+/** Register (or clear, with `null`) the operator policy consulted at the 5-hour wall. */
+export function setClaudeLimitResetPolicy(policy: ClaudeLimitResetPolicy | null): void {
+  limitResetPolicy = policy;
+}
+
+export function hasClaudeLimitResetPolicy(): boolean {
+  return limitResetPolicy !== null;
+}
+
+/** Ask the registered policy. Never throws: a failing policy means "do not claim". */
+export async function consultClaudeLimitResetPolicy(
+  input: ClaudeLimitResetPolicyInput
+): Promise<ClaudeLimitResetPolicyVerdict | null> {
+  const policy = limitResetPolicy;
+  if (!policy) return null;
+  try {
+    const verdict = await policy(input);
+    if (!verdict) return null;
+    return verdict.allow === true ? verdict : { allow: false };
+  } catch {
+    return { allow: false };
+  }
+}
+
 /**
  * Auto-claim at the wall (opt-in per connection). Resolves `reset: true` only when the
  * server confirmed the session window was reset (or reports the account is not limited),
@@ -405,6 +460,12 @@ export async function attemptClaudeLimitReset(opts: {
     info?: (tag: string, msg: string) => void;
     warn?: (tag: string, msg: string) => void;
   } | null;
+  /**
+   * Called once with the outcome of a claim POST this call actually made. Siblings that
+   * share an in-flight attempt, the memo and the recent-reset shortcut never call it, so
+   * every real claim is reported exactly once. Errors it throws are swallowed.
+   */
+  onSettled?: (attempt: ClaudeLimitResetAttempt) => void;
 }): Promise<ClaudeLimitResetAttempt> {
   const now = opts.now ?? Date.now();
   const recentUntil = recentResetUntil.get(opts.key);
@@ -485,7 +546,17 @@ async function runLimitResetClaim(
       ? `${claim.result} — next reset available ${claim.nextAvailableAt ?? "in a week"}`
       : `claim result=${claim.result}`
   );
-  return { reset: granted, outcome: claim.result, nextAvailableAt: claim.nextAvailableAt };
+  const attempt: ClaudeLimitResetAttempt = {
+    reset: granted,
+    outcome: claim.result,
+    nextAvailableAt: claim.nextAvailableAt,
+  };
+  try {
+    opts.onSettled?.(attempt);
+  } catch {
+    // Reporting is best-effort and must never change the claim's outcome.
+  }
+  return attempt;
 }
 
 async function runClaudeLimitResetAttempt(
