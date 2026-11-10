@@ -175,8 +175,10 @@ function stubFetchAlwaysValid(hitLog?: Array<{ url: string; model?: string }>) {
 
 test("storage reset waits for background call-log saves before removing files", async (t) => {
   await resetStorage();
+  const id = "before-storage-reset";
   let saved = false;
   const saving = saveCallLog({
+    id,
     method: "POST",
     path: "/v1/images/generations",
     status: 200,
@@ -186,6 +188,16 @@ test("storage reset waits for background call-log saves before removing files", 
     requestBody: { prompt: "a cat" },
     responseBody: { data: [{ b64_json: PNG_B64 }] },
   }).then(() => {
+    const row = core
+      .getDbInstance()
+      .prepare("SELECT detail_state, artifact_relpath FROM call_logs WHERE id = ?")
+      .get(id) as { detail_state: string; artifact_relpath: string | null };
+    assert.equal(row?.detail_state, "ready", "the pending save must publish artifact metadata");
+    assert.ok(row.artifact_relpath, "the pending save must record its artifact path");
+    assert.ok(
+      fs.statSync(path.join(TEST_DATA_DIR, "call_logs", row.artifact_relpath)).size > 0,
+      "the pending save must write a nonempty artifact before storage resets"
+    );
     saved = true;
   });
   let removed = false;
