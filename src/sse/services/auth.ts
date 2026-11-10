@@ -1334,7 +1334,8 @@ export async function getProviderCredentials(
       }
       if (
         requestedModel &&
-        ((c.provider === "codex" && advertisedModelsByConnection.get(c.id)?.size === 0) ||
+        (((c.provider === "codex" || c.provider === "chatgpt") &&
+          advertisedModelsByConnection.get(c.id)?.size === 0) ||
           !isRequestedModelAdvertised(
             c.provider,
             requestedModel,
