@@ -294,7 +294,7 @@ import {
   shouldDeferAntigravityQuotaStateToCaller,
 } from "../services/accountFallback.ts";
 import { saveIdempotencyWithConfiguredWindow } from "@/lib/idempotencyLayer";
-import { hasMintedPiiTokens } from "@/lib/pii/tokenVault";
+import { hasMintedPiiTokens } from "../utils/piiTokenVault.ts";
 
 import { computeRequestHash, shouldDeduplicate } from "../services/requestDedup.ts";
 import {

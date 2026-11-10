@@ -265,6 +265,6 @@ test("minted tokens skip memory, the idempotency save and both semantic cache wr
 });
 
 test("the vault has no global singleton and no timers", () => {
-  const vault = read("src/lib/pii/tokenVault.ts");
+  const vault = read("open-sse/utils/piiTokenVault.ts");
   assert.doesNotMatch(vault, /globalThis|setInterval|setTimeout|getInstance/);
 });
