@@ -240,7 +240,8 @@ export function computeUsageRowCost(
       model,
       serviceTier,
       flatRateAsZero,
-      isAggregated: true,
+      // Analytics rows sum many requests: no per-request long-context tier (#19429).
+      aggregatedTokens: true,
     })
   );
 }

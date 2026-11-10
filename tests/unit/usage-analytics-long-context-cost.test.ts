@@ -23,20 +23,20 @@ test("computeCostFromPricing: single request crossing threshold applies long_con
       prompt_tokens: 150_000,
       completion_tokens: 1_000,
     },
-    { isAggregated: false }
+    { aggregatedTokens: false }
   );
   // Tier rates: input 5, output 25 -> (150_000 * 5 + 1_000 * 25) / 1e6 = 0.775
   assert.ok(Math.abs(singleRequestCost - 0.775) < 1e-12);
 });
 
-test("computeCostFromPricing: isAggregated true skips long_context tier (#19429)", () => {
+test("computeCostFromPricing: aggregatedTokens true skips long_context tier (#19429)", () => {
   const aggregatedDayCost = computeCostFromPricing(
     HAIKU_LIKE_PRICING,
     {
       prompt_tokens: 150_000,
       completion_tokens: 1_000,
     },
-    { isAggregated: true }
+    { aggregatedTokens: true }
   );
   // Flat rates: input 1, output 5 -> (150_000 * 1 + 1_000 * 5) / 1e6 = 0.155
   assert.ok(Math.abs(aggregatedDayCost - 0.155) < 1e-12);
