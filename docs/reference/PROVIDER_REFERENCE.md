@@ -1,14 +1,14 @@
 ---
 title: "Provider Reference"
 version: 3.8.54
-lastUpdated: 2026-11-09
+lastUpdated: 2026-11-10
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-09
+> **Last generated:** 2026-11-10
 
 Total providers: **386**. See category breakdown below.
 
