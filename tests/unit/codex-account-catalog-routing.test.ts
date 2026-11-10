@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -6,6 +6,13 @@ import path from "node:path";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-codex-account-catalog-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+
+// Catalog refreshes scheduled by fixture mutations must never use external transports.
+mock.method(globalThis, "fetch", async () => {
+  throw new Error("Unexpected external fetch in synthetic Codex inventory test");
+});
+const { aiHordeImageCatalog } = await import("../../open-sse/services/aihordeImageCatalog.ts");
+aiHordeImageCatalog.setFetch(async () => Response.json([]));
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
@@ -23,6 +30,7 @@ async function resetStorage() {
 test.after(() => {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  mock.restoreAll();
 });
 
 async function createConnection(data: Record<string, unknown>): Promise<string> {
@@ -393,4 +401,66 @@ test("Codex model listed by one account still routes only to that account (#1831
     "gpt-pro-only-test"
   );
   assert.equal(selectedConnectionId(restricted), null);
+});
+
+for (const staleOwner of ["inactive", "orphaned"] as const) {
+  test(`Codex ignores ${staleOwner} inventory evidence when active accounts have stale catalogs`, async () => {
+    await resetStorage();
+    const { proId, plusId } = await seedTwoAccounts();
+    const staleId =
+      staleOwner === "inactive"
+        ? await createConnection({
+            provider: PROVIDER,
+            authType: "oauth",
+            accessToken: "synthetic-inactive-token",
+            name: "Inactive catalog owner",
+            isActive: false,
+          })
+        : "synthetic-deleted-account";
+    await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, staleId, [
+      { id: "gpt-6.1-sol", name: "Synthetic Sol" },
+    ]);
+
+    for (const model of ["gpt-6.1-sol", "cx/gpt-6.1-sol", "gpt-6.1-sol-high"]) {
+      const selected = await auth.getProviderCredentials(PROVIDER, null, null, model);
+      assert.equal(
+        selectedConnectionId(selected),
+        proId,
+        `${model}: stale owner must not veto active accounts`
+      );
+      const failover = await auth.getProviderCredentials(PROVIDER, proId, null, model);
+      assert.equal(selectedConnectionId(failover), plusId);
+      const restricted = await auth.getProviderCredentials(PROVIDER, null, [plusId], model);
+      assert.equal(selectedConnectionId(restricted), plusId);
+    }
+  });
+}
+
+test("Codex activation and deactivation update inventory evidence without bypassing active account restrictions", async () => {
+  await resetStorage();
+  const { proId, plusId } = await seedTwoAccounts();
+  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, proId, [
+    { id: "gpt-6.1-sol", name: "Synthetic Sol" },
+  ]);
+
+  const rejected = await auth.getProviderCredentials(PROVIDER, null, [plusId], "gpt-6.1-sol");
+  assert.equal(
+    selectedConnectionId(rejected),
+    null,
+    "an active owner outside the allowlist remains evidence"
+  );
+  await providersDb.updateProviderConnection(proId, { isActive: false });
+  const admitted = await auth.getProviderCredentials(PROVIDER, null, [plusId], "gpt-6.1-sol");
+  assert.equal(
+    selectedConnectionId(admitted),
+    plusId,
+    "a disabled owner stops vetoing the active pool"
+  );
+  await providersDb.updateProviderConnection(proId, { isActive: true });
+  const rejectedAgain = await auth.getProviderCredentials(PROVIDER, null, [plusId], "gpt-6.1-sol");
+  assert.equal(
+    selectedConnectionId(rejectedAgain),
+    null,
+    "reactivated inventory becomes authoritative again"
+  );
 });

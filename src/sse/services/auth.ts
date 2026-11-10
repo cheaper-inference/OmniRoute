@@ -1037,13 +1037,17 @@ export async function getProviderCredentials(
       }
     }
     rehydrateAntigravityFamilyLocksForConnections(provider, connections);
+    const activeInventoryConnections = connections;
     // allowedConnections: restrict to specific connection IDs (from API key policy, #363)
     if (allowedConnections && allowedConnections.length > 0) {
       connections = connections.filter((conn) => allowedConnections.includes(conn.id));
     }
     // The active, key-scoped pool before any pin narrows it: per-account catalogs (antigravity/agy)
     // judge "does some account list the model" over the whole pool, not just the pinned account.
-    const inventoryPoolConnections = connections;
+    // Codex entitlement evidence covers all active accounts, even outside a key's allowlist.
+    // Restricting credentials must not turn a known missing entitlement into unknown evidence.
+    const inventoryPoolConnections =
+      provider === "codex" ? activeInventoryConnections : connections;
     let explicitProbeKind: "probe" | "suppressed" | "skip" = "skip";
     if (forcedConnectionId && !connections.some((c) => c.id === forcedConnectionId)) {
       const pinnedRaw = await getCachedProviderConnectionById(forcedConnectionId);
