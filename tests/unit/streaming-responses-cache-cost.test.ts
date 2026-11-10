@@ -208,6 +208,8 @@ for (const model of ["deepseek-v4-pro", "kimi-k3"]) {
     assert.equal(result.usage.prompt_tokens, 100_000);
     assert.equal(result.usage.completion_tokens, 100);
     assert.equal(result.usage.cached_tokens, 95_000);
+    // The Responses-shaped usage (input_tokens/output_tokens) must not replace it (#18966).
+    assert.equal(result.usage.input_tokens, undefined);
     assert.match(result.clientWire, /"cached_tokens":95000/);
     assertCost(result.ledgerCost, 0.03);
     assertCost(result.quotaCost, 0.03);

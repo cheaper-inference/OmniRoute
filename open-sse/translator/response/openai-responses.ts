@@ -148,6 +148,24 @@ interface DoubleEscapedTabState {
 }
 
 /**
+ * Feed one character to the held backslashes of fixDoubleEscapedTabs.
+ * `held` is "\\" or "\\\\". `out` is what to write now; when `consumed` is false the
+ * character itself still has to be scanned by the caller.
+ */
+function stepHeldBackslashes(
+  held: string,
+  ch: string
+): { held: string; out: string; consumed: boolean } {
+  if (held === "\\\\") {
+    // `\\t` collapses to the tab escape; any other char releases the escaped backslash.
+    if (ch === "t") return { held: "", out: "\\t", consumed: true };
+    return { held: "", out: "\\\\", consumed: false };
+  }
+  if (ch === "\\") return { held: "\\\\", out: "", consumed: true };
+  return { held: "", out: "\\" + ch, consumed: true };
+}
+
+/**
  * Collapse double-escaped tab sequences inside JSON string values.
  * gpt-5.6-luna (#12831) sometimes writes `\\t` (an escaped backslash, then `t`) where it
  * means the JSON tab escape `\t`. Only call this for those models: for every other model
@@ -160,21 +178,11 @@ function fixDoubleEscapedTabs(json: string, tabState: DoubleEscapedTabState): st
   let { inString, held } = tabState;
 
   for (const ch of json) {
-    if (held === "\\\\") {
-      held = "";
-      if (ch === "t") {
-        result += "\\t";
-        continue;
-      }
-      result += "\\\\";
-    } else if (held === "\\") {
-      if (ch === "\\") {
-        held = "\\\\";
-      } else {
-        held = "";
-        result += "\\" + ch;
-      }
-      continue;
+    if (held) {
+      const step = stepHeldBackslashes(held, ch);
+      held = step.held;
+      result += step.out;
+      if (step.consumed) continue;
     }
 
     if (inString && ch === "\\") {
@@ -739,6 +747,16 @@ function announcedToolOutputIndex(state, tcIdx) {
   );
 }
 
+// Only DOUBLE_ESCAPED_TAB_MODEL needs the repair; its scan state lives per tool call index.
+function repairDoubleEscapedTabs(state, tcIdx, rawArgs: string): string {
+  if (!DOUBLE_ESCAPED_TAB_MODEL.test(state.model || "")) return rawArgs;
+  if (!state.funcArgsTabState) state.funcArgsTabState = {};
+  if (!state.funcArgsTabState[tcIdx]) {
+    state.funcArgsTabState[tcIdx] = { inString: false, held: "" };
+  }
+  return fixDoubleEscapedTabs(rawArgs, state.funcArgsTabState[tcIdx]);
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
@@ -785,13 +803,7 @@ function emitToolCall(state, emit, tc) {
     if (!state.funcArgsEscapeState[tcIdx]) {
       state.funcArgsEscapeState[tcIdx] = createJsonStringEscapeState();
     }
-    let rawArgs = tc.function.arguments;
-    if (DOUBLE_ESCAPED_TAB_MODEL.test(state.model || "")) {
-      if (!state.funcArgsTabState) state.funcArgsTabState = {};
-      if (!state.funcArgsTabState[tcIdx])
-        state.funcArgsTabState[tcIdx] = { inString: false, held: "" };
-      rawArgs = fixDoubleEscapedTabs(rawArgs, state.funcArgsTabState[tcIdx]);
-    }
+    const rawArgs = repairDoubleEscapedTabs(state, tcIdx, tc.function.arguments);
     const sanitized = escapeJsonStringValues(rawArgs, state.funcArgsEscapeState[tcIdx]);
     const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized);
     const emittedDelta = nextArgs.slice(existingArgs.length);
@@ -808,14 +820,19 @@ function emitToolCall(state, emit, tc) {
   }
 }
 
+// The final arguments of a closing tool call. A truncated stream can end inside an
+// escape, so the backslashes fixDoubleEscapedTabs still holds are written back first.
+function finalToolCallArgs(state, idx): string {
+  const heldTab = state.funcArgsTabState?.[idx]?.held;
+  if (heldTab) state.funcArgsBuf[idx] = (state.funcArgsBuf[idx] || "") + heldTab;
+  return state.funcArgsBuf[idx] || "{}";
+}
+
 function closeToolCall(state, emit, idx, recordAsCompleted = true) {
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
     const normalizedIndex = announcedToolOutputIndex(state, idx);
-    // A truncated stream can end inside an escape: write the held backslashes back.
-    const heldTab = state.funcArgsTabState?.[idx]?.held;
-    if (heldTab) state.funcArgsBuf[idx] = (state.funcArgsBuf[idx] || "") + heldTab;
-    const args = state.funcArgsBuf[idx] || "{}";
+    const args = finalToolCallArgs(state, idx);
     emitToolCallAdded(state, emit, idx, normalizedIndex, true);
     const selection = translatorToolCallLifecycle(state).get(idx)!;
     const isCustomTool = selection.custom;
