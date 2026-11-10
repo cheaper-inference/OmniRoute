@@ -163,6 +163,7 @@ import { zcodeProvider } from "./registry/zcode/index.ts";
 import { minimaxCodeProvider } from "./registry/minimax-code/index.ts";
 import { zed_hostedProvider } from "./registry/zed-hosted/index.ts";
 import { nanogptProvider } from "./registry/nanogpt/index.ts";
+import { lunarouteProvider } from "./registry/lunaroute/index.ts";
 import { nanProvider } from "./registry/nan/index.ts";
 import { apmixProvider } from "./registry/apmix/index.ts";
 import { scalewayProvider } from "./registry/scaleway/index.ts";
@@ -461,6 +462,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "minimax-code": minimaxCodeProvider,
   "zed-hosted": zed_hostedProvider,
   nanogpt: nanogptProvider,
+  lunaroute: lunarouteProvider,
   nan: nanProvider,
   apmix: apmixProvider,
   scaleway: scalewayProvider,
