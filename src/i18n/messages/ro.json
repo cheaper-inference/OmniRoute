@@ -7906,6 +7906,7 @@
     "systemActor": "sistem",
     "ipAccessControl": "Control acces IP",
     "ipAccessControlDesc": "Blocați sau permiteți anumite adrese IP",
+    "ipAccessMode": "Mod de acces",
     "ipModeDisabled": "Dezactivat",
     "ipModeBlacklist": "Lista neagră",
     "ipModeWhitelist": "Lista albă",

@@ -15,7 +15,7 @@
 
 **Sukūrė [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Niekada nenustokite programuoti. Kiekvienas AI įrankis → 381 teikėjas — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity į NEMOKAMUS Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. RTK + Caveman pakopinis glaudinimas sutaupo 15–95 % žetonų (~89 % vidutiniškai) — niekada nepasiekite limitų. 381 AI teikėjas · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėnesį · 20 maršrutizavimo strategijų · pradėkite už 0 USD."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Niekada nenustokite programuoti. Kiekvienas AI įrankis → 384 teikėjas — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity į NEMOKAMUS Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. RTK + Caveman pakopinis glaudinimas sutaupo 15–95 % žetonų (~89 % vidutiniškai) — niekada nepasiekite limitų. 384 AI teikėjas · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėnesį · 20 maršrutizavimo strategijų · pradėkite už 0 USD."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                   |               v3.8.50               | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :---------------------------------: | :---------: | :-------------------: |
-| 🌐 Teikėjai                       |                 352                 |   **358**   |          381          |
+| 🌐 Teikėjai                       |                 352                 |   **358**   |          384          |
 | 🧠 Unikalūs pokalbių modelių ID   |                1320                 |  **1374**   |         1491          |
 | 🖼️ Modalumo tiltas                | 🆕 vaizdas + garsas + vaizdo įrašas |      ✓      |           ✓           |
 | 📡 Nemokamas „Radar“ katalogas    |           🆕 pasirenkamas           |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkcijos</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Deriniai</a></td>
-    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 Teikėjai</a></td>
+    <td align="center"><a href="#-384-ai-providers--153-catalog-marked-free">🌐 Teikėjai</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ir MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis punktas ir 381 teikėjas. Automatinis atsarginis perjungimas užtikrina maršrutų parinkimą, kol pasiekiamas kitas veikiantis taikinys. Šeši pagrindiniai privalumai: atsparus atsarginis perjungimas tarp 381 teikėjo · iki 95 % žetonų sutaupymas tinkamiems darbo krūviams · pradėti galima už 0 USD, turint daugiau nei 150 nemokamų planų ir 52 pasikartojančius arba rakto nereikalaujančius nemokamus planus visam laikui · 39 CLI / agentų integracijos naudojant vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas adresu /v1 · gamybinės aplinkos valdikliai, įskaitant grandinės pertraukiklius, TLS slėpimą, MCP su 110 įrankių, A2A, atmintį, apsaugos priemones, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 sekamų testų failų."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis punktas ir 384 teikėjas. Automatinis atsarginis perjungimas užtikrina maršrutų parinkimą, kol pasiekiamas kitas veikiantis taikinys. Šeši pagrindiniai privalumai: atsparus atsarginis perjungimas tarp 384 teikėjo · iki 95 % žetonų sutaupymas tinkamiems darbo krūviams · pradėti galima už 0 USD, turint daugiau nei 150 nemokamų planų ir 52 pasikartojančius arba rakto nereikalaujančius nemokamus planus visam laikui · 39 CLI / agentų integracijos naudojant vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas adresu /v1 · gamybinės aplinkos valdikliai, įskaitant grandinės pertraukiklius, TLS slėpimą, MCP su 110 įrankių, A2A, atmintį, apsaugos priemones, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 sekamų testų failų."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Visos **20** strategijų – derinkite jas kiekviename kombinacijos žingsnyje:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo išsiskiria „OmniRoute“ — atnaujinta funkcijų momentinė apžvalga, kurioje pagal 13 galimybių lyginami 9router, OpenRouter, CLIProxyAPI ir LiteLLM. „OmniRoute“: 381 tiekėjas, daugiau nei 150 integruotų nemokamų planų, 20 maršrutizavimo strategijų, žetonų glaudinimas naudojant 12 variklių, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos taisyklės, debesijos agentai, TLS pirštų atspaudų slėpimas, Desktop/Termux/PWA ir 67 i18n naudotojo sąsajos lokalės. „OmniRoute“ licencijuota pagal MIT licenciją ir gali būti talpinama savarankiškai. Konkurentų galimybės ir skaičiai gali keistis; žr. susietą metodiką."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo išsiskiria „OmniRoute“ — atnaujinta funkcijų momentinė apžvalga, kurioje pagal 13 galimybių lyginami 9router, OpenRouter, CLIProxyAPI ir LiteLLM. „OmniRoute“: 384 tiekėjas, daugiau nei 150 integruotų nemokamų planų, 20 maršrutizavimo strategijų, žetonų glaudinimas naudojant 12 variklių, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos taisyklės, debesijos agentai, TLS pirštų atspaudų slėpimas, Desktop/Termux/PWA ir 67 i18n naudotojo sąsajos lokalės. „OmniRoute“ licencijuota pagal MIT licenciją ir gali būti talpinama savarankiškai. Konkurentų galimybės ir skaičiai gali keistis; žr. susietą metodiką."/>
 
 <sub>📊 Visa metodika ir išsami kiekvienos funkcijos informacija, palyginti su 9router, OpenRouter, CLIProxyAPI ir LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -613,7 +613,7 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 - **🖼️ Nauji galiniai taškai** — `/v1/ocr` (Mistral OCR) ir `/v1/audio/translations` (Whisper tipo) užbaigia medijos funkcijų rinkinį. → [API nuoroda](docs/reference/API_REFERENCE.md)
 - **🎨 Vaizdų / vaizdo įrašų / garso generavimas** — viena medijos API: xAI Grok Imagine ir Novita AI vaizdo įrašai, ComfyUI, Magnific, Adobe Firefly, Segmind bei kalbos teikėjai, tokie kaip ElevenLabs. → [API nuoroda](docs/reference/API_REFERENCE.md)
 - **🌍 Diegimas ir operacijos** — atvirkštinio tarpinio serverio `basePath`, automatinis naršyklės kalbos aptikimas, įrenginių sekimas pagal raktą, MITM pasitikėjimas be root teisių, zh-TW lokalizacija. → [Aplinka](docs/reference/ENVIRONMENT.md)
-- **🤝 Daugiau teikėjų ir agentų** — debesijos agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su naršyklės ir OAuth prisijungimu, visavertė Ollama kortelė, Claude Opus 5 ir Sonnet 5, oficiali Kimi partnerystė (Code / Web / Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **381 teikėjo katalogas**. → [Teikėjai](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Daugiau teikėjų ir agentų** — debesijos agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su naršyklės ir OAuth prisijungimu, visavertė Ollama kortelė, Claude Opus 5 ir Sonnet 5, oficiali Kimi partnerystė (Code / Web / Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **384 teikėjo katalogas**. → [Teikėjai](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Maršrutizavimo skaidrumas** — kiekviename atsakyme pateikiama `X-OmniRoute-Decision` antraštė, nurodanti strategiją, teikėją ir delsą, aptarnavusius užklausą; nauja `cache-optimized` derinio strategija ir Auto-Combo `cacheAffinity` faktorius nukreipia pasikartojančias užklausas atgal į ryšį, kuriame laikoma podėlyje esanti priešdėlio dalis; tik skaitymui skirtas `/v1/auto-combo/{channel}/candidates` galinis taškas atskleidžia tiesioginį `auto/*` kanalo kandidatų telkinį. → [Automatiniai deriniai](docs/routing/AUTO-COMBO.md).
 - **⚡ Vietinis našumas ir infrastruktūra** — vienu spustelėjimu paleidžiamas vietinis Redis, „Cloudflare Workers“ / „Deno Deploy“ perdavimo serverių diegikliai, „Bifrost“ ir „Mux“ kaip prižiūrimosios įterptosios paslaugos. → [Įterptosios paslaugos](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Taip pat įtraukta** — įskiepių sistema ir prekyvietė, „Omni“ / „Agent“ / „GitHub“ įgūdžių sistemos, „Obsidian“ saugyklos integracija (22 MCP įrankiai), su „OpenAI“ suderinamos „Batch“ ir „Files“ API, semantinė atsakymų podėlio sistema, žaidybinimas su lyderių lentelėmis, ACP agentų aptikimas (15 integruotų agentų), suplanuotas žurnalų eksportavimas į „BigQuery“, `auto/chaos` lygiagretus kelių modelių paskirstymas, „Telegram“ roboto sąsaja, programoje integruota versijų tvarkyklė ir nemokamų teikėjų reitingai pagal LMArena-ELO. → [Dokumentacija](docs/README.md)
@@ -697,11 +697,11 @@ slaptus duomenis nuo patekimo į jūsų shell istoriją. → [CLI integracijos](
 
 <div align="center">
 
-## 🌐 381 AI teikėjai — 153 kataloge pažymėti kaip nemokami
+## 🌐 384 AI teikėjai — 153 kataloge pažymėti kaip nemokami
 
 </div>
 
-> **381 registruotas teikėjas** kanoninėse pokalbių, medijos, paieškos, vietinėse, debesijos agentų ir sistemos kolekcijose, įskaitant **153 teikėjus, turinčius `hasFree: true` aptikimo metaduomenis**. Pokalbių modelių registre yra **239 teikėjai / 3 059 skirtingos teikėjo ir modelio poros / 1 475 neapdoroti modelių ID**; atskirame nemokamų planų kataloge yra **471 eilutė pagal modelį**, **34 pasikartojantys fondai** ir **52 pasikartojantys arba be rakto visam laikui nemokami teikėjai**. Tai skirtingi vardikliai pagal paskirtį; apibrėžimai ir pagal fondus deduplikuoti skaičiavimai pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
+> **384 registruotas teikėjas** kanoninėse pokalbių, medijos, paieškos, vietinėse, debesijos agentų ir sistemos kolekcijose, įskaitant **153 teikėjus, turinčius `hasFree: true` aptikimo metaduomenis**. Pokalbių modelių registre yra **239 teikėjai / 3 059 skirtingos teikėjo ir modelio poros / 1 475 neapdoroti modelių ID**; atskirame nemokamų planų kataloge yra **471 eilutė pagal modelį**, **34 pasikartojantys fondai** ir **52 pasikartojantys arba be rakto visam laikui nemokami teikėjai**. Tai skirtingi vardikliai pagal paskirtį; apibrėžimai ir pagal fondus deduplikuoti skaičiavimai pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1306,7 +1306,7 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td nowrap><b>Vykdymo aplinka</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> visame <code>src/</code> ir <code>open-sse/</code> (nuo v2.0 pagrindiniame kode nėra <code>any</code>)</td></tr>
   <tr><td nowrap><b>Karkasas</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalinimas) + LowDB (JSON senoji sistema) — 147 domeno modulių, 230 migracijos</td></tr>
+  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalinimas) + LowDB (JSON senoji sistema) — 147 domeno modulių, 232 migracijos</td></tr>
   <tr><td nowrap><b>Atmintis</b></td><td>SQLite FTS5 viso teksto paieška + int8 kvantuoti vektoriniai įterpiniai, tipizuotas nykimas</td></tr>
   <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties / išvesties tikrinimas + API sutartys</td></tr>
   <tr><td nowrap><b>Protokolai</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
