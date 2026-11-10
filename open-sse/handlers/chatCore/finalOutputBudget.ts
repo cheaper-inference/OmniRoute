@@ -18,6 +18,29 @@ import { enforceOutputTokenBudget } from "./outputTokenBudget.ts";
 type LoggerLike =
   { info?: (...args: unknown[]) => void; warn?: (...args: unknown[]) => void } | null | undefined;
 
+type RejectedBudget = {
+  estimatedInputTokens: number;
+  contextLimit: number;
+  maxInputTokens?: number;
+};
+
+function rejectionMessage(
+  budget: RejectedBudget,
+  provider: string,
+  effectiveModel: string
+): string {
+  const exceededInputCap = budget.maxInputTokens !== undefined;
+  return (
+    `Input exceeds ${exceededInputCap ? "maximum input tokens" : "context window"} for ${provider}/${effectiveModel}: ` +
+    `estimated ${budget.estimatedInputTokens} input tokens, ${exceededInputCap ? `max input ${budget.maxInputTokens}` : `limit ${budget.contextLimit}`}. ` +
+    `Reduce the prompt or route to a model with a larger ${exceededInputCap ? "input limit" : "context window"}.`
+  );
+}
+
+function claudeOverflowMessage(budget: RejectedBudget): string {
+  return `prompt is too long: ${budget.estimatedInputTokens} tokens > ${budget.maxInputTokens ?? budget.contextLimit} maximum`;
+}
+
 export function enforceFinalOutputTokenBudget({
   body,
   finalEstimatedInputTokens,
@@ -52,19 +75,12 @@ export function enforceFinalOutputTokenBudget({
     effectiveInputCap
   );
   if (outputBudget.ok === false) {
-    const exceededInputCap = outputBudget.maxInputTokens !== undefined;
-    const message =
-      `Input exceeds ${exceededInputCap ? "maximum input tokens" : "context window"} for ${provider}/${effectiveModel}: ` +
-      `estimated ${outputBudget.estimatedInputTokens} input tokens, ${exceededInputCap ? `max input ${outputBudget.maxInputTokens}` : `limit ${outputBudget.contextLimit}`}. ` +
-      `Reduce the prompt or route to a model with a larger ${exceededInputCap ? "input limit" : "context window"}.`;
+    const message = rejectionMessage(outputBudget, provider, effectiveModel);
     log?.warn?.("CONTEXT", message);
     // Claude Code compacts only on Anthropic's own overflow wording and reads both counts from it.
     return {
       ok: false,
-      message:
-        sourceFormat === FORMATS.CLAUDE
-          ? `prompt is too long: ${outputBudget.estimatedInputTokens} tokens > ${outputBudget.maxInputTokens ?? outputBudget.contextLimit} maximum`
-          : message,
+      message: sourceFormat === FORMATS.CLAUDE ? claudeOverflowMessage(outputBudget) : message,
     };
   }
   if (outputBudget.adjustedFields.length > 0) {
