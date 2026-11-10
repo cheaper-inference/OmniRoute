@@ -2040,3 +2040,9 @@ Used by `scripts/cli/omniroute-media-mcp.mjs`. Set these in the local tool proce
 | `OMNIROUTE_MEDIA_PROVIDER` | `omniroute` | Provider entry read from the OpenCode configuration by the media tool. |
 | `OMNIROUTE_MEDIA_MODEL` | `auto` | Model submitted by the media tool. Its provider must support the requested media types. |
 | `OMNIROUTE_MEDIA_API_KEY` | Configured provider API key or its environment reference | Optional credential override. Keep it in the local process environment; never commit it. |
+
+## Session tracking
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `OMNIROUTE_SESSION_TTL_MIN` | `15` | `open-sse/services/sessionManager.ts` | Idle TTL in minutes for the in-memory session map. Governs sticky connection reuse (`getSessionConnection`) and the active-sessions views; raising it keeps a session pinned to its connection longer. Read once at startup. Blank, non-numeric or `<= 0` values fall back to the default. |
