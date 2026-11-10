@@ -1,1 +1,0 @@
-- **fix(quota):** the Redis quota store now charges a usage counter and sets its expiry in one atomic call, so a crash between the two steps can no longer leave a counter that never expires.
