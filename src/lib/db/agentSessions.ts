@@ -13,6 +13,10 @@ import type { SqliteAdapter } from "./adapters/types";
 export const AGENT_SESSION_IDLE_WINDOW_MS = 30 * 60 * 1000;
 
 // A type alias (not an interface) so it stays assignable to the cost calculator's token record.
+// `input` includes cache reads and writes, the way the usage extractors report prompt tokens and
+// the cost calculator prices them; `output` includes reasoning. Requests recorded before the usage
+// extractor fix (#14878) by some non-streaming Claude-format providers stored input without its
+// cached part, so their input and uncached input may be under-reported; they are not guessed at.
 export type AgentSessionTokens = {
   input: number;
   output: number;
@@ -40,7 +44,10 @@ function newSessionId(): string {
   return `as_${randomUUID().replace(/-/g, "").slice(0, 32)}`;
 }
 
-/** Scoped to the API key, so one key can never write into another key's session. */
+/**
+ * Scoped to the API key, so one key can never write into another key's session. The list filter
+ * by client session id looks rows up by this id, so changing it hides existing sessions there.
+ */
 function clientSessionRowId(apiKeyId: string | null, clientSessionId: string): string {
   const digest = createHash("sha256")
     .update(`${apiKeyId ?? ""}\x1f${clientSessionId}`)
@@ -141,4 +148,251 @@ export function recordAgentSessionUsage(db: SqliteAdapter, usage: AgentSessionUs
     connectionId: usage.connectionId,
   });
   return id;
+}
+
+export interface AgentSessionRecord {
+  id: string;
+  apiKeyId: string | null;
+  apiKeyName: string | null;
+  client: string | null;
+  clientSessionId: string | null;
+  projectName: string | null;
+  projectRepo: string | null;
+  projectPath: string | null;
+  projectSource: string | null;
+  gitBranch: string | null;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  requestCount: number;
+  errorCount: number;
+  tokens: {
+    /** Input including cache reads and writes. */
+    input: number;
+    output: number;
+    cacheRead: number;
+    cacheCreation: number;
+    reasoning: number;
+    /** Input that was neither read from nor written to the prompt cache, clamped at 0. */
+    uncachedInput: number;
+    /** input + output: cache reads and writes are already part of input. */
+    total: number;
+  };
+  costUsd: number;
+  unpricedCount: number;
+  lastProvider: string | null;
+  lastModel: string | null;
+  lastConnectionId?: string | null;
+}
+
+export interface ListAgentSessionsFilter {
+  apiKeyId?: string | null;
+  projectName?: string | null;
+  client?: string | null;
+  /** The client's own session id (agent_sessions.client_session_id). */
+  clientSessionId?: string | null;
+  from?: string | null;
+  to?: string | null;
+  sort?: "lastSeen" | "firstSeen" | "requests" | "tokens" | "cost";
+  order?: "asc" | "desc";
+  limit?: number;
+  offset?: number;
+}
+
+export interface AgentSessionRecentUsage {
+  id: number;
+  timestamp: string;
+  provider: string | null;
+  model: string | null;
+  /** Same meaning as the session tokens, so request rows add up to their session. */
+  tokens: {
+    input: number;
+    output: number;
+    cacheRead: number;
+    cacheCreation: number;
+    reasoning: number;
+    uncachedInput: number;
+  };
+  latencyMs: number;
+  ttftMs: number;
+  status: string | null;
+  success: boolean;
+  connectionId?: string | null;
+}
+
+/** Input that was neither read from nor written to the prompt cache (input includes both). */
+function uncachedInput(input: number, cacheRead: number, cacheCreation: number): number {
+  return Math.max(0, input - cacheRead - cacheCreation);
+}
+
+function textOrNull(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
+function countOf(value: unknown): number {
+  return Number(value ?? 0);
+}
+
+function rowToAgentSessionRecord(row: Record<string, unknown>): AgentSessionRecord {
+  const input = countOf(row.tokens_input);
+  const output = countOf(row.tokens_output);
+  const cacheRead = countOf(row.tokens_cache_read);
+  const cacheCreation = countOf(row.tokens_cache_creation);
+  return {
+    id: String(row.id),
+    apiKeyId: textOrNull(row.api_key_id),
+    apiKeyName: textOrNull(row.api_key_name),
+    client: textOrNull(row.client),
+    clientSessionId: textOrNull(row.client_session_id),
+    projectName: textOrNull(row.project_name),
+    projectRepo: textOrNull(row.project_repo),
+    projectPath: textOrNull(row.project_path),
+    projectSource: textOrNull(row.project_source),
+    gitBranch: textOrNull(row.git_branch),
+    firstSeenAt: String(row.first_seen_at),
+    lastSeenAt: String(row.last_seen_at),
+    requestCount: countOf(row.request_count),
+    errorCount: countOf(row.error_count),
+    tokens: {
+      input,
+      output,
+      cacheRead,
+      cacheCreation,
+      reasoning: countOf(row.tokens_reasoning),
+      uncachedInput: uncachedInput(input, cacheRead, cacheCreation),
+      // Input already includes cache reads and writes; adding them again double counts.
+      total: input + output,
+    },
+    costUsd: countOf(row.cost_usd),
+    unpricedCount: countOf(row.unpriced_count),
+    lastProvider: textOrNull(row.last_provider),
+    lastModel: textOrNull(row.last_model),
+    lastConnectionId: textOrNull(row.last_connection_id),
+  };
+}
+
+const SORT_COLUMNS: Record<string, string> = {
+  lastSeen: "last_seen_at",
+  firstSeen: "first_seen_at",
+  requests: "request_count",
+  tokens: "(tokens_input + tokens_output)",
+  cost: "cost_usd",
+};
+
+/** WHERE clause and bound params for the list filter (absent fields do not filter). */
+function buildSessionFilterSql(filter: ListAgentSessionsFilter): {
+  whereClause: string;
+  params: unknown[];
+} {
+  const conditions: string[] = [];
+  const params: unknown[] = [];
+  const add = (condition: string, value: unknown) => {
+    conditions.push(condition);
+    params.push(value);
+  };
+
+  if (filter.apiKeyId === null) conditions.push("api_key_id IS NULL");
+  else if (filter.apiKeyId !== undefined) add("api_key_id = ?", filter.apiKeyId);
+  if (filter.projectName) add("project_name = ?", filter.projectName);
+  if (filter.client) add("client = ?", filter.client);
+  if (filter.clientSessionId) {
+    add("client_session_id = ?", filter.clientSessionId);
+    // A key's session for a client session id is stored under clientSessionRowId, so the
+    // primary key finds it without scanning the key's other sessions.
+    if (filter.apiKeyId !== undefined) {
+      add("id = ?", clientSessionRowId(filter.apiKeyId, filter.clientSessionId));
+    }
+  }
+  if (filter.from) add("last_seen_at >= ?", filter.from);
+  if (filter.to) add("last_seen_at <= ?", filter.to);
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  return { whereClause, params };
+}
+
+export function listAgentSessions(
+  db: SqliteAdapter,
+  filter: ListAgentSessionsFilter = {}
+): { sessions: AgentSessionRecord[]; total: number } {
+  const { whereClause, params } = buildSessionFilterSql(filter);
+  const sortCol = SORT_COLUMNS[filter.sort || "lastSeen"] || "last_seen_at";
+  const sortOrder = filter.order?.toLowerCase() === "asc" ? "ASC" : "DESC";
+
+  const limit = Math.max(1, Math.min(Number(filter.limit) || 20, 100));
+  const offset = Math.max(0, Number(filter.offset) || 0);
+
+  const countRow = db
+    .prepare(`SELECT COUNT(*) as count FROM agent_sessions ${whereClause}`)
+    .get(...params) as { count: number } | undefined;
+  const total = Number(countRow?.count ?? 0);
+
+  const rows = db
+    .prepare(
+      `SELECT * FROM agent_sessions
+       ${whereClause}
+       ORDER BY ${sortCol} ${sortOrder}, id DESC
+       LIMIT ? OFFSET ?`
+    )
+    .all(...params, limit, offset) as Record<string, unknown>[];
+
+  return {
+    sessions: rows.map(rowToAgentSessionRecord),
+    total,
+  };
+}
+
+export function getAgentSessionById(
+  db: SqliteAdapter,
+  id: string,
+  apiKeyId?: string
+): AgentSessionRecord | null {
+  const query = apiKeyId
+    ? "SELECT * FROM agent_sessions WHERE id = ? AND api_key_id = ?"
+    : "SELECT * FROM agent_sessions WHERE id = ?";
+  const params = apiKeyId ? [id, apiKeyId] : [id];
+  const row = db.prepare(query).get(...params) as Record<string, unknown> | undefined;
+  return row ? rowToAgentSessionRecord(row) : null;
+}
+
+export function getAgentSessionRecentUsage(
+  db: SqliteAdapter,
+  sessionId: string,
+  limit = 50
+): AgentSessionRecentUsage[] {
+  const boundedLimit = Math.max(1, Math.min(limit, 100));
+  const rows = db
+    .prepare(
+      `SELECT id, timestamp, provider, model, tokens_input, tokens_output,
+              tokens_cache_read, tokens_cache_creation, tokens_reasoning,
+              latency_ms, ttft_ms, status, success, connection_id
+       FROM usage_history
+       WHERE agent_session_id = ?
+       ORDER BY timestamp DESC, id DESC
+       LIMIT ?`
+    )
+    .all(sessionId, boundedLimit) as Record<string, unknown>[];
+
+  return rows.map((row) => {
+    const input = Number(row.tokens_input ?? 0);
+    const cacheRead = Number(row.tokens_cache_read ?? 0);
+    const cacheCreation = Number(row.tokens_cache_creation ?? 0);
+    return {
+      id: Number(row.id),
+      timestamp: String(row.timestamp),
+      provider: typeof row.provider === "string" ? row.provider : null,
+      model: typeof row.model === "string" ? row.model : null,
+      tokens: {
+        input,
+        output: Number(row.tokens_output ?? 0),
+        cacheRead,
+        cacheCreation,
+        reasoning: Number(row.tokens_reasoning ?? 0),
+        uncachedInput: uncachedInput(input, cacheRead, cacheCreation),
+      },
+      latencyMs: Number(row.latency_ms ?? 0),
+      ttftMs: Number(row.ttft_ms ?? 0),
+      status: typeof row.status === "string" ? row.status : null,
+      success: row.success === 1 || row.success === true,
+      connectionId: typeof row.connection_id === "string" ? row.connection_id : null,
+    };
+  });
 }
