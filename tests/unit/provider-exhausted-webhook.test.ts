@@ -13,6 +13,7 @@ process.env.OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS = "true";
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const fallback = await import("../../open-sse/services/accountFallback.ts");
 const webhooksDb = await import("../../src/lib/db/webhooks.ts");
 const { getProviderCredentials } = await import("../../src/sse/services/auth.ts");
 const { WEBHOOK_EVENT_VALUES } = await import("../../src/lib/webhooks/eventDescriptions.ts");
@@ -39,12 +40,12 @@ test.after(async () => {
 
 const future = () => new Date(Date.now() + 30 * 60 * 1000).toISOString();
 
-async function seed(provider: string, name: string, cooling: boolean) {
+async function seed(provider: string, name: string, cooling: boolean, key?: string) {
   const created = await providersDb.createProviderConnection({
     provider,
     authType: "apikey",
     name,
-    apiKey: `sk-synthetic-${name}`,
+    apiKey: key ?? `sk-synthetic-${name}`,
     isActive: true,
     testStatus: "active",
     rateLimitedUntil: cooling ? future() : null,
@@ -113,4 +114,37 @@ test("no webhook when a key policy narrows the pool to cooling accounts only", a
   assert.equal(narrowed.allRateLimited, true);
   await settle(before);
   assert.equal(received.length, before, "the provider is not down, only this key's view of it");
+});
+
+test("no webhook when the tool-capability filter hides a usable account", async () => {
+  const before = received.length;
+  await seed("qoder", "q-http", true, "http-synthetic-q");
+  await seed("qoder", "q-pat", false, "pt-synthetic-q");
+  const result = (await getProviderCredentials("qoder", null, null, null, {
+    requireToolCalling: true,
+  })) as Record<string, unknown>;
+  assert.equal(result.allRateLimited, true, "the tool-capable account is cooling");
+  await settle(before);
+  assert.equal(received.length, before, "the provider still serves requests without tools");
+});
+
+test("the webhook retry time comes from the connection cooldowns, not a shorter model lock", async () => {
+  const before = received.length;
+  const id = await seed("mistral", "m1", true);
+  fallback.recordModelLockoutFailure("mistral", id, "mistral-large", "rate_limited", 429, 0, null, {
+    exactCooldownMs: 5 * 60 * 1000,
+    exactCooldownIsUpstreamReset: true,
+  });
+  const result = (await getProviderCredentials("mistral", null, null, "mistral-large")) as Record<
+    string,
+    unknown
+  >;
+  assert.equal(result.allRateLimited, true);
+  await settle(before + 1);
+  assert.equal(received.length, before + 1);
+  const retryAt = Date.parse(String(received[before].data.retryAfter));
+  assert.ok(
+    retryAt - Date.now() > 20 * 60 * 1000,
+    `retryAfter ${received[before].data.retryAfter} must follow the 30 min connection cooldown`
+  );
 });
