@@ -85,6 +85,8 @@ import {
   type ApiKeyPermissionsUpdate,
 } from "./apiKeys/permissionsUpdate";
 import { getModelCatalogCacheVersion, invalidateModelCatalogCache } from "./readCache";
+import { KeyTemplateError } from "./keyTemplates/errors.ts";
+import type { KeyTemplatePolicy } from "@/shared/types/keyTemplates";
 import type { AccessSchedule, RateLimitRule } from "./apiKeys/types";
 
 // ──────────────── Performance Optimizations ────────────────
@@ -839,6 +841,100 @@ export async function createApiKey(
 
   backupDbFile("pre-write");
   return apiKey;
+}
+
+export interface CreateApiKeyFromPolicyOptions {
+  /** Absolute expiry used by the legacy create body instead of `policy.expiry`. */
+  absoluteExpiresAt?: string | null;
+  /** Reject blocking stale references (template/policy creation). */
+  enforceReferences?: boolean;
+  /** Audit provenance only; never re-applied over the policy. */
+  templateRef?: { id: string; revision: number };
+}
+
+/**
+ * Creates a key with its complete policy and every related row in one transaction:
+ * on any failure no key row (and no secret) exists. The secret is generated here and
+ * returned once; it is never stored in a template or a policy.
+ */
+export async function createApiKeyFromPolicy(
+  name: string,
+  machineId: string,
+  policy: KeyTemplatePolicy,
+  options: CreateApiKeyFromPolicyOptions = {}
+) {
+  if (!machineId) throw new Error("machineId is required");
+  assertExclusiveLeaseKeyPolicy(policy.key.scopes, policy.key.allowedConnections);
+  const db = getDbInstance() as ApiKeysDbLike;
+  getPreparedStatements(db);
+  if (policy.related.domainBudget) {
+    // Lazily adds the budget columns the domain-state module owns.
+    const { loadBudget } = await import("./domainState");
+    loadBudget("");
+  }
+  if (policy.related.tokenLimits.length > 0) {
+    const { listTokenLimits } = await import("./tokenLimits");
+    listTokenLimits("");
+  }
+  const core = await import("./keyTemplates/policyCore.ts");
+  const { generateApiKeyWithMachine } = await import("@/shared/utils/apiKey");
+  const { key } = generateApiKeyWithMachine(machineId);
+  const id = uuidv4();
+  const now = Date.now();
+  const createdAt = new Date(now).toISOString();
+  const rows = core.templatePolicyToRows(policy, now);
+  if (options.absoluteExpiresAt !== undefined)
+    rows.keyColumns.expires_at = options.absoluteExpiresAt;
+  const identity = {
+    id,
+    name,
+    machineId,
+    secret: encryptApiKeySecret(key),
+    hash: await hashKey(key),
+    prefix: key.slice(0, 12),
+    createdAt,
+  };
+  core.runImmediate(db, () => {
+    if (options.enforceReferences) {
+      const blocking = core.collectReferenceIssues(db, policy).filter((issue) => issue.blocking);
+      if (blocking.length > 0) {
+        throw new KeyTemplateError(
+          422,
+          "REFERENCE_INVALID",
+          "The policy references settings that no longer exist; edit them before creating the key",
+          { issues: blocking }
+        );
+      }
+    }
+    core.insertKeyPolicyRows(db, identity, rows);
+  });
+  clearApiKeyCaches();
+  if (policy.related.reasoningRules.length > 0) invalidateReasoningRoutingRuleCache();
+  invalidateModelCatalogCache();
+  setNoLog(id, policy.key.noLog === true);
+  const { logAuditEvent } = await import("@/lib/compliance");
+  logAuditEvent({
+    action: "apiKey.create",
+    target: id,
+    details: {
+      name,
+      source: options.templateRef ? "template" : "policy",
+      scopes: policy.key.scopes,
+      ...(options.templateRef && {
+        templateId: options.templateRef.id,
+        templateRevision: options.templateRef.revision,
+      }),
+    },
+  });
+  backupDbFile("pre-write");
+  return {
+    id,
+    name,
+    key,
+    machineId,
+    createdAt,
+    expiresAt: (rows.keyColumns.expires_at as string | null) ?? null,
+  };
 }
 
 export async function regenerateApiKey(id: string) {
