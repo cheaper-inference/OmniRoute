@@ -15,7 +15,7 @@
 
 **তৈরি করেছেন [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — কখনও কোড লেখা থামাবেন না। প্রতিটি AI টুল → 388টি প্রোভাইডার — 150টিরও বেশি বিনামূল্যে — একটি এন্ডপয়েন্টের মাধ্যমে। Claude Code, Codex, Cursor, Cline, Copilot ও Antigravity এখন স্বয়ংক্রিয় ফ্যালব্যাকসহ বিনামূল্যের Claude / GPT / Gemini-তে। RTK + Caveman স্তরভিত্তিক কম্প্রেশন 15–95% টোকেন সাশ্রয় করে (~89% গড়) — কখনও সীমায় পৌঁছাবেন না। 388টি AI প্রোভাইডার · 150টিরও বেশি বিনামূল্যের টিয়ার · মাসে প্রায় 1.62B বিনামূল্যের টোকেন · 20টি রাউটিং কৌশল · শুরুতে $0।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — কখনও কোড লেখা থামাবেন না। প্রতিটি AI টুল → 389টি প্রোভাইডার — 150টিরও বেশি বিনামূল্যে — একটি এন্ডপয়েন্টের মাধ্যমে। Claude Code, Codex, Cursor, Cline, Copilot ও Antigravity এখন স্বয়ংক্রিয় ফ্যালব্যাকসহ বিনামূল্যের Claude / GPT / Gemini-তে। RTK + Caveman স্তরভিত্তিক কম্প্রেশন 15–95% টোকেন সাশ্রয় করে (~89% গড়) — কখনও সীমায় পৌঁছাবেন না। 389টি AI প্রোভাইডার · 150টিরও বেশি বিনামূল্যের টিয়ার · মাসে প্রায় 1.62B বিনামূল্যের টোকেন · 20টি রাউটিং কৌশল · শুরুতে $0।"/>
 
 </div>
 
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট এবং 388টি প্রদানকারী। আরেকটি সুস্থ লক্ষ্য উপলভ্য থাকা পর্যন্ত স্বয়ংক্রিয় ফলব্যাক রাউটিং সচল রাখে। ছয়টি স্তম্ভ: 388টি প্রদানকারী জুড়ে স্থিতিস্থাপক ফলব্যাক · যোগ্য ওয়ার্কলোডে সর্বোচ্চ 95% টোকেন সাশ্রয় · 150+টি ফ্রি টিয়ার এবং 52টি পুনরাবৃত্ত/কী-বিহীন চিরস্থায়ী বিনামূল্যের প্রদানকারীসহ $0 দিয়ে শুরু · একটি কনফিগারেশনের মাধ্যমে 39টি CLI/এজেন্ট ইন্টিগ্রেশন · /v1-এ OpenAI, Claude, Gemini এবং Responses API সামঞ্জস্য · সার্কিট ব্রেকার, TLS স্টেলথ, MCP-এর 110টি টুল, A2A, মেমরি, গার্ডরেল, ইভ্যাল, এবং 7,800+ ট্র্যাক করা টেস্ট ফাইলজুড়ে 56,000+ স্ট্যাটিক টেস্ট ডিক্লারেশনসহ প্রোডাকশন নিয়ন্ত্রণ।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট এবং 389টি প্রদানকারী। আরেকটি সুস্থ লক্ষ্য উপলভ্য থাকা পর্যন্ত স্বয়ংক্রিয় ফলব্যাক রাউটিং সচল রাখে। ছয়টি স্তম্ভ: 389টি প্রদানকারী জুড়ে স্থিতিস্থাপক ফলব্যাক · যোগ্য ওয়ার্কলোডে সর্বোচ্চ 95% টোকেন সাশ্রয় · 150+টি ফ্রি টিয়ার এবং 52টি পুনরাবৃত্ত/কী-বিহীন চিরস্থায়ী বিনামূল্যের প্রদানকারীসহ $0 দিয়ে শুরু · একটি কনফিগারেশনের মাধ্যমে 39টি CLI/এজেন্ট ইন্টিগ্রেশন · /v1-এ OpenAI, Claude, Gemini এবং Responses API সামঞ্জস্য · সার্কিট ব্রেকার, TLS স্টেলথ, MCP-এর 110টি টুল, A2A, মেমরি, গার্ডরেল, ইভ্যাল, এবং 7,800+ ট্র্যাক করা টেস্ট ফাইলজুড়ে 56,000+ স্ট্যাটিক টেস্ট ডিক্লারেশনসহ প্রোডাকশন নিয়ন্ত্রণ।"/>
 
 <br/>
 <br/>
@@ -688,11 +688,11 @@ omniroute configure codex          # এছাড়াও: claude opencode qwen
 
 <div align="center">
 
-## 🌐 388টি AI প্রদানকারী — ক্যাটালগে চিহ্নিত 153টি বিনামূল্যে
+## 🌐 389টি AI প্রদানকারী — ক্যাটালগে চিহ্নিত 153টি বিনামূল্যে
 
 </div>
 
-> **388টি নিবন্ধিত প্রদানকারী** canonical chat, media, search, local, cloud-agent এবং system collection জুড়ে রয়েছে, যার মধ্যে **153টি `hasFree: true` discovery metadata বহন করে**। Chat model registry-তে রয়েছে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র provider-model pair / 1,475টি raw model ID**; পৃথক free-budget catalog-এ রয়েছে **471টি per-model row**, **34টি recurring pool** এবং **52টি recurring/keyless free-forever provider**। নকশা অনুযায়ী এগুলো ভিন্ন denominator; সংজ্ঞা এবং pool-deduped হিসাব [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ও [Free Tiers](docs/reference/FREE_TIERS.md)-এ রয়েছে।
+> **389টি নিবন্ধিত প্রদানকারী** canonical chat, media, search, local, cloud-agent এবং system collection জুড়ে রয়েছে, যার মধ্যে **153টি `hasFree: true` discovery metadata বহন করে**। Chat model registry-তে রয়েছে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র provider-model pair / 1,475টি raw model ID**; পৃথক free-budget catalog-এ রয়েছে **471টি per-model row**, **34টি recurring pool** এবং **52টি recurring/keyless free-forever provider**। নকশা অনুযায়ী এগুলো ভিন্ন denominator; সংজ্ঞা এবং pool-deduped হিসাব [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ও [Free Tiers](docs/reference/FREE_TIERS.md)-এ রয়েছে।
 
 <div align="center">
 
