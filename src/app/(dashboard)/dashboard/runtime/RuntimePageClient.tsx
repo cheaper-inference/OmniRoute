@@ -698,7 +698,7 @@ export default function RuntimePageClient() {
                         <span className="truncate flex-1">
                           {resolveProviderName(b.provider, nodeMap)}
                         </span>
-                        <span style={{ color: tone.dot }} className="text-[10px] font-bold">
+                        <span style={{ color: tone.dot }} className="text-[10px] font-semibold">
                           {tone.label}
                         </span>
                       </div>
@@ -1062,7 +1062,7 @@ function KpiCard({
           <span className="block text-[11px] uppercase tracking-wider font-semibold text-text-muted">
             {label}
           </span>{" "}
-          <span className="mt-1 block text-2xl font-bold tabular-nums" style={{ color: tone }}>
+          <span className="mt-1 block text-2xl font-semibold tabular-nums" style={{ color: tone }}>
             {value}
           </span>
         </>
@@ -1139,7 +1139,7 @@ function LayerSection({
     <div className="mt-4 border-t border-border/40 pt-3 first-of-type:border-t-0 first-of-type:pt-0">
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider font-bold text-text-muted">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-text-muted">
             Layer {id}
           </span>
           <h3 className="text-[13px] font-semibold text-text-main">{title}</h3>
@@ -1198,7 +1198,7 @@ function QuotaGroup({
   return (
     <div>
       <div
-        className="text-[10px] font-bold uppercase tracking-wider mb-1.5"
+        className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
         style={{ color: tc.text }}
       >
         {label}
@@ -1218,7 +1218,7 @@ function QuotaGroup({
               <div className="text-[10px] text-text-muted">{m.window ?? ""}</div>
             </div>
             {typeof m.remainingPercent === "number" && (
-              <span className="text-[11px] font-bold tabular-nums" style={{ color: tc.text }}>
+              <span className="text-[11px] font-semibold tabular-nums" style={{ color: tc.text }}>
                 {Math.round(m.remainingPercent)}%
               </span>
             )}

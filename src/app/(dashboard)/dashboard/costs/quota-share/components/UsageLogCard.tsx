@@ -72,7 +72,7 @@ export default function UsageLogCard({ poolId, keyLabels }: UsageLogCardProps) {
         size="sm"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] font-bold uppercase tracking-wide text-text-muted"
+        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted"
       >
         <Icon
           name="chevron_right"

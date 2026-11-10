@@ -802,7 +802,7 @@ export default function CostOverviewTab() {
               </h3>
             </div>
             <div className="flex items-end gap-3">
-              <p className="text-3xl font-bold text-info">
+              <p className="text-3xl font-semibold text-info">
                 {currencyFormatter.format(projectedMonthEnd)}
               </p>
               <p className="text-xs text-text-muted pb-1">
@@ -829,7 +829,7 @@ export default function CostOverviewTab() {
             </div>
             <div className="flex items-end gap-3">
               <p
-                className={`text-3xl font-bold ${
+                className={`text-3xl font-semibold ${
                   costChangePct > 0
                     ? "text-error"
                     : costChangePct < 0
@@ -1070,7 +1070,7 @@ function CostExplorerCard({
         <div>
           <div className="flex items-center gap-2">
             <Icon name="travel_explore" size={20} className="text-success" />
-            <h3 className="text-lg font-bold text-text-main">{t("costExplorerTitle")}</h3>
+            <h3 className="text-lg font-semibold text-text-main">{t("costExplorerTitle")}</h3>
           </div>
           <p className="text-sm text-text-muted mt-1">{t("costExplorerDescription")}</p>
         </div>

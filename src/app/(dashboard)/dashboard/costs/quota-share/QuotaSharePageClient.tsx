@@ -85,7 +85,7 @@ function StatCard({
       <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold">
         {label}
       </div>
-      <div className={`text-2xl font-bold tabular-nums leading-tight ${color}`}>{value}</div>
+      <div className={`text-2xl font-semibold tabular-nums leading-tight ${color}`}>{value}</div>
     </div>
   );
 }

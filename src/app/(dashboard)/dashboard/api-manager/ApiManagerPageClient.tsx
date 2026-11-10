@@ -945,7 +945,7 @@ export default function ApiManagerPageClient() {
                         </span>
                       )}
                       {key.isBanned && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-error/10 text-error text-[11px] font-bold animate-pulse">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-error/10 text-error text-[11px] font-semibold animate-pulse">
                           <Icon name="gavel" size={12} />
                           BANNED
                         </span>
