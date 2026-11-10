@@ -1654,10 +1654,32 @@ jobs:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
       - run: npm run check:node-runtime
+      - name: Bind integration progress identity
+        id: integration-progress-identity
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from "node:fs";
+          import { randomUUID } from "node:crypto";
+          import { execFileSync } from "node:child_process";
+          const sha = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+          if (!/^[a-f0-9]{40}$/.test(sha)) throw new Error("Invalid checkout identity");
+          appendFileSync(process.env.GITHUB_ENV,
+            `OMNIROUTE_INTEGRATION_INVOCATION_ID=${randomUUID()}\nOMNIROUTE_INTEGRATION_CHECKOUT_SHA=${sha}\n`);
+          NODE
       - name: Integration tests (shard ${{ matrix.shard }}/4)
         env:
           TEST_SHARD: ${{ matrix.shard }}/4
         run: npm run test:integration:ci
+      - name: Upload integration progress receipt
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: integration-progress-ci-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+          path: .artifacts/integration-progress/*.jsonl
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
 
   test-security:
     name: Security Tests

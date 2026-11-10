@@ -214,6 +214,8 @@ const reporter = fileURLToPath(
 function fixture(enabled, fail) {
   const root = mkdtempSync(join(tmpdir(), "integration-progress-synthetic-"));
   try {
+    // Keep the synthetic TypeScript module independent of a parent package scope.
+    writeFileSync(join(root, "package.json"), JSON.stringify({ type: "module" }));
     mkdirSync(join(root, "tests/integration"), { recursive: true });
     writeFileSync(
       join(root, "tests/integration/example.test.ts"),
