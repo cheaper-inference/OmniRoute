@@ -25,6 +25,12 @@ const core = await import("../../src/lib/db/core.ts");
 const providersRoute = await import("../../src/app/api/providers/route.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
 
+// After the imports: loading the route loads proxyFetch, which replaces globalThis.fetch with its
+// own fetch on explicit dispatchers (the MockAgent above never sees those). Without this stub the
+// auto-tests reach the real providers, and the settle hook above depends on their response time.
+const previousFetch = globalThis.fetch;
+globalThis.fetch = async () => Response.json({ data: [], models: [] });
+
 function resetDb() {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -36,6 +42,7 @@ test.beforeEach(() => {
 });
 
 test.after(async () => {
+  globalThis.fetch = previousFetch;
   setGlobalDispatcher(previousDispatcher);
   await network.close();
   core.resetDbInstance();
