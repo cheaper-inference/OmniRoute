@@ -32,6 +32,8 @@ interface Props {
   /** True while the active-state PUT is in flight. */
   togglingActive: boolean;
   onTestSent?: () => void;
+  /** Shared card clock (epoch ms) for the token-expiry countdown. */
+  now?: number;
 }
 
 export default function QuotaCardHeader({
@@ -45,6 +47,7 @@ export default function QuotaCardHeader({
   onToggleActive,
   togglingActive,
   onTestSent,
+  now,
 }: Props) {
   const t = useTranslations("usage");
   const isActive = connection.isActive ?? true;
@@ -68,7 +71,7 @@ export default function QuotaCardHeader({
       : readCookieExpiresAt(connection.providerSpecificData);
   const tokenExpiryMs = tokenExpiryIso ? new Date(tokenExpiryIso).getTime() : NaN;
   const hasTokenExpiry = Number.isFinite(tokenExpiryMs);
-  const tokenCountdown = hasTokenExpiry ? formatCountdown(tokenExpiryIso) : null;
+  const tokenCountdown = hasTokenExpiry ? formatCountdown(tokenExpiryIso, now) : null;
   const tokenExpiryLabel = !hasTokenExpiry
     ? null
     : tokenCountdown

@@ -20,6 +20,7 @@ import {
 } from "./utils";
 import QuotaCardHeader from "./parts/QuotaCardHeader";
 import QuotaCardExpanded from "./parts/QuotaCardExpanded";
+import { useQuotaClock } from "./useQuotaClock";
 import ProviderUsdCostModal from "./ProviderUsdCostModal";
 import type { CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 
@@ -89,6 +90,7 @@ export default function QuotaCard({
   onShowQuota,
 }: QuotaCardProps) {
   const isActive = connection.isActive ?? true;
+  const clockNow = useQuotaClock();
   const [costModalOpen, setCostModalOpen] = useState(false);
   const rawQuotas = quota?.quotas ?? EMPTY_QUOTAS;
   // Per-account visibility (9router#4767); provider entry is a legacy fallback.
@@ -164,6 +166,7 @@ export default function QuotaCard({
         onToggleActive={onToggleActive}
         togglingActive={togglingActive}
         onTestSent={onRefresh}
+        now={clockNow}
       />
       <QuotaCardExpanded
         quotas={quotas}
@@ -188,6 +191,7 @@ export default function QuotaCard({
         onHideQuota={onHideQuota}
         onShowQuota={onShowQuota}
         speed={quota?.raw?.speed}
+        now={clockNow}
         cursorModelUsage={connection.provider === "cursor" ? quota?.raw?.modelUsage : undefined}
         canEditCutoff={canEditCutoff}
         hasCutoffOverrides={hasOverrides}

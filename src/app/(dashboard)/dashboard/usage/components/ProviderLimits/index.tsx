@@ -47,6 +47,7 @@ import {
   useSaveQuotaWindowThresholds,
 } from "./useConfirmedAvailabilityChange";
 import { useCachedQuotaPolling } from "./useCachedQuotaPolling";
+import { useQuotaClock } from "./useQuotaClock";
 import { useAutomaticQuotaRequests } from "./useAutomaticQuotaRequests";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
@@ -224,6 +225,7 @@ export default function ProviderLimits({
   showFilters = true,
   autoRefreshInterval = 0,
 }: ProviderLimitsProps) {
+  const clockNow = useQuotaClock();
   const t = useTranslations("usage");
   const tr = useCallback(
     (key: string, fallback: string, values?: UsageTranslationValues) =>
@@ -799,7 +801,7 @@ export default function ProviderLimits({
           const pct = q.unlimited
             ? 100
             : Math.round(q.remainingPercentage ?? calculatePercentage(q.used, q.total));
-          const cd = formatCountdown(q.resetAt);
+          const cd = formatCountdown(q.resetAt, clockNow);
           const tone = getQuotaToneClasses(pct);
           return (
             <span
