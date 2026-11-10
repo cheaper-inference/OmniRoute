@@ -287,7 +287,7 @@ test("importToken_UserinfoReturnsNoEmail_Returns400AndPersistsNothing", async ()
     assert.equal(status, 400);
     assert.equal(body.success, false);
     assert.match(body.error, /account identity/i);
-    assert.doesNotMatch(body.error, new RegExp(REFRESH_TOKEN.replace(/[/]/g, "\\/")));
+    assert.equal(body.error.includes(REFRESH_TOKEN), false);
   }
   assert.equal((await antigravityRows()).length, 0, "No email-less connection may be persisted");
 });
