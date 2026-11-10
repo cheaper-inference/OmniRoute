@@ -564,12 +564,14 @@ const PROBE_SAMPLE_SQL = `SELECT v FROM (
   SELECT api_key AS v FROM provider_connections WHERE api_key LIKE 'enc:v1:%'
   UNION ALL SELECT access_token FROM provider_connections WHERE access_token LIKE 'enc:v1:%'
   UNION ALL SELECT key FROM api_keys WHERE key LIKE 'enc:v1:%'
-) LIMIT 5`;
+) LIMIT 6`; // one more than the five we decrypt: tells a complete sample from a partial one
 
 /**
  * Decrypt a few stored secrets once, at boot, to tell a wrong STORAGE_ENCRYPTION_KEY from a
- * single bad row. Returns true when any sample decrypts, false when none do (logged once),
- * null when encryption is off, no secret is stored, or the tables cannot be read.
+ * single bad row. Returns true when any sample decrypts, false when every stored secret was
+ * sampled and none decrypt (logged once), null when the answer is unknown: encryption is off,
+ * no secret is stored, the tables cannot be read, or the five sampled secrets are unreadable
+ * and more were left unchecked (logged once).
  * `db` is passed in because core.ts imports this module.
  */
 export function probeStoredSecrets(db: {
@@ -586,9 +588,17 @@ export function probeStoredSecrets(db: {
   }
   if (samples.length === 0) return null;
 
-  keyStoreDecryptable = samples.some((row) => {
+  keyStoreDecryptable = samples.slice(0, 5).some((row) => {
     return typeof row.v === "string" && decrypt(row.v, { quiet: true }) !== null;
   });
+  if (!keyStoreDecryptable && samples.length > 5) {
+    keyStoreDecryptable = null;
+    console.error(
+      "[Encryption] None of the sampled stored credentials could be decrypted, and other " +
+        "credentials were not checked. Verify STORAGE_ENCRYPTION_KEY and the sampled credentials."
+    );
+    return null;
+  }
   if (!keyStoreDecryptable) {
     console.error(
       "[Encryption] STORAGE_ENCRYPTION_KEY cannot decrypt the stored credentials. The database " +

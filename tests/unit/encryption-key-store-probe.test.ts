@@ -91,3 +91,42 @@ test("probe returns null when encryption is disabled", async (t) => {
   assert.equal(encOff.probeStoredSecrets(db), null);
   assert.equal(errors.mock.callCount(), 0);
 });
+
+// Well-formed (iv:data:tag) but the auth tag cannot verify: a corrupt row or a row from another key.
+const BAD_ROW = `enc:v1:${"00".repeat(12)}:${"00".repeat(8)}:${"00".repeat(16)}`;
+
+test("probe stays false when every stored secret was sampled and none decrypt", async (t) => {
+  process.env.STORAGE_ENCRYPTION_KEY = "probe-key-A";
+  const enc = await importFreshEncryption();
+  const db = core.getDbInstance();
+  for (let n = 0; n < 5; n++) insertConnection(db, BAD_ROW);
+  const errors = t.mock.method(console, "error", () => {});
+
+  assert.equal(enc.probeStoredSecrets(db), false);
+  assert.equal(errors.mock.callCount(), 1);
+});
+
+test("probe is inconclusive when five unreadable rows hide a readable one", async (t) => {
+  process.env.STORAGE_ENCRYPTION_KEY = "probe-key-A";
+  const enc = await importFreshEncryption();
+  const db = core.getDbInstance();
+  for (let n = 0; n < 5; n++) insertConnection(db, BAD_ROW);
+  insertConnection(db, enc.encrypt("sk-readable"));
+  const errors = t.mock.method(console, "error", () => {});
+
+  assert.equal(enc.probeStoredSecrets(db), null);
+  assert.equal(enc.getKeyStoreDecryptable(), null);
+  assert.equal(errors.mock.callCount(), 1, "the inconclusive sample must still be reported");
+  assert.match(String(errors.mock.calls[0].arguments[0]), /not checked|inconclusive/i);
+});
+
+test("probe is inconclusive when more than five stored secrets are unreadable", async (t) => {
+  process.env.STORAGE_ENCRYPTION_KEY = "probe-key-A";
+  const enc = await importFreshEncryption();
+  const db = core.getDbInstance();
+  for (let n = 0; n < 7; n++) insertConnection(db, BAD_ROW);
+  const errors = t.mock.method(console, "error", () => {});
+
+  assert.equal(enc.probeStoredSecrets(db), null);
+  assert.equal(errors.mock.callCount(), 1);
+});
