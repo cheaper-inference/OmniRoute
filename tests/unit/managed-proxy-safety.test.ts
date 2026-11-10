@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import { ensureManagedDirectory } from "../../src/lib/services/managedProxy/directories.ts";
 import { nativeOutbound } from "../../src/lib/services/managedProxy/config.ts";
@@ -29,7 +30,7 @@ test("native outbounds reject local processes and nested filesystem options", ()
 
 test("managed fixture cleanup uses PowerShell environment syntax", () => {
   const runner = fs.readFileSync(
-    new URL("../../scripts/test/run-managed-proxy-runtime.mjs", import.meta.url),
+    new URL("../../scripts/test/managed-proxy-fixture-children.mjs", import.meta.url),
     "utf8"
   );
   assert.ok(runner.includes("$env:FIXTURE_PID"));
@@ -107,7 +108,7 @@ test("hosted managed suites have dedicated discovery and retain their guard", ()
     for (const match of source.matchAll(/(?:from\s+|import\()["'](\.[^"']+)["']/g)) {
       const imported = new URL(match[1], new URL(file, directory));
       assert.ok(
-        ["", ".ts", ".tsx"].some((extension) => fs.existsSync(imported.pathname + extension)),
+        ["", ".ts", ".tsx"].some((extension) => fs.existsSync(fileURLToPath(imported) + extension)),
         match[1]
       );
     }

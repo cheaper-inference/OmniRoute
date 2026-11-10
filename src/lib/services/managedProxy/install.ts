@@ -129,41 +129,56 @@ async function regularPrivateDirectory(directory: string): Promise<void> {
     throw new Error("Managed core directory must not be a link");
 }
 
-export async function installManagedCore(
-  core: ManagedCore,
-  root: string,
-  allowDownload = true
-): Promise<string> {
-  const release = officialRelease(core);
-  const directory = path.join(root, "binaries", core, release.version);
-  await regularPrivateDirectory(path.join(root, "binaries"));
-  await regularPrivateDirectory(path.join(root, "binaries", core));
+/** Only an absent version directory permits installation; incomplete versions fail closed. */
+async function verifiedInstalledBinary(
+  directory: string,
+  release: ReturnType<typeof officialRelease>
+): Promise<string | null> {
   const binaryPath = path.join(directory, release.executable);
+  let directoryInfo: Awaited<ReturnType<typeof fs.lstat>>;
   try {
+    directoryInfo = await fs.lstat(directory);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+  try {
+    const metadataInfo = await fs.lstat(path.join(directory, "verified.json"));
+    if (
+      !directoryInfo.isDirectory() ||
+      directoryInfo.isSymbolicLink() ||
+      !metadataInfo.isFile() ||
+      metadataInfo.isSymbolicLink()
+    )
+      throw new Error("Installed core verification failed");
     const metadata = JSON.parse(await fs.readFile(path.join(directory, "verified.json"), "utf8"));
     const info = await fs.lstat(binaryPath);
+    if (!info.isFile() || info.isSymbolicLink())
+      throw new Error("Installed core verification failed");
     const bytes = await fs.readFile(binaryPath);
     if (
-      !info.isFile() ||
-      info.isSymbolicLink() ||
       metadata.archiveSha256 !== release.sha256 ||
       metadata.binarySha256 !== createHash("sha256").update(bytes).digest("hex")
     )
       throw new Error("Installed core verification failed");
     return binaryPath;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT")
-      throw new Error(
-        "Installed core verification failed; remove only the damaged managed version before retrying"
-      );
+  } catch {
+    throw new Error(
+      "Installed core verification failed; remove only the damaged managed version before retrying"
+    );
   }
-  if (!allowDownload)
-    throw new Error("Managed core verified binary is missing; save a proxy to install it");
+}
+
+/** Publish a complete, verified version atomically, never an archive's paths. */
+async function downloadManagedVersion(
+  directory: string,
+  release: ReturnType<typeof officialRelease>
+): Promise<string> {
   const bytes = await download(release.url);
   if (createHash("sha256").update(bytes).digest("hex") !== release.sha256)
     throw new Error("Official core archive SHA-256 mismatch");
   const executable = await archiveExecutable(bytes, release.asset, release.executable);
-  const temporary = await fs.mkdtemp(path.join(root, "binaries", core, ".install-"));
+  const temporary = await fs.mkdtemp(path.join(path.dirname(directory), ".install-"));
   try {
     await fs.writeFile(path.join(temporary, release.executable), executable, {
       mode: 0o700,
@@ -178,8 +193,24 @@ export async function installManagedCore(
       { encoding: "utf8", mode: 0o600, flag: "wx" }
     );
     await fs.rename(temporary, directory);
-    return binaryPath;
+    return path.join(directory, release.executable);
   } finally {
     await fs.rm(temporary, { recursive: true, force: true });
   }
+}
+
+export async function installManagedCore(
+  core: ManagedCore,
+  root: string,
+  allowDownload = true
+): Promise<string> {
+  const release = officialRelease(core);
+  await regularPrivateDirectory(path.join(root, "binaries"));
+  await regularPrivateDirectory(path.join(root, "binaries", core));
+  const directory = path.join(root, "binaries", core, release.version);
+  const existing = await verifiedInstalledBinary(directory, release);
+  if (existing) return existing;
+  if (!allowDownload)
+    throw new Error("Managed core verified binary is missing; save a proxy to install it");
+  return downloadManagedVersion(directory, release);
 }

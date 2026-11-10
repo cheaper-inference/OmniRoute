@@ -21,6 +21,7 @@ import { resolveSpawnArgs as singboxSpawnArgs, SINGBOX_DEFAULT_PORT } from "./in
 import { getOrCreateApiKey } from "./apiKey";
 import { scheduleServiceModelSync, stopServiceModelSync } from "./modelSync";
 import type { ServiceStatus } from "./types";
+import { restoreManagedProxyCoresSafely } from "./managedProxy/restore";
 import { getServiceProviderPlugin } from "./providerPlugins/registry";
 
 // 9router's port/health/lifecycle config is sourced from the plugin registry (#7333
@@ -187,8 +188,7 @@ function buildSpawnArgsFactory(
 }
 
 export async function bootstrapEmbeddedServices(): Promise<void> {
-  const { restoreManagedProxyCores } = await import("./managedProxy/manager");
-  await restoreManagedProxyCores();
+  await restoreManagedProxyCoresSafely();
   for (const cfg of SERVICES) {
     if (getSupervisor(cfg.tool)) continue;
 

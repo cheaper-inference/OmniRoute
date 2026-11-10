@@ -64,7 +64,9 @@ Managed files live under `DATA_DIR/services/managed-proxy/`, separate from TPROX
 owned process per selected core, up to 100 listeners. No autostart or global routing default is
 changed. Successful Save remembers activation for this managed core only; application startup
 restores enabled saved cores using the already verified binary, never a boot-time download.
-Explicit Stop clears that activation flag. A missing or damaged binary requires re-saving a source.
+Explicit Stop clears that activation flag. A missing version can be installed by re-saving a source.
+An existing damaged version fails verification before any download: remove only that managed version
+directory and re-save, preserving sources and other versions.
 Registry deletion removes the source and listener locally; ordinary endpoint edits are rejected for
 managed rows so the saved source cannot silently drift from its routed listener.
 

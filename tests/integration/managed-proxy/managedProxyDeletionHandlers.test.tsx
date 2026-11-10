@@ -36,6 +36,7 @@ vi.mock("@/lib/db/proxies", () => ({
             ? JSON.stringify({ managedProxyId: id, managedCore: "singbox" })
             : null,
         },
+  getProxyWhereUsed: async () => ({ count: 0 }),
   deleteProxyById: async (id: string, { force }: { force: boolean }) => {
     if (id === "missing") return false;
     if (id === "managed-commit-failure") throw new Error("synthetic registry failure");
@@ -128,7 +129,7 @@ test("destination rejects absent/spoofed origin, locality and method pairs befor
 test("login-off retains ordinary deletion but managed deletion still requires credentials", async () => {
   state.login = false;
   expect((await endpoint.DELETE(request({ id: "ordinary" }))).status).toBe(200);
-  expect((await endpoint.DELETE(request())).status).toBe(500);
+  expect((await endpoint.DELETE(request())).status).toBe(401);
   expect(state.removed).toEqual([]);
   expect(state.committed).toEqual([{ id: "ordinary", force: true }]);
   state.login = true;
@@ -188,7 +189,7 @@ test("generic remote deletion keeps ordinary CRUD but cannot invoke the managed 
   const ordinary = new Request(`http://localhost${SINGLE}?id=ordinary`, { method: "DELETE" });
   expect((await handleProxyDelete(ordinary)).status).toBe(200);
   const managed = new Request(`http://localhost${SINGLE}?id=managed-first`, { method: "DELETE" });
-  expect((await handleProxyDelete(managed)).status).toBe(500);
+  expect((await handleProxyDelete(managed)).status).toBe(401);
   const batch = await batchDelete(
     new Request(`http://localhost${BATCH}`, {
       method: "POST",
