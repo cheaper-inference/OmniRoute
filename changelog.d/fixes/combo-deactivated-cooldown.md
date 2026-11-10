@@ -1,0 +1,1 @@
+- Keep deactivated combo accounts out of temporary cooldown recovery so they do not produce misleading wait hints or shorten another account's Retry-After.
