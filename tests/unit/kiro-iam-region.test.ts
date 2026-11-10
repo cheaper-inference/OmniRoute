@@ -16,7 +16,10 @@ import { resolveKiroRegion, kiroRuntimeHost } from "../../open-sse/executors/kir
 import { kiro } from "@/lib/oauth/providers/kiro";
 
 test("resolveKiroRegion prefers the stored region", () => {
-  assert.equal(resolveKiroRegion({ providerSpecificData: { region: "eu-central-1" } }), "eu-central-1");
+  assert.equal(
+    resolveKiroRegion({ providerSpecificData: { region: "eu-central-1" } }),
+    "eu-central-1"
+  );
 });
 
 test("resolveKiroRegion falls back to the region in the profileArn", () => {
@@ -43,8 +46,8 @@ test("resolveKiroRegion normalizes case and whitespace", () => {
   );
 });
 
-test("kiroRuntimeHost keeps the legacy host for us-east-1 and uses regional Q hosts otherwise", () => {
-  assert.equal(kiroRuntimeHost("us-east-1"), "https://codewhisperer.us-east-1.amazonaws.com");
+test("kiroRuntimeHost uses the regional Q host for every region, us-east-1 included (#19607)", () => {
+  assert.equal(kiroRuntimeHost("us-east-1"), "https://q.us-east-1.amazonaws.com");
   assert.equal(kiroRuntimeHost("eu-central-1"), "https://q.eu-central-1.amazonaws.com");
   assert.equal(kiroRuntimeHost("ap-southeast-2"), "https://q.ap-southeast-2.amazonaws.com");
 });

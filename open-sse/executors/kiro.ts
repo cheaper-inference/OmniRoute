@@ -325,9 +325,12 @@ const KIRO_ENDPOINT_FALLBACK_STATUSES = new Set([401, 403, 404]);
  * Verified live (2026-09-10): the identical access token + request body gets
  *   400 {"message":"profileArn is required for this request.","reason":null}
  * from `runtime.us-east-1.kiro.dev`, and a normal streaming
- * `generateAssistantResponse` from `codewhisperer.us-east-1.amazonaws.com` —
+ * `generateAssistantResponse` from the regional Amazon Q host —
  * confirmed both against a live Builder ID kiro-cli session and against the
  * production accounts that were surfacing this 400 to end users.
+ * (2026-11-10, #19607: the fallback host is `q.us-east-1.amazonaws.com`;
+ * `codewhisperer.us-east-1.amazonaws.com` was retired with Kiro's client-version
+ * enforcement, kirodotdev/Kiro#11335.)
  *
  * A plain 400 is deliberately excluded from KIRO_ENDPOINT_FALLBACK_STATUSES
  * above (a malformed request body cannot be fixed by resending it to another
@@ -458,9 +461,10 @@ export class KiroExecutor extends BaseExecutor {
       typeof credentials.providerSpecificData?.authMethod === "string"
         ? credentials.providerSpecificData.authMethod
         : undefined;
-    // Long-lived API keys only work on the regional Amazon Q host (q.<region>), including
-    // us-east-1 where codewhisperer.us-east-1 rejects API-key payloads with
-    // REQUEST_BODY_INVALID. One persisted region, no surface rotation.
+    // All auth methods ride the regional Amazon Q host (q.<region>) — us-east-1 included
+    // since the legacy codewhisperer host was retired (#19607). API keys additionally
+    // normalize their region through the Q profile-region allowlist. One persisted
+    // region, no surface rotation.
     const runtimeHost =
       authMethod === "api_key" ? kiroApiKeyRuntimeHost(region) : kiroRuntimeHost(region);
     const regionalUrl = `${runtimeHost}/generateAssistantResponse`;

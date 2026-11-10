@@ -79,7 +79,9 @@ test("KiroExecutor.execute falls back to the regional CodeWhisperer host when th
 
     assert.equal(calledUrls.length, 2);
     assert.match(calledUrls[0], /^https:\/\/runtime\.us-east-1\.kiro\.dev/);
-    assert.match(calledUrls[1], /^https:\/\/codewhisperer\.us-east-1\.amazonaws\.com/);
+    // Regional Amazon Q host — the legacy codewhisperer.us-east-1 fallback was
+    // retired with Kiro's client-version gate (#19607, kirodotdev/Kiro#11335).
+    assert.match(calledUrls[1], /^https:\/\/q\.us-east-1\.amazonaws\.com/);
     assert.equal((result.response as Response).status, 200);
   } finally {
     globalThis.fetch = originalFetch;

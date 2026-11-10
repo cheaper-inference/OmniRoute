@@ -41,8 +41,8 @@ for (const providerId of ["kiro", "amazon-q"]) {
         },
       } as never);
       assert.ok(
-        calledUrls.some((u) => /codewhisperer\.us-east-1\.amazonaws\.com/.test(u)),
-        `CodeWhisperer host never tried; calls=${JSON.stringify(calledUrls)}`
+        calledUrls.some((u) => /q\.us-east-1\.amazonaws\.com/.test(u)),
+        `regional Amazon Q host never tried; calls=${JSON.stringify(calledUrls)}`
       );
       assert.equal(result.response.status, 200);
     } finally {

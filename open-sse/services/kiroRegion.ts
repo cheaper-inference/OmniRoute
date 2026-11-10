@@ -56,15 +56,19 @@ export function safeAwsRegion(region: unknown, fallback = "us-east-1"): string {
 export const KIRO_PROFILE_REGIONS = ["us-east-1", "eu-central-1"] as const;
 
 /**
- * CodeWhisperer / Amazon Q runtime host for a region. us-east-1 keeps the legacy
- * codewhisperer.us-east-1 host (AWS Builder ID home region); other regions use the regional
- * Amazon Q endpoint `q.{region}.amazonaws.com` — codewhisperer.{region}.amazonaws.com does not
- * resolve for non-us-east-1 regions.
+ * CodeWhisperer / Amazon Q runtime host for a region. All regions — us-east-1
+ * included — use the regional Amazon Q endpoint `q.{region}.amazonaws.com`.
+ *
+ * The legacy `codewhisperer.us-east-1.amazonaws.com` special case was retired with
+ * the 2026-11-09 client-version enforcement (kirodotdev/Kiro#11335, #19607): the
+ * current kiro-cli only embeds `runtime.*.kiro.dev` and `q.<region>.amazonaws.com`
+ * and never talks to the codewhisperer host, which the gate now rejects with
+ * 403 "This version of Kiro is no longer supported". SSO/social/IdC tokens
+ * authenticate on the regional q.* host exactly like API keys already did
+ * (see `kiroApiKeyRuntimeHost`).
  */
 export function kiroRuntimeHost(region: string): string {
-  return region === "us-east-1"
-    ? "https://codewhisperer.us-east-1.amazonaws.com"
-    : `https://q.${region}.amazonaws.com`;
+  return `https://q.${region}.amazonaws.com`;
 }
 
 /** Region selector value that asks API-key import to detect the key's Amazon Q region. */

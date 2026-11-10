@@ -99,14 +99,12 @@ test("API-key connection does not fail over to another surface on 403", async ()
   assert.deepEqual(urls, ["https://q.us-east-1.amazonaws.com/generateAssistantResponse"]);
 });
 
-test("IdC connection in us-east-1 still uses codewhisperer.us-east-1 (regression guard)", async () => {
+test("IdC connection in us-east-1 uses the regional q.us-east-1 host (regression guard, #19607)", async () => {
   const urls = await captureExecuteUrls({
     accessToken: "idc-token",
     providerSpecificData: { authMethod: "idc", region: "us-east-1" },
   });
-  assert.deepEqual(urls, [
-    "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse",
-  ]);
+  assert.deepEqual(urls, ["https://q.us-east-1.amazonaws.com/generateAssistantResponse"]);
 });
 
 test("social connection in us-east-1 still tries the Kiro IDE gateway first (regression guard)", async () => {

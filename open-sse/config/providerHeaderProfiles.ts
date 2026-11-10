@@ -443,8 +443,14 @@ export function resetCodeBuddyCnVersionCache(): void {
   codeBuddyVersionInFlight = null;
 }
 
-export const KIRO_SDK_USER_AGENT = "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0";
-export const KIRO_AMZ_USER_AGENT = "aws-sdk-js/3.0.0 kiro-ide/1.0.0";
+// Kiro enforces a client-version floor since 2026-11-09 (kirodotdev/Kiro#11335):
+// clients older than CLI 1.28.2 / IDE 0.11.133 get
+// 403 "This version of Kiro is no longer supported" on every inference call
+// (#19607). `kiro-ide/1.0.0` was far below the floor; identify as a current
+// kiro-cli release instead. Keep the version comfortably above the next floor
+// too (CLI 2.5.0 / IDE 0.12.291, effective 2027-01-15 — kirodotdev/Kiro#11966).
+export const KIRO_SDK_USER_AGENT = "AWS-SDK-JS/3.0.0 kiro-cli/3.1.0";
+export const KIRO_AMZ_USER_AGENT = "aws-sdk-js/3.0.0 kiro-cli/3.1.0";
 export const KIRO_STREAMING_TARGET =
   "AmazonCodeWhispererStreamingService.GenerateAssistantResponse";
 
