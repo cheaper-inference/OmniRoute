@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API chomhpháirteanna an deais: cuibheoirí thar `packages/ui-kit` — féach `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ainmneacha deilbhíní a úsáideann na scáileáin → comhpháirteanna Lucide (`<Icon>`)                 |
-| `constants/providers.ts`         | **385 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                       |
+| `constants/providers.ts`         | **386 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                       |
 | `constants/cliTools.ts`          | Clárlann uirlisí CLI seachtracha                                                                              |
 | `constants/routingStrategies.ts` | **20 straitéis ródaithe** le tosaíochtaí                                                                      |
 | `constants/publicApiRoutes.ts`   | Bealaí a éilíonn fíordheimhniú Bearer (seachas fíordheimhniú bainistíochta)                                   |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Comhtháthuithe CLI seachtracha + CLI inmheánach OmniRoute                           |
 | `I18N.md`                   | Ailtireacht i18n, teanga a chur leis, 67 locale                                     |
 | `UNINSTALL.md`              | Céimeanna dísuiteála glana                                                          |
-| `PROVIDER_REFERENCE.md`     | Catalóg **uathghinte** de 385 soláthraí (athghin: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Catalóg **uathghinte** de 386 soláthraí (athghin: `npm run gen:provider-reference`) |
 
 ### Anailís dhomhain ar fhochórais
 

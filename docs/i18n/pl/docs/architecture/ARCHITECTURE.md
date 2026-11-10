@@ -15,7 +15,7 @@ Udostępnia pojedynczy punkt końcowy zgodny z OpenAI (`/v1/*`) i kieruje ruch d
 
 Najważniejsze możliwości:
 
-- Warstwa API zgodna z OpenAI dla narzędzi CLI i innych narzędzi (385 dostawców, 159 modułów wykonawczych)
+- Warstwa API zgodna z OpenAI dla narzędzi CLI i innych narzędzi (386 dostawców, 159 modułów wykonawczych)
 - Translacja żądań i odpowiedzi między formatami dostawców
 - Mechanizm awaryjny dla kombinacji modeli (sekwencja wielu modeli)
 - Ustrukturyzowane kroki kombinacji (`provider + model + connection`) z ustalaniem kolejności w czasie wykonywania przez `compositeTiers`

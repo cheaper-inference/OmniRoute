@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်",
     "fallbackSummary": "စတင်သော request များ၏ {rate}% သည် fallback သို့ ပြန်လည်သွားခဲ့ပြီး တစ်ခုလျှင် ပျမ်းမျှ ~{skips} target များကို ကျော်လွှားခဲ့သည်",
     "reorderAll": "အားလုံးကို ပြန်စီပါ။",
-    "reorderAllDescription": "{count} combo အားလုံးကို ပြန်စီပါ။ ဆွဲယူလက်ကိုင်များကို ဖွင့်ထားသည်။"
+    "reorderAllDescription": "{count} combo အားလုံးကို ပြန်စီပါ။ ဆွဲယူလက်ကိုင်များကို ဖွင့်ထားသည်။",
+    "liveStatStrategy": "နည်းဗျူဟာ",
+    "liveStatTargets": "ပစ်မှတ်များ",
+    "liveStatFailed": "မအောင်မြင်သော ကြိုးပမ်းမှုများ",
+    "liveStatOutcome": "ရလဒ်"
   },
   "common": {
     "save": "သိမ်းမည်",

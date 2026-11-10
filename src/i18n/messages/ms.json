@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Cipta kombo statik dari {name}",
     "fallbackSummary": "{rate}% permintaan kembali ke cadangan, purata ~{skips} sasaran dilepaskan setiap satu",
     "reorderAll": "Susun semula semua",
-    "reorderAllDescription": "Menyusun semula semua kombo {count}. Pemegang seret didayakan."
+    "reorderAllDescription": "Menyusun semula semua kombo {count}. Pemegang seret didayakan.",
+    "liveStatStrategy": "Strategi",
+    "liveStatTargets": "Sasaran",
+    "liveStatFailed": "Percubaan gagal",
+    "liveStatOutcome": "Keputusan"
   },
   "common": {
     "save": "Jimat",

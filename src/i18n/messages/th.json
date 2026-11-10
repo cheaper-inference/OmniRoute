@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}",
     "fallbackSummary": "คำขอ {rate}% ย้ายไปใช้สำรอง แต่ละครั้งข้ามเป้าหมายประมาณ {skips} รายการ",
     "reorderAll": "เรียงลำดับใหม่ทั้งหมด",
-    "reorderAllDescription": "การเรียงลำดับคอมโบ {count} ทั้งหมดใหม่ เปิดใช้งานตัวจัดการการลากแล้ว"
+    "reorderAllDescription": "การเรียงลำดับคอมโบ {count} ทั้งหมดใหม่ เปิดใช้งานตัวจัดการการลากแล้ว",
+    "liveStatStrategy": "กลยุทธ์",
+    "liveStatTargets": "เป้าหมาย",
+    "liveStatFailed": "ความพยายามที่ล้มเหลว",
+    "liveStatOutcome": "ผลลัพธ์"
   },
   "common": {
     "save": "บันทึก",

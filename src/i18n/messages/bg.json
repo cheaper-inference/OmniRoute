@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Създайте статично комбо от {name}",
     "fallbackSummary": "{rate}% от заявките използваха резервна линия, всяка изпусна средно ~{skips} цели",
     "reorderAll": "Пренаредете всички",
-    "reorderAllDescription": "Пренареждане на всички {count} комбинации. Дръжките за плъзгане са активирани."
+    "reorderAllDescription": "Пренареждане на всички {count} комбинации. Дръжките за плъзгане са активирани.",
+    "liveStatStrategy": "Стратегия",
+    "liveStatTargets": "Цели",
+    "liveStatFailed": "Неуспешни опити",
+    "liveStatOutcome": "Резултат"
   },
   "common": {
     "save": "Запазване",

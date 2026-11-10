@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기",
     "fallbackSummary": "요청의 {rate}%가 폴백으로 전환되어 요청당 평균 약 {skips}개 타겟이 건너뛰었습니다",
     "reorderAll": "모두 재정렬",
-    "reorderAllDescription": "모든 {count} 콤보를 재정렬합니다. 드래그 핸들이 활성화되었습니다."
+    "reorderAllDescription": "모든 {count} 콤보를 재정렬합니다. 드래그 핸들이 활성화되었습니다.",
+    "liveStatStrategy": "전략",
+    "liveStatTargets": "대상",
+    "liveStatFailed": "실패한 시도",
+    "liveStatOutcome": "결과"
   },
   "common": {
     "save": "저장",

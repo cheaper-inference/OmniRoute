@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}",
     "fallbackSummary": "{rate}% zahteva je koristilo zamenski metod, ~{skips} meta preskočeno za svaki",
     "reorderAll": "Промени све",
-    "reorderAllDescription": "Промена редоследа свих {count} комбинација. Ручице за повлачење су омогућене."
+    "reorderAllDescription": "Промена редоследа свих {count} комбинација. Ручице за повлачење су омогућене.",
+    "liveStatStrategy": "Стратегија",
+    "liveStatTargets": "Циљеви",
+    "liveStatFailed": "Неуспели покушаји",
+    "liveStatOutcome": "Исход"
   },
   "common": {
     "save": "Сачувај",

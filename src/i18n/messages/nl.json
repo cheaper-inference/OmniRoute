@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Maak een statische combinatie van {name}",
     "fallbackSummary": "{rate}% van de verzoeken viel terug, gemiddeld ~{skips} doelen per verzoek overslagen",
     "reorderAll": "Alles opnieuw ordenen",
-    "reorderAllDescription": "Alle {count} combo's opnieuw ordenen. Sleepgrepen zijn ingeschakeld."
+    "reorderAllDescription": "Alle {count} combo's opnieuw ordenen. Sleepgrepen zijn ingeschakeld.",
+    "liveStatStrategy": "Strategie",
+    "liveStatTargets": "Doelen",
+    "liveStatFailed": "Mislukte pogingen",
+    "liveStatOutcome": "Uitkomst"
   },
   "common": {
     "save": "Opslaan",

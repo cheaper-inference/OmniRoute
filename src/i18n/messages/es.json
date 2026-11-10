@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Crear una combinación estática de {name}",
     "fallbackSummary": "{rate}% de las solicitudes usaron el respaldo; cada una omitió en promedio ~{skips} objetivos",
     "reorderAll": "Reordenar todo",
-    "reorderAllDescription": "Reordenando todos los combos {count}. Los controladores de arrastre están habilitados."
+    "reorderAllDescription": "Reordenando todos los combos {count}. Los controladores de arrastre están habilitados.",
+    "liveStatStrategy": "Estrategia",
+    "liveStatTargets": "Destinos",
+    "liveStatFailed": "Intentos fallidos",
+    "liveStatOutcome": "Resultado"
   },
   "common": {
     "save": "Guardar",

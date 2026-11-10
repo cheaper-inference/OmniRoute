@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}",
     "fallbackSummary": "{rate}% užklausų naudojo atsarginį variantą, vidutiniškai praleido apie {skips} tikslų per užklausą",
     "reorderAll": "Pertvarkyti viską",
-    "reorderAllDescription": "Visų {count} kombinacijų pertvarkymas. Vilkimo rankenos įjungtos."
+    "reorderAllDescription": "Visų {count} kombinacijų pertvarkymas. Vilkimo rankenos įjungtos.",
+    "liveStatStrategy": "Strategija",
+    "liveStatTargets": "Tikslai",
+    "liveStatFailed": "Nesėkmingi bandymai",
+    "liveStatOutcome": "Rezultatas"
   },
   "common": {
     "save": "Išsaugoti",

@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}",
     "fallbackSummary": "{rate}% av forespurningene gikk til fallback, i snitt ~{skips} mål hoppet over hver",
     "reorderAll": "Omorganiser alle",
-    "reorderAllDescription": "Omorganiserer alle {count} kombinasjoner. Drahåndtak er aktivert."
+    "reorderAllDescription": "Omorganiserer alle {count} kombinasjoner. Drahåndtak er aktivert.",
+    "liveStatStrategy": "Strategi",
+    "liveStatTargets": "Mål",
+    "liveStatFailed": "Mislykkede forsøk",
+    "liveStatOutcome": "Utfall"
   },
   "common": {
     "save": "Lagre",

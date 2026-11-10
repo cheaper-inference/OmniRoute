@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
     "fallbackSummary": "{rate}% das requisições usaram fallback, ~{skips} alvos ignorados por cada uma",
     "reorderAll": "Reordenar tudo",
-    "reorderAllDescription": "Reordenando todos os combos {count}. As pegas de arrastar estão ativadas."
+    "reorderAllDescription": "Reordenando todos os combos {count}. As pegas de arrastar estão ativadas.",
+    "liveStatStrategy": "Estratégia",
+    "liveStatTargets": "Destinos",
+    "liveStatFailed": "Tentativas falhadas",
+    "liveStatOutcome": "Resultado"
   },
   "common": {
     "save": "Salvar",

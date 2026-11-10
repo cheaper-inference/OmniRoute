@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር",
     "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን",
     "reorderAll": "ሁሉንም እንደገና ይዘዙ",
-    "reorderAllDescription": "ሁሉንም {count} ጥንብሮችን እንደገና በማዘዝ ላይ። የመጎተት መያዣዎች ነቅተዋል።"
+    "reorderAllDescription": "ሁሉንም {count} ጥንብሮችን እንደገና በማዘዝ ላይ። የመጎተት መያዣዎች ነቅተዋል።",
+    "liveStatStrategy": "ስትራቴጂ",
+    "liveStatTargets": "ኢላማዎች",
+    "liveStatFailed": "ያልተሳኩ ሙከራዎች",
+    "liveStatOutcome": "ውጤት"
   },
   "common": {
     "save": "አስቀምጥ",

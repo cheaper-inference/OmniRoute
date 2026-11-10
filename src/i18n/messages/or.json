@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ",
     "fallbackSummary": "{rate}% ଆବେଦନ ଫଲବେକ୍ ହୋଇଛି, ପ୍ରତି ଆବେଦନରେ ପ୍ରାୟ ~{skips} ଟାର୍ଗେଟ୍ ଚାଲି ଯାଇଛି",
     "reorderAll": "ସମସ୍ତ ରେକର୍ଡ କରନ୍ତୁ \\|",
-    "reorderAllDescription": "ସମସ୍ତ {count} କମ୍ବୋକୁ ରେକର୍ଡ କରିବା \\| ଡ୍ରାଗ୍ ହ୍ୟାଣ୍ଡେଲଗୁଡିକ ସକ୍ଷମ ହୋଇଛି \\|"
+    "reorderAllDescription": "ସମସ୍ତ {count} କମ୍ବୋକୁ ରେକର୍ଡ କରିବା \\| ଡ୍ରାଗ୍ ହ୍ୟାଣ୍ଡେଲଗୁଡିକ ସକ୍ଷମ ହୋଇଛି \\|",
+    "liveStatStrategy": "ରଣନୀତି",
+    "liveStatTargets": "ଲକ୍ଷ୍ୟ",
+    "liveStatFailed": "ବିଫଳ ପ୍ରୟାସ",
+    "liveStatOutcome": "ପରିଣାମ"
   },
   "common": {
     "save": "ସଞ୍ଚୟ କରନ୍ତୁ",

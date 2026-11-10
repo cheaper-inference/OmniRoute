@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}",
     "fallbackSummary": "{rate}% zahtjeva je koristilo alternativni put, svaki je prosječno preskočio ~{skips} meta",
     "reorderAll": "Ponovo naruči sve",
-    "reorderAllDescription": "Promjena redoslijeda svih {count} kombinacija. Ručice za povlačenje su omogućene."
+    "reorderAllDescription": "Promjena redoslijeda svih {count} kombinacija. Ručice za povlačenje su omogućene.",
+    "liveStatStrategy": "Strategija",
+    "liveStatTargets": "Ciljevi",
+    "liveStatFailed": "Neuspjeli pokušaji",
+    "liveStatOutcome": "Ishod"
   },
   "common": {
     "save": "Sačuvaj",

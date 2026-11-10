@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}",
     "fallbackSummary": "{rate}% żądań użyło awaryjnego przełącznika, ~{skips} celów pominiętych przy każdym",
     "reorderAll": "Zmień kolejność wszystkich",
-    "reorderAllDescription": "Zmiana kolejności wszystkich kombinacji {count}. Uchwyty przeciągania są włączone."
+    "reorderAllDescription": "Zmiana kolejności wszystkich kombinacji {count}. Uchwyty przeciągania są włączone.",
+    "liveStatStrategy": "Strategia",
+    "liveStatTargets": "Cele",
+    "liveStatFailed": "Nieudane próby",
+    "liveStatOutcome": "Wynik"
   },
   "common": {
     "save": "Zapisz",

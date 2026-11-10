@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name}-dan statik kombo yarat",
     "fallbackSummary": "Sorğuların {rate}-i ehtiyat rejimindən istifadə etdi, hər sorğuda təqribən {skips} obyekti atlandı",
     "reorderAll": "Hamısını yenidən sıralayın",
-    "reorderAllDescription": "Bütün {count} kombinləri yenidən sıralanır. Sürük tutacaqları aktivləşdirilib."
+    "reorderAllDescription": "Bütün {count} kombinləri yenidən sıralanır. Sürük tutacaqları aktivləşdirilib.",
+    "liveStatStrategy": "Strategiya",
+    "liveStatTargets": "Hədəflər",
+    "liveStatFailed": "Uğursuz cəhdlər",
+    "liveStatOutcome": "Nəticə"
   },
   "common": {
     "save": "Yadda saxla",

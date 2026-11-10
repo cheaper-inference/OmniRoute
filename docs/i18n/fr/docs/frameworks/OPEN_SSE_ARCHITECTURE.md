@@ -488,7 +488,7 @@ Celui-ci gère :
 
 | Déposer                             | But                                                              |
 | ----------------------------------- | ---------------------------------------------------------------- |
-| `providerRegistry.ts`               | Registre de modèles de chat sur le catalogue de 385 fournisseurs |
+| `providerRegistry.ts`               | Registre de modèles de chat sur le catalogue de 386 fournisseurs |
 | `providerModels.ts`                 | Alias de modèle, mappage de format                               |
 | `constants.ts`                      | Délais d'attente, limites, codes d'état                          |
 | `defaultThinkingSignature.ts`       | Signature de réflexion Claude par défaut                         |

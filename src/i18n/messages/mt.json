@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}",
     "fallbackSummary": "{rate}% tal-bitiet wasslu għal fallback, ċaże mhux medja ~{skips} objettivi salta",
     "reorderAll": "Ordna mill-ġdid kollha",
-    "reorderAllDescription": "Reordering kollha {count} combos. Il-manki tat-tkaxkir huma attivati."
+    "reorderAllDescription": "Reordering kollha {count} combos. Il-manki tat-tkaxkir huma attivati.",
+    "liveStatStrategy": "Strateġija",
+    "liveStatTargets": "Miri",
+    "liveStatFailed": "Tentattivi falluti",
+    "liveStatOutcome": "Riżultat"
   },
   "common": {
     "save": "Issejvja",

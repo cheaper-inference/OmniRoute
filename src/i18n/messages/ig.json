@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Mepụta ngwakọta anaghị agbanwe agbanwe site na {name}",
     "fallbackSummary": "{rate}% nke akaụnyụ jiri ọnụọgụgụ, otu ụzọ dịka ~{skips} ihe ebe a chọrọ",
     "reorderAll": "Dezie ha niile",
-    "reorderAllDescription": "Na-atụgharị combos {count} niile. Agbanyere aka ịdọrọ."
+    "reorderAllDescription": "Na-atụgharị combos {count} niile. Agbanyere aka ịdọrọ.",
+    "liveStatStrategy": "Atụmatụ",
+    "liveStatTargets": "Ebumnuche",
+    "liveStatFailed": "Mgbalị dara ada",
+    "liveStatOutcome": "Nsonaazụ"
   },
   "common": {
     "save": "Chekwa",

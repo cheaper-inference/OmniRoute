@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}",
     "fallbackSummary": "{rate}% av begärandedan använde en reserv, ~{skips} mål hopplat över per begärande",
     "reorderAll": "Ordna om alla",
-    "reorderAllDescription": "Ordnar om alla {count} kombinationer. Drahandtag är aktiverade."
+    "reorderAllDescription": "Ordnar om alla {count} kombinationer. Drahandtag är aktiverade.",
+    "liveStatStrategy": "Strategi",
+    "liveStatTargets": "Mål",
+    "liveStatFailed": "Misslyckade försök",
+    "liveStatOutcome": "Utfall"
   },
   "common": {
     "save": "Spara",

@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur",
     "fallbackSummary": "İsteklerin %{rate}'i yedek hedeflere geçti, her seferinde ~{skips} hedef atlandı",
     "reorderAll": "Tümünü yeniden sırala",
-    "reorderAllDescription": "Tüm {count} kombinasyonları yeniden sıralanıyor. Sürükleme tutamaçları etkinleştirildi."
+    "reorderAllDescription": "Tüm {count} kombinasyonları yeniden sıralanıyor. Sürükleme tutamaçları etkinleştirildi.",
+    "liveStatStrategy": "Strateji",
+    "liveStatTargets": "Hedefler",
+    "liveStatFailed": "Başarısız denemeler",
+    "liveStatOutcome": "Sonuç"
   },
   "common": {
     "save": "Kaydet",

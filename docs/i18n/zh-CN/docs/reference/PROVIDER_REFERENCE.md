@@ -4,9 +4,9 @@
 
 ---
 
-> **自动生成**来自`src/shared/constants/providers.ts` —不手工编辑。再生方式： `npm run gen:provider-reference`**最后生成：** 2026-11-09
+> **自动生成**来自`src/shared/constants/providers.ts` —不手工编辑。再生方式： `npm run gen:provider-reference`**最后生成：** 2026-11-10
 
-提供者总数：**第385章**。请参阅下面的类别细分。
+提供者总数：**第386章**。请参阅下面的类别细分。
 
 ## 类别
 
@@ -45,7 +45,7 @@
 | `veoaifree-web`         | `veo-free` | Veo AI Free               | 免认证、视频 | [link](https://veoaifree.com)                           | 无需认证。每个 IP 限流为 6 次请求/小时。                                                                                                                                           | —        |
 | `zcode`                 | `zc`       | ZCode (GLM Coding Plan)   | 免认证       | [link](https://zcode.z.ai)                              | OmniRoute 不存储 API 密钥。本地 ZCode app-server 使用现有的 builtin:zai-coding-plan 登录。                                                                                         | —        |
 
-## OAuth提供者 (29)
+## OAuth提供者 (30)
 
 | ID               | 别名          | 名称                      | 标签  | 网站                                                                      | 备注                                                                                                                                                                                                                                                                                                                                                           |
 | ---------------- | ------------- | ------------------------- | ----- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -73,6 +73,7 @@
 | `muse-code`      | `mc`          | Muse Code (Meta)          | OAuth | [链接](https://ai.developer.meta.com/docs/muse-code/auth)                 | 使用 Muse Code 设备流程（与 `muse login` / CLIProxyAPI `-meta-login` 相同）登录以使用 Muse 订阅，或粘贴 META_API_KEY。设备登录会保留长期有效的 dca 令牌并生成推理密钥；遇到 401 时会重新生成该密钥。传输格式为 OpenAI Responses（POST /responses）。                                                                                                           |
 | `openference`    | `of`          | Openference               | OAuth | [链接](https://openference.com)                                           | 使用你的 Openference 账户登录，通过 api.openference.com 路由请求。包括对 Qwen3.8 27b 和 Llama 3.2 3B 的免费套餐访问权限——当前套餐条款请参阅 openference.com/pricing。                                                                                                                                                                                          |
 | `qoder`          | `if`          | Qoder                     | OAuth | —                                                                         | PAT (pt-)：需要本地 qodercli；仅支持纯聊天，不支持调用方工具，采用缓冲式流传输，且聊天限制为 45 秒。HTTP 密钥使用 DashScope；浏览器 OAuth 需要管理员配置。                                                                                                                                                                                                     |
+| `renderhour`     | —             | RenderHour                | OAuth | [link](https://renderhour.com)                                            | 登录 RenderHour 账户，可将订阅额度用于图像（Nano Banana Pro, GPT Image 2, Seedream）、视频（Seedance, Kling, Veo）和语音；或粘贴从 renderhour.com/developers 获取的 rh_… API 密钥，使用 API 的美元余额支付。模型标识格式为 renderhour/<model>。                                                                                                                |
 | `trae`           | `tr`          | Trae                      | OAuth | [链接](https://trae.ai)                                                   | Trae 是字节跳动推出的 AI 原生 IDE（SOLO 远程代理）。在弹出窗口中通过 trae.ai 授权，或登录 solo.trae.ai 并粘贴 Cloud-IDE-JWT（以 'Authorization: Cloud-IDE-JWT <token>' 形式发送，有效期约 14 天）作为访问令牌；web_id/biz_user_id/user_unique_id/scope/tenant/region 会通过 providerSpecificData 传递。粘贴的令牌无法进行无头刷新——过期后需重新粘贴。          |
 | `workbuddy`      | `wb`          | WorkBuddy                 | OAuth | [链接](https://www.workbuddy.ai)                                          | 腾讯 WorkBuddy（www.workbuddy.ai）。在弹出窗口中授权 CLI 设备流程；随后 OmniRoute 会轮询令牌并附加必需的 X-Product: SaaS 请求头。模型列表由经过身份验证的目录提供，因此会实时发现，而不会在此处列出。WorkBuddy 仅接受流式请求，OmniRoute 会将其累积并转换回 JSON 响应，以供非流式调用方使用。                                                                  |
 | `xai-oauth`      | `xao`         | xAI OAuth (Grok)          | OAuth | [链接](https://x.ai)                                                      | 使用 xAI 登录，以使用 api.x.ai 模型，例如 Grok 4.5。这与 Grok Build JWT 会话不同；后者使用 cli-chat-proxy.grok.com 和 grok-build 模型别名。                                                                                                                                                                                                                    |

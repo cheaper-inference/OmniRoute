@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name}から静的コンボを作成",
     "fallbackSummary": "リクエストの{rate}%がフォールバックに切り替えられ、平均して約{skips}件のターゲットがスキップされました",
     "reorderAll": "すべて並べ替える",
-    "reorderAllDescription": "すべての{count}コンボを並べ替えます。ドラッグハンドルが有効になります。"
+    "reorderAllDescription": "すべての{count}コンボを並べ替えます。ドラッグハンドルが有効になります。",
+    "liveStatStrategy": "戦略",
+    "liveStatTargets": "ターゲット",
+    "liveStatFailed": "失敗した試行",
+    "liveStatOutcome": "結果"
   },
   "common": {
     "save": "保存",

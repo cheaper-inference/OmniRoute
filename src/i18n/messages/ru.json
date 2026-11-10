@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Создать статическое комбо из {name}",
     "fallbackSummary": "{rate}% запросов использовали аварийный режим, в каждом пропущено ~{skips} целей",
     "reorderAll": "Переупорядочить все",
-    "reorderAllDescription": "Изменение порядка всех комбинаций {count}. Маркеры перетаскивания включены."
+    "reorderAllDescription": "Изменение порядка всех комбинаций {count}. Маркеры перетаскивания включены.",
+    "liveStatStrategy": "Стратегия",
+    "liveStatTargets": "Цели",
+    "liveStatFailed": "Неудачные попытки",
+    "liveStatOutcome": "Итог"
   },
   "common": {
     "save": "Сохранить",

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `components/`                    | Töölaua komponentide API: `packages/ui-kit` adapterid — vt `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: kuvadel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                   |
-| `constants/providers.ts`         | **385 teenusepakkujat** koos Zodi valideerimisega (ainus tõeallikas)                            |
+| `constants/providers.ts`         | **386 teenusepakkujat** koos Zodi valideerimisega (ainus tõeallikas)                            |
 | `constants/cliTools.ts`          | Väliste CLI-tööriistade register                                                                |
 | `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** koos prioriteetidega                                             |
 | `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad Bearer-autentimist (haldusautentimise asemel)                           |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Välised CLI integratsioonid + sisemine OmniRoute CLI                                                            |
 | `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaati                                                                    |
 | `UNINSTALL.md`              | Puhta eemaldamise sammud                                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 385 teenusepakkuja kataloog (taasgenereerimine: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 386 teenusepakkuja kataloog (taasgenereerimine: `npm run gen:provider-reference`) |
 
 ### Alamsüsteemide põhjalikud ülevaated
 

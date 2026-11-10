@@ -15,7 +15,7 @@
 
 **Tạo bởi [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 385 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 385 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                     |            v3.8.50             | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------------- | :----------------------------: | :---------: | :-------------------: |
-| Nhà cung cấp 🌐                     |              352               |   **358**   |          385          |
+| Nhà cung cấp 🌐                     |              352               |   **358**   |          386          |
 | 🧠 Mô hình trò chuyện độc đáo IDs   |              1320              |  **1374**   |         1535          |
 | Cầu phương thức 🖼️                  | Tầm nhìn 🆕 Âm thanh + Video + |      ✓      |           ✓           |
 | Danh mục miễn phí 📡 Radar          |        Chọn tham gia 🆕        |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-385-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 385 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 385 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Tất cả **20** chiến lược — kết hợp tùy ý theo từng bước c�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Điều gì khiến OmniRoute khác biệt — ảnh chụp nhanh các tính năng theo thời điểm so với 9router, OpenRouter, CLIProxyAPI và LiteLLM trên 13 khả năng. OmniRoute: 385 nhà cung cấp, tích hợp sẵn hơn 150 gói miễn phí, 20 chiến lược định tuyến, tính năng nén token trên 12 engine, máy chủ MCP tích hợp sẵn với 110 công cụ, giao thức tác tử A2A, bộ nhớ bền vững, các biện pháp bảo vệ, tác tử đám mây, cơ chế ẩn dấu vân tay TLS, Desktop/Termux/PWA và 67 ngôn ngữ giao diện i18n. OmniRoute được cấp phép MIT và có thể tự lưu trữ. Các khả năng và số lượng của đối thủ có thể thay đổi; xem phương pháp luận được liên kết."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Điều gì khiến OmniRoute khác biệt — ảnh chụp nhanh các tính năng theo thời điểm so với 9router, OpenRouter, CLIProxyAPI và LiteLLM trên 13 khả năng. OmniRoute: 386 nhà cung cấp, tích hợp sẵn hơn 150 gói miễn phí, 20 chiến lược định tuyến, tính năng nén token trên 12 engine, máy chủ MCP tích hợp sẵn với 110 công cụ, giao thức tác tử A2A, bộ nhớ bền vững, các biện pháp bảo vệ, tác tử đám mây, cơ chế ẩn dấu vân tay TLS, Desktop/Termux/PWA và 67 ngôn ngữ giao diện i18n. OmniRoute được cấp phép MIT và có thể tự lưu trữ. Các khả năng và số lượng của đối thủ có thể thay đổi; xem phương pháp luận được liên kết."/>
 
 <sub>📊 Phương pháp luận đầy đủ &amp; chi tiết từng tính năng so với 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar hoạt động theo cơ chế chọn tham gia và chỉ sử dụng GET. �
 - **🖼️ Điểm cuối mới** — `/v1/ocr` (Mistral OCR) Và `/v1/audio/translations` (kiểu thì thầm) làm tròn bề mặt phương tiện truyền thông. → [API Thẩm quyền giải quyết](docs/reference/API_REFERENCE.md)
 - **🎨 Tạo hình ảnh / video / âm thanh** — một API dành cho phương tiện truyền thông: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind và các nhà cung cấp giọng nói như ElevenLabs. Tài liệu tham khảo → [API](docs/reference/API_REFERENCE.md)
 - **Triển khai & vận hành 🌍** — proxy ngược `basePath`, tự động phát hiện ngôn ngữ trình duyệt, theo dõi thiết bị theo từng phím, tin cậy MITM không cần root, bản địa hóa zh-TW. [Môi trường](docs/reference/ENVIRONMENT.md) →
-- **🤝 Thêm nhà cung cấp và đại lý** Các đại lý đám mây — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) với trình duyệt đăng nhập + OAuth, thẻ hạng nhất Ollama, Claude Opus 5 & Sonnet 5, đối tác chính thức Kimi (Code/Web/Moonshot), Zed, Asky, SenseNova, Yuanbao, Agnes AI… và một bản làm mới **Danh mục nhà cung cấp 385** . [Nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Thêm nhà cung cấp và đại lý** Các đại lý đám mây — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) với trình duyệt đăng nhập + OAuth, thẻ hạng nhất Ollama, Claude Opus 5 & Sonnet 5, đối tác chính thức Kimi (Code/Web/Moonshot), Zed, Asky, SenseNova, Yuanbao, Agnes AI… và một bản làm mới **Danh mục nhà cung cấp 386** . [Nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) →
 - **Tính minh bạch của định tuyến 📡** Mỗi phản hồi — đều mang tiêu đề `X-OmniRoute-Decision` đặt tên strategy/provider/latency phục vụ nó, chiến lược kết hợp `cache-optimized` mới + Auto-Combo tuyến yếu tố `cacheAffinity` lặp lại yêu cầu quay lại kết nối giữ tiền tố được lưu trong bộ nhớ đệm và điểm cuối `/v1/auto-combo/{channel}/candidates` chỉ đọc sẽ hiển thị nhóm ứng cử viên trực tiếp của kênh `auto/*`. [Tự động kết hợp](docs/routing/AUTO-COMBO.md) →
 - **⚡ Hiệu suất và cơ sở hạ tầng cục bộ** — chỉ bằng một cú nhấp chuột Redis cục bộ, Cloudflare Workers / Deno Triển khai các nhà triển khai chuyển tiếp, Biblast & Mux dưới dạng các dịch vụ nhúng được giám sát. [Dịch vụ nhúng](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Cũng có trong hộp** Khung plugin — Thị trường +, khung kỹ năng Omni/Agent/GitHub, tích hợp vault Obsidian (22 công cụ MCP ), Batch & Files APIs tương thích với OpenAI, bộ nhớ đệm phản hồi ngữ nghĩa, trò chơi hóa với bảng xếp hạng, khám phá tác nhân ACP (15 tác nhân tích hợp), xuất nhật ký theo lịch sang BigQuery, phân xuất đa mô hình song song `auto/chaos`, cầu nối bot Telegram, trình quản lý phiên bản trong ứng dụng và bảng xếp hạng nhà cung cấp miễn phí LMArena-ELO. [Tài liệu](docs/README.md) →
@@ -678,11 +678,11 @@ khỏi lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTE
 
 <div align="center">
 
-## 🌐 385 Nhà cung cấp AI — 156 được đánh dấu danh mục miễn phí
+## 🌐 386 Nhà cung cấp AI — 156 được đánh dấu danh mục miễn phí
 
 </div>
 
-> **385 nhà cung cấp đã đăng ký** trên các bộ sưu tập hệ thống, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống chuẩn, bao gồm **156 mang siêu dữ liệu khám phá `hasFree: true`** . Sổ đăng ký mô hình trò chuyện bao gồm **245 nhà cung cấp / 3.172 cặp mô hình nhà cung cấp riêng biệt / 1.535 mô hình thô IDs** ; danh mục ngân sách miễn phí riêng biệt có **466 hàng cho mỗi mô hình** ,**34 nhóm định kỳ** Và **52 nhà cung cấp recurring/keyless miễn phí mãi mãi** . Đây là những mẫu số khác nhau theo thiết kế; các định nghĩa và tính toán loại trừ nhóm có trong Tài [liệu tham khảo nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Bậc miễn phí](docs/reference/FREE_TIERS.md).
+> **386 nhà cung cấp đã đăng ký** trên các bộ sưu tập hệ thống, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống chuẩn, bao gồm **156 mang siêu dữ liệu khám phá `hasFree: true`** . Sổ đăng ký mô hình trò chuyện bao gồm **245 nhà cung cấp / 3.172 cặp mô hình nhà cung cấp riêng biệt / 1.535 mô hình thô IDs** ; danh mục ngân sách miễn phí riêng biệt có **466 hàng cho mỗi mô hình** ,**34 nhóm định kỳ** Và **52 nhà cung cấp recurring/keyless miễn phí mãi mãi** . Đây là những mẫu số khác nhau theo thiết kế; các định nghĩa và tính toán loại trừ nhóm có trong Tài [liệu tham khảo nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Bậc miễn phí](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

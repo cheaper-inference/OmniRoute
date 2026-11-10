@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Створити статичне комбо з {name}",
     "fallbackSummary": "Побічних {rate}% запитів, пропущено ~{skips} цілей за кожен раз",
     "reorderAll": "Перезамовити все",
-    "reorderAllDescription": "Перевпорядкування всіх комбінацій {count}. Маркери перетягування ввімкнено."
+    "reorderAllDescription": "Перевпорядкування всіх комбінацій {count}. Маркери перетягування ввімкнено.",
+    "liveStatStrategy": "Стратегія",
+    "liveStatTargets": "Цілі",
+    "liveStatFailed": "Невдалі спроби",
+    "liveStatOutcome": "Підсумок"
   },
   "common": {
     "save": "зберегти",

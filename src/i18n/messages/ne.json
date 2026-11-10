@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्",
     "fallbackSummary": "{rate}% अनुरोधहरू फलब्याकमा गएको, बरामद ~{skips} लक्ष्यहरू हटाइयो",
     "reorderAll": "सबै पुन: क्रमबद्ध गर्नुहोस्",
-    "reorderAllDescription": "सबै {count} कम्बोहरू पुन: क्रमबद्ध गर्दै। ड्र्याग ह्यान्डलहरू सक्षम छन्।"
+    "reorderAllDescription": "सबै {count} कम्बोहरू पुन: क्रमबद्ध गर्दै। ड्र्याग ह्यान्डलहरू सक्षम छन्।",
+    "liveStatStrategy": "रणनीति",
+    "liveStatTargets": "लक्ष्यहरू",
+    "liveStatFailed": "असफल प्रयासहरू",
+    "liveStatOutcome": "नतिजा"
   },
   "common": {
     "save": "सेभ गर्नुहोस्",

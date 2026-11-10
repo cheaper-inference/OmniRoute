@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}",
     "fallbackSummary": "نسبة {rate}% من الطلبات استخدمت المسار البديل، مع تخطي ~{skips} أهداف لكل طلب تقريباً",
     "reorderAll": "إعادة ترتيب الكل",
-    "reorderAllDescription": "إعادة ترتيب جميع مجموعات {count}. تم تمكين مقابض السحب."
+    "reorderAllDescription": "إعادة ترتيب جميع مجموعات {count}. تم تمكين مقابض السحب.",
+    "liveStatStrategy": "الاستراتيجية",
+    "liveStatTargets": "الأهداف",
+    "liveStatFailed": "المحاولات الفاشلة",
+    "liveStatOutcome": "النتيجة"
   },
   "common": {
     "save": "حفظ",

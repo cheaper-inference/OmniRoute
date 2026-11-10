@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Ստեղծել ստատիկ կոմբինացիա {name}-ից",
     "fallbackSummary": "{rate}%-ը հարցումները փոխարինվել են, յուրաքանչյուրը միջինում ~{skips} նպատակ թողած",
     "reorderAll": "Վերադասավորեք բոլորը",
-    "reorderAllDescription": "Բոլոր {count} կոմբինացիաների վերադասավորում: Քաշեք բռնակները միացված են:"
+    "reorderAllDescription": "Բոլոր {count} կոմբինացիաների վերադասավորում: Քաշեք բռնակները միացված են:",
+    "liveStatStrategy": "Ռազմավարություն",
+    "liveStatTargets": "Թիրախներ",
+    "liveStatFailed": "Անհաջող փորձեր",
+    "liveStatOutcome": "Արդյունք"
   },
   "common": {
     "save": "Պահպանել",

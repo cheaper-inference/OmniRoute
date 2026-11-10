@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Δημιουργία στατικού συνδυασμού από {name}",
     "fallbackSummary": "{rate}% των αιτημάτων έπιασαν εναλλακτική, κάθε ένα παραλείπει σε μέσο όρο ~{skips} στόχους",
     "reorderAll": "Αναπαραγγελία όλων",
-    "reorderAllDescription": "Αναδιάταξη όλων των συνδυασμών {count}. Οι λαβές μεταφοράς είναι ενεργοποιημένες."
+    "reorderAllDescription": "Αναδιάταξη όλων των συνδυασμών {count}. Οι λαβές μεταφοράς είναι ενεργοποιημένες.",
+    "liveStatStrategy": "Στρατηγική",
+    "liveStatTargets": "Στόχοι",
+    "liveStatFailed": "Αποτυχημένες προσπάθειες",
+    "liveStatOutcome": "Αποτέλεσμα"
   },
   "common": {
     "save": "Αποθήκευση",

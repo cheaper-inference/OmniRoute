@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Crea una combinazione statica da {name}",
     "fallbackSummary": "{rate}% delle richieste ha utilizzato un fallback, saltando in media ~{skips} target ciascuna",
     "reorderAll": "Riordina tutto",
-    "reorderAllDescription": "Riordino tutte le combo {count}. Le maniglie di trascinamento sono abilitate."
+    "reorderAllDescription": "Riordino tutte le combo {count}. Le maniglie di trascinamento sono abilitate.",
+    "liveStatStrategy": "Strategia",
+    "liveStatTargets": "Destinazioni",
+    "liveStatFailed": "Tentativi falliti",
+    "liveStatOutcome": "Esito"
   },
   "common": {
     "save": "Salva",

@@ -163,7 +163,7 @@ OmniRoute paljastaa 6 A2A -taitoa, jotka on yhdistetty `src/lib/a2a/taskExecutio
 | Terveysraportti         | `health-report`      | Aggregaatit katkaisija, jäähdytys, lukitustila palveluntarjoajakohtaisesti                                                                                    | terveyttä, kestävyyttä      | "Näytä kaikkien palveluntarjoajien terveydentila" |
 | Listaa ominaisuudet     | `list-capabilities`  | Palauttaa koko 45 merkinnän Agent Skills -luettelon (23 API + 21 CLI + 1 konfiguraatio) merkintätaulukkona raaka SKILL.md URLs llä kontekstin lisäystä varten | luettelo, löytö, taidot     | "Lista kaikki OmniRoute -ominaisuudet"            |
 
-> Agenttikortti tulee pitää linjassa reaaliaikaisen 385-palveluntarjoajan luettelon kanssa; palveluntarjoajien määrät ja free/no-auth metatiedot saadaan ajonaikaisesta rekisteristä.
+> Agenttikortti tulee pitää linjassa reaaliaikaisen 386-palveluntarjoajan luettelon kanssa; palveluntarjoajien määrät ja free/no-auth metatiedot saadaan ajonaikaisesta rekisteristä.
 
 ### `list-capabilities` Skill Detail
 

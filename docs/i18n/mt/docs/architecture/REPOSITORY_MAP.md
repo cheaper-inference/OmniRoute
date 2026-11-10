@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API tal-komponenti tad-dashboard: adapters fuq `packages/ui-kit` — ara `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ismijiet tal-ikoni użati mill-iskrins → komponenti Lucide (`<Icon>`)                            |
-| `constants/providers.ts`         | **385 fornitur** b’validazzjoni Zod (is-sors awtorevoli)                                                    |
+| `constants/providers.ts`         | **386 fornitur** b’validazzjoni Zod (is-sors awtorevoli)                                                    |
 | `constants/cliTools.ts`          | Reġistru ta’ għodod CLI esterni                                                                             |
 | `constants/routingStrategies.ts` | **20 strateġija ta’ rotot** bi prijoritajiet                                                                |
 | `constants/publicApiRoutes.ts`   | Rotot li jeħtieġu awtentikazzjoni Bearer (minflok dik tal-ġestjoni)                                         |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrazzjonijiet ta' CLI esterni + CLI intern ta' OmniRoute                              |
 | `I18N.md`                   | Arkitettura i18n, kif iżżid lingwa, 67 locale                                             |
 | `UNINSTALL.md`              | Passi għal disinstallazzjoni nadifa                                                       |
-| `PROVIDER_REFERENCE.md`     | Katalogu **awto-ġenerat** ta' 385 providitur (riġenera: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalogu **awto-ġenerat** ta' 386 providitur (riġenera: `npm run gen:provider-reference`) |
 
 ### Analiżi fil-fond tas-subsistemi
 

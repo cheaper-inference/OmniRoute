@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} سے ایک جامد کمبو بنائیں",
     "fallbackSummary": "{rate}% درخواستیں بیک فیل ہوئیں، ہر ایک میں تقریباً {skips} ٹارگٹس چھوڑے گئے",
     "reorderAll": "سب کو دوبارہ ترتیب دیں۔",
-    "reorderAllDescription": "تمام {count} کومبوس کو دوبارہ ترتیب دینا۔ ڈریگ ہینڈلز فعال ہیں۔"
+    "reorderAllDescription": "تمام {count} کومبوس کو دوبارہ ترتیب دینا۔ ڈریگ ہینڈلز فعال ہیں۔",
+    "liveStatStrategy": "حکمت عملی",
+    "liveStatTargets": "اہداف",
+    "liveStatFailed": "ناکام کوششیں",
+    "liveStatOutcome": "نتیجہ"
   },
   "common": {
     "save": "محفوظ کریں",

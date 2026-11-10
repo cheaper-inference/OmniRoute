@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं",
     "fallbackSummary": "{rate}% अनुरोध फ़ॉलबैक पर गए, हर एक में औसतन {skips} लक्ष्य छोड़े गए",
     "reorderAll": "सभी को पुनः व्यवस्थित करें",
-    "reorderAllDescription": "सभी {count} कॉम्बो को पुनः व्यवस्थित करना। ड्रैग हैंडल सक्षम हैं."
+    "reorderAllDescription": "सभी {count} कॉम्बो को पुनः व्यवस्थित करना। ड्रैग हैंडल सक्षम हैं.",
+    "liveStatStrategy": "रणनीति",
+    "liveStatTargets": "लक्ष्य",
+    "liveStatFailed": "विफल प्रयास",
+    "liveStatOutcome": "परिणाम"
   },
   "common": {
     "save": "सहेजें",

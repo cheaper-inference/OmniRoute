@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}",
     "fallbackSummary": "d'fhéad fa ghabh {rate}% d'iarruithe siuile, thit thart {skips} sprioc sa chineál gach ceann",
     "reorderAll": "Athordú go léir",
-    "reorderAllDescription": "Gach combos {count} a athordú. Tá láimhseálacha tarraing cumasaithe."
+    "reorderAllDescription": "Gach combos {count} a athordú. Tá láimhseálacha tarraing cumasaithe.",
+    "liveStatStrategy": "Straitéis",
+    "liveStatTargets": "Spriocanna",
+    "liveStatFailed": "Iarrachtaí teipthe",
+    "liveStatOutcome": "Toradh"
   },
   "common": {
     "save": "Sábháil",

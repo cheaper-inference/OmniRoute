@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}",
     "fallbackSummary": "{rate} % af anmodningerne faldt tilbage, hver hoppede i gennemsnit over ~{skips} mål",
     "reorderAll": "Omarranger alle",
-    "reorderAllDescription": "Omarrangerer alle {count} kombinationer. Trækhåndtag er aktiveret."
+    "reorderAllDescription": "Omarrangerer alle {count} kombinationer. Trækhåndtag er aktiveret.",
+    "liveStatStrategy": "Strategi",
+    "liveStatTargets": "Mål",
+    "liveStatFailed": "Mislykkede forsøg",
+    "liveStatOutcome": "Resultat"
   },
   "common": {
     "save": "Gem",

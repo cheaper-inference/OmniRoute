@@ -15,7 +15,7 @@
 
 **Создано [Диего Соузой](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 385 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 385 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                               |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------- | :------------------------: | :---------: | :-------------------: |
-| Поставщики 🌐                 |            352             |   **358**   |          385          |
+| Поставщики 🌐                 |            352             |   **358**   |          386          |
 | 🧠 Уникальная модель чата IDs |            1320            |  **1374**   |         1535          |
 | Мост модальности 🖼️           | 🆕 видение + аудио + видео |      ✓      |           ✓           |
 | Бесплатный каталог 📡 Radar   |       Согласие на 🆕       |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-385-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 385 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 385 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Чем отличается OmniRoute — снимок функций на определённую дату по сравнению с 9router, OpenRouter, CLIProxyAPI и LiteLLM по 13 возможностям. OmniRoute: 385 провайдеров, более 150 встроенных бесплатных тарифов, 20 стратегий маршрутизации, 12-движковое сжатие токенов, встроенный MCP-сервер со 110 инструментами, протокол агентов A2A, постоянная память, защитные механизмы, облачные агенты, скрытие TLS-отпечатка, Desktop/Termux/PWA и 67 языковых локалей интерфейса. OmniRoute распространяется по лицензии MIT и может быть развёрнут самостоятельно. Возможности и количество у конкурентов могут меняться; см. связанную методологию."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Чем отличается OmniRoute — снимок функций на определённую дату по сравнению с 9router, OpenRouter, CLIProxyAPI и LiteLLM по 13 возможностям. OmniRoute: 386 провайдеров, более 150 встроенных бесплатных тарифов, 20 стратегий маршрутизации, 12-движковое сжатие токенов, встроенный MCP-сервер со 110 инструментами, протокол агентов A2A, постоянная память, защитные механизмы, облачные агенты, скрытие TLS-отпечатка, Desktop/Termux/PWA и 67 языковых локалей интерфейса. OmniRoute распространяется по лицензии MIT и может быть развёрнут самостоятельно. Возможности и количество у конкурентов могут меняться; см. связанную методологию."/>
 
 <sub>📊 Полная методология и подробности по функциям vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar используется по желанию и выполняет тол�
 - **🖼️ Новые конечные точки** — `/v1/ocr` (Mistral OCR) и `/v1/audio/translations` (стиль Whisper) закругляют поверхность носителя. → [API Справочник](docs/reference/API_REFERENCE.md)
 - **🎨 Генерация изображения/видео/аудио** — one API для мультимедиа: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind и поставщики речи, такие как ElevenLabs. → [API Справочник](docs/reference/API_REFERENCE.md)
 - **🌍 Развертывание и эксплуатация** Обратный прокси-сервер — `basePath`, автоматическое определение языка браузера, отслеживание устройств по ключу, доверие MITM без root, локализация zh-TW. [Среда](docs/reference/ENVIRONMENT.md) →
-- **🤝 Другие поставщики и агенты** Облачные агенты — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) с браузером + Логин OAuth, первоклассная карта Ollama, Claude Opus 5 и Sonnet 5, официальное партнерство Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… и обновленный **Каталог 385-провайдеров** . → [провайдеры](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Другие поставщики и агенты** Облачные агенты — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) с браузером + Логин OAuth, первоклассная карта Ollama, Claude Opus 5 и Sonnet 5, официальное партнерство Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… и обновленный **Каталог 386-провайдеров** . → [провайдеры](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Прозрачность маршрутизации** Каждый ответ — содержит заголовок `X-OmniRoute-Decision`, называющий обслуживавший его strategy/provider/latency, новую комбинированную стратегию `cache-optimized` + Auto-Combo `cacheAffinity` запросы повторения факторного маршрута обратно к соединению, содержащему кэшированный префикс, а конечную точку `/v1/auto-combo/{channel}/candidates`, доступную только для чтения, предоставляет активный пул кандидатов канала `auto/*`. → [Авто-Комбо](docs/routing/AUTO-COMBO.md)
 - **⚡ Локальная производительность и инфраструктура** — локальный Redis в один клик, Cloudflare Workers / Deno Развертывание релейных развертываний, Bifrost и Mux в качестве контролируемых встроенных сервисов. [Встроенные услуги](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Также в коробке** Платформа плагинов — Торговая площадка +, платформы навыков Omni/Agent/GitHub, интеграция хранилища Obsidian (22 инструмента MCP ), OpenAI-совместимая пакетная обработка и файлы APIs, кеш семантических ответов, геймификация со списками лидеров, обнаружение агентов ACP (15 встроенных агентов), запланированный экспорт журналов в BigQuery, параллельное многомодельное разветвление `auto/chaos`, мост ботов Telegram, менеджер версий в приложении и LMArena-ELO рейтинги бесплатных поставщиков. → [документы](docs/README.md)
@@ -678,11 +678,11 @@ omniroute configure codex          # также: claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 385 Поставщики AI — 156 с пометкой «Свободно» в каталоге
+## 🌐 386 Поставщики AI — 156 с пометкой «Свободно» в каталоге
 
 </div>
 
-> **385 зарегистрированных провайдера** в каноническом чате, медиа, поиске, локальных коллекциях, облачных агентах и системных коллекциях, включая **156, несущих метаданные обнаружения `hasFree: true`** . Реестр модели чата охватывает **245 поставщика / 3172 различных пар «поставщик-модель» / 1535 необработанных модели IDs** ; отдельный бесплатный бюджетный каталог имеет **466 строк для каждой модели** ,**34 повторяющихся пула** и **52 провайдера recurring/keyless навсегда и бесплатно** . По замыслу это разные знаменатели; Определения и дедупированные вычисления пула находятся на уровнях [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) и [Free Tiers](docs/reference/FREE_TIERS.md).
+> **386 зарегистрированных провайдера** в каноническом чате, медиа, поиске, локальных коллекциях, облачных агентах и системных коллекциях, включая **156, несущих метаданные обнаружения `hasFree: true`** . Реестр модели чата охватывает **245 поставщика / 3172 различных пар «поставщик-модель» / 1535 необработанных модели IDs** ; отдельный бесплатный бюджетный каталог имеет **466 строк для каждой модели** ,**34 повторяющихся пула** и **52 провайдера recurring/keyless навсегда и бесплатно** . По замыслу это разные знаменатели; Определения и дедупированные вычисления пула находятся на уровнях [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) и [Free Tiers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

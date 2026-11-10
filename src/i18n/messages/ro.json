@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Creați o combinație statică din {name}",
     "fallbackSummary": "{rate}% din cereri au folosit alternativ, ~{skips} ținte omise fiecare",
     "reorderAll": "Reordonați toate",
-    "reorderAllDescription": "Reordonarea tuturor combo-urilor {count}. Mânerele de glisare sunt activate."
+    "reorderAllDescription": "Reordonarea tuturor combo-urilor {count}. Mânerele de glisare sunt activate.",
+    "liveStatStrategy": "Strategie",
+    "liveStatTargets": "Ținte",
+    "liveStatFailed": "Încercări eșuate",
+    "liveStatOutcome": "Rezultat"
   },
   "common": {
     "save": "Salvați",

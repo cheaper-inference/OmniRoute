@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Stvori statičnu kombinaciju iz {name}",
     "fallbackSummary": "{rate}% zahtjeva je prebačeno na rezervni sustav, prosječno je zapremljeno ~{skips} ciljeva po zahtjevu",
     "reorderAll": "Preuredite sve",
-    "reorderAllDescription": "Promjena redoslijeda svih {count} kombinacija. Ručke za povlačenje su omogućene."
+    "reorderAllDescription": "Promjena redoslijeda svih {count} kombinacija. Ručke za povlačenje su omogućene.",
+    "liveStatStrategy": "Strategija",
+    "liveStatTargets": "Ciljevi",
+    "liveStatFailed": "Neuspjeli pokušaji",
+    "liveStatOutcome": "Ishod"
   },
   "common": {
     "save": "Spremi",

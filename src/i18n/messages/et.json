@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon",
     "fallbackSummary": "{rate}% palvastest kasutas tagasilükkumist, keskmiselt hüljati igaühes ~{skips} sihtpunkti",
     "reorderAll": "Järjesta kõik ümber",
-    "reorderAllDescription": "Kõikide {count} kombinatsioonide järjestamine. Pukseerimiskäepidemed on lubatud."
+    "reorderAllDescription": "Kõikide {count} kombinatsioonide järjestamine. Pukseerimiskäepidemed on lubatud.",
+    "liveStatStrategy": "Strateegia",
+    "liveStatTargets": "Sihtmärgid",
+    "liveStatFailed": "Ebaõnnestunud katsed",
+    "liveStatOutcome": "Tulemus"
   },
   "common": {
     "save": "Salvesta",

@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}",
     "fallbackSummary": "{rate}% ya maombi yalitembea, ~{skips} lengo zilizopitishwa kila moja",
     "reorderAll": "Panga upya zote",
-    "reorderAllDescription": "Inapanga upya michanganyiko yote {count}. Ncha za kuburuta zimewashwa."
+    "reorderAllDescription": "Inapanga upya michanganyiko yote {count}. Ncha za kuburuta zimewashwa.",
+    "liveStatStrategy": "Mkakati",
+    "liveStatTargets": "Malengo",
+    "liveStatFailed": "Majaribio yaliyoshindwa",
+    "liveStatOutcome": "Matokeo"
   },
   "common": {
     "save": "Hifadhi",

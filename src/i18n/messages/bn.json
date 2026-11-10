@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
     "fallbackSummary": "আপেক্ষার {rate}% ফলব্যাক ব্যবহার করেছিল, প্রতিটিতে গড় করে ~{skips}টি লক্ষ্য বিমুখ",
     "reorderAll": "সব পুনঃক্রম",
-    "reorderAllDescription": "সমস্ত {count} কম্বো পুনরায় সাজানো। ড্র্যাগ হ্যান্ডেলগুলি সক্ষম করা হয়েছে৷"
+    "reorderAllDescription": "সমস্ত {count} কম্বো পুনরায় সাজানো। ড্র্যাগ হ্যান্ডেলগুলি সক্ষম করা হয়েছে৷",
+    "liveStatStrategy": "কৌশল",
+    "liveStatTargets": "লক্ষ্য",
+    "liveStatFailed": "ব্যর্থ প্রচেষ্টা",
+    "liveStatOutcome": "ফলাফল"
   },
   "common": {
     "save": "সংরক্ষণ করুন",

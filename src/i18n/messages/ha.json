@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}",
     "fallbackSummary": "kasofofen {rate}% na tambaya suke ta wucin gari, kawai matsi {skips} a kowace",
     "reorderAll": "Sake oda duka",
-    "reorderAllDescription": "Ana sake yin odar duk combos {count}. An kunna hannaye ja."
+    "reorderAllDescription": "Ana sake yin odar duk combos {count}. An kunna hannaye ja.",
+    "liveStatStrategy": "Dabara",
+    "liveStatTargets": "Makasudai",
+    "liveStatFailed": "Yunƙurin da suka gaza",
+    "liveStatOutcome": "Sakamako"
   },
   "common": {
     "save": "Ajiye",

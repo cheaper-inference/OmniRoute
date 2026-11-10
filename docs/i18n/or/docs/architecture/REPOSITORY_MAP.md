@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ଡ୍ୟାଶବୋର୍ଡ କମ୍ପୋନେଣ୍ଟ API: `packages/ui-kit` ଉପରେ ଆଡାପ୍ଟର୍ଗୁଡ଼ିକ — `docs/architecture/DESIGN_SYSTEM.md` ଦେଖନ୍ତୁ |
 | `constants/iconMap.ts`           | `ICON_MAP`: ସ୍କ୍ରିନ୍ଗୁଡ଼ିକ ଦ୍ୱାରା ବ୍ୟବହୃତ ଆଇକନ୍ ନାମ → Lucide କମ୍ପୋନେଣ୍ଟଗୁଡ଼ିକ (`<Icon>`)                        |
-| `constants/providers.ts`         | Zod ବୈଧତାକରଣ ସହିତ **385 ପ୍ରଦାନକାରୀ** (ସତ୍ୟର ମୂଳ ଉତ୍ସ)                                                           |
+| `constants/providers.ts`         | Zod ବୈଧତାକରଣ ସହିତ **386 ପ୍ରଦାନକାରୀ** (ସତ୍ୟର ମୂଳ ଉତ୍ସ)                                                           |
 | `constants/cliTools.ts`          | ବାହ୍ୟ CLI ଟୁଲ୍ ରେଜିଷ୍ଟ୍ରି                                                                                       |
 | `constants/routingStrategies.ts` | ପ୍ରାଥମିକତା ସହିତ **20 ରାଉଟିଂ କୌଶଳ**                                                                              |
 | `constants/publicApiRoutes.ts`   | ପରିଚାଳନା ପ୍ରମାଣୀକରଣ ପରିବର୍ତ୍ତେ Bearer ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ କରୁଥିବା ରୁଟ୍ଗୁଡ଼ିକ                                      |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ବାହ୍ୟ CLI ଇଣ୍ଟିଗ୍ରେସନ୍ + ଆଭ୍ୟନ୍ତରୀଣ OmniRoute CLI                                             |
 | `I18N.md`                   | i18n ଆର୍କିଟେକଚର୍, ଭାଷା ଯୋଡ଼ିବା, 67 ଲୋକେଲ୍                                                     |
 | `UNINSTALL.md`              | ପରିଷ୍କାର ଅନଇନଷ୍ଟଲ୍ ପଦକ୍ଷେପ                                                                    |
-| `PROVIDER_REFERENCE.md`     | 385 ପ୍ରୋଭାଇଡରଙ୍କ **ସ୍ୱୟଂଚାଳିତ-ଜେନେରେଟେଡ୍** କାଟାଲଗ୍ (ରିଜେନ୍: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 386 ପ୍ରୋଭାଇଡରଙ୍କ **ସ୍ୱୟଂଚାଳିତ-ଜେନେରେଟେଡ୍** କାଟାଲଗ୍ (ରିଜେନ୍: `npm run gen:provider-reference`) |
 
 ### ସବ୍ସିଷ୍ଟମ୍ ଗଭୀର-ବିଶ୍ଳେଷଣ
 

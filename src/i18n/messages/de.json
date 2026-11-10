@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}",
     "fallbackSummary": "{rate} % der Anfragen haben den Fallback genutzt, jede übersprang im Durchschnitt ~{skips} Ziele",
     "reorderAll": "Alles neu anordnen",
-    "reorderAllDescription": "Alle {count} Kombinationen werden neu angeordnet. Ziehgriffe sind aktiviert."
+    "reorderAllDescription": "Alle {count} Kombinationen werden neu angeordnet. Ziehgriffe sind aktiviert.",
+    "liveStatStrategy": "Strategie",
+    "liveStatTargets": "Ziele",
+    "liveStatFailed": "Fehlgeschlagene Versuche",
+    "liveStatOutcome": "Ergebnis"
   },
   "common": {
     "save": "Speichern",

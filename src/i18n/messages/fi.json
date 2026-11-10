@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}",
     "fallbackSummary": "{rate}% pyynnöistä siirtyi varatahoojeen, noin {skips} kohdet ohitettiin kussakin pyynnössä",
     "reorderAll": "Järjestä kaikki uudelleen",
-    "reorderAllDescription": "Järjestetään kaikki {count} yhdistelmät uudelleen. Vetokahvat ovat käytössä."
+    "reorderAllDescription": "Järjestetään kaikki {count} yhdistelmät uudelleen. Vetokahvat ovat käytössä.",
+    "liveStatStrategy": "Strategia",
+    "liveStatTargets": "Kohteet",
+    "liveStatFailed": "Epäonnistuneet yritykset",
+    "liveStatOutcome": "Lopputulos"
   },
   "common": {
     "save": "Tallenna",

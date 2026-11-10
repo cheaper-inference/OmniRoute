@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Buat kombo statis dari {name}",
     "fallbackSummary": "{rate}% permintaan menggunakan cadangan, rata-rata ~{skips} target dilewati per permintaan",
     "reorderAll": "Susun ulang semuanya",
-    "reorderAllDescription": "Menyusun ulang semua kombo {count}. Pegangan tarik diaktifkan."
+    "reorderAllDescription": "Menyusun ulang semua kombo {count}. Pegangan tarik diaktifkan.",
+    "liveStatStrategy": "Strategi",
+    "liveStatTargets": "Target",
+    "liveStatFailed": "Percobaan gagal",
+    "liveStatOutcome": "Hasil"
   },
   "common": {
     "save": "Simpan",

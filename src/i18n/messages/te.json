@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి",
     "fallbackSummary": "{rate}% గమనికలు బ్యాక్‌అప్ అయ్యాయి, ప్రతిసారీ ~{skips} లక్ష్యాలు వదిలివేయబడ్డాయి",
     "reorderAll": "అన్నింటినీ క్రమాన్ని మార్చండి",
-    "reorderAllDescription": "అన్ని {count} కాంబోలను క్రమాన్ని మార్చడం. డ్రాగ్ హ్యాండిల్స్ ప్రారంభించబడ్డాయి."
+    "reorderAllDescription": "అన్ని {count} కాంబోలను క్రమాన్ని మార్చడం. డ్రాగ్ హ్యాండిల్స్ ప్రారంభించబడ్డాయి.",
+    "liveStatStrategy": "వ్యూహం",
+    "liveStatTargets": "లక్ష్యాలు",
+    "liveStatFailed": "విఫలమైన ప్రయత్నాలు",
+    "liveStatOutcome": "ఫలితం"
   },
   "common": {
     "save": "సేవ్ చేయండి",

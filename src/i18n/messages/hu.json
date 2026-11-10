@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból",
     "fallbackSummary": "{rate}% kérés vésztárhelyre váltott, átlagosan ~{skips} célpontot ugrottunk feje kérésenként",
     "reorderAll": "Rendezze át az összeset",
-    "reorderAllDescription": "Az összes {count} kombó átrendezése. A húzófogantyúk engedélyezve vannak."
+    "reorderAllDescription": "Az összes {count} kombó átrendezése. A húzófogantyúk engedélyezve vannak.",
+    "liveStatStrategy": "Stratégia",
+    "liveStatTargets": "Célok",
+    "liveStatFailed": "Sikertelen próbálkozások",
+    "liveStatOutcome": "Eredmény"
   },
   "common": {
     "save": "Mentés",

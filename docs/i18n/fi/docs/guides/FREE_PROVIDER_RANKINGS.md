@@ -12,7 +12,7 @@
 
 ## Mikä se on
 
-OmniRoute rekisteröi 385 palveluntarjoajaa, joista 155 on merkitty luetteloon**free/no-auth** (no-auth, free-tier OAuth tai free-tier API key — katso [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) ja täydellinen [Free Tiers -hakemisto](../reference/FREE_TIERS.md) ). Saalis: ilmaiset palveluntarjoajat vaihtelevat valtavasti mallien laadussa. Valmentamaton palveluntarjoaja, joka palvelee rajamallia, on paljon hyödyllisempi kuin pieni vanha malli.
+OmniRoute rekisteröi 386 palveluntarjoajaa, joista 155 on merkitty luetteloon**free/no-auth** (no-auth, free-tier OAuth tai free-tier API key — katso [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) ja täydellinen [Free Tiers -hakemisto](../reference/FREE_TIERS.md) ). Saalis: ilmaiset palveluntarjoajat vaihtelevat valtavasti mallien laadussa. Valmentamaton palveluntarjoaja, joka palvelee rajamallia, on paljon hyödyllisempi kuin pieni vanha malli.
 
 **Ilmaiset palveluntarjoajan sijoitukset** vastauksia"** mikä ilmainen tarjoaja tarjoaa minulle parhaan mallin?** " liittymällä jokaisen ilmaisen palveluntarjoajan luetteloon** joukkolähteet laatupisteet** alkaen** Arena AI tulostaulukko** (ihmis-preferenssi ELO, sama idea LMArena chatbot-areenan takana). Palveluntarjoajat luokitellaan sitten niiden vahvuuden mukaan** paras ilmainen malli** .
 

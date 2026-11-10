@@ -491,7 +491,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex` `devin-desktop` প্লাস `claudeIdentity.ts` (শেয়ারড আইডেন্টিটি হেল্পার) এবং `index.ts` (রেজিস্ট্রি)।
 
-> দ্রষ্টব্য: এখানে তালিকাভুক্ত নয় এমন প্রদানকারীরা জেনেরিক OpenAI- সামঞ্জস্যপূর্ণ নির্বাহক ব্যবহার করে `default.ts` দ্বারা পরিবেশিত হয়। সম্পূর্ণ প্রদানকারীর ক্যাটালগ (385 প্রদানকারী) `src/shared/constants/providers.ts` এ থাকে।
+> দ্রষ্টব্য: এখানে তালিকাভুক্ত নয় এমন প্রদানকারীরা জেনেরিক OpenAI- সামঞ্জস্যপূর্ণ নির্বাহক ব্যবহার করে `default.ts` দ্বারা পরিবেশিত হয়। সম্পূর্ণ প্রদানকারীর ক্যাটালগ (386 প্রদানকারী) `src/shared/constants/providers.ts` এ থাকে।
 
 ### 4.3 `open-sse/translator/`
 

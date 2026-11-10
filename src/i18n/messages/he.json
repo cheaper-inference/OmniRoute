@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}",
     "fallbackSummary": "{rate}% מהבקשות הופעל בהן נפיל, כ-{skips} יעדים נדלגו בממוצע לכל בקשה",
     "reorderAll": "סדר הכל מחדש",
-    "reorderAllDescription": "מסדר מחדש את כל השילובים {count}. ידיות גרירה מופעלות."
+    "reorderAllDescription": "מסדר מחדש את כל השילובים {count}. ידיות גרירה מופעלות.",
+    "liveStatStrategy": "אסטרטגיה",
+    "liveStatTargets": "יעדים",
+    "liveStatFailed": "ניסיונות שנכשלו",
+    "liveStatOutcome": "תוצאה"
   },
   "common": {
     "save": "שמור",

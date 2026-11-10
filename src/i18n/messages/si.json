@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න",
     "fallbackSummary": "{rate}% අනුරෝපණ ආලෝපයන්ට ආශ්‍රිත විය, සෑම එකක්ම ~{skips} ඉලක්ක හැර යාමකි",
     "reorderAll": "සියල්ල නැවත ඇණවුම් කරන්න",
-    "reorderAllDescription": "සියලුම {count} සංයෝජන නැවත ඇණවුම් කිරීම. ඩ්‍රැග් හැන්ඩ්ල් සබල කර ඇත."
+    "reorderAllDescription": "සියලුම {count} සංයෝජන නැවත ඇණවුම් කිරීම. ඩ්‍රැග් හැන්ඩ්ල් සබල කර ඇත.",
+    "liveStatStrategy": "උපාය මාර්ගය",
+    "liveStatTargets": "ඉලක්ක",
+    "liveStatFailed": "අසාර්ථක උත්සාහයන්",
+    "liveStatOutcome": "ප්‍රතිඵලය"
   },
   "common": {
     "save": "සුරකින්න",

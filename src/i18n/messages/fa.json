@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}",
     "fallbackSummary": "{rate}% درخواست‌ها فallback شدند، در هر درخواست به طور متوسط ~{skips} هدف رد شد",
     "reorderAll": "همه را دوباره سفارش دهید",
-    "reorderAllDescription": "مرتب کردن مجدد همه ترکیبات {count}. دستگیره های کشیدن فعال هستند."
+    "reorderAllDescription": "مرتب کردن مجدد همه ترکیبات {count}. دستگیره های کشیدن فعال هستند.",
+    "liveStatStrategy": "راهبرد",
+    "liveStatTargets": "مقصدها",
+    "liveStatFailed": "تلاش‌های ناموفق",
+    "liveStatOutcome": "نتیجه"
   },
   "common": {
     "save": "ذخیره",

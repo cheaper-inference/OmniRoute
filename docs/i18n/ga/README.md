@@ -15,7 +15,7 @@
 
 **Cruthaithe ag [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 385 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 385 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                 |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :----------------------: | :---------: | :-------------------: |
-| Soláthraithe 🌐                 |           352            |   **358**   |          385          |
+| Soláthraithe 🌐                 |           352            |   **358**   |          386          |
 | 🧠 samhail comhrá uathúil IDs   |           1320           |  **1374**   |         1535          |
 | Droichead Módúlacht 🖼️          | Fís 🆕 + fuaime + físeán |      ✓      |           ✓           |
 | Catalóg 📡 radar saor in aisce, |  🆕 rogha an diúltaithe  |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-385-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 385 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 385 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Gach ceann de na **20** straitéis — measc agus meaitseáil iad ag gach céim 
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Cad a dhéanann OmniRoute uathúil — léargas ar ghnéithe as dáta i gcomparáid le 9router, OpenRouter, CLIProxyAPI agus LiteLLM thar 13 gcumas. OmniRoute: 385 soláthraí, 150+ leibhéal saor in aisce ionsuite, 20 straitéis ródaithe, comhbhrú comhartha 12-inneall, freastalaí MCP ionsuite le 110 uirlis, prótacal gníomhaire A2A, cuimhne bhuan, ráillí cosanta, gníomhairí scamall, stealth méarlorg TLS, Desktop/Termux/PWA agus 67 teanga UI i18n. Tá ceadúnas MIT ag OmniRoute agus is féidir é a óstáil leat féin. D’fhéadfadh cumais agus comhaireamh iomaitheoirí athrú; féach an mhodheolaíocht nasctha."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Cad a dhéanann OmniRoute uathúil — léargas ar ghnéithe as dáta i gcomparáid le 9router, OpenRouter, CLIProxyAPI agus LiteLLM thar 13 gcumas. OmniRoute: 386 soláthraí, 150+ leibhéal saor in aisce ionsuite, 20 straitéis ródaithe, comhbhrú comhartha 12-inneall, freastalaí MCP ionsuite le 110 uirlis, prótacal gníomhaire A2A, cuimhne bhuan, ráillí cosanta, gníomhairí scamall, stealth méarlorg TLS, Desktop/Termux/PWA agus 67 teanga UI i18n. Tá ceadúnas MIT ag OmniRoute agus is féidir é a óstáil leat féin. D’fhéadfadh cumais agus comhaireamh iomaitheoirí athrú; féach an mhodheolaíocht nasctha."/>
 
 <sub>📊 Modheolaíocht iomlán & sonraí de réir gné i gcomparáid le 9router, OpenRouter, CLIProxyAPI & LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ faoin gcatalóg reatha ag **[radar.omniroute.online/planos](https://radar.omniro
 - **🖼️ Críochphointí nua** — `/v1/ocr` (Mistral OCR) agus `/v1/audio/translations` (Stíl Whisper) bhabhta amach dromchla an mheáin. → [API Tagairt](docs/reference/API_REFERENCE.md)
 - **🎨 Giniúint íomhá / físe / fuaime** — aon API do na meáin: xAI Grok Samhlaigh & Novita AI físeán, ComfyUI, Magnific, Adobe Firefly, Segmind, agus soláthraithe urlabhra mar ElevenLabs. → [API Tagairt](docs/reference/API_REFERENCE.md)
 - **Imscaradh 🌍 & comharchumainn** — droim ar ais-seachfhreastalaí `basePath`, brabhsálaí-teanga uathbhraite, rianú feiste in aghaidh an eochair, iontaobhas MITM gan fhréamh, logánú zh-TW. [Comhshaol](docs/reference/ENVIRONMENT.md) →
-- **🤝 Tuilleadh soláthraithe & gníomhairí** — gníomhairí scamall (Codex Scamall, Cursor, Devin, Jules), Grok tóg (xAI) le brabhsálaí + OAuth logáil isteach, Ollama cárta den chéad scoth, Claude Opus 5 & Sonnet 5, Kimi comhpháirtíocht oifigiúil (Code/Web/Moonshot), Zed, Iarratas, SenseNova, Yuanbao, Agnes AI… agus athnuachan **385-catalóg soláthraí**. → [Soláthraithe](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Tuilleadh soláthraithe & gníomhairí** — gníomhairí scamall (Codex Scamall, Cursor, Devin, Jules), Grok tóg (xAI) le brabhsálaí + OAuth logáil isteach, Ollama cárta den chéad scoth, Claude Opus 5 & Sonnet 5, Kimi comhpháirtíocht oifigiúil (Code/Web/Moonshot), Zed, Iarratas, SenseNova, Yuanbao, Agnes AI… agus athnuachan **386-catalóg soláthraí**. → [Soláthraithe](docs/reference/PROVIDER_REFERENCE.md)
 - **Trédhearcacht ródú 📡** — tá ceanntásc `X-OmniRoute-Decision` ag gach freagra ag ainmniú an strategy/provider/latency a d'fhreastail air, straitéis nua teaglama `cache-optimized` iarratais ar bhealach fachtóir + Auto-Combo `cacheAffinity` ar ais go dtí an nasc ina bhfuil an réimír i dtaisce, agus nochtann críochphointe `/v1/auto-combo/{channel}/candidates` inléite amháin comhthiomsú iarrthóirí beo chainéil `auto/*`. [Teaglaim Uathoibríoch](docs/routing/AUTO-COMBO.md) →
 - **⚡ Feidhmíocht áitiúil & infra** — aon-cliceáil Redis áitiúil , Cloudflare Workers / Deno Imscaradh imscaradh sealaíochta, Bifrost & Mux mar sheirbhísí leabaithe maoirsithe. [Seirbhísí Leabaithe](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Chomh maith leis sin sa bhosca** creat breiseán — margadh +, creataí scileanna Omni/Agent/GitHub, comhtháthú cruinneachán Obsidian (22 uirlis MCP ), Baisc & Comhaid OpenAI-comhoiriúnach APIs, taisce freagra shéimeantach, gamification le cláir cheannairí, fionnachtain gníomhaire ACP (15 gníomhairí ionsuite), onnmhairiú logáil sceidealta go BigQuery, `auto/chaos` comhthreomhar il-samhail bainisteoir lucht leanúna, leagan in LMA lucht leanúna-botout il-samhail, agus leagan in ELMA lucht leanúna-botout Telegram, leagan in ELMA lucht leanúna-botout il-samhail Rangú soláthraí saor in aisce,. [doiciméid](docs/README.md) →
@@ -686,11 +686,11 @@ an timpeallacht/args cruinn gan é a rith, agus coimeádann `--api-key-env NAME`
 
 <div align="center">
 
-## Soláthraithe 🌐 385 AI — 156 Catalóg-Marcáilte Saor in Aisce
+## Soláthraithe 🌐 386 AI — 156 Catalóg-Marcáilte Saor in Aisce
 
 </div>
 
-> **385 soláthraí cláraithe** trasna na mbailiúchán canónacha comhrá, meáin, cuardaigh, áitiúla, néalghníomhairí agus córais, lena n-áirítear **156 ag iompar meiteashonraí fionnachtana `hasFree: true`** . Clúdaíonn clárlann na múnla comhrá **245 soláthraí / 3,172 soláthróir ar leith-péire samhail / 1,535 samhail amh IDs** ; tá catalóg ar leith saor-bhuiséid **466 sraitheanna in aghaidh an tsamhail** ,**34 linnte athfhillteacha** agus **52 soláthraí recurring/keyless saor in aisce go deo** . Is ainmneoirí difriúla iad seo de réir dearaidh; tá sainmhínithe agus ríomhaireachtaí comhthiomsaithe le fáil i [Sraith Tagartha an tSoláthraí](docs/reference/PROVIDER_REFERENCE.md) agus [sna Sraitheanna Saora](docs/reference/FREE_TIERS.md).
+> **386 soláthraí cláraithe** trasna na mbailiúchán canónacha comhrá, meáin, cuardaigh, áitiúla, néalghníomhairí agus córais, lena n-áirítear **156 ag iompar meiteashonraí fionnachtana `hasFree: true`** . Clúdaíonn clárlann na múnla comhrá **245 soláthraí / 3,172 soláthróir ar leith-péire samhail / 1,535 samhail amh IDs** ; tá catalóg ar leith saor-bhuiséid **466 sraitheanna in aghaidh an tsamhail** ,**34 linnte athfhillteacha** agus **52 soláthraí recurring/keyless saor in aisce go deo** . Is ainmneoirí difriúla iad seo de réir dearaidh; tá sainmhínithe agus ríomhaireachtaí comhthiomsaithe le fáil i [Sraith Tagartha an tSoláthraí](docs/reference/PROVIDER_REFERENCE.md) agus [sna Sraitheanna Saora](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}",
     "fallbackSummary": "{rate}% yêu cầu đã dùng phương án dự phòng, mỗi lần bỏ qua ~{skips} mục tiêu",
     "reorderAll": "Sắp xếp lại tất cả",
-    "reorderAllDescription": "Sắp xếp lại tất cả các combo {count}. Tay cầm kéo được bật."
+    "reorderAllDescription": "Sắp xếp lại tất cả các combo {count}. Tay cầm kéo được bật.",
+    "liveStatStrategy": "Chiến lược",
+    "liveStatTargets": "Đích",
+    "liveStatFailed": "Lần thử thất bại",
+    "liveStatOutcome": "Kết quả"
   },
   "common": {
     "save": "Lưu",

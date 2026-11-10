@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
     "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů",
     "reorderAll": "Objednejte vše znovu",
-    "reorderAllDescription": "Změna pořadí všech {count} komb. Přetahovací úchyty jsou povoleny."
+    "reorderAllDescription": "Změna pořadí všech {count} komb. Přetahovací úchyty jsou povoleny.",
+    "liveStatStrategy": "Strategie",
+    "liveStatTargets": "Cíle",
+    "liveStatFailed": "Neúspěšné pokusy",
+    "liveStatOutcome": "Výsledek"
   },
   "common": {
     "save": "Uložit",

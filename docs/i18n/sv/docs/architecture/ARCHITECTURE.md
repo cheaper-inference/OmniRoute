@@ -15,7 +15,7 @@ Den tillhandahåller en enda OpenAI-kompatibel slutpunkt (`/v1/*`) och dirigerar
 
 Centrala funktioner:
 
-- OpenAI-kompatibelt API-gränssnitt för CLI/verktyg (385 leverantörer, 159 exekveringsmoduler)
+- OpenAI-kompatibelt API-gränssnitt för CLI/verktyg (386 leverantörer, 159 exekveringsmoduler)
 - Översättning av förfrågningar/svar mellan leverantörsformat
 - Reservväxling för modellkombinationer (sekvens med flera modeller)
 - Strukturerade kombinationssteg (`provider + model + connection`) med körningsordning baserad på `compositeTiers`

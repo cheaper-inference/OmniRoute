@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Vytvorte staticú kombináciu z {name}",
     "fallbackSummary": "{rate}% požiadaviek použilo záložný proces, ~{skips} cieľov preskočených každou",
     "reorderAll": "Znova objednať všetko",
-    "reorderAllDescription": "Zmena poradia všetkých komb {count}. Rukoväte ťahania sú povolené."
+    "reorderAllDescription": "Zmena poradia všetkých komb {count}. Rukoväte ťahania sú povolené.",
+    "liveStatStrategy": "Stratégia",
+    "liveStatTargets": "Ciele",
+    "liveStatFailed": "Neúspešné pokusy",
+    "liveStatOutcome": "Výsledok"
   },
   "common": {
     "save": "Uložiť",

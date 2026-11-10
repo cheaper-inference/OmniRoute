@@ -15,7 +15,7 @@ Pruža jedinstvenu krajnju tačku kompatibilnu s OpenAI-jem (`/v1/*`) i usmjerav
 
 Ključne mogućnosti:
 
-- API interfejs kompatibilan s OpenAI-jem za CLI/alate (385 pružalaca, 159 izvršnih modula)
+- API interfejs kompatibilan s OpenAI-jem za CLI/alate (386 pružalaca, 159 izvršnih modula)
 - Prevođenje zahtjeva/odgovora između formata pružalaca
 - Rezervni niz kombinacije modela (sekvenca više modela)
 - Strukturirani koraci kombinacije (`provider + model + connection`) s redoslijedom tokom izvršavanja prema `compositeTiers`

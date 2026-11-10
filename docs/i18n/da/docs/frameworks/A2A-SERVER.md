@@ -163,7 +163,7 @@ OmniRoute afslører 6 A2A færdigheder forbundet med `src/lib/a2a/taskExecution.
 | Sundhedsrapport    | `health-report`      | Aggregerer strømafbryder, nedkøling, lockout-tilstand pr. udbyder                                                                              | sundhed, robusthed              | "Vis sundhedsstatus for alle udbydere"  |
 | Liste muligheder   | `list-capabilities`  | Returnerer hele 45-indgange Agent Skills-katalog (23 API + 21 CLI + 1 config) som en markdown-tabel med rå SKILL.md URLs til kontekstinjektion | katalog, opdagelse, færdigheder | "List alle OmniRoute -funktioner"       |
 
-> Agentkortet skal holdes på linje med det levende 385-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
+> Agentkortet skal holdes på linje med det levende 386-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
 
 ### `list-capabilities` Færdighedsdetaljer
 

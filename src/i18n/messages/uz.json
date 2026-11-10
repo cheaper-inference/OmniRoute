@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish",
     "fallbackSummary": "So'rovlar uchun %{rate} o'rin aldi, har birida ~{skips} maqsadlar o'tkazib yuborildi",
     "reorderAll": "Hammasini qayta tartiblang",
-    "reorderAllDescription": "Barcha {count} kombinatsiyalari qayta tartiblanmoqda. Surish tutqichlari yoqilgan."
+    "reorderAllDescription": "Barcha {count} kombinatsiyalari qayta tartiblanmoqda. Surish tutqichlari yoqilgan.",
+    "liveStatStrategy": "Strategiya",
+    "liveStatTargets": "Maqsadlar",
+    "liveStatFailed": "Muvaffaqiyatsiz urinishlar",
+    "liveStatOutcome": "Natija"
   },
   "common": {
     "save": "Saqlash",

@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}",
     "fallbackSummary": "សំណើរ {rate}% បានប្រើជម្រើស រហូតដល់ ~{skips} គោលដៅ ដែលបានរំលង",
     "reorderAll": "រៀបចំឡើងវិញទាំងអស់។",
-    "reorderAllDescription": "កំពុងរៀបចំបន្សំ {count} ឡើងវិញ។ ចំណុចទាញត្រូវបានបើក។"
+    "reorderAllDescription": "កំពុងរៀបចំបន្សំ {count} ឡើងវិញ។ ចំណុចទាញត្រូវបានបើក។",
+    "liveStatStrategy": "យុទ្ធសាស្ត្រ",
+    "liveStatTargets": "គោលដៅ",
+    "liveStatFailed": "ការព្យាយាមដែលបរាជ័យ",
+    "liveStatOutcome": "លទ្ធផល"
   },
   "common": {
     "save": "រក្សាទុក",

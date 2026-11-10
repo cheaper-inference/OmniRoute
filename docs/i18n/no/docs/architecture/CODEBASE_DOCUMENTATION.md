@@ -499,7 +499,7 @@ per leverandør (verktøyskjemaer, fetch-/TTS-adaptere, håndtering av særegenh
 (delt identitetshjelper) og `index.ts` (register).
 
 > Merk: Leverandører som ikke er oppført her, betjenes av `default.ts` ved hjelp av den generiske
-> OpenAI-kompatible eksekvereren. Den fullstendige leverandørkatalogen (385 leverandører) finnes i
+> OpenAI-kompatible eksekvereren. Den fullstendige leverandørkatalogen (386 leverandører) finnes i
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

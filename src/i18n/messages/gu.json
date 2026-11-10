@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો",
     "fallbackSummary": "{rate}% વિનંતીઓ ફેલબેક પર ગઈ, દરેકમાં લગભગ {skips} લક્ષ્યો ચૂકાયા",
     "reorderAll": "બધાને ફરીથી ગોઠવો",
-    "reorderAllDescription": "બધા {count} કોમ્બોઝને ફરીથી ગોઠવી રહ્યાં છીએ. ખેંચો હેન્ડલ્સ સક્ષમ છે."
+    "reorderAllDescription": "બધા {count} કોમ્બોઝને ફરીથી ગોઠવી રહ્યાં છીએ. ખેંચો હેન્ડલ્સ સક્ષમ છે.",
+    "liveStatStrategy": "વ્યૂહરચના",
+    "liveStatTargets": "લક્ષ્યો",
+    "liveStatFailed": "નિષ્ફળ પ્રયાસો",
+    "liveStatOutcome": "પરિણામ"
   },
   "common": {
     "save": "સાચવો",

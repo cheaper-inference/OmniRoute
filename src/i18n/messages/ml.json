@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക",
     "fallbackSummary": "{rate}% ആവശ്യങ്ങൾ ഫോൾബാക്ക് ചെയ്തു, ഓരോ ആവശ്യവും ശരാശരി ~{skips} ടാർഗറ്റുകൾ പെറിച്ചു",
     "reorderAll": "എല്ലാം പുനഃക്രമീകരിക്കുക",
-    "reorderAllDescription": "എല്ലാ {count} കോമ്പോകളും പുനഃക്രമീകരിക്കുന്നു. ഡ്രാഗ് ഹാൻഡിലുകൾ പ്രവർത്തനക്ഷമമാക്കി."
+    "reorderAllDescription": "എല്ലാ {count} കോമ്പോകളും പുനഃക്രമീകരിക്കുന്നു. ഡ്രാഗ് ഹാൻഡിലുകൾ പ്രവർത്തനക്ഷമമാക്കി.",
+    "liveStatStrategy": "തന്ത്രം",
+    "liveStatTargets": "ലക്ഷ്യങ്ങൾ",
+    "liveStatFailed": "പരാജയപ്പെട്ട ശ്രമങ്ങൾ",
+    "liveStatOutcome": "ഫലം"
   },
   "common": {
     "save": "സംരക്ഷിക്കുക",

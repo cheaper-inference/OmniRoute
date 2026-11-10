@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Izveidot statisku kombināciju no {name}",
     "fallbackSummary": "{rate}% pieprasījumu tika pārcelti, vidēji tiek izlaisti ~{skips} mērķi",
     "reorderAll": "Pārkārtot visu",
-    "reorderAllDescription": "Visu {count} kombināciju pārkārtošana. Vilkšanas rokturi ir iespējoti."
+    "reorderAllDescription": "Visu {count} kombināciju pārkārtošana. Vilkšanas rokturi ir iespējoti.",
+    "liveStatStrategy": "Stratēģija",
+    "liveStatTargets": "Mērķi",
+    "liveStatFailed": "Neveiksmīgi mēģinājumi",
+    "liveStatOutcome": "Iznākums"
   },
   "common": {
     "save": "Saglabāt",

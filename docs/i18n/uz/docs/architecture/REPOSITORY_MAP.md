@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Boshqaruv paneli komponentlari APIʼsi: `packages/ui-kit` ustidagi adapterlar — `docs/architecture/DESIGN_SYSTEM.md` ga qarang |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlarda ishlatiladigan ikonka nomlari → Lucide komponentlari (`<Icon>`)                                        |
-| `constants/providers.ts`         | Zod validatsiyasiga ega **385 ta provayder** (asosiy ishonchli manba)                                                         |
+| `constants/providers.ts`         | Zod validatsiyasiga ega **386 ta provayder** (asosiy ishonchli manba)                                                         |
 | `constants/cliTools.ts`          | Tashqi CLI vositalari reyestri                                                                                                |
 | `constants/routingStrategies.ts` | Ustuvorliklarga ega **20 ta marshrutlash strategiyasi**                                                                       |
 | `constants/publicApiRoutes.ts`   | Bearer autentifikatsiyasini (boshqaruv autentifikatsiyasidan farqli ravishda) talab qiladigan marshrutlar                     |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tashqi CLI integratsiyalari + ichki OmniRoute CLI                                                     |
 | `I18N.md`                   | i18n arxitekturasi, til qo'shish, 67 ta lokal                                                         |
 | `UNINSTALL.md`              | Toza o'chirish qadamlari                                                                              |
-| `PROVIDER_REFERENCE.md`     | **Avtomatik yaratilgan** 385 ta provayder katalogi (qayta yaratish: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Avtomatik yaratilgan** 386 ta provayder katalogi (qayta yaratish: `npm run gen:provider-reference`) |
 
 ### Subsistemalar bo'yicha chuqur tahlillar
 

@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "{name} मधून स्थिर कॉम्बो तयार करा",
     "fallbackSummary": "{rate}% आवेदनांचा फॉलबॅक झाला, प्रत्येक आवेदनातून सरासरी ~{skips} टार्गेट्स वगळले गेले",
     "reorderAll": "सर्व पुनर्क्रमित करा",
-    "reorderAllDescription": "सर्व {count} कॉम्बोचे पुनर्क्रमण करत आहे. ड्रॅग हँडल सक्षम आहेत."
+    "reorderAllDescription": "सर्व {count} कॉम्बोचे पुनर्क्रमण करत आहे. ड्रॅग हँडल सक्षम आहेत.",
+    "liveStatStrategy": "धोरण",
+    "liveStatTargets": "लक्ष्ये",
+    "liveStatFailed": "अयशस्वी प्रयत्न",
+    "liveStatOutcome": "परिणाम"
   },
   "common": {
     "save": "जतन करा",

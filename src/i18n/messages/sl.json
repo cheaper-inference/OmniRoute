@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}",
     "fallbackSummary": "{rate}% zahtev je uporabilo nadomestno rešitev, vsaka je preskočila približno {skips} ciljev",
     "reorderAll": "Preuredite vse",
-    "reorderAllDescription": "Preurejanje vseh kombinacij {count}. Ročaji za vlečenje so omogočeni."
+    "reorderAllDescription": "Preurejanje vseh kombinacij {count}. Ročaji za vlečenje so omogočeni.",
+    "liveStatStrategy": "Strategija",
+    "liveStatTargets": "Cilji",
+    "liveStatFailed": "Neuspeli poskusi",
+    "liveStatOutcome": "Izid"
   },
   "common": {
     "save": "Shrani",

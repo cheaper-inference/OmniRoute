@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}",
     "fallbackSummary": "{rate}% ng mga request ang nagbailback, tinatayang ~{skips} na target ang sinakrip sa bawat isa",
     "reorderAll": "Muling ayusin ang lahat",
-    "reorderAllDescription": "Muling pag-aayos ng lahat ng {count} combo. Naka-enable ang mga drag handle."
+    "reorderAllDescription": "Muling pag-aayos ng lahat ng {count} combo. Naka-enable ang mga drag handle.",
+    "liveStatStrategy": "Estratehiya",
+    "liveStatTargets": "Mga target",
+    "liveStatFailed": "Mga nabigong pagtatangka",
+    "liveStatOutcome": "Kinalabasan"
   },
   "common": {
     "save": "I-save",

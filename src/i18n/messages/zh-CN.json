@@ -3221,7 +3221,11 @@
     "duplicateAutoComboTitle": "从{name}创建静态组合",
     "fallbackSummary": "{rate}% 的请求已回退，每次约跳过 {skips} 个目标",
     "reorderAll": "全部重新排序",
-    "reorderAllDescription": "重新排序所有{count}组合。拖动手柄已启用。"
+    "reorderAllDescription": "重新排序所有{count}组合。拖动手柄已启用。",
+    "liveStatStrategy": "策略",
+    "liveStatTargets": "目标",
+    "liveStatFailed": "失败尝试",
+    "liveStatOutcome": "结果"
   },
   "common": {
     "save": "保存",
