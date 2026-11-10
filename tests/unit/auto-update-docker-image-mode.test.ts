@@ -177,12 +177,13 @@ test("docker-trigger: trigger inside DATA_DIR is supported and launch writes the
 });
 
 test("docker-trigger: a relative trigger path resolves inside DATA_DIR", () => {
+  const dataDir = path.join(os.tmpdir(), "docker-trigger-relative");
   const config = autoUpdate.getAutoUpdateConfig(
-    { DATA_DIR: "/app/data", DOCKER_UPDATE_TRIGGER_FILE: "update/request.json" },
+    { DATA_DIR: dataDir, DOCKER_UPDATE_TRIGGER_FILE: "update/request.json" },
     IMAGE_PROBE
   );
   assert.equal(config.mode, "docker-trigger");
-  assert.equal(config.dockerTriggerFile, "/app/data/update/request.json");
+  assert.equal(config.dockerTriggerFile, path.join(dataDir, "update", "request.json"));
 });
 
 test("docker-trigger: paths outside DATA_DIR are rejected and nothing is written", async () => {
@@ -222,7 +223,11 @@ test("docker-trigger: a symlinked directory escaping DATA_DIR is rejected at wri
   const dataDir = makeDataDir();
   const outsideDir = makeDataDir();
   try {
-    fs.symlinkSync(outsideDir, path.join(dataDir, "update"));
+    fs.symlinkSync(
+      outsideDir,
+      path.join(dataDir, "update"),
+      process.platform === "win32" ? "junction" : "dir"
+    );
     const env = {
       DATA_DIR: dataDir,
       DOCKER_UPDATE_TRIGGER_FILE: path.join(dataDir, "update", "request.json"),

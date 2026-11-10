@@ -294,6 +294,95 @@ Michanganyiko ya mfinyazo ni wasifu wa mfinyazo wenye majina ambao unaweza kuhus
 
 Sehemu ya dashibodi: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Masharti / mwongozo wa mwendeshaji (CCR & kikao-dup)
+
+CCR (`ccr`) na `session-dedup` badala ya maandishi au elide na kuacha a** alama** nyuma. Sehemu hii ni rejeleo la opereta la kuunganisha mteja juu, kusoma vialamisho viwili, na kurejesha au kutambua maudhui yaliyopendekezwa. Mitambo ya kila injini imefunikwa hapo juu; hii ndio safu ya "nawezaje kuiendesha".
+
+### Usafiri na vituo
+
+Seva MCP inayofichua zana za CCR inaweza kufikiwa kwa njia tatu. Msingi msingi URL ni `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Usafiri                                          | URL / amri                              | Vidokezo                                                                                                                                         |
+| ------------------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| HTTP inayoweza kutiririka (mteja, anapendekezwa) | `http://localhost:20128/api/mcp/stream` | Wateja wa MCP wa sasa wanazungumza nao.                                                                                                          |
+| Urithi SSE singleton                             | `http://localhost:20128/api/mcp/sse`    | Usafiri wa zamani wa singleton. Ni** hufunga** vikao vinavyoweza kutiririka; tumia wateja `streamable-http` dhidi ya `/api/mcp/stream`, sio hii. |
+| stdio                                            | `omniroute --mcp`                       | Kwa usanidi wa IDE MCP ambao husababisha mchakato. Hakuna bendera `--dev` ; `omniroute --mcp` ndio sehemu ya kuingilia ya stdio.                 |
+
+### Viwango vya uhifadhi (kinachosalia kuanzishwa tena)
+
+CCR ni** daraja mbili** duka, sio kwenye kumbukumbu pekee:
+
+- **Kiwango cha joto cha kumbukumbu** — per-block cap 2 MiB, per-principal 16 MiB, global 64 MiB. Maingizo chaguomsingi kwa TTL 24 h (kiwango cha juu zaidi cha siku 7). Urejeshaji kamili wa MCP kutoka kwa kumbukumbu umefungwa kwa 256 KiB; chochote kikubwa bado kinaweza kufikiwa kupitia aina mbalimbali / grep.
+- **Daraja la kudumu SQLite** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, on by default) — huweka nyuma kiwango cha kumbukumbu ili kizuizi kiokoe kufukuzwa LRU, kuwashwa upya, au kutua tena kwa tukio lingine. Safu huweka kizuizi TTL, kwa hivyo kizuizi kilichopita TTL yake kimeondoka kutoka kwa viwango vyote viwili.
+
+Walinzi watatu huweka kiwango cha kudumu kikiwa na — a block hukaa kwa kumbukumbu tu wakati:
+
+1. block imekwisha** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. wakati wa kukimbia ni wakati wa kukimbia wa wingu (hakuna diski ya ndani);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Kwa hivyo "kizuizi kilitoweka" sio hadithi ya kuanzishwa upya kwa blanketi: kizuizi cha sub-512 KB kwenye muda wa kukimbia wa ndani, usio wa wingu husalia kuanzishwa upya kupitia kiwango cha kudumu hadi TTL yake iishe. Tazama [rejeleo la Mazingira](../reference/ENVIRONMENT.md) kwa utofauti.
+
+### Alama mbili
+
+| Alama                                 | Maana                                                                                                                                                | Nini mfano unapaswa kufanya                                                                                                                                                                         |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Kizuizi kikubwa kilihifadhiwa kikiwa kimeshughulikiwa.                                                                                               | Piga `omniroute_ccr_retrieve` na** Heshi ya heksi 24 imenakiliwa kwa neno moja** ili kurudisha maandishi asilia.                                                                                    |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided maandishi tayari yametumwa katika zamu ya awali ya kipindi sawa. Hii ni** kuangalia nyuma kwa makusudi** , si hasara au kosa. | Fanya** sivyo** piga chombo chochote na ufanye** sivyo** jaribu "kuijenga upya". Tukio la kwanza la maandishi ni nakala ya kisheria; zamu ya sasa haijaandikwa tena, inatolewa kwa zamu ya baadaye. |
+
+Kuangalia nyuma kwa `[dedup:ref]` ni uamuzi wa itifaki wa makusudi — hakuna ujenzi wa kabla ya kutuma. Ichukulie kama "maandishi haya yalikuwa tayari kwenye waya mapema katika kipindi hiki."
+
+### Mahitaji ya mteja
+
+- **Ufunguo (stdio):** mpigaji simu wa stdio habebi kitambulisho cha kila ombi, kwa hivyo inathibitisha na `OMNIROUTE_API_KEY` (iliyowekwa katika seva ya MCP `env`). Bila hivyo mpigaji simu hatambuliki na zana zinazohitaji mkuu wa shule zinaweza kushusha hadhi.
+- **`tools[]` ni sharti la sindano.** Maagizo ya CCR ya kupata-itifaki (#8033) yamedungwa** pekee** wakati ombi limetangazwa `tools[]` inathibitisha mteja anaweza kufikia `omniroute_ccr_retrieve`. Mechi ni sehemu inayofuata inayolingana inayopakana na kitenganishi (`__`, `.`, `/`, `:`) — kamwe hakuna kamba ndogo — kwa hivyo jina lililowekwa nafasi ya jina kama vile `mcp__gateway__omniroute_ccr_retrieve` bado huhesabiwa. `tools[]` haipo au isiyolingana inamaanisha kuwa maagizo _si_ yamedungwa, kwa muundo.
+- **`codemode:false` (wateja OpenCode ).** OpenCode chaguo-msingi kwa Njia ya Msimbo, ambayo hutangaza zana zake asili tu kwa modeli na** haifanyi hivyo** weka zana MCP kwenye orodha ya asili `tools[]`. Weka `codemode: false` kwenye ingizo la seva MCP ili zana za `omniroute_ccr_*` zitangazwe. Hii ni** mteja** mpangilio, sio wa OmniRoute. Bado haipati maagizo ya CCR hudungwa: OpenCode hutaja chombo `<server>_<tool>`, kwa hivyo seva inayoitwa `omniroute` inafichua `omniroute_omniroute_ccr_retrieve`, na `_` sio mojawapo ya vitenganishi vinavyolingana.
+- **Wakuu wa shule.** Hifadhi na urejeshaji hutengwa kwa kila mhusika mkuu aliyeidhinishwa (kwa kila kitufe cha API ). Ufunguo huona vizuizi vyake pekee.
+
+### Upeo kwa chombo
+
+Utekelezaji wa mawanda huwa umewashwa kwa wapiga simu HTTP/SSE wenye upeo mwembamba. Zana `omniroute_` CCR zinahitaji:
+
+| Zana                     | Upeo                |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Upeo unaokosekana hurejesha**MCP matokeo ya kosa la zana** (`isError: true`, si HTTP 403 — `403 LOCAL_ONLY` ni mwandishi tofauti wa mlinzi wa njia ya nyuma): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Kitufe kidogo cha mbali kinaweza kushikilia `mcp:connect` (huidhinisha `/api/mcp/` ya eneo-pekee kuchonga) pamoja na upeo mahususi read/write unaohitaji.
+
+### Matrix ya mteja
+
+| Mteja           | Usafiri                                           | Sanidi ili kutumia                                                                                                                                                                                                                                  | `tools[]` kutangazwa? (maelekezo ya → CCR hudungwa)                                                                                                                                     |
+| --------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| nambari Claude  | inayoweza kutiririka-http                         | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                   | Ndiyo — MCP-uwezo; hudungwa.                                                                                                                                                            |
+| Cursor / Cline  | `stdio`** au** `streamable-http`                  | stdio: `omniroute --mcp` na `OMNIROUTE_API_KEY` katika `env`; au ingizo la mbali MCP linaloelekeza `http://localhost:20128/api/mcp/stream` (tazama [Mwongozo wa Kuweka → MCP Usanidi wa Mteja](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Ndio — tangaza zana za `omniroute_ccr_*`.                                                                                                                                               |
+| OpenCode        | inayoweza kutiririka-http                         | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, pamoja na `codemode: false`                                                                                                                                               | Zana zilizotangazwa tu na `codemode: false`; maagizo bado hayajadungwa, kwa sababu `omniroute_omniroute_ccr_retrieve` hailingani (angalia [mahitaji ya Mteja](#client-prerequisites) ). |
+| OpenAI-sambamba | HTTP inayolingana na OpenAI (kukamilika kwa soga) | mteja wa kawaida wa kukamilisha gumzo dhidi ya ncha inayooana na OpenAI                                                                                                                                                                             | **Kamwe** — mpigaji simu anayeendana na OpenAI kamwe huwa haambiwi kupiga kifaa, na maagizo hayajadungwa.                                                                               |
+
+### Vikomo vya urejeshaji na uwekaji kurasa
+
+matokeo ya maandishi ya zana MCP yanakatwa karibu na `mcpAccessibility.maxTextChars` (chaguo-msingi `50000`). Urejeshaji wa `full` wa kizuizi umewekwa kwa KiB — 256** hakuna urejeshaji kamili usio na kikomo** . Wakati `chars=N` ya block ni kubwa, ukurasa badala ya kuvuta jambo zima:
+
+- Kanuni ya kidole gumba:**`chars > 40000` → tumia `mode`** , kamwe kujaa tupu.
+- `mode:"grep"` — regex `pattern` inayolingana mstari kwa mstari, hadi mistari 1,000 inayolingana (`unique: true` drops inajirudia), nafuu zaidi kwa "tafuta mstari mmoja ninaohitaji."
+- `mode:"lines"` — safu ya mstari yenye fahirisi 1; inahitaji `start` na `end`.
+- mistari `mode:"head"` / `mode:"tail"` — first/last `n`.
+- `mode:"stats"` — mstari, tabia, na hesabu za byte bila mwili.
+
+Tumia `mode:"lines"` na `start`/`end` kutembea kizuizi kirefu kwenye kurasa badala ya kuomba jambo zima mara moja.
+
+### Chombo cha kumtaja
+
+Zana ya kurejesha kwa sasa imepewa jina `omniroute_ccr_retrieve` (kiambishi awali cha `omniroute_` ni kazi ya tarehe ya migongano ya jina la seva). Jina la zana ya kiambishi kilicho na mipaka safi na urekebishaji wa matokeo ya MCP JSON iliyokatwa katikati ya mfuatano hufuatiliwa kama ufuatiliaji wa juu wa mkondo; ukurasa huu unaandika tabia ya sasa, iliyosafirishwa pekee.
+
+### Mzunguko wa maisha ya kikao
+
+Vipindi vya HTTP vinavyoweza kutiririka bila kufanya kitu na seva huvivuna; dirisha la uvivu limewekwa na `OMNIROUTE_MCP_SESSION_IDLE_MS` (dakika 5 chaguomsingi; iliyorejelewa kwa jina, sio thamani ya msimbo ngumu, kwa hivyo ukurasa huu hauelezi inapobadilika). Dalili ya kikao kilichovunwa bila kufanya kitu ni HTTP 404 na `Unknown Mcp-Session-Id` — suluhu ni kuunganisha upya au kuanzisha upya kipindi,** sivyo** kuzungusha kitufe, kubadilisha upeo, au kubadilisha jina la zana.
+
 ## Kiolesura cha API
 
 | Njia                                   | Madhumuni                                                                   |

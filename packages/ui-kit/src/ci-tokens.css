@@ -14,6 +14,14 @@
 .ci-theme {
   color-scheme: light;
 
+  /* Scheme toggles for values a component must pick per colour scheme, when the
+     values live on the component (for example inline) and so cannot be set in
+     these blocks. var(--ci-scheme-dark, X) is X only in the light scheme and
+     var(--ci-scheme-light, X) only in the dark scheme: `initial` falls back and
+     the empty value does not. Inheritance keeps nested themes correct. */
+  --ci-scheme-light: ;
+  --ci-scheme-dark: initial;
+
   /* --- observed brand seeds ------------------------------------------------ */
   --ci-observed-canvas: #fbfbf8;
   --ci-observed-ink: #040d10;
@@ -72,6 +80,8 @@
   --ci-color-accent-surface-subtle: var(--ci-lime-50);
   --ci-color-accent-surface-strong: var(--ci-lime-100);
   --ci-color-accent-surface-range: rgb(216 255 0 / 0.22);
+  /* Accent as text or icon ink on content surfaces (lime itself is ~1.2:1 on white). */
+  --ci-color-accent-ink: var(--ci-lime-800);
   --ci-color-control-active-bg: var(--ci-color-surface-inverse);
   --ci-color-control-active-fg: var(--ci-color-text-inverse);
   --ci-color-control-thumb: var(--ci-color-foreground);
@@ -94,18 +104,61 @@
   --ci-color-live: #cff331;
   --ci-color-success: #087a4f;
   --ci-color-success-bg: #e8f7f0;
-  --ci-color-warning: #a75a00;
+  --ci-color-warning: #a05600;
   --ci-color-warning-bg: #fff3df;
+  /* Warning control outline: 3:1 or better against --ci-color-warning-bg and every
+     content surface. An alias, so each theme's warning ink carries over. */
+  --ci-color-warning-border: var(--ci-color-warning);
   --ci-color-danger: #bf3636;
   --ci-color-danger-bg: #ffeded;
   --ci-color-danger-foreground: var(--ci-neutral-0);
   --ci-color-info: #2869d8;
   --ci-color-info-bg: #edf4ff;
-  --ci-chart-1: #9bb800;
+  /* Chart marks need 3:1 on background, surface and surface-subtle;
+     lime-600 measured 2.19:1 on the canvas. */
+  --ci-chart-1: var(--ci-lime-700);
   --ci-chart-2: #2869d8;
   --ci-chart-3: #7d4fc7;
   --ci-chart-4: #087a4f;
   --ci-chart-5: #c15588;
+  /* Categorical slots 6–8: orange, petrol, brown. Assign series in
+     ciChartSeriesOrder (tokens.ts); colour never identifies a series alone. */
+  --ci-chart-6: #d2580f;
+  --ci-chart-7: #007f8c;
+  --ci-chart-8: #8f5a2a;
+  /* Text-safe ink per chart colour: 4.5:1 on background, surface and
+     surface-subtle. Same OKLCH hue as the chart token, darker. */
+  --ci-chart-1-ink: var(--ci-lime-800);
+  --ci-chart-2-ink: #1d5ecc;
+  --ci-chart-3-ink: #7749c0;
+  --ci-chart-4-ink: #027249;
+  --ci-chart-5-ink: #a83e72;
+  --ci-chart-6-ink: #ab4403;
+  --ci-chart-7-ink: #066f7a;
+  --ci-chart-8-ink: #8c5727;
+  /* Opaque chip/row tints; pair with --ci-chart-N-ink text and an optional --ci-chart-N border. */
+  --ci-chart-1-subtle: #eef1e0;
+  --ci-chart-2-subtle: #e5edfa;
+  --ci-chart-3-subtle: #efeaf8;
+  --ci-chart-4-subtle: #e1efea;
+  --ci-chart-5-subtle: #f8ebf1;
+  --ci-chart-6-subtle: #faebe2;
+  --ci-chart-7-subtle: #e0f0f1;
+  --ci-chart-8-subtle: #f2ebe5;
+  --ci-scale-seq-1: #559471;
+  --ci-scale-seq-2: #43815f;
+  --ci-scale-seq-3: #326e4e;
+  --ci-scale-seq-4: #205b3d;
+  --ci-scale-seq-5: #0b492d;
+  --ci-scale-seq-6: #013720;
+  --ci-scale-seq-7: #002614;
+  --ci-scale-div-1: #4d1e00;
+  --ci-scale-div-2: #783302;
+  --ci-scale-div-3: #a24c15;
+  --ci-scale-div-4: #888885;
+  --ci-scale-div-5: #3969a6;
+  --ci-scale-div-6: #06498e;
+  --ci-scale-div-7: #012d5d;
 
   /* Approved muted tints for illustrated announcement surfaces (both themes). */
   --ci-color-announcement-info: #689ed7;
@@ -113,6 +166,44 @@
   --ci-color-announcement-success: #54b995;
   --ci-color-announcement-violet: #9570e3;
   --ci-color-announcement-warning: #d7a255;
+
+  /* --- code syntax (derived) --------------------------------------------- */
+  /* --ci-code-* follows the theme surfaces; --ci-code-inverse-* is the dark-
+     surface palette (terminal CodePreview in every theme, and dark mode).
+     ciTokens.color.code/codeInverse export the resolved default-theme hex
+     values so editors such as Monaco can use them without reading CSS. */
+  --ci-code-keyword: var(--ci-lime-800);
+  --ci-code-string: #027249;
+  --ci-code-number: #9a5300;
+  --ci-code-function: #1d5ecc;
+  --ci-code-property: #8a3fb0;
+  --ci-code-comment: var(--ci-neutral-600);
+  --ci-code-inverse-keyword: var(--ci-lime-400);
+  --ci-code-inverse-string: #a7e8c5;
+  --ci-code-inverse-number: #f4cf8b;
+  --ci-code-inverse-function: #b8d8ff;
+  --ci-code-inverse-property: #e9c1ff;
+  --ci-code-inverse-comment: var(--ci-neutral-400);
+
+  /* --- log levels (derived) ----------------------------------------------- */
+  /* Console and log viewers on the dark technical panel, in every theme. Inks
+     keep 4.5:1 on --ci-color-surface-inverse and on every -subtle tint, so a
+     tinted row can carry the timestamp and message in any ink. Tints do not stack:
+     a badge inside a tinted row stays untinted. They are translucent on purpose,
+     to follow the inverse surface of each appearance.
+     ciTokens.color.log/logSubtle export the default-theme values. */
+  --ci-log-debug: var(--ci-neutral-300);
+  --ci-log-trace: var(--ci-neutral-400);
+  --ci-log-info: #39c5cf;
+  --ci-log-warn: #e3b341;
+  --ci-log-error: #ff7b72;
+  --ci-log-fatal: #f778ba;
+  --ci-log-debug-subtle: rgb(199 203 197 / 0.16);
+  --ci-log-trace-subtle: rgb(156 163 159 / 0.16);
+  --ci-log-info-subtle: rgb(57 197 207 / 0.16);
+  --ci-log-warn-subtle: rgb(227 179 65 / 0.16);
+  --ci-log-error-subtle: rgb(255 123 114 / 0.16);
+  --ci-log-fatal-subtle: rgb(247 120 186 / 0.16);
 
   /* --- typography ---------------------------------------------------------- */
   /* All text, including technical content, uses the same self-hosted family. */
@@ -282,6 +373,9 @@
   --ci-z-toast: 1400;
 
   /* --- component aliases -------------------------------------------------- */
+  /* Badge tone="accent" text: the accent ink, except where it falls under 4.5:1 on the
+     translucent accent tint over the muted surface (Editions light darkens it). */
+  --ci-badge-accent-ink: var(--ci-color-accent-ink);
   --ci-button-primary-bg: var(--ci-color-surface-inverse);
   --ci-button-primary-fg: var(--ci-color-text-inverse);
   --ci-button-primary-hover: var(--ci-neutral-800);
@@ -332,6 +426,9 @@
 [data-theme="dark"] .ci-theme {
   color-scheme: dark;
 
+  --ci-scheme-light: initial;
+  --ci-scheme-dark: ;
+
   --ci-color-background: var(--ci-neutral-950);
   --ci-color-canvas: var(--ci-color-background);
   --ci-color-surface: var(--ci-neutral-900);
@@ -352,6 +449,7 @@
   --ci-color-accent-surface-subtle: rgb(216 255 0 / 0.08);
   --ci-color-accent-surface-strong: rgb(216 255 0 / 0.14);
   --ci-color-accent-surface-range: rgb(216 255 0 / 0.12);
+  --ci-color-accent-ink: var(--ci-color-accent);
   --ci-color-control-active-bg: var(--ci-color-accent);
   --ci-color-control-active-fg: var(--ci-color-accent-foreground);
   --ci-color-control-thumb: var(--ci-color-foreground);
@@ -383,6 +481,46 @@
   --ci-chart-3: #d0a8ff;
   --ci-chart-4: #5dd6a5;
   --ci-chart-5: #f3a6c9;
+  --ci-chart-6: #ff9a57;
+  --ci-chart-7: #4fd1dc;
+  --ci-chart-8: #d9a46c;
+  --ci-code-keyword: var(--ci-code-inverse-keyword);
+  --ci-code-string: var(--ci-code-inverse-string);
+  --ci-code-number: var(--ci-code-inverse-number);
+  --ci-code-function: var(--ci-code-inverse-function);
+  --ci-code-property: var(--ci-code-inverse-property);
+  --ci-code-comment: var(--ci-code-inverse-comment);
+  /* Dark chart colours already pass 4.5:1 as text. */
+  --ci-chart-1-ink: var(--ci-chart-1);
+  --ci-chart-2-ink: var(--ci-chart-2);
+  --ci-chart-3-ink: var(--ci-chart-3);
+  --ci-chart-4-ink: var(--ci-chart-4);
+  --ci-chart-5-ink: var(--ci-chart-5);
+  --ci-chart-6-ink: var(--ci-chart-6);
+  --ci-chart-7-ink: var(--ci-chart-7);
+  --ci-chart-8-ink: var(--ci-chart-8);
+  --ci-chart-1-subtle: #384726;
+  --ci-chart-2-subtle: #273949;
+  --ci-chart-3-subtle: #343649;
+  --ci-chart-4-subtle: #1d3f37;
+  --ci-chart-5-subtle: #3b353f;
+  --ci-chart-6-subtle: #3d3328;
+  --ci-chart-7-subtle: #1a3e42;
+  --ci-chart-8-subtle: #36352c;
+  --ci-scale-seq-1: #16a25f;
+  --ci-scale-seq-2: #41b373;
+  --ci-scale-seq-3: #5fc487;
+  --ci-scale-seq-4: #7ad59c;
+  --ci-scale-seq-5: #94e6b1;
+  --ci-scale-seq-6: #adf8c7;
+  --ci-scale-seq-7: #e4ffec;
+  --ci-scale-div-1: #fedbc4;
+  --ci-scale-div-2: #ffb27d;
+  --ci-scale-div-3: #e3945b;
+  --ci-scale-div-4: #8b8e8e;
+  --ci-scale-div-5: #71aeec;
+  --ci-scale-div-6: #99cbfe;
+  --ci-scale-div-7: #cfe6ff;
 
   --ci-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.34);
   --ci-shadow-sm:
@@ -403,6 +541,28 @@
   --primary: var(--ci-color-accent);
   --primary-foreground: var(--ci-color-accent-foreground);
   --destructive-foreground: var(--ci-color-danger-foreground);
+}
+
+/* Script coverage: the bundled Switzer covers Latin only (no Cyrillic, Greek,
+   Vietnamese tone marks, Azerbaijani ə, Armenian or Georgian). Text in those
+   languages uses the system part of --ci-font-ui as one whole face instead of
+   mixing Switzer and a fallback glyph by glyph inside a word. Matches lang on
+   the document, on a .ci-theme root and on any inner element carrying lang.
+   Specificity is a single pseudo-class, so it outranks the token block above
+   by source order only; a host rule such as `:lang(ru) { --ci-font-ui: ... }`
+   loaded after the kit plugs its own matching webfont. Serbian Latin stays on
+   Switzer, and the Editions landing variant keeps its host-supplied Inter. */
+:where(:root, .ci-theme, [lang]):is(:lang(ru), :lang(uk), :lang(be), :lang(bg), :lang(sr), :lang(mk), :lang(kk), :lang(ky), :lang(mn), :lang(tg), :lang(tt), :lang(ba), :lang(cv), :lang(el), :lang(vi), :lang(az), :lang(hy), :lang(ka)):where(:not(:lang(sr-Latn), :root:has([data-ci-appearance="editions"][data-ci-editions-variant="landing"]) *, [data-ci-appearance="editions"][data-ci-editions-variant="landing"] *)) {
+  --ci-font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-display: var(--ci-font-ui);
+  --ci-font-mono: var(--ci-font-ui);
+  --ci-type-body-family: var(--ci-font-ui);
+  --ci-type-ui-family: var(--ci-font-ui);
+  --ci-type-display-family: var(--ci-font-display);
+  --ci-type-dashboard-display-family: var(--ci-font-display);
+  --font-sans: var(--ci-font-ui);
+  --font-serif: var(--ci-font-display);
+  --font-mono: var(--ci-font-mono);
 }
 
 @media (prefers-reduced-motion: reduce) {

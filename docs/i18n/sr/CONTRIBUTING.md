@@ -13,21 +13,26 @@ i korake usaglašavanja.
 
 ---
 
-## Подешавање развојног окружења
+## Podešavanje razvojnog okruženja
 
-### Предуслови
+### Preduslovi
 
-- **Node.js** `>=22.22.2 <23`, или `>=24.0.0 <27` (препоручено: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ili `>=24.0.0 <27` (preporučeno: 24 LTS)
 - **npm** 10+
 
-> **Корисници npm v11+ (Node 24+):** Након `npm install`, проверите да ли су изворни модули инсталирани:
-> `node -e "require('better-sqlite3')"`. Ако команда не успе уз грешку `MODULE_NOT_FOUND`,
-> покрените `npm approve-scripts better-sqlite3 && npm install`. Погледајте
-> [Решавање проблема](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Windows sa Node 24:** koristite aktuelno izdanje zakrpe za 24 LTS (najmanje 24.20.0).
+> Starija izdanja mogu prekinuti proces nakon uspešnih testova kada `--test-force-exit` zatvori
+> proces. Node-ova [Windows libuv ispravka](https://github.com/nodejs/node/pull/61999) rešava
+> ovaj pad tokom izvršavanja; zadržite provere tvrdnji testova i izlaza pokretača omogućene.
+
+> **Korisnici npm v11+ (Node 24+):** Nakon `npm install`, proverite da li su izvorni moduli instalirani:
+> `node -e "require('better-sqlite3')"`. Ako ne uspe sa greškom `MODULE_NOT_FOUND`,
+> pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte
+> [Rešavanje problema](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Клонирање и инсталација
+### Kloniranje i instalacija
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,94 +40,94 @@ cd OmniRoute
 npm install
 ```
 
-### Променљиве окружења
+### Promenljive okruženja
 
 ```bash
-# Направите своју .env датотеку на основу шаблона
+# Kreirajte svoj .env na osnovu šablona
 cp .env.example .env
 
-# Генеришите неопходне тајне
+# Generišite potrebne tajne
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Кључне променљиве за развој:
+Ključne promenljive za razvoj:
 
-| Променљива             | Подразумевана вредност за развој | Опис                       |
-| ---------------------- | -------------------------------- | -------------------------- |
-| `PORT`                 | `20128`                          | Порт сервера               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | Основни URL за фронтенд    |
-| `JWT_SECRET`           | (генерисати изнад)               | Тајна за потписивање JWT-а |
-| `INITIAL_PASSWORD`     | `CHANGEME`                       | Лозинка за прву пријаву    |
-| `APP_LOG_LEVEL`        | `info`                           | Ниво опширности евиденције |
+| Promenljiva            | Podrazumevana vrednost za razvoj | Opis                           |
+| ---------------------- | -------------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                          | Port servera                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | Osnovni URL frontend-a         |
+| `JWT_SECRET`           | (generišite iznad)               | Tajna za potpisivanje JWT-a    |
+| `INITIAL_PASSWORD`     | `CHANGEME`                       | Lozinka za prvo prijavljivanje |
+| `APP_LOG_LEVEL`        | `info`                           | Nivo detaljnosti zapisnika     |
 
-### Подешавања контролне табле
+### Podešavanja kontrolne table
 
-Контролна табла пружа прекидаче корисничког интерфејса за функције које се такође могу конфигурисати путем променљивих окружења:
+Kontrolna tabla pruža prekidače u korisničkom interfejsu za funkcije koje se takođe mogu konfigurisati putem promenljivih okruženja:
 
-| Локација подешавања   | Прекидач                | Опис                                                   |
-| --------------------- | ----------------------- | ------------------------------------------------------ |
-| Подешавања → Напредно | Режим отклањања грешака | Омогућава евиденцију захтева за отклањање грешака (UI) |
-| Подешавања → Опште    | Видљивост бочне траке   | Приказује/скрива одељке бочне траке                    |
+| Lokacija podešavanja | Prekidač           | Opis                                                  |
+| -------------------- | ------------------ | ----------------------------------------------------- |
+| Settings → Advanced  | Debug Mode         | Omogući zapisnike zahteva za otklanjanje grešaka (UI) |
+| Settings → General   | Sidebar Visibility | Prikaži/sakrij odeljke bočne trake                    |
 
-Ова подешавања се чувају у бази података и опстају након поновних покретања, а када су постављена, имају предност над подразумеваним вредностима променљивих окружења.
+Ova podešavanja se čuvaju u bazi podataka i opstaju nakon ponovnog pokretanja, nadjačavajući podrazumevane vrednosti promenljivih okruženja kada su postavljena.
 
-### Локално покретање
+### Lokalno pokretanje
 
 ```bash
-# Развојни режим (аутоматско поновно учитавање)
+# Razvojni režim (ponovno učitavanje bez ručnog pokretanja)
 npm run dev
 
-# Продукциона изградња
-npm run build    # next build → .build/next/ затим assembleStandalone → dist/
+# Produkciona izgradnja
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Брзо компајлирање само бекенда/API-ја за измене сарадника
+# Brza kompilacija samo backend-a/API-ja za izmene saradnika
 npm run build:contributor
 
-# Изградња издања (чиста поновна изградња + HEAD контролна ознака — обавезно за постављање)
-npm run build:release   # rm -rf .build dist && изградња + уписује dist/BUILD_SHA
+# Izgradnja izdanja (čista ponovna izgradnja + HEAD sentinel — obavezno za postavljanje)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Уобичајена конфигурација порта
+# Uobičajena konfiguracija porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Изградња за сараднике обавља проверу само компајлирањем: не саставља самосталну
-дистрибуцију нити изграђује опционе изворне ресурсе за паковање. Користите редовну продукциону изградњу када
-треба да проверите пакет спреман за испоруку.
+Izgradnja za saradnike obavlja validaciju samo tokom kompilacije: ne sklapa samostalnu
+distribuciju niti izgrađuje opcionalna izvorna sredstva za pakovanje. Koristite standardnu produkcionu
+izgradnju kada treba da proverite paket spreman za isporuku.
 
-### Распоред излазних датотека изградње
+### Raspored izlaza izgradnje
 
-| Директоријум | Садржај                                                                           | Праћено |
-| ------------ | --------------------------------------------------------------------------------- | ------- |
-| `src/`       | Изворни код апликације (TypeScript / TSX)                                         | Да      |
-| `.build/`    | Посредне датотеке — излаз `next build` (игнорише их Git, `distDir = .build/next`) | Не      |
-| `dist/`      | Пакет спреман за испоруку — саставља га `assembleStandalone` (игнорише га Git)    | Не      |
+| Direktorijum | Sadržaj                                                                          | Praćeno |
+| ------------ | -------------------------------------------------------------------------------- | ------- |
+| `src/`       | Izvorni kod aplikacije (TypeScript / TSX)                                        | Da      |
+| `.build/`    | Međurezultati — izlaz komande `next build` (gitignored, `distDir = .build/next`) | Ne      |
+| `dist/`      | Paket spreman za isporuku — sklapa ga `assembleStandalone` (gitignored)          | Ne      |
 
-Процес изградње се извршава у једном пролазу:
+Proces izgradnje odvija se u jednom prolazu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (излаз Next.js-а)
-  └─ assembleStandalone()                 (копира самосталне + статичке + јавне + изворне ресурсе)
-       └─ излаз: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` додатно прво чисти оба директоријума и уписује
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) као контролну ознаку интегритета постављања.
+`npm run build:release` dodatno prvo čisti oba direktorijuma i upisuje
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao kontrolni pokazatelj integriteta za postavljanje.
 
-`npm run build:contributor` користи профил изградње само за бекенд. Он привремено замењује
-датотеке корисничког интерфејса контролне табле помоћним датотекама током изградње, задржава обрађиваче API рута и враћа оригиналне датотеке
-након изградње. Користите `npm run build` за измене које утичу на кориснички интерфејс контролне табле или за потпуну
-проверу издања; профил за сараднике није замена за изградњу издања.
+`npm run build:contributor` koristi profil izgradnje samo za backend. Privremeno zamenjuje datoteke
+korisničkog interfejsa kontrolne table tokom izgradnje, zadržava rukovaoce API ruta i vraća originalne
+datoteke nakon izgradnje. Koristite `npm run build` za izmene koje utiču na korisnički interfejs kontrolne table
+ili za potpunu validaciju izdanja; profil za saradnike nije zamena za izgradnju izdanja.
 
-> **Напомена за постављање на VPS:** удаљени директоријум слике `/usr/lib/node_modules/omniroute/app/`
-> остаје непромењен. Вештине за постављање помоћу rsync-а синхронизују садржај директоријума `dist/` у њега.
-> Промењена је само путања излаза изградње унутар репозиторијума (`app/` → `dist/`).
+> **Napomena za VPS postavljanje:** udaljeni direktorijum slike `/usr/lib/node_modules/omniroute/app/`
+> ostaje nepromenjen. Veštine za postavljanje rsync-om sinhronizuju sadržaj direktorijuma `dist/` u njega.
+> Promenjena je samo putanja izlaza izgradnje unutar repozitorijuma (`app/` → `dist/`).
 
-Подразумевани URL-ови:
+Podrazumevani URL-ovi:
 
-- **Контролна табла**: `http://localhost:20128/dashboard`
+- **Kontrolna tabla**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---

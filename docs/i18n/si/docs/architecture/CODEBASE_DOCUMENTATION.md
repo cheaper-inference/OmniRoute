@@ -442,7 +442,7 @@ server/
 
 ---
 
-## 4. `open-sse/` - ප්‍රවාහ එන්ජින් වැඩබිම
+## 4. `open-sse/` — ප්‍රවාහ එන්ජිම වැඩබිම
 
 `@omniroute/open-sse` ලෙස ප්‍රකාශයට පත් කරන ලද වෙනම npm වැඩ ඉඩක්. ඉල්ලීම් සැකසීම, ක්‍රියාත්මක කරන්නන්, පරිවර්තකයන්, සේවා, ට්‍රාන්ස්ෆෝමරය සහ MCP සේවාදායකය සතුය.
 
@@ -454,7 +454,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -484,17 +484,17 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ඉහළ මට්ටමේ විධායක මොඩියුල 156 (`*.ts` minus `base.ts`, `index.ts` සහ පරීක්ෂණ - ගණන් කිරීමේ `npm run check:docs-counts` මිනුම්). සෑම විධායක පන්තියක්ම `BaseExecutor` (`base.ts`), සෘජුව හෝ `DefaultExecutor` හරහා හෝ වෙනත් ක්‍රියාත්මක කරන්නෙකු හරහා දිගු කරයි; ඉතිරි මොඩියුලයන් එක්-සැපයුම්කරුගේ උපකාරක වේ (මෙවලම් ක්‍රම, fetch/TTS ඇඩප්ටර, quirk හසුරුවන්නා). විධායකයින්ට ඇතුළත් වන්නේ:
+ඉහළ මට්ටමේ විධායක මොඩියුල 159 (`*.ts` minus `base.ts`, `index.ts` සහ පරීක්ෂණ — ගණන් කිරීමේ `npm run check:docs-counts` මිනුම්). සෑම විධායක පන්තියක්ම `BaseExecutor` (`base.ts`) සෘජුව හෝ `DefaultExecutor` හරහා හෝ වෙනත් ක්‍රියාත්මක කරන්නෙකු හරහා දිගු කරයි; ඉතිරි මොඩියුලයන් එක්-සැපයුම්කරුට සහායකයින් වේ (මෙවලම් ක්‍රම, fetch/TTS ඇඩප්ටර, quirk හසුරුවන්න). විධායකයින්ට ඇතුළත් වන්නේ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `pollinations`, `qoder`, plus `devin-desktop` `petals` බෙදාගත් අනන්‍යතා සහායකයා) සහ `claudeIdentity.ts` (රෙජිස්ට්‍රිය) `index.ts`
 
-> සටහන: මෙහි ලැයිස්තුගත කර නොමැති සපයන්නන් සඳහා සාමාන්‍ය OpenAI-අනුකූල ක්‍රියාකාරකය භාවිතයෙන් `default.ts` විසින් සේවය කරනු ලැබේ. සම්පූර්ණ සැපයුම්කරුවන්ගේ නාමාවලිය (සපයන්නන් 377) `src/shared/constants/providers.ts` හි වාසය කරයි.
+> සටහන: මෙහි ලැයිස්තුගත කර නොමැති සපයන්නන් සඳහා සාමාන්‍ය OpenAI-අනුකූල ක්‍රියාකාරකය භාවිතයෙන් `default.ts` විසින් සේවය කරනු ලැබේ. සම්පූර්ණ සැපයුම්කරුවන්ගේ නාමාවලිය (සපයන්නන් 381) `src/shared/constants/providers.ts` හි වාසය කරයි.
 
 ### 4.3 `open-sse/translator/`
 
 හබ් සහ කථන පරිවර්තනය (OpenAI යනු කේන්ද්‍රයයි).
 
-- **9 ඉල්ලීම් පරිවර්තකයන්** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **පරිවර්තකයින් 9ක් ඉල්ලන්න** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
 - **9 ප්‍රතිචාර පරිවර්තකයන්** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
 - **උදව්කරුවන් 9 දෙනෙක්** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, plus helper tests.
 - **රූප සහායකයින්** (`translator/image/sizeMapper.ts`).
@@ -517,25 +517,25 @@ open-sse/
 | හැඹිලිගත කිරීම       | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | මාර්ගගත බුද්ධිය      | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | ආදර්ශ හැසිරවීම       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| සම්පීඩනය             | `compression/` - සම්පූර්ණ සම්පීඩන එන්ජින් රැහැන්                                                                                                                                                                                                         |
+| සම්පීඩනය             | `compression/` — සම්පූර්ණ සම්පීඩන එන්ජින් රැහැන්                                                                                                                                                                                                         |
 | ටෝකන් + සැසිය        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| ස්ථරය / මැනිෆෙස්ට්   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| ස්ථරය / මැනිෆෙස්ටය   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / ජාලය            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | කණ්ඩායම්             | `batchProcessor.ts`                                                                                                                                                                                                                                      |
 | භාවිතය               | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **අද්විතීය මෙවලම් 110 ක්** `server.ts` හි රැහැන්ගත (45 canonical in `schemas/tools.ts` + memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus and compression modules — Union counted by `countUniqueMcpTools`).
+- **අද්විතීය මෙවලම් 110 ක්** `server.ts` හි රැහැන්ගත (45 canonical in `schemas/tools.ts` + memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus and compression modules — Union by `countUniqueMcpTools`).
 - **3 ප්රවාහන** : stdio, HTTP Streamable, SSE.
-- **විෂය පථ 33 ක්** ධාවන වේලාවේදී බලාත්මක කර ඇත - `src/shared/constants/mcpScopes.ts` හි පාදක ලැයිස්තුව, සම්පූර්ණ කට්ටලය යනු එක් එක් මෙවලම් මොඩියුලය විසින් ප්‍රකාශිත විෂය පථවල එකමුතුවයි.
+- **විෂය පථ 33 ක්** `src/shared/constants/mcpScopes.ts` හි ධාවන කාල — පාදක ලැයිස්තුවේ බලාත්මක කර ඇත, සම්පූර්ණ කට්ටලය යනු එක් එක් මෙවලම් මොඩියුලය විසින් ප්‍රකාශිත විෂය පථවල එකමුතුවයි.
 - විගණන වගුව: `mcp_tool_audit` ( `audit.ts` මගින් ජනාකීර්ණ).
 - ගොනු: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus tests under `__tests__/`.
 - සම්පූර්ණ මෙවලම් නාමාවලිය සඳහා [MCP-SERVER.md](../frameworks/MCP-SERVER.md) බලන්න.
 
 ### 4.7 `open-sse/config/`
 
-සපයන්නන්ගේ රෙජිස්ට්‍රි (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), එක්-ආකෘති ආකෘති රෙජිස්ට්‍රි (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, zqh, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), අනන්‍යතා සහායකයින් (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `cliFingerprints.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, අක්තපත්‍ර සහායකයන් (`credentialLoader.ts`, `codexClient.ts`) සහ වලාකුළු ඇඩැප්ටර (`azureAi.ts`, `bedrock.ts`, `antigravityModelAliases.ts`, `datarobot.ts`, `glmProvider.ts` `maritalk.ts` `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

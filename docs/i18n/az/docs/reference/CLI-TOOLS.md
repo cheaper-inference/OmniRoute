@@ -107,41 +107,42 @@ bir səthə əlavə edilən hədəf səssizcə uyğunsuzlaşmaq əvəzinə test 
 
 ---
 
-## 1. CLI Code kataloqu (27 alət)
+## 1. CLI Kodunun Kataloqu (28 alət)
 
-`/dashboard/cli-code` bölməsində görünən bütün alətlər. `baseUrlSupport: none` olanlar fərdi baza URL-i əvəzinə MITM və ya manual təlimat vasitəsilə qoşulur:
+`/dashboard/cli-code`-da görünən bütün alətlər. `baseUrlSupport: none` olanlar xüsusi baza URL əvəzinə MITM və ya əl bələdçisindən keçirlər:
 
-| id           | ad                      | təchizatçı              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ----------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic               | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                  | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                    | none           | custom         | false        |
-| cline        | Cline                   | OSS (keçmiş Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org                | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)               | full           | guide          | false        |
-| continue     | Continue                | continue.dev            | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)       | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ             | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)          | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)       | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)            | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (keçmiş SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI              | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS               | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere               | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)       | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)        | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                     | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)             | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                 | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries          | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere               | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                  | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research           | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                  | none           | mitm           | false        |
-| custom       | Fərdi CLI               | —                       | full           | custom-builder | false        |
+| id                | ad                            | satıcı                 | baseUrlSupport | configType | acpSpawnable |
+| ----------------- | ----------------------------- | ---------------------- | -------------- | ---------- | ------------ |
+| klaud             | Claude kodu                   | Anthropic              | dolu           | env        | doğrudur     |
+| kodeks            | OpenAI Codex CLI              | OpenAI                 | dolu           | adət       | doğrudur     |
+| zcode             | ZCode (GLM Kodlaşdırma Planı) | Z.ai                   | heç biri       | adət       | yalan        |
+| klin              | Cline                         | OSS (keçmiş Klod Dev)  | dolu           | adət       | doğrudur     |
+| kilo              | Kilo kodu                     | Kilo-Org               | dolu           | adət       | yalan        |
+| roo               | Roo kodu                      | Roo (OSS)              | dolu           | bələdçi    | yalan        |
+| davam et          | Davam et                      | davam.dev              | dolu           | bələdçi    | yalan        |
+| yardımçı          | Aider                         | OSS (P. Gauthier)      | dolu           | bələdçi    | doğrudur     |
+| döymək            | ForgeCode                     | Antinomiya HQ          | dolu           | adət       | doğrudur     |
+| jcode             | jcode                         | 1jehuang (OSS)         | dolu           | adət       | yalan        |
+| dərin axtarış-tui | DeepSeek TUI                  | Hunter Bown (OSS)      | dolu           | adət       | yalan        |
+| kod balina        | CodeWhale                     | Hmbown (OSS)           | dolu           | adət       | yalan        |
+| açıq kod          | OpenCode                      | Anomaliya (keçmiş SST) | dolu           | bələdçi    | doğrudur     |
+| droid             | Droid zavodu                  | Zavod AI               | qismən         | bələdçi    | yalan        |
+| köməkçi pilot     | GitHub Copilot CLI            | GitHub/MS              | dolu           | adət       | yalan        |
+| kursor-cli        | Cursor CLI                    | İstənilən sfera        | qismən         | bələdçi    | doğrudur     |
+| iyləmək           | Ətir                          | leonardcser (OSS)      | dolu           | adət       | yalan        |
+| pi                | Pi (pi-kodlaşdırma agenti)    | M. Zechner (OSS)       | dolu           | adət       | yalan        |
+| grok-qurmaq       | Grok Build                    | xAI                    | dolu           | adət       | yalan        |
+| əzmək             | Əzmək                         | OSS (cazibə)           | dolu           | adət       | yalan        |
+| qwen              | Qwen kodu                     | Alibaba                | dolu           | bələdçi    | doğrudur     |
+| açıq klaud        | OpenClaude                    | Gitlawb (OSS)          | dolu           | bələdçi    | yalan        |
+| zed               | Zed                           | Zed Industries         | dolu           | bələdçi    | yalan        |
+| kursor            | Cursor                        | İstənilən sfera        | heç biri       | bələdçi    | yalan        |
+| antiqravitasiya   | Antigravity                   | Google                 | heç biri       | mitm       | yalan        |
+| hermes            | Hermes                        | Nous Araşdırma         | heç biri       | bələdçi    | yalan        |
+| kiro              | Kiro AI                       | Amazon                 | heç biri       | mitm       | yalan        |
+| adət              | Xüsusi CLI                    | —                      | dolu           | sifarişçi  | yalan        |
 
-`baseUrlSupport: "partial"` olan alətlərin idarəetmə panelindəki kartında "⚠ Qismən baza URL-i" nişanı göstərilir.
+`baseUrlSupport: "partial"` ilə alətlər tablosunun kartında "⚠ Base URL parcial" nişanını göstərir.
 ---
 
 ## 2. CLI Agentlər Kataloqu (11 alət)
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Yeni Alətlər üçün Parametr Emalçıları
+## 6. Yeni Alətlər üçün Parametrlər İşləyiciləri
 
-`configType: "custom"` olan yeni alətlər üçün xüsusi parametrlər API marşrutları mövcuddur:
+`configType: "custom"` ilə yeni alətlər API marşrutları üçün xüsusi parametrlərə malikdir:
 
-| Marşrut                                     | Alət                                                                     |
-| ------------------------------------------- | ------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                  |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url bayrağı)                                               |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, köhnə)                                    |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, əsas + köhnə `~/.deepseek` sinxronizasiyası) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                    |
-| `POST /api/cli-tools/pi-settings`           | Pi kodlaşdırma agenti                                                    |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                    |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + xüsusi `.env` açarı)                |
+| Marşrut                                     | Alət                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                   |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url bayrağı)                                                |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, miras)                                     |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, əsas + mirası `~/.deepseek` sinxronizasiyası) |
+| `POST /api/cli-tools/smelt-settings`        | Ətir                                                                      |
+| `POST /api/cli-tools/pi-settings`           | Pi kodlaşdırma agenti (`~/.pi/agent/models.json`, `providers.omniroute`)  |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                     |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Kodu (`~/.qwen/settings.json` + ayrılmış `.env` açarı)               |
 
-Bütün marşrutlar xəta cavabları üçün `sanitizeErrorMessage()` funksiyasından istifadə edir (Sərt Qayda #12).
+Bütün marşrutlar səhv cavabları üçün `sanitizeErrorMessage()` istifadə edir (Hard Rule #12).
 
 ---
 
@@ -291,21 +292,21 @@ Tam PT-BR və EN tərcümələri təqdim olunur. Digər 39 lokalizasiya `src/i18
 
 ---
 
-## 9. Sürətli Başlanğıc
+## 9. Tez Başlanğıc
 
-### Addım 1 — OmniRoute API Açarı Əldə Edin
+### Addım 1 — Bir OmniRoute API Açarı əldə edin
 
-1. `/dashboard/api-manager` səhifəsini açın → **API Açarı Yaradın**
+1. `/dashboard/api-manager` → açın** API açarı yaradın**
 2. Ona ad verin (məsələn, `cli-tools`) və bütün icazələri seçin
-3. Açarı kopyalayın — aşağıdakı hər bir CLI üçün ona ehtiyacınız olacaq
+3. Aşağıdakı hər CLI üçün sizə lazım olacaq — açarını kopyalayın
 
 > Açarınız belə görünür: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Addım 2 — CLI Alətlərini Quraşdırın
+### Addım 2 — CLI Tools quraşdırın
 
-npm əsaslı bütün alətlər Node.js 22.22.2+ və ya 24.x tələb edir:
+Bütün npm əsaslı alətlər Node.js 22.22.2 + və ya 24.x tələb edir:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (`omniroute run gemini` vasitəsilə işə salına bilər → /v1beta səthi)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust əsaslıdır
+cargo install smelt  # Rust-based
 
-# Pi kodlaşdırma agenti
-# quraşdırma üçün https://github.com/zechnerj/pi-coding-agent ünvanına baxın
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# quraşdırma üçün https://github.com/1jehuang/jcode ünvanına baxın
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Addım 3 — İdarəetmə Paneli Vasitəsilə Konfiqurasiya Edin
+### Addım 3 — Panel vasitəsilə konfiqurasiya edin
 
-1. `http://localhost:20128/dashboard/cli-code` ünvanına keçin
-2. Şəbəkədə alətinizi tapın
-3. Alətin təfərrüat səhifəsini açmaq üçün karta klikləyin
-4. API açarınızı və əsas URL-ni seçin
-5. **Konfiqurasiyanı Tətbiq Et** düyməsinə klikləyin və ya əl ilə konfiqurasiya fraqmentini kopyalayın
+1. `http://localhost:20128/dashboard/cli-code` gedin
+2. Alətinizi şəbəkədə tapın
+3. Alət təfərrüatları səhifəsini açmaq üçün kartı vurun
+4. API açarınızı və URL əsasını seçin
+5. klikləyin** Konfiqurasiyanı tətbiq edin** və ya əl ilə konfiqurasiya parçasını kopyalayın
 
 ---
 
-### Addım 4 — Qlobal Mühit Dəyişənlərini Təyin Edin
+### Addım 4 — Qlobal Ətraf Dəyişənlərini təyin edin
 
 ```bash
-# OmniRoute universal son nöqtəsi
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI GOOGLE_GEMINI_BASE_URL dəyərini KÖK səviyyəsində oxuyur (onun SDK-sı /v1beta/... hissəsini özü əlavə edir)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **Uzaq server** üçün `localhost:20128` hissəsini serverin IP ünvanı və ya domeni ilə əvəz edin,
-> məsələn, `http://<your-server-ip>:20128`.
+> üçün a** uzaq server** `localhost:20128` IP və ya domen serveri ilə əvəz edin, məsələn, `http://<your-server-ip>:20128`.
 
 ---
 
-### Addım 4 — Hər Aləti Konfiqurasiya Edin
+### Addım 4 — Hər Aləti Konfiqurasiya edin
 
-#### Claude Code
+#### Claude kodu
 
 ```bash
-# ~/.claude/settings.json yaradın:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code üçün vahid Anthropic şlüz kökündən istifadə edin. Buraya `/v1` əlavə etməyin.
+Claude Kodu üçün vahid Anthropic şlüz kökündən istifadə edin. Bura `/v1` əlavə etməyin.
 
 **Test:** `claude "say hello"`
 
@@ -396,10 +396,7 @@ Claude Code üçün vahid Anthropic şlüz kökündən istifadə edin. Buraya `/
 
 #### OpenAI Codex
 
-Müasir Codex (v0.137+) yalnız `~/.codex/config.toml` faylını oxuyur — köhnə
-`config.yaml` irsi npm CLI-yə aiddir və xəbərdarlıq edilmədən nəzərə alınmır. API
-açarı faylın daxilində deyil, həmişə `OMNIROUTE_API_KEY` mühit dəyişənində (`env_key`)
-saxlanılır:
+Müasir Codex (v0.137 +) `~/.codex/config.toml` yalnız — oxuyur, köhnə `config.yaml` miras npm CLI ə aiddir və səssizcə nəzərə alınmır. API açarı `OMNIROUTE_API_KEY` mühit dəyişənində (`env_key`) qalır, heç vaxt faylın içində deyil:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,7 +411,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Tam istinad (profillər, `wire_api`, kontekst pəncərələri): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Tam arayış (profillər, `wire_api`, kontekst pəncərələri): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Test:** `codex "what is 2+2?"`
 
@@ -447,12 +444,42 @@ EOF
 
 **Test:** `opencode`
 
-> Düşünmə variantlarını göndərmək üçün `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> əmrindən istifadə edin.
+> Düşüncə variantlarını göndərmək üçün `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` istifadə edin.
 
 ---
 
-#### Cline (CLI və ya VS Code)
+#### Pi Kodlama Agenti
+
+Rəsmi Pi Coding Agent paketini `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` ilə quraşdırın. Pi `~/.pi/agent/models.json` dən xüsusi provayderləri oxuyur; bütün agent kataloqunu köçürmək üçün `PI_CODING_AGENT_DIR` təyin edin. İdarə paneli həmin ləğvi izləyir. Pi xüsusi son nöqtələrdən modelləri kəşf etmir, ona görə də OmniRoute seçilmiş modeli Pi-nin `openai-completions` API və OmniRoute OpenAI-a uyğun `/v1` son nöqtəsindən istifadə edərək `models[]` yazır.
+
+In**CLI Alətləri → Pi** , son nöqtə, API açarı və modeli seçin, provayderin önizləməsini nəzərdən keçirin, sonra tətbiq edin. Önizləmə provayder fraqmentidir: Pi-ni əl ilə konfiqurasiya edərkən `providers.omniroute` mövcud `models.json` -yə birləşdirin ki, digər provayderlər və parametrlər toxunulmaz qalsın.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model` açdığınız zaman Pi yenidən `models.json` yükləyir. Seçdiyiniz provayder id və model id ilə konfiqurasiya edilmiş marşrutu sınayın:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+İstinadlar: [Pi modelləri və xüsusi provayderlər](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi mühit dəyişənləri](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi quraşdırma təlimatları](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI və ya VS Kodu)
 
 **CLI rejimi:**
 
@@ -466,14 +493,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code rejimi:**
-Cline genişləndirməsinin parametrləri → API Provayderi: `OpenAI Compatible` → Əsas URL: `http://localhost:20128/v1`
+**VS Kod rejimi:** Cline genişləndirmə parametrləri → API Provayder: `OpenAI Compatible` → Əsas URL: `http://localhost:20128/v1`
 
-Alternativ olaraq, OmniRoute idarəetmə panelindən istifadə edin → **CLI Alətləri → Cline → Konfiqurasiyanı Tətbiq Et**.
+Və ya OmniRoute tablosundan → istifadə edin**CLI Alətlər → Cline → Tətbiq Konfiqurasiya** .
 
 ---
 
-#### KiloCode (CLI və ya VS Code)
+#### KiloCode (CLI və ya VS Kodu)
 
 **CLI rejimi:**
 
@@ -481,7 +507,7 @@ Alternativ olaraq, OmniRoute idarəetmə panelindən istifadə edin → **CLI Al
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code parametrləri:**
+**VS Kodu parametrləri:**
 
 ```json
 {
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Alternativ olaraq, OmniRoute idarəetmə panelindən istifadə edin → **CLI Alətləri → KiloCode → Konfiqurasiyanı Tətbiq Et**.
+Və ya OmniRoute tablosundan → istifadə edin**CLI Alətlər → KiloCode → Tətbiq Konfiqurasiya** .
 
 ---
 
-#### Continue (VS Code Genişləndirməsi)
+#### Davam et (VS Kodu Genişlənməsi)
 
-`~/.continue/config.yaml` faylını redaktə edin:
+`~/.continue/config.yaml` redaktə edin:
 
 ```yaml
 models:
@@ -508,20 +534,20 @@ models:
     default: true
 ```
 
-Redaktədən sonra VS Code-u yenidən başladın.
+Redaktə etdikdən sonra VS Kodunu yenidən başladın.
 
 ---
 
-#### VS Code Insiders (`chatLanguageModels.json`)
+#### VS Kodu İnsayderləri (`chatLanguageModels.json`)
 
-VS Code Insiders fərdi son nöqtə modelləri üçün konfiqurasiya edildikdə və OmniRoute-un fərdi başlıq sahəsi olmadan işləməsini istədikdə bundan istifadə edin.
+VS Code Insiders xüsusi son nöqtə modelləri üçün konfiqurasiya edildikdə və OmniRoute xüsusi başlıq sahəsi olmadan işləməsini istədiyiniz zaman bundan istifadə edin.
 
 **Tövsiyə olunan yer:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Tokenləşdirilmiş OmniRoute aliasından istifadə nümunəsi:**
+**Tokenləşdirilmiş OmniRoute ləqəbindən istifadə nümunəsi:**
 
 ```json
 [
@@ -545,27 +571,26 @@ VS Code Insiders fərdi son nöqtə modelləri üçün konfiqurasiya edildikdə 
 
 **Qeydlər:**
 
-- `sk-your-omniroute-key` hissəsini OmniRoute-da yaradılmış API açarı ilə əvəz edin.
-- `url` sahəsi `/api/v1/vscode/{token}/chat/completions` ünvanını göstərməlidir.
-- `modelsUrl` sahəsi `/api/v1/vscode/{token}/models` ünvanını göstərməlidir.
-- Müştəri fərdi başlıqları dəstəklədikdə standart `/v1` + Bearer başlığı axınına üstünlük verin.
-- URL-ə yerləşdirilmiş tokenlər uyğunluq üçün ehtiyat variantdır və redaktor jurnallarında və ya proksi tarixçəsində görünə bilər.
+- `sk-your-omniroute-key` OmniRoute-də yaradılmış API açarı ilə əvəz edin.
+- `url` sahəsi `/api/v1/vscode/{token}/chat/completions`-ə işarə etməlidir.
+- `modelsUrl` sahəsi `/api/v1/vscode/{token}/models`-ə işarə etməlidir.
+- Müştəri fərdi başlıqları dəstəklədikdə normal `/v1` + Bearer başlıq axınına üstünlük verin.
+- URL daxil edilmiş tokenlər uyğunluq ehtiyatıdır və redaktor qeydlərində və ya proxy tarixçəsində görünə bilər.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# AWS/Kiro hesabınıza daxil olun:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI öz autentifikasiya mexanizmindən istifadə edir — Kiro CLI-nin özü üçün OmniRoute backend kimi tələb olunmur.
-# Digər alətlər üçün OmniRoute ilə yanaşı kiro-cli istifadə edin.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** masaüstü tətbiqi üçün OmniRoute tərəfindən təqdim edilən MITM son nöqtəsindən
-`/dashboard/cli-tools → Kiro` bölməsində istifadə edin.
+üçün**Kiro IDE** masa üstü tətbiqi üçün `/dashboard/cli-tools → Kiro` altında OmniRoute tərəfindən ifşa olunan MITM son nöqtəsindən istifadə edin.
 
 ---
 

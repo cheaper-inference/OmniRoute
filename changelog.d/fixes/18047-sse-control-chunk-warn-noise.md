@@ -1,1 +1,0 @@
-- fix(api): control-only SSE chunks no longer log a sanitizer warning on every stream (#18047)

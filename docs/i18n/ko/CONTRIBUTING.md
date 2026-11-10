@@ -12,11 +12,16 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### 사전 요구 사항
 
-- **Node.js** `>=22.22.2 <23` 또는 `>=24.0.0 <27`(권장: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, 또는 `>=24.0.0 <27` (권장: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ 사용자(Node 24+):** `npm install` 실행 후 네이티브 모듈이 설치되었는지 확인하세요:
-> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` 오류와 함께 실패하면
+> **Node 24를 사용하는 Windows:** 현재 24 LTS 패치 릴리스(최소 24.20.0)를 사용하세요.
+> 이전 릴리스에서는 `--test-force-exit`가 프로세스를 종료할 때 테스트가 성공한 후 중단될 수 있습니다.
+> Node의 [Windows libuv 수정 사항](https://github.com/nodejs/node/pull/61999)은
+> 이 런타임 충돌을 해결합니다. 테스트 어설션과 러너 종료 검사를 활성화된 상태로 유지하세요.
+
+> **npm v11+ 사용자(Node 24+):** `npm install` 후 네이티브 모듈이 설치되었는지 확인하세요:
+> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` 오류가 발생하면
 > `npm approve-scripts better-sqlite3 && npm install`을 실행하세요. 자세한 내용은
 > [문제 해결](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)을 참조하세요.
 
@@ -33,34 +38,34 @@ npm install
 ### 환경 변수
 
 ```bash
-# 템플릿을 사용하여 .env 생성
+# 템플릿에서 .env 생성
 cp .env.example .env
 
-# 필수 비밀 값 생성
+# 필요한 시크릿 생성
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-개발에 필요한 주요 변수:
+개발에 사용하는 주요 변수:
 
 | 변수                   | 개발 기본값              | 설명                 |
 | ---------------------- | ------------------------ | -------------------- |
 | `PORT`                 | `20128`                  | 서버 포트            |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 프런트엔드 기본 URL  |
-| `JWT_SECRET`           | (위에서 생성)            | JWT 서명 비밀 값     |
+| `JWT_SECRET`           | (위에서 생성)            | JWT 서명 시크릿      |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | 최초 로그인 비밀번호 |
 | `APP_LOG_LEVEL`        | `info`                   | 로그 상세 수준       |
 
 ### 대시보드 설정
 
-대시보드는 환경 변수를 통해서도 구성할 수 있는 기능에 대한 UI 토글을 제공합니다:
+대시보드에서는 환경 변수를 통해서도 구성할 수 있는 기능을 UI 토글로 제공합니다.
 
-| 설정 위치   | 토글               | 설명                        |
-| ----------- | ------------------ | --------------------------- |
-| 설정 → 고급 | 디버그 모드        | 디버그 요청 로그 활성화(UI) |
-| 설정 → 일반 | 사이드바 표시 여부 | 사이드바 섹션 표시/숨기기   |
+| 설정 위치           | 토글               | 설명                        |
+| ------------------- | ------------------ | --------------------------- |
+| Settings → Advanced | Debug Mode         | 디버그 요청 로그 활성화(UI) |
+| Settings → General  | Sidebar Visibility | 사이드바 섹션 표시/숨기기   |
 
-이러한 설정은 데이터베이스에 저장되어 재시작 후에도 유지되며, 설정된 경우 환경 변수 기본값보다 우선합니다.
+이러한 설정은 데이터베이스에 저장되며 재시작 후에도 유지됩니다. 설정된 경우 환경 변수 기본값보다 우선합니다.
 
 ### 로컬에서 실행
 
@@ -69,49 +74,46 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 npm run dev
 
 # 프로덕션 빌드
-npm run build    # next build → .build/next/ 실행 후 assembleStandalone → dist/
+npm run build    # next build → .build/next/ 이후 assembleStandalone → dist/
 npm run start
 
 # 기여자 변경 사항을 위한 빠른 백엔드/API 전용 컴파일
 npm run build:contributor
 
-# 릴리스 빌드(클린 빌드 + HEAD 센티널 — 배포 시 필수)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA 기록
+# 릴리스 빌드(정리 후 재빌드 + HEAD 센티널 — 배포에 필요)
+npm run build:release   # rm -rf .build dist 후 빌드 + dist/BUILD_SHA 작성
 
 # 일반적인 포트 구성
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-기여자 빌드는 컴파일 전용 검증을 수행합니다. 독립 실행형 배포판을 조립하거나 선택적 네이티브 패키징 에셋을 빌드하지 않습니다. 배포 가능한 번들을 검증해야 할 때는 일반 프로덕션 빌드를 사용하세요.
+기여자 빌드는 컴파일 전용 검증을 수행합니다. 독립 실행형 배포판을 조립하거나 선택적 네이티브 패키징 자산을 빌드하지 않습니다. 배포 가능한 번들을 검증해야 할 때는 일반 프로덕션 빌드를 사용하세요.
 
 ### 빌드 출력 구조
 
-| 디렉터리  | 내용                                                                     | 추적 여부 |
-| --------- | ------------------------------------------------------------------------ | --------- |
-| `src/`    | 애플리케이션 소스(TypeScript / TSX)                                      | 예        |
-| `.build/` | 중간 산출물 — `next build` 출력(gitignore 적용, `distDir = .build/next`) | 아니요    |
-| `dist/`   | 배포 가능한 번들 — `assembleStandalone`로 조립(gitignore 적용)           | 아니요    |
+| 디렉터리  | 내용                                                                   | 추적 여부 |
+| --------- | ---------------------------------------------------------------------- | --------- |
+| `src/`    | 애플리케이션 소스(TypeScript / TSX)                                    | 예        |
+| `.build/` | 중간 산출물 — `next build` 출력(`gitignored`, `distDir = .build/next`) | 아니요    |
+| `dist/`   | 배포 가능한 번들 — `assembleStandalone`에서 조립(`gitignored`)         | 아니요    |
 
-빌드 파이프라인은 단일 패스로 실행됩니다:
+빌드 파이프라인은 단일 단계로 수행됩니다.
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js 출력)
-  └─ assembleStandalone()                 (독립 실행형 파일 + 정적 파일 + public + 네이티브 에셋 복사)
-       └─ 출력: dist/                     (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native assets 복사)
+       └─ 출력: dist/                    (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release`는 먼저 두 디렉터리를 모두 정리하고 배포 무결성 센티널로
-`dist/BUILD_SHA`(= `git rev-parse --short HEAD`)도 기록합니다.
+`npm run build:release`는 먼저 두 디렉터리를 정리하고,
+배포 무결성 센티널인 `dist/BUILD_SHA`(= `git rev-parse --short HEAD`)를 추가로 작성합니다.
 
-`npm run build:contributor`는 백엔드 전용 빌드 프로필을 사용합니다. 빌드하는 동안
-대시보드 UI 파일을 임시 스텁으로 대체하고 API 경로 핸들러는 유지하며 빌드 후 원본 파일을
-복원합니다. 대시보드 UI에 영향을 주는 변경 사항이나 전체 릴리스 검증에는 `npm run build`를
-사용하세요. 기여자 프로필은 릴리스 빌드를 대체하지 않습니다.
+`npm run build:contributor`는 백엔드 전용 빌드 프로필을 사용합니다. 빌드 중 대시보드 UI 파일을 일시적으로 스텁 처리하고, API 라우트 핸들러는 유지하며, 빌드 후 원본 파일을 복원합니다. 대시보드 UI에 영향을 주는 변경 사항이나 전체 릴리스 검증에는 `npm run build`를 사용하세요. 기여자 프로필은 릴리스 빌드를 대체하지 않습니다.
 
-> **VPS 배포 참고:** 원격 이미지 디렉터리 `/usr/lib/node_modules/omniroute/app/`는
+> **VPS 배포 참고:** 원격 이미지 디렉터리 `/usr/lib/node_modules/omniroute/app/`은
 > 변경되지 않습니다. 배포 스킬은 `dist/`의 내용을 이 디렉터리로 rsync합니다.
-> 저장소 내 빌드 출력 경로만 변경되었습니다(`app/` → `dist/`).
+> 저장소 내부의 빌드 출력 경로만 변경되었습니다(`app/` → `dist/`).
 
 기본 URL:
 

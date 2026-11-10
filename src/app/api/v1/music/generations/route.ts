@@ -1,3 +1,4 @@
+import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { handleMusicGeneration } from "@omniroute/open-sse/handlers/musicGeneration.ts";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -86,7 +87,13 @@ async function dispatchMusicModel(
     credentials = local.credentials;
   }
 
-  const result = await handleMusicGeneration({ body, credentials, log, signal: request.signal });
+  const result = await handleMusicGeneration({
+    prepareFalInput: getFalCompatibilityPreparer(),
+    body,
+    credentials,
+    log,
+    signal: request.signal,
+  });
   if (!result.success) {
     return failedMediaGenerationResponse(result, "Music generation provider error");
   }

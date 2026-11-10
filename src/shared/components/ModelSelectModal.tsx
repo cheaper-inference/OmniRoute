@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import Modal from "./Modal";
 import Button from "./Button";
 import Checkbox from "./Checkbox";
@@ -23,6 +24,11 @@ import {
   hasWorkingTestResults,
   listVisibleProviderIds,
 } from "./modelSelectModalHelpers";
+import {
+  buildLiveModelEntries,
+  hasUsableLiveModels,
+  shouldFetchLiveModels,
+} from "./modelSelectLiveProviders";
 import { getModelsByProviderId, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableModels";
 import { getWebComboTargets } from "@/shared/utils/webComboTargets";
@@ -41,6 +47,7 @@ import {
 } from "@/shared/constants/providers";
 import { hasEligibleConnectionForModel } from "@/domain/connectionModelRules";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { fetchProviderModels, type ProviderDegradation } from "./modelSelectDiscovery";
 import { DiscoveryDegradedNotice } from "./DiscoveryDegradedNotice";
 
@@ -128,6 +135,7 @@ export default function ModelSelectModal({
 }: ModelSelectModalProps) {
   const t = useTranslations("common");
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const resolvedTitle = title ?? t("selectModel");
   const labelOrFallback = (key: string, fallback: string, values?: Record<string, unknown>) =>
     typeof (t as { has?: (k: string) => boolean }).has === "function" &&
@@ -233,7 +241,8 @@ export default function ModelSelectModal({
   }, [isOpen]);
 
   // When the modal opens, dynamically load models for every connected custom
-  // (openai-/anthropic-compatible) provider in parallel.
+  // (openai-/anthropic-compatible) provider and every live-only catalog provider
+  // (empty static catalog + modelsUrl, e.g. zed-hosted) in parallel.
   useEffect(() => {
     if (!isOpen) return;
 
@@ -241,9 +250,7 @@ export default function ModelSelectModal({
 
     const loadCustomProviderModels = async () => {
       const customProviderIds = activeProviders
-        .filter(
-          (p) => isOpenAICompatibleProvider(p.provider) || isAnthropicCompatibleProvider(p.provider)
-        )
+        .filter((p) => shouldFetchLiveModels(p.provider))
         .map((p) => p.provider);
 
       if (customProviderIds.length === 0) return;
@@ -254,7 +261,7 @@ export default function ModelSelectModal({
         customProviderIds.map(async (providerId) => {
           const connection = activeProviders.find((p) => p.provider === providerId);
           const discovery = await fetchProviderModels(providerId, connection?.id);
-          if (discovery.models.length > 1) {
+          if (hasUsableLiveModels(providerId, discovery.models)) {
             fetched[providerId] = discovery.models;
           }
           // A fallback catalog is reported even when it holds a single row: the
@@ -413,25 +420,12 @@ export default function ModelSelectModal({
         // already filtered hidden rows via `excludeHidden=true`, but re-check the
         // unified map here so a hidden model is dropped even on the local-catalog
         // fallback path where the query param is not passed through.
-        const fetchedEntries = (fetchedModels[providerId] || [])
-          .map((m) => {
-            const id = m.id || m.slug || m.model || m.name;
-            return {
-              id,
-              name: m.name || m.displayName || id,
-              value: `${nodePrefix}/${id}`,
-              isFetched: true,
-              source: "auto",
-            };
-          })
-          .filter(
-            (fm) =>
-              fm.id &&
-              !nodeModels.some((nm) => nm.id === fm.id) &&
-              !fallbackEntries.some((fbm) => fbm.id === fm.id) &&
-              !customEntries.some((cm) => cm.id === fm.id)
-          )
-          .filter((fm) => !isHiddenForProvider(fm.id));
+        const fetchedEntries = buildLiveModelEntries({
+          liveModels: fetchedModels[providerId] || [],
+          prefix: nodePrefix,
+          existingIds: [...nodeModels, ...fallbackEntries, ...customEntries].map((m) => m.id),
+          isHidden: isHiddenForProvider,
+        });
 
         const allModels = [...nodeModels, ...fallbackEntries, ...customEntries, ...fetchedEntries];
 
@@ -475,7 +469,16 @@ export default function ModelSelectModal({
             source: normalizeModelCatalogSource(cm.source) === "imported" ? "imported" : "custom",
           }));
 
-        const allModels = [...systemEntries, ...customEntries];
+        // Live catalog (zed-hosted and other live-only providers); system and
+        // custom rows win over a live duplicate.
+        const fetchedEntries = buildLiveModelEntries({
+          liveModels: fetchedModels[providerId] || [],
+          prefix: alias,
+          existingIds: [...systemEntries, ...customEntries].map((m) => m.id),
+          isHidden: isHiddenForProvider,
+        });
+
+        const allModels = [...systemEntries, ...customEntries, ...fetchedEntries];
 
         if (allModels.length > 0) {
           groups[providerId] = {
@@ -636,7 +639,7 @@ export default function ModelSelectModal({
   const canAddWorking = workingModelsToSelect.length > 0;
   const canRemoveWorking = workingModelsToUnselect.length > 0;
 
-  const handleToggleSelectAllVisible = () => {
+  const handleToggleSelectAllVisible = async () => {
     if (!showSelectAllToggle) return;
     if (allVisibleSelected) {
       const toRemove = visibleModels.filter(
@@ -653,11 +656,12 @@ export default function ModelSelectModal({
     // "Show configured only" off) — see modelSelectModalHelpers.ts (#8526).
     if (
       shouldConfirmSelectAll(toAdd.length) &&
-      !confirm(
-        labelOrFallback("selectAllConfirm", `Add ${toAdd.length} models to this combo?`, {
+      !(await requestConfirm({
+        message: labelOrFallback("selectAllConfirm", `Add ${toAdd.length} models to this combo?`, {
           count: toAdd.length,
-        })
-      )
+        }),
+        variant: "primary",
+      }))
     ) {
       return;
     }
@@ -677,18 +681,19 @@ export default function ModelSelectModal({
   };
 
   /** Add or remove models that passed the last Test providers run. */
-  const handleToggleWorkingModels = () => {
+  const handleToggleWorkingModels = async () => {
     if (!showSelectWorkingModels) return;
     if (canAddWorking) {
       if (
         shouldConfirmSelectAll(workingModelsToSelect.length) &&
-        !confirm(
-          labelOrFallback(
+        !(await requestConfirm({
+          message: labelOrFallback(
             "selectAllConfirm",
             `Add ${workingModelsToSelect.length} models to this combo?`,
             { count: workingModelsToSelect.length }
-          )
-        )
+          ),
+          variant: "primary",
+        }))
       ) {
         return;
       }
@@ -945,11 +950,11 @@ export default function ModelSelectModal({
                   title={labelOrFallback("testSelectedProviders", "Test providers")}
                   className="gap-1 text-xs"
                 >
-                  <Icon
-                    name={testingProviders ? "progress_activity" : "science"}
-                    size={14}
-                    className={testingProviders ? "animate-spin" : undefined}
-                  />
+                  {testingProviders ? (
+                    <Spinner decorative size="xs" />
+                  ) : (
+                    <Icon name="science" size={14} />
+                  )}
                   <span>
                     {testingProviders && testProgress
                       ? labelOrFallback(
@@ -1164,6 +1169,7 @@ export default function ModelSelectModal({
           </div>
         </div>
       )}
+      {confirmDialog}
     </Modal>
   );
 }

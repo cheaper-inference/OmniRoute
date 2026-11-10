@@ -16,11 +16,11 @@ AgentBridge on OmniRouten MITM (Man-in-the-Middle) -välityspalvelin, joka siepp
 
 ### Mikä on AgentBridge?
 
-Kun IDE agentti (esim. GitHub Copilot, Cursor, Claude Code) soittaa API puhelun, se muodostaa yhteyden suoraan ylävirran AI toimittajaan (OpenAI, Anthropic jne.). AgentBridge katkaisee yhteyden läpinäkyvästi TLS tasolla – ilman agenttikokoonpanon muutosta – ja kirjoittaa pyynnön uudelleen OmniRoute kautta.
+Kun IDE agentti (esim. GitHub Copilot, Cursor, Claude Code) soittaa API puhelun, se muodostaa yhteyden suoraan ylävirran AI toimittajaan (OpenAI, Anthropic jne.). AgentBridge katkaisee yhteyden läpinäkyvästi TLS tasolla — ilman agenttikokoonpanon vaihtamista — ja kirjoittaa pyynnön uudelleen OmniRoute kautta.
 
 Tämä tarkoittaa, että voit:
 
-- **Ohjaa kaikki edustajat mille tahansa palveluntarjoajalle** : Copilot puhuu OpenAI:lle? Ohjaa se Anthropic Claude, Gemini tai johonkin OmniRoute:n 377 palveluntarjoajalta.
+- **Ohjaa kaikki edustajat mille tahansa palveluntarjoajalle** : Copilot puhuu OpenAI:lle? Ohjaa se Anthropic Claude, Gemini tai johonkin OmniRoute:n 381 palveluntarjoajalta.
 - **Käytä mallikartoituksia** : `gemini-3-flash` → `claude-sonnet-4.7` läpinäkyvästi ohjaajan tasolla.
 - **Tarkkaile kaikkea agenttiliikennettä** : jokainen pysäytetty pyyntö julkaistaan [liikennetarkastajalle](./TRAFFIC_INSPECTOR.md).
 - **Käytä OmniRoute kimmoisuutta** : yhdistelmäreititys, katkaisijat, varaosat ja kustannusseurantatyöt myös IDE -agenttiliikenteelle.

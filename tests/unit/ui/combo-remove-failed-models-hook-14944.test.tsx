@@ -42,6 +42,7 @@ function renderHook(overrides: Partial<Options> = {}) {
     updateCombo: vi.fn().mockResolvedValue(true),
     onRemoved: vi.fn(),
     notify: { error: vi.fn(), success: vi.fn() },
+    requestConfirm: vi.fn().mockResolvedValue(true),
     t,
     ...overrides,
   };
@@ -70,10 +71,6 @@ beforeEach(() => {
   (
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
   ).IS_REACT_ACT_ENVIRONMENT = true;
-  vi.stubGlobal(
-    "confirm",
-    vi.fn(() => true)
-  );
 });
 
 afterEach(() => {
@@ -89,7 +86,7 @@ describe("useRemoveFailedComboModels", () => {
     const hook = renderHook();
     await act(() => hook.get().removeFailedModels(["step-bad"]));
 
-    expect(globalThis.confirm).toHaveBeenCalledWith(
+    expect(hook.options.requestConfirm).toHaveBeenCalledWith(
       'removeErrorModelsConfirm:{"count":1,"name":"free"}'
     );
     expect(hook.options.updateCombo).toHaveBeenCalledWith("combo-1", {
@@ -109,13 +106,10 @@ describe("useRemoveFailedComboModels", () => {
   });
 
   it("does nothing when the confirmation is declined", async () => {
-    vi.stubGlobal(
-      "confirm",
-      vi.fn(() => false)
-    );
-    const hook = renderHook();
+    const hook = renderHook({ requestConfirm: vi.fn().mockResolvedValue(false) });
     await act(() => hook.get().removeFailedModels(["step-bad"]));
 
+    expect(hook.options.requestConfirm).toHaveBeenCalledTimes(1);
     expect(hook.options.updateCombo).not.toHaveBeenCalled();
     expect(hook.options.onRemoved).not.toHaveBeenCalled();
   });
@@ -125,7 +119,7 @@ describe("useRemoveFailedComboModels", () => {
     await act(() => hook.get().removeFailedModels(["step-bad", "step-good"]));
 
     expect(hook.options.notify.error).toHaveBeenCalledWith("cannotRemoveAllModels");
-    expect(globalThis.confirm).not.toHaveBeenCalled();
+    expect(hook.options.requestConfirm).not.toHaveBeenCalled();
     expect(hook.options.updateCombo).not.toHaveBeenCalled();
   });
 

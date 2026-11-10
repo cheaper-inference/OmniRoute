@@ -10,35 +10,30 @@
 
 ## Instalasi
 
-OmniRoute MCP sudah tersedia secara bawaan. Jalankan dengan:
+OmniRoute MCP sudah ada di dalamnya. Mulailah dengan:
 
 ```bash
 omniroute --mcp
 ```
 
-Atau melalui transport open-sse:
+Atau melalui transportasi terbuka:
 
 ```bash
-# Transport HTTP yang dapat dialirkan (port 20130)
-omniroute --dev  # MCP dimulai secara otomatis pada endpoint /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Transport HTTP (`sse` / `streamable-http`, disajikan dalam proses oleh server dasbor) dinonaktifkan
-secara bawaan dan sebelumnya hanya dapat diaktifkan atau dinonaktifkan dari halaman `/dashboard/mcp`. Mulai v3.8.51,
-CLI memiliki kemampuan yang setara:
+Transportasi HTTP (`sse` / `streamable-http`, disajikan dalam proses oleh server dasbor) dinonaktifkan secara default dan sebelumnya hanya dapat diubah dari halaman `/dashboard/mcp`. Pada v3.8.51 CLI memiliki paritas:
 
 ```bash
-omniroute mcp status                                  # status aktif/online, transport, jumlah alat
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # mengatur ulang sesi sse/streamable-http yang aktif
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` melakukan PATCH terhadap pengaturan `mcpEnabled` (dan secara opsional `mcpTransport`) yang sama
-dengan yang diaktifkan atau dinonaktifkan oleh dasbor melalui `/api/settings`. `mcp restart` memanggil `POST /api/mcp/restart`: tindakan ini menghentikan
-sesi `sse`/`streamable-http` yang aktif agar permintaan berikutnya melakukan inisialisasi ulang secara bersih, mengembalikan
-`409` jika MCP dinonaktifkan, dan `501` untuk transport `stdio` (klien stdio memiliki
-subprosesnya sendiri — tidak ada handle dalam proses yang dapat dimulai ulang).
+`mcp enable`/`mcp disable` PATCH `mcpEnabled` yang sama (dan opsional `mcpTransport`) menyetel dasbor untuk beralih melalui `/api/settings`. `mcp restart` memanggil `POST /api/mcp/restart`: ia menghancurkan sesi `sse`/`streamable-http` yang aktif sehingga permintaan berikutnya diinisialisasi ulang dengan bersih, mengembalikan `409` jika MCP dinonaktifkan, dan `501` untuk transportasi `stdio` (klien stdio memiliki subproses mereka sendiri — tidak ada pegangan dalam proses untuk memulai ulang).
 
 ## Transport
 
@@ -133,53 +128,40 @@ Cursor, Cline, dan klien MCP yang kompatibel.
 
 ## Alat Kompresi (13)
 
-| Alat                                | Cakupan             | Deskripsi                                                                                                                                   |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | Pengaturan kompresi, ringkasan analitik, dan statistik sadar-cache (mencakup metadata `analytics.mcpDescriptionCompression`)                |
-| `omniroute_compression_configure`   | `write:compression` | Konfigurasikan mode kompresi, ambang batas, rasio target, preservasi prompt sistem, dan tombol kompresi deskripsi MCP                       |
-| `omniroute_set_compression_engine`  | `write:compression` | Pilih mesin aktif (off/caveman/rtk/stacked) serta intensitas Caveman/RTK                                                                    |
-| `omniroute_list_compression_combos` | `read:compression`  | Cantumkan kombo kompresi bernama beserta pipeline mesinnya                                                                                  |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analitik yang dikelompokkan berdasarkan kombo kompresi dan mesin                                                                            |
-| `omniroute_ccr_store`               | `write:compression` | Simpan konten yang diisolasi per pemanggil dalam penyimpanan CCR dalam memori yang dibatasi, lalu kembalikan penanda dan referensi `ccr://` |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Ambil konten CCR secara penuh atau dengan mode bagian awal, bagian akhir, baris, grep, dan statistik                                        |
-| `omniroute_ccr_inspect`             | `read:compression`  | Periksa metadata CCR milik pemanggil tanpa mengembalikan konten                                                                             |
-| `omniroute_ccr_list`                | `read:compression`  | Cantumkan metadata berpaginasi untuk blok CCR milik pemanggil                                                                               |
-| `omniroute_ccr_delete`              | `write:compression` | Hapus blok CCR milik pemanggil                                                                                                              |
-| `omniroute_ccr_stats`               | `read:compression`  | Laporkan penggunaan memori dalam cakupan pemanggil, penghitung siklus hidup, dan batas penyimpanan                                          |
-| `omniroute_rtk_discover`            | `read:compression`  | Temukan derau berulang dalam sampel output RTK yang disertakan secara sukarela                                                              |
-| `omniroute_rtk_learn`               | `read:compression`  | Buat draf filter RTK yang dapat ditinjau dari sampel yang disertakan secara sukarela                                                        |
+| Alat                                | Lingkup             | Keterangan                                                                                                                          |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Pengaturan kompresi, ringkasan analitik, dan statistik cache-aware (termasuk metadata `analytics.mcpDescriptionCompression` )       |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurasikan mode kompresi, ambang batas, rasio target, pelestarian prompt sistem, sakelar kompresi deskripsi MCP                 |
+| `omniroute_set_compression_engine`  | `write:compression` | Pilih mesin aktif (off/caveman/rtk/stacked) dan intensitas Caveman/RTK                                                              |
+| `omniroute_list_compression_combos` | `read:compression`  | Daftar bernama kombo kompresi dan saluran mesinnya                                                                                  |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analisis dikelompokkan berdasarkan kombo kompresi dan mesin                                                                         |
+| `omniroute_ccr_store`               | `write:compression` | Simpan konten yang diisolasi penelepon di penyimpanan CCR dalam memori yang dibatasi dan kembalikan penanda plus referensi `ccr://` |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Ambil konten CCR secara penuh atau dengan mode kepala, ekor, garis, grep, dan statistik                                             |
+| `omniroute_ccr_inspect`             | `read:compression`  | Periksa metadata CCR milik penelepon tanpa mengembalikan konten                                                                     |
+| `omniroute_ccr_list`                | `read:compression`  | Cantumkan metadata yang diberi nomor halaman untuk blok CCR milik pemanggil                                                         |
+| `omniroute_ccr_delete`              | `write:compression` | Hapus blok CCR milik penelepon                                                                                                      |
+| `omniroute_ccr_stats`               | `read:compression`  | Laporkan penggunaan memori cakupan pemanggil, penghitung siklus hidup, dan batas penyimpanan                                        |
+| `omniroute_rtk_discover`            | `read:compression`  | Temukan kebisingan berulang dalam sampel keluaran RTK opt-in                                                                        |
+| `omniroute_rtk_learn`               | `read:compression`  | Hasilkan draf filter RTK yang dapat ditinjau dari sampel keikutsertaan                                                              |
 
-Entri CCR hanya disimpan dalam memori dan akan hilang saat dimulai ulang. Setiap blok dibatasi hingga 2 MiB, setiap
-prinsipal hingga 16 MiB, dan penyimpanan global hingga 64 MiB. Secara default, entri memiliki TTL 24 jam (maksimum
-tujuh hari). Pengambilan MCP penuh dibatasi hingga 256 KiB; blok yang lebih besar tetap tersedia melalui mode
-rentang dan grep. Penyimpanan, pengambilan, pencantuman, pemeriksaan, penghapusan, dan statistik diisolasi berdasarkan
-prinsipal kunci API yang diautentikasi. Catatan audit berisi hash dan metadata ukuran, bukan konten.
+entri CCR menggunakan penyimpanan dua tingkat: tingkat dalam memori panas yang didukung, pada runtime non-cloud lokal, oleh tingkat SQLite yang tahan lama (`ccr_blocks`, diaktifkan secara default) sehingga sebuah blok bertahan dari penggusuran atau restart hingga TTL -nya habis — kecuali memblokir lebih dari 512 KB dan runtime cloud, yang tetap hanya memori. Setiap blok dibatasi hingga 2 MiB, masing-masing blok utama hingga 16 MiB, dan penyimpanan global hingga 64 MiB. Entri default adalah TTL 24 jam (maksimum tujuh hari). Pengambilan MCP penuh dibatasi hingga 256 KiB; blok yang lebih besar tetap tersedia melalui mode jarak jauh dan grep. Penyimpanan, pengambilan, pencatatan, inspeksi, penghapusan, dan statistik diisolasi oleh prinsip kunci API yang diautentikasi. Catatan audit berisi hash dan metadata ukuran, tidak pernah berisi konten. Detail yang dilihat oleh operator (dua penanda, prasyarat klien, `codemode:false`, cakupan per alat, penomoran halaman, dan matriks diagnostik) terdapat di [Mesin Kompresi → Prasyarat / panduan operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` melaporkan kompresi deskripsi MCP secara terpisah di bawah
-`analytics.mcpDescriptionCompression`. Nilai tersebut merupakan estimasi ukuran metadata untuk deskripsi MCP yang dapat dicantumkan
-(`tools`, `prompts`, `resources`, dan `resourceTemplates`); nilai tersebut bukan tanda terima penggunaan
-penyedia dan ditandai dengan `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` melaporkan kompresi deskripsi MCP secara terpisah di bawah `analytics.mcpDescriptionCompression`. Nilai tersebut merupakan perkiraan ukuran metadata untuk deskripsi daftar MCP (`tools`, `prompts`, `resources`, dan `resourceTemplates`); itu bukan tanda terima penggunaan penyedia dan ditandai dengan `source: "mcp_metadata_estimate"`.
 
-### Filter Pohon Aksesibilitas MCP (v3.8.0)
+### MCP Filter Pohon Aksesibilitas (v3.8.0)
 
-Terpisah dari alat kompresi di atas, OmniRoute menyertakan filter pascaeksekusi yang
-mengompresi **hasil alat** dari alat peramban/aksesibilitas MCP sebelum dikembalikan ke
-agen. Filter ini bukan merupakan alat — filter ini berjalan secara transparan pada setiap hasil alat yang berisi
-teks pohon aksesibilitas atau snapshot peramban yang panjang (≥2000 karakter).
+Terpisah dari alat kompresi di atas, OmniRoute menyertakan filter pasca-eksekusi yang mengompresi** hasil alat** alat MCP browser/accessibility sebelum dikembalikan ke agen. Filter ini sendiri bukan merupakan alat — melainkan berjalan secara transparan pada hasil alat apa pun yang berisi pohon aksesibilitas verbose atau teks cuplikan browser (≥ 2000 karakter).
 
 Perilaku utama:
 
-- Meringkas ≥30 baris saudara berulang yang berurutan menjadi ringkasan bagian awal + akhir
-- Mempertahankan jangkar `[ref=eXX]` yang diperlukan oleh Playwright/computer-use
-- Memangkas paksa teks yang terlalu besar (>50.000 karakter) dengan petunjuk navigasi
-- Perkiraan penghematan: **60–80%** pada muatan snapshot peramban
+- Runtuh ≥ 30 baris saudara berulang berturut-turut menjadi ringkasan kepala + ekor
+- Mempertahankan jangkar `[ref=eXX]` yang dibutuhkan oleh Playwright/computer-use
+- Memotong teks berukuran besar (> 50.000 karakter) dengan petunjuk navigasi
+- Penghematan yang diharapkan:** 60–80%** pada muatan snapshot browser
 
-Konfigurasi: `compression.mcpAccessibility` dalam pengaturan global (migrasi 056).
-Implementasi: `open-sse/services/compression/engines/mcpAccessibility/`.
-Dokumentasi lengkap: [Mesin Kompresi — Filter Pohon Aksesibilitas MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfigurasi: `compression.mcpAccessibility` dalam pengaturan global (migrasi 056). Implementasi: `open-sse/services/compression/engines/mcpAccessibility/`. Dokumen lengkap: [Mesin Kompresi — MCP Filter Pohon Aksesibilitas](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Lihat [Mesin Kompresi](../compression/COMPRESSION_ENGINES.md) dan [Kompresi RTK](../compression/RTK_COMPRESSION.md) untuk
-model kompresi runtime yang mendasari alat-alat ini.
+Lihat [Mesin Kompresi](../compression/COMPRESSION_ENGINES.md) dan [Kompresi RTK](../compression/RTK_COMPRESSION.md) untuk model kompresi runtime di balik alat ini.
 
 ## Alat 1Proxy (3)
 
@@ -307,112 +289,73 @@ berarti kelulusan dari pemeriksa lainnya.
 Aturannya ada di [Tiga namespace cakupan](#three-scope-namespaces).
 Katalog alatnya ada di [Cakupan alat MCP](#mcp-tool-scopes).
 
-## Tiga namespace cakupan
+## Otentikasi & Cakupan
 
-`manage` pada sebuah API key, `read:compression` pada sebuah alat MCP, dan `read` pada
-access token `oma_live_…` adalah tiga hibah yang berbeda. Pemanggil yang mengirim access token `read`
-ke rute manajemen yang mengubah state akan mendapat HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Tingkat itu adalah `scopeSatisfies`. Fungsi ini tidak mengacu pada tabel MCP, dan
-pencocok MCP juga tidak mengacu padanya.
+alat MCP memanggil string cakupan baca dari pemanggil. Cek itu adalah salah satu dari tiga namespace independen. Sebuah operan dari satu pemeriksa bukan merupakan operan dari pemeriksa lainnya. Aturannya adalah [Three scope namespace](#three-scope-namespaces). Katalog alat adalah [cakupan alat MCP](#mcp-tool-scopes).
 
-| Namespace         | Credential                                                                                          | Checker                 | A pass allows                                                |
-| :---------------- | :-------------------------------------------------------------------------------------------------- | :---------------------- | :----------------------------------------------------------- |
-| Manajemen API key | `api_keys.scopes`                                                                                   | `hasManageScope`        | REST manajemen untuk Bearer key tersebut                     |
-| API key aditif    | array yang sama, satu string persis                                                                 | helper bernama di bawah | Hanya satu kapabilitas itu saja                              |
-| Cakupan alat MCP  | array yang sama, jika tidak ada `_meta` MCP (hanya HTTP/SSE), jika tidak ada `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Alat tersebut, setelah penegakan aktif                       |
-| Access token      | `oma_live_…`                                                                                        | `scopeSatisfies`        | Rute manajemen yang method dan path-nya menuntut tingkat itu |
+### Tiga ruang nama cakupan
 
-Penerbitan tiap kredensial dijelaskan di
-[Autentikasi Manajemen](../guides/MANAGEMENT-AUTH.md).
+`manage` pada kunci API, `read:compression` pada alat MCP, dan `read` pada token akses `oma_live_…` adalah tiga pemberian yang berbeda. Penelepon yang mengirimkan token akses `read` ke rute manajemen yang bermutasi mendapatkan HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Peringkat itu adalah `scopeSatisfies`. Itu tidak berkonsultasi dengan tabel MCP, dan pencocokan MCP tidak berkonsultasi dengannya.
 
-### Cakupan API key
+| Ruang nama          | Mandat                                                                           | Pemeriksa                             | Sebuah izin memungkinkan                                                |
+| :------------------ | :------------------------------------------------------------------------------- | :------------------------------------ | :---------------------------------------------------------------------- |
+| Manajemen kunci API | `api_keys.scopes`                                                                | `hasManageScope`                      | REST manajemen untuk kunci Pembawa itu                                  |
+| Aditif kunci API    | array yang sama, satu string yang sama persis                                    | pembantu yang disebutkan di bawah ini | Hanya satu kemampuan itu                                                |
+| cakupan alat MCP    | array yang sama, else MCP `_meta` (hanya HTTP/SSE ), else `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                        | Alat tersebut, setelah penerapannya aktif                               |
+| Token akses         | `oma_live_…`                                                                     | `scopeSatisfies`                      | Rute pengelolaan yang metode dan jalurnya memerlukan peringkat tersebut |
 
-Satu array `api_keys.scopes` melayani dua kebutuhan. Keduanya memakai fungsi yang berbeda.
+Mencetak setiap kredensial tercakup dalam [Otentikasi Manajemen](../guides/MANAGEMENT-AUTH.md).
 
-**REST manajemen.** `manage` dan `admin` adalah anggota dari
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` itulah yang mengotorisasi rute manajemen untuk key tersebut. `admin`
-berkemampuan manajemen pada rute-rute itu. Kata `admin` di sini bukan
-tingkat access token dan tidak meluas menjadi cakupan alat MCP.
+#### Cakupan kunci API
 
-**String aditif.** Masing-masing adalah uji keanggotaan yang persis, dan masing-masing tetap berada
-di luar `MANAGEMENT_API_KEY_SCOPES`.
+Satu array `api_keys.scopes` memberi makan dua pekerjaan. Mereka menggunakan fungsi yang berbeda.
 
-| Cakupan                        | Kelulusan mengizinkan                                                                                                                                                         |
-| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Hanya pengecualian LOCAL_ONLY untuk `/api/mcp/` non-loopback (`hasMcpConnectOrManageScope`). Key dengan `manage` atau `admin` tetap lolos melalui pengecualian itu.           |
-| `self:usage`                   | `GET /api/v1/me/status` untuk key ini (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` menambahkan cakupan ini saat pembuatan (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Kuota akun upstream di dalam payload status tersebut (`src/lib/usage/apiKeySelfService.ts`). Rute status tetap menuntut `self:usage`.                                         |
-| `policy:bypass-provider-quota` | Panggilan inferensi milik key ini melewati kebijakan kuota provider (`hasProviderQuotaBypassScope` di `src/sse/handlers/chat.ts`).                                            |
+**Manajemen REST.** `manage` dan `admin` adalah anggota `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` adalah yang mengotorisasi rute manajemen untuk kunci itu. `admin` mampu mengelola rute tersebut. Kata `admin` di sini bukanlah peringkat token akses dan tidak diperluas ke cakupan alat MCP.
 
-### Pencocokan
+**String aditif.** Masing-masing merupakan tes keanggotaan yang tepat, dan masing-masing tetap berada di luar `MANAGEMENT_API_KEY_SCOPES`.
 
-Katalognya adalah tabel di bawah [Cakupan alat MCP](#mcp-tool-scopes). Jangan
-perlakukan `MCP_SCOPE_LIST` di `src/shared/constants/mcpScopes.ts` sebagai katalog
-tersebut: itu adalah subset bertipe asli. Alat yang lebih baru mendeklarasikan
-cakupan tambahan di sampingnya (`read:notion`, `read:skills`, `read:local-corpus`, dan
-sisa tabel).
+| Cakupan                        | Sebuah izin memungkinkan                                                                                                                                                        |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | Hanya ukiran `/api/mcp/` LOCAL_ONLY non-loopback (`hasMcpConnectOrManageScope`). Kunci dengan `manage` atau `admin` masih lolos dari ukiran itu.                                |
+| `self:usage`                   | `GET /api/v1/me/status` untuk kunci ini (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` menambahkan cakupan ini pada pembuatan (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Kuota akun upstream di dalam status payload (`src/lib/usage/apiKeySelfService.ts`). Rute status masih memerlukan `self:usage`.                                                  |
+| `policy:bypass-provider-quota` | Panggilan inferensi kunci ini melewati kebijakan kuota penyedia (`hasProviderQuotaBypassScope` di `src/sse/handlers/chat.ts`).                                                  |
 
-`evaluateToolScopes` di `open-sse/mcp-server/scopeEnforcement.ts` mengizinkan suatu
-panggilan bila setiap cakupan yang diperlukan cocok dengan salah satu cakupan yang
-diberikan:
+#### Cocok
+
+Katalog adalah tabel di bawah [cakupan alat MCP](#mcp-tool-scopes). Jangan perlakukan `MCP_SCOPE_LIST` di `src/shared/constants/mcpScopes.ts` seperti katalog itu: ini adalah subset asli yang diketik. Alat selanjutnya mendeklarasikan cakupan lebih lanjut di sampingnya (`read:notion`, `read:skills`, `read:local-corpus`, dan tabel lainnya).
+
+`evaluateToolScopes` di `open-sse/mcp-server/scopeEnforcement.ts` memungkinkan panggilan ketika setiap cakupan yang diperlukan cocok dengan cakupan yang diberikan:
 
 - `*` cocok dengan setiap cakupan yang diperlukan.
-- Cakupan yang diberikan dan berakhir dengan `*` cocok dengan cakupan yang diperlukan
-  dan diawali prefiks sebelum bintangnya. `read:*` cocok dengan `read:compression`.
-- Cakupan yang diberikan lainnya hanya cocok dengan string yang diperlukan yang identik.
+- Cakupan tertentu yang diakhiri dengan `*` cocok dengan cakupan wajib yang dimulai dengan awalan sebelum bintang. `read:*` cocok dengan `read:compression`.
+- Setiap cakupan lain yang diberikan hanya cocok dengan string wajib yang sama.
 
-Key dengan cakupan `["manage"]` gagal pada `scopeMatches` untuk `read:compression`.
-Panggilan yang sama gagal untuk `admin`, `mcp:connect`, `read`, dan `write` ketika
-string-string itulah satu-satunya yang diberikan. Tidak ada hierarki di antara cakupan
-alat MCP selain `*` di akhir.
+Kunci yang cakupannya `["manage"]` gagal `scopeMatches` untuk `read:compression`. Panggilan yang sama gagal untuk `admin`, `mcp:connect`, `read`, dan `write` ketika itu adalah satu-satunya string yang diberikan. Tidak ada hierarki di antara cakupan alat MCP di luar `*` yang tertinggal.
 
-Penegakan mati kecuali `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (bawaan
-`false`). Saat mati, `evaluateToolScopes` mengizinkan panggilan dan melewati
-katalog. Saat aktif, HTTP memakai `api_keys.scopes` milik Bearer key sebagai
-`authInfo` (lihat [Pengikatan cakupan HTTP per-key](#per-key-http-scope-binding-7895)).
-Ketika tidak ada cakupan key yang ter-resolve, himpunan yang diberikan jatuh ke `_meta` MCP (hanya dihormati
-untuk pemanggil HTTP/SSE, di dalam konteks autentikasi HTTP; `_meta` milik pemanggil stdio diabaikan
-karena dikendalikan klien dan tidak membawa identitas per-pemanggil), lalu
-`OMNIROUTE_MCP_SCOPES`.
+Penegakan tidak aktif kecuali `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (default `false`). Saat tidak aktif, `evaluateToolScopes` mengizinkan panggilan dan melewati katalog. Saat aktif, HTTP menggunakan `api_keys.scopes` kunci Pembawa sebagai `authInfo` (lihat [pengikatan cakupan HTTP per kunci](#per-key-http-scope-binding-7895) ). Ketika tidak ada cakupan kunci yang terselesaikan, set yang diberikan akan jatuh ke MCP `_meta` (hanya diberikan untuk pemanggil HTTP/SSE, dalam konteks autentikasi HTTP ; `_meta` pemanggil stdio diabaikan karena klien mengontrolnya dan tidak membawa identitas per pemanggil), lalu `OMNIROUTE_MCP_SCOPES`.
 
-### Cakupan access token
+#### Cakupan token akses
 
-Token `oma_live_…` (`src/lib/accessTokens/scopes.ts`) membawa `read`, `write`,
-atau `admin`. `scopeSatisfies` adalah sebuah tingkat: `admin` mencakup `write` dan
-`read`, dan `write` mencakup `read`. Cakupan yang tidak dikenal tidak mencakup apa pun.
+token `oma_live_…` (`src/lib/accessTokens/scopes.ts`) membawa `read`, `write`, atau `admin`. `scopeSatisfies` adalah peringkat: `admin` mencakup `write` dan `read`, dan `write` mencakup `read`. Cakupan yang tidak diketahui tidak mencakup apa pun.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) membandingkan tingkat
-tersebut dengan `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) membandingkan peringkat itu dengan `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD`, dan `OPTIONS` memerlukan `read`.
-- Setiap metode lainnya memerlukan `write`.
-- Path di dalam `ADMIN_SCOPE_PREFIXES` memerlukan `admin` untuk setiap metode. `/api/mcp`
-  berada di dalam daftar tersebut, sehingga access token `write` tetap tidak dapat
-  memanggil permukaan HTTP MCP.
-- Path di dalam `ADMIN_MUTATION_PREFIXES` memerlukan `admin` hanya untuk mutasi.
-- Path di dalam `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) memerlukan `admin` hanya untuk mutasi, dan hanya pada
-  path persis tersebut — sub-route `/api/settings/*` lainnya tetap memakai `write`.
+- `GET`, `HEAD`, dan `OPTIONS` membutuhkan `read`.
+- Setiap metode lain memerlukan `write`.
+- Jalur di `ADMIN_SCOPE_PREFIXES` memerlukan `admin` untuk setiap metode. `/api/mcp` ada dalam daftar itu, jadi token akses `write` masih tidak dapat memanggil permukaan MCP HTTP.
+- Jalur di `ADMIN_MUTATION_PREFIXES` memerlukan `admin` hanya untuk mutasi.
+- Jalur di `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) memerlukan `admin` hanya untuk mutasi, dan hanya pada jalur yang sama — sub-rute `/api/settings/*` lainnya tetap `write`.
 
-`PATCH /api/keys/{id}` merupakan mutasi dan tidak terdapat dalam daftar admin tersebut, sehingga token
-`read` menerima 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Access token `write` atau `admin` memenuhi route tersebut. JWT dashboard, token
-machine-id CLI loopback, serta API key dengan `manage` atau `admin` mengambil cabang
-lain dan tidak dipersempit oleh rank ini.
+`PATCH /api/keys/{id}` adalah mutasi dan tidak ada dalam daftar admin tersebut, jadi token `read` menerima 403 `Access token scope 'read' is insufficient; 'write' required.` Token akses `write` atau `admin` memenuhi rute tersebut. Dasbor JWT, token id mesin loopback CLI, dan kunci API dengan `manage` atau `admin` mengambil cabang lain dan tidak dipersempit oleh peringkat ini.
 
-Access token yang lolos `scopeSatisfies` untuk `/api/mcp` baru melewati gerbang
-manajemen. Panggilan tool tetap menjalankan `scopeMatches` terhadap scope API key.
-Rank access token bukan merupakan input untuk `scopeMatches`.
+Token akses yang melewati `scopeSatisfies` untuk `/api/mcp` hanya melewati gerbang manajemen. Panggilan alat masih menjalankan `scopeMatches` terhadap cakupan kunci API. Peringkat token akses bukan merupakan masukan ke `scopeMatches`.
 
-### Scope tool MCP
+### cakupan alat MCP
 
-Penegakan scope dipusatkan di `open-sse/mcp-server/scopeEnforcement.ts`.
-Setiap tool memerlukan scope tertentu:
+Penegakan lingkup dipusatkan di `open-sse/mcp-server/scopeEnforcement.ts`. Setiap alat memerlukan cakupan spesifik:
 
-| Cakupan               | Alat                                                                                                                                                                        |
+| Cakupan               | Peralatan                                                                                                                                                                   |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                           |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                   |
@@ -448,17 +391,19 @@ Setiap tool memerlukan scope tertentu:
 | `write:obsidian`      | 9 alat tulis — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                           |
 
-Wildcard scope didukung: `read:*` memberi seluruh scope baca, `*` memberi akses penuh.
+Cakupan wildcard didukung: `read:*` memberikan semua cakupan baca, `*` memberikan akses penuh.
 
-### `mcp:connect` — kapabilitas rute sempit (#7895)
+### `mcp:connect` — kemampuan rute sempit (#7895)
 
-Menjangkau transport MCP HTTP/SSE (`/api/mcp/*`) dari non-loopback memerlukan pengecualian (carve-out) LOCAL_ONLY `/api/mcp/` (lihat `docs/security/ROUTE_GUARD_TIERS.md`). Secara historis, pengecualian tersebut hanya menerima API key dengan scope penuh `manage`/`admin` — terlalu luas untuk pemanggil yang hanya perlu berkomunikasi dengan MCP. Sekarang `src/shared/constants/managementScopes.ts` mengekspor `MCP_CONNECT_SCOPE = "mcp:connect"`: scope tambahan yang sempit (preseden yang sama dengan `SELF_USAGE_SCOPE`) yang HANYA mengotorisasi bypass `/api/mcp/` di `src/server/authz/policies/management.ts` — hal ini tidak memberi akses ke rute manajemen lain dan sengaja dijaga DI LUAR dari `MANAGEMENT_API_KEY_SCOPES`. API key yang memegang `manage`/`admin` tetap melewati pengecualian tersebut apa adanya; `mcp:connect` merupakan alternatif dengan hak akses lebih rendah untuk pemanggil MCP jarak jauh khusus, diperiksa melalui `hasMcpConnectOrManageScope()`.
+Mencapai transportasi HTTP/SSE MCP (`/api/mcp/*`) dari non-loopback memerlukan `/api/mcp/` LOCAL_ONLY ukiran (lihat `docs/security/ROUTE_GUARD_TIERS.md`). Secara historis, carve-out hanya menerima kunci `manage`/`admin` -scope API — yang terlalu luas untuk penelepon yang hanya perlu berbicara MCP. `src/shared/constants/managementScopes.ts` sekarang mengekspor `MCP_CONNECT_SCOPE = "mcp:connect"`: cakupan aditif dan sempit (preseden yang sama dengan `SELF_USAGE_SCOPE`) yang mengizinkan ONLY melewati `/api/mcp/` di `src/server/authz/policies/management.ts` — sehingga tidak memberikan akses rute manajemen lain dan sengaja disimpan OUT dari `MANAGEMENT_API_KEY_SCOPES`. Kunci yang memegang `manage`/`admin` masih lolos dari pemotongan tanpa perubahan; `mcp:connect` adalah alternatif dengan hak istimewa lebih rendah untuk penelepon jarak jauh khusus MCP, diperiksa melalui `hasMcpConnectOrManageScope()`.
 
-### Pengikatan scope HTTP per-key (#7895)
+### Pengikatan cakupan HTTP per kunci (#7895)
 
-Melalui HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` kini menyelesaikan scope asli `api_keys.scopes` milik pemanggil melalui `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) dan meneruskannya ke `transport.handleRequest(req, { authInfo })` milik MCP SDK, sehingga `extra.authInfo.scopes` yang mencapai setiap pemanggilan tool mencerminkan scope milik key Bearer itu sendiri. Fungsi `resolveCallerScopeContext()` di `scopeEnforcement.ts` sudah memprioritaskan `authInfo` di atas fallback `_meta` dan env `OMNIROUTE_MCP_SCOPES` — perubahan ini hanya mengisi sumber pertama yang berprioritas tertinggi tersebut, yang sebelumnya tidak terisi melalui HTTP. Ketika tidak ada API key yang dapat diselesaikan (tidak ada header, key tidak valid), `authInfo` tetap `undefined` dan resolusi jatuh ke rantai `meta`/env yang ada tanpa perubahan. stdio tidak memiliki identitas per-pemanggil (lihat `mcpCallerIdentity.ts`) dan tidak terpengaruh oleh pengikatan per-key — stdio melewati langkah `_meta` (`_meta` hanya dihormati di dalam konteks autentikasi HTTP, #15159) dan menyelesaikan dari env key `OMNIROUTE_MCP_SCOPES` saja.
+Di atas HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` sekarang menyelesaikan `api_keys.scopes` pemanggil yang sebenarnya melalui `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) dan meneruskannya ke `transport.handleRequest(req, { authInfo })` SDKMCP sehingga `extra.authInfo.scopes` yang mencapai setiap panggilan alat mencerminkan cakupan kunci Pembawa itu sendiri. `scopeEnforcement.ts`'s `resolveCallerScopeContext()` sudah memprioritaskan `authInfo` di atas `_meta` dan `OMNIROUTE_MCP_SCOPES` env fallback — this hanya mengisi sumber pertama dengan prioritas tertinggi, yang sebelumnya tidak dimasukkan ke HTTP. Ketika tidak ada kunci API yang terselesaikan (tidak ada header, kunci tidak valid), `authInfo` tetap `undefined` dan resolusi turun ke rantai `meta`/env yang ada tidak berubah. stdio tidak memiliki identitas per pemanggil (lihat `mcpCallerIdentity.ts`) dan tidak terpengaruh oleh pengikatan per kunci — ia melewatkan langkah `_meta` (`_meta` hanya dihormati di dalam konteks autentikasi HTTP, #15159) dan diselesaikan hanya dari kunci `OMNIROUTE_MCP_SCOPES` env saja.
 
-**Penegakan dipaksa aktif untuk pemanggil HTTP/SSE dengan scope sempit, apa pun nilai `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Nilai default `OMNIROUTE_MCP_ENFORCE_SCOPES` sebesar `false` hanya aman untuk alur lokal/stdio dengan satu operator, di mana tidak ada identitas per-pemanggil yang bisa dijadikan acuan scope. `open-sse/mcp-server/server.ts::withScopeEnforcement()` menyalakan penegakan scope per-tool secara tanpa syarat (`shouldForceScopeEnforcement()` di `scopeEnforcement.ts`) setiap kali `resolveCallerScopeContext()` menyelesaikan `source === "authInfo"` (yaitu header Authorization HTTP per-key yang sesungguhnya, khusus HTTP/SSE) DAN key tersebut tidak memegang scope penuh `manage`/`admin`. Ini menutup celah di mana key yang HANYA memegang scope bypass sempit `mcp:connect` — yang di atas didokumentasikan sebagai otoritasi tidak selain pengecualian LOCAL_ONLY `/api/mcp/` — sebenarnya bisa memanggil setiap tool MCP begitu operator mengaktifkan akses MCP jarak jauh/non-loopback, semata-mata karena `OMNIROUTE_MCP_ENFORCE_SCOPES` dikirim dengan default `false`. Key `manage`/`admin` penuh melalui HTTP, serta setiap pemanggil stdio/lokal, mempertahankan perilaku yang dikendalikan oleh `OMNIROUTE_MCP_ENFORCE_SCOPES` tanpa perubahan.
+**Penegakan diberlakukan untuk pemanggil HTTP/SSE dengan cakupan sempit terlepas dari `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` default ke `false` hanya aman untuk aliran operator tunggal local/stdio, di mana tidak ada identitas per pemanggil yang harus dicakup. `open-sse/mcp-server/server.ts::withScopeEnforcement()` mengaktifkan penerapan cakupan per alat tanpa syarat (`shouldForceScopeEnforcement()` dalam `scopeEnforcement.ts`) setiap kali `resolveCallerScopeContext()` menyelesaikan `source === "authInfo"` (yaitu header Otorisasi HTTP per kunci yang sebenarnya, HTTP/SSE-only) AND kunci tersebut tidak memiliki cakupan `manage`/`admin` penuh. Ini menutup celah di mana kunci yang menahan ONLY cakupan bypass `mcp:connect` sempit — yang didokumentasikan di atas tidak memberi otorisasi apa pun kecuali `/api/mcp/` LOCAL_ONLY carve-out — dapat memanggil setiap alat MCP setelah operator mengaktifkan akses remote/non-loopback MCP, hanya karena `OMNIROUTE_MCP_ENFORCE_SCOPES` mengirimkan `false` secara default. Kunci `manage`/`admin` penuh di atas HTTP, dan setiap pemanggil stdio/local, pertahankan perilaku `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated yang ada tidak berubah.
+
+---
 
 ## Variabel Lingkungan
 

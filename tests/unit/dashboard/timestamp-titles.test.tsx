@@ -3,7 +3,7 @@
 // Regression guard: JSON tree values that are actually Unix timestamps
 // (e.g. `created: 1787562749` in an event-stream payload) rendered as a
 // bare number with no way to read the actual date/time without doing the
-// epoch math by hand. react-json-view-lite exposes no per-value render
+// epoch math by hand. The kit JsonTree exposes no per-value render
 // hook, so useTimestampTitles walks the rendered tree and adds a
 // human-readable title/tooltip to number values whose field name looks
 // like a timestamp and whose value is a plausible Unix epoch -- without
@@ -90,5 +90,36 @@ describe("timestamp title tooltips in JSON trees", () => {
 
     const valueSpan = findValueSpan("1787562749");
     expect(valueSpan?.textContent).toBe("1787562749");
+  });
+
+  it("titles a value revealed by expanding its parent", async () => {
+    renderPayload({ a: { b: { created: 1787562749 } } });
+    expect(findValueSpan("1787562749")).toBeUndefined();
+
+    const rows = container.querySelectorAll<HTMLElement>('[role="treeitem"]');
+    await act(async () => {
+      rows[2].querySelector<HTMLElement>('[data-action="toggle"]')?.click();
+    });
+
+    expect(findValueSpan("1787562749")?.title).toMatch(/202\d/);
+  });
+
+  it("retitles a value when a new payload changes it in place", async () => {
+    renderPayload({ created: 1787562749 });
+    const before = findValueSpan("1787562749")?.title;
+
+    await act(async () => renderPayload({ created: 1887562749 }));
+
+    const after = findValueSpan("1887562749")?.title;
+    expect(after).toMatch(/20\d\d/);
+    expect(after).not.toBe(before);
+  });
+
+  it("drops the title when a new payload leaves the epoch range", async () => {
+    renderPayload({ created: 1787562749 });
+
+    await act(async () => renderPayload({ created: 42 }));
+
+    expect(findValueSpan("42")?.title).toBe("");
   });
 });

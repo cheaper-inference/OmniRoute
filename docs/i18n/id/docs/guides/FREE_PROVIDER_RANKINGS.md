@@ -13,13 +13,13 @@
 
 ## Apa Itu
 
-OmniRoute mendaftarkan 377 penyedia, termasuk 155 entri katalog yang ditandai**free/no-auth** (tanpa autentikasi, OAuth tingkat gratis, atau kunci API tingkat gratis — lihat [Panduan Tingkatan Gratis](../getting-started/FREE-TIERS-GUIDE.md) dan [direktori Tingkatan Gratis](../reference/FREE_TIERS.md) selengkapnya). Hasil tangkapannya: penyedia gratis sangat bervariasi dalam kualitas model. Penyedia tanpa autentikasi yang melayani model frontier jauh lebih berguna daripada penyedia yang melayani model lama yang kecil.
+OmniRoute mendaftarkan 381 penyedia, termasuk 155 entri katalog yang ditandai**free/no-auth** (tanpa autentikasi, OAuth tingkat gratis, atau kunci API tingkat gratis — lihat [Panduan Tingkatan Gratis](../getting-started/FREE-TIERS-GUIDE.md) dan [direktori Tingkatan Gratis](../reference/FREE_TIERS.md) selengkapnya). Hasil tangkapannya: penyedia gratis sangat bervariasi dalam kualitas model. Penyedia tanpa autentikasi yang melayani model frontier jauh lebih berguna daripada penyedia yang melayani model lama yang kecil.
 
-**Peringkat Penyedia Gratis** jawaban "** penyedia gratis mana yang memberi saya model terbaik?** " dengan bergabung dalam katalog masing-masing penyedia gratis** skor kualitas yang bersumber dari banyak orang** dari** Papan peringkat arena AI** (preferensi manusia ELO, ide yang sama di balik arena chatbot LMArena). Penyedia kemudian diberi peringkat berdasarkan kekuatan mereka** model gratis terbaik** .
+**Peringkat Penyedia Gratis** jawaban "** penyedia gratis mana yang memberi saya model terbaik?** " dengan bergabung dalam katalog masing-masing penyedia gratis** skor kualitas yang bersumber dari banyak orang** dari** Papan peringkat arena AI** (preferensi manusia ELO, ide yang sama di balik arena chatbot LMArena ). Penyedia kemudian diberi peringkat berdasarkan kekuatan mereka** model gratis terbaik** .
 
 Pemeringkatan dihitung dari tiga sumber nyata:
 
-1. Daftar penyedia gratis — `NOAUTH_PROVIDERS`, ditambah entri `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ditandai `hasFree` (`src/shared/constants/providers.ts`).
+1. Penyedia gratis mencantumkan — `NOAUTH_PROVIDERS`, ditambah entri `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` yang ditandai `hasFree` (`src/shared/constants/providers.ts`).
 2. Katalog model masing-masing penyedia dari registri penyedia (`open-sse/config/providerRegistry.ts`).
 3. Skor kesesuaian tugas yang diturunkan dari ELO disimpan dalam tabel `model_intelligence` DB oleh mesin sinkronisasi Arena ELO (`src/lib/arenaEloSync.ts`).
 

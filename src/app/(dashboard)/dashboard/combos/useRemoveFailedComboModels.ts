@@ -17,11 +17,20 @@ type Options = {
   /** Called after a successful removal (closes the test results modal). */
   onRemoved: () => void;
   notify: { error: (message: string) => void; success: (message: string) => void };
+  /** Kit confirmation dialog (`useConfirmDialog().requestConfirm`); resolves true on confirm. */
+  requestConfirm: (message: string) => Promise<boolean>;
   t: (key: string, values?: Record<string, string | number>) => string;
 };
 
 /** "Delete N failed model(s)" in the combo test results modal (#14944). */
-export function useRemoveFailedComboModels({ combo, updateCombo, onRemoved, notify, t }: Options) {
+export function useRemoveFailedComboModels({
+  combo,
+  updateCombo,
+  onRemoved,
+  notify,
+  requestConfirm,
+  t,
+}: Options) {
   const [removing, setRemoving] = useState(false);
 
   const removeFailedModels = async (failedStepIds: string[]) => {
@@ -35,7 +44,8 @@ export function useRemoveFailedComboModels({ combo, updateCombo, onRemoved, noti
       notify.error(t("cannotRemoveAllModels"));
       return;
     }
-    if (!confirm(t("removeErrorModelsConfirm", { count: removedCount, name: combo.name }))) return;
+    const message = t("removeErrorModelsConfirm", { count: removedCount, name: combo.name });
+    if (!(await requestConfirm(message))) return;
     setRemoving(true);
     try {
       const routes = combo.routes?.chat

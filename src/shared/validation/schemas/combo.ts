@@ -14,6 +14,7 @@ import {
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 import { COMBO_ENDPOINTS, COMBO_NON_CHAT_STRATEGIES } from "@/shared/constants/comboEndpoints";
+import { OPENAI_SERVICE_TIER_VALUES } from "@omniroute/open-sse/config/serviceTier.ts";
 
 // ──── Combo Schemas ────
 
@@ -168,6 +169,12 @@ export const responseValidationSchema = z
   })
   .strict();
 
+const comboServiceTierSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.enum(OPENAI_SERVICE_TIER_VALUES));
+
 export const comboRuntimeConfigSchema = z
   .object({
     responseValidation: responseValidationSchema.optional(),
@@ -213,6 +220,7 @@ export const comboRuntimeConfigSchema = z
     outputLimitAdvisory: z.boolean().optional(),
     reasoningTransportFallback: z.enum(["skip", "drop"]).optional(),
     compressionMode: compressionModeSchema.optional(),
+    comboCooldownWaitEnabled: z.boolean().optional(),
     failoverBeforeRetry: z.boolean().optional(),
     maxSetRetries: z.coerce.number().int().min(0).max(10).optional(),
     setRetryDelayMs: z.coerce.number().int().min(0).max(60000).optional(),
@@ -225,6 +233,13 @@ export const comboRuntimeConfigSchema = z
     relayMode: z.enum(["schema-locked", "standard"]).optional(),
     // Auto-Combo / LKGP Extensions
     candidatePool: z.array(z.string().min(1)).optional(),
+    accountPreferences: z
+      .record(
+        z.string().trim().min(1).max(200),
+        z.enum(["preferred", "normal", "reserve", "excluded"])
+      )
+      .refine((entries) => Object.keys(entries).length <= 500, "At most 500 account preferences")
+      .optional(),
     weights: scoringWeightsSchema.optional(),
     modePack: z.string().max(100).optional(),
     budgetCap: z.number().positive().optional(),
@@ -249,6 +264,7 @@ export const comboRuntimeConfigSchema = z
     resetAwareWeeklyWeight: z.coerce.number().min(0).max(100).optional(),
     resetAwareTieBandPercent: z.coerce.number().min(0).max(100).optional(),
     resetAwareExhaustionGuardPercent: z.coerce.number().min(0).max(100).optional(),
+    resetAwareNoQuotaFloor: z.coerce.number().min(0).max(1).optional(),
     quotaWeightedFloorPercent: z.coerce.number().min(0).max(100).optional(),
     quotaWeightedScoring: z.enum(["leftover", "pace"]).optional(),
     resetAwareQuotaCacheTtlMs: z.coerce.number().int().min(0).max(300_000).optional(),
@@ -303,6 +319,10 @@ export const comboRuntimeConfigSchema = z
       })
       .strict()
       .optional(),
+    // Per-combo OpenAI tier, forwarded only to targets that accept service_tier. Read from the
+    // combo's own config: comboDefaults and providerOverrides share this schema but do not apply it.
+    service_tier: comboServiceTierSchema.optional(),
+    serviceTier: comboServiceTierSchema.optional(),
     // Optional client-side sort hint for combo models.
     // Honored in the dashboard builder; reserved for future server-side use. Inert on execution.
     modelSort: z

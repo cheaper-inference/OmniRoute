@@ -1,0 +1,1 @@
+- **feat(gemini):** Pass an explicit per-image `media_resolution` (`low` through `ultra_high`) through the OpenAI to Gemini conversion as `Part.mediaResolution` for inline and remote images; opt-in, and `detail` keeps its meaning ([#18844](https://github.com/cheaper-inference/OmniRoute/pull/18844)) — thanks @Bl0ck154

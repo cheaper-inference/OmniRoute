@@ -14,7 +14,7 @@ OmniRoute je lokalni usmerjevalni prehod AI in nadzorna plošča, zgrajena na Ne
 
 Osnovne zmogljivosti:
 
-- Površina API združljiva z OpenAI, za CLI/tools (377 ponudnikov, 156 izvajalskih modulov)
+- Površina API združljiva z OpenAI, za CLI/tools (381 ponudnikov, 159 izvajalskih modulov)
 - prevod Request/response med formati ponudnika
 - Nadomestni kombinirani model (zaporedje več modelov)
 - Strukturirani kombinirani koraki (`provider + model + connection`) z vrstnim redom med izvajanjem `compositeTiers`
@@ -414,7 +414,7 @@ Imenski prostor `src/domain/` centralizira odločitve politike, tako da upravlja
 - združevalec pravil Connection/model : `src/domain/connectionModelRules.ts`
 - Posnetki razpoložljivosti modela: `src/domain/modelAvailability.ts`
 - Sledenje poteku veljavnosti ponudnika: `src/domain/providerExpiration.ts`
-- Predpomnilnik kvote: `src/domain/quotaCache.ts`
+- Predpomnilnik kvote: `src/domain/quotaCache.ts`. Ponudniki dodajajo in odstranjujejo kvotna okna (OpenAI je opustil 5-urno okno Codex za nekatere načrte), tako da branje uporabe ponudnikovega vmesnika potrdi kot popolno (`quotasComplete`, glejte `src/lib/usage/usageReading.ts`) je celoten nabor oken računa: okno, ki je bilo prej znano, a ga ni, je umaknjeno, v predpomnilniku, v `quota_snapshots` se rehidrira ponovni zagon (priložen zapis o upokojitvi), v obstoječem stanje kvote Codex in v vedrih nasičenosti Claude. Delni dokazi (glave odgovorov, zastarele kopije) posodobijo samo okna, ki jih nosijo.
 - Stanje razgradnje: `src/domain/degradation.ts`
 - Revizija konfiguracije: `src/domain/configAudit.ts`
 - Graditelj metapodatkov odziva OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -454,7 +454,7 @@ Več ponudnikov pošilja namenske module odpornosti in prikrite module, ki se na
 - motor Antigravity 429: `open-sse/services/antigravity429Engine.ts` (zasuka identiteto, počisti glave odgovorov, poganja sledenje credits/version prek `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
 - Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (proračun na zahtevo 429 navzgor v vseh gostiteljih, `ANTIGRAVITY_MAX_429_ATTEMPTS`; na identično ponovno pošiljanje zavrnjenega telesa se odgovori lokalno; `src/sse/handlers/chat.ts` ne zažene znova takšne zahteve prek ponovnega poskusa, ki se zaveda ohlajanja)
 - Politika kvot ModelScope : `open-sse/services/modelscopePolicy.ts`
-- koda Claude CCH (rokovanje kanala združljivosti): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- koda Claude CCH (rokovanje združljivostnega kanala): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Oblikovanje prstnega odtisa kode Claude : `open-sse/services/claudeCodeFingerprint.ts`
 - Claude Zakrivanje kode: `open-sse/services/claudeCodeObfuscation.ts`
 

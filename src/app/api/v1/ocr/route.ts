@@ -26,6 +26,7 @@ import {
 } from "@/app/api/v1/_shared/rateLimit";
 import { getComboByName } from "@/lib/db/combos";
 import { runModelEndpointCombo } from "@/lib/combos/modelEndpointCombo";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 
 export { resolveVertexOcrAccessToken };
 
@@ -107,7 +108,7 @@ async function dispatchOcrModel(
  * Mistral OCR API compatible.
  */
 /** Validate and execute an OCR request, including named combo routing. */
-async function postHandler(request, context) {
+async function postHandler(request, _context) {
   let rawBody;
   try {
     rawBody = await request.json();
@@ -122,6 +123,9 @@ async function postHandler(request, context) {
   const body = validation.data;
 
   const model = body.model || "mistral-ocr-latest";
+
+  const endpointMismatch = await getRequestedModelEndpointMismatch(model, "ocr");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
 
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, model);

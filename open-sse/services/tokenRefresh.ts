@@ -61,10 +61,12 @@ import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersi
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
 import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
 import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
+import { refreshRenderhourToken } from "./tokenRefresh/providers/renderhour.ts";
 import { refreshKiroToken } from "./tokenRefresh/providers/kiro.ts";
 import { refreshQoderToken } from "./tokenRefresh/providers/qoder.ts";
 import { refreshGitHubToken } from "./tokenRefresh/providers/github.ts";
 import { refreshCopilotToken } from "./tokenRefresh/providers/copilot.ts";
+import { refreshM365Token } from "./tokenRefresh/providers/m365.ts";
 
 export {
   refreshCodebuddyCnToken,
@@ -77,6 +79,7 @@ export {
   refreshCodexToken,
   refreshCursorToken,
   refreshOpenferenceToken,
+  refreshRenderhourToken,
   refreshKiroToken,
   refreshQoderToken,
   refreshGitHubToken,
@@ -249,6 +252,7 @@ export function getActiveOnPersist(): RefreshPersistFn | undefined {
 
 export function refreshAccessToken(provider, token, creds, log, proxy: unknown = null) {
   if (isPassiveCodex(provider)) return resolvePassiveCodex(creds);
+  if (provider === "copilot-m365-web") return refreshM365Token(token, creds, log, proxy);
   return refreshActiveAccessToken(provider, token, creds, log, proxy);
 }
 
@@ -395,10 +399,16 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
         try {
           const discovered = await ensureAntigravityProjectAssigned(result.accessToken, fetch);
           if (isUsableAntigravityProjectId(discovered)) {
-            result.projectId = discovered;
-            result.providerSpecificData = {
+            // The refresh result type declares only the token fields; the antigravity
+            // recovery adds these two alongside them.
+            const recovery = result as {
+              projectId?: string;
+              providerSpecificData?: Record<string, unknown>;
+            };
+            recovery.projectId = discovered;
+            recovery.providerSpecificData = {
               ...(credentials.providerSpecificData || {}),
-              ...(result.providerSpecificData || {}),
+              ...(recovery.providerSpecificData || {}),
               projectId: discovered,
             };
             if (credentials.connectionId) {
@@ -422,6 +432,9 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
       return result;
     }
 
+    case "copilot-m365-web":
+      return await refreshM365Token(credentials.refreshToken, credentials, log, proxyConfig);
+
     case "claude":
       return await refreshClaudeOAuthToken(credentials.refreshToken, log, proxyConfig);
 
@@ -436,6 +449,8 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
 
     case "openference":
       return await refreshOpenferenceToken(credentials.refreshToken, log, proxyConfig);
+    case "renderhour":
+      return await refreshRenderhourToken(credentials.refreshToken, log, proxyConfig);
 
     case "qoder":
       return await refreshQoderToken(credentials.refreshToken, log, proxyConfig);
@@ -500,12 +515,14 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
  */
 export function supportsTokenRefresh(provider) {
   const explicitlySupported = new Set([
+    "copilot-m365-web",
     "gemini",
     "antigravity",
     "agy",
     "claude",
     "codex",
     "openference",
+    "renderhour",
     "qoder",
     "github",
     "kiro",
@@ -600,9 +617,11 @@ export async function getAccessToken(
         log,
         proxyConfig
       );
+      // The refresh helpers return one of nine shapes; name the token once.
+      const token = result as { accessToken?: string } | null;
       // Invoke onPersist INSIDE the mutex so [network call + DB write] are one atomic step.
       // This prevents a concurrent waiter from reading stale credentials before the DB is updated.
-      if (result?.accessToken && effectiveOnPersist) {
+      if (token?.accessToken && effectiveOnPersist) {
         // #4038: skip the persist if a concurrent writer already rotated this row past the
         // refresh_token we presented (compare-and-swap) — overwriting would revert it.
         if (await casGuardShouldSkipPersist(log)) {
@@ -657,7 +676,9 @@ export async function getAccessToken(
   // resolve the promise to all waiters with the refreshed credentials.
   const refreshPromise = _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig)
     .then(async (result) => {
-      if (result?.accessToken && effectiveOnPersist) {
+      // The refresh helpers return one of nine shapes; name the token once.
+      const token = result as { accessToken?: string } | null;
+      if (token?.accessToken && effectiveOnPersist) {
         // #4038: same compare-and-swap guard as Layer 1 — skip the persist if a concurrent
         // writer already rotated this row past the refresh_token we presented.
         if (await casGuardShouldSkipPersist(log)) {
@@ -673,7 +694,7 @@ export async function getAccessToken(
           );
           throw persistErr;
         }
-      } else if (result?.accessToken && !effectiveOnPersist) {
+      } else if (token?.accessToken && !effectiveOnPersist) {
         log?.warn?.(
           "TOKEN_REFRESH",
           `Layer 2 refresh succeeded for ${provider} without onPersist — DB row will not be updated with rotated token. Callers should pass connectionId for Layer 1 atomicity.`

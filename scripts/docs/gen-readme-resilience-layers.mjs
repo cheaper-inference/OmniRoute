@@ -5,13 +5,13 @@
 //
 //   node scripts/docs/gen-readme-resilience-layers.mjs [--out path.svg]
 //
-// Everything the diagram draws lives in RESILIENCE_LAYERS_COPY: it is both the drawn text and
-// the subset input for the embedded fonts. The three healing loops replay on one shared 18 s
+// Everything the diagram draws lives in RESILIENCE_LAYERS_COPY: it is both the drawn text and what the
+// outlining step shapes (scripts/docs/readme-outline.mjs). The three healing loops replay on one shared 18 s
 // cycle; every window below is the beat the previous hand-written file carried.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildFontFaceCss } from "./readme-fonts.mjs";
-import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { outlineSvg } from "./readme-outline.mjs";
+import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs";
 
 const LAYERS = [
   {
@@ -119,7 +119,7 @@ function pill(x, y, w, t, label, values, keyTimes) {
   return (
     `<rect x="${x}" y="${y}" width="${w}" height="24" rx="12" class="${t}-bg"/>` +
     `<circle cx="${x + 16}" cy="${y + 12}" r="4.5" class="${t}"><animate attributeName="opacity" calcMode="discrete" values="${values}" keyTimes="${keyTimes}" dur="${DUR}" repeatCount="indefinite"/></circle>` +
-    `<text x="${x + 30}" y="${y + 16}" class="mono-sm" style="fill:${tone(t)}">${esc(label)}</text>\n`
+    `<text x="${x + 30}" y="${y + 16}" class="label-sm" style="fill:${tone(t)}">${esc(label)}</text>\n`
   );
 }
 
@@ -130,7 +130,7 @@ const dashed = (d) =>
 const card = (x, y, w, h, rx, strokeCls = "", fillCls = "surface-subtle") =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" class="${fillCls}${strokeCls ? " " + strokeCls : ""}"${strokeCls ? "" : ' style="stroke:var(--border)"'} stroke-width="1"/>\n`;
 const mono = (x, y, s, extra = "") =>
-  `<text x="${x}" y="${y}" class="mono-sm"${extra}>${esc(s)}</text>\n`;
+  `<text x="${x}" y="${y}" class="label-sm"${extra}>${esc(s)}</text>\n`;
 
 function panel(i) {
   const L = LAYERS[i];
@@ -158,7 +158,7 @@ function breakerScene() {
   const pB = "M 418,220 C 442,220 446,261 466,261";
   return (
     `  <circle cx="404" cy="220" r="13" class="accent"/><circle cx="404" cy="220" r="4" style="fill:var(--accent-ink)"/>\n` +
-    `  <text x="404" y="250" text-anchor="middle" class="mono-xs">${esc(C[0])}</text>\n` +
+    `  <text x="404" y="250" text-anchor="middle" class="label-xs">${esc(C[0])}</text>\n` +
     `  ` +
     card(470, 164, 152, 50, 10) +
     `  ` +
@@ -207,7 +207,7 @@ function cooldownScene() {
   return (
     `  <circle cx="384" cy="402" r="5" class="accent stroke-ink" stroke-width="1"/>\n` +
     `  <rect x="404" y="336" width="270" height="134" rx="10" fill="none" class="rule" stroke-width="1"/>\n` +
-    `  <text x="416" y="352" class="mono-xs">${esc(C[0])}</text>\n` +
+    `  <text x="416" y="352" class="label-xs">${esc(C[0])}</text>\n` +
     `  ` +
     card(420, 362, 120, 26, 6, "stroke-err") +
     `  ` +
@@ -223,7 +223,7 @@ function cooldownScene() {
     `  ` +
     mono(432, 451, C[4]) +
     `  <rect x="556" y="363" width="112" height="24" rx="12" class="warn-bg"/>\n` +
-    `  <text x="568" y="379" class="mono-xs" style="fill:var(--warn)">${esc(C[5])}</text>\n` +
+    `  <text x="568" y="379" class="label-xs" style="fill:var(--warn)">${esc(C[5])}</text>\n` +
     `  <rect x="556" y="392" width="112" height="4" rx="2" class="track"/>\n` +
     `  <rect x="556" y="392" width="112" height="4" rx="2" class="warn"><animate attributeName="width" values="112;0;0;112" keyTimes="0;0.7;0.78;1" dur="${DUR}" repeatCount="indefinite"/></rect>\n` +
     `  ` +
@@ -301,23 +301,8 @@ function lockoutScene() {
 
 export async function renderResilienceLayers() {
   const C = RESILIENCE_LAYERS_COPY;
-  const { css } = await buildFontFaceCss({
-    ui: [C.headline[0], C.headline[2], C.headline[4], ...C.descriptions].join(""),
-    uiBold: [C.headline[1], C.headline[3], ...C.titles].join(""),
-    mono: [
-      ...C.kicker,
-      ...C.legend,
-      ...C.layerKickers,
-      ...C.bullets,
-      ...C.breaker,
-      ...C.cooldown,
-      ...C.lockout,
-      ...C.foot,
-    ].join(""),
-  });
-
   const legend =
-    `  <g class="mono-xs">` +
+    `  <g class="label-xs">` +
     `<rect x="1000" y="34" width="160" height="80" rx="10" fill="none" class="stroke-ink" stroke-opacity="0.5"/>` +
     `<text x="1012" y="48" style="fill:var(--ink)">${esc(C.legend[0])}</text>` +
     `<rect x="1034" y="56" width="118" height="50" rx="8" fill="none" class="stroke-warn" stroke-opacity="0.7"/>` +
@@ -326,30 +311,29 @@ export async function renderResilienceLayers() {
     `<text x="1078" y="92" style="fill:var(--info)">${esc(C.legend[2])}</text>` +
     `</g>\n`;
 
-  return (
+  return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 726",
       title:
         "OmniRoute resilience — three independent self-healing layers, the right layer for the right failure.",
       desc: "Layer 1, provider circuit breaker (scope: whole provider): trips only on 408/500/502/503/504, thresholds of 8 fails for OAuth, 12 for API-key, 2 for local providers, reset timeouts of 60, 30 and 15 seconds into a HALF-OPEN probe, lazy recovery where reads refresh expired state; while OPEN the combo reroutes to the next provider, then a probe closes the breaker. Layer 2, connection cooldown (scope: one key or account): base cooldown 5 seconds OAuth and 3 seconds API-key, exponential backoff times two per repeated failure with an anti-thundering-herd guard, 429 honors Retry-After and reset headers, success calls clearAccountError; one rate-limited key is skipped while the other keys keep serving. Layer 3, model lockout (scope: one model): per-model 429, local 404 or mode denials lock just that model — a locked model is not a dead key, other models keep serving instantly. Terminal states banned, expired and credits_exhausted are not cooldowns and wait for the operator. Animated resilience card: three stacked layer panels, each replaying its healing loop — breaker states cycling CLOSED, OPEN, HALF-OPEN; a cooling key with backoff while other keys serve; a locked model while sibling models keep serving. First frame is fully readable. Light and dark follow the viewer's color scheme.",
-      fontFaceCss: css,
       extraCss: `.rl-strong{font-weight:600;fill:var(--ink)}`,
     }) +
-    gridDefs("rl-grid") +
-    `  <rect class="bg" x="0" y="0" width="1200" height="726"/>\n` +
-    `  <rect x="0" y="0" width="1200" height="726" fill="url(#rl-grid)"/>\n` +
-    `  <text x="40" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
-    `  <line x1="392" y1="51" x2="976" y2="51" class="rule" stroke-width="1"/>\n` +
-    `  <text x="40" y="100" class="sub">${esc(C.headline[0])}<tspan class="rl-strong">${esc(C.headline[1])}</tspan>${esc(C.headline[2])}<tspan class="rl-strong">${esc(C.headline[3])}</tspan>${esc(C.headline[4])}</text>\n` +
-    legend +
-    panel(0) +
-    breakerScene() +
-    panel(1) +
-    cooldownScene() +
-    panel(2) +
-    lockoutScene() +
-    `  <text x="40" y="708" class="mono-sm" style="fill:var(--muted)">${esc(C.foot[0])}<tspan style="fill:var(--ink)">${esc(C.foot[1])}</tspan>${esc(C.foot[2])}<tspan style="fill:var(--warn)">${esc(C.foot[3])}</tspan>${esc(C.foot[2])}<tspan style="fill:var(--info)">${esc(C.foot[4])}</tspan>${esc(C.foot[5])}</text>\n` +
-    "</svg>\n"
+      gridDefs("rl-grid") +
+      `  <rect class="bg" x="0" y="0" width="1200" height="726"/>\n` +
+      `  <rect x="0" y="0" width="1200" height="726" fill="url(#rl-grid)"/>\n` +
+      `  <text x="40" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
+      `  <line x1="${afterKicker(40, C.kicker[0])}" y1="51" x2="976" y2="51" class="rule" stroke-width="1"/>\n` +
+      `  <text x="40" y="100" class="sub">${esc(C.headline[0])}<tspan class="rl-strong">${esc(C.headline[1])}</tspan>${esc(C.headline[2])}<tspan class="rl-strong">${esc(C.headline[3])}</tspan>${esc(C.headline[4])}</text>\n` +
+      legend +
+      panel(0) +
+      breakerScene() +
+      panel(1) +
+      cooldownScene() +
+      panel(2) +
+      lockoutScene() +
+      `  <text x="40" y="708" class="label-sm" style="fill:var(--muted)">${esc(C.foot[0])}<tspan style="fill:var(--ink)">${esc(C.foot[1])}</tspan>${esc(C.foot[2])}<tspan style="fill:var(--warn)">${esc(C.foot[3])}</tspan>${esc(C.foot[2])}<tspan style="fill:var(--info)">${esc(C.foot[4])}</tspan>${esc(C.foot[5])}</text>\n` +
+      "</svg>\n"
   );
 }
 

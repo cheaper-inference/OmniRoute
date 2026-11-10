@@ -173,6 +173,8 @@ export function validationErrorMessage(error: unknown): string | null {
 export interface TestAllModelOutcome {
   status: "ok" | "error";
   isQuota?: boolean;
+  /** The runner never dispatched this probe: neither working nor broken. */
+  skipped?: boolean;
   shouldHide: boolean;
 }
 type TestAllEntryStatus = "ok" | "error" | "slow";
@@ -224,6 +226,7 @@ export function evaluateTestAllEntry(
     // so an evening Test All on a free-tier provider doesn't silently wipe the
     // catalog for the next day.
     ...(entry?.isQuota ? { isQuota: true } : {}),
+    ...(!ok && entry?.skipped ? { skipped: true } : {}),
     // Hide only persistent failures. Transient (rate-limited, timeout, quota) are
     // surfaced on the icon but kept visible so a single throttled batch test
     // does not silently wipe the catalog.
@@ -243,6 +246,50 @@ export function testAllResultsText(
   total: number
 ): string {
   return providerText(t, "testAllResults", "{ok} of {total} models working", { ok, total });
+}
+
+/**
+ * Running counts for a "Test all models" batch. Skipped probes (a web-session
+ * provider's models are never dispatched) are neither working nor failing.
+ */
+export interface TestAllTally {
+  ok: number;
+  error: number;
+  skipped: number;
+  /** The runner's reason for the first skipped probe, shown in the summary. */
+  skipReason?: string;
+}
+
+/** Count one model's Test All outcome; `reason` is the entry's error message. */
+export function recordTestAllOutcome(
+  tally: TestAllTally,
+  outcome: Pick<TestAllModelOutcome, "status" | "skipped">,
+  reason?: string
+): void {
+  if (outcome.skipped) {
+    tally.skipped++;
+    tally.skipReason ??= reason;
+  } else if (outcome.status === "ok") {
+    tally.ok++;
+  } else {
+    tally.error++;
+  }
+}
+
+/**
+ * The toast lines for a finished "Test all models" batch: the count covers only
+ * the models that were tested, then the runner's skip reason is shown, as the
+ * single-model test does.
+ */
+export function testAllSummaryMessages(
+  t: ProviderMessageTranslator,
+  tally: TestAllTally
+): string[] {
+  const { ok, error, skipped, skipReason } = tally;
+  const tested = ok + error;
+  const messages = tested > 0 || skipped === 0 ? [testAllResultsText(t, ok, tested)] : [];
+  if (skipped > 0 && skipReason) messages.push(skipReason);
+  return messages.length > 0 ? messages : [testAllResultsText(t, ok, tested)];
 }
 
 export function providerCountText(

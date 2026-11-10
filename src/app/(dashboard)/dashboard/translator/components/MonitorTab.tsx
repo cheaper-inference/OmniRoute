@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import { useTranslations } from "next-intl";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -218,16 +219,13 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
               variant="ghost"
               size="sm"
               onClick={() => setAutoRefresh((prev) => !prev)}
-              aria-label={
-                autoRefresh
-                  ? translateOrFallback("pauseAutoRefresh", "Pause auto-refresh")
-                  : translateOrFallback("resumeAutoRefresh", "Resume auto-refresh")
-              }
+              // The button names its action; the Live/Paused badge beside it shows the state.
+              // Visible text = accessible name (WCAG 2.5.3), no aria-label or title override.
               data-testid="auto-refresh-toggle"
             >
               {autoRefresh
-                ? translateOrFallback("liveAutoRefreshing", "Atualizando ao vivo")
-                : translateOrFallback("paused", "Pausado")}
+                ? translateOrFallback("pauseAutoRefresh", "Pause auto-refresh")
+                : translateOrFallback("resumeAutoRefresh", "Resume auto-refresh")}
             </Button>
           </div>
           <div className="flex items-center gap-2">
@@ -250,8 +248,8 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
           <h3 className="text-sm font-semibold text-text-main mb-3">{t("recentTranslations")}</h3>
 
           {loading ? (
-            <div className="flex items-center justify-center py-12 text-text-muted">
-              <Icon name="progress_activity" className="animate-spin mr-2" />
+            <div role="status" className="flex items-center justify-center py-12 text-text-muted">
+              <Spinner decorative size="sm" className="mr-2" />
               {tc("loading")}
             </div>
           ) : events.length === 0 ? (

@@ -1,0 +1,1 @@
+- **db:** Migrations whose ledger row duplicates another migration's name now release that version slot instead of shadowing the file that belongs there, so the seven pairs from #18952 no longer leave `radar_referrals_cache` and the two `proxy_subscriptions` columns uncreated on databases that carried the duplicates
