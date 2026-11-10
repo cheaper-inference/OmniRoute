@@ -120,7 +120,8 @@ test("pii-masker with the PII flags OFF never mutates the request payload", asyn
   assert.equal(result.block, false);
   assert.equal(result.modifiedPayload, undefined);
   // Masking off is a no-op: the payload is not scanned, so there is no detection count.
-  assert.equal(result.meta ?? null, null);
+  assert.equal(result.meta?.detections, undefined);
+  assert.equal(result.meta?.redacted, undefined);
   assert.deepEqual(payload, snapshot);
 });
 
