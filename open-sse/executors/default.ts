@@ -376,7 +376,8 @@ export class DefaultExecutor extends BaseExecutor {
         const baseUrl = this.resolveBaseUrl(credentials);
         return buildMaritalkChatUrl(baseUrl);
       }
-      case "siliconflow": {
+      case "siliconflow":
+      case "infomaniak": {
         const baseUrl = this.resolveBaseUrl(credentials);
         return normalizeOpenAIChatUrl(baseUrl);
       }

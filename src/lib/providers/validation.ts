@@ -11,6 +11,10 @@ import {
   WEB_COOKIE_PROVIDERS,
 } from "@/shared/constants/providers";
 import { MODAL_DEFAULT_VALIDATION_MODEL_ID } from "@/shared/constants/modal";
+import {
+  INFOMANIAK_BASE_URL_EXAMPLE,
+  INFOMANIAK_DEFAULT_VALIDATION_MODEL_ID,
+} from "@/shared/constants/infomaniak";
 import { validateImageProviderApiKey } from "@/lib/providers/imageValidation";
 import { usesCcWireImage } from "@omniroute/open-sse/services/ccWireImageBuiltins.ts";
 import {
@@ -346,6 +350,25 @@ export async function validateProviderApiKey({
         providerSpecificData,
         baseUrl: normalizeBaseUrl(baseUrl),
         modelId: MODAL_DEFAULT_VALIDATION_MODEL_ID,
+        isLocal,
+      });
+    },
+    infomaniak: ({ apiKey, providerSpecificData }: any) => {
+      // The endpoint path carries the account's AI Tools product id; without a Base URL
+      // the probe would hit the registry placeholder.
+      const baseUrl = (providerSpecificData?.baseUrl || "").trim();
+      if (!baseUrl) {
+        return {
+          valid: false,
+          error: `Infomaniak requires a Base URL with your AI Tools product id (e.g. ${INFOMANIAK_BASE_URL_EXAMPLE}).`,
+        };
+      }
+      return validateOpenAILikeProvider({
+        provider: "infomaniak",
+        apiKey,
+        providerSpecificData,
+        baseUrl: normalizeBaseUrl(baseUrl),
+        modelId: INFOMANIAK_DEFAULT_VALIDATION_MODEL_ID,
         isLocal,
       });
     },
