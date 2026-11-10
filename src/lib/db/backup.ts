@@ -536,8 +536,14 @@ export async function restoreDbBackup(backupId: string) {
         backupDirForPre,
         `db_${new Date().toISOString().replace(/[:.]/g, "-")}_pre-restore.sqlite`
       );
-      const dbForBackup = getDbInstance();
-      await dbForBackup.backup(preBackupPath);
+      try {
+        const dbForBackup = getDbInstance();
+        await dbForBackup.backup(preBackupPath);
+      } catch (e: unknown) {
+        // The restore stops here, before any live data is touched. Say which step failed.
+        const message = e instanceof Error ? e.message : String(e);
+        throw new Error(`Pre-restore safety backup failed: ${message}`, { cause: e });
+      }
       chmodQuiet(preBackupPath, DB_SECRET_FILE_MODE);
       _lastBackupAt = Date.now();
     }
