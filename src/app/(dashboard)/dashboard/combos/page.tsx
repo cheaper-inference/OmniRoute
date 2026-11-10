@@ -864,6 +864,14 @@ function hasInvalidWeightedRoute(drafts: CapabilityDrafts): boolean {
   );
 }
 
+/** Every target of every capability route, for the allowed-provider restriction sync. */
+function routeTargets(routes: CapabilityDrafts): Array<{ providerId?: string; model?: string }> {
+  return Object.values(routes).flatMap((route) => route?.models || []) as Array<{
+    providerId?: string;
+    model?: string;
+  }>;
+}
+
 /** Serialize the configured capability tabs; empty ones are not persisted. */
 function buildCapabilityRoutes(drafts: CapabilityDrafts, isExpertMode: boolean): CapabilityDrafts {
   return Object.fromEntries(
@@ -2537,7 +2545,9 @@ function ComboFormModal({
       setModels(next.models);
       setStrategy(next.strategy);
       setConfig(next.config);
-      const nextSort = normalizeSortMethod(next.config?.modelSort?.method);
+      const nextSort = normalizeSortMethod(
+        (next.config?.modelSort as { method?: unknown } | undefined)?.method
+      );
       setSortMethod(nextSort);
       sortMethodRef.current = nextSort;
       setBuilderStage(next.models.length > 0 ? "strategy" : "steps");
@@ -3527,8 +3537,7 @@ function ComboFormModal({
 
     // When editing an existing combo from the dashboard form, synchronize allowedProviders
     // and clear legacy family restrictions so adding steps across providers never triggers COMBO_008
-    const allRouteModels = Object.values(routes).flatMap((route) => route?.models || []);
-    Object.assign(saveData, computeAllowedRestrictionSync(isEdit, combo, allRouteModels));
+    Object.assign(saveData, computeAllowedRestrictionSync(isEdit, combo, routeTargets(routes)));
 
     // Per-combo description (#5005). Free-text, optional, persisted in combo data.
     if (description.trim()) {
