@@ -88,11 +88,16 @@ test("KiroExecutor.execute falls back to the regional CodeWhisperer host when th
   }
 });
 
-test("KiroExecutor.execute never tries the gateway for api_key/idc/external_idp auth methods", async () => {
+test("KiroExecutor.execute never tries the gateway for api_key/external_idp auth methods (idc rides it first since #19607)", async () => {
   const executor = new KiroExecutor();
   const originalFetch = globalThis.fetch;
 
-  for (const authMethod of ["api_key", "idc", "external_idp"]) {
+  // api_key and external_idp remain gateway-ineligible: the branded gateway rejects
+  // TokenType=API_KEY and org-IdP tokens outright. IdC was moved to gateway-first in
+  // #19607 (live-verified: the AWS-native hosts answer the version-gate 403 for
+  // SSO-issued tokens; only runtime.us-east-1.kiro.dev authenticates them) — its
+  // gateway-first behavior is pinned in tests/unit/kiro-version-gate-19607.test.ts.
+  for (const authMethod of ["api_key", "external_idp"]) {
     const calledUrls: string[] = [];
     globalThis.fetch = (async (url: string) => {
       calledUrls.push(String(url));

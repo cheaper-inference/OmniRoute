@@ -117,12 +117,53 @@ test("kiroRuntimeHost never routes to the retired codewhisperer host in us-east-
   assert.equal(kiroRuntimeHost("eu-central-1"), "https://q.eu-central-1.amazonaws.com");
 });
 
-test("idc connection in us-east-1 executes against q.us-east-1, not codewhisperer", async () => {
+test("idc connection in us-east-1 tries the branded gateway first, regional Q as fallback", async () => {
+  // Live-verified 2026-11-10 (#19607): AWS-native hosts (codewhisperer AND q.us-east-1)
+  // reject SSO-issued tokens with the version-gate 403 regardless of User-Agent; the
+  // branded runtime.us-east-1.kiro.dev gateway authenticates the same IdC token and
+  // streams a real completion. IdC inference must therefore ride the gateway first
+  // exactly like builder-id/social, keeping the regional Q host as the fallback.
   const { urls } = await captureExecuteRequests({
     accessToken: "idc-token",
     providerSpecificData: { authMethod: "idc", region: "us-east-1" },
   });
-  assert.deepEqual(urls, ["https://q.us-east-1.amazonaws.com/generateAssistantResponse"]);
+  // Success on the first candidate means exactly one URL — the gateway.
+  assert.deepEqual(urls, ["https://runtime.us-east-1.kiro.dev/generateAssistantResponse"]);
+});
+
+test("idc connection falls back to the regional Q host when the gateway rejects auth", async () => {
+  const executor = new KiroExecutor();
+  executor.transformEventStreamToSSE = () =>
+    new Response("data: [DONE]\n\n", {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    });
+  const originalFetch = globalThis.fetch;
+  const urls: string[] = [];
+  globalThis.fetch = (async (url: URL | string) => {
+    urls.push(String(url));
+    if (String(url).includes("runtime.us-east-1.kiro.dev")) {
+      return new Response(JSON.stringify({ message: "bearer token invalid" }), { status: 403 });
+    }
+    return new Response("ok", { status: 200 });
+  }) as typeof fetch;
+  try {
+    await executor.execute({
+      model: "kiro-model",
+      body: { conversationState: {} },
+      stream: true,
+      credentials: {
+        accessToken: "idc-token",
+        providerSpecificData: { authMethod: "idc", region: "us-east-1" },
+      },
+    } as Parameters<KiroExecutor["execute"]>[0]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.deepEqual(urls, [
+    "https://runtime.us-east-1.kiro.dev/generateAssistantResponse",
+    "https://q.us-east-1.amazonaws.com/generateAssistantResponse",
+  ]);
 });
 
 test("kiro catalog fingerprint UA carries a supported IDE version", async () => {

@@ -469,15 +469,16 @@ export class KiroExecutor extends BaseExecutor {
       authMethod === "api_key" ? kiroApiKeyRuntimeHost(region) : kiroRuntimeHost(region);
     const regionalUrl = `${runtimeHost}/generateAssistantResponse`;
 
-    // The Kiro IDE's own branded gateway (runtime.*.kiro.dev) only exists for
-    // us-east-1 and only accepts Kiro OIDC/social tokens — it rejects
-    // TokenType=API_KEY and external-IdP/IdC SSO tokens outright (403 "bearer
-    // token invalid"), so those auth methods go straight to the region-resolved
-    // CodeWhisperer/Amazon Q surface. For everything else, try the branded gateway
-    // first — it is the surface the native Kiro IDE itself talks to — and fall
-    // back to the raw AWS host on an auth/profile-shaped failure.
-    const isCodeWhispererOnly =
-      authMethod === "api_key" || authMethod === "idc" || isExternalIdpAuthMethod(authMethod);
+    // The Kiro branded gateway (runtime.*.kiro.dev) only exists for us-east-1 and is
+    // the ONLY surface that still authenticates SSO-issued (builder-id/IdC) tokens
+    // after the 2026-11-09 client-version enforcement (#19607, live-verified): the
+    // AWS-native hosts — codewhisperer AND q.<region> — answer the version-gate 403
+    // for those tokens regardless of User-Agent. IdC therefore rides the gateway
+    // first like builder-id/social, keeping the regional Q host as fallback (an
+    // eu-central-1 IdC profile has no gateway — only the regional host serves it).
+    // API keys and external-IdP org tokens remain gateway-ineligible: the gateway
+    // rejects TokenType=API_KEY and org-IdP tokens outright (403 "bearer token invalid").
+    const isCodeWhispererOnly = authMethod === "api_key" || isExternalIdpAuthMethod(authMethod);
     const candidateUrls =
       region === "us-east-1" && !isCodeWhispererOnly
         ? ["https://runtime.us-east-1.kiro.dev/generateAssistantResponse", regionalUrl]
