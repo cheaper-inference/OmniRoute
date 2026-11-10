@@ -632,3 +632,105 @@ test("opencode-server: the URL setting is pushed by the runtime-settings applier
     settingsModule.clearOpencodeServerSettingsCache();
   }
 });
+
+// OpenCode 2.x moved every route under /api/ (Basic auth) and serves the web app's
+// index.html on the legacy paths, so a v1-only executor must recognize it instead of
+// treating that HTML 200 as a healthy server (field test on PR #16995, v2.2.5).
+type FakeRoute = { status: number; type: "json" | "html"; body?: unknown };
+
+async function startStaticServer(
+  routes: Record<string, FakeRoute>
+): Promise<{ url: string; hits: string[]; close: () => Promise<void> }> {
+  const hits: string[] = [];
+  const spa: FakeRoute = { status: 200, type: "html" };
+  const server = http.createServer((req, res) => {
+    const url = (req.url || "/").split("?")[0];
+    hits.push(`${req.method} ${url}`);
+    const route = routes[url] ?? spa;
+    if (route.type === "json") {
+      res.writeHead(route.status, { "content-type": "application/json" });
+      res.end(JSON.stringify(route.body ?? {}));
+    } else {
+      res.writeHead(route.status, { "content-type": "text/html; charset=utf-8" });
+      res.end("<!doctype html><html><body><div id=root></div></body></html>");
+    }
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address() as AddressInfo;
+  return {
+    url: `http://127.0.0.1:${address.port}`,
+    hits,
+    close: () => new Promise<void>((resolve) => server.close(() => resolve())),
+  };
+}
+
+const V2_API_PROVIDER: Record<string, FakeRoute> = {
+  "/api/provider": {
+    status: 401,
+    type: "json",
+    body: { error: "Unauthorized" },
+  },
+};
+
+test("opencode-server: the health probe tells a v1 server from a v2 one", async () => {
+  const { probeOpencodeServerHealth } =
+    await import("../../open-sse/services/opencodeServerEndpoint.ts");
+  const cases: Array<[string, Record<string, FakeRoute>, unknown]> = [
+    [
+      "v1 JSON health",
+      {
+        "/global/health": { status: 200, type: "json", body: { healthy: true, version: "1.19.2" } },
+      },
+      { healthy: true, version: "1.19.2", apiMajor: 1 },
+    ],
+    [
+      "v2 JSON health",
+      {
+        "/global/health": { status: 200, type: "json", body: { healthy: true, version: "2.2.5" } },
+      },
+      { healthy: true, version: "2.2.5", apiMajor: 2 },
+    ],
+    [
+      "v2 web app on the legacy path, JSON under /api/",
+      V2_API_PROVIDER,
+      { healthy: true, apiMajor: 2 },
+    ],
+    ["a web app that is not an opencode server", {}, null],
+  ];
+  for (const [label, routes, expected] of cases) {
+    const fake = await startStaticServer(routes);
+    try {
+      assert.deepEqual(await probeOpencodeServerHealth(fake.url), expected, label);
+    } finally {
+      await fake.close();
+    }
+  }
+});
+
+test("opencode-server: a v2 server is a clear unsupported-version error, never a session call", async () => {
+  const fake = await startStaticServer(V2_API_PROVIDER);
+  process.env.OPENCODE_SERVER_URL = fake.url;
+  executorModule.clearOpencodeServerSettingsCache();
+  try {
+    const executor = new executorModule.OpencodeServerExecutor();
+    const result = await executor.execute({
+      model: "opencode-server/test-model",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(result.response.status, 501);
+    const payload = (await result.response.json()) as Json;
+    const message = String(dig(payload, "error", "message"));
+    assert.match(message, /unsupported opencode server version/);
+    assert.match(message, /v2/);
+    assert.doesNotMatch(JSON.stringify(payload), /\bat \S+:\d+:\d+|node:internal|Error:/);
+    assert.deepEqual(
+      fake.hits.filter((hit) => /\/session|\/config\/providers/.test(hit)),
+      [],
+      "a v2 server must not receive v1 session or catalog calls"
+    );
+  } finally {
+    await fake.close();
+  }
+});

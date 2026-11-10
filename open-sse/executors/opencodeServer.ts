@@ -107,11 +107,30 @@ export class OpencodeServerUnavailableError extends Error {
   }
 }
 
-/** Health of the configured server, or OpencodeServerUnavailableError. Never spawns. */
+/**
+ * An opencode 2.x server answers on the configured URL. Its API (`/api/*`, Basic
+ * auth, a per-session model) is not the v1 one this executor speaks, so requests
+ * fail clearly instead of hitting the web app's HTML or a 405 on `/session`.
+ */
+export class OpencodeServerUnsupportedVersionError extends Error {
+  readonly status = 501;
+  constructor(url: string, version?: string) {
+    super(
+      `unsupported opencode server version on ${url}${version ? ` (${version})` : ""}: ` +
+        "this provider speaks the opencode v1 server API, and v2 servers are not supported yet"
+    );
+    this.name = "OpencodeServerUnsupportedVersionError";
+  }
+}
+
+/** Health of the configured v1 server, or a typed unavailable/unsupported error. Never spawns. */
 export async function requireOpencodeServer(): Promise<OpencodeServerHealth> {
   resolvedSettings = await readOpencodeServerSettings();
   const health = await probeOpencodeServerHealth(serverBaseUrl());
   if (!health) throw new OpencodeServerUnavailableError(serverBaseUrl());
+  if (health.apiMajor === 2) {
+    throw new OpencodeServerUnsupportedVersionError(serverBaseUrl(), health.version);
+  }
   return health;
 }
 
@@ -123,7 +142,12 @@ async function unavailableResponse(): Promise<Response | null> {
     await requireOpencodeServer();
     return null;
   } catch (error) {
-    if (!(error instanceof OpencodeServerUnavailableError)) throw error;
+    if (
+      !(error instanceof OpencodeServerUnavailableError) &&
+      !(error instanceof OpencodeServerUnsupportedVersionError)
+    ) {
+      throw error;
+    }
     return new Response(JSON.stringify(buildErrorBody(error.status, error.message)), {
       status: error.status,
       headers: { "Content-Type": "application/json; charset=utf-8" },
