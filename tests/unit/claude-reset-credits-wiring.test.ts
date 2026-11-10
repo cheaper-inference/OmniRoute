@@ -12,7 +12,8 @@ const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-claude-reset-wi
 process.env.DATA_DIR = dataDir;
 process.env.API_KEY_SECRET = "claude-reset-wiring-test-secret";
 
-const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
+const { createProviderConnection, deleteProviderConnection } =
+  await import("../../src/lib/db/providers.ts");
 const { getProviderLimitsCache } = await import("../../src/lib/db/providerLimits.ts");
 const { acquireExclusiveConnectionLease } =
   await import("../../src/lib/db/exclusiveConnectionLeases.ts");
@@ -206,4 +207,29 @@ test("a redeem whose follow-up refresh is throttled does not bring back the old 
   assert.equal(redeemed.usage._stale, true);
   assert.equal("bankedResetCredits" in redeemed.usage, false, "no pre-redeem count");
   assert.equal(getProviderLimitsCache(id)?.bankedResetCredits, undefined);
+});
+
+test("a redeem whose post-claim usage refresh throws still reports the spent credit", async () => {
+  const connection = await createProviderConnection({
+    provider: "claude",
+    authType: "oauth",
+    name: "Reset wiring refresh throws",
+    accessToken: "wiring-refresh-throws-token",
+    isActive: true,
+    expiresAt: "2099-01-01T00:00:00Z",
+    providerSpecificData: { organizationUUID: "org-uuid-1" },
+  });
+  const id = connection.id as string;
+  mockUpstream();
+  const upstream = globalThis.fetch;
+  // The claim succeeds upstream; the connection is gone by the time the usage refresh
+  // runs, so fetchAndPersistProviderLimits throws ("Connection not found").
+  globalThis.fetch = (async (input: unknown, init?: RequestInit) => {
+    if (String(input) === CLAIM_URL) await deleteProviderConnection(id);
+    return upstream(input as string, init);
+  }) as typeof fetch;
+
+  const redeemed = await consumeClaudeResetCredit(id, "idem-refresh-throws", "grant:grant-a");
+  assert.deepEqual(redeemed, { outcome: "reset", usage: {} });
+  assert.equal(count(`POST ${CLAIM_URL}`), 1);
 });
