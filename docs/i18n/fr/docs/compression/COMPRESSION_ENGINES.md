@@ -354,7 +354,7 @@ L'outil de récupération s'appelle actuellement `omniroute_ccr_retrieve` (le pr
 
 ### Cycle de vie des sessions
 
-Les sessions HTTP diffusables s'arrêtent et le serveur les récupère ; la fenêtre inactive est la constante `MCP_SESSION_IDLE_MS` (référencée par son nom, pas par une valeur codée en dur, donc cette page ne dérive pas lorsqu'elle change). Le symptôme d'une session inactive est un HTTP 404 avec `Unknown Mcp-Session-Id` — le remède est de se reconnecter ou de redémarrer la session,** pas** pour faire pivoter une clé, modifier une portée ou renommer un outil.
+Les sessions HTTP diffusables s'arrêtent et le serveur les récupère ; la fenêtre d'inactivité est définie par `OMNIROUTE_MCP_SESSION_IDLE_MS` (par défaut 5 minutes ; référencée par un nom, pas une valeur codée en dur, donc cette page ne dérive pas lorsqu'elle change). Le symptôme d'une session inactive est un HTTP 404 avec `Unknown Mcp-Session-Id` — le remède est de se reconnecter ou de redémarrer la session,** pas** pour faire pivoter une clé, modifier une portée ou renommer un outil.
 
 ## Surface de l’API
 

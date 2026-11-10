@@ -405,7 +405,7 @@ Alat za dohvaćanje trenutačno se zove `omniroute_ccr_retrieve` (prefiks `omnir
 
 ### Životni ciklus sesije
 
-Streamable-HTTP sesije su u stanju mirovanja i poslužitelj ih žanje; prozor mirovanja je `MCP_SESSION_IDLE_MS` konstanta (referencirana imenom, a ne čvrsto kodiranom vrijednošću, tako da se ova stranica ne pomiče kada se mijenja). Simptom idle-reaped sesije je HTTP 404 sa `Unknown Mcp-Session-Id` — lijek je ponovno povezivanje ili ponovno pokretanje sesije,** ne** za rotiranje ključa, promjenu opsega ili preimenovanje alata.
+Streamable-HTTP sesije su u stanju mirovanja i poslužitelj ih žanje; prozor mirovanja postavlja `OMNIROUTE_MCP_SESSION_IDLE_MS` (zadano 5 minuta; referencira se imenom, a ne tvrdo kodiranom vrijednošću, tako da se ova stranica ne pomiče kada se promijeni). Simptom idle-reaped sesije je HTTP 404 sa `Unknown Mcp-Session-Id` — lijek je ponovno povezivanje ili ponovno pokretanje sesije,** ne** za rotiranje ključa, promjenu opsega ili preimenovanje alata.
 
 ## API sučelje
 
