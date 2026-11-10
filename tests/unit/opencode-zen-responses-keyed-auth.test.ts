@@ -63,3 +63,64 @@ test("Issue #19315: execute translates adaptive thinking to reasoning for openai
     globalThis.fetch = originalFetch;
   }
 });
+
+function transformThinking(
+  provider: string,
+  model: string,
+  requestFormat: string,
+  body: Record<string, unknown>
+) {
+  const executor = new OpencodeExecutor(provider);
+  executor._requestFormat = requestFormat;
+  return executor.transformRequest(model, { model, ...body }, false, {
+    apiKey: "sk-test",
+  }) as Record<string, unknown>;
+}
+
+const THINKING = { type: "enabled", budget_tokens: 2048 };
+
+test("Issue #19315: chat-format thinking on opencode-zen folds into reasoning_effort", () => {
+  const out = transformThinking("opencode-zen", "qwen3.8-flash", "openai", { thinking: THINKING });
+
+  assert.equal(out.thinking, undefined);
+  assert.equal(out.reasoning_effort, "medium");
+});
+
+test("Issue #19315: a client reasoning control is not overridden when thinking is dropped", () => {
+  const out = transformThinking("opencode-zen", "gpt-5.6-luna", "openai-responses", {
+    thinking: THINKING,
+    reasoning: { effort: "high" },
+  });
+
+  assert.equal(out.thinking, undefined);
+  assert.equal((out.reasoning as Record<string, unknown>).effort, "high");
+});
+
+test("Issue #19315: the model-suffix effort wins over the thinking fallback", () => {
+  const out = transformThinking("opencode-zen", "deepseek-v4-pro-high", "openai", {
+    thinking: THINKING,
+  });
+
+  assert.equal(out.model, "deepseek-v4-pro");
+  assert.equal(out.reasoning_effort, "high");
+  assert.equal(out.thinking, undefined);
+});
+
+test("Issue #19315: thinking is left alone off the Zen host", () => {
+  for (const format of ["openai", "openai-responses"]) {
+    const out = transformThinking("opencode-go", "kimi-k3", format, { thinking: THINKING });
+
+    assert.deepEqual(out.thinking, THINKING, `${format} keeps thinking on opencode-go`);
+    assert.equal(out.reasoning_effort, undefined);
+    assert.equal(out.reasoning, undefined);
+  }
+});
+
+test("Issue #19315: non-OpenAI lanes on opencode-zen keep their own thinking contract", () => {
+  for (const format of ["claude", "gemini"]) {
+    const out = transformThinking("opencode-zen", "some-model", format, { thinking: THINKING });
+
+    assert.deepEqual(out.thinking, THINKING, `${format} keeps thinking`);
+    assert.equal(out.reasoning_effort, undefined);
+  }
+});

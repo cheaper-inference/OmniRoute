@@ -68,7 +68,7 @@ test("executor resolves muse-spark-1.3 models to the Responses API", () => {
   }
 });
 
-test("Responses-format executor hits /responses with x-api-key auth and no Bearer header", () => {
+test("Responses-format executor hits /responses with x-api-key auth (Bearer only on the keyed lane)", () => {
   for (const { id } of PROVIDERS) {
     for (const modelId of MODEL_IDS) {
       const executor = new OpencodeExecutor(id);
@@ -81,10 +81,10 @@ test("Responses-format executor hits /responses with x-api-key auth and no Beare
       const headers = executor.buildHeaders({ apiKey: "sk-test" }, true, null, modelId);
       // The free sibling is gated: since 2026-10-21 it rides the anonymous /inference
       // lane with the lane's `public` credential instead of the operator key (which that
-      // lane 403s). The paid sibling keeps the real key on the keyed lane.
-      const expectedKey = modelId.endsWith("-free") ? "public" : "sk-test";
-      assert.equal(headers["x-api-key"], expectedKey);
-      assert.equal(headers["Authorization"], undefined);
+      // lane 403s). The paid sibling keeps the real key and also sends Bearer (#19315).
+      const isFree = modelId.endsWith("-free");
+      assert.equal(headers["x-api-key"], isFree ? "public" : "sk-test");
+      assert.equal(headers["Authorization"], isFree ? undefined : "Bearer sk-test");
     }
   }
 });

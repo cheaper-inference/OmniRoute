@@ -55,7 +55,6 @@ export function normalizeResponsesTokenFields(body: Record<string, unknown>): vo
  * object, in place. Extracted from sanitizeResponsesBody (see above).
  */
 export function normalizeResponsesReasoningField(body: Record<string, unknown>): void {
-  normalizeOpencodeThinking(body, "openai-responses");
   if (body.reasoning_effort !== undefined && body.reasoning === undefined) {
     body.reasoning = { effort: body.reasoning_effort, summary: "auto" };
   }
@@ -67,21 +66,22 @@ export function normalizeResponsesReasoningField(body: Record<string, unknown>):
 }
 
 /**
- * OpenCode Console rejects raw `thinking` on non-Claude formats (#19315).
- * Fold or remove any Claude/adaptive `thinking` field for non-Claude formats.
+ * OpenCode Console rejects a raw `thinking` field on the OpenAI lanes (#19315): fold it into the
+ * lane's own reasoning control, without overriding one the request already carries. Run it after
+ * the model-suffix effort is applied so a `-high` alias keeps its tier.
  */
 export function normalizeOpencodeThinking(
   body: Record<string, unknown>,
   format: string | undefined
 ): void {
-  if (format === "claude" || !body.thinking) return;
-  const thinking = body.thinking as Record<string, unknown> | undefined;
+  if (!body.thinking || (format !== "openai" && format !== "openai-responses")) return;
+  const thinking = body.thinking as Record<string, unknown>;
   if (format === "openai-responses") {
-    if (thinking?.type !== "disabled" && body.reasoning === undefined) {
+    if (thinking.type !== "disabled" && body.reasoning === undefined) {
       body.reasoning = { effort: "medium", summary: "auto" };
     }
   } else if (body.reasoning_effort === undefined) {
-    body.reasoning_effort = thinking?.type === "disabled" ? "none" : "medium";
+    body.reasoning_effort = thinking.type === "disabled" ? "none" : "medium";
   }
   delete body.thinking;
 }

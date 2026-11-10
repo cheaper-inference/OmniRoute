@@ -1569,14 +1569,9 @@ export class OpencodeExecutor extends BaseExecutor {
   }
 
   /**
-   * #12633: OpenCode Zen's `/v1/responses` endpoint (reached when
-   * `_requestFormat === "openai-responses"`, e.g. Muse Spark Contributor
-   * models) requires `x-api-key`, not `Authorization: Bearer` — unlike the
-   * default `/chat/completions` endpoint on the same host, which accepts
-   * Bearer. Scoped by baseUrl (not provider id/alias) so this only applies to
-   * the main Zen host (`opencode` / `opencode-zen`, both `https://opencode.ai/zen/v1`)
-   * and never to opencode-go, which serves Responses-format models from a
-   * different upstream (`https://opencode.ai/zen/go/v1`) that expects Bearer.
+   * #12633 / #19315: on the main Zen host (baseUrl, not provider id, so never opencode-go, which
+   * expects Bearer) the `/v1/responses` endpoint takes `x-api-key`. The gated free-tier lane sends
+   * only that; a Console key also needs `Authorization: Bearer`, or it answers 401 "Missing API key."
    */
   private usesZenApiKeyAuth(): boolean {
     return this._requestFormat === "openai-responses" && this.config?.baseUrl === ZEN_BASE_URL;
@@ -1799,7 +1794,6 @@ export class OpencodeExecutor extends BaseExecutor {
 
       // OpenCode accepts stream_options only on streaming Chat Completions (#13699).
       const format = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
-      normalizeOpencodeThinking(mb, format);
       if (format !== "openai" || mb.stream !== true) {
         delete mb.stream_options;
       }
@@ -1824,6 +1818,7 @@ export class OpencodeExecutor extends BaseExecutor {
         // carries no flat reasoning_effort field, so rewriting to the base id
         // silently dropped the tier — forward the aliased id verbatim instead.
       }
+      if (this.config?.baseUrl === ZEN_BASE_URL) normalizeOpencodeThinking(mb, format);
     }
     // #1543 / upstream PR #1099: thinking-mode upstreams routed through OpenCode
     // (DeepSeek V4 Flash, Kimi, MiniMax, ...) require reasoning_content echoed
