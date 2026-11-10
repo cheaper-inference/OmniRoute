@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw) દ્વારા બનાવાયેલ**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ક્યારેય કોડિંગ બંધ ન કરો. દરેક AI ટૂલ → 383 પ્રદાતાઓ — જેમાંથી 150+ મફત — એક જ એન્ડપૉઇન્ટ દ્વારા. Claude Code, Codex, Cursor, Cline, Copilot અને Antigravity ને ઓટો-ફૉલબૅક સાથે મફત Claude / GPT / Gemini માં જોડો. RTK + Caveman સ્ટૅક્ડ કમ્પ્રેશન 15–95% ટોકન (~89% સરેરાશ) બચાવે છે — ક્યારેય મર્યાદા સુધી ન પહોંચો. 383 AI પ્રદાતાઓ · 150+ મફત ટિયર · ~1.62B મફત ટોકન/મહિનો · 20 રાઉટિંગ વ્યૂહરચનાઓ · શરૂ કરવા માટે $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ક્યારેય કોડિંગ બંધ ન કરો. દરેક AI ટૂલ → 386 પ્રદાતાઓ — જેમાંથી 150+ મફત — એક જ એન્ડપૉઇન્ટ દ્વારા. Claude Code, Codex, Cursor, Cline, Copilot અને Antigravity ને ઓટો-ફૉલબૅક સાથે મફત Claude / GPT / Gemini માં જોડો. RTK + Caveman સ્ટૅક્ડ કમ્પ્રેશન 15–95% ટોકન (~89% સરેરાશ) બચાવે છે — ક્યારેય મર્યાદા સુધી ન પહોંચો. 386 AI પ્રદાતાઓ · 150+ મફત ટિયર · ~1.62B મફત ટોકન/મહિનો · 20 રાઉટિંગ વ્યૂહરચનાઓ · શરૂ કરવા માટે $0."/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                            |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 પ્રદાતાઓ                |           352            |   **358**   |          383          |
+| 🌐 પ્રદાતાઓ                |           352            |   **358**   |          386          |
 | 🧠 અનન્ય ચેટ મોડેલ IDs     |           1320           |  **1374**   |         1491          |
 | 🖼️ મોડેલિટી બ્રિજ          | 🆕 વિઝન + ઑડિયો + વિડિયો |      ✓      |           ✓           |
 | 📡 રડાર મફત કેટલોગ         |       🆕 વૈકલ્પિક        |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ સુવિધાઓ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 કોમ્બોઝ</a></td>
-    <td align="center"><a href="#-383-ai-providers--153-catalog-marked-free">🌐 પ્રદાતાઓ</a></td>
+    <td align="center"><a href="#-386-ai-providers--153-catalog-marked-free">🌐 પ્રદાતાઓ</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI અને MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="વચન — એક એન્ડપૉઇન્ટ અને 383 પ્રોવાઇડર્સ. બીજું સ્વસ્થ લક્ષ્ય ઉપલબ્ધ હોય ત્યાં સુધી સ્વચાલિત ફૉલબૅક રૂટિંગ ચાલુ રાખે છે. છ આધારસ્તંભો: 383 પ્રોવાઇડર્સમાં સ્થિતિસ્થાપક ફૉલબૅક · યોગ્ય વર્કલોડ પર 95% સુધી ટોકન બચત · 150+ મફત ટિયર્સ અને 52 પુનરાવર્તિત/કીવિહોણા હંમેશાં-મફત પ્રોવાઇડર્સ સાથે શરૂઆત માટે $0 · એક કૉન્ફિગરેશન દ્વારા 39 CLI/એજન્ટ ઇન્ટિગ્રેશન્સ · /v1 પર OpenAI, Claude, Gemini અને Responses API સુસંગતતા · સર્કિટ બ્રેકર્સ, TLS stealth, MCP 110 ટૂલ્સ, A2A, મેમરી, ગાર્ડરેલ્સ, evals અને 7,800+ ટ્રૅક કરેલી ટેસ્ટ ફાઇલો પર 56,000+ સ્ટૅટિક ટેસ્ટ ડિક્લેરેશન્સ સહિતના પ્રોડક્શન નિયંત્રણો."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="વચન — એક એન્ડપૉઇન્ટ અને 386 પ્રોવાઇડર્સ. બીજું સ્વસ્થ લક્ષ્ય ઉપલબ્ધ હોય ત્યાં સુધી સ્વચાલિત ફૉલબૅક રૂટિંગ ચાલુ રાખે છે. છ આધારસ્તંભો: 386 પ્રોવાઇડર્સમાં સ્થિતિસ્થાપક ફૉલબૅક · યોગ્ય વર્કલોડ પર 95% સુધી ટોકન બચત · 150+ મફત ટિયર્સ અને 52 પુનરાવર્તિત/કીવિહોણા હંમેશાં-મફત પ્રોવાઇડર્સ સાથે શરૂઆત માટે $0 · એક કૉન્ફિગરેશન દ્વારા 39 CLI/એજન્ટ ઇન્ટિગ્રેશન્સ · /v1 પર OpenAI, Claude, Gemini અને Responses API સુસંગતતા · સર્કિટ બ્રેકર્સ, TLS stealth, MCP 110 ટૂલ્સ, A2A, મેમરી, ગાર્ડરેલ્સ, evals અને 7,800+ ટ્રૅક કરેલી ટેસ્ટ ફાઇલો પર 56,000+ સ્ટૅટિક ટેસ્ટ ડિક્લેરેશન્સ સહિતના પ્રોડક્શન નિયંત્રણો."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ને શું અલગ બનાવે છે — 13 ક્ષમતાઓમાં 9router, OpenRouter, CLIProxyAPI અને LiteLLM સામેની તારીખવાળી સુવિધા ઝલક. OmniRoute: 383 પ્રદાતાઓ, બિલ્ટ-ઇન 150+ મફત ટિયર્સ, 20 રૂટિંગ વ્યૂહરચનાઓ, 12-એન્જિન ટોકન કમ્પ્રેશન, 110 ટૂલ્સ સાથેનું બિલ્ટ-ઇન MCP સર્વર, A2A એજન્ટ પ્રોટોકોલ, કાયમી મેમરી, ગાર્ડરેલ્સ, ક્લાઉડ એજન્ટ્સ, TLS ફિંગરપ્રિન્ટ સ્ટેલ્થ, Desktop/Termux/PWA અને 67 i18n UI લોકેલ્સ. OmniRoute MIT-લાઇસન્સ ધરાવે છે અને તેને સ્વ-હોસ્ટ કરી શકાય છે. સ્પર્ધકોની ક્ષમતાઓ અને ગણતરીઓ બદલાઈ શકે છે; લિંક કરેલી પદ્ધતિ જુઓ."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ને શું અલગ બનાવે છે — 13 ક્ષમતાઓમાં 9router, OpenRouter, CLIProxyAPI અને LiteLLM સામેની તારીખવાળી સુવિધા ઝલક. OmniRoute: 386 પ્રદાતાઓ, બિલ્ટ-ઇન 150+ મફત ટિયર્સ, 20 રૂટિંગ વ્યૂહરચનાઓ, 12-એન્જિન ટોકન કમ્પ્રેશન, 110 ટૂલ્સ સાથેનું બિલ્ટ-ઇન MCP સર્વર, A2A એજન્ટ પ્રોટોકોલ, કાયમી મેમરી, ગાર્ડરેલ્સ, ક્લાઉડ એજન્ટ્સ, TLS ફિંગરપ્રિન્ટ સ્ટેલ્થ, Desktop/Termux/PWA અને 67 i18n UI લોકેલ્સ. OmniRoute MIT-લાઇસન્સ ધરાવે છે અને તેને સ્વ-હોસ્ટ કરી શકાય છે. સ્પર્ધકોની ક્ષમતાઓ અને ગણતરીઓ બદલાઈ શકે છે; લિંક કરેલી પદ્ધતિ જુઓ."/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI અને LiteLLM સામેની સંપૂર્ણ પદ્ધતિ અને દરેક સુવિધાની વિગતો → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar વૈકલ્પિક છે અને માત્ર GET નો ઉ�
 - **🖼️ નવા endpoints** — `/v1/ocr` (Mistral OCR) અને `/v1/audio/translations` (Whisper-style) મીડિયા સપાટી પૂર્ણ કરે છે. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 છબી / વિડિયો / ઑડિયો જનરેશન** — મીડિયા માટે એક API: xAI Grok Imagine અને Novita AI વિડિયો, ComfyUI, Magnific, Adobe Firefly, Segmind અને ElevenLabs જેવા speech providers. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 ડિપ્લોયમેન્ટ અને ઑપ્સ** — reverse-proxy `basePath`, બ્રાઉઝર-ભાષા ઑટો-ડિટેક્ટ, દરેક કી માટે device tracking, root-less MITM trust, zh-TW સ્થાનિકીકરણ. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 વધુ પ્રોવાઇડર્સ અને એજન્ટ્સ** — cloud agents (Codex Cloud, Cursor, Devin, Jules), બ્રાઉઝર + OAuth login સાથે Grok Build (xAI), first-class card તરીકે Ollama, Claude Opus 5 અને Sonnet 5, Kimiની સત્તાવાર ભાગીદારી (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… અને નવેસરથી તૈયાર કરેલો **383-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 વધુ પ્રોવાઇડર્સ અને એજન્ટ્સ** — cloud agents (Codex Cloud, Cursor, Devin, Jules), બ્રાઉઝર + OAuth login સાથે Grok Build (xAI), first-class card તરીકે Ollama, Claude Opus 5 અને Sonnet 5, Kimiની સત્તાવાર ભાગીદારી (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… અને નવેસરથી તૈયાર કરેલો **386-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 રાઉટિંગ પારદર્શિતા** — દરેક પ્રતિભાવમાં તેને સેવા આપનાર strategy/provider/latencyનું નામ આપતું `X-OmniRoute-Decision` હેડર હોય છે; નવી `cache-optimized` કોમ્બો વ્યૂહરચના અને Auto-Combo `cacheAffinity` factor વારંવાર આવતી વિનંતીઓને cached prefix ધરાવતા કનેક્શન તરફ પાછી રાઉટ કરે છે; અને read-only `/v1/auto-combo/{channel}/candidates` endpoint `auto/*` ચેનલનો live candidate pool જાહેર કરે છે. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ સ્થાનિક કામગીરી અને ઇન્ફ્રા** — એક-ક્લિક સ્થાનિક Redis, Cloudflare Workers / Deno Deploy રિલે ડિપ્લોયર્સ, દેખરેખ હેઠળની એમ્બેડેડ સેવાઓ તરીકે Bifrost અને Mux. → [એમ્બેડેડ સેવાઓ](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 બૉક્સમાં આ પણ સામેલ છે** — પ્લગિન ફ્રેમવર્ક + માર્કેટપ્લેસ, Omni/Agent/GitHub સ્કિલ્સ ફ્રેમવર્ક્સ, Obsidian વૉલ્ટ ઇન્ટિગ્રેશન (22 MCP ટૂલ્સ), OpenAI-સુસંગત Batch અને Files APIs, સેમેન્ટિક રિસ્પોન્સ કૅશ, લીડરબોર્ડ્સ સાથે ગેમિફિકેશન, ACP એજન્ટ ડિસ્કવરી (15 બિલ્ટ-ઇન એજન્ટ્સ), BigQuery પર શેડ્યૂલ કરેલું લૉગ એક્સપોર્ટ, `auto/chaos` પેરલલ મલ્ટિ-મોડલ ફૅન-આઉટ, Telegram બોટ બ્રિજ, ઇન-ઍપ વર્ઝન મેનેજર અને LMArena-ELO મફત-પ્રદાતા રેન્કિંગ્સ. → [દસ્તાવેજો](docs/README.md)
@@ -688,11 +688,11 @@ omniroute configure codex          # આ માટે પણ: claude opencode qw
 
 <div align="center">
 
-## 🌐 383 AI પ્રોવાઇડર્સ — 153 કેટલોગ-ચિહ્નિત મફત
+## 🌐 386 AI પ્રોવાઇડર્સ — 153 કેટલોગ-ચિહ્નિત મફત
 
 </div>
 
-> **383 નોંધાયેલા પ્રોવાઇડર્સ** કેનોનિકલ ચેટ, મીડિયા, શોધ, સ્થાનિક, ક્લાઉડ-એજન્ટ અને સિસ્ટમ સંગ્રહોમાં, જેમાં **153 પાસે `hasFree: true` ડિસ્કવરી મેટાડેટા છે**. ચેટ મોડેલ રજિસ્ટ્રીમાં **239 પ્રોવાઇડર્સ / 3,059 અલગ પ્રોવાઇડર-મોડેલ જોડીઓ / 1,475 કાચા મોડેલ IDs** આવરી લેવાય છે; અલગ મફત-બજેટ કેટલોગમાં **471 પ્રતિ-મોડેલ પંક્તિઓ**, **34 પુનરાવર્તિત પૂલ્સ** અને **52 પુનરાવર્તિત/કીલેસ હંમેશાં-મફત પ્રોવાઇડર્સ** છે. આ અલગ છેદકો જાણપૂર્વક રાખવામાં આવ્યા છે; વ્યાખ્યાઓ અને પૂલ-ડિડુપ્લિકેટેડ ગણતરીઓ [પ્રોવાઇડર સંદર્ભ](docs/reference/PROVIDER_REFERENCE.md) અને [મફત ટિયર્સ](docs/reference/FREE_TIERS.md) માં ઉપલબ્ધ છે.
+> **386 નોંધાયેલા પ્રોવાઇડર્સ** કેનોનિકલ ચેટ, મીડિયા, શોધ, સ્થાનિક, ક્લાઉડ-એજન્ટ અને સિસ્ટમ સંગ્રહોમાં, જેમાં **153 પાસે `hasFree: true` ડિસ્કવરી મેટાડેટા છે**. ચેટ મોડેલ રજિસ્ટ્રીમાં **239 પ્રોવાઇડર્સ / 3,059 અલગ પ્રોવાઇડર-મોડેલ જોડીઓ / 1,475 કાચા મોડેલ IDs** આવરી લેવાય છે; અલગ મફત-બજેટ કેટલોગમાં **471 પ્રતિ-મોડેલ પંક્તિઓ**, **34 પુનરાવર્તિત પૂલ્સ** અને **52 પુનરાવર્તિત/કીલેસ હંમેશાં-મફત પ્રોવાઇડર્સ** છે. આ અલગ છેદકો જાણપૂર્વક રાખવામાં આવ્યા છે; વ્યાખ્યાઓ અને પૂલ-ડિડુપ્લિકેટેડ ગણતરીઓ [પ્રોવાઇડર સંદર્ભ](docs/reference/PROVIDER_REFERENCE.md) અને [મફત ટિયર્સ](docs/reference/FREE_TIERS.md) માં ઉપલબ્ધ છે.
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 પણ તેન�
   <tr><td nowrap><b>રનટાઇમ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ભાષા</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> સમગ્ર <code>src/</code> અને <code>open-sse/</code>માં (v2.0થી કોરમાં શૂન્ય <code>any</code>)</td></tr>
   <tr><td nowrap><b>ફ્રેમવર્ક</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ડેટાબેઝ</b></td><td>better-sqlite3 (SQLite, WAL જર્નલિંગ) + LowDB (JSON લેગસી) — 147 ડોમેન મોડ્યુલ્સ, 230 માઇગ્રેશન્સ</td></tr>
+  <tr><td nowrap><b>ડેટાબેઝ</b></td><td>better-sqlite3 (SQLite, WAL જર્નલિંગ) + LowDB (JSON લેગસી) — 147 ડોમેન મોડ્યુલ્સ, 233 માઇગ્રેશન્સ</td></tr>
   <tr><td nowrap><b>મેમરી</b></td><td>SQLite FTS5 પૂર્ણ-ટેક્સ્ટ + int8-quantized વેક્ટર એમ્બેડિંગ્સ, ટાઇપ્ડ ડિકે</td></tr>
   <tr><td nowrap><b>સ્કીમા</b></td><td>Zod 4 — MCP ટૂલ I/O માન્યકરણ + API કૉન્ટ્રેક્ટ્સ</td></tr>
   <tr><td nowrap><b>પ્રોટોકોલ્સ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
