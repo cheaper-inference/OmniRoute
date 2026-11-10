@@ -99,3 +99,30 @@ for (const tier of ["", "-high", "-medium", "-low"]) {
     assert.equal(resolved.provider, PROVIDER);
   });
 }
+
+// #18917: the bare-id route folds a registered 3.8 tier into its declared `-tiered` live id
+// before the reconcile step, so an account that lists the tier ids themselves (and not the
+// `-tiered` id) had a live model refused as "not available in the active live catalog".
+for (const tier of ["-high", "-medium", "-low"]) {
+  test(`#18917: bare gemini-3.8-flash${tier} resolves on an account that lists the tier ids`, async () => {
+    await seedLiveCatalog([
+      "gemini-3.8-flash-high",
+      "gemini-3.8-flash-medium",
+      "gemini-3.8-flash-low",
+    ]);
+    const resolved = await getModelInfo(`gemini-3.8-flash${tier}`);
+    assert.equal(resolved.errorType, undefined, JSON.stringify(resolved));
+    assert.equal(resolved.provider, PROVIDER);
+    assert.equal(resolved.model, `gemini-3.8-flash${tier}`);
+  });
+}
+
+test("#18917: a bare 3.8 tier the roster does not list is still refused", async () => {
+  await seedLiveCatalog(["gemini-3.8-flash-high"]);
+  assert.equal((await getModelInfo("gemini-3.8-flash-high")).provider, PROVIDER);
+  for (const tier of ["-medium", "-low"]) {
+    const resolved = await getModelInfo(`gemini-3.8-flash${tier}`);
+    assert.equal(resolved.errorType, "model_not_found", JSON.stringify(resolved));
+    assert.equal(resolved.provider, null);
+  }
+});

@@ -38,6 +38,7 @@ import {
 import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers";
 import { useProviderQuotaVisibility } from "./useProviderQuotaVisibility";
 import { useReorderByAvailability } from "./useReorderByAvailability";
+import { resolveBatchTestOpener, restoreBatchTestFocus } from "./batchTestFocus";
 import { useCodexPaidCreditsToggle } from "./useCodexPaidCreditsToggle";
 import {
   useConnectionDeleteConfirm,
@@ -226,7 +227,7 @@ export interface UseProviderConnectionsReturn {
   setProviderNode: (node: any) => void;
 
   // Connection fetch
-  fetchConnections: () => Promise<void>;
+  fetchConnections: () => Promise<boolean>;
   fetchProxyConfig: () => Promise<void>;
   refreshProxyState: () => Promise<void>;
 
@@ -266,8 +267,8 @@ export interface UseProviderConnectionsReturn {
   handleBatchSetActive: (isActive: boolean) => Promise<void>;
   handleBatchDeleteOpenModal: () => void;
   handleBatchDeleteConfirm: (onAfter?: () => Promise<void>) => Promise<void>;
-  handleBatchRetest: () => Promise<void>;
-  handleBatchTestAll: () => Promise<void>;
+  handleBatchRetest: (event?: { currentTarget?: unknown }) => Promise<void>;
+  handleBatchTestAll: (event?: { currentTarget?: unknown }) => Promise<void>;
 
   // Selection helpers
   handleToggleSelectOne: (id: string) => void;
@@ -304,7 +305,16 @@ export function useProviderConnections(
   const [retestingId, setRetestingId] = useState<string | null>(null);
   const [clearingCooldownId, setClearingCooldownId] = useState<string | null>(null);
   const [batchTesting, setBatchTesting] = useState(false);
-  const [batchTestResults, setBatchTestResults] = useState<BatchTestResults>(null);
+  const [batchTestResults, setBatchTestResultsState] = useState<BatchTestResults>(null);
+  // The trigger that started the current batch; focused again when the results close.
+  const batchTestOpenerRef = useRef<HTMLElement | null>(null);
+  // Public setter: dismissing the results (null) returns focus to the batch trigger.
+  const setBatchTestResults = useCallback((results: BatchTestResults) => {
+    setBatchTestResultsState(results);
+    if (results !== null) return;
+    restoreBatchTestFocus(batchTestOpenerRef.current);
+    batchTestOpenerRef.current = null;
+  }, []);
 
   // ── selection + batch state ─────────────────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -382,14 +392,21 @@ export function useProviderConnections(
     if (map) setConnProxyMap(map);
   }, []);
 
+  const connectionsGeneration = useRef(0);
   const fetchConnections = useCallback(async () => {
+    const generation = ++connectionsGeneration.current;
     const result = await loadProviderConnectionsData(providerId, isCompatible);
+    if (generation !== connectionsGeneration.current) return false;
     if (result) {
       if (result.connections) setConnections(result.connections);
       if (result.nodeResolved) setProviderNode(result.node);
     }
     setLoading(false);
+    return result?.connections !== null && result?.connections !== undefined;
   }, [providerId, isCompatible]);
+  const refreshConnectionsWithoutResult = useCallback(async () => {
+    await fetchConnections();
+  }, [fetchConnections]);
 
   // ── effects ──────────────────────────────────────────────────────────────
   // The async work is defined INSIDE each effect (a component-scope loader
@@ -399,13 +416,9 @@ export function useProviderConnections(
   useEffect(() => {
     let active = true;
     const run = async () => {
-      const result = await loadProviderConnectionsData(providerId, isCompatible);
-      if (!active) return;
-      if (result) {
-        if (result.connections) setConnections(result.connections);
-        if (result.nodeResolved) setProviderNode(result.node);
-      }
-      setLoading(false);
+      // fetchConnections' generation counter drops an obsolete connection load (#17253):
+      // the cleanup below bumps it, so a response for a previous provider is ignored.
+      await fetchConnections();
     };
     void run();
     const runProxyConfig = async () => {
@@ -416,8 +429,9 @@ export function useProviderConnections(
     void runProxyConfig();
     return () => {
       active = false;
+      connectionsGeneration.current += 1;
     };
-  }, [providerId, isCompatible]);
+  }, [fetchConnections]);
 
   // Per-connection proxy (handles registry assignments)
   useEffect(() => {
@@ -476,7 +490,7 @@ export function useProviderConnections(
   // Single-connection handlers
   // ────────────────────────────────────────────────────────────────────────
 
-  const deleteConfirm = useConnectionDeleteConfirm(fetchConnections, notify);
+  const deleteConfirm = useConnectionDeleteConfirm(refreshConnectionsWithoutResult, notify);
 
   const handleUpdateConnectionStatus = async (id: string, isActive: boolean) => {
     try {
@@ -854,7 +868,7 @@ export function useProviderConnections(
   const { reorderingByAvailability, handleReorderByAvailability } = useReorderByAvailability({
     connections,
     setConnections,
-    fetchConnections,
+    fetchConnections: refreshConnectionsWithoutResult,
     notify,
     t,
   });
@@ -970,7 +984,7 @@ export function useProviderConnections(
 
   // Shared runner for batch connection tests (all-for-provider or selected IDs)
   const runBatchTest = async (payload: Record<string, unknown>) => {
-    setBatchTestResults(null);
+    setBatchTestResultsState(null);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120_000); // 2min max
     try {
@@ -986,7 +1000,7 @@ export function useProviderConnections(
       } catch {
         data = { error: t("providerTestFailed"), results: [], summary: null };
       }
-      setBatchTestResults({
+      setBatchTestResultsState({
         ...data,
         error: data.error
           ? typeof data.error === "object"
@@ -1004,7 +1018,7 @@ export function useProviderConnections(
     } catch (error: any) {
       const isAbort = error?.name === "AbortError";
       const msg = isAbort ? t("providerTestTimeout") : t("providerTestFailed");
-      setBatchTestResults({ error: msg, results: [], summary: null });
+      setBatchTestResultsState({ error: msg, results: [], summary: null });
       notify.error(msg);
     } finally {
       clearTimeout(timeoutId);
@@ -1012,8 +1026,9 @@ export function useProviderConnections(
   };
 
   // Batch test all connections for this provider
-  const handleBatchTestAll = async () => {
+  const handleBatchTestAll = async (event?: { currentTarget?: unknown }) => {
     if (batchTesting || (connections as any[]).length === 0) return;
+    batchTestOpenerRef.current = resolveBatchTestOpener(event);
     setBatchTesting(true);
     try {
       await runBatchTest({ mode: "provider", providerId });
@@ -1023,7 +1038,7 @@ export function useProviderConnections(
   };
 
   // Batch retest only the selected connections
-  const handleBatchRetest = async () => {
+  const handleBatchRetest = async (event?: { currentTarget?: unknown }) => {
     if (batchRetesting || selectedIds.size === 0) return;
     // Live-testing a huge selection risks the 120s client abort; bound it to
     // the same cap the API enforces and tell the user to narrow the selection.
@@ -1031,6 +1046,7 @@ export function useProviderConnections(
       notify.warning(t("batchRetestLimit", { max: MAX_BULK_IDS }));
       return;
     }
+    batchTestOpenerRef.current = resolveBatchTestOpener(event);
     setBatchRetesting(true);
     try {
       await runBatchTest({ mode: "selected", connectionIds: Array.from(selectedIds) });

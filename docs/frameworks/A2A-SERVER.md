@@ -165,7 +165,7 @@ OmniRoute exposes 6 A2A skills wired in `src/lib/a2a/taskExecution.ts::A2A_SKILL
 | Health Report      | `health-report`      | Aggregates circuit breaker, cooldown, lockout state per provider                                                                             | health, resilience         | "Show health status of all providers"  |
 | List Capabilities  | `list-capabilities`  | Returns the full 45-entry Agent Skills catalog (23 API + 21 CLI + 1 config) as a markdown table with raw SKILL.md URLs for context injection | catalog, discovery, skills | "List all OmniRoute capabilities"      |
 
-> The Agent Card should be kept aligned with the live 380-provider catalog; provider counts and free/no-auth metadata are sourced from the runtime registry.
+> The Agent Card should be kept aligned with the live 387-provider catalog; provider counts and free/no-auth metadata are sourced from the runtime registry.
 
 ### `list-capabilities` Skill Detail
 
@@ -211,16 +211,16 @@ Where a credential is required, a `read`-scope `oma_` token only works for `GET`
 
 1. **Create skill file:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Export an async function `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Follow the shape of existing skills such as `smartRouting.ts`.
+   Export an async function `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Follow the shape of existing skills such as `smartRouting.ts`. If the skill calls back into OmniRoute over HTTP, build the headers with `buildSelfLoopHeaders(caller)` from `src/lib/a2a/selfLoopAuth.ts` so the call runs with the A2A caller's key, not `OMNIROUTE_API_KEY`, and pass `redirect: "error"` to `fetch` so a redirect never gets the key. The helper only builds headers; each skill sets the redirect policy itself. It throws `UnsafeSelfLoopTargetError` rather than attach a key when the resolved base URL is plain http outside the private network (loopback, a container or service name, and private addresses are fine) or holds credentials, so a skill that swallows rejected calls must rethrow that error.
 
 2. **Register handler:** in `src/lib/a2a/taskExecution.ts`, add an entry to `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```

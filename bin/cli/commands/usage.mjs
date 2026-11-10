@@ -202,7 +202,13 @@ export async function runUsageQuota(opts, cmd) {
       used: r.used ?? r.tokensUsed ?? null,
       remaining: r.remaining ?? r.percentRemaining ?? null,
       resetAt: r.resetAt ?? r.nextReset ?? null,
-      state: r.state ?? (r.percentRemaining > 0 ? "available" : "exhausted"),
+      state:
+        r.state ??
+        (r.percentRemaining == null
+          ? "unknown"
+          : r.percentRemaining > 0
+            ? "available"
+            : "exhausted"),
     })
   );
   emit(rows, globalOpts, quotaSchema);

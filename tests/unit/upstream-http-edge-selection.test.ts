@@ -546,7 +546,7 @@ test("successful tool-loop limit boundaries retain the current provider send", a
 
 test("body-cap and body-read failures retain their exact observed HTTP200 association", async () => {
   const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
-  const { MAX_NONSTREAMING_RESPONSE_BYTES } =
+  const { getMaxNonStreamingResponseBytes } =
     await import("../../open-sse/handlers/chatCore/nonStreamingResponseBody.ts");
   for (const mode of ["cap", "read"] as const) {
     const f = fixture();
@@ -566,7 +566,7 @@ test("body-cap and body-read failures retain their exact observed HTTP200 associ
         headers: {
           "content-type": "application/json",
           ...(mode === "cap"
-            ? { "content-length": String(MAX_NONSTREAMING_RESPONSE_BYTES + 1) }
+            ? { "content-length": String(getMaxNonStreamingResponseBytes() + 1) }
             : {}),
         },
       });
@@ -598,6 +598,59 @@ test("body-cap and body-read failures retain their exact observed HTTP200 associ
     assert.equal(saved[0].status, 502);
     assert.equal(saved[0].upstreamHttp?.send?.status, 200);
     assert.equal(saved[0].requestType === "upstream_http_attempt", false);
+  }
+});
+
+test("a streaming request resolves over-cap upstream bodies to a failure result", async () => {
+  const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
+  const capEnv = "OMNIROUTE_MAX_NONSTREAMING_RESPONSE_BYTES";
+  const previousCap = process.env[capEnv];
+  process.env[capEnv] = "64";
+  try {
+    for (const [upstreamStatus, clientStatus] of [
+      [500, 500],
+      [200, 502],
+    ] as const) {
+      const f = fixture();
+      let sends = 0;
+      globalThis.fetch = (async () => {
+        sends++;
+        return new Response(JSON.stringify({ padding: "x".repeat(256) }), {
+          status: upstreamStatus,
+          headers: { "content-type": "application/json" },
+        });
+      }) as typeof fetch;
+      const body = {
+        model: "gpt-4o-mini",
+        stream: true,
+        messages: [{ role: "user", content: f.id }],
+      };
+      const result = await handleChatCore({
+        body,
+        modelInfo: { provider: "openai", model: "gpt-4o-mini", extendedContext: false },
+        credentials: { apiKey: "fixture" },
+        connectionId: "account-wire",
+        correlationId: f.id,
+        userAgent: "unit-test",
+        isCombo: false,
+        clientRawRequest: {
+          endpoint: "/v1/chat/completions",
+          body,
+          headers: new Headers({ "content-type": "application/json" }),
+        },
+        log: { debug() {}, info() {}, warn() {}, error() {} },
+      } as unknown as Parameters<typeof handleChatCore>[0]);
+      assert.equal(result.success, false);
+      assert.equal(result.status, clientStatus);
+      assert.equal(sends, 1);
+      const saved = await rows(f);
+      assert.equal(saved.length, 1);
+      assert.equal(saved[0].status, clientStatus);
+      assert.equal(saved[0].upstreamHttp?.send?.status, upstreamStatus);
+    }
+  } finally {
+    if (previousCap === undefined) delete process.env[capEnv];
+    else process.env[capEnv] = previousCap;
   }
 });
 
@@ -675,14 +728,19 @@ function deferred() {
   return { promise, release };
 }
 
+/** The capped reader consumes `response.body`, so a read fixture has to act on the stream. */
+function bodyOnRead(onRead: (controller: ReadableStreamDefaultController<Uint8Array>) => unknown) {
+  return new Response(new ReadableStream<Uint8Array>({ pull: onRead }, { highWaterMark: 0 }), {
+    headers: { "content-type": "application/json" },
+  });
+}
+
 function rejectingBody(value: unknown, gate: ReturnType<typeof deferred>, started: () => void) {
-  const response = Response.json({ choices: [] });
-  response.text = async () => {
+  return bodyOnRead(async (controller) => {
     started();
     await gate.promise;
-    throw value;
-  };
-  return response;
+    controller.error(value);
+  });
 }
 
 test("body-read rejection slots preserve frozen and primitive values across concurrent executions", async () => {
@@ -787,11 +845,7 @@ test("a swallowed ClinePass read failure preserves the original outcome and cann
   const deps = await bodyReadDeps(f, async () => {
     sends++;
     if (sends === 1) return Response.json({ success: false, error: "empty content" });
-    const response = Response.json({ choices: [] });
-    response.text = async () => {
-      throw failure;
-    };
-    return response;
+    return bodyOnRead((controller) => controller.error(failure));
   });
   const result = await runNonStreamingProviderLeg(
     baseInput({
@@ -845,11 +899,7 @@ test("a client abort during the body read stays unassociated despite observed HT
     Object.assign(new Error("fixture client abort"), { name: "AbortError" })
   );
   const deps = await bodyReadDeps(f, async () => {
-    const response = Response.json({ choices: [] });
-    response.text = async () => {
-      throw abort;
-    };
-    return response;
+    return bodyOnRead((controller) => controller.error(abort));
   });
   const result = await runNonStreamingProviderLeg(
     baseInput({
@@ -894,13 +944,12 @@ test("successful dedup joiner has no owner selection or observed sends", async (
   let sends = 0;
   const ownerDeps = await bodyReadDeps(owner, async () => {
     sends++;
-    const response = new Response(payload, { headers: { "content-type": "application/json" } });
-    response.text = async () => {
+    return bodyOnRead(async (controller) => {
       started.release();
       await gate.promise;
-      return payload;
-    };
-    return response;
+      controller.enqueue(new TextEncoder().encode(payload));
+      controller.close();
+    });
   });
   const joinerDeps = await bodyReadDeps(joiner, async () => {
     sends++;

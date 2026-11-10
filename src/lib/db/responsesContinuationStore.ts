@@ -62,7 +62,12 @@ function containsTruncatedArrayMarker(items: readonly unknown[]): boolean {
 
 export type ContinuationPipeline = {
   clientRawRequest?: { body?: unknown; effectiveInput?: unknown };
-  clientResponse?: { output?: unknown; summary?: { output?: unknown }; _truncated?: unknown };
+  clientResponse?: {
+    output?: unknown;
+    status?: unknown;
+    summary?: { output?: unknown; status?: unknown };
+    _truncated?: unknown;
+  };
 };
 
 /**
@@ -143,7 +148,14 @@ function extractContinuationState(
   // makes the caller ask the client to resend full history instead of
   // silently reconstructing an empty one, exactly like a real
   // previous_response_not_found from OpenAI itself.
-  if ((clientResponse as { _truncated?: unknown } | undefined)?._truncated === true) return null;
+  //
+  // `_truncated` only says the collector dropped stream events from the log.
+  // A reasoning-heavy reply can pass the cap and still reach
+  // `response.completed`, whose summary carries the whole output, so that turn
+  // is safe to continue from. Rejecting it sent a false "not found" for a
+  // response OmniRoute had just served and cost the client a full resend.
+  const status = clientResponse?.summary?.status ?? clientResponse?.status;
+  if (clientResponse?._truncated === true && status !== "completed") return null;
   if (output.length === 0) return null;
 
   return { input, output };

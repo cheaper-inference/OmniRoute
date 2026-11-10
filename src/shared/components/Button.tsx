@@ -36,7 +36,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children?: React.ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
-  /** Material Symbols name (resolved through <Icon>). */
+  /** ICON_MAP name (resolved through <Icon>). */
   icon?: string;
   iconRight?: string;
   loading?: boolean;
