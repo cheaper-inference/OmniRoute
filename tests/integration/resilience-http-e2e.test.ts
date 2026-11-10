@@ -547,6 +547,7 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
 
   assert.equal(response.status, 200);
   // Exact key set — this is the whole point of the test: configuration only.
+  // `antigravityTimingTelemetry` configures opt-in timing telemetry; it is not runtime state.
   // `providerQuotaOverrides` joined the projection in #9871;
   // `quotaPreflight` joined in #12014 (Settings → Routing Quota Preflight card);
   // `credentialHealthCheck` joined in #12043 (the sweep's intervalMinutes setting);
@@ -555,6 +556,7 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
   // `streamRecovery` joined the projection with this change: the route stores the
   // block on every PATCH, so GET exposes it like every other stored block.
   assert.deepEqual(Object.keys(json).sort(), [
+    "antigravityTimingTelemetry",
     "comboCooldownWait",
     "connectionCooldown",
     "credentialHealthCheck",

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import ts from "typescript";
 import {
   insertNextSection,
   extractSection,
@@ -143,11 +144,70 @@ test("greenGateArgs returns null only with the explicit --skip-green-gate flag",
   assert.notEqual(greenGateArgs(["node", "script", "3.8.49", "--other"]), null);
 });
 
-test("sync-next-cycle gates the push on release-green (source guard)", () => {
-  const src = readFileSync(SCRIPT_PATH, "utf8");
-  const mainIdx = src.indexOf("function main()");
-  const gateCallIdx = src.indexOf("greenGateArgs(process.argv)", mainIdx);
-  const pushIdx = src.indexOf('git(["push", "origin", BRANCH]');
-  assert.ok(gateCallIdx > mainIdx, "main() must call greenGateArgs(process.argv)");
-  assert.ok(pushIdx > gateCallIdx, "the release-green gate must run BEFORE the push");
+test("sync-next-cycle gates immutable publication on release-green", () => {
+  const ast = ts.createSourceFile(
+    SCRIPT_PATH,
+    readFileSync(SCRIPT_PATH, "utf8"),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS
+  );
+  const main = ast.statements.find(
+    (node): node is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(node) && node.name?.text === "main"
+  );
+  assert.ok(main?.body, "main() must be present");
+  const callsWithin = (node: ts.Node): ts.CallExpression[] => {
+    const calls: ts.CallExpression[] = [];
+    const visit = (child: ts.Node) => {
+      if (ts.isCallExpression(child)) calls.push(child);
+      ts.forEachChild(child, visit);
+    };
+    visit(node);
+    return calls;
+  };
+  const named = (call: ts.CallExpression, name: string) =>
+    ts.isIdentifier(call.expression) && call.expression.text === name;
+  const mainCalls = callsWithin(main.body);
+  const selection = mainCalls.find((call) => named(call, "greenGateArgs"));
+  assert.ok(selection, "main() must select the green gate");
+  const gate = main.body.statements.find(
+    (node): node is ts.IfStatement =>
+      ts.isIfStatement(node) && ts.isIdentifier(node.expression) && node.expression.text === "gate"
+  );
+  assert.ok(gate, "the selected gate must be executed conditionally");
+  const invocation = callsWithin(gate.thenStatement).find(
+    (call) =>
+      named(call, "execFileSync") &&
+      ts.isIdentifier(call.arguments[1]) &&
+      call.arguments[1].text === "gate"
+  );
+  assert.ok(invocation, "the gate must complete synchronously before publication");
+  assert.ok(selection.getStart(ast) < gate.getStart(ast));
+  const tryBlock = ts.isBlock(gate.thenStatement)
+    ? gate.thenStatement.statements.find(ts.isTryStatement)
+    : undefined;
+  assert.ok(tryBlock?.catchClause, "a failing gate must have an abort path");
+  assert.ok(
+    callsWithin(tryBlock.catchClause).some((call) => {
+      const callee = call.expression;
+      return (
+        ts.isPropertyAccessExpression(callee) &&
+        ts.isIdentifier(callee.expression) &&
+        callee.expression.text === "process" &&
+        callee.name.text === "exit" &&
+        ts.isNumericLiteral(call.arguments[0]) &&
+        call.arguments[0].text === "1"
+      );
+    }),
+    "a failed green gate must exit unsuccessfully"
+  );
+  const publication = mainCalls.find((call) => named(call, "publishSyncWorktree"));
+  assert.ok(publication, "main() must publish through the immutable-SHA helper");
+  assert.ok(publication.getStart(ast) > gate.end, "publication must follow the entire gate");
+  assert.deepEqual(
+    publication.arguments.map((arg) => (ts.isIdentifier(arg) ? arg.text : null)),
+    ["WT", "BRANCH", "expectedHead"],
+    "publish the validated worktree and captured SHA"
+  );
 });
