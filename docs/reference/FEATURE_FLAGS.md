@@ -285,7 +285,7 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 121 flags
+    // ... all 122 flags
   ],
   "summary": {
     "total": 121,

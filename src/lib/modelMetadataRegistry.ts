@@ -390,41 +390,38 @@ function resolveCatalogPricing(
   return user ? { ...(base || {}), ...user } : base;
 }
 
+function findCatalogModelPricing(
+  source: Record<string, Record<string, Record<string, unknown>>>,
+  provider: string,
+  model: string
+): Record<string, unknown> | undefined {
+  const providerPricing =
+    findInsensitive(source, provider) || findInsensitive(source, provider.replace(/-cn$/, ""));
+  if (!providerPricing) return undefined;
+  return (
+    findInsensitive(providerPricing, model) ||
+    findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
+    findInsensitive(providerPricing, model.includes("/") ? model.split("/").pop() || model : model)
+  );
+}
+
 function lookupCatalogPricing(
   source: Record<string, Record<string, Record<string, unknown>>>,
   provider: string,
   model: string,
   includeReasoning = false
 ): Record<string, number> | null {
-  const providerPricing =
-    findInsensitive(source, provider) || findInsensitive(source, provider.replace(/-cn$/, ""));
-  if (providerPricing) {
-    const modelPricing =
-      findInsensitive(providerPricing, model) ||
-      findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
-      findInsensitive(
-        providerPricing,
-        model.includes("/") ? model.split("/").pop() || model : model
-      );
-    if (modelPricing && typeof modelPricing === "object") {
-      const input = modelPricing.input;
-      const output = modelPricing.output;
-      if (typeof input === "number" || typeof output === "number") {
-        const pricing: Record<string, number> = {};
-        if (typeof input === "number") pricing.input = input;
-        if (typeof output === "number") pricing.output = output;
-        if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
-        if (includeReasoning && typeof modelPricing.reasoning === "number") {
-          pricing.reasoning = modelPricing.reasoning;
-        }
-        if (typeof modelPricing.cache_creation === "number") {
-          pricing.cache_creation = modelPricing.cache_creation;
-        }
-        return pricing;
-      }
-    }
-  }
-  return null;
+  const modelPricing = findCatalogModelPricing(source, provider, model);
+  if (!modelPricing || typeof modelPricing !== "object") return null;
+  const { input, output, cached, reasoning, cache_creation: cacheCreation } = modelPricing;
+  if (typeof input !== "number" && typeof output !== "number") return null;
+  const pricing: Record<string, number> = {};
+  if (typeof input === "number") pricing.input = input;
+  if (typeof output === "number") pricing.output = output;
+  if (typeof cached === "number") pricing.cached = cached;
+  if (includeReasoning && typeof reasoning === "number") pricing.reasoning = reasoning;
+  if (typeof cacheCreation === "number") pricing.cache_creation = cacheCreation;
+  return pricing;
 }
 
 /** The first source that prices the model wins: models.dev, then LiteLLM, then defaults. */
