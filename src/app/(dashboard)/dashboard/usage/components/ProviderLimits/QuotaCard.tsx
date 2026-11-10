@@ -48,6 +48,7 @@ interface QuotaCardProps {
           quotaGroups?: Array<Record<string, unknown>>;
           paidCredits?: CodexPaidCredits;
           speed?: unknown;
+          modelUsage?: unknown;
         };
         stale?: { since?: string; reason?: string } | null;
       }
@@ -178,6 +179,7 @@ export default function QuotaCard({
           quotaGroups={quota?.raw?.quotaGroups}
           paidCredits={connection.provider === "codex" ? quota?.raw?.paidCredits : undefined}
           speed={quota?.raw?.speed}
+          cursorModelUsage={connection.provider === "cursor" ? quota?.raw?.modelUsage : undefined}
           providerId={connection.provider}
           loading={loading}
           error={error}

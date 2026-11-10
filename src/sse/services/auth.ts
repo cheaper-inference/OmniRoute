@@ -845,6 +845,8 @@ async function materializeConnection(
     reactivatedFromInactive?: boolean;
     routingLease?: AntigravityLease;
     requestedModel?: string | null;
+    selectedByApiKeyPreference?: boolean;
+    preferredFallbackAvailable?: boolean;
   } = {}
 ) {
   const providerSpecificData = await hydrateConnectionProviderSpecificData(connection);
@@ -1804,11 +1806,15 @@ export async function getProviderCredentials(
         )
       : undefined;
     let selectedByApiKeyPreference = false;
+    let preferredFallbackAvailable = false;
     if (!connection && options.preferredConnectionIds?.length) {
       const preferred = pickPreferredConnection(orderedConnections, options.preferredConnectionIds);
       if (preferred) {
         connection = preferred;
         selectedByApiKeyPreference = true;
+        preferredFallbackAvailable = orderedConnections.some(
+          (candidate) => candidate.id !== preferred.id
+        );
         log.debug("AUTH", `${provider} api-key preference selected ${preferred.id.slice(0, 8)}...`);
       }
     }
@@ -2054,6 +2060,8 @@ export async function getProviderCredentials(
         return materializeConnection(connection, options, {
           commitSelectionSideEffects,
           selectNextLeaseCandidate,
+          selectedByApiKeyPreference,
+          preferredFallbackAvailable,
           ...probeStamp,
         });
       }
@@ -2103,6 +2111,8 @@ export async function getProviderCredentials(
       ...probeStamp,
       routingLease: reserved.lease,
       requestedModel,
+      selectedByApiKeyPreference,
+      preferredFallbackAvailable,
     });
   } finally {
     selectionLock?.release();
