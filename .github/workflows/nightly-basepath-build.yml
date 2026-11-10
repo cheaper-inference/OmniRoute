@@ -1,0 +1,112 @@
+name: Nightly basePath build
+
+# Proves that a build under OMNIROUTE_BASE_PATH ships no root-absolute /brand/ asset and still
+# bundles the fonts (tests/unit/build-basepath-brand.test.ts). The ci.yml Build job compiles
+# without a basePath, so this needs a second full `next build`. That is too slow for every PR
+# (#19620), so it runs once a day against the tip of the active release branch.
+#
+# GitHub starts `schedule` and `workflow_dispatch` only from the copy of this file on the default
+# branch, so the first run happens after the release that carries it reaches main.
+
+on:
+  schedule:
+    - cron: "31 2 * * *" # 02:31 UTC daily, a slot no other workflow uses
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to validate (default: highest release/vX.Y.Z)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-basepath-build
+  cancel-in-progress: true
+
+jobs:
+  resolve-branch:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    name: Resolve active release branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      target: ${{ steps.branch.outputs.target }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Resolve active release branch
+        id: branch
+        env:
+          INPUT_BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_BRANCH:-}" ]; then
+            TARGET="$INPUT_BRANCH"
+          else
+            TARGET=$(git for-each-ref --format='%(refname:short)' 'refs/remotes/origin/release/v*' \
+              | sed 's#origin/##' \
+              | sort -t/ -k2 -V \
+              | tail -1)
+          fi
+          case "$TARGET" in
+            release/v[0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "Refusing non-canonical branch name: $TARGET"; exit 1 ;;
+          esac
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+
+  basepath-build:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    name: Build with basePath
+    needs: resolve-branch
+    # Hosted, with webpack: the 16 GB runners cannot hold a Turbopack build of this tree, and the
+    # single omni-build slot stays free for release builds (see the ci.yml Build job).
+    runs-on: ubuntu-latest
+    # The test caps the build at 40 min. The rest covers checkout, install and the scan.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.resolve-branch.outputs.target }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          cache: "false"
+      - name: Build under a basePath and scan the output
+        run: node --import tsx/esm --test tests/unit/build-basepath-brand.test.ts
+        env:
+          RUN_BUILD_TESTS: "1"
+          OMNIROUTE_USE_TURBOPACK: "0"
+          JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
+
+  report:
+    name: Open / update tracking issue on failure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ !cancelled() && (needs.resolve-branch.result == 'failure' || needs.basepath-build.result == 'failure') && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
+    needs: [resolve-branch, basepath-build]
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET: ${{ needs.resolve-branch.outputs.target }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          TITLE="🌙 nightly-basepath-build: basePath build failed"
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$TITLE in:title" --json number --jq '.[0].number')
+          BODY="Nightly basePath build failed on \`${TARGET:-unresolved branch}\`: $RUN_URL. Check the build log first. An assertion failure lists the output files that reference /brand/ without the basePath."
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body "$BODY"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body "$BODY"
+          fi
