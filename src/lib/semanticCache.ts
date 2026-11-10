@@ -425,6 +425,9 @@ export function recordSemanticCacheHit(signature: string, tokensSaved = 0): void
  * @param {number} [ttlMs] - TTL in ms (default: 1 hour)
  */
 export function setCachedResponse(signature, model, response, tokensSaved = 0, ttlMs = 3600000) {
+  if (isRefusalOrUnavailableCompletion(response)) {
+    return;
+  }
   const ttl = parseInt(process.env.SEMANTIC_CACHE_TTL_MS || String(ttlMs), 10);
 
   // 1. Memory cache
@@ -633,4 +636,113 @@ export function isTruncatedStreamBody(streamBody: unknown): boolean {
     }
   }
   return false;
+}
+
+/**
+ * Extract assistant completion text across OpenAI, Claude, and Responses payload formats.
+ */
+export function extractCompletionText(response: unknown): string {
+  if (!response || typeof response !== "object") return "";
+  const r = response as Record<string, unknown>;
+
+  // 1. OpenAI Chat Completions: choices[].message.content or choices[].text
+  if (Array.isArray(r.choices)) {
+    const parts: string[] = [];
+    for (const choice of r.choices) {
+      if (!choice || typeof choice !== "object") continue;
+      const c = choice as Record<string, unknown>;
+      if (typeof c.text === "string" && c.text) {
+        parts.push(c.text);
+      }
+      if (c.message && typeof c.message === "object") {
+        const msg = c.message as Record<string, unknown>;
+        if (typeof msg.content === "string" && msg.content) {
+          parts.push(msg.content);
+        } else if (Array.isArray(msg.content)) {
+          for (const item of msg.content) {
+            if (item && typeof item === "object") {
+              const p = item as Record<string, unknown>;
+              if (typeof p.text === "string" && p.text) parts.push(p.text);
+            }
+          }
+        }
+      }
+    }
+    if (parts.length > 0) return parts.join(" ");
+  }
+
+  // 2. Claude format: content[].text
+  if (Array.isArray(r.content)) {
+    const parts: string[] = [];
+    for (const item of r.content) {
+      if (item && typeof item === "object") {
+        const p = item as Record<string, unknown>;
+        if (typeof p.text === "string" && p.text) parts.push(p.text);
+      }
+    }
+    if (parts.length > 0) return parts.join(" ");
+  }
+
+  // 3. Responses API format: output[].content[].text
+  if (Array.isArray(r.output)) {
+    const parts: string[] = [];
+    for (const item of r.output) {
+      if (item && typeof item === "object") {
+        const out = item as Record<string, unknown>;
+        if (Array.isArray(out.content)) {
+          for (const sub of out.content) {
+            if (sub && typeof sub === "object") {
+              const p = sub as Record<string, unknown>;
+              if (typeof p.text === "string" && p.text) parts.push(p.text);
+            }
+          }
+        }
+      }
+    }
+    if (parts.length > 0) return parts.join(" ");
+  }
+
+  return "";
+}
+
+export const UPSTREAM_REFUSAL_OR_UNAVAILABLE_PATTERNS = [
+  /\bthis version of (?:antigravity|kiro|gemini|cursor|codex|copilot|[a-z0-9_-]+) is no longer supported\b/i,
+  /\bno longer supported\b[\s\S]{0,100}?\b(?:update|version|latest|ide|client)\b/i,
+  /\b(?:update|version|latest|ide|client)[\s\S]{0,100}?\bno longer supported\b/i,
+  /\bplease update (?:to the latest version|your (?:ide|client|extension|version))\b/i,
+  /\bhas reached (?:its |the )?end.?of.?life\b/i,
+  /\bmodel[\s\S]{0,40}?\b(?:deprecated|retired|discontinued|decommissioned|no longer (?:available|supported))\b/i,
+  /\b(?:deprecated|retired|discontinued|decommissioned|no longer (?:available|supported))[\s\S]{0,40}?\bmodel\b/i,
+];
+
+/**
+ * Returns true if the response is an upstream refusal, content filter block, or
+ * permanent obsolescence notice returned with HTTP 200 (#19619). Such responses must
+ * never be stored in semantic cache, preventing stale refusals from being served.
+ */
+export function isRefusalOrUnavailableCompletion(response: unknown): boolean {
+  if (!response || typeof response !== "object") return false;
+  const r = response as Record<string, unknown>;
+
+  // Explicit OpenAI refusal or content filter
+  if (Array.isArray(r.choices)) {
+    for (const choice of r.choices) {
+      if (!choice || typeof choice !== "object") continue;
+      const c = choice as Record<string, unknown>;
+      if (c.finish_reason === "content_filter") return true;
+      if (typeof c.refusal === "string" && c.refusal.trim().length > 0) return true;
+      if (c.message && typeof c.message === "object") {
+        const msg = c.message as Record<string, unknown>;
+        if (typeof msg.refusal === "string" && msg.refusal.trim().length > 0) return true;
+      }
+    }
+  }
+
+  // Claude-format refusal stop reason
+  if (r.stop_reason === "refusal") return true;
+
+  const text = extractCompletionText(response);
+  if (!text) return false;
+
+  return UPSTREAM_REFUSAL_OR_UNAVAILABLE_PATTERNS.some((pattern) => pattern.test(text));
 }

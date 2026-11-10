@@ -14,6 +14,7 @@ import {
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedCompletion as defaultIsTruncatedCompletion,
+  isRefusalOrUnavailableCompletion as defaultIsRefusalOrUnavailableCompletion,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
 import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
@@ -33,6 +34,7 @@ export interface SemanticCacheStoreDeps {
   isCacheableForWrite: typeof defaultIsCacheableForWrite;
   /** Optional so pre-existing callers/tests with partial deps keep working. */
   isTruncatedCompletion?: typeof defaultIsTruncatedCompletion;
+  isRefusalOrUnavailableCompletion?: typeof defaultIsRefusalOrUnavailableCompletion;
   isSmallEnoughForSemanticCache: typeof defaultIsSmallEnough;
   generateSignature: typeof defaultGenerateSignature;
   setCachedResponse: typeof defaultSetCachedResponse;
@@ -41,6 +43,7 @@ export interface SemanticCacheStoreDeps {
 const DEFAULT_DEPS: SemanticCacheStoreDeps = {
   isCacheableForWrite: defaultIsCacheableForWrite,
   isTruncatedCompletion: defaultIsTruncatedCompletion,
+  isRefusalOrUnavailableCompletion: defaultIsRefusalOrUnavailableCompletion,
   isSmallEnoughForSemanticCache: defaultIsSmallEnough,
   generateSignature: defaultGenerateSignature,
   setCachedResponse: defaultSetCachedResponse,
@@ -67,6 +70,9 @@ export function storeSemanticCacheResponse(
     !args.enabled ||
     !deps.isCacheableForWrite(args.body, args.headers) ||
     (deps.isTruncatedCompletion ?? defaultIsTruncatedCompletion)(args.translatedResponse) ||
+    (deps.isRefusalOrUnavailableCompletion ?? defaultIsRefusalOrUnavailableCompletion)(
+      args.translatedResponse
+    ) ||
     !deps.isSmallEnoughForSemanticCache(args.translatedResponse)
   ) {
     return;
