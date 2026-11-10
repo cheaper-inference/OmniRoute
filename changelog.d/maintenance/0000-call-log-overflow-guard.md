@@ -1,1 +1,0 @@
-- **perf(call-logs):** call-log rotation no longer scans and sorts the whole call-log table every minute to prove that no artifact overflows its limit. It now checks with the existing artifact index first and sorts only when files must go.
