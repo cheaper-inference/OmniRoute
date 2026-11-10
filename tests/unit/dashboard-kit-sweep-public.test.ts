@@ -260,31 +260,7 @@ const CONSTANTS_HEX_ALLOWED: Allow = {
   },
 };
 
-const STALE_KIT_EXCEPTION_ALLOWED: Allow = Object.fromEntries(
-  [
-    ["src/app/(dashboard)/dashboard/batch/components/UploadFileModal.tsx", 1],
-    ["src/app/(dashboard)/dashboard/batch/components/wizard/InputStep.tsx", 1],
-    ["src/app/(dashboard)/dashboard/combos/AutoComboCatalog.tsx", 1],
-    ["src/app/(dashboard)/dashboard/combos/ComboHeaderActions.tsx", 1],
-    ["src/app/(dashboard)/dashboard/context/rtk/RtkTomlImportCard.tsx", 1],
-    ["src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab.tsx", 1],
-    ["src/app/(dashboard)/dashboard/omni-skills/OmniSkillsPageClient.tsx", 1],
-    ["src/app/(dashboard)/dashboard/orchestration/tabs/OverviewTab.tsx", 1],
-    ["src/app/(dashboard)/dashboard/profile/page.tsx", 1],
-    ["src/app/(dashboard)/dashboard/runtime/RuntimePageClient.tsx", 1],
-    ["src/app/(dashboard)/dashboard/search-tools/components/SearchConceptCard.tsx", 1],
-    ["src/app/(dashboard)/dashboard/settings/components/CompressionSettingsTab.tsx", 1],
-    ["src/app/(dashboard)/dashboard/settings/components/ProviderTransferPanel.tsx", 1],
-    ["src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx", 1],
-    ["src/app/(dashboard)/dashboard/webhooks/components/shared/IntegrationCard.tsx", 1],
-  ].map(([file, max]) => [
-    file,
-    {
-      max: max as number,
-      reason: `reason predates kit FileInput/FileDropZone, Tile and Disclosure (block 4) — ${TRACKED}`,
-    },
-  ])
-);
+const STALE_KIT_EXCEPTION_ALLOWED: Allow = {};
 
 function overBudget(list: string[], scan: (src: string) => number, allow: Allow): string[] {
   const out: string[] = [];
