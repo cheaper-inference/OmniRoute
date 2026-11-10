@@ -15,10 +15,12 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const imageRoute = await import("../../src/app/api/v1/images/generations/route.ts");
-const providerImageRoute =
-  await import("../../src/app/api/v1/providers/[provider]/images/generations/route.ts");
-const providerChatRoute =
-  await import("../../src/app/api/v1/providers/[provider]/chat/completions/route.ts");
+const providerImageRoute = await import(
+  "../../src/app/api/v1/providers/[provider]/images/generations/route.ts"
+);
+const providerChatRoute = await import(
+  "../../src/app/api/v1/providers/[provider]/chat/completions/route.ts"
+);
 const imageEditRoute = await import("../../src/app/api/v1/images/edits/route.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 const { setPinnedFetchTestOverride } = await import("../../src/shared/network/remoteImageFetch.ts");
