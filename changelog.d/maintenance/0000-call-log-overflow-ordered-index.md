@@ -1,1 +1,0 @@
-- **perf(call-logs):** the artifact overflow cleanup now reads newest-first from a dedicated partial index, so each rotation pass no longer sorts every artifact row in a temporary tree.
