@@ -100,13 +100,14 @@ SHA256(SALT + msg[4] + msg[7] + msg[20] + version)[:3]
 Server-side integrity check the official Claude Code CLI computes via Bun/Zig. OmniRoute reimplements with `xxhash-wasm`:
 
 1. Serialize body with `cch=00000;` placeholder
-2. `xxhash64(bytes, seed) & 0xFFFFF`
-3. Zero-padded 5-char lowercase hex
-4. Replace `cch=00000;` with the computed token
+2. Build the hash view: empty every `model` string value, remove every numeric `max_tokens` member
+3. `xxhash64(view_bytes, seed) & 0xFFFFF`
+4. Zero-padded 5-char lowercase hex
+5. Replace `cch=00000;` with the computed token
 
 Constants:
 
-- Seed: `0x6e52736ac806831e`
+- Seed: `0x4d659218e32a3268` (matches loopback captures of Claude Code 2.1.252 and 2.1.322)
 - Pattern: `/\bcch=([0-9a-f]{5});/`
 
 ### `claudeCodeObfuscation.ts`
@@ -246,14 +247,14 @@ All MITM endpoints require management auth (`requireCliToolsAuth`). The sudo pas
 
 ## User-Agent Overrides — env vars (`.env.example` section 12)
 
-| Variable                 | Default                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Variable            | Default                                       |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
 Consumed by `open-sse/executors/base.ts::buildHeaders()` via dynamic lookup. **Bump these when providers release new CLI versions** — stale UA strings start getting rejected as outdated clients.
 
