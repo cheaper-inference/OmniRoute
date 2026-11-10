@@ -13,21 +13,25 @@ qamrovi va muvofiqlashtirish bosqichlari bilan bogʻlangan.
 
 ---
 
-## Ishlab chiqish muhitini sozlash
+## Ishlab chiqish muhiti
 
-### Dastlabki talablar
+### Talablar
 
-- **Node.js** `>=22.22.2 <23` yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` buyrugʻidan soʻng mahalliy modullar oʻrnatilganini tekshiring:
-> `node -e "require('better-sqlite3')"`. Agar u `MODULE_NOT_FOUND` xatosi bilan bajarilmasa,
-> `npm approve-scripts better-sqlite3 && npm install` buyrugʻini ishga tushiring. Batafsil:
-> [Nosozliklarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Node 24 o‘rnatilgan Windows:** joriy 24 LTS patch versiyasidan foydalaning (kamida 24.20.0).
+> Oldingi versiyalar `--test-force-exit` jarayonni yopganidan keyin testlar muvaffaqiyatli
+> yakunlangan bo‘lsa ham, jarayonni to‘satdan to‘xtatishi mumkin. Node'ning [Windows libuv tuzatishi](https://github.com/nodejs/node/pull/61999)
+> ushbu runtime ishdan chiqishini bartaraf etadi; test tasdiqlarini va runner chiqish tekshiruvlarini yoqilgan holda qoldiring.
+
+> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` dan so‘ng native modullar o‘rnatilganini tekshiring:
+> `node -e "require('better-sqlite3')"`. Agar u `MODULE_NOT_FOUND` xatosi bilan ishlamasa,
+> `npm approve-scripts better-sqlite3 && npm install` buyrug‘ini ishga tushiring. [Muammolarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) bo‘limiga qarang.
 
 - **Git**
 
-### Klonlash va oʻrnatish
+### Klonlash va o‘rnatish
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,7 +39,7 @@ cd OmniRoute
 npm install
 ```
 
-### Muhit oʻzgaruvchilari
+### Muhit o‘zgaruvchilari
 
 ```bash
 # Shablondan .env faylingizni yarating
@@ -46,75 +50,76 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Ishlab chiqish uchun asosiy oʻzgaruvchilar:
+Ishlab chiqish uchun asosiy o‘zgaruvchilar:
 
-| Oʻzgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                          |
-| ---------------------- | ---------------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                            | Server porti                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL       |
-| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash uchun maxfiy kalit |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish uchun parol     |
-| `APP_LOG_LEVEL`        | `info`                             | Jurnal tafsilotlari darajasi    |
+| O‘zgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                       |
+| ---------------------- | ---------------------------------- | ---------------------------- |
+| `PORT`                 | `20128`                            | Server porti                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL    |
+| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash maxfiy kaliti   |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish paroli       |
+| `APP_LOG_LEVEL`        | `info`                             | Jurnal batafsilligi darajasi |
 
 ### Boshqaruv paneli sozlamalari
 
-Boshqaruv paneli muhit oʻzgaruvchilari orqali ham sozlanishi mumkin boʻlgan funksiyalar uchun UI almashtirgichlarini taqdim etadi:
+Boshqaruv paneli muhit o‘zgaruvchilari orqali ham sozlanishi mumkin bo‘lgan funksiyalar uchun UI tugmalarini taqdim etadi:
 
-| Sozlama joylashuvi          | Almashtirgich                 | Tavsif                                                 |
-| --------------------------- | ----------------------------- | ------------------------------------------------------ |
-| Sozlamalar → Kengaytirilgan | Nosozliklarni tuzatish rejimi | Nosozliklarni tuzatish soʻrov jurnallarini yoqish (UI) |
-| Sozlamalar → Umumiy         | Yon panel koʻrinishi          | Yon panel boʻlimlarini koʻrsatish/yashirish            |
+| Sozlama joylashuvi          | Tugma                | Tavsif                                      |
+| --------------------------- | -------------------- | ------------------------------------------- |
+| Sozlamalar → Kengaytirilgan | Debug rejimi         | Debug so‘rov jurnallarini yoqish (UI)       |
+| Sozlamalar → Umumiy         | Yon panel ko‘rinishi | Yon panel bo‘limlarini ko‘rsatish/yashirish |
 
-Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar orasida saqlanib qoladi; oʻrnatilganda ular muhit oʻzgaruvchilarining standart qiymatlarini bekor qiladi.
+Bu sozlamalar ma’lumotlar bazasida saqlanadi va qayta ishga tushirishlar orasida saqlanib qoladi; sozlanganida ular muhit o‘zgaruvchilaridagi standart qiymatlarni bekor qiladi.
 
-### Mahalliy muhitda ishga tushirish
+### Lokal ishga tushirish
 
 ```bash
-# Ishlab chiqish rejimi (avtomatik qayta yuklash)
+# Ishlab chiqish rejimi (hot reload)
 npm run dev
 
-# Ishlab chiqarish uchun yigʻish
-npm run build    # next build → .build/next/, keyin assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Hissa qoʻshuvchilar oʻzgarishlari uchun faqat backend/API’ni tezkor kompilyatsiya qilish
+# Contributor o‘zgarishlari uchun backend/API-only tezkor kompilyatsiya
 npm run build:contributor
 
-# Reliz yigʻilishi (toza qayta yigʻish + HEAD nazorat belgisi — joylashtirish uchun talab qilinadi)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA fayliga yozadi
+# Release build (toza qayta qurish + HEAD sentinel — deploy uchun talab qilinadi)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Keng tarqalgan port sozlamasi
+# Portni sozlashning keng tarqalgan usuli
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Hissa qoʻshuvchilar yigʻilishi faqat kompilyatsiya tekshiruvini bajaradi: u mustaqil distributivni yigʻmaydi yoki ixtiyoriy mahalliy paketlash resurslarini yaratmaydi. Yetkazib beriladigan toʻplamni tekshirish kerak boʻlganda, odatiy ishlab chiqarish yigʻilishidan foydalaning.
+Contributor build faqat kompilyatsiya tekshiruvini amalga oshiradi: u standalone distributivini yig‘maydi yoki ixtiyoriy native packaging aktivlarini build qilmaydi. Yetkazib beriladigan to‘plamni tekshirish kerak bo‘lganda oddiy production build'dan foydalaning.
 
-### Yigʻish natijasi tuzilishi
+### Build chiqishi tuzilishi
 
-| Katalog   | Tarkibi                                                                                                        | Kuzatiladimi |
-| --------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
-| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                                            | Ha           |
-| `.build/` | Oraliq fayllar — `next build` natijasi (git tomonidan eʼtiborsiz qoldiriladi, `distDir = .build/next`)         | Yoʻq         |
-| `dist/`   | Yetkazib beriladigan toʻplam — `assembleStandalone` tomonidan yigʻiladi (git tomonidan eʼtiborsiz qoldiriladi) | Yoʻq         |
+| Katalog   | Tarkib                                                                               | Kuzatiladi |
+| --------- | ------------------------------------------------------------------------------------ | ---------- |
+| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                  | Ha         |
+| `.build/` | Oraliq fayllar — `next build` chiqishi (gitignored, `distDir = .build/next`)         | Yo‘q       |
+| `dist/`   | Yetkazib beriladigan to‘plam — `assembleStandalone` tomonidan yig‘iladi (gitignored) | Yo‘q       |
 
-Yigʻish jarayoni bir bosqichda amalga oshiriladi:
+Build pipeline bir martalik o‘tishdan iborat:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js natijasi)
-  └─ assembleStandalone()                 (mustaqil fayllar + statik fayllar + ommaviy fayllar + mahalliy resurslarni nusxalaydi)
-       └─ natija: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` qoʻshimcha ravishda avval har ikkala katalogni tozalaydi va joylashtirish yaxlitligini tekshirish belgisi sifatida `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) faylini yozadi.
+`npm run build:release` qo‘shimcha ravishda avval ikkala katalogni tozalaydi va
+`dist/BUILD_SHA` fayliga (= `git rev-parse --short HEAD`) deploy yaxlitligi indikatori sifatida yozadi.
 
-`npm run build:contributor` faqat backend uchun moʻljallangan yigʻish profilidan foydalanadi. Yigʻish vaqtida u boshqaruv paneli UI fayllarini vaqtincha almashtiradi, API marshrut ishlov beruvchilarini saqlab qoladi va yigʻishdan soʻng asl fayllarni tiklaydi. Boshqaruv paneli UI’iga taʼsir qiladigan oʻzgarishlar yoki toʻliq reliz tekshiruvi uchun `npm run build` buyrugʻidan foydalaning; hissa qoʻshuvchi profili reliz yigʻilishini almashtirmaydi.
+`npm run build:contributor` backend-only build profilidan foydalanadi. Build jarayonida dashboard UI fayllarini vaqtincha stub bilan almashtiradi, API route handler'larini saqlab qoladi va build tugagach asl fayllarni tiklaydi. Dashboard UI'ga ta’sir qiladigan o‘zgarishlar yoki to‘liq release tekshiruvi uchun `npm run build` dan foydalaning; contributor profili release build o‘rnini bosa olmaydi.
 
-> **VPS’ga joylashtirish eslatmasi:** masofaviy obraz katalogi `/usr/lib/node_modules/omniroute/app/`
-> oʻzgarishsiz qoladi. Joylashtirish vositalari `dist/` tarkibini unga rsync orqali nusxalaydi.
-> Faqat repozitoriy ichidagi yigʻish natijasi yoʻli oʻzgardi (`app/` → `dist/`).
+> **VPS deploy qaydi:** masofaviy image katalogi `/usr/lib/node_modules/omniroute/app/`
+> o‘zgartirilmaydi. Deploy skills `dist/` tarkibini unga rsync qiladi.
+> Faqat repozitoriy ichidagi build chiqishi yo‘li o‘zgargan (`app/` → `dist/`).
 
-Standart URL’lar:
+Standart URL'lar:
 
 - **Boshqaruv paneli**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`

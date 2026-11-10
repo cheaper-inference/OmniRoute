@@ -353,47 +353,47 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Nasadenie
+## 🚀 nasadenie
 
-### Globálna inštalácia cez npm (odporúčané)
+### Globálna inštalácia npm (odporúča sa)
 
 ```bash
 npm install -g omniroute
 
-# Vytvorenie konfiguračného adresára
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Vytvorenie súboru .env (pozrite si .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Spustenie servera
+# Start server
 omniroute
-# Alebo s vlastným portom:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automaticky načíta súbor `.env` z `~/.omniroute/.env` alebo `./.env`.
+CLI automaticky načíta `.env` z `~/.omniroute/.env` alebo `./.env`. `./.env` v pracovnom adresári môže nastaviť iba krátky zoznam povolených kľúčov (porty, `REQUIRE_API_KEY`, miestne nastavenia a nastavenia farieb); všetko ostatné vložte do `~/.omniroute/.env`. Pozrite si [zmluvy o spustení CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Režim systémovej lišty
+### Režim zásobníka
 
-Spustite OmniRoute v systémovej lište:
+Spustite OmniRoute na systémovej lište:
 
 ```bash
 omniroute serve --tray
 ```
 
-Príkaz sa ukončí po pripravení servera a systémovej lišty.
+Príkaz sa vráti, keď sú server a zásobník pripravené.
 
-Server naďalej beží bez terminálu.
+Server pokračuje bez terminálu.
 
-Režim systémovej lišty podporuje macOS, Windows a grafické relácie Linuxu. V režime systémovej lišty sa ovládací panel neotvorí automaticky.
+Režim zásobníka podporuje relácie macOS, Windows a grafické Linux. Režim zásobníka neotvorí prístrojovú dosku automaticky.
 
-Ponuku systémovej lišty použite na tieto akcie:
+Na tieto akcie použite ponuku zásobníka:
 
-- Otvorenie ovládacieho panela.
-- Otvorenie `/dashboard/logs`.
-- Zmenu automatického spúšťania.
-- Zastavenie OmniRoute.
+- Otvorte palubnú dosku.
+- Otvorte `/dashboard/logs`.
+- Zmeňte automatické spustenie.
+- Stop OmniRoute.
 
 Nekombinujte `--tray` s týmito možnosťami:
 
@@ -403,32 +403,32 @@ Nekombinujte `--tray` s týmito možnosťami:
 
 Tieto režimy vyžadujú odlišné vlastníctvo procesu.
 
-Povoľte spustenie pri nasledujúcom prihlásení do počítača:
+Povoliť spustenie pri ďalšom prihlásení stroja:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automatické spúšťanie používa režim systémovej lišty v systémoch macOS, Windows a grafických reláciách Linuxu. Linux bez grafického rozhrania používa existujúcu používateľskú službu systemd.
+Automatické spustenie používa režim zásobníka pri reláciách macOS, Windows a grafických Linux. Headless Linux využíva existujúcu službu používateľa systemd.
 
-Zakážte spúšťanie pri prihlásení:
+Zakázať spustenie pri prihlásení:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Odinštalovanie
+### Prebieha odinštalovanie
 
-Keď už OmniRoute nepotrebujete, poskytujeme dva rýchle skripty na jeho úplné odstránenie:
+Keď už nepotrebujete OmniRoute, poskytujeme dva rýchle skripty na čisté odstránenie:
 
-| Príkaz                   | Akcia                                                                                        |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Odstráni systémovú aplikáciu, ale **ponechá vašu databázu a konfigurácie** v `~/.omniroute`. |
-| `npm run uninstall:full` | Odstráni aplikáciu A zároveň natrvalo **vymaže všetky konfigurácie, kľúče a databázy**.      |
+| Príkaz                   | Akcia                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Odstráni systémovú aplikáciu, ale** uchováva vaše DB a konfigurácie** v `~/.omniroute`. |
+| `npm run uninstall:full` | Natrvalo odstráni aplikáciu AND** vymaže všetky konfigurácie, kľúče a databázy** .      |
 
-> Poznámka: Ak chcete spustiť tieto príkazy, prejdite do priečinka projektu OmniRoute (ak ste ho klonovali) a spustite ich. Ak ste aplikáciu nainštalovali globálne, môžete jednoducho spustiť `npm uninstall -g omniroute`.
+> Poznámka: Ak chcete spustiť tieto príkazy, prejdite do priečinka projektu OmniRoute (ak ste ho naklonovali) a spustite ich. Prípadne, ak je globálne nainštalovaný, môžete jednoducho spustiť `npm uninstall -g omniroute`.
 
-### Nasadenie na VPS
+### VPS nasadenie
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Alebo: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Nasadenie pomocou PM2 (nízka spotreba pamäte)
+### Nasadenie PM2 (nízka pamäť)
 
-Pre servery s obmedzenou pamäťou RAM použite možnosť obmedzenia pamäte:
+Pre servery s obmedzeným RAM použite možnosť limitu pamäte:
 
 ```bash
-# S limitom 512 MB (predvolené)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Alebo s vlastným limitom pamäte
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Alebo pomocou ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Vytvorte súbor `ecosystem.config.js`:
+Vytvorte `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Zostavenie obrazu (predvolené = runner-cli s predinštalovanými codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Prenosný režim (odporúčané)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Informácie o režime integrovanom s hostiteľom a binárnymi súbormi CLI nájdete v časti Docker v hlavnej dokumentácii.
+Informácie o režime integrovanom s hostiteľom s binárnymi súbormi CLI nájdete v časti Docker v hlavných dokumentoch.
 
 ### Void Linux (xbps-src)
 
-Používatelia Void Linuxu môžu OmniRoute zostaviť do balíka a natívne nainštalovať pomocou frameworku `xbps-src` na krížovú kompiláciu. Tento proces automatizuje samostatné zostavenie Node.js spolu s požadovanými natívnymi väzbami `better-sqlite3`.
+Používatelia Void Linux môžu zabaliť a nainštalovať OmniRoute natívne pomocou rámca krížovej kompilácie `xbps-src`. Toto automatizuje samostatné zostavenie Node.js spolu s požadovanými natívnymi väzbami `better-sqlite3`.
 
 <details>
 <summary><b>Zobraziť šablónu xbps-src</b></summary>
 
 ```bash
-# Súbor šablóny pre „omniroute“
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Určenie cieľovej architektúry CPU pre node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Inštalácia všetkých závislostí – preskočenie skriptov
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Zostavenie samostatného balíka Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Skopírovanie statických prostriedkov do samostatného balíka
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompilácia natívnej väzby better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Umiestnenie skompilovanej väzby do samostatného balíka
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Odstránenie balíkov sharp špecifických pre jednotlivé architektúry
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Skopírovanie runtime závislostí pino vynechaných statickou analýzou Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Zabránenie odstráneniu prázdnych adresárov smerovača aplikácie Next.js hookom po inštalácii
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### Premenné prostredia
 
-| Premenná                                | Predvolená hodnota                     | Popis                                                                                                                                                                                           |
-| --------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me`   | Tajný kľúč na podpisovanie JWT (**v produkcii ho zmeňte**)                                                                                                                                      |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                             | Heslo na prvé prihlásenie                                                                                                                                                                       |
-| `DATA_DIR`                              | `~/.omniroute`                         | Dátový adresár (databáza, využitie, protokoly)                                                                                                                                                  |
-| `PORT`                                  | predvolená hodnota frameworku          | Port služby (v príkladoch `20128`)                                                                                                                                                              |
-| `HOSTNAME`                              | predvolená hodnota frameworku          | Hostiteľ pre väzbu (Docker predvolene používa `0.0.0.0`)                                                                                                                                        |
-| `NODE_ENV`                              | predvolená hodnota behového prostredia | Pri nasadení nastavte na `production`                                                                                                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`               | Verejná základná URL sprístupnená ovládaciemu panelu a serveru (nahrádza staršiu premennú `BASE_URL`)                                                                                           |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`                | Základná URL koncového bodu cloudovej synchronizácie (nahrádza staršiu premennú `CLOUD_URL`)                                                                                                    |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`        | Tajný kľúč HMAC pre generované kľúče API                                                                                                                                                        |
-| `REQUIRE_API_KEY`                       | `false`                                | Vyžadovať kľúč API typu Bearer na `/v1/*`                                                                                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                                | Umožniť overeným používateľom ovládacieho panela na požiadanie zobraziť úplné hodnoty uložených kľúčov API                                                                                      |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                   | Interval obnovovania údajov o limitoch poskytovateľov uložených vo vyrovnávacej pamäti na strane servera; tlačidlá obnovenia v používateľskom rozhraní naďalej spúšťajú manuálnu synchronizáciu |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                                | Zakázať automatické snímky SQLite pred zápisom/importom/obnovením; manuálne zálohy budú naďalej fungovať                                                                                        |
-| `APP_LOG_TO_FILE`                       | `true`                                 | Povolí zapisovanie protokolov aplikácie a auditu na disk                                                                                                                                        |
-| `AUTH_COOKIE_SECURE`                    | `false`                                | Vynútiť atribút `Secure` pre autentifikačný súbor cookie (za reverzným proxy serverom HTTPS)                                                                                                    |
-| `CLOUDFLARED_BIN`                       | nenastavené                            | Použiť existujúci binárny súbor `cloudflared` namiesto spravovaného sťahovania                                                                                                                  |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                                | Prenosový protokol pre spravované rýchle tunely (`http2`, `quic` alebo `auto`)                                                                                                                  |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                  | Limit haldy Node.js v MB                                                                                                                                                                        |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                   | Maximálny počet položiek vo vyrovnávacej pamäti promptov                                                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                  | Maximálny počet položiek v sémantickej vyrovnávacej pamäti                                                                                                                                      |
+| Variabilné                              | Predvolené                   | Popis                                                                                                                                                               |
+| --------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automaticky vygenerované)_ | tajný podpis JWT — sa vygeneroval automaticky pri prvom spustení a zachoval sa do `server.env`; nastavte ho explicitne, keď je dátový adresár efemérny              |
+| `INITIAL_PASSWORD`                      | _(nenastavené)_              | Prvé prihlasovacie heslo. inštalácie npm/source začínajú `CHANGEME`: nahraďte ho. Nenastavené: sprievodca vstupom                                                   |
+| `DATA_DIR`                              | `~/.omniroute`               | Adresár údajov (db, využitie, protokoly)                                                                                                                            |
+| `PORT`                                  | predvolený rámec             | Port služby (v príkladoch `20128` )                                                                                                                                 |
+| `HOSTNAME`                              | predvolený rámec             | Zviazať hostiteľa (Docker predvolene `0.0.0.0`)                                                                                                                     |
+| `NODE_ENV`                              | predvolená doba spustenia    | Nastavte `production` na nasadenie                                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Verejná základňa URL sa objavila na palubnej doske a bola vystavená serveru (nahrádza staršie `BASE_URL`)                                                           |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | Základný koncový bod synchronizácie s cloudom URL (nahrádza starý `CLOUD_URL`)                                                                                      |
+| `API_KEY_SECRET`                        | _(automaticky vygenerované)_ | HMAC tajomstvo pre vygenerované kľúče API — sa automaticky vygenerovalo pri prvom spustení a zachovalo sa do `server.env`                                           |
+| `REQUIRE_API_KEY`                       | `false`                      | Vynútiť kľúč API nosiča na `/v1/*`                                                                                                                                  |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                      | Umožnite overeným používateľom dashboardu odhaliť úplné uložené hodnoty kľúča API na požiadanie                                                                     |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                         | Kadencia obnovovania na strane servera pre údaje limitov poskytovateľa uložené vo vyrovnávacej pamäti; Tlačidlá obnovenia UI stále spúšťajú manuálnu synchronizáciu |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                      | Zakázať automatické snímky SQLite pred writes/import/restore; manuálne zálohovanie stále funguje                                                                    |
+| `APP_LOG_TO_FILE`                       | `true`                       | Umožňuje výstup protokolu aplikácie a auditu na disk                                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                      | Vynútiť `Secure` auth cookie (za HTTPS reverzným proxy serverom)                                                                                                    |
+| `CLOUDFLARED_BIN`                       | odstaviť                     | Namiesto riadeného sťahovania použite existujúci binárny súbor `cloudflared`                                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                      | Preprava pre spravované rýchle tunely (`http2`, `quic` alebo `auto`)                                                                                                |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                        | limit haldy Node.js v MB                                                                                                                                            |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                         | Maximálne rýchle položky vyrovnávacej pamäte                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                        | Maximálny počet záznamov sémantickej vyrovnávacej pamäte                                                                                                            |
 
-Úplný prehľad premenných prostredia nájdete v súbore [README](../README.md).
+Úplnú referenciu premenných prostredia nájdete v [README](../README.md).
 
 ---
 
@@ -632,53 +632,53 @@ post_install() {
 
 > Zoznam nižšie je zostavený zo súboru `open-sse/config/providerRegistry.ts` pre v3.8.0. Cloudové katalógy (Gemini, OpenRouter atď.) sa synchronizujú dynamicky — úplný aktuálny katalóg otvoríte cez **Dashboard → Providers → [provider] → Available Models** alebo zavolaním `GET /api/models/catalog`.
 >
-> Ak sa vstavaný zoznam poskytovateľa odchýlil od aktuálneho stavu, použite na tejto stránke možnosť **Import from /models** (alebo povoľte **Auto-Sync**) a načítajte aktuálny katalóg upstreamu. Toto bolo overené vo v3.8.50 pre LLM7.io (`gemini-3.1-flash-lite`) a UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonymný prístup Pollinations zostal počas toho istého testu obmedzený upstreamom.
+> Ak sa vstavaný zoznam poskytovateľa nezhoduje s aktuálnym stavom, použite na tejto stránke možnosť **Import from /models** (alebo povoľte **Auto-Sync**) a načítajte aktuálny katalóg od upstreamu. Toto bolo overené vo v3.8.50 pre LLM7.io (`gemini-3.1-flash-lite`) a UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonymný prístup Pollinations zostal počas rovnakého testovania obmedzený upstreamom.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ úrovne úsilia: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ úrovne náročnosti: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth ZDARMA: použite aktuálny katalóg zobrazený v **Dashboard → Providers → Kiro → Available Models**. Dostupnosť závisí od účtu a tarify.
+**Kiro (`kr/`)** — OAuth ZDARMA: použite aktuálny katalóg zobrazený v časti **Dashboard → Providers → Kiro → Available Models**. Dostupnosť závisí od účtu a tarify.
 
 **Qoder (`if/`)** — OAuth ZDARMA: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 $/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — paušálne $9/mesiac alebo podľa použitia: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/mesiac paušálne alebo podľa využitia: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API kľúč: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Kľúč API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ultra rýchle: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Mimoriadne rýchly: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — natívny Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Natívny Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — hostované v EÚ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Hostované v EÚ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — rozšírené vyhľadávaním: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Rozšírené o vyhľadávanie: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (zadarmo), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (zadarmo), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — rýchla inferencia: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Rýchla inferencia: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — V mierke waferov: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — zamerané na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Zamerané na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — podnikové: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Podnikové: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synchronizuje sa priebežne podľa API kľúča zo služby Google — nemá statický zoznam. Pripojte kľúč v **Dashboard → Providers** a potom použite **Available Models** na import aktuálneho katalógu (napr. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synchronizuje sa priebežne podľa kľúča API zo služby Google — neexistuje žiadny statický zoznam. Pripojte kľúč v časti **Dashboard → Providers** a potom použite **Available Models** na import aktuálneho katalógu (napr. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Ďalší kompatibilní poskytovatelia** (vybraní): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (cez `aws-bedrock`), `azure-ai`, `openrouter` (katalóg passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Každý z nich udržiava vlastný zoznam modelov v `providerRegistry.ts` a možno ho automaticky synchronizovať, keď poskytovateľ sprístupňuje koncový bod `/models`.
+**Ďalší kompatibilní poskytovatelia** (vybraní): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (cez `aws-bedrock`), `azure-ai`, `openrouter` (katalóg passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Každý z nich spravuje vlastný zoznam modelov v súbore `providerRegistry.ts` a možno ho automaticky synchronizovať, ak poskytovateľ sprístupňuje koncový bod `/models`.
 
-**Poznámka k identifikátorom modelov:** OmniRoute používa natívne identifikátory poskytovateľov (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Niektoré identifikátory obsahujú verzie s bodkami, pretože tak ich očakáva upstreamové API. Ak model nie je uvedený vyššie, spustite `omniroute models --search <term>` alebo zavolajte `GET /api/models/catalog` a overte jeho dostupnosť.
+**Poznámka k ID modelov:** OmniRoute používa natívne ID poskytovateľov (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Niektoré ID obsahujú verzie s bodkami, pretože tak ich očakáva upstreamové API. Ak model nie je uvedený vyššie, spustite `omniroute models --search <term>` alebo zavolajte `GET /api/models/catalog` a overte jeho dostupnosť.
 
 </details>
 

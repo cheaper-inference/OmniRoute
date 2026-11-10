@@ -16,97 +16,23 @@
 > සිරිලික්, ග්රීක සහ වියට්නාම සඳහා Inter ද, `html[dir="rtl"]` යටතේ පමණක් අරාබි ලිඛිතය සඳහා Vazirmatn ද භාවිත වේ.
 > සෑම නිරූපකයක්ම Lucide ග්ලයිෆයකි.
 
-## 1. දේවල් පිහිටා ඇති ස්ථාන
+## 1. දේවල් ජීවත් වන තැන
 
-- **කිට් එක.** `packages/ui-kit/src` යනු
-  `packages/ui-kit/UPSTREAM.md` තුළ සලකුණු කර ඇති commit එකේ upstream `src/` හි byte-for-byte පිටපතකි (එහි බලපත්ර අවසරයද සටහන් කර ඇත); `PATCHES.md` හි දේශීය patches ලැයිස්තුගත කර ඇත (කිසිවක් නැත). එය build එකක් නොමැතිව source ලෙස භාවිත වේ: `next.config.mjs` එය transpile කරන අතර,
-  `tsconfig.json` මඟින් `@omniroute/ui-kit` → `packages/ui-kit/src` සහ `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` ලෙස map කරයි (`vitest.config.ts` සහ `vitest.mcp.config.ts` තුළද එම alias එකම ඇත). කිට් component එකක් එහි subpath එකෙන් (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) import කරන්න; කිසිවිටෙකත්
-  `@omniroute/ui-kit` barrel එක හරහා import නොකරන්න: එම barrel එක සෑම component එකක්ම (date picker එකද ඇතුළුව)
-  සෑම importer එකකටම ඇතුළත් කරයි. කිට් stylesheet එක `src/app/globals.css` හරහා ඇතුළු වේ
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokens.** `packages/ui-kit/src/ci-tokens.css` මඟින් `--ci-*` tokens ප්රකාශ කරයි; `src/app/globals.css`
-  ඒවා පැරණි OmniRoute නම් (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) වෙත සම්බන්ධ කරන බැවින් පවතින `var(--color-*)` කියවීම් සහ Tailwind
-  utilities දිගටම ක්රියා කරයි. නව code එක Tailwind utilities (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) හෝ කිට් classes භාවිත කරයි — කිසිවිටෙකත් hex value එකක්
-  භාවිත නොකරයි (`tests/unit/design-kit-bridge.test.ts` මඟින් මෙම bridge එක බලාත්මක කරයි). `text-primary` යන්න
-  `--text-color-primary` හරහා `--color-primary-ink` ලෙස resolve වන බැවින් primary text කියවිය හැකිව පවතින අතර
-  `bg-primary`/`border-primary` accent surface එක පවත්වා ගනී: Editions යටතේ එය කිට් එකේ
-  `--ci-color-accent-active` වේ (light හි තද තඹ පැහැති `#99562f`, dark හි තඹ accent එක); Classic යටතේ,
-  light හි lime-800 සහ dark හි lime accent එක වේ. Chart series සඳහා
-  `--color-chart-1` … `--color-chart-5` භාවිත වේ.
-- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) මඟින් document එක කිට් theme එකට ඇතුළත් කරයි.
-  අභිරුචිය `light`, `dark` හෝ `system` වේ (`src/shared/constants/appConfig.ts` හි
-  `THEME_CONFIG.defaultTheme = "system"`; `system` යන්න `prefers-color-scheme` අනුගමනය කරයි). `src/store/themeStore.ts` හි
-  `applyTheme()` (`src/app/layout.tsx` තුළ inline කර hydration වීමට පෙර ක්රියාත්මක වන `THEME_BOOT_SCRIPT` මඟින්ද එයම සිදු කරයි)
-  `data-theme="dark"|"light"` සකසා, ඒ සමඟම `<html>` මත `.dark` class එක toggle කරයි.
-  කිට් එකේ dark token කට්ටලය `data-theme="dark"` මත key කර ඇත (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute හිම dark overrides (`globals.css` හි `.dark` block එක) සහ පැරණි Tailwind `dark:`
-  utilities `.dark` class එක මත key කර ඇත. Accent color presets නොමැත: accent එක සැමවිටම කිට් එකෙන් ලැබෙන අතර,
-  පැරණි build එකකින් persist වූ preset එකක් store එක load වන විට ඉවත් කරනු ලැබේ.
-- **Palettes.** දෙකම කිට් එකෙන් ලැබේ (`src/shared/constants/appearancePalette.ts`): පෙරනිමිය වන `editions`, සහ
-  `classic`. Editions යනු `<html>` මත ඇති කිට් එකේ `data-ci-appearance="editions"` attribute එක වන අතර,
-  `ci-editions.css` (`ci-ui.css` මඟින් import කර ඇත) එය `data-theme` සමඟ ඒකාබද්ධ කරයි; Classic යනු එම attribute එක
-  නොමැති වීමයි. Root layout එක server-side එකේදී attribute එක render කරන බැවින් කිසිවක් store කර නොමැති (හෝ JS නොමැති)
-  අමුත්තෙකුට සෑම surface එකකදීම — dashboard, login, `/status`, error pages, `/docs` සහ PWA තුළ — Editions ලැබේ. තේරීම
-  theme එක අසලම එම `theme` store එකේ persist කරයි (`src/store/themeStore.ts` හි `palette`, `setPalette()`, `applyPalette()`)
-  සහ paint වීමට පෙර `THEME_BOOT_SCRIPT`
-  (`src/shared/utils/themeBootScript.ts`, layout එකේ `<head>` තුළ inline කර ඇත) මඟින් යොදයි; එය attribute එක
-  ඉවත් කරන්නේ store කර ඇති palette එක `"classic"` වූ විට පමණි; root layout එකෙන් පිටත ඇති `src/app/global-error.tsx`
-  එම store එකෙන්ම එය යොදයි. වෙනත් කිසිදු element එකක් මත `data-ci-appearance` නොතබන්න: කිට් එක එය
-  `html:root:has([data-ci-appearance="editions"])` සමඟ match කරන බැවින් එක් descendant එකක් වුවද මුළු document එකම මාරු කරයි.
-  Editions හි `data-ci-editions-variant="landing"` variant එක marketing pages සඳහා වන අතර dashboard සඳහා නොවේ.
-  Browser chrome (`viewport.themeColor`, web manifest එක) හට CSS හෝ store කර ඇති තේරීම කියවිය නොහැකි බැවින් එය
-  පෙරනිමිය අනුගමනය කරයි: `src/shared/constants/pwaThemeColors.ts` හි `PWA_THEME_COLORS` යනු Editions
-  `--ci-color-background` හි එකම mirror එකයි (`#f3f1e9` / `#11120f`), එය
-  `tests/unit/pwa-theme-colors.test.ts` මඟින් `ci-editions.css` වෙත pin කර ඇත. Monaco සිය වර්ණ probe එකකින් කියවයි
-  (`monacoKitTheme.ts`); Editions යටතේ probe කියවීම එක් synchronous pass එකක් සඳහා root `data-theme` මාරු කරයි,
-  මන්ද කිට් එක Editions light/dark root එකෙන් resolve කරන බැවිනි.
-- **Components (adapters).** `src/shared/components/index.tsx` මඟින් OmniRoute component API එක (එම
-  නම්, default exports සහ props) පවත්වා ගන්නා අතර, එයට පසුබිම් වන primitives කිට් එක මත ඇති adapters වේ: forms
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays සහ feedback
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  structure (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) සහ tables
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter එකක් කිට්
-  component එක subpath එකෙන් import කර පැරණි props එයට map කරයි — උදාහරණයක් ලෙස `Button variant="primary"` යනු
-  කිට් එකේ `default` button එකයි (`--ci-button-primary-*`: light හි inverse surface එක, dark හි එහි
-  `--ci-color-accent-foreground` ink එක සහිත accent එක), `danger` යනු `destructive` වන අතර `warning` යනු `outline` සහ
-  `.ci-button--warning` extension එක වේ. `globals.css` අවසානයේ (`@layer components`) ඇති
-  `.ci-button--warning` සහ `.ci-badge[data-tone]` rules, කිට් classes මත එක් කළ OmniRoute extensions වේ.
-  `tests/unit/ui/adapters/*.test.tsx` මඟින් එක් එක් adapter එක pin කරයි.
-- **Shell.** `src/app/(dashboard)/layout.tsx` මඟින් `DashboardLayout` render කරන අතර, එය
-  `src/shared/components/layouts/DashboardShell.tsx` render කරයි: කිට් එකේ `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), සහ `src/shared/components/Sidebar.tsx` හි OmniRoute navigation logic.
-  `#main-content` වෙත යන "අන්තර්ගතයට යන්න" link එක පළමු focus කළ හැකි element එකයි.
-  `src/shared/components/Header.tsx` තුළ කිට් එකේ `SidebarTrigger` (shell එකේ එකම sidebar
-  toggle එක), Keak `ProductSwitcher` සහ command-palette opener එක ඇත; එය route title එක පෙන්වන්නේ
-  `#main-content` තුළ කිට් `PageHeader` (`.ci-page-header`) එකක් mount වී නොමැති විට පමණක් වන බැවින්, තමන්ගේම
-  `PageHeader` එකක් ඇති page එකකට ඇත්තේ එක් `h1` එකක් පමණි. `src/shared/components/CommandPalette.tsx` යනු කිට් `Dialog` එකකි.
-- **අයිකන.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) විසින් නාමය (තිර භාවිත කරන
-  Material Symbols වචන මාලාව) `ICON_MAP` (`src/shared/constants/iconMap.ts`) හරහා
-  Lucide ග්ලිෆයකට නිරාකරණය කරයි. Material Symbols අකුරු රටාව සහ පැකේජය ඉවත් කර ඇත: සිතියමේ නොමැති නාමයක්
-  මධ්යස්ථ තැන් දරන ග්ලිෆයක් (`data-icon-missing="true"`) විදැහුම් කරන අතර production පරිසරයෙන් පිටතදී console අනතුරු ඇඟවීමක් සටහන් කරයි.
-  `npm run gen:icon-map` මඟින් භාවිතයේ පවතින නමුත් සිතියමේ නොමැති නාම මුද්රණය කරයි
-  (Lucide අයිකනයක් නොමැති ඕනෑම නාමයක් සඳහා `tests/unit/icon-map-coverage.test.ts` අසමත් වේ;
-  සෙවුම් වස්තු තුළ ගබඩා කර ඇති නාම `tests/unit/icon-map-object-values.test.ts` මඟින් ආවරණය කරයි);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` මඟින් වචනාර්ථ
-  `<span className="material-symbols-outlined">` spans, `<Icon>` බවට නැවත ලියයි.
-- **සන්නාමය.** `src/shared/components/OmniRouteLogo.tsx` කට්ටලය ආවරණය කරයි: පෙරනිමි export එක වන `OmniRouteLogo`
-  මඟින් `ProductIcon product="omniroute" variant="glyph"` (පේළිගත SVG, `basePath`-ආරක්ෂිත) විදැහුම් කරන අතර
-  `OmniRouteLockup` මඟින් `ProductLockup product="omniroute"` (ප්රවේශ විය හැකි නාමය "Keak OmniRoute") හෝ,
-  white-label මෙහෙයුම්කරුවන් සඳහා, ඔවුන්ගේම `name`/`logoSrc` විදැහුම් කරයි. නිෂ්පාදන මාරුකාරකයේ ගමනාන්ත
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) තුළ පවතී. ස්වාධීන
-  තිර — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` සහ `src/shared/components/ErrorPageScaffold.tsx`
-  — lockup එක පෙන්වන අතර `tests/unit/brand-pages-static.test.ts` එය ආරක්ෂා කරයි.
+- **කට්ටලය.** `packages/ui-kit/src` යනු `packages/ui-kit/UPSTREAM.md` හි අමුණා ඇති (බලපත්‍ර අවසරය ද වාර්තා කරන) කැපවීමේදී උඩුගං `src/` හි බයිට් සඳහා බයිට් පිටපතකි; `PATCHES.md` දේශීය පැච් ලැයිස්තුගත කරයි (කිසිවක් නැත). එය කිසිදු ගොඩනැගීමකින් තොරව ප්‍රභවයක් ලෙස පරිභෝජනය කරයි: `next.config.mjs` එය සම්ප්‍රේෂණය කරයි, සහ `tsconfig.json` සිතියම් `@omniroute/ui-kit` → `packages/ui-kit/src` සහ `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` සහ `vitest.mcp.config.ts` එකම අන්වර්ථය දරයි). කට්ටල සංරචකයක් එහි උප මාර්ගයෙන් ආයාත කරන්න (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), කිසි විටෙකත් `@omniroute/ui-kit` බැරලය හරහා නොවේ: බැරලය සෑම සංරචකයක්ම (දින පිකර් ඇතුළුව) එක් එක් ආනයනකරු වෙතට ඇද දමයි. කට්ටල මෝස්තර පත්‍රය `src/app/globals.css` හරහා ඇතුල් වේ (`@import "../../packages/ui-kit/src/ci-styles.css"`, සම්පූර්ණ පත්‍රය: හරය `ci-ui.css` සහ සෑම රටා පවුලක්ම).
+- **ටෝකන.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ටෝකන ප්‍රකාශ කරයි; `src/app/globals.css` ඒවා ලෙගසි OmniRoute නම් (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) වෙත පාලම් කරයි, එබැවින් පවතින `var(--color-*)` කියවන අතර Tailwind උපයෝගිතා දිගටම ක්‍රියා කරයි. නව කේතය Tailwind උපයෝගිතා භාවිතා කරයි (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) හෝ කට්ටල පන්ති — කිසි විටෙක හෙක්ස් අගයක් නොවේ (`tests/unit/design-kit-bridge.test.ts` පාලම බලාත්මක කරයි). `text-primary` `--text-color-primary` හරහා `--color-primary-ink` වෙත නිරාකරණය කරයි, එබැවින් `bg-primary`/`border-primary` උච්චාරණ මතුපිට තබා ගන්නා අතරතුර ප්‍රාථමික පෙළ කියවිය හැකි වේ: සංස්කරණ යටතේ එය කට්ටලයේ `--ci-color-accent-active` වේ (ආලෝකයේ ගැඹුරු තඹ `#99562f`, අඳුරේ තඹ උච්චාරණය); Classic යටතේ, ආලෝකයේ lime-800 සහ අඳුරේ දෙහි උච්චාරණය. ප්‍රස්ථාර ශ්‍රේණි භාවිතා කරන්නේ `--color-chart-1`... `--color-chart-8`, එක් එක් පෙළ-ආරක්ෂිත `--color-chart-N-ink` සහ පාරාන්ධ `--color-chart-N-subtle` චිප් ටින්ට්, කට්ටල ශ්‍රේණි අනුපිළිවෙලට පවරා ඇත (`ciChartSeriesOrder`).
+- **තේමා.** `<html className="ci-theme">` (`src/app/layout.tsx`) ලේඛනය කට්ටල තේමාවට තෝරා ගනී. මනාපය `light`, `dark` හෝ `system` ( `src/shared/constants/appConfig.ts` හි`THEME_CONFIG.defaultTheme = "system"` ; `system` `prefers-color-scheme` අනුගමනය කරයි). `src/store/themeStore.ts` හි `applyTheme()` ( `THEME_BOOT_SCRIPT` මගින් දර්පණය කර ඇත, `src/app/layout.tsx` හි පේළිගත කර ඇත, එය සජලනය වීමට පෙර ධාවනය වේ) `data-theme="dark"|"light"` සකසා `.dark` පන්තිය `<html>` මත ටොගල් කරයි. කට්ටලයේ අඳුරු සංකේත කට්ටලය `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) මත යතුරු කර ඇත; OmniRoute ගේම අඳුරු අභිබවා යාම ( `globals.css` හි `.dark` බ්ලොක්) සහ `.dark` පන්තියේ ලෙගසි Tailwind `dark:` උපයෝගිතා යතුර. උච්චාරණ වර්ණ පෙරසිටුවීම් නොමැත: උච්චාරණය සෑම විටම කට්ටලයෙන් පැමිණේ, සහ ගබඩාව පූරණය වන විට පැරණි ගොඩනැගීමේ සිට පවතින පෙරසිටුවක් පහත වැටේ.
+- **පැලට්.** දෙක, කට්ටලයෙන් දෙකම (`src/shared/constants/appearancePalette.ts`): `editions`, පෙරනිමිය සහ `classic`. සංස්කරණ යනු `<html>` හි කට්ටලයේ `data-ci-appearance="editions"` ගුණාංගය වන අතර, `ci-editions.css` ( `ci-ui.css` මගින් ආනයනය කරන ලද) `data-theme` සමඟ ඒකාබද්ධ වේ; ක්ලැසික් යනු ගුණාංගයේ නොපැවතීමයි. මූල පිරිසැලසුම සේවාදායකය - ගුණාංගය ලබා දෙයි, එබැවින් කිසිවක් ගබඩා කර නොමැති (හෝ JS) ආගන්තුකයෙකුට සෑම මතුපිට — උපකරණ පුවරුව, පිවිසීම, `/status`, දෝෂ පිටු, `/docs` සහ PWA මත සංස්කරණ ලැබේ. තේරීම එකම `theme` ගබඩාවේ (`palette`, `setPalette()`, `applyPalette()` in `src/store/themeStore.ts`) තේමාවට යාබදව පවතින අතර `THEME_BOOT_SCRIPT` මගින් තීන්තයට පෙර යොදනු ලැබේ (`src/shared/utils/themeBootScript.ts`, පිරිසැලසුමේ `<head>` හි පේළිගත කර ඇත), එය ගබඩා කර ඇති palette `"classic"` වූ විට පමණක් ගුණාංගය ඉවත් කරයි; `src/app/global-error.tsx`, මූල පිරිසැලසුමෙන් පිටත, එය එකම ගබඩාවෙන් අදාළ වේ. වෙනත් කිසිදු මූලද්‍රව්‍යයක් මත `data-ci-appearance` නොතබන්න: කට්ටලය එය `html:root:has([data-ci-appearance="editions"])` සමඟ ගැලපේ, එබැවින් එක් පරම්පරාවක් මුළු ලේඛනයම මාරු කරනු ඇත. සංස්කරණ `data-ci-editions-variant="landing"` ප්‍රභේදය අලෙවිකරණ පිටු සඳහා මිස උපකරණ පුවරුව සඳහා නොවේ. බ්‍රවුසරය ක්‍රෝම්: සේවාදායකය පෙරනිමි, සංස්කරණ, `viewport.themeColor` ( `prefers-color-scheme` එකකට ටැග් එකක්) සහ වෙබ් මැනිෆෙස්ට් — `PWA_THEME_COLORS` `src/shared/constants/pwaThemeColors.ts` හිදී ලබා දෙයි, සංස්කරණවල එක් කැඩපත වන `--ci-color-background` (`#f3f1e9` / `#11120f`), `ci-editions.css` ට පින් කර `tests/unit/pwa-theme-colors.test.ts`. සජීවී `<meta name="theme-color">` පසුව ගබඩා කර ඇති තලය සහ මාදිලිය අනුගමනය කරයි: `THEME_BOOT_SCRIPT` තීන්ත ආලේප කිරීමට පෙර ටැග් නැවත ලියන අතර තේමා ගබඩාවේ ක්‍රියාවන් සෑම වෙනස්කමකදීම එය කරයි (`resolveThemeColor()` / `applyThemeColor()` `src/shared/utils/themeColorMeta.ts`, කට්ටලයේ `ciTokens` වෙතින් `CLASSIC_PAGE_BACKGROUND` කියවීම සමඟ). පැහැදිලි light/dark තේමාවක් සෑම ටැගයක්ම එම මාදිලියට සකසයි; `system` එක් යෝජනා ක්‍රමයකට එක් වර්ණයක් තබා ගනී. මැනිෆෙස්ටය සංස්කරණ රැඳී සිටියි: එය එක් ස්ථාපනයකට වරක්, මනාපයකින් තොරව ලබා ගනී. මොනාකෝ පරීක්ෂණයකින් (`monacoKitTheme.ts`) එහි වර්ණ කියවයි; සංස්කරණ යටතේ ප්‍රොබ් රීඩ් එක් සමමුහුර්ත අවසරයක් සඳහා මූල `data-theme` පෙරළයි, මන්ද කට්ටලය මූලයෙන් සංස්කරණ light/dark විසඳයි.
+- **සංරචක (ඇඩප්ටර්).** `src/shared/components/index.tsx` OmniRoute සංරචකය API (එකම නම්, පෙරනිමි අපනයන සහ මුක්කු) තබා ගන්නා අතර, එය පිටුපස ඇති ප්‍රාථමිකයන් කට්ටලයට ඉහළින් ඇති ඇඩප්ටර වේ: ආකෘති (`Button` `Loading` `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `NotificationToast` `ConfirmModal` `Modal` `Tooltip` `InfoTooltip` `EmptyState` `Card` ව්යුහය (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Avatar` `Breadcrumbs` සහ වගු (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ඇඩැප්ටරයක් උපපථය මඟින් කට්ටල සංරචකය ආයාත කර එයට උරුම මුක්කු සිතියම්ගත කරයි — උදාහරණයක් ලෙස `Button variant="primary"` යනු kit `default` බොත්තමයි (`--ci-button-primary-*`: ආලෝකයේ ප්‍රතිලෝම පෘෂ්ඨය, එහි `--ci-color-accent-foreground` තීන්ත අඳුරේ ඇති උච්චාරණය), `danger` යනු `destructive`, සහ `warning` යනු k `warning` k. `Badge` තත්ත්‍ව ප්‍රභේද කිට් ටෝන වන අතර, `<option>` ළමුන් සමඟ `Select` කට්ටලය `NativeSelect` විදැහුම් කරයි. `tests/unit/ui/adapters/*.test.tsx` එක් එක් ඇඩප්ටරය pin.
+- **ෂෙල්.** `src/app/(dashboard)/layout.tsx` විදැහුම්කරණය `DashboardLayout`, එය `src/shared/components/layouts/DashboardShell.tsx` විදැහුම් කරයි: කට්ටලය `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), `src/shared/components/Sidebar.tsx` හි OmniRoute හි සංචාලන තර්කනය සමඟ. `#main-content` වෙත "අන්තර්ගතයට පනින්න" සබැඳියක් නාභිගත කළ හැකි පළමු මූලද්‍රව්‍යය වේ. `src/shared/components/Header.tsx` කිට් `SidebarTrigger` (කවචයේ එකම පැති තීරුව ටොගලය), Keak `ProductSwitcher` සහ විධාන-පටල විවෘත කරන්නා; `#main-content` ඇතුළත `PageHeader` (`.ci-page-header`) කට්ටලයක් සවි කර නොමැති අතර එය මාර්ග මාතෘකාව පමණක් පෙන්වයි, එබැවින් එහිම `PageHeader` සහිත පිටුවකට තනි `h1` ඇත. `src/shared/components/CommandPalette.tsx` යනු `Dialog` කට්ටලයකි.
+- **අයිකන.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) නම (තිර භාවිතා කරන ද්‍රව්‍ය සංකේත වචන මාලාව) `ICON_MAP` (`src/shared/constants/iconMap.ts`) හරහා Lucide glyph එකක් දක්වා විසඳයි. ද්‍රව්‍ය සංකේත අකුරු සහ පැකේජය නැති වී ඇත: සිතියමේ නැති නමක් මධ්‍යස්ථ ස්ථාන දරණ ග්ලයිෆ් (`data-icon-missing="true"`) ලබා දෙන අතර නිෂ්පාදනයෙන් පිටත කොන්සෝල අනතුරු ඇඟවීමක් ලොග් කරයි. `npm run gen:icon-map` සිතියමේ නැති භාවිතයේ ඇති නම් මුද්‍රණය කරයි (Lucide නිරූපකයක් නොමැතිව ඕනෑම නමක `tests/unit/icon-map-coverage.test.ts` අසමත් වේ; `tests/unit/icon-map-object-values.test.ts` සෙවුම් වස්තූන් තුළ ගබඩා කර ඇති නම් ආවරණය කරයි); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` වචනාර්ථයෙන් `<span className="material-symbols-outlined">` spans `<Icon>` වෙත නැවත ලියයි.
+- **වෙළඳ නාමය.** `src/shared/components/OmniRouteLogo.tsx` කට්ටලය ආවරණය කරයි: පෙරනිමි අපනයන `OmniRouteLogo` මඟින් `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) සහ `OmniRouteLockup` විදැහුම්කරණය `ProductLockup product="omniroute"` (ප්‍රවේශ විය හැකි නම "Keak OmniRoute") හෝ, සුදු ලේබල් ක්‍රියාකරුවන් සඳහා, ඔවුන්ගේම `name`/`logoSrc`. නිෂ්පාදන-ස්විචර ගමනාන්ත `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) හි ජීවත් වේ. ස්වාධීන තිර — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` සහ `src/shared/components/ErrorPageScaffold.tsx` — අගුලු දැමීම පෙන්වයි; `tests/unit/brand-pages-static.test.ts` එය ආරක්ෂා කරයි.
 
 ## 2. රීති
 
-1. ටෝකන, කිසි විටෙකත් වචනාර්ථයෙන් නොවේ. ව්‍යතිරේක අරමුණු මත තබා ඇත: සැමවිටම අඳුරු කොන්සෝල පර්යන්තය සහ `STATUS_HEX` (`src/shared/constants/statusColors.ts`), වචනාර්ථයෙන් හෙක්ස් අවශ්‍ය ඇමතුම්කරුවන් සඳහා කට්ටල තත්ත්‍වයේ නිරාකරණය වූ හෙක්ස් දර්පණය. වර්ගීකරණ තල තවත් ව්‍යතිරේකයක් නොවේ: ඒවා කට්ටලයේ ප්‍රස්ථාර පහක (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` හරහා ගමන් කරන අතර, මාර්ගගත කිරීමේ උපාය මාර්ග සඳහා, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow දාර සහ වාද්‍ය වෘන්ද කැන්වසය තේමා-දැනුවත් `--orch-status-*` විචල්‍ය (`src/shared/components/flow/edgeStyles.ts`) කියවයි.
+1. ටෝකන, කිසි විටෙකත් වචනාර්ථයෙන් නොවේ. ව්‍යතිරේක අරමුණු මත තබා ඇත: සැමවිටම අඳුරු කොන්සෝල පර්යන්තය සහ `STATUS_HEX` (`src/shared/constants/statusColors.ts`), වචනාර්ථයෙන් හෙක්ස් අවශ්‍ය ඇමතුම්කරුවන් සඳහා කට්ටල තත්ත්‍වයේ නිරාකරණය වූ හෙක්ස් දර්පණය. වර්ගීකරණ තලයන් තවදුරටත් ව්‍යතිරේකයක් නොවේ: ඒවා කට්ටලයේ ප්‍රස්ථාර ටෝකන අටක් (`--color-chart-1..8`, plus `-ink`/`-subtle`), කට්ටල ශ්‍රේණියේ අනුපිළිවෙලින්, `src/shared/utils/categoricalPalette.ts` හරහා සහ, මාර්ගගත කිරීමේ උපාය මාර්ග සඳහා, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow දාර සහ වාද්‍ය වෘන්ද කැන්වසය තේමා-දැනුවත් `--orch-status-*` විචල්‍ය (`src/shared/components/flow/edgeStyles.ts`) කියවයි.
 2. කිසිවිටෙක අතින් `packages/ui-kit/src` පැච් නොකරන්න: `scripts/dev/sync-ui-kit.sh <commit>` සමඟ සමමුහුර්ත කරන්න ; පූර්ව-විධිමත් ද්වාරය `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) අමුණන ලද උඩු ගංඟා කැපවීමෙන් වෙනස් වන ඕනෑම බයිටයක් මත අසමත් වේ (එය upstream clone, `UI_KIT_CLONE` හෝ `_references/cheaper-inference-ui-kit`, නොමැති විට අනතුරු ඇඟවීමක් සමඟ මඟ හැරේ). කට්ටලයට යමක් නොමැති විට, එය ඇඩැප්ටරයේ හෝ තිරයේ වැඩ කර එය උඩුගත කරන්න.
-3. කට්ටල පෙළ පෙරනිමි ඉංග්‍රීසි වේ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — කට්ටල සංරචකයක් පෙළ විදැහුම් කරන සෑම විටම `useTranslations(...)` වෙතින් පරිවර්තනය කළ තන්තු ලබා දෙන්න.
-4. Tailwind උපයෝගිතා කට්ටල සංරචක පන්ති ජය ගනී (කට්ටලය `@layer theme, base, components, utilities` ප්‍රකාශ කරන අතර එහි නීති `components` හි ප්‍රකාශ කරයි) — කට්ටල සංරචක නැවත වර්ණ ගැන්වීමට නොව පරතරය සහ පිරිසැලසුම සඳහා උපයෝගිතා භාවිතා කරන්න.
+3. කට්ටල පෙළ පෙරනිමිය ඉංග්‍රීසි (`label = "Loading"`, `loadingLabel = "Loading table"`…) — pass පරිවර්තිත තන්තු `useTranslations(...)` වෙතින් කට්ටල සංරචකයක් පෙළ විදැහුම් කරන විට.
+4. Tailwind උපයෝගිතා කට්ටල සංරචක පන්ති (කට්ටලය ප්‍රකාශ කරයි `@layer theme, base, components, utilities` සහ එහි නීති `components`) — භාවිතා කරන්නේ පරතරය සහ පිරිසැලසුම සඳහා මිස කට්ටල සංරචක නැවත වර්ණ ගැන්වීම සඳහා නොවේ.
 5. ශීර්ෂයන්: පිටු සහ කොටස් මාතෘකා සඳහා `.ci-heading` ; `.ci-dashboard-display` දෝෂ පිටු තත්ව කේතය වැනි විශාල, විරල සංදර්ශක පෙළ සඳහා පමණි. දෙදෙනාම ස්විට්සර් භාවිතා කරයි.
 6. `tests/unit/dashboard-kit-sweep.test.ts` කට්ටලය දරුකමට හදා ගැනීම ආරක්ෂා කරයි: `src/app` හෝ `src/shared/components` යටතේ ද්‍රව්‍ය බන්ධන පරාසයක් නොමැත; උපකරණ පුවරුවේ ගසෙහි (`src/app/(dashboard)` සහ `src/shared/components`) raw `<select>`, `<textarea>` හෝ `<table>` සහ ලැයිස්තුගත ව්‍යතිරේකවලින් පිටත අතින් රෝල් කරන ලද `role="dialog"` නොමැත ( `Select` ඇඩැප්ටරයේ ස්වදේශික ශාඛාව, `RequestLoggerDetail`); සෑම raw `<button>` හෝ `<input>` එකකටම `kit-exception:` අඩංගු විවරණයක් අවශ්‍ය වේ (හේතුව සමඟ) ඊට ඉහලින් පේළි 3කින් අවසන් වේ; palette hues සහ `dark:` ප්‍රභේද පරීක්ෂණ ලැයිස්තුගත කරන ගොනු වල පමණි.
 7. PR (තිරපිටපත්) ට පෙර තේමාවන් සහ 390 px දර්ශන තොටුපළ දෙකම තහවුරු කරන්න; `tests/e2e/a11y.spec.ts` දුවන්නේ axe.
@@ -203,18 +129,11 @@ PR විවෘත කළ නොහැකි වූ විට (ඉලක්ක �
 
 ## 7. යොමු දර්ශකය
 
-- `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` දිගු
-- `packages/ui-kit/UPSTREAM.md` — ස්ථාවර කළ upstream commit සහ බලපත්ර අවසරය; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
-  `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` සහ ඒ අසල ඇති adapters; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+- `src/app/globals.css` — ටෝකන් පාලම, `.dark` අභිබවා යාම, OmniRoute `@layer components` දිගු
+- `packages/ui-kit/UPSTREAM.md` — pinned upstream කැපවීම සහ බලපත්‍ර අවසරය; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` සහ ඒ අසල ඇති ඇඩප්ටරයන්; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`,
-  `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`,
-  `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

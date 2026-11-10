@@ -352,49 +352,49 @@ Samfuri: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Turawa
+## 🚀 turawa
 
-### Shigarwa ta npm na gaba ɗaya (An Ba da Shawara)
+### Global npm shigar (An bada shawarar)
 
 ```bash
 npm install -g omniroute
 
-# Ƙirƙiri kundin daidaitawa
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ƙirƙiri fayil ɗin .env (duba .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Fara uwar garken
+# Start server
 omniroute
-# Ko tare da port na musamman:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI yana loda `.env` kai tsaye daga `~/.omniroute/.env` ko `./.env`.
+CLI loda `.env` ta atomatik daga `~/.omniroute/.env` ko `./.env`. `./.env` a cikin kundin aiki na iya saita ɗan gajeren jerin izini na maɓallai (mashigai, `REQUIRE_API_KEY`, saitunan gida da launi); sanya komai a `~/.omniroute/.env`. Duba [kwangilolin ƙaddamar da CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Yanayin tray
+### Yanayin tire
 
-Fara OmniRoute a tray na tsarin:
+Fara OmniRoute a cikin tsarin tire:
 
 ```bash
 omniroute serve --tray
 ```
 
-Umarnin yana ƙarewa bayan uwar garken da tray sun shirya.
+Umurnin yana dawowa bayan uwar garken da tire sun shirya.
 
-Uwar garken tana ci gaba da aiki ba tare da terminal ba.
+Sabar ta ci gaba ba tare da tasha ba.
 
-Yanayin tray yana goyon bayan macOS, Windows, da zaman Linux mai zanen allo. Yanayin tray ba ya buɗe dashboard kai tsaye.
+Yanayin tire yana goyan bayan macOS, Windows, da zaman Linux na hoto. Yanayin tire baya buɗe dashboard ta atomatik.
 
-Yi amfani da menu na tray don waɗannan ayyukan:
+Yi amfani da menu na tire don waɗannan ayyuka:
 
-- Buɗe dashboard.
-- Buɗe `/dashboard/logs`.
-- Canja farawa ta atomatik.
-- Dakatar da OmniRoute.
+- Bude dashboard.
+- Bude `/dashboard/logs`.
+- Canza farawa ta atomatik.
+- Tsaya OmniRoute.
 
-Kada ka haɗa `--tray` da waɗannan zaɓuɓɓukan:
+Kar a hada `--tray` da waɗannan zaɓuɓɓuka:
 
 - `--daemon`
 - `--log`
@@ -402,32 +402,32 @@ Kada ka haɗa `--tray` da waɗannan zaɓuɓɓukan:
 
 Waɗannan hanyoyin suna buƙatar mallakar tsari daban-daban.
 
-Kunna farawa a shigar na gaba zuwa na'urar:
+Kunna farawa a shiga na'ura na gaba:
 
 ```bash
 omniroute autostart enable
 ```
 
-Farawa ta atomatik yana amfani da yanayin tray a macOS, Windows, da zaman Linux mai zanen allo. Linux marar zanen allo yana amfani da sabis ɗin mai amfani na systemd da ake da shi.
+Farawa ta atomatik yana amfani da yanayin tire akan macOS, Windows, da zaman Linux na hoto. Linux mara kai yana amfani da sabis ɗin mai amfani da tsarin da ake da shi.
 
-Kashe farawa yayin shiga:
+Kashe farawa a lokacin shiga:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Cire Shigarwa
+### Ana cirewa
 
-Idan ba ka ƙara buƙatar OmniRoute ba, muna samar da rubutun umarni biyu masu sauri don cire shi tsaf:
+Lokacin da ba ku buƙatar OmniRoute, muna samar da rubutun sauri guda biyu don cirewa mai tsabta:
 
-| Umarni                   | Aiki                                                                                          |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Yana cire manhajar tsarin amma **yana barin DB da daidaitawarka** a `~/.omniroute`.           |
-| `npm run uninstall:full` | Yana cire manhajar KUMA yana **goge duk daidaitawa, maɓallai, da ma'ajin bayanai har abada**. |
+| Umurni                   | Aiki                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Yana cire tsarin app amma** yana kiyaye DB da daidaitawa** a `~/.omniroute`.              |
+| `npm run uninstall:full` | Yana cire AND app ɗin dindindin** yana goge duk saituna, maɓallai, da bayanan bayanai** . |
 
-> Lura: Don gudanar da waɗannan umarnin, je zuwa babban fayil ɗin aikin OmniRoute (idan ka clone shi) sannan ka gudanar da su. A madadin haka, idan an shigar da shi na gaba ɗaya, za ka iya kawai gudanar da `npm uninstall -g omniroute`.
+> Lura: Don gudanar da waɗannan umarni, kewaya zuwa babban fayil ɗin aikin OmniRoute (idan kun rufe shi) kuma kunna su. A madadin, idan an shigar da shi a duniya, zaku iya gudanar da `npm uninstall -g omniroute` kawai.
 
-### Turawa zuwa VPS
+### VPS turawa
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -443,21 +443,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ko: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Turawa da PM2 (Ƙarancin Ƙwaƙwalwa)
+### PM2 (Ƙarfin Ƙwaƙwalwar Ƙwaƙwalwa)
 
-Ga uwar garken da ke da ƙarancin RAM, yi amfani da zaɓin iyakar ƙwaƙwalwa:
+Don sabobin masu iyakacin RAM, yi amfani da zaɓin iyakar ƙwaƙwalwar ajiya:
 
 ```bash
-# Tare da iyakar 512MB (tsoho)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Ko tare da iyakar ƙwaƙwalwa ta musamman
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Ko ta amfani da ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -486,24 +486,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Gina image (tsoho = runner-cli tare da codex/claude/droid da aka riga aka shigar)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Yanayin ɗaukuwa (an ba da shawara)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Don yanayin da aka haɗa da host tare da binaries na CLI, duba sashen Docker a cikin manyan takardu.
+Don yanayin haɗe-haɗe mai masaukin baki tare da binaries CLI, duba sashin Docker a cikin manyan takardu.
 
 ### Void Linux (xbps-src)
 
-Masu amfani da Void Linux za su iya shirya fakiti da girka OmniRoute kai tsaye ta amfani da tsarin haɗa-giciye na `xbps-src`. Wannan yana sarrafa gina sigar Node.js mai zaman kanta ta atomatik tare da ɗaurin asali na `better-sqlite3` da ake buƙata.
+Masu amfani da Linux marasa amfani za su iya haɗawa da shigar da OmniRoute ta asali ta amfani da tsarin haɗin giciye `xbps-src`. Wannan yana sarrafa ginin Node.js na tsaye tare da ɗaurin `better-sqlite3` da ake buƙata.
 
 <details>
 <summary><b>Duba samfurin xbps-src</b></summary>
 
 ```bash
-# Fayil ɗin samfur don 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -524,7 +524,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Ƙayyade tsarin CPU da ake nufi don node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -533,29 +533,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Girka dukkan abubuwan dogaro – tsallake rubutun umarni
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Gina kunshin Next.js mai zaman kansa
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kwafi kadarorin tsaye zuwa cikin sigar mai zaman kanta
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Haɗa ɗaurin asali na better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Sanya ɗaurin da aka haɗa cikin kunshin mai zaman kansa
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Cire kunshin sharp na takamaiman tsari
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kwafi abubuwan dogaron lokacin aiki na pino da nazarin tsaye na Next.js ya bari:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -569,7 +569,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Hana ƙugiyar bayan-girkawa cire kundin manhajar Next.js app router marasa komai
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -595,32 +595,32 @@ post_install() {
 
 </details>
 
-### Sauye-sauyen Muhalli
+### Canje-canjen Muhalli
 
-| Maɓalli                                 | Tsoho                                | Bayani                                                                                                                                   |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Sirrin sanya hannu na JWT (**canza shi a yanayin samarwa**)                                                                              |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Kalmar sirrin shiga ta farko                                                                                                             |
-| `DATA_DIR`                              | `~/.omniroute`                       | Kundin bayanai (rumbun bayanai, amfani, rajistan ayyuka)                                                                                 |
-| `PORT`                                  | tsohon ƙimar tsarin                  | Tashar sabis (`20128` a misalai)                                                                                                         |
-| `HOSTNAME`                              | tsohon ƙimar tsarin                  | Mai masaukin ɗaurewa (Docker yana amfani da `0.0.0.0` ta tsohuwa)                                                                        |
-| `NODE_ENV`                              | tsohon ƙimar lokacin aiki            | Saita `production` don turawa                                                                                                            |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL na tushe na jama'a da ake nunawa ga dashboard kuma ake bayyanawa ga sabar (yana maye gurbin tsohon `BASE_URL`)                       |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL na tushe na maƙurar daidaitawar cloud (yana maye gurbin tsohon `CLOUD_URL`)                                                          |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Sirrin HMAC don maɓallan API da aka ƙirƙira                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Tilasta amfani da maɓallin API na Bearer a kan `/v1/*`                                                                                   |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Ba masu amfani da dashboard da aka tantance damar bayyana cikakkun ƙimomin maɓallan API da aka adana idan sun buƙata                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Tazarar sabuntawa ta ɓangaren saba don bayanan Provider Limits da aka adana; maɓallan sabunta UI har yanzu suna fara daidaitawa da hannu |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Kashe hotunan ajiyar SQLite na atomatik kafin rubutawa/shigo da bayanai/maidowa; ajiyar da hannu har yanzu tana aiki                     |
-| `APP_LOG_TO_FILE`                       | `true`                               | Kunna fitar da rajistan aikace-aikace da na binciken tsaro zuwa faifai                                                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Tilasta kukin tantancewa na `Secure` (a bayan reverse proxy na HTTPS)                                                                    |
-| `CLOUDFLARED_BIN`                       | ba a saita ba                        | Yi amfani da fayil ɗin binary na `cloudflared` da ke akwai maimakon zazzagewar da ake sarrafawa                                          |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Hanyar sufuri don Quick Tunnels da ake sarrafawa (`http2`, `quic`, ko `auto`)                                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Iyakar heap na Node.js a MB                                                                                                              |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Matsakaicin adadin shigarwar cache na prompt                                                                                             |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Matsakaicin adadin shigarwar semantic cache                                                                                              |
+| Mai canzawa                             | Default                    | Bayani                                                                                                                                                    |
+| --------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(an ƙirƙira ta atomatik)_ | JWT sa hannu a sirrin — mai sarrafa kansa a farkon gudu kuma ya dage zuwa `server.env`; saita shi a sarari lokacin da kundin bayanan ya kasance mara kyau |
+| `INITIAL_PASSWORD`                      | _(Ba a saita ba)_          | Kalmar shiga ta farko. shigar npm/source farawa da `CHANGEME`: maye gurbin shi. Unset: mayen hawan jirgi                                                  |
+| `DATA_DIR`                              | `~/.omniroute`             | Jagorar bayanai (db, amfani, rajistan ayyukan)                                                                                                            |
+| `PORT`                                  | tsoho tsarin               | Tashar sabis (`20128` a misalai)                                                                                                                          |
+| `HOSTNAME`                              | tsoho tsarin               | Daure mai watsa shiri (Docker tsoho zuwa `0.0.0.0`)                                                                                                       |
+| `NODE_ENV`                              | tsoho lokacin aiki         | Saita `production` don turawa                                                                                                                             |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | Tushen URL na jama'a ya fito zuwa gaban dashboard kuma an fallasa shi ga uwar garken (ya maye gurbin `BASE_URL` na gado)                                  |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | URL ƙarshen sync Cloud (yana maye gurbin `CLOUD_URL`)                                                                                                     |
+| `API_KEY_SECRET`                        | _(an ƙirƙira ta atomatik)_ | sirrin HMAC don maɓallan API da aka ƙirƙira — ta atomatik a farkon gudu kuma ya dage zuwa `server.env`                                                    |
+| `REQUIRE_API_KEY`                       | `false`                    | Ƙaddamar da maɓallin API mai ɗaukar nauyi akan `/v1/*`                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | Bada ingantattun masu amfani da dashboard don bayyana cikakkun ƙimar maɓalli API akan buƙata                                                              |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | Ƙaddamar da wartsakewar gefen uwar garken don bayanan iyakantaccen mai bayarwa; UI refresh buttons har yanzu yana haifar da aiki tare                     |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | Kashe hotunan SQLite ta atomatik kafin writes/import/restore; kayan aikin hannu har yanzu suna aiki                                                       |
+| `APP_LOG_TO_FILE`                       | `true`                     | Yana ba da damar aikace-aikace da fitar da bayanan rajista zuwa faifai                                                                                    |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | Tilasta kuki auth `Secure` (a bayan HTTPS reverse proxy)                                                                                                  |
+| `CLOUDFLARED_BIN`                       | rashin daidaitawa          | Yi amfani da binary `cloudflared` mai wanzuwa maimakon saukewar sarrafawa                                                                                 |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | Sufuri don Tunnels masu sauri da ake gudanarwa (`http2`, `quic`, ko `auto`)                                                                               |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | Node.js heap iyaka a cikin MB                                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | Matsakaicin shigarwar cache mai sauri                                                                                                                     |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | Matsakaicin shigarwar cache na fassarar fassarar                                                                                                          |
 
-Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
+Don cikakken bayani game da canjin yanayi, duba [README](../README.md).
 
 ---
 
@@ -629,9 +629,9 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 <details>
 <summary><b>Duba duk samfuran da ake da su</b></summary>
 
-> An tattara jerin da ke ƙasa daga `open-sse/config/providerRegistry.ts` don v3.8.0. Ana daidaita kundin girgije (Gemini, OpenRouter, da sauransu) ta atomatik — don cikakken kundin kai-tsaye, buɗe **Dashboard → Providers → [provider] → Available Models** ko kira `GET /api/models/catalog`.
+> An tsara jerin da ke ƙasa daga `open-sse/config/providerRegistry.ts` don v3.8.0. Ana daidaita kundin gajimare (Gemini, OpenRouter, da sauransu) kai tsaye — don cikakken kundin yanzu, buɗe **Dashboard → Providers → [provider] → Available Models** ko kira `GET /api/models/catalog`.
 >
-> Idan jerin da aka gina cikin mai samarwa ya samu bambanci, yi amfani da **Import from /models** a wannan shafin (ko kunna **Auto-Sync**) don jawo kundin kai-tsaye daga tushen sama. An tabbatar da wannan a v3.8.50 don LLM7.io (`gemini-3.1-flash-lite`) da UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); samun damar Pollinations ba tare da tantancewa ba ya ci gaba da kasancewa da iyaka daga tushen sama yayin gwajin guda.
+> Idan jerin da aka gina cikin mai bayarwa ya samu bambanci, yi amfani da **Import from /models** a wannan shafin (ko kunna **Auto-Sync**) don ɗauko kundin kai tsaye daga tushen sabis. An tabbatar da wannan a v3.8.50 don LLM7.io (`gemini-3.1-flash-lite`) da UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); samun damar Pollinations ba tare da tantancewa ba ya ci gaba da kasancewa mai iyaka daga tushen sabis yayin gwajin guda.
 
 **Claude Code (`cc/`)** — OAuth na Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -639,15 +639,15 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth na KYAUTA: yi amfani da kundin kai-tsaye da aka nuna ƙarƙashin **Dashboard → Providers → Kiro → Available Models**. Samuwar ya danganta da asusu da tsarin biyan kuɗi.
+**Kiro (`kr/`)** — OAuth kyauta: yi amfani da kundin kai tsaye da ake nunawa ƙarƙashin **Dashboard → Providers → Kiro → Available Models**. Samuwar ya danganta da asusu da tsarin biyan kuɗi.
 
-**Qoder (`if/`)** — OAuth na KYAUTA: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth kyauta: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/wata le ko bisa amfani: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/wata ko bisa amfani: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Mabudin API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -661,23 +661,23 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 
 **Together AI (`together/`)** — Buɗaɗɗen tushe: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (kyauta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Hasashe mai sauri: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Ƙaddamarwa mai sauri: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — A ma’aunin wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — An mai da hankali kan RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — An mayar da hankali kan RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Na kamfanoni: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Na kamfanoni: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Ana daidaita shi kai-tsaye bisa mabudin API daga Google — babu tsayayyen jeri. Haɗa mabudi a cikin **Dashboard → Providers**, sannan yi amfani da **Available Models** don shigo da kundin yanzu (misali `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Ana daidaita shi kai tsaye bisa ga kowane mabudin API daga Google — babu tsayayyen jeri. Haɗa mabudi a **Dashboard → Providers**, sannan yi amfani da **Available Models** don shigo da kundin yanzu (misali `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Sauran masu samarwa masu jituwa** (zaɓaɓɓu): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ta `aws-bedrock`), `azure-ai`, `openrouter` (kundin passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kowanne yana kula da jerin samfuransa a cikin `providerRegistry.ts`, kuma ana iya daidaita su ta atomatik idan mai samarwar yana bayyana ƙarshen `/models`.
+**Sauran masu bayarwa masu dacewa** (zaɓaɓɓu): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ta `aws-bedrock`), `azure-ai`, `openrouter` (kundin wucewa kai tsaye), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kowanne yana kula da jerin samfuransa a `providerRegistry.ts`, kuma ana iya daidaita shi ta atomatik idan mai bayarwar yana samar da hanyar `/models`.
 
-**Lura kan ID na samfura:** OmniRoute yana amfani da ID na asali na mai samarwa (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Wasu ID suna ɗauke da sifofin da aka raba da ɗigo saboda haka ne API na tushen sama yake buƙatarsu. Idan ba a jera wani samfur a sama ba, gudanar da `omniroute models --search <term>` ko kira `GET /api/models/catalog` don tabbatar da samuwarsa.
+**Bayani game da ID na samfura:** OmniRoute yana amfani da ID na asali na mai bayarwa (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Wasu ID suna ɗauke da sigogi masu ɗigo saboda haka ne API na tushen sabis ke buƙatarsu. Idan ba a jera wani samfuri a sama ba, gudanar da `omniroute models --search <term>` ko buɗe `GET /api/models/catalog` don tabbatar da samuwarsa.
 
 </details>
 

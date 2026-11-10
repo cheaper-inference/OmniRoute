@@ -13,15 +13,20 @@ aprėptimi ir suderinimo veiksmais.
 
 ---
 
-## Kūrimo aplinkos parengimas
+## Kūrimo aplinka
 
 ### Būtinosios sąlygos
 
 - **Node.js** `>=22.22.2 <23` arba `>=24.0.0 <27` (rekomenduojama: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ naudotojams (Node 24+):** paleidę `npm install`, patikrinkite, ar buvo įdiegti savieji moduliai:
-> `node -e "require('better-sqlite3')"`. Jei komanda nepavyksta ir pateikiama klaida `MODULE_NOT_FOUND`,
+> **Windows su Node 24:** naudokite dabartinį 24 LTS pataisų leidimą (bent 24.20.0).
+> Ankstesni leidimai gali nutraukti procesą po sėkmingų testų, kai `--test-force-exit` uždaro
+> procesą. Node [Windows libuv pataisa](https://github.com/nodejs/node/pull/61999) išsprendžia
+> šią vykdymo laiko avariją; testų tvirtinimus ir vykdyklės išėjimo patikras palikite įjungtas.
+
+> **npm v11+ naudotojams (Node 24+):** po `npm install` patikrinkite, ar savieji moduliai buvo įdiegti:
+> `node -e "require('better-sqlite3')"`. Jei komanda baigiama klaida `MODULE_NOT_FOUND`,
 > paleiskite `npm approve-scripts better-sqlite3 && npm install`. Žr.
 > [Trikčių šalinimas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -38,10 +43,10 @@ npm install
 ### Aplinkos kintamieji
 
 ```bash
-# Sukurkite savo .env pagal šabloną
+# Sukurkite .env failą iš šablono
 cp .env.example .env
 
-# Sugeneruokite būtinus slaptuosius raktus
+# Sugeneruokite reikalingas paslaptis
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
@@ -51,21 +56,21 @@ Pagrindiniai kūrimo aplinkos kintamieji:
 | Kintamasis             | Numatytoji kūrimo reikšmė | Aprašymas                        |
 | ---------------------- | ------------------------- | -------------------------------- |
 | `PORT`                 | `20128`                   | Serverio prievadas               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | Bazinis sąsajos URL              |
-| `JWT_SECRET`           | (sugeneruokite anksčiau)  | JWT pasirašymo slaptasis raktas  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | Frontend bazinis URL             |
+| `JWT_SECRET`           | (sugeneruokite aukščiau)  | JWT pasirašymo paslaptis         |
 | `INITIAL_PASSWORD`     | `CHANGEME`                | Pirmojo prisijungimo slaptažodis |
-| `APP_LOG_LEVEL`        | `info`                    | Žurnalų išsamumo lygis           |
+| `APP_LOG_LEVEL`        | `info`                    | Žurnalo išsamumo lygis           |
 
 ### Valdymo skydelio nustatymai
 
 Valdymo skydelyje pateikiami funkcijų jungikliai, kuriuos taip pat galima konfigūruoti naudojant aplinkos kintamuosius:
 
-| Nustatymo vieta        | Jungiklis                 | Aprašymas                                   |
-| ---------------------- | ------------------------- | ------------------------------------------- |
-| Nustatymai → Išsamiau  | Derinimo režimas          | Įjungti derinimo užklausų žurnalus (sąsaja) |
-| Nustatymai → Bendrieji | Šoninės juostos matomumas | Rodyti / slėpti šoninės juostos skiltis     |
+| Nustatymo vieta           | Jungiklis                 | Aprašymas                               |
+| ------------------------- | ------------------------- | --------------------------------------- |
+| Nustatymai → Išplėstiniai | Derinimo režimas          | Įjungti derinimo užklausų žurnalus (UI) |
+| Nustatymai → Bendrieji    | Šoninės juostos matomumas | Rodyti / slėpti šoninės juostos skiltis |
 
-Šie nustatymai saugomi duomenų bazėje ir išlieka po paleidimo iš naujo, o juos nustačius jie pakeičia numatytąsias aplinkos kintamųjų reikšmes.
+Šie nustatymai saugomi duomenų bazėje ir išlieka po paleidimo iš naujo, kai yra nustatyti, todėl pakeičia numatytąsias aplinkos kintamųjų reikšmes.
 
 ### Paleidimas vietoje
 
@@ -73,52 +78,53 @@ Valdymo skydelyje pateikiami funkcijų jungikliai, kuriuos taip pat galima konfi
 # Kūrimo režimas (automatinis perkrovimas)
 npm run dev
 
-# Produkcinė komponuotė
-npm run build    # next build → .build/next/, tada assembleStandalone → dist/
+# Produkcinis kūrimas
+npm run build    # next build → .build/next/ ir assembleStandalone → dist/
 npm run start
 
-# Spartus tik vidinės sistemos / API kompiliavimas bendraautorių pakeitimams
+# Spartus tik backend / API kompiliavimas pagalbininkų pakeitimams
 npm run build:contributor
 
-# Leidimo komponuotė (švari komponuotė iš naujo + HEAD kontrolinis failas — būtina diegimui)
-npm run build:release   # rm -rf .build dist && komponuoja + įrašo dist/BUILD_SHA
+# Leidimo kūrimas (švarus kūrimas + HEAD žymuo — būtina diegimui)
+npm run build:release   # rm -rf .build dist ir build + įrašo dist/BUILD_SHA
 
-# Įprasta prievado konfigūracija
+# Dažniausiai naudojama prievado konfigūracija
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bendraautorių komponuotė atlieka tik kompiliavimo patikrą: ji nesurenka autonominio
-platinimo paketo ir nekomponuoja pasirenkamų savųjų pakavimo išteklių. Naudokite įprastą produkcinę komponuotę, kai
-reikia patikrinti platinimui paruoštą paketą.
+Pagalbininkų kūrimas atlieka tik kompiliavimo patikrą: jis nesurinkia autonominio
+platinimo paketo ir nesukuria pasirinktinių savųjų pakavimo išteklių. Kai reikia
+patikrinti paruoštą platinti paketą, naudokite įprastą produkcinį kūrimą.
 
-### Komponuotės išvesties struktūra
+### Kūrimo išvesties struktūra
 
-| Katalogas | Turinys                                                                             | Sekamas |
-| --------- | ----------------------------------------------------------------------------------- | ------- |
-| `src/`    | Programos pirminis kodas (TypeScript / TSX)                                         | Taip    |
-| `.build/` | Tarpiniai failai — `next build` išvestis (git ignoruojama, `distDir = .build/next`) | Ne      |
-| `dist/`   | Platinamas paketas — surenkamas naudojant `assembleStandalone` (git ignoruojamas)   | Ne      |
+| Katalogas | Turinys                                                                              | Sekamas |
+| --------- | ------------------------------------------------------------------------------------ | ------- |
+| `src/`    | Programos šaltinis (TypeScript / TSX)                                                | Taip    |
+| `.build/` | Tarpiniai failai — `next build` išvestis (`gitignored`, `distDir = .build/next`)     | Ne      |
+| `dist/`   | Paruoštas platinti paketas — surinktas naudojant `assembleStandalone` (`gitignored`) | Ne      |
 
-Komponavimo procesas atliekamas vienu etapu:
+Kūrimo konvejeris vykdomas vienu etapu:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js išvestis)
-  └─ assembleStandalone()                 (nukopijuoja standalone + static + public + savuosius išteklius)
-       └─ išvestis: dist/                 (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (autonominio paketo + statinių + viešų + savųjų išteklių kopijavimas)
+       └─ išvestis: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` taip pat pirmiausia išvalo abu katalogus ir įrašo
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kaip diegimo vientisumo kontrolinį failą.
+`npm run build:release` papildomai pirmiausia išvalo abu katalogus ir įrašo
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kaip diegimo vientisumo žymenį.
 
-`npm run build:contributor` naudoja tik vidinei sistemai skirtą komponavimo profilį. Komponuojant jis laikinai pakeičia
-valdymo skydelio sąsajos failus imitaciniais failais, išsaugo API maršrutų apdorojimo priemones ir po komponavimo atkuria originalius failus.
-Naudokite `npm run build` pakeitimams, kurie turi įtakos valdymo skydelio sąsajai, arba visapusei
-leidimo patikrai; bendraautorių profilis nepakeičia leidimo komponuotės.
+`npm run build:contributor` naudoja tik backend skirtą kūrimo profilį. Kūrimo metu
+jis laikinai pakeičia valdymo skydelio UI failus, išsaugo API maršrutų apdorotuvus
+ir po kūrimo atkuria pradinius failus. Pakeitimams, kurie turi įtakos valdymo
+skydelio UI, arba visai leidimo patikrai naudokite `npm run build`; pagalbininkų
+profilis nėra leidimo kūrimo pakaitalas.
 
-> **Pastaba dėl diegimo VPS:** nuotolinis atvaizdo katalogas `/usr/lib/node_modules/omniroute/app/`
-> nepasikeitė. Diegimo įrankiai naudodami rsync nukopijuoja `dist/` turinį į jį.
-> Pasikeitė tik saugykloje esantis komponuotės išvesties kelias (`app/` → `dist/`).
+> **VPS diegimo pastaba:** nuotolinis atvaizdo katalogas `/usr/lib/node_modules/omniroute/app/`
+> lieka nepakeistas. Diegimo įgūdžiai į jį per `rsync` sinchronizuoja `dist/` turinį.
+> Pakeistas tik saugykloje esantis kūrimo išvesties kelias (`app/` → `dist/`).
 
 Numatytieji URL:
 

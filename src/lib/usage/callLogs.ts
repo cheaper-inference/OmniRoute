@@ -1,3 +1,8 @@
+import {
+  parseUpstreamHttp,
+  UPSTREAM_HTTP_ATTEMPT,
+  type UpstreamHttpSummary,
+} from "@/shared/utils/upstreamHttp";
 /**
  * Structured call log management.
  *
@@ -8,6 +13,12 @@
 import type { RequestPipelinePayloads } from "@omniroute/open-sse/utils/requestLogger.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import { getDbInstance } from "../db/core";
+import { getPricingForModel } from "../db/settings/pricing";
+import {
+  readCacheWriteUsage,
+  storedCacheWriteUsage,
+} from "@omniroute/open-sse/utils/cacheWriteUsage.ts";
+import { estimateApiEquivalentCacheWrite } from "./cacheWriteEstimate";
 import { failPendingCallLogDetail, publishPendingCallLogDetail } from "../db/callLogDetails";
 import { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 export { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
@@ -26,7 +37,6 @@ import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
   getPromptCacheReadTokensOrNull,
-  getPromptCacheCreationTokensOrNull,
   getReasoningTokensOrNull,
   getObservedReasoning,
 } from "./tokenAccounting";
@@ -100,6 +110,11 @@ type CallLogSummaryRow = {
   tokens_out: number | null;
   tokens_cache_read: number | null;
   tokens_cache_creation: number | null;
+  tokens_cache_creation_5m?: number | null;
+  tokens_cache_creation_1h?: number | null;
+  cache_creation_tier_status?: string | null;
+  cache_write_cost_usd?: number | null;
+  cache_write_priced_tokens?: number | null;
   tokens_reasoning: number | null;
   tokens_compressed: number | null;
   reasoning_source?: string | null;
@@ -136,11 +151,6 @@ type CallLogSummaryRow = {
 
 export const RESOLVED_ACCOUNT_SQL =
   "COALESCE(NULLIF(pc.name, ''), NULLIF(pc.email, ''), cl.account)";
-
-type DeleteResult = {
-  deletedRows: number;
-  deletedArtifacts: number;
-};
 
 const CALL_LOG_ID_RETRY_LIMIT = 3;
 
@@ -309,15 +319,18 @@ function snapshotHasOpaqueReasoningItem(body: unknown): boolean {
   const record =
     body !== null && typeof body === "object" && !Array.isArray(body) ? (body as JsonRecord) : null;
   if (!record) return false;
-  const outputs: unknown[] = [];
-  if (Array.isArray(record.output)) outputs.push(...record.output);
   const nested =
     record.response !== null &&
     typeof record.response === "object" &&
     !Array.isArray(record.response)
       ? (record.response as JsonRecord)
       : null;
-  if (nested && Array.isArray(nested.output)) outputs.push(...nested.output);
+  // Array literals, not push(...): no-log attempts pass the live body, and a spread
+  // into call arguments overflows the stack past roughly 125k items.
+  const outputs: unknown[] = [
+    ...(Array.isArray(record.output) ? record.output : []),
+    ...(nested && Array.isArray(nested.output) ? nested.output : []),
+  ];
   return outputs.some((item) => {
     const itemRecord =
       item !== null && typeof item === "object" && !Array.isArray(item)
@@ -336,19 +349,47 @@ function snapshotHasOpaqueReasoningItem(body: unknown): boolean {
 function resolveReasoningObservation(
   usageReasoning: number | null,
   responseBody: unknown,
-  streamMeta?: { encryptedSeen?: boolean } | null
+  streamMeta?: {
+    encryptedSeen?: boolean;
+    snapshotSource?: string | null;
+    snapshotChars?: number | null;
+  } | null
 ): { source: string | null; chars: number | null } {
-  if (streamMeta?.encryptedSeen === true || snapshotHasOpaqueReasoningItem(responseBody)) {
+  if (
+    streamMeta?.encryptedSeen === true ||
+    streamMeta?.snapshotSource === "encrypted" ||
+    snapshotHasOpaqueReasoningItem(responseBody)
+  ) {
     return { source: "encrypted", chars: null };
   }
   if (usageReasoning != null && usageReasoning > 0) {
     return { source: "usage", chars: null };
+  }
+  // A no-log request keeps only scalars from its live response, not a cloned body.
+  if (
+    (streamMeta?.snapshotSource === "content" || streamMeta?.snapshotSource === "think") &&
+    typeof streamMeta.snapshotChars === "number" &&
+    streamMeta.snapshotChars > 0
+  ) {
+    return { source: streamMeta.snapshotSource, chars: streamMeta.snapshotChars };
   }
   const observed = getObservedReasoning(extractAssistantMessage(responseBody));
   if (observed.chars > 0) {
     return { source: observed.source, chars: observed.chars };
   }
   return { source: null, chars: null };
+}
+
+/**
+ * Read numerical reasoning observations from the live response before a no-log
+ * attempt drops its payload. Never retain content or encrypted reasoning blobs.
+ */
+export function captureReasoningSnapshotMeta(responseBody: unknown): {
+  snapshotSource: string | null;
+  snapshotChars: number | null;
+} {
+  const { source, chars } = resolveReasoningObservation(null, responseBody);
+  return { snapshotSource: source, snapshotChars: chars };
 }
 
 function hasCallLogsColumn(columnName: string): boolean {
@@ -380,6 +421,12 @@ function mapSummaryRow(row: CallLogSummaryRow) {
   const provider = row.provider;
   const nodeName = row.provider_node_name ?? null;
   const nodePrefix = row.provider_node_prefix ?? null;
+  const requestSummary = row.request_summary ? parseStoredPayload(row.request_summary) : null;
+  const upstreamHttp = parseUpstreamHttp(
+    requestSummary && typeof requestSummary === "object"
+      ? (requestSummary as Record<string, unknown>).upstreamHttp
+      : null
+  );
   return {
     id: row.id,
     timestamp: row.timestamp,
@@ -403,6 +450,17 @@ function mapSummaryRow(row: CallLogSummaryRow) {
       compressed: row.tokens_compressed != null ? toNumber(row.tokens_compressed) : null,
     },
     cacheSource: row.cache_source || "upstream",
+    cacheWriteUsage: storedCacheWriteUsage(
+      row.tokens_cache_creation,
+      row.tokens_cache_creation_5m,
+      row.tokens_cache_creation_1h,
+      row.cache_creation_tier_status
+    ),
+    cacheWriteEstimate: {
+      knownTierCostUsd: row.cache_write_cost_usd ?? null,
+      pricedTokens: row.cache_write_priced_tokens ?? 0,
+      source: "api-equivalent-estimate" as const,
+    },
     // #6187/#13965: observed reasoning (source + CHARACTER count, never tokens) so the
     // detail view can tell "reasoned but not metered" apart from "did not reason".
     reasoningSource: row.reasoning_source ?? null,
@@ -422,7 +480,8 @@ function mapSummaryRow(row: CallLogSummaryRow) {
     artifactRelPath: row.artifact_relpath,
     artifactSizeBytes: row.artifact_size_bytes,
     artifactSha256: row.artifact_sha256,
-    requestSummary: row.request_summary ? parseStoredPayload(row.request_summary) : null,
+    requestSummary,
+    upstreamHttp,
     hasRequestBody: toNumber(row.has_request_body) === 1,
     hasResponseBody: toNumber(row.has_response_body) === 1,
     hasPipelineDetails: toNumber(row.has_pipeline_details) === 1,
@@ -434,54 +493,61 @@ function mapSummaryRow(row: CallLogSummaryRow) {
   };
 }
 
-async function saveCallLogOperation(entry: any): Promise<void> {
-  let prepared: PreparedCallLogRow;
+async function saveCallLogOperation(entry: any, metadataOnly = false): Promise<void> {
   try {
-    prepared = await buildCallLogRow(entry);
-  } catch (error) {
-    logCallLogSaveFailure(error);
-    return;
-  }
-  let inserted = false;
-  try {
-    insertCallLogRow(prepared);
-    inserted = true;
-  } catch (error) {
-    if (!isWriteLockError(error)) {
+    let prepared: PreparedCallLogRow;
+    try {
+      prepared = await buildCallLogRow(entry, metadataOnly);
+    } catch (error) {
       logCallLogSaveFailure(error);
       return;
     }
-    const retry = scheduleWriteRetry(() => {
+    let inserted = false;
+    try {
       insertCallLogRow(prepared);
       inserted = true;
-    }, logCallLogSaveFailure);
-    pendingCallLogSaves.add(retry);
-    try {
-      await retry;
-    } finally {
-      pendingCallLogSaves.delete(retry);
+    } catch (error) {
+      if (!isWriteLockError(error)) {
+        logCallLogSaveFailure(error);
+        return;
+      }
+      const retry = scheduleWriteRetry(() => {
+        insertCallLogRow(prepared);
+        inserted = true;
+      }, logCallLogSaveFailure);
+      pendingCallLogSaves.add(retry);
+      try {
+        await retry;
+      } finally {
+        pendingCallLogSaves.delete(retry);
+      }
     }
-  }
-  if (!inserted) return;
-  markRequestPersistedById(
-    entry.pendingRequestId,
-    entry.pendingRequestGeneration,
-    String(prepared.logEntry.id)
-  );
-  try {
-    await publishCallLogDetail(prepared);
-  } catch (error) {
-    logCallLogSaveFailure(error);
+    if (!inserted) return;
+    markRequestPersistedById(
+      entry.pendingRequestId,
+      entry.pendingRequestGeneration,
+      String(prepared.logEntry.id)
+    );
+    try {
+      await publishCallLogDetail(prepared);
+    } catch (error) {
+      logCallLogSaveFailure(error);
+    }
+  } finally {
+    // Clear a temporary continuation even if the row or artifact cannot be written.
+    // Metadata-only summaries must not invalidate a full response's bridge.
+    if (!metadataOnly && typeof entry?.responseId === "string" && entry.responseId.length > 0) {
+      clearPendingContinuationState(entry.responseId);
+    }
   }
 }
 
 type PreparedCallLogRow = {
+  metadataOnly: boolean;
   db: ReturnType<typeof getDbInstance>;
   logEntry: Record<string, unknown>;
   insertParams: Record<string, unknown>;
   hasResilienceColumn: boolean;
-  detailState: CallLogDetailState;
-  responseId: string | null;
   /** Builds the artifact from the row's FINAL id; null when no detail is expected. */
   buildDetailArtifact: (() => ReturnType<typeof buildArtifact>) | null;
 };
@@ -496,7 +562,7 @@ function logCallLogSaveFailure(error: unknown): void {
   );
 }
 
-async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
+async function buildCallLogRow(entry: any, metadataOnly = false): Promise<PreparedCallLogRow> {
   // Bind before any await: a reset must never redirect this request or its retry
   // into a replacement database (#12780). Closed handles fail normally.
   const db = getDbInstance();
@@ -506,7 +572,9 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
   // nor block the request-scoped context.
   const apiKeyId = entry.apiKeyId || apiKeyContext?.apiKeyId || null;
   const apiKeyName = entry.apiKeyName || apiKeyContext?.apiKeyName || null;
-  const connectionId = entry.connectionId || apiKeyContext?.connectionId || null;
+  const connectionId = metadataOnly
+    ? (entry.connectionId ?? null)
+    : entry.connectionId || apiKeyContext?.connectionId || null;
   const noLogEnabled = Boolean(entry.noLog) || (apiKeyId ? isNoLog(apiKeyId) : false);
 
   const protectedRequestBody = noLogEnabled ? null : protectPayloadForLog(entry.requestBody);
@@ -533,7 +601,7 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
   // payload the artifact will eventually hold (and the same
   // videoContentRemoved/fail-closed rules), so it is available the instant
   // this function is called. See responsesContinuationStore.ts.
-  if (typeof entry.responseId === "string" && entry.responseId.length > 0) {
+  if (!metadataOnly && typeof entry.responseId === "string" && entry.responseId.length > 0) {
     seedPendingContinuationState(
       entry.responseId,
       apiKeyId,
@@ -549,7 +617,7 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
   // around the attempt; null outside a store or when nothing was noted).
   // Read BEFORE any await: the ALS context is synchronous and later awaits
   // (resolveAccountName, artifact write) may cross async boundaries.
-  const resilienceActions = serializeResilienceActions();
+  const resilienceActions = metadataOnly ? null : serializeResilienceActions();
   const hasResilienceColumn = hasCallLogsColumn("resilience_actions");
 
   const account = await resolveAccountName(connectionId);
@@ -567,11 +635,9 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     entry.reasoningMeta !== null && typeof entry.reasoningMeta === "object"
       ? (entry.reasoningMeta as { encryptedSeen?: boolean; durationMs?: unknown })
       : null;
-  const reasoningObservation = resolveReasoningObservation(
-    tokensReasoning,
-    entry.responseBody,
-    streamReasoningMeta
-  );
+  const reasoningObservation = metadataOnly
+    ? { source: null, chars: null }
+    : resolveReasoningObservation(tokensReasoning, entry.responseBody, streamReasoningMeta);
   // Encrypted-reasoning observability (nullable, additive): stream-side
   // flag+duration win when present; the sink scan above already forced
   // source='encrypted' for opaque snapshots (duration NULL there).
@@ -623,11 +689,33 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     isSuccess && !noLogEnabled && !isNonTextRequest(entry.requestType, entry.path ?? entry.method);
   const renderedContent = measurableContent ? hasRenderedContent(clientVisibleBody) : null;
   const hasContent = renderedContent === null ? null : renderedContent ? 1 : 0;
-  const usageProvenance = resolveUsageProvenance({
-    usageEstimated: entry.usageEstimated === true,
-    tokens: entry.tokens,
-    isSuccess,
+  const usageProvenance = metadataOnly
+    ? null
+    : resolveUsageProvenance({
+        usageEstimated: entry.usageEstimated === true,
+        tokens: entry.tokens,
+        isSuccess,
+      });
+  const cacheWriteUsage = readCacheWriteUsage(entry.tokens);
+  let cacheWriteEstimate = estimateApiEquivalentCacheWrite(null, cacheWriteUsage, {
+    provider: rawProvider,
+    model: entry.model || "",
   });
+  if (cacheWriteUsage.fiveMinute !== null || cacheWriteUsage.oneHour !== null) {
+    try {
+      cacheWriteEstimate = estimateApiEquivalentCacheWrite(
+        await getPricingForModel(rawProvider, entry.model || ""),
+        cacheWriteUsage,
+        {
+          provider: rawProvider,
+          model: entry.model || "",
+          inputTokens: getLoggedInputTokens(entry.tokens),
+        }
+      );
+    } catch {
+      // Diagnostic pricing is optional; a lookup failure must not discard usage.
+    }
+  }
   const logEntry = {
     id: typeof entry.id === "string" && entry.id.length > 0 ? entry.id : generateLogId(),
     timestamp: typeof entry.timestamp === "string" ? entry.timestamp : new Date().toISOString(),
@@ -649,7 +737,12 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     tokensIn: toNumber(getLoggedInputTokens(entry.tokens)),
     tokensOut: toNumber(getLoggedOutputTokens(entry.tokens)),
     tokensCacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
-    tokensCacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
+    tokensCacheCreation: cacheWriteUsage.total,
+    tokensCacheCreation5m: cacheWriteUsage.fiveMinute,
+    tokensCacheCreation1h: cacheWriteUsage.oneHour,
+    cacheCreationTierStatus: cacheWriteUsage.status,
+    cacheWriteCostUsd: cacheWriteEstimate.knownTierCostUsd,
+    cacheWritePricedTokens: cacheWriteEstimate.pricedTokens,
     tokensReasoning,
     reasoningSource: reasoningObservation.source,
     reasoningChars: reasoningObservation.chars,
@@ -701,10 +794,15 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     usageProvenance,
   };
 
+  const legacySummary = buildRequestSummary(logEntry.requestType, protectedRequestBody);
+  const upstreamHttp = parseUpstreamHttp(entry.upstreamHttp);
   const requestSummary = noLogEnabled
     ? null
-    : buildRequestSummary(logEntry.requestType, protectedRequestBody);
+    : upstreamHttp
+      ? JSON.stringify({ ...(legacySummary ? JSON.parse(legacySummary) : {}), upstreamHttp })
+      : legacySummary;
   const detailExpected =
+    !metadataOnly &&
     !noLogEnabled &&
     (protectedRequestBody !== null ||
       protectedResponseBody !== null ||
@@ -735,12 +833,11 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     requestSummary,
   };
   return {
+    metadataOnly,
     db,
     logEntry,
     insertParams,
     hasResilienceColumn,
-    detailState,
-    responseId: typeof logEntry.responseId === "string" ? logEntry.responseId : null,
     buildDetailArtifact: detailExpected
       ? () =>
           buildArtifact(
@@ -765,6 +862,8 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         id, timestamp, method, path, status, model, requested_model, provider,
         account, connection_id, duration, ttft_ms, tokens_in, tokens_out,
         tokens_cache_read, tokens_cache_creation, tokens_reasoning, tokens_compressed,
+        tokens_cache_creation_5m, tokens_cache_creation_1h, cache_creation_tier_status,
+        cache_write_cost_usd, cache_write_priced_tokens,
         reasoning_source, reasoning_chars,
         reasoning_duration_ms, reasoning_effort_requested, reasoning_effort_upstream,
         reasoning_encrypted,
@@ -780,6 +879,8 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
         @account, @connectionId, @duration, @ttftMs, @tokensIn, @tokensOut,
         @tokensCacheRead, @tokensCacheCreation, @tokensReasoning, @tokensCompressed,
+        @tokensCacheCreation5m, @tokensCacheCreation1h, @cacheCreationTierStatus,
+        @cacheWriteCostUsd, @cacheWritePricedTokens,
         @reasoningSource, @reasoningChars,
         @reasoningDurationMs, @reasoningEffortRequested, @reasoningEffortUpstream,
         @reasoningEncrypted,
@@ -808,57 +909,68 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
   // sink note: the sink is the unique consumer — reset only after a successful
   // INSERT, so a failed write (or a second persistence of the same
   // attempt) keeps the summary instead of silently writing NULL.
-  resetResilienceActions();
+  if (!prepared.metadataOnly) resetResilienceActions();
 }
 
 /** Write the inserted row's artifact and publish it, or make the row terminal missing. */
 async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void> {
-  const { db, logEntry, buildDetailArtifact, responseId } = prepared;
-  let detailState = prepared.detailState;
+  const { db, logEntry, buildDetailArtifact } = prepared;
   if (buildDetailArtifact) {
     const id = String(logEntry.id);
     try {
       const artifactResult = await writeCallArtifactAsync(buildDetailArtifact());
-      if (artifactResult && publishPendingCallLogDetail(db, id, artifactResult)) {
-        detailState = "ready";
-      }
+      if (artifactResult) publishPendingCallLogDetail(db, id, artifactResult);
     } finally {
       // A null result or a thrown write must not strand the export cursor.
       failPendingCallLogDetail(db, id);
     }
   }
 
-  if (detailState === "ready" && typeof responseId === "string") {
-    // The durable row is now authoritative; drop the bridge entry instead
-    // of letting it idle until its TTL.
-    clearPendingContinuationState(responseId);
-  }
-
   scheduleCallLogRotation();
 }
 
-export function saveCallLog(entry: any): Promise<void> {
+export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
   // Usage is also needed by the live dashboard when disk history is disabled.
   // Retain only counters, never the request/response bodies from this entry.
-  if (entry?.tokens && typeof entry.tokens === "object") {
+  if (!metadataOnly && entry?.tokens && typeof entry.tokens === "object") {
     updateRequestTokensById(entry.pendingRequestId ?? entry.id, {
       in: getLoggedInputTokens(entry.tokens),
       out: getLoggedOutputTokens(entry.tokens),
       cacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
-      cacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
+      cacheCreation: readCacheWriteUsage(entry.tokens).total,
       reasoning: getReasoningTokensOrNull(entry.tokens),
       compressed: typeof entry.tokensCompressed === "number" ? entry.tokensCompressed : null,
     });
   }
   if (!shouldPersistToDisk || callLogSavesClosing) return Promise.resolve();
 
-  const operation = saveCallLogOperation(entry);
+  const operation = saveCallLogOperation(entry, metadataOnly);
   pendingCallLogSaves.add(operation);
   void operation.then(
     () => pendingCallLogSaves.delete(operation),
     () => pendingCallLogSaves.delete(operation)
   );
   return operation;
+}
+
+export function saveUpstreamHttpAttempt(entry: {
+  timestamp: string;
+  method: string;
+  path: string;
+  status: number;
+  model: string;
+  provider: string;
+  connectionId: string | null;
+  duration: number;
+  error: string | null;
+  correlationId: string;
+  noLog: boolean;
+  upstreamHttp: UpstreamHttpSummary;
+  apiKeyId?: string | null;
+  apiKeyName?: string | null;
+  comboName?: unknown;
+}): Promise<void> {
+  return saveCallLog({ ...entry, requestType: UPSTREAM_HTTP_ATTEMPT }, true);
 }
 
 export async function waitForCallLogSaves(timeoutMs: number): Promise<boolean> {
@@ -930,7 +1042,9 @@ export async function getCallLogs(filter: any = {}) {
 
   if (filter.status) {
     if (filter.status === "error") {
-      conditions.push("(cl.status >= 400 OR cl.error_summary IS NOT NULL)");
+      conditions.push(
+        "(cl.status >= 400 OR (cl.error_summary IS NOT NULL AND (cl.request_type IS NULL OR cl.request_type <> 'upstream_http_attempt' OR cl.error_summary <> 'No HTTP response observed')) OR (cl.request_type = 'upstream_http_attempt' AND cl.status = 0 AND cl.error_summary IS NULL))"
+      );
     } else if (filter.status === "ok") {
       conditions.push("cl.status >= 200 AND cl.status < 300");
     } else {

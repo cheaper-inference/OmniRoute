@@ -359,80 +359,80 @@ API ቁልፍ፦ [ከዳሽቦርድ]
 
 ## 🚀 ማሰማራት
 
-### አጠቃላይ npm ጭነት (የሚመከር)
+### ዓለም አቀፍ npm መጫን (የሚመከር)
 
 ```bash
 npm install -g omniroute
 
-# የውቅር ማውጫ ይፍጠሩ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# የ.env ፋይል ይፍጠሩ (.env.exampleን ይመልከቱ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# አገልጋዩን ያስጀምሩ
+# Start server
 omniroute
-# ወይም ብጁ port በመጠቀም፦
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLIው `.env`ን ከ`~/.omniroute/.env` ወይም `./.env` በራስ-ሰር ይጭናል።
+CLI በራስሰር `.env` ከ `~/.omniroute/.env` ወይም `./.env` ይጭናል። በስራ ማውጫው ውስጥ ያለው `./.env` አጭር የተፈቀደ ቁልፍ ዝርዝር ብቻ ሊያዘጋጅ ይችላል (ወደቦች ፣ `REQUIRE_API_KEY`፣ የአካባቢ እና የቀለም ቅንጅቶች)። ሁሉንም ነገር በ `~/.omniroute/.env` ውስጥ ያስቀምጡ. [CLI ማስጀመሪያ ውሎችን](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ይመልከቱ።
 
-### የማሳወቂያ ሳጥን ሁነታ
+### የትሪ ሁነታ
 
-OmniRouteን በስርዓቱ የማሳወቂያ ሳጥን ውስጥ ያስጀምሩ፦
+በስርዓት መሣቢያው ውስጥ OmniRoute ጀምር
 
 ```bash
 omniroute serve --tray
 ```
 
-አገልጋዩና የማሳወቂያ ሳጥኑ ዝግጁ ከሆኑ በኋላ ትዕዛዙ ይጠናቀቃል።
+ትዕዛዙ አገልጋዩ እና ትሪው ዝግጁ ከሆኑ በኋላ ይመለሳል።
 
-አገልጋዩ ያለ terminal መስራቱን ይቀጥላል።
+አገልጋዩ ያለ ተርሚናል ይቀጥላል።
 
-የማሳወቂያ ሳጥን ሁነታ macOSን፣ Windowsን እና ግራፊክሳዊ የLinux ክፍለ-ጊዜዎችን ይደግፋል። የማሳወቂያ ሳጥን ሁነታ ዳሽቦርዱን በራስ-ሰር አይከፍትም።
+ትሬይ ሁነታ macOS, Windows, እና በግራፊክ Linux ክፍለ ጊዜዎችን ይደግፋል. የትሬይ ሁነታ ዳሽቦርዱን በራስ ሰር አይከፍትም።
 
-ለእነዚህ ድርጊቶች የማሳወቂያ ሳጥን ምናሌውን ይጠቀሙ፦
+ለእነዚህ ድርጊቶች የትሪ ምናሌውን ይጠቀሙ፡-
 
 - ዳሽቦርዱን ይክፈቱ።
-- `/dashboard/logs`ን ይክፈቱ።
-- ራስ-ሰር ማስጀመርን ይቀይሩ።
-- OmniRouteን ያቁሙ።
+- `/dashboard/logs` ን ይክፈቱ።
+- ራስ-ሰር ጅምርን ይቀይሩ።
+- OmniRoute አቁም .
 
-`--tray`ን ከእነዚህ አማራጮች ጋር አያጣምሩ፦
+`--tray` ከእነዚህ አማራጮች ጋር አታጣምር፡-
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-እነዚህ ሁነታዎች የተለየ የሂደት ባለቤትነት ይፈልጋሉ።
+እነዚህ ሁነታዎች የተለያየ የሂደት ባለቤትነት ያስፈልጋቸዋል።
 
-በሚቀጥለው የማሽን መግቢያ ጊዜ ማስጀመርን ያንቁ፦
+በሚቀጥለው የማሽን መግቢያ ላይ ጅምርን አንቃ፡-
 
 ```bash
 omniroute autostart enable
 ```
 
-ራስ-ሰር ማስጀመር በmacOS፣ Windows እና ግራፊክሳዊ የLinux ክፍለ-ጊዜዎች ላይ የማሳወቂያ ሳጥን ሁነታን ይጠቀማል። ማሳያ የሌለው Linux ነባሩን የsystemd ተጠቃሚ አገልግሎት ይጠቀማል።
+ራስ-ጀምር በ macOS፣ Windows እና በግራፊክ Linux ክፍለ-ጊዜዎች ላይ የመሳቢያ ሁነታን ይጠቀማል። ጭንቅላት የሌለው Linux ያለውን የስርዓት ተጠቃሚ አገልግሎት ይጠቀማል።
 
-በመግቢያ ጊዜ ማስጀመርን ያሰናክሉ፦
+በመግቢያው ላይ ጅምርን ያሰናክሉ፡
 
 ```bash
 omniroute autostart disable
 ```
 
-### ማራገፍ
+### በማራገፍ ላይ
 
-ከአሁን በኋላ OmniRoute በማያስፈልግዎት ጊዜ፣ ሙሉ በሙሉ ለማስወገድ ሁለት ፈጣን ስክሪፕቶችን አቅርበናል፦
+OmniRoute በማይፈልጉበት ጊዜ፣ ለንፁህ ማስወገጃ ሁለት ፈጣን ስክሪፕቶችን እናቀርባለን።
 
-| ትዕዛዝ                     | ድርጊት                                                                          |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `npm run uninstall`      | የስርዓት መተግበሪያውን ያስወግዳል፣ ነገር ግን በ`~/.omniroute` ውስጥ **የውሂብ ጎታዎንና ውቅሮችዎን ያቆያል**። |
-| `npm run uninstall:full` | መተግበሪያውን ያስወግዳል፣ እንዲሁም **ሁሉንም ውቅሮች፣ ቁልፎች እና የውሂብ ጎታዎች እስከመጨረሻው ይሰርዛል**።       |
+| ትዕዛዝ                     | ድርጊት                                                                   |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `npm run uninstall`      | የስርዓት መተግበሪያን ያስወግዳል ግን** የእርስዎን DB እና ውቅሮች ይጠብቃል።** በ `~/.omniroute`. |
+| `npm run uninstall:full` | መተግበሪያው AND በቋሚነት ያስወግዳል** ሁሉንም አወቃቀሮች፣ ቁልፎች እና የውሂብ ጎታዎችን ይሰርዛል** .   |
 
-> ማስታወሻ፦ እነዚህን ትዕዛዞች ለማስኬድ፣ ወደ OmniRoute ፕሮጀክት አቃፊ ይሂዱ (clone ካደረጉት) እና ያስኪዷቸው። እንደ አማራጭ፣ በአጠቃላይ የተጫነ ከሆነ፣ `npm uninstall -g omniroute`ን ብቻ ማስኬድ ይችላሉ።
+> ማሳሰቢያ፡ እነዚህን ትዕዛዞች ለማስኬድ ወደ OmniRoute ፕሮጀክት ማህደር (ክሎድ ካደረጉት) ይሂዱ እና ያሂዱ። በአማራጭ፣ በአለምአቀፍ ደረጃ ከተጫነ በቀላሉ `npm uninstall -g omniroute` ማሄድ ይችላሉ።
 
-### በVPS ላይ ማሰማራት
+### VPS ማሰማራት
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -448,25 +448,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# ወይም፦ pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### በPM2 ላይ ማሰማራት (ዝቅተኛ ማህደረ ትውስታ)
+### PM2 ማሰማራት (ዝቅተኛ ማህደረ ትውስታ)
 
-የRAM አቅማቸው ውስን ለሆኑ አገልጋዮች፣ የማህደረ ትውስታ ገደብ አማራጩን ይጠቀሙ፦
+ውስን RAM ላላቸው አገልጋዮች የማህደረ ትውስታ ገደብ አማራጩን ይጠቀሙ፡-
 
 ```bash
-# በ512MB ገደብ (ነባሪ)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# ወይም ብጁ የማህደረ ትውስታ ገደብ በመጠቀም
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# ወይም ecosystem.config.jsን በመጠቀም
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js`ን ይፍጠሩ፦
+`ecosystem.config.js` ይፍጠሩ:
 
 ```javascript
 module.exports = {
@@ -491,30 +491,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Image ይገንቡ (ነባሪ = codex/claude/droid አስቀድሞ የተጫነበት runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# ተንቀሳቃሽ ሁነታ (የሚመከር)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-ከCLI binaries ጋር ለhost-የተዋሃደ ሁነታ፣ በዋናዎቹ ሰነዶች ውስጥ ያለውን የDocker ክፍል ይመልከቱ።
+ለአስተናጋጅ የተዋሃደ ሁነታ ከ CLI ሁለትዮሾች ጋር፣ በዋናው ሰነዶች ውስጥ የ Docker ክፍልን ይመልከቱ።
 
-### Void Linux (xbps-src)
+### ባዶ Linux (xbps-src)
 
-Void Linux ተጠቃሚዎች `xbps-src` የመስቀለኛ-ማጠናቀር ማዕቀፍን በመጠቀም OmniRouteን በስርዓቱ ቤተኛ መንገድ ማሸግ እና መጫን ይችላሉ። ይህም የNode.js ራሱን የቻለ ግንባታን ከሚያስፈልጉት `better-sqlite3` ቤተኛ bindings ጋር በራስ-ሰር ያከናውናል።
+ባዶ Linux ተጠቃሚዎች የ `xbps-src` ማጠቃለያ ማዕቀፍን በመጠቀም OmniRoute ማሸግ እና መጫን ይችላሉ። ይህ የ Node.js ብቻውን ግንባታ ከሚፈለገው `better-sqlite3` ቤተኛ ማሰሪያዎች ጋር በራስ ሰር ያደርገዋል።
 
 <details>
-<summary><b>የxbps-src አብነትን ይመልከቱ</b></summary>
+<summary><b>የ xbps-src አብነት ይመልከቱ</b></summary>
 
 ```bash
-# የ'omniroute' አብነት ፋይል
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="ብዙ LLM አቅራቢዎችን በብልህ ማዘዋወር የሚያስተዳድር ሁለንተናዊ AI መግቢያ"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -529,7 +529,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# ለnode-gyp የዒላማውን CPU መዋቅር ይወስኑ
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -538,29 +538,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) ሁሉንም ጥገኛዎች ይጫኑ – ስክሪፕቶችን ይዝለሉ
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) ራሱን የቻለውን የNext.js ጥቅል ይገንቡ
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) የማይንቀሳቀሱ ሀብቶችን ወደ ራሱን የቻለው ጥቅል ይቅዱ
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) የbetter-sqlite3 ቤተኛ bindingን ያጠናቅሩ
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) የተጠናቀረውን binding በራሱን የቻለው ጥቅል ውስጥ ያስቀምጡ
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) ለተወሰነ መዋቅር የተዘጋጁ sharp ጥቅሎችን ያስወግዱ
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) በNext.js የማይንቀሳቀስ ትንተና የተዘለሉትን የpino runtime ጥገኛዎች ይቅዱ፦
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -574,7 +574,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ከመጫን በኋላ ባለው hook ባዶ የNext.js መተግበሪያ router ማውጫዎች እንዳይወገዱ ይከላከሉ
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -602,87 +602,87 @@ post_install() {
 
 ### የአካባቢ ተለዋዋጮች
 
-| ተለዋዋጭ                                   | ነባሪ                                  | መግለጫ                                                                           |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT መፈረሚያ ሚስጥር (**በምርት አካባቢ ይቀይሩት**)                                           |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | የመጀመሪያ መግቢያ የይለፍ ቃል                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | የውሂብ ማውጫ (የውሂብ ጎታ፣ አጠቃቀም፣ ምዝግቦች)                                               |
-| `PORT`                                  | የፍሬምወርኩ ነባሪ                          | የአገልግሎት ወደብ (በምሳሌዎች ውስጥ `20128`)                                               |
-| `HOSTNAME`                              | የፍሬምወርኩ ነባሪ                          | የማስተሳሰሪያ አስተናጋጅ (የDocker ነባሪ `0.0.0.0` ነው)                                     |
-| `NODE_ENV`                              | የአሂድ ጊዜ ነባሪ                          | ለማሰማራት `production` ያዘጋጁ                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ለዳሽቦርዱ የሚታይ እና ለአገልጋዩ የሚጋለጥ ይፋዊ መሠረታዊ URL (የቀድሞውን `BASE_URL` ይተካል)             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | የደመና ማመሳሰያ መጨረሻ ነጥብ መሠረታዊ URL (የቀድሞውን `CLOUD_URL` ይተካል)                        |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | ለሚፈጠሩ API ቁልፎች የHMAC ሚስጥር                                                      |
-| `REQUIRE_API_KEY`                       | `false`                              | በ`/v1/*` ላይ የBearer API ቁልፍን ያስገድዱ                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | ማንነታቸው የተረጋገጠ የዳሽቦርድ ተጠቃሚዎች ሲጠይቁ ሙሉ የተከማቹ API ቁልፍ እሴቶችን እንዲመለከቱ ይፍቀዱ           |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ለተሸጎጠ የአቅራቢ ገደቦች ውሂብ የአገልጋይ-ወገን ማደሻ ድግግሞሽ፤ የUI ማደሻ አዝራሮች አሁንም በእጅ ማመሳሰልን ያስነሳሉ |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ከመጻፍ/ማስመጣት/መመለስ በፊት ራስ-ሰር የSQLite ቅጽበተ ቅጂዎችን ያሰናክሉ፤ በእጅ የሚደረጉ ምትኬዎች አሁንም ይሠራሉ  |
-| `APP_LOG_TO_FILE`                       | `true`                               | የመተግበሪያ እና የኦዲት ምዝግብ ውጤትን ወደ ዲስክ ማስቀመጥን ያነቃል                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` የማረጋገጫ ኩኪን ያስገድዱ (ከHTTPS ተገላቢጦሽ ፕሮክሲ በስተጀርባ)                          |
-| `CLOUDFLARED_BIN`                       | አልተዋቀረም                              | በሚተዳደር ማውረድ ፈንታ ነባር `cloudflared` ባይነሪን ይጠቀሙ                                   |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | በሚተዳደሩ Quick Tunnels የሚጠቀመው ማጓጓዣ (`http2`፣ `quic`፣ ወይም `auto`)                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | የNode.js ሂፕ ገደብ በMB                                                            |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ከፍተኛው የጥያቄ መሸጎጫ ግቤቶች ብዛት                                                       |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | ከፍተኛው የፍቺ መሸጎጫ ግቤቶች ብዛት                                                        |
+| ተለዋዋጭ                                   | ነባሪ                      | መግለጫ                                                                                                  |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(በራስ-ሰር የተፈጠረ)_         | JWT ፊርማ ሚስጥራዊ — በራስ የመነጨ በመጀመሪያ ሩጫ እና እስከ `server.env` ድረስ ቀጠለ; የውሂብ ማውጫው ጊዜያዊ በሚሆንበት ጊዜ በግልጽ ያስቀምጡት። |
+| `INITIAL_PASSWORD`                      | _(ያልተቀናበረ)_              | መጀመሪያ የመግቢያ የይለፍ ቃል. npm/source ጭነቶች በ `CHANGEME` ይጀምራሉ: ይተኩ. አልተዋቀረም፡ የመሳፈር አዋቂ                      |
+| `DATA_DIR`                              | `~/.omniroute`           | የውሂብ ማውጫ (ዲቢ፣ አጠቃቀም፣ ምዝግብ ማስታወሻዎች)                                                                    |
+| `PORT`                                  | ማዕቀፍ ነባሪ                 | የአገልግሎት ወደብ (`20128` በምሳሌዎች)                                                                          |
+| `HOSTNAME`                              | ማዕቀፍ ነባሪ                 | አስረው አስተናጋጅ (Docker ነባሪ ወደ `0.0.0.0`)                                                                 |
+| `NODE_ENV`                              | የሩጫ ጊዜ ነባሪ               | ለማሰማራት `production` አዘጋጅ                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | የህዝብ መሰረት URL ወደ ዳሽቦርዱ ወጣ እና ለአገልጋዩ ተጋልጧል (የቆየ `BASE_URL` ይተካዋል)                                      |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | የክላውድ ማመሳሰል የመጨረሻ ነጥብ ቤዝ URL (የቆየ `CLOUD_URL` ን ይተካዋል)                                                |
+| `API_KEY_SECRET`                        | _(በራስ-ሰር የተፈጠረ)_         | HMAC ሚስጥር ለተፈጠሩ API ቁልፎች — በራስ ሰር የተፈጠረ እና በ `server.env` ጸንቷል                                        |
+| `REQUIRE_API_KEY`                       | `false`                  | Bearer API ቁልፍን በ `/v1/*` ላይ ያስፈጽሙ                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | የተረጋገጡ የዳሽቦርድ ተጠቃሚዎች ሙሉ የተከማቹ API ቁልፍ እሴቶችን በፍላጎት እንዲያሳዩ ይፍቀዱላቸው                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | ለተሸጎጠ የአቅራቢ ገደብ ውሂብ የአገልጋይ-ጎን አድስ ማረጋገጫ; UI አድስ አዝራሮች አሁንም በእጅ ማመሳሰልን ይቀሰቅሳሉ                          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | ከ writes/import/restore በፊት አውቶማቲክ SQLite ቅጽበተ-ፎቶዎችን አሰናክል; በእጅ ምትኬዎች አሁንም ይሰራሉ                       |
+| `APP_LOG_TO_FILE`                       | `true`                   | የመተግበሪያ እና የኦዲት ምዝግብ ማስታወሻን ወደ ዲስክ ያነቃል።                                                              |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth ኩኪን አስገድድ (ከ HTTPS ተገላቢጦሽ ፕሮክሲ ጀርባ)                                                     |
+| `CLOUDFLARED_BIN`                       | አልተዋቀረም።                 | ከሚተዳደር ማውረድ ይልቅ ነባር `cloudflared` ሁለትዮሽ ይጠቀሙ                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | ለሚተዳደሩ ፈጣን ዋሻዎች መጓጓዣ (`http2`፣ `quic` ወይም `auto`)                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js ክምር ገደብ በ MB                                                                                  |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | ከፍተኛው ፈጣን መሸጎጫ ግቤቶች                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | ከፍተኛው የትርጉም መሸጎጫ ግቤቶች                                                                                 |
 
-የአካባቢ ተለዋዋጮችን ሙሉ ማጣቀሻ ለማየት [README](../README.md)ን ይመልከቱ።
+ለሙሉ አካባቢ ተለዋዋጭ ማጣቀሻ፣ [README](../README.md) ይመልከቱ።
 
 ---
 
-## 📊 የሚገኙ ሞዴሎች
+## 📊 ያሉ ሞዴሎች
 
 <details>
-<summary><b>ሁሉንም የሚገኙ ሞዴሎች ይመልከቱ</b></summary>
+<summary><b>ያሉ ሁሉንም ሞዴሎች ይመልከቱ</b></summary>
 
-> ከ v3.8.0 የ`open-sse/config/providerRegistry.ts` የተመረጠ ዝርዝር ነው። የCloud ካታሎጎች (Gemini፣ OpenRouter፣ ወዘተ) በተለዋዋጭ ሁኔታ ይመሳሰላሉ — ሙሉውን የቀጥታ ካታሎግ ለማየት **Dashboard → Providers → [provider] → Available Models** ይክፈቱ ወይም `GET /api/models/catalog` ይጠቀሙ።
+> ከ `open-sse/config/providerRegistry.ts` ለ v3.8.0 የተመረጠ ዝርዝር ነው። የCloud ካታሎጎች (Gemini፣ OpenRouter፣ ወዘተ) በተለዋዋጭ ይመሳሰላሉ — ሙሉውን የቀጥታ ካታሎግ ለመክፈት **ዳሽቦርድ → አቅራቢዎች → [provider] → ያሉ ሞዴሎች** ይሂዱ ወይም `GET /api/models/catalog` ይጥሩ።
 >
-> የአንድ አቅራቢ አብሮ የተሰራ ዝርዝር ከቀጥታ ካታሎጉ ጋር ካልተጣጣመ፣ የቀጥታ የupstream ካታሎጉን ለማስገባት በዚያ ገጽ ላይ **Import from /models** ይጠቀሙ (ወይም **Auto-Sync** ያንቁ)። ይህ በ v3.8.50 ለ LLM7.io (`gemini-3.1-flash-lite`) እና UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ተረጋግጧል፤ በተመሳሳይ የሙከራ ዙር Pollinations ያልታወቀ መዳረሻ በupstream የተገደበ ሆኖ ቀጥሏል።
+> የአንድ አቅራቢ አብሮ የተሰራ ዝርዝር ከቀጥታ ካታሎጉ ጋር ካልተመሳሰለ፣ በዚያ ገጽ ላይ **ከ /models አስመጣ** የሚለውን ይጠቀሙ (ወይም **ራስ-ሰር ማመሳሰል**ን ያንቁ)፤ ይህም የቀጥታ የupstream ካታሎግን ያመጣል። ይህ በ v3.8.50 ለ LLM7.io (`gemini-3.1-flash-lite`) እና UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ተረጋግጧል፤ Pollinations የማይታወቅ መዳረሻ በዚያው የሙከራ ዙር ወቅት በupstream የተገደበ ሆኖ ቀርቷል።
 
-**Claude Code (`cc/`)** — የPro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth፦ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — የPlus/Pro OAuth: `cx/gpt-5.5` (+ የeffort ደረጃዎች: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth፦ `cx/gpt-5.5` (+ የጥረት ደረጃዎች፦ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth፦ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ነፃ OAuth: በ**Dashboard → Providers → Kiro → Available Models** ስር የሚታየውን የቀጥታ ካታሎግ ይጠቀሙ። የሚገኝነቱ በመለያው እና በዕቅዱ ላይ ይመረኮዛል።
+**Kiro (`kr/`)** — ነፃ OAuth፦ በ **ዳሽቦርድ → አቅራቢዎች → Kiro → ያሉ ሞዴሎች** ስር የሚታየውን የቀጥታ ካታሎግ ይጠቀሙ። ተገኝነቱ በመለያው እና በዕቅዱ ይወሰናል።
 
-**Qoder (`if/`)** — ነፃ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ነፃ OAuth፦ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M፦ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M፦ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — በወር $9 ቋሚ ክፍያ ወይም በአጠቃቀም: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ወር ቋሚ ክፍያ ወይም በአጠቃቀም፦ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — የAPI ቁልፍ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — የAPI ቁልፍ፦ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — እጅግ ፈጣን: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — እጅግ ፈጣን፦ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok ቤተኛ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — ተፈጥሯዊ Grok፦ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — በEU የሚስተናገድ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — በEU የሚስተናገድ፦ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — በፍለጋ የተጨመረ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — በፍለጋ የተጨመረ፦ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ክፍት ምንጭ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ነፃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ክፍት ምንጭ፦ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ነፃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ፈጣን ማስኬድ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — ፈጣን ኢንፈረንስ፦ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — በwafer ሚዛን: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — በዋፈር ሚዛን፦ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — በRAG ላይ ያተኮረ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — በRAG ላይ ያተኮረ፦ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ለድርጅት: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ለድርጅቶች፦ `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE፦ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**፦ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: በGoogle የሚገኘውን የAPI ቁልፍ በመጠቀም በቀጥታ ይመሳሰላል — ቋሚ ዝርዝር የለውም። ቁልፍ በ**Dashboard → Providers** ያገናኙ፣ ከዚያም **Available Models** በመጠቀም የአሁኑን ካታሎግ ያስገቡ (ለምሳሌ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)።
+**Gemini (Google Cloud `gemini/`)**፦ በGoogle በኩል ለእያንዳንዱ API ቁልፍ በቀጥታ ይመሳሰላል — ቋሚ ዝርዝር የለውም። ቁልፍ በ **ዳሽቦርድ → አቅራቢዎች** ያገናኙ፣ ከዚያ **ያሉ ሞዴሎች**ን በመጠቀም የአሁኑን ካታሎግ ያስመጡ (ለምሳሌ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)።
 
-**ሌሎች ተኳሃኝ አቅራቢዎች** (የተመረጡ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (በ`aws-bedrock` በኩል), `azure-ai`, `openrouter` (የpassthrough ካታሎግ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`። እያንዳንዱ በ`providerRegistry.ts` ውስጥ የራሱን የሞዴል ዝርዝር ያስተዳድራል፣ እንዲሁም አቅራቢው `/models` የሚለውን endpoint ካቀረበ በራስ-ሰር ሊመሳሰል ይችላል።
+**ሌሎች ተኳኋኝ አቅራቢዎች** (የተመረጡ)፦ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (በ `aws-bedrock` በኩል), `azure-ai`, `openrouter` (የሚያልፍ ካታሎግ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`። እያንዳንዱ በ `providerRegistry.ts` ውስጥ የራሱን የሞዴል ዝርዝር ያስተዳድራል፣ እና አቅራቢው `/models` የሚል endpoint ካቀረበ በራስ-ሰር ሊመሳሰል ይችላል።
 
-**ስለ ሞዴል IDዎች ማስታወሻ:** OmniRoute የአቅራቢውን ቤተኛ IDዎች ይጠቀማል (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)። አንዳንድ IDዎች በነጥብ የተለዩ የስሪት ቁጥሮችን ያካትታሉ፣ ምክንያቱም የupstream API የሚጠብቀው እንደዚያ ስለሆነ ነው። አንድ ሞዴል ከላይ በተዘረዘረው ውስጥ ካልተካተተ፣ ተገኝነቱን ለማረጋገጥ `omniroute models --search <term>` ያስኬዱ ወይም `GET /api/models/catalog` ይጠቀሙ።
+**ስለ ሞዴል መለያዎች ማስታወሻ፦** OmniRoute የአቅራቢውን ተፈጥሯዊ መለያዎች ይጠቀማል (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)። አንዳንድ መለያዎች ነጥብ የያዙ ስሪቶችን ያካትታሉ፤ ምክንያቱም የupstream API እንዲሁ እንዲሆኑ ስለሚጠብቅ ነው። አንድ ሞዴል ከላይ በተዘረዘረው ውስጥ ካልተካተተ፣ ተገኝነቱን ለማረጋገጥ `omniroute models --search <term>` ያስኪዱ ወይም `GET /api/models/catalog` ይጠቀሙ።
 
 </details>
 

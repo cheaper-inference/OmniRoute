@@ -341,28 +341,28 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Namestitev
+## 🚀
 
 ### Globalna namestitev npm (priporočeno)
 
 ```bash
 npm install -g omniroute
 
-# Ustvarite konfiguracijski imenik
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ustvarite datoteko .env (glejte .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Zaženite strežnik
+# Start server
 omniroute
-# Ali z vrati po meri:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`.
+CLI samodejno naloži `.env` iz `~/.omniroute/.env` ali `./.env`. `./.env` v delovnem imeniku lahko nastavi le kratek seznam dovoljenih ključev (vrata, `REQUIRE_API_KEY`, področne in barvne nastavitve); vse ostalo daj v `~/.omniroute/.env`. Oglejte si [pogodbe o lansiranju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Način sistemske vrstice
+### Način pladnja
 
 Zaženite OmniRoute v sistemski vrstici:
 
@@ -370,20 +370,20 @@ Zaženite OmniRoute v sistemski vrstici:
 omniroute serve --tray
 ```
 
-Ukaz se zaključi, ko sta strežnik in sistemska vrstica pripravljena.
+Ukaz se vrne, ko sta strežnik in pladenj pripravljena.
 
-Strežnik deluje naprej brez terminala.
+Strežnik nadaljuje brez terminala.
 
-Način sistemske vrstice podpira macOS, Windows in grafične seje Linuxa. Nadzorna plošča se v načinu sistemske vrstice ne odpre samodejno.
+Način pladnja podpira seje macOS, Windows in grafične Linux. Način pladnja ne odpre samodejno nadzorne plošče.
 
-V meniju sistemske vrstice so na voljo ta dejanja:
+Za ta dejanja uporabite meni pladnja:
 
-- Odpiranje nadzorne plošče.
-- Odpiranje `/dashboard/logs`.
-- Spreminjanje samodejnega zagona.
-- Ustavitev OmniRoute.
+- Odprite nadzorno ploščo.
+- Odprite `/dashboard/logs`.
+- Spremenite samodejni zagon.
+- Ustavi OmniRoute.
 
-Možnosti `--tray` ne uporabljajte skupaj s temi možnostmi:
+Ne kombinirajte `--tray` s temi možnostmi:
 
 - `--daemon`
 - `--log`
@@ -391,32 +391,32 @@ Možnosti `--tray` ne uporabljajte skupaj s temi možnostmi:
 
 Ti načini zahtevajo drugačno lastništvo procesa.
 
-Omogočite zagon ob naslednji prijavi v računalnik:
+Omogoči zagon ob naslednji prijavi v računalnik:
 
 ```bash
 omniroute autostart enable
 ```
 
-Samodejni zagon uporablja način sistemske vrstice v sistemih macOS, Windows in grafičnih sejah Linuxa. Linux brez grafičnega vmesnika uporablja obstoječo uporabniško storitev systemd.
+Samodejni zagon uporablja način pladnja v sejah macOS, Windows in grafičnih Linux. Headless Linux uporablja obstoječo uporabniško storitev systemd.
 
-Onemogočite zagon ob prijavi:
+Onemogoči zagon ob prijavi:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Odstranitev
+### Odstranjevanje
 
-Ko OmniRoute ne potrebujete več, sta za čisto odstranitev na voljo dva hitra skripta:
+Ko OmniRoute ne potrebujete več, nudimo dva hitra skripta za čisto odstranitev:
 
-| Ukaz                     | Dejanje                                                                                             |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Odstrani sistemsko aplikacijo, vendar **ohrani zbirko podatkov in konfiguracije** v `~/.omniroute`. |
-| `npm run uninstall:full` | Odstrani aplikacijo IN trajno **izbriše vse konfiguracije, ključe in zbirke podatkov**.             |
+| Ukaz                     | Akcija                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Odstrani sistemsko aplikacijo, vendar** ohranja vaš DB in konfiguracije** v `~/.omniroute`. |
+| `npm run uninstall:full` | Trajno odstrani aplikacijo AND** izbriše vse konfiguracije, ključe in baze podatkov** .     |
 
-> Opomba: Če želite zagnati te ukaze, se pomaknite v mapo projekta OmniRoute (če ste ga klonirali) in jih zaženite. Če ste ga namestili globalno, lahko preprosto zaženete `npm uninstall -g omniroute`.
+> Opomba: Če želite zagnati te ukaze, se pomaknite do mape projekta OmniRoute (če ste jo klonirali) in jih zaženite. Če pa je globalno nameščen, lahko preprosto zaženete `npm uninstall -g omniroute`.
 
-### Namestitev na VPS
+### VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -432,25 +432,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ali: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Namestitev s PM2 (malo pomnilnika)
+### Uvajanje PM2 (malo pomnilnika)
 
-Za strežnike z omejenim RAM-om uporabite možnost omejitve pomnilnika:
+Za strežnike z omejenim RAM uporabite možnost omejitve pomnilnika:
 
 ```bash
-# Z omejitvijo 512 MB (privzeto)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Ali z omejitvijo pomnilnika po meri
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Ali z uporabo ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Ustvarite `ecosystem.config.js`:
+Ustvari `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -475,24 +475,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Zgradite sliko (privzeto = runner-cli s prednameščenimi codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Prenosni način (priporočeno)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Za način, integriran z gostiteljem in binarnimi datotekami CLI, glejte razdelek Docker v glavni dokumentaciji.
+Za gostiteljsko integriran način z binarnimi datotekami CLI glejte razdelek Docker v glavnih dokumentih.
 
-### Void Linux (xbps-src)
+### Prazen Linux (xbps-src)
 
-Uporabniki Void Linuxa lahko OmniRoute zapakirajo in namestijo izvorno z ogrodjem za navzkrižno prevajanje `xbps-src`. To avtomatizira samostojno gradnjo Node.js skupaj z zahtevanimi izvornimi vezavami `better-sqlite3`.
+Uporabniki Void Linux lahko pakirajo in namestijo OmniRoute izvirno z uporabo ogrodja za navzkrižno prevajanje `xbps-src`. To avtomatizira samostojno gradnjo Node.js skupaj z zahtevanimi izvornimi vezavami `better-sqlite3`.
 
 <details>
-<summary><b>Prikaži predlogo xbps-src</b></summary>
+<summary><b>Oglejte si predlogo xbps-src</b></summary>
 
 ```bash
-# Datoteka predloge za 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -513,7 +513,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Določite ciljno arhitekturo CPE za node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -522,29 +522,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Namestite vse odvisnosti – preskočite skripte
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Zgradite samostojni paket Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopirajte statična sredstva v samostojni paket
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Prevedite izvorno vezavo better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Namestite prevedeno vezavo v samostojni paket
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Odstranite pakete sharp, specifične za arhitekturo
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopirajte izvajalne odvisnosti pino, ki jih je izpustila statična analiza Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -558,7 +558,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Preprečite, da bi kavelj po namestitvi odstranil prazne imenike usmerjevalnika aplikacije Next.js
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -584,32 +584,32 @@ post_install() {
 
 </details>
 
-### Okoljske spremenljivke
+### Spremenljivke okolja
 
-| Spremenljivka                           | Privzeto                             | Opis                                                                                                                                                          |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Skrivnost za podpisovanje JWT (**spremenite v produkcijskem okolju**)                                                                                         |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Geslo za prvo prijavo                                                                                                                                         |
-| `DATA_DIR`                              | `~/.omniroute`                       | Imenik podatkov (zbirka podatkov, uporaba, dnevniki)                                                                                                          |
-| `PORT`                                  | privzeta vrednost ogrodja            | Vrata storitve (`20128` v primerih)                                                                                                                           |
-| `HOSTNAME`                              | privzeta vrednost ogrodja            | Gostitelj za vezavo (Docker privzeto uporablja `0.0.0.0`)                                                                                                     |
-| `NODE_ENV`                              | privzeta vrednost izvajalnega okolja | Za namestitev nastavite `production`                                                                                                                          |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Javni osnovni URL, prikazan na nadzorni plošči in izpostavljen strežniku (nadomešča opuščeni `BASE_URL`)                                                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Osnovni URL končne točke za sinhronizacijo z oblakom (nadomešča opuščeni `CLOUD_URL`)                                                                         |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Skrivnost HMAC za ustvarjene ključe API-ja                                                                                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | Zahteva ključ API-ja Bearer na `/v1/*`                                                                                                                        |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Overjenim uporabnikom nadzorne plošče omogoči, da na zahtevo razkrijejo celotne shranjene vrednosti ključev API-ja                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Pogostost osveževanja predpomnjenih podatkov o omejitvah ponudnikov na strani strežnika; gumbi v uporabniškem vmesniku še vedno sprožijo ročno sinhronizacijo |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Onemogoči samodejne posnetke SQLite pred zapisovanjem, uvozom ali obnovitvijo; ročne varnostne kopije še vedno delujejo                                       |
-| `APP_LOG_TO_FILE`                       | `true`                               | Omogoči zapisovanje dnevnikov aplikacije in revizije na disk                                                                                                  |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Vsili piškotek za preverjanje pristnosti `Secure` (za povratnim posredniškim strežnikom HTTPS)                                                                |
-| `CLOUDFLARED_BIN`                       | ni nastavljeno                       | Uporabi obstoječo binarno datoteko `cloudflared` namesto upravljanega prenosa                                                                                 |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Prenos za upravljane hitre tunele (`http2`, `quic` ali `auto`)                                                                                                |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Omejitev kopice Node.js v MB                                                                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Največje število vnosov v predpomnilniku pozivov                                                                                                              |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Največje število vnosov v semantičnem predpomnilniku                                                                                                          |
+| Spremenljivka                           | Privzeto                 | Opis                                                                                                                                                  |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(samodejno ustvarjeno)_ | skrivnost podpisovanja JWT — samodejno ustvarjena ob prvem zagonu in vztrajna v `server.env`; nastavite izrecno, ko je podatkovni imenik kratkotrajen |
+| `INITIAL_PASSWORD`                      | _(nenastavljeno)_        | Prvo geslo za prijavo. namestitve npm/source se začnejo z `CHANGEME`: zamenjajte ga. Ni nastavljeno: čarovnik za vkrcanje                             |
+| `DATA_DIR`                              | `~/.omniroute`           | Imenik podatkov (db, uporaba, dnevniki)                                                                                                               |
+| `PORT`                                  | privzeti okvir           | Storitvena vrata (`20128` v primerih)                                                                                                                 |
+| `HOSTNAME`                              | privzeti okvir           | Poveži gostitelja (Docker privzeto `0.0.0.0`)                                                                                                         |
+| `NODE_ENV`                              | privzeti čas izvajanja   | Nastavite `production` za uvedbo                                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Javna baza URL se je pojavila na nadzorni plošči in izpostavljena strežniku (nadomešča podedovano `BASE_URL`)                                         |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Baza končne točke sinhronizacije v oblaku URL (nadomešča podedovano `CLOUD_URL`)                                                                      |
+| `API_KEY_SECRET`                        | _(samodejno ustvarjeno)_ | skrivnost HMAC za ustvarjene ključe API — samodejno ustvarjen ob prvem zagonu in vztrajen v `server.env`                                              |
+| `REQUIRE_API_KEY`                       | `false`                  | Uveljavi ključ nosilca API na `/v1/*`                                                                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Omogočite overjenim uporabnikom nadzorne plošče, da na zahtevo razkrijejo celotne shranjene vrednosti ključev API                                     |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Kadenca osveževanja na strani strežnika za predpomnjene podatke o omejitvah ponudnika; Gumbi za osvežitev UI še vedno sprožijo ročno sinhronizacijo   |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Onemogoči samodejne posnetke SQLite pred writes/import/restore; ročne varnostne kopije še vedno delujejo                                              |
+| `APP_LOG_TO_FILE`                       | `true`                   | Omogoča izpis aplikacij in revizijskih dnevnikov na disk                                                                                              |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Vsili avtentični piškotek `Secure` (za obratnim proxyjem HTTPS )                                                                                      |
+| `CLOUDFLARED_BIN`                       | nenastavljeno            | Namesto upravljanega prenosa uporabite obstoječo dvojiško datoteko `cloudflared`                                                                      |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport za upravljane hitre tunele (`http2`, `quic` ali `auto`)                                                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | omejitev kopice Node.js v MB                                                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Največ vnosov v predpomnilnik pozivov                                                                                                                 |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Največ semantičnih vnosov v predpomnilnik                                                                                                             |
 
-Za celoten seznam okoljskih spremenljivk glejte [README](../README.md).
+Za celotno referenco spremenljivk okolja glejte [README](../README.md).
 
 ---
 
@@ -618,17 +618,17 @@ Za celoten seznam okoljskih spremenljivk glejte [README](../README.md).
 <details>
 <summary><b>Prikaži vse razpoložljive modele</b></summary>
 
-> Spodnji seznam je pripravljen na podlagi `open-sse/config/providerRegistry.ts` za v3.8.0. Katalogi v oblaku (Gemini, OpenRouter itd.) se sinhronizirajo dinamično — za celoten aktualni katalog odprite **Dashboard → Providers → [provider] → Available Models** ali pokličite `GET /api/models/catalog`.
+> Spodnji seznam je pripravljen na podlagi `open-sse/config/providerRegistry.ts` za v3.8.0. Katalogi v oblaku (Gemini, OpenRouter itd.) se sinhronizirajo dinamično — za celoten aktualni katalog odprite **Nadzorna plošča → Ponudniki → [ponudnik] → Razpoložljivi modeli** ali pokličite `GET /api/models/catalog`.
 >
-> Če je vgrajeni seznam ponudnika zastarel, na tej strani uporabite **Import from /models** (ali omogočite **Auto-Sync**), da pridobite aktualni katalog iz izvornega sistema. To je bilo preverjeno v v3.8.50 za LLM7.io (`gemini-3.1-flash-lite`) in UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonimni dostop Pollinations je med istim preizkusom ostal omejen z omejitvami izvornega sistema.
+> Če je vgrajeni seznam ponudnika zastarel, na tej strani uporabite **Uvozi iz /models** (ali omogočite **Samodejno sinhronizacijo**), da pridobite aktualni katalog iz izvorne storitve. To je bilo preverjeno v v3.8.50 za LLM7.io (`gemini-3.1-flash-lite`) in UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonimni dostop Pollinations je bil med istim preizkusom še vedno omejen na ravni izvorne storitve.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ stopnje zahtevnosti: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ ravni zahtevnosti: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — BREZPLAČNI OAuth: uporabite aktualni katalog, prikazan v razdelku **Dashboard → Providers → Kiro → Available Models**. Razpoložljivost je odvisna od računa in paketa.
+**Kiro (`kr/`)** — BREZPLAČNI OAuth: uporabite aktualni katalog, prikazan pod **Nadzorna plošča → Ponudniki → Kiro → Razpoložljivi modeli**. Razpoložljivost je odvisna od računa in paketa.
 
 **Qoder (`if/`)** — BREZPLAČNI OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -636,7 +636,7 @@ Za celoten seznam okoljskih spremenljivk glejte [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 USD/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — pavšalno 9 USD/mesec ali glede na uporabo: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 USD/mesec pavšalno ali glede na uporabo: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — ključ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -644,11 +644,11 @@ Za celoten seznam okoljskih spremenljivk glejte [README](../README.md).
 
 **xAI (`xai/`)** — izvorni Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — gostovanje v EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — gostuje v EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — z razširitvijo z iskanjem: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — odprtokodni: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (brezplačen), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — odprtokodni: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (brezplačno), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — hitro izvajanje: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
@@ -656,17 +656,17 @@ Za celoten seznam okoljskih spremenljivk glejte [README](../README.md).
 
 **Cohere (`cohere/`)** — osredotočeno na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — za podjetja: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — za podjetja: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sinhronizacija se izvaja sproti za vsak ključ API iz Googla — statičnega seznama ni. Povežite ključ v **Dashboard → Providers** in nato uporabite **Available Models** za uvoz aktualnega kataloga (npr. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: sinhronizacija se izvaja v živo glede na ključ API iz Googla — statičnega seznama ni. Povežite ključ v **Nadzorna plošča → Ponudniki**, nato uporabite **Razpoložljivi modeli**, da uvozite aktualni katalog (npr. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Drugi združljivi ponudniki** (izbrani): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (prek `aws-bedrock`), `azure-ai`, `openrouter` (katalog posredovanja), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Vsak vzdržuje svoj seznam modelov v `providerRegistry.ts`; samodejna sinhronizacija je mogoča, kadar ponudnik omogoča končno točko `/models`.
+**Drugi združljivi ponudniki** (izbrani): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (prek `aws-bedrock`), `azure-ai`, `openrouter` (katalog s posredovanjem), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Vsak vzdržuje svoj seznam modelov v `providerRegistry.ts`; seznam je mogoče samodejno sinhronizirati, če ponudnik izpostavlja končno točko `/models`.
 
-**Opomba o ID-jih modelov:** OmniRoute uporablja izvorne ID-je ponudnikov (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nekateri ID-ji vključujejo različice s pikami, ker jih izvorni API pričakuje v takšni obliki. Če model ni naveden zgoraj, za potrditev razpoložljivosti zaženite `omniroute models --search <term>` ali uporabite `GET /api/models/catalog`.
+**Opomba o ID-jih modelov:** OmniRoute uporablja izvorne ID-je ponudnikov (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nekateri ID-ji vsebujejo različice s pikami, ker jih izvorni API pričakuje v takšni obliki. Če model ni naveden zgoraj, za potrditev razpoložljivosti zaženite `omniroute models --search <term>` ali pokličite `GET /api/models/catalog`.
 
 </details>
 

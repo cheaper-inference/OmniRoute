@@ -16,7 +16,7 @@ const block = (selector: string) => {
 test("globals.css loads the vendored kit CSS right after Tailwind, and the kit self-hosts its font", () => {
   const order = [
     '@import "tailwindcss" source(none);',
-    '@import "../../packages/ui-kit/src/ci-ui.css";',
+    '@import "../../packages/ui-kit/src/ci-styles.css";',
   ].map((needle) => css.indexOf(needle));
   assert.ok(
     order.every((i) => i >= 0),
@@ -88,6 +88,24 @@ test("the OmniRoute color tokens are aliases of kit tokens (no hex left in :root
   assert.match(dark, /color-scheme:\s*dark/);
 });
 
+test("the coral/indigo rgba() leftovers and the orphan legacy blocks are gone (#19066)", () => {
+  // The hex check above missed the same colours written as rgba() (coral 229,77,94 and
+  // indigo 99,102,241): the ::selection fallback, `border-glow` and the route progress glow.
+  const legacyRgba = /rgba\(\s*(?:229,\s*77,\s*94|99,\s*102,\s*241)\b/;
+  assert.doesNotMatch(css, legacyRgba);
+  assert.doesNotMatch(read("src/shared/components/NavigationProgress.tsx"), legacyRgba);
+  assert.doesNotMatch(read("src/shared/components/NavigationProgress.tsx"), /rgba?\(/);
+  // Blocks with no consumer anywhere in src/: an old coral glow, a macOS vibrancy panel and the
+  // antd table (antd is not a dependency).
+  for (const orphan of [/border-glow/, /\.bg-vibrancy\b/, /\.ant-table\b/]) {
+    assert.doesNotMatch(css, orphan);
+  }
+  assert.match(
+    css,
+    /::selection \{\s*background-color: color-mix\(in srgb, var\(--color-primary\) 22%, transparent\);/
+  );
+});
+
 test("the graph-paper grid, the coral/indigo palette and the macOS font stack are gone", () => {
   assert.doesNotMatch(css, /body::before/);
   assert.doesNotMatch(css, /--grid-line|--grid-size|--section-alt/);
@@ -111,9 +129,33 @@ test("the graph-paper grid, the coral/indigo palette and the macOS font stack ar
     "--color-info-bg",
     "--color-chart-1",
     "--color-chart-5",
+    "--color-chart-8",
+    "--color-chart-3-ink",
+    "--color-chart-2-subtle",
   ]) {
     assert.ok(theme.includes(`${t}:`), `@theme inline exposes ${t}`);
   }
+});
+
+test("all eight kit chart tokens, their -ink and -subtle are bridged in :root and @theme (#19066)", () => {
+  const root = block(":root {\n  --desktop-safe-top");
+  const theme = block("@theme inline {");
+  const dark = block(".dark {");
+  for (let n = 1; n <= 8; n++) {
+    for (const suffix of ["", "-ink", "-subtle"]) {
+      const name = `--color-chart-${n}${suffix}`;
+      assert.ok(
+        root.includes(`${name}: var(--ci-chart-${n}${suffix});`),
+        `:root maps ${name} → var(--ci-chart-${n}${suffix})`
+      );
+      // Tailwind utilities (bg-chart-6, text-chart-3-ink, bg-chart-2-subtle) need the @theme entry.
+      assert.ok(theme.includes(`${name}: var(${name});`), `@theme inline exposes ${name}`);
+      // The kit flips --ci-chart-* per theme/edition; OmniRoute never re-declares them per theme.
+      assert.ok(!dark.includes(`${name}:`), `.dark does not redefine ${name}`);
+    }
+  }
+  assert.ok(!root.includes("--color-chart-9"), "the kit has exactly eight chart tokens");
+  assert.doesNotMatch(root, /--color-chart-[\w-]+:\s*#/, "chart bridge carries no hex");
 });
 
 test("focus ring lives in @layer base so kit controls keep their own focus styles", () => {
@@ -148,19 +190,70 @@ test("phone-only heading/button rules leave kit elements alone (spike conflicts 
   assert.doesNotMatch(css, /main :is\(h1, h2\) \{/);
 });
 
-test("adapter extension classes exist for the Button warning variant and Badge tones", () => {
-  assert.match(css, /\.ci-button--warning \{/);
-  for (const tone of ["success", "warning", "danger", "info", "primary"]) {
-    assert.match(css, new RegExp(`\\.ci-badge\\[data-tone="${tone}"\\]`), `badge tone ${tone}`);
+test("the Button warning variant and Badge tones come from the kit, with no local extension", () => {
+  const kit = read("packages/ui-kit/src/ci-ui.css");
+  assert.match(kit, /\.ci-button--warning \{/);
+  assert.doesNotMatch(css, /\.ci-button--warning|\.ci-select-native/);
+  for (const tone of ["success", "warning", "danger", "info", "accent"]) {
+    assert.match(kit, new RegExp(`\\.ci-badge--tone-${tone} \\{`), `badge tone ${tone}`);
+    assert.doesNotMatch(css, new RegExp(`\\.ci-badge\\[data-tone="${tone}"\\]`), `local ${tone}`);
   }
 });
 
+// `--color-accent` / `--color-primary` are the kit's lime (#d8ff00): white on it is ~1.1:1.
+// Solid token = `bg-accent` / `bg-primary` followed by whitespace, a quote or the end —
+// `bg-accent/10`, `bg-accent-light`, `bg-primary/20` are tints and stay out of scope.
+const SOLID_ACCENT = /(?<![\w/:-])bg-(?:accent|primary)(?=[\s"'`]|$)/;
+const WHITE_INK = /(?<![\w/:-])text-white(?=[\s"'`]|$)/;
+
+/**
+ * True when one class literal can render a solid accent background with white ink.
+ *
+ * A template literal is judged per branch: the static part plus at most one string from
+ * each `${…}`. Strings of the SAME expression are alternatives (`${c ? "a" : "b"}` renders
+ * one of them), so they never combine; strings of DIFFERENT expressions can render together,
+ * so every pair across two expressions is checked too (#18079). Two classes are enough for
+ * a violation, so pairs cover every case without enumerating the full product.
+ */
+function pairsAccentWithWhite(literal: string): boolean {
+  const units: string[] = [];
+  if (literal.startsWith("`") && literal.includes("${")) {
+    const stat = literal.replace(/\$\{[^}]*\}/g, " ");
+    const options = [...literal.matchAll(/\$\{[^}]*\}/g)].map(
+      (e) => e[0].match(/"[^"]*"|'[^']*'/g) ?? []
+    );
+    units.push(stat);
+    options.forEach((own, i) => {
+      for (const a of own) {
+        units.push(`${stat} ${a}`);
+        for (const other of options.slice(i + 1)) {
+          for (const b of other) units.push(`${stat} ${a} ${b}`);
+        }
+      }
+    });
+  } else units.push(literal);
+  return units.some((u) => SOLID_ACCENT.test(u) && WHITE_INK.test(u));
+}
+
+test("the accent-ink rule reads template branches, alone and across expressions", () => {
+  const flagged = [
+    '"bg-primary text-white"',
+    '`bg-accent ${big ? "text-white" : ""}`',
+    '`p-2 ${on ? "bg-primary" : "bg-muted"} ${loud ? "text-white" : "text-text-main"}`',
+    "`${a && \"bg-accent\"} gap-1 ${b && 'text-white'}`",
+  ];
+  const clean = [
+    '"bg-primary text-accent-foreground"',
+    '"bg-primary/10 text-white"',
+    '`${on ? "bg-primary text-accent-foreground" : "bg-red-500 text-white"}`',
+    '`p-2 ${on ? "bg-primary" : "text-white"}`',
+    '`${on ? "bg-accent" : ""} ${loud ? "text-text-main" : ""}`',
+  ];
+  for (const literal of flagged) assert.equal(pairsAccentWithWhite(literal), true, literal);
+  for (const literal of clean) assert.equal(pairsAccentWithWhite(literal), false, literal);
+});
+
 test("no class literal pairs a solid bg-accent/bg-primary with text-white (lime needs dark ink)", () => {
-  // `--color-accent` / `--color-primary` are the kit's lime (#d8ff00): white on it is ~1.1:1.
-  // Solid token = `bg-accent` / `bg-primary` followed by whitespace, a quote or the end —
-  // `bg-accent/10`, `bg-accent-light`, `bg-primary/20` are tints and stay out of scope.
-  const SOLID = /(?<![\w/:-])bg-(?:accent|primary)(?=[\s"'`]|$)/;
-  const WHITE = /(?<![\w/:-])text-white(?=[\s"'`]|$)/;
   const LITERAL = /"[^"]*"|'[^'\n]*'|`[^`]*`/g;
   const offenders: string[] = [];
   const walk = (dir: string) => {
@@ -170,19 +263,8 @@ test("no class literal pairs a solid bg-accent/bg-primary with text-white (lime 
       else if (entry.name.endsWith(".tsx")) {
         const src = fs.readFileSync(full, "utf8");
         for (const m of src.matchAll(LITERAL)) {
-          const line = src.slice(0, m.index).split("\n").length;
-          // A template literal is judged per branch: the static part plus ONE `${…}` branch at
-          // a time, so `${cond ? "bg-primary text-accent-foreground" : "bg-red-500 text-white"}`
-          // is fine while `bg-primary ${cond ? "text-white" : ""}` is not.
-          const units: string[] = [];
-          if (m[0].startsWith("`") && m[0].includes("${")) {
-            const stat = m[0].replace(/\$\{[^}]*\}/g, " ");
-            const branches = [...m[0].matchAll(/\$\{[^}]*\}/g)].flatMap(
-              (e) => e[0].match(/"[^"]*"|'[^']*'/g) ?? []
-            );
-            units.push(stat, ...branches.map((b) => `${stat} ${b}`));
-          } else units.push(m[0]);
-          if (units.some((u) => SOLID.test(u) && WHITE.test(u))) {
+          if (pairsAccentWithWhite(m[0])) {
+            const line = src.slice(0, m.index).split("\n").length;
             offenders.push(`${path.relative(ROOT, full)}:${line}`);
           }
         }
@@ -223,9 +305,17 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   const engine = read("src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx");
   const edges = read("src/shared/components/flow/edgeStyles.ts");
   const badge = read("src/shared/components/TokenHealthBadge.tsx");
-  for (const [name, src] of Object.entries({ combo, engine, edges })) {
+  for (const [name, src] of Object.entries({ engine, edges })) {
     assert.ok(src.includes("var(--orch-status-"), `${name} reads the status tokens`);
   }
+  // The Combo Studio run outcome is a kit Stat: its state colour is the Stat tone (kit status
+  // tokens), mapped per outcome, never a literal.
+  assert.match(
+    combo,
+    /tone=\{OUTCOME_TONE\[run\.outcome\]\}/,
+    "combo maps the outcome to a Stat tone"
+  );
+  assert.doesNotMatch(combo, /#[0-9a-fA-F]{6}\b/, "combo has no fixed hex");
   // TokenHealthBadge moved onto the kit (KEA-7886, lote 10): its state reads the same kit
   // status tokens through the semantic utilities (--color-success/warning/error → --ci-*).
   for (const tone of ["text-success", "text-warning", "text-error"]) {
@@ -280,9 +370,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   // Combo live studio: active/error provider pills + the run outcome tri-state.
   assert.ok(combo.includes("FLOW_EDGE_COLORS.active"), "combo active pill uses the flow palette");
   assert.ok(combo.includes("FLOW_EDGE_COLORS.error"), "combo error pill uses the flow palette");
-  assert.ok(combo.includes('"var(--orch-status-success)"'), "combo succeeded = success token");
-  assert.ok(combo.includes('"var(--orch-status-error)"'), "combo exhausted = error token");
-  assert.ok(combo.includes('"var(--orch-status-warning)"'), "combo pending = warning token");
+  // The run outcome is a kit Stat; its tone carries the kit status token (the kit Stat has no
+  // warning tone, so a running run stays neutral).
+  assert.match(combo, /succeeded: "positive"/, "combo succeeded = positive (success) tone");
+  assert.match(combo, /exhausted: "critical"/, "combo exhausted = critical (error) tone");
+  assert.match(combo, /running: "default"/, "combo running = neutral tone");
   assert.ok(!combo.includes('"#ef4444"'), "combo studio hardcodes no error hex");
   assert.ok(!combo.includes('"#f59e0b"'), "combo studio hardcodes no warning hex");
 
@@ -511,16 +603,13 @@ test("token aliases with no consumer are gone (KEA-7886 F4)", () => {
   assert.doesNotMatch(css, /\.traffic-lights?\b/, "the unused .traffic-light(s) chrome is gone");
 });
 
-test("the primary Badge tone keeps dark ink in light and takes the lime ink in dark (F4)", () => {
-  // Light: near-black ink on lime-100. Dark: the kit keeps --ci-color-accent-foreground near-black
-  // while the surface becomes a 14 % lime tint over the dark background, so the "8 features"
-  // translator badge read near-black on near-black. Dark flips the ink to the lime itself.
+test("the primary Badge tone uses the kit accent ink in every look (F4)", () => {
+  // The near-black accent foreground vanished on the dark accent tint ("8 features" on the
+  // translator). The kit tone draws its own ink, which holds AA in all four looks.
+  const kit = read("packages/ui-kit/src/ci-ui.css");
   assert.match(
-    css,
-    /\.ci-badge\[data-tone="primary"\] \{\s*color: var\(--ci-color-accent-foreground\);\s*background: var\(--ci-color-accent-surface-strong\);/
+    kit,
+    /\.ci-badge--tone-accent \{[^}]*color: var\(--ci-badge-accent-ink\);[^}]*background: var\(--ci-color-accent-surface-strong\);/
   );
-  assert.match(
-    css,
-    /:root\[data-theme="dark"\] \.ci-badge\[data-tone="primary"\] \{\s*color: var\(--ci-color-accent\);/
-  );
+  assert.doesNotMatch(css, /\.ci-badge\[data-tone="primary"\]/);
 });

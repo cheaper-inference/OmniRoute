@@ -343,82 +343,82 @@ API သော့: [ဒက်ရှ်ဘုတ်မှ]
 
 ---
 
-## 🚀 ဖြန့်ကျက်တပ်ဆင်ခြင်း
+## 🚀 ဖြန့်ကျက်ခြင်း။
 
 ### Global npm ထည့်သွင်းခြင်း (အကြံပြုထားသည်)
 
 ```bash
 npm install -g omniroute
 
-# ဖွဲ့စည်းမှုလမ်းညွှန်ကို ဖန်တီးပါ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ဖိုင်ကို ဖန်တီးပါ (.env.example ကို ကြည့်ပါ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ဆာဗာကို စတင်ပါ
+# Start server
 omniroute
-# သို့မဟုတ် စိတ်ကြိုက် port ဖြင့်:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI သည် `~/.omniroute/.env` သို့မဟုတ် `./.env` မှ `.env` ကို အလိုအလျောက် ဖွင့်ပေးသည်။
+CLI သည် `.env` `~/.omniroute/.env` သို့မဟုတ် `./.env` မှ အလိုအလျောက်တင်ပေးသည်။ အလုပ်လုပ်သောလမ်းညွှန်ရှိ `./.env` သည် သော့များ၏ခွင့်ပြုချက်စာရင်းတို (ports၊ `REQUIRE_API_KEY`၊ ဒေသနှင့် အရောင်ဆက်တင်များ) ကိုသာ သတ်မှတ်နိုင်သည်။ အခြားအရာအားလုံးကို `~/.omniroute/.env` တွင်ထည့်ပါ။ [CLI မိတ်ဆက်စာချုပ်များကို](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ကြည့်ပါ။
 
-### Tray မုဒ်
+### ဗန်းမုဒ်
 
-OmniRoute ကို စနစ် tray တွင် စတင်ပါ:
+စနစ်ဗန်းတွင် OmniRoute စတင်ပါ။
 
 ```bash
 omniroute serve --tray
 ```
 
-ဆာဗာနှင့် tray အသင့်ဖြစ်ပြီးနောက် command သည် ပြန်လည်ပြီးဆုံးသည်။
+ဆာဗာနှင့် ဗန်းအဆင်သင့်ဖြစ်ပြီးနောက် အမိန့်ပြန်တက်လာသည်။
 
-ဆာဗာသည် terminal မရှိဘဲ ဆက်လက်လည်ပတ်နေသည်။
+ဆာဗာသည် terminal မပါဘဲ ဆက်လက်လုပ်ဆောင်သည်။
 
-Tray မုဒ်သည် macOS၊ Windows နှင့် ဂရပ်ဖစ် Linux session များကို ပံ့ပိုးသည်။ Tray မုဒ်သည် dashboard ကို အလိုအလျောက် မဖွင့်ပေးပါ။
+ဗန်းမုဒ်သည် macOS၊ Windows နှင့် ဂရပ်ဖစ် Linux ဆက်ရှင်များကို ပံ့ပိုးပေးသည်။ ဗန်းမုဒ်သည် ဒက်ရှ်ဘုတ်ကို အလိုအလျောက် မဖွင့်ပါ။
 
-အောက်ပါလုပ်ဆောင်ချက်များအတွက် tray မီနူးကို အသုံးပြုပါ:
+ဤလုပ်ဆောင်ချက်များအတွက် ဗန်းမီနူးကို အသုံးပြုပါ-
 
-- Dashboard ကို ဖွင့်ရန်။
-- `/dashboard/logs` ကို ဖွင့်ရန်။
-- အလိုအလျောက်စတင်မှုကို ပြောင်းလဲရန်။
-- OmniRoute ကို ရပ်တန့်ရန်။
+- ဒက်ရှ်ဘုတ်ကိုဖွင့်ပါ။
+- `/dashboard/logs` ကိုဖွင့်ပါ။
+- အလိုအလျောက်စတင်ခြင်းကို ပြောင်းလဲပါ။
+- OmniRoute။
 
-`--tray` ကို အောက်ပါရွေးချယ်စရာများနှင့် တွဲဖက်မသုံးပါနှင့်:
+`--tray` ဤရွေးချယ်မှုများနှင့် မပေါင်းစပ်ပါနှင့်။
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-ဤမုဒ်များသည် မတူညီသော process ပိုင်ဆိုင်မှု လိုအပ်သည်။
+ဤမုဒ်များသည် မတူညီသော လုပ်ငန်းစဉ် ပိုင်ဆိုင်မှုကို လိုအပ်သည်။
 
-စက်ထဲသို့ နောက်တစ်ကြိမ် login ဝင်သည့်အခါ စတင်ရန် ဖွင့်ပါ:
+နောက်စက်ဝင်ရောက်မှုတွင် စတင်ခြင်းအား ဖွင့်ပါ-
 
 ```bash
 omniroute autostart enable
 ```
 
-အလိုအလျောက်စတင်မှုသည် macOS၊ Windows နှင့် ဂရပ်ဖစ် Linux session များတွင် tray မုဒ်ကို အသုံးပြုသည်။ မျက်နှာပြင်မဲ့ Linux သည် လက်ရှိ systemd အသုံးပြုသူဝန်ဆောင်မှုကို အသုံးပြုသည်။
+အလိုအလျောက်စတင်ခြင်းသည် macOS၊ Windows နှင့် ဂရပ်ဖစ် Linux စက်ရှင်များတွင် ဗန်းမုဒ်ကို အသုံးပြုသည်။ Headless Linux သည် ရှိပြီးသား systemd အသုံးပြုသူဝန်ဆောင်မှုကို အသုံးပြုသည်။
 
-Login ဝင်ချိန် စတင်မှုကို ပိတ်ပါ:
+အကောင့်ဝင်ချိန်တွင် စတင်ခြင်းကို ပိတ်ပါ
 
 ```bash
 omniroute autostart disable
 ```
 
-### ဖယ်ရှားခြင်း
+### ဖြုတ်နေသည်
 
-OmniRoute ကို မလိုအပ်တော့သည့်အခါ ရှင်းလင်းစွာဖယ်ရှားရန် အမြန် script နှစ်ခု ပံ့ပိုးထားသည်:
+OmniRoute မလိုအပ်တော့သည့်အခါ၊ ရှင်းလင်းဖယ်ရှားရန်အတွက် အမြန် script နှစ်ခုကို ကျွန်ုပ်တို့ ပံ့ပိုးပေးသည်-
 
-| Command                  | လုပ်ဆောင်ချက်                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | စနစ်အက်ပ်ကို ဖယ်ရှားသော်လည်း `~/.omniroute` ရှိ **သင့် DB နှင့် ဖွဲ့စည်းမှုများကို ထိန်းသိမ်းထားသည်**။ |
-| `npm run uninstall:full` | အက်ပ်ကို ဖယ်ရှားပြီး **ဖွဲ့စည်းမှုများ၊ သော့များနှင့် database အားလုံးကို အပြီးတိုင် ဖျက်ပစ်သည်**။     |
+| အမိန့်ပေးသည်။            | အက်ရှင်                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | စနစ်အက်ပ်ကို ဖယ်ရှားသော်လည်း၊** သင်၏ DB နှင့် configurations များကိုသိမ်းဆည်းထားသည်။** `~/.omniroute` တွင် |
+| `npm run uninstall:full` | အက်ပ် AND အပြီးတိုင် ဖယ်ရှားသည်။** ဖွဲ့စည်းမှုပုံစံများ၊ သော့များနှင့် ဒေတာဘေ့စ်အားလုံးကို ဖျက်ပါ။** .     |
 
-> မှတ်ချက်: ဤ command များကို လုပ်ဆောင်ရန် OmniRoute ပရောဂျက်ဖိုင်တွဲသို့ သွားပြီး (clone ပြုလုပ်ထားပါက) ၎င်းတို့ကို လုပ်ဆောင်ပါ။ သို့မဟုတ် global အဖြစ် ထည့်သွင်းထားပါက `npm uninstall -g omniroute` ကို ရိုးရှင်းစွာ လုပ်ဆောင်နိုင်သည်။
+> မှတ်ချက်- ဤအမိန့်များကို လုပ်ဆောင်ရန်၊ OmniRoute ပရောဂျက်ဖိုင်တွဲသို့ သွားပါ (၎င်းကို ကလိုလ်လုပ်ထားလျှင်) နှင့် ၎င်းတို့ကို လုပ်ဆောင်ပါ။ တနည်းအားဖြင့်၊ တစ်ကမ္ဘာလုံးတွင်ထည့်သွင်းပါက၊ သင်သည် `npm uninstall -g omniroute` ရိုးရှင်းစွာ run နိုင်သည်။
 
-### VPS ဖြန့်ကျက်တပ်ဆင်ခြင်း
+### VPS ဖြန့်ကျက်ခြင်း။
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -434,25 +434,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# သို့မဟုတ်: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 ဖြန့်ကျက်တပ်ဆင်ခြင်း (Memory နည်းပါးမှု)
+### PM2 ဖြန့်ကျက်မှု (မှတ်ဉာဏ်နည်း)
 
-RAM ကန့်သတ်ထားသော ဆာဗာများအတွက် memory limit ရွေးချယ်စရာကို အသုံးပြုပါ:
+RAM ကန့်သတ်ထားသောဆာဗာများအတွက်၊ မှတ်ဉာဏ်ကန့်သတ်ရွေးချယ်မှုကို အသုံးပြုပါ-
 
 ```bash
-# 512MB ကန့်သတ်ချက်ဖြင့် (မူလသတ်မှတ်ချက်)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# သို့မဟုတ် စိတ်ကြိုက် memory ကန့်သတ်ချက်ဖြင့်
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# သို့မဟုတ် ecosystem.config.js ကို အသုံးပြု၍
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` ကို ဖန်တီးပါ:
+`ecosystem.config.js` ဖန်တီးပါ
 
 ```javascript
 module.exports = {
@@ -477,24 +477,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Image တည်ဆောက်ပါ (မူလသတ်မှတ်ချက် = codex/claude/droid ကြိုတင်ထည့်သွင်းထားသော runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# သယ်ဆောင်အသုံးပြုနိုင်သော မုဒ် (အကြံပြုထားသည်)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI binary များပါဝင်သော host-integrated မုဒ်အတွက် ပင်မစာရွက်စာတမ်းများရှိ Docker ကဏ္ဍကို ကြည့်ပါ။
+CLI binaries ဖြင့် host-integrated mode အတွက်၊ main docs ရှိ Docker အပိုင်းကို ကြည့်ပါ။
 
-### Void Linux (xbps-src)
+### ပျက်ပြယ် Linux (xbps-src)
 
-Void Linux အသုံးပြုသူများသည် `xbps-src` ဖြတ်ကျော်ကွန်ပိုင်လုပ်ခြင်း မူဘောင်ကို အသုံးပြု၍ OmniRoute ကို မူရင်းစနစ်နှင့် ကိုက်ညီသည့် ပက်ကေ့ချ်အဖြစ် ဖန်တီးပြီး ထည့်သွင်းနိုင်သည်။ ၎င်းသည် လိုအပ်သော `better-sqlite3` မူရင်း bindings များနှင့်အတူ Node.js standalone build ကို အလိုအလျောက် ပြုလုပ်ပေးသည်။
+Void Linux အသုံးပြုသူများသည် `xbps-src` cross-compilation မူဘောင်ကို အသုံးပြု၍ OmniRoute မူရင်းအတိုင်း ထုပ်ပိုးပြီး ထည့်သွင်းနိုင်သည်။ ၎င်းသည် လိုအပ်သော `better-sqlite3` ဇာတိနှောင်ကြိုးများနှင့်အတူ Node.js သီးသန့်တည်ဆောက်မှုကို အလိုအလျောက်လုပ်ဆောင်ပေးသည်။
 
 <details>
-<summary><b>xbps-src template ကို ကြည့်ရန်</b></summary>
+<summary><b>xbps-src နမူနာပုံစံကို ကြည့်ပါ။</b></summary>
 
 ```bash
-# 'omniroute' အတွက် template ဖိုင်
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -515,7 +515,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp အတွက် ပစ်မှတ် CPU architecture ကို သတ်မှတ်ပါ
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -524,29 +524,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) မှီခိုပက်ကေ့ချ်အားလုံးကို ထည့်သွင်းပါ – scripts များကို ကျော်ပါ
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js standalone bundle ကို build လုပ်ပါ
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) static assets များကို standalone ထဲသို့ ကူးယူပါ
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 မူရင်း binding ကို compile လုပ်ပါ
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) compile လုပ်ထားသော binding ကို standalone bundle ထဲသို့ ထည့်ပါ
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) architecture အလိုက် သီးခြားဖြစ်သော sharp bundles များကို ဖယ်ရှားပါ
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js static analysis က ချန်လှပ်ထားသည့် pino runtime မှီခိုပက်ကေ့ချ်များကို ကူးယူပါ-
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -560,7 +560,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ထည့်သွင်းပြီးနောက် hook ကြောင့် အလွတ် Next.js app router လမ်းညွှန်များကို ဖယ်ရှားခြင်းမှ ကာကွယ်ပါ
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -586,43 +586,43 @@ post_install() {
 
 </details>
 
-### ပတ်ဝန်းကျင် ကိန်းရှင်များ
+### ပတ်ဝန်းကျင် အပြောင်းအလဲများ
 
-| Variable                                | Default                              | Description                                                                                                                                                       |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT လက်မှတ်ရေးထိုးခြင်းအတွက် လျှို့ဝှက်ချက် (**ထုတ်လုပ်ရေးပတ်ဝန်းကျင်တွင် ပြောင်းလဲပါ**)                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | ပထမဆုံး ဝင်ရောက်အသုံးပြုရန် စကားဝှက်                                                                                                                              |
-| `DATA_DIR`                              | `~/.omniroute`                       | ဒေတာလမ်းညွှန် (ဒေတာဘေ့စ်၊ အသုံးပြုမှု၊ မှတ်တမ်းများ)                                                                                                              |
-| `PORT`                                  | မူဘောင်၏ မူလသတ်မှတ်ချက်              | ဝန်ဆောင်မှု ပေါ့တ် (`20128` ကို နမူနာများတွင် အသုံးပြုထားသည်)                                                                                                     |
-| `HOSTNAME`                              | မူဘောင်၏ မူလသတ်မှတ်ချက်              | ချိတ်ဆက်မည့် ဟို့စ် (Docker တွင် မူလအတိုင်း `0.0.0.0`)                                                                                                            |
-| `NODE_ENV`                              | လည်ပတ်မှုပတ်ဝန်းကျင်၏ မူလသတ်မှတ်ချက် | ဖြန့်ကျက်အသုံးပြုရန် `production` ဟု သတ်မှတ်ပါ                                                                                                                    |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ဒက်ရှ်ဘုတ်တွင် ပြသပြီး ဆာဗာသို့လည်း ဖော်ထုတ်ပေးသည့် အများသုံး အခြေခံ URL (အမွေဆက်ခံထားသော `BASE_URL` ကို အစားထိုးသည်)                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Cloud စင့်ခ် အဆုံးမှတ်၏ အခြေခံ URL (အမွေဆက်ခံထားသော `CLOUD_URL` ကို အစားထိုးသည်)                                                                                  |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | ထုတ်လုပ်ထားသော API key များအတွက် HMAC လျှို့ဝှက်ချက်                                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` တွင် Bearer API key ကို မဖြစ်မနေ အသုံးပြုစေသည်                                                                                                            |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | အထောက်အထားစိစစ်ပြီးသော ဒက်ရှ်ဘုတ်အသုံးပြုသူများအား သိမ်းဆည်းထားသည့် API key တန်ဖိုးအပြည့်အစုံကို လိုအပ်ချိန်တွင် ဖော်ပြခွင့်ပြုသည်                                |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ကက်ရှ်လုပ်ထားသော Provider Limits ဒေတာအတွက် ဆာဗာဘက်မှ ပြန်လည်စစ်ဆေးသည့် ကြိမ်နှုန်း၊ UI ပြန်လည်စစ်ဆေးရေး ခလုတ်များက ကိုယ်တိုင် စင့်ခ်လုပ်ခြင်းကို ဆက်လက်စတင်ပေးသည် |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ရေးသားခြင်း/တင်သွင်းခြင်း/ပြန်လည်ရယူခြင်းမပြုမီ အလိုအလျောက် SQLite snapshot များဖန်တီးခြင်းကို ပိတ်သည်၊ ကိုယ်တိုင် အရန်သိမ်းခြင်းမှာ ဆက်လက်အလုပ်လုပ်သည်           |
-| `APP_LOG_TO_FILE`                       | `true`                               | အပလီကေးရှင်းနှင့် စာရင်းစစ်မှတ်တမ်း ရလဒ်များကို ဒစ်ခ်သို့ ရေးသားခြင်း ဖွင့်ပေးသည်                                                                                 |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` အထောက်အထားစိစစ်ရေး cookie ကို မဖြစ်မနေ အသုံးပြုစေသည် (HTTPS reverse proxy နောက်ကွယ်တွင်)                                                                 |
-| `CLOUDFLARED_BIN`                       | မသတ်မှတ်ထားပါ                        | စီမံထိန်းချုပ်ထားသော ဒေါင်းလုဒ်အစား ရှိပြီးသား `cloudflared` binary ကို အသုံးပြုသည်                                                                               |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | စီမံထိန်းချုပ်ထားသော Quick Tunnels အတွက် ပို့ဆောင်ရေး ပရိုတိုကော (`http2`၊ `quic` သို့မဟုတ် `auto`)                                                               |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js heap ကန့်သတ်ချက်ကို MB ဖြင့် သတ်မှတ်သည်                                                                                                                   |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | prompt cache ထည့်သွင်းချက် အများဆုံးအရေအတွက်                                                                                                                      |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | semantic cache ထည့်သွင်းချက် အများဆုံးအရေအတွက်                                                                                                                    |
+| ပြောင်းလဲနိုင်သော                       | ပုံသေ                     | ဖော်ပြချက်                                                                                                                                                                 |
+| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(အလိုအလျောက်ထုတ်ပေးသည်)_ | JWT လက်မှတ်ထိုးခြင်း လျှို့ဝှက် — ပထမအပြေးတွင် အလိုအလျောက်ထုတ်ပေးပြီး `server.env` တွင် ဆက်လက်တည်ရှိနေပါသည်။ ဒေတာလမ်းညွှန်သည် ပေါ်ပင်ဖြစ်သောအခါ ၎င်းကို အတိအလင်းသတ်မှတ်ပါ။ |
+| `INITIAL_PASSWORD`                      | _(မသတ်မှတ်ရသေး)_          | ပထမဦးစွာ login စကားဝှက်။ npm/source ထည့်သွင်းမှုများကို `CHANGEME` ဖြင့် စတင်သည်- ၎င်းကို အစားထိုးပါ။ Unset: စတင်အသုံးပြုခြင်း wizard                                      |
+| `DATA_DIR`                              | `~/.omniroute`            | ဒေတာလမ်းညွှန် (db၊ အသုံးပြုမှု၊ မှတ်တမ်းများ)                                                                                                                              |
+| `PORT`                                  | မူဘောင်ပုံစံ              | ဝန်ဆောင်မှုဆိပ်ကမ်း (ဥပမာတွင်`20128` )                                                                                                                                     |
+| `HOSTNAME`                              | မူဘောင်ပုံစံ              | host ကို စည်းပါ (Docker မူရင်းမှာ `0.0.0.0`)                                                                                                                               |
+| `NODE_ENV`                              | runtime မူရင်း            | ဖြန့်ကျက်ရန်အတွက် `production` သတ်မှတ်ပါ။                                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | အများသူငှာ အခြေခံ URL ဒက်ရှ်ဘုတ်တွင် ပေါ်လာပြီး ဆာဗာနှင့် ထိတွေ့သည် (အမွေအနှစ် `BASE_URL` ကို အစားထိုးသည်)                                                                 |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud စင့်ခ်လုပ်ခြင်း အဆုံးမှတ်အခြေခံ URL (အမွေအနှစ် `CLOUD_URL` ကို အစားထိုးသည်)                                                                                          |
+| `API_KEY_SECRET`                        | _(အလိုအလျောက်ထုတ်ပေးသည်)_ | ထုတ်လုပ်လိုက်တဲ့ API သော့များအတွက်HMAC လျှို့ဝှက်ချက် — ပထမဆုံး run တွင် အလိုအလျောက်ထုတ်ပေးပြီး `server.env` သို့ ဆက်လက်တည်ရှိနေသည်                                        |
+| `REQUIRE_API_KEY`                       | `false`                   | `/v1/*` တွင် Bearer API ကီးကို တွန်းအားပေးပါ။                                                                                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | စစ်မှန်သော ဒက်ရှ်ဘုတ်အသုံးပြုသူများကို ဝယ်လိုအားတွင် သိမ်းဆည်းထားသော API သော့တန်ဖိုးများကို အပြည့်အစုံဖော်ပြခွင့်ပြုပါ။                                                    |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | ကက်ရှ်လုပ်ထားသော ပံ့ပိုးပေးသူ ကန့်သတ်ဒေတာအတွက် ဆာဗာ-ဘေးမှ ပြန်လည်ဆန်းသစ်သည့် အပိုင်း၊ UI refresh ခလုတ်များသည် လူကိုယ်တိုင် စင့်ခ်လုပ်ခြင်းကို အစပျိုးဆဲဖြစ်သည်။            |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | writes/import/restore မတိုင်မီ အလိုအလျောက် SQLite လျှပ်တစ်ပြက်ရိုက်ချက်များကို ပိတ်ပါ။ လူကိုယ်တိုင် မိတ္တူကူးခြင်းများသည် အလုပ်မဖြစ်သေးပါ။                                 |
+| `APP_LOG_TO_FILE`                       | `true`                    | အပလီကေးရှင်းကိုဖွင့်ပြီး စာရင်းစစ်မှတ်တမ်းအထွက်ကို ဒစ်ခ်သို့ဖွင့်ပါ။                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | `Secure` auth cookie ကို အတင်းအကျပ် ( HTTPS ပြောင်းပြန် proxy နောက်တွင်)                                                                                                   |
+| `CLOUDFLARED_BIN`                       | သတ်မှတ်မထားပါ။            | စီမံခန့်ခွဲထားသောဒေါင်းလုဒ်အစား ရှိပြီးသား `cloudflared` ဒွိဒွိတစ်ခုကို သုံးပါ။                                                                                            |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | စီမံခန့်ခွဲထားသော အမြန်လိုဏ်ခေါင်းများ (`http2`၊ `quic`၊ သို့မဟုတ် `auto`)                                                                                                 |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js heap ကန့်သတ်ချက် MB                                                                                                                                                |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | အမြင့်ဆုံးအချက်ပြ ကက်ရှ် ထည့်သွင်းမှုများ                                                                                                                                  |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | အများဆုံး semantic cache ထည့်သွင်းမှုများ                                                                                                                                  |
 
-ပတ်ဝန်းကျင် variable အပြည့်အစုံကို ကိုးကားရန် [README](../README.md) ကို ကြည့်ပါ။
+ပတ်ဝန်းကျင် ပြောင်းလဲနိုင်သော အကိုးအကား အပြည့်အစုံအတွက် [README](../README.md) ကို ကြည့်ပါ။
 
 ---
 
 ## 📊 ရရှိနိုင်သော မော်ဒယ်များ
 
 <details>
-<summary><b>ရရှိနိုင်သော မော်ဒယ်များအားလုံးကို ကြည့်ရန်</b></summary>
+<summary><b>ရရှိနိုင်သော မော်ဒယ်အားလုံးကို ကြည့်ရန်</b></summary>
 
-> အောက်ပါစာရင်းကို v3.8.0 အတွက် `open-sse/config/providerRegistry.ts` မှ စုစည်းထားခြင်းဖြစ်သည်။ Cloud catalog များ (Gemini၊ OpenRouter စသည်) ကို အလိုအလျောက် တစ်ပြိုင်တည်းပြုလုပ်ထားသည် — လက်ရှိ catalog အပြည့်အစုံကို ကြည့်ရန် **Dashboard → Providers → [provider] → Available Models** ကို ဖွင့်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ပါ။
+> အောက်ပါစာရင်းကို v3.8.0 အတွက် `open-sse/config/providerRegistry.ts` မှ ရွေးချယ်စုစည်းထားခြင်းဖြစ်သည်။ Cloud catalog များ (Gemini၊ OpenRouter စသည်) ကို အလိုအလျောက် synchronize လုပ်ထားသည် — လက်ရှိ live catalog အပြည့်အစုံအတွက် **Dashboard → Providers → [provider] → Available Models** ကိုဖွင့်ပါ သို့မဟုတ် `GET /api/models/catalog` ကိုခေါ်ပါ။
 >
-> Provider တစ်ခု၏ built-in စာရင်းသည် နောက်ဆုံး upstream စာရင်းနှင့် ကွာဟနေပါက၊ ထိုစာမျက်နှာရှိ **Import from /models** ကို အသုံးပြုပါ (သို့မဟုတ် **Auto-Sync** ကို ဖွင့်ပါ)။ ထိုသို့ပြုလုပ်ခြင်းဖြင့် လက်ရှိ upstream catalog ကို ရယူနိုင်သည်။ ၎င်းကို LLM7.io (`gemini-3.1-flash-lite`) နှင့် UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) အတွက် v3.8.50 တွင် စစ်ဆေးအတည်ပြုထားသည်။ တူညီသော စမ်းသပ်မှုအတွင်း Pollinations ၏ အမည်မဖော်ပြသော အသုံးပြုခွင့်မှာ upstream ကန့်သတ်ချက်အတွင်း ဆက်လက်ရှိနေခဲ့သည်။
+> Provider တစ်ခု၏ built-in list သည် နောက်ကျကျန်နေပါက ထိုစာမျက်နှာရှိ **Import from /models** ကိုအသုံးပြုပါ (သို့မဟုတ် **Auto-Sync** ကိုဖွင့်ပါ)၊ ထို့နောက် live upstream catalog ကို ရယူပါ။ ၎င်းကို v3.8.50 တွင် LLM7.io (`gemini-3.1-flash-lite`) နှင့် UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) အတွက် အတည်ပြုထားသည်။ တူညီသော စမ်းသပ်မှုအတွင်း Pollinations ၏ anonymous access သည် upstream ကန့်သတ်ချက်အောက်တွင် ဆက်လက်ရှိနေခဲ့သည်။
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -630,7 +630,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — အခမဲ့ OAuth: **Dashboard → Providers → Kiro → Available Models** အောက်တွင် ပြသထားသော လက်ရှိ catalog ကို အသုံးပြုပါ။ ရရှိနိုင်မှုသည် အကောင့်နှင့် အစီအစဉ်ပေါ် မူတည်သည်။
+**Kiro (`kr/`)** — အခမဲ့ OAuth: **Dashboard → Providers → Kiro → Available Models** အောက်တွင် ပြသထားသော live catalog ကို အသုံးပြုပါ။ ရရှိနိုင်မှုသည် account နှင့် plan ပေါ်မူတည်သည်။
 
 **Qoder (`if/`)** — အခမဲ့ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -638,17 +638,17 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — တစ်လလျှင် $9 သတ်မှတ်နှုန်း သို့မဟုတ် အသုံးပြုမှုအလိုက်: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — တစ်လလျှင် $9 flat သို့မဟုတ် အသုံးပြုမှုအလိုက်: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — အလွန်မြန်ဆန်သော: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok မူရင်း: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — မူရင်း Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU တွင် hosting ပြုလုပ်ထားသော: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU တွင် host ပြုထားသော: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ရှာဖွေမှုဖြင့် ဖြည့်စွက်ထားသော: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Search ဖြင့် အထောက်အကူပြုထားသော: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (အခမဲ့), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -658,17 +658,17 @@ post_install() {
 
 **Cohere (`cohere/`)** — RAG ကို အဓိကထားသော: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — လုပ်ငန်းသုံး: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — လုပ်ငန်းသုံး: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google မှ API key တစ်ခုချင်းစီအလိုက် တိုက်ရိုက် တစ်ပြိုင်တည်းပြုလုပ်သည် — static စာရင်းမရှိပါ။ **Dashboard → Providers** တွင် key တစ်ခု ချိတ်ဆက်ပြီး **Available Models** ကို အသုံးပြုကာ လက်ရှိ catalog ကို ထည့်သွင်းပါ (ဥပမာ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)။
+**Gemini (Google Cloud `gemini/`)**: Google မှ API key တစ်ခုချင်းစီအလိုက် live အနေဖြင့် synchronize လုပ်ထားသည် — static list မရှိပါ။ **Dashboard → Providers** တွင် key တစ်ခုချိတ်ဆက်ပြီး **Available Models** ကိုအသုံးပြု၍ လက်ရှိ catalog ကို import လုပ်ပါ (ဥပမာ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)။
 
-**အခြား ကိုက်ညီသော provider များ** (ရွေးချယ်ထားသည်): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` မှတစ်ဆင့်), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`။ တစ်ခုချင်းစီသည် `providerRegistry.ts` တွင် ကိုယ်ပိုင် မော်ဒယ်စာရင်းကို ထိန်းသိမ်းထားပြီး provider က `/models` endpoint ကို ဖော်ပြထားပါက အလိုအလျောက် တစ်ပြိုင်တည်းပြုလုပ်နိုင်သည်။
+**အခြား ကိုက်ညီသော provider များ** (ရွေးချယ်ထားသည်): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` မှတစ်ဆင့်), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`။ တစ်ခုချင်းစီသည် `providerRegistry.ts` တွင် ကိုယ်ပိုင် model list ကို ထိန်းသိမ်းထားပြီး provider က `/models` endpoint ကို ဖော်ပြပေးပါက အလိုအလျောက် synchronize လုပ်နိုင်သည်။
 
-**မော်ဒယ် ID များအကြောင်း မှတ်ချက်:** OmniRoute သည် provider-native ID များကို အသုံးပြုသည် (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)။ အချို့ ID များတွင် dotted version များ ပါဝင်သည်မှာ upstream API က ထိုပုံစံအတိုင်း မျှော်မှန်းထားသောကြောင့် ဖြစ်သည်။ မော်ဒယ်တစ်ခုကို အထက်ပါစာရင်းတွင် မတွေ့ပါက ရရှိနိုင်မှုကို အတည်ပြုရန် `omniroute models --search <term>` ကို run ပြုလုပ်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ပါ။
+**Model ID များအကြောင်း မှတ်ချက်:** OmniRoute သည် provider-native ID များကို အသုံးပြုသည် (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)။ အချို့ ID များတွင် dotted version များ ပါဝင်သည်၊ အကြောင်းမှာ upstream API က ထိုပုံစံအတိုင်း မျှော်လင့်ထားသောကြောင့် ဖြစ်သည်။ မော်ဒယ်တစ်ခုကို အထက်ပါစာရင်းတွင် မတွေ့ပါက ရရှိနိုင်မှုကို အတည်ပြုရန် `omniroute models --search <term>` ကို run လုပ်ပါ သို့မဟုတ် `GET /api/models/catalog` ကိုခေါ်ပါ။
 
 </details>
 

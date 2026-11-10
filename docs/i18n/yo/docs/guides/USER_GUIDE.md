@@ -352,82 +352,82 @@ Mọ́dẹ́lì: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Ìmúṣiṣẹ́
+## 🚀 Gbigbe
 
-### Fífi npm sí gbogbo ètò (A Dámọ̀ràn)
+### Fi sori ẹrọ npm agbaye (Ti ṣeduro)
 
 ```bash
 npm install -g omniroute
 
-# Ṣẹ̀dá àpò ìṣètò
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ṣẹ̀dá fáìlì .env (wo .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Bẹ̀rẹ̀ olupin
+# Start server
 omniroute
-# Tàbí pẹ̀lú port àkànṣe:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI máa ń kojọpọ̀ `.env` láti `~/.omniroute/.env` tàbí `./.env` láìfọwọ́yí.
+CLI naa n gbe `.env` laifọwọyi lati `~/.omniroute/.env` tabi `./.env`. A `./.env` ninu iwe ilana iṣẹ le ṣeto atokọ iyọọda kukuru ti awọn bọtini (awọn ibudo, `REQUIRE_API_KEY`, agbegbe ati awọn eto awọ); fi ohun gbogbo miiran sinu `~/.omniroute/.env`. Wo [awọn adehun ifilọlẹ CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Ipò tray
+### Ipo atẹ
 
-Bẹ̀rẹ̀ OmniRoute nínú tray ètò:
+Bẹrẹ OmniRoute ninu atẹ eto:
 
 ```bash
 omniroute serve --tray
 ```
 
-Àṣẹ náà máa padà lẹ́yìn tí olupin àti tray bá ti ṣetán.
+Aṣẹ naa pada lẹhin olupin ati atẹ ti ṣetan.
 
-Olupin náà máa tẹ̀síwájú láìsí terminal.
+Olupin naa tẹsiwaju laisi ebute.
 
-Ipò tray ń ṣe àtìlẹ́yìn fún macOS, Windows, àti àwọn session Linux aláwòrán. Ipò tray kì í ṣí dashboard láìfọwọ́yí.
+Ipo atẹ ṣe atilẹyin macOS, Windows, ati awọn akoko Linux ayaworan. Ipo atẹ ko ṣii dasibodu laifọwọyi.
 
-Lo àkójọ aṣàyàn tray fún àwọn ìgbésẹ̀ wọ̀nyí:
+Lo akojọ aṣayan atẹ fun awọn iṣe wọnyi:
 
-- Ṣí dashboard.
-- Ṣí `/dashboard/logs`.
-- Yí ìbẹ̀rẹ̀-láìfọwọ́yí padà.
-- Dá OmniRoute dúró.
+- Ṣii dasibodu naa.
+- Ṣii `/dashboard/logs`.
+- Yi pada laifọwọyi ibere.
+- Duro OmniRoute.
 
-Má ṣe darapọ̀ `--tray` mọ́ àwọn aṣàyàn wọ̀nyí:
+Maṣe dapọ `--tray` pẹlu awọn aṣayan wọnyi:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Àwọn ipò wọ̀nyí nílò ìṣàkóso process tó yàtọ̀.
+Awọn ipo wọnyi nilo nini ilana ti o yatọ.
 
-Mú ìbẹ̀rẹ̀ ṣiṣẹ́ ní ìwọlé ẹ̀rọ tó kàn:
+Mu ibẹrẹ ṣiṣẹ ni wiwọle ẹrọ atẹle:
 
 ```bash
 omniroute autostart enable
 ```
 
-Ìbẹ̀rẹ̀-láìfọwọ́yí máa ń lo ipò tray lórí macOS, Windows, àti àwọn session Linux aláwòrán. Linux tí kò ní ìfihàn máa ń lo iṣẹ́ onílò systemd tó ti wà tẹ́lẹ̀.
+Ibẹrẹ aifọwọyi nlo ipo atẹ lori macOS, Windows, ati awọn akoko Linux ayaworan. Linux ti ko ni ori nlo iṣẹ olumulo ti o wa tẹlẹ.
 
-Mú ìbẹ̀rẹ̀ nígbà ìwọlé kúrò:
+Pa ibẹrẹ ni wiwọle:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Yíyọ Kúrò
+### Yiyokuro
 
-Nígbà tí o kò bá nílò OmniRoute mọ́, a pèsè script kíákíá méjì fún yíyọ ọ́ kúrò lọ́nà mímọ́:
+Nigbati o ko nilo OmniRoute mọ, a pese awọn iwe afọwọkọ iyara meji fun yiyọkuro mimọ:
 
-| Àṣẹ                      | Ìgbésẹ̀                                                                           |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Yọ app ètò náà kúrò ṣùgbọ́n ó **pa DB àti àwọn ìṣètò rẹ mọ́** sínú `~/.omniroute`. |
-| `npm run uninstall:full` | Yọ app náà kúrò, Ó SÌ **pa gbogbo ìṣètò, kọ́kọ́rọ́, àti database rẹ́ pátápátá**.     |
+| Òfin                     | Iṣe                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | Yọ awọn eto app sugbon** ntọju DB rẹ ati awọn atunto** ninu `~/.omniroute`.          |
+| `npm run uninstall:full` | Yọ AND app kuro patapata** nu gbogbo awọn atunto, awọn bọtini, ati awọn database** . |
 
-> Àkíyèsí: Láti ṣiṣẹ́ àwọn àṣẹ wọ̀nyí, lọ sí àpò iṣẹ́-àkànṣe OmniRoute (tí o bá ṣe clone rẹ̀), kí o sì ṣiṣẹ́ wọn. Ní ọ̀nà míì, tí o bá fi sí gbogbo ètò, o lè ṣiṣẹ́ `npm uninstall -g omniroute` nìkan.
+> Akiyesi: Lati ṣiṣe awọn aṣẹ wọnyi, lilö kiri si folda ise agbese OmniRoute (ti o ba ṣe cloned) ati ṣiṣe wọn. Ni omiiran, ti o ba fi sori ẹrọ agbaye, o le jiroro ni ṣiṣe `npm uninstall -g omniroute`.
 
-### Ìmúṣiṣẹ́ VPS
+### VPS Gbigbe
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -443,25 +443,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Tàbí: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Ìmúṣiṣẹ́ PM2 (Memory Kékeré)
+### Gbigbe PM2 (Iranti Kekere)
 
-Fún àwọn olupin tó ní RAM tó ní ààlà, lo aṣàyàn ààlà memory:
+Fun awọn olupin ti o ni opin RAM, lo aṣayan opin iranti:
 
 ```bash
-# Pẹ̀lú ààlà 512MB (àkọ́ṣe)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Tàbí pẹ̀lú ààlà memory àkànṣe
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Tàbí nípa lílo ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Ṣẹ̀dá `ecosystem.config.js`:
+Ṣẹda `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -486,30 +486,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Kọ image (àkọ́ṣe = runner-cli pẹ̀lú codex/claude/droid tí a ti fi sí tẹ́lẹ̀)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Ipò tó ṣeé gbé kiri (a dámọ̀ràn)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Fún ipò tó darapọ̀ mọ́ host pẹ̀lú àwọn binary CLI, wo apá Docker nínú docs pàtàkì.
+Fun ipo iṣọpọ-ogun pẹlu awọn alakomeji CLI, wo apakan Docker ninu awọn docs akọkọ.
 
-### Void Linux (xbps-src)
+### Linux ofo (xbps-src)
 
-Àwọn olumulo Void Linux lè ṣe àkójọpọ̀ package OmniRoute kí wọ́n sì fi sí ẹ̀rọ wọn lọ́nà abinibi nípa lílo ìlànà àkójọpọ̀ agbelebu `xbps-src`. Èyí ń ṣe àkójọpọ̀ standalone Node.js àti àwọn binding abinibi `better-sqlite3` tí a nílò láìfọwọ́ṣe.
+Awọn olumulo Linux ofo le ṣajọ ati fi sori ẹrọ OmniRoute ni abinibi nipa lilo ilana akojọpọ-agbelebu `xbps-src`. Eyi ṣe adaṣe adaṣe imurasilẹ Node.js pẹlu awọn asopọ abinibi `better-sqlite3` ti o nilo.
 
 <details>
-<summary><b>Wo template xbps-src</b></summary>
+<summary><b>Wo awoṣe xbps-src</b></summary>
 
 ```bash
-# Fáìlì template fún 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Ẹnu-ọ̀nà AI àgbáyé pẹ̀lú ìdarí ọlọ́gbọ́n fún ọ̀pọ̀ olùpèsè LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -524,7 +524,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Ṣe ìdánimọ̀ faaji CPU àfojúsùn fún node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -533,29 +533,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Fi gbogbo deps sílẹ̀ – fo àwọn script
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Kọ́ bundle standalone Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Da àwọn ohun èlò static sínú standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Ṣàkójọpọ̀ binding abinibi better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Fi binding tí a ṣàkójọpọ̀ sínú bundle standalone
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Yọ àwọn bundle sharp tí ó jẹ́ ti faaji pàtó kúrò
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Da àwọn deps runtime pino tí ìṣàyẹ̀wò static Next.js kò fi sí:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -569,7 +569,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Dènà kí hook lẹ́yìn ìfiṣílẹ̀ má ba à yọ àwọn directory app router Next.js tí ó ṣófo
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -595,43 +595,43 @@ post_install() {
 
 </details>
 
-### Àwọn Àyípadà Àyíká
+### Awọn iyipada Ayika
 
-| Àyípadà                                 | Àkọ́ṣe                                | Àpèjúwe                                                                                                                               |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Àṣírí ìfọwọ́sí JWT (**yí i padà ní ìṣelọpọ**)                                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Ọ̀rọ̀ aṣínà fún ìwọlé àkọ́kọ́                                                                                                             |
-| `DATA_DIR`                              | `~/.omniroute`                       | Àpò-ọ̀nà dátà (db, lílò, àwọn àkọsílẹ̀)                                                                                                 |
-| `PORT`                                  | àkọ́ṣe framework                      | Port iṣẹ́ (`20128` nínú àwọn àpẹẹrẹ)                                                                                                   |
-| `HOSTNAME`                              | àkọ́ṣe framework                      | Host ìsopọ̀ (Docker máa ń lo `0.0.0.0` gẹ́gẹ́ bí àkọ́ṣe)                                                                                  |
-| `NODE_ENV`                              | àkọ́ṣe runtime                        | Ṣètò sí `production` fún ìmúṣiṣẹ́                                                                                                      |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL ìpìlẹ̀ gbogbogbò tí a fi hàn sí dashboard tí server sì lè ráyè sí (ó rọ́pò `BASE_URL` àtijọ́)                                        |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL ìpìlẹ̀ endpoint fún ìṣiṣẹ́pọ̀ cloud (ó rọ́pò `CLOUD_URL` àtijọ́)                                                                       |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Àṣírí HMAC fún àwọn kọ́kọ́rọ́ API tí a ṣẹ̀dá                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Fi ipa mú lílo kọ́kọ́rọ́ API Bearer lórí `/v1/*`                                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Gba àwọn olùlò dashboard tí a ti jẹ́rìí sí láyè láti fi gbogbo iye kọ́kọ́rọ́ API tí a tọ́jú hàn nígbà ìbéèrè                               |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Àkókò ìmúdójúìwọ̀n ní ẹ̀gbẹ́ server fún dátà Provider Limits tí a fi pamọ́ sínú cache; àwọn bọ́tìnì ìmúdójúìwọ̀n UI ṣì ń fa ìṣiṣẹ́pọ̀ afọwọ́ṣe |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Pa àwọn snapshot SQLite aládàáṣiṣẹ́ ṣáájú kíkọ/import/restore; àwọn backup afọwọ́ṣe ṣì ń ṣiṣẹ́                                           |
-| `APP_LOG_TO_FILE`                       | `true`                               | Mú àbájáde àkọsílẹ̀ ohun èlò àti àyẹ̀wò lọ sí disk                                                                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Fi ipa mú cookie ìjẹ́rìí `Secure` (lẹ́yìn HTTPS reverse proxy)                                                                          |
-| `CLOUDFLARED_BIN`                       | kò ṣètò                              | Lo binary `cloudflared` tó ti wà dípò gbígbàsílẹ̀ tí a ń ṣàkóso                                                                        |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Ọ̀nà ìgbékalẹ̀ fún àwọn Quick Tunnels tí a ń ṣàkóso (`http2`, `quic`, tàbí `auto`)                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Òpin heap Node.js ní MB                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Iye tó pọ̀ jù fún àwọn àkọọ́lẹ̀ prompt cache                                                                                             |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Iye tó pọ̀ jù fún àwọn àkọọ́lẹ̀ semantic cache                                                                                           |
+| Ayípadà                                 | Aiyipada                 | Apejuwe                                                                                                                                   |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ti ipilẹṣẹ laifọwọyi)_ | JWT wíwọlé ìkọ̀kọ̀ — laifọwọyi ti ipilẹṣẹ lori ṣiṣe akọkọ ati tẹsiwaju si `server.env`; ṣeto ni kedere nigbati awọn data liana ni ephemeral |
+| `INITIAL_PASSWORD`                      | _(a ko ṣeto)_            | Ọrọ igbaniwọle akọkọ. awọn fifi sori npm/source bẹrẹ pẹlu `CHANGEME`: rọpo rẹ. Unset: onboarding oso                                      |
+| `DATA_DIR`                              | `~/.omniroute`           | Itọsọna data (db, lilo, awọn akọọlẹ)                                                                                                      |
+| `PORT`                                  | aiyipada ilana           | Ibudo iṣẹ (`20128` ninu awọn apẹẹrẹ)                                                                                                      |
+| `HOSTNAME`                              | aiyipada ilana           | Di agbalejo (awọn aiyipada Docker si `0.0.0.0`)                                                                                           |
+| `NODE_ENV`                              | aiyipada asiko isise     | Ṣeto `production` fun ransogun                                                                                                            |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | URL ipilẹ ti gbogbo eniyan farahan si dasibodu ati fifihan si olupin naa (rọpo `BASE_URL` julọ)                                           |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Ipilẹṣẹ ìsiṣẹpọ awọsanma URL (rọpo ogún `CLOUD_URL`)                                                                                      |
+| `API_KEY_SECRET`                        | _(ti ipilẹṣẹ laifọwọyi)_ | Aṣiri HMAC fun awọn bọtini API ti ipilẹṣẹ — ti ipilẹṣẹ laifọwọyi ni ṣiṣe akọkọ ati tẹsiwaju si `server.env`                               |
+| `REQUIRE_API_KEY`                       | `false`                  | Fi agbara mu Bọtini API Bearer lori `/v1/*`                                                                                               |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Gba awọn olumulo dasibodu ti o ni idaniloju lati ṣafihan awọn iye bọtini API ti o fipamọ ni kikun lori ibeere                             |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | cadence isọdọtun ẹgbẹ olupin fun data Awọn opin Olupese ti a fipamọ; awọn bọtini isọdọtun UI ṣi nfa amuṣiṣẹpọ afọwọṣe                     |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Pa a laifọwọyi SQLite snapshots ṣaaju ki o writes/import/restore; Afowoyi backups si tun ṣiṣẹ                                             |
+| `APP_LOG_TO_FILE`                       | `true`                   | Mu ohun elo ṣiṣẹ ati iṣẹjade iwe ayẹwo si disk                                                                                            |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Fi ipa mu kuki `Secure` auth (lẹhin aṣoju yiyipada HTTPS )                                                                                |
+| `CLOUDFLARED_BIN`                       | unset                    | Lo alakomeji `cloudflared` ti o wa tẹlẹ dipo igbasilẹ iṣakoso                                                                             |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Gbigbe fun Awọn Tunnel Iyara ti a ṣakoso (`http2`, `quic`, tabi `auto`)                                                                   |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js okiti iye to ni MB                                                                                                                |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Awọn titẹ sii kaṣe kiakia ti o pọju                                                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Awọn titẹ sii kaṣe atunmọ to pọju                                                                                                         |
 
-Fún àlàyé kíkún nípa àwọn àyípadà ayíká, wo [README](../README.md).
+Fun itọkasi iyipada ayika ni kikun, wo [README](../README.md).
 
 ---
 
-## 📊 Àwọn Módẹ́lì Tó Wà
+## 📊 Àwọn Àwòṣe Tí Wà
 
 <details>
-<summary><b>Wo gbogbo àwọn módẹ́lì tó wà</b></summary>
+<summary><b>Wo gbogbo àwọn àwòṣe tó wà</b></summary>
 
-> Àtòjọ tó wà ní isalẹ ni a yan láti inú `open-sse/config/providerRegistry.ts` fún v3.8.0. Àwọn katalogi inú awọ̀n (Gemini, OpenRouter, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) ni a ń múṣiṣẹ́pọ̀ lọ́nà aláìdáwọ́dúró — fún katalogi alààyè kíkún, ṣí **Dashboard → Providers → [provider] → Available Models** tàbí pè `GET /api/models/catalog`.
+> Àtòkọ tó wà nísàlẹ̀ ni a yan láti inú `open-sse/config/providerRegistry.ts` fún v3.8.0. Àwọn katalogi awọ̀nà (Gemini, OpenRouter, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) ni a ń múṣiṣẹ́pọ̀ ní ìmúdàgba — fún katalogi alààyè kíkún, ṣí **Dashboard → Providers → [provider] → Available Models** tàbí pe `GET /api/models/catalog`.
 >
-> Bí àtòjọ tí a ṣe sínú provider kan bá ti yà, lo **Import from /models** lórí ojú-ìwé yẹn (tàbí mú **Auto-Sync** ṣiṣẹ́) láti fa katalogi alààyè upstream wọlé. A ṣàyẹ̀wò èyí nínú v3.8.50 fún LLM7.io (`gemini-3.1-flash-lite`) àti UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ìwọlé aláìní orúkọ Pollinations ṣì ní ààlà upstream nígbà ìdánwò kan náà.
+> Bí àtòkọ tí a ṣe sínú pẹ̀lú olùpèsè bá ti yapa, lo **Import from /models** lórí ojú-ìwé yẹn (tàbí mú **Auto-Sync** ṣiṣẹ́) láti fa katalogi gíga alààyè wá. A fìdí èyí múlẹ̀ nínú v3.8.50 fún LLM7.io (`gemini-3.1-flash-lite`) àti UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ìráyè aláìlórúkọ Pollinations ṣì ní ààlà látọwọ́ olùpèsè gíga nígbà ìdánwò kan náà.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -639,7 +639,7 @@ Fún àlàyé kíkún nípa àwọn àyípadà ayíká, wo [README](../README.md
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth Ọ̀FẸ́: lo katalogi alààyè tí a fihàn lábẹ́ **Dashboard → Providers → Kiro → Available Models**. Ìwàlérí rẹ̀ dá lórí àkáǹtì àti ètò rẹ.
+**Kiro (`kr/`)** — OAuth Ọ̀FẸ́: lo katalogi alààyè tí a fi hàn lábẹ́ **Dashboard → Providers → Kiro → Available Models**. Àyẹ̀wò bóyá ó wà dá lórí àkọọ́lẹ̀ àti ètò.
 
 **Qoder (`if/`)** — OAuth Ọ̀FẸ́: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -647,37 +647,37 @@ Fún àlàyé kíkún nípa àwọn àyípadà ayíká, wo [README](../README.md
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo ní ìye pẹlẹbẹ tàbí gẹ́gẹ́ bí ìlò: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/osù tàbí fún ìlò kọ̀ọ̀kan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — Kọ́kọ́rọ́ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Bọtìnì API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Yára púpọ̀: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Yíyára gíga: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok abinibi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Àwọn tí a gbàlejò ní EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Tí a gbàlejò ní EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Àwárí tí a fikún sí: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Tí a fi ìwádìí kún un: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Orísun-ìmọ̀: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ọ̀fẹ́), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Ìfẹnukò tó yára: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Ìṣirò ìyára: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — Ìwọ̀n wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Fókusì RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Tí a dojú kọ́ sí RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Fún ilé-iṣẹ́: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Fún ilé-iṣẹ́: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: A ń múṣiṣẹ́pọ̀ rẹ̀ lọ́nà alààyè fún kọ́kọ́rọ́ API kọ̀ọ̀kan láti Google — kò sí àtòjọ tó dúró ṣinṣin. So kọ́kọ́rọ́ kan pọ̀ nínú **Dashboard → Providers**, lẹ́yìn náà lo **Available Models** láti kó katalogi tó wà lọ́wọ́lọ́wọ́ wọlé (fún àpẹẹrẹ, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: A ń múṣiṣẹ́pọ̀ rẹ̀ ní ìmúdàgba fún bọtìnì API kọ̀ọ̀kan láti Google — kò sí àtòkọ tí a ti ṣètò tẹ́lẹ̀. So bọtìnì kan pọ̀ nínú **Dashboard → Providers**, lẹ́yìn náà lo **Available Models** láti kó katalogi tó wà lọ́wọ́ wọlé (fún àpẹẹrẹ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Àwọn olùpèsè mìíràn tó bá mu** (àwọn tí a yàn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (nípasẹ̀ `aws-bedrock`), `azure-ai`, `openrouter` (katalogi passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ọ̀kọ̀ọ̀kan ń tọ́jú àtòjọ módẹ́lì tirẹ̀ nínú `providerRegistry.ts`, a sì lè múṣiṣẹ́pọ̀ rẹ̀ láìdáwọ́dúró nígbà tí provider náà bá ṣí endpoint `/models` sílẹ̀.
+**Àwọn olùpèsè mìíràn tó bá ara wọn mu** (àwọn tí a yàn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (nípasẹ̀ `aws-bedrock`), `azure-ai`, `openrouter` (katalogi passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ọ̀kọ̀ọ̀kan ń ṣàbójútó àtòkọ àwòṣe tirẹ̀ nínú `providerRegistry.ts`, ó sì lè ṣe ìmúṣiṣẹ́pọ̀ aládàáṣiṣẹ́ nígbà tí olùpèsè bá ṣí endpoint `/models` sílẹ̀.
 
-**Àkíyèsí lórí àwọn ID módẹ́lì:** OmniRoute máa ń lo àwọn ID abinibi provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Àwọn ID kan ní àwọn ẹ̀dà tí a yà pẹ̀lú àmì àkókò nítorí pé báyìí ni API upstream ṣe ń retí wọn. Bí módẹ́lì kan kò bá sí nínú àtòjọ tó wà lókè, ṣiṣẹ́ `omniroute models --search <term>` tàbí lo `GET /api/models/catalog` láti jẹ́rìí wíwà rẹ̀.
+**Àkíyèsí nípa àwọn ID àwòṣe:** OmniRoute máa ń lo àwọn ID abinibi olùpèsè (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Àwọn ID kan ní àwọn ẹ̀dà tí a fi àmì àkókò sí nítorí pé báyìí ni API gíga ṣe ń retí wọn. Bí a kò bá rí àwòṣe kan nínú àtòkọ tó wà lókè, ṣiṣẹ́ `omniroute models --search <term>` tàbí pe `GET /api/models/catalog` láti jẹ́rìí pé ó wà.
 
 </details>
 

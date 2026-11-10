@@ -21,6 +21,9 @@ export interface DerivedPlan {
   /** Which precedence layer decided this plan (Phase 3 observability). Optional so
    *  Phase 1/2 callers and snapshots are unaffected. */
   source?: CompressionSource;
+  /** Set when a policy wraps a configured single mode in another dispatch shape (lite run as
+   *  a one-step stacked pipeline), so analytics still reports the configured mode. */
+  reportedMode?: string;
 }
 
 /**

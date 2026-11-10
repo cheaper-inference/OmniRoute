@@ -354,65 +354,65 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Ανάπτυξη
+## Ανάπτυξη 🚀
 
-### Καθολική εγκατάσταση npm (Προτεινόμενη)
+### Καθολική εγκατάσταση npm (Συνιστάται)
 
 ```bash
 npm install -g omniroute
 
-# Δημιουργία καταλόγου ρυθμίσεων
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Δημιουργία αρχείου .env (δείτε .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Εκκίνηση διακομιστή
+# Start server
 omniroute
-# Ή με προσαρμοσμένη θύρα:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-Το CLI φορτώνει αυτόματα το `.env` από `~/.omniroute/.env` ή `./.env`.
+Το CLI φορτώνει αυτόματα `.env` από `~/.omniroute/.env` ή `./.env`. Ένα `./.env` στον κατάλογο εργασίας μπορεί να ορίσει μόνο μια σύντομη λίστα επιτρεπόμενων κλειδιών (θύρες, `REQUIRE_API_KEY`, τοπικές ρυθμίσεις και ρυθμίσεις χρώματος). βάλε όλα τα άλλα στο `~/.omniroute/.env`. Δείτε [συμβόλαια εκκίνησης CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Λειτουργία δίσκου συστήματος (Tray)
+### Λειτουργία δίσκου
 
-Εκκινήστε το OmniRoute στο δίσκο συστήματος:
+Εκκινήστε OmniRoute στο δίσκο συστήματος:
 
 ```bash
 omniroute serve --tray
 ```
 
-Η εντολή επιστρέφει μετά την ετοιμότητα του διακομιστή και του δίσκου.
+Η εντολή επιστρέφει αφού ο διακομιστής και ο δίσκος είναι έτοιμοι.
 
 Ο διακομιστής συνεχίζει χωρίς το τερματικό.
 
-Η λειτουργία δίσκου υποστηρίζει macOS, Windows και γραφικές συνεδρίες Linux. Η λειτουργία δίσκου δεν ανοίγει αυτόματα το dashboard.
+Η λειτουργία δίσκου υποστηρίζει συνεδρίες macOS, Windows και γραφικά Linux. Η λειτουργία δίσκου δεν ανοίγει αυτόματα το ταμπλό.
 
 Χρησιμοποιήστε το μενού δίσκου για αυτές τις ενέργειες:
 
-- Άνοιγμα του dashboard.
-- Άνοιγμα του `/dashboard/logs`.
+- Ανοίξτε τον πίνακα ελέγχου.
+- Ανοίξτε `/dashboard/logs`.
 - Αλλαγή αυτόματης εκκίνησης.
-- Διακοπή του OmniRoute.
+- Σταματήστε OmniRoute.
 
-Μη συνδυάζετε το `--tray` με αυτές τις επιλογές:
+Μην συνδυάζετε `--tray` με αυτές τις επιλογές:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Αυτές οι λειτουργίες απαιτούν διαφορετική ιδιοκτησία διεργασίας.
+Αυτές οι λειτουργίες απαιτούν διαφορετική ιδιοκτησία διεργασιών.
 
-Ενεργοποιήστε την εκκίνηση κατά την επόμενη σύνδεση στο μηχάνημα:
+Ενεργοποίηση εκκίνησης στην επόμενη σύνδεση του μηχανήματος:
 
 ```bash
 omniroute autostart enable
 ```
 
-Η αυτόματη εκκίνηση χρησιμοποιεί λειτουργία δίσκου σε macOS, Windows και γραφικές συνεδρίες Linux. Το headless Linux χρησιμοποιεί την υπάρχουσα υπηρεσία χρήστη systemd.
+Η αυτόματη εκκίνηση χρησιμοποιεί τη λειτουργία δίσκου σε συνεδρίες macOS, Windows και γραφικά Linux. Το Headless Linux χρησιμοποιεί την υπάρχουσα υπηρεσία χρήστη systemd.
 
-Απενεργοποιήστε την εκκίνηση κατά τη σύνδεση:
+Απενεργοποίηση εκκίνησης κατά τη σύνδεση:
 
 ```bash
 omniroute autostart disable
@@ -420,16 +420,16 @@ omniroute autostart disable
 
 ### Απεγκατάσταση
 
-Όταν δεν χρειάζεστε πλέον το OmniRoute, παρέχουμε δύο γρήγορα σενάρια για καθαρή αφαίρεση:
+Όταν δεν χρειάζεστε πλέον OmniRoute, παρέχουμε δύο γρήγορα σενάρια για καθαρή κατάργηση:
 
-| Εντολή                   | Ενέργεια                                                                                                      |
+| Εντολή                   | Δράση                                                                                                         |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Αφαιρεί την εφαρμογή συστήματος αλλά **διατηρεί τη βάση δεδομένων και τις ρυθμίσεις σας** στο `~/.omniroute`. |
-| `npm run uninstall:full` | Αφαιρεί την εφαρμογή ΚΑΙ **διαγράφει μόνιμα όλες τις ρυθμίσεις, τα κλειδιά και τις βάσεις δεδομένων**.        |
+| `npm run uninstall`      | Καταργεί την εφαρμογή συστήματος αλλά** διατηρεί DB και τις διαμορφώσεις σας** στο `~/.omniroute`.            |
+| `npm run uninstall:full` | Καταργεί οριστικά την εφαρμογή AND** διαγράφει όλες τις διαμορφώσεις, τα κλειδιά και τις βάσεις δεδομένων** . |
 
-> Σημείωση: Για να εκτελέσετε αυτές τις εντολές, μεταβείτε στον φάκελο του έργου OmniRoute (εάν το κλωνοποιήσατε) και εκτελέστε τες. Εναλλακτικά, εάν είναι εγκατεστημένο καθολικά, μπορείτε απλώς να εκτελέσετε `npm uninstall -g omniroute`.
+> Σημείωση: Για να εκτελέσετε αυτές τις εντολές, μεταβείτε στον φάκελο του έργου OmniRoute (αν τον έχετε κλωνοποιήσει) και εκτελέστε τις. Εναλλακτικά, εάν εγκατασταθεί καθολικά, μπορείτε απλά να εκτελέσετε `npm uninstall -g omniroute`.
 
-### Ανάπτυξη σε VPS
+### Ανάπτυξη VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -445,25 +445,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ή: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Ανάπτυξη με PM2 (Χαμηλή Μνήμη)
+### Ανάπτυξη PM2 (Χαμηλή μνήμη)
 
-Για διακομιστές με περιορισμένη RAM, χρησιμοποιήστε την επιλογή ορίου μνήμης:
+Για διακομιστές με περιορισμένο RAM, χρησιμοποιήστε την επιλογή ορίου μνήμης:
 
 ```bash
-# Με όριο 512MB (προεπιλογή)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Ή με προσαρμοσμένο όριο μνήμης
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Ή χρησιμοποιώντας το ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Δημιουργήστε το `ecosystem.config.js`:
+Δημιουργία `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -488,18 +488,18 @@ module.exports = {
 ### Docker
 
 ```bash
-# Κατασκευή εικόνας (προεπιλογή = runner-cli με προεγκατεστημένα codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Φορητή λειτουργία (προτεινόμενη)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Για λειτουργία ενσωματωμένη στον κεντρικό υπολογιστή με δυαδικά αρχεία CLI, δείτε την ενότητα Docker στην κύρια τεκμηρίωση.
+Για λειτουργία ενσωματωμένη στον κεντρικό υπολογιστή με δυαδικά αρχεία CLI, δείτε την ενότητα Docker στα κύρια έγγραφα.
 
-### Void Linux (xbps-src)
+### Άκυρο Linux (xbps-src)
 
-Οι χρήστες Void Linux μπορούν να δημιουργήσουν πακέτο και να εγκαταστήσουν το OmniRoute εγγενώς χρησιμοποιώντας το πλαίσιο cross-compilation `xbps-src`. Αυτό αυτοματοποιεί τη μεμονωμένη κατασκευή Node.js μαζί με τις απαιτούμενες εγγενείς συνδέσεις `better-sqlite3`.
+Οι χρήστες Void Linux μπορούν να συσκευάσουν και να εγκαταστήσουν OmniRoute εγγενώς χρησιμοποιώντας το πλαίσιο πολλαπλής μεταγλώττισης `xbps-src`. Αυτό αυτοματοποιεί την αυτόνομη κατασκευή Node.js μαζί με τις απαιτούμενες εγγενείς συνδέσεις `better-sqlite3`.
 
 <details>
 <summary><b>Προβολή προτύπου xbps-src</b></summary>
@@ -526,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Καθορισμός αρχιτεκτονικής CPU στόχου για node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -535,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Εγκατάσταση όλων των εξαρτήσεων – παράλειψη scripts
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Κατασκευή του μεμονωμένου bundle Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Αντιγραφή στατικών στοιχείων στο standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Μεταγλώττιση εγγενούς σύνδεσης better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Τοποθέτηση της μεταγλωττισμένης σύνδεσης στο standalone bundle
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Αφαίρεση πακέτων sharp ειδικών αρχιτεκτονικής
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Αντιγραφή εξαρτήσεων runtime pino που παραλείπει η στατική ανάλυση του Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -571,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Αποτροπή αφαίρεσης κενών καταλόγων δρομολογητή Next.js app από το hook μετά την εγκατάσταση
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -599,30 +599,30 @@ post_install() {
 
 ### Μεταβλητές Περιβάλλοντος
 
-| Μεταβλητή                               | Προεπιλογή                           | Περιγραφή                                                                                                                                                               |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Μυστικό υπογραφής JWT (**αλλάξτε σε παραγωγή**)                                                                                                                         |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Κωδικός πρόσβασης πρώτης σύνδεσης                                                                                                                                       |
-| `DATA_DIR`                              | `~/.omniroute`                       | Κατάλογος δεδομένων (db, χρήση, αρχεία καταγραφής)                                                                                                                      |
-| `PORT`                                  | προεπιλογή framework                 | Θύρα υπηρεσίας (`20128` στα παραδείγματα)                                                                                                                               |
-| `HOSTNAME`                              | προεπιλογή framework                 | Κεντρικός υπολογιστής δέσμευσης (Docker προεπιλέγει `0.0.0.0`)                                                                                                          |
-| `NODE_ENV`                              | προεπιλογή runtime                   | Ορίστε `production` για ανάπτυξη                                                                                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Δημόσιο βασικό URL που εμφανίζεται στο dashboard και εκτίθεται στον διακομιστή (αντικαθιστά το παλαιό `BASE_URL`)                                                       |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Βασικό URL endpoint συγχρονισμού cloud (αντικαθιστά το παλαιό `CLOUD_URL`)                                                                                              |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Μυστικό HMAC για τα παραγόμενα κλειδιά API                                                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Επιβολή κλειδιού API Bearer στο `/v1/*`                                                                                                                                 |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Επιτρέπει σε πιστοποιημένους χρήστες dashboard να αποκαλύπτουν πλήρεις αποθηκευμένες τιμές κλειδιών API κατ' απαίτηση                                                   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Συχνότητα ανανέωσης από τον διακομιστή για δεδομένα Ορίων Παροχέα σε προσωρινή αποθήκευση· τα κουμπιά ανανέωσης UI εξακολουθούν να ενεργοποιούν χειροκίνητο συγχρονισμό |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Απενεργοποίηση αυτόματων στιγμιοτύπων SQLite πριν από εγγραφές/εισαγωγή/επαναφορά· τα χειροκίνητα αντίγραφα ασφαλείας εξακολουθούν να λειτουργούν                       |
-| `APP_LOG_TO_FILE`                       | `true`                               | Ενεργοποιεί την εξαγωγή αρχείων καταγραφής εφαρμογής και ελέγχου στο δίσκο                                                                                              |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Επιβολή cookie ταυτοποίησης `Secure` (πίσω από αντίστροφο διακομιστή μεσολάβησης HTTPS)                                                                                 |
-| `CLOUDFLARED_BIN`                       | μη ορισμένο                          | Χρήση υπάρχοντος δυαδικού `cloudflared` αντί για διαχειριζόμενη λήψη                                                                                                    |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Μεταφορά για διαχειριζόμενα Quick Tunnels (`http2`, `quic` ή `auto`)                                                                                                    |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Όριο heap Node.js σε MB                                                                                                                                                 |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Μέγιστες καταχωρήσεις προσωρινής αποθήκευσης prompt                                                                                                                     |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Μέγιστες καταχωρήσεις σημασιολογικής προσωρινής αποθήκευσης                                                                                                             |
+| Μεταβλητός                              | Αθέτηση                     | Περιγραφή                                                                                                                                                                          |
+| --------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(αυτόματη δημιουργία)_     | JWT υπογραφή μυστικού — που δημιουργήθηκε αυτόματα κατά την πρώτη εκτέλεση και συνεχίστηκε να `server.env`. ορίστε το ρητά όταν ο κατάλογος δεδομένων είναι εφήμερος               |
+| `INITIAL_PASSWORD`                      | _(unset)_                   | Πρώτος κωδικός σύνδεσης. Οι εγκαταστάσεις npm/source ξεκινούν με `CHANGEME`: αντικαταστήστε το. Unset: inboarding wizard                                                           |
+| `DATA_DIR`                              | `~/.omniroute`              | Κατάλογος δεδομένων (db, χρήση, αρχεία καταγραφής)                                                                                                                                 |
+| `PORT`                                  | προεπιλογή πλαισίου         | Θύρα εξυπηρέτησης (`20128` σε παραδείγματα)                                                                                                                                        |
+| `HOSTNAME`                              | προεπιλογή πλαισίου         | Σύνδεση κεντρικού υπολογιστή (Docker είναι από προεπιλογή `0.0.0.0`)                                                                                                               |
+| `NODE_ENV`                              | προεπιλογή χρόνου εκτέλεσης | Ρυθμίστε `production` για ανάπτυξη                                                                                                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`    | Η δημόσια βάση URL εμφανίστηκε στον πίνακα εργαλείων και εκτέθηκε στον διακομιστή (αντικαθιστά `BASE_URL` παλαιού τύπου)                                                           |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`     | Βάση τελικού σημείου συγχρονισμού cloud URL (αντικαθιστά `CLOUD_URL` παλαιού τύπου)                                                                                                |
+| `API_KEY_SECRET`                        | _(αυτόματη δημιουργία)_     | HMAC μυστικό για δημιουργημένα κλειδιά API — δημιουργήθηκε αυτόματα στην πρώτη εκτέλεση και συνεχίστηκε στο `server.env`                                                           |
+| `REQUIRE_API_KEY`                       | `false`                     | Επιβολή κλειδιού API του φορέα στο `/v1/*`                                                                                                                                         |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Επιτρέψτε στους επαληθευμένους χρήστες του πίνακα εργαλείων να αποκαλύπτουν τις πλήρεις αποθηκευμένες τιμές κλειδιού API κατά παραγγελία                                           |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                        | Ρυθμός ανανέωσης από την πλευρά του διακομιστή για δεδομένα ορίων παρόχου προσωρινής αποθήκευσης. Τα κουμπιά ανανέωσης UI εξακολουθούν να ενεργοποιούν τον μη αυτόματο συγχρονισμό |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                     | Απενεργοποιήστε τα αυτόματα στιγμιότυπα SQLite πριν από writes/import/restore. Τα χειροκίνητα αντίγραφα ασφαλείας εξακολουθούν να λειτουργούν                                      |
+| `APP_LOG_TO_FILE`                       | `true`                      | Ενεργοποιεί την έξοδο του αρχείου καταγραφής εφαρμογής και ελέγχου στο δίσκο                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                     | Επιβολή cookie auth `Secure` (πίσω από τον αντίστροφο διακομιστή μεσολάβησης HTTPS )                                                                                               |
+| `CLOUDFLARED_BIN`                       | απενεργοποίηση              | Χρησιμοποιήστε ένα υπάρχον δυαδικό αρχείο `cloudflared` αντί για διαχειριζόμενη λήψη                                                                                               |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                     | Μεταφορά για διαχειριζόμενες γρήγορες σήραγγες (`http2`, `quic` ή `auto`)                                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                       | Όριο σωρού Node.js στο MB                                                                                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                        | Μέγιστες καταχωρήσεις προσωρινής μνήμης                                                                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                       | Μέγιστες καταχωρήσεις σημασιολογικής κρυφής μνήμης                                                                                                                                 |
 
-Για την πλήρη αναφορά μεταβλητών περιβάλλοντος, δείτε το [README](../README.md).
+Για την πλήρη αναφορά της μεταβλητής περιβάλλοντος, δείτε το [README](../README.md).
 
 ---
 
@@ -631,13 +631,13 @@ post_install() {
 <details>
 <summary><b>Προβολή όλων των διαθέσιμων μοντέλων</b></summary>
 
-> Η παρακάτω λίστα προέρχεται από το `open-sse/config/providerRegistry.ts` για την έκδοση v3.8.0. Οι κατάλογοι cloud (Gemini, OpenRouter κ.λπ.) συγχρονίζονται δυναμικά — για τον πλήρη τρέχοντα κατάλογο ανοίξτε **Πίνακας ελέγχου → Πάροχοι → [πάροχος] → Διαθέσιμα μοντέλα** ή καλέστε το `GET /api/models/catalog`.
+> Η παρακάτω λίστα επιμελείται από το `open-sse/config/providerRegistry.ts` για την έκδοση v3.8.0. Οι κατάλογοι cloud (Gemini, OpenRouter κ.λπ.) συγχρονίζονται δυναμικά — για τον πλήρη τρέχοντα κατάλογο ανοίξτε **Πίνακας ελέγχου → Πάροχοι → [πάροχος] → Διαθέσιμα μοντέλα** ή καλέστε το `GET /api/models/catalog`.
 >
-> Αν η ενσωματωμένη λίστα ενός παρόχου έχει αποκλίνει, χρησιμοποιήστε την επιλογή **Εισαγωγή από /models** σε αυτήν τη σελίδα (ή ενεργοποιήστε τον **Αυτόματο συγχρονισμό**) για να ανακτήσετε τον τρέχοντα κατάλογο από την upstream πηγή. Αυτό επαληθεύτηκε στην έκδοση v3.8.50 για το LLM7.io (`gemini-3.1-flash-lite`) και το UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)· η ανώνυμη πρόσβαση στο Pollinations παρέμεινε περιορισμένη από την upstream πηγή κατά την ίδια σειρά δοκιμών.
+> Αν η ενσωματωμένη λίστα ενός παρόχου έχει αποκλίνει, χρησιμοποιήστε την επιλογή **Εισαγωγή από /models** σε αυτήν τη σελίδα (ή ενεργοποιήστε τον **Αυτόματο συγχρονισμό**) για να ανακτήσετε τον τρέχοντα κατάλογο από την upstream υπηρεσία. Αυτό επαληθεύτηκε στην έκδοση v3.8.50 για το LLM7.io (`gemini-3.1-flash-lite`) και το UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)· η ανώνυμη πρόσβαση στο Pollinations παρέμεινε περιορισμένη από την upstream υπηρεσία κατά τον ίδιο κύκλο δοκιμών.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ επίπεδα προσπάθειας: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ επίπεδα effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
@@ -649,7 +649,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/μήνα σταθερή χρέωση ή ανά χρήση: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/μήνα σταθερά ή ανά χρήση: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Κλειδί API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -657,7 +657,7 @@ post_install() {
 
 **xAI (`xai/`)** — Εγγενές Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Φιλοξενία στην ΕΕ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Φιλοξενείται στην ΕΕ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — Ενισχυμένο με αναζήτηση: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
@@ -667,9 +667,9 @@ post_install() {
 
 **Cerebras (`cerebras/`)** — Κλίμακα wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Εστιασμένο στο RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Εστιασμένο σε RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Για επιχειρήσεις: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Για επιχειρήσεις: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
@@ -677,9 +677,9 @@ post_install() {
 
 **Gemini (Google Cloud `gemini/`)**: Συγχρονίζεται ζωντανά ανά κλειδί API από την Google — δεν υπάρχει στατική λίστα. Συνδέστε ένα κλειδί στον **Πίνακα ελέγχου → Πάροχοι** και, στη συνέχεια, χρησιμοποιήστε τα **Διαθέσιμα μοντέλα** για να εισαγάγετε τον τρέχοντα κατάλογο (π.χ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Άλλοι συμβατοί πάροχοι** (επιλεγμένοι): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (μέσω `aws-bedrock`), `azure-ai`, `openrouter` (κατάλογος passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ο καθένας διατηρεί τη δική του λίστα μοντέλων στο `providerRegistry.ts` και μπορεί να συγχρονίζεται αυτόματα όταν ο πάροχος παρέχει ένα endpoint `/models`.
+**Άλλοι συμβατοί πάροχοι** (επιλεγμένοι): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (μέσω `aws-bedrock`), `azure-ai`, `openrouter` (κατάλογος passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ο καθένας διατηρεί τη δική του λίστα μοντέλων στο `providerRegistry.ts` και μπορεί να συγχρονίζεται αυτόματα όταν ο πάροχος εκθέτει ένα endpoint `/models`.
 
-**Σημείωση σχετικά με τα αναγνωριστικά μοντέλων:** Το OmniRoute χρησιμοποιεί εγγενή αναγνωριστικά παρόχων (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ορισμένα αναγνωριστικά περιλαμβάνουν τελείες στις εκδόσεις, επειδή έτσι τα αναμένει το upstream API. Αν ένα μοντέλο δεν αναφέρεται παραπάνω, εκτελέστε `omniroute models --search <term>` ή καλέστε το `GET /api/models/catalog` για να επιβεβαιώσετε τη διαθεσιμότητα.
+**Σημείωση για τα αναγνωριστικά μοντέλων:** Το OmniRoute χρησιμοποιεί εγγενή αναγνωριστικά παρόχων (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ορισμένα αναγνωριστικά περιλαμβάνουν εκδόσεις με τελείες, επειδή έτσι τα αναμένει το upstream API. Αν ένα μοντέλο δεν αναφέρεται παραπάνω, εκτελέστε το `omniroute models --search <term>` ή καλέστε το `GET /api/models/catalog` για να επιβεβαιώσετε τη διαθεσιμότητα.
 
 </details>
 

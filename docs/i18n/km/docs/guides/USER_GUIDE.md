@@ -353,65 +353,65 @@ API Key: [ពីផ្ទាំងគ្រប់គ្រង]
 
 ---
 
-## 🚀 ការដាក់ឱ្យដំណើរការ
+## ការដាក់ពង្រាយ 🚀
 
-### ការដំឡើង npm ជាសកល (បានណែនាំ)
+### ការដំឡើង npm សកល (បានណែនាំ)
 
 ```bash
 npm install -g omniroute
 
-# បង្កើតថតកំណត់រចនាសម្ព័ន្ធ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# បង្កើតឯកសារ .env (សូមមើល .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ចាប់ផ្តើមម៉ាស៊ីនមេ
+# Start server
 omniroute
-# ឬប្រើច្រកផ្ទាល់ខ្លួន៖
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ផ្ទុក `.env` ដោយស្វ័យប្រវត្តិពី `~/.omniroute/.env` ឬ `./.env`។
+CLI ផ្ទុក `.env` ដោយស្វ័យប្រវត្តិពី `~/.omniroute/.env` ឬ `./.env`។ `./.env` ក្នុងថតដែលធ្វើការអាចកំណត់តែបញ្ជីអនុញ្ញាតខ្លីប៉ុណ្ណោះ (ច្រក, `REQUIRE_API_KEY`, មូលដ្ឋាន និងការកំណត់ពណ៌); ដាក់អ្វីៗផ្សេងទៀតនៅក្នុង `~/.omniroute/.env`។ សូមមើល [កិច្ចសន្យាចាប់ផ្តើម CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ។
 
-### របៀប Tray
+### របៀបថាស
 
-ចាប់ផ្តើម OmniRoute ក្នុងថាសប្រព័ន្ធ៖
+ចាប់ផ្តើម OmniRoute នៅក្នុងថាសប្រព័ន្ធ៖
 
 ```bash
 omniroute serve --tray
 ```
 
-ពាក្យបញ្ជានឹងបញ្ចប់បន្ទាប់ពីម៉ាស៊ីនមេ និង tray រួចរាល់។
+ពាក្យបញ្ជាត្រឡប់បន្ទាប់ពីម៉ាស៊ីនមេ និងថាសរួចរាល់។
 
-ម៉ាស៊ីនមេបន្តដំណើរការដោយមិនចាំបាច់មាន terminal។
+ម៉ាស៊ីនមេបន្តដោយគ្មានស្ថានីយ។
 
-របៀប Tray គាំទ្រ macOS, Windows និងសម័យ Linux ដែលមានចំណុចប្រទាក់ក្រាហ្វិក។ របៀប Tray មិនបើកផ្ទាំងគ្រប់គ្រងដោយស្វ័យប្រវត្តិទេ។
+របៀបថាសគាំទ្រវគ្គ macOS, Windows, និងក្រាហ្វិក Linux ។ របៀបថាសមិនបើកផ្ទាំងគ្រប់គ្រងដោយស្វ័យប្រវត្តិទេ។
 
-ប្រើម៉ឺនុយ tray សម្រាប់សកម្មភាពទាំងនេះ៖
+ប្រើម៉ឺនុយថាសសម្រាប់សកម្មភាពទាំងនេះ៖
 
 - បើកផ្ទាំងគ្រប់គ្រង។
 - បើក `/dashboard/logs`។
 - ផ្លាស់ប្តូរការចាប់ផ្តើមដោយស្វ័យប្រវត្តិ។
 - បញ្ឈប់ OmniRoute។
 
-កុំប្រើ `--tray` រួមជាមួយជម្រើសទាំងនេះ៖
+កុំផ្សំ `--tray` ជាមួយជម្រើសទាំងនេះ៖
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-របៀបទាំងនេះតម្រូវឱ្យមានការគ្រប់គ្រងកម្មសិទ្ធិដំណើរការខុសៗគ្នា។
+របៀបទាំងនេះទាមទារភាពជាម្ចាស់នៃដំណើរការផ្សេងៗគ្នា។
 
-បើកការចាប់ផ្តើមនៅពេលចូលប្រើម៉ាស៊ីនលើកក្រោយ៖
+បើកដំណើរការចាប់ផ្តើមនៅពេលចូលម៉ាស៊ីនបន្ទាប់៖
 
 ```bash
 omniroute autostart enable
 ```
 
-ការចាប់ផ្តើមដោយស្វ័យប្រវត្តិប្រើរបៀប tray នៅលើ macOS, Windows និងសម័យ Linux ដែលមានចំណុចប្រទាក់ក្រាហ្វិក។ Linux ដែលគ្មានចំណុចប្រទាក់ក្រាហ្វិកប្រើសេវាអ្នកប្រើ systemd ដែលមានស្រាប់។
+ការចាប់ផ្តើមដោយស្វ័យប្រវត្តិប្រើរបៀបថាសនៅលើ macOS, Windows, និងក្រាហ្វិក Linux sessions ។ Headless Linux ប្រើប្រាស់សេវាអ្នកប្រើប្រាស់ systemd ដែលមានស្រាប់។
 
-បិទការចាប់ផ្តើមនៅពេលចូលប្រើ៖
+បិទការចាប់ផ្តើមនៅពេលចូល៖
 
 ```bash
 omniroute autostart disable
@@ -419,16 +419,16 @@ omniroute autostart disable
 
 ### ការលុបការដំឡើង
 
-នៅពេលអ្នកលែងត្រូវការ OmniRoute យើងផ្តល់ស្គ្រីបរហ័សពីរសម្រាប់ការលុបចេញឱ្យស្អាត៖
+នៅពេលដែលអ្នកលែងត្រូវការ OmniRoute យើងផ្តល់ស្គ្រីបរហ័សពីរសម្រាប់ការដកយកចេញស្អាត៖
 
-| ពាក្យបញ្ជា               | សកម្មភាព                                                                                          |
+| បញ្ជា                    | សកម្មភាព                                                                                          |
 | ------------------------ | ------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | លុបកម្មវិធីប្រព័ន្ធ ប៉ុន្តែ **រក្សាទុក DB និងការកំណត់រចនាសម្ព័ន្ធរបស់អ្នក** ក្នុង `~/.omniroute`។ |
-| `npm run uninstall:full` | លុបកម្មវិធី ហើយ **លុបជាអចិន្ត្រៃយ៍នូវការកំណត់រចនាសម្ព័ន្ធ សោ និងមូលដ្ឋានទិន្នន័យទាំងអស់**។        |
+| `npm run uninstall`      | លុបកម្មវិធីប្រព័ន្ធ ប៉ុន្តែ** រក្សា DB និងការកំណត់រចនាសម្ព័ន្ធរបស់អ្នក។** នៅក្នុង `~/.omniroute`។ |
+| `npm run uninstall:full` | លុបកម្មវិធី AND ជាអចិន្ត្រៃយ៍** លុបការកំណត់រចនាសម្ព័ន្ធ សោ និងមូលដ្ឋានទិន្នន័យទាំងអស់។** .        |
 
-> ចំណាំ៖ ដើម្បីដំណើរការពាក្យបញ្ជាទាំងនេះ សូមចូលទៅកាន់ថតគម្រោង OmniRoute (ប្រសិនបើអ្នកបាន clone វា) រួចដំណើរការពួកវា។ ជាជម្រើស ប្រសិនបើបានដំឡើងជាសកល អ្នកអាចដំណើរការ `npm uninstall -g omniroute` បានដោយផ្ទាល់។
+> ចំណាំ៖ ដើម្បីដំណើរការពាក្យបញ្ជាទាំងនេះ សូមចូលទៅកាន់ថតគម្រោង OmniRoute (ប្រសិនបើអ្នកបានក្លូនវា) ហើយដំណើរការវា។ ជាជម្រើស ប្រសិនបើដំឡើងជាសកល អ្នកអាចដំណើរការ `npm uninstall -g omniroute` បាន។
 
-### ការដាក់ឱ្យដំណើរការលើ VPS
+### ការដាក់ពង្រាយ VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# ឬ៖ pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### ការដាក់ឱ្យដំណើរការជាមួយ PM2 (អង្គចងចាំទាប)
+### ការដាក់ពង្រាយ PM2 (អង្គចងចាំទាប)
 
-សម្រាប់ម៉ាស៊ីនមេដែលមាន RAM កំណត់ សូមប្រើជម្រើសកំណត់អង្គចងចាំ៖
+សម្រាប់ម៉ាស៊ីនមេដែលមាន RAM មានកំណត់ សូមប្រើជម្រើសកំណត់អង្គចងចាំ៖
 
 ```bash
-# ជាមួយដែនកំណត់ 512MB (លំនាំដើម)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# ឬជាមួយដែនកំណត់អង្គចងចាំផ្ទាល់ខ្លួន
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# ឬប្រើ ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-បង្កើត `ecosystem.config.js`៖
+បង្កើត `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# បង្កើត image (លំនាំដើម = runner-cli ដែលបានដំឡើង codex/claude/droid ជាមុន)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# របៀបចល័ត (បានណែនាំ)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-សម្រាប់របៀបរួមបញ្ចូលជាមួយ host ដែលមាន CLI binaries សូមមើលផ្នែក Docker ក្នុងឯកសារចម្បង។
+សម្រាប់របៀបរួមបញ្ចូលម៉ាស៊ីនជាមួយ CLI binaries សូមមើលផ្នែក Docker នៅក្នុងឯកសារចម្បង។
 
-### Void Linux (xbps-src)
+### Linux ចាត់ទុកជាមោឃៈ (xbps-src)
 
-អ្នកប្រើប្រាស់ Void Linux អាចវេចខ្ចប់ និងដំឡើង OmniRoute ដោយផ្ទាល់តាមប្រព័ន្ធ ដោយប្រើក្របខណ្ឌចងក្រងឆ្លងវេទិកា `xbps-src`។ វាធ្វើស្វ័យប្រវត្តិកម្មលើការបង្កើត Node.js standalone រួមជាមួយ native bindings របស់ `better-sqlite3` ដែលត្រូវការ។
+អ្នកប្រើប្រាស់ Linux ចាត់ទុកជាមោឃៈអាចខ្ចប់ និងដំឡើង OmniRoute ដើមកំណើតដោយប្រើ `xbps-src` cross-compilation framework ។ នេះធ្វើស្វ័យប្រវត្តិកម្មការបង្កើត Node.js ឯករាជ្យរួមជាមួយនឹងការចងដើម `better-sqlite3` ដែលត្រូវការ។
 
 <details>
 <summary><b>មើលគំរូ xbps-src</b></summary>
 
 ```bash
-# ឯកសារគំរូសម្រាប់ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# កំណត់ស្ថាបត្យកម្ម CPU គោលដៅសម្រាប់ node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) ដំឡើង dependencies ទាំងអស់ – រំលង scripts
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) បង្កើត Next.js standalone bundle
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) ចម្លង static assets ទៅក្នុង standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) ចងក្រង native binding របស់ better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) ដាក់ binding ដែលបានចងក្រងទៅក្នុង standalone bundle
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) លុប sharp bundles ដែលជាក់លាក់ចំពោះស្ថាបត្យកម្ម
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) ចម្លង runtime dependencies របស់ pino ដែលការវិភាគ static របស់ Next.js បានរំលង៖
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ទប់ស្កាត់ការលុបថត app router ទទេរបស់ Next.js ដោយ post-install hook
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,59 +598,59 @@ post_install() {
 
 ### អថេរបរិស្ថាន
 
-| អថេរ                                    | តម្លៃលំនាំដើម                        | ការពិពណ៌នា                                                                                                                                                   |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | ពាក្យសម្ងាត់សម្រាប់ចុះហត្ថលេខា JWT (**ត្រូវប្តូរនៅក្នុងបរិស្ថានផលិតកម្ម**)                                                                                   |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | ពាក្យសម្ងាត់សម្រាប់ការចូលប្រើលើកដំបូង                                                                                                                        |
-| `DATA_DIR`                              | `~/.omniroute`                       | ថតទិន្នន័យ (មូលដ្ឋានទិន្នន័យ ការប្រើប្រាស់ កំណត់ហេតុ)                                                                                                        |
-| `PORT`                                  | លំនាំដើមរបស់ framework               | ច្រកសេវា (`20128` នៅក្នុងឧទាហរណ៍)                                                                                                                            |
-| `HOSTNAME`                              | លំនាំដើមរបស់ framework               | ម៉ាស៊ីនមេដែលត្រូវភ្ជាប់ (Docker ប្រើ `0.0.0.0` ជាលំនាំដើម)                                                                                                   |
-| `NODE_ENV`                              | លំនាំដើមរបស់ runtime                 | កំណត់ជា `production` សម្រាប់ការដាក់ឱ្យប្រើប្រាស់                                                                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL មូលដ្ឋានសាធារណៈដែលបង្ហាញទៅកាន់ dashboard និងបើកឱ្យ server ប្រើប្រាស់ (ជំនួស `BASE_URL` ចាស់)                                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL មូលដ្ឋាននៃ endpoint សមកាលកម្ម cloud (ជំនួស `CLOUD_URL` ចាស់)                                                                                             |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | ពាក្យសម្ងាត់ HMAC សម្រាប់ API key ដែលបានបង្កើត                                                                                                               |
-| `REQUIRE_API_KEY`                       | `false`                              | តម្រូវឱ្យប្រើ Bearer API key នៅលើ `/v1/*`                                                                                                                    |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | អនុញ្ញាតឱ្យអ្នកប្រើ dashboard ដែលបានផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ បង្ហាញតម្លៃ API key ដែលបានរក្សាទុកពេញលេញតាមតម្រូវការ                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ចន្លោះពេលធ្វើបច្ចុប្បន្នភាពពីផ្នែក server សម្រាប់ទិន្នន័យ Provider Limits ដែលបាន cache; ប៊ូតុងធ្វើបច្ចុប្បន្នភាពក្នុង UI នៅតែបង្កឱ្យមានការធ្វើសមកាលកម្មដោយដៃ |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | បិទ snapshot SQLite ដោយស្វ័យប្រវត្តិមុនពេលសរសេរ/នាំចូល/ស្ដារឡើងវិញ; ការបម្រុងទុកដោយដៃនៅតែដំណើរការ                                                            |
-| `APP_LOG_TO_FILE`                       | `true`                               | បើកការសរសេរកំណត់ហេតុកម្មវិធី និងកំណត់ហេតុសវនកម្មទៅកាន់ថាស                                                                                                    |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | បង្ខំឱ្យ cookie ផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវប្រើ `Secure` (នៅពីក្រោយ HTTPS reverse proxy)                                                                        |
-| `CLOUDFLARED_BIN`                       | មិនបានកំណត់                          | ប្រើ binary `cloudflared` ដែលមានស្រាប់ ជំនួសឱ្យការទាញយកដែលបានគ្រប់គ្រង                                                                                       |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | ការដឹកជញ្ជូនសម្រាប់ Quick Tunnels ដែលបានគ្រប់គ្រង (`http2`, `quic` ឬ `auto`)                                                                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | ដែនកំណត់ heap របស់ Node.js គិតជា MB                                                                                                                          |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ចំនួនធាតុអតិបរមាក្នុង prompt cache                                                                                                                           |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | ចំនួនធាតុអតិបរមាក្នុង semantic cache                                                                                                                         |
+| អថេរ                                    | លំនាំដើម                   | ការពិពណ៌នា                                                                                                                                       |
+| --------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(បង្កើតដោយស្វ័យប្រវត្តិ)_ | JWT ចុះហត្ថលេខាសម្ងាត់ — បង្កើតដោយស្វ័យប្រវត្តិនៅលើការរត់លើកដំបូង និងបន្តទៅ `server.env`; កំណត់វាឱ្យច្បាស់នៅពេលដែលថតទិន្នន័យមានលក្ខណៈមិនប្រក្រតី |
+| `INITIAL_PASSWORD`                      | _(មិនកំណត់)_               | ពាក្យសម្ងាត់ចូលដំបូង។ ការដំឡើង npm/source ចាប់ផ្តើមដោយ `CHANGEME`: ជំនួសវា។ មិនកំណត់៖ អ្នកជំនួយការបើកដំណើរការ                                    |
+| `DATA_DIR`                              | `~/.omniroute`             | ថតទិន្នន័យ (db, ការប្រើប្រាស់, កំណត់ហេតុ)                                                                                                        |
+| `PORT`                                  | គ្រោងការណ៍លំនាំដើម         | ច្រកសេវា (`20128` ជាឧទាហរណ៍)                                                                                                                     |
+| `HOSTNAME`                              | គ្រោងការណ៍លំនាំដើម         | ភ្ជាប់ម៉ាស៊ីន (Docker លំនាំដើមទៅ `0.0.0.0`)                                                                                                      |
+| `NODE_ENV`                              | ពេលវេលាដំណើរការលំនាំដើម    | កំណត់ `production` សម្រាប់ដាក់ពង្រាយ                                                                                                             |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | URL មូលដ្ឋានសាធារណៈបានលេចចេញនៅលើផ្ទាំងគ្រប់គ្រង និងលាតត្រដាងទៅកាន់ម៉ាស៊ីនមេ (ជំនួស `BASE_URL` កេរ្តិ៍ដំណែល)                                      |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | URL មូលដ្ឋានចំណុចបញ្ចប់សមកាលកម្មពពក (ជំនួស `CLOUD_URL` កេរ្តិ៍ដំណែល)                                                                             |
+| `API_KEY_SECRET`                        | _(បង្កើតដោយស្វ័យប្រវត្តិ)_ | HMAC សម្ងាត់សម្រាប់កូនសោ API ដែលបានបង្កើត — បង្កើតដោយស្វ័យប្រវត្តិនៅពេលដំណើរការដំបូង និងបន្តទៅ `server.env`                                      |
+| `REQUIRE_API_KEY`                       | `false`                    | បង្ខំ Bearer API key នៅលើ `/v1/*`                                                                                                                |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | អនុញ្ញាតឱ្យអ្នកប្រើប្រាស់ផ្ទាំងគ្រប់គ្រងដែលផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវបង្ហាញតម្លៃគន្លឹះ API ដែលបានរក្សាទុកពេញលេញតាមតម្រូវការ                        |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | ការធ្វើឱ្យស្រស់ផ្នែកខាងម៉ាស៊ីនមេសម្រាប់ទិន្នន័យដែនកំណត់អ្នកផ្តល់ឃ្លាំងសម្ងាត់។ ប៊ូតុងធ្វើឱ្យស្រស់ UI នៅតែបង្កឱ្យមានការធ្វើសមកាលកម្មដោយដៃ         |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | បិទការថតរូប SQLite ដោយស្វ័យប្រវត្តិមុនពេល writes/import/restore; ការបម្រុងទុកដោយដៃនៅតែដំណើរការ                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                     | បើកដំណើរការកម្មវិធី និងលទ្ធផលកំណត់ហេតុសវនកម្មទៅកាន់ថាស                                                                                           |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | បង្ខំ `Secure` auth cookie (នៅពីក្រោយ HTTPS reverse proxy)                                                                                       |
+| `CLOUDFLARED_BIN`                       | មិនបានកំណត់                | ប្រើប្រព័ន្ធគោលពីរ `cloudflared` ដែលមានស្រាប់ជំនួសឱ្យការទាញយកដែលបានគ្រប់គ្រង                                                                     |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | ការដឹកជញ្ជូនសម្រាប់ផ្លូវរូងក្រោមដីរហ័សដែលបានគ្រប់គ្រង (`http2`, `quic`, ឬ `auto`)                                                                |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | Node.js heap limit ក្នុង MB                                                                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | ធាតុឃ្លាំងសម្ងាត់ប្រអប់បញ្ចូលអតិបរមា                                                                                                             |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | ធាតុឃ្លាំងសម្ងាត់អត្ថន័យអតិបរមា                                                                                                                  |
 
-សម្រាប់ឯកសារយោងពេញលេញអំពីអថេរបរិស្ថាន សូមមើល [README](../README.md)។
+សម្រាប់សេចក្តីយោងអថេរបរិស្ថានពេញលេញ សូមមើល [README](../README.md) ។
 
 ---
 
-## 📊 ម៉ូដែលដែលមាន
+## 📊 ម៉ូដែលដែលអាចប្រើបាន
 
 <details>
-<summary><b>មើលម៉ូដែលដែលមានទាំងអស់</b></summary>
+<summary><b>មើលម៉ូដែលដែលអាចប្រើបានទាំងអស់</b></summary>
 
-> បញ្ជីខាងក្រោមត្រូវបានរៀបចំពី `open-sse/config/providerRegistry.ts` សម្រាប់ v3.8.0។ កាតាឡុក Cloud (Gemini, OpenRouter ជាដើម) ត្រូវបានធ្វើសមកាលកម្មជាថាមវន្ត — ដើម្បីមើលកាតាឡុកបន្តផ្ទាល់ពេញលេញ សូមបើក **Dashboard → Providers → [provider] → Available Models** ឬហៅ `GET /api/models/catalog`។
+> បញ្ជីខាងក្រោមត្រូវបានរៀបចំពី `open-sse/config/providerRegistry.ts` សម្រាប់ v3.8.0។ កាតាឡុក Cloud (Gemini, OpenRouter ជាដើម) ត្រូវបានធ្វើសមកាលកម្មដោយថាមវន្ត — ដើម្បីមើលកាតាឡុកបន្តផ្ទាល់ពេញលេញ សូមបើក **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → [អ្នកផ្តល់សេវា] → ម៉ូដែលដែលអាចប្រើបាន** ឬហៅ `GET /api/models/catalog`។
 >
-> ប្រសិនបើបញ្ជីដែលភ្ជាប់មកជាមួយរបស់ provider មួយមិនទាន់ស្របគ្នា សូមប្រើ **Import from /models** នៅលើទំព័រនោះ (ឬបើក **Auto-Sync**) ដើម្បីទាញយកកាតាឡុក upstream បន្តផ្ទាល់។ វាត្រូវបានផ្ទៀងផ្ទាត់នៅក្នុង v3.8.50 សម្រាប់ LLM7.io (`gemini-3.1-flash-lite`) និង UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)។ ការចូលប្រើ Pollinations ដោយអនាមិក នៅតែមានកម្រិតតាម upstream ក្នុងអំឡុងការធ្វើតេស្តដូចគ្នា។
+> ប្រសិនបើបញ្ជីដែលភ្ជាប់មកជាមួយអ្នកផ្តល់សេវាមួយមិនទាន់ស្របគ្នា សូមប្រើ **នាំចូលពី /models** នៅទំព័រនោះ (ឬបើក **ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ**) ដើម្បីទាញយកកាតាឡុក upstream បន្តផ្ទាល់។ វាត្រូវបានផ្ទៀងផ្ទាត់ក្នុង v3.8.50 សម្រាប់ LLM7.io (`gemini-3.1-flash-lite`) និង UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)។ ការចូលប្រើដោយអនាមិករបស់ Pollinations នៅតែមានដែនកំណត់ពី upstream ក្នុងអំឡុងពេលធ្វើតេស្តដដែល។
 
-**Claude Code (`cc/`)** — OAuth Pro/Max៖ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth សម្រាប់ Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro៖ `cx/gpt-5.5` (+ កម្រិត effort៖ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth សម្រាប់ Plus/Pro: `cx/gpt-5.5` (+ កម្រិត effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth៖ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth ឥតគិតថ្លៃ៖ ប្រើកាតាឡុកបន្តផ្ទាល់ដែលបង្ហាញនៅក្រោម **Dashboard → Providers → Kiro → Available Models**។ ភាពមានអាស្រ័យលើគណនី និងគម្រោង។
+**Kiro (`kr/`)** — OAuth ឥតគិតថ្លៃ៖ ប្រើកាតាឡុកបន្តផ្ទាល់ដែលបង្ហាញនៅក្រោម **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា → Kiro → ម៉ូដែលដែលអាចប្រើបាន**។ ភាពអាចប្រើបានអាស្រ័យលើគណនី និងគម្រោង។
 
 **Qoder (`if/`)** — OAuth ឥតគិតថ្លៃ៖ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M៖ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M៖ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ខែ ជាតម្លៃថេរ ឬតាមការប្រើប្រាស់៖ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ខែ ថ្លៃថេរ ឬគិតតាមការប្រើប្រាស់៖ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API key៖ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — គ្រាប់ចុច API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — ល្បឿនលឿនខ្លាំង៖ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
@@ -660,25 +660,25 @@ post_install() {
 
 **Perplexity (`pplx/`)** — បន្ថែមសមត្ថភាពស្វែងរក៖ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ប្រភពបើកចំហ៖ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ឥតគិតថ្លៃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ប្រភពកូដបើកចំហ៖ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ឥតគិតថ្លៃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — ការសន្និដ្ឋានលឿន៖ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — កម្រិត wafer៖ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — មាត្រដ្ឋាន wafer៖ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — ផ្តោតលើ RAG៖ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — សម្រាប់សហគ្រាស៖ `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — សម្រាប់សហគ្រាស៖ `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE៖ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**៖ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**៖ ធ្វើសមកាលកម្មបន្តផ្ទាល់តាម API key ពី Google — គ្មានបញ្ជីថេរ។ ភ្ជាប់ key មួយនៅក្នុង **Dashboard → Providers** បន្ទាប់មកប្រើ **Available Models** ដើម្បីនាំចូលកាតាឡុកបច្ចុប្បន្ន (ឧ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)។
+**Gemini (Google Cloud `gemini/`)**៖ ធ្វើសមកាលកម្មបន្តផ្ទាល់តាម API key ពី Google — មិនមានបញ្ជីថេរទេ។ ភ្ជាប់ key នៅ **ផ្ទាំងគ្រប់គ្រង → អ្នកផ្តល់សេវា** បន្ទាប់មកប្រើ **ម៉ូដែលដែលអាចប្រើបាន** ដើម្បីនាំចូលកាតាឡុកបច្ចុប្បន្ន (ឧ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)។
 
-**Provider ដែលឆបគ្នាផ្សេងទៀត** (ជ្រើសរើស)៖ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (តាមរយៈ `aws-bedrock`), `azure-ai`, `openrouter` (កាតាឡុក passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`។ Provider នីមួយៗរក្សាបញ្ជីម៉ូដែលផ្ទាល់ខ្លួននៅក្នុង `providerRegistry.ts` ហើយអាចធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ នៅពេល provider បង្ហាញ endpoint `/models`។
+**អ្នកផ្តល់សេវាដែលត្រូវគ្នាផ្សេងទៀត** (ជ្រើសរើស)៖ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (តាមរយៈ `aws-bedrock`), `azure-ai`, `openrouter` (កាតាឡុក passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`។ អ្នកផ្តល់សេវានីមួយៗរក្សាបញ្ជីម៉ូដែលផ្ទាល់ខ្លួននៅក្នុង `providerRegistry.ts` ហើយអាចធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ នៅពេលអ្នកផ្តល់សេវាបង្ហាញ endpoint `/models`។
 
-**ចំណាំអំពី model ID**៖ OmniRoute ប្រើ ID ដើមរបស់ provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)។ ID មួយចំនួនមានកំណែដែលបំបែកដោយចំណុច ពីព្រោះ API upstream រំពឹងទុកទម្រង់បែបនេះ។ ប្រសិនបើម៉ូដែលមួយមិនមានក្នុងបញ្ជីខាងលើ សូមដំណើរការ `omniroute models --search <term>` ឬហៅ `GET /api/models/catalog` ដើម្បីបញ្ជាក់ភាពមាន។
+**ចំណាំអំពីអត្តសញ្ញាណម៉ូដែល**៖ OmniRoute ប្រើអត្តសញ្ញាណដើមរបស់អ្នកផ្តល់សេវា (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)។ អត្តសញ្ញាណមួយចំនួនមានកំណែដែលបំបែកដោយចំណុច ព្រោះនោះជាទម្រង់ដែល API upstream រំពឹងទុក។ ប្រសិនបើម៉ូដែលមួយមិនមានក្នុងបញ្ជីខាងលើ សូមដំណើរការ `omniroute models --search <term>` ឬហៅ `GET /api/models/catalog` ដើម្បីបញ្ជាក់ភាពអាចប្រើបាន។
 
 </details>
 

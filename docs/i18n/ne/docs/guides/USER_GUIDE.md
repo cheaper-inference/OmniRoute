@@ -354,82 +354,82 @@ API कुञ्जी: [ड्यासबोर्डबाट]
 
 ---
 
-## 🚀 परिनियोजन
+## 🚀 तैनाती
 
-### ग्लोबल npm स्थापना (सिफारिस गरिएको)
+### ग्लोबल एनपीएम स्थापना (सिफारिस गरिएको)
 
 ```bash
 npm install -g omniroute
 
-# कन्फिग डाइरेक्टरी सिर्जना गर्नुहोस्
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env फाइल सिर्जना गर्नुहोस् (.env.example हेर्नुहोस्)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# सर्भर सुरु गर्नुहोस्
+# Start server
 omniroute
-# वा आफूअनुकूल पोर्टसहित:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ले `~/.omniroute/.env` वा `./.env` बाट `.env` स्वतः लोड गर्छ।
+CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्दछ। काम गर्ने डाइरेक्टरीमा रहेको `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (पोर्टहरू, `REQUIRE_API_KEY`, लोकेल र रङ सेटिङहरू); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
 
 ### ट्रे मोड
 
-OmniRoute लाई प्रणाली ट्रेमा सुरु गर्नुहोस्:
+प्रणाली ट्रेमा OmniRoute सुरु गर्नुहोस्:
 
 ```bash
 omniroute serve --tray
 ```
 
-सर्भर र ट्रे तयार भएपछि कमान्ड समाप्त हुन्छ।
+सर्भर र ट्रे तयार भएपछि आदेश फिर्ता हुन्छ।
 
-सर्भर टर्मिनलविना पनि चलिरहन्छ।
+सर्भर टर्मिनल बिना जारी छ।
 
-ट्रे मोडले macOS, Windows र ग्राफिकल Linux सेसनहरू समर्थन गर्छ। ट्रे मोडले ड्यासबोर्ड स्वतः खोल्दैन।
+ट्रे मोडले macOS, Windows, र ग्राफिकल Linux सत्रहरूलाई समर्थन गर्दछ। ट्रे मोडले स्वचालित रूपमा ड्यासबोर्ड खोल्दैन।
 
-यी कार्यहरूका लागि ट्रे मेनु प्रयोग गर्नुहोस्:
+यी कार्यहरूको लागि ट्रे मेनु प्रयोग गर्नुहोस्:
 
 - ड्यासबोर्ड खोल्नुहोस्।
 - `/dashboard/logs` खोल्नुहोस्।
-- स्वतः-सुरु सेटिङ परिवर्तन गर्नुहोस्।
+- स्वत: सुरु परिवर्तन गर्नुहोस्।
 - OmniRoute रोक्नुहोस्।
 
-`--tray` लाई यी विकल्पहरूसँग संयोजन नगर्नुहोस्:
+यी विकल्पहरूसँग `--tray` संयोजन नगर्नुहोस्:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-यी मोडहरूलाई फरक प्रक्रिया स्वामित्व आवश्यक पर्छ।
+यी मोडहरूलाई फरक प्रक्रिया स्वामित्व चाहिन्छ।
 
-मेसिनमा अर्को पटक लगइन गर्दा स्टार्टअप सक्षम गर्नुहोस्:
+अर्को मेसिन लगइनमा स्टार्टअप सक्षम गर्नुहोस्:
 
 ```bash
 omniroute autostart enable
 ```
 
-स्वतः-सुरुले macOS, Windows र ग्राफिकल Linux सेसनहरूमा ट्रे मोड प्रयोग गर्छ। हेडलेस Linux ले विद्यमान systemd प्रयोगकर्ता सेवा प्रयोग गर्छ।
+macOS, Windows, र ग्राफिकल Linux सत्रहरूमा स्वतः-सुरुले ट्रे मोड प्रयोग गर्दछ। हेडलेस Linux ले अवस्थित systemd प्रयोगकर्ता सेवा प्रयोग गर्दछ।
 
-लगइनमा हुने स्टार्टअप असक्षम गर्नुहोस्:
+लगइनमा स्टार्टअप असक्षम गर्नुहोस्:
 
 ```bash
 omniroute autostart disable
 ```
 
-### अनइन्स्टल गर्दै
+### स्थापना रद्द गर्दै
 
-तपाईंलाई OmniRoute आवश्यक नपरेपछि, पूर्ण रूपमा हटाउन हामी दुईवटा द्रुत स्क्रिप्ट उपलब्ध गराउँछौँ:
+जब तपाईलाई अब OmniRoute आवश्यक पर्दैन, हामी सफा हटाउनका लागि दुई द्रुत लिपिहरू प्रदान गर्दछौं:
 
-| कमान्ड                   | कार्य                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | प्रणाली एप हटाउँछ तर `~/.omniroute` मा रहेका **तपाईंका DB र कन्फिगरेसनहरू राखिराख्छ**। |
-| `npm run uninstall:full` | एप हटाउँछ र **सबै कन्फिगरेसन, कुञ्जी तथा डाटाबेसहरू स्थायी रूपमा मेटाउँछ**।            |
+| आदेश                     | कार्य                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | प्रणाली एप हटाउँछ तर** तपाईंको DB र कन्फिगरेसनहरू राख्छ** `~/.omniroute` मा।               |
+| `npm run uninstall:full` | अनुप्रयोग AND स्थायी रूपमा हटाउँछ** सबै कन्फिगरेसनहरू, कुञ्जीहरू, र डाटाबेसहरू मेटाउँछ** । |
 
-> टिप्पणी: यी कमान्डहरू चलाउन OmniRoute परियोजनाको फोल्डरमा जानुहोस् (यदि तपाईंले यसलाई क्लोन गर्नुभएको हो भने) र तिनलाई चलाउनुहोस्। वैकल्पिक रूपमा, ग्लोबल रूपमा स्थापना गरिएको छ भने तपाईंले केवल `npm uninstall -g omniroute` चलाउन सक्नुहुन्छ।
+> नोट: यी आदेशहरू चलाउनको लागि, OmniRoute प्रोजेक्ट फोल्डरमा नेभिगेट गर्नुहोस् (यदि तपाईंले यसलाई क्लोन गर्नुभयो भने) र तिनीहरूलाई चलाउनुहोस्। वैकल्पिक रूपमा, यदि विश्वव्यापी रूपमा स्थापित छ भने, तपाइँ केवल `npm uninstall -g omniroute` चलाउन सक्नुहुन्छ।
 
-### VPS परिनियोजन
+### VPS तैनाती
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -445,21 +445,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# वा: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 परिनियोजन (कम मेमोरी)
+### PM2 तैनाती (कम मेमोरी)
 
-सीमित RAM भएका सर्भरहरूका लागि मेमोरी सीमा विकल्प प्रयोग गर्नुहोस्:
+सीमित RAM भएका सर्भरहरूको लागि, मेमोरी सीमा विकल्प प्रयोग गर्नुहोस्:
 
 ```bash
-# 512MB सीमासहित (पूर्वनिर्धारित)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# वा आफूअनुकूल मेमोरी सीमासहित
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# वा ecosystem.config.js प्रयोग गरेर
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -488,24 +488,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# इमेज निर्माण गर्नुहोस् (पूर्वनिर्धारित = codex/claude/droid पूर्वस्थापित भएको runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# पोर्टेबल मोड (सिफारिस गरिएको)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI बाइनरीहरूसहित होस्ट-एकीकृत मोडका लागि मुख्य दस्तावेजमा रहेको Docker खण्ड हेर्नुहोस्।
+CLI बाइनरीहरूसँग होस्ट-एकीकृत मोडको लागि, मुख्य कागजातहरूमा Docker खण्ड हेर्नुहोस्।
 
-### Void Linux (xbps-src)
+### शून्य Linux (xbps-src)
 
-Void Linux प्रयोगकर्ताहरूले `xbps-src` क्रस-कम्पाइलेसन फ्रेमवर्क प्रयोग गरेर OmniRoute लाई नेटिभ रूपमा प्याकेज र स्थापना गर्न सक्छन्। यसले आवश्यक `better-sqlite3` नेटिभ बाइन्डिङहरूसहित Node.js स्ट्यान्डअलोन बिल्डलाई स्वचालित बनाउँछ।
+Void Linux प्रयोगकर्ताहरूले `xbps-src` क्रस-कम्पाइलेशन ढाँचा प्रयोग गरेर नेटिभ रूपमा OmniRoute प्याकेज र स्थापना गर्न सक्छन्। यसले आवश्यक `better-sqlite3` नेटिभ बाइन्डिङहरू सहित Node.js स्ट्यान्डअलोन निर्माणलाई स्वचालित बनाउँछ।
 
 <details>
 <summary><b>xbps-src टेम्प्लेट हेर्नुहोस्</b></summary>
 
 ```bash
-# 'omniroute' का लागि टेम्प्लेट फाइल
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -526,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp का लागि लक्षित CPU आर्किटेक्चर निर्धारण गर्नुहोस्
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -535,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) सबै निर्भरताहरू स्थापना गर्नुहोस् – स्क्रिप्टहरू छोड्नुहोस्
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js स्ट्यान्डअलोन बन्डल बिल्ड गर्नुहोस्
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) स्थिर एसेटहरू स्ट्यान्डअलोनमा प्रतिलिपि गर्नुहोस्
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 नेटिभ बाइन्डिङ कम्पाइल गर्नुहोस्
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) कम्पाइल गरिएको बाइन्डिङलाई स्ट्यान्डअलोन बन्डलमा राख्नुहोस्
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) आर्किटेक्चर-विशिष्ट sharp बन्डलहरू हटाउनुहोस्
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js को स्थिर विश्लेषणले छुटाएका pino रनटाइम निर्भरताहरू प्रतिलिपि गर्नुहोस्:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -571,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# स्थापना-पश्चात् हुकद्वारा खाली Next.js एप राउटर डाइरेक्टरीहरू हटाउन नदिनुहोस्
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -597,32 +597,32 @@ post_install() {
 
 </details>
 
-### वातावरण चरहरू
+### वातावरण चर
 
-| Variable                                | पूर्वनिर्धारित                       | विवरण                                                                                                                  |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT हस्ताक्षर गर्ने गोप्य कुञ्जी (**उत्पादनमा परिवर्तन गर्नुहोस्**)                                                    |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | पहिलो लगइनको पासवर्ड                                                                                                   |
-| `DATA_DIR`                              | `~/.omniroute`                       | डेटा डाइरेक्टरी (db, प्रयोग, लगहरू)                                                                                    |
-| `PORT`                                  | फ्रेमवर्कको पूर्वनिर्धारित मान       | सेवा पोर्ट (उदाहरणहरूमा `20128`)                                                                                       |
-| `HOSTNAME`                              | फ्रेमवर्कको पूर्वनिर्धारित मान       | बाइन्ड होस्ट (Docker को पूर्वनिर्धारित मान `0.0.0.0`)                                                                  |
-| `NODE_ENV`                              | रनटाइमको पूर्वनिर्धारित मान          | डिप्लोयका लागि `production` सेट गर्नुहोस्                                                                              |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ड्यासबोर्डमा देखाइने र सर्भरमा उपलब्ध गराइने सार्वजनिक आधार URL (पुरानो `BASE_URL` लाई प्रतिस्थापन गर्छ)               |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | क्लाउड सिङ्क एन्डपोइन्टको आधार URL (पुरानो `CLOUD_URL` लाई प्रतिस्थापन गर्छ)                                           |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | सिर्जना गरिएका API कुञ्जीहरूका लागि HMAC गोप्य कुञ्जी                                                                  |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` मा Bearer API कुञ्जी अनिवार्य बनाउनुहोस्                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | प्रमाणीकरण भएका ड्यासबोर्ड प्रयोगकर्ताहरूलाई मागअनुसार भण्डारण गरिएका API कुञ्जीका पूर्ण मानहरू देखाउन अनुमति दिनुहोस् |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | क्यास गरिएको Provider Limits डेटाका लागि सर्भर-साइड रिफ्रेस अन्तराल; UI रिफ्रेस बटनहरूले अझै पनि म्यानुअल सिङ्क गर्छन् |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | लेखन/आयात/पुनर्स्थापना अघि स्वचालित SQLite स्न्यापसटहरू असक्षम गर्नुहोस्; म्यानुअल ब्याकअपहरूले अझै काम गर्छन्         |
-| `APP_LOG_TO_FILE`                       | `true`                               | एप्लिकेसन र अडिट लग आउटपुटलाई डिस्कमा लेख्न सक्षम बनाउँछ                                                               |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` प्रमाणीकरण कुकी अनिवार्य बनाउनुहोस् (HTTPS रिभर्स प्रोक्सी पछाडि)                                             |
-| `CLOUDFLARED_BIN`                       | सेट नगरिएको                          | व्यवस्थापित डाउनलोडको सट्टा अवस्थित `cloudflared` बाइनरी प्रयोग गर्नुहोस्                                              |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | व्यवस्थापित Quick Tunnels का लागि ट्रान्सपोर्ट (`http2`, `quic`, वा `auto`)                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB मा Node.js हिप सीमा                                                                                                 |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | प्रॉम्प्ट क्यास प्रविष्टिहरूको अधिकतम सङ्ख्या                                                                          |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | सिम्यान्टिक क्यास प्रविष्टिहरूको अधिकतम सङ्ख्या                                                                        |
+| चर                                      | पूर्वनिर्धारित           | विवरण                                                                                                                                             |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(स्वतः उत्पन्न)_        | JWT हस्ताक्षर गोप्य — पहिलो रनमा स्वतः उत्पन्न भयो र `server.env` मा कायम रह्यो; डाटा डाइरेक्टरी अल्पकालीन हुँदा यसलाई स्पष्ट रूपमा सेट गर्नुहोस् |
+| `INITIAL_PASSWORD`                      | _(अनसेट)_                | पहिलो लगइन पासवर्ड। npm/source स्थापनाहरू `CHANGEME` बाट सुरु हुन्छ: यसलाई बदल्नुहोस्। अनसेट: अनबोर्डिङ विजार्ड                                   |
+| `DATA_DIR`                              | `~/.omniroute`           | डाटा डाइरेक्टरी (db, उपयोग, लग)                                                                                                                   |
+| `PORT`                                  | पूर्वनिर्धारित फ्रेमवर्क | सेवा पोर्ट (उदाहरणमा`20128` )                                                                                                                     |
+| `HOSTNAME`                              | पूर्वनिर्धारित फ्रेमवर्क | बाइन्ड होस्ट (Docker पूर्वनिर्धारित `0.0.0.0`)                                                                                                    |
+| `NODE_ENV`                              | रनटाइम पूर्वनिर्धारित    | परिनियोजनको लागि `production` सेट गर्नुहोस्                                                                                                       |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | सार्वजनिक आधार URL ड्यासबोर्डमा देखा पर्‍यो र सर्भरमा पर्दाफास भयो (लेगेसी `BASE_URL` प्रतिस्थापन गर्दछ)                                          |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | क्लाउड सिंक अन्तिम बिन्दु आधार URL (लेगेसी `CLOUD_URL` प्रतिस्थापन गर्दछ)                                                                         |
+| `API_KEY_SECRET`                        | _(स्वतः उत्पन्न)_        | जेनरेट गरिएको API कुञ्जीहरूको लागिHMAC गोप्य — पहिलो रनमा स्वतः उत्पन्न भयो र `server.env` मा कायम                                                |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` मा Bearer API कुञ्जी लागू गर्नुहोस्                                                                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | प्रमाणीकृत ड्यासबोर्ड प्रयोगकर्ताहरूलाई पूर्ण भण्डारण गरिएको API प्रमुख मानहरू मागमा प्रकट गर्न अनुमति दिनुहोस्                                   |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | क्यास प्रदायक सीमा डेटाको लागि सर्भर-साइड रिफ्रेस ताल; UI रिफ्रेस बटनहरूले अझै पनि म्यानुअल सिंक ट्रिगर गर्दछ                                     |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore अघि स्वचालित SQLite स्न्यापसटहरू असक्षम गर्नुहोस्; म्यानुअल ब्याकअप अझै पनि काम गर्दछ                                       |
+| `APP_LOG_TO_FILE`                       | `true`                   | डिस्कमा अनुप्रयोग र अडिट लग आउटपुट सक्षम गर्दछ                                                                                                    |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | बल `Secure` auth कुकी ( HTTPS रिभर्स प्रोक्सी पछाडि)                                                                                              |
+| `CLOUDFLARED_BIN`                       | सेट नगरिएको              | व्यवस्थित डाउनलोडको सट्टा अवस्थित `cloudflared` बाइनरी प्रयोग गर्नुहोस्                                                                           |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | व्यवस्थित द्रुत टनेलहरूको लागि यातायात (`http2`, `quic`, वा `auto`)                                                                               |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB माNode.js हिप सीमा                                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | अधिकतम प्रम्प्ट क्यास प्रविष्टिहरू                                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | अधिकतम सिमेन्टिक क्यास प्रविष्टिहरू                                                                                                               |
 
-सम्पूर्ण वातावरण चर सन्दर्भका लागि [README](../README.md) हेर्नुहोस्।
+पूर्ण वातावरण चर सन्दर्भको लागि, [README](../README.md) हेर्नुहोस्।
 
 ---
 
@@ -631,9 +631,9 @@ post_install() {
 <details>
 <summary><b>उपलब्ध सबै मोडेलहरू हेर्नुहोस्</b></summary>
 
-> तलको सूची v3.8.0 का लागि `open-sse/config/providerRegistry.ts` बाट छनोट गरिएको हो। क्लाउड क्याटलगहरू (Gemini, OpenRouter, आदि) गतिशील रूपमा सिङ्क हुन्छन् — पूर्ण लाइभ क्याटलगका लागि **ड्यासबोर्ड → प्रदायकहरू → [प्रदायक] → उपलब्ध मोडेलहरू** खोल्नुहोस् वा `GET /api/models/catalog` कल गर्नुहोस्।
+> तलको सूची v3.8.0 का लागि `open-sse/config/providerRegistry.ts` बाट छनोट गरिएको हो। क्लाउड क्याटलगहरू (Gemini, OpenRouter आदि) गतिशील रूपमा सिङ्क हुन्छन् — पूर्ण लाइभ क्याटलगका लागि **Dashboard → Providers → [provider] → Available Models** खोल्नुहोस् वा `GET /api/models/catalog` कल गर्नुहोस्।
 >
-> यदि कुनै प्रदायकको निर्मित सूचीमा फरक परेको छ भने, लाइभ अपस्ट्रिम क्याटलग ल्याउन त्यस पृष्ठमा **/models बाट आयात गर्नुहोस्** प्रयोग गर्नुहोस् (वा **स्वतः-सिङ्क** सक्षम गर्नुहोस्)। यो v3.8.50 मा LLM7.io (`gemini-3.1-flash-lite`) र UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) का लागि प्रमाणीकरण गरिएको थियो; सोही परीक्षण चरणमा Pollinations को अज्ञात पहुँच अपस्ट्रिम सीमित नै रह्यो।
+> यदि कुनै प्रदायकको निर्मित सूचीमा भिन्नता आएको छ भने, लाइभ अपस्ट्रिम क्याटलग ल्याउन त्यस पृष्ठमा **Import from /models** प्रयोग गर्नुहोस् (वा **Auto-Sync** सक्षम गर्नुहोस्)। यो v3.8.50 मा LLM7.io (`gemini-3.1-flash-lite`) र UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) का लागि प्रमाणित गरिएको थियो; सोही परीक्षण चरणमा Pollinations को बेनामे पहुँच अपस्ट्रिम सीमित नै रह्यो।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -641,7 +641,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — निःशुल्क OAuth: **ड्यासबोर्ड → प्रदायकहरू → Kiro → उपलब्ध मोडेलहरू** अन्तर्गत देखाइएको लाइभ क्याटलग प्रयोग गर्नुहोस्। उपलब्धता खाता र योजनामा निर्भर हुन्छ।
+**Kiro (`kr/`)** — निःशुल्क OAuth: **Dashboard → Providers → Kiro → Available Models** अन्तर्गत देखाइएको लाइभ क्याटलग प्रयोग गर्नुहोस्। उपलब्धता खाता र योजनामा निर्भर हुन्छ।
 
 **Qoder (`if/`)** — निःशुल्क OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -649,17 +649,17 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/महिना निश्चित शुल्क वा प्रयोगअनुसार: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/महिना स्थिर शुल्क वा प्रयोगअनुसार: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API कुञ्जी: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — अत्यन्त द्रुत: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — अति तीव्र: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok नेटिभ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — EU-होस्टेड: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — खोज-सहायक: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — खोज-संवर्धित: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — खुला-स्रोत: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (निःशुल्क), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -669,17 +669,17 @@ post_install() {
 
 **Cohere (`cohere/`)** — RAG-केन्द्रित: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — इन्टरप्राइज: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — इन्टरप्राइज: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google बाट API कुञ्जीअनुसार लाइभ सिङ्क हुन्छ — स्थिर सूची छैन। **ड्यासबोर्ड → प्रदायकहरू** मा कुञ्जी जडान गर्नुहोस्, त्यसपछि हालको क्याटलग आयात गर्न **उपलब्ध मोडेलहरू** प्रयोग गर्नुहोस् (जस्तै `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google बाट API कुञ्जीअनुसार लाइभ सिङ्क हुन्छ — स्थिर सूची छैन। **Dashboard → Providers** मा कुञ्जी जडान गर्नुहोस्, त्यसपछि हालको क्याटलग आयात गर्न **Available Models** प्रयोग गर्नुहोस् (जस्तै `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
 
-**अन्य अनुकूल प्रदायकहरू** (चयनित): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` मार्फत), `azure-ai`, `openrouter` (पासथ्रु क्याटलग), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। प्रत्येकले `providerRegistry.ts` मा आफ्नै मोडेल सूची राख्छ र प्रदायकले `/models` एन्डपोइन्ट उपलब्ध गराएमा स्वतः-सिङ्क गर्न सकिन्छ।
+**अन्य सुसंगत प्रदायकहरू** (चयनित): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` मार्फत), `azure-ai`, `openrouter` (पासथ्रु क्याटलग), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। प्रत्येकले `providerRegistry.ts` मा आफ्नै मोडेल सूची राख्छ र प्रदायकले `/models` endpoint उपलब्ध गराएमा स्वचालित रूपमा सिङ्क गर्न सकिन्छ।
 
-**मोडेल ID सम्बन्धी टिप्पणी:** OmniRoute ले प्रदायक-नेटिभ ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) प्रयोग गर्छ। केही ID मा डट भएका संस्करणहरू छन्, किनभने अपस्ट्रिम API ले तिनलाई त्यही रूपमा अपेक्षा गर्छ। यदि कुनै मोडेल माथि सूचीबद्ध छैन भने, उपलब्धता पुष्टि गर्न `omniroute models --search <term>` चलाउनुहोस् वा `GET /api/models/catalog` मा अनुरोध पठाउनुहोस्।
+**मोडेल ID सम्बन्धी टिप्पणी:** OmniRoute ले प्रदायक-नेटिभ ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) प्रयोग गर्छ। केही ID मा बिन्दुयुक्त संस्करणहरू छन्, किनभने अपस्ट्रिम API ले तिनलाई त्यही रूपमा अपेक्षा गर्छ। कुनै मोडेल माथि सूचीबद्ध छैन भने, उपलब्धता पुष्टि गर्न `omniroute models --search <term>` चलाउनुहोस् वा `GET /api/models/catalog` मा अनुरोध पठाउनुहोस्।
 
 </details>
 

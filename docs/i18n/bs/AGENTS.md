@@ -31,23 +31,23 @@ Pokretanje testova: pogledajte [Testiranje](#testing) u nastavku (prvo pokrenite
 
 ---
 
-## Pregled projekta
+## Projekat ukratko
 
-**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, 380 LLM provajdera, automatski fallback.
+**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, 381 LLM dobavljač, automatski fallback.
 
 - API rute — `src/app/api/v1/` (ulazne tačke Next.js App Routera)
-- Rukovatelji — `open-sse/handlers/` (obrada zahtjeva: chat, embeddings itd.)
-- Izvršitelji — `open-sse/executors/` (HTTP slanje specifično za provajdera)
+- Rukovaoci — `open-sse/handlers/` (obrada zahtjeva: chat, embeddings itd.)
+- Izvršioci — `open-sse/executors/` (HTTP distribucija specifična za dobavljača)
 - Prevoditelji — `open-sse/translator/` (konverzija formata OpenAI↔Claude↔Gemini)
 - Transformator — `open-sse/transformer/` (Responses API ↔ Chat Completions)
-- Servisi — `open-sse/services/` (kombinovano rutiranje, ograničenja zahtjeva, keširanje itd.)
-- Baza podataka — `src/lib/db/` (domenski moduli SQLite baze, 221 migracija)
-- Domen/pravila — `src/domain/` (mehanizam pravila, pravila troškova, fallback logika)
-- MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + moduli memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
+- Servisi — `open-sse/services/` (kombinovano rutiranje, ograničenja brzine, keširanje itd.)
+- Baza podataka — `src/lib/db/` (SQLite domenski moduli, 228 migracija)
+- Domena/pravila — `src/domain/` (mehanizam pravila, pravila troškova, logika rezervnog prebacivanja)
+- MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + moduli za memoriju/vještine/GitHub/pool/gamifikaciju/plugin/Notion/Obsidian/lokalni korpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
 - A2A server — `src/lib/a2a/` (protokol agenata JSON-RPC 2.0)
 - Vještine — `src/lib/skills/` (proširivi okvir vještina); Memorija — `src/lib/memory/` (trajna konverzacijska memorija)
 
-Monorepo: `src/` (Next.js 16 aplikacija), `open-sse/` (radni prostor streaming mehanizma), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
+Monorepo: `src/` (Next.js 16 aplikacija), `open-sse/` (radni prostor mehanizma za streaming), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
 
 ---
 

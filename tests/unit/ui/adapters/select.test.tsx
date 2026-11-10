@@ -64,8 +64,8 @@ describe("Select adapter", () => {
     );
     const el = getByLabelText("Native") as HTMLSelectElement;
     expect(el.tagName).toBe("SELECT");
-    expect(el.className).toContain("ci-select-native");
-    expect(el.className).toContain("ci-select-native--error");
+    expect(el.className).toContain("ci-native-select__control");
+    expect(el.closest("[data-slot='native-select']")?.hasAttribute("data-invalid")).toBe(true);
     expect(el.getAttribute("aria-invalid")).toBe("true");
     expect(el.getAttribute("aria-describedby")).toBe("n-error");
     expect(getByText("Pick one").id).toBe("n-error");
@@ -87,7 +87,7 @@ describe("Select adapter", () => {
       </Select>
     );
     const el = getByTestId("nat") as HTMLSelectElement;
-    expect(el.className).toContain("ci-select-native--sm");
+    expect(el.closest("[data-slot='native-select']")?.getAttribute("data-size")).toBe("sm");
     fireEvent.change(el, { target: { value: "y" } });
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange.mock.calls[0][0].target).toBe(el);

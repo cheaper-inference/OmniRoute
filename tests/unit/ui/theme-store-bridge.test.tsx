@@ -146,3 +146,104 @@ describe("themeStore palette (Editions default, Classic option)", () => {
     expect(root.getAttribute("data-ci-appearance")).toBe("editions");
   });
 });
+
+describe("themeStore → live theme-color (browser chrome follows the palette)", () => {
+  const LIGHT_MEDIA = "(prefers-color-scheme: light)";
+  const DARK_MEDIA = "(prefers-color-scheme: dark)";
+
+  /** Server-render the layout's two Editions tags and fake the OS scheme. */
+  function serverHead(systemDark = false) {
+    document.head.innerHTML =
+      `<meta name="theme-color" media="${LIGHT_MEDIA}" content="#f3f1e9">` +
+      `<meta name="theme-color" media="${DARK_MEDIA}" content="#11120f">`;
+    window.matchMedia = ((query: string) => ({
+      matches: query === DARK_MEDIA && systemDark,
+      media: query,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia;
+  }
+
+  const themeColors = () =>
+    Object.fromEntries(
+      [...document.querySelectorAll('meta[name="theme-color"]')].map((m) => [
+        m.getAttribute("media") ?? "",
+        m.getAttribute("content"),
+      ])
+    );
+
+  beforeEach(() => {
+    vi.resetModules();
+    localStorage.clear();
+    document.documentElement.removeAttribute("data-ci-appearance");
+  });
+
+  it("switching the palette live re-points every tag, in light and in dark", async () => {
+    serverHead();
+    const { default: useThemeStore } = await loadStore();
+    const { CLASSIC_PAGE_BACKGROUND: C, EDITIONS_PAGE_BACKGROUND: E } =
+      await import("@/shared/constants/pwaThemeColors");
+    const store = useThemeStore.getState();
+    store.setTheme("light");
+    expect(themeColors()).toEqual({ [LIGHT_MEDIA]: E.light, [DARK_MEDIA]: E.light });
+    useThemeStore.getState().setPalette("classic");
+    expect(themeColors()).toEqual({ [LIGHT_MEDIA]: C.light, [DARK_MEDIA]: C.light });
+    useThemeStore.getState().setTheme("dark");
+    expect(themeColors()).toEqual({ [LIGHT_MEDIA]: C.dark, [DARK_MEDIA]: C.dark });
+    useThemeStore.getState().toggleTheme();
+    expect(themeColors()).toEqual({ [LIGHT_MEDIA]: C.light, [DARK_MEDIA]: C.light });
+    useThemeStore.getState().setPalette("editions");
+    expect(themeColors()).toEqual({ [LIGHT_MEDIA]: E.light, [DARK_MEDIA]: E.light });
+  });
+
+  it("the system theme keeps one colour per scheme, so an OS flip still works natively", async () => {
+    serverHead(true);
+    const { default: useThemeStore } = await loadStore();
+    const { CLASSIC_PAGE_BACKGROUND: C } = await import("@/shared/constants/pwaThemeColors");
+    useThemeStore.getState().setTheme("system");
+    useThemeStore.getState().setPalette("classic");
+    expect(themeColors()).toEqual({ [LIGHT_MEDIA]: C.light, [DARK_MEDIA]: C.dark });
+  });
+
+  it("initTheme applies a stored Classic choice over the server's Editions tags", async () => {
+    serverHead();
+    localStorage.setItem(
+      "theme",
+      JSON.stringify({ state: { theme: "dark", palette: "classic" }, version: 0 })
+    );
+    const { default: useThemeStore } = await loadStore();
+    const { CLASSIC_PAGE_BACKGROUND: C } = await import("@/shared/constants/pwaThemeColors");
+    await useThemeStore.persist.rehydrate();
+    useThemeStore.getState().initTheme();
+    expect(themeColors()).toEqual({ [LIGHT_MEDIA]: C.dark, [DARK_MEDIA]: C.dark });
+  });
+
+  it("adds a theme-color tag when the page has none (error pages, tests)", async () => {
+    serverHead();
+    document.head.innerHTML = "";
+    const { default: useThemeStore } = await loadStore();
+    const { CLASSIC_PAGE_BACKGROUND: C } = await import("@/shared/constants/pwaThemeColors");
+    useThemeStore.getState().setTheme("dark");
+    useThemeStore.getState().setPalette("classic");
+    expect(themeColors()).toEqual({ "": C.dark });
+    expect(document.querySelectorAll("meta[data-theme-color-fallback]")).toHaveLength(1);
+    useThemeStore.getState().setTheme("light");
+    expect(themeColors()).toEqual({ "": C.light });
+    expect(document.querySelectorAll('meta[name="theme-color"]')).toHaveLength(1);
+  });
+
+  it("drops the boot script's fallback tag once the server tags exist, so it can't shadow them", async () => {
+    serverHead(true);
+    const fallback = document.createElement("meta");
+    fallback.name = "theme-color";
+    fallback.setAttribute("data-theme-color-fallback", "");
+    fallback.content = "#000000";
+    document.head.prepend(fallback);
+    const { default: useThemeStore } = await loadStore();
+    const { CLASSIC_PAGE_BACKGROUND: C } = await import("@/shared/constants/pwaThemeColors");
+    useThemeStore.getState().setTheme("system");
+    useThemeStore.getState().setPalette("classic");
+    expect(document.querySelector("meta[data-theme-color-fallback]")).toBeNull();
+    expect(themeColors()).toEqual({ [LIGHT_MEDIA]: C.light, [DARK_MEDIA]: C.dark });
+  });
+});

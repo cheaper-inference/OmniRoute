@@ -1,1 +1,0 @@
-- **fix(usage):** Preserve pending-request byte accounting across module reloads, including retained state created before the shared counter was added (related to #17283).

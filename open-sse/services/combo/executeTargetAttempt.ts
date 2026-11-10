@@ -5,6 +5,7 @@
  *
  * @internal — not part of the public combo.ts barrel.
  */
+import { cloneForQuality } from "./preContentTransportFailure.ts";
 import {
   checkFallbackError,
   classifyLockoutReason,
@@ -39,6 +40,7 @@ import {
   getLastSessionModel,
   getHandoff,
 } from "../../../src/lib/db/contextHandoffs.ts";
+import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
 import { resolveModelLockoutSettings } from "../../../src/lib/resilience/modelLockoutSettings";
 import { fetchCodexQuota } from "../codexQuotaFetcher.ts";
 import { emit } from "../../../src/lib/events/eventBus";
@@ -63,12 +65,14 @@ import {
   isHedgeCancelledSentinel,
   isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
+  isLocalProcessPressureResponse,
   toRecordedTarget,
   resolveDelayMs,
-  resolvePersistedConnectionCooldownSkipReason,
   isModelScoped400,
   isContextOverflowFailure,
   requestScopedReplayKey,
+  clampDeadlineFailureBudget,
+  isReadinessDeadlineFailure,
 } from "./comboPredicates.ts";
 import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
@@ -94,7 +98,7 @@ import {
 } from "./quotaExhaustion.ts";
 import { markAccountExhaustedFromCredits } from "../../../src/domain/quotaCache.ts";
 import { classifyComboOutcome, redactConnectionLabel } from "./comboErrorAggregation.ts";
-import { readConnectionForCooldownGate } from "./executeTargetGates.ts";
+import { resolveRetryCooldownWait, waitForAuthorizedRetry } from "./authorizedRetryWait.ts";
 import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   handlePreContentStreamRetry,
@@ -121,7 +125,12 @@ import {
   isReadinessFailure,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
+import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
+/**
+ * Executes an admitted target with configured retries and response validation. Returns a
+ * success or terminal response, or a nonterminal result when the loop may try another target.
+ */
 export async function executeTargetAttempt(
   opts: ExecuteTargetAttemptOptions
 ): Promise<ExecuteTargetResult> {
@@ -137,6 +146,11 @@ export async function executeTargetAttempt(
   const maxGlobalAttempts = clampGlobalAttempts(deps.config.maxGlobalAttempts);
   const retryDelayMs = resolveDelayMs(deps.config.retryDelayMs, 2000);
   const fallbackDelayMs = resolveDelayMs(deps.config.fallbackDelayMs, 0);
+  // Handoff and model-history rows are keyed per caller (see scopeHandoffSessionId).
+  const handoffSessionId = scopeHandoffSessionId(
+    deps.relayOptions?.sessionId,
+    deps.relayOptions?.apiKeyId
+  );
   const universalHandoffConfig = deps.universalHandoffConfig ?? DEFAULT_UNIVERSAL_HANDOFF_CONFIG;
   const stopTarget = (message: string, cause?: ProtectedPriorityStopCause) =>
     stopProtectedPriorityTarget({
@@ -148,11 +162,15 @@ export async function executeTargetAttempt(
       cause,
     });
 
+  const targetSignal = state.abortControllers.get(i)?.signal;
+  const cooldownWait = resolveRetryCooldownWait(deps);
   const familyTried = new Set<string>();
   // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): an empty_content turn spends
   // this loop's existing retry on a sibling connection with no lockout. Off = release path.
   const emptyStreamSiblingRecovery = isEmptyStreamSiblingRecoveryEnabled();
   let emptyTurnConnectionId: string | null = null;
+  const preContentTransportRecovery =
+    deps.clientRequestedStream && deps.resilienceSettings.streamRecovery.enabled === true;
   // Retry loop for transient errors
   for (let retry = 0; retry <= deps.maxRetries; retry++) {
     // Fix #1681: Bail out immediately if the client has disconnected
@@ -160,6 +178,7 @@ export async function executeTargetAttempt(
       deps.log.info("COMBO", `Client disconnected — aborting combo loop before model ${modelStr}`);
       return { ok: false, response: errorResponse(499, "Client disconnected") };
     }
+    if (state.comboExpired || targetSignal?.aborted) return null;
     state.globalAttempts++;
     if (state.globalAttempts > maxGlobalAttempts) {
       deps.log.warn(
@@ -207,36 +226,19 @@ export async function executeTargetAttempt(
         "COMBO",
         `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${deps.maxRetries + 1})`
       );
-      await new Promise((resolve) => {
-        const timer = setTimeout(resolve, retryDelayMs);
-        deps.signal?.addEventListener(
-          "abort",
-          () => {
-            clearTimeout(timer);
-            resolve(undefined);
-          },
-          { once: true }
-        );
+      const outcome = await waitForAuthorizedRetry({
+        state,
+        deps,
+        target,
+        targetSignal,
+        retryDelayMs,
+        cooldownWait,
+        allowRateLimitedConnection,
       });
-      if (deps.signal?.aborted) {
-        deps.log.info("COMBO", `Client disconnected during retry delay — aborting`);
+      if (outcome === "client_disconnected") {
         return { ok: false, response: errorResponse(499, "Client disconnected") };
       }
-
-      // Retry re-check: a sibling attempt (or attempt 1) may have persisted
-      // a quota cooldown while this attempt was sleeping out its retry delay
-      // ("Trying model 1/7: zai/glm-5.3 (retry 1)" after "already marked
-      // unavailable until …"). Reads fresh, not cached: see readConnectionForCooldownGate.
-      const persistedRetrySkip = await resolvePersistedConnectionCooldownSkipReason(
-        target,
-        (id) => readConnectionForCooldownGate(id, true),
-        allowRateLimitedConnection
-      );
-      if (persistedRetrySkip) {
-        deps.log.info("COMBO", persistedRetrySkip);
-        state.fallbackCount++;
-        return null;
-      }
+      if (outcome === "stop") return null;
     }
 
     deps.log.info(
@@ -300,12 +302,12 @@ export async function executeTargetAttempt(
     if (
       i === 0 &&
       universalHandoffConfig.enabled &&
-      deps.relayOptions?.sessionId &&
+      handoffSessionId &&
       !(deps.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
     ) {
-      const lastModel = getLastSessionModel(deps.relayOptions.sessionId, deps.combo.name);
+      const lastModel = getLastSessionModel(handoffSessionId, deps.combo.name);
       if (lastModel && lastModel !== modelStr) {
-        const existingHandoff = getHandoff(deps.relayOptions.sessionId, deps.combo.name);
+        const existingHandoff = getHandoff(handoffSessionId, deps.combo.name);
         attemptBody = injectUniversalHandoffBody(
           attemptBody, // Use the cloned body to maintain isolation
           lastModel,
@@ -349,6 +351,9 @@ export async function executeTargetAttempt(
           : "",
       fingerprint: resolveTargetFingerprint(target) ?? "",
     });
+    if (preContentTransportRecovery && deps.signal?.aborted) {
+      return { ok: false, response: errorResponse(499, "Client disconnected") };
+    }
     // #10681: record dispatch once per target (retries keep the first decision).
     if (!state.dispatchedTargets.has(target.executionKey)) {
       state.dispatchedTargets.add(target.executionKey);
@@ -358,12 +363,24 @@ export async function executeTargetAttempt(
         decision: "dispatched",
       });
     }
+    if (retry > 0) {
+      if (Date.now() >= cooldownWait.deadline) state.comboExpired = true;
+      if (deps.signal?.aborted) {
+        return { ok: false, response: errorResponse(499, "Client disconnected") };
+      }
+      if (state.comboExpired || targetSignal?.aborted) return null;
+    }
     const result = await deps.handleSingleModelWithTimeout(attemptBody, modelStr, {
       ...targetForAttempt,
       emptyTurnConnectionId,
       effectiveComboStrategy: deps.strategy,
       failoverBeforeRetry: deps.config.failoverBeforeRetry,
     });
+
+    if (preContentTransportRecovery && deps.signal?.aborted) {
+      releaseRejectedQualityResponse(result, result);
+      return { ok: false, response: errorResponse(499, "Client disconnected") };
+    }
 
     // Success — validate response quality before returning
     if (result.ok) {
@@ -389,21 +406,38 @@ export async function executeTargetAttempt(
       // Clone BEFORE quality check — validateResponseQuality reads the body
       // via getReader() which locks the stream. The clone's body is consumed
       // by the quality check; the original stays unlocked for piping.
-      let qualityClone: Response;
-      try {
-        qualityClone = result.clone();
-      } catch {
-        qualityClone = result;
-      }
+      const qualityClone = cloneForQuality(result);
       const quality = await validateResponseQuality(
         qualityClone,
         deps.clientRequestedStream,
         deps.log,
         deps.config.responseValidation as ResponseValidationConfig | null | undefined,
-        null,
-        await isTrustedEmptyTurn(provider, result, target.connectionId)
+        targetSignal
+          ? preContentTransportRecovery
+            ? AbortSignal.any(
+                [deps.signal, targetSignal].filter((signal): signal is AbortSignal => !!signal)
+              )
+            : targetSignal
+          : preContentTransportRecovery
+            ? deps.signal
+            : null,
+        await isTrustedEmptyTurn(provider, result, target.connectionId),
+        preContentTransportRecovery
       );
       releaseQualityClone(qualityClone, result, quality);
+      if (preContentTransportRecovery && deps.signal?.aborted) {
+        void quality.clonedResponse?.body?.cancel().catch(() => {});
+        releaseRejectedQualityResponse(qualityClone, result);
+        return { ok: false, response: errorResponse(499, "Client disconnected") };
+      }
+      // The per-target timers are gone once the first-output gate passed, so an abort here comes
+      // from the parent (a hedge sibling won, a fatal sibling, or the loop safety). The quality
+      // peek reports such an abort as valid; it is not a success of this target.
+      if (targetSignal?.aborted) {
+        void quality.clonedResponse?.body?.cancel().catch(() => {});
+        releaseRejectedQualityResponse(qualityClone, result);
+        return null;
+      }
       if (!quality.valid) {
         releaseRejectedQualityResponse(qualityClone, result);
         deps.log.warn(
@@ -667,12 +701,12 @@ export async function executeTargetAttempt(
       // Universal handoff: record model usage for session
       if (
         universalHandoffConfig.enabled &&
-        deps.relayOptions?.sessionId &&
+        handoffSessionId &&
         !(deps.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
       ) {
-        const prevModel = getLastSessionModel(deps.relayOptions.sessionId, deps.combo.name);
+        const prevModel = getLastSessionModel(handoffSessionId, deps.combo.name);
         recordSessionModelUsage(
-          deps.relayOptions.sessionId,
+          handoffSessionId,
           deps.combo.name,
           modelStr,
           provider,
@@ -694,7 +728,7 @@ export async function executeTargetAttempt(
                 : [];
 
           maybeGenerateUniversalHandoff({
-            sessionId: deps.relayOptions.sessionId,
+            sessionId: handoffSessionId,
             comboName: deps.combo.name,
             messages: handoffSourceMessages as MessageLike[],
             prevModel,
@@ -705,7 +739,7 @@ export async function executeTargetAttempt(
         }
 
         recordSessionModelUsage(
-          deps.relayOptions.sessionId,
+          handoffSessionId,
           deps.combo.name,
           modelStr,
           provider,
@@ -718,6 +752,7 @@ export async function executeTargetAttempt(
       if (
         getStrategyTraits(deps.strategy).contextRelay &&
         deps.relayOptions?.sessionId &&
+        handoffSessionId &&
         deps.relayConfig &&
         (deps.relayConfig.handoffProviders ?? []).includes(provider) &&
         provider === "codex"
@@ -741,7 +776,7 @@ export async function executeTargetAttempt(
                   : [];
 
             maybeGenerateHandoff({
-              sessionId: deps.relayOptions.sessionId,
+              sessionId: handoffSessionId,
               comboName: deps.combo.name,
               connectionId,
               percentUsed: quotaInfo.percentUsed,
@@ -774,6 +809,11 @@ export async function executeTargetAttempt(
 
     const failure = await readAttemptFailure(result, { log: deps.log, modelStr });
     const { errorText, errorBody, structuredError } = failure;
+    // Return the original verdict before retry hints, health or affinity mutations.
+    // The attempt loop treats this as fatal and cancels already-running hedges.
+    if (isLocalProcessPressureResponse(result, errorBody)) {
+      return { ok: false, response: result };
+    }
     const retryAfter = resolveAttemptRetryAfter(failure);
 
     // Track earliest retryAfter
@@ -1273,6 +1313,27 @@ export async function executeTargetAttempt(
       code: structuredError?.code,
     });
     state.lastStatus = result.status;
+    // Opt-in sub-budget for readiness-deadline failures
+    // (OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES). A stalled upstream fails the
+    // readiness window (tens of seconds to minutes) on EVERY target, and each
+    // rotation re-dispatches the full body — a few of them multiply user
+    // latency and gateway memory while the global-attempts cap (calibrated
+    // for fast failures) still has plenty of headroom. With the budget set,
+    // exhausting it terminates the combo with a clean 504 instead of
+    // rotating further targets. Unset (default) = disabled, zero change.
+    // The exit itself happens below, AFTER the model-lockout and provider-
+    // cooldown recording, so the target that exhausts the budget is charged
+    // exactly like every earlier one.
+    let deadlineFailureBudgetExhausted = 0;
+    if (isReadinessDeadlineFailure(result.status, structuredError?.code)) {
+      state.deadlineFailures++;
+      const deadlineFailureBudget = clampDeadlineFailureBudget(
+        process.env.OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES
+      );
+      if (deadlineFailureBudget > 0 && state.deadlineFailures >= deadlineFailureBudget) {
+        deadlineFailureBudgetExhausted = deadlineFailureBudget;
+      }
+    }
     state.fallbackCount++;
     // Wire combo failures into the resilience dashboard (model-level lockout)
     // alongside the provider-level cooldown below — they govern different scopes.
@@ -1336,23 +1397,27 @@ export async function executeTargetAttempt(
       );
     }
 
+    if (deadlineFailureBudgetExhausted > 0) {
+      deps.log.warn(
+        "COMBO",
+        `Readiness-deadline failure budget (${deadlineFailureBudgetExhausted}) exhausted — terminating combo instead of rotating further targets`
+      );
+      return {
+        ok: false,
+        response: errorResponse(
+          504,
+          `Stream readiness deadline failed on ${state.deadlineFailures} targets — terminating to avoid amplifying a stalled upstream; retry shortly`
+        ),
+      };
+    }
+
     const fallbackWaitMs =
       fallbackDelayMs > 0 && cooldownMs > 0 && cooldownMs <= MAX_FALLBACK_WAIT_MS
         ? Math.min(cooldownMs, fallbackDelayMs)
         : 0;
     if ([502, 503, 504].includes(result.status) && fallbackWaitMs > 0) {
       deps.log.debug?.("COMBO", `Waiting ${fallbackWaitMs}ms before fallback to next model`);
-      await new Promise((resolve) => {
-        const timer = setTimeout(resolve, fallbackWaitMs);
-        deps.signal?.addEventListener(
-          "abort",
-          () => {
-            clearTimeout(timer);
-            resolve(undefined);
-          },
-          { once: true }
-        );
-      });
+      await waitForCooldownAwareRetry(fallbackWaitMs, deps.signal);
       if (deps.signal?.aborted) {
         deps.log.info("COMBO", `Client disconnected during fallback wait — aborting`);
         return { ok: false, response: errorResponse(499, "Client disconnected") };

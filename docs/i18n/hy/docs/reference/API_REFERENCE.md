@@ -6,10 +6,12 @@
 
 🌐 **Լեզուներ:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API-ի հիմնական տեղեկատուն։ Այն ներառում է հանրային `/v1` մակերեսը և կառավարման առավել հաճախ օգտագործվող վերջնակետերը։ Մեքենայաընթեռնելի [`docs/openapi.yaml`](../openapi.yaml) ֆայլը և `src/app/api/`-ի ներքո գտնվող երթուղիների ծառը ամբողջական աղբյուրներն են։
+OmniRoute API-ի հիմնական տեղեկատուն։ Այն ընդգրկում է հանրային `/v1` մակերեսը և կառավարման ամենաշատ օգտագործվող վերջնակետերը։ Մեքենայաընթեռնելի [`docs/openapi.yaml`](../openapi.yaml) ֆայլը և `src/app/api/`-ի ներքո գտնվող երթուղիների ծառը ամբողջական աղբյուրներն են։
 
 OpenAI-ին համատեղելի արձանագրության և մատակարարների հնարավորությունների կենտրոնացված մատրիցի համար տես
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md)։
+
+Յուրաքանչյուր տեղակայում սպասարկում է սպեցիֆիկացիայի իր պատճենը՝ `/openapi.yaml` հասցեում, որը կառուցման ընթացքում ստեղծվում է `docs/openapi.yaml`-ից։ Այն պարունակում է կառուցման տարբերակը և հարաբերական սերվերի URL՝ (`./`), ուստի հարցումները մնում են այն հոսթում, որը սպասարկել է փաստաթուղթը։ Ներբեռնված ֆայլը ներմուծող գործիքը նման հոսթ չունի և բազային URL-ը պետք է սահմանվի ձեռքով։
 
 ---
 
@@ -337,7 +339,7 @@ GET /v1/embeddings
 
 ---
 
-## Պատկերների գեներացում
+## Image Generation
 
 ```bash
 POST /v1/images/generations
@@ -351,35 +353,22 @@ Content-Type: application/json
 }
 ```
 
-Հասանելի մատակարարներից են OpenAI-ը (GPT Image 2), xAI-ը (Grok Image), Together AI-ը (FLUX), Fireworks AI-ը, Nebius-ը (FLUX), Hyperbolic-ը, NanoBanana-ն, **OpenRouter-ը**, **ZenMux-ը**, SD WebUI-ն (տեղային), ComfyUI-ն (տեղային)։
+Հասանելի մատակարարները ներառում են OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (տեղական), ComfyUI (տեղական)։
 
-`n`-ը `data[]`-ում վերադարձնում է `n` պատկեր։ Այն մատակարարների համար, որոնց վերադաս API-ն յուրաքանչյուր կանչի դեպքում վերադարձնում է մեկ պատկեր
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), կատարվում են `n` առանձին վերադաս կանչեր, որոնցից առավելագույնը 4-ը՝ միաժամանակ։ Ֆիքսված `seed`-ը շեղվում է կանչի ինդեքսով (`seed`, `seed + 1`, …), ուստի պատկերները տարբերվում են, բայց մնում են վերարտադրելի։ `n`-ի առավելագույն արժեքը 10 է։ Հարցումը ամբողջությամբ ձախողվում է, եթե որևէ կանչ ձախողվի։ Բազմակի կանչերի ձևաչափերի ցանկը `SINGLE_IMAGE_FANOUT_FORMATS`-ն է՝
-`open-sse/handlers/imageGeneration/fanOut.ts`-ում։
+`n` վերադարձնում է `n` պատկերները `data[]` ում: Պրովայդերները, որոնց վերին հոսանքում API մեկ զանգի համար վերադարձնում է մեկ պատկեր (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI), ստանում են `n` առանձին զանգեր վերևից՝ առավելագույնը 4 թռիչքի ժամանակ: Ֆիքսված `seed` փոխհատուցվում է զանգի ինդեքսով (`seed`, `seed + 1`,…), այնպես որ պատկերները տարբերվում են, բայց մնում են վերարտադրելի: `n` սահմանափակված է 10-ով: Հարցումն ամբողջությամբ ձախողվում է, եթե որևէ զանգ ձախողվի: Fan-out ձևաչափերի ցանկը `SINGLE_IMAGE_FANOUT_FORMATS` է `open-sse/handlers/imageGeneration/fanOut.ts` ում:
 
-ZenMux-ը կրկին օգտագործում է API բանալիով առկա միացումը և ընդունում է `zenmux/` կամ `zm/` նախածանցներ։
+ZenMux նորից օգտագործում է գոյություն ունեցող API-բանալին կապը և ընդունում `zenmux/` կամ `zm/` նախածանցները.
 
-- `zenmux/openai/gpt-image-2`-ն օգտագործում է ZenMux-ի OpenAI Images API-ն։ Հնարավոր ընտրանքներն են `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` և `response_format`։
-- Այլ հրատարակիչներ, օրինակ՝ `zm/meta/muse-image-1.0`, օգտագործում են ZenMux-ի Vertex AI-ի `:predict`
-  վերջնակետը։ `n`-ը համապատասխանեցվում է `sampleCount`-ին, `aspect_ratio`-ը՝ `aspectRatio`-ին, իսկ `image_size`-ը
-  (`1K`, `2K`, `4K`)՝ `sampleImageSize`-ին։ Պիքսելային `size`-ը տրամադրում է միայն կողմերի հարաբերակցություն,
-  այլ ոչ թե երաշխավորված պիքսելային չափեր։ Աջակցվող հարաբերակցությունները, թույլատրությունները և քանակները
-  տարբերվում են ըստ մոդելի։
-- `zm/inclusionai/ming-image-0.1-design`-ը ինքն է ընտրում չափերը։ Բաց թողեք `size`-ը,
-  `aspect_ratio`-ը և `image_size`-ը․ բացահայտ արժեքները վերադարձնում են HTTP 400։ PNG, JPEG և WebP
-  ձևաչափերը կարելի է պահանջել `output_format`-ի միջոցով։
+- `zenmux/openai/gpt-image-2` օգտագործում է ZenMux ի OpenAI Պատկերները API: Տարբերակները ներառում են `size`, `quality`, `n`, `output_format`, `output_compression`, `background` և `response_format`:
+- Այլ հրատարակիչներ, ինչպիսիք են `zm/meta/muse-image-1.0`, օգտագործում են ZenMux ի Vertex AI `:predict` վերջնակետը: `n` քարտեզներ `sampleCount`, `aspect_ratio` to `aspectRatio`, իսկ `image_size` (`1K`, `2K`, `4K`) `sampleImageSize`: Pixel `size` ապահովում է միայն կողմի հարաբերակցությունը, ոչ երաշխավորված պիքսելների չափսերը: Աջակցվող գործակիցները, լուծումները և հաշվարկները տարբերվում են ըստ մոդելի:
+- `zm/inclusionai/ming-image-0.1-design` ընտրում է իր չափերը: Բաց թողնել `size`, `aspect_ratio` և `image_size`; բացահայտ արժեքները վերադարձնում են HTTP 400: PNG, JPEG և WebP կարող են պահանջվել `output_format` ով:
 
-Այս ինտեգրումն աջակցում է տեքստից պատկերների գեներացմանը, ոչ թե հղումային պատկերի խմբագրմանը։ Vertex-ի
-ելքը նորմալացվում է `data[].b64_json`-ի։ `response_format: "url"`-ը վերադարձնում է վերադասի
-HTTPS URL կամ base64 տվյալների URL, երբ հասանելի են միայն պատկերի բայթերը։ Դատարկ կամ զտված ելքերը
-վերադարձնում են սխալ, այլ ոչ թե դատարկ հաջող պատասխան։ Մոդելի հասանելիությունը կախված է ZenMux-ի հաշվից։
-Տես [ZenMux-ի Vertex API-ն](https://docs.zenmux.ai/api/vertexai/generate-images) և
-[OpenAI Images API-ն](https://docs.zenmux.ai/api/openai/generate-an-image)։
+Այս ինտեգրումն աջակցում է տեքստի պատկերի ստեղծմանը, այլ ոչ թե հղում-պատկերի խմբագրմանը: Vertex ելքը նորմալացված է `data[].b64_json`; `response_format: "url"` վերադարձնում է HTTPS URL կամ base64 տվյալների URL երբ հասանելի են միայն պատկերի բայթերը: Empty/filtered ելքերը վերադարձնում են ոչ թե դատարկ հաջողություն, այլ սխալ: Մոդելի հասանելիությունը կախված է ZenMux հաշվից: Տես [ZenMux ի Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) և [OpenAI Պատկերները API](https://docs.zenmux.ai/api/openai/generate-an-image) :
+
+Microsoft 365 Copilot մուտքի կապը ծառայում է `copilot-m365-web/m365-copilot-image` Copilot ի ներկառուցված պատկերային գործիքի միջոցով՝ մեկ Copilot պտույտ յուրաքանչյուր պատկերի համար (`n` 1–4), `size` ուղղորդում է միայն կողմնորոշումը և պատկերները վերադարձվում են ներկառուցված (`b64_json` կամ URL տվյալների `response_format: "url"` համար): Տես [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Թվարկել պատկերների բոլոր մոդելները
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -818,69 +807,42 @@ OpenAI-ի հետ համատեղելի փաթեթային մշակում։
 
 ---
 
-## Որոնման API
+## Որոնել API
 
-Վեբ/որոնման մատակարարների աբստրակցիա (Tavily, Brave, Exa, Serper և այլն)։
+Web/search մատակարարի աբստրակցիա (Tavily, Brave, Exa, Serper և այլն):
 
-| Մեթոդ | Ուղի                   | Նկարագրություն                                                                                                       |
-| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Կազմաձևված որոնման մատակարարների և հնարավորությունների ցանկ                                                          |
-| POST  | `/v1/search`           | Որոնման հարցման գործարկում — մարմինը վավերացվում է `v1SearchSchema`-ի միջոցով, աջակցում է քեշավորմանն ու համախմբմանը |
-| GET   | `/v1/search/analytics` | Ըստ մատակարարի՝ հաջողությունների/ուշացման/քեշի վիճակագրություն                                                       |
+| Մեթոդ | Ճանապարհ               | Նկարագրություն                                                                                        |
+| ----- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Ցուցակեք կազմաձևված որոնման մատակարարների + հնարավորությունները                                       |
+| POST  | `/v1/search`           | Գործարկեք որոնման հարցում — մարմինը վավերացված `v1SearchSchema` կողմից, աջակցում է caching/coalescing |
+| GET   | `/v1/search/analytics` | Յուրաքանչյուր մատակարարի hit/latency/cache վիճակագրություն                                            |
 
-**Նույնականացում՝** Bearer API բանալի (`extractApiKey` + `isValidApiKey`)։ Որոնման քաղաքականությունը կիրառվում է `enforceApiKeyPolicy`-ի միջոցով։
+**Auth:** Կրող API բանալի (`extractApiKey` + `isValidApiKey`). Որոնման քաղաքականությունն իրականացվում է `enforceApiKeyPolicy` միջոցով:
 
-### Exa-ի և Tavily-ի `provider_options`
+**Ավտոմատ ընտրություն.** առանց `provider`, սկզբում աշխատում է կազմաձևված կապով ամենաէժան մատակարարը, իսկ հաջորդ ամենաէժանը ձախողումն է: Անվճար վերջին միջոցի մատակարարները (`duckduckgo-free`) օգտագործվում են միայն այն դեպքում, երբ այլ բան կազմաձևված չէ: Ինքնահոսթավորված SearXNG հաշվվում է որպես կազմաձև, երբ նրա կապը պահում է իրական `baseUrl` (ոչ թե կատալոգի լռելյայն `http://localhost:8888/search` `baseUrl` : այն այնուհետև դասվում է որպես $0 պրովայդեր ստեղնավորվածներից առաջ, իսկ ամենաէժան ստեղնավորված մատակարարը որպես ձախողում, ներառյալ, երբ SearXNG պատասխանում է 400, 401, 403 կամ 401 `http(s)` URL : ամպային մետատվյալների հասցեն չի հաշվվում: SearXNG կապը, որը պահում է նշան, դասվում է այս կերպ միայն `https://` կամ loopback `http://` վրա: Հեռավոր պարզ `http://` միջոցով այն երբեք ձախողում է և մնում է որպես վերջին միջոց, որն օգտագործվում է միայն այն ժամանակ, երբ որևէ այլ մատակարար չկա կազմաձևված կամ երբ պահանջվում է անունով, ուստի այն ուղարկում է նշանը հստակ տեքստով այդ երկու դեպքերում:
 
-Exa-ն և Tavily-ն մատակարարին հատուկ դաշտերը կարդում են անունների տարածությամբ փաթեթից՝
-`provider_options.exa` (կամ `provider_options["exa-search"]`) և `provider_options.tavily`
-(կամ `provider_options["tavily-search"]`)։ Միայն ստորև նշված բանալիներն են փոխանցվում։ Յուրաքանչյուրը
-ստուգվում է իր սեփական Zod սխեմայի դեմ՝
-`open-sse/handlers/search/providerOptionsPassthrough.ts`-ում, իսկ սխալ տիպ ունեցող բանալին
-հեռացվում է։ Ցանկացած այլ բանալի անտեսվում է, ներառյալ նույնականացման տվյալները, բազային URL-ը,
-`stream`-ը և `outputSchema`-ն։ Այլ մատակարարների կողմից օգտագործվող հարթ բանալիները (`cx`, `depth` ...)
-շարունակում են աշխատել ինչպես նախկինում։
+### Exa եւ Tavily `provider_options`
 
-| Մատակարար | Վերևի մակարդակի դաշտեր                                                                                                                                                                                                                                                                                                                                                    | Ներդրված                                                                                                                                           |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (հարթ պարզունակներ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` միաձուլվում է լռելյայն `{ text: true, highlights: true }` արժեքի վրա |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
+Exa-ն և Tavily-ը կարդում են մատակարարի համար նախատեսված դաշտերը անունների տարածության պայուսակից՝ `provider_options.exa` (կամ `provider_options["exa-search"]`) և `provider_options.tavily` (կամ `provider_options["tavily-search"]`): Միայն ստորև նշված ստեղները փոխանցվում են: Յուրաքանչյուրը ստուգվում է `open-sse/handlers/search/providerOptionsPassthrough.ts` ում իր սեփական Zod սխեմայի համեմատ, և սխալ տիպով բանալին բաց է թողնվում: Ցանկացած այլ բանալի անտեսվում է, այդ թվում՝ auth, base URL, `stream` և `outputSchema`: Այլ պրովայդերների կողմից օգտագործվող հարթ ստեղները (`cx`, `depth`, ...) աշխատում են ինչպես նախկինում:
 
-Ընդհանուր դաշտերը միշտ առաջնահերթ են՝ `query`, `max_results`, `filters` (տիրույթներ), `country` և
-`search_type`-ից ստացվող թեման։ Exa-ում `search_type: "news"`-ը պահպանում է
-`category: "news"`-ը։ Tavily-ն նաև ընդունում է `search_type: "finance"` (`topic: "finance"`)։
+| Մատակարար | Բարձր մակարդակի դաշտեր                                                                                                                                                                                                                                                                                                                                                    | Բնադրված                                                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (հարթ պարզունակներ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` միավորվել է լռելյայն `{ text: true, highlights: true }` վրա |
+| Թավիլի    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                         |
 
-Firecrawl-ի որոնման արժեքը գրանցվում է վերադարձված արդյունքների յուրաքանչյուր սկսված 10-ական
-բլոկի համար՝ մեկ բլոկի արժեքը $0.002 (2 կրեդիտ), իսկ յուրաքանչյուր կանչի համար՝ առնվազն մեկ բլոկ
-([Firecrawl-ի վճարում](https://docs.firecrawl.dev/billing))․ 11 արդյունքն արժե $0.004։
+Միշտ հաղթում են ընդհանուր դաշտերը՝ `query`, `max_results`, `filters` (տիրույթներ), `country` և `search_type` ից ստացված թեման։ Exa-ում `search_type: "news"` պահպանում է `category: "news"`: Տավիլը նույնպես ընդունում է `search_type: "finance"` (`topic: "finance"`)։
 
-Ընդհանուր `time_range`-ն այժմ հասնում է երկու մատակարարներին․ Exa-ն ստանում է
-`startPublishedDate` (ISO դրոշմ), իսկ Tavily-ն՝ `start_date` (`YYYY-MM-DD`)։ `provider_options`-ում
-բացահայտորեն նշված ամսաթիվը վերագրում է քարտեզագրված ամսաթվին։
+Firecrawl որոնման արժեքը գրանցվում է 10 վերադարձված արդյունքների մեկնարկած բլոկի համար՝ $0,002 (2 վարկ) մեկ բլոկ և առնվազն մեկ բլոկ մեկ զանգի համար ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): 11 արդյունք արժե $0,004:
 
-Exa-ի արդյունքները `provider_raw`-ում պահպանում են `id`, `highlights` (յուրաքանչյուր highlight-ը,
-ոչ միայն առաջինը, որն օգտագործվում է որպես `snippet`), `highlight_scores`, `summary`, `subpages`,
-`entities` և `extras`։ Tavily-ի արդյունքները պահպանում են `images` և `favicon`։
+Ընդհանուր `time_range` այժմ հասնում է երկու մատակարարներին. Exa-ն ստանում է `startPublishedDate` (ISO ժամադրոշմ) և Tavily-ն ստանում է `start_date` (`YYYY-MM-DD`): `provider_options` ում հստակ ամսաթիվը գերակայում է քարտեզագրվածին:
 
-Linkup-ի որոնման արժեքը գրանցվում է $0.005՝ `depth`-ի `fast` և `standard` արժեքների, և $0.05՝
-`deep` արժեքի համար ([Linkup-ի գնագոյացում](https://docs.linkup.so/pages/documentation/development/pricing))՝
-անկախ նրանից՝ `depth`-ը գալիս է `provider_options`-ից, թե կապի կարգավորումներից։
+Exa արդյունքները պահպանում են `id`, `highlights` (յուրաքանչյուր կարևոր կետ, ոչ միայն առաջինը, որն օգտագործվում է որպես `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` և `extras` `provider_raw` ում: Tavily արդյունքները պահպանում են `images` և `favicon`:
 
-Exa-ի `type: "lite"` (Exa 3.0) ռեժիմն ընդունում է դաշտերի ավելի փոքր հավաքածու և մերժում է ամբողջ
-հարցումը, երբ որևէ այլ դաշտ սահմանված է։ Lite-ի համար `additionalQueries`-ը, `systemPrompt`-ը և
-`contents`-ի՝ `text`-ից ու `highlights`-ից բացի, բոլոր բանալիները հեռացվում են կանչից առաջ։
-Հնացած `subpages`, `subpageTarget`, `highlights.numSentences` և `highlights.highlightsPerUrl`
-դաշտերն այլևս չեն փոխանցվում։
+Linkup որոնման արժեքը գրանցվում է $0,005 `depth` `fast` և `standard` համար և $0,05-ի համար `deep` համար ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), անկախ նրանից `depth` գալիս է `provider_options` ից կամ կապի կարգավորումներից:
 
-Արժեքի հաշվառումը կատարվում է հարթ `costPerQuery` ռեեստրով, բացառությամբ Exa-ի, որը հետևում է
-Exa-ի սեփական գնագոյացմանը․ `auto`-ի (և ժառանգական `fast`-ի) համար յուրաքանչյուր կանչը $0.007,
-կամ `lite`-ի (և ժառանգական `instant`-ի) համար՝ $0.004՝ ներառելով 10 արդյունք․ յուրաքանչյուր
-հետագա արդյունքի համար՝ $0.001, իսկ `contents.summary` սահմանված լինելու դեպքում՝ յուրաքանչյուր
-վերադարձված արդյունքի համար $0.001։ Tavily-ն գրանցվում է որպես 1 կրեդիտ ($0.008)՝
-`search_depth`-ի `basic`, `fast` և `ultra-fast` արժեքների, և 2 կրեդիտ ($0.016)՝ `advanced` արժեքի
-համար ([Tavily API-ի կրեդիտներ](https://docs.tavily.com/documentation/api-credits))։ `auto_parameters: true`
-արժեքով կանչը, որի դեպքում Tavily-ն անցնում է advanced ռեժիմի, միևնույն է գրանցվում է որպես
-1 կրեդիտ։
+Exa `type: "lite"` (Exa 3.0) ընդունում է դաշտերի ավելի փոքր շարք և մերժում է ամբողջ հարցումը, երբ որևէ այլ դաշտ է սահմանված: Lite-ի համար `additionalQueries`, `systemPrompt` և բոլոր `contents` ստեղները, բացի `text` և `highlights` հանվում են զանգից առաջ: Հնացած `subpages`, `subpageTarget`, `highlights.numSentences` և `highlights.highlightsPerUrl` այլևս չեն փոխանցվում:
+
+Ծախսերի հաշվառումը `costPerQuery` հարթ գրանցամատյանն `instant`, բացառությամբ Exa- `auto`, որը հետևում `fast` `lite` ի սեփական գնին. $0,001 յուրաքանչյուր հետագա արդյունքի համար; և $0,001 մեկ վերադարձված արդյունքի համար, երբ `contents.summary` սահմանվում է: Tavily-ն գրանցվում է 1 կրեդիտով ($0,008) `search_depth` `basic`, `fast` և `ultra-fast` համար, իսկ 2 վարկ (0,016$) `advanced` համար ( [Tavily API վարկեր](https://docs.tavily.com/documentation/api-credits) ): `auto_parameters: true` ով զանգը, որը Tavily-ն թարմացնում է առաջադեմի, դեռ գրանցվում է 1 կրեդիտով:
 
 ---
 
@@ -1009,32 +971,28 @@ CLI-ն `base_url + /responses`-ը թարմացնում է WebSocket-ի և OmniRo
 
 ---
 
-## Ինքնասպասարկվող օգտագործում (`/api/usage/om-usage`)
+## Ինքնասպասարկման օգտագործում (`/api/usage/om-usage`)
 
-Ցանկացած API բանալի կարող է կարդալ **իր սեփական** օգտագործումն ու քվոտաները՝ առանց կառավարման
-նույնականացման։ Սա այն endpoint-ն է, որն օգտագործում է հաճախորդը (CLI-ն, OmniCopilot-ի վահանակը),
-որպեսզի բանալու տիրոջը ցույց տա նրա ծախսերը։
+Ցանկացած API ստեղն կարող է կարդալ** իր սեփականը** օգտագործման և քվոտաների — ոչ կառավարման հեղինակություն. Սա այն վերջնակետն է, որն օգտագործում է հաճախորդը (CLI, OmniCopilot վահանակ)՝ բանալիատիրոջը ցույց տալու իրենց ծախսերը:
 
 ```bash
-# Տեքստային ձևաչափ (պատմական պայմանագիր — պարզ տեքստ տերմինալի համար)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Կառուցվածքային ձևաչափ — այն, ինչ օգտագործում է UI-ն
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Բանալին պետք է ունենա միացված **`allowUsageCommand`**-ը (լռելյայն անջատված է. վահանակի API բանալիների
-կառավարիչը այն փոխում է յուրաքանչյուր բանալիի համար)։ Առանց դրա endpoint-ը վերադարձնում է `403`։
+Բանալին պետք է ունենա**`allowUsageCommand`** միացված է (կանխադրաբար անջատված է — վահանակի API-ստեղների կառավարիչը փոխում է այն յուրաքանչյուր բանալիով): Առանց դրա վերջնակետը պատասխանում է `403`:
 
-`?format=json`-ը վերադարձնում է տարբերակված կառուցվածք, որպեսզի կանչողը երբեք մերժված պատասխանից
-տվյալների դաշտ չկարդա։ Հաջողության դեպքում.
+`?format=json` վերադարձնում է խտրական ձև, այնպես որ զանգահարողը երբեք չի կարդում տվյալների դաշտը մերժումից հետո: Հաջողության մասին.
 
 ```jsonc
 {
   "allowed": true,
-  // առկա է միայն այն դեպքում, երբ բանալին միացրել է յուրաքանչյուր բանալու օգտագործման սահմանաչափերը (օրական/շաբաթական USD).
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1043,9 +1001,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // ընտրված provider-ի քվոտայի snapshot-ը, կամ null, երբ դեռ ոչինչ չի պահվել քեշում.
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // յուրաքանչյուր connection-ի snapshot-ը, որպեսզի UI-ն կարողանա մի քանի provider ցուցադրել կողք կողքի.
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1053,65 +1011,49 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-Մերժման դեպքում (`401`՝ անվավեր բանալի / `403`՝ թույլատրված չէ) նույն երթուղին վերադարձնում է
-`{ "allowed": false, "error": { "message": "…" } }`։ Ներկա, բայց դատարկ `personal`/`provider`
-դաշտը (բանալին թույլատրված է, սակայն դեռ ոչինչ չի հայտնաբերվել) տարբերվում է մերժումից, և միայն
-JSON ձևաչափն է տարբերակում այդ վիճակները։
+Մերժման դեպքում (`401` վատ ստեղնը / `403` չի թույլատրվում) նույն երթուղին վերադարձնում է `{ "allowed": false, "error": { "message": "…" } }` — ներկա, բայց դատարկ `personal`/`provider` (բանալին թույլատրված է, դեռ ոչինչ չի սովորել) տարբերվում է մերժումից, և միայն JSON ձևն է տարբերակում դրանք:
 
-**Auth:** կանչողի սեփական Bearer API բանալին, վավերացված `isValidApiKey`-ով — սա կառավարման
-մակերեսը չէ (`/api/keys/…`), որը շարունակում է պաշտպանվել `requireManagementAuth`-ով։
+**Auth:** զանգահարողի սեփական կրող API ստեղնը, վավերացված `isValidApiKey` — ով, սա _ոչ_ կառավարման մակերեսն է (`/api/keys/…`), որը մնում է `requireManagementAuth` հետևում:
 
-### Հում և շեմով ճշգրտված քվոտայի տոկոսներ
+### Հումք ընդդեմ Cutoff- ճշգրտված քվոտայի տոկոսների
 
-`/api/usage/om-usage`-ն օգտագործելիս կանչողները պետք է նկատի ունենան տարբերությունը **պարզ տեքստի
-արտածմամբ** և կառուցվածքային **JSON արտածմամբ** ներկայացվող տոկոսների միջև։
+`/api/usage/om-usage` օգտագործելիս զանգահարողները պետք է ուշադրություն դարձնեն այն տոկոսների միջև, որոնք ներկայացված են** պարզ տեքստային ելք** և կառուցվածքային**JSON ելք** :
 
-| Aspect               | Plain-text format (`/api/usage/om-usage` / `@@om-usage`)                                                              | JSON format (`?format=json`)                                                                        |
-| :------------------- | :-------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
-| **Output field**     | `NN% left` (օրինակ՝ `20% left`)                                                                                       | `provider.quotas` / `providers[].quotas`                                                            |
-| **Measurement**      | **Շեմով ճշգրտված օգտագործելի թույլատրելի չափաբաժին**. շեմից վեր մնացած տարողությունը                                  | **Հում upstream քվոտա**. չճշգրտված provider-ի չափումը                                               |
-| **Cutoff scaling**   | Մասշտաբավորվում է `effectiveRemainingPercent()`-ի միջոցով, այնպես որ պաշտպանված պահուստը կարդացվում է որպես `0% left` | Չկա (հում snapshot արժեքները՝ provider-ի հաղորդմամբ)                                                |
-| **Threshold data**   | Ներառված է ցուցադրվող տոկոսում                                                                                        | Պահվում է յուրաքանչյուր connection-ի `quotaWindowThresholds`-ում (կամ սերվերի լռելյայն արժեքներում) |
-| **Primary consumer** | Ինտերակտիվ CLI-ներ, տերմինալի հուշումներ, մարդկային օպերատորներ                                                       | Ծրագրային ինտեգրումներ, վահանակներ, վերլուծություն, հաշվարկների հետևողներ                           |
+| Ասպեկտ               | Պարզ տեքստի ձևաչափ (`/api/usage/om-usage` / `@@om-usage`)                                                    | JSON ձևաչափ (`?format=json`)                                                |
+| :------------------- | :----------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| **Արդյունք դաշտ**    | `NN% left` (օրինակ, `20% left`)                                                                              | `provider.quotas` / `providers[].quotas`                                    |
+| **Չափում**           | **Կտրված-ճշգրտված օգտագործելի նպաստ** : մնացորդային հզորությունը սահմանային շեմից բարձր                      | **Հումքի վերին քվոտա** Չճշգրտված մատակարարի չափում                          |
+| **Cutoff scaling**   | Սանդղակավորվել է `effectiveRemainingPercent()` միջոցով, որպեսզի պաշտպանված արգելոցը կարդացվի որպես `0% left` | Ոչ մեկը (չմշակված պատկերի արժեքները, ինչպես հաղորդում է մատակարարը)         |
+| **Շեմային տվյալներ** | Ներառված է ցուցադրվող տոկոսի մեջ                                                                             | Պահվում է `quotaWindowThresholds` ում մեկ կապի համար (կամ սերվերի լռելյայն) |
+| **Առաջնային սպառող** | Ինտերակտիվ CLIs, տերմինալի հուշումներ, մարդկային օպերատորներ                                                 | Ծրագրային ինտեգրումներ, վահանակներ, վերլուծություններ, վճարումների հետքեր   |
 
-#### Շեմի ճշգրտման բանաձևը
+#### The Cutoff Adjustment Formula
 
-OmniRoute-ն աջակցում է քվոտայի ակտիվ շեմերի կանխարգելիչ կիրառմանը՝ upstream սպառումը կանխելու համար
-(կարգավորվում է connection-ի `quotaWindowThresholds`-ի, provider-ի լռելյայն արժեքների կամ գլոբալ
-դիմակայունության կարգավորումների միջոցով)։ Երբ քվոտայի պատուհանում ակտիվ է շեմ
-(օրինակ՝ `cutoff = 25%`), տեքստային renderer-ը մնացած թույլատրելի չափաբաժինը հաշվարկում է այսպես.
+OmniRoute աջակցում է ակտիվ քվոտաների կրճատումներ՝ կանխելու վերին հոսանքի հյուծումը (կազմաձևված է `quotaWindowThresholds` կապի, մատակարարի լռելյայն կամ գլոբալ ճկունության կարգավորումների միջոցով): Երբ սահմանային շեմը (օրինակ՝ `cutoff = 25%`) ակտիվ է քվոտայի պատուհանում, տեքստի մատուցողը հաշվարկում է մնացորդը հետևյալ կերպ.
 
-- Եթե `remaining <= cutoff`, վերադարձվում է `0%`։
-- Եթե `remaining > cutoff`, վերադարձվում է `((remaining - cutoff) / (100 - cutoff)) * 100`։
+- Եթե `remaining <= cutoff`. վերադարձնում է `0%`:
+- Եթե `remaining > cutoff`. վերադարձնում է `((remaining - cutoff) / (100 - cutoff)) * 100`:
 
-Ձևաչափված տեքստային արտածումը կլորացնում է այս արժեքը մինչև մոտակա ամբողջ թիվը (`Math.round(...)`)։
+Ձևաչափված տեքստի ելքը կլորացնում է սա մինչև մոտակա ամբողջ թիվը (`Math.round(...)`):
 
 #### Պատկերավոր օրինակ
 
-Դիտարկենք մատակարարի պատուհան՝ **60% հում օգտագործմամբ** (հետևաբար՝ **40% հում մնացած քվոտայով**) և **25% մնացած քվոտայի cutoff**-ի կազմաձևված շեմով.
+Դիտարկենք մատակարարի պատուհանը** 60% հումքի օգտագործում** (հետևաբար** 40% հումքի մնացորդային քվոտա** ) և կազմաձևված** 25% մնացյալ քվոտայի կրճատում** շեմը:
 
-| Ներկայացում                       | Հաշվարկ                                            | Մնացած  |                Ենթադրվող օգտագործված                |
-| :-------------------------------- | :------------------------------------------------- | :-----: | :-------------------------------------------------: |
-| **Հում JSON (`?format=json`)**    | Վերևի հոսքի snapshot (`quotas[window]`)            | **40%** |                       **60%**                       |
-| **Տեքստային ձևաչափ (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (եթե հաշվարկվում է որպես `100 - remaining`) |
+| Ներկայացուցչություն            | Հաշվարկ                                            | Մնացած  |           Նշանակված Օգտագործված           |
+| :----------------------------- | :------------------------------------------------- | :-----: | :---------------------------------------: |
+| **Հում JSON (`?format=json`)** | Հոսանքի վերևի լուսանկար (`quotas[window]`)         | **40%** |                  **60%**                  |
+| **Տեքստի ձևաչափ (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (եթե `100 - remaining` հաշվում է) |
 
-- **Ինչու է տեքստում ցուցադրվում 20% մնացած:** Հաշվում ունենալու ֆիզիկական 40% քվոտայից 25%-ը վերապահված է
-  cutoff-ի քաղաքականությամբ։ Կանչողին մնում է 75% օգտագործելի հնարավորությունից միայն 15%-ը՝ մինչև երթուղիչը դադարեցնի
-  երթուղղումը դեպի այս միացումը։ Սանդղակավորումն ապահովում է, որ միացումը սպառվածության ազդանշան (`0% left`) տա
-  հենց այն պահին, երբ երթուղղումը դադարի։
-- **Ինչու է JSON-ը պահպանում հում արժեքները:** JSON payload-ը վերադարձնում է մատակարարի ճշգրիտ snapshot-ը (`UsageSnapshot`),
-  որպեսզի արտաքին գործիքները հասանելիություն ունենան վերևի հոսքի օգտագործման սկզբնական տվյալներին և միացման մակարդակի
-  `quotaWindowThresholds`-ին՝ առանց սերվերի կողմից կորուստներով սանդղակավորման։
+- **Ինչու տեքստը ցույց է տալիս 20% ձախ.** Հաշվի վրա մնացած 40% ֆիզիկական քվոտայից 25%-ը վերապահված է կտրման քաղաքականության կողմից: Զանգահարողին մնում է 75%-ից միայն 15%-ը, մինչև երթուղիչը կդադարեցնի երթուղին դեպի այս միացում: Scaling-ը ապահովում է կապի ազդանշանների սպառումը (`0% left`) հենց այն ժամանակ, երբ երթուղավորումը կդադարի:
+- **Ինչու JSON պահպանում է հումքի արժեքները.** JSON ծանրաբեռնվածությունը վերադարձնում է մատակարարի ճշգրիտ նկարը (`UsageSnapshot`), այնպես որ արտաքին գործիքներն ունենան մուտք դեպի վերգետնյա ճշմարտություն վերին հոսքի օգտագործման և կապի մակարդակի `quotaWindowThresholds` առանց սերվերի կողմից կորուստների մասշտաբավորման:
 
-#### Սպառողի միգրացիայի ուղեցույց
+#### Սպառողների միգրացիայի ուղեցույց
 
-Եթե արտաքին ինտեգրումը (օրինակ՝ խմբագրիչի plugin-ը կամ agent-ի ընդլայնումը) նախկինում հավաքում էր տեքստային
-endpoint-ը (`NN% left`) և օգտագործված տոկոսի հաշվարկը կատարում էր որպես `100 - NN`, ապա `?format=json`-ին անցնելիս՝
+Եթե արտաքին ինտեգրումը (օրինակ՝ խմբագրի հավելվածը կամ գործակալի ընդլայնումը) նախկինում քերել է տեքստի վերջնակետը (`NN% left`) և հաշվարկել օգտագործված տոկոսը որպես `100 - NN`, միգրացիա `?format=json` նշանակում է.
 
-- Հում JSON արժեքների ընթերցումը կարտացոլի **վերևի հոսքի իրական սպառումը** (վերոնշյալ օրինակում՝ օգտագործված 60%)։
-- Եթե ինտեգրումը ցանկանում է պահպանել տեքստային endpoint-ի օգտագործելի թույլատրելիության իմաստաբանությունը, այն կարող է
-  հաճախորդի կողմում գնահատել մնացածի արդյունավետ բանաձևը՝ օգտագործելով միացման մակարդակի վերասահմանումների համար
-  `quotaWindowThresholds`-ը։
+- Հում JSON արժեքները կարդալը կանդրադառնա** իրական սպառումը հոսանքին հակառակ** (60% օգտագործվում է վերը նշված օրինակում):
+- Եթե ինտեգրացիան ցանկանում է պահպանել տեքստի վերջնակետի օգտագործելի թույլատրելի իմաստաբանությունը, այն կարող է գնահատել հաճախորդի կողմից մնացած արդյունավետ բանաձևը, օգտագործելով `quotaWindowThresholds` կապի մակարդակի վերացման համար:
 
 ---
 
@@ -1218,46 +1160,38 @@ https://api.anthropic.com/api/oauth/usage` և Codex-ի `GET https://chatgpt.com/
 
 ## Վահանակ և կառավարում
 
-Կառավարման երթուղիները (`/api/*`, բացառությամբ հանրային auth/login-ի) **չեն լիազորվում** սովորական inference API բանալիներով։ Հավատարմագրերի ընտանիքները, scope-երը և curl-ի օրինակները՝
-[Կառավարման նույնականացում](../guides/MANAGEMENT-AUTH.md)։
+Կառավարման երթուղիները (`/api/*` բացի հանրային auth/login) են** ոչ** լիազորված սովորական եզրակացության API ստեղներով: Հավատարմագրերի ընտանիքներ, շրջանակներ և ոլորման օրինակներ. [Կառավարման վավերացում](../guides/MANAGEMENT-AUTH.md) :
 
 ### Նույնականացում
 
-| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Մուտք գործել համակարգ                                                                                                                                                                                                                                                                                                                              |
-| `/api/auth/logout`            | POST     | Ելք համակարգից                                                                                                                                                                                                                                                                                                                                     |
-| `/api/settings/require-login` | GET/POST | Մուտքի կարգավիճակ (GET-ը հանրային է)։ POST-ը սահմանում է գաղտնաբառը / միացնում կամ անջատում է մուտքը. գաղտնաբառի առկայությունից հետո հասանելի է միայն օպերատորին (վահանակի սեսիա, տեղային CLI կամ անջատված մուտք — API բանալիները և `oma_` թոքենները ստանում են `403`)․ վահանակի սեսիան գաղտնաբառը փոխարինելու համար ուղարկում է `currentPassword` |
+| Վերջնակետ                     | Մեթոդ    | Նկարագրություն                                                                                                                                                                                                                                                                                                  |
+| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Մուտք գործել                                                                                                                                                                                                                                                                                                    |
+| `/api/auth/logout`            | POST     | Դուրս գալ                                                                                                                                                                                                                                                                                                       |
+| `/api/settings/require-login` | GET/POST | Մուտքի կարգավիճակը (GET, հանրային): POST սահմանում է գաղտնաբառը / փոխում է մուտքը. օպերատորը միայն գաղտնաբառի առկայության դեպքում (վահանակի նիստ, տեղական CLI կամ մուտքի անջատում — API ստեղները և `oma_` նշանները ստանում են `403`); վահանակի նիստը ուղարկում է `currentPassword` գաղտնաբառը փոխարինելու համար |
 
 ### Մատակարարների կառավարում
 
-| Endpoint                                | Method                    | Description                                                                                                                                                       |
-| --------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Մատակարարների ցուցակ / ստեղծում                                                                                                                                   |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Մատակարարի կառավարում                                                                                                                                             |
-| `/api/providers/[id]/test`              | POST                      | Մատակարարի կապի ստուգում                                                                                                                                          |
-| `/api/providers/[id]/models`            | GET                       | Մատակարարի մոդելների ցուցակ                                                                                                                                       |
-| `/api/providers/validate`               | POST                      | Մատակարարի կազմաձևի վավերացում                                                                                                                                    |
-| `/api/providers/bulk`                   | POST                      | ՄԵԿ մատակարարի համար API բանալիների զանգվածային ավելացում                                                                                                         |
-| `/api/providers/import`                 | POST                      | Վերլուծված CSV/JSON ֆայլից տարասեռ մատակարարների ՑՈՒՑԱԿԻ ներմուծում (#6836)․ յուրաքանչյուր տողի մասնակի ձախողման արդյունքներ                                      |
-| `/api/provider-nodes*`                  | Various                   | Մատակարարի հանգույցների կառավարում                                                                                                                                |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Հատուկ մոդելներ և յուրաքանչյուր մոդելի վերասահմանումներ (ավելացում, թարմացում, թաքցնում/ցուցադրում, ջնջում)                                                       |
-| `/api/provider-models/validate-and-add` | POST                      | Կառավարման նույնականացմամբ, ըստ ընտրության միացված խիստ կապի վավերացում և հատուկ մոդելի ատոմային գրանցում․ տես [Մոդելի վավերացում](../guides/MODEL-VALIDATION.md) |
+| Վերջնակետ                               | Մեթոդ                     | Նկարագրություն                                                                                                                                       |
+| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Ցուցակել / ստեղծել պրովայդերներ                                                                                                                      |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Կառավարեք մատակարարին                                                                                                                                |
+| `/api/providers/[id]/test`              | POST                      | Փորձարկող մատակարարի միացում                                                                                                                         |
+| `/api/providers/[id]/models`            | GET                       | Ցուցակեք մատակարարների մոդելները                                                                                                                     |
+| `/api/providers/validate`               | POST                      | Վավերացրեք մատակարարի կազմաձևը                                                                                                                       |
+| `/api/providers/bulk`                   | POST                      | Զանգվածային ավելացրեք API ստեղները ONE մատակարարի համար                                                                                              |
+| `/api/providers/import`                 | POST                      | Ներմուծեք տարասեռ մատակարար LIST վերլուծված CSV/JSON ֆայլից (#6836); մեկ տողում մասնակի ձախողման արդյունքներ                                         |
+| `/api/provider-nodes*`                  | Տարբեր                    | Մատակարարի հանգույցի կառավարում                                                                                                                      |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Պատվերով մոդելներ և յուրաքանչյուր մոդելի անտեսում (ավելացնել, թարմացնել, hide/show, ջնջել)                                                           |
+| `/api/provider-models/validate-and-add` | POST                      | Կառավարման կողմից վավերացված, միացնել խիստ կապի վավերացում և ատոմային հատուկ մոդելի գրանցում; տես [Մոդելի վավերացում](../guides/MODEL-VALIDATION.md) |
 
-Սինքրոնացված/ներմուծված մոդելների համար `PUT /api/provider-models` ընդունում է `provider`, `modelId` և
-`maxOutputTokenOverride` արժեքները․ դրական ամբողջ թիվը սահմանում է ելքային թոքենների ձեռքով սահմանաչափը, իսկ
-`null`-ը մաքրում է այն՝ վերականգնելու լռելյայն արժեքը։ `GET /api/provider-models?provider=<provider>`-ը վերադարձնում է այս
-արժեքները `modelOutputOverrides`-ում, ներառյալ այն մոդելները, որոնք հատուկ մոդելի տող չունեն։ Վերասահմանումը
-օգտագործում է runtime-ի `max_output_tokens` հնարավորությունը և պահպանվում է մոդելի վերասինքրոնացումից հետո։ OpenAI-ի հետ
-համատեղելի մատակարարի էջն առաջարկում է նույն խմբագրման/մաքրման կառավարումները և նշում է բացահայտ vision աջակցությամբ մոդելները։
+synced/imported մոդելների համար `PUT /api/provider-models` ընդունում է `provider`, `modelId` և `maxOutputTokenOverride`. դրական ամբողջ թիվը սահմանում է ձեռքով ելքային նշանի գլխարկը, իսկ `null` մաքրում է այն՝ կանխադրվածը վերականգնելու համար: `GET /api/provider-models?provider=<provider>` վերադարձնում է այս արժեքները `modelOutputOverrides` ով, ներառյալ մոդելներն առանց հատուկ մոդելի տողի: The override-ն օգտագործում է գործարկման ժամանակի `max_output_tokens` հնարավորությունը և գոյատևում է մոդելի վերահամաժամեցումից: OpenAI-ի հետ համատեղելի մատակարարի էջն առաջարկում է նույն edit/clear կառավարումը և նշում մոդելները՝ հստակ տեսողության աջակցությամբ:
 
-Համատեղելի մատակարարի հանգույցում գրելու ուղիները (`POST`, `PUT`, `PATCH`, `DELETE` և
-`/api/provider-models/validate-and-add`) մոդելի նույնացուցիչը պահպանում են որպես վերին հոսքի առանց նախածանցի նույնացուցիչ․ հանգույցի սեփական նախածանցով ցուցակից տեղադրված նույնացուցիչի դեպքում նախածանցի սկզբում կուտակված բոլոր կրկնությունները միավորվում են, իսկ պատասխանները վերադարձնում են պահված նույնացուցիչը։ Կանոնական մատակարարների շեղագծով նույնացուցիչները (օրինակ՝ `nvidia/nemotron-…`) պահվում են բառացիորեն։ `/v1/models`-ը երբեք չի արտածում կուտակված `<prefix>/<prefix>/<model>` նույնացուցիչ։
+Համատեղելի մատակարարի հանգույցում գրելու ուղիները (`POST`, `PUT`, `PATCH`, `DELETE` և `/api/provider-models/validate-and-add`) պահում են մոդելի id-ը որպես մերկ վերին հոսանքով id. նախածանցային ցուցակից տեղադրվող id-ի դեպքում հանգույցի սեփական նախածանցի որևէ առաջատար փաթեթը ծալված է, և պատասխանները կրկնում են պահված ID-ն: Կանոնական մատակարարների կտրված ID-ները (օրինակ՝ `nvidia/nemotron-…`) պահվում են բառացի: `/v1/models` երբեք չի թողարկում կուտակված `<prefix>/<prefix>/<model>` id:
 
-Custom Chat Completions հանգույցները բացահայտ reasoning-ի անջատման ընտրանքները հարմարեցնում են upstream backend-ին։ Հաջողությամբ անցած կապի թեստը յուրաքանչյուր ճշգրիտ model ID-ի համար ավտոմատ ընտրում է chat-template-ի կառավարման միջոցները, եթե այդ մոդելի `/models` գրառումը հաստատում է `owned_by`-ի ճանաչված արժեք՝ `vllm`, `sglang` կամ `llamacpp`։ Թափանցիկ OpenAI-համատեղելի wrapper-ները կարող են բնօրինակ model entry-ն պահպանել ներդրված
-`openai` օբյեկտի ներսում․ հայտնաբերումը հետևում է առավելագույնը երեք նման envelope-ի։ Բացակայող, անհայտ կամ իրար հակասող ownership ունեցող մոդելները պահպանում են սովորական OpenAI վարքագիծը։ Հայտնաբերումը կրկին օգտագործում է առկա catalog request-ը, completion token-ներ չի ստեղծում և անվավեր է դառնում, երբ փոխվում է կապի endpoint-ը։
+Պատվերով Զրույցի ավարտման հանգույցները հարմարեցնում են բացահայտ հիմնավորումների անջատումները վերին հոսանքին հակառակ: Հաջողակ կապի փորձարկումն ավտոմատ կերպով ընտրում է զրույցի ձևանմուշների կառավարում ID ի ճշգրիտ մոդելի համար, որի `/models` մուտքն ապացուցում է `owned_by` ճանաչված արժեքը՝ `vllm`, `sglang` կամ `llamacpp`: Թափանցիկ OpenAI-ի հետ համատեղելի փաթաթանները կարող են պահպանել սկզբնական մոդելի մուտքագրումը տեղադրված `openai` օբյեկտի ներսում. հայտնաբերումը հետևում է մինչև երեք նման ծրարների: Բացակայող, անհայտ կամ հակասական սեփականություն ունեցող մոդելները պահպանում են սովորական OpenAI վարքագիծը: Հայտնաբերումը վերօգտագործում է առկա կատալոգի հարցումը, չի առաջացնում ավարտման նշաններ և անվավեր է դառնում, երբ կապի վերջնակետը փոխվում է:
 
-Այդ metadata-ն չտրամադրող backend-ի համար վարքագիծը ամրագնելու նպատակով օգտագործեք առկա մասնակի provider update API-ն․
+Այդ մետատվյալները չբացահայտող հետին պլանի վարքագիծը ամրացնելու համար օգտագործեք գոյություն ունեցող մասնակի մատակարարի թարմացումը API.
 
 ```json
 {
@@ -1267,90 +1201,91 @@ Custom Chat Completions հանգույցները բացահայտ reasoning-ի �
 }
 ```
 
-Այդ body-ն ուղարկեք `PUT /api/providers/<connection-id>` հասցեով։ Այդ կապի դեպքում `none` բացահայտ reasoning effort-ը ուղարկվում է որպես `chat_template_kwargs.thinking=false` և `chat_template_kwargs.enable_thinking=false`։ Բացահայտ native template արժեքները շարունակում են ունենալ առաջնահերթություն, եթե server-side reasoning rule-ը effort չի պարտադրում։ Կարգավորումը կիրառվում է միայն այն դեպքում, երբ custom OpenAI-համատեղելի կապը dispatch է անում Chat Completions body․ Responses հարցումները և սովորական provider-ները պահպանում են իրենց native request shape-ը։ `reasoningControl`-ը սահմանեք `openai`՝ սովորական OpenAI `reasoning_effort` passthrough-ը պարտադրելու համար, կամ բաց թողեք այն/սահմանեք `null`՝ ավտոմատ հայտնաբերումն օգտագործելու համար։
+Ուղարկեք այդ մարմինը `PUT /api/providers/<connection-id>` ով: Այդ կապակցությամբ, `none` ի բացահայտ հիմնավորումը ուղարկվում է որպես `chat_template_kwargs.thinking=false` և `chat_template_kwargs.enable_thinking=false`: Կաղապարի բացահայտ արժեքները մնում են հեղինակավոր, քանի դեռ սերվերի կողմից հիմնավորման կանոնը չի ստիպում ջանքեր գործադրել: Կարգավորումը կիրառվում է միայն այն դեպքում, երբ սովորական OpenAI-ի հետ համատեղելի կապը ուղարկում է Chat Completions մարմինը. Պատասխանների հարցումները և սովորական մատակարարները պահպանում են իրենց մայրենի հարցումների ձևը: Սահմանեք `reasoningControl` ին `openai` ՝ սովորական OpenAI `reasoning_effort` անցումը ստիպելու համար, կամ բաց թողեք it/set այն `null` ՝ ավտոմատ հայտնաբերումն օգտագործելու համար:
 
-Claude Code-ի auto-mode classifier հարցումները լռելյայն անջատում են native thinking-ը, երբ չեն պարունակում reasoning-ի բացահայտ կառավարման միջոցներ։ Հայտնաբերումը Claude-format հարցումներում օգտագործում է classifier-ի system marker-ը, ոչ թե մոդելների անունները կամ completion limit-ները։ Բացահայտ body controls-ը, աջակցվող effort/thinking headers-ը, routing rules-ը և resolved model effort-ը պահպանում են իրենց առկա առաջնահերթությունը։ Classifier-ի երկու փուլերն էլ պահպանում են իրենց prompts-ը, completion limit-ները, stop sequence-ները և upstream-ի իրական permission verdict-ները․ երկրորդ փուլը դեռ կարող է իր պահանջած տեսանելի reasoning-ը ստեղծել որպես սովորական տեքստ։
+Claude Code-ի ավտոմատ ռեժիմի դասակարգիչը պահանջում է անջատել լռելյայն բնիկ մտածողությունը, երբ դրանք չեն պարունակում հստակ հիմնավորման վերահսկումներ: Հայտնաբերումը օգտագործում է դասակարգչի համակարգի նշիչը Claude-ի ձևաչափի հարցումներում, այլ ոչ թե մոդելների անունները կամ լրացման սահմանները: Բացահայտ մարմնի կառավարումները, աջակցվող effort/thinking վերնագրերը, երթուղային կանոնները և լուծված մոդելի ջանքերը պահպանում են իրենց առաջնահերթությունը: Դասակարգիչի երկու փուլերն էլ պահպանում են իրենց հուշումները, ավարտի սահմանները, կանգառի հաջորդականությունը և իրական վերին հոսքի թույլտվության վճիռները. Երկրորդ փուլը դեռևս կարող է արտադրել իր պահանջված տեսանելի պատճառաբանությունը որպես սովորական տեքստ:
 
-### OAuth հոսքեր
+### OAuth Հոսում է
 
-| Endpoint                         | Method  | Description              |
-| -------------------------------- | ------- | ------------------------ |
-| `/api/oauth/[provider]/[action]` | Various | Provider-ին հատուկ OAuth |
+| Վերջնակետ                        | Մեթոդ  | Նկարագրություն          |
+| -------------------------------- | ------ | ----------------------- |
+| `/api/oauth/[provider]/[action]` | Տարբեր | Մատակարարի հատուկ OAuth |
 
-### Routing և կարգավորում
+### Ուղղորդում և կազմաձևում
 
-| Endpoint              | Method   | Description                           |
-| --------------------- | -------- | ------------------------------------- |
-| `/api/models`         | GET/PUT  | Մոդելների ցանկ / alias-ի թարմացում    |
-| `/api/models/alias`   | GET/POST | Մոդելների alias-ներ                   |
-| `/api/models/catalog` | GET      | Բոլոր մոդելներն ըստ provider-ի + տիպի |
-| `/api/combos*`        | Various  | Combo-ների կառավարում                 |
-| `/api/keys*`          | Various  | API key-երի կառավարում                |
-| `/api/pricing`        | GET      | Մոդելների գնագոյացում                 |
+| Վերջնակետ             | Մեթոդ    | Նկարագրություն                             |
+| --------------------- | -------- | ------------------------------------------ |
+| `/api/models`         | GET/PUT  | Մոդելների ցուցակ / կեղծանունների թարմացում |
+| `/api/models/alias`   | GET/POST | Մոդելային անուններ                         |
+| `/api/models/catalog` | GET      | Բոլոր մոդելներն ըստ մատակարարի + տեսակի    |
+| `/api/combos*`        | Տարբեր   | Համակցված կառավարում                       |
+| `/api/keys*`          | Տարբեր   | API բանալիների կառավարում                  |
+| `/api/pricing`        | GET      | Մոդելային գնագոյացում                      |
 
-#### Մոդելի սահմանաչափերի ծագումը
+#### Մոդելի սահմանաչափի ծագումը
 
-`GET /api/models?withLimits=1` (նաև `true`․ `0`/`false` արժեքը կամ պարամետրի բացակայությունը պահպանում է լռելյայն payload-ը անփոփոխ) յուրաքանչյուր model row-ին ավելացնում է `contextWindow`, `maxInputTokens`, `maxOutputTokens` և `capsSource` object-ը։ `capsSource`-ը նշում է այն կանոնը, որը տրամադրել է յուրաքանչյուր սահմանաչափը, այնպես որ անսպասելի սահմանաչափը (օրինակ՝ 1M մոդելի համար 128k) հնարավոր է հետագծել մինչև իր սկզբնաղբյուրը։ Լուծված արժեքները նույնն են, որոնք օգտագործում է routing-ը․ flag-ը միայն դաշտեր է ավելացնում և երբեք չի փոխում որևէ արժեք։ `withLimits`-ի ցանկացած այլ արժեք մերժվում է `400`-ով։
+`GET /api/models?withLimits=1` (նաև `true`; `0`/`false` կամ դրա բացթողումը պահում է լռելյայն օգտակար բեռը անփոփոխ) յուրաքանչյուր մոդելի տողում ավելացնում է `contextWindow`, `maxInputTokens`, `maxOutputTokens` և `capsSource` օբյեկտ: `capsSource` անվանում է այն կանոնը, որն ապահովում էր յուրաքանչյուր սահմանաչափ, ուստի զարմանալի սահմանը (օրինակ՝ 128k 1M մոդելի վրա) կարելի է հետևել դրա ծագմանը: Լուծված արժեքները նույնն են, ինչ օգտագործում է երթուղիչը. դրոշը միայն դաշտեր է ավելացնում և երբեք արժեքը չի փոխում: Ցանկացած այլ `withLimits` արժեք մերժվում է `400` ով:
 
-| `capsSource` value                           | Origin                                                                 |
-| -------------------------------------------- | ---------------------------------------------------------------------- |
-| `override:context`                           | Պահպանված context-window override (`model_context_overrides`)          |
-| `override:max_input` / `override:max_output` | Պահպանված `max_input_tokens` / `max_output_tokens` capability override |
-| `static-authoritative:<provider>/<model>`    | Static authoritative context-window table                              |
-| `synced:<provider>/<model>`                  | models.dev-ի համաժամեցված capability row                               |
-| `registry:<provider>/<model>`                | Provider registry-ի entry                                              |
-| `spec:<model>`                               | Static model spec                                                      |
-| `effort-base:` prefix                        | Row, որը վերցված է effort-suffixed variant-ի base model-ից             |
-| `none`                                       | Ոչ մի source չի հայտարարում սահմանաչափը (value-ը `null` է)             |
+| `capsSource` արժեքը                          | Ծագում                                                                     |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `override:context`                           | Համատեքստ-պատուհանի շարունակական վերացում (`model_context_overrides`)      |
+| `override:max_input` / `override:max_output` | Մշտական `max_input_tokens` / `max_output_tokens` կարողությունների վերացում |
+| `static-authoritative:<provider>/<model>`    | Ստատիկ հեղինակավոր համատեքստ-պատուհան աղյուսակ                             |
+| `synced:<provider>/<model>`                  | models.dev համաժամեցված հնարավորությունների տող                            |
+| `registry:<provider>/<model>`                | Մատակարարի ռեեստրի մուտքը                                                  |
+| `spec:<model>`                               | Ստատիկ մոդելի սպեկտր                                                       |
+| `effort-base:` նախածանց                      | Շարքը փոխառված է ջանք-ծածանցով տարբերակի բազային մոդելից                   |
+| `none`                                       | Ոչ մի աղբյուր չի հայտարարում սահմանաչափը (արժեքը `null` է)                 |
 
-Իրականացում՝ `getResolvedModelCapabilitiesWithLimitSources()`-ը `src/lib/modelCapabilities.ts`-ում և առաջնահերթությունների շղթաները՝ `src/lib/modelCapabilityLimits.ts`-ում։
+Իրականացում. `getResolvedModelCapabilitiesWithLimitSources()` `src/lib/modelCapabilities.ts` ում և գերակայության շղթաները `src/lib/modelCapabilityLimits.ts` ում:
 
 ### Օգտագործում և վերլուծություն
 
-| Endpoint                         | Method          | Description                                                                                                                                                                                                                                                                                                                                           |
-| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Օգտագործման պատմություն                                                                                                                                                                                                                                                                                                                               |
-| `/api/usage/logs`                | GET             | Օգտագործման մատյաններ                                                                                                                                                                                                                                                                                                                                 |
-| `/api/usage/request-logs`        | GET             | Հարցումների մակարդակի մատյաններ                                                                                                                                                                                                                                                                                                                       |
-| `/api/usage/[connectionId]`      | GET             | Յուրաքանչյուր կապի օգտագործում                                                                                                                                                                                                                                                                                                                        |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Յուրաքանչյուր API բանալու նշանների սահմանաչափի բյուջեներ                                                                                                                                                                                                                                                                                              |
-| `/api/usage/model-latency-stats` | GET             | Մատակարարի/մոդելի ուշացման շարժական համախմբված վիճակագրություն (միջին/p50/p95/p99, հաջողության տոկոս); զտիչներ՝ `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                       |
-| `/api/usage/cache-health`        | GET             | Հուշման քեշի առողջության ամփոփում `call_logs`-ի հիման վրա՝ գրելու/կարդալու հարաբերակցություն, գրելու չափերի p50/p90/p99 բաշխում, ինտենսիվ գրումների կենտրոնացվածություն, ըստ մոդելի բաժանում և `healthy`/`degraded`/`thrash`/`no-data` գնահատական; հարցման պարամետրեր՝ `range` (`1h`\|`24h`\|`7d`\|`30d`, լռելյայն՝ `24h`) և կամընտիր `model` (#8827) |
+| Վերջնակետ                        | Մեթոդ           | Նկարագրություն                                                                                                                                                                                                                                                                                                               |
+| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Օգտագործման պատմություն                                                                                                                                                                                                                                                                                                      |
+| `/api/usage/logs`                | GET             | Օգտագործման տեղեկամատյաններ                                                                                                                                                                                                                                                                                                  |
+| `/api/usage/request-logs`        | GET             | Հարցման մակարդակի տեղեկամատյաններ                                                                                                                                                                                                                                                                                            |
+| `/api/usage/[connectionId]`      | GET             | Մեկ կապի օգտագործումը                                                                                                                                                                                                                                                                                                        |
+| `/api/usage/token-limits`        | GET/POST/DELETE | API-բանալինների նշանային-սահմանափակ բյուջեներ                                                                                                                                                                                                                                                                                |
+| `/api/usage/model-latency-stats` | GET             | Rolling per-provider/model latency ագրեգատ (avg/p50/p95/p99, հաջողության մակարդակ); զտիչներ՝ `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                 |
+| `/api/usage/cache-health`        | GET             | Արագ քեշի առողջության ամփոփում `call_logs` — write/read հարաբերակցությամբ, p50/p90/p99 գրելու չափի բաշխում, ծանր գրելու համակենտրոնացում, յուրաքանչյուր մոդելի բաժանում և `healthy`/`degraded`/`thrash`/`no-data` դատավճիռ; հարցումը params `range` (`1h`\| `24h`\| `7d`\| `30d`, լռելյայն `24h`) և կամընտիր `model` (#8827) |
 
-### API բանալու թույլտվություններ
+### API հիմնական թույլտվությունները
 
-`PATCH /api/keys/{id}`-ը թարմացնում է գոյություն ունեցող բանալու թույլտվությունները։ Ինչպես `/api/keys*` յուրաքանչյուր երթուղի, այն պահանջում է կառավարման թույլտվություն (տե՛ս [Կառավարման նույնականացում](../guides/MANAGEMENT-AUTH.md)), այլ ոչ թե ինֆերենսի բանալի։ Ուղարկեք միայն այն դաշտերը, որոնք ցանկանում եք փոխել. եթե դրանցից ոչ մեկը նշված չէ, հարցումը մերժվում է՝ `No valid fields to update` հաղորդագրությամբ։ Ընդունվող դաշտերը սահմանված են `src/shared/validation/schemas/keys.ts`-ում գտնվող `updateKeyPermissionsSchema`-ով։
+`PATCH /api/keys/{id}` թարմացնում է գոյություն ունեցող բանալու թույլտվությունները: Ինչպես յուրաքանչյուր `/api/keys*` երթուղի, այն կարիք ունի կառավարման թույլտվության (տես [Կառավարման նույնականացում](../guides/MANAGEMENT-AUTH.md) ), ոչ թե եզրակացության բանալի: Ուղարկեք միայն այն դաշտերը, որոնք ցանկանում եք փոխել; Նրանցից ոչ մեկի հետ կապված հարցումը չի մերժվում `No valid fields to update` ով: Ընդունված դաշտերը սահմանված են `updateKeyPermissionsSchema` ով `src/shared/validation/schemas/keys.ts` ում:
 
-| Դաշտ                                        | Տեսակ                                                                           | Նշումներ                                                                                                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | տող, 1-200 նիշ                                                                  |                                                                                                                                                               |
-| `isActive`                                  | բուլյան                                                                         |                                                                                                                                                               |
-| `isBanned`                                  | բուլյան                                                                         |                                                                                                                                                               |
-| `expiresAt`                                 | ISO 8601 ամսաթիվ-ժամ կամ `null`                                                 | `null`-ը մաքրում է ժամկետի ավարտը                                                                                                                             |
-| `modelAccessMode`                           | `all` \| `restricted`                                                           | `allowedModels`-ը պետք է դատարկ լինի, երբ ռեժիմը `all` է                                                                                                      |
-| `allowedModels`, `blockedModels`            | տողերի զանգված, առավելագույնը 1000                                              |                                                                                                                                                               |
-| `allowedCombos`                             | տողերի զանգված, առավելագույնը 500                                               | Սահմանում է, թե որ կոմբինացիաները կարող է կանչել բանալին․ ուղղակի մոդելները կառավարվում են `modelAccessMode` / `allowedModels`-ով                             |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                           | `allowedConnections`-ը պետք է ոչ դատարկ լինի `restricted` ռեժիմում և դատարկ լինի `all` ռեժիմում                                                               |
-| `allowedConnections`                        | UUID-ների զանգված, առավելագույնը 100                                            |                                                                                                                                                               |
-| `allowAutoCombos`                           | բուլյան                                                                         | `false`-ը մերժում է այս բանալիով `auto/*` մոդելների հարցումները․ այն բանալիները, որոնք երբեք չեն սահմանել այս արժեքը, թույլատրված են                          |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                   | Ինչ է ցուցադրում `GET /v1/models`-ը այս բանալու համար (միայն կոմբինացիաներ, միայն մոդելներ կամ երկուսն էլ)․ սա չի փոխում, թե ինչ կարող է կանչել բանալին       |
-| `forcedModel`                               | մինչև 300 նիշանոց տող կամ `null`                                                | Չաթի հարցումները ուղղորդում է դեպի այս մոդելը/կոմբինացիան՝ `X-Route-Model`-ից և `body.model`-ից առաջնահերթ․ բանալու սահմանափակումները շարունակում են կիրառվել |
-| `noLog`, `autoResolve`                      | բուլյան                                                                         |                                                                                                                                                               |
-| `throttleDelayMs`                           | ամբողջ թիվ, 0-300000                                                            |                                                                                                                                                               |
-| `maxSessions`                               | ամբողջ թիվ, 0-10000                                                             |                                                                                                                                                               |
-| `rateLimits`                                | `{ limit, window }`-ի զանգված (դրական ամբողջ թվեր, առավելագույնը 50) կամ `null` | `null`-ը մաքրում է սահմանաչափերը                                                                                                                              |
-| `accessSchedule`                            | ժամանակացույցի օբյեկտ կամ `null`                                                | `null`-ը մաքրում է ժամանակացույցը                                                                                                                             |
-| `scopes`                                    | տողերի զանգված, առավելագույնը 32                                                |                                                                                                                                                               |
-| `allowedEndpoints`                          | տողերի զանգված, առավելագույնը 20                                                |                                                                                                                                                               |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                              |                                                                                                                                                               |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                            | Տես [Բանալիի համար քեշի շրջանցում](#per-key-cache-bypass)                                                                                                     |
-| `compressionEnabled`                        | բուլյան                                                                         |                                                                                                                                                               |
-| `codexServiceMode`                          | Codex ծառայության ռեժիմներից մեկը                                               |                                                                                                                                                               |
-| `disableNonPublicModels`                    | boolean                                                                         |                                                                                                                                                               |
-| `allowUsageCommand`                         | boolean                                                                         |                                                                                                                                                               |
-| `usageLimitEnabled`                         | boolean                                                                         |                                                                                                                                                               |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                           |                                                                                                                                                               |
-| `chaosModeEnabled`                          | boolean                                                                         |                                                                                                                                                               |
+| Դաշտ                                        | Տեսակ                                                                 | Նշումներ                                                                                                                                                                                                                                                               |
+| ------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | լարային, 1-200 նիշ                                                    |                                                                                                                                                                                                                                                                        |
+| `isActive`                                  | բուլյան                                                               |                                                                                                                                                                                                                                                                        |
+| `isBanned`                                  | բուլյան                                                               |                                                                                                                                                                                                                                                                        |
+| `expiresAt`                                 | ISO 8601 datetime կամ `null`                                          | `null` մաքրում է ժամկետը                                                                                                                                                                                                                                               |
+| `modelAccessMode`                           | `all` \| `restricted`                                                 | `allowedModels` պետք է դատարկ լինի, երբ ռեժիմը `all` է                                                                                                                                                                                                                 |
+| `allowedModels`, `blockedModels`            | լարերի զանգված՝ մինչև 1000                                            |                                                                                                                                                                                                                                                                        |
+| `allowedCombos`                             | լարերի զանգված՝ մինչև 500                                             | Բանալին համակցող դարպասներ կարող են կանչել. ուղղակի մոդելները կառավարվում են `modelAccessMode` / `allowedModels` ով                                                                                                                                                    |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                 | `allowedConnections` պետք է լինի ոչ դատարկ, երբ `restricted` և դատարկ, երբ `all`                                                                                                                                                                                       |
+| `allowedConnections`                        | UUIDs ի զանգված, մինչև 100                                            |                                                                                                                                                                                                                                                                        |
+| `allowAutoCombos`                           | բուլյան                                                               | `false` մերժում է այս բանալիով `auto/*` մոդելների հարցումները. թույլատրվում են այն բանալիները, որոնք երբեք չեն կարգավորում                                                                                                                                             |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                         | Ինչ է թվարկում `GET /v1/models` այս ստեղնի համար (միայն կոմբինատներ, միայն մոդելներ կամ երկուսն էլ); այն չի փոխում, թե ինչ կարող է զանգահարել ստեղնը                                                                                                                   |
+| `forcedModel`                               | լարային մինչև 300 նիշ կամ `null`                                      | Ուղարկում է զրույցի հարցումները դեպի այս model/combo, `X-Route-Model` և `body.model` վրա; բանալիների սահմանները դեռ գործում են                                                                                                                                         |
+| `noLog`, `autoResolve`                      | բուլյան                                                               |                                                                                                                                                                                                                                                                        |
+| `throttleDelayMs`                           | ամբողջ թիվ, 0-300000                                                  |                                                                                                                                                                                                                                                                        |
+| `maxSessions`                               | ամբողջ թիվ, 0-10000                                                   |                                                                                                                                                                                                                                                                        |
+| `rateLimits`                                | `{ limit, window }` (դրական ամբողջ թվեր, մինչև 50) կամ `null` զանգված | `null` մաքրում է սահմանները                                                                                                                                                                                                                                            |
+| `accessSchedule`                            | ժամանակացույցի օբյեկտ կամ `null`                                      | `null` մաքրում է ժամանակացույցը                                                                                                                                                                                                                                        |
+| `scopes`                                    | տողերի զանգված, մինչև 32                                              |                                                                                                                                                                                                                                                                        |
+| `allowedEndpoints`                          | տողերի զանգված, մինչև 20                                              |                                                                                                                                                                                                                                                                        |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                    |                                                                                                                                                                                                                                                                        |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                  | Տես [մեկ բանալի քեշի շրջանցում](#per-key-cache-bypass)                                                                                                                                                                                                                 |
+| `compressionEnabled`                        | բուլյան                                                               |                                                                                                                                                                                                                                                                        |
+| `codexServiceMode`                          | Codex ծառայության ռեժիմներից մեկը                                     |                                                                                                                                                                                                                                                                        |
+| `disableNonPublicModels`                    | բուլյան                                                               |                                                                                                                                                                                                                                                                        |
+| `allowUsageCommand`                         | բուլյան                                                               |                                                                                                                                                                                                                                                                        |
+| `usageLimitEnabled`                         | բուլյան                                                               |                                                                                                                                                                                                                                                                        |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | թիվը >= 0 կամ `null`                                                  |                                                                                                                                                                                                                                                                        |
+| `fiveHourUsageLimitUsd`                     | թիվը >= 0 կամ `null`                                                  | Շարժվող 5-ժամյա USD բյուջեն, որը կիրառվում է օրական և շաբաթական սահմանաչափերի նման (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`): `retry-after` այն է, երբ պատուհանի ամենահին ծախսերը հնանում են, ինչը կարող է արգելափակված թողնել իր սահմանաչափից շատ բանալի: |
+| `chaosModeEnabled`                          | բուլյան                                                               |                                                                                                                                                                                                                                                                        |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1361,163 +1296,163 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Կարգավորումներ
 
-| Endpoint                              | Method        | Description                                                                                                                                                                                                                                                                                                                             |
-| ------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Ընդհանուր կարգավորումներ։ Անվտանգության քաղաքականության բանալիները (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) պահանջում են `currentPassword` և օպերատորի հավատարմագիր — API բանալիները և `oma_` նշանները ստանում են `403`, իսկ յուրաքանչյուր փոփոխություն պահանջում է `admin` մուտքի նշանի scope-ը |
-| `/api/settings/proxy`                 | GET/PUT       | Ցանցային պրոքսիի կազմաձևում                                                                                                                                                                                                                                                                                                             |
-| `/api/settings/proxy/test`            | POST          | Պրոքսիի կապի ստուգում                                                                                                                                                                                                                                                                                                                   |
-| `/api/settings/ip-filter`             | GET/PUT       | IP-ների թույլատրման/արգելափակման ցուցակ                                                                                                                                                                                                                                                                                                 |
-| `/api/settings/thinking-budget`       | GET/PUT       | Մտածողության/տրամաբանության **հարցման** վերաշարադրման ռեժիմ (passthrough / auto-strip / custom / adaptive)։ Անկախ է սեղմումից։ Տե՛ս [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)։                                                                                                                                                 |
-| `/api/settings/system-prompt`         | GET/PUT       | Համակարգային գլոբալ հրահանգ                                                                                                                                                                                                                                                                                                             |
-| `/api/settings/compression`           | GET/PUT       | Սեղմման գլոբալ կազմաձևում                                                                                                                                                                                                                                                                                                               |
-| `/api/settings/purge-request-history` | POST          | Մաքրել հարցումների մատյանի տողերը և տեղային կանչերի մատյանի արտեֆակտները                                                                                                                                                                                                                                                                |
+| Վերջնակետ                             | Մեթոդ         | Նկարագրություն                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Ընդհանուր կարգավորումներ. Անվտանգության քաղաքականության բանալիներին (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) անհրաժեշտ է `currentPassword` և օպերատորի հավատարմագիր — API ստեղները և `oma_` նշանները ստանում են `403`; յուրաքանչյուր մուտացիայի կարիք ունի `admin` մուտքի նշանի շրջանակը |
+| `/api/settings/proxy`                 | GET/PUT       | Ցանցի վստահված անձի կազմաձևում                                                                                                                                                                                                                                                                                                  |
+| `/api/settings/proxy/test`            | POST          | Փորձարկեք վստահված անձի կապը                                                                                                                                                                                                                                                                                                    |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                                                                          |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** խնդրանք** վերագրանցման ռեժիմ (անցում / ավտոմատ ժապավեն / մաքսային / հարմարվողական): Անկախ սեղմումից: Տես [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                                                               |
+| `/api/settings/system-prompt`         | GET/PUT       | Համաշխարհային համակարգի հուշում                                                                                                                                                                                                                                                                                                 |
+| `/api/settings/compression`           | GET/PUT       | Համաշխարհային սեղմման կոնֆիգուրացիա                                                                                                                                                                                                                                                                                             |
+| `/api/settings/purge-request-history` | POST          | Մաքրել հարցումների մատյանների տողերը և տեղական զանգերի գրանցամատյանի արտեֆակտները                                                                                                                                                                                                                                               |
 
 ### Համատեքստ և սեղմում
 
-| Endpoint                               | Method         | Description                                                                      |
-| -------------------------------------- | -------------- | -------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked սեղմման նախադիտում                |
-| `/api/compression/language-packs`      | GET            | Հասանելի Caveman լեզվային փաթեթների ցանկ                                         |
-| `/api/compression/rules`               | GET            | Caveman կանոնների մետատվյալների ցանկ                                             |
-| `/api/context/caveman/config`          | GET/PUT        | Caveman-ին հատուկ կարգավորումների կեղծանուն                                      |
-| `/api/context/rtk/config`              | GET/PUT        | RTK-ին հատուկ կարգավորումներ, ներառյալ անհատական զտիչները և հում ելքի պահպանումը |
-| `/api/context/rtk/filters`             | GET            | RTK զտիչների կատալոգ և անհատական զտիչների ախտորոշում                             |
-| `/api/context/rtk/test`                | POST           | Գործարկել RTK նախադիտում/թեստ տեքստային payload-ի վրա                            |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Կարդալ ցուցիչի id-ով պահպանված, գաղտնազերծված հում ելքը                          |
-| `/api/context/combos`                  | GET/POST       | Սեղմման կոմբինացիաների ցանկ/ստեղծում                                             |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Սեղմման կոմբինացիայի մանրամասներ/թարմացում/ջնջում                                |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Սեղմման կոմբինացիաների վերագրում երթուղայնացման կոմբինացիաներին                  |
-| `/api/context/analytics`               | GET            | Սեղմման վերլուծության կեղծանուն                                                  |
+| Վերջնակետ                              | Մեթոդ          | Նկարագրություն                                                                        |
+| -------------------------------------- | -------------- | ------------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Նախադիտեք off/lite/standard/aggressive/ultra/RTK/stacked սեղմումը                     |
+| `/api/compression/language-packs`      | GET            | Ցուցակե՛ք Caveman լեզվի հասանելի փաթեթները                                            |
+| `/api/compression/rules`               | GET            | Թվարկեք Caveman կանոնների մետատվյալները                                               |
+| `/api/context/caveman/config`          | GET/PUT        | Caveman-ի հատուկ կարգավորումների կեղծանունը                                           |
+| `/api/context/rtk/config`              | GET/PUT        | RTK-ին հատուկ կարգավորումներ, ներառյալ հատուկ զտիչներ և չմշակված արտադրանքի պահպանում |
+| `/api/context/rtk/filters`             | GET            | RTK ֆիլտրի կատալոգ և անհատական ֆիլտրի ախտորոշում                                      |
+| `/api/context/rtk/test`                | POST           | Գործարկեք RTK preview/test տեքստային ծանրաբեռնվածության դեմ                           |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Կարդացեք պահպանված խմբագրված չմշակված ելքը ըստ ցուցիչի ID-ի                           |
+| `/api/context/combos`                  | GET/POST       | Կոմպրեսիոն կոմբինացիա list/create                                                     |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Կոմպրեսիոն կոմբինացիա detail/update/delete                                            |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Վերագրեք սեղմման կոմպոզիցիաներ երթուղային կոմբինատներին                               |
+| `/api/context/analytics`               | GET            | Կոմպրեսիոն վերլուծական կեղծանուն                                                      |
 
-### Մոնիթորինգ
+### Մոնիտորինգ
 
-| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Ակտիվ սեսիաների հետագծում                                                                                                                                                                                                                                                                                                                                                                                      |
-| `/api/rate-limits`                   | GET        | Յուրաքանչյուր հաշվի համար սահմանաչափեր                                                                                                                                                                                                                                                                                                                                                                         |
-| `/api/monitoring/health`             | GET        | Վիճակի ստուգում + մատակարարների ամփոփում (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`)։ Կառավարման տեսքը ներառում է `credentialHealth`՝ probe-cache-ի սկալյարներ, `failedConnections`, երբ `failed>0`, և `staleDbNonOkCount` (SQLite-ի sticky `test_status`, ոչ թե gauge-ը)։ Տե՛ս [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status)։ |
-| `/api/cache/stats`                   | GET/DELETE | Քեշի վիճակագրություն / մաքրում                                                                                                                                                                                                                                                                                                                                                                                 |
-| `/api/modality-bridge/stats`         | GET        | Հիշողության մեջ պահվող `attempts`, հաջողություններ/`bridged`, ձախողումներ, քեշի հարվածներ, `totalLatencyMs`, `latencySamples`, նմուշներով արտահայտված `averageLatencyMs` և վերջին օգտագործման ժամանակը (վերակայվում է վերագործարկման ժամանակ, կառավարման վավերացում)                                                                                                                                           |
-| `/api/modality-bridge/video/runtime` | GET        | Կառավարման վավերացումից/զոնդավորումից առաջ խիստ վստահելի loopback ստուգում, FFmpeg/ffprobe-ի մաքրված հասանելիություն և տարբերակներ (no-store)                                                                                                                                                                                                                                                                  |
-| `/api/modality-bridge/video/extract` | POST       | Ներքին՝ վավերացված, վստահելի loopback բայթերի միջնորդ, 50 MiB մուտք, սահմանափակված հերթ/32 MiB ելք, `503` հզորության սահմանաչափ, `499` անջատում, `504` վերջնաժամկետ․ հանրային upload API չէ                                                                                                                                                                                                                    |
+| Վերջնակետ                            | Մեթոդ      | Նկարագրություն                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Ակտիվ նստաշրջանի հետևում                                                                                                                                                                                                                                                                                                                                                                              |
+| `/api/rate-limits`                   | GET        | Մեկ հաշվի տոկոսադրույքի սահմանաչափեր                                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/monitoring/health`             | GET        | Առողջության ստուգման + մատակարարի ամփոփագիր (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`): Կառավարման տեսքը ներառում է `credentialHealth`. զոնդ-քեշի սկալերներ, `failedConnections` երբ `failed>0` և `staleDbNonOkCount` (SQLite կպչուն `test_status`, ոչ թե չափիչ): Տես [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Քեշի վիճակագրություն / մաքրել                                                                                                                                                                                                                                                                                                                                                                         |
+| `/api/modality-bridge/stats`         | GET        | Հիշողության մեջ `attempts`, հաջողություններ/`bridged`, ձախողումներ, քեշի հարվածներ, `totalLatencyMs`, `latencySamples`, նմուշով նշանակված `averageLatencyMs` և վերջին օգտագործման ժամանակը (վերագործարկվելիս, կառավարման հաստատում)                                                                                                                                                                   |
+| `/api/modality-bridge/video/runtime` | GET        | Խիստ վստահելի-loopback ստուգում նախքան կառավարումը auth/probe; ախտահանված FFmpeg/ffprobe առկայությունը և տարբերակները (առանց խանութի)                                                                                                                                                                                                                                                                 |
+| `/api/modality-bridge/video/extract` | POST       | Ներքին վավերացված վստահելի-loopback բայթ բրոքեր; 50 MiB մուտքագրում, սահմանափակված queue/32 MiB ելք, `503` հզորություն, `499` անջատում, `504` վերջնաժամկետ; ոչ հանրային վերբեռնում API                                                                                                                                                                                                                |
 
-### Պահուստավորում և արտահանում/ներմուծում
+### Տեսանյութի շրջանակի փորագրում
 
-| Endpoint                    | Method | Description                                                                                   |
-| --------------------------- | ------ | --------------------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Հասանելի պահուստային պատճենների ցանկ                                                          |
-| `/api/db-backups`           | PUT    | Ձեռքով պահուստային պատճենի ստեղծում                                                           |
-| `/api/db-backups`           | POST   | Վերականգնում որոշակի պահուստային պատճենից                                                     |
-| `/api/db-backups`           | PATCH  | Պահուստային պատճենների պահպանման կարգավորումների պահպանում (միայն օպերատորի համար)            |
-| `/api/db-backups`           | DELETE | Պահված պահուստային պատճենների մաքրում՝ ըստ պահպանման կարգավորումների (միայն օպերատորի համար)  |
-| `/api/db-backups/export`    | GET    | Տվյալների բազայի ներբեռնում որպես .sqlite ֆայլ                                                |
-| `/api/db-backups/import`    | POST   | .sqlite ֆայլի վերբեռնում՝ տվյալների բազան փոխարինելու համար (`?dryRun=true` ստուգում է միայն) |
-| `/api/db-backups/exportAll` | GET    | Ամբողջական պահուստային պատճենի ներբեռնում որպես .tar.gz արխիվ                                 |
+`GET /api/v1/video-bridge/drilldown` կարդում է վարձակալի վրա ամրացված անթափանց բռնակը, որը վերադարձվել է `x-omniroute-video-drilldown` ում հստակ համաձայնեցված Video Bridge հարցումից հետո: Ե՛վ ընթերցումները, և՛ `DELETE` միշտ պահանջում են վավեր API բանալի և օպերատորի անկախ `modalityBridgeVideoDrilldownRemoteEnabled` թույլտվությունը: Արտադրության պահպանումը լրացուցիչ պահանջում է `modalityBridgeVideoDrilldownEnabled` և խիստ յուրաքանչյուր մասի `drilldown: true`: Եթե բանալին ունի ոչ դատարկ վերջնակետի թույլտվության ցուցակ, այն պետք է ներառի `video` և՛ GET, և՛ DELETE համար, անկախ նրանից զանգահարողը օգտագործում է `/v1`, թե `/api/v1`:
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` և `/api/settings/export-json` տրամադրում են
-պահված բոլոր հավատարմագրերը, ուստի դրանց համար պահանջվում է dashboard-ի աշխատաշրջանը կամ տեղային CLI-ն (կամ մուտքն անջատված լինի)։
-Ցանկացած ընդգրկման API բանալիներ և `oma_` մուտքի նշանները ստանում են `403`։ Վերականգնման դեպքում գործում է նույն
-սահմանափակումը. `POST /api/db-backups/import` (`dryRun=true` ներառյալ), `POST /api/db-backups` (ըստ id-ի վերականգնում)
-և `POST /api/settings/import-json` փոխարինում են գործող տվյալների բազան կամ կարգավորումները, ուստի մեքենայի
-հավատարմագիրը նույնպես ստանում է `403`։ `omniroute sync import`-ը ուղարկում է տեղային CLI-ի հավատարմագիրը։ Այդպես են
-գործում նաև `DELETE /api/db-backups`-ը (պահված պահուստային պատճենների մաքրում) և `PATCH /api/db-backups`-ը (պահպանման
-կարգավորումներ. պահպանված արժեքներն են որոշում յուրաքանչյուր պահուստավորումից հետո ավտոմատ մաքրումը)։
-Ցուցակումը (`GET`) և ձեռքով պահուստային պատճենի ստեղծումը (`PUT`) շարունակում են օգտագործել կառավարման սովորական նույնականացումը։
+GET հարցում՝ պահանջվում է `handle`; ընտրովի `variant` (`preview`, `standard`, `detail`), `limit` (1–8; ժառանգական `frames` ընդունված է, բայց չի կարող համակցվել `limit` հետ), զրոյական `page` և `start`/`end` վայրկյաններ: Երբ երկու ֆոկուսի սահմաններն էլ տրամադրված են, `end` պետք է ավելի մեծ լինի, քան `start`: Duplicate/unknown հարցման բանալիները մերժված են: Հաջող պատասխանները պարունակում են `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` և կամընտիր `focusWindow`; no-store JSON սահմանափակված է 32 MiB ով, ներառյալ Base64-ը: Չափազանց մեծ արդյունքը վերադարձնում է 413; պահանջել ավելի քիչ շրջանակներ:
 
-### Ամպային համաժամեցում
+`DELETE /api/v1/video-bridge/drilldown?handle=...` վերադարձնում է `{ "removed": 0|1 }`. Անհայտ, ժամկետանց և խաչաձեւ բանալի GETs չեն տարբերվում 404 պատասխաններից; cross-key DELETE չի կարող հեռացնել սեփականատիրոջ մուտքը: Անջատված մուտքը վերադարձնում է 403, missing/invalid վավերացում 401, անվավեր հարցումներ 400, չեղարկում 499 և ժամանակավոր սխալներ 503: Բռնակները գործընթացային են, ժամկետանց են տասը րոպեից և չեն պահպանվում վերագործարկումից հետո: Նոր բռնակներ օգտագործում են `v1.` գումարած 32 բայթ պատահական Base64URL նշան; պահպանվում են միայն նշանային հեշերը: Legacy 64-hex նշանները մնում են շարահյուսական ընթեռնելի՝ համատեղելիության համար: Համաձայնության, քվոտաների և տարբերակների ստացման մանրամասների համար տե՛ս [Video Bridge-ի պաշտպանիչ բազրիքները](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) :
 
-| Endpoint               | Method  | Description                           |
-| ---------------------- | ------- | ------------------------------------- |
-| `/api/sync/cloud`      | Various | Ամպային համաժամեցման գործողություններ |
-| `/api/sync/initialize` | POST    | Համաժամեցման սկզբնավորում             |
-| `/api/cloud/*`         | Various | Ամպային կառավարում                    |
+### Կրկնօրինակում և Export/Import
+
+| Վերջնակետ                   | Մեթոդ  | Նկարագրություն                                                                                 |
+| --------------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | Ցուցակեք հասանելի կրկնօրինակները                                                               |
+| `/api/db-backups`           | PUT    | Ստեղծեք ձեռքով կրկնօրինակում                                                                   |
+| `/api/db-backups`           | POST   | Վերականգնել հատուկ կրկնօրինակից                                                                |
+| `/api/db-backups`           | PATCH  | Պահպանեք կրկնօրինակի պահպանման կարգավորումները (միայն օպերատորի համար)                         |
+| `/api/db-backups`           | DELETE | Պահված պահուստները կտրեք պահպանման կարգավորումներում (միայն օպերատորի համար)                   |
+| `/api/db-backups/export`    | GET    | Ներբեռնեք տվյալների բազան որպես .sqlite ֆայլ                                                   |
+| `/api/db-backups/import`    | POST   | Վերբեռնեք .sqlite ֆայլը տվյալների բազան փոխարինելու համար (միայն `?dryRun=true` վավերացնում է) |
+| `/api/db-backups/exportAll` | GET    | Ներբեռնեք ամբողջական կրկնօրինակը որպես .tar.gz արխիվ                                           |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` և `/api/settings/export-json` հանձնում են յուրաքանչյուր պահված հավատարմագիրը, այնպես որ նրանք պահանջում են վահանակի նիստը կամ տեղական CLI (կամ մուտքն անջատված է): Ցանկացած ծավալի API ստեղները և `oma_` մուտքի նշանները ստանում են `403`: Վերականգնումները պահպանում են նույն սահմանը. `POST /api/db-backups/import` (ներառյալ `dryRun=true` ), `POST /api/db-backups` (վերականգնել id-ով) և `POST /api/settings/import-json` փոխարինում են կենդանի տվյալների բազան կամ կարգավորումները, այնպես որ մեքենայի հավատարմագրերն այնտեղ նույնպես ստանում են `403` : `omniroute sync import` ուղարկում է տեղական CLI հավատարմագիրը: Այդպես արեք `DELETE /api/db-backups` (կտրեք պահված կրկնօրինակները) և `PATCH /api/db-backups` (պահման կարգավորումները. պահպանվող արժեքները մղում են ավտոմատ էտումը յուրաքանչյուր կրկնօրինակումից հետո): Ցուցակումը (`GET`) և ձեռքով կրկնօրինակի ստեղծումը (`PUT`) պահպանում են սովորական կառավարման հեղինակությունը:
+
+### Cloud Sync
+
+| Վերջնակետ              | Մեթոդ  | Նկարագրություն                        |
+| ---------------------- | ------ | ------------------------------------- |
+| `/api/sync/cloud`      | Տարբեր | Ամպային համաժամացման գործողություններ |
+| `/api/sync/initialize` | POST   | Նախաձեռնել համաժամացումը              |
+| `/api/cloud/*`         | Տարբեր | Ամպային կառավարում                    |
 
 ### Թունելներ
 
-| Endpoint                   | Method | Description                                                                       |
-| -------------------------- | ------ | --------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET    | Cloudflare Quick Tunnel-ի տեղադրման/գործարկման վիճակի ընթերցում dashboard-ի համար |
-| `/api/tunnels/cloudflared` | POST   | Cloudflare Quick Tunnel-ի միացում կամ անջատում (`action=enable/disable`)          |
-| `/api/tunnels/ngrok`       | GET    | ngrok Tunnel-ի գործարկման վիճակի ընթերցում dashboard-ի համար                      |
-| `/api/tunnels/ngrok`       | POST   | ngrok Tunnel-ի միացում կամ անջատում (`action=enable/disable`)                     |
+| Վերջնակետ                  | Մեթոդ | Նկարագրություն                                                              |
+| -------------------------- | ----- | --------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET   | Կարդացեք Cloudflare Quick Tunnel install/runtime կարգավիճակը վահանակի համար |
+| `/api/tunnels/cloudflared` | POST  | Միացնել կամ անջատել Cloudflare Quick Tunnel-ը (`action=enable/disable`)     |
+| `/api/tunnels/ngrok`       | GET   | Կարդացեք ngrok Tunnel-ի գործարկման ժամանակի կարգավիճակը վահանակի համար      |
+| `/api/tunnels/ngrok`       | POST  | Միացնել կամ անջատել ngrok թունելը (`action=enable/disable`)                 |
 
 ### CLI գործիքներ
 
-| Endpoint                           | Method | Description                         |
-| ---------------------------------- | ------ | ----------------------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Claude CLI-ի վիճակ                  |
-| `/api/cli-tools/codex-settings`    | GET    | Codex CLI-ի վիճակ                   |
-| `/api/cli-tools/droid-settings`    | GET    | Droid CLI-ի վիճակ                   |
-| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI-ի վիճակ                |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | CLI-ի ընդհանուր գործարկման միջավայր |
+| Վերջնակետ                          | Մեթոդ | Նկարագրություն                   |
+| ---------------------------------- | ----- | -------------------------------- |
+| `/api/cli-tools/claude-settings`   | GET   | Claude CLI կարգավիճակ            |
+| `/api/cli-tools/codex-settings`    | GET   | Codex CLI կարգավիճակ             |
+| `/api/cli-tools/droid-settings`    | GET   | Droid CLI կարգավիճակը            |
+| `/api/cli-tools/openclaw-settings` | GET   | OpenClaw CLI կարգավիճակ          |
+| `/api/cli-tools/runtime/[toolId]`  | GET   | Ընդհանուր CLI գործարկման ժամանակ |
 
-CLI-ի պատասխանները ներառում են՝ `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`։
+CLI պատասխանները ներառում են՝ `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`:
 
-### ACP գործակալներ
+### ACP Գործակալներ
 
-| Endpoint          | Method | Description                                                                   |
-| ----------------- | ------ | ----------------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Հայտնաբերված բոլոր գործակալների ցանկ (ներկառուցված + անհատական)՝ կարգավիճակով |
-| `/api/acp/agents` | POST   | Անհատական գործակալի ավելացում կամ հայտնաբերման քեշի թարմացում                 |
-| `/api/acp/agents` | DELETE | Անհատական գործակալի հեռացում `id` հարցման պարամետրով                          |
+| Վերջնակետ         | Մեթոդ  | Նկարագրություն                                                              |
+| ----------------- | ------ | --------------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Նշեք բոլոր հայտնաբերված գործակալները (ներկառուցված + մաքսային) կարգավիճակով |
+| `/api/acp/agents` | POST   | Ավելացնել հատուկ գործակալ կամ թարմացնել հայտնաբերման քեշը                   |
+| `/api/acp/agents` | DELETE | Հեռացրեք մաքսային գործակալը `id` հարցման պարամի միջոցով                     |
 
-GET-ի պատասխանը ներառում է `agents[]` (id, name, binary, version, installed, protocol, isCustom) և `summary` (total, installed, notFound, builtIn, custom)։
+GET պատասխանը ներառում է `agents[]` (id, անուն, երկուական, տարբերակ, տեղադրված, արձանագրություն, isCustom) և `summary` (ընդհանուր, տեղադրված, notFound, builtIn, մաքսային):
 
-### Կայունություն և հաճախականության սահմանափակումներ
+### Ճկունության և տոկոսադրույքի սահմանները
 
-| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Ստանալ/թարմացնել հարցումների հերթը, կապի սառեցումը, մատակարարի անջատիչը և սպասման կարգավորումները                                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/resilience/reset`           | POST      | Վերակայել մատակարարների շղթայի անջատիչները                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `/api/resilience/model-cooldowns` | GET       | Ցուցադրել ակտիվ՝ ըստ (մատակարար, կապ, մոդել) արգելափակումները՝ դասավորված ըստ մնացած ժամանակի                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/resilience/model-cooldowns` | DELETE    | Մաքրել մոդելի արգելափակումը — մարմինը՝ `{provider, model}` կամ `{all: true}`՝ ամեն ինչ մաքրելու համար                                                                                                                                                                                                                                                                                                                                                                |
-| `/api/rate-limits`                | GET/POST  | Հաշվին վերաբերող արագության սահմանաչափի կարգավիճակ (GET) կամ կապի համար արագության սահմանաչափի պաշտպանությունը միացնել/անջատել (POST `{connectionId, enabled}`). `rateLimitProtection`-ի գրելու համար աջակցվող ուղի (երբեք չի փոփոխվում `PUT /api/providers/[id]`-ի միջոցով)։ Նշում՝ `enabled: false`-ը անջատում է բացահայտ պաշտպանությունը, սակայն ակտիվ API-բանալիով կապը չի հանում գլոբալ ավտոմատ միացման անվտանգության մեխանիզմից (`autoEnableApiKeyProviders`)։ |
-| `/api/rate-limit`                 | GET       | Արագության սահմանաչափի գլոբալ կազմաձև (հնացած է․ այլանուն է `/api/rate-limits`-ի համար)                                                                                                                                                                                                                                                                                                                                                                              |
+| Վերջնակետ                         | Մեթոդ     | Նկարագրություն                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/resilience`                 | GET/PATCH | Get/update հարցումների հերթ, կապի սառեցում, մատակարարի անջատիչ և սպասման կարգավորումներ                                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/resilience/reset`           | POST      | Վերականգնել մատակարարի անջատիչները                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/resilience/model-cooldowns` | GET       | Ցուցակեք ակտիվ կողպեքները յուրաքանչյուր (մատակարար, կապ, մոդել)՝ տեսակավորված ըստ մնացած ժամանակի                                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/resilience/model-cooldowns` | DELETE    | Մաքրել մոդելի կողպեքը — մարմնի `{provider, model}` կամ `{all: true}` ամեն ինչ ջնջելու համար                                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/rate-limits`                | GET/POST  | Մեկ հաշվի տոկոսադրույքի սահմանաչափի կարգավիճակը (GET) կամ փոխարկեք տոկոսադրույքի սահմանաչափի պաշտպանությունը միացման համար (POST `{connectionId, enabled}`): Աջակցված գրելու ուղին `rateLimitProtection` համար (երբեք չի փոփոխվել `PUT /api/providers/[id]` միջոցով): Նշում. `enabled: false` անջատում է բացահայտ պաշտպանությունը, բայց չի անջատում ակտիվ API-բանալին միացումը համաշխարհային ավտոմատ միացնելու անվտանգության ցանցից (`autoEnableApiKeyProviders`): |
+| `/api/rate-limit`                 | GET       | Համաշխարհային տոկոսադրույքի սահմանաչափի կազմաձևում (հնացած, `/api/rate-limits` ի կեղծանուն)                                                                                                                                                                                                                                                                                                                                                                        |
 
-> Բոլոր չորս `/api/resilience/*` երթուղիները պահանջում են **կառավարման նույնականացում** (`requireManagementAuth`)։ Տե՛ս [Դիմակայունություն (ընդլայնված)](#resilience-extended)՝ մատակարարի անջատիչի, կապի սառեցման և մոդելի արգելափակման ամբողջական մանրամասների համար։
+> Բոլոր չորս `/api/resilience/*` երթուղիները պահանջում են** կառավարման հեղինակություն** (`requireManagementAuth`): Տե՛ս [առաձգականություն (ընդլայնված)](#resilience-extended) ՝ մատակարարի անջատիչի ընդդեմ կապի սառեցման ընդդեմ մոդելի արգելափակման ամբողջական խզման համար:
 
-### Գնահատումներ
+### Էվալս
 
-| Endpoint     | Method   | Description                                         |
-| ------------ | -------- | --------------------------------------------------- |
-| `/api/evals` | GET/POST | Ցուցադրել գնահատման փաթեթները / գործարկել գնահատում |
+| Վերջնակետ    | Մեթոդ    | Նկարագրություն                                          |
+| ------------ | -------- | ------------------------------------------------------- |
+| `/api/evals` | GET/POST | Ցուցակել արժեքավոր հավաքակազմերը / գործարկել գնահատումը |
 
-### Քաղաքականություններ
+### Քաղաքականություն
 
-| Endpoint        | Method          | Description                                   |
-| --------------- | --------------- | --------------------------------------------- |
-| `/api/policies` | GET/POST/DELETE | Կառավարել երթուղայնացման քաղաքականությունները |
+| Վերջնակետ       | Մեթոդ           | Նկարագրություն                         |
+| --------------- | --------------- | -------------------------------------- |
+| `/api/policies` | GET/POST/DELETE | Կառավարեք երթուղային քաղաքականությունը |
 
 ### Համապատասխանություն
 
-| Endpoint                    | Method | Description                                              |
-| --------------------------- | ------ | -------------------------------------------------------- |
-| `/api/compliance/audit-log` | GET    | Համապատասխանության աուդիտի մատյան (վերջին N գրառումները) |
+| Վերջնակետ                   | Մեթոդ | Նկարագրություն                               |
+| --------------------------- | ----- | -------------------------------------------- |
+| `/api/compliance/audit-log` | GET   | Համապատասխանության աուդիտի մատյան (վերջին N) |
 
-### v1beta (Gemini-ին համատեղելի)
+### v1beta (Gemini-ի հետ համատեղելի)
 
-| Endpoint                   | Method | Description                           |
-| -------------------------- | ------ | ------------------------------------- |
-| `/v1beta/models`           | GET    | Ցուցադրել մոդելները Gemini-ի ձևաչափով |
-| `/v1beta/models/{...path}` | POST   | Gemini-ի `generateContent` վերջնակետ  |
+| Վերջնակետ                  | Մեթոդ | Նկարագրություն                     |
+| -------------------------- | ----- | ---------------------------------- |
+| `/v1beta/models`           | GET   | Ցուցակեք մոդելները Gemini ձևաչափով |
+| `/v1beta/models/{...path}` | POST  | Gemini `generateContent` վերջնակետ |
 
-Այս վերջնակետերը կրկնօրինակում են Gemini-ի API ձևաչափը այն հաճախորդների համար, որոնք ակնկալում են Gemini SDK-ի բնիկ համատեղելիություն։
+Այս վերջնակետերը արտացոլում են Gemini ի API ձևաչափը հաճախորդների համար, ովքեր ակնկալում են տեղական Gemini SDK համատեղելիություն:
 
-### Ներքին / Համակարգային API-ներ
+### Ներքին / Համակարգ APIs
 
-| Endpoint                 | Method | Description                                                                |
-| ------------------------ | ------ | -------------------------------------------------------------------------- |
-| `/api/init`              | GET    | Հավելվածի սկզբնավորման ստուգում (օգտագործվում է առաջին գործարկման ժամանակ) |
-| `/api/tags`              | GET    | Ollama-ին համատեղելի մոդելի պիտակներ (Ollama հաճախորդների համար)           |
-| `/api/restart`           | POST   | Գործարկել սերվերի սահուն վերագործարկում                                    |
-| `/api/shutdown`          | POST   | Գործարկել սերվերի սահուն անջատում                                          |
-| `/api/system/env/repair` | POST   | Վերականգնել OAuth մատակարարի միջավայրի փոփոխականները                       |
-| `/api/system/version`    | GET    | Ընթացիկ/վերջին տարբերակ, թարմացման կարգավիճակ, թողարկման ալիք              |
-| `/api/system/version`    | POST   | Սկսել տեղակայմանը համապատասխան վերջին տարբերակի թարմացում                  |
+| Վերջնակետ                | Մեթոդ | Նկարագրություն                                                       |
+| ------------------------ | ----- | -------------------------------------------------------------------- |
+| `/api/init`              | GET   | Սկսել ֆոնային համաժամացման ծառայությունները (կառավարման վավերացում)  |
+| `/api/tags`              | GET   | Ollama-ի հետ համատեղելի մոդելի պիտակներ ( Ollama հաճախորդների համար) |
+| `/api/restart`           | POST  | Գործարկեք նրբագեղ սերվերի վերագործարկումը                            |
+| `/api/shutdown`          | POST  | Գործարկեք սերվերի նրբագեղ անջատումը                                  |
+| `/api/system/env/repair` | POST  | Վերանորոգեք OAuth մատակարարի միջավայրի փոփոխականները                 |
+| `/api/system/version`    | GET   | Current/latest տարբերակ, թարմացման կարգավիճակ, թողարկման ալիք        |
+| `/api/system/version`    | POST  | Սկսեք տեղակայման մասին տեղեկացված թարմացում վերջին տարբերակի համար   |
 
-> **Նշում․** Այս վերջնակետերը համակարգը ներքին նպատակներով կամ Ollama հաճախորդների համատեղելիության համար է օգտագործում։ Սովորաբար դրանք վերջնական օգտվողները չեն կանչում։
+> **Նշում.** Այս վերջնակետերն օգտագործվում են ներքին համակարգի կողմից կամ Ollama հաճախորդի համատեղելիության համար: Նրանք սովորաբար չեն կանչվում վերջնական օգտագործողների կողմից:
 
-### OAuth միջավայրի վերականգնում _(v3.6.1+)_
+### OAuth Շրջակա միջավայրի վերանորոգում _(v3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1528,7 +1463,7 @@ Content-Type: application/json
 }
 ```
 
-Վերականգնում է տվյալ մատակարարի բացակայող կամ վնասված OAuth միջավայրի փոփոխականները։ Վերադարձնում է՝
+Վերականգնում է բացակայող կամ վնասված OAuth միջավայրի փոփոխականները կոնկրետ մատակարարի համար: Վերադարձնում է՝
 
 ```json
 {
@@ -1538,15 +1473,13 @@ Content-Type: application/json
 }
 ```
 
-### Տարբերակ և թողարկման ալիք
+### Տարբերակի և թողարկման ալիք
 
 ```bash
 GET /api/system/version
 ```
 
-Միայն loopback-ի համար նախատեսված կառավարման երթուղի (ադմինիստրատորի նույնականացում)։ Վերադարձնում է գործարկվող տարբերակը, վերջին
-հրապարակված տարբերակը և ավտոմատ թարմացման կարգավիճակը։ `releaseChannel` և `channels` դաշտերը հավելյալ են (rail 3.8.54)․ `channel`-ը պահպանում է իր նշանակությունը՝ տեղակայման ռեժիմը, որն օգտագործում է վահանակի թարմացնողը
-(`npm`, `source` կամ `docker-compose`)։
+Միայն Loopback-ի կառավարման երթուղին (admin auth): Վերադարձնում է գործող տարբերակը, վերջին հրապարակված տարբերակը և ավտոմատ թարմացման կարգավիճակը: `releaseChannel` և `channels` հավելյալ դաշտեր են (երկաթուղային 3.8.54); `channel` պահպանում է իր նշանակությունը — տեղակայման ռեժիմում, որն օգտագործում է վահանակի թարմացումը (`npm`, `source` կամ `docker-compose`):
 
 ```json
 {
@@ -1562,16 +1495,10 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — գործարկվող build-ի npm ալիքը՝ `nightly`՝ `-nightly.*` տարբերակների համար,
-  `next`՝ այլ նախնական թողարկումների (`-rc.*`, `-beta.*`, `-alpha.*`) համար, `lts`՝
-  `channels.latest`-ից ավելի հին major-ի կայուն տարբերակի համար, իսկ մնացած դեպքերում՝ `latest`։ Նույն կանոններն են գործում, ինչ
-  `scripts/release/dist-tag.mjs`-ում, որն ընտրում է npm dist-tag-ը հրապարակման պահին։
-- `channels` — յուրաքանչյուր dist-tag-ի հրապարակված վերջին տարբերակը՝ `npm view omniroute dist-tags`-ից (registry HTTP fallback), քեշավորված `latest`-ի
-  նույն 10 րոպեանոց TTL-ով։ `latest`-ը միշտ առկա է (նախ վերադառնում է `latest` դաշտին, ապա՝ `"unavailable"`-ին)․ `next`, `nightly` և `lts` դաշտերը հայտնվում են
-  միայն այն դեպքում, երբ տվյալ dist-tag-ը գոյություն ունի։ `Cache-Control: no-cache` հարցումը թարմացնում է երկու որոնումների արդյունքները։
+- `releaseChannel` — npm ալիքը գործող շինարարության համար. `nightly` `-nightly.*` տարբերակների համար, `next` այլ նախնական թողարկումների համար (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` ավելի հին հիմնական տարբերակի համար, քան `channels.latest`, այլապես `latest`: Նույն կանոնները, ինչ `scripts/release/dist-tag.mjs`, որն ընտրում է npm dist-պիտակը հրապարակման պահին:
+- `channels` — հրապարակել է յուրաքանչյուր dist-tag-ի գլուխը՝ `npm view omniroute dist-tags` ից (registry HTTP backback), քեշավորված նույն 10 րոպեանոց TTL ինչ `latest`: `latest` միշտ առկա է (հետ է ընկնում `latest` դաշտ, հետո `"unavailable"`); `next`, `nightly` և `lts` հայտնվում են միայն այն ժամանակ, երբ այդ dist-tag-ը գոյություն ունի: `Cache-Control: no-cache` հարցումը թարմացնում է երկու որոնումները:
 
-Ալիքների մոդելը (`latest` = v3 մինչև 4.0 GA-ն, `next` = rc, `nightly` = `develop` builds,
-`lts` = v3 patches 4.0 GA-ից հետո) նկարագրված է `docs/ops/RELEASE_STRATEGY.md`-ում։
+Ալիքի մոդելը (`latest` = v3 մինչև 4.0 GA, `next` = rc, `nightly` = `develop` կառուցումներ, `lts` = v3 patches 4.0 GA ից հետո) նկարագրված է `docs/ops/RELEASE_STRATEGY.md` ում:
 
 ---
 

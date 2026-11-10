@@ -358,82 +358,82 @@ API விசை: [கட்டுப்பாட்டுப் பலகைய
 
 ---
 
-## 🚀 நிறுவல்
+## 🚀 வரிசைப்படுத்தல்
 
 ### உலகளாவிய npm நிறுவல் (பரிந்துரைக்கப்படுகிறது)
 
 ```bash
 npm install -g omniroute
 
-# உள்ளமைவு கோப்பகத்தை உருவாக்கவும்
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env கோப்பை உருவாக்கவும் (.env.example-ஐப் பார்க்கவும்)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# சேவையகத்தைத் தொடங்கவும்
+# Start server
 omniroute
-# அல்லது தனிப்பயன் போர்ட்டுடன்:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ஆனது `~/.omniroute/.env` அல்லது `./.env`-இலிருந்து `.env`-ஐத் தானாக ஏற்றும்.
+CLI தானாகவே `~/.omniroute/.env` அல்லது `./.env` இலிருந்து `.env` ஏற்றுகிறது. வேலை செய்யும் கோப்பகத்தில் ஒரு `./.env` விசைகளின் குறுகிய அனுமதிப் பட்டியலை மட்டுமே அமைக்கலாம் (போர்ட்கள், `REQUIRE_API_KEY`, லோகேல் மற்றும் வண்ண அமைப்புகள்); மற்ற அனைத்தையும் `~/.omniroute/.env` இல் வைக்கவும். [CLI வெளியீட்டு ஒப்பந்தங்களைப்](CLI-LAUNCH-CONTRACTS.md#working-directory-env) பார்க்கவும்.
 
 ### தட்டு முறை
 
-கணினித் தட்டில் OmniRoute-ஐத் தொடங்கவும்:
+கணினி தட்டில் OmniRoute தொடங்கவும்:
 
 ```bash
 omniroute serve --tray
 ```
 
-சேவையகமும் தட்டும் தயாரானதும் கட்டளை நிறைவடையும்.
+சர்வர் மற்றும் தட்டு தயாரான பிறகு கட்டளை திரும்பும்.
 
-முனையம் இல்லாமலும் சேவையகம் தொடர்ந்து இயங்கும்.
+டெர்மினல் இல்லாமல் சர்வர் தொடர்கிறது.
 
-தட்டு முறை macOS, Windows மற்றும் வரைகலை Linux அமர்வுகளை ஆதரிக்கிறது. தட்டு முறை கட்டுப்பாட்டுப் பலகையைத் தானாகத் திறக்காது.
+தட்டு முறை macOS, Windows, மற்றும் வரைகலை Linux அமர்வுகளை ஆதரிக்கிறது. தட்டு பயன்முறை டாஷ்போர்டை தானாக திறக்காது.
 
-பின்வரும் செயல்களுக்கு தட்டு மெனுவைப் பயன்படுத்தவும்:
+இந்த செயல்களுக்கு தட்டு மெனுவைப் பயன்படுத்தவும்:
 
-- கட்டுப்பாட்டுப் பலகையைத் திறக்கவும்.
-- `/dashboard/logs`-ஐத் திறக்கவும்.
+- டாஷ்போர்டைத் திறக்கவும்.
+- `/dashboard/logs` திறக்கவும்.
 - தானியங்கு தொடக்கத்தை மாற்றவும்.
-- OmniRoute-ஐ நிறுத்தவும்.
+- OmniRoute நிறுத்துங்கள்.
 
-பின்வரும் விருப்பங்களுடன் `--tray`-ஐ இணைத்துப் பயன்படுத்த வேண்டாம்:
+இந்த விருப்பங்களுடன் `--tray` இணைக்க வேண்டாம்:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-இந்த முறைகளுக்கு வேறுபட்ட செயல்முறை உரிமை தேவைப்படுகிறது.
+இந்த முறைகளுக்கு வெவ்வேறு செயல்முறை உரிமை தேவை.
 
-அடுத்த கணினி உள்நுழைவின்போது தொடங்குவதை இயக்கவும்:
+அடுத்த இயந்திர உள்நுழைவில் தொடக்கத்தை இயக்கவும்:
 
 ```bash
 omniroute autostart enable
 ```
 
-தானியங்கு தொடக்கம் macOS, Windows மற்றும் வரைகலை Linux அமர்வுகளில் தட்டு முறையைப் பயன்படுத்தும். திரையற்ற Linux ஏற்கனவே உள்ள systemd பயனர் சேவையைப் பயன்படுத்தும்.
+தானியங்கு-தொடக்கம் macOS, Windows, மற்றும் வரைகலை Linux அமர்வுகளில் தட்டு பயன்முறையைப் பயன்படுத்துகிறது. Headless Linux ஏற்கனவே உள்ள systemd பயனர் சேவையைப் பயன்படுத்துகிறது.
 
-உள்நுழையும்போது தொடங்குவதை முடக்கவும்:
+உள்நுழைவில் தொடக்கத்தை முடக்கு:
 
 ```bash
 omniroute autostart disable
 ```
 
-### நிறுவல் நீக்கம்
+### நிறுவல் நீக்குகிறது
 
-OmniRoute இனி தேவையில்லாதபோது, முழுமையாக அகற்றுவதற்கு இரண்டு விரைவான ஸ்கிரிப்ட்களை வழங்குகிறோம்:
+உங்களுக்கு இனி OmniRoute தேவைப்படாதபோது, சுத்தமான அகற்றுதலுக்கு இரண்டு விரைவான ஸ்கிரிப்ட்களை வழங்குகிறோம்:
 
-| கட்டளை                   | செயல்                                                                                                     |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | கணினிச் செயலியை அகற்றும், ஆனால் `~/.omniroute`-இல் உள்ள **உங்கள் DB மற்றும் உள்ளமைவுகளைத் தக்கவைக்கும்**. |
-| `npm run uninstall:full` | செயலியை அகற்றுவதுடன் **அனைத்து உள்ளமைவுகள், விசைகள் மற்றும் தரவுத்தளங்களை நிரந்தரமாக அழிக்கும்**.         |
+| கட்டளை                   | செயல்                                                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | கணினி பயன்பாட்டை நீக்குகிறது ஆனால்** உங்கள் DB மற்றும் கட்டமைப்புகளை வைத்திருக்கிறது** `~/.omniroute` இல்.  |
+| `npm run uninstall:full` | AND பயன்பாட்டை நிரந்தரமாக நீக்குகிறது** அனைத்து கட்டமைப்புகள், விசைகள் மற்றும் தரவுத்தளங்களை அழிக்கிறது** . |
 
-> குறிப்பு: இந்தக் கட்டளைகளை இயக்க, OmniRoute திட்டக் கோப்பகத்திற்குச் சென்று (அதை clone செய்திருந்தால்) அவற்றை இயக்கவும். மாற்றாக, உலகளாவிய முறையில் நிறுவியிருந்தால், `npm uninstall -g omniroute` என்பதை மட்டும் இயக்கலாம்.
+> குறிப்பு: இந்த கட்டளைகளை இயக்க, OmniRoute திட்ட கோப்புறைக்கு செல்லவும் (நீங்கள் அதை குளோன் செய்தால்) அவற்றை இயக்கவும். மாற்றாக, உலகளவில் நிறுவப்பட்டிருந்தால், நீங்கள் `npm uninstall -g omniroute` இயக்கலாம்.
 
-### VPS நிறுவல்
+### VPS வரிசைப்படுத்தல்
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -449,25 +449,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# அல்லது: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 நிறுவல் (குறைந்த நினைவகம்)
+### PM2 வரிசைப்படுத்தல் (குறைந்த நினைவகம்)
 
-குறைந்த RAM கொண்ட சேவையகங்களுக்கு, நினைவக வரம்பு விருப்பத்தைப் பயன்படுத்தவும்:
+வரையறுக்கப்பட்ட RAM கொண்ட சேவையகங்களுக்கு, நினைவக வரம்பு விருப்பத்தைப் பயன்படுத்தவும்:
 
 ```bash
-# 512MB வரம்புடன் (இயல்புநிலை)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# அல்லது தனிப்பயன் நினைவக வரம்புடன்
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# அல்லது ecosystem.config.js-ஐப் பயன்படுத்தி
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js`-ஐ உருவாக்கவும்:
+`ecosystem.config.js` உருவாக்கவும்:
 
 ```javascript
 module.exports = {
@@ -492,24 +492,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# படிமத்தை உருவாக்கவும் (இயல்புநிலை = codex/claude/droid முன்பே நிறுவப்பட்ட runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# எடுத்துச் செல்லக்கூடிய முறை (பரிந்துரைக்கப்படுகிறது)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI பைனரிகளுடன் ஹோஸ்ட்-ஒருங்கிணைந்த முறைக்கு, முதன்மை ஆவணங்களில் உள்ள Docker பகுதியைப் பார்க்கவும்.
+CLI பைனரிகளுடன் ஹோஸ்ட்-ஒருங்கிணைந்த பயன்முறைக்கு, முக்கிய ஆவணத்தில் Docker பகுதியைப் பார்க்கவும்.
 
-### Void Linux (xbps-src)
+### வெற்றிடமான Linux (xbps-src)
 
-Void Linux பயனர்கள் `xbps-src` குறுக்குத் தொகுப்பு கட்டமைப்பைப் பயன்படுத்தி OmniRoute-ஐ இயல்பாகத் தொகுப்பாக்கி நிறுவலாம். இது தேவையான `better-sqlite3` இயல்புநிலை பிணைப்புகளுடன் Node.js தனித்தியங்கும் உருவாக்கத்தையும் தானியங்குபடுத்துகிறது.
+வெற்றிடமான Linux பயனர்கள் `xbps-src` குறுக்கு-தொகுப்பு கட்டமைப்பைப் பயன்படுத்தி OmniRoute தொகுத்து நிறுவலாம். இது தேவையான `better-sqlite3` நேட்டிவ் பைண்டிங்குகளுடன் Node.js ஸ்டாண்டலோன் கட்டமைப்பை தானியக்கமாக்குகிறது.
 
 <details>
-<summary><b>xbps-src வார்ப்புருவைக் காண்க</b></summary>
+<summary><b>xbps-src டெம்ப்ளேட்டைப் பார்க்கவும்</b></summary>
 
 ```bash
-# 'omniroute'-க்கான வார்ப்புருக் கோப்பு
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -530,7 +530,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp-க்கான இலக்கு CPU கட்டமைப்பைத் தீர்மானிக்கவும்
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -539,29 +539,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) அனைத்து சார்புகளையும் நிறுவவும் – ஸ்கிரிப்ட்களைத் தவிர்க்கவும்
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js தனித்தியங்கும் தொகுப்பை உருவாக்கவும்
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) நிலையான வளங்களைத் தனித்தியங்கும் தொகுப்புக்குள் நகலெடுக்கவும்
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 இயல்புநிலை பிணைப்பைத் தொகுக்கவும்
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) தொகுக்கப்பட்ட பிணைப்பைத் தனித்தியங்கும் தொகுப்புக்குள் வைக்கவும்
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) கட்டமைப்பு சார்ந்த sharp தொகுப்புகளை அகற்றவும்
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js நிலையான பகுப்பாய்வால் விடுபட்ட pino இயக்கநேரச் சார்புகளை நகலெடுக்கவும்:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -575,7 +575,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# நிறுவலுக்குப் பிந்தைய hook மூலம் காலியான Next.js பயன்பாட்டு router அடைவுகள் அகற்றப்படுவதைத் தடுக்கவும்
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -601,32 +601,32 @@ post_install() {
 
 </details>
 
-### சூழல் மாறிகள்
+### சுற்றுச்சூழல் மாறிகள்
 
-| மாறி                                    | இயல்புநிலை                           | விளக்கம்                                                                                                                                               |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT கையொப்பமிடும் ரகசியம் (**உற்பத்திச் சூழலில் மாற்றவும்**)                                                                                           |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | முதல் உள்நுழைவுக்கான கடவுச்சொல்                                                                                                                        |
-| `DATA_DIR`                              | `~/.omniroute`                       | தரவுக் கோப்பகம் (தரவுத்தளம், பயன்பாடு, பதிவுகள்)                                                                                                       |
-| `PORT`                                  | கட்டமைப்பின் இயல்புநிலை              | சேவை போர்ட் (எடுத்துக்காட்டுகளில் `20128`)                                                                                                             |
-| `HOSTNAME`                              | கட்டமைப்பின் இயல்புநிலை              | பிணைப்பு ஹோஸ்ட் (Docker-இன் இயல்புநிலை `0.0.0.0`)                                                                                                      |
-| `NODE_ENV`                              | இயக்கநேர இயல்புநிலை                  | வரிசைப்படுத்தலுக்கு `production` என அமைக்கவும்                                                                                                         |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | முகப்புப்பலகையில் காட்டப்பட்டு சேவையகத்திற்கும் வெளிப்படுத்தப்படும் பொது அடிப்படை URL (மரபார்ந்த `BASE_URL`-ஐ மாற்றுகிறது)                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | கிளவுட் ஒத்திசைவு முனைப்புள்ளியின் அடிப்படை URL (மரபார்ந்த `CLOUD_URL`-ஐ மாற்றுகிறது)                                                                  |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | உருவாக்கப்பட்ட API விசைகளுக்கான HMAC ரகசியம்                                                                                                           |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*`-இல் Bearer API விசையைச் செயல்படுத்திக் கட்டாயப்படுத்தும்                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | அங்கீகரிக்கப்பட்ட முகப்புப்பலகைப் பயனர்கள் கோரிக்கையின் பேரில் சேமிக்கப்பட்ட முழு API விசை மதிப்புகளைப் பார்க்க அனுமதிக்கும்                           |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | தற்காலிகச் சேமிப்பிலுள்ள வழங்குநர் வரம்புத் தரவுக்கான சேவையகப் புதுப்பிப்பு இடைவெளி; UI புதுப்பிப்புப் பொத்தான்கள் இன்னும் கைமுறை ஒத்திசைவைத் தூண்டும் |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | எழுதுதல்/இறக்குமதி/மீட்டமைப்புக்கு முன் தானியங்கு SQLite நகலெடுப்புகளை முடக்கும்; கைமுறை காப்புப்பிரதிகள் தொடர்ந்து செயல்படும்                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | பயன்பாட்டு மற்றும் தணிக்கைப் பதிவு வெளியீட்டை வட்டில் சேமிக்கச் செயல்படுத்தும்                                                                         |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` அங்கீகார குக்கியை கட்டாயப்படுத்தும் (HTTPS ரிவர்ஸ் ப்ராக்ஸிக்குப் பின்னால்)                                                                   |
-| `CLOUDFLARED_BIN`                       | அமைக்கப்படவில்லை                     | நிர்வகிக்கப்பட்ட பதிவிறக்கத்திற்குப் பதிலாக ஏற்கனவே உள்ள `cloudflared` பைனரியைப் பயன்படுத்தும்                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | நிர்வகிக்கப்பட்ட Quick Tunnels-க்கான போக்குவரத்து (`http2`, `quic`, அல்லது `auto`)                                                                     |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB-இல் Node.js ஹீப் வரம்பு                                                                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ப்ராம்ப்ட் தற்காலிகச் சேமிப்பின் அதிகபட்ச உள்ளீடுகள்                                                                                                   |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | அர்த்தவியல் தற்காலிகச் சேமிப்பின் அதிகபட்ச உள்ளீடுகள்                                                                                                  |
+| மாறி                                    | இயல்புநிலை               | விளக்கம்                                                                                                                                                        |
+| --------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(தானாக உருவாக்கப்பட்ட)_ | JWT கையொப்பமிடும் இரகசிய — முதல் ஓட்டத்தில் தானாக உருவாக்கப்பட்டு `server.env` க்கு நீடித்தது; தரவு அடைவு இடைக்காலமாக இருக்கும்போது அதை வெளிப்படையாக அமைக்கவும் |
+| `INITIAL_PASSWORD`                      | _(அமைக்கப்படாதது)_       | முதல் உள்நுழைவு கடவுச்சொல். npm/source நிறுவல்கள் `CHANGEME` உடன் தொடங்குகின்றன: அதை மாற்றவும். அமைக்கப்படவில்லை: ஆன்போர்டிங் வழிகாட்டி                         |
+| `DATA_DIR`                              | `~/.omniroute`           | தரவு கோப்பகம் (db, பயன்பாடு, பதிவுகள்)                                                                                                                          |
+| `PORT`                                  | கட்டமைப்பு இயல்புநிலை    | சேவை துறைமுகம் (உதாரணங்களில்`20128` )                                                                                                                           |
+| `HOSTNAME`                              | கட்டமைப்பு இயல்புநிலை    | ஹோஸ்ட்டை பிணைக்கவும் (Docker இயல்புநிலை `0.0.0.0` க்கு)                                                                                                         |
+| `NODE_ENV`                              | இயக்க நேர இயல்புநிலை     | வரிசைப்படுத்த `production` அமைக்கவும்                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | பொது அடிப்படை URL டாஷ்போர்டில் தோன்றி சேவையகத்திற்கு வெளிப்பட்டது (மரபு `BASE_URL` மாற்றுகிறது)                                                                 |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | கிளவுட் ஒத்திசைவு இறுதிப்புள்ளி அடிப்படை URL (மரபு `CLOUD_URL` ஐ மாற்றுகிறது)                                                                                   |
+| `API_KEY_SECRET`                        | _(தானாக உருவாக்கப்பட்ட)_ | உருவாக்கப்பட்ட API விசைகளுக்கான HMAC ரகசியம் — முதல் இயக்கத்தில் தானாக உருவாக்கப்பட்டு `server.env` வரை நீடித்தது                                               |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` இல் Bearer API விசையைச் செயல்படுத்தவும்                                                                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | அங்கீகரிக்கப்பட்ட டாஷ்போர்டு பயனர்கள் தேவைக்கேற்ப முழு சேமிக்கப்பட்ட API முக்கிய மதிப்புகளை வெளிப்படுத்த அனுமதிக்கவும்                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | தற்காலிகச் சேமிப்பு வழங்குநர் வரம்புகள் தரவிற்கான சேவையகப் பக்க புதுப்பிப்பு கேடன்ஸ்; UI புதுப்பிப்பு பொத்தான்கள் இன்னும் கைமுறை ஒத்திசைவைத் தூண்டுகின்றன       |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore க்கு முன் தானியங்கி SQLite ஸ்னாப்ஷாட்களை முடக்கு ; கைமுறை காப்புப்பிரதிகள் இன்னும் வேலை செய்கின்றன                                        |
+| `APP_LOG_TO_FILE`                       | `true`                   | பயன்பாடு மற்றும் தணிக்கை பதிவு வெளியீட்டை வட்டுக்கு இயக்குகிறது                                                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth குக்கீயை கட்டாயப்படுத்தவும் ( HTTPS ரிவர்ஸ் ப்ராக்ஸிக்கு பின்னால்)                                                                                |
+| `CLOUDFLARED_BIN`                       | அமைக்கப்படவில்லை         | நிர்வகிக்கப்பட்ட பதிவிறக்கத்திற்குப் பதிலாக ஏற்கனவே உள்ள `cloudflared` பைனரியைப் பயன்படுத்தவும்                                                                 |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | நிர்வகிக்கப்படும் விரைவு சுரங்கங்களுக்கான போக்குவரத்து (`http2`, `quic`, அல்லது `auto`)                                                                         |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB இல்Node.js குவியல் வரம்பு                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | அதிகபட்ச உடனடி கேச் உள்ளீடுகள்                                                                                                                                  |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | அதிகபட்ச சொற்பொருள் கேச் உள்ளீடுகள்                                                                                                                             |
 
-முழுமையான சூழல் மாறிக் குறிப்புக்கு, [README](../README.md)-ஐப் பார்க்கவும்.
+முழு சூழல் மாறி குறிப்புக்கு, [README](../README.md) ஐப் பார்க்கவும்.
 
 ---
 
@@ -635,17 +635,17 @@ post_install() {
 <details>
 <summary><b>கிடைக்கக்கூடிய அனைத்து மாதிரிகளையும் காண்க</b></summary>
 
-> கீழே உள்ள பட்டியல் v3.8.0-க்கான `open-sse/config/providerRegistry.ts` இலிருந்து தொகுக்கப்பட்டது. Cloud பட்டியல்கள் (Gemini, OpenRouter போன்றவை) மாறும் வகையில் ஒத்திசைக்கப்படுகின்றன — முழுமையான நேரலைப் பட்டியலைக் காண **Dashboard → Providers → [provider] → Available Models** என்பதைத் திறக்கவும் அல்லது `GET /api/models/catalog` அழைப்பைச் செய்யவும்.
+> கீழேயுள்ள பட்டியல் v3.8.0-க்கான `open-sse/config/providerRegistry.ts` கோப்பிலிருந்து தேர்ந்தெடுக்கப்பட்டது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) மாறும் விதத்தில் ஒத்திசைக்கப்படுகின்றன — முழுமையான நேரடி பட்டியலைப் பெற **டாஷ்போர்டு → வழங்குநர்கள் → [வழங்குநர்] → கிடைக்கக்கூடிய மாதிரிகள்** என்பதைத் திறக்கவும் அல்லது `GET /api/models/catalog` ஐ அழைக்கவும்.
 >
-> ஒரு provider-ன் உள்ளமைக்கப்பட்ட பட்டியல் மாறுபட்டிருந்தால், நேரலை upstream பட்டியலைப் பெற அந்தப் பக்கத்தில் **Import from /models** என்பதைப் பயன்படுத்தவும் (அல்லது **Auto-Sync**-ஐ இயக்கவும்). இது LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்கு v3.8.50-ல் சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றில் Pollinations-ன் பெயரில்லா அணுகல் upstream வரம்புக்குள் இருந்தது.
+> வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் மாறுபட்டிருந்தால், நேரடி upstream பட்டியலைப் பெற அந்தப் பக்கத்தில் **/models இலிருந்து இறக்குமதி செய்** என்பதைப் பயன்படுத்தவும் (அல்லது **தானியங்கு ஒத்திசைவு** என்பதை இயக்கவும்). இது LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்காக v3.8.50-ல் சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றில் Pollinations-ன் அநாமதேய அணுகல் upstream வரம்புக்குள் இருந்தது.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ முயற்சி நிலைகள்: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ முயற்சி அடுக்குகள்: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — இலவச OAuth: **Dashboard → Providers → Kiro → Available Models** என்பதன் கீழ் காட்டப்படும் நேரலைப் பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் மாதிரிகள் கணக்கு மற்றும் திட்டத்தைப் பொறுத்தவை.
+**Kiro (`kr/`)** — இலவச OAuth: **டாஷ்போர்டு → வழங்குநர்கள் → Kiro → கிடைக்கக்கூடிய மாதிரிகள்** என்பதன் கீழ் காட்டப்படும் நேரடி பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் மாதிரிகள் கணக்கு மற்றும் திட்டத்தைப் பொறுத்தது.
 
 **Qoder (`if/`)** — இலவச OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -653,37 +653,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — மாதத்திற்கு $9 அல்லது பயன்பாட்டின் அடிப்படையில்: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/மாதம் நிலையான கட்டணம் அல்லது பயன்பாட்டின் அடிப்படையில்: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API விசை: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — அதிவேகம்: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — சொந்த Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok நேட்டிவ்: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-ல் வழங்கப்படுகிறது: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-வில் ஹோஸ்ட் செய்யப்பட்டது: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — தேடல்-மேம்படுத்தப்பட்டது: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — திறந்த மூல: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (இலவசம்), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — அதிவேக inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — வேகமான inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — wafer அளவிலானது: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ஐ மையமாகக் கொண்டது: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-மையம்: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — நிறுவனப் பயன்பாடு: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — நிறுவனப் பயன்பாடு: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-இலிருந்து API key அடிப்படையில் நேரலையில் ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **Dashboard → Providers** என்பதில் ஒரு key-ஐ இணைத்து, தற்போதைய பட்டியலை இறக்குமதி செய்ய **Available Models**-ஐப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google வழங்கும் API விசையின் அடிப்படையில் நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **டாஷ்போர்டு → வழங்குநர்கள்** என்பதில் ஒரு விசையை இணைத்து, தற்போதைய பட்டியலை இறக்குமதி செய்ய **கிடைக்கக்கூடிய மாதிரிகள்** என்பதைப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**பிற இணக்கமான providers** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts`-ல் தனக்கென ஒரு மாதிரிப் பட்டியலைப் பராமரிக்கிறது; provider `/models` endpoint-ஐ வழங்கினால், தானாக ஒத்திசைக்கப்படலாம்.
+**பிற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (passthrough பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts` இல் தனித்தனி மாதிரிப் பட்டியலைப் பராமரிக்கிறது; மேலும், வழங்குநர் `/models` endpoint-ஐ வழங்கினால் தானாக ஒத்திசைக்கப்படலாம்.
 
-**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute provider-native ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). சில ID-களில் புள்ளியுடன் கூடிய பதிப்புகள் உள்ளன; upstream API அவற்றை எதிர்பார்ப்பதே காரணம். ஒரு மாதிரி மேலே பட்டியலிடப்படவில்லை என்றால், கிடைப்பதை உறுதிப்படுத்த `omniroute models --search <term>`-ஐ இயக்கவும் அல்லது `GET /api/models/catalog`-ஐ அணுகவும்.
+**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநரின் நேட்டிவ் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). சில ID-களில் புள்ளியுடன் கூடிய பதிப்புகள் உள்ளன; upstream API அவற்றை எதிர்பார்ப்பதே அதற்குக் காரணம். மேலே மாதிரி பட்டியலிடப்படவில்லை என்றால், கிடைக்குமா என்பதை உறுதிப்படுத்த `omniroute models --search <term>` ஐ இயக்கவும் அல்லது `GET /api/models/catalog` ஐ அணுகவும்.
 
 </details>
 

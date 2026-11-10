@@ -337,28 +337,28 @@ Modell: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Driftsättning
+## 🚀 distribution
 
-### Global npm-installation (rekommenderas)
+### Global npm installation (rekommenderas)
 
 ```bash
 npm install -g omniroute
 
-# Skapa konfigurationskatalog
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Skapa .env-fil (se .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Starta servern
+# Start server
 omniroute
-# Eller med en anpassad port:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI:n läser automatiskt in `.env` från `~/.omniroute/.env` eller `./.env`.
+CLI laddar automatiskt `.env` från `~/.omniroute/.env` eller `./.env`. En `./.env` i arbetskatalogen kan endast ställa in en kort godkännandelista med nycklar (portar, `REQUIRE_API_KEY`, språkinställningar och färginställningar); lägg allt annat i `~/.omniroute/.env`. Se [CLI lanseringskontrakt](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Systemfältsläge
+### Fackläge
 
 Starta OmniRoute i systemfältet:
 
@@ -366,34 +366,34 @@ Starta OmniRoute i systemfältet:
 omniroute serve --tray
 ```
 
-Kommandot avslutas när servern och systemfältet är redo.
+Kommandot återkommer när servern och facket är klara.
 
-Servern fortsätter att köras utan terminalen.
+Servern fortsätter utan terminalen.
 
-Systemfältsläget stöder macOS, Windows och grafiska Linux-sessioner. Systemfältsläget öppnar inte kontrollpanelen automatiskt.
+Fackläge stöder macOS, Windows och grafiska Linux sessioner. Fackläget öppnar inte instrumentbrädan automatiskt.
 
-Använd systemfältsmenyn för följande åtgärder:
+Använd fackmenyn för dessa åtgärder:
 
-- Öppna kontrollpanelen.
+- Öppna instrumentpanelen.
 - Öppna `/dashboard/logs`.
-- Ändra automatisk start.
-- Stoppa OmniRoute.
+- Ändra autostart.
+- Sluta OmniRoute.
 
-Kombinera inte `--tray` med följande alternativ:
+Kombinera inte `--tray` med dessa alternativ:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Dessa lägen kräver olika processägarskap.
+Dessa lägen kräver olika processägande.
 
-Aktivera start vid nästa inloggning på datorn:
+Aktivera start vid nästa maskininloggning:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automatisk start använder systemfältsläget på macOS, Windows och i grafiska Linux-sessioner. Huvudlösa Linux-system använder den befintliga systemd-användartjänsten.
+Autostart använder fackläge på macOS, Windows, och grafiska Linux sessioner. Headless Linux använder den befintliga systemd användartjänsten.
 
 Inaktivera start vid inloggning:
 
@@ -401,18 +401,18 @@ Inaktivera start vid inloggning:
 omniroute autostart disable
 ```
 
-### Avinstallation
+### Avinstallerar
 
 När du inte längre behöver OmniRoute tillhandahåller vi två snabba skript för en ren borttagning:
 
-| Kommando                 | Åtgärd                                                                                       |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Tar bort systemappen men **behåller din databas och dina konfigurationer** i `~/.omniroute`. |
-| `npm run uninstall:full` | Tar bort appen OCH **raderar permanent alla konfigurationer, nycklar och databaser**.        |
+| Kommando                 | Handling                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Tar bort systemappen men** behåller din DB och konfigurationer** i `~/.omniroute`.     |
+| `npm run uninstall:full` | Tar bort appen AND permanent** raderar alla konfigurationer, nycklar och databaser** . |
 
-> Obs! För att köra dessa kommandon går du till OmniRoute-projektmappen (om du klonade den) och kör dem där. Om OmniRoute installerades globalt kan du alternativt köra `npm uninstall -g omniroute`.
+> Obs: För att köra dessa kommandon, navigera till OmniRoute -projektmappen (om du klonade den) och kör dem. Alternativt, om den är globalt installerad, kan du helt enkelt köra `npm uninstall -g omniroute`.
 
-### VPS-driftsättning
+### VPS distribution
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,21 +428,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Eller: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-driftsättning (lågt minnesbehov)
+### PM2 -distribution (lågt minne)
 
-För servrar med begränsat RAM-minne använder du alternativet för minnesgräns:
+För servrar med begränsad RAM, använd alternativet för minnesbegränsning:
 
 ```bash
-# Med gränsen 512 MB (standard)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Eller med en anpassad minnesgräns
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Eller med ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -471,24 +471,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Bygg avbildningen (standard = runner-cli med codex/claude/droid förinstallerade)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Portabelt läge (rekommenderas)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-För värdintegrerat läge med CLI-binärfiler, se Docker-avsnittet i huvuddokumentationen.
+För värdintegrerat läge med CLI binärer, se Docker avsnittet i huvuddokumentationen.
 
 ### Void Linux (xbps-src)
 
-Void Linux-användare kan paketera och installera OmniRoute direkt med hjälp av ramverket `xbps-src` för korskompilering. Detta automatiserar den fristående Node.js-versionen tillsammans med de nödvändiga systemspecifika bindningarna för `better-sqlite3`.
+Void Linux användare kan paketera och installera OmniRoute naturligt med hjälp av `xbps-src` -korskompileringsramverket. Detta automatiserar den fristående Node.js -byggnaden tillsammans med de nödvändiga inbyggda `better-sqlite3` -bindningarna.
 
 <details>
-<summary><b>Visa xbps-src-mallen</b></summary>
+<summary><b>Visa xbps-src mall</b></summary>
 
 ```bash
-# Mallfil för 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +509,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Fastställ målprocessorarkitekturen för node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +518,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Installera alla beroenden – hoppa över skript
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Bygg det fristående Next.js-paketet
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopiera statiska resurser till det fristående paketet
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompilera den systemspecifika bindningen för better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Placera den kompilerade bindningen i det fristående paketet
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Ta bort arkitekturspecifika sharp-paket
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopiera pino-körtidsberoenden som utelämnats av Next.js statiska analys:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +554,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Förhindra att tomma Next.js-kataloger för app-routern tas bort av efterinstallationskroken
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -582,30 +582,30 @@ post_install() {
 
 ### Miljövariabler
 
-| Variabel                                | Standardvärde                        | Beskrivning                                                                                                                       |
-| --------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Hemlighet för JWT-signering (**ändra i produktion**)                                                                              |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Lösenord för första inloggningen                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datakatalog (databas, användning, loggar)                                                                                         |
-| `PORT`                                  | ramverkets standardvärde             | Tjänsteport (`20128` i exemplen)                                                                                                  |
-| `HOSTNAME`                              | ramverkets standardvärde             | Värd att binda till (Docker använder som standard `0.0.0.0`)                                                                      |
-| `NODE_ENV`                              | exekveringsmiljöns standardvärde     | Ange `production` för driftsättning                                                                                               |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Offentlig bas-URL som visas i kontrollpanelen och exponeras för servern (ersätter äldre `BASE_URL`)                               |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Bas-URL för slutpunkten för molnsynkronisering (ersätter äldre `CLOUD_URL`)                                                       |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-hemlighet för genererade API-nycklar                                                                                         |
-| `REQUIRE_API_KEY`                       | `false`                              | Kräv Bearer-API-nyckel för `/v1/*`                                                                                                |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Tillåt autentiserade kontrollpanelsanvändare att visa fullständiga lagrade API-nyckelvärden på begäran                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Serverns uppdateringsintervall för cachade data om leverantörsgränser; uppdateringsknappar i gränssnittet synkar manuellt         |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Inaktivera automatiska SQLite-ögonblicksbilder före skrivning/import/återställning; manuella säkerhetskopior fungerar fortfarande |
-| `APP_LOG_TO_FILE`                       | `true`                               | Aktiverar skrivning av program- och granskningsloggar till disk                                                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Tvinga autentiseringscookien att använda `Secure` (bakom en omvänd HTTPS-proxy)                                                   |
-| `CLOUDFLARED_BIN`                       | ej angivet                           | Använd en befintlig `cloudflared`-binärfil i stället för en hanterad hämtning                                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport för hanterade Quick Tunnels (`http2`, `quic` eller `auto`)                                                              |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Heapgräns för Node.js i MB                                                                                                        |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maximalt antal poster i promptcachen                                                                                              |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maximalt antal poster i den semantiska cachen                                                                                     |
+| Variabel                                | Standard                  | Beskrivning                                                                                                                                                     |
+| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automatiskt genererad)_ | JWT -signeringshemligheten — genererades automatiskt vid första körningen och fortsatte att `server.env`; ställ in det explicit när datakatalogen är tillfällig |
+| `INITIAL_PASSWORD`                      | _(avstängd)_              | Första inloggningslösenordet. npm/source installationer börjar med `CHANGEME`: ersätt det. Avaktiverad: introduktionsguide                                      |
+| `DATA_DIR`                              | `~/.omniroute`            | Datakatalog (db, användning, loggar)                                                                                                                            |
+| `PORT`                                  | ram standard              | Serviceport (`20128` i exempel)                                                                                                                                 |
+| `HOSTNAME`                              | ram standard              | Bind värd (Docker är standard till `0.0.0.0`)                                                                                                                   |
+| `NODE_ENV`                              | runtime standard          | Ställ in `production` för utplacering                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Public base URL dök upp till instrumentpanelen och exponerades för servern (ersätter äldre `BASE_URL`)                                                          |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud sync endpoint base URL (ersätter äldre `CLOUD_URL`)                                                                                                       |
+| `API_KEY_SECRET`                        | _(automatiskt genererad)_ | HMAC hemlighet för genererade API nycklar — genererades automatiskt vid första körningen och fortsatte till `server.env`                                        |
+| `REQUIRE_API_KEY`                       | `false`                   | Framtvinga bärarens API nyckel på `/v1/*`                                                                                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Tillåt autentiserade instrumentpanelanvändare att avslöja fullständiga lagrade API nyckelvärden på begäran                                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Uppdateringskadens på serversidan för cachelagrade Provider Limits-data; UI refresh-knappar utlöser fortfarande manuell synkronisering                          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Inaktivera automatiska SQLite -ögonblicksbilder före writes/import/restore; manuella säkerhetskopieringar fungerar fortfarande                                  |
+| `APP_LOG_TO_FILE`                       | `true`                    | Aktiverar utmatning av program och granskningslogg till disk                                                                                                    |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | Forcera `Secure` auth-cookie (bakom HTTPS omvänd proxy)                                                                                                         |
+| `CLOUDFLARED_BIN`                       | avstängd                  | Använd en befintlig `cloudflared` -binär istället för hanterad nedladdning                                                                                      |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Transport för hanterade snabba tunnlar (`http2`, `quic` eller `auto`)                                                                                           |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js heap limit i MB                                                                                                                                         |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Max prompt cache-poster                                                                                                                                         |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Max semantiska cacheposter                                                                                                                                      |
 
-Fullständig referens för miljövariabler finns i [README](../README.md).
+För den fullständiga referensen till miljövariabeln, se [README](../README.md).
 
 ---
 
@@ -614,9 +614,9 @@ Fullständig referens för miljövariabler finns i [README](../README.md).
 <details>
 <summary><b>Visa alla tillgängliga modeller</b></summary>
 
-> Listan nedan är sammanställd från `open-sse/config/providerRegistry.ts` för v3.8.0. Molnkataloger (Gemini, OpenRouter med flera) synkroniseras dynamiskt — öppna **Instrumentpanel → Leverantörer → [leverantör] → Tillgängliga modeller** eller anropa `GET /api/models/catalog` för den fullständiga aktuella katalogen.
+> Listan nedan är sammanställd från `open-sse/config/providerRegistry.ts` för v3.8.0. Molnkataloger (Gemini, OpenRouter med flera) synkroniseras dynamiskt — öppna **Dashboard → Providers → [provider] → Available Models** eller anropa `GET /api/models/catalog` för att se hela den aktuella katalogen.
 >
-> Om en leverantörs inbyggda lista har blivit inaktuell använder du **Importera från /models** på den sidan (eller aktiverar **Automatisk synkronisering**) för att hämta den aktuella katalogen från uppströmskällan. Detta verifierades i v3.8.50 för LLM7.io (`gemini-3.1-flash-lite`) och UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym åtkomst till Pollinations var fortfarande begränsad av uppströmskällan under samma testomgång.
+> Om en providers inbyggda lista har blivit inaktuell kan du använda **Import from /models** på den sidan (eller aktivera **Auto-Sync**) för att hämta den aktuella uppströmskatalogen. Detta verifierades i v3.8.50 för LLM7.io (`gemini-3.1-flash-lite`) och UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym åtkomst till Pollinations var fortfarande begränsad av uppströmsleverantören under samma testomgång.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -624,21 +624,21 @@ Fullständig referens för miljövariabler finns i [README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — GRATIS OAuth: använd den aktuella katalogen som visas under **Instrumentpanel → Leverantörer → Kiro → Tillgängliga modeller**. Tillgängligheten beror på kontot och abonnemanget.
+**Kiro (`kr/`)** — GRATIS OAuth: använd den aktuella katalogen som visas under **Dashboard → Providers → Kiro → Available Models**. Tillgängligheten beror på konto och abonnemang.
 
 **Qoder (`if/`)** — GRATIS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 USD/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 USD/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 USD/mån fast pris eller per användning: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — fast pris på $9/mån eller betalning per användning: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-nyckel: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultr snabb: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Extremt snabb: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Inbyggt Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Inbyggt Grok-stöd: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — Hostas i EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
@@ -648,21 +648,21 @@ Fullständig referens för miljövariabler finns i [README](../README.md).
 
 **Fireworks AI (`fireworks/`)** — Snabb inferens: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Skalning på wafer-nivå: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-skala: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Fokuserat på RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Företag: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Företagsinriktat: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkroniseras live per API-nyckel från Google — ingen statisk lista. Anslut en nyckel under **Instrumentpanel → Leverantörer** och använd sedan **Tillgängliga modeller** för att importera den aktuella katalogen (t.ex. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkroniseras live per API-nyckel från Google — ingen statisk lista. Anslut en nyckel i **Dashboard → Providers** och använd sedan **Available Models** för att importera den aktuella katalogen (t.ex. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andra kompatibla leverantörer** (urval): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (vidarebefordrad katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Var och en underhåller sin egen modellista i `providerRegistry.ts` och kan synkroniseras automatiskt när leverantören tillhandahåller en `/models`-slutpunkt.
+**Övriga kompatibla providers** (urval): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (vidarebefordrad katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Var och en underhåller sin egen modellista i `providerRegistry.ts` och kan synkroniseras automatiskt när providern tillhandahåller en `/models`-slutpunkt.
 
-**Obs om modell-ID:n:** OmniRoute använder leverantörens inbyggda ID:n (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Vissa ID:n innehåller versionsnummer med punkt eftersom det är så API:et uppströms förväntar sig dem. Om en modell inte finns med ovan kör du `omniroute models --search <term>` eller anropar `GET /api/models/catalog` för att bekräfta tillgängligheten.
+**Obs om modell-ID:n:** OmniRoute använder provider-interna ID:n (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Vissa ID:n innehåller punktseparerade versioner eftersom det är så det uppströms-API:t förväntar sig dem. Om en modell inte finns med ovan kan du köra `omniroute models --search <term>` eller anropa `GET /api/models/catalog` för att bekräfta tillgängligheten.
 
 </details>
 

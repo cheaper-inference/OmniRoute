@@ -4,12 +4,14 @@
 
 ---
 
-🌐 **Àwọn èdè:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Àwọn èdè:** 🇺🇸 [Gẹ̀ẹ́sì](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Itọ́ka pàtàkì fún API OmniRoute. Ó bo ojú-ọ̀nà gbogbogbò `/v1` àti àwọn endpoint ìṣàkóso tí a máa ń lò jù lọ; [`docs/openapi.yaml`](../openapi.yaml) tí ẹ̀rọ lè kà àti igi àwọn route tó wà lábẹ́ `src/app/api/` ni àwọn orísun tó péye jù lọ.
+Ìtọ́kasí pàtàkì fún API OmniRoute. Ó bo ojú-ọ̀nà `/v1` tó ṣí sí gbogbo ènìyàn àti àwọn endpoint ìṣàkóso tí a máa ń lò jù lọ; [`docs/openapi.yaml`](../openapi.yaml) tí ẹrọ lè kà àti igi àwọn route tó wà lábẹ́ `src/app/api/` ni àwọn orísun tó péye jù lọ.
 
-Fún ìlànà tó bá OpenAI mu àti àkójọpọ̀ agbára àwọn provider ní pàtàkì, wo
+Fún ìlànà ibaramu OpenAI pàtó àti àtòjọ agbára àwọn olùpèsè, wo
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Ìṣàkóso kọ̀ọ̀kan máa ń pèsè ẹ̀dà tirẹ̀ ti spec ní `/openapi.yaml`, tí a ṣẹ̀dá láti `docs/openapi.yaml` nígbà ìkọ́lé. Ó ní ẹ̀dà ìkọ́lé náà àti URL server ojúlówó (`./`), nítorí náà àwọn ìbéèrè máa ń dúró lórí host tó pèsè ìwé náà. Ọ̀pa kan tó ń gbé fáìlì tí a gbà wọlé kò ní host bẹ́ẹ̀, ó sì nílò kí a ṣètò base URL pẹ̀lú ọwọ́.
 
 ---
 
@@ -310,7 +312,7 @@ GET /v1/embeddings
 
 ---
 
-## Ìṣẹ̀dá Àwòrán
+## Aworan Iran
 
 ```bash
 POST /v1/images/generations
@@ -324,28 +326,22 @@ Content-Type: application/json
 }
 ```
 
-Àwọn olupèsè tó wà pẹ̀lú OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (agbegbe), ComfyUI (agbegbe).
+Awọn olupese ti o wa pẹlu OpenAI (Aworan GPT 2), xAI (Aworan Grok ), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (agbegbe), ComfyUI (agbegbe).
 
-`n` máa ń dá `n` àwòrán padà nínú `data[]`. Àwọn olupèsè tí API upstream wọn ń dá àwòrán kan padà fún ìpè kọ̀ọ̀kan
-(Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) gba ìpè upstream tó yàtọ̀ fún `n`, pẹ̀lú ìpè tó pọ̀ jù lọ mẹ́rin tí ń lọ ní ẹ̀ẹ́kan náà. `seed` tó dúró ṣinṣin ni a máa ń yí padà pẹ̀lú atọ́ka ìpè (`seed`, `seed + 1`, …), kí àwọn àwòrán náà lè yàtọ̀ síra ṣùgbọ́n kí wọ́n ṣì lè ṣe àtúnṣe. `n` kò le ju 10 lọ. Ìbéèrè náà máa ń kùnà lápapọ̀ bí ìpè kankan bá kùnà. Àtòjọ àwọn fọ́ọ̀mù fan-out wà nínú `SINGLE_IMAGE_FANOUT_FORMATS` ní
-`open-sse/handlers/imageGeneration/fanOut.ts`.
+`n` awọn aworan `n` pada ni `data[]`. Awọn olupese ti API oke wọn da aworan kan pada fun ipe kan (Labs Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) gba `n` lọtọ awọn ipe oke, ni julọ 4 ni flight. `seed` ti o wa titi jẹ aiṣedeede nipasẹ atọka ipe (`seed`, `seed + 1`, …), nitorinaa awọn aworan yato ṣugbọn o duro ni atunṣe. `n` ti wa ni capped ni 10. Awọn ìbéèrè kuna bi odidi ti eyikeyi ipe ba kuna. Atokọ awọn ọna kika àìpẹ-jade jẹ `SINGLE_IMAGE_FANOUT_FORMATS` ni `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux máa ń tún lo ìsopọ̀ API-key tó wà tẹ́lẹ̀, ó sì gba àwọn àfikún `zenmux/` tàbí `zm/`:
+ZenMux tun lo asopọ bọtini API ti o wa ati gba `zenmux/` tabi awọn ami-iṣaaju `zm/` :
 
-- `zenmux/openai/gpt-image-2` máa ń lo OpenAI Images API ti ZenMux. Àwọn àṣàyàn rẹ̀ ní `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, àti `response_format`.
-- Àwọn olùtẹ̀jáde mìíràn, bí `zm/meta/muse-image-1.0`, máa ń lo endpoint Vertex AI `:predict` ti ZenMux. `n` máa ń yí padà sí `sampleCount`, `aspect_ratio` sí `aspectRatio`, àti `image_size`
-  (`1K`, `2K`, `4K`) sí `sampleImageSize`. `size` ẹ̀ẹ́ka píksẹ́lì máa ń pèsè ipin abala nìkan,
-  kì í ṣe ìwọ̀n píksẹ́lì tí a ṣe ìdánilójú. Àwọn ipin, ìpinnu, àti iye àwòrán tí a ṣe àtìlẹ́yìn yàtọ̀ síra gẹ́gẹ́ bí àwòkọ́ṣe.
-- `zm/inclusionai/ming-image-0.1-design` máa ń yan ìwọ̀n tirẹ̀. Má ṣe fi `size`,
-  `aspect_ratio`, àti `image_size` ránṣẹ́; àwọn iye tí a bá ṣàlàyé máa ń dá HTTP 400 padà. A lè béèrè PNG, JPEG, àti WebP pẹ̀lú `output_format`.
+- `zenmux/openai/gpt-image-2` nlo ZenMux's OpenAI Awọn aworan API. Awọn aṣayan pẹlu `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, ati `response_format`.
+- Awọn atẹwe miiran, gẹgẹbi `zm/meta/muse-image-1.0`, lo ZenMux's Vertex AI `:predict` endpoint. awọn maapu `n` si `sampleCount`, `aspect_ratio` si `aspectRatio`, ati `image_size` (`1K`, `2K`, `4K`) si `sampleImageSize`. Piksẹli `size` n pese ipin ipin nikan, kii ṣe awọn iwọn ẹbun ti o ni ẹri. Awọn ipin atilẹyin, awọn ipinnu, ati awọn iṣiro yatọ nipasẹ awoṣe.
+- `zm/inclusionai/ming-image-0.1-design` yan awọn iwọn tirẹ. Yọ `size`, `aspect_ratio`, ati `image_size`; awọn iye kedere pada HTTP 400. PNG, JPEG, ati WebP le beere pẹlu `output_format`.
 
-Ìṣọ̀kan yìí ń ṣe àtìlẹ́yìn fún ìṣẹ̀dá text-to-image, kì í ṣe àtúnṣe àwòrán ìtọ́kasí. A máa ń ṣe àtúnṣe àbájáde Vertex sí `data[].b64_json`; `response_format: "url"` máa ń dá URL HTTPS upstream padà tàbí URL data base64 nígbà tí bá jẹ́ pé àwọn báítì àwòrán nìkan ló wà. Àwọn àbájáde tó ṣófo tàbí tí a yọ́ kúrò máa ń dá àṣìṣe padà dípò àṣeyọrí tó ṣófo. Ààyè sí àwòkọ́ṣe dá lórí àkọọ́lẹ̀ ZenMux. Wo [Vertex API ti ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) àti
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+Iṣọkan yii ṣe atilẹyin iran-ọrọ-si-aworan, kii ṣe ṣiṣatunṣe aworan itọkasi. Iṣẹjade fatesi jẹ deede si `data[].b64_json`; `response_format: "url"` da pada HTTPS URL oke tabi data base64 URL nigbati awọn baiti aworan nikan wa. awọn abajade Empty/filtered da aṣiṣe pada kuku ju aṣeyọri ofo kan. Wiwọle awoṣe da lori akọọlẹ ZenMux. Wo [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) ati [OpenAI Awọn aworan API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Asopọ iwọle Microsoft 365 Copilot n ṣe iranṣẹ `copilot-m365-web/m365-copilot-image` nipasẹ ohun elo aworan ti a ṣe sinu Copilot: yiyi Copilot kan fun aworan (`n` 1–4), idari `size` nikan ni iṣalaye, ati awọn aworan ti o pada si laini (`b64_json`, tabi data URL fun `response_format: "url"`). Wo [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Ṣàkọsílẹ̀ gbogbo àwọn àwòkọ́ṣe àwòrán
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -784,66 +780,42 @@ olùpè tí kì í ṣe session (retrieve, delete, cancel, àti àyẹ̀wò `inp
 
 ---
 
-## API Ìwádìí
+## API
 
-Àkójọpọ̀ àwọn olupèsè wẹ́ẹ̀bù/ìwádìí (Tavily, Brave, Exa, Serper, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ).
+abstraction olupese Web/search (Tavily, Brave, Exa, Serper, bbl).
 
-| Ọ̀nà  | Ọ̀nà URL                | Àlàyé                                                                                               |
-| ---- | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | Ṣàkójọ àwọn olupèsè ìwádìí tí a ṣàgbékalẹ̀ + àwọn agbára wọn                                         |
-| POST | `/v1/search`           | Ṣe ìbéèrè ìwádìí — ara ìbéèrè ni `v1SearchSchema` ń fọwọ́sí, ó sì ṣe àtìlẹ́yìn fún caching/coalescing |
-| GET  | `/v1/search/analytics` | Àwọn ìṣirò ìkọlù/ìdákẹ́jẹ́/cache fún olùpèsè kọ̀ọ̀kan                                                   |
+| Ọna  | Ona                    | Apejuwe                                                                                    |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| GET  | `/v1/search`           | Akojọ atunto awọn olupese wiwa + awọn agbara                                               |
+| POST | `/v1/search`           | Ṣiṣe ibeere wiwa — ara ti a fọwọsi nipasẹ `v1SearchSchema`, ṣe atilẹyin caching/coalescing |
+| GET  | `/v1/search/analytics` | Awọn iṣiro hit/latency/cache fun olupese                                                   |
 
-**Ìfàṣẹ:** Kókó API Bearer (`extractApiKey` + `isValidApiKey`). A ń fi ìlànà ìwádìí sílò nípasẹ̀ `enforceApiKeyPolicy`.
+**Ifọwọsi:** Bọtini API ti nrù (`extractApiKey` + `isValidApiKey`). Ilana wiwa ti fi agbara mu nipasẹ `enforceApiKeyPolicy`.
 
-### `provider_options` Exa àti Tavily
+**Yan laifọwọyi:** lai `provider`, awọn lawin olupese pẹlu a tunto asopọ nṣiṣẹ akọkọ ati awọn ti o tẹle lawin ni awọn failover. Awọn olupese ibi asegbeyin ti ọfẹ (`duckduckgo-free`) ni a lo nigbati ko si ohun miiran ti a tunto. SearXNG ti o gbalejo ti ara ẹni ṣe iṣiro bi atunto ni kete ti asopọ rẹ tọju `baseUrl` gidi kan (kii ṣe aiyipada `http://localhost:8888/search` katalogi): lẹhinna o wa ni ipo bi olupese $ 0 ṣaaju awọn ti a ti kọkọ, pẹlu olupese bọtini ti o rọrun julọ bi ikuna, pẹlu nigbati SearXNG dahun 400, 401, 403 tabi 404. A `baseUrl` ti ko ṣe URL `http(s)` awọsanma ti ko wulo ka. Asopọ SearXNG ti o tọju ami ami kan ni ọna yii nikan lori `https://` tabi loopback `http://`. Lori `http://` pẹtẹlẹ jijin kii ṣe ikuna ati duro ni ibi-afẹde ti o kẹhin, ti a lo nikan nigbati ko ba tunto olupese miiran tabi nigba ti o ba beere fun orukọ, nitorinaa o firanṣẹ aami ni cleartext ni awọn ọran meji yẹn.
 
-Exa àti Tavily máa ń ka àwọn pápá pàtàkì fún olùpèsè láti inú àpò tí a pín sí orúkọ:
-`provider_options.exa` (tàbí `provider_options["exa-search"]`) àti `provider_options.tavily`
-(tàbí `provider_options["tavily-search"]`). Kókó tó wà nísàlẹ̀ nìkan ni a máa rán síwájú. A máa
-ṣàyẹ̀wò ọ̀kọ̀ọ̀kan wọn lòdì sí àṣà Zod tirẹ̀ nínú `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-àti pé a máa yọ kókó tí irú rẹ̀ kò tọ́ kúrò. A máa kọ gbogbo kókó mìíràn sílẹ̀, pẹ̀lú ìfàṣẹ, URL ìpìlẹ̀,
-`stream` àti `outputSchema`. Àwọn kókó alapin tí àwọn olupèsè mìíràn ń lò (`cx`, `depth`, ...) ṣi ń ṣiṣẹ́
-gẹ́gẹ́ bí tẹ́lẹ̀.
+### Exa ati Tavily `provider_options`
 
-| Olùpèsè | Àwọn pápá ipele òkè                                                                                                                                                                                                                                                                                                                                                       | Ti inú                                                                                                                                   |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (àwọn primitive alapin), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                        | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ni a máa dapọ̀ mọ́ àìpẹ̀yà `{ text: true, highlights: true }` |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
+Exa ati Tavily ka awọn aaye olupese kan pato lati apo ti a fi orukọ silẹ: `provider_options.exa` (tabi `provider_options["exa-search"]`) ati `provider_options.tavily` (tabi `provider_options["tavily-search"]`). Awọn bọtini ni isalẹ nikan ni a firanṣẹ siwaju. Olukuluku jẹ ayẹwo lodi si eto Zod tirẹ ni `open-sse/handlers/search/providerOptionsPassthrough.ts`, ati pe bọtini kan pẹlu iru aṣiṣe ti lọ silẹ. Eyikeyi bọtini miiran jẹ aibikita, pẹlu auth, ipilẹ URL, `stream` ati `outputSchema`. Awọn bọtini alapin ti a lo nipasẹ awọn olupese miiran (`cx`, `depth`, ...) ṣiṣẹ bi iṣaaju.
 
-Àwọn pápá gbogbogbòò máa ń ṣẹ́gun ní gbogbo ìgbà: `query`, `max_results`, `filters` (àwọn àgbègbè),
-`country` àti kókó tí a yọ jáde láti `search_type`. Ní Exa, `search_type: "news"` máa ń pa
-`category: "news"` mọ́. Tavily tún gba `search_type: "finance"` (`topic: "finance"`).
+| Olupese | Awọn aaye oke-ipele                                                                                                                                                                                                                                                                                                                                                       | iteeye                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` dapọ lori aiyipada `{ text: true, highlights: true }` |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                   |
 
-A máa ń ṣe àkọsílẹ̀ iye owó ìwádìí Firecrawl fún ìpìlẹ̀ mẹ́wàá àwọn èsì tí a dá padà tí ó bẹ̀rẹ̀,
-ní $0.002 (kírẹ́dììtì 2) fún ìpìlẹ̀ kọ̀ọ̀kan, àti ó kéré tán ìpìlẹ̀ kan fún ìpè kọ̀ọ̀kan
-([Ìsanwó Firecrawl](https://docs.firecrawl.dev/billing)): èsì 11 ń ná $0.004.
+Awọn aaye jeneriki nigbagbogbo bori: `query`, `max_results`, `filters` (awọn ibugbe), `country` ati koko-ọrọ ti o jade lati `search_type`. Lori Exa, `search_type: "news"` ntọju `category: "news"`. Tavily tun gba `search_type: "finance"` (`topic: "finance"`).
 
-`time_range` gbogbogbòò ti ń dé bá àwọn olupèsè méjèèjì báyìí: Exa ń gba `startPublishedDate`
-(àkókò ISO) àti Tavily ń gba `start_date` (`YYYY-MM-DD`). Ọjọ́ tí a bá sọ ní kedere nínú `provider_options`
-máa ń borí èyí tí a yọ̀ọ́ sí.
+Iye owo wiwa Firecrawl jẹ igbasilẹ fun bulọọki ti o bẹrẹ ti awọn abajade 10 ti o pada, ni $0.002 (awọn kirẹditi 2) bulọki kan ati pe o kere ju bulọọki kan fun ipe ( [Isanwo Firecrawl](https://docs.firecrawl.dev/billing) ): awọn abajade 11 jẹ $0.004.
 
-Àwọn èsì Exa ń pa `id`, `highlights` (gbogbo highlight, kì í ṣe èyí àkọ́kọ́ tí a lò nìkan gẹ́gẹ́ bí
-`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` àti `extras` mọ́ nínú
-`provider_raw`. Àwọn èsì Tavily ń pa `images` àti `favicon` mọ́.
+`time_range` jeneriki bayi de ọdọ awọn olupese mejeeji: Exa n gba `startPublishedDate` (ISO timestamp) ati Tavily n gba `start_date` (`YYYY-MM-DD`). Ọjọ ti o fojuhan ni `provider_options` dojukọ eyi ti a ya aworan.
 
-A máa ń ṣe àkọsílẹ̀ iye owó ìwádìí Linkup ní $0.005 fún `depth` `fast` àti `standard`, àti $0.05 fún
-`deep` ([Ìṣètò iye owó Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
-bóyá `depth` wá láti `provider_options` tàbí láti àwọn ètò ìsopọ̀.
+Awọn abajade idanwo pa `id`, `highlights` (gbogbo afihan, kii ṣe ọkan akọkọ ti a lo bi `snippet` nikan), `highlight_scores`, `summary`, `subpages`, `entities` ati `extras` ni `provider_raw`. Awọn abajade Tavily tọju `images` ati `favicon`.
 
-Exa `type: "lite"` (Exa 3.0) ń gba àkójọpọ̀ pápá kékeré kan, ó sì máa kọ gbogbo ìbéèrè sílẹ̀
-nígbà tí a bá ṣètò pápá mìíràn. Fún lite, a máa yọ `additionalQueries`, `systemPrompt` àti gbogbo kókó
-`contents` yàtọ̀ sí `text` àti `highlights` kúrò kí a tó ṣe ìpè náà. Àwọn
-`subpages`, `subpageTarget`, `highlights.numSentences` àti `highlights.highlightsPerUrl` tí kò gbọ́dọ̀
-lò mọ́, kò tún ní jẹ́ kí a rán wọn síwájú.
+Iye owo wiwa ọna asopọ jẹ igbasilẹ ni $0.005 fun `depth` `fast` ati `standard` ati $0.05 fun `deep` ( [Ifowoleri Ọna asopọ](https://docs.linkup.so/pages/documentation/development/pricing) ), boya `depth` wa lati `provider_options` tabi awọn eto asopọ.
 
-Ìṣírò iye owó jẹ́ àkọsílẹ̀ alapin `costPerQuery`, àyàfi fún Exa, tó ń tẹ̀lé iye owó tirẹ̀: $0.007 fún ìpè
-kọ̀ọ̀kan fún `auto` (àti `fast` àtijọ́) tàbí $0.004 fún `lite` (àti `instant` àtijọ́), èyí tó bo èsì mẹ́wàá;
-$0.001 fún èsì àfikún kọ̀ọ̀kan; àti $0.001 fún èsì kọ̀ọ̀kan tí a dá padà nígbà tí a bá ṣètò
-`contents.summary`. A máa ń ṣe àkọsílẹ̀ Tavily ní kírẹ́dììtì 1 ($0.008) fún `search_depth` `basic`,
-`fast` àti `ultra-fast`, àti kírẹ́dììtì 2 ($0.016) fún `advanced`
-([Kírẹ́dììtì API Tavily](https://docs.tavily.com/documentation/api-credits)). Ìpè kan tí ó ní
-`auto_parameters: true` tí Tavily gbéga sí advanced ṣì máa ń jẹ́ àkọsílẹ̀ gẹ́gẹ́ bí kírẹ́dììtì 1.
+Exa `type: "lite"` (Exa 3.0) gba awọn aaye ti o kere ju ati kọ gbogbo ibeere nigbati eyikeyi aaye miiran ti ṣeto. Fun Lite, `additionalQueries`, `systemPrompt` ati gbogbo bọtini `contents` ayafi `text` ati `highlights` ti wa silẹ ṣaaju ipe naa. `subpages`, `subpageTarget`, `highlights.numSentences` ati `highlights.highlightsPerUrl` ti a ti sọ silẹ ko ni siwaju mọ.
+
+Iṣiro iye owo jẹ iforukọsilẹ alapin `costPerQuery`, ayafi fun Exa, eyiti o tẹle idiyele ti ara Exa: $ 0.007 fun ipe fun `auto` (ati julọ `fast`) tabi $ 0.004 fun `lite` (ati aṣẹ `instant`), ti o bo awọn abajade 10; $ 0.001 fun abajade siwaju kọọkan; ati $0.001 fun esi pada nigbati `contents.summary` ti ṣeto. Tavily ti wa ni igbasilẹ ni 1 kirẹditi ($0.008) fun `search_depth` `basic`, `fast` ati `ultra-fast`, ati 2 kirediti ($0.016) fun `advanced` ( [Tavily API kirediti](https://docs.tavily.com/documentation/api-credits) ). Ipe pẹlu `auto_parameters: true` ti awọn iṣagbega Tavily si ilọsiwaju jẹ ṣi gbasilẹ ni kirẹditi 1.
 
 ---
 
@@ -983,28 +955,28 @@ le dúró kí a sì tún ṣe é lẹ́yìn díẹ̀ dípò kí a dá àṣìṣ
 
 ---
 
-## Lílo iṣẹ́ fúnra ẹni (`/api/usage/om-usage`)
+## Lilo iṣẹ-ara ẹni (`/api/usage/om-usage`)
 
-Kọ́kọ́rọ́ API èyíkéyìí lè ka lílo àti quotas **tirẹ̀ fúnra rẹ̀** — kò nílò ìfọwọ́sí ìṣàkóso. Èyí ni endpoint tí oníbàárà (CLI, pánẹ́ẹ̀lì OmniCopilot) ń lò láti fi iye tí ẹni tó ní kọ́kọ́rọ́ ti ná hàn.
+Eyikeyi bọtini API le ka** tirẹ** lilo ati awọn ipin — ko si isakoso auth. Eyi ni aaye ipari ti alabara kan (CLI, nronu OmniCopilot ) nlo lati ṣafihan dimu bọtini kan inawo wọn.
 
 ```bash
-# Fọ́ọ̀mù ọ̀rọ̀ (àdéhùn ìtàn — ọ̀rọ̀ pẹ́ẹ̀lì fún ebute)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Fọ́ọ̀mù tí a ṣètò — ohun tí UI máa ń lò
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Kọ́kọ́rọ́ náà gbọ́dọ̀ ní **`allowUsageCommand`** tí a ti mú ṣiṣẹ́ (ó máa ń wa ni pipa ní àkọ́kọ́ — alákóso kọ́kọ́rọ́ API dashboard máa ń yí i fún kọ́kọ́rọ́ kọ̀ọ̀kan). Láìsí rẹ̀, endpoint náà máa dá `403` padà.
+Awọn bọtini gbọdọ ni**`allowUsageCommand`** ṣiṣẹ (pa nipasẹ aiyipada — oluṣakoso bọtini API ti dasibodu yi pada fun bọtini kan). Laisi rẹ ojuami ipari awọn idahun `403`.
 
-`?format=json` máa dá àpẹrẹ tí ó ṣe ìyàtọ̀ padà, kí olùpè má bàa ka pápá data kankan láti inú ìkọ̀sílẹ̀. Nígbà tí ó bá ṣàṣeyọrí:
+`?format=json` da apẹrẹ iyasoto pada ki olupe ko ka aaye data kan kuro ni aigba. Lori aṣeyọri:
 
 ```jsonc
 {
   "allowed": true,
-  // ó máa wà nìkan nígbà tí kọ́kọ́rọ́ náà bá yàn àwọn ààlà lílo fún kọ́kọ́rọ́ kọ̀ọ̀kan (USD ojoojúmọ́/ọ̀sọ̀ọ̀sẹ̀):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1013,9 +985,9 @@ Kọ́kọ́rọ́ náà gbọ́dọ̀ ní **`allowUsageCommand`** tí a ti mú 
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // àkótán quota provider tí a yàn, tàbí null nígbà tí kò tíì sí ohun tí a pamọ́:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // àkótán gbogbo connection, kí UI lè fi àwọn provider púpọ̀ hàn lẹ́gbẹ̀ẹ́ ara wọn:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1023,53 +995,49 @@ Kọ́kọ́rọ́ náà gbọ́dọ̀ ní **`allowUsageCommand`** tí a ti mú 
 }
 ```
 
-Nígbà tí a bá kọ̀ (`401` kọ́kọ́rọ́ búburú / `403` kò gba àṣẹ), ọ̀nà kan náà máa dá
-`{ "allowed": false, "error": { "message": "…" } }` padà — `personal`/`provider`
-tí ó wà ṣùgbọ́n tí ó ṣofo (kọ́kọ́rọ́ gba àṣẹ, kò sí ohun tí a ti kọ́ síbẹ̀) jẹ́ ipò tí ó yàtọ̀ sí ìkọ̀sílẹ̀, àti pé fọ́ọ̀mù JSON nìkan ni ó ń ya wọn sọ́tọ̀.
+Lori aigba (bọtini `401` buburu / `403` ko gba laaye) ipa ọna kanna pada `{ "allowed": false, "error": { "message": "…" } }` — a bayi-ṣugbọn-ṣofo `personal`/`provider` (bọtini ti a gba laaye, ko si ohun ti a kọ sibẹsibẹ) jẹ ipo ti o yatọ si aigba, ati pe fọọmu JSON nikan ni o ṣe iyatọ wọn.
 
-**Ìfọwọ́sí:** Kọ́kọ́rọ́ API Bearer ti olùpè fúnra rẹ̀, tí a fìdí rẹ̀ múlẹ̀ pẹ̀lú `isValidApiKey` — èyí **kì í ṣe** ojú ìṣàkóso (`/api/keys/…`), tí ó ṣì wà lẹ́yìn `requireManagementAuth`.
+**Ifọwọsi:** Bọtini API ti olupe ti ara rẹ, ti a fọwọsi pẹlu `isValidApiKey` — eyi ni _not_ dada isakoso (`/api/keys/…`), eyiti o duro lẹhin `requireManagementAuth`.
 
-### Àwọn Ìdá Ogorun Quota Aise àti Tí A Ṣàtúnṣe Pẹ̀lú Ààlà
+### Aise vs. Cutoff-Titunse Quota ogorun
 
-Nígbà tí o bá ń lo `/api/usage/om-usage`, àwọn olùpè gbọ́dọ̀ ṣe àkíyèsí ìyàtọ̀ láàárín àwọn ìdá ogorun tí **àbájáde ọ̀rọ̀ pẹ́ẹ̀lì** àti **àbájáde JSON** tí a ṣètò ń fi hàn:
+Nigbati o ba n gba `/api/usage/om-usage`, awọn olupe yẹ ki o ṣe akiyesi iyatọ laarin awọn ipin ogorun ti a gbekalẹ nipasẹ awọn** itele ti ọrọ jade** ati awọn ti eleto**JSON igbejade** :
 
-| Abala                | Fọ́ọ̀mù ọ̀rọ̀ pẹ́ẹ̀lì (`/api/usage/om-usage` / `@@om-usage`)                                    | Fọ́ọ̀mù JSON (`?format=json`)                                                            |
-| :------------------- | :---------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| **Pápá àbájáde**     | `NN% left` (àpẹẹrẹ, `20% left`)                                                           | `provider.quotas` / `providers[].quotas`                                               |
-| **Ìwọ̀n**             | **Àyè lílo tí a ṣàtúnṣe pẹ̀lú ààlà**: agbára tó kù lókè ààlà ìdènà                         | **Quota aise láti upstream**: ìwọ̀n provider tí a kò ṣàtúnṣe                            |
-| **Ìmúdójúìwọ̀n ààlà** | A ṣe ìwọ̀n rẹ̀ pẹ̀lú `effectiveRemainingPercent()` kí ìpamọ́ tí a dáàbò bo lè kà sí `0% left` | Kò sí (àwọn iye àkótán aise bí provider ṣe ròyìn wọn)                                  |
-| **Data ààlà**        | Wọ́n ti fi kún ìdá ogorun tí a fi hàn                                                      | A pamọ́ sínú `quotaWindowThresholds` fún connection kọ̀ọ̀kan (tàbí àwọn ààlà aiyé server) |
-| **Olùlò pàtàkì**     | Àwọn CLI ìbánisọ̀rọ̀, àwọn ìbéèrè ebute, àwọn oníṣẹ́ ènìyàn                                  | Àwọn ìṣọ̀kan programmatic, dashboards, analytics, àwọn olùtọ́pin ìṣirò                   |
+| Abala             | Ọna kika ọrọ pẹtẹlẹ (`/api/usage/om-usage` / `@@om-usage`)                                   | ọna kika JSON (`?format=json`)                                            |
+| :---------------- | :------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------ |
+| **Aaye ijade**    | `NN% left` (fun apẹẹrẹ, `20% left`)                                                          | `provider.quotas` / `providers[].quotas`                                  |
+| **Wiwọn**         | **Iyọnda ohun elo ti a ṣatunṣe gige** : ti o ku agbara loke awọn cutoff ala                  | **Aise ni oke ipin** : wiwọn olupese ti ko ni atunṣe                      |
+| **Irẹjẹ gige**    | Ti iwọn nipasẹ `effectiveRemainingPercent()` nitorina ibi ipamọ ti o ni aabo ka bi `0% left` | Ko si (awọn iye aworan aworan aise bi olupese ṣe royin)                   |
+| **Data ala**      | Ti dapọ si ipin ogorun ti o han                                                              | Ti fipamọ sinu `quotaWindowThresholds` fun asopọ (tabi awọn aṣiṣe olupin) |
+| **Olumulo akọkọ** | Ibanisọrọ CLIs, awọn ebute ebute, awọn oniṣẹ eniyan                                          | Awọn iṣọpọ eto, dashboards, atupale, awọn olutọpa ìdíyelé                 |
 
-#### Fọ́ọ̀mù Ìṣírò Àtúnṣe Ààlà
+#### Agbekalẹ Atunṣe gige gige
 
-OmniRoute ń ṣe àtìlẹ́yìn fún àwọn ààlà quota aláìṣiṣẹ́pọ̀ láti dènà kí upstream má bàa tán (a ṣètò wọn pẹ̀lú connection
-`quotaWindowThresholds`, àwọn ààlà àiyé provider, tàbí àwọn ètò resilience àgbáyé). Nígbà tí ààlà ìdènà (fún àpẹẹrẹ, `cutoff = 25%`) bá ń ṣiṣẹ́ lórí fèrèsé quota, olùṣe àfihàn ọ̀rọ̀ máa ń ṣe ìṣírò àyè tó kù báyìí:
+OmniRoute ṣe atilẹyin awọn gige ipin ti o n ṣiṣẹ lọwọ lati ṣe idiwọ irẹwẹsi oke (ti a tunto nipasẹ asopọ `quotaWindowThresholds`, awọn aṣiṣe olupese, tabi awọn eto imupadabọ agbaye). Nigbati ẹnu-ọna gige kan (fun apẹẹrẹ, `cutoff = 25%`) nṣiṣẹ lori ferese ipin kan, oluṣe ọrọ naa ṣe iṣiro awọn iyọọda ti o ku bi:
 
-- Tí `remaining <= cutoff`: ó máa dá `0%` padà.
-- Tí `remaining > cutoff`: ó máa dá `((remaining - cutoff) / (100 - cutoff)) * 100` padà.
+- Ti `remaining <= cutoff`: pada `0%`.
+- Ti `remaining > cutoff`: pada `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Àbájáde ọ̀rọ̀ tí a ṣètò máa ń yí èyí ká sí odidi tó sún mọ́ ọn (`Math.round(...)`).
+Iṣagbejade ọrọ ti a ṣe pa akoonu yika eyi si nomba to sunmọ (`Math.round(...)`).
 
-#### Àpẹẹrẹ Àlàyé
+#### Apeere Apejuwe
 
-Ronú ferese olupese kan tí ó ní **60% lílo aise** (nítorí náà **40% ipin tí ó kù aise**) àti ààlà **25% ipin tí ó kù** tí a ṣètò:
+Wo window olupese kan pẹlu** 60% aise lilo** (nitorinaa** 40% aise ti o ku ipin** ) ati ki o kan tunto** 25% ti o ku-ipin gige** ala:
 
-| Àfihàn                          | Ìṣirò                                              | Tí ó kù |                 Lílo tí a yọ̀ọ́                  |
-| :------------------------------ | :------------------------------------------------- | :-----: | :--------------------------------------------: |
-| **JSON aise (`?format=json`)**  | Àwòrán àkókò láti ọdọ olupese (`quotas[window]`)   | **40%** |                    **60%**                     |
-| **Ọ̀nà àfihàn ọrọ̀ (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (bí a bá ń ṣe ìṣirò `100 - remaining`) |
+| Aṣoju                          | Iṣiro                                              | Ti o ku |                   Itumọ Lo                   |
+| :----------------------------- | :------------------------------------------------- | :-----: | :------------------------------------------: |
+| **Aise JSON (`?format=json`)** | Aworan ti oke (`quotas[window]`)                   | **40%** |                   **60%**                    |
+| **Ọna kika ọrọ (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (ti o ba ṣe iṣiro `100 - remaining`) |
 
-- **Ìdí tí ọrọ̀ fi ń fi 20% hàn pé ó kù:** Nínú 40% ipin ti ara tí ó kù lórí àkántì, 25% ni ìlànà ààlà fi pamọ́. Olùpè ní 15% nínú 75% ààyè lílo tí ó ṣí kù kí rútà náà tó dá lílo ìbáṣepọ̀ yìí dúró. Ìṣàfihàn pẹ̀lú ìwọ̀n yìí ń jẹ́ kí ìbáṣepọ̀ náà fi hàn pé ó ti rẹ̀ (`0% left`) gan-an nígbà tí ìtọ́nisọ́nà yóò dáwọ́ dúró.
-- **Ìdí tí JSON fi ń pa àwọn iye aise mọ́:** Àkójọpọ̀ JSON náà ń dá àwòrán olupese gangan padà (`UsageSnapshot`), kí àwọn irinṣẹ́ òde lè ráyè sí lílo gidi láti ọdọ olupese àti `quotaWindowThresholds` ìpele ìbáṣepọ̀ láìsí ìdínkù iye ní ẹgbẹ́ sẹ́fà.
+- **Kini idi ti ọrọ fi han 20% osi:** Ninu ipin 40% ti ara ti o ku lori akọọlẹ, 25% wa ni ipamọ nipasẹ eto imulo gige. Olupe naa ni 15% nikan ninu 75% ori yara lilo ti o ku ṣaaju ki olulana naa dẹkun lilọ kiri si asopọ yii. Iwọn wiwọn ṣe idaniloju irẹwẹsi awọn ifihan agbara asopọ (`0% left`) ni deede nigbati ipa-ọna yoo dẹkun.
+- **Kini idi ti JSON ṣe itọju awọn iye aise:** Ẹru isanwo JSON pada aworan aworan olupese gangan (`UsageSnapshot`) nitorinaa awọn irinṣẹ ita ni iwọle si ilẹ-otitọ iṣamulo oke ati ipele asopọ `quotaWindowThresholds` laisi igbelowọn ipadanu ẹgbẹ olupin.
 
-#### Ìtọ́sọ́nà Ìṣípadà Fún Olùmúlò
+#### Olumulo Migration Itọsọna
 
-Tí ìṣọ̀kan òde kan (gẹ́gẹ́ bí ohun èlò ìfikún olùṣàtúnṣe tàbí àfikún aṣojú) bá ti ń yọ́ àkóónú kúrò ní ojúlé ọrọ̀
-(`NN% left`) tẹ́lẹ̀ tí ó sì ń ṣe ìṣirò ìpín lílo gẹ́gẹ́ bí `100 - NN`, yíyí sí `?format=json` túmọ̀ sí pé:
+Ti iṣọpọ ita (gẹgẹbi ohun itanna olootu tabi itẹsiwaju aṣoju) ṣaju ọrọ ipari ọrọ tẹlẹ (`NN% left`) ati ṣe iṣiro ipin ti a lo bi `100 - NN`, gbigbe si `?format=json` tumọ si:
 
-- Kíkà àwọn iye JSON aise yóò fi **lílò gidi láti ọdọ olupese** hàn (60% lílo nínú àpẹẹrẹ yìí).
-- Tí ìṣọ̀kan náà bá fẹ́ pa ìtumọ̀ ààyè lílo tí ojúlé ọrọ̀ ń lò mọ́, ó lè ṣe àyẹ̀wò àgbékalẹ̀ ìṣirò iye tí ó kù ní ẹgbẹ́ oníbàárà pẹ̀lú `quotaWindowThresholds` fún àwọn àtúnṣe ìpele ìbáṣepọ̀.
+- Kika awọn iye JSON aise yoo ṣe afihan** agbara oke gangan** (60% lo ninu apẹẹrẹ loke).
+- Ti irẹpọ ba fẹ lati tọju awọn itumọ-iyọọda-iyọọda ohun elo ti ipari ọrọ, o le ṣe iṣiro imunadoko agbekalẹ ti o ku ni ẹgbẹ-ẹgbẹ nipa lilo `quotaWindowThresholds` fun awọn ipalọlọ ipele-isopọ.
 
 ---
 
@@ -1166,50 +1134,40 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 
 ---
 
-## Dasibodu àti Ìṣàkóso
+## Dasibodu & Isakoso
 
-Àwọn ipa-ọ̀nà ìṣàkóso (`/api/*` àyàfi ìfàṣẹsí/ìwọlé gbogbogbò) **kì í** jẹ́ àṣẹ fún àwọn kọ́kọ́rọ́ API inference lasan. Àwọn ẹbí ìjẹ́rìí, àwọn àyè, àti àwọn àpẹẹrẹ curl:
-[Ìfàṣẹsí Ìṣàkóso](../guides/MANAGEMENT-AUTH.md).
+Awọn ipa ọna iṣakoso (`/api/*` ayafi auth/login ti gbogbo eniyan) jẹ** kii ṣe** ti a fun ni aṣẹ nipasẹ awọn bọtini API itọkasi lasan. Awọn idile ijẹrisi, awọn aaye, ati awọn apẹẹrẹ curl: [Ijeri iṣakoso](../guides/MANAGEMENT-AUTH.md).
 
-### Ìfàṣẹsí
+### Ijeri
 
-| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                            |
-| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Ìwọlé                                                                                                                                                                                                                                                                                  |
-| `/api/auth/logout`            | POST     | Ìjáde                                                                                                                                                                                                                                                                                  |
-| `/api/settings/require-login` | GET/POST | Ipò ìwọlé (GET, gbogbogbò). POST máa ń ṣètò ọ̀rọ̀ aṣínà / yípadà ìwọlé: alákóso nìkan lẹ́yìn tí ọ̀rọ̀ aṣínà bá ti wà (àsèjú dasibodu, CLI àdúgbò, tàbí ìwọlé tí a pa — àwọn kọ́kọ́rọ́ API àti àwọn àmi `oma_` máa ń gba `403`); àsèjú dasibodu máa ń rán `currentPassword` láti rọ́pò ọ̀rọ̀ aṣínà |
+| Opin ojuami                   | Ọna      | Apejuwe                                                                                                                                                                                                                                                                                     |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Wo ile                                                                                                                                                                                                                                                                                      |
+| `/api/auth/logout`            | POST     | Jade jade                                                                                                                                                                                                                                                                                   |
+| `/api/settings/require-login` | GET/POST | Ipo wiwọle (GET, gbogbo eniyan). POST ṣeto ọrọ igbaniwọle / yiyi iwọle: oniṣẹ ẹrọ-nikan ni kete ti ọrọ igbaniwọle kan wa (akoko dasibodu, CLI agbegbe, tabi iwọle alaabo awọn bọtini — API ati awọn ami `oma_` gba `403`); igba dasibodu kan ran `currentPassword` lati rọpo ọrọ igbaniwọle |
 
-### Ìṣàkóso Olùpèsè
+### Isakoso Olupese
 
-| Endpoint                                | Method                    | Description                                                                                                                                           |
-| --------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Ṣe àkójọ / ṣẹ̀dá àwọn olùpèsè                                                                                                                          |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Ṣàkóso olùpèsè kan                                                                                                                                    |
-| `/api/providers/[id]/test`              | POST                      | Ṣàyẹ̀wò ìsopọ̀ olùpèsè                                                                                                                                  |
-| `/api/providers/[id]/models`            | GET                       | Ṣe àkójọ àwọn model olùpèsè                                                                                                                           |
-| `/api/providers/validate`               | POST                      | Jẹ́rìí ìṣètò olùpèsè                                                                                                                                   |
-| `/api/providers/bulk`                   | POST                      | Fí àwọn kọ́kọ́rọ́ API púpọ̀ kún fún olùpèsè Ọ̀KAN                                                                                                          |
-| `/api/providers/import`                 | POST                      | Kó ÀKÓJỌ olùpèsè onírúurú wọlé láti inú fáìlì CSV/JSON tí a ti tú sílẹ̀ (#6836); àwọn àbájáde ìkùnà apá kan fún ẹ̀ka kọ̀ọ̀kan                             |
-| `/api/provider-nodes*`                  | Various                   | Ìṣàkóso nódù olùpèsè                                                                                                                                  |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Àwọn model àṣà àti àwọn àyípadà fún model kọ̀ọ̀kan (fikún, imudojúìwọ̀n, pamọ́/fihàn, píparẹ́)                                                             |
-| `/api/provider-models/validate-and-add` | POST                      | Ìjẹ́rìí ìsopọ̀ líle tí a yan láti lò, tí ìfàṣẹsí ìṣàkóso ṣe, àti ìforúkọsílẹ̀ model àṣà ní ọ̀nà atomiki; wo [Ìjẹ́rìí model](../guides/MODEL-VALIDATION.md) |
+| Opin ojuami                             | Ọna                       | Apejuwe                                                                                                                             |
+| --------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Akojọ / ṣẹda awọn olupese                                                                                                           |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Ṣakoso awọn olupese                                                                                                                 |
+| `/api/providers/[id]/test`              | POST                      | Igbeyewo asopọ olupese                                                                                                              |
+| `/api/providers/[id]/models`            | GET                       | Akojọ olupese si dede                                                                                                               |
+| `/api/providers/validate`               | POST                      | Soto olupese olupese                                                                                                                |
+| `/api/providers/bulk`                   | POST                      | Ṣafikun awọn bọtini API fun olupese ONE                                                                                             |
+| `/api/providers/import`                 | POST                      | Ṣe agbewọle LIST olupese oniruuru lati inu faili CSV/JSON ti a ti ṣe itupalẹ (#6836); fun kana-apakan-ikuna esi                     |
+| `/api/provider-nodes*`                  | Orisirisi                 | Olupese ipade isakoso                                                                                                               |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Awọn awoṣe aṣa ati awọn ifasilẹ fun awoṣe kọọkan (fikun, imudojuiwọn, hide/show, paarẹ)                                             |
+| `/api/provider-models/validate-and-add` | POST                      | Isakoso-ifọwọsi, ijade-afọwọsi-asopọ ti o muna ati iforukọsilẹ aṣa-awoṣe atomiki; wo [Awoṣe afọwọsi](../guides/MODEL-VALIDATION.md) |
 
-Fún àwọn model tí a ti múṣiṣẹpọ̀/tí a ti kó wọlé, `PUT /api/provider-models` máa ń gba `provider`, `modelId`, àti
-`maxOutputTokenOverride`: odidi rere máa ń ṣètò ààlà àbájáde-token afọwọ́ṣe, nígbà tí `null`
-máa ń pa á rẹ́ kí ó lè dá ààlà àkọ́kọ́ padà. `GET /api/provider-models?provider=<provider>` máa ń dá àwọn iye wọ̀nyí padà
-ní `modelOutputOverrides`, pẹ̀lú àwọn model tí kò ní ẹ̀ka model àṣà. Àyípadà yìí máa ń lo agbára `max_output_tokens`
-ìkànsí àkókò-ṣiṣe, ó sì máa ń wà láìyípadà lẹ́yìn ìmúṣiṣẹpọ̀ model. Ojú-ìwé olùpèsè tó bá OpenAI mu
-ní àwọn ìṣàkóso àtúnṣe/pípà kan náà, ó sì máa ń fi àmì sí àwọn model tí wọ́n ní ìtìlẹ́yìn vision tí a sọ ní kedere.
+Fun awọn awoṣe synced/imported, `PUT /api/provider-models` gba `provider`, `modelId`, ati `maxOutputTokenOverride`: odidi rere kan ṣeto fila-ifihan afọwọṣe, ati `null` ko o lati mu pada aiyipada. `GET /api/provider-models?provider=<provider>` da awọn iye wọnyi pada ni `modelOutputOverrides`, pẹlu awọn awoṣe laisi ila-aṣa awoṣe. Ifiweranṣẹ naa nlo agbara asiko-ṣiṣe `max_output_tokens` ati pe o yege awoṣe tun-ṣiṣẹpọ. Oju-iwe olupese ibaramu OpenAI nfunni ni awọn idari edit/clear kanna ati awọn ami si awọn awoṣe pẹlu atilẹyin iran ti o fojuhan.
 
-Lórí nódù olùpèsè tó bá ohun náà mu, àwọn ọ̀nà ìkọ̀wé (`POST`, `PUT`, `PATCH`, `DELETE` àti
-`/api/provider-models/validate-and-add`) máa ń fi id model pamọ́ gẹ́gẹ́ bí id upstream aláìlórúkọ: id
-tí a lẹ̀ mọ́ láti inú àkójọ tó ní prefix máa ń yọ gbogbo ọ̀wọ̀ prefix ti nódù náà sílẹ̀, àwọn
-ìdáhùn sì máa ń fi id tí a pamọ́ padà. Àwọn id tí a gé pẹ̀lú slash ti àwọn olùpèsè canonical (fún àpẹẹrẹ `nvidia/nemotron-…`) máa ń
-wà gẹ́gẹ́ bí a ṣe fi wọ́n sílẹ̀. `/v1/models` kì í ṣe jáde id tí ó ní àkójọpọ̀ `<prefix>/<prefix>/<model>`.
+Lori ipade olupese ibaramu, awọn ọna kikọ (`POST`, `PUT`, `PATCH`, `DELETE` ati `/api/provider-models/validate-and-add`) tọju id awoṣe bi id ti oke oke: id ti o lẹẹmọ lati atokọ iṣaaju ni akopọ eyikeyi asiwaju ti ami-ipele ti ara ti oju ipade, ati awọn idahun ṣe iwoyi id ti o fipamọ. Awọn ids idinku ti awọn olupese Canonical (fun apẹẹrẹ `nvidia/nemotron-…`) ti wa ni ipamọ lọrọ ẹnu. `/v1/models` ko jade ni tolera `<prefix>/<prefix>/<model>` id.
 
-Àwọn node Custom Chat Completions máa ń ṣàtúnṣe àwọn ìyọkúrò reasoning tó ṣe kedere sí backend upstream. Ìdánwò ìsopọ̀ tó ṣàṣeyọrí máa ń yan àwọn ìṣàkóso chat-template fún ID model kọọkan gangan tí àkọsílẹ̀ `/models` rẹ̀ bá fi iye `owned_by` tí a mọ̀ hàn: `vllm`, `sglang`, tàbí `llamacpp`. Àwọn wrapper tó bá OpenAI mu tí ó ṣí hàn gbangba lè pa àkọsílẹ̀ model ìpilẹ̀ mọ́ sínú object `openai` tó wà ní inú; ìwádìí máa ń tẹ̀lé irú envelope bẹ́ẹ̀ tó tó mẹ́ta. Àwọn model tí ownership wọn kò sí, tí a kò mọ̀, tàbí tí ó ní ìjàmbá máa ń pa ìhùwàsí OpenAI lasan mọ́. Ìwádìí náà tún máa ń lo ìbéèrè catalog tó wà tẹ́lẹ̀, kò sì máa ń ṣe àwọn completion token kankan; a máa ń sọ ọ́ di aláìṣiṣẹ́ nígbà tí endpoint ìsopọ̀ bá yí padà.
+Awọn apa Iwiregbe Aṣa Aṣa ṣe deede awọn ijade ero-ọrọ ti o fojuhan si ẹhin oke. Idanwo asopọ ti o ṣaṣeyọri yoo yan awọn iṣakoso iwiregbe-awoṣe laifọwọyi fun awoṣe deede ID kọọkan ti titẹsi `/models` ṣe afihan iye `owned_by` ti a mọ: `vllm`, `sglang`, tabi `llamacpp`. Sihin OpenAI-ibaramu wrappers le se itoju awọn atilẹba titẹsi awoṣe inu kan itẹ-ẹiyẹ `openai` ohun; erin wọnyi soke si meta iru envelopes. Awọn awoṣe pẹlu sonu, aimọ, tabi nini rogbodiyan tọju ihuwasi OpenAI lasan. Wiwa tun lo ibeere katalogi ti o wa tẹlẹ, ṣe ipilẹṣẹ ko si awọn ami ipari, ati pe o jẹ asan nigbati aaye ipari asopọ ba yipada.
 
-Láti so ìhùwàsí náà mọ́ backend kan tí kò ṣàfihàn metadata yẹn, lo API imudojuiwọn provider apá kan tó wà tẹ́lẹ̀:
+Lati pin ihuwasi naa fun ẹhin ti ko ṣe afihan metadata yẹn, lo imudojuiwọn apa kan olupese API:
 
 ```json
 {
@@ -1219,91 +1177,91 @@ Láti so ìhùwàsí náà mọ́ backend kan tí kò ṣàfihàn metadata yẹn
 }
 ```
 
-Fi body yẹn ránṣẹ́ pẹ̀lú `PUT /api/providers/<connection-id>`. Lórí ìsopọ̀ yẹn, reasoning effort tó ṣe kedere ti `none` máa ń ránṣẹ́ gẹ́gẹ́ bí `chat_template_kwargs.thinking=false` àti `chat_template_kwargs.enable_thinking=false`. Àwọn iye template abinibi tó ṣe kedere ṣì jẹ́ aláṣẹ, àyàfi tí òfin reasoning ní ẹgbẹ́ server bá fi tipátipá béèrè effort kan. Ètò náà kan nígbà tí ìsopọ̀ OpenAI-compatible àṣà kan bá ń ránṣẹ́ sí body Chat Completions; àwọn ìbéèrè Responses àti àwọn provider lasan máa ń pa irisi request abinibi wọn mọ́. Ṣètò `reasoningControl` sí `openai` láti fi tipátipá lo ìkọjá `reasoning_effort` OpenAI lasan, tàbí yọ ọ́ kúrò/ṣètò rẹ̀ sí `null` láti lo ìwádìí aládàáṣiṣẹ́.
+Firanṣẹ ara yẹn pẹlu `PUT /api/providers/<connection-id>`. Lori asopọ yẹn, igbiyanju ironu ti o fojuhan ti `none` ni a firanṣẹ bi `chat_template_kwargs.thinking=false` ati `chat_template_kwargs.enable_thinking=false`. Awọn iye awoṣe abinibi ti o fojuhan wa ni aṣẹ ayafi ti ofin ero ẹgbẹ olupin fi ipa mu akitiyan kan. Eto naa kan nikan nigbati asopọ ibaramu OpenAI aṣa kan firanṣẹ ara Awọn ipari iwiregbe; Awọn ibeere idahun ati awọn olupese lasan tọju apẹrẹ ibeere abinibi wọn. Ṣeto `reasoningControl` si `openai` lati fi ipa mu ọna gbigbe OpenAI `reasoning_effort` lasan, tabi fi it/set silẹ si `null` lati lo wiwa aifọwọyi.
 
-Àwọn ìbéèrè classifier Claude Code auto-mode máa ń ṣètò native thinking sí alaabo ní àìpẹ́ nígbà tí wọn kò bá ní àwọn ìṣàkóso reasoning tó ṣe kedere. Ìwádìí náà máa ń lo àmì system ti classifier nínú àwọn ìbéèrè tó wà ní irisi Claude, kì í ṣe àwọn orúkọ model tàbí àwọn ààlà completion. Àwọn ìṣàkóso body tó ṣe kedere, àwọn header effort/thinking tí a ní àtìlẹ́yìn, àwọn òfin routing, àti effort model tí a ti pinnu máa ń pa àṣẹ àtẹ̀yìnwá wọn mọ́. Àwọn ipele classifier méjèèjì ṣì ń pa prompts wọn, àwọn ààlà completion, àwọn stop sequence, àti àwọn verdict ìyọ̀nda gidi láti upstream mọ́; ipele kejì ṣì lè ṣe reasoning tí ó béèrè hàn gẹ́gẹ́ bí text lasan.
+Claude Code classifier-mode auto awọn ibeere ironu abinibi aiyipada si alaabo nigba ti wọn ko ni awọn idari ero ero gbangba ninu. Iwari nlo aami eto classifier ni awọn ibeere ọna kika Claude, kii ṣe awọn orukọ awoṣe tabi awọn opin ipari. Awọn iṣakoso ara ti o han gbangba, awọn akọsori effort/thinking ti o ṣe atilẹyin, awọn ofin ipa-ọna, ati igbiyanju awoṣe ti o yanju jẹ ki o jẹ pataki wọn tẹlẹ. Awọn ipele ikawe mejeeji ni idaduro awọn itọsi wọn, awọn opin ipari, awọn ilana iduro, ati awọn idajo igbanilaaye oke gidi; ipele keji tun le gbe awọn ero ti o han ti o beere bi ọrọ lasan.
 
-### Àwọn Ìṣàn OAuth
+### OAuth Awọn ṣiṣan
 
-| Endpoint                         | Method  | Description                    |
-| -------------------------------- | ------- | ------------------------------ |
-| `/api/oauth/[provider]/[action]` | Various | OAuth tó jẹ́ pàtàkì sí provider |
+| Opin ojuami                      | Ọna       | Apejuwe            |
+| -------------------------------- | --------- | ------------------ |
+| `/api/oauth/[provider]/[action]` | Orisirisi | Olupese-pato OAuth |
 
-### Routing àti Config
+### Ipa ọna & Iṣeto
 
-| Endpoint              | Method   | Description                      |
-| --------------------- | -------- | -------------------------------- |
-| `/api/models`         | GET/PUT  | Àtòjọ model / imudojuiwọn alias  |
-| `/api/models/alias`   | GET/POST | Àwọn alias model                 |
-| `/api/models/catalog` | GET      | Gbogbo model nípa provider + irú |
-| `/api/combos*`        | Various  | Ìṣàkóso combo                    |
-| `/api/keys*`          | Various  | Ìṣàkóso kọ́kọ́rọ́ API               |
-| `/api/pricing`        | GET      | Iye owó model                    |
+| Opin ojuami           | Ọna       | Apejuwe                                |
+| --------------------- | --------- | -------------------------------------- |
+| `/api/models`         | GET/PUT   | Awoṣe akojọ / inagijẹ imudojuiwọn      |
+| `/api/models/alias`   | GET/POST  | Awọn inagijẹ awoṣe                     |
+| `/api/models/catalog` | GET       | Gbogbo awọn awoṣe nipasẹ olupese + iru |
+| `/api/combos*`        | Orisirisi | Konbo isakoso                          |
+| `/api/keys*`          | Orisirisi | API isakoso bọtini                     |
+| `/api/pricing`        | GET       | Ifowoleri awoṣe                        |
 
-#### Orísun provenance ti ààlà model
+#### Awoṣe iye to provenance
 
-`GET /api/models?withLimits=1` (pẹ̀lú `true`; `0`/`false` tàbí fífi í sílẹ̀ máa ń pa payload àiyipada mọ́) máa ń fi `contextWindow`, `maxInputTokens`, `maxOutputTokens` àti object `capsSource` kún gbogbo ìlà model. `capsSource` máa ń tọ́ka sí òfin tó pèsè ààlà kọọkan, kí a lè tọpinpin ààlà tó yà wá lẹ́nu (fún àpẹẹrẹ 128k lórí model 1M) sí orísun rẹ̀. Àwọn iye tí a ti pinnu náà jẹ́ àwọn kan náà tí routing ń lò; flag náà kàn ń fi àwọn field kún un, kò sì yí iye kankan padà. Iye `withLimits` míràn yóò jẹ́ kí a kọ̀ ọ́ pẹ̀lú `400`.
+`GET /api/models?withLimits=1` (bakannaa `true`; `0`/`false` tabi yiyọ kuro o tọju fifuye isanwo aiyipada ko yipada) ṣafikun `contextWindow`, `maxInputTokens`, `maxOutputTokens` ati ohun `capsSource` si gbogbo ila awoṣe. `capsSource` lorukọ ofin ti o pese opin kọọkan, nitorinaa opin iyalẹnu kan (fun apẹẹrẹ 128k lori awoṣe 1M) ni a le tọpa si ipilẹṣẹ rẹ. Awọn iye ipinnu jẹ kanna awọn ipawo ipa-ọna; Flag nikan ṣe afikun awọn aaye ati pe ko yipada iye kan. Eyikeyi iye `withLimits` miiran jẹ kọ pẹlu `400`.
 
-| `capsSource` value                           | Origin                                                               |
-| -------------------------------------------- | -------------------------------------------------------------------- |
-| `override:context`                           | Override context-window tí a fipamọ́ (`model_context_overrides`)      |
-| `override:max_input` / `override:max_output` | Override agbára `max_input_tokens` / `max_output_tokens` tí a fipamọ́ |
-| `static-authoritative:<provider>/<model>`    | Tábìlì context-window static authoritative                           |
-| `synced:<provider>/<model>`                  | Ìlà agbára tí models.dev ti muṣiṣẹ́pọ̀                                 |
-| `registry:<provider>/<model>`                | Àkọsílẹ̀ registry provider                                            |
-| `spec:<model>`                               | Àlàyé model static                                                   |
-| `effort-base:` prefix                        | Ìlà tí a yá láti model ìpìlẹ̀ ti variant tí effort suffix wà lórí rẹ̀  |
-| `none`                                       | Kò sí orísun tó kéde ààlà náà (iye jẹ́ `null`)                        |
+| `capsSource` iye                             | Ipilẹṣẹ                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------ |
+| `override:context`                           | Iyipada ọrọ-ọrọ ti o duro duro-fẹẹfẹlẹ (`model_context_overrides`) |
+| `override:max_input` / `override:max_output` | Iduroṣinṣin `max_input_tokens` / `max_output_tokens` agbara idojuk |
+| `static-authoritative:<provider>/<model>`    | Aimi alaṣẹ ayika-window tabili                                     |
+| `synced:<provider>/<model>`                  | modeld.dev synced agbara kana                                      |
+| `registry:<provider>/<model>`                | Titẹ sii iforukọsilẹ olupese                                       |
+| `spec:<model>`                               | Aimi awoṣe spec                                                    |
+| `effort-base:` ìpele                         | Kana yiya lati ipilẹ awoṣe ti ẹya akitiyan-suffixed iyatọ          |
+| `none`                                       | Ko si orisun ti o sọ opin (iye jẹ `null`)                          |
 
-Ìmúṣẹ̀: `getResolvedModelCapabilitiesWithLimitSources()` nínú `src/lib/modelCapabilities.ts`
-àti àwọn ẹ̀wọ̀n precedence nínú `src/lib/modelCapabilityLimits.ts`.
+Imuse: `getResolvedModelCapabilitiesWithLimitSources()` ni `src/lib/modelCapabilities.ts` ati awọn ẹwọn iṣaaju ni `src/lib/modelCapabilityLimits.ts`.
 
-### Lílò àti Àyẹ̀wò iṣẹ́
+### Lilo & Atupale
 
-| Endpoint                         | Method          | Description                                                                                                                                                                                                                                                                                         |
-| -------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Ìtàn lílo                                                                                                                                                                                                                                                                                           |
-| `/api/usage/logs`                | GET             | Àwọn àkọsílẹ̀ lílo                                                                                                                                                                                                                                                                                   |
-| `/api/usage/request-logs`        | GET             | Àwọn àkọsílẹ̀ ní ìpele ìbéèrè                                                                                                                                                                                                                                                                        |
-| `/api/usage/[connectionId]`      | GET             | Lílo fún connection kọ̀ọ̀kan                                                                                                                                                                                                                                                                          |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Àwọn isuna ààlà token fún API key kọ̀ọ̀kan                                                                                                                                                                                                                                                            |
-| `/api/usage/model-latency-stats` | GET             | Àkójọpọ̀ latency tí ń yí padà fún provider/model kọ̀ọ̀kan (avg/p50/p95/p99, ìpín aṣeyọrí); àwọn àlẹ̀mọ́: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                 |
-| `/api/usage/cache-health`        | GET             | Àkótán ìlera prompt-cache lórí `call_logs` — ìpín write/read, pínpín iwọn-write p50/p90/p99, ìkójọpọ̀ heavy-write, ìpín fún model kọ̀ọ̀kan, àti ìdájọ́ `healthy`/`degraded`/`thrash`/`no-data`; àwọn query params `range` (`1h`\|`24h`\|`7d`\|`30d`, àiyípadà `24h`) àti `model` tí ó jẹ́ àṣàyàn (#8827) |
+| Opin ojuami                      | Ọna             | Apejuwe                                                                                                                                                                                                                                                                       |
+| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Itan lilo                                                                                                                                                                                                                                                                     |
+| `/api/usage/logs`                | GET             | Awọn akọọlẹ lilo                                                                                                                                                                                                                                                              |
+| `/api/usage/request-logs`        | GET             | Awọn akọọlẹ ipele-ibeere                                                                                                                                                                                                                                                      |
+| `/api/usage/[connectionId]`      | GET             | Lilo-asopọmọra                                                                                                                                                                                                                                                                |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Per-API-bọtini àmi-isuna-iye                                                                                                                                                                                                                                                  |
+| `/api/usage/model-latency-stats` | GET             | Yiyi per-provider/model lairi apapọ (avg/p50/p95/p99, oṣuwọn aṣeyọri); Ajọ: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                   |
+| `/api/usage/cache-health`        | GET             | Lakotan kaṣe-kiakia ilera lori ipin `call_logs` — write/read, pinpin iwọn-kikọ p50/p90/p99, ifọkansi-kikọ wuwo, pipin-awoṣe, ati idajọ `healthy`/`degraded`/`thrash`/`no-data` ; ibeere params `range` (`1h`\| `24h`\| `7d`\| `30d`, aiyipada `24h`) ati `model` iyan (#8827) |
 
-### Àwọn igbanilaaye bọtini API
+### awọn igbanilaaye bọtini API
 
-`PATCH /api/keys/{id}` máa ń ṣe àtúnṣe àwọn igbanilaaye bọtini tó wà tẹ́lẹ̀. Gẹ́gẹ́ bí gbogbo route `/api/keys*`, ó nílò àṣẹ ìṣàkóso (wo [Ìfàṣẹsí Ìṣàkóso](../guides/MANAGEMENT-AUTH.md)), kì í ṣe bọtini inference. Rán àwọn pápá tí o fẹ́ yí padà nìkan; a máa kọ ìbéèrè tí kò bá ní èyíkéyìí nínú wọn pẹ̀lú `No valid fields to update`. Àwọn pápá tí a gbà jẹ́ èyí tí `updateKeyPermissionsSchema` ṣe àfọwọ́kọ nínú `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` ṣe imudojuiwọn awọn igbanilaaye bọtini ti o wa tẹlẹ. Bii gbogbo ọna `/api/keys*` o nilo aṣẹ iṣakoso (wo [Ijeri Isakoso](../guides/MANAGEMENT-AUTH.md) ), kii ṣe bọtini itọka. Firanṣẹ nikan awọn aaye ti o fẹ yipada; ibeere pẹlu ko si ọkan ninu wọn ti a kọ pẹlu `No valid fields to update`. Awọn aaye ti o gba jẹ asọye nipasẹ `updateKeyPermissionsSchema` ni `src/shared/validation/schemas/keys.ts`.
 
-| Ààyè                                        | Iru                                                                   | Àwọn àkíyèsí                                                                                                                     |
-| ------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, àwọn ohun kikọ 1-200                                          |                                                                                                                                  |
-| `isActive`                                  | boolean                                                               |                                                                                                                                  |
-| `isBanned`                                  | boolean                                                               |                                                                                                                                  |
-| `expiresAt`                                 | Ọjọ́ àti àkókò ISO 8601 tàbí `null`                                    | `null` máa ń yọ àkókò ìparí kúrò                                                                                                 |
-| `modelAccessMode`                           | `all` \| `restricted`                                                 | `allowedModels` gbọ́dọ̀ jẹ́ òfo nígbà tí mode bá jẹ́ `all`                                                                           |
-| `allowedModels`, `blockedModels`            | àkójọpọ̀ àwọn string, tó tó 1000                                       |                                                                                                                                  |
-| `allowedCombos`                             | àkójọpọ̀ àwọn string, tó tó 500                                        | Ó ń pinnu àwọn combos tí kọ́kọ́rọ́ lè pè; àwọn model tààrà ni `modelAccessMode` / `allowedModels` ń ṣàkóso                          |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                 | `allowedConnections` gbọ́dọ̀ kún fún ohun kan tàbí jù bẹ́ẹ̀ lọ nígbà `restricted`, kí ó sì jẹ́ òfo nígbà `all`                        |
-| `allowedConnections`                        | àkójọpọ̀ UUIDs, tó tó 100                                              |                                                                                                                                  |
-| `allowAutoCombos`                           | boolean                                                               | `false` máa ń kọ́ àwọn ìbéèrè fún àwọn model `auto/*` pẹ̀lú kọ́kọ́rọ́ yìí; àwọn kọ́kọ́rọ́ tí kò bá ti ṣètò rẹ̀ rí ni a gbà                |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                         | Ohun tí `GET /v1/models` máa ṣe àtòjọ fún kọ́kọ́rọ́ yìí (combos nìkan, models nìkan, tàbí méjèèjì); kò yí ohun tí kọ́kọ́rọ́ lè pè padà |
-| `forcedModel`                               | string tó tó àwọn ohun kikọ 300, tàbí `null`                          | Ó máa ń darí àwọn ìbéèrè ìfọ̀rọ̀wérọ̀ sí model/combo yìí, ju `X-Route-Model` àti `body.model` lọ; àwọn ààlà kọ́kọ́rọ́ náà ṣì kan       |
-| `noLog`, `autoResolve`                      | boolean                                                               |                                                                                                                                  |
-| `throttleDelayMs`                           | integer, 0-300000                                                     |                                                                                                                                  |
-| `maxSessions`                               | integer, 0-10000                                                      |                                                                                                                                  |
-| `rateLimits`                                | àkójọpọ̀ `{ limit, window }` (àwọn integer rere, tó tó 50) tàbí `null` | `null` máa ń yọ àwọn ààlà kúrò                                                                                                   |
-| `accessSchedule`                            | ohun schedule tàbí `null`                                             | `null` máa ń yọ schedule kúrò                                                                                                    |
-| `scopes`                                    | àkójọpọ̀ àwọn string, tó tó 32                                         |                                                                                                                                  |
-| `allowedEndpoints`                          | àkójọpọ̀ àwọn string, tó tó 20                                         |                                                                                                                                  |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                    |                                                                                                                                  |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                  | Wo [Yíyí cache kọjá fún kọ́kọ́rọ́ kọ̀ọ̀kan](#per-key-cache-bypass)                                                                    |
-| `compressionEnabled`                        | boolean                                                               |                                                                                                                                  |
-| `codexServiceMode`                          | ọ̀kan lára àwọn mode iṣẹ́ Codex                                         |                                                                                                                                  |
-| `disableNonPublicModels`                    | boolean                                                               |                                                                                                                                  |
-| `allowUsageCommand`                         | boolean                                                               |                                                                                                                                  |
-| `usageLimitEnabled`                         | boolean                                                               |                                                                                                                                  |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                 |                                                                                                                                  |
-| `chaosModeEnabled`                          | boolean                                                               |                                                                                                                                  |
+| Aaye                                        | Iru                                                        | Awọn akọsilẹ                                                                                                                                                                                                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | okun, 1-200 chars                                          |                                                                                                                                                                                                                                                                 |
+| `isActive`                                  | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `isBanned`                                  | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `expiresAt`                                 | ISO 8601 datetime tabi `null`                              | `null` nso ipari                                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                      | `allowedModels` gbọdọ jẹ ofo nigbati ipo ba jẹ `all`                                                                                                                                                                                                            |
+| `allowedModels`, `blockedModels`            | opo ti awọn okun, to 1000                                  |                                                                                                                                                                                                                                                                 |
+| `allowedCombos`                             | orisirisi awọn okun, to 500                                | Gates eyi ti combos bọtini le pe; Awọn awoṣe taara jẹ iṣakoso nipasẹ `modelAccessMode` / `allowedModels`                                                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                      | `allowedConnections` gbọdọ jẹ ti ko ṣofo nigbati `restricted` ati ofo nigbati `all`                                                                                                                                                                             |
+| `allowedConnections`                        | titobi UUIDs, to 100                                       |                                                                                                                                                                                                                                                                 |
+| `allowAutoCombos`                           | boolianu                                                   | `false` kọ awọn ibeere fun awọn awoṣe `auto/*` pẹlu bọtini yii; awọn bọtini ti o ko ṣeto ti wa ni laaye                                                                                                                                                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                              | Kini awọn atokọ `GET /v1/models` fun bọtini yii (combos nikan, awọn awoṣe nikan, tabi mejeeji); ko yi ohun ti bọtini le pe                                                                                                                                      |
+| `forcedModel`                               | okun to 300 chars, tabi `null`                             | Awọn ibeere iwiregbe awọn ọna si model/combo yii, lori `X-Route-Model` ati `body.model`; awọn ifilelẹ ti awọn bọtini si tun waye                                                                                                                                |
+| `noLog`, `autoResolve`                      | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `throttleDelayMs`                           | odidi, 0-300000                                            |                                                                                                                                                                                                                                                                 |
+| `maxSessions`                               | odidi, 0-10000                                             |                                                                                                                                                                                                                                                                 |
+| `rateLimits`                                | titobi `{ limit, window }` (odidi rere, to 50) tabi `null` | `null` nso awọn ifilelẹ                                                                                                                                                                                                                                         |
+| `accessSchedule`                            | iṣeto ohun tabi `null`                                     | `null` nso iṣeto                                                                                                                                                                                                                                                |
+| `scopes`                                    | ọpọlọpọ awọn okun, to 32                                   |                                                                                                                                                                                                                                                                 |
+| `allowedEndpoints`                          | orisirisi awọn okun, to 20                                 |                                                                                                                                                                                                                                                                 |
+| `streamDefaultMode`                         | `legacy` \| `json`                                         |                                                                                                                                                                                                                                                                 |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                       | Wo [Per-bọtini kaṣe fori](#per-key-cache-bypass)                                                                                                                                                                                                                |
+| `compressionEnabled`                        | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `codexServiceMode`                          | ọkan ninu awọn ipo iṣẹ Codex                               |                                                                                                                                                                                                                                                                 |
+| `disableNonPublicModels`                    | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `allowUsageCommand`                         | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `usageLimitEnabled`                         | boolianu                                                   |                                                                                                                                                                                                                                                                 |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nọmba >= 0 tabi `null`                                     |                                                                                                                                                                                                                                                                 |
+| `fiveHourUsageLimitUsd`                     | nọmba >= 0 tabi `null`                                     | Isuna USD wakati 5 yiyi, ti fi agbara mu bi awọn opin ojoojumọ ati osẹ (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` jẹ nigbati inawo ti o dagba julọ ni window ti pari, eyiti o le fi bọtini kan silẹ ti o jinna lori opin rẹ tun dina. |
+| `chaosModeEnabled`                          | boolianu                                                   |                                                                                                                                                                                                                                                                 |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1312,166 +1270,165 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
   -d '{ "allowAutoCombos": false, "catalogScope": "combos" }'
 ```
 
-### Àwọn Ètò
+### Eto
 
-| Endpoint                              | Method        | Àpèjúwe                                                                                                                                                                                                                                                                     |
-| ------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Àwọn ètò gbogbogbò. Àwọn bọtini ìlànà ààbò (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) nílò `currentPassword` àti ẹ̀rí oníṣẹ́ — àwọn kọ́kọ́rọ́ API àti àwọn àmi `oma_` máa ń gba `403`; gbogbo ìyípadà nílò àgbègbè àṣẹ `admin` ti àmi ìráyè |
-| `/api/settings/proxy`                 | GET/PUT       | Àtòpọ̀ aṣojú nẹ́tíwọ́ọ̀kì                                                                                                                                                                                                                                                       |
-| `/api/settings/proxy/test`            | POST          | Ṣàyẹ̀wò ìsopọ̀ aṣojú                                                                                                                                                                                                                                                          |
-| `/api/settings/ip-filter`             | GET/PUT       | Àtòjọ àwọn IP tí a fàyè gba/tí a dí                                                                                                                                                                                                                                         |
-| `/api/settings/thinking-budget`       | GET/PUT       | Ipo ìtúnkọ̀ **ìbéèrè** ìrònú/ìmọ̀ràn (passthrough / auto-strip / custom / adaptive). Ó yàtọ̀ sí ìfúnpọ̀. Wo [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                                 |
-| `/api/settings/system-prompt`         | GET/PUT       | Ìtọ́nisọ́nà ètò àgbáyé                                                                                                                                                                                                                                                        |
-| `/api/settings/compression`           | GET/PUT       | Àtòpọ̀ ìfúnpọ̀ àgbáyé                                                                                                                                                                                                                                                         |
-| `/api/settings/purge-request-history` | POST          | Pa àwọn ìlà àkọsílẹ̀ ìbéèrè àti àwọn àjákù àkọsílẹ̀ ìpè àdúgbò rẹ́                                                                                                                                                                                                             |
+| Opin ojuami                           | Ọna           | Apejuwe                                                                                                                                                                                                                                                         |
+| ------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Awọn eto gbogbogbo. Awọn bọtini aabo-eto imulo (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) nilo `currentPassword` ati awọn bọtini ijẹrisi — API oniṣẹ ati awọn ami `oma_` gba `403`; gbogbo iyipada nilo aaye-iwọle `admin` |
+| `/api/settings/proxy`                 | GET/PUT       | Aṣoju nẹtiwọki nẹtiwọki                                                                                                                                                                                                                                         |
+| `/api/settings/proxy/test`            | POST          | Idanwo asopo aṣoju                                                                                                                                                                                                                                              |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                          |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** ìbéèrè** atunkọ mode (passthrough / auto-rinho / aṣa / aṣamubadọgba). Ominira ti funmorawon. Wo [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                        |
+| `/api/settings/system-prompt`         | GET/PUT       | Lagbaye eto tọ                                                                                                                                                                                                                                                  |
+| `/api/settings/compression`           | GET/PUT       | Agbaye funmorawon konfigi                                                                                                                                                                                                                                       |
+| `/api/settings/purge-request-history` | POST          | Ko awọn ori ila iwe ibeere ati awọn ohun-ọṣọ ipe-ipe agbegbe kuro                                                                                                                                                                                               |
 
-### Àyíká & Ìfúnpọ̀
+### Atokọ & Funmorawon
 
-| Endpoint                               | Method         | Àlàyé                                                               |
-| -------------------------------------- | -------------- | ------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Ṣàgbéwò ìfúnpọn off/lite/standard/aggressive/ultra/RTK/stacked      |
-| `/api/compression/language-packs`      | GET            | Ṣe àtòjọ àwọn àkójọpọ̀ èdè Caveman tí ó wà                           |
-| `/api/compression/rules`               | GET            | Ṣe àtòjọ metadata àwọn òfin Caveman                                 |
-| `/api/context/caveman/config`          | GET/PUT        | Àwọn ètò pàtó fún Caveman àti àpèjáde rẹ                            |
-| `/api/context/rtk/config`              | GET/PUT        | Àwọn ètò pàtó fún RTK, pẹ̀lú àwọn àlẹmọ àdáni àti ìpamọ́ àbájáde aise |
-| `/api/context/rtk/filters`             | GET            | Kátálógù àlẹmọ RTK àti àyẹ̀wò àṣìṣe àlẹmọ àdáni                      |
-| `/api/context/rtk/test`                | POST           | Ṣe àgbéwò/ìdánwò RTK lórí ẹrù ọ̀rọ̀                                   |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Ka àbájáde aise tí a ti bo tí a pa mọ́ nípasẹ̀ id itọ́ka               |
-| `/api/context/combos`                  | GET/POST       | Àtòjọ/ìṣẹ̀dá àkópọ̀ ìfúnpọn                                           |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Àlàyé/àtúnṣe/piparẹ̀ àkópọ̀ ìfúnpọn                                   |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Yàn àwọn àkópọ̀ ìfúnpọn sí àwọn àkópọ̀ ìdarí                          |
-| `/api/context/analytics`               | GET            | Àpèjáde ìtúpalẹ̀ ìfúnpọn                                             |
+| Opin ojuami                            | Ọna            | Apejuwe                                                           |
+| -------------------------------------- | -------------- | ----------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Awotẹlẹ off/lite/standard/aggressive/ultra/RTK/stacked funmorawon |
+| `/api/compression/language-packs`      | GET            | Ṣe atokọ awọn akopọ ede Caveman ti o wa                           |
+| `/api/compression/rules`               | GET            | Akojọ Caveman ofin metadata                                       |
+| `/api/context/caveman/config`          | GET/PUT        | Caveman-pato eto inagijẹ                                          |
+| `/api/context/rtk/config`              | GET/PUT        | Awọn eto pato-RTK, pẹlu awọn asẹ aṣa ati idaduro aise-jade        |
+| `/api/context/rtk/filters`             | GET            | Katalogi àlẹmọ RTK ati awọn iwadii àlẹmọ aṣa                      |
+| `/api/context/rtk/test`                | POST           | Ṣiṣe RTK preview/test lodi si fifuye ọrọ kan                      |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Ka ni idaduro redacted aise isejade nipa ijuboluwole id           |
+| `/api/context/combos`                  | GET/POST       | Funmorawon konbo list/create                                      |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Funmorawon konbo detail/update/delete                             |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Fi awọn combos funmorawon si ipa ọna combos                       |
+| `/api/context/analytics`               | GET            | funmorawon atupale inagijẹ                                        |
 
-### Ìṣàbójútó
+### Abojuto
 
-| Endpoint                             | Method     | Àlàyé                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Ìtọpinpin àwọn ìpàdé tí ó ń ṣiṣẹ́                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/rate-limits`                   | GET        | Àwọn ààlà ìwọ̀n fún àkọọ́lẹ̀ kọ̀ọ̀kan                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/monitoring/health`             | GET        | Àyẹ̀wò ìlera + àkótán olùpèsè (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Ìwòye ìṣàkóso ní `credentialHealth`: àwọn iye probe-cache, `failedConnections` nígbà tí `failed>0`, àti `staleDbNonOkCount` (SQLite `test_status` tí ó dúró mọ́, kì í ṣe gauge). Wo [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Àwọn ìṣirò cache / ìmúkúrò                                                                                                                                                                                                                                                                                                                                                                  |
-| `/api/modality-bridge/stats`         | GET        | `attempts` inú ìrántí, àwọn àṣeyọrí/`bridged`, àwọn ìkùnà, àwọn ìbẹ̀wẹ̀ cache, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` tí a ṣe iṣiro lórí àpẹẹrẹ, àti àkókò ìlò ìkẹyìn (a tún un ṣe nígbà ìbẹ̀rẹ̀; ìfàṣẹsí ìṣàkóso)                                                                                                                                                              |
-| `/api/modality-bridge/video/runtime` | GET        | Àyẹ̀wò trusted-loopback tó muna ṣáájú ìfàṣẹsí ìṣàkóso/probe; àyè àti àwọn ẹ̀yà FFmpeg/ffprobe tí a ti sọ di mímọ́ (no-store)                                                                                                                                                                                                                                                                   |
-| `/api/modality-bridge/video/extract` | POST       | Alárìnàkò báìtì trusted-loopback inú ètò tó ní ìfàṣẹsí; àbáwọlé 50 MiB, ìlà dídúró tí a díwọ̀n àti àbájáde 32 MiB, agbára `503`, ìjáde `499`, àkókò ìkẹyìn `504`; kì í ṣe API ìgbérù gbogbogbòò                                                                                                                                                                                              |
+| Opin ojuami                          | Ọna        | Apejuwe                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Titele igba ti nṣiṣe lọwọ                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/rate-limits`                   | GET        | Fun-iroyin oṣuwọn ifilelẹ                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/monitoring/health`             | GET        | Ayẹwo ilera + akopọ olupese (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Wiwo iṣakoso pẹlu `credentialHealth`: scalars-cache, `failedConnections` nigbati `failed>0`, ati `staleDbNonOkCount` (SQLite alalepo `test_status`, kii ṣe iwọn). Wo [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Kaṣe iṣiro / ko o                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/modality-bridge/stats`         | GET        | `attempts` ninu iranti, awọn aṣeyọri/`bridged`, awọn ikuna, awọn deba kaṣe, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` ti a sọ fun apẹẹrẹ, ati akoko lilo to kẹhin (tun bẹrẹ bẹrẹ; auth iṣakoso)                                                                                                                                                                 |
+| `/api/modality-bridge/video/runtime` | GET        | Ayẹwo igbẹkẹle-loopback ti o muna ṣaaju iṣakoso auth/probe; wiwa FFmpeg/ffprobe ti a sọ di mimọ ati awọn ẹya (ko si ile itaja)                                                                                                                                                                                                                                               |
+| `/api/modality-bridge/video/extract` | POST       | Ti abẹnu tito gbẹkẹle-loopback alagbata baiti; 50 MiB igbewọle, didi queue/32 MiB àbájade, agbara `503`, `499` asopọ, akoko ipari `504` ; ko kan àkọsílẹ po API                                                                                                                                                                                                              |
 
-### Àfikúnpamọ́ àti Ìtajàwọlé/Ìwọlé
+### Fidio fireemu lu-mọlẹ
 
-| Endpoint                    | Ọ̀nà    | Àpèjúwe                                                                      |
-| --------------------------- | ------ | ---------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Ṣàfihàn àwọn àfẹ̀yìntì tó wà                                                  |
-| `/api/db-backups`           | PUT    | Ṣẹ̀dá àfẹ̀yìntì afọwọ́ṣe                                                        |
-| `/api/db-backups`           | POST   | Múpadàbọ̀ láti inú àfẹ̀yìntì kan pàtó                                          |
-| `/api/db-backups`           | PATCH  | Fi àwọn ìṣètò ìdádúró àfẹ̀yìntì pamọ́ (fún olùdarí nìkan)                      |
-| `/api/db-backups`           | DELETE | Yọ àwọn àfẹ̀yìntì tí a ti tọ́jú kúrò gẹ́gẹ́ bí ìṣètò ìdádúró (fún olùdarí nìkan) |
-| `/api/db-backups/export`    | GET    | Ṣe àgbàsílẹ̀ database gẹ́gẹ́ bí fáìlì .sqlite                                   |
-| `/api/db-backups/import`    | POST   | Ṣàgbérù fáìlì .sqlite láti rọ́pò database (`?dryRun=true` ń ṣe ìfọwọ́sí nìkan) |
-| `/api/db-backups/exportAll` | GET    | Ṣe àgbàsílẹ̀ àfẹ̀yìntì kíkún gẹ́gẹ́ bí àkójọ .tar.gz                             |
+`GET /api/v1/video-bridge/drilldown` ka ọwọ akomo ti agbatọju ti o da pada ni `x-omniroute-video-drilldown` lẹhin ti o ti gba ibeere Afara Fidio ni gbangba. Mejeeji kika ati `DELETE` nigbagbogbo nilo bọtini API to wulo ati igbanilaaye `modalityBridgeVideoDrilldownRemoteEnabled` ominira oniṣẹ. Idaduro iṣelọpọ ni afikun nilo `modalityBridgeVideoDrilldownEnabled` ati ti o muna fun apakan `drilldown: true`. Ti bọtini ba ni atokọ aaye ipari asan, o gbọdọ pẹlu `video` fun mejeeji GET ati DELETE, boya olupe naa nlo `/v1` tabi `/api/v1`.
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` àti `/api/settings/export-json` ń fi
-gbogbo ẹ̀rí ìwọlé tí a tọ́jú jáde, nítorí náà wọ́n nílò session dashboard tàbí CLI agbègbè (tàbí kí
-ìwọlé jẹ́ dídásílẹ̀). Àwọn API key ti scope èyíkéyìí àti àwọn access token `oma_` máa gba `403`.
-Àwọn iṣẹ́ ìmúpadàbọ̀ náà ní ààlà kan náà: `POST /api/db-backups/import` (pẹ̀lú `dryRun=true`),
-`POST /api/db-backups` (ìmúpadàbọ̀ nípasẹ̀ id) àti `POST /api/settings/import-json` ń rọ́pò
-database tàbí àwọn ìṣètò tó ń ṣiṣẹ́ lọ́wọ́, nítorí náà ẹ̀rí ìwọlé ẹ̀rọ náà máa gba `403` níbẹ̀ pẹ̀lú;
-`omniroute sync import` ń fi ẹ̀rí ìwọlé CLI agbègbè ránṣẹ́. Bákan náà ni `DELETE /api/db-backups`
-(yíyọ àwọn àfẹ̀yìntì tí a tọ́jú kúrò) àti `PATCH /api/db-backups` (àwọn ìṣètò ìdádúró: àwọn iye tí a
-tọ́jú ló ń darí yíyọ aládàáṣiṣẹ́ lẹ́yìn gbogbo àfẹ̀yìntì). Ṣíṣàfihàn (`GET`) àti ṣíṣẹ̀dá àfẹ̀yìntì
-afọwọ́ṣe (`PUT`) ṣì ń lo ìfàṣẹsí ìṣàkóso déédéé.
+ibeere GET : beere `handle`; `variant` iyan (`preview`, `standard`, `detail`), `limit` (1–8; ogún `frames` jẹ itẹwọgba ṣugbọn a ko le ṣe idapo pelu `limit`), `page` orisun-odo, ati `start`/`end` iṣẹju-aaya. Nigbati a ba pese awọn opin idojukọ mejeeji, `end` gbọdọ tobi ju `start` lọ. Awọn bọtini ibeere Duplicate/unknown jẹ kọ. Awọn idahun to ṣaṣeyọri ni `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, ati `focusWindow` iyan; ko si-itaja JSON ti wa ni capped ni 32 MiB pẹlu Base64. Ijade ti o tobi ju pada 413; beere diẹ awọn fireemu.
 
-### Ìmúṣiṣẹ́pọ̀ Awọsanma
+`DELETE /api/v1/video-bridge/drilldown?handle=...` pada `{ "removed": 0|1 }`. Aimọ, ipari ati bọtini agbelebu GETs jẹ awọn idahun 404 ko ṣe iyatọ; bọtini agbelebu DELETE ko le yọ iwọle ti eni kuro. Alaabo wiwọle pada 403, missing/invalid ìfàṣẹsí 401, invalid ibeere 400, ifagile 499 ati ibùgbé aṣiṣe 503. Kapa ni o wa ilana-agbegbe, pari lẹhin iṣẹju mẹwa, ati ki o ko ye a tun bẹrẹ. New kapa lo `v1.` plus a 32-baiti ID Base64URL àmi; nikan hashes àmi ti wa ni idaduro. Legacy 64-hex àmi wa syntactically ṣeékà fun ibamu. Wo [Awọn ọna opopona fidio Afara](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) fun igbanilaaye, awọn ipin ati awọn alaye itọsẹ iyatọ.
 
-| Endpoint               | Ọ̀nà       | Àpèjúwe                     |
+### Afẹyinti & Export/Import
+
+| Opin ojuami                 | Ọna    | Apejuwe                                                                       |
+| --------------------------- | ------ | ----------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | Akojọ awọn afẹyinti to wa                                                     |
+| `/api/db-backups`           | PUT    | Ṣẹda afẹyinti afọwọṣe                                                         |
+| `/api/db-backups`           | POST   | Mu pada lati kan pato afẹyinti                                                |
+| `/api/db-backups`           | PATCH  | Ṣafipamọ awọn eto idaduro afẹyinti (oṣiṣẹ-nikan)                              |
+| `/api/db-backups`           | DELETE | Pire awọn ifipamọ ti o fipamọ si awọn eto idaduro (oṣiṣẹ-nikan)               |
+| `/api/db-backups/export`    | GET    | Ṣe igbasilẹ ibi ipamọ data bi faili .sqlite                                   |
+| `/api/db-backups/import`    | POST   | Ṣe ìrùsókè .sqlite fáìlì láti rọ́pò ibùdó dátà (`?dryRun=true` jẹ́rìí sí nìkan) |
+| `/api/db-backups/exportAll` | GET    | Ṣe igbasilẹ afẹyinti ni kikun bi ibi ipamọ .tar.gz                            |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` ati `/api/settings/export-json` fi gbogbo iwe-ẹri ti o fipamọ silẹ, nitorinaa wọn nilo igba dasibodu tabi CLI agbegbe (tabi alaabo wiwọle). awọn bọtini API ti iwọn eyikeyi ati awọn ami iraye si `oma_` gba `403`. Awọn imupadabọ mu aala kanna mu: `POST /api/db-backups/import` (pẹlu `dryRun=true` ), `POST /api/db-backups` (pada sipo nipasẹ id) ati `POST /api/settings/import-json` rọpo aaye data laaye tabi awọn eto, nitorinaa ẹri ẹrọ kan gba `403` nibẹ paapaa; `omniroute sync import` fi iwe-ẹri CLI agbegbe ranṣẹ. Nitorina ṣe `DELETE /api/db-backups` (awọn ipamọ ti o fipamọpamọ piruni) ati `PATCH /api/db-backups` (awọn eto idaduro: awọn iye ti o duro ni o wakọ pruning laifọwọyi lẹhin gbogbo afẹyinti). Kikojọ (`GET`) ati ṣiṣẹda afẹyinti afọwọṣe (`PUT`) tọju auth iṣakoso lasan.
+
+### Awọsanma Sync
+
+| Opin ojuami            | Ọna       | Apejuwe                     |
 | ---------------------- | --------- | --------------------------- |
-| `/api/sync/cloud`      | Oríṣiríṣi | Àwọn iṣẹ́ ìmúṣiṣẹ́pọ̀ awọsanma |
-| `/api/sync/initialize` | POST      | Bẹ̀rẹ̀ ìmúṣiṣẹ́pọ̀              |
-| `/api/cloud/*`         | Oríṣiríṣi | Ìṣàkóso awọsanma            |
+| `/api/sync/cloud`      | Orisirisi | Awọn iṣẹ amuṣiṣẹpọ awọsanma |
+| `/api/sync/initialize` | POST      | Bibẹrẹ imuṣiṣẹpọ            |
+| `/api/cloud/*`         | Orisirisi | Awọsanma isakoso            |
 
-### Àwọn Eefin
+### Tunnels
 
-| Endpoint                   | Ọ̀nà  | Àpèjúwe                                                             |
-| -------------------------- | ---- | ------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET  | Ka ipò fifi sori ẹrọ/ṣiṣiṣẹ́ Cloudflare Quick Tunnel fún dashboard   |
-| `/api/tunnels/cloudflared` | POST | Mú Cloudflare Quick Tunnel ṣiṣẹ́ tàbí pa á (`action=enable/disable`) |
-| `/api/tunnels/ngrok`       | GET  | Ka ipò ṣiṣiṣẹ́ ngrok Tunnel fún dashboard                            |
-| `/api/tunnels/ngrok`       | POST | Mú ngrok Tunnel ṣiṣẹ́ tàbí pa á (`action=enable/disable`)            |
+| Opin ojuami                | Ọna  | Apejuwe                                                                |
+| -------------------------- | ---- | ---------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET  | Ka ipo Cloudflare Tunnel Quick install/runtime fun dasibodu naa        |
+| `/api/tunnels/cloudflared` | POST | Mu ṣiṣẹ tabi mu Eefin Yiyara Cloudflare ṣiṣẹ (`action=enable/disable`) |
+| `/api/tunnels/ngrok`       | GET  | Ka ipo asiko asiko ngrok Tunnel fun dasibodu naa                       |
+| `/api/tunnels/ngrok`       | POST | Mu ṣiṣẹ tabi mu Eefin ngrok ṣiṣẹ (`action=enable/disable`)             |
 
-### Àwọn Irinṣẹ́ CLI
+### CLI Awọn irinṣẹ
 
-| Endpoint                           | Ọ̀nà | Àpèjúwe               |
-| ---------------------------------- | --- | --------------------- |
-| `/api/cli-tools/claude-settings`   | GET | Ipò Claude CLI        |
-| `/api/cli-tools/codex-settings`    | GET | Ipò Codex CLI         |
-| `/api/cli-tools/droid-settings`    | GET | Ipò Droid CLI         |
-| `/api/cli-tools/openclaw-settings` | GET | Ipò OpenClaw CLI      |
-| `/api/cli-tools/runtime/[toolId]`  | GET | Runtime CLI gbogbogbò |
+| Opin ojuami                        | Ọna | Apejuwe                 |
+| ---------------------------------- | --- | ----------------------- |
+| `/api/cli-tools/claude-settings`   | GET | Claude CLI ipo          |
+| `/api/cli-tools/codex-settings`    | GET | Codex CLI ipo           |
+| `/api/cli-tools/droid-settings`    | GET | Duroidi CLI ipo         |
+| `/api/cli-tools/openclaw-settings` | GET | OpenClaw CLI ipo        |
+| `/api/cli-tools/runtime/[toolId]`  | GET | Generic CLI asiko isise |
 
-Àwọn ìdáhùn CLI ní: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+awọn idahun CLI pẹlu: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### Àwọn Agent ACP
+### ACP Awọn aṣoju
 
-| Endpoint          | Ọ̀nà    | Àpèjúwe                                                             |
-| ----------------- | ------ | ------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Ṣàfihàn gbogbo agent tí a ṣàwárí (tí a fi sínú rẹ̀ + àdáni) pẹ̀lú ipò |
-| `/api/acp/agents` | POST   | Ṣàfikún agent àdáni tàbí tún cache ìṣàwárí ṣe                       |
-| `/api/acp/agents` | DELETE | Yọ agent àdáni kúrò nípasẹ̀ query param `id`                         |
+| Opin ojuami       | Ọna    | Apejuwe                                                           |
+| ----------------- | ------ | ----------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Ṣe atokọ gbogbo awọn aṣoju ti a rii (aṣa + ti a ṣe sinu) pẹlu ipo |
+| `/api/acp/agents` | POST   | Ṣafikun aṣoju aṣa tabi sọtun kaṣe wiwa                            |
+| `/api/acp/agents` | DELETE | Yọ aṣoju aṣa kuro nipasẹ param ibeere `id`                        |
 
-Ìdáhùn GET ní `agents[]` (id, name, binary, version, installed, protocol, isCustom) àti `summary` (total, installed, notFound, builtIn, custom).
+idahun GET pẹlu `agents[]` (id, orukọ, alakomeji, ẹya, ti fi sori ẹrọ, Ilana, isCustom) ati `summary` (lapapọ, ti fi sori ẹrọ, notFound, builtIn, aṣa).
 
-### Ìfaradà àti Àwọn Ààlà Oṣùwọ̀n
+### Resilience & Oṣuwọn Awọn idiwọn
 
-| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                     |
-| --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Gba/ṣe imudojuiwọn àkójọpọ̀ àwọn ìbéèrè, ìtútù asopọ̀, breaker olupese, àti àwọn ètò ìdúró                                                                                                                                                                                                                                                                                                        |
-| `/api/resilience/reset`           | POST      | Tun àwọn circuit breaker olupese ṣe                                                                                                                                                                                                                                                                                                                                                             |
-| `/api/resilience/model-cooldowns` | GET       | Ṣàkójọ àwọn ìdènà fún (olupese, asopọ̀, awoṣe) tí ó ń ṣiṣẹ́, tí a sì tò gẹ́gẹ́ bí àkókò tó kù                                                                                                                                                                                                                                                                                                       |
-| `/api/resilience/model-cooldowns` | DELETE    | Pa ìdènà awoṣe rẹ́ — body `{provider, model}` tàbí `{all: true}` láti nu gbogbo rẹ̀ kúrò                                                                                                                                                                                                                                                                                                          |
-| `/api/rate-limits`                | GET/POST  | Ipò ààlà oṣuwọn fún àkántì kọ̀ọ̀kan (GET) tàbí yí ààbò ààlà oṣuwọn fún asopọ̀ padà (POST `{connectionId, enabled}`). Ọ̀nà ìkọ̀wé tí a ṣe àtìlẹ́yìn fún `rateLimitProtection` (a kì í ṣe àtúnṣe rẹ̀ láé nípasẹ̀ `PUT /api/providers/[id]`). Àkíyèsí: `enabled: false` máa ń pa ààbò pàtó kúrò, ṣùgbọ́n kò yọ asopọ̀ API-key tó ń ṣiṣẹ́ kúrò nínú àwọ̀n ààbò ìṣiṣẹ́-ọwọ́ kariaye (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | Àtòpọ̀ ààlà oṣuwọn kariaye (ti di àtijọ́; orúkọ mìíràn fún `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                    |
+| Opin ojuami                       | Ọna       | Apejuwe                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | ti isinyi ibeere Get/update, itutu asopọ, fifọ olupese, ati awọn eto iduro                                                                                                                                                                                                                                                                                                               |
+| `/api/resilience/reset`           | POST      | Tun olupese Circuit breakers                                                                                                                                                                                                                                                                                                                                                             |
+| `/api/resilience/model-cooldowns` | GET       | Ṣe atokọ lọwọ fun (olupese, asopọ, awoṣe) awọn titiipa, lẹsẹsẹ nipasẹ akoko to ku                                                                                                                                                                                                                                                                                                        |
+| `/api/resilience/model-cooldowns` | DELETE    | Pa awoṣe titiipa — ara `{provider, model}` tabi `{all: true}` lati nu ohun gbogbo rẹ                                                                                                                                                                                                                                                                                                     |
+| `/api/rate-limits`                | GET/POST  | Ipo idiwọn oṣuwọn-iroyin kan (GET) tabi yiyi oṣuwọn-iwọn aabo fun asopọ kan (POST `{connectionId, enabled}`). Atilẹyin ọna kikọ fun `rateLimitProtection` (ko ṣe atunṣe nipasẹ `PUT /api/providers/[id]`). Akiyesi: `enabled: false` ṣe aabo aabo to fojuhan ṣugbọn ko yọkuro asopọ bọtini API ti nṣiṣe lọwọ jade kuro ni apapọ aabo aifọwọyi-ṣiṣẹ agbaye (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Iṣeto ni opin oṣuwọn agbaye (ti a fi silẹ; inagijẹ si `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                |
 
-> Gbogbo àwọn ipa-ọ̀nà `/api/resilience/*` mẹ́rin nílò **ìfọwọ́sí ìṣàkóso** (`requireManagementAuth`). Wo [Ìdúróṣinṣin (àlàyé síwájú)](#resilience-extended) fún ìtúpalẹ̀ kíkún nípa breaker olupese, ìtútù asopọ̀, àti ìdènà awoṣe.
+> Gbogbo awọn ọna `/api/resilience/*` mẹrin nilo** auth isakoso** (`requireManagementAuth`). Wo [Resilience (ti o gbooro sii)](#resilience-extended) fun didenukole ni kikun ti olupilẹṣẹ olupese vs cooldown asopọ vs titiipa awoṣe.
 
-### Àyẹ̀wò
+### Evals
 
-| Endpoint     | Method   | Description                           |
-| ------------ | -------- | ------------------------------------- |
-| `/api/evals` | GET/POST | Ṣàkójọ àwọn àkójọpọ̀ àyẹ̀wò / ṣe ìdánwò |
+| Opin ojuami  | Ọna      | Apejuwe                            |
+| ------------ | -------- | ---------------------------------- |
+| `/api/evals` | GET/POST | Akojọ eval suites / ṣiṣe igbelewọn |
 
-### Àwọn Ìlànà
+### Awọn ilana
 
-| Endpoint        | Method          | Description               |
+| Opin ojuami     | Ọna             | Apejuwe                   |
 | --------------- | --------------- | ------------------------- |
-| `/api/policies` | GET/POST/DELETE | Ṣàkóso àwọn ìlànà ìtọ́sọ́nà |
+| `/api/policies` | GET/POST/DELETE | Ṣakoso awọn ilana ipa ọna |
 
-### Ìbámu
+### Ibamu
 
-| Endpoint                    | Method | Description                      |
-| --------------------------- | ------ | -------------------------------- |
-| `/api/compliance/audit-log` | GET    | Àkọsílẹ̀ àyẹ̀wò ìbámu (N tó kẹ́yìn) |
+| Opin ojuami                 | Ọna | Apejuwe                     |
+| --------------------------- | --- | --------------------------- |
+| `/api/compliance/audit-log` | GET | Iwe iṣayẹwo ibamu (N kẹhin) |
 
-### v1beta (Ìbámu pẹ̀lú Gemini)
+### v1beta (Gemini-ibaramu)
 
-| Endpoint                   | Method | Description                      |
-| -------------------------- | ------ | -------------------------------- |
-| `/v1beta/models`           | GET    | Ṣàkójọ àwọn awoṣe ní ọ̀nà Gemini  |
-| `/v1beta/models/{...path}` | POST   | Ipa-ọ̀nà Gemini `generateContent` |
+| Opin ojuami                | Ọna  | Apejuwe                                |
+| -------------------------- | ---- | -------------------------------------- |
+| `/v1beta/models`           | GET  | Ṣe atokọ awọn awoṣe ni ọna kika Gemini |
+| `/v1beta/models/{...path}` | POST | Gemini `generateContent` ipari         |
 
-Àwọn ibi ìpẹ̀yà wọ̀nyí fara wé ọ̀nà API Gemini fún àwọn oníbàárà tí wọ́n ń retí ìbámu SDK Gemini abinibi.
+Awọn aaye ipari wọnyi digi Gemini's API kika fun awọn alabara ti o nireti ibamu Gemini SDK abinibi.
 
-### Àwọn API Abẹ́nú / Ètò
+### Ti abẹnu / System APIs
 
-| Endpoint                 | Method | Description                                               |
-| ------------------------ | ------ | --------------------------------------------------------- |
-| `/api/init`              | GET    | Àyẹ̀wò ìbẹ̀rẹ̀ ohun èlò (tí a ń lò ní ìṣiṣẹ́ àkọ́kọ́)           |
-| `/api/tags`              | GET    | Àwọn àmì awoṣe tó bá Ollama mu (fún àwọn oníbàárà Ollama) |
-| `/api/restart`           | POST   | Bẹ̀rẹ̀ àtúnbẹ̀rẹ̀ olupin pẹ̀lẹ́pẹ̀lẹ́                             |
-| `/api/shutdown`          | POST   | Bẹ̀rẹ̀ pípa olupin pẹ̀lẹ́pẹ̀lẹ́                                 |
-| `/api/system/env/repair` | POST   | Ṣètúnṣe àwọn oníyípadà àyíká OAuth olupese                |
-| `/api/system/version`    | GET    | Ẹ̀dà ìsinsìnyí/àìpẹ́, ipò ìmúdójúìwọ̀n, ikanni ìtúsílẹ̀       |
-| `/api/system/version`    | POST   | Bẹ̀rẹ̀ ìmúdójúìwọ̀n tó mọ̀ nípa ìtúsílẹ̀ sí ẹ̀dà àìpẹ́           |
+| Opin ojuami              | Ọna  | Apejuwe                                                  |
+| ------------------------ | ---- | -------------------------------------------------------- |
+| `/api/init`              | GET  | Bẹrẹ awọn iṣẹ amuṣiṣẹpọ lẹhin (ifọwọsi iṣakoso)          |
+| `/api/tags`              | GET  | Awọn ami awoṣe ibaramu Ollama (fun awọn alabara Ollama ) |
+| `/api/restart`           | POST | Ṣe okunfa oore-ọfẹ olupin tun bẹrẹ                       |
+| `/api/shutdown`          | POST | Ṣe okunfa titiipa olupin oore-ọfẹ                        |
+| `/api/system/env/repair` | POST | Ṣe atunṣe awọn oniyipada ayika olupese OAuth             |
+| `/api/system/version`    | GET  | Current/latest version, imudojuiwọn ipo, Tu ikanni       |
+| `/api/system/version`    | POST | Bẹrẹ imudojuiwọn imuṣiṣẹ-mọ si ẹya tuntun                |
 
-> **Àkíyèsí:** Ètò náà máa ń lo àwọn ibi ìpẹ̀yà wọ̀nyí fúnra rẹ̀ tàbí fún ìbámu pẹ̀lú àwọn oníbàárà Ollama. Àwọn olumulo ìkẹyìn kì í sábà pe wọ́n.
+> **Akiyesi:** Awọn aaye ipari wọnyi ni a lo ninu inu nipasẹ eto tabi fun ibaramu alabara Ollama. Wọn kii ṣe deede pe nipasẹ awọn olumulo ipari.
 
-### Ìtúnṣe Àyíká OAuth _(v3.6.1+)_
+### Atunṣe Ayika OAuth _(v3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1482,7 +1439,7 @@ Content-Type: application/json
 }
 ```
 
-Ó ń ṣàtúnṣe àwọn oníyípadà ayíká OAuth tí ó sọnù tàbí tí ó bàjẹ́ fún olupese kan pàtó. Ó máa dá:
+Awọn atunṣe ayika ti nsọnu tabi ibajẹ awọn oniyipada ayika OAuth fun olupese kan pato. Pada:
 
 ```json
 {
@@ -1492,13 +1449,13 @@ Content-Type: application/json
 }
 ```
 
-### Ẹ̀yà àti Ìkànnì Ìtújáde
+### Ẹya ati Tu ikanni
 
 ```bash
 GET /api/system/version
 ```
 
-Ọ̀nà ìṣàkóso tí ó wà fún loopback nìkan (ìfàṣẹsí alákóso). Ó máa dá ẹ̀yà tí ń ṣiṣẹ́ padà, ẹ̀yà tuntun tí a tẹ̀jáde àti ipò ìmúdójúìwọ̀n aládàáṣiṣẹ́. Àwọn pápá `releaseChannel` àti `channels` jẹ́ àfikún (rail 3.8.54); `channel` ṣì ní ìtumọ̀ rẹ̀ — ìlànà ìgbékalẹ̀ tí olùmúdójúìwọ̀n dashboard ń lò (`npm`, `source` tàbí `docker-compose`).
+Ipa ọna iṣakoso Loopback-nikan (auth abojuto). Pada ẹya ti nṣiṣẹ pada, ẹya tuntun ti a tẹjade ati ipo imudojuiwọn aifọwọyi. `releaseChannel` ati `channels` jẹ awọn aaye afikun (iṣinipopada 3.8.54); `channel` tọju itumọ rẹ — ipo imuṣiṣẹ ti imudojuiwọn dasibodu nlo (`npm`, `source` tabi `docker-compose`).
 
 ```json
 {
@@ -1514,16 +1471,10 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — ìkànnì npm ti ìkọ́lé tí ń ṣiṣẹ́: `nightly` fún àwọn ẹ̀yà `-nightly.*`,
-  `next` fún àwọn ìtújáde àkọ́kọ́ mìíràn (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` fún ẹ̀yà
-  tó dúró ṣinṣin ti major àgbà ju `channels.latest` lọ, bí kò bá rí bẹ́ẹ̀, `latest`. Àwọn òfin kan náà
-  ni ó wà nínú `scripts/release/dist-tag.mjs`, èyí tí ó yan npm dist-tag nígbà ìtẹ̀jáde.
-- `channels` — head tí a tẹ̀jáde fún dist-tag kọ̀ọ̀kan, láti `npm view omniroute dist-tags` (pẹ̀lú ìpadàbọ̀ HTTP registry), tí a fi pamọ́ pẹ̀lú TTL iṣẹ́jú mẹ́wàá kan náà pẹ̀lú `latest`. `latest` máa wà nígbà gbogbo
-  (ó máa padà sí pápá `latest`, lẹ́yìn náà sí `"unavailable"`); `next`, `nightly` àti `lts` máa hàn
-  nìkan nígbà tí dist-tag yẹn bá wà. Ìbéèrè `Cache-Control: no-cache` máa tún àwọn ìwádìí méjèèjì ṣe.
+- `releaseChannel` — npm ikanni ti ṣiṣiṣẹ kọ: `nightly` fun awọn ẹya `-nightly.*`, `next` fun awọn idasilẹ iṣaaju (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` fun ẹya iduroṣinṣin ti agbalagba agbalagba ju `channels.latest`, bibẹẹkọ `latest`. Awọn ofin kanna bi `scripts/release/dist-tag.mjs`, eyiti o mu tag dist npm ni akoko titẹjade.
+- `channels` — ṣe atẹjade ori ti tag dist-tag kọọkan, lati `npm view omniroute dist-tags` (iforukọsilẹ HTTP fallback), cache pẹlu TTL iṣẹju 10 kanna bi `latest`. `latest` nigbagbogbo wa (ṣubu pada si aaye `latest`, lẹhinna `"unavailable"`); `next`, `nightly` ati `lts` han nikan nigbati dist-tag naa wa. Ibeere `Cache-Control: no-cache` kan tu awọn wiwa mejeeji pada.
 
-A ṣàlàyé àwòṣe ìkànnì náà (`latest` = v3 títí di GA 4.0, `next` = rc, `nightly` = àwọn ìkọ́lé `develop`,
-`lts` = àwọn àtúnṣe v3 lẹ́yìn GA 4.0) nínú `docs/ops/RELEASE_STRATEGY.md`.
+Awoṣe ikanni (`latest` = v3 titi di 4.0 GA, `next` = rc, `nightly` = `develop` kọ, `lts` = v3 abulẹ lẹhin 4.0 GA) ti wa ni apejuwe ninu `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 

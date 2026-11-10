@@ -38,27 +38,27 @@ Permintaan ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ---
 
-## Data yang Dicatat
+## Apa yang Dicatat
 
-Layanan `usage.ts` mencatat sebuah **peristiwa penggunaan** untuk setiap permintaan:
+Layanan `usage.ts` merekam **peristiwa penggunaan** untuk setiap permintaan:
 
-| Bidang             | Tipe    | Sumber                                                     |
-| ------------------ | ------- | ---------------------------------------------------------- |
-| `id`               | string  | UUID yang dibuat saat pencatatan                           |
-| `apiKeyId`         | string  | Kunci API yang memulai permintaan                          |
-| `provider`         | string  | ID penyedia (openai, anthropic, dan sebagainya)            |
-| `model`            | string  | ID model (gpt-5, claude-opus-4-6, dan sebagainya)          |
-| `comboId`          | string? | ID combo jika dirutekan melalui sebuah combo               |
-| `promptTokens`     | number  | Dari respons upstream                                      |
-| `completionTokens` | number  | Dari respons upstream                                      |
-| `cachedTokens`     | number  | Token cache hit (caching prompt Anthropic, dan sebagainya) |
-| `totalTokens`      | number  | prompt + penyelesaian                                      |
-| `costUsd`          | number  | Dihitung dari data harga                                   |
-| `latencyMs`        | number  | Durasi permintaan menyeluruh                               |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled` |
-| `errorClass`       | string? | Kelas error jika status != success                         |
-| `timestamp`        | string  | ISO 8601 UTC                                               |
-| `metadata`         | object  | Data khusus yang disuntikkan oleh plugin                   |
+| Kolom              | Tipe    | Sumber                                                            |
+| ------------------ | ------- | ----------------------------------------------------------------- |
+| `id`               | string  | UUID yang dibuat saat pencatatan                                  |
+| `apiKeyId`         | string  | Kunci API yang memulai permintaan                                 |
+| `provider`         | string  | ID penyedia (openai, anthropic, dll.)                             |
+| `model`            | string  | ID model (gpt-5, claude-opus-4-6, dll.)                           |
+| `comboId`          | string? | ID combo jika dirutekan melalui combo                             |
+| `promptTokens`     | number  | Dari respons upstream                                             |
+| `completionTokens` | number  | Dari respons upstream                                             |
+| `cachedTokens`     | number  | Token yang ditemukan dalam cache (caching prompt Anthropic, dll.) |
+| `totalTokens`      | number  | prompt + penyelesaian                                             |
+| `costUsd`          | number  | Dihitung dari data harga                                          |
+| `latencyMs`        | number  | Durasi permintaan dari awal hingga akhir                          |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`        |
+| `errorClass`       | string? | Kelas kesalahan jika status != success                            |
+| `timestamp`        | string  | ISO 8601 UTC                                                      |
+| `metadata`         | object  | Data kustom yang disisipkan oleh plugin                           |
 
 ### Asal Token
 
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Untuk penyedia yang tidak mengembalikan penggunaan (beberapa penyedia berbasis cookie web), OmniRoute **memperkirakan** token menggunakan heuristik `~4 karakter per token` (lihat `open-sse/services/autoCombo/pipelineRouter.ts`).
+Untuk penyedia yang tidak mengembalikan data penggunaan (beberapa penyedia berbasis cookie web), OmniRoute **memperkirakan** token menggunakan heuristik `~4 chars per token` (lihat `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Token yang Di-cache
+### Token dalam Cache
 
 OmniRoute melacak `cached_tokens` secara terpisah dari `prompt_tokens` karena:
 
-- Caching prompt Anthropic mengenakan tarif lebih rendah untuk token yang di-cache (10% dari tarif normal)
-- Beberapa penyedia mengembalikan `cache_read_input_tokens` yang harus diberi harga berbeda
+- Caching prompt Anthropic mengenakan tarif lebih rendah untuk token dalam cache (10% dari tarif normal)
+- Beberapa penyedia mengembalikan `cache_read_input_tokens` yang harus dikenai harga berbeda
 - Analitik dapat menampilkan **rasio cache hit** = `cached_tokens / prompt_tokens`
+
+### Diagnostik tingkat penulisan cache
+
+Panel kesehatan cache prompt pada dasbor Analitik membedakan penulisan cache
+5 menit dan 1 jam yang dilaporkan penyedia. Nilai
+`usage.cache_creation.ephemeral_5m_input_tokens` dan
+`usage.cache_creation.ephemeral_1h_input_tokens` dari Anthropic dipertahankan selama penerjemahan data penggunaan streaming dan
+non-streaming, serta disimpan bersama ringkasan log panggilan. Total gabungan
+penulisan cache tidak ditambahkan lagi ke kelompok tersebut.
+
+Panggilan yang hanya memiliki penghitung penulisan gabungan, termasuk catatan lama, memiliki tingkat
+yang tidak diketahui. Perincian parsial mempertahankan sisa yang belum dialokasikan sebagai tidak diketahui; penghitung yang tidak valid atau
+bertentangan ditandai, bukan diam-diam diberi TTL. Penanda
+TTL pada sisi permintaan bukanlah bukti tingkat yang ditagihkan.
+
+Estimasi penulisan setara API pada panel hanya mencakup tingkat yang dilaporkan dan memiliki harga, bukan
+seluruh permintaan. Untuk harga model Claude/Anthropic native, estimasi ini menggunakan 1,25 kali
+tarif input untuk penulisan 5 menit dan dua kali tarif input untuk penulisan 1 jam. Harga yang
+tidak tersedia dianggap tidak tersedia, bukan nol. Harga dicatat saat setiap panggilan baru dicatat;
+catatan historis tidak dihitung ulang harganya. Karena itu, akun langganan dapat memiliki
+estimasi setara API tanpa menimbulkan pengeluaran tunai atau pemakaian kuota
+langganan sebesar jumlah tersebut. Perhitungan kuota, anggaran, dan biaya yang persis sesuai dengan penyedia yang sudah ada tetap tidak berubah.
+
+Diagnostik ini menggunakan ringkasan kesehatan cache berbatas dan retensi log panggilan
+yang sudah ada. Diagnostik ini tidak mengubah TTL permintaan default, perutean, atau pemilihan akun.
+Pencatatan TTL yang diminta klien dibandingkan dengan TTL keluar efektif pada batas pengiriman
+ke penyedia ditunda; panel ini melaporkan tingkat pada bukti tagihan, bukan TTL keluar efektif.
+
+Implementasi: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, dan `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -125,19 +155,19 @@ Untuk model yang tidak memiliki data harga, OmniRoute akan **memperkirakan biaya
 
 Modul `usageAnalytics.ts` menghitung widget dasbor dari data penggunaan mentah. Modul ini mendukung 7 rentang waktu:
 
-| Rentang  | Periode                             | Kegunaan                       |
+| Rentang  | Periode                             | Kasus penggunaan               |
 | -------- | ----------------------------------- | ------------------------------ |
 | `1d`     | 24 jam terakhir                     | Deteksi lonjakan biaya per jam |
 | `7d`     | 7 hari terakhir                     | Tinjauan mingguan              |
 | `30d`    | 30 hari terakhir                    | Penagihan bulanan              |
 | `90d`    | 90 hari terakhir                    | Analisis triwulanan            |
-| `ytd`    | Sejak 1 Jan tahun berjalan          | Pelacakan anggaran tahunan     |
-| `all`    | Sepanjang waktu                     | Statistik sepanjang masa       |
+| `ytd`    | Sejak 1 Januari tahun ini           | Pelacakan anggaran tahunan     |
+| `all`    | Seluruh waktu                       | Statistik sepanjang waktu      |
 | `custom` | Awal/akhir yang ditentukan pengguna | Audit, kueri ad hoc            |
 
 ### Widget Dasbor yang Dihitung
 
-Untuk setiap rentang tanggal, lapisan analitik menghitung:
+Untuk rentang tanggal apa pun, lapisan analitik menghitung:
 
 | Widget                   | Deskripsi                                                              |
 | ------------------------ | ---------------------------------------------------------------------- |
@@ -165,7 +195,7 @@ const analytics = await computeAnalytics(
 );
 
 console.log(analytics.summary.totalCost);   // 12.34 (sen)
-console.log(analytics.byModel[0]);           // { model, biaya, permintaan, token prompt, token penyelesaian }
+console.log(analytics.byModel[0]);           // { model, cost, requests, promptTokens, completionTokens }
 
 ---
 
@@ -173,8 +203,8 @@ console.log(analytics.byModel[0]);           // { model, biaya, permintaan, toke
 
 Kuota per kunci API diterapkan di dua tempat:
 
-1. **Batas lunak** (`quotaWarnAt`): peringatan di dasbor ketika penggunaan melampaui ambang batas
-2. **Batas keras** (`quotaLimit`): permintaan ditolak dengan HTTP 429 ketika batas terlampaui
+1. **Batas lunak** (`quotaWarnAt`): peringatan dasbor saat penggunaan melampaui ambang batas
+2. **Batas keras** (`quotaLimit`): permintaan ditolak dengan HTTP 429 saat terlampaui
 
 ### Konfigurasi
 
@@ -182,7 +212,7 @@ Kuota per kunci API diterapkan di dua tempat:
 // Per kunci API
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — tampilkan peringatan
-  quotaLimit: 10_00,    // $10.00 — penghentian mutlak
+  quotaLimit: 10_00,    // $10.00 — hentikan sepenuhnya
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
@@ -190,32 +220,32 @@ await updateApiKey(keyId, {
 ### Alur Penerapan
 
 ```
-Permintaan ──▶ quotaCheck()
-                 │
-                 ├── Dalam batas?  ──▶ izinkan
-                 │
-                 └── Melebihi batas?  ──▶ 429 Too Many Requests
-                                          dengan header Retry-After
+Request ──▶ quotaCheck()
+              │
+              ├── Within limit?  ──▶ allow
+              │
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
 ### Snapshot Kuota
 
 Tabel `quotaSnapshots` menyimpan **status kuota historis** untuk analisis tren:
 
-| Bidang | Deskripsi |
-| ----------- | ------------------------------------------ | ------ | ------- |
+| Kolom | Deskripsi |
+| ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Kunci yang dilacak |
 | `window` | "day" | "week" | "month" |
-| `used` | Biaya yang digunakan dalam jendela ini (sen) |
+| `used` | Biaya yang digunakan dalam periode ini (sen) |
 | `limit` | Batas (sen) |
-| `resetAt` | Waktu jendela diatur ulang |
+| `resetAt` | Waktu periode direset |
 | `createdAt` | Waktu snapshot diambil |
 
 Snapshot diambil **pada setiap permintaan** yang menggunakan biaya > 0, dan digunakan untuk:
 
-- Merender bilah progres kuota di dasbor
+- Menampilkan bilah progres kuota di dasbor
 - Menampilkan grafik tren kuota 30 hari
-- Memicu peringatan ketika penggunaan mendekati batas
+- Memicu peringatan saat penggunaan mendekati batas
 
 ---
 
@@ -272,12 +302,7 @@ Respons:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -290,7 +315,7 @@ Respons:
 
 Data penggunaan diakses melalui dasbor atau alat MCP, bukan melalui endpoint ekspor REST langsung. Analitik yang tersedia:
 
-- **`/api/usage/analytics`** — metrik penggunaan teragregasi (dikelompokkan berdasarkan model, penyedia, kunci)
+- **`/api/usage/analytics`** — metrik penggunaan agregat (dikelompokkan berdasarkan model, penyedia, kunci)
 - **`/api/usage/quota`** — status kuota saat ini per kunci API
 - **`/api/usage/history`** — log riwayat permintaan
 
@@ -298,12 +323,12 @@ Data penggunaan diakses melalui dasbor atau alat MCP, bukan melalui endpoint eks
 
 ## Alat MCP
 
-Dua alat MCP mengekspos data penggunaan kepada agen (lihat `open-sse/mcp-server/tools/`):
+Dua alat MCP menyediakan data penggunaan bagi agen (lihat `open-sse/mcp-server/tools/`):
 
 | Alat                    | Deskripsi                                                   |
 | ----------------------- | ----------------------------------------------------------- |
 | `omniroute_cost_report` | Menghasilkan laporan biaya per kunci untuk periode tertentu |
-| `omniroute_check_quota` | Mengembalikan status kuota saat ini untuk sebuah kunci API  |
+| `omniroute_check_quota` | Mengembalikan status kuota saat ini untuk suatu kunci API   |
 
 Contoh pemanggilan oleh agen:
 
@@ -318,38 +343,38 @@ Contoh pemanggilan oleh agen:
 
 ## Retensi dan Pembersihan
 
-Data penggunaan bertambah sekitar ~1-10KB per permintaan. Dalam skala besar, jumlah ini dapat menjadi signifikan.
+Data penggunaan bertambah ~1-10KB per permintaan. Pada skala besar, jumlah ini bisa signifikan.
 
 ### Pengaturan Retensi
 
-Retensi riwayat penggunaan dikonfigurasi melalui Pengaturan Database di UI atau melalui `/api/settings/database`.
+Retensi riwayat penggunaan dikonfigurasi melalui Pengaturan Basis Data di UI atau melalui `/api/settings/database`.
 
-Secara default, riwayat penggunaan dipertahankan selama **90 hari**.
+Secara default, riwayat penggunaan disimpan selama **90 hari**.
 
 ### Pembersihan
 
 Catatan lama dibersihkan oleh `src/lib/db/cleanup.ts`:
 
 - Dipicu oleh proses cron latar belakang
-- Menghapus catatan dari `usage_history` yang lebih lama dari pengaturan retensi `usageHistory` yang dikonfigurasi
+- Menghapus catatan dari `usage_history` yang lebih lama daripada periode retensi yang dikonfigurasi dalam pengaturan `usageHistory`
 
-### Estimasi Penyimpanan
+### Perkiraan Penyimpanan
 
-| Tingkat permintaan      | Penyimpanan 30 hari | Penyimpanan 90 hari |
+| Laju permintaan         | Penyimpanan 30 hari | Penyimpanan 90 hari |
 | ----------------------- | ------------------- | ------------------- |
 | 100 permintaan/hari     | ~3MB                | ~9MB                |
-| 1.000 permintaan/hari   | ~30MB               | ~90MB               |
-| 10.000 permintaan/hari  | ~300MB              | ~900MB              |
-| 100.000 permintaan/hari | ~3GB                | ~9GB                |
+| 1,000 permintaan/hari   | ~30MB               | ~90MB               |
+| 10,000 permintaan/hari  | ~300MB              | ~900MB              |
+| 100,000 permintaan/hari | ~3GB                | ~9GB                |
 
 Untuk lalu lintas yang sangat tinggi, pertimbangkan:
 
-- Mengurangi periode retensi melalui Pengaturan Database
+- Mengurangi periode retensi melalui Pengaturan Basis Data
 - Menggunakan `aggregated_metrics` alih-alih catatan mentah (hanya untuk analitik)
 
 ---
 
-## Tips Pengoptimalan Biaya
+## Tips Optimasi Biaya
 
 ### 1. Gunakan Model yang Tepat
 
@@ -357,16 +382,16 @@ Untuk lalu lintas yang sangat tinggi, pertimbangkan:
 # Jawaban cepat — gunakan yang murah + cepat
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Tugas kompleks — gunakan yang berkualitas
+# Tugas kompleks — utamakan kualitas
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Aktifkan Caching
 
-Caching prompt Anthropic menghemat **90% pada konteks yang berulang**:
+Caching prompt Anthropic menghemat **90% untuk konteks yang berulang**:
 
 ```ts
-// Caching berlangsung otomatis — cukup sertakan prompt sistem besar yang sama
+// Caching dilakukan secara otomatis — cukup sertakan prompt sistem panjang yang sama
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Akan di-cache secara otomatis
@@ -387,15 +412,15 @@ const config = {
 };
 ```
 
-### 4. Tetapkan Kuota Per Kunci
+### 4. Tetapkan Kuota per Kunci
 
-Selalu tetapkan `quotaLimit` untuk mencegah biaya tak terkendali:
+Selalu tetapkan `quotaLimit` untuk mencegah biaya yang tidak terkendali:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Batas $10/bulan
 ```
 
-### 5. Audit Konsumen Teratas
+### 5. Audit Pengguna dengan Konsumsi Tertinggi
 
 Gunakan dasbor atau **`/api/usage/analytics`** untuk mengelompokkan berdasarkan kunci API dan mengurutkan berdasarkan biaya:
 
@@ -407,30 +432,30 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Pemecahan Masalah
 
-### "Biaya lebih tinggi dari yang diperkirakan"
+### "Biaya lebih tinggi dari perkiraan"
 
 1. Periksa **`/api/usage/analytics?groupBy=model`** — temukan model yang mahal
-2. Periksa **`/api/usage/analytics?groupBy=apiKey`** — temukan konsumen terbesar
+2. Periksa **`/api/usage/analytics?groupBy=apiKey`** — temukan pengguna dengan konsumsi tinggi
 3. Pastikan data harga sudah diperbarui: `POST /api/pricing/sync`
 
-### "Catatan hilang"
+### "Catatan tidak ditemukan"
 
-- Periksa pengaturan retensi DB di Dasbor → Database → Pembersihan — catatan lama dihapus oleh tugas pembersihan berkala (`src/lib/db/cleanup.ts`)
-- Periksa kesalahan di `src/lib/db/usage*.ts` — kegagalan penulisan DB dicatat dalam log, tetapi tidak ditampilkan
+- Periksa pengaturan retensi DB di Dasbor → Basis Data → Pembersihan — catatan lama dihapus oleh tugas pembersihan berkala (`src/lib/db/cleanup.ts`)
+- Periksa kesalahan di `src/lib/db/usage*.ts` — kegagalan penulisan DB dicatat dalam log tetapi tidak ditampilkan
 - Pastikan permintaan benar-benar mencapai `chatCore` — periksa perutean kombo
 
-### "Kuota tidak diterapkan"
+### "Kuota tidak diberlakukan"
 
-- Periksa pengaturan `quotaLimit` milik kunci
-- Pastikan `quotaWindow` ditetapkan dengan benar
-- Cari catatan `quotaSnapshots` — catatan tersebut seharusnya dibuat pada setiap permintaan
+- Periksa pengaturan `quotaLimit` pada kunci
+- Pastikan `quotaWindow` diatur dengan benar
+- Cari catatan `quotaSnapshots` — catatan ini seharusnya dibuat pada setiap permintaan
 
 ---
 
 ## Lihat Juga
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Skema untuk tabel penggunaan
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — variabel lingkungan sinkronisasi harga
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Variabel lingkungan untuk sinkronisasi harga
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Cara `auto/fast`, `auto/cheap` mengurangi biaya
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — Referensi lengkap `/api/usage/*`
 - Sumber: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

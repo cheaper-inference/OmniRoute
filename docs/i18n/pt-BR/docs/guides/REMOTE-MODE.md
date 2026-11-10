@@ -46,28 +46,33 @@ seu laptop                               OmniRoute remoto (VPS)
 
 ## Conectando
 
-### Com a senha de gerenciamento (inicialização)
+### Com a senha de gerenciamento (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Senha de gerenciamento de http://192.168.0.15:20128: ********
+# Senha de gerenciamento para http://192.168.0.15:20128: ********
 # ✔ Conectado a http://192.168.0.15:20128 — contexto '192.168.0.15' (escopo: admin)
 ```
 
-O fluxo com senha emite, por padrão, um token **admin** (você possui a senha, portanto
-já tem controle total). Restrinja o escopo com `--scope`:
+O fluxo de senha cria um token **admin** por padrão (você possui a senha, portanto
+já tem controle total). Reduza o escopo com `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Opções: `--port <p>` (quando o host não especifica uma porta), `--name <ctx>` (nome do contexto),
-`--scope read|write|admin`. Uma URL completa é respeitada sem alterações:
+Opções: `--port <p>` (quando o host não tiver uma porta), `--name <ctx>` (nome do
+contexto), `--scope read|write|admin`. Uma URL completa é respeitada como está:
 `omniroute connect https://omni.example.com`.
 
-### Com um token gerado previamente
+Quando a autenticação de dois fatores do dashboard estiver habilitada (Configurações →
+Segurança), a senha sozinha será recusada: a CLI solicitará o código do aplicativo
+autenticador (ou um código de recuperação). Informe-o antecipadamente com
+`--totp <code>` para uso não interativo.
 
-Gere um token com escopo no painel (ou com `omniroute tokens create`) e
+### Com um token pré-gerado
+
+Gere um token com escopo no dashboard (ou com `omniroute tokens create`) e
 cole-o — nenhuma senha é necessária:
 
 ```bash
@@ -451,12 +456,12 @@ omniroute contexts remove 192-168-0-15 --yes   # remove o contexto local (mesmo 
 
 ## Endpoints da API (referência)
 
-| Método | Rota                  | Autenticação           | Escopo                           |
-| ------ | --------------------- | ---------------------- | -------------------------------- |
-| POST   | `/api/cli/connect`    | senha de gerenciamento | — (público, protegido por senha) |
-| GET    | `/api/cli/whoami`     | token de acesso        | leitura                          |
-| GET    | `/api/cli/tokens`     | token de acesso        | administrador                    |
-| POST   | `/api/cli/tokens`     | token de acesso        | administrador                    |
-| DELETE | `/api/cli/tokens/:id` | token de acesso        | administrador                    |
+| Método | Rota                  | Autenticação          | Escopo                           |
+| ------ | --------------------- | --------------------- | -------------------------------- |
+| POST   | `/api/cli/connect`    | senha; 2FA se ativada | — (público, protegido por senha) |
+| GET    | `/api/cli/whoami`     | token de acesso       | leitura                          |
+| GET    | `/api/cli/tokens`     | token de acesso       | administrador                    |
+| POST   | `/api/cli/tokens`     | token de acesso       | administrador                    |
+| DELETE | `/api/cli/tokens/:id` | token de acesso       | administrador                    |
 
 Consulte [openapi.yaml](../openapi.yaml) para ver os esquemas completos.

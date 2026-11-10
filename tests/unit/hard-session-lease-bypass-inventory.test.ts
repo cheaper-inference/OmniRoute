@@ -97,6 +97,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
     "src/lib/embeddings/service.ts": 5,
+    // Fal inference uses the scoped quota-preflight resolver; existing-job reads
+    // cannot dispatch. Ownership, connection limits and later-message budgets are route-tested.
+    "src/lib/fal/runtime.ts": 1,
     "src/lib/images/adobeFireflyEdit.ts": 1,
     // PR #11390: second site is the generic derived-provider listing fallback —
     // read-only key presence probe used to decide whether a configured chat
@@ -172,6 +175,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // and active flag; dispatch goes through runSingleModelTest, which refuses managed-lease
     // connections itself (class C).
     "src/app/api/providers/[id]/test-message/route.ts": 3,
+    // Fal management reads its pinned account only for catalog/schema discovery (class C).
+    "src/app/api/providers/[id]/fal/route.ts": 1,
     "src/lib/providers/volcPlanAutoSyncBackfill.ts": 1,
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/app/(dashboard)/dashboard/tools/agent-bridge/page.tsx": 1,
@@ -188,6 +193,13 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/models/test-all/route.ts": 1,
     "src/app/api/monitoring/health/route.ts": 1,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
+    // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
+    // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
+    "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
+    // #15201: the ChatGPT sign-in session route reads the target connection row twice
+    // (existing-registration check on start, and again on completion) behind management
+    // auth — state reads, never connection selection or dispatch (class C).
+    "src/app/api/oauth/chatgpt/session/route.ts": 2,
     "src/app/api/oauth/codex/import/route.ts": 1,
     "src/app/api/oauth/kiro/api-key/route.ts": 1,
     "src/app/api/oauth/kiro/auto-import/route.ts": 2,
@@ -219,7 +231,12 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/settings/export-json/route.ts": 1,
     "src/app/api/settings/qdrant/embedding-models/route.ts": 1,
     "src/app/api/settings/route.ts": 1,
-    "src/app/api/token-health/route.ts": 1,
+    // 18666 (token bulk refresh wave): the POST /api/token-health refresh-all
+    // endpoint reads the active OAuth connection rows once to build the wave
+    // (exclusions + per-connection ids). Read-only lookup behind
+    // requireManagementAuth; it never selects a connection to serve a
+    // request, so it stays class C.
+    "src/app/api/token-health/route.ts": 2,
     "src/app/api/translator/send/route.ts": 1,
     "src/app/api/translator/translate/route.ts": 1,
     "src/app/api/usage/call-logs/route.ts": 1,
@@ -229,6 +246,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // the handlers it delegates to carry the auxiliary-lease fence themselves. It
     // never selects a connection to serve a request, so it stays class C.
     "src/app/api/usage/codex-reset-credit/route.ts": 1,
+    // #15201: connection-local usage summary looks the row up by id behind management
+    // auth to bound the result to a real ChatGPT connection — a state read (class C).
+    "src/app/api/usage/local-summary/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
@@ -264,6 +284,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // connections whose default model does not conflict with the requested one; the
     // connection itself is still selected by getProviderCredentials (class C).
     "src/lib/embeddings/service.ts": 1,
+    // Read-only validation of a pinned Fal row. New inference still goes through
+    // the credential resolver above; existing receipts never choose another account (class C).
+    "src/lib/fal/runtime.ts": 1,
     "src/lib/freeProviderRankings.ts": 1,
     "src/lib/guardrails/visionBridgeCredentials.ts": 2,
     "src/lib/kimi/tokenRefresh.ts": 1,
@@ -290,6 +313,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/lib/proxyEgress.ts": 1,
     "src/lib/quota/connectionRecovery.ts": 2,
+    // #18630: the opt-in reset-credit auto-spend sweep lists the active Codex OAuth
+    // connections only to hand each id to spendExpiringResetCredits() in
+    // codexResetCredits.ts, whose loadCodexConnection() carries the auxiliary-lease
+    // fence (class B there). The listing itself never selects or dispatches (class C).
+    "src/lib/services/codexResetCreditAutospend.ts": 1,
     "src/lib/sync/bundle.ts": 1,
     // #11495: verify-only sweep queries oauth + cookie connections
     // #13874: the health check re-reads the row inside the refresh lane to see whether
@@ -313,6 +341,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // lookup behind the health endpoint, never connection selection or dispatch (class C).
     "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
+    // #18864: after a confirmed GLM reset-card redemption (whose caller already passed the
+    // auxiliary-lease gate) the row is re-read only to confirm the captured cooldown is
+    // unchanged before the compare-and-clear — a state read, never connection selection or
+    // dispatch, so class C (same shape as resetCreditCooldownRelease.ts).
+    "src/lib/usage/glmResetCardRecovery.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same
     // shape — isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an
@@ -540,16 +573,16 @@ test("managed request surfaces are fenced centrally or rejected before independe
   );
   const rotationPolicySites = [
     ...nonStreamingLeg.matchAll(
-      /allowAccountRotation: !managedLease && comboStrategy !== "context-relay"/g
+      /allowAccountRotation:\s*!managedLease && comboStrategy !== "context-relay" && !forcedConnectionId/g
     ),
     ...streamingLeg.matchAll(
-      /allowAccountRotation: !managedLease && comboStrategy !== "context-relay"/g
+      /allowAccountRotation:\s*!managedLease && comboStrategy !== "context-relay" && !forcedConnectionId/g
     ),
   ];
   assert.equal(
     rotationPolicySites?.length,
     2,
-    "both the streaming and the non-streaming leg must derive account rotation from !managedLease"
+    "both the streaming and the non-streaming leg must derive account rotation from !managedLease and the connection pin"
   );
   assert.match(pipeline, /const canRotateAccount = policy\.allowAccountRotation && !isolateProbe;/);
   assert.match(pipeline, /canRotateAccount &&\s*target\.provider === "codex"/);

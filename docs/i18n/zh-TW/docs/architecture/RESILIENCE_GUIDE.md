@@ -68,217 +68,270 @@ OmniRoute有三種不同但相關的彈性機制。每個都有不同的範圍�
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`。
 迴歸防護:`tests/unit/provider-cooldown-window-gate.test.ts`。
 
-## 2. 連接冷卻
+## 2. 連線冷卻
 
-**範圍：**單一提供者connection/account/key.
+**範圍：** 單一提供者連線／帳戶／金鑰。
 
-**目的：**跳過一個壞密鑰，同時同一提供者的其他連線繼續提供服務。
+**目的：** 略過一個有問題的金鑰，同時讓同一提供者的其他連線繼續提供服務。
 
-**執行：**
+**實作：**
 
-- 標記不可用： `src/sse/services/auth.ts::markAccountUnavailable()`
-- 選擇： `getProviderCredentials*`在同一文件中
-- 冷卻時間計算： `open-sse/services/accountFallback.ts::checkFallbackError()`
-- 設定： `src/lib/resilience/settings.ts`
+- 標記為不可用：`src/sse/services/auth.ts::markAccountUnavailable()`
+- 選取：同一檔案中的 `getProviderCredentials*`
+- 冷卻計算：`open-sse/services/accountFallback.ts::checkFallbackError()`
+- 設定：`src/lib/resilience/settings.ts`
 
-**每個連接的欄位：**
+**每個連線的欄位：**
 
-- `rateLimitedUntil` —時間戳記直到冷卻時間結束
+- `rateLimitedUntil` — 冷卻到期前的時間戳記
 - `testStatus: "unavailable"`
-- `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` —指數退避計數器
+- `lastError`、`lastErrorType`、`errorCode`
+- `backoffLevel` — 指數退避計數器
 
 **預設冷卻時間：**
 
-- OAuth基礎：5s
-- API 金鑰基礎：3s
-- API-key 429：偏好上游`Retry-After`/reset headers/parseable重置文本
-- 退避： `baseCooldownMs * 2 ** failureIndex`
+- OAuth 基準值：5s
+- API 金鑰基準值：3s
+- API 金鑰 429：優先使用上游的 `Retry-After`／重設標頭／可解析的重設文字
+- 退避：`baseCooldownMs * 2 ** failureIndex`
 
-**每個提供者的重試延遲。**提供者詳細資訊頁面有一個**重試延遲**選擇（自動，15 秒至 1 小時）。它保存`resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` （1–21600，到`PATCH /api/resilience`）。當速率限制錯誤不攜帶上游重試提示時，該值將替換提供者的縮放後退並將`backoffLevel`重設為 0 (`open-sse/services/rotationConfig.ts::overrideFor`)。速率限制錯誤的優先級，最高優先級：上游重試提示，然後是每個連接`providerSpecificData.rotationOverrides.rateLimitResetSeconds`，然後是每個提供者重試延遲，然後是 env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`，然後是縮放後的退避。自動刪除該欄位。它只影響速率限制原因，從不影響終端狀態。
+**每個提供者的重試延遲。** 提供者詳細資料頁面有一個 **重試延遲** 選取欄位（自動、15s 至 1h）。它會將值儲存至
+`resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+（1–21600，透過 `PATCH /api/resilience`）。當限流錯誤沒有上游重試提示時，該值會取代提供者的縮放退避時間，並將
+`backoffLevel` 重設為 0（`open-sse/services/rotationConfig.ts::overrideFor`）。對於限流錯誤，優先順序由高至低為：上游重試提示、每個連線的
+`providerSpecificData.rotationOverrides.rateLimitResetSeconds`、每個提供者的重試延遲、環境變數
+`OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`，最後是縮放退避時間。自動模式會移除該欄位。它只會影響限流原因，絕不影響終止狀態。
 
-**防雷群守衛：**防止因過度延長冷卻時間或雙倍遞增`backoffLevel`而導致併發故障。
+**防驚群保護：** 防止並行錯誤過度延長冷卻時間，或重複遞增 `backoffLevel`。
 
-**並發限制 429 不會爬上退避階梯。**一個`429`的主體報告並發限制（「同時請求太多」、「並發限制」、「並行請求限制」、 GLM `并发数过高`）意味著該帳戶健康但繁忙。 `checkFallbackError()`返回原因`concurrency_limited`：現在故障轉移到下一個連接，冷卻此連接以獲得固定的`CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) 或上游重試提示，保持`backoffLevel`不變，並設定`skipProviderBreaker`。顯式配額主體仍獲勝，因此也符合配額模式的主體仍保留配額裁決。檢測： `looksLikeConcurrencyLimit()` in `src/shared/utils/classify429.ts`；結論： `open-sse/services/accountFallback/concurrencyLimit429.ts`。 `classify429()` （斷路器的`FailureKind`）未更改，仍然讀取這些實體的`rate_limit` 。
+**並行限制 429 不會提升退避階梯。** 其本文回報並行限制（「同時請求過多」、「並行限制」、「平行請求限制」、GLM 的
+`并发数过高`）的 `429`，表示帳戶健康但目前繁忙。
+`checkFallbackError()` 會回傳 `concurrency_limited` 原因：立即切換至下一個連線，讓此連線固定冷卻
+`CONCURRENCY_LIMIT_COOLDOWN_MS`（1s），或使用上游重試提示；保持 `backoffLevel` 不變，並設定
+`skipProviderBreaker`。
+明確的配額本文仍優先，因此同時符合配額模式的本文仍會判定為配額錯誤。偵測：`src/shared/utils/classify429.ts` 中的
+`looksLikeConcurrencyLimit()`；判定：`open-sse/services/accountFallback/concurrencyLimit429.ts`。
+`classify429()`（斷路器的 `FailureKind`）維持不變，對這些本文仍會讀取 `rate_limit`。
 
-**串流內容停滯不會讓帳戶冷卻。**當內容停頓看門狗 (`open-sse/utils/streamHandler.ts`) 放棄未及時發送模型輸出的流時， `markAccountUnavailable()`會記錄連接上的錯誤，但不設定冷卻時間：停頓屬於該請求，通常是一個尚未輸出的長時間推理回合。操作員可以選擇使用`resilienceSettings.streamStallCooldown.enabled` （預設`false`）重新加入。
+**串流內容停滯不會冷卻帳戶。** 當內容停滯監視器（`open-sse/utils/streamHandler.ts`）放棄一個在指定時間內未傳送模型輸出的串流時，
+`markAccountUnavailable()` 會在連線上記錄錯誤，但不設定冷卻時間：停滯屬於該請求，通常是因為長時間的推理回合尚未產生輸出。
+操作人員可以透過 `resilienceSettings.streamStallCooldown.enabled` 重新啟用此功能（預設為 `false`）。
 
-**`p2c`帳戶選擇的選擇加入延遲訊號。**每次分派的嘗試都會在記憶體滾動視窗中記錄每個連接的首字節時間和結果（以及每個連接+模型）：15 分鐘內的最後 20 個樣本（`open-sse/services/connectionLatencyTracker.ts`，從`src/sse/handlers/chatHelpers.ts`中的`safeLogEvents()`記錄）。當`resilienceSettings.p2cLatency.weight`高於`0` （範圍0-20，預設`0` =關閉）時， `src/sse/services/auth.ts`中的`compareP2CConnections()`加起來為該對中每個候選的`weight`點。其中一半來自延遲與較快候選者的比率（慢者的兩倍佔全部一半），一半來自滾動錯誤率。該條款僅在兩位候選人都擁有至少 3 個樣本時適用，因此新帳戶不會受到處罰，並且其上限低於配額凍結和配額用盡的處罰。它沒有添加自己的電路：失敗的帳戶仍然由冷卻、鎖定和斷路器層處理。使用`PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`設定它。
+**供 `p2c` 帳戶選取使用的選用延遲訊號。** 每次派送的嘗試都會針對每個連線（以及每個連線 + 模型）在記憶體中的滾動視窗記錄其
+首位元組時間與結果：15 分鐘內的最近 20 個樣本
+（`open-sse/services/connectionLatencyTracker.ts`，由 `src/sse/handlers/chatHelpers.ts` 中的
+`safeLogEvents()` 記錄）。當 `resilienceSettings.p2cLatency.weight` 大於 `0`
+（範圍為 0-20，預設 `0` = 關閉）時，`src/sse/services/auth.ts` 中的
+`compareP2CConnections()` 會為候選配對中的每個候選連線加上最多 `weight` 分。這些分數的一半來自相對於較快候選連線的延遲比例（速度慢兩倍時取得完整的一半分數），另一半來自滾動錯誤率。
+只有當兩個候選連線各自至少有 3 個樣本時才會套用此項，因此不會懲罰新帳戶；其上限也維持低於配額封鎖與配額耗盡的懲罰。
+它不會自行建立任何斷路機制：失敗的帳戶仍由冷卻、鎖定與斷路器層處理。使用以下設定：
+`PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`。
 
-**推理框架重新啟動內容停滯預算。**推理模型可以在第一個可見標記之前思考幾分鐘： Claude流式傳輸`thinking_delta`幀，其思考文本可能為空，而回應API流式傳輸一個又一個推理項。 `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) 識別這些幀，並且看門狗在每一幀上重新啟動其預算，而不是取消回合。它們仍然不是模型輸出，因此僅以推理結束的回合仍被報告為空，而停止推理且僅發送心跳的回合仍會使看門狗跳閘。
+**推理框架會重新開始計算內容停滯預算。** 推理模型可能需要數分鐘才會產生第一個可見 token：Claude 會串流
+`thinking_delta` 框架，其 thinking 文字可能為空，而 Responses API 會接連串流一個又一個推理項目。
+`isReasoningProgressFrame()`（`open-sse/utils/streamReadiness.ts`）會辨識這些框架，監視器會在每個框架上重新開始計算其預算，而不是取消該回合。
+它們仍不是模型輸出，因此只以推理結束的回合仍會回報為空白，而停止推理後只傳送心跳的回合仍會觸發監視器。
 
-Kiro的具有非空簽章的二進位`reasoningContentEvent`幀透過致動器將推理活動保留為空`reasoning_content`增量。簽名不會被轉發。元資料、不完整的框架和空簽章不會重新啟動內容預算；獨立的活動流逾時和客戶端取消仍然適用（`open-sse/executors/kiro/reasoning.ts`）。
+Kiro 的二進位 `reasoningContentEvent` 框架若具有非空簽章，會透過執行器將此推理活動保留為空的
+`reasoning_content` delta。簽章不會被轉送。中繼資料、不完整框架與空白簽章不會重新開始內容預算；獨立的作用中串流逾時與用戶端取消仍然適用（`open-sse/executors/kiro/reasoning.ts`）。
 
-**終端狀態（NOT冷卻時間）：**
+**終止狀態（不是冷卻）：**
 
-- `banned` —透過禁止關鍵字/帳戶禁止偵測設定（請參閱[BAN_DETECTION](../security/BAN_DETECTION.md) ），並透過三個連續的上游每個請求拒絕（`request_rejected`，例如Anthropic OAuth 403「不允許請求」 — `open-sse/services/requestRejectedStreak.ts`）；一次拒絕只會讓連線降溫
-- `expired` （在有界重試— `EXPIRED_RETRY_MAX = 3`和指數退避—後轉換到終端，因此瞬態OAuth錯誤可以在帳戶永久停用之前自我修復）
+- `banned` — 由禁止關鍵字／帳戶封鎖偵測設定（請參閱 [BAN_DETECTION](../security/BAN_DETECTION.md)）。上游每個請求的拒絕（`request_rejected`，例如 Anthropic OAuth 403「Request not allowed」）絕不會設定此狀態：它們會依連線與模型分別計數，並以逐漸增加且上限為 `REQUEST_REJECTED_MAX_COOLDOWN_MS`（1 h）的冷卻時間將該模型移出輪替；若不知道模型，則會冷卻該連線 — `open-sse/services/requestRejectedStreak.ts`
+- `expired`（在有限次重試後轉換為終止狀態 — `EXPIRED_RETRY_MAX = 3` 並採用指數退避 — 因此暫時性的 OAuth 錯誤可以在帳戶永久停用前自行復原）
 - `credits_exhausted`
 
-這些持續存在，直到憑證變更或操作員重置它們為止。不要用瞬態冷卻狀態覆蓋最終狀態。
+這些狀態會持續存在，直到憑證變更或操作員將其重設。請勿以暫時性的冷卻狀態覆寫終止狀態。
 
-**惰性恢復：**當`rateLimitedUntil`過去時，連接再次變得合格。成功使用後， `clearAccountError()`會清除所有錯誤欄位。
+**延遲復原：**當 `rateLimitedUntil` 已過期時，連線會再次符合使用資格。成功使用後，`clearAccountError()` 會清除所有錯誤欄位。
 
-### Claude OAuth使用牆：低優先權通道+會話限制重置
+### Claude OAuth 用量牆：較低優先順序通道 + 工作階段限制重設
 
-**範圍：**一個Claude訂閱 (OAuth) 連線。這兩個功能都是**每個連接選擇加入**（編輯`providerSpecificData`中的連接→ Claude部分→ `lowPriorityMode` / `autoLimitReset` ，兩者預設為關閉）並鏡像Claude Code 的`/low-priority`和`/limit-reset`命令（從Claude Code 2.1.263 捕獲的電匯合約）。
+**範圍：**單一 Claude 訂閱（OAuth）連線。這兩項功能皆為**每個連線選擇性啟用**
+（編輯連線 → Claude 區段 → `providerSpecificData` 中的 `lowPriorityMode` /
+`autoLimitReset`，兩者預設皆為關閉），並對應 Claude Code 的 `/low-priority` 與
+`/limit-reset` 命令（線路合約擷取自 Claude Code 2.1.263）。
 
-**執行：**
+**實作：**
 
-- 狀態機+回應分類： `open-sse/services/claudeLowPriority.ts`
-- 重置status/claim客戶端： `open-sse/services/claudeLimitReset.ts`
-- 執行器hook（頭注入+同帳號重試）： `open-sse/executors/base.ts::execute()`
-- 選擇加入持久性： `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- 狀態機 + 回應分類：`open-sse/services/claudeLowPriority.ts`
+- 重設狀態/領取用戶端：`open-sse/services/claudeLimitReset.ts`
+- 執行器掛鉤（標頭注入 + 相同帳戶重試）：`open-sse/executors/base.ts::execute()`
+- 選擇性啟用持久化：`src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**扳機：** 5 小時使用牆— a `429` ，其標頭帶有`anthropic-ratelimit-unified-status: rejected` ，當帳戶符合條件時，帶有`anthropic-ratelimit-unified-slow-offer: treatment`。在第一牆429之前沒有發送任何內容；沒有統一標頭的突發 429 會經歷正常的冷卻路徑。
+**觸發條件：**5 小時用量牆 — 一個標頭帶有
+`anthropic-ratelimit-unified-status: rejected`，且當帳戶符合資格時帶有
+`anthropic-ratelimit-unified-slow-offer: treatment` 的 `429`。在第一次遇到該用量牆
+429 前不會傳送任何內容；不含統一標頭的突發 429 會走一般冷卻路徑。
 
-**低優先車道**（`lowPriorityMode`）：
+**較低優先順序通道**（`lowPriorityMode`）：
 
-- 在牆上 429 執行者接受報價並立即重試**相同的**`anthropic-usage-limit: slow`帳戶；該通道保持活動狀態，直到宣布`anthropic-ratelimit-unified-reset` （+ 60s 寬限期）並且該視窗中的每個請求都帶有標頭。攔截到的 429 永遠不會到達`handleChatCore`，因此連接是**不是**放入冷卻時間並且不會被旋轉走。
-- `anthropic-ratelimit-unified-slow-status`稍後回應： `active` / `not_needed`保持車道； `slot_busy` (429) 或`529`等待伺服器的`anthropic-ratelimit-unified-slow-retry-after` （預設 20 秒，限制 5–600 秒， ± 30% 抖動）並重試，以`anthropic-ratelimit-unified-slow-max-wait` （預設為 20 分鐘，限制 1 分鐘–6 小時）並重試，以— （預設為 20 分鐘，限制 1 分鐘–6 小時）並重試，重新qi 10 分鐘。等待也受到請求自身上游啟動超時（`resolveFetchStartTimeout`，預設為 10 分鐘）減去 5 秒餘量的剩餘部分的限制：如果沒有該上限，20 分鐘的預設最大等待時間將超過請求，並且睡眠將在等待中中止，出現`TimeoutError`而不是優雅的`max_wait` end +冷靜。
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`，5小時窗口翻轉，或`ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` （在任何狀態下都以`extra_usage`結束，因為付費超額現在覆蓋了牆）結束車道；然後回應流向正常的冷卻路徑。 `budget_exhausted`會被記住，直到宣布預算重置（≤ 8 天）。
-- 牆檢查在執行器自己的 400 次驅動的內部嘗試重試（上下文編輯、 thinking/effort箝位、參數自動學習）之後運行，因此僅在其中一次重試中出現的牆 429 仍然會被攔截，而不是到達冷卻路徑。
-- 每個連線的狀態都在記憶體中（重新啟動需要額外花費一面牆 429 來重新接受）。
+- 遇到用量牆 429 時，執行器會接受提議，並立即使用
+  `anthropic-usage-limit: slow` 重試**相同**帳戶；此通道會保持啟用，直到公告的
+  `anthropic-ratelimit-unified-reset`（+60 秒寬限期），且該時間範圍內的每個要求都會帶有
+  此標頭。遭攔截的 429 永遠不會到達 `handleChatCore`，因此連線
+  **不會**進入冷卻，也不會輪替到其他連線。
+- 後續回應中的 `anthropic-ratelimit-unified-slow-status`：`active` / `not_needed`
+  會維持此通道；`slot_busy`（429）或 `529` 會依伺服器的
+  `anthropic-ratelimit-unified-slow-retry-after` 等待（預設 20 秒，限制於 5–600 秒，±30% 抖動）
+  並重試，且受 `anthropic-ratelimit-unified-slow-max-wait` 限制（預設 20 分鐘，限制於
+  1 分鐘–6 小時）— 超過該時間後，此通道會結束，且有 10 分鐘的冷卻期阻止再次接受。
+  等待時間還會受要求本身剩餘的上游啟動逾時
+  （`resolveFetchStartTimeout`，預設 10 分鐘）減去 5 秒餘裕所限制：若無此限制，
+  預設 20 分鐘的最大等待時間會超過要求的存續時間，且休眠會在等待途中遭到中止，
+  導致浮現 `TimeoutError`，而不是正常的 `max_wait` 結束 + 冷卻。
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`、5 小時視窗輪替，或
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true`（由於付費超額用量現在會涵蓋
+  用量牆，因此無論任何狀態都會以 `extra_usage` 結束）會終止此通道；之後回應會流向
+  一般冷卻路徑。`budget_exhausted` 會被記住，直到公告的預算重設時間（≤ 8 天）。
+- 用量牆檢查會在執行器自身由 400 驅動的嘗試內重試（內容編輯、
+  思考/投入程度限制、參數自動學習）之後執行，因此僅在其中一次重試中出現的用量牆 429
+  仍會遭到攔截，而不會到達冷卻路徑。
+- 狀態會依每個連線保存在記憶體中（重新啟動會多耗費一次用量牆 429 才能重新接受）。
 
-**會話限制重置**（`autoLimitReset`，在兩者都打開時在車道之前嘗試過）：
+**工作階段限制重設**（`autoLimitReset`，兩者皆啟用時會在通道前先嘗試）：
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`區塊；當`arm: "reset"`和`available: true`、 `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits`和`{ "program": "juniper_tide" }` （來自`providerSpecificData.organizationUUID`組織UUID ，引導回退）。
-- `result: reset|not_limited` →全速重試請求（無慢速標頭）。 `already_used` / `not_offered` memoise `next_available_at` （預設一週）；任何失敗都會後退 15 分鐘。重置每週一次，並且仍計入每週限制。
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
+  區塊；當 `arm: "reset"` 且 `available: true` 時，
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits`，並帶有
+  `{ "program": "juniper_tide" }`（組織 UUID 來自
+  `providerSpecificData.organizationUUID`，並有啟動程序備援）。
+- `result: reset|not_limited` → 要求會以全速重試（不帶慢速標頭）。
+  `already_used` / `not_offered` 會記憶 `next_available_at`（預設一週）；任何
+  失敗都會退避 15 分鐘。重設每週僅能執行一次，且仍會計入每週限制。
 
-回歸守衛： `tests/unit/claude-low-priority-mode.test.ts`、 `tests/unit/claude-limit-reset.test.ts`、 `tests/unit/claude-low-priority-executor.test.ts`。
+迴歸防護：`tests/unit/claude-low-priority-mode.test.ts`、
+`tests/unit/claude-limit-reset.test.ts`、`tests/unit/claude-low-priority-executor.test.ts`。
 
-### 會話關聯性 (#7274)
+### 工作階段親和性 (#7274)
 
-**範圍：**一個客戶端會話（`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`標頭）固定到一個連接，用於**任何**提供者。
+**範圍：**將一個用戶端工作階段（`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` 標頭）固定至一個連線，適用於**任何**提供者。
 
-**目的：**跨請求將多輪代理（Claude代碼、輔助程序、自訂代理）保留在同一帳戶上，從而減少跨帳戶上下文遺失以及對具有每個帳戶會話狀態的提供者重複冷啟動 429。
+**目的：**讓多輪代理程式（Claude Code、aider、自訂代理程式）在多個要求間使用相同帳戶，減少跨帳戶內容遺失，以及在具有每帳戶工作階段狀態的提供者上重複發生冷啟動 429。
 
-**執行：**
+**實作：**
 
-- TTL解析度： `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- 引腳selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- 標頭提取（通用，任何提供者）： `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- 持久化引腳表： `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- 設定： `sessionAffinityTtlMs` （全域TTL以毫秒為單位， `0`停用） — `src/lib/db/settings.ts`。透過遷移`124_generic_session_affinity_ttl.sql`從 Codex-only `codexSessionAffinityTtlMs`重命名，它將繼承任何先前配置的Codex TTL作為新的預設值。
+- TTL 解析：`src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- 固定連線選擇/建立：`src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- 標頭擷取（通用，任何提供者）：`src/sse/services/auth.ts::extractSessionAffinityKey()`
+- 持久化固定關聯表：`sessionAccountAffinity`（`src/lib/db/sessionAccountAffinity.ts`）
+- 設定：`sessionAffinityTtlMs`（以毫秒為單位的全域 TTL，`0` 表示停用）— `src/lib/db/settings.ts`。由遷移 `124_generic_session_affinity_ttl.sql` 將僅限 Codex 的 `codexSessionAffinityTtlMs` 重新命名而來，該遷移會將先前設定的任何 Codex TTL 沿用為新的預設值。
 
-在 #7274 之前，除了`codex`之外， `resolveSessionAffinityTtlMs()`硬鎖到`0`的每個提供者，因此TTL設定（和會話標頭）在其他任何地方都沒有效果，即使固定機制和標頭提取已經與提供者無關。此修復程式取消了提前返回的功能； TTL現在統一適用於在`0`之上全域設定的每個提供者。
+在 #7274 之前，`resolveSessionAffinityTtlMs()` 對 `codex` 以外的每個提供者都會直接提早中止並傳回 `0`，因此 TTL 設定（及工作階段標頭）在其他任何地方都不會生效，儘管固定機制與標頭擷取已與提供者無關。此修正移除了該提早傳回；現在，只要全域設定為高於 `0`，TTL 就會一致套用至每個提供者。
 
-三個會話親和性標頭永遠不會轉發到上游—執行器從頭開始建立自己的上游標頭，而不是傳遞客戶端標頭，因此這僅保留內部相關 ID。
+這三個工作階段親和性標頭絕不會轉送至上游 — 執行器會從頭建構自己的上游標頭，而不是直接傳遞用戶端標頭，因此這只會作為內部關聯 ID。
 
-### 獨佔託管會話連線租用
+### 獨佔式受管理工作階段連線租約
 
-**範圍：**一個主動管理的HTTP client/session擁有 1 個合格的OmniRoute連線。
+**範圍：** 一個作用中的受管理 HTTP 用戶端／工作階段擁有一個符合資格的 OmniRoute 連線。
 
-**目的：**為需要跨請求的硬路由圍籬的用戶端提供持久的獨佔連線所有權。這與會話親和力不同，會話親和力是一種軟連續性偏好：獨佔租約在SQLite中保留生命週期狀態，強制全域活動所有者和活動連接唯一性，並在提供者分派之前拒絕陳舊的生成。
+**目的：** 為需要跨要求維持硬性路由隔離的用戶端，提供持久且專用的連線擁有權。這不同於工作階段親和性；後者是軟性的連續性偏好：專用租約會在 SQLite 中持久化生命週期狀態、強制全域作用中擁有者與作用中連線的唯一性，並在分派至提供者前拒絕過時的世代。
 
-此功能是根據API密鑰選擇加入的。託管金鑰必須具有`lease:exclusive`範圍和顯式非空`allowedConnections`清單。任何HTTP客戶端都可以使用生命週期端點；不需要客戶端名稱、使用者代理、提供者、 OAuth方法或模型。租約擁有一個連接，而不是一個模型，因此模型變更會保留綁定，而連接通常仍然合格。正常模型、配額、運行狀況、冷卻時間和許可名單規則仍然具有權威性，並且可能會將同一代過渡到另一個免費的合格連接。
+此功能可依 API 金鑰選擇性啟用。受管理金鑰必須具有 `lease:exclusive` 範圍，以及明確且非空的 `allowedConnections` 清單。任何 HTTP 用戶端都可以使用生命週期端點；不需要用戶端名稱、user-agent、提供者、OAuth 方法或模型。租約擁有的是連線，而非模型，因此只要連線仍符合一般資格，變更模型仍會保留該連線繫結。一般的模型、配額、健康狀態、冷卻時間與允許清單規則仍具最高權威，且可能將同一世代轉移至另一個可用的符合資格連線。
 
-生命週期是`POST /api/v1/session-leases`和JSON操作`acquire`、 `renew`和`release`。託管推理請求提供不透明的`X-OmniRoute-Lease-Owner`值和精確的`X-OmniRoute-Lease-Generation`。擁有者使用`vlo_`後跟 43 個 base64url 字元；僅儲存其SHA-256雜湊值。每個最終調度柵欄也綁定經過驗證的API金鑰ID和活動連接ID。租約控制標頭已從日誌、保留的請求快照和上游執行程序標頭中刪除。
+生命週期為 `POST /api/v1/session-leases`，搭配 `acquire`、`renew` 和 `release` JSON 動作。受管理的推論要求會提供不透明的 `X-OmniRoute-Lease-Owner` 值與完全相符的 `X-OmniRoute-Lease-Generation`。擁有者使用 `vlo_` 加上 43 個 base64url 字元；系統只會儲存其 SHA-256 雜湊。每個最終分派隔離也會繫結已驗證的 API 金鑰 ID 與作用中連線 ID。租約控制標頭會從記錄、保留的要求快照以及上游執行器標頭中移除。
 
-如果普通路由具有合格的託管候選，但每個空閒候選都被外部活動租約佔用， OmniRoute返回HTTP `429`、租約容量不可用代碼、等待容量狀態以及從最早相關到期派生的有界`Retry-After` 。普通空資格不是租約爭用，並且保留其現有的路由錯誤語意。
+如果一般路由具有符合資格的受管理候選項目，但每個可用候選項目都已被其他擁有者的作用中租約占用，OmniRoute 會傳回 HTTP `429`、租約容量不可用代碼、等待容量狀態，以及根據最早相關到期時間計算且有上限的 `Retry-After`。一般的可用資格為空並不屬於租約爭用，仍會沿用現有的路由錯誤語意。
 
-相關機制保持獨立：
+相關機制仍彼此分離：
 
-- OAuth會話佔用率是OAuth帳戶的程序本機軟體分配。
-- 帳戶信號量授予請求並發許可並在請求完成時結束。
-- 獨佔託管會話租賃是具有代圍欄的持久生命週期所有權。
+- OAuth 工作階段占用是 OAuth 帳戶的程序內軟性分配。
+- 帳戶信號量會授予要求並行處理許可，並在要求完成時結束。
+- 受管理的專用工作階段租約是具持久性的生命週期擁有權，並具有世代隔離機制。
 
 ---
 
-## 3. 模型鎖定（Model Lockout）
+## 3. 模型鎖定
 
 **範圍：** provider + connection + model 三元組。
 
-**依狀態決定的鎖定鍵範圍：** 失敗的狀態碼決定鎖定要寫入哪個鍵（`open-sse/services/accountFallback/exactModelLock.ts` 中的 `resolveLockoutScope()`）：
+**依狀態決定範圍：**失敗狀態決定鎖定寫入哪個金鑰
+（`open-sse/services/accountFallback/exactModelLock.ts` 中的
+`resolveLockoutScope()`）：
 
-- `429` / `403` / `402` — 配額或授權信號 — 鎖定**配額家族**：
-  對 codex 而言是整個 `codex` / `spark` 範圍（該連線的每個 `gpt-5*` 模型），
-  其他 provider 則由 `getQuotaScopedModelForProvider()` 決定。
-- `404` 鎖定單一模型本身（`getModelLockKey()` 會將 `not_found` 收窄範圍）。
-- 任何其他狀態 — `5xx` 傳輸/伺服器故障，以及 OmniRoute 自身從品質驗證合成的
-  `502` — 僅鎖定**確切**的 provider/connection/model 組合。單一模型上的
-  串流故障並不能作為帳號配額出問題的證據；在此規則之前，
-  `codex/gpt-5.6-luna` 上的一次空回應，就會把該連線的所有 `gpt-5*`
-  模型從路由中移除 2–30 分鐘（逐級升級），而其配額其實完全未受影響。
-- 呼叫方明確指定的 `scope` 選項永遠優先（Antigravity 傳入 `"exact"`）。
+- `429` / `403` / `402` — 配額或權限訊號 — 鎖定**配額系列**：
+  對 codex 而言，是整個 `codex` / `spark` 範圍（該連線的所有
+  `gpt-5*` 模型）；對其他 provider，則使用
+  `getQuotaScopedModelForProvider()`。
+- `404` 鎖定基礎模型（`getModelLockKey()` 會縮小 `not_found` 的範圍）。
+- 任何其他狀態 — `5xx` 傳輸／伺服器失敗，以及 OmniRoute 在品質驗證中自行
+  合成的 `502` — 僅鎖定**確切的** provider/connection/model 三元組。某個模型的
+  串流異常不能代表帳戶的配額；在此規則之前，`codex/gpt-5.6-luna` 的一次空
+  回應就會讓該連線的所有 `gpt-5*` 模型在 2–30 分鐘內（逐步延長）停止
+  路由，而其配額完全不受影響。
+- 呼叫端明確指定的 `scope` 選項永遠優先（Antigravity 傳入 `"exact"`）。
 
-**目的：** 當只有單一模型不可用或受配額限制時，避免停用整個連線。
+**目的：**避免只因單一模型無法使用或受配額限制，就停用整個連線。
 
 **範例：**
 
-- 採每模型配額制的 provider 回傳 429
-- 本地 provider 對某個不存在的模型回傳 404
-- 特定 provider 的模式/模型權限故障（例如 Grok 模式）
+- 回傳 429 的模型級配額 provider
+- 對某個缺少的模型回傳 404 的本機 provider
+- Provider 特定的模式／模型權限失敗（例如 Grok 模式）
 
-**實作：** `open-sse/services/accountFallback.ts` — `lockModel()`、`clearModelLock()`、`getAllModelLockouts()`。
+**實作：**`open-sse/services/accountFallback.ts` — `lockModel()`、`clearModelLock()`、`getAllModelLockouts()`。
 
-### 模型冷卻儀表板 (v3.8.0)
+### 模型冷卻時間儀表板（v3.8.0）
 
-UI：設定 → 模型冷卻（`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`）
+UI：設定 → 模型冷卻時間（`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`）
 
-列出作用中的鎖定，包含：provider、connection、model、reason、expiresAt。操作人員可以從該卡片手動重新啟用模型。
+列出作用中的鎖定項目，包括：provider、connection、model、reason、expiresAt。操作人員可以從卡片中手動重新啟用模型。
 
 **REST API：**
 
-- `GET /api/resilience/model-cooldowns` — 列出作用中的鎖定
-- `DELETE /api/resilience/model-cooldowns` — 手動重新啟用。請求主體：`{provider, connection, model}`。驗證：management。
+- `GET /api/resilience/model-cooldowns` — 列出作用中的鎖定項目
+- `DELETE /api/resilience/model-cooldowns` — 手動重新啟用。Body：`{provider, connection, model}`。驗證：management。
 
-### 冷卻管理器
+### 冷卻時間管理員
 
-UI：監控 → 冷卻管理器（`src/app/(dashboard)/dashboard/resilience/cooldowns/`）。
+UI：監控 → 冷卻時間管理員（`src/app/(dashboard)/dashboard/resilience/cooldowns/`）。
 
-用單一頁面檢視所有因暫時性原因而脫離路由的連線，不必逐一開啟各 provider
-頁面。它會列出連線冷卻、模型鎖定與終端狀態，可依單一連線、依選取項目、或依
-某 provider 的所有連線來清除，並可編輯最常調整的冷卻規則：
-`streamStallCooldown.enabled`，以及 OAuth / API 金鑰 `connectionCooldown`
-的基礎冷卻時間與最大退避步數（透過 `PATCH /api/resilience` 儲存）。終端狀態
-（`banned`、`expired`、`credits_exhausted`）僅列出，絕不會在此被清除。
+為每個因暫時性原因而停止路由的連線提供單一頁面，無需逐一開啟各 provider 頁面。此頁面列出連線冷卻時間、模型鎖定項目與終止狀態，並可針對單一連線、選取的連線，或某個 provider 的所有連線清除這些狀態；同時也能編輯最常調整的冷卻規則：`streamStallCooldown.enabled` 以及 OAuth／API-key 的 `connectionCooldown` 基礎冷卻時間與最大退避步數（透過 `PATCH /api/resilience` 儲存）。終止狀態（`banned`、`expired`、`credits_exhausted`）會列出，但絕不會在此處清除。
+
+同一頁上的**錯誤冷卻規則**卡片會透過 `PATCH /api/settings` 編輯操作人員錯誤規則（`settings.providerErrorRules`）與各 provider 的全域預設值（`settings.providerErrorDefaults`）— 關於其比對方式，請參閱 §7 的「操作人員宣告的規則」。持續時間可選擇預設值（無明確冷卻時間）、30 分鐘、1 小時、5 小時、24 小時，或自訂 1 至 43,200 分鐘（30 天）。
 
 **REST API**（`src/lib/resilience/cooldownManager.ts`，驗證：management）：
 
-- `GET /api/resilience/cooldowns[?provider=]` — 回傳連線及其狀態、剩餘冷卻時間、
-  退避層級、最後錯誤類型與模型鎖定（不含憑證）
-- `POST /api/resilience/cooldowns` — 請求主體 `{connectionIds: string[]}` 或
-  `{all: true, provider?}`；回傳 `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
+- `GET /api/resilience/cooldowns[?provider=]` — 列出連線狀態、剩餘冷卻時間、退避等級、上次錯誤類型與模型鎖定項目（不含憑證）
+- `POST /api/resilience/cooldowns` — Body `{connectionIds: string[]}` 或 `{all: true, provider?}`；回傳 `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### 鎖定設定 UI + 成功衰減恢復 (v3.8.23)
+### 鎖定設定 UI + 成功衰減復原（v3.8.23）
 
-模型鎖定從永遠開啟的硬編碼行為，轉變為完全可設定、需主動啟用（opt-in）
-的功能，擁有專屬的設定卡片與自我修復的恢復路徑。
+模型鎖定已從永遠啟用的硬編碼行為，改為完全可設定、選擇性啟用的功能，並具備獨立的設定卡片與自動修復復原路徑。
 
-**設定卡片：** 設定 → 模型鎖定
+**設定卡片：**設定 → 模型鎖定
 （`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`）。
-這與上方唯讀的 `ModelCooldownsCard`（僅_列出_作用中的鎖定）**不同** —
-新卡片用來_設定參數_。預設值定義於 `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+這與上方僅供讀取的 `ModelCooldownsCard` **不同**（該卡片只會
+_列出_作用中的鎖定項目）— 新卡片用來_設定參數_。預設值位於
+`DEFAULT_MODEL_LOCKOUT_SETTINGS`
 （`src/lib/resilience/modelLockoutSettings.ts`）：
 
-| 設定                    | 預設值                           | 意義                                   |
+| 設定                    | 預設值                           | 說明                                   |
 | ----------------------- | -------------------------------- | -------------------------------------- |
-| `enabled`               | `false`                          | 主開關 — 模型鎖定**預設關閉**。        |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | 計入模型範圍故障的上游狀態碼。         |
-| `baseCooldownMs`        | `120_000` (120 s)                | 首次故障的初始鎖定時長。               |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | 升級後冷卻時間的上限。                 |
-| `maxBackoffSteps`       | `10`                             | 指數退避升級的最大步數。               |
-| `useExponentialBackoff` | `true`                           | 重複故障時是否以指數方式升級冷卻時間。 |
+| `enabled`               | `false`                          | 主開關 — 模型鎖定**預設為關閉**。      |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | 計為模型範圍失敗的上游狀態。           |
+| `baseCooldownMs`        | `120_000`（120 秒）              | 第一次失敗時的初始鎖定持續時間。       |
+| `maxCooldownMs`         | `1_800_000`（30 分鐘）           | 逐步延長的冷卻時間上限。               |
+| `maxBackoffSteps`       | `10`                             | 指數退避延長的最大步數。               |
+| `useExponentialBackoff` | `true`                           | 重複失敗時是否以指數方式延長冷卻時間。 |
 
-設定會透過一般的設定儲存機制持久化，並經由 resilience 設定 schema
-驗證；卡片會對 `baseCooldownMs`/`maxCooldownMs` 進行邊界限制
-（確保 `maxCooldownMs ≥ baseCooldownMs`），並限制 `maxBackoffSteps`。
+設定會透過一般設定儲存區保存，並透過復原能力設定結構描述進行驗證；該卡片會限制
+`baseCooldownMs`／`maxCooldownMs`（其中 `maxCooldownMs ≥ baseCooldownMs`）及
+`maxBackoffSteps` 的範圍。
 
-**成功衰減恢復：** 恢復**並非**純粹依賴計時器到期。健康的回應會讓模型的
-故障計數逐步下降，因此在窗口期間內恢復的模型，會在計時器到期前就停止
-升級（並解除鎖定）。當 combo 目標成功時，`open-sse/services/combo.ts`
-會呼叫 `decayModelFailureCount()`（`open-sse/services/accountFallback.ts`），
-將儲存的 `failureCount` **減半**（`Math.floor(failureCount / 2)`）；當其歸
-`0` 時，鎖定項目會被完全刪除。相對應的 `recordModelLockoutFailure()`
-則會在升級窗口內發生故障時遞增計數（並升級冷卻時間）。此成功衰減機制
-是單純計時器到期之外的額外路徑 — 任一路徑都能重新啟用模型。
+**成功衰減復原：**復原**不只是**等待計時器到期。健康的
+回應會逐步降低模型的失敗計數，因此已在期間中復原的模型會停止
+延長冷卻（並在計時器到期前解除鎖定）。在成功的組合目標上，
+`open-sse/services/combo.ts` 會呼叫 `decayModelFailureCount()`
+（`open-sse/services/accountFallback.ts`），將儲存的
+`failureCount` **減半**（`Math.floor(failureCount / 2)`）；當其降至 `0` 時，鎖定項目會完全刪除。對應的
+`recordModelLockoutFailure()` 會在延長期間內發生失敗時遞增計數（並延長冷卻時間）。這項成功衰減機制是在單純計時器到期之外的額外復原方式 —
+任一路徑都能重新啟用模型。
 
-**狀態：** 鎖定保存於**記憶體中**（每個程序的 `Map`，存放以
-`provider:connectionId:model` 為鍵的 `ModelLockoutEntry`，確切範圍鎖定則以
-`provider:connectionId:exact:model` 為鍵），不會持久化到
-資料庫 — 重啟後即遺失。_設定_會被持久化；作用中的鎖定
-_狀態_則是暫時性的。
+**狀態：** 鎖定狀態保留在**記憶體中**（每個程序中，以 `provider:connectionId:model` 為鍵的
+`ModelLockoutEntry` `Map`，精確範圍鎖定則使用
+`provider:connectionId:exact:model`），不會持久化至
+DB — 重新啟動後即會遺失。_設定_會持久化；作用中的鎖定_狀態_則是暫時性的。
 
 ---
 
@@ -427,203 +480,117 @@ quota_exhausted / auth_error / not_found / not_found_local:
 
 ---
 
-## 7. 上游狀態碼重述（狀態碼遭誤標的配額錯誤）
+## 7. 上游狀態重述（錯誤陳述的配額錯誤）
 
-**範圍：** 一個以錯誤的 HTTP 狀態碼回報暫時性配額耗盡的上游閘道。
+**範圍：** 一個以錯誤 HTTP 狀態回報暫時配額耗盡的上游閘道。
 
-**目的：** 在分類之前更正誤導性的狀態碼，讓下游消費者（fallback 引擎、combo 聚合、面向客戶端的回應）看到失敗真正的可重試本質。
+**目的：** 在分類之前更正誤導性的狀態，讓下游取用者（fallback 引擎、組合彙總、面向用戶端的回應）看見失敗的真正可重試性質。
 
-某些閘道會以不可重試的 HTTP 狀態碼來表示暫時性配額耗盡。`agentrouter.org` 會回傳 `403`（有時是 `400`），並附上中文內文（`用户额度不足` / `额度不足`），而非標準的 `429`。像 Claude Code 這類客戶端會將 `403` 視為永久性錯誤並中止工作階段；若不加以更正，fallback 引擎會將其分類為 `AUTH_ERROR`，而非配額事件。
+部分閘道會以不可重試的 HTTP 狀態表示暫時配額耗盡。`agentrouter.org` 會回傳 `403`（有時為 `400`），並附帶中文本文（`用户额度不足` / `额度不足`），而不是標準的 `429`。Claude
+Code 等用戶端會將 `403` 視為永久錯誤並中止工作階段；若不加以更正，
+fallback 引擎會將其分類為 `AUTH_ERROR`，而不是配額事件。
 
 **實作：**
 
-- 註冊表 + 比對器：`open-sse/config/upstreamStatusRestatement.ts` —— 一份依提供者區分的規則清單（`{id, fromStatuses, toStatus, textMarkers,
+- 登錄表 + 比對器：`open-sse/config/upstreamStatusRestatement.ts` — 每個提供者各自擁有規則清單（`{id, fromStatuses, toStatus, textMarkers,
 excludeMarkers, defaultRetryAfterMs}`），透過 `applyStatusRestatement()` 進行比對。
-- 呼叫位置：`open-sse/handlers/chatCore.ts` 中的 `providerFailure:` 區塊（約第 3654 行），位於 `parseUpstreamError()` 解析完帶有錯誤 HTTP 狀態碼（`!providerResponse.ok`）的上游回應之後、任何分類執行之前，讓每個下游消費者都能看到更正後的狀態碼。嵌入在 `200` SSE 串流內的錯誤走的是另一條較晚的串流解析路徑，目前**並未**被此 hook 涵蓋 —— 這是已知的限制，而 agentrouter 的狀態碼誤標（以錯誤 HTTP 狀態碼浮現）暫時還不需要用到它。
-- 重試資格：`429` 已列入 `RETRY_AFTER_ELIGIBLE_STATUSES`（`open-sse/services/combo/unavailableRetryGate.ts`），因此重述後的錯誤會帶有真正的重試窗口，而不會以無法重試的 `403` 浮現。
-- 合成的 `60s` `defaultRetryAfterMs`（`upstreamStatusRestatement.ts`）只是重述後的回應告知**客戶端**的數值；它本身並非連線的內部冷卻／鎖定期間 —— 後者由實際處理該重述錯誤的機制各自掌管（連線冷卻的遞增退避，§2，API 金鑰提供者的基礎值為 `3s`；或模型鎖定，§3，適用於像 agentrouter 這類按模型配額的提供者）。路由器在內部可能比它向客戶端宣告的 60 秒窗口更早具備重試資格 —— 這是有意保留的餘裕，不是 bug。
+- 呼叫位置：`open-sse/handlers/chatCore.ts` 中的 `providerFailure:` 區塊
+  （約第 3654 行），緊接在 `parseUpstreamError()` 解析出帶有錯誤 HTTP 狀態的上游回應（`!providerResponse.ok`）之後，且在任何分類執行之前，因此每個下游取用者都能看見更正後的狀態。嵌入 `200` SSE 串流中的錯誤會遵循另一個較晚的串流解析路徑，目前**不**涵蓋在此 hook 中 — 這是已知限制，目前 agentrouter 的錯誤狀態尚不需要此功能（因為它會以錯誤 HTTP 狀態呈現）。
+- 重試資格：`429` 位於 `RETRY_AFTER_ELIGIBLE_STATUSES`
+  （`open-sse/services/combo/unavailableRetryGate.ts`）中，因此重述後的錯誤會攜帶實際的重試時間窗，而不是以失效的 `403` 呈現。
+- 合成的 `60s` `defaultRetryAfterMs`（`upstreamStatusRestatement.ts`）僅是重述後的回應告知**用戶端**的值；它本身不是連線內部的冷卻／鎖定持續時間 — 該時間由實際處理重述錯誤的機制另行控管（Connection Cooldown 的遞增退避，第 2 節，API 金鑰提供者的基準值為 `3s`；或 Model Lockout，第 3 節，適用於 agentrouter 等每模型配額提供者）。路由器可能會在對用戶端宣告的 60 秒時間窗之前，於內部更早具備重試資格 — 這是刻意保留的緩衝空間，而非錯誤。
 
-永久性錯誤（agentrouter 的 `无权访问模型` —— 無權存取此模型）絕不會被重述：即使 `textMarkers` 命中，`excludeMarkers` 仍會否決該規則，因此錯誤會保留其原始狀態碼，也不會有任何機制永無止境地重試它。對應的提供者分類規則（`open-sse/config/providerErrorRules.ts` 中的 `agentrouter-model-access-denied`：`reason: "auth_error"`、`scope: "model"`、宣告的基礎冷卻時間為 `6h`）會由 `checkFallbackError`（`open-sse/services/accountFallback.ts`）在通用的 apikey 類別 `FORBIDDEN` 提早返回_之前_查閱，並以 `honorsRuleLockScope(provider)` 作為閘門（#10334 —— 目前透過 `providerErrorRules.ts` 中的 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允許清單僅限 agentrouter）。規則宣告的 6 小時冷卻時間會以 `fallbackResult.baseCooldownMs` 的形式傳遞，但它仍會餵入既有的按模型配額鎖定路徑（`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()`，除了冷卻時間來源之外不受 #10334 影響）：如同其他所有模型鎖定，它會被箝制到營運者的 `mlSettings.maxCooldownMs`（預設 `1_800_000ms` / 30 分鐘），且_持久化的鎖定原因_仍維持既有硬編碼的 `"forbidden"`，而非規則的 `"auth_error"` —— 端到端只採用冷卻時間長度，不採用原因字串。連線本身保持啟用；同一連線上的兄弟模型不受影響。
+永久錯誤（agentrouter 的 `无权访问模型` — 無權存取此模型）**絕不會**被重述：即使 `textMarkers` 命中，`excludeMarkers` 也會否決該規則，因此錯誤會保留原始狀態，且不會永遠重試。相符的提供者分類規則
+（`open-sse/config/providerErrorRules.ts` 中的 `agentrouter-model-access-denied`：
+`reason: "auth_error"`、`scope: "model"`，宣告的基準冷卻時間為 `6h`）會由
+`checkFallbackError`（`open-sse/services/accountFallback.ts`）
+在通用 apikey 類別 `FORBIDDEN` 提前返回之前進行查詢，條件是
+`honorsRuleLockScope(provider)`（#10334 — 目前僅透過
+`providerErrorRules.ts` 中的 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允許清單專屬於 agentrouter）。規則宣告的 6h 冷卻時間會以
+`fallbackResult.baseCooldownMs` 的形式傳遞，但仍會進入既有的每模型配額鎖定路徑
+（`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`，#10334 僅變更冷卻時間來源）：如同其他模型鎖定一樣，該時間會被限制在操作員的
+`mlSettings.maxCooldownMs`（預設為 `1_800_000ms` / 30 分鐘）以下，而_persisted lockout reason_仍維持既有的硬編碼值 `"forbidden"`，不會改為規則的 `"auth_error"` — 端到端遵循的只有冷卻時間長度，而非原因字串。連線本身會保持啟用；同一連線上的兄弟模型不受影響。
 
-重述後的配額錯誤（`额度不足`）在生產環境中會命中一條提供者規則（`agentrouter-user-quota-exhausted`：`reason: "quota_exhausted"`、`scope:
-"connection"`，本身未宣告冷卻時間 —— 套用持久層的按比例退避預設值）。自 #10334 起，`ProviderErrorRuleMatch` 上的 `scope` 確實會被端到端消費，但**僅限** `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允許清單中的提供者（`providerErrorRules.ts` —— 目前僅有 `"agentrouter"`，透過 `honorsRuleLockScope()` 把關）。對其他所有提供者而言，`scope` 仍僅供參考，與 #10334 之前完全相同。`checkFallbackError` 會將命中規則的 scope 以 `fallbackResult.ruleScope` 呈現；`isAgentrouterConnectionQuotaScope()`（`src/sse/services/auth.ts`）是共用的守衛，用來確認某個 `ruleScope` 是否真正可安全地視為連線範圍、可自我恢復的訊號（scope 為 `"connection"`、reason 為 `quota_exhausted`、絕不為 `permanent`、絕不為 `creditsExhausted` —— 以防未來某條規則將 scope `"connection"` 與永久性帳號狀態配對）。有兩個消費者會呼叫它：
+重述後的配額錯誤（`额度不足`）在正式環境中會命中提供者規則
+（`agentrouter-user-quota-exhausted`：`reason: "quota_exhausted"`、`scope:
+"connection"`，本身未宣告冷卻時間 — 持久化層的縮放退避預設值會套用）。自 #10334 起，
+`ProviderErrorRuleMatch` 中的 `scope` 會端到端地被使用，但**僅**適用於
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允許清單中的提供者（`providerErrorRules.ts` —
+目前僅有 `"agentrouter"`，透過 `honorsRuleLockScope()` 控制）。對於其他所有提供者，`scope` 仍僅具參考資訊，與 #10334 之前完全相同。
+`checkFallbackError` 會將相符規則的 scope 暴露為
+`fallbackResult.ruleScope`；`isAgentrouterConnectionQuotaScope()`
+（`src/sse/services/auth.ts`）是共用的防護，會確認 `ruleScope` 確實可安全地作為一個全連線範圍、可自行恢復的訊號來遵循（scope `"connection"`、原因為 `quota_exhausted`，絕不為 `permanent`，也絕不為 `creditsExhausted` — 用於防範未來將 scope `"connection"` 與永久帳戶狀態配對的情況）。有兩個取用者會呼叫它：
 
-- **持久化**(`markAccountUnavailable()`、`src/sse/services/auth.ts`):
-  不再落入 passthrough 提供者的**每模型**鎖定分支
-  (agentrouter 為 `passthroughModels: true` → `hasPerModelQuota()`
-  回傳 `true`),而是套用**暫時性連線冷卻**——
-  `testStatus: "unavailable"` 加上 `rateLimitedUntil`,絕不會是終態狀態
-  (`credits_exhausted`/`banned`/`expired`)——因此連線在冷卻期結束後
-  會自行恢復,而無需手動重設憑證。
-  對於設有 `disableCooling: true` 的連線則會略過(#2997):該選擇退出
-  會改為落入每模型鎖定(這是有文件記錄的權衡取捨——
-  請參閱該分支上方的程式碼註解)。
-- **同一請求的組合路由**(`applyComboTargetExhaustion()`、
-  `open-sse/services/combo/targetExhaustion.ts`):同一個防護判斷會將該連線
-  標記進記憶體內的 `exhaustedConnections` 集合,以
-  `${provider}:${connectionId}` 為鍵。這只會略過同一請求中、其自身目標物件上
-  _已經帶有完全相同 `connectionId`_ 的剩餘目標
-  (`getExhaustedTargetSkipReason()`、
-  `open-sse/services/combo/comboPredicates.ts`,在 `exhaustedConnections` 查詢之前的
-  `if (provider &&
-connectionId)`)——一般的模型清單組合中,同層目標本身並未固定
-  帶有自己的 `connectionId`,只會在每次派發時從回應的
-  `X-OmniRoute-Selected-Connection-Id` 標頭解析出來,因此永遠不會命中
-  該鍵值比對。對於這種常見情況,真正防止剩餘分支(leg)重複使用
-  剛耗盡帳號的機制並不是這個 Set——而是上方的持久化層
-  (該連線的 `rateLimitedUntil` 現在指向未來時間),加上同一個
-  防護判斷抑制了此失敗的 `transientRateLimitedProviders`
-  (請參閱「兩階段設計」以及 `targetExhaustion.ts` 中
-  `isAgentrouterConnectionQuotaScope` 分支上的程式碼註解):由於該 Set
-  未被標記,`combo.ts` 的 `allowRateLimitedConnection` 強制允許
-  (`open-sse/services/combo.ts:1005-1013`、`:2734-2738`)不會對
-  該提供者的剩餘分支生效,因此憑證選擇的 `rateLimitedUntil`
-  篩選器(`src/sse/services/auth.ts:1238`)會正常生效,剩餘分支
-  要麼選擇另一條仍符合資格的 agentrouter 連線,要麼以無可用憑證
-  而失敗——它不會強行回到此分支剛冷卻的連線上。
+- **持久化**（`markAccountUnavailable()`、`src/sse/services/auth.ts`）：
+  不再落入 passthrough-provider 的**按模型**鎖定分支（agentrouter 的設定為 `passthroughModels: true` → `hasPerModelQuota()` 回傳 `true`），而是套用**暫時性連線冷卻** — `testStatus: "unavailable"` + `rateLimitedUntil`，絕不設定終端狀態（`credits_exhausted`/`banned`/`expired`）— 如此一來，連線會在冷卻期結束後自行恢復，不需要手動重設憑證。
+  對設定 `disableCooling: true` 的連線會跳過（#2997）：這個退出選項會改為落入按模型鎖定分支（這是已記錄的取捨 — 請參閱分支上方的程式碼註解）。
+- **相同請求的組合路由**（`applyComboTargetExhaustion()`、`open-sse/services/combo/targetExhaustion.ts`）：相同的防護條件會將連線標記到記憶體中的 `exhaustedConnections` 集合，索引鍵為 `${provider}:${connectionId}`。這只會跳過仍在處理中的相同請求目標，且該目標本身必須在自己的 target 物件上帶有完全相同的 `connectionId`（`getExhaustedTargetSkipReason()`、`open-sse/services/combo/comboPredicates.ts`、在 `exhaustedConnections` 查找前的 `if (provider && connectionId)`）— 一般的模型清單組合中，同層目標本身不會帶有固定的 `connectionId`，而是每次分派時才從回應的 `X-OmniRoute-Selected-Connection-Id` 標頭解析其中一個，因此絕不會命中該索引鍵。對於這個常見情況，防止剩餘步驟重用剛剛耗盡額度的帳戶，真正發揮作用的不是這個 Set — 而是上方的持久化層（連線的 `rateLimitedUntil` 現在位於未來）與相同的防護條件共同抑制該失敗的 `transientRateLimitedProviders`（請參閱「兩階段設計」以及 `targetExhaustion.ts` 中 `isAgentrouterConnectionQuotaScope` 分支上的程式碼註解）：由於該 Set 未被標記，`combo.ts` 的 `allowRateLimitedConnection` 強制允許（`open-sse/services/combo.ts:1005-1013`、`:2734-2738`）不會對該提供者的剩餘步驟生效，因此憑證選取的 `rateLimitedUntil` 篩選條件（`src/sse/services/auth.ts:1238`）會正常獲得遵守，剩餘步驟要麼選取其他仍符合資格的 agentrouter 連線，要麼因沒有可用憑證而失敗 — 不會強行回到這個分支剛剛冷卻的連線。
 
-### 兩階段設計:先狀態重述,再分類
+### 兩階段設計：狀態重述，然後分類
 
-狀態重述(`upstreamStatusRestatement.ts`)與提供者
-分類規則(`open-sse/config/providerErrorRules.ts`、
-`providerRuleRegistry`)是兩個獨立的註冊表,兩者都以提供者 id
-與文字標記為鍵,但它們在不同位置執行、服務於不同目的:
-重述會在 `chatCore.ts` 早期改寫 HTTP 狀態碼;
-分類規則則在 `checkFallbackError()`
-(`open-sse/services/accountFallback.ts`)內部決定容錯移轉的 `reason`
-並鎖定 `scope`(`model` / `provider` / `connection`)。
+狀態重述（`upstreamStatusRestatement.ts`）與提供者分類規則（`open-sse/config/providerErrorRules.ts`、`providerRuleRegistry`）是分開的登錄表，兩者都以提供者 ID 和文字標記作為索引，但執行位置及用途不同：重述會在 `chatCore.ts` 中及早改寫 HTTP 狀態；分類規則則會在 `checkFallbackError()` 中選取後援 `reason` 並鎖定 `scope`（`model` / `provider` / `connection`）（`open-sse/services/accountFallback.ts`）。
 
-分類規則只有在提供者被列於 `providerErrorRules.ts` 的
-`FULL_TEXT_RULE_PROVIDERS` 允許清單中時,才能看到完整的錯誤**文字**
-(這是比對 `额度不足` 等內文標記所必需的)——目前僅有
-`"agentrouter"`。對於其他所有**內建目錄**提供者,
-`checkFallbackError` 只會將結構化錯誤(`{code, type}`)交給
-`getProviderErrorRuleMatch`,這對於基於標頭/狀態碼/錯誤碼的規則
-已經足夠,但無法看到內文文字標記。
-輔助函式 `resolveRuleMatchBody()` 負責這項選擇:允許清單中的提供者
-取得完整錯誤文字,其餘則取得結構化錯誤。將**內建**提供者加入
-`FULL_TEXT_RULE_PROVIDERS` 是明確的逐提供者選擇加入(opt-in)——
-其存在目的是讓不在清單上的每個提供者的預設路徑
-保持逐位元完全不變。
+只有對 `providerErrorRules.ts` 中 `FULL_TEXT_RULE_PROVIDERS` 允許清單所列的提供者，分類規則才會看到完整的錯誤**文字**（這是比對 `额度不足` 等本文標記所需的內容）— 目前只有 `"agentrouter"`。對於其他所有**內建目錄**提供者，`checkFallbackError` 傳給 `getProviderErrorRuleMatch` 的只有結構化錯誤（`{code, type}`），這對基於標頭／狀態／程式碼的規則已經足夠，但無法看到本文文字標記。輔助函式 `resolveRuleMatchBody()` 會執行這項選擇：對允許清單中的提供者使用完整錯誤文字，否則使用結構化錯誤。將**內建**提供者加入 `FULL_TEXT_RULE_PROVIDERS` 是針對每個提供者的明確選擇加入 — 其存在目的，是讓不在清單中的每個提供者仍維持位元組層級完全不變的預設路徑。
 
-規則的 `scope`(`model` / `provider` / `connection`)是與
-`FULL_TEXT_RULE_PROVIDERS` 分開的選擇加入:
-`checkFallbackError` 只會將其呈現為 `fallbackResult.ruleScope`,
-而下游消費者只會對同一檔案中 `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-允許清單內的提供者(透過 `honorsRuleLockScope()` 把關——目前僅有
-`"agentrouter"`)將其當作不只是資訊性標籤的內容來遵循。
-關於提供者進入該允許清單後,`scope: "connection"` 比對
-實際會產生什麼效果,請參閱上方的「重述後的配額錯誤」。
+規則的 `scope`（`model` / `provider` / `connection`）與 `FULL_TEXT_RULE_PROVIDERS` 是彼此獨立的選擇加入項目：`checkFallbackError` 只會將其提供為 `fallbackResult.ruleScope`，而下游取用者只有在同一檔案中的 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 允許清單所列提供者上，才會將其視為不只是資訊標籤的內容（透過 `honorsRuleLockScope()` 控制 — 目前只有 `"agentrouter"`）。關於提供者加入該允許清單後，`scope: "connection"` 比對實際會執行什麼操作，請參閱上方的「重述後的配額錯誤」。
 
-**#11104——操作者宣告的規則會繞過這兩個允許清單。**操作者可在
-執行期透過 `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-宣告逐提供者規則,而無需編輯此檔案。若將操作者規則擋在
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-之後——這些允許清單的目的是保護內建目錄規則的**預設**行為——
-將使設定機制對除已列名者之外的所有提供者失效,
-因為宣告規則本身就已經是操作者的明確選擇加入。
-`resolveRuleMatchBody()` 與 `honorsRuleLockScope()` 都會先檢查
-`hasOperatorRuleForProvider()`:擁有操作者規則的提供者
-會取得原始錯誤文字,且其宣告的 `scope` 會被遵循,
-無論它是否也出現在任一允許清單中。
+**#11104 — 操作者宣告的規則會繞過這兩個允許清單。**操作者可以在執行階段透過 `settings.providerErrorRules`（`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`）宣告每個提供者的規則，而不必編輯此檔案。讓操作者規則受 `FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` 限制 — 這兩個允許清單的用途是保護內建目錄規則的**預設**行為 — 會使設定機制對除清單中已列出的提供者以外的所有提供者失去作用，因為宣告規則本身已是操作者明確的選擇加入。`resolveRuleMatchBody()` 與 `honorsRuleLockScope()` 都會先檢查 `hasOperatorRuleForProvider()`：具有操作者規則的提供者會取得原始錯誤文字，並遵循其宣告的 `scope`，不論它是否同時出現在任一允許清單中。
 
-**已知缺口——`providerRuleRegistry` 在 HTTP 400 時永遠不會被查詢。**
-`checkFallbackError` 的 `BAD_REQUEST` 分支完全透過自己的模式陣列
-(`accountFallback.ts` 中的 `MODEL_ACCESS_DENIED_PATTERNS`、
-`CONTEXT_OVERFLOW_PATTERNS` 等)來分類狀態碼 400,
-並在其上方的 `configuredRule`/`getProviderErrorRuleMatch` 分支
-被執行到之前就回傳。一條 `status: 400` 的內建目錄規則
-(或操作者規則)在語法上是有效的,但永遠不會觸發。
-目前沒有任何現存規則以 400 為目標,因此生產環境不受影響——
-但未來的 400 規則需要先修改此分支,這比新增一條規則是更大的變更
-(它會為每個已依賴模式陣列行為的提供者重新分類 400),
-且超出單一提供者規則新增的範圍。
+**操作者宣告的規則**（`OperatorProviderErrorRule`）：每個規則都有選用的 `status` 與選用的 `match`（對錯誤文字執行簡單的不分大小寫子字串比對，絕不使用 RegExp，因此不會造成 ReDoS），且至少必須設定其中一項。兩者同時設定時會以 AND 條件組合；省略的欄位會比對任何內容，因此 `{match: "insufficient_quota"}` 會比對任何帶有該程式碼的狀態。第一個符合的規則會生效。`cooldownMs` 最多接受 30 天；規則總數最多為 50 個。
 
-### 新增會誤報配額狀態的閘道
+**兜底預設值**（`settings.providerErrorDefaults`，選擇性啟用，透過
+`setOperatorProviderErrorDefaults` 設定）：`{[provider]: {cooldownMs, scope?, reason?}}`
+其中 `cooldownMs` 的範圍為 1 分鐘至 30 天。只有在沒有任何操作員規則或內建目錄規則符合時，且錯誤為 402、403、408、429 或 5xx 時，才會套用預設值。請求形狀錯誤（400、404、409、413、422）以及單獨的 401 會維持各自的處理方式。若未明確指定 `reason`，原因會根據狀態碼取得，方式與 `classifyError` 相同。宣告預設值會在 `hasOperatorRuleForProvider()` 中被視為操作員規則，因此其 `scope`（預設為 `"connection"`）會受到遵循。預設值的實際冷卻時間取 `cooldownMs` 與提供者自身重試提示（`Retry-After`、`x-ratelimit-reset` 或本文中的重設提示，亦即當連線冷卻設定「使用上游重試提示」開啟時引擎所遵循的相同提示）兩者中較長者，因此預設值可以延長較短的上游提示，但絕不會縮短真正的重設時間。明確的操作員規則會保留其確切的 `cooldownMs`。規則與預設值都不會繞過 `markAccountUnavailable` 中的連線冷卻防護：作用中的較長冷卻時間絕不會被縮短，終止狀態也絕不會被覆寫。在 `checkFallbackError` 中較早執行的內建文字偵測器（額度耗盡、每日配額、帳戶停用）仍會優先處理其各自的詞組。
 
-1. 在 `statusRestatementRegistry`
-   （`open-sse/config/upstreamStatusRestatement.ts`）中註冊一個規則陣列。讓 `textMarkers`
-   保持提供者專屬；絕不要重複使用會與
-   `CREDITS_EXHAUSTED_SIGNALS`（`open-sse/services/accountFallback.ts`）衝突的通用英文片語。
-2. 可選地在
-   `open-sse/config/providerErrorRules.ts`（`providerRuleRegistry`）中註冊分類規則，
-   以選擇正確的鎖定範圍（`connection` 用於帳號層級配額，`model` 用於
-   個別模型的錯誤）。此步驟僅對規則需要完整錯誤文字（body 標記）的提供者
-   在生產環境中生效：在同一檔案中將提供者 id 加入
-   `FULL_TEXT_RULE_PROVIDERS` — 否則 `checkFallbackError` 只會把結構化的
-   `{code, type}` 錯誤交給規則，而 body 文字規則將永遠無法匹配
-   即時流量。純粹依據 `status`/`headers` 匹配的規則（如 Opencode 或
-   Minimax 的規則）不需要此選用設定。另外，如果規則宣告
-   `scope: "connection"`，且意圖是實際的連線層級冷卻加上同一請求的
-   combo 跳過（而非僅是資訊性標籤），請在同一檔案中將提供者 id 加入
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` — 這正是控制
-   `markAccountUnavailable()`（`src/sse/services/auth.ts`）與
+**已知缺口 — `providerRuleRegistry` 永遠不會針對 HTTP 400 進行查詢。**
+`checkFallbackError` 的 `BAD_REQUEST` 分支完全透過自身的模式陣列（`accountFallback.ts` 中的 `MODEL_ACCESS_DENIED_PATTERNS`、`CONTEXT_OVERFLOW_PATTERNS` 等）對狀態 400 進行分類，並會在抵達上方的 `configuredRule`/`getProviderErrorRuleMatch` 分支之前返回。具有 `status: 400` 的內建目錄規則（或操作員規則）在語法上有效，但永遠不會觸發。目前沒有任何現有規則以 400 為目標，因此不會影響生產環境 — 但未來的 400 規則必須先修改此分支，這比新增規則更大的變更（因為會重新分類所有已依賴模式陣列行為的提供者所收到的 400），不在單一提供者規則新增的範圍內。
+
+### 新增會錯誤陳述配額的閘道
+
+1. 在 `statusRestatementRegistry` 中註冊一個規則陣列（`open-sse/config/upstreamStatusRestatement.ts`）。讓 `textMarkers`
+   僅限於提供者專用；絕不要重複使用會與
+   `CREDITS_EXHAUSTED_SIGNALS`（`open-sse/services/accountFallback.ts`）衝突的通用英文詞組。
+2. 可選擇在
+   `open-sse/config/providerErrorRules.ts`（`providerRuleRegistry`）中註冊分類規則，以選擇正確的鎖定範圍（帳戶層級配額使用
+   `connection`，每個模型的錯誤使用 `model`）。此步驟只有在生產環境中，對於規則需要完整錯誤文字（本文標記）的提供者才會生效：將提供者 id 加入同一檔案中的 `FULL_TEXT_RULE_PROVIDERS` — 否則 `checkFallbackError` 只會將結構化的
+   `{code, type}` 錯誤傳給規則，而本文文字規則在實際流量中永遠不會符合。純粹根據 `status`/`headers` 進行比對的規則（例如 Opencode 或 Minimax 的規則）不需要此選擇性啟用。另外，如果規則宣告 `scope: "connection"`，且目的是實際的全連線冷卻加上相同請求的組合跳過（而不只是資訊標籤），請將提供者 id 加入同一檔案中的 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` — 這是控制 `markAccountUnavailable()`（`src/sse/services/auth.ts`）中的 `isAgentrouterConnectionQuotaScope()` 類型消費，以及
    `applyComboTargetExhaustion()`
-   （`open-sse/services/combo/targetExhaustion.ts`）中
-   `isAgentrouterConnectionQuotaScope()` 式取用行為的開關；沒有它，
-   `scope` 仍會透過 `fallbackResult.ruleScope` 傳遞，但不會有任何東西
-   據此行動。
-3. 新增仿照 `tests/unit/upstream-status-restatement.test.ts`
-   與 `tests/unit/agentrouter-error-rules.test.ts` 的單元測試（包含
-   not-permanent / not-creditsExhausted 防護，以及 — 如果提供者需要
-   允許清單 — 一個斷言 `resolveRuleMatchBody()` 僅對該提供者回傳
-   完整文字的測試）。
+   （`open-sse/services/combo/targetExhaustion.ts`）的閘門；若未加入，`scope` 仍會透過 `fallbackResult.ruleScope` 傳遞，但不會有任何實際作用。
+3. 新增對應的單元測試，參照
+   `tests/unit/upstream-status-restatement.test.ts` 和
+   `tests/unit/agentrouter-error-rules.test.ts`（包括
+   not-permanent / not-creditsExhausted 防護；如果提供者需要允許清單，還要新增測試，確認 `resolveRuleMatchBody()` 僅會對該提供者返回完整文字）。
 
-不需要變更 `chatCore.ts`、`classifyError` 或 combo。
+不需要修改 `chatCore.ts`、`classifyError` 或 combo。
 
-#### 出口分桶鎖定 (#10880)
+#### Egress 分桶鎖定 (#10880)
 
-`EGRESS_BUCKETED_LOCK_PROVIDERS` 中的提供者（opencode 家族）被視為
-以 IP 分桶的上游（opencode 免費方案是以 IP 分桶，而非
-以帳號分桶 — 參見 #9611）：一個被分類為 `quota_exhausted`
-**或** `rate_limit_exceeded` 的 status-429，會在輪替有機會嘗試之前，
-冷卻所有最後已知出口 IP 與失敗連線相同的允許清單家族連線
-— 避免 N-1 次保證失敗的上游呼叫（與 #10460/#10525 形式相同）。
-刻意包含 `rate_limit_exceeded`：在 `markAccountUnavailable`
-路徑上，opencode 專屬規則永遠不會匹配（沒有 headers/body 交給
-`checkFallbackError`，opencode 不在 `FULL_TEXT_RULE_PROVIDERS` 中），
-因此 body 帶有訂閱配額文字（"monthly usage limit reached"）的 429
-會在 `status_429` 規則被觸及之前，由配額文字回退
-（`buildSubscriptionQuotaFallback`，`accountFallback.ts`；1 小時冷卻）
-分類為 `quota_exhausted` — 而不含配額文字的 429（純粹的速率限制）
-會透過 `status_429` 規則分類為 `rate_limit_exceeded`，且仍會冷卻
-該 IP 家族。對於允許清單中的提供者，以 IP 分桶的速率限制
-與配額耗盡是相同的訊號。坦誠的限制：
+`EGRESS_BUCKETED_LOCK_PROVIDERS` 中的提供者（opencode 系列）會被視為以 IP 分桶的上游（opencode 免費層是以 IP 分桶，而非以帳戶分桶 — 參見 #9611）：被分類為 `quota_exhausted`
+**或** `rate_limit_exceeded` 的 status-429，會在輪替嘗試連線之前，冷卻所有列入允許清單的系列連線，只要其最後已知的 egress IP 與失敗連線的 IP 相符
+— 避免 N-1 次必然失敗的上游呼叫（形態與 #10460/#10525 相同）。
+此處特意納入 `rate_limit_exceeded`：在 `markAccountUnavailable` 路徑中，opencode 專用規則永遠不會符合（沒有將標頭/本文傳給 `checkFallbackError`，且 opencode 不在 `FULL_TEXT_RULE_PROVIDERS` 中），因此，本文帶有訂閱配額文字（「monthly usage limit reached」）的 429，會先由配額文字後備處理（`buildSubscriptionQuotaFallback`、`accountFallback.ts`；1 小時冷卻）分類為 `quota_exhausted`，之後才會到達 `status_429` 規則 — 而不含配額文字的 429（一般速率限制）則會透過 `status_429` 規則分類為 `rate_limit_exceeded`，同樣會冷卻整個 IP 系列。對於列入允許清單的提供者而言，IP 分桶的速率限制與配額耗盡是相同的訊號。合理限制：
 
-- **盡力而為（Best-effort）**：鎖定會從 `proxy_logs` 解析該連線最後已知的 `egress_ip`
-  （24 小時視窗、同步、無快取）。冷快取（出口 IP 從未被探測）或無資料列 →
-  失敗的連線仍會被分支冷卻（如同現行做法記錄），只是不會鎖定任何兄弟連線。
-- **永不為終態**：冷卻是一個可更新的配額視窗
-  （`testStatus: "unavailable"`）；永久狀態絕不會從 IP 層級的訊號推導出來。
-  `disableCooling` 連線會完全跳過此分支。
-- **允許清單家族的鎖定粒度改變**：這是範圍（scope）變更，不只是兄弟連線的
-  最佳化。opencode 是 `passthroughModels` 提供者，所以在此分支之前，429 會產生
-  逐模型（per-MODEL）的鎖定；現在則產生連線冷卻 —— 包括對於只執行單一連線、
-  完全沒有兄弟連線的營運者。這正是 opencode 規則表早已宣告為正確的粒度
-  （`scope: "connection"`，`providerErrorRules.ts`），但至今從未被遵守，因為
-  opencode 不在 `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 中。此分支會自行寫入失敗
-  連線的冷卻 + `backoffLevel`，比照連線範圍的 agentrouter 分支，然後返回 ——
-  逐模型封鎖與下方的一般路徑永遠不會被到達。
-- **包含 Combo**：如同 agentrouter 分支，此範圍刻意忽略 combo 呼叫者對 429
-  套用的 `persistUnavailableState`/`isCombo` 降級。逐模型鎖定並非此範圍的較弱
-  形式，而是錯誤的單位：它對已耗盡的 IP 什麼也沒說，因此 combo 輪替會持續為
-  每個兄弟連線白白浪費一次保證失敗的呼叫。
-- **兄弟連線安全**：已處於終態（banned/credits_exhausted）或已在較長冷卻中的
-  兄弟連線絕不會被覆寫。
-- **專屬允許清單**：擴大 `EGRESS_BUCKETED_LOCK_PROVIDERS` 是明確的擁有者決策；
-  不引入通用化接線（模式 #10334/#10419）。兄弟連線查詢綁定同一個允許清單，
-  而非以 SQL 字面值重複它，因此擴大清單仍維持一行變更。
-- **出口 IP 輪替，雙向皆然**：查詢視窗（24 小時）遠寬於出口 IP 快取 TTL
-  （5 分鐘），所以「最後已知 IP」是歷史紀錄，而非目前狀態。如果連線的代理在
-  視窗內輪替過，鎖定可能**錯過**真正共享的 IP（記錄的 IP 是新的、未耗盡的那個）
-  —— 對稱地，它也可能**冷卻一個已從耗盡 IP 輪替離開的兄弟連線**。第二種情況
-  會讓該兄弟連線損失一個冷卻視窗；兩者都是基於歷史查詢的盡力而為限制，已予接受。
-- **成本**：對 `proxy_logs` 的兩次有界掃描（透過 `idx_pl_timestamp` 過濾視窗），
-  僅以 429 的發生頻率執行。無新索引（遷移 134 YAGNI）。在適度大小的真實流量
-  資料庫副本上測量；高吞吐量的實例在同一視窗中會按比例持有更多資料列。
-
----
+- **盡力而為**：鎖定會從 `proxy_logs`（24 小時視窗、同步、無快取）解析連線最後已知的 `egress_ip`
+  。快取為冷狀態（從未探測過 egress IP）或沒有資料列時 → 失敗的連線仍會由分支進入冷卻狀態（如同目前的記錄方式），只是
+  不會鎖定任何同層連線。
+- **永不進入終止狀態**：冷卻是一個會續期的配額視窗
+  （`testStatus: "unavailable"`）；永遠不會從 IP 層級訊號推導出永久狀態。`disableCooling` 連線會完全略過此分支。
+- **允許清單家族的鎖定粒度變更**：這是範圍變更，而不只是同層連線最佳化。opencode 是 `passthroughModels`
+  提供者，因此在此分支之前，429 會產生每個 MODEL 的鎖定；現在則會產生連線冷卻——包括操作人員只有單一連線、完全沒有同層連線的情況。這正是 opencode 規則表已宣告為正確的粒度（`scope: "connection"`、
+  `providerErrorRules.ts`），只是到目前為止從未生效，因為 opencode 不在
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` 中。此分支會自行寫入失敗連線的冷卻狀態與 `backoffLevel`，仿照
+  connection-scoped agentrouter 分支，然後返回——每個模型的封鎖與下方的通用路徑都不會被執行。
+- **包含 Combo**：與 agentrouter 分支相同，此範圍會刻意忽略 Combo 呼叫端針對 429 套用的
+  `persistUnavailableState`/`isCombo` 降級。每個模型的鎖定並不是此範圍的較弱形式，而是錯誤的單位：它完全無法表示耗盡的 IP，因此 Combo
+  輪替仍會在每個同層連線上各消耗一次必然失敗的呼叫。
+- **同層連線安全性**：已進入終止狀態（banned/credits_exhausted）的同層連線，或已處於更長冷卻狀態的同層連線，永遠不會被覆寫。
+- **專屬允許清單**：擴大 `EGRESS_BUCKETED_LOCK_PROVIDERS` 是明確的擁有者決策；不使用通用接線（pattern #10334/#10419）。同層連線查詢會繫結相同的允許清單，而不是在 SQL
+  常值中重複它，因此擴大清單時只需變更一行。
+- **雙向的 Egress IP 輪替**：查詢視窗（24 小時）遠大於 egress-IP 快取 TTL（5 分鐘），因此「最後已知 IP」代表的是歷史記錄，而非目前狀態。如果連線的 Proxy 在視窗內輪替過，鎖定可能會**遺漏**實際共用的 IP（記錄中的 IP 是新的、尚未耗盡的 IP）——反過來，也可能會讓已經從耗盡 IP
+  輪替離開的同層連線進入冷卻狀態。第二種情況會讓該同層連線承受一次冷卻視窗；兩者都是基於歷史記錄查詢的盡力而為限制，並予以接受。
+- **成本**：對 `proxy_logs` 執行兩次有界掃描（透過 `idx_pl_timestamp` 篩選視窗），且只在 429 頻率下執行。不新增索引（migration 134
+  YAGNI）。測量結果來自中等規模、具有實際流量的資料庫副本；高吞吐量執行個體在相同視窗中會按比例保留更多資料列。
 
 ## 其他韌性功能
 

@@ -347,73 +347,73 @@ API 키: [대시보드에서 가져오기]
 ```bash
 npm install -g omniroute
 
-# 구성 디렉터리 생성
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env 파일 생성(.env.example 참조)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 서버 시작
+# Start server
 omniroute
-# 또는 사용자 지정 포트 사용:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI는 `~/.omniroute/.env` 또는 `./.env`에서 `.env`를 자동으로 로드합니다.
+CLI `~/.omniroute/.env` 또는 `./.env` 에서 `.env` 자동으로 로드합니다. 작업 디렉터리의 `./.env` 짧은 키 허용 목록(포트, `REQUIRE_API_KEY`, 로케일 및 색상 설정)만 설정할 수 있습니다. 다른 모든 것을 `~/.omniroute/.env` 에 넣으십시오. [CLI 출시 계약을](CLI-LAUNCH-CONTRACTS.md#working-directory-env) 참조하세요.
 
 ### 트레이 모드
 
-시스템 트레이에서 OmniRoute를 시작합니다.
+시스템 트레이에서 OmniRoute 시작합니다:
 
 ```bash
 omniroute serve --tray
 ```
 
-서버와 트레이가 준비되면 명령이 반환됩니다.
+서버와 트레이가 준비된 후에 명령이 반환됩니다.
 
-터미널을 닫아도 서버는 계속 실행됩니다.
+서버는 터미널 없이 계속됩니다.
 
 트레이 모드는 macOS, Windows 및 그래픽 Linux 세션을 지원합니다. 트레이 모드에서는 대시보드가 자동으로 열리지 않습니다.
 
-트레이 메뉴에서 다음 작업을 수행할 수 있습니다.
+다음 작업에는 트레이 메뉴를 사용하세요.
 
 - 대시보드를 엽니다.
-- `/dashboard/logs`를 엽니다.
-- 자동 시작 설정을 변경합니다.
-- OmniRoute를 중지합니다.
+- `/dashboard/logs` 엽니다.
+- 자동 시작을 변경합니다.
+- OmniRoute 중지하세요.
 
-`--tray`를 다음 옵션과 함께 사용하지 마세요.
+`--tray` 다음 옵션과 결합하지 마십시오:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-이러한 모드에는 서로 다른 프로세스 소유권이 필요합니다.
+이러한 모드에는 다양한 프로세스 소유권이 필요합니다.
 
-다음 시스템 로그인 시 자동으로 시작되도록 설정합니다.
+다음 머신 로그인 시 시작을 활성화합니다.
 
 ```bash
 omniroute autostart enable
 ```
 
-자동 시작은 macOS, Windows 및 그래픽 Linux 세션에서 트레이 모드를 사용합니다. 헤드리스 Linux에서는 기존 systemd 사용자 서비스를 사용합니다.
+자동 시작은 macOS, Windows 및 그래픽 Linux 세션에서 트레이 모드를 사용합니다. 헤드리스 Linux 기존 시스템 사용자 서비스를 사용합니다.
 
-로그인 시 자동 시작을 비활성화합니다.
+로그인 시 시작 비활성화:
 
 ```bash
 omniroute autostart disable
 ```
 
-### 제거
+### 제거 중
 
-OmniRoute가 더 이상 필요하지 않은 경우, 깔끔하게 제거할 수 있도록 두 가지 빠른 스크립트를 제공합니다.
+OmniRoute 더 이상 필요하지 않은 경우 완전히 제거할 수 있는 두 가지 빠른 스크립트를 제공합니다.
 
-| 명령                     | 작업                                                                     |
-| ------------------------ | ------------------------------------------------------------------------ |
-| `npm run uninstall`      | 시스템 앱을 제거하지만 `~/.omniroute`의 **DB와 구성은 유지합니다**.      |
-| `npm run uninstall:full` | 앱을 제거하고 **모든 구성, 키 및 데이터베이스를 영구적으로 삭제합니다**. |
+| 명령                     | 행동                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `npm run uninstall`      | 시스템 앱을 제거하지만** DB 및 구성을 유지합니다.** `~/.omniroute` 에서 .     |
+| `npm run uninstall:full` | 앱 AND 영구적으로 제거합니다.** 모든 구성, 키 및 데이터베이스를 지웁니다.** . |
 
-> 참고: 이 명령을 실행하려면 OmniRoute 프로젝트 폴더로 이동한 후(복제한 경우) 실행하세요. 또는 전역으로 설치한 경우 `npm uninstall -g omniroute`를 실행하면 됩니다.
+> 참고: 이러한 명령을 실행하려면 OmniRoute 프로젝트 폴더(복제한 경우)로 이동하여 실행하십시오. 또는 전역적으로 설치된 경우 간단히 `npm uninstall -g omniroute` 실행할 수 있습니다.
 
 ### VPS 배포
 
@@ -431,25 +431,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# 또는: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 배포(낮은 메모리)
 
-RAM이 제한된 서버에서는 메모리 제한 옵션을 사용하세요.
+RAM 제한된 서버의 경우 메모리 제한 옵션을 사용하십시오.
 
 ```bash
-# 512MB 제한 사용(기본값)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# 또는 사용자 지정 메모리 제한 사용
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# 또는 ecosystem.config.js 사용
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js`를 생성합니다.
+`ecosystem.config.js` 생성:
 
 ```javascript
 module.exports = {
@@ -474,24 +474,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# 이미지 빌드(기본값 = codex/claude/droid가 사전 설치된 runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# 포터블 모드(권장)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI 바이너리를 사용하는 호스트 통합 모드에 대해서는 기본 문서의 Docker 섹션을 참조하세요.
+CLI 바이너리를 사용한 호스트 통합 모드의 경우 기본 문서의 Docker 섹션을 참조하세요.
 
-### Void Linux (xbps-src)
+### 무효 Linux (xbps-src)
 
-Void Linux 사용자는 `xbps-src` 크로스 컴파일 프레임워크를 사용하여 OmniRoute를 네이티브로 패키징하고 설치할 수 있습니다. 이 프레임워크는 필수 `better-sqlite3` 네이티브 바인딩과 함께 Node.js 독립 실행형 빌드를 자동화합니다.
+Void Linux 사용자는 `xbps-src` 크로스 컴파일 프레임워크를 사용하여 기본적으로 OmniRoute 패키징하고 설치할 수 있습니다. 이는 필수 `better-sqlite3` 기본 바인딩과 함께 Node.js 독립형 빌드를 자동화합니다.
 
 <details>
 <summary><b>xbps-src 템플릿 보기</b></summary>
 
 ```bash
-# 'omniroute'용 템플릿 파일
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -512,7 +512,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp의 대상 CPU 아키텍처 결정
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -521,29 +521,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) 모든 의존성 설치 – 스크립트 건너뛰기
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js 독립 실행형 번들 빌드
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 정적 자산을 독립 실행형 번들로 복사
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 네이티브 바인딩 컴파일
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) 컴파일된 바인딩을 독립 실행형 번들에 배치
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) 아키텍처별 sharp 번들 제거
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js 정적 분석에서 누락된 pino 런타임 의존성 복사:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -557,7 +557,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# 설치 후 훅이 비어 있는 Next.js 앱 라우터 디렉터리를 제거하지 않도록 방지
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -585,30 +585,30 @@ post_install() {
 
 ### 환경 변수
 
-| 변수                                    | 기본값                               | 설명                                                                                      |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 서명 시크릿(**프로덕션 환경에서는 변경**)                                             |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 최초 로그인 비밀번호                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | 데이터 디렉터리(db, 사용량, 로그)                                                         |
-| `PORT`                                  | 프레임워크 기본값                    | 서비스 포트(예시에서는 `20128`)                                                           |
-| `HOSTNAME`                              | 프레임워크 기본값                    | 바인딩 호스트(Docker 기본값은 `0.0.0.0`)                                                  |
-| `NODE_ENV`                              | 런타임 기본값                        | 배포 시 `production`으로 설정                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | 대시보드에 표시되고 서버에 노출되는 공개 기본 URL(기존 `BASE_URL` 대체)                   |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | 클라우드 동기화 엔드포인트 기본 URL(기존 `CLOUD_URL` 대체)                                |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 생성된 API 키의 HMAC 시크릿                                                               |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*`에서 Bearer API 키 사용 강제                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 인증된 대시보드 사용자가 요청 시 저장된 API 키 전체 값을 표시할 수 있도록 허용            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | 캐시된 Provider Limits 데이터의 서버 측 갱신 주기. UI 새로 고침 버튼으로 수동 동기화 가능 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 쓰기/가져오기/복원 전 자동 SQLite 스냅샷 비활성화. 수동 백업은 계속 사용 가능             |
-| `APP_LOG_TO_FILE`                       | `true`                               | 애플리케이션 및 감사 로그를 디스크에 출력하도록 설정                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` 인증 쿠키 강제 적용(HTTPS 리버스 프록시 사용 시)                                 |
-| `CLOUDFLARED_BIN`                       | 설정되지 않음                        | 관리형 다운로드 대신 기존 `cloudflared` 바이너리 사용                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 관리형 Quick Tunnels용 전송 프로토콜(`http2`, `quic` 또는 `auto`)                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js 힙 제한(MB)                                                                       |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | 최대 프롬프트 캐시 항목 수                                                                |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | 최대 시맨틱 캐시 항목 수                                                                  |
+| 변하기 쉬운                             | 기본                     | 설명                                                                                                                          |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(자동 생성)_            | JWT 서명 비밀 — 처음 실행 시 자동 생성되고 `server.env` 에 유지됩니다. 데이터 디렉터리가 일시적인 경우 명시적으로 설정합니다. |
+| `INITIAL_PASSWORD`                      | _(설정되지 않음)_        | 첫 번째 로그인 비밀번호입니다. npm/source 설치는 `CHANGEME` 로 시작합니다: 교체합니다. 설정되지 않음: 온보딩 마법사           |
+| `DATA_DIR`                              | `~/.omniroute`           | 데이터 디렉터리(db, 사용량, 로그)                                                                                             |
+| `PORT`                                  | 프레임워크 기본값        | 서비스 포트(예제에서는 `20128` )                                                                                              |
+| `HOSTNAME`                              | 프레임워크 기본값        | 호스트 바인딩(Docker 의 기본값은 `0.0.0.0`)                                                                                   |
+| `NODE_ENV`                              | 런타임 기본값            | 배포용 `production` 설정                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | 대시보드에 표시되고 서버에 노출되는 공개 기반 URL (레거시 `BASE_URL` 대체)                                                    |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | 클라우드 동기화 엔드포인트 기반 URL (기존 `CLOUD_URL` 대체)                                                                   |
+| `API_KEY_SECRET`                        | _(자동 생성)_            | 생성된 API 키에 대한 HMAC 비밀 — 처음 실행 시 자동 생성되고 `server.env` 에 유지됩니다.                                       |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` 에 Bearer API 키 적용                                                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | 인증된 대시보드 사용자가 요청 시 저장된 전체 API 키 값을 공개하도록 허용                                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 캐시된 공급자 제한 데이터에 대한 서버측 새로 고침 주기. UI 새로 고침 버튼은 여전히 수동 동기화를 실행합니다.                  |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore 전에 자동 SQLite 스냅샷을 비활성화합니다. 수동 백업은 여전히 작동합니다                                 |
+| `APP_LOG_TO_FILE`                       | `true`                   | 애플리케이션 및 감사 로그를 디스크에 출력할 수 있습니다.                                                                      |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` 인증 쿠키 강제 적용( HTTPS 역방향 프록시 뒤)                                                                         |
+| `CLOUDFLARED_BIN`                       | 설정되지 않음            | 관리형 다운로드 대신 기존 `cloudflared` 바이너리 사용                                                                         |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | 관리형 빠른 터널(`http2`, `quic` 또는 `auto`)에 대한 전송                                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB 의 Node.js 힙 제한                                                                                                         |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | 최대 프롬프트 캐시 항목                                                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | 최대 의미 캐시 항목                                                                                                           |
 
-전체 환경 변수 참조는 [README](../README.md)를 확인하세요.
+전체 환경 변수 참조는 [README](../README.md) 를 참조하세요.
 
 ---
 
@@ -617,9 +617,9 @@ post_install() {
 <details>
 <summary><b>사용 가능한 모든 모델 보기</b></summary>
 
-> 아래 목록은 v3.8.0의 `open-sse/config/providerRegistry.ts`에서 선별되었습니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다. 전체 최신 카탈로그를 확인하려면 **Dashboard → Providers → [provider] → Available Models**를 열거나 `GET /api/models/catalog`을 호출하세요.
+> 아래 목록은 v3.8.0의 `open-sse/config/providerRegistry.ts`에서 선별한 것입니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다. 전체 실시간 카탈로그를 보려면 **Dashboard → Providers → [provider] → Available Models**를 열거나 `GET /api/models/catalog`을 호출하세요.
 >
-> 공급자의 기본 제공 목록이 변경된 경우, 해당 페이지에서 **Import from /models**를 사용하거나 **Auto-Sync**를 활성화하여 최신 업스트림 카탈로그를 가져오세요. 이는 v3.8.50에서 LLM7.io(`gemini-3.1-flash-lite`) 및 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 확인되었습니다. Pollinations의 익명 액세스는 동일한 테스트 과정에서 업스트림 제한 상태로 유지되었습니다.
+> 제공업체의 기본 제공 목록이 최신 상태와 달라진 경우, 해당 페이지에서 **Import from /models**를 사용하거나 **Auto-Sync**를 활성화하여 실시간 업스트림 카탈로그를 가져오세요. 이는 v3.8.50에서 LLM7.io(`gemini-3.1-flash-lite`) 및 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 확인되었습니다. 동일한 테스트 과정에서 Pollinations 익명 액세스는 업스트림 제한 상태로 유지되었습니다.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -627,7 +627,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — 무료 OAuth: **Dashboard → Providers → Kiro → Available Models**에 표시되는 최신 카탈로그를 사용하세요. 사용 가능 여부는 계정 및 요금제에 따라 다릅니다.
+**Kiro (`kr/`)** — 무료 OAuth: **Dashboard → Providers → Kiro → Available Models**에 표시되는 실시간 카탈로그를 사용하세요. 사용 가능 여부는 계정 및 요금제에 따라 달라집니다.
 
 **Qoder (`if/`)** — 무료 OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -649,23 +649,23 @@ post_install() {
 
 **Together AI (`together/`)** — 오픈 소스: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (무료), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — 빠른 추론: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — 고속 추론: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — 웨이퍼 규모: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG 중심: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — 엔터프라이즈: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — 엔터프라이즈: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google에서 API 키별로 실시간 동기화되므로 고정 목록이 없습니다. **Dashboard → Providers**에서 키를 연결한 다음 **Available Models**를 사용하여 최신 카탈로그를 가져오세요(예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google에서 API 키별로 실시간 동기화되며, 정적 목록은 없습니다. **Dashboard → Providers**에서 키를 연결한 다음 **Available Models**를 사용하여 현재 카탈로그를 가져오세요(예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**기타 호환 공급자** (일부): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`를 통해), `azure-ai`, `openrouter` (패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 공급자는 `providerRegistry.ts`에 자체 모델 목록을 유지하며, 공급자가 `/models` 엔드포인트를 제공하는 경우 자동으로 동기화할 수 있습니다.
+**기타 호환 제공업체**(일부): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock`(`aws-bedrock`를 통해), `azure-ai`, `openrouter`(패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 제공업체는 `providerRegistry.ts`에서 자체 모델 목록을 관리하며, 제공업체가 `/models` 엔드포인트를 제공하는 경우 자동으로 동기화할 수 있습니다.
 
-**모델 ID 참고:** OmniRoute는 공급자 네이티브 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점이 포함된 버전이 있는 것은 업스트림 API가 해당 형식을 요구하기 때문입니다. 모델이 위에 나열되어 있지 않다면 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`을 호출하여 사용 가능 여부를 확인하세요.
+**모델 ID 참고:** OmniRoute는 제공업체 네이티브 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점이 포함된 버전이 있는 이유는 업스트림 API가 해당 형식을 요구하기 때문입니다. 모델이 위에 나열되어 있지 않다면 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`을 호출하여 사용 가능 여부를 확인하세요.
 
 </details>
 
@@ -1286,34 +1286,34 @@ OmniRoute는 클라우드 코딩 에이전트(**OpenAI Codex Cloud**, **Devin**,
 
 ## 🛠️ 프로그래밍 방식 관리
 
-**`manage` 스코프가 포함된 Bearer 키를 사용하여** 모든 OmniRoute 리소스(프로바이더, 콤보, 키, 설정)를 HTTP를 통해 관리할 수 있습니다.
+다음을 사용하여 HTTP 통해 모든 OmniRoute 리소스(공급자, 콤보, 키, 설정)를 관리할 수 있습니다.** `manage` 범위가 있는 베어러 키** .
 
-**대시보드 → API 키 → 새 키 → 스코프: manage**에서 키를 생성한 다음:
+키 생성** 대시보드 → API 키 → 새 키 → 범위: 관리** , 그 다음에:
 
 ```bash
-# 프로바이더 목록 조회
+# List providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# 프로바이더 연결 추가
+# Add a provider connection
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# 콤보 생성
+# Create a combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# API 키 목록 조회/생성
+# List/create API keys
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-전체 엔드포인트 카탈로그와 요청/응답 스키마는 [API_REFERENCE.md](../reference/API_REFERENCE.md)를 참조하세요.
+전체 엔드포인트 카탈로그 및 request/response 스키마는 [API_REFERENCE.md를](../reference/API_REFERENCE.md) 참조하세요.
 
 ---
 

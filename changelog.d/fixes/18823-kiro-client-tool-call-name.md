@@ -1,1 +1,0 @@
-- **fix(providers):** Kiro no longer rejects calls to a client-declared tool named `tool_call` (OpenClaw, Hermes Agent deferred-tool bridges) as a malformed MCP wrapper; those calls now pass through with their arguments unchanged. Fixes #18675 ([#18823](https://github.com/cheaper-inference/OmniRoute/pull/18823)) — thanks @gaurav0107.

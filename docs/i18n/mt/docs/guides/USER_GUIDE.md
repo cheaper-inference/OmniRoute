@@ -337,82 +337,82 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Twaqqif
+## 🚀 Deployment
 
-### npm globali install (Rikomandat)
+### Installa npm globali (Rakkomandat)
 
 ```bash
 npm install -g omniroute
 
-# Oħloq direttorju tal-konfigurazzjoni
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Oħloq fajl .env (ara .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Beda s-server
+# Start server
 omniroute
-# Jew b'port abbinali:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-L-CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`.
+CLI awtomatikament jgħabbi `.env` minn `~/.omniroute/.env` jew `./.env`. `./.env` fid-direttorju tax-xogħol jista' jistabbilixxi biss lista qasira ta' ċwievet (portijiet, `REQUIRE_API_KEY`, settings tal-lokal u tal-kulur); poġġi kull ħaġa oħra `~/.omniroute/.env`. Ara [CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Triq il-tray
+### Modalità trej
 
-Bedal OmniRoute fil-tray tas-sistema:
+Ibda OmniRoute fit-trej tas-sistema:
 
 ```bash
 omniroute serve --tray
 ```
 
-Il-kmand jirritorna wara li s-server u t-tray ikunu lesti.
+Il-kmand jirritorna wara li s-server u t-trej ikunu lesti.
 
-Is-server jibqa' mingħajr il-terminal.
+Is-server ikompli mingħajr it-terminal.
 
-It-tray mode jappoġġa macOS, Windows, u sessions Linux b'interfaċċi grafika. It-tray mode ma jiftaħx l-dashboard awtomatikament.
+Il-mod tat-trej jappoġġja sessjonijiet macOS, Windows, u Linux grafiċi. Il-mod tat-trej ma jiftaħx id-dashboard awtomatikament.
 
-Uża l-menu tal-tray għal dawn l-azzjonijiet:
+Uża l-menu tat-trej għal dawn l-azzjonijiet:
 
-- Ftaħ l-dashboard.
-- Ftaħ `/dashboard/logs`.
-- Biddel l-awto-bidu.
-- Waqqaf OmniRoute.
+- Iftaħ id-dashboard.
+- Open `/dashboard/logs`.
+- Ibdel l-awto-start.
+- Stop OmniRoute.
 
-Tagħmilx `--tray` ma' dawn l-għażliet:
+Tgħaqqadx `--tray` ma 'dawn l-għażliet:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Dawn il-mudelli jeħtieġu proprjetà differenti tal-proċess.
+Dawn il-modi jeħtieġu sjieda tal-proċess differenti.
 
-Ekwiżizzjoni ta' bidu fil-login li jmiss tal-magna:
+Ippermetti l-istartjar fil-login tal-magna li jmiss:
 
 ```bash
 omniroute autostart enable
 ```
 
-L-awto-bidu juża t-tray mode fuq macOS, Windows, u sessions Linux b'interfaċċi grafika. Linux Headless juża s-servizz attwali tal-systemd user.
+Auto-start juża l-mod trej fuq sessjonijiet macOS, Windows, u grafiċi Linux. Headless Linux juża s-servizz tal-utent systemd eżistenti.
 
-Tixħirx l-awto-bidu fil-login:
+Iddiżattiva l-istartjar waqt il-login:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Tneħħija
+### Iddiżinstalla
 
-Meta m'għadekx teħtieġ OmniRoute, noffrulek żewġ scripts ħfief għat-tneħħija nadifa:
+Meta m'għadx għandek bżonn OmniRoute, aħna nipprovdu żewġ skripts ta' malajr għal tneħħija nadifa:
 
-| Kmand                    | Azzjoni                                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Jneħħi l-app tal-sistema iżda **jżomm il-DB u l-konfigurazzjonijiet tiegħek** f'`~/.omniroute`. |
-| `npm run uninstall:full` | Jneħħi l-app U **jħassar permanentement il-konfigurazzjonijiet, ċavetti, u databases kollha**.  |
+| Kmand                    | Azzjoni                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Tneħħi l-app tas-sistema iżda** iżomm DB u konfigurazzjonijiet tiegħek** `~/.omniroute`.                |
+| `npm run uninstall:full` | Tneħħi l-app AND b'mod permanenti** iħassar il-konfigurazzjonijiet, iċ-ċwievet u d-databases kollha** . |
 
-> Nota: Biex tħaddem dawn il-kmandi, mur fil-folder tal-proġett OmniRoute (jekk klonjajtu) u ħaddemhom. Barra minn hekk, jekk installat globalment, tista' sempliċement tħaddem `npm uninstall -g omniroute`.
+> Nota: Biex tmexxi dawn il-kmandi, innaviga lejn il-folder tal-proġett OmniRoute (jekk ikklonjah) u mexxihom. Inkella, jekk installat globalment, tista 'sempliċement tħaddem `npm uninstall -g omniroute`.
 
-### Twaqqif VPS
+### VPS Deployment
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,21 +428,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Jew: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Twaqqif PM2 (RAM Baxxa)
+### Skjerament PM2 (Memorja Baxxa)
 
-Għal servers b'RAM limitata, uża l-għażla tal-limitu tal-memorja:
+Għal servers RAM limitat, uża l-għażla tal-limitu tal-memorja:
 
 ```bash
-# B'limitu ta' 512MB (default)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Jew b'limitu tal-memorja abbinali
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Jew uża ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -471,24 +471,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Bini ta' stampa (default = runner-cli b'codex/claude/droid installat minn qabel)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Mod portable (rikomandat)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Għall-mod host-integrated b'binaries CLI, ara t-taqsima Docker fil-dokumentazzjoni ewlenija.
+Għall-modalità integrata mal-ospitanti b'binaries CLI, ara t-taqsima Docker fid-doks prinċipali.
 
 ### Void Linux (xbps-src)
 
-L-utenti tal-Void Linux jistgħu jippakkjaw u jinstallaw OmniRoute b'mod nattiv jużand il-framework tal-kross-kompilazzjoni `xbps-src`. Dan jawtomatizza l-bini standalone tal-Node/js flimkien mal-`better-sqlite3` native bindings meħtieġa.
+L-utenti ta’ Void Linux jistgħu jippakkjaw u jinstallaw OmniRoute b’mod nattiv billi jużaw il-qafas ta’ cross-compilation `xbps-src`. Dan awtomat il-bini Node.js standalone flimkien mal-irbit indiġeni `better-sqlite3` meħtieġa.
 
 <details>
 <summary><b>Ara l-mudell xbps-src</b></summary>
 
 ```bash
-# Fajl tal-mudell għal 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +509,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Iddetermina l-arqa CPU tal-mira għal node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +518,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Installa d-dipendenzi kollha – omitti l-scripts
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Bni l-bundle standalone Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopja l-assetti statiċi fil-standalone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Ġabar il-binding nativ better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Poġġi l-binding imġabar fil-bundle standalone
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Neħħi l-bundles ta' @img speċifiċi għall-arqa
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopja d-dipendenzi runtime tal-pino li ġew omessi mill-analiżi statika Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +554,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Prevjeni t-tneħħija ta' direttorji vojta tal-app router Next.js mill-hook post-install
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,41 +580,43 @@ post_install() {
 
 </details>
 
-### Varjabbli tal-Ambjent
+### Varjabbli Ambjentali
 
-| Varjabbli                               | Default                              | Deskrizzjoni                                                                                                                                     |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Sigriet għat-tiffirma tal-JWT (**biddel fil-produzzjoni**)                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Password tal-ewwel login                                                                                                                         |
-| `DATA_DIR`                              | `~/.omniroute`                       | Direttorju tad-dejta (db, użu, logħob)                                                                                                           |
-| `PORT`                                  | default tal-frawwerk                 | Port tas-servizz (`20128` fil-eżempji)                                                                                                           |
-| `HOSTNAME`                              | default tal-frawwerk                 | Jorbot il-host (Docker default għal `0.0.0.0`)                                                                                                   |
-| `NODE_ENV`                              | default runtime                      | Waħħal `production` għat-twaqqif                                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL pubbliku bażiċi murija lill-dashboard u esposta lis-sserver (tissostitwixxi l-`BASE_URL` antika)                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL bażiċi tal-endpoint tal-sinkronizzazzjoni cloud (tissostitwixxi l-`CLOUD_URL` antika)                                                        |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Sigriet HMAC għall-API keys ġenerati                                                                                                             |
-| `REQUIRE_API_KEY`                       | `false`                              | Infurza Bearer API key fuq `/v1/*`                                                                                                               |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Tippermetti lill-utenti tal-dashboard awtentikati jikxfu l-valuri kompluti tal-API key洢żżati meta jitolbuhom                                    |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Frekwenza tal-ġdid tas-server għad-dejta tal-Provider Limits maħżuna; il-buttuni tal-ġdid tal-UI għadhom jistimulaw is-sinkronizzazzjoni manwali |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Tixħirx il-prints awtomatiċi SQLite qabel il-kitbiet/importazzjoni/rkupru; il-backups manwali għadhom jaħdmu                                     |
-| `APP_LOG_TO_FILE`                       | `true`                               | Jippermetti l-output tal-log tal-applikazzjoni u tal-awditjar fuq il-disk                                                                        |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Tifforza cookie `Secure` tal-awtentikazzjoni (wara reverse proxy HTTPS)                                                                          |
-| `CLOUDFLARED_BIN`                       | ma twarrabx                          | Uża binarju `cloudflared` eżistenti minflok l-downloads immaniġġjati                                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Trasport għat-Quick Tunnels immaniġġjati (`http2`, `quic`, jew `auto`)                                                                           |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Limitu tal-heap tal-Node.js f'MB                                                                                                                 |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Daqs massimu ta' dħul tal-cache tal-prompt                                                                                                       |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Daqs massimu ta' dħul tal-cache semantiku                                                                                                        |
+| Varjabbli                               | Default                    | Deskrizzjoni                                                                                                                                                        |
+| --------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ġenerat awtomatikament)_ | JWT iffirmar sigriet — awto-ġenerat fl-ewwel ġirja u jippersisti għal `server.env`; issettjaha b'mod espliċitu meta d-direttorju tad-dejta jkun effimeru            |
+| `INITIAL_PASSWORD`                      | _(mitfi)_                  | L-ewwel password tal-login. npm/source installs tibda `CHANGEME`: ibdelha. Unset: Wizard tal-onboarding                                                             |
+| `DATA_DIR`                              | `~/.omniroute`             | Direttorju tad-dejta (db, użu, zkuk)                                                                                                                                |
+| `PORT`                                  | default tal-qafas          | Port tas-servizz (`20128` fl-eżempji)                                                                                                                               |
+| `HOSTNAME`                              | default tal-qafas          | Irbit l-ospitant (Docker default għal `0.0.0.0`)                                                                                                                    |
+| `NODE_ENV`                              | default runtime            | Set `production` for deploy                                                                                                                                         |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | Il-bażi pubblika URL ħarġet mad-dashboard u esposta għas-server (jissostitwixxi l-legacy `BASE_URL`)                                                                |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | Cloud sync endpoint bażi URL (jissostitwixxi l-legacy `CLOUD_URL`)                                                                                                  |
+| `API_KEY_SECRET`                        | _(ġenerat awtomatikament)_ | HMAC sigriet għal ċwievet API iġġenerati — awto-ġenerati fl-ewwel ġirja u jippersistu għal `server.env`                                                             |
+| `REQUIRE_API_KEY`                       | `false`                    | Enforce Bearer API key fuq `/v1/*`                                                                                                                                  |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | Ħalli l-utenti tad-dashboard awtentikati jiżvelaw valuri ewlenin API maħżuna sħaħ fuq talba                                                                         |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | Kadenza ta' aġġornament tan-naħa tas-server għad-dejta tal-Limiti tal-Fornitur fil-cache; Il-buttuni ta' aġġornament UI għadhom jibdew is-sinkronizzazzjoni manwali |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | Iddiżattiva snapshots SQLite awtomatiċi qabel writes/import/restore; backups manwali għadhom jaħdmu                                                                 |
+| `APP_LOG_TO_FILE`                       | `true`                     | Jippermetti l-applikazzjoni u l-output tar-reġistru tal-verifika fuq id-diska                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | Forza `Secure` auth cookie (wara HTTPS reverse proxy)                                                                                                               |
+| `CLOUDFLARED_BIN`                       | mitfija                    | Uża binarju `cloudflared` eżistenti minflok download amministrat                                                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | Trasport għal Mini Quick ġestiti (`http2`, `quic`, jew `auto`)                                                                                                      |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | Node.js heap limit in MB                                                                                                                                            |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | Max entrati fil-cache fil-pront                                                                                                                                     |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | Max entrati semantiċi cache                                                                                                                                         |
 
-Għar-riferenza sħiħa tal-varjabbli tal-ambjent, ara l-[README](../README.md).
+Għar-referenza sħiħa tal-varjabbli ambjentali, ara l- [README](../README.md).
+
+---
 
 ## 📊 Mudelli Disponibbli
 
 <details>
 <summary><b>Ara l-mudelli kollha disponibbli</b></summary>
 
-> Il-lista hawn taħt hija magħżula minn `open-sse/config/providerRegistry.ts` għal v3.8.0. Il-katalgi tal-cloud (Gemini, OpenRouter, eċċ.) jiġu sinkronizzati dinam­ikament — biex tara l-katalgu sħiħ u aġġornat, iftaħ **Dashboard → Providers → [provider] → Mudelli Disponibbli** jew agħmel sejħa lil `GET /api/models/catalog`.
+> Il-lista hawn taħt hija kkurata minn `open-sse/config/providerRegistry.ts` għal v3.8.0. Il-katalgi tal-cloud (Gemini, OpenRouter, eċċ.) jiġu sinkronizzati b’mod dinamiku — għall-katalgu sħiħ attwali iftaħ **Dashboard → Providers → [provider] → Available Models** jew sejjaħ `GET /api/models/catalog`.
 >
-> Jekk il-lista inkorporata ta’ provider tkun inbidlet, uża **Importa minn /models** fuq dik il-paġna (jew attiva **Sinkronizzazzjoni Awtomatika**) biex tiġbed il-katalgu dirett aġġornat. Dan ġie vverifikat f’v3.8.50 għal LLM7.io (`gemini-3.1-flash-lite`) u UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); l-aċċess anonimu għal Pollinations baqa’ limitat min-naħa tas-sors matul l-istess sessjoni ta’ ttestjar.
+> Jekk il-lista integrata ta’ provider tkun inbidlet, uża **Import from /models** f’dik il-paġna (jew attiva **Auto-Sync**) biex tiġbed il-katalgu attwali upstream. Dan ġie vverifikat f’v3.8.50 għal LLM7.io (`gemini-3.1-flash-lite`) u UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); l-aċċess anonimu għal Pollinations baqa’ limitat minn upstream matul l-istess test.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,7 +624,7 @@ Għar-riferenza sħiħa tal-varjabbli tal-ambjent, ara l-[README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth B’XEJN: uża l-katalgu aġġornat muri taħt **Dashboard → Providers → Kiro → Mudelli Disponibbli**. Id-disponibbiltà tiddependi mill-kont u mill-pjan.
+**Kiro (`kr/`)** — OAuth B’XEJN: uża l-katalgu attwali muri taħt **Dashboard → Providers → Kiro → Available Models**. Id-disponibbiltà tiddependi mill-kont u mill-pjan.
 
 **Qoder (`if/`)** — OAuth B’XEJN: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -640,9 +642,9 @@ Għar-riferenza sħiħa tal-varjabbli tal-ambjent, ara l-[README](../README.md).
 
 **Mistral (`mistral/`)** — Ospitat fl-UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — B’tiftix miżjud: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — B’titjibiet imsaħħa bit-tfittxija: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Sors miftuħ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (b’xejn), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (b’xejn), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Inferenza veloċi: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
@@ -650,17 +652,17 @@ Għar-riferenza sħiħa tal-varjabbli tal-ambjent, ara l-[README](../README.md).
 
 **Cohere (`cohere/`)** — Iffukat fuq RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Għall-intrapriżi: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Għall-intrapriżi: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sinkronizzat direttament għal kull ċavetta API minn Google — m’hemmx lista statika. Qabbad ċavetta f’**Dashboard → Providers** imbagħad uża **Mudelli Disponibbli** biex timporta l-katalgu attwali (eż. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Sinkronizzat live għal kull ċavetta API minn Google — m’hemmx lista statika. Qabbad ċavetta f’**Dashboard → Providers** u mbagħad uża **Available Models** biex timporta l-katalgu attwali (eż. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Providers oħra kompatibbli** (magħżula): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (permezz ta’ `aws-bedrock`), `azure-ai`, `openrouter` (katalgu passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kull wieħed iżomm il-lista tal-mudelli tiegħu f’`providerRegistry.ts` u jista’ jiġi sinkronizzat awtomatikament meta l-provider jipprovdi endpoint `/models`.
+**Providers kompatibbli oħra** (magħżula): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (permezz ta’ `aws-bedrock`), `azure-ai`, `openrouter` (katalgu passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kull wieħed iżomm il-lista tal-mudelli tiegħu f’`providerRegistry.ts` u jista’ jiġi sinkronizzat awtomatikament meta l-provider jipprovdi endpoint `/models`.
 
-**Nota dwar l-IDs tal-mudelli:** OmniRoute juża IDs nattivi tal-provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Xi IDs jinkludu verżjonijiet b’punti għax hekk tistennihom l-API tas-sors. Jekk mudell ma jkunx elenkat hawn fuq, eżegwixxi `omniroute models --search <term>` jew agħmel sejħa lil `GET /api/models/catalog` biex tikkonferma d-disponibbiltà tiegħu.
+**Nota dwar l-IDs tal-mudelli:** OmniRoute juża IDs nattivi tal-provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Xi IDs jinkludu verżjonijiet b’punti għaliex hekk tistennihom l-API upstream. Jekk mudell ma jkunx elenkat hawn fuq, ħaddem `omniroute models --search <term>` jew agħmel talba lil `GET /api/models/catalog` biex tikkonferma d-disponibbiltà.
 
 </details>
 

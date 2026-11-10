@@ -2,6 +2,7 @@ import { createElement, type HTMLAttributes, type ReactNode, type SVGProps } fro
 import { cn } from "./lib/utils";
 import { KEAK_MARK_PATH, KEAK_WORDMARK_PATH, KEAK_WORDMARK_VIEWBOX } from "./keak-brand-vectors";
 import { KEAK_PRODUCT_GLYPHS } from "./keak-product-vectors";
+import { DetailsDismiss } from "./details-dismiss";
 
 export { KEAK_MARK_PATH, KEAK_WORDMARK_PATH, KEAK_WORDMARK_VIEWBOX } from "./keak-brand-vectors";
 
@@ -69,16 +70,17 @@ export interface ProductSwitcherProps extends HTMLAttributes<HTMLElement> {
   activeProduct?: KeakProduct;
 }
 
-/** Native disclosure and links remain usable without client-side JavaScript. */
+/** Native disclosure and links remain usable without client-side JavaScript; once hydrated, Escape and outside presses close the list. */
 export function ProductSwitcher({ items, activeProduct, className, ...props }: ProductSwitcherProps) {
   return <nav aria-label="Keak products" className={cn("ci-keak-switcher", className)} {...props}>
     <details><summary>{activeProduct && <ProductIcon product={activeProduct} />}{activeProduct ? `Keak ${keakProductNames[activeProduct]}` : "Our products"}
       <span className="ci-keak-switcher-caret" aria-hidden="true">+</span></summary>
       <ul>{items.map(item => <li key={item.product}><a href={item.href}
-        aria-current={activeProduct === item.product ? "page" : undefined}>
+        aria-current={activeProduct === item.product ? "true" : undefined}>
         <span className="ci-keak-switcher-product"><ProductIcon product={item.product} /><span>Keak {keakProductNames[item.product]}</span></span>
         {item.description && <small>{item.description}</small>}
       </a></li>)}</ul>
+      <DetailsDismiss />
     </details>
   </nav>;
 }

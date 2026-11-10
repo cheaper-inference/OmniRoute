@@ -37,6 +37,7 @@ const baseProps = {
   fetchProviderModelMeta: vi.fn().mockResolvedValue(undefined),
   fetchAliases: vi.fn().mockResolvedValue(undefined),
   notify,
+  requestConfirm: vi.fn().mockResolvedValue(true),
   t,
   selectedConnection: { id: "conn-1", provider: "anthropic-compatible-cc-test" },
   providerNode: { id: "anthropic-compatible-cc-test" },
@@ -150,11 +151,56 @@ describe("useModelVisibilityHandlers", () => {
     expect(hook.get().modelTestStatus["agnes-image-2.5-flash"]).toBeUndefined();
   });
 
+  it("#19338 editing another compat flag keeps an unset normalizeToolCallId unset", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue({ ok: true, json: () => Promise.resolve({}) } as Response);
+
+    let latestResult: HookResult | null = null;
+    function CustomWrapper() {
+      const result = useModelVisibilityHandlers({
+        ...baseProps,
+        providerId: "mistral",
+        providerStorageAlias: "mistral",
+        customMap: new Map<string, unknown>([
+          ["mistral-large-4", { id: "mistral-large-4", name: "Mistral Large 4" }],
+          ["pinned-off", { id: "pinned-off", name: "Pinned Off", normalizeToolCallId: false }],
+        ]),
+      });
+      React.useEffect(() => {
+        latestResult = result;
+      });
+      return null;
+    }
+
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const root = createRoot(el);
+    act(() => {
+      root.render(<CustomWrapper />);
+    });
+    roots.push({ root, el });
+
+    await act(async () => {
+      await latestResult!.saveModelCompatFlags("mistral-large-4", {
+        preserveOpenAIDeveloperRole: false,
+      });
+      await latestResult!.saveModelCompatFlags("pinned-off", {
+        preserveOpenAIDeveloperRole: false,
+      });
+    });
+
+    const bodies = fetchMock.mock.calls
+      .filter(([url]) => url === "/api/provider-models")
+      .map(([, init]) => JSON.parse(String((init as RequestInit).body)));
+    expect(bodies).toHaveLength(2);
+    // Unset stays unset, so the mistral runtime default is not pinned to false.
+    expect(bodies[0]).not.toHaveProperty("normalizeToolCallId");
+    expect(bodies[0].preserveOpenAIDeveloperRole).toBe(false);
+    // An explicit value already on the row is still carried over.
+    expect(bodies[1].normalizeToolCallId).toBe(false);
+  });
+
   it("clears models for both storage alias and canonical providerId when they differ", async () => {
-    vi.stubGlobal(
-      "confirm",
-      vi.fn(() => true)
-    );
     const fetchMock = vi.mocked(fetch);
     fetchMock.mockResolvedValue({
       ok: true,
