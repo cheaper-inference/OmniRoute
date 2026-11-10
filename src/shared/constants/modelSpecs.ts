@@ -354,6 +354,17 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     aliases: ["gemini-4"],
   },
 
+  // ── Gemini 4 Carbon ──────────────────────────────────────────────
+  "gemini-4-carbon": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    defaultThinkingBudget: 8192,
+    thinkingBudgetCap: 24576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+  },
+
   // Provider-neutral compatibility for providers that still serve Gemini 3.6.
   // Antigravity/AGY availability is governed by their own provider catalogs and
   // retirement filters; these shared specs must not be treated as an allowlist.
