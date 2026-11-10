@@ -26,8 +26,12 @@ import {
 
 type JsonRecord = Record<string, unknown>;
 
+// Retired codewhisperer.us-east-1 default: Kiro's 2026-11-09 client-version gate
+// (#19607, kirodotdev/Kiro#11335) rejects the legacy host; GetUsageLimits rides the
+// regional Amazon Q endpoint like every other Kiro surface. Env override kept for
+// operators who pinned a custom base URL.
 const CODEWHISPERER_BASE_URL =
-  process.env.OMNIROUTE_CODEWHISPERER_BASE_URL ?? "https://codewhisperer.us-east-1.amazonaws.com";
+  process.env.OMNIROUTE_CODEWHISPERER_BASE_URL ?? "https://q.us-east-1.amazonaws.com";
 
 function isKiroOverageEnabled(data: JsonRecord): boolean {
   const overageConfiguration = toRecord(data.overageConfiguration);
@@ -180,16 +184,15 @@ export async function discoverKiroProfileArn(
  */
 function buildKiroUsageAttempts(opts: {
   authHeaders: Record<string, string>;
-  usageParams: URLSearchParams;
   qParams: URLSearchParams;
   payload: Record<string, unknown>;
   usageBaseUrl: string;
   qBaseUrl: string;
 }): Array<{ name: string; run: () => Promise<Response> }> {
-  const { authHeaders, usageParams, qParams, payload, usageBaseUrl, qBaseUrl } = opts;
+  const { authHeaders, qParams, payload, usageBaseUrl, qBaseUrl } = opts;
   return [
     {
-      name: "codewhisperer-post",
+      name: "q-post",
       run: () =>
         fetch(usageBaseUrl, {
           method: "POST",
@@ -199,18 +202,6 @@ function buildKiroUsageAttempts(opts: {
             "x-amz-target": "AmazonCodeWhispererService.GetUsageLimits",
           },
           body: JSON.stringify(payload),
-        }),
-    },
-    {
-      name: "codewhisperer-get",
-      run: () =>
-        fetch(`${CODEWHISPERER_BASE_URL}/getUsageLimits?${usageParams.toString()}`, {
-          method: "GET",
-          headers: {
-            ...authHeaders,
-            "x-amz-user-agent": "aws-sdk-js/1.0.0 KiroIDE",
-            "user-agent": "aws-sdk-js/1.0.0 KiroIDE",
-          },
         }),
     },
     {
@@ -330,18 +321,14 @@ export async function getKiroUsage(accessToken?: string, providerSpecificData?: 
     }
 
     // The RUNTIME region is the profileArn region (us-east-1 / eu-central-1), never the IdC token
-    // region. Route GetUsageLimits to that region's host so quota resolves for cross-region IdC.
+    // region. Route GetUsageLimits to that region's regional Amazon Q host so quota resolves for
+    // cross-region IdC (#19607: the legacy codewhisperer.us-east-1 host is retired).
     const region = resolveKiroRuntimeRegion({ region: storedRegion, profileArn });
     const usageBaseUrl = region === "us-east-1" ? CODEWHISPERER_BASE_URL : kiroRuntimeHost(region);
     const qBaseUrl = `https://q.${region}.amazonaws.com`;
 
     const authHeaders = buildKiroAuthHeaders(accessToken, isApiKey, providerSpecificData);
 
-    const usageParams = new URLSearchParams({
-      isEmailRequired: "true",
-      origin: "AI_EDITOR",
-      resourceType: "AGENTIC_REQUEST",
-    });
     const qParams = new URLSearchParams({
       origin: "AI_EDITOR",
       ...(profileArn ? { profileArn } : {}),
@@ -355,7 +342,6 @@ export async function getKiroUsage(accessToken?: string, providerSpecificData?: 
 
     const attempts = buildKiroUsageAttempts({
       authHeaders,
-      usageParams,
       qParams,
       payload,
       usageBaseUrl,

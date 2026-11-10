@@ -1,4 +1,5 @@
 import { getAntigravityContentHeaders } from "../services/antigravityHeaders.ts";
+import { buildKiroServiceUserAgent } from "../services/kiroIdentity.ts";
 import type { AntigravityClientProfile } from "@/shared/constants/antigravityClientProfile";
 import {
   BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
@@ -443,8 +444,16 @@ export function resetCodeBuddyCnVersionCache(): void {
   codeBuddyVersionInFlight = null;
 }
 
-export const KIRO_SDK_USER_AGENT = "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0";
-export const KIRO_AMZ_USER_AGENT = "aws-sdk-js/3.0.0 kiro-ide/1.0.0";
+// Kiro enforces a client-version floor since 2026-11-09 (kirodotdev/Kiro#11335):
+// clients older than CLI 1.28.2 / IDE 0.11.133 get
+// 403 "This version of Kiro is no longer supported" on every inference call
+// (#19607). The gate accepts the IDE-shaped fingerprint, not a bare CLI version
+// (live A/B: q.eu-central-1 + kiro-cli/3.1.0 → 403, + KiroIDE-1.4.121-<machineId>
+// → 200). The executor overrides these per connection; this fallback keeps
+// registry/static callers above the gate without a connection context.
+const KIRO_FALLBACK_IDENTITY = buildKiroServiceUserAgent(null);
+export const KIRO_SDK_USER_AGENT = KIRO_FALLBACK_IDENTITY.userAgent;
+export const KIRO_AMZ_USER_AGENT = KIRO_FALLBACK_IDENTITY.amzUserAgent;
 export const KIRO_STREAMING_TARGET =
   "AmazonCodeWhispererStreamingService.GenerateAssistantResponse";
 

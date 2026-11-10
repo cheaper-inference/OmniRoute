@@ -679,7 +679,9 @@ test("usage service covers Codex, Kiro and Kimi usage parsing and error branches
       );
     }
 
-    if (String(url) === "https://codewhisperer.us-east-1.amazonaws.com") {
+    // The usage POST targets the regional Amazon Q host root since #19607
+    // (q-post attempt) — the GET fallback uses the /getUsageLimits path below.
+    if (String(url) === "https://q.us-east-1.amazonaws.com") {
       return new Response(
         JSON.stringify({
           subscriptionInfo: { subscriptionTitle: "Kiro Pro" },
@@ -835,7 +837,8 @@ test("usage service covers Codex auth failures, Kiro hard failures and Kimi no-q
   assert.match(codexBroken.message, /Codex API error: 500/i);
 
   globalThis.fetch = async (url) => {
-    if (String(url) === "https://codewhisperer.us-east-1.amazonaws.com") {
+    // The usage POST rides the regional Amazon Q host since #19607.
+    if (String(url) === "https://q.us-east-1.amazonaws.com") {
       return new Response("bad request", { status: 400 });
     }
     throw new Error(`unexpected fetch: ${url}`);
