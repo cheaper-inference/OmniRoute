@@ -5,29 +5,9 @@ import {
 } from "@/lib/db/providers";
 import { CodexAuthFileError } from "@/lib/oauth/utils/codexAuthFile";
 import { pickCodexConnectionForUser } from "@/lib/oauth/utils/codexConnectionSelection";
+import { toRecord, toNonEmptyString, decodeJwtPayload } from "./codexAuthValues";
 
 type JsonRecord = Record<string, unknown>;
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-function toNonEmptyString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
-}
-
-function decodeJwtPayload(jwt: string): JsonRecord | null {
-  try {
-    const parts = jwt.split(".");
-    if (parts.length !== 3) return null;
-    const payload = Buffer.from(parts[1], "base64url").toString("utf8");
-    return toRecord(JSON.parse(payload));
-  } catch {
-    return null;
-  }
-}
 
 function extractExpFromJwt(jwt: string): number | null {
   const payload = decodeJwtPayload(jwt);

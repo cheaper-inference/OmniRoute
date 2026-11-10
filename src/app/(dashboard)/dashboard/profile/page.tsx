@@ -2,11 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Progress } from "@omniroute/ui-kit/progress";
+import { Tile } from "@omniroute/ui-kit/tile";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import Modal from "@/shared/components/Modal";
+import { cn } from "@/shared/utils/cn";
 import { cumulativeXpForLevel, getLevelTier, getLevelTitle } from "@/lib/gamification/xp";
 
 interface UserLevel {
@@ -40,11 +44,11 @@ interface UserBadge {
 }
 
 const TIER_CONFIG: Record<string, { labelKey: string; color: string; bg: string }> = {
-  bronze: { labelKey: "tiers.bronze", color: "text-chart-5", bg: "bg-chart-5/10" },
+  bronze: { labelKey: "tiers.bronze", color: "text-chart-5-ink", bg: "bg-chart-5-subtle" },
   silver: { labelKey: "tiers.silver", color: "text-text-muted", bg: "bg-text-muted/10" },
   gold: { labelKey: "tiers.gold", color: "text-warning", bg: "bg-warning/10" },
-  platinum: { labelKey: "tiers.platinum", color: "text-chart-2", bg: "bg-chart-2/10" },
-  diamond: { labelKey: "tiers.diamond", color: "text-chart-3", bg: "bg-chart-3/10" },
+  platinum: { labelKey: "tiers.platinum", color: "text-chart-2-ink", bg: "bg-chart-2-subtle" },
+  diamond: { labelKey: "tiers.diamond", color: "text-chart-3-ink", bg: "bg-chart-3-subtle" },
 };
 
 const BADGE_ICONS: Record<string, string> = {
@@ -93,7 +97,7 @@ const RARITY_COLORS: Record<string, string> = {
   common: "text-text-muted border-border",
   uncommon: "text-success border-success/30",
   rare: "text-info border-info/30",
-  epic: "text-chart-3 border-chart-3/30",
+  epic: "text-chart-3-ink border-chart-3/30",
   legendary: "text-warning border-warning/30",
 };
 
@@ -108,14 +112,7 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [selectedBadge, setSelectedBadge] = useState<BadgeDef | null>(null);
 
-  useEffect(() => {
-    if (!selectedBadge) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedBadge(null);
-    };
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [selectedBadge]);
+  // Escape closes the badge dialog through the kit Modal (Radix Dialog) itself (#18076).
   const [streak, setStreak] = useState(0);
 
   const fetchData = useCallback(async () => {
@@ -177,7 +174,6 @@ export default function ProfilePage() {
   const nextLevelCumulative = cumulativeXpForLevel(level + 1);
   const xpInCurrentLevel = totalXp - currentLevelCumulative;
   const xpForNext = nextLevelCumulative - currentLevelCumulative;
-  const xpProgress = xpForNext > 0 ? (xpInCurrentLevel / xpForNext) * 100 : 0;
   const tier = getLevelTier(level);
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.bronze;
   const earnedIds = new Set(earnedBadges.map((b) => b.badgeId));
@@ -197,7 +193,9 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="sr-only lg:hidden">{t("profile")}</h1>
+      {/* Kit PageHeader (its own h1): the shell drops its title while a .ci-page-header is
+          mounted, so the page has one "Profile" heading (KEA-7886 P12). */}
+      <PageHeader compact title={t("profile")} />
       {error && (
         <div role="alert" className="p-3 rounded-lg bg-error-bg text-error text-sm">
           {error}
@@ -239,19 +237,12 @@ export default function ProfilePage() {
                 {xpInCurrentLevel.toLocaleString(locale)} / {xpForNext.toLocaleString(locale)} XP
               </span>
             </div>
-            <div
-              role="progressbar"
+            {/* Kit Progress clamps the value to [0, max] for both the bar and aria-valuenow. */}
+            <Progress
               aria-label={tg("levelProgress", { current: level, next: level + 1 })}
-              aria-valuemin={0}
-              aria-valuemax={xpForNext}
-              aria-valuenow={Math.min(Math.max(xpInCurrentLevel, 0), xpForNext)}
-              className="w-full h-3 rounded-full bg-border overflow-hidden"
-            >
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-chart-3 to-chart-5 transition-all duration-500"
-                style={{ width: `${Math.min(xpProgress, 100)}%` }}
-              />
-            </div>
+              value={xpInCurrentLevel}
+              max={xpForNext}
+            />
             <p className="text-xs text-text-muted mt-1">
               {tg("totalXpEarned", { count: totalXp.toLocaleString(locale) })}
             </p>
@@ -289,57 +280,64 @@ export default function ProfilePage() {
               const isHiddenAndLocked = Boolean(badge.hidden) && !isEarned;
               const earnedInfo = earnedBadges.find((b) => b.badgeId === badge.id);
               const rarityColor = RARITY_COLORS[badge.rarity] || RARITY_COLORS.common;
+              // Rarity tints the earned glyph; a locked glyph is dimmed (its text keeps full ink).
+              const glyphTone = isEarned ? rarityColor : "opacity-50 grayscale";
+              const glyph = (
+                <span className={glyphTone}>
+                  <BadgeIcon icon={isHiddenAndLocked ? null : badge.icon} earned={isEarned} />
+                </span>
+              );
 
               return (
-                // kit-exception: Multi-line badge tile (icon, name, description, date, progress): the kit Button
-                // is a single-line pill, so the tile stays a native <button> on kit tokens.
-                <button
+                <Tile
                   key={badge.id}
-                  type="button"
+                  layout="stacked"
                   onClick={() => !isHiddenAndLocked && setSelectedBadge(badge)}
                   disabled={isHiddenAndLocked}
                   // Locked: dashed border, muted surface, dimmed glyph and a lock mark. The text
                   // keeps full token ink — the old tile-wide opacity-50 + grayscale put names and
-                  // descriptions under AA (36 axe color-contrast nodes, F4).
-                  className={`relative p-4 rounded-xl border transition-all text-start ${
-                    isEarned
-                      ? `${rarityColor} bg-surface hover:shadow-md`
-                      : "border-dashed border-border bg-bg-subtle enabled:hover:border-text-muted disabled:cursor-default"
-                  }`}
-                  data-locked={isEarned ? undefined : "true"}
-                >
-                  {!isEarned && (
-                    <span className="absolute top-2 end-2 text-text-muted">
-                      <Icon name="lock" size={14} />
-                      <span className="ci-sr-only">{tg("badgeLocked")}</span>
-                    </span>
+                  // descriptions under AA (36 axe color-contrast nodes, F4) — so the kit's dimmed
+                  // disabled tile is brought back to full opacity for the hidden badge.
+                  className={cn(
+                    isEarned ? `${rarityColor} hover:shadow-md` : "border-dashed bg-bg-subtle",
+                    isHiddenAndLocked && "cursor-default opacity-100"
                   )}
-                  <div className={`text-3xl mb-2 ${isEarned ? "" : "opacity-50 grayscale"}`}>
-                    <BadgeIcon icon={isHiddenAndLocked ? null : badge.icon} earned={isEarned} />
-                  </div>
-                  <p className="font-semibold text-sm truncate">
-                    {badge.hidden && !isEarned ? "???" : translateBadge(badge, "name")}
-                  </p>
-                  <p className="text-xs text-text-muted mt-1 line-clamp-2">
-                    {badge.hidden && !isEarned
-                      ? tg("hiddenBadge")
-                      : translateBadge(badge, "description")}
-                  </p>
+                  data-locked={isEarned ? undefined : "true"}
+                  icon={glyph}
+                  title={
+                    <span className="block truncate font-semibold">
+                      {badge.hidden && !isEarned ? "???" : translateBadge(badge, "name")}
+                    </span>
+                  }
+                  meta={
+                    isEarned ? undefined : (
+                      <span className="text-text-muted">
+                        <Icon name="lock" size={14} />
+                        <span className="ci-sr-only">{tg("badgeLocked")}</span>
+                      </span>
+                    )
+                  }
+                  description={
+                    <span className="line-clamp-2">
+                      {badge.hidden && !isEarned
+                        ? tg("hiddenBadge")
+                        : translateBadge(badge, "description")}
+                    </span>
+                  }
+                >
                   {isEarned && earnedInfo?.unlockedAt && (
-                    <p className="text-[10px] text-text-muted mt-2">
+                    <span className="block text-[10px] text-text-muted">
                       {tg("earnedDate", {
                         date: new Date(earnedInfo.unlockedAt).toLocaleDateString(locale),
                       })}
-                    </p>
+                    </span>
                   )}
                   {!isEarned && badge.criteria && (
-                    <div className="mt-2">
-                      <div className="w-full h-1.5 rounded-full bg-border overflow-hidden">
-                        <div className="h-full w-0 rounded-full bg-chart-3/50" />
-                      </div>
-                    </div>
+                    <span className="block w-full h-1.5 rounded-full bg-border overflow-hidden">
+                      <span className="block h-full w-0 rounded-full bg-chart-3/50" />
+                    </span>
                   )}
-                </button>
+                </Tile>
               );
             })}
           </div>

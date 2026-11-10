@@ -20,12 +20,26 @@ export const PRE_SCREEN_CONCURRENCY = 5;
  * `targetTimeoutMs`. Combos exist to fail over fast, so inheriting the full upstream
  * request timeout (FETCH_TIMEOUT_MS, 600s by default) made a single hung target stall
  * the whole combo for up to 10 minutes before falling through to the next model
- * (escalated cmqlrhd7c). For STREAMING requests this only bounds the time-to-first-headers
- * — token generation streams after the response resolves, so it is NOT cut short. Operators
- * can still raise it per-combo via `targetTimeoutMs`, or set
- * a longer value for slow non-streaming reasoning combos.
+ * (escalated cmqlrhd7c). For STREAMING requests this bounds the time to the first output
+ * frame, not the time to response headers: a target that opens the stream and then produces
+ * nothing is abandoned at the same budget, while token generation that has started streams
+ * to completion and is NOT cut short. A target that declares a longer budget of its own
+ * (connection, per-model or provider-level `timeoutMs`) may wait longer for its first output,
+ * up to DECLARED_FIRST_OUTPUT_WAIT_CAP_MS (see resolveDeclaredTargetBudgetMs in combo.ts).
+ * An explicit `targetTimeoutMs` in the resolved combo config (the combo's own config or the
+ * global `comboDefaults`) overrides the declared budgets.
  */
 export const DEFAULT_COMBO_TARGET_TIMEOUT_MS = 120_000;
+
+/**
+ * Upper bound on how far a declared budget may stretch a combo target's first-output wait.
+ * Declared budgets are total-lifetime budgets (Codex high/xhigh declare 20 minutes, GLM 50),
+ * so using them unbounded as a time-to-first-output wait would let one silent target hold the
+ * combo for that long before failing over. 180s matches the default
+ * STREAM_READINESS_MAX_TIMEOUT_MS. A longer floor (an explicit `targetTimeoutMs`, a connection
+ * timeout or the cooldown-wait floor) is never lowered by this cap.
+ */
+export const DECLARED_FIRST_OUTPUT_WAIT_CAP_MS = 180_000;
 
 /**
  * Small buffer added on top of the combo-cooldown-wait budget (see below) when deriving
@@ -47,13 +61,15 @@ export const COMBO_TARGET_TIMEOUT_WAIT_BUFFER_MS = 10_000;
  *
  * `strategy` is retained in the signature for call-site clarity; eligibility is
  * strategy-agnostic (the wait path in combo.ts already uses the real model-lockout
- * reason for every strategy).
+ * reason for every strategy). Only literal per-combo false opts out; no config
+ * can enable waiting when the global feature is disabled.
  */
 export function isComboCooldownWaitEligible(
   _strategy: string,
-  comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled">
+  comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled">,
+  config?: Record<string, unknown> | null
 ): boolean {
-  return comboCooldownWait.enabled;
+  return comboCooldownWait.enabled && config?.comboCooldownWaitEnabled !== false;
 }
 
 /**
@@ -72,7 +88,7 @@ export function resolveComboTargetTimeoutMsForCombo(
   strategy: string,
   comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled" | "budgetMs">
 ): number {
-  const defaultTimeoutMs = isComboCooldownWaitEligible(strategy, comboCooldownWait)
+  const defaultTimeoutMs = isComboCooldownWaitEligible(strategy, comboCooldownWait, config)
     ? Math.max(
         DEFAULT_COMBO_TARGET_TIMEOUT_MS,
         comboCooldownWait.budgetMs + COMBO_TARGET_TIMEOUT_WAIT_BUFFER_MS
@@ -130,6 +146,7 @@ const DEFAULT_COMBO_CONFIG = {
   resetAwareWeeklyWeight: 0.65,
   resetAwareTieBandPercent: 5,
   resetAwareExhaustionGuardPercent: 10,
+  resetAwareNoQuotaFloor: 0.5,
   quotaWeightedFloorPercent: 1,
   // Historical default (predates #2417/#10217) — true. This value feeds TWO
   // independent mechanisms and must stay true-by-default for one of them:
@@ -241,6 +258,18 @@ function normalizePositiveTimeoutMs(value: unknown): number {
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue) || numericValue <= 0) return 0;
   return Math.min(Math.floor(numericValue), MAX_TIMER_TIMEOUT_MS);
+}
+
+/**
+ * True when `targetTimeoutMs` is set explicitly in the resolved combo config: the combo's own
+ * config or the global `comboDefaults`. An explicit value outranks every declared budget.
+ * `providerOverrides` only join the cascade when resolveComboConfig is given a provider; the
+ * combo setup (resolveComboSetupConfig) resolves it without one, so they never reach here.
+ */
+export function hasExplicitComboTargetTimeout(
+  config: Record<string, unknown> | null | undefined
+): boolean {
+  return isRecord(config) && normalizePositiveTimeoutMs(config.targetTimeoutMs) > 0;
 }
 
 export function resolveComboTargetTimeoutMs(

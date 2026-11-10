@@ -17,11 +17,28 @@ import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
 import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
-import { requestBodyLimitMbFromEnv } from "@/shared/constants/bodySize";
+import {
+  normalizeRequestBodyLimitMb,
+  requestBodyLimitMbFromEnv,
+} from "@/shared/constants/bodySize";
 import { DEFAULT_RESPONSES_PREVIOUS_RESPONSE_ID_MODE } from "@/shared/constants/responsesPreviousResponseId";
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
+import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
+import { createBankedResetAutoApplyDefaults } from "@/shared/constants/bankedResetAutoApply";
+import { DEFAULT_NEW_CONNECTION_PROXY_ENABLED } from "@/shared/constants/newConnectionProxy.mjs";
+
+/**
+ * Settings values stored encrypted at rest (AES-256-GCM via ./encryption).
+ * Read and write must stay in sync — a key that is encrypted on write but not
+ * decrypted on read hands ciphertext to the consumer, which fails as a silent
+ * auth error rather than a visible one. Both paths derive from this set.
+ */
+const ENCRYPTED_SETTING_KEYS: ReadonlySet<string> = new Set([
+  "oidcClientSecret",
+  "entraGraphClientSecret",
+]);
 
 type ProxyValue = JsonRecord | string | null;
 type ProxyResolutionResult = {
@@ -160,7 +177,12 @@ export async function getSettings() {
     disableSessionStickiness: false,
     // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
     connectionAwareExpansion: false,
+    // Keep combo targets whose known output ceiling is below the request's
+    // max_tokens instead of treating output_tokens as a hard compatibility
+    // mismatch; the upstream then applies its own ceiling.
+    outputLimitAdvisory: false,
     promptCacheAffinityEnabled: true,
+    geminiPromptCacheMode: "off",
     comboStrategy: "fallback",
     comboStickyRoundRobinLimit: null, // null = inherit stickyRoundRobinLimit (a literal default here shadows the documented batched-rotation default of 3 — #6678 regression caught by the v3.8.47 release CI)
     providerStrategies: {},
@@ -170,6 +192,14 @@ export async function getSettings() {
     // ProviderLimits/utils.tsx) — this is a personal view preference, not an
     // admin model-catalog edit. Ported from upstream decolua/9router#2371.
     quotaVisibility: {},
+    // Per-operator Quota Tracker provider group order (drag-to-reorder), written
+    // through by ProviderLimits/useProviderOrder. Empty = no server order (the
+    // dashboard keeps its localStorage order, else the built-in PROVIDER_ORDER).
+    // Display-only; never touches connection priority.
+    quotaProviderOrder: [],
+    // #13917: operator-configurable ceiling for POST /api/settings/proxies/bulk-import.
+    // Resolved through resolveProxyBulkImportLimit at both enforcement points.
+    proxyBulkImportLimit: PROXY_BULK_IMPORT_LIMIT_DEFAULT,
     requestRetry: 3,
     maxRetryIntervalSec: 30,
     antigravitySignatureCacheMode: "enabled",
@@ -182,6 +212,18 @@ export async function getSettings() {
     oidcScopes: ["openid", "profile", "email"],
     oidcRedirectPath: "/api/auth/oidc/callback",
     oidcAllowedSubjects: [], // optional sub or email whitelist
+    oidcAdmissionClaim: null, // optional ID-token role/group admission policy
+    // Entra ID SSO for /v1/* (see docs/security/ENTRA_SSO.md). Off by default:
+    // enabling it only ADDS a way to authenticate — static API keys keep working.
+    entraSsoEnabled: false,
+    entraAuthorityHost: "",
+    entraTenantId: "",
+    entraClientId: "",
+    entraApiAudience: "",
+    entraGroupMappings: [],
+    entraDefaultKeyGroupId: null, // null = users matching no mapping are denied
+    entraGraphFallbackEnabled: false,
+    entraGraphClientSecret: "",
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],
@@ -245,6 +287,7 @@ export async function getSettings() {
     autoDisableBannedScope: "all",
     proxyEnabled: true,
     perKeyProxyEnabled: false,
+    defaultNewConnectionProxyEnabled: DEFAULT_NEW_CONNECTION_PROXY_ENABLED,
     customSystemPromptEnabled: false,
     customSystemPrompt: "",
     // #6316: Opt-in filter that hides paid-only models from the /v1/models catalog.
@@ -265,6 +308,9 @@ export async function getSettings() {
     // #9418: Opt-in filter that hides no-think/* gateway variants from the /v1/models catalog.
     // Routing still works for hidden ids sent explicitly.
     hideNoThinkVariants: false,
+    // Opt-in: the public /v1/models listing advertises only combos (user combos +
+    // auto/*). Catalog-only — explicit provider/model ids still route.
+    exposeCombosOnly: false,
     // #11481: Opt-in explicit model exposure allow/deny list, mirrored into the
     // auto/* combo candidate pool (open-sse/services/autoCombo/modelExposureFilter.ts)
     // so a denied model can't sneak back in via combo routing — the same trap
@@ -280,8 +326,28 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    // Opt-in auto-apply of banked resets (Codex credits, Claude grants, Claude weekly
+    // session reset). OFF and dry-run by default — never redeems on the operator's behalf
+    // until enabled. Stored values are merged with these defaults by
+    // mergeBankedResetAutoApplySettings (src/lib/usage/bankedResetPolicy.ts).
+    bankedResetAutoApply: createBankedResetAutoApplyDefaults(),
+    // Opt-in auto-spend of Codex reset credits that are about to expire. Spending a
+    // credit mutates upstream account state, so this is off by default (Hard Rule #20
+    // spirit: never consume on the operator's behalf until they opt in).
+    // `enabled` is the master switch; `connections` narrows it to specific ids
+    // (absent = every eligible Codex connection; `{}` = nobody). `maxPerDay` is a
+    // per-connection ceiling and `horizonHours` how close to expiry a credit must be.
+    codexSpendExpiringResetCredits: {
+      enabled: false,
+      horizonHours: 24,
+      maxPerDay: 1,
+    },
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
+    // Operator-set CLI client-version overrides for the Claude Code / Codex
+    // identity presets (open-sse/config/cliVersions.ts). Empty record = no
+    // override: resolution falls back to the env var, then the captured pin.
+    cliVersionOverrides: {},
   };
   for (const row of rows) {
     const record = toRecord(row);
@@ -295,8 +361,10 @@ export async function getSettings() {
     }
   }
 
-  if (typeof settings.oidcClientSecret === "string") {
-    settings.oidcClientSecret = decrypt(settings.oidcClientSecret) ?? "";
+  for (const encryptedKey of ENCRYPTED_SETTING_KEYS) {
+    if (typeof settings[encryptedKey] === "string") {
+      settings[encryptedKey] = decrypt(settings[encryptedKey] as string) ?? "";
+    }
   }
   applySessionAffinityLegacyFallback(settings);
 
@@ -314,6 +382,23 @@ export async function getSettings() {
   }
 
   return settings;
+}
+
+/**
+ * The `maxBodySizeMb` an operator saved, or null if they never did. getSettings() cannot tell these
+ * apart because it fills the key with the default.
+ */
+export function getSavedRequestBodyLimitMb(): number | null {
+  const row = getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = 'settings' AND key = 'maxBodySizeMb'")
+    .get();
+  const rawValue = toRecord(row).value;
+  if (typeof rawValue !== "string") return null;
+  try {
+    return normalizeRequestBodyLimitMb(JSON.parse(rawValue));
+  } catch {
+    return null;
+  }
 }
 
 export async function updateSettings(
@@ -341,7 +426,7 @@ export async function updateSettings(
       throw new SettingsRevisionConflictError(currentRevision);
     }
     for (const [key, value] of Object.entries(updates)) {
-      const toStore = key === "oidcClientSecret" ? encrypt(value as string) : value;
+      const toStore = ENCRYPTED_SETTING_KEYS.has(key) ? encrypt(value as string) : value;
       insert.run(key, JSON.stringify(toStore));
     }
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));

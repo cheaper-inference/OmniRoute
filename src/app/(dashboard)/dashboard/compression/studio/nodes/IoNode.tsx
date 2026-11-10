@@ -1,6 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 
 // ── Node data shapes ──────────────────────────────────────────────────────
 
@@ -18,14 +19,16 @@ export function IoNode({ data }: NodeProps) {
   const { variant, tokens, savingsPercent } = data as IoNodeData;
 
   const isInput = variant === "input";
-  const color = isInput ? "#6366f1" : "#22c55e"; // indigo for input, green for output
+  // Input/output identity pair on the kit chart tokens (KEA-7886 P8): chart-2 (blue) for input,
+  // chart-4 (green) for output. The token paints border + glow; the text stays neutral ink.
+  const color = isInput ? "var(--color-chart-2)" : "var(--color-chart-4)";
 
   return (
     <div
       className="rounded-xl border-2 bg-bg px-4 py-3 min-w-[120px] text-center transition-all duration-200"
       style={{
         borderColor: color,
-        boxShadow: `0 0 12px ${color}25`,
+        boxShadow: `0 0 12px ${flowColorAlpha(color, 15)}`,
       }}
     >
       {/* Input only uses source handle; Output only uses target handle */}
@@ -43,11 +46,11 @@ export function IoNode({ data }: NodeProps) {
         />
       )}
 
-      <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color }}>
+      <div className="text-[10px] font-semibold uppercase tracking-wider mb-1 text-text-muted">
         {isInput ? "Input" : "Output"}
       </div>
 
-      <div className="text-base font-bold" style={{ color }}>
+      <div className="text-base font-bold text-text-main">
         {(tokens as number).toLocaleString()}
       </div>
       <div className="text-[10px] text-text-muted">tokens</div>

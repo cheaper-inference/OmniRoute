@@ -55,7 +55,8 @@ test(
     );
     fs.writeFileSync(
       path.join(fixture, "app/api/probe/route.js"),
-      helpers +
+      'import os from "node:os";\n' +
+        helpers +
         `\nexport const dynamic = "force-dynamic";
 export function GET(request) {
   const command = new URL(request.url).searchParams.get("command");
@@ -94,18 +95,20 @@ export function GET(request) {
     fs.writeFileSync(
       runner,
       `const route = require(process.argv[2]).routeModule.userland.GET;
-const original = Object.getOwnPropertyDescriptor(process, "platform");
+const os = require("node:os");
+const original = os.platform;
 (async () => {
   const results = [];
   try {
     for (const platform of ["linux", "win32", "darwin"]) {
-      Object.defineProperty(process, "platform", { value: platform, configurable: true });
+      // Simulate the *runtime* OS; the build/host process remains Linux.
+      os.platform = () => platform;
       for (const command of ${JSON.stringify(commands)}) {
         const response = await route(new Request("http://localhost/api/probe?command=" + encodeURIComponent(command)));
         results.push({ platform, command, ...(await response.json()) });
       }
     }
-  } finally { Object.defineProperty(process, "platform", original); }
+  } finally { os.platform = original; }
   console.log(JSON.stringify(results));
 })().catch((error) => { console.error(error); process.exitCode = 1; });\n`
     );

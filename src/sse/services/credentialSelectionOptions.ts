@@ -10,6 +10,10 @@ export interface CredentialSelectionOptions {
   allowRateLimitedConnections?: boolean;
   bypassQuotaPolicy?: boolean;
   forcedConnectionId?: string | null;
+  /** API-key-scoped ordered preference. Only ranks connections that survived eligibility gates. */
+  preferredConnectionIds?: string[] | null;
+  /** The pin was chosen by the operator for this request (x-omniroute-connection), not derived by a combo. */
+  explicitConnectionPin?: boolean;
   excludeConnectionIds?: string[] | null;
   sessionKey?: string | null;
   sessionAffinityTtlMs?: number | null;

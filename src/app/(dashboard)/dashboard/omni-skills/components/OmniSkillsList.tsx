@@ -10,6 +10,7 @@ import { Card } from "@/shared/components";
 import { OmniSkillCard } from "./OmniSkillCard";
 import { SkillInspectorPane } from "./SkillInspectorPane";
 import type { OmniSkill } from "./OmniSkillCard";
+import type { JSX } from "react";
 
 interface OmniSkillsListProps {
   skills: OmniSkill[];

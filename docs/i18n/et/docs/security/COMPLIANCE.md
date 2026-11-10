@@ -20,63 +20,71 @@ auditi logimine ei saaks katkestada peamist päringuvoogu.
 
 ## Mida logitakse
 
-### Haldusauditi sündmused (`audit_log`)
+### Administratiivse auditi sündmused (`audit_log`)
 
-Iga kutse `logAuditEvent({ action, actor, target, details, ... })` loob ühe rea.
-Toimingustringid järgivad mustrit `domain.verb` (või `domain.verb.outcome`).
-Lähtekoodis kinnitatud toimingutüübid on järgmised:
+Iga `logAuditEvent({ action, actor, target, details, ... })` väljakutse loob
+ühe rea. Tegevuste stringid järgivad mustrit `domain.verb` (või
+`domain.verb.outcome`). Koodipuust kinnitatud tegevusetüübid on järgmised:
 
-| Toiming                              | Allikas                                 |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Tegevus                              | Allikas                                  |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Iga kirje talletab väljad `action`, `actor` (vaikeväärtus on `"system"`),
-`target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+Iga kirje sisaldab välju `action`, `actor` (vaikimisi `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
 `request_id` ja `timestamp`. Tundlikud võtmed (`apiKey`, `accessToken`,
-`refreshToken`, `password`, kõik mustritele `*token`/`*secret`/`*apikey`
-vastavad võtmed jne) redigeeritakse enne rea kirjutamist rekursiivselt
-väärtuseks `"[redacted]"`.
+`refreshToken`, `password`, kõik võtmed, mis vastavad mustrile
+`*token`/`*secret`/`*apikey` jne) asendatakse enne rea kirjutamist rekursiivselt
+väärtusega `"[redacted]"`.
 
-### MCP-tööriistade kutsed (`mcp_tool_audit`)
+`api_key.auth.touch` read registreerivad edukate API-võtme metaandmete ja
+avastamispäringute (GET/HEAD) lugemised, mis ei jõua päringulogisse: millist
+võtit kasutati, millal ja milline oli normaliseeritud tee. Kirjed koondatakse
+ning nende arv on piiratud 1 000 reaga. `noLog`-iga võtmed ja keskkonnavõti
+jäetakse vahele. Kutsuja IP-aadress ja kasutajaagent lisatakse ainult siis, kui
+funktsioonilipp `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` on sisse lülitatud
+(vaikimisi välja lülitatud).
 
-Iga MCP-tööriista väljakutse kirjutab faili `open-sse/mcp-server/audit.ts`
-kaudu ühe rea. Skeem (failist
-`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### MCP-tööriistade väljakutsed (`mcp_tool_audit`)
 
-| Veerg            | Märkused                                     |
-| ---------------- | -------------------------------------------- |
-| `id`             | automaatselt suurenev                        |
-| `tool_name`      | MCP-tööriista identifikaator                 |
-| `input_hash`     | sisendi sha256 (sisendandmeid ei salvestata) |
-| `output_summary` | lühike, kärbitud kokkuvõte                   |
-| `duration_ms`    | tegelik kulunud aeg                          |
-| `api_key_id`     | väljakutsuja (võib olla null)                |
-| `success`        | `1` / `0`                                    |
-| `error_code`     | tõrke korral lõplik veakood                  |
-| `created_at`     | ISO ajatempel                                |
+Iga MCP-tööriista väljakutse kirjutab rea `open-sse/mcp-server/audit.ts` kaudu.
+Skeem (failist `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+
+| Veerg            | Märkused                            |
+| ---------------- | ----------------------------------- |
+| `id`             | automaatselt kasvav                 |
+| `tool_name`      | MCP-tööriista identifikaator        |
+| `input_hash`     | sisendi sha256 (sisu ei salvestata) |
+| `output_summary` | lühike, kärbitud kokkuvõte          |
+| `duration_ms`    | kulunud aeg                         |
+| `api_key_id`     | kutsuja (võib olla tühi)            |
+| `success`        | `1` / `0`                           |
+| `error_code`     | terminalne veakood tõrke korral     |
+| `created_at`     | ISO-ajamärgend                      |
 
 ### Päringu- ja kasutuslogid
 
-Need on käitamise telemeetria (mitte rangelt haldusaudit), kuid kasutavad sama
-säilituskonveierit:
+Need on operatiivse telemeetria logid (mitte rangelt administratiivne audit),
+kuid kasutavad sama säilituskonveierit:
 
-- `usage_history` — päringupõhine kasutuse koondandmestik
-- `call_logs` — täielik päringupõhine logi (ridade ülempiiriga, vt allpool)
-- `proxy_logs` — puhverserveri liikluse logi (ridade ülempiiriga)
-- `request_detail_logs` — pärandlahenduse üksikasjalik päringulogi (kärbitakse endiselt, kui see on olemas)
+- `usage_history` — päringupõhine kasutuse koond
+- `call_logs` — täielik päringupõhine logi (reapiirangu alusel, vt allpool)
+- `proxy_logs` — puhverserveri liikluse logi (reapiirangu alusel)
+- `request_detail_logs` — päringute päranddetailne logi (olemasolu korral kärbitakse seda endiselt)
 
 ## Salvestusskeem
 

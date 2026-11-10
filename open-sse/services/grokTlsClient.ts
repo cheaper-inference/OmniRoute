@@ -13,6 +13,7 @@ import {
   type TlsFetchOptions,
   type TlsFetchResult,
 } from "./tlsClientBase.ts";
+import { newestChromeProfile } from "../utils/browserProfiles.ts";
 
 const DEFAULT_TIMEOUT_MS =
   Number.parseInt(process.env.OMNIROUTE_GROK_TLS_TIMEOUT_MS || "", 10) || 60_000;
@@ -21,7 +22,7 @@ const HARD_TIMEOUT_GRACE_MS =
 
 export const tlsClientModule = createTlsClientModule({
   providerName: "Grok",
-  tlsProfile: "chrome_146",
+  tlsProfile: newestChromeProfile,
   emulationOs: "linux",
   domain: "https://grok.com",
   streamEofPolicy: "exclude",

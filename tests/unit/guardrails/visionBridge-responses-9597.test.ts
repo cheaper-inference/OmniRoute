@@ -497,7 +497,12 @@ test("#9597 matrix: bridge transformation clears the real fail-closed combo visi
 
   assert.ok(rawExhaustion);
   assert.equal(rawExhaustion.terminalReason, "capability_mismatch");
-  assert.match(rawExhaustion.message, /confirmed vision support/);
+  // #17375 (#17289): only explicitly non-vision targets are hard-rejected now, and the
+  // exhaustion message names that verdict instead of "no confirmed vision support".
+  assert.match(
+    rawExhaustion.message,
+    /accepts image input: every target is explicitly marked non-vision/
+  );
 
   const guardrail = new VisionBridgeGuardrail({
     deps: {

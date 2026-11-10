@@ -38,34 +38,34 @@ Requête ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ---
 
-## Données enregistrées
+## Ce qui est enregistré
 
-Le service `usage.ts` enregistre un **événement d’utilisation** pour chaque requête :
+Le service `usage.ts` capture un **événement d’utilisation** pour chaque requête :
 
 | Champ              | Type    | Source                                                                   |
 | ------------------ | ------- | ------------------------------------------------------------------------ |
 | `id`               | string  | UUID généré lors de l’enregistrement                                     |
-| `apiKeyId`         | string  | Clé API à l’origine de la requête                                        |
-| `provider`         | string  | ID du fournisseur (openai, anthropic, etc.)                              |
-| `model`            | string  | ID du modèle (gpt-5, claude-opus-4-6, etc.)                              |
-| `comboId`          | string? | ID de la combinaison si le routage passe par une combinaison             |
-| `promptTokens`     | number  | Issu de la réponse du service en amont                                   |
-| `completionTokens` | number  | Issu de la réponse du service en amont                                   |
+| `apiKeyId`         | string  | La clé API à l’origine de la requête                                     |
+| `provider`         | string  | Identifiant du fournisseur (openai, anthropic, etc.)                     |
+| `model`            | string  | Identifiant du modèle (gpt-5, claude-opus-4-6, etc.)                     |
+| `comboId`          | string? | Identifiant du combo si la requête est acheminée via un combo            |
+| `promptTokens`     | number  | Issu de la réponse du fournisseur en amont                               |
+| `completionTokens` | number  | Issu de la réponse du fournisseur en amont                               |
 | `cachedTokens`     | number  | Tokens trouvés dans le cache (mise en cache des prompts Anthropic, etc.) |
 | `totalTokens`      | number  | prompt + complétion                                                      |
 | `costUsd`          | number  | Calculé à partir des données tarifaires                                  |
-| `latencyMs`        | number  | Durée totale de la requête                                               |
+| `latencyMs`        | number  | Durée de la requête de bout en bout                                      |
 | `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`               |
-| `errorClass`       | string? | Classe d’erreur si le statut est différent de `success`                  |
+| `errorClass`       | string? | Classe d’erreur si le statut est différent de success                    |
 | `timestamp`        | string  | ISO 8601 UTC                                                             |
 | `metadata`         | object  | Données personnalisées injectées par un plugin                           |
 
-### Origine des tokens
+### D’où proviennent les tokens
 
 Les tokens sont extraits de la réponse du fournisseur en amont dans le **gestionnaire de réponse** :
 
 ```ts
-// Extrait de open-sse/handlers/chatCore.ts
+// Depuis open-sse/handlers/chatCore.ts
 const response = await providerExecutor.execute(provider, request);
 const usage = response.usage || {
   prompt_tokens: 0,
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Pour les fournisseurs qui ne renvoient pas de données d’utilisation (certains fournisseurs utilisant des cookies web), OmniRoute **estime** le nombre de tokens à l’aide d’une heuristique de `~4 caractères par token` (voir `open-sse/services/autoCombo/pipelineRouter.ts`).
+Pour les fournisseurs qui ne renvoient pas de données d’utilisation (certains fournisseurs utilisant des cookies web), OmniRoute **estime** le nombre de tokens à l’aide de l’heuristique `~4 chars per token` (voir `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Tokens mis en cache
+### Tokens en cache
 
-OmniRoute suit `cached_tokens` séparément de `prompt_tokens`, car :
+OmniRoute suit `cached_tokens` séparément de `prompt_tokens` pour les raisons suivantes :
 
-- La mise en cache des prompts Anthropic facture les tokens mis en cache à un tarif réduit (10 % du tarif normal)
-- Certains fournisseurs renvoient `cache_read_input_tokens`, qui doivent être facturés différemment
-- Les données analytiques peuvent afficher le **taux d’accès au cache** = `cached_tokens / prompt_tokens`
+- La mise en cache des prompts Anthropic applique un tarif réduit aux tokens en cache (10 % du tarif normal)
+- Certains fournisseurs renvoient des `cache_read_input_tokens` qui doivent être facturés différemment
+- Les analyses peuvent afficher le **taux de succès du cache** = `cached_tokens / prompt_tokens`
+
+### Diagnostics des paliers d’écriture en cache
+
+Le panneau d’état du cache de prompts du tableau de bord d’analyse distingue les écritures en cache
+de 5 minutes et de 1 heure signalées par les fournisseurs. Les champs Anthropic
+`usage.cache_creation.ephemeral_5m_input_tokens` et
+`usage.cache_creation.ephemeral_1h_input_tokens` sont conservés lors de la conversion des données d’utilisation en mode streaming et
+hors streaming, puis stockés avec les résumés du journal des appels. Le total combiné
+des écritures en cache n’est pas ajouté une seconde fois à ces catégories.
+
+Les appels ne disposant que d’un compteur d’écriture combiné, y compris les anciens enregistrements, ont un palier
+inconnu. En cas de ventilation partielle, le reste non attribué demeure inconnu ; les compteurs invalides ou
+contradictoires sont signalés plutôt que de se voir attribuer silencieusement un TTL. Les marqueurs
+TTL côté requête ne constituent pas une preuve du palier facturé.
+
+L’estimation des écritures en équivalent API affichée par le panneau couvre uniquement les paliers signalés et tarifés, et non
+l’ensemble de la requête. Pour la tarification native des modèles Claude/Anthropic, elle applique 1,25 fois le
+tarif d’entrée aux écritures de 5 minutes et deux fois le tarif d’entrée aux écritures de 1 heure. Une tarification
+manquante est considérée comme indisponible, et non comme nulle. Les prix sont enregistrés lors de la journalisation de chaque nouvel appel ;
+les enregistrements historiques ne sont pas recalculés. Les comptes avec abonnement peuvent donc présenter une
+estimation en équivalent API sans que ce montant soit effectivement débité ni décompté du
+quota d’abonnement. Les calculs existants de quota, de budget et de coût exact du fournisseur restent inchangés.
+
+Ces diagnostics utilisent le résumé borné existant de l’état du cache et la politique de conservation du journal
+des appels. Ils ne modifient ni les TTL par défaut des requêtes, ni le routage, ni la sélection des comptes.
+La capture du TTL demandé par le client et du TTL sortant effectif au point d’envoi
+au fournisseur est reportée ; ce panneau présente les paliers indiqués dans les justificatifs, et non le TTL sortant effectif.
+
+Implémentation : `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` et `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,31 +153,31 @@ Pour les modèles dépourvus de données tarifaires, OmniRoute se rabat sur une 
 
 ## Agrégation par plage de dates
 
-Le module `usageAnalytics.ts` calcule les widgets du tableau de bord à partir des données brutes d'utilisation. Il prend en charge 7 plages temporelles :
+Le module `usageAnalytics.ts` calcule les widgets du tableau de bord à partir des données brutes d’utilisation. Il prend en charge 7 plages temporelles :
 
-| Plage    | Période                                             | Cas d'utilisation                  |
-| -------- | --------------------------------------------------- | ---------------------------------- |
-| `1d`     | Les dernières 24 heures                             | Détection horaire des pics de coût |
-| `7d`     | Les 7 derniers jours                                | Revue hebdomadaire                 |
-| `30d`    | Les 30 derniers jours                               | Facturation mensuelle              |
-| `90d`    | Les 90 derniers jours                               | Analyse trimestrielle              |
-| `ytd`    | Depuis le 1er janvier de l'année en cours           | Suivi du budget annuel             |
-| `all`    | Depuis toujours                                     | Statistiques cumulées              |
-| `custom` | Dates de début et de fin définies par l'utilisateur | Audits, requêtes ponctuelles       |
+| Plage    | Période                                   | Cas d’utilisation                   |
+| -------- | ----------------------------------------- | ----------------------------------- |
+| `1d`     | Dernières 24 heures                       | Détection des pics de coût horaires |
+| `7d`     | 7 derniers jours                          | Revue hebdomadaire                  |
+| `30d`    | 30 derniers jours                         | Facturation mensuelle               |
+| `90d`    | 90 derniers jours                         | Analyse trimestrielle               |
+| `ytd`    | Depuis le 1er janvier de l’année en cours | Suivi du budget annuel              |
+| `all`    | Toute la période                          | Statistiques cumulées               |
+| `custom` | Début/fin définis par l’utilisateur       | Audits, requêtes ponctuelles        |
 
-### Widgets calculés pour le tableau de bord
+### Widgets du tableau de bord calculés
 
-Pour toute plage de dates, la couche analytique calcule :
+Pour toute plage de dates, la couche d’analyse calcule :
 
-| Widget                                | Description                                                                   |
-| ------------------------------------- | ----------------------------------------------------------------------------- |
-| **Cartes récapitulatives**            | Nombre total de requêtes, coût total, jetons totaux, taux de réussite         |
-| **Graphique de tendance quotidienne** | Coût + jetons par jour, empilés par modèle                                    |
-| **Carte thermique d'activité**        | Grille heure de la journée × jour de la semaine, couleur = nombre de requêtes |
-| **Répartition par modèle**            | Diagramme circulaire du coût par modèle                                       |
-| **Répartition par fournisseur**       | Diagramme à barres des requêtes par fournisseur                               |
-| **Principales clés API**              | Tableau des 10 principales clés par coût                                      |
-| **Analyse des erreurs**               | Taux d'erreur au fil du temps, principales classes d'erreurs                  |
+| Widget                                | Description                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| **Cartes de synthèse**                | Nombre total de requêtes, coût total, nombre total de tokens, taux de réussite |
+| **Graphique de tendance quotidienne** | Coût + tokens par jour, empilés par modèle                                     |
+| **Carte thermique de l’activité**     | Grille heure de la journée × jour de la semaine, couleur = nombre de requêtes  |
+| **Répartition par modèle**            | Diagramme circulaire du coût par modèle                                        |
+| **Répartition par fournisseur**       | Diagramme à barres des requêtes par fournisseur                                |
+| **Principales clés API**              | Tableau des 10 clés les plus coûteuses                                         |
+| **Analyse des erreurs**               | Taux d’erreur au fil du temps, principales classes d’erreurs                   |
 
 ### Accès programmatique
 
@@ -155,7 +185,7 @@ Pour toute plage de dates, la couche analytique calcule :
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
-  history,              // enregistrements de l'historique d'utilisation
+  history,              // enregistrements de l’historique d’utilisation
   "7d",                 // plage temporelle : "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
   connectionMap,        // table de correspondance des connexions fournisseur (connectionId → nom du compte)
   {
@@ -171,47 +201,47 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ## Application des quotas
 
-Le quota par clé d’API est appliqué à deux niveaux :
+Le quota par clé API est appliqué à deux niveaux :
 
 1. **Limite souple** (`quotaWarnAt`) : avertissement dans le tableau de bord lorsque l’utilisation dépasse le seuil
-2. **Limite stricte** (`quotaLimit`) : requête rejetée avec le code HTTP 429 lorsque la limite est dépassée
+2. **Limite stricte** (`quotaLimit`) : requête rejetée avec le statut HTTP 429 en cas de dépassement
 
 ### Configuration
 
 ```ts
-// Par clé d’API
+// Par clé API
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // 5,00 $ — afficher un avertissement
-  quotaLimit: 10_00,    // 10,00 $ — arrêt strict
+  quotaLimit: 10_00,    // 10,00 $ — blocage strict
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### Flux d’application
+### Déroulement du contrôle
 
 ```
 Requête ──▶ quotaCheck()
               │
               ├── Dans la limite ?  ──▶ autoriser
               │
-              └── Limite dépassée ?  ──▶ 429 Trop de requêtes
-                                         avec l’en-tête Retry-After
+              └── Limite dépassée ?  ──▶ 429 Too Many Requests
+                                   avec l’en-tête Retry-After
 ```
 
 ### Instantanés des quotas
 
-La table `quotaSnapshots` stocke **l’état historique des quotas** à des fins d’analyse des tendances :
+La table `quotaSnapshots` stocke **l’état historique des quotas** pour l’analyse des tendances :
 
 | Champ | Description |
-| ----------- | ---------------------------------------- | ------ | ------- |
-| `apiKeyId` | La clé faisant l’objet du suivi |
+| ----------- | -------------------------------- | ------ | ------- |
+| `apiKeyId` | La clé suivie |
 | `window` | "day" | "week" | "month" |
-| `used` | Coût utilisé dans cette fenêtre (cents) |
-| `limit` | La limite (cents) |
-| `resetAt` | Date de réinitialisation de la fenêtre |
+| `used` | Coût consommé pendant cette période (centimes) |
+| `limit` | La limite (centimes) |
+| `resetAt` | Date de réinitialisation de la période |
 | `createdAt` | Date de création de l’instantané |
 
-Des instantanés sont créés **à chaque requête** dont le coût est supérieur à 0 et servent à :
+Des instantanés sont créés **à chaque requête** dont le coût est > 0, et servent à :
 
 - Afficher la barre de progression du quota dans le tableau de bord
 - Afficher les graphiques de tendance des quotas sur 30 jours
@@ -221,7 +251,7 @@ Des instantanés sont créés **à chaque requête** dont le coût est supérieu
 
 ## API REST
 
-### Répertorier les enregistrements d’utilisation
+### Lister les enregistrements d’utilisation
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -253,7 +283,7 @@ Réponse :
 }
 ```
 
-### Obtenir le récapitulatif analytique
+### Obtenir une synthèse analytique
 
 ```bash
 GET /api/usage/analytics?range=7d&groupBy=model
@@ -272,12 +302,7 @@ Réponse :
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,12 +311,12 @@ Réponse :
 }
 ```
 
-### Interroger les données analytiques d’utilisation
+### Consulter les analyses d’utilisation
 
-Les données d’utilisation sont accessibles via le tableau de bord ou les outils MCP, et non via des points de terminaison d’exportation REST directs. Données analytiques disponibles :
+Les données d’utilisation sont accessibles via le tableau de bord ou les outils MCP, et non via des points de terminaison REST d’exportation directe. Analyses disponibles :
 
-- **`/api/usage/analytics`** — métriques d’utilisation agrégées (regroupées par modèle, fournisseur ou clé)
-- **`/api/usage/quota`** — état actuel du quota pour chaque clé d’API
+- **`/api/usage/analytics`** — métriques d’utilisation agrégées (regroupement par modèle, fournisseur, clé)
+- **`/api/usage/quota`** — état actuel du quota par clé API
 - **`/api/usage/history`** — journaux de l’historique des requêtes
 
 ---
@@ -303,7 +328,7 @@ Deux outils MCP exposent les données d’utilisation aux agents (voir `open-sse
 | Outil                   | Description                                                 |
 | ----------------------- | ----------------------------------------------------------- |
 | `omniroute_cost_report` | Génère un rapport des coûts par clé pour une période donnée |
-| `omniroute_check_quota` | Renvoie l’état actuel du quota pour une clé d’API           |
+| `omniroute_check_quota` | Renvoie l’état actuel du quota pour une clé API             |
 
 Exemple d’appel par un agent :
 
@@ -318,43 +343,43 @@ Exemple d’appel par un agent :
 
 ## Conservation et nettoyage
 
-Les données d’utilisation augmentent d’environ 1 à 10 Ko par requête. À grande échelle, cela peut devenir significatif.
+Les données d’utilisation augmentent d’environ 1 à 10 Ko par requête. À grande échelle, cela peut représenter un volume important.
 
 ### Paramètres de conservation
 
-La durée de conservation de l’historique d’utilisation est configurée via les paramètres de base de données dans l’interface utilisateur ou via `/api/settings/database`.
+La conservation de l’historique d’utilisation se configure dans les paramètres de la base de données de l’interface utilisateur ou via `/api/settings/database`.
 
 Par défaut, l’historique d’utilisation est conservé pendant **90 jours**.
 
 ### Nettoyage
 
-Les anciens enregistrements sont nettoyés par `src/lib/db/cleanup.ts` :
+Les anciens enregistrements sont supprimés par `src/lib/db/cleanup.ts` :
 
 - Déclenché par le processus cron en arrière-plan
-- Supprime les enregistrements de `usage_history` plus anciens que la durée de conservation configurée dans le paramètre `usageHistory`
+- Supprime de `usage_history` les enregistrements plus anciens que la durée de conservation configurée dans le paramètre `usageHistory`
 
-### Estimation du stockage
+### Estimation de l’espace de stockage
 
-| Taux de requêtes      | Stockage sur 30 jours | Stockage sur 90 jours |
-| --------------------- | --------------------- | --------------------- |
-| 100 requêtes/jour     | ~3 Mo                 | ~9 Mo                 |
-| 1 000 requêtes/jour   | ~30 Mo                | ~90 Mo                |
-| 10 000 requêtes/jour  | ~300 Mo               | ~900 Mo               |
-| 100 000 requêtes/jour | ~3 Go                 | ~9 Go                 |
+| Fréquence des requêtes | Stockage sur 30 jours | Stockage sur 90 jours |
+| ---------------------- | --------------------- | --------------------- |
+| 100 req/jour           | ~3 Mo                 | ~9 Mo                 |
+| 1 000 req/jour         | ~30 Mo                | ~90 Mo                |
+| 10 000 req/jour        | ~300 Mo               | ~900 Mo               |
+| 100 000 req/jour       | ~3 Go                 | ~9 Go                 |
 
-Pour un trafic très élevé, envisagez les options suivantes :
+En cas de trafic très élevé, envisagez de :
 
-- Réduire la durée de conservation via les paramètres de base de données
-- Utiliser `aggregated_metrics` au lieu des enregistrements bruts (uniquement pour l’analyse)
+- Réduire la durée de conservation dans les paramètres de la base de données
+- Utiliser `aggregated_metrics` plutôt que les enregistrements bruts (uniquement pour les analyses)
 
 ---
 
 ## Conseils d’optimisation des coûts
 
-### 1. Utiliser le modèle approprié
+### 1. Utiliser le bon modèle
 
 ```bash
-# Réponse rapide — utiliser un modèle économique et rapide
+# Réponse rapide — privilégier un modèle économique et rapide
 curl -d '{"model":"auto/fast","messages":[...]}'
 
 # Tâche complexe — privilégier la qualité
@@ -363,10 +388,10 @@ curl -d '{"model":"auto/smart","messages":[...]}'
 
 ### 2. Activer la mise en cache
 
-La mise en cache des prompts d’Anthropic permet d’économiser **90 % sur les contextes répétés** :
+La mise en cache des prompts d’Anthropic permet d’économiser **90% sur le contexte répété** :
 
 ```ts
-// La mise en cache est automatique — il suffit d’inclure la même longue invite système
+// La mise en cache est automatique — il suffit d’inclure le même long prompt système
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Sera automatiquement mis en cache
@@ -376,7 +401,7 @@ const response = await openai.chat({
 
 ### 3. Utiliser la compression
 
-La compression RTK + Caveman permet d’économiser **15 à 95 % sur les sessions utilisant beaucoup d’outils** :
+La compression RTK + Caveman permet d’économiser **15-95% sur les sessions utilisant beaucoup d’outils** :
 
 ```ts
 const config = {
@@ -389,15 +414,15 @@ const config = {
 
 ### 4. Définir des quotas par clé
 
-Définissez toujours `quotaLimit` afin d’éviter les coûts incontrôlés :
+Définissez toujours `quotaLimit` pour éviter une envolée des coûts :
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Plafond de 10 $/mois
 ```
 
-### 5. Auditer les principaux consommateurs
+### 5. Examiner les plus gros consommateurs
 
-Utilisez le tableau de bord ou **`/api/usage/analytics`** pour regrouper les données par clé d’API et les trier par coût :
+Utilisez le tableau de bord ou **`/api/usage/analytics`** pour regrouper les données par clé API et les trier par coût :
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -410,14 +435,14 @@ GET /api/usage/analytics?groupBy=apiKey
 ### « Le coût est plus élevé que prévu »
 
 1. Consultez **`/api/usage/analytics?groupBy=model`** — identifiez le modèle coûteux
-2. Consultez **`/api/usage/analytics?groupBy=apiKey`** — identifiez le principal consommateur
+2. Consultez **`/api/usage/analytics?groupBy=apiKey`** — identifiez le gros consommateur
 3. Vérifiez que les données tarifaires sont à jour : `POST /api/pricing/sync`
 
 ### « Des enregistrements sont manquants »
 
-- Vérifiez les paramètres de conservation de la base de données sous Tableau de bord → Base de données → Nettoyage — les anciens enregistrements sont supprimés par la tâche de nettoyage périodique (`src/lib/db/cleanup.ts`)
+- Vérifiez les paramètres de conservation de la base de données dans Tableau de bord → Base de données → Nettoyage — les anciens enregistrements sont supprimés par la tâche de nettoyage périodique (`src/lib/db/cleanup.ts`)
 - Recherchez les erreurs dans `src/lib/db/usage*.ts` — les échecs d’écriture dans la base de données sont journalisés, mais ne sont pas signalés
-- Vérifiez que la requête a effectivement atteint `chatCore` — contrôlez le routage combiné
+- Vérifiez que la requête a bien atteint `chatCore` — vérifiez le routage des combos
 
 ### « Le quota n’est pas appliqué »
 
@@ -430,7 +455,7 @@ GET /api/usage/analytics?groupBy=apiKey
 ## Voir aussi
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Schéma des tables d’utilisation
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — variables d’environnement pour la synchronisation des tarifs
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Variables d’environnement pour la synchronisation des tarifs
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Comment `auto/fast` et `auto/cheap` réduisent les coûts
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — Référence complète de `/api/usage/*`
 - Source : `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

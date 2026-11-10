@@ -12,6 +12,19 @@ OmniRoute has three distinct but related resilience mechanisms. Each has a diffe
 
 > Source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Env-vs-dashboard precedence for resilience toggles.** The opt-in
+> resilience toggles seeded from the environment — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`,
+> `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`,
+> `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` —
+> only supply the _default_ (`DEFAULT_RESILIENCE_SETTINGS`,
+> `src/lib/resilience/settings.ts`). A boolean persisted in `resilienceSettings`
+> (Dashboard → **Settings → Resilience** / `PATCH /api/resilience`, stored in
+> `key_value`) wins over the env value: normalization (`toBoolean`,
+> `src/lib/resilience/settings/normalize.ts`) keeps the stored boolean whenever
+> one exists. Setting such an env var to `true` on a deployment where the
+> dashboard already saved `false` therefore changes nothing — flip the toggle
+> in **Settings → Resilience** (or clear the stored field) instead.
+
 ## 1. Provider Circuit Breaker
 
 **Scope:** entire provider (e.g., `glm`, `openai`, `anthropic`).
@@ -96,6 +109,15 @@ Regression guard: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-key 429: prefers upstream `Retry-After`/reset headers/parseable reset text
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
 
+**Per-provider retry delay.** The provider detail page has a **Retry delay** select (Auto,
+15s up to 1h). It saves `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`
+(1–21600, through `PATCH /api/resilience`). When a rate-limit error carries no upstream retry
+hint, that value replaces the scaled backoff for the provider and resets `backoffLevel` to 0
+(`open-sse/services/rotationConfig.ts::overrideFor`). Precedence for a rate-limited error, highest
+first: upstream retry hint, then per-connection `providerSpecificData.rotationOverrides.rateLimitResetSeconds`,
+then the per-provider retry delay, then env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, then the
+scaled backoff. Auto removes the field. It only affects the rate-limit reason, never terminal states.
+
 **Anti-thundering-herd guard:** prevents concurrent failures from over-extending cooldown or double-incrementing `backoffLevel`.
 
 **Concurrency-limit 429s do not climb the backoff ladder.** A `429` whose body reports a
@@ -116,6 +138,19 @@ cooldown: the stall belongs to that request, most often a long reasoning turn wi
 output yet. Operators can opt back in with `resilienceSettings.streamStallCooldown.enabled`
 (default `false`).
 
+**Opt-in latency signal for `p2c` account selection.** Each dispatched attempt records its
+time-to-first-byte and outcome per connection (and per connection + model) in an in-memory
+rolling window: the last 20 samples within 15 minutes
+(`open-sse/services/connectionLatencyTracker.ts`, recorded from `safeLogEvents()` in
+`src/sse/handlers/chatHelpers.ts`). When `resilienceSettings.p2cLatency.weight` is above `0`
+(range 0-20, default `0` = off), `compareP2CConnections()` in `src/sse/services/auth.ts` adds
+up to `weight` points to each candidate of the pair. Half of that comes from latency as a ratio to
+the faster candidate (twice as slow takes the full half) and half from the rolling error rate.
+The term applies only when both candidates have at least 3 samples, so new accounts are not
+penalized, and its ceiling stays below the quota-blocked and quota-exhausted penalties. It
+adds no circuit of its own: failing accounts are still handled by the cooldown, lockout and
+breaker layers. Set it with `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+
 **Reasoning frames restart the content-stall budget.** A reasoning model can think for
 minutes before its first visible token: Claude streams `thinking_delta` frames whose
 thinking text may be empty, and the Responses API streams one reasoning item after
@@ -133,7 +168,7 @@ apply (`open-sse/executors/kiro/reasoning.ts`).
 
 **Terminal states (NOT cooldowns):**
 
-- `banned` — set by banned-keyword / account-ban detection (see [BAN_DETECTION](../security/BAN_DETECTION.md)), and by three consecutive upstream per-request refusals (`request_rejected`, e.g. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); a single refusal only cools the connection down
+- `banned` — set by banned-keyword / account-ban detection (see [BAN_DETECTION](../security/BAN_DETECTION.md)). Upstream per-request refusals (`request_rejected`, e.g. Anthropic OAuth 403 "Request not allowed") never set it: they are counted per connection and model and take that model out of rotation with a growing cooldown capped at `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), or cool the connection when no model is known — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (transitions to terminal after bounded retries — `EXPIRED_RETRY_MAX = 3` with exponential backoff — so transient OAuth errors can self-heal before the account is permanently deactivated)
 - `credits_exhausted`
 
@@ -200,6 +235,69 @@ connection** (Edit connection → Claude section → `lowPriorityMode` / `autoLi
 
 Regression guards: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+
+### Auto-apply banked resets
+
+**Scope:** Codex and Claude subscription (OAuth) connections. **Opt-in**: the
+`bankedResetAutoApply` setting is off and in `dry-run` mode by default
+(Settings → AI → Auto-apply banked resets).
+
+**Purpose:** spend banked resets on their own when an account hits a usage wall, instead of
+waiting for an operator to press "Redeem" on the Provider Limits page.
+
+| Credit type (`creditTypes`) | What is redeemed                          | Where it runs                                                   |
+| --------------------------- | ----------------------------------------- | --------------------------------------------------------------- |
+| `codexCredits`              | Codex reset credits                       | background job, every 60 s                                      |
+| `claudeCredits`             | Claude banked grants (`GRANT` credits)    | background job, every 60 s                                      |
+| `claudeSessionReset`        | Claude weekly session-limit reset (above) | request path, through the same policy as the per-account toggle |
+
+**Implementation:**
+
+- Pure decision (one rule set for both paths): `src/lib/usage/bankedResetPolicy.ts::decideBankedReset()`
+- Background job: `src/lib/services/bankedResetAutoApply.ts` (started in `src/instrumentation-node.ts`)
+- Claude request-path gate: `src/lib/usage/claudeSessionResetPolicy.ts`, registered through
+  `setClaudeLimitResetPolicy()` in `open-sse/services/claudeLimitReset.ts`
+- History, caps and webhook: `src/lib/usage/bankedResetAudit.ts`
+- History API: `GET /api/settings/banked-reset-auto/history?limit=50` (management auth)
+
+**Decision order** (the first failing rule is the recorded reason):
+
+1. Feature off, credit type off, or account out of scope (`accountScope` `all` / `selected`
+   plus the per-account `connections` map).
+2. Outside the optional UTC schedule (`startHourUtc` > `endHourUtc` crosses midnight).
+3. Caps over the last 24 h: `maxPerAccountPerDay` (1), `maxPerDay` (3), and
+   `minSpacingMinutes` (30) between any two redemptions.
+4. Trigger: a walled `session` or `weekly` window (read from
+   `getQuotaWindowStatus().reachedThreshold`, not `isAccountQuotaExhausted()`, which only
+   reports an account with every window spent), or a credit expiring within
+   `expiringCreditHours` (24) on an account that has used at least
+   `expiringCreditMinUsedPercent` (50).
+5. Natural-reset guard: skip when the walled 5-hour window resets within
+   `sessionResetGuardMinutes` (90), or the walled weekly window within
+   `weeklyResetGuardHours` (12).
+6. Weekly floor: skip a 5-hour reset when weekly remaining is below `weeklyFloorPercent` (10).
+7. `last-resort` mode: skip while another in-scope account of the same provider has at least
+   `poolHeadroomPercent` (10) left in both windows. Expiring-credit triggers bypass this.
+8. `dry-run` records a row and redeems nothing; `last-resort` and `eager` redeem.
+
+Missing quota data never unlocks a redemption: an unknown reset time or weekly usage skips.
+
+**Claude session reset:** with the feature off, or `claudeSessionReset` off, the per-account
+`autoLimitReset` toggle decides exactly as before. With both on, the feature replaces the
+per-account toggles: an in-scope account may claim only when the policy allows it, and in
+`dry-run` mode no claim is made.
+
+**Safety:** the job redeems at most one credit per tick, decides before listing credits (a
+skipped account is never listed), uses idempotency keys
+`auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`, and backs an account off for 1 h after a
+failed listing or redemption. Every redemption, failure and dry-run decision is written to
+`audit_log` (`action: "bankedReset.redeem"`, no tokens or credit ids); the caps are counted
+from those rows, so they survive restarts. Successful redemptions also fire the
+`provider.reset_redeemed` webhook.
+
+Regression guards: `tests/unit/banked-reset-policy.test.ts`,
+`tests/unit/banked-reset-auto-apply.test.ts`, `tests/unit/claude-limit-reset-policy-gate.test.ts`,
+`tests/unit/banked-reset-history-route.test.ts`.
 
 ### Session affinity (#7274)
 
@@ -306,6 +404,12 @@ and edits the most-tuned cooldown rules: `streamStallCooldown.enabled` and the O
 `connectionCooldown` base cooldown and maximum backoff steps (saved through
 `PATCH /api/resilience`). Terminal states (`banned`, `expired`, `credits_exhausted`) are
 listed but never cleared here.
+
+The **Error cooldown rules** card on the same page edits the operator error rules
+(`settings.providerErrorRules`) and the per-provider catch-all defaults
+(`settings.providerErrorDefaults`) through `PATCH /api/settings` — see "Operator-declared
+rules" under §7 for how they match. Durations are Default (no explicit cooldown), 30 min,
+1 h, 5 h, 24 h, or a custom 1 to 43,200 minutes (30 days).
 
 **REST API** (`src/lib/resilience/cooldownManager.ts`, auth: management):
 
@@ -443,6 +547,13 @@ on multi-model combos, e.g. both targets of a 2-model combo hitting a per-model
 rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
 `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted`
 (locked until midnight) or auth/not-found reasons.
+
+A combo can opt out with `config.comboCooldownWaitEnabled: false`. Only literal
+`false` disables these shared combo waits (post-dispatch cooldown and pre-dispatch
+circuit-open/model-lock waits) and their wait-budget timeout-floor extension.
+Missing or `true` preserves the global policy; `true` cannot enable globally
+disabled waiting. An explicit `targetTimeoutMs` still wins. This opt-out does not
+change the separate native-Codex turn-pin pre-dispatch wait.
 
 The same gate covers the pre-dispatch case (#16319): when every target of a
 combo is skipped before any attempt is made because its model sits in a short
@@ -597,7 +708,10 @@ The watchdog requires a warm-up period followed by a complete rolling window bef
 it can abort. It counts text deltas from Chat Completions and Responses API output
 events (a conservative UTF-8 byte proxy), ignores usage-only and empty events, and
 suspends judgement while tool-call or reasoning events are in flight. It is disabled
-by default and can be enabled with `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; the
+by default and can be enabled with `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`
+(that env value only seeds the default — a saved
+`resilienceSettings.streamRecovery.throughputWatchdog.enabled` boolean wins;
+see the env-vs-dashboard precedence note at the top of this guide); the
 window, warm-up, minimum rate, and minimum measurable output are bounded by the
 normal resilience-settings normalization layer.
 
@@ -763,6 +877,34 @@ opt-in. `resolveRuleMatchBody()` and `honorsRuleLockScope()` both check
 `hasOperatorRuleForProvider()` first: a provider with an operator rule gets
 the raw error text and has its declared `scope` honored, regardless of
 whether it also appears in either allowlist.
+
+**Operator-declared rules** (`OperatorProviderErrorRule`): each rule has an
+optional `status` and an optional `match` (a plain, case-insensitive substring
+of the error text, never a RegExp, so it cannot cause ReDoS), and must set at
+least one of the two. When both are set they are AND-ed; an omitted field
+matches anything, so `{match: "insufficient_quota"}` matches any status that
+carries that code. The first matching rule wins. `cooldownMs` accepts up to
+30 days; at most 50 rules in total.
+
+**Catch-all defaults** (`settings.providerErrorDefaults`, opt-in, set through
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+with `cooldownMs` from 1 minute to 30 days. A default applies only when no
+operator rule and no built-in catalog rule matched, and only to 402, 403, 408,
+429 and 5xx errors. Request-shape errors (400, 404, 409, 413, 422) and bare
+401s keep their own handling. With no explicit `reason`, the reason comes from
+the status, the same way `classifyError` does it. Declaring a default counts as
+an operator rule for `hasOperatorRuleForProvider()`, so its `scope` (default
+`"connection"`) is honored. The effective cooldown of a default is the longer
+of its `cooldownMs` and the provider's own retry hint (`Retry-After`,
+`x-ratelimit-reset` or a reset hint in the body, the same hint the engine
+honors when the connection-cooldown setting "use upstream retry hints" is on),
+so a default can stretch a short upstream hint but never cut a real reset
+short. An explicit operator rule keeps its exact `cooldownMs`. Neither a rule nor a default bypasses the
+connection-cooldown guards in `markAccountUnavailable`: an active, longer
+cooldown is never shortened and a terminal status is never overwritten. The
+built-in text detectors that run earlier in `checkFallbackError` (credits
+exhausted, daily quota, account deactivated) still take precedence for their
+own phrases.
 
 **Known gap — `providerRuleRegistry` is never consulted for HTTP 400.**
 `checkFallbackError`'s `BAD_REQUEST` branch classifies status 400 entirely

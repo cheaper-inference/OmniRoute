@@ -9,6 +9,7 @@ export interface ApiKeyPermissionsUpdate {
   blockedModels?: string[];
   allowedCombos?: string[];
   allowedConnections?: string[];
+  preferredConnections?: string[];
   allowedQuotas?: string[];
   noLog?: boolean;
   autoResolve?: boolean;
@@ -32,9 +33,11 @@ export interface ApiKeyPermissionsUpdate {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   chaosModeEnabled?: boolean;
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
+  allowCcDiscoveryAliases?: boolean;
   catalogScope?: "all" | "combos" | "models";
   forcedModel?: string | null;
 }
@@ -54,6 +57,7 @@ export function normalizeApiKeyPermissionsUpdate(
     blockedModels: update.blockedModels,
     allowedCombos: update.allowedCombos,
     allowedConnections: update.allowedConnections,
+    preferredConnections: update.preferredConnections,
     allowedQuotas: update.allowedQuotas,
     noLog: update.noLog,
     autoResolve: update.autoResolve,
@@ -77,9 +81,11 @@ export function normalizeApiKeyPermissionsUpdate(
     usageLimitEnabled: update.usageLimitEnabled,
     dailyUsageLimitUsd: update.dailyUsageLimitUsd,
     weeklyUsageLimitUsd: update.weeklyUsageLimitUsd,
+    fiveHourUsageLimitUsd: update.fiveHourUsageLimitUsd,
     chaosModeEnabled: update.chaosModeEnabled,
     compressionEnabled: update.compressionEnabled,
     allowAutoCombos: update.allowAutoCombos,
+    allowCcDiscoveryAliases: update.allowCcDiscoveryAliases,
     catalogScope: update.catalogScope,
     forcedModel: update.forcedModel,
   };

@@ -12,6 +12,7 @@ import {
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 import { AUTO_DISABLE_BANNED_SCOPES } from "@/shared/utils/autoDisableBanned";
+import { CLI_VERSION_KEYS, CLI_VERSION_PATTERN } from "@omniroute/open-sse/config/cliVersions.ts";
 
 // Single source of truth: ../settingsSchemas (the schema the runtime settings route validates
 // against). Re-exported here so this modular barrel stays in exact lockstep — a divergent local
@@ -42,6 +43,9 @@ export const requestQueueSettingsSchema = z
     requestsPerMinute: z.number().int().min(1).optional(),
     minTimeBetweenRequestsMs: z.number().int().min(0).optional(),
     concurrentRequests: z.number().int().min(1).optional(),
+    // #18390: the Request Queue card always posts this field. Bounds mirror
+    // normalizeRequestQueueSettings; 0 disables the global gate.
+    globalConcurrentRequests: z.number().int().min(0).max(100_000).optional(),
     // 0 is an explicit "disable the queue-wait budget" sentinel (see
     // src/lib/resilience/settings/normalize.ts maxWaitMs) — do not clamp it up to 1.
     maxWaitMs: z.number().int().min(0).optional(),
@@ -90,6 +94,9 @@ export const waitForCooldownSettingsSchema = z
     enabled: z.boolean().optional(),
     maxRetries: z.number().int().min(0).max(10).optional(),
     maxRetryWaitSec: z.number().int().min(0).max(300).optional(),
+    // #18390: read by normalizeWaitForCooldownSettings, which also floors it at
+    // maxRetryWaitSec * 1000. The ceiling matches its 5 minute cap.
+    budgetMs: z.number().int().min(0).max(300_000).optional(),
   })
   .strict();
 
@@ -117,6 +124,13 @@ export const quotaShareConcurrencyLimitSettingsSchema = z
 export const streamStallCooldownSettingsSchema = z
   .object({
     enabled: z.boolean().optional(),
+  })
+  .strict();
+
+// Opt-in latency term for p2c account selection. Bounds mirror normalizeP2CLatencySettings.
+export const p2cLatencySettingsSchema = z
+  .object({
+    weight: z.number().int().min(0).max(20).optional(),
   })
   .strict();
 
@@ -196,8 +210,37 @@ export const tokenRefreshBreakerSettingsSchema = z
   })
   .strict();
 
+const preferredOverrideTimeoutSchema = z
+  .number()
+  .int()
+  .min(0)
+  .max(120_000)
+  .refine((value) => value === 0 || value >= 500, "Must be 0 or at least 500 ms");
+
+const preferredTimeoutOverridesSchema = z
+  .record(
+    z
+      .string()
+      .min(1)
+      .max(180)
+      .regex(/^[a-z0-9][a-z0-9._/@:+-]*\*?$/i),
+    preferredOverrideTimeoutSchema
+  )
+  .refine((value) => Object.keys(value).length <= 64, "Too many timeout overrides");
+
+export const preferredAccountFailoverSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    defaultTimeoutMs: z.number().int().min(500).max(120_000).optional(),
+    providerTimeoutsMs: preferredTimeoutOverridesSchema.optional(),
+    modelTimeoutsMs: preferredTimeoutOverridesSchema.optional(),
+  })
+  .strict();
+
 export const updateResilienceSchema = z
   .object({
+    preferredAccountFailover: preferredAccountFailoverSchema.optional(),
+    antigravityTimingTelemetry: z.object({ enabled: z.boolean().optional() }).strict().optional(),
     requestQueue: requestQueueSettingsSchema.optional(),
     connectionCooldown: z
       .object({
@@ -217,6 +260,7 @@ export const updateResilienceSchema = z
     comboCooldownWait: comboCooldownWaitSettingsSchema.optional(),
     quotaShareConcurrencyLimit: quotaShareConcurrencyLimitSettingsSchema.optional(),
     streamStallCooldown: streamStallCooldownSettingsSchema.optional(),
+    p2cLatency: p2cLatencySettingsSchema.optional(),
     streamRecovery: streamRecoverySettingsSchema.optional(),
     providerCooldown: providerCooldownSettingsSchema.optional(),
     // Quota preflight cutoff (auth-level account skipping) — surfaced in the
@@ -243,6 +287,7 @@ export const updateResilienceSchema = z
             rpm: z.number().int().min(1).optional(),
             concurrency: z.number().int().min(1).optional(),
             providerConcurrency: z.number().int().min(0).max(100_000).optional(),
+            rateLimitCooldownSeconds: z.number().int().min(1).max(21_600).optional(),
           })
           .strict()
       )
@@ -254,6 +299,8 @@ export const updateResilienceSchema = z
   .superRefine((value, ctx) => {
     const provided = [
       value.requestQueue,
+      value.preferredAccountFailover,
+      value.antigravityTimingTelemetry,
       value.connectionCooldown,
       value.providerBreaker,
       value.tokenRefreshBreaker,
@@ -261,6 +308,7 @@ export const updateResilienceSchema = z
       value.comboCooldownWait,
       value.quotaShareConcurrencyLimit,
       value.streamStallCooldown,
+      value.p2cLatency,
       value.streamRecovery,
       value.providerCooldown,
       value.quotaPreflight,
@@ -342,6 +390,42 @@ export const updateThinkingBudgetSchema = z
         message: "No valid fields to update",
         path: [],
       });
+    }
+  });
+
+// Operator-set CLI client-version overrides for the Claude Code / Codex identity
+// presets (Dashboard -> Providers -> claude/codex card). `null` is an explicit
+// "clear this override" sentinel; omitting a key leaves its current value alone.
+// Values are validated HERE as well as in the store so the route can reject a bad
+// version loudly: the #12417 env vars fail silently and fall back to the captured
+// pin, which is the very footgun this control exists to remove.
+export const updateCliVersionSchema = z
+  .object({
+    claude: z.string().trim().nullable().optional(),
+    codex: z.string().trim().nullable().optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.claude === undefined && value.codex === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "No valid fields to update",
+        path: [],
+      });
+      return;
+    }
+    // Mirrors the store's drop-don't-coerce rule, but reported per field so the
+    // operator sees WHICH value the wire would otherwise have silently dropped.
+    for (const key of CLI_VERSION_KEYS) {
+      const raw = value[key];
+      if (raw === undefined || raw === null) continue;
+      if (!CLI_VERSION_PATTERN.test(raw)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Must be a version token like 2.1.259, or null to clear the override",
+          path: [key],
+        });
+      }
     }
   });
 

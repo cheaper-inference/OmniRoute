@@ -16,18 +16,22 @@ import {
 import { prepareToolMessages } from "../translator/webTools.ts";
 import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 import { buildToolModeResponse } from "./chatgptWebTools.ts";
-import { projectPublicErrorIdentifier, sanitizeErrorMessage } from "../utils/error.ts";
-import { buildSessionCookieHeader, mergeRefreshedCookie } from "../utils/nextAuthCookie.ts";
+import {
+  buildErrorBody,
+  projectPublicErrorIdentifier,
+  sanitizeErrorMessage,
+} from "../utils/error.ts";
+import { mergeRefreshedCookie } from "../utils/nextAuthCookie.ts";
 import { formatTranslatedStreamError } from "../utils/streamErrorFormat.ts";
 import {
   PPLX_SSE_ENDPOINT,
-  PPLX_USER_AGENT,
   PPLX_STREAM_EOF_SYMBOL,
   MODEL_MAP,
   THINKING_MAP,
   cleanResponse,
   parseOpenAIMessages,
   buildPplxRequestBody,
+  buildPplxHeaders,
   buildQuery,
   extractContent,
   sseChunk,
@@ -491,9 +495,16 @@ export class PerplexityWebExecutor extends BaseExecutor {
     } else if (MODEL_MAP[model]) {
       [pplxMode, modelPref] = MODEL_MAP[model];
     } else {
-      pplxMode = "copilot";
-      modelPref = model;
-      log?.info?.("PPLX-WEB", `Unmapped model ${model}, using as raw preference`);
+      const errResp = new Response(
+        JSON.stringify(
+          buildErrorBody(404, `Unknown model: ${model}`, undefined, {
+            type: "invalid_request_error",
+            code: "model_not_found",
+          })
+        ),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
+      return { response: errResp, url: PPLX_SSE_ENDPOINT, headers: {}, transformedBody: body };
     }
 
     // Parse messages and check session continuity
@@ -525,26 +536,11 @@ export class PerplexityWebExecutor extends BaseExecutor {
       requestId
     );
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
-      Origin: "https://www.perplexity.ai",
-      Referer: "https://www.perplexity.ai/",
-      "User-Agent": PPLX_USER_AGENT,
-      // Current app request headers (replaced the stale X-App-ApiVersion/X-App-ApiClient pair,
-      // which the new endpoint no longer expects and which contributed to HTTP 400).
-      "x-perplexity-request-endpoint": PPLX_SSE_ENDPOINT,
-      "x-perplexity-request-reason": "ask-query-state-provider",
-      "x-perplexity-request-try-number": "1",
-      "x-request-id": requestId,
-    };
-
+    const headers = buildPplxHeaders(requestId, {
+      accessToken: credentials.accessToken,
+      apiKey: credentials.apiKey ?? "",
+    });
     const cookieBlob = credentials.apiKey ?? "";
-    if (credentials.accessToken) {
-      headers["Authorization"] = `Bearer ${credentials.accessToken}`;
-    } else if (cookieBlob) {
-      headers["Cookie"] = buildSessionCookieHeader(cookieBlob);
-    }
 
     log?.info?.(
       "PPLX-WEB",

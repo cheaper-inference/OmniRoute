@@ -1,5 +1,10 @@
-import { getPendingById } from "@/lib/usage/usageHistory";
-import { getChatLogMaxDepth, getChatLogArrayTailItems } from "@/lib/logEnv";
+import { getPendingById, updatePendingRequestStreamChunksById } from "@/lib/usage/usageHistory";
+import {
+  getChatLogMaxDepth,
+  getChatLogArrayTailItems,
+  getChatLogMaxObjectKeys,
+  getChatLogTextLimit,
+} from "@/lib/logEnv";
 import { sanitizeErrorMessage } from "./error.ts";
 import { redactUrlQuerySecrets } from "./errorSanitization.ts";
 
@@ -68,7 +73,7 @@ type RequestLoggerOptions = {
 
 const DEFAULT_MAX_STREAM_CHUNK_BYTES = 128 * 1024;
 const DEFAULT_MAX_STREAM_CHUNK_ITEMS = 10_240;
-const MAX_LOG_STRING_LENGTH = 64 * 1024;
+const STREAM_CHUNK_SYNC_THRESHOLD = 64 * 1024;
 // Was its own separate hardcoded 24, independent of the sibling
 // cloneBoundedChatLogPayload (chatCore/logTruncation.ts) implementation's
 // configurable cap — the two duplicated the same "bound an array for
@@ -77,7 +82,11 @@ const MAX_LOG_STRING_LENGTH = 64 * 1024;
 // artifact data consistent. Read once at module load, matching this file's
 // existing plain-constant shape; CHAT_LOG_ARRAY_TAIL_ITEMS still overrides it.
 export const MAX_LOG_ARRAY_ITEMS = getChatLogArrayTailItems();
-const MAX_LOG_OBJECT_KEYS = 80;
+// String and object-key caps come from the same CHAT_LOG_TEXT_LIMIT /
+// CHAT_LOG_MAX_OBJECT_KEYS settings as cloneBoundedChatLogPayload
+// (chatCore/logTruncation.ts), which bounds the other half of the same artifact.
+// They were hardcoded here (64 KB / 80 keys), so the pipeline capture stayed cut
+// even when an operator raised the limits for complete request logs.
 const MAX_TOOL_LOOP_LEGS = 4;
 
 function maskSensitiveHeaders(headers: HeaderInput): Record<string, unknown> {
@@ -102,6 +111,9 @@ function maskSensitiveHeaders(headers: HeaderInput): Record<string, unknown> {
     "storagestate",
     "capability",
     "x-omniroute-lease-owner",
+    // OpenCode free relay: the egress proxy URL (may carry user:password) and the relay secret.
+    "x-opencode-relay-proxy",
+    "x-opencode-relay-auth",
   ];
 
   for (const key of Object.keys(masked)) {
@@ -110,7 +122,12 @@ function maskSensitiveHeaders(headers: HeaderInput): Record<string, unknown> {
     if (lowerKey.startsWith("x-ratelimit-")) {
       continue;
     }
-    if (lowerKey === "x-omniroute-lease-owner") {
+    if (
+      lowerKey === "x-omniroute-lease-owner" ||
+      lowerKey === "x-omniroute-self-hop" ||
+      lowerKey === "x-opencode-relay-proxy" ||
+      lowerKey === "x-opencode-relay-auth"
+    ) {
       masked[key] = "[REDACTED]";
       continue;
     }
@@ -177,13 +194,14 @@ function sliceSuffixWithoutSplitSurrogate(value: string, length: number): string
   return value.slice(split ? start + 1 : start);
 }
 
-function truncateLogString(value: string, maxLength = MAX_LOG_STRING_LENGTH): string {
+function truncateLogString(value: string, maxLength = getChatLogTextLimit()): string {
   if (value.length <= maxLength) return value;
   // The marker has to fit INSIDE the budget (#7847): keeping maxLength characters and then
   // adding the marker produced a result longer than maxLength, so re-bounding an already
   // bounded string truncated it a second time and the function was not idempotent.
   const marker = `\n[...truncated ${value.length - maxLength} chars...]\n`;
-  const keep = Math.max(0, maxLength - marker.length);
+  if (marker.length >= maxLength) return slicePrefixWithoutSplitSurrogate(marker, maxLength);
+  const keep = maxLength - marker.length;
   const head = slicePrefixWithoutSplitSurrogate(value, Math.floor(keep / 2));
   const tail = sliceSuffixWithoutSplitSurrogate(value, Math.ceil(keep / 2));
   // Flatten the bounded string before it is retained anywhere (call-log details,
@@ -251,14 +269,32 @@ export function cloneBoundedForLog(value: unknown, depth = 0, key: string | null
   const entries = Object.entries(value as JsonRecord).filter(
     ([k]) => !(carried > 0 && k === TRUNCATED_KEYS_MARKER)
   );
-  for (const [k, item] of entries.slice(0, MAX_LOG_OBJECT_KEYS)) {
+  // 0 = unlimited, as in cloneBoundedChatLogPayload.
+  const maxKeys = getChatLogMaxObjectKeys();
+  for (const [k, item] of maxKeys > 0 ? entries.slice(0, maxKeys) : entries) {
     result[k] = cloneBoundedForLog(item, depth + 1, k);
   }
-  const dropped = Math.max(0, entries.length - MAX_LOG_OBJECT_KEYS) + carried;
+  const dropped = (maxKeys > 0 ? Math.max(0, entries.length - maxKeys) : 0) + carried;
   if (dropped > 0) {
     result[TRUNCATED_KEYS_MARKER] = dropped;
   }
   return result;
+}
+
+function utf8Prefix(value: string, maxBytes: number): string {
+  if (value.length <= maxBytes && Buffer.byteLength(value, "utf8") <= maxBytes) {
+    return Buffer.from(value, "utf8").toString("utf8");
+  }
+  let end = 0;
+  let bytes = 0;
+  for (const character of value) {
+    const size = Buffer.byteLength(character, "utf8");
+    if (bytes + size > maxBytes) break;
+    bytes += size;
+    end += character.length;
+  }
+  // Copy only the bounded prefix so a V8 slice cannot retain the entire source chunk.
+  return Buffer.from(value.slice(0, end), "utf8").toString("utf8");
 }
 
 function appendBoundedChunk(
@@ -268,7 +304,7 @@ function appendBoundedChunk(
   maxBytes: number,
   maxItems = DEFAULT_MAX_STREAM_CHUNK_ITEMS
 ) {
-  if (typeof chunk !== "string" || chunk.length === 0) {
+  if (typeof chunk !== "string" || chunk.length === 0 || bytes.truncated) {
     return;
   }
   if (chunks.length >= maxItems) {
@@ -281,18 +317,15 @@ function appendBoundedChunk(
     return;
   }
 
-  const remaining = maxBytes - bytes.value;
-  if (chunk.length <= remaining) {
-    chunks.push(chunk);
-    bytes.value += chunk.length;
-    return;
-  }
+  const prefix = utf8Prefix(chunk, maxBytes - bytes.value);
+  chunks.push(prefix);
+  bytes.value += Buffer.byteLength(prefix, "utf8");
+  if (prefix.length === chunk.length) return;
 
-  chunks.push(chunk.slice(0, remaining));
+  // One marker is outside the data-byte budget, but still inside the item cap.
   if (chunks.length < maxItems) {
     chunks.push(`[stream chunk log truncated after ${maxBytes} bytes]`);
   }
-  bytes.value = maxBytes;
   bytes.truncated = true;
 }
 
@@ -352,48 +385,56 @@ function makeStreamChunkMethods(options: RequestLoggerOptions, captureChunks: bo
     Number.isInteger(options.maxStreamChunkItems) && Number(options.maxStreamChunkItems) > 0
       ? Number(options.maxStreamChunkItems)
       : DEFAULT_MAX_STREAM_CHUNK_ITEMS;
-  let pendingPushed = false;
-
-  const push = () => {
-    if (pendingPushed) return;
-    if (!options.requestId && (!options.connectionId || !options.model)) return;
-    pendingPushed = true;
+  let lastSyncedBytes = 0;
+  const push = (): boolean => {
+    if (!options.requestId && (!options.connectionId || !options.model)) return false;
     try {
-      const pending = getPendingById();
-      const exactEntry = options.requestId ? pending.get(options.requestId) : null;
-      if (exactEntry) {
-        exactEntry.streamChunks = { ...streamChunks };
-        return;
+      // A finished exact request must never fall back to another concurrent attempt.
+      if (options.requestId) {
+        const updated = updatePendingRequestStreamChunksById(options.requestId, streamChunks);
+        if (updated) lastSyncedBytes = totalCapturedBytes();
+        return updated;
       }
-
+      const pending = getPendingById();
       for (const entry of pending.values()) {
         if (
           entry?.connectionId === options.connectionId &&
           entry?.model === options.model &&
           entry?.provider === (options.provider || "")
         ) {
-          entry.streamChunks = { ...streamChunks };
-          return;
+          const updated = updatePendingRequestStreamChunksById(entry.id, streamChunks);
+          if (updated) lastSyncedBytes = totalCapturedBytes();
+          return updated;
         }
       }
+      return false;
     } catch (e) {
       // Do not allow logging failures to disrupt request handling
       try {
         console.warn("[requestLogger] updatePendingRequestStreamChunks failed:", e);
       } catch {}
+      return false;
     }
+  };
+  const totalCapturedBytes = () =>
+    streamChunkBytes.provider.value + streamChunkBytes.openai.value + streamChunkBytes.client.value;
+  const flush = () => {
+    push();
   };
 
   const append = (arr: string[], bytes: { value: number; truncated: boolean }, chunk: string) => {
     if (!captureChunks) return;
-    push();
     const ts = new Date().toISOString().slice(11, 23);
     appendBoundedChunk(arr, bytes, `[${ts}] ${chunk}`, maxBytes, maxItems);
+    if (totalCapturedBytes() - lastSyncedBytes >= STREAM_CHUNK_SYNC_THRESHOLD) {
+      push();
+    }
   };
 
   return {
     streamChunks,
     streamChunkBytes,
+    flush,
     appendProviderChunk(chunk: string) {
       append(streamChunks.provider, streamChunkBytes.provider, chunk);
     },
@@ -437,6 +478,7 @@ export async function createRequestLogger(
       logError() {},
       logToolLoopReceipt() {},
       getPipelinePayloads() {
+        chunkMethods.flush();
         return routeDecision ? { routeDecision } : null;
       },
     };
@@ -547,6 +589,7 @@ export async function createRequestLogger(
     },
 
     getPipelinePayloads() {
+      chunkMethods.flush();
       return compactPipelinePayloads(payloads);
     },
   };

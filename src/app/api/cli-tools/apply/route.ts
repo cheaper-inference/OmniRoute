@@ -25,6 +25,7 @@ const HOST_SETUP_COMMANDS: Record<string, string> = {
   cline: "omniroute setup-cline",
   kilo: "omniroute setup-kilo",
   continue: "omniroute setup-continue",
+  whycodes: "omniroute setup-whycodes",
 };
 
 function ensureBackup(configPath: string): string | null {
@@ -38,7 +39,7 @@ function ensureBackup(configPath: string): string | null {
 
 // POST /api/cli-tools/apply - Apply config for a specific tool
 export async function POST(request: Request) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) {
     authError.headers.set("cache-control", "no-store");
     return authError;

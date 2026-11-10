@@ -13,12 +13,17 @@ i kroków uzgadniania.
 
 ---
 
-## Konfiguracja środowiska programistycznego
+## Konfiguracja środowiska deweloperskiego
 
 ### Wymagania wstępne
 
-- **Node.js** `>=22.22.2 <23` lub `>=24.0.0 <27` (zalecane: 24 LTS)
+- **Node.js** `>=22.22.2 <23` lub `>=24.0.0 <27` (zalecana wersja: 24 LTS)
 - **npm** 10+
+
+> **Windows z Node 24:** użyj bieżącej poprawkowej wersji 24 LTS (co najmniej 24.20.0).
+> Wcześniejsze wersje mogą przerwać działanie po pomyślnym przejściu testów, gdy `--test-force-exit` zamyka
+> proces. [Poprawka Windows w bibliotece libuv](https://github.com/nodejs/node/pull/61999) dla Node.js
+> rozwiązuje ten błąd środowiska uruchomieniowego; pozostaw włączone asercje testów i kontrole wyjścia runnera.
 
 > **Użytkownicy npm v11+ (Node 24+):** Po wykonaniu `npm install` sprawdź, czy moduły natywne zostały zainstalowane:
 > `node -e "require('better-sqlite3')"`. Jeśli polecenie zakończy się błędem `MODULE_NOT_FOUND`,
@@ -46,79 +51,79 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Kluczowe zmienne dla środowiska programistycznego:
+Najważniejsze zmienne w środowisku deweloperskim:
 
-| Zmienna                | Wartość domyślna w środowisku programistycznym | Opis                                    |
-| ---------------------- | ---------------------------------------------- | --------------------------------------- |
-| `PORT`                 | `20128`                                        | Port serwera                            |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`                       | Bazowy adres URL interfejsu użytkownika |
-| `JWT_SECRET`           | (wygeneruj powyżej)                            | Sekret do podpisywania tokenów JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                                     | Hasło pierwszego logowania              |
-| `APP_LOG_LEVEL`        | `info`                                         | Poziom szczegółowości dzienników        |
+| Zmienna                | Wartość domyślna w środowisku deweloperskim | Opis                           |
+| ---------------------- | ------------------------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                                     | Port serwera                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`                    | Bazowy URL frontendu           |
+| `JWT_SECRET`           | (wygeneruj powyżej)                         | Sekret podpisywania JWT        |
+| `INITIAL_PASSWORD`     | `CHANGEME`                                  | Hasło przy pierwszym logowaniu |
+| `APP_LOG_LEVEL`        | `info`                                      | Poziom szczegółowości logów    |
 
 ### Ustawienia panelu
 
-Panel udostępnia przełączniki interfejsu użytkownika dla funkcji, które można również skonfigurować za pomocą zmiennych środowiskowych:
+Panel udostępnia przełączniki interfejsu użytkownika dla funkcji, które można również konfigurować za pomocą zmiennych środowiskowych:
 
-| Lokalizacja ustawienia    | Przełącznik               | Opis                                           |
-| ------------------------- | ------------------------- | ---------------------------------------------- |
-| Ustawienia → Zaawansowane | Tryb debugowania          | Włącza dzienniki żądań debugowania (interfejs) |
-| Ustawienia → Ogólne       | Widoczność paska bocznego | Pokazuje/ukrywa sekcje paska bocznego          |
+| Lokalizacja ustawienia    | Przełącznik               | Opis                              |
+| ------------------------- | ------------------------- | --------------------------------- |
+| Ustawienia → Zaawansowane | Tryb debugowania          | Włącz debugowe logi żądań (UI)    |
+| Ustawienia → Ogólne       | Widoczność paska bocznego | Pokaż/ukryj sekcje paska bocznego |
 
-Ustawienia te są przechowywane w bazie danych i zachowywane po ponownym uruchomieniu, a po ich ustawieniu zastępują domyślne wartości zmiennych środowiskowych.
+Te ustawienia są przechowywane w bazie danych i zachowują się po ponownym uruchomieniu, zastępując wartości domyślne zmiennych środowiskowych, jeśli zostały ustawione.
 
 ### Uruchamianie lokalne
 
 ```bash
-# Tryb programistyczny (automatyczne przeładowywanie)
+# Tryb deweloperski (automatyczne przeładowywanie)
 npm run dev
 
 # Kompilacja produkcyjna
-npm run build    # next build → .build/next/, następnie assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Szybka kompilacja samego backendu/API do weryfikacji zmian kontrybutorów
+# Szybka kompilacja tylko backendu/API dla zmian wprowadzanych przez współtwórców
 npm run build:contributor
 
-# Kompilacja wydania (czysta ponowna kompilacja + znacznik HEAD — wymagane do wdrożenia)
-npm run build:release   # rm -rf .build dist, następnie kompilacja + zapis dist/BUILD_SHA
+# Kompilacja wydania (czysta kompilacja + znacznik HEAD — wymagane przed wdrożeniem)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Typowa konfiguracja portu
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Kompilacja dla kontrybutorów wykonuje wyłącznie walidację kompilacji: nie tworzy samodzielnej
-dystrybucji ani opcjonalnych natywnych zasobów pakietu. Użyj standardowej kompilacji produkcyjnej,
-gdy musisz zweryfikować pakiet przeznaczony do dystrybucji.
+Kompilacja dla współtwórców wykonuje wyłącznie walidację kompilacji: nie składa dystrybucji standalone
+ani nie buduje opcjonalnych natywnych zasobów pakietowania. Użyj standardowej kompilacji produkcyjnej,
+jeśli chcesz zweryfikować pakiet przeznaczony do wdrożenia.
 
-### Struktura wyników kompilacji
+### Układ danych wyjściowych kompilacji
 
-| Katalog   | Zawartość                                                                            | Śledzony |
-| --------- | ------------------------------------------------------------------------------------ | -------- |
-| `src/`    | Kod źródłowy aplikacji (TypeScript / TSX)                                            | Tak      |
-| `.build/` | Pliki pośrednie — wynik `next build` (ignorowany przez git, `distDir = .build/next`) | Nie      |
-| `dist/`   | Pakiet dystrybucyjny — tworzony przez `assembleStandalone` (ignorowany przez git)    | Nie      |
+| Katalog   | Zawartość                                                                                     | Śledzony |
+| --------- | --------------------------------------------------------------------------------------------- | -------- |
+| `src/`    | Kod źródłowy aplikacji (TypeScript / TSX)                                                     | Tak      |
+| `.build/` | Pliki pośrednie — dane wyjściowe `next build` (ignorowane przez git, `distDir = .build/next`) | Nie      |
+| `dist/`   | Pakiet przeznaczony do wdrożenia — składany przez `assembleStandalone` (ignorowany przez git) | Nie      |
 
-Proces kompilacji przebiega w jednym przebiegu:
+Potok kompilacji składa się z jednego przebiegu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (wynik Next.js)
-  └─ assembleStandalone()                 (kopiuje pliki standalone + static + public + zasoby natywne)
-       └─ wynik: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (dane wyjściowe Next.js)
+  └─ assembleStandalone()                 (kopiuje standalone + static + public + zasoby natywne)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` dodatkowo najpierw czyści oba katalogi i zapisuje
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) jako znacznik integralności wdrożenia.
 
-`npm run build:contributor` korzysta z profilu kompilacji obejmującego wyłącznie backend. Tymczasowo zastępuje
-pliki interfejsu panelu plikami zastępczymi na czas kompilacji, zachowuje procedury obsługi tras API i przywraca oryginalne pliki
-po zakończeniu kompilacji. Użyj `npm run build` w przypadku zmian wpływających na interfejs panelu lub do pełnej
-walidacji wydania; profil dla kontrybutorów nie zastępuje kompilacji wydania.
+`npm run build:contributor` używa profilu kompilacji tylko backendu. Tymczasowo zastępuje pliki interfejsu
+panelu podczas kompilacji, zachowuje procedury obsługi tras API i przywraca oryginalne pliki
+po zakończeniu kompilacji. Użyj `npm run build` w przypadku zmian wpływających na interfejs panelu
+lub pełnej walidacji wydania; profil dla współtwórców nie zastępuje kompilacji wydania.
 
-> **Uwaga dotycząca wdrażania na VPS:** zdalny katalog obrazu `/usr/lib/node_modules/omniroute/app/`
-> pozostaje bez zmian. Narzędzia wdrożeniowe synchronizują do niego zawartość katalogu `dist/` za pomocą rsync.
-> Zmieniła się jedynie ścieżka wyników kompilacji w repozytorium (`app/` → `dist/`).
+> **Uwaga dotycząca wdrożenia na VPS:** zdalny katalog obrazów `/usr/lib/node_modules/omniroute/app/`
+> pozostaje bez zmian. Narzędzia wdrożeniowe rsyncują do niego zawartość `dist/`.
+> Zmieniono tylko ścieżkę danych wyjściowych kompilacji w repozytorium (`app/` → `dist/`).
 
 Domyślne adresy URL:
 
@@ -175,7 +180,7 @@ Zakresy (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`,
 ## Uruchamianie testów
 
 ```bash
-# Wszystkie testy (jednostkowe + vitest + ekosystemowe + e2e)
+# Wszystkie testy (jednostkowe + vitest + ekosystem + e2e)
 npm run test:all
 
 # Pojedynczy plik testowy (natywny mechanizm uruchamiania testów Node.js — korzysta z niego większość testów)
@@ -183,10 +188,10 @@ node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Tylko testy jednostkowe, na które wpływa Twoja zmiana (ten sam selektor TIA co w bramce CI, #8084)
 npm run test:scoped            # zmiany w ostatnim commicie (lub w drzewie roboczym)
-npm run test:scoped:staged     # tylko przygotowane zmiany — dobrze współpracuje z uruchomieniem przed commitem
-npm run test:scoped:full       # najpierw przebuduj mapę grafu importów (po dodaniu/przeniesieniu plików)
-# Kod wyjścia 1 + „uruchom pełny zestaw” oznacza, że zmienił się plik centralny (tsconfig, package.json, …)
-# lub nieodwzorowany plik źródłowy — selektor działa bezpiecznie i nigdy nie pomija niczego po cichu.
+npm run test:scoped:staged     # tylko zmiany dodane do indeksu — dobrze współpracuje z uruchomieniem przed commitem
+npm run test:scoped:full       # najpierw ponownie tworzy mapę grafu importów (po dodaniu/przeniesieniu plików)
+# Kod wyjścia 1 + „uruchom pełny zestaw” oznacza, że zmienił się plik centralny (tsconfig, package.json, …) lub
+# niezmapowane źródło — selektor bezpiecznie przerywa działanie i nigdy po cichu niczego nie pomija.
 
 # Vitest (serwer MCP, autoCombo, pamięć podręczna)
 npm run test:vitest
@@ -204,56 +209,57 @@ npm run test:ecosystem
 npm run test:coverage
 npm run coverage:report
 
-# Lintowanie + sprawdzanie formatowania
+# Sprawdzanie lintowania i formatowania
 npm run lint
 npm run check
 
-# Warunkowo uruchamiany test dymny kombinacji z rzeczywistymi usługami upstream (wymaga dostępu do VPS + środków u rzeczywistych dostawców)
-# Korzysta z RZECZYWISTYCH dostawców — generuje niewielkie koszty. NIGDY nie jest uruchamiany w CI. Bez warunku jest prawidłowo pomijany.
-# Wymaga: dostępu ssh root@192.168.0.15 (pobiera z VPS migawkę bazy danych tylko do odczytu).
+# Warunkowy test smoke rzeczywistej kombinacji upstream (wymaga dostępu do VPS i środków u rzeczywistych dostawców)
+# Korzysta z RZECZYWISTYCH dostawców — generuje niewielkie koszty. NIGDY nie działa w CI. Jest bezpiecznie pomijany bez aktywnej bramki.
+# Wymaga dostępu: ssh root@192.168.0.15 (pobiera z VPS migawkę bazy danych tylko do odczytu).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Test dymny na żywo VPS fazy 3 — zwykłe skrypty Node ESM komunikujące się bezpośrednio z działającym serwerem .15.
-# Wymaga: dostępu ssh root@192.168.0.15 (kombinacje są tworzone/usuwane przez SSH sqlite).
-# Korzysta z RZECZYWISTYCH dostawców (niewielki koszt). Tworzy/usuwa tylko kombinacje __live_test__*. NIGDY nie jest uruchamiany w CI.
-# REQUIRE_API_KEY=false na .15, więc klucz API nie jest potrzebny, ale respektuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, jeśli je ustawiono.
+# Test smoke na żywo fazy 3 na VPS — zwykłe skrypty Node ESM, bezpośrednio korzystające z działającego serwera .15.
+# Wymaga dostępu: ssh root@192.168.0.15 (kombinacje są tworzone/usuwane przez SSH sqlite).
+# Korzysta z RZECZYWISTYCH dostawców (niewielki koszt). Tworzy/usuwa wyłącznie kombinacje __live_test__*. NIGDY nie działa w CI.
+# Na .15 ustawiono REQUIRE_API_KEY=false, więc klucz API nie jest wymagany, ale ustawienia COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY są respektowane.
 npm run test:combo:live:vps              # 7 scenariuszy HTTP (priorytet/cykliczny/ważony/koszt/fuzja/automatyczny + kondycja)
 npm run test:combo:live:vps:failover     # dodaje rzeczywisty scenariusz przełączania awaryjnego między dostawcami (łącznie 8)
 ```
 
 Uwagi dotyczące pokrycia:
 
-- `npm run test:coverage` mierzy pokrycie kodu źródłowego przez główny zestaw testów jednostkowych, wyklucza `tests/**` i obejmuje `open-sse/**`
-- Pull requesty muszą utrzymywać próg pokrycia na poziomie **60%+** instrukcji/wierszy/funkcji/gałęzi
+- `npm run test:coverage` mierzy pokrycie kodu źródłowego dla głównego zestawu testów jednostkowych, wyklucza `tests/**` i obejmuje `open-sse/**`
+- Pull requesty muszą utrzymywać bramkę pokrycia na poziomie **60%+** instrukcji/wierszy/funkcji/gałęzi
 - Jeśli PR zmienia kod produkcyjny w `src/`, `open-sse/`, `electron/` lub `bin/`, musi w tym samym PR dodawać lub aktualizować testy automatyczne
-- `npm run coverage:report` wyświetla szczegółowy raport dla poszczególnych plików z ostatniego uruchomienia testów pokrycia
-- `npm run test:coverage:legacy` zachowuje starszą metrykę na potrzeby porównań historycznych
-- Zobacz `docs/ops/COVERAGE_PLAN.md`, aby poznać etapowy plan poprawy pokrycia
+- `npm run coverage:report` wyświetla szczegółowy raport dla poszczególnych plików z ostatniego pomiaru pokrycia
+- `npm run test:coverage:legacy` zachowuje starszą metrykę do porównań historycznych
+- Etapowy plan poprawy pokrycia znajduje się w `docs/ops/COVERAGE_PLAN.md`
 
-### Wymagania dotyczące Pull Requestów
+### Wymagania dotyczące pull requestów
 
 Przed otwarciem PR skorzystaj z
-[zalecanej ścieżki wnoszenia wkładu](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), aby uruchomić ukierunkowaną pętlę dla
-wprowadzonych zmian. Za pełny zestaw testów jednostkowych (4 fragmenty CI), Vitest, bramkę pokrycia **60%+** oraz
-kompilację produkcyjną odpowiada CI — uruchamianie ich lokalnie nie dostarcza żadnych dodatkowych informacji ponad to,
-co i tak zapewnią kontrole PR, a na słabszych maszynach może przeciążyć hosta (#8084):
+[zalecanej ścieżki wnoszenia zmian](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), aby uruchomić ukierunkowaną pętlę dla
+wprowadzonych zmian. Pełny zestaw testów jednostkowych (4 fragmenty CI), Vitest, bramka pokrycia **60%+** oraz
+kompilacja produkcyjna należą do obowiązków CI — ich lokalne uruchamianie nie dostarcza żadnych informacji,
+których nie zapewnią już kontrole PR, a na słabszych maszynach może przeciążyć hosta (#8084):
 
 - Uruchom pliki testowe obejmujące Twoją zmianę: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Uruchom `npm run lint`
-- Za każdym razem, gdy zmienia się kod produkcyjny, dodaj lub zaktualizuj testy automatyczne w tym samym PR
-- Jeśli zmienił się kod produkcyjny, wymień zmienione lub dodane pliki testowe w opisie PR
-- Sprawdź wynik SonarQube w PR, gdy sekrety projektu są skonfigurowane w CI
+- Za każdym razem, gdy zmienia się kod produkcyjny, uwzględnij lub zaktualizuj testy automatyczne w tym samym PR
+- W plikach `node:test` umieść każde `await` najwyższego poziomu (np. `await import(...)`) przed pierwszym `test()` / `describe()`: przy `--test-force-exit` testy zarejestrowane po nim mogą po cichu nigdy się nie uruchomić (#18045; wymuszane przez `npm run check:test-tla-order`)
+- Jeśli zmienił się kod produkcyjny, uwzględnij zmienione lub dodane pliki testowe w opisie PR
+- Gdy sekrety projektu są skonfigurowane w CI, sprawdź wynik SonarQube dla PR
 
-Aktualny stan testów: **122 pliki testów jednostkowych** obejmujące:
+Bieżący stan testów: **122 pliki testów jednostkowych** obejmujące:
 
 - Translatory dostawców i konwersję formatów
-- Ograniczanie szybkości, wyłącznik awaryjny i odporność
+- Ograniczanie częstotliwości, wyłącznik automatyczny i odporność
 - Semantyczną pamięć podręczną, idempotencję i śledzenie postępu
 - Operacje na bazie danych i schemat (21 modułów DB)
 - Przepływy OAuth i uwierzytelnianie
 - Walidację punktów końcowych API (Zod v4)
-- Narzędzia serwera MCP i wymuszanie zakresów
-- Systemy Memory i Skills
+- Narzędzia serwera MCP i egzekwowanie zakresów
+- Systemy pamięci i umiejętności
 
 ---
 

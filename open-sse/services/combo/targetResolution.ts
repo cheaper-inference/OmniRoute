@@ -31,6 +31,8 @@ import type { resolveComboSetupConfig } from "../comboConfig.ts";
 import { orderTargetsByEvalScores } from "../evalRouting.ts";
 import { parseModel } from "../model.ts";
 import { getRemainingCooldownMs, isProviderInCooldown } from "../providerCooldownTracker.ts";
+import { orderAccountPreferences } from "./accountPreferences.ts";
+import { parseAutoConfig } from "./autoConfig.ts";
 import {
   classifyTask,
   getConversationCacheKey,
@@ -53,6 +55,7 @@ import {
 } from "./comboStructure.ts";
 import { applyContextRequirements } from "./contextRequirements.ts";
 import { recordComboFailure } from "./failureTracker.ts";
+import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
 import {
   buildAllTargetsCoolingDownResponse,
   buildEmptyComboTargetsPayload,
@@ -404,6 +407,8 @@ async function dispatchSmartPipeline(
 ): Promise<Response | null> {
   const { body, combo, strategy, config, settings, signal, log } = deps;
   if (!getStrategyTraits(strategy).smartPipeline) return null;
+  // The smart pipeline dispatches model strings, not concrete accounts.
+  if (Object.keys(parseAutoConfig(combo, []).accountPreferences).length > 0) return null;
   const autoParsed = parseAutoPrefix(combo.name);
   const autoVariant = autoParsed.valid ? autoParsed.variant : undefined;
   if (autoVariant !== "smart" && !config.pipeline_enabled) return null;
@@ -456,7 +461,8 @@ function logPipelineFallthrough(pipelineErr: unknown, log: ComboLogger): void {
  */
 async function orderByStrategy(
   deps: ResolveComboTargetPipelineDeps,
-  initialOrderedTargets: ResolvedComboTarget[]
+  initialOrderedTargets: ResolvedComboTarget[],
+  exclusions: PreDispatchExclusion[]
 ): Promise<
   | { earlyResponse: Response }
   | {
@@ -477,6 +483,7 @@ async function orderByStrategy(
       resilienceSettings: deps.resilienceSettings,
       log,
       buildAutoCandidates: deps.buildAutoCandidates,
+      apiKeyAllowedConnections: deps.apiKeyAllowedConnections,
     });
     if ("earlyResponse" in autoResult) return { earlyResponse: autoResult.earlyResponse };
     return {
@@ -495,6 +502,7 @@ async function orderByStrategy(
       log,
       apiKeyAllowedConnections: deps.apiKeyAllowedConnections,
       sessionKey: deps.relayOptions?.sessionId,
+      exclusions,
     }
   );
   return { orderedTargets, autoUsedExplicitRouter: false, quotaShareRelease };
@@ -594,7 +602,7 @@ async function applyContinuityFilters(
     if (exhaustion) {
       // Match handleComboChat: only track failures under context-cache protection pins.
       const effectiveSessionId: string | null = combo.context_cache_protection
-        ? (relayOptions?.sessionId ?? null)
+        ? scopeHandoffSessionId(relayOptions?.sessionId, relayOptions?.apiKeyId)
         : null;
       recordComboFailure(effectiveSessionId, combo.name);
       return {
@@ -620,7 +628,7 @@ async function applyContinuityFilters(
   orderedTargets = applyContextRequirements(orderedTargets, config.contextRequirements, log);
   if (orderedTargets.length === 0 && preContextTargets.length > 0) {
     const effectiveSessionId: string | null = combo.context_cache_protection
-      ? (relayOptions?.sessionId ?? null)
+      ? scopeHandoffSessionId(relayOptions?.sessionId, relayOptions?.apiKeyId)
       : null;
     recordComboFailure(effectiveSessionId, combo.name);
     const { message, diagnostics } = buildEmptyComboTargetsPayload(
@@ -790,7 +798,9 @@ function buildWeightedExhaustionResponse(
     `Weighted selection: every target excluded before dispatch — ${formatPreDispatchExclusions(exclusions)}`
   );
   recordComboFailure(
-    deps.combo.context_cache_protection ? (deps.relayOptions?.sessionId ?? null) : null,
+    deps.combo.context_cache_protection
+      ? scopeHandoffSessionId(deps.relayOptions?.sessionId, deps.relayOptions?.apiKeyId)
+      : null,
     deps.combo.name
   );
   return coolingDown;
@@ -867,6 +877,7 @@ export async function resolveComboTargetPipeline(
   // continuity/stickiness, prompt-cache stage) sees per-connection targets.
   // Stickiness is applied later inside applyContinuityFilters, so its pin key
   // naturally matches the expanded connectionId targets.
+  const expansionExclusions: PreDispatchExclusion[] = [];
   orderedTargets = await expandTargetsForAllStrategies({
     strategy,
     targets: orderedTargets,
@@ -875,7 +886,14 @@ export async function resolveComboTargetPipeline(
     settings: settings as Record<string, unknown> | null | undefined,
     log,
     apiKeyAllowedConnectionIds: deps.apiKeyAllowedConnections,
+    exclusions: expansionExclusions,
   });
+  // Classify at the expansion boundary: later filters may empty a surviving
+  // pool for unrelated reasons and must retain their own error contracts.
+  if (orderedTargets.length === 0) {
+    const coolingDown = buildAllTargetsCoolingDownResponse(expansionExclusions);
+    if (coolingDown) return { earlyResponse: coolingDown };
+  }
 
   logTargetPoolSize(strategy, allCombos, orderedTargets, stickyWeightedKey, log);
 
@@ -885,8 +903,15 @@ export async function resolveComboTargetPipeline(
   );
   if (pipelineResponse) return { earlyResponse: pipelineResponse };
 
-  const ordering = await orderByStrategy(deps, orderedTargets);
+  const ordering = await orderByStrategy(deps, orderedTargets, expansionExclusions);
   if ("earlyResponse" in ordering) return ordering;
+  if (ordering.orderedTargets.length === 0) {
+    const coolingDown = buildAllTargetsCoolingDownResponse(expansionExclusions);
+    if (coolingDown) {
+      ordering.quotaShareRelease?.();
+      return { earlyResponse: coolingDown };
+    }
+  }
   const { autoUsedExplicitRouter } = ordering;
   let { quotaShareRelease } = ordering;
   const drawnId = ordering.orderedTargets[0]?.connectionId ?? "";
@@ -905,6 +930,14 @@ export async function resolveComboTargetPipeline(
     continuity.sticky.stuck,
     autoUsedExplicitRouter
   );
+
+  if (strategy === "auto") {
+    orderedTargets = orderAccountPreferences(
+      orderedTargets,
+      parseAutoConfig(combo, orderedTargets).accountPreferences,
+      continuity.sticky.stuck
+    );
+  }
 
   quotaShareRelease = transferInflightReservation(
     traits.inflightReservation,

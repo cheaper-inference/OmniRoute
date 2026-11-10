@@ -143,6 +143,8 @@ const CRITICAL_DB_TABLES: CriticalTableSpec[] = [
   { table: "provider_nodes", maxRows: 5_000 },
   { table: "combos", maxRows: 5_000 },
   { table: "api_keys", maxRows: 5_000 },
+  { table: "teams", maxRows: 5_000 },
+  { table: "api_key_billing_team_history", maxRows: 20_000 },
   { table: "proxy_registry", maxRows: 5_000 },
   { table: "proxy_assignments", maxRows: 10_000 },
   { table: "model_combo_mappings", maxRows: 5_000 },
@@ -152,6 +154,8 @@ const CRITICAL_DB_TABLES: CriticalTableSpec[] = [
   { table: "account_key_limits", maxRows: 10_000 },
   { table: "upstream_proxy_config", maxRows: 5_000 },
   { table: "webhooks", maxRows: 5_000 },
+  // Key Templates: editable, secret-free key policy snapshots (operator configuration).
+  { table: "key_templates", maxRows: 5_000 },
 ];
 
 /**
@@ -322,6 +326,8 @@ const SCHEMA_SQL = `
     account_key TEXT,
     account_label TEXT,
     account_label_priority INTEGER DEFAULT 0,
+    billing_team_id TEXT,
+    team_rollup_processed_at TEXT,
     api_key_id TEXT,
     api_key_name TEXT,
     tokens_input INTEGER DEFAULT 0,
@@ -499,6 +505,19 @@ const SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_provider_time ON quota_snapshots(provider, created_at);
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_connection_time ON quota_snapshots(connection_id, created_at);
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_created_at ON quota_snapshots(created_at);
+
+  -- Key Templates are secret-free policy snapshots copied into independent keys.
+  CREATE TABLE IF NOT EXISTS key_templates (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    revision INTEGER NOT NULL DEFAULT 1 CHECK (revision > 0),
+    schema_version INTEGER NOT NULL DEFAULT 1,
+    policy TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_key_templates_name ON key_templates(name COLLATE NOCASE);
 `;
 
 // `CREATE TABLE IF NOT EXISTS` is a no-op against a legacy database that already owns the
@@ -1005,7 +1024,7 @@ export function getDbInstance(): SqliteDatabase {
         driver: "sql.js",
         open: true,
         name: ":memory:",
-        prepare: () => noopStatement,
+        prepare: <Row = unknown>() => noopStatement as PreparedStatement<Row>,
         exec: () => {},
         pragma: () => undefined,
         transaction: <T>(fn: (...args: unknown[]) => T) => fn,
@@ -1212,7 +1231,21 @@ export function getDbInstance(): SqliteDatabase {
             `Original error: ${message}`
         );
       }
-      if (!retryProbeIfTransient(sqliteFile, e, openSqliteDatabase, closeProbeIfSafe)) {
+      const probeOutcome = retryProbeIfTransient(
+        sqliteFile,
+        e,
+        openSqliteDatabase,
+        closeProbeIfSafe
+      );
+      if (probeOutcome === "readonly" || probeOutcome === "transient_exhausted") {
+        // #17995: neither proves corruption — fail closed, leave the DB untouched.
+        throw new Error(
+          `[DB] Could not probe ${sqliteFile} (${probeOutcome}); the database was left untouched. ` +
+            `Check that the data volume is writable and no other process holds the lock, then restart. ` +
+            `Original error: ${message}`
+        );
+      }
+      if (probeOutcome === "not_transient") {
         preservedCriticalState = captureCriticalDbState(sqliteFile);
         // SAFETY: Never delete the database — rename to backup so data can be recovered.
         // The old code would silently destroy all user data on any probe failure.

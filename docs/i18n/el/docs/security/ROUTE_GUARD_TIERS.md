@@ -14,244 +14,251 @@
 
 ### Επίπεδο 1 — LOCAL_ONLY
 
-**Επιβάλλεται από:** `isLocalOnlyPath(path)` → έλεγχος κεντρικού υπολογιστή loopback
-**Παράκαμψη:** Καμία από προεπιλογή. Περιορισμένη εξαίρεση για διαδρομές στο
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, όταν το αίτημα περιλαμβάνει έγκυρο
-κλειδί API με το πεδίο εφαρμογής `manage` (βλ. [Εξαίρεση πεδίου εφαρμογής manage](#manage-scope-carve-out)).
+**Επιβάλλεται από:** `isLocalOnlyPath(path)` → έλεγχος loopback host
+**Παράκαμψη:** Καμία από προεπιλογή. Στενή εξαίρεση για διαδρομές στο
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` όταν το αίτημα φέρει έγκυρο
+κλειδί API με το scope `manage` (βλ. [Εξαίρεση scope manage](#manage-scope-carve-out)).
 
-Αυτές οι διαδρομές δημιουργούν θυγατρικές διεργασίες ή εκτελούν κώδικα κατά τον χρόνο εκτέλεσης. Η έκθεσή τους σε
-κίνηση εκτός loopback θα επέτρεπε σε έναν εισβολέα που απέκτησε έγκυρο JWT (π.χ.,
-μέσω μιας διοχέτευσης Cloudflared/Ngrok) να ενεργοποιήσει τη δημιουργία διεργασιών — μια γνωστή κατηγορία
-CVE ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+Αυτές οι διαδρομές δημιουργούν θυγατρικές διεργασίες ή εκτελούν κώδικα χρόνου
+εκτέλεσης. Η έκθεσή τους σε κίνηση εκτός loopback θα επέτρεπε σε εισβολέα που
+απέκτησε έγκυρο JWT (π.χ., μέσω tunnel Cloudflared/Ngrok) να προκαλέσει δημιουργία
+διεργασιών — μια γνωστή κατηγορία CVE
+([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**Τι είναι το GHSA-fhh6-4qxv-rpqj (η κατηγορία επίθεσης):** ένας διακομιστής διαχείρισης/agent
-εκθέτει ένα τελικό σημείο που εκκινεί μια υποδιεργασία (`npm install`, `node`, ένα πρόγραμμα περιήγησης,
-έναν διακομιστή μεσολάβησης, `git`, `tar`, …). Αν αυτό το τελικό σημείο είναι προσβάσιμο εκτός κεντρικού υπολογιστή — επειδή
-ο διαχειριστής τοποθέτησε το OmniRoute πίσω από μια διοχέτευση nginx/Cloudflare/Tailscale και διέρρευσε ένα JWT
-ή ο έλεγχος ταυτότητας είχε ρυθμιστεί εσφαλμένα — ο εισβολέας μετατρέπει την «κλήση ενός API» σε «εκτέλεση μιας
-εντολής στον κεντρικό υπολογιστή» (απομακρυσμένη εκτέλεση κώδικα). Το OmniRoute αποτρέπει αυτό το ενδεχόμενο επιβάλλοντας
-**άνευ όρων έναν έλεγχο κεντρικού υπολογιστή loopback, πριν από οποιονδήποτε έλεγχο ταυτότητας**, σε κάθε
-διαδρομή που μπορεί να δημιουργήσει διεργασίες: ένα διαρρεύσαν διακριτικό μέσω διοχέτευσης εξακολουθεί να μην μπορεί να φτάσει στη λειτουργία δημιουργίας διεργασιών.
+**Τι είναι το GHSA-fhh6-4qxv-rpqj (η κατηγορία επίθεσης):** ένας διακομιστής
+διαχείρισης/agent εκθέτει ένα endpoint που εκκινεί μια υποδιεργασία (`npm install`,
+`node`, έναν browser, έναν proxy, `git`, `tar`, …). Εάν αυτό το endpoint είναι
+προσβάσιμο εκτός host — επειδή ο χειριστής έθεσε το OmniRoute πίσω από ένα tunnel
+nginx/Cloudflare/Tailscale και διέρρευσε ένα JWT, ή η πιστοποίηση ταυτότητας
+ρυθμίστηκε εσφαλμένα — ο εισβολέας μετατρέπει το «κάλεσμα ενός API» σε «εκτέλεση
+εντολής στον host» (απομακρυσμένη εκτέλεση κώδικα). Το OmniRoute κλείνει αυτό το
+κενό επιβάλλοντας **έλεγχο loopback host άνευ όρων, πριν από οποιονδήποτε έλεγχο
+πιστοποίησης**, σε κάθε διαδρομή με δυνατότητα spawn: ένα διαρρεύσαν token μέσω
+tunnel εξακολουθεί να μην μπορεί να φτάσει στο spawn.
 
-**Το πλήρες σύνολο LOCAL_ONLY.** Η έγκυρη πηγή είναι τα
+**Το πλήρες σύνολο LOCAL_ONLY.** Η αυθεντική πηγή είναι τα
 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` στο
-`src/server/authz/routeGuard.ts`· ο παρακάτω πίνακας αντικατοπτρίζει την τρέχουσα κατάσταση. Η πύλη
-`check-route-guard-membership` απαριθμεί κάθε `route.ts` κάτω από τα
-προθέματα που μπορούν να δημιουργήσουν διεργασίες και αποτυγχάνει στο CI αν κάποιο από αυτά δεν έχει ταξινομηθεί ως αποκλειστικά τοπικό.
+`src/server/authz/routeGuard.ts`· ο παρακάτω πίνακας αντικατοπτρίζει την τρέχουσα
+κατάσταση. Το gate `check-route-guard-membership` απαριθμεί κάθε `route.ts` κάτω από
+τα prefixes με δυνατότητα spawn και αποτυγχάνει το CI εάν κάποιο δεν έχει ταξινομηθεί
+ως local-only.
 
-| Πρόθεμα / μοτίβο                                                                                         | Γιατί είναι μόνο για τοπική χρήση                                                                                                                          |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | Διακομιστής MCP — δημιουργεί γέφυρες stdio + χειριστές SSE                                                                                                 |
-| `/api/cli-tools/runtime/`                                                                                | Περιβάλλον εκτέλεσης εργαλείων CLI — εκτελεί αυθαίρετο κώδικα προσθηκών                                                                                    |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Εγγραφείς ρυθμίσεων ανά εργαλείο που μπορούν να τροποποιήσουν εκτελέσιμα/ρυθμίσεις εργαλείων στον κεντρικό υπολογιστή                                      |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Ίδια δημιουργία διεργασίας μέσω `getCliRuntimeStatus()` όπως και στα έξι παραπάνω συγγενικά endpoints (GHSA-35fw-cv32-2373)                                |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Έλεγχοι απογραφής CLI — δημιουργούν διεργασίες `command -v` / `--version` ανά εργαλείο (GHSA-35fw-cv32-2373)                                               |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Έλεγχος διακομιστή μεσολάβησης MITM Antigravity (δημιουργεί/ορίζει τον διακομιστή μεσολάβησης συστήματος)                                                  |
-| `/api/modality-bridge/video/`                                                                            | Αυστηρός έλεγχος περιβάλλοντος εκτέλεσης Video Bridge μέσω αξιόπιστου loopback και εσωτερική γέφυρα εξαγωγής                                               |
-| `/api/services/`                                                                                         | Ενσωματωμένες υπηρεσίες (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + δημιουργία διεργασίας                                               |
-| `/dashboard/providers/services/`                                                                         | Αντίστροφος διακομιστής μεσολάβησης προς τα περιβάλλοντα χρήστη ενσωματωμένων υπηρεσιών                                                                    |
-| `/api/tunnels/cloudflared`                                                                               | Εγκαθιστά/εκκινεί το εκτελέσιμο cloudflared                                                                                                                |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Εγκαθιστά/ελέγχει το tailscaled στον κεντρικό υπολογιστή                                                                                                   |
-| `/api/copilot/`                                                                                          | Πρόγραμμα οδήγησης LLM χωρίς έλεγχο ταυτότητας — από προεπιλογή μόνο μέσω CLI                                                                              |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — εκκινεί διακομιστή MITM + τροποποιεί το DNS                                                                                                  |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — listener http-proxy + διακομιστής μεσολάβησης συστήματος                                                                               |
-| `/api/settings/mitm`                                                                                     | Ενεργοποιεί υποκλοπή MITM (κατάσταση διακομιστή μεσολάβησης σε επίπεδο συστήματος)                                                                         |
-| `/api/issue-agent/`                                                                                      | Πράκτορας ζητημάτων — εκκινεί τοπικά εργαλεία για το αποθετήριο                                                                                            |
-| `/api/plugins/`, `/api/plugins`                                                                          | Πρόσθετα — φόρτωση/εκτέλεση μέσω `worker_threads` + `child_process`                                                                                        |
-| `/api/middleware/`                                                                                       | Middleware χρήστη — φορτώνει/εκτελεί κώδικα διαχειριστή εντός της διεργασίας                                                                               |
-| `/api/system/version`                                                                                    | Αυτόματη ενημέρωση (μόνο POST· εξαιρούνται GET/HEAD/OPTIONS) — εκκινεί `git checkout` + `npm install`                                                      |
-| `/api/db-backups/exportAll`                                                                              | Εκκινεί το `tar` για το αρχείο εξαγωγής                                                                                                                    |
-| `/api/local/`                                                                                            | Τοπικοί εκκινητές με 1 κλικ (προς το παρόν Redis) — εκκινούν podman/docker                                                                                 |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Κύκλος ζωής διακομιστή μεσολάβησης Headroom — εκκινεί python CLI / στέλνει σήματα σε PID                                                                   |
-| `/api/jobs`, `/api/jobs/`                                                                                | Έλεγχος εκτελεστή εργασιών — εκτελεί προγραμματισμένες εργασίες στον κεντρικό υπολογιστή                                                                   |
-| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` πριν από την εισαγωγή διαπιστευτηρίων                                                                                      |
-| `/api/oauth/kiro/auto-import`                                                                            | Διαβάζει αρχεία διαπιστευτηρίων Kiro CLI από τον κεντρικό υπολογιστή                                                                                       |
-| `/api/skills/collect/`                                                                                   | Συλλογή δεξιοτήτων — εντοπίζει/εγκαθιστά τοπικά εργαλεία                                                                                                   |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Καταχώριση + εκτέλεση χειριστή δεξιοτήτων — φτάνει στην εκκίνηση κοντέινερ sandbox (GHSA-jx89)                                                             |
-| `/api/discovery/`                                                                                        | Ανιχνευτικοί έλεγχοι τοπικού δικτύου/παρόχων                                                                                                               |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Εκκινεί πρόγραμμα περιήγησης με γραφικό περιβάλλον + συνεδρία VNC για διαδραστικές συνδέσεις                                                               |
-| `/api/acp/agents`                                                                                        | ACP — εντοπίζει και εκκινεί τοπικά εκτελέσιμα δυαδικά αρχεία πρακτόρων CLI                                                                                 |
-| `/api/resilience/connections`                                                                            | JSON ανθεκτικότητας ανά λογαριασμό (χρόνος αναμονής, διακόπτης κυκλώματος, κλείδωμα). Το HTML του πίνακα ελέγχου δεν προορίζεται μόνο για τοπική πρόσβαση. |
-| `/api/providers/cursor/agent-availability`                                                               | Έλεγχος προτροπής εγκατάστασης στον πίνακα ελέγχου — εκκινεί `cursor-agent status --format json`                                                           |
-| `/api/providers/{id}/login` (regex)                                                                      | Εκκινεί Playwright Chromium με γραφικό περιβάλλον για σύνδεση μέσω cookie ιστού                                                                            |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | Μη αυτόματη ροή με γραφικό περιβάλλον + αυτόματη σύνδεση μέσω τηλεφώνου/SMS βάσει συνεδρίας (εκκινεί το Playwright)                                        |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Μη αυτόματη ανανέωση συνεδρίας Cursor — ενεργοποιεί το `cursor-agent`                                                                                      |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Διαγιγνώσκει την τοπική εγκατάσταση του Codex CLI (εκκινεί το εκτελέσιμο δυαδικό αρχείο)                                                                   |
+| Πρόθεμα / μοτίβο                                                                                         | Γιατί είναι διαθέσιμο μόνο τοπικά                                                                                 |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | Διακομιστής MCP — εκκινεί γέφυρες stdio + χειριστές SSE                                                           |
+| `/api/cli-tools/runtime/`                                                                                | Runtime εργαλείων CLI — εκτελεί αυθαίρετο κώδικα προσθηκών                                                        |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Εγγραφείς ρυθμίσεων ανά εργαλείο που μπορούν να πειράξουν εκτελέσιμα/ρυθμίσεις εργαλείων στον κεντρικό υπολογιστή |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Η ίδια εκκίνηση μέσω `getCliRuntimeStatus()` όπως τα έξι αδελφικά παραπάνω (GHSA-35fw-cv32-2373)                  |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | Διερευνητικές απογραφές CLI — εκκινούν `command -v` / `--version` ανά εργαλείο (GHSA-35fw-cv32-2373)              |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Έλεγχος του MITM proxy Antigravity (εκκινεί/ορίζει το proxy του συστήματος)                                       |
+| `/api/modality-bridge/video/`                                                                            | Αυστηρός έλεγχος runtime του Video Bridge σε αξιόπιστο loopback και εσωτερική γέφυρα εξαγωγής                     |
+| `/api/services/`                                                                                         | Ενσωματωμένες υπηρεσίες (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + εκκίνηση διεργασίας        |
+| `/dashboard/providers/services/`                                                                         | Αντίστροφο proxy (reverse proxy) προς τα UI των ενσωματωμένων υπηρεσιών                                           |
+| `/api/tunnels/cloudflared`                                                                               | Εγκαθιστά/εκκινεί το εκτελέσιμο cloudflared                                                                       |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Εγκαθιστά/ελέγχει το tailscaled στον κεντρικό υπολογιστή                                                          |
+| `/api/copilot/`                                                                                          | Driver LLM χωρίς έλεγχο ταυτότητας — μόνο μέσω CLI από προεπιλογή                                                 |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — εκκινεί διακομιστή MITM + τροποποιήσεις DNS                                                         |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — ακροατής http-proxy + proxy του συστήματος                                                    |
+| `/api/settings/mitm`                                                                                     | Ενεργοποιεί υποκλοπή MITM (κατάσταση proxy σε επίπεδο συστήματος)                                                 |
+| `/api/issue-agent/`                                                                                      | Πράκτορας θεμάτων — εκκινεί τοπικά εργαλεία εναντίον του αποθετηρίου                                              |
+| `/api/plugins/`, `/api/plugins`                                                                          | Πρόσθετα (plugins) — φόρτωση/εκτέλεση μέσω `worker_threads` + `child_process`                                     |
+| `/api/middleware/`                                                                                       | Middleware χρήστη — φορτώνει/εκτελεί κώδικα του χειριστή εντός της ίδιας διεργασίας                               |
+| `/api/system/version`                                                                                    | Αυτόματη ενημέρωση (μόνο POST· εξαιρούνται GET/HEAD/OPTIONS) — εκκινεί `git checkout` + `npm install`             |
+| `/api/db-backups/exportAll`                                                                              | Εκκινεί το `tar` για το αρχείο εξαγωγής                                                                           |
+| `/api/local/`                                                                                            | Τοπικοί εκκινητές ενός κλικ (σήμερα Redis) — εκκινούν podman/docker                                               |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Κύκλος ζωής του Headroom proxy — εκκινεί python CLI / στέλνει σήματα σε PID                                       |
+| `/api/jobs`, `/api/jobs/`                                                                                | Έλεγχος του εκτελεστή εργασιών — εκτελεί προγραμματισμένη εργασία στον κεντρικό υπολογιστή                        |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` πριν από την εισαγωγή διαπιστευτηρίων                                             |
+| `/api/oauth/kiro/auto-import`                                                                            | Διαβάζει αρχεία διαπιστευτηρίων του Kiro CLI από τον κεντρικό υπολογιστή                                          |
+| `/api/skills/collect/`                                                                                   | Συλλογή δεξιοτήτων — εντοπίζει/εγκαθιστά τοπικά εργαλεία                                                          |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Καταχώριση handler skill + εκτέλεση — πρόσβαση στο spawn του sandbox container (GHSA-jx89)                        |
+| `/api/discovery/`                                                                                        | Probes ανακάλυψης τοπικού δικτύου/παρόχων                                                                         |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Εκκινεί headful browser + συνεδρία VNC για διαδραστικές συνδέσεις                                                 |
+| `/api/acp/agents`                                                                                        | ACP — ανακαλύπτει και εκκινεί τοπικά binaries CLI agent                                                           |
+| `/api/resilience/connections`                                                                            | JSON ανθεκτικότητας ανά λογαριασμό (cooldown, breaker, lockout). Το HTML του dashboard δεν είναι local-only.      |
+| `/api/providers/cursor/agent-availability`                                                               | Έλεγχος install-nudge του dashboard — εκκινεί `cursor-agent status --format json`                                 |
+| `/api/providers/{id}/login` (regex)                                                                      | Εκκινεί ένα headful Playwright Chromium για σύνδεση με web-cookie                                                 |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Χειροκίνητη headful ροή + αυτόματη σύνδεση τηλεφώνου/SMS βάσει συνεδρίας (εκκινεί Playwright)                     |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Χειροκίνητη ανανέωση συνεδρίας Cursor — ενεργοποιεί το `cursor-agent`                                             |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Διαγιγνώσκει την τοπική εγκατάσταση του Codex CLI (εκκινεί το binary)                                             |
 
-**Απόκριση σε περίπτωση παραβίασης:** `403 LOCAL_ONLY`
+**Απόκριση σε παραβίαση:** `403 LOCAL_ONLY`
 
-#### Εξαίρεση βάσει πεδίου διαχείρισης
+#### Παρέκκλιση manage-scope
 
-Ένα υποσύνολο διαδρομών LOCAL_ONLY ΜΠΟΡΕΙ επίσης να προσπελαστεί από διευθύνσεις εκτός loopback εάν και
-μόνο εάν το αίτημα περιλαμβάνει ένα `Authorization: Bearer <api-key>` του οποίου
-τα μεταδεδομένα περιλαμβάνουν το πεδίο `manage` (ή `admin`). Η εξαίρεση ενεργοποιείται
-ρητά ανά διαδρομή μέσω του `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, ώστε η
-προεπιλογή για κάθε νέα διαδρομή LOCAL_ONLY να παραμένει αυστηρά περιορισμένη στο loopback. Τα μη πιστοποιημένα
-αιτήματα και τα αιτήματα με κλειδιά χωρίς δικαιώματα διαχείρισης εξακολουθούν να απορρίπτονται με
-`403 LOCAL_ONLY`.
+Ένα υποσύνολο διαδρομών LOCAL_ONLY ΜΠΟΡΕΙ επίσης να προσπελαστεί από
+μη-loopback διευθύνσεις εάν και μόνο εάν το αίτημα φέρει ένα
+`Authorization: Bearer <api-key>` του οποίου τα μεταδεδομένα περιλαμβάνουν το
+scope `manage` (ή `admin`). Η παρέκκλιση ελέγχεται ρητά ανά διαδρομή μέσω
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, ώστε η προεπιλογή για κάθε νέα
+διαδρομή LOCAL_ONLY να παραμένει αυστηρή loopback. Τα μη αυθεντικοποιημένα
+αιτήματα και τα αιτήματα με κλειδιά χωρίς manage εξακολουθούν να απορρίπτονται
+με `403 LOCAL_ONLY`.
 
-Επί του παρόντος, το μόνο πρόθεμα που μπορεί να παρακάμψει τον περιορισμό είναι το `/api/mcp/`. Τα `/api/cli-tools/runtime/` και
-`/api/services/` εξαιρούνται σκόπιμα, επειδή μπορούν να εκκινήσουν αυθαίρετες
-υποδιεργασίες (`npm install`, `node`), δηλαδή ακριβώς την κατηγορία CVE που
-έχει σχεδιαστεί να αποτρέπει το επίπεδο LOCAL_ONLY.
+Σήμερα το μόνο πρόθεμα που μπορεί να παρακαμφθεί είναι το `/api/mcp/`. Τα
+`/api/cli-tools/runtime/` και `/api/services/` αποκλείονται σκόπιμα επειδή
+μπορούν να εκκινήσουν αυθαίρετες υποδιεργασίες (`npm install`, `node`), που
+είναι ακριβώς η κατηγορία CVE που το επίπεδο LOCAL_ONLY υπάρχει για να
+αποτρέψει.
 
-**#7895 — περιορισμένο πεδίο `mcp:connect`:** η εξαίρεση `/api/mcp/` δέχεται ΕΠΙΣΗΣ
-ένα κλειδί Bearer που διαθέτει το περιορισμένο πεδίο `mcp:connect`
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), το οποίο ελέγχεται μέσω της
-`hasMcpConnectOrManageScope()` στο `src/server/authz/policies/management.ts`.
-Αυτό περιορίζεται ΑΠΟΚΛΕΙΣΤΙΚΑ στο `/api/mcp/` — το `mcp:connect` δεν παρέχει κανένα δικαίωμα σε οποιαδήποτε άλλη
-διαδρομή διαχείρισης (συμπεριλαμβανομένου κάθε άλλου προθέματος παράκαμψης LOCAL_ONLY, εάν προστεθεί
-ποτέ κάποιο) και εξαιρείται σκόπιμα από το
-`MANAGEMENT_API_KEY_SCOPES`. Ένα κλειδί που διαθέτει `manage`/`admin` εξακολουθεί να περνά την
-εξαίρεση ακριβώς όπως πριν· το `mcp:connect` αποτελεί εναλλακτική χαμηλότερων προνομίων
-για απομακρυσμένους καλούντες που χρησιμοποιούν μόνο MCP και δεν θα πρέπει να χρειάζονται ευρεία πρόσβαση διαχείρισης.
+**#7895 — στενό scope `mcp:connect`:** η παρέκκλιση του `/api/mcp/` δέχεται
+ΕΠΙΣΗΣ ένα κλειδί Bearer που κατέχει το στενό scope `mcp:connect`
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), το οποίο
+ελέγχεται μέσω `hasMcpConnectOrManageScope()` στο
+`src/server/authz/policies/management.ts`. Αυτό ισχύει ΜΟΝΟ για το `/api/mcp/`
+— το `mcp:connect` δεν παρέχει τίποτα σε καμία άλλη διαδρομή διαχείρισης
+(συμπεριλαμβανομένου οποιουδήποτε άλλου προθέματος παράκαμψης LOCAL_ONLY, αν
+προστεθεί ποτέ), και αποκλείεται σκόπιμα από το `MANAGEMENT_API_KEY_SCOPES`.
+Ένα κλειδί με `manage`/`admin` εξακολουθεί να περνά την παρέκκλιση ακριβώς
+όπως πριν· το `mcp:connect` είναι μια εναλλακτική χαμηλότερων δικαιωμάτων για
+απομακρυσμένους καλούντες μόνο-MCP που δεν θα πρέπει να χρειάζονται ευρεία
+διαχειριστική πρόσβαση.
 
-| Αίτημα                                              | Διαδρομή                   | Αποτέλεσμα                                 |
-| --------------------------------------------------- | -------------------------- | ------------------------------------------ |
-| Εκτός loopback, χωρίς Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY                             |
-| Εκτός loopback, Bearer με πεδίο `manage`            | `/api/mcp/*`               | Επιτρέπεται                                |
-| Εκτός loopback, Bearer με πεδίο `mcp:connect`       | `/api/mcp/*`               | Επιτρέπεται                                |
-| Εκτός loopback, Bearer χωρίς `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                             |
-| Εκτός loopback, Bearer με πεδίο `mcp:connect`       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                             |
-| Εκτός loopback, Bearer με πεδίο `manage`            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                             |
-| Loopback, με οποιοδήποτε/χωρίς Bearer               | οποιαδήποτε LOCAL_ONLY     | Επιτρέπεται (η πύλη επιτρέπει τη διέλευση) |
+| Αίτημα                                           | Διαδρομή                   | Αποτέλεσμα                    |
+| ------------------------------------------------ | -------------------------- | ----------------------------- |
+| Μη-loopback, χωρίς Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY                |
+| Μη-loopback, Bearer με scope `manage`            | `/api/mcp/*`               | Επιτρέπεται                   |
+| Μη-loopback, Bearer με scope `mcp:connect`       | `/api/mcp/*`               | Επιτρέπεται                   |
+| Μη-loopback, Bearer χωρίς `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                |
+| Μη-loopback, Bearer με scope `mcp:connect`       | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
+| Μη-loopback, Bearer με scope `manage`            | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
+| Loopback, με οποιοδήποτε/χωρίς Bearer            | οποιαδήποτε LOCAL_ONLY     | Επιτρέπεται (ο έλεγχος περνά) |
 
-#### Οδηγίες για διαχειριστές & έλεγχος
+#### Οδηγίες χειριστή & έλεγχος
 
-Εάν εκτελείτε το OmniRoute πίσω από αντίστροφο διακομιστή μεσολάβησης ή σήραγγα (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok), ο έλεγχος loopback εξακολουθεί να προστατεύει τις παραπάνω
-διαδρομές με δυνατότητα εκκίνησης — ένα αίτημα του οποίου η διεύθυνση πελάτη δεν είναι loopback απορρίπτεται με
-`403 LOCAL_ONLY` **πριν εκτελεστεί ο έλεγχος ταυτότητας**, επομένως ένα JWT που έχει διαρρεύσει δεν μπορεί να προκαλέσει εκκίνηση. Παραμένουν δύο
-ευθύνες για τους διαχειριστές:
+Αν εκτελείτε το OmniRoute πίσω από reverse proxy ή tunnel (nginx, Caddy,
+Cloudflare Tunnel, Tailscale, Ngrok), ο έλεγχος loopback εξακολουθεί να
+προστατεύει τις παραπάνω διαδρομές με δυνατότητα spawn — ένα αίτημα του
+οποίου η διεύθυνση πελάτη είναι μη-loopback απορρίπτεται με `403 LOCAL_ONLY`
+**πριν εκτελεστεί η ταυτοποίηση**, ώστε ένα διαρρεύσαν JWT να μην μπορεί να
+φτάσει σε spawn. Δύο ευθύνες του χειριστή παραμένουν:
 
-- **Μην «διορθώνετε» ένα 403 πλαστογραφώντας τη διεύθυνση IP του client ως loopback.** Ο ορισμός
-  `X-Forwarded-For: 127.0.0.1` ή η χρήση proxy που αντικαθιστά τη διεύθυνση προέλευσης με
-  loopback επαναφέρει ακριβώς την κατηγορία RCE που αποκλείει αυτό το επίπεδο. Εκθέστε το
-  dashboard/API μέσω του proxy — ποτέ τις διαδρομές που έχουν δυνατότητα spawn.
-- **Διατηρήστε ελάχιστη την παράκαμψη βάσει scope `manage`.** Μόνο το `/api/mcp/` μπορεί να παρακαμφθεί και
-  μόνο με API key που έχει scope `manage`. Τα `SPAWN_CAPABLE_PREFIXES` δεν μπορούν ποτέ να
+- **Μην «διορθώνετε» ένα 403 πλαστογραφώντας το IP του πελάτη ως loopback.** Η ρύθμιση
+  `X-Forwarded-For: 127.0.0.1`, ή ενός proxy που ξαναγράφει τη διεύθυνση προέλευσης σε
+  loopback, ανοίγει εκ νέου ακριβώς την κατηγορία RCE που κλείνει αυτό το επίπεδο. Εκθέστε το
+  dashboard/API μέσω του proxy — ποτέ τις διαδρομές με δυνατότητα spawn.
+- **Κρατήστε την παράκαμψη manage-scope ελάχιστη.** Μόνο το `/api/mcp/` μπορεί να παρακαμφθεί, και
+  μόνο με κλειδί API εμβέλειας `manage`. Τα `SPAWN_CAPABLE_PREFIXES` δεν μπορούν ποτέ να
   προστεθούν στη λίστα παράκαμψης — το σχήμα zod τα απορρίπτει και το
-  `isLocalOnlyBypassableByManageScope` τα απορρίπτει κατά την εκτέλεση (άμυνα σε βάθος),
-  κάτι που εννοεί το dashboard με το «δεν μπορεί να καταστεί παρακάμψιμο». Η ίδια
-  λίστα αποκλεισμού περιλαμβάνει επίσης μερικές διαδρομές LOCAL_ONLY που δεν εκτελούν spawn, αλλά δεν πρέπει ποτέ να
-  είναι προσβάσιμες απομακρυσμένα — `/api/oauth/kiro/auto-import` (διαβάζει τοπικά αρχεία
-  διαπιστευτηρίων Kiro του host), `/api/discovery/` και `/api/issue-agent/`. Ο loader
-  snapshot κατά την εκτέλεση αφαιρεί επίσης τέτοιες καταχωρίσεις από μια αποθηκευμένη γραμμή ρυθμίσεων, ενώ η
-  εισαγωγή legacy JSON (`/api/settings/import-json`) δεν εγγράφει ποτέ τα κλειδιά παράκαμψης.
-  Κάθε καταχώριση `LOCAL_ONLY_API_PREFIXES` πρέπει είτε να βρίσκεται στη λίστα αποκλεισμού είτε
-  να έχει ελεγχθεί ως επιλέξιμη για παράκαμψη (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Οι διαδρομές με
-  δυναμικά τμήματα και στατικές διαδρομές που έχουν δυνατότητα spawn κάτω από το `/api/providers/` (π.χ. `/login`,
-  `/refresh-cursor`) καλύπτονται από τα συνοδευτικά `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` που βασίζονται σε regex, στο
-  `src/shared/constants/spawnCapablePrefixes.ts`, και όχι από τον επίπεδο πίνακα
-  `SPAWN_CAPABLE_PREFIXES` — ο επίπεδος πίνακας θα έπρεπε να καλύπτει ολόκληρο το
-  πρόθεμα `/api/providers/` για να τις εντοπίζει, διευρύνοντας υπερβολικά ένα δέντρο διαδρομών
-  που τα απομακρυσμένα dashboards χρησιμοποιούν νόμιμα για CRUD παρόχων.
+  `isLocalOnlyBypassableByManageScope` τα αρνείται στον χρόνο εκτέλεσης (άμυνα σε βάθος),
+  κάτι που το dashboard εννοεί με το "cannot be made bypassable" («δεν μπορεί να καταστεί παρακάμψιμο»). Η ίδια
+  λίστα άρνησης περιέχει επίσης μερικές διαδρομές LOCAL_ONLY που δεν κάνουν spawn αλλά δεν πρέπει ποτέ να είναι
+  απομακρυσμένα προσβάσιμες — `/api/oauth/kiro/auto-import` (διαβάζει τοπικά αρχεία διαπιστευτηρίων Kiro
+  του host), `/api/discovery/` και `/api/issue-agent/`. Ο φορτωτής
+  στιγμιοτύπων χρόνου εκτέλεσης απορρίπτει επίσης τέτοιες εγγραφές από μια αποθηκευμένη γραμμή ρυθμίσεων, και η
+  παλαιού τύπου εισαγωγή JSON (`/api/settings/import-json`) δεν γράφει ποτέ τα κλειδιά παράκαμψης.
+  Κάθε εγγραφή `LOCAL_ONLY_API_PREFIXES` πρέπει είτε να βρίσκεται στη λίστα άρνησης είτε
+  να αξιολογείται ως επιλέξιμη για παράκαμψη (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Οι
+  διαδρομές spawn-capable δυναμικών τμημάτων και στατικών μονοπατιών κάτω από το `/api/providers/` (π.χ. `/login`,
+  `/refresh-cursor`) καλύπτονται από τα συνοδά βασισμένα σε regex `SPAWN_CAPABLE_PATTERNS` /
+  `SPAWN_CAPABLE_PATTERN_ANCESTORS` στο
+  `src/shared/constants/spawnCapablePrefixes.ts`, όχι από τον απλό
+  πίνακα `SPAWN_CAPABLE_PREFIXES` — ο απλός πίνακας θα έπρεπε να καλύπτει ολόκληρο
+  το πρόθεμα `/api/providers/` για να τις εντοπίσει, διευρύνοντας υπερβολικά ένα δέντρο
+  διαδρομών που απομακρυσμένα dashboards χρησιμοποιούν νόμιμα για CRUD παρόχων.
 
-**Έλεγχος πρόσβασης** — για να επαληθεύσετε ότι τίποτα εκτός host δεν αποκτά πρόσβαση σε αυτές τις διαδρομές:
+**Επιθεώρηση πρόσβασης** — για να επαληθεύσετε ότι τίποτα εκτός host δεν φτάνει σε αυτές τις διαδρομές:
 
-- Ανοίξτε το **Απόθεμα εξουσιοδότησης** στη διεύθυνση `/dashboard/settings/security`: εμφανίζει τη
+- Ανοίξτε την **Απογραφή Εξουσιοδότησης (Authorization Inventory)** στο `/dashboard/settings/security`: αποδίδει τη
   ζωντανή λίστα προθεμάτων LOCAL_ONLY, ποια προθέματα είναι παρακάμψιμα και το σύνολο
-  με δυνατότητα spawn που καθορίζεται κατά τη μεταγλώττιση («δεν μπορεί να καταστεί παρακάμψιμο»).
-- Αναζητήστε στα logs του reverse proxy / πρόσβασης τα παραπάνω προθέματα σε συνδυασμό με μια
-  διεύθυνση client που δεν είναι loopback. Οποιαδήποτε τέτοια πρόσβαση επέστρεψε `200` αντί για
-  `403 LOCAL_ONLY` σημαίνει ότι ο proxy αποκρύπτει την πραγματική IP του client — διορθώστε τον proxy.
-- Ένα `403 LOCAL_ONLY` στα logs του OmniRoute για μία από αυτές τις διαδρομές σημαίνει ότι ο μηχανισμός προστασίας
-  λειτουργεί όπως προβλέπεται και όχι ότι υπάρχει σφάλμα που πρέπει να κατασταλεί.
+  spawn-capable χρόνου μεταγλώττισης ("cannot be made bypassable" — «δεν μπορεί να καταστεί παρακάμψιμο»).
+- Κάντε grep στα logs του reverse proxy / πρόσβασής σας για τα παραπάνω προθέματα σε
+  συνδυασμό με μη-loopback διεύθυνση πελάτη. Οποιαδήποτε τέτοια αντιστοίχιση επέστρεψε `200` αντί για
+  `403 LOCAL_ONLY` σημαίνει ότι ο proxy αποκρύπτει την πραγματική IP του πελάτη — διορθώστε τον proxy.
+- Ένα `403 LOCAL_ONLY` στα logs του OmniRoute για κάποιο από αυτά τα μονοπάτια είναι ο φύλακας
+  που λειτουργεί όπως προβλέπεται, όχι σφάλμα προς απόκρυψη.
 
-#### Απομακρυσμένα προσβάσιμες διαδρομές με πύλη ελέγχου στο σημείο κλήσης
+#### Απομακρυσμένα προσβάσιμες διαδρομές με πύλη probe στο σημείο κλήσης
 
-Ορισμένες διαδρομές πρέπει να παραμένουν προσβάσιμες από ένα απομακρυσμένο dashboard, αλλά να εκτελούν έναν έλεγχο
-στην πλευρά του host (`which <binary>`, `<binary> --version`, `tailscale status --json`) για τοπικούς callers.
-Δεν είναι LOCAL_ONLY για `GET`· αντίθετα, ο handler διαβάζει την αξιόπιστη απόφαση για τον peer
-με το `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) και εκτελεί τον έλεγχο μόνο
-για callers `loopback` / `lan`. Ένας `remote` caller λαμβάνει την ίδια δομή απόκρισης, δημιουργημένη από
-πηγές χωρίς spawn (διατηρούμενη κατάσταση, ρυθμίσεις, έλεγχοι fs), με τη σημαία `probed: false`.
+Ορισμένες διαδρομές πρέπει να παραμένουν προσβάσιμες από απομακρυσμένο dashboard αλλά εκτελούν
+ένα probe στην πλευρά του host (`which <binary>`, `<binary> --version`, `tailscale status --json`) για τοπικούς καλούντες.
+Δεν είναι LOCAL_ONLY για `GET`· αντιθέτως, ο handler διαβάζει την έγκυρη κρίση για τον peer
+με το `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) και εκτελεί το probe μόνο
+για καλούντες `loopback` / `lan`. Ένας `remote` καλών λαμβάνει το ίδιο σχήμα απόκρισης κατασκευασμένο από
+πηγές χωρίς spawn (διατηρημένη κατάσταση, ρυθμίσεις, έλεγχοι fs), με σημαία `probed: false`.
 
-| Διαδρομή                                                              | Έλεγχος που παραλείπεται για απομακρυσμένους callers                                          |
-| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`          | Έλεγχος περιβάλλοντος εκτέλεσηςς CLI (`allowLocalRuntimeProbe`) και spawn εφεδρικής λύσης CLI |
-| `GET /api/headroom/status`                                            | `which headroom` και οι έλεγχοι python `--version`                                            |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`      | `which tailscale`, `tailscale status/funnel --json`, `which brew`                             |
-| `GET /api/tunnels/cloudflared` (εξαιρείται από το LOCAL_ONLY για GET) | Αναζήτηση PATH μέσω `which cloudflared`                                                       |
+| Διαδρομή                                                         | Probe που παραλείπεται για απομακρυσμένους καλούντες                          |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Probe χρόνου εκτέλεσης CLI (`allowLocalRuntimeProbe`) και spawn εφεδρείας CLI |
+| `GET /api/headroom/status`                                       | `which headroom` και τα probes `--version` της python                         |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`             |
+| `GET /api/tunnels/cloudflared` (εξαίρεση GET από LOCAL_ONLY)     | Αναζήτηση PATH με `which cloudflared`                                         |
 
-Μια νέα διαδρομή ανάγνωσης που πραγματοποιεί έλεγχο στον host ακολουθεί το ίδιο μοτίβ ή ταξινομείται
-εξ ολοκλήρου ως LOCAL_ONLY.
+Μια νέα διαδρομή ανάγνωσης που κάνει probe στον host ακολουθεί το ίδιο μοτίβο, ή ταξινομείται
+ευθέως ως LOCAL_ONLY.
 
 ### Επίπεδο 2 — ALWAYS_PROTECTED
 
 **Επιβάλλεται από:** `isAlwaysProtectedPath(path)` → παράλειψη της παράκαμψης `requireLogin=false`
 **Παράκαμψη:** Καμία όταν `requireLogin=false`· απαιτείται πάντα JWT
 
-Αυτές οι διαδρομές είναι καταστροφικές ή μη αναστρέψιμες. Η αποδοχή τους σε μια εγκατάσταση
-«χωρίς κωδικό πρόσβασης» θα σήμαινε ότι οποιοσδήποτε στο ίδιο LAN θα μπορούσε να διαγράψει τη βάση δεδομένων ή να τερματίσει τη
-διεργασία του server.
+Αυτές οι διαδρομές είναι καταστρεπτικές ή μη αναστρέψιμες. Η αποδοχή τους σε εγκατάσταση
+«χωρίς κωδικό» θα σήμαινε ότι οποιοσδήποτε στο ίδιο LAN θα μπορούσε να διαγράψει πλήρως τη
+βάση δεδομένων ή να τερματίσει τη διεργασία του server.
 
-| Διαδρομή                                  | Αιτία                                                                         |
-| ----------------------------------------- | ----------------------------------------------------------------------------- |
-| `/api/shutdown`                           | Τερματίζει τη διεργασία του server                                            |
-| `/api/settings/database`                  | Εξαγωγή, εισαγωγή και διαγραφή της βάσης δεδομένων                            |
-| `/api/db-backups`                         | Πρόσβαση σε πλήρες αρχείο αντιγράφου ασφαλείας της βάσης δεδομένων            |
-| `/api/settings/export-json`               | Εξάγει ολόκληρο το blob ρυθμίσεων (συμπερ. μυστικών)                          |
-| `/api/settings/import-json`               | Αντικαθιστά ολόκληρο το blob ρυθμίσεων                                        |
-| `/api/providers/health-autopilot/actions` | Εκτελεί ενέργειες αποκατάστασης του autopilot                                 |
-| `/api/settings/obsidian`                  | Εκδίδει επαναχρησιμοποιήσιμα διαπιστευτήρια WebDAV για οποιαδήποτε ρίζα vault |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                  |
+| Διαδρομή                                  | Λόγος                                                                            |
+| ----------------------------------------- | -------------------------------------------------------------------------------- |
+| `/api/shutdown`                           | Τερματίζει τη διεργασία του server                                               |
+| `/api/settings/database`                  | Εξαγωγή, εισαγωγή και πλήρης διαγραφή βάσης δεδομένων                            |
+| `/api/db-backups`                         | Πρόσβαση στο πλήρες αρχείο backup της βάσης δεδομένων                            |
+| `/api/settings/export-json`               | Εξάγει ολόκληρο το blob ρυθμίσεων (συμπ. μυστικών)                               |
+| `/api/settings/import-json`               | Αντικαθιστά ολόκληρο το blob ρυθμίσεων                                           |
+| `/api/providers/health-autopilot/actions` | Εκτελεί ενέργειες αποκατάστασης autopilot                                        |
+| `/api/settings/obsidian`                  | Δημιουργεί επαναχρησιμοποιήσιμα διαπιστευτήρια WebDAV για οποιαδήποτε ρίζα vault |
+| `/api/relay/tokens`                       | Δημιουργεί, απαριθμεί, επεξεργάζεται και ανακαλεί tokens relay                   |
+| `/api/cli-tools/apply`                    | Ξαναγράφει τη διαμόρφωση CLI του host του χειριστή                               |
+| `/api/cli-tools/guide-settings`           | Γράφει αρχεία διαμόρφωσης CLI καθοδηγούμενα από οδηγό                            |
+| `/api/cli-tools/hermes-agent-settings`    | Γράφει τη διαμόρφωση του Hermes agent                                            |
+| `/api/cli-tools/backups`                  | Επαναφέρει και διαγράφει backups διαμόρφωσης CLI                                 |
+| `/api/log-export`                         | Αποστέλλει logs κλήσεων σε διαμορφωμένο προορισμό                                |
+| `/api/restart`                            | Επανεκκινεί τη διεργασία του server                                              |
 
-**Απόκριση σε περίπτωση παραβίασης:** `401 Authentication required`
+**Απόκριση σε παράβαση:** `401 Authentication required`
 
-Το `/api/settings/obsidian` καλύπτει το child `/webdav`: το `POST` κατευθύνει την υπηρεσία αρχείων WebDAV —
-η οποία εξυπηρετείται από το προσαρμοσμένο επίπεδο Node πριν από το Next.js, εκτός αυτού του pipeline — σε μια ρίζα
-που επιλέγει ο caller και επιστρέφει νέα διαπιστευτήρια Basic, το `DELETE` τα ανανεώνει και το γονικό `POST` αποθηκεύει
-το token του Obsidian REST API. Το GHSA-62vw απέκρυψε μόνο την αποκάλυψη του κωδικού πρόσβασης μέσω `GET`· η έκδοση
-παρέμενε στο fail-open επίπεδο (GHSA-7pq4-8pvv-rx7r). Το `enableObsidianVaultSync()` επιπλέον
-απορρίπτει ένα vault που είναι ο κατάλογος δεδομένων, βρίσκεται μέσα σε αυτόν ή τον περιέχει.
+Το `/api/settings/obsidian` καλύπτει το θυγατρικό του `/webdav`: το `POST` κατευθύνει την υπηρεσία αρχείων WebDAV —
+που εξυπηρετείται από το προσαρμοσμένο επίπεδο Node πριν από το Next.js, εκτός αυτής της διοχέτευσης — σε μια ρίζα
+επιλογής του καλούντος και επιστρέφει νεοδημιουργημένα διαπιστευτήρια Basic, το `DELETE` τα εναλλάσσει, και το γονικό
+`POST` αποθηκεύει το token του Obsidian REST API. Το GHSA-62vw απλώς απέκρυψε την αποκάλυψη του κωδικού στο `GET`· η
+έκδοση παρέμενε στο επίπεδο fail-open (GHSA-7pq4-8pvv-rx7r). Η `enableObsidianVaultSync()` επιπλέον αρνείται ένα vault
+που είναι, βρίσκεται μέσα σε, ή περιέχει τον κατάλογο δεδομένων.
 
-#### Οι εξαγωγές διαπιστευτηρίων προορίζονται αποκλειστικά για τον διαχειριστή
+#### Οι εξαγωγές και οι επαναφορές διαπιστευτηρίων είναι μόνο για χειριστές
 
-Το παραπάνω επίπεδο αποφασίζει μόνο αν απαιτείται _κάποιο_ διαπιστευτήριο. Οι διαδρομές που πραγματοποιούν λήψη
-αποθηκευμένων διαπιστευτηρίων προσθέτουν έναν δεύτερο έλεγχο στον χειριστή: τα `GET /api/settings/export-json` (αποκρυπτογραφημένες
+Το παραπάνω επίπεδο αποφασίζει μόνο αν απαιτείται _κάποιο_ διαπιστευτήριο. Οι διαδρομές που κατεβάζουν αποθηκευμένα
+διαπιστευτήρια προσθέτουν έναν δεύτερο έλεγχο στον handler: οι `GET /api/settings/export-json` (αποκρυπτογραφημένες
 συνδέσεις παρόχων και ακατέργαστα κλειδιά API), `GET /api/db-backups/export` (το αρχείο SQLite) και
-`GET /api/db-backups/exportAll` (το πλήρες αρχείο) καλούν τη `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Αποδέχεται μια συνεδρία του πίνακα ελέγχου, το τοπικό υποκείμενο CLI ή
-μια εγκατάσταση με απενεργοποιημένη σύνδεση και απαντά με `403` σε κλειδιά API οποιουδήποτε εύρους (συμπεριλαμβανομένων των `manage`
-και `admin`) και σε διακριτικά πρόσβασης `oma_`. Η έκδοση διακριτικών συγχρονισμού (`POST /api/sync/tokens`) χρησιμοποιεί τον
-ίδιο βοηθό, καθώς και το διακριτικό εσωτερικής υπηρεσίας από αξιόπιστο loopback.
+`GET /api/db-backups/exportAll` (το πλήρες αρχείο) καλούν την `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`). Αυτή αποδέχεται μια συνεδρία dashboard, το τοπικό υποκείμενο CLI, ή μια
+εγκατάσταση με απενεργοποιημένη τη σύνδεση, και απαντά `403` σε κλειδιά API οποιουδήποτε εύρους (συμπεριλαμβανομένων
+των `manage` και `admin`) και σε access tokens `oma_`. Τα καταστροφικά αντίστοιχα τηρούν το ίδιο όριο:
+`POST /api/db-backups/import` (μεταφορτωμένο `.sqlite`, συμπεριλαμβανομένου του `dryRun=true`), `POST /api/db-backups`
+(επαναφορά αποθηκευμένου αντιγράφου ασφαλείας κατά id) και `POST /api/settings/import-json` (επαναφορά παλαιού τύπου
+JSON) αντικαθιστούν τη ζωντανή βάση δεδομένων ή ολόκληρο το σύνολο ρυθμίσεων/συνδέσεων/κλειδιών API, ώστε ένα μηχανικό
+διαπιστευτήριο δεν μπορεί να τα ενεργοποιήσει ούτε αυτό. Η καταστροφή σημείων επαναφοράς τηρεί το ίδιο όριο:
+`DELETE /api/db-backups` (εκκαθάριση — διατήρηση των τελευταίων N / απόρριψη παλαιότερων των D ημερών) και
+`PATCH /api/db-backups` (ρυθμίσεις διατήρησης), επειδή η αποθηκευμένη διατήρηση είναι ακριβώς αυτό που εφαρμόζει η
+`cleanupDbBackups()` μετά από κάθε αυτόματο αντίγραφο ασφαλείας (`src/lib/db/backup.ts`), ώστε ένα μηχανικό
+διαπιστευτήριο που θα μπορούσε να αποθηκεύσει `keepLatest: 1` θα περιέκοπτε τα πάντα στο επόμενο στιγμιότυπο. Η
+καταχώριση και η δημιουργία αντιγράφων ασφαλείας (`GET`/`PUT /api/db-backups`) διατηρούν τον συνήθη έλεγχο ταυτότητας
+διαχείρισης. Η έκδοση token συγχρονισμού (`POST /api/sync/tokens`) χρησιμοποιεί τον ίδιο βοηθό, συν το αξιόπιστο token
+εσωτερικής υπηρεσίας loopback.
 
-#### Credential exports and restores are operator-only
+### Η εκκίνηση νέας εγκατάστασης είναι μόνο για loopback — κατά πραγματικό peer, όχι κατά `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Χωρίς ρυθμισμένο κωδικό διαχείρισης (και χωρίς `INITIAL_PASSWORD`), η `isAuthRequired()` στο
+`src/shared/utils/apiAuth.ts` κρατά την ανώνυμη εκκίνηση ανοιχτή **μόνο για peers loopback**. Το loopback κρίνεται από
+τα αξιόπιστα σήματα peer, με τη σειρά: ο πραγματικός TCP peer με σφραγίδα token (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`,
+αυτό που βλέπει η πολιτική), η δική της διοχέτευσης απόφαση `AUTHZ_HEADER_PEER_LOCALITY` (αυτό που βλέπουν οι handlers
+διαδρομών, αξιόπιστη μόνο όσο είναι ορισμένο το `OMNIROUTE_PEER_STAMP_TOKEN`), ή ένας πραγματικός socket peer για
+άμεσους καλούντες. Τα `Host` / `nextUrl.hostname` δεν λαμβάνονται ποτέ υπόψη, και η εγγραφή του πρώτου κωδικού
+(`POST /api/settings/require-login`) υπόκειται στον ίδιο περιορισμό αντί να είναι ανοιχτή σε κάθε peer του δικτύου
+(GHSA-7pq4-8pvv-rx7r). Το `managementPolicy` περνά ρητά την δική του απόφαση `peerContext` προς τα κάτω, ώστε οι
+κεφαλίδες του ΑΡΧΙΚΟΥ (πριν την αφαίρεση) αιτήματος να μην την αποφασίζουν ποτέ.
 
-### Η αρχική ρύθμιση νέας εγκατάστασης είναι διαθέσιμη μόνο μέσω loopback — βάσει του πραγματικού ομότιμου και όχι του `Host`
+### Επίπεδο 3 — MANAGEMENT (προεπιλογή)
 
-Όταν δεν έχει ρυθμιστεί κωδικός πρόσβασης διαχείρισης (και δεν υπάρχει `INITIAL_PASSWORD`), η `isAuthRequired()` στο
-`src/shared/utils/apiAuth.ts` διατηρεί ανοιχτή την ανώνυμη αρχική ρύθμιση **μόνο για ομότιμους loopback**.
-Το loopback προσδιορίζεται από τα αξιόπιστα σήματα του ομότιμου, με την εξής σειρά: τον πραγματικό ομότιμο TCP που επισημαίνεται από το διακριτικό
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, αυτόν που βλέπει η πολιτική), την ετυμηγορία
-`AUTHZ_HEADER_PEER_LOCALITY` της ίδιας της διοχέτευσης (αυτήν που βλέπουν οι χειριστές διαδρομών, αξιόπιστη μόνο όταν
-έχει οριστεί το `OMNIROUTE_PEER_STAMP_TOKEN`) ή έναν πραγματικό ομότιμο υποδοχής για άμεσους καλούντες. Τα `Host` /
-`nextUrl.hostname` δεν εξετάζονται ποτέ και η πρώτη εγγραφή κωδικού πρόσβασης
-(`POST /api/settings/require-login`) υπόκειται στον ίδιο περιορισμό, αντί να είναι ανοιχτή σε κάθε
-ομότιμο του δικτύου (GHSA-7pq4-8pvv-rx7r). Η `managementPolicy` μεταβιβάζει ρητά τη δική της ετυμηγορία `peerContext`
-προς τα κάτω, ώστε οι κεφαλίδες του ΑΡΧΙΚΟΥ αιτήματος (πριν από την αφαίρεσή τους) να μην την καθορίζουν ποτέ.
-
-### Επίπεδο 3 — ΔΙΑΧΕΙΡΙΣΗ (προεπιλογή)
-
-Όλες οι υπόλοιπες διαδρομές διαχείρισης. Απαιτείται έλεγχος ταυτότητας, εκτός αν έχει
-ρυθμιστεί `requireLogin=false`. Τα διακριτικά CLI μπορούν να χρησιμοποιηθούν για έλεγχο ταυτότητας σε αυτές τις διαδρομές (loopback + έγκυρο HMAC).
+Όλες οι υπόλοιπες διαδρομές διαχείρισης. Απαιτείται έλεγχος ταυτότητας εκτός αν έχει ρυθμιστεί το
+`requireLogin=false`. Τα tokens CLI μπορούν να πιστοποιήσουν αυτές τις διαδρομές (loopback + έγκυρο HMAC).
 
 ## Σειρά αξιολόγησης
 

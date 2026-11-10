@@ -5,7 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
+import { MetricCard } from "@omniroute/ui-kit/metric-card";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import type { StatProps } from "@omniroute/ui-kit/stat";
 import {
   Table,
   TableBody,
@@ -19,6 +21,7 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
 import Icon from "@/shared/components/Icon";
+import { ActivityCalendar } from "@/shared/components/analytics/ActivityCalendar";
 import {
   getServiceTierDisplayLabel,
   type TranslationFn as CostTranslationFn,
@@ -53,7 +56,6 @@ import {
   type CostRange,
 } from "./costExplorerParams";
 import { ApiKeyUsageLimitCard } from "./components/ApiKeyUsageLimitCard";
-import { MetricCard } from "./components/MetricCard";
 import { TopListCard } from "./components/TopListCard";
 import { useApiKeyUsageLimits } from "./useApiKeyUsageLimits";
 
@@ -162,17 +164,6 @@ const EXPLORER_GROUP_OPTIONS: Array<{
   { value: "serviceTier", labelKey: "groupServiceTier" },
 ];
 
-const CHART_COLORS = [
-  "#10b981",
-  "#06b6d4",
-  "#f59e0b",
-  "#8b5cf6",
-  "#ef4444",
-  "#14b8a6",
-  "#6366f1",
-  "#ec4899",
-];
-
 const SHORT_WEEKDAY_INDEX: Record<string, number> = {
   Sun: 0,
   Mon: 1,
@@ -200,29 +191,60 @@ export function createCurrencyFormatter(locale: string) {
   });
 }
 
-function formatCurrencyCost(locale: string, value: number): string {
+/** USD with 6 / 4 / 2 fraction digits below $0.01 / $1 / above; 0 and non-finite are $0.00. */
+function currencyCostFormatOptions(value: number): Intl.NumberFormatOptions {
   const numericValue = Number(value || 0);
-  if (!Number.isFinite(numericValue) || numericValue === 0) {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(0);
-  }
-
-  const absValue = Math.abs(numericValue);
-  const fractionDigits = absValue < 0.01 ? 6 : absValue < 1 ? 4 : 2;
-  return new Intl.NumberFormat(locale, {
+  const absValue = Number.isFinite(numericValue) ? Math.abs(numericValue) : 0;
+  const fractionDigits = absValue === 0 ? 2 : absValue < 0.01 ? 6 : absValue < 1 ? 4 : 2;
+  return {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
-  }).format(numericValue);
+  };
 }
 
+function formatCurrencyCost(locale: string, value: number): string {
+  const numericValue = Number(value || 0);
+  return new Intl.NumberFormat(locale, currencyCostFormatOptions(numericValue)).format(
+    Number.isFinite(numericValue) ? numericValue : 0
+  );
+}
+
+/**
+ * Kit `Stat` for a spend headline: the kit formats the number with the same precision rules as
+ * `formatCurrencyCost`, and the value keeps its chart colour through the token's text-safe ink.
+ */
+function spendStat(
+  locale: string,
+  label: string,
+  value: number,
+  inkClass: string,
+  hint?: string
+): StatProps {
+  const numericValue = Number(value || 0);
+  const safeValue = Number.isFinite(numericValue) ? numericValue : 0;
+  return {
+    label,
+    labelVariant: "eyebrow",
+    value: safeValue,
+    format: "currency",
+    currency: "USD",
+    locale,
+    numberFormatOptions: currencyCostFormatOptions(safeValue),
+    hint,
+    className: inkClass,
+  };
+}
+
+// A text cell that starts with = + - @ (after any spaces) or with a tab or carriage return runs as a
+// formula in a spreadsheet. Model and key names come from clients, so a leading quote makes them text.
+// Values passed as numbers are never changed.
+const CSV_FORMULA_START = /^(?:[\t\r]|\s*[=+\-@])/;
+
 function csvCell(value: string | number): string {
-  const text = String(value);
+  let text = String(value);
+  if (typeof value === "string" && CSV_FORMULA_START.test(text)) text = `'${text}`;
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
@@ -336,6 +358,7 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 
 export default function CostOverviewTab() {
   const t = useTranslations("costs");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const nodeMap = useProviderNodeMap();
   const searchParams = useSearchParams();
@@ -585,28 +608,43 @@ export default function CostOverviewTab() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MetricCard
-          label={t("spendToday")}
-          value={formatCurrencyCost(locale, presetCosts["1d"] || 0)}
-          loading={summaryLoading}
-          color="text-chart-4"
+          stat={spendStat(
+            locale,
+            t("spendToday"),
+            presetCosts["1d"],
+            "[&_.ci-stat__value]:text-chart-4-ink"
+          )}
+          state={summaryLoading ? "loading" : "ready"}
+          loadingLabel={tc("loading")}
         />
         <MetricCard
-          label={t("spend7d")}
-          value={formatCurrencyCost(locale, presetCosts["7d"] || 0)}
-          loading={summaryLoading}
-          color="text-chart-2"
+          stat={spendStat(
+            locale,
+            t("spend7d"),
+            presetCosts["7d"],
+            "[&_.ci-stat__value]:text-chart-2-ink"
+          )}
+          state={summaryLoading ? "loading" : "ready"}
+          loadingLabel={tc("loading")}
         />
         <MetricCard
-          label={t("spend30d")}
-          value={formatCurrencyCost(locale, presetCosts["30d"] || 0)}
-          loading={summaryLoading}
-          color="text-chart-3"
+          stat={spendStat(
+            locale,
+            t("spend30d"),
+            presetCosts["30d"],
+            "[&_.ci-stat__value]:text-chart-3-ink"
+          )}
+          state={summaryLoading ? "loading" : "ready"}
+          loadingLabel={tc("loading")}
         />
         <MetricCard
-          label={t("selectedWindow")}
-          value={formatCurrencyCost(locale, summary.totalCost || 0)}
-          subValue={selectedRangeLabel}
-          color="text-chart-5"
+          stat={spendStat(
+            locale,
+            t("selectedWindow"),
+            summary.totalCost,
+            "[&_.ci-stat__value]:text-chart-5-ink",
+            selectedRangeLabel
+          )}
         />
       </div>
 
@@ -1161,67 +1199,19 @@ function ActivityHeatmap({
   tokensLabel: string;
   locale: string;
 }) {
-  const days: Array<{ date: string; value: number }> = [];
-  const today = new Date();
-  for (let index = 364; index >= 0; index--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - index);
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
-      date.getDate()
-    ).padStart(2, "0")}`;
-    days.push({ date: key, value: activityMap[key] || 0 });
-  }
-
-  const maxValue = Math.max(...days.map((day) => day.value), 1);
-  const getIntensity = (value: number): string => {
-    if (value === 0) return "bg-border/50";
-    const ratio = value / maxValue;
-    if (ratio < 0.25) return "bg-success/25";
-    if (ratio < 0.5) return "bg-success/45";
-    if (ratio < 0.75) return "bg-success/70";
-    return "bg-success";
-  };
-
-  const weeks: Array<Array<{ date: string; value: number }>> = [];
-  for (let index = 0; index < days.length; index += 7) {
-    weeks.push(days.slice(index, index + 7));
-  }
-
   return (
     <Card className="p-5">
       <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
         {title}
       </h3>
-      <div className="overflow-x-auto">
-        <div className="flex gap-0.75">
-          {weeks.map((week) => (
-            <div key={week[0]?.date} className="flex flex-col gap-0.75">
-              {week.map((day) => (
-                <div
-                  key={day.date}
-                  className={`w-2.75 h-2.75 rounded-xs ${getIntensity(day.value)}`}
-                  title={`${day.date}: ${
-                    day.value > 0
-                      ? `${new Intl.NumberFormat(locale).format(day.value)} ${tokensLabel}`
-                      : "No activity"
-                  }`}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="flex items-center gap-2 mt-3 text-[10px] text-text-muted">
-        <span>{lessLabel}</span>
-        <div className="flex gap-0.5">
-          <div className="w-2.5 h-2.5 rounded-xs bg-border/50" />
-          <div className="w-2.5 h-2.5 rounded-xs bg-success/25" />
-          <div className="w-2.5 h-2.5 rounded-xs bg-success/45" />
-          <div className="w-2.5 h-2.5 rounded-xs bg-success/70" />
-          <div className="w-2.5 h-2.5 rounded-xs bg-success" />
-        </div>
-        <span>{moreLabel}</span>
-      </div>
+      <ActivityCalendar
+        ariaLabel={title}
+        activityMap={activityMap}
+        lessLabel={lessLabel}
+        moreLabel={moreLabel}
+        locale={locale}
+        valueFormatter={(value) => `${new Intl.NumberFormat(locale).format(value)} ${tokensLabel}`}
+      />
     </Card>
   );
 }

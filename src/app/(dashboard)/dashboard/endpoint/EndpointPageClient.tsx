@@ -1,7 +1,9 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Alert } from "@omniroute/ui-kit/alert";
+import { Badge, type BadgeTone } from "@omniroute/ui-kit/badge";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Checkbox } from "@omniroute/ui-kit/checkbox";
@@ -109,7 +111,12 @@ type EndpointModelSummary = {
   root?: string;
 };
 
-type CopyHandler = (text: string, key?: string) => void | Promise<void>;
+/**
+ * Copy handlers report whether the write succeeded; useCopyToClipboard returns
+ * Promise<boolean>. Promise<boolean> is not assignable to Promise<void>, so the
+ * type has to admit the boolean even though most call sites ignore it.
+ */
+type CopyHandler = (text: string, key?: string) => void | Promise<boolean>;
 
 type EndpointTunnelVisibility = {
   showCloudflaredTunnel: boolean;
@@ -125,6 +132,10 @@ const ENDPOINT_TABS: Array<{ value: EndpointTab; labelKey: string; icon: string 
   { value: "a2a", labelKey: "tabA2a", icon: "hub" },
   { value: "context-sources", labelKey: "tabContextSources", icon: "database" },
 ];
+
+/** Title button that expands a tunnel row (#18071): icon + name, same look as the old row text. */
+const TUNNEL_ROW_TOGGLE_CLASS =
+  "h-auto min-h-0 min-w-0 justify-start gap-3 p-0 text-left font-normal text-text-main hover:bg-transparent";
 
 const DEFAULT_TUNNEL_VISIBILITY: EndpointTunnelVisibility = {
   showCloudflaredTunnel: true,
@@ -181,6 +192,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const [ngrokToken, setNgrokToken] = useState("");
   const [showNgrokTunnel, setShowNgrokTunnel] = useState(true);
   const [expandedTunnel, setExpandedTunnel] = useState<string | null>(null);
+  const toggleTunnelRow = (id: string) =>
+    setExpandedTunnel((current) => (current === id ? null : id));
   const [localApiUrl, setLocalApiUrl] = useState(
     typeof window !== "undefined" ? `${window.location.origin}/v1` : "http://localhost:20128/v1"
   );
@@ -1151,63 +1164,62 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   ].filter(Boolean).length;
 
   const cloudflaredPhase = cloudflaredStatus?.phase || "not_installed";
-  const cloudflaredPhaseMeta: Record<CloudflaredTunnelPhase, { label: string; className: string }> =
-    {
-      running: {
-        label: translateOrFallback("cloudflaredRunning", "Running"),
-        className: "bg-success/10 border-success/30 text-success",
-      },
-      starting: {
-        label: translateOrFallback("cloudflaredStarting", "Starting"),
-        className: "bg-info/10 border-info/30 text-info",
-      },
-      stopped: {
-        label: translateOrFallback("cloudflaredStoppedState", "Stopped"),
-        className: "bg-surface border-border/70 text-text-muted",
-      },
-      not_installed: {
-        label: translateOrFallback("cloudflaredNotInstalled", "Not installed"),
-        className: "bg-surface border-border/70 text-text-muted",
-      },
-      unsupported: {
-        label: translateOrFallback("cloudflaredUnsupported", "Unsupported"),
-        className: "bg-warning/10 border-warning/30 text-warning",
-      },
-      error: {
-        label: translateOrFallback("cloudflaredError", "Error"),
-        className: "bg-error/10 border-error/30 text-error",
-      },
-    };
+  const cloudflaredPhaseMeta: Record<CloudflaredTunnelPhase, { label: string; tone: BadgeTone }> = {
+    running: {
+      label: translateOrFallback("cloudflaredRunning", "Running"),
+      tone: "success",
+    },
+    starting: {
+      label: translateOrFallback("cloudflaredStarting", "Starting"),
+      tone: "info",
+    },
+    stopped: {
+      label: translateOrFallback("cloudflaredStoppedState", "Stopped"),
+      tone: "neutral",
+    },
+    not_installed: {
+      label: translateOrFallback("cloudflaredNotInstalled", "Not installed"),
+      tone: "neutral",
+    },
+    unsupported: {
+      label: translateOrFallback("cloudflaredUnsupported", "Unsupported"),
+      tone: "warning",
+    },
+    error: {
+      label: translateOrFallback("cloudflaredError", "Error"),
+      tone: "danger",
+    },
+  };
   const cloudflaredActionLabel = cloudflaredStatus?.running
     ? translateOrFallback("cloudflaredDisable", "Stop Tunnel")
     : cloudflaredStatus?.installed
       ? translateOrFallback("cloudflaredEnable", "Enable Tunnel")
       : translateOrFallback("cloudflaredInstallAndEnable", "Install & Enable");
   const tailscalePhase = tailscaleStatus?.phase || "not_installed";
-  const tailscalePhaseMeta: Record<TailscaleTunnelPhase, { label: string; className: string }> = {
+  const tailscalePhaseMeta: Record<TailscaleTunnelPhase, { label: string; tone: BadgeTone }> = {
     running: {
       label: translateOrFallback("tailscaleRunning", "Running"),
-      className: "bg-success/10 border-success/30 text-success",
+      tone: "success",
     },
     needs_login: {
       label: translateOrFallback("tailscaleNeedsLogin", "Needs Login"),
-      className: "bg-info/10 border-info/30 text-info",
+      tone: "info",
     },
     stopped: {
       label: translateOrFallback("tailscaleStoppedState", "Stopped"),
-      className: "bg-surface border-border/70 text-text-muted",
+      tone: "neutral",
     },
     not_installed: {
       label: translateOrFallback("tailscaleNotInstalled", "Not installed"),
-      className: "bg-surface border-border/70 text-text-muted",
+      tone: "neutral",
     },
     unsupported: {
       label: translateOrFallback("tailscaleUnsupported", "Unsupported"),
-      className: "bg-warning/10 border-warning/30 text-warning",
+      tone: "warning",
     },
     error: {
       label: translateOrFallback("tailscaleError", "Error"),
-      className: "bg-error/10 border-error/30 text-error",
+      tone: "danger",
     },
   };
   const tailscaleActionLabel = tailscaleStatus?.running
@@ -1223,34 +1235,34 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   );
 
   const ngrokPhase = ngrokStatus?.phase || "not_installed";
-  const ngrokPhaseMeta: Record<NgrokTunnelPhase, { label: string; className: string }> = {
+  const ngrokPhaseMeta: Record<NgrokTunnelPhase, { label: string; tone: BadgeTone }> = {
     running: {
       label: translateOrFallback("ngrokRunning", "Running"),
-      className: "bg-success/10 border-success/30 text-success",
+      tone: "success",
     },
     starting: {
       label: translateOrFallback("ngrokStarting", "Starting"),
-      className: "bg-info/10 border-info/30 text-info",
+      tone: "info",
     },
     stopped: {
       label: translateOrFallback("ngrokStoppedState", "Stopped"),
-      className: "bg-surface border-border/70 text-text-muted",
+      tone: "neutral",
     },
     needs_auth: {
       label: translateOrFallback("ngrokNeedsAuth", "Needs Auth"),
-      className: "bg-warning/10 border-warning/30 text-warning",
+      tone: "warning",
     },
     not_installed: {
       label: translateOrFallback("ngrokNotInstalled", "Not installed"),
-      className: "bg-surface border-border/70 text-text-muted",
+      tone: "neutral",
     },
     unsupported: {
       label: translateOrFallback("ngrokUnsupported", "Unsupported"),
-      className: "bg-warning/10 border-warning/30 text-warning",
+      tone: "warning",
     },
     error: {
       label: translateOrFallback("ngrokError", "Error"),
-      className: "bg-error/10 border-error/30 text-error",
+      tone: "danger",
     },
   };
   const ngrokActionLabel = ngrokStatus?.running
@@ -1487,11 +1499,14 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                     {translateOrFallback("cloudflaredTitle", "Cloudflare Quick Tunnel")}
                   </span>
                 </div>
-                <span
-                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium shrink-0 ${cloudflaredPhaseMeta[cloudflaredPhase].className}`}
+                <Badge
+                  variant="outline"
+                  shape="pill"
+                  tone={cloudflaredPhaseMeta[cloudflaredPhase].tone}
+                  className="shrink-0"
                 >
                   {cloudflaredPhaseMeta[cloudflaredPhase].label}
-                </span>
+                </Badge>
                 {cloudflaredStatus?.supported !== false && (
                   <Button
                     size="sm"
@@ -1549,24 +1564,31 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           {/* Tailscale Funnel */}
           {showTailscaleFunnel && (
             <div className={showCloudflaredTunnel ? "border-t border-border/30" : ""}>
+              {/* #18071: the row is no longer `role="button"` (axe nested-interactive — it
+                  wrapped the copy/action Buttons). The keyboard and screen-reader control is the
+                  title button; a click anywhere else on the row still toggles for the mouse. */}
               <div
-                role="button"
-                tabIndex={0}
                 className="w-full flex items-center gap-3 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
-                onClick={() => setExpandedTunnel(expandedTunnel === "ts" ? null : "ts")}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setExpandedTunnel(expandedTunnel === "ts" ? null : "ts");
-                  }
-                }}
+                onClick={() => toggleTunnelRow("ts")}
               >
-                <Icon name="vpn_lock" size={18} className="text-chart-3" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-1 flex-wrap">
-                    <span className="text-sm font-medium">
-                      {translateOrFallback("tailscaleTitle", "Tailscale Funnel")}
-                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-expanded={expandedTunnel === "ts"}
+                      aria-controls="endpoint-tunnel-ts-details"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTunnelRow("ts");
+                      }}
+                      className={TUNNEL_ROW_TOGGLE_CLASS}
+                    >
+                      <Icon name="vpn_lock" size={18} className="text-chart-3" />
+                      <span className="text-sm font-medium">
+                        {translateOrFallback("tailscaleTitle", "Tailscale Funnel")}
+                      </span>
+                    </Button>
                     {tailscaleIpUrl && (
                       <Button
                         variant="ghost"
@@ -1591,11 +1613,14 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                     )}
                   </div>
                 </div>
-                <span
-                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium shrink-0 ${tailscalePhaseMeta[tailscalePhase].className}`}
+                <Badge
+                  variant="outline"
+                  shape="pill"
+                  tone={tailscalePhaseMeta[tailscalePhase].tone}
+                  className="shrink-0"
                 >
                   {tailscalePhaseMeta[tailscalePhase].label}
-                </span>
+                </Badge>
                 {tailscaleStatus?.supported !== false && (
                   <Button
                     size="sm"
@@ -1627,7 +1652,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 />
               </div>
               {expandedTunnel === "ts" && (
-                <div className="pb-3 pl-7 pr-1 flex flex-col gap-2">
+                <div id="endpoint-tunnel-ts-details" className="pb-3 pl-7 pr-1 flex flex-col gap-2">
                   {tailscaleNotice && (
                     <Alert
                       variant={
@@ -1709,28 +1734,35 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
               }
             >
               <div
-                role="button"
-                tabIndex={0}
                 className="w-full flex items-center gap-3 py-3 hover:bg-surface/40 transition-colors rounded -mx-1 px-1 text-left cursor-pointer"
-                onClick={() => setExpandedTunnel(expandedTunnel === "ngrok" ? null : "ngrok")}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setExpandedTunnel(expandedTunnel === "ngrok" ? null : "ngrok");
-                  }
-                }}
+                onClick={() => toggleTunnelRow("ngrok")}
               >
-                <Icon name="public" size={18} className="text-chart-3" />
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium">
-                    {translateOrFallback("ngrokTitle", "ngrok Tunnel")}
-                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-expanded={expandedTunnel === "ngrok"}
+                    aria-controls="endpoint-tunnel-ngrok-details"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleTunnelRow("ngrok");
+                    }}
+                    className={TUNNEL_ROW_TOGGLE_CLASS}
+                  >
+                    <Icon name="public" size={18} className="text-chart-3" />
+                    <span className="text-sm font-medium">
+                      {translateOrFallback("ngrokTitle", "ngrok Tunnel")}
+                    </span>
+                  </Button>
                 </div>
-                <span
-                  className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium shrink-0 ${ngrokPhaseMeta[ngrokPhase].className}`}
+                <Badge
+                  variant="outline"
+                  shape="pill"
+                  tone={ngrokPhaseMeta[ngrokPhase].tone}
+                  className="shrink-0"
                 >
                   {ngrokPhaseMeta[ngrokPhase].label}
-                </span>
+                </Badge>
                 {ngrokStatus?.supported !== false && (
                   <Button
                     size="sm"
@@ -1756,7 +1788,10 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 />
               </div>
               {expandedTunnel === "ngrok" && (
-                <div className="pb-3 pl-7 pr-1 flex flex-col gap-2">
+                <div
+                  id="endpoint-tunnel-ngrok-details"
+                  className="pb-3 pl-7 pr-1 flex flex-col gap-2"
+                >
                   {ngrokNotice && (
                     <Alert
                       variant={
@@ -2165,6 +2200,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           {/* Sync Progress / Success */}
           {(cloudSyncing || modalSuccess) && (
             <div
+              role="status"
               className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-300 ${
                 modalSuccess ? "bg-success/10 border-success/30" : "bg-primary/10 border-primary/30"
               }`}
@@ -2172,7 +2208,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
               {modalSuccess ? (
                 <Icon name="check_circle" className="text-success text-xl" />
               ) : (
-                <Icon name="progress_activity" className="animate-spin text-primary" />
+                <Spinner decorative size="sm" className="text-primary" />
               )}
               <div className="flex-1">
                 <p
@@ -2196,7 +2232,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             >
               {cloudSyncing ? (
                 <span className="flex items-center gap-2">
-                  <Icon name="progress_activity" className="animate-spin text-sm" />
+                  <Spinner decorative size="sm" />
                   {syncStep === "syncing" ? t("connecting") : t("verifying")}
                 </span>
               ) : modalSuccess ? (
@@ -2239,8 +2275,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
 
           {/* Sync Progress */}
           {cloudSyncing && (
-            <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg">
-              <Icon name="progress_activity" className="animate-spin text-primary" />
+            <div
+              role="status"
+              className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg"
+            >
+              <Spinner decorative size="sm" className="text-primary" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-primary">
                   {syncStep === "syncing" && t("syncingData")}
@@ -2261,7 +2300,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             >
               {cloudSyncing ? (
                 <span className="flex items-center gap-2">
-                  <Icon name="progress_activity" className="animate-spin text-sm" />
+                  <Spinner decorative size="sm" />
                   {syncStep === "syncing" ? t("syncing") : t("disabling")}
                 </span>
               ) : (
@@ -2325,7 +2364,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             >
               {tailscaleInstallBusy ? (
                 <span className="flex items-center gap-2">
-                  <Icon name="progress_activity" className="animate-spin text-sm" />
+                  <Spinner decorative size="sm" />
                   {translateOrFallback("tailscaleInstalling", "Installing")}
                 </span>
               ) : (

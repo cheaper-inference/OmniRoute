@@ -21,13 +21,13 @@ Turbopack 執行槽大多數時間都處於閒置狀態：
 
 2026-10-18 實測：
 
-| 資源      | 數值                      | 對排程的意義                                                                                                                                                                                                                                                                                                                                  |
-| --------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 核心**       | 未設上限的 Turbopack production 建置峰值為 49 GB（`tests/unit/ci-build-bundler-webpack.test.ts`）；在 Next 16.3.8 上，僅編譯階段就會占用約 40 GB（`next-build` 中 36 GB RSS，加上 17 個各占 3 GB 的 loader worker，於 2026-10-18 實測）；webpack 建置約占 14–16 GB。一個 Turbopack 與一個 webpack 建置可以同時容納；兩個 Turbopack 建置則不行 |
-| swap      | 16 GB                     | `omniroute-113-5` 執行時停用 swap（`MemorySwapMax=0`），因此失控的建置會在達到上限時被終止，而不會因使用 swap 拖垮整台主機                                                                                                                                                                                                                    |
-| `/tmp`    | **12 GB tmpfs = RAM**     | 放在此處的任何內容都會占用記憶體；殘留內容會在 3 小時後清除                                                                                                                                                                                                                                                                                   |
-| CPU       | 在 32 核心上觀察到負載 60 | 在設定 quota 之前，一個 Turbopack 建置（約 1166 % CPU）加上同一台主機上的 coverage suite，曾導致其他 listener 的 heartbeat 無法獲得資源（`The self-hosted runner lost communication`，#16853）                                                                                                                                                |
-| runners   | **6 個 listener**         | 4 個 OmniRoute，加上 OmniHeuris 與 OmniMind；`omniroute-113-3/-4/-7/-8` 已停用（使用 `systemctl enable --now` 可重新啟用其中一個）                                                                                                                                                                                                            |
+| 資源      | 數值                            | 對排程的意義                                                                                                                                                                                                                                                                                                                                  |
+| --------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 核心**             | 未設上限的 Turbopack production 建置峰值為 49 GB（`tests/unit/ci-build-bundler-webpack.test.ts`）；在 Next 16.3.8 上，僅編譯階段就會占用約 40 GB（`next-build` 中 36 GB RSS，加上 17 個各占 3 GB 的 loader worker，於 2026-10-18 實測）；webpack 建置約占 14–16 GB。一個 Turbopack 與一個 webpack 建置可以同時容納；兩個 Turbopack 建置則不行 |
+| swap      | 16 GB                           | `omniroute-113-5` 執行時停用 swap（`MemorySwapMax=0`），因此失控的建置會在達到上限時被終止，而不會因使用 swap 拖垮整台主機                                                                                                                                                                                                                    |
+| `/tmp`    | **12 GB tmpfs = RAM**           | 放在此處的任何內容都會占用記憶體；殘留內容會在 3 小時後清除                                                                                                                                                                                                                                                                                   |
+| CPU       | 在 32 核心上觀察到負載 60       | 在設定 quota 之前，一個 Turbopack 建置（約 1166 % CPU）加上同一台主機上的 coverage suite，曾導致其他 listener 的 heartbeat 無法獲得資源（`The self-hosted runner lost communication`，#16853）                                                                                                                                                |
+| runners   | **7 個 listener**（2026-10-28） | 5 個 OmniRoute，加上 OmniHeuris 與 OmniMind；`omniroute-113-7` 也帶有 `omni-build`；`omniroute-113-3/-4/-8` 已從儲存庫刪除（2026-10-28）                                                                                                                                                                                                      |
 
 這些限制位於各 unit 的 `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 中（先前的值保留為 `override.conf.bak-20261018`），並已透過
@@ -42,7 +42,7 @@ Turbopack 執行槽大多數時間都處於閒置狀態：
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron（root）：每 30 分鐘執行一次，記錄至 /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 必須安裝 `lsof`：清理程式會透過一次開啟檔案快照來確認路徑處於閒置狀態，
@@ -118,8 +118,14 @@ Runner 的預設 `KillMode=process` 會在單元停止或重新啟動後，留�
   2026-10-18，`omniroute-113` 的 `MemoryHigh=4G`——promptfoo 建置在該處歷經 54 分鐘的反覆回收才完成；
   8 GB 可消除節流。
 - **刻意減少監聽器數量。** 2026-08-29 已停用四個 OmniRoute 單元——每個額外的
-  監聽器都是上述記憶體預算的另一個租戶。清理程式上限為 6（cron 中的 `MAX_ACTIVE_RUNNERS=6`）：它會計算
-  機器上的每個 `Runner.Listener`，而 OmniHeuris + OmniMind 會在我們的四個之外再增加兩個。
+  監聽器都是上述記憶體預算的另一個租戶。清理程式上限為 8（cron 中的 `MAX_ACTIVE_RUNNERS=8`）：它會計算
+  機器上的每個 `Runner.Listener`，而 OmniHeuris + OmniMind 會在我們的五個之外再增加兩個。
+- **Unit 與 Vitest 作業維持使用託管執行器。** 只有在儲存庫變數 `vars.USE_VPS_TEST_RUNNER` 為
+  `true` 時，`ci.yml` 才會將其 unit 分片與 Vitest 作業送往 `[self-hosted, omni-ci]`，且僅限同一儲存庫的
+  `pull_request` 執行；fork、`merge_group` 與推送則維持在 `ubuntu-latest`（`tests/unit/vps-runner-variable-scope.test.ts`）。此變數目前為
+  `false`。2026-10-28 時，三個 4 核心的 `omni-ci` 監聽器執行 `npm ci` 需時 250–270 秒，每個
+  unit 分片都撞上 30 分鐘的作業上限，而託管分片約只需 634 秒，當時機器負載為
+  17–24。這些監聽器已被刪除。在沒有足以承載 unit 分片的監聽器之前，請勿重新開啟此變數。
 - **任何執行器忙碌時，絕不可手動清理 `/tmp` 或 `_work`。** 先檢查後刪除且兩者之間
   存在時間間隔，正是 2026-08-27 一個執行中的 Build 工作遺失其
   `_work` 的原因。清理程式會在單一步驟中完成檢查與移除；
@@ -133,7 +139,7 @@ Runner 的預設 `KillMode=process` 會在單元停止或重新啟動後，留�
 
 ## 託管通道（GitHub-hosted runners）
 
-此帳戶使用 **Pro** 方案：**40 個並行託管作業**，由所有 PR 檢查、所有由推送觸發的工作流程，以及 CodeQL 的預設設定共用。於 2026-10-18 的一次合併行動期間測得（`release/v3.8.52` 上約每小時 10 次合併）：**24 小時內建立了 2,500 次工作流程執行**，6 小時內有 44 次推送至該分支，PR 檢查等待數小時期間，有 **106 個託管作業排入佇列**，而 PR 在未完成這些檢查的情況下即被合併。每次推送至該分支時，都會觸發九個工作流程：
+此儲存庫屬於 `cheaper-inference` 組織，使用 **Team** 方案：**60 個並行託管作業**，由組織內所有儲存庫、所有 PR 檢查、所有由推送觸發的工作流程，以及 CodeQL 的預設設定共用。以下數據是在 **Pro** 方案（40 個並行託管作業）下測得。於 2026-10-18 的一次合併行動期間測得（`release/v3.8.52` 上約每小時 10 次合併）：**24 小時內建立了 2,500 次工作流程執行**，6 小時內有 44 次推送至該分支，PR 檢查等待數小時期間，有 **106 個託管作業排入佇列**，而 PR 在未完成這些檢查的情況下即被合併。每次推送至該分支時，都會觸發九個工作流程：
 
 | 每次推送至 `release/v*`                     | 託管作業數 | 大量觸發期間的結果                                                 | 自 2026-10-18 起                                                          |
 | ------------------------------------------- | ---------: | ------------------------------------------------------------------ | ------------------------------------------------------------------------- |

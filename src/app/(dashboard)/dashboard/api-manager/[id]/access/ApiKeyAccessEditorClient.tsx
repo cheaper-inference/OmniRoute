@@ -4,7 +4,7 @@ import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
@@ -13,6 +13,7 @@ import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { CardSkeleton } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
@@ -80,7 +81,7 @@ function useAccessFormContext({
   const form = useApiKeyAccessForm(apiKey, t);
 
   const handleTabKeyDown = useAccessTabKeyboard(switchTab, tabListRef);
-  useAccessNavigationGuard(form.isDirty, t);
+  const navigationConfirmDialog = useAccessNavigationGuard(form.isDirty, t);
   const { permissionModels, filteredModelsByProvider } = useAccessModelGroups(
     allModels,
     searchModel,
@@ -112,6 +113,7 @@ function useAccessFormContext({
     setSearchModel,
     allCombos,
     allConnections,
+    navigationConfirmDialog,
   };
 }
 function useAccessTabKeyboard(
@@ -167,6 +169,8 @@ function isLeavingAccessPage(e: MouseEvent): boolean {
   return true;
 }
 function useAccessNavigationGuard(isDirty: boolean, t: ReturnType<typeof useTranslations>) {
+  const router = useRouter();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   // Dirty navigation guard (browser close / reload)
   useEffect(() => {
     if (!isDirty) return;
@@ -183,14 +187,21 @@ function useAccessNavigationGuard(isDirty: boolean, t: ReturnType<typeof useTran
     if (!isDirty) return;
     const handleDocumentClick = (e: MouseEvent) => {
       if (!isLeavingAccessPage(e)) return;
-      if (!window.confirm(t("unsavedChangesWarning"))) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      const anchor = (e.target as Element).closest("a") as HTMLAnchorElement;
+      // The kit dialog is asynchronous: hold the navigation and follow the link only once
+      // the user confirms. Cancel leaves the user on the page with the edits intact.
+      e.preventDefault();
+      e.stopPropagation();
+      const destination = `${anchor.pathname}${anchor.search}${anchor.hash}`;
+      void requestConfirm(t("unsavedChangesWarning")).then((ok) => {
+        if (ok) router.push(destination);
+      });
     };
     document.addEventListener("click", handleDocumentClick, true);
     return () => document.removeEventListener("click", handleDocumentClick, true);
-  }, [isDirty, t]);
+  }, [isDirty, t, requestConfirm, router]);
+
+  return confirmDialog;
 }
 function useAccessModelGroups(
   allModels: Model[],
@@ -354,6 +365,7 @@ function AccessCombosPanelPanelContent({ context }: { context: AccessFormContext
       setSelectedCombos={form.setSelectedCombos}
       toggleCombo={form.toggleCombo}
       setAllowAutoCombos={form.setAllowAutoCombos}
+      setAllowCcDiscoveryAliases={form.setAllowCcDiscoveryAliases}
       errors={form.tabErrors.combos}
     />
   );
@@ -367,6 +379,9 @@ function AccessConnectionsPanelPanelContent({ context }: { context: AccessFormCo
       allConnections={allConnections}
       setAllowAllConnections={form.setAllowAllConnections}
       setSelectedConnections={form.setSelectedConnections}
+      togglePreferredConnection={form.togglePreferredConnection}
+      movePreferredConnection={form.movePreferredConnection}
+      clearPreferredConnections={form.clearPreferredConnections}
       errors={form.tabErrors.connections}
     />
   );
@@ -390,6 +405,7 @@ function AccessLimitsPanelPanelContent({ context }: { context: AccessFormContext
       setUsageLimitEnabled={form.setUsageLimitEnabled}
       setDailyUsageLimitUsd={form.setDailyUsageLimitUsd}
       setWeeklyUsageLimitUsd={form.setWeeklyUsageLimitUsd}
+      setFiveHourUsageLimitUsd={form.setFiveHourUsageLimitUsd}
       errors={form.tabErrors.limits}
     />
   );
@@ -580,6 +596,7 @@ function ApiKeyAccessEditorForm(props: ApiKeyAccessEditorFormProps) {
         <AccessPanel context={context} />
       </Tabs>
       <AccessSaveBar context={context} />
+      {context.navigationConfirmDialog}
     </div>
   );
 }

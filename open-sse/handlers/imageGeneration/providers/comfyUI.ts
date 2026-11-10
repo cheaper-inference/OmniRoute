@@ -3,7 +3,7 @@
 // Ref: see open-sse/handlers/imageGeneration.ts top-of-file comment for split rationale
 
 import { randomUUID } from "crypto";
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 import {
   submitComfyWorkflow,
@@ -113,4 +113,3 @@ export async function handleComfyUIImageGeneration({ model, provider, providerCo
     };
   }
 }
-

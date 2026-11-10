@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 /**
  * F4 (KEA-7886, review M-4): render tests for widgets the F4 sweep moved onto the kit adapters —
- * MaintenanceBanner, CloudSyncStatus, MitmProxyTab. Each must render without Material ligatures,
- * with token colours and the adapter controls.
+ * MaintenanceBanner, CloudSyncStatus. Each must render without Material ligatures, with token
+ * colours and the adapter controls. (The orphan settings MitmProxyTab was deleted in F5-A / P2 —
+ * the live screen is /dashboard/system/mitm-proxy.)
  */
 import React from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
@@ -25,12 +26,12 @@ afterEach(() => {
 });
 
 describe("MaintenanceBanner", () => {
-  it("shows a token-coloured warning after two failed pings and the ghost close button hides it", async () => {
+  // #18068: the banner was a hand-made `div role="status"`; it is the kit warning Alert now
+  // (inline layout, dismiss button named by the catalog), still a polite status region.
+  it("shows the kit warning Alert after two failed pings; dismissing keeps it hidden until recovery", async () => {
     vi.useFakeTimers();
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => json({}, false))
-    );
+    const ping = vi.fn(async () => json({}, false));
+    vi.stubGlobal("fetch", ping);
     const { default: MaintenanceBanner } = await import("@/shared/components/MaintenanceBanner");
     const { container } = render(<MaintenanceBanner />);
     await act(async () => {
@@ -38,13 +39,22 @@ describe("MaintenanceBanner", () => {
     });
     const banner = container.querySelector<HTMLElement>('[role="status"]')!;
     expect(banner).not.toBeNull();
-    expect(banner.className).toContain("bg-warning-bg");
+    expect(banner.getAttribute("data-slot")).toBe("alert");
+    expect(banner.getAttribute("data-variant")).toBe("warning");
+    expect(banner.getAttribute("data-layout")).toBe("inline");
+    expect(banner.className).toContain("ci-alert--warning");
     expect(banner.className).not.toMatch(/amber-\d/);
+    expect(banner.textContent).toContain("maintenanceServerIssues");
     expect(banner.querySelector('svg[data-icon="warning"]')).not.toBeNull();
     expect(banner.querySelector(".material-symbols-outlined")).toBeNull();
     const close = screen.getByRole("button", { name: "close" });
-    expect(close.className).toContain("ci-button");
+    expect(close.className).toContain("ci-alert__dismiss");
     act(() => fireEvent.click(close));
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    // still failing: the dismissed banner does not come back on the next polls
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(20_050);
+    });
     expect(container.querySelector('[role="status"]')).toBeNull();
   });
 });
@@ -67,64 +77,4 @@ describe("CloudSyncStatus", () => {
     act(() => fireEvent.click(button));
     expect(push).toHaveBeenCalledWith("/dashboard/endpoint");
   });
-});
-
-describe("MitmProxyTab", () => {
-  it(
-    "renders labelled adapter fields, kit badges and a kit table for the target routes",
-    { timeout: 30_000 },
-    async () => {
-      // The kit Table watches its scroll container.
-      vi.stubGlobal(
-        "ResizeObserver",
-        class {
-          observe() {}
-          unobserve() {}
-          disconnect() {}
-        }
-      );
-      vi.stubGlobal(
-        "fetch",
-        vi.fn(async () =>
-          json({
-            running: true,
-            pid: 4242,
-            dnsConfigured: true,
-            certExists: false,
-            hasCachedPassword: false,
-            port: 443,
-            targets: [
-              {
-                id: "t1",
-                name: "Copilot",
-                targetHost: "api.example.com",
-                targetPort: 443,
-                localPort: 8443,
-                endpoints: ["/v1/chat"],
-                enabled: true,
-              },
-            ],
-            stats: {
-              startedAt: null,
-              totalRequests: 3,
-              interceptedRequests: 2,
-              activeConnections: 1,
-              lastInterceptAt: null,
-            },
-          })
-        )
-      );
-      const { default: MitmProxyTab } =
-        await import("@/app/(dashboard)/dashboard/settings/components/MitmProxyTab");
-      const { container } = render(<MitmProxyTab />);
-      await screen.findByText("Copilot");
-      expect(screen.getByLabelText("port")).toBeTruthy();
-      expect(screen.getByLabelText("apiKey").getAttribute("type")).toBe("password");
-      expect(container.querySelector("table.ci-table")).not.toBeNull();
-      expect(screen.getByRole("button", { name: /stop/ }).className).toContain("ci-button");
-      expect(container.querySelectorAll(".ci-badge").length).toBeGreaterThan(2);
-      expect(container.querySelector(".material-symbols-outlined")).toBeNull();
-      expect(container.innerHTML).not.toMatch(/(emerald|amber|red)-\d/);
-    }
-  );
 });

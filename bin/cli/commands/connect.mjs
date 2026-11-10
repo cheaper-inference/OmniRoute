@@ -38,6 +38,19 @@ export function hostLabel(host) {
   return value || "remote";
 }
 
+/** True when the server refused a password-only connect because two-factor login is on. */
+export function isMfaRequiredResponse(status, body) {
+  return status === 401 && Boolean(body && typeof body === "object" && body.mfaRequired === true);
+}
+
+/** Request body for POST /api/cli/connect; `totp` is only sent when a code was given. */
+export function buildConnectBody({ password, name, scope, totp }) {
+  const body = { password, name, scope };
+  const code = typeof totp === "string" ? totp.trim() : "";
+  if (code) body.totp = code;
+  return body;
+}
+
 async function readErrorMessage(res) {
   try {
     const body = await res.json();
@@ -84,13 +97,36 @@ export async function runConnectCommand(host, opts = {}) {
       printError("Password is required (or use --key <token>).");
       return 2;
     }
-    const res = await apiFetch("/api/cli/connect", {
-      baseUrl,
-      method: "POST",
-      body: { password, name, scope: opts.scope },
-      acceptNotOk: true,
-      retry: false,
-    });
+    const connect = (totp) =>
+      apiFetch("/api/cli/connect", {
+        baseUrl,
+        method: "POST",
+        body: buildConnectBody({ password, name, scope: opts.scope, totp }),
+        acceptNotOk: true,
+        retry: false,
+      });
+    let res = await connect(opts.totp);
+    if (!res.ok && !opts.totp) {
+      // Two-factor login is on: ask for the authenticator (or recovery) code once.
+      const refusal = await res
+        .clone()
+        .json()
+        .catch(() => null);
+      if (isMfaRequiredResponse(res.status, refusal)) {
+        const codePrompt = createPrompt();
+        let code;
+        try {
+          code = await codePrompt.ask(`Two-factor code for ${baseUrl}`);
+        } finally {
+          codePrompt.close();
+        }
+        if (!code) {
+          printError("A two-factor code is required (or pass --totp <code>).");
+          return 2;
+        }
+        res = await connect(code);
+      }
+    }
     if (!res.ok) {
       printError(`Connect failed (${res.status}): ${await readErrorMessage(res)}`);
       return res.exitCode || 1;
@@ -127,6 +163,7 @@ export function registerConnect(program) {
     .option("--key <token>", "Use a pre-generated scoped access token (skips the password prompt)")
     .option("--name <name>", "Context name to save (default: derived from host)")
     .option("--scope <scope>", "Requested scope for the password flow (read|write|admin)")
+    .option("--totp <code>", "Two-factor code when the server has dashboard 2FA enabled")
     .action(async (host, opts) => {
       const code = await runConnectCommand(host, opts);
       if (code !== 0) process.exit(code);

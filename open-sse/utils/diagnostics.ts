@@ -11,6 +11,7 @@
 
 import { sanitizeErrorMessage } from "./error.ts";
 import { classifyFakeSuccessBody } from "../services/errorClassifier.ts";
+import { isDeliberateEmptyResponsesTerminal } from "../translator/helpers/responsesTerminalStatus.ts";
 import {
   buildSyntheticResponsesFailureId,
   SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
@@ -230,7 +231,8 @@ export function detectMalformedNonStream(
         // function_call / other structural items count
         return Boolean(it.type);
       });
-    if (!hasOutput && !(trustedEmptyTurn && body.status === "completed")) return "empty_choices";
+    if (!hasOutput && !(trustedEmptyTurn && isDeliberateEmptyResponsesTerminal(body)))
+      return "empty_choices";
     const status = typeof body.status === "string" ? body.status : "";
     // OpenAI Responses spec: "incomplete" (budget exhausted — max_output_tokens
     // / max_tool_calls) and "cancelled" are legal terminal states, not a body
@@ -328,7 +330,12 @@ export function detectMalformedNonStream(
       (stopReason === "end_turn" || stopReason === "stop_sequence")
     )
       return null;
-    if (stopReason === "max_tokens" || stopReason === "tool_use" || stopReason === "length")
+    if (
+      stopReason === "max_tokens" ||
+      stopReason === "tool_use" ||
+      stopReason === "length" ||
+      stopReason === "refusal"
+    )
       return null;
     // content:[] with no stop_reason at all is non-terminal, not empty (#9971).
     if (content.length === 0 && stopReason.length === 0) return null;

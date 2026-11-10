@@ -12,7 +12,9 @@ import { getEffectiveToolLimit, getKnownToolLimit } from "../../services/toolLim
 import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "../../services/webSearchFallback.ts";
 import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "../../services/webFetchInterception.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
+import { applyToolDisclosure, type ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 import {
+  isOpenCodeLane,
   providerSupportsCaching,
   resolveConnectionCacheOverride,
   type ConnectionCacheOverride,
@@ -40,6 +42,7 @@ import { stripUnsupportedParams } from "./unsupportedParamsStrip.ts";
 import {
   stripGpt5SamplingWhenReasoning,
   stripGpt5ReasoningWhenTools,
+  foldReasoningForOpenAIChat,
 } from "../../services/gpt5SamplingGuard.ts";
 import { wireAdaptiveEffort } from "./adaptiveEffortWiring.ts";
 
@@ -172,10 +175,45 @@ function capToolList(tools: unknown[], limit: number): unknown[] {
   return tools.filter((tool) => (isFallbackTool(tool) ? pinnedRoom-- > 0 : room-- > 0));
 }
 
+const MAX_LOGGED_DROPPED_TOOLS = 15;
+
+function toolDisplayName(tool: unknown): string {
+  if (!tool || typeof tool !== "object") return "?";
+  const record = tool as Record<string, unknown>;
+  const fn = record.function as Record<string, unknown> | undefined;
+  const name = typeof record.name === "string" ? record.name : fn?.name;
+  return typeof name === "string" ? name : "?";
+}
+
+// Cap the list and make the loss visible: one WARN line naming (a bounded sample of)
+// the dropped tools, so a missing tool is never silent (#18120).
+function applyToolCap(
+  bodyToSend: Body,
+  tools: unknown[],
+  limit: number,
+  provider: string | null | undefined,
+  log?: LoggerLike
+): Body {
+  const truncatedTools = capToolList(tools, limit);
+  const kept = new Set(truncatedTools);
+  const dropped = tools.filter((tool) => !kept.has(tool)).map(toolDisplayName);
+  const sample = dropped.slice(0, MAX_LOGGED_DROPPED_TOOLS).join(", ");
+  const more =
+    dropped.length > MAX_LOGGED_DROPPED_TOOLS
+      ? ` (+${dropped.length - MAX_LOGGED_DROPPED_TOOLS} more)`
+      : "";
+  log?.warn?.(
+    "TOOL_LIMIT",
+    `Truncated ${tools.length} tools to ${limit} for ${provider}; dropped: ${sample}${more}`
+  );
+  return { ...bodyToSend, tools: truncatedTools };
+}
+
 function truncateToolList(
   bodyToSend: Body,
   provider: string | null | undefined,
   bypassDefaultToolLimit: boolean,
+  targetFormat: string | null | undefined,
   log?: LoggerLike
 ): Body {
   if (!Array.isArray(bodyToSend.tools)) return bodyToSend;
@@ -183,28 +221,20 @@ function truncateToolList(
   const knownLimit = getKnownToolLimit(provider);
   if (knownLimit !== null) {
     if (bodyToSend.tools.length > knownLimit) {
-      const originalCount = bodyToSend.tools.length;
-      const truncatedTools = capToolList(bodyToSend.tools, knownLimit);
-      bodyToSend = { ...bodyToSend, tools: truncatedTools };
-      log?.debug?.(
-        "TOOL_LIMIT",
-        `Truncated ${originalCount} tools to ${knownLimit} for ${provider}`
-      );
+      bodyToSend = applyToolCap(bodyToSend, bodyToSend.tools, knownLimit, provider, log);
     }
     return bodyToSend;
   }
 
   if (bypassDefaultToolLimit === true) return bodyToSend;
+  // The Anthropic Messages API has no tool-count limit: the generic default cap is meant
+  // for OpenAI-style providers and silently dropped Claude Code built-ins (#18120).
+  // Documented or learned limits (handled above) still apply.
+  if (targetFormat === FORMATS.CLAUDE) return bodyToSend;
 
   const effectiveToolLimit = getEffectiveToolLimit(provider);
   if (bodyToSend.tools.length > effectiveToolLimit) {
-    const originalCount = bodyToSend.tools.length;
-    const truncatedTools = capToolList(bodyToSend.tools, effectiveToolLimit);
-    bodyToSend = { ...bodyToSend, tools: truncatedTools };
-    log?.debug?.(
-      "TOOL_LIMIT",
-      `Truncated ${originalCount} tools to ${effectiveToolLimit} for ${provider}`
-    );
+    bodyToSend = applyToolCap(bodyToSend, bodyToSend.tools, effectiveToolLimit, provider, log);
   }
   return bodyToSend;
 }
@@ -279,6 +309,16 @@ function defaultImageDetail(bodyToSend: Body, isOpencodeClient: boolean): Body {
   return nextBody;
 }
 
+// OpenCode's model-derived cache support only describes implicit prefix caching. Nothing shows
+// its gateway accepts this field, so only an explicit connection opt-in sends it (#18787).
+function providerRejectsPromptCacheKey(
+  provider: string | null | undefined,
+  connectionCacheOverride: ConnectionCacheOverride | null
+): boolean {
+  if (["nvidia", "xai"].includes(provider)) return true;
+  return isOpenCodeLane(provider) && connectionCacheOverride?.supportsPromptCaching !== true;
+}
+
 // Inject prompt_cache_key only for providers that support it.
 async function injectPromptCacheKey(
   bodyToSend: Body,
@@ -288,10 +328,15 @@ async function injectPromptCacheKey(
 ): Promise<Body> {
   if (
     targetFormat === FORMATS.OPENAI &&
-    providerSupportsCaching(provider, undefined, connectionCacheOverride) &&
+    providerSupportsCaching(
+      provider,
+      undefined,
+      connectionCacheOverride,
+      bodyToSend.model as string
+    ) &&
     !bodyToSend.prompt_cache_key &&
     Array.isArray(bodyToSend.messages) &&
-    !["nvidia", "xai"].includes(provider)
+    !providerRejectsPromptCacheKey(provider, connectionCacheOverride)
   ) {
     const { generatePromptCacheKey } = await import("@/lib/promptCache");
     const cacheKey = generatePromptCacheKey(bodyToSend.messages);
@@ -317,6 +362,8 @@ type PrepareUpstreamBodyOptions = {
   rawBody?: { messages?: unknown } | undefined;
   /** Incoming client request — read for the x-omniroute-effort header (#13448). */
   clientRawRequest?: { headers?: unknown } | undefined;
+  /** Opt-in relevance-based tool selection (settings.toolDisclosure); null/absent = off. */
+  toolDisclosure?: ToolDisclosureConfig | null;
   log?: LoggerLike;
 };
 
@@ -342,7 +389,16 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
     translatedBody.reasoning !== undefined ||
     translatedBody.thinking !== undefined ||
     hasExplicitTemplateReasoning;
-  let bodyToSend: Body = { ...structuredClone(translatedBody), model: modelToCall };
+  // Codex's Responses transform normalizes input into new item records before
+  // mutation and independently copies its mutable tools/reasoning fields.
+  // Keep the potentially huge input history shared until that boundary: the
+  // no-rule payload path is also a no-op. All other targets retain full
+  // isolation until their executor mutation paths can be audited separately.
+  const attemptSource =
+    provider === "codex" && targetFormat === FORMATS.OPENAI_RESPONSES
+      ? translatedBody
+      : structuredClone(translatedBody);
+  let bodyToSend: Body = { ...attemptSource, model: modelToCall };
   bodyToSend = normalizeThinkingForModel(bodyToSend, modelToCall);
   bodyToSend = normalizeClaudeAdaptiveThinking(bodyToSend, modelToCall);
   bodyToSend = normalizeClaudeDisabledThinkingEffort(bodyToSend, modelToCall, provider);
@@ -365,6 +421,7 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
       rawBody: opts.rawBody as Parameters<typeof wireAdaptiveEffort>[1]["rawBody"],
       clientRawRequest: opts.clientRawRequest,
       targetFormat,
+      model: modelToCall,
     });
   }
   if (provider === "xiaomi-mimo") bodyToSend = normalizeMimoThinking(bodyToSend);
@@ -460,8 +517,31 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
       throw error;
     }
   }
+  // After the sanitizers, which read `reasoning.effort`, and after payload rules can add it.
+  bodyToSend = foldReasoningForOpenAIChat(bodyToSend, provider, targetFormat);
   bodyToSend = defaultImageDetail(bodyToSend, isOpencodeClient);
-  bodyToSend = truncateToolList(bodyToSend, provider, bypassDefaultToolLimit ?? false, log);
+  // Relevance selection runs before the provider cap so the cap keeps the useful tools.
+  const disclosure = applyToolDisclosure(bodyToSend, opts.toolDisclosure, {
+    rawBody: opts.rawBody,
+    toolNamePrefix: CLAUDE_OAUTH_TOOL_PREFIX,
+    isPinnedTool: isFallbackTool,
+    onError: (error) =>
+      log?.warn?.("TOOL_DISCLOSURE", `Selection failed, sending all tools: ${String(error)}`),
+  });
+  if (disclosure.stats) {
+    bodyToSend = disclosure.body;
+    log?.debug?.(
+      "TOOL_DISCLOSURE",
+      `Kept ${disclosure.stats.after}/${disclosure.stats.before} tools by relevance`
+    );
+  }
+  bodyToSend = truncateToolList(
+    bodyToSend,
+    provider,
+    bypassDefaultToolLimit ?? false,
+    targetFormat,
+    log
+  );
   const connectionCacheOverride = resolveConnectionCacheOverride(credentials?.providerSpecificData);
   bodyToSend = await injectPromptCacheKey(
     bodyToSend,

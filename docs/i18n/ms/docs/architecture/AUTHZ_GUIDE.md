@@ -23,9 +23,9 @@ Digunakan untuk API klien yang serasi dengan OpenAI/Anthropic/Gemini dan beberap
 Authorization: Bearer <api-key>
 ```
 
-Disahkan oleh `isValidApiKey()` / `extractApiKey()` dalam `src/sse/services/auth.ts` dan dieksport semula melalui `src/shared/utils/apiAuth.ts`. Pengesah turut menerima pembolehubah persekitaran `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` sebagai kunci passthrough kekal (isu #1350).
+Disahkan oleh `isValidApiKey()` / `extractApiKey()` dalam `src/sse/services/auth.ts` dan dieksport semula melalui `src/shared/utils/apiAuth.ts`. Pengesah juga menerima pemboleh ubah persekitaran `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` sebagai kunci lulus terus berterusan (isu #1350).
 
-### 2. Sesi Papan Pemuka (cookie auth_token)
+### 2. Sesi Papan Pemuka (kuki auth_token)
 
 Untuk halaman papan pemuka dan operasi pentadbir.
 
@@ -33,121 +33,228 @@ Untuk halaman papan pemuka dan operasi pentadbir.
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookie hanya dianggap sesi apabila JWT disahkan **dan** membawa `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Setiap pengguna cookie — pengawal laluan papan pemuka (`isDashboardSessionAuthenticated()`), penyegaran saluran authz, jabat tangan WebSocket, pelayan langsung, `/api/settings/require-login`, `/api/auth/status` — melalui pembantu ini.
-Terdapat juga JWT lain yang ditandatangani dengan `JWT_SECRET` — laluan passthrough Cursor CLI mengeluarkan token `iss "omniroute" / aud "cursor-cli"` untuk pemegang kunci — dan token tersebut tidak sekali-kali dianggap sesi (#13298).
+Kuki hanya dianggap sebagai sesi apabila JWT berjaya disahkan **dan** membawa `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Setiap
+pengguna kuki (pengawal laluan papan pemuka (`isDashboardSessionAuthenticated()`), penyegaran saluran paip authz, jabat tangan WebSocket, pelayan langsung,
+`/api/settings/require-login`, `/api/auth/status`) melalui pembantu tersebut.
+JWT lain yang ditandatangani dengan `JWT_SECRET` juga wujud — laluan pintas Cursor CLI
+menghasilkan token `iss "omniroute" / aud "cursor-cli"` untuk pemegang kunci — dan tidak pernah menjadi sesi
+(#13298).
 
-Disahkan oleh `isDashboardSessionAuthenticated()` dalam `src/shared/utils/apiAuth.ts`. Saluran memperbaharui JWT secara automatik apabila kurang daripada 7 hari berbaki daripada jangka hayat 30 hari.
+Disahkan oleh `isDashboardSessionAuthenticated()` dalam `src/shared/utils/apiAuth.ts`. Saluran paip menyegarkan JWT secara automatik apabila tempoh sahnya berbaki kurang daripada 7 hari dalam jangka hayat 30 harinya.
 
-Sesi juga boleh tamat sebelum 30 hari berlalu: setiap penerbit melalui `mintDashboardSessionToken` (masa terbit `iat` dan ID `jti`), dan pengesah menyemak dua tetapan: `sessionsValidAfter`, yang ditetapkan oleh pertukaran kata laluan supaya setiap sesi yang diterbitkan sebelumnya berhenti disahkan (pelayar yang menukar kata laluan mendapat cookie baharu), dan `revokedDashboardSessions`, yang `POST /api/auth/logout` tambahkan `jti` sesi yang dilog keluar. Sesi yang dicipta oleh keluaran lama tidak membawa tuntutan ini dan kekal sah sehingga pertukaran kata laluan pertama. Jika tetapan tidak dapat dibaca, sesi tidak dipercayai.
+Sesi juga boleh berakhir sebelum 30 harinya tamat, kerana setiap pengeluar token melalui `mintDashboardSessionToken` (masa pengeluaran `iat` dan id `jti`) dan pengesah menyemak dua tetapan: `sessionsValidAfter`, yang ditetapkan apabila kata laluan ditukar supaya setiap sesi yang dikeluarkan sebelum masa tersebut tidak lagi berjaya disahkan (pelayar yang menukar kata laluan menerima kuki baharu), serta `revokedDashboardSessions`, yang ditambah oleh `POST /api/auth/logout` dengan `jti` sesi yang telah dilog keluar. Sesi yang dihasilkan oleh keluaran lebih lama tidak membawa mana-mana tuntutan tersebut dan kekal sah sehingga penukaran kata laluan pertama. Jika tetapan tidak dapat dibaca, sesi tersebut tidak dipercayai.
 
-Sesetengah laluan pengurusan menerima **salah satu** mod: cookie ATAU `Bearer <key>` apabila kunci API mempunyai skop `manage` (atau `admin`). Inilah yang membolehkan aliran kerja "boleh dikonfigurasi melalui panggilan API" yang ditambah dalam v3.8.
+Sesetengah laluan pengurusan menerima **mana-mana** mod: kuki ATAU `Bearer <key>` apabila kunci API mempunyai skop `manage` (atau `admin`). Inilah yang membolehkan aliran kerja "boleh dikonfigurasikan melalui panggilan API" yang ditambahkan dalam v3.8.
 
-#### Pintu log masuk OIDC pilihan (#6973)
+#### Gerbang log masuk OIDC pilihan (#6973)
 
-Log masuk pentadbir papan pemuka turut menyokong aliran OIDC (OpenID Connect) yang **pilihan** di samping log masuk kata laluan lalai — log masuk kata laluan tidak pernah dibuang, hanya ditambah:
+Log masuk pentadbir papan pemuka turut menyokong aliran OIDC (OpenID Connect) **pilihan pengguna**
+di samping log masuk kata laluan lalai — log masuk kata laluan tidak pernah dibuang, hanya
+ditambah:
 
-- Diaktifkan hanya jika `settings.oidcEnabled === true` **dan** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` kesemuanya dikonfigurasi (Tetapan → Pengesahan). Jika tidak, `GET /api/auth/oidc/login` mengembalikan `400`.
-- `GET /api/auth/oidc/login` menemukan `authorization_endpoint` daripada `/.well-known/openid-configuration` pengeluar (jatuh balik kepada `<issuer>/authorize`), membina URI ubah hala daripada permintaan masuk (menghormati `x-forwarded-proto`), dan mengubah hala ke IdP dengan nilai `state` rawak yang disimpan dalam cookie `oidc_state` `httpOnly`.
-- `GET /api/auth/oidc/callback` mengesahkan `state`, menukar kod kebenaran, dan mengesahkan tandatangan ID token melalui JWKS pengeluar (`jose` `createRemoteJWKSet`, di-cache bagi setiap URI JWKS), dengan semakan `issuer`/`audience`. Senarai benar `oidcAllowedSubjects` diwajibkan: ia dipadankan dengan tuntutan `sub` token atau tuntutan `email` — tuntutan e-mel hanya diterima apabila `email_verified === true`, jadi e-mel yang tidak disahkan di IdP tidak sekali-kali dapat melepasi pintu ini — dan tanpa sebarang entri, callback menolak setiap log masuk (`not_configured`).
-- Apabila berjaya, ia mengeluarkan JWT `auth_token` 30 hari yang **sama** seperti yang dikeluarkan oleh log masuk kata laluan (`src/app/api/auth/login/route.ts`), jadi baki saluran sesi papan pemuka (penyegaran automatik, bendera cookie) tidak berubah — OIDC hanya menggantikan cara cookie dikeluarkan, bukan apa yang diberikannya.
-- Setiap tetapan `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) berada dalam `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` menjawab `400 PASSWORD_REQUIRED` melainkan badan membawa kata laluan pengurusan sebagai `currentPassword` (`401 PASSWORD_MISMATCH` jika salah). `oidcDisablePasswordLogin` menghalang _log masuk_ kata laluan (`POST /api/auth/login`) tetapi mengekalkan hash kata laluan yang disimpan, dan pengesahan semula tetap menyemaknya terhadap `currentPassword`.
-- `corsOrigins` dan `bruteForceProtection` turut berada dalam `SECURITY_IMPACTING_SETTINGS_KEYS`: melonggarkan mana-mana satu daripadanya melemahkan pertahanan log masuk, jadi kedua-duanya memerlukan pengesahan semula `currentPassword` yang sama (tab Keselamatan memintanya) dan import JSON membuangnya.
-- Setiap kunci dasar keselamatan — entri `SECURITY_IMPACTING_SETTINGS_KEYS`, setiap kunci `oidc*`, dan keadaan sesi papan pemuka — ialah **khusus operator** pada `PATCH /api/settings`: kunci API berskop manage atau token akses `oma_` ditolak dengan `403` walaupun menghantar `currentPassword` yang betul, dan penolakan itu diaudit sebagai `settings.update_failed` dengan `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` dalam `src/lib/api/operatorCredential.ts`). Tetapan biasa (tema, keutamaan paparan) kekal boleh ditulis oleh kunci `manage` atau token akses `admin`. Setiap mutasi pada `/api/settings` itu sendiri (dan `/api/settings/require-login`) turut memerlukan skop token akses `admin` (`ADMIN_MUTATION_EXACT_PATHS` dalam `src/server/authz/accessScopes.ts`, padanan laluan tepat); `GET` memerlukan `read`, manakala sub-laluan `/api/settings/*` yang lain (proksi, lalai combo, alias model, pemampatan, pembersihan…) mengekalkan skop `write` yang disimpulkan daripada kaedah.
-- `POST /api/settings/import-json` melangkau pengesahan semula itu, jadi sebelum menulis ia membuang setiap kunci dalam `IMPORT_STRIPPED_SETTINGS_KEYS` (fail yang sama): kata laluan dan `currentPassword`, setiap entri `SECURITY_IMPACTING_SETTINGS_KEYS`, dan keadaan sesi papan pemuka (`sessionsValidAfter`, `revokedDashboardSessions`). Oleh itu, mengimport sandaran lama tidak dapat menghidupkan semula sesi yang telah ditamatkan oleh pertukaran kata laluan atau log keluar.
-- Diaktifkan hanya jika `settings.oidcEnabled === true` **dan** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` kesemuanya dikonfigurasi (Tetapan → Pengesahan). Jika tidak, `GET /api/auth/oidc/login` mengembalikan `400`.
-- `GET /api/auth/oidc/login` menemukan `authorization_endpoint` daripada `/.well-known/openid-configuration` pengeluar (jatuh balik kepada `<issuer>/authorize`), membina URI ubah hala daripada permintaan masuk (menghormati `x-forwarded-proto`), dan mengubah hala ke IdP dengan nilai `state` rawak yang disimpan dalam cookie `oidc_state` `httpOnly`.
-- `GET /api/auth/oidc/callback` mengesahkan `state`, menukar kod kebenaran, dan mengesahkan tandatangan ID token melalui JWKS pengeluar (`jose` `createRemoteJWKSet`, di-cache bagi setiap URI JWKS), dengan semakan `issuer`/`audience`. Senarai benar `oidcAllowedSubjects` diwajibkan: ia dipadankan dengan tuntutan `sub` token atau tuntutan `email` — tuntutan e-mel hanya diterima apabila `email_verified === true`, jadi e-mel yang tidak disahkan di IdP tidak sekali-kali dapat melepasi pintu ini — dan tanpa sebarang entri, callback menolak setiap log masuk (`not_configured`).
-- Apabila berjaya, ia mengeluarkan JWT `auth_token` 30 hari yang **sama** seperti yang dikeluarkan oleh log masuk kata laluan (`src/app/api/auth/login/route.ts`), jadi baki saluran sesi papan pemuka (penyegaran automatik, bendera cookie) tidak berubah — OIDC hanya menggantikan cara cookie dikeluarkan, bukan apa yang diberikannya.
-- Setiap tetapan `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) berada dalam `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` menjawab `400 PASSWORD_REQUIRED` melainkan badan membawa kata laluan pengurusan sebagai `currentPassword` (`401 PASSWORD_MISMATCH` jika salah). `oidcDisablePasswordLogin` menghalang _log masuk_ kata laluan (`POST /api/auth/login`) tetapi mengekalkan hash kata laluan yang disimpan, dan pengesahan semula tetap menyemaknya terhadap `currentPassword`.
-- `corsOrigins` dan `bruteForceProtection` turut berada dalam `SECURITY_IMPACTING_SETTINGS_KEYS`: melonggarkan mana-mana satu daripadanya melemahkan pertahanan log masuk, jadi kedua-duanya memerlukan pengesahan semula `currentPassword` yang sama (tab Keselamatan memintanya) dan import JSON membuangnya.
-- Setiap kunci dasar keselamatan — entri `SECURITY_IMPACTING_SETTINGS_KEYS`, setiap kunci `oidc*`, dan keadaan sesi papan pemuka — ialah **khusus operator** pada `PATCH /api/settings`: kunci API berskop manage atau token akses `oma_` ditolak dengan `403` walaupun menghantar `currentPassword` yang betul, dan penolakan itu diaudit sebagai `settings.update_failed` dengan `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` dalam `src/lib/api/operatorCredential.ts`). Tetapan biasa (tema, keutamaan paparan) kekal boleh ditulis oleh kunci `manage` atau token akses `admin`. Setiap mutasi pada `/api/settings` itu sendiri (dan `/api/settings/require-login`) turut memerlukan skop token akses `admin` (`ADMIN_MUTATION_EXACT_PATHS` dalam `src/server/authz/accessScopes.ts`, padanan laluan tepat); `GET` memerlukan `read`, manakala sub-laluan `/api/settings/*` yang lain (proksi, lalai combo, alias model, pemampatan, pembersihan…) mengekalkan skop `write` yang disimpulkan daripada kaedah.
-- `POST /api/settings/import-json` melangkau pengesahan semula itu, jadi sebelum menulis ia membuang setiap kunci dalam `IMPORT_STRIPPED_SETTINGS_KEYS` (fail yang sama): kata laluan dan `currentPassword`, setiap entri `SECURITY_IMPACTING_SETTINGS_KEYS`, dan keadaan sesi papan pemuka (`sessionsValidAfter`, `revokedDashboardSessions`). Oleh itu, mengimport sandaran lama tidak dapat menghidupkan semula sesi yang telah ditamatkan oleh pertukaran kata laluan atau log keluar.
+- Dilumpuhkan melainkan `settings.oidcEnabled === true` **dan** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` semuanya dikonfigurasikan (Tetapan → Pengesahan).
+  `GET /api/auth/oidc/login` mengembalikan `400` jika sebaliknya.
+- `GET /api/auth/oidc/login` menemui `authorization_endpoint` daripada
+  `/.well-known/openid-configuration` penerbit (kembali kepada
+  `<issuer>/authorize`), membina URI ubah hala daripada permintaan masuk
+  (mengambil kira `x-forwarded-proto`), dan mengubah hala ke IdP dengan
+  `state` rawak yang disimpan dalam kuki `oidc_state` `httpOnly`.
+- `GET /api/auth/oidc/callback` mengesahkan `state`, menukar kod kebenaran,
+  dan mengesahkan tandatangan token ID melalui JWKS penerbit
+  (`createRemoteJWKSet` milik `jose`, dicache mengikut URI JWKS) dengan
+  pemeriksaan `issuer`/`audience`. Kemasukan ke papan pemuka memerlukan
+  senarai `oidcAllowedSubjects` yang tidak kosong, dasar `oidcAdmissionClaim`,
+  atau kedua-duanya. Senarai subjek hanya sepadan dengan `sub` atau `email`
+  apabila `email_verified === true`. Dasar tuntutan pilihan menerima laluan
+  tuntutan token ID yang dipisahkan dengan titik (contohnya,
+  `realm_access.roles`) dan tatasusunan nilai yang diterima; tuntutan yang
+  diselesaikan mestilah tatasusunan rentetan yang mengandungi sekurang-kurangnya
+  satu nilai yang diterima. Jika kedua-dua dasar dikonfigurasikan, kedua-duanya
+  mesti lulus. Tuntutan yang tiada/tidak sah gagal secara tertutup, dan tanpa
+  mana-mana dasar, panggilan balik menolak log masuk (`not_configured`).
+  Konfigurasi sedia ada yang hanya menggunakan subjek terus berfungsi tanpa
+  perubahan.
+- Keycloak biasanya memetakan peranan realm ke dalam token akses, bukan
+  semestinya token ID. Untuk mewajibkan peranan realm `admin`, konfigurasikan
+  pemeta protokol untuk klien ini yang menyertakan `realm_access.roles` dalam
+  **token ID**, kemudian tetapkan `oidcAdmissionClaim` kepada
+  `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Semak tuntutan token ID sebenar untuk klien ini sebelum mendayakan kemasukan
+  berdasarkan peranan sahaja; aplikasi tidak membaca peranan token akses.
+  Penolakan token pada pihak IdP boleh melengkapkan tetapi tidak menggantikan
+  pemeriksaan pada pihak aplikasi ini.
+- Selepas berjaya, ia menghasilkan JWT `auth_token` 30 hari yang **sama
+  tepat** seperti yang dikeluarkan oleh log masuk kata laluan
+  (`src/app/api/auth/login/route.ts`), jadi saluran paip sesi papan pemuka yang
+  lain (penyegaran automatik, bendera kuki) tidak berubah — OIDC hanya
+  menggantikan cara kuki dihasilkan, bukan perkara yang dibenarkannya.
+  Perubahan pada peranan/kumpulan IdP tidak membatalkan sesi OmniRoute sedia ada;
+  log keluar, penggiliran kata laluan atau tamat tempoh sesi masih menentukan
+  jangka hayatnya.
+- Setiap tetapan `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) berada dalam
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`):
+  `PATCH /api/settings` menjawab `400 PASSWORD_REQUIRED` melainkan badan
+  membawa kata laluan pengurusan sebagai `currentPassword`
+  (`401 PASSWORD_MISMATCH` apabila salah). `oidcDisablePasswordLogin` menolak
+  _log masuk_ kata laluan (`POST /api/auth/login`) tetapi mengekalkan cincangan
+  kata laluan yang disimpan, dan pengesahan semula masih menyemak
+  `currentPassword` terhadapnya.
+- `corsOrigins` dan `bruteForceProtection` juga berada dalam
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: melonggarkan mana-mana satunya
+  melemahkan pertahanan log masuk, jadi kedua-duanya memerlukan pengesahan
+  semula `currentPassword` yang sama (tab Security memintanya) dan import JSON
+  menggugurkannya.
+- Setiap kunci dasar keselamatan — entri `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  setiap kunci `oidc*` dan keadaan sesi papan pemuka — adalah
+  **operator sahaja** pada `PATCH /api/settings`: kunci API dengan skop
+  pengurusan atau token akses `oma_` ditolak dengan `403` walaupun menghantar
+  `currentPassword` yang betul, dan penolakan diaudit sebagai
+  `settings.update_failed` dengan `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` dalam `src/lib/api/operatorCredential.ts`).
+  Tetapan biasa (tema, pilihan paparan) kekal boleh ditulis oleh kunci `manage`
+  atau token akses `admin`. Setiap mutasi `/api/settings` itu sendiri (dan
+  `/api/settings/require-login`) juga memerlukan skop token akses `admin`
+  (`ADMIN_MUTATION_EXACT_PATHS` dalam `src/server/authz/accessScopes.ts`,
+  padanan laluan tepat); `GET` kekal `read`, manakala sublaluan
+  `/api/settings/*` yang lain (proksi, lalai gabungan, alias model, pemampatan,
+  pembersihan…) mengekalkan skop `write` yang ditentukan mengikut kaedah.
+- `POST /api/settings/import-json` melangkau pengesahan semula tersebut,
+  jadi ia menggugurkan setiap kunci dalam `IMPORT_STRIPPED_SETTINGS_KEYS`
+  (fail yang sama) sebelum menulis: kata laluan dan `currentPassword`, setiap
+  entri `SECURITY_IMPACTING_SETTINGS_KEYS`, serta keadaan sesi papan pemuka
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Oleh itu, mengimport
+  sandaran lama tidak dapat menghidupkan semula sesi yang telah ditamatkan oleh
+  perubahan kata laluan atau tindakan log keluar.
+
+#### Log masuk dua faktor TOTP pilihan (#16619)
+
+Didaftarkan daripada Tetapan → Keselamatan; dinyahaktifkan sehingga operator
+menghidupkannya (`src/server/auth/dashboardMfa.ts`).
+
+- **Perkara yang diliputi:** log masuk kata laluan (`POST /api/auth/login`, yang kemudiannya memerlukan
+  `POST /api/auth/mfa/verify`) dan `omniroute connect` (`POST /api/cli/connect`,
+  yang menolak pertukaran kata laluan sahaja dan menerima kod sebagai `totp`).
+- **Perkara yang tidak diliputi:** log masuk OIDC / SSO (`/api/auth/oidc/callback`) tidak
+  meminta TOTP OmniRoute. Ia bergantung pada faktor kedua penyedia identiti sendiri, jadi kuatkuasakan MFA dalam
+  IdP jika OIDC didayakan.
+- **Pemulihan** (peranti hilang, tiada kod pemulihan yang berbaki, atau faktor yang tidak lagi
+  dapat disahkan, contohnya selepas `STORAGE_ENCRYPTION_KEY` berubah):
+  1. Mulakan semula pelayan dengan `OMNIROUTE_DISABLE_MFA=true`.
+  2. Pada hos itu sendiri (rakan sebaya gelung balik dan `Host` gelung balik, seperti
+     `http://localhost:20128`), log masuk dengan kata laluan. Faktor kedua dilangkau untuk asal itu sahaja; setiap asal lain masih memerlukan kod.
+  3. Dalam Tetapan → Keselamatan → Nyahdayakan, masukkan kata laluan dan biarkan kod
+     kosong. `POST /api/auth/mfa/disable` menerima isi kandungan tanpa `code` hanya semasa
+     pemboleh ubah ditetapkan dan permintaan datang daripada hos; ia masih memerlukan sesi papan pemuka
+     dan kata laluan semasa, serta diaudit sebagai `auth.mfa.disabled` dengan
+     `secondFactor: "recovery_switch"`.
+  4. Nyahset `OMNIROUTE_DISABLE_MFA`, mulakan semula, dan daftarkan semula jika perlu.
 
 ## Kelas Laluan
 
-`src/server/authz/types.ts` mentakrifkan tiga kelas; mana-mana laluan yang tidak dapat diklasifikasikan secara deterministik akan jatuh balik kepada `MANAGEMENT`.
+`src/server/authz/types.ts` mentakrifkan tiga kelas; sebarang laluan yang tidak boleh dikelaskan secara deterministik akan kembali kepada `MANAGEMENT`.
 
-| Kelas        | Penerangan                                                                                                                                              | Pengesahan diperlukan                                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `PUBLIC`     | Laluan yang secara eksplisit selamat — log masuk, log keluar, status, inisialisasi, kesihatan dan bootstrap pendaftaran.                                | Tiada                                                                        |
-| `CLIENT_API` | Titik akhir penyajian model — `/api/v1/*`, `/api/v1beta/*`, serta alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Kunci Bearer apabila bendera ciri `REQUIRE_API_KEY` yang berkesan diaktifkan |
-| `MANAGEMENT` | Halaman papan pemuka, tetapan, pembekal, kunci, serta titik akhir pentadbiran dan diagnostik.                                                           | Sesi papan pemuka ATAU Bearer dengan skop `manage`                           |
+| Kelas        | Perihalan                                                                                                                                                | Pengesahan diperlukan                                                            |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `PUBLIC`     | Laluan yang dinyatakan selamat secara jelas — log masuk, log keluar, status, kesihatan, bootstrap onboarding.                                            | Tiada                                                                            |
+| `CLIENT_API` | Titik akhir penyediaan model — `/api/v1/*`, `/api/v1beta/*`, serta alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Kunci Bearer apabila bendera ciri `REQUIRE_API_KEY` yang berkuat kuasa didayakan |
+| `MANAGEMENT` | Halaman papan pemuka, tetapan, penyedia, kunci, titik akhir pentadbir dan diagnostik.                                                                    | Sesi papan pemuka ATAU Bearer dengan skop `manage`                               |
 
-Beberapa tindakan `MANAGEMENT` adalah **khusus operator**: kunci `manage` tidak mencukupi. Mengeksport kelayakan tersimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), memulihkan sandaran ke atas data langsung (`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pemulihan mengikut id, `POST /api/settings/import-json`), dan memusnahkan titik pemulihan (`DELETE /api/db-backups` pembersihan, dan `PATCH /api/db-backups` kerana pengekalannya memacu pemangkasan automatik selepas setiap sandaran) memerlukan sesi papan pemuka, subjek CLI tempatan, atau log masuk yang dilumpuhkan. Mengeluarkan token penyegerakan (`POST /api/sync/tokens`) dan mencetak token akses CLI `admin` (`POST /api/cli/tokens`) memerlukan sesi papan pemuka atau subjek CLI tempatan dalam setiap mod log masuk. Kunci API bagi mana-mana skop dan token akses `oma_` bukan kelayakan operator: ia menerima `403` setiap kali salah satu diperlukan. Semakannya terdapat dalam `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Menukar tetapan log masuk juga khusus operator: `POST /api/settings/require-login` (menetapkan kata laluan pengurusan / menukar `requireLogin`) hanya menerima kelayakan tersebut selepas kata laluan wujud — tetingkap bootstrap permulaan (belum ada kata laluan) kekal tidak berubah — dan sesi papan pemuka mesti menghantar `currentPassword` untuk menggantikan kata laluan (`403` jika tiada atau salah, diaudit sebagai `settings.update_failed`). CLI tempatan dan contoh yang log masuknya dilumpuhkan mengekalkan laluan pemulihan dan boleh menetapkan kata laluan tanpanya, kerana kedua-duanya terikat pada hos yang memiliki direktori data.
+Beberapa tindakan `MANAGEMENT` adalah **khas operator**: kunci `manage` sahaja tidak mencukupi. Mengeksport
+kelayakan yang disimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), memulihkan sandaran ke atas data langsung
+(`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pemulihan mengikut id,
+`POST /api/settings/import-json`), memusnahkan titik pemulihan (`DELETE /api/db-backups` pembersihan,
+dan `PATCH /api/db-backups` kerana pengekalan yang disimpannya mengawal pemangkasan automatik selepas
+setiap sandaran) memerlukan sesi papan pemuka, subjek CLI setempat, atau log masuk dilumpuhkan. Mengeluarkan
+token penyegerakan (`POST /api/sync/tokens`) dan mencipta token akses CLI `admin`
+(`POST /api/cli/tokens`) memerlukan sesi papan pemuka atau subjek CLI setempat dalam setiap mod log masuk.
+Kunci API daripada sebarang skop dan token akses `oma_` bukan kelayakan operator: token tersebut menerima `403`
+apabila kelayakan sedemikian diperlukan. Pemeriksaan ini
+berada dalam `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`). Mengubah tetapan log masuk juga hanya untuk operator:
+`POST /api/settings/require-login` (menetapkan kata laluan pengurusan / menogol `requireLogin`) hanya menerima
+kelayakan tersebut setelah kata laluan wujud — tetingkap bootstrap kali pertama (belum ada kata laluan)
+kekal tidak berubah — dan sesi papan pemuka mesti menghantar `currentPassword` untuk menggantikan kata laluan
+(`403` apabila tiada atau salah, diaudit sebagai `settings.update_failed`). CLI setempat dan tika dengan log masuk dilumpuhkan mengekalkan laluan pemulihan dan boleh menetapkan kata laluan tanpanya, kerana kedua-duanya terikat pada hos yang memiliki direktori data.
 
-## Saluran Pemprosesan
+## Saluran paip
 
 ```
-Permintaan masuk → src/proxy.ts
-  → runAuthzPipeline() dalam src/server/authz/pipeline.ts
-    1. Buang pengepala dalaman yang dipercayai (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Jana ID permintaan, kelaskan laluan melalui classifyRoute()
-    3. Jika pathname == "/" → ubah hala ke /dashboard
-    4. Jika sedang dikosongkan (penutupan secara terkawal) dan /api/* → 503
-    5. Jika bukan GET /api/* → pengadang checkBodySize()
-    6. Jika OPTIONS → prapenerbangan CORS 204
-    7. Jika options.enforce == false → teruskan dengan pengepala kelas laluan
-    8. Jika tidak: POLICIES[routeClass].evaluate(ctx)
-       - benarkan → cap x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - tolak    → ralat JSON dengan correlation_id (halaman papan pemuka → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Pengepala dalaman yang dipercayai (ditakrifkan dalam `src/server/authz/headers.ts`) **dibuang daripada permintaan masuk** sebelum pengelasan — klien tidak boleh mengisi awal `x-omniroute-auth-*` untuk menyamar sebagai subjek.
+Pengepala dalaman yang dipercayai (ditakrifkan dalam `src/server/authz/headers.ts`) ialah** dilucutkan daripada permintaan masuk** sebelum pengelasan — pelanggan tidak boleh pra-populasi `x-omniroute-auth-*` untuk menyamar sebagai subjek.
 
-### Kontrak dasar
+### Kontrak polisi
 
 Setiap kelas laluan mempunyai dasar dalam `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — sentiasa mengembalikan `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Bearer dan mengesahkannya melalui `validateApiKey()`. Hanya beralih kepada akses tanpa nama apabila bendera ciri `REQUIRE_API_KEY` yang berkuat kuasa dinyahdayakan. Bendera yang berkuat kuasa ditentukan melalui `isRequireApiKeyEnabled()` (`penggantian bendera ciri DB > process.env.REQUIRE_API_KEY > lalai`) supaya Bendera Ciri Papan Pemuka dan pemboleh ubah persekitaran mengawal `/api/v1/*`, `/api/v1beta/*`, serta alias secara konsisten; kegagalan penentu akan ditutup secara selamat. Membenarkan permintaan sesi papan pemuka pada laluan API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model papan pemuka).
-- **`managementPolicy`** (`policies/management.ts`) — menerima sesi papan pemuka, permintaan penyegerakan model dalaman (dipadankan dengan `/api/providers/[name]/(sync-models|models)`), atau dilangkau sepenuhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) apabila token Bearer disertakan tetapi tidak sah, dan 401 jika tidak. Ia juga menguatkuasakan peringkat pengadang laluan (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum mana-mana cabang pengesahan — lihat [Peringkat Pengadang Laluan](../security/ROUTE_GUARD_TIERS.md). Laluan LOCAL_ONLY dalam `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (pada masa ini: `/api/mcp/`) boleh dicapai dari bukan gelung balik apabila kunci Bearer mempunyai skop `manage`; semua laluan LOCAL_ONLY yang lain kekal terhad kepada gelung balik tanpa mengira skop.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ekstrak Pembawa, mengesahkan melalui `validateApiKey()`. Terjadi tanpa nama hanya apabila bendera ciri `REQUIRE_API_KEY` yang berkesan dilumpuhkan. Bendera berkesan diselesaikan melalui `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) jadi Bendera Ciri Papan Pemuka dan pembolehubah persekitaran mengawal `/api/v1/*`, `/api/v1beta/*` dan alias secara konsisten; kegagalan penyelesai gagal ditutup. Membenarkan permintaan sesi papan pemuka pada laluan API pelanggan (termasuk `/api/v1/models`, digunakan oleh katalog model papan pemuka). Apabila Entra ID SSO didayakan, Pembawa yang secara struktur ialah token Entra (tiga segmen base64url, `RS*` alg, `kid`) dikendalikan oleh cawangan SSO** sebelum ini** `validateApiKey()` dan keputusannya adalah — muktamad ia tidak pernah jatuh ke laluan kunci API atau cawangan merendahkan kepada tanpa nama, jadi gangguan pembekal identiti tidak boleh menjadi akses terbuka. Kekunci API statik tidak terjejas. Lihat [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — menerima sesi papan pemuka, permintaan penyegerakan model dalaman (dipadanan dengan `/api/providers/[name]/(sync-models|models)`), atau melangkau sepenuhnya jika `isAuthRequired()` mengembalikan palsu. Mengembalikan 403 (`AUTH_001`) apabila token Pembawa hadir tetapi tidak sah, 401 sebaliknya. Juga menguatkuasakan peringkat pengawal laluan (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum mana-mana cawangan pengesahan — lihat [Peringkat Pengawal Laluan](../security/ROUTE_GUARD_TIERS.md). laluan LOCAL_ONLY dalam `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hari ini: `/api/mcp/`) boleh diakses daripada bukan gelung apabila kunci Pembawa membawa skop `manage` ; semua laluan LOCAL_ONLY lain kekal strict-loopback tanpa mengira skop.
 
-Dasar yang berjaya mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Pengendali hiliran boleh membacanya melalui `assertAuth(request, "CLIENT_API")` dalam `src/server/authz/assertAuth.ts` dan bukannya menjalankan semula logik pengesahan.
+Polisi yang berjaya mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Pengendali hiliran boleh membacanya melalui `assertAuth(request, "CLIENT_API")` dalam `src/server/authz/assertAuth.ts` dan bukannya menjalankan semula logik auth.
 
 ## Senarai Laluan Awam
 
-`src/shared/constants/publicApiRoutes.ts` ialah senarai dibenarkan yang eksplisit:
+`src/shared/constants/publicApiRoutes.ts` ialah senarai benarkan eksplisit:
 
-Senarai ini dibahagikan mengikut **bentuk**, dan pembahagian ini amat penting (GHSA-74g9-q8f6-793h): awalan dipadankan menggunakan `startsWith()`, maka ia turut memadankan setiap laluan bersebelahan yang berkongsi aksara permulaan yang sama.
-Apabila `/api/usage/om-usage` digunakan sebagai awalan, `/api/usage/om-usage<anything>` ditandai sebagai AWAM, dan Next menyelesaikannya kepada `/api/usage/[connectionId]` — pengendali yang tidak mempunyai pengesahan tersendiri.
+Senarai ini dibahagikan mengikut **bentuk**, dan pembahagian ini penting untuk keselamatan (GHSA-74g9-q8f6-793h): awalan dipadankan dengan `startsWith()`, jadi ia turut sepadan dengan setiap laluan bersebelahan yang berkongsi aksara pendahulunya.
+`/api/usage/om-usage` sebagai awalan menandakan `/api/usage/om-usage<anything>` sebagai PUBLIC, dan Next menyelesaikannya kepada `/api/usage/[connectionId]` — pengendali tanpa pengesahan sendiri.
 
 ```ts
-// Subpohon sebenar. Setiap entri MESTI berakhir dengan "/" (disahkan oleh ujian unit).
+// Subpepohon sebenar. Setiap entri MESTI berakhir dengan "/" (disahkan oleh ujian unit).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // dianggap sebagai CLIENT_API dalam classify, bukan sebagai awam "tanpa pengesahan"
+  "/api/v1/", // dianggap sebagai CLIENT_API dalam classify, bukan "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Laluan tunggal, dipadankan SECARA TEPAT (dengan atau tanpa garis miring di hujung).
+// Laluan tunggal, dipadankan SECARA TEPAT (dengan atau tanpa garis condong di hujung).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // langkah log masuk 2 untuk TOTP pilihan; memerlukan kuki MFA-pending
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Laluan tunggal baca sahaja yang turut menerima pelonggaran asal CORS.
+// Laluan tunggal baca sahaja yang turut menerima kelonggaran asal CORS.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Laluan tunggal baca sahaja TANPA pelonggaran CORS.
+// Laluan tunggal baca sahaja TANPA kelonggaran CORS.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Laluan baca sahaja adalah awam **hanya** untuk kaedah yang selamat. Nota: `classifyRoute()` mengecualikan `/api/v1/*` dan `/api/v1beta/*` daripada sandaran PUBLIC — laluan tersebut sentiasa `CLIENT_API` supaya dasar kunci Bearer terus digunakan.
+Laluan baca sahaja adalah awam **hanya** untuk kaedah selamat. Nota: `classifyRoute()` mengecualikan `/api/v1/*` dan `/api/v1beta/*` daripada laluan sandaran PUBLIC — laluan tersebut sentiasa `CLIENT_API`, jadi dasar kunci Bearer masih terpakai.
 
 ## Menambah Laluan Baharu
 
@@ -224,15 +331,29 @@ Ia kekal tidak aktif melainkan `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Peringkat ini hanya terpakai pada
 kelayakan token akses. Lihat [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md).
 
-## Suis Pengesahan Diperlukan
+## Togol Keperluan Pengesahan
 
 `isAuthRequired()` dalam `src/shared/utils/apiAuth.ts` menentukan sama ada **sebarang** pengesahan dikuatkuasakan untuk sesuatu permintaan:
 
-- `settings.requireLogin === false` → pengesahan dilumpuhkan secara global, kecuali bagi peringkat yang sentiasa dilindungi (lihat [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) dan panggilan yang menyerahkan kelayakan yang diterimanya, yang memerlukan kelayakan yang sama seperti apabila log masuk dihidupkan: mengeluarkan token penyegerakan, mencetak token akses CLI pada mana-mana skop, dan mencipta kunci API dengan skop `manage`/`admin`, memberikan skop tersebut kepada kunci, atau menjana semula atau mendedahkan kunci sedemikian (`requireCredentialForManagementScopedKey()` dalam `src/lib/api/requireManagementAuth.ts`). Kunci khusus inferens kekal terbuka.
-- Tiada kata laluan dikonfigurasi **dan** tiada pembolehubah persekitaran `INITIAL_PASSWORD` → mod bootstrap: wizard pendaftaran dan permintaan loopback dibenarkan, tetapi permintaan rangkaian luaran masih memerlukan kelayakan.
-- Sebarang ralat DB → gagal tertutup (selamat secara lalai).
+- `settings.requireLogin === false` → pengesahan dinyahdayakan secara global, kecuali untuk
+  tingkat yang sentiasa dilindungi (lihat [Tingkat Pengawal Laluan](../security/ROUTE_GUARD_TIERS.md)) dan panggilan yang mengeluarkan
+  kelayakan yang diterimanya, yang memerlukan kelayakan yang sama seperti apabila log masuk
+  didayakan: mengeluarkan token penyegerakan, menjana token akses CLI pada sebarang skop, dan
+  mencipta kunci API dengan skop `manage`/`admin`, memberikan skop tersebut kepada kunci, atau
+  menjana semula atau mendedahkan kunci sedemikian
+  (`requireCredentialForManagementScopedKey()` dalam `src/lib/api/requireManagementAuth.ts`).
+  Kunci inferens sahaja kekal terbuka. Penulisan bendera ciri yang dilindungi (`REQUIRE_API_KEY`,
+  bendera Security yang lain, serta bendera SSRF / TLS / skop MCP / sandbox yang disenaraikan dalam
+  [Bendera Ciri](../reference/FEATURE_FLAGS.md#rest-api)) dan penyimpanan tetapan penyamaran PII
+  (`PUT /api/settings/pii`) juga terus memerlukan kelayakan.
+- Tiada kata laluan dikonfigurasikan **dan** tiada pemboleh ubah persekitaran `INITIAL_PASSWORD` → mod
+  bootstrap membenarkan wizard onboarding dan permintaan loopback, tetapi permintaan rangkaian yang
+  terdedah masih memerlukan kelayakan. Pengecualian: penulisan bendera ciri yang dilindungi dan
+  penyimpanan tetapan penyamaran PII (`PUT /api/settings/pii`) memerlukan kelayakan walaupun dari
+  loopback, jadi loopback sahaja tidak mencukupi untuknya.
+- Sebarang ralat DB → gagal secara tertutup (selamat secara lalai).
 
-Penguatkuasaan kunci API klien menggunakan `isRequireApiKeyEnabled()` dalam `src/shared/utils/featureFlags.ts`, bukan bacaan langsung `process.env.REQUIRE_API_KEY`. Ini penting bagi contoh yang dideploy: menukar `REQUIRE_API_KEY` dalam Papan Pemuka → Feature Flags menyimpan override DB dan segera memberi kesan kepada `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` dan semakan pengesahan API klien lain yang berkongsi pembantu ini. Jika stor feature flag tidak dapat dibaca, pengesahan API klien gagal tertutup dan memerlukan kunci.
+Penguatkuasaan kunci API klien menggunakan `isRequireApiKeyEnabled()` dalam `src/shared/utils/featureFlags.ts`, bukan bacaan langsung `process.env.REQUIRE_API_KEY`. Hal ini penting untuk instans yang digunakan: menogol `REQUIRE_API_KEY` dalam Papan Pemuka → Bendera Ciri menyimpan penggantian DB dan serta-merta mempengaruhi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, serta semakan pengesahan API klien lain yang berkongsi pembantu ini. Jika stor bendera ciri tidak dapat dibaca, pengesahan API klien gagal secara tertutup dan memerlukan kunci.
 
 ## Perubahan Pecah Keserasian — v3.8.0
 
@@ -253,20 +374,20 @@ Titik akhir `/api/v1/agents/tasks/*` dan `/api/resilience/model-cooldowns` **kin
 Saluran paip sentiasa mengecap respons dengan:
 
 ```
-x-request-id:               <id korelasi, digemakan dalam badan ralat>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Untuk permintaan yang disahkan, pengepala permintaan huluan (pada bahagian pengendali) turut merangkumi:
+Untuk permintaan yang disahkan, pengepala permintaan huluan (sebelah pengendali) juga termasuk:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4-aksara-terakhir> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (pilihan)
-x-omniroute-auth-scopes:    senarai dipisahkan koma
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Gunakan `assertAuth(req, expectedClass)` dalam pengendali — ia melontarkan `AuthzAssertionError` dengan kod `AUTHZ_NOT_INITIALIZED` jika perisian tengah telah dipintas (berguna untuk mengesan regresi konfigurasi dalam ujian).
+Gunakan `assertAuth(req, expectedClass)` dalam pengendali — ia membuang `AuthzAssertionError` dengan kod `AUTHZ_NOT_INITIALIZED` jika perisian tengah dipintas (bermanfaat untuk menangkap regresi konfigurasi dalam ujian).
 
 ## Lihat Juga
 

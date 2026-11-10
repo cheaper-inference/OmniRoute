@@ -27,6 +27,8 @@ import {
   resolveBaseUrl,
 } from "./validation/urlHelpers";
 import { toValidationErrorResult } from "./validation/transport";
+import { validateOpencodeProvider } from "./validation/opencode";
+import { validateCloudflareAiProvider } from "./validation/cloudflareAi";
 import {
   validateDeepSeekWebProvider,
   validateGrokWebProvider,
@@ -111,6 +113,9 @@ import { validateAiHordeProvider } from "./validation/aihorde";
 import { validateDifyProvider } from "./validation/dify";
 import { validateZyloApiProvider } from "./validation/zylo";
 import { validateInceptionProvider } from "./validation/inception";
+import { validateClineProvider } from "./validation/cline";
+import { validateKilocodeProvider } from "./validation/kilocode";
+import { validateMegabrainProvider } from "./validation/megabrain";
 import { validateAdobeFireflyProvider } from "./validation/adobeFirefly";
 import {
   validateV0VercelProvider,
@@ -188,6 +193,10 @@ export async function validateProviderApiKey({
   // pass `false` for non-loopback callers; direct/internal callers keep the
   // permissive default. See validateDevinCloudAgentProvider for the rationale.
   allowLocalSpawn = true,
+  // A stored connection's own token columns (accessToken / refreshToken / expiresAt), so a
+  // specialty validator judges the token the executor will actually use, not a stale paste.
+  // Omitted when validating a credential that is not stored yet.
+  credentials = {},
 }: any) {
   provider = typeof provider === "string" ? resolveProviderId(provider) : provider;
   const requiresApiKey = !providerAllowsOptionalApiKey(provider);
@@ -227,6 +236,7 @@ export async function validateProviderApiKey({
 
   // ── Specialty provider validation ──
   const SPECIALTY_VALIDATORS = {
+    "cloudflare-ai": validateCloudflareAiProvider,
     "v0-vercel": ({ apiKey, providerSpecificData }: any) =>
       validateV0VercelProvider({ apiKey, providerSpecificData, isLocal }),
     jules: validateJulesProvider,
@@ -270,12 +280,28 @@ export async function validateProviderApiKey({
     // Inception Labs serves GET /v1/models without authentication (200 for any key), so the
     // generic OpenAI-like probe greened bogus keys. Probe the authenticated chat route instead.
     inception: validateInceptionProvider,
+    // Cline and ClinePass serve unauthenticated GET /v1/models (open catalog returning 200 for any key)
+    // and require streaming + Cline client headers on /chat/completions. Probe the authenticated route.
+    cline: validateClineProvider,
+    clinepass: (args: {
+      apiKey?: string;
+      providerSpecificData?: Record<string, unknown> | null;
+      isLocal?: boolean;
+    }) => validateClineProvider({ ...args, provider: "clinepass" }),
+    // Kilo Code serves unauthenticated GET /models (open catalog returning 200 for any key).
+    // Authenticate against /chat/completions with the required X-KILOCODE-EDITORNAME header.
+    kilocode: validateKilocodeProvider,
+    // MegaBrain's /api/openrouter/models is public too; its validator probes the
+    // authenticated /api/profile/limits instead.
+    megabrain: validateMegabrainProvider,
     deepgram: validateDeepgramProvider,
     assemblyai: validateAssemblyAIProvider,
     "rev-ai": validateRevAiProvider,
     soniox: validateSonioxProvider,
     "fal-ai": ({ apiKey, providerSpecificData }: any) =>
       validateImageProviderApiKey({ provider: "fal-ai", apiKey, providerSpecificData }),
+    renderhour: ({ apiKey, providerSpecificData }: any) =>
+      validateImageProviderApiKey({ provider: "renderhour", apiKey, providerSpecificData }),
     "stability-ai": ({ apiKey, providerSpecificData }: any) =>
       validateImageProviderApiKey({ provider: "stability-ai", apiKey, providerSpecificData }),
     "black-forest-labs": ({ apiKey, providerSpecificData }: any) =>
@@ -412,6 +438,7 @@ export async function validateProviderApiKey({
         apiKey,
         providerSpecificData,
         allowLocalSpawn,
+        credentials,
       });
     } catch (error: any) {
       return toValidationErrorResult(error);
@@ -464,6 +491,11 @@ export async function validateProviderApiKey({
     : resolveBaseUrl(validationEntry, providerSpecificData);
 
   try {
+    // OpenCode Zen/Go: probe with the discovery identity, never a free-tier chat probe.
+    if (entry.executor === "opencode") {
+      return await validateOpencodeProvider({ provider, apiKey, providerSpecificData, isLocal });
+    }
+
     if (OPENAI_LIKE_FORMATS.has(entry.format)) {
       return await validateOpenAILikeProvider({
         apiKey,

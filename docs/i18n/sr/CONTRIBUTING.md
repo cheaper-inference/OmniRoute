@@ -13,21 +13,26 @@ i korake usaglašavanja.
 
 ---
 
-## Подешавање развојног окружења
+## Podešavanje razvojnog okruženja
 
-### Предуслови
+### Preduslovi
 
-- **Node.js** `>=22.22.2 <23`, или `>=24.0.0 <27` (препоручено: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ili `>=24.0.0 <27` (preporučeno: 24 LTS)
 - **npm** 10+
 
-> **Корисници npm v11+ (Node 24+):** Након `npm install`, проверите да ли су изворни модули инсталирани:
-> `node -e "require('better-sqlite3')"`. Ако команда не успе уз грешку `MODULE_NOT_FOUND`,
-> покрените `npm approve-scripts better-sqlite3 && npm install`. Погледајте
-> [Решавање проблема](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Windows sa Node 24:** koristite aktuelno izdanje zakrpe za 24 LTS (najmanje 24.20.0).
+> Starija izdanja mogu prekinuti proces nakon uspešnih testova kada `--test-force-exit` zatvori
+> proces. Node-ova [Windows libuv ispravka](https://github.com/nodejs/node/pull/61999) rešava
+> ovaj pad tokom izvršavanja; zadržite provere tvrdnji testova i izlaza pokretača omogućene.
+
+> **Korisnici npm v11+ (Node 24+):** Nakon `npm install`, proverite da li su izvorni moduli instalirani:
+> `node -e "require('better-sqlite3')"`. Ako ne uspe sa greškom `MODULE_NOT_FOUND`,
+> pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte
+> [Rešavanje problema](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Клонирање и инсталација
+### Kloniranje i instalacija
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,94 +40,94 @@ cd OmniRoute
 npm install
 ```
 
-### Променљиве окружења
+### Promenljive okruženja
 
 ```bash
-# Направите своју .env датотеку на основу шаблона
+# Kreirajte svoj .env na osnovu šablona
 cp .env.example .env
 
-# Генеришите неопходне тајне
+# Generišite potrebne tajne
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Кључне променљиве за развој:
+Ključne promenljive za razvoj:
 
-| Променљива             | Подразумевана вредност за развој | Опис                       |
-| ---------------------- | -------------------------------- | -------------------------- |
-| `PORT`                 | `20128`                          | Порт сервера               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | Основни URL за фронтенд    |
-| `JWT_SECRET`           | (генерисати изнад)               | Тајна за потписивање JWT-а |
-| `INITIAL_PASSWORD`     | `CHANGEME`                       | Лозинка за прву пријаву    |
-| `APP_LOG_LEVEL`        | `info`                           | Ниво опширности евиденције |
+| Promenljiva            | Podrazumevana vrednost za razvoj | Opis                           |
+| ---------------------- | -------------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                          | Port servera                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | Osnovni URL frontend-a         |
+| `JWT_SECRET`           | (generišite iznad)               | Tajna za potpisivanje JWT-a    |
+| `INITIAL_PASSWORD`     | `CHANGEME`                       | Lozinka za prvo prijavljivanje |
+| `APP_LOG_LEVEL`        | `info`                           | Nivo detaljnosti zapisnika     |
 
-### Подешавања контролне табле
+### Podešavanja kontrolne table
 
-Контролна табла пружа прекидаче корисничког интерфејса за функције које се такође могу конфигурисати путем променљивих окружења:
+Kontrolna tabla pruža prekidače u korisničkom interfejsu za funkcije koje se takođe mogu konfigurisati putem promenljivih okruženja:
 
-| Локација подешавања   | Прекидач                | Опис                                                   |
-| --------------------- | ----------------------- | ------------------------------------------------------ |
-| Подешавања → Напредно | Режим отклањања грешака | Омогућава евиденцију захтева за отклањање грешака (UI) |
-| Подешавања → Опште    | Видљивост бочне траке   | Приказује/скрива одељке бочне траке                    |
+| Lokacija podešavanja | Prekidač           | Opis                                                  |
+| -------------------- | ------------------ | ----------------------------------------------------- |
+| Settings → Advanced  | Debug Mode         | Omogući zapisnike zahteva za otklanjanje grešaka (UI) |
+| Settings → General   | Sidebar Visibility | Prikaži/sakrij odeljke bočne trake                    |
 
-Ова подешавања се чувају у бази података и опстају након поновних покретања, а када су постављена, имају предност над подразумеваним вредностима променљивих окружења.
+Ova podešavanja se čuvaju u bazi podataka i opstaju nakon ponovnog pokretanja, nadjačavajući podrazumevane vrednosti promenljivih okruženja kada su postavljena.
 
-### Локално покретање
+### Lokalno pokretanje
 
 ```bash
-# Развојни режим (аутоматско поновно учитавање)
+# Razvojni režim (ponovno učitavanje bez ručnog pokretanja)
 npm run dev
 
-# Продукциона изградња
-npm run build    # next build → .build/next/ затим assembleStandalone → dist/
+# Produkciona izgradnja
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Брзо компајлирање само бекенда/API-ја за измене сарадника
+# Brza kompilacija samo backend-a/API-ja za izmene saradnika
 npm run build:contributor
 
-# Изградња издања (чиста поновна изградња + HEAD контролна ознака — обавезно за постављање)
-npm run build:release   # rm -rf .build dist && изградња + уписује dist/BUILD_SHA
+# Izgradnja izdanja (čista ponovna izgradnja + HEAD sentinel — obavezno za postavljanje)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Уобичајена конфигурација порта
+# Uobičajena konfiguracija porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Изградња за сараднике обавља проверу само компајлирањем: не саставља самосталну
-дистрибуцију нити изграђује опционе изворне ресурсе за паковање. Користите редовну продукциону изградњу када
-треба да проверите пакет спреман за испоруку.
+Izgradnja za saradnike obavlja validaciju samo tokom kompilacije: ne sklapa samostalnu
+distribuciju niti izgrađuje opcionalna izvorna sredstva za pakovanje. Koristite standardnu produkcionu
+izgradnju kada treba da proverite paket spreman za isporuku.
 
-### Распоред излазних датотека изградње
+### Raspored izlaza izgradnje
 
-| Директоријум | Садржај                                                                           | Праћено |
-| ------------ | --------------------------------------------------------------------------------- | ------- |
-| `src/`       | Изворни код апликације (TypeScript / TSX)                                         | Да      |
-| `.build/`    | Посредне датотеке — излаз `next build` (игнорише их Git, `distDir = .build/next`) | Не      |
-| `dist/`      | Пакет спреман за испоруку — саставља га `assembleStandalone` (игнорише га Git)    | Не      |
+| Direktorijum | Sadržaj                                                                          | Praćeno |
+| ------------ | -------------------------------------------------------------------------------- | ------- |
+| `src/`       | Izvorni kod aplikacije (TypeScript / TSX)                                        | Da      |
+| `.build/`    | Međurezultati — izlaz komande `next build` (gitignored, `distDir = .build/next`) | Ne      |
+| `dist/`      | Paket spreman za isporuku — sklapa ga `assembleStandalone` (gitignored)          | Ne      |
 
-Процес изградње се извршава у једном пролазу:
+Proces izgradnje odvija se u jednom prolazu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (излаз Next.js-а)
-  └─ assembleStandalone()                 (копира самосталне + статичке + јавне + изворне ресурсе)
-       └─ излаз: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` додатно прво чисти оба директоријума и уписује
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) као контролну ознаку интегритета постављања.
+`npm run build:release` dodatno prvo čisti oba direktorijuma i upisuje
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao kontrolni pokazatelj integriteta za postavljanje.
 
-`npm run build:contributor` користи профил изградње само за бекенд. Он привремено замењује
-датотеке корисничког интерфејса контролне табле помоћним датотекама током изградње, задржава обрађиваче API рута и враћа оригиналне датотеке
-након изградње. Користите `npm run build` за измене које утичу на кориснички интерфејс контролне табле или за потпуну
-проверу издања; профил за сараднике није замена за изградњу издања.
+`npm run build:contributor` koristi profil izgradnje samo za backend. Privremeno zamenjuje datoteke
+korisničkog interfejsa kontrolne table tokom izgradnje, zadržava rukovaoce API ruta i vraća originalne
+datoteke nakon izgradnje. Koristite `npm run build` za izmene koje utiču na korisnički interfejs kontrolne table
+ili za potpunu validaciju izdanja; profil za saradnike nije zamena za izgradnju izdanja.
 
-> **Напомена за постављање на VPS:** удаљени директоријум слике `/usr/lib/node_modules/omniroute/app/`
-> остаје непромењен. Вештине за постављање помоћу rsync-а синхронизују садржај директоријума `dist/` у њега.
-> Промењена је само путања излаза изградње унутар репозиторијума (`app/` → `dist/`).
+> **Napomena za VPS postavljanje:** udaljeni direktorijum slike `/usr/lib/node_modules/omniroute/app/`
+> ostaje nepromenjen. Veštine za postavljanje rsync-om sinhronizuju sadržaj direktorijuma `dist/` u njega.
+> Promenjena je samo putanja izlaza izgradnje unutar repozitorijuma (`app/` → `dist/`).
 
-Подразумевани URL-ови:
+Podrazumevani URL-ovi:
 
-- **Контролна табла**: `http://localhost:20128/dashboard`
+- **Kontrolna tabla**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -172,88 +177,89 @@ Obim (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `m
 
 ---
 
-## Pokretanje testova
+## Покретање тестова
 
 ```bash
-# Svi testovi (unit + vitest + ecosystem + e2e)
+# Сви тестови (јединични + vitest + екосистемски + e2e)
 npm run test:all
 
-# Jedan test fajl (Node.js native test runner — većina testova koristi ovo)
+# Једна тест-датотека (уграђени Node.js покретач тестова — већина тестова користи њега)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Samo unit testovi na koje utiče vaša izmena (isti TIA selektor kao CI gate, #8084)
-npm run test:scoped            # izmene u poslednjem commit-u (ili u radnom stablu)
-npm run test:scoped:staged     # samo staged izmene — dobro se kombinuje sa pre-commit pokretanjem
-npm run test:scoped:full       # prvo ponovo izgradi import-graph mapu (nakon dodavanja/pomeranja fajlova)
-# Exit 1 + "run the full suite" znači da je izmenjen hub fajl (tsconfig, package.json, …) ili
-# nemapiran source fajl — selektor bezbedno otkazuje, nikada ne preskoči nešto neprimetno.
+# Само јединични тестови на које утиче ваша измена (исти TIA селектор као у CI контролној тачки, #8084)
+npm run test:scoped            # измене у последњој потврди (или радном стаблу)
+npm run test:scoped:staged     # само припремљене измене — добро се уклапа са покретањем пре потврде
+npm run test:scoped:full       # прво поново изграђује мапу графа увоза (након додавања/премештања датотека)
+# Излазни код 1 + „покрените цео скуп“ значи да је измењена централна датотека (tsconfig, package.json, …) или
+# немапирани извор — селектор безбедно прекида рад и никада неприметно не прескаче тестове.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP сервер, autoCombo, кеш)
 npm run test:vitest
 
-# E2E testovi (zahteva Playwright)
+# E2E тестови (захтевају Playwright)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# E2E тестови клијената протокола (MCP транспорти, A2A)
 npm run test:protocols:e2e
 
-# Testovi kompatibilnosti ekosistema
+# Тестови компатибилности екосистема
 npm run test:ecosystem
 
-# Coverage gate: 60% statements/lines/functions/branches
+# Контролна тачка покривености: 60% исказа/линија/функција/грана
 npm run test:coverage
 npm run coverage:report
 
-# Provera lint-a i formatiranja
+# Провера линтовања + форматирања
 npm run lint
 npm run check
 
-# Gated real-upstream combo smoke test (zahteva VPS pristup + kredite kod pravih provajdera)
-# Pogađa PRAVE provajdere — nešto košta. NIKADA se ne pokreće u CI. Uredno se preskače bez gate-a.
-# Potreban: ssh root@192.168.0.15 pristup (izvor je read-only DB snapshot sa VPS-a).
+# Контролисани кратки комбиновани тест са стварним узводним системима (захтева приступ VPS-у + кредите стварног добављача)
+# Приступа СТВАРНИМ добављачима — кошта мало. НИКАДА се не покреће у CI-ју. Уредно се прескаче без контролне променљиве.
+# Потребно: приступ преко ssh root@192.168.0.15 (учитава снимак базе података само за читање са VPS-а).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — obični Node ESM skriptovi, direktno pogađaju live .15 server.
-# Zahteva: ssh root@192.168.0.15 pristup (combo se kreira/uklanja preko SSH sqlite).
-# Pogađa PRAVE provajdere (mali trošak). Kreira/briše samo __live_test__* combo-e. NIKADA se ne pokreće u CI.
-# REQUIRE_API_KEY=false na .15 tako da API ključ nije potreban, ali poštuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ako su postavljeni.
-npm run test:combo:live:vps              # 7 HTTP scenarija (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # dodaje pravi cross-provider failover scenario (ukupno 8)
+# Фаза 3 кратког теста активног VPS-а — обичне Node ESM скрипте које директно приступају активном .15 серверу.
+# Захтева: приступ преко ssh root@192.168.0.15 (комбинације се креирају/уклањају преко SSH sqlite).
+# Приступа СТВАРНИМ добављачима (мали трошак). Креира/брише само __live_test__* комбинације. НИКАДА се не покреће у CI-ју.
+# На .15 је REQUIRE_API_KEY=false, па API кључ није потребан, али поштује COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ако су подешени.
+npm run test:combo:live:vps              # 7 HTTP сценарија (приоритет/редом/пондерисано/трошак/фузија/аутоматски + исправност)
+npm run test:combo:live:vps:failover     # додаје стварни сценарио пребацивања између добављача (укупно 8)
 ```
 
-Napomene o coverage-u:
+Напомене о покривености:
 
-- `npm run test:coverage` mери source coverage za glavni unit test suite, isključuje `tests/**`, i uključuje `open-sse/**`
-- Pull request-ovi moraju održati coverage gate na **60%+** statements/lines/functions/branches
-- Ako PR menja production kod u `src/`, `open-sse/`, `electron/` ili `bin/`, mora dodati ili ažurirati automatizovane testove u istom PR-u
-- `npm run coverage:report` ispisuje detaljan izveštaj po fajlovima iz poslednjeg coverage pokretanja
-- `npm run test:coverage:legacy` čuva starije metrike za istorijsko poređenje
-- Pogledajte `docs/ops/COVERAGE_PLAN.md` za fazni plan poboljšanja coverage-a
+- `npm run test:coverage` мери покривеност изворног кода за главни скуп јединичних тестова, изузима `tests/**` и укључује `open-sse/**`
+- Захтеви за спајање морају да одрже контролну тачку покривености на **60%+** исказа/линија/функција/грана
+- Ако PR мења продукциони кôд у `src/`, `open-sse/`, `electron/` или `bin/`, мора да дода или ажурира аутоматизоване тестове у истом PR-у
+- `npm run coverage:report` приказује детаљан извештај по датотекама из последњег покретања провере покривености
+- `npm run test:coverage:legacy` чува старију метрику ради историјског поређења
+- Погледајте `docs/ops/COVERAGE_PLAN.md` за фазни план побољшања покривености
 
-### Zahtevi za Pull Request
+### Захтеви за захтев за спајање
 
-Prije otvaranja PR-a, koristite
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) da pokrenete fokusiranu petlju za
-ono što ste izmenili. Ceo unit suite (4 CI shard-a), Vitest, **60%+** coverage gate, i
-production build su odgovornost CI-ja — pokretanje istih lokalno ne daje nikakav dodatni signal koji
-PR provere već ne bi dale, a na manjim mašinama može zasititi host (#8084):
+Пре отварања PR-а, користите
+[Златну путању за доприносе](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) да бисте покренули усмерени циклус за
+оно што сте изменили. Комплетан скуп јединичних тестова (4 CI партиције), Vitest, контролна тачка покривености од **60%+** и
+продукциона изградња одговорност су CI-ја — њихово локално покретање не пружа додатне информације које вам PR
+провере већ неће дати, а на слабијим машинама може да преоптерети домаћина (#8084):
 
-- Pokrenite test fajlove koji pokrivaju vašu izmenu: `node --import tsx/esm --test tests/unit/<file>.test.ts`
-- Pokrenite `npm run lint`
-- Uključite ili ažurirajte automatizovane testove u istom PR-u kad god se menja production kod
-- Uključite izmenjene ili dodate test fajlove u opis PR-a kada je production kod izmenjen
-- Provjerite SonarQube rezultat na PR-u kada su project secrets konfigurisani u CI
+- Покрените тест-датотеке које покривају вашу измену: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Покрените `npm run lint`
+- Додајте или ажурирајте аутоматизоване тестове у истом PR-у кад год се промени продукциони кôд
+- У `node:test` датотекама поставите сваки `await` највишег нивоа (као што је `await import(...)`) пре првог `test()` / `describe()`: под `--test-force-exit`, тестови регистровани после њега могу неприметно да остану непокренути (#18045; спроводи се помоћу `npm run check:test-tla-order`)
+- У опис PR-а укључите измењене или додате тест-датотеке када је продукциони кôд промењен
+- Проверите SonarQube резултат на PR-у када су тајне пројекта конфигурисане у CI-ју
 
-Trenutni status testova: **122 unit test fajla** koji pokrivaju:
+Тренутно стање тестова: **122 датотеке јединичних тестова** које покривају:
 
-- Provider translatore i konverziju formata
-- Rate limiting, circuit breaker i resilience
-- Semantic cache, idempotency, praćenje progresa
-- Operacije baze podataka i šemu (21 DB modul)
-- OAuth tokove i autentifikaciju
-- Validaciju API endpoint-a (Zod v4)
-- MCP server alate i primenu scope-a
-- Sisteme Memory i Skills
+- Преводиоце добављача и конверзију формата
+- Ограничавање брзине, прекидач кола и отпорност
+- Семантички кеш, идемпотентност и праћење напретка
+- Операције над базом података и шему (21 модул базе података)
+- OAuth токове и аутентификацију
+- Валидацију API крајњих тачака (Zod v4)
+- Алатке MCP сервера и спровођење опсега
+- Системе меморије и вештина
 
 ---
 

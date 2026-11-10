@@ -12,7 +12,10 @@ test("#12633: openai-responses format on opencode-zen sends x-api-key, not Autho
     "muse-spark-1.2-contributor-free"
   );
 
-  assert.equal(headers["x-api-key"], "sk-zen-test");
+  // The model is gated, so the credential is the anonymous /inference lane's `public`
+  // literal (measured 2026-10-21: x-api-key public → 200, a real key → 403). The header
+  // NAME is still x-api-key — that is what #12633 is about.
+  assert.equal(headers["x-api-key"], "public");
   assert.equal(headers["Authorization"], undefined);
 });
 

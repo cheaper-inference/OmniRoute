@@ -99,10 +99,15 @@ describe("resilience/settings normalize split-guard", () => {
   it("host exposes DEFAULT_RESILIENCE_SETTINGS with the full section set", () => {
     const keys = Object.keys(DEFAULT_RESILIENCE_SETTINGS).sort();
     assert.deepEqual(keys, [
+      "antigravityTimingTelemetry",
       "comboCooldownWait",
       "connectionCooldown",
       // Global default cadence for the background credential health check sweep.
       "credentialHealthCheck",
+      // Opt-in latency term for p2c account selection (weight 0 = off).
+      "p2cLatency",
+      // Opt-in preferred-account timeout fallback section.
+      "preferredAccountFailover",
       "providerBreaker",
       "providerCooldown",
       "providerQuotaOverrides",

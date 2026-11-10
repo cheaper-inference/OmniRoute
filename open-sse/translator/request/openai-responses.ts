@@ -15,6 +15,7 @@ import {
 } from "../../config/providerRegistry.ts";
 import { collectResponsesTools } from "./openai-responses/additionalTools.ts";
 import {
+  collectFlatToolNames,
   flattenNamespaceToolName,
   resolveNamespacedToolChoiceName,
 } from "./openai-responses/namespaceFlatten.ts";
@@ -22,6 +23,7 @@ import { mergeHistoricalToolIdentities } from "./openai-responses/historyToolIde
 import { openaiToOpenAIResponsesRequest } from "./openai-responses/toResponses.ts";
 import { coerceToolCallArguments } from "../helpers/toolArguments.ts";
 import { chatStrictFrom } from "../helpers/toolStrict.ts";
+import { stripInvalidSchemaConstructs } from "../helpers/schemaCoercion.ts";
 import {
   JsonRecord,
   RESPONSES_STORE_MARKER,
@@ -86,7 +88,11 @@ function toolOutputContentToString(output: unknown): string {
  * can carry them to the downstream model — the `tool` message itself is
  * text-only on Chat Completions, which is why the placeholder exists (#8459).
  */
-function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
+function toolOutputImagesToChatParts(
+  output: unknown,
+  droppedImages: Set<unknown>,
+  toolCallId: string
+): JsonRecord[] {
   if (!Array.isArray(output)) return [];
   const images: JsonRecord[] = [];
   for (const item of output) {
@@ -95,6 +101,13 @@ function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
     if (rec.type !== "input_image") continue;
     const url = toString(rec.image_url);
     if (!url) continue;
+    if (droppedImages.has(item)) {
+      images.push({
+        type: "text",
+        text: `[Earlier tool output image omitted to bound request size (tool_call_id: ${toolCallId})]`,
+      });
+      continue;
+    }
     const part: JsonRecord = { type: "image_url", image_url: { url } };
     if (rec.detail !== undefined) {
       (part.image_url as JsonRecord).detail = rec.detail;
@@ -102,6 +115,72 @@ function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
     images.push(part);
   }
   return images;
+}
+
+function positiveIntEnv(raw: string | undefined, fallback: number): number {
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+/** The `output` payload a Responses input item carries for a tool result, if it is one. */
+function toolResultOutputOf(item: JsonRecord): unknown {
+  const itemType = toString(item.type);
+  if (itemType === "function_call_output" || itemType === "custom_tool_call_output") {
+    return item.output;
+  }
+  const isToolRoleMessage = toString(item.role) === "tool" && (itemType === "message" || !itemType);
+  return isToolRoleMessage ? item.content : undefined;
+}
+
+/** Every `input_image` part (with its URL byte length) across all tool outputs, oldest first. */
+function collectToolOutputImages(inputItems: unknown[]): { part: unknown; bytes: number }[] {
+  const images: { part: unknown; bytes: number }[] = [];
+  for (const itemValue of inputItems) {
+    const output = toolResultOutputOf(toRecord(itemValue));
+    if (!Array.isArray(output)) continue;
+    for (const part of output) {
+      const rec = toRecord(part);
+      if (rec.type !== "input_image") continue;
+      const url = toString(rec.image_url);
+      if (url) images.push({ part, bytes: url.length });
+    }
+  }
+  return images;
+}
+
+/**
+ * #18684: every turn re-sends all historical tool-output images, so a long session
+ * grows the Chat request without bound until the upstream rejects the body. Keep the
+ * newest images that fit the count and byte budget and return the older ones to omit.
+ */
+function selectDroppedToolOutputImages(inputItems: unknown[]): Set<unknown> {
+  const maxCount = positiveIntEnv(process.env.OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_COUNT, 16);
+  const maxBytes = positiveIntEnv(
+    process.env.OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_BYTES,
+    20 * 1024 * 1024
+  );
+  const images = collectToolOutputImages(inputItems);
+
+  const dropped = new Set<unknown>();
+  let kept = 0;
+  let keptBytes = 0;
+  let totalBytes = 0;
+  for (let i = images.length - 1; i >= 0; i--) {
+    const { part, bytes } = images[i];
+    totalBytes += bytes;
+    if (dropped.size === 0 && kept < maxCount && keptBytes + bytes <= maxBytes) {
+      kept++;
+      keptBytes += bytes;
+    } else {
+      dropped.add(part);
+    }
+  }
+  if (dropped.size > 0) {
+    console.warn(
+      `TOOL_OUTPUT_IMAGE_CAP kept=${kept} dropped=${dropped.size} bytesBefore=${totalBytes} bytesAfter=${keptBytes}`
+    );
+  }
+  return dropped;
 }
 
 function appendReasoningContent(current: unknown, next: string): string {
@@ -138,6 +217,25 @@ function normalizeRoleBasedToolCalls(toolCalls: unknown): JsonRecord[] {
 }
 
 /**
+ * #18679: client tool schemas reach the Chat upstream as-is, including the invalid
+ * constructs that deep-truncating harnesses emit (`"enum": "[MaxDepth]"`, index-keyed
+ * objects where an array is required). Strict OpenAI-compatible validators reject them
+ * before inference (Ollama Cloud: `cannot unmarshal string into ... ToolProperty.enum`).
+ * Run every emitted `function.parameters` through the same sanitizer the Claude path uses.
+ */
+function sanitizeChatToolParameters(tools: unknown[]): unknown[] {
+  return tools.map((toolValue) => {
+    const tool = toRecord(toolValue);
+    const fn = toRecord(tool.function);
+    if (fn.parameters === undefined) return toolValue;
+    return {
+      ...tool,
+      function: { ...fn, parameters: stripInvalidSchemaConstructs(fn.parameters) },
+    };
+  });
+}
+
+/**
  * Convert OpenAI Responses API request to OpenAI Chat Completions format
  */
 export function openaiResponsesToOpenAIRequest(
@@ -160,6 +258,7 @@ export function openaiResponsesToOpenAIRequest(
   // `additional_tools` input items. Normalize both forms before validation/conversion so
   // every downgraded provider receives the same available tool set.
   const tools = collectResponsesTools(root.tools, rawInputItems);
+  const flatToolNames = collectFlatToolNames(tools);
   if (tools.length > 0) {
     for (const toolValue of tools) {
       const tool = toRecord(toolValue);
@@ -288,6 +387,7 @@ export function openaiResponsesToOpenAIRequest(
     rawInputItems.length === 0
       ? [{ type: "message", role: "user", content: [{ type: "input_text", text: "..." }] }]
       : rawInputItems;
+  const droppedToolImages = selectDroppedToolOutputImages(inputItems);
   for (const itemValue of inputItems) {
     const item = toRecord(itemValue);
 
@@ -322,12 +422,17 @@ export function openaiResponsesToOpenAIRequest(
       }
 
       if (toString(item.role) === "tool") {
+        const toolCallId = claimToolCallId(item.tool_call_id);
         messages.push({
           role: "tool",
-          tool_call_id: claimToolCallId(item.tool_call_id),
+          tool_call_id: toolCallId,
           content: toolOutputContentToString(item.content),
         });
-        const roleToolImages = toolOutputImagesToChatParts(item.content);
+        const roleToolImages = toolOutputImagesToChatParts(
+          item.content,
+          droppedToolImages,
+          toolCallId
+        );
         if (roleToolImages.length > 0) {
           messages.push({ role: "user", content: roleToolImages });
         }
@@ -409,7 +514,9 @@ export function openaiResponsesToOpenAIRequest(
     if (itemType === "function_call") {
       // Skip tool calls with empty names to avoid infinite placeholder_tool loops
       const leafName = toString(item.name).trim();
-      const fnName = leafName ? flattenNamespaceToolName(toString(item.namespace), leafName) : "";
+      const fnName = leafName
+        ? flattenNamespaceToolName(toString(item.namespace), leafName, flatToolNames)
+        : "";
       if (!fnName) {
         continue;
       }
@@ -468,14 +575,15 @@ export function openaiResponsesToOpenAIRequest(
       }
 
       // Add tool result immediately
+      const toolCallId = claimToolCallId(item.call_id);
       messages.push({
         role: "tool",
-        tool_call_id: claimToolCallId(item.call_id),
+        tool_call_id: toolCallId,
         content: toolOutputContentToString(item.output),
       });
       // #14111: Chat Completions `tool` content is text-only, so a following
       // multimodal user message carries the output's images to vision models.
-      const toolImages = toolOutputImagesToChatParts(item.output);
+      const toolImages = toolOutputImagesToChatParts(item.output, droppedToolImages, toolCallId);
       if (toolImages.length > 0) {
         messages.push({ role: "user", content: toolImages });
       }
@@ -488,7 +596,9 @@ export function openaiResponsesToOpenAIRequest(
       // arguments wrap the raw string as { input }, matching the { input: string }
       // schema the request-side tools normalization advertises for custom tools.
       const leafName = toString(item.name).trim();
-      const fnName = leafName ? flattenNamespaceToolName(toString(item.namespace), leafName) : "";
+      const fnName = leafName
+        ? flattenNamespaceToolName(toString(item.namespace), leafName, flatToolNames)
+        : "";
       if (!fnName) {
         continue;
       }
@@ -542,12 +652,17 @@ export function openaiResponsesToOpenAIRequest(
       } catch {
         // Not JSON — keep the raw output as the tool content.
       }
+      const toolCallId = claimToolCallId(item.call_id);
       messages.push({
         role: "tool",
-        tool_call_id: claimToolCallId(item.call_id),
+        tool_call_id: toolCallId,
         content: toolContent,
       });
-      const customToolImages = toolOutputImagesToChatParts(item.output);
+      const customToolImages = toolOutputImagesToChatParts(
+        item.output,
+        droppedToolImages,
+        toolCallId
+      );
       if (customToolImages.length > 0) {
         messages.push({ role: "user", content: customToolImages });
       }
@@ -658,7 +773,7 @@ export function openaiResponsesToOpenAIRequest(
               // identity for the response-side seam keyed on that qualified
               // wire name — qualified names cannot collide across namespaces,
               // so there is no ambiguity to detect/drop here anymore.
-              const wireName = flattenNamespaceToolName(nsName, leaf);
+              const wireName = flattenNamespaceToolName(nsName, leaf, flatToolNames);
               if (nsName && leaf) {
                 namespaceToolIdentityMap.set(wireName, { namespace: nsName, name: leaf });
               }
@@ -789,6 +904,7 @@ export function openaiResponsesToOpenAIRequest(
           },
         };
       });
+    result.tools = sanitizeChatToolParameters(result.tools as unknown[]);
   }
 
   // Filter orphaned tool results (no matching tool_call in assistant messages)
@@ -835,7 +951,7 @@ export function openaiResponsesToOpenAIRequest(
     );
     const forcedName = (name: unknown) =>
       typeof name === "string"
-        ? resolveNamespacedToolChoiceName(tc.namespace, name, chatToolNames)
+        ? resolveNamespacedToolChoiceName(tc.namespace, name, chatToolNames, flatToolNames)
         : name;
     // Custom/freeform tools are normalized to Chat function tools with an { input: string }
     // schema above. Force the normalized function here while response-side custom-tool metadata
@@ -874,7 +990,12 @@ export function openaiResponsesToOpenAIRequest(
           );
         }
         allowedNames.add(
-          resolveNamespacedToolChoiceName(allowed.namespace, allowedName, chatToolNames)
+          resolveNamespacedToolChoiceName(
+            allowed.namespace,
+            allowedName,
+            chatToolNames,
+            flatToolNames
+          )
         );
       }
 
@@ -906,15 +1027,12 @@ export function openaiResponsesToOpenAIRequest(
     }
   }
 
-  // #12141: When translated Chat tools is empty/absent, strip neutral tool_choice
-  // ("auto" / "none") so strict Chat endpoints (e.g. vLLM) do not reject with 400
-  // ("When using tool_choice, tools must be set"). Contradictory choices like "required"
-  // or forced functions are preserved so the upstream error remains visible.
+  // #12141: Strip dangling "auto" for strict Chat endpoints without tools.
+  // Explicit "none" forbids more tool calls, including after a tool loop;
+  // preserve it even when there are no definitions. Contradictory "required"
+  // or forced-function choices retain their existing upstream-error behavior.
   const finalChatTools = Array.isArray(result.tools) ? result.tools : [];
-  if (
-    finalChatTools.length === 0 &&
-    (result.tool_choice === "auto" || result.tool_choice === "none")
-  ) {
+  if (finalChatTools.length === 0 && result.tool_choice === "auto") {
     delete result.tool_choice;
   }
 

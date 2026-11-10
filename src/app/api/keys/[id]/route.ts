@@ -5,6 +5,11 @@ import {
   updateApiKeyPermissions,
   ApiKeyPolicyInvariantError,
 } from "@/lib/db/apiKeys";
+import {
+  deleteApiKeySelfServiceSettings,
+  getApiKeySelfServiceSettings,
+  updateApiKeySelfServiceSettings,
+} from "@/lib/db/apiKeySelfServiceSettings";
 import { isCloudEnabled } from "@/lib/db/settings";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
@@ -34,6 +39,7 @@ export async function GET(request, { params }) {
     const keyValue = typeof key.key === "string" ? key.key : null;
     return NextResponse.json({
       ...key,
+      ...getApiKeySelfServiceSettings(id),
       key: keyValue ? keyValue.slice(0, 8) + "****" + keyValue.slice(-4) : null,
     });
   } catch (error) {
@@ -76,6 +82,7 @@ export async function PATCH(request, { params }) {
       blockedModels,
       allowedCombos,
       allowedConnections,
+      preferredConnections,
       noLog,
       autoResolve,
       isActive,
@@ -90,6 +97,7 @@ export async function PATCH(request, { params }) {
       streamDefaultMode,
       compressionEnabled,
       allowAutoCombos,
+      allowCcDiscoveryAliases,
       catalogScope,
       forcedModel,
       cacheDefaultMode,
@@ -99,7 +107,10 @@ export async function PATCH(request, { params }) {
       usageLimitEnabled,
       dailyUsageLimitUsd,
       weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd,
       chaosModeEnabled,
+      sharedQuotaProviders,
+      anthropicRateLimitHeaders,
     } = validation.data;
 
     const scopeAuthError = await requireCredentialForManagementScopedKey(request, scopes);
@@ -116,6 +127,7 @@ export async function PATCH(request, { params }) {
     } else if (allowedConnections !== undefined) {
       payload.allowedConnections = allowedConnections;
     }
+    if (preferredConnections !== undefined) payload.preferredConnections = preferredConnections;
     if (noLog !== undefined) payload.noLog = noLog;
     if (autoResolve !== undefined) payload.autoResolve = autoResolve;
     if (isActive !== undefined) payload.isActive = isActive;
@@ -131,6 +143,8 @@ export async function PATCH(request, { params }) {
     if (compressionEnabled !== undefined) payload.compressionEnabled = compressionEnabled;
     if (codexServiceMode !== undefined) payload.codexServiceMode = codexServiceMode;
     if (allowAutoCombos !== undefined) payload.allowAutoCombos = allowAutoCombos;
+    if (allowCcDiscoveryAliases !== undefined)
+      payload.allowCcDiscoveryAliases = allowCcDiscoveryAliases;
     if (catalogScope !== undefined) payload.catalogScope = catalogScope;
     if (forcedModel !== undefined) payload.forcedModel = forcedModel;
     if (cacheDefaultMode !== undefined) payload.cacheDefaultMode = cacheDefaultMode;
@@ -140,12 +154,23 @@ export async function PATCH(request, { params }) {
     if (usageLimitEnabled !== undefined) payload.usageLimitEnabled = usageLimitEnabled;
     if (dailyUsageLimitUsd !== undefined) payload.dailyUsageLimitUsd = dailyUsageLimitUsd;
     if (weeklyUsageLimitUsd !== undefined) payload.weeklyUsageLimitUsd = weeklyUsageLimitUsd;
+    if (fiveHourUsageLimitUsd !== undefined) payload.fiveHourUsageLimitUsd = fiveHourUsageLimitUsd;
     if (chaosModeEnabled !== undefined) payload.chaosModeEnabled = chaosModeEnabled;
 
-    const updated = await updateApiKeyPermissions(id, payload);
+    const hasSelfServiceUpdate =
+      sharedQuotaProviders !== undefined || anthropicRateLimitHeaders !== undefined;
+    // updateApiKeyPermissions() returns false for an empty payload, so a
+    // settings-only PATCH checks the key exists instead.
+    const updated =
+      Object.keys(payload).length > 0
+        ? await updateApiKeyPermissions(id, payload)
+        : hasSelfServiceUpdate && Boolean(await getApiKeyById(id));
     if (!updated) {
       return NextResponse.json({ error: "Key not found" }, { status: 404 });
     }
+    const selfServiceSettings = hasSelfServiceUpdate
+      ? updateApiKeySelfServiceSettings(id, { sharedQuotaProviders, anthropicRateLimitHeaders })
+      : null;
 
     // Auto sync to Cloud if enabled
     await syncKeysToCloudIfEnabled();
@@ -158,6 +183,7 @@ export async function PATCH(request, { params }) {
       ...(blockedModels !== undefined && { blockedModels }),
       ...(allowedCombos !== undefined && { allowedCombos }),
       ...(allowedConnections !== undefined && { allowedConnections }),
+      ...(preferredConnections !== undefined && { preferredConnections }),
       ...(noLog !== undefined && { noLog }),
       ...(autoResolve !== undefined && { autoResolve }),
       ...(isActive !== undefined && { isActive }),
@@ -171,6 +197,7 @@ export async function PATCH(request, { params }) {
       ...(allowedEndpoints !== undefined && { allowedEndpoints }),
       ...(streamDefaultMode !== undefined && { streamDefaultMode }),
       ...(compressionEnabled !== undefined && { compressionEnabled }),
+      ...(allowCcDiscoveryAliases !== undefined && { allowCcDiscoveryAliases }),
       ...(cacheDefaultMode !== undefined && { cacheDefaultMode }),
       ...(codexServiceMode !== undefined && { codexServiceMode }),
       ...(forcedModel !== undefined && { forcedModel }),
@@ -179,7 +206,16 @@ export async function PATCH(request, { params }) {
       ...(usageLimitEnabled !== undefined && { usageLimitEnabled }),
       ...(dailyUsageLimitUsd !== undefined && { dailyUsageLimitUsd }),
       ...(weeklyUsageLimitUsd !== undefined && { weeklyUsageLimitUsd }),
+      ...(fiveHourUsageLimitUsd !== undefined && { fiveHourUsageLimitUsd }),
       ...(chaosModeEnabled !== undefined && { chaosModeEnabled }),
+      ...(selfServiceSettings && {
+        ...(sharedQuotaProviders !== undefined && {
+          sharedQuotaProviders: selfServiceSettings.sharedQuotaProviders,
+        }),
+        ...(anthropicRateLimitHeaders !== undefined && {
+          anthropicRateLimitHeaders: selfServiceSettings.anthropicRateLimitHeaders,
+        }),
+      }),
     });
   } catch (error) {
     if (
@@ -212,6 +248,7 @@ export async function DELETE(request, { params }) {
     if (!deleted) {
       return NextResponse.json({ error: "Key not found" }, { status: 404 });
     }
+    deleteApiKeySelfServiceSettings(id);
 
     // Auto sync to Cloud if enabled
     await syncKeysToCloudIfEnabled();

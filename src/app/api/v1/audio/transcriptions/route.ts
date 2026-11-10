@@ -2,6 +2,7 @@
 export const maxDuration = 300;
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { handleAudioTranscription } from "@omniroute/open-sse/handlers/audioTranscription.ts";
+import { fetchRemoteMedia } from "@/shared/network/remoteImageFetch";
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
@@ -103,7 +104,8 @@ async function transcribeWithModel(
   startTime: number,
   apiKeyId?: string | null,
   apiKeyName?: string | null,
-  allowedConnections: string[] | null = null
+  allowedConnections: string[] | null = null,
+  signal: AbortSignal | null = null
 ): Promise<Response> {
   // Provider nodes eligible for transcription: this route's own audio type plus
   // general chat/responses gateways. Remote hosts are opt-in (default OFF).
@@ -207,6 +209,8 @@ async function transcribeWithModel(
     credentials,
     resolvedProvider: providerConfig,
     resolvedModel,
+    remoteMediaFetcher: fetchRemoteMedia,
+    signal,
   });
 
   const connectionId = (credentials as { connectionId?: string } | null)?.connectionId || undefined;
@@ -277,7 +281,8 @@ async function transcribeWithAlias(
   apiKeyId: string | null,
   apiKeyName: string | null,
   apiKey: string | null,
-  allowedConnections: string[] | null
+  allowedConnections: string[] | null,
+  signal: AbortSignal | null = null
 ) {
   const resolvedModel = await resolveTranscriptionAlias(modelStr);
   if (
@@ -294,7 +299,8 @@ async function transcribeWithAlias(
     startTime,
     apiKeyId,
     apiKeyName,
-    allowedConnections
+    allowedConnections,
+    signal
   );
 }
 
@@ -361,7 +367,8 @@ export async function POST(request) {
               startTime,
               apiKeyId,
               apiKeyName,
-              allowedConnections
+              allowedConnections,
+              request.signal ?? null
             ),
           isModelAvailable: createComboTargetKeyGate(policy, modelStr),
           log,
@@ -383,6 +390,7 @@ export async function POST(request) {
     apiKeyId,
     apiKeyName,
     policy.apiKey,
-    allowedConnections
+    allowedConnections,
+    request.signal ?? null
   );
 }

@@ -17,6 +17,7 @@ import {
   hasValidUsage,
   normalizeUsage,
 } from "./usageTracking.ts";
+import { cacheCreationFields } from "./cacheWriteUsage.ts";
 
 export type PartialStreamUsage = {
   prompt_tokens: number;
@@ -79,6 +80,16 @@ function positive(value: unknown): number {
   return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
 }
 
+function appendUsageDetails(usage: PartialStreamUsage, normalized: Record<string, unknown>): void {
+  const cacheRead =
+    positive(normalized.cache_read_input_tokens) || positive(normalized.cached_tokens);
+  if (cacheRead) usage.cache_read_input_tokens = cacheRead;
+  const cacheCreation = positive(normalized.cache_creation_input_tokens);
+  if (cacheCreation) usage.cache_creation_input_tokens = cacheCreation;
+  const reasoning = positive(normalized.reasoning_tokens);
+  if (reasoning) usage.reasoning_tokens = reasoning;
+}
+
 /**
  * Resolve the usage to record for a stream that ended before its terminal event.
  *
@@ -128,17 +139,12 @@ export function resolvePartialStreamUsage({
   if (prompt === 0 && completion === 0) return null;
 
   const usage: PartialStreamUsage = {
+    ...cacheCreationFields(normalized),
     prompt_tokens: prompt,
     completion_tokens: completion,
     total_tokens: prompt + completion,
   };
-  const cacheRead =
-    positive(normalized.cache_read_input_tokens) || positive(normalized.cached_tokens);
-  if (cacheRead) usage.cache_read_input_tokens = cacheRead;
-  const cacheCreation = positive(normalized.cache_creation_input_tokens);
-  if (cacheCreation) usage.cache_creation_input_tokens = cacheCreation;
-  const reasoning = positive(normalized.reasoning_tokens);
-  if (reasoning) usage.reasoning_tokens = reasoning;
+  appendUsageDetails(usage, normalized);
   if (estimated) usage.estimated = true;
   return usage;
 }

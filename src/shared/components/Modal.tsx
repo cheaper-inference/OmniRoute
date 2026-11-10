@@ -3,6 +3,17 @@
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  type AlertDialogTone,
+} from "@omniroute/ui-kit/alert-dialog";
+import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -60,19 +71,40 @@ const TOASTER_SELECTOR = '[data-slot="toaster"]';
 const isFromToaster = (event: Event) =>
   event.target instanceof Element && event.target.closest(TOASTER_SELECTOR) !== null;
 
+// Dialogs take ~70% of the viewport from the `sm` breakpoint up, so settings-style modals
+// (API key permissions, provider config, routing editors) stop cramming their forms into a
+// 28rem column. Below `sm` they keep the kit's `calc(100vw - 3rem)` width with its 30rem cap
+// lifted (`max-w-none`), i.e. full width minus the mobile gutter. Only `sm` keeps a fixed
+// narrow width — it is the confirm/alert dialog size.
+const WIDE = "max-w-none sm:w-[70vw] sm:max-w-[70vw]";
 const SIZES = {
   sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-xl",
-  full: "max-w-4xl",
+  md: WIDE,
+  lg: WIDE,
+  xl: WIDE,
+  full: WIDE,
 } as const;
+
+// A menu item leaves the DOM as soon as its menu closes, so it cannot take focus back. The kit
+// DropdownMenu (Radix) labels its content with the trigger's id: climb to the trigger that
+// opened the menu (and past submenu triggers, which unmount with their parent menu).
+function menuTriggerFor(element: HTMLElement): HTMLElement {
+  let target = element;
+  for (let depth = 0; depth < 5; depth += 1) {
+    const menu = target.closest<HTMLElement>('[role="menu"][aria-labelledby]');
+    const trigger = menu && document.getElementById(menu.getAttribute("aria-labelledby") ?? "");
+    if (!trigger || trigger === target) break;
+    target = trigger;
+  }
+  return target;
+}
 
 // The element focused right now, unless it is <body> (nothing to return to).
 function currentFocus(): HTMLElement | null {
   if (typeof document === "undefined") return null;
   const active = document.activeElement;
-  return active instanceof HTMLElement && active !== document.body ? active : null;
+  if (!(active instanceof HTMLElement) || active === document.body) return null;
+  return menuTriggerFor(active);
 }
 
 // Initial focus, the focus trap, Escape, body scroll lock and the aria-labelledby
@@ -135,8 +167,7 @@ export default function Modal({
         className={cn("p-0 max-h-[calc(100vh-3rem)]", SIZES[size], className)}
         style={inlineMaxWidth ? { maxWidth: inlineMaxWidth } : undefined}
         onOpenAutoFocus={() => {
-          const active = document.activeElement;
-          openerRef.current = renderOpener ?? (active instanceof HTMLElement ? active : null);
+          openerRef.current = renderOpener ?? currentFocus();
         }}
         onCloseAutoFocus={(e) => {
           e.preventDefault();
@@ -186,7 +217,14 @@ export default function Modal({
   );
 }
 
-// Confirm Modal helper
+// The legacy variant vocabulary, read as the kit's confirmation tones.
+const CONFIRM_TONES: Partial<Record<ButtonVariant, AlertDialogTone>> = {
+  danger: "destructive",
+  warning: "warning",
+};
+
+// The kit AlertDialog: role="alertdialog", focus starts on Cancel, an outside click does nothing
+// and there is no close button. Focus goes back to the opener through the kit, not `Modal`.
 export function ConfirmModal({
   isOpen,
   onClose,
@@ -199,25 +237,39 @@ export function ConfirmModal({
   loading = false,
 }: ConfirmModalProps) {
   const t = useTranslations("common");
+  const [confirming, setConfirming] = useState(false);
+  const busy = loading || confirming;
+
+  const handleConfirm = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // The kit action closes after onClick. Callers close through `isOpen`, and some keep the
+    // dialog open on purpose when the work fails.
+    event.preventDefault();
+    const result = onConfirm();
+    if (!(result instanceof Promise)) return;
+    setConfirming(true);
+    void result.finally(() => setConfirming(false));
+  };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title ?? t("confirmTitle")}
-      size="sm"
-      footer={
-        <>
-          <Button variant="ghost" onClick={onClose} disabled={loading}>
-            {cancelText ?? t("cancel")}
-          </Button>
-          <Button variant={variant} onClick={() => void onConfirm()} loading={loading}>
-            {confirmText ?? t("confirmAction")}
-          </Button>
-        </>
-      }
+    <AlertDialog
+      tone={CONFIRM_TONES[variant] ?? "default"}
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <p className="text-text-muted">{message}</p>
-    </Modal>
+      <AlertDialogContent className="max-w-sm">
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title ?? t("confirmTitle")}</AlertDialogTitle>
+          <AlertDialogDescription>{message}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={busy}>{cancelText ?? t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction loading={busy} onClick={handleConfirm}>
+            {confirmText ?? t("confirmAction")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

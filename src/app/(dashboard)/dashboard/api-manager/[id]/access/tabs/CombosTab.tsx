@@ -2,6 +2,7 @@
 
 import { AllowedCombosSection } from "@/app/(dashboard)/dashboard/api-manager/components/AllowedCombosSection";
 import { ApiKeyAutoCombosToggle } from "@/app/(dashboard)/dashboard/api-manager/components/ApiKeyAutoCombosToggle";
+import { ApiKeyCcDiscoveryAliasesToggle } from "@/app/(dashboard)/dashboard/api-manager/components/ApiKeyCcDiscoveryAliasesToggle";
 import type { ApiKeyAccessFormState } from "../useApiKeyAccessForm";
 import TabErrorList from "./TabErrorList";
 
@@ -20,6 +21,7 @@ interface CombosTabProps {
   setSelectedCombos: (combos: string[]) => void;
   toggleCombo: (comboName: string) => void;
   setAllowAutoCombos: (enabled: boolean) => void;
+  setAllowCcDiscoveryAliases: (enabled: boolean) => void;
   errors?: string[];
 }
 
@@ -30,6 +32,7 @@ export default function CombosTab({
   setSelectedCombos,
   toggleCombo,
   setAllowAutoCombos,
+  setAllowCcDiscoveryAliases,
   errors,
 }: CombosTabProps) {
   return (
@@ -40,6 +43,11 @@ export default function CombosTab({
       <ApiKeyAutoCombosToggle
         enabled={formState.allowAutoCombos}
         onToggle={() => setAllowAutoCombos(!formState.allowAutoCombos)}
+      />
+
+      <ApiKeyCcDiscoveryAliasesToggle
+        enabled={formState.allowCcDiscoveryAliases}
+        onToggle={() => setAllowCcDiscoveryAliases(!formState.allowCcDiscoveryAliases)}
       />
 
       {/* Allowed Combos Section */}

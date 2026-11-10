@@ -116,10 +116,14 @@ export function listForRequest(
 /** Release a request list once its request is over. Write back first. */
 export function releaseRequestList(
   origin: unknown,
-  health: Map<string, ScopedAccountHealth>
+  health: Map<string, ScopedAccountHealth>,
+  onMutate?: () => void
 ): void {
   if (!isObject(origin)) return;
   const list = scoped.get(origin);
-  if (list) writeBackHealth(health, list);
+  if (list) {
+    writeBackHealth(health, list);
+    onMutate?.();
+  }
   scoped.delete(origin);
 }
