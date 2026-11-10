@@ -102,9 +102,11 @@ Search Tools Studio 将 `/dashboard/search-tools` 从基础搜索试验场升级
 `ProviderCatalog.tsx` 会展示来自 `GET /api/search/providers` 的完整提供者列表
 （在 F4 中扩展为包含抓取提供者）：
 
-| `kind` | `"search"`（20 个提供者）或 `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search、parallel-search） |
+| `kind` | `"search"`（23 个提供者）或 `"fetch"`（firecrawl、jina-reader、tavily-search、tinyfish、nimble-search、anysearch-search、parallel-search） |
 
 状态通过检查凭据是否存在以及所有密钥当前是否均处于冷却状态，**在请求时动态确定**。
+
+`codex-search` (Codex Web Search): 使用已连接的 Codex (ChatGPT) 账号，无需单独的密钥。 每次搜索都会消耗订阅配额，耗时约 10–40 s。 请求指定该提供商时才会运行；自动选择需要启用默认关闭的 `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` 功能标志。
 
 ---
 

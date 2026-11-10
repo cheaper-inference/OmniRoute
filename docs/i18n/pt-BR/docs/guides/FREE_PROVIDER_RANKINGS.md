@@ -13,7 +13,7 @@
 
 ## O que é
 
-OmniRoute registra 386 provedores, incluindo 155 entradas de catálogo marcadas**free/no-auth** (no-auth, free-tier OAuth ou free-tier API key — consulte o [Guia de níveis gratuitos](../getting-started/FREE-TIERS-GUIDE.md) e o [diretório completo de níveis gratuitos](../reference/FREE_TIERS.md) ). O problema: os provedores gratuitos variam muito na qualidade do modelo. Um provedor sem autenticação que atenda a um modelo de fronteira é muito mais útil do que aquele que atenda a um pequeno modelo legado.
+OmniRoute registra 387 provedores, incluindo 155 entradas de catálogo marcadas**free/no-auth** (no-auth, free-tier OAuth ou free-tier API key — consulte o [Guia de níveis gratuitos](../getting-started/FREE-TIERS-GUIDE.md) e o [diretório completo de níveis gratuitos](../reference/FREE_TIERS.md) ). O problema: os provedores gratuitos variam muito na qualidade do modelo. Um provedor sem autenticação que atenda a um modelo de fronteira é muito mais útil do que aquele que atenda a um pequeno modelo legado.
 
 **Classificações de provedores gratuitos** respostas "** qual provedor gratuito me oferece o melhor modelo?** " juntando-se ao catálogo de cada provedor gratuito com** índices de qualidade de crowdsourcing** do** Tabela de classificação da Arena AI** (preferência humana ELO, a mesma ideia por trás da arena LMArena chatbot). Os provedores são então classificados pela força de seus** melhor modelo grátis** .
 

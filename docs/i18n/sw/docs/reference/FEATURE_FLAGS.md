@@ -44,7 +44,7 @@ Bendera ya boolean huchukuliwa kuwa **imewashwa** wakati thamani yake inayotumik
 
 ## Katalogi ya Bendera
 
-Bendera 120 katika kategoria 6.** Chaguomsingi** ni ufafanuzi chaguo-msingi — thamani inayotumika wakati hakuna ubatilishaji wa DB au utofauti wa mazingira haupo.
+Bendera 121 katika kategoria 6.** Chaguomsingi** ni ufafanuzi chaguo-msingi — thamani inayotumika wakati hakuna ubatilishaji wa DB au utofauti wa mazingira haupo.
 
 ### Usalama (11)
 
@@ -115,7 +115,7 @@ Bendera 120 katika kategoria 6.** Chaguomsingi** ni ufafanuzi chaguo-msingi — 
 
 Wakati `UNPRICED_USAGE_BUDGET_POLICY` imesanidiwa kwa uwazi (DB kubatilisha kabla ya mazingira), inachukua nafasi ya kwanza kuliko `USAGE_LIMIT_IGNORE_UNPRICED`. Bila thamani dhahiri ya enum, opt-out ya boolean ya juu huchagua `count_as_zero`; vinginevyo chaguo-msingi ni `fail_closed`. Thamani batili za enum na hifadhi ya bendera ya kipengele isiyoweza kusomeka imeshindwa kufungwa. Wala kuchagua kutoka si kulegeza matumizi ya bei au imeshindwa kuangalia bei. Utekelezaji na ripoti ya msimamizi hutatua sera hiyo yenye ufanisi.
 
-### Muda wa kukimbia (57)
+### Muda wa kukimbia (58)
 
 | Ufunguo                                        | Aina    | Chaguomsingi | Anzisha upya | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ---------------------------------------------- | ------- | ------------ | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Wakati `UNPRICED_USAGE_BUDGET_POLICY` imesanidiwa kwa uwazi (DB kubatilisha kabl
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`      |              | Acha kutoa na kusambaza `max` juhudi za hoja za Cursor Grok 4.7 (#17386): hati za Cursor zinaorodhesha low/medium/high/xhigh pekee , kwa hivyo lakabu mbadala ya `grok-4.7-max` hutoweka kwenye katalogi na ombi la juhudi `max` hutumwa bila kigezo cha juhudi. Imezimwa kwa chaguo-msingi: `max` inasalia kutolewa na kusambazwa, kama uchunguzi wa moja kwa moja AgentService/Run uliikubali.                                                                                                                                                                                                                                                                                                                                                                |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false`      |              | Tuma kumbukumbu za Majibu kama mstari tupu badala ya tukio la majibu.in_progress, ili muhtasari wa sintetiki hauwezi kamwe kuchukua nafasi ya jibu halisi katika SDK rasmi. Laini tupu haitumi tukio la SSE, kwa hivyo shirika la ulinzi la mteja ambalo linaweka upya matukio pekee halitawekwa upya wakati wa awamu ya kimya kirefu. Imezimwa kwa chaguomsingi: vipima muda hutuma tukio maalum la majibu.in_progress.                                                                                                                                                                                                                                                                                                                                        |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`      |              | Katika takwimu za akiba ya mbano, hesabu ombi lililobanwa kwa mtoa huduma wa kuweka akiba kiambishi kiotomatiki (OpenAI, Codex, Azure, au muunganisho maalum unaotangaza uwekaji wa papo hapo kwa uondoaji wa alama) kama makadirio ya akiba ambayo hayana alama za `cache_control` (#17114). Kadirio ni ishara ya ustahiki wa akiba, sio hit iliyozingatiwa, kwa hivyo kiwango kilichoripotiwa cha watoa huduma hao kinaelekea 100%. Imezimwa kwa chaguo-msingi: ombi lililobeba viambishi vya `cache_control` pekee kwa mtoa huduma wa akiba ndilo linalohesabiwa kama makadirio, kwa hivyo watoa huduma wa kiambishi kiambishi otomatiki wanaendelea kuripoti 0.                                                                                             |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false`      |              | Huruhusu utafutaji wa wavuti wa kiotomatiki kupitia `codex-search` kwa akaunti ya Codex iliyounganishwa wakati `provider` haijatajwa wazi. Ikiwa hakuna mtoa huduma mwenye vitambulisho vinavyotumika, hii ni njia ya mwisho kabla ya watoa huduma wasiohitaji ufunguo, na pia ni mbadala wakati huduma nyingine inaposhindwa (#17933). Kila utafutaji hutumia mgao wa usajili wa ChatGPT na huchukua takriban sekunde 10–40. Imezimwa kwa chaguo-msingi; `codex-search` huendeshwa tu inapoombwa wazi.                                                                                                                                                                                                                                                         |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Hurejesha kila bendera pamoja na thamani yake, chanzo na muhtasari.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

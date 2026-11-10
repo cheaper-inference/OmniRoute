@@ -102,9 +102,11 @@ Search Tools Studio는 `/dashboard/search-tools`를 기본 검색 플레이그�
 `ProviderCatalog.tsx`는 `GET /api/search/providers`에서 전체 제공자 목록을 노출합니다
 (F4에서 fetch 제공자를 포함하도록 확장됨):
 
-| `kind` | `"search"`(20개 제공자) 또는 `"fetch"`(firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"`(23개 제공자) 또는 `"fetch"`(firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 상태는 자격 증명의 존재 여부와 모든 키가 현재 쿨다운 상태인지 확인하여 **요청 시점에 파생**됩니다.
+
+`codex-search` (Codex Web Search): 별도의 키 없이 연결된 Codex (ChatGPT) 계정을 사용합니다. 각 검색은 구독 할당량을 사용하며, 약 10–40 s가 걸립니다. 요청에서 지정하면 실행됩니다. 자동 선택에는 기본적으로 꺼져 있는 `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` 플래그가 필요합니다.
 
 ---
 

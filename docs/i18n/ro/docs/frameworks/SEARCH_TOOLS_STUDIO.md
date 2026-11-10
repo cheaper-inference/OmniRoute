@@ -104,10 +104,12 @@ Rulează aceeași interogare/același URL prin maximum **4 furnizori în paralel
 `ProviderCatalog.tsx` expune lista completă de furnizori din `GET /api/search/providers`
 (extinsă în F4 pentru a include furnizorii de preluare):
 
-| `kind` | `"search"` (20 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Starea este **determinată în momentul solicitării**, verificând dacă există credențiale și dacă
 toate cheile se află în prezent în perioada de așteptare.
+
+`codex-search` (Codex Web Search): Folosește conturile Codex (ChatGPT) conectate, fără o cheie separată. Fiecare căutare consumă cota abonamentului și durează aproximativ 10–40 s. Se execută când cererea îl indică; selectarea automată necesită indicatorul `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, dezactivat implicit.
 
 ---
 

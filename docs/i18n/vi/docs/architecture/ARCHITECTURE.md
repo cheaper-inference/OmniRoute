@@ -15,7 +15,7 @@ Nó cung cấp một endpoint duy nhất tương thích với OpenAI (`/v1/*`) v
 
 Các khả năng cốt lõi:
 
-- Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (386 nhà cung cấp, 159 mô-đun thực thi)
+- Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (387 nhà cung cấp, 159 mô-đun thực thi)
 - Chuyển đổi yêu cầu/phản hồi giữa các định dạng của nhà cung cấp
 - Dự phòng theo tổ hợp mô hình (chuỗi nhiều mô hình)
 - Các bước tổ hợp có cấu trúc (`provider + model + connection`) với thứ tự thời gian chạy theo `compositeTiers`

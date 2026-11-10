@@ -44,7 +44,7 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 
 ## Bayraq kataloqu
 
-6 kateqoriya üzrə 120 bayraq.** Defolt** defolt tərifdir — nə DB ləğvi, nə də mühit dəyişəni mövcud olmadıqda istifadə edilən dəyərdir.
+6 kateqoriya üzrə 121 bayraq.** Defolt** defolt tərifdir — nə DB ləğvi, nə də mühit dəyişəni mövcud olmadıqda istifadə edilən dəyərdir.
 
 ### Təhlükəsizlik (11)
 
@@ -115,7 +115,7 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 
 `UNPRICED_USAGE_BUDGET_POLICY` açıq şəkildə konfiqurasiya edildikdə (mühitdən əvvəl DB ləğv edilir), `USAGE_LIMIT_IGNORE_UNPRICED` üzərində üstünlük təşkil edir. Heç bir açıq enum dəyəri olmadan, yuxarı məntiqi imtina seçimi `count_as_zero`; əks halda defolt `fail_closed`. Yanlış enum dəyərləri və oxunmayan xüsusiyyət-bayraq yaddaşı bağlanmadı. Nə imtina qiymətli xərcləri, nə də uğursuz qiymət axtarışını rahatlaşdırmır. İcra və inzibatçı hesabatı eyni effektiv siyasəti həll edir.
 
-### İcra müddəti (57)
+### İcra müddəti (58)
 
 | Açar                                           | Növ     | Defolt  | Yenidən başladın | Təsvir                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------- | ------- | ------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                  | Cursor Grok 4.7 (#17386) üçün `max` əsaslandırma səyini təklif etməyi və yönləndirməyi dayandırın: Cursor-nin sənədlər siyahısı yalnız low/medium/high/xhigh, beləliklə, `grok-4.7-max` ehtiyat ləqəbi kataloqdan yox olur və səy parametri olmadan `max` səy sorğusu göndərilir. Defolt olaraq deaktivdir: `max` təklif olunur və ötürülür, çünki canlı AgentService/Run zondu bunu qəbul etmişdir.                                                                                                                                                                                                                                                                                                  |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |                  | Cavabları cavab.in_progress hadisəsi əvəzinə boş sətir kimi göndərin, beləliklə, sintetik snapshot heç vaxt rəsmi SDK dakı real cavabı əvəz edə bilməz. Boş sətir heç bir SSE hadisəsi göndərmir, ona görə də yalnız hadisələrdə sıfırlanan müştəri nəzarətçisi uzun səssiz faza zamanı sıfırlanmayacaq. Defolt olaraq söndürülür: taymerlər etibarlı cavab.in_progress hadisəsini göndərir.                                                                                                                                                                                                                                                                                                          |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                  | Sıxılma keş statistiklərində, avtomatik prefiks-keşləmə provayderinə (OpenAI, Codex, Azure və ya markerin çıxarılması ilə operativ keşləşdirməni elan edən fərdi əlaqə) sıxılmış sorğunu hətta `cache_control` markerləri (#17114) olmadan da təxmin edilən keş vurulması kimi hesablayın. Təxmin, müşahidə olunan hit deyil, keş-uyğunluq siqnalıdır, ona görə də həmin provayderlər üçün bildirilən hit dərəcəsi 100%-ə doğru meyl edir. Defolt olaraq deaktivdir: yalnız keşləmə provayderinə `cache_control` markerlərini daşıyan sorğu təxmin edilən hit kimi sayılır, beləliklə, avtomatik prefiks təminatçıları 0-a hesabat verməyə davam edirlər.                                             |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |                  | Açıq şəkildə `provider` göstərilməyən avtomatik veb axtarışına `codex-search` vasitəsilə qoşulmuş Codex (ChatGPT) hesabından istifadə etməyə icazə verir: giriş məlumatları olan heç bir provayder istifadə edilə bilmədikdə açarsız provayderlərdən əvvəl son seçim kimi və nasazlıq zamanı ehtiyat variant kimi (#17933). Hər axtarış abunəlik kvotasını sərf edir və təxminən 10–40 s çəkir. Standart olaraq söndürülüb: `codex-search` yalnız sorğu onu açıq şəkildə göstərdikdə işləyir.                                                                                                                                                                                                         |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Hər bir bayrağı effektiv dəyəri, mənbəyi və xülasəsi ilə qaytarır.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

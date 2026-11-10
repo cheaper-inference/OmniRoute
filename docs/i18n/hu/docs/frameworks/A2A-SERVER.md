@@ -156,7 +156,7 @@ OmniRoute 6 A2A képességet tesz elérhetővé `src/lib/a2a/taskExecution.ts::A
 | Egészségügyi jelentés   | `health-report`      | Aggregálja a megszakítót, a lehűlést, a lezárási állapotot szolgáltatónként                                                                                                        | egészség, rugalmasság            | "Minden szolgáltató egészségi állapotának megjelenítése" |
 | Képességek listázása    | `list-capabilities`  | Visszaadja a teljes, 45 bejegyzésből álló Agent Skills katalógust (23 API + 21 CLI + 1 konfiguráció) leértékelési táblázatként nyers SKILL.md URLs fel a kontextus beillesztéséhez | katalógus, felfedezés, készségek | "List all OmniRoute képességek"                          |
 
-> Az ügynökkártyát összhangban kell tartani az élő 386-es szolgáltatókatalógussal; A szolgáltatók száma és free/no-auth metaadatok a futásidejű nyilvántartásból származnak.
+> Az ügynökkártyát összhangban kell tartani az élő 387-es szolgáltatókatalógussal; A szolgáltatók száma és free/no-auth metaadatok a futásidejű nyilvántartásból származnak.
 
 ### `list-capabilities` Skill Detail
 

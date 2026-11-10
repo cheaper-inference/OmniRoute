@@ -103,10 +103,12 @@ Studio с три раздела, обединяващо уеб търсене, �
 `ProviderCatalog.tsx` показва пълния списък с доставчици от `GET /api/search/providers`
 (разширен във F4, за да включва доставчици за извличане):
 
-| `kind` | `"search"` (20 доставчици) или `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 доставчици) или `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Състоянието се **определя по време на заявката**, като се проверява дали съществуват идентификационни данни и дали
 всички ключове в момента са в период на изчакване.
+
+`codex-search` (Codex Web Search): Използва свързаните ви акаунти Codex (ChatGPT), без отделен ключ. Всяко търсене изразходва квота от абонамента и отнема около 10–40 s. Изпълнява се, когато заявката го посочи; автоматичният избор изисква флага `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, изключен по подразбиране.
 
 ---
 

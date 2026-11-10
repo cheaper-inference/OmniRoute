@@ -44,7 +44,7 @@ Flag boolean dianggap **diaktifkan** ketika nilai efektifnya adalah `"true"`,
 
 ## Katalog Bendera
 
-120 bendera di 6 kategori.** Bawaan** adalah definisi default — nilai yang digunakan ketika tidak ada penggantian DB atau variabel lingkungan.
+121 bendera di 6 kategori.** Bawaan** adalah definisi default — nilai yang digunakan ketika tidak ada penggantian DB atau variabel lingkungan.
 
 ### Keamanan (11)
 
@@ -115,7 +115,7 @@ Flag boolean dianggap **diaktifkan** ketika nilai efektifnya adalah `"true"`,
 
 Ketika `UNPRICED_USAGE_BUDGET_POLICY` dikonfigurasi secara eksplisit (DB override sebelum lingkungan), ini akan diutamakan daripada `USAGE_LIMIT_IGNORE_UNPRICED`. Tanpa nilai enum eksplisit, penyisihan boolean upstream memilih `count_as_zero`; jika tidak, defaultnya adalah `fail_closed`. Nilai enum yang tidak valid dan penyimpanan tanda fitur yang tidak dapat dibaca gagal ditutup. Tidak ada pilihan untuk tidak ikut serta yang melonggarkan pembelanjaan harga atau pencarian harga yang gagal. Penegakan dan laporan administrator menyelesaikan kebijakan efektif yang sama.
 
-### Waktu tayang (57)
+### Waktu tayang (58)
 
 | Kunci                                          | Jenis   | Bawaan  | Mulai ulang | Keterangan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------- | ------- | ------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Ketika `UNPRICED_USAGE_BUDGET_POLICY` dikonfigurasi secara eksplisit (DB overrid
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |             | Berhenti menawarkan dan meneruskan upaya penalaran `max` untuk Cursor Grok 4.7 (#17386): dokumen Cursor hanya mencantumkan low/medium/high/xhigh, sehingga alias cadangan `grok-4.7-max` menghilang dari katalog dan permintaan upaya `max` dikirim tanpa parameter upaya. Nonaktif secara default: `max` tetap ditawarkan dan diteruskan, karena probe AgentService/Run langsung menerimanya.                                                                                                                                                                                                                                                                                                                                                            |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |             | Send Responses keepalives sebagai baris kosong, bukan peristiwa respon.in_progress, sehingga snapshot sintetis tidak akan pernah bisa menggantikan respons sebenarnya di SDK resmi. Baris kosong tidak mengirimkan peristiwa SSE, sehingga pengawas klien yang mengatur ulang hanya pada peristiwa tidak akan diatur ulang selama fase diam yang panjang. Nonaktif secara default: pengatur waktu mengirimkan peristiwa respon.in_progress yang valid dengan spesifikasi.                                                                                                                                                                                                                                                                                 |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |             | Dalam statistik cache kompresi, hitung permintaan terkompresi ke penyedia cache awalan otomatis (OpenAI, Codex, Azure, atau koneksi khusus yang mendeklarasikan cache cepat dengan penghapusan penanda) sebagai perkiraan cache yang dicapai bahkan tanpa penanda `cache_control` (#17114). Estimasi tersebut merupakan sinyal kelayakan cache, bukan hit yang teramati, sehingga tingkat hit yang dilaporkan untuk penyedia tersebut cenderung menuju 100%. Nonaktif secara default: hanya permintaan yang membawa penanda `cache_control` ke penyedia cache yang dihitung sebagai perkiraan hit, sehingga penyedia awalan otomatis terus melaporkan 0.                                                                                                  |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |             | Mengizinkan pencarian web otomatis tanpa `provider` eksplisit menggunakan akun Codex (ChatGPT) yang terhubung melalui `codex-search`: sebagai pilihan terakhir sebelum penyedia tanpa kunci ketika tidak ada penyedia berkredensial yang dapat digunakan, dan sebagai alternatif saat terjadi kegagalan (#17933). Setiap pencarian memakai kuota langganan dan memerlukan sekitar 10–40 s. Nonaktif secara default: `codex-search` hanya berjalan saat permintaan menyebutkannya secara eksplisit.                                                                                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Mengembalikan setiap tanda dengan nilai efektif, sumber, dan ringkasannya.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

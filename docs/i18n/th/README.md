@@ -15,7 +15,7 @@
 
 **สร้างโดย [ดิเอโก ซูซ่า](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                   |        เวอร์ชัน 3.8.50         | **เวอร์ชัน 3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :----------------------------: | :-----------------: | :-------------------: |
-| ผู้ให้บริการ 🌐                   |              352               |       **358**       |          386          |
+| ผู้ให้บริการ 🌐                   |              352               |       **358**       |          387          |
 | 🧠 รูปแบบการแชทที่ไม่ซ้ำใคร IDs   |              1320              |      **1374**       |         1535          |
 | สะพาน Modality 🖼️                 | การมองเห็น 🆕 เสียง + วิดีโอ + |          ✓          |           ✓           |
 | แคตตาล็อก 📡 Radar ฟรี            |      การเลือกเข้าร่วม 🆕       |          ✓          |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="สิ่งที่ทำให้ OmniRoute โดดเด่น — ภาพรวมฟีเจอร์ ณ เวลาหนึ่งเทียบกับ 9router, OpenRouter, CLIProxyAPI และ LiteLLM ครอบคลุม 13 ความสามารถ OmniRoute: 386 ผู้ให้บริการ, มี free tier มากกว่า 150 รายการในตัว, กลยุทธ์การกำหนดเส้นทาง 20 แบบ, การบีบอัด token 12 engine, มี MCP server ในตัวพร้อม 110 เครื่องมือ, โปรโตคอล agent A2A, หน่วยความจำถาวร, guardrails, cloud agents, TLS fingerprint stealth, รองรับ Desktop/Termux/PWA และ 67 ภาษา UI i18n OmniRoute ใช้สัญญาอนุญาต MIT และโฮสต์เองได้ ความสามารถและจำนวนของคู่แข่งอาจเปลี่ยนแปลงได้; ดูวิธีการที่ลิงก์ไว้."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="สิ่งที่ทำให้ OmniRoute โดดเด่น — ภาพรวมฟีเจอร์ ณ เวลาหนึ่งเทียบกับ 9router, OpenRouter, CLIProxyAPI และ LiteLLM ครอบคลุม 13 ความสามารถ OmniRoute: 387 ผู้ให้บริการ, มี free tier มากกว่า 150 รายการในตัว, กลยุทธ์การกำหนดเส้นทาง 20 แบบ, การบีบอัด token 12 engine, มี MCP server ในตัวพร้อม 110 เครื่องมือ, โปรโตคอล agent A2A, หน่วยความจำถาวร, guardrails, cloud agents, TLS fingerprint stealth, รองรับ Desktop/Termux/PWA และ 67 ภาษา UI i18n OmniRoute ใช้สัญญาอนุญาต MIT และโฮสต์เองได้ ความสามารถและจำนวนของคู่แข่งอาจเปลี่ยนแปลงได้; ดูวิธีการที่ลิงก์ไว้."/>
 
 <sub>📊 วิธีการเปรียบเทียบฉบับเต็ม &amp; รายละเอียดแต่ละฟีเจอร์เทียบกับ 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar เป็นฟีเจอร์ที่ต้องเลือกเ�
 - **🖼️ จุดสิ้นสุดใหม่** — `/v1/ocr` (Mistral OCR) และ `/v1/audio/translations` (สไตล์กระซิบ) ล้อมรอบพื้นผิวสื่อ → [API อ้างอิง](docs/reference/API_REFERENCE.md)
 - **🎨 การสร้างภาพ / วิดีโอ / เสียง** — หนึ่ง API สำหรับสื่อ: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind และผู้ให้บริการคำพูดเช่น ElevenLabs การอ้างอิง → [API](docs/reference/API_REFERENCE.md)
 - **การปรับใช้และการดำเนินการ 🌍** — Reverse-proxy `basePath`, ตรวจจับอัตโนมัติในภาษาเบราว์เซอร์, การติดตามอุปกรณ์ต่อคีย์, ความน่าเชื่อถือ MITM แบบไม่รูท, การแปล zh-TW [สิ่งแวดล้อม](docs/reference/ENVIRONMENT.md) →
-- **🤝 ผู้ให้บริการและตัวแทนเพิ่มเติม** ตัวแทนคลาวด์ — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) พร้อมเบราว์เซอร์ + OAuth เข้าสู่ระบบ, การ์ดเฟิร์สคลาส Ollama, Claude Opus 5 และ Sonnet 5, ความร่วมมืออย่างเป็นทางการของ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… และการปรับปรุงใหม่**แค็ตตาล็อกผู้ให้บริการ 386 ราย** . [ผู้ให้บริการ](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 ผู้ให้บริการและตัวแทนเพิ่มเติม** ตัวแทนคลาวด์ — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) พร้อมเบราว์เซอร์ + OAuth เข้าสู่ระบบ, การ์ดเฟิร์สคลาส Ollama, Claude Opus 5 และ Sonnet 5, ความร่วมมืออย่างเป็นทางการของ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… และการปรับปรุงใหม่**แค็ตตาล็อกผู้ให้บริการ 387 ราย** . [ผู้ให้บริการ](docs/reference/PROVIDER_REFERENCE.md) →
 - **ความโปร่งใสของการกำหนดเส้นทาง 📡** — ทุกการตอบสนองจะมีส่วนหัว `X-OmniRoute-Decision` ตั้งชื่อ strategy/provider/latency ที่ให้บริการนั้น กลยุทธ์คำสั่งผสม `cache-optimized` ใหม่ + Auto-Combo `cacheAffinity` แฟคเตอร์กำหนดเส้นทางคำขอซ้ำกลับไปยังการเชื่อมต่อที่เก็บคำนำหน้าที่แคชไว้ และจุดสิ้นสุด `/v1/auto-combo/{channel}/candidates` แบบอ่านอย่างเดียวจะแสดงพูลผู้สมัครสดของช่อง `auto/*` → [ออโต้คอมโบ](docs/routing/AUTO-COMBO.md)
 - **⚡ ประสิทธิภาพท้องถิ่นและอินฟาเรด** — คลิกเดียว Redis ในพื้นที่, Cloudflare Workers / Deno Deploy ตัวปรับใช้รีเลย์, Bifrost & Mux เป็นบริการฝังตัวที่ได้รับการดูแล [บริการฝังตัว](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 อยู่ในกล่องด้วย** เฟรมเวิร์กปลั๊กอิน — ตลาด +, เฟรมเวิร์กทักษะ Omni/Agent/GitHub, การรวม Obsidian vault (เครื่องมือ MCP 22 อัน), แบตช์และไฟล์ที่เข้ากันได้กับ OpenAI APIs, แคชการตอบสนองความหมาย, gamification พร้อมลีดเดอร์บอร์ด, การค้นพบเอเจนต์ ACP (เอเจนต์ในตัว 15 ตัว), การส่งออกบันทึกตามกำหนดเวลาไปยัง BigQuery, `auto/chaos` การกระจายหลายโมเดลแบบขนาน, บอทบริดจ์ Telegram, ตัวจัดการเวอร์ชันในแอป และผู้ให้บริการฟรี LMArena-ELO การจัดอันดับ [เอกสาร](docs/README.md) →
@@ -678,11 +678,11 @@ omniroute configure codex          # ใช้ได้กับ: claude opencod
 
 <div align="center">
 
-## ผู้ให้บริการ 🌐 386 AI — 156 ทำเครื่องหมายแคตตาล็อกฟรี
+## ผู้ให้บริการ 🌐 387 AI — 156 ทำเครื่องหมายแคตตาล็อกฟรี
 
 </div>
 
-> **ผู้ให้บริการที่ลงทะเบียนแล้ว 386 ราย** ผ่านการแชท สื่อ การค้นหา ท้องถิ่น คลาวด์เอเจนต์ และระบบ รวมถึงคอลเลกชั่นต่างๆ **156 ซึ่งมีข้อมูลเมตาการค้นพบ `hasFree: true`** . การลงทะเบียนโมเดลการแชทครอบคลุมถึง **ผู้ให้บริการ 245 ราย / คู่โมเดลผู้ให้บริการที่แตกต่างกัน 3,172 คู่ / โมเดลดิบ IDs 1,535 ราย** ; มีแคตตาล็อกงบประมาณฟรีแยกต่างหาก **466 แถวต่อรุ่น** ,**34 พูลที่เกิดซ้ำ** และ **52 recurring/keyless ผู้ให้บริการฟรีตลอดไป** . สิ่งเหล่านี้เป็นตัวส่วนที่แตกต่างกันตามการออกแบบ คำจำกัดความและการคำนวณที่ซ้ำกันของพูลอยู่ใน [การอ้างอิงผู้ให้บริการ](docs/reference/PROVIDER_REFERENCE.md) และ [Free Tiers](docs/reference/FREE_TIERS.md)
+> **ผู้ให้บริการที่ลงทะเบียนแล้ว 387 ราย** ผ่านการแชท สื่อ การค้นหา ท้องถิ่น คลาวด์เอเจนต์ และระบบ รวมถึงคอลเลกชั่นต่างๆ **156 ซึ่งมีข้อมูลเมตาการค้นพบ `hasFree: true`** . การลงทะเบียนโมเดลการแชทครอบคลุมถึง **ผู้ให้บริการ 245 ราย / คู่โมเดลผู้ให้บริการที่แตกต่างกัน 3,172 คู่ / โมเดลดิบ IDs 1,535 ราย** ; มีแคตตาล็อกงบประมาณฟรีแยกต่างหาก **466 แถวต่อรุ่น** ,**34 พูลที่เกิดซ้ำ** และ **52 recurring/keyless ผู้ให้บริการฟรีตลอดไป** . สิ่งเหล่านี้เป็นตัวส่วนที่แตกต่างกันตามการออกแบบ คำจำกัดความและการคำนวณที่ซ้ำกันของพูลอยู่ใน [การอ้างอิงผู้ให้บริการ](docs/reference/PROVIDER_REFERENCE.md) และ [Free Tiers](docs/reference/FREE_TIERS.md)
 
 <div align="center">
 

@@ -102,9 +102,11 @@ Aynı sorguyu/URL'yi en fazla **4 sağlayıcıda paralel olarak** çalıştırı
 `ProviderCatalog.tsx`, `GET /api/search/providers` uç noktasından tam sağlayıcı listesini sunar
 (F4'te getirme sağlayıcılarını içerecek şekilde genişletilmiştir):
 
-| `kind` | `"search"` (20 sağlayıcı) veya `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 sağlayıcı) veya `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Durum, kimlik bilgilerinin mevcut olup olmadığı ve tüm anahtarların o anda bekleme süresinde olup olmadığı kontrol edilerek **istek sırasında türetilir**.
+
+`codex-search` (Codex Web Search): Ayrı bir anahtar gerektirmeden bağlı Codex (ChatGPT) hesaplarınızı kullanır. Her arama abonelik kotasını tüketir ve yaklaşık 10–40 s sürer. İstek onu belirttiğinde çalışır; otomatik seçim, varsayılan olarak kapalı olan `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` bayrağını gerektirir.
 
 ---
 

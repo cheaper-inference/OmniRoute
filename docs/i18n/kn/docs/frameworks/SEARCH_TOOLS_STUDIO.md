@@ -103,9 +103,11 @@ Search Tools Studio, `/dashboard/search-tools` ಅನ್ನು ಮೂಲಭೂ�
 `ProviderCatalog.tsx`, `GET /api/search/providers` ನಿಂದ ಸಂಪೂರ್ಣ ಪ್ರೊವೈಡರ್ ಪಟ್ಟಿಯನ್ನು ಒದಗಿಸುತ್ತದೆ
 (fetch ಪ್ರೊವೈಡರ್ಗಳನ್ನು ಒಳಗೊಂಡಂತೆ F4 ನಲ್ಲಿ ವಿಸ್ತರಿಸಲಾಗಿದೆ):
 
-| `kind` | `"search"` (20 ಪ್ರೊವೈಡರ್ಗಳು) ಅಥವಾ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 ಪ್ರೊವೈಡರ್ಗಳು) ಅಥವಾ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 ಕ್ರೆಡೆನ್ಶಿಯಲ್ಗಳು ಅಸ್ತಿತ್ವದಲ್ಲಿವೆಯೇ ಮತ್ತು ಎಲ್ಲಾ ಕೀಗಳು ಪ್ರಸ್ತುತ cooldown ನಲ್ಲಿವೆಯೇ ಎಂಬುದನ್ನು ಪರಿಶೀಲಿಸುವ ಮೂಲಕ, ವಿನಂತಿಯ ಸಮಯದಲ್ಲಿ ಸ್ಥಿತಿಯನ್ನು **ನಿರ್ಧರಿಸಲಾಗುತ್ತದೆ**.
+
+`codex-search` (Codex Web Search): ಸಂಪರ್ಕಿತ Codex (ChatGPT) ಖಾತೆಗಳನ್ನು ಬಳಸುತ್ತದೆ; ಪ್ರತ್ಯೇಕ ಕೀ ಅಗತ್ಯವಿಲ್ಲ. ಪ್ರತಿ ಹುಡುಕಾಟವು ChatGPT ಚಂದಾದಾರಿಕೆಯ ಕೋಟಾವನ್ನು ಬಳಸುತ್ತದೆ ಮತ್ತು ಸುಮಾರು 10–40 ಸೆಕೆಂಡುಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ. ವಿನಂತಿಯಲ್ಲಿ ಅದರ ಹೆಸರು ಸೂಚಿಸಿದಾಗ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ; ಸ್ವಯಂಚಾಲಿತ ಆಯ್ಕೆಗೆ ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುವ `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ಅನ್ನು ಆನ್ ಮಾಡಬೇಕು.
 
 ---
 

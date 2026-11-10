@@ -6,7 +6,7 @@
 
 > **자동 생성** `src/shared/constants/providers.ts` — 에서 직접 편집하지 마십시오. 재생성: `npm run gen:provider-reference`**마지막 생성 날짜:** 2026-11-10
 
-총 제공업체:**386** . 아래 카테고리 분석을 참조하세요.
+총 제공업체:**387** . 아래 카테고리 분석을 참조하세요.
 
 ## 카테고리
 
@@ -404,29 +404,30 @@
 | `vllm`                | `vllm`       | vLLM                | 로컬, 자체 호스팅 | [링크](https://github.com/vllm-project/vllm)                    | API 키는 선택 사항입니다. 로컬 vLLM의 OpenAI 호환 기본 URL을 구성하세요(기본값: http://localhost:8000/v1).                                                                                                                                                                              |
 | `xinference`          | `xinference` | XInference          | 로컬, 자체 호스팅 | [링크](https://inference.readthedocs.io)                        | API 키는 선택 사항입니다. 로컬 XInference의 OpenAI 호환 기본 URL을 구성하세요(기본값: http://localhost:9997/v1).                                                                                                                                                                        |
 
-## 검색 제공자 (19)
+## 검색 제공자 (20)
 
-| ID                  | 별칭            | 이름                       | 태그 | 웹사이트                                                        | 참고 사항                                                                                                    |
-| ------------------- | --------------- | -------------------------- | ---- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `anysearch-search`  | `anysearch`     | AnySearch                  | 검색 | [링크](https://anysearch.com)                                   | anysearch.com에서 제공하는 선택적 API 키(as_sk_...) - 일일 1,000회 무료; 키가 없는 티어는 한도가 더 낮음     |
-| `brave-search`      | `brave-search`  | Brave Search               | 검색 | [링크](https://brave.com/search/api)                            | Brave Search API 대시보드에서 발급받은 구독 토큰                                                             |
-| `context7`          | `context7`      | Context7 (라이브러리 문서) | 검색 | [링크](https://context7.com)                                    | API 키는 선택 사항(ctx7sk-...) — 익명 티어는 키 없이 사용할 수 있으며, 키를 사용하면 요청 한도가 증가함      |
-| `exa-search`        | `exa-search`    | Exa Search                 | 검색 | [링크](https://exa.ai)                                          | dashboard.exa.ai에서 발급받은 API 키                                                                         |
-| `firecrawl`         | `fc`            | Firecrawl                  | 검색 | [링크](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys에서 발급받은 API 키(또는 자체 호스팅된 Firecrawl 기본 URL 설정)                   |
-| `google-pse-search` | `google-pse`    | Google Programmable Search | 검색 | [링크](https://developers.google.com/custom-search/v1/overview) | Google API 키와 Programmable Search Engine ID(cx)가 필요함                                                   |
-| `kimi-search`       | `kimi-search`   | Kimi Search                | 검색 | [링크](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai에서 발급받은 Moonshot AI API 키(MOONSHOT_API_KEY)                                           |
-| `linkup-search`     | `linkup`        | Linkup Search              | 검색 | [링크](https://docs.linkup.so)                                  | Linkup 대시보드에서 발급받은 Bearer API 키                                                                   |
-| `nimble-search`     | `nimble`        | Nimble Search              | 검색 | [링크](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble 대시보드에서 발급받은 Bearer API 키                                                                   |
-| `ollama-search`     | `ollama-search` | Ollama Search              | 검색 | [링크](https://ollama.com/settings/keys)                        | Ollama Cloud와 동일한 API 키(ollama.com/settings/keys에서 발급)                                              |
-| `parallel-search`   | `parallel`      | Parallel Search            | 검색 | [링크](https://parallel.ai)                                     | platform.parallel.ai에서 발급받은 API 키(x-api-key로 전송)                                                   |
-| `perplexity-search` | `pplx-search`   | Perplexity Search          | 검색 | [링크](https://docs.perplexity.ai/guides/search-quickstart)     | Perplexity와 동일한 API 키(pplx-...)                                                                         |
-| `searchapi-search`  | `searchapi`     | SearchAPI                  | 검색 | [링크](https://www.searchapi.io/docs/google)                    | SearchAPI에서 발급받은 API 키(쿼리 매개변수 또는 Bearer 인증)                                                |
-| `searxng-search`    | `searxng`       | SearXNG Search             | 검색 | [링크](https://docs.searxng.org)                                | API 키는 선택 사항임. SearXNG 기본 URL을 설정해야 함. 일부 인스턴스는 액세스에 Bearer 토큰이 필요할 수 있음. |
-| `serper-search`     | `serper-search` | Serper Search              | 검색 | [링크](https://serper.dev)                                      | serper.dev 대시보드에서 발급받은 API 키                                                                      |
-| `tavily-search`     | `tavily-search` | Tavily Search              | 검색 | [링크](https://tavily.com)                                      | app.tavily.com에서 발급받은 API 키(형식: tvly-...)                                                           |
-| `x-search`          | `x_search`      | X Search (Grok)            | 검색 | [링크](https://docs.x.ai/developers/tools/x-search)             | SuperGrok OAuth(xai-oauth) 또는 xAI API 키. 이는 Grok X Search이며 X Developer MCP가 아님.                   |
-| `xquik-search`      | `xquik`         | Xquik X Search             | 검색 | [링크](https://docs.xquik.com)                                  | Xquik API 키(xq_...). 검색 요금은 반환된 게시물별로 측정되며, 카탈로그 예상치는 결과 5개를 기준으로 함.      |
-| `youcom-search`     | `youcom-search` | You.com Search             | 검색 | [링크](https://you.com/business/api/)                           | You.com 플랫폼 대시보드에서 발급받은 X-API-Key                                                               |
+| ID                  | 별칭            | 이름                       | 태그 | 웹사이트                                                        | 참고 사항                                                                                                                           |
+| ------------------- | --------------- | -------------------------- | ---- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `anysearch-search`  | `anysearch`     | AnySearch                  | 검색 | [링크](https://anysearch.com)                                   | anysearch.com에서 제공하는 선택적 API 키(as_sk_...) - 일일 1,000회 무료; 키가 없는 티어는 한도가 더 낮음                            |
+| `brave-search`      | `brave-search`  | Brave Search               | 검색 | [링크](https://brave.com/search/api)                            | Brave Search API 대시보드에서 발급받은 구독 토큰                                                                                    |
+| `codex-search`      | `codex_search`  | Codex Web Search (ChatGPT) | 검색 | [link](https://chatgpt.com)                                     | 별도의 키 없이 연결된 Codex (ChatGPT) 계정을 사용합니다. 각 검색은 구독 할당량을 사용하며(입력 토큰 약 10k), 약 10–40 s가 걸립니다. |
+| `context7`          | `context7`      | Context7 (라이브러리 문서) | 검색 | [링크](https://context7.com)                                    | API 키는 선택 사항(ctx7sk-...) — 익명 티어는 키 없이 사용할 수 있으며, 키를 사용하면 요청 한도가 증가함                             |
+| `exa-search`        | `exa-search`    | Exa Search                 | 검색 | [링크](https://exa.ai)                                          | dashboard.exa.ai에서 발급받은 API 키                                                                                                |
+| `firecrawl`         | `fc`            | Firecrawl                  | 검색 | [링크](https://firecrawl.dev)                                   | firecrawl.dev/app/api-keys에서 발급받은 API 키(또는 자체 호스팅된 Firecrawl 기본 URL 설정)                                          |
+| `google-pse-search` | `google-pse`    | Google Programmable Search | 검색 | [링크](https://developers.google.com/custom-search/v1/overview) | Google API 키와 Programmable Search Engine ID(cx)가 필요함                                                                          |
+| `kimi-search`       | `kimi-search`   | Kimi Search                | 검색 | [링크](https://platform.kimi.ai/docs/api/tools-search)          | platform.kimi.ai에서 발급받은 Moonshot AI API 키(MOONSHOT_API_KEY)                                                                  |
+| `linkup-search`     | `linkup`        | Linkup Search              | 검색 | [링크](https://docs.linkup.so)                                  | Linkup 대시보드에서 발급받은 Bearer API 키                                                                                          |
+| `nimble-search`     | `nimble`        | Nimble Search              | 검색 | [링크](https://docs.nimbleway.com/nimble-sdk/web-tools/search)  | Nimble 대시보드에서 발급받은 Bearer API 키                                                                                          |
+| `ollama-search`     | `ollama-search` | Ollama Search              | 검색 | [링크](https://ollama.com/settings/keys)                        | Ollama Cloud와 동일한 API 키(ollama.com/settings/keys에서 발급)                                                                     |
+| `parallel-search`   | `parallel`      | Parallel Search            | 검색 | [링크](https://parallel.ai)                                     | platform.parallel.ai에서 발급받은 API 키(x-api-key로 전송)                                                                          |
+| `perplexity-search` | `pplx-search`   | Perplexity Search          | 검색 | [링크](https://docs.perplexity.ai/guides/search-quickstart)     | Perplexity와 동일한 API 키(pplx-...)                                                                                                |
+| `searchapi-search`  | `searchapi`     | SearchAPI                  | 검색 | [링크](https://www.searchapi.io/docs/google)                    | SearchAPI에서 발급받은 API 키(쿼리 매개변수 또는 Bearer 인증)                                                                       |
+| `searxng-search`    | `searxng`       | SearXNG Search             | 검색 | [링크](https://docs.searxng.org)                                | API 키는 선택 사항임. SearXNG 기본 URL을 설정해야 함. 일부 인스턴스는 액세스에 Bearer 토큰이 필요할 수 있음.                        |
+| `serper-search`     | `serper-search` | Serper Search              | 검색 | [링크](https://serper.dev)                                      | serper.dev 대시보드에서 발급받은 API 키                                                                                             |
+| `tavily-search`     | `tavily-search` | Tavily Search              | 검색 | [링크](https://tavily.com)                                      | app.tavily.com에서 발급받은 API 키(형식: tvly-...)                                                                                  |
+| `x-search`          | `x_search`      | X Search (Grok)            | 검색 | [링크](https://docs.x.ai/developers/tools/x-search)             | SuperGrok OAuth(xai-oauth) 또는 xAI API 키. 이는 Grok X Search이며 X Developer MCP가 아님.                                          |
+| `xquik-search`      | `xquik`         | Xquik X Search             | 검색 | [링크](https://docs.xquik.com)                                  | Xquik API 키(xq_...). 검색 요금은 반환된 게시물별로 측정되며, 카탈로그 예상치는 결과 5개를 기준으로 함.                             |
+| `youcom-search`     | `youcom-search` | You.com Search             | 검색 | [링크](https://you.com/business/api/)                           | You.com 플랫폼 대시보드에서 발급받은 X-API-Key                                                                                      |
 
 ## 오디오 전용 제공업체 (12)
 

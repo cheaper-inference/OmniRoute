@@ -44,7 +44,7 @@ Uma flag booleana é considerada **habilitada** quando seu valor efetivo é `"tr
 
 ## Catálogo de Bandeiras
 
-120 bandeiras em 6 categorias.** Padrão** é a definição padrão — o valor usado quando não há substituição de DB nem variável de ambiente.
+121 bandeiras em 6 categorias.** Padrão** é a definição padrão — o valor usado quando não há substituição de DB nem variável de ambiente.
 
 ### Segurança (11)
 
@@ -115,7 +115,7 @@ Uma flag booleana é considerada **habilitada** quando seu valor efetivo é `"tr
 
 Quando `UNPRICED_USAGE_BUDGET_POLICY` é configurado explicitamente ( substituição DB antes do ambiente), ele tem precedência sobre `USAGE_LIMIT_IGNORE_UNPRICED`. Sem valor enum explícito, a opção de exclusão booleana upstream seleciona `count_as_zero`; caso contrário, o padrão é `fail_closed`. Valores de enumeração inválidos e armazenamento de sinalizador de recurso ilegível falham no fechamento. Nenhuma das opções de exclusão relaxa os gastos com preços ou uma falha na pesquisa de preços. A aplicação e o relatório do administrador resolvem a mesma política efetiva.
 
-### Tempo de execução (57)
+### Tempo de execução (58)
 
 | Chave                                          | Tipo       | Padrão  | Reiniciar | Descrição                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ---------------------------------------------- | ---------- | ------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Quando `UNPRICED_USAGE_BUDGET_POLICY` é configurado explicitamente ( substitui�
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | booleano   | `false` |           | Pare de oferecer e encaminhar o esforço de raciocínio `max` para Cursor Grok 4.7 (#17386): os documentos de Cursor listam apenas low/medium/high/xhigh, para que o alias de fallback `grok-4.7-max` desapareça do catálogo e uma solicitação de esforço `max` seja enviada sem um parâmetro de esforço. Desativado por padrão: `max` permanece oferecido e encaminhado, pois uma sonda AgentService/Run ao vivo o aceitou.                                                                                                                                                                                                                                                                                                                               |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | booleano   | `false` |           | Envie manutenções de atividade de respostas como uma linha em branco em vez de um evento response.in_progress, para que um instantâneo sintético nunca possa substituir a resposta real no SDK oficial. Uma linha em branco não despacha nenhum evento SSE, portanto, um watchdog do cliente que reinicializa apenas em eventos não seria reinicializado durante uma longa fase silenciosa. Desativado por padrão: os temporizadores enviam o evento response.in_progress com especificação válida.                                                                                                                                                                                                                                                      |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | booleano   | `false` |           | Nas estatísticas de cache de compactação, conte uma solicitação compactada para um provedor de cache de prefixo automático (OpenAI, Codex, Azure ou uma conexão personalizada que declara cache de prompt com remoção de marcador) como um acerto de cache estimado mesmo sem marcadores `cache_control` (#17114). A estimativa é um sinal de elegibilidade do cache, não um acerto observado, portanto, a taxa de acerto relatada para esses provedores tende a 100%. Desativado por padrão: apenas uma solicitação que transporta marcadores `cache_control` para um provedor de cache conta como um acerto estimado, portanto, os provedores de prefixo automático continuam reportando 0.                                                            |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | booleano   | `false` |           | Permite que uma pesquisa web automática sem `provider` explícito use uma conta Codex (ChatGPT) conectada por meio de `codex-search`: como último recurso antes dos provedores sem chave quando nenhum provedor com credenciais está disponível, e como alternativa em caso de falha (#17933). Cada pesquisa consome a cota da assinatura e leva cerca de 10–40 s. Desativado por padrão: `codex-search` só é executado quando a solicitação o indica explicitamente.                                                                                                                                                                                                                                                                                     |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Retorna cada sinalizador com seu valor efetivo, origem e um resumo.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

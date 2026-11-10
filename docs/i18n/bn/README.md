@@ -15,7 +15,7 @@
 
 **[দিয়েগো সুজা](https://github.com/diegosouzapw) দ্বারা নির্মিত**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                              |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 প্রদানকারী                |           352            |   **358**   |          386          |
+| 🌐 প্রদানকারী                |           352            |   **358**   |          387          |
 | 🧠 অনন্য চ্যাট মডেল IDs      |           1320           |  **1374**   |         1535          |
 | 🖼️ মোডালিটি ব্রিজ            | 🆕 দৃষ্টি + অডিও + ভিডিও |      ✓      |           ✓           |
 | 📡 রাডার বিনামূল্যে ক্যাটালগ |        🆕 অপ্ট-ইন        |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 386 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 387 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 সম্পূর্ণ পদ্ধতি &amp; প্রতি- বৈশিষ্ট্যের বিস্তারিত বনাম 9 রাউটার, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar ব্যবহার ঐচ্ছিক এবং এটি কেবল 
 - **🖼️ নতুন শেষ পয়েন্ট** — `/v1/ocr` (Mistral OCR) এবং `/v1/audio/translations` (হুইস্পার-স্টাইল) মিডিয়া সারফেস জুড়ে। → [API রেফারেন্স](docs/reference/API_REFERENCE.md)
 - **🎨 ছবি / ভিডিও / অডিও প্রজন্ম** মিডিয়ার জন্য — এক API : xAI Grok Imagine & Novita AI ভিডিও, ComfyUI, Magnific, Adobe Firefly, Segmind এবং বক্তৃতা প্রদানকারী যেমন ElevenLabs। → [API রেফারেন্স](docs/reference/API_REFERENCE.md)
 - **🌍 স্থাপনা ও অপারেশন** — রিভার্স-প্রক্সি `basePath`, ব্রাউজার-ভাষা অটো-ডিটেক্ট, প্রতি-কী ডিভাইস ট্র্যাকিং, রুট-লেস MITM বিশ্বাস, zh-TW স্থানীয়করণ। → [পরিবেশ](docs/reference/ENVIRONMENT.md)
-- **🤝 আরো প্রদানকারী এবং এজেন্ট** — ক্লাউড এজেন্ট (Codex ক্লাউড, Cursor, Devin, Jules), Grok বিল্ড (xAI) ব্রাউজার + OAuth লগইন, Ollama ফার্স্ট-ক্লাস কার্ড, Claude Opus 5 এবং সনেট 5, Kimi অফিসিয়াল অংশীদারিত্ব (Code/Web/Moonshot), Zed, অনুরোধ, SenseNova এবং একটি AI রিফ্রেশ **386-প্রদানকারীর ক্যাটালগ** . → [প্রদানকারী](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 আরো প্রদানকারী এবং এজেন্ট** — ক্লাউড এজেন্ট (Codex ক্লাউড, Cursor, Devin, Jules), Grok বিল্ড (xAI) ব্রাউজার + OAuth লগইন, Ollama ফার্স্ট-ক্লাস কার্ড, Claude Opus 5 এবং সনেট 5, Kimi অফিসিয়াল অংশীদারিত্ব (Code/Web/Moonshot), Zed, অনুরোধ, SenseNova এবং একটি AI রিফ্রেশ **387-প্রদানকারীর ক্যাটালগ** . → [প্রদানকারী](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 রাউটিং স্বচ্ছতা** — প্রতিটি প্রতিক্রিয়াতে একটি `X-OmniRoute-Decision` শিরোনাম রয়েছে যা এটি পরিবেশন করেছে এমন strategy/provider/latency এর নামকরণ করে, একটি নতুন `cache-optimized` কম্বো কৌশল + অটো-কম্বো `cacheAffinity` ফ্যাক্টর রুট ক্যাশে করা উপসর্গ ধরে থাকা সংযোগে পুনরায় অনুরোধ করে এবং একটি শুধুমাত্র-পঠনযোগ্য `/v1/auto-combo/{channel}/candidates` শেষ পয়েন্ট একটি `auto/*` চ্যানেলের লাইভ প্রার্থী পুলকে প্রকাশ করে। → [অটো-কম্বো](docs/routing/AUTO-COMBO.md)
 - **⚡ স্থানীয় কর্মক্ষমতা এবং ইনফ্রা** — এক-ক্লিক স্থানীয় Redis, Cloudflare কর্মী / Deno নিয়োজিত রিলে স্থাপনার, Bifrost এবং Mux তত্ত্বাবধানে এমবেডেড পরিষেবা হিসাবে। → [এমবেডেড পরিষেবা](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 এছাড়াও বাক্সে** — প্লাগইন ফ্রেমওয়ার্ক + মার্কেটপ্লেস, Omni/Agent/GitHub দক্ষতা ফ্রেমওয়ার্ক, Obsidian ভল্ট ইন্টিগ্রেশন (22 MCP টুলস), OpenAI- সামঞ্জস্যপূর্ণ ব্যাচ এবং ফাইল APIs, শব্দার্থিক প্রতিক্রিয়া ক্যাশে, লিডারবোর্ডের সাথে গ্যামিফিকেশন, ACP এজেন্ট আবিষ্কার (15 বিল্ট-ইন এজেন্ট), নির্ধারিত লগ, BigQuery এ মাল্টি-জেড-ফ্যান এক্সপোর্ট `auto/chaos` Telegram ব্রিজ, একটি ইন-অ্যাপ ভার্সন ম্যানেজার এবং LMArena-ELO ফ্রি-প্রোভাইডার র‍্যাঙ্কিং। → [ডক্স](docs/README.md)
@@ -677,11 +677,11 @@ omniroute configure codex          # এছাড়াও: claude opencode qwen
 
 <div align="center">
 
-## 🌐 386 AI প্রদানকারী — 156 ক্যাটালগ-চিহ্নিত বিনামূল্যে
+## 🌐 387 AI প্রদানকারী — 156 ক্যাটালগ-চিহ্নিত বিনামূল্যে
 
 </div>
 
-> **386 নিবন্ধিত প্রদানকারী** ক্যানোনিকাল চ্যাট, মিডিয়া, অনুসন্ধান, স্থানীয়, ক্লাউড-এজেন্ট এবং সিস্টেম সংগ্রহ সহ **156 `hasFree: true` আবিষ্কার মেটাডেটা বহন করে** . চ্যাট মডেল রেজিস্ট্রি কভার **245 প্রদানকারী / 3,172 স্বতন্ত্র প্রদানকারী-মডেল জোড়া / 1,535 কাঁচা মডেল IDs** ; আলাদা ফ্রি-বাজেট ক্যাটালগ আছে**প্রতি মডেল সারি 466** ,**34টি পুনরাবৃত্ত পুল** এবং**52 recurring/keyless বিনামূল্যে-চিরকালের প্রদানকারী** . এগুলি নকশা অনুসারে বিভিন্ন হর; সংজ্ঞা এবং পুল-ডিডুড গণনাগুলি [প্রদানকারীর রেফারেন্স](docs/reference/PROVIDER_REFERENCE.md) এবং [বিনামূল্যের স্তরগুলিতে](docs/reference/FREE_TIERS.md) থাকে৷
+> **387 নিবন্ধিত প্রদানকারী** ক্যানোনিকাল চ্যাট, মিডিয়া, অনুসন্ধান, স্থানীয়, ক্লাউড-এজেন্ট এবং সিস্টেম সংগ্রহ সহ **156 `hasFree: true` আবিষ্কার মেটাডেটা বহন করে** . চ্যাট মডেল রেজিস্ট্রি কভার **245 প্রদানকারী / 3,172 স্বতন্ত্র প্রদানকারী-মডেল জোড়া / 1,535 কাঁচা মডেল IDs** ; আলাদা ফ্রি-বাজেট ক্যাটালগ আছে**প্রতি মডেল সারি 466** ,**34টি পুনরাবৃত্ত পুল** এবং**52 recurring/keyless বিনামূল্যে-চিরকালের প্রদানকারী** . এগুলি নকশা অনুসারে বিভিন্ন হর; সংজ্ঞা এবং পুল-ডিডুড গণনাগুলি [প্রদানকারীর রেফারেন্স](docs/reference/PROVIDER_REFERENCE.md) এবং [বিনামূল্যের স্তরগুলিতে](docs/reference/FREE_TIERS.md) থাকে৷
 
 <div align="center">
 

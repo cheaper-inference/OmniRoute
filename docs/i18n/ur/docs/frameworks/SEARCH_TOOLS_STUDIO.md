@@ -102,10 +102,12 @@
 `ProviderCatalog.tsx`، `GET /api/search/providers` سے فراہم کنندگان کی مکمل فہرست ظاہر کرتا ہے
 (جسے F4 میں fetch فراہم کنندگان شامل کرنے کے لیے توسیع دی گئی ہے):
 
-| `kind` | `"search"` (20 فراہم کنندگان) یا `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 فراہم کنندگان) یا `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 اسٹیٹس کو **درخواست کے وقت اخذ کیا جاتا ہے**، اس بات کی جانچ کرکے کہ آیا اسناد موجود ہیں اور آیا
 تمام کلیدیں فی الحال cooldown میں ہیں۔
+
+`codex-search` (Codex Web Search): الگ کلید کے بغیر آپ کے منسلک Codex (ChatGPT) اکاؤنٹس استعمال کرتا ہے۔ ہر تلاش سبسکرپشن کا کوٹا استعمال کرتی ہے اور تقریباً 10–40 s لیتی ہے۔ جب درخواست اس کا نام بتائے تو چلتا ہے؛ خودکار انتخاب کے لیے `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` فلیگ درکار ہے، جو بطور ڈیفالٹ بند ہے۔
 
 ---
 

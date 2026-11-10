@@ -44,7 +44,7 @@ Bir boolean bayrağı, etkin değeri `"true"`, `"1"` veya `"yes"` olduğunda
 
 ## Bayrak Kataloğu
 
-6 kategoride 120 bayrak. **Varsayılan**, tanım varsayılanıdır — ne bir DB geçersiz kılması ne de bir ortam değişkeni mevcut olduğunda kullanılan değerdir.
+6 kategoride 121 bayrak. **Varsayılan**, tanım varsayılanıdır — ne bir DB geçersiz kılması ne de bir ortam değişkeni mevcut olduğunda kullanılan değerdir.
 
 ### Güvenlik (11)
 
@@ -118,7 +118,7 @@ Bir boolean bayrağı, etkin değeri `"true"`, `"1"` veya `"yes"` olduğunda
 üst akıştaki boolean kapsam dışı bırakma seçeneği `count_as_zero` değerini seçer; aksi takdirde varsayılan
 `fail_closed` olur. Geçersiz enum değerleri ve okunamayan özellik bayrağı depolaması güvenli şekilde başarısız olur. Bu kapsam dışı bırakma seçeneklerinin hiçbiri fiyatlandırılmış harcamalar veya başarısız bir fiyatlandırma araması üzerindeki kısıtlamaları gevşetmez. Zorunlu uygulama ve yönetici raporu aynı etkin politikayı temel alır.
 
-### Çalışma Zamanı (57)
+### Çalışma Zamanı (58)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ---------------------------------------------- | ------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -181,6 +181,7 @@ Bir boolean bayrağı, etkin değeri `"true"`, `"1"` veya `"yes"` olduğunda
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Cursor Grok 4.7 için `max` akıl yürütme çabasını sunmayı ve iletmeyi durdurun (#17386): Cursor belgelerinde yalnızca low/medium/high/xhigh listelendiğinden, `grok-4.7-max` geri dönüş takma adı katalogdan kaldırılır ve `max` çaba isteği, çaba parametresi olmadan gönderilir. Varsayılan olarak kapalıdır: canlı bir AgentService/Run yoklaması bunu kabul ettiğinden `max` sunulmaya ve iletilmeye devam eder.                                                                                                                                                                                                                                                                                                                                                                               |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |         | Responses keepalive'lerini bir response.in_progress olayı yerine boş satır olarak gönderin; böylece sentetik bir anlık görüntü resmi SDK'daki gerçek yanıtın yerini asla alamaz. Boş satır hiçbir SSE olayı göndermez; bu nedenle yalnızca olaylar üzerinden sıfırlanan bir istemci watchdog'u uzun sessiz bir aşama sırasında sıfırlanmaz. Varsayılan olarak kapalıdır: zamanlayıcılar, spesifikasyona uygun response.in_progress olayını gönderir.                                                                                                                                                                                                                                                                                                                                              |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |         | Sıkıştırma önbelleği istatistiklerinde, otomatik önek önbelleğe alma kullanan bir sağlayıcıya (OpenAI, Codex, Azure veya işaretçi kaldırma ile istem önbelleğe almayı bildiren özel bir bağlantı) gönderilen sıkıştırılmış isteği, `cache_control` işaretçileri olmasa bile tahmini önbellek isabeti olarak sayın (#17114). Bu tahmin, gözlemlenen bir isabet değil, önbelleğe uygunluk sinyalidir; bu nedenle bu sağlayıcılar için bildirilen isabet oranı %100'e yaklaşır. Varsayılan olarak kapalıdır: yalnızca önbelleğe alma sağlayıcısına `cache_control` işaretçileri taşıyan bir istek tahmini isabet olarak sayılır; bu nedenle otomatik önek sağlayıcıları 0 bildirmeye devam eder.                                                                                                     |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Açık bir `provider` belirtilmeyen otomatik web aramasının `codex-search` üzerinden bağlı bir Codex (ChatGPT) hesabını kullanmasına izin verir: kimlik bilgilerine sahip hiçbir sağlayıcı kullanılamadığında anahtarsız sağlayıcılardan önce son seçenek olarak ve hata durumunda alternatif olarak (#17933). Her arama abonelik kotasını tüketir ve yaklaşık 10–40 s sürer. Varsayılan olarak kapalıdır: `codex-search` yalnızca istek onu açıkça belirttiğinde çalışır.                                                                                                                                                                                                                                                                                                                          |
 
 ### CLI (5)
 
@@ -274,10 +275,10 @@ Her bayrağı etkin değeri, kaynağı ve bir özetle birlikte döndürür.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tüm 119 bayrak
+    // ... tüm 121 bayrak
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -103,10 +103,12 @@ Studio τριών καρτελών που ενοποιεί την αναζήτη
 Το `ProviderCatalog.tsx` εκθέτει την πλήρη λίστα παρόχων από το `GET /api/search/providers`
 (επεκτάθηκε στο F4 ώστε να περιλαμβάνει παρόχους ανάκτησης):
 
-| `kind` | `"search"` (20 πάροχοι) ή `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 πάροχοι) ή `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Η κατάσταση **προσδιορίζεται κατά τη στιγμή του αιτήματος**, ελέγχοντας αν υπάρχουν διαπιστευτήρια και αν
 όλα τα κλειδιά βρίσκονται επί του παρόντος σε περίοδο αναμονής.
+
+`codex-search` (Codex Web Search): Χρησιμοποιεί τους συνδεδεμένους λογαριασμούς σας Codex (ChatGPT), χωρίς ξεχωριστό κλειδί. Κάθε αναζήτηση καταναλώνει ποσόστωση συνδρομής και διαρκεί περίπου 10–40 s. Εκτελείται όταν το αίτημα το κατονομάζει· η αυτόματη επιλογή απαιτεί τη σημαία `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, απενεργοποιημένη από προεπιλογή.
 
 ---
 

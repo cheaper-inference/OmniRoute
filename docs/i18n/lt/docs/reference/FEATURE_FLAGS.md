@@ -39,7 +39,7 @@ Loginė vėliavėlė laikoma **įjungta**, kai jos efektyvioji reikšmė yra `"t
 
 ## Vėliavos katalogas
 
-120 vėliavėlių 6 kategorijose.** Numatytoji** yra numatytoji apibrėžimo — reikšmė, naudojama, kai nėra nei DB nepaisymo, nei aplinkos kintamojo.
+121 vėliavėlių 6 kategorijose.** Numatytoji** yra numatytoji apibrėžimo — reikšmė, naudojama, kai nėra nei DB nepaisymo, nei aplinkos kintamojo.
 
 ### Saugumas (11)
 
@@ -110,7 +110,7 @@ Loginė vėliavėlė laikoma **įjungta**, kai jos efektyvioji reikšmė yra `"t
 
 Kai `UNPRICED_USAGE_BUDGET_POLICY` yra aiškiai sukonfigūruotas (DB nepaisymas prieš aplinką), jis turi viršenybę prieš `USAGE_LIMIT_IGNORE_UNPRICED`. Jei nėra aiškios enum reikšmės, loginis atsisakymas parenka `count_as_zero`; kitu atveju numatytoji reikšmė yra `fail_closed`. Netinkamos sąrašo reikšmės ir neįskaitoma funkcijos žymos saugyklos gedimas uždarytas. Nė vienas atsisakymas nesumažina kainos išlaidų arba nepavykusios kainodaros paieškos. Vykdymas ir administratoriaus ataskaita išsprendžia tą pačią veiksmingą politiką.
 
-### Veikimo laikas (57)
+### Veikimo laikas (58)
 
 | Raktas                                         | Tipas   | Numatytoji | Paleisti iš naujo | Aprašymas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | ---------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -173,6 +173,7 @@ Kai `UNPRICED_USAGE_BUDGET_POLICY` yra aiškiai sukonfigūruotas (DB nepaisymas 
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | loginis | `false`    |                   | Nustokite siūlyti ir persiųsti `max` samprotavimo pastangas, skirtas Cursor Grok 4.7 (#17386): Cursor dokumentų sąrašas tik low/medium/high/xhigh, todėl `grok-4.7-max` atsarginis pseudonimas dingsta iš katalogo ir `max` pastangų užklausa išsiunčiama be pastangų parametro. Išjungta pagal numatytuosius nustatymus: `max` išlieka siūlomas ir persiųstas, nes tiesioginis AgentService/Run zondas jį priėmė.                                                                                                                                                                                                                                                                                                                                        |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | loginis | `false`    |                   | Siųskite atsakymus kaip tuščią eilutę, o ne įvykį response.in_progress, todėl sintetinė momentinė nuotrauka niekada negali pakeisti tikrojo atsakymo oficialiame SDK. Tuščia eilutė nesiunčia jokio SSE įvykio, todėl kliento sergėtojas, kuris iš naujo nustato tik įvykius, nebūtų iš naujo nustatytas per ilgą tyliąją fazę. Išjungta pagal numatytuosius nustatymus: laikmačiai siunčia spec-valid response.in_progress įvykį.                                                                                                                                                                                                                                                                                                                        |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | loginis | `false`    |                   | Suglaudinimo talpyklos statistikoje skaičiuokite suglaudintą užklausą automatinio priešdėlio kaupimo talpykloje teikėjui (OpenAI, Codex, Azure arba tinkintam ryšiui, kuris deklaruoja greitą talpyklą su žymeklio pašalinimu) kaip apskaičiuotą talpyklos įvykį net be `cache_control` žymeklių (#17114). Įvertinimas yra talpyklos tinkamumo signalas, o ne pastebėtas įvykis, todėl tų paslaugų teikėjų pranešimų apie įvykius rodiklis siekia 100 %. Išjungta pagal numatytuosius nustatymus: tik užklausa su `cache_control` žymekliais talpyklos teikėjui skaičiuojama kaip įvertintas įvykis, todėl automatinio priešdėlio teikėjai praneša 0.                                                                                                     |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | loginis | `false`    |                   | Leidžia automatinei žiniatinklio paieškai be aiškiai nurodyto `provider` naudoti prijungtą Codex (ChatGPT) paskyrą per `codex-search`: kaip paskutinį variantą prieš teikėjus be rakto, kai nėra tinkamo teikėjo su prisijungimo duomenimis, ir kaip atsarginį variantą gedimo atveju (#17933). Kiekviena paieška naudoja prenumeratos kvotą ir trunka maždaug 10–40 s. Pagal numatytuosius nustatymus išjungta: `codex-search` vykdomas tik tada, kai užklausa jį aiškiai nurodo.                                                                                                                                                                                                                                                                        |
 
 ### CLI (5)
 
@@ -243,10 +244,10 @@ Grąžina kiekvieną vėliavėlę su efektyvia verte, šaltiniu ir santrauka.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

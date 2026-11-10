@@ -103,10 +103,12 @@ Vykdo tą pačią užklausą / URL lygiagrečiai naudojant iki **4 teikėjų** (
 `ProviderCatalog.tsx` pateikia visą teikėjų sąrašą iš `GET /api/search/providers`
 (F4 išplėstas įtraukiant turinio gavimo teikėjus):
 
-| `kind` | `"search"` (20 teikėjų) arba `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 teikėjų) arba `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Būsena **nustatoma užklausos metu**, patikrinant, ar yra prisijungimo duomenų ir ar
 visiems raktams šiuo metu taikomas atvėsimo laikotarpis.
+
+`codex-search` (Codex Web Search): Naudoja jūsų prijungtas Codex (ChatGPT) paskyras be atskiro rakto. Kiekviena paieška naudoja prenumeratos kvotą ir trunka maždaug 10–40 s. Vykdoma, kai užklausa jį nurodo; automatiniam pasirinkimui reikia vėliavėlės `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, kuri pagal numatytuosius nustatymus išjungta.
 
 ---
 

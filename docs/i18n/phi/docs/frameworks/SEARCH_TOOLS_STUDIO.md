@@ -103,10 +103,12 @@ Pinapatakbo ang parehong query/URL sa hanggang **4 na provider nang sabay-sabay*
 Inilalantad ng `ProviderCatalog.tsx` ang kumpletong listahan ng provider mula sa `GET /api/search/providers`
 (pinalawak sa F4 upang isama ang mga fetch provider):
 
-| `kind` | `"search"` (20 provider) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 provider) o `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Ang status ay **tinutukoy sa oras ng request** sa pamamagitan ng pagsuri kung may mga credential at kung
 ang lahat ng key ay kasalukuyang nasa cooldown.
+
+`codex-search` (Codex Web Search): Ginagamit ang iyong nakakonektang mga Codex (ChatGPT) account, nang walang hiwalay na key. Bawat paghahanap ay gumagamit ng quota ng subscription at tumatagal nang humigit-kumulang 10–40 s. Tumatakbo kapag tinukoy ito ng request; kailangan ng awtomatikong pagpili ang flag na `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, na naka-off bilang default.
 
 ---
 

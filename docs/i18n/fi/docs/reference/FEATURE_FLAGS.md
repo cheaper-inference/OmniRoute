@@ -44,7 +44,7 @@ Totuusarvoinen lippu katsotaan **käytössä olevaksi**, kun sen voimassa oleva 
 
 ## Lippujen luettelo
 
-120 lippua 6 kategoriassa.** Oletus** on määritelmä oletusarvo — arvo, jota käytetään, kun DB ohitusta tai ympäristömuuttujaa ei ole.
+121 lippua 6 kategoriassa.** Oletus** on määritelmä oletusarvo — arvo, jota käytetään, kun DB ohitusta tai ympäristömuuttujaa ei ole.
 
 ### Turvallisuus (11)
 
@@ -115,7 +115,7 @@ Totuusarvoinen lippu katsotaan **käytössä olevaksi**, kun sen voimassa oleva 
 
 Kun `UNPRICED_USAGE_BUDGET_POLICY` on eksplisiittisesti määritetty (DB ohitus ennen ympäristöä), se on etusijalla `USAGE_LIMIT_IGNORE_UNPRICED` nähden. Ilman nimenomaista enum-arvoa ylävirran looginen opt-out valitsee `count_as_zero`; muuten oletus on `fail_closed`. Virheelliset enum-arvot ja lukukelvoton ominaisuuslipun tallennusvika suljettiin. Kumpikaan kieltäytyminen ei kevennä hinnoiteltua kulutusta tai epäonnistunutta hinnoitteluhakua. Täytäntöönpano ja järjestelmänvalvojan raportti ratkaisevat saman tehokkaan käytännön.
 
-### Kesto (57)
+### Kesto (58)
 
 | Avain                                          | Tyyppi  | Oletus  | Käynnistä uudelleen | Kuvaus                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ---------------------------------------------- | ------- | ------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Kun `UNPRICED_USAGE_BUDGET_POLICY` on eksplisiittisesti määritetty (DB ohitus 
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                     | Lopeta `max` -päättelyn tarjoaminen ja välittäminen versiolle Cursor Grok 4.7 (#17386): Cursor:n dokumenttiluettelossa on vain low/medium/high/xhigh, joten `grok-4.7-max` -varaalias katoaa luettelosta ja `max` -työpyyntö lähetetään ilman työparametria. Pois oletusarvoisesti: `max` pysyy tarjottavana ja välitettynä, koska live AgentService/Run -anturi hyväksyi sen.                                                                                                                                                                                                                                                                                                                                                           |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |                     | Lähetä vastaukset pysyvästi tyhjänä rivinä response.in_progress-tapahtuman sijaan, joten synteettinen tilannekuva ei voi koskaan korvata todellista vastausta virallisessa SDK ssa. Tyhjä rivi ei lähetä SSE tapahtumaa, joten asiakasvahti, joka nollautuu vain tapahtumien yhteydessä, ei nollautuisi pitkän hiljaisen vaiheen aikana. Oletuksena pois päältä: ajastimet lähettävät spec-valid response.in_progress -tapahtuman.                                                                                                                                                                                                                                                                                                       |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                     | Laske pakkausvälimuistin tilastoissa pakattu pyyntö automaattisen etuliitevälimuistin palveluntarjoajalle (OpenAI, Codex, Azure tai mukautettu yhteys, joka ilmoittaa välimuistin välimuistin ja merkkien poistamisen) arvioiduksi välimuistiosumaksi myös ilman `cache_control` -merkkejä (#17114). Arvio on välimuistin kelpoisuussignaali, ei havaittu osuma, joten näiden palveluntarjoajien raportoitu osumaprosentti on kohti 100 %. Pois oletuksena: vain pyyntö, joka kuljettaa `cache_control` -merkkejä välimuistin tarjoajalle, lasketaan arvioiduksi osumaksi, joten automaattisten etuliitteiden tarjoajat raportoivat jatkuvasti 0:n.                                                                                      |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |                     | Sallii automaattisen verkkohaun ilman erikseen määritettyä `provider`-arvoa käyttää yhdistettyä Codex-tiliä (ChatGPT) palvelun `codex-search` kautta: viimeisenä vaihtoehtona ennen avaimettomia tarjoajia, kun yksikään tunnistetiedoilla toimiva tarjoaja ei ole käytettävissä, sekä varavaihtoehtona virhetilanteessa (#17933). Jokainen haku kuluttaa tilauksen kiintiötä ja kestää noin 10–40 s. Oletusarvoisesti pois käytöstä: `codex-search` suoritetaan vain, kun pyyntö nimeää sen erikseen.                                                                                                                                                                                                                                   |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Palauttaa jokaisen lipun tehollisen arvon, lähteen ja yhteenvedon kera.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

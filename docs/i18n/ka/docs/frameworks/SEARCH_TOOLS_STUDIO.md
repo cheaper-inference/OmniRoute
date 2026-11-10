@@ -101,10 +101,12 @@ Search Tools Studio გარდაქმნის `/dashboard/search-tools`-ს
 `ProviderCatalog.tsx` ასახავს პროვაიდერების სრულ სიას `GET /api/search/providers`-დან
 (F4-ში გაფართოებულია fetch პროვაიდერების ჩასართავად):
 
-| `kind` | `"search"` (20 პროვაიდერი) ან `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 პროვაიდერი) ან `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 სტატუსი **განისაზღვრება მოთხოვნის შესრულების დროს** იმის შემოწმებით, არსებობს თუ არა ავტორიზაციის მონაცემები და
 არის თუ არა ყველა გასაღები ამჟამად cooldown რეჟიმში.
+
+`codex-search` (Codex Web Search): იყენებს დაკავშირებულ Codex (ChatGPT) ანგარიშებს; ცალკე გასაღები საჭირო არ არის. თითოეული ძიება ხარჯავს ChatGPT გამოწერის კვოტას და დაახლოებით 10–40 წამს მოითხოვს. მუშაობს, როცა მოთხოვნაში მისი სახელია მითითებული; ავტომატური არჩევისთვის საჭიროა `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`-ის ჩართვა, რომელიც ნაგულისხმევად გამორთულია.
 
 ---
 

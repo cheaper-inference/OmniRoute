@@ -33,7 +33,7 @@ Pokretanje testova: pogledajte [Testiranje](#testiranje) u nastavku (prvo pokren
 
 ## Projekt na prvi pogled
 
-**OmniRoute** — unificirani AI proxy/router. Jedna krajnja tačka, 386 LLM provajdera, automatski zamjenski.
+**OmniRoute** — unificirani AI proxy/router. Jedna krajnja tačka, 387 LLM provajdera, automatski zamjenski.
 
 - API rute — `src/app/api/v1/` (ulazne tačke Next.js App Router)
 - Rukovaoci — `open-sse/handlers/` (obrada zahtjeva: chat, ugradnja, itd.)

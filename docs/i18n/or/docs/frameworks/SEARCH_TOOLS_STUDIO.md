@@ -103,9 +103,11 @@ Search Tools Studio, `/dashboard/search-tools`କୁ ଏକ ମୌଳିକ ସ�
 `ProviderCatalog.tsx`, `GET /api/search/providers` ରୁ ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରଦାତା ତାଲିକାକୁ ଉପଲବ୍ଧ କରାଏ
 (fetch ପ୍ରଦାତାମାନଙ୍କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରିବା ପାଇଁ F4ରେ ବିସ୍ତାରିତ):
 
-| `kind` | `"search"` (20ଟି ପ୍ରଦାତା) କିମ୍ବା `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23ଟି ପ୍ରଦାତା) କିମ୍ବା `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 ପରିଚୟପତ୍ର ଉପଲବ୍ଧ ଅଛି କି ନାହିଁ ଏବଂ ସମସ୍ତ କୀ ବର୍ତ୍ତମାନ କୁଲ୍ଡାଉନ୍ରେ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରି, ଅନୁରୋଧ ସମୟରେ ସ୍ଥିତି **ନିର୍ଣ୍ଣୟ କରାଯାଏ**।
+
+`codex-search` (Codex Web Search): ସଂଯୁକ୍ତ Codex (ChatGPT) ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରେ; ଅଲଗା କୀ ଦରକାର ନାହିଁ। ପ୍ରତ୍ୟେକ ସନ୍ଧାନ ChatGPT ସଦସ୍ୟତାର କୋଟା ବ୍ୟବହାର କରେ ଏବଂ ପ୍ରାୟ 10–40 ସେକେଣ୍ଡ ନିଏ। ଅନୁରୋଧରେ ଏହାର ନାମ ଥିଲେ ଏହା ଚାଲେ; ସ୍ୱୟଂଚାଳିତ ଚୟନ ପାଇଁ ଡିଫଲ୍ଟ ଭାବେ ବନ୍ଦ ଥିବା `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ଚାଲୁ କରିବା ଦରକାର।
 
 ---
 

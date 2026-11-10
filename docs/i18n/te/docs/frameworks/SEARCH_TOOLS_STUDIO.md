@@ -103,9 +103,11 @@ Search Tools Studio, `/dashboard/search-tools`ను ప్రాథమిక �
 `ProviderCatalog.tsx`, `GET /api/search/providers` నుండి పూర్తి ప్రొవైడర్ జాబితాను అందుబాటులో ఉంచుతుంది
 (fetch ప్రొవైడర్లను చేర్చడానికి F4లో విస్తరించబడింది):
 
-| `kind` | `"search"` (20 ప్రొవైడర్లు) లేదా `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 ప్రొవైడర్లు) లేదా `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 క్రెడెన్షియల్స్ ఉన్నాయా మరియు అన్ని కీలు ప్రస్తుతం కూల్డౌన్లో ఉన్నాయా అని తనిఖీ చేయడం ద్వారా స్థితి **అభ్యర్థన సమయంలో నిర్ణయించబడుతుంది**.
+
+`codex-search` (Codex Web Search): అనుసంధానించిన Codex (ChatGPT) ఖాతాలను ఉపయోగిస్తుంది; ప్రత్యేక కీ అవసరం లేదు. ప్రతి శోధన ChatGPT సబ్‌స్క్రిప్షన్ కోటాను ఉపయోగిస్తుంది మరియు సుమారు 10–40 సెకన్లు పడుతుంది. అభ్యర్థనలో దాని పేరు పేర్కొంటే నడుస్తుంది; స్వయంచాలక ఎంపిక కోసం డిఫాల్ట్‌గా ఆఫ్‌లో ఉన్న `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ను ఆన్ చేయాలి.
 
 ---
 

@@ -104,10 +104,12 @@ Voert dezelfde zoekopdracht/URL parallel uit bij maximaal **4 providers** (D22):
 `ProviderCatalog.tsx` toont de volledige lijst met providers van `GET /api/search/providers`
 (in F4 uitgebreid met fetchproviders):
 
-| `kind` | `"search"` (20 providers) of `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 providers) of `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 De status wordt **op het moment van de aanvraag afgeleid** door te controleren of er inloggegevens bestaan en of
 alle sleutels momenteel een afkoelperiode hebben.
+
+`codex-search` (Codex Web Search): Gebruikt je gekoppelde Codex-accounts (ChatGPT), zonder aparte sleutel. Elke zoekopdracht verbruikt abonnementsquotum en duurt ongeveer 10–40 s. Wordt uitgevoerd als het verzoek deze aanbieder noemt; automatische selectie vereist de vlag `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, die standaard uitstaat.
 
 ---
 

@@ -44,7 +44,7 @@ Būla karogs tiek uzskatīts par **iespējotu**, ja tā efektīvā vērtība ir 
 
 ## Karoga katalogs
 
-120 karogi 6 kategorijās.** Noklusējums** ir definīcijas noklusējuma — vērtība, ko izmanto, ja nav ne DB ignorēšanas, ne vides mainīgā.
+121 karogi 6 kategorijās.** Noklusējums** ir definīcijas noklusējuma — vērtība, ko izmanto, ja nav ne DB ignorēšanas, ne vides mainīgā.
 
 ### Drošība (11)
 
@@ -115,7 +115,7 @@ Būla karogs tiek uzskatīts par **iespējotu**, ja tā efektīvā vērtība ir 
 
 Ja `UNPRICED_USAGE_BUDGET_POLICY` ir skaidri konfigurēts (DB ignorēšana pirms vides), tam ir prioritāte pār `USAGE_LIMIT_IGNORE_UNPRICED`. Ja nav skaidras enum vērtības, augšējā Būla atteikšanās atlasa `count_as_zero`; pretējā gadījumā noklusējuma vērtība ir `fail_closed`. Nederīgas uzskaites vērtības un nelasāma līdzekļa karoga krātuves kļūme aizvērta. Neviena atteikšanās neatbrīvo cenu tēriņus vai neveiksmīgu cenu meklēšanu. Izpilde un administratora ziņojums atrisina vienu un to pašu efektīvu politiku.
 
-### Izpildlaiks (57)
+### Izpildlaiks (58)
 
 | Atslēga                                        | Tips    | Noklusējums | Restartēt | Apraksts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------------- | ------- | ----------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Ja `UNPRICED_USAGE_BUDGET_POLICY` ir skaidri konfigurēts (DB ignorēšana pirms
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | Būla    | `false`     |           | Pārtrauciet piedāvāt un pārsūtīt `max` argumentācijas mēģinājumu Cursor Grok 4.7 (#17386): Cursor dokumentu sarakstā ir tikai low/medium/high/xhigh, tāpēc `grok-4.7-max` atkāpšanās aizstājvārds pazūd no kataloga un tiek nosūtīts `max` piepūles pieprasījums bez piepūles parametra. Pēc noklusējuma izslēgts: `max` joprojām tiek piedāvāts un pārsūtīts, jo tiešā AgentService/Run zonde to pieņēma.                                                                                                                                                                                                                                                                                                                                      |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | Būla    | `false`     |           | Sūtiet atbildes kā tukšu rindiņu, nevis notikuma response.in_progress vietā, tāpēc sintētisks momentuzņēmums nekad nevar aizstāt reālo atbildi oficiālajā SDK. Tukša rindiņa nenosūta SSE notikumu, tāpēc klienta sargsuns, kas atiestata tikai notikumus, netiktu atiestatīts ilgstošas klusuma fāzes laikā. Pēc noklusējuma izslēgts: taimeri nosūta spec-valid response.in_progress notikumu.                                                                                                                                                                                                                                                                                                                                                |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | Būla    | `false`     |           | Saspiešanas kešatmiņas statistikā uzskaitiet saspiestu pieprasījumu automātiskās prefiksu kešatmiņas nodrošinātājam (OpenAI, Codex, Azure vai pielāgotam savienojumam, kas deklarē tūlītēju kešatmiņu ar marķiera noņemšanu) kā aptuveno kešatmiņas trāpījumu pat bez `cache_control` marķieriem (#17114). Aprēķins ir kešatmiņas piemērotības signāls, nevis novērots trāpījums, tāpēc ziņotais trāpījumu līmenis šiem pakalpojumu sniedzējiem ir 100%. Izslēgts pēc noklusējuma: tikai pieprasījums ar `cache_control` marķieriem kešatmiņas nodrošinātājam tiek uzskatīts par aptuvenu trāpījumu, tāpēc automātisko prefiksu nodrošinātāji turpina ziņot par 0.                                                                              |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | Būla    | `false`     |           | Ļauj automātiskai tīmekļa meklēšanai bez skaidri norādīta `provider` izmantot pievienotu Codex (ChatGPT) kontu caur `codex-search`: kā pēdējo iespēju pirms pakalpojumu sniedzējiem bez atslēgas, ja neviens sniedzējs ar akreditācijas datiem nav izmantojams, un kā rezerves iespēju kļūmes gadījumā (#17933). Katrs meklējums patērē abonementa kvotu un ilgst aptuveni 10–40 s. Pēc noklusējuma izslēgts: `codex-search` darbojas tikai tad, ja pieprasījums to skaidri norāda.                                                                                                                                                                                                                                                             |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Atgriež katru karogu ar tā faktisko vērtību, avotu un kopsavilkumu.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

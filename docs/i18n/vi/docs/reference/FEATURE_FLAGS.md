@@ -39,7 +39,7 @@ Một cờ boolean được coi là **đã bật** khi giá trị hiệu quả c
 
 ## Danh mục cờ
 
-120 lá cờ trên 6 loại.** Mặc định** — mặc định của định nghĩa là giá trị được sử dụng khi không có ghi đè DB cũng như biến môi trường.
+121 lá cờ trên 6 loại.** Mặc định** — mặc định của định nghĩa là giá trị được sử dụng khi không có ghi đè DB cũng như biến môi trường.
 
 ### An ninh (11)
 
@@ -110,7 +110,7 @@ Một cờ boolean được coi là **đã bật** khi giá trị hiệu quả c
 
 Khi `UNPRICED_USAGE_BUDGET_POLICY` được định cấu hình rõ ràng (DB ghi đè trước môi trường), nó được ưu tiên hơn `USAGE_LIMIT_IGNORE_UNPRICED`. Không có giá trị enum rõ ràng, tùy chọn không tham gia boolean ngược dòng sẽ chọn `count_as_zero`; nếu không thì mặc định là `fail_closed`. Giá trị enum không hợp lệ và bộ lưu trữ cờ tính năng không thể đọc được không đóng được. Việc chọn không tham gia sẽ không làm giảm mức chi tiêu đã định giá hoặc việc tra cứu giá không thành công. Việc thực thi và báo cáo của quản trị viên giải quyết cùng một chính sách hiệu quả.
 
-### Thời gian chạy (57)
+### Thời gian chạy (58)
 
 | Chìa khóa                                      | Kiểu    | Mặc định | Khởi động lại | Sự miêu tả                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------- | ------- | -------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -173,6 +173,7 @@ Khi `UNPRICED_USAGE_BUDGET_POLICY` được định cấu hình rõ ràng (DB gh
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`  |               | Dừng cung cấp và chuyển tiếp nỗ lực lập luận `max` cho Cursor Grok 4.7 (#17386): danh sách tài liệu của Cursor chỉ low/medium/high/xhigh, do đó bí danh dự phòng `grok-4.7-max` biến mất khỏi danh mục và yêu cầu nỗ lực `max` được gửi mà không có tham số nỗ lực. Tắt theo mặc định: `max` vẫn được cung cấp và chuyển tiếp, vì một đầu dò AgentService/Run trực tiếp đã chấp nhận nó.                                                                                                                                                                                                                                                                                                                   |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false`  |               | Gửi các nội dung lưu giữ của Phản hồi dưới dạng một dòng trống thay vì sự kiện reply.in_progress, do đó, ảnh chụp nhanh tổng hợp không bao giờ có thể thay thế phản hồi thực trong SDK chính thức. Một dòng trống sẽ không gửi đi sự kiện SSE, do đó, cơ quan giám sát máy khách chỉ đặt lại các sự kiện sẽ không được đặt lại trong giai đoạn im lặng kéo dài. Tắt theo mặc định: bộ hẹn giờ gửi sự kiện phản hồi hợp lệ.in_progress.                                                                                                                                                                                                                                                                     |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`  |               | Trong số liệu thống kê về bộ nhớ đệm nén, hãy tính yêu cầu đã nén tới nhà cung cấp bộ đệm ẩn tiền tố tự động (OpenAI, Codex, Azure hoặc kết nối tùy chỉnh khai báo bộ nhớ đệm nhanh chóng bằng cách loại bỏ điểm đánh dấu) là một lần truy cập bộ nhớ đệm ước tính ngay cả khi không có điểm đánh dấu `cache_control` (#17114). Ước tính này là tín hiệu đủ điều kiện cho bộ đệm, không phải là lần truy cập được quan sát, vì vậy tỷ lệ lần truy cập được báo cáo cho các nhà cung cấp đó có xu hướng đạt tới 100%. Tắt theo mặc định: chỉ yêu cầu mang điểm đánh dấu `cache_control` đến nhà cung cấp bộ đệm được tính là lần truy cập ước tính, do đó, nhà cung cấp tiền tố tự động tiếp tục báo cáo 0. |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false`  |               | Cho phép tìm kiếm web tự động không chỉ định `provider` dùng tài khoản Codex (ChatGPT) đã kết nối qua `codex-search`: làm lựa chọn cuối trước các nhà cung cấp không cần khóa khi không có nhà cung cấp có thông tin xác thực nào dùng được, đồng thời làm phương án dự phòng khi lỗi (#17933). Mỗi lượt tìm kiếm tiêu tốn hạn mức thuê bao và mất khoảng 10–40 s. Mặc định tắt: `codex-search` chỉ chạy khi yêu cầu chỉ định rõ.                                                                                                                                                                                                                                                                          |
 
 ### CLI (5)
 
@@ -243,10 +244,10 @@ Trả về mọi cờ với giá trị hiệu dụng, nguồn và bản tóm t�
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

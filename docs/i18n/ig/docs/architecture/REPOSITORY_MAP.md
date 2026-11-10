@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API kọmpọnenti Dashboard: ihe nkwụnye n'elu `packages/ui-kit` — lee `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: aha akara ngosi ndị ihuenyo na-eji → kọmpọnenti Lucide (`<Icon>`)                            |
-| `constants/providers.ts`         | **Ndị na-eweta 386** nwere nkwado Zod (isi mmalite nke eziokwu)                                          |
+| `constants/providers.ts`         | **Ndị na-eweta 387** nwere nkwado Zod (isi mmalite nke eziokwu)                                          |
 | `constants/cliTools.ts`          | Ndebanye ngwaọrụ CLI mpụga                                                                               |
 | `constants/routingStrategies.ts` | **Usoro nhazi ụzọ 20** nwere ọkwa mkpa                                                                   |
 | `constants/publicApiRoutes.ts`   | Ụzọ ndị chọrọ nkwenye Bearer (kama nkwenye njikwa)                                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Njikọ CLI si mpụga + CLI OmniRoute si n'ime                                                        |
 | `I18N.md`                   | Architecture i18n, itinye asụsụ, locale 67                                                         |
 | `UNINSTALL.md`              | Nzọụkwụ iwepụ dị ọcha                                                                              |
-| `PROVIDER_REFERENCE.md`     | Katalọgụ ndị na-enye 386 **a na-emepụta akpaaka** (mepụtaghachi: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalọgụ ndị na-enye 387 **a na-emepụta akpaaka** (mepụtaghachi: `npm run gen:provider-reference`) |
 
 ### Nnyocha miri emi nke subsystem
 

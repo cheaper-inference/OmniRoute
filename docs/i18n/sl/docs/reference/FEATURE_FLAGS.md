@@ -44,7 +44,7 @@ Logična zastavica se šteje za **omogočeno**, kadar je njena dejanska vrednost
 
 ## Katalog zastav
 
-120 zastav v 6 kategorijah.** Privzeto** je privzeta definicija — vrednost, uporabljena, ko ni prisotna niti preglasitev DB niti spremenljivka okolja.
+121 zastav v 6 kategorijah.** Privzeto** je privzeta definicija — vrednost, uporabljena, ko ni prisotna niti preglasitev DB niti spremenljivka okolja.
 
 ### Varnost (11)
 
@@ -115,7 +115,7 @@ Logična zastavica se šteje za **omogočeno**, kadar je njena dejanska vrednost
 
 Ko je `UNPRICED_USAGE_BUDGET_POLICY` izrecno konfiguriran (DB preglasi pred okoljem), ima prednost pred `USAGE_LIMIT_IGNORE_UNPRICED`. Brez eksplicitne vrednosti enum, navzgornja logična zavrnitev izbere `count_as_zero`; drugače je privzetek `fail_closed`. Neveljavne vrednosti enum in neberljiva shramba za zastavice funkcij se ne zaprejo. Nobena zavrnitev ne zmanjša porabe po ceni ali neuspešnega iskanja cen. Uveljavljanje in skrbniško poročilo rešujeta enako učinkovito politiko.
 
-### Runtime (57)
+### Runtime (58)
 
 | Ključ                                          | Vrsta   | Privzeto | Znova zaženite | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------------------------------------------- | ------- | -------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Ko je `UNPRICED_USAGE_BUDGET_POLICY` izrecno konfiguriran (DB preglasi pred okol
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | logično | `false`  |                | Prenehajte ponujati in posredovati poskus razmišljanja `max` za Cursor Grok 4.7 (#17386): dokumenti Cursor navajajo samo low/medium/high/xhigh, tako da nadomestni vzdevek `grok-4.7-max` izgine iz kataloga in zahteva za trud `max` je poslana brez parametra truda. Privzeto izklopljeno: `max` ostane ponujen in posredovan, saj ga je živa sonda AgentService/Run sprejela.                                                                                                                                                                                                                                                                                                                                                                   |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | logično | `false`  |                | Pošlji Responses keepalive kot prazno vrstico namesto dogodka response.in_progress, tako da sintetični posnetek nikoli ne more nadomestiti pravega odgovora v uradnem SDK. Prazna vrstica ne odpošlje nobenega dogodka SSE, tako da nadzorni pas odjemalca, ki se ponastavi samo ob dogodkih, ne bi bil ponastavljen med dolgo tiho fazo. Privzeto izklopljeno: časovniki pošljejo specifikacijsko veljaven dogodek response.in_progress.                                                                                                                                                                                                                                                                                                          |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | logično | `false`  |                | V statističnih podatkih o stiskanju predpomnilnika štejte stisnjeno zahtevo ponudniku samodejnega predpomnjenja v predpono (OpenAI, Codex, Azure ali povezava po meri, ki razglasi hitro predpomnjenje z odstranjevanjem oznak) kot ocenjen zadetek predpomnilnika tudi brez označevalcev `cache_control` (#17114). Ocena je signal primernosti predpomnilnika in ne opazovani zadetek, zato se poročana stopnja zadetkov za te ponudnike giblje proti 100 %. Privzeto izklopljeno: samo zahteva, ki prenaša oznake `cache_control` ponudniku predpomnjenja, se šteje kot ocenjeni zadetek, zato ponudniki s samodejno predpono poročajo 0.                                                                                                        |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | logično | `false`  |                | Omogoča samodejnemu spletnemu iskanju brez izrecnega `provider`, da uporabi povezan račun Codex (ChatGPT) prek `codex-search`: kot zadnjo možnost pred ponudniki brez ključa, ko ni mogoče uporabiti nobenega ponudnika s poverilnicami, in kot rezervo ob napaki (#17933). Vsako iskanje porabi naročniško kvoto in traja približno 10–40 s. Privzeto izklopljeno: `codex-search` se zažene le, če ga zahteva izrecno navede.                                                                                                                                                                                                                                                                                                                     |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Vrne vsako zastavico z njeno dejansko vrednostjo, virom in povzetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

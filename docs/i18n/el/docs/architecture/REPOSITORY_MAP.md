@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | API στοιχείων του dashboard: προσαρμογείς πάνω από το `packages/ui-kit` — βλ. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ονόματα εικονιδίων που χρησιμοποιούνται από τις οθόνες → στοιχεία Lucide (`<Icon>`)                    |
-| `constants/providers.ts`         | **386 πάροχοι** με επικύρωση Zod (μοναδική πηγή αλήθειας)                                                          |
+| `constants/providers.ts`         | **387 πάροχοι** με επικύρωση Zod (μοναδική πηγή αλήθειας)                                                          |
 | `constants/cliTools.ts`          | Μητρώο εξωτερικών εργαλείων CLI                                                                                    |
 | `constants/routingStrategies.ts` | **20 στρατηγικές δρομολόγησης** με προτεραιότητες                                                                  |
 | `constants/publicApiRoutes.ts`   | Διαδρομές που απαιτούν έλεγχο ταυτότητας Bearer (αντί διαχείρισης)                                                 |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ενσωματώσεις εξωτερικών CLI + Εσωτερικό CLI OmniRoute                                              |
 | `I18N.md`                   | Αρχιτεκτονική i18n, προσθήκη γλώσσας, 67 locales                                                   |
 | `UNINSTALL.md`              | Βήματα καθαρής απεγκατάστασης                                                                      |
-| `PROVIDER_REFERENCE.md`     | **Αυτόματα παραγόμενος** κατάλογος 386 παρόχων (επαναδημιουργία: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Αυτόματα παραγόμενος** κατάλογος 387 παρόχων (επαναδημιουργία: `npm run gen:provider-reference`) |
 
 ### Σε βάθος παρουσιάσεις υποσυστημάτων
 

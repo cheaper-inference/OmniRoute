@@ -44,7 +44,7 @@ Bendera boolean dianggap **didayakan** apabila nilai berkuat kuasanya ialah `"tr
 
 ## Katalog Bendera
 
-120 bendera merentas 6 kategori. **Lalai** ialah lalai definisi — nilai
+121 bendera merentas 6 kategori. **Lalai** ialah lalai definisi — nilai
 yang digunakan apabila tiada penggantian DB atau pemboleh ubah persekitaran hadir.
 
 ### Keselamatan (11)
@@ -121,7 +121,7 @@ Nilai enum yang tidak sah dan storan feature flag yang tidak boleh dibaca akan g
 melonggarkan perbelanjaan berharga atau carian harga yang gagal. Penguatkuasaan dan laporan pentadbir
 menyelesaikan dasar berkesan yang sama.
 
-### Masa jalan (57)
+### Masa jalan (58)
 
 | Key                                            | Jenis   | Lalai   | Mulakan semula | Penerangan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------- | ------- | ------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -184,6 +184,7 @@ menyelesaikan dasar berkesan yang sama.
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                | Hentikan penawaran dan penghantaran usaha penaakulan `max` untuk Cursor Grok 4.7 (#17386): dokumentasi Cursor hanya menyenaraikan low/medium/high/xhigh, jadi alias sandaran `grok-4.7-max` dikeluarkan daripada katalog dan permintaan usaha `max` dihantar tanpa parameter usaha. Dilumpuhkan secara lalai: `max` kekal ditawarkan dan dihantar, kerana siasatan langsung AgentService/Run menerimanya.                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |                | Hantar keepalive Responses sebagai baris kosong dan bukannya acara response.in_progress, supaya snapshot sintetik tidak boleh menggantikan respons sebenar dalam SDK rasmi. Baris kosong tidak menghantar acara SSE, jadi watchdog klien yang ditetapkan semula hanya apabila menerima acara tidak akan ditetapkan semula semasa fasa senyap yang panjang. Dilumpuhkan secara lalai: pemasa menghantar acara response.in_progress yang sah mengikut spesifikasi.                                                                                                                                                                                                                                                                                                                                              |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                | Dalam statistik cache pemampatan, kira permintaan termampat kepada pembekal caching awalan automatik (OpenAI, Codex, Azure atau sambungan tersuai yang mengisytiharkan caching prompt dengan pelucutan penanda) sebagai cache hit anggaran walaupun tanpa penanda `cache_control` (#17114). Anggaran tersebut ialah isyarat kelayakan cache, bukan hit yang diperhatikan, jadi kadar hit yang dilaporkan untuk pembekal tersebut cenderung kepada 100%. Dilumpuhkan secara lalai: hanya permintaan yang membawa penanda `cache_control` kepada pembekal caching dikira sebagai hit anggaran, jadi pembekal awalan automatik terus melaporkan 0.                                                                                                                                                               |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |                | Membenarkan carian web automatik tanpa `provider` yang jelas menggunakan akaun Codex (ChatGPT) yang disambungkan melalui `codex-search`: sebagai pilihan terakhir sebelum penyedia tanpa kunci apabila tiada penyedia dengan kelayakan boleh digunakan, serta sebagai alternatif apabila berlaku kegagalan (#17933). Setiap carian menggunakan kuota langganan dan mengambil masa kira-kira 10–40 s. Dimatikan secara lalai: `codex-search` hanya berjalan apabila permintaan menamakannya secara jelas.                                                                                                                                                                                                                                                                                                      |
 
 ### CLI (5)
 
@@ -276,10 +277,10 @@ Mengembalikan setiap flag bersama nilai berkesan, sumber dan ringkasan.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... semua 119 flag
+    // ... semua 121 flag
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -15,7 +15,7 @@
 
 **Dibuat oleh [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                            |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------- | :---------------------: | :---------: | :-------------------: |
-| Penyedia 🌐                |           352           |   **358**   |          386          |
+| Penyedia 🌐                |           352           |   **358**   |          387          |
 | 🧠 Model obrolan unik IDs  |          1320           |  **1374**   |         1535          |
 | Jembatan Modalitas 🖼️      | Visi 🆕 + audio + video |      ✓      |           ✓           |
 | Katalog gratis 📡 Radar    |    Keikutsertaan 🆕     |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Seluruh **20** strategi — padukan sesuai kebutuhan pada setiap langkah combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membuat OmniRoute berbeda — snapshot fitur terkini vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM di 13 kapabilitas. OmniRoute: 386 penyedia, 150+ free tier bawaan, 20 strategi routing, kompresi token 12-engine, server MCP bawaan dengan 110 tools, protokol agen A2A, memori persisten, guardrails, cloud agents, stealth fingerprint TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-host sendiri. Kapabilitas dan jumlah pesaing dapat berubah; lihat metodologi yang ditautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membuat OmniRoute berbeda — snapshot fitur terkini vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM di 13 kapabilitas. OmniRoute: 387 penyedia, 150+ free tier bawaan, 20 strategi routing, kompresi token 12-engine, server MCP bawaan dengan 110 tools, protokol agen A2A, memori persisten, guardrails, cloud agents, stealth fingerprint TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-host sendiri. Kapabilitas dan jumlah pesaing dapat berubah; lihat metodologi yang ditautkan."/>
 
 <sub>📊 Metodologi lengkap &amp; detail per fitur vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar bersifat pilihan dan hanya menggunakan GET. Klien OmniRoute tidak mengungg
 - **🖼️ Titik akhir baru** — `/v1/ocr` (Mistral OCR) Dan `/v1/audio/translations` (Gaya bisikan) melengkapi permukaan media. → [API Referensi](docs/reference/API_REFERENCE.md)
 - **🎨 Pembuatan gambar / video / audio** — satu API untuk media: xAI Grok Bayangkan & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, dan penyedia ucapan seperti ElevenLabs. → [API Referensi](docs/reference/API_REFERENCE.md)
 - **Penerapan & operasi 🌍** — reverse-proxy `basePath`, deteksi otomatis bahasa browser, pelacakan perangkat per kunci, kepercayaan MITM tanpa root, lokalisasi zh-TW. [Lingkungan](docs/reference/ENVIRONMENT.md) →
-- **🤝 Lebih banyak penyedia & agen** Agen cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan browser + OAuth login, kartu kelas satu Ollama, Claude Opus 5 & Sonnet 5, kemitraan resmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… dan yang disegarkan **Katalog penyedia 386** . [Penyedia](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Lebih banyak penyedia & agen** Agen cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan browser + OAuth login, kartu kelas satu Ollama, Claude Opus 5 & Sonnet 5, kemitraan resmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… dan yang disegarkan **Katalog penyedia 387** . [Penyedia](docs/reference/PROVIDER_REFERENCE.md) →
 - **Transparansi Perutean 📡** Setiap respons — membawa header `X-OmniRoute-Decision` yang memberi nama strategy/provider/latency yang menyajikannya, strategi kombo `cache-optimized` baru + Auto-Combo `cacheAffinity` merutekan permintaan pengulangan kembali ke koneksi yang menyimpan awalan cache, dan titik akhir `/v1/auto-combo/{channel}/candidates` hanya-baca mengekspos kumpulan kandidat langsung saluran `auto/*`. [Kombo Otomatis](docs/routing/AUTO-COMBO.md) →
 - **⚡ Kinerja lokal & infra** — Redis lokal sekali klik, Cloudflare Workers / Deno Deploy relay deployer, Bifrost & Mux sebagai layanan tersemat yang diawasi. [Layanan Tertanam](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Juga di dalam kotak** Kerangka plugin — Pasar +, kerangka keterampilan Omni/Agent/GitHub, integrasi brankas Obsidian (22 alat MCP ), Batch & File APIs yang kompatibel dengan OpenAI, cache respons semantik, gamifikasi dengan papan peringkat, penemuan agen ACP (15 agen bawaan), ekspor log terjadwal ke BigQuery, fan-out multi-model paralel `auto/chaos`, jembatan bot Telegram, manajer versi dalam aplikasi, dan peringkat penyedia gratis LMArena-ELO. [Dokumen](docs/README.md) →
@@ -678,11 +678,11 @@ tetap aman dari riwayat shell Anda. → [Integrasi CLI](docs/guides/CLI-INTEGRAT
 
 <div align="center">
 
-## 🌐 386 Penyedia AI — 156 Ditandai Katalog Gratis
+## 🌐 387 Penyedia AI — 156 Ditandai Katalog Gratis
 
 </div>
 
-> **386 penyedia terdaftar** di seluruh obrolan kanonik, media, pencarian, lokal, agen cloud, dan koleksi sistem, termasuk **156 membawa metadata penemuan `hasFree: true`** . Registri model obrolan mencakup **245 penyedia / 3.172 pasangan model penyedia berbeda / 1.535 model mentah IDs** ; katalog anggaran bebas terpisah memilikinya **466 baris per model** ,**34 kumpulan berulang** Dan **52 penyedia recurring/keyless gratis selamanya** . Ini adalah penyebut yang berbeda berdasarkan desain; definisi dan penghitungan kumpulan yang dikurangkan ada di [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tingkat Gratis](docs/reference/FREE_TIERS.md).
+> **387 penyedia terdaftar** di seluruh obrolan kanonik, media, pencarian, lokal, agen cloud, dan koleksi sistem, termasuk **156 membawa metadata penemuan `hasFree: true`** . Registri model obrolan mencakup **245 penyedia / 3.172 pasangan model penyedia berbeda / 1.535 model mentah IDs** ; katalog anggaran bebas terpisah memilikinya **466 baris per model** ,**34 kumpulan berulang** Dan **52 penyedia recurring/keyless gratis selamanya** . Ini adalah penyebut yang berbeda berdasarkan desain; definisi dan penghitungan kumpulan yang dikurangkan ada di [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tingkat Gratis](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

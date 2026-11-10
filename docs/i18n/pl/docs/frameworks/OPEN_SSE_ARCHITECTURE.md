@@ -488,7 +488,7 @@ Obsługuje:
 
 | Plik                          | Zamiar                                            |
 | ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Rejestracja modelu czatu w katalogu 386 dostawców |
+| `providerRegistry.ts`         | Rejestracja modelu czatu w katalogu 387 dostawców |
 | `providerModels.ts`           | Aliasy modeli, mapowanie formatów                 |
 | `constants.ts`                | Limity czasu, limity, kody stanu                  |
 | `defaultThinkingSignature.ts` | Domyślny podpis myślenia Claude                   |

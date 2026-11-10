@@ -103,10 +103,12 @@
 يعرض `ProviderCatalog.tsx` القائمة الكاملة للمزوّدين من `GET /api/search/providers`
 (تم توسيعها في F4 لتشمل مزوّدي الجلب):
 
-| `kind` | `"search"` (20 مزوّدًا) أو `"fetch"` (firecrawl، jina-reader، tavily-search، tinyfish، nimble-search، anysearch-search، parallel-search) |
+| `kind` | `"search"` (23 مزوّدًا) أو `"fetch"` (firecrawl، jina-reader، tavily-search، tinyfish، nimble-search، anysearch-search، parallel-search) |
 
 تُشتق الحالة **وقت الطلب** عبر التحقق مما إذا كانت بيانات الاعتماد موجودة، وما إذا كانت
 جميع المفاتيح حاليًا في فترة انتظار.
+
+`codex-search` (Codex Web Search): يستخدم حسابات Codex (ChatGPT) المتصلة، دون مفتاح منفصل. يستهلك كل بحث حصة من الاشتراك ويستغرق نحو 10–40 s. يعمل عندما يحدده الطلب؛ ويتطلب الاختيار التلقائي العلم `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`، المعطل افتراضيًا.
 
 ---
 

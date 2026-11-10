@@ -44,7 +44,7 @@ Příznak typu boolean se považuje za **povolený**, pokud je jeho efektivní h
 
 ## Katalog příznaků
 
-120 příznaků v 6 kategoriích. **Výchozí** je výchozí hodnota definice — hodnota
+121 příznaků v 6 kategoriích. **Výchozí** je výchozí hodnota definice — hodnota
 použitá, když není přítomno ani přepsání v DB, ani proměnná prostředí.
 
 ### Zabezpečení (11)
@@ -121,7 +121,7 @@ výchozí hodnota `fail_closed`. Neplatné hodnoty výčtu a nečitelná úloži
 k bezpečnému uzavření. Žádná z voleb deaktivace neuvolňuje omezení zpoplatněné spotřeby ani
 selhání vyhledání ceny. Vynucování a zpráva pro správce vyhodnocují stejnou efektivní zásadu.
 
-### Runtime (57)
+### Runtime (58)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | ---------------------------------------------- | ------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -184,6 +184,7 @@ selhání vyhledání ceny. Vynucování a zpráva pro správce vyhodnocují ste
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Přestane nabízet a předávat úsilí uvažování `max` pro Cursor Grok 4.7 (#17386): dokumentace Cursoru uvádí pouze low/medium/high/xhigh, takže náhradní alias `grok-4.7-max` zmizí z katalogu a požadavek s úsilím `max` se odešle bez parametru úsilí. Ve výchozím nastavení vypnuto: `max` zůstává nabízeno a předáváno, protože živá sonda AgentService/Run jej přijala.                                                                                                                                                                                                                                                                                                                                            |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |         | Odesílat keepalive zprávy Responses jako prázdný řádek namísto události response.in_progress, aby syntetický snímek nikdy nemohl v oficiálním SDK nahradit skutečnou odpověď. Prázdný řádek nevyšle žádnou událost SSE, takže watchdog klienta, který se resetuje pouze při událostech, by se během dlouhé tiché fáze neresetoval. Ve výchozím nastavení vypnuto: časovače odesílají událost response.in_progress platnou podle specifikace.                                                                                                                                                                                                                                                                         |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |         | Ve statistikách kompresní mezipaměti započítat komprimovaný požadavek poskytovateli s automatickým ukládáním prefixu do mezipaměti (OpenAI, Codex, Azure nebo vlastní připojení, které deklaruje ukládání promptů do mezipaměti s odstraňováním značek) jako odhadovaný zásah do mezipaměti i bez značek `cache_control` (#17114). Tento odhad je signálem způsobilosti pro mezipaměť, nikoli pozorovaným zásahem, takže vykazovaná míra zásahů u těchto poskytovatelů směřuje ke 100 %. Ve výchozím nastavení vypnuto: za odhadovaný zásah se počítá pouze požadavek obsahující značky `cache_control` odeslaný poskytovateli s podporou mezipaměti, takže poskytovatelé s automatickým prefixem nadále vykazují 0. |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Umožňuje automatickému webovému vyhledávání bez výslovného `provider` použít připojený účet Codex (ChatGPT) přes `codex-search`: jako poslední možnost před poskytovateli bez klíče, pokud není použitelný žádný poskytovatel s přihlašovacími údaji, a jako zálohu při selhání (#17933). Každé vyhledávání čerpá kvótu předplatného a trvá přibližně 10–40 s. Ve výchozím stavu vypnuto: `codex-search` se spouští jen při výslovném uvedení v požadavku.                                                                                                                                                                                                                                                           |
 
 ### CLI (5)
 
@@ -275,10 +276,10 @@ Vrátí každý příznak s jeho efektivní hodnotou, zdrojem a souhrnem.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všech 119 příznaků
+    // ... všech 121 příznaků
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -44,7 +44,7 @@ En boolesk flagga anses vara **aktiverad** när dess effektiva värde är `"true
 
 ## Flagga katalog
 
-120 flaggor i 6 kategorier.** Standard** är definitionen standard — värdet som används när varken en DB åsidosättning eller en miljövariabel är närvarande.
+121 flaggor i 6 kategorier.** Standard** är definitionen standard — värdet som används när varken en DB åsidosättning eller en miljövariabel är närvarande.
 
 ### Säkerhet (11)
 
@@ -115,7 +115,7 @@ En boolesk flagga anses vara **aktiverad** när dess effektiva värde är `"true
 
 När `UNPRICED_USAGE_BUDGET_POLICY` är explicit konfigurerad (DB åsidosätt före miljö) har det företräde framför `USAGE_LIMIT_IGNORE_UNPRICED`. Utan något explicit uppräkningsvärde väljer den booleska opt-out uppströms `count_as_zero`; annars är standardvärdet `fail_closed`. Ogiltiga uppräkningsvärden och oläsbar funktionsflaggalagring misslyckades. Varken att välja bort minskar prissatta utgifter eller en misslyckad prissökning. Verkställighet och administratörsrapport löser samma effektiva policy.
 
-### Körtid (57)
+### Körtid (58)
 
 | Nyckel                                         | Typ        | Standard | Starta om | Beskrivning                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------- | ---------- | -------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ När `UNPRICED_USAGE_BUDGET_POLICY` är explicit konfigurerad (DB åsidosätt f�
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | booleskt   | `false`  |           | Sluta erbjuda och vidarebefordra `max` resonemangsansträngningen för Cursor Grok 4.7 (#17386): Cursor dokumentlista endast low/medium/high/xhigh, så `grok-4.7-max` reservaliaset försvinner från katalogen och en `max` -förfrågan skickas utan en ansträngningsparameter. Av som standard: `max` förblir erbjuds och vidarebefordras, eftersom en live AgentService/Run -sond accepterade det.                                                                                                                                                                                                                                                                                                               |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | booleskt   | `false`  |           | Skicka svar keepalives som en tom rad istället för en response.in_progress-händelse, så en syntetisk ögonblicksbild kan aldrig ersätta det verkliga svaret i den officiella SDK. En tom rad skickar ingen SSE händelse, så en klientövervakning som endast återställer på händelser skulle inte återställas under en lång tyst fas. Av som standard: timers skickar händelsen spec-valid response.in_progress.                                                                                                                                                                                                                                                                                                 |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | booleskt   | `false`  |           | I komprimeringscachestatistiken räknar du en komprimerad begäran till en leverantör av automatisk prefix-cache (OpenAI, Codex, Azure eller en anpassad anslutning som deklarerar promptcache med markeringsstrippning) som en uppskattad cacheträff även utan `cache_control` markörer (#17114). Uppskattningen är en signal för cacheberättigande, inte en observerad träff, så den rapporterade träfffrekvensen för dessa leverantörer trendar mot 100 %. Av som standard: endast en begäran som bär `cache_control` -markörer till en cachingleverantör räknas som en uppskattad träff, så leverantörer av automatiska prefix fortsätter att rapportera 0.                                                  |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | booleskt   | `false`  |           | Låter en automatisk webbsökning utan uttrycklig `provider` använda ett anslutet Codex-konto (ChatGPT) via `codex-search`: som sista alternativ före leverantörer utan nyckel när ingen leverantör med autentiseringsuppgifter kan användas, och som reserv vid fel (#17933). Varje sökning förbrukar prenumerationskvot och tar cirka 10–40 s. Avstängd som standard: `codex-search` körs bara när en begäran uttryckligen anger den.                                                                                                                                                                                                                                                                          |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Returnerar varje flagga med dess effektiva värde, källa och en sammanfattning.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

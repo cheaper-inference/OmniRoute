@@ -43,7 +43,7 @@ A ka àmì boolean sí **tí a ti mú ṣiṣẹ́** nígbà tí iye tó ń ṣi
 
 ## Katalogi Flag
 
-Awọn asia 120 kọja awọn ẹka 6.** Aiyipada** jẹ — aiyipada asọye iye ti a lo nigbati DB kọju tabi oniyipada ayika ko wa.
+Awọn asia 121 kọja awọn ẹka 6.** Aiyipada** jẹ — aiyipada asọye iye ti a lo nigbati DB kọju tabi oniyipada ayika ko wa.
 
 ### Aabo (11)
 
@@ -114,7 +114,7 @@ Awọn asia 120 kọja awọn ẹka 6.** Aiyipada** jẹ — aiyipada asọye iy
 
 Nigbati `UNPRICED_USAGE_BUDGET_POLICY` ba ti ni atunto ni gbangba (DB override ṣaaju ayika), o gba iṣaaju lori `USAGE_LIMIT_IGNORE_UNPRICED`. Pẹlu iye enum ti o han gbangba, ijade-jade boolean ti oke yan `count_as_zero`; bibẹkọ ti aiyipada ni `fail_closed`. Awọn iye enum ti ko wulo ati ibi ipamọ asia ti a ko le ka ni o kuna ni pipade. Bẹni ijade kuro ni isinmi inawo idiyele tabi wiwa idiyele ti kuna. Ijabọ imuṣiṣẹ ati oluṣakoso yanju eto imulo imunadoko kanna.
 
-### Akoko ṣiṣe (57)
+### Akoko ṣiṣe (58)
 
 | Bọtini                                         | Iru      | Aiyipada | Tun bẹrẹ | Apejuwe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ---------------------------------------------- | -------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -177,6 +177,7 @@ Nigbati `UNPRICED_USAGE_BUDGET_POLICY` ba ti ni atunto ni gbangba (DB override �
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolianu | `false`  |          | Duro fifunni ati siwaju igbiyanju ero `max` fun Cursor Grok 4.7 (#17386): atokọ Cursor's docs nikan low/medium/high/xhigh, nitorinaa inagijẹ `grok-4.7-max` fallback parẹ lati inu katalogi ati pe ibeere igbiyanju `max` kan ranṣẹ laisi paramita akitiyan kan. Paa nipasẹ aiyipada: awọn iduro `max` funni ati firanṣẹ siwaju, bi wiwa AgentService/Run ifiwe kan gba.                                                                                                                                                                                                                                                                        |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolianu | `false`  |          | Firanṣẹ Awọn idahun keepalive bi laini ofo dipo idahun.in_progress iṣẹlẹ, nitorinaa aworan sintetiki ko le rọpo esi gidi rara ni SDK osise. Laini òfo ko firanṣẹ iṣẹlẹ SSE, nitorinaa oluṣọ alabara ti o tunto lori awọn iṣẹlẹ nikan kii yoo tunto lakoko ipele ipalọlọ pipẹ. Paa nipasẹ aiyipada: awọn aago fi iṣẹlẹ spec-valid respond.in_progress ranṣẹ.                                                                                                                                                                                                                                                                                     |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolianu | `false`  |          | Ninu awọn iṣiro kaṣe funmorawon, ka ibeere fisinuirindigbindigbin si olupese caching-iṣaaju-laifọwọyi (OpenAI, Codex, Azure, tabi asopọ aṣa ti o kede caching kiakia pẹlu yiyọ ami ami) bi kaṣe ifoju lu paapaa laisi awọn ami `cache_control` (#17114). Iṣiro naa jẹ ami ami yiyan-kaṣe, kii ṣe ikọlu ti a ṣe akiyesi, nitorinaa oṣuwọn lilu ti a royin fun awọn aṣa awọn olupese wọnyẹn si 100%. Paa nipasẹ aiyipada: ibeere nikan ti o gbe awọn ami `cache_control` si olupese caching kan ni o ka bi ikọlu ifoju, nitorinaa awọn olupese iṣaaju-iṣaaju adaṣe tọju ijabọ 0.                                                                  |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolianu | `false`  |          | Ó gba ìwádìí wẹ́ẹ̀bù aládàáṣiṣẹ́ láyè nípasẹ̀ `codex-search` pẹ̀lú àkọọ́lẹ̀ Codex tí a ti so pọ̀, tí a kò bá sọ `provider` ní kedere. Tí kò bá sí olùpèsè tó ní ẹ̀rí ìwọlé tí a lè lò, èyí ni àṣàyàn ìkẹyìn ṣáájú àwọn olùpèsè tí kò nílò kọ́kọ́rọ́, ó sì jẹ́ àṣàyàn àfẹ́yìntì nígbà ìkùnà (#17933). Ìwádìí kọ̀ọ̀kan ń lo ìpín àlábápín ChatGPT , ó sì máa ń gba nǹkan bí ìṣẹ́jú-àáyá 10–40. A pa á ní ìbẹ̀rẹ̀; `codex-search` ń ṣiṣẹ́ kìkì nígbà tí a béèrè rẹ̀ ní kedere.                                                                                                                                                                                          |
 
 ### CLI (5)
 
@@ -247,10 +248,10 @@ Pada gbogbo asia pada pẹlu iye to munadoko, orisun, ati akojọpọ kan.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

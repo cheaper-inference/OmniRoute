@@ -15,7 +15,7 @@ See pakub ühtset OpenAI-ga ühilduvat lõpp-punkti (`/v1/*`) ning marsruudib li
 
 Põhivõimekused:
 
-- OpenAI-ga ühilduv API-liides CLI-dele ja tööriistadele (386 teenusepakkujat, 159 käivitusmoodulit)
+- OpenAI-ga ühilduv API-liides CLI-dele ja tööriistadele (387 teenusepakkujat, 159 käivitusmoodulit)
 - Päringute ja vastuste teisendamine teenusepakkujate vormingute vahel
 - Mudelikombinatsioonide tõrkesiire (mitme mudeli järjestus)
 - Struktureeritud kombinatsioonisammud (`provider + model + connection`) käitusaegse järjestamisega `compositeTiers` alusel

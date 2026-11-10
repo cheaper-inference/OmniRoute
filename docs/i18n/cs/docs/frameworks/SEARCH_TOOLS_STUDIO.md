@@ -103,10 +103,12 @@ Spouští stejný dotaz/URL paralelně až u **4 poskytovatelů** (D22):
 `ProviderCatalog.tsx` zpřístupňuje úplný seznam poskytovatelů z `GET /api/search/providers`
 (rozšířený ve F4 o poskytovatele načítání):
 
-| `kind` | `"search"` (20 poskytovatelů) nebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 poskytovatelů) nebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Stav je **odvozen v okamžiku požadavku** na základě kontroly, zda přihlašovací údaje existují a zda
 jsou všechny klíče aktuálně v režimu cooldown.
+
+`codex-search` (Codex Web Search): Používá vaše připojené účty Codex (ChatGPT), bez samostatného klíče. Každé vyhledávání čerpá kvótu předplatného a trvá přibližně 10–40 s. Spouští se, když jej požadavek uvede; automatický výběr vyžaduje příznak `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, který je ve výchozím stavu vypnutý.
 
 ---
 

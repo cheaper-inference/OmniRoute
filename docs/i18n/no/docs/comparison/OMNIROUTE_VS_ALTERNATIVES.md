@@ -39,7 +39,7 @@ Objektiv funksjonssammenligning mot populære AI-rutere med åpen kildekode.
 
 ## Når du skal velge OmniRoute
 
-- Du selv vert og ønsker** maksimal leverandørdekning** (386 leverandører, 155 free/no-auth -katalogoppføringer)
+- Du selv vert og ønsker** maksimal leverandørdekning** (387 leverandører, 155 free/no-auth -katalogoppføringer)
 - Du trenger en** innebygd MCP server** (LLM verktøy, minne, ferdigheter eksponert som verktøy)
 - Du trenger**A2A -protokollen** for agent-til-agent arbeidsflyter
 - Du vil** fingeravtrykk stealth** (JA3/JA4) for å unngå deteksjon av oppstrøms CAPTCHAs

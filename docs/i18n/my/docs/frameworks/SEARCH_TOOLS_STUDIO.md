@@ -102,9 +102,11 @@ Search Tools Studio သည် `/dashboard/search-tools` ကို အခြေ�
 `ProviderCatalog.tsx` သည် `GET /api/search/providers` မှ provider စာရင်းအပြည့်အစုံကို ဖော်ပြပေးသည်
 (fetch provider များ ပါဝင်လာစေရန် F4 တွင် တိုးချဲ့ထားသည်)-
 
-| `kind` | `"search"` (provider 20 ခု) သို့မဟုတ် `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (provider 23 ခု) သို့မဟုတ် `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 အထောက်အထားများ ရှိ၊ မရှိနှင့် key အားလုံးသည် လက်ရှိတွင် cooldown အခြေအနေ၌ ရှိ၊ မရှိကို စစ်ဆေးခြင်းဖြင့် တောင်းဆိုမှုပြုလုပ်သည့်အချိန်တွင် status ကို **တွက်ချက်သတ်မှတ်သည်**။
+
+`codex-search` (Codex Web Search): ချိတ်ဆက်ထားသော Codex (ChatGPT) အကောင့်များကို အသုံးပြုသည်။ သီးခြားကီး မလိုအပ်ပါ။ ရှာဖွေမှုတိုင်းသည် ChatGPT စာရင်းသွင်းမှု ခွဲတမ်း ကို သုံးစွဲပြီး 10–40 စက္ကန့်ခန့် ကြာသည်။ တောင်းဆိုချက်တွင် ၎င်း၏အမည်ကို ဖော်ပြပါက လုပ်ဆောင်သည်။ အလိုအလျောက်ရွေးချယ်ရန် မူလက ပိတ်ထားသော `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ကို ဖွင့်ရန်လိုသည်။
 
 ---
 

@@ -103,10 +103,12 @@ Search Tools Studio បម្លែង `/dashboard/search-tools` ពីកន្
 `ProviderCatalog.tsx` បង្ហាញបញ្ជីអ្នកផ្តល់សេវាពេញលេញពី `GET /api/search/providers`
 (បានពង្រីកនៅក្នុង F4 ដើម្បីរួមបញ្ចូលអ្នកផ្តល់សេវាទាញយក):
 
-| `kind` | `"search"` (អ្នកផ្តល់សេវា 20) ឬ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (អ្នកផ្តល់សេវា 23) ឬ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 ស្ថានភាពត្រូវបាន **កំណត់នៅពេលស្នើសុំ** ដោយពិនិត្យថាតើព័ត៌មានសម្ងាត់មានឬអត់ និងថាតើ
 សោទាំងអស់កំពុងស្ថិតក្នុងរយៈពេលរង់ចាំមុនប្រើឡើងវិញឬអត់។
+
+`codex-search` (Codex Web Search): ប្រើគណនី Codex (ChatGPT) ដែលបានភ្ជាប់ ដោយមិនត្រូវការសោដាច់ដោយឡែក។ ការស្វែងរកនីមួយៗប្រើកូតានៃការជាវ ChatGPT ហើយចំណាយពេលប្រហែល 10–40 វិនាទី។ វាដំណើរការនៅពេលសំណើបញ្ជាក់ឈ្មោះវា។ ការជ្រើសរើសស្វ័យប្រវត្តិត្រូវការបើក `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ដែលត្រូវបានបិទតាមលំនាំដើម។
 
 ---
 

@@ -15,7 +15,7 @@
 
 **Luonut [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                   |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 palveluntarjoajat              |            352            |   **358**   |          386          |
+| 🌐 palveluntarjoajat              |            352            |   **358**   |          387          |
 | 🧠 Ainutlaatuinen chat-malli IDs  |           1320            |  **1374**   |         1535          |
 | 🖼️ Modality Bridge                | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Radar ilmainen luettelo        |    🆕 n osallistuminen    |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Kaikki **20** strategiaa — yhdistele vapaasti yhdistelmän jokaisessa vaiheess
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista — vanhentunut ominaisuustaulukko vs 9router, OpenRouter, CLIProxyAPI ja LiteLLM 13 ominaisuuden osalta. OmniRoute: 386 tarjoajaa, 150+ sisäänrakennettua ilmaistasoa, 20 reititysstrategiaa, 12-moottorinen token-kompressio, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, turvakaiteet, pilviagentit, TLS-sormenjäljen piilotus, Desktop/Termux/PWA ja 67 i18n UI-kieltä. OmniRoute on MIT-lisensoitu ja itse isännöitävissä. Kilpailijoiden ominaisuudet ja määrät voivat muuttua; katso linkitetty metodologia."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista — vanhentunut ominaisuustaulukko vs 9router, OpenRouter, CLIProxyAPI ja LiteLLM 13 ominaisuuden osalta. OmniRoute: 387 tarjoajaa, 150+ sisäänrakennettua ilmaistasoa, 20 reititysstrategiaa, 12-moottorinen token-kompressio, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, turvakaiteet, pilviagentit, TLS-sormenjäljen piilotus, Desktop/Termux/PWA ja 67 i18n UI-kieltä. OmniRoute on MIT-lisensoitu ja itse isännöitävissä. Kilpailijoiden ominaisuudet ja määrät voivat muuttua; katso linkitetty metodologia."/>
 
 <sub>📊 Koko metodologia &amp; ominaisuuskohtaiset yksityiskohdat vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 - **🖼️ Uudet päätepisteet** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisper-tyyli) pyöristävät materiaalin pintaa. → [API Viite](docs/reference/API_REFERENCE.md)
 - **🎨 Kuvan / videon / äänen sukupolvi** — one API medialle: xAI Grok Imagine & Novita AI -video, ComfyUI, Magnific, Adobe Firefly, Segmind ja puheentarjoajat, kuten ElevenLabs. → [API Viite](docs/reference/API_REFERENCE.md)
 - **🌍 käyttöönotto ja toiminta** — -käänteinen välityspalvelin `basePath`, selainkielen automaattinen tunnistus, avaimenkohtainen laiteseuranta, juureton MITM luottamus, zh-TW-lokalisointi. → [ympäristö](docs/reference/ENVIRONMENT.md)
-- **🤝 Lisää palveluntarjoajia ja edustajia** — -pilviagentit (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) selaimella + OAuth -sisäänkirjautumisella, Ollama -ensiluokan kortti AIClaude Opus 5 & Sonnet 5, Kimi virallinen kumppanuus (Code/Web/Moonshot), Zed, Requesty, A ja SenseNova**386-toimittajan luettelo** . → [palveluntarjoajat](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Lisää palveluntarjoajia ja edustajia** — -pilviagentit (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) selaimella + OAuth -sisäänkirjautumisella, Ollama -ensiluokan kortti AIClaude Opus 5 & Sonnet 5, Kimi virallinen kumppanuus (Code/Web/Moonshot), Zed, Requesty, A ja SenseNova**387-toimittajan luettelo** . → [palveluntarjoajat](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 reitityksen läpinäkyvyys** Jokainen — vastaus sisältää `X-OmniRoute-Decision` otsikon, joka nimeää sitä palvelevan strategy/provider/latency, uuden `cache-optimized` yhdistelmästrategian + Auto-Combo `cacheAffinity` -tekijän toistopyynnöt takaisin välimuistissa olevan etuliitettä sisältävään yhteyteen, ja vain luku -tilassa oleva `/v1/auto-combo/{channel}/candidates` päätepiste paljastaa `auto/*` kanavan reaaliaikaisen ehdokasjoukon. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Paikallinen suorituskyky ja infra** — yhdellä napsautuksella paikallinen Redis, Cloudflare Workers / Deno Deploy rele-käyttöönottimet, Bifrost & Mux valvottuina sulautetuina palveluina. → [sulautetut palvelut](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Myös laatikossa** — laajennuskehys + markkinapaikka, Omni/Agent/GitHub -taitojen viitekehykset, Obsidian holvin integrointi (22 MCP työkalua), OpenAI-yhteensopiva Batch & Files APIs, semanttinen vastausvälimuisti, pelillinen tulostaulukoiden avulla, ACP agenttien etsintä (15 sisäänrakennettua agenttia), ajoitettu lokin vienti BigQuery:hen, `auto/chaos` fani-robotin rinnakkaisversio, Telegram -fan-out-silta, monen mallin hallinta LMArena-ELO ilmaisten palveluntarjoajien sijoitukset. → [Docs](docs/README.md)
@@ -687,11 +687,11 @@ komentorivihistoriastasi. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS.md
 
 <div align="center">
 
-## 🌐 386 AI Providers — 156 Luettelomerkitty ilmainen
+## 🌐 387 AI Providers — 156 Luettelomerkitty ilmainen
 
 </div>
 
-> **386 rekisteröityä palveluntarjoajaa** Kanonisen chat-, media-, haku-, paikallis-, pilvi-agentti- ja järjestelmäkokoelmissa, mukaan lukien **156 kuljettaa `hasFree: true` -etsinnän metatietoja** . Chat-mallirekisteri kattaa **245 tarjoajaa / 3 172 erillistä tarjoaja-malli-paria / 1 535 raakamalli IDs** ; erillisessä vapaabudjettiluettelossa on **466 riviä mallia kohti** ,**34 toistuvaa allasta** ja **52 recurring/keyless ilmaista ikuisesti -palveluntarjoajaa** . Nämä ovat suunnittelultaan erilaisia nimittäjiä; määritelmät ja pool-deuped laskelmat ovat saatavilla [Provider Reference-](docs/reference/PROVIDER_REFERENCE.md) ja [Free Tiers](docs/reference/FREE_TIERS.md) -sivuilla.
+> **387 rekisteröityä palveluntarjoajaa** Kanonisen chat-, media-, haku-, paikallis-, pilvi-agentti- ja järjestelmäkokoelmissa, mukaan lukien **156 kuljettaa `hasFree: true` -etsinnän metatietoja** . Chat-mallirekisteri kattaa **245 tarjoajaa / 3 172 erillistä tarjoaja-malli-paria / 1 535 raakamalli IDs** ; erillisessä vapaabudjettiluettelossa on **466 riviä mallia kohti** ,**34 toistuvaa allasta** ja **52 recurring/keyless ilmaista ikuisesti -palveluntarjoajaa** . Nämä ovat suunnittelultaan erilaisia nimittäjiä; määritelmät ja pool-deuped laskelmat ovat saatavilla [Provider Reference-](docs/reference/PROVIDER_REFERENCE.md) ja [Free Tiers](docs/reference/FREE_TIERS.md) -sivuilla.
 
 <div align="center">
 

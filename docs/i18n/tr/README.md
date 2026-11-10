@@ -15,7 +15,7 @@
 
 **Oluşturan [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                                |           v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------ | :-------------------------: | :---------: | :-------------------: |
-| 🌐 Sağlayıcıları               |             352             |   **358**   |          386          |
+| 🌐 Sağlayıcıları               |             352             |   **358**   |          387          |
 | 🧠 Benzersiz sohbet modeli IDs |            1320             |  **1374**   |         1535          |
 | 🖼️ Modalite Köprüsü            | 🆕 vizyonu + sesi + videosu |      ✓      |           ✓           |
 | 📡 Radar ücretsiz kataloğu     |         🆕 katılım          |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Kombo oluşturmanız gerekmez. Modelinizi `auto` (veya bir varyantı) olarak aya
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'u öne çıkaranlar — tarihli bir özellik anlık görüntüsü ile 9router, OpenRouter, CLIProxyAPI ve LiteLLM arasında 13 yetenek üzerinden karşılaştırma. OmniRoute: 386 sağlayıcı, 150+ yerleşik ücretsiz katman, 20 yönlendirme stratejisi, 12-motorlu token sıkıştırma, 110 araçlı yerleşik MCP sunucusu, A2A ajan protokolü, kalıcı hafıza, güvenlik önlemleri, bulut ajanları, TLS parmak izi gizliliği, Masaüstü/Termux/PWA ve 67 i18n arayüz dili. OmniRoute MIT lisanslı ve kendi sunucunda barındırılabilir. Rakip yetenekleri ve sayıları değişebilir; bağlantılı metodolojiye bakınız."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'u öne çıkaranlar — tarihli bir özellik anlık görüntüsü ile 9router, OpenRouter, CLIProxyAPI ve LiteLLM arasında 13 yetenek üzerinden karşılaştırma. OmniRoute: 387 sağlayıcı, 150+ yerleşik ücretsiz katman, 20 yönlendirme stratejisi, 12-motorlu token sıkıştırma, 110 araçlı yerleşik MCP sunucusu, A2A ajan protokolü, kalıcı hafıza, güvenlik önlemleri, bulut ajanları, TLS parmak izi gizliliği, Masaüstü/Termux/PWA ve 67 i18n arayüz dili. OmniRoute MIT lisanslı ve kendi sunucunda barındırılabilir. Rakip yetenekleri ve sayıları değişebilir; bağlantılı metodolojiye bakınız."/>
 
 <sub>📊 Tam metodoloji &amp; özellik bazında detaylı karşılaştırma: 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar isteğe bağlıdır ve yalnızca GET kullanır. OmniRoute istemcisi isteml
 - **🖼️ Yeni uç noktalar** — `/v1/ocr` (Mistral OCR) ve `/v1/audio/translations` (Fısıltı stili) medya yüzeyini tamamlar. → [API Referansı](docs/reference/API_REFERENCE.md)
 - **🎨 Görüntü / video / ses üretimi** Medya için — one API : xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ve ElevenLabs gibi konuşma sağlayıcıları. → [API Referansı](docs/reference/API_REFERENCE.md)
 - **🌍 Dağıtımı ve operasyonları** — ters proxy `basePath`, tarayıcı dili otomatik algılama, anahtar başına cihaz takibi, köksüz MITM güveni, zh-TW yerelleştirmesi. → [Ortamı](docs/reference/ENVIRONMENT.md)
-- **🤝 Daha fazla sağlayıcı ve acente** — bulut aracıları (Codex Cloud, Cursor, Devin, Jules), tarayıcı + OAuth girişi ile Grok Build (xAI), Ollama birinci sınıf kart, Claude Opus 5 ve Sonnet 5, Kimi resmi ortaklığı (Code/Web/Moonshot), Zed, requesty, SenseNova, Yuanbao, Agnes AI… ve yenilenmiş **386 sağlayıcı kataloğu** . → [Sağlayıcıları](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Daha fazla sağlayıcı ve acente** — bulut aracıları (Codex Cloud, Cursor, Devin, Jules), tarayıcı + OAuth girişi ile Grok Build (xAI), Ollama birinci sınıf kart, Claude Opus 5 ve Sonnet 5, Kimi resmi ortaklığı (Code/Web/Moonshot), Zed, requesty, SenseNova, Yuanbao, Agnes AI… ve yenilenmiş **387 sağlayıcı kataloğu** . → [Sağlayıcıları](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Yönlendirme şeffaflığı** — her yanıt, kendisine hizmet eden strategy/provider/latency adlandıran bir `X-OmniRoute-Decision` başlığını, yeni bir `cache-optimized` kombo stratejisi + Otomatik Kombo `cacheAffinity` faktörü, tekrar isteklerini önbelleğe alınmış öneki tutan bağlantıya yönlendirir ve salt okunur bir `/v1/auto-combo/{channel}/candidates` uç noktası, bir `auto/*` kanalının canlı aday havuzunu açığa çıkarır. → [Otomatik Kombo](docs/routing/AUTO-COMBO.md)
 - **⚡ Yerel performans ve altyapı** — tek tıklamayla yerel Redis, Cloudflare Workers / Deno Deploy aktarma dağıtıcıları, denetlenen yerleşik hizmetler olarak Bifrost ve Mux. → [Gömülü Hizmetler](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Ayrıca kutuda** — eklenti çerçevesi + pazarı, Omni/Agent/GitHub beceri çerçeveleri, Obsidian kasa entegrasyonu (22 MCP aracı), OpenAI uyumlu Toplu İş ve Dosyalar APIs, semantik yanıt önbelleği, lider tablolarıyla oyunlaştırma, ACP aracı keşfi (15 yerleşik aracı), BigQuery planlanmış günlük aktarımı, `auto/chaos` paralel çoklu model yayma, bir Telegram bot köprüsü, bir uygulama içi sürüm yöneticisi ve LMArena-ELO ücretsiz sağlayıcı sıralamalar. → [Dokümanları](docs/README.md)
@@ -678,11 +678,11 @@ kabuk geçmişinizden uzak tutar. → [CLI Entegrasyonları](docs/guides/CLI-INT
 
 <div align="center">
 
-## 🌐 386 AI Sağlayıcıları — 156 Katalog İşaretli Ücretsiz
+## 🌐 387 AI Sağlayıcıları — 156 Katalog İşaretli Ücretsiz
 
 </div>
 
-> **386 kayıtlı sağlayıcı** dahil olmak üzere standart sohbet, medya, arama, yerel, bulut aracısı ve sistem koleksiyonlarında **`hasFree: true` keşif meta verilerini taşıyan 156** . Sohbet modeli kayıt defteri şunları kapsar:**245 sağlayıcı / 3.172 farklı sağlayıcı-model çifti / 1.535 ham model IDs** ; ayrı bir serbest bütçe kataloğu vardır **Model başına 466 satır** ,**34 yinelenen havuz** Ve **52 recurring/keyless sonsuza kadar ücretsiz sağlayıcı** . Bunlar tasarım gereği farklı paydalardır; Tanımlar ve havuzdan tekilleştirilmiş hesaplamalar [, Sağlayıcı Referansında](docs/reference/PROVIDER_REFERENCE.md) ve [Ücretsiz Kullanımlarda](docs/reference/FREE_TIERS.md) mevcuttur.
+> **387 kayıtlı sağlayıcı** dahil olmak üzere standart sohbet, medya, arama, yerel, bulut aracısı ve sistem koleksiyonlarında **`hasFree: true` keşif meta verilerini taşıyan 156** . Sohbet modeli kayıt defteri şunları kapsar:**245 sağlayıcı / 3.172 farklı sağlayıcı-model çifti / 1.535 ham model IDs** ; ayrı bir serbest bütçe kataloğu vardır **Model başına 466 satır** ,**34 yinelenen havuz** Ve **52 recurring/keyless sonsuza kadar ücretsiz sağlayıcı** . Bunlar tasarım gereği farklı paydalardır; Tanımlar ve havuzdan tekilleştirilmiş hesaplamalar [, Sağlayıcı Referansında](docs/reference/PROVIDER_REFERENCE.md) ve [Ücretsiz Kullanımlarda](docs/reference/FREE_TIERS.md) mevcuttur.
 
 <div align="center">
 

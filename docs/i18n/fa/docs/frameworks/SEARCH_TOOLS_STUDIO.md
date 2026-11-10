@@ -103,10 +103,12 @@ Search Tools Studio صفحهٔ `/dashboard/search-tools` را از یک محیط
 `ProviderCatalog.tsx` فهرست کامل ارائهدهندگان را از `GET /api/search/providers` در دسترس قرار میدهد
 (در F4 گسترش یافته است تا ارائهدهندگان واکشی را نیز شامل شود):
 
-| `kind` | `"search"` (۲۰ ارائهدهنده) یا `"fetch"` (firecrawl، jina-reader، tavily-search، tinyfish، nimble-search، anysearch-search، parallel-search) |
+| `kind` | `"search"` (۲۳ ارائهدهنده) یا `"fetch"` (firecrawl، jina-reader، tavily-search، tinyfish، nimble-search، anysearch-search، parallel-search) |
 
 وضعیت **هنگام درخواست محاسبه میشود**؛ به این صورت که بررسی میشود آیا اطلاعات احراز هویت موجود است و آیا
 همه کلیدها در حال حاضر در دوره انتظار مجدد هستند.
+
+`codex-search` (Codex Web Search): از حساب‌های متصل Codex (ChatGPT) شما استفاده می‌کند و به کلید جداگانه نیاز ندارد. هر جست‌وجو از سهمیهٔ اشتراک مصرف می‌کند و حدود 10–40 s طول می‌کشد. وقتی درخواست آن را مشخص کند اجرا می‌شود؛ انتخاب خودکار به پرچم `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` نیاز دارد که به‌طور پیش‌فرض خاموش است.
 
 ---
 

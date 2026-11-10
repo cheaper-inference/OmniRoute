@@ -20,7 +20,7 @@ AgentBridge הוא פרוקסי ה-MITM (אדם בתווך) של OmniRoute, שמ
 
 זה אומר שאתה יכול:
 
-- **נתב מחדש כל סוכן לכל ספק** : Copilot מדבר עם OpenAI? הפנה אותו אל Anthropic Claude, Gemini, או כל אחד מספקי 386 של OmniRoute.
+- **נתב מחדש כל סוכן לכל ספק** : Copilot מדבר עם OpenAI? הפנה אותו אל Anthropic Claude, Gemini, או כל אחד מספקי 387 של OmniRoute.
 - **החל מיפויי מודלים** : `gemini-3-flash` → `claude-sonnet-4.7` בשקיפות ברמת המטפל.
 - **שים לב לכל תעבורת הסוכנים** : כל בקשה מיירטת מתפרסמת [לפקח התעבורה](./TRAFFIC_INSPECTOR.md).
 - **החל חוסן OmniRoute** : ניתוב משולב, מפסקי זרם, תקלות ועבודות מעקב עלויות גם עבור תעבורת סוכני IDE.

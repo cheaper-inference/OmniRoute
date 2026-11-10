@@ -44,7 +44,7 @@ Itinuturing na **enabled** ang isang boolean flag kapag ang effective value nito
 
 ## Catalog ng Bandila
 
-120 flag sa 6 na kategorya.** Default** ay ang default na depinisyon — ang halaga na ginagamit kapag walang DB na nag-override o isang variable ng kapaligiran ay naroroon.
+121 flag sa 6 na kategorya.** Default** ay ang default na depinisyon — ang halaga na ginagamit kapag walang DB na nag-override o isang variable ng kapaligiran ay naroroon.
 
 ### Seguridad (11)
 
@@ -115,7 +115,7 @@ Itinuturing na **enabled** ang isang boolean flag kapag ang effective value nito
 
 Kapag `UNPRICED_USAGE_BUDGET_POLICY` ay tahasang na-configure (DB override bago ang kapaligiran), ito ay mauuna kaysa `USAGE_LIMIT_IGNORE_UNPRICED`. Nang walang tahasang halaga ng enum, pinipili ng upstream na boolean opt-out `count_as_zero`; kung hindi ang default ay `fail_closed`. Hindi naisara ang mga di-wastong halaga ng enum at hindi nababasang feature-flag storage. Ang alinman sa pag-opt-out ay hindi nakakapagpapahinga sa paggastos sa presyo o sa isang nabigong paghahanap sa pagpepresyo. Niresolba ng pagpapatupad at ng ulat ng administrator ang parehong epektibong patakaran.
 
-### Runtime (57)
+### Runtime (58)
 
 | Susi                                           | Uri     | Default | I-restart | Paglalarawan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------------------------------------------- | ------- | ------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ Kapag `UNPRICED_USAGE_BUDGET_POLICY` ay tahasang na-configure (DB override bago 
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |           | Ihinto ang pag-aalok at pagpapasa ng `max` reasoning effort para sa Cursor Grok 4.7 (#17386): Cursor's docs list lang low/medium/high/xhigh, kaya ang `grok-4.7-max` fallback alias ay mawala sa catalog at ang `max` effort request ay ipinapadala nang walang effort parameter. Naka-off bilang default: nananatili `max` na inaalok at ipinapasa, dahil tinanggap ito ng isang live AgentService/Run probe.                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |           | Ipadala ang Mga Tugon na keepalive bilang isang blangkong linya sa halip na isang response.in_progress na kaganapan, kaya hindi kailanman mapapalitan ng isang synthetic na snapshot ang tunay na tugon sa opisyal SDK. Ang isang blangkong linya ay hindi nagpapadala SSE na kaganapan, kaya ang isang client watchdog na nagre-reset lamang sa mga kaganapan ay hindi mare-reset sa mahabang yugto ng tahimik. Naka-off bilang default: ipinapadala ng mga timer ang spec-valid response.in_progress na kaganapan.                                                                                                                                                                                                                                                                                                                     |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |           | Sa mga istatistika ng cache ng compression, bilangin ang isang naka-compress na kahilingan sa isang provider ng automatic-prefix-caching (OpenAI, Codex, Azure, o isang custom na koneksyon na nagdedeklara ng prompt na pag-cache na may marker stripping) bilang isang tinantyang cache hit kahit na walang `cache_control` marker (#17114). Ang pagtatantya ay isang signal ng pagiging kwalipikado sa cache, hindi isang naobserbahang hit, kaya ang naiulat na rate ng hit para sa mga provider na iyon ay nagte-trend sa 100%. Naka-off bilang default: isang kahilingan lang na nagdadala ng mga marker `cache_control` sa isang provider ng caching ang binibilang bilang isang tinantyang hit, kaya ang mga provider ng awtomatikong prefix ay patuloy na nag-uulat ng 0.                                                       |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |           | Pinapayagan ang awtomatikong paghahanap sa web na walang tahasang `provider` na gumamit ng nakakonektang Codex (ChatGPT) account sa pamamagitan ng `codex-search`: bilang huling opsyon bago ang mga provider na walang key kapag walang magagamit na provider na may kredensiyal, at bilang alternatibo kapag may pagkabigo (#17933). Bawat paghahanap ay gumagamit ng quota ng subscription at tumatagal nang humigit-kumulang 10–40 s. Naka-off bilang default: tatakbo lamang ang `codex-search` kapag tahasang tinukoy ito ng request.                                                                                                                                                                                                                                                                                              |
 
 ### CLI (5)
 
@@ -248,10 +249,10 @@ Ibinabalik ang bawat flag kasama ang epektibong halaga, pinagmulan, at isang buo
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -43,7 +43,7 @@ A na-ewere boolean flag dị ka nke **agbanyere** mgbe uru ya dị irè bụ `"t
 
 ## Katalọgụ ọkọlọtọ
 
-Ọkọlọtọ 120 gafee ụdị 6.** Ọdabara** bụ nkọwapụta nke ndabara — uru a na-eji mgbe na-enweghị DB override ma ọ bụ mgbanwe gburugburu ebe obibi adịghị.
+Ọkọlọtọ 121 gafee ụdị 6.** Ọdabara** bụ nkọwapụta nke ndabara — uru a na-eji mgbe na-enweghị DB override ma ọ bụ mgbanwe gburugburu ebe obibi adịghị.
 
 ### Nchekwa (11)
 
@@ -114,7 +114,7 @@ A na-ewere boolean flag dị ka nke **agbanyere** mgbe uru ya dị irè bụ `"t
 
 Mgbe ahaziri `UNPRICED_USAGE_BUDGET_POLICY` nke ọma (DB override tupu gburugburu), ọ na-ebute ụzọ karịa `USAGE_LIMIT_IGNORE_UNPRICED`. Na-enweghị uru enum pụtara ìhè, ọpụpụ boolean nke dị elu na-ahọrọ `count_as_zero`; ma ọ bụghị na ndabara bụ `fail_closed`. Ụkpụrụ nọmba na ezighi ezi yana nchekwa ọkọlọtọ enweghị ike ịgụta mechiri. Ma ịpụpụ adịghị ebelata ọnụ ahịa ọnụ ahịa ma ọ bụ nyocha ọnụahịa dara ada. Ndị mmanye na mkpesa onye nchịkwa na-edozi otu amụma dị irè.
 
-### Oge ịgba ọsọ (57)
+### Oge ịgba ọsọ (58)
 
 | Igodo                                          | Ụdị     | Ọdabara | Malitegharịa ekwentị | Nkọwa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------------------------------------------- | ------- | ------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -177,6 +177,7 @@ Mgbe ahaziri `UNPRICED_USAGE_BUDGET_POLICY` nke ọma (DB override tupu gburugbu
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |                      | Kwụsị inye na ibuga mbọ echiche `max` maka Cursor Grok 4.7 (#17386): ndepụta docs Cursor naanị low/medium/high/xhigh, yabụ `grok-4.7-max` fallback utu aha na-apụ n'anya na katalọgụ ma ziga arịrịọ mgbalị `max` na-enweghị oke mbọ. Gbanyụọ na ndabara: `max` nọrọ na-enye ma bufee ya, dịka nyocha AgentService/Run dị ndụ nabatara ya.                                                                                                                                                                                                                                                                                                                         |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false` |                      | Zipu nzaghachi keepalives dị ka oghere oghere kama omume nzaghachi.in_progress, yabụ foto sịntetịt enweghị ike dochie ezigbo nzaghachi na SDK gọọmentị. Ahịrị oghere anaghị eziga mmemme SSE ọ bụla, yabụ, onye na-ahụ maka ndị ahịa na-emegharị naanị na mmemme agaghị emegharị ya n'oge ogologo oge ịgbachi nkịtị. Gbanyụọ na ndabara: ndị ngụ oge na-eziga emume nzaghachi ziri ezi.in_progress.                                                                                                                                                                                                                                                               |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |                      | N'ime stats cache mkpakọ, gụọ arịrịọ abịakọrọ na onye na-eweta caching prefix akpaaka (OpenAI, Codex, Azure, ma ọ bụ njikọ omenala nke na-ekwupụta caching ngwa ngwa na ihe nrịbama akara) dị ka echere cache kụrụ ọbụna na-enweghị akara `cache_control` (#17114). Atụmatụ ahụ bụ akara ntozu nke cache, ọ bụghị ihe a hụrụ n'anya, yabụ ọnụego a kọrọ maka ndị na-enye ndị ahụ na-aga n'ihu na 100%. Gbanyụọ na ndabara: naanị arịrịọ na-ebu akara `cache_control` gaa na ndị na-eweta caching na-agụta dị ka atụmatụ a tụrụ anya, yabụ ndị na-eweta prefix akpaka na-aga n'ihu na-akọ 0.                                                                       |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |                      | Ọ na-ekwe ka nchọcha weebụ akpaka jiri akaụntụ Codex ejikọrọ site na `codex-search` mgbe a na-akọwaghị `provider` kpọmkwem. Ọ bụrụ na e nweghị onye na-enye ọrụ nwere nzere a pụrụ iji, nke a bụ nhọrọ ikpeazụ tupu ndị na-adịghị achọ igodo, nakwa nhọrọ ndabere mgbe ọrụ ọzọ dara (#17933). Nchọcha ọ bụla na-eji oke ndenye aha ChatGPT ma na-ewe ihe dị ka sekọnd 10–40. Ọ na-adị gbanyụrụ na mbụ; `codex-search` na-arụ ọrụ naanị mgbe a rịọrọ ya kpọmkwem.                                                                                                                                                                                                  |
 
 ### CLI (5)
 
@@ -247,10 +248,10 @@ Na-eweghachi ọkọlọtọ ọ bụla nwere uru, isi mmalite ya na nchịkọt
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

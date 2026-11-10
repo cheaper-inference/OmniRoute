@@ -15,7 +15,7 @@ Soláthraíonn sé críochphointe aonair atá comhoiriúnach le OpenAI (`/v1/*`)
 
 Príomhchumais:
 
-- Dromchla API atá comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (386 soláthraí, 159 modúl rite)
+- Dromchla API atá comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (387 soláthraí, 159 modúl rite)
 - Aistriú iarrataí/freagraí idir formáidí soláthraithe
 - Cúltaca teaglama samhlacha (seicheamh il-samhail)
 - Céimeanna struchtúrtha teaglama (`provider + model + connection`) le hordú ag am rite de réir `compositeTiers`

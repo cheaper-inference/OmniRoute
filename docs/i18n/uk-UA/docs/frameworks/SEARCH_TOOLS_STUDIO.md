@@ -103,10 +103,12 @@ Studio із трьома вкладками, що об’єднує вебпош
 `ProviderCatalog.tsx` відображає повний список провайдерів з `GET /api/search/providers`
 (розширений у F4 для включення провайдерів отримання даних):
 
-| `kind` | `"search"` (20 провайдерів) або `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 провайдерів) або `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Статус **визначається під час запиту** шляхом перевірки наявності облікових даних і того, чи
 всі ключі наразі перебувають у періоді очікування.
+
+`codex-search` (Codex Web Search): Використовує підключені облікові записи Codex (ChatGPT), без окремого ключа. Кожен пошук витрачає квоту передплати і триває приблизно 10–40 s. Запускається, коли запит його вказує; автоматичний вибір потребує прапорця `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, вимкненого за замовчуванням.
 
 ---
 

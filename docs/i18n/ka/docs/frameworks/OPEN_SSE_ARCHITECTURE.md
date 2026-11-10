@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ფაილი                           | მიზანი                                          |
 | ------------------------------- | ----------------------------------------------- |
-| `providerRegistry.ts`           | ჩატის მოდელის რეესტრი 386 პროვაიდერის კატალოგზე |
+| `providerRegistry.ts`           | ჩატის მოდელის რეესტრი 387 პროვაიდერის კატალოგზე |
 | `providerModels.ts`             | მოდელის მეტსახელები, ფორმატის რუქა              |
 | `constants.ts`                  | ვადები, ლიმიტები, სტატუსის კოდები               |
 | `defaultThinkingSignature.ts`   | ნაგულისხმევი Claude აზროვნების ხელმოწერა        |

@@ -103,10 +103,12 @@ Search Tools Studio `/dashboard/search-tools`-কে একটি সাধা�
 `ProviderCatalog.tsx` `GET /api/search/providers` থেকে সম্পূর্ণ প্রোভাইডার তালিকা প্রকাশ করে
 (fetch প্রোভাইডার অন্তর্ভুক্ত করতে F4-এ সম্প্রসারিত):
 
-| `kind` | `"search"` (২০টি প্রোভাইডার) অথবা `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (২৩টি প্রোভাইডার) অথবা `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 ক্রেডেনশিয়াল বিদ্যমান আছে কি না এবং
 সব কী বর্তমানে কুলডাউনে আছে কি না তা পরীক্ষা করে **রিকোয়েস্টের সময় স্ট্যাটাস নির্ধারণ করা হয়**।
+
+`codex-search` (Codex Web Search): সংযুক্ত Codex (ChatGPT) অ্যাকাউন্ট ব্যবহার করে; আলাদা কী লাগে না। প্রতিটি অনুসন্ধান ChatGPT সাবস্ক্রিপশনের কোটা খরচ করে এবং প্রায় 10–40 সেকেন্ড সময় নেয়। অনুরোধে নাম উল্লেখ থাকলে এটি চলে; স্বয়ংক্রিয় নির্বাচনের জন্য `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` চালু করতে হয়, যা ডিফল্টভাবে বন্ধ।
 
 ---
 

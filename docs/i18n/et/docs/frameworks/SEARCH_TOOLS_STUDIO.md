@@ -103,10 +103,12 @@ Käitab sama päringut/URL-i paralleelselt kuni **4 pakkuja kaudu** (D22):
 `ProviderCatalog.tsx` kuvab täieliku pakkujate loendi päringust `GET /api/search/providers`
 (mida laiendati F4-s toomispakkujate lisamiseks):
 
-| `kind` | `"search"` (20 pakkujat) või `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 pakkujat) või `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Olek **tuletatakse päringu ajal**, kontrollides, kas identimisteave on olemas ja kas
 kõik võtmed on parajasti ooteajal.
+
+`codex-search` (Codex Web Search): Kasutab teie ühendatud Codexi (ChatGPT) kontosid ilma eraldi võtmeta. Iga otsing kulutab tellimuse kvooti ja kestab umbes 10–40 s. Käivitub siis, kui päring seda nimetab; automaatne valik nõuab lippu `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, mis on vaikimisi välja lülitatud.
 
 ---
 

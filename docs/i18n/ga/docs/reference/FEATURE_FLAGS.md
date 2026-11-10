@@ -44,7 +44,7 @@ Meastar bratach bhooleach a bheith **cumasaithe** nuair is é `"true"`,
 
 ## Catalóg na mBratach
 
-120 bratach i 6 chatagóir. Is é **Réamhshocrú** an réamhshocrú sainmhínithe — an luach
+121 bratach i 6 chatagóir. Is é **Réamhshocrú** an réamhshocrú sainmhínithe — an luach
 a úsáidtear nuair nach bhfuil sárú DB ná athróg timpeallachta i láthair.
 
 ### Slándáil (11)
@@ -121,7 +121,7 @@ réamhshocrú. Má tá luachanna neamhbhailí ón enum ann nó mura féidir stó
 sé i mód dúnta. Ní mhaolaíonn ceachtar den dá rogha dhiúltaithe caiteachas praghsáilte ná teip ar chuardach praghsála.
 Réitíonn forfheidhmiú agus tuarascáil an riarthóra an beartas éifeachtach céanna.
 
-### Am rite (57)
+### Am rite (58)
 
 | Eochair                                        | Cineál  | Réamhshocrú | Atosaigh | Cur síos                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ---------------------------------------------- | ------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -184,6 +184,7 @@ Réitíonn forfheidhmiú agus tuarascáil an riarthóra an beartas éifeachtach 
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false`     |          | Stop ag tairiscint agus ag cur ar aghaidh na hiarrachta réasúnaithe `max` do Cursor Grok 4.7 (#17386): ní liostaíonn cáipéisíocht Cursor ach low/medium/high/xhigh, mar sin imíonn an ailias cúltaca `grok-4.7-max` ón gcatalóg agus seoltar iarratas iarrachta `max` gan paraiméadar iarrachta. Díchumasaithe de réir réamhshocraithe: fanann `max` ar fáil agus cuirtear ar aghaidh é, mar gur ghlac taiscéalaí beo AgentService/Run leis.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED`        | boolean | `false`     |          | Seol coimeádáin bheo Responses mar líne fholamh in ionad imeachta response.in_progress, ionas nach féidir le léargas sintéiseach an freagra iarbhír sa SDK oifigiúil a ionadú choíche. Ní sheolann líne fholamh aon imeacht SSE, mar sin ní athshocródh faireoir cliaint a athshocraíonn ar imeachtaí amháin é le linn céime ciúine fada. Díchumasaithe de réir réamhshocraithe: seolann na hamadóirí an t-imeacht response.in_progress atá bailí de réir na sonraíochta.                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false`     |          | I staitisticí an taisce chomhbhrúite, áirigh iarratas comhbhrúite chuig soláthraí a úsáideann taisceadh réimír uathoibríoch (OpenAI, Codex, Azure, nó nasc saincheaptha a dhearbhaíonn taisceadh leideanna le marcóirí bainte) mar bhuille taisce measta fiú gan marcóirí `cache_control` (#17114). Is comhartha incháilitheachta taisce é an meastachán, ní buille breathnaithe, mar sin claonann an ráta buillí tuairiscithe do na soláthraithe sin i dtreo 100%. Díchumasaithe de réir réamhshocraithe: ní áirítear ach iarratas a bhfuil marcóirí `cache_control` aige chuig soláthraí taisceála mar bhuille measta, agus mar sin leanann soláthraithe réimír uathoibríoch de bheith ag tuairisciú 0.                                                                                                                                                                            |
+| `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false`     |          | Ligeann sé do chuardach gréasáin uathoibríoch gan `provider` sainráite cuntas Codex (ChatGPT) nasctha a úsáid trí `codex-search`: mar rogha dheiridh roimh sholáthraithe gan eochair nuair nach bhfuil soláthraí le dintiúir inúsáidte, agus mar rogha chúltaca má theipeann ar an bpríomhsholáthraí (#17933). Úsáideann gach cuardach cuóta an tsíntiúis agus tógann sé thart ar 10–40 s. Díchumasaithe de réir réamhshocraithe: ní ritheann `codex-search` ach nuair a ainmníonn an t-iarratas go sainráite é.                                                                                                                                                                                                                                                                                                                                                                     |
 
 ### CLI (5)
 
@@ -272,10 +273,10 @@ Filleann sé gach bratach lena luach éifeachtach, a foinse agus achoimre.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... na 119 bratach ar fad
+    // ... na 121 bratach ar fad
   ],
   "summary": {
-    "total": 119,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

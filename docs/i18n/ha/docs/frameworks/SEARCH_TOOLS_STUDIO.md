@@ -103,10 +103,12 @@ Yana gudanar da tambaya/URL iri ɗaya a lokaci guda a kan masu samarwa har zuwa 
 `ProviderCatalog.tsx` yana bayyana cikakken jerin masu bayar da sabis daga `GET /api/search/providers`
 (an faɗaɗa shi a F4 don haɗa masu bayar da sabis na fetch):
 
-| `kind` | `"search"` (masu bayar da sabis 20) ko `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (masu bayar da sabis 23) ko `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Ana **ƙayyade matsayin a lokacin buƙata** ta hanyar bincika ko bayanan shiga suna nan da kuma ko
 dukkan maɓallan suna cikin lokacin jira a halin yanzu.
+
+`codex-search` (Codex Web Search): Yana amfani da asusun Codex (ChatGPT) da aka haɗa; ba ya buƙatar wata maɓalli ta daban. Kowane bincike yana cin rabon biyan kuɗin ChatGPT kuma yana ɗaukar kusan daƙiƙa 10–40. Yana aiki idan buƙata ta ambaci sunansa; zaɓi ta atomatik yana buƙatar kunna `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`, wanda yake a kashe tun farko.
 
 ---
 

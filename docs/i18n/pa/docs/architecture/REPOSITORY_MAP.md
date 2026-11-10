@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `components/`                    | ਡੈਸ਼ਬੋਰਡ ਕੰਪੋਨੈਂਟ API: `packages/ui-kit` ਉੱਤੇ ਐਡਾਪਟਰ — `docs/architecture/DESIGN_SYSTEM.md` ਵੇਖੋ |
 | `constants/iconMap.ts`           | `ICON_MAP`: ਸਕ੍ਰੀਨਾਂ ਵੱਲੋਂ ਵਰਤੇ ਜਾਂਦੇ ਆਈਕਨ ਨਾਮ → Lucide ਕੰਪੋਨੈਂਟ (`<Icon>`)                      |
-| `constants/providers.ts`         | Zod ਪ੍ਰਮਾਣਿਕਤਾ ਵਾਲੇ **386 ਪ੍ਰੋਵਾਈਡਰ** (ਸੱਚਾਈ ਦਾ ਮੂਲ ਸਰੋਤ)                                        |
+| `constants/providers.ts`         | Zod ਪ੍ਰਮਾਣਿਕਤਾ ਵਾਲੇ **387 ਪ੍ਰੋਵਾਈਡਰ** (ਸੱਚਾਈ ਦਾ ਮੂਲ ਸਰੋਤ)                                        |
 | `constants/cliTools.ts`          | ਬਾਹਰੀ CLI ਟੂਲ ਰਜਿਸਟਰੀ                                                                            |
 | `constants/routingStrategies.ts` | ਤਰਜੀਹਾਂ ਵਾਲੀਆਂ **20 ਰਾਊਟਿੰਗ ਰਣਨੀਤੀਆਂ**                                                           |
 | `constants/publicApiRoutes.ts`   | ਉਹ ਰੂਟ ਜਿਨ੍ਹਾਂ ਨੂੰ (ਮੈਨੇਜਮੈਂਟ ਦੀ ਬਜਾਏ) Bearer ਪ੍ਰਮਾਣੀਕਰਨ ਦੀ ਲੋੜ ਹੈ                               |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ਬਾਹਰੀ CLI ਇੰਟੀਗਰੇਸ਼ਨਾਂ + ਅੰਦਰੂਨੀ OmniRoute CLI                                         |
 | `I18N.md`                   | i18n ਆਰਕੀਟੈਕਚਰ, ਭਾਸ਼ਾ ਜੋੜਨਾ, 67 ਲੋਕੇਲ                                                  |
 | `UNINSTALL.md`              | ਸਾਫ਼ ਅਣਇੰਸਟਾਲ ਕਦਮ                                                                      |
-| `PROVIDER_REFERENCE.md`     | 386 ਪ੍ਰੋਵਾਈਡਰਾਂ ਦੀ **ਸਵੈ-ਜਨਰੇਟ ਕੀਤੀ** ਕੈਟਾਲਾਗ (ਰੀਜਨ: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 387 ਪ੍ਰੋਵਾਈਡਰਾਂ ਦੀ **ਸਵੈ-ਜਨਰੇਟ ਕੀਤੀ** ਕੈਟਾਲਾਗ (ਰੀਜਨ: `npm run gen:provider-reference`) |
 
 ### ਸਬਸਿਸਟਮ ਡੀਪ-ਡਾਈਵਜ਼
 

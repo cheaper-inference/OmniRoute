@@ -102,9 +102,11 @@ Search Tools Studio, `/dashboard/search-tools`-ஐ ஓர் அடிப்ப�
 `ProviderCatalog.tsx`, `GET /api/search/providers` இலிருந்து முழுமையான வழங்குநர் பட்டியலை வெளிப்படுத்துகிறது
 (fetch வழங்குநர்களை உள்ளடக்குவதற்காக F4-இல் விரிவாக்கப்பட்டது):
 
-| `kind` | `"search"` (20 வழங்குநர்கள்) அல்லது `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 வழங்குநர்கள்) அல்லது `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 நற்சான்றுகள் உள்ளனவா மற்றும் அனைத்து விசைகளும் தற்போது cooldown நிலையில் உள்ளனவா என்பதைச் சரிபார்ப்பதன் மூலம், கோரிக்கை நேரத்தில் நிலை **பெறப்படுகிறது**.
+
+`codex-search` (Codex Web Search): இணைக்கப்பட்ட Codex (ChatGPT) கணக்குகளைப் பயன்படுத்துகிறது; தனி சாவி தேவையில்லை. ஒவ்வொரு தேடலும் ChatGPT சந்தா ஒதுக்கீட்டை பயன்படுத்தி, சுமார் 10–40 விநாடிகள் எடுக்கும். கோரிக்கையில் பெயர் குறிப்பிடப்பட்டால் இயங்கும்; தானியக்கத் தேர்விற்கு இயல்பாக அணைக்கப்பட்டுள்ள `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` இயக்கப்பட வேண்டும்.
 
 ---
 

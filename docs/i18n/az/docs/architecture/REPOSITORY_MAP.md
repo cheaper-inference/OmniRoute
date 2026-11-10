@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | İdarə paneli komponent API-si: `packages/ui-kit` üzərində adapterlər — baxın: `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlarda istifadə olunan ikon adları → Lucide komponentləri (`<Icon>`)                               |
-| `constants/providers.ts`         | Zod doğrulaması ilə **386 provayder** (əsas həqiqət mənbəyi)                                                       |
+| `constants/providers.ts`         | Zod doğrulaması ilə **387 provayder** (əsas həqiqət mənbəyi)                                                       |
 | `constants/cliTools.ts`          | Xarici CLI alətləri reyestri                                                                                       |
 | `constants/routingStrategies.ts` | Prioritetləri olan **20 marşrutlaşdırma strategiyası**                                                             |
 | `constants/publicApiRoutes.ts`   | İdarəetmə autentifikasiyasından fərqli olaraq Bearer autentifikasiyası tələb edən marşrutlar                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Xarici CLI inteqrasiyaları + Daxili OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n arxitekturası, dil əlavə etmə, 67 lokal                                                        |
 | `UNINSTALL.md`              | Təmiz silmə addımları                                                                               |
-| `PROVIDER_REFERENCE.md`     | **Avtomatik yaradılan** 386 provayder kataloqu (yenidən yaratmaq: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Avtomatik yaradılan** 387 provayder kataloqu (yenidən yaratmaq: `npm run gen:provider-reference`) |
 
 ### Alt sistemlərin ətraflı təhlili
 

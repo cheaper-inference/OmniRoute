@@ -15,7 +15,7 @@
 
 **[ਡਿਏਗੋ ਸੂਜ਼ਾ](https://github.com/diegosouzapw) ਦੁਆਰਾ ਬਣਾਇਆ ਗਿਆ**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 386 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 386 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 387 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 387 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,7 +67,7 @@
 
 |                           |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 ਪ੍ਰਦਾਤਾ                |           352           |   **358**   |          386          |
+| 🌐 ਪ੍ਰਦਾਤਾ                |           352           |   **358**   |          387          |
 | 🧠 ਵਿਲੱਖਣ ਚੈਟ ਮਾਡਲ IDs    |          1320           |  **1374**   |         1535          |
 | 🖼️ ਮੋਡੈਲਿਟੀ ਬ੍ਰਿਜ         | 🆕 ਵਿਜ਼ਨ + ਆਡੀਓ + ਵੀਡੀਓ |      ✓      |           ✓           |
 | 📡 ਰਾਡਾਰ ਮੁਫ਼ਤ ਕੈਟਾਲਾਗ    |        🆕 ਔਪਟ-ਇਨ        |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-386-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-387-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 386 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 386 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 387 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 387 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ਨੂੰ ਵੱਖਰਾ ਬਣਾਉਣ ਵਾਲੀਆਂ ਚੀਜ਼ਾਂ — ਇੱਕ ਮਿਆਦੀ ਫੀਚਰ ਸਨੈਪਸ਼ਾਟ بمੁਕਾਬਲਾ 9router, OpenRouter, CLIProxyAPI ਅਤੇ LiteLLM 13 ਸਮਰੱਥਾਵਾਂ ਵਿੱਚ। OmniRoute: 386 ਪ੍ਰੋਵਾਈਡਰ, 150+ ਮੁਫ਼ਤ ਟੀਅਰ ਬਣੇ ਹੋਏ, 20 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ, 12-ਇੰਜਣ ਟੋਕਨ ਕੰਪ੍ਰੈਸ਼ਨ, 110 ਟੂਲਾਂ ਨਾਲ ਬਣਿਆ MCP ਸਰਵਰ, A2A ਏਜੰਟ ਪ੍ਰੋਟੋਕੋਲ, ਸਥਾਈ ਮੈਮੋਰੀ, ਗਾਰਡਰੇਲ, ਕਲਾਉਡ ਏਜੰਟ, TLS ਫਿੰਗਰਪ੍ਰਿੰਟ ਸਟੀਲਥ, Desktop/Termux/PWA ਅਤੇ 67 i18n UI ਲੋਕੇਲ। OmniRoute MIT-ਲਾਇਸੈਂਸ ਅਤੇ ਸਵੈ-ਹੋਸਟੇਬਲ ਹੈ। ਮੁਕਾਬਲੇਦਾਰ ਸਮਰੱਥਾਵਾਂ ਅਤੇ ਗਿਣਤੀਆਂ ਬਦਲ ਸਕਦੀਆਂ ਹਨ; ਲਿੰਕ ਕੀਤੀ ਵਿਧੀ ਦੇਖੋ।"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ਨੂੰ ਵੱਖਰਾ ਬਣਾਉਣ ਵਾਲੀਆਂ ਚੀਜ਼ਾਂ — ਇੱਕ ਮਿਆਦੀ ਫੀਚਰ ਸਨੈਪਸ਼ਾਟ بمੁਕਾਬਲਾ 9router, OpenRouter, CLIProxyAPI ਅਤੇ LiteLLM 13 ਸਮਰੱਥਾਵਾਂ ਵਿੱਚ। OmniRoute: 387 ਪ੍ਰੋਵਾਈਡਰ, 150+ ਮੁਫ਼ਤ ਟੀਅਰ ਬਣੇ ਹੋਏ, 20 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ, 12-ਇੰਜਣ ਟੋਕਨ ਕੰਪ੍ਰੈਸ਼ਨ, 110 ਟੂਲਾਂ ਨਾਲ ਬਣਿਆ MCP ਸਰਵਰ, A2A ਏਜੰਟ ਪ੍ਰੋਟੋਕੋਲ, ਸਥਾਈ ਮੈਮੋਰੀ, ਗਾਰਡਰੇਲ, ਕਲਾਉਡ ਏਜੰਟ, TLS ਫਿੰਗਰਪ੍ਰਿੰਟ ਸਟੀਲਥ, Desktop/Termux/PWA ਅਤੇ 67 i18n UI ਲੋਕੇਲ। OmniRoute MIT-ਲਾਇਸੈਂਸ ਅਤੇ ਸਵੈ-ਹੋਸਟੇਬਲ ਹੈ। ਮੁਕਾਬਲੇਦਾਰ ਸਮਰੱਥਾਵਾਂ ਅਤੇ ਗਿਣਤੀਆਂ ਬਦਲ ਸਕਦੀਆਂ ਹਨ; ਲਿੰਕ ਕੀਤੀ ਵਿਧੀ ਦੇਖੋ।"/>
 
 <sub>📊 ਪੂਰੀ ਵਿਧੀ ਅਤੇ ਹਰ-ਫੀਚਰ ਵਿਸਥਾਰ بمੁਕਾਬਲਾ 9router, OpenRouter, CLIProxyAPI ਅਤੇ LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar ਦੀ ਵਰਤੋਂ ਇੱਛਿਕ ਹੈ ਅਤੇ ਇਹ ਸਿਰ�
 - **🖼️ ਨਵੇਂ ਅੰਤ ਬਿੰਦੂ** — `/v1/ocr` (Mistral OCR) ਅਤੇ `/v1/audio/translations` (ਵਿਸਪਰ-ਸ਼ੈਲੀ) ਮੀਡੀਆ ਦੀ ਸਤ੍ਹਾ ਨੂੰ ਘੇਰਦੇ ਹਨ। → [API ਹਵਾਲਾ](docs/reference/API_REFERENCE.md)
 - **🎨 ਚਿੱਤਰ / ਵੀਡੀਓ / ਆਡੀਓ ਪੀੜ੍ਹੀ** ਮੀਡੀਆ ਲਈ — ਇੱਕ API : xAI Grok Imagine & Novita AI ਵੀਡੀਓ, ComfyUI, Magnific, Adobe Firefly, Segmind, ਅਤੇ ਸਪੀਚ ਪ੍ਰਦਾਤਾ ਜਿਵੇਂ ਕਿ ElevenLabs। → [API ਹਵਾਲਾ](docs/reference/API_REFERENCE.md)
 - **🌍 ਡਿਪਲਾਇਮੈਂਟ ਅਤੇ ਓਪਸ** — ਰਿਵਰਸ-ਪ੍ਰਾਕਸੀ `basePath`, ਬ੍ਰਾਊਜ਼ਰ-ਭਾਸ਼ਾ ਆਟੋ-ਡਿਟੈਕਟ, ਪ੍ਰਤੀ-ਕੁੰਜੀ ਡਿਵਾਈਸ ਟਰੈਕਿੰਗ, ਰੂਟ-ਲੈੱਸ MITM ਟਰੱਸਟ, zh-TW ਸਥਾਨਕਕਰਨ। → [ਵਾਤਾਵਰਨ](docs/reference/ENVIRONMENT.md)
-- **🤝 ਹੋਰ ਪ੍ਰਦਾਤਾ ਅਤੇ ਏਜੰਟ** — ਕਲਾਊਡ ਏਜੰਟ (Codex Cloud, Cursor, Devin, Jules), Grok ਬਿਲਡ (xAI) ਬ੍ਰਾਊਜ਼ਰ + OAuth ਲੌਗਇਨ, Ollama ਫਸਟ-ਕਲਾਸ ਕਾਰਡ, Claude ਓਪਸ 5 ਅਤੇ ਸਨੇਟ 5, Kimi ਅਧਿਕਾਰਤ ਭਾਈਵਾਲੀ (Code/Web/Moonshot), Zed, SenseNova ਅਤੇ ਬੇਨਤੀ, AI... ਤਾਜ਼ਾ**386-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ** . → [ਪ੍ਰਦਾਤਾ](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 ਹੋਰ ਪ੍ਰਦਾਤਾ ਅਤੇ ਏਜੰਟ** — ਕਲਾਊਡ ਏਜੰਟ (Codex Cloud, Cursor, Devin, Jules), Grok ਬਿਲਡ (xAI) ਬ੍ਰਾਊਜ਼ਰ + OAuth ਲੌਗਇਨ, Ollama ਫਸਟ-ਕਲਾਸ ਕਾਰਡ, Claude ਓਪਸ 5 ਅਤੇ ਸਨੇਟ 5, Kimi ਅਧਿਕਾਰਤ ਭਾਈਵਾਲੀ (Code/Web/Moonshot), Zed, SenseNova ਅਤੇ ਬੇਨਤੀ, AI... ਤਾਜ਼ਾ**387-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ** . → [ਪ੍ਰਦਾਤਾ](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 ਰੂਟਿੰਗ ਪਾਰਦਰਸ਼ਤਾ** — ਹਰ ਜਵਾਬ ਵਿੱਚ ਇੱਕ `X-OmniRoute-Decision` ਸਿਰਲੇਖ ਹੁੰਦਾ ਹੈ ਜਿਸ ਵਿੱਚ strategy/provider/latency ਦਾ ਨਾਮ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ ਜਿਸਨੇ ਇਸਨੂੰ ਸੇਵਾ ਦਿੱਤੀ ਸੀ, ਇੱਕ ਨਵੀਂ `cache-optimized` ਕੰਬੋ ਰਣਨੀਤੀ + ਆਟੋ-ਕੌਂਬੋ `cacheAffinity` ਫੈਕਟਰ ਰੂਟ ਕੈਸ਼ ਕੀਤੇ ਅਗੇਤਰ ਨੂੰ ਰੱਖਣ ਵਾਲੇ ਕਨੈਕਸ਼ਨ ਲਈ ਦੁਹਰਾਉਣ ਲਈ ਬੇਨਤੀ ਕਰਦਾ ਹੈ, ਅਤੇ ਇੱਕ ਰੀਡ-ਓਨਲੀ `/v1/auto-combo/{channel}/candidates` ਐਂਡਪੁਆਇੰਟ ਇੱਕ `auto/*` ਚੈਨਲ ਦੇ ਲਾਈਵ ਉਮੀਦਵਾਰ ਪੂਲ ਦਾ ਪਰਦਾਫਾਸ਼ ਕਰਦਾ ਹੈ। → [ਆਟੋ-ਕੰਬੋ](docs/routing/AUTO-COMBO.md)
 - **⚡ ਸਥਾਨਕ ਪ੍ਰਦਰਸ਼ਨ ਅਤੇ ਬੁਨਿਆਦੀ** — ਇੱਕ-ਕਲਿੱਕ ਸਥਾਨਕ Redis, Cloudflare ਵਰਕਰ / Deno ਡਿਪਲੋਏ ਰੀਲੇਅ ਡਿਪਲੋਅਰ, Bifrost ਅਤੇ Mux ਨਿਗਰਾਨੀ ਕੀਤੀਆਂ ਏਮਬੈਡਡ ਸੇਵਾਵਾਂ ਵਜੋਂ। → [ਏਮਬੈਡਡ ਸੇਵਾਵਾਂ](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 ਵੀ ਬਕਸੇ ਵਿੱਚ** — ਪਲੱਗਇਨ ਫਰੇਮਵਰਕ + ਮਾਰਕਿਟਪਲੇਸ, Omni/Agent/GitHub ਹੁਨਰ ਫਰੇਮਵਰਕ, Obsidian ਵਾਲਟ ਏਕੀਕਰਣ (22 MCP ਟੂਲ), OpenAI- ਅਨੁਕੂਲ ਬੈਚ ਅਤੇ ਫਾਈਲਾਂ APIs, ਸਿਮੈਂਟਿਕ ਰਿਸਪਾਂਸ ਕੈਸ਼, ਲੀਡਰਬੋਰਡਸ ਦੇ ਨਾਲ ਗੇਮੀਫਿਕੇਸ਼ਨ, ACP ਏਜੰਟ ਖੋਜ (15 ਬਿਲਟ-ਇਨ ਏਜੰਟ), ਅਨੁਸੂਚਿਤ ਲੌਗ, BigQuery, `auto/chaos`, ਮਲਟੀ-ਜੇਡਫਲ ਪੈਰਾ-ਆਉਟ ਐਕਸਪੋਰਟ Telegram ਬੋਟ ਬ੍ਰਿਜ, ਇੱਕ ਇਨ-ਐਪ ਸੰਸਕਰਣ ਪ੍ਰਬੰਧਕ ਅਤੇ LMArena-ELO ਮੁਫਤ-ਪ੍ਰਦਾਤਾ ਦਰਜਾਬੰਦੀ। → [ਡੌਕਸ](docs/README.md)
@@ -677,11 +677,11 @@ omniroute configure codex          # ਇਹ ਵੀ: claude opencode qwen aider g
 
 <div align="center">
 
-## 🌐 386 AI ਪ੍ਰਦਾਤਾ — 156 ਕੈਟਾਲਾਗ-ਮਾਰਕ ਕੀਤੇ ਮੁਫ਼ਤ
+## 🌐 387 AI ਪ੍ਰਦਾਤਾ — 156 ਕੈਟਾਲਾਗ-ਮਾਰਕ ਕੀਤੇ ਮੁਫ਼ਤ
 
 </div>
 
-> **386 ਰਜਿਸਟਰਡ ਪ੍ਰਦਾਤਾ** ਕੈਨੋਨੀਕਲ ਚੈਟ, ਮੀਡੀਆ, ਖੋਜ, ਸਥਾਨਕ, ਕਲਾਉਡ-ਏਜੰਟ ਅਤੇ ਸਿਸਟਮ ਸੰਗ੍ਰਹਿ, ਸਮੇਤ **156 `hasFree: true` ਖੋਜ ਮੈਟਾਡੇਟਾ ਲੈ ਕੇ ਜਾ ਰਿਹਾ ਹੈ** . ਚੈਟ ਮਾਡਲ ਰਜਿਸਟਰੀ ਕਵਰ ਕਰਦਾ ਹੈ**245 ਪ੍ਰਦਾਤਾ / 3,172 ਵੱਖਰੇ ਪ੍ਰਦਾਤਾ-ਮਾਡਲ ਜੋੜੇ / 1,535 ਕੱਚਾ ਮਾਡਲ IDs** ; ਵੱਖਰਾ ਮੁਫ਼ਤ-ਬਜਟ ਕੈਟਾਲਾਗ ਹੈ**466 ਪ੍ਰਤੀ-ਮਾਡਲ ਕਤਾਰਾਂ** ,**34 ਆਵਰਤੀ ਪੂਲ** ਅਤੇ**52 recurring/keyless ਮੁਫ਼ਤ-ਸਦਾ ਲਈ ਪ੍ਰਦਾਤਾ** . ਇਹ ਡਿਜ਼ਾਇਨ ਦੁਆਰਾ ਵੱਖ-ਵੱਖ ਭਾਅ ਹਨ; ਪਰਿਭਾਸ਼ਾਵਾਂ ਅਤੇ ਪੂਲ-ਕੱਟੀਆਂ ਗਣਨਾਵਾਂ [ਪ੍ਰਦਾਤਾ ਸੰਦਰਭ](docs/reference/PROVIDER_REFERENCE.md) ਅਤੇ [ਮੁਫਤ ਟੀਅਰਜ਼](docs/reference/FREE_TIERS.md) ਵਿੱਚ ਰਹਿੰਦੀਆਂ ਹਨ।
+> **387 ਰਜਿਸਟਰਡ ਪ੍ਰਦਾਤਾ** ਕੈਨੋਨੀਕਲ ਚੈਟ, ਮੀਡੀਆ, ਖੋਜ, ਸਥਾਨਕ, ਕਲਾਉਡ-ਏਜੰਟ ਅਤੇ ਸਿਸਟਮ ਸੰਗ੍ਰਹਿ, ਸਮੇਤ **156 `hasFree: true` ਖੋਜ ਮੈਟਾਡੇਟਾ ਲੈ ਕੇ ਜਾ ਰਿਹਾ ਹੈ** . ਚੈਟ ਮਾਡਲ ਰਜਿਸਟਰੀ ਕਵਰ ਕਰਦਾ ਹੈ**245 ਪ੍ਰਦਾਤਾ / 3,172 ਵੱਖਰੇ ਪ੍ਰਦਾਤਾ-ਮਾਡਲ ਜੋੜੇ / 1,535 ਕੱਚਾ ਮਾਡਲ IDs** ; ਵੱਖਰਾ ਮੁਫ਼ਤ-ਬਜਟ ਕੈਟਾਲਾਗ ਹੈ**466 ਪ੍ਰਤੀ-ਮਾਡਲ ਕਤਾਰਾਂ** ,**34 ਆਵਰਤੀ ਪੂਲ** ਅਤੇ**52 recurring/keyless ਮੁਫ਼ਤ-ਸਦਾ ਲਈ ਪ੍ਰਦਾਤਾ** . ਇਹ ਡਿਜ਼ਾਇਨ ਦੁਆਰਾ ਵੱਖ-ਵੱਖ ਭਾਅ ਹਨ; ਪਰਿਭਾਸ਼ਾਵਾਂ ਅਤੇ ਪੂਲ-ਕੱਟੀਆਂ ਗਣਨਾਵਾਂ [ਪ੍ਰਦਾਤਾ ਸੰਦਰਭ](docs/reference/PROVIDER_REFERENCE.md) ਅਤੇ [ਮੁਫਤ ਟੀਅਰਜ਼](docs/reference/FREE_TIERS.md) ਵਿੱਚ ਰਹਿੰਦੀਆਂ ਹਨ।
 
 <div align="center">
 

@@ -103,10 +103,12 @@ Search Tools Studio-ն `/dashboard/search-tools`-ը որոնման պարզ փո
 `ProviderCatalog.tsx`-ը ցուցադրում է պրովայդերների ամբողջական ցանկը՝ ստացված `GET /api/search/providers`-ից
 (F4-ում ընդլայնված՝ ներառելով տվյալներ ստացող պրովայդերները)․
 
-| `kind` | `"search"` (20 պրովայդեր) կամ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 պրովայդեր) կամ `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 Կարգավիճակը **որոշվում է հարցման պահին**՝ ստուգելով՝ արդյոք մուտքային տվյալները առկա են, և արդյոք
 բոլոր բանալիները տվյալ պահին սպասման ժամանակահատվածում են։
+
+`codex-search` (Codex Web Search): Օգտագործում է միացված Codex (ChatGPT) հաշիվները․ առանձին բանալի պետք չէ։ Յուրաքանչյուր որոնում ծախսում է ChatGPT բաժանորդագրության քվոտան և տևում մոտ 10–40 վայրկյան։ Աշխատում է, երբ հարցումը նշում է դրա անունը․ ավտոմատ ընտրության համար պետք է միացնել `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`-ը, որը լռելյայն անջատված է։
 
 ---
 

@@ -103,10 +103,12 @@ Search Tools Studio `/dashboard/search-tools` ને મૂળભૂત સર�
 `ProviderCatalog.tsx`, `GET /api/search/providers`માંથી પ્રદાતાઓની સંપૂર્ણ સૂચિ ઉપલબ્ધ કરાવે છે
 (fetch પ્રદાતાઓને સમાવવા માટે F4માં વિસ્તૃત):
 
-| `kind` | `"search"` (20 પ્રદાતાઓ) અથવા `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 પ્રદાતાઓ) અથવા `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 સ્થિતિ **વિનંતીના સમયે નિર્ધારિત** થાય છે, જેના માટે ઓળખપત્રો અસ્તિત્વમાં છે કે નહીં અને
 હાલમાં બધી keys cooldownમાં છે કે નહીં તે તપાસવામાં આવે છે.
+
+`codex-search` (Codex Web Search): જોડાયેલા Codex (ChatGPT) એકાઉન્ટનો ઉપયોગ કરે છે; અલગ કી જરૂરી નથી. દરેક શોધ ChatGPT સબ્સ્ક્રિપ્શનનો ક્વોટા વાપરે છે અને આશરે 10–40 સેકન્ડ લે છે. વિનંતીમાં તેનું નામ આપેલું હોય ત્યારે ચાલે છે; આપમેળે પસંદગી માટે `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` ચાલુ કરવો જરૂરી છે, જે મૂળભૂત રીતે બંધ છે.
 
 ---
 
