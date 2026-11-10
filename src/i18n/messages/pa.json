@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "ਇਹ ਇਸ ਟੈਂਪਲੇਟ ਨਾਲ ਮੇਲ ਖਾਂਦੇ ਮੌਜੂਦਾ ਕਨੈਕਟ ਕੀਤੇ ਪ੍ਰਦਾਤਾਵਾਂ/ਮਾਡਲਾਂ ਦਾ ਸਨੈਪਸ਼ਾਟ ਲੈ ਕੇ ਇੱਕ ਸੰਪਾਦਨਯੋਗ ਕੌਂਬੋ ਬਣਾਏਗਾ।",
     "duplicateAutoComboFailedPrefix": "ਆਟੋ-ਕੌਂਬੋ ਦੀ ਨਕਲ ਬਣਾਉਣ ਵਿੱਚ ਅਸਫਲ:",
     "duplicateAutoComboUnknownError": "ਅਣਜਾਣ ਗਲਤੀ",
-    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ"
+    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ",
+    "endpointBehaviorTitle": "ਅੰਤਮ ਬਿੰਦੂ ਵਿਵਹਾਰ",
+    "endpointBehaviorDescription": "ਹਰੇਕ API ਸਮਰੱਥਾ ਲਈ ਸੁਤੰਤਰ ਤੌਰ 'ਤੇ ਟੀਚਿਆਂ ਅਤੇ ਰੂਟਿੰਗ ਰਣਨੀਤੀ ਨੂੰ ਕੌਂਫਿਗਰ ਕਰੋ। ਖਾਲੀ ਸਮਰੱਥਾਵਾਂ ਨੂੰ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਚੈਟ ਪੁਰਾਣੀ-ਅਨੁਕੂਲ ਡਿਫੌਲਟ ਰਹਿੰਦੀ ਹੈ।",
+    "endpointTabsAria": "ਕੰਬੋ ਸਮਰੱਥਾ",
+    "endpointChatTargetRequired": "ਕੰਬੋ ਨੂੰ ਗਾਹਕਾਂ ਦੇ ਅਨੁਕੂਲ ਰੱਖਣ ਲਈ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਚੈਟ ਟੀਚਾ ਸ਼ਾਮਲ ਕਰੋ।",
+    "endpointWeightedRouteTotalInvalid": "ਹਰੇਕ ਵਜ਼ਨ ਸਮਰੱਥਾ ਵਾਲੇ ਰੂਟ ਦਾ ਕੁੱਲ ਭਾਰ 100% ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।",
+    "endpointTabs": {
+      "chat": "ਚੈਟ",
+      "search": "ਖੋਜ",
+      "web-fetch": "ਪ੍ਰਾਪਤ ਕਰੋ",
+      "embeddings": "ਏਮਬੈਡਿੰਗਸ",
+      "rerank": "ਮੁੜ ਦਰਜਾ",
+      "images": "ਚਿੱਤਰ",
+      "image-edits": "ਚਿੱਤਰ ਸੰਪਾਦਨ",
+      "videos": "ਵੀਡੀਓ",
+      "music": "ਸੰਗੀਤ",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ਆਡੀਓ ਅਨੁਵਾਦ",
+      "audio-generation": "ਆਵਾਜ਼ ਪੈਦਾ"
+    }
   },
   "costs": {
     "title": "ਲਾਗਤਾਂ",

@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Ovo će napraviti snapshot povezanih providera/modela koji odgovaraju ovom šablonu u uredivi combo.",
     "duplicateAutoComboFailedPrefix": "Neuspjelo dupliranje auto-comba:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}",
+    "endpointBehaviorTitle": "Ponašanje krajnje tačke",
+    "endpointBehaviorDescription": "Konfigurirajte ciljeve i strategiju usmjeravanja nezavisno za svaku API sposobnost. Prazne mogućnosti se ne pohranjuju. Chat ostaje zadana postavka kompatibilna sa naslijeđem.",
+    "endpointTabsAria": "Kombinovana sposobnost",
+    "endpointChatTargetRequired": "Dodajte barem jedan Chat cilj kako bi kombinacija bila kompatibilna s klijentima.",
+    "endpointWeightedRouteTotalInvalid": "Svaka ruta ponderisane sposobnosti mora imati ukupnu težinu od 100%.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Traži",
+      "web-fetch": "Dohvati",
+      "embeddings": "Embeddings",
+      "rerank": "Ponovno rangiranje",
+      "images": "Slike",
+      "image-edits": "Uređivanje slika",
+      "videos": "Video",
+      "music": "Muzika",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Audio prijevod",
+      "audio-generation": "Generacija zvuka"
+    }
   },
   "costs": {
     "title": "Troškovi",

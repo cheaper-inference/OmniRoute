@@ -112,7 +112,7 @@ export function projectComboForEndpoint(
   endpoint: ComboEndpoint
 ): {
   combo: ComboLike & { models: ComboStep[] };
-  allCombos: Array<ComboLike & { models: ComboStep[] }>;
+  allCombos: ComboLike[];
 } {
   const collection = Array.isArray(allCombos) ? allCombos : allCombos?.combos || [];
   const stored = collection.map((item) => {
@@ -123,12 +123,12 @@ export function projectComboForEndpoint(
     } as ComboLike;
     return comboForEndpoint(normalized, endpoint);
   });
+  const storedByName = new Map(stored.map((item) => [item.name, item]));
+  const comboNames = new Set(storedByName.keys());
   const project = (item: ComboLike) => ({
     ...item,
     models: item.models
-      .map((entry, index) =>
-        normalizeComboStep(entry, { comboName: item.name, index, allCombos: stored })
-      )
+      .map((entry, index) => normalizeComboStep(entry, { comboName: item.name, index, comboNames }))
       .filter((step): step is ComboStep => Boolean(step))
       .filter((step) => {
         if (step.kind === "combo-ref") return true; // DAG validation/expansion remains in combo engine.
@@ -140,8 +140,20 @@ export function projectComboForEndpoint(
       }),
   });
   const projected = project(comboForEndpoint(combo, endpoint));
-  const children = stored.map(project);
-  const byName = new Map([...children, projected].map((item) => [item.name, item]));
+  // This runs on every chat request, so only the requested combo's own DAG is walked. Any other
+  // saved combo keeps its route-selected steps for the engine to normalize if it is referenced.
+  const byName = new Map([[projected.name, projected]]);
+  const pending = [projected];
+  for (let current = pending.pop(); current; current = pending.pop()) {
+    for (const step of current.models) {
+      if (step.kind !== "combo-ref" || byName.has(step.comboName)) continue;
+      const child = storedByName.get(step.comboName);
+      if (!child) continue;
+      const projectedChild = project(child);
+      byName.set(step.comboName, projectedChild);
+      pending.push(projectedChild);
+    }
+  }
   const compatible = new Map<string, boolean>();
   const hasCompatibleTarget = (name: string, visiting = new Set<string>()): boolean => {
     // Unknown references, cycles and excessive depth stay visible to engine validation.
@@ -163,5 +175,11 @@ export function projectComboForEndpoint(
       (step) => step.kind !== "combo-ref" || hasCompatibleTarget(step.comboName)
     ),
   });
-  return { combo: prune(projected), allCombos: children.map(prune) };
+  return {
+    combo: prune(projected),
+    allCombos: stored.map((item) => {
+      const reached = byName.get(item.name);
+      return reached ? prune(reached) : item;
+    }),
+  };
 }

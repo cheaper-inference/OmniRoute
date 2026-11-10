@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Tím se zachytí aktuálně připojení poskytovatelé/modely, které odpovídají této šabloně, do upravitelné kombinace.",
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
-    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}"
+    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
+    "endpointBehaviorTitle": "Chování koncového bodu",
+    "endpointBehaviorDescription": "Nakonfigurujte cíle a strategii směrování nezávisle pro každou schopnost API. Prázdné schopnosti se neuloží. Chat zůstává výchozím nastavením kompatibilním se staršími verzemi.",
+    "endpointTabsAria": "Kombinovaná schopnost",
+    "endpointChatTargetRequired": "Přidejte alespoň jeden cíl chatu, aby byla kombinace kompatibilní s klienty.",
+    "endpointWeightedRouteTotalInvalid": "Každá trasa vážených schopností musí mít celkovou váhu 100 %.",
+    "endpointTabs": {
+      "chat": "Povídání",
+      "search": "Vyhledávání",
+      "web-fetch": "Vynést",
+      "embeddings": "Vložení",
+      "rerank": "Přehodnotit",
+      "images": "Obrázky",
+      "image-edits": "Úpravy obrázků",
+      "videos": "Video",
+      "music": "Hudba",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Zvukový překlad",
+      "audio-generation": "Generování zvuku"
+    }
   },
   "costs": {
     "title": "Náklady",

@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Isso irá capturar os provedores/modelos atualmente conectados que correspondem a este modelo em uma combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
+    "endpointBehaviorTitle": "Comportamento por endpoint",
+    "endpointBehaviorDescription": "Configure os alvos e a estratégia de roteamento de forma independente para cada capacidade da API. Capacidades vazias não são salvas. O Chat continua sendo o padrão compatível com o comportamento legado.",
+    "endpointTabsAria": "Capacidade do combo",
+    "endpointChatTargetRequired": "Adicione pelo menos um alvo de Chat para manter o combo compatível com os clientes.",
+    "endpointWeightedRouteTotalInvalid": "Cada rota de capacidade ponderada deve ter um peso total de 100%.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Procurar",
+      "web-fetch": "Busca de página",
+      "embeddings": "Incorporações",
+      "rerank": "Reclassificar",
+      "images": "Imagens",
+      "image-edits": "Edições de imagem",
+      "videos": "Vídeo",
+      "music": "Música",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Tradução de áudio",
+      "audio-generation": "Geração de som"
+    }
   },
   "costs": {
     "title": "Custos",

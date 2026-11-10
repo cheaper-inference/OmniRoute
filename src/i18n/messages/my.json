@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "ဤလုပ်ဆောင်ချက်သည် လက်ရှိချိတ်ဆက်ထားပြီး ဤတမ်းပလိတ်နှင့် ကိုက်ညီသော ဝန်ဆောင်မှုပေးသူများ/မော်ဒယ်များကို တည်းဖြတ်နိုင်သည့် ပေါင်းစပ်မှုတစ်ခုအဖြစ် လက်ရှိအခြေအနေအတိုင်း မှတ်တမ်းတင်မည်။",
     "duplicateAutoComboFailedPrefix": "အလိုအလျောက်ပေါင်းစပ်မှုကို မိတ္တူပွား၍မရပါ:",
     "duplicateAutoComboUnknownError": "မသိသော အမှား",
-    "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်"
+    "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်",
+    "endpointBehaviorTitle": "အဆုံးမှတ် အပြုအမူ",
+    "endpointBehaviorDescription": "API စွမ်းရည်တစ်ခုစီအတွက် ပစ်မှတ်များနှင့် လမ်းကြောင်းသတ်မှတ်ခြင်းဗျူဟာကို သီးခြားသတ်မှတ်ပါ။ အချည်းနှီးသောစွမ်းရည်များကို မသိမ်းဆည်းပါ။ ချတ်သည် အမွေအနှစ်နှင့် လိုက်ဖက်ညီသော မူရင်းအဖြစ် ကျန်ရှိနေပါသည်။",
+    "endpointTabsAria": "ပေါင်းစပ်စွမ်းရည်",
+    "endpointChatTargetRequired": "သုံးစွဲသူများနှင့် တွဲဖက်အသုံးပြုနိုင်စေရန် အနည်းဆုံး Chat ပစ်မှတ်တစ်ခု ထည့်ပါ။",
+    "endpointWeightedRouteTotalInvalid": "အလေးချိန် တိုင်းတာနိုင်သော လမ်းကြောင်းတိုင်းတွင် စုစုပေါင်းအလေးချိန် 100% ရှိရပါမည်။",
+    "endpointTabs": {
+      "chat": "စကားစမြည်",
+      "search": "ရှာရန်",
+      "web-fetch": "အကျိူး",
+      "embeddings": "တသားတည်း",
+      "rerank": "ပြန်အဆင့်သတ်မှတ်ပါ။",
+      "images": "ပုံများ",
+      "image-edits": "ပုံတည်းဖြတ်မှုများ",
+      "videos": "ဗီဒီယို",
+      "music": "ဂီတ",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "အသံဘာသာပြန်",
+      "audio-generation": "အသံမျိုးဆက်"
+    }
   },
   "costs": {
     "title": "ကုန်ကျစရိတ်များ",

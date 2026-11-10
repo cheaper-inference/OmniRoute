@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "這將把與此模板匹配的目前連線提供者/模型快照到可編輯的組合中。",
     "duplicateAutoComboFailedPrefix": "複製自動組合失敗：",
     "duplicateAutoComboUnknownError": "未知錯誤",
-    "duplicateAutoComboTitle": "從{name}建立靜態組合"
+    "duplicateAutoComboTitle": "從{name}建立靜態組合",
+    "endpointBehaviorTitle": "端點行為",
+    "endpointBehaviorDescription": "為每個API功能獨立配置目標和路由策略。不保存空功能。聊天仍然是舊版相容的預設設定。",
+    "endpointTabsAria": "組合能力",
+    "endpointChatTargetRequired": "新增至少一個聊天目標以保持組合與客戶端相容。",
+    "endpointWeightedRouteTotalInvalid": "每條加權能力路線的總權重必須為 100%。",
+    "endpointTabs": {
+      "chat": "聊天",
+      "search": "搜尋",
+      "web-fetch": "拿來",
+      "embeddings": "嵌入",
+      "rerank": "重新排序",
+      "images": "圖片",
+      "image-edits": "圖像編輯",
+      "videos": "影片",
+      "music": "音樂",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "音訊翻譯",
+      "audio-generation": "聲音產生"
+    }
   },
   "costs": {
     "title": "成本",

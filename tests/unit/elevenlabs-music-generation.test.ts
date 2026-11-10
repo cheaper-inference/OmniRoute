@@ -196,6 +196,8 @@ test("unified music route applies an endpoint-specific round-robin combo", async
       music: {
         strategy: "round-robin",
         models: ["elevenlabs/music_v1", "elevenlabs/music_v2"],
+        // Without this the default stickyRoundRobinLimit (3) batches requests on one target.
+        config: { stickyRoundRobinLimit: 1 },
       },
     },
   });

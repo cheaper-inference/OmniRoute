@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil ta et øyeblikksbilde av de nåvørende tilkoblede leverandørene/modellene som matcher denne malen i en redigerbar kombinasjon.",
     "duplicateAutoComboFailedPrefix": "Duplisering av auto-kombinasjon mislyktes:",
     "duplicateAutoComboUnknownError": "Ukjent feil",
-    "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}"
+    "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}",
+    "endpointBehaviorTitle": "Endepunktadferd",
+    "endpointBehaviorDescription": "Konfigurer mål og rutingstrategi uavhengig for hver API evne. Tomme funksjoner lagres ikke. Chat er fortsatt den eldre kompatible standarden.",
+    "endpointTabsAria": "Kombinasjonsevne",
+    "endpointChatTargetRequired": "Legg til minst ett Chat-mål for å holde kombinasjonen kompatibel med klienter.",
+    "endpointWeightedRouteTotalInvalid": "Hver veid kapasitetsrute må ha en totalvekt på 100 %.",
+    "endpointTabs": {
+      "chat": "Chat",
+      "search": "Søk",
+      "web-fetch": "Hent",
+      "embeddings": "Innstøpinger",
+      "rerank": "Ranger på nytt",
+      "images": "Bilder",
+      "image-edits": "Bilderedigeringer",
+      "videos": "Video",
+      "music": "Musikk",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Lydoversettelse",
+      "audio-generation": "Lydgenerering"
+    }
   },
   "costs": {
     "title": "Kostnader",

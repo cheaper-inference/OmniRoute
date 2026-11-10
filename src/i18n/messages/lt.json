@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Taip šiuo metu prijungtų, šį šabloną atitinkančių teikėjų ir modelių momentinė kopija bus įrašyta į redaguojamą kombo.",
     "duplicateAutoComboFailedPrefix": "Nepavyko dubliuoti automatinio kombo:",
     "duplicateAutoComboUnknownError": "Nežinoma klaida",
-    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}"
+    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}",
+    "endpointBehaviorTitle": "Galinio taško elgesys",
+    "endpointBehaviorDescription": "Kiekvienai API funkcijai atskirai konfigūruokite tikslus ir maršruto parinkimo strategiją. Tuščios galimybės neišsaugomos. Pokalbiai išlieka su senu suderinamu numatytuoju režimu.",
+    "endpointTabsAria": "Kombinuotosios galimybės",
+    "endpointChatTargetRequired": "Pridėkite bent vieną pokalbio tikslą, kad derinys būtų suderinamas su klientais.",
+    "endpointWeightedRouteTotalInvalid": "Kiekvienas svertinis pajėgumų maršrutas turi turėti 100 % bendrą svorį.",
+    "endpointTabs": {
+      "chat": "Pokalbis",
+      "search": "Ieškoti",
+      "web-fetch": "Atnešti",
+      "embeddings": "Įterpimai",
+      "rerank": "Pakeisti reitingą",
+      "images": "Vaizdai",
+      "image-edits": "Vaizdo redagavimas",
+      "videos": "Vaizdo įrašas",
+      "music": "Muzika",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Garso vertimas",
+      "audio-generation": "Garso generavimas"
+    }
   },
   "costs": {
     "title": "Išlaidos",

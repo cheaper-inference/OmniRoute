@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Це зробить знімок поточно підключених постачальників/моделей, які відповідають цьому шаблону, у редаговане комбо.",
     "duplicateAutoComboFailedPrefix": "Не вдалося дублювати автоматичне комбо:",
     "duplicateAutoComboUnknownError": "Невідома помилка",
-    "duplicateAutoComboTitle": "Створити статичне комбо з {name}"
+    "duplicateAutoComboTitle": "Створити статичне комбо з {name}",
+    "endpointBehaviorTitle": "Поведінка кінцевої точки",
+    "endpointBehaviorDescription": "Налаштуйте цілі та стратегію маршрутизації окремо для кожної можливості API. Порожні можливості не зберігаються. Чат залишається сумісним зі старими версіями за умовчанням.",
+    "endpointTabsAria": "Можливість комбо",
+    "endpointChatTargetRequired": "Додайте принаймні одну ціль Chat, щоб комбо було сумісним із клієнтами.",
+    "endpointWeightedRouteTotalInvalid": "Кожен зважений маршрут можливостей повинен мати загальну вагу 100%.",
+    "endpointTabs": {
+      "chat": "Чат",
+      "search": "Пошук",
+      "web-fetch": "Fetch",
+      "embeddings": "Вбудовування",
+      "rerank": "Змінити ранг",
+      "images": "Зображення",
+      "image-edits": "Редагування зображень",
+      "videos": "відео",
+      "music": "музика",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Переклад аудіо",
+      "audio-generation": "Генерація звуку"
+    }
   },
   "costs": {
     "title": "Витрати",

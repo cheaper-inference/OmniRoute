@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "S tem boste trenutno povezane ponudnike/modele, ki se ujemajo s to predlogo, zajeli v kombinacijo, ki jo je mogoče urejati.",
     "duplicateAutoComboFailedPrefix": "Podvajanje samodejne kombinacije ni uspelo:",
     "duplicateAutoComboUnknownError": "Neznana napaka",
-    "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}"
+    "duplicateAutoComboTitle": "Ustvari statično kombinacijo iz {name}",
+    "endpointBehaviorTitle": "Vedenje končne točke",
+    "endpointBehaviorDescription": "Konfigurirajte cilje in strategijo usmerjanja neodvisno za vsako zmožnost API. Prazne zmogljivosti niso shranjene. Klepet ostaja privzeta nastavitev, združljiva s starimi različicami.",
+    "endpointTabsAria": "Kombinirana zmogljivost",
+    "endpointChatTargetRequired": "Dodajte vsaj en cilj za klepet, da bo kombinacija združljiva s strankami.",
+    "endpointWeightedRouteTotalInvalid": "Vsaka ponderirana zmogljivostna pot mora imeti skupno težo 100 %.",
+    "endpointTabs": {
+      "chat": "Klepetajte",
+      "search": "Iskanje",
+      "web-fetch": "Prinesi",
+      "embeddings": "Vdelave",
+      "rerank": "Ponovno uvrstitev",
+      "images": "Slike",
+      "image-edits": "Urejanje slik",
+      "videos": "Video",
+      "music": "Glasba",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Avdio prevod",
+      "audio-generation": "Generiranje zvoka"
+    }
   },
   "costs": {
     "title": "Stroški",

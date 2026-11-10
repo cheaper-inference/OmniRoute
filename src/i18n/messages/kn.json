@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "ಈ ಟೆಂಪ್ಲೇಟ್ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಪ್ರಸ್ತುತ ಸಂಪರ್ಕಿತ ಪೂರೈಕೆದಾರರು/ಮಾಡೆಲ್ಗಳ ಸ್ನ್ಯಾಪ್ಶಾಟ್ ತೆಗೆದು, ಅದನ್ನು ಸಂಪಾದಿಸಬಹುದಾದ ಕಾಂಬೊ ಆಗಿ ರಚಿಸಲಾಗುತ್ತದೆ.",
     "duplicateAutoComboFailedPrefix": "ಸ್ವಯಂ-ಕಾಂಬೊವನ್ನು ನಕಲಿಸಲು ವಿಫಲವಾಗಿದೆ:",
     "duplicateAutoComboUnknownError": "ಅಜ್ಞಾತ ದೋಷ",
-    "duplicateAutoComboTitle": "{name} ನಿಂದ ಸ್ಥಿರ ಕಾಂಬೊವನ್ನು ರಚಿಸಿ"
+    "duplicateAutoComboTitle": "{name} ನಿಂದ ಸ್ಥಿರ ಕಾಂಬೊವನ್ನು ರಚಿಸಿ",
+    "endpointBehaviorTitle": "ಅಂತ್ಯಬಿಂದು ವರ್ತನೆ",
+    "endpointBehaviorDescription": "ಪ್ರತಿ API ಸಾಮರ್ಥ್ಯಕ್ಕಾಗಿ ಸ್ವತಂತ್ರವಾಗಿ ಗುರಿಗಳನ್ನು ಮತ್ತು ರೂಟಿಂಗ್ ತಂತ್ರವನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ. ಖಾಲಿ ಸಾಮರ್ಥ್ಯಗಳನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ. ಚಾಟ್ ಪರಂಪರೆ-ಹೊಂದಾಣಿಕೆಯ ಡೀಫಾಲ್ಟ್ ಆಗಿ ಉಳಿದಿದೆ.",
+    "endpointTabsAria": "ಕಾಂಬೊ ಸಾಮರ್ಥ್ಯ",
+    "endpointChatTargetRequired": "ಕ್ಲೈಂಟ್ಗಳೊಂದಿಗೆ ಕಾಂಬೊ ಹೊಂದಾಣಿಕೆಯನ್ನು ಇರಿಸಿಕೊಳ್ಳಲು ಕನಿಷ್ಠ ಒಂದು ಚಾಟ್ ಗುರಿಯನ್ನು ಸೇರಿಸಿ.",
+    "endpointWeightedRouteTotalInvalid": "ಪ್ರತಿ ತೂಕದ ಸಾಮರ್ಥ್ಯದ ಮಾರ್ಗವು ಒಟ್ಟು 100% ತೂಕವನ್ನು ಹೊಂದಿರಬೇಕು.",
+    "endpointTabs": {
+      "chat": "ಚಾಟ್ ಮಾಡಿ",
+      "search": "ಹುಡುಕು",
+      "web-fetch": "ತರಲು",
+      "embeddings": "ಎಂಬೆಡಿಂಗ್ಗಳು",
+      "rerank": "ರೀರ್ಯಾಂಕ್",
+      "images": "ಚಿತ್ರಗಳು",
+      "image-edits": "ಚಿತ್ರ ಸಂಪಾದನೆಗಳು",
+      "videos": "ವೀಡಿಯೊ",
+      "music": "ಸಂಗೀತ",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ಆಡಿಯೋ ಅನುವಾದ",
+      "audio-generation": "ಧ್ವನಿ ಉತ್ಪಾದನೆ"
+    }
   },
   "costs": {
     "title": "ವೆಚ್ಚಗಳು",

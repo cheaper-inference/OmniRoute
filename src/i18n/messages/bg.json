@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Това ще направи моментна снимка на текущо свързаните доставчици/модели, които съвпадат с този шаблон, в редактируемо комбо.",
     "duplicateAutoComboFailedPrefix": "Неуспешно копиране на автоматично комбо:",
     "duplicateAutoComboUnknownError": "Неизвестна грешка",
-    "duplicateAutoComboTitle": "Създайте статично комбо от {name}"
+    "duplicateAutoComboTitle": "Създайте статично комбо от {name}",
+    "endpointBehaviorTitle": "Поведение на крайната точка",
+    "endpointBehaviorDescription": "Конфигурирайте цели и стратегия за маршрутизиране независимо за всяка възможност API. Празните възможности не се записват. Чатът остава по подразбиране, съвместим с наследените версии.",
+    "endpointTabsAria": "Комбо възможност",
+    "endpointChatTargetRequired": "Добавете поне една цел за чат, за да поддържате комбинацията съвместима с клиентите.",
+    "endpointWeightedRouteTotalInvalid": "Всеки маршрут с претеглена способност трябва да има общо тегло от 100%.",
+    "endpointTabs": {
+      "chat": "Чат",
+      "search": "Търсене",
+      "web-fetch": "Извличане",
+      "embeddings": "Вграждания",
+      "rerank": "Прекласиране",
+      "images": "Изображения",
+      "image-edits": "Редакции на изображения",
+      "videos": "видео",
+      "music": "Музика",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Аудио превод",
+      "audio-generation": "Генериране на звук"
+    }
   },
   "costs": {
     "title": "Разходи",

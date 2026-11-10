@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "এটি এই টেমপ্লেটের সাথে মিলে যায় এমন বর্তমান সংযুক্ত প্রদানকারী/মডেলগুলিকে একটি সম্পাদনযোগ্য কম্বোতে স্ন্যাপশট নেবে।",
     "duplicateAutoComboFailedPrefix": "অটোকম্বো ডুপ্লিকেশন ব্যর্থ:",
     "duplicateAutoComboUnknownError": "অজানা ত্রুটি",
-    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন"
+    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
+    "endpointBehaviorTitle": "এন্ডপয়েন্ট আচরণ",
+    "endpointBehaviorDescription": "প্রতিটি API ক্ষমতার জন্য স্বাধীনভাবে লক্ষ্য এবং রাউটিং কৌশল কনফিগার করুন। খালি ক্ষমতা সংরক্ষণ করা হয় না. চ্যাট লিগ্যাসি-সামঞ্জস্যপূর্ণ ডিফল্ট রয়ে গেছে।",
+    "endpointTabsAria": "কম্বো ক্ষমতা",
+    "endpointChatTargetRequired": "ক্লায়েন্টদের সাথে কম্বো সামঞ্জস্যপূর্ণ রাখতে কমপক্ষে একটি চ্যাট লক্ষ্য যোগ করুন।",
+    "endpointWeightedRouteTotalInvalid": "প্রতিটি ওজনযুক্ত ক্ষমতার রুটের মোট ওজন 100% থাকতে হবে।",
+    "endpointTabs": {
+      "chat": "চ্যাট",
+      "search": "অনুসন্ধান করুন",
+      "web-fetch": "আনুন",
+      "embeddings": "এমবেডিং",
+      "rerank": "পুনঃরাঙ্ক",
+      "images": "ছবি",
+      "image-edits": "ছবি সম্পাদনা",
+      "videos": "ভিডিও",
+      "music": "সঙ্গীত",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "অডিও অনুবাদ",
+      "audio-generation": "শব্দ প্রজন্ম"
+    }
   },
   "costs": {
     "title": "খরচ",

@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "ამჟამად დაკავშირებული პროვაიდერებისა და მოდელების, რომლებიც ამ შაბლონს შეესაბამება, მიმდინარე მდგომარეობა დაფიქსირდება რედაქტირებად კომბოდ.",
     "duplicateAutoComboFailedPrefix": "ავტოკომბოს დუბლირება ვერ მოხერხდა:",
     "duplicateAutoComboUnknownError": "უცნობი შეცდომა",
-    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან"
+    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან",
+    "endpointBehaviorTitle": "ბოლო წერტილის ქცევა",
+    "endpointBehaviorDescription": "დააკონფიგურირეთ სამიზნეები და მარშრუტიზაციის სტრატეგია დამოუკიდებლად თითოეული API შესაძლებლობისთვის. ცარიელი შესაძლებლობები არ არის შენახული. ჩატი რჩება მემკვიდრეობასთან თავსებად ნაგულისხმევად.",
+    "endpointTabsAria": "კომბინირებული უნარი",
+    "endpointChatTargetRequired": "დაამატეთ ჩატის მინიმუმ ერთი სამიზნე, რომ კომბინირებული იყოს კლიენტებთან თავსებადი.",
+    "endpointWeightedRouteTotalInvalid": "ყველა შეწონილი შესაძლებლობების მარშრუტს უნდა ჰქონდეს საერთო წონა 100%.",
+    "endpointTabs": {
+      "chat": "ჩატი",
+      "search": "ძიება",
+      "web-fetch": "მოტანა",
+      "embeddings": "ჩაშენებები",
+      "rerank": "გადაადგილება",
+      "images": "სურათები",
+      "image-edits": "სურათის რედაქტირება",
+      "videos": "ვიდეო",
+      "music": "მუსიკა",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "აუდიო თარგმანი",
+      "audio-generation": "ხმის თაობა"
+    }
   },
   "costs": {
     "title": "ხარჯები",

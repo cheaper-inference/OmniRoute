@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Èyí yóò ṣe ẹ̀dà àwọn olùpèsè/àwọn awoṣe tó sopọ̀ lọ́wọ́lọ́wọ́ tí ó bá àdàkọ yìí mu, yóò sì fi wọ́n sínú àkójọpọ̀ tí a lè ṣàtúnṣe.",
     "duplicateAutoComboFailedPrefix": "Kò ṣeé ṣe láti ṣe ẹ̀dà àkójọpọ̀ aládàáṣiṣẹ́:",
     "duplicateAutoComboUnknownError": "Àṣìṣe àìmọ̀",
-    "duplicateAutoComboTitle": "Ṣẹ̀dá àkójọpọ̀ àìyípadà láti inú {name}"
+    "duplicateAutoComboTitle": "Ṣẹ̀dá àkójọpọ̀ àìyípadà láti inú {name}",
+    "endpointBehaviorTitle": "Iwa ipari ipari",
+    "endpointBehaviorDescription": "Ṣe atunto awọn ibi-afẹde ati ilana ipa-ọna ni ominira fun agbara API kọọkan. Awọn agbara ofo ko ni fipamọ. Iwiregbe si maa wa julọ-ibaramu aiyipada.",
+    "endpointTabsAria": "Agbara Konbo",
+    "endpointChatTargetRequired": "Ṣafikun o kere ju ibi-afẹde Wiregbe kan lati jẹ ki konbo ni ibamu pẹlu awọn alabara.",
+    "endpointWeightedRouteTotalInvalid": "Gbogbo ipa ọna agbara iwuwo gbọdọ ni iwuwo lapapọ ti 100%.",
+    "endpointTabs": {
+      "chat": "Wiregbe",
+      "search": "Wa",
+      "web-fetch": "Mu",
+      "embeddings": "Awọn ifibọ",
+      "rerank": "Rerank",
+      "images": "Awọn aworan",
+      "image-edits": "Awọn atunṣe aworan",
+      "videos": "Fidio",
+      "music": "Orin",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Itumọ ohun",
+      "audio-generation": "Iran ohun"
+    }
   },
   "costs": {
     "title": "Àwọn ìnáwó",

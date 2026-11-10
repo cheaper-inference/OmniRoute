@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Ini akan mengambil snapshot penyedia/model yang terhubung saat ini yang cocok dengan templat ini ke dalam kombo yang dapat diedit.",
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo otomatis:",
     "duplicateAutoComboUnknownError": "Kesalahan tidak diketahui",
-    "duplicateAutoComboTitle": "Buat kombo statis dari {name}"
+    "duplicateAutoComboTitle": "Buat kombo statis dari {name}",
+    "endpointBehaviorTitle": "Perilaku titik akhir",
+    "endpointBehaviorDescription": "Konfigurasikan target dan strategi perutean secara independen untuk setiap kemampuan API. Peluang kosong tidak disimpan. Obrolan tetap menjadi default yang kompatibel dengan versi lama.",
+    "endpointTabsAria": "Kemampuan kombo",
+    "endpointChatTargetRequired": "Tambahkan setidaknya satu target Obrolan agar kombo tetap kompatibel dengan klien.",
+    "endpointWeightedRouteTotalInvalid": "Setiap rute kemampuan tertimbang harus memiliki bobot total 100%.",
+    "endpointTabs": {
+      "chat": "Mengobrol",
+      "search": "Mencari",
+      "web-fetch": "Mengambil",
+      "embeddings": "Penyematan",
+      "rerank": "Ubah peringkat",
+      "images": "Gambar",
+      "image-edits": "Pengeditan gambar",
+      "videos": "Video",
+      "music": "Musik",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Terjemahan audio",
+      "audio-generation": "Generasi suara"
+    }
   },
   "costs": {
     "title": "Biaya",

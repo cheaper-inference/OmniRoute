@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "यह इस टेम्पलेट से मेल खाने वाले वर्तमान जुड़े प्रदाताओं/मॉडल को संपादन योग्य कॉम्बो में स्नैपशॉट लेगा।",
     "duplicateAutoComboFailedPrefix": "ऑटोकॉम्बो डुप्लिकेट करने में विफल:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं"
+    "duplicateAutoComboTitle": "{name} से एक स्थैतिक कॉम्बो बनाएं",
+    "endpointBehaviorTitle": "समापन बिंदु व्यवहार",
+    "endpointBehaviorDescription": "प्रत्येक API क्षमता के लिए लक्ष्य और रूटिंग रणनीति को स्वतंत्र रूप से कॉन्फ़िगर करें। खाली क्षमताएं सहेजी नहीं जातीं. चैट विरासत-संगत डिफ़ॉल्ट बनी हुई है।",
+    "endpointTabsAria": "कॉम्बो क्षमता",
+    "endpointChatTargetRequired": "कॉम्बो को ग्राहकों के अनुकूल बनाए रखने के लिए कम से कम एक चैट लक्ष्य जोड़ें।",
+    "endpointWeightedRouteTotalInvalid": "प्रत्येक भारित क्षमता मार्ग का कुल भार 100% होना चाहिए।",
+    "endpointTabs": {
+      "chat": "बात करना",
+      "search": "खोज",
+      "web-fetch": "लाना",
+      "embeddings": "एंबेडिंग",
+      "rerank": "पुनः रैंक करें",
+      "images": "इमेजिस",
+      "image-edits": "छवि संपादन",
+      "videos": "वीडियो",
+      "music": "संगीत",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ऑडियो अनुवाद",
+      "audio-generation": "ध्वनि निर्माण"
+    }
   },
   "costs": {
     "title": "लागत",

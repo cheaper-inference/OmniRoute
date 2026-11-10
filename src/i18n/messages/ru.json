@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Это создаст снимок текущих подключенных провайдеров/моделей, соответствующих этому шаблону, в редактируемом комбо.",
     "duplicateAutoComboFailedPrefix": "Не удалось дублировать автоматическое комбо:",
     "duplicateAutoComboUnknownError": "Неизвестная ошибка",
-    "duplicateAutoComboTitle": "Создать статическое комбо из {name}"
+    "duplicateAutoComboTitle": "Создать статическое комбо из {name}",
+    "endpointBehaviorTitle": "Поведение конечной точки",
+    "endpointBehaviorDescription": "Настраивайте цели и стратегию маршрутизации независимо для каждой возможности API. Пустые возможности не сохраняются. Чат остается версией по умолчанию, совместимой с устаревшими версиями.",
+    "endpointTabsAria": "Комбинированные возможности",
+    "endpointChatTargetRequired": "Добавьте хотя бы одну цель Chat, чтобы комбинация была совместима с клиентами.",
+    "endpointWeightedRouteTotalInvalid": "Каждый маршрут с взвешенными возможностями должен иметь общий вес 100%.",
+    "endpointTabs": {
+      "chat": "Чат",
+      "search": "Поиск",
+      "web-fetch": "Принести",
+      "embeddings": "Вложения",
+      "rerank": "Изменить рейтинг",
+      "images": "Изображения",
+      "image-edits": "Редактирование изображений",
+      "videos": "Видео",
+      "music": "Музыка",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Аудио перевод",
+      "audio-generation": "Генерация звука"
+    }
   },
   "costs": {
     "title": "Затраты",

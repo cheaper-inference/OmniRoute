@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "פעולה זו תצלם את הספקים/מודלים המחוברים כעת התואמים לתבנית הזו לקומבו ניתן לעריכה.",
     "duplicateAutoComboFailedPrefix": "כשל בהעתיק קומבו אוטומטי:",
     "duplicateAutoComboUnknownError": "שגיאה לא ידועה",
-    "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}"
+    "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}",
+    "endpointBehaviorTitle": "התנהגות נקודת קצה",
+    "endpointBehaviorDescription": "הגדר יעדים ואסטרטגיית ניתוב באופן עצמאי עבור כל יכולת API. לא נשמרות יכולות ריקות. צ'אט נשאר ברירת המחדל התואמת מדור קודם.",
+    "endpointTabsAria": "יכולת קומבו",
+    "endpointChatTargetRequired": "הוסף לפחות יעד צ'אט אחד כדי שהשילוב יהיה תואם ללקוחות.",
+    "endpointWeightedRouteTotalInvalid": "לכל מסלול יכולת משוקלל חייב להיות משקל כולל של 100%.",
+    "endpointTabs": {
+      "chat": "לְשׂוֹחֵחַ",
+      "search": "לְחַפֵּשׂ",
+      "web-fetch": "לְהָבִיא",
+      "embeddings": "הטבעות",
+      "rerank": "דרג מחדש",
+      "images": "תמונות",
+      "image-edits": "עריכות תמונה",
+      "videos": "וִידֵאוֹ",
+      "music": "מוּסִיקָה",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "תרגום אודיו",
+      "audio-generation": "יצירת סאונד"
+    }
   },
   "costs": {
     "title": "עלויות",

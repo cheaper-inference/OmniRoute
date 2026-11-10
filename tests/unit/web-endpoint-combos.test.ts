@@ -118,7 +118,7 @@ test("direct search-only chat requests return actionable JSON rather than an emp
     })
   );
   assert.equal(response.status, 400);
-  assert.match((await response.json()).error.message, /search/);
+  assert.match((await response.json()).error.message, /POST \/v1\/search/);
   assert.deepEqual(calls, []);
 });
 

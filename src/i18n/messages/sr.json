@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Овим ће тренутно повезани провајдери/модели који одговарају овом шаблону бити снимљени у комбинацију која се може уређивати.",
     "duplicateAutoComboFailedPrefix": "Neuspešno dupliranje auto-kombinacije:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}",
+    "endpointBehaviorTitle": "Понашање крајње тачке",
+    "endpointBehaviorDescription": "Конфигуришите циљеве и стратегију рутирања независно за сваку API способност. Празне могућности се не чувају. Ћаскање остаје подразумевано компатибилно са наслеђем.",
+    "endpointTabsAria": "Комбинована способност",
+    "endpointChatTargetRequired": "Додајте најмање један циљ ћаскања да би комбинација била компатибилна са клијентима.",
+    "endpointWeightedRouteTotalInvalid": "Свака пондерисана рута способности мора имати укупну тежину од 100%.",
+    "endpointTabs": {
+      "chat": "Ћаскање",
+      "search": "Тражи",
+      "web-fetch": "Дохвати",
+      "embeddings": "Ембеддингс",
+      "rerank": "Реранк",
+      "images": "Слике",
+      "image-edits": "Уређивање слика",
+      "videos": "Видео",
+      "music": "Музика",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Аудио превод",
+      "audio-generation": "Генерација звука"
+    }
   },
   "costs": {
     "title": "Troškovi",

@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Wannan zai adana kwafin masu samarwa/samfura da aka haɗa a yanzu waɗanda suka dace da wannan samfuri na tsari a matsayin haɗin da za a iya gyarawa.",
     "duplicateAutoComboFailedPrefix": "An kasa yin kwafin haɗin atomatik:",
     "duplicateAutoComboUnknownError": "Kuskuren da ba a sani ba",
-    "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}"
+    "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}",
+    "endpointBehaviorTitle": "Halin Ƙarshen Ƙarshe",
+    "endpointBehaviorDescription": "Tsara maƙasudai da dabarun tuƙi daban-daban don kowane ƙarfin API. Ba a ajiye iyawa mara komai ba. Taɗi ya kasance tsoho mai dacewa da gado.",
+    "endpointTabsAria": "Haɗuwa iyawa",
+    "endpointChatTargetRequired": "Ƙara aƙalla maƙasudin Taɗi ɗaya don kiyaye haduwar ta dace da abokan ciniki.",
+    "endpointWeightedRouteTotalInvalid": "Kowane hanya mai nauyi mai nauyi dole ne ya kasance yana da jimillar nauyin 100%.",
+    "endpointTabs": {
+      "chat": "Taɗi",
+      "search": "Bincika",
+      "web-fetch": "Dauke",
+      "embeddings": "Abun ciki",
+      "rerank": "Rerank",
+      "images": "Hotuna",
+      "image-edits": "Gyaran hoto",
+      "videos": "Bidiyo",
+      "music": "Kiɗa",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Fassarar sauti",
+      "audio-generation": "Ƙarfin sauti"
+    }
   },
   "costs": {
     "title": "Kuɗaɗen kashewa",

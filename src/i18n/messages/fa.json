@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "این ارائه‌دهندگان/مدل‌های متصل فعلی که با این قالب مطابقت دارند را در یک ترکیب قابل ویرایش ذخیره می‌کند.",
     "duplicateAutoComboFailedPrefix": "تکرار ترکیب خودکار ناموفق بود:",
     "duplicateAutoComboUnknownError": "خطای ناشناخته",
-    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}"
+    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}",
+    "endpointBehaviorTitle": "رفتار نقطه پایانی",
+    "endpointBehaviorDescription": "اهداف و استراتژی مسیریابی را به طور مستقل برای هر قابلیت API پیکربندی کنید. قابلیت های خالی ذخیره نمی شوند. چت پیشفرض سازگار با میراث باقی میماند.",
+    "endpointTabsAria": "قابلیت ترکیبی",
+    "endpointChatTargetRequired": "حداقل یک هدف چت اضافه کنید تا ترکیبی را با مشتریان سازگار نگه دارید.",
+    "endpointWeightedRouteTotalInvalid": "هر مسیر قابلیت وزنی باید دارای وزن کل 100 درصد باشد.",
+    "endpointTabs": {
+      "chat": "چت کنید",
+      "search": "جستجو کنید",
+      "web-fetch": "واکشی",
+      "embeddings": "جاسازی ها",
+      "rerank": "رتبه بندی مجدد",
+      "images": "تصاویر",
+      "image-edits": "ویرایش های تصویر",
+      "videos": "ویدئو",
+      "music": "موسیقی",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "ترجمه صوتی",
+      "audio-generation": "تولید صدا"
+    }
   },
   "costs": {
     "title": "هزینهها",

@@ -4,6 +4,7 @@ import {
   projectComboForEndpoint,
   targetSupportsEndpoint,
 } from "../../src/lib/combos/endpointCapabilities.ts";
+import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
 
 test("a mixed combo exposes only candidates for the requested endpoint", () => {
   const combo = {
@@ -173,5 +174,40 @@ test("nested combos select their own route for the requested capability", () => 
   assert.deepEqual(
     projectedChild.models.map((step) => step.model),
     ["tavily-search/web"]
+  );
+});
+
+test("no chat-capable registry model is treated as non-chat", () => {
+  const blocked: string[] = [];
+  for (const [providerId, entry] of Object.entries(REGISTRY)) {
+    const alias = entry.alias || providerId;
+    for (const model of entry.models || []) {
+      const endpoints = (model as { supportedEndpoints?: string[] }).supportedEndpoints;
+      if (endpoints?.length && !endpoints.includes("chat")) continue;
+      if (!targetSupportsEndpoint(`${alias}/${model.id}`, "chat", providerId)) {
+        blocked.push(`${alias}/${model.id}`);
+      }
+    }
+  }
+  assert.deepEqual(blocked, []);
+});
+
+test("projection walks only the requested combo's DAG, not every saved combo", () => {
+  const child = { name: "child", models: ["openai/gpt-4o", "tavily-search/web"] };
+  const root = { name: "root", models: ["child", "openai/gpt-4o-mini"] };
+  const unrelated = { name: "unrelated", models: ["openai/gpt-4o", "serper-search/web"] };
+  const projected = projectComboForEndpoint(root, [root, child, unrelated], "chat");
+
+  assert.deepEqual(
+    projected.allCombos
+      .find((c) => c.name === "child")!
+      .models.map((m) => (m as { model?: string }).model),
+    ["openai/gpt-4o"],
+    "a referenced child is still projected"
+  );
+  assert.equal(
+    projected.allCombos.find((c) => c.name === "unrelated")!.models,
+    unrelated.models,
+    "an unreachable combo keeps its stored steps untouched"
   );
 });

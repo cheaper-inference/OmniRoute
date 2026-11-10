@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "Spowoduje to przechwycenie aktualnie połączonych dostawców/modeli pasujących do tego szablonu w edytowalnej kombinacji.",
     "duplicateAutoComboFailedPrefix": "Nie udało się skopiować automatycznej kombinacji:",
     "duplicateAutoComboUnknownError": "Nieznany błąd",
-    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}"
+    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}",
+    "endpointBehaviorTitle": "Zachowanie punktu końcowego",
+    "endpointBehaviorDescription": "Skonfiguruj cele i strategię routingu niezależnie dla każdej możliwości API. Puste możliwości nie są zapisywane. Czat pozostaje domyślnym rozwiązaniem zgodnym ze starszymi wersjami.",
+    "endpointTabsAria": "Możliwość kombinacji",
+    "endpointChatTargetRequired": "Dodaj co najmniej jeden cel czatu, aby kombinacja była zgodna z klientami.",
+    "endpointWeightedRouteTotalInvalid": "Każda trasa zdolności ważonej musi mieć całkowitą wagę 100%.",
+    "endpointTabs": {
+      "chat": "Pogawędzić",
+      "search": "Szukaj",
+      "web-fetch": "Aportować",
+      "embeddings": "Osadzenia",
+      "rerank": "Zmień rangę",
+      "images": "Obrazy",
+      "image-edits": "Edycje obrazu",
+      "videos": "Wideo",
+      "music": "Muzyka",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Tłumaczenie audio",
+      "audio-generation": "Generacja dźwięku"
+    }
   },
   "costs": {
     "title": "Koszty",

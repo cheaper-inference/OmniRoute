@@ -4423,7 +4423,28 @@
     "duplicateAutoComboSnapshotMsg": "See salvestab hetkel ühendatud ja sellele mallile vastavad teenusepakkujad/mudelid redigeeritavasse kombinatsiooni.",
     "duplicateAutoComboFailedPrefix": "Automaatse kombinatsiooni dubleerimine ebaõnnestus:",
     "duplicateAutoComboUnknownError": "Tundmatu viga",
-    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon"
+    "duplicateAutoComboTitle": "Loo automaatsest kombinatsioonist {name} staatiline kombinatsioon",
+    "endpointBehaviorTitle": "Lõpp-punkti käitumine",
+    "endpointBehaviorDescription": "Konfigureerige sihtmärgid ja marsruutimisstrateegia iga API võime jaoks eraldi. Tühje võimalusi ei salvestata. Vestlus jääb pärandühilduvaks vaikeseadeks.",
+    "endpointTabsAria": "Kombineeritud võime",
+    "endpointChatTargetRequired": "Lisage vähemalt üks vestluse sihtmärk, et kombinatsioon oleks klientidega ühilduv.",
+    "endpointWeightedRouteTotalInvalid": "Iga kaalutud võimete marsruudi kogukaal peab olema 100%.",
+    "endpointTabs": {
+      "chat": "Vestlus",
+      "search": "Otsi",
+      "web-fetch": "Too",
+      "embeddings": "Manused",
+      "rerank": "Reastada ümber",
+      "images": "Pildid",
+      "image-edits": "Pilditöötlused",
+      "videos": "Video",
+      "music": "Muusika",
+      "ocr": "OCR",
+      "audio-speech": "TTS",
+      "audio-transcriptions": "STT",
+      "audio-translations": "Heli tõlge",
+      "audio-generation": "Heli genereerimine"
+    }
   },
   "costs": {
     "title": "Kulud",

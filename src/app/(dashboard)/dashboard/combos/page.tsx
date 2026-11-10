@@ -154,23 +154,6 @@ const ProxyConfigModal = dynamic(() => import("@/shared/components/ProxyConfigMo
 
 const VALID_NAME_REGEX = /^[a-zA-Z0-9_/.\-\[\] ]+$/;
 
-const COMBO_ENDPOINT_LABELS: Record<ComboEndpoint, string> = {
-  chat: "Chat",
-  search: "Search",
-  "web-fetch": "Fetch",
-  embeddings: "Embeddings",
-  rerank: "Rerank",
-  images: "Images",
-  "image-edits": "Image edits",
-  videos: "Video",
-  music: "Music",
-  ocr: "OCR",
-  "audio-speech": "TTS",
-  "audio-transcriptions": "STT",
-  "audio-translations": "Audio translation",
-  "audio-generation": "Sound generation",
-};
-
 const COMBO_ENDPOINT_MODEL_TAGS: Record<ComboEndpoint, string[]> = {
   chat: ["chat", "responses", "messages", "completions"],
   search: ["search"],
@@ -3475,14 +3458,14 @@ function ComboFormModal({
     };
     const chatDraft = drafts.chat;
     if (!chatDraft || chatDraft.models.length === 0) {
-      setBuilderError("Add at least one Chat target to keep the combo compatible with clients.");
+      setBuilderError(t("endpointChatTargetRequired"));
       return;
     }
     for (const draft of Object.values(drafts)) {
       if (!draft || draft.models.length === 0 || draft.strategy !== "weighted") continue;
       const total = draft.models.reduce((sum, entry) => sum + (entry.weight || 0), 0);
       if (total !== 100) {
-        setBuilderError("Every weighted capability route must have a total weight of 100%.");
+        setBuilderError(t("endpointWeightedRouteTotalInvalid"));
         return;
       }
     }
@@ -3610,13 +3593,12 @@ function ComboFormModal({
         <div className="flex flex-col gap-3">
           <div className="rounded-lg border border-border bg-surface p-3">
             <div className="mb-2">
-              <p className="text-xs font-semibold text-text-main">Endpoint behavior</p>
+              <p className="text-xs font-semibold text-text-main">{t("endpointBehaviorTitle")}</p>
               <p className="mt-0.5 text-[10px] text-text-muted">
-                Configure targets and routing strategy independently for each API capability. Empty
-                capabilities are not saved. Chat remains the legacy-compatible default.
+                {t("endpointBehaviorDescription")}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2" role="tablist" aria-label="Combo capability">
+            <div className="flex flex-wrap gap-2" role="tablist" aria-label={t("endpointTabsAria")}>
               {COMBO_ENDPOINTS.map((endpoint) => {
                 const configured =
                   endpoint === activeEndpoint
@@ -3632,7 +3614,7 @@ function ComboFormModal({
                     size="sm"
                     onClick={() => switchCapability(endpoint)}
                   >
-                    {COMBO_ENDPOINT_LABELS[endpoint]}
+                    {t(`endpointTabs.${endpoint}`)}
                     {configured ? " •" : ""}
                   </Button>
                 );
