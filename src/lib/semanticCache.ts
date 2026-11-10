@@ -591,39 +591,43 @@ export function isCacheableForWrite(body, headers) {
  */
 const TRUNCATED_FINISH_REASONS = new Set(["length", "max_tokens"]);
 
+type CompletionChoice = {
+  finish_reason?: unknown;
+  message?: { tool_calls?: Array<{ function?: { arguments?: unknown } }> };
+};
+
+function isTruncatedReason(reason: unknown): boolean {
+  return typeof reason === "string" && TRUNCATED_FINISH_REASONS.has(reason);
+}
+
+// A cut tool call can reach this point relabelled `tool_calls` (the response
+// sanitizer and the streaming accumulator set it whenever calls exist). Its
+// arguments are then not a complete JSON object. Empty arguments are a no-arg call.
+function hasCutToolCallArguments(choice: CompletionChoice | null | undefined): boolean {
+  const toolCalls = choice?.message?.tool_calls;
+  if (!Array.isArray(toolCalls)) return false;
+  return toolCalls.some((call) => {
+    const args = call?.function?.arguments;
+    return typeof args === "string" && !isCompleteToolCallArguments(args, true);
+  });
+}
+
+function isTruncatedChoice(choice: CompletionChoice | null | undefined): boolean {
+  return isTruncatedReason(choice?.finish_reason) || hasCutToolCallArguments(choice);
+}
+
 export function isTruncatedCompletion(response: unknown): boolean {
   if (!response || typeof response !== "object") return false;
   const r = response as {
-    choices?: Array<{
-      finish_reason?: unknown;
-      message?: { tool_calls?: Array<{ function?: { arguments?: unknown } }> };
-    }>;
+    choices?: Array<CompletionChoice>;
     stop_reason?: unknown;
     status?: unknown;
   };
-  if (Array.isArray(r.choices)) {
-    for (const choice of r.choices) {
-      const reason = choice?.finish_reason;
-      if (typeof reason === "string" && TRUNCATED_FINISH_REASONS.has(reason)) return true;
-      // A cut tool call can reach this point relabelled `tool_calls` (the response
-      // sanitizer and the streaming accumulator set it whenever calls exist). Its
-      // arguments are then not a complete JSON object. Empty arguments are a no-arg call.
-      const toolCalls = choice?.message?.tool_calls;
-      if (Array.isArray(toolCalls)) {
-        for (const call of toolCalls) {
-          const args = call?.function?.arguments;
-          if (typeof args === "string" && !isCompleteToolCallArguments(args, true)) return true;
-        }
-      }
-    }
-  }
+  if (Array.isArray(r.choices) && r.choices.some(isTruncatedChoice)) return true;
   // Responses-format replies report a cut turn as `status: "incomplete"`.
   if (r.status === "incomplete") return true;
   // Claude-format responses carry the reason at the top level instead.
-  if (typeof r.stop_reason === "string" && TRUNCATED_FINISH_REASONS.has(r.stop_reason)) {
-    return true;
-  }
-  return false;
+  return isTruncatedReason(r.stop_reason);
 }
 
 /**
