@@ -138,15 +138,18 @@ function rewriteChatChunk(chunk: unknown, state: SseChunkState): boolean {
 
   let changed = false;
   for (const choice of choices) {
-    const delta = asRecord(asRecord(choice)?.delta);
+    const choiceRecord = asRecord(choice);
+    const delta = asRecord(choiceRecord?.delta);
     if (!delta) continue;
     if (nonEmptyString(delta.reasoning_content) || nonEmptyString(delta.reasoning)) {
       state.sawReasoningContent = true;
     }
-    if (typeof delta.content !== "string") continue;
+    // Clients stop reading at finish_reason, so a held partial tag has to leave here.
+    const finishing = choiceRecord?.finish_reason != null;
+    if (typeof delta.content !== "string" && !finishing) continue;
 
-    const original = delta.content;
-    const visible = state.filter.push(original);
+    const original = typeof delta.content === "string" ? delta.content : "";
+    const visible = state.filter.push(original) + (finishing ? state.filter.flush() : "");
 
     // Only when the gateway never sent reasoning_content on its own channel:
     // hand the stripped block to the client as reasoning, exactly once.
@@ -210,7 +213,11 @@ export function createInfCodeSseTransform(): TransformStream<Uint8Array, Uint8Ar
     const match = line.match(/^(data:\s?)(.*)$/);
     if (!match) return line;
     const payload = match[2];
-    if (payload.trim() === "[DONE]") return line;
+    if (payload.trim() === "[DONE]") {
+      // Anything framed after [DONE] is discarded by the reader.
+      const tail = state.filter.flush();
+      return tail ? `data: ${buildTailChunk(tail, envelope)}\n\n${line}` : line;
+    }
     let parsed: unknown;
     try {
       parsed = JSON.parse(payload);

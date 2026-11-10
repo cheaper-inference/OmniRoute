@@ -194,6 +194,29 @@ test("SSE: promotes the stripped thinking when reasoning_content is absent", asy
   assert.equal(joinDelta(chunks, "reasoning_content"), "\nWe need help.\n");
 });
 
+test("SSE: a held partial tag is delivered with the finish chunk, before [DONE]", async () => {
+  const { raw, chunks } = await rewriteSse([
+    toSse([
+      chunk({ content: "Use Array<T" }),
+      { ...BASE, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] },
+    ]),
+  ]);
+
+  assert.equal(joinDelta(chunks, "content"), "Use Array<T");
+  const finishIndex = chunks.findIndex(
+    (item) => (item.choices as JsonRecord[])[0].finish_reason === "stop"
+  );
+  assert.equal(finishIndex, chunks.length - 1, "no content frame may follow the finish chunk");
+  assert.ok(raw.lastIndexOf("<T") < raw.indexOf("[DONE]"));
+});
+
+test("SSE: without a finish chunk the held text still precedes [DONE]", async () => {
+  const { raw, chunks } = await rewriteSse([toSse([chunk({ content: "ends with <" })])]);
+
+  assert.equal(joinDelta(chunks, "content"), "ends with <");
+  assert.ok(raw.lastIndexOf('<"') < raw.indexOf("[DONE]"));
+});
+
 test("non-stream: strips the block and preserves reasoning_content", () => {
   const payload = {
     choices: [
