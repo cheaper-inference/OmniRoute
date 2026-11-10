@@ -1,5 +1,6 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
+import { SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED_FLAG } from "./featureFlagDefinitionsSystemOne";
 
 export type { FeatureFlagDefinition };
 
@@ -1433,4 +1434,5 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED_FLAG,
 ];

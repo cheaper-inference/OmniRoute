@@ -7,7 +7,10 @@ import {
   handleSystemOneProxy,
   type SystemOneCredentials,
 } from "@omniroute/open-sse/handlers/systemOne.ts";
-import { resolveSystemOneTarget } from "@omniroute/open-sse/config/systemOneRegistry.ts";
+import {
+  resolveSystemOneTarget,
+  type SystemOneTarget,
+} from "@omniroute/open-sse/config/systemOneRegistry.ts";
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
@@ -28,6 +31,7 @@ import {
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
+import { isSystemOneCloudflareBackendEnabled } from "@/shared/utils/featureFlags";
 
 function optionsResponse() {
   return new Response(null, {
@@ -48,6 +52,37 @@ export function systemOneModelsGet(pathname: string) {
     });
 }
 
+/**
+ * Decisions backend for the request model, or the 400 to return: unknown model,
+ * or a Cloudflare model while its default-off backend flag is off (#16676).
+ */
+function resolveEnabledTarget(
+  model: string | undefined
+): { target: SystemOneTarget } | { rejection: Response } {
+  const target = resolveSystemOneTarget(model);
+  if (!target) {
+    return {
+      rejection: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `Unknown decisions model: ${model ?? "(missing)"}. Use "typesafe/<model>", ` +
+          `a bare jev-* alias, "openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models, ` +
+          `or "cloudflare-ai/<jev|clef|clef-flash>" for Cloudflare Workers AI ` +
+          `(needs the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag).`
+      ),
+    };
+  }
+  if (target.backend === "cloudflare" && !isSystemOneCloudflareBackendEnabled()) {
+    return {
+      rejection: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `Decisions model ${model} needs the Cloudflare Workers AI backend, which is off. ` +
+          `Enable the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag to use it.`
+      ),
+    };
+  }
+  return { target };
+}
+
 async function postHandler(request: Request): Promise<Response> {
   let rawBody: unknown;
   try {
@@ -63,14 +98,9 @@ async function postHandler(request: Request): Promise<Response> {
   const body = validation.data;
   const model = typeof body.model === "string" ? body.model.trim() : undefined;
 
-  const target = resolveSystemOneTarget(model);
-  if (!target) {
-    return errorResponse(
-      HTTP_STATUS.BAD_REQUEST,
-      `Unknown decisions model: ${model ?? "(missing)"}. Use "typesafe/<model>", ` +
-        `a bare jev-* alias, or "openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models.`
-    );
-  }
+  const resolved = resolveEnabledTarget(model);
+  if ("rejection" in resolved) return resolved.rejection;
+  const { target } = resolved;
 
   const policy = await enforceApiKeyPolicy(request, model ?? target.upstreamModel);
   if (policy.rejection) return policy.rejection;
