@@ -219,76 +219,114 @@ base64url карактера; чува се само његов SHA-256 хеш. 
 
 ## 3. Zaključavanje modela
 
-**Opseg:** trojka provajder + konekcija + model.
+**Opseg:** trojka provajder + veza + model.
 
-**Opseg ključa prema statusu:** status koji je prouzrokovao neuspeh određuje pod kojim ključem se zaključavanje upisuje (`resolveLockoutScope()` u `open-sse/services/accountFallback/exactModelLock.ts`):
+**Opseg prema statusu:** status greške određuje u koji ključ zaključavanje upisuje
+(`resolveLockoutScope()` u `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — signal kvote ili prava korišćenja — zaključava **porodicu kvota**: za codex ceo opseg `codex` / `spark` (svaki `gpt-5*` model te konekcije), za ostale provajdere `getQuotaScopedModelForProvider()`.
-- `404` zaključava sam konkretan model (`getModelLockKey()` sužava `not_found`).
-- Svaki drugi status — `5xx` transportne/serverske greške i OmniRoute-ov sopstveni sintetisani `502` iz validacije kvaliteta — zaključava samo **tačnu** torku provajder/konekcija/model. Loš stream na jednom modelu nije dokaz o kvoti naloga; pre ovog pravila jedan prazan odgovor na `codex/gpt-5.6-luna` uklanjao je svaki `gpt-5*` model te konekcije iz rutiranja na 2–30 min (eskalirajuće), dok je njegova kvota ostajala netaknuta.
+- `429` / `403` / `402` — signal kvote ili prava pristupa — zaključava **porodicu kvota**:
+  za codex ceo opseg `codex` / `spark` (svaki `gpt-5*` model te veze), a za
+  druge provajdere `getQuotaScopedModelForProvider()`.
+- `404` zaključava osnovni model (`getModelLockKey()` sužava opseg
+  `not_found`).
+- Bilo koji drugi status — `5xx` greške prenosa/servera i OmniRoute-ov sopstveni
+  sintetizovani `502` iz validacije kvaliteta — zaključava samo **tačnu**
+  kombinaciju provajdera/veze/modela. Neuspešan tok jednog modela nije dokaz o
+  kvoti naloga; pre ovog pravila jedan prazan odgovor na
+  `codex/gpt-5.6-luna` uklanjao je svaki `gpt-5*` model te veze iz rutiranja na
+  2–30 min (uz eskalaciju), dok je njena kvota ostajala netaknuta.
 - Eksplicitna opcija `scope` pozivaoca uvek ima prednost (Antigravity prosleđuje `"exact"`).
 
-**Svrha:** izbeći onemogućavanje cele konekcije kada je samo jedan model nedostupan ili ograničen kvotom.
+**Svrha:** izbeći onemogućavanje cele veze kada je nedostupan ili ograničen kvotom samo jedan model.
 
 **Primeri:**
 
-- Provajderi sa kvotom po modelu koji vraćaju 429
-- Lokalni provajderi koji vraćaju 404 za jedan nedostajući model
-- Greške dozvola za režim/model specifične za provajdera (npr. Grok režimi)
+- Provajderi sa kvotama po modelu koji vraćaju 429
+- Lokalni provajderi koji vraćaju 404 za jedan model koji nedostaje
+- Neuspešna provera dozvola specifična za provajdera/režim/model (npr. režimi za Grok)
 
 **Implementacija:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Kontrolna tabla hlađenja modela (v3.8.0)
+### Kontrolna tabla perioda hlađenja modela (v3.8.0)
 
-UI: Podešavanja → Hlađenja modela (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+Interfejs: Podešavanja → Periodi hlađenja modela (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Prikazuje aktivna zaključavanja sa: provajder, konekcija, model, razlog, expiresAt. Operatori mogu ručno ponovo omogućiti model sa kartice.
+Navodi aktivna zaključavanja sa podacima: provajder, veza, model, razlog, expiresAt. Operateri mogu ručno ponovo da omoguće model sa kartice.
 
 **REST API:**
 
-- `GET /api/resilience/model-cooldowns` — prikazuje aktivna zaključavanja
-- `DELETE /api/resilience/model-cooldowns` — ručno ponovno omogućavanje. Telo: `{provider, connection, model}`. Autentikacija: management.
+- `GET /api/resilience/model-cooldowns` — navodi aktivna zaključavanja
+- `DELETE /api/resilience/model-cooldowns` — ručno ponovno omogućavanje. Telo: `{provider, connection, model}`. Autentifikacija: upravljanje.
 
-### Upravitelj hlađenja
+### Upravljač periodima hlađenja
 
-UI: Praćenje → Upravitelj hlađenja (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+Interfejs: Nadzor → Upravljač periodima hlađenja (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-Jedna stranica za svaku konekciju koja je van rutiranja iz prolaznog razloga, umesto otvaranja stranice svakog provajdera. Prikazuje hlađenja konekcija, zaključavanja modela i terminalna stanja, briše ih po konekciji, za izabrani skup ili za sve konekcije jednog provajdera, i uređuje najčešće podešavana pravila hlađenja: `streamStallCooldown.enabled` i osnovno hlađenje `connectionCooldown` za OAuth / API-ključ kao i maksimalne korake backoff-a (čuva se kroz `PATCH /api/resilience`). Terminalna stanja (`banned`, `expired`, `credits_exhausted`) se prikazuju, ali se ovde nikada ne brišu.
+Jedna stranica za svaku vezu koja je van rutiranja iz privremenog razloga, umesto
+otvaranja stranice svakog provajdera. Navodi periode hlađenja veza, zaključavanja
+modela i terminalna stanja, uklanja ih po vezi, za izabrane veze ili za sve veze
+jednog provajdera i uređuje najčešće podešavana pravila perioda hlađenja:
+`streamStallCooldown.enabled` i osnovni period hlađenja `connectionCooldown` za OAuth /
+API ključ, kao i maksimalan broj koraka eksponencijalnog povratnog čekanja (čuva se
+putem `PATCH /api/resilience`). Terminalna stanja (`banned`, `expired`, `credits_exhausted`) su
+navedena, ali se ovde nikada ne uklanjaju.
 
-**REST API** (`src/lib/resilience/cooldownManager.ts`, autentikacija: management):
+Kartica **Pravila perioda hlađenja za greške** na istoj stranici uređuje pravila
+grešaka operatera (`settings.providerErrorRules`) i podrazumevane opšte vrednosti
+po provajderu (`settings.providerErrorDefaults`) putem `PATCH /api/settings` — pogledajte
+„Pravila koja je deklarisao operater“ u odeljku §7 za način njihovog uparivanja. Trajanja
+su Podrazumevano (bez eksplicitnog perioda hlađenja), 30 min, 1 h, 5 h, 24 h ili
+prilagođeno od 1 do 43.200 minuta (30 dana).
 
-- `GET /api/resilience/cooldowns[?provider=]` — konekcije sa statusom, preostalim hlađenjem, nivoom backoff-a, tipom poslednje greške i zaključavanjima modela (bez kredencijala)
+**REST API** (`src/lib/resilience/cooldownManager.ts`, autentifikacija: upravljanje):
+
+- `GET /api/resilience/cooldowns[?provider=]` — veze sa statusom, preostalim periodom hlađenja,
+  nivoom povratnog čekanja, poslednjim tipom greške i zaključavanjima modela (bez akreditiva)
 - `POST /api/resilience/cooldowns` — telo `{connectionIds: string[]}` ili
   `{all: true, provider?}`; vraća `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### UI podešavanja zaključavanja + oporavak slabljenjem pri uspehu (v3.8.23)
+### Interfejs podešavanja zaključavanja + oporavak smanjenjem nakon uspeha (v3.8.23)
 
-Zaključavanje modela je prešlo sa uvek uključenog, hardkodovanog ponašanja na potpuno podesivu, opt-in funkciju sa sopstvenom karticom podešavanja i putanjom samoisceljujućeg oporavka.
+Zaključavanje modela prešlo je sa ponašanja koje je uvek bilo uključeno i
+hardkodovano na potpuno podesivu, opcionalnu funkciju sa sopstvenom karticom
+podešavanja i putanjom za samoisceljujući oporavak.
 
 **Kartica podešavanja:** Podešavanja → Zaključavanje modela
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Ovo je **različito** od gornje kartice `ModelCooldownsCard` koja je samo za čitanje (koja samo _prikazuje_ aktivna zaključavanja) — nova kartica _podešava parametre_. Podrazumevane vrednosti se nalaze u `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+Ovo je **različito** od kartice samo za čitanje `ModelCooldownsCard` iznad (koja samo
+_navodi_ aktivna zaključavanja) — nova kartica _podešava parametre_. Podrazumevane
+vrednosti se nalaze u `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
 | Podešavanje             | Podrazumevano                    | Značenje                                                                |
 | ----------------------- | -------------------------------- | ----------------------------------------------------------------------- |
 | `enabled`               | `false`                          | Glavni prekidač — zaključavanje modela je **podrazumevano isključeno**. |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Upstream statusi koji se računaju kao neuspeh u opsegu modela.          |
-| `baseCooldownMs`        | `120_000` (120 s)                | Početno trajanje zaključavanja za prvi neuspeh.                         |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Gornja granica eskaliranog hlađenja.                                    |
-| `maxBackoffSteps`       | `10`                             | Maksimalan broj koraka eskalacije eksponencijalnog backoff-a.           |
-| `useExponentialBackoff` | `true`                           | Da li ponovljeni neuspesi eksponencijalno eskaliraju hlađenje.          |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Statusi uzvodnog sistema koji se računaju kao greška opsega modela.     |
+| `baseCooldownMs`        | `120_000` (120 s)                | Početno trajanje zaključavanja pri prvom neuspehu.                      |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Ograničenje eskaliranog perioda hlađenja.                               |
+| `maxBackoffSteps`       | `10`                             | Maksimalan broj koraka eskalacije eksponencijalnog povratnog čekanja.   |
+| `useExponentialBackoff` | `true`                           | Da li ponovljeni neuspesi eksponencijalno povećavaju period hlađenja.   |
 
-Podešavanja se trajno čuvaju kroz uobičajeno skladište podešavanja i validiraju putem šeme podešavanja otpornosti; kartica ograničava `baseCooldownMs`/`maxCooldownMs`
-(uz `maxCooldownMs ≥ baseCooldownMs`) i `maxBackoffSteps`.
+Podešavanja se čuvaju kroz uobičajeno skladište podešavanja i proveravaju prema
+šemi podešavanja otpornosti; kartica ograničava `baseCooldownMs`/`maxCooldownMs`
+(tako da važi `maxCooldownMs ≥ baseCooldownMs`) i `maxBackoffSteps`.
 
-**Oporavak slabljenjem pri uspehu:** oporavak **nije** čisto istek tajmera. Zdrav odgovor smanjuje brojač neuspeha modela, tako da model koji se oporavio usred prozora prestaje da eskalira (i biva otključan) pre nego što bi njegov tajmer istekao. Pri uspešnom combo cilju, `open-sse/services/combo.ts` poziva `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), koja **prepolovljava** sačuvani
-`failureCount` (`Math.floor(failureCount / 2)`); kada dostigne `0`, unos zaključavanja se u potpunosti briše. Pandan `recordModelLockoutFailure()` uvećava brojač (i eskalira hlađenje) pri neuspesima unutar prozora eskalacije. Ovo slabljenje pri uspehu je dodatak običnom isteku tajmera — bilo koja od dve putanje može ponovo omogućiti model.
+**Oporavak smanjenjem nakon uspeha:** oporavak se ne zasniva **isključivo** na
+isteku tajmera. Zdrav odgovor smanjuje broj neuspeha modela, tako da model koji se
+oporavio usred perioda prestaje da eskalira (i otključava se) pre isteka tajmera.
+Nakon uspešne kombinacije ciljeva, `open-sse/services/combo.ts` poziva
+`decayModelFailureCount()` (`open-sse/services/accountFallback.ts`), što
+**prepolovljava** sačuvani `failureCount` (`Math.floor(failureCount / 2)`); kada
+dostigne `0`, unos zaključavanja se u potpunosti briše. Suprotna funkcija
+`recordModelLockoutFailure()` povećava broj (i eskalira period hlađenja) pri
+neuspesima unutar prozora eskalacije. Ovo smanjenje nakon uspeha predstavlja
+dodatak običnom isteku tajmera — bilo koji od ta dva puta može ponovo da omogući
+model.
 
-**Stanje:** zaključavanja se drže **u memoriji** (`Map` strukture po procesu sa
-`ModelLockoutEntry` ključevanim po `provider:connectionId:model`, a zaključavanja tačnog opsega po
-`provider:connectionId:exact:model`), ne čuvaju se trajno u bazi — gube se pri restartu. _Podešavanja_ se trajno čuvaju; aktivno _stanje_ zaključavanja je efemerno.
+**Stanje:** blokade se čuvaju **u memoriji** (kao `Map` objekti po procesu, sa ključevima `ModelLockoutEntry` u obliku
+`provider:connectionId:model`, dok brave za tačan opseg koriste ključeve
+`provider:connectionId:exact:model`), a ne u bazi podataka — gube se nakon
+ponovnog pokretanja. _Postavke_ se čuvaju; aktivno _stanje blokade_ je prolazno.
 
 ---
 
@@ -485,252 +523,303 @@ Zaštita od ograničenja brzine po konekciji prati se putem bulovskog polja `rat
 
 ---
 
-## 7. Preformulisanje statusa upstream-a (pogrešno prijavljene greške kvote)
+## 7. Ponovno postavljanje statusa upstream-a (pogrešno navedene greške kvote)
 
-**Opseg:** jedan upstream gateway koji prijavljuje privremeno iscrpljenje kvote pogrešnim HTTP statusom.
+**Obuhvat:** jedan upstream gateway koji prijavljuje privremenu iscrpljenost kvote pogrešnim HTTP statusom.
 
-**Svrha:** ispraviti zavodljiv status PRE klasifikacije, tako da downstream potrošači (fallback engine, combo agregacija, odgovor okrenut klijentu) vide pravu prirodu greške koja dopušta ponovni pokušaj.
+**Svrha:** ispraviti status koji dovodi u zabludu PRE klasifikacije, kako bi downstream potrošači (fallback engine, agregacija kombinacija, odgovor namenjen klijentu) videli stvarnu mogućnost ponovnog pokušaja.
 
-Neki gateway-i signaliziraju PRIVREMENO iscrpljenje kvote HTTP statusom
-koji ne dopušta ponovni pokušaj. `agentrouter.org` vraća `403` (ponekad `400`)
-sa telom na kineskom (`用户额度不足` / `额度不足`) umesto standardnog `429`.
-Klijenti poput Claude Code tretiraju `403` kao trajnu grešku i prekidaju
-sesiju, a bez korekcije bi je fallback engine klasifikovao kao `AUTH_ERROR`
-umesto kao događaj kvote.
+Neki gateway-i signaliziraju PRIVREMENU iscrpljenost kvote HTTP statusom koji ne
+dozvoljava ponovni pokušaj. `agentrouter.org` vraća `403` (ponekad `400`) sa
+kineskim telom (`用户额度不足` / `额度不足`) umesto standardnog `429`. Klijenti
+kao što je Claude Code tretiraju `403` kao trajnu grešku i prekidaju sesiju, a bez
+ispravke bi fallback engine klasifikovao grešku kao `AUTH_ERROR`, umesto kao
+događaj povezan sa kvotom.
 
 **Implementacija:**
 
 - Registar + matcher: `open-sse/config/upstreamStatusRestatement.ts` — lista
   pravila po provajderu (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), upoređivanih putem `applyStatusRestatement()`.
+excludeMarkers, defaultRetryAfterMs}`), koja se podudaraju pomoću `applyStatusRestatement()`.
 - Mesto poziva: blok `providerFailure:` u `open-sse/handlers/chatCore.ts`
-  (oko linije 3654), odmah nakon što `parseUpstreamError()` parsira upstream
-  odgovor sa HTTP statusom greške (`!providerResponse.ok`), a pre nego što se
-  pokrene bilo kakva klasifikacija, tako da svaki downstream potrošač vidi
-  ispravljeni status. Greške ugrađene unutar `200` SSE toka prate poseban,
-  kasniji put parsiranja toka i danas **nisu** obuhvaćene ovim hook-om —
-  poznato ograničenje, koje za agentrouterov pogrešan status još nije
-  potrebno (on se pojavljuje kao HTTP status greške).
+  (oko linije 3654), neposredno nakon što `parseUpstreamError()` obradi upstream
+  odgovor sa HTTP statusom greške (`!providerResponse.ok`), a pre pokretanja bilo
+  kakve klasifikacije, tako da svaki downstream potrošač vidi ispravljeni status.
+  Greške ugrađene u `200` SSE tok prate zasebnu, kasniju putanju za parsiranje toka
+  i danas **nisu** obuhvaćene ovom tačkom integracije — to je poznato ograničenje,
+  koje trenutno nije potrebno za pogrešan status agentrouter-a (koji se pojavljuje
+  kao HTTP status greške).
 - Podobnost za ponovni pokušaj: `429` se nalazi u
   `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), tako da preformulisana
-  greška nosi stvarni prozor za ponovni pokušaj umesto da se pojavi kao
-  mrtav `403`.
-- Sintetički `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  je samo ono što preformulisani odgovor saopštava **klijentu**; on sam
-  nije interno trajanje cooldown-a/lockout-a veze — time posebno upravlja
-  onaj mehanizam koji stvarno obrađuje preformulisanu grešku (escalating
-  backoff mehanizma Connection Cooldown, §2, osnovnih `3s` za provajdere sa
-  API ključem; ili Model Lockout, §3, za provajdere sa kvotom po modelu
-  poput agentrouter-a). Ruter interno može postati podoban za ponovni
-  pokušaj ranije od prozora od 60s koji oglašava klijentu — namerna
-  rezerva, ne greška.
+  (`open-sse/services/combo/unavailableRetryGate.ts`), pa ispravljena greška
+  nosi stvarni prozor za ponovni pokušaj, umesto da se prikazuje kao neaktivni
+  `403`.
+- Sintetički `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`) samo
+  je vrednost koju ispravljeni odgovor saopštava **klijentu**; ona sama nije
+  interno trajanje hlađenja/blokade konekcije — njime zasebno upravlja mehanizam
+  koji zaista obrađuje ispravljenu grešku (Connection Cooldown sa rastućim
+  backoff-om, §2, osnovnih `3s` za provajdere API ključeva; ili Model Lockout, §3,
+  za provajdere sa kvotom po modelu, kao što je agentrouter). Router interno može
+  postati podoban za ponovni pokušaj pre isteka prozora od 60s koji oglašava
+  klijentu — to je namerno obezbeđivanje rezerve, a ne greška.
 
-Trajne greške (agentrouterov `无权访问模型` — nema pristupa ovom modelu) se
-NIKAD ne preformulišu: `excludeMarkers` stavlja veto na pravilo čak i kada
-`textMarkers` pogode, tako da greška zadržava svoj originalni status i ništa
-je ne ponavlja zauvek. Odgovarajuće pravilo klasifikacije provajdera
+Trajne greške (`无权访问模型` — nema pristupa ovom modelu) se NIKADA ne
+ispravljaju: `excludeMarkers` poništava pravilo čak i kada se `textMarkers`
+podudare, pa greška zadržava svoj prvobitni status i ništa je ne pokušava ponovo
+u nedogled. Odgovarajuće pravilo klasifikacije provajdera
 (`agentrouter-model-access-denied` u `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, deklarisani osnovni cooldown od
-`6h`) konsultuje `checkFallbackError` (`open-sse/services/accountFallback.ts`)
-_pre_ generičkog ranog izlaska (early-return) `FORBIDDEN` kategorije apikey,
-uslovljeno sa `honorsRuleLockScope(provider)` (#10334 — trenutno ekskluzivno
-za agentrouter preko allowlist-e `HONORS_RULE_LOCK_SCOPE_PROVIDERS` u
-`providerErrorRules.ts`). Deklarisani cooldown pravila od 6h teče dalje kao
-`fallbackResult.baseCooldownMs`, ali i dalje hrani postojeći put lockout-a
-kvote po modelu (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, nepromenjen sa #10334 osim izvora
-cooldown-a): on se obara na operatorov `mlSettings.maxCooldownMs`
-(podrazumevano `1_800_000ms` / 30min), kao i svaki drugi lockout modela, a
-_perzistirani razlog lockout-a_ ostaje postojeći hardkodirani `"forbidden"`,
-ne `"auth_error"` iz pravila — samo se trajanje cooldown-a poštuje s kraja
-na kraj, ne i string razloga. Sama veza ostaje aktivna; ostali modeli na
-istoj vezi nisu pogođeni.
+`reason: "auth_error"`, `scope: "model"`, deklarisano osnovno hlađenje od `6h`)
+proverava `checkFallbackError` (`open-sse/services/accountFallback.ts`)
+_pre_ generičkog ranog vraćanja za kategoriju apikey `FORBIDDEN`, uz uslov
+`honorsRuleLockScope(provider)` (#10334 — trenutno ekskluzivno za agentrouter
+putem liste dozvoljenih provajdera `HONORS_RULE_LOCK_SCOPE_PROVIDERS` u
+`providerErrorRules.ts`). Deklarisano hlađenje od 6h iz pravila prosleđuje se
+kao `fallbackResult.baseCooldownMs`, ali se i dalje koristi postojeća putanja
+blokade po modelu za kvotu (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, koju #10334 nije promenio osim izvora trajanja
+hlađenja): ono se ograničava na vrednost `mlSettings.maxCooldownMs` operatora
+(podrazumevano `1_800_000ms` / 30min), kao i svaka druga blokada modela, a
+_persisted lockout reason_ ostaje postojeća hardkodovana vrednost `"forbidden"`,
+a ne `"auth_error"` iz pravila — kroz ceo tok uvažava se samo trajanje hlađenja,
+ne i tekst razloga. Sama konekcija ostaje aktivna; povezani modeli na istoj
+konekciji nisu pogođeni.
 
-Preformulisane greške kvote (`额度不足`) u produkciji dopiru do pravila
-provajdera (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`,
-`scope: "connection"`, bez sopstvenog deklarisanog cooldown-a — primenjuje
-se podrazumevani skalirani backoff sloja perzistencije). Od #10334, `scope`
-na `ProviderErrorRuleMatch` SE konzumira s kraja na kraj, ali **samo** za
-provajdere na allowlist-i `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-(`providerErrorRules.ts` — danas samo `"agentrouter"`, uslovljeno preko
-`honorsRuleLockScope()`). Za svaki drugi provajder `scope` ostaje
-informativan, tačno kao pre #10334. `checkFallbackError` iznosi opseg
-uparenog pravila kao `fallbackResult.ruleScope`;
-`isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) je
-zajednički guard koji potvrđuje da je `ruleScope` zaista bezbedno poštovati
-kao signal za celu vezu koji se sam oporavlja (scope `"connection"`, reason
-`quota_exhausted`, nikad `permanent`, nikad `creditsExhausted` — odbrana od
-budućeg pravila koje bi uparilo scope `"connection"` sa trajnim stanjem
-naloga). Dva potrošača ga pozivaju:
+Ispravljene greške kvote (`额度不足`) u produkciji dolaze do pravila provajdera
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, bez sopstvenog deklarisanog hlađenja — primenjuje se podrazumevani
+skalirani backoff sloja za perzistenciju). Od #10334, `scope` u
+`ProviderErrorRuleMatch` SE koristi kroz ceo tok, ali **samo** za provajdere na
+listi dozvoljenih `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+(`providerErrorRules.ts` — danas samo `"agentrouter"`, uz uslov
+`honorsRuleLockScope()`). Za sve druge provajdere `scope` ostaje informativan,
+upravo kao i pre #10334. `checkFallbackError` izlaže obuhvat podudarnog pravila
+kao `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) je zajednička provera koja potvrđuje da je
+`ruleScope` zaista bezbedno uvažiti kao signal koji važi za celu konekciju i
+omogućava samostalni oporavak (obuhvat `"connection"`, razlog
+`quota_exhausted`, nikada `permanent`, nikada `creditsExhausted` — zaštita od
+budućeg uparivanja obuhvata `"connection"` sa trajnim stanjem naloga). Pozivaju
+je dva potrošača:
 
 - **Перзистенција** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  уместо да упадне у грану **per-model** блокаде за passthrough провајдера
-  (agentrouter је `passthroughModels: true` → `hasPerModelQuota()`
-  враћа `true`), примењује **привремено хлађење конекције** —
+  уместо да пређе у грану за **закључавање по моделу** passthrough-провајдера
+  (agentrouter има `passthroughModels: true` → `hasPerModelQuota()`
+  враћа `true`), примењује **привремени cooldown везе** —
   `testStatus: "unavailable"` + `rateLimitedUntil`, никада терминални статус
-  (`credits_exhausted`/`banned`/`expired`) — тако да се конекција сама
-  опорави када хлађење истекне уместо да захтева ручни ресет креденцијала.
-  Прескаче се за конекције са `disableCooling: true` (#2997): то одустајање
-  уместо тога прелази на per-model блокаду (документован компромис —
-  погледајте коментар кода изнад гране).
-- **Рутирање комбинације у оквиру истог захтева** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): исти чувар означава
-  конекцију у `exhaustedConnections` сету у меморији, са кључем
-  `${provider}:${connectionId}`. Ово прескаче само преостали циљ ИСТОГ ЗАХТЕВА
-  који _сам већ носи тачно тај `connectionId`_ на свом сопственом циљном
-  објекту (`getExhaustedTargetSkipReason()`,
+  (`credits_exhausted`/`banned`/`expired`) — тако да се веза сама опоравља
+  након истека cooldown-а, уместо да захтева ручно ресетовање акредитива.
+  Прескаче се за везе са `disableCooling: true` (#2997): тај opt-out
+  уместо тога прелази на закључавање по моделу (документовани компромис —
+  погледајте коментар у коду изнад гране).
+- **Комбиновано рутирање у оквиру истог захтева** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): иста заштита означава
+  везу у меморијском скупу `exhaustedConnections`, чији је кључ
+  `${provider}:${connectionId}`. Ово прескаче само преостали циљ у оквиру
+  ИСТОГ ЗАХТЕВА који _сам већ садржи тај исти `connectionId`_ у сопственом
+  објекту циља (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` пре претраге `exhaustedConnections`) — обична комбинација
-  листе модела, где суседни циљеви не носе сопствени закачени `connectionId`
-  и један се разрешава тек по отпреми из заглавља одговора
-  `X-OmniRoute-Selected-Connection-Id`, никада не погађа то подударање
-  кључа. За тај уобичајени случај, права заштита од тога да преостали крак
-  поново искористи управо исцрпљени налог НИЈЕ овај Set — то је слој
-  перзистенције изнад (`rateLimitedUntil` конекције је сада у будућности)
-  комбинован са истим овим чуваром који потискује
-  `transientRateLimitedProviders` за неуспех (погледајте „Двостепени дизајн"
-  и коментар кода на грани `isAgentrouterConnectionQuotaScope` у
-  `targetExhaustion.ts`): са тим Set-ом остављеним неозначеним, force-allow
-  `allowRateLimitedConnection` из `combo.ts`
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) се НЕ активира за
-  преостале кракове провајдера, тако да се `rateLimitedUntil` филтер избора
-  креденцијала (`src/sse/services/auth.ts:1238`) нормално поштује и
-  преостали крак или бира другу, још увек подобну agentrouter конекцију или
-  не успева без доступних креденцијала — не пробија се силом назад на
-  конекцију коју је ова грана управо охладила.
+connectionId)` пре претраге `exhaustedConnections`) — обичан combo са листом
+  модела, где суседни циљеви немају сопствени закачени `connectionId`, а један
+  се разрешава по диспечирању из заглавља одговора
+  `X-OmniRoute-Selected-Connection-Id`, никада не погађа то подударање кључа. У
+  том уобичајеном случају, стварна заштита од тога да преостала грана поново
+  употреби управо исцрпљени налог НИЈЕ овај скуп — већ горенаведени слој
+  перзистенције (вредност `rateLimitedUntil` везе је сада у будућности)
+  у комбинацији са тиме што иста заштита потискује
+  `transientRateLimitedProviders` за овај неуспех (погледајте „Двостепени дизајн“
+  и коментар у коду на грани
+  `isAgentrouterConnectionQuotaScope` у `targetExhaustion.ts`): пошто скуп
+  остаје неозначен, `combo.ts`-ов `allowRateLimitedConnection` force-allow
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) НЕ активира се
+  за преостале гране овог провајдера, па се филтер за `rateLimitedUntil` у
+  избору акредитива (`src/sse/services/auth.ts:1238`) поштује уобичајено, а
+  преостала грана или бира другу, и даље подобну agentrouter везу или не успева
+  јер нема доступних акредитива — не пробија се назад до везе коју је ова грана
+  управо ставила у cooldown.
 
-### Двостепени дизајн: преформулисање статуса, затим класификација
+### Двостепени дизајн: поновно навођење статуса, затим класификација
 
-Преформулисање статуса (`upstreamStatusRestatement.ts`) и правила
+Поновно навођење статуса (`upstreamStatusRestatement.ts`) и правила
 класификације провајдера (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) су засебни регистри који се оба кључују на ID
-провајдера и текстуалне маркере, али се извршавају на различитим местима и
-служе различитим сврхама: преформулисање преписује HTTP статус рано у
-`chatCore.ts`; правила класификације бирају резервни `reason` и закључавају
-`scope` (`model` / `provider` / `connection`) унутар `checkFallbackError()`
+`providerRuleRegistry`) представљају одвојене регистре који оба користе
+идентификатор провајдера и текстуалне маркере као кључеве, али се извршавају
+на различитим местима и служе различитим сврхама: поновно навођење рано
+преписује HTTP статус у `chatCore.ts`; правила класификације бирају резервни
+`reason` и опсег закључавања `scope`
+(`model` / `provider` / `connection`) унутар `checkFallbackError()`
 (`open-sse/services/accountFallback.ts`).
 
-Правила класификације виде пун **текст** грешке (потребан за подударање
-маркера тела као што је `额度不足`) само за провајдере наведене у
-`FULL_TEXT_RULE_PROVIDERS` листи дозвољених у `providerErrorRules.ts` —
-тренутно само `"agentrouter"`. За сваки други провајдер **уграђеног
-каталога**, `checkFallbackError` прослеђује `getProviderErrorRuleMatch` само
-структурирану грешку (`{code, type}`), што је довољно за правила заснована
-на заглављу/статусу/коду, али слепо за маркере текста тела. Помоћник
-`resolveRuleMatchBody()` врши овај избор: пун текст грешке за провајдере на
-листи дозвољених, иначе структурирану грешку. Додавање **уграђеног**
-провајдера у `FULL_TEXT_RULE_PROVIDERS` је експлицитно пријављивање по
-провајдеру — постоји како би подразумевана путања за сваки провајдер који
-није на листи остала бајт-по-бајт непромењена.
+Правила класификације виде пун **текст** грешке (потребан за подударање са
+маркерима у телу, као што је `额度不足`) само за провајдере наведене на
+списку дозвољених `FULL_TEXT_RULE_PROVIDERS` у `providerErrorRules.ts` —
+тренутно само `"agentrouter"`. За сваки други **уграђени провајдер**,
+`checkFallbackError` прослеђује `getProviderErrorRuleMatch`-у само
+структурисану грешку (`{code, type}`), што је довољно за правила заснована на
+заглављу/статусу/коду, али не и за маркере у тексту тела. Помоћна функција
+`resolveRuleMatchBody()` обавља овај избор: пун текст грешке за провајдере на
+списку, а структурисану грешку у супротном. Додавање **уграђеног** провајдера
+у `FULL_TEXT_RULE_PROVIDERS` представља експлицитно укључивање за сваки
+провајдер појединачно — постоји како би подразумевана путања за сваки
+провајдер који није на списку остала непромењена до нивоа бајта.
 
-`scope` правила (`model` / `provider` / `connection`) је засебно
-пријављивање од `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` га само
-износи као `fallbackResult.ruleScope`, а низводни потрошачи га поштују као
-било шта друго осим информативне ознаке само за провајдере на
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` листи дозвољених у истом фајлу
+`scope` правила (`model` / `provider` / `connection`) представља одвојено
+експлицитно укључивање у односу на `FULL_TEXT_RULE_PROVIDERS`:
+`checkFallbackError` га само излаже као `fallbackResult.ruleScope`, а
+низводни корисници га поштују као било шта осим информативне ознаке само за
+провајдере на списку `HONORS_RULE_LOCK_SCOPE_PROVIDERS` у истој датотеци
 (контролисано преко `honorsRuleLockScope()` — данас само `"agentrouter"`).
-Погледајте „Преформулисане грешке квоте" изнад за оно што подударање
-`scope: "connection"` заправо ради када се провајдер нађе на тој листи
-дозвољених.
+Погледајте „Поново наведене грешке квоте“ изнад за објашњење шта
+подударање са `scope: "connection"` заправо ради након што се провајдер
+дода на тај списак.
 
-**#11104 — правила декларисана од стране оператора заобилазе обе листе
-дозвољених.** Оператор може декларисати правило по провајдеру у време
-извршавања преко `settings.providerErrorRules`
-(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`) без
-уређивања овог фајла. Контролисање правила оператора иза
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — листи
-дозвољених намењених заштити **подразумеваног** понашања уграђених правила
-каталога — учинило би механизам подешавања инертним за сваки провајдер осим
-оних који су тамо већ наведени, пошто је декларисање правила већ само по
-себи експлицитно пријављивање оператора. `resolveRuleMatchBody()` и
-`honorsRuleLockScope()` оба прво проверавају `hasOperatorRuleForProvider()`:
-провајдер са правилом оператора добија сирови текст грешке и његов
-декларисани `scope` се поштује, без обзира да ли се такође појављује на
-било којој од листа дозвољених.
+**#11104 — правила која је декларисао оператор заобилазе оба списка.**
+Оператор може у време извршавања да декларише правило по провајдеру преко
+`settings.providerErrorRules`
+(`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
+без измене ове датотеке. Условљавање правила оператора списковима
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — списковима
+намењеним заштити **подразумеваног** понашања правила уграђених провајдера —
+учинило би механизам подешавања неактивним за сваки провајдер осим оних који
+су већ наведени, пошто је декларисање правила већ експлицитно укључивање од
+стране оператора. `resolveRuleMatchBody()` и `honorsRuleLockScope()` прво
+проверавају `hasOperatorRuleForProvider()`: провајдер са правилом оператора
+добија необрађени текст грешке и његов декларисани `scope` се поштује,
+без обзира на то да ли се такође појављује на било ком од та два списка.
 
-**Познати пропуст — `providerRuleRegistry` се никада не консултује за HTTP 400.** Грана `BAD_REQUEST` функције `checkFallbackError` класификује статус
-400 у потпуности кроз своје сопствене низове образаца
-(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, итд. у
-`accountFallback.ts`) и враћа се пре него што се достигне грана
-`configuredRule`/`getProviderErrorRuleMatch` изнад ње. Уграђено правило
-каталога (или правило оператора) са `status: 400` је синтаксно валидно,
-али се никада неће активирати. Ниједно постојеће правило данас не циља
-400, тако да ништа у продукцији није погођено — али будуће правило за 400
-захтева да се ова грана прво измени, што је већа промена од додавања
-правила (рекласификује 400 за сваки провајдер који се већ ослања на
-понашање низова образаца) и изван је опсега додавања правила за један
-провајдер.
+**Правила која је декларисао оператор** (`OperatorProviderErrorRule`): свако
+правило има опциони `status` и опциони `match` (обична подниска текста грешке
+без разликовања великих и малих слова, никада RegExp, па не може изазвати
+ReDoS), а мора да постави најмање једно од та два поља. Када су оба постављена,
+користи се логичко И; изостављено поље се подудара са било чим, па
+`{match: "insufficient_quota"}` одговара било ком статусу који садржи тај код.
+Побеђује прво правило које се подудара. `cooldownMs` прихвата највише 30 дана;
+укупно је дозвољено највише 50 правила.
 
-### Додавање новог гејтвеја који нетачно пријављује квоту
+**Podrazumevane vrednosti za sve slučajeve** (`settings.providerErrorDefaults`, opcionalno uključivanje, podešava se putem
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+sa `cooldownMs` od 1 minuta do 30 dana. Podrazumevana vrednost se primenjuje samo kada se
+ne podudara nijedno operatorsko pravilo niti ugrađeno pravilo kataloga, i samo na greške
+402, 403, 408, 429 i 5xx. Greške oblika zahteva (400, 404, 409, 413, 422) i samostalne
+401 greške zadržavaju sopstvenu obradu. Ako nije naveden eksplicitni `reason`, razlog se
+određuje na osnovu statusa, na isti način kao što to radi `classifyError`. Deklarisanje
+podrazumevane vrednosti računa se kao operatorsko pravilo za
+`hasOperatorRuleForProvider()`, pa se njen `scope` (podrazumevano `"connection"`) uvažava.
+Efektivno vreme hlađenja podrazumevane vrednosti je duže od njenog `cooldownMs` i sopstvenog
+saveta provajdera za ponovno pokušavanje (`Retry-After`, `x-ratelimit-reset` ili savet o
+resetovanju u telu, isti savet koji engine uvažava kada je podešavanje za hlađenje veze
+„use upstream retry hints“ uključeno), tako da podrazumevana vrednost može produžiti kratak
+savet provajdera, ali nikada ne može skratiti stvarno resetovanje. Eksplicitno operatorsko
+pravilo zadržava svoj tačan `cooldownMs`. Ni pravilo ni podrazumevana vrednost ne zaobilaze
+zaštite od hlađenja veze u `markAccountUnavailable`: aktivno, duže hlađenje se nikada ne
+skraćuje, a terminalni status se nikada ne prepisuje. Ugrađeni detektori teksta koji se
+ranije izvršavaju u `checkFallbackError` (iscrpljeni krediti, dnevna kvota, deaktiviran
+nalog) i dalje imaju prednost za sopstvene fraze.
 
-1. Региструјте један низ правила у `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). Нека `textMarkers`
-   буду специфични за провајдера; никада немојте поново користити генеричке
-   енглеске фразе које се поклапају са
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
-2. Опционо региструјте правила класификације у
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) да бисте
-   изабрали прави опсег закључавања (`connection` за квоту на нивоу налога,
-   `model` за грешке по моделу). Овај корак ступа на снагу у продукцији само
-   за провајдере чијим правилима је потребан пуни текст грешке (маркери тела
-   одговора): додајте ID провајдера у `FULL_TEXT_RULE_PROVIDERS` у истом
-   фајлу — у супротном `checkFallbackError` правилу увек прослеђује само
-   структурирану грешку `{code, type}` и правило засновано на тексту тела
-   никада неће одговарати живом саобраћају.
-   Правилима која се поклапају искључиво на основу `status`/`headers`
-   (као што су Opencode-ова или Minimax-ова) ово укључивање није потребно.
-   Независно од тога, ако правило декларише
-   `scope: "connection"` и намера је стварна пауза на нивоу конекције
-   уз прескакање комбоа у оквиру истог захтева (а не само информативна
-   ознака), додајте ID провајдера у `HONORS_RULE_LOCK_SCOPE_PROVIDERS` у
-   истом фајлу — то је оно што контролише потрошњу у стилу
-   `isAgentrouterConnectionQuotaScope()` у
-   `markAccountUnavailable()` (`src/sse/services/auth.ts`) и
+**Poznat nedostatak — `providerRuleRegistry` se nikada ne proverava za HTTP 400.**
+Grana `BAD_REQUEST` u `checkFallbackError` klasifikuje status 400 u potpunosti putem
+sopstvenih nizova obrazaca (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS` itd. u `accountFallback.ts`) i vraća rezultat pre nego što
+se dođe do grane `configuredRule`/`getProviderErrorRuleMatch` iznad nje.
+Ugrađeno pravilo kataloga (ili operatorsko pravilo) sa `status: 400` sintaksički je
+ispravno, ali se nikada neće aktivirati. Nijedno postojeće pravilo trenutno ne cilja
+400, pa ništa u produkciji nije pogođeno — ali buduće pravilo za 400 zahteva da se
+najpre izmeni ova grana, što je veća izmena od dodavanja pravila (ona menja klasifikaciju
+400 za svakog provajdera koji se već oslanja na ponašanje nizova obrazaca) i izvan je
+opsega dodavanja pravila za jednog provajdera.
+
+### Dodavanje novog gateway-a koji pogrešno navodi kvotu
+
+1. Registrujte jedan niz pravila u `statusRestatementRegistry`
+   (`open-sse/config/upstreamStatusRestatement.ts`). Održavajte `textMarkers`
+   specifičnim za provajdera; nikada nemojte ponovo koristiti generičke engleske fraze
+   koje se preklapaju sa `CREDITS_EXHAUSTED_SIGNALS`
+   (`open-sse/services/accountFallback.ts`).
+2. Opcionalno registrujte pravila klasifikacije u
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) da biste izabrali
+   odgovarajući opseg zaključavanja (`connection` za kvotu na nivou naloga, `model` za
+   greške po modelu). Ovaj korak u produkciji stupa na snagu samo za provajdere čija
+   pravila zahtevaju puni tekst greške (markere iz tela): dodajte identifikator provajdera
+   u `FULL_TEXT_RULE_PROVIDERS` u istoj datoteci — u suprotnom
+   `checkFallbackError` pravilu prosleđuje samo strukturisanu grešku
+   `{code, type}`, pa se pravilo zasnovano na tekstu tela nikada neće podudariti sa
+   stvarnim saobraćajem. Pravila koja se podudaraju isključivo na osnovu
+   `status`/`headers` (kao Opencode-ova ili Minimax-ova) ne zahtevaju ovo eksplicitno
+   uključivanje. Odvojeno, ako pravilo navodi `scope: "connection"` i namera je stvarno
+   hlađenje na nivou veze uz preskakanje kombinacije za isti zahtev (a ne samo
+   informativna oznaka), dodajte identifikator provajdera u
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` u istoj datoteci — to određuje da li se koristi
+   potrošnja u stilu `isAgentrouterConnectionQuotaScope()` u
+   `markAccountUnavailable()` (`src/sse/services/auth.ts`) i
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); без тога, `scope`
-   и даље пролази кроз `fallbackResult.ruleScope`, али ништа на њега не
-   делује.
-3. Додајте јединичне тестове који прате `tests/unit/upstream-status-restatement.test.ts`
-   и `tests/unit/agentrouter-error-rules.test.ts` (укључујући
-   not-permanent / not-creditsExhausted провере, и — ако провајдеру треба
-   листа дозвољених — тест који потврђује да `resolveRuleMatchBody()` враћа
-   пуни текст само за тог провајдера).
+   (`open-sse/services/combo/targetExhaustion.ts`); bez toga, `scope` i dalje prolazi kroz
+   `fallbackResult.ruleScope`, ali ništa ne postupa na osnovu njega.
+3. Dodajte jedinične testove po uzoru na
+   `tests/unit/upstream-status-restatement.test.ts`
+   i `tests/unit/agentrouter-error-rules.test.ts` (uključujući provere
+   not-permanent / not-creditsExhausted, kao i — ako je provajderu potrebna lista
+   dozvoljenih — test kojim se potvrđuje da `resolveRuleMatchBody()` vraća puni tekst
+   samo za tog provajdera).
 
-Нису потребне измене у `chatCore.ts`, `classifyError` или комбоу.
+Nisu potrebne izmene u `chatCore.ts`, `classifyError` niti u combo.
 
-#### Закључавање груписано по излазној (egress) IP адреси (#10880)
+#### Zaključavanje grupisano po izlazu (#10880)
 
-Провајдери у `EGRESS_BUCKETED_LOCK_PROVIDERS` (opencode породица) третирају
-се као upstream груписан по IP адреси (opencode бесплатни ниво је груписан
-по IP адреси, а не по налогу — види #9611): статус-429 класификован као
-`quota_exhausted` **или** `rate_limit_exceeded` ставља у паузу сваку
-конекцију из породице са листе дозвољених чија се последња позната излазна
-IP адреса поклапа са адресом конекције која је отказала, пре него што их
-ротација уопште може испробати
-— чиме се избегава N-1 загарантовано неуспешних upstream позива (истог облика као #10460/#10525).
-`rate_limit_exceeded` је укључен намерно: на путањи `markAccountUnavailable`
-правила специфична за opencode се никада не поклапају (`checkFallbackError`-у
-се не прослеђују headers/body, а opencode није у `FULL_TEXT_RULE_PROVIDERS`),
-па се 429 чије тело садржи текст о квоти претплате („monthly usage limit
-reached") класификује као `quota_exhausted` помоћу резервне логике за текст
-квоте (`buildSubscriptionQuotaFallback`, `accountFallback.ts`; пауза од 1h)
-пре него што се до правила `status_429` уопште и дође — док се 429 без текста
-о квоти (обично ограничавање брзине) класификује преко правила `status_429`
-као `rate_limit_exceeded` и и даље ставља IP породицу у паузу. За провајдера
-са листе дозвољених, ограничење брзине груписано по IP адреси исти је сигнал
-као исцрпљена квота. Искрена ограничења:
+Provajderi u `EGRESS_BUCKETED_LOCK_PROVIDERS` (porodica opencode) tretiraju se kao
+uzvodni sistemi grupisani po IP adresi (besplatni nivo opencode-a grupisan je po IP
+adresi, a ne po nalogu — pogledajte #9611): status-429 klasifikovan kao
+`quota_exhausted` **ili** `rate_limit_exceeded` hladi svaku vezu iz porodice na listi
+dozvoljenih čiji se poslednji poznati izlazni IP podudara sa IP adresom neuspešne veze,
+pre nego što rotacija može da ih pokuša
+— čime se izbegavaju N-1 garantovano neuspešnih poziva uzvodnom sistemu (isti obrazac kao
+u #10460/#10525). `rate_limit_exceeded` je namerno uključen: na putanji
+`markAccountUnavailable` pravila specifična za opencode nikada se ne podudaraju
+(`checkFallbackError` ne dobija zaglavlja/telo, a opencode nije u
+`FULL_TEXT_RULE_PROVIDERS`), pa 429 čije telo sadrži tekst o kvoti pretplate
+("monthly usage limit reached") klasifikuje `quota_exhausted` rezervni mehanizam za
+tekst kvote (`buildSubscriptionQuotaFallback`, `accountFallback.ts`; hlađenje od 1
+časa) pre nego što se uopšte dođe do pravila `status_429` — dok se 429 bez teksta o
+kvoti (obično ograničavanje brzine) klasifikuje putem pravila `status_429` kao
+`rate_limit_exceeded` i i dalje hladi IP porodicu. Za provajdera na listi dozvoljenih,
+ograničenje brzine grupisano po IP adresi predstavlja isti signal kao i iscrpljena kvota.
+Poštena ograničenja:
 
-- **Najbolji mogući pokušaj**: brava razrešava poslednju poznatu `egress_ip` konekcije iz `proxy_logs` (prozor od 24 časa, sinhrono, bez keša). Hladan keš (egress IP adresa nikada nije ispitana) ili nema reda → konekcija koja je otkazala se i dalje hladi od strane grane (zapisuje se kao do sada), samo se nijedan srodnik ne zaključava.
-- **Nikada terminalno**: hlađenje je obnavljajući prozor kvote (`testStatus: "unavailable"`); trajno stanje se nikada ne izvodi iz signala na nivou IP adrese. Konekcije sa `disableCooling` u potpunosti preskaču granu.
-- **Granularnost brave se menja za porodicu na dozvoljenoj listi**: ovo je promena opsega, ne samo optimizacija srodnika. opencode je `passthroughModels` provajder, pa je pre ove grane 429 proizvodio blokadu po MODELU; sada proizvodi hlađenje konekcije — uključujući i za operatora koji vodi jednu konekciju bez ijednog srodnika. To je granularnost koju tabela pravila opencode već proglašava ispravnom (`scope: "connection"`, `providerErrorRules.ts`), do sada nikada poštovanu jer opencode nije u `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Grana sama upisuje hlađenje konekcije koja je otkazala + `backoffLevel`, po ugledu na granu agentrouter sa opsegom na nivou konekcije, i vraća se — blok po modelu i generički put ispod se nikada ne dosežu.
-- **Combo uključen**: kao i grana agentrouter, opseg namerno zanemaruje `persistUnavailableState`/`isCombo` obaranje koje combo pozivalac primenjuje na 429. Blokada po modelu nije slabiji oblik ovog opsega, to je pogrešna jedinica: ne govori ništa o iscrpljenoj IP adresi, pa bi combo rotacija i dalje trošila po jedan zagarantovano neuspešan poziv po srodniku.
-- **Bezbednost srodnika**: srodnik koji je već terminalan (banned/credits_exhausted) ili već u dužem hlađenju se nikada ne prepisuje.
-- **Ekskluzivna dozvoljena lista**: proširenje `EGRESS_BUCKETED_LOCK_PROVIDERS` je eksplicitna odluka vlasnika; nema generičkog povezivanja (obrazac #10334/#10419). Upit srodnika vezuje tu istu dozvoljenu listu umesto da je ponavlja kao SQL literal, pa njeno proširenje ostaje promena u jednom redu.
-- **Rotacija egress IP adrese, u oba smera**: prozor pretrage (24 časa) je daleko širi od TTL-a keša egress IP adrese (5 min), pa je "poslednja poznata IP adresa" istorija, a ne trenutno stanje. Ako se proksi konekcije rotirao unutar prozora, brava može **promašiti** zaista deljenu IP adresu (zapisana IP adresa je nova, neiscrpljena) — i simetrično, može **ohladiti srodnika koji se u međuvremenu odrotirao** sa iscrpljene IP adrese. Drugi slučaj tog srodnika košta jedan prozor hlađenja; oba su prihvaćena ograničenja pretrage zasnovane na istoriji u režimu najboljeg mogućeg pokušaja.
-- **Trošak**: dva ograničena skeniranja `proxy_logs` (filtrirana prozorom putem `idx_pl_timestamp`), samo pri učestalosti 429. Nema novog indeksa (migracija 134 YAGNI). Izmereno na kopiji baze podataka umerene veličine sa stvarnim saobraćajem; instanca visokog protoka čuva proporcionalno više redova u istom prozoru.
-
----
+- **Најбољи могући покушај**: закључавање разрешава последњи познати `egress_ip` конекције
+  из `proxy_logs` (прозор од 24 сата, синхроно, без кеша). Хладан кеш (`egress`
+  IP никада није испитан) или непостојећи ред → неуспешна конекција се и даље
+  хлади преко гране (бележи се као и данас), само се ниједна суседна конекција не закључава.
+- **Никада терминално**: хлађење је обновљиви квотни прозор
+  (`testStatus: "unavailable"`); трајно стање се никада не изводи из сигнала на нивоу IP адресе.
+  Конекције са `disableCooling` у потпуности прескачу ову грану.
+- **Грануларност закључавања се мења за породицу са allowlist-e**: ово је промена опсега, а не само
+  оптимизација суседних конекција. opencode је `passthroughModels` провајдер, па је пре ове гране
+  429 производио закључавање по-MODEL-у; сада производи хлађење конекције — укључујући и случај
+  оператора који покреће само једну конекцију, без иједне суседне. То је грануларност коју табела
+  правила за opencode већ проглашава исправном (`scope: "connection"`,
+  `providerErrorRules.ts`), али до сада никада није била уважена јер opencode није у
+  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Грана сама уписује хлађење неуспешне
+  конекције + `backoffLevel`, по узору на грану agentrouter-а са опсегом конекције, и враћа се —
+  блокада по моделу и генерички пут испод се никада не досежу.
+- **Комбо је укључен**: као и грана agentrouter-а, опсег намерно игнорише смањење
+  `persistUnavailableState`/`isCombo` које комбо позивалац примењује на 429. Закључавање по моделу
+  није слабији облик овог опсега, већ погрешна јединица: оно не говори ништа о исцрпљеном IP-у,
+  па би комбо ротација наставила да троши по један гарантовано неуспешан позив по суседној конекцији.
+- **Безбедност суседних конекција**: суседна конекција која је већ терминална (banned/credits_exhausted)
+  или је већ у дужем хлађењу никада се не преписује.
+- **Искључива allowlist-а**: проширивање `EGRESS_BUCKETED_LOCK_PROVIDERS` је
+  експлицитна одлука власника; не постоји генеричко повезивање (образац #10334/#10419). Упит
+  суседних конекција везује исту allowlist-у, уместо да је понавља као SQL литерал, па њено
+  проширивање остаје промена у једном реду.
+- **Ротација излазног IP-а у оба смера**: прозор претраге (24 сата) је
+  знатно шири од TTL-а кеша излазног IP-а (5 минута), па је „последњи познати IP“ историја,
+  а не тренутно стање. Ако је прокси конекције ротирао унутар прозора, закључавање може
+  **промашити** заиста дељени IP (забележени IP је нови, неисцрпљени) — и симетрично може
+  **охладити суседну конекцију која је у међувремену ротирала даље** од исцрпљеног IP-а.
+  Други случај тој суседној конекцији одузима један прозор хлађења; оба случаја су прихваћена
+  ограничења најбољег могућег покушаја заснованог на претрази историје.
+- **Цена**: два ограничена скенирања `proxy_logs` (филтрирана по прозору преко
+  `idx_pl_timestamp`), и то само учесталошћу 429. Нема новог индекса (миграција 134
+  YAGNI). Измерено на копији базе са стварним саобраћајем умерене величине; инстанца
+  са великим протоком садржи сразмерно више редова у истом прозору.
 
 ## Ostale funkcije otpornosti
 

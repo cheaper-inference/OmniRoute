@@ -1,0 +1,1 @@
+- **ci(test-unit):** reclaim the unused Android SDK on hosted Linux runners before the unit coverage shards, and wait for the initial background credential probe in the #16190 regression fixture instead of a fixed sleep ([#16452](https://github.com/cheaper-inference/OmniRoute/pull/16452)) — thanks @KiaroSama
