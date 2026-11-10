@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve complete encrypted reasoning-detail records, including opaque extension fields, through credential/PII stream transforms, and keep reasoning-record indices out of choice/tool routing.

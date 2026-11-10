@@ -162,6 +162,16 @@ export function classifyField(key: string, parentKey = ""): FieldCategory | null
   return "content";
 }
 
+/** The complete encrypted reasoning record is protocol state, including unknown extensions. */
+export function isOpaqueReasoningDetail(value: unknown, parentKey: string): boolean {
+  return (
+    parentKey === "reasoning_details" &&
+    value !== null &&
+    typeof value === "object" &&
+    (value as Record<string, unknown>).type === "reasoning.encrypted"
+  );
+}
+
 // Back-compat helper kept for any external caller expecting a category rather than `null`
 // for metadata; internal call sites use `classifyField` so they can skip metadata entirely.
 export function getFieldCategory(key: string): FieldCategory {
@@ -315,11 +325,13 @@ export function createSseTextTransform(
             parentKey = ""
           ) => {
             if (!obj || typeof obj !== "object") return;
+            if (isOpaqueReasoningDetail(obj, parentKey)) return;
 
             const { choiceIdx, toolIdx } = resolveStreamIndices(
               obj,
               currentChoiceIdx,
-              currentToolIdx
+              currentToolIdx,
+              parentKey
             );
 
             const compositeKey = `${choiceIdx}_${toolIdx}`;

@@ -1,5 +1,10 @@
 import { resolveStreamIndices } from "./streamIndices";
-import { createSseTextTransform, FieldCategory, classifyField } from "./sseTextTransform";
+import {
+  createSseTextTransform,
+  FieldCategory,
+  classifyField,
+  isOpaqueReasoningDetail,
+} from "./sseTextTransform";
 import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
 import {
   bufferField,
@@ -247,6 +252,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     // be cleared to "" or refilled with buffered answer text here either. See #13488.
     const clearDeltas = (obj: any, parentKey = "") => {
       if (!obj || typeof obj !== "object") return;
+      if (isOpaqueReasoningDetail(obj, parentKey)) return;
       const isArray = Array.isArray(obj);
       for (const key of Object.keys(obj)) {
         if (typeof obj[key] === "string") {
@@ -268,8 +274,14 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
       parentKey = ""
     ) => {
       if (!obj || typeof obj !== "object") return;
+      if (isOpaqueReasoningDetail(obj, parentKey)) return;
 
-      const { choiceIdx, toolIdx } = resolveStreamIndices(obj, currentChoiceIdx, currentToolIdx);
+      const { choiceIdx, toolIdx } = resolveStreamIndices(
+        obj,
+        currentChoiceIdx,
+        currentToolIdx,
+        parentKey
+      );
 
       const compositeKey = `${choiceIdx}_${toolIdx}`;
       const isArray = Array.isArray(obj);
