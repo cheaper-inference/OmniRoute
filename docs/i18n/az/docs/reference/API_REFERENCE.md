@@ -955,31 +955,28 @@ onları yaradan API açarına görünür. Nəticəsi qeyri-müəyyən olan təkr
 
 ---
 
-## Özünəxidmət istifadəsi (`/api/usage/om-usage`)
+## Özünə xidmətdən istifadə (`/api/usage/om-usage`)
 
-İstənilən API açarı **öz** istifadəsini və kvotalarını oxuya bilər — idarəetmə autentifikasiyası tələb olunmur. Bu,
-müştərinin (CLI, OmniCopilot paneli) açar sahibinə xərclərini göstərmək üçün istifadə etdiyi endpoint-dir.
+İstənilən API açarı oxuya bilər** öz** istifadə və kvota — heç bir idarəetmə auth. Bu, müştərinin (CLI, OmniCopilot paneli) əsas sahibinə xərclərini göstərmək üçün istifadə etdiyi son nöqtədir.
 
 ```bash
-# Mətn forması (tarixi müqavilə — terminal üçün düz mətn)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturlaşdırılmış forma — interfeysin istifadə etdiyi format
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Açar üçün **`allowUsageCommand`** aktivləşdirilməlidir (standart olaraq deaktivdir — panelin API açarı
-idarəedicisi bunu hər bir açar üçün dəyişir). Bu aktiv olmadıqda endpoint `403` qaytarır.
+Açar olmalıdır**`allowUsageCommand`** aktivdir (defolt olaraq sönülü — tablosunun API-açar meneceri onu hər düyməyə dəyişir). Onsuz son nöqtə `403` cavab verir.
 
-`?format=json` fərqləndirilən forma qaytarır ki, çağıran tərəf imtina cavabından heç vaxt məlumat sahəsi
-oxumasın. Uğurlu cavabda:
+`?format=json` ayrı-seçkilik formasını qaytarır, beləliklə zəng edən şəxs heç vaxt imtinadan kənar məlumat sahəsini oxumur. Uğur haqqında:
 
 ```jsonc
 {
   "allowed": true,
-  // yalnız açar hər açar üzrə istifadə limitlərinə (gündəlik/həftəlik USD) qoşulduqda mövcuddur:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -988,9 +985,9 @@ oxumasın. Uğurlu cavabda:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // seçilmiş provayder kvotasının snapshot-ı və ya hələ heç nə keşlənməyibsə null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // hər bağlantının snapshot-ı; interfeys bir neçə provayderi yan-yana göstərə bilər:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -998,65 +995,49 @@ oxumasın. Uğurlu cavabda:
 }
 ```
 
-İmtina cavabında (`401` yanlış açar / `403` icazə verilmir) eyni marşrut
-`{ "allowed": false, "error": { "message": "…" } }` qaytarır — mövcud, lakin boş
-`personal`/`provider` (açara icazə verilib, hələ heç bir məlumat əldə edilməyib) imtina cavabından
-fərqli vəziyyətdir və yalnız JSON forması bu vəziyyətləri fərqləndirir.
+İmtina edildikdə (`401` pis açar / `403` icazə verilmir) eyni marşrut `{ "allowed": false, "error": { "message": "…" } }` — a indiki, lakin boş `personal`/`provider` qaytarır (açar icazə verilir, hələ heç nə öyrənilməmişdir) imtinadan fərqli bir vəziyyətdir və yalnız JSON forması onları fərqləndirir.
 
-**Autentifikasiya:** çağıranın öz Bearer API açarı `isValidApiKey` ilə yoxlanılır — bu, idarəetmə
-səthi (`/api/keys/…`) deyil və həmin səth `requireManagementAuth` arxasında qalır.
+**Auth:** Zəng edənin öz Daşıyıcı API açarı, `isValidApiKey` — ilə təsdiqlənmiş bu, `requireManagementAuth` arxasında qalan idarəetmə səthi (`/api/keys/…`) deyil.
 
-### Xam və kəsimə uyğunlaşdırılmış kvota faizləri
+### Raw vs. Cutoff-Düzenlenmiş Kvota Faizləri
 
-`/api/usage/om-usage` istifadə edilərkən çağıran tərəflər **düz mətn çıxışında** və strukturlaşdırılmış
-**JSON çıxışında** təqdim olunan faizlər arasındakı fərqə diqqət etməlidir:
+`/api/usage/om-usage` istehlak edərkən, zəng edənlər tərəfindən təqdim olunan faizlər arasındakı fərqi qeyd etməlidirlər** düz mətn çıxışı** və strukturlaşdırılmışdır**JSON çıxışı** :
 
-| Aspekt                     | Düz mətn formatı (`/api/usage/om-usage` / `@@om-usage`)                                              | JSON formatı (`?format=json`)                                                          |
-| :------------------------- | :--------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| **Çıxış sahəsi**           | `NN% left` (məsələn, `20% left`)                                                                     | `provider.quotas` / `providers[].quotas`                                               |
-| **Ölçmə**                  | **Kəsimə uyğunlaşdırılmış istifadə edilə bilən limit**: kəsim həddindən yuxarı qalan tutum           | **Xam upstream kvotası**: uyğunlaşdırılmamış provayder ölçümü                          |
-| **Kəsim miqyaslandırması** | `effectiveRemainingPercent()` vasitəsilə miqyaslandırılır; qorunan ehtiyat `0% left` kimi göstərilir | Yoxdur (provayder tərəfindən bildirilən xam snapshot dəyərləri)                        |
-| **Hədd məlumatları**       | Göstərilən faizə daxil edilir                                                                        | Hər bağlantı üzrə `quotaWindowThresholds`-da (və ya server standartlarında) saxlanılır |
-| **Əsas istehlakçı**        | İnteraktiv CLI-lər, terminal sorğuları, insan operatorlar                                            | Proqram inteqrasiyaları, panellər, analitika, hesablaşma izləyiciləri                  |
+| Aspekt               | Düz mətn formatı (`/api/usage/om-usage` / `@@om-usage`)                                       | JSON formatı (`?format=json`)                                                     |
+| :------------------- | :-------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| **Çıxış sahəsi**     | `NN% left` (məsələn, `20% left`)                                                              | `provider.quotas` / `providers[].quotas`                                          |
+| **Ölçmə**            | **Kəsmə ilə tənzimlənən istifadəyə yararlı müavinət** : kəsilmə həddinin üstündə qalan tutum  | **Raw upstream kvota** : tənzimlənməmiş provayder ölçməsi                         |
+| **Kəsmə miqyası**    | Qorunan ehtiyat `0% left` kimi oxunması üçün `effectiveRemainingPercent()` vasitəsilə ölçülür | Yoxdur (provayder tərəfindən bildirilən xam snapshot dəyərləri)                   |
+| **Eşik məlumatları** | Göstərilən faizə daxil edilmişdir                                                             | Hər əlaqə üçün `quotaWindowThresholds` -da saxlanılır (və ya server standartları) |
+| **Əsas istehlakçı**  | İnteraktiv CLIs, terminal göstərişləri, insan operatorları                                    | Proqramatik inteqrasiyalar, tablolar, analitika, faktura izləyiciləri             |
 
-#### Kəsim uyğunlaşdırması düsturu
+#### Kəsmə Tənzimləmə Formulu
 
-OmniRoute upstream tükənməsinin qarşısını almaq üçün proaktiv kvota kəsimlərini dəstəkləyir (bağlantının
-`quotaWindowThresholds` parametri, provayder standartları və ya qlobal dayanıqlılıq parametrləri vasitəsilə konfiqurasiya edilir). Kvota pəncərəsində kəsim həddi
-(məsələn, `cutoff = 25%`) aktiv olduqda, mətn renderedicisi qalan limiti belə hesablayır:
+OmniRoute yuxarı axının tükənməsinin qarşısını almaq üçün proaktiv kvota kəsmələrini dəstəkləyir ( `quotaWindowThresholds` bağlantısı, provayderin defoltları və ya qlobal dayanıqlıq parametrləri ilə konfiqurasiya edilmişdir). Kvota pəncərəsində kəsilmə həddi (məsələn, `cutoff = 25%`) aktiv olduqda, mətn renderer qalan ehtiyatı aşağıdakı kimi hesablayır:
 
-- `remaining <= cutoff`: `0%` qaytarılır.
-- `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` qaytarılır.
+- Əgər `remaining <= cutoff`: `0%` qaytarır.
+- Əgər `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100` qaytarır.
 
-Formatlaşdırılmış mətn çıxışı bunu ən yaxın tam ədədə yuvarlaqlaşdırır (`Math.round(...)`).
+Formatlanmış mətn çıxışı bunu ən yaxın tam ədədə yuvarlaqlaşdırır (`Math.round(...)`).
 
-#### Nümunə
+#### İllüstrativ Nümunə
 
-Tərkibində **60% xam istifadə** (beləliklə **40% xam qalan kvota**) və konfiqurasiya edilmiş
-**25% qalan kvota kəsim** həddi olan provayder pəncərəsini nəzərdən keçirək:
+ilə provayder pəncərəsini nəzərdən keçirin** 60% xam istifadə** (deməli** 40% xam qalan kvota** ) və konfiqurasiya edilmiş** 25% qalan-kvota kəsimi** hədd:
 
-| Təqdimat                      | Hesablama                                          |  Qalan  |         Nəzərdə tutulan istifadə         |
-| :---------------------------- | :------------------------------------------------- | :-----: | :--------------------------------------: |
-| **Xam JSON (`?format=json`)** | Upstream snapshot (`quotas[window]`)               | **40%** |                 **60%**                  |
-| **Mətn formatı (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (hesablanarsa `100 - remaining`) |
+| Nümayəndəlik                  | Hesablama                                          |  Qalan  |        İstifadəsi nəzərdə tutulur         |
+| :---------------------------- | :------------------------------------------------- | :-----: | :---------------------------------------: |
+| **Raw JSON (`?format=json`)** | Upstream snapshot (`quotas[window]`)               | **40%** |                  **60%**                  |
+| **Mətn formatı (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** ( `100 - remaining` hesablanırsa) |
 
-- **Mətnin 20% qalan göstərməsinin səbəbi:** Hesabda fiziki kvotanın qalan 40%-nin 25%-i kəsim siyasəti
-  tərəfindən rezerv edilir. Router bu bağlantıya marşrutlaşdırmanı dayandırmazdan əvvəl çağıranın istifadə edə
-  biləcəyi 75%-lik baş boşluğun yalnız 15%-i qalır. Miqyaslaşdırma bağlantının marşrutlaşdırmanın dayanacağı
-  anda tam tükənməni (`0% left`) siqnal etməsini təmin edir.
-- **JSON-un xam dəyərləri saxlamasının səbəbi:** JSON yükü dəqiq provayder snapshot-ını (`UsageSnapshot`)
-  qaytarır ki, xarici alətlər upstream istifadəsi və bağlantı səviyyəsindəki
-  `quotaWindowThresholds` barədə server tərəfində itkilərlə miqyaslaşdırılmamış real məlumatlara çıxış əldə etsin.
+- **Niyə mətn 20% sol göstərir:** Hesabda qalan 40% fiziki kvotadan 25% kəsmə siyasəti ilə qorunur. Zəng edənin 75%-dən yalnız 15%-i marşrutlaşdırıcının bu əlaqəyə marşrutunu dayandırmazdan əvvəl qalır. Ölçəkləmə, marşrutlaşdırma dayandırıldıqda əlaqə siqnallarının tükənməsini (`0% left`) təmin edir.
+- **Niyə JSON xam dəyərləri qoruyur:** JSON faydalı yükü dəqiq provayder şəklini (`UsageSnapshot`) qaytarır, beləliklə, xarici alətlər server tərəfində itkili miqyaslama olmadan yerdən-həqiqətdən yuxarı istifadəyə və əlaqə səviyyəli `quotaWindowThresholds` ə çıxış əldə edir.
 
-#### İstehlakçıların miqrasiyası üzrə təlimat
+#### İstehlakçı Miqrasiya Rəhbərliyi
 
-Əgər xarici inteqrasiya (məsələn, redaktor plaqini və ya agent genişləndirməsi) əvvəllər mətn
-endpoint-indən (`NN% left`) istifadə edib istifadə faizini `100 - NN` kimi hesablayırdısa,
-`?format=json`-a keçid zamanı:
+Xarici inteqrasiya (məsələn, redaktor plaqini və ya agent uzantısı) əvvəllər mətnin son nöqtəsini (`NN% left`) qırıbsa və istifadə olunan faizi `100 - NN` kimi hesablayıbsa, `?format=json` -ə keçid o deməkdir ki,:
 
-- Xam JSON dəyərlərinin oxunması **həqiqi upstream istifadəsini** (yuxarıdakı nümunədə 60% istifadə) əks etdirəcək.
-- İnteqrasiya mətn endpoint-indəki istifadə üçün mövcud limit semantikasını qorumaq istəyərsə, bağlantı səviyyəsindəki
-  override-lar üçün `quotaWindowThresholds`-dən istifadə edərək effektiv qalan dəyər düsturunu müştəri tərəfində hesablaya bilər.
+- Xam JSON dəyərlərini oxumaq əks olunacaq** faktiki yuxarı istehlak** (60% yuxarıdakı nümunədə istifadə edilmişdir).
+- İnteqrasiya mətnin son nöqtəsinin istifadə edilə bilən semantikasını qorumaq istəyirsə, o, əlaqə səviyyəsini ləğv etmək üçün `quotaWindowThresholds` istifadə edərək müştəri tərəfində effektiv qalan formulanı qiymətləndirə bilər.
 
 ---
 
@@ -1251,36 +1232,37 @@ Claude Kodunun avtomatik rejim təsnifatçısı, heç bir açıq əsaslandırma 
 
 `PATCH /api/keys/{id}` mövcud açarın icazələrini yeniləyir. Hər bir `/api/keys*` marşrutu kimi, nəticə çıxarma açarı deyil, idarəetmə icazəsi tələb olunur (bax [İdarəetmə Doğrulaması](../guides/MANAGEMENT-AUTH.md) ). Yalnız dəyişdirmək istədiyiniz sahələri göndərin; onlardan heç biri olmayan sorğu `No valid fields to update` ilə rədd edilir. Qəbul edilmiş sahələr `src/shared/validation/schemas/keys.ts`-də `updateKeyPermissionsSchema` ilə müəyyən edilir.
 
-| Sahə                                        | Növ                                                                        | Qeydlər                                                                                                                                      |
-| ------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | sətir, 1-200 simvol                                                        |                                                                                                                                              |
-| `isActive`                                  | boolean                                                                    |                                                                                                                                              |
-| `isBanned`                                  | boolean                                                                    |                                                                                                                                              |
-| `expiresAt`                                 | ISO 8601 datetime və ya `null`                                             | `null` son müddəti təmizləyir                                                                                                                |
-| `modelAccessMode`                           | `all` \| `restricted`                                                      | rejim `all` olduqda `allowedModels` boş olmalıdır                                                                                            |
-| `allowedModels`, `blockedModels`            | sətirlər massivi, 1000-ə qədər                                             |                                                                                                                                              |
-| `allowedCombos`                             | sətirlər massivi, 500-ə qədər                                              | Açarı birləşdirən qapılar zəng edə bilər; birbaşa modellər `modelAccessMode` / `allowedModels` ilə idarə olunur                              |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `allowedConnections` `restricted` olduqda boş, `all` olduqda isə boş olmalıdır                                                               |
-| `allowedConnections`                        | UUIDs massivi, 100-ə qədər                                                 |                                                                                                                                              |
-| `allowAutoCombos`                           | boolean                                                                    | `false` bu açarla `auto/*` modelləri üçün sorğuları rədd edir; heç vaxt təyin etməyən düymələrə icazə verilir                                |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                              | Bu açar üçün hansı `GET /v1/models` siyahıları var (yalnız kombinlər, yalnız modellər və ya hər ikisi); açarın nə çağıra biləcəyini dəyişmir |
-| `forcedModel`                               | 300 simvola qədər sətir və ya `null`                                       | Çat sorğularını `X-Route-Model` və `body.model` üzərindən bu model/combo ya yönləndirir; açarın məhdudiyyətləri hələ də qüvvədədir           |
-| `noLog`, `autoResolve`                      | boolean                                                                    |                                                                                                                                              |
-| `throttleDelayMs`                           | tam, 0-300000                                                              |                                                                                                                                              |
-| `maxSessions`                               | tam, 0-10000                                                               |                                                                                                                                              |
-| `rateLimits`                                | `{ limit, window }` massivi (müsbət tam ədədlər, 50-yə qədər) və ya `null` | `null` sərhədləri təmizləyir                                                                                                                 |
-| `accessSchedule`                            | cədvəli obyekt və ya `null`                                                | `null` cədvəli təmizləyir                                                                                                                    |
-| `scopes`                                    | sətirlər massivi, 32-ə qədər                                               |                                                                                                                                              |
-| `allowedEndpoints`                          | sətirlər massivi, 20-yə qədər                                              |                                                                                                                                              |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                              |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | Baxın: [Hər düyməli önbelleğe keçid](#per-key-cache-bypass)                                                                                  |
-| `compressionEnabled`                        | boolean                                                                    |                                                                                                                                              |
-| `codexServiceMode`                          | Codex xidmət rejimlərindən biri                                            |                                                                                                                                              |
-| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                              |
-| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                              |
-| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                              |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | >= 0 və ya `null` nömrəsi                                                  |                                                                                                                                              |
-| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                              |
+| Sahə                                        | Növ                                                                        | Qeydlər                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | sətir, 1-200 simvol                                                        |                                                                                                                                                                                                                                                         |
+| `isActive`                                  | boolean                                                                    |                                                                                                                                                                                                                                                         |
+| `isBanned`                                  | boolean                                                                    |                                                                                                                                                                                                                                                         |
+| `expiresAt`                                 | ISO 8601 datetime və ya `null`                                             | `null` son müddəti təmizləyir                                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                                      | rejim `all` olduqda `allowedModels` boş olmalıdır                                                                                                                                                                                                       |
+| `allowedModels`, `blockedModels`            | sətirlər massivi, 1000-ə qədər                                             |                                                                                                                                                                                                                                                         |
+| `allowedCombos`                             | sətirlər massivi, 500-ə qədər                                              | Açarı birləşdirən qapılar zəng edə bilər; birbaşa modellər `modelAccessMode` / `allowedModels` ilə idarə olunur                                                                                                                                         |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `allowedConnections` `restricted` olduqda boş, `all` olduqda isə boş olmalıdır                                                                                                                                                                          |
+| `allowedConnections`                        | UUIDs massivi, 100-ə qədər                                                 |                                                                                                                                                                                                                                                         |
+| `allowAutoCombos`                           | boolean                                                                    | `false` bu açarla `auto/*` modelləri üçün sorğuları rədd edir; heç vaxt təyin etməyən düymələrə icazə verilir                                                                                                                                           |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                              | Bu açar üçün hansı `GET /v1/models` siyahıları var (yalnız kombinlər, yalnız modellər və ya hər ikisi); açarın nə çağıra biləcəyini dəyişmir                                                                                                            |
+| `forcedModel`                               | 300 simvola qədər sətir və ya `null`                                       | Çat sorğularını `X-Route-Model` və `body.model` üzərindən bu model/combo ya yönləndirir; açarın məhdudiyyətləri hələ də qüvvədədir                                                                                                                      |
+| `noLog`, `autoResolve`                      | boolean                                                                    |                                                                                                                                                                                                                                                         |
+| `throttleDelayMs`                           | tam, 0-300000                                                              |                                                                                                                                                                                                                                                         |
+| `maxSessions`                               | tam, 0-10000                                                               |                                                                                                                                                                                                                                                         |
+| `rateLimits`                                | `{ limit, window }` massivi (müsbət tam ədədlər, 50-yə qədər) və ya `null` | `null` sərhədləri təmizləyir                                                                                                                                                                                                                            |
+| `accessSchedule`                            | cədvəli obyekt və ya `null`                                                | `null` cədvəli təmizləyir                                                                                                                                                                                                                               |
+| `scopes`                                    | sətirlər massivi, 32-ə qədər                                               |                                                                                                                                                                                                                                                         |
+| `allowedEndpoints`                          | sətirlər massivi, 20-yə qədər                                              |                                                                                                                                                                                                                                                         |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                                                                                                         |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | Baxın: [Hər düyməli önbelleğe keçid](#per-key-cache-bypass)                                                                                                                                                                                             |
+| `compressionEnabled`                        | boolean                                                                    |                                                                                                                                                                                                                                                         |
+| `codexServiceMode`                          | Codex xidmət rejimlərindən biri                                            |                                                                                                                                                                                                                                                         |
+| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                                                                                                         |
+| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                                                                                                         |
+| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                                                                                                         |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | >= 0 və ya `null` nömrəsi                                                  |                                                                                                                                                                                                                                                         |
+| `fiveHourUsageLimitUsd`                     | >= 0 və ya `null` nömrəsi                                                  | Gündəlik və həftəlik limitlər (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) kimi tətbiq edilən 5 saatlıq USD büdcəsi. `retry-after` pəncərədəki ən köhnə xərcləmənin köhnəldiyi zamandır ki, bu da açarı öz limitindən çox kənara çıxara bilər. |
+| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                                                                                                         |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
