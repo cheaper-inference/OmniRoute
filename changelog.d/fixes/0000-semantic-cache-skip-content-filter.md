@@ -1,1 +1,0 @@
-- **fix(cache):** The semantic cache no longer stores a reply that ended in a content filter block (`content_filter`, or Claude `refusal`), so a false-positive block can clear on retry instead of being served from cache for the whole TTL.
