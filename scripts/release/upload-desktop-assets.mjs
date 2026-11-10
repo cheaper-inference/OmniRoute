@@ -9,7 +9,7 @@ export function desktopAssets(directory) {
     .filter(
       (entry) =>
         entry.isFile() &&
-        /(?:\.dmg|\.exe|\.AppImage|\.deb|\.blockmap|\.yml|\.source\.tar\.gz|\.source\.zip)$/.test(
+        /(?:\.dmg|\.exe|\.AppImage|\.deb|\.blockmap|\.yml|^optional-pack-.*\.tar\.gz|\.source\.tar\.gz|\.source\.zip)$/.test(
           entry.name
         )
     )
