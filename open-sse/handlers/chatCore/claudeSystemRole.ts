@@ -18,6 +18,7 @@ export type HoistedCacheBoundary = "moved" | "kept" | "dropped";
 // importers of this module keep working.
 import { relocateDirectiveOnlyMessages } from "../../services/claudeCodeConstraints.ts";
 import { resolveClaudeMidConversationSystemPolicy } from "../../services/claudeMidConversationSystem.ts";
+import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
 import { FORMATS } from "../../translator/formats.ts";
 
 export { relocateDirectiveOnlyMessages };
@@ -229,6 +230,7 @@ export function hoistLeadingTextSystemMessages(payload: Record<string, unknown>)
 
 /** Routing context of a native Claude upstream call (the target format is always Claude). */
 export type SystemRoleRoute = {
+  model?: string | null;
   provider?: string | null;
   sourceFormat?: string | null;
   /** The connection's providerSpecificData (carries the keepMidConversationSystem opt-in). */
@@ -247,12 +249,18 @@ export function liftSystemRoleMessages(
   payload: Record<string, unknown>,
   route?: SystemRoleRoute
 ): void {
-  const preserveMidConversationSystem = resolveClaudeMidConversationSystemPolicy({
-    provider: route?.provider,
-    sourceFormat: route?.sourceFormat,
-    targetFormat: FORMATS.CLAUDE,
-    providerSpecificData: route?.providerSpecificData,
-  });
+  const nativePolicy =
+    route?.provider === "claude" &&
+    route?.sourceFormat === FORMATS.CLAUDE &&
+    shouldUseMidConversationSystem(payload, route?.model);
+  const preserveMidConversationSystem =
+    nativePolicy ||
+    resolveClaudeMidConversationSystemPolicy({
+      provider: route?.provider,
+      sourceFormat: route?.sourceFormat,
+      targetFormat: FORMATS.CLAUDE,
+      providerSpecificData: route?.providerSpecificData,
+    });
   const messages = Array.isArray(payload.messages)
     ? (payload.messages as Array<{ role?: unknown }>)
     : [];

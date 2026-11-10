@@ -44,8 +44,6 @@ for (const model of ["claude-sonnet-5-5", "claude-haiku-5-5"]) {
     ["missing system", { system: undefined }],
     ["empty string system", { system: "" }],
     ["empty block system", { system: [] }],
-    ["missing tools", { tools: undefined }],
-    ["empty tools", { tools: [] }],
   ] as const) {
     test(`${model} retains the ${shape} exclusion`, () => {
       assert.equal(shouldUseMidConversationSystem({ ...agentBody(model), ...change }), false);

@@ -732,6 +732,11 @@
       "name": "check:ui-kit-upstream",
       "command": "node scripts/check/check-ui-kit-upstream.mjs",
       "disposition": "separately-invoked"
+    },
+    {
+      "name": "test:compression:packaged",
+      "command": "node scripts/test/check-compression-packaged-runtime.mjs",
+      "disposition": "separately-invoked"
     }
   ],
   "profiles": {

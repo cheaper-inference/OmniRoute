@@ -133,15 +133,19 @@ export class ServerSupervisor {
     // Node args come from buildNodeRuntimeArgs (#9209 IPv4-first DNS + #5238
     // heap flag handling); the Bun branch keeps #9761's polyfill preload —
     // Bun does not accept the Node-only flags.
-    this.child = spawn(process.execPath, buildServerSpawnArgs(this.serverPath, this.memoryLimit), {
-      cwd: dirname(this.serverPath),
-      env: this.env,
-      stdio: showLog ? "inherit" : ["ignore", "pipe", "pipe"],
-      // Tray mode has no visible console. Keep the supervised server hidden on Windows,
-      // including when it is restarted after a crash. Without this, each supervised
-      // spawn can create a visible terminal window.
-      windowsHide: true,
-    });
+    this.child = spawn(
+      process.execPath,
+      buildServerSpawnArgs(this.serverPath, this.memoryLimit, this.env),
+      {
+        cwd: dirname(this.serverPath),
+        env: this.env,
+        stdio: showLog ? "inherit" : ["ignore", "pipe", "pipe"],
+        // Tray mode has no visible console. Keep the supervised server hidden on Windows,
+        // including when it is restarted after a crash. Without this, each supervised
+        // spawn can create a visible terminal window.
+        windowsHide: true,
+      }
+    );
 
     this.lastChildPid = this.child?.pid ?? null;
     // #16030: drop any intent marker left by a previous run so only THIS child's

@@ -108,6 +108,7 @@ type ChatLog =
   | undefined;
 
 export type ExecuteProviderRequestDeps = {
+  cachePrincipalId?: string | null;
   agentGoalPolicy: AgentGoalPolicy;
   assertManagedLeaseFence: (attemptConnectionId: string | null | undefined) => void;
   buildUpstreamHeadersForExecute: (modelToCall: string) => Record<string, string>;
@@ -226,6 +227,7 @@ export async function executeProviderRequest(
       isOpencodeClient,
       rawBody: body,
       clientRawRequest,
+      cachePrincipalId: deps.cachePrincipalId,
       toolDisclosure,
     });
 

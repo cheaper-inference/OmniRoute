@@ -1,6 +1,6 @@
 import { extractXmlInvokeBlocks } from "../helpers/xmlToolCalls.ts";
 import { register } from "../registry.ts";
-import { mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
+import { mergeCacheCreationFields, readCacheWriteUsage } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../request/openai-to-claude.ts";
 import {
@@ -316,9 +316,7 @@ function readUsageCounters(usage) {
     promptTokens: firstNumber(usage.prompt_tokens, usage.input_tokens),
     outputTokens: firstNumber(usage.completion_tokens, usage.output_tokens),
     cacheReadTokens: firstNumber(promptDetails?.cached_tokens ?? inputDetails?.cached_tokens),
-    cacheCreateTokens: firstNumber(
-      promptDetails?.cache_creation_tokens ?? inputDetails?.cache_creation_tokens
-    ),
+    cacheCreateTokens: readCacheWriteUsage(usage).total ?? 0,
     writeInPrompt: (promptDetails ?? inputDetails)?.cache_creation_in_prompt !== false,
     reasoningTokens: firstNumber(
       usage.completion_tokens_details?.reasoning_tokens ??
@@ -359,7 +357,7 @@ function trackUsageFromChunk(chunk, state) {
   }
 
   // Add cache_creation_input_tokens if present
-  if (cacheCreateTokens > 0) {
+  if (readCacheWriteUsage(chunk.usage).total !== null) {
     state.usage.cache_creation_input_tokens = cacheCreateTokens;
   }
 

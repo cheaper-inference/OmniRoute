@@ -264,25 +264,27 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
     const metadata = compressMcpRegistryMetadata(config, {
       enabled: mcpDescriptionCompressionEnabled,
     });
-    const filteredHandler = mcpAccessibilityConfig.enabled
-      ? async (args: unknown, extra?: unknown) => {
-          const result = await (handler as (a: unknown, e?: unknown) => Promise<TextToolResult>)(
-            args,
-            extra
-          );
-          if (Array.isArray(result?.content)) {
-            for (const block of result.content) {
-              if (block && block.type === "text" && typeof block.text === "string") {
-                block.text = smartFilterText(block.text, mcpAccessibilityConfig);
+    // CCR owns bounded retrieval and principal checks; accessibility previews must not alter it.
+    const filteredHandler =
+      mcpAccessibilityConfig.enabled && name !== "omniroute_ccr_retrieve"
+        ? async (args: unknown, extra?: unknown) => {
+            const result = await (handler as (a: unknown, e?: unknown) => Promise<TextToolResult>)(
+              args,
+              extra
+            );
+            if (Array.isArray(result?.content)) {
+              for (const block of result.content) {
+                if (block && block.type === "text" && typeof block.text === "string") {
+                  block.text = smartFilterText(block.text, mcpAccessibilityConfig);
+                }
               }
             }
+            // A JSON result truncated by the filter flags `truncated` on the text;
+            // mirror that mark onto `structuredContent` (when present) so the two
+            // views of one result do not diverge. `isError` is never touched.
+            return propagateTruncationToStructuredContent(result);
           }
-          // A JSON result truncated by the filter flags `truncated` on the text;
-          // mirror that mark onto `structuredContent` (when present) so the two
-          // views of one result do not diverge. `isError` is never touched.
-          return propagateTruncationToStructuredContent(result);
-        }
-      : handler;
+        : handler;
     const registered = registerTool(name, metadata, filteredHandler as never);
     if (toolProfile && reduceToolManifest([{ name, scopes: [] }], toolProfile).length === 0) {
       // Denied by the cardinality profile: keep the registration valid but disable it so the tool

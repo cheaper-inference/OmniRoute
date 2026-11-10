@@ -184,3 +184,9 @@ export function normalizeClaudeUpstreamMessages(
     payload.messages as ClaudeMessage[]
   ) as unknown as Record<string, unknown>[];
 }
+
+/** Bind resolved route capabilities once for every normalization call in the request. */
+export function createClaudeUpstreamNormalizer(route: SystemRoleRoute, log?: LoggerLike) {
+  return (payload: Record<string, unknown>, options?: { preserveToolResultBlocks?: boolean }) =>
+    normalizeClaudeUpstreamMessages(payload, { ...options, ...route }, log);
+}

@@ -356,14 +356,9 @@ export function shouldUseMidConversationSystem(
     !!payload.system &&
     (typeof payload.system === "string" ||
       (Array.isArray(payload.system) && payload.system.length > 0));
-  const hasTools = Array.isArray(payload.tools) && payload.tools.length > 0;
   const effectiveModel = model ?? (typeof payload.model === "string" ? payload.model : "");
 
-  return (
-    hasSystem &&
-    hasTools &&
-    matchesModelPrefix(effectiveModel, MID_CONVERSATION_SYSTEM_MODEL_PREFIXES)
-  );
+  return hasSystem && matchesModelPrefix(effectiveModel, MID_CONVERSATION_SYSTEM_MODEL_PREFIXES);
 }
 
 /**

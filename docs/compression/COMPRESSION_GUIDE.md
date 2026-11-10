@@ -255,6 +255,40 @@ The applied plan is echoed back in the `X-OmniRoute-Compression: <mode>; source=
 header, where `<source>` is one of `request-header`, `routing-override`, `active-profile`,
 `auto-trigger`, `default`, or `off`.
 
+### Selection and retrieval diagnostics
+
+A valid `x-omniroute-compression` header selects its plan before the auto-trigger threshold.
+A named profile supplies its ordered pipeline; `engine:rtk` selects just RTK, not the profile's
+helper engines. Stored explicit engine choices differ from display maps populated with defaults.
+The existing lossy-engine consent rules, per-engine eligibility and configured intensity still apply.
+Zero savings can be valid when a body lacks the selected engine's supported structure or an earlier
+stage has already removed the reducible content. Output-style injection alone does not measure savings.
+
+CCR references require `omniroute_ccr_retrieve` on the same authenticated principal that stored the
+content. Grant only the required `read:compression` tool scope and, for remote MCP connection,
+`mcp:connect`; preserve normal authentication. Missing tools or scopes are not repaired by granting
+administrative access. Full MCP retrieval retains the existing 256 KiB content bound; oversized blocks
+use the existing ranged retrieval modes. The accessibility filter does not shorten CCR retrievals.
+Generic oversized JSON tool results still use valid previews with explicit truncation marks.
+
+For the Node CLI server, optional `OMNIROUTE_CACHE_DIAGNOSTICS=1` writes bounded private numeric
+observations under the same resolved data directory used by the launcher, even without `DATA_DIR`.
+`OMNIROUTE_TOKEN_BREAKDOWN=1` additionally enables disposable-worker visible-content estimates.
+These are off by default, respect per-key `noLog`, and never persist prompt text, tool names, credentials
+or raw session IDs.
+Only known OpenAI/Codex HTTPS endpoints using Undici are observed; encoded responses, oversized frames,
+unavailable usage and missing terminal events are reported as unavailable rather than cache misses.
+Per-process keyed body/item/head fingerprints cover captured bytes, not a provider's full rendered
+prompt. Comparisons with an unknown account or session are explicitly marked and can interleave traffic.
+
+The estimator permits one body up to 8 MiB, no queue, a 5-second deadline and a 1-second recovery
+cooldown. Chunked `o200k_base` work stops cooperatively at 262,144 characters or 1,500 ms; remaining
+characters use a disclosed heuristic. The outer worker deadline bounds slow chunks. A 128 MiB V8 heap
+limit does not cap external or WASM allocations. Category/source subtotals describe visible content,
+not exact native Claude tokenization, provider framing or billable per-category usage. No historical
+prompts or unknown counters are backfilled. Neither these observations nor session cache affinity
+guarantee provider cache hits, invoice savings or output quality.
+
 ### API
 
 ```bash
