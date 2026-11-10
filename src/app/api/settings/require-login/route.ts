@@ -89,6 +89,9 @@ export async function GET() {
         authenticated: false,
         requireLogin: true,
         hasPassword: true,
+        // The fail-safe values above are not a real reading; the onboarding wizard must not
+        // treat this `hasPassword` as a configured password (#19211).
+        settingsUnavailable: true,
         setupComplete: true,
         oidcEnabled: false,
         oidcDisablePasswordLogin: false,

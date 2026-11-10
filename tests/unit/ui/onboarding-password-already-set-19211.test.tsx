@@ -199,6 +199,20 @@ it("does not offer to set the password again after it was set earlier in the sam
   ).toHaveLength(1);
 });
 
+it("does not read the server's fail-safe hasPassword as a configured password", async () => {
+  stubFetch({
+    hasPassword: true,
+    requireLogin: true,
+    setupComplete: true,
+    settingsUnavailable: true,
+  });
+  await openSecurityStep();
+
+  expect(container.textContent).not.toContain("passwordAlreadySet");
+  expect(container.querySelectorAll('input[type="password"]')).toHaveLength(2);
+  expect(container.textContent).toContain("setPassword");
+});
+
 it("falls back to the password form when the login settings cannot be read", async () => {
   stubFetch(new Error("network down"));
   await openSecurityStep();

@@ -83,7 +83,10 @@ export default function OnboardingWizard() {
         if (res.ok) {
           const loginSettings = await res.json();
           // One-way: a password set earlier in this run must not be "unset" by a later read.
-          if (loginSettings?.hasPassword === true) setPasswordAlreadySet(true);
+          // A failed server read answers hasPassword:true as a fail-safe; that is not a password.
+          if (loginSettings?.hasPassword === true && loginSettings?.settingsUnavailable !== true) {
+            setPasswordAlreadySet(true);
+          }
         }
       } catch {
         // Unknown: keep the password form, as before
