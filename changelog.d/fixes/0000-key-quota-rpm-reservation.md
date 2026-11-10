@@ -1,1 +1,0 @@
-- **fix(quota):** a key with a requests-per-minute quota can no longer go over it when many calls arrive at the same time. A call now holds a slot from the moment it is admitted until it ends: the slot becomes the recorded call when it succeeds, and it returns on an upstream error, a client abort, a later policy deny or a thrown error.
