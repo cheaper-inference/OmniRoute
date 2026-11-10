@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
 import { z } from "zod";
 import {
@@ -8,6 +8,7 @@ import {
   CHATGPT_TOKEN_URL,
 } from "@omniroute/open-sse/config/chatgpt";
 import { resolvePublicCred } from "@omniroute/open-sse/utils/publicCreds";
+import { generateCodeChallenge } from "./utils/pkce";
 
 export const chatGptTokensSchema = z.object({
   access_token: z.string().min(1),
@@ -61,7 +62,7 @@ export function createChatGptAttempt(
     state: attempt.state,
     nonce: attempt.nonce,
     code_challenge_method: "S256",
-    code_challenge: createHash("sha256").update(verifier).digest("base64url"),
+    code_challenge: generateCodeChallenge(verifier),
   }).toString();
   return { attempt, authUrl: url.toString() };
 }

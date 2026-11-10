@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { generateKeyPair, exportJWK, createLocalJWKSet, SignJWT, UnsecuredJWT } from "jose";
+import { opaqueTokenFingerprint } from "../../open-sse/utils/opaqueTokenFingerprint.ts";
 
 const dataDir = mkdtempSync(join(tmpdir(), "omniroute-siwc-"));
 process.env.DATA_DIR = dataDir;
@@ -393,7 +394,7 @@ test("manual completion validates owner and callback before exchange and prevent
         body: JSON.stringify(body),
       })
     );
-  const owner = createHash("sha256").update(`auth_token=${token}`).digest("hex");
+  const owner = opaqueTokenFingerprint(`auth_token=${token}`);
   const { attempt } = createChatGptAttempt("https://router.example", 1455, "test-host");
   saveChatGptAttempt(attempt, owner);
   let exchanges = 0;
@@ -461,7 +462,7 @@ test("verified reauthorization reactivates the registration and resets refresh f
     subject: "reauth-user",
     connectionId: connection.id,
   });
-  saveChatGptAttempt(attempt, createHash("sha256").update(`auth_token=${session}`).digest("hex"));
+  saveChatGptAttempt(attempt, opaqueTokenFingerprint(`auth_token=${session}`));
   const { privateKey, publicKey } = await generateKeyPair("RS256");
   const idToken = await new SignJWT({ nonce: attempt.nonce })
     .setProtectedHeader({ alg: "RS256", kid: "reauth-test" })
