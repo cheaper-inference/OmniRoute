@@ -11,7 +11,7 @@ import { DetailsSection, EmptyNote, SaveFeedback } from "./DetailsPrimitives";
 
 const toInput = (value: number | null) => (value === null ? "" : String(value));
 
-/** Daily / weekly USD usage limit, persisted through PATCH /api/keys/[id]. */
+/** Daily / weekly / rolling 5-hour USD usage limit, persisted through PATCH /api/keys/[id]. */
 export function UsageLimitCard({
   keyId,
   keyConfig,
@@ -28,13 +28,19 @@ export function UsageLimitCard({
   const [enabled, setEnabled] = useState(keyConfig?.usageLimitEnabled === true);
   const [daily, setDaily] = useState(toInput(keyConfig?.dailyUsageLimitUsd ?? null));
   const [weekly, setWeekly] = useState(toInput(keyConfig?.weeklyUsageLimitUsd ?? null));
+  const [fiveHour, setFiveHour] = useState(toInput(keyConfig?.fiveHourUsageLimitUsd ?? null));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const save = async () => {
     const dailyUsageLimitUsd = parseOptionalLimitInput(daily);
     const weeklyUsageLimitUsd = parseOptionalLimitInput(weekly);
-    if (dailyUsageLimitUsd === undefined || weeklyUsageLimitUsd === undefined) {
+    const fiveHourUsageLimitUsd = parseOptionalLimitInput(fiveHour);
+    if (
+      dailyUsageLimitUsd === undefined ||
+      weeklyUsageLimitUsd === undefined ||
+      fiveHourUsageLimitUsd === undefined
+    ) {
       setError(t("invalidAmount"));
       return;
     }
@@ -44,6 +50,7 @@ export function UsageLimitCard({
       usageLimitEnabled: enabled,
       dailyUsageLimitUsd,
       weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd,
     });
     if (res.ok) await onSaved();
     else setError(safeApiErrorMessage(res.body, t("saveFailed")));
@@ -58,11 +65,11 @@ export function UsageLimitCard({
             enabled={enabled}
             dailyLimitUsd={daily}
             weeklyLimitUsd={weekly}
-            enabledLabel={tc("enabled")}
-            disabledLabel={tc("disabled")}
+            fiveHourLimitUsd={fiveHour}
             onEnabledChange={setEnabled}
             onDailyLimitUsdChange={setDaily}
             onWeeklyLimitUsdChange={setWeekly}
+            onFiveHourLimitUsdChange={setFiveHour}
           />
           <div className="flex flex-wrap items-center gap-3">
             <Button size="sm" icon="save" loading={saving} onClick={() => void save()}>

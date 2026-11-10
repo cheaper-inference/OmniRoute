@@ -151,7 +151,11 @@ describe("API key list", () => {
 });
 
 describe("API key details page", () => {
-  function routeDetails(selfService: unknown, selfServiceStatus = 200) {
+  function routeDetails(
+    selfService: unknown,
+    selfServiceStatus = 200,
+    keyBody: Record<string, unknown> = {}
+  ) {
     return stubFetch((url, method) => {
       if (url === "/api/keys/key-1/self-service") {
         return method === "PUT"
@@ -159,8 +163,15 @@ describe("API key details page", () => {
           : { status: selfServiceStatus, body: selfService };
       }
       if (url === "/api/keys/key-1") {
+        if (method === "PATCH") return { body: { success: true } };
         return {
-          body: { id: "key-1", name: "Team key", scopes: ["self:usage"], usageLimitEnabled: false },
+          body: {
+            id: "key-1",
+            name: "Team key",
+            scopes: ["self:usage"],
+            usageLimitEnabled: false,
+            ...keyBody,
+          },
         };
       }
       if (url.startsWith("/api/usage/token-limits")) return { body: { limits: [] } };
@@ -260,6 +271,31 @@ describe("API key details page", () => {
     await waitFor(() => expect(deletes()).toHaveLength(1));
     expect(deletes()[0].url).toBe("/api/usage/key-quota?apiKeyId=key-1");
     expect(nativeConfirm).not.toHaveBeenCalled();
+  });
+
+  it("edits and saves the rolling 5-hour USD limit with the daily and weekly ones", async () => {
+    const calls = routeDetails(SELF_SERVICE_FIXTURE, 200, {
+      usageLimitEnabled: true,
+      dailyUsageLimitUsd: 10,
+      weeklyUsageLimitUsd: 50,
+      fiveHourUsageLimitUsd: 3,
+    });
+    render(<ApiKeyDetailsPageClient keyId="key-1" />);
+    const card = await screen.findByRole("region", { name: "USD usage limit" });
+    const fiveHour = within(card).getByLabelText("5-hour quota (USD)") as HTMLInputElement;
+    expect(fiveHour.value).toBe("3");
+
+    fireEvent.change(fiveHour, { target: { value: "4.5" } });
+    fireEvent.click(within(card).getByRole("button", { name: "Save" }));
+
+    const patch = () => calls.find((c) => c.method === "PATCH" && c.url === "/api/keys/key-1");
+    await waitFor(() => expect(patch()).toBeTruthy());
+    expect(patch()?.body).toEqual({
+      usageLimitEnabled: true,
+      dailyUsageLimitUsd: 10,
+      weeklyUsageLimitUsd: 50,
+      fiveHourUsageLimitUsd: 4.5,
+    });
   });
 
   it("shows a sanitized error instead of the raw body when loading fails", async () => {

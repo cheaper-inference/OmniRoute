@@ -89,6 +89,19 @@ test("parsers degrade to empty values for a partial or foreign body", () => {
   assert.deepEqual(details.parseKeyQuota({ limits: { tpmLimit: 0, rpmLimit: 30 } }).tpmLimit, null);
 });
 
+test("parseKeyConfig keeps the rolling 5-hour USD limit next to daily and weekly", () => {
+  const config = details.parseKeyConfig({
+    id: "key-1",
+    name: "Team key",
+    usageLimitEnabled: true,
+    dailyUsageLimitUsd: 10,
+    weeklyUsageLimitUsd: 50,
+    fiveHourUsageLimitUsd: 3,
+  });
+  assert.equal(config?.fiveHourUsageLimitUsd, 3);
+  assert.equal(details.parseKeyConfig({ id: "key-2" })?.fiveHourUsageLimitUsd, null);
+});
+
 test("token-limit API reset timestamps retain scheduled epoch-ms resets", () => {
   const iso = "2026-10-02T12:00:00.000Z";
   for (const [nextResetAt, expected] of [
