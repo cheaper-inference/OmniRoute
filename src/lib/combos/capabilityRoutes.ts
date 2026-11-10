@@ -1,4 +1,4 @@
-import { COMBO_ENDPOINTS, type ComboEndpoint } from "@/shared/constants/comboEndpoints";
+import { COMBO_ENDPOINTS, type ComboEndpoint } from "@omniroute/open-sse/config/comboEndpoints.ts";
 import { normalizeComboModels, type ComboStep } from "./steps";
 import { stripDeadComboConfigKeys } from "./deadConfigKeys";
 

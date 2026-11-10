@@ -36,8 +36,8 @@ import {
   narrowMediaConnectionScope,
   pinnedConnectionIds,
 } from "./mediaComboFallback.ts";
-import { projectComboForEndpoint } from "../../src/lib/combos/endpointCapabilities.ts";
-import { orderCapabilityTargets } from "../../src/lib/combos/capabilityTargetOrder.ts";
+import { projectComboForEndpoint } from "./combo/endpointCapabilities.ts";
+import { orderCapabilityTargets } from "./combo/capabilityTargetOrder.ts";
 
 /**
  * Caller-facing shape of handleImageGeneration(). The handler is untyped and

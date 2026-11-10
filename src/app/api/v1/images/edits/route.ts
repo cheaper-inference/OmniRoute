@@ -37,8 +37,8 @@ import {
   runImageComboTargets,
   type ImageComboDispatchResult,
 } from "@omniroute/open-sse/services/imageCombo.ts";
-import { projectComboForEndpoint } from "@/lib/combos/endpointCapabilities";
-import { orderCapabilityTargets } from "@/lib/combos/capabilityTargetOrder";
+import { projectComboForEndpoint } from "@omniroute/open-sse/services/combo/endpointCapabilities.ts";
+import { orderCapabilityTargets } from "@omniroute/open-sse/services/combo/capabilityTargetOrder.ts";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
 import {
   runImageRequestWithAccounting,
@@ -474,20 +474,13 @@ async function dispatchImageEditTarget(
  * edit-capable (or lacks credentials) now falls through to a later edit-capable
  * target instead of flattening to the first target and hard-erroring.
  */
-async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): Promise<Response> {
-  const combo = await getComboByName(comboName);
-  if (!combo) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
-  }
-  const allCombos = await getCombos();
-  const projected = projectComboForEndpoint(combo as never, allCombos as never, "image-edits");
-  const targets = resolveComboTargets(projected.combo as never, projected.allCombos as never);
-  if (!targets || targets.length === 0) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
-  }
-
-  // Build the edit-capable target list (prefix-resolved). Non-edit-capable and
-  // retired targets are skipped here so the loop only iterates dispatchable ones.
+/**
+ * Build the edit-capable target list (prefix-resolved). Non-edit-capable and
+ * retired targets are skipped here so the loop only iterates dispatchable ones.
+ */
+async function resolveEditComboTargets(
+  targets: NonNullable<ReturnType<typeof resolveComboTargets>>
+): Promise<EditComboTarget[]> {
   const editTargets: EditComboTarget[] = [];
   for (const t of targets) {
     const raw =
@@ -514,7 +507,22 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
       credKey: capability.credKey,
     });
   }
+  return editTargets;
+}
 
+async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): Promise<Response> {
+  const combo = await getComboByName(comboName);
+  if (!combo) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
+  }
+  const allCombos = await getCombos();
+  const projected = projectComboForEndpoint(combo as never, allCombos as never, "image-edits");
+  const targets = resolveComboTargets(projected.combo as never, projected.allCombos as never);
+  if (!targets || targets.length === 0) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
+  }
+
+  const editTargets = await resolveEditComboTargets(targets);
   if (editTargets.length === 0) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,

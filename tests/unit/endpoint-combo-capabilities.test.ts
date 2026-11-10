@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   projectComboForEndpoint,
   targetSupportsEndpoint,
-} from "../../src/lib/combos/endpointCapabilities.ts";
+} from "../../open-sse/services/combo/endpointCapabilities.ts";
 import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
 
 test("a mixed combo exposes only candidates for the requested endpoint", () => {

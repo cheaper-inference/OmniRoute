@@ -48,12 +48,33 @@ import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as logger from "@/sse/utils/logger";
-import { projectComboForEndpoint } from "../../src/lib/combos/endpointCapabilities.ts";
-import { orderCapabilityTargets } from "../../src/lib/combos/capabilityTargetOrder.ts";
+import { projectComboForEndpoint } from "./combo/endpointCapabilities.ts";
+import { orderCapabilityTargets } from "./combo/capabilityTargetOrder.ts";
 
 /**
  * Execute a full combo strategy for a video generation request.
  */
+/** Load a combo, project it onto video generation and apply the caller key's scope. */
+async function loadScopedVideoComboTargets(comboName: string, keyScope?: ComboKeyScope) {
+  const combo = await getComboByName(comboName);
+  if (!combo) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
+  }
+
+  const allCombos = await getCombos();
+  const projected = projectComboForEndpoint(combo as never, allCombos as never, "videos");
+  const resolvedTargets = resolveComboTargets(
+    projected.combo as never,
+    projected.allCombos as never
+  );
+  if (!resolvedTargets || resolvedTargets.length === 0) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
+  }
+  const scoped = await scopeComboTargetsForKey(resolvedTargets, keyScope, comboName);
+  if (scoped.rejection) return scoped.rejection;
+  return { projected, targets: scoped.targets, allowedConnections: scoped.allowedConnections };
+}
+
 export async function executeVideoCombo(
   comboName: string,
   body: Record<string, unknown>,
@@ -74,23 +95,9 @@ export async function executeVideoCombo(
   const signal = auth.request.signal;
   if (signal.aborted) return errorResponse(499, "Request aborted");
 
-  const combo = await getComboByName(comboName);
-  if (!combo) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
-  }
-
-  const allCombos = await getCombos();
-  const projected = projectComboForEndpoint(combo as never, allCombos as never, "videos");
-  const resolvedTargets = resolveComboTargets(
-    projected.combo as never,
-    projected.allCombos as never
-  );
-  if (!resolvedTargets || resolvedTargets.length === 0) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
-  }
-  const scoped = await scopeComboTargetsForKey(resolvedTargets, auth.keyScope, comboName);
-  if (scoped.rejection) return scoped.rejection;
-  const { targets, allowedConnections } = scoped;
+  const prepared = await loadScopedVideoComboTargets(comboName, auth.keyScope);
+  if (prepared instanceof Response) return prepared;
+  const { projected, targets, allowedConnections } = prepared;
 
   // Resolve every target once — built-in registry first, then custom
   // OpenAI-compatible provider nodes tagged with the "videos" endpoint —

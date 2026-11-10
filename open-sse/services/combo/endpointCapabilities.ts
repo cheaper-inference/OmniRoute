@@ -1,8 +1,5 @@
 /** Project a stored combo onto a dispatch surface before credentials, scoring or attempts. */
-import {
-  resolveSearchProvider,
-  SEARCH_PROVIDERS,
-} from "@omniroute/open-sse/config/searchRegistry.ts";
+import { SEARCH_PROVIDERS } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { WEB_FETCH_PROVIDERS } from "@omniroute/open-sse/config/webFetchProviders.ts";
 import { getImageModelEntry, isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry.ts";
 import { getModelsByProviderId } from "@omniroute/open-sse/config/providerModels.ts";
@@ -13,13 +10,17 @@ import {
   getSpeechProvider,
   getTranscriptionProvider,
 } from "@omniroute/open-sse/config/audioRegistry.ts";
-import type { ComboCollectionLike, ComboLike } from "@omniroute/open-sse/services/combo/types.ts";
-import { MAX_COMBO_DEPTH_HARD_CAP } from "@omniroute/open-sse/services/combo/comboPredicates.ts";
-import type { ComboEndpoint } from "@/shared/constants/comboEndpoints";
-import { getProviderByAlias, getProviderById } from "@/shared/constants/providers";
-import { getComboModelString, normalizeComboStep, type ComboStep } from "./steps.ts";
+import type { ComboCollectionLike, ComboLike } from "./types.ts";
+import { MAX_COMBO_DEPTH_HARD_CAP } from "./comboPredicates.ts";
+import type { ComboEndpoint } from "../../config/comboEndpoints.ts";
+import {
+  getComboModelString,
+  normalizeComboStep,
+  resolveComboProviderId,
+  type ComboStep,
+} from "./comboStructure.ts";
 
-export type { ComboEndpoint } from "@/shared/constants/comboEndpoints";
+export type { ComboEndpoint } from "../../config/comboEndpoints.ts";
 
 type CapabilityRoute = {
   models?: unknown;
@@ -51,10 +52,47 @@ export function comboForEndpoint(combo: ComboLike, endpoint: ComboEndpoint): Com
 
 /** Resolve aliases to the provider id used by capability registries. */
 export function targetProvider(modelStr: string, hint?: string | null): string {
-  const raw = hint || modelStr.split("/")[0];
-  return (
-    (getProviderById(raw) || getProviderByAlias(raw))?.id || resolveSearchProvider(raw)?.id || raw
+  return resolveComboProviderId(hint || modelStr.split("/")[0]);
+}
+
+type ModelCatalog = { models?: Array<{ id?: string }> } | null | undefined;
+
+/** Registries that decide which provider/model pairs serve one media endpoint. */
+const MEDIA_ENDPOINT_CATALOGS: Partial<Record<ComboEndpoint, (provider: string) => ModelCatalog>> =
+  {
+    videos: getVideoProvider,
+    music: getMusicProvider,
+    ocr: getOcrProvider,
+    "audio-speech": getSpeechProvider,
+    "audio-transcriptions": getTranscriptionProvider,
+    "audio-translations": getTranscriptionProvider,
+  };
+
+/** Tell whether a catalog lists the model; null when the provider has no catalog. */
+function catalogHasModel(catalog: ModelCatalog, modelId: string, modelStr: string): boolean | null {
+  if (!catalog) return null;
+  if (!Array.isArray(catalog.models) || catalog.models.length === 0) return true;
+  return catalog.models.some((model) => model.id === modelId || model.id === modelStr);
+}
+
+/** Answer for dedicated web executors, which must never reach DefaultExecutor's OpenAI fallback. */
+function webEndpointSupport(provider: string, endpoint: ComboEndpoint): boolean | null {
+  const search = Object.hasOwn(SEARCH_PROVIDERS, provider) ? SEARCH_PROVIDERS[provider] : undefined;
+  const fetch = (WEB_FETCH_PROVIDERS as readonly string[]).includes(provider);
+  if (endpoint === "search") return Boolean(search && !search.disabled);
+  if (endpoint === "web-fetch") return fetch;
+  return search || fetch ? false : null;
+}
+
+/** A model served only by media registries must not be dispatched as chat. */
+function isMediaOnlyTarget(provider: string, modelStr: string, modelId: string): boolean {
+  if (getModelsByProviderId(provider).some((m) => m.id === modelId || m.id === modelStr)) {
+    return false;
+  }
+  const inMediaCatalog = Object.values(MEDIA_ENDPOINT_CATALOGS).some(
+    (lookup) => catalogHasModel(lookup(provider), modelId, modelStr) === true
   );
+  return inMediaCatalog || Boolean(getImageModelEntry(modelStr) && isImageOnlyModel(modelStr));
 }
 
 /** Check whether a provider/model target can serve the requested endpoint. */
@@ -64,42 +102,16 @@ export function targetSupportsEndpoint(
   hint?: string | null
 ): boolean {
   const provider = targetProvider(modelStr, hint);
-  const search = Object.hasOwn(SEARCH_PROVIDERS, provider) ? SEARCH_PROVIDERS[provider] : undefined;
-  const fetch = (WEB_FETCH_PROVIDERS as readonly string[]).includes(provider);
-  const modelId = modelStr.includes("/") ? modelStr.slice(modelStr.indexOf("/") + 1) : modelStr;
-  const hasModel = (config: { models?: Array<{ id?: string }> } | null): boolean | null => {
-    if (!config) return null;
-    if (!Array.isArray(config.models) || config.models.length === 0) return true;
-    return config.models.some((model) => model.id === modelId || model.id === modelStr);
-  };
-  if (endpoint === "search") return Boolean(search && !search.disabled);
-  if (endpoint === "web-fetch") return fetch;
-  // Dedicated web executors must never reach DefaultExecutor's OpenAI fallback.
-  if (search || fetch) return false;
+  const webSupport = webEndpointSupport(provider, endpoint);
+  if (webSupport !== null) return webSupport;
   if (endpoint === "images" || endpoint === "image-edits") {
     return Boolean(getImageModelEntry(modelStr));
   }
-  if (endpoint === "videos") return hasModel(getVideoProvider(provider)) ?? true;
-  if (endpoint === "music") return hasModel(getMusicProvider(provider)) ?? true;
-  if (endpoint === "ocr") return hasModel(getOcrProvider(provider)) ?? true;
-  if (endpoint === "audio-speech") return hasModel(getSpeechProvider(provider)) ?? true;
-  if (endpoint === "audio-transcriptions" || endpoint === "audio-translations") {
-    return hasModel(getTranscriptionProvider(provider)) ?? true;
-  }
+  const modelId = modelStr.includes("/") ? modelStr.slice(modelStr.indexOf("/") + 1) : modelStr;
+  const mediaCatalog = MEDIA_ENDPOINT_CATALOGS[endpoint];
+  if (mediaCatalog) return catalogHasModel(mediaCatalog(provider), modelId, modelStr) ?? true;
   if (endpoint === "audio-generation") return provider === "elevenlabs";
-  const chatCatalogHasModel = getModelsByProviderId(provider).some(
-    (model) => model.id === modelId || model.id === modelStr
-  );
-  const recognizedModalTarget =
-    [
-      hasModel(getVideoProvider(provider)),
-      hasModel(getMusicProvider(provider)),
-      hasModel(getOcrProvider(provider)),
-      hasModel(getSpeechProvider(provider)),
-      hasModel(getTranscriptionProvider(provider)),
-      getImageModelEntry(modelStr) && isImageOnlyModel(modelStr) ? true : null,
-    ].some((supported) => supported === true) && !chatCatalogHasModel;
-  if (endpoint === "chat" && recognizedModalTarget) return false;
+  if (endpoint === "chat") return !isMediaOnlyTarget(provider, modelStr, modelId);
   // Keep existing non-web endpoint guards and opt-in modality bridges authoritative.
   // Unknown/custom models cannot be rejected solely because a static catalog lacks them.
   return true;

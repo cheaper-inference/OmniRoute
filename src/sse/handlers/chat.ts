@@ -1,5 +1,5 @@
 import { hasQoderCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
-import { targetSupportsEndpoint } from "@/lib/combos/endpointCapabilities";
+import { targetSupportsEndpoint } from "@omniroute/open-sse/services/combo/endpointCapabilities.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";

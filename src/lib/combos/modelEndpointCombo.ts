@@ -10,7 +10,7 @@ import { getSettings } from "@/lib/db/settings";
 import { createComboTargetKeyGate } from "@/sse/services/keyConnectionScope";
 import * as log from "@/sse/utils/logger";
 import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
-import type { ComboEndpoint } from "@/shared/constants/comboEndpoints";
+import type { ComboEndpoint } from "@omniroute/open-sse/config/comboEndpoints.ts";
 
 interface ModelEndpointComboOptions {
   name: string;

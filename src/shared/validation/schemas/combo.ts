@@ -13,7 +13,10 @@ import {
   isForbiddenCustomHeaderName,
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
-import { COMBO_ENDPOINTS, COMBO_NON_CHAT_STRATEGIES } from "@/shared/constants/comboEndpoints";
+import {
+  COMBO_ENDPOINTS,
+  COMBO_NON_CHAT_STRATEGIES,
+} from "@omniroute/open-sse/config/comboEndpoints.ts";
 import { OPENAI_SERVICE_TIER_VALUES } from "@omniroute/open-sse/config/serviceTier.ts";
 
 // ──── Combo Schemas ────

@@ -46,7 +46,7 @@ import { getCachedClaudeQuotaScopeDecision } from "../claudeQuotaScopeBridge.ts"
 import { resolveProviderId } from "@/shared/constants/providers";
 import { LOCAL_MODEL_COOLDOWN_HEADER } from "../../utils/localCooldownHeader.ts";
 import { isExplicitModelCapacityFailure } from "../accountFallback/perModelFailureScope.ts";
-import { targetSupportsEndpoint } from "../../../src/lib/combos/endpointCapabilities.ts";
+import { targetSupportsEndpoint } from "./endpointCapabilities.ts";
 import { isModelScopedAccessDenial } from "../accountFallback/modelScopedAccessDenial.ts";
 import type { ComboLogger, ResolvedComboTarget } from "./types.ts";
 

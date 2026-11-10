@@ -39,8 +39,8 @@ import {
   narrowMediaConnectionScope,
   pinnedConnectionIds,
 } from "./mediaComboFallback.ts";
-import { projectComboForEndpoint } from "../../src/lib/combos/endpointCapabilities.ts";
-import { orderCapabilityTargets } from "../../src/lib/combos/capabilityTargetOrder.ts";
+import { projectComboForEndpoint } from "./combo/endpointCapabilities.ts";
+import { orderCapabilityTargets } from "./combo/capabilityTargetOrder.ts";
 
 /**
  * Execute a full combo strategy for a text-to-speech request.

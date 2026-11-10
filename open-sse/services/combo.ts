@@ -29,7 +29,7 @@ import {
 } from "./comboConfig.ts";
 import { getModelTimeoutMs } from "../config/providerModels.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
-import { projectComboForEndpoint } from "../../src/lib/combos/endpointCapabilities.ts";
+import { projectComboForEndpoint } from "./combo/endpointCapabilities.ts";
 
 import { getHiddenModelsByProvider } from "@/models";
 import { getHiddenChatModels } from "../../src/lib/hiddenChatModels";
@@ -765,25 +765,27 @@ function resolveRegistryDeclaredTimeoutMs(provider: string, modelStr: string): n
     : undefined;
 }
 
+/** Narrow a combo to its targets for the requested endpoint, or reject when none remain. */
+function projectComboChatOptions(
+  options: HandleComboChatOptions
+): HandleComboChatOptions | Response {
+  const endpoint = options.endpointCapability ?? "chat";
+  const projected = projectComboForEndpoint(options.combo, options.allCombos, endpoint);
+  if (options.combo.models.length > 0 && projected.combo.models.length === 0) {
+    return errorResponse(400, `Combo has no compatible targets for ${endpoint}`);
+  }
+  return { ...options, combo: projected.combo, allCombos: projected.allCombos };
+}
+
 /**
  * #10681 egress: every combo response carries the opaque trace id in an
  * `X-OmniRoute-Combo-Trace` header so a post-incident lookup of the ordered
  * per-target decisions is possible; the finalized summary is also emitted as
  * one metadata-only log line for durability across restarts.
  */
-export async function handleComboChat(options: HandleComboChatOptions): Promise<Response> {
-  const projected = projectComboForEndpoint(
-    options.combo,
-    options.allCombos,
-    options.endpointCapability ?? "chat"
-  );
-  if (options.combo.models.length > 0 && projected.combo.models.length === 0) {
-    return errorResponse(
-      400,
-      `Combo has no compatible targets for ${options.endpointCapability ?? "chat"}`
-    );
-  }
-  options = { ...options, combo: projected.combo, allCombos: projected.allCombos };
+export async function handleComboChat(requested: HandleComboChatOptions): Promise<Response> {
+  const options = projectComboChatOptions(requested);
+  if (options instanceof Response) return options;
   const comboInvocationId = (options.combo as { traceInvocationId?: unknown } | null | undefined)
     ?.traceInvocationId;
   const traceInvocationId =

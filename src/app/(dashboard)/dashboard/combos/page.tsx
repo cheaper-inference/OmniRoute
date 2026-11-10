@@ -142,7 +142,7 @@ import {
   COMBO_ENDPOINTS,
   COMBO_NON_CHAT_STRATEGIES,
   type ComboEndpoint,
-} from "@/shared/constants/comboEndpoints";
+} from "@omniroute/open-sse/config/comboEndpoints.ts";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 const ModelSelectModal = dynamic(() => import("@/shared/components/ModelSelectModal"), {
@@ -844,6 +844,59 @@ function formatComboStepWithAccount(
     connectionId,
     connectionLabel,
   })}`;
+}
+
+type CapabilityDraft = {
+  models: ComboStep[];
+  strategy: string;
+  config: Record<string, unknown>;
+};
+type CapabilityDrafts = Partial<Record<ComboEndpoint, CapabilityDraft>>;
+
+/** A weighted route with targets must add up to exactly 100%. */
+function hasInvalidWeightedRoute(drafts: CapabilityDrafts): boolean {
+  return Object.values(drafts).some(
+    (draft) =>
+      draft &&
+      draft.models.length > 0 &&
+      draft.strategy === "weighted" &&
+      draft.models.reduce((sum, entry) => sum + (entry.weight || 0), 0) !== 100
+  );
+}
+
+/** Serialize the configured capability tabs; empty ones are not persisted. */
+function buildCapabilityRoutes(drafts: CapabilityDrafts, isExpertMode: boolean): CapabilityDrafts {
+  return Object.fromEntries(
+    COMBO_ENDPOINTS.flatMap((endpoint) => {
+      const draft = drafts[endpoint];
+      if (!draft || draft.models.length === 0) return [];
+      const routeConfig = applyQuotaOnlyFallbackConfig(
+        draft.strategy,
+        draft.models,
+        sanitizeComboRuntimeConfig(draft.config)
+      );
+      persistStickyRoundRobinLimit(draft.strategy, routeConfig, draft.config);
+      persistConnectionAwareExpansion(draft.strategy, routeConfig, draft.config);
+      if (
+        isIntelligentBuilderStrategy(draft.strategy) &&
+        !isExpertMode &&
+        (!Array.isArray(routeConfig.candidatePool) || routeConfig.candidatePool.length === 0)
+      ) {
+        const candidates = deriveCandidatePoolFromModels(draft.models);
+        if (candidates.length > 0) routeConfig.candidatePool = candidates;
+      }
+      return [
+        [
+          endpoint,
+          {
+            models: draft.models,
+            strategy: draft.strategy,
+            ...(Object.keys(routeConfig).length > 0 ? { config: routeConfig } : {}),
+          },
+        ],
+      ];
+    })
+  ) as CapabilityDrafts;
 }
 
 function deriveCandidatePoolFromModels(models) {
@@ -2359,11 +2412,6 @@ function ComboFormModal({
   comboConfigMode,
   routingSettings,
 }) {
-  type CapabilityDraft = {
-    models: ComboStep[];
-    strategy: string;
-    config: Record<string, unknown>;
-  };
   type CreateDraftSnapshot = {
     name: string;
     models: unknown[];
@@ -3461,47 +3509,13 @@ function ComboFormModal({
       setBuilderError(t("endpointChatTargetRequired"));
       return;
     }
-    for (const draft of Object.values(drafts)) {
-      if (!draft || draft.models.length === 0 || draft.strategy !== "weighted") continue;
-      const total = draft.models.reduce((sum, entry) => sum + (entry.weight || 0), 0);
-      if (total !== 100) {
-        setBuilderError(t("endpointWeightedRouteTotalInvalid"));
-        return;
-      }
+    if (hasInvalidWeightedRoute(drafts)) {
+      setBuilderError(t("endpointWeightedRouteTotalInvalid"));
+      return;
     }
     setSaving(true);
 
-    const routes = Object.fromEntries(
-      COMBO_ENDPOINTS.flatMap((endpoint) => {
-        const draft = drafts[endpoint];
-        if (!draft || draft.models.length === 0) return [];
-        const routeConfig = applyQuotaOnlyFallbackConfig(
-          draft.strategy,
-          draft.models,
-          sanitizeComboRuntimeConfig(draft.config)
-        );
-        persistStickyRoundRobinLimit(draft.strategy, routeConfig, draft.config);
-        persistConnectionAwareExpansion(draft.strategy, routeConfig, draft.config);
-        if (
-          isIntelligentBuilderStrategy(draft.strategy) &&
-          !isExpertMode &&
-          (!Array.isArray(routeConfig.candidatePool) || routeConfig.candidatePool.length === 0)
-        ) {
-          const candidates = deriveCandidatePoolFromModels(draft.models);
-          if (candidates.length > 0) routeConfig.candidatePool = candidates;
-        }
-        return [
-          [
-            endpoint,
-            {
-              models: draft.models,
-              strategy: draft.strategy,
-              ...(Object.keys(routeConfig).length > 0 ? { config: routeConfig } : {}),
-            },
-          ],
-        ];
-      })
-    ) as Partial<Record<ComboEndpoint, CapabilityDraft>>;
+    const routes = buildCapabilityRoutes(drafts, isExpertMode);
     const savedChat = routes.chat!;
 
     const saveData: any = {

@@ -10,7 +10,7 @@ import { getComboByName, getCombos } from "@/lib/db/combos";
 import { createComboTargetKeyGate } from "@/sse/services/keyConnectionScope";
 import * as log from "@/sse/utils/logger";
 import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
-import { targetProvider } from "./endpointCapabilities.ts";
+import { targetProvider } from "@omniroute/open-sse/services/combo/endpointCapabilities.ts";
 
 interface WebComboOptions {
   name: string;

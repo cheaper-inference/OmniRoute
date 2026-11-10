@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   orderCapabilityTargets,
   resetCapabilityTargetOrderForTests,
-} from "../../src/lib/combos/capabilityTargetOrder.ts";
+} from "../../open-sse/services/combo/capabilityTargetOrder.ts";
 
 const targets = [
   { modelStr: "music/a", weight: 10 },
