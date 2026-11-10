@@ -1,1 +1,0 @@
-- **fix(db):** Scheduled cleanup now prunes ended exclusive-connection lease rows and past provider quota-reset events, so these two history tables stop growing forever.
