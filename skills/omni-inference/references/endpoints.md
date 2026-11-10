@@ -1153,7 +1153,7 @@ curl http://localhost:20128/api/v1/me/sessions \
 
 GET me › sessions › <id>
 
-Get details and recent requests of a session owned by the calling API key.
+Get details and recent requests of a session owned by the calling API key. Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.
 
 ```bash
 curl http://localhost:20128/api/v1/me/sessions/{id} \
