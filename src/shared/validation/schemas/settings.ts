@@ -210,8 +210,37 @@ export const tokenRefreshBreakerSettingsSchema = z
   })
   .strict();
 
+const preferredOverrideTimeoutSchema = z
+  .number()
+  .int()
+  .min(0)
+  .max(120_000)
+  .refine((value) => value === 0 || value >= 500, "Must be 0 or at least 500 ms");
+
+const preferredTimeoutOverridesSchema = z
+  .record(
+    z
+      .string()
+      .min(1)
+      .max(180)
+      .regex(/^[a-z0-9][a-z0-9._/@:+-]*\*?$/i),
+    preferredOverrideTimeoutSchema
+  )
+  .refine((value) => Object.keys(value).length <= 64, "Too many timeout overrides");
+
+export const preferredAccountFailoverSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    defaultTimeoutMs: z.number().int().min(500).max(120_000).optional(),
+    providerTimeoutsMs: preferredTimeoutOverridesSchema.optional(),
+    modelTimeoutsMs: preferredTimeoutOverridesSchema.optional(),
+  })
+  .strict();
+
 export const updateResilienceSchema = z
   .object({
+    preferredAccountFailover: preferredAccountFailoverSchema.optional(),
+    antigravityTimingTelemetry: z.object({ enabled: z.boolean().optional() }).strict().optional(),
     requestQueue: requestQueueSettingsSchema.optional(),
     connectionCooldown: z
       .object({
@@ -270,6 +299,8 @@ export const updateResilienceSchema = z
   .superRefine((value, ctx) => {
     const provided = [
       value.requestQueue,
+      value.preferredAccountFailover,
+      value.antigravityTimingTelemetry,
       value.connectionCooldown,
       value.providerBreaker,
       value.tokenRefreshBreaker,

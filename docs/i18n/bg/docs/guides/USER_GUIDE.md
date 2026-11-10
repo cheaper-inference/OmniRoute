@@ -352,28 +352,28 @@ codex "your prompt"
 
 ---
 
-## 🚀 Внедряване
+## Внедряване 🚀
 
-### Глобална инсталация чрез npm (препоръчително)
+### Глобално инсталиране на npm (препоръчително)
 
 ```bash
 npm install -g omniroute
 
-# Създаване на директорията за конфигурация
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Създаване на файла .env (вижте .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Стартиране на сървъра
+# Start server
 omniroute
-# Или със зададен порт:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI автоматично зарежда `.env` от `~/.omniroute/.env` или `./.env`.
+CLI автоматично зарежда `.env` от `~/.omniroute/.env` или `./.env`. `./.env` в работната директория може да задава само кратък списък с разрешени ключове (портове, `REQUIRE_API_KEY`, настройки за локал и цвят); поставете всичко останало в `~/.omniroute/.env`. Вижте [договорите за стартиране CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Режим в системната област
+### Режим на тава
 
 Стартирайте OmniRoute в системната област:
 
@@ -381,36 +381,36 @@ CLI автоматично зарежда `.env` от `~/.omniroute/.env` или
 omniroute serve --tray
 ```
 
-Командата приключва, след като сървърът и иконата в системната област са готови.
+Командата се връща, след като сървърът и треят са готови.
 
-Сървърът продължава да работи без терминала.
+Сървърът продължава без терминала.
 
-Режимът в системната област се поддържа в macOS, Windows и графични Linux сесии. Този режим не отваря таблото автоматично.
+Режимът на панела поддържа macOS, Windows и графични Linux сесии. Режимът на тава не отваря автоматично таблото.
 
-Използвайте менюто в системната област за следните действия:
+Използвайте менюто в областта за следните действия:
 
-- Отваряне на таблото.
-- Отваряне на `/dashboard/logs`.
+- Отворете таблото.
+- Отворете `/dashboard/logs`.
 - Промяна на автоматичното стартиране.
-- Спиране на OmniRoute.
+- Спрете OmniRoute.
 
-Не комбинирайте `--tray` със следните опции:
+Не комбинирайте `--tray` с тези опции:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Тези режими изискват различно управление на процесите.
+Тези режими изискват различна собственост върху процеса.
 
-Активирайте стартиране при следващото влизане в системата:
+Активиране на стартиране при следващото влизане в машината:
 
 ```bash
 omniroute autostart enable
 ```
 
-Автоматичното стартиране използва режима в системната област в macOS, Windows и графични Linux сесии. Linux без графична среда използва съществуващата потребителска услуга на systemd.
+Автоматичното стартиране използва режим на област на macOS, Windows и графични Linux сесии. Headless Linux използва съществуващата потребителска услуга systemd.
 
-Деактивирайте стартирането при влизане в системата:
+Деактивирайте стартирането при влизане:
 
 ```bash
 omniroute autostart disable
@@ -418,16 +418,16 @@ omniroute autostart disable
 
 ### Деинсталиране
 
-Когато OmniRoute вече не ви е необходим, предоставяме два бързи скрипта за пълно премахване:
+Когато вече не се нуждаете от OmniRoute, ние предоставяме два бързи скрипта за чисто премахване:
 
-| Команда                  | Действие                                                                                             |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Премахва системното приложение, но **запазва базата ви от данни и конфигурациите** в `~/.omniroute`. |
-| `npm run uninstall:full` | Премахва приложението И окончателно **изтрива всички конфигурации, ключове и бази от данни**.        |
+| командване               | Действие                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Премахва системното приложение, но** запазва вашата DB и конфигурации** в `~/.omniroute`.      |
+| `npm run uninstall:full` | Премахва приложението AND за постоянно** изтрива всички конфигурации, ключове и бази данни** . |
 
-> Забележка: За да изпълните тези команди, отидете в папката на проекта OmniRoute (ако сте го клонирали) и ги стартирайте. Като алтернатива, ако е инсталиран глобално, можете просто да изпълните `npm uninstall -g omniroute`.
+> Забележка: За да изпълните тези команди, отидете до папката на проекта OmniRoute (ако сте го клонирали) и ги изпълнете. Като алтернатива, ако е инсталиран глобално, можете просто да стартирате `npm uninstall -g omniroute`.
 
-### Внедряване на VPS
+### Внедряване VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -443,21 +443,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Или: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Внедряване с PM2 (малко памет)
+### Внедряване PM2 (малко памет)
 
-За сървъри с ограничена RAM използвайте опцията за ограничаване на паметта:
+За сървъри с ограничен RAM използвайте опцията за ограничаване на паметта:
 
 ```bash
-# С ограничение от 512MB (по подразбиране)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Или със зададено ограничение на паметта
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Или чрез ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -486,30 +486,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Изграждане на образа (по подразбиране = runner-cli с предварително инсталирани codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Преносим режим (препоръчително)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-За интегриран с хоста режим с CLI изпълними файлове вижте раздела за Docker в основната документация.
+За интегриран в хост режим с двоични файлове CLI вижте раздела Docker в основните документи.
 
-### Void Linux (xbps-src)
+### Невалиден Linux (xbps-src)
 
-Потребителите на Void Linux могат да пакетират и инсталират OmniRoute по нативен начин с помощта на рамката за кръстосана компилация `xbps-src`. Това автоматизира самостоятелното изграждане на Node.js заедно с необходимите нативни обвързвания на `better-sqlite3`.
+Потребителите на Void Linux могат да пакетират и инсталират OmniRoute естествено, като използват рамката за кръстосано компилиране `xbps-src`. Това автоматизира самостоятелното изграждане Node.js заедно с необходимите естествени свързвания `better-sqlite3`.
 
 <details>
-<summary><b>Преглед на шаблона за xbps-src</b></summary>
+<summary><b>Вижте шаблона xbps-src</b></summary>
 
 ```bash
-# Файл с шаблон за 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Универсален AI шлюз с интелигентно маршрутизиране за множество доставчици на LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -524,7 +524,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Определяне на целевата процесорна архитектура за node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -533,29 +533,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Инсталиране на всички зависимости – без изпълнение на скриптове
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Изграждане на самостоятелния пакет на Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Копиране на статичните ресурси в самостоятелния пакет
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Компилиране на нативното обвързване на better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Поставяне на компилираното обвързване в самостоятелния пакет
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Премахване на специфичните за архитектурата пакети на sharp
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Копиране на зависимостите на pino по време на изпълнение, пропуснати от статичния анализ на Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -569,7 +569,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Предотвратяване на премахването на празните директории на маршрутизатора на приложението Next.js от куката след инсталиране
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -597,30 +597,30 @@ post_install() {
 
 ### Променливи на средата
 
-| Променлива                              | Стойност по подразбиране             | Описание                                                                                                                                                                                  |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Тайна за подписване на JWT (**променете в продукционна среда**)                                                                                                                           |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Парола за първоначално влизане                                                                                                                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | Директория за данни (база данни, използване, регистрационни файлове)                                                                                                                      |
-| `PORT`                                  | по подразбиране за рамката           | Порт на услугата (`20128` в примерите)                                                                                                                                                    |
-| `HOSTNAME`                              | по подразбиране за рамката           | Хост за свързване (Docker използва по подразбиране `0.0.0.0`)                                                                                                                             |
-| `NODE_ENV`                              | по подразбиране за средата           | Задайте `production` при внедряване                                                                                                                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Публичен базов URL адрес, предоставен на таблото и достъпен за сървъра (заменя остарелия `BASE_URL`)                                                                                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Базов URL адрес на крайната точка за облачна синхронизация (заменя остарелия `CLOUD_URL`)                                                                                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC тайна за генерираните API ключове                                                                                                                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | Изискване на Bearer API ключ за `/v1/*`                                                                                                                                                   |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Позволява на удостоверени потребители на таблото да разкриват при поискване пълните стойности на съхранените API ключове                                                                  |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Интервал на сървъра за опресняване на кешираните данни за ограниченията на доставчиците; бутоните за опресняване в потребителския интерфейс продължават да задействат ръчна синхронизация |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Деактивира автоматичните моментни снимки на SQLite преди запис, импортиране или възстановяване; ръчните архиви продължават да работят                                                     |
-| `APP_LOG_TO_FILE`                       | `true`                               | Активира записването на регистрационните файлове на приложението и одита на диска                                                                                                         |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Принудително използване на `Secure` бисквитка за удостоверяване (зад HTTPS обратен прокси сървър)                                                                                         |
-| `CLOUDFLARED_BIN`                       | не е зададено                        | Използва съществуващ двоичен файл `cloudflared` вместо управлявано изтегляне                                                                                                              |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Транспорт за управляваните бързи тунели (`http2`, `quic` или `auto`)                                                                                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Ограничение на heap паметта на Node.js в MB                                                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Максимален брой записи в кеша за подкани                                                                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Максимален брой записи в семантичния кеш                                                                                                                                                  |
+| Променлива                              | По подразбиране                        | Описание                                                                                                                                                         |
+| --------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(автоматично генериран)_              | JWT тайна за подписване — автоматично генерирана при първо изпълнение и персистирана до `server.env`; задайте го изрично, когато директорията с данни е ефимерна |
+| `INITIAL_PASSWORD`                      | _(незададено)_                         | Първа парола за влизане. npm/source инсталациите започват с `CHANGEME`: заменете го. Не е зададено: съветник за включване                                        |
+| `DATA_DIR`                              | `~/.omniroute`                         | Директория с данни (db, използване, регистрационни файлове)                                                                                                      |
+| `PORT`                                  | рамка по подразбиране                  | Сервизен порт (`20128` в примерите)                                                                                                                              |
+| `HOSTNAME`                              | рамка по подразбиране                  | Свързване на хост (Docker по подразбиране е `0.0.0.0`)                                                                                                           |
+| `NODE_ENV`                              | по подразбиране по време на изпълнение | Задайте `production` за внедряване                                                                                                                               |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`               | Публичната база URL се появява на таблото за управление и е изложена на сървъра (заменя наследеното `BASE_URL`)                                                  |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`                | Основна крайна точка за синхронизиране в облака URL (заменя наследеното `CLOUD_URL`)                                                                             |
+| `API_KEY_SECRET`                        | _(автоматично генериран)_              | HMAC тайна за генерирани API ключове — автоматично генерирани при първо изпълнение и запазени до `server.env`                                                    |
+| `REQUIRE_API_KEY`                       | `false`                                | Принудително носител API ключ на `/v1/*`                                                                                                                         |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                                | Позволете на удостоверените потребители на таблото за управление да разкриват пълните съхранени API ключови стойности при поискване                              |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                   | Честота на опресняване от страна на сървъра за кеширани данни за ограниченията на доставчика; UI бутоните за опресняване все още задействат ръчно синхронизиране |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                                | Деактивирайте автоматичните моментни снимки SQLite преди writes/import/restore; ръчните архиви все още работят                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                                 | Разрешава извеждане на журнал на приложения и одит на диск                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                                | Принудителна бисквитка за удостоверяване на `Secure` (зад HTTPS обратен прокси)                                                                                  |
+| `CLOUDFLARED_BIN`                       | ненастроен                             | Използвайте съществуващ `cloudflared` двоичен файл вместо управлявано изтегляне                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                                | Транспорт за управлявани бързи тунели (`http2`, `quic` или `auto`)                                                                                               |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                                  | Node.js ограничение на купчина в MB                                                                                                                              |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                   | Максимални записи в кеша за подкани                                                                                                                              |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                  | Максимални семантични записи в кеша                                                                                                                              |
 
-За пълния списък с променливи на средата вижте [README](../README.md).
+За пълната справка на променливите на средата вижте [README](../README.md).
 
 ---
 

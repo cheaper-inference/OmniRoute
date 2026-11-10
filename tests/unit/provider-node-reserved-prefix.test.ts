@@ -189,6 +189,87 @@ test("registry IDs and aliases, including ZCode tariffs, are reserved", async ()
   assert.equal(RESERVED_PREFIX_COUNT, RESERVED_PROVIDER_PREFIXES.size);
 });
 
+test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen Web prefixes", () => {
+  // 2026-08-30: 398 → 400 with Perplexity Agent API (#12103) and the second prefix the same
+  // afternoon batch registered — computed, not hand-derived (see the note below).
+  // Computed (not hand-derived) after combining Designer's 2 retired
+  // ids/aliases with Felo's 2 retired ids/aliases and Qwen Web's 2 retired
+  // ids/aliases (qwen-web's REGISTRY id/alias were identical strings, so its
+  // live-REGISTRY contribution was 1 unique member; retiring it removes that
+  // 1 and adds 2 distinct tombstones "qwen-web"/"qw", a net +1) on top of the
+  // live REGISTRY walk, minus the 3 GPL-derived Raycast/Hailuo Web
+  // ids/aliases removed from REGISTRY by #11691's migration 166.
+  // #11513: the two UC providers add four REGISTRY prefixes — the persona id "uc" +
+  // alias "ucn", and the Developer API id "uc-direct" + alias "ucd" (402 → 406).
+  // #12389: the gemini-business registry entry adds its id "gemini-business" and
+  // alias "gembiz" to the REGISTRY walk (406 → 408).
+  // 2026-09-02: a keyless provider was removed at its operator's request, taking its id and
+  // alias out of the REGISTRY walk (408 → 406).
+  // #11786: SeekAi adds id "seekai" + alias "ska" (406 → 408).
+  // #13024 (2b9e7fb3e) GreenPT and #13025 (22473dee5) EURouter each add one REGISTRY member (id ==
+  // alias); #13277 (02128f334) registers Arcee AI, adding id "arcee-ai" + alias "arcee" (408 → 412).
+  // #13399 (cdcde97c7) registers Agnes AI (China): id "agnes-cn" + alias "agnescn" — the only
+  // two provider-level members added since (412 -> 414); everything else in that range is
+  // model ids. Same entry that moved the apikey/regional count to 241 in #13905.
+  // #13131 then retires `chipotle`/`pepper` (dead upstream), removing its id "chipotle" and
+  // alias "pepper" from the REGISTRY walk (414 -> 412) — the two land back on the same total.
+  // #12648 registers xKiro: id "xkiro" with no separate alias — a single REGISTRY
+  // member (412 -> 413).
+  // Base 413. Lyceum (pay-per-use OpenAI-compatible gateway, 2026-09-20, #12474) registers
+  // id "lyceum" PLUS a distinct alias — two REGISTRY members, not one (413 -> 415). #12474's
+  // own comment said "identical alias" and left this assertion at 414, so the release tip
+  // carries this test RED; measured directly on origin/release/v3.8.51 (198b3bfd), the live
+  // set is 415. #14217 then retires gemini-business (protocol death, no live account to
+  // validate a rewrite against — see docs/reference/REMOVED_PROVIDERS.md), removing its id
+  // "gemini-business" and alias "gembiz" from the REGISTRY walk and adding no tombstones
+  // (415 -> 413). Measured, not hand-derived: RESERVED_PROVIDER_PREFIXES.size on this head.
+  // Reconciled 2026-09-23: #14468 (suno retirement) landed on the tip first, which already
+  // measured 413 there; with gemini-business also retired on top of it the live set is 412
+  // (413 -> 412). Measured, not hand-derived: RESERVED_PROVIDER_PREFIXES.size on this head.
+  // origin/release/v3.8.52 already measures 413 (test still 412, inherited).
+  // onomeo registers id "onomeo" with the same alias — one REGISTRY member (413 -> 414).
+  // Unifically (#14182) registers id "unifically" with the same alias — one REGISTRY member
+  // (414 -> 415). BeatAPI (#14875) registers id "beatapi" with an identical alias — one more
+  // (415 -> 416). Measured, not hand-derived: RESERVED_PROVIDER_PREFIXES.size.
+  // ChatPlayground (#12690) registers id "chatplayground" and alias "cpl" — two more
+  // (416 -> 418). Measured: RESERVED_PROVIDER_PREFIXES.size after #12690 and #14875 both landed.
+  // notrack-web (#12534): registry entry registers its id "notrack-web" + alias "ntw"
+  // (two new members, 418 -> 420). Do not fold this into a generic catalog bump — the
+  // dedicated notrack-web prefix test below is the regression lock for this provider.
+  // Apmix (#14821) registers id "apmix" with the same alias — one more (420 -> 421).
+  // Token Market (#13191) registers id "tokenmarket" with the same alias — one more.
+  // Twinmind (#14131) registers id "twinmind" and alias "tm" — two more.
+  // SYNTX.ai (#14269) registers id "syntx" and alias "stx" — two more.
+  // CodeBuddy International (#15173) adds id "codebuddy-intl" plus alias "cbai" (429 -> 431).
+  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 431.
+  // The current catalog removes the Free provider id and oc alias (432 -> 430).
+  // ainetcafe (#13862) registers id "ainetcafe" with the same alias — one more (432 -> 433).
+  // Token Harbor (#16315) registers id "tokenharbor" with the same alias — one more
+  // (433 -> 434). Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 434.
+  // Runcrate (#18061) registers id "runcrate" with the same alias — one more
+  // (434 -> 435). Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 435.
+  // Gisoo (#18112) adds id and alias "gisoo" (+1 distinct prefix: 435 -> 436).
+  // MiniMax Code (#17286) registers id "minimax-code" and alias "mmcode" — two
+  // more (436 -> 438).
+  // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
+  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
+  // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 441 -> 443).
+  // ZCode native accounts (#19307) register four tariff ids plus their four aliases
+  // (zcode-start/zc-start, zcode-individual/zc-individual, zcode-cn-start/zc-cn-start,
+  // zcode-cn-individual/zc-cn-individual): +8 (443 -> 451). Measured on the merged tree.
+  assert.equal(RESERVED_PREFIX_COUNT, 451);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("zcode-start"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("gisoo"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("minimax-code"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("mmcode"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("empiriolabs"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("megabrain"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("mb"), true);
+});
+
 test("notrack-web registry id and alias stay reserved", () => {
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("notrack-web"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ntw"), true);

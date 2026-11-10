@@ -1,0 +1,1 @@
+- **feat(zcode):** Add isolated official native OAuth accounts for Z.ai and BigModel Start/Individual tariffs, preserve caller tools and usage across continuations, and separate tariff quota failures. Native account responses remain buffered per model step; legacy local transports remain available. ([#19307](https://github.com/cheaper-inference/OmniRoute/pull/19307)).
