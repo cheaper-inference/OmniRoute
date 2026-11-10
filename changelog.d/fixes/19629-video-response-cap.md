@@ -1,0 +1,1 @@
+- **fix(video):** video provider responses are read under the shared non-streaming byte cap; an over-cap body returns 502 instead of filling memory. ([#19629](https://github.com/cheaper-inference/OmniRoute/pull/19629))
