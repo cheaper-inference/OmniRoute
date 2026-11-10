@@ -2153,6 +2153,7 @@
     "inputTokens": "ഇൻപുട്ട് ടോക്കണുകൾ",
     "outputTokens": "ഔട്ട്പുട്ട് ടോക്കണുകൾ",
     "estCost": "കണക്കാക്കിയ ചെലവ്",
+    "costSplit": "റിപ്പോർട്ട് ചെയ്തത് {reported} · ഏകദേശം {estimated}",
     "infraTitle": "അടിസ്ഥാന സൗകര്യം",
     "infraAccounts": "അക്കൗണ്ടുകൾ",
     "infraProviders": "പ്രൊവൈഡർമാർ",

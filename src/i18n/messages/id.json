@@ -2153,6 +2153,7 @@
     "inputTokens": "Token Input",
     "outputTokens": "Token Output",
     "estCost": "Est. Biaya",
+    "costSplit": "Laporan {reported} · estimasi {estimated}",
     "infraTitle": "Infrastruktur",
     "infraAccounts": "Akun",
     "infraProviders": "Penyedia",

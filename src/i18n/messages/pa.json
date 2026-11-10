@@ -2153,6 +2153,7 @@
     "inputTokens": "ਇਨਪੁੱਟ ਟੋਕਨ",
     "outputTokens": "ਆਉਟਪੁੱਟ ਟੋਕਨ",
     "estCost": "ਅਨੁਮਾਨਿਤ ਲਾਗਤ",
+    "costSplit": "ਰਿਪੋਰਟਡ {reported} · ਅਨੁਮਾਨਿਤ {estimated}",
     "infraTitle": "ਬੁਨਿਆਦੀ ਢਾਂਚਾ",
     "infraAccounts": "ਖਾਤੇ",
     "infraProviders": "ਪ੍ਰਦਾਤਾ",

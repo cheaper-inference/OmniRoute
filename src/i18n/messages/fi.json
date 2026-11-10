@@ -2153,6 +2153,7 @@
     "inputTokens": "Syötetokenit",
     "outputTokens": "Tulostokenit",
     "estCost": "Arvioitu kustannus",
+    "costSplit": "Raportoitu {reported} · arvioitu {estimated}",
     "infraTitle": "Infrastruktuuri",
     "infraAccounts": "Tilit",
     "infraProviders": "Palveluntarjoajat",

@@ -2153,6 +2153,7 @@
     "inputTokens": "Tọkịn Ntinye",
     "outputTokens": "Tọkịn Mmepụta",
     "estCost": "Ọnụ Ahịa E Mere Atụmatụ",
+    "costSplit": "Akọpụ {reported} · nkwekọrịta {estimated}",
     "infraTitle": "Akụrụngwa",
     "infraAccounts": "Akaụntụ",
     "infraProviders": "Ndị Na-enye Ọrụ",

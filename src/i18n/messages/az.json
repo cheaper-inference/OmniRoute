@@ -2153,6 +2153,7 @@
     "inputTokens": "Giriş Tokenləri",
     "outputTokens": "Çıxış Tokenləri",
     "estCost": "Təxm. Xərc",
+    "costSplit": "Qeyd olub {reported} · təxmini {estimated}",
     "infraTitle": "Infrastruktur",
     "infraAccounts": "Hesablar",
     "infraProviders": "Provayderlər",

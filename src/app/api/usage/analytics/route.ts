@@ -33,6 +33,7 @@ import {
   computeUsageRowCost,
   computeUsageRowStandardCost,
   computeUsageSavingsTokens,
+  splitUsageRowCost,
   type PricingResolutionContext,
 } from "@/lib/usage/analyticsPricing";
 import { getCachedInputAnalytics } from "@/lib/db/cachedInputAnalytics";
@@ -339,6 +340,8 @@ async function computeAnalyticsResponse(
           : 0,
       avgLatencyMs: Math.round(Number(summaryRow?.avgLatencyMs || 0)),
       totalCost: 0,
+      costReported: 0,
+      costEstimated: 0,
       firstRequest: summaryRow?.firstRequest || "",
       lastRequest: summaryRow?.lastRequest || "",
       fallbackCount: Number(fallbackRow?.fallbacks || 0),
@@ -377,12 +380,15 @@ async function computeAnalyticsResponse(
     const allModels = new Set<string>();
 
     const dailyCostByDate = new Map<string, number>();
+    let costReportedTotal = 0;
+    let costEstimatedTotal = 0;
     for (const row of dailyCostRows) {
       const date = toStringValue(row.date);
       if (!date) continue;
 
-      // Calculate costs
-      const cost = computeUsageRowCost(
+      // Calculate costs, keeping the provider-reported and catalog-priced parts
+      // apart so the summary can say how much of the figure is a bill.
+      const split = splitUsageRowCost(
         row,
         pricingByProvider,
         PROVIDER_ID_TO_ALIAS,
@@ -391,7 +397,9 @@ async function computeAnalyticsResponse(
         !includeFlatRateEstimates,
         pricingContext
       );
-      dailyCostByDate.set(date, (dailyCostByDate.get(date) || 0) + cost);
+      costReportedTotal += split.reported;
+      costEstimatedTotal += split.estimated;
+      dailyCostByDate.set(date, (dailyCostByDate.get(date) || 0) + split.total);
 
       // Group tokens by model for the day
       const model = normalizeModelName(row.model as string);
@@ -491,6 +499,8 @@ async function computeAnalyticsResponse(
 
     const totalCost = Array.from(dailyCostByDate.values()).reduce((sum, cost) => sum + cost, 0);
     summary.totalCost = roundCost(totalCost);
+    summary.costReported = roundCost(costReportedTotal);
+    summary.costEstimated = roundCost(costEstimatedTotal);
 
     const providerCostByProvider = new Map<string, number>();
     for (const row of providerCostRows) {

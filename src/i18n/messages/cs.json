@@ -2153,6 +2153,7 @@
     "inputTokens": "Vstupní tokeny",
     "outputTokens": "Výstupní tokeny",
     "estCost": "Odhad. náklady",
+    "costSplit": "Nahlášeno {reported} · odhadováno {estimated}",
     "infraTitle": "Infrastruktura",
     "infraAccounts": "Účty",
     "infraProviders": "Poskytovatelé",

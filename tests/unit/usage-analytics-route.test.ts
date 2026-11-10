@@ -109,6 +109,27 @@ test("GET /api/usage/analytics returns summary with aggregated metrics", async (
   assert.ok(body.summary.streak > 0);
 });
 
+test("GET /api/usage/analytics splits the cost into reported and estimated parts", async () => {
+  await seedAnalyticsData();
+  // A row whose cost the provider reported: its tokens are excluded from the
+  // cost* sums upstream, so the stored amount is the whole cost of the row.
+  core
+    .getDbInstance()
+    .prepare(
+      `INSERT INTO usage_history (provider, model, connection_id, tokens_input, tokens_output, success, latency_ms, timestamp, provider_cost_usd)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    )
+    .run("grok-cli", "grok-4.7", "gc-conn", 0, 0, 1, 400, new Date().toISOString(), 1.25);
+
+  const response = await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics"));
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assertClose(body.summary.costReported, 1.25);
+  assertClose(body.summary.costReported + body.summary.costEstimated, body.summary.totalCost);
+  assertClose(body.summary.costEstimated, EXPECTED_TOTAL_COST);
+});
+
 test("GET /api/usage/analytics includes dailyTrend array with cost data", async () => {
   await seedAnalyticsData();
 

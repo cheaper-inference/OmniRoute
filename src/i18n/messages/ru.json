@@ -2153,6 +2153,7 @@
     "inputTokens": "Входные токены",
     "outputTokens": "Токены вывода",
     "estCost": "Ориентировочная стоимость",
+    "costSplit": "Сообщено {reported} · оценивается {estimated}",
     "infraTitle": "Инфраструктура",
     "infraAccounts": "Учетные записи",
     "infraProviders": "Поставщики",

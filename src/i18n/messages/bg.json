@@ -2153,6 +2153,7 @@
     "inputTokens": "Входящи токени",
     "outputTokens": "Изходящи токени",
     "estCost": "Прибл. разход",
+    "costSplit": "Подаден {reported} · приблизителен {estimated}",
     "infraTitle": "Инфраструктура",
     "infraAccounts": "Акаунти",
     "infraProviders": "Доставчици",

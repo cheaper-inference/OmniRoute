@@ -2153,6 +2153,7 @@
     "inputTokens": "Input-tokens",
     "outputTokens": "Output-tokens",
     "estCost": "Est. omkostning",
+    "costSplit": "Rapporteret {reported} · estimeret {estimated}",
     "infraTitle": "Infrastruktur",
     "infraAccounts": "Konti",
     "infraProviders": "Udbydere",

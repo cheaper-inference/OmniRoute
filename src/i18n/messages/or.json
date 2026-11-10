@@ -2153,6 +2153,7 @@
     "inputTokens": "ଇନପୁଟ୍ ଟୋକେନ୍",
     "outputTokens": "ଆଉଟପୁଟ୍ ଟୋକେନ୍",
     "estCost": "ଆନୁମାନିକ ଖର୍ଚ୍ଚ",
+    "costSplit": "ରିପୋର୍ଟ ସ୍ଥା {reported} · ଅନୁମାନ {estimated}",
     "infraTitle": "ଭିତ୍ତିଭୂମି",
     "infraAccounts": "ଆକାଉଣ୍ଟଗୁଡ଼ିକ",
     "infraProviders": "ପ୍ରଦାନକାରୀମାନେ",

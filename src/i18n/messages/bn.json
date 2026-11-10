@@ -2153,6 +2153,7 @@
     "inputTokens": "ইনপুট টোকেন",
     "outputTokens": "আউটপুট টোকেন",
     "estCost": "আনুমানিক খরচ",
+    "costSplit": "জানানো {reported} · আনুমানিক {estimated}",
     "infraTitle": "অবকাঠামো",
     "infraAccounts": "অ্যাকাউন্টসমূহ",
     "infraProviders": "প্রোভাইডারসমূহ",

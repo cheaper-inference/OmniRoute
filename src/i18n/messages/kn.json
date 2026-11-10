@@ -2153,6 +2153,7 @@
     "inputTokens": "ಇನ್ಪುಟ್ ಟೋಕನ್ಗಳು",
     "outputTokens": "ಔಟ್ಪುಟ್ ಟೋಕನ್ಗಳು",
     "estCost": "ಅಂದಾಜು ವೆಚ್ಚ",
+    "costSplit": "ರವಾಯಿ {reported} · ಅಂದಾಜು {estimated}",
     "infraTitle": "ಮೂಲಸೌಕರ್ಯ",
     "infraAccounts": "ಖಾತೆಗಳು",
     "infraProviders": "ಪ್ರೊವೈಡರ್ಗಳು",

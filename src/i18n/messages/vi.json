@@ -2153,6 +2153,7 @@
     "inputTokens": "Token đầu vào",
     "outputTokens": "Token đầu ra",
     "estCost": "Chi phí ước tính",
+    "costSplit": "Đã báo cáo {reported} · ước tính {estimated}",
     "infraTitle": "Cơ sở hạ tầng",
     "infraAccounts": "Tài khoản",
     "infraProviders": "Nhà cung cấp",

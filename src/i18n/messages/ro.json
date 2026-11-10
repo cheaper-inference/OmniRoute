@@ -2153,6 +2153,7 @@
     "inputTokens": "Tokeni de intrare",
     "outputTokens": "Tokeni de ieșire",
     "estCost": "Cost est.",
+    "costSplit": "Raportat {reported} · estimat {estimated}",
     "infraTitle": "Infrastructură",
     "infraAccounts": "Conturi",
     "infraProviders": "Furnizori",

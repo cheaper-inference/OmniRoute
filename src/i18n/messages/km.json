@@ -2153,6 +2153,7 @@
     "inputTokens": "ថូខឹនបញ្ចូល",
     "outputTokens": "ថូខឹនលទ្ធផល",
     "estCost": "ថ្លៃប៉ាន់ស្មាន",
+    "costSplit": "បានចូលរួម {reported} · ប៉ាន់ស្មាន {estimated}",
     "infraTitle": "ហេដ្ឋារចនាសម្ព័ន្ធ",
     "infraAccounts": "គណនី",
     "infraProviders": "អ្នកផ្តល់សេវា",

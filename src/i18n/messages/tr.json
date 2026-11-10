@@ -2153,6 +2153,7 @@
     "inputTokens": "Girdi Tokenları",
     "outputTokens": "Çıktı Tokenları",
     "estCost": "Tahm. Maliyet",
+    "costSplit": "Bildirilen {reported} · tahmini {estimated}",
     "infraTitle": "Altyapı",
     "infraAccounts": "Hesaplar",
     "infraProviders": "Sağlayıcılar",

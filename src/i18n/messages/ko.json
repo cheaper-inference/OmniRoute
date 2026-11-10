@@ -2153,6 +2153,7 @@
     "inputTokens": "입력 토큰",
     "outputTokens": "출력 토큰",
     "estCost": "예상 비용",
+    "costSplit": "보고된 {reported} · 추정 {estimated}",
     "infraTitle": "인프라",
     "infraAccounts": "계정",
     "infraProviders": "제공업체",

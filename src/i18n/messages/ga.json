@@ -2153,6 +2153,7 @@
     "inputTokens": "Comharthaí Ionchuir",
     "outputTokens": "Comharthaí Aschurtha",
     "estCost": "Costas Measta",
+    "costSplit": "Ábharthaithe {reported} · measta {estimated}",
     "infraTitle": "Bonneagar",
     "infraAccounts": "Cuntais",
     "infraProviders": "Soláthraithe",

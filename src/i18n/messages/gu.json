@@ -2153,6 +2153,7 @@
     "inputTokens": "ઇનપુટ ટોકન્સ",
     "outputTokens": "આઉટપુટ ટોકન્સ",
     "estCost": "અંદાજિત ખર્ચ",
+    "costSplit": "રિપોર્ટેડ {reported} · અંદાજિત {estimated}",
     "infraTitle": "ઇન્ફ્રાસ્ટ્રક્ચર",
     "infraAccounts": "એકાઉન્ટ્સ",
     "infraProviders": "પ્રદાતાઓ",

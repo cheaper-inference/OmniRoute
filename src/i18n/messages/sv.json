@@ -2153,6 +2153,7 @@
     "inputTokens": "Indatatokens",
     "outputTokens": "Utdatatokens",
     "estCost": "Uppskattad kostnad",
+    "costSplit": "Anmäld {reported} · uppskattad {estimated}",
     "infraTitle": "Infrastruktur",
     "infraAccounts": "Konton",
     "infraProviders": "Leverantörer",
