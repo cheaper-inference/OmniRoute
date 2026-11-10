@@ -19,7 +19,7 @@ export const paraloncloudProvider: RegistryEntry = buildOpenAiCompatibleRegistry
   modelsUrl: "https://paraloncloud.com/v1/models",
   models: [
     { id: "qwen3.8-27b", name: "Qwen3.8 27B", contextLength: 131072 },
-    { id: "qwen3-3b", name: "Qwen3 3B", contextLength: 32768 },
+    { id: "qwen3-3b", name: "Qwen3 4B", contextLength: 32768 },
   ],
   passthroughModels: true,
 });
