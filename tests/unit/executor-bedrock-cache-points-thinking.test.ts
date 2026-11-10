@@ -7,6 +7,7 @@ import {
   providerHonorsOpenAIFormatCacheControl,
   providerSupportsCaching,
 } from "../../open-sse/utils/cacheControlPolicy.ts";
+import { claudeModelSupportsThinking } from "../../open-sse/translator/request/openai-to-claude/thinkingConfig.ts";
 
 // Bedrock Converse caches a prompt prefix only when the request carries explicit
 // `cachePoint` blocks, and takes Claude extended thinking in
@@ -413,4 +414,10 @@ test("a raw additionalModelRequestFields leaves the sampling config alone", () =
   });
   assert.deepEqual(payload.additionalModelRequestFields, { top_k: 5 });
   assert.deepEqual(payload.inferenceConfig, { maxTokens: 1000, temperature: 0.2, topP: 0.9 });
+});
+
+test("claudeModelSupportsThinking reads the model spec capability", () => {
+  assert.equal(claudeModelSupportsThinking("claude-sonnet-4-5"), true);
+  assert.equal(claudeModelSupportsThinking("gemini-3-flash"), false);
+  assert.equal(claudeModelSupportsThinking("not-a-real-model-spec"), false);
 });

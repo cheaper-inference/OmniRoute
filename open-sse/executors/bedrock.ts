@@ -16,9 +16,11 @@ import { buildBedrockNativeConverseUrl, resolveBedrockRegion } from "../config/b
 import * as prl from "../utils/providerRequestLogging.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { normalizeClaudeAdaptiveThinking } from "../services/claudeAdaptiveThinking.ts";
-import { claudeThinkingFromOpenAIRequest } from "../translator/request/openai-to-claude/thinkingConfig.ts";
+import {
+  claudeModelSupportsThinking,
+  claudeThinkingFromOpenAIRequest,
+} from "../translator/request/openai-to-claude/thinkingConfig.ts";
 import { fitThinkingToMaxTokens } from "../translator/request/openai-to-claude/thinkingBudget.ts";
-import { getModelSpec } from "../../src/shared/constants/modelSpecs.ts";
 
 const encoder = new TextEncoder();
 
@@ -541,7 +543,7 @@ function withThinkingDisplay(thinking) {
 function claudeThinkingFields(model, request, inferenceConfig, payload) {
   if (!BEDROCK_CLAUDE_MODEL.test(String(model))) return null;
   const specId = claudeSpecId(model);
-  if (!getModelSpec(specId)?.supportsThinking) return null;
+  if (!claudeModelSupportsThinking(specId)) return null;
   const toolChoice = payload.toolConfig?.toolChoice;
   if (toolChoice && !toolChoice.auto) return null;
 

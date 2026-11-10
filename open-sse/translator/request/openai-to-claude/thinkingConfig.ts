@@ -1,6 +1,7 @@
 import { supportsClaudeMaxEffort, supportsXHighEffort } from "../../../config/providerModels.ts";
 import {
   getDefaultThinkingBudget,
+  getModelSpec,
   isAdaptiveThinkingOnly,
 } from "../../../../src/shared/constants/modelSpecs.ts";
 
@@ -20,6 +21,15 @@ const EFFORT_BUDGETS: Record<string, number> = {
   high: 131072,
   max: 131072,
 };
+
+/**
+ * Whether the model spec lists the Claude model as thinking-capable. Exported so the
+ * Bedrock Converse executor can gate extended thinking without its own open-sse → src
+ * import of modelSpecs (check:boundary:ratchet).
+ */
+export function claudeModelSupportsThinking(specId: string): boolean {
+  return getModelSpec(specId)?.supportsThinking === true;
+}
 
 export interface ClaudeThinkingConfig {
   /** Claude `thinking` object, when the request asks for extended thinking. */
