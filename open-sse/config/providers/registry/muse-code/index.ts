@@ -65,6 +65,8 @@ export const muse_codeProvider: RegistryEntry = buildOpenAiCompatibleRegistryEnt
     "X-Client-Id": MUSE_CODE_CLIENT_SURFACE,
   },
   passthroughModels: true,
+  // Meta rejects any declared tool name over 64 chars; ZCode MCP ids exceed it.
+  toolNameMaxLength: 64,
   reasoningTransport: "opaque",
   defaultContextLength: 200000,
   models: [
