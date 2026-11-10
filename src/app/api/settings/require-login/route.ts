@@ -58,6 +58,15 @@ function isBootstrapSecurityWindow(settings: Record<string, unknown>) {
   return !hasConfiguredPassword(settings);
 }
 
+/**
+ * GET /api/settings/require-login — login state for the login page and the onboarding wizard.
+ *
+ * When settings cannot be read it still answers 200 with fail-closed values (`requireLogin` and
+ * `hasPassword` true) and sets `settingsUnavailable: true`, so a caller can tell that this
+ * `hasPassword` is not a real reading (#19211).
+ *
+ * @returns the login-settings JSON response
+ */
 export async function GET() {
   const nodeInfo = getNodeCompatibility();
   try {

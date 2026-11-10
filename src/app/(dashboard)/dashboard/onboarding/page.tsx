@@ -30,6 +30,15 @@ const COMMON_PROVIDERS = [
   { id: "mistral", name: "Mistral", color: "#FF7000" },
 ];
 
+/**
+ * First-run setup wizard (welcome, tiers, security, provider, test, done).
+ *
+ * The Security step offers to set the management password only while none exists; when one is
+ * already configured (an earlier, unfinished run of the wizard, or this run), it confirms that and
+ * continues without writing login settings (#19211).
+ *
+ * @returns the wizard page
+ */
 export default function OnboardingWizard() {
   const router = useRouter();
   const t = useTranslations("onboarding");
