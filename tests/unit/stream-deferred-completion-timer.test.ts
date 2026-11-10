@@ -93,3 +93,53 @@ test("cancelling the client read clears the grace timer: no completion work runs
     core.resetDbInstance();
   }
 });
+
+test("a failing deferred completion errors the live stream instead of leaving it silent", async () => {
+  mock.timers.enable({ apis: ["setTimeout"] });
+  let failNext = false;
+  const stream = createSSEStream({
+    mode: "translate",
+    targetFormat: FORMATS.OPENAI,
+    sourceFormat: FORMATS.OPENAI_RESPONSES,
+    provider: "openai",
+    model: "gpt-test",
+    body: { input: "hi" },
+    reqLogger: {
+      appendConvertedChunk() {
+        if (failNext) throw new Error("deferred completion write failed");
+      },
+    },
+  });
+  const writer = stream.writable.getWriter();
+  const reader = stream.readable.getReader();
+  let readError: unknown = null;
+  void (async () => {
+    try {
+      for (;;) {
+        const { done } = await reader.read();
+        if (done) return;
+      }
+    } catch (error) {
+      readError = error;
+    }
+  })();
+  const settle = async () => {
+    for (let i = 0; i < 5; i++) await new Promise((r) => setImmediate(r));
+  };
+  try {
+    await writer.write(
+      sse({ ...base, choices: [{ index: 0, delta: { content: "Hi" }, finish_reason: null }] })
+    );
+    await writer.write(sse({ ...base, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] }));
+    await settle();
+    failNext = true;
+    mock.timers.tick(3000);
+    await settle();
+    assert.ok(readError instanceof Error, "the client must receive a terminal error");
+    assert.match((readError as Error).message, /deferred completion write failed/);
+  } finally {
+    mock.timers.reset();
+    await writer.abort().catch(() => {});
+    core.resetDbInstance();
+  }
+});

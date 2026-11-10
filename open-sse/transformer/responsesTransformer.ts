@@ -1,4 +1,5 @@
 import { transformStreamWithCancel } from "../utils/cancelableTransformStream.ts";
+import { RESPONSES_DEFERRED_COMPLETION_GRACE_MS } from "../config/constants.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { mergeCacheCreationFields } from "../utils/cacheWriteUsage.ts";
 import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
@@ -206,9 +207,6 @@ export function createResponsesLogger(model, logsDir = null) {
     },
   };
 }
-
-// How long a finish_reason waits for a trailing usage chunk before completing anyway.
-const DEFERRED_COMPLETION_GRACE_MS = 3000;
 
 /**
  * Create TransformStream that converts Chat Completions SSE to Responses API SSE
@@ -1002,7 +1000,7 @@ export function createResponsesApiTransformStream(
                   // stream: report it to the client. error() is a no-op on a closed stream.
                   controller.error(error);
                 }
-              }, DEFERRED_COMPLETION_GRACE_MS);
+              }, RESPONSES_DEFERRED_COMPLETION_GRACE_MS);
               (state.completionTimer as { unref?: () => void })?.unref?.();
             }
           }

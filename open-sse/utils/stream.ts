@@ -40,7 +40,12 @@ import { calculateCost } from "@/lib/usage/costCalculator";
 import { buildOmniRouteSseMetadataComment } from "@/domain/omnirouteResponseMeta";
 import { sseCommentsEnabled } from "./sseHeartbeat.ts";
 import { createStructuredSSECollector } from "./streamPayloadCollector.ts";
-import { STREAM_IDLE_TIMEOUT_MS, FETCH_BODY_TIMEOUT_MS, HTTP_STATUS } from "../config/constants.ts";
+import {
+  STREAM_IDLE_TIMEOUT_MS,
+  FETCH_BODY_TIMEOUT_MS,
+  HTTP_STATUS,
+  RESPONSES_DEFERRED_COMPLETION_GRACE_MS,
+} from "../config/constants.ts";
 import {
   OMIT_STREAMING_CHUNK_MARKER,
   isResponsesCommentaryMessageItem,
@@ -2805,12 +2810,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                   emitTranslatedClientItem(controller, item);
                 }
               } catch (error) {
-                console.debug(
+                // Every end-of-stream path clears this timer, so the stream is still live:
+                // report the failure and give the client a terminal error (as the transformer does).
+                console.warn(
                   `[STREAM] deferred completion flush failed (${model || "unknown"}):`,
                   error
                 );
+                controller.error(error);
               }
-            }, 3000);
+            }, RESPONSES_DEFERRED_COMPLETION_GRACE_MS);
             deferredCompletionTimer.unref?.();
           }
         }
