@@ -134,6 +134,17 @@ interface DbLike {
   transaction: <T>(fn: () => T) => () => T;
 }
 
+/** Nullable-column normalisation shared by every read/write path that returns a connection. */
+function withNullableConnectionColumns(row: JsonRecord, source: JsonRecord | null | undefined) {
+  return withNullableNotesAndModelMap(
+    withNullableRateLimitOverrides(
+      withNullableQuotaWindowThresholds(withNullableMaxConcurrent(row, source), source),
+      source
+    ),
+    source
+  );
+}
+
 // Real column set for provider_connections (must match the CREATE TABLE in
 // core.ts's SCHEMA_SQL). getProviderConnections()'s optional `columns`
 // projection is interpolated directly into the SELECT clause, so every
@@ -278,16 +289,7 @@ export async function getRawProviderConnections(
   const rows = db.prepare(sql).all(params);
   return rows.map((r) => {
     const camelRow = rowToCamel(r);
-    return withNullableNotesAndModelMap(
-      withNullableRateLimitOverrides(
-        withNullableQuotaWindowThresholds(
-          withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
-          camelRow
-        ),
-        camelRow
-      ),
-      camelRow
-    );
+    return withNullableConnectionColumns(cleanNulls(camelRow), camelRow);
   });
 }
 
@@ -325,18 +327,7 @@ export async function getProviderConnectionById(id: string) {
   if (!row) return null;
 
   const camelRow = rowToCamel(row);
-  return decryptConnectionFields(
-    withNullableNotesAndModelMap(
-      withNullableRateLimitOverrides(
-        withNullableQuotaWindowThresholds(
-          withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
-          camelRow
-        ),
-        camelRow
-      ),
-      camelRow
-    )
-  );
+  return decryptConnectionFields(withNullableConnectionColumns(cleanNulls(camelRow), camelRow));
 }
 
 export interface ProviderConnectionDisplayMetadata {
@@ -821,16 +812,7 @@ export async function createProviderConnection(data: JsonRecord) {
   backupDbFile("pre-write");
   invalidateDbCache("connections"); // Bust connections read cache
 
-  const returnedConnection = withNullableNotesAndModelMap(
-    withNullableRateLimitOverrides(
-      withNullableQuotaWindowThresholds(
-        withNullableMaxConcurrent(cleanNulls(connection), connection),
-        connection
-      ),
-      connection
-    ),
-    connection
-  );
+  const returnedConnection = withNullableConnectionColumns(cleanNulls(connection), connection);
 
   if (
     isMicrosoftDesignerWebRetiredProviderId(data.provider) ||
@@ -1105,16 +1087,7 @@ export async function updateProviderConnection(
   // callers of updateProviderConnection must never see enc:v1 metadata as the
   // usable console credentials (#16836).
   const returned = decryptConnectionFields({ ...merged });
-  const returnedConnection = withNullableNotesAndModelMap(
-    withNullableRateLimitOverrides(
-      withNullableQuotaWindowThresholds(
-        withNullableMaxConcurrent(cleanNulls(returned), returned),
-        returned
-      ),
-      returned
-    ),
-    returned
-  );
+  const returnedConnection = withNullableConnectionColumns(cleanNulls(returned), returned);
 
   if (
     isMicrosoftDesignerWebRetiredProviderId(merged.provider) ||
