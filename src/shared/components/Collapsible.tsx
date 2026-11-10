@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@omniroute/ui-kit/accordion";
 import { cn } from "@/shared/utils/cn";
+import Icon from "./Icon";
 
 interface CollapsibleProps {
   /** Header content (always visible, click-to-toggle). */
@@ -10,7 +17,7 @@ interface CollapsibleProps {
   subtitle?: ReactNode;
   /** Material symbol name shown left of the title. */
   icon?: string;
-  /** Trailing element rendered next to the chevron (badges, op counts, etc). */
+  /** Trailing element rendered next to the trigger (badges, op counts, toggles…). */
   trailing?: ReactNode;
   /** Whether the section is open on first render. Defaults to false. */
   defaultOpen?: boolean;
@@ -22,11 +29,13 @@ interface CollapsibleProps {
   children: ReactNode;
 }
 
+const ITEM = "item";
+
 /**
- * Minimal click-to-expand section. Stateless from the caller's perspective
- * (open/closed lives in local state — does NOT survive page refresh, per the
- * UX brief). Uses material-symbols-outlined chevrons to match the rest of
- * the OmniRoute UI.
+ * Click-to-expand section over the kit `Accordion` (KEA-7886). Open/closed lives in local
+ * state (does NOT survive a refresh). The trigger is the kit's single native button with
+ * `aria-expanded`; trailing interactive controls (Toggle, Button) live OUTSIDE it so we never
+ * nest <button> inside <button>. Children mount only while open, as before.
  */
 export default function Collapsible({
   title,
@@ -38,56 +47,40 @@ export default function Collapsible({
   className,
   children,
 }: CollapsibleProps) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  const wrapperClasses = cn(
-    variant === "default"
-      ? "rounded-lg border border-black/5 dark:border-white/5 bg-surface"
-      : "rounded-md border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02]",
-    className
-  );
-
-  const headerRowClasses = cn(
-    "flex items-center gap-3",
-    variant === "default" ? "p-4" : "p-3",
-    "hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors",
-    open && "border-b border-black/5 dark:border-white/5"
-  );
-
-  // The chevron + title region is the click target. Trailing interactive
-  // controls (Toggle, Button) live OUTSIDE the toggle button so we never nest
-  // <button> inside <button> (invalid HTML; breaks keyboard nav + ARIA).
+  const [value, setValue] = useState(defaultOpen ? ITEM : "");
+  const open = value === ITEM;
   return (
-    <div className={wrapperClasses}>
-      <div className={headerRowClasses}>
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          className="flex items-center gap-3 flex-1 min-w-0 text-left -m-1 p-1 rounded"
-        >
-          <span
-            className="material-symbols-outlined text-text-muted text-[20px] shrink-0"
-            aria-hidden="true"
-          >
-            {open ? "expand_more" : "chevron_right"}
-          </span>
-          {icon && (
-            <span
-              className="material-symbols-outlined text-text-muted text-[18px] shrink-0"
-              aria-hidden="true"
-            >
-              {icon}
+    <Accordion
+      type="single"
+      collapsible
+      value={value}
+      onValueChange={(next) => setValue(typeof next === "string" ? next : (next[0] ?? ""))}
+      variant={variant === "inline" ? "plain" : "bordered"}
+      className={className}
+    >
+      <AccordionItem value={ITEM}>
+        {/* The kit renders the trigger inside an <h3> (accordion.tsx), so that is the flex item
+            that must grow; its children wrapper span must shrink for the title to truncate. */}
+        <div className="flex items-center gap-2 [&>h3]:min-w-0 [&>h3]:flex-1">
+          <AccordionTrigger className="w-full min-w-0 [&>span:first-child]:min-w-0">
+            <span className="flex min-w-0 items-center gap-2 text-start">
+              {icon && <Icon name={icon} size={18} className="text-text-muted" />}
+              <span className="flex min-w-0 flex-col">
+                <span className="truncate text-sm font-medium text-text-main">{title}</span>
+                {subtitle && <span className="truncate text-xs text-text-muted">{subtitle}</span>}
+              </span>
             </span>
+          </AccordionTrigger>
+          {trailing && (
+            <div
+              className={cn("flex shrink-0 items-center gap-2", variant === "default" && "pe-4")}
+            >
+              {trailing}
+            </div>
           )}
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-text-main truncate">{title}</div>
-            {subtitle && <div className="text-xs text-text-muted truncate">{subtitle}</div>}
-          </div>
-        </button>
-        {trailing && <div className="flex items-center gap-2 shrink-0">{trailing}</div>}
-      </div>
-      {open && <div className={variant === "default" ? "p-4" : "p-3"}>{children}</div>}
-    </div>
+        </div>
+        <AccordionContent>{open ? children : null}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }

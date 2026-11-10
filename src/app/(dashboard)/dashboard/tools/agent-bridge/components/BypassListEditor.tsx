@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Textarea from "@/shared/components/Textarea";
 
-const DEFAULT_BYPASS_PATTERNS = [
-  "*.bank.*",
-  "*.gov.*",
-  "*.okta.com",
-  "*.auth0.com",
-];
+const DEFAULT_BYPASS_PATTERNS = ["*.bank.*", "*.gov.*", "*.okta.com", "*.auth0.com"];
 
 interface BypassListEditorProps {
   patterns: string[];
@@ -23,6 +22,7 @@ export function BypassListEditor({ patterns, onSave }: BypassListEditorProps) {
   const t = useTranslations("agentBridge");
   const [userInput, setUserInput] = useState(patterns.join("\n"));
   const [saving, setSaving] = useState(false);
+  const textareaId = useId();
 
   const handleSave = async () => {
     setSaving(true);
@@ -45,37 +45,30 @@ export function BypassListEditor({ patterns, onSave }: BypassListEditorProps) {
         </p>
         <div className="flex flex-wrap gap-1.5">
           {DEFAULT_BYPASS_PATTERNS.map((p) => (
-            <span
-              key={p}
-              className="inline-flex items-center px-2 py-0.5 rounded-full bg-surface text-xs text-text-muted border border-border/40"
-            >
+            <Badge key={p} size="sm" className="font-mono">
               {p}
-            </span>
+            </Badge>
           ))}
         </div>
       </div>
 
-      <div>
-        <label className="text-xs font-medium text-text-muted mb-1.5 block">
-          {t("bypassUserLabel") || "Custom bypass patterns (one per line, glob or regex)"}
-        </label>
-        <textarea
-          className="w-full min-h-[80px] rounded-lg border border-border/50 bg-card px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
+      <Field
+        htmlFor={textareaId}
+        label={t("bypassUserLabel") || "Custom bypass patterns (one per line, glob or regex)"}
+      >
+        <Textarea
+          id={textareaId}
+          className="min-h-[80px] font-mono text-sm"
           placeholder="*.internal.corp&#10;sso.example.com"
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}
         />
-      </div>
+      </Field>
 
       <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="rounded-lg bg-primary/10 text-primary px-4 py-2 text-sm font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
-        >
+        <Button variant="secondary" icon="save" onClick={handleSave} disabled={saving}>
           {saving ? t("saving") || "Saving…" : t("saveBypassList") || "Save bypass list"}
-        </button>
+        </Button>
       </div>
     </div>
   );

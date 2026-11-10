@@ -10,7 +10,7 @@
 
 ## Установка
 
-OmniRoute MCP встроен. Запустите его командой:
+OmniRoute MCP встроен. Начните с:
 
 ```bash
 omniroute --mcp
@@ -19,26 +19,21 @@ omniroute --mcp
 Или через транспорт open-sse:
 
 ```bash
-# Потоковый HTTP-транспорт (порт 20130)
-omniroute --dev  # MCP автоматически запускается на конечной точке /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP-транспорты (`sse` / `streamable-http`, обслуживаемые сервером панели управления в рамках того же процесса)
-по умолчанию отключены, и ранее переключать их можно было только на странице `/dashboard/mcp`. Начиная с v3.8.51
-CLI обладает теми же возможностями:
+Транспорты HTTP (`sse` / `streamable-http`, обслуживаемые в процессе сервером информационной панели) по умолчанию отключены, и ранее их можно было переключать только со страницы `/dashboard/mcp`. Начиная с версии 3.8.51, CLI имеет четность:
 
 ```bash
-omniroute mcp status                                  # состояние enabled/online, транспорт, количество инструментов
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # сбрасывает активные сеансы sse/streamable-http
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` отправляют PATCH-запрос для того же параметра `mcpEnabled` (и, при необходимости, `mcpTransport`),
-который панель управления переключает через `/api/settings`. `mcp restart` вызывает `POST /api/mcp/restart`: он завершает
-активные сеансы `sse`/`streamable-http`, чтобы следующий запрос выполнил чистую повторную инициализацию, возвращает
-`409`, если MCP отключен, и `501` для транспорта `stdio` (клиенты stdio управляют собственными
-подпроцессами — внутрипроцессного дескриптора для перезапуска не существует).
+`mcp enable`/`mcp disable` PATCH тот же `mcpEnabled` (и, необязательно `mcpTransport`), настройка переключения панели управления через `/api/settings`. `mcp restart` вызывает `POST /api/mcp/restart`: он разрывает активные сеансы `sse`/`streamable-http`, чтобы следующий запрос повторно инициализировался без ошибок, возвращает `409` если MCP отключен, и `501` для транспорта `stdio` (клиенты stdio владеют собственным подпроцессом — внутри процесса нет дескриптора для перезапуска).
 
 ## Транспорты
 
@@ -71,6 +66,16 @@ curl -i \
 ```
 
 Ключ без области manage (или отсутствие Bearer) приводит к ответу `403 LOCAL_ONLY`. Для соседнего префикса `/api/cli-tools/runtime/*` обход намеренно НЕ предусмотрен — см. [Уровни Route Guard — исключение для области manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
+
+### Проверка Origin
+
+После аутентификации у каждого запроса к `/api/mcp/*` — транспортам и управляющим маршрутам вроде `status`, `tools`, `audit`, `restart` — проверяется заголовок `Origin`, кем бы ни был вызывающий (API-ключ, токен CLI, сессия дашборда или анонимный loopback при отключённом входе). Это защита от DNS rebinding, которую требует спецификация MCP Streamable HTTP.
+
+- **Нет заголовка `Origin`** → разрешено. CLI OmniRoute, SDK и IDE-клиенты его не отправляют.
+- **Допустимый `Origin`** → `localhost` / `127.0.0.1` / `[::1]` на любом порту или собственный публичный origin OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin, переданный доверенным обратным прокси (`OMNIROUTE_TRUST_PROXY`, только если base URL не задан), или прямое обращение к loopback/LAN IP-хосту. Один лишь заголовок `Host` никогда не делает origin доверенным.
+- **Любой другой `Origin`, включая `null`** → `403` с телом ошибки JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Сессия дашборда с действительным CSRF-токеном по-прежнему принимается, как и для других операций записи дашборда.
+
+Браузерному MCP-клиенту за обратным прокси нужен `OMNIROUTE_PUBLIC_BASE_URL`; списка разрешённых других origin нет. Предварительный CORS-запрос (`OPTIONS`) не проверяется по Origin; последующий запрос — проверяется.
 
 ## Конфигурация IDE
 
@@ -121,55 +126,42 @@ Cursor, Cline и совместимые клиенты MCP.
 | `omniroute_cache_stats` | `read:cache`    | Статистика семантического кеша, кеша промптов и идемпотентности |
 | `omniroute_cache_flush` | `write:cache`   | Очистка кеша глобально или по сигнатуре/модели                  |
 
-## Инструменты сжатия (13)
+## Инструменты для сжатия (13)
 
-| Инструмент                          | Области доступа     | Описание                                                                                                                               |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Настройки сжатия, сводка аналитики и статистика с учётом кеша (включая метаданные `analytics.mcpDescriptionCompression`)               |
-| `omniroute_compression_configure`   | `write:compression` | Настройка режима сжатия, порогового значения, целевого коэффициента, сохранения системного промпта и переключателя сжатия описаний MCP |
-| `omniroute_set_compression_engine`  | `write:compression` | Выбор активного движка (off/caveman/rtk/stacked) и интенсивности Caveman/RTK                                                           |
-| `omniroute_list_compression_combos` | `read:compression`  | Список именованных комбинаций сжатия и их конвейеров движков                                                                           |
-| `omniroute_compression_combo_stats` | `read:compression`  | Аналитика, сгруппированная по комбинации сжатия и движку                                                                               |
-| `omniroute_ccr_store`               | `write:compression` | Сохранение изолированного содержимого вызывающей стороны в ограниченном хранилище CCR в памяти и возврат маркера со ссылкой `ccr://`   |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Получение содержимого CCR полностью или в режимах начала, конца, строк, grep и статистики                                              |
-| `omniroute_ccr_inspect`             | `read:compression`  | Просмотр метаданных CCR, принадлежащих вызывающей стороне, без возврата содержимого                                                    |
-| `omniroute_ccr_list`                | `read:compression`  | Список метаданных с пагинацией для блоков CCR, принадлежащих вызывающей стороне                                                        |
-| `omniroute_ccr_delete`              | `write:compression` | Удаление блока CCR, принадлежащего вызывающей стороне                                                                                  |
-| `omniroute_ccr_stats`               | `read:compression`  | Отчёт об использовании памяти вызывающей стороной, счётчиках жизненного цикла и лимитах хранилища                                      |
-| `omniroute_rtk_discover`            | `read:compression`  | Обнаружение повторяющегося шума в добровольно предоставленных образцах вывода RTK                                                      |
-| `omniroute_rtk_learn`               | `read:compression`  | Создание доступного для проверки черновика фильтра RTK на основе добровольно предоставленных образцов                                  |
+| Инструмент                          | Области применения  | Описание                                                                                                                                  |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Настройки сжатия, сводная аналитика и статистика с учетом кэша (включая метаданные `analytics.mcpDescriptionCompression` )                |
+| `omniroute_compression_configure`   | `write:compression` | Настройка режима сжатия, порогового значения, целевого коэффициента, сохранения системных подсказок, переключения сжатия описания MCP     |
+| `omniroute_set_compression_engine`  | `write:compression` | Выберите активный механизм (off/caveman/rtk/stacked) и интенсивность Caveman/RTK                                                          |
+| `omniroute_list_compression_combos` | `read:compression`  | Список именованных комбинаций сжатия и их конвейеров                                                                                      |
+| `omniroute_compression_combo_stats` | `read:compression`  | Аналитика сгруппирована по комбинации сжатия и механизму                                                                                  |
+| `omniroute_ccr_store`               | `write:compression` | Сохранять изолированный от вызывающего абонента контент в ограниченном хранилище CCR в памяти и возвращать маркер плюс ссылку на `ccr://` |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Извлекайте содержимое CCR полностью или в режимах head, Tail, Lines, Grep и Stats.                                                        |
+| `omniroute_ccr_inspect`             | `read:compression`  | Проверка метаданных CCR, принадлежащих вызывающему абоненту, без возврата содержимого                                                     |
+| `omniroute_ccr_list`                | `read:compression`  | Получение списка метаданных с разбивкой по страницам для блоков CCR, принадлежащих вызывающему абоненту                                   |
+| `omniroute_ccr_delete`              | `write:compression` | Удаление блока CCR, принадлежащего вызывающему абоненту                                                                                   |
+| `omniroute_ccr_stats`               | `read:compression`  | Сообщайте об использовании памяти на уровне вызывающего абонента, счетчиках жизненного цикла и ограничениях хранилища.                    |
+| `omniroute_rtk_discover`            | `read:compression`  | Обнаружьте повторяющийся шум в образцах выходных данных RTK включенных в выборку                                                          |
+| `omniroute_rtk_learn`               | `read:compression`  | Создайте пригодный для проверки черновой вариант фильтра RTK на основе добровольных образцов.                                             |
 
-Записи CCR хранятся только в памяти и исчезают после перезапуска. Размер каждого блока ограничен 2 МиБ, для каждого
-субъекта — 16 МиБ, а для глобального хранилища — 64 МиБ. По умолчанию срок жизни записей составляет 24 часа (максимум —
-семь дней). Полное получение через MCP ограничено 256 КиБ; более крупные блоки остаются доступными в
-режимах диапазона и grep. Хранение, получение, перечисление, просмотр, удаление и статистика изолированы по
-аутентифицированному субъекту API-ключа. Записи аудита содержат хеши и метаданные размера, но никогда не содержимое.
+Записи CCR используют двухуровневое хранилище: горячий уровень в памяти, поддерживаемый в локальных необлачных средах выполнения надежным уровнем SQLite (`ccr_blocks`, включенным по умолчанию), поэтому блок выдерживает вытеснение или перезапуск до тех пор, пока в его TTL не закончится — за исключением блоков более 512 KB и облачных сред выполнения, которые остаются только в памяти. Каждый блок ограничен 2 MiB, каждый принципал — 16 MiB, а глобальное хранилище — 64 MiB. По умолчанию для записей указывается 24-часовой TTL (максимум семь дней). Полное извлечение MCP ограничено 256 KiB; более крупные блоки остаются доступными в режимах range и grep. Хранение, извлечение, перечисление, проверка, удаление и статистика изолированы аутентифицированным субъектом API-ключа. Записи аудита содержат хэши и метаданные размера, а не контент. Детали, доступные для оператора (два маркера, предварительные требования клиента, `codemode:false`, области для каждого инструмента, разбивка на страницы и диагностическая матрица), находятся в [разделе «Предварительные требования/руководство оператора» модулей сжатия →](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` сообщает о сжатии описаний MCP отдельно в
-`analytics.mcpDescriptionCompression`. Эти значения представляют собой оценки размера метаданных для доступных для перечисления
-описаний MCP (`tools`, `prompts`, `resources` и `resourceTemplates`); они не являются
-данными об использовании от провайдера и помечены как `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` сообщает о сжатии описания MCP отдельно в `analytics.mcpDescriptionCompression`. Эти значения представляют собой оценки размера метаданных для перечисляемых описаний MCP (`tools`, `prompts`, `resources` и `resourceTemplates`); они не являются квитанциями об использовании поставщика и отмечены значком `source: "mcp_metadata_estimate"`.
 
 ### Фильтр дерева доступности MCP (v3.8.0)
 
-Помимо описанных выше инструментов сжатия, OmniRoute включает фильтр постобработки, который
-сжимает **результаты работы инструментов** браузера/доступности MCP перед их возвратом
-агенту. Этот фильтр сам по себе не является инструментом — он прозрачно обрабатывает любой результат инструмента, содержащий
-подробный текст дерева доступности или снимка браузера (≥2000 символов).
+Помимо инструментов сжатия, описанных выше, OmniRoute включает фильтр после выполнения, который сжимает** результаты инструмента** инструментов MCP browser/accessibility прежде чем они будут возвращены агенту. Этот фильтр сам по себе не является инструментом — он прозрачно запускается для любого результата инструмента, который содержит подробное дерево доступности или текст снимка браузера (≥ 2000 символов).
 
-Основные особенности:
+Ключевые модели поведения:
 
-- Сворачивает ≥30 последовательных повторяющихся строк одного уровня в сводку из начала и конца
-- Сохраняет якоря `[ref=eXX]`, необходимые для Playwright/computer-use
-- Жёстко обрезает слишком большой текст (>50 000 символов), добавляя подсказку по навигации
-- Ожидаемая экономия: **60–80%** для полезной нагрузки снимков браузера
+- Сворачивает ≥ 30 последовательных повторяющихся одноуровневых строк в заголовок + хвостовую сводку
+- Сохраняет привязки `[ref=eXX]` необходимые для Playwright/computer-use
+- Жесткое сокращение текста большого размера (50 000 >) с подсказкой по навигации.
+- Ожидаемая экономия:** 60–80%** в полезных данных снимка браузера
 
-Конфигурация: `compression.mcpAccessibility` в глобальных настройках (миграция 056).
-Реализация: `open-sse/services/compression/engines/mcpAccessibility/`.
-Полная документация: [Механизмы сжатия — фильтр дерева доступности MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Конфигурация: `compression.mcpAccessibility` в глобальных настройках (миграция 056). Реализация: `open-sse/services/compression/engines/mcpAccessibility/`. Полная документация: [Механизмы сжатия — MCP Фильтр дерева доступности](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Сведения о модели сжатия во время выполнения, лежащей в основе этих инструментов, см. в разделах
-[Механизмы сжатия](../compression/COMPRESSION_ENGINES.md) и [Сжатие RTK](../compression/RTK_COMPRESSION.md).
+См. [Механизмы сжатия](../compression/COMPRESSION_ENGINES.md) и [сжатие RTK,](../compression/RTK_COMPRESSION.md) чтобы узнать о модели сжатия во время выполнения, лежащей в основе этих инструментов.
 
 ## Инструменты 1Proxy (3)
 
@@ -289,142 +281,137 @@ OmniRoute через ту же модель соединения, которая
 
 ---
 
-## Аутентификация и области видимости
+## Аутентификация и области действия
 
-Инструмент MCP считывает строки областей видимости от вызывающей стороны. Эта проверка является одним из трех независимых пространств имен. Успешная проверка одним механизмом не означает успешную проверку другими. Правила описаны в разделе [Три пространства имен областей видимости](#three-scope-namespaces). Каталог инструментов находится в разделе [Области видимости инструментов MCP](#mcp-tool-scopes).
+Инструмент MCP вызывает чтение строк области от вызывающего объекта. Эта проверка является одним из трех независимых пространств имен. Пропуск одной шашки не является пропуском остальных. Правила — это [три пространства имен](#three-scope-namespaces). Каталог инструментов — [MCP](#mcp-tool-scopes).
 
-### Три пространства имен областей видимости
+### Три пространства имен области видимости
 
-`manage` для ключа API, `read:compression` для инструмента MCP и `read` для токена доступа `oma_live_…` — это три разных разрешения. Вызывающие стороны, которые отправляют токен доступа `read` на изменяющий маршрут управления, получают HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Этот ранг — `scopeSatisfies`. Он не обращается к таблице MCP, и сопоставитель MCP не обращается к нему.
+`manage` для ключа API, `read:compression` для инструмента MCP и `read` для токена доступа `oma_live_…` — это три разных гранта. Вызывающие абоненты, которые отправляют токен доступа `read` на изменяющийся маршрут управления, получают HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Этот ранг равен `scopeSatisfies`. Он не обращается к таблице MCP, и средство сопоставления MCP не обращается к ней.
 
-| Пространство имен                  | Учетные данные                                                 | Проверяющий механизм     | Успешная проверка разрешает                                    |
-| :--------------------------------- | :------------------------------------------------------------- | :----------------------- | :------------------------------------------------------------- |
-| Управление API-ключом              | `api_keys.scopes`                                              | `hasManageScope`         | Управление REST для этого ключа Bearer                         |
-| Дополнительный API-ключ            | тот же массив, одна точная строка                              | помощник, указанный ниже | Только эта одна возможность                                    |
-| Области видимости инструментов MCP | тот же массив, иначе MCP `_meta`, иначе `OMNIROUTE_MCP_SCOPES` | `scopeMatches`           | Этот инструмент, как только включено принудительное применение |
-| Токен доступа                      | `oma_live_…`                                                   | `scopeSatisfies`         | Маршрут управления, метод и путь которого требуют этого ранга  |
+| Пространство имен                  | Полномочия                                                                        | Шашка                    | Пропуск позволяет                                                    |
+| :--------------------------------- | :-------------------------------------------------------------------------------- | :----------------------- | :------------------------------------------------------------------- |
+| Управление API-ключами             | `api_keys.scopes`                                                                 | `hasManageScope`         | Управление REST для этого ключа на предъявителя                      |
+| Добавка API-ключа                  | тот же массив, одна точная строка                                                 | помощник, указанный ниже | Только эта одна способность                                          |
+| Области применения инструмента MCP | тот же массив, иначе MCP `_meta` (только HTTP/SSE ), иначе `OMNIROUTE_MCP_SCOPES` | `scopeMatches`           | Этот инструмент, как только принудительное исполнение будет включено |
+| Токен доступа                      | `oma_live_…`                                                                      | `scopeSatisfies`         | Маршрут управления, метод и путь которого требуют этого ранга.       |
 
-Создание каждого учетного данных описано в разделе [Аутентификация управления](../guides/MANAGEMENT-AUTH.md).
+Создание каждого учетного документа рассматривается в разделе [«Аутентификация управления»](../guides/MANAGEMENT-AUTH.md).
 
-#### Области видимости API-ключа
+#### Области API-ключей
 
-Один массив `api_keys.scopes` выполняет две задачи. Они используют разные функции.
+Один массив `api_keys.scopes` обслуживает два задания. Они используют разные функции.
 
-**Управление REST.** `manage` и `admin` являются членами `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` — это то, что авторизует маршруты управления для этого ключа. `admin` способен управлять этими маршрутами. Слово `admin` здесь не является рангом токена доступа и не расширяется до областей видимости инструментов MCP.
+**Управление REST.** `manage` и `admin` являются членами `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` — это то, что разрешает маршруты управления для этого ключа. `admin` способен управлять этими маршрутами. Слово `admin` здесь не является рангом токена доступа и не распространяется на области действия инструмента MCP.
 
-**Дополнительные строки.** Каждая из них является точной проверкой членства, и каждая из них остается вне `MANAGEMENT_API_KEY_SCOPES`.
+**Аддитивные строки.** Каждый из них представляет собой точный тест на членство, и каждый из них остается за пределами `MANAGEMENT_API_KEY_SCOPES`.
 
-| Область видимости              | Успешная проверка разрешает                                                                                                                                                           |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | Только не-loopback `/api/mcp/` LOCAL_ONLY (`hasMcpConnectOrManageScope`). Ключ с `manage` или `admin` по-прежнему проходит эту проверку.                                              |
-| `self:usage`                   | `GET /api/v1/me/status` для этого ключа (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` добавляет эту область видимости при создании (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Квоты учетной записи вышестоящего уровня внутри этой полезной нагрузки статуса (`src/lib/usage/apiKeySelfService.ts`). Маршрут статуса по-прежнему требует `self:usage`.              |
-| `policy:bypass-provider-quota` | Вызовы вывода этого ключа пропускают политику квот поставщика (`hasProviderQuotaBypassScope` в `src/sse/handlers/chat.ts`).                                                           |
+| Объем                          | Пропуск позволяет                                                                                                                                                           |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Только вырезание `/api/mcp/` LOCAL_ONLY без обратной связи (`hasMcpConnectOrManageScope`). Ключ с `manage` или `admin` по-прежнему проходит это исключение.                 |
+| `self:usage`                   | `GET /api/v1/me/status` для этого ключа (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` добавляет эту область при создании (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Квоты восходящего аккаунта внутри этой полезной нагрузки статуса (`src/lib/usage/apiKeySelfService.ts`). Маршрут статуса по-прежнему требует `self:usage`.                  |
+| `policy:bypass-provider-quota` | Вызовы вывода этого ключа пропускают политику квот поставщика (`hasProviderQuotaBypassScope` в `src/sse/handlers/chat.ts`).                                                 |
 
-#### Сопоставление
+#### Соответствие
 
-Каталог — это таблица в разделе [Области видимости инструментов MCP](#mcp-tool-scopes). Не рассматривайте `MCP_SCOPE_LIST` в `src/shared/constants/mcpScopes.ts` как этот каталог: это исходное типизированное подмножество. Более поздние инструменты объявляют дополнительные области видимости рядом с ним (`read:notion`, `read:skills`, `read:local-corpus` и остальная часть таблицы).
+Каталог представляет собой таблицу [областей действия инструментов MCP](#mcp-tool-scopes). Не рассматривайте `MCP_SCOPE_LIST` в `src/shared/constants/mcpScopes.ts` как этот каталог: это исходное типизированное подмножество. Более поздние инструменты объявляют рядом с ним дополнительные области действия (`read:notion`, `read:skills`, `read:local-corpus` и остальная часть таблицы).
 
-`evaluateToolScopes` в `open-sse/mcp-server/scopeEnforcement.ts` разрешает вызов, когда каждая требуемая область видимости соответствует некоторой предоставленной области видимости:
+`evaluateToolScopes` в `open-sse/mcp-server/scopeEnforcement.ts` разрешает вызов, когда каждая требуемая область соответствует некоторой предоставленной области:
 
-- `*` соответствует каждой требуемой области видимости.
-- Предоставленная область видимости, заканчивающаяся на `*`, соответствует требуемой области видимости, которая начинается с префикса перед звездочкой. `read:*` соответствует `read:compression`.
-- Каждая другая предоставленная область видимости соответствует только идентичной требуемой строке.
+- `*` соответствует каждой необходимой области.
+- Предоставленная область, оканчивающаяся на `*` соответствует требуемой области, которая начинается с префикса перед звездочкой. `read:*` соответствует `read:compression`.
+- Любая другая предоставленная область соответствует только идентичной требуемой строке.
 
-Ключ, области видимости которого `["manage"]`, не проходит `scopeMatches` для `read:compression`. Тот же вызов не проходит для `admin`, `mcp:connect`, `read` и `write`, когда это единственные предоставленные строки. Между областями видимости инструментов MCP нет иерархии, кроме конечной `*`.
+Ключ с областью действия `["manage"]` не работает `scopeMatches` для `read:compression`. Тот же вызов завершается неудачно для `admin`, `mcp:connect`, `read` и `write` если это единственные разрешенные строки. Между областями действия инструмента MCP нет никакой иерархии, кроме завершающего `*`.
 
-Принудительное применение отключено, если `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (по умолчанию `false`). Пока оно отключено, `evaluateToolScopes` разрешает вызов и пропускает каталог. Пока оно включено, HTTP использует `api_keys.scopes` ключа Bearer в качестве `authInfo` (см. [Привязка области видимости HTTP для каждого ключа](#per-key-http-scope-binding-7895)). Если области видимости ключа не разрешаются, предоставленный набор переходит к MCP `_meta`, затем к `OMNIROUTE_MCP_SCOPES`.
+Принудительное применение отключено, кроме случаев, когда используется `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ( `false` по умолчанию). Пока он выключен, `evaluateToolScopes` разрешает вызов и пропускает каталог. Пока он включен, HTTP использует `api_keys.scopes` ключа носителя в качестве `authInfo` (см. [Привязка области действия HTTP для каждого ключа](#per-key-http-scope-binding-7895) ). Когда никакие области ключей не разрешаются, предоставленный набор переходит к MCP `_meta` (соблюдается только для вызывающих HTTP/SSE, внутри контекста аутентификации HTTP ; `_meta` вызывающего stdio игнорируется, поскольку клиент управляет им и не несет идентификатора для каждого вызывающего абонента), затем `OMNIROUTE_MCP_SCOPES`.
 
-#### Области видимости токена доступа
+#### Области токена доступа
 
-Токены `oma_live_…` (`src/lib/accessTokens/scopes.ts`) несут `read`, `write` или `admin`. `scopeSatisfies` — это ранг: `admin` охватывает `write` и `read`, а `write` охватывает `read`. Неизвестные области видимости ничего не охватывают.
+Токены `oma_live_…` (`src/lib/accessTokens/scopes.ts`) содержат `read`, `write` или `admin`. `scopeSatisfies` — ранг: `admin` покрывает `write` и `read`, а `write` покрывает `read`. Неизвестные области ничего не покрывают.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) сравнивает этот ранг с `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` и `OPTIONS` требуют `read`.
-- Каждый другой метод требует `write`.
-- Пути в `ADMIN_SCOPE_PREFIXES` требуют `admin` для каждого метода. `/api/mcp` находится в этом списке, поэтому токен доступа `write` по-прежнему не может вызывать HTTP-интерфейс MCP.
+- Для любого другого метода требуется `write`.
+- Пути в `ADMIN_SCOPE_PREFIXES` требуют `admin` для каждого метода. `/api/mcp` находится в этом списке, поэтому токен доступа `write` по-прежнему не может вызвать поверхность MCP HTTP.
 - Пути в `ADMIN_MUTATION_PREFIXES` требуют `admin` только для мутаций.
+- Пути в `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) требуют `admin` только для мутаций, и только на этом точном пути — другие подмаршруты `/api/settings/*` сохраняют `write`.
 
-`PATCH /api/keys/{id}` является мутацией и не входит в эти списки администраторов, поэтому токен
-`read` получает 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Токен доступа `write` или `admin` удовлетворяет этому маршруту. JWT панели управления,
-токен machine-id CLI loopback и ключ API с `manage` или `admin` используют
-другие ветви и не сужаются этим рангом.
+`PATCH /api/keys/{id}` является мутацией и не находится в этих списках администраторов, поэтому токен `read` получает 403 `Access token scope 'read' is insufficient; 'write' required.` Токен доступа `write` или `admin` удовлетворяет этому маршруту. Панель мониторинга JWT, токен машинного идентификатора обратной связи CLI и ключ API с `manage` или `admin` берут другие ветви и не сужаются этим рангом.
 
-Токен доступа, который проходит `scopeSatisfies` для `/api/mcp`, очистил
-только шлюз управления. Вызовы инструментов по-прежнему запускают `scopeMatches`
-против областей действия ключей API. Ранг токена доступа не является входными данными для `scopeMatches`.
+Токен доступа, который передает `scopeSatisfies` для `/api/mcp`, очищает только шлюз управления. Вызовы инструментов по-прежнему запускают `scopeMatches` для областей ключей API. Ранг токена доступа не является входными данными для `scopeMatches`.
 
-### Области действия инструментов MCP
+### Области применения инструмента MCP
 
-Применение областей действия централизовано в `open-sse/mcp-server/scopeEnforcement.ts`.
-Каждый инструмент требует определенных областей действия:
+Контроль области действия централизован в `open-sse/mcp-server/scopeEnforcement.ts`. Каждый инструмент требует определенных областей применения:
 
-| Область               | Инструменты                                                                                                                                                                               |
-| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                         |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                                 |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                                    |
-| `read:quota`          | `check_quota`                                                                                                                                                                             |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                                    |
-| `read:models`         | `list_models_catalog`                                                                                                                                                                     |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                             |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                     |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                        |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                               |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                            |
-| `read:cache`          | `cache_stats`                                                                                                                                                                             |
-| `write:cache`         | `cache_flush`                                                                                                                                                                             |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                                |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                         |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                     |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                          |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                                    |
-| `read:memory`         | `memory_search`                                                                                                                                                                           |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                              |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                        |
-| `write:skills`        | `skills_enable`                                                                                                                                                                           |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                          |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                          |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                                   |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                                 |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                          |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                            |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                        |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                           |
-| `read:obsidian`       | 13 инструментов для чтения — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 инструментов для записи — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                         |
+| Объем                 | Инструменты                                                                                                                                                                           |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                     |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                             |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                                |
+| `read:quota`          | `check_quota`                                                                                                                                                                         |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                                |
+| `read:models`         | `list_models_catalog`                                                                                                                                                                 |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                         |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                 |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                                    |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                           |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                        |
+| `read:cache`          | `cache_stats`                                                                                                                                                                         |
+| `write:cache`         | `cache_flush`                                                                                                                                                                         |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                            |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                     |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                 |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                      |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                                |
+| `read:memory`         | `memory_search`                                                                                                                                                                       |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                          |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                    |
+| `write:skills`        | `skills_enable`                                                                                                                                                                       |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                      |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                      |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                               |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                             |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                      |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                        |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                    |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                       |
+| `read:obsidian`       | 13 инструментов чтения — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 инструментов записи — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                     |
 
-Поддерживаются групповые области видимости: `read:*` предоставляет все области видимости для чтения, `*` предоставляет полный доступ.
+Поддерживаются области с подстановочными знаками: `read:*` предоставляет все области чтения, `*` предоставляет полный доступ.
 
-### `mcp:connect` — узкая возможность маршрута (#7895)
+### `mcp:connect` — возможность узкого маршрута (#7895)
 
-Доступ к транспорту HTTP/SSE MCP (`/api/mcp/*`) из не-loopback требует исключения `/api/mcp/` LOCAL_ONLY (см. `docs/security/ROUTE_GUARD_TIERS.md`). Исторически это исключение принимало только ключ API с полной областью видимости `manage`/`admin` — слишком широкой для вызывающей стороны, которой нужно только общаться с MCP. Файл `src/shared/constants/managementScopes.ts` теперь экспортирует `MCP_CONNECT_SCOPE = "mcp:connect"`: аддитивную, узкую область видимости (по тому же прецеденту, что и `SELF_USAGE_SCOPE`), которая авторизует ТОЛЬКО обход `/api/mcp/` в `src/server/authz/policies/management.ts` — она не предоставляет никакого другого доступа к маршрутам управления и намеренно исключена из `MANAGEMENT_API_KEY_SCOPES`. Ключ, содержащий `manage`/`admin`, по-прежнему проходит исключение без изменений; `mcp:connect` — это альтернатива с более низкими привилегиями для удаленных вызывающих сторон, работающих только с MCP, проверяемая через `hasMcpConnectOrManageScope()`.
+Для достижения транспорта HTTP/SSE MCP (`/api/mcp/*`) без обратной связи требуется вырезание `/api/mcp/` LOCAL_ONLY (см. `docs/security/ROUTE_GUARD_TIERS.md`). Исторически сложилось так, что при таком выделении допускался только полный ключ `manage`/`admin` -scope API — слишком широкий для вызывающего абонента, которому нужно только говорить MCP. `src/shared/constants/managementScopes.ts` теперь экспортирует `MCP_CONNECT_SCOPE = "mcp:connect"`: аддитивную узкую область действия (тот же прецедент, что и `SELF_USAGE_SCOPE`), которая разрешает ONLY обход `/api/mcp/` в `src/server/authz/policies/management.ts` — он не предоставляет никакого другого доступа к маршруту управления и намеренно сохраняет OUT из `MANAGEMENT_API_KEY_SCOPES`. Ключ, содержащий `manage`/`admin` по-прежнему проходит вырезание без изменений; `mcp:connect` — это альтернатива с более низкими привилегиями для удаленных вызывающих абонентов, использующих только MCP, проверенная через `hasMcpConnectOrManageScope()`.
 
-### Привязка области видимости HTTP к каждому ключу (#7895)
+### Привязка области действия HTTP для каждого ключа (#7895)
 
-Через HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` теперь разрешает реальные `api_keys.scopes` вызывающей стороны через `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) и передает их в `transport.handleRequest(req, { authInfo })` SDK MCP, так что `extra.authInfo.scopes`, достигающие каждого вызова инструмента, отражают собственные области видимости Bearer-ключа. Метод `resolveCallerScopeContext()` из `scopeEnforcement.ts` уже отдавал приоритет `authInfo` над `_meta` и запасным вариантом `OMNIROUTE_MCP_SCOPES` из переменных окружения — это изменение лишь заполняет этот первый, наивысший приоритетный источник, который ранее не использовался через HTTP. Если ключ API не разрешается (нет заголовка, недействительный ключ), `authInfo` остается `undefined`, и разрешение переходит к существующей цепочке `meta`/env без изменений. Это НЕ меняет значение по умолчанию `OMNIROUTE_MCP_ENFORCE_SCOPES` — принудительное применение по-прежнему должно быть явно включено; это изменение лишь делает путь для каждого ключа приоритетным, как только оно включено. stdio не имеет идентификации для каждого вызывающего (см. `mcpCallerIdentity.ts`) и не затрагивается — оно остается в цепочке запасных вариантов `_meta`/env.
+Через HTTP/SSE `open-sse/mcp-server/httpTransport.ts` теперь разрешает реальный `api_keys.scopes` вызывающего объекта через `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) и передает его MCP `transport.handleRequest(req, { authInfo })` SDK, поэтому `extra.authInfo.scopes` достигающий каждого вызова инструмента, отражает собственные области действия ключа-носителя. `scopeEnforcement.ts` в `resolveCallerScopeContext()` уже отдал приоритет `authInfo` над резервным вариантом `_meta` и `OMNIROUTE_MCP_SCOPES` env. — это заполняет только тот первый источник с наивысшим приоритетом, который ранее не был подключен к HTTP. Когда ключ API не разрешается (нет заголовка, неверный ключ), `authInfo` остается `undefined`, и разрешение попадает в существующую цепочку `meta`/env без изменений. stdio не имеет идентификации для каждого вызывающего абонента (см. `mcpCallerIdentity.ts`) и на него не влияет привязка каждого ключа — он пропускает шаг `_meta` (`_meta` учитывается только внутри контекста аутентификации HTTP, #15159) и разрешается только из ключа `OMNIROUTE_MCP_SCOPES` env.
+
+**Принудительное применение принудительно применяется для вызывающих HTTP/SSE с узкой областью независимо от `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` значение которого по умолчанию равно `false` безопасно только для потока local/stdio с одним оператором, где нет идентификатора для каждого вызывающего абонента, на который можно было бы ориентироваться. `open-sse/mcp-server/server.ts::withScopeEnforcement()` включает безусловное принудительное применение области для каждого инструмента (`shouldForceScopeEnforcement()` в `scopeEnforcement.ts`), когда `resolveCallerScopeContext()` разрешает `source === "authInfo"` (т. е. реальный заголовок авторизации HTTP для каждого ключа, HTTP/SSE-only) AND этот ключ не содержит полной области `manage`/`admin`. Это закрывает пробел, где ключ, содержащий ONLY узкую область обхода `mcp:connect` — описанную выше как не разрешающую ничего, кроме исключения `/api/mcp/` LOCAL_ONLY — в противном случае мог бы вызвать каждый инструмент MCP как только оператор включил доступ remote/non-loopback MCP, просто потому, что `OMNIROUTE_MCP_ENFORCE_SCOPES` поставляет `false` по умолчанию. Полный ключ `manage`/`admin` поверх HTTP и каждый вызывающий stdio/local сохраняют существующее поведение `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated неизменным.
 
 ---
 
 ## Переменные окружения
 
-| Переменная                              | Значение по умолчанию              | Назначение                                                                                                                                                         |
-| :-------------------------------------- | :--------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`           | Базовый URL-адрес, используемый сервером MCP при вызове внутренних API OmniRoute                                                                                   |
-| `OMNIROUTE_API_KEY`                     | (пусто)                            | Ключ API, передаваемый внутренним вызовам API в виде `Authorization: Bearer`                                                                                       |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (включает только `"true"`) | Если включено, отсутствие областей доступа блокирует вызовы инструментов и записывает `scope_denied:<reason>` в журнал аудита                                      |
-| `OMNIROUTE_MCP_SCOPES`                  | (пусто)                            | Разделённый запятыми список разрешённых областей доступа, считающихся «доступными» по умолчанию (если вызывающая сторона не указывает собственные области доступа) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (не задано = включено)             | Если задано значение `0/false/off/no`, отключает сжатие описаний MCP во время регистрации                                                                          |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (не задано = включено)             | Альтернативный псевдоним для указанного выше переключателя                                                                                                         |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                            | Лимит времени до отмены внутренних управляющих запросов на чтение (работоспособность, отказоустойчивость, комбинации, квота, использование)                        |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                            | Лимит времени до отмены переходов, ожидающих ответа поставщика (`route_request`, `web_search`, `web_fetch`)                                                        |
-| `MCP_TOOL_DENY`                         | (не задано = без фильтра)          | Разделённые запятыми имена инструментов, исключаемых из `tools/list` (сокращение количества инструментов — см. ниже)                                               |
-| `MCP_TOOL_ALLOW`                        | (не задано = без фильтра)          | Разделённые запятыми имена инструментов, которые следует оставить исключительно (режим списка разрешений — см. ниже)                                               |
-| `DATA_DIR`                              | `~/.omniroute`                     | Файл пульса записывается в `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                |
+| Переменная                              | Значение по умолчанию                          | Назначение                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :-------------------------------------- | :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                       | Базовый URL-адрес, который сервер MCP использует при обращении к внутренним API OmniRoute                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `OMNIROUTE_API_KEY`                     | (пусто)                                        | API-ключ, передаваемый внутренним вызовам API в виде `Authorization: Bearer`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (включается только значением `"true"`) | Если параметр включён, отсутствие областей доступа приводит к отклонению вызовов инструментов и записи `scope_denied:<reason>` в журнал аудита. Принудительная проверка ТАКЖЕ выполняется независимо от этого флага для любого вызывающего клиента HTTP/SSE, определённого по индивидуальному заголовку Authorization (`source === "authInfo"`), у которого нет полной области доступа `manage`/`admin`, — например, для ключа, имеющего только узкую область обхода `mcp:connect`, — поэтому это значение по умолчанию безопасно только для локального однопользовательского режима/stdio и никогда не должно использоваться для удалённого доступа не через loopback-интерфейс |
+| `OMNIROUTE_MCP_SCOPES`                  | (пусто)                                        | Разделённый запятыми список разрешённых областей доступа, которые по умолчанию считаются «доступными» (используется, когда вызывающий клиент не предоставляет собственные области доступа)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (не задано = включено)                         | Если задано значение `0/false/off/no`, сжатие описаний MCP при регистрации отключается                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (не задано = включено)                         | Альтернативный псевдоним для того же переключателя, что указан выше                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                        | Лимит времени до прерывания внутренних управляющих запросов на чтение (состояние, отказоустойчивость, комбинации, квота, использование)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                        | Лимит времени до прерывания переходов, ожидающих ответа провайдера (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `MCP_TOOL_DENY`                         | (не задано = без фильтра)                      | Разделённые запятыми имена инструментов, которые следует исключить из `tools/list` (уменьшение количества инструментов — см. ниже)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `MCP_TOOL_ALLOW`                        | (не задано = без фильтра)                      | Разделённые запятыми имена инструментов, которые следует оставить исключительно (режим списка разрешённых — см. ниже)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `DATA_DIR`                              | `~/.omniroute`                                 | Файл пульса записывается в `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ---
 

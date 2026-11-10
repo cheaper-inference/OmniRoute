@@ -13,19 +13,19 @@ OmniRoute yana da tsarin izini mai sanin hanya wanda ke hana kowane buƙatar API
 
 > Tushe: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## Hanyoyin Tabbatar da Shaida Biyu
+## Hanyoyin Tabbatarwa Guda Biyu
 
 ### 1. Maɓallin API (Bearer)
 
-Ana amfani da shi don API na abokan hulɗa masu dacewa da OpenAI/Anthropic/Gemini da kuma wasu hanyoyin gudanarwa kaɗan idan maɓallin yana da iyakar izinin `manage`.
+Ana amfani da shi don APIs na abokan ciniki masu dacewa da OpenAI/Anthropic/Gemini da kuma wasu hanyoyin gudanarwa idan maɓallin yana da ikon `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Ana inganta shi ta `isValidApiKey()` / `extractApiKey()` a cikin `src/sse/services/auth.ts`, sannan a sake fitar da su ta `src/shared/utils/apiAuth.ts`. Mai ingantawar yana kuma karɓar env vars na `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` a matsayin maɓallan wucewa masu ɗorewa (batun #1350).
+Ana tabbatar da ingancinsa ta `isValidApiKey()` / `extractApiKey()` a cikin `src/sse/services/auth.ts`, sannan a sake fitar da su ta `src/shared/utils/apiAuth.ts`. Mai tabbatarwar yana kuma karɓar masu canjin muhalli `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` a matsayin maɓallan wucewa na dindindin (issue #1350).
 
-### 2. Zaman Dashboard (cookie na auth_token)
+### 2. Zaman Dashboard (kuk ɗin auth_token)
 
 Don shafukan dashboard da ayyukan gudanarwa.
 
@@ -33,127 +33,209 @@ Don shafukan dashboard da ayyukan gudanarwa.
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Ana ɗaukar cookie a matsayin zama ne kawai idan an tabbatar da JWT ɗin **kuma** yana ɗauke da `authenticated: true`
+Kuk ɗin zama ne kawai idan JWT ya inganta **kuma yana ɗauke da `authenticated: true`**
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Duk
-mai amfani da cookie ɗin (mai gadin hanya, sabunta bututun authz, musayar hannun WebSocket, sabar
-kai-tsaye, `/api/settings/require-login`, `/api/auth/status`) yana bi ta wannan mataimakin.
-Akwai wasu JWT da aka sanya wa hannu da `JWT_SECRET` — wucewar Cursor CLI tana ƙirƙirar
-tokens na `iss "omniroute" / aud "cursor-cli"` ga masu riƙe da maɓalli — kuma ba a taɓa ɗaukar su a matsayin zaman mai amfani
+masu amfani da kuk ɗin (mai tsaron hanyar dashboard
+(`isDashboardSessionAuthenticated()`), sabunta bututun izini, musayar WebSocket, uwar garken
+kai tsaye, `/api/settings/require-login`, `/api/auth/status`) suna bi ta wannan mataimaki.
+Akwai wasu JWT da aka sanya hannu da `JWT_SECRET` — CLI na Cursor yana ƙirƙirar
+`iss "omniroute" / aud "cursor-cli"` tokens don masu riƙe da maɓalli — kuma ba su taɓa zama zaman shiga ba
 (#13298).
 
-Ana tabbatar da shi ta `isDashboardSessionAuthenticated()` a cikin `src/shared/utils/apiAuth.ts`. Bututun yana sabunta JWT ta atomatik idan kwanakin da suka rage masa sun ƙasa da 7 daga tsawon rayuwarsa na kwanaki 30.
+Ana tabbatar da shi ta `isDashboardSessionAuthenticated()` a cikin `src/shared/utils/apiAuth.ts`. Bututun yana sabunta JWT ta atomatik idan ya rage masa ƙasa da kwanaki 7 a cikin rayuwarsa ta kwanaki 30.
 
-Wasu hanyoyin gudanarwa suna karɓar **ɗaya daga cikin** hanyoyin biyu: cookie KO `Bearer <key>` idan maɓallin API yana da iyakar izinin `manage` (ko `admin`). Wannan ne ke ba da damar tsarin aiki na “daidaitawa ta hanyar kiran API” da aka ƙara a v3.8.
+Zaman shiga na iya ƙarewa kafin kwanaki 30 su cika, saboda duk mai ƙirƙirar token yana bi ta `mintDashboardSessionToken` (lokacin bayarwa `iat` da ID `jti`), kuma mai tabbatarwa yana duba saituna biyu: `sessionsValidAfter`, wanda canjin kalmar sirri ke saita shi domin duk zaman da aka bayar kafin lokacin su daina ingantawa (mai binciken da ya canja kalmar sirri yana samun sabon kuk), da `revokedDashboardSessions`, wanda `POST /api/auth/logout` ke ƙara `jti` na zaman da aka fita daga ciki. Zaman da tsohuwar sigar ta ƙirƙira ba su ɗauke da ɗaya daga cikin waɗannan claims ba, kuma za su ci gaba da aiki har sai an fara canja kalmar sirri. Idan ba a iya karanta saitunan ba, ba a amince da zaman ba.
 
-#### Ƙofar shiga ta OIDC mai zaɓi (#6973)
+Wasu hanyoyin gudanarwa suna karɓar **ɗaya daga cikin** hanyoyin biyu: kuk ko `Bearer <key>` idan maɓallin API yana da ikon `manage` (ko `admin`). Wannan ne ke ba da damar tsarin aikin “ana iya daidaita shi ta kiran API” da aka ƙara a v3.8.
 
-Shigar admin na dashboard yana kuma tallafa wa tsarin OIDC (OpenID Connect) na **zaɓin shiga**
-tare da tsohuwar hanyar shiga da kalmar sirri — ba a taɓa cire hanyar shiga da kalmar sirri, ana
-ƙara mata wata hanya ne kawai:
+#### Ƙofar shiga ta OIDC ta zaɓi (#6973)
 
-- A kashe take sai idan `settings.oidcEnabled === true` **kuma** an daidaita
-  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` duka (Settings → Auth).
-  In ba haka ba, `GET /api/auth/oidc/login` yana mayar da `400`.
+Shigar mai gudanar da dashboard yana kuma tallafa wa tsarin OIDC (OpenID Connect) na **zaɓi** tare da tsohuwar hanyar shiga da kalmar sirri — ba a taɓa cire
+shigar da kalmar sirri ba, ana ƙara masa wannan zaɓi ne kawai:
+
+- Yana kashe ne sai idan `settings.oidcEnabled === true` **kuma** an saita
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` duka (Saituna → Tantancewa).
+  `GET /api/auth/oidc/login` yana mayar da `400` idan ba haka ba.
 - `GET /api/auth/oidc/login` yana gano `authorization_endpoint` daga
-  `/.well-known/openid-configuration` na mai bayarwa (yana komawa
-  `<issuer>/authorize` idan hakan ya gaza), yana gina URI na turawa daga buƙatar da ta shigo
-  (tare da la’akari da `x-forwarded-proto`), sannan ya tura zuwa IdP tare da `state` bazuwar
-  da aka adana a cikin cookie na `oidc_state` mai `httpOnly`.
-- `GET /api/auth/oidc/callback` yana tabbatar da `state`, yana musanya lambar ba da izini,
-  sannan yana tabbatar da sa hannun ID token ta hanyar JWKS na mai bayarwa
-  (`createRemoteJWKSet` na `jose`, wanda ake cache bisa kowane JWKS URI) tare da binciken
-  `issuer`/`audience`. Jerin izini na `oidcAllowedSubjects` mai zaɓi yana daidaita da iƙirarin
-  `sub` na token ko iƙirarin `email` — ana amincewa da iƙirarin email ne kawai idan
-  `email_verified === true`, saboda haka email da ba a tabbatar da shi ba a IdP ba zai taɓa
-  wuce ƙofar ba.
-- Idan an yi nasara, yana ƙirƙirar **daidai wannan** JWT na `auth_token` na kwanaki 30 da hanyar
-  shiga da kalmar sirri ke bayarwa (`src/app/api/auth/login/route.ts`), don haka sauran
-  bututun zaman dashboard (sabuntawa ta atomatik, tutocin cookie) bai canza ba —
-  OIDC yana maye gurbin yadda ake ƙirƙirar cookie ne kawai, ba abin da yake ba da izini ba.
+  `/.well-known/openid-configuration` na mai bayarwa (idan ba haka ba, yana koma wa
+  `<issuer>/authorize`), yana gina URI ɗin turawa daga buƙatar da ta shigo
+  (yana kula da `x-forwarded-proto`), sannan yana tura zuwa IdP tare da wani
+  `state` bazuwar da aka adana a cikin kuki `oidc_state` mai `httpOnly`.
+- `GET /api/auth/oidc/callback` yana tabbatar da `state`, yana musanya lambar
+  izini, sannan yana tabbatar da sa hannun ID token ta JWKS na mai bayarwa
+  (`createRemoteJWKSet` na `jose`, wanda ake adanawa bisa ga URI na JWKS) tare da
+  binciken `issuer`/`audience`. Shigar da dashboard yana buƙatar jerin
+  `oidcAllowedSubjects` marar komai, manufar `oidcAdmissionClaim`, ko duka biyun.
+  Jerin batutuwa yana daidaita `sub` ko `email` ne kawai idan
+  `email_verified === true`. Manufar da'awar zaɓi tana karɓar hanyar da'awar ID
+  token mai rabe da digo (misali, `realm_access.roles`) da kuma jerin ƙimomin da
+  aka yarda da su; da'awar da aka warware dole ta kasance jerin rubutu kuma ta
+  ƙunshi aƙalla ƙima guda daga cikin waɗanda aka yarda da su. Idan an saita
+  manufofin biyu, dole ne duka su yi nasara. Da'awoyin da suka ɓace ko suka lalace
+  suna sa tsarin ya ƙi amincewa, kuma idan babu wata manufa daga cikin biyun,
+  callback ɗin yana ƙin shiga (`not_configured`). Saitunan da ke amfani da
+  batun kawai na da suke ci gaba ba tare da canji ba.
+- Keycloak yawanci yana sanya rawunan realm cikin access tokens, ba lallai cikin
+  ID tokens ba. Don buƙatar rawar realm `admin`, saita protocol mapper na wannan
+  client wanda zai haɗa da `realm_access.roles` cikin **ID token** ɗinsa, sannan ka
+  saita `oidcAdmissionClaim` zuwa `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Bincika ainihin da'awar ID token na wannan client kafin kunna shigarwa bisa rawa
+  kawai; manhajar ba ta karanta rawunan access-token ba. Ƙin bayar da token daga
+  ɓangaren IdP na iya ƙara kariya, amma ba ya maye gurbin wannan binciken na
+  ɓangaren manhajar.
+- Idan an yi nasara, yana ƙirƙirar **ainihin** JWT `auth_token` na kwanaki 30 da
+  shigar kalmar sirri ke bayarwa (`src/app/api/auth/login/route.ts`), saboda haka
+  sauran tsarin zaman dashboard (sabunta kai-tsaye, tutocin kuki) ba su canza ba —
+  OIDC yana maye gurbin yadda ake ƙirƙirar kukin ne kawai, ba abin da yake ba da
+  izini ba. Canje-canje ga rawuna/ƙungiyoyin IdP ba sa soke zaman OmniRoute da ake
+  da su; fita, sauya kalmar sirri, ko ƙarewar zaman ne har yanzu ke ƙayyade
+  tsawon rayuwarsu.
+- Kowane saitin `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) yana cikin
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  yana amsa `400 PASSWORD_REQUIRED` sai idan jikin buƙatar yana ɗauke da kalmar
+  sirrin gudanarwa a matsayin `currentPassword` (`401 PASSWORD_MISMATCH` idan ba
+  daidai ba ce). `oidcDisablePasswordLogin` yana ƙin shigar da kalmar sirri
+  (`POST /api/auth/login`) amma yana riƙe hash ɗin kalmar sirrin da aka adana,
+  kuma sake tantancewa har yanzu yana duba `currentPassword` da shi.
+- `corsOrigins` da `bruteForceProtection` su ma suna cikin
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: sassauta ɗayansu yana raunana kariyar
+  shiga, saboda haka suna buƙatar sake tantancewa da `currentPassword` iri ɗaya
+  (shafin Tsaro yana neman sa), kuma shigo da JSON yana cire su.
+- Kowace maɓallin manufar tsaro — shigarwar `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  kowace maɓallin `oidc*`, da yanayin zaman dashboard — **na mai gudanarwa
+  kawai** ne a `PATCH /api/settings`: ana ƙin maɓallin API mai ikon manage ko
+  token ɗin samun dama na `oma_` da `403` ko da ya aika da `currentPassword` daidai,
+  kuma ana rubuta ƙin amincewar a duba-aiki a matsayin `settings.update_failed`
+  tare da `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` a `src/lib/api/operatorCredential.ts`).
+  Saitunan yau da kullum (jigo, zaɓuɓɓukan nuni) suna ci gaba da kasancewa masu
+  rubutu ga maɓallin `manage` ko token ɗin samun dama na `admin`. Kowace gyara ta
+  `/api/settings` kanta (da ta `/api/settings/require-login`) ita ma tana buƙatar
+  ikon `admin` na token ɗin samun dama
+  (`ADMIN_MUTATION_EXACT_PATHS` a `src/server/authz/accessScopes.ts`, daidaitawar
+  ainihin hanya); `GET` yana ci gaba da zama `read`, yayin da sauran ƙananan
+  hanyoyin `/api/settings/*` (proxies, tsoffin combo, laƙaban model, matsawa,
+  sharewa…) suke ci gaba da amfani da ikon `write` da ake ƙayyade bisa ga hanyar.
+- `POST /api/settings/import-json` yana tsallake wannan sake tantancewa, saboda haka
+  yana cire kowace maɓalli da ke cikin `IMPORT_STRIPPED_SETTINGS_KEYS` (a fayil ɗin
+  nan) kafin rubutawa: kalmar sirri da `currentPassword`, kowace shigarwa ta
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, da yanayin zaman dashboard
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Saboda haka, shigo da tsohon
+  madadin ba zai iya dawo da zaman da canjin kalmar sirri ko fita ya riga ya ƙare
+  ba.
 
-## Rukunonin Hanya
+#### Shigar TOTP na zaɓi mai tabbatarwa matakai biyu (#16619)
 
-`src/server/authz/types.ts` yana ayyana rukunoni uku; duk hanyar da ba za a iya tantance rukuninta kai tsaye ba tana komawa zuwa `MANAGEMENT`.
+Ana yi masa rajista daga Saituna → Tsaro; yana kashe har sai mai gudanarwa ya
+kunna shi (`src/server/auth/dashboardMfa.ts`).
 
-| Rukuni       | Bayani                                                                                                                                                            | Tantancewar da ake buƙata                                              |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `PUBLIC`     | Hanyoyin da aka tabbatar a sarari cewa suna da aminci — shiga, fita, matsayi, farawa, lafiyar tsarin, fara amfani da tsarin.                                      | Babu                                                                   |
-| `CLIENT_API` | Wuraren ƙarshen samar da samfuri — `/api/v1/*`, `/api/v1beta/*`, tare da laƙabban `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Maɓallin Bearer idan an kunna tutar fasalin `REQUIRE_API_KEY` mai aiki |
-| `MANAGEMENT` | Shafukan dashboard, saituna, masu samarwa, maɓallai, da wuraren ƙarshen gudanarwa da bincike.                                                                     | Zaman dashboard KO Bearer mai iyakar izinin `manage`                   |
+- **Abin da ya ƙunsa:** shiga ta kalmar sirri (`POST /api/auth/login`, wanda daga nan yake buƙatar
+  `POST /api/auth/mfa/verify`) da `omniroute connect` (`POST /api/cli/connect`,
+  wanda ya ƙi musayar kalmar sirri kawai kuma yake karɓar lambar a matsayin `totp`).
+- **Abin da bai ƙunsa ba:** shiga ta OIDC / SSO (`/api/auth/oidc/callback`) ba ya
+  neman TOTP na OmniRoute. Yana dogara ne da mataki na biyu na mai ba da shaidar kansa,
+  don haka a tilasta MFA a cikin IdP idan an kunna OIDC.
+- **Farfadowa** (na'ura ta ɓace, babu sauran lambobin farfadowa, ko kuma wani abu na
+  tabbatarwa da ba za a iya tabbatar da shi ba, misali bayan an canza
+  `STORAGE_ENCRYPTION_KEY`):
+  1. Sake kunna uwar garken tare da `OMNIROUTE_DISABLE_MFA=true`.
+  2. A kan host ɗin da kansa (abokin loopback da `Host` na loopback, kamar
+     `http://localhost:20128`), shiga da kalmar sirri. Ana tsallake mataki na biyu
+     ne kawai don wannan asalin; kowane sauran asali har yanzu yana buƙatar lambar.
+  3. A cikin Saituna → Tsaro → Kashe, shigar da kalmar sirri kuma bar lambar
+     babu komai. `POST /api/auth/mfa/disable` yana karɓar jiki ba tare da `code` ba
+     ne kawai yayin da aka saita wannan canjin kuma buƙatar ta fito daga host; har yanzu
+     yana buƙatar zaman dashboard da kalmar sirri ta yanzu, kuma ana rubuta shi a
+     kundin duba-audit a matsayin `auth.mfa.disabled` tare da `secondFactor: "recovery_switch"`.
+  4. Cire saitin `OMNIROUTE_DISABLE_MFA`, sake kunnawa, sannan a sake yin rajista idan ya zama dole.
 
-## Bututun Aiki
+## Azuzuwan hanya
+
+`src/server/authz/types.ts` ta bayyana aji uku; duk wata hanya da ba za a iya rarraba ta ta faɗuwa zuwa `MANAGEMENT` ba.
+
+| Class        | Bayani                                                                                                                                            | Ana buƙatar tabbaci                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `PUBLIC`     | Tsare-tsare amintattun hanyoyin shiga — shiga, fita, matsayi, lafiya, hawan takalmin jirgi.                                                       | Babu                                                                                      |
+| `CLIENT_API` | Ƙarshen sabis na samfur — `/api/v1/*`, `/api/v1beta/*`, da laƙabi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Maɓallin mai ɗaukar hoto lokacin da aka kunna alamar fasalin `REQUIRE_API_KEY` mai tasiri |
+| `MANAGEMENT` | Shafukan dashboard, saituna, masu samarwa, maɓallai, gudanarwa da ƙarshen bincike.                                                                | Dashboard zaman OR Bearer tare da iyakar `manage`                                         |
+
+Ayyukan `MANAGEMENT` kaɗan ne** ma'aikaci-kawai** : maɓallin `manage` bai isa ba. Ana fitar da bayanan da aka adana (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), maido da ajiyar ajiya akan bayanan rayuwa (`POST /api/db-backups/import` ciki har da `dryRun=true`, `POST /api/db-backups` mayar da id, `POST /api/settings/import-json`), lalata wuraren dawo da (`DELETE /api/db-backups` cleanup, da `PATCH /api/db-backups` saboda riƙewar da yake ci gaba da tafiyar da pruning ta atomatik bayan kowane madadin) yana buƙatar zaman dashboard, batun da CLI a iya cirewa na gida. Bayar da alamar daidaitawa (`POST /api/sync/tokens`) da ƙaddamar da alamar samun damar CLI `admin` (`POST /api/cli/tokens`) na buƙatar zaman dashboard ko batun CLI na gida a kowane yanayin shiga. maɓallan API na kowane yanki da alamun samun damar `oma_` ba fa'idodin aiki bane: suna samun `403` duk lokacin da ake buƙata ɗaya. Duban yana zaune a cikin `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Canza saitunan shiga ma'aikaci ne kawai: `POST /api/settings/require-login` (saitin kalmar sirrin gudanarwa / kunna `requireLogin`) yana karɓar waɗannan takaddun shaida kawai sau ɗaya kalmar sirri ta wanzu — taga bootstrap na farko (ba kalmar sirri ba tukuna) ba canzawa — kuma zaman dashboard dole ne ya aika `currentPassword` don maye gurbin kalmar sirri (`403` lokacin da ya ɓace ko kuskure, duba shi azaman `settings.update_failed`). CLI na gida da misali tare da nakasassun shiga suna kiyaye hanyar dawowa kuma suna iya saita kalmar sirri ba tare da shi ba, tunda duka biyun suna daure ga mai watsa shiri wanda ya mallaki kundin bayanan.
+
+## Bututu
 
 ```
-Buƙata mai shigowa → src/proxy.ts
-  → runAuthzPipeline() a cikin src/server/authz/pipeline.ts
-    1. Cire amintattun kanun bayanai na ciki (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Samar da id na buƙata, tantance rukunin hanya ta hanyar classifyRoute()
-    3. Idan pathname == "/" → karkatar zuwa /dashboard
-    4. Idan ana rufe tsarin a hankali kuma hanyar ita ce /api/* → 503
-    5. Idan /api/* ce ba ta GET ba → aiwatar da kariyar checkBodySize()
-    6. Idan OPTIONS ce → gwajin-farko na CORS 204
-    7. Idan options.enforce == false → bari ta wuce tare da kanun rukunin hanya
-    8. In ba haka ba: POLICIES[routeClass].evaluate(ctx)
-       - allow  → sanya x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → kuskuren JSON mai correlation_id (shafukan dashboard → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Amintattun kanun bayanai na ciki (waɗanda aka ayyana a cikin `src/server/authz/headers.ts`) ana **cire su daga buƙatun da ke shigowa** kafin tantance rukuni — abokan hulɗa ba za su iya riga cika `x-omniroute-auth-*` don kwaikwayon wani mai amfani ba.
+Amintattun masu kai na ciki (wanda aka bayyana a cikin `src/server/authz/headers.ts`) sune** cire daga buƙatun masu shigowa** kafin rarraba — abokan ciniki ba za su iya riga-kafin `x-omniroute-auth-*` don kwaikwayi wani batu ba.
 
-### Yarjejeniyoyin manufofi
+### Kwangilolin siyasa
 
-Kowane rukunin hanya yana da manufa a cikin `src/server/authz/policies/`:
+Kowane ajin hanya yana da manufa a cikin `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — koyaushe yana mayar da `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — yana cire Bearer, sannan ya inganta shi ta hanyar `validateApiKey()`. Yana komawa ga mara suna ne kawai idan an kashe tutar fasalin `REQUIRE_API_KEY` mai aiki. Ana tantance tutar mai aiki ta hanyar `isRequireApiKeyEnabled()` (`Maye gurbin tutar fasalin DB > process.env.REQUIRE_API_KEY > tsohon ƙima`) domin Tutocin Fasali na Dashboard da sauye-sauyen muhalli su sarrafa `/api/v1/*`, `/api/v1beta/*`, da laƙabbai iri ɗaya; gazawar mai tantancewa tana hana shiga. Yana ba da izini ga buƙatun zaman dashboard a hanyoyin client API (ciki har da `/api/v1/models`, wanda kundin samfuran dashboard ke amfani da shi).
-- **`managementPolicy`** (`policies/management.ts`) — yana karɓar zaman dashboard, buƙatun daidaita samfuri na ciki (waɗanda aka dace da `/api/providers/[name]/(sync-models|models)`), ko kuma ya tsallake gaba ɗaya idan `isAuthRequired()` ya mayar da false. Yana mayar da 403 (`AUTH_001`) idan akwai alamar Bearer amma ba ta da inganci, in ba haka ba 401. Haka kuma yana tilasta matakan kariyar hanya (LOCAL_ONLY / ALWAYS_PROTECTED) kafin kowane reshen tantancewa — duba [Matakan Kariyar Hanya](../security/ROUTE_GUARD_TIERS.md). Ana iya samun damar hanyoyin LOCAL_ONLY da ke cikin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (a yau: `/api/mcp/`) daga wurin da ba loopback ba idan maɓallin Bearer yana ɗauke da iyakar izinin `manage`; duk sauran hanyoyin LOCAL_ONLY suna ci gaba da buƙatar strict-loopback ba tare da la'akari da iyakar izini ba.
+- **`publicPolicy`** (`policies/public.ts`) — kullum yana dawowa `allow({ kind: "anonymous", id: "anonymous" })`.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — yana fitar da Mai ɗaukar nauyi, yana inganta ta hanyar `validateApiKey()`. Faɗuwa zuwa ga wanda ba a san sunansa ba kawai lokacin da aka kashe ingantaccen tutar fasalin `REQUIRE_API_KEY`. Tuta mai inganci ana warware ta ta hanyar `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) don haka Tutoci Siffofin Dashboard da masu canjin yanayi suna sarrafa `/api/v1/*`, `/api/v1beta/*`, da laƙabi akai-akai; gazawar warwarewa ta kasa rufe. Yana ba da damar buƙatun-zaman dashboard akan hanyoyin API abokin ciniki (ciki har da `/api/v1/models`, ke amfani da kundin ƙirar dashboard). Lokacin da aka kunna Entra ID SSO, reshen SSO ne ke kula da mai ɗaukar kaya wanda shine tsarin Entra token (bangaren tushe64url uku, `RS*` alg, `kid`).** kafin** `validateApiKey()` kuma hukuncinsa shine — na ƙarshe ba zai taɓa shiga hanyar API-key ba ko reshe-zuwa-wanda ba a san shi ba, don haka ƙaddamarwar mai ba da shaida ba zai iya zama buɗe hanyar shiga ba. Maɓallan API na tsaye ba su shafa ba. Duba [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — yana karɓar zaman dashboard, buƙatun ƙirar ƙira na ciki (wanda ya dace da `/api/providers/[name]/(sync-models|models)`), ko kuma ya tsallake gaba ɗaya idan `isAuthRequired()` ya dawo ƙarya. Yana dawo da 403 (`AUTH_001`) lokacin da alamar Mai ɗauka ta kasance amma bata aiki, 401 in ba haka ba. Hakanan yana tilasta matakan tsaro na hanya (LOCAL_ONLY / ALWAYS_PROTECTED) kafin kowane reshe na auth — duba [Tiers Guard Route](../security/ROUTE_GUARD_TIERS.md). hanyoyin LOCAL_ONLY a cikin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (yau: `/api/mcp/`) ana iya samun dama daga waɗanda ba a dawo da su ba lokacin da maɓalli na Bearer ke ɗauke da iyakar `manage` ; duk sauran hanyoyin LOCAL_ONLY sun kasance masu tsattsauran ra'ayi ba tare da la'akari da iyaka ba.
 
-Manufa mai nasara tana mayar da `AuthSubject` tare da `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Masu sarrafa buƙatu na gaba za su iya karanta shi ta hanyar `assertAuth(request, "CLIENT_API")` a cikin `src/server/authz/assertAuth.ts` maimakon sake gudanar da dabarun tantancewa.
+Manufar nasara tana mayar da `AuthSubject` da `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Masu kula da ƙasa za su iya karanta ta ta `assertAuth(request, "CLIENT_API")` a cikin `src/server/authz/assertAuth.ts` maimakon sake gudanar da dabaru na gaskiya.
 
-## Jerin Hanyoyin Jama'a
+## Jerin Hanyoyi na Jama'a
 
-`src/shared/constants/publicApiRoutes.ts` shi ne jerin izini na bayyane:
+`src/shared/constants/publicApiRoutes.ts` shine fiyayyen lissafin izini:
 
-An raba jerin bisa ga **siffa**, kuma wannan rabuwar tana da matuƙar muhimmanci (GHSA-74g9-q8f6-793h): ana daidaita prefix ta amfani da `startsWith()`, don haka yana kuma daidaita kowace hanya da ke kusa wadda take da haruffan farko iri ɗaya.
-Amfani da `/api/usage/om-usage` a matsayin prefix ya sanya `/api/usage/om-usage<anything>` ya zama PUBLIC, sannan Next yana fassara hakan zuwa `/api/usage/[connectionId]` — handler wanda ba shi da nasa tantancewar izini.
+An raba lissafin ta** siffa** , kuma tsaga yana ɗaukar kaya (GHSA-74g9-q8f6-793h): prefix yana daidaita da `startsWith()`, don haka kuma ya dace da kowace hanya da ke kusa da raba manyan haruffa. `/api/usage/om-usage` a matsayin prefix mai alamar `/api/usage/om-usage<anything>` PUBLIC, kuma Na gaba yana warware wannan don `/api/usage/[connectionId]` — mai sarrafa wanda ba shi da nasa.
 
 ```ts
-// Manyan rassan hanyoyi na ainihi. DOLE kowane shigarwa ya ƙare da "/" (gwajin unit yana tabbatar da hakan).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // ana ɗaukarsa a matsayin CLIENT_API a classify, ba a matsayin "jama'a ba tare da auth ba"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Hanyoyi guda-guda, ana daidaita su DAIDAI (tare da ko ba tare da slash a ƙarshe ba).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Hanyoyi guda-guda na karantawa kawai waɗanda kuma suke samun sassaucin origin na CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Hanya guda ta karantawa kawai BA TARE da sassaucin CORS ba.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Hanyoyin karantawa kawai na jama'a ne **kawai** ga hanyoyin buƙata masu aminci. Lura: `classifyRoute()` yana cire `/api/v1/*` da `/api/v1beta/*` daga faɗuwar PUBLIC — waɗannan koyaushe `CLIENT_API` ne domin manufar Bearer-key ta ci gaba da aiki.
+Hanyoyin karantawa kawai jama'a ne** kawai** don hanyoyin aminci. Lura: `classifyRoute()` ta keɓe `/api/v1/*` da `/api/v1beta/*` daga faɗuwar PUBLIC ta hanyar — waɗanda koyaushe suke `CLIENT_API` don haka har yanzu manufar maɓalli mai ɗaukar nauyi tana aiki.
 
 ## Ƙara Sabuwar Hanya
 
@@ -225,15 +307,15 @@ Yana kashe sai dai idan `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 `read` / `write` / `admin` akan alamomin `oma_live_…`, an jera su ta `scopeSatisfies`
 (`src/lib/accessTokens/scopes.ts`). Wannan matsayi yana aiki ne kawai ga takardar shaidar alamar shiga. Duba [Tabbatar da Gudanarwa](../guides/MANAGEMENT-AUTH.md).
 
-## Maɓallin Buƙatar Tantancewa
+## Auth Bukatar Canji
 
-`isAuthRequired()` a cikin `src/shared/utils/apiAuth.ts` yana tantance ko za a tilasta **kowace irin** tantancewa ga buƙata:
+`isAuthRequired()` a `src/shared/utils/apiAuth.ts` ya yanke shawarar ko** kowane** Ana aiwatar da auth don buƙatu:
 
-- `settings.requireLogin === false` → an kashe tantancewa gaba ɗaya.
-- Ba a saita kalmar sirri ba **kuma** babu env var na `INITIAL_PASSWORD` → yanayin bootstrap yana ba da damar amfani da mayen fara amfani da tsarin da kuma buƙatun loopback, amma buƙatun cibiyar sadarwa da aka fallasa har yanzu suna buƙatar bayanan shiga.
-- Duk wani kuskuren DB → tsarin yana rufewa don kariya (tsaro ta tsohuwa).
+- `settings.requireLogin === false` → auth naƙasasshe ne a duk duniya, in ban da matakin kariya koyaushe (duba [Tiers Guard Route](../security/ROUTE_GUARD_TIERS.md) ) da kuma kiran da ke ba da takaddun shaidar da yake karɓa, waɗanda ke buƙatar shaidar daidai da yadda ake shiga: ba da alamun daidaitawa, Mingin CLI samun damar shiga a kowane fage, da ƙirƙirar maɓallin API, ko ba da ikon `manage` da ikon `admin`. sabuntawa ko bayyana irin wannan maɓalli (`requireCredentialForManagementScopedKey()` a cikin `src/lib/api/requireManagementAuth.ts`). Maɓallai-kawai suna buɗewa. Rubuta tuta mai kariya (`REQUIRE_API_KEY`, sauran tutocin Tsaro, da tutocin SSRF / TLS / MCP-scope / sandbox da aka jera a cikin [Tutocin Feature](../reference/FEATURE_FLAGS.md#rest-api) ) da adana saitunan abin rufe fuska PII (`PUT /api/settings/pii`) suma suna buƙatar takaddun shaida.
+- Babu kalmar sirri da aka saita** kuma** babu `INITIAL_PASSWORD` env var → yanayin bootstrap yana ba da damar mayen hawan hawa da buƙatun madauki, amma buƙatun hanyar sadarwa da aka fallasa har yanzu suna buƙatar takaddun shaida. Banbanci: rubuta tutar sifa mai kariya da adana saitunan rufe fuska PII (`PUT /api/settings/pii`) suna buƙatar takaddun shaida ko da daga madauki, don haka madauki da kanta bai isa ba a can.
+- Duk wani kuskuren DB → ya kasa rufe (amintacce-by-default).
 
-Tilasta maɓallin API na abokin ciniki yana amfani da `isRequireApiKeyEnabled()` a cikin `src/shared/utils/featureFlags.ts`, ba karanta `process.env.REQUIRE_API_KEY` kai tsaye ba. Wannan yana da muhimmanci ga tsarin da aka tura: sauya `REQUIRE_API_KEY` a cikin Dashboard → Feature Flags yana adana maye-gurbin DB kuma nan take yana shafar `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, da sauran binciken tantancewar API na abokin ciniki waɗanda ke amfani da wannan mataimakin. Idan ba za a iya karanta ma'ajiyar feature flag ba, tantancewar API na abokin ciniki tana rufewa don kariya kuma tana buƙatar maɓalli.
+Ƙaddamar da maɓallin API abokin ciniki yana amfani da `isRequireApiKeyEnabled()` a cikin `src/shared/utils/featureFlags.ts`, ba karanta `process.env.REQUIRE_API_KEY` kai tsaye ba. Wannan yana da mahimmanci ga al'amuran da aka tura: jujjuya `REQUIRE_API_KEY` a cikin Dashboard → Feature Tutoci yana adana DB wuce gona da iri kuma nan da nan ya shafi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, da sauran abokin ciniki-API auth checks da ke raba wannan mataimaki. Idan ba a iya karanta kantin sayar da tuta, abokin ciniki API auth ya kasa rufe kuma yana buƙatar maɓalli.
 
 ## Sauyin da ke Karya Daidaituwa — v3.8.0
 
@@ -249,25 +331,25 @@ Wuraren ƙarshen `/api/v1/agents/tasks/*` da `/api/resilience/model-cooldowns` *
 - Jerin hanyoyin jama'a da aka amince da su: `tests/unit/public-api-routes.test.ts`.
 - Gudanar da gwaji takamaimai: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Gano Matsala
+## Gyara kurakurai
 
-Pipeline koyaushe yana yi wa amsoshi tambari da:
+Bututun yana yin tambari koyaushe tare da:
 
 ```
-x-request-id:               <ID na daidaitawa, ana maimaita shi a jikin kuskure>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Ga buƙatun da aka tantance, headers na buƙatar upstream (a ɓangaren handler) su ma sun haɗa da:
+Don ingantattun buƙatun masu kan buƙatun buƙatun na sama (handler-gefen) suma sun haɗa da:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<lambobi-4-na-ƙarshe> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (na zaɓi)
-x-omniroute-auth-scopes:    jeri da aka raba da waƙafi
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Yi amfani da `assertAuth(req, expectedClass)` a cikin handlers — yana jefa `AuthzAssertionError` mai lambar `AUTHZ_NOT_INITIALIZED` idan an tsallake middleware (yana taimakawa wajen gano koma-baya na saiti a gwaje-gwaje).
+Yi amfani da `assertAuth(req, expectedClass)` a cikin masu kula da — yana jefa `AuthzAssertionError` tare da lambar `AUTHZ_NOT_INITIALIZED` idan an ketare na'urar tsakiya (taimaka don kama koma bayan daidaitawa a cikin gwaje-gwaje).
 
 ## Duba Kuma
 

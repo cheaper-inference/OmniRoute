@@ -4,89 +4,99 @@
 
 ---
 
-> **ആധികാരിക ഉറവിടം:** `electron/` വർക്ക്സ്പേസ്
-> **അവസാനം പുതുക്കിയത്:** 2026-06-28 — v3.8.40
+> **സത്യത്തിൻ്റെ ഉറവിടം:** `electron/` ജോലിസ്ഥലം** അവസാനം അപ്ഡേറ്റ് ചെയ്തത്:** 2026-06-28 — v3.8.40
 
-**Electron 41** + **electron-builder 26.10** എന്നിവയെ അടിസ്ഥാനമാക്കി നിർമ്മിച്ച ഒരു ക്രോസ്-പ്ലാറ്റ്ഫോം ഡെസ്ക്ടോപ്പ് ആപ്പ് (Windows / macOS / Linux) OmniRoute നൽകുന്നു. ഡെസ്ക്ടോപ്പ് ആപ്പ് Next.js സ്റ്റാൻഡ്എലോൺ സെർവറിനെ ഒരു ചൈൽഡ് പ്രോസസായി ആരംഭിക്കുകയും, ഒരു `BrowserWindow` അതിലേക്ക് ചൂണ്ടുകയും, സിസ്റ്റം ട്രേ, ഓട്ടോ-അപ്ഡേറ്റർ, IPC ബ്രിഡ്ജ്, സീറോ-കോൺഫിഗ് സീക്രട്ട് ബൂട്ട്സ്ട്രാപ്പ് എന്നിവ ചേർക്കുകയും ചെയ്യുന്നു.
+OmniRoute ഒരു ക്രോസ്-പ്ലാറ്റ്ഫോം ഡെസ്ക്ടോപ്പ് ആപ്പ് (Windows / macOS / Linux) നിർമ്മിച്ചിരിക്കുന്നത്**Electron 41** +** ഇലക്ട്രോൺ ബിൽഡർ 26.10** . ഡെസ്ക്ടോപ്പ് ആപ്പ് Next.js സ്റ്റാൻഡ്എലോൺ സെർവറിനെ ഒരു ചൈൽഡ് പ്രോസസ് ആയി രൂപപ്പെടുത്തുകയും അതിലേക്ക് ഒരു `BrowserWindow` പോയിൻ്റ് ചെയ്യുകയും സിസ്റ്റം ട്രേ, ഓട്ടോ-അപ്ഡേറ്റർ, IPC ബ്രിഡ്ജ്, സീറോ-കോൺഫിഗ് സീക്രട്ട് ബൂട്ട്സ്ട്രാപ്പ് എന്നിവ ചേർക്കുകയും ചെയ്യുന്നു.
 
-## ആർക്കിടെക്ചർ
+## വാസ്തുവിദ്യ
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│ Electron മെയിൻ പ്രോസസ് (electron/main.js)                │
-│ ├─ സിംഗിൾ-ഇൻസ്റ്റൻസ് ലോക്ക്                                │
-│ ├─ ചൈൽഡ് പ്രോസസ്: Next.js സ്റ്റാൻഡ്എലോൺ സെർവർ          │
-│ │   (Electron-ന്റെ Node റൺടൈം ഉപയോഗിച്ച് ആരംഭിച്ചത്)      │
-│ ├─ BrowserWindow → http://localhost:PORT                 │
-│ ├─ സിസ്റ്റം ട്രേ + കോൺടെക്സ്റ്റ് മെനു                       │
-│ ├─ electron-updater വഴിയുള്ള ഓട്ടോ-അപ്ഡേറ്റ്             │
-│ ├─ കണ്ടന്റ് സെക്യൂരിറ്റി പോളിസി (സെഷൻ ഹെഡറുകൾ)           │
-│ └─ സീക്രട്ട് ബൂട്ട്സ്ട്രാപ്പ് (JWT / API_KEY_SECRET)       │
-└─────────────────────────────────────────────────────────┘
-            ↕ IPC ബ്രിഡ്ജ് (electron/preload.js)
-┌─────────────────────────────────────────────────────────┐
-│ റെൻഡറർ (Next.js ഡാഷ്ബോർഡ്)                             │
-│   window.electronAPI.* (contextIsolation)                │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
+│ ├─ BrowserWindow → http://localhost:PORT     │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────┘
+            ↕ IPC bridge (electron/preload.js)
+┌──────────────────────────────────────────────┐
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
+└──────────────────────────────────────────────┘
 ```
 
 ## പതിപ്പുകൾ
 
-`electron/package.json`-ൽ നിന്ന് സ്ഥിരീകരിച്ചത്:
+`electron/package.json` യിൽ നിന്ന് സ്ഥിരീകരിച്ചു:
 
-| പാക്കേജ്           | പതിപ്പ്                                                          |
-| ------------------ | ---------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                        |
-| `electron-builder` | `^26.15.3`                                                       |
-| `electron-updater` | `^6.8.9`                                                         |
-| `better-sqlite3`   | റൂട്ട് `^13.0.2` (Node-API പ്രീബിൽഡുകൾ — Electron റീബിൽഡ് വേണ്ട) |
-| ആപ്പ് പതിപ്പ്      | `3.8.0`                                                          |
-| ആപ്പ് ഐഡി          | `online.omniroute.desktop`                                       |
-| ഉൽപ്പന്ന നാമം      | `OmniRoute`                                                      |
+| പാക്കേജ്              | പതിപ്പ്                                                      |
+| --------------------- | ------------------------------------------------------------ |
+| `electron`            | `^43.4.1`                                                    |
+| `electron-builder`    | `^26.15.3`                                                   |
+| `electron-updater`    | `^6.8.9`                                                     |
+| `better-sqlite3`      | റൂട്ട് `^13.0.2` (നോഡ്-എപിഐ പ്രീബിൽഡ് — നോ Electron റീബിൽഡ്) |
+| ആപ്പ് പതിപ്പ്         | `3.8.0`                                                      |
+| ആപ്പ് ഐഡി             | `online.omniroute.desktop`                                   |
+| ഉൽപ്പന്നത്തിൻ്റെ പേര് | `OmniRoute`                                                  |
 
 ## സ്ക്രിപ്റ്റുകൾ (റൂട്ട് `package.json`)
 
-| സ്ക്രിപ്റ്റ്                      | ഉദ്ദേശ്യം                                                                                                      |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | `npm run dev` ആരംഭിക്കുന്നു + `localhost:20128`-നായി കാത്തിരിക്കുന്നു + Electron ലോഞ്ച് ചെയ്യുന്നു             |
-| `npm run electron:build`          | Next.js ബിൽഡ് ചെയ്തശേഷം നിലവിലെ OS-നായി `electron-builder` പ്രവർത്തിപ്പിക്കുന്നു                               |
-| `npm run electron:build:win`      | Windows NSIS ഇൻസ്റ്റാളർ + പോർട്ടബിൾ (x64) ബിൽഡ് ചെയ്യുന്നു                                                     |
-| `npm run electron:build:mac`      | macOS DMG (Intel + Apple Silicon) ബിൽഡ് ചെയ്യുന്നു                                                             |
-| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) ബിൽഡ് ചെയ്യുന്നു                                                            |
-| `npm run electron:smoke:packaged` | പാക്കേജ് ചെയ്ത ബൈനറി ലോഞ്ച് ചെയ്ത് HTTP 200 ലഭിക്കുന്നുണ്ടോയെന്ന് `/login` പരിശോധിച്ചശേഷം ഷട്ട് ഡൗൺ ചെയ്യുന്നു |
+| സ്ക്രിപ്റ്റ്                      | ഉദ്ദേശ്യം                                                                                                              |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` + ആരംഭിക്കുന്നു `localhost:20128` + കാത്തിരിക്കുന്നു Electron സമാരംഭിക്കുന്നു                            |
+| `npm run electron:build`          | Next.js നിർമ്മിക്കുന്നു, തുടർന്ന് നിലവിലെ OS നായി `electron-builder` പ്രവർത്തിപ്പിക്കുന്നു                             |
+| `npm run electron:build:win`      | Windows NSIS ഇൻസ്റ്റാളർ + പോർട്ടബിൾ നിർമ്മിക്കുന്നു (x64)                                                              |
+| `npm run electron:build:mac`      | macOS DMG (ഇൻ്റൽ + ആപ്പിൾ സിലിക്കൺ) നിർമ്മിക്കുന്നു                                                                    |
+| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) നിർമ്മിക്കുന്നു                                                                     |
+| `npm run electron:smoke:packaged` | പാക്കേജുചെയ്ത ബൈനറി സമാരംഭിക്കുകയും HTTP 200-നായി `/login` പ്രോബ് ചെയ്യുകയും ചെയ്യുന്നു, തുടർന്ന് ഷട്ട് ഡൗൺ ചെയ്യുന്നു |
 
-`electron/` വർക്ക്സ്പേസ് ഇനിപ്പറയുന്നവയും ലഭ്യമാക്കുന്നു:
+`electron/` വർക്ക്സ്പെയ്സും തുറന്നുകാട്ടുന്നു:
 
 - `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` പ്രവർത്തിപ്പിക്കുന്നു
-- `npm run build:mac-x64` / `build:mac-arm64` — സിംഗിൾ-ആർക്ക് macOS ബിൽഡുകൾ
-- `npm run pack` — ലോക്കൽ പരിശോധനയ്ക്കുള്ള ഡയറക്ടറി-മാത്രം ബിൽഡ് (ഇൻസ്റ്റാളർ ഇല്ല)
+- `npm run build:mac-x64` / `build:mac-arm64` — സിംഗിൾ-ആർച്ച് macOS ബിൽഡുകൾ
+- `npm run pack` — ഡയറക്ടറി-പ്രാദേശിക പരിശോധനയ്ക്കായി മാത്രം നിർമ്മിക്കുക (ഇൻസ്റ്റാളർ ഇല്ല)
 
-## ഡയറക്ടറി ഘടന
+## ഓപ്ഷണൽ റൺടൈം പായ്ക്കുകൾ
+
+ഡെസ്ക്ടോപ്പ് ബിൽഡുകൾക്ക് അവരുടെ ഇൻസ്റ്റാളറുകൾക്കൊപ്പം ഓപ്ഷണൽ റൺടൈം ആർക്കൈവുകൾ പ്രസിദ്ധീകരിക്കാൻ കഴിയും. ഇൻസ്റ്റാൾ ചെയ്ത സെർവർ പേലോഡിൽ `optional-packs.index.json` അടങ്ങിയിരിക്കുന്നു ( Windows, Linux എന്നിവയിൽ `resources/app` ന് കീഴിൽ). `browser-runtime` എൻട്രിക്കായി, `packs[].tarball` വായിച്ച് ഡൗൺലോഡ് ചെയ്യുക** അതേ റിലീസിൽ നിന്നുള്ള കൃത്യമായ ഫയൽ നാമം** . ആർക്കൈവ് പേരുകളിൽ ഒരു SHA-256 ഡൈജസ്റ്റ് ഉൾപ്പെടുന്നു; വ്യത്യസ്ത ബിൽഡുകൾക്ക് വ്യത്യസ്ത ആർക്കൈവുകൾ ആവശ്യമായി വന്നേക്കാം. ഡൗൺലോഡ് ചെയ്ത ഫയലിൻ്റെ പേര് മാറ്റാതെ സൂക്ഷിക്കുക.
+
+ഇൻസ്റ്റാൾ ചെയ്ത ആപ്പിൻ്റെ സൂചികയും തിരഞ്ഞെടുത്ത ആർക്കൈവും ഒരു ഡയറക്ടറിയിലേക്ക് പകർത്തുക, തുടർന്ന് അതേ റിലീസിൽ നിന്ന് CLI ഉപയോഗിക്കുക:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` ഇൻസ്റ്റാളേഷനും സ്ഥിരീകരണ നിലയും പ്രദർശിപ്പിക്കുന്നു, ആർക്കൈവ് ഫയൽ നാമമല്ല. ബണ്ടിൽ ചെയ്ത സൂചിക ആർക്കൈവ് തിരഞ്ഞെടുക്കുന്നു. എക്സ്ട്രാക്ഷൻ ചെയ്യുന്നതിന് മുമ്പായി ഇൻസ്റ്റലേഷൻ അതിൻ്റെ ആർക്കൈവ് ചെക്ക്സം പരിശോധിക്കുന്നു, ഇൻസ്റ്റോൾ ചെയ്ത ഒരു പായ്ക്ക് മാറ്റിസ്ഥാപിക്കുന്നതിന് മുമ്പ് അതിൻ്റെ പാക്കേജ് ചെക്ക്സം പരിശോധിക്കുന്നു. ഇത് പ്രാദേശിക ഫയലുകൾ വായിക്കുന്നു; ഇത് നഷ്ടപ്പെട്ട ആർക്കൈവുകൾ ഡൗൺലോഡ് ചെയ്യുന്നില്ല. ഇൻസ്റ്റാളേഷന് ശേഷം ആപ്ലിക്കേഷൻ പുനരാരംഭിക്കുക. റിലീസിന് പൊരുത്തപ്പെടുന്ന അസറ്റ് ഇല്ലെങ്കിൽ, ആ റിലീസിൻ്റെ അസറ്റുകൾ വഴി ഓപ്ഷണൽ പായ്ക്ക് ലഭ്യമല്ല.
+
+## ഡയറക്ടറി ലേഔട്ട്
 
 ```
 electron/
-├── package.json              # Electron ഡിപെൻഡൻസികൾ + electron-builder കോൺഫിഗറേഷൻ
-├── main.js                   # പ്രധാന പ്രോസസ് (24 KB — താഴെയുള്ള വ്യാഖ്യാനങ്ങൾ കാണുക)
-├── preload.js                # contextBridge IPC ബ്രിഡ്ജ്
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI ടൈപ്പുകൾ
-├── README.md                 # വർക്ക്സ്പേസിനുള്ളിലെ കുറിപ്പുകൾ
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder ഔട്ട്പുട്ട് (git അവഗണിക്കുന്നത്)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # .next/electron-standalone ബണ്ടിൽ തയ്യാറാക്കുന്നു
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # ബിൽഡിന് ശേഷമുള്ള സ്മോക്ക് ടെസ്റ്റ്
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-`main.js`, `preload.js` എന്നിവ രണ്ടും TypeScript അല്ല, **CommonJS `.js` ഫയലുകളാണ്**.
-റെൻഡറർ-സൈഡ് ടൈപ്പിങ്ങുകൾ `electron/types.d.ts`-ലാണ് ഉള്ളത്.
+`main.js`, `preload.js` എന്നിവ രണ്ടും**CommonJS `.js` ഫയലുകൾ** , TypeScript അല്ല. റെൻഡറർ-സൈഡ് ടൈപ്പിംഗുകൾ `electron/types.d.ts` ൽ താമസിക്കുന്നു.
 
-## IPC ബ്രിഡ്ജ് (`preload.js`)
+## IPC പാലം (`preload.js`)
 
-`contextIsolation: true`, `nodeIntegration: false` എന്നിവ ഉപയോഗിച്ച് `contextBridge`
-വഴി പ്രീലോഡ്, വൈറ്റ്ലിസ്റ്റ് ചെയ്ത ഒരു API `window.electronAPI`-യിൽ ലഭ്യമാക്കുന്നു.
+`contextIsolation: true`, `nodeIntegration: false` എന്നിവയ്ക്കൊപ്പം `contextBridge` ഉപയോഗിച്ച് `window.electronAPI` ൽ ഒരു വൈറ്റ്ലിസ്റ്റ് ചെയ്ത API പ്രിലോഡ് തുറന്നുകാട്ടുന്നു.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -105,107 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-ലഭ്യമാക്കിയിരിക്കുന്ന മെത്തഡുകൾ:
+തുറന്ന രീതികൾ:
 
-| റെൻഡറർ കോൾ                                                        | തരം                                |
-| ----------------------------------------------------------------- | ---------------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                             |
-| `openExternal(url)`                                               | invoke                             |
-| `getDataDir()`                                                    | invoke                             |
-| `restartServer()`                                                 | invoke                             |
-| `getAppVersion()`                                                 | invoke                             |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                             |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                               |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (ഡിസ്പോസർ തിരികെ നൽകുന്നു) |
+| റെൻഡറർ കോൾ                                                        | ടൈപ്പ് ചെയ്യുക                    |
+| ----------------------------------------------------------------- | --------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | അഭ്യർത്ഥിക്കുക                    |
+| `openExternal(url)`                                               | അഭ്യർത്ഥിക്കുക                    |
+| `getDataDir()`                                                    | അഭ്യർത്ഥിക്കുക                    |
+| `restartServer()`                                                 | അഭ്യർത്ഥിക്കുക                    |
+| `getAppVersion()`                                                 | അഭ്യർത്ഥിക്കുക                    |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | അഭ്യർത്ഥിക്കുക                    |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | അയയ്ക്കുക                         |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | സ്വീകരിക്കുക (റിട്ടേൺസ് ഡിസ്പോസർ) |
 
-React ഘടകങ്ങൾ വീണ്ടും മൗണ്ട് ചെയ്യുമ്പോൾ ലിസണറുകൾ കുമിഞ്ഞുകൂടുന്നത് തടയാൻ,
-`removeAllListeners`-നെ ആശ്രയിക്കുന്നതിനുപകരം receive ഹെൽപ്പറുകൾ ഒരു **ഡിസ്പോസർ ഫങ്ഷൻ**
-തിരികെ നൽകുന്നു.
+സ്വീകരിക്കുന്ന സഹായികൾ തിരികെ എ** ഡിസ്പോസർ പ്രവർത്തനം** `removeAllListeners` — യെ ആശ്രയിക്കുന്നതിനുപകരം ഇത് React ഘടകങ്ങൾ റീമൗണ്ട് ചെയ്യുമ്പോൾ ശ്രോതാക്കളുടെ ശേഖരണത്തെ തടയുന്നു.
 
-## സെർവർ ലൈഫ്സൈക്കിൾ
+## സെർവർ ജീവിതചക്രം
 
-സിസ്റ്റം Node-മായുള്ള നേറ്റീവ്-മൊഡ്യൂൾ ABI പൊരുത്തക്കേട് ഒഴിവാക്കാൻ, `main.js` Next.js
-സ്റ്റാൻഡ്അലോൺ ബണ്ടിൽ Electron Node റൺടൈം ഉപയോഗിച്ച് നേരിട്ട് ആരംഭിക്കുന്നു:
+സിസ്റ്റം നോഡുമായുള്ള നേറ്റീവ്-മൊഡ്യൂൾ ABI പൊരുത്തക്കേട് ഒഴിവാക്കാൻ `main.js` നേരിട്ട് Electron നോഡ് റൺടൈം ഉപയോഗിച്ച് Next.js സ്റ്റാൻഡ്എലോൺ ബണ്ടിൽ ഉണ്ടാക്കുന്നു:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-പ്രധാന സവിശേഷതകൾ:
+ഹൈലൈറ്റുകൾ:
 
-- വിൻഡോ കാണിക്കുന്നതിന് മുമ്പ് `waitForServer()` പരമാവധി 30 s വരെ URL പോൾ ചെയ്യുന്നു (കോൾഡ് സ്റ്റാർട്ടിൽ ശൂന്യമായ സ്ക്രീൻ ഉണ്ടാകില്ല).
-- `stdio: "pipe"` stdout/stderr ക്യാപ്ചർ ചെയ്യുന്നു; റെഡി സൂചിപ്പിക്കുന്ന വാക്യങ്ങൾ (`Ready` / `listening`) IPC വഴി `server-status: running` എമിറ്റ് ചെയ്യുന്നു.
-- `before-quit`, സുഗമമായ SIGTERM-നായി (WAL ചെക്ക്പോയിന്റ്) പരമാവധി 5 s വരെ കാത്തിരിക്കുകയും തുടർന്ന് SIGKILL അയയ്ക്കുകയും ചെയ്യുന്നു.
-- ട്രേയിലെ പോർട്ട് സ്വിച്ചർ (`20128`, `3000`, `8080`) സെർവർ നിർത്തി പുനരാരംഭിച്ച ശേഷം BrowserWindow വീണ്ടും ലോഡ് ചെയ്യുന്നു.
+- `waitForServer()` ജാലകം കാണിക്കുന്നതിന് മുമ്പ് 30 സെക്കൻഡ് വരെ URL വോട്ടെടുപ്പ് നടത്തുന്നു (തണുത്ത ആരംഭത്തിൽ ശൂന്യമായ സ്ക്രീൻ ഇല്ല).
+- `stdio: "pipe"` stdout/stderr പിടിച്ചെടുക്കുന്നു; തയ്യാറായ ശൈലികൾ (`Ready` / `listening`) IPC ൽ `server-status: running` പുറപ്പെടുവിക്കുന്നു.
+- ഭംഗിയുള്ള SIGTERM (WAL ചെക്ക്പോയിൻ്റ്)ക്കായി`before-quit` 5 സെക്കൻഡ് വരെ കാത്തിരിക്കുന്നു, തുടർന്ന് SIGKILL അയയ്ക്കുന്നു.
+- ട്രേയിലെ പോർട്ട് സ്വിച്ചർ (`20128`, `3000`, `8080`) നിർത്തി സെർവർ പുനരാരംഭിക്കുന്നു, തുടർന്ന് BrowserWindow വീണ്ടും ലോഡുചെയ്യുന്നു.
 
-## സീറോ-കോൺഫിഗ് സീക്രട്ട് ബൂട്ട്സ്ട്രാപ്പ്
+## സീറോ കോൺഫിഗർ സീക്രട്ട് ബൂട്ട്സ്ട്രാപ്പ്
 
-ആദ്യമായി സമാരംഭിക്കുമ്പോൾ, പ്രധാന പ്രോസസ് ലഭ്യമല്ലാത്ത സീക്രട്ടുകൾ സ്വയമേവ സൃഷ്ടിച്ച് സ്ഥിരമായി സംഭരിക്കുന്നു:
+ആദ്യ വിക്ഷേപണത്തിൽ, പ്രധാന പ്രക്രിയ സ്വയമേവ സൃഷ്ടിക്കുകയും നഷ്ടമായ രഹസ്യങ്ങൾ നിലനിൽക്കുകയും ചെയ്യുന്നു:
 
-| സീക്രട്ട്                | ഉറവിടം                                                                                                            |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                          |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (എൻക്രിപ്റ്റ് ചെയ്ത ക്രെഡൻഷ്യലുകൾ ഇതിനകം നിലവിലുണ്ടെങ്കിൽ നിരസിക്കുന്നു) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                          |
+| രഹസ്യം                   | ഉറവിടം                                                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                         |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (എൻക്രിപ്റ്റ് ചെയ്ത ക്രെഡിറ്റുകൾ ഇതിനകം നിലവിലുണ്ടെങ്കിൽ നിരസിക്കുന്നു) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                         |
 
-`<DATA_DIR>/server.env`-ലേക്ക് സ്ഥിരമായി സംഭരിക്കുന്നു. `DATA_DIR` ഇപ്രകാരം നിർണ്ണയിക്കപ്പെടുന്നു:
+`<DATA_DIR>/server.env` വരെ തുടർന്നു. `DATA_DIR` പരിഹരിക്കുന്നു:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` അല്ലെങ്കിൽ `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## വിൻഡോയും ട്രേയും
+## പരിസ്ഥിതി ഫയൽ തിരയൽ
 
-- `BrowserWindow`: 1400×900 (കുറഞ്ഞത് 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, ട്രാഫിക് ലൈറ്റ് `{ x: 16, y: 16 }`-ൽ.
+സെർവർ സ്പോൺ ചെയ്യുന്നതിന് മുമ്പ്, പ്രധാന പ്രക്രിയ (`getPreferredEnvFilePath()` in `electron/main.js`) തിരഞ്ഞെടുക്കുന്നു** ഒന്ന്** `.env` ഫയൽ: നിലവിലുള്ളതിൽ ആദ്യത്തേത്.
+
+1. `$DATA_DIR/.env`, പരിസ്ഥിതിയിൽ `DATA_DIR` സജ്ജീകരിക്കുമ്പോൾ ആപ്പ് സമാരംഭിച്ചു.
+2. `<resolved DATA_DIR>/.env`, മുകളിൽ പറഞ്ഞ അതേ ഡിഫോൾട്ടുകൾ ഉപയോഗിക്കുന്നു: `%APPDATA%\omniroute\.env` ൽ Windows, `$XDG_CONFIG_HOME/omniroute/.env` അല്ലെങ്കിൽ `~/.omniroute/.env` ലെ Linux, macOS.
+3. പ്രോസസ്സ് വർക്കിംഗ് ഡയറക്ടറിയിൽ `.env`.
+
+പ്രധാന പ്രക്രിയ ആ ഫയൽ മാത്രം വായിക്കുന്നു; പിന്നീടുള്ള കാൻഡിഡേറ്റുകൾ ലയിപ്പിച്ചിട്ടില്ല. സെർവർ എൻവയോൺമെൻ്റ് ഈ മുൻഗണനയോടെ നിർമ്മിക്കപ്പെടുന്നു (ഏറ്റവും ഉയർന്നത് ആദ്യം):
+
+1. Electron പ്രോസസ്സ് എൻവയോൺമെൻ്റ് (ആപ്പ് ലോഞ്ച് ചെയ്തതിൽ നിന്ന് വേരിയബിളുകൾ പാരമ്പര്യമായി ലഭിക്കുന്നു).
+2. തിരഞ്ഞെടുത്ത `.env` ഫയൽ.
+3. `<DATA_DIR>/server.env` (മുകളിലുള്ള ബൂട്ട്സ്ട്രാപ്പ് രഹസ്യങ്ങൾ).
+
+ആപ്പ് ആരംഭിക്കുമ്പോൾ പ്രോസസ് എൻവയോൺമെൻ്റ് ക്യാപ്ചർ ചെയ്യപ്പെടും, അതിനാൽ ആപ്പ് പ്രവർത്തിക്കുന്ന സമയത്ത് ഒരു സിസ്റ്റം അല്ലെങ്കിൽ യൂസർ എൻവയോൺമെൻ്റ് വേരിയബിൾ സെറ്റ് (വിൻഡോ അടച്ചതിന് ശേഷം ട്രേയിൽ ഇരിക്കുന്നത് ഉൾപ്പെടെ) ആപ്പ് പൂർണ്ണമായി ഉപേക്ഷിച്ച് വീണ്ടും സമാരംഭിക്കുന്നതുവരെ സെർവറിൽ എത്തില്ല. `CONTEXT_LENGTH_<PROVIDER>` പോലുള്ള റൺടൈം നോബുകൾക്ക് ( [പരിസ്ഥിതി വേരിയബിളുകൾ കാണുക: ഓരോ ദാതാവിനും സന്ദർഭ ദൈർഘ്യം](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), `.env` ഫയൽ തിരഞ്ഞെടുക്കുക, തുടർന്ന് പൂർണ്ണമായും ഉപേക്ഷിക്കുക (ട്രേ,** ഉപേക്ഷിക്കുക** ) വീണ്ടും സമാരംഭിക്കുക.
+
+## വിൻഡോ & ട്രേ
+
+- `BrowserWindow`: 1400 × 900 (മിനിറ്റ് 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, `{ x: 16, y: 16 }` ലെ ട്രാഫിക്ക് ലൈറ്റ്.
 - Windows/Linux: നേറ്റീവ് ടൈറ്റിൽ ബാർ.
-- ക്ലോസ് ബട്ടൺ ട്രേയിലേക്ക് മിനിമൈസ് ചെയ്യുന്നു; ട്രേ മെനുവിൽ **OmniRoute തുറക്കുക**, **ഡാഷ്ബോർഡ് തുറക്കുക** (ബാഹ്യ ബ്രൗസർ), **സെർവർ പോർട്ട്** സബ്മെനു, **അപ്ഡേറ്റുകൾ പരിശോധിക്കുക**, **പുറത്തുകടക്കുക** എന്നിവയുണ്ട്.
+- അടയ്ക്കുക ബട്ടൺ ട്രേയിലേക്ക് ചെറുതാക്കുന്നു; ട്രേ മെനുവുണ്ട്** OmniRoute തുറക്കുക** ,** ഡാഷ്ബോർഡ് തുറക്കുക** (ബാഹ്യ ബ്രൗസർ),** സെർവർ പോർട്ട്** ഉപമെനു,** അപ്ഡേറ്റുകൾക്കായി പരിശോധിക്കുക** ,** ഉപേക്ഷിക്കുക** .
 
 ## ഉള്ളടക്ക സുരക്ഷാ നയം
 
-`session.defaultSession.webRequest.onHeadersReceived` വഴി സജ്ജീകരിക്കുന്നു. ശ്രദ്ധേയമായ ഡയറക്ടീവുകൾ:
+`session.defaultSession.webRequest.onHeadersReceived` വഴി സജ്ജമാക്കുക. ശ്രദ്ധേയമായ നിർദ്ദേശങ്ങൾ:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Dev മോഡിൽ `script-src`-ലേക്ക് മാത്രം `'unsafe-eval'` ചേർക്കുന്നു
+- ദേവ് മോഡ് `'unsafe-eval'` `script-src` ലേക്ക് മാത്രം ചേർക്കുന്നു
 
-## സ്വയമേവയുള്ള അപ്ഡേറ്റ്
+## സ്വയമേവ അപ്ഡേറ്റ്
 
-GitHub പ്രൊവൈഡർ (`diegosouzapw/OmniRoute`) ഉപയോഗിച്ച് `electron-updater` പ്രയോജനപ്പെടുത്തുന്നു.
+GitHub ദാതാവിനൊപ്പം (`diegosouzapw/OmniRoute`) `electron-updater` ഉപയോഗിക്കുന്നു.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- ഇവന്റുകൾ `update-status` IPC വഴി റെൻഡററിലേക്ക് കൈമാറുന്നു:
-  `checking`, `available`, `not-available`, `downloading` (`percent` സഹിതം), `downloaded`, `error`
-- `installUpdate()` സെർവർ അവസാനിപ്പിച്ചശേഷം `autoUpdater.quitAndInstall()` വിളിക്കുന്നു
-- Dev മോഡിൽ (`!app.isPackaged`) ഇത് ഒഴിവാക്കുന്നു
+- ഇവൻ്റുകൾ `update-status` IPC വഴി റെൻഡറർക്ക് കൈമാറി: `checking`, `available`, `not-available`, `downloading` ( `percent` ഉള്ളത് ), `downloaded`, `error`
+- `installUpdate()` സെർവറിനെ കൊല്ലുന്നു, തുടർന്ന് `autoUpdater.quitAndInstall()` എന്ന് വിളിക്കുന്നു
+- dev മോഡിൽ ഒഴിവാക്കി (`!app.isPackaged`)
 
-## ബിൽഡ് പൈപ്പ്ലൈൻ
+## പൈപ്പ് ലൈൻ നിർമ്മിക്കുക
 
-1. `npm run build` → `.next/standalone`-ൽ Next.js standalone.
-2. `prepare-electron-standalone.mjs` → `.next/electron-standalone`-ലേക്ക് വീണ്ടും സ്റ്റേജ് ചെയ്യുകയും ബണ്ടിൽ സ്ഥലം മാറ്റാനാകുന്നതിനായി `server.js` + `required-server-files.json` എന്നിവയിലെ അബ്സല്യൂട്ട് പാതകൾ തിരുത്തുകയും ചെയ്യുന്നു.
-3. `electron-builder`, `main.js`, `preload.js`, `node_modules`, കൂടാതെ `extraResources: { ../.next/electron-standalone → app }` എന്നിവ പാക്കേജ് ചെയ്യുന്നു.
+1. `npm run build` → Next.js `.next/standalone` ൽ ഒറ്റയ്ക്കാണ്.
+2. `prepare-electron-standalone.mjs` → വീണ്ടും `.next/electron-standalone` ലേക്ക് ഘട്ടം ഘട്ടമായി `server.js` + `required-server-files.json` നുള്ളിൽ കേവല പാതകൾ വീണ്ടും എഴുതുന്നു, അതിനാൽ ബണ്ടിൽ മാറ്റിസ്ഥാപിക്കാനാകും.
+3. `electron-builder` പാക്കേജുകൾ `main.js`, `preload.js`, `node_modules`, `extraResources: { ../.next/electron-standalone → app }`.
 
-### ബിൽഡ് ടാർഗെറ്റുകൾ
+### ലക്ഷ്യങ്ങൾ നിർമ്മിക്കുക
 
-| OS      | ടാർഗെറ്റുകൾ                                                   |
-| ------- | ------------------------------------------------------------- |
-| Windows | NSIS ഇൻസ്റ്റാളർ + പോർട്ടബിൾ (x64)                             |
-| macOS   | DMG (Intel + arm64, Applications-ലേക്ക് ഡ്രാഗ് ചെയ്യാവുന്നത്) |
-| Linux   | AppImage + DEB (x64 + arm64)                                  |
+| OS      | ലക്ഷ്യങ്ങൾ                                    |
+| ------- | --------------------------------------------- |
+| Windows | NSIS ഇൻസ്റ്റാളർ + പോർട്ടബിൾ (x64)             |
+| macOS   | DMG (Intel + arm64, ഡ്രാഗ്-ടു-ആപ്ലിക്കേഷനുകൾ) |
+| Linux   | AppImage + DEB (x64 + arm64)                  |
 
-NSIS ക്രമീകരണങ്ങൾ: `oneClick: false`, ഇൻസ്റ്റാൾ ഡയറക്ടറി തിരഞ്ഞെടുക്കാൻ ഉപയോക്താവിനെ അനുവദിക്കുന്നു, Desktop, Start-Menu ഷോർട്ട്കട്ടുകൾ സൃഷ്ടിക്കുന്നു.
+NSIS ക്രമീകരണങ്ങൾ: `oneClick: false`, ഇൻസ്റ്റോൾ ഡയറക്ടറി തിരഞ്ഞെടുക്കാൻ ഉപയോക്താവിനെ അനുവദിക്കുന്നു, ഡെസ്ക്ടോപ്പും സ്റ്റാർട്ട്-മെനു കുറുക്കുവഴികളും സൃഷ്ടിക്കുന്നു.
 
-## പാക്കേജ് ചെയ്ത ബിൽഡിന്റെ സ്മോക്ക് ടെസ്റ്റിംഗ്
+## സ്മോക്ക് ടെസ്റ്റിംഗ് പാക്കേജ്ഡ് ബിൽഡ്
 
 ```bash
 npm run electron:smoke:packaged
@@ -213,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- നിലവിലെ പ്ലാറ്റ്ഫോമിനായി `electron/dist-electron/`-ലെ പാക്കേജ് ചെയ്ത ബൈനറി സ്വയമേവ കണ്ടെത്തുന്നു.
-- ഡെവലപ്പർ ഡാറ്റയെ ബാധിക്കാതിരിക്കാൻ ഒറ്റപ്പെടുത്തിയ `HOME`/`APPDATA`/`XDG_*` ഡയറക്ടറികൾ ഉപയോഗിച്ച് സമാരംഭിക്കുന്നു.
-- 45 സെക്കൻഡിനുള്ളിൽ HTTP 200 ലഭിക്കുന്നതിനായി `http://127.0.0.1:20128/login` പോൾ ചെയ്യുന്നു.
-- ഗുരുതരമായ പാറ്റേണുകൾക്കായി stderr/stdout നിരീക്ഷിക്കുന്നു (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` മുതലായവ).
-- സജ്ജമായതിനുശേഷം 2 സെക്കൻഡ് സ്ഥിരതയുള്ള റൺടൈമിനായി കാത്തിരിക്കുന്നു, തുടർന്ന് SIGTERM അയച്ച് പോർട്ട് സ്വതന്ത്രമാകുന്നതുവരെ കാത്തിരിക്കുന്നു.
-- CI-യിൽ, `--no-sandbox --disable-gpu` സ്വയമേവ പാസ് ചെയ്യുന്നു (Linux-ൽ `--disable-dev-shm-usage`-ഉം).
+- നിലവിലെ പ്ലാറ്റ്ഫോമിനായി `electron/dist-electron/` യിൽ പാക്കേജുചെയ്ത ബൈനറി സ്വയമേവ കണ്ടെത്തുന്നു.
+- ഒറ്റപ്പെട്ട `HOME`/`APPDATA`/`XDG_*` ഡയറക്ടറികൾ ഉപയോഗിച്ച് സമാരംഭിക്കുന്നു, അതിനാൽ ഇത് ഡെവലപ്പർ ഡാറ്റയെ സ്പർശിക്കില്ല.
+- 45 സെക്കൻഡിനുള്ളിൽ HTTP 200-നുള്ള വോട്ടെടുപ്പ് `http://127.0.0.1:20128/login`.
+- മാരകമായ പാറ്റേണുകൾക്കായുള്ള വാച്ചുകൾ stderr/stdout (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, മുതലായവ).
+- തയ്യാറായതിന് ശേഷം 2 സെക്കൻഡ് സ്ഥിരമായ റൺടൈം കാത്തിരിക്കുന്നു, തുടർന്ന് SIGTERM നൽകുകയും പോർട്ട് സ്വതന്ത്രമാകുന്നതിനായി കാത്തിരിക്കുകയും ചെയ്യുന്നു.
+- CI യിൽ, സ്വയമേവ `--no-sandbox --disable-gpu` കടന്നുപോകുന്നു (ഒപ്പം Linux ൽ `--disable-dev-shm-usage` ).
 
-Env ഓവർറൈഡുകൾ: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+എൻവി അസാധുവാക്കുന്നു: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## കോഡ് സൈനിംഗ്
+## കോഡ് ഒപ്പിടൽ
 
-`electron/package.json` സൈനിംഗ് ക്രെഡൻഷ്യലുകൾ നേരിട്ട് ബന്ധിപ്പിക്കുന്നില്ല. അവ env vars വഴി `electron-builder`-ന് കൈമാറുക:
+`electron/package.json` ചെയ്യുന്നു** അല്ല** ക്രെഡൻഷ്യലുകൾ നേരിട്ട് ഒപ്പിടുക. അവയെ env vars വഴി `electron-builder` ലേക്ക് കൈമാറുക:
 
 ### macOS
 
@@ -247,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage സൈനിംഗ് ഐച്ഛികമാണ് — സൈൻ ചെയ്യണമെങ്കിൽ `LINUX_GPG_KEY` സജ്ജമാക്കുക.
+AppImage സൈനിംഗ് എന്നത് ഓപ്ഷണൽ ആണ് — സെറ്റ് സൈൻ ചെയ്യുകയാണെങ്കിൽ `LINUX_GPG_KEY`.
 
 ## വിതരണം
 
-ആർട്ടിഫാക്റ്റുകൾ `electron/dist-electron/`-ൽ ലഭിക്കും:
+പുരാവസ്തുക്കൾ `electron/dist-electron/` യിൽ ഇറങ്ങുന്നു:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-റിലീസുകൾ GitHub Releases-ലേക്ക് (`diegosouzapw/OmniRoute`) പ്രസിദ്ധീകരിക്കുന്നു; പുതിയ പതിപ്പുകൾക്കായി `electron-updater` പരിശോധിക്കുന്നതും അവിടെയാണ്.
+റിലീസുകൾ GitHub റിലീസുകളിൽ (`diegosouzapw/OmniRoute`) പ്രസിദ്ധീകരിക്കുന്നു, അവിടെയാണ് `electron-updater` പുതിയ പതിപ്പുകൾക്കായി പരിശോധിക്കുന്നത്.
 
-## പ്രശ്നപരിഹാരം
+## ട്രബിൾഷൂട്ടിംഗ്
 
-| ലക്ഷണം                                                                               | പരിഹാരം                                                                                                                                                                                                     |
-| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Electron-ന്റെ പ്രധാന പതിപ്പ് ഉയർത്തിയതിന് ശേഷം `Cannot find module 'better-sqlite3'` | better-sqlite3 v13 Node-API പ്രീബിൽഡുകളോടെയാണ് വരുന്നത് — റൂട്ടിൽ `npm install` വീണ്ടും പ്രവർത്തിപ്പിച്ച ശേഷം `prepare:bundle` പ്രവർത്തിപ്പിക്കുക (നിലവിലെ പ്ലാറ്റ്ഫോമിനുള്ള പ്രീബിൽഡ് അത് പരിശോധിക്കുന്നു) |
-| നേറ്റീവ് മൊഡ്യൂളിന് `ERR_DLOPEN_FAILED`                                              | `prepare:bundle` വീണ്ടും പ്രവർത്തിപ്പിക്കുക — നിലവിലെ പ്ലാറ്റ്ഫോമിനുള്ള Node-API പ്രീബിൽഡ് ഇല്ലെങ്കിൽ അത് ഉടൻ പരാജയപ്പെടും                                                                                  |
-| Linux-ൽ വിൻഡോ ശൂന്യമായി കാണപ്പെടുന്നു                                                | Next.js സെർവർ യഥാർത്ഥത്തിൽ PORT-ലേക്ക് ബൈൻഡ് ചെയ്തിട്ടുണ്ടെന്ന് സ്ഥിരീകരിക്കുക (`[Server]` ലോഗുകൾ പരിശോധിക്കുക)                                                                                             |
-| macOS നോട്ടറൈസേഷൻ സ്തംഭിക്കുന്നു                                                     | `APPLE_*` vars `.env`-ൽ മാത്രമല്ല, export ചെയ്തിട്ടുണ്ടെന്ന് ഉറപ്പാക്കുക                                                                                                                                    |
-| Windows SmartScreen മുന്നറിയിപ്പ്                                                    | EV cert ഉപയോഗിച്ച് സൈൻ ചെയ്യുക, അല്ലെങ്കിൽ ഉപയോക്താക്കൾ റൈറ്റ്-ക്ലിക്ക് → "Run anyway"                                                                                                                      |
-| പോർട്ട് ഉപയോഗത്തിലായതിനാൽ സ്മോക്ക് ടെസ്റ്റ് പരാജയപ്പെടുന്നു                          | `electron:smoke:packaged` പ്രവർത്തിപ്പിക്കുന്നതിന് മുമ്പ് 20128-ൽ പ്രവർത്തിക്കുന്ന ഏതെങ്കിലും ലോക്കൽ dev സെർവർ നിർത്തുക                                                                                     |
+| ലക്ഷണം                                                            | പരിഹരിക്കുക                                                                                                                                                             |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Electron പ്രധാന ബമ്പിന് ശേഷം`Cannot find module 'better-sqlite3'` | better-sqlite3 v13 ഷിപ്പുകൾ Node-API റൂട്ടിലും `prepare:bundle` ലും — റീ-റൺ `npm install` പ്രീബിൽഡ് ചെയ്യുന്നു (ഇത് നിലവിലെ പ്ലാറ്റ്ഫോമിനായി പ്രീബിൽഡ് പരിശോധിക്കുന്നു) |
+| നേറ്റീവ് മൊഡ്യൂളിനായി`ERR_DLOPEN_FAILED`                          | `prepare:bundle` — വീണ്ടും പ്രവർത്തിപ്പിക്കുക, നിലവിലെ പ്ലാറ്റ്ഫോമിനായുള്ള നോഡ്-എപിഐ പ്രീബിൽഡ് കാണാതെ വരുമ്പോൾ അത് വേഗത്തിൽ പരാജയപ്പെടുന്നു                             |
+| Linux യിൽ വിൻഡോ ശൂന്യമായി കാണപ്പെടുന്നു                           | Next.js സെർവർ യഥാർത്ഥത്തിൽ PORT ലേക്ക് ബന്ധിപ്പിച്ചതായി സ്ഥിരീകരിക്കുക ( `[Server]` ലോഗുകൾ പരിശോധിക്കുക)                                                                |
+| macOS നോട്ടറൈസേഷൻ സ്റ്റാളുകൾ                                      | `APPLE_*` vars കയറ്റുമതി ചെയ്യുന്നുണ്ടെന്ന് ഉറപ്പാക്കുക, `.env` ൽ മാത്രമല്ല                                                                                             |
+| Windows SmartScreen മുന്നറിയിപ്പ്                                 | EV cert ഉപയോഗിച്ച് സൈൻ ചെയ്യുക, അല്ലെങ്കിൽ ഉപയോക്താക്കൾ → "എന്തായാലും പ്രവർത്തിപ്പിക്കുക" എന്നതിൽ വലത്-ക്ലിക്കുചെയ്യുക                                                  |
+| പോർട്ട്-ഇൻ-ഉപയോഗത്തിൽ സ്മോക്ക് ടെസ്റ്റ് പരാജയപ്പെടുന്നു           | `electron:smoke:packaged` പ്രവർത്തിപ്പിക്കുന്നതിന് മുമ്പ് 20128-ൽ ഏതെങ്കിലും പ്രാദേശിക ദേവ് സെർവർ നിർത്തുക                                                              |
 
 ## ഇതും കാണുക
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- സോഴ്സ്: `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- ഉറവിടം: `electron/main.js`, `electron/preload.js`, `electron/package.json`
 - സഹായികൾ: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

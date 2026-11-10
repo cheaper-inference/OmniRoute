@@ -35,7 +35,11 @@ test("catalog post-filters do not add mirrors when gate off (default)", async ()
     prefixMode: "dual",
     aliasToProviderId: {},
   });
-  assert.deepEqual(out, models);
+  // Post-filters also attach `pricing` (catalogPricing.ts); compare everything else.
+  assert.deepEqual(
+    out.map(({ pricing: _pricing, ...entry }) => entry),
+    models
+  );
 });
 
 test("final catalog permission filtering does not let a mirror inherit base access", async () => {
@@ -109,10 +113,10 @@ test("catalog post-filters synthesize a gateway mirror when gate on and gateway 
 
 test("restricted catalog does not synthesize unauthorized effort or no-thinking variants", async () => {
   setFeatureFlagOverride(NO_THINK_FLAG, "true");
-  const baseId = "wecansync/claude-opus-5";
+  const baseId = "acme-gateway/claude-opus-5";
   const out = await applyCatalogPostFilters(
     makeRequest(),
-    [{ id: baseId, owned_by: "wecansync", root: "claude-opus-5" }],
+    [{ id: baseId, owned_by: "acme-gateway", root: "claude-opus-5" }],
     {
       connections: [],
       prefixMode: "dual",
@@ -129,21 +133,21 @@ test("restricted catalog does not synthesize unauthorized effort or no-thinking 
 
 test("provider wildcard authorization retains provider-scoped effort variants", async () => {
   setFeatureFlagOverride(NO_THINK_FLAG, "true");
-  const baseId = "wecansync/claude-opus-5";
+  const baseId = "acme-gateway/claude-opus-5";
   const out = await applyCatalogPostFilters(
     makeRequest(),
-    [{ id: baseId, owned_by: "wecansync", root: "claude-opus-5" }],
+    [{ id: baseId, owned_by: "acme-gateway", root: "claude-opus-5" }],
     {
       connections: [],
       prefixMode: "dual",
       aliasToProviderId: {},
       authorizeSyntheticModel: async (model) =>
-        typeof model.id === "string" && model.id.startsWith("wecansync/"),
+        typeof model.id === "string" && model.id.startsWith("acme-gateway/"),
     }
   );
   const ids = out.map((model) => model.id);
 
-  assert.equal(ids.includes("wecansync/claude-opus-5-low"), true);
-  assert.equal(ids.includes("wecansync/claude-opus-5-xhigh"), true);
-  assert.equal(ids.includes("no-think/wecansync/claude-opus-5"), false);
+  assert.equal(ids.includes("acme-gateway/claude-opus-5-low"), true);
+  assert.equal(ids.includes("acme-gateway/claude-opus-5-xhigh"), true);
+  assert.equal(ids.includes("no-think/acme-gateway/claude-opus-5"), false);
 });

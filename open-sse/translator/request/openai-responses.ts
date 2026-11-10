@@ -14,8 +14,16 @@ import {
   requiresPlainStringContent,
 } from "../../config/providerRegistry.ts";
 import { collectResponsesTools } from "./openai-responses/additionalTools.ts";
-import { flattenNamespaceToolName } from "./openai-responses/namespaceFlatten.ts";
+import {
+  collectFlatToolNames,
+  flattenNamespaceToolName,
+  resolveNamespacedToolChoiceName,
+} from "./openai-responses/namespaceFlatten.ts";
+import { mergeHistoricalToolIdentities } from "./openai-responses/historyToolIdentity.ts";
 import { openaiToOpenAIResponsesRequest } from "./openai-responses/toResponses.ts";
+import { coerceToolCallArguments } from "../helpers/toolArguments.ts";
+import { chatStrictFrom } from "../helpers/toolStrict.ts";
+import { stripInvalidSchemaConstructs } from "../helpers/schemaCoercion.ts";
 import {
   JsonRecord,
   RESPONSES_STORE_MARKER,
@@ -80,7 +88,11 @@ function toolOutputContentToString(output: unknown): string {
  * can carry them to the downstream model — the `tool` message itself is
  * text-only on Chat Completions, which is why the placeholder exists (#8459).
  */
-function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
+function toolOutputImagesToChatParts(
+  output: unknown,
+  droppedImages: Set<unknown>,
+  toolCallId: string
+): JsonRecord[] {
   if (!Array.isArray(output)) return [];
   const images: JsonRecord[] = [];
   for (const item of output) {
@@ -89,6 +101,13 @@ function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
     if (rec.type !== "input_image") continue;
     const url = toString(rec.image_url);
     if (!url) continue;
+    if (droppedImages.has(item)) {
+      images.push({
+        type: "text",
+        text: `[Earlier tool output image omitted to bound request size (tool_call_id: ${toolCallId})]`,
+      });
+      continue;
+    }
     const part: JsonRecord = { type: "image_url", image_url: { url } };
     if (rec.detail !== undefined) {
       (part.image_url as JsonRecord).detail = rec.detail;
@@ -96,6 +115,72 @@ function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
     images.push(part);
   }
   return images;
+}
+
+function positiveIntEnv(raw: string | undefined, fallback: number): number {
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+/** The `output` payload a Responses input item carries for a tool result, if it is one. */
+function toolResultOutputOf(item: JsonRecord): unknown {
+  const itemType = toString(item.type);
+  if (itemType === "function_call_output" || itemType === "custom_tool_call_output") {
+    return item.output;
+  }
+  const isToolRoleMessage = toString(item.role) === "tool" && (itemType === "message" || !itemType);
+  return isToolRoleMessage ? item.content : undefined;
+}
+
+/** Every `input_image` part (with its URL byte length) across all tool outputs, oldest first. */
+function collectToolOutputImages(inputItems: unknown[]): { part: unknown; bytes: number }[] {
+  const images: { part: unknown; bytes: number }[] = [];
+  for (const itemValue of inputItems) {
+    const output = toolResultOutputOf(toRecord(itemValue));
+    if (!Array.isArray(output)) continue;
+    for (const part of output) {
+      const rec = toRecord(part);
+      if (rec.type !== "input_image") continue;
+      const url = toString(rec.image_url);
+      if (url) images.push({ part, bytes: url.length });
+    }
+  }
+  return images;
+}
+
+/**
+ * #18684: every turn re-sends all historical tool-output images, so a long session
+ * grows the Chat request without bound until the upstream rejects the body. Keep the
+ * newest images that fit the count and byte budget and return the older ones to omit.
+ */
+function selectDroppedToolOutputImages(inputItems: unknown[]): Set<unknown> {
+  const maxCount = positiveIntEnv(process.env.OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_COUNT, 16);
+  const maxBytes = positiveIntEnv(
+    process.env.OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_BYTES,
+    20 * 1024 * 1024
+  );
+  const images = collectToolOutputImages(inputItems);
+
+  const dropped = new Set<unknown>();
+  let kept = 0;
+  let keptBytes = 0;
+  let totalBytes = 0;
+  for (let i = images.length - 1; i >= 0; i--) {
+    const { part, bytes } = images[i];
+    totalBytes += bytes;
+    if (dropped.size === 0 && kept < maxCount && keptBytes + bytes <= maxBytes) {
+      kept++;
+      keptBytes += bytes;
+    } else {
+      dropped.add(part);
+    }
+  }
+  if (dropped.size > 0) {
+    console.warn(
+      `TOOL_OUTPUT_IMAGE_CAP kept=${kept} dropped=${dropped.size} bytesBefore=${totalBytes} bytesAfter=${keptBytes}`
+    );
+  }
+  return dropped;
 }
 
 function appendReasoningContent(current: unknown, next: string): string {
@@ -119,8 +204,7 @@ function normalizeRoleBasedToolCalls(toolCalls: unknown): JsonRecord[] {
           type: "function",
           function: {
             name,
-            arguments:
-              typeof fn.arguments === "string" ? fn.arguments : JSON.stringify(fn.arguments ?? {}),
+            arguments: coerceToolCallArguments(fn.arguments),
           },
         };
       })
@@ -130,6 +214,25 @@ function normalizeRoleBasedToolCalls(toolCalls: unknown): JsonRecord[] {
       // element's own type; the literal satisfies JsonRecord at the return.
       .filter((toolCall): toolCall is NonNullable<typeof toolCall> => toolCall !== null)
   );
+}
+
+/**
+ * #18679: client tool schemas reach the Chat upstream as-is, including the invalid
+ * constructs that deep-truncating harnesses emit (`"enum": "[MaxDepth]"`, index-keyed
+ * objects where an array is required). Strict OpenAI-compatible validators reject them
+ * before inference (Ollama Cloud: `cannot unmarshal string into ... ToolProperty.enum`).
+ * Run every emitted `function.parameters` through the same sanitizer the Claude path uses.
+ */
+function sanitizeChatToolParameters(tools: unknown[]): unknown[] {
+  return tools.map((toolValue) => {
+    const tool = toRecord(toolValue);
+    const fn = toRecord(tool.function);
+    if (fn.parameters === undefined) return toolValue;
+    return {
+      ...tool,
+      function: { ...fn, parameters: stripInvalidSchemaConstructs(fn.parameters) },
+    };
+  });
 }
 
 /**
@@ -155,6 +258,7 @@ export function openaiResponsesToOpenAIRequest(
   // `additional_tools` input items. Normalize both forms before validation/conversion so
   // every downgraded provider receives the same available tool set.
   const tools = collectResponsesTools(root.tools, rawInputItems);
+  const flatToolNames = collectFlatToolNames(tools);
   if (tools.length > 0) {
     for (const toolValue of tools) {
       const tool = toRecord(toolValue);
@@ -264,6 +368,17 @@ export function openaiResponsesToOpenAIRequest(
   let currentAssistantMsg: JsonRecord | null = null;
   let pendingToolResults: JsonRecord[] = [];
   let pendingReasoningContent = "";
+  // Call ids still waiting for their output, oldest first. Some clients send a
+  // `*_output` item without `call_id`; pair it with the oldest pending call so the real
+  // tool output reaches the model instead of an empty synthetic result.
+  const pendingCallIds: string[] = [];
+  const claimToolCallId = (rawCallId: unknown): string => {
+    const callId = toString(rawCallId);
+    if (!callId.trim()) return pendingCallIds.shift() ?? callId;
+    const index = pendingCallIds.indexOf(callId);
+    if (index !== -1) pendingCallIds.splice(index, 1);
+    return callId;
+  };
 
   // Upstream providers reject messages:[] with "400: at least one message is required".
   // When the client sends input:[] (empty), inject a placeholder user message — mirrors
@@ -272,6 +387,7 @@ export function openaiResponsesToOpenAIRequest(
     rawInputItems.length === 0
       ? [{ type: "message", role: "user", content: [{ type: "input_text", text: "..." }] }]
       : rawInputItems;
+  const droppedToolImages = selectDroppedToolOutputImages(inputItems);
   for (const itemValue of inputItems) {
     const item = toRecord(itemValue);
 
@@ -306,12 +422,17 @@ export function openaiResponsesToOpenAIRequest(
       }
 
       if (toString(item.role) === "tool") {
+        const toolCallId = claimToolCallId(item.tool_call_id);
         messages.push({
           role: "tool",
-          tool_call_id: toString(item.tool_call_id),
+          tool_call_id: toolCallId,
           content: toolOutputContentToString(item.content),
         });
-        const roleToolImages = toolOutputImagesToChatParts(item.content);
+        const roleToolImages = toolOutputImagesToChatParts(
+          item.content,
+          droppedToolImages,
+          toolCallId
+        );
         if (roleToolImages.length > 0) {
           messages.push({ role: "user", content: roleToolImages });
         }
@@ -359,6 +480,7 @@ export function openaiResponsesToOpenAIRequest(
           if (currentAssistantMsg) {
             messages.push(currentAssistantMsg);
           }
+          for (const toolCall of roleBasedToolCalls) pendingCallIds.push(toString(toolCall.id));
           currentAssistantMsg = {
             role,
             content,
@@ -391,7 +513,10 @@ export function openaiResponsesToOpenAIRequest(
 
     if (itemType === "function_call") {
       // Skip tool calls with empty names to avoid infinite placeholder_tool loops
-      const fnName = toString(item.name).trim();
+      const leafName = toString(item.name).trim();
+      const fnName = leafName
+        ? flattenNamespaceToolName(toString(item.namespace), leafName, flatToolNames)
+        : "";
       if (!fnName) {
         continue;
       }
@@ -424,13 +549,13 @@ export function openaiResponsesToOpenAIRequest(
         type: "function",
         function: {
           name: fnName,
-          arguments:
-            typeof item.arguments === "string"
-              ? item.arguments
-              : JSON.stringify(item.arguments ?? {}),
+          // Codex replays raw streamed args verbatim; partial fragments / freeform
+          // text must become valid JSON or strict Chat upstreams 400 the request.
+          arguments: coerceToolCallArguments(item.arguments),
         },
       });
       currentAssistantMsg.tool_calls = toolCalls;
+      pendingCallIds.push(toString(item.call_id));
       continue;
     }
 
@@ -450,14 +575,15 @@ export function openaiResponsesToOpenAIRequest(
       }
 
       // Add tool result immediately
+      const toolCallId = claimToolCallId(item.call_id);
       messages.push({
         role: "tool",
-        tool_call_id: toString(item.call_id),
+        tool_call_id: toolCallId,
         content: toolOutputContentToString(item.output),
       });
       // #14111: Chat Completions `tool` content is text-only, so a following
       // multimodal user message carries the output's images to vision models.
-      const toolImages = toolOutputImagesToChatParts(item.output);
+      const toolImages = toolOutputImagesToChatParts(item.output, droppedToolImages, toolCallId);
       if (toolImages.length > 0) {
         messages.push({ role: "user", content: toolImages });
       }
@@ -469,7 +595,10 @@ export function openaiResponsesToOpenAIRequest(
       // arguments. Map it onto the assistant tool_calls list as a function call whose
       // arguments wrap the raw string as { input }, matching the { input: string }
       // schema the request-side tools normalization advertises for custom tools.
-      const fnName = toString(item.name).trim();
+      const leafName = toString(item.name).trim();
+      const fnName = leafName
+        ? flattenNamespaceToolName(toString(item.namespace), leafName, flatToolNames)
+        : "";
       if (!fnName) {
         continue;
       }
@@ -496,6 +625,7 @@ export function openaiResponsesToOpenAIRequest(
         },
       });
       currentAssistantMsg.tool_calls = toolCalls;
+      if (toString(item.call_id).trim()) pendingCallIds.push(toString(item.call_id));
       continue;
     }
 
@@ -522,12 +652,17 @@ export function openaiResponsesToOpenAIRequest(
       } catch {
         // Not JSON — keep the raw output as the tool content.
       }
+      const toolCallId = claimToolCallId(item.call_id);
       messages.push({
         role: "tool",
-        tool_call_id: toString(item.call_id),
+        tool_call_id: toolCallId,
         content: toolContent,
       });
-      const customToolImages = toolOutputImagesToChatParts(item.output);
+      const customToolImages = toolOutputImagesToChatParts(
+        item.output,
+        droppedToolImages,
+        toolCallId
+      );
       if (customToolImages.length > 0) {
         messages.push({ role: "user", content: customToolImages });
       }
@@ -638,7 +773,7 @@ export function openaiResponsesToOpenAIRequest(
               // identity for the response-side seam keyed on that qualified
               // wire name — qualified names cannot collide across namespaces,
               // so there is no ambiguity to detect/drop here anymore.
-              const wireName = flattenNamespaceToolName(nsName, leaf);
+              const wireName = flattenNamespaceToolName(nsName, leaf, flatToolNames);
               if (nsName && leaf) {
                 namespaceToolIdentityMap.set(wireName, { namespace: nsName, name: leaf });
               }
@@ -660,7 +795,7 @@ export function openaiResponsesToOpenAIRequest(
                           type: "object",
                           properties: {},
                         }),
-                  strict: sub.strict,
+                  ...chatStrictFrom(sub),
                 },
               };
             });
@@ -755,7 +890,7 @@ export function openaiResponsesToOpenAIRequest(
                 required: ["input"],
                 additionalProperties: false,
               },
-              strict: tool.strict,
+              ...chatStrictFrom(tool),
             },
           };
         }
@@ -765,10 +900,11 @@ export function openaiResponsesToOpenAIRequest(
             name,
             description: toString(tool.description),
             parameters: tool.parameters,
-            strict: tool.strict,
+            ...chatStrictFrom(tool),
           },
         };
       });
+    result.tools = sanitizeChatToolParameters(result.tools as unknown[]);
   }
 
   // Filter orphaned tool results (no matching tool_call in assistant messages)
@@ -781,15 +917,21 @@ export function openaiResponsesToOpenAIRequest(
       }
     }
   }
-  result.messages = messages.filter((m) => {
+  result.messages = messages.flatMap((m) => {
     const rec = toRecord(m);
-    // #2893: drop ANY tool result whose tool_call_id has no matching tool_call —
-    // including empty/missing ids (the previous `&& rec.tool_call_id` guard let
-    // empty-id orphans slip through and triggered an upstream 400).
-    if (rec.role === "tool") {
-      return allToolCallIds.has(String(rec.tool_call_id ?? ""));
-    }
-    return true;
+    if (rec.role !== "tool") return [m];
+    const toolCallId = String(rec.tool_call_id ?? "");
+    if (allToolCallIds.has(toolCallId)) return [m];
+    // #2893: a tool result without a matching tool_call is never sent as `role:"tool"`
+    // (strict upstreams 400). An empty/missing id can never be attributed — drop it.
+    if (!toolCallId.trim()) return [];
+    // Stateless continuations (`previous_response_id` + only `*_output` items) carry
+    // the output of a call that lives in the previous server-side response. Keep it as
+    // labelled user context (same label the Claude reconciliation uses) instead of
+    // dropping it silently, which made the model re-run the tool.
+    return [
+      { role: "user", content: `[Unpaired tool result ${toolCallId}]\n${toString(rec.content)}` },
+    ];
   });
 
   // Translate tool_choice object format: Responses {type,name} → Chat {type,function:{name}}
@@ -800,11 +942,22 @@ export function openaiResponsesToOpenAIRequest(
   ) {
     const tc = toRecord(result.tool_choice);
     const tcType = toString(tc.type);
+    // A forced `{ name, namespace }` targets a child of a flattened namespace tool;
+    // resolve it to the declared wire name (`ns__leaf`) instead of the bare leaf.
+    const chatToolNames = new Set(
+      (Array.isArray(result.tools) ? result.tools : [])
+        .map((toolValue) => toString(toRecord(toRecord(toolValue).function).name))
+        .filter(Boolean)
+    );
+    const forcedName = (name: unknown) =>
+      typeof name === "string"
+        ? resolveNamespacedToolChoiceName(tc.namespace, name, chatToolNames, flatToolNames)
+        : name;
     // Custom/freeform tools are normalized to Chat function tools with an { input: string }
     // schema above. Force the normalized function here while response-side custom-tool metadata
     // restores custom_tool_call and raw input for the Responses client.
     if ((tcType === "function" || tcType === "custom") && tc.name !== undefined && !tc.function) {
-      result.tool_choice = { type: "function", function: { name: tc.name } };
+      result.tool_choice = { type: "function", function: { name: forcedName(tc.name) } };
     } else if (tcType === "local_shell") {
       result.tool_choice = { type: "function", function: { name: "shell" } };
     } else if (tcType === "custom" && tc.name !== undefined) {
@@ -812,7 +965,7 @@ export function openaiResponsesToOpenAIRequest(
       // sends this to force functions__exec-style tools). Custom tools are already
       // normalized into a Chat { input: string } function schema above, so forcing that
       // same declared name via Chat's tool_choice selects it correctly.
-      result.tool_choice = { type: "function", function: { name: tc.name } };
+      result.tool_choice = { type: "function", function: { name: forcedName(tc.name) } };
     } else if (tcType === "allowed_tools") {
       const mode = toString(tc.mode);
       if (mode !== "auto" && mode !== "required") {
@@ -836,16 +989,18 @@ export function openaiResponsesToOpenAIRequest(
             `Unsupported Responses API feature: allowed_tools descriptor type '${allowedType || "missing"}' cannot be represented in Chat Completions`
           );
         }
-        allowedNames.add(allowedName);
+        allowedNames.add(
+          resolveNamespacedToolChoiceName(
+            allowed.namespace,
+            allowedName,
+            chatToolNames,
+            flatToolNames
+          )
+        );
       }
 
       const chatTools = Array.isArray(result.tools) ? result.tools : [];
-      const availableNames = new Set(
-        chatTools
-          .map((toolValue) => toString(toRecord(toRecord(toolValue).function).name))
-          .filter(Boolean)
-      );
-      const missingNames = [...allowedNames].filter((name) => !availableNames.has(name));
+      const missingNames = [...allowedNames].filter((name) => !chatToolNames.has(name));
       if (missingNames.length > 0) {
         throw unsupportedFeature(
           `Unsupported Responses API feature: allowed_tools references unavailable function tool(s): ${missingNames.join(", ")}`
@@ -872,15 +1027,12 @@ export function openaiResponsesToOpenAIRequest(
     }
   }
 
-  // #12141: When translated Chat tools is empty/absent, strip neutral tool_choice
-  // ("auto" / "none") so strict Chat endpoints (e.g. vLLM) do not reject with 400
-  // ("When using tool_choice, tools must be set"). Contradictory choices like "required"
-  // or forced functions are preserved so the upstream error remains visible.
+  // #12141: Strip dangling "auto" for strict Chat endpoints without tools.
+  // Explicit "none" forbids more tool calls, including after a tool loop;
+  // preserve it even when there are no definitions. Contradictory "required"
+  // or forced-function choices retain their existing upstream-error behavior.
   const finalChatTools = Array.isArray(result.tools) ? result.tools : [];
-  if (
-    finalChatTools.length === 0 &&
-    (result.tool_choice === "auto" || result.tool_choice === "none")
-  ) {
+  if (finalChatTools.length === 0 && result.tool_choice === "auto") {
     delete result.tool_choice;
   }
 
@@ -910,7 +1062,11 @@ export function openaiResponsesToOpenAIRequest(
     const reasoningRec = toRecord(root.reasoning);
     const effort = toString(reasoningRec.effort);
     if (effort && result.reasoning_effort === undefined) {
-      result.reasoning_effort = normalizeResponsesReasoningEffort(effort, model ?? root.model);
+      result.reasoning_effort = normalizeResponsesReasoningEffort(
+        effort,
+        model ?? root.model,
+        credentialRecord._targetFormat
+      );
     }
     if (
       credentialRecord._copilotClient === true &&
@@ -937,6 +1093,7 @@ export function openaiResponsesToOpenAIRequest(
   delete result.prompt_cache_options;
   delete result.prompt_cache_retention;
 
+  mergeHistoricalToolIdentities(namespaceToolIdentityMap, rawInputItems, tools);
   if (namespaceToolIdentityMap.size > 0) {
     // chatCore extracts and deletes these transient side channels before dispatch.
     // Non-enumerability keeps internal request metadata off the upstream wire.

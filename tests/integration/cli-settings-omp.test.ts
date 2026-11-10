@@ -182,7 +182,10 @@ test("omp-settings POST: writes models.yml with the env-var NAME, never a litera
   } finally {
     agentDb.close();
   }
-  assert.ok(content.includes("openai-models-list"), "models.yml must use openai-models-list discovery");
+  assert.ok(
+    content.includes("openai-models-list"),
+    "models.yml must use openai-models-list discovery"
+  );
   assert.ok(content.includes("injectV1: false"), "models.yml must specify injectV1: false");
 
   const getRes = await GET(req());
@@ -242,12 +245,11 @@ test("omp-settings POST: refuses to overwrite an unparseable models.yml", async 
       body: JSON.stringify({ baseUrl: "http://localhost:20128" }),
     })
   );
-  assert.equal(res.status, 500, `Expected 500, got ${res.status}`);
-  assert.match(
-    JSON.stringify(await res.json()),
-    /Cannot parse existing/,
-    "readable parse error reported"
-  );
+  // Refused by the shared no-clobber reader (#16523): 409, never a rewrite.
+  assert.equal(res.status, 409, `Expected 409, got ${res.status}`);
+  const body = await res.json();
+  assert.equal(body.error?.code, "config_unparseable", "readable parse error reported");
+  assert.match(String(body.error?.message), /models\.yml/);
   assert.equal(
     fs.readFileSync(modelsYmlPath, "utf-8"),
     "providers:\n  omniroute: [unclosed",

@@ -186,9 +186,24 @@
       "_rebaseline_2026_08_28_npm_publish_hosted_stage_job": "192 -> 194 (+2). Job novo `stage-npm` em .github/workflows/npm-publish.yml: o npm RECUSA `--provenance` vindo de runner self-hosted (422 \"Unsupported GitHub Actions runner environment\"), e o job `publish` nao pode migrar para runner hospedado porque 16 GB nao bastam para o fallback next-build do build:cli (documentado no proprio runs-on). A separacao foi a unica saida que preserva a atestacao SLSA que a 3.8.49 ja tem. Os +2 sao da MESMA convencao deliberada de todos os workflows (ver _scanner_harden_workflows_2026_06_16): unpinned-uses @vN em actions/download-artifact@v8 + actions/setup-node@v7, mais o cache-poisoning que o proprio setup-node@v7 ja gera nos outros 2 jobs deste MESMO arquivo (linhas 85 e 463) e que ja esta na baseline. Fixar por SHA so este job violaria a convencao. Nenhuma classe nova: zero template-injection / artipacked / dangerous-triggers / excessive-permissions — o job declara apenas contents:read + id-token:write, que e o minimo para a proveniencia. Medido pelo job Quality Gates (Extended) no run 33162... da PR #11877 = 194."
     },
     "vulnCount": {
-      "value": 27,
+      "value": 7,
       "direction": "down",
-      "dedicatedGate": true
+      "dedicatedGate": true,
+      "_tighten_2026_11_06_pr18174": "27 -> 7. Measured vulnCount=7 by scripts/check/check-vuln-ratchet.mjs on the root lockfile after the promptfoo 0.125.1, MSAL and basic-ftp repair merged with release/v3.8.54. The 7 are dev-only and were disclosed on 2026-10-30, after the repair was first measured: glob 10.5.0, 11.1.0, 13.0.6 (GHSA-3g3m-2fjr-6pw4), minimatch 9.0.9, 10.2.5, 10.2.6 (GHSA-g3hv-75wg-m249), joi 18.2.9 (GHSA-4528-x5fx-h6hg)."
+    },
+    "cycles": {
+      "value": 14,
+      "direction": "down",
+      "dedicatedGate": true,
+      "_note": "Import-cycle count over src/ + open-sse/ from scripts/check/check-cycles.mjs (#15159 G-02). Before this entry the metric did not exist and the gate was a false green: it scanned 5 subdirectories (450 files), matched only static `import|export … from`, and dropped every `@/` and `@omniroute/open-sse/` specifier — so it could not see the dynamic-import + alias cycles that dominated the repo. Fixed in the same change; the 14 below are the cycles the honest scan finds at release/v3.8.52 @ dbe703a000, not new debt.",
+      "_seed_2026_10_01_g01_g02_false_green": "0 (unmeasured, falsely reported) -> 14. The previous 0 was not a measurement, it was a blind spot. Fixing the three blinds (roots -> src+open-sse, AST-based extraction so `import(\"…\")` counts while type-position `typeof import(\"…\")` does not, tsconfig paths resolution for `@/*` and `@omniroute/open-sse/*`) took the scanned surface from 450 to 5023 files and surfaced 14 strongly connected components. Largest is a 43-file SCC over src/lib/db (settings.ts -> readCache.ts -> settings.ts, closed by the dynamic `await import(\"@/lib/db/settings\")` at src/lib/db/readCache.ts:102 — exactly the shape the old regex + alias filter could not see). Ceiling seeded at the measured 14 so the metric can only fall; burn-down is A-01 (chatCore.ts split) and the open-sse/services+imageGeneration extractions. Measured twice, identical both times. Do NOT raise this ceiling to make a gate green — that is the exact inverse of this ratchet."
+    },
+    "boundaryOpenSseToSrc": {
+      "value": 774,
+      "direction": "down",
+      "dedicatedGate": true,
+      "_note": "Unique file-to-file import edges from open-sse/ into src/ (engine -> app), counted by scripts/quality/measure-boundary.mjs (`edges.openSseToSrc`; `npm run quality:boundary` prints the full list). That list is the v4 core/module-split remediation backlog and must only shrink, but while the script only measured it the count drifted 745 (2026-10-10) -> 768 (2026-10-16) with nobody noticing. `npm run check:boundary:ratchet` (ci.yml lint + quality.yml fast-gates) now fails when the measured count exceeds this value. Seeded at the measured 771 at release/v3.8.52 @ 0293bc415b (measured twice, identical edge list) with NO velocity-phase +20% headroom, same as `cycles`. The ceiling only goes down: run `node scripts/quality/measure-boundary.mjs --update` only when the count genuinely falls (it refuses to raise the value). Do NOT raise this ceiling to make a gate green - remove the new open-sse -> src import (move the code into open-sse/ or inject it) instead.",
+      "_drift_2026_10_16_seed_to_merge_race": "771 -> 774 (+3), re-measured on release/v3.8.52 @ 0e4d056413 (first 773 @ f9ec93d991 right after #16874 merged, then +1 from #14619: open-sse/services/imageCombo.ts -> src/lib/usage/imageRequestAccounting.ts while this re-seed waited in the CI queue; #16901 moved five chatCore.ts edges into its new modules with no net change). The ceiling was seeded at the measured 771 on 224ca6030e; two merges landed between the seed and the merge and each added one engine -> app edge (open-sse/handlers/chatCore/antigravityVerificationState.ts -> src/lib/db/providers.ts and open-sse/handlers/chatCore/projectRouteFailure.ts -> src/lib/db/providers.ts), so the gate went red on the base tip the moment it landed. Absorbed at the tip (same policy as the file-size tip rebaselines, base-red #15306). From here the ceiling only goes down: `--update` refuses to raise it, and a PR that adds an edge must remove one or justify a documented rebaseline."
     },
     "bundleSize": {
       "value": 10384,
@@ -207,7 +222,8 @@
       "direction": "down",
       "dedicatedGate": true,
       "_note": "oasdiff breaking-change gate (Fase 9 Onda 0). Blocks any breaking change vs base spec.",
-      "_rebaseline_2026_08_22_combo_create_min1": "0 -> 4, split 3 own + 1 inherited. Docs-only alignment of components.schemas.ComboCreate with the request contract already enforced by the API since 638fc5fbd (combo create refuses an empty model list) and d5034ea52: `model`/`nodes` were phantom properties the server never accepted, and `models` (array, minItems 1) is the real required field. OWN findings (3, caused by this commit): removed `model`, removed `nodes`, added required `models` on POST /api/combos — spec-vs-server drift, not client-facing breakage, no working client could have relied on the removed shapes. INHERITED finding (1, NOT caused by this PR's code changes — pre-existing drift already present at parent d5034ea52): PATCH /api/combos/{id} request-body-added-required; that route's patch operation declares its own inline requestBody (required: true, bare object schema, docs/openapi.yaml ~2107-2118) and does not reference ComboCreate, so this finding exists independently of the ComboCreate alignment (same own-growth vs inherited-drift convention as _rebaseline_2026_07_20_aliasresolver_hook_split_7808). No code change in this PR; follow-up tracking = this change's PR description."
+      "_rebaseline_2026_08_22_combo_create_min1": "0 -> 4, split 3 own + 1 inherited. Docs-only alignment of components.schemas.ComboCreate with the request contract already enforced by the API since 638fc5fbd (combo create refuses an empty model list) and d5034ea52: `model`/`nodes` were phantom properties the server never accepted, and `models` (array, minItems 1) is the real required field. OWN findings (3, caused by this commit): removed `model`, removed `nodes`, added required `models` on POST /api/combos — spec-vs-server drift, not client-facing breakage, no working client could have relied on the removed shapes. INHERITED finding (1, NOT caused by this PR's code changes — pre-existing drift already present at parent d5034ea52): PATCH /api/combos/{id} request-body-added-required; that route's patch operation declares its own inline requestBody (required: true, bare object schema, docs/openapi.yaml ~2107-2118) and does not reference ComboCreate, so this finding exists independently of the ComboCreate alignment (same own-growth vs inherited-drift convention as _rebaseline_2026_07_20_aliasresolver_hook_split_7808). No code change in this PR; follow-up tracking = this change's PR description.",
+      "_ack_2026_11_09_pr19311_keys_post_name": "No value change (measured 2 <= 5). PR #19311 (key policy templates, owner decision 48 of 2026-11-09) corrects the POST /api/keys request schema in docs/openapi.yaml: oasdiff reports request-property-removed `label` and new-required-request-property `name` (2 findings). Docs-only correction, not a contract change: src/app/api/keys/route.ts already validated `name` (createKeySchema) and never read `label`, so no working client could rely on the old shape."
     },
     "mutationScore.src/sse/services/auth.ts": {
       "value": 43.81,
@@ -365,10 +381,11 @@
       "dedicatedGate": true
     },
     "rtlPhysicalClasses": {
-      "value": 1214,
+      "value": 843,
       "direction": "down",
       "eps": 0,
-      "_seeded_2026_07_28": "Measured by scripts/check/check-rtl-ratchet.mjs. tests/unit/ui/rtl-logical-classes.test.tsx pins four components and states it is partial (#3541); this bounds the remainder."
+      "_seeded_2026_07_28": "Measured by scripts/check/check-rtl-ratchet.mjs. tests/unit/ui/rtl-logical-classes.test.tsx pins four components and states it is partial (#3541); this bounds the remainder.",
+      "_tighten_2026_10_22_kea7886": "1214 -> 843. Measured rtlPhysicalClasses=702 by scripts/check/check-rtl-ratchet.mjs on feat/new-uikit-task42 (feat/new-uikit af385849 + docs): the UI kit migration (KEA-7886) replaced physical left/right utilities across the dashboard. 843 = ceil(702 * 1.2), keeping the velocity-phase 20% headroom (_policy) instead of freezing at the live count."
     }
   },
   "_coverage_note": "Pisos anti-flake ~2pt abaixo do real do CI mergeado MEDIDO COM os 135 testes religados (run 27247237268: statements 78.4 / lines 78.4 / functions 83.84 / branches 75.73). O religamento da 6A.1 HONESTIFICOU a regua: os ~82.5 anteriores eram inflados porque modulos nunca importados ficavam fora do denominador do c8. Apertar via --require-tighten na Fase 6A (2026-06-16).",

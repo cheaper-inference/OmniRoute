@@ -4,88 +4,99 @@
 
 ---
 
-> **기준 소스:** `electron/` 워크스페이스
-> **최종 업데이트:** 2026-06-28 — v3.8.40
+> **진실의 출처:** `electron/` 작업 공간** 마지막 업데이트:** 2026-06-28 — v3.8.40
 
-OmniRoute는 **Electron 41** + **electron-builder 26.10**을 기반으로 구축된 크로스 플랫폼 데스크톱 앱(Windows / macOS / Linux)을 제공합니다. 데스크톱 앱은 Next.js 독립 실행형 서버를 자식 프로세스로 생성하고, `BrowserWindow`가 해당 서버를 가리키도록 하며, 시스템 트레이, 자동 업데이터, IPC 브리지 및 무설정 시크릿 부트스트랩 기능을 추가합니다.
+OmniRoute 는 다음을 기반으로 하는 크로스 플랫폼 데스크탑 앱(Windows / macOS / Linux)을 제공합니다.**Electron** +** 전자 빌더 26.10** . 데스크탑 앱은 Next.js 독립형 서버를 하위 프로세스로 생성하고 `BrowserWindow` 를 가리키며 시스템 트레이, 자동 업데이트, IPC 브리지 및 제로 구성 비밀 부트스트랩을 추가합니다.
 
-## 아키텍처
+## 건축학
 
 ```
-┌──────────────────────────────────────────────────┐
-│ Electron 메인 프로세스 (electron/main.js)        │
-│ ├─ 단일 인스턴스 잠금                            │
-│ ├─ 자식 프로세스: Next.js 독립 실행형 서버       │
-│ │   (Electron의 Node 런타임으로 생성됨)           │
-│ ├─ BrowserWindow → http://localhost:PORT         │
-│ ├─ 시스템 트레이 + 컨텍스트 메뉴                 │
-│ ├─ electron-updater를 통한 자동 업데이트         │
-│ ├─ 콘텐츠 보안 정책(세션 헤더)                   │
-│ └─ 시크릿 부트스트랩(JWT / API_KEY_SECRET)       │
-└──────────────────────────────────────────────────┘
-               ↕ IPC 브리지 (electron/preload.js)
-┌──────────────────────────────────────────────────┐
-│ 렌더러(Next.js 대시보드)                         │
-│   window.electronAPI.* (contextIsolation)        │
-└──────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
+│ ├─ BrowserWindow → http://localhost:PORT     │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────┘
+            ↕ IPC bridge (electron/preload.js)
+┌──────────────────────────────────────────────┐
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
+└──────────────────────────────────────────────┘
 ```
 
 ## 버전
 
-`electron/package.json`에서 확인됨:
+`electron/package.json` 에서 확인됨:
 
-| 패키지             | 버전                                                         |
-| ------------------ | ------------------------------------------------------------ |
-| `electron`         | `^43.4.1`                                                    |
-| `electron-builder` | `^26.15.3`                                                   |
-| `electron-updater` | `^6.8.9`                                                     |
-| `better-sqlite3`   | 루트 `^13.0.2` (Node-API 사전 빌드 — Electron 재빌드 불필요) |
-| 앱 버전            | `3.8.0`                                                      |
-| 앱 ID              | `online.omniroute.desktop`                                   |
-| 제품명             | `OmniRoute`                                                  |
+| 패키지             | 버전                                                                    |
+| ------------------ | ----------------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                               |
+| `electron-builder` | `^26.15.3`                                                              |
+| `electron-updater` | `^6.8.9`                                                                |
+| `better-sqlite3`   | 루트 `^13.0.2` (Node-API는 — 사전 빌드하고 Electron 다시 빌드하지 않음) |
+| 앱 버전            | `3.8.0`                                                                 |
+| 앱 ID              | `online.omniroute.desktop`                                              |
+| 제품명             | `OmniRoute`                                                             |
 
 ## 스크립트(루트 `package.json`)
 
-| 스크립트                          | 용도                                                                     |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| `npm run electron:dev`            | `npm run dev`를 시작하고 `localhost:20128`을 기다린 후 Electron 실행     |
-| `npm run electron:build`          | Next.js를 빌드한 후 현재 OS용 `electron-builder` 실행                    |
-| `npm run electron:build:win`      | Windows NSIS 설치 프로그램 + 포터블 버전(x64) 빌드                       |
-| `npm run electron:build:mac`      | macOS DMG(Intel + Apple Silicon) 빌드                                    |
-| `npm run electron:build:linux`    | Linux AppImage + DEB(x64 + arm64) 빌드                                   |
-| `npm run electron:smoke:packaged` | 패키징된 바이너리를 실행하고 `/login`에서 HTTP 200 응답을 확인한 후 종료 |
+| 스크립트                          | 목적                                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` 시작합니다. + `localhost:20128` 를 기다립니다. + Electron 시작합니다. |
+| `npm run electron:build`          | Next.js 를 빌드한 후 현재 OS 에 대해 `electron-builder` 실행합니다.                 |
+| `npm run electron:build:win`      | Windows NSIS 설치 프로그램 + Portable(x64) 빌드                                     |
+| `npm run electron:build:mac`      | macOS DMG 빌드(Intel + Apple Silicon)                                               |
+| `npm run electron:build:linux`    | Linux AppImage + DEB x64 + arm64) 빌드                                              |
+| `npm run electron:smoke:packaged` | 패키지된 바이너리를 실행하고 HTTP 200에 대해 `/login` 조사한 다음 종료합니다.       |
 
-`electron/` 워크스페이스에서는 다음 스크립트도 제공합니다:
+`electron/` 작업 공간은 다음 사항도 공개합니다.
 
-- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` 실행
+- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` 실행합니다.
 - `npm run build:mac-x64` / `build:mac-arm64` — 단일 아키텍처 macOS 빌드
-- `npm run pack` — 로컬 테스트용 디렉터리 전용 빌드(설치 프로그램 없음)
+- 로컬 테스트를 위한 `npm run pack` — 디렉토리 전용 빌드(설치 프로그램 없음)
 
-## 디렉터리 구조
+## 선택적 런타임 팩
+
+데스크탑 빌드는 설치 프로그램과 함께 선택적 런타임 아카이브를 게시할 수 있습니다. 설치된 서버 페이로드에는 `optional-packs.index.json` ( Windows 및 Linux 의 `resources/app` 아래)가 포함되어 있습니다. `browser-runtime` 항목의 경우 `packs[].tarball` 읽고 다운로드하십시오.** 동일한 릴리스의 정확한 파일 이름** . 아카이브 이름에는 SHA-256 다이제스트가 포함됩니다. 빌드마다 다른 아카이브가 필요할 수 있습니다. 다운로드한 파일 이름을 변경하지 않고 유지하세요.
+
+설치된 앱의 색인과 선택한 아카이브를 하나의 디렉터리에 복사한 다음 동일한 릴리스의 CLI 사용합니다.
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` 아카이브 파일 이름이 아닌 설치 및 확인 상태를 표시합니다. 번들 인덱스는 아카이브를 선택합니다. 설치에서는 추출 전에 아카이브 체크섬을 확인하고, 설치된 팩을 교체하기 전에 패키지 체크섬을 확인합니다. 로컬 파일을 읽습니다. 누락된 아카이브는 다운로드하지 않습니다. 설치 후 응용 프로그램을 다시 시작하십시오. 릴리스에 일치하는 자산이 없으면 해당 릴리스의 자산을 통해 선택적 팩을 사용할 수 없습니다.
+
+## 디렉토리 레이아웃
 
 ```
 electron/
-├── package.json              # Electron 의존성 + electron-builder 설정
-├── main.js                   # 메인 프로세스(24 KB — 아래 주석 참조)
-├── preload.js                # contextBridge IPC 브리지
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI 타입
-├── README.md                 # 워크스페이스 내부 참고 사항
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder 출력(gitignored)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # .next/electron-standalone 번들 스테이징
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # 빌드 후 스모크 테스트
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-`main.js`와 `preload.js`는 모두 TypeScript가 아니라 **CommonJS `.js` 파일**입니다.
-렌더러 측 타입 정의는 `electron/types.d.ts`에 있습니다.
+`main.js` 와 `preload.js` 는 모두**CommonJS `.js` 파일** , TypeScript 아닙니다. 렌더러 측 입력은 `electron/types.d.ts` 에 있습니다.
 
 ## IPC 브리지(`preload.js`)
 
-프리로드는 `contextIsolation: true` 및 `nodeIntegration: false` 설정과 함께 `contextBridge`를 사용하여 허용 목록에 포함된 API를 `window.electronAPI`에 노출합니다.
+사전 로드는 `contextIsolation: true` 및 `nodeIntegration: false` 와 함께 `contextBridge` 사용하여 `window.electronAPI` 에 허용된 API 노출합니다.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -104,104 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-노출된 메서드:
+노출된 방법:
 
-| 렌더러 호출                                                       | 유형                    |
-| ----------------------------------------------------------------- | ----------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                  |
-| `openExternal(url)`                                               | invoke                  |
-| `getDataDir()`                                                    | invoke                  |
-| `restartServer()`                                                 | invoke                  |
-| `getAppVersion()`                                                 | invoke                  |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                  |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                    |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive(해제 함수 반환) |
+| 렌더러 호출                                                       | 유형              |
+| ----------------------------------------------------------------- | ----------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | 부르다            |
+| `openExternal(url)`                                               | 부르다            |
+| `getDataDir()`                                                    | 부르다            |
+| `restartServer()`                                                 | 부르다            |
+| `getAppVersion()`                                                 | 부르다            |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | 부르다            |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | 보내다            |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | 수신(반품 처리자) |
 
-수신 헬퍼는 `removeAllListeners`에 의존하지 않고 **해제 함수**를 반환합니다. 이를 통해 React 컴포넌트가 다시 마운트될 때 리스너가 누적되는 것을 방지합니다.
+수신 도우미는 다음을 반환합니다.** 디스포저 기능** `removeAllListeners` — 에 의존하는 대신 React 구성 요소를 다시 마운트할 때 수신기가 누적되는 것을 방지합니다.
 
-## 서버 수명 주기
+## 서버 수명주기
 
-`main.js`는 시스템 Node와의 네이티브 모듈 ABI 불일치를 방지하기 위해 Electron Node 런타임으로 Next.js 독립 실행형 번들을 직접 생성합니다.
+`main.js` 시스템 노드와의 기본 모듈 ABI 불일치를 방지하기 위해 Electron Node 런타임으로 직접 Next.js 독립형 번들을 생성합니다.
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-주요 사항:
+하이라이트:
 
-- `waitForServer()`는 창을 표시하기 전에 최대 30초 동안 URL을 폴링합니다(콜드 스타트 시 빈 화면 방지).
-- `stdio: "pipe"`는 stdout/stderr를 캡처하며, 준비 완료 문구(`Ready` / `listening`)가 감지되면 IPC를 통해 `server-status: running`을 내보냅니다.
-- `before-quit`는 정상적인 SIGTERM 종료(WAL 체크포인트)를 위해 최대 5초간 대기한 후 SIGKILL을 보냅니다.
-- 트레이의 포트 전환기(`20128`, `3000`, `8080`)는 서버를 중지하고 다시 시작한 다음 BrowserWindow를 다시 로드합니다.
+- `waitForServer()` 창을 표시하기 전에 최대 30초 동안 URL 를 폴링합니다(콜드 스타트 시 빈 화면 없음).
+- `stdio: "pipe"` stdout/stderr 캡처합니다. 준비된 문구(`Ready` / `listening`)는 IPC 통해 `server-status: running` 방출합니다.
+- `before-quit` 우아한 SIGTERM (WAL 체크포인트)를 위해 최대 5초를 기다린 다음 SIGKILL 보냅니다.
+- 트레이의 포트 전환기(`20128`, `3000`, `8080`)는 서버를 중지하고 다시 시작한 다음 BrowserWindow 를 다시 로드합니다.
 
-## 무설정 시크릿 부트스트랩
+## 구성이 필요 없는 비밀 부트스트랩
 
-최초 실행 시 메인 프로세스가 누락된 시크릿을 자동 생성하고 영구 저장합니다.
+처음 실행 시 기본 프로세스는 누락된 비밀을 자동 생성하고 유지합니다.
 
-| 시크릿                   | 소스                                                                             |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                         |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (암호화된 자격 증명이 이미 있으면 거부) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                         |
+| 비밀                     | 원천                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (암호화된 자격 증명이 이미 존재하는 경우 거부) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                |
 
-`<DATA_DIR>/server.env`에 저장됩니다. `DATA_DIR`은 다음 경로로 결정됩니다.
+`<DATA_DIR>/server.env` 에 지속됩니다. `DATA_DIR` 다음을 해결합니다.
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` 또는 `~/.omniroute`
 - macOS: `~/.omniroute`
 
+## 환경 파일 조회
+
+서버를 생성하기 전에 기본 프로세스( `electron/main.js` 의 `getPreferredEnvFilePath()` )는 다음을 선택합니다.** 하나** `.env` 파일: 존재하는 첫 번째 파일입니다.
+
+1. `$DATA_DIR/.env`, 앱이 실행된 환경에 `DATA_DIR` 설정된 경우.
+2. `<resolved DATA_DIR>/.env`, 위와 동일한 기본값 사용: Windows 의 `%APPDATA%\omniroute\.env`, `$XDG_CONFIG_HOME/omniroute/.env` 및 Linux 의 macOS 또는 `~/.omniroute/.env`.
+3. 프로세스 작업 디렉터리에 `.env`.
+
+기본 프로세스는 해당 파일만 읽습니다. 이후의 후보는 병합되지 않습니다. 그런 다음 서버 환경은 다음 우선 순위(가장 높은 것부터)로 구축됩니다.
+
+1. Electron 프로세스 환경(앱을 시작한 모든 것에서 상속된 변수)
+2. 선택한 `.env` 파일입니다.
+3. `<DATA_DIR>/server.env` (위의 부트스트랩 비밀).
+
+프로세스 환경은 앱이 시작될 때 캡처되므로 앱이 실행되는 동안 설정된 시스템 또는 사용자 환경 변수(창을 닫은 후 트레이에 있는 동안 포함)는 앱이 완전히 종료되고 다시 시작될 때까지 서버에 도달하지 않습니다. `CONTEXT_LENGTH_<PROVIDER>` ( [환경 변수: 공급자별 컨텍스트 길이](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) 참조)와 같은 런타임 노브의 경우 `.env` 파일을 선호한 다음 완전히 종료합니다(트레이,** 그만두다** ) 다시 시작하세요.
+
 ## 창 및 트레이
 
-- `BrowserWindow`: 1400×900(최소 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, 창 제어 버튼 위치는 `{ x: 16, y: 16 }`.
-- Windows/Linux: 네이티브 제목 표시줄.
-- 닫기 버튼을 누르면 트레이로 최소화됩니다. 트레이 메뉴에는 **OmniRoute 열기**, **대시보드 열기**(외부 브라우저), **서버 포트** 하위 메뉴, **업데이트 확인**, **종료**가 있습니다.
+- `BrowserWindow`: 1400 × 900 (최소 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, `{ x: 16, y: 16 }` 의 신호등.
+- Windows/Linux: 기본 제목 표시줄.
+- 닫기 버튼은 트레이로 최소화됩니다. 트레이 메뉴에는** OmniRoute 열기** ,** 대시보드 열기** (외부 브라우저),** 서버 포트** 하위 메뉴,** 업데이트 확인** ,** 그만두다** .
 
 ## 콘텐츠 보안 정책
 
-`session.defaultSession.webRequest.onHeadersReceived`를 통해 설정됩니다. 주요 지시문은 다음과 같습니다.
+`session.defaultSession.webRequest.onHeadersReceived` 통해 설정합니다. 주목할만한 지시문:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- 개발 모드에서는 `script-src`에만 `'unsafe-eval'`이 추가됩니다.
+- 개발자 모드에서는 `script-src` 에만 `'unsafe-eval'` 추가합니다.
 
 ## 자동 업데이트
 
-GitHub 공급자(`diegosouzapw/OmniRoute`)와 함께 `electron-updater`를 사용합니다.
+GitHub 공급자(`diegosouzapw/OmniRoute`)와 함께 `electron-updater` 사용합니다.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- 이벤트는 `update-status` IPC를 통해 렌더러로 전달됩니다.
-  `checking`, `available`, `not-available`, `downloading`(`percent` 포함), `downloaded`, `error`
-- `installUpdate()`는 서버를 종료한 다음 `autoUpdater.quitAndInstall()`을 호출합니다.
-- 개발 모드(`!app.isPackaged`)에서는 건너뜁니다.
+- `update-status` IPC 통해 렌더러로 전달되는 이벤트: `checking`, `available`, `not-available`, `downloading` ( `percent` 사용 ), `downloaded`, `error`
+- `installUpdate()` 서버를 종료한 다음 `autoUpdater.quitAndInstall()` 호출합니다.
+- 개발 모드에서 건너뛰었습니다(`!app.isPackaged`)
 
-## 빌드 파이프라인
+## 파이프라인 구축
 
-1. `npm run build` → `.next/standalone`에 Next.js standalone을 생성합니다.
-2. `prepare-electron-standalone.mjs` → `.next/electron-standalone`으로 다시 스테이징하고, 번들을 재배치할 수 있도록 `server.js` 및 `required-server-files.json` 내부의 절대 경로를 다시 작성합니다.
-3. `electron-builder`는 `main.js`, `preload.js`, `node_modules` 및 `extraResources: { ../.next/electron-standalone → app }`을 패키징합니다.
+1. `npm run build` → Next.js `.next/standalone` 에서 독립형입니다.
+2. `prepare-electron-standalone.mjs` → 는 `.next/electron-standalone` 로 다시 준비하고 `server.js` + `required-server-files.json` 내부의 절대 경로를 다시 작성하여 번들이 재배치 가능하도록 합니다.
+3. `electron-builder` 패키지 `main.js`, `preload.js`, `node_modules` 및 `extraResources: { ../.next/electron-standalone → app }`.
 
-### 빌드 대상
+### 빌드 타겟
 
-| OS      | 대상                                      |
-| ------- | ----------------------------------------- |
-| Windows | NSIS 설치 프로그램 + 포터블(x64)          |
-| macOS   | DMG(Intel + arm64, Applications로 드래그) |
-| Linux   | AppImage + DEB(x64 + arm64)               |
+| OS      | 대상                                         |
+| ------- | -------------------------------------------- |
+| Windows | NSIS 설치 프로그램 + Portable (x64)          |
+| macOS   | DMG (Intel + arm64, 애플리케이션으로 드래그) |
+| Linux   | AppImage + DEB (x64 + arm64)                 |
 
-NSIS 설정: `oneClick: false`이며, 사용자가 설치 디렉터리를 선택할 수 있고 바탕 화면 및 시작 메뉴 바로 가기를 생성합니다.
+NSIS 설정: `oneClick: false`, 사용자가 설치 디렉터리를 선택하고 바탕 화면 및 시작 메뉴 바로 가기를 만들 수 있습니다.
 
-## 패키징된 빌드 스모크 테스트
+## 연기 테스트 패키지 빌드
 
 ```bash
 npm run electron:smoke:packaged
@@ -209,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- 현재 플랫폼에 맞는 패키징된 바이너리를 `electron/dist-electron/`에서 자동으로 검색합니다.
-- 개발자 데이터에 영향을 주지 않도록 격리된 `HOME`/`APPDATA`/`XDG_*` 디렉터리를 사용해 실행합니다.
-- 45초 이내에 `http://127.0.0.1:20128/login`이 HTTP 200을 반환하는지 폴링합니다.
-- stderr/stdout에서 치명적 패턴(`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` 등)을 감시합니다.
-- 준비 완료 후 2초 동안 안정적으로 실행되는지 기다린 다음 SIGTERM을 보내고 포트가 해제될 때까지 기다립니다.
-- CI에서는 자동으로 `--no-sandbox --disable-gpu`를 전달하며, Linux에서는 `--disable-dev-shm-usage`도 함께 전달합니다.
+- 현재 플랫폼에 대해 `electron/dist-electron/` 에서 패키지된 바이너리를 자동 검색합니다.
+- 개발자 데이터에 영향을 주지 않도록 격리된 `HOME`/`APPDATA`/`XDG_*` 디렉토리로 실행됩니다.
+- 45초 내에 HTTP 200에 대해 `http://127.0.0.1:20128/login` 폴링합니다.
+- 치명적인 패턴(`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` 등)이 있는지 stderr/stdout 감시합니다.
+- 준비 후 2초간 안정적인 런타임을 기다린 다음 SIGTERM 실행하고 포트가 해제될 때까지 기다립니다.
+- CI 에서는 자동으로 `--no-sandbox --disable-gpu` (및 Linux 의 `--disable-dev-shm-usage` )를 전달합니다.
 
-환경 변수 재정의: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env 재정의: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## 코드 서명
 
-`electron/package.json`에서는 서명 자격 증명을 직접 연결하지 **않습니다**. 환경 변수를 통해 `electron-builder`에 전달하세요.
+`electron/package.json` 그렇습니다** ~ 아니다** 서명 자격 증명을 직접 전송합니다. env vars를 통해 `electron-builder` 로 전달합니다.
 
 ### macOS
 
@@ -243,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage 서명은 선택 사항입니다. 서명하려면 `LINUX_GPG_KEY`를 설정하세요.
+AppImage 서명은 선택 사항입니다. — 서명하는 경우 `LINUX_GPG_KEY` 설정합니다.
 
-## 배포
+## 분포
 
-아티팩트는 `electron/dist-electron/`에 생성됩니다.
+아티팩트은 `electron/dist-electron/` 에 위치합니다.
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-릴리스는 GitHub Releases(`diegosouzapw/OmniRoute`)에 게시되며, `electron-updater`도 이 위치에서 새 버전을 확인합니다.
+릴리스는 GitHub 릴리스(`diegosouzapw/OmniRoute`)에 게시되며 `electron-updater` 새 버전을 확인하는 곳이기도 합니다.
 
 ## 문제 해결
 
-| 증상                                                                          | 해결 방법                                                                                                                                                                 |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Electron 메이저 버전 업그레이드 후 `Cannot find module 'better-sqlite3'` 발생 | better-sqlite3 v13은 Node-API 프리빌드를 제공합니다. 루트에서 `npm install`과 `prepare:bundle`을 다시 실행하세요(`prepare:bundle`은 현재 플랫폼용 프리빌드를 검증합니다). |
-| 네이티브 모듈에서 `ERR_DLOPEN_FAILED` 발생                                    | `prepare:bundle`을 다시 실행하세요. 현재 플랫폼용 Node-API 프리빌드가 없으면 즉시 실패합니다.                                                                             |
-| Linux에서 창이 비어 있음                                                      | Next.js 서버가 실제로 PORT에 바인딩되었는지 확인하세요(`[Server]` 로그 확인).                                                                                             |
-| macOS 공증이 멈춤                                                             | `APPLE_*` 변수가 `.env`에만 설정된 것이 아니라 export되었는지 확인하세요.                                                                                                 |
-| Windows SmartScreen 경고                                                      | EV 인증서로 서명하거나, 사용자가 마우스 오른쪽 버튼을 클릭한 후 → "Run anyway"를 선택하도록 안내하세요.                                                                   |
-| 포트 사용 중 오류로 스모크 테스트 실패                                        | `electron:smoke:packaged`를 실행하기 전에 20128에서 실행 중인 모든 로컬 개발 서버를 중지하세요.                                                                           |
+| 징후                                                        | 고치다                                                                                                                                                    |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Electron 주요 충돌 후 `Cannot find module 'better-sqlite3'` | better-sqlite3 v13은 Node-API 사전 빌드를 제공합니다. — 루트에서 `npm install` 다시 실행하고 `prepare:bundle` (현재 플랫폼에 대한 사전 빌드를 확인합니다) |
+| 네이티브 모듈용 `ERR_DLOPEN_FAILED`                         | 현재 플랫폼에 대한 Node-API 사전 빌드가 누락되면 `prepare:bundle` — 다시 실행하면 빠르게 실패합니다.                                                      |
+| Linux 에서 창이 공백으로 나타납니다.                        | 실제로 PORT 에 바인딩된 Next.js 서버를 확인합니다( `[Server]` 로그 확인).                                                                                 |
+| macOS 공증 매점                                             | `.env` 뿐만 아니라 `APPLE_*` 변수를 내보내는지 확인하세요.                                                                                                |
+| Windows SmartScreen 경고                                    | EV 인증서로 서명하거나 사용자가 → "어쨌든 실행"을 마우스 오른쪽 버튼으로 클릭합니다.                                                                      |
+| 포트 사용 시 스모크 테스트 실패                             | `electron:smoke:packaged` 실행하기 전에 20128에서 로컬 개발 서버를 중지하세요.                                                                            |
 
-## 참고 항목
+## 참조
 
-- [SETUP_GUIDE.md](./SETUP_GUIDE.md)
-- [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
+- [SETUP_GUIDE](./SETUP_GUIDE.md)
+- [RELEASE_CHECKLIST](../ops/RELEASE_CHECKLIST.md)
 - 소스: `electron/main.js`, `electron/preload.js`, `electron/package.json`
 - 도우미: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

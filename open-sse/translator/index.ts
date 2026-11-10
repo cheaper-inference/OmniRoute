@@ -2,6 +2,7 @@ import { FORMATS } from "./formats.ts";
 import {
   ensureToolCallIds,
   fixMissingToolResponses,
+  repairDisplacedToolResults,
   stripOrphanedToolResults,
 } from "./helpers/toolCallHelper.ts";
 import {
@@ -11,9 +12,13 @@ import {
 import { filterToOpenAIFormat } from "./helpers/openaiHelper.ts";
 import {
   providerHonorsOpenAIFormatCacheControl,
+  providerAcceptsPromptCacheBreakpoint,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
-import { isInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
+import {
+  isInternalReasoningPlaceholder,
+  requiresReasoningContentPresence,
+} from "../utils/reasoningPlaceholder.ts";
 import {
   coerceToolSchemas,
   injectEmptyReasoningContentForToolCalls,
@@ -23,13 +28,19 @@ import {
 } from "./helpers/schemaCoercion.ts";
 import { getRequestTranslator, getResponseTranslator } from "./registry.ts";
 import { bootstrapTranslatorRegistry } from "./bootstrap.ts";
+import { scopeGeminiThoughtSignatureNamespace } from "../services/geminiThoughtSignatureStore.ts";
+import { extractResponsesWebSearchEvidence } from "./response/openai-responses/pureHelpers.ts";
 import { hasThinkingConfig, normalizeThinkingConfig } from "../services/provider.ts";
 import { applyThinkingBudget } from "../services/thinkingBudget.ts";
 import { applyReasoningRuleDirective } from "@/lib/reasoningRouting/policy";
 import { getModelPreserveVideoUrl } from "@/lib/db/models/modelPreserveVideoUrl";
 import { getResolvedModelCapabilities, supportsReasoning } from "../services/modelCapabilities.ts";
-import { normalizeRoles } from "../services/roleNormalizer.ts";
+import { requestMediaRefs, assertCIMediaPreserved } from "./helpers/mediaIntegrity.ts";
+import { normalizeRoles, resolvePreserveDeveloperRole } from "../services/roleNormalizer.ts";
 import { hoistLeadingSystemMessage } from "./helpers/strictSystemHoist.ts";
+import { ensurePoeUserTurnHasText } from "./helpers/poeImageOnlyUserTurn.ts";
+import { acceptsInlineToolAdditions, hoistToolAdditions } from "./helpers/claudeDeferredTools.ts";
+import { isStrictResponsesToolHistoryEnabled } from "./helpers/responsesToolHistory.ts";
 import {
   buildAssistantMessageCacheKey,
   lookupReasoning,
@@ -38,9 +49,11 @@ import {
 } from "../services/reasoningCache.ts";
 import {
   normalizeResponsesReasoningEffort,
+  REASONING_SUMMARY_OPT_OUT_MARKER,
   RESPONSES_STORE_MARKER,
 } from "./request/openai-responses/helpers.ts";
 import { applyReasoningInputPolicy } from "../services/reasoningInputPolicy.ts";
+import { normalizeReasoningRequest } from "@/shared/reasoning/effortStandardization";
 
 bootstrapTranslatorRegistry();
 export { register } from "./registry.ts";
@@ -182,29 +195,6 @@ function isReasoningOnlyReplayTarget(provider: unknown, model: unknown): boolean
 }
 
 /**
- * Upstreams that reject an ABSENT reasoning_content on replay turns, so the
- * placeholder must survive the cache miss.
- *
- * #9573/#9610 removed the placeholder globally because the model echoed it as
- * its own reasoning and stopped (empty turns). That holds for DeepSeek, where
- * an absent field was verified to be accepted — but Xiaomi MiMo still 400s
- * ("Param Incorrect: The reasoning_content in the thinking mode must be passed
- * back to the API", 9router#1321/#1337), so omitting the field there trades one
- * live bug for another. Keep the placeholder only for those providers; the echo
- * that comes back is still stripped on the way in by
- * isInternalReasoningPlaceholder(), so it never re-poisons cache or history.
- */
-function requiresReasoningContentPresence(provider: unknown, model: unknown): boolean {
-  const normalizedProvider = String(provider ?? "")
-    .trim()
-    .toLowerCase();
-  const normalizedModel = String(model ?? "")
-    .trim()
-    .toLowerCase();
-  return normalizedProvider === "xiaomi-mimo" || /(^|\/)mimo/i.test(normalizedModel);
-}
-
-/**
  * Projects the pivot transcript down to what `buildAssistantMessageCacheKey`
  * digests (`role`, `name`, `content`, and `tool_calls[].{type, function.name,
  * function.arguments}`). The caller keeps the result for the whole request, so
@@ -263,6 +253,13 @@ function replayOpenAIReasoningMessage(
   ) {
     message.reasoning_content = message.reasoning;
   }
+  // Serde-based upstreams (z-ai GLM, Moonshot Kimi) alias `reasoning` to
+  // `reasoning_content`, so a turn carrying both is rejected with 400
+  // "duplicate field `reasoning_content`" (9router#4841). Once
+  // `reasoning_content` holds the text it is the canonical carrier.
+  if (typeof message.reasoning === "string" && hasNonEmptyReasoningContent(message)) {
+    delete message.reasoning;
+  }
 
   const toolCalls = Array.isArray(message.tool_calls) ? message.tool_calls : [];
   const hasToolCalls = toolCalls.length > 0;
@@ -304,6 +301,20 @@ function replayOpenAIReasoningMessage(
 
   if (options.requiresExplicitReasoningReplay) {
     if (message.reasoning_content === "") delete message.reasoning_content;
+    // Presence-enforcing upstreams (opencode console gateways, Xiaomi MiMo)
+    // 400 when a thinking-mode replay turn lacks the reasoning field — even on
+    // a reasoning-cache miss, where the original summary is unavailable. Emit
+    // the internal sentinel so the Responses converter still emits the
+    // reasoning_text item; the echo coming back is stripped on the way in by
+    // isInternalReasoningPlaceholder(), so it never re-poisons cache or
+    // history (#9573). DeepSeek itself accepts an ABSENT field — untouched.
+    if (
+      !message.reasoning_content &&
+      (hasToolCalls || shouldReplayReasoningOnly) &&
+      requiresReasoningContentPresence(options.provider, options.model)
+    ) {
+      message.reasoning_content = NON_ANTHROPIC_THINKING_PLACEHOLDER;
+    }
     return;
   }
 
@@ -317,7 +328,7 @@ function replayOpenAIReasoningMessage(
 }
 
 /** @param options.normalizeToolCallId - When true, use 9-char tool call ids (e.g. Mistral); when false, leave ids as-is */
-/** @param options.preserveDeveloperRole - undefined/true: keep developer for OpenAI format (default); false: map to system */
+/** @param options.preserveDeveloperRole - true: keep developer for OpenAI format; false: map to system; undefined: provider default (resolvePreserveDeveloperRole) */
 /** @param options.preserveCacheControl - When true, preserve client-side cache_control markers (for Claude Code, etc.) */
 // Translate request: source -> openai -> target
 // Client-only assistant "echo" fields that strict OpenAI-compatible upstreams (e.g.
@@ -334,6 +345,10 @@ const OPENAI_INCOMPATIBLE_ECHO_FIELDS = [
   "cache_control",
 ];
 
+/**
+ * Translate a request between protocols, applying target-specific compatibility rules and
+ * enforcing attachment preservation for CI dispatch.
+ */
 export function translateRequest(
   sourceFormat,
   targetFormat,
@@ -363,7 +378,17 @@ export function translateRequest(
     copilotClient?: boolean;
   }
 ) {
-  let result = body;
+  // Claude Code inline-tools `tool_addition` blocks only reach Anthropic-native targets;
+  const originalCIMedia =
+    provider === "cheaperinference" || provider === "cinf" ? requestMediaRefs(body) : null;
+  // everywhere else their definitions move into tools[] (copy-on-write).
+  const hoistDeferredTools =
+    sourceFormat === FORMATS.CLAUDE &&
+    !(targetFormat === FORMATS.CLAUDE && acceptsInlineToolAdditions(provider));
+  let result = normalizeReasoningRequest(
+    hoistDeferredTools ? hoistToolAdditions(body) : body,
+    provider
+  );
   const use9CharId = options?.normalizeToolCallId === true;
   const preserveDeveloperRole = options?.preserveDeveloperRole;
   const connectionCacheOverride = resolveConnectionCacheOverride(
@@ -383,8 +408,13 @@ export function translateRequest(
     ["opencode-go", "opencode-zen"].includes(normalizedProvider) ||
     /glm|zhipu|z-ai/i.test(normalizedModel);
 
-  // Phase 2: Apply thinking budget control before normalization
-  result = applyThinkingBudget(result);
+  // Phase 2: Apply thinking budget control before normalization. Gemini targets receive
+  // the model so a native thinkingLevel reaches the translator instead of a lossy budget.
+  // Claude -> Antigravity is excluded: claude-to-openai drops the level on the hub path.
+  const readsNativeGeminiLevel =
+    targetFormat === FORMATS.GEMINI ||
+    (targetFormat === FORMATS.ANTIGRAVITY && sourceFormat !== FORMATS.CLAUDE);
+  result = applyThinkingBudget(result, null, readsNativeGeminiLevel ? normalizedModel : undefined);
   // Explicit reasoning-routing policies are final. The marker is internal and is
   // consumed here before any provider translation can see it.
   result = applyReasoningRuleDirective(result);
@@ -415,16 +445,23 @@ export function translateRequest(
   });
   const preserveResponsesReasoning = sourceFormat === FORMATS.OPENAI_RESPONSES && isReasoner;
 
+  // In strict tool-history mode the Responses translator validates the history, so do not
+  // normalize malformed arguments or synthesize empty outputs before that boundary. Reordering
+  // a displaced tool result next to its call invents nothing, so it applies in both modes.
+  const strictResponsesHistory =
+    targetFormat === FORMATS.OPENAI_RESPONSES && isStrictResponsesToolHistoryEnabled();
+
   // Ensure tool_calls have id; optionally normalize to 9-char for providers like Mistral
-  ensureToolCallIds(result, { use9CharId });
+  if (!strictResponsesHistory) ensureToolCallIds(result, { use9CharId });
 
   // Fix missing tool responses (insert empty tool_result if needed)
-  fixMissingToolResponses(result);
+  repairDisplacedToolResults(result);
+  if (!strictResponsesHistory) fixMissingToolResponses(result);
 
   // Claude reconciliation preserves orphaned tool output as labelled user text.
   // Keep the raw result carriers until the target translator can perform that
   // lossless conversion; other target formats retain the strict orphan filter.
-  if (targetFormat !== FORMATS.CLAUDE) {
+  if (targetFormat !== FORMATS.CLAUDE && !strictResponsesHistory) {
     stripOrphanedToolResults(result);
   }
 
@@ -466,6 +503,26 @@ export function translateRequest(
     result.messages = hoistLeadingSystemMessage(result.messages, provider);
   }
 
+  // GLM-family upstreams (Z.AI / Zhipu console gateways) reject messages arrays
+  // with no role:"user" turn (400 [1214] "The messages parameter is illegal") —
+  // ALSO on the SAME-FORMAT (openai→openai) lane, where no source→openai
+  // translator runs to apply the _ensureUserTurn credential flag. Agent
+  // tool-loop continuations reach exactly that shape when every inbound user
+  // turn was tool_result-only and context compression evicted the original
+  // prompt (production evidence: opencode-go/glm-5.3-flash, 37× in one day).
+  // Mirrors claude-to-openai.ts's _ensureUserTurn branch: appending at the end
+  // keeps every earlier byte identical for upstream prompt caches.
+  if (
+    isGlmFamilyUpstream &&
+    targetFormat === FORMATS.OPENAI &&
+    Array.isArray(result.messages) &&
+    !result.messages.some(
+      (m) => m && typeof m === "object" && (m as Record<string, unknown>).role === "user"
+    )
+  ) {
+    result.messages.push({ role: "user", content: "(continue)" });
+  }
+
   // If same format, skip translation steps
   if (sourceFormat !== targetFormat) {
     // Check for direct translation path first (e.g., Claude → Gemini)
@@ -482,7 +539,14 @@ export function translateRequest(
           ? {
               ...(credentials && typeof credentials === "object" ? credentials : {}),
               ...(hasProvider ? { _provider: provider } : {}),
-              ...(hasNs ? { _signatureNamespace: options.signatureNamespace } : {}),
+              ...(hasNs
+                ? {
+                    _signatureNamespace: scopeGeminiThoughtSignatureNamespace(
+                      options.signatureNamespace,
+                      model
+                    ),
+                  }
+                : {}),
             }
           : credentials;
       result = directTranslator(model, result, stream, directCredentials);
@@ -503,9 +567,13 @@ export function translateRequest(
           const preserveCacheControl =
             options?.preserveCacheControl === true &&
             providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride);
+          // Routed provider id lets claudeToOpenAIRequest keep service_tier only for
+          // targets that accept it.
+          const hasStep1Provider = provider != null;
           const step1Credentials =
             options?.copilotClient ||
             hasTargetHint ||
+            hasStep1Provider ||
             preserveCacheControl ||
             preserveResponsesReasoning ||
             isGlmFamilyUpstream
@@ -513,12 +581,28 @@ export function translateRequest(
                   ...(credentials && typeof credentials === "object" ? credentials : {}),
                   ...(options?.copilotClient ? { _copilotClient: true } : {}),
                   ...(hasTargetHint ? { _targetFormat: targetFormat } : {}),
+                  ...(hasStep1Provider ? { _provider: provider } : {}),
                   ...(preserveCacheControl ? { _preserveCacheControl: true } : {}),
                   ...(preserveResponsesReasoning ? { _preserveReasoningContent: true } : {}),
                   ...(isGlmFamilyUpstream ? { _ensureUserTurn: true } : {}),
                 }
               : credentials;
           result = toOpenAI(model, result, stream, step1Credentials);
+          // Responses creates messages after the initial role pass; normalize before
+          // Gemini targets consume the pivot and discard unsupported developer turns.
+          if (
+            sourceFormat === FORMATS.OPENAI_RESPONSES &&
+            (targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY) &&
+            Array.isArray(result.messages)
+          ) {
+            result.messages = normalizeRoles(
+              result.messages,
+              provider || "",
+              model || "",
+              targetFormat,
+              preserveDeveloperRole
+            );
+          }
           // Log OpenAI intermediate format
           reqLogger?.logOpenAIRequest?.(result);
         }
@@ -563,16 +647,30 @@ export function translateRequest(
           const hasPreCompression = options?.preCompressionBody != null;
           const hasCopilot = options?.copilotClient === true;
           const hasProvider = provider != null;
+          const videoSensitive = options?.videoTranscriptSensitive === true;
           const translationCredentials =
-            hasNs || hasPreCompression || hasCopilot || hasProvider
+            hasNs || hasPreCompression || hasCopilot || hasProvider || videoSensitive
               ? {
                   ...(credentials && typeof credentials === "object" ? credentials : {}),
-                  ...(hasNs ? { _signatureNamespace: options.signatureNamespace } : {}),
+                  ...(hasNs
+                    ? {
+                        _signatureNamespace: scopeGeminiThoughtSignatureNamespace(
+                          options.signatureNamespace,
+                          model
+                        ),
+                        // Raw connection id (chatCore threads the serving connection as
+                        // signatureNamespace): openai-to-claude binds the Claude signed-
+                        // thinking restore on it (#17324 — signatures are org-scoped).
+                        _connectionId: options.signatureNamespace,
+                      }
+                    : {}),
                   ...(hasPreCompression ? { _preCompressionBody: options.preCompressionBody } : {}),
                   ...(hasCopilot ? { _copilotClient: true } : {}),
                   // Routed provider id so target translators can apply provider-specific
                   // quirks (e.g. Vertex rejects function_call.id — #3440).
                   ...(hasProvider ? { _provider: provider } : {}),
+                  // Video-derived requests must not replay retained Claude signed thinking.
+                  ...(videoSensitive ? { _videoTranscriptSensitive: true } : {}),
                 }
               : credentials;
           // #9780 — carry the Responses namespace identity map across the pivot.
@@ -608,16 +706,23 @@ export function translateRequest(
     // honor explicit OpenAI-format markers (DashScope/alibaba, Xiaomi MiMo) when
     // requested upstream; generic/implicit-cache OpenAI providers stay stripped.
     result = filterToOpenAIFormat(result, {
+      normalizeFileUrls: normalizedProvider === "cheaperinference" || normalizedProvider === "cinf",
       preserveCacheControl:
         options?.preserveCacheControl === true &&
         providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride),
+      preservePromptCacheBreakpoint: providerAcceptsPromptCacheBreakpoint(provider),
       // #4849 regression guard: keep client reasoning_content for replay providers.
       preserveReasoningContent: isReasoner,
       // Per-provider/model preserveVideoUrl flag from compat overrides.
       // Falls back to true for moonshot/kimi when unset (legacy behavior).
       preserveVideoUrl:
         getModelPreserveVideoUrl(normalizedProvider, normalizedModel) ??
-        (normalizedProvider === "moonshot" || normalizedProvider === "kimi"),
+        (normalizedProvider === "moonshot" ||
+          normalizedProvider === "kimi" ||
+          normalizedProvider === "cheaperinference" ||
+          normalizedProvider === "cinf"),
+      // Same decision normalizeRoles made above — never undo it here.
+      preserveDeveloperRole: resolvePreserveDeveloperRole(preserveDeveloperRole, provider),
     });
   }
 
@@ -693,6 +798,7 @@ export function translateRequest(
 
   // Ensure unique tool_call ids on final payload (translators may have introduced duplicates)
   ensureToolCallIds(result, { use9CharId });
+  repairDisplacedToolResults(result);
   fixMissingToolResponses(result);
   stripOrphanedToolResults(result);
 
@@ -848,6 +954,12 @@ export function translateRequest(
     delete result[RESPONSES_STORE_MARKER];
   }
 
+  // #18124: only the Codex executor understands the reasoning-summary opt-out
+  // marker; any other provider would forward it verbatim to its upstream.
+  if (REASONING_SUMMARY_OPT_OUT_MARKER in result && provider !== "codex") {
+    delete result[REASONING_SUMMARY_OPT_OUT_MARKER];
+  }
+
   // #7293 follow-up: the pre-translation hoist above normalizes the *source*
   // message array, which a target translator can then undo. `claudeToOpenAI`
   // pushes `body.system` as a fresh leading system message before appending the
@@ -859,9 +971,54 @@ export function translateRequest(
   // prompt-cache prefixes stay stable.
   if (targetFormat === FORMATS.OPENAI && result.messages && Array.isArray(result.messages)) {
     result.messages = hoistLeadingSystemMessage(result.messages, provider);
+    // Poe rejects image-only user turns (400 "invalid request error"); give them a
+    // text part. Poe-only — every other provider keeps the exact same payload.
+    result.messages = ensurePoeUserTurnHasText(result.messages, provider);
   }
 
+  assertCIMediaPreserved(originalCIMedia, result);
   return result;
+}
+
+// Shared per-stream web-search evidence record (created on first use).
+function getResponsesWebSearchEvidence(state) {
+  const existing = state._responsesWebSearchEvidence;
+  const evidence =
+    existing && typeof existing === "object" && Array.isArray(existing.calls)
+      ? existing
+      : { calls: [], citations: [] };
+  state._responsesWebSearchEvidence = evidence;
+  return evidence;
+}
+
+// Merge a call into the recorded ones: a later record for the same id fills in the
+// query / sources instead of duplicating the call.
+function mergeResponsesWebSearchCall(evidence, call) {
+  const previous = evidence.calls.find((entry) => entry.id === call.id);
+  if (!previous) {
+    evidence.calls.push(call);
+    return;
+  }
+  if (call.query) previous.query = call.query;
+  if (call.items.length > 0) previous.items = call.items;
+}
+
+// Accumulate the per-chunk web-search evidence (see extractResponsesWebSearchEvidence)
+// on the shared stream state. `output_item.added` announces a call without its action
+// and `output_item.done` carries the resolved action, so a later record for the same id
+// merges instead of duplicating the call.
+function accumulateResponsesWebSearchEvidence(state, chunk) {
+  if (!state || typeof state !== "object") return;
+  const { call, citations, revokeCallId } = extractResponsesWebSearchEvidence(chunk);
+  if (!call && citations.length === 0 && !revokeCallId) return;
+  const evidence = getResponsesWebSearchEvidence(state);
+  // A call whose `done` reported a non-completed status never ran: drop the entry
+  // the `added` event recorded, so no (empty) search pair is emitted for it.
+  if (revokeCallId) {
+    evidence.calls = evidence.calls.filter((entry) => entry.id !== revokeCallId);
+  }
+  if (call) mergeResponsesWebSearchCall(evidence, call);
+  for (const citation of citations) evidence.citations.push(citation);
 }
 
 // Translate response chunk: target -> openai -> source
@@ -875,6 +1032,19 @@ export function translateResponse(targetFormat, sourceFormat, chunk, state) {
 
   let results = [chunk];
   let openaiResults = null; // Store OpenAI intermediate results
+
+  // Claude Code WebSearch bridge, record half. A native Responses upstream (Codex)
+  // reports a server-side search as `web_search_call` items + `url_citation`
+  // annotations; accumulate them on the shared state so the OpenAI→Claude step below
+  // can emit the Anthropic server_tool_use + web_search_tool_result pair via the shared
+  // emitter. Recording is silent, so a Chat Completions client's stream is unchanged
+  // (only a CLAUDE client's output differs) and it is a no-op for every other target.
+  // Kept here (the hub entry point) rather than inside the Responses→OpenAI translator,
+  // whose size is frozen by the file-size ratchet; the extractor itself is pure and
+  // lives in that translator's leaf helpers.
+  if (targetFormat === FORMATS.OPENAI_RESPONSES) {
+    accumulateResponsesWebSearchEvidence(state, chunk);
+  }
 
   // Check for direct translation path first (e.g., Gemini → Claude)
   const directTranslator = getResponseTranslator(targetFormat, sourceFormat);

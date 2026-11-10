@@ -1,3 +1,6 @@
+import { falModelPath, falSelectionEndpoint } from "../../config/falEndpoint.ts";
+import type { PrepareFalInput } from "../fal/compatibility.ts";
+import { FalError, falTrackingUrl, normalizeFalOutput } from "../fal/client.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import {
   FetchTimeoutError,
@@ -13,6 +16,7 @@ type FalBody = Record<string, unknown>;
 type FalCredentials = {
   apiKey?: unknown;
   accessToken?: unknown;
+  connectionId?: unknown;
 };
 
 type FalProviderConfig = {
@@ -41,6 +45,83 @@ function falDuration(value: unknown, fallback: string): string {
   if (typeof value === "string" && /^(4|6|8)s$/.test(value)) return value;
   const numeric = numberValue(value);
   return numeric && [4, 6, 8].includes(numeric) ? `${numeric}s` : fallback;
+}
+
+/** Seconds from a caller-supplied duration, accepting `8`, `"8"` or `"8s"`. */
+function falSeconds(value: unknown): number | undefined {
+  const numeric = numberValue(value);
+  if (numeric !== undefined) return numeric;
+  if (typeof value === "string") {
+    const match = value.trim().match(/^(\d+(?:\.\d+)?)s?$/);
+    if (match) return Number(match[1]);
+  }
+  return undefined;
+}
+
+function clampInt(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+/**
+ * fal apps disagree on the duration wire format and only reject a mismatch with a
+ * 422, so each format has to be encoded per app family:
+ *   - fal-ai's own wrappers (Veo, LTX, …) take the `"8s"` string form
+ *   - most vendor apps take a bare numeric string `"8"` (Seedance, Kling, …)
+ *   - some take a bare number `8` (Wan)
+ * `falDuration` above keeps the historical `"Ns"` default, and the overrides
+ * below cover the families that were verified against fal's published OpenAPI
+ * schemas. Add an entry here rather than changing the default, so models that
+ * already work stay untouched.
+ */
+const FAL_DURATION_OVERRIDES: Array<{
+  test: RegExp;
+  encode: (seconds: number) => string | number;
+  fallback: string | number;
+}> = [
+  // bytedance/seedance-*: string enum "auto" | "4" … "30"
+  { test: /(?:^|\/)seedance-/, encode: (n) => String(clampInt(n, 4, 30)), fallback: "auto" },
+  // fal-ai/kling-video/v3/*: string enum "3" … "15"
+  { test: /kling-video\/v3\//, encode: (n) => String(clampInt(n, 3, 15)), fallback: "5" },
+  // fal-ai/wan/* (and the wan/ owner): integer enum 2 … 15
+  { test: /(?:^|\/)wan\//, encode: (n) => clampInt(n, 2, 15), fallback: 5 },
+  // minimax/h3-*: bare integer 5 … 15 (verified against fal's OpenAPI:
+  // `{"type": "integer", "minimum": 5, "maximum": 15, "default": 5}`)
+  { test: /(?:^|\/)h3(?:-|\/)/, encode: (n) => clampInt(n, 5, 15), fallback: 5 },
+];
+
+/** Duration in the wire format the addressed fal app expects. */
+function falDurationFor(model: string, value: unknown): string | number {
+  const override = FAL_DURATION_OVERRIDES.find((entry) => entry.test.test(model));
+  if (!override) return falDuration(value, "8s");
+  const seconds = falSeconds(value);
+  return seconds === undefined ? override.fallback : override.encode(seconds);
+}
+
+/**
+ * fal apps disagree on the resolution wire format too. Most accept the lowercase
+ * `"720p"` form, but some vendor apps publish an uppercase enum — MiniMax H3 uses
+ * `"480P" | "768P" | "1080P"` and has no 720p tier at all — and reject a mismatch
+ * with a 422. As with the duration overrides above, add an entry here rather than
+ * changing the default, so models that already work stay untouched.
+ */
+const FAL_RESOLUTION_OVERRIDES: Array<{
+  test: RegExp;
+  encode: (resolution: string) => string;
+}> = [
+  // minimax/h3-*: uppercase enum "480P" | "768P" | "1080P". 720p has no tier on
+  // this app, so it maps onto its native 768P mid-tier.
+  {
+    test: /(?:^|\/)h3(?:-|\/)/,
+    encode: (r) => (r.startsWith("480") ? "480P" : r.startsWith("1080") ? "1080P" : "768P"),
+  },
+];
+
+/** Resolution in the wire format the addressed fal app expects. */
+function falResolutionFor(model: string, value: unknown, quality: unknown): string {
+  const explicit = stringValue(value);
+  const resolution = explicit || (quality === "hd" ? "1080p" : "720p");
+  const override = FAL_RESOLUTION_OVERRIDES.find((entry) => entry.test.test(model));
+  return override ? override.encode(resolution.toLowerCase()) : resolution;
 }
 
 function grokDuration(value: unknown, fallback = 6): number {
@@ -98,8 +179,8 @@ export function buildFalVideoRequestBody(body: FalBody, model = ""): FalBody {
   const request: FalBody = {
     prompt: stringValue(body.prompt) || "",
     aspect_ratio: stringValue(body.aspect_ratio) || "16:9",
-    duration: falDuration(body.duration, "8s"),
-    resolution: stringValue(body.resolution) || (body.quality === "hd" ? "1080p" : "720p"),
+    duration: falDurationFor(model, body.duration),
+    resolution: falResolutionFor(model, body.resolution, body.quality),
     generate_audio: typeof body.generate_audio === "boolean" ? body.generate_audio : true,
   };
 
@@ -216,6 +297,12 @@ function absoluteFalUrl(value: unknown, baseUrl: string): string | undefined {
     : `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
 }
 
+/** The native path pins upstream-supplied URLs to the fal queue before sending the key. */
+function falQueueUrl(value: unknown, requestId: string, baseUrl: string, native: boolean) {
+  if (!native) return absoluteFalUrl(value, baseUrl);
+  return stringValue(value) ? falTrackingUrl(value, requestId) : undefined;
+}
+
 function getToken(credentials: FalCredentials | null | undefined): string {
   return String(credentials?.apiKey || credentials?.accessToken || "");
 }
@@ -232,6 +319,8 @@ async function runFalQueue({
   providerConfig,
   credentials,
   log,
+  signal,
+  native = false,
 }: {
   model: string;
   body: FalBody;
@@ -240,6 +329,8 @@ async function runFalQueue({
   providerConfig: FalProviderConfig;
   credentials: FalCredentials | null | undefined;
   log?: FalLog | null;
+  signal?: AbortSignal | null;
+  native?: boolean;
 }) {
   const startTime = Date.now();
   const baseUrl = providerConfig.baseUrl.replace(/\/$/, "");
@@ -257,12 +348,7 @@ async function runFalQueue({
   const timeoutMs = getConfiguredTimeout();
   const deadline = startTime + timeoutMs;
   const resolvedModel = resolveFalModel(model, body, kind);
-  const falModel =
-    resolvedModel.startsWith("fal-ai/") ||
-    resolvedModel.startsWith("xai/") ||
-    resolvedModel.startsWith("google/")
-      ? resolvedModel
-      : `fal-ai/${resolvedModel}`;
+  const falModel = native ? falSelectionEndpoint(resolvedModel) : falModelPath(resolvedModel);
   const queueUrl = `${baseUrl}/${falModel}`;
 
   try {
@@ -271,6 +357,7 @@ async function runFalQueue({
       headers,
       body: JSON.stringify(body),
       timeoutMs,
+      signal,
     });
     const createPayload = await createResponse.json().catch(() => ({}));
 
@@ -300,13 +387,15 @@ async function runFalQueue({
     }
 
     const statusUrl =
-      absoluteFalUrl(createPayload.status_url, baseUrl) ||
+      falQueueUrl(createPayload.status_url, requestId, baseUrl, native) ||
       `${queueUrl}/requests/${requestId}/status`;
     const responseUrl =
-      absoluteFalUrl(createPayload.response_url, baseUrl) || `${queueUrl}/requests/${requestId}`;
+      falQueueUrl(createPayload.response_url, requestId, baseUrl, native) ||
+      `${queueUrl}/requests/${requestId}`;
 
     while (Date.now() < deadline) {
       const statusResponse = await fetchWithTimeout(statusUrl, {
+        signal,
         headers: { Authorization: `Key ${token}` },
         timeoutMs: Math.min(getConfiguredTimeout(), Math.max(1000, deadline - Date.now())),
       });
@@ -320,6 +409,7 @@ async function runFalQueue({
       const status = stringValue(statusPayload?.status);
       if (status === "COMPLETED") {
         const resultResponse = await fetchWithTimeout(responseUrl, {
+          signal,
           headers: { Authorization: `Key ${token}` },
           timeoutMs: Math.min(getConfiguredTimeout(), Math.max(1000, deadline - Date.now())),
         });
@@ -333,6 +423,9 @@ async function runFalQueue({
         }
 
         const normalized = normalizeFalMediaResult(resultPayload, kind);
+        if (native && normalized.success) {
+          Object.assign(normalized.data, normalizeFalOutput(resultPayload));
+        }
         saveCallLog({
           method: "POST",
           path: `/v1/${kind === "video" ? "videos" : "music"}/generations`,
@@ -375,28 +468,78 @@ async function runFalQueue({
   }
 }
 
-export function handleFalVideoGeneration(args: {
+type FalGenerationArgs = {
   model: string;
   provider: string;
   providerConfig: FalProviderConfig;
   body: FalBody;
   credentials: FalCredentials | null | undefined;
   log?: FalLog | null;
-}) {
-  return runFalQueue({
-    ...args,
-    body: buildFalVideoRequestBody(args.body, args.model),
-    kind: "video",
-  });
+  signal?: AbortSignal | null;
+  /** FAL_NATIVE_ENABLED, injected by the routes. Null keeps the established request body. */
+  prepareFalInput?: PrepareFalInput | null;
+};
+
+function isBuiltInFalVideoModel(model: string): boolean {
+  return (
+    ["veo3.1/lite", "fal-ai/veo3.1/lite"].includes(model) ||
+    model.startsWith("xai/grok-imagine-video/") ||
+    model.startsWith("google/gemini-omni-flash")
+  );
 }
 
-export function handleFalMusicGeneration(args: {
-  model: string;
-  provider: string;
-  providerConfig: FalProviderConfig;
-  body: FalBody;
-  credentials: FalCredentials | null | undefined;
-  log?: FalLog | null;
-}) {
-  return runFalQueue({ ...args, body: buildFalMusicRequestBody(args.body), kind: "music" });
+async function runNativeFalQueue(
+  { prepareFalInput, ...args }: FalGenerationArgs & { prepareFalInput: PrepareFalInput },
+  kind: MediaKind,
+  buildBody: (() => FalBody) | null
+) {
+  try {
+    const endpoint = falSelectionEndpoint(resolveFalModel(args.model, args.body, kind));
+    const body = buildBody
+      ? buildBody()
+      : await prepareFalInput(
+          endpoint,
+          args.body,
+          args.credentials ?? {},
+          args.signal ?? undefined
+        );
+    return await runFalQueue({ ...args, body, kind, native: true });
+  } catch (error) {
+    return {
+      success: false,
+      status: error instanceof FalError ? error.status : 400,
+      error: sanitizeErrorMessage(error),
+    };
+  }
+}
+
+export async function handleFalVideoGeneration({
+  prepareFalInput = null,
+  signal,
+  ...args
+}: FalGenerationArgs) {
+  const buildBody = () => buildFalVideoRequestBody(args.body, args.model);
+  if (!prepareFalInput) return runFalQueue({ ...args, body: buildBody(), kind: "video" });
+  const builtIn = args.body.fal_input === undefined && isBuiltInFalVideoModel(args.model);
+  return runNativeFalQueue(
+    { ...args, signal, prepareFalInput },
+    "video",
+    builtIn ? buildBody : null
+  );
+}
+
+export async function handleFalMusicGeneration({
+  prepareFalInput = null,
+  signal,
+  ...args
+}: FalGenerationArgs) {
+  const buildBody = () => buildFalMusicRequestBody(args.body);
+  if (!prepareFalInput) return runFalQueue({ ...args, body: buildBody(), kind: "music" });
+  const builtIn =
+    args.body.fal_input === undefined && ["ace-step", "fal-ai/ace-step"].includes(args.model);
+  return runNativeFalQueue(
+    { ...args, signal, prepareFalInput },
+    "music",
+    builtIn ? buildBody : null
+  );
 }

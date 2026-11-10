@@ -8,6 +8,27 @@
 import { fallbackToolCallId } from "../../helpers/toolCallHelper.ts";
 import { normalizeToolName, stripEmptyOptionalToolArgs } from "./pureHelpers.ts";
 
+type FinishReason = "tool_calls" | "stop" | "length" | "content_filter";
+
+// Structural view of the shared translator state. Upstream payload fields stay
+// unknown until the existing guards/helpers narrow them.
+interface CompletionState {
+  chatId?: string;
+  created?: number;
+  model?: string;
+  toolCallIndex?: number;
+  currentToolCallId?: unknown;
+  incompleteReason?: unknown;
+  roleEmitted?: boolean;
+  finishReasonSent?: boolean;
+  finishReason?: FinishReason;
+  usage?: unknown;
+}
+
+interface AssistantRoleChunk {
+  choices?: Array<{ delta?: unknown }>;
+}
+
 /**
  * Resolve the terminal finish_reason for a Responses→Chat stream.
  *
@@ -23,8 +44,12 @@ import { normalizeToolName, stripEmptyOptionalToolArgs } from "./pureHelpers.ts"
  * guarded (tests/unit/response-openai-responses-purehelpers-split.test.ts) to have NO
  * state coupling at all.
  */
-export function computeFinishReason(state): "tool_calls" | "stop" {
-  return (state.toolCallIndex || 0) > 0 || state.currentToolCallId ? "tool_calls" : "stop";
+export function computeFinishReason(state: CompletionState): FinishReason {
+  if ((state.toolCallIndex || 0) > 0 || state.currentToolCallId) return "tool_calls";
+  // #15489: a `response.incomplete` terminal is a truncated turn, not a clean stop.
+  if (state.incompleteReason === "max_output_tokens") return "length";
+  if (state.incompleteReason === "content_filter") return "content_filter";
+  return "stop";
 }
 
 /**
@@ -41,31 +66,35 @@ export function computeFinishReason(state): "tool_calls" | "stop" {
 // Shared by both branches of withAssistantRoleOnFirstDelta below: stamps
 // role: "assistant" onto a single delta object when eligible, returning
 // whether it did so (used to short-circuit the array branch's loop).
-function setAssistantRoleIfEligible(state, delta) {
+function setAssistantRoleIfEligible(state: CompletionState, delta: unknown): boolean {
   if (delta && typeof delta === "object" && !Array.isArray(delta)) {
-    delta.role = "assistant";
+    (delta as Record<string, unknown>).role = "assistant";
     state.roleEmitted = true;
     return true;
   }
   return false;
 }
 
-export function withAssistantRoleOnFirstDelta(state, result) {
+export function withAssistantRoleOnFirstDelta<TResult>(
+  state: CompletionState,
+  result: TResult
+): TResult {
   if (!result || state.roleEmitted) return result;
 
   // Handle arrays of chunks (e.g. synthesized from response.completed output[])
   if (Array.isArray(result)) {
     for (const chunk of result) {
-      if (setAssistantRoleIfEligible(state, chunk?.choices?.[0]?.delta)) break;
+      if (setAssistantRoleIfEligible(state, (chunk as AssistantRoleChunk)?.choices?.[0]?.delta))
+        break;
     }
     return result;
   }
 
-  setAssistantRoleIfEligible(state, result.choices?.[0]?.delta);
+  setAssistantRoleIfEligible(state, (result as AssistantRoleChunk).choices?.[0]?.delta);
   return result;
 }
 
-function baseChunk(state): Record<string, unknown> {
+function baseChunk(state: CompletionState): Record<string, unknown> {
   return {
     id: state.chatId,
     object: "chat.completion.chunk",
@@ -75,7 +104,7 @@ function baseChunk(state): Record<string, unknown> {
 }
 
 /** Resolve the arguments string to emit — may arrive as a string or object. */
-function resolveArgsStr(rawArgs, toolName, toolSchema): string {
+function resolveArgsStr(rawArgs: unknown, toolName: string, toolSchema: unknown): string {
   const argsToEmit = stripEmptyOptionalToolArgs(rawArgs, toolName, toolSchema);
   if (argsToEmit != null) {
     return typeof argsToEmit === "string" ? argsToEmit : JSON.stringify(argsToEmit);
@@ -93,7 +122,10 @@ function resolveArgsStr(rawArgs, toolName, toolSchema): string {
  * toolCallIndex), so downstream chunk math (computeFinishReason, subsequent
  * incremental events in the same turn) stays consistent.
  */
-function buildToolCallChunks(state, fcItem): Record<string, unknown>[] {
+function buildToolCallChunks(
+  state: ToolSnapshotState,
+  fcItem: Record<string, unknown>
+): Record<string, unknown>[] {
   const chunks: Record<string, unknown>[] = [];
   const callId = fcItem.call_id || fallbackToolCallId(state.toolCallIndex);
   const toolName = normalizeToolName(fcItem.name);
@@ -150,7 +182,7 @@ function buildToolCallChunks(state, fcItem): Record<string, unknown>[] {
 }
 
 /** Build the terminal chunk (finish_reason + usage) once all tool calls are synthesized. */
-function buildFinalChunk(state): Record<string, unknown> {
+export function buildFinalChunk(state: CompletionState): Record<string, unknown> {
   state.finishReasonSent = true;
   const reason = computeFinishReason(state);
   state.finishReason = reason;
@@ -163,6 +195,26 @@ function buildFinalChunk(state): Record<string, unknown> {
     finalChunk.usage = state.usage;
   }
   return finalChunk;
+}
+
+interface ToolSnapshotState extends CompletionState {
+  toolCallIndex: number;
+  toolCallIdsSeen?: Set<unknown>;
+  toolSchemas?: ReadonlyMap<string, unknown>;
+  currentToolCallArgsBuffer?: string;
+  currentToolCallDeferred?: boolean;
+}
+
+/** Synthesize one unseen tool without finalizing, allowing ordered text/tool recovery. */
+export function synthesizeCompletedToolItem(
+  state: ToolSnapshotState,
+  value: unknown
+): Record<string, unknown>[] {
+  if (!value || typeof value !== "object" || Array.isArray(value) || state.finishReasonSent)
+    return [];
+  const item = value as Record<string, unknown>;
+  if (item.type !== "function_call" || state.toolCallIdsSeen?.has(item.call_id)) return [];
+  return buildToolCallChunks(state, item);
 }
 
 /**
@@ -181,18 +233,15 @@ function buildFinalChunk(state): Record<string, unknown> {
  * synthesize (no un-seen function_call items, or finish_reason already sent)
  * — the caller falls through to its own default finish_reason handling.
  */
-export function synthesizeCompletedToolCalls(state, output): Record<string, unknown>[] | null {
+export function synthesizeCompletedToolCalls(
+  state: ToolSnapshotState,
+  output: unknown
+): Record<string, unknown>[] | null {
   const outputItems = Array.isArray(output) ? output : [];
-  const functionCallItems = outputItems.filter(
-    (item) => item?.type === "function_call" && !state.toolCallIdsSeen?.has(item.call_id)
+  const synthesizedChunks = outputItems.flatMap((item: unknown) =>
+    synthesizeCompletedToolItem(state, item)
   );
-
-  if (functionCallItems.length === 0 || state.finishReasonSent) return null;
-
-  const synthesizedChunks: Record<string, unknown>[] = [];
-  for (const fcItem of functionCallItems) {
-    synthesizedChunks.push(...buildToolCallChunks(state, fcItem));
-  }
+  if (!synthesizedChunks.length) return null;
   synthesizedChunks.push(buildFinalChunk(state));
   return synthesizedChunks;
 }

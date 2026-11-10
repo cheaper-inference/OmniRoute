@@ -18,6 +18,8 @@ interface HealthInfo {
   measured?: boolean;
   transportOk?: number;
   transportFailures?: number;
+  slowAbandoned?: number;
+  clientAborted?: number;
   upstream4xx?: number;
   upstream5xx?: number;
   connectionTests?: number;
@@ -60,15 +62,15 @@ export function ProxyHealthCell({ testResult, health }: ProxyHealthCellProps) {
     if (testResult.success) {
       return (
         <div className="flex flex-col gap-0.5">
-          <span className="text-emerald-400">{t("testPassed")}</span>
+          <span className="text-success">{t("testPassed")}</span>
           {testResult.latencyMs != null && (
             <span
               className={
                 testResult.latencyMs < 1000
-                  ? "text-emerald-400"
+                  ? "text-success"
                   : testResult.latencyMs < 3000
-                    ? "text-amber-400"
-                    : "text-red-400"
+                    ? "text-warning"
+                    : "text-error"
               }
             >
               {testResult.latencyMs}ms
@@ -77,13 +79,12 @@ export function ProxyHealthCell({ testResult, health }: ProxyHealthCellProps) {
         </div>
       );
     }
-    return <span className="text-red-400">✗ {testResult.error || t("failed")}</span>;
+    return <span className="text-error">✗ {testResult.error || t("failed")}</span>;
   }
 
   if (health) {
     const sweep = health.sweep;
     const blockedHistory = health.blockedHistory;
-    const upstreamRefusals = (health.upstream4xx ?? 0) + (health.upstream5xx ?? 0);
     return (
       <div className="flex flex-col gap-0.5">
         <span title={t("previousSuccessRate", { rate: health.successRate ?? 0 })}>
@@ -91,7 +92,12 @@ export function ProxyHealthCell({ testResult, health }: ProxyHealthCellProps) {
             ? t("notMeasured")
             : t("transportRate", { rate: health.transportRate ?? 0 })}
         </span>
-        <span>{t("upstreamRefusals", { count: upstreamRefusals })}</span>
+        <span title={t("slowAbandonedHint")}>
+          {t("slowAbandoned", { count: health.slowAbandoned ?? 0 })}
+        </span>
+        <span>{t("clientAborted", { count: health.clientAborted ?? 0 })}</span>
+        <span>{t("upstream4xx", { count: health.upstream4xx ?? 0 })}</span>
+        <span>{t("upstream5xx", { count: health.upstream5xx ?? 0 })}</span>
         <span>{t("connectionTestsCount", { count: health.connectionTests ?? 0 })}</span>
         <span>{t("avgLatency", { latency: health.avgLatencyMs ?? "-" })}</span>
         {sweep ? (

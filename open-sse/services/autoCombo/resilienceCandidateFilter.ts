@@ -13,6 +13,21 @@ import { recordAutoExclusion } from "./autoEvaluationTrace";
 
 export const SYNTHETIC_NOAUTH_CONNECTION_ID = "noauth";
 
+/**
+ * #9057 gate for the synthetic keyless connection: allowed when there is no
+ * allowlist, or when the allowlist names the synthetic id explicitly. The auto
+ * combo pins keyless targets to "noauth", and pin-fail-closed
+ * (`implicitPinAllowlist`) turns that pin into the allowlist ["noauth"].
+ * Lives next to the id so the engine (`comboKeyScope.ts`) and the app
+ * (`src/sse/services/noAuthAllowlist.ts`) share one implementation.
+ */
+export function allowlistPermitsSyntheticNoAuth(
+  allowedConnections: string[] | null | undefined
+): boolean {
+  if (!Array.isArray(allowedConnections) || allowedConnections.length === 0) return true;
+  return allowedConnections.includes(SYNTHETIC_NOAUTH_CONNECTION_ID);
+}
+
 const TERMINAL_CONNECTION_STATUSES = new Set([
   "banned",
   "expired",
@@ -87,7 +102,7 @@ export function filterResilienceBlockedCandidates<T extends ResilienceFilterCand
       // synthetic candidate for a short TTL (never model lockout / cooldown).
       if (
         isModelLocked(candidate.provider, SYNTHETIC_NOAUTH_CONNECTION_ID, candidate.model) ||
-        isOpencodeFreeTierSkipped(candidate.provider)
+        isOpencodeFreeTierSkipped(candidate.provider, Date.now(), candidate.model)
       ) {
         changed = true;
         recordAutoExclusion(

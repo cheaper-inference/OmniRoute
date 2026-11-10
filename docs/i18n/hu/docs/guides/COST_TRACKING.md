@@ -36,65 +36,61 @@ Mivel az érték becslés:
 
 ---
 
-## A költségek becslésének módja
+## A költségek becslése
 
-### Az árak forrása
+### Az árképzés forrása
 
-A költségek egy ártáblázatból származnak, amelyet a rendszer a következő prioritási sorrendben old fel
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+A költségek a [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) egyesített ártáblázatából származnak, ebben a sorrendben (** a legmagasabb először** ):
 
-1. **Felhasználói felülírások** — az irányítópulton / a `PATCH /api/pricing` használatával megadott árak.
-2. **Szinkronizált külső árak** — a LiteLLM nyilvános
-   `model_prices_and_context_window.json` fájljából lekérve, ha a szinkronizálás engedélyezve van (külön
-   `pricing_synced` névtérben tárolva, így soha nem írja felül a saját beállításaidat).
-3. **Beépített alapértékek** — az OmniRoute részeként szállítva.
+1. **Felhasználó felülírja** az irányítópulton vagy `PATCH /api/pricing` (a `pricing` névtéren) keresztül beállított — árak.
+2. **model.dev szinkron** — árképzés `https://models.dev/api.json` ből (a `models_dev_pricing` névtérből) származik.
+3. **LiteLLM szinkron** — árak LiteLLM nyilvános `model_prices_and_context_window.json` (a `pricing_synced` névtérből) származnak.
+4. **Hardcoded alapértelmezések** — árak [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) ben szállítva.
 
-A külső árak szinkronizálása **külön engedélyezendő**, és alapértelmezés szerint ki van kapcsolva. A kapcsolódó környezeti változók
-(lásd: [`.env.example`](../../.env.example)):
+Ugyanazon provider/model esetén a magasabb prioritású rétegekből származó értékek felülírják az alacsonyabb rétegek egyező mezőit; a felső rétegből hiányzó mezők továbbra is származhatnak egy alsó rétegből. A sorrend akkor is rögzített, ha mindkét független szinkronizálási feladat egyszerre fut. `GET /api/pricing?includeSources=1` `pricing` és `sourceMap` adja vissza, amelyek modellenkénti címkéi (`user`, `modelsDev`, `litellm`, `default`) az adott modellt tartalmazó legmagasabb prioritású réteget azonosítják.
 
-| Környezeti változó      | Alapérték | Rendeltetés                                                                |
-| ----------------------- | --------- | -------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | A háttérben futó LiteLLM-árszinkronizálás engedélyezése indításkor.        |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Szinkronizálási időköz **másodpercben** (alapértelmezés szerint naponta).  |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Vesszővel elválasztott forráslista (jelenleg csak a `litellm` támogatott). |
+**LiteLLM szinkron** engedélyezve van, alapértelmezés szerint le van tiltva. Környezeti változói (lásd [`.env.example`](../../.env.example) ) a következők:
+
+| Env var                 | Alapértelmezett | Cél                                                                                     |
+| ----------------------- | --------------- | --------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`         | A háttér LiteLLM árszinkronizálásának engedélyezése.                                    |
+| `PRICING_SYNC_INTERVAL` | `86400`         | Szinkronizálási intervallum másodpercben (naponta).                                     |
+| `PRICING_SYNC_SOURCES`  | `litellm`       | Forrás kiválasztása csak ehhez a szinkronizáláshoz; jelenleg csak `litellm` támogatott. |
+
+**model.dev szinkron** elkülönül a LiteLLM sync-től, és alapértelmezés szerint le is van tiltva. Engedélyezze a Beállításokban (models.dev sync), vagy használja az alábbi változókat:
+
+| Env var                    | Alapértelmezett | Cél                                                                                                                                                |
+| -------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(unset)_       | Az Unset a Beállítások kapcsolót követi; `1/true/on/yes` bekapcsol, `0/false/off/no` pedig kikapcsol (még akkor is, ha a Beállítások engedélyezi). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Az alapértelmezett models.dev szinkronizálási időköz másodpercben (naponta).                                                                       |
+
+`PRICING_SYNC_SOURCES` igen** nem** model.dev engedélyezése; csak a LiteLLM szinkronizálást vezérli. A felhasználói felülírás törlése nem törli egyik szinkronizált névteret sem; a következő elérhető árréteg lép hatályba. Ár nélküli modellek esetén ellenőrizze mind a szinkronizálási beállításokat, mind a `sourceMap` mielőtt manuális felülírást adna hozzá.
 
 ### A költségképlet
 
-A költséget a rendszer kérésenként számítja ki a tokenek száma és az egymillió tokenre vetített díjak alapján a
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`) fájlban:
+A költséget kérésenként számítjuk ki a tokenszámból és a milliónkénti token arányból [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) ban (`computeCostFromPricing` / `calculateCost`):
 
-- **Bemeneti tokenek** (a gyorsítótárból olvasott és a gyorsítótár létrehozásához használt tokenek levonásával) × `input` díj.
-- **Gyorsítótárból olvasott tokenek** × `cached` díj (ennek hiányában a bemeneti díj).
-- **Gyorsítótár-létrehozási tokenek** × `cache_creation` díj (ennek hiányában a bemeneti díj).
-- **Kimeneti tokenek** × `output` díj.
-- **Következtetési tokenek** × `reasoning` díj (ennek hiányában a kimeneti díj).
+- **Beviteli tokenek** (mínusz gyorsítótár olvasási és gyorsítótár-létrehozási tokenek) × `input` arány.
+- **Gyorsítótár-olvasási tokenek** × `cached` ráta (visszaesik a bemeneti sebességre).
+- **Gyorsítótár-létrehozási tokenek** × `cache_creation` ráta (visszaesik a bemeneti sebességre).
+- **Kimeneti tokenek** × `output` ráta.
+- **Érvelési jelzők** × `reasoning` ráta (visszaesik a kimeneti sebességre).
 
-Minden díj USD/1 000 000 token egységben értendő. A Codex „fast”/„priority” vagy
-„flex” szolgáltatási szintje költségszorzót alkalmaz (`getCodexFastCostMultiplier`) — például a flex
-50%-os tokenkedvezménnyel kerül elszámolásra, amely az irányítópulton **flex-megtakarításként** jelenik meg.
+Minden árfolyam USD per 1 000 000 token. A Codex „gyors”/„prioritásos” vagy „flexibilis” szolgáltatási szint költségszorzót (`getCodexFastCostMultiplier`) alkalmaz. — pl. a flex 50%-os token-kedvezménnyel kerül kiszámlázásra.** flex megtakarítás** a műszerfalon.
 
-A rendszer először normalizálja a modellneveket (eltávolítja a szolgáltatói útvonalelőtagokat, például az `openai/` vagy
-`accounts/fireworks/models/` előtagot), így a korábbi sorok továbbra is hozzárendelhetők egy árhoz.
+A modellnevek először normalizálódnak (a szolgáltató elérési útjának előtagjai, például `openai/` vagy `accounts/fireworks/models/` megvonásra kerülnek), így az előzménysorok továbbra is egyeznek az árral.
 
-### A költés rögzítésének módja
+### Hogyan történik a költés rögzítése
 
-- A rendszer a válasz után számítja ki a kérésenkénti költséget, és „küldd el és felejtsd el” módon rögzíti, így az
-  soha nem növeli az ügyfél által érzékelt késleltetést. A megosztott kvóta felhasználásának rögzítése a következő
-  eseményciklus-ütemben történik a [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) használatával.
-- Az API-kulcsokhoz tartozó költés pufferbe kerül, majd a
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) kötegekben írja ki (alapértelmezett kiírási időköz:
-  60 másodperc, 1 000 bejegyzéses puffer). A következőkkel hangolható:
+- A kérésenkénti költséget a válasz után számítják ki, és rögzítik a tűz és felejtsd el, így soha nem növeli a várakozási időt az ügyfél számára. A megosztott kvóta felhasználása a következő eseményhurok tickre van ütemezve [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) segítségével.
+- Az API-kulcs kiadásait a [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) puffereli és kötegekben üríti ki (alapértelmezett 60 másodperces öblítési időköz, 1000 bejegyzéses puffer). Hangolható:
 
-  | Környezeti változó                  | Alapérték | Rendeltetés                                           |
-  | ----------------------------------- | --------- | ----------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`   | Kiírási időköz ezredmásodpercben.                     |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`    | A pufferelt bejegyzések maximális száma kiírás előtt. |
+  | Env var                             | Alapértelmezett | Cél                                            |
+  | ----------------------------------- | --------------- | ---------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`         | Öblítési intervallum ezredmásodpercben.        |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`          | Maximális pufferelt bejegyzések öblítés előtt. |
 
-Az irányítópulton látható költségadatokat a rendszer **nem** egy soronként tárolt dollárösszegből olvassa ki — ehelyett
-minden alkalommal menet közben újraszámítja őket a tokenek száma és az aktuális ártáblázat alapján, amikor az
-analitikai végpont lefut. Ez azt jelenti, hogy egy hibás ár kijavítása (és az újbóli szinkronizálás)
-visszamenőleg is frissíti a korábbi költségbecsléseket.
+A műszerfal költségadatai a következők** nem** soronként tárolt dolláros — összegből olvassa ki, a rendszer menet közben újraszámítja a tokenszámból és az aktuális ártáblázatból minden alkalommal, amikor az analitikai végpont fut. Ez azt jelenti, hogy a rossz ár kijavítása (és az újraszinkronizálás) visszamenőleg frissíti a múltbeli költségbecsléseket.
 
 ---
 
@@ -140,52 +136,50 @@ A Költségek terület a következő oldalakat is tartalmazza (mindegyik a `/das
 
 ---
 
-## API-végpontok
+## API végpontok
 
-Eltérő jelzés hiányában mindegyikhez felügyeleti hitelesítés szükséges (loopback/JWT, a `requireManagementAuth` használatával).
+Ezek mindegyike kezelési hitelesítést igényel (loopback/JWT, via `requireManagementAuth`), hacsak nincs megjelölve.
 
 ### Használati és költségelemzés
 
-| Metódus | Végpont                  | Rendeltetés                                                                                                                                                                        |
-| ------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`   | `/api/usage/analytics`   | Teljes költség- és használatelemzés: összesítés, napi trend, szolgáltató/modell/API-kulcs/fiók/szint szerint. Lekérdezés: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`   | `/api/usage/utilization` | Szolgáltatónkénti kvótakihasználtság az idő függvényében. Lekérdezés: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                 |
-| `GET`   | `/api/usage/history`     | Nyers használati előzménysorok.                                                                                                                                                    |
-| `GET`   | `/api/usage/call-logs`   | Kérésenkénti hívásnaplók (modell, tokenek, költség, késleltetés, állapot).                                                                                                         |
-| `GET`   | `/api/usage/quota`       | Szolgáltatói kvóta állapota.                                                                                                                                                       |
-| `GET`   | `/api/usage/proxy-logs`  | Proxykérések naplói.                                                                                                                                                               |
+| Módszer | Végpont                  | Cél                                                                                                                                                                    |
+| ------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/usage/analytics`   | Teljes cost/usage elemzés: összefoglaló, napi trend, provider/model/API key/account/tier. szerint Lekérdezés: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`   | `/api/usage/utilization` | Szolgáltatónkénti kvótakihasználás az idő múlásával. Lekérdezés: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                          |
+| `GET`   | `/api/usage/history`     | Nyers használati előzmények sorai.                                                                                                                                     |
+| `GET`   | `/api/usage/call-logs`   | Kérésenkénti hívásnaplók (modell, tokenek, költség, várakozási idő, állapot).                                                                                          |
+| `GET`   | `/api/usage/quota`       | Szolgáltatói kvóta állapota.                                                                                                                                           |
+| `GET`   | `/api/usage/proxy-logs`  | Proxy kérések naplói.                                                                                                                                                  |
 
-### Költségkeretek
+### Költségvetések
 
-| Metódus | Végpont                  | Rendeltetés                                                                                                   |
-| ------- | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `GET`   | `/api/usage/budget`      | Költségösszesítés és költségkeret-ellenőrzés egy API-kulcshoz (az `apiKeyId` lekérdezési paraméter kötelező). |
-| `POST`  | `/api/usage/budget`      | Napi/heti/havi USD-korlátok és figyelmeztetési küszöb beállítása egy API-kulcshoz.                            |
-| `GET`   | `/api/usage/budget/bulk` | Tömeges költségkeret-összesítések API-kulcsokon keresztül.                                                    |
+| Módszer | Végpont                  | Cél                                                                                                        |
+| ------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/usage/budget`      | Költségösszegzés + költségvetés ellenőrzése egy API kulcshoz (`apiKeyId` lekérdezési paraméter szükséges). |
+| `POST`  | `/api/usage/budget`      | Állítsa be daily/weekly/monthly USD limits + figyelmeztetési küszöbértéket egy API kulcshoz.               |
+| `GET`   | `/api/usage/budget/bulk` | Tömeges költségvetési összefoglalók API kulcsok között.                                                    |
 
-> A költségkeret-API hatóköre **API-kulcsonkénti** (`apiKeyId`). A
-> `GET /api/usage/budget` által visszaadott korlátok közé tartozik a `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> a `warningThreshold`, valamint a folyamatos összesítések (`totalCostToday`, `totalCostMonth`, …).
+> A költségvetés API hatóköre per**API kulcs** (`apiKeyId`). `GET /api/usage/budget` által visszaadott korlátok közé tartozik `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` és a futó összegek (`totalCostToday`, `totalCostMonth`, …).
 
-### Árazás
+### Árképzés
 
-| Metódus  | Végpont                 | Rendeltetés                                                                                                                                   |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Aktuális egyesített árazás (felhasználói + szinkronizált + alapértelmezett). A `?includeSources=1` megjeleníti az egyes bejegyzések forrását. |
-| `PATCH`  | `/api/pricing`          | A(z) `{ provider: { model: { input, output, cached, … } } }` árazásának felülbírálása.                                                        |
-| `DELETE` | `/api/pricing`          | Az árazás visszaállítása az alapértelmezett értékekre (opcionálisan a `?provider=&model=` paraméterekkel szűkítve).                           |
-| `GET`    | `/api/pricing/defaults` | Az alapértelmezett, 1 millió egységre vetített tartalék díjak megjelenítése.                                                                  |
-| `GET`    | `/api/pricing/models`   | Modell szerint kulcsolt árazás.                                                                                                               |
-| `POST`   | `/api/pricing/sync`     | Kézi szinkronizálás indítása külső forrásokból (LiteLLM).                                                                                     |
-| `GET`    | `/api/pricing/sync`     | Aktuális szinkronizálási állapot.                                                                                                             |
-| `DELETE` | `/api/pricing/sync`     | Az összes szinkronizált árazási adat törlése.                                                                                                 |
+| Módszer  | Végpont                 | Cél                                                                                                                                                                           |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Összevont négyrétegű árképzés (felhasználó, models.dev, LiteLLM, alapértelmezett). `?includeSources=1` `pricing` + `sourceMap` értéket adja vissza.                           |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` árának felülbírálása.                                                                                                 |
+| `DELETE` | `/api/pricing`          | Felhasználói ár-felülírások eltávolítása (opcionálisan a `?provider=&model=` hatóköre); a szinkronizált díjak vagy a beépített alapértelmezett értékek tartalékként maradnak. |
+| `GET`    | `/api/pricing/defaults` | Az alapértelmezett per-1M tartalék arányok megjelenítése.                                                                                                                     |
+| `GET`    | `/api/pricing/models`   | Az árak modellenként kulcsolva.                                                                                                                                               |
+| `POST`   | `/api/pricing/sync`     | Kézi szinkronizálás elindítása külső forrásból (LiteLLM).                                                                                                                     |
+| `GET`    | `/api/pricing/sync`     | Jelenlegi szinkronizálási állapot.                                                                                                                                            |
+| `DELETE` | `/api/pricing/sync`     | Csak LiteLLM-szinkronizált árképzés tiszta (`pricing_synced`); A models.dev adatok különállóak.                                                                               |
 
-### Egyéb, költségekkel kapcsolatos végpontok
+### Egyéb költségreleváns végpontok
 
-| Metódus | Végpont                       | Cél                                                                                         |
-| ------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
-| `GET`   | `/api/free-tier/summary`      | Ingyenes modellek tokenösszege, az adott hónapban felhasznált és fennmaradó ingyenes keret. |
-| `GET`   | `/api/quota/pools/[id]/usage` | Egy megosztott kvótakészlet használata.                                                     |
+| Módszer | Végpont                       | Cél                                                                                             |
+| ------- | ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| `GET`   | `/api/free-tier/summary`      | Ingyenes modell token-összegek, felhasznált ebben a hónapban és a fennmaradó ingyenes juttatás. |
+| `GET`   | `/api/quota/pools/[id]/usage` | Használat megosztott kvótakészlethez.                                                           |
 
 ---
 

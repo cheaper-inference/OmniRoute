@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 /**
  * Tests for CompressionPreviewAccordion (F7).
  *
@@ -154,8 +155,8 @@ describe("CompressionPreviewAccordion — smoke render", () => {
   it("renders the toggle button with compress icon and i18n title", async () => {
     const { container } = await renderComponent();
     // compress icon in header
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("compress");
 
     // title text (mock returns the key)
@@ -582,5 +583,38 @@ describe("CompressionPreviewAccordion — error path (Hard Rule #12)", () => {
     expect(errorEl?.textContent).toContain("compressionPreviewFailed");
 
     vi.unstubAllGlobals();
+  });
+});
+
+describe("CompressionPreviewAccordion — kit Disclosure (#18074)", () => {
+  it("is a controlled kit Disclosure whose trigger controls the content region", async () => {
+    const { container } = await renderComponent();
+    const disclosure = container.querySelector("[data-slot='disclosure']");
+    expect(disclosure).toBeTruthy();
+    const trigger = container.querySelector(
+      "[data-slot='disclosure-trigger']"
+    ) as HTMLButtonElement | null;
+    expect(trigger).toBe(container.querySelector("button[aria-expanded]"));
+    const region = container.querySelector("[data-slot='disclosure-content']") as HTMLElement;
+    expect(trigger?.getAttribute("aria-controls")).toBe(region.id);
+    expect(region.hidden).toBe(true);
+    expect(disclosure?.getAttribute("data-state")).toBe("closed");
+
+    await clickToggle(container);
+    expect(region.hidden).toBe(false);
+    expect(disclosure?.getAttribute("data-state")).toBe("open");
+    expect(region.querySelector("#compression-preview-content")).toBeTruthy();
+
+    await clickToggle(container);
+    // Closing unmounts the preview again (render-while-open, as before).
+    expect(region.hidden).toBe(true);
+    expect(region.querySelector("#compression-preview-content")).toBeNull();
+  });
+
+  it("names the trigger by the title and keeps the subtitle inside it", async () => {
+    const { container } = await renderComponent();
+    const trigger = container.querySelector("[data-slot='disclosure-trigger']");
+    expect(trigger?.textContent).toContain("advancedCompressionTitle");
+    expect(trigger?.textContent).toContain("advancedCompressionSubtitle");
   });
 });

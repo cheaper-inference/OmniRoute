@@ -23,6 +23,7 @@ import {
 import { getUserDatabaseSettings } from "../db/databaseSettings";
 import { generateRequestId, getRequestId } from "@/shared/utils/requestId";
 import { HIGH_LEVEL_ACTIONS } from "@/lib/audit/highLevelActions";
+import { isNoLog } from "./noLog";
 
 /** @returns {SqliteAdapter | null} */
 function getDb() {
@@ -127,6 +128,17 @@ const SENSITIVE_AUDIT_KEYS = new Set([
   "clientsecret",
 ]);
 
+export const API_KEY_AUTH_TOUCH_ACTION = "api_key.auth.touch";
+export const API_KEY_AUTH_TOUCH_MAX_ROWS = 1_000;
+const API_KEY_AUTH_TOUCH_COALESCE_MS = 5 * 60 * 1_000;
+/**
+ * A coalesced row is only re-stamped once it is this old, so a hot metadata poll
+ * (e.g. GET /v1/models) costs one indexed read per request instead of a write.
+ */
+const API_KEY_AUTH_TOUCH_REFRESH_MS = 60 * 1_000;
+const API_KEY_AUTH_TOUCH_PATH_MAX_LENGTH = 256;
+const API_KEY_AUTH_TOUCH_USER_AGENT_MAX_LENGTH = 256;
+
 function normalizeAuditKey(key: string) {
   return key.replace(/[^a-z0-9]/gi, "").toLowerCase();
 }
@@ -171,6 +183,24 @@ function serializeAuditValue(value: unknown): string | null {
   } catch {
     return String(sanitizedValue);
   }
+}
+
+function sanitizeBoundedAuditText(value: unknown, maxLength: number): string | null {
+  if (typeof value !== "string") return null;
+  const sanitized = value
+    .replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return sanitized ? sanitized.slice(0, maxLength) : null;
+}
+
+function normalizeAuditPath(value: unknown): string {
+  const raw = sanitizeBoundedAuditText(value, API_KEY_AUTH_TOUCH_PATH_MAX_LENGTH) || "/";
+  const pathOnly = raw.split(/[?#]/, 1)[0] || "/";
+  return (pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`).slice(
+    0,
+    API_KEY_AUTH_TOUCH_PATH_MAX_LENGTH
+  );
 }
 
 function parseAuditValue(value: unknown): unknown {
@@ -386,6 +416,193 @@ export function logAuditEvent(entry: {
 }
 
 /**
+ * Per-DB-instance state for the auth-touch hot path (keyed by the adapter so a
+ * reset/reopened database starts clean): the audit_log schema is ensured once
+ * instead of on every request, and `lastStampMs` remembers when each identical
+ * touch (key + ip + method/path/UA) last stamped its row, so a repeat inside the
+ * refresh window returns before touching SQLite at all. Bounded LRU; if a
+ * remembered row is pruned meanwhile (cap or retention) it is re-inserted on the
+ * first touch after the refresh window.
+ */
+type ApiKeyAuthTouchDbState = { schemaReady: boolean; lastStampMs: Map<string, number> };
+const API_KEY_AUTH_TOUCH_MEMO_MAX_ENTRIES = 1_000;
+const apiKeyAuthTouchDbState = new WeakMap<SqliteAdapter, ApiKeyAuthTouchDbState>();
+
+function getApiKeyAuthTouchDbState(db: SqliteAdapter): ApiKeyAuthTouchDbState {
+  let state = apiKeyAuthTouchDbState.get(db);
+  if (!state) {
+    state = { schemaReady: false, lastStampMs: new Map() };
+    apiKeyAuthTouchDbState.set(db, state);
+  }
+  return state;
+}
+
+function rememberApiKeyAuthTouchStamp(
+  state: ApiKeyAuthTouchDbState,
+  memoKey: string,
+  stampMs: number
+): void {
+  state.lastStampMs.delete(memoKey);
+  state.lastStampMs.set(memoKey, stampMs);
+  if (state.lastStampMs.size > API_KEY_AUTH_TOUCH_MEMO_MAX_ENTRIES) {
+    const oldest = state.lastStampMs.keys().next().value;
+    if (oldest !== undefined) state.lastStampMs.delete(oldest);
+  }
+}
+
+type ApiKeyAuthTouch = {
+  apiKeyId: string;
+  timestamp: string;
+  timestampMs: number;
+  ipAddress: string | null;
+  requestId: string | null;
+  serializedMetadata: string | null;
+};
+
+/**
+ * Coalesce into the newest identical touch row when one exists. Returns the row's
+ * stamp (ms) when the touch was absorbed (re-stamped, or left alone while still
+ * fresh), or null when there is no row to coalesce into.
+ */
+function coalesceApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): number | null {
+  const cutoff = new Date(touch.timestampMs - API_KEY_AUTH_TOUCH_COALESCE_MS).toISOString();
+  const recent = db
+    .prepare(
+      `SELECT id, timestamp
+       FROM audit_log
+       WHERE action = ? AND target = ? AND status = 'success'
+         AND ip_address IS ? AND metadata IS ? AND timestamp >= ?
+       ORDER BY timestamp DESC, id DESC
+       LIMIT 1`
+    )
+    .get(
+      API_KEY_AUTH_TOUCH_ACTION,
+      touch.apiKeyId,
+      touch.ipAddress,
+      touch.serializedMetadata,
+      cutoff
+    ) as { id?: number; timestamp?: string } | undefined;
+  if (!recent?.id) return null;
+
+  // Fresh enough: skip the write entirely (no per-request write amplification).
+  const lastStampMs = Date.parse(recent.timestamp ?? "");
+  if (
+    Number.isFinite(lastStampMs) &&
+    touch.timestampMs - lastStampMs < API_KEY_AUTH_TOUCH_REFRESH_MS
+  ) {
+    return lastStampMs;
+  }
+  db.prepare(`UPDATE audit_log SET timestamp = ?, request_id = ? WHERE id = ?`).run(
+    touch.timestamp,
+    touch.requestId,
+    recent.id
+  );
+  return touch.timestampMs;
+}
+
+function insertApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): void {
+  db.prepare(
+    `INSERT INTO audit_log (
+      timestamp, action, actor, target, details, ip_address,
+      resource_type, status, request_id, metadata
+    ) VALUES (?, ?, ?, ?, ?, ?, 'api_key', 'success', ?, ?)`
+  ).run(
+    touch.timestamp,
+    API_KEY_AUTH_TOUCH_ACTION,
+    "api_key",
+    touch.apiKeyId,
+    touch.serializedMetadata,
+    touch.ipAddress,
+    touch.requestId,
+    touch.serializedMetadata
+  );
+
+  db.prepare(
+    `DELETE FROM audit_log
+     WHERE id IN (
+       SELECT id FROM audit_log
+       WHERE action = ?
+       ORDER BY timestamp DESC, id DESC
+       LIMIT -1 OFFSET ?
+     )`
+  ).run(API_KEY_AUTH_TOUCH_ACTION, API_KEY_AUTH_TOUCH_MAX_ROWS);
+}
+
+/** Write (or coalesce) one touch, skipping SQLite entirely for a remembered fresh hit. */
+function persistApiKeyAuthTouch(db: SqliteAdapter, touch: ApiKeyAuthTouch): void {
+  const state = getApiKeyAuthTouchDbState(db);
+  const memoKey = [touch.apiKeyId, touch.ipAddress ?? "", touch.serializedMetadata ?? ""].join(
+    "\u0000"
+  );
+  const rememberedMs = state.lastStampMs.get(memoKey);
+  if (rememberedMs !== undefined) {
+    const sinceStampMs = touch.timestampMs - rememberedMs;
+    // Coalesced hit inside the refresh window: no SQLite read, write or DDL.
+    if (sinceStampMs >= 0 && sinceStampMs < API_KEY_AUTH_TOUCH_REFRESH_MS) return;
+  }
+  if (!state.schemaReady) {
+    ensureAuditLogSchema(db);
+    state.schemaReady = true;
+  }
+  let stampMs = coalesceApiKeyAuthTouch(db, touch);
+  if (stampMs === null) {
+    insertApiKeyAuthTouch(db, touch);
+    stampMs = touch.timestampMs;
+  }
+  rememberApiKeyAuthTouchStamp(state, memoKey, stampMs);
+}
+
+/**
+ * Record a successful metadata/discovery API-key authentication without
+ * creating an inference call-log row. Identical touches are coalesced for a
+ * short window and the action has its own hard row cap in addition to normal
+ * application-log retention.
+ */
+export function recordApiKeyAuthTouch(entry: {
+  apiKeyId: string;
+  method: string;
+  normalizedPath: string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  requestId?: string | null;
+  createdAt?: string;
+}): void {
+  const apiKeyId = sanitizeBoundedAuditText(entry.apiKeyId, 128);
+  if (!apiKeyId || apiKeyId === "env-key" || isNoLog(apiKeyId)) return;
+
+  const method = sanitizeBoundedAuditText(entry.method, 16)?.toUpperCase() || "GET";
+  if (method !== "GET" && method !== "HEAD") return;
+
+  const db = getDb();
+  if (!db) return;
+
+  try {
+    const createdAtMs = Date.parse(entry.createdAt || "");
+    const validCreatedAt = Number.isFinite(createdAtMs);
+    const timestampMs = validCreatedAt ? createdAtMs : Date.now();
+    const serializedMetadata = serializeAuditValue({
+      method,
+      path: normalizeAuditPath(entry.normalizedPath),
+      userAgent: sanitizeBoundedAuditText(
+        entry.userAgent,
+        API_KEY_AUTH_TOUCH_USER_AGENT_MAX_LENGTH
+      ),
+    });
+    const touch: ApiKeyAuthTouch = {
+      apiKeyId,
+      timestamp: validCreatedAt ? String(entry.createdAt) : new Date(timestampMs).toISOString(),
+      timestampMs,
+      ipAddress: sanitizeBoundedAuditText(entry.ipAddress, 64),
+      requestId: sanitizeBoundedAuditText(entry.requestId, 128),
+      serializedMetadata,
+    };
+    persistApiKeyAuthTouch(db, touch);
+  } catch {
+    // Authentication observability is best effort and must never block a request.
+  }
+}
+
+/**
  * Query audit log entries.
  *
  * @param {Object} [filter={}]
@@ -414,6 +631,34 @@ export function getAuditLog(filter: AuditLogFilter = {}): AuditLogEntry[] {
   return rows.map((row) => normalizeAuditLogRow(row));
 }
 
+/**
+ * Every row of one exact `action` written at or after `sinceIso`, newest first — no page
+ * cap. For reads on a hot path (the banked-reset caps run on every Claude usage wall):
+ * the equality seek on idx_audit_action touches only that action's rows, where
+ * getAuditLog's LIKE / datetime() filters scan the table. INDEXED BY pins the index so
+ * ANALYZE statistics cannot switch the plan to a scan of the day's timestamp range.
+ *
+ * `timestamp` is compared as text: logAuditEvent stamps `new Date().toISOString()`
+ * (ISO-8601 UTC, which sorts lexically) unless a caller passes `createdAt`. Pass
+ * `sinceIso` in that same format, and only use this for actions written without
+ * `createdAt`.
+ */
+export function getAuditLogByActionSince(action: string, sinceIso: string): AuditLogEntry[] {
+  const db = getDb();
+  if (!db) return [];
+
+  ensureAuditLogSchema(db);
+  const rows = db
+    .prepare(
+      `SELECT * FROM audit_log INDEXED BY idx_audit_action
+       WHERE action = ? AND timestamp >= ?
+       ORDER BY timestamp DESC, id DESC`
+    )
+    .all(action, sinceIso) as AuditLogRow[];
+
+  return rows.map((row) => normalizeAuditLogRow(row));
+}
+
 export function countAuditLog(filter: AuditLogFilter = {}) {
   const db = getDb();
   if (!db) return 0;
@@ -421,8 +666,7 @@ export function countAuditLog(filter: AuditLogFilter = {}) {
   ensureAuditLogSchema(db);
   const { where, params } = buildAuditLogQuery(filter);
   const row = db.prepare(`SELECT COUNT(*) as count FROM audit_log ${where}`).get(...params) as
-    | { count?: number }
-    | undefined;
+    { count?: number } | undefined;
   return Number(row?.count || 0);
 }
 
@@ -493,6 +737,12 @@ export async function cleanupExpiredLogs() {
   // usage_history before the dashboard-based runAutoCleanup() could run. We now honor the
   // dashboard retention per table when the operator did not set the env var, while still
   // letting an explicit env var win (and falling back to env for non-DB deployments).
+  // NOTE (#16302): this startup pass reads the MERGED settings (DEFAULT_DATABASE_SETTINGS
+  // fills in unsaved keys), whereas the periodic request-log rotation resolves through
+  // resolveCallLogRetentionDays() (src/lib/usage/callLogRetention.ts), which honors only
+  // the dashboard keys the operator actually persisted and otherwise falls back to the env
+  // variable / 7 days. Both share the env-override-first precedence; they differ only when
+  // nothing was saved in the dashboard. Keep this in mind before tightening either side.
   const callOverride = getCallLogRetentionDaysOverride();
   const appOverride = getAppLogRetentionDaysOverride();
   let dbRetention: { usageHistory: number; callLogs: number; mcpAudit: number } | null = null;

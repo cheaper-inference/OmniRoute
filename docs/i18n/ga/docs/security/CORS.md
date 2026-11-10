@@ -56,11 +56,11 @@ mar gheall ar fhíric nithiúil amháin faoin gcur chun feidhme:
 
 Seo a chiallaíonn sé sin do gach dromchla, fiú le `CORS_ALLOW_ALL=true`:
 
-| Dromchla                               | Sásra fíordheimhnithe          | Éifeacht CORS saoróige                                                                                                                                                                                                                                                               |
-| -------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Deais / MANAGEMENT `/api/*`            | Seisiún fianán                 | Cuirtear an bhunfhoinse ar ais mar mhacalla, ach **gan `Allow-Credentials`** cuireann an brabhsálaí **bac** ar an léamh a bhfuil dintiúir leis. **Ní féidir** le suíomh mailíseach trastionscnaimh freagraí fíordheimhnithe do dheaise a léamh, agus ní nochtar fianán an tseisiúin. |
-| API Cliant `/v1/*`, `/v1beta/*`        | Ceanntásc Bearer / `x-api-key` | Ceadaitheach cheana féin **de réir dearaidh** (`relaxForTokenAuth`): ní cheanglaíonn brabhsálaithe `Authorization`/`x-api-key` go huathoibríoch riamh, mar sin ní féidir le leathanach ionsaitheora d’eochair a sholáthar. Ní leathnaíonn `CORS_ALLOW_ALL` é seo.                    |
-| Léamh poiblí amháin (`/api/health`, …) | Gan cheann                     | Neamhíogair; tá saoróg neamhdhíobhálach.                                                                                                                                                                                                                                             |
+| Dromchla                               | Sásra fíordheimhnithe          | Éifeacht CORS saoróige                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| -------------------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deais / MANAGEMENT `/api/*`            | Seisiún fianán                 | Cuirtear an bhunfhoinse ar ais mar mhacalla, ach **gan `Allow-Credentials`** cuireann an brabhsálaí **bac** ar an léamh a bhfuil dintiúir leis. **Ní féidir** le suíomh mailíseach trastionscnaimh freagraí fíordheimhnithe do dheaise a léamh, agus ní nochtar fianán an tseisiúin.                                                                                                                                                     |
+| API Cliant `/v1/*`, `/v1beta/*`        | Ceanntásc Bearer / `x-api-key` | Ceadaitheach cheana féin **de réir dearaidh** (`relaxForTokenAuth`): ní cheanglaíonn brabhsálaithe `Authorization`/`x-api-key` go huathoibríoch riamh, mar sin ní féidir le leathanach ionsaitheora d’eochair a sholáthar. Ní bhaineann an macalla ach amháin nuair a bhailíochtaíodh an eochair a cuireadh i láthair; coinníonn freagraí gan ainm (`REQUIRE_API_KEY=false`) an liosta ceadaithe. Ní leathnaíonn `CORS_ALLOW_ALL` é seo. |
+| Léamh poiblí amháin (`/api/health`, …) | Gan cheann                     | Neamhíogair; tá saoróg neamhdhíobhálach.                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 Mar sin, tá nochtadh **iarmharach** `CORS_ALLOW_ALL=true` teoranta do: (a)
 **léamha** trastionscnaimh gan dintiúir ar shonraí atá neamhfhíordheimhnithe cheana féin, agus (b)
@@ -122,29 +122,71 @@ atosú.
   iad seo go huathoibríoch riamh. Ní bacainn fhiúntach é CORS anseo — is í an eochair API an
   bhacainn — agus sin an fáth a bhfuil an dromchla sin ceadmhach d’aon ghnó ionas gur féidir le cliaint
   bhrabhsálaí agus Electron freagraí a bhfuil siad i dteideal iad a fháil cheana féin a léamh.
+  Leanann an macalla maolaithe an eochair bhailíochtaithe, ní hamháin láithreacht an
+  cheanntáisc: nuair a fhreastalaíonn `REQUIRE_API_KEY=false` ar iarratas gan ainm,
+  coinníonn a fhreagra rathúil an liosta ceadaithe fail-closed. Fanann diúltuithe
+  fíordheimhnithe (401) inléite ionas gur féidir le cliaint eochair aisghairthe nó
+  mícheart a thaispeáint (#5242): coinníonn 401 an phíblíne féin an macalla, agus cuireann
+  bealach a dhiúltaíonn don eochair é féin tar éis don phíblíne freastal air mar iarratas
+  gan ainm (`/v1/models` agus `/v1beta/models` nuair atá fíordheimhniú bainistíochta
+  cumraithe, na bealaí atá teoranta don úinéir `/v1/files`, `/v1/batches`,
+  `/v1/media`, `/v1/session-leases` agus bealaí iarrthóra auto-combo) an macalla leis an
+  401 sin trí `credentialRejectionHeaders()`. Braitheann an macalla ar cé acu an bhfuil
+  ceanntásc dintiúir ag an iarratas (`Authorization`, `x-api-key`, `x-goog-api-key` nó
+  an fianán `auth_token`), ní ar cé acu díobh a sheiceáil an bealach, agus ní
+  phéireáiltear riamh é le `Access-Control-Allow-Credentials`; is clúdach earráide
+  seasta an corp. Ní chuireann bealaí bainistíochta faoi `/api/v1/` atá cosanta ag
+  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) an
+  macalla leis: le `REQUIRE_API_KEY=false` ní féidir a 401/403 a léamh ó bhunús eile.
 - **Seisiún fianán (an deais):** cosnaítear é leis an réamhshocrú a dhiúltaíonn i gcás teipe **agus**
   le heaspa `Access-Control-Allow-Credentials` ar an gcosán comhroinnte. Coinnigh
   bunúis bhainistíochta/deaise amach as aon chumraíocht cheadmhach; ní mór dóibh fanacht
   go hiomlán dúnta i gcás teipe.
 
+## Croitheadh láimhe WebSocket (`/v1/responses`, `/v1/ws`)
+
+Ní chuireann brabhsálaithe CORS i bhfeidhm ar WebSocket, mar sin seiceálann na
+hiompair WebSocket a thugann aschur tátail ar ais `Origin` an chroite láimhe iad féin
+(`src/server/origin/wsOrigin.ts`): WebSocket Responses (`/v1/responses`) agus, nuair a
+ritheann OmniRoute trí `npm start` / `npm run dev`, an droichead `/v1/ws` agus
+`/api/v1/ws`, a shruthaíonn `/v1/chat/completions`, `/v1/messages` agus
+`/v1/responses` mar fhrámaí. Iarrann an droichead an breithiúnas ar
+`/api/v1/ws?handshake=1` agus diúltaíonn sé an nasc a uasghrádú mura ndearna an bealach
+sin an seiceáil. Glactar le croitheadh láimhe nuair:
+
+- nach bhfuil ceanntásc `Origin` aige (Codex CLI, SDKanna agus cliaint eile nach brabhsálaithe iad);
+- a ligeann an liosta ceadaithe thuas isteach an `Origin` (`CORS_ALLOWED_ORIGINS`, an
+  socrú `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- is ceann de bhunúis phoiblí OmniRoute féin an `Origin` (an bun-URL poiblí cumraithe,
+  bunús curtha ar aghaidh ó sheachfhreastalaí iontaofa, nó óstach díreach loopback/LAN a
+  thugtar mar litriúil IP nó `localhost` — na hiarrthóirí céanna a úsáideann seiceáil
+  athruithe na deaise); nó
+- a bhfuil eochair API bhailí aige, mar a bhíonn ar dhromchla HTTP `/v1/*`.
+
+Faigheann aon rud eile `403 ws_origin_forbidden`. Ní dhíolmhaíonn fianán seisiúin na
+deaise `Origin` coimhthíoch, mar ceanglaíonn an brabhsálaí é le soicéad aon leathanaigh.
+Ní chaitear le `localhost` ar phort eile mar an bunús céanna; cuir bunúis forbartha den
+sórt sin le `CORS_ALLOWED_ORIGINS`.
+
 ## Sampla: seachfhreastalaí droim ar ais os comhair OmniRoute
 
-Cuireann OmniRoute féin CORS i bhfeidhm, mar sin de ghnáth níor cheart don seachfhreastalaí ceanntásca
-`Access-Control-*` a chur leis ná a athscríobh (briseann ceanntásca dúbailte brabhsálaithe). Críochnaigh TLS
-agus cuir ar aghaidh — lig do OmniRoute réamheitilt a fhreagairt:
+Cuireann OmniRoute féin CORS i bhfeidhm, mar sin de ghnáth níor cheart don seachfhreastalaí ceanntásca `Access-Control-*` a chur leis ná a athscríobh (briseann ceanntásca dúbailte brabhsálaithe). Cuir deireadh le TLS agus cuir an trácht ar aghaidh — lig do OmniRoute an réamhiarratas a fhreagairt:
 
 ```nginx
-# nginx — cuir ar aghaidh chuig OmniRoute; NÁ hinsteall ceanntásca Access-Control-* anseo
+# nginx — cuir ar aghaidh chuig OmniRoute; NÁ hiontráil Access-Control-* anseo
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # NÁ socraigh X-Forwarded-For mar 127.0.0.1 — sáraíonn sé garda na mbealaí aisfhillteacha.
+    # Coinnigh na ceanntásca curtha ar aghaidh: nascann seachfhreastalaí ar an óstríomhaire céanna ón gcomhéadan aisfhillte, agus is iadsan
+    # a insíonn do OmniRoute nach é an t-oibreoir áitiúil an glaoiteoir. Má chuireann seachfhreastalaí ceann ar bith díobh leis,
+    # beidh cuma glaoiteora áitiúil ar gach glaoiteoir cianda. Ná socraigh X-Forwarded-For go 127.0.0.1 ach oiread.
 }
 ```
 
-Socraigh na bunúis bhrabhsálaí cheadaithe in OmniRoute (`CORS_ALLOWED_ORIGINS` nó an
-chluaisín Slándála), ní sa seachfhreastalaí.
+Socraigh bunús ceadaithe na mbrabhsálaithe in OmniRoute (`CORS_ALLOWED_ORIGINS` nó an cluaisín Slándála), ní sa seachfhreastalaí.
 
 ## Comhaid fhoinseacha
 
@@ -157,6 +199,7 @@ chluaisín Slándála), ní sa seachfhreastalaí.
 | Meirge rabhaidh na deaise                                  | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Réimse Bunús Ceadaithe CORS                                | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS in aghaidh an bhealaigh do Cloud-Agent (an eisceacht) | `src/lib/cloudAgent/api.ts`                                          |
+| Seiceáil `Origin` ar chroitheadh láimhe WebSocket          | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Féach freisin
 

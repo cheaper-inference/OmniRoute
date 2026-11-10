@@ -15,6 +15,11 @@ import { cliModelConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey } from "@/shared/services/apiKeyResolver";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import {
+  configClobberRefusalResponse,
+  parseJsonObject,
+  readExistingConfig,
+} from "../_lib/readExistingConfig";
 
 const TOOL_ID = "smelt";
 
@@ -84,10 +89,7 @@ export async function GET(request: Request) {
       configPath: getSmeltConfigPath(),
     });
   } catch (err) {
-    return NextResponse.json(
-      { error: { message: sanitizeErrorMessage(err) } },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: { message: sanitizeErrorMessage(err) } }, { status: 500 });
   }
 }
 
@@ -100,10 +102,7 @@ export async function POST(request: Request) {
   try {
     rawBody = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: { message: "Invalid JSON body" } },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: { message: "Invalid JSON body" } }, { status: 400 });
   }
 
   try {
@@ -131,14 +130,10 @@ export async function POST(request: Request) {
     // Backup current config before modifying
     await createBackup(TOOL_ID, configPath);
 
-    // Read existing config or start fresh
-    let existing: Record<string, unknown> = {};
-    try {
-      const raw = await fs.readFile(configPath, "utf-8");
-      existing = JSON.parse(raw) as Record<string, unknown>;
-    } catch {
-      /* No existing config */
-    }
+    // Read existing config or start fresh. Only a missing file starts fresh —
+    // an unreadable/unparsable one is refused (409) instead of being replaced.
+    const existing: Record<string, unknown> =
+      (await readExistingConfig(configPath, parseJsonObject)) ?? {};
 
     // Merge OmniRoute settings (smelt uses OpenAI-compatible config)
     const normalizedBaseUrl = baseUrl.endsWith("/v1") ? baseUrl : `${baseUrl}/v1`;
@@ -165,10 +160,9 @@ export async function POST(request: Request) {
       configPath,
     });
   } catch (err) {
-    return NextResponse.json(
-      { error: { message: sanitizeErrorMessage(err) } },
-      { status: 500 }
-    );
+    const refusal = configClobberRefusalResponse(err);
+    if (refusal) return refusal;
+    return NextResponse.json({ error: { message: sanitizeErrorMessage(err) } }, { status: 500 });
   }
 }
 
@@ -221,9 +215,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: "Smelt OmniRoute settings removed" });
   } catch (err) {
-    return NextResponse.json(
-      { error: { message: sanitizeErrorMessage(err) } },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: { message: sanitizeErrorMessage(err) } }, { status: 500 });
   }
 }

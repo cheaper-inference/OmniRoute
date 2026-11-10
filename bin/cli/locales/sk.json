@@ -123,7 +123,9 @@
       "maxCostOpt": "Maximálne náklady za deň (USD)",
       "allowedModelsOpt": "Zoznam povolených modelov oddelených čiarkami",
       "nothingToSet": "Neboli zadané žiadne polia zásad. Použite --rate-limit, --max-cost alebo --allowed-models.",
-      "updated": "Zásady boli aktualizované."
+      "updated": "Zásady boli aktualizované.",
+      "modelAccessModeOpt": "Režim prístupu k modelom (all | restricted)",
+      "unrestrictedOpt": "Povoliť všetky modely (--model-access-mode all)"
     },
     "expiration": {
       "title": "Vypršanie platnosti kľúča",
@@ -254,6 +256,7 @@
     "log": "Zobrazovať protokoly servera priamo",
     "no_recovery": "Zakázať automatické reštartovanie pri zlyhaní (režim ladenia)",
     "max_restarts": "Maximálny počet reštartov po zlyhaní v priebehu 30 s pred ukončením pokusov (predvolené: 2)",
+    "headless": "Spustiť iba proxy jadro: ovládací panel vypnutý (404), voliteľné subsystémy preskočené (nastaví OMNIROUTE_HEADLESS=1)",
     "tray": "Spustiť v systémovej lište (iba počítačová verzia, voliteľné)",
     "no_tray": "Zakázať ikonu v systémovej lište",
     "ready_timeout": "Časový limit sondy pripravenosti v ms (tiež OMNIROUTE_READY_TIMEOUT_MS, predvolené: 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Synchronizovať konfiguráciu medzi inštanciami OmniRoute",
     "push": {
-      "description": "Odoslať konfiguráciu do cloudu alebo vzdialenej inštancie",
-      "target": "Cieľ (cloud alebo context:name)",
-      "bundle": "Časti balíka na synchronizáciu",
-      "dryRun": "Zobraziť náhľad bez použitia zmien"
+      "description": "Odoslať konfiguráciu do cloudu alebo vzdialenej inštancie"
     },
     "pull": {
-      "description": "Načítať konfiguráciu z cloudu alebo vzdialenej inštancie",
-      "source": "Zdroj (cloud alebo context:name)",
-      "merge": "Zlúčiť s existujúcou konfiguráciou",
-      "replace": "Nahradiť existujúcu konfiguráciu",
-      "dryRun": "Zobraziť náhľad bez použitia zmien"
-    },
-    "diff": {
-      "source": "Zdrojový kontext",
-      "target": "Cieľový kontext"
+      "description": "Načítať konfiguráciu z cloudu alebo vzdialenej inštancie"
     },
     "bundle": {
       "description": "Exportovať konfiguráciu ako súbor balíka",
-      "include": "Časti, ktoré sa majú zahrnúť (oddelené čiarkami)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importovať súbor balíka",
       "dryRun": "Overiť bez použitia zmien"
-    },
-    "initialize": {
-      "fromCloud": "Inicializovať z cloudovej zálohy"
     },
     "tokens": {
       "description": "Spravovať synchronizačné tokeny",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Preskočiť potvrdenie"
       }
-    },
-    "resolve": {
-      "description": "Interaktívne vyriešiť konflikty synchronizácie"
     }
   },
   "config": {

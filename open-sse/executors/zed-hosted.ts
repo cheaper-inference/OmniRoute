@@ -47,6 +47,7 @@ import {
 import { buildErrorBody } from "../utils/error.ts";
 import { hasUsefulStreamContent } from "../utils/streamReadiness.ts";
 import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../utils/thinkCloseMarker.ts";
+import { getZedClientVersion } from "./zedClientVersion.ts";
 
 // Wire values for the `provider` field of POST /completions. These are NOT
 // display names: cloud.zed.dev matches them exactly, and an unrecognized value
@@ -87,7 +88,8 @@ function asMutableRecord(value: unknown): Record<string, unknown> | null {
 
 // Zed's Google proxy enums are narrower than Google's own (#13363): the safety
 // threshold only accepts BLOCK_NONE (not "OFF"), and FunctionCallingMode is
-// lowercase auto/any/none (no VALIDATED).
+// lowercase auto/any/none (no VALIDATED). Its thinkingLevel Rust enum is also
+// uppercase-only (MINIMAL/LOW/MEDIUM/HIGH), unlike Google's lowercase (#18910).
 const ZED_FUNCTION_CALLING_MODES: Record<string, string> = {
   VALIDATED: "auto",
   AUTO: "auto",
@@ -109,6 +111,10 @@ function adaptGeminiRequestForZed(request: unknown): unknown {
     ? ZED_FUNCTION_CALLING_MODES[String(callingConfig.mode || "").toUpperCase()]
     : undefined;
   if (callingConfig && mappedMode) callingConfig.mode = mappedMode;
+  const thinkingConfig = asMutableRecord(asMutableRecord(record.generationConfig)?.thinkingConfig);
+  if (typeof thinkingConfig?.thinkingLevel === "string") {
+    thinkingConfig.thinkingLevel = thinkingConfig.thinkingLevel.toUpperCase();
+  }
   return request;
 }
 
@@ -528,7 +534,8 @@ export class ZedHostedExecutor extends BaseExecutor {
           Accept: "application/x-ndjson, text/event-stream, */*",
           "User-Agent": `OmniRoute/zed-hosted`,
           "x-zed-version":
-            (this.config as Record<string, unknown>)?.appVersion?.toString() || "0.200.0",
+            (this.config as Record<string, unknown>)?.appVersion?.toString() ||
+            getZedClientVersion(),
           [ZED_HEADERS.clientSupportsStatus]: "true",
           [ZED_HEADERS.clientSupportsStreamEnded]: "true",
         },

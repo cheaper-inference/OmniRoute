@@ -12,6 +12,12 @@ import {
   splitClaudeEffortSuffix,
   getProviderModels,
 } from "@omniroute/open-sse/config/providerModels.ts";
+import { splitKimiCodingEffortVariant } from "@omniroute/open-sse/utils/kimiCodingEffortVariant.ts";
+import {
+  codexModelFamilySupportsExtendedEffort,
+  isCodexExtendedEffortBaseModel,
+} from "@/shared/reasoning/codexExtendedEffort";
+import { shouldDeriveDisabledReasoningEffort } from "@/shared/reasoning/effortStandardization";
 
 type JsonRecord = Record<string, unknown>;
 const EFFORTS = new Set<ReasoningEffort>([
@@ -57,8 +63,9 @@ function asRecord(value: unknown): JsonRecord {
 
 function effort(value: unknown): ReasoningEffort | null {
   if (typeof value !== "string") return null;
-  const normalized = value.trim().toLowerCase() as ReasoningEffort;
-  return EFFORTS.has(normalized) ? normalized : null;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "extra") return "xhigh";
+  return EFFORTS.has(normalized as ReasoningEffort) ? (normalized as ReasoningEffort) : null;
 }
 
 function thinkingLevelEffort(value: unknown): ReasoningEffort | null {
@@ -75,12 +82,37 @@ function splitGenericEffortSuffix(model: string): {
 } {
   const claude = model.toLowerCase().includes("claude") ? splitClaudeEffortSuffix(model) : null;
   if (claude?.effort) return { model: claude.baseModel, effort: claude.effort };
+  const kimi = splitKimiEffortSuffix(model);
+  if (kimi) return kimi;
   return splitCodexEffortSuffix(model) ?? { model, effort: null };
 }
 
+const KIMI_CODING_PREFIX_PROVIDER: Record<string, string> = {
+  "kimi-coding": "kimi-coding",
+  kmc: "kimi-coding",
+  "kimi-coding-apikey": "kimi-coding-apikey",
+  kmca: "kimi-coding-apikey",
+};
+
+function splitKimiEffortSuffix(model: string): { model: string; effort: ReasoningEffort } | null {
+  // Kimi Coding serves bare ids (k3, kimi-for-coding) and takes the effort as a request
+  // property; chatCore strips the suffix before dispatch (#16985). Mirror that split for
+  // reasoning-rule matching, using the same splitter, and only for ids explicitly routed
+  // to a Kimi Coding provider — a bare `kimi-k3-high` may be Cursor's genuine id.
+  const slash = model.indexOf("/");
+  if (slash <= 0) return null;
+  const provider = KIMI_CODING_PREFIX_PROVIDER[model.slice(0, slash).toLowerCase()];
+  if (!provider) return null;
+  const split = splitKimiCodingEffortVariant(provider, model.slice(slash + 1));
+  if (!split?.effort) return null;
+  const baseModel = model.slice(0, -(split.effort.length + 1));
+  return { model: baseModel, effort: split.effort };
+}
+
 function supportsCodexSuffix(candidate: string, normalizedBase: string): boolean {
-  if (candidate === "max") return /^gpt-5\.6-(?:sol|terra|luna)$/.test(normalizedBase);
-  if (candidate === "ultra") return /^gpt-5\.6-(?:sol|terra)$/.test(normalizedBase);
+  if (candidate === "max" || candidate === "ultra") {
+    return isCodexExtendedEffortBaseModel(normalizedBase, candidate);
+  }
   return true;
 }
 
@@ -116,6 +148,7 @@ function firstDefinedEffort(
     thinkingLevelEffort(thinkingConfig.thinkingLevel ?? thinkingConfig.thinking_level),
     body.thinking === false || thinking.type === "disabled" ? "none" : null,
     suffixEffort,
+    shouldDeriveDisabledReasoningEffort(body) ? "none" : null,
   ];
   return values.find((value): value is ReasoningEffort => value !== null) ?? null;
 }
@@ -278,7 +311,8 @@ function capabilityFor(
     //   2. For unregistered providers/models, a declared (synced or
     //      operator-overridden) vocabulary listing the tier is authoritative —
     //      the sanitizer forwards verbatim there (#8057 trust-the-upstream).
-    //   3. The gpt-5.6 regex remains the fallback for undeclared models.
+    //   3. The Codex max/ultra alias sets (`codex/reasoningSuffix.ts`) remain
+    //      the fallback for undeclared models.
     // This keeps custom OpenAI-compatible providers whose models accept `max`
     // natively (e.g. Merge Gateway `zai/glm-5.3-flash`, accepting
     // `low|high|max`) usable with forced-max rules instead of 400ing.
@@ -308,16 +342,15 @@ function capabilityFor(
     }
     // An operator-declared vocabulary that excludes the tier is terminal —
     // the same lookup the override resolves from must not be overruled by the
-    // legacy regex below.
+    // alias-set fallback below.
     if (capabilities.reasoningEffortsOverride && Array.isArray(declaredEfforts)) {
       return "unsupported" as const;
     }
-    const normalized = model.toLowerCase().replace(/^(?:codex|cx)\//, "");
-    const supported =
-      targetEffort === "ultra"
-        ? /^gpt-5\.6-(?:sol|terra)(?:-|$)/.test(normalized)
-        : /^gpt-5\.6-(?:sol|terra|luna)(?:-|$)/.test(normalized);
-    if (supported) return "supported" as const;
+    // Strip the provider namespace (`openai/`, `github/`, `opencode-zen/`,
+    // `codex/`…) so every provider serving the family resolves the same way.
+    if (codexModelFamilySupportsExtendedEffort(modelIdForRegistry, targetEffort)) {
+      return "supported" as const;
+    }
     if (capabilities.supportsThinking === null) return "unknown" as const;
     return "unsupported" as const;
   }

@@ -10,54 +10,53 @@
 
 ## Hvad er en udbyder?
 
-Tænk på en udbyder som et **teleselskab**. Ligesom du skal have et teleselskab for at foretage opkald, skal du have en AI-udbyder for at bruge AI-modeller. OmniRoute er som en telefon, der fungerer med **alle teleselskaber** — du kan automatisk skifte mellem dem.
+Tænk på en udbyder som et **teleselskab**. Ligesom du har brug for et teleselskab for at foretage opkald, har du brug for en AI-udbyder for at bruge AI-modeller. OmniRoute er som en telefon, der fungerer med **alle teleselskaber** — du kan automatisk skifte mellem dem.
 
 ### Typer af udbydere
 
-| Type          | Hvad det er                | Eksempler                         | Pris                   |
-| ------------- | -------------------------- | --------------------------------- | ---------------------- |
-| **Gratis**    | Ingen betaling påkrævet    | Kiro, OpenCode Free, Pollinations | $0                     |
-| **API-nøgle** | Du skal bruge en API-nøgle | OpenAI, Anthropic, Google         | Betaling efter forbrug |
-| **OAuth**     | Log ind med din konto      | Claude Code, GitHub Copilot       | Abonnement             |
-| **Webcookie** | Bruger din browsersession  | ChatGPT Web (Codex), Gemini Web   | $0 (bruger din konto)  |
+| Type          | Hvad det er                | Eksempler                       | Pris                   |
+| ------------- | -------------------------- | ------------------------------- | ---------------------- |
+| **Gratis**    | Ingen betaling påkrævet    | Kiro, Pollinations              | $0                     |
+| **API-nøgle** | Du skal bruge en API-nøgle | OpenAI, Anthropic, Google       | Betaling efter forbrug |
+| **OAuth**     | Log ind med din konto      | Claude Code, GitHub Copilot     | Abonnement             |
+| **Webcookie** | Bruger din browsersession  | ChatGPT Web (Codex), Gemini Web | $0 (bruger din konto)  |
 
 ### Udbydere med webcookies
 
-Se **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** for generelle konfigurationsinstruktioner, begrænsninger, fejlfinding og udbyderspecifik vejledning til godkendelse.
+Se **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** for generelle opsætningsvejledninger, begrænsninger, fejlfinding og udbyderspecifik vejledning til godkendelse.
 ---
 
-## Hurtig start: Tilslut din første udbyder
+## Hurtig start: Forbind din første udbyder
 
-### Valgfri konfiguration af gratis udbydere ved første kørsel
+### Valgfri opsætning af gratis udbydere ved første kørsel
 
-Guiden ved første kørsel tilbyder et særskilt kort til **Konfigurer gratis udbydere**. Den udleder den aktuelle
-liste over kvalificerede udbydere fra OmniRoutes register over udbydere uden godkendelse og giver dig derefter mulighed for at gennemgå og fravælge hver enkelt
+Guiden til første kørsel indeholder et særskilt kort til **Opsæt gratis udbydere**. Den udleder den aktuelle
+liste over kvalificerede udbydere fra OmniRoutes register over udbydere uden godkendelse og giver dig derefter mulighed for at gennemgå og fravælge hver
 udbyder, før du bekræfter. OmniRoute viser udbyderens advarsel og et link til udbyderens websted,
 så du først kan gennemgå tredjepartens vilkår, privatlivspolitik, tilgængelighed og hastighedsgrænser.
 
-Denne handling er valgfri: Når guiden afsluttes, oprettes der aldrig forbindelser til gratis udbydere uden din viden.
+Denne handling er valgfri: Når guiden afsluttes, oprettes der aldrig forbindelser til gratis udbydere uden dit samtykke.
 Den opretter kun udbydere, der stadig mangler, lader eksisterende tilpassede forbindelser
-være urørte og rapporterer oprettede, allerede konfigurerede og mislykkede udbydere individuelt. Efter et delvist resultat kan du
-uden risiko prøve igen udelukkende for de mislykkede udbydere.
+forblive uændrede og rapporterer individuelt om oprettede, allerede konfigurerede og mislykkede udbydere. Du kan
+uden risiko prøve igen udelukkende med dem, der mislykkedes efter et delvist resultat.
 
 ### Mulighed A: Gratis udbyder (intet kreditkort)
 
 1. Åbn kontrolpanelet på `http://localhost:20128`
 2. Gå til **Udbydere** → **Tilføj udbyder**
 3. Vælg en af disse gratis udbydere:
-   - **Kiro AI** — Gratis Claude-modeller (ingen godkendelse påkrævet)
-   - **OpenCode Free** — Gratis GPT-modeller (ingen godkendelse påkrævet)
-   - **Pollinations** — Gratis GPT-5, Claude og Gemini (ingen nøgle påkrævet)
-   - **LongCat** — 10M gratis tokens (engangstildeling, kræver konto + KYC)
-   - **Cloudflare AI** — Mere end 50 modeller, 10K neuroner/dag
+   - **Kiro AI** — Gratis Claude-modeller (ingen godkendelse nødvendig)
+   - **Pollinations** — Gratis GPT-5, Claude og Gemini (ingen nøgle nødvendig)
+   - **LongCat** — 10 mio. tokens gratis (engangstildeling, kræver konto + KYC)
+   - **Cloudflare AI** — Over 50 modeller, 10.000 neuroner/dag
    - **MLX Gemma 26B** — Lokal Apple Silicon-model (~38.5 tok/s, ~15.9GB RAM)
    - **MLX Qwen 3.8 27B** — Lokal Apple Silicon-model (~9.1 tok/s, ~13.1GB RAM)
-4. Klik på **Tilslut**
+4. Klik på **Forbind**
 5. Færdig! Du har nu gratis adgang til AI.
 
 ### Mulighed B: Udbyder med API-nøgle (betalt)
 
-1. Få en API-nøgle fra udbyderens websted:
+1. Hent en API-nøgle fra udbyderens websted:
    - **OpenAI**: https://platform.openai.com/api-keys
    - **Anthropic**: https://console.anthropic.com/
    - **Google**: https://aistudio.google.com/apikey
@@ -67,7 +66,7 @@ uden risiko prøve igen udelukkende for de mislykkede udbydere.
 3. Gå til **Udbydere** → **Tilføj udbyder**
 4. Vælg din udbyder
 5. Indsæt din API-nøgle
-6. Klik på **Tilslut**
+6. Klik på **Forbind**
 7. Færdig! Du har nu adgang til denne udbyders modeller.
 
 ### Mulighed C: OAuth-udbyder (abonnement)
@@ -75,18 +74,18 @@ uden risiko prøve igen udelukkende for de mislykkede udbydere.
 1. Åbn kontrolpanelet på `http://localhost:20128`
 2. Gå til **Udbydere** → **Tilføj udbyder**
 3. Vælg din udbyder (f.eks. Claude Code eller GitHub Copilot)
-4. Klik på **Opret forbindelse med OAuth**
+4. Klik på **Forbind med OAuth**
 5. Log ind med din konto
 6. Færdig! Du har nu adgang til modellerne i dit abonnement.
 
 ### Mulighed D: Lokale MLX-modeller (Apple Silicon)
 
-På Apple Silicon-Mac-computere med unified memory understøtter OmniRoute forbindelse til lokale MLX-modeller, der kører via `mlx-lm.server`, som almindelige lokale OpenAI-kompatible udbydere.
+På Apple Silicon-Mac-computere med samlet hukommelse understøtter OmniRoute forbindelse til lokale MLX-modeller, der kører via `mlx-lm.server`, som almindelige OpenAI-kompatible lokale udbydere.
 
 #### Forudsætninger
 
-- **Apple Silicon-Mac** (M1/M2/M3/M4) med mindst 24GB unified memory anbefales
-- **uv**-pakkehåndtering: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **Apple Silicon-Mac** (M1/M2/M3/M4) med mindst 24GB samlet hukommelse anbefales
+- Pakkehåndteringen **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
 #### Hurtig start
@@ -114,13 +113,13 @@ På Apple Silicon-Mac-computere med unified memory understøtter OmniRoute forbi
 3. **Opret forbindelse i OmniRoute-kontrolpanelet**:
    - Gå til **Udbydere** → **Tilføj udbyder**
    - Vælg **MLX Gemma 26B** eller **MLX Qwen 3.8 27B**
-   - Klik på **Tilslut** (ingen API-nøgle påkrævet)
+   - Klik på **Forbind** (ingen API-nøgle nødvendig)
 
 4. **Brug med OpenCode**:
    ```bash
    # Konfigurer OpenCode til at bruge OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
-   opencode config set api.key <din-omniroute-api-nøgle>
+   opencode config set api.key <your-omniroute-api-key>
 
    # Brug MLX-modeller
    opencode run --model mlx-gemma/gemma-4-26b
@@ -129,18 +128,18 @@ På Apple Silicon-Mac-computere med unified memory understøtter OmniRoute forbi
 
 #### Hukommelsesstyring
 
-**Vigtigt**: Med 24GB unified memory kan der kun køre **én stor MLX-model ad gangen**.
+**Vigtigt**: Med 24GB samlet hukommelse kan der kun køre **én stor MLX-model ad gangen**.
 
-- Gemma 26B: ~15.9GB maksimal hukommelse
-- Qwen 3.8 27B: ~13.1GB maksimal hukommelse
+- Gemma 26B: ~15.9GB maksimalt hukommelsesforbrug
+- Qwen 3.8 27B: ~13.1GB maksimalt hukommelsesforbrug
 
-Du skal administrere dette manuelt:
+Du skal håndtere dette manuelt:
 
 - Kør kun én MLX-server ad gangen, eller
-- Kør dem på separate maskiner, eller
+- Kør dem begge på separate maskiner, eller
 - Stop den ene, før du starter den anden
 
-OmniRoute administrerer ikke automatisk MLX-serverprocesser — den videresender kun anmodninger til de OpenAI-kompatible slutpunkter, du konfigurerer.
+OmniRoute administrerer ikke automatisk MLX-serverprocesser — det dirigerer kun anmodninger til de OpenAI-kompatible slutpunkter, du konfigurerer.
 
 #### Understøttelse af værktøjskald
 
@@ -152,20 +151,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Hvad er 2+2? Brug lommeregnerværktøjet."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Beregn", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Fejlfinding
 
-| Problem                | Løsning                                                                                     |
-| ---------------------- | ------------------------------------------------------------------------------------------- |
-| Serveren starter ikke  | Tjek `uv run mlx_lm.server --help`, og bekræft model-id'er                                  |
-| Ikke nok hukommelse    | Sørg for, at kun én model kører; luk andre apps; tjek Aktivitetsovervågning                 |
-| Forbindelse afvist     | Bekræft, at serveren kører på den korrekte port (11435/11436)                               |
-| Langsomme svar         | Den første anmodning indlæser modellen i hukommelsen (~30-60s); efterfølgende er hurtige    |
-| Værktøjskald mislykkes | Sørg for, at modellen understøtter værktøjer; tjek OmniRoute-logfiler for oversættelsesfejl |
+| Problem                | Løsning                                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| Serveren starter ikke  | Kontrollér `uv run mlx_lm.server --help`, og bekræft model-id'erne                                   |
+| Ikke nok hukommelse    | Sørg for, at kun én model kører; luk andre apps; kontrollér Aktivitetsovervågning                    |
+| Forbindelsen afvises   | Bekræft, at serveren kører på den korrekte port (11435/11436)                                        |
+| Langsomme svar         | Den første anmodning indlæser modellen i hukommelsen (~30-60s); efterfølgende anmodninger er hurtige |
+| Værktøjskald mislykkes | Sørg for, at modellen understøtter værktøjer; kontrollér OmniRoute-logfilerne for oversættelsesfejl  |
 
 ---
 
@@ -173,18 +172,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Disse udbydere tilbyder **gratis adgang** uden kreditkort:
 
-| Udbyder           | Gratis kvote       | Modeller                                 | Sådan opretter du forbindelse |
-| ----------------- | ------------------ | ---------------------------------------- | ----------------------------- |
-| **Kiro AI**       | 50 kreditter/måned | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Ingen godkendelse nødvendig   |
-| **OpenCode Free** | Ubegrænset         | GPT-4o, Claude, Gemini                   | Ingen godkendelse nødvendig   |
-| **Pollinations**  | Ingen nøgle kræves | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Ingen godkendelse nødvendig   |
-| **LongCat**       | 10M én gang        | LongCat-2.0                              | API-nøgle + KYC               |
-| **Cloudflare AI** | 10K neuroner/dag   | Mere end 50 modeller                     | Ingen godkendelse nødvendig   |
-| **NVIDIA NIM**    | ~40 RPM            | 129 modeller                             | API-nøgle nødvendig           |
-| **Cerebras**      | $5 i startkredit   | GLM 4.7, GPT-OSS 120B                    | API-nøgle + kort              |
-| **Qoder**         | Ubegrænset         | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Ingen godkendelse nødvendig   |
+| Udbyder           | Gratis kvote          | Modeller                                 | Sådan opretter du forbindelse |
+| ----------------- | --------------------- | ---------------------------------------- | ----------------------------- |
+| **Kiro AI**       | 50 kreditter/måned    | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Ingen godkendelse nødvendig   |
+| **Pollinations**  | Ingen nøgle nødvendig | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Ingen godkendelse nødvendig   |
+| **LongCat**       | 10M én gang           | LongCat-2.0                              | API-nøgle + KYC               |
+| **Cloudflare AI** | 10K neuroner/dag      | Mere end 50 modeller                     | Ingen godkendelse nødvendig   |
+| **NVIDIA NIM**    | ~40 RPM               | 129 modeller                             | API-nøgle nødvendig           |
+| **Cerebras**      | $5 i startkredit      | GLM 4.7, GPT-OSS 120B                    | API-nøgle + kort              |
 
-**Tip**: Forbind flere gratis udbydere for at få **ubegrænset gratis AI** med automatisk fallback!
+**Tip**: Forbind flere gratis udbydere for at få **ubegrænset gratis AI** med automatisk reserveudbyder!
 
 ---
 
@@ -241,8 +238,8 @@ Din udbyder er nu tilsluttet. Du kan bruge den med `model: "auto"` eller angive 
 
 OmniRoute fungerer bedst med **flere udbydere**. Det giver dig:
 
-- **Automatisk fallback** — Hvis én udbyder fejler, prøver OmniRoute den næste
-- **Prisoptimering** — OmniRoute vælger den billigste udbyder til hver anmodning
+- **Automatisk reservevalg** — Hvis én udbyder svigter, prøver OmniRoute den næste
+- **Omkostningsoptimering** — OmniRoute vælger den billigste udbyder til hver anmodning
 - **Hastighedsoptimering** — OmniRoute vælger den hurtigste udbyder til hver anmodning
 - **Kvalitetsoptimering** — OmniRoute vælger den bedste udbyder til hver opgave
 
@@ -250,7 +247,7 @@ OmniRoute fungerer bedst med **flere udbydere**. Det giver dig:
 
 Forbind mindst **3 udbydere** for at få den bedste oplevelse:
 
-1. **Én gratis udbyder** (Kiro, OpenCode Free eller Pollinations) — Altid tilgængelig
+1. **Én gratis udbyder** (Kiro eller Pollinations) — Altid tilgængelig
 2. **Én hurtig udbyder** (Groq, Cerebras) — Til hurtige svar
 3. **Én kvalitetsudbyder** (OpenAI, Anthropic, Google) — Til komplekse opgaver
 
@@ -284,6 +281,46 @@ Brug derefter `model: "auto"`, så vælger OmniRoute automatisk den bedste til h
 2. I OmniRoute: Udbydere → Tilføj udbyder → DeepSeek
 3. Indsæt API-nøglen → Opret forbindelse
 
+### Qoder: vælg transportmetode for legitimationsoplysninger
+
+Qoder kræver legitimationsoplysninger. De to transportmetoder har forskellige funktioner; et modelnavn
+alene identificerer ikke, hvad en bestemt forbindelse kan gøre.
+
+| Legitimationsoplysninger              | OmniRoute-transport                         | Værktøjskald fra klienten                                | Streaming                                                       |
+| ------------------------------------- | ------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------- |
+| PAT, der begynder med `pt-`           | Lokal `qodercli`-proces på OmniRoute-værten | Understøttes ikke                                        | Bufferet: SSE udsendes først, når CLI'en returnerer hele svaret |
+| Ikke-PAT-adgangstoken eller API-nøgle | DashScope OpenAI-kompatibelt HTTP-slutpunkt | Videresendes med forbehold for upstream-modellen/-nøglen | Upstream HTTP/SSE-sti                                           |
+
+For en PAT skal Qoder CLI installeres på samme vært eller i samme container som OmniRoute. Den eksekverbare fil
+skal kunne findes som `qodercli`, eller `CLI_QODER_BIN` skal indstilles til dens eksekverbare sti. En CLI,
+der kun er installeret på Docker-værten, er ikke automatisk tilgængelig i containeren. Manglende
+binære filer udløser en eksplicit fejl, der henviser til installationen eller stiindstillingen.
+
+PAT-chatstien har en procestimeout på 45 sekunder. Den samler samtalen til en
+prompt og kalder CLI'en i ikke-streamende udskriftstilstand. Anmodning om `stream: true` ændrer
+svarindpakningen til SSE; den giver ikke trinvis upstream-levering af tokens.
+CLI-validering/modelliste bruger en separat timeout på 20 sekunder. Dette er de aktuelle
+standardværdier i koden og ikke konfigurerbare dashboardindstillinger.
+
+Brug PAT-forbindelser til almindelig chat. Agentanmodninger, der indeholder `tools` eller ældre `functions`,
+udelukker PAT-konti under valget af legitimationsoplysninger, herunder fastgjorte kombinationsmål. En blandet
+Qoder-pulje kan stadig vælge sin HTTP-konto. Direkte kald til PAT-eksekveringskomponenten mislykkes også
+eksplicit, før CLI'en startes, i stedet for lydløst at fjerne værktøjsdefinitioner. Denne
+begrænsning vedrører værktøjer, der leveres af API-klienten, ikke eventuelle interne værktøjer, som Qoder
+CLI selv måtte bruge. En HTTP-nøgle garanterer ikke, at alle modeller understøtter værktøjer; normale
+kontroller af modelkapacitet gælder stadig.
+
+Browser-OAuth er kun tilgængelig, når administratoren konfigurerer alle fem indstillinger:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID` og `QODER_OAUTH_CLIENT_SECRET`. De er som standard tomme; en
+ukonfigureret installation bør bruge en understøttet import af legitimationsoplysninger i stedet for at antage,
+at loginforløbet i browseren er klar.
+
+Implementeringsreferencer: [Qoder-eksekveringskomponent](../../open-sse/executors/qoder.ts),
+[CLI-kørselsmiljø](../../open-sse/services/qoderCli.ts) og
+[OAuth-konfiguration](../../src/lib/oauth/constants/oauth.ts). Trinvis PAT-streaming
+og en konfigurerbar timeout er separate forbedringer; denne adfærd lover dem ikke.
+
 ### Groq
 
 1. Hent API-nøgle: https://console.groq.com/
@@ -296,7 +333,7 @@ Brug derefter `model: "auto"`, så vælger OmniRoute automatisk den bedste til h
 
 ### "Skal jeg betale for at bruge OmniRoute?"
 
-**Nej!** OmniRoute er gratis og open source. Du kan bruge gratis udbydere (Kiro, OpenCode Free, Pollinations) uden at betale noget. Du betaler kun, hvis du vælger at bruge betalingsudbydere.
+**Nej!** OmniRoute er gratis og open source. Du kan bruge gratis udbydere (Kiro, Pollinations) uden at betale noget. Du betaler kun, hvis du vælger at bruge betalte udbydere.
 
 ### "Hvilken udbyder skal jeg starte med?"
 
@@ -304,7 +341,7 @@ Start med **Kiro AI** — den er gratis, kræver ingen API-nøgle og giver dig a
 
 ### "Kan jeg bruge flere udbydere på samme tid?"
 
-**Ja!** Det er hele idéen med OmniRoute. Forbind flere udbydere, og brug `model: "auto"` til at lade OmniRoute vælge den bedste til hver anmodning.
+**Ja!** Det er hele pointen med OmniRoute. Forbind flere udbydere, og brug `model: "auto"` for at lade OmniRoute vælge den bedste til hver anmodning.
 
 ### "Hvad sker der, hvis en udbyder går ned?"
 
@@ -316,7 +353,7 @@ Gå til Udbydere → klik på udbyderen → klik på **Afbryd forbindelsen**.
 
 ### "Kan jeg bruge mine eksisterende API-nøgler?"
 
-**Ja!** Hvis du allerede har API-nøgler til OpenAI, Anthropic, Google osv., kan du bruge dem i OmniRoute. Du skal blot indsætte dem, når du opretter forbindelse til udbyderen.
+**Ja!** Hvis du allerede har API-nøgler til OpenAI, Anthropic, Google osv., kan du bruge dem i OmniRoute. Du skal blot indsætte dem, når du forbinder udbyderen.
 
 ---
 

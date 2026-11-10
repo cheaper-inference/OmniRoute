@@ -4,92 +4,99 @@
 
 ---
 
-> **Tõeallikas:** tööruum `electron/`
-> **Viimati uuendatud:** 2026-06-28 — v3.8.40
+> **Tõe allikas:** `electron/` tööruum** Viimati värskendatud:** 28.06.2026 — v3.8.40
 
-OmniRoute sisaldab platvormideülest töölauarakendust (Windows / macOS / Linux), mis põhineb
-tehnoloogiatel **Electron 41** + **electron-builder 26.10**. Töölauarakendus käivitab Next.js-i
-autonoomse serveri alamprotsessina, suunab `BrowserWindow`-i sellele ning lisab
-süsteemisalve, automaatvärskendaja, IPC-silla ja seadistamist mittevajava saladuste algväärtustamise.
+OmniRoute tarnib platvormideülese töölauarakenduse (Windows / macOS / Linux), mis on ehitatud**Electron 41** +** elektronehitaja 26.10** . Töölauarakendus loob Next.js eraldiseisva serveri alamprotsessina, osutab sellele `BrowserWindow` ja lisab süsteemse salve, automaatse värskendaja, IPC silla ja nullkonfiguratsiooniga salajase alglaadimise.
 
 ## Arhitektuur
 
 ```
-┌────────────────────────────────────────────────────┐
-│ Electroni põhiprotsess (electron/main.js)          │
-│ ├─ Ühe eksemplari lukk                             │
-│ ├─ Alamprotsess: Next.js-i autonoomne server       │
-│ │   (käivitatud Electroni Node'i käituskeskkonnaga)│
-│ ├─ BrowserWindow → http://localhost:PORT           │
-│ ├─ Süsteemisalv + kontekstimenüü                   │
-│ ├─ Automaatvärskendus electron-updateri kaudu      │
-│ ├─ Sisuturbepoliitika (seansi päised)              │
-│ └─ Saladuste algväärtustamine (JWT / API_KEY_SECRET)│
-└────────────────────────────────────────────────────┘
-            ↕ IPC-sild (electron/preload.js)
-┌────────────────────────────────────────────────────┐
-│ Renderdaja (Next.js-i juhtpaneel)                  │
-│   window.electronAPI.* (contextIsolation)          │
-└────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
+│ ├─ BrowserWindow → http://localhost:PORT     │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────┘
+            ↕ IPC bridge (electron/preload.js)
+┌──────────────────────────────────────────────┐
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
+└──────────────────────────────────────────────┘
 ```
 
 ## Versioonid
 
-Kinnitatud faili `electron/package.json` põhjal:
+`electron/package.json` poolt kinnitatud:
 
-| Pakett             | Versioon                                                                                                  |
-| ------------------ | --------------------------------------------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                                                                 |
-| `electron-builder` | `^26.15.3`                                                                                                |
-| `electron-updater` | `^6.8.9`                                                                                                  |
-| `better-sqlite3`   | juurkaustas `^13.0.2` (Node-API eelkompileeritud paketid — Electroni jaoks pole vaja uuesti kompileerida) |
-| Rakenduse versioon | `3.8.0`                                                                                                   |
-| Rakenduse ID       | `online.omniroute.desktop`                                                                                |
-| Toote nimi         | `OmniRoute`                                                                                               |
+| pakett             | Versioon                                                             |
+| ------------------ | -------------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                            |
+| `electron-builder` | `^26.15.3`                                                           |
+| `electron-updater` | `^6.8.9`                                                             |
+| `better-sqlite3`   | juur `^13.0.2` (Node-API eelehitab — ilma Electron ümberehitamiseta) |
+| Rakenduse versioon | `3.8.0`                                                              |
+| Rakenduse ID       | `online.omniroute.desktop`                                           |
+| Toote nimi         | `OmniRoute`                                                          |
 
-## Skriptid (juurfail `package.json`)
+## Skriptid (root `package.json`)
 
-| Skript                            | Otstarve                                                                                                    |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Käivitab `npm run dev`, ootab aadressi `localhost:20128` valmimist ja käivitab Electroni                    |
-| `npm run electron:build`          | Kompileerib Next.js-i ja käivitab seejärel praeguse operatsioonisüsteemi jaoks `electron-builder`-i         |
-| `npm run electron:build:win`      | Loob Windowsi NSIS-i installeri ja portatiivse versiooni (x64)                                              |
-| `npm run electron:build:mac`      | Loob macOS-i DMG-faili (Intel + Apple Silicon)                                                              |
-| `npm run electron:build:linux`    | Loob Linuxi AppImage'i ja DEB-paketi (x64 + arm64)                                                          |
-| `npm run electron:smoke:packaged` | Käivitab pakendatud binaarfaili, kontrollib, kas `/login` tagastab HTTP 200, ning sulgeb seejärel rakenduse |
+| Skript                            | Eesmärk                                                                                 |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Käivitab `npm run dev` + ootab `localhost:20128` + käivitab Electron                    |
+| `npm run electron:build`          | Ehitab Next.js seejärel käivitab `electron-builder` praeguse OS jaoks                   |
+| `npm run electron:build:win`      | Ehitab Windows NSIS installerit + portable (x64)                                        |
+| `npm run electron:build:mac`      | Ehitab macOS DMG (Intel + Apple Silicon)                                                |
+| `npm run electron:build:linux`    | Ehitab Linux AppImage + DEB (x64 + arm64)                                               |
+| `npm run electron:smoke:packaged` | Käivitab pakitud kahendfaili ja proovib `/login` HTTP 200 jaoks, seejärel lülitub välja |
 
-Tööruum `electron/` pakub ka järgmisi käske:
+`electron/` tööala paljastab ka:
 
 - `npm run prepare:bundle` — käivitab `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — ühe arhitektuuriga macOS-i järgud
-- `npm run pack` — ainult kataloogi loov järk kohalikuks testimiseks (ilma installerita)
+- `npm run build:mac-x64` / `build:mac-arm64` — ühekaarelised macOS järgud
+- `npm run pack` — ainult kataloogi ehitamine kohalikuks testimiseks (installer puudub)
 
-## Kataloogistruktuur
+## Valikulised käitusaja paketid
+
+Töölauajärgud võivad koos installijatega avaldada valikulisi käitusaegseid arhiive. Installitud serveri kasulik koormus sisaldab `optional-packs.index.json` ( `resources/app` all Windows ja Linux puhul). `browser-runtime` -kirje jaoks lugege `packs[].tarball` ja laadige alla** see täpne failinimi samast versioonist** . Arhiivinimed sisaldavad SHA-256 kokkuvõtet; erinevad konstruktsioonid võivad vajada erinevaid arhiive. Hoidke allalaaditud failinimi muutmata.
+
+Kopeerige installitud rakenduse register ja valitud arhiiv ühte kataloogi, seejärel kasutage sama versiooni CLI :
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` kuvab installi- ja kinnitusoleku, mitte arhiivi failinime. Komplekteeritud register valib arhiivi. Installimine kontrollib oma arhiivi kontrollsummat enne ekstraktimist ja pakettide kontrollsummasid enne installitud paketi asendamist. See loeb kohalikke faile; see ei laadi alla puuduvaid arhiive. Pärast installimist taaskäivitage rakendus. Kui versioonil pole ühtki vastavat vara, pole valikuline pakett selle versiooni varade kaudu saadaval.
+
+## Kataloogi paigutus
 
 ```
 electron/
-├── package.json              # Electroni sõltuvused + electron-builderi konfiguratsioon
-├── main.js                   # Põhiprotsess (24 KB — vt allolevaid märkusi)
-├── preload.js                # contextBridge'i IPC-sild
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI tüübid
-├── README.md                 # Tööruumisisesed märkmed
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builderi väljund (gitignore'is)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Valmistab ette .next/electron-standalone'i kogumi
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Kompileerimisjärgne suitsutest
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Nii `main.js` kui ka `preload.js` on **CommonJS-i `.js`-failid**, mitte TypeScript. Renderdajapoolsed
-tüübidefinitsioonid asuvad failis `electron/types.d.ts`.
+Nii `main.js` kui ka `preload.js` on**CommonJS `.js` failid** , mitte TypeScript. Renderdajapoolsed tüübid on `electron/types.d.ts`.
 
-## IPC-sild (`preload.js`)
+## IPC sild (`preload.js`)
 
-Eellaadimine avaldab lubatud API objektil `window.electronAPI`, kasutades `contextBridge`'i
-sätetega `contextIsolation: true` ja `nodeIntegration: false`.
+Eellaadimine paljastab `window.electronAPI` lubatud loendis oleva API, kasutades `contextBridge` koos `contextIsolation: true` ja `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -108,107 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-Avaldatud meetodid:
+Avatud meetodid:
 
-| Renderdaja kutse                                                  | Tüüp                         |
-| ----------------------------------------------------------------- | ---------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                       |
-| `openExternal(url)`                                               | invoke                       |
-| `getDataDir()`                                                    | invoke                       |
-| `restartServer()`                                                 | invoke                       |
-| `getAppVersion()`                                                 | invoke                       |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                       |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                         |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (tagastab eemaldaja) |
+| Renderdaja kõne                                                   | Tüüp                              |
+| ----------------------------------------------------------------- | --------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | kutsuda                           |
+| `openExternal(url)`                                               | kutsuda                           |
+| `getDataDir()`                                                    | kutsuda                           |
+| `restartServer()`                                                 | kutsuda                           |
+| `getAppVersion()`                                                 | kutsuda                           |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | kutsuda                           |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | saata                             |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | vastu võtma (tagastab prügikasti) |
 
-Vastuvõtu abifunktsioonid tagastavad **eemaldajafunktsiooni**, selle asemel et tugineda
-funktsioonile `removeAllListeners` — see hoiab ära kuularite kuhjumise Reacti komponentide
-taasühendamisel.
+Vastuvõtvad abilised tagastavad a** kõrvaldamise funktsioon** `removeAllListeners` — tuginemise asemel hoiab see ära kuulajate kuhjumise React komponentide uuesti paigaldamisel.
 
 ## Serveri elutsükkel
 
-`main.js` käivitab Next.js-i autonoomse kogumi otse Electroni Node'i
-käituskeskkonnaga, et vältida omamoodulite ABI ühildumatust süsteemi Node'iga:
+`main.js` loob Next.js eraldiseisva paketi otse Electron Node käitusajaga, et vältida algmooduli ABI mittevastavust süsteemisõlmega:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-Olulisemad punktid:
+Tähtsündmused:
 
-- `waitForServer()` kontrollib URL-i kuni 30 s enne akna kuvamist (külmkäivitusel ei kuvata tühja ekraani).
-- `stdio: "pipe"` hõivab stdout/stderr-i; valmisolekufraasid (`Ready` / `listening`) edastavad IPC kaudu `server-status: running`.
-- `before-quit` ootab korrektset SIGTERM-i lõpetamist kuni 5 s (WAL-i kontrollpunkt) ja saadab seejärel SIGKILL-i.
-- Süsteemisalves asuv pordivahetaja (`20128`, `3000`, `8080`) peatab ja taaskäivitab serveri ning laadib seejärel BrowserWindow'i uuesti.
+- `waitForServer()` küsitleb URL kuni 30 s enne akna näitamist (külmkäivitamisel tühja ekraani pole).
+- `stdio: "pipe"` lööb stdout/stderr; valmis fraasid (`Ready` / `listening`) kiirgavad `server-status: running` üle IPC.
+- `before-quit` ootab graatsilist SIGTERM (WAL kontrollpunkt) kuni 5 sekundit, seejärel saadab SIGKILL.
+- Salves olev pordi vahetaja (`20128`, `3000`, `8080`) peatab ja taaskäivitab serveri ning laadib seejärel BrowserWindow uuesti.
 
-## Nullkonfiguratsiooniga saladuste alglaadimine
+## Nullkonfiguratsiooniga salajane alglaadimine
 
-Esimesel käivitamisel genereerib põhiprotsess puuduvad saladused automaatselt ja salvestab need püsivalt:
+Esmakordsel käivitamisel genereeritakse põhiprotsess automaatselt ja puuduvad saladused:
 
-| Saladus                  | Allikas                                                                                       |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                      |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (keeldub, kui krüpteeritud mandaadid on juba olemas) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                      |
+| Saladus                  | Allikas                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                 |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (keeldub, kui krüptitud krediit on juba olemas) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                 |
 
-Salvestatakse faili `<DATA_DIR>/server.env`. `DATA_DIR` lahendatakse järgmiselt:
+Püsis kuni `<DATA_DIR>/server.env`. `DATA_DIR` lahendab:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` või `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Aken ja süsteemisalv
+## Keskkonnafailide otsing
 
-- `BrowserWindow`: 1400×900 (min 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, aknanupud asukohas `{ x: 16, y: 16 }`.
-- Windows/Linux: süsteemi omane tiitliriba.
-- Sulgemisnupp minimeerib rakenduse süsteemisalve; süsteemisalve menüüs on **Ava OmniRoute**, **Ava juhtpaneel** (välises brauseris), alammenüü **Serveri port**, **Kontrolli värskendusi**, **Välju**.
+Enne serveri loomist valib põhiprotsess (`getPreferredEnvFilePath()` in `electron/main.js`).** üks** `.env` -fail: esimene neist, mis on olemas.
 
-## Sisuturbepoliitika
+1. `$DATA_DIR/.env`, kui `DATA_DIR` on määratud keskkonnas, millega rakendus käivitati.
+2. `<resolved DATA_DIR>/.env`, kasutades samu vaikeväärtusi nagu ülal: `%APPDATA%\omniroute\.env` Windows, `$XDG_CONFIG_HOME/omniroute/.env` või `~/.omniroute/.env` puhul Linux ja macOS.
+3. `.env` protsessi töökataloogis.
 
-Määratakse `session.defaultSession.webRequest.onHeadersReceived` kaudu. Olulised direktiivid:
+Põhiprotsess loeb ainult seda faili; hilisemaid kandidaate ei liideta. Seejärel luuakse serverikeskkond järgmise prioriteediga (kõrgeim enne):
+
+1. Electron protsessikeskkond (muutujad, mis on päritud sellest, mis rakenduse käivitas).
+2. Valitud `.env` fail.
+3. `<DATA_DIR>/server.env` (ülaltoodud alglaadimissaladused).
+
+Protsessikeskkond jäädvustatakse rakenduse käivitumisel, nii et süsteemi või kasutajakeskkonna muutuja, mis on seatud rakenduse töötamise ajal (sealhulgas siis, kui see on salves pärast selle akna sulgemist), ei jõua serverisse enne, kui rakendus on täielikult välja lülitatud ja uuesti käivitatud. Käitusaja nuppude (nt `CONTEXT_LENGTH_<PROVIDER>` jaoks (vt [Keskkonnamuutujad: Pakkuja konteksti pikkus](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ) eelistage `.env` faili, seejärel sulgege täielikult (salv,** Lõpeta** ) ja taaskäivitage.
+
+## Aken ja salv
+
+- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, valgusfoor `{ x: 16, y: 16 }` juures.
+- Windows/Linux: omapärane tiitliriba.
+- Sulgemisnupp minimeerib salve; salve menüüs on** Ava OmniRoute** ,** Avage armatuurlaud** (väline brauser),** Serveri port** alammenüü,** Kontrollige värskendusi** ,** Lõpeta** .
+
+## Sisu turvapoliitika
+
+Seadista `session.defaultSession.webRequest.onHeadersReceived` kaudu. Märkimisväärsed juhised:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Arendusrežiimis lisatakse `'unsafe-eval'` ainult direktiivile `script-src`
+- Arendusrežiim lisab `'unsafe-eval'` ainult `script-src` le
 
-## Automaatne värskendamine
+## Automaatne värskendus
 
-Kasutab paketti `electron-updater` koos GitHubi pakkujaga (`diegosouzapw/OmniRoute`).
+Kasutab `electron-updater` koos GitHub pakkujaga (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Sündmused edastatakse renderdusprotsessile `update-status` IPC kaudu:
-  `checking`, `available`, `not-available`, `downloading` (koos väärtusega `percent`), `downloaded`, `error`
-- `installUpdate()` lõpetab serveri töö ja kutsub seejärel välja `autoUpdater.quitAndInstall()`
-- Arendusrežiimis jäetakse vahele (`!app.isPackaged`)
+- `update-status` IPC kaudu renderdajale edastatud sündmused: `checking`, `available`, `not-available`, `downloading` (koos `percent`), `downloaded`, `error`
+- `installUpdate()` tapab serveri ja seejärel kutsub `autoUpdater.quitAndInstall()`
+- Arendusrežiimis vahele jäetud (`!app.isPackaged`)
 
-## Koostekonveier
+## Ehitage torujuhe
 
-1. `npm run build` → Next.js-i autonoomne väljund kataloogis `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → paigutab failid ümber kataloogi `.next/electron-standalone` ja kirjutab failides `server.js` + `required-server-files.json` olevad absoluutsed teed ümber, et paketti saaks ümber paigutada.
-3. `electron-builder` pakendab `main.js`, `preload.js`, `node_modules` ja `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → Next.js eraldiseisev `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → lavastab uuesti `.next/electron-standalone` -ks ja kirjutab ümber `server.js` + `required-server-files.json` sees olevad absoluutsed teed, nii et kogum on ümberpaigutav.
+3. `electron-builder` paketid `main.js`, `preload.js`, `node_modules` ja `extraResources: { ../.next/electron-standalone → app }`.
 
-### Koostesihtmärgid
+### Ehitage sihtmärke
 
-| OS      | Sihtmärgid                                          |
-| ------- | --------------------------------------------------- |
-| Windows | NSIS-i installer + kaasaskantav versioon (x64)      |
-| macOS   | DMG (Intel + arm64, lohistatav kausta Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)                        |
+| OS      | Sihtmärgid                                     |
+| ------- | ---------------------------------------------- |
+| Windows | NSIS installer + portable (x64)                |
+| macOS   | DMG (Intel + arm64, rakendustesse lohistamine) |
+| Linux   | AppImage + DEB (x64 + arm64)                   |
 
-NSIS-i sätted: `oneClick: false`, võimaldab kasutajal valida paigalduskataloogi ning loob otseteed töölauale ja Start-menüüsse.
+NSIS sätted: `oneClick: false`, võimaldab kasutajal valida installikataloogi, loob töölaua ja Start-menüü otseteed.
 
-## Pakendatud koostu suitsutestimine
+## Suitsutestimise pakitud komplekt
 
 ```bash
 npm run electron:smoke:packaged
@@ -216,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Leiab praeguse platvormi pakendatud käivitatava faili automaatselt kataloogist `electron/dist-electron/`.
-- Käivitab rakenduse isoleeritud `HOME`/`APPDATA`/`XDG_*` kataloogidega, et arendaja andmeid mitte puudutada.
-- Pollib aadressi `http://127.0.0.1:20128/login`, oodates 45 s jooksul HTTP 200 vastust.
-- Jälgib stderr/stdout väljundit fataalsete mustrite suhtes (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` jne).
-- Ootab pärast valmisoleku saavutamist 2 s stabiilset tööaega, saadab seejärel SIGTERM-i ja ootab pordi vabanemist.
-- CI-s edastab automaatselt `--no-sandbox --disable-gpu` (ja Linuxis `--disable-dev-shm-usage`).
+- Avastab automaatselt praeguse platvormi jaoks `electron/dist-electron/` pakitud binaarfaili.
+- Käivitatakse isoleeritud `HOME`/`APPDATA`/`XDG_*` kataloogidega, nii et see ei puuduta arendaja andmeid.
+- Küsitlused `http://127.0.0.1:20128/login` jaoks HTTP 200 45 sekundi jooksul.
+- Kellad stderr/stdout saatuslike mustrite jaoks (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` jne).
+- Pärast valmisolekut ootab 2 s stabiilset käitusaega, siis väljastab SIGTERM ja ootab pordi vabanemist.
+- Kui CI, möödub automaatselt `--no-sandbox --disable-gpu` (ja `--disable-dev-shm-usage` Linux puhul).
 
-Keskkonnamuutujate ülekirjutused: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env alistab: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Koodi allkirjastamine
 
-`electron/package.json` **ei** seo allkirjastamise mandaate otse. Edastage need keskkonnamuutujate kaudu tööriistale `electron-builder`:
+`electron/package.json` teeb** mitte** otse allkirjastamise volikirjad. Edastage need env varsi kaudu `electron-builder` le:
 
 ### macOS
 
@@ -250,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage'i allkirjastamine on valikuline — allkirjastamiseks määrake `LINUX_GPG_KEY`.
+AppImage allkirjastamine on valikuline. — määrake allkirjastamisel `LINUX_GPG_KEY`.
 
 ## Levitamine
 
-Artefaktid paigutatakse kataloogi `electron/dist-electron/`:
+Artefaktid maanduvad `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Väljalasked avaldatakse GitHub Releasesis (`diegosouzapw/OmniRoute`), kust ka `electron-updater` uusi versioone otsib.
+Väljalasked avaldatakse GitHub Releases (`diegosouzapw/OmniRoute`), kus `electron-updater` kontrollib ka uusi versioone.
 
-## Tõrkeotsing
+## Veaotsing
 
-| Sümptom                                                                         | Lahendus                                                                                                                                                                                       |
-| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` pärast Electroni põhiversiooni uuendamist | better-sqlite3 v13 sisaldab Node-API eelkompileeritud pakette — käivitage juurkataloogis uuesti `npm install` ja `prepare:bundle` (see kontrollib praeguse platvormi eelkompileeritud paketti) |
-| `ERR_DLOPEN_FAILED` omamooduli puhul                                            | Käivitage `prepare:bundle` uuesti — see lõpetab kohe veaga, kui praeguse platvormi Node-API eelkompileeritud pakett puudub                                                                     |
-| Linuxis kuvatakse tühi aken                                                     | Veenduge, et Next.js-i server oleks tegelikult seotud pordiga PORT (kontrollige logisid `[Server]`)                                                                                            |
-| macOS-i notariseerimine takerdub                                                | Veenduge, et muutujad `APPLE_*` oleksid eksporditud, mitte üksnes failis `.env`                                                                                                                |
-| Windows SmartScreeni hoiatus                                                    | Allkirjastage EV-sertifikaadiga või laske kasutajatel teha paremklõps → „Käivita ikkagi“                                                                                                       |
-| Suitsutest nurjub kasutusel oleva pordi tõttu                                   | Enne `electron:smoke:packaged` käivitamist peatage kõik pordis 20128 töötavad kohalikud arendusserverid                                                                                        |
+| Sümptom                                                              | Parandage                                                                                                                                                 |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` pärast Electron suurt põrutust | better-sqlite3 v13 tarnib Node-API eelehitused — käivitab uuesti `npm install` juurtes ja `prepare:bundle` (see kontrollib praeguse platvormi eelehitust) |
+| `ERR_DLOPEN_FAILED` algmooduli jaoks                                 | Käivitage `prepare:bundle` — uuesti see ebaõnnestub kiiresti, kui praeguse platvormi Node-API eelehitus puudub                                            |
+| Zqa aken on Linux                                                    | Kinnitage, Next.js server on tegelikult PORT ga seotud (kontrollige `[Server]` logisid)                                                                   |
+| macOS notariaalse kinnituse kioskites                                | Veenduge, `APPLE_*` varsid eksporditaks, mitte ainult `.env`                                                                                              |
+| Windows SmartScreen hoiatus                                          | Allkirjastage EV sertifikaadiga või paremklõpsake kasutajal → "Käivita ikkagi"                                                                            |
+| Kasutatava pordi korral suitsutest ebaõnnestub                       | Enne `electron:smoke:packaged` käivitamist peatage 20128. aastal mis tahes kohalik arendusserver                                                          |
 
-## Vaadake ka
+## Vaata ka
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- Lähtekood: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Abiskriptid: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Allikas: `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- Abilised: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

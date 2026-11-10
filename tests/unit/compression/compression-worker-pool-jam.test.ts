@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
+import path from "node:path";
 import { after, describe, it } from "node:test";
+import { pathToFileURL } from "node:url";
 import type { Worker } from "node:worker_threads";
 import {
   __setCompressionWorkerFactoryForTests,
@@ -64,7 +66,7 @@ function captureWarn(): { lines: string[]; restore(): void } {
 
 /**
  * EventEmitter-based Worker stand-in: mirrors node:worker_threads' surface
- * (on/once/off, postMessage, terminate). Construction is observable so a
+ * (on/once/off, postMessage, terminate, ref/unref). Construction is observable so a
  * factory can busy the first worker(s), then start throwing.
  */
 type FakeWorker = Worker & { messages: unknown[] };
@@ -76,6 +78,8 @@ function fakeWorker(): FakeWorker {
     worker.messages.push(message);
   }) as Worker["postMessage"];
   worker.terminate = (() => Promise.resolve(0)) as Worker["terminate"];
+  worker.ref = () => {};
+  worker.unref = () => {};
   return worker;
 }
 
@@ -602,7 +606,7 @@ describe("llmlingua worker spawn specifier", () => {
     const specifier = llmlinguaWorkerSpecifier("/app/onnxWorker.js");
     assert.ok(specifier instanceof URL, "Worker entry must be a URL object, not a string");
     assert.equal(specifier.protocol, "file:");
-    assert.equal(specifier.pathname, "/app/onnxWorker.js");
+    assert.equal(specifier.pathname, pathToFileURL(path.resolve("/app/onnxWorker.js")).pathname);
   });
 });
 
@@ -634,6 +638,40 @@ describe("llmlingua worker fail-open catch paths", () => {
       assert.equal(spawnWarnings.length, 1, "spawn failure must warn (rate-limited to one)");
       assert.match(spawnWarnings[0] ?? "", /simulated MODULE_NOT_FOUND/);
       assert.ok(spawns >= 1, "the injected throwing factory must have been exercised");
+    } finally {
+      warn.restore();
+      restoreHarness();
+    }
+  });
+
+  it("warns when a worker errors with a pending request", async () => {
+    const broken = fakeWorker();
+    __setLlmlinguaWorkerHarnessForTests({ depsAvailable: true, factory: () => broken });
+    __resetCompressionFailOpenNotifierForTests();
+    const warn = captureWarn();
+    try {
+      const result = workerBackend("original prose", {});
+      assert.equal(broken.messages.length, 1);
+      broken.emit("error", new Error("worker module missing"));
+      assert.equal(await result, "original prose");
+      assert.equal(warn.lines.filter((line) => line.includes("llmlingua worker error")).length, 1);
+    } finally {
+      warn.restore();
+      restoreHarness();
+    }
+  });
+
+  it("warns when a worker exits with a pending request", async () => {
+    const broken = fakeWorker();
+    __setLlmlinguaWorkerHarnessForTests({ depsAvailable: true, factory: () => broken });
+    __resetCompressionFailOpenNotifierForTests();
+    const warn = captureWarn();
+    try {
+      const result = workerBackend("original prose", {});
+      assert.equal(broken.messages.length, 1);
+      broken.emit("exit", 1);
+      assert.equal(await result, "original prose");
+      assert.equal(warn.lines.filter((line) => line.includes("llmlingua worker exit")).length, 1);
     } finally {
       warn.restore();
       restoreHarness();

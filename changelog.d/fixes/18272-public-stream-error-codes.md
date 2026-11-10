@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve the existing `invalid_sse_payload` and `invalid_json_payload` classifications in sanitized public 502 responses when buffering provider responses for non-streaming clients ([#18272](https://github.com/cheaper-inference/OmniRoute/pull/18272)) — thanks @aldoeliacim

@@ -14,9 +14,10 @@
  * Sliced out of #3500 (proxy_logs cluster, slice 4).
  */
 
+import { logicalCallSql } from "./logicalCallSql";
 import { getDbInstance } from "./core";
-import { normalizeProxyHostForLog } from "../proxyLogger";
-import { sanitizeTimingMs } from "@omniroute/open-sse/utils/upstreamStatusCapture.ts";
+import { normalizeProxyHostForLog } from "../proxyLogHost";
+import { sanitizeTimingMs } from "@omniroute/open-sse/utils/timingMs.ts";
 
 // ---------------------------------------------------------------------------
 // Queries
@@ -62,6 +63,9 @@ const PAGE_SIZE = 500;
  * `run`/`get`/`all` — no `.iterate()` cursor — so LIMIT/OFFSET batching is
  * the cursor-equivalent available without widening that shared interface
  * across all 4 driver adapters.
+ * This is a live, best-effort export, not a transactionally consistent snapshot:
+ * concurrent inserts/deletes can shift OFFSET pages and repeat or omit rows.
+ * The preflight COUNT is an estimate; the route reports its emitted count last.
  */
 export function* iterateProxyLogsSince(
   since: string,
@@ -261,7 +265,7 @@ export function getPoolEgressFailureBreakdown(
        FROM (
          SELECT l.egress_ip AS exit,
                 (SELECT c.error_type FROM call_logs c
-                 WHERE c.correlation_id = l.correlation_id
+                 WHERE ${logicalCallSql("c")} AND c.correlation_id = l.correlation_id
                  ORDER BY c.rowid LIMIT 1) AS family
          FROM proxy_logs l
          JOIN proxy_registry r ON l.proxy_host = r.host AND l.proxy_port = r.port

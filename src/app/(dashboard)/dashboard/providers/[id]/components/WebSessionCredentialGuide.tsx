@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // Issue #3501 Phase 1c — extracted from the god-component.
 // Shared by AddApiKeyModal and EditConnectionModal; imports only leaf modules
 // (no cycle risk).
@@ -36,11 +38,9 @@ export default function WebSessionCredentialGuide({
 
   if (requirement.kind === "none") {
     return (
-      <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-3 text-sm text-text-muted">
+      <div className="rounded-lg border border-success/25 bg-success/10 px-3 py-3 text-sm text-text-muted">
         <div className="flex items-start gap-2">
-          <span className="material-symbols-outlined mt-0.5 text-[18px] text-emerald-500">
-            check_circle
-          </span>
+          <Icon name="check_circle" size={18} className="mt-0.5 text-success" />
           <div>
             <p className="font-medium text-text-main">
               {providerText(t, "webNoAuthGuideTitle", "No credential required")}
@@ -66,9 +66,9 @@ export default function WebSessionCredentialGuide({
   const guideSteps = requirement.guideSteps;
 
   return (
-    <div className="rounded-lg border border-purple-500/25 bg-purple-500/10 px-3 py-3 text-sm text-text-muted">
+    <div className="rounded-lg border border-chart-3/25 bg-chart-3/10 px-3 py-3 text-sm text-text-muted">
       <div className="flex items-start gap-2">
-        <span className="material-symbols-outlined mt-0.5 text-[18px] text-purple-500">cookie</span>
+        <Icon name="cookie" size={18} className="mt-0.5 text-chart-3" />
         <div className="space-y-2">
           <div>
             <p className="font-medium text-text-main">
@@ -103,9 +103,7 @@ export default function WebSessionCredentialGuide({
                       {providerText(t, "webSessionGuideOpenProvider", "Open {host}", {
                         host: providerWebsiteHost,
                       })}
-                      <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                        open_in_new
-                      </span>
+                      <Icon name="open_in_new" size={14} />
                     </a>
                   )}
                 </li>
@@ -127,9 +125,7 @@ export default function WebSessionCredentialGuide({
                     {providerText(t, "webSessionGuideOpenProvider", "Open {host}", {
                       host: providerWebsiteHost,
                     })}
-                    <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                      open_in_new
-                    </span>
+                    <Icon name="open_in_new" size={14} />
                   </a>
                 )}
               </li>
@@ -157,7 +153,7 @@ export default function WebSessionCredentialGuide({
               </li>
             </ol>
           )}
-          <p className="text-xs text-amber-700 dark:text-amber-300">
+          <p className="text-xs text-warning">
             {requirement.guideNote ??
               providerText(
                 t,

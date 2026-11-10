@@ -4,6 +4,8 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { ConfigStateSetter } from "../../../src/app/(dashboard)/dashboard/playground/components/StudioConfigPane";
+
 // next-intl: no local mock — falls through to the real-EN-text default mock in
 // tests/_setup/vitestUiPolyfills.ts. The collapse/expand buttons are found by their
 // real `aria-label` text (playground.collapseConfig/expandConfig in en.json), which the
@@ -13,12 +15,10 @@ vi.mock("@/lib/playground/codeExport", () => ({
   endpointToPath: (ep: string) => `/v1/${ep}`,
 }));
 
-const { default: StudioConfigPane } = await import(
-  "../../../src/app/(dashboard)/dashboard/playground/components/StudioConfigPane"
-);
-const { DEFAULT_PARAMS } = await import(
-  "../../../src/app/(dashboard)/dashboard/playground/components/ParamSliders"
-);
+const { default: StudioConfigPane } =
+  await import("../../../src/app/(dashboard)/dashboard/playground/components/StudioConfigPane");
+const { DEFAULT_PARAMS } =
+  await import("../../../src/app/(dashboard)/dashboard/playground/components/ParamSliders");
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -36,13 +36,13 @@ function makeConfig() {
 
 function renderPane(
   configState: ReturnType<typeof makeConfig>,
-  setConfigState: (s: ReturnType<typeof makeConfig>) => void
+  setConfigState: ConfigStateSetter
 ): HTMLDivElement {
   const el = document.createElement("div");
   document.body.appendChild(el);
   const root = createRoot(el);
   act(() => {
-    root.render(<StudioConfigPane configState={configState} setConfigState={setConfigState as (s: typeof configState) => void} />);
+    root.render(<StudioConfigPane configState={configState} setConfigState={setConfigState} />);
   });
   containers.push({ root, el });
   return el;
@@ -52,8 +52,9 @@ function renderPane(
 
 describe("StudioConfigPane", () => {
   beforeEach(() => {
-    (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean })
-      .IS_REACT_ACT_ENVIRONMENT = true;
+    (
+      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true;
   });
 
   afterEach(() => {
@@ -94,8 +95,8 @@ describe("StudioConfigPane", () => {
     const el = renderPane(config, setConfigState);
 
     const inputs = el.querySelectorAll("input[type='text']");
-    const modelInput = Array.from(inputs).find(
-      (inp) => (inp as HTMLInputElement).placeholder?.includes("gpt-4o")
+    const modelInput = Array.from(inputs).find((inp) =>
+      (inp as HTMLInputElement).placeholder?.includes("gpt-4o")
     ) as HTMLInputElement | undefined;
 
     expect(modelInput).toBeTruthy();
@@ -119,7 +120,9 @@ describe("StudioConfigPane", () => {
     const config = makeConfig();
     const el = renderPane(config, vi.fn());
 
-    const collapseBtn = el.querySelector("button[aria-label='Collapse config pane']") as HTMLButtonElement | null;
+    const collapseBtn = el.querySelector(
+      "button[aria-label='Collapse config pane']"
+    ) as HTMLButtonElement | null;
     expect(collapseBtn).toBeTruthy();
 
     act(() => {
@@ -128,6 +131,43 @@ describe("StudioConfigPane", () => {
 
     // After collapse, expanded content should not be visible
     expect(el.querySelector("textarea")).toBeNull();
+  });
+
+  // #18071: at 390 px the fixed `w-72` side pane left the chat ~100 px. Below `md` the pane
+  // stacks under the tab content at full width; the side column only starts at `md`.
+  it("stacks full-width below md and becomes the w-72 side column from md (#18071)", () => {
+    const el = renderPane(makeConfig(), vi.fn());
+    const aside = el.querySelector("aside");
+    expect(aside).toBeTruthy();
+    const classes = (aside?.className ?? "").split(/\s+/);
+    expect(classes).toContain("w-full");
+    expect(classes).toContain("md:w-72");
+    expect(classes).not.toContain("w-72");
+    expect(classes).toContain("border-t");
+    expect(classes).toContain("md:border-t-0");
+    expect(classes).toContain("md:border-l");
+    // Stacked, the pane must not take the whole viewport from the chat above it: it is capped
+    // and may shrink (and scroll) so the tab content keeps its minimum height.
+    expect(classes).toContain("max-h-[45vh]");
+    expect(classes).toContain("md:max-h-none");
+    expect(classes).toContain("min-h-0");
+    expect(classes).toContain("shrink");
+    expect(classes).not.toContain("shrink-0");
+    expect(classes).toContain("md:shrink-0");
+  });
+
+  it("keeps the collapsed rail as a full-width strip below md (#18071)", () => {
+    const el = renderPane(makeConfig(), vi.fn());
+    act(() => {
+      (el.querySelector("button[aria-label='Collapse config pane']") as HTMLButtonElement).click();
+    });
+    const expandBtn = el.querySelector("button[aria-label='Expand config pane']");
+    const rail = expandBtn?.parentElement;
+    const classes = (rail?.className ?? "").split(/\s+/);
+    expect(classes).toContain("w-full");
+    expect(classes).toContain("md:w-8");
+    expect(classes).not.toContain("w-8");
+    expect(classes).toContain("md:flex-col");
   });
 
   it("expands when expand button is clicked after collapse", () => {
@@ -191,8 +231,8 @@ describe("StudioConfigPane", () => {
     // Multiple <select> elements may exist (PresetPicker also renders one).
     // The endpoint select is the one with our 13 endpoint values.
     const selects = Array.from(el.querySelectorAll<HTMLSelectElement>("select"));
-    const endpointSelect = selects.find(
-      (s) => Array.from(s.options).some((o) => o.value === "chat.completions")
+    const endpointSelect = selects.find((s) =>
+      Array.from(s.options).some((o) => o.value === "chat.completions")
     );
     expect(endpointSelect).toBeTruthy();
     expect(endpointSelect?.options.length).toBe(13);

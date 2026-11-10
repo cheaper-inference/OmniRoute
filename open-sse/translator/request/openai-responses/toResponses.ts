@@ -4,12 +4,26 @@
  * Extracted verbatim from openai-responses.ts. Registration stays in the host.
  */
 import { isOpenAIResponsesStoreEnabled } from "@/lib/providers/requestDefaults";
-import { isInternalReasoningPlaceholder } from "../../../utils/reasoningPlaceholder.ts";
+import {
+  isInternalReasoningPlaceholder,
+  requiresReasoningContentPresence,
+} from "../../../utils/reasoningPlaceholder.ts";
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
 import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
 import {
+  coerceHistoricalToolCallArguments,
+  coerceToolCallArguments,
+  createToolHistoryError,
+} from "../../helpers/toolArguments.ts";
+import {
+  isStrictResponsesToolHistoryEnabled,
+  requireResponsesCallId,
+} from "../../helpers/responsesToolHistory.ts";
+import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
+import {
   JsonRecord,
   RESPONSES_STORE_MARKER,
+  REASONING_SUMMARY_OPT_OUT_MARKER,
   toRecord,
   toArray,
   toString,
@@ -28,6 +42,18 @@ import {
 // explicit `reasoning` object from a Responses-shaped client is preserved as-is.
 const DEFAULT_RESPONSES_REASONING_SUMMARY = "auto";
 const RESPONSES_REASONING_ENCRYPTED_CONTENT_INCLUDE = "reasoning.encrypted_content";
+
+// Preserve the client's effort-only request shape for the listed model families
+// during Chat-to-Responses translation (optional `codex/` or `cx/` routing prefix,
+// optional effort suffix). Do not add a default summary or encrypted-content
+// include on this path. This compatibility policy makes no claim about the cause
+// or resolution of upstream safety rejections.
+const CODEX_MODEL_PATTERN =
+  /^(?:(?:codex|cx)\/)?(?:gpt-6(?:\.1)?-(?:astra|sol|luna)|gpt-5\.6-(?:sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
+function isCodexModel(model: unknown): boolean {
+  if (typeof model !== "string") return false;
+  return CODEX_MODEL_PATTERN.test(model.trim().toLowerCase());
+}
 
 // Chat Completions JSON `response_format` → Responses API `text.format`.
 // Merges into any existing `result.text` (e.g. verbosity) so structured-output schemas from
@@ -53,6 +79,32 @@ function mapChatResponseFormatToResponsesText(body: JsonRecord, result: JsonReco
   if (jsonSchema.strict !== undefined) format.strict = jsonSchema.strict;
 
   result.text = { ...existingText, format };
+}
+
+// The Responses API rejects text.format json_object with 400 "Response input
+// messages must contain the word 'json'" unless an `input` message says "json";
+// `instructions` does not count. Chat Completions counts the system prompt, and
+// this translator hoists that prompt into `instructions`, so a request that was
+// valid as Chat (JSON asked for only in the system prompt) failed upstream.
+// Prepend a constant developer hint in that case: a fixed prefix keeps
+// the prompt-cache prefix stable across turns.
+const JSON_OBJECT_INPUT_HINT = "Respond with a valid JSON object.";
+
+function ensureJsonObjectInputHint(result: JsonRecord): void {
+  if (toRecord(toRecord(result.text).format).type !== "json_object") return;
+  if (!Array.isArray(result.input)) return;
+  const input = result.input as JsonRecord[];
+  const mentionsJson = input.some((item) => {
+    if (item.type !== "message") return false;
+    if (typeof item.content === "string") return /json/i.test(item.content);
+    return toArray(item.content).some((part) => /json/i.test(toString(toRecord(part).text)));
+  });
+  if (mentionsJson) return;
+  input.unshift({
+    type: "message",
+    role: "developer",
+    content: [{ type: "input_text", text: JSON_OBJECT_INPUT_HINT }],
+  });
 }
 
 // Flatten a Chat-Completions content block into the single string the Responses
@@ -95,6 +147,95 @@ function buildResponsesTextParts(content: unknown): unknown[] {
   return [{ type: "input_text", text: "" }];
 }
 
+type ToolHistoryEncoding = {
+  toolCallId: (value: unknown) => string;
+  outputCallId: (value: unknown) => string;
+  namedCallId: (value: string) => string;
+  toolArguments: (value: unknown) => string;
+  finishInput: (input: JsonRecord[], root: JsonRecord) => JsonRecord[];
+};
+
+/**
+ * Drop outputs with no matching call, then pair every unanswered call with an empty output.
+ * Claude Code compaction removes messages but leaves tool results; a truncated history or a
+ * client crash mid-tool-loop leaves a call with no output, which strict Responses upstreams
+ * reject with 400 "No tool output found for function call <id>" (#15216). The call stays, so
+ * the model still sees that it happened.
+ */
+function repairToolHistory(input: JsonRecord[]): JsonRecord[] {
+  const knownCallIds = new Set(
+    input.filter((item) => item.type === "function_call" && item.call_id).map((i) => i.call_id)
+  );
+  const kept = input.filter(
+    (item) =>
+      item.type !== "function_call_output" || !item.call_id || knownCallIds.has(item.call_id)
+  );
+  const pairedCallIds = new Set(
+    kept
+      .filter((item) => item.type === "function_call_output" && item.call_id)
+      .map((i) => i.call_id)
+  );
+  const paired: JsonRecord[] = [];
+  for (const item of kept) {
+    paired.push(item);
+    if (item.type === "function_call" && item.call_id && !pairedCallIds.has(item.call_id)) {
+      paired.push({
+        type: "function_call_output",
+        call_id: item.call_id,
+        output: "",
+        status: "completed",
+      });
+      pairedCallIds.add(item.call_id);
+    }
+  }
+  return paired;
+}
+
+/**
+ * Strict mode: a compacted orphan is still supplied history, so reject it even alongside a valid
+ * local pair. Pending calls stay as they are; the handler validates complete history after
+ * continuation policy has selected the actual wire body.
+ */
+function rejectOrphanToolOutputs(input: JsonRecord[], root: JsonRecord): JsonRecord[] {
+  const knownCallIds = new Set(
+    input.filter((item) => item.type === "function_call").map((item) => item.call_id)
+  );
+  const hasPreviousResponse =
+    typeof root.previous_response_id === "string" && root.previous_response_id.trim() !== "";
+  for (const item of input) {
+    if (
+      item.type === "function_call_output" &&
+      !knownCallIds.has(item.call_id) &&
+      !hasPreviousResponse
+    ) {
+      throw createToolHistoryError(
+        "Tool output does not match a local tool call",
+        "invalid_tool_call_output"
+      );
+    }
+  }
+  return input;
+}
+
+// The Responses API rejects call_id values over 64 characters, so the default encoding clamps
+// them identically on a call and its output; strict mode refuses them instead.
+const REPAIRING_TOOL_HISTORY: ToolHistoryEncoding = {
+  toolCallId: (value) => clampCallId(toString(value).trim() || generateToolCallId()),
+  outputCallId: (value) => clampCallId(toString(value).trim()),
+  namedCallId: clampCallId,
+  toolArguments: coerceToolCallArguments,
+  finishInput: repairToolHistory,
+};
+
+const STRICT_TOOL_HISTORY: ToolHistoryEncoding = {
+  toolCallId: requireResponsesCallId,
+  outputCallId: requireResponsesCallId,
+  namedCallId: requireResponsesCallId,
+  toolArguments: (value) => coerceHistoricalToolCallArguments(value, ""),
+  finishInput: rejectOrphanToolOutputs,
+};
+
+/** Encode Chat history as Responses input, repairing or rejecting inconsistent tool history. */
 export function openaiToOpenAIResponsesRequest(
   model: unknown,
   body: unknown,
@@ -116,6 +257,9 @@ export function openaiToOpenAIResponsesRequest(
   }
 
   const input = result.input as JsonRecord[];
+  const toolHistory = isStrictResponsesToolHistoryEnabled()
+    ? STRICT_TOOL_HISTORY
+    : REPAIRING_TOOL_HISTORY;
 
   // Extract first system message as instructions
   let hasSystemMessage = false;
@@ -233,6 +377,25 @@ export function openaiToOpenAIResponsesRequest(
           // for opaque items in reasoningInputPolicy.ts (#11108).
           summary: [],
         });
+      } else if (
+        isInternalReasoningPlaceholder(reasoning) &&
+        requiresReasoningContentPresence(credentialRecord._provider, model)
+      ) {
+        // Reasoning-presence validation on strict Responses upstreams (opencode
+        // console gateways) rejects thinking-mode history whose assistant turns
+        // lack a reasoning_text item — even when OmniRoute's replay cache missed
+        // and the history only carries the internal sentinel (see
+        // replayOpenAIReasoningMessage's requiresExplicitReasoningReplay branch).
+        // Emit the sentinel text: it satisfies presence validation, and the
+        // response translators suppress the sentinel again on echo (#9573).
+        // Gated to presence-enforcing upstreams only: everywhere else (e.g.
+        // DeepSeek) the sentinel is never promoted, since models echo it as
+        // their own reasoning and stop (#9573/#9610).
+        input.push({
+          type: "reasoning",
+          content: [{ type: "reasoning_text", text: reasoning }],
+          summary: [],
+        });
       }
 
       // Thinking blocks remain display-only here. They do not prove that the
@@ -280,9 +443,9 @@ export function openaiToOpenAIResponsesRequest(
           }
           input.push({
             type: "function_call",
-            call_id: clampCallId(toString(toolCall.id).trim() || generateToolCallId()),
+            call_id: toolHistory.toolCallId(toolCall.id),
             name: fnName,
-            arguments: toString(fn.arguments, "{}"),
+            arguments: toolHistory.toolArguments(fn.arguments),
             status: "completed",
           });
         }
@@ -295,9 +458,9 @@ export function openaiToOpenAIResponsesRequest(
         if (fnName) {
           input.push({
             type: "function_call",
-            call_id: clampCallId(`call_${fnName}`),
+            call_id: toolHistory.namedCallId(`call_${fnName}`),
             name: fnName,
-            arguments: toString(fc.arguments, "{}"),
+            arguments: toolHistory.toolArguments(fc.arguments),
             status: "completed",
           });
         }
@@ -308,7 +471,7 @@ export function openaiToOpenAIResponsesRequest(
     if (role === "tool") {
       input.push({
         type: "function_call_output",
-        call_id: clampCallId(toString(msg.tool_call_id).trim()),
+        call_id: toolHistory.outputCallId(msg.tool_call_id),
         output:
           typeof msg.content === "string"
             ? msg.content
@@ -328,28 +491,14 @@ export function openaiToOpenAIResponsesRequest(
     if (role === "function") {
       input.push({
         type: "function_call_output",
-        call_id: clampCallId(`call_${toString(msg.name).trim()}`),
+        call_id: toolHistory.namedCallId(`call_${toString(msg.name).trim()}`),
         output: typeof msg.content === "string" ? msg.content : String(msg.content ?? ""),
         status: "completed",
       });
     }
   }
 
-  // Filter orphaned function_call_output items (no matching function_call)
-  // This happens when Claude Code compaction removes messages but leaves tool results
-  const knownCallIds = new Set(
-    input
-      .filter(
-        (item: { type?: string; call_id?: string }) => item.type === "function_call" && item.call_id
-      )
-      .map((item: { type?: string; call_id?: string }) => item.call_id)
-  );
-  result.input = input.filter((item: { type?: string; call_id?: string }) => {
-    if (item.type === "function_call_output" && item.call_id) {
-      return knownCallIds.has(item.call_id);
-    }
-    return true;
-  });
+  result.input = toolHistory.finishInput(input, root);
 
   // If no system message, keep empty instructions
   if (!hasSystemMessage) {
@@ -368,7 +517,11 @@ export function openaiToOpenAIResponsesRequest(
           name,
           description: toString(fn.description),
           parameters: fn.parameters,
-          strict: fn.strict,
+          // Omitted strict is non-strict on Chat but strict-normalized on Responses.
+          strict: chatStrictForResponses(fn),
+          ...(credentialRecord._provider === "codex" && typeof fn.defer_loading === "boolean"
+            ? { defer_loading: fn.defer_loading }
+            : {}),
         };
       }
       return toolValue;
@@ -429,6 +582,11 @@ export function openaiToOpenAIResponsesRequest(
       ];
     }
   }
+  // Only Codex accepts this Responses extension; direct Zed translation shares this helper.
+  const summaryDelivery = toRecord(root.stream_options).reasoning_summary_delivery;
+  if (credentialRecord._provider === "codex" && summaryDelivery !== undefined) {
+    result.stream_options = { reasoning_summary_delivery: summaryDelivery };
+  }
   if (root.service_tier !== undefined) result.service_tier = root.service_tier;
   if (root.temperature !== undefined) result.temperature = root.temperature;
   // Translate max_tokens / max_completion_tokens → max_output_tokens for Responses API.
@@ -442,7 +600,12 @@ export function openaiToOpenAIResponsesRequest(
     result.max_output_tokens = root.max_tokens;
   }
   if (root.top_p !== undefined) result.top_p = root.top_p;
+  // A client's explicit tool-parallelism choice is a request control, not a Chat-only field.
+  if (typeof root.parallel_tool_calls === "boolean") {
+    result.parallel_tool_calls = root.parallel_tool_calls;
+  }
   mapChatResponseFormatToResponsesText(root, result);
+  ensureJsonObjectInputHint(result);
   // GPT-5 verbosity: Chat Completions `verbosity` → Responses `text.verbosity`.
   const chatVerbosity = normalizeVerbosity(root.verbosity);
   if (chatVerbosity) {
@@ -455,9 +618,24 @@ export function openaiToOpenAIResponsesRequest(
     const effort = normalizeResponsesReasoningEffort(root.reasoning_effort, model ?? root.model);
     if (effort && effort !== "none") {
       // Effort-only chat request: default a reasoning summary so the upstream
-      // streams thinking back (see the constant's note above).
-      result.reasoning = { effort, summary: DEFAULT_RESPONSES_REASONING_SUMMARY };
-      defaultedReasoningSummary = true;
+      // streams thinking back (see the constant's note above). For Codex-family
+      // models, preserve the effort-only request shape rather
+      // than adding an inferred summary and encrypted-content include. This
+      // compatibility path applies only to Chat-to-Responses translation.
+      if (isCodexModel(model ?? root.model)) {
+        result.reasoning = { effort };
+        // Tell the Codex executor not to re-add the defaults on the wire. Native
+        // Responses clients never carry this marker, so they keep their
+        // encrypted-reasoning continuity.
+        result[REASONING_SUMMARY_OPT_OUT_MARKER] = true;
+      } else if (credentialRecord._provider === "mistral") {
+        // Effort is all the chat client asked for, and the defaults below are
+        // OpenAI extras that nothing shows Mistral's preview endpoint accepts.
+        result.reasoning = { effort };
+      } else {
+        result.reasoning = { effort, summary: DEFAULT_RESPONSES_REASONING_SUMMARY };
+        defaultedReasoningSummary = true;
+      }
     } else if (effort) {
       result.reasoning = { effort };
     }

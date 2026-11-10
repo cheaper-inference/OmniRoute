@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+بالنسبة إلى `smart-routing`، تُعدّ `metadata.combo` تجاوزًا صريحًا لـ
+`metadata.model` في طلب البوابة؛ إذ تُرسل بوصفها `model` الفعلي،
+وليس بوصفها حقل JSON باسم `x-combo` يتم تجاهله. تظل مصادقة البوابة المعتادة باستخدام مفتاح API
+والتخويل الخاص بكل وجهة ساريين. وتُرفض أي توليفة غير صالحة أو فارغة.
+
+تعرض النتيجة `requested_combo` (قصد المستدعي)، و`dispatched_model`
+(طلب البوابة الفعلي)، و`response_model` (استجابة البوابة)، و
+`confirmed_combo`. يكون الحقل الأخير `null` ما لم تحدد البوابة
+توليفة بشكل صريح. تنسب سجلات قرارات A2A التنفيذ فقط إلى
+توليفة مؤكدة، مع الاحتفاظ بالطلب غير المؤكد باسم `requestedCombo`.
+
 **الاستجابة:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — البث عبر SSE
 
-يماثل `message/send`، لكنه يعيد أحداثًا يرسلها الخادم للبث في الوقت الفعلي.
+مماثل لـ `message/send`، لكنه يعيد أحداثًا مرسلة من الخادم للبث في الوقت الفعلي.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -148,70 +152,78 @@ curl -X POST http://localhost:20128/a2a \
 
 ## المهارات المتاحة
 
-يوفّر OmniRoute عددًا قدره 6 مهارات A2A مرتبطة في `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. توجد كل وحدة مهارة في `src/lib/a2a/skills/`.
+OmniRoute يكشف عن 6 مهارات A2A موصولة في `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. توجد كل وحدة مهارة في `src/lib/a2a/skills/`.
 
-| المهارة          | المعرّف              | الوصف                                                                                                                                                                      | الوسوم                       | أمثلة                              |
-| :--------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :--------------------------------- |
-| التوجيه الذكي    | `smart-routing`      | يوجّه مطالبة عبر المزوّد/التركيبة المثلى باستخدام محرك التركيبات في OmniRoute مع نظام التقييم                                                                              | التوجيه، المزوّدون           | "وجّه هذه المطالبة عبر أفضل نموذج" |
-| إدارة الحصص      | `quota-management`   | يعرض حالة الحصة لكل مزوّد، ويساعد المستدعين على تحديد وقت تقييد المعدل/التبديل                                                                                             | الحصص، المزوّدون             | "تحقق من حصة anthropic"            |
-| اكتشاف المزوّدين | `provider-discovery` | يسرد المزوّدين المثبّتين مع الإمكانات، ومؤشرات الطبقة المجانية، وحالة OAuth                                                                                                | المزوّدون، الاكتشاف          | "ما المزوّدون المتاحون؟"           |
-| تحليل التكلفة    | `cost-analysis`      | يقدّر تكلفة طلب/محادثة استنادًا إلى الكتالوج والاستخدام الحديث                                                                                                             | التكلفة، الاستخدام           | "قدّر تكلفة هذه المحادثة"          |
-| تقرير السلامة    | `health-report`      | يجمع حالة قاطع الدائرة، وفترة التهدئة، والإقفال لكل مزوّد                                                                                                                  | السلامة، المرونة             | "اعرض حالة سلامة جميع المزوّدين"   |
-| سرد الإمكانات    | `list-capabilities`  | يعيد كتالوج مهارات الوكيل الكامل المكوّن من 45 إدخالًا (23 لواجهة API و21 لواجهة CLI و1 للإعداد) كجدول markdown يحتوي على عناوين URL خام لملفات SKILL.md من أجل حقن السياق | الكتالوج، الاكتشاف، المهارات | "اسرد جميع إمكانات OmniRoute"      |
+| مهارة         | ID                   | وصف                                                                                                                                      | العلامات                     | أمثلة                                    |
+| :------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :--------------------------------------- |
+| التوجيه الذكي | `smart-routing`      | يقوم بتوجيه الموجه عبر provider/combo الأمثل باستخدام محرك التحرير والسرد + الخاص بـ OmniRoute                                           | التوجيه، مقدمي الخدمات       | "توجيه هذه المطالبة عبر أفضل نموذج"      |
+| إدارة الحصص   | `quota-management`   | تقارير حالة الحصص لكل مزود، تساعد المتصلين على تحديد متى throttle/switch                                                                 | الحصص، مقدمي الخدمات         | "التحقق من الحصص البشرية"                |
+| اكتشاف المزود | `provider-discovery` | يسرد موفري الخدمة المثبتين ذوي القدرات، وأعلام الطبقة المجانية، وحالة OAuth                                                              | مقدمي الخدمة، الاكتشاف       | "ما هي مقدمي الخدمات المتاحة؟"           |
+| تحليل التكلفة | `cost-analysis`      | تقدير تكلفة request/conversation بالنظر إلى كتالوج + الذي تم استخدامه مؤخرًا                                                             | التكلفة والاستخدام           | "تقدير التكلفة لهذه المحادثة"            |
+| تقرير الصحة   | `health-report`      | تجميع قاطع الدائرة الكهربائية وحالة التهدئة وحالة القفل لكل مزود                                                                         | الصحة والمرونة               | "إظهار الحالة الصحية لجميع مقدمي الخدمة" |
+| قائمة القدرات | `list-capabilities`  | إرجاع كتالوج مهارات الوكيل الكامل المكون من 45 إدخالًا (23 API + 21 CLI + 1 config) كجدول تخفيض السعر مع SKILL.md URLs الخام لحقن السياق | الكتالوج والاكتشاف والمهارات | "سرد جميع إمكانيات OmniRoute "           |
 
-> يجب إبقاء بطاقة الوكيل متوافقة مع الكتالوج الفعلي الذي يضم 352 مزوّدًا؛ وتُستمد أعداد المزوّدين والبيانات الوصفية الخاصة بالمجانية/عدم الحاجة إلى المصادقة من سجل وقت التشغيل.
+> يجب أن تظل بطاقة الوكيل متوافقة مع كتالوج الموفر المباشر 381؛ يتم الحصول على أعداد الموفرين وبيانات تعريف free/no-auth من سجل وقت التشغيل.
 
 ### تفاصيل مهارة `list-capabilities`
 
-تُعد مهارة `list-capabilities` مفيدة بوجه خاص للوكلاء الخارجيين الذين يحتاجون إلى اكتشاف ما يوفّره OmniRoute قبل إرسال استدعاءات API. وهي تعيد عنصرًا منظمًا على هيئة جدول markdown:
+تعتبر مهارة `list-capabilities` مفيدة بشكل خاص للعملاء الخارجيين الذين يحتاجون إلى اكتشاف ما يكشفه OmniRoute قبل إرسال مكالمات API. تقوم بإرجاع قطعة أثرية من جدول تخفيض السعر منظم:
 
 ```
-| المعرّف | الاسم | الفئة | المجال | نقاط النهاية/الأوامر | عنوان URL الخام |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | المصادقة والجلسات | api | المصادقة | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-يتضمن كل صف العمود `rawUrl` حتى تتمكن الوكلاء من جلب ملف SKILL.md الكامل فورًا. يعكس الحقل `metadata.totalSkills` حجم الكتالوج (45 حاليًا). التنفيذ: `src/lib/a2a/skills/listCapabilities.ts`. راجع أيضًا [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+يتضمن كل صف عمود `rawUrl` حتى يتمكن الوكلاء من جلب SKILL.md الكامل على الفور. يعكس الحقل `metadata.totalSkills` حجم الكتالوج (45 اليوم). التنفيذ : `src/lib/a2a/skills/listCapabilities.ts`. انظر أيضًا [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## واجهة REST API (مساعدة)
+## REST API (مساعد)
 
-نقطة نهاية JSON-RPC‏ `/a2a` هي نقطة الدخول الأساسية لـ A2A. توفّر نقاط نهاية REST أدناه وصولًا مساعدًا للوحات المعلومات والأدوات الخارجية:
+نقطة نهاية JSON-RPC `/a2a` هي نقطة دخول A2A الأساسية. توفر نقاط النهاية REST أدناه وصولاً مساعدًا للوحات المعلومات والأدوات الخارجية:
 
-| نقطة النهاية                 | الطريقة | الوصف                                                   | المصادقة                                        |
-| :--------------------------- | :------ | :------------------------------------------------------ | :---------------------------------------------- |
-| `/api/a2a/status`            | GET     | حالة الخادم، والمهارات المسجّلة                         | (عام)                                           |
-| `/api/a2a/tasks`             | GET     | سرد المهام باستخدام عوامل التصفية                       | إدارية                                          |
-| `/api/a2a/tasks/[id]`        | GET     | الحصول على المهمة حسب المعرّف                           | إدارية                                          |
-| `/api/a2a/tasks/[id]/cancel` | POST    | إلغاء مهمة قيد التشغيل                                  | إدارية                                          |
-| `/.well-known/agent.json`    | GET     | بطاقة الوكيل (اكتشاف A2A)                               | (عام، مخزّن مؤقتًا لمدة 3600s)                  |
-| `/api/a2a/tasks`             | POST    | تفويض وارد إلى أسطول OmniConductor‏ (Conductor PRD RF5) | Bearer مقابل `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| نقطة النهاية                 | طريقة | وصف                                                   | مصادقة                                                                                                     |
+| :--------------------------- | :---- | :---------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET   | حالة الخادم، المهارات المسجلة                         | (عام)                                                                                                      |
+| `/api/a2a/tasks`             | GET   | قائمة المهام مع المرشحات                              | الإدارة أو مفتاح API (انظر أدناه)                                                                          |
+| `/api/a2a/tasks/[id]`        | GET   | الحصول على المهمة بواسطة ID                           | الإدارة أو مفتاح API (انظر أدناه)                                                                          |
+| `/api/a2a/tasks/[id]/cancel` | POST  | إلغاء المهمة قيد التشغيل                              | الإدارة أو مفتاح API (انظر أدناه)                                                                          |
+| `/.well-known/agent.json`    | GET   | بطاقة الوكيل (اكتشاف A2A )                            | (عام، مخبأ 3600)                                                                                           |
+| `/api/a2a/tasks`             | POST  | الوفود الواردة إلى أسطول OmniConductor (موصل PRD RF5) | نفس `GET`، بالإضافة إلى `OMNIROUTE_API_KEY` إذا تم ضبطه أثناء إيقاف تشغيل `REQUIRE_API_KEY` ؛ `a2aEnabled` |
 
-**تفويض Conductor الوارد (`POST /api/a2a/tasks`):** تفوّض وكلاء A2A الخارجيون أعمال البرمجة إلى أسطول OmniConductor عبر OmniRoute. النص الأساسي: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — لا يمكن تفويض سوى مهارات أسطول Conductor (وهي المهارات المُعلنة في بطاقة الوكيل)؛ والحقل `metadata.conductor.repo.url` مطلوب (يعمل الأسطول على مستودعات git). يُترجم المسار إلى `POST /v1/tasks` الخاص بالمحور باستخدام `CONDUCTOR_ORCHESTRATOR_TOKEN` من جانب الخادم (مع الرجوع إلى `CONDUCTOR_HUB_TOKEN` كخيار بديل)، ويُرجع `201 { conductor_task_id, state: "submitted" }`؛ وتتدفق حالات المهام عائدةً عبر مرآة SSE→A2A‏ (RF1)، ويمكن عرضها عبر `GET /api/a2a/tasks?skill=conductor`.
+يعتمد من يصل إلى مسارات `/api/a2a/tasks*` على إعدادات تسجيل الدخول ومفتاح API:
+
+- `requireLogin=true` (افتراضي): تقبل البرامج الوسيطة فقط بيانات اعتماد الإدارة (جلسة لوحة المعلومات، ومفتاح `manage` -scope API ، ورمز وصول `oma_` ) و `OMNIROUTE_API_KEY`. يحصل مفتاح الاستدلال العادي على `403`. في رأس `Authorization` تأخذ البرمجيات الوسيطة `OMNIROUTE_API_KEY` كـ `Bearer <key>` فقط؛ مفتاح مكشوف أو علامة تبويب بعد أن يحصل `Bearer` على `401`.
+- `requireLogin=false` أو نافذة الاسترجاع قبل الانضمام: مع `REQUIRE_API_KEY=true` يتم قبول أي مفتاح OmniRoute API صالح أو بيانات اعتماد الإدارة ويحصل المتصلون المجهولون `401`؛ مع `REQUIRE_API_KEY` خارج الطرق مفتوحة.
+- يتطلب `POST /api/a2a/tasks` بالإضافة إلى ذلك `OMNIROUTE_API_KEY` في رأس `Authorization` عند تعيين هذا المتغير وإيقاف تشغيل `REQUIRE_API_KEY`. الرؤوس الأخرى، مثل `x-api-key`، لا يتم احتسابها هناك. مع تسجيل الخروج أو قبل الإعداد، يمر المفتاح ببادئة `Bearer` أو بدونها؛ مع تسجيل الدخول، فقط `Bearer <key>` يتجاوز البرامج الوسيطة.
+
+عندما تكون بيانات الاعتماد مطلوبة، فإن الرمز `read` -scope `oma_` يعمل فقط مع `GET`.
+
+**وفد الموصل الداخلي (`POST /api/a2a/tasks`):** يقوم وكلاء A2A الخارجيون بتفويض أعمال الترميز إلى أسطول OmniConductor من خلال OmniRoute. الجسم: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — فقط مهارات أسطول الموصلات (تلك المعلن عنها في بطاقة الوكيل) قابلة للتفويض؛ مطلوب `metadata.conductor.repo.url` (يعمل الأسطول على git repos). يترجم المسار إلى `POST /v1/tasks` للمركز باستخدام `CONDUCTOR_ORCHESTRATOR_TOKEN` من جانب الخادم (الاحتياطي `CONDUCTOR_HUB_TOKEN`) ويعيد `201 { conductor_task_id, state: "submitted" }`؛ تتدفق حالات المهمة مرة أخرى من خلال مرآة SSE→A2A (RF1) وتكون مرئية عبر `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
 ## إضافة مهارة جديدة
 
-1. **أنشئ ملف المهارة:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **إنشاء ملف المهارات:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   صدّر دالة غير متزامنة `(task: A2ATask) => Promise<{ artifacts, metadata }>`. اتبع بنية المهارات الموجودة مثل `smartRouting.ts`.
+   تصدير دالة غير متزامنة `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. اتبع شكل المهارات الموجودة مثل `smartRouting.ts`. إذا استدعت المهارة مرة أخرى OmniRoute عبر HTTP، فقم ببناء الرؤوس باستخدام `buildSelfLoopHeaders(caller)` من `src/lib/a2a/selfLoopAuth.ts` بحيث يتم تشغيل الاستدعاء باستخدام مفتاح المتصل A2A ، وليس `OMNIROUTE_API_KEY`، ومرر `redirect: "error"` إلى `fetch` حتى لا تحصل عملية إعادة التوجيه على المفتاح أبدًا. المساعد يبني الرؤوس فقط؛ تحدد كل مهارة سياسة إعادة التوجيه نفسها. إنها ترمي `UnsafeSelfLoopTargetError` بدلاً من إرفاق مفتاح عندما يكون URL الأساسي الذي تم حله هو http عادي خارج الشبكة الخاصة (لا بأس بالاسترجاع، واسم الحاوية أو الخدمة، والعناوين الخاصة) أو يحمل بيانات الاعتماد، لذا فإن المهارة التي تبتلع المكالمات المرفوضة يجب أن تعيد طرح هذا الخطأ.
 
-2. **سجّل المعالج:** في `src/lib/a2a/taskExecution.ts`، أضف إدخالًا إلى `A2A_SKILL_HANDLERS`:
+2. **سجل المعالج:** في `src/lib/a2a/taskExecution.ts`، قم بإضافة إدخال إلى `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...المهارات الموجودة
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **أظهرها في بطاقة الوكيل:** في `src/app/.well-known/agent.json/route.ts`، ألحق العنصر التالي بمصفوفة `skills`:
+3. **كشف في بطاقة الوكيل:** في `src/lib/a2a/agentCardMetadata.ts` (المشتركة بين `/.well-known/agent.json` و `/.well-known/agent-card.json`)، قم بإلحاق المصفوفة `skills` :
 
    ```json
    {
@@ -223,9 +235,9 @@ curl -X POST http://localhost:20128/a2a \
    }
    ```
 
-4. **اكتب الاختبارات:** `tests/unit/a2a-<your-skill>.test.ts`. غطِّ مسار النجاح ومسار الخطأ.
+4. **كتابة الاختبارات:** `tests/unit/a2a-<your-skill>.test.ts`. تغطية المسار السعيد مسار الخطأ +.
 
-5. **وثّق** المهارة الجديدة في جدول `Available Skills` بهذا الملف.
+5. **وثيقة** المهارة الجديدة في جدول `Available Skills` لهذا الملف.
 
 ---
 
@@ -264,7 +276,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ## أمثلة التكامل
 
-### Python ‏(requests)
+### بايثون (الطلبات)
 
 ```python
 import requests
@@ -283,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript ‏(fetch)
+### TypeScript (جلب)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

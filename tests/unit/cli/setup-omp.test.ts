@@ -38,9 +38,13 @@ function withTempHome(fn: (tmp: string) => Promise<void>) {
   return async () => {
     const prevHome = process.env.HOME;
     const prevCtx = process.env.OMNIROUTE_CONTEXT;
+    const prevAllow = process.env.OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE;
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "setup-omp-"));
     process.env.HOME = tmp;
     delete process.env.OMNIROUTE_CONTEXT;
+    // The temp HOME is the intended target: when the suite itself runs inside a
+    // container, the host-config guard would otherwise refuse the write (exit 2).
+    process.env.OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE = "1";
     try {
       await fn(tmp);
     } finally {
@@ -48,6 +52,8 @@ function withTempHome(fn: (tmp: string) => Promise<void>) {
       else process.env.HOME = prevHome;
       if (prevCtx === undefined) delete process.env.OMNIROUTE_CONTEXT;
       else process.env.OMNIROUTE_CONTEXT = prevCtx;
+      if (prevAllow === undefined) delete process.env.OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE;
+      else process.env.OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE = prevAllow;
       fs.rmSync(tmp, { recursive: true, force: true });
     }
   };

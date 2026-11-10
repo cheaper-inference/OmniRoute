@@ -11,21 +11,24 @@ const ENV_MATRIX: Record<string, string | undefined>[] = [
   {},
   { MAIN_SERVER_KEEPALIVE_TIMEOUT_MS: "70000" },
   { MAIN_SERVER_HEADERS_TIMEOUT_MS: "80000" },
+  { MAIN_SERVER_TCP_KEEPALIVE_MS: "45000" },
   { MAIN_SERVER_KEEPALIVE_TIMEOUT_MS: "90000", MAIN_SERVER_HEADERS_TIMEOUT_MS: "10000" },
-  { MAIN_SERVER_KEEPALIVE_TIMEOUT_MS: "0", MAIN_SERVER_HEADERS_TIMEOUT_MS: "0" },
+  {
+    MAIN_SERVER_KEEPALIVE_TIMEOUT_MS: "0",
+    MAIN_SERVER_HEADERS_TIMEOUT_MS: "0",
+    MAIN_SERVER_TCP_KEEPALIVE_MS: "0",
+  },
   { MAIN_SERVER_KEEPALIVE_TIMEOUT_MS: "abc" },
+  { MAIN_SERVER_TCP_KEEPALIVE_MS: "invalid" },
   { MAIN_SERVER_KEEPALIVE_TIMEOUT_MS: "  " },
   { MAIN_SERVER_KEEPALIVE_TIMEOUT_MS: "-5" },
+  { MAIN_SERVER_TCP_KEEPALIVE_MS: "-10" },
   { MAIN_SERVER_KEEPALIVE_TIMEOUT_MS: "1234.9" },
 ];
 
 test("sibling main-server-timeouts.mjs stays in parity with runtimeTimeouts.ts", () => {
   for (const env of ENV_MATRIX) {
-    assert.deepStrictEqual(
-      mjsImpl(env),
-      tsImpl(env),
-      `divergence for env ${JSON.stringify(env)}`
-    );
+    assert.deepStrictEqual(mjsImpl(env), tsImpl(env), `divergence for env ${JSON.stringify(env)}`);
   }
 });
 

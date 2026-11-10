@@ -4,46 +4,48 @@
 
 ---
 
-> Prótacal Gníomhaire le Gníomhaire v0.3 — OmniRoute mar ghníomhaire ródúcháin cliste
+> Prótacal Gníomhaire le Gníomhaire v0.3 — OmniRoute mar ghníomhaire ródaithe cliste
 
-Tá dhá aghaidh ar chomhéadan A2A:
+Tá dhá aghaidh ar dhromchla A2A:
 
-- **JSON-RPC 2.0** ag `POST /a2a` (an pointe iontrála caighdeánach, sainithe in `src/app/a2a/route.ts`).
+- **JSON-RPC 2.0** ag `POST /a2a` (an pointe iontrála canónach, sainithe in `src/app/a2a/route.ts`).
 - **REST** faoi `/api/a2a/*` le haghaidh deaiseanna agus uirlisí (stádas, liosta tascanna, cealú).
 
 Déanann `A2ATaskManager` (`src/lib/a2a/taskManager.ts`, TTL réamhshocraithe 5 nóiméad) tascanna a rianú. Seoltar scileanna trí `A2A_SKILL_HANDLERS` in `src/lib/a2a/taskExecution.ts`.
 
-## Fionnachtain Gníomhaire
+## Fionnachtain Gníomhairí
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Tugann sé an Cárta Gníomhaire ar ais a chuireann síos ar chumais, scileanna, agus riachtanais fhíordheimhnithe OmniRoute.
+Tugtar ar ais an Cárta Gníomhaire ina ndéantar cur síos ar chumais, scileanna agus riachtanais fíordheimhnithe OmniRoute.
 
-Tá réimse `version` an Chárta Gníomhaire tógtha ó `process.env.npm_package_version` (féach `src/app/.well-known/agent.json/route.ts:13`), mar sin fanann sé uathshioncronaithe le `package.json` ar gach scaoileadh.
+Faightear réimse `version` an Chárta Gníomhaire ó `process.env.npm_package_version` (féach `src/app/.well-known/agent.json/route.ts:13`), mar sin fanann sé sioncronaithe go huathoibríoch le `package.json` le gach eisiúint.
 
 ---
 
 ## Fíordheimhniú
 
-Éilíonn gach iarratas `/a2a` eochair API trí cheanntásc `Authorization`:
+Teastaíonn eochair API ó gach iarratas `/a2a` tríd an gceanntásc `Authorization`:
 
 ```
 Authorization: Bearer YOUR_OMNIROUTE_API_KEY
 ```
 
-Mura bhfuil aon eochair API cumraithe ar an bhfreastalaí, déantar fíordheimhniú a sheachaint.
+Mura bhfuil aon eochair API cumraithe ar an bhfreastalaí, seachnaítear an fíordheimhniú.
 
 ## Cumasú
 
-Rialaítear A2A ag an scorán **Endpoints → A2A** agus tá sé díchumasaithe de réir réamhshocraithe. Nuair a bhíonn sé díchumasaithe, tuairiscíonn `GET /api/a2a/status` `status: "disabled"` agus `online: false`; tugann glaonna JSON-RPC ar `POST /a2a` HTTP 503 ar ais le cód earráide JSON-RPC `-32000`.
+Rialaítear A2A leis an scorán **Críochphointí → A2A** agus tá sé díchumasaithe de réir réamhshocraithe. Nuair atá sé díchumasaithe,
+tuairiscíonn `GET /api/a2a/status` `status: "disabled"` agus `online: false`; tugann glaonna JSON-RPC chuig
+`POST /a2a` HTTP 503 ar ais le cód earráide JSON-RPC `-32000`.
 
 ---
 
 ## Modhanna JSON-RPC 2.0
 
-### `message/send` — Forghníomhú Sioncrónach
+### `message/send` — Forghníomhú Sioncronach
 
 Seolann sé teachtaireacht chuig scil agus fanann sé leis an bhfreagra iomlán.
 
@@ -63,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+I gcás `smart-routing`, is sárú sainráite ar
+`metadata.model` é `metadata.combo` don iarratas geata; seoltar é mar an fíor-`model`,
+seachas mar réimse JSON `x-combo` a ndéantar neamhaird de. Tá gnáthúdarú na heochrach API agus
+an t-údarú de réir sprice ag an ngeata fós i bhfeidhm. Diúltaítear teaglaim neamhbhailí nó folamh.
+
+Nochtann an toradh `requested_combo` (rún an ghlaoiteora), `dispatched_model`
+(an t-iarratas geata iarbhír), `response_model` (freagra an gheata) agus
+`confirmed_combo`. Is é `null` an réimse deireanach mura sainaithníonn an geata
+teaglaim go sainráite. Ní chuireann logaí cinnteoireachta A2A an forghníomhú i leith
+teaglaim ach amháin má tá sí deimhnithe, agus coinnítear iarratas neamhdheimhnithe mar `requestedCombo`.
+
 **Freagra:**
 
 ```json
@@ -74,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -97,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Sruthú SSE
 
-Mar an gcéanna le `message/send` ach tugann sé Server-Sent Events ar ais le haghaidh sruthú fíor-ama.
+Mar an gcéanna le `message/send`, ach seoltar Imeachtaí arna Seoladh ag an bhFreastalaí ar ais le haghaidh sruthú fíor-ama.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -124,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Fiosrú Stádas Tasc
+### `tasks/get` — Fiosraigh Stádas Taisc
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -133,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Cealú Tasc
+### `tasks/cancel` — Cealaigh Tasc
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -144,50 +150,58 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Scileanna ar Fáil
+## Scileanna atá ar Fáil
 
-Léiríonn OmniRoute 6 scileanna A2A wired i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Tá gach modúl scileanna i `src/lib/a2a/skills/`.
+nochtar OmniRoute 6 scil A2A sreangaithe i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Cónaíonn gach modúl scile i `src/lib/a2a/skills/`.
 
-| Scileanna           | ID                   | Cur Síos                                                                                                                                                                   | Clibeanna                  | Samplaí                                             |
-| :------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :-------------------------------------------------- |
-| Ródáil Chliste      | `smart-routing`      | Ródálann sé luaidh trí an soláthraí/comhoibriú is fearr ag baint úsáide as inneall comhoibriú OmniRoute + scóráil                                                          | ródáil, soláthraithe       | "Ródáil an t-aiomhrá seo tríd an tsamhail is fearr" |
-| Bainistíocht Cuóta  | `quota-management`   | Tuairiscíonn stádas cuóta in aghaidh an tsoláthraí, cuidíonn sé le glaoiteoirí a chinneadh cathain a dhéanamh rialú/athrú                                                  | cuóta, soláthraithe        | "Seiceáil cuóta do anthropic"                       |
-| Aimsiú Soláthraithe | `provider-discovery` | Liostann soláthraithe suiteáilte le cumais, bratacha saor-tléibhse, stádas OAuth                                                                                           | soláthraithe, aimsiú       | "Cén soláthraithe atá ar fáil?"                     |
-| Anailís Costais     | `cost-analysis`      | Measann costas iarratais/comhrá agus an catalóg le húsáid le déanaí                                                                                                        | costas, úsáid              | "Meas costas don chomhrá seo"                       |
-| Tuairisc Sláinte    | `health-report*      | Comhtháthaíonn sé briseadh circuit, fuarú, stádas glasála in aghaidh an tsoláthraí                                                                                         | sláinte, athléimneacht     | "Taispeáin stádas sláinte na soláthróirí uile"      |
-| Liostú Cumais       | `list-capabilities`  | Filleann sé tábla marcála iomlán 45 iontráil de Chatalóg Scileanna an tseibhse (23 API + 21 CLI + 1 cumraíocht) le URLanna RAW SKILL.md le haghaidh instealladh comhthéacs | catalóg, aimsiú, scileanna | "Liostaigh cumais OmniRoute go léir"                |
+| Scil                   | ID                   | Cur síos                                                                                                                                                                       | Clibeanna                        | Samplaí                                     |
+| :--------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------ |
+| Ródú Cliste            | `smart-routing`      | Bealaí leid tríd an provider/combo optamach ag baint úsáide as scóráil inneall teaglama + OmniRoute                                                                            | ródú, soláthraithe               | "Rótáil an leid seo tríd an múnla is fearr" |
+| Bainistíocht Cuóta     | `quota-management`   | Cabhraíonn tuairiscí in aghaidh an tsoláthraí de réir an chuóta, le glaoiteoirí cinneadh a dhéanamh cén uair ba cheart dóibh throttle/switch a dhéanamh                        | cuóta, soláthraithe              | "Seiceáil cuóta le haghaidh antraipeach"    |
+| Fionnachtain Soláthraí | `provider-discovery` | Liostaíonn soláthraithe suiteáilte le cumais, bratacha saorshraith, stádas OAuth                                                                                               | soláthraithe, fionnachtana       | "Cad iad na soláthraithe atá ar fáil?"      |
+| Anailís Costas         | `cost-analysis`      | Meastacháin ar chostas request/conversation i bhfianaise na húsáide a úsáideadh le déanaí sa chatalóg +                                                                        | costas, úsáid                    | "Meastachán ar an gcostas don chomhrá seo"  |
+| Tuarascáil Sláinte     | `health-report`      | Comhiomláin scoradáin chiorcaid, fuarú, staid frithdhúnadh in aghaidh an tsoláthraí                                                                                            | sláinte, athléimneacht           | "Taispeáin stádas sláinte gach soláthraí"   |
+| Cumais Liosta          | `list-capabilities`  | Seoltar ar ais an chatalóg iomlán 45-iontráil Scileanna Gníomhaire (23 API + 21 CLI + 1 config) mar tábla marcála síos le amh SKILL.md URLs le haghaidh instealladh comhthéacs | catalóg, fionnachtain, scileanna | "Liostaigh gach acmhainn OmniRoute "        |
 
-> Ba cheart go mbeadh Chairt an tSeibhse ailínithe le catalóg reatha 352 soláthraí; tagann líon na soláthróirí agus metadata saor/an-údaraithe ó chlár rith.
+> Ba cheart an Cárta Gníomhaire a choinneáil ar chomhréim leis an gcatalóg bheo 381 soláthraí; Faightear comhaireamh soláthraithe agus meiteashonraí free/no-auth ón gclár ama rite.
 
-### Sonraí Scileanna `list-capabilities`
+### `list-capabilities` Scil Sonraigh
 
-Tá an scileanna `list-cumas` úsáideach go háirithe d'heimhneáin sheachtracha a bhfuil gá acu aimsiú cad a nochann OmniRoute sula seolann siad glaonna API. Filleann sé tábla marcála struchtúrtha:
+Tá an scil `list-capabilities` úsáideach go háirithe do ghníomhairí seachtracha ar gá dóibh a fháil amach cad a nochtar OmniRoute roimh ghlaonna API a sheoladh. Tugann sé déantán tábla marcála síos struchtúrtha ar ais:
 
 ```
-| ID | Ainm | Catagóir | Limistéar | Deireadhanna/Ceanna | URL RAW |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Údarú & Seisiúin | api | údarú | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Tá colún `rawUrl i ngach ró ionas gur féidir le heimhneáin an SKILL.md iomlán a fháil láithreach. Scáileán `metadata.totalSkills`scáileanna méid an chatalóig (45 inniu). Tá feidhmiúcháin i`src/lib/a2a/skills/listCapabilities.ts`. Féach freisin [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Cuimsíonn gach sraith an colún `rawUrl` ionas gur féidir le gníomhairí an SKILL.md iomlán a fháil láithreach. Is ionann an réimse `metadata.totalSkills` agus méid na catalóige (45 inniu). Cur i bhfeidhm: `src/lib/a2a/skills/listCapabilities.ts`. Féach freisin [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
 ## REST API (cúnta)
 
-Is é an pointe deiridh JSON-RPC `/a2a` an príomhbhealach isteach A2A. Soláthraíonn na pointí deiridh REST thíos rochtain chúnta do dheais agus d'uirlisí seachtracha:
+Is é an críochphointe JSON-RPC `/a2a` an pointe iontrála canonical A2A. Soláthraíonn na críochphointí REST thíos rochtain chúnta ar dheais agus ar uirlisí seachtracha:
 
-| Pointe deiridh               | Modh | Cur síos                                                            | Údarú                                        |
-| :--------------------------- | :--- | :------------------------------------------------------------------ | :------------------------------------------- |
-| `/api/a2a/status`            | GET  | Stádas freastalaí, scileanna cláraithe                              | (poiblí)                                     |
-| `/api/a2a/tasks`             | GET  | Liostaigh tascanna le scagairí                                      | bainistíocht                                 |
-| `/api/a2a/tasks/[id]`        | GET  | Faigh tasc de réir ID                                               | bainistíocht                                 |
-| `/api/a2a/tasks/[id]/cancel` | POST | Cealaigh tasc atá ar siúl                                           | bainistíocht                                 |
-| `/.well-known/agent.json`    | GET  | Cárta Gníomhaire (aimsiú A2A)                                       | (poiblí, i dtaisce 3600s)                    |
-| `/api/a2a/tasks`             | POST | Tarmligean isteach chuig cabhlach OmniConductor (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Críochphointe                | Modh | Cur síos                                                                  | Údar                                                                                                            |
+| :--------------------------- | :--- | :------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET  | Stádas freastalaí, scileanna cláraithe                                    | (poiblí)                                                                                                        |
+| `/api/a2a/tasks`             | GET  | Déan liosta de na tascanna le scagairí                                    | eochair bainistíochta nó API (féach thíos)                                                                      |
+| `/api/a2a/tasks/[id]`        | GET  | Faigh tasc ag ID                                                          | eochair bainistíochta nó API (féach thíos)                                                                      |
+| `/api/a2a/tasks/[id]/cancel` | POST | Cealaigh tasc reatha                                                      | eochair bainistíochta nó API (féach thíos)                                                                      |
+| `/.well-known/agent.json`    | GET  | Cárta Gníomhaire (A2A discovery)                                          | (poiblí, i dtaisce 3600í)                                                                                       |
+| `/api/a2a/tasks`             | POST | Toscaireacht isteach chuig an gcabhlach OmniConductor ( Seoltóir PRD RF5) | mar an gcéanna le `GET`, móide `OMNIROUTE_API_KEY` má shocraítear é agus `REQUIRE_API_KEY` múchta; `a2aEnabled` |
 
-**Tarmligean Conductor isteach (`POST /api/a2a/tasks`):** tarmligann gníomhairí seachtracha A2A obair chódaithe chuig cabhlach OmniConductor trí OmniRoute. Comhlacht: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ní féidir ach scileanna cabhlaigh Conductor (na cinn a fhógraítear ar an gCárta Gníomhaire) a tharmligean; tá `metadata.conductor.repo.url` riachtanach (oibríonn an cabhlach ar stórtha git). Aistríonn an bealach go dtí `POST /v1/tasks` an mhoil ag úsáid `CONDUCTOR_ORCHESTRATOR_TOKEN` ar an taobh freastalaí (titim ar ais go `CONDUCTOR_HUB_TOKEN`) agus filleann sé `201 { conductor_task_id, state: "submitted" }`; sníonn stáit tasc ar ais tríd an scáthán SSE→A2A (RF1) agus tá siad le feiceáil trí `GET /api/a2a/tasks?skill=conductor`.
+Braitheann an té a théann tríd na bealaí `/api/a2a/tasks*` ar an logáil isteach agus ar na socruithe eochair-API:
+
+- `requireLogin=true` (réamhshocraithe): ní admhaíonn an middleware ach dintiúir bhainistíochta (seisiún painéal, eochair `manage` -scope API, comhartha rochtana `oma_` ) agus `OMNIROUTE_API_KEY`. Faigheann eochair tátail shimplí `403`. Sa cheanntásc `Authorization` ní thógann an lárearraí ach `OMNIROUTE_API_KEY` mar `Bearer <key>`; eochair lom nó cluaisín tar éis `Bearer` a fháil `401`.
+- `requireLogin=false`, nó an fhuinneog loopback roimh dul ar bord: le `REQUIRE_API_KEY=true` glactar le haon eochair OmniRoute API bailí nó le creidiúint bhainistíochta agus faigheann glaoiteoirí gan ainm `401`; le `REQUIRE_API_KEY` amach tá na bealaí oscailte.
+- Éilíonn `POST /api/a2a/tasks` freisin `OMNIROUTE_API_KEY` sa cheanntásc `Authorization` nuair a bhíonn an athróg sin socraithe agus `REQUIRE_API_KEY` múchta. Ní áirítear ceanntásca eile, mar shampla `x-api-key`, ann. Nuair a logáil isteach as nó roimh dul ar bord an eochair Gabhann le nó gan réimír `Bearer` ; le logáil isteach, ní théann ach `Bearer <key>` thar na hearraí lár.
+
+I gcás ina bhfuil dintiúr ag teastáil, ní oibríonn comhartha `read` -scope `oma_` ach do `GET`.
+
+**Toscaireacht Seoltóra Isteach (`POST /api/a2a/tasks`) :** Déanann gníomhairí seachtracha A2A obair códaithe a tharmligean chuig an gcabhlach OmniConductor trí OmniRoute. Comhlacht: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — amháin Tá scileanna cabhlaigh seoltóra (na cinn a fógraíodh ar an gCárta Gníomhaire) inchurtha; `metadata.conductor.repo.url` ag teastáil (oibríonn an cabhlach ar git repos). Aistríonn an bealach go `POST /v1/tasks` an mhoil ag baint úsáide as an taobh freastalaí `CONDUCTOR_ORCHESTRATOR_TOKEN` ( fallback `CONDUCTOR_HUB_TOKEN`) agus filleann `201 { conductor_task_id, state: "submitted" }`; Sníonn na tascstáit ar ais tríd an scáthán SSE→A2A (RF1) agus tá siad le feiceáil trí `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
@@ -195,94 +209,96 @@ Is é an pointe deiridh JSON-RPC `/a2a` an príomhbhealach isteach A2A. Soláthr
 
 1. **Cruthaigh comhad scile:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Easpórtáil feidhm async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Lean cruth na scileanna atá ann cheana mar `smartRouting.ts`.
+   Easpórtáil feidhm asincréite `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Lean cruth na scileanna atá ann cheana féin mar `smartRouting.ts`. Má ghlaonn an scil ar ais go OmniRoute thar HTTP, tóg na ceanntásca le `buildSelfLoopHeaders(caller)` ó `src/lib/a2a/selfLoopAuth.ts` ionas go n-imíonn an glao le heochair an ghlaoiteora A2A, ní `OMNIROUTE_API_KEY`, agus pas `redirect: "error"` go `fetch` ionas nach bhfaighidh atreorú an eochair riamh. Ní thógann an cúntóir ach ceanntásca; leagann gach scil síos an polasaí atreoraithe féin. Caitheann sé `UnsafeSelfLoopTargetError` seachas eochair a cheangal nuair a bhíonn an bonn réitithe URL soiléir http lasmuigh den líonra príobháideach (lúb siar, ainm coimeádán nó seirbhíse, agus seoltaí príobháideacha go breá) nó nuair a bhíonn dintiúir aige, agus mar sin ní mór do scil a shlogann glaonna diúltaithe an earráid sin a athmhúnlú.
 
-2. **Cláraigh an láimhseálaí:** in `src/lib/a2a/taskExecution.ts`, cuir iontráil le `A2A_SKILL_HANDLERS`:
+2. **Láimhseálaí clárúcháin:** in `src/lib/a2a/taskExecution.ts`, cuir iontráil le `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...scileanna atá ann cheana
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Nocht ar an gCárta Gníomhaire:** in `src/app/.well-known/agent.json/route.ts`, ceangail leis an eagar `skills`:
+3. **Nochtadh i gCárta Gníomhaire:** in `src/lib/a2a/agentCardMetadata.ts` (roinnte ag `/.well-known/agent.json` agus `/.well-known/agent-card.json`), cuir leis an eagar `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Do Scil",
-     "description": "Cur síos gairid, dírithe ar intinn",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Sampla de ghlaoch teanga nádúrtha"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Scríobh tástálacha:** `tests/unit/a2a-<your-skill>.test.ts`. Clúdaigh an cosán sona + cosán earráide.
+4. **Scríobh trialacha:** `tests/unit/a2a-<your-skill>.test.ts`. Clúdach cosán sásta conair earráide +.
 
-5. **Doiciméadaigh** an scil nua i dtábla `Scileanna ar Fáil` an chomhaid seo.
-
-## TTL Tascanna
-
-Imíonn tascanna tar éis `ttlMinutes` (réamhshocrú 5 nóiméad) — coinnítear é seo i gcoinneoir tógála `A2ATaskManager` ag `src/lib/a2a/taskManager.ts:82`. Chun é a shaincheapadh, déan fork ar instaint `A2ATaskManager` agus tabhair luach éagsúil (m.sh., `new A2ATaskManager(15)` le haghaidh TTL 15 nóiméad). Déanann eatramh cúltaca glanadh ar thascanna imithe in éag gach 60 soicind.
+5. **Doiciméad** an scil nua i dtábla `Available Skills` an chomhaid seo.
 
 ---
 
-## Saolré Tascanna
+## TTL an Taisc
+
+Téann tascanna in éag tar éis `ttlMinutes` (5 nóiméad de réir réamhshocraithe) — cumraithe i gcruthaitheoir `A2ATaskManager` ag `src/lib/a2a/taskManager.ts:82`. Chun é seo a shaincheapadh, forcáil tionscnamh `A2ATaskManager` agus cuir luach difriúil ar aghaidh (m.sh., `new A2ATaskManager(15)` le haghaidh TTL 15 nóiméad). Glanann eatramh cúlra na tascanna atá imithe in éag gach 60 soicind.
+
+---
+
+## Saolré an Taisc
 
 ```
-→ áirithe → ag obair → críochnaithe
-                  → theip
-                  → cealaithe
+curtha isteach → ar siúl → críochnaithe
+                         → teipthe
+                         → curtha ar ceal
 ```
 
-- Imíonn tascanna i ndiaidh 5 nóiméad de réir réamhshocraithe (féach [TTL Tascanna](#ttl-tascanna))
-- Stáit deiridh: `críochnaithe`, `theip`, `cealaithe`
-- Rianaíonn loga imeartha gach athrú stáit
+- Téann tascanna in éag tar éis 5 nóiméad de réir réamhshocraithe (féach [TTL an Taisc](#task-ttl))
+- Staideanna deiridh: `completed`, `failed`, `cancelled`
+- Rianaíonn loga na dteagmhas gach aistriú staide
 
 ---
 
-## Códanna Earráide
+## Cóid Earráide
 
-| Cód     | Ciall                                   |
-| :------ | :-------------------------------------- |
-| -32700  | Earráid pharsála (JSON neamhcheadaithe) |
-| -32600  | Iarratas neamhcheadaithe / Unauthorized |
-| -32601  | Modh nó scile gan aimsiú                |
-| -32602  | Paraiméadair neamhcheadaithe            |
-| - 32603 | Earráid inmheánach                      |
-| -32000  | Tá críochfort A2A díchumasaithe         |
+| Cód    | Brí                                   |
+| :----- | :------------------------------------ |
+| -32700 | Earráid pharsála (JSON neamhbhailí)   |
+| -32600 | Iarratas neamhbhailí / Neamhúdaraithe |
+| -32601 | Modh nó scil gan aimsiú               |
+| -32602 | Paraiméadair neamhbhailí              |
+| -32603 | Earráid inmheánach                    |
+| -32000 | Tá críochphointe A2A díchumasaithe    |
 
 ---
 
-## Samplaí Comhtháthúcháin
+## Comhtháthú Samplaí
 
-### Python (requests)
+### Python (iarratais)
 
 ```python
 import requests
 
-freagra = requests.post("http://localhost:20128/a2a", json={
+resp = requests.post("http://localhost:20128/a2a", json={
     "jsonrpc": "2.0", "id": "1",
     "method": "message/send",
     "params": {
         "skill": "smart-routing",
-        "messages": [{"role": "user", "content": "Dia dhuit"}]
+        "messages": [{"role": "user", "content": "Hello"}]
     }
 }, headers={"Authorization": "Bearer YOUR_KEY"})
 
-toradh = freagra.json()["result"]
-print(toradh["artifacts"][0]["content"])
-print(toradh["metadata"]["routing_explanation"])
+result = resp.json()["result"]
+print(result["artifacts"][0]["content"])
+print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (faigh)
 
 ```typescript
-const freagra = await fetch("http://localhost:20128/a2a", {
+const resp = await fetch("http://localhost:20128/a2a", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -294,10 +310,10 @@ const freagra = await fetch("http://localhost:20128/a2a", {
     method: "message/send",
     params: {
       skill: "smart-routing",
-      messages: [{ role: "user", content: "Dia dhuit" }],
+      messages: [{ role: "user", content: "Hello" }],
     },
   }),
 });
-const { result } = await freagra.json();
+const { result } = await resp.json();
 console.log(result.metadata.routing_explanation);
 ```

@@ -10,7 +10,7 @@ import assert from "node:assert/strict";
 
 const { classifyErrorText, parseRetryFromErrorText, checkFallbackError, getProviderProfile } =
   await import("../../open-sse/services/accountFallback.ts");
-const { isSubscriptionQuotaText } =
+const { isSubscriptionQuotaText, isClaudeModelCreditEntitlementText } =
   await import("../../open-sse/services/quotaTextCooldowns.ts");
 const { RateLimitReason } = await import("../../open-sse/config/constants.ts");
 
@@ -134,4 +134,74 @@ test("#2321 generic 429 without quota keyword still gets the short cooldown path
     out.cooldownMs < 5 * 60 * 1000,
     `expected short cooldown (<5min), got ${out.cooldownMs}ms`
   );
+});
+
+// Claude returns this 429 once the account's monthly extra-usage spend cap is reached. It is a
+// long-window quota (it clears when the billing month rolls over or the cap is raised), so the
+// connection must be parked for the subscription cooldown instead of being retried every few seconds.
+const MONTHLY_SPEND_LIMIT_TEXT =
+  "This request would exceed your account's monthly spend limit. Please try again later.";
+
+test("Claude monthly spend limit text is subscription quota only for Claude", () => {
+  assert.equal(isSubscriptionQuotaText(MONTHLY_SPEND_LIMIT_TEXT.toLowerCase(), "claude"), true);
+  assert.equal(isSubscriptionQuotaText(MONTHLY_SPEND_LIMIT_TEXT.toLowerCase(), "codex"), false);
+});
+
+test("Claude monthly spend limit 429 gets the subscription quota cooldown", () => {
+  const out = checkFallbackError(429, MONTHLY_SPEND_LIMIT_TEXT, 0, null, "claude");
+  assert.equal(out.shouldFallback, true);
+  assert.equal(out.reason, RateLimitReason.QUOTA_EXHAUSTED);
+  assert.ok(out.cooldownMs >= 5 * 60 * 1000, `expected long cooldown, got ${out.cooldownMs}ms`);
+});
+
+test("Claude per-minute rate limit text is not mistaken for the monthly spend limit", () => {
+  const out = checkFallbackError(
+    429,
+    "rate_limit_error: 50 requests per minute",
+    0,
+    null,
+    "claude"
+  );
+  assert.ok(out.cooldownMs < 5 * 60 * 1000, `expected short cooldown, got ${out.cooldownMs}ms`);
+});
+
+const MODEL_CREDIT_ENTITLEMENT_TEXT = "[429]: Usage credits are required for this model.";
+
+test("#18058: model-credit entitlement is a Claude-only long-window quota", () => {
+  assert.equal(
+    isSubscriptionQuotaText(MODEL_CREDIT_ENTITLEMENT_TEXT.toLowerCase(), "claude"),
+    true
+  );
+  for (const provider of ["codex", "antigravity", "gemini", "anthropic", undefined]) {
+    assert.equal(
+      isSubscriptionQuotaText(MODEL_CREDIT_ENTITLEMENT_TEXT.toLowerCase(), provider),
+      false,
+      String(provider)
+    );
+  }
+  assert.equal(isClaudeModelCreditEntitlementText(MODEL_CREDIT_ENTITLEMENT_TEXT), true);
+  assert.equal(isClaudeModelCreditEntitlementText(null), false);
+  assert.equal(isClaudeModelCreditEntitlementText(undefined), false);
+  assert.equal(isSubscriptionQuotaText("requests per minute limit reached", "claude"), false);
+});
+
+test("#18058: model entitlement 429 uses hour-scale quota, not short retry or depleted wallet", () => {
+  const result = checkFallbackError(429, MODEL_CREDIT_ENTITLEMENT_TEXT, 0, null, "claude");
+  assert.equal(result.shouldFallback, true);
+  assert.equal(result.reason, RateLimitReason.QUOTA_EXHAUSTED);
+  assert.equal(result.cooldownMs, 60 * 60 * 1000);
+  assert.notEqual(result.creditsExhausted, true, "one-model entitlement is not account-wide debt");
+  assert.notEqual(result.permanent, true);
+});
+
+test("#18058: unrelated Claude rate-limit 429 stays transient", () => {
+  const result = checkFallbackError(
+    429,
+    "rate_limit_error: 50 requests per minute",
+    0,
+    null,
+    "claude"
+  );
+  assert.equal(result.shouldFallback, true);
+  assert.ok(result.cooldownMs < 5 * 60 * 1000);
 });

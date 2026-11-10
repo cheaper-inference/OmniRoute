@@ -10,16 +10,16 @@
 
 ## Apa Itu Penyedia?
 
-Bayangkan penyedia seperti **operator seluler**. Sama seperti Anda memerlukan operator seluler untuk melakukan panggilan, Anda memerlukan penyedia AI untuk menggunakan model AI. OmniRoute seperti ponsel yang berfungsi dengan **semua operator** — Anda dapat beralih di antara mereka secara otomatis.
+Bayangkan penyedia seperti **operator seluler**. Sama seperti Anda memerlukan operator seluler untuk melakukan panggilan, Anda memerlukan penyedia AI untuk menggunakan model AI. OmniRoute seperti ponsel yang dapat digunakan dengan **semua operator** — Anda dapat beralih di antara mereka secara otomatis.
 
 ### Jenis Penyedia
 
-| Jenis          | Pengertiannya                 | Contoh                            | Biaya                      |
-| -------------- | ----------------------------- | --------------------------------- | -------------------------- |
-| **Gratis**     | Tidak memerlukan pembayaran   | Kiro, OpenCode Free, Pollinations | $0                         |
-| **Kunci API**  | Anda memerlukan kunci API     | OpenAI, Anthropic, Google         | Bayar sesuai pemakaian     |
-| **OAuth**      | Masuk dengan akun Anda        | Claude Code, GitHub Copilot       | Langganan                  |
-| **Cookie Web** | Menggunakan sesi browser Anda | ChatGPT Web (Codex), Gemini Web   | $0 (menggunakan akun Anda) |
+| Jenis          | Pengertiannya                 | Contoh                          | Biaya                      |
+| -------------- | ----------------------------- | ------------------------------- | -------------------------- |
+| **Gratis**     | Tidak memerlukan pembayaran   | Kiro, Pollinations              | $0                         |
+| **Kunci API**  | Anda memerlukan kunci API     | OpenAI, Anthropic, Google       | Bayar sesuai penggunaan    |
+| **OAuth**      | Masuk dengan akun Anda        | Claude Code, GitHub Copilot     | Langganan                  |
+| **Cookie Web** | Menggunakan sesi browser Anda | ChatGPT Web (Codex), Gemini Web | $0 (menggunakan akun Anda) |
 
 ### Penyedia Cookie Web
 
@@ -28,17 +28,11 @@ Lihat **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** untuk petunjuk penyiapan 
 
 ## Mulai Cepat: Hubungkan Penyedia Pertama Anda
 
-### Penyiapan penyedia gratis saat penggunaan pertama yang bersifat opsional
+### Penyiapan opsional penyedia gratis saat pertama kali dijalankan
 
-Wizard penggunaan pertama menyediakan kartu **Siapkan penyedia gratis** secara eksplisit. Wizard tersebut menentukan daftar
-penyedia yang memenuhi syarat saat ini dari registri penyedia tanpa autentikasi OmniRoute, lalu memungkinkan Anda meninjau dan membatalkan pilihan setiap
-penyedia sebelum mengonfirmasi. OmniRoute menampilkan pemberitahuan peringatan penyedia dan tautan ke situsnya
-agar Anda dapat meninjau terlebih dahulu ketentuan pihak ketiga, privasi, ketersediaan, dan batas laju.
+Wizard saat pertama kali dijalankan menyediakan kartu **Siapkan penyedia gratis** secara eksplisit. Wizard ini mengambil daftar penyedia yang saat ini memenuhi syarat dari registri penyedia tanpa autentikasi OmniRoute, lalu memungkinkan Anda meninjau dan membatalkan pilihan setiap penyedia sebelum mengonfirmasi. OmniRoute menampilkan pemberitahuan peringatan dari penyedia dan tautan ke situsnya agar Anda dapat terlebih dahulu meninjau ketentuan pihak ketiga, privasi, ketersediaan, dan batas penggunaan.
 
-Tindakan ini bersifat opsional: menyelesaikan wizard tidak pernah membuat koneksi penyedia gratis secara diam-diam.
-Tindakan ini hanya membuat penyedia yang masih belum tersedia, membiarkan koneksi yang telah disesuaikan
-tetap utuh, serta melaporkan penyedia yang berhasil dibuat, telah dikonfigurasi, dan gagal secara individual. Anda dapat
-mencoba kembali hanya penyedia yang gagal setelah memperoleh hasil sebagian.
+Tindakan ini bersifat opsional: menyelesaikan wizard tidak pernah membuat koneksi penyedia gratis secara diam-diam. Wizard hanya membuat penyedia yang masih belum tersedia, membiarkan koneksi yang telah disesuaikan tetap tidak berubah, serta melaporkan secara terpisah penyedia yang berhasil dibuat, telah dikonfigurasi, dan gagal. Setelah mendapatkan hasil parsial, Anda dapat mencoba ulang hanya penyedia yang gagal dengan aman.
 
 ### Opsi A: Penyedia Gratis (Tanpa Kartu Kredit)
 
@@ -46,14 +40,13 @@ mencoba kembali hanya penyedia yang gagal setelah memperoleh hasil sebagian.
 2. Buka **Penyedia** → **Tambahkan Penyedia**
 3. Pilih salah satu penyedia gratis berikut:
    - **Kiro AI** — Model Claude gratis (tidak memerlukan autentikasi)
-   - **OpenCode Free** — Model GPT gratis (tidak memerlukan autentikasi)
-   - **Pollinations** — GPT-5, Claude, dan Gemini gratis (tidak memerlukan kunci)
-   - **LongCat** — 10 juta token gratis (hibah satu kali, memerlukan akun + KYC)
-   - **Cloudflare AI** — Lebih dari 50 model, 10 ribu neuron/hari
+   - **Pollinations** — GPT-5, Claude, Gemini gratis (tidak memerlukan kunci)
+   - **LongCat** — 10 juta token gratis (pemberian satu kali, memerlukan akun + KYC)
+   - **Cloudflare AI** — 50+ model, 10 ribu neuron/hari
    - **MLX Gemma 26B** — Model Apple Silicon lokal (~38,5 token/dtk, ~15,9 GB RAM)
    - **MLX Qwen 3.8 27B** — Model Apple Silicon lokal (~9,1 token/dtk, ~13,1 GB RAM)
 4. Klik **Hubungkan**
-5. Selesai! Sekarang Anda memiliki akses AI gratis.
+5. Selesai! Kini Anda memiliki akses AI gratis.
 
 ### Opsi B: Penyedia Kunci API (Berbayar)
 
@@ -68,7 +61,7 @@ mencoba kembali hanya penyedia yang gagal setelah memperoleh hasil sebagian.
 4. Pilih penyedia Anda
 5. Tempelkan kunci API Anda
 6. Klik **Hubungkan**
-7. Selesai! Sekarang Anda memiliki akses ke model penyedia tersebut.
+7. Selesai! Kini Anda memiliki akses ke model dari penyedia tersebut.
 
 ### Opsi C: Penyedia OAuth (Langganan)
 
@@ -77,7 +70,7 @@ mencoba kembali hanya penyedia yang gagal setelah memperoleh hasil sebagian.
 3. Pilih penyedia Anda (misalnya, Claude Code, GitHub Copilot)
 4. Klik **Hubungkan dengan OAuth**
 5. Masuk dengan akun Anda
-6. Selesai! Sekarang Anda memiliki akses ke model langganan Anda.
+6. Selesai! Kini Anda memiliki akses ke model langganan Anda.
 
 ### Opsi D: Model MLX Lokal (Apple Silicon)
 
@@ -85,7 +78,7 @@ Untuk Mac Apple Silicon dengan memori terpadu, OmniRoute mendukung koneksi ke mo
 
 #### Prasyarat
 
-- **Mac Apple Silicon** (M1/M2/M3/M4) dengan rekomendasi memori terpadu 24 GB atau lebih
+- **Mac Apple Silicon** (M1/M2/M3/M4) dengan memori terpadu 24 GB+ disarankan
 - Manajer paket **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
@@ -118,7 +111,7 @@ Untuk Mac Apple Silicon dengan memori terpadu, OmniRoute mendukung koneksi ke mo
 
 4. **Gunakan dengan OpenCode**:
    ```bash
-   # Konfigurasikan OpenCode agar menggunakan OmniRoute
+   # Konfigurasikan OpenCode untuk menggunakan OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
    opencode config set api.key <your-omniroute-api-key>
 
@@ -127,18 +120,18 @@ Untuk Mac Apple Silicon dengan memori terpadu, OmniRoute mendukung koneksi ke mo
    opencode run --model mlx-qwen/qwen3.8-27b
    ```
 
-#### Pengelolaan Memori
+#### Manajemen Memori
 
-**Penting**: Dengan memori terpadu 24 GB, hanya **satu model MLX besar yang dapat berjalan pada satu waktu**.
+**Penting**: Dengan memori terpadu 24 GB, hanya **satu model MLX besar yang dapat berjalan dalam satu waktu**.
 
-- Gemma 26B: memori puncak ~15,9 GB
-- Qwen 3.8 27B: memori puncak ~13,1 GB
+- Gemma 26B: penggunaan memori puncak ~15,9 GB
+- Qwen 3.8 27B: penggunaan memori puncak ~13,1 GB
 
 Anda harus mengelolanya secara manual:
 
-- Jalankan hanya satu server MLX pada satu waktu, atau
+- Jalankan hanya satu server MLX dalam satu waktu, atau
 - Jalankan keduanya di mesin terpisah, atau
-- Hentikan salah satunya sebelum menjalankan yang lain
+- Hentikan salah satunya sebelum memulai yang lain
 
 OmniRoute tidak mengelola proses server MLX secara otomatis — OmniRoute hanya merutekan permintaan ke endpoint kompatibel OpenAI yang Anda konfigurasi.
 
@@ -152,20 +145,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Berapa hasil 2+2? Gunakan alat kalkulator."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Hitung", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Pemecahan Masalah
 
-| Masalah                    | Solusi                                                                                       |
-| -------------------------- | -------------------------------------------------------------------------------------------- |
-| Server tidak dapat dimulai | Periksa `uv run mlx_lm.server --help` dan verifikasi ID model                                |
-| Kehabisan memori           | Pastikan hanya satu model yang berjalan; tutup aplikasi lain; periksa Activity Monitor       |
-| Koneksi ditolak            | Verifikasi bahwa server berjalan pada port yang benar (11435/11436)                          |
-| Respons lambat             | Permintaan pertama memuat model ke memori (~30-60 detik); permintaan berikutnya akan cepat   |
-| Pemanggilan alat gagal     | Pastikan model mendukung alat; periksa log OmniRoute untuk mengetahui kesalahan penerjemahan |
+| Masalah                    | Solusi                                                                                          |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| Server tidak dapat dimulai | Periksa `uv run mlx_lm.server --help` dan verifikasi ID model                                   |
+| Kehabisan memori           | Pastikan hanya satu model yang berjalan; tutup aplikasi lain; periksa Activity Monitor          |
+| Koneksi ditolak            | Pastikan server berjalan pada port yang benar (11435/11436)                                     |
+| Respons lambat             | Permintaan pertama memuat model ke memori (~30–60 dtk); permintaan berikutnya berlangsung cepat |
+| Pemanggilan alat gagal     | Pastikan model mendukung alat; periksa log OmniRoute untuk kesalahan penerjemahan               |
 
 ---
 
@@ -173,18 +166,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Penyedia berikut menawarkan **akses gratis** tanpa kartu kredit:
 
-| Penyedia          | Kuota Gratis          | Model                                    | Cara Menghubungkan      |
+| Penyedia          | Kuota Gratis          | Model                                    | Cara Terhubung          |
 | ----------------- | --------------------- | ---------------------------------------- | ----------------------- |
 | **Kiro AI**       | 50 kredit/bulan       | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Tidak perlu autentikasi |
-| **OpenCode Free** | Tanpa batas           | GPT-4o, Claude, Gemini                   | Tidak perlu autentikasi |
 | **Pollinations**  | Tidak perlu kunci     | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Tidak perlu autentikasi |
 | **LongCat**       | 10 juta satu kali     | LongCat-2.0                              | Kunci API + KYC         |
 | **Cloudflare AI** | 10 ribu neuron/hari   | 50+ model                                | Tidak perlu autentikasi |
 | **NVIDIA NIM**    | ~40 RPM               | 129 model                                | Memerlukan kunci API    |
 | **Cerebras**      | Kredit pendaftaran $5 | GLM 4.7, GPT-OSS 120B                    | Kunci API + kartu       |
-| **Qoder**         | Tanpa batas           | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Tidak perlu autentikasi |
 
-**Kiat**: Hubungkan beberapa penyedia gratis untuk mendapatkan **AI gratis tanpa batas** dengan peralihan otomatis!
+**Kiat**: Hubungkan beberapa penyedia gratis untuk mendapatkan **AI gratis tanpa batas** dengan failover otomatis!
 
 ---
 
@@ -239,18 +230,18 @@ Penyedia Anda kini telah terhubung. Anda dapat menggunakannya dengan `model: "au
 
 ## Menggunakan Beberapa Penyedia
 
-OmniRoute berfungsi paling baik dengan **beberapa penyedia**. Hal ini memberikan Anda:
+OmniRoute berfungsi paling baik dengan **beberapa penyedia**. Hal ini memberi Anda:
 
-- **Peralihan otomatis** — Jika satu penyedia gagal, OmniRoute mencoba penyedia berikutnya
+- **Failover otomatis** — Jika satu penyedia gagal, OmniRoute mencoba penyedia berikutnya
 - **Optimalisasi biaya** — OmniRoute memilih penyedia termurah untuk setiap permintaan
 - **Optimalisasi kecepatan** — OmniRoute memilih penyedia tercepat untuk setiap permintaan
 - **Optimalisasi kualitas** — OmniRoute memilih penyedia terbaik untuk setiap tugas
 
 ### Penyiapan yang Direkomendasikan
 
-Hubungkan setidaknya **3 penyedia** untuk pengalaman terbaik:
+Hubungkan setidaknya **3 penyedia** untuk mendapatkan pengalaman terbaik:
 
-1. **Satu penyedia gratis** (Kiro, OpenCode Free, atau Pollinations) — Selalu tersedia
+1. **Satu penyedia gratis** (Kiro atau Pollinations) — Selalu tersedia
 2. **Satu penyedia cepat** (Groq, Cerebras) — Untuk respons cepat
 3. **Satu penyedia berkualitas** (OpenAI, Anthropic, Google) — Untuk tugas kompleks
 
@@ -284,6 +275,29 @@ Kemudian gunakan `model: "auto"` dan OmniRoute akan secara otomatis memilih peny
 2. Di OmniRoute: Penyedia → Tambahkan Penyedia → DeepSeek
 3. Tempelkan kunci API → Hubungkan
 
+### Qoder: pilih metode pengiriman kredensial
+
+Qoder memerlukan kredensial. Kedua metode pengirimannya memiliki kemampuan yang berbeda; nama model saja tidak dapat mengidentifikasi kemampuan koneksi tertentu.
+
+| Kredensial                         | Metode pengiriman OmniRoute                           | Pemanggilan alat oleh pemanggil                  | Streaming                                                              |
+| ---------------------------------- | ----------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------- |
+| PAT yang diawali dengan `pt-`      | Proses `qodercli` lokal pada host OmniRoute           | Tidak didukung                                   | Di-buffer: SSE hanya dikirim setelah CLI mengembalikan respons lengkap |
+| Token akses non-PAT atau kunci API | Endpoint HTTP DashScope yang kompatibel dengan OpenAI | Diteruskan, bergantung pada model/kunci upstream | Jalur HTTP/SSE upstream                                                |
+
+Untuk PAT, instal Qoder CLI pada host atau kontainer yang sama dengan OmniRoute. File yang dapat dieksekusi harus dapat ditemukan sebagai `qodercli`, atau atur `CLI_QODER_BIN` ke jalur file tersebut. CLI yang hanya diinstal pada host Docker tidak secara otomatis tersedia di dalam kontainer. Ketiadaan file biner menghasilkan galat eksplisit yang mengarahkan Anda ke penginstalan atau pengaturan jalur.
+
+Jalur percakapan PAT memiliki batas waktu proses 45 detik. Jalur ini meratakan percakapan menjadi sebuah prompt dan menjalankan CLI dalam mode cetak non-streaming. Meminta `stream: true` mengubah pembungkus respons menjadi SSE; hal ini tidak menyediakan pengiriman token upstream secara bertahap. Validasi CLI/daftar model menggunakan batas waktu terpisah selama 20 detik. Ini adalah nilai default kode saat ini, bukan pengaturan dasbor yang dapat dikonfigurasi.
+
+Gunakan koneksi PAT untuk percakapan biasa. Permintaan agen yang membawa `tools` atau `functions` lama mengecualikan akun PAT selama pemilihan kredensial, termasuk target kombo yang disematkan. Kumpulan Qoder campuran masih dapat memilih akun HTTP-nya. Panggilan langsung ke eksekutor PAT juga gagal secara eksplisit sebelum menjalankan CLI, alih-alih menghapus definisi alat secara diam-diam. Pembatasan ini berlaku untuk alat yang diberikan oleh pemanggil API, bukan alat internal apa pun yang mungkin digunakan sendiri oleh Qoder CLI. Kunci HTTP tidak menjamin bahwa setiap model mendukung alat; pemeriksaan kemampuan model yang normal tetap berlaku.
+
+OAuth browser hanya tersedia ketika administrator mengonfigurasi kelima pengaturan berikut:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID`, dan `QODER_OAUTH_CLIENT_SECRET`. Nilai defaultnya kosong; instalasi yang belum dikonfigurasi sebaiknya menggunakan impor kredensial yang didukung alih-alih mengasumsikan bahwa alur masuk melalui browser sudah siap.
+
+Referensi implementasi: [Eksekutor Qoder](../../open-sse/executors/qoder.ts),
+[runtime CLI](../../open-sse/services/qoderCli.ts), dan
+[konfigurasi OAuth](../../src/lib/oauth/constants/oauth.ts). Streaming PAT bertahap dan batas waktu yang dapat dikonfigurasi merupakan peningkatan terpisah; perilaku ini tidak menjanjikan keduanya.
+
 ### Groq
 
 1. Dapatkan kunci API: https://console.groq.com/
@@ -296,7 +310,7 @@ Kemudian gunakan `model: "auto"` dan OmniRoute akan secara otomatis memilih peny
 
 ### "Apakah saya perlu membayar untuk menggunakan OmniRoute?"
 
-**Tidak!** OmniRoute gratis dan bersumber terbuka. Anda dapat menggunakan penyedia gratis (Kiro, OpenCode Free, Pollinations) tanpa membayar apa pun. Anda hanya membayar jika memilih untuk menggunakan penyedia berbayar.
+**Tidak!** OmniRoute gratis dan bersifat sumber terbuka. Anda dapat menggunakan penyedia gratis (Kiro, Pollinations) tanpa membayar apa pun. Anda hanya perlu membayar jika memilih menggunakan penyedia berbayar.
 
 ### "Penyedia mana yang sebaiknya saya gunakan terlebih dahulu?"
 
@@ -306,13 +320,13 @@ Mulailah dengan **Kiro AI** — layanan ini gratis, tidak memerlukan kunci API, 
 
 **Ya!** Itulah tujuan utama OmniRoute. Hubungkan beberapa penyedia dan gunakan `model: "auto"` agar OmniRoute memilih penyedia terbaik untuk setiap permintaan.
 
-### "Bagaimana jika layanan penyedia tidak tersedia?"
+### "Bagaimana jika suatu penyedia mengalami gangguan?"
 
 OmniRoute secara otomatis melewati penyedia yang gagal dan mencoba penyedia berikutnya. Anda tidak perlu melakukan apa pun.
 
 ### "Bagaimana cara memutuskan koneksi penyedia?"
 
-Buka Penyedia → klik penyedia → klik **Putuskan Koneksi**.
+Buka Penyedia → klik penyedia tersebut → klik **Putuskan Koneksi**.
 
 ### "Bisakah saya menggunakan kunci API yang sudah saya miliki?"
 

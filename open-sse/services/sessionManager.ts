@@ -6,6 +6,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { resolveTtlMsFromEnv } from "../utils/ttlFromEnv.ts";
 
 interface SessionEntry {
   createdAt: number;
@@ -41,8 +42,10 @@ const sessions = new Map<string, SessionEntry>();
 // Hard cap on active sessions to prevent memory exhaustion
 const MAX_SESSIONS = 200;
 
-// Auto-cleanup sessions older than 15 minutes (reduced from 30)
-const SESSION_TTL_MS = 15 * 60 * 1000;
+// Auto-cleanup sessions older than the TTL (15 minutes by default, reduced from 30).
+// Operators with long agent sessions can raise it via OMNIROUTE_SESSION_TTL_MIN
+// without a rebuild; invalid values (blank/NaN/≤0) keep the default.
+const SESSION_TTL_MS = resolveTtlMsFromEnv("OMNIROUTE_SESSION_TTL_MIN", 15);
 const _cleanupTimer = setInterval(() => {
   const now = Date.now();
   // Evict expired sessions
@@ -128,7 +131,7 @@ export function generateSessionId(
   // Tools signature (sorted names)
   if (body.tools && Array.isArray(body.tools) && body.tools.length > 0) {
     const toolNames = body.tools
-      .map((t) => t.name || t.function?.name || "")
+      .map((t) => (t && typeof t === "object" ? t.name || t.function?.name : "") || "")
       .filter(Boolean)
       .sort()
       .join(",");
@@ -359,7 +362,7 @@ function extractSystemPrompt(body: SessionBody | null | undefined): string | nul
   }
   // OpenAI format: messages[0].role === "system"
   if (Array.isArray(body.messages)) {
-    const sys = body.messages.find((m) => m.role === "system" || m.role === "developer");
+    const sys = body.messages.find((m) => m?.role === "system" || m?.role === "developer");
     if (sys) {
       return typeof sys.content === "string" ? sys.content : JSON.stringify(sys.content);
     }
@@ -372,7 +375,7 @@ function extractFirstUserMessage(body: SessionBody | null | undefined): string |
   const messages = body.messages || body.input || [];
   if (!Array.isArray(messages)) return null;
   for (const msg of messages) {
-    if (msg.role === "user") {
+    if (msg?.role === "user") {
       return typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
     }
   }

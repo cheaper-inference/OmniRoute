@@ -144,87 +144,94 @@ omniroute providers validate
 2. Dashboard → `Endpoints` ကိုဖွင့်ပြီး API key တစ်ခု ဖန်တီးပါ။
 3. (ရွေးချယ်နိုင်သည်) Dashboard → `Combos` ကိုဖွင့်ပြီး သင်၏ fallback chain ကို သတ်မှတ်ပါ။
 
-### 2) သင်၏ Coding Tool ကို ချိတ်ဆက်သတ်မှတ်ခြင်း
+### 2) သင်၏ Coding Tool ကို ချိတ်ဆက်ခြင်း
 
 ```txt
-Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
+အခြေခံ URL: http://localhost:20128/v1
+API Key:    [Endpoint စာမျက်နှာမှ ကူးယူပါ]
+Model:      if/qwen3.8-max-preview (သို့မဟုတ် မည်သည့် provider/model prefix မဆို)
 ```
 
-သင်၏ editor က `Authorization: Bearer ...` ကို မပို့နိုင်ပါက၊ token ထည့်သွင်းထားသော compatibility base ကို အစားထိုးအသုံးပြုပါ-
+သင်၏ editor သည် `Authorization: Bearer ...` ကို မပို့နိုင်ပါက token ထည့်သွင်းထားသော compatibility base ကို အစားထိုးအသုံးပြုပါ-
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+အခြေခံ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
 Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Claude Code၊ Codex CLI၊ Cursor၊ Cline၊ OpenClaw၊ OpenCode နှင့် OpenAI-compatible SDK များတွင် အသုံးပြုနိုင်သည်။
+Claude Code၊ Codex CLI၊ Cursor၊ Cline၊ OpenClaw၊ OpenCode နှင့် OpenAI-compatible SDK များဖြင့် အသုံးပြုနိုင်သည်။
 
 #### `setup-*` ဖြင့် အလိုအလျောက် ဖွဲ့စည်းသတ်မှတ်ခြင်း
 
-Base URL နှင့် key ကို ကိုယ်တိုင်ထည့်သွင်းမည့်အစား၊ လက်ရှိ model catalog မှ tool တစ်ခုစီ၏ ကိုယ်ပိုင် config ကို OmniRoute အား ရေးသားခိုင်းနိုင်သည်။ Tool တစ်ခုစီအတွက် command တစ်ခုစီဖြစ်သည်-
+Base URL နှင့် key ကို ကိုယ်တိုင်ကူးထည့်မည့်အစား OmniRoute က live model catalog မှတစ်ဆင့် tool တစ်ခုချင်းစီ၏
+ကိုယ်ပိုင် config ကို ရေးသားပေးပါစေ။ Tool တစ်ခုလျှင် command တစ်ခုစီ အသုံးပြုပါ-
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml ပရိုဖိုင်များ
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-compatible)
 omniroute setup-cline        # Cline CLI + VS Code extension ဆက်တင်များ
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor အက်ပ်အတွင်း လုပ်ဆောင်ရမည့် အဆင့်များကို ပြသသည်
-omniroute setup-roo          # Roo Code တင်သွင်းမှု + autoImport ညွှန်တံ
+omniroute setup-cursor       # Cursor ၏ app အတွင်း လုပ်ဆောင်ရမည့် အဆင့်များကို ပြသသည်
+omniroute setup-roo          # Roo Code import + autoImport ညွှန်ပြချက်
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-တစ်ခုစီသည် local tool တစ်ခုကို **remote** OmniRoute နှင့် ချိတ်ဆက်ဖွဲ့စည်းရန် `--remote <url> --api-key <key>` ကို လက်ခံသကဲ့သို့၊ ကြိုတင်ကြည့်ရှုရန် `--dry-run` ကိုလည်း လက်ခံသည်။ မှန်ကန်သော env ကို ထည့်သွင်းပေးပြီး config တစ်စုံတစ်ရာ လုံးဝမရေးဘဲ CLI တစ်ခုကို စတင်ရန် ယေဘုယျ launcher ဖြစ်သော `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ကို အသုံးပြုပါ။ ယခင် tool တစ်ခုချင်းစီအလိုက် launcher များဖြစ်သော `omniroute launch` (Claude Code) နှင့် `omniroute launch-codex` (Codex) တို့ကိုလည်း ဆက်လက်အသုံးပြုနိုင်သည်။
+တစ်ခုချင်းစီတွင် local tool တစ်ခုကို **remote** OmniRoute နှင့် အသုံးပြုနိုင်ရန် ဖွဲ့စည်းသတ်မှတ်ဖို့ `--remote <url> --api-key <key>` ကို လက်ခံပြီး အကြိုကြည့်ရှုရန် `--dry-run` ကိုလည်း လက်ခံသည်။ မှန်ကန်သော
+env ကို ထည့်သွင်းပေးထားပြီး မည်သည့် config ကိုမျှ ရေးသားခြင်းမရှိဘဲ CLI တစ်ခုကို စတင်ရန် generic launcher
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ကို အသုံးပြုပါ။
+ယခင် tool အလိုက် launcher များဖြစ်သော `omniroute launch` (Claude Code) နှင့်
+`omniroute launch-codex` (Codex) တို့ကိုလည်း ဆက်လက်အသုံးပြုနိုင်သည်။
 
-ဇယားအပြည့်အစုံ (command တစ်ခုစီက ရေးသားသည့်အရာ၊ flag အားလုံး၊ local နှင့် remote ကွာခြားချက်၊ base-URL `/v1` စံသတ်မှတ်ချက်များ) ကို **[CLI ပေါင်းစည်းအသုံးပြုမှုများ](./CLI-INTEGRATIONS.md)** တွင် ကြည့်ပါ။
+ဇယားအပြည့်အစုံ (command တစ်ခုချင်းစီက ရေးသားသည့်အရာ၊ flag အားလုံး၊ local နှင့် remote ကွာခြားချက်၊ base-URL
+`/v1` သတ်မှတ်ပုံများ) ကို သိရှိရန် **[CLI ပေါင်းစည်းအသုံးပြုမှုများ](./CLI-INTEGRATIONS.md)** ကို ကြည့်ပါ။
 
-Tool တစ်ခုချင်းစီအတွက် အသေးစိတ်ဖွဲ့စည်းသတ်မှတ်မှု (Claude Code၊ Codex CLI၊ Cursor၊ Cline၊ OpenClaw၊ Kilo Code၊ Copilot နှင့် အခြားအရာများ) ကို သီးခြား **[CLI Tools လမ်းညွှန်](../reference/CLI-TOOLS.md)** တွင် ကြည့်ပါ။
+Tool တစ်ခုချင်းစီအတွက် အသေးစိတ်ဖွဲ့စည်းသတ်မှတ်ပုံ (Claude Code၊ Codex CLI၊ Cursor၊ Cline၊ OpenClaw၊ Kilo Code၊ Copilot နှင့် အခြားအရာများ) ကို သိရှိရန် သီးသန့် **[CLI Tools လမ်းညွှန်](../reference/CLI-TOOLS.md)** ကို ကြည့်ပါ။
 
 ---
 
-## Protocol ဖွဲ့စည်းသတ်မှတ်ခြင်း (MCP + A2A)
+## ပရိုတိုကော စနစ်ထည့်သွင်းခြင်း (MCP + A2A)
 
-### MCP ဖွဲ့စည်းသတ်မှတ်ခြင်း (Model Context Protocol)
+### MCP စနစ်ထည့်သွင်းခြင်း (မော်ဒယ်ဆက်စပ်ပရိုတိုကော)
 
-MCP transport ကို stdio mode ဖြင့် စတင်ပါ-
+stdio မုဒ်တွင် MCP သယ်ယူပို့ဆောင်ရေးကို စတင်ပါ-
 
 ```bash
 omniroute --mcp
 ```
 
-အကြံပြုထားသော စစ်ဆေးအတည်ပြုမှု အဆင့်စဉ်-
+အကြံပြုထားသော အတည်ပြုခြင်းစီးဆင်းမှု-
 
 ```bash
-# 1. MCP server ကို စတင်ပါ
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. သင်၏ MCP client မှ အောက်ပါတို့ကို ခေါ်ဆိုပါ-
-omniroute_get_health        # System health ကို ပြန်ပေးသင့်သည်
-omniroute_list_combos       # လက်ရှိအသုံးပြုနေသော combos များကို ပြန်ပေးသင့်သည်
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. သို့မဟုတ် E2E suite အပြည့်အစုံကို run ပါ-
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP Client ဖွဲ့စည်းသတ်မှတ်ခြင်း
+#### MCP Client Configuration
 
-**Claude Code:**
+**Claude ကုဒ်-**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-သင်၏ MCP ဆက်တင်များတွင် အောက်ပါတို့ကို ထည့်ပါ-
+သင်၏ MCP ဆက်တင်များသို့ ပေါင်းထည့်ပါ (stdio၊ သော့ဖြင့် ခေါ်ဆိုသူတွင် ကျောင်းအုပ်တစ်ခုရှိသည်)။
 
 ```json
 {
@@ -232,23 +239,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP စာရွက်စာတမ်းအပြည့်အစုံ:** [MCP Server README](../../open-sse/mcp-server/README.md) — tool 110 ခု၊ IDE config များ၊ Python/TS/Go client များ။
+သို့မဟုတ်၊ `mcpTransport` သည် `streamable-http` ဖြစ်သောအခါ (၎င်းကို `/dashboard/mcp` သို့မဟုတ် `omniroute mcp enable --transport streamable-http` ဖြင့် သတ်မှတ်ပါ)၊ သုံးစွဲသူ၏ အဝေးထိန်း MCP ဆာဗာ entry ကို `http://localhost:20128/api/mcp/stream` တွင် ညွှန်ပါ။
 
-### A2A ဖွဲ့စည်းသတ်မှတ်ခြင်း (Agent-to-Agent Protocol)
+သော့သည် `Authorization: Bearer <api-key>` အဖြစ်သွားသည် (ဝေးလံခေါင်သီသောအိမ်ရှင်များအတွက် [MCP ဆာဗာ → အဝေးထိန်းဝင်ရောက်မှုကို](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ကြည့်ပါ၊ အဝေးထိန်းသော့သည် `mcp:connect` နှင့် ၎င်း၏ read/write နယ်ပယ်များ လိုအပ်သည်)။
 
-Agent Card ကို စစ်ဆေးအတည်ပြုပါ-
+**MCP စာရွက်စာတမ်းအပြည့်အစုံ-** [MCP ဆာဗာ README](../../open-sse/mcp-server/README.md) — 110 တူးလ်များ၊ IDE configs၊ Python/TS/Go ဖောက်သည်များ။ compression CCR/dedup ကိရိယာများအတွက် အော်ပရေတာ ရည်ညွှန်းချက် (အမှတ်အသားများ၊ ကြိုတင်လိုအပ်ချက်များ၊ ကိရိယာတစ်ခုစီ၏ နယ်ပယ်များ၊ ထုတ်ယူမှု အပိုင်းအစများ၊ ရောဂါရှာဖွေမှုများ)- [Compression Engines → ကြိုတင်လိုအပ်ချက်များ / အော်ပရေတာလမ်းညွှန်](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ။
+
+### A2A စနစ်ထည့်သွင်းခြင်း (Agent-to-Agent Protocol)
+
+ကိုယ်စားလှယ်ကတ်ကို အတည်ပြုပါ-
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Task တစ်ခု ပို့ပါ-
+လုပ်ဆောင်စရာတစ်ခု ပေးပို့ပါ-
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -256,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A စာရွက်စာတမ်းအပြည့်အစုံ:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0၊ skill များ၊ streaming၊ task lifecycle။
+**A2A စာရွက်စာတမ်းအပြည့်အစုံ-** [A2A ဆာဗာ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0၊ ကျွမ်းကျင်မှု၊ တိုက်ရိုက်ထုတ်လွှင့်မှု၊ အလုပ်သက်တမ်းစက်ဝန်း။
 
 ---
 
@@ -315,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) Template
+## Linux (xbps-src) Template ကို ပျက်ပြယ်စေပါသည်။
 
-Void Linux အသုံးပြုသူများသည် `xbps-src` ကို အသုံးပြု၍ native package တစ်ခု တည်ဆောက်နိုင်ပါသည်။ ဤ block ကို `srcpkgs/omniroute/template` အဖြစ် သိမ်းဆည်းပါ-
+Void Linux အသုံးပြုသူများအတွက်၊ သင်သည် `xbps-src` အသုံးပြု၍ မူရင်းပက်ကေ့ခ်ျကို တည်ဆောက်နိုင်သည်။ ဤဘလောက်ကို `srcpkgs/omniroute/template` အဖြစ်သိမ်းဆည်းပါ။
 
 ```bash
-# 'omniroute' အတွက် Template ဖိုင်
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -331,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Release တစ်ခုစီအတွက် checksum ကို အောက်ပါအတိုင်း ပြန်လည်ဖန်တီးပါ-
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -1,13 +1,18 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 import {
   executeWithAnthropicThinkingSignatureRecovery,
   isAnthropicThinkingSignatureError,
+  isAnthropicThinkingModifiedError,
 } from "./passthroughHelpers.ts";
 
 type ProviderExecution = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   response: Response;
   url?: string;
   headers?: Headers | Record<string, string>;
   transformedBody?: unknown;
+  /** Internal-only upstream failure classification carried by the retried execution (#3229). */
+  upstreamDiagnostic?: Record<string, unknown>;
 };
 
 type ParsedError = {
@@ -28,24 +33,30 @@ export type ThinkingSignatureRecoveryResult = {
 };
 
 /**
- * Retry exactly once after Anthropic's explicit thinking-signature validation
- * error. The caller keeps all connection/provider resilience state untouched
- * until this request-scoped recovery has finished.
+ * Retry exactly once after one of the two Anthropic thinking-block
+ * validation errors this module understands: the explicit signature
+ * rejection, or the separate "latest assistant message cannot be modified"
+ * error (#17324). The caller keeps all connection/provider resilience state
+ * untouched until this request-scoped recovery has finished.
  */
 export async function recoverAnthropicThinkingSignature(args: {
   provider?: string | null;
+  model?: string | null;
   statusCode: number;
   message: string;
   body: unknown;
   execute: (body: unknown) => Promise<ProviderExecution>;
   parseError: (response: Response) => Promise<ParsedError>;
 }): Promise<ThinkingSignatureRecoveryResult> {
+  const errorArgs = {
+    provider: args.provider,
+    model: args.model,
+    status: args.statusCode,
+    message: args.message,
+  };
   if (
-    !isAnthropicThinkingSignatureError({
-      provider: args.provider,
-      status: args.statusCode,
-      message: args.message,
-    })
+    !isAnthropicThinkingSignatureError(errorArgs) &&
+    !isAnthropicThinkingModifiedError(errorArgs)
   ) {
     return {
       attempted: false,
@@ -63,6 +74,7 @@ export async function recoverAnthropicThinkingSignature(args: {
   };
   const recovery = await executeWithAnthropicThinkingSignatureRecovery({
     provider: args.provider,
+    model: args.model,
     body: args.body,
     execute: async (requestBody) => {
       if (requestBody === args.body) return firstFailure;

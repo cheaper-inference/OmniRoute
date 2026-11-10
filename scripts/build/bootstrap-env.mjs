@@ -32,12 +32,27 @@ const OPTIONAL_OAUTH_SECRETS = [
   { keys: ["QODER_OAUTH_CLIENT_SECRET"], label: "Qoder OAuth" },
 ];
 
-// ── Resolve DATA_DIR (mirrors dataPaths.ts logic) ───────────────────────────
-function resolveDataDir(overridePath, env = process.env) {
+// ── Resolve DATA_DIR (mirrors src/lib/dataPaths.ts::getDefaultDataDir) ─────────
+// Kept self-contained on purpose: assembleStandalone.mjs copies this file alone into the
+// standalone build, so it cannot import src/lib/dataPaths.ts or bin/cli/data-dir.mjs. The
+// order MUST stay identical to those two: explicit DATA_DIR → an EXISTING legacy
+// ~/.omniroute → %APPDATA% (Windows) → $XDG_CONFIG_HOME (when set) → ~/.omniroute.
+// Skipping the legacy check made a machine with XDG_CONFIG_HOME exported persist
+// server.env (incl. STORAGE_ENCRYPTION_KEY) under ~/.config/omniroute while the app opened
+// ~/.omniroute/storage.sqlite and the CLI read ~/.omniroute/.env — two keys, one database.
+export function resolveDataDir(overridePath, env = process.env) {
   if (overridePath?.trim()) return resolve(overridePath);
 
   const configured = env.DATA_DIR?.trim();
   if (configured) return resolve(configured);
+
+  // Preserve an existing legacy dir so an upgrade never splits secrets from the database.
+  const legacyDir = join(homedir(), ".omniroute");
+  try {
+    if (statSync(legacyDir).isDirectory()) return legacyDir;
+  } catch {
+    // absent or unreadable — fall through to the platform default
+  }
 
   if (process.platform === "win32") {
     const appData = env.APPDATA || join(homedir(), "AppData", "Roaming");
@@ -47,7 +62,7 @@ function resolveDataDir(overridePath, env = process.env) {
   const xdg = env.XDG_CONFIG_HOME?.trim();
   if (xdg) return join(resolve(xdg), "omniroute");
 
-  return join(homedir(), ".omniroute");
+  return legacyDir;
 }
 
 function getPreferredEnvFilePath(env = process.env) {
@@ -161,17 +176,25 @@ function parseEnvFile(filePath) {
     const eqIdx = trimmed.indexOf("=");
     if (eqIdx < 1) continue;
     const key = trimmed.slice(0, eqIdx).trim();
-    const val = unquoteEnvValue(trimmed.slice(eqIdx + 1).trim());
+    const val = parseEnvValue(trimmed.slice(eqIdx + 1));
     env[key] = val;
   }
   return env;
 }
 
-function unquoteEnvValue(value) {
-  if (value.length < 2) return value;
-  const quote = value[0];
-  if ((quote !== '"' && quote !== "'") || value[value.length - 1] !== quote) return value;
-  return value.slice(1, -1);
+// Mirrors bin/cli/utils/parseEnvValue.mjs so Docker boot reads the same value as
+// the command-line reader: a `#` preceded by whitespace outside quotes starts a
+// comment, while a `#` inside quotes or without preceding whitespace is data. A
+// value holding only a comment maps to an empty string so the existing
+// empty-value filter drops it instead of persisting the comment text.
+function parseEnvValue(raw) {
+  const value = String(raw).trim();
+  if (!value) return "";
+  if (value.startsWith("#")) return "";
+  const quoted = value.match(/^(['"])([\s\S]*)\1\s*(?:#.*)?$/);
+  if (quoted) return quoted[2];
+  const commentIdx = value.search(/\s#/);
+  return (commentIdx === -1 ? value : value.slice(0, commentIdx)).trim();
 }
 
 // ── Write a simple KEY=VALUE env file ───────────────────────────────────────
@@ -324,9 +347,32 @@ export function bootstrapEnv({ dataDirOverride, quiet = false } = {}) {
     log("   These providers will not work until configured.");
   }
 
-  // ── Warn about default password ────────────────────────────────────────────
-  if (merged.INITIAL_PASSWORD === "CHANGEME" || !merged.INITIAL_PASSWORD?.trim()) {
-    log("⚠️  INITIAL_PASSWORD is not set — using default 'CHANGEME'. Change it in Settings!");
+  // ── Warn about the initial dashboard password ──────────────────────────────
+  // Bootstrap reads process.env, one .env file, and server.env. Next.js can still fill
+  // an unset INITIAL_PASSWORD from its own .env files, so the unset notice hedges.
+  const initialPassword = merged.INITIAL_PASSWORD;
+  // Placeholder variants (" changeme ", "Changeme") become equally guessable passwords,
+  // so the comparison normalizes case and surrounding whitespace.
+  const isPlaceholderLike =
+    typeof initialPassword === "string" && initialPassword.trim().toUpperCase() === "CHANGEME";
+  if (isPlaceholderLike) {
+    log("⚠️  INITIAL_PASSWORD matches the .env.example placeholder 'CHANGEME', a publicly known");
+    log("   password. If no dashboard password is saved yet, that value becomes the password.");
+    log("   Set your own INITIAL_PASSWORD before first boot. In Docker, do it before the");
+    log("   container's first start: a host browser reaches the container as a remote client,");
+    log("   and the login refuses the exact placeholder CHANGEME from remote clients (case or");
+    log("   whitespace variants are not refused remotely). Elsewhere, change the password");
+    log("   right away: sign in from localhost and use Dashboard → Settings → Security, or run");
+    log("   `omniroute reset-password` (`node bin/reset-password.mjs` in a source checkout)");
+    log("   with DATA_DIR set to this server's data directory.");
+  } else if (!initialPassword) {
+    log("ℹ️  INITIAL_PASSWORD is unset here. Unless a .env file that Next.js loads sets it,");
+    log("   a fresh install asks you to create the dashboard password in the onboarding wizard.");
+  } else if (!initialPassword.trim()) {
+    log("⚠️  INITIAL_PASSWORD is only whitespace. If no dashboard password is saved yet, that");
+    log("   whitespace becomes the password, and it works from any address. Set a real");
+    log("   INITIAL_PASSWORD before first boot, or change the password right away in");
+    log("   Dashboard → Settings → Security.");
   }
 
   // ── Decrypt-probe: verify STORAGE_ENCRYPTION_KEY matches encrypted data (#1622) ─

@@ -11,17 +11,18 @@
 ihe amụtara gbasara PII). Gụọ ya niile; etinyekwala iwu ọrụ ọzọ ebe a. Ihe niile dị n'okpuru metụtara
 naanị Claude Code — mmezi etu e si arụ ọrụ nke iwu ndị akọwarala na `AGENTS.md`.
 
-## Ikewapụ worktree — nkọwa ndị metụtara Claude Code
+## Ịkewapụ worktree — ihe ndị metụtara Claude Code
 
-Usoro worktree zuru ezu nke a ga-agbasorịrị (nkwenye base branch, ụzọ iwu `.claude/worktrees/`,
-`cp -al` node_modules, iwu mmechi) dị na `AGENTS.md` → Git Workflow → "Worktree
-isolation". Isi ihe ndị metụtara Claude Code:
+Usoro ịkewapụ worktree zuru oke nke bụ iwu (ịkwenye base-branch, ụzọ canonical
+`.claude/worktrees/`, `cp -al` node_modules, iwu ịwepụ) nọ na
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (nke a chịkọtara n'ụzọ mkpirikpi na `AGENTS.md` →
+Usoro ọrụ Git → "Ịkewapụ worktree"). Ihe ndị metụtara naanị Claude Code:
 
-- Jiri `AskUserQuestion` kwado base branch ahụ n'aka onye na-ahụ maka ọrụ (Iwu Siri Ike #19) belụsọ ma ha
-  agwala gị ya.
-- Họrọ ngwaọrụ `EnterWorktree` nke sistemụ ahụ — ọ na-emepụta worktree n'okpuru
-  `.claude/worktrees/` (ụzọ iwu ahụ). Jiri iwu `git
-worktree add` edepụtara mepụta worktree ahụ, wee kpọọ `EnterWorktree` site na iji `path` ya.
+- Kwenye base branch n'aka onye na-arụ ọrụ ahụ site na `AskUserQuestion` (Iwu Ike #19) ọ bụrụ na ha
+  agwabeghị gị tupu.
+- Họrọ ngwá ọrụ `EnterWorktree` nke e wuru n'ime — ọ na-emepụtala worktree n'okpuru
+  `.claude/worktrees/` (ụzọ canonical ahụ). Jiri iwu `git worktree add` e dekọrọ mepụta worktree ahụ, wee
+  kpọọ `EnterWorktree` jiri `path` ya.
 
 ## Nchekwa gafee nnọkọ dị iche iche — nkọwa ndị metụtara Claude Code
 

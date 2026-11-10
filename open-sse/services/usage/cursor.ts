@@ -5,9 +5,12 @@
  * Fall back to the cookie-based cursor.com dashboard endpoint for IDE-imported
  * WorkOS sessions. OpenCodex-compatible chain:
  *   GetCurrentPeriodUsage → /api/usage/summary → /auth/usage → cookie dashboard.
+ * When GetCurrentPeriodUsage succeeds, GetAggregatedUsageEvents adds per-model token
+ * counts and Cursor's billed cost (fail-open: any failure leaves the quotas unchanged).
  */
 
 import { toRecord, toNumber, clampPercentage } from "./scalars.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
 
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -16,6 +19,8 @@ const CURSOR_API2 = "https://api2.cursor.sh";
 const CURSOR_PERIOD_USAGE_URL = `${CURSOR_API2}/aiserver.v1.DashboardService/GetCurrentPeriodUsage`;
 const CURSOR_USAGE_SUMMARY_URL = `${CURSOR_API2}/api/usage/summary`;
 const CURSOR_AUTH_USAGE_URL = `${CURSOR_API2}/auth/usage`;
+const CURSOR_AGGREGATED_USAGE_URL = `${CURSOR_API2}/aiserver.v1.DashboardService/GetAggregatedUsageEvents`;
+const MAX_MODEL_USAGE_ROWS = 50;
 
 /** Legacy IDE/session cookie path (last resort). */
 const CURSOR_COOKIE_USAGE_CONFIG = {
@@ -28,9 +33,24 @@ const CURSOR_COOKIE_USAGE_CONFIG = {
 
 const REAUTH_HINT = "Use Cursor Login (PKCE) or re-import the connection from Cursor IDE.";
 
+/**
+ * One row of Cursor's per-model usage for the current billing cycle.
+ * `costUsd` is the amount Cursor billed (`totalCents / 100`), not an OmniRoute estimate —
+ * it is display-only and never feeds OmniRoute cost accounting.
+ */
+export type CursorModelUsageRow = {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  costUsd: number;
+};
+
 export type CursorUsageResult = {
   plan?: string;
   quotas?: Record<string, UsageQuota>;
+  modelUsage?: CursorModelUsageRow[];
   message?: string;
 };
 
@@ -124,13 +144,20 @@ function buildPlanUsageQuotas(
 
 async function fetchJson(
   url: string,
-  init: RequestInit
+  init: RequestInit,
+  connectionId?: string
 ): Promise<{ ok: true; data: Record<string, unknown> } | { ok: false }> {
   try {
-    const response = await fetch(url, {
-      ...init,
-      signal: init.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
+    const response = connectionId
+      ? await fetchWithConnectionProxy(connectionId, url, {
+          ...init,
+          signal: init.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        })
+      : await globalThis.fetch(url, {
+          ...init,
+          signal: init.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        });
+    if (!response) return { ok: false };
     if (!response.ok) return { ok: false };
     const data = toRecord(await response.json().catch(() => null));
     if (Object.keys(data).length === 0) return { ok: false };
@@ -146,6 +173,46 @@ function tryPeriodUsage(data: Record<string, unknown>): CursorUsageResult | null
   const quotas = buildPlanUsageQuotas(planUsage, data.billingCycleEnd ?? planUsage.billingCycleEnd);
   if (!quotas) return null;
   return { plan: "Cursor Pro", quotas };
+}
+
+/** Cursor sends token counts as decimal strings (`"4861279"`); clamp to a non-negative int. */
+function parseTokenCount(value: unknown): number {
+  return Math.max(0, Math.floor(toNumber(value, 0)));
+}
+
+/**
+ * Map GetAggregatedUsageEvents `aggregations[]` into per-model rows, most expensive first.
+ * Rows without a `modelIntent` (or that are not objects) are skipped; output is capped.
+ */
+export function mapAggregatedUsageEvents(data: unknown): CursorModelUsageRow[] {
+  const aggregations = toRecord(data).aggregations;
+  if (!Array.isArray(aggregations)) return [];
+  const rows: CursorModelUsageRow[] = [];
+  for (const entry of aggregations) {
+    const row = toRecord(entry);
+    const model = typeof row.modelIntent === "string" ? row.modelIntent.trim() : "";
+    if (!model) continue;
+    const cents = Math.max(0, toNumber(row.totalCents, 0));
+    rows.push({
+      model,
+      inputTokens: parseTokenCount(row.inputTokens),
+      outputTokens: parseTokenCount(row.outputTokens),
+      cacheReadTokens: parseTokenCount(row.cacheReadTokens),
+      cacheWriteTokens: parseTokenCount(row.cacheWriteTokens),
+      costUsd: Math.round(cents * 100) / 10_000, // cents → USD, 4 decimals
+    });
+  }
+  rows.sort((a, b) => b.costUsd - a.costUsd || a.model.localeCompare(b.model));
+  return rows.slice(0, MAX_MODEL_USAGE_ROWS);
+}
+
+/** Fail-open: any HTTP/parse/network failure yields no rows, never an error. */
+async function fetchModelUsage(
+  connectInit: RequestInit,
+  connectionId?: string
+): Promise<CursorModelUsageRow[]> {
+  const aggregated = await fetchJson(CURSOR_AGGREGATED_USAGE_URL, connectInit, connectionId);
+  return aggregated.ok ? mapAggregatedUsageEvents(aggregated.data) : [];
 }
 
 function tryUsageSummary(data: Record<string, unknown>): CursorUsageResult | null {
@@ -234,10 +301,11 @@ function tryAuthUsage(data: Record<string, unknown>): CursorUsageResult | null {
 
 async function fetchCookieDashboardUsage(
   accessToken: string,
-  userId: string
+  userId: string,
+  connectionId?: string
 ): Promise<CursorUsageResult> {
   try {
-    const response = await fetch(CURSOR_COOKIE_USAGE_CONFIG.usageUrl, {
+    const cookieInit: RequestInit = {
       method: "POST",
       redirect: "manual",
       headers: {
@@ -250,7 +318,20 @@ async function fetchCookieDashboardUsage(
       },
       body: "{}",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
+    };
+    const response = connectionId
+      ? await fetchWithConnectionProxy(
+          connectionId,
+          CURSOR_COOKIE_USAGE_CONFIG.usageUrl,
+          cookieInit
+        )
+      : await globalThis.fetch(CURSOR_COOKIE_USAGE_CONFIG.usageUrl, cookieInit);
+    if (!response) {
+      return {
+        plan: "Cursor",
+        message: "Cursor connected. No active plan usage returned.",
+      };
+    }
 
     if (response.status >= 300 && response.status < 400) {
       return {
@@ -301,7 +382,8 @@ async function fetchCookieDashboardUsage(
  */
 export async function getCursorUsage(
   accessToken: string,
-  providerSpecificData?: unknown
+  providerSpecificData?: unknown,
+  connectionId?: string
 ): Promise<CursorUsageResult> {
   if (!accessToken) {
     return { message: `Cursor access token missing. ${REAUTH_HINT}` };
@@ -309,7 +391,7 @@ export async function getCursorUsage(
 
   const auth = bearerHeaders(accessToken);
 
-  const period = await fetchJson(CURSOR_PERIOD_USAGE_URL, {
+  const connectInit: RequestInit = {
     method: "POST",
     headers: {
       ...auth,
@@ -317,25 +399,37 @@ export async function getCursorUsage(
       "Connect-Protocol-Version": "1",
     },
     body: "{}",
-  });
+  };
+  const period = await fetchJson(CURSOR_PERIOD_USAGE_URL, connectInit, connectionId);
   if (period.ok) {
     const mapped = tryPeriodUsage(period.data);
-    if (mapped) return mapped;
+    if (mapped) {
+      const modelUsage = await fetchModelUsage(connectInit, connectionId);
+      return modelUsage.length > 0 ? { ...mapped, modelUsage } : mapped;
+    }
   }
 
-  const summary = await fetchJson(CURSOR_USAGE_SUMMARY_URL, {
-    method: "GET",
-    headers: auth,
-  });
+  const summary = await fetchJson(
+    CURSOR_USAGE_SUMMARY_URL,
+    {
+      method: "GET",
+      headers: auth,
+    },
+    connectionId
+  );
   if (summary.ok) {
     const mapped = tryUsageSummary(summary.data);
     if (mapped) return mapped;
   }
 
-  const authUsage = await fetchJson(CURSOR_AUTH_USAGE_URL, {
-    method: "GET",
-    headers: auth,
-  });
+  const authUsage = await fetchJson(
+    CURSOR_AUTH_USAGE_URL,
+    {
+      method: "GET",
+      headers: auth,
+    },
+    connectionId
+  );
   if (authUsage.ok) {
     const mapped = tryAuthUsage(authUsage.data);
     if (mapped) return mapped;
@@ -354,5 +448,5 @@ export async function getCursorUsage(
     };
   }
 
-  return fetchCookieDashboardUsage(accessToken, userId);
+  return fetchCookieDashboardUsage(accessToken, userId, connectionId);
 }

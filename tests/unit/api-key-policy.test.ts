@@ -727,6 +727,35 @@ test("enforceApiKeyPolicy enforces combo allowlists separately from model allowl
   assert.equal(mapped.rejection, null);
 });
 
+// GHSA-7j4q-6gx6-pg77 (reported with this test by @aldoeliacim): built-in virtual routes
+// dispatch like combos but are not persisted combo rows, so a combo-restricted key must not
+// reach them unless its allow-list grants them.
+test("restricted combo keys cannot dispatch virtual auto routes", async () => {
+  const namedKey = await createKeyWithPolicy({ allowedCombos: ["quebin"] });
+  const denyAllKey = await createKeyWithPolicy({ allowedCombos: [] });
+  const legacyKey = await createKeyWithPolicy({ allowedCombos: ["combo/*"] });
+  const optedOutKey = await createKeyWithPolicy({
+    allowedCombos: ["combo/*"],
+    allowAutoCombos: false,
+  });
+  const policy = await loadPolicy("virtual-combo-access");
+
+  for (const model of ["auto/coding", "auto/fast", "auto/cheap"]) {
+    for (const key of [namedKey, denyAllKey, optedOutKey]) {
+      const result = await policy.enforceApiKeyPolicy(makePolicyRequest(key.key), model);
+      assert.equal(result.rejection?.status, 403, `${model} must be denied`);
+    }
+    const allowed = await policy.enforceApiKeyPolicy(makePolicyRequest(legacyKey.key), model);
+    assert.equal(allowed.rejection, null, `${model} must remain available to unrestricted keys`);
+  }
+
+  const directModel = await policy.enforceApiKeyPolicy(
+    makePolicyRequest(namedKey.key),
+    "openai/gpt-4.1"
+  );
+  assert.equal(directModel.rejection, null, "combo restrictions do not restrict direct models");
+});
+
 test("new API keys allow all Combos explicitly", async () => {
   const key = await apiKeysDb.createApiKey("Explicit Combo Default", "machine-607");
   const stored = await apiKeysDb.getApiKeyMetadata(key.key);
@@ -836,4 +865,37 @@ test("enforceApiKeyPolicy enforces request-per-minute limits and returns success
   );
   assert.equal(second.rejection.status, 429);
   assert.match(await readErrorMessage(second.rejection), /Request limit exceeded/);
+});
+
+test("enforceApiKeyPolicy carries the key's self-service settings on apiKeyInfo", async () => {
+  const settingsDb = await import("../../src/lib/db/apiKeySelfServiceSettings.ts");
+  const key = await createKeyWithPolicy();
+  settingsDb.updateApiKeySelfServiceSettings(key.id, {
+    sharedQuotaProviders: ["claude"],
+    anthropicRateLimitHeaders: "strip",
+  });
+  const policy = await loadPolicy("self-service-settings");
+
+  const result = await policy.enforceApiKeyPolicy(makePolicyRequest(key.key), null);
+
+  assert.equal(result.rejection, null);
+  assert.deepEqual(result.apiKeyInfo.sharedQuotaProviders, ["claude"]);
+  assert.equal(result.apiKeyInfo.anthropicRateLimitHeaders, "strip");
+});
+
+test("enforceApiKeyPolicy keeps forwarding upstream anthropic headers for the env key", async () => {
+  const previous = process.env.OMNIROUTE_API_KEY;
+  process.env.OMNIROUTE_API_KEY = "sk-env-owner-key";
+  try {
+    const policy = await loadPolicy("env-key-anthropic-headers");
+
+    const result = await policy.enforceApiKeyPolicy(makePolicyRequest("sk-env-owner-key"), null);
+
+    assert.equal(result.rejection, null);
+    assert.equal(result.apiKeyInfo.id, "env-key");
+    assert.equal(result.apiKeyInfo.anthropicRateLimitHeaders, "forward");
+  } finally {
+    if (previous === undefined) delete process.env.OMNIROUTE_API_KEY;
+    else process.env.OMNIROUTE_API_KEY = previous;
+  }
 });

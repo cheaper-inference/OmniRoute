@@ -140,51 +140,59 @@ omniroute providers validate
 
 ### 1) Unganisha Watoa Huduma na Uunde Ufunguo wa API
 
-1. Fungua Dashboard → `Providers` na uunganishe angalau mtoa huduma mmoja (OAuth au ufunguo wa API).
-2. Fungua Dashboard → `Endpoints` na uunde ufunguo wa API.
-3. (Si lazima) Fungua Dashboard → `Combos` na uweke mnyororo wako wa mbadala.
+1. Fungua Dashibodi → `Providers` na uunganishe angalau mtoa huduma mmoja (OAuth au ufunguo wa API).
+2. Fungua Dashibodi → `Endpoints` na uunde ufunguo wa API.
+3. (Si lazima) Fungua Dashibodi → `Combos` na usanidi mnyororo wako wa mbadala.
 
-### 2) Elekeza Zana Yako ya Uandishi wa Msimbo
-
-```txt
-URL ya Msingi: http://localhost:20128/v1
-Ufunguo wa API:  [nakili kutoka ukurasa wa Endpoint]
-Modeli:          if/qwen3.8-max-preview (au kiambishi awali chochote cha mtoa huduma/modeli)
-```
-
-Ikiwa kihariri chako hakiwezi kutuma `Authorization: Bearer ...`, tumia anwani ya msingi ya uoanifu yenye tokeni badala yake:
+### 2) Elekeza Zana Yako ya Kuandika Misimbo
 
 ```txt
-URL ya Msingi: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL ya Modeli: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL ya Gumzo: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL ya Lebo za Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Base URL: http://localhost:20128/v1
+API Key:  [copy from Endpoint page]
+Model:    if/qwen3.8-max-preview (or any provider/model prefix)
 ```
 
-Hufanya kazi na Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, na SDK zinazooana na OpenAI.
+Ikiwa kihariri chako hakiwezi kutuma `Authorization: Bearer ...`, tumia anwani msingi ya uoanifu iliyo na tokeni badala yake:
+
+```txt
+Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
+
+Hufanya kazi na Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, na SDK zinazoendana na OpenAI.
 
 #### Sanidi kiotomatiki kwa `setup-*`
 
-Badala ya kubandika URL ya msingi na ufunguo mwenyewe, ruhusu OmniRoute kuandika usanidi wa kila zana kutoka kwenye katalogi hai ya modeli. Amri moja kwa kila zana:
+Badala ya kubandika anwani msingi na ufunguo mwenyewe, ruhusu OmniRoute iandike usanidi
+wa kila zana kutoka kwenye katalogi hai ya modeli. Amri moja kwa kila zana:
 
 ```bash
-omniroute setup-codex        # wasifu wa ~/.codex/<name>.config.toml
+omniroute setup-codex        # profaili za ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (inaoana na OpenAI)
-omniroute setup-cline        # Mipangilio ya Cline CLI + kiendelezi cha VS Code
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (inaoendana na OpenAI)
+omniroute setup-cline        # mipangilio ya Cline CLI + kiendelezi cha VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # huchapisha hatua za ndani ya programu ya Cursor
-omniroute setup-roo          # Uingizaji wa Roo Code + kielekezi cha autoImport
+omniroute setup-roo          # uingizaji wa Roo Code + kielekezi cha autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Kila moja hukubali `--remote <url> --api-key <key>` ili kusanidi zana ya ndani dhidi ya OmniRoute ya **mbali**, pamoja na `--dry-run` ili kuona hakikisho. Ili kuanzisha CLI ikiwa mazingira yanayofaa yameingizwa bila kuandika usanidi wowote, tumia kizinduzi cha jumla `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); vizinduzi vya zamani vya kila zana `omniroute launch` (Claude Code) na `omniroute launch-codex` (Codex) bado vinapatikana.
+Kila moja hukubali `--remote <url> --api-key <key>` ili kusanidi zana ya ndani dhidi ya
+OmniRoute ya **mbali**, pamoja na `--dry-run` ili kuhakiki. Ili kuzindua CLI huku
+mazingira sahihi yakiwa yameingizwa na bila kuandika usanidi wowote, tumia kizinduzi cha jumla
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
+vizinduzi vya awali vya kila zana `omniroute launch` (Claude Code) na
+`omniroute launch-codex` (Codex) bado vinapatikana.
 
-Kwa jedwali kamili (kile ambacho kila amri huandika, kila alama, ya ndani dhidi ya ya mbali, na kanuni za `/v1` za URL ya msingi), tazama **[Miunganisho ya CLI](./CLI-INTEGRATIONS.md)**.
+Kwa jedwali kamili (kile ambacho kila amri huandika, kila alama, ya ndani dhidi ya ya mbali, kanuni za anwani msingi
+za `/v1`), tazama **[Miunganisho ya CLI](./CLI-INTEGRATIONS.md)**.
 
 Kwa usanidi wa kina wa kila zana (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, na nyinginezo), tazama **[Mwongozo wa Zana za CLI](../reference/CLI-TOOLS.md)** uliotengwa.
 
@@ -192,39 +200,39 @@ Kwa usanidi wa kina wa kila zana (Claude Code, Codex CLI, Cursor, Cline, OpenCla
 
 ## Usanidi wa Itifaki (MCP + A2A)
 
-### Usanidi wa MCP (Itifaki ya Muktadha wa Modeli)
+### Usanidi wa MCP (Itifaki ya Muktadha wa Muundo)
 
-Anzisha usafirishaji wa MCP katika modi ya stdio:
+Anzisha usafiri MCP katika hali ya stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Mtiririko unaopendekezwa wa uthibitishaji:
+Mtiririko wa uthibitishaji unaopendekezwa:
 
 ```bash
-# 1. Anzisha seva ya MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Kutoka kwa kiteja chako cha MCP, ita:
-omniroute_get_health        # Inapaswa kurejesha hali ya mfumo
-omniroute_list_combos       # Inapaswa kurejesha combos zinazotumika
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Au endesha mkusanyiko kamili wa E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Usanidi wa Kiteja cha MCP
+#### MCP Usanidi wa Mteja
 
-**Claude Code:**
+**Msimbo wa Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Ongeza kwenye mipangilio yako ya MCP:
+Ongeza kwenye mipangilio yako MCP (stdio, na ufunguo ili mpigaji awe na mkuu):
 
 ```json
 {
@@ -232,15 +240,22 @@ Ongeza kwenye mipangilio yako ya MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Nyaraka kamili za MCP:** [README ya Seva ya MCP](../../open-sse/mcp-server/README.md) — zana 110, usanidi wa IDE, viteja vya Python/TS/Go.
+Au, wakati `mcpTransport` ni `streamable-http` (iweke `/dashboard/mcp` au na `omniroute mcp enable --transport streamable-http`), elekeza ingizo la seva ya MCP la mbali kwa `http://localhost:20128/api/mcp/stream`.
 
-### Usanidi wa A2A (Itifaki ya Wakala-kwa-Wakala)
+Ufunguo husafiri kama `Authorization: Bearer <api-key>` (angalia [MCP Seva → Ufikiaji wa Mbali](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) kwa seva pangishi za mbali; ufunguo wa mbali unahitaji `mcp:connect` pamoja na mawanda yake read/write ).
+
+**Nyaraka kamili MCP :** [MCP Seva README](../../open-sse/mcp-server/README.md) — 110, usanidi IDE, wateja wa Python/TS/Go. Marejeleo ya opereta kwa zana za CCR/dedup mgandamizo (alama, sharti, upeo wa kila chombo, urejeleaji wa urejeshaji, uchunguzi): [Injini za Ukandamizaji → Masharti / mwongozo wa opereta](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Usanidi wa A2A (Itifaki ya Wakala kwa Wakala)
 
 Thibitisha Kadi ya Wakala:
 
@@ -256,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Nyaraka kamili za A2A:** [README ya Seva ya A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ujuzi, utiririshaji, mzunguko wa maisha wa jukumu.
+**Nyaraka kamili A2A :** [A2A Seva README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ujuzi, utiririshaji, mzunguko wa maisha ya kazi.
 
 ---
 
@@ -315,23 +330,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Kiolezo cha Void Linux (xbps-src)
+## Kiolezo cha Linux (xbps-src) tupu
 
-Kwa watumiaji wa Void Linux, unaweza kuunda kifurushi asilia ukitumia `xbps-src`. Hifadhi sehemu hii kama `srcpkgs/omniroute/template`:
+Kwa watumiaji wa Void Linux, unaweza kuunda kifurushi asilia kwa kutumia `xbps-src`. Hifadhi kizuizi hiki kama `srcpkgs/omniroute/template`:
 
 ```bash
-# Faili ya kiolezo cha 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Lango la AI la jumla lenye uelekezaji mahiri kwa watoa huduma wengi wa LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Tengeneza upya checksum kwa kila toleo kwa kutumia:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

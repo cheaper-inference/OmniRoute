@@ -198,7 +198,15 @@ test("provider bundle retires exactly the 78 unresolved assets and keeps the gen
   // freebuff-light.svg, freebuff.png, openvecta.svg, picoclaw.jpg, zoocode.png),
   // so the real pre-fix count was 142, not 148. This fix retires the unresolved
   // Nimble asset as well, leaving 141 distributed assets.
-  assert.equal(distributedAssets.length, 141, "all 141 non-target assets must remain");
+  // notrack-web: operator-supplied logomark with a provenance record (unresolved
+  // status, non-blocking) ships in the bundle — 141 → 142.
+  // runcrate (#18061): contributor-supplied logomark with a provenance record
+  // (unresolved status, non-blocking) ships in the bundle — 142 → 143.
+  // gisoo (#18112): contributor-supplied logomark with a provenance record
+  // (unresolved status, non-blocking) ships in the bundle — 143 → 144.
+  // Sign in with ChatGPT (#15201): the official SIWC black/white ChatGPT marks, each with a
+  // provenance record (probable status, non-blocking), ship in the bundle — 144 → 146.
+  assert.equal(distributedAssets.length, 146, "all 146 non-target assets must remain");
   assert.ok(distributedAssets.includes("cli-generic.svg"));
 });
 

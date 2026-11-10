@@ -136,7 +136,7 @@ omniroute providers validate
 
 ---
 
-## CLI సాధనం కాన్ఫిగరేషన్
+## CLI టూల్ కాన్ఫిగరేషన్
 
 ### 1) ప్రొవైడర్లను కనెక్ట్ చేసి API కీని సృష్టించండి
 
@@ -144,93 +144,95 @@ omniroute providers validate
 2. Dashboard → `Endpoints` తెరిచి, ఒక API కీని సృష్టించండి.
 3. (ఐచ్ఛికం) Dashboard → `Combos` తెరిచి, మీ ఫాల్బ్యాక్ చైన్ను సెట్ చేయండి.
 
-### 2) మీ కోడింగ్ సాధనాన్ని సూచించండి
+### 2) మీ కోడింగ్ టూల్ను సూచించండి
 
 ```txt
-బేస్ URL: http://localhost:20128/v1
-API కీ:   [Endpoint పేజీ నుండి కాపీ చేయండి]
-మోడల్:    if/qwen3.8-max-preview (లేదా ఏదైనా ప్రొవైడర్/మోడల్ ప్రిఫిక్స్)
+Base URL: http://localhost:20128/v1
+API Key:  [Endpoint పేజీ నుండి కాపీ చేయండి]
+Model:    if/qwen3.8-max-preview (లేదా ఏదైనా ప్రొవైడర్/మోడల్ ప్రిఫిక్స్)
 ```
 
-మీ ఎడిటర్ `Authorization: Bearer ...`ను పంపలేకపోతే, బదులుగా టోకెనైజ్డ్ అనుకూలత బేస్ను ఉపయోగించండి:
+మీ ఎడిటర్ `Authorization: Bearer ...`ను పంపలేకపోతే, బదులుగా టోకనైజ్డ్ కంపాటిబిలిటీ బేస్ను ఉపయోగించండి:
 
 ```txt
-బేస్ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-మోడల్స్ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-చాట్ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama ట్యాగ్స్ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-ఇది Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode మరియు OpenAI-అనుకూల SDKలతో పనిచేస్తుంది.
+Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode మరియు OpenAI-అనుకూల SDKలతో పనిచేస్తుంది.
 
-#### `setup-*`తో స్వయంచాలకంగా కాన్ఫిగర్ చేయండి
+#### `setup-*`తో ఆటోమేటిక్గా కాన్ఫిగర్ చేయండి
 
-బేస్ URL మరియు కీని చేతితో పేస్ట్ చేయడానికి బదులుగా, ప్రత్యక్ష మోడల్ కేటలాగ్ నుండి ప్రతి సాధనానికి సంబంధించిన
-సొంత కాన్ఫిగ్ను OmniRoute వ్రాయనివ్వండి. ఒక్కో సాధనానికి ఒక్క కమాండ్:
+బేస్ URL మరియు కీని చేతితో పేస్ట్ చేయడానికి బదులుగా, లైవ్ మోడల్ కేటలాగ్ నుండి ప్రతి టూల్కు
+సంబంధించిన స్వంత కాన్ఫిగ్ను OmniRoute రాయనివ్వండి. ప్రతి టూల్కు ఒక కమాండ్:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml ప్రొఫైల్లు
+omniroute setup-codex        # ~/.codex/<name>.config.toml ప్రొఫైళ్లు
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-అనుకూలం)
 omniroute setup-cline        # Cline CLI + VS Code ఎక్స్టెన్షన్ సెట్టింగ్లు
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursor యాప్లోని దశలను ముద్రిస్తుంది
-omniroute setup-roo          # Roo Code దిగుమతి + autoImport పాయింటర్
+omniroute setup-cursor       # Cursorలోని యాప్-అంతర్గత దశలను ప్రింట్ చేస్తుంది
+omniroute setup-roo          # Roo Code ఇంపోర్ట్ + autoImport పాయింటర్
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-ఒక స్థానిక సాధనాన్ని **రిమోట్** OmniRouteకు వ్యతిరేకంగా కాన్ఫిగర్ చేయడానికి ప్రతి కమాండ్ `--remote <url> --api-key <key>`ను, అలాగే ప్రివ్యూ కోసం `--dry-run`ను అంగీకరిస్తుంది. సరైన
-envను ఇంజెక్ట్ చేసి, ఎటువంటి కాన్ఫిగ్నూ వ్రాయకుండా CLIని ప్రారంభించడానికి, సాధారణ లాంచర్
+**రిమోట్** OmniRouteతో ఉపయోగించేందుకు లోకల్ టూల్ను కాన్ఫిగర్ చేయడానికి ప్రతి కమాండ్
+`--remote <url> --api-key <key>`ను, ప్రివ్యూ కోసం `--dry-run`ను అంగీకరిస్తుంది. సరైన
+envను ఇంజెక్ట్ చేసి, ఎలాంటి కాన్ఫిగ్ను రాయకుండానే CLIని ప్రారంభించడానికి సాధారణ లాంచర్
 `omniroute run <target>`ను (claude, codex, aider, goose, opencode, qwen, gemini) ఉపయోగించండి;
-పాత ఒక్కో-సాధన లాంచర్లు `omniroute launch` (Claude Code) మరియు
+పాత ప్రతి-టూల్ లాంచర్లు `omniroute launch` (Claude Code) మరియు
 `omniroute launch-codex` (Codex) ఇప్పటికీ అందుబాటులో ఉన్నాయి.
 
-పూర్తి పట్టిక కోసం (ప్రతి కమాండ్ ఏమి వ్రాస్తుంది, ప్రతి ఫ్లాగ్, లోకల్ vs రిమోట్, బేస్-URL
+పూర్తి పట్టిక కోసం (ప్రతి కమాండ్ ఏమి రాస్తుంది, ప్రతి ఫ్లాగ్, లోకల్ vs రిమోట్, బేస్-URL
 `/v1` నియమాలు), **[CLI ఇంటిగ్రేషన్లు](./CLI-INTEGRATIONS.md)** చూడండి.
 
-ప్రతి సాధనానికి సంబంధించిన వివరణాత్మక కాన్ఫిగరేషన్ కోసం (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot మరియు మరిన్ని), ప్రత్యేక **[CLI సాధనాల గైడ్](../reference/CLI-TOOLS.md)** చూడండి.
+ప్రతి టూల్కు సంబంధించిన వివరణాత్మక కాన్ఫిగరేషన్ కోసం (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot మరియు మరిన్ని), ప్రత్యేక **[CLI టూల్స్ గైడ్](../reference/CLI-TOOLS.md)** చూడండి.
 
 ---
 
 ## ప్రోటోకాల్ సెటప్ (MCP + A2A)
 
-### MCP సెటప్ (Model Context Protocol)
+### MCP సెటప్ (మోడల్ కాంటెక్స్ట్ ప్రోటోకాల్)
 
-stdio మోడ్లో MCP ట్రాన్స్పోర్ట్ను ప్రారంభించండి:
+stdio మోడ్లో MCP రవాణాను ప్రారంభించండి:
 
 ```bash
 omniroute --mcp
 ```
 
-సిఫార్సు చేసిన ధ్రువీకరణ ప్రక్రియ:
+సిఫార్సు చేయబడిన ధృవీకరణ విధానం:
 
 ```bash
-# 1. MCP సర్వర్ను ప్రారంభించండి
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. మీ MCP క్లయింట్ నుండి, వీటిని కాల్ చేయండి:
-omniroute_get_health        # సిస్టమ్ ఆరోగ్య స్థితిని తిరిగి ఇవ్వాలి
-omniroute_list_combos       # సక్రియ కాంబోలను తిరిగి ఇవ్వాలి
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. లేదా పూర్తి E2E సూట్ను అమలు చేయండి:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP క్లయింట్ కాన్ఫిగరేషన్
 
-**Claude Code:**
+**Claude కోడ్:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-మీ MCP సెట్టింగ్లకు జోడించండి:
+మీ MCP సెట్టింగ్లకు జోడించండి (stdio, కీతో పాటు కాలర్కి ప్రిన్సిపల్ ఉంటుంది):
 
 ```json
 {
@@ -238,31 +240,38 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**పూర్తి MCP డాక్యుమెంటేషన్:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 సాధనాలు, IDE కాన్ఫిగ్లు, Python/TS/Go క్లయింట్లు.
+లేదా, `mcpTransport` `streamable-http` అయినప్పుడు (దీన్ని `/dashboard/mcp` లేదా `omniroute mcp enable --transport streamable-http` తో సెట్ చేయండి), క్లయింట్ యొక్క రిమోట్ MCP సర్వర్ ఎంట్రీని `http://localhost:20128/api/mcp/stream` వద్ద సూచించండి.
 
-### A2A సెటప్ (Agent-to-Agent Protocol)
+కీ `Authorization: Bearer <api-key>` వలె ప్రయాణిస్తుంది (రిమోట్ హోస్ట్ల కోసం [MCP సర్వర్ → రిమోట్ యాక్సెస్](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) చూడండి; రిమోట్ కీకి `mcp:connect` మరియు దాని read/write స్కోప్లు అవసరం).
 
-Agent Cardను ధ్రువీకరించండి:
+**పూర్తి MCP డాక్యుమెంటేషన్:** [MCP సర్వర్ README](../../open-sse/mcp-server/README.md) — 110 సాధనాలు, IDE configs, Python/TS/Go క్లయింట్లు. కంప్రెషన్ CCR/dedup సాధనాల కోసం ఆపరేటర్ సూచన (మార్కర్లు, ప్రీరిక్విజిట్స్, పర్-టూల్ స్కోప్లు, రిట్రీవల్ పేజినేషన్, డయాగ్నస్టిక్స్): [కంప్రెషన్ ఇంజిన్లు → ముందస్తు అవసరాలు / ఆపరేటర్ గైడ్](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A సెటప్ (ఏజెంట్-టు-ఏజెంట్ ప్రోటోకాల్)
+
+ఏజెంట్ కార్డ్ని ధృవీకరించండి:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ఒక టాస్క్ను పంపండి:
+ఒక పనిని పంపండి:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"నాకు సంక్షిప్త కోటా సారాంశాన్ని ఇవ్వండి."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**పూర్తి A2A డాక్యుమెంటేషన్:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, నైపుణ్యాలు, స్ట్రీమింగ్, టాస్క్ జీవితచక్రం.
+**పూర్తి A2A డాక్యుమెంటేషన్:** [A2A సర్వర్ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, నైపుణ్యాలు, స్ట్రీమింగ్, టాస్క్ లైఫ్సైకిల్.
 
 ---
 
@@ -321,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) టెంప్లేట్
+## శూన్యమైన Linux (xbps-src) టెంప్లేట్
 
-Void Linux వినియోగదారులు `xbps-src` ఉపయోగించి స్థానిక ప్యాకేజీని బిల్డ్ చేయవచ్చు. ఈ బ్లాక్ను `srcpkgs/omniroute/template`గా సేవ్ చేయండి:
+Void Linux వినియోగదారుల కోసం, మీరు `xbps-src` ఉపయోగించి స్థానిక ప్యాకేజీని రూపొందించవచ్చు. ఈ బ్లాక్ని `srcpkgs/omniroute/template` గా సేవ్ చేయండి:
 
 ```bash
-# 'omniroute' కోసం టెంప్లేట్ ఫైల్
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -337,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ప్రతి విడుదల కోసం దీనితో చెక్సమ్ను మళ్లీ రూపొందించండి:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

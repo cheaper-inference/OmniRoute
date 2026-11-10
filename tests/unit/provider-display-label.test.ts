@@ -2,9 +2,42 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { getProviderDisplayLabel } from "../../src/shared/utils/providerDisplayLabel.ts";
 
+test("empty and ordinary providers bypass node names", () => {
+  assert.equal(getProviderDisplayLabel("", [{ id: "", name: "ignored" }]), "-");
+  assert.equal(getProviderDisplayLabel("openai", [{ id: "openai", name: "ignored" }]), null);
+});
+
+test("fallback labels preserve suffix boundaries and first-match precedence", () => {
+  for (const [prefix, label] of [
+    ["openai", "OAI"],
+    ["anthropic", "ANT"],
+  ]) {
+    for (const [suffix, expected] of [
+      ["", `${label}: `],
+      ["chat-1234567", `${label}: CHAT-1234567`],
+      ["chat-12345678", `${label}-COMPAT`],
+      ["abcdefghijklmnopq", `${label}: ABCDEFGHIJKLMNOP`],
+    ]) {
+      const provider = `${prefix}-compatible-${suffix}`;
+      assert.equal(getProviderDisplayLabel(provider), expected);
+      assert.equal(
+        getProviderDisplayLabel(provider, [
+          { id: provider, name: "" },
+          { prefix: provider, name: "later match" },
+        ]),
+        expected
+      );
+    }
+  }
+});
+
 test("returns matched node name for openai-compatible UUID id", () => {
   const providerNodes = [
-    { id: "openai-compatible-chat-02669115-2545-4896-b003-cb4dac09d441", prefix: undefined, name: "My Custom OAI" },
+    {
+      id: "openai-compatible-chat-02669115-2545-4896-b003-cb4dac09d441",
+      prefix: undefined,
+      name: "My Custom OAI",
+    },
   ];
   const result = getProviderDisplayLabel(
     "openai-compatible-chat-02669115-2545-4896-b003-cb4dac09d441",

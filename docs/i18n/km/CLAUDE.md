@@ -11,17 +11,18 @@
 និងមេរៀនអំពី PII)។ សូមអានវាទាំងស្រុង ហើយកុំបន្ថែមច្បាប់គម្រោងឡើងវិញនៅទីនេះ។ អ្វីៗខាងក្រោមអនុវត្តតែ
 ចំពោះ Claude Code ប៉ុណ្ណោះ — ជាការកែលម្អប្រតិបត្តិការនៃច្បាប់ដែលបានកំណត់រួចហើយក្នុង `AGENTS.md`។
 
-## ការញែក worktree ដាច់ដោយឡែក — ចំណុចជាក់លាក់សម្រាប់ Claude Code
+## ការញែក worktree ដោយឡែក — ចំណុចពិសេសសម្រាប់ Claude Code
 
-ពិធីការចាំបាច់ពេញលេញសម្រាប់ worktree (ការបញ្ជាក់ base branch, ផ្លូវស្តង់ដារ
-`.claude/worktrees/`, `cp -al` node_modules និងច្បាប់នៃការសម្អាតក្រោយប្រើប្រាស់) មាននៅក្នុង `AGENTS.md` → Git Workflow → "Worktree
-isolation"។ ចំណុចជាក់លាក់សម្រាប់ Claude Code៖
+ពិធីការ worktree ដោយឡែកដែលតម្រូវជាចាំបាច់ទាំងស្រុង (ការបញ្ជាក់ base branch, ផ្លូវ canonical
+`.claude/worktrees/`, `cp -al` node_modules, ច្បាប់ teardown) មាននៅក្នុង
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (សង្ខេបក្នុង `AGENTS.md` →
+ដំណើរការ Git → "ការញែក worktree ដោយឡែក")។ ចំណុចពិសេសសម្រាប់ Claude Code:
 
-- បញ្ជាក់ base branch ជាមួយអ្នកប្រតិបត្តិករតាមរយៈ `AskUserQuestion` (ច្បាប់តឹងរ៉ឹង #19) លុះត្រាតែពួកគេ
-  បានប្រាប់អ្នករួចហើយ។
-- គួរប្រើឧបករណ៍ដើម `EnterWorktree` — វាបង្កើត worktree នៅក្រោម
-  `.claude/worktrees/` (ផ្លូវស្តង់ដារ) រួចជាស្រេច។ បង្កើត worktree ដោយប្រើពាក្យបញ្ជា `git
-worktree add` ដែលបានចងក្រងជាឯកសារ បន្ទាប់មកហៅ `EnterWorktree` ជាមួយ `path` របស់វា។
+- បញ្ជាក់ base branch ជាមួយអ្នកប្រតិបត្តិការតាមរយៈ `AskUserQuestion` (ច្បាប់រឹង #19) លុះត្រាតែ
+  ពួកគេបានប្រាប់អ្នករួចហើយ។
+- សូមផ្តល់អាទិភាពឧបករណ៍ native `EnterWorktree` — វាបង្កើត worktree នៅក្រោម
+  `.claude/worktrees/` (ផ្លូវ canonical) រួចហើយ។ បង្កើត worktree ដោយពាក្យបញ្ជាដែលបានកត់ត្រាទុក `git
+worktree add` រួចហើយហៅ `EnterWorktree` ជាមួយ `path` របស់វា។
 
 ## សុវត្ថិភាពឆ្លងសម័យ — ចំណុចជាក់លាក់សម្រាប់ Claude Code
 

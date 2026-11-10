@@ -20,9 +20,24 @@ import {
   isOmniRouteCustomModel,
   normalizeDroidModelList,
 } from "@/shared/services/droidCustomModels";
+import {
+  configClobberRefusalResponse,
+  parseJsoncObject,
+  readExistingConfig,
+} from "../_lib/readExistingConfig";
 
 const getDroidSettingsPath = () => getCliPrimaryConfigPath("droid");
 const getDroidDir = () => path.dirname(getDroidSettingsPath());
+
+// `customModels` is filtered and re-spread below; a non-array value would be
+// reset to OmniRoute's entries only, so refuse it like an unparsable file.
+const parseDroidSettings = (raw: string): Record<string, any> => {
+  const parsed = parseJsoncObject(raw);
+  if (parsed.customModels != null && !Array.isArray(parsed.customModels)) {
+    throw new TypeError("settings.json `customModels` must be an array");
+  }
+  return parsed;
+};
 
 // Read current settings.json.
 // Ported from upstream decolua/9router@6c10edf8: tolerate JSONC (trailing
@@ -125,9 +140,7 @@ export async function POST(request: Request) {
         {
           error: {
             message: "Invalid request",
-            details: [
-              { field: "models", message: "baseUrl and at least one model are required" },
-            ],
+            details: [{ field: "models", message: "baseUrl and at least one model are required" }],
           },
         },
         { status: 400 }
@@ -143,14 +156,10 @@ export async function POST(request: Request) {
     // Backup current settings before modifying
     await createBackup("droid", settingsPath);
 
-    // Read existing settings or create new
-    let settings: Record<string, any> = {};
-    try {
-      const existingSettings = await fs.readFile(settingsPath, "utf-8");
-      settings = JSON.parse(existingSettings);
-    } catch {
-      /* No existing settings */
-    }
+    // Read existing settings or create new. Only a missing file starts fresh —
+    // an unreadable/unparsable one is refused (409) instead of being replaced.
+    const settings: Record<string, any> =
+      (await readExistingConfig(settingsPath, parseDroidSettings)) ?? {};
 
     // Ensure customModels array exists
     if (!settings.customModels) {
@@ -187,6 +196,8 @@ export async function POST(request: Request) {
       settingsPath,
     });
   } catch (error) {
+    const refusal = configClobberRefusalResponse(error);
+    if (refusal) return refusal;
     console.log("Error updating droid settings:", error);
     return NextResponse.json({ error: "Failed to update droid settings" }, { status: 500 });
   }

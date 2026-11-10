@@ -24,7 +24,10 @@ export type ModelFamily =
   | "kimi"
   | "qwen"
   | "deepseek"
-  | "gpt";
+  | "gpt"
+  | "claude-opus"
+  | "claude-sonnet"
+  | "claude-haiku";
 
 export const MODEL_FAMILIES: readonly ModelFamily[] = [
   "glm",
@@ -38,6 +41,9 @@ export const MODEL_FAMILIES: readonly ModelFamily[] = [
   "qwen",
   "deepseek",
   "gpt",
+  "claude-opus",
+  "claude-sonnet",
+  "claude-haiku",
 ];
 
 const MODEL_FAMILY_SET: ReadonlySet<string> = new Set(MODEL_FAMILIES);
@@ -55,6 +61,11 @@ const FAMILY_ID_PATTERNS: ReadonlyArray<{ family: ModelFamily; pattern: RegExp }
   { family: "qwen", pattern: /^qwen/i },
   { family: "deepseek", pattern: /^deepseek-/i },
   { family: "gpt", pattern: /^gpt-/i },
+  // #15675: Claude tiers. Matches `claude-opus-4-8`, `claude-4.6-opus-high` and
+  // Bedrock-style `us.anthropic.claude-opus-4-v1:0` (the `.`-separated prefix).
+  { family: "claude-opus", pattern: /(?:^|\.)claude-(?:\d[\d.-]*-)?opus/i },
+  { family: "claude-sonnet", pattern: /(?:^|\.)claude-(?:\d[\d.-]*-)?sonnet/i },
+  { family: "claude-haiku", pattern: /(?:^|\.)claude-(?:\d[\d.-]*-)?haiku/i },
 ];
 
 /**
@@ -99,7 +110,7 @@ interface FamilyPoolCandidate {
  * Build the candidate filter for `auto/<family>`. Provider-override families
  * (currently only `zai`) filter by connection provider id; every other family
  * filters by `detectModelFamily(model) === family`, with a provider-scoped
- * exception for Kimi backends exposing the bare `k3` model id.
+ * exception for Kimi backends exposing bare `k3` / `k3.1-*` model ids.
  */
 export function buildFamilyCandidateFilter(
   family: ModelFamily
@@ -110,13 +121,13 @@ export function buildFamilyCandidateFilter(
   }
   return (candidate) => {
     if (detectModelFamily(candidate.model) === family) return true;
-    // Coding OAuth/API-key and web share the bare k3 id. Do not classify an
+    // Coding OAuth/API-key and web share bare k3-family ids. Do not classify an
     // unrelated provider's k3 (or other models on these providers) as Kimi.
     const bareModel = candidate.model.slice(candidate.model.lastIndexOf("/") + 1);
     return (
       family === "kimi" &&
       ["kimi-coding", "kimi-coding-apikey", "kimi-web"].includes(candidate.provider) &&
-      bareModel.toLowerCase() === "k3"
+      /^k3(?:$|[.-])/.test(bareModel.toLowerCase())
     );
   };
 }

@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Pentru `smart-routing`, `metadata.combo` suprascrie în mod explicit
+`metadata.model` pentru cererea către gateway; acesta este trimis drept câmpul `model` real,
+nu drept un câmp JSON `x-combo` ignorat. Autorizarea obișnuită a gateway-ului, bazată pe cheia API și
+specifică fiecărei destinații, se aplică în continuare. Un combo nevalid sau gol este respins.
+
+Rezultatul expune `requested_combo` (intenția apelantului), `dispatched_model`
+(cererea efectivă către gateway), `response_model` (răspunsul gateway-ului) și
+`confirmed_combo`. Ultimul câmp este `null`, cu excepția cazului în care gateway-ul
+identifică în mod explicit un combo. Jurnalele de decizie A2A atribuie execuția numai unui
+combo confirmat, păstrând o cerere neconfirmată drept `requestedCombo`.
+
 **Răspuns:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Transmitere în flux prin SSE
+### `message/stream` — Streaming SSE
 
-La fel ca `message/send`, dar returnează evenimente trimise de server pentru transmiterea în flux în timp real.
+La fel ca `message/send`, dar returnează evenimente trimise de server pentru streaming în timp real.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -148,84 +152,92 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Abilități disponibile
 
-OmniRoute expune 6 abilități A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de abilitate se află în `src/lib/a2a/skills/`.
+OmniRoute expune 6 abilități A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de abilități locuiește în `src/lib/a2a/skills/`.
 
-| Abilitate                   | ID                   | Descriere                                                                                                                                                                            | Etichete                        | Exemple                                              |
-| :-------------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :--------------------------------------------------- |
-| Rutare inteligentă          | `smart-routing`      | Rutează un prompt prin furnizorul/combinația optimă, folosind motorul de combinații și sistemul de evaluare OmniRoute                                                                | rutare, furnizori               | „Rutează acest prompt prin cel mai bun model”        |
-| Gestionarea cotelor         | `quota-management`   | Raportează starea cotei pentru fiecare furnizor și ajută apelanții să decidă când să limiteze traficul/schimbe furnizorul                                                            | cote, furnizori                 | „Verifică cota pentru anthropic”                     |
-| Descoperirea furnizorilor   | `provider-discovery` | Listează furnizorii instalați, împreună cu funcționalitățile, opțiunile de nivel gratuit și starea OAuth                                                                             | furnizori, descoperire          | „Ce furnizori sunt disponibili?”                     |
-| Analiza costurilor          | `cost-analysis`      | Estimează costul unei solicitări/conversații pe baza catalogului și a utilizării recente                                                                                             | cost, utilizare                 | „Estimează costul acestei conversații”               |
-| Raport de sănătate          | `health-report`      | Agregă starea întrerupătorului de circuit, a perioadei de așteptare și a blocării pentru fiecare furnizor                                                                            | sănătate, reziliență            | „Afișează starea de sănătate a tuturor furnizorilor” |
-| Listarea funcționalităților | `list-capabilities`  | Returnează catalogul complet cu 45 de intrări Agent Skills (23 API + 21 CLI + 1 configurație) sub forma unui tabel markdown, cu URL-uri SKILL.md brute pentru injectarea contextului | catalog, descoperire, abilități | „Listează toate funcționalitățile OmniRoute”         |
+| Îndemânare                | ID                   | Descriere                                                                                                                                                                   | Etichete                         | Exemple                                             |
+| :------------------------ | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :-------------------------------------------------- |
+| Rutare inteligentă        | `smart-routing`      | Direcționează un prompt prin provider/combo optimă folosind scorul + al motorului combo al lui OmniRoute                                                                    | rutare, furnizori                | „Dirijați acest prompt prin cel mai bun model”      |
+| Managementul cotelor      | `quota-management`   | Raportează starea cotei pentru fiecare furnizor, îi ajută pe apelanți să decidă când să throttle/switch                                                                     | cotă, furnizori                  | „Verificați cota pentru antropic”                   |
+| Descoperirea furnizorului | `provider-discovery` | Enumeră furnizorii instalați cu capacități, steaguri de nivel gratuit, OAuth                                                                                                | furnizori, descoperire           | „Ce furnizori sunt disponibili?”                    |
+| Analiza costurilor        | `cost-analysis`      | Estimează costul unui request/conversation având în vedere utilizarea recentă a catalogului +                                                                               | cost, utilizare                  | „Cost estimat pentru această conversație”           |
+| Raport de sănătate        | `health-report`      | Agregă întrerupător, răcire, stare de blocare per furnizor                                                                                                                  | sănătate, rezistență             | „Afișați starea de sănătate a tuturor furnizorilor” |
+| Lista de capabilități     | `list-capabilities`  | Returnează întregul catalog de abilități de agent cu 45 de intrări (23 API + 21 CLI + 1 config) ca un tabel de reducere cu SKILL.md URLs brut pentru injectarea contextului | catalog, descoperire, aptitudini | „Enumeră toate capabilitățile OmniRoute ”           |
 
-> Agent Card trebuie menținut aliniat cu catalogul activ de 352 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
+> Cardul de agent trebuie menținut aliniat cu catalogul live 381-furnizor; Numărul furnizorilor și metadatele free/no-auth provin din registrul de rulare.
 
-### Detalii despre abilitatea `list-capabilities`
+### `list-capabilities` Detaliu abilitate
 
-Abilitatea `list-capabilities` este deosebit de utilă pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Aceasta returnează un artefact structurat sub forma unui tabel markdown:
+Abilitatea `list-capabilities` este deosebit de utilă pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Returnează un artefact structurat de tabel de reducere:
 
 ```
-| ID | Nume | Categorie | Zonă | Puncte finale/Comenzi | URL brut |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentificare și sesiuni | api | autentificare | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Fiecare rând include coloana `rawUrl`, astfel încât agenții să poată prelua imediat fișierul SKILL.md complet. Câmpul `metadata.totalSkills` reflectă dimensiunea catalogului (45 în prezent). Implementare: `src/lib/a2a/skills/listCapabilities.ts`. Consultați și [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Fiecare rând include coloana `rawUrl`, astfel încât agenții să poată prelua imediat SKILL.md complet. Câmpul `metadata.totalSkills` reflectă dimensiunea catalogului (45 astăzi). Implementare: `src/lib/a2a/skills/listCapabilities.ts`. Vezi și [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## API REST (auxiliar)
+## REST API (auxiliar)
 
-Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele finale REST de mai jos oferă acces auxiliar pentru tablouri de bord și instrumente externe:
+Punctul final JSON-RPC `/a2a` este punctul de intrare canonic A2A. Punctele finale REST de mai jos oferă acces auxiliar pentru tablouri de bord și instrumente externe:
 
-| Punct final                  | Metodă | Descriere                                                         | Autentificare                                |
-| :--------------------------- | :----- | :---------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET    | Starea serverului, competențe înregistrate                        | (public)                                     |
-| `/api/a2a/tasks`             | GET    | Listează sarcinile folosind filtre                                | administrare                                 |
-| `/api/a2a/tasks/[id]`        | GET    | Obține sarcina după ID                                            | administrare                                 |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Anulează sarcina în curs de execuție                              | administrare                                 |
-| `/.well-known/agent.json`    | GET    | Fișa agentului (descoperire A2A)                                  | (public, memorat în cache timp de 3600s)     |
-| `/api/a2a/tasks`             | POST   | Delegare de intrare către flota OmniConductor (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Punct final                  | Metodă | Descriere                                                         | Auth                                                                                                                 |
+| :--------------------------- | :----- | :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Stare server, competențe înregistrate                             | (public)                                                                                                             |
+| `/api/a2a/tasks`             | GET    | Listează sarcinile cu filtre                                      | management sau cheie API (vezi mai jos)                                                                              |
+| `/api/a2a/tasks/[id]`        | GET    | Obțineți sarcina de la ID                                         | management sau cheie API (vezi mai jos)                                                                              |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Anulați sarcina de rulare                                         | management sau cheie API (vezi mai jos)                                                                              |
+| `/.well-known/agent.json`    | GET    | Card de agent (A2A discovery)                                     | (public, cache 3600s)                                                                                                |
+| `/api/a2a/tasks`             | POST   | Delegare de intrare către flota OmniConductor (Conductor PRD RF5) | la fel ca `GET`, plus `OMNIROUTE_API_KEY` dacă este setat în timp ce `REQUIRE_API_KEY` este dezactivat; `a2aEnabled` |
 
-**Delegare Conductor de intrare (`POST /api/a2a/tasks`):** agenții A2A externi deleagă activități de programare flotei OmniConductor prin OmniRoute. Corp: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — numai competențele flotei Conductor (cele anunțate în Fișa agentului) pot fi delegate; `metadata.conductor.repo.url` este obligatoriu (flota lucrează cu depozite git). Ruta se traduce în `POST /v1/tasks` al hubului, folosind `CONDUCTOR_ORCHESTRATOR_TOKEN` de pe server (alternativ, `CONDUCTOR_HUB_TOKEN`) și returnează `201 { conductor_task_id, state: "submitted" }`; stările sarcinilor sunt retransmise prin oglinda SSE→A2A (RF1) și sunt vizibile prin `GET /api/a2a/tasks?skill=conductor`.
+Cine ajunge la rutele `/api/a2a/tasks*` depinde de setările de conectare și cheie API:
+
+- `requireLogin=true` (implicit): middleware-ul admite doar acreditările de gestionare (sesiune de tablou de bord, cheie `manage` -scope API, token de acces `oma_` ) și `OMNIROUTE_API_KEY`. O cheie de inferență simplă devine `403`. În antetul `Authorization` middleware-ul ia doar `OMNIROUTE_API_KEY` ca `Bearer <key>`; o cheie goală sau o filă după ce `Bearer` devine `401`.
+- `requireLogin=false`, sau fereastra de loopback înainte de integrare: cu `REQUIRE_API_KEY=true` orice cheie OmniRoute API validă sau autentificare de gestionare este acceptată și apelanții anonimi primesc `401`; cu `REQUIRE_API_KEY` off rutele sunt deschise.
+- `POST /api/a2a/tasks` necesită în plus `OMNIROUTE_API_KEY` în antetul `Authorization` atunci când acea variabilă este setată și `REQUIRE_API_KEY` este dezactivat. Alte anteturi, cum ar fi `x-api-key`, nu sunt luate în considerare acolo. Cu conectarea dezactivată sau înainte de îmbarcare, cheia trece cu sau fără prefix `Bearer` ; cu autentificarea, doar `Bearer <key>` trece de middleware.
+
+Acolo unde este necesară o acreditare, un jeton `read` -scope `oma_` funcționează numai pentru `GET`.
+
+**Delegarea conducătorului de intrare (`POST /api/a2a/tasks`):** agenții externi A2A delegă munca de codificare flotei OmniConductor prin OmniRoute. Corp: numai `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Abilitățile de flota de dirijor (cele anunțate pe Cardul de agent) sunt delegabile; `metadata.conductor.repo.url` este necesar (flota funcționează pe git repos). Ruta se traduce în `POST /v1/tasks` al hub-ului folosind `CONDUCTOR_ORCHESTRATOR_TOKEN` de pe partea serverului ( `CONDUCTOR_HUB_TOKEN` de rezervă) și returnează `201 { conductor_task_id, state: "submitted" }`; stările sarcinii curg înapoi prin oglinda SSE→A2A (RF1) și sunt vizibile prin `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Adăugarea unei competențe noi
+## Adăugarea unei noi abilități
 
-1. **Creați fișierul competenței:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Creați fișierul de abilități:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportați o funcție asincronă `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Urmați structura competențelor existente, precum `smartRouting.ts`.
+   Exportați o funcție asincronă `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Urmăriți forma abilităților existente, cum ar fi `smartRouting.ts`. Dacă skill-ul apelează înapoi în OmniRoute peste HTTP, construiți anteturile cu `buildSelfLoopHeaders(caller)` din `src/lib/a2a/selfLoopAuth.ts`, astfel încât apelul să ruleze cu cheia apelantului A2A, nu `OMNIROUTE_API_KEY`, și transmiteți `redirect: "error"` către `fetch` astfel încât o redirecționare să nu primească niciodată cheia. Ajutorul construiește doar anteturi; fiecare abilitate stabilește însăși politica de redirecționare. Aruncă `UnsafeSelfLoopTargetError` mai degrabă decât atașează o cheie atunci când URL de bază rezolvată este simplu http în afara rețelei private (loopback, un nume de container sau serviciu și adresele private sunt în regulă) sau deține acreditări, așa că o abilitate care înghite apelurile respinse trebuie să reintroducă acea eroare.
 
-2. **Înregistrați gestionarul:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare în `A2A_SKILL_HANDLERS`:
+2. **Înregistrare handler:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare la `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...competențe existente
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Expuneți în Fișa agentului:** în `src/app/.well-known/agent.json/route.ts`, adăugați la sfârșitul matricei `skills`:
+3. **Expuneți în cardul de agent:** în `src/lib/a2a/agentCardMetadata.ts` (partajat de `/.well-known/agent.json` și `/.well-known/agent-card.json`), adăugați la matricea `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Competența dvs.",
-     "description": "Descriere scurtă, axată pe intenție",
-     "tags": ["rutare", "cotă"],
-     "examples": ["Exemplu de invocare în limbaj natural"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Scrieți teste:** `tests/unit/a2a-<your-skill>.test.ts`. Acoperiți scenariul reușit și scenariul de eroare.
+4. **Scrie teste:** `tests/unit/a2a-<your-skill>.test.ts`. Acoperiți calea de eroare + fericită.
 
-5. **Documentați** noua competență în tabelul `Competențe disponibile` din acest fișier.
+5. **Document** noua abilitate din tabelul `Available Skills` al acestui fișier.
 
 ---
 
@@ -264,7 +276,7 @@ trimisă → în lucru → finalizată
 
 ## Exemple de integrare
 
-### Python (requests)
+### Python (cereri)
 
 ```python
 import requests
@@ -283,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (preluare)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

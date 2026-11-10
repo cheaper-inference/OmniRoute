@@ -140,63 +140,64 @@ omniroute providers validate
 
 ## Konfiguracija CLI alata
 
-### 1) Povežite provajdere i kreirajte API ključ
+### 1) Povežite pružaoce usluga i kreirajte API ključ
 
-1. Otvorite Dashboard → `Providers` i povežite barem jednog provajdera (OAuth ili API ključ).
-2. Otvorite Dashboard → `Endpoints` i kreirajte API ključ.
-3. (Opcionalno) Otvorite Dashboard → `Combos` i podesite svoj lanac rezervnih opcija (fallback chain).
+1. Otvorite kontrolnu ploču → `Providers` i povežite najmanje jednog pružaoca usluga (OAuth ili API ključ).
+2. Otvorite kontrolnu ploču → `Endpoints` i kreirajte API ključ.
+3. (Opcionalno) Otvorite kontrolnu ploču → `Combos` i postavite svoj rezervni lanac.
 
-### 2) Usmjerite svoj alat za kodiranje
-
-```txt
-Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
-```
-
-Ako vaš uređivač ne može poslati `Authorization: Bearer ...`, umjesto toga koristite tokenizovanu bazu za kompatibilnost:
+### 2) Usmjerite svoj alat za programiranje
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Osnovni URL: http://localhost:20128/v1
+API ključ:   [kopirajte sa stranice Endpoint]
+Model:       if/qwen3.8-max-preview (ili bilo koji prefiks pružaoca/modela)
 ```
 
-Radi sa Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode i SDK-ovima kompatibilnim sa OpenAI.
+Ako vaš uređivač ne može poslati `Authorization: Bearer ...`, umjesto toga koristite tokeniziranu osnovnu adresu za kompatibilnost:
 
-#### Automatska konfiguracija sa `setup-*`
+```txt
+Osnovni URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+URL modela: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL razgovora: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL Ollama oznaka: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
 
-Umjesto ručnog lijepljenja osnovnog URL-a i ključa, dozvolite OmniRoute-u da napiše konfiguraciju svakog alata iz kataloga modela uživo. Jedna komanda po alatu:
+Radi s alatima Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode i SDK-ovima kompatibilnim s OpenAI-em.
+
+#### Automatski konfigurirajte pomoću `setup-*`
+
+Umjesto ručnog lijepljenja osnovnog URL-a i ključa, dopustite da OmniRoute zapiše vlastitu konfiguraciju svakog alata iz aktivnog kataloga modela. Jedna naredba po alatu:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml profili
+omniroute setup-codex        # profili ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (kompatibilno sa openai)
-omniroute setup-cline        # Cline CLI + postavke VS Code ekstenzije
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (kompatibilno s OpenAI-em)
+omniroute setup-cline        # postavke za Cline CLI + VS Code ekstenziju
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # ispisuje korake unutar Cursor aplikacije
-omniroute setup-roo          # Roo Code uvoz + autoImport pokazivač
+omniroute setup-cursor       # ispisuje korake unutar aplikacije Cursor
+omniroute setup-roo          # Roo Code uvoz + pokazivač autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Svaki prihvata `--remote <url> --api-key <key>` za konfigurisanje lokalnog alata prema **udaljenom** OmniRoute-u, plus `--dry-run` za pregled. Da biste pokrenuli CLI sa ispravno umetnutim okruženjem (env) bez pisanja konfiguracije, koristite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); naslijeđeni pokretači po alatu `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) ostaju dostupni.
+Svaka prihvata `--remote <url> --api-key <key>` za konfiguriranje lokalnog alata prema **udaljenom** OmniRouteu, kao i `--dry-run` za pregled. Za pokretanje CLI-ja s umetnutim odgovarajućim okruženjem, bez ikakvog zapisivanja konfiguracije, koristite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); stariji pokretači za pojedinačne alate `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) ostaju dostupni.
 
-Za kompletnu tabelu (šta svaka komanda piše, svaki flag, lokalno naspram udaljenog, konvencije osnovnog URL-a `/v1`), pogledajte **[CLI Integrations](./CLI-INTEGRATIONS.md)**.
+Za kompletnu tabelu (šta svaka naredba zapisuje, sve zastavice, lokalno naspram udaljenog, konvencije osnovnog URL-a `/v1`) pogledajte **[CLI integracije](./CLI-INTEGRATIONS.md)**.
 
-Za detaljnu konfiguraciju po alatu (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot i više), pogledajte namjenski **[CLI Tools Guide](../reference/CLI-TOOLS.md)**.
+Za detaljnu konfiguraciju pojedinačnih alata (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot i drugi) pogledajte namjenski **[Vodič za CLI alate](../reference/CLI-TOOLS.md)**.
 
 ---
 
 ## Podešavanje protokola (MCP + A2A)
 
-### MCP podešavanje (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Pokrenite MCP transport u stdio režimu:
+Pokrenite MCP transport u stdio modu:
 
 ```bash
 omniroute --mcp
@@ -205,28 +206,28 @@ omniroute --mcp
 Preporučeni tok validacije:
 
 ```bash
-# 1. Pokrenite MCP server
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Iz vašeg MCP klijenta, pozovite:
-omniroute_get_health        # Trebalo bi vratiti zdravlje sistema
-omniroute_list_combos       # Trebalo bi vratiti aktivne kombinacije
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Ili pokrenite puni E2E paket testova:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Konfiguracija MCP klijenta
+#### MCP konfiguracija klijenta
 
-**Claude Code:**
+**Claude kod:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Dodajte u svoje MCP postavke:
+Dodajte svojim MCP postavkama (stdio, sa ključem tako da pozivalac ima principala):
 
 ```json
 {
@@ -234,17 +235,24 @@ Dodajte u svoje MCP postavke:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Kompletna MCP dokumentacija:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 alata, IDE konfiguracije, Python/TS/Go klijenti.
+Ili, kada je `mcpTransport` `streamable-http` (postavite ga na `/dashboard/mcp` ili sa `omniroute mcp enable --transport streamable-http`), usmjerite klijentov daljinski MCP server na `http://localhost:20128/api/mcp/stream`.
 
-### A2A podešavanje (Agent-to-Agent protokol)
+Ključ putuje kao `Authorization: Bearer <api-key>` (pogledajte [MCP Server → Daljinski pristup](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) za udaljene hostove; udaljenom ključu je potreban `mcp:connect` plus njegove read/write opsege).
 
-Verifikujte Agent karticu:
+**Kompletna MCP dokumentacija:** [MCP server README](../../open-sse/mcp-server/README.md) — 110 alati, IDE konfiguracije, Python/TS/Go klijenti. Referenca operatera za alate za kompresiju CCR/dedup (markeri, preduvjeti, opsezi po alatu, paginacija pri preuzimanju, dijagnostika): [Motori kompresije → Preduvjeti / vodič za operatera](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A postavljanje (protokol agent-to-agent)
+
+Potvrdite karticu agenta:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -317,12 +325,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Predložak za Void Linux (xbps-src)
+## Void Linux (xbps-src) predložak
 
-Za korisnike Void Linuxa, izvorni paket možete izgraditi pomoću alata `xbps-src`. Sačuvajte ovaj blok kao `srcpkgs/omniroute/template`:
+Za korisnike Void Linux, možete napraviti izvorni paket koristeći `xbps-src`. Sačuvajte ovaj blok kao `srcpkgs/omniroute/template`:
 
 ```bash
-# Datoteka predloška za 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -333,7 +341,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Ponovo generišite kontrolni zbir za svako izdanje pomoću:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

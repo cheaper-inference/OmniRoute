@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
 import { NumberField } from "./ResilienceFields";
 
@@ -102,10 +103,8 @@ export default function QuotaPreflightCard() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            battery_alert
-          </span>
+        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted shrink-0">
+          <Icon name="battery_alert" size={20} />
         </div>
         <div>
           <h3 className="text-base sm:text-lg font-semibold">
@@ -135,6 +134,7 @@ export default function QuotaPreflightCard() {
           </div>
           <Toggle
             checked={value.enabled}
+            ariaLabel={tx("quotaPreflightEnable", "Enable quota preflight")}
             disabled={saving}
             onChange={() => save({ enabled: !value.enabled })}
           />

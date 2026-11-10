@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Voor `smart-routing` is `metadata.combo` een expliciete overschrijving van
+`metadata.model` voor de gatewayaanvraag; deze wordt verzonden als het daadwerkelijke `model`,
+niet als een genegeerd JSON-veld `x-combo`. De normale API-sleutel- en
+autorisatiecontroles per doel van de gateway blijven van toepassing. Een ongeldige of lege combo wordt geweigerd.
+
+Het resultaat bevat `requested_combo` (intentie van de aanroeper), `dispatched_model`
+(de daadwerkelijke gatewayaanvraag), `response_model` (gatewayantwoord) en
+`confirmed_combo`. Het laatste veld is `null`, tenzij de gateway expliciet
+een combo identificeert. A2A-beslissingslogboeken schrijven uitvoering alleen toe aan een
+bevestigde combo en behouden een onbevestigde aanvraag als `requestedCombo`.
+
 **Antwoord:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE-events:**
+**SSE-gebeurtenissen:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -148,84 +152,92 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Beschikbare vaardigheden
 
-OmniRoute biedt 6 A2A-vaardigheden die zijn gekoppeld in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Elke vaardigheidsmodule bevindt zich in `src/lib/a2a/skills/`.
+OmniRoute onthult 6 A2A vaardigheden die zijn vastgelegd in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Elke vaardigheidsmodule bevindt zich in `src/lib/a2a/skills/`.
 
-| Vaardigheid         | ID                   | Beschrijving                                                                                                                                                        | Tags                              | Voorbeelden                               |
-| :------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------- | :---------------------------------------- |
-| Slimme routering    | `smart-routing`      | Routeert een prompt via de optimale provider/combinatie met behulp van de combinatie-engine en scoreberekening van OmniRoute                                        | routering, providers              | "Routeer deze prompt via het beste model" |
-| Quotabeheer         | `quota-management`   | Rapporteert de quotastatus per provider en helpt aanroepers te bepalen wanneer ze moeten beperken/overschakelen                                                     | quota, providers                  | "Controleer het quota voor anthropic"     |
-| Providerdetectie    | `provider-discovery` | Toont geïnstalleerde providers met mogelijkheden, gratis-niveau-indicatoren en OAuth-status                                                                         | providers, detectie               | "Welke providers zijn beschikbaar?"       |
-| Kostenanalyse       | `cost-analysis`      | Schat de kosten van een aanvraag/gesprek op basis van de catalogus en het recente gebruik                                                                           | kosten, gebruik                   | "Schat de kosten voor dit gesprek"        |
-| Statusrapport       | `health-report`      | Aggregeert de status van circuitonderbrekers, afkoelperioden en blokkeringen per provider                                                                           | status, veerkracht                | "Toon de status van alle providers"       |
-| Mogelijkheden tonen | `list-capabilities`  | Retourneert de volledige catalogus met 45 Agent Skills (23 API + 21 CLI + 1 configuratie) als een markdown-tabel met onbewerkte SKILL.md-URL's voor contextinjectie | catalogus, detectie, vaardigheden | "Toon alle mogelijkheden van OmniRoute"   |
+| Vaardigheid                      | ID                   | Beschrijving                                                                                                                                                            | Labels                              | Voorbeelden                                     |
+| :------------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------- | :---------------------------------------------- |
+| Slimme routering                 | `smart-routing`      | Leidt een prompt door de optimale provider/combo met behulp van de combo-engine + scoring van OmniRoute                                                                 | routering, aanbieders               | "Route deze prompt via het beste model"         |
+| Quotumbeheer                     | `quota-management`   | Rapporteert de quotastatus per provider, zodat bellers kunnen beslissen wanneer ze moeten throttle/switch                                                               | quota, leveranciers                 | "Controleer quota voor antropisch"              |
+| Ontdekking van aanbieders        | `provider-discovery` | Geeft een overzicht van geïnstalleerde providers met mogelijkheden, free-tier-vlaggen en OAuth -status                                                                  | aanbieders, ontdekking              | "Welke providers zijn beschikbaar?"             |
+| Kostenanalyse                    | `cost-analysis`      | Schat de kosten van een request/conversation op basis van het recente gebruik van de catalogus +                                                                        | kosten, gebruik                     | 'Schat de kosten voor dit gesprek'              |
+| Gezondheidsrapport               | `health-report`      | Verzamelt de stroomonderbreker, cooldown en lock-outstatus per provider                                                                                                 | gezondheid, veerkracht              | "Toon gezondheidsstatus van alle zorgverleners" |
+| Maak een lijst van mogelijkheden | `list-capabilities`  | Retourneert de volledige Agent Skills-catalogus met 45 vermeldingen (23 API + 21 CLI + 1 config) als een afprijstabel met onbewerkte SKILL.md URLs voor contextinjectie | catalogus, ontdekking, vaardigheden | "Laat alle OmniRoute mogelijkheden zien"        |
 
-> De Agent Card moet gesynchroniseerd blijven met de actuele catalogus van 352 providers; aantallen providers en metadata over gratis/geen-authenticatie worden verkregen uit het runtimeregister.
+> De Agent Card moet in lijn blijven met de live 381-providercatalogus; providertellingen en free/no-auth metagegevens zijn afkomstig uit het runtime-register.
 
-### Details van de vaardigheid `list-capabilities`
+### `list-capabilities` -vaardigheidsdetail
 
-De vaardigheid `list-capabilities` is met name nuttig voor externe agents die moeten ontdekken wat OmniRoute beschikbaar stelt voordat ze API-aanroepen verzenden. De vaardigheid retourneert een gestructureerd markdown-tabelartefact:
+De `list-capabilities` vaardigheid is vooral handig voor externe agenten die moeten ontdekken wat OmniRoute blootlegt voordat ze API aanroepen verzenden. Het retourneert een gestructureerd markdown-tabelartefact:
 
 ```
-| ID | Naam | Categorie | Gebied | Eindpunten/opdrachten | Onbewerkte URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Authenticatie en sessies | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Elke rij bevat de kolom `rawUrl`, zodat agents onmiddellijk het volledige SKILL.md-bestand kunnen ophalen. Het veld `metadata.totalSkills` weerspiegelt de grootte van de catalogus (momenteel 45). Implementatie: `src/lib/a2a/skills/listCapabilities.ts`. Zie ook [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Elke rij bevat de `rawUrl` kolom, zodat agenten onmiddellijk de volledige SKILL.md kunnen ophalen. Het `metadata.totalSkills` veld weerspiegelt de catalogusgrootte (45 vandaag). Implementatie: `src/lib/a2a/skills/listCapabilities.ts`. Zie ook [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST API (aanvullend)
+## REST API (hulp)
 
-Het JSON-RPC-eindpunt `/a2a` is het canonieke A2A-toegangspunt. De onderstaande REST-eindpunten bieden aanvullende toegang voor dashboards en externe tooling:
+Het JSON-RPC-eindpunt `/a2a` is het canonieke A2A ingangspunt. De onderstaande REST eindpunten bieden aanvullende toegang voor dashboards en externe tools:
 
-| Eindpunt                     | Methode | Beschrijving                                                       | Authenticatie                                    |
-| :--------------------------- | :------ | :----------------------------------------------------------------- | :----------------------------------------------- |
-| `/api/a2a/status`            | GET     | Serverstatus, geregistreerde skills                                | (openbaar)                                       |
-| `/api/a2a/tasks`             | GET     | Taken weergeven met filters                                        | beheer                                           |
-| `/api/a2a/tasks/[id]`        | GET     | Taak ophalen via ID                                                | beheer                                           |
-| `/api/a2a/tasks/[id]/cancel` | POST    | Actieve taak annuleren                                             | beheer                                           |
-| `/.well-known/agent.json`    | GET     | Agent Card (A2A-detectie)                                          | (openbaar, 3600s gecachet)                       |
-| `/api/a2a/tasks`             | POST    | Inkomende delegatie aan de OmniConductor-vloot (Conductor PRD RF5) | Bearer versus `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Eindpunt                     | Methode | Beschrijving                                                       | Aut                                                                                                                     |
+| :--------------------------- | :------ | :----------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET     | Serverstatus, geregistreerde vaardigheden                          | (openbaar)                                                                                                              |
+| `/api/a2a/tasks`             | GET     | Maak een lijst van taken met filters                               | beheer- of API sleutel (zie hieronder)                                                                                  |
+| `/api/a2a/tasks/[id]`        | GET     | Taak ophalen door ID                                               | beheer- of API sleutel (zie hieronder)                                                                                  |
+| `/api/a2a/tasks/[id]/cancel` | POST    | Annuleer lopende taak                                              | beheer- of API sleutel (zie hieronder)                                                                                  |
+| `/.well-known/agent.json`    | GET     | Agentkaart (A2A -ontdekking)                                       | (openbaar, 3600's in cache)                                                                                             |
+| `/api/a2a/tasks`             | POST    | Inkomende delegatie naar de OmniConductor vloot (dirigent PRD RF5) | hetzelfde als `GET`, plus `OMNIROUTE_API_KEY` indien ingesteld terwijl `REQUIRE_API_KEY` is uitgeschakeld; `a2aEnabled` |
 
-**Inkomende Conductor-delegatie (`POST /api/a2a/tasks`):** externe A2A-agents delegeren programmeerwerk via OmniRoute aan de OmniConductor-vloot. Body: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — alleen skills van de Conductor-vloot (de skills die op de Agent Card worden vermeld) kunnen worden gedelegeerd; `metadata.conductor.repo.url` is verplicht (de vloot werkt met git-repositories). De route vertaalt dit naar `POST /v1/tasks` van de hub met behulp van het serverzijdige `CONDUCTOR_ORCHESTRATOR_TOKEN` (met `CONDUCTOR_HUB_TOKEN` als terugvaloptie) en retourneert `201 { conductor_task_id, state: "submitted" }`; taakstatussen worden teruggestuurd via de SSE→A2A-mirror (RF1) en zijn zichtbaar via `GET /api/a2a/tasks?skill=conductor`.
+Wie toegang krijgt tot de `/api/a2a/tasks*` routes is afhankelijk van de login- en API-key-instellingen:
+
+- `requireLogin=true` (standaard): de middleware laat alleen beheerreferenties toe (dashboardsessie, `manage` -scope API sleutel, `oma_` -toegangstoken) en `OMNIROUTE_API_KEY`. Een gewone inferentiesleutel krijgt `403`. In de `Authorization` header neemt de middleware alleen `OMNIROUTE_API_KEY` als `Bearer <key>`; een blote sleutel of een tabblad na `Bearer` krijgt `401`.
+- `requireLogin=false`, of het loopback-venster vóór onboarding: met `REQUIRE_API_KEY=true` wordt elke geldige OmniRoute API sleutel of managementreferentie geaccepteerd en krijgen anonieme bellers `401`; met `REQUIRE_API_KEY` uit zijn de routes open.
+- `POST /api/a2a/tasks` vereist bovendien `OMNIROUTE_API_KEY` in de `Authorization` header wanneer die variabele is ingesteld en `REQUIRE_API_KEY` is uitgeschakeld. Andere headers, zoals `x-api-key`, tellen daar niet mee. Bij het uitloggen of vóór het onboarden worden de sleutelpassen met of zonder `Bearer` -voorvoegsel; als je inlogt, komt alleen `Bearer <key>` voorbij de middleware.
+
+Wanneer een referentie vereist is, werkt een `read` -scope `oma_` token alleen voor `GET`.
+
+**Delegatie van inkomende dirigenten (`POST /api/a2a/tasks`):** externe A2A agenten delegeren codeerwerk aan de OmniConductor vloot via OmniRoute. Lichaam: alleen `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Vaardigheden van de conducteursvloot (die aangekondigd op de agentenkaart) zijn delegeerbaar; `metadata.conductor.repo.url` is vereist (de vloot werkt op git repo's). De route vertaalt zich naar de `POST /v1/tasks` van de hub met behulp van de `CONDUCTOR_ORCHESTRATOR_TOKEN` aan de serverzijde (fallback `CONDUCTOR_HUB_TOKEN`) en retourneert `201 { conductor_task_id, state: "submitted" }`; taakstatussen vloeien terug via de SSE→A2A spiegel (RF1) en zijn zichtbaar via `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Een nieuwe skill toevoegen
+## Een nieuwe vaardigheid toevoegen
 
-1. **Maak een skillbestand:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Vaardigheidsbestand maken:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exporteer een asynchrone functie `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Volg de structuur van bestaande skills, zoals `smartRouting.ts`.
+   Exporteer een asynchrone functie `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Volg de vorm van bestaande vaardigheden zoals `smartRouting.ts`. Als de vaardigheid terugroept naar OmniRoute via HTTP, bouw dan de headers met `buildSelfLoopHeaders(caller)` vanaf `src/lib/a2a/selfLoopAuth.ts` zodat de oproep wordt uitgevoerd met de sleutel van de A2A beller, niet met `OMNIROUTE_API_KEY`, en geef `redirect: "error"` door aan `fetch` zodat een omleiding nooit de sleutel krijgt. De helper bouwt alleen headers; elke vaardigheid stelt zelf het omleidingsbeleid in. Het gooit `UnsafeSelfLoopTargetError` in plaats van een sleutel toe te voegen wanneer de opgeloste basis- URL gewoon http buiten het privénetwerk is (loopback, een container- of servicenaam en privéadressen zijn prima) of inloggegevens bevat, dus een vaardigheid die afgewezen oproepen slikt, moet die fout opnieuw genereren.
 
-2. **Registreer de handler:** voeg in `src/lib/a2a/taskExecution.ts` een item toe aan `A2A_SKILL_HANDLERS`:
+2. **Registerbehandelaar:** Voeg in `src/lib/a2a/taskExecution.ts` een vermelding toe aan `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...bestaande skills
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Maak de skill beschikbaar in de Agent Card:** voeg in `src/app/.well-known/agent.json/route.ts` het volgende toe aan de `skills`-array:
+3. **Blootstellen op agentkaart:** in `src/lib/a2a/agentCardMetadata.ts` (gedeeld door `/.well-known/agent.json` en `/.well-known/agent-card.json`), voeg toe aan de `skills` array:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Uw skill",
-     "description": "Korte, intentiegerichte beschrijving",
-     "tags": ["routering", "quotum"],
-     "examples": ["Voorbeeld van een aanroep in natuurlijke taal"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Schrijf tests:** `tests/unit/a2a-<your-skill>.test.ts`. Test zowel het succesvolle pad als het foutpad.
+4. **Schrijf testen:** `tests/unit/a2a-<your-skill>.test.ts`. Bedek het gelukkige pad + foutpad.
 
-5. **Documenteer** de nieuwe skill in de tabel `Beschikbare skills` van dit bestand.
+5. **Document** de nieuwe vaardigheid in de `Available Skills` tabel van dit bestand.
 
 ---
 
@@ -262,9 +274,9 @@ ingediend → in uitvoering → voltooid
 
 ---
 
-## Integratievoorbeelden
+## Integratie voorbeelden
 
-### Python (requests)
+### Python (verzoeken)
 
 ```python
 import requests
@@ -283,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (halen)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

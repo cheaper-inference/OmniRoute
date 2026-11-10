@@ -140,24 +140,24 @@ omniroute providers validate
 
 ### 1) Szolgáltatók csatlakoztatása és API-kulcs létrehozása
 
-1. Nyissa meg a Vezérlőpult → `Providers` oldalt, és csatlakoztasson legalább egy szolgáltatót (OAuth vagy API-kulcs használatával).
-2. Nyissa meg a Vezérlőpult → `Endpoints` oldalt, és hozzon létre egy API-kulcsot.
-3. (Opcionális) Nyissa meg a Vezérlőpult → `Combos` oldalt, és állítsa be a tartalék láncot.
+1. Nyissa meg az Irányítópult → `Providers` oldalt, és csatlakoztasson legalább egy szolgáltatót (OAuth vagy API-kulcs használatával).
+2. Nyissa meg az Irányítópult → `Endpoints` oldalt, és hozzon létre egy API-kulcsot.
+3. (Nem kötelező) Nyissa meg az Irányítópult → `Combos` oldalt, és állítsa be a tartalék láncot.
 
 ### 2) A kódolási eszköz beállítása
 
 ```txt
-Alap URL: http://localhost:20128/v1
-API-kulcs:  [másolja ki az Endpoint oldalról]
-Modell:    if/qwen3.8-max-preview (vagy bármely szolgáltató/modell előtag)
+Alap URL:  http://localhost:20128/v1
+API-kulcs: [másolja ki az Endpoint oldalról]
+Modell:    if/qwen3.8-max-preview (vagy bármilyen szolgáltató-/modell-előtag)
 ```
 
-Ha a szerkesztője nem tud `Authorization: Bearer ...` fejlécet küldeni, használja helyette a tokenizált kompatibilitási alapcímet:
+Ha a szerkesztője nem tudja elküldeni az `Authorization: Bearer ...` fejlécet, használja helyette a tokent tartalmazó kompatibilitási alap-URL-t:
 
 ```txt
-Alap URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Modellek URL-je: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Csevegés URL-je: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Alap URL:          http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Modellek URL-je:   http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Csevegés URL-je:   http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
 Ollama-címkék URL-je: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
@@ -165,8 +165,8 @@ Működik a Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode és az Ope
 
 #### Automatikus konfigurálás a `setup-*` parancsokkal
 
-Az alap URL és a kulcs kézi beillesztése helyett hagyja, hogy az OmniRoute az élő modellkatalógusból írja be az egyes eszközök
-saját konfigurációját. Eszközönként egy parancs:
+Az alap-URL és a kulcs kézi beillesztése helyett hagyja, hogy az OmniRoute az élő modellkatalógus alapján létrehozza az egyes eszközök
+saját konfigurációját. Eszközönként egy parancs szükséges:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml profilok
@@ -178,60 +178,61 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # kiírja a Cursor alkalmazáson belüli lépéseit
 omniroute setup-roo          # Roo Code-importálás + autoImport-mutató
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Mindegyik támogatja a `--remote <url> --api-key <key>` kapcsolókat, amelyekkel egy helyi eszköz konfigurálható egy
-**távoli** OmniRoute használatára, valamint a `--dry-run` kapcsolót az előnézethez. Ha egy CLI-t a megfelelő
-környezeti változók átadásával, konfiguráció írása nélkül szeretne elindítani, használja az általános
+Mindegyik támogatja a `--remote <url> --api-key <key>` kapcsolókat, amelyekkel egy helyi eszköz egy
+**távoli** OmniRoute használatára konfigurálható, valamint az előnézethez a `--dry-run` kapcsolót. Ha egy CLI-t a megfelelő
+beillesztett környezeti változókkal, konfigurációs fájl írása nélkül szeretne elindítani, használja az általános
 `omniroute run <target>` indítót (claude, codex, aider, goose, opencode, qwen, gemini);
 a korábbi, eszközspecifikus `omniroute launch` (Claude Code) és
 `omniroute launch-codex` (Codex) indítók továbbra is elérhetők.
 
-A teljes táblázatért (az egyes parancsok által írt fájlok, minden kapcsoló, helyi és távoli használat, valamint az alap URL
-`/v1` konvenciói) tekintse meg a **[CLI-integrációk](./CLI-INTEGRATIONS.md)** dokumentumot.
+A teljes táblázatért (az egyes parancsok által írt fájlok, minden kapcsoló, helyi és távoli használat, valamint az alap-URL
+`/v1` konvenciói) tekintse meg a **[CLI-integrációk](./CLI-INTEGRATIONS.md)** című dokumentumot.
 
-Az eszközönkénti részletes konfigurációért (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot és továbbiak) tekintse meg a különálló **[CLI-eszközök útmutatóját](../reference/CLI-TOOLS.md)**.
+Az egyes eszközök részletes konfigurációjáért (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot és továbbiak) tekintse meg a különálló **[CLI-eszközök útmutatóját](../reference/CLI-TOOLS.md)**.
 
 ---
 
 ## Protokollbeállítás (MCP + A2A)
 
-### MCP beállítása (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Indítsa el az MCP-átvitelt stdio módban:
+Indítsa MCP átvitelt stdio módban:
 
 ```bash
 omniroute --mcp
 ```
 
-Ajánlott ellenőrzési folyamat:
+Javasolt érvényesítési folyamat:
 
 ```bash
-# 1. Indítsa el az MCP-kiszolgálót
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Az MCP-kliensből hívja meg a következőket:
-omniroute_get_health        # A rendszer állapotát kell visszaadnia
-omniroute_list_combos       # Az aktív kombinációkat kell visszaadnia
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Vagy futtassa a teljes E2E tesztcsomagot:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP-kliens konfigurálása
+#### MCP kliens konfigurációja
 
-**Claude Code:**
+**Claude kód:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Adja hozzá az MCP-beállításokhoz:
+Adja hozzá MCP beállításokhoz (stdio, a kulccsal, hogy a hívó félnek legyen fő tagja):
 
 ```json
 {
@@ -239,23 +240,30 @@ Adja hozzá az MCP-beállításokhoz:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Teljes MCP-dokumentáció:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 eszköz, IDE-konfigurációk, Python/TS/Go kliensek.
+Vagy ha `mcpTransport` `streamable-http` (állítsa `/dashboard/mcp` re vagy `omniroute mcp enable --transport streamable-http`-vel), mutasson a kliens távoli MCP szerver bejegyzésére a `http://localhost:20128/api/mcp/stream`-re.
 
-### A2A beállítása (ügynökök közötti protokoll)
+A kulcs `Authorization: Bearer <api-key>` -ként utazik (lásd: [MCP Server → Távoli hozzáférés](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) távoli gazdagépekhez; a távoli kulcshoz `mcp:connect` és read/write hatókörei szükségesek).
 
-Ellenőrizze az ügynökkártyát:
+**Teljes MCP dokumentáció:** [MCP szerver README](../../open-sse/mcp-server/README.md) — 110 eszközök, IDE konfigurációk, Python/TS/Go kliensek. Üzemeltetői hivatkozás a tömörítési CCR/dedup eszközökhöz (jelölők, előfeltételek, szerszámonkénti hatókör, visszakeresési oldalszámozás, diagnosztika): [Compression Engines → Előfeltételek / kezelői útmutató](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A beállítás (ügynök-ügynök protokoll)
+
+Az ügynökkártya ellenőrzése:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Küldjön egy feladatot:
+Feladat küldése:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -263,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Teljes A2A-dokumentáció:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, képességek, streamelés, feladat-életciklus.
+**Teljes A2A dokumentáció:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, készségek, adatfolyam, feladat életciklusa.
 
 ---
 
@@ -322,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) sablon
+## Érvénytelen Linux (xbps-src) sablon
 
-A Void Linux felhasználói az `xbps-src` használatával natív csomagot készíthetnek. Mentse ezt a blokkot `srcpkgs/omniroute/template` néven:
+A Void Linux felhasználók számára natív csomagot készíthet a `xbps-src` használatával. Mentse ezt a blokkot `srcpkgs/omniroute/template` néven:
 
 ```bash
-# Sablonfájl az „omniroute” csomaghoz
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Minden kiadáshoz generálja újra az ellenőrző összeget a következő paranccsal:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

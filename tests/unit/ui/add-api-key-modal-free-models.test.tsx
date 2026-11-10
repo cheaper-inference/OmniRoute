@@ -3,6 +3,9 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so queries start there (the container is a child of body).
+
 // next-intl: return the key so we can assert on stable strings.
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
@@ -11,7 +14,7 @@ vi.mock("next-intl", () => ({
 const { default: AddApiKeyModal } =
   await import("../../../src/app/(dashboard)/dashboard/providers/[id]/components/modals/AddApiKeyModal");
 
-const FREE_TOGGLE = 'button[role="switch"][aria-label="importFreeModelsOnlyLabel"]';
+const FREE_TOGGLE = '[role="switch"][aria-label="importFreeModelsOnlyLabel"]';
 
 const containers: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
 
@@ -30,7 +33,8 @@ function render(props: Record<string, unknown>) {
     );
   });
   containers.push({ root, el });
-  return el;
+  // Queries go through document.body: the dialog is portaled there (KEA-7886).
+  return document.body;
 }
 
 function setInputValue(input: HTMLInputElement, value: string) {
@@ -102,6 +106,33 @@ describe("AddApiKeyModal — import only free models", () => {
     await waitFor(() => onSave.mock.calls.length > 0);
     const payload = onSave.mock.calls[0][0];
     expect(payload.providerSpecificData?.importFreeModelsOnly).toBe(true);
+  });
+});
+
+describe("AddApiKeyModal — free-only import on compatible nodes", () => {
+  it("shows the toggle with the payload-evidence hint on an OpenAI-compatible node", () => {
+    const el = render({
+      provider: "openai-compatible-12345678-1234-1234-1234-123456789abc",
+      providerName: "Aggregator",
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeTruthy();
+    expect(el.textContent).toContain("importFreeModelsOnlyCompatibleHint");
+  });
+
+  it("shows the toggle on an Anthropic-compatible node", () => {
+    const el = render({
+      provider: "anthropic-compatible-12345678-1234-1234-1234-123456789abc",
+      providerName: "Anthropic gateway",
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeTruthy();
+  });
+
+  it("hides the toggle on a Claude Code-compatible node", () => {
+    const el = render({
+      provider: "anthropic-compatible-cc-12345678-1234-1234-1234-123456789abc",
+      providerName: "CC node",
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeNull();
   });
 });
 

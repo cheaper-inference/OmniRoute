@@ -1,3 +1,4 @@
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import type { default as BaseExecutorType } from "./base.ts";
 import {
   configuredPlaceholderToolNames,
@@ -5,7 +6,8 @@ import {
   mergeClientToolsWithObserved,
   type OpencodeSurface,
 } from "./opencodeFreeTierContract.ts";
-import { isOpencodeFreeTierRefusal } from "./opencodeGeoBlock.ts";
+import { resolvePlaceholderNames } from "./opencodeToolObservation.ts";
+import { isOpencodeFreeTierRefusal, isOpencodeQuotaShapeRefusal } from "./opencodeGeoBlock.ts";
 import { resolveOpencodeTargetFormat } from "./opencode.ts";
 
 type ExecutorInput = Parameters<BaseExecutorType["execute"]>[0];
@@ -30,35 +32,78 @@ type RetryCtx = {
   clientSession: string | undefined;
   borrowed: boolean | undefined;
   clientToolNames: readonly string[];
+  /** Opt-in OpenCode v2 fingerprint (#16571): the appended names carry the v2 CLI schemas. */
+  v2Fingerprint?: boolean;
 };
 
 /** Scope guards: refusal status, gated surface+model, own (non-borrowed) tools, object body. */
-function retryScopeApplies(
-  ctx: RetryCtx,
-  input: ExecutorInput,
-  status: number
-): boolean {
+function retryScopeApplies(ctx: RetryCtx, input: ExecutorInput, status: number): boolean {
   if (status !== 403 && status !== 451) return false;
   if (!isGatedFreeTierRequest(ctx.surface, ctx.provider, String(input.model ?? ""))) return false;
   // Borrowed tools are the store's own names coming back: the retry would add
   // nothing, and the refusal is already counted by noteFreeTierOutcome below.
+  // Only a refusal naming the model clears borrowed tools (#15475); other
+  // failures leave the streak untouched.
   if (ctx.borrowed) return false;
   return !!input.body && typeof input.body === "object" && !Array.isArray(input.body);
 }
 
-/** Read the refusal body; null when unreadable or not a free-tier refusal. */
+/**
+ * Whether a refusal on a request carrying its own tools may be retried once
+ * with the observed names appended: a free-tier refusal or a quota-shape
+ * refusal. The quota predicate's own exclusions win, so a refusal carrying a
+ * fingerprint, geo or user_blocked marker stays excluded here too.
+ */
+export function isOwnToolsRetryableRefusal(status: number, bodyText: string | null): boolean {
+  return (
+    isOpencodeFreeTierRefusal(status, bodyText) || isOpencodeQuotaShapeRefusal(status, bodyText)
+  );
+}
+
+/** Read the refusal body; null when unreadable or not a retryable refusal. */
 async function readRefusalBody(
   first: { response: Response },
   status: number,
   log: ExecutorLog
 ): Promise<string | null> {
   try {
-    const text = await first.response.clone().text();
-    return isOpencodeFreeTierRefusal(status, text) ? text : null;
+    const text = await readResponseTextWithinCap(first.response.clone());
+    return isOwnToolsRetryableRefusal(status, text) ? text : null;
   } catch {
     log?.debug?.("OPENCODE", "body read failed on free-tier retry check");
     return null;
   }
+}
+
+function toolNamesOf(body: unknown): string[] {
+  const tools = (body as { tools?: unknown } | null)?.tools;
+  if (!Array.isArray(tools)) return [];
+  const names: string[] = [];
+  for (const tool of tools) {
+    const entry = (tool ?? {}) as { name?: unknown; function?: { name?: unknown } };
+    const name = typeof entry.name === "string" ? entry.name : entry.function?.name;
+    if (typeof name === "string") names.push(name);
+  }
+  return names;
+}
+
+/**
+ * Since #14156 the contract appends the resolved placeholder names to a client's own
+ * tools on the FIRST dispatch too. When the merged retry body declares no name beyond
+ * what that first dispatch already carried (client names + resolved placeholders), the
+ * retry would re-send the exact shape the upstream just refused — skip it.
+ */
+function addsNothingBeyondFirstDispatch(
+  ctx: RetryCtx,
+  model: string,
+  configured: readonly string[],
+  merged: unknown
+): boolean {
+  const sent = new Set<string>([
+    ...ctx.clientToolNames,
+    ...resolvePlaceholderNames(ctx.provider, model, ctx.clientSession, configured),
+  ]);
+  return toolNamesOf(merged).every((name) => sent.has(name));
 }
 
 export async function retryFreeTierRefusalWithObservedTools(
@@ -71,15 +116,19 @@ export async function retryFreeTierRefusalWithObservedTools(
 ): Promise<{ response: Response } | null> {
   const status = first.response.status;
   if (!retryScopeApplies(ctx, input, status)) return null;
+  const model = String(input.model ?? "");
+  const configured = configuredPlaceholderToolNames();
   const merged = mergeClientToolsWithObserved(
     input.body,
-    ctx.requestFormat ?? resolveOpencodeTargetFormat(ctx.provider, String(input.model ?? "")),
+    ctx.requestFormat ?? resolveOpencodeTargetFormat(ctx.provider, model),
     ctx.provider,
-    String(input.model ?? ""),
+    model,
     ctx.clientSession,
-    configuredPlaceholderToolNames()
+    configured,
+    ctx.v2Fingerprint === true
   );
   if (merged === input.body) return null;
+  if (addsNothingBeyondFirstDispatch(ctx, model, configured, merged)) return null;
   if ((await readRefusalBody(first, status, log)) === null) return null;
   log?.warn?.(
     "OPENCODE",
@@ -111,6 +160,8 @@ export async function handleLoopFreeTierRefusal(
   hooks: {
     dispatch: (retryInput: ExecutorInput) => Promise<{ response: Response }>;
     noteServed: (account: unknown) => void;
+    /** Opt-in egress probe once the retry failed or did not apply (opencodeFreeTierEgressProbe). */
+    probe?: () => Promise<{ response: Response } | null>;
   }
 ): Promise<ShapedResult> {
   const retried = await retryFreeTierRefusalWithObservedTools(
@@ -121,6 +172,8 @@ export async function handleLoopFreeTierRefusal(
     cid,
     hooks.dispatch
   );
+  const probed = hooks.probe && !retried?.response.ok ? await hooks.probe() : null;
+  if (probed) return shape(probed);
   if (retried) {
     return shape(retried);
   }

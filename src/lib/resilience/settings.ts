@@ -6,22 +6,43 @@ import {
 
 import type { JsonRecord, ResilienceSettings, ResilienceSettingsPatch } from "./settings/types";
 import {
+  normalizePreferredFailoverSettings,
+  readPreferredFailoverSettings,
+} from "@/sse/services/preferredConnectionFailover";
+import {
   asRecord,
+  toBoolean,
   toInteger,
   resolveStreamRecoveryDefaults,
   normalizeLegacyConnectionCooldownProfile,
   normalizeRequestQueueSettings,
   normalizeConnectionCooldownProfile,
   normalizeProviderBreakerProfile,
+  normalizeTokenRefreshBreakerSettings,
   normalizeWaitForCooldownSettings,
   normalizeComboCooldownWaitSettings,
   normalizeQuotaShareConcurrencyLimitSettings,
+  normalizeStreamStallCooldownSettings,
+  normalizeP2CLatencySettings,
   normalizeProviderCooldownSettings,
   normalizeQuotaPreflightSettings,
   normalizeStreamRecoverySettings,
   normalizeProviderQuotaOverrides,
   normalizeCredentialHealthCheckSettings,
+  pruneResilienceSettingsToProvided,
 } from "./settings/normalize";
+
+export { pruneResilienceSettingsToProvided };
+
+// Memoization cache for resolveResilienceSettings: keyed by the settings object
+// reference returned by getCachedSettings(). The TTLCache in readCache.ts returns
+// the same object identity within its 5s window, so this cache is naturally
+// invalidated when settings are updated (the old object is evicted and a new one
+// is created). WeakMap avoids holding onto stale settings objects.
+// Env-derived defaults (RATE_LIMIT_*, PROVIDER_COOLDOWN_*, STREAM_RECOVERY_*) are read
+// once per settings object, so they stay frozen for that object's lifetime (bounded by the
+// 5s cache TTL). The returned object is shared across callers and must be treated as read-only.
+const resolvedSettingsCache = new WeakMap<Record<string, unknown>, ResilienceSettings>();
 
 // Re-export the settings shape (moved to ./settings/types) so this module's
 // public API is unchanged.
@@ -29,6 +50,8 @@ export type {
   RequestQueueSettings,
   ConnectionCooldownProfileSettings,
   ProviderBreakerProfileSettings,
+  TokenRefreshBreakerScope,
+  TokenRefreshBreakerSettings,
   WaitForCooldownSettings,
   ComboCooldownWaitSettings,
   QuotaShareConcurrencyLimitSettings,
@@ -65,6 +88,10 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 })();
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+  preferredAccountFailover: readPreferredFailoverSettings(),
+  antigravityTimingTelemetry: {
+    enabled: process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY === "true",
+  },
   requestQueue: {
     autoEnableApiKeyProviders: true,
     requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
@@ -99,6 +126,14 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
       resetTimeoutMs: PROVIDER_PROFILES.apikey.circuitBreakerReset,
     },
   },
+  // Token-refresh breaker: provider-wide by default (current behavior), so
+  // existing installs see no change. Operators can switch to per-connection
+  // scope to isolate one dead account from healthy ones on the same provider.
+  tokenRefreshBreaker: {
+    scope: "provider",
+    failureThreshold: 5,
+    cooldownMs: 30 * 60 * 1000,
+  },
   // Wait at most 90s for a single connection cooldown (covers Gemini-class
   // TPM/RPM windows, which report ~60s retry-after live), at most 5 retry
   // cycles, never more than 300s (5 min) total (#7360 follow-up — raised now
@@ -129,6 +164,15 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   // comes from each connection's max_concurrent.
   quotaShareConcurrencyLimit: {
     enabled: true,
+  },
+  // A stream content stall fails one request; it does not cool the account unless
+  // the operator opts in (see StreamStallCooldownSettings).
+  streamStallCooldown: {
+    enabled: false,
+  },
+  // Opt-in latency term for p2c account selection (see P2CLatencySettings). 0 = off.
+  p2cLatency: {
+    weight: 0,
   },
   providerCooldown: {
     minRetryCooldownMs: Number(process.env.PROVIDER_COOLDOWN_MIN_MS || "5000"),
@@ -192,6 +236,37 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   },
 };
 
+// Normalize legacy and modern opt-in flags without inflating the large resolvers.
+function normalizeAntigravityToggle(
+  section: unknown,
+  legacyEnabled: unknown,
+  fallback: boolean
+): { enabled: boolean } {
+  return { enabled: toBoolean(asRecord(section).enabled, toBoolean(legacyEnabled, fallback)) };
+}
+
+function normalizeCooldownProfiles(
+  source: unknown,
+  fallback: ResilienceSettings["connectionCooldown"]
+): ResilienceSettings["connectionCooldown"] {
+  const sections = asRecord(source);
+  return {
+    oauth: normalizeConnectionCooldownProfile(sections.oauth, fallback.oauth),
+    apikey: normalizeConnectionCooldownProfile(sections.apikey, fallback.apikey),
+  };
+}
+
+function normalizeBreakerProfiles(
+  source: unknown,
+  fallback: ResilienceSettings["providerBreaker"]
+): ResilienceSettings["providerBreaker"] {
+  const sections = asRecord(source);
+  return {
+    oauth: normalizeProviderBreakerProfile(sections.oauth, fallback.oauth),
+    apikey: normalizeProviderBreakerProfile(sections.apikey, fallback.apikey),
+  };
+}
+
 function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
   const profiles = asRecord(settings.providerProfiles);
   const defaults = asRecord(settings.rateLimitDefaults);
@@ -229,8 +304,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
         DEFAULT_RESILIENCE_SETTINGS.requestQueue.concurrentRequests,
         { min: 1, max: 10_000 }
       ),
-      globalConcurrentRequests:
-        DEFAULT_RESILIENCE_SETTINGS.requestQueue.globalConcurrentRequests,
+      globalConcurrentRequests: DEFAULT_RESILIENCE_SETTINGS.requestQueue.globalConcurrentRequests,
       maxWaitMs: DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxWaitMs,
       executionMaxWaitMs: DEFAULT_RESILIENCE_SETTINGS.requestQueue.executionMaxWaitMs,
       maxQueueDepth: DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxQueueDepth,
@@ -287,11 +361,16 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     },
     comboCooldownWait: DEFAULT_RESILIENCE_SETTINGS.comboCooldownWait,
     quotaShareConcurrencyLimit: DEFAULT_RESILIENCE_SETTINGS.quotaShareConcurrencyLimit,
+    streamStallCooldown: DEFAULT_RESILIENCE_SETTINGS.streamStallCooldown,
+    p2cLatency: DEFAULT_RESILIENCE_SETTINGS.p2cLatency,
     providerCooldown: DEFAULT_RESILIENCE_SETTINGS.providerCooldown,
+    tokenRefreshBreaker: DEFAULT_RESILIENCE_SETTINGS.tokenRefreshBreaker,
     quotaPreflight: DEFAULT_RESILIENCE_SETTINGS.quotaPreflight,
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
+    preferredAccountFailover: DEFAULT_RESILIENCE_SETTINGS.preferredAccountFailover,
+    antigravityTimingTelemetry: DEFAULT_RESILIENCE_SETTINGS.antigravityTimingTelemetry,
   };
 }
 
@@ -322,31 +401,34 @@ export function resolveResilienceSettings(
   settings: Record<string, unknown> | null | undefined
 ): ResilienceSettings {
   const record = asRecord(settings);
+  const cacheKey = record; // the exact object reference from getCachedSettings()
+  const cached = resolvedSettingsCache.get(cacheKey);
+  if (cached) return cached;
+
   const current = asRecord(record.resilienceSettings);
+  const legacyAntigravitySettings = asRecord(current.antigravity);
   const fallback = buildLegacyFallback(record);
 
-  return {
+  const resolved: ResilienceSettings = {
+    preferredAccountFailover: normalizePreferredFailoverSettings(
+      current.preferredAccountFailover,
+      fallback.preferredAccountFailover
+    ),
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      current.antigravityTimingTelemetry,
+      legacyAntigravitySettings.timingTelemetryEnabled,
+      fallback.antigravityTimingTelemetry.enabled
+    ),
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
-    connectionCooldown: {
-      oauth: normalizeConnectionCooldownProfile(
-        asRecord(current.connectionCooldown).oauth,
-        fallback.connectionCooldown.oauth
-      ),
-      apikey: normalizeConnectionCooldownProfile(
-        asRecord(current.connectionCooldown).apikey,
-        fallback.connectionCooldown.apikey
-      ),
-    },
-    providerBreaker: {
-      oauth: normalizeProviderBreakerProfile(
-        asRecord(current.providerBreaker).oauth,
-        fallback.providerBreaker.oauth
-      ),
-      apikey: normalizeProviderBreakerProfile(
-        asRecord(current.providerBreaker).apikey,
-        fallback.providerBreaker.apikey
-      ),
-    },
+    connectionCooldown: normalizeCooldownProfiles(
+      current.connectionCooldown,
+      fallback.connectionCooldown
+    ),
+    providerBreaker: normalizeBreakerProfiles(current.providerBreaker, fallback.providerBreaker),
+    tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
+      current.tokenRefreshBreaker,
+      fallback.tokenRefreshBreaker
+    ),
     waitForCooldown: normalizeWaitForCooldownSettings(
       current.waitForCooldown,
       fallback.waitForCooldown
@@ -359,6 +441,11 @@ export function resolveResilienceSettings(
       current.quotaShareConcurrencyLimit,
       fallback.quotaShareConcurrencyLimit
     ),
+    streamStallCooldown: normalizeStreamStallCooldownSettings(
+      current.streamStallCooldown,
+      fallback.streamStallCooldown
+    ),
+    p2cLatency: normalizeP2CLatencySettings(current.p2cLatency, fallback.p2cLatency),
     providerCooldown: normalizeProviderCooldownSettings(
       current.providerCooldown,
       fallback.providerCooldown
@@ -380,6 +467,9 @@ export function resolveResilienceSettings(
       fallback.credentialHealthCheck
     ),
   };
+
+  resolvedSettingsCache.set(cacheKey, resolved);
+  return resolved;
 }
 
 export function mergeResilienceSettings(
@@ -387,27 +477,25 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
+    preferredAccountFailover: normalizePreferredFailoverSettings(
+      updates.preferredAccountFailover,
+      current.preferredAccountFailover
+    ),
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      updates.antigravityTimingTelemetry,
+      undefined,
+      current.antigravityTimingTelemetry.enabled
+    ),
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
-    connectionCooldown: {
-      oauth: normalizeConnectionCooldownProfile(
-        updates.connectionCooldown?.oauth,
-        current.connectionCooldown.oauth
-      ),
-      apikey: normalizeConnectionCooldownProfile(
-        updates.connectionCooldown?.apikey,
-        current.connectionCooldown.apikey
-      ),
-    },
-    providerBreaker: {
-      oauth: normalizeProviderBreakerProfile(
-        updates.providerBreaker?.oauth,
-        current.providerBreaker.oauth
-      ),
-      apikey: normalizeProviderBreakerProfile(
-        updates.providerBreaker?.apikey,
-        current.providerBreaker.apikey
-      ),
-    },
+    connectionCooldown: normalizeCooldownProfiles(
+      updates.connectionCooldown,
+      current.connectionCooldown
+    ),
+    providerBreaker: normalizeBreakerProfiles(updates.providerBreaker, current.providerBreaker),
+    tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
+      updates.tokenRefreshBreaker,
+      current.tokenRefreshBreaker
+    ),
     waitForCooldown: normalizeWaitForCooldownSettings(
       updates.waitForCooldown,
       current.waitForCooldown
@@ -420,6 +508,11 @@ export function mergeResilienceSettings(
       updates.quotaShareConcurrencyLimit,
       current.quotaShareConcurrencyLimit
     ),
+    streamStallCooldown: normalizeStreamStallCooldownSettings(
+      updates.streamStallCooldown,
+      current.streamStallCooldown
+    ),
+    p2cLatency: normalizeP2CLatencySettings(updates.p2cLatency, current.p2cLatency),
     providerCooldown: normalizeProviderCooldownSettings(
       updates.providerCooldown,
       current.providerCooldown

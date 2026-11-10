@@ -4,22 +4,21 @@
 
 ---
 
-> **အမှန်တကယ်ကိုးကားရမည့် ရင်းမြစ်:** `electron/` workspace
-> **နောက်ဆုံးပြင်ဆင်ထားသည့်ရက်:** 2026-06-28 — v3.8.40
+> **အမှန်တရားအရင်းအမြစ်-** `electron/` အလုပ်ခွင်** နောက်ဆုံးအပ်ဒိတ်လုပ်ထားသည်-** 2026-06-28 — v3.8.40
 
-OmniRoute တွင် **Electron 41** + **electron-builder 26.10** ဖြင့် တည်ဆောက်ထားသည့် ပလက်ဖောင်းစုံသုံး desktop app (Windows / macOS / Linux) ပါဝင်သည်။ Desktop app သည် Next.js standalone server ကို child process အဖြစ် စတင်ပြီး `BrowserWindow` ကို ၎င်းထံ ညွှန်ပေးကာ system tray၊ auto-updater၊ IPC bridge နှင့် configuration ပြုလုပ်ရန်မလိုသော secret bootstrap တို့ကို ထည့်သွင်းပေးသည်။
+OmniRoute တည်ဆောက်ထားသော cross-platform desktop app (Windows / macOS / Linux) ကို ပေးပို့သည်**Electron ၄၁** +** အီလက်ထရွန်တည်ဆောက်သူ ၂၆.၁၀** . ဒက်စ်တော့အက်ပ်သည် Next.js သီးသန့်ဆာဗာကို ကလေးလုပ်ငန်းစဉ်အဖြစ် ပေါက်ဖွားစေပြီး `BrowserWindow` ကို ညွှန်ပြကာ စနစ်ဗန်း၊ အလိုအလျောက် အပ်ဒိတ်လုပ်သူ၊ IPC တံတားနှင့် သုည config လျှို့ဝှက် bootstrap တို့ကို ပေါင်းထည့်သည်။
 
-## ဖွဲ့စည်းပုံ
+## ဗိသုကာပညာ
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Electron ပင်မ process (electron/main.js)     │
-│ ├─ Instance တစ်ခုတည်းသာ run နိုင်ရန် lock    │
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
 │ ├─ Child process: Next.js standalone server  │
-│ │   (Electron ၏ Node runtime ဖြင့် စတင်သည်)  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
 │ ├─ System tray + context menu                │
-│ ├─ electron-updater ဖြင့် auto-update        │
+│ ├─ Auto-update via electron-updater          │
 │ ├─ Content Security Policy (session headers) │
 │ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
@@ -32,61 +31,72 @@ OmniRoute တွင် **Electron 41** + **electron-builder 26.10** ဖြင့
 
 ## ဗားရှင်းများ
 
-`electron/package.json` မှ အတည်ပြုထားသည်-
+`electron/package.json` မှအတည်ပြုခဲ့သည်
 
-| Package            | ဗားရှင်း                                                      |
-| ------------------ | ------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                     |
-| `electron-builder` | `^26.15.3`                                                    |
-| `electron-updater` | `^6.8.9`                                                      |
-| `better-sqlite3`   | root `^13.0.2` (Node-API prebuilds — Electron rebuild မလိုပါ) |
-| App ဗားရှင်း       | `3.8.0`                                                       |
-| App id             | `online.omniroute.desktop`                                    |
-| ထုတ်ကုန်အမည်       | `OmniRoute`                                                   |
+| အထုပ်              | ဗားရှင်း                                                  |
+| ------------------ | --------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                 |
+| `electron-builder` | `^26.15.3`                                                |
+| `electron-updater` | `^6.8.9`                                                  |
+| `better-sqlite3`   | root `^13.0.2` (Node-API prebuilds — no Electron rebuild) |
+| အက်ပ်ဗားရှင်း      | `3.8.0`                                                   |
+| အက်ပ်အိုင်ဒီ       | `online.omniroute.desktop`                                |
+| ထုတ်ကုန်အမည်       | `OmniRoute`                                               |
 
 ## Script များ (root `package.json`)
 
-| Script                            | ရည်ရွယ်ချက်                                                                                  |
-| --------------------------------- | -------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | `npm run dev` ကို စတင်ပြီး `localhost:20128` ကို စောင့်ဆိုင်းကာ Electron ကို ဖွင့်သည်        |
-| `npm run electron:build`          | Next.js ကို build လုပ်ပြီးနောက် လက်ရှိ OS အတွက် `electron-builder` ကို run သည်               |
-| `npm run electron:build:win`      | Windows NSIS installer + portable (x64) ကို build လုပ်သည်                                    |
-| `npm run electron:build:mac`      | macOS DMG (Intel + Apple Silicon) ကို build လုပ်သည်                                          |
-| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) ကို build လုပ်သည်                                         |
-| `npm run electron:smoke:packaged` | Packaged binary ကို ဖွင့်ပြီး `/login` တွင် HTTP 200 ရရှိကြောင်း စမ်းသပ်ကာ ထို့နောက် ပိတ်သည် |
+| ဇာတ်ညွှန်း                        | ရည်ရွယ်ချက်                                                                            |
+| --------------------------------- | -------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` + စတင်သည် `localhost:20128` + လွှတ်တင်ခြင်း Electron ကိုစောင့်ဆိုင်းသည်။ |
+| `npm run electron:build`          | Next.js တည်ဆောက်ပြီးနောက် လက်ရှိ OS အတွက် `electron-builder` လုပ်ဆောင်သည်။             |
+| `npm run electron:build:win`      | Windows NSIS installer + ခရီးဆောင် (x64) ကို တည်ဆောက်သည်                               |
+| `npm run electron:build:mac`      | macOS DMG (Intel + Apple Silicon) တည်ဆောက်သည်                                          |
+| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) တည်ဆောက်သည်                                         |
+| `npm run electron:smoke:packaged` | ထုပ်ပိုးထားသော binary နှင့် HTTP 200 အတွက် `/login` စတင်ပြီးနောက် ပိတ်လိုက်ပါ။         |
 
-`electron/` workspace တွင် အောက်ပါတို့ကိုလည်း အသုံးပြုနိုင်သည်-
+`electron/` အလုပ်ခွင်တွင်လည်း ဖော်ထုတ်ထားသည်-
 
-- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` ကို run သည်
-- `npm run build:mac-x64` / `build:mac-arm64` — architecture တစ်မျိုးတည်းအတွက် macOS build များ
-- `npm run pack` — စက်အတွင်း စမ်းသပ်ရန် directory သီးသန့် build (installer မပါဝင်ပါ)
+- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` လုပ်ဆောင်သည်။
+- `npm run build:mac-x64` / `build:mac-arm64` — single-arch macOS တည်ဆောက်သည်။
+- `npm run pack` — directory-only build for local test (ထည့်သွင်းသူမရှိပါ)
 
-## ဖိုင်တွဲ ဖွဲ့စည်းပုံ
+## ရွေးချယ်နိုင်သော runtime packs
+
+ဒက်စ်တော့တည်ဆောက်မှုများသည် ၎င်းတို့၏ထည့်သွင်းသူများနှင့်အတူ ရွေးချယ်နိုင်သော runtime မှတ်တမ်းများကို ထုတ်ဝေနိုင်သည်။ ထည့်သွင်းထားသော ဆာဗာ ပေးဆောင်မှုတွင် `optional-packs.index.json` ( `resources/app` အောက်တွင် Windows နှင့် Linux) ပါရှိသည်။ `browser-runtime` entry အတွက် `packs[].tarball` ဖတ်ပြီး ဒေါင်းလုဒ်လုပ်ပါ။** တူညီသောထုတ်ဝေမှုမှ ဖိုင်အမည်အတိအကျ** . မှတ်တမ်းဟောင်းအမည်များတွင် SHA-256 digest ပါဝင်သည်။ မတူညီသော တည်ဆောက်မှုများသည် မတူညီသော မော်ကွန်းတိုက်များ လိုအပ်နိုင်သည်။ ဒေါင်းလုဒ်လုပ်ထားသော ဖိုင်အမည်ကို မပြောင်းလဲထားပါ။
+
+ထည့်သွင်းထားသော အက်ပ်၏ အညွှန်းနှင့် ရွေးချယ်ထားသော မှတ်တမ်းကို လမ်းညွှန်တစ်ခုထဲသို့ ကူးယူပြီး တူညီသောထုတ်ဝေမှုမှ CLI အသုံးပြုပါ-
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` မှတ်တမ်းဖိုင်အမည်မဟုတ်ဘဲ ထည့်သွင်းခြင်းနှင့် အတည်ပြုခြင်းအခြေအနေကို ပြသသည်။ စုစည်းထားသော အညွှန်းသည် မှတ်တမ်းဟောင်းကို ရွေးချယ်သည်။ ထည့်သွင်းခြင်း သည် ထုတ်ယူခြင်းမပြုမီ ၎င်း၏ မော်ကွန်းစစ်ဆေးချက်ဆမ်းများနှင့် တပ်ဆင်ထားသည့် ပက်ကေ့ခ်ျကို အစားထိုးခြင်းမပြုမီ ၎င်း၏ ပက်ကေ့ခ်ျစစ်ဆေးမှုများကို စစ်ဆေးသည်။ ၎င်းသည် ဒေသတွင်းဖိုင်များကိုဖတ်သည်။ ပျောက်ဆုံးနေသော မှတ်တမ်းများကို ဒေါင်းလုဒ်မလုပ်ပါ။ တပ်ဆင်ပြီးနောက် အပလီကေးရှင်းကို ပြန်လည်စတင်ပါ။ ထုတ်ဝေမှုတွင် ကိုက်ညီသည့် ပိုင်ဆိုင်မှုမရှိပါက၊ ထိုထုတ်ဝေမှု၏ ပိုင်ဆိုင်မှုများမှတစ်ဆင့် ရွေးချယ်နိုင်သော အတွဲကို မရနိုင်ပါ။
+
+## လမ်းညွှန်လက်ကွက်
 
 ```
 electron/
-├── package.json              # Electron မှီခိုပက်ကေ့ချ်များ + electron-builder စီစဉ်သတ်မှတ်ချက်
-├── main.js                   # ပင်မ process (24 KB — အောက်ပါ မှတ်ချက်များကို ကြည့်ပါ)
-├── preload.js                # contextBridge IPC ချိတ်ဆက်တံတား
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI အမျိုးအစားများ
-├── README.md                 # Workspace အတွင်းရှိ မှတ်စုများ
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder အထွက်ဖိုင်များ (git မှ လျစ်လျူရှုထားသည်)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # .next/electron-standalone bundle ကို ပြင်ဆင်နေရာချသည်
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Build ပြီးနောက် smoke test
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-`main.js` နှင့် `preload.js` နှစ်ခုစလုံးသည် TypeScript မဟုတ်ဘဲ **CommonJS `.js` ဖိုင်များ** ဖြစ်သည်။
-Renderer ဘက်ရှိ type သတ်မှတ်ချက်များသည် `electron/types.d.ts` တွင် ရှိသည်။
+`main.js` နှင့် `preload.js` နှစ်မျိုးလုံး**CommonJS `.js` ဖိုင်များ** TypeScript မဟုတ်ပါ။ တင်ဆက်သူဘက်မှ စာရိုက်များသည် `electron/types.d.ts` တွင် နေထိုင်သည်။
 
-## IPC ချိတ်ဆက်တံတား (`preload.js`)
+## IPC တံတား (`preload.js`)
 
-Preload သည် `contextIsolation: true` နှင့် `nodeIntegration: false` ကို အသုံးပြု၍ `contextBridge`
-မှတစ်ဆင့် ခွင့်ပြုစာရင်းသွင်းထားသော API တစ်ခုကို `window.electronAPI` ပေါ်တွင် ဖော်ထုတ်ပေးသည်။
+အကြိုတင်ခြင်းသည် `contextIsolation: true` နှင့် `nodeIntegration: false` ဖြင့် `contextBridge` အသုံးပြု၍ `window.electronAPI` တွင် အဖြူရောင်စာရင်းသွင်းထားသော API ဖော်ထုတ်သည်။
 
 ```javascript
 const VALID_CHANNELS = {
@@ -105,126 +115,132 @@ const VALID_CHANNELS = {
 };
 ```
 
-ဖော်ထုတ်ပေးထားသော method များ-
+ဖော်ထုတ်ထားသော နည်းလမ်းများ-
 
-| Renderer မှ ခေါ်ဆိုမှု                                            | အမျိုးအစား                                             |
-| ----------------------------------------------------------------- | ------------------------------------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                                                 |
-| `openExternal(url)`                                               | invoke                                                 |
-| `getDataDir()`                                                    | invoke                                                 |
-| `restartServer()`                                                 | invoke                                                 |
-| `getAppVersion()`                                                 | invoke                                                 |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                                                 |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                                   |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (ရှင်းလင်းဖယ်ရှားသည့် function ကို ပြန်ပေးသည်) |
+| သရုပ်ဖေါ်ခေါ်ဆိုခြင်း။                                            | ရိုက်ပါ။                           |
+| ----------------------------------------------------------------- | ---------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | ဖိတ်ခေါ်ပါ။                        |
+| `openExternal(url)`                                               | ဖိတ်ခေါ်ပါ။                        |
+| `getDataDir()`                                                    | ဖိတ်ခေါ်ပါ။                        |
+| `restartServer()`                                                 | ဖိတ်ခေါ်ပါ။                        |
+| `getAppVersion()`                                                 | ဖိတ်ခေါ်ပါ။                        |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | ဖိတ်ခေါ်ပါ။                        |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | ပို့ပါ။                            |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | လက်ခံ (စွန့်ပစ်ပစ္စည်း ပြန်ပေးသည်) |
 
-Receive helper များသည် `removeAllListeners` ကို အားကိုးမည့်အစား **ရှင်းလင်းဖယ်ရှားသည့် function**
-တစ်ခုကို ပြန်ပေးသည် — ဤနည်းဖြင့် React component များ ပြန်လည် mount လုပ်သည့်အခါ listener များ
-စုပုံလာခြင်းကို တားဆီးပေးသည်။
+လက်ခံရရှိသူများသည် A ပြန်လာကြသည်။** disposer function** `removeAllListeners` — ကို အားကိုးမည့်အစား ၎င်းသည် React အစိတ်အပိုင်းများ ပြန်တက်လာသောအခါ နားထောင်သူစုဆောင်းမှုကို တားဆီးသည်။
 
-## Server အသက်တာစက်ဝန်း
+## Server Lifecycle
 
-System Node နှင့် native-module ABI မကိုက်ညီမှုကို ရှောင်ရှားရန် `main.js` သည် Electron Node
-runtime ဖြင့် Next.js standalone bundle ကို တိုက်ရိုက် စတင်မောင်းနှင်သည်-
+`main.js` သည် Next.js standalone အစုအစည်းကို Electron Node runtime ဖြင့် တိုက်ရိုက် မွေးဖွားပေးသည်- စနစ် Node နှင့် ဇာတိ-မော်ဂျူး ABI မကိုက်ညီမှုမှ ရှောင်ရှားရန်။
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-အဓိကအချက်များ-
+ပေါ်လွင်ချက်များ-
 
-- `waitForServer()` သည် window ကို မပြသမီ URL ကို 30 s အထိ အကြိမ်ကြိမ် စစ်ဆေးသည် (cold start တွင် မျက်နှာပြင်အလွတ် မပေါ်စေရန်)။
-- `stdio: "pipe"` သည် stdout/stderr ကို ဖမ်းယူသည်။ အဆင်သင့်ဖြစ်ကြောင်း ဖော်ပြသည့် စာသားများ (`Ready` / `listening`) ကို တွေ့ရှိပါက IPC မှတစ်ဆင့် `server-status: running` ကို ထုတ်လွှင့်သည်။
-- `before-quit` သည် ချောမွေ့စွာ SIGTERM လုပ်ဆောင်ပြီးဆုံးရန် (WAL checkpoint) 5 s အထိ စောင့်ပြီးနောက် SIGKILL ကို ပေးပို့သည်။
-- Tray ရှိ port ပြောင်းလဲကိရိယာ (`20128`, `3000`, `8080`) သည် server ကို ရပ်ပြီး ပြန်လည်စတင်ကာ ထို့နောက် BrowserWindow ကို ပြန်လည်ဖွင့်တင်သည်။
+- `waitForServer()` ပြတင်းပေါက်ကိုမပြမီ URL ကို 30 အထိ စစ်တမ်းကောက်ယူသည် (အအေးစတင်ချိန်တွင် မျက်နှာပြင်အလွတ်မရှိပါ)။
+- `stdio: "pipe"` ဖမ်းယူသည် stdout/stderr; အဆင်သင့်စကားစုများ (`Ready` / `listening`) `server-status: running` IPC မှ ထုတ်လွှတ်သည်။
+- `before-quit` လှပသော SIGTERM (WAL စစ်ဆေးရေးဂိတ်) အတွက် 5 s အထိ စောင့်ပြီး SIGKILL ပို့ပေးသည်။
+- ဗန်းအတွင်းရှိ ပို့တ်ပြောင်းကိရိယာ (`20128`၊ `3000`၊ `8080`) ရပ်တန့်ပြီး ဆာဗာကို ပြန်လည်စတင်ပြီးနောက် BrowserWindow ကို ပြန်လည်စတင်သည်။
 
-## သတ်မှတ်ပြင်ဆင်မှုမလိုသော Secret Bootstrap
+## Zero-config လျှို့ဝှက် Bootstrap
 
-ပထမဆုံး စတင်ဖွင့်လှစ်ချိန်တွင် main process က မရှိသေးသော secret များကို အလိုအလျောက် ထုတ်လုပ်ပြီး အမြဲတမ်းသိမ်းဆည်းထားသည်-
+ပထမအကြိမ် စတင်ခြင်းတွင်၊ အဓိက လုပ်ငန်းစဉ်သည် အလိုအလျောက် ထုတ်ပေးပြီး ပျောက်ဆုံးနေသော လျှို့ဝှက်ချက်များကို ဆက်လက်လုပ်ဆောင်သည်-
 
-| Secret                   | ရင်းမြစ်                                                                                            |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                            |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (ကုဒ်ဝှက်ထားသော အထောက်အထားများ ရှိပြီးသားဖြစ်ပါက လက်မခံပါ) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                            |
+| လျှို့ဝှက်ချက်           | အရင်းအမြစ်                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                      |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (ကုဒ်ဝှက်ထားသော ခရက်ဒစ်များ ရှိနှင့်ပါက ငြင်းဆိုသည်) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                      |
 
-`<DATA_DIR>/server.env` တွင် အမြဲတမ်းသိမ်းဆည်းထားသည်။ `DATA_DIR` ကို အောက်ပါအတိုင်း သတ်မှတ်သည်-
+`<DATA_DIR>/server.env` တွင်ဆက်လက်တည်ရှိခဲ့သည်။ `DATA_DIR` မှ ဖြေရှင်းသည်
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` သို့မဟုတ် `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Window နှင့် Tray
+## ပတ်ဝန်းကျင်ဖိုင်ကို ရှာဖွေခြင်း။
 
-- `BrowserWindow`: 1400×900 (အနည်းဆုံး 1024×700)၊ `backgroundColor: "#0a0a0a"`။
-- macOS: `titleBarStyle: "hiddenInset"`၊ traffic-light ကို `{ x: 16, y: 16 }` တွင်ထားသည်။
-- Windows/Linux: မူလစနစ်၏ title bar ကို အသုံးပြုသည်။
-- Close ခလုတ်က tray သို့ လျှော့ချသည်။ tray menu တွင် **OmniRoute ကိုဖွင့်ရန်**၊ **Dashboard ကိုဖွင့်ရန်** (ပြင်ပ browser)၊ **Server Port** submenu၊ **အပ်ဒိတ်များ စစ်ဆေးရန်**နှင့် **ထွက်ရန်**တို့ ပါဝင်သည်။
+ဆာဗာကို မဖြန့်မီ၊ ပင်မလုပ်ငန်းစဉ် (`getPreferredEnvFilePath()` in `electron/main.js`) ကို ရွေးသည်။** တစ်ခု** `.env` ဖိုင်- ဤအရာများထဲမှ ပထမဆုံးဖြစ်သည်။
 
-## Content Security Policy
+1. `$DATA_DIR/.env`၊ `DATA_DIR` ကို ပတ်ဝန်းကျင်တွင် သတ်မှတ်သောအခါ၊ အက်ပ်ကို စတင်ခဲ့သည်။
+2. `<resolved DATA_DIR>/.env`၊ အထက်ဖော်ပြပါကဲ့သို့တူညီသောမူလများကိုအသုံးပြုသည်- `%APPDATA%\omniroute\.env` တွင် Windows၊ `$XDG_CONFIG_HOME/omniroute/.env` သို့မဟုတ် `~/.omniroute/.env` နှင့် Linux နှင့် macOS ပေါ်တွင်။
+3. `.env` လုပ်ငန်းစဉ်တွင် အလုပ်လုပ်သောလမ်းညွှန်။
 
-`session.defaultSession.webRequest.onHeadersReceived` မှတစ်ဆင့် သတ်မှတ်သည်။ မှတ်သားဖွယ် directive များ-
+ပင်မလုပ်ငန်းစဉ်သည် ထိုဖိုင်ကိုသာ ဖတ်သည်။ နောက်ပိုင်းတွင် ကိုယ်စားလှယ်လောင်းများကို ပေါင်းစည်းခြင်းမပြုပါ။ ထို့နောက် ဆာဗာပတ်ဝန်းကျင်ကို ဤဦးစားပေး (အမြင့်ဆုံးပထမ) ဖြင့် တည်ဆောက်ပါသည်။
+
+1. Electron လုပ်ငန်းစဉ်ပတ်ဝန်းကျင် (အက်ပ်ကိုဖွင့်ထားသမျှမှ အမွေဆက်ခံသည့်ကိန်းရှင်များ)။
+2. ရွေးချယ်ထားသော `.env` ဖိုင်။
+3. `<DATA_DIR>/server.env` (အထက် bootstrap လျှို့ဝှက်ချက်များ)။
+
+အက်ပ်စတင်သောအခါတွင် လုပ်ငန်းစဉ်ပတ်ဝန်းကျင်ကို ဖမ်းယူထားသောကြောင့် အက်ပ်လည်ပတ်နေချိန်တွင် စနစ် သို့မဟုတ် အသုံးပြုသူပတ်ဝန်းကျင် ပြောင်းလဲနိုင်သောသတ်မှတ်မှုတစ်ခု (၎င်း၏ဝင်းဒိုးပိတ်ပြီးနောက် ဗန်းထဲတွင် ထိုင်နေချိန်အပါအဝင်) အက်ပ်အား အပြီးအပိုင်ပိတ်ပြီး ပြန်လည်စတင်သည့်အချိန်အထိ ဆာဗာသို့ မရောက်ပါ။ `CONTEXT_LENGTH_<PROVIDER>` ကဲ့သို့သော runtime knob များအတွက် ( [Environment Variables များကိုကြည့်ပါ- ဝန်ဆောင်မှုပေးသူတစ်ခုချင်း၏ context length ကို](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ကြည့်ပါ) ၊ `.env` ဖိုင်ကို နှစ်သက်သည်၊ ထို့နောက် အပြည့်အ၀ထွက်ပါ (ဗန်း၊** ထွက်လိုက်ပါ။** ) နှင့် ပြန်လည်စတင်ပါ။
+
+## ပြတင်းပေါက်နှင့် ဗန်း
+
+- `BrowserWindow`: 1400 × 900 (အနည်းဆုံး 1024 × 700), `backgroundColor: "#0a0a0a"`
+- macOS: `titleBarStyle: "hiddenInset"`, traffic-light at `{ x: 16, y: 16 }`.
+- Windows/Linux: မူရင်း ခေါင်းစဉ်ဘား။
+- ပိတ်ခလုတ်သည် ဗန်းထဲသို့ နိမ့်သွားသည် ။ ဗန်းမီနူး ပါရှိပါသည်။** OmniRoute ဖွင့်ပါ။** ၊** Dashboard ကိုဖွင့်ပါ။** (ပြင်ပဘရောက်ဆာ)၊** ဆာဗာ ဆိပ်ကမ်း** မီနူး၊** အပ်ဒိတ်များအတွက် စစ်ဆေးပါ။** ၊** ထွက်လိုက်ပါ။** .
+
+## အကြောင်းအရာ လုံခြုံရေးမူဝါဒ
+
+`session.defaultSession.webRequest.onHeadersReceived` မှတဆင့်သတ်မှတ်ပါ။ ထင်ရှားသော ညွှန်ကြားချက်များ-
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Dev mode တွင် `script-src` သို့သာ `'unsafe-eval'` ကို ထည့်သွင်းသည်
+- Dev မုဒ်သည် `'unsafe-eval'` ကို `script-src` တွင်သာ ပေါင်းထည့်သည်။
 
-## အလိုအလျောက်အပ်ဒိတ်
+## အလိုအလျောက်မွမ်းမံခြင်း။
 
-GitHub provider (`diegosouzapw/OmniRoute`) နှင့်အတူ `electron-updater` ကို အသုံးပြုသည်။
+`electron-updater` GitHub ပံ့ပိုးပေးသူ (`diegosouzapw/OmniRoute`) ဖြင့် အသုံးပြုသည်။
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Event များကို `update-status` IPC မှတစ်ဆင့် renderer သို့ ပေးပို့သည်-
-  `checking`, `available`, `not-available`, `downloading` (`percent` နှင့်အတူ), `downloaded`, `error`
-- `installUpdate()` က server ကို ပိတ်ပြီးနောက် `autoUpdater.quitAndInstall()` ကို ခေါ်သည်
-- Dev mode (`!app.isPackaged`) တွင် ကျော်သွားသည်
+- `update-status` IPC မှတဆင့် တင်ဆက်သူသို့ ထပ်ဆင့်ပို့သော အစီအစဉ်များ : `checking`, `available`, `not-available`, `downloading` (with `percent`), `downloaded`, `error`
+- `installUpdate()` server ကိုသတ်ပြီးနောက် `autoUpdater.quitAndInstall()` ကိုခေါ်သည်။
+- dev မုဒ် (`!app.isPackaged`) တွင် ကျော်သွားသည်
 
-## Build Pipeline
+## ပိုက်လိုင်းတည်ဆောက်ပါ။
 
-1. `npm run build` → `.next/standalone` ထဲရှိ Next.js standalone။
-2. `prepare-electron-standalone.mjs` → `.next/electron-standalone` ထဲသို့ ပြန်လည်အဆင့်ဆင့် စီစဉ်ပြီး bundle ကို နေရာရွှေ့နိုင်စေရန် `server.js` + `required-server-files.json` အတွင်းရှိ absolute path များကို ပြန်လည်ရေးသားသည်။
-3. `electron-builder` က `main.js`, `preload.js`, `node_modules` နှင့် `extraResources: { ../.next/electron-standalone → app }` ကို package ပြုလုပ်သည်။
+1. `npm run build` → Next.js standalone `.next/standalone`။
+2. `prepare-electron-standalone.mjs` → `.next/electron-standalone` သို့ ပြန်လည်အဆင့်ပြီး `server.js` + `required-server-files.json` အတွင်းရှိ absolute paths များကို ပြန်လည်ရေးသားပေးသောကြောင့် အစုအဝေးကို နေရာရွှေ့ပြောင်းနိုင်ပါသည်။
+3. `electron-builder` အထုပ်များကို `main.js`၊ `preload.js`၊ `node_modules` နှင့် `extraResources: { ../.next/electron-standalone → app }`။
 
-### Build ပစ်မှတ်များ
+### ရည်မှန်းချက်များတည်ဆောက်ပါ။
 
-| OS      | ပစ်မှတ်များ                                         |
-| ------- | --------------------------------------------------- |
-| Windows | NSIS installer + portable (x64)                     |
-| macOS   | DMG (Intel + arm64၊ Applications သို့ ဆွဲထည့်ခြင်း) |
-| Linux   | AppImage + DEB (x64 + arm64)                        |
+| OS      | ပစ်မှတ်များ                               |
+| ------- | ----------------------------------------- |
+| Windows | NSIS installer + ခရီးဆောင် (x64)          |
+| macOS   | DMG (Intel + arm64၊ drag-to-Applications) |
+| Linux   | AppImage + DEB (x64 + arm64)              |
 
-NSIS ဆက်တင်များ- `oneClick: false`၊ အသုံးပြုသူအား install directory ရွေးချယ်ခွင့်ပေးပြီး Desktop နှင့် Start-Menu shortcut များကို ဖန်တီးသည်။
+NSIS ဆက်တင်များ- `oneClick: false`၊ အသုံးပြုသူအား ထည့်သွင်းသည့်လမ်းညွှန်ကို ရွေးချယ်ခွင့်ပေးပြီး၊ Desktop နှင့် Start-Menu ဖြတ်လမ်းများကို ဖန်တီးပေးသည်။
 
-## Package ပြုလုပ်ထားသော Build ကို Smoke Testing လုပ်ခြင်း
+## Smoke Testing Packaged Build
 
 ```bash
 npm run electron:smoke:packaged
 ```
 
-`scripts/dev/smoke-electron-packaged.mjs`-
+`scripts/dev/smoke-electron-packaged.mjs`:
 
-- လက်ရှိ platform အတွက် package ပြုလုပ်ထားသော binary ကို `electron/dist-electron/` ထဲတွင် အလိုအလျောက်ရှာဖွေသည်။
-- Developer data ကို မထိခိုက်စေရန် သီးခြားခွဲထားသော `HOME`/`APPDATA`/`XDG_*` directory များဖြင့် စတင်သည်။
-- 45 s အတွင်း HTTP 200 ရရှိရန် `http://127.0.0.1:20128/login` ကို အကြိမ်ကြိမ် စစ်ဆေးသည်။
-- ဆိုးရွားသော pattern များ (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` စသည်) ရှိမရှိ stderr/stdout ကို စောင့်ကြည့်သည်။
-- အဆင်သင့်ဖြစ်ပြီးနောက် တည်ငြိမ်သော runtime 2 s ကို စောင့်သည်၊ ထို့နောက် SIGTERM ကို ပေးပို့ပြီး port လွတ်သွားသည်အထိ စောင့်သည်။
-- CI တွင် `--no-sandbox --disable-gpu` ကို အလိုအလျောက် ထည့်သွင်းပေးသည် (Linux တွင် `--disable-dev-shm-usage` ကိုလည်း ထည့်သွင်းသည်)။
+- လက်ရှိပလက်ဖောင်းအတွက် `electron/dist-electron/` တွင် ထုပ်ပိုးထားသော binary ကို အလိုအလျောက်ရှာဖွေသည်။
+- သီးခြား `HOME`/`APPDATA`/`XDG_*` လမ်းညွှန်များဖြင့် ဖွင့်ထားသောကြောင့် ၎င်းသည် developer ဒေတာကို မထိမိပါ။
+- ၄၅ စက္ကန့်အတွင်း HTTP 200 အတွက် `http://127.0.0.1:20128/login` စစ်တမ်းများ။
+- ဆိုးဝါးသောပုံစံများ (`Cannot find module`၊ `MODULE_NOT_FOUND`၊ `ERR_DLOPEN_FAILED`၊ `Failed to start server` စသည်ဖြင့်) အတွက် stderr/stdout ကြည့်သည်။
+- အဆင်သင့်ဖြစ်ပြီးနောက် တည်ငြိမ်သော runtime 2 s ကိုစောင့်ပါ၊ ထို့နောက် SIGTERM ကိုထုတ်ပေးပြီး port လွတ်သွားသည်အထိစောင့်ပါ။
+- CI တွင် `--no-sandbox --disable-gpu` (နှင့် `--disable-dev-shm-usage` တွင် Linux) အလိုအလျောက်ဖြတ်သန်းသည်။
 
-Env override များ- `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`။
+Env အပေါ်ထပ်- `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## ကုဒ် လက်မှတ်ထိုးခြင်း
+## ကုဒ်လက်မှတ်ထိုးခြင်း။
 
-`electron/package.json` တွင် လက်မှတ်ထိုးရန် အထောက်အထားများကို တိုက်ရိုက်ချိတ်ဆက်သတ်မှတ်ထားခြင်း **မရှိပါ**။ ၎င်းတို့ကို env vars မှတစ်ဆင့် `electron-builder` သို့ ပေးပို့ပါ-
+`electron/package.json` လုပ်တယ်။** မဟုတ်ဘူး** ကြေးနန်းအထောက်အထားများကို တိုက်ရိုက်လက်မှတ်ထိုးခြင်း။ သူတို့ကို env vars မှတဆင့် `electron-builder` သို့ပို့ပါ။
 
 ### macOS
 
@@ -247,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage လက်မှတ်ထိုးခြင်းသည် ရွေးချယ်နိုင်သည် — လက်မှတ်ထိုးလိုပါက `LINUX_GPG_KEY` ကို သတ်မှတ်ပါ။
+AppImage လက်မှတ်ထိုးခြင်းသည် လက်မှတ်ထိုးလျှင် စိတ်ကြိုက် — သတ်မှတ် `LINUX_GPG_KEY` ဖြစ်သည်။
 
-## ဖြန့်ချိခြင်း
+## ဖြန့်ဝေခြင်း။
 
-တည်ဆောက်ပြီးသော ဖိုင်များကို `electron/dist-electron/` တွင် ရရှိပါမည်-
+`electron/dist-electron/` တွင် ရှေးဟောင်းပစ္စည်းများ
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ဖြန့်ချိမှုများကို GitHub Releases (`diegosouzapw/OmniRoute`) သို့ ထုတ်ဝေပြီး `electron-updater` ကလည်း ဗားရှင်းအသစ်များ ရှိမရှိ ထိုနေရာတွင် စစ်ဆေးပါသည်။
+ဖြန့်ချိမှုများကို GitHub Releases (`diegosouzapw/OmniRoute`) တွင် ထုတ်ဝေထားပြီး `electron-updater` ဗားရှင်းအသစ်များကို စစ်ဆေးသည့်နေရာဖြစ်သည်။
 
-## ပြဿနာဖြေရှင်းခြင်း
+## ပြသာနာရှာဖွေရှင်းပေးခြင်း
 
-| လက္ခဏာ                                                                                     | ဖြေရှင်းနည်း                                                                                                                                                                             |
-| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Electron major ဗားရှင်းမြှင့်ပြီးနောက် `Cannot find module 'better-sqlite3'` ဖြစ်ပေါ်ခြင်း | better-sqlite3 v13 တွင် Node-API prebuilds များ ပါဝင်သည် — root တွင် `npm install` နှင့် `prepare:bundle` ကို ပြန်လည် run ပါ (၎င်းက လက်ရှိ platform အတွက် prebuild ကို စစ်ဆေးအတည်ပြုသည်) |
-| native module အတွက် `ERR_DLOPEN_FAILED` ဖြစ်ပေါ်ခြင်း                                      | `prepare:bundle` ကို ပြန်လည် run ပါ — လက်ရှိ platform အတွက် Node-API prebuild မရှိပါက ၎င်းသည် ချက်ချင်း မအောင်မြင်ကြောင်း ပြသပါမည်                                                       |
-| Linux တွင် window က ဗလာဖြစ်နေခြင်း                                                         | Next.js server သည် PORT နှင့် အမှန်တကယ် bind ဖြစ်ထားကြောင်း အတည်ပြုပါ (`[Server]` logs ကို စစ်ဆေးပါ)                                                                                     |
-| macOS notarization ရပ်တန့်နေခြင်း                                                          | `APPLE_*` vars များကို `.env` ထဲတွင်သာ ထည့်ထားခြင်းမဟုတ်ဘဲ export လုပ်ထားကြောင်း သေချာပါစေ                                                                                               |
-| Windows SmartScreen သတိပေးချက်                                                             | EV cert ဖြင့် လက်မှတ်ထိုးပါ၊ သို့မဟုတ် အသုံးပြုသူများက right-click → "Run anyway" ကို ရွေးချယ်နိုင်သည်                                                                                   |
-| port အသုံးပြုနေသောကြောင့် smoke test မအောင်မြင်ခြင်း                                       | `electron:smoke:packaged` ကို run မလုပ်မီ 20128 တွင် run နေသော local dev server မှန်သမျှကို ရပ်တန့်ပါ                                                                                    |
+| ရောဂါလက္ခဏာ                                                                       | ပြင်ပါ။                                                                                                                                                                |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` ပြီးနောက် Electron သည် အဓိက အဖုအထစ်ဖြစ်သည်။ | better-sqlite3 v13 သည် Node-API prebuilds — root တွင် `npm install` ပြန်လည်လည်ပတ်ပြီး `prepare:bundle` (၎င်းသည် လက်ရှိပလပ်ဖောင်းအတွက် ကြိုတင်တည်ဆောက်မှုကို စစ်ဆေးသည်) |
+| ဇာတိ module အတွက်`ERR_DLOPEN_FAILED`                                              | Re-run `prepare:bundle` — it fails fast when the Node-API prebuild for the current platform is missing                                                                 |
+| Linux တွင် Window သည် ဗလာဖြစ်နေသည်။                                               | Next.js ဆာဗာသည် PORT သို့ အမှန်တကယ်ချည်နှောင်ထားကြောင်း အတည်ပြုပါ ( `[Server]` မှတ်တမ်းများကို စစ်ဆေးပါ)                                                               |
+| macOS notarization ဆိုင်များ                                                      | `.env` တွင်တင်မဟုတ်ဘဲ `APPLE_*` vars များကို တင်ပို့ကြောင်း သေချာပါစေ။                                                                                                 |
+| Windows SmartScreen သတိပေးချက်                                                    | EV cert ဖြင့် လက်မှတ်ထိုးပါ သို့မဟုတ် အသုံးပြုသူများသည် → "ဘာပဲဖြစ်ဖြစ် Run" ကို ညာကလစ်နှိပ်ပါ။                                                                        |
+| ဆိပ်ကမ်း-အသုံးပြုမှုဖြင့် မီးခိုးစမ်းသပ်မှု မအောင်မြင်ပါ။                         | `electron:smoke:packaged` မလည်ပတ်မီ 20128 တွင် မည်သည့် local dev server ကိုမဆို ရပ်ပါ။                                                                                 |
 
-## ထပ်မံကြည့်ရှုရန်
+## ဒါကိုလည်းကြည့်ပါ။
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - အရင်းအမြစ်- `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- အကူ Script များ- `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- ကူညီသူများ- `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

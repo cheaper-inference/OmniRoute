@@ -17,14 +17,14 @@ function getPublicModel(id: string) {
   return ANTIGRAVITY_PUBLIC_MODELS.find((model) => model.id === id) as any;
 }
 
-// #10537 retired the single-alias `gemini-3.7-flash` (which mapped to the upstream
-// `gemini-3.7-flash-tiered`) in favor of three directly-callable tiered public models —
+// #10537 retired the single-alias `gemini-3.8-flash` (which mapped to the upstream
+// `gemini-3.8-flash-tiered`) in favor of three directly-callable tiered public models —
 // the suffixed ids now work upstream without the collapsing alias. Keep this list in sync
 // with ANTIGRAVITY_PUBLIC_MODELS/ANTIGRAVITY_MODEL_ALIASES instead of the retired bare id.
 const EXPECTED_FLASH_TIERS = [
-  ["gemini-3.7-flash-high", "Gemini 3.7 Flash (High)"],
-  ["gemini-3.7-flash-medium", "Gemini 3.7 Flash (Medium)"],
-  ["gemini-3.7-flash-low", "Gemini 3.7 Flash (Low)"],
+  ["gemini-3.8-flash-high", "Gemini 3.8 Flash (High)"],
+  ["gemini-3.8-flash-medium", "Gemini 3.8 Flash (Medium)"],
+  ["gemini-3.8-flash-low", "Gemini 3.8 Flash (Low)"],
 ] as const;
 
 const RETIRED_FLASH_IDS = [
@@ -38,6 +38,7 @@ const RETIRED_FLASH_IDS = [
   "gemini-3.5-flash-medium",
   "gemini-3.5-flash-high",
   "gemini-3.5-flash-preview",
+  "gemini-3.1-flash-lite-preview",
 ] as const;
 
 test("toClientAntigravityQuotaModelId preserves upstream Gemini Flash bucket IDs", () => {
@@ -58,7 +59,7 @@ test("toClientAntigravityQuotaModelId preserves upstream Gemini Flash bucket IDs
 test("resolveAntigravityModelId maps the documented Antigravity aliases to upstream IDs", () => {
   assert.equal(resolveAntigravityModelId("gemini-3-pro-image-preview"), "gemini-3-pro-image");
   for (const [modelId] of EXPECTED_FLASH_TIERS) {
-    assert.equal(resolveAntigravityModelId(modelId), "gemini-3.7-flash-tiered");
+    assert.equal(resolveAntigravityModelId(modelId), modelId);
   }
   assert.equal(resolveAntigravityModelId("gemini-3.7-flash"), "gemini-3.7-flash-tiered");
   assert.equal(resolveAntigravityModelId("gemini-3.7-flash-tiered"), "gemini-3.7-flash-tiered");
@@ -119,6 +120,10 @@ test("isDiscoverableAntigravityModelId accepts new live chat models without a st
   assert.equal(isDiscoverableAntigravityModelId("gemini-3.8-flash-high"), true);
   assert.equal(isDiscoverableAntigravityModelId("claude-sonnet-5"), true);
   assert.equal(isDiscoverableAntigravityModelId("gemini-new-live-tier"), true);
+  // GA and currently served legacy ids must not be confused with a retired preview.
+  assert.equal(isDiscoverableAntigravityModelId("gemini-3.1-flash-lite"), true);
+  assert.equal(isDiscoverableAntigravityModelId("gemini-3.5-flash-lite"), true);
+  assert.equal(isDiscoverableAntigravityModelId("gemini-3-flash"), true);
 
   for (const retiredId of RETIRED_FLASH_IDS) {
     assert.equal(isDiscoverableAntigravityModelId(retiredId), false);
@@ -154,6 +159,8 @@ test("ANTIGRAVITY_PUBLIC_MODELS exposes current live names and capabilities", ()
     assert.deepEqual(getPublicModel(modelId), {
       id: modelId,
       name: displayName,
+      // #15659: a tiered-only account's live catalog proves the tier ids through `-tiered`.
+      liveCatalogIds: [modelId.replace(/-(high|medium|low)$/, "-tiered")],
       contextLength: 1048576,
       maxOutputTokens: 65536,
       supportsReasoning: true,

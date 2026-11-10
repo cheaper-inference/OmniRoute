@@ -1,11 +1,22 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
+import Icon from "@/shared/components/Icon";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button, Card } from "@/shared/components";
 import { copyToClipboard } from "@/shared/utils/clipboard";
-import { cn } from "@/shared/utils/cn";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Textarea from "@/shared/components/Textarea";
 
 // ─── Sample payloads ──────────────────────────────────────────────────────────
 
@@ -156,12 +167,14 @@ export default function StreamTransformerAccordion({
     }
   }, [forceOpen, onOpenChange]);
 
-  const handleToggle = useCallback(() => {
-    const next = !open;
-    setOpen(next);
-    if (next) setHasOpened(true);
-    onOpenChange?.(next);
-  }, [open, onOpenChange]);
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      setOpen(next);
+      if (next) setHasOpened(true);
+      onOpenChange?.(next);
+    },
+    [onOpenChange]
+  );
 
   // ── Transform state (only matters once content is mounted) ────────────────
   const [rawSse, setRawSse] = useState(SAMPLE_TEXT);
@@ -229,51 +242,29 @@ export default function StreamTransformerAccordion({
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="rounded-lg border border-black/5 dark:border-white/5 bg-surface">
-      {/* ── Collapsible header — mirrors Collapsible.tsx visual style ──── */}
-      <div
-        className={cn(
-          "flex items-center gap-3 p-4 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors",
-          open && "border-b border-black/5 dark:border-white/5"
-        )}
-      >
-        <button
-          type="button"
-          onClick={handleToggle}
-          aria-expanded={open}
-          className="flex items-center gap-3 flex-1 min-w-0 text-left -m-1 p-1 rounded"
-        >
-          <span
-            className="material-symbols-outlined text-text-muted text-[20px] shrink-0"
-            aria-hidden="true"
-          >
-            {open ? "expand_more" : "chevron_right"}
+    <Disclosure
+      open={open}
+      onOpenChange={handleOpenChange}
+      className="rounded-lg border border-border bg-surface"
+    >
+      <DisclosureTrigger className="gap-3 p-4">
+        <span className="flex min-w-0 items-center gap-3">
+          <Icon name="swap_horiz" size={18} className="text-text-muted" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium text-text-main">{title}</span>
+            <span className="block truncate text-xs text-text-muted">{subtitle}</span>
           </span>
-          <span
-            className="material-symbols-outlined text-text-muted text-[18px] shrink-0"
-            aria-hidden="true"
-          >
-            swap_horiz
-          </span>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-text-main truncate">{title}</div>
-            <div className="text-xs text-text-muted truncate">{subtitle}</div>
-          </div>
-        </button>
-      </div>
+        </span>
+      </DisclosureTrigger>
 
-      {/* ── Content: lazy-render guard (D7) ────────────────────────────── */}
-      {(open || hasOpened) && (
-        <div className={cn("p-4", !open && "hidden")}>
+      {/* ── Content: lazy-render guard (D7) — mounted on first open, then kept (hidden)
+          so the pasted SSE and the last result survive closing the section. ───── */}
+      <DisclosureContent keepMounted={hasOpened} className="border-t border-border">
+        <div className="p-4">
           <div className="space-y-5 min-w-0">
             {/* Info banner */}
             <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
-              <span
-                className="material-symbols-outlined text-primary text-[20px] mt-0.5 shrink-0"
-                aria-hidden="true"
-              >
-                swap_horiz
-              </span>
+              <Icon name="swap_horiz" size={20} className="text-primary mt-0.5" />
               <div>
                 <p className="font-medium text-text-main mb-0.5">
                   {translateOrFallback("streamTransformerTitle", "Responses Stream Transformer")}
@@ -326,7 +317,7 @@ export default function StreamTransformerAccordion({
                   <div
                     role="alert"
                     data-testid="error-display"
-                    className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400"
+                    className="rounded-lg border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
                   >
                     {error}
                   </div>
@@ -346,16 +337,14 @@ export default function StreamTransformerAccordion({
                         onClick={() => handleCopy(rawSse, "input")}
                         aria-label={translateOrFallback("copyInput", "Copy input")}
                       >
-                        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                          {copiedField === "input" ? "check" : "content_copy"}
-                        </span>
+                        <Icon name={copiedField === "input" ? "check" : "content_copy"} size={14} />
                       </Button>
                     </div>
-                    <textarea
+                    <Textarea
                       value={rawSse}
                       onChange={(e) => setRawSse(e.target.value)}
                       data-testid="raw-sse-input"
-                      className="min-h-[360px] w-full rounded-lg border border-border bg-bg-secondary px-3 py-3 text-xs font-mono text-text-main focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      className="min-h-[360px] w-full font-mono text-xs"
                       spellCheck={false}
                       aria-label={translateOrFallback(
                         "rawChatSseInput",
@@ -380,14 +369,15 @@ export default function StreamTransformerAccordion({
                         disabled={!transformedSse}
                         aria-label={translateOrFallback("copyOutput", "Copy output")}
                       >
-                        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                          {copiedField === "output" ? "check" : "content_copy"}
-                        </span>
+                        <Icon
+                          name={copiedField === "output" ? "check" : "content_copy"}
+                          size={14}
+                        />
                       </Button>
                     </div>
                     <pre
                       data-testid="transformed-output"
-                      className="min-h-[360px] overflow-auto rounded-lg border border-border bg-bg-secondary px-3 py-3 text-xs font-mono whitespace-pre-wrap break-all"
+                      className="min-h-[360px] overflow-auto rounded-lg border border-border bg-bg-subtle px-3 py-3 text-xs font-mono whitespace-pre-wrap break-all"
                     >
                       {transformedSse || translateOrFallback("noResultsYet", "No results yet")}
                     </pre>
@@ -431,41 +421,37 @@ export default function StreamTransformerAccordion({
                     )}
                   </p>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="text-left text-xs text-text-muted border-b border-border">
-                          <th className="pb-2 pr-4">#</th>
-                          <th className="pb-2 pr-4">
-                            {translateOrFallback("eventType", "Event type")}
-                          </th>
-                          <th className="pb-2">{translateOrFallback("eventPreview", "Preview")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {transformedFrames.map((frame, index) => (
-                          <tr
-                            key={`${frame.event}_${index}`}
-                            className="border-b border-border/50 align-top"
-                          >
-                            <td className="py-2 pr-4 text-xs text-text-muted">{index + 1}</td>
-                            <td className="py-2 pr-4 font-mono text-xs text-primary">
-                              {frame.event}
-                            </td>
-                            <td className="py-2 text-xs text-text-muted break-all">
-                              {frame.preview}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <Table
+                    scrollbarLabel={translateOrFallback("eventType", "Event type")}
+                    className="text-sm"
+                  >
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>{translateOrFallback("eventType", "Event type")}</TableHead>
+                        <TableHead>{translateOrFallback("eventPreview", "Preview")}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {transformedFrames.map((frame, index) => (
+                        <TableRow key={`${frame.event}_${index}`} className="align-top">
+                          <TableCell className="text-xs text-text-muted">{index + 1}</TableCell>
+                          <TableCell className="font-mono text-xs text-primary">
+                            {frame.event}
+                          </TableCell>
+                          <TableCell className="break-all text-xs text-text-muted">
+                            {frame.preview}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 )}
               </div>
             </Card>
           </div>
         </div>
-      )}
-    </div>
+      </DisclosureContent>
+    </Disclosure>
   );
 }

@@ -1,16 +1,27 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  getResolvedModelCapabilities,
-  supportsReasoning,
-} from "../../src/lib/modelCapabilities.ts";
-import { applyThinkingBudget } from "../../open-sse/services/thinkingBudget.ts";
-import { translateRequest } from "../../open-sse/translator/index.ts";
-import { FORMATS } from "../../open-sse/translator/formats.ts";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-ag-thinking-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const { getResolvedModelCapabilities, supportsReasoning } =
+  await import("../../src/lib/modelCapabilities.ts");
+const { applyThinkingBudget } = await import("../../open-sse/services/thinkingBudget.ts");
+const { translateRequest } = await import("../../open-sse/translator/index.ts");
+const { FORMATS } = await import("../../open-sse/translator/formats.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+
+test.after(() => {
+  resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 test("antigravity reasoning capabilities: Gemini and Claude models support reasoning", () => {
   const geminiModels = [
-    "antigravity/gemini-3.7-flash-high",
+    "antigravity/gemini-3.8-flash-high",
     "antigravity/gemini-pro-agent",
     "antigravity/gemini-3.1-pro-low",
     "antigravity/claude-sonnet-4-6",
@@ -96,7 +107,7 @@ test("antigravity translator: translates reasoning_effort into Gemini thinkingCo
   );
 });
 
-test("antigravity translator: Claude models bump maxOutputTokens and strip raw thinkingConfig", () => {
+test("antigravity translator: Claude models omit implicit output limits and raw thinkingConfig", () => {
   const inputReq = {
     model: "antigravity/claude-sonnet-4-6",
     messages: [{ role: "user", content: "Explain quantum mechanics" }],
@@ -123,8 +134,25 @@ test("antigravity translator: Claude models bump maxOutputTokens and strip raw t
     undefined,
     "raw thinkingConfig must be stripped for Claude models on Antigravity"
   );
-  assert.ok(
-    (generationConfig.maxOutputTokens as number) >= 16384,
-    "maxOutputTokens should be preserved/bumped for Claude reasoning"
-  );
+  assert.equal(generationConfig.maxOutputTokens, undefined);
+});
+
+test("Antigravity Responses request: Claude reasoning omits implicit output limits", () => {
+  const translated = translateRequest(
+    FORMATS.OPENAI_RESPONSES,
+    FORMATS.ANTIGRAVITY,
+    "claude-opus-5-5-medium",
+    {
+      input: "Explain quantum mechanics",
+      reasoning: { effort: "medium" },
+    },
+    true,
+    { projectId: "test-project" },
+    "antigravity"
+  ) as { request?: { generationConfig?: Record<string, unknown> } };
+
+  const generationConfig = translated.request?.generationConfig;
+  assert.ok(generationConfig);
+  assert.equal(generationConfig.maxOutputTokens, undefined);
+  assert.equal(generationConfig.thinkingConfig, undefined);
 });

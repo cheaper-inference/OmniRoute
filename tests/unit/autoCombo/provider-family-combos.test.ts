@@ -19,11 +19,15 @@ import {
   buildFamilyCandidateFilter,
   isValidModelFamily,
   AUTO_FAMILY_IDS,
+  MODEL_FAMILIES,
 } from "../../../open-sse/services/autoCombo/modelFamily";
 
 // First-touch DB migrations run once per worker and can exceed vitest's 5s
-// default in a cold thread; the DB-backed materialization tests below need it.
-vi.setConfig({ testTimeout: 20_000 });
+// default in a cold thread. auto/glm then materializes a ~50-candidate cartesian
+// pool across connected GLM backends plus always-on no-auth catalogs (auggie,
+// cloudflare-playground, zcode); that step measured ~35s on
+// a loaded runner and blew the previous 20s budget (base-red #15306).
+vi.setConfig({ testTimeout: 90_000 });
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-family-combo-"));
 const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
@@ -79,7 +83,7 @@ describe("detectModelFamily (pure)", () => {
     assert.equal(detectModelFamily("zai-glm-5.2"), null);
   });
 
-  it("isValidModelFamily accepts exactly the 11 advertised families", () => {
+  it("isValidModelFamily accepts exactly the advertised families", () => {
     for (const family of [
       "glm",
       "minimax",
@@ -92,6 +96,9 @@ describe("detectModelFamily (pure)", () => {
       "qwen",
       "deepseek",
       "gpt",
+      "claude-opus",
+      "claude-sonnet",
+      "claude-haiku",
     ]) {
       assert.equal(isValidModelFamily(family), true);
     }
@@ -101,6 +108,9 @@ describe("detectModelFamily (pure)", () => {
 
   it("advertises exactly one auto/<family> catalog id per family", () => {
     assert.deepEqual([...AUTO_FAMILY_IDS].sort(), [
+      "auto/claude-haiku",
+      "auto/claude-opus",
+      "auto/claude-sonnet",
       "auto/deepseek",
       "auto/gemini",
       "auto/gemma",
@@ -155,23 +165,16 @@ describe("auto/<family> materialization (#6453)", () => {
     // "degrades gracefully" test below documents for opencode/minimax — a
     // no-auth backend that genuinely serves a family model IS a legitimate
     // member of the family pool, not just credentialed provider_connections rows.
-    // `devin-cli-agentic` joined for the same documented reason as `auggie`:
-    // #8914 added the Devin ACP bridge whose catalog (registry/devin/catalog.ts)
-    // advertises the glm-5-2* line, so it genuinely serves the family.
+    // `devin-cli-agentic` also advertises the glm-5-2* line (#8914), but it is a
+    // local CLI behind the #15446 readiness gate. No probe is registered here, so it
+    // fails closed and stays out of the family pool too (#18417).
     // `zcode` joined for the same documented reason too — #10184 added the local
     // ZCode app-server backend whose registry (registry/zcode) advertises the
     // full GLM_SHARED_MODELS line-up, so it genuinely serves the family.
     // `cloudflare-playground` joined on the same rule — its registry
     // (open-sse/config/providers/registry/cloudflare-playground/index.ts) advertises
     // zai-org/glm-5.2 and zai-org/glm-4.7-flash, so it genuinely serves the family.
-    assert.deepEqual(providerIds, [
-      "auggie",
-      "cloudflare-playground",
-      "devin-cli-agentic",
-      "glm",
-      "zai",
-      "zcode",
-    ]);
+    assert.deepEqual(providerIds, ["auggie", "cloudflare-playground", "glm", "zai", "zcode"]);
     // Every candidate must be a glm-family model (the Cartesian pool now surfaces
     // each backend's full glm line-up, not only the glm-5.2 default), and the
     // connected openai/gpt-4o-mini backend must be excluded — same family
@@ -247,19 +250,7 @@ describe("auto/<family> materialization (#6453)", () => {
   });
 
   it("isRecognizedBuiltinAuto recognizes every auto/<family> id", () => {
-    for (const family of [
-      "glm",
-      "minimax",
-      "mimo",
-      "zai",
-      "gemma",
-      "llama",
-      "gemini",
-      "kimi",
-      "qwen",
-      "deepseek",
-      "gpt",
-    ]) {
+    for (const family of MODEL_FAMILIES) {
       assert.equal(builtinCatalog.isRecognizedBuiltinAuto(`auto/${family}`, family), true);
     }
     assert.equal(builtinCatalog.isRecognizedBuiltinAuto("auto/unknownfam", "unknownfam"), false);
@@ -325,6 +316,22 @@ describe("additional auto-routing families (#13214)", () => {
         provider
       );
     }
+    for (const [providerId, model] of [
+      ["moonshot", "kimi-k3.1-pro"],
+      ["moonshot", "kimi-k3.1-pro-highspeed"],
+      ["kimi-coding", "k3.1-pro"],
+      ["kimi-coding", "k3.1-pro-highspeed"],
+      ["kimi-coding-apikey", "k3.1-pro"],
+      ["kimi-coding-apikey", "k3.1-pro-highspeed"],
+    ]) {
+      assert.ok(
+        combo.models.some(
+          (candidate) =>
+            candidate.providerId === providerId && candidate.model === `${providerId}/${model}`
+        ),
+        `${providerId}/${model}`
+      );
+    }
     assert.ok(combo.models.every((model) => model.providerId !== "openai"));
   });
 
@@ -346,28 +353,85 @@ describe("additional auto-routing families (#13214)", () => {
   it("includes Kimi k3 only on known Kimi backends, alongside prefix matches", () => {
     const filter = buildFamilyCandidateFilter("kimi");
     for (const provider of ["kimi-coding", "kimi-web", "kimi-coding-apikey"]) {
-      assert.equal(filter({ provider, model: "k3" }), true);
-      assert.equal(filter({ provider, model: `${provider}/k3` }), true);
+      for (const model of ["k3", "k3.1-pro", "k3.1-pro-highspeed"]) {
+        assert.equal(filter({ provider, model }), true);
+        assert.equal(filter({ provider, model: `${provider}/${model}` }), true);
+      }
       assert.equal(filter({ provider, model: "gpt-4o" }), false);
     }
     assert.equal(filter({ provider: "moonshot", model: "kimi-k3" }), true);
     assert.equal(filter({ provider: "custom", model: "kimi-k2.5" }), true);
     assert.equal(filter({ provider: "custom", model: "k3" }), false);
+    assert.equal(filter({ provider: "custom", model: "k3.1-pro" }), false);
     assert.equal(buildFamilyCandidateFilter("gpt")({ provider: "kimi-web", model: "k3" }), false);
     assert.equal(buildFamilyCandidateFilter("zai")({ provider: "glm", model: "glm-5.2" }), false);
   });
 
-  it("maps Haiku to fast while preserving Opus and Sonnet variants", () => {
-    for (const [suffix, variant] of [
-      ["claude-haiku", "fast"],
-      ["claude-opus", "smart"],
-      ["claude-sonnet", "coding"],
-    ]) {
-      assert.equal(builtinCatalog.AUTO_TEMPLATE_VARIANTS[`auto/${suffix}`], variant);
+  it("resolves auto/claude-* as Claude model-family ids, not weight-pack variants (#15675)", () => {
+    for (const suffix of ["claude-haiku", "claude-opus", "claude-sonnet"]) {
+      assert.equal(builtinCatalog.AUTO_TEMPLATE_VARIANTS[`auto/${suffix}`], undefined);
       assert.equal(builtinCatalog.isRecognizedBuiltinAuto(`auto/${suffix}`, suffix), true);
       assert.deepEqual(builtinCatalog.resolveBuiltinAutoSpec(`auto/${suffix}`, suffix), {
-        variant,
+        family: suffix,
       });
     }
+  });
+
+  it("detects Claude tier names across real-world model id shapes", () => {
+    for (const [model, family] of [
+      ["claude-opus-4.8", "claude-opus"],
+      ["claude-opus-5", "claude-opus"],
+      ["anthropic/claude-3-opus-20240229", "claude-opus"],
+      ["us.anthropic.claude-opus-4-1", "claude-opus"],
+      ["claude-sonnet-4-5", "claude-sonnet"],
+      ["anthropic/claude-3-5-sonnet-20241022", "claude-sonnet"],
+      ["claude-haiku-4-5-20251001", "claude-haiku"],
+      ["anthropic.claude-haiku-4-5", "claude-haiku"],
+    ]) {
+      assert.equal(detectModelFamily(model), family, model);
+    }
+    // Non-tier Claude ids and unrelated models must not match any Claude family.
+    assert.equal(detectModelFamily("claude-fable-5"), null);
+    assert.equal(detectModelFamily("aion-3.0"), null);
+    // The \b boundary keeps substring lookalikes out.
+    assert.equal(detectModelFamily("octopus-v2"), null);
+  });
+
+  it("auto/claude-opus pool contains only *opus* models (#15675 repro)", async () => {
+    // Reproduces the issue: a connected cheaperinference serving aion-3.0 must
+    // NOT be routable through auto/claude-opus, while its real claude-opus-*
+    // catalog models legitimately are.
+    await providersDb.createProviderConnection({
+      provider: "cheaperinference",
+      authType: "apikey",
+      name: "CheaperInference",
+      apiKey: "sk-test-cinf",
+      defaultModel: "aion-3.0",
+    });
+    await providersDb.createProviderConnection({
+      provider: "claude",
+      authType: "apikey",
+      name: "Claude",
+      apiKey: "sk-test-claude",
+      defaultModel: "claude-opus-5",
+    });
+
+    const combo = await builtinCatalog.createBuiltinAutoCombo("auto/claude-opus", "claude-opus");
+
+    assert.equal(combo.id, "auto/claude-opus");
+    assert.equal(combo.strategy, "auto");
+    assert.ok(combo.models.length > 0, "auto/claude-opus must materialize candidates");
+    assert.ok(
+      combo.models.every((m) => detectModelFamily(m.model) === "claude-opus"),
+      "every auto/claude-opus candidate must be an *opus* model"
+    );
+    assert.ok(
+      combo.models.every((m) => !m.model.toLowerCase().includes("aion")),
+      "the issue's aion-3.0 target must never enter the opus pool"
+    );
+    assert.ok(
+      combo.models.some((m) => m.providerId === "claude"),
+      "the connected Claude provider must contribute opus candidates"
+    );
   });
 });

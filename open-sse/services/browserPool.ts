@@ -27,6 +27,7 @@
 import { Buffer } from "node:buffer";
 
 import { connectObscuraBrowser } from "./obscura.ts";
+import { ensureVirtualDisplay, stopVirtualDisplay } from "./virtualDisplay.ts";
 
 type Browser = import("playwright").Browser;
 type BrowserContext = import("playwright").BrowserContext;
@@ -46,7 +47,12 @@ export interface BrowserPoolContextOptions {
   proxyProviderKey?: string;
   /** Some first-party anti-bot flows reject Chromium's headless mode even with valid cookies. */
   headless?: boolean;
-  /** Optional system Chrome/Chromium path, primarily for headed contexts. */
+  /**
+   * Optional system Chrome/Chromium path. Applied in BOTH modes: headless installs
+   * frequently have no Playwright-managed `chromium_headless_shell`, and an executor
+   * that resolved a working system Chrome must not be overridden by a missing
+   * bundled binary (that mismatch surfaced as a launch error rather than a fallback).
+   */
   executablePath?: string;
 }
 
@@ -251,8 +257,11 @@ export async function resolvePlaywrightProxy(
     }
     return proxy;
   } catch (err) {
-    console.warn("[BrowserPool] Failed to resolve proxy from DB:", err);
-    return undefined;
+    throw new Error(
+      `[BrowserPool] Proxy resolution failed for ${providerKey}; refusing direct connection (fail-closed): ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
   }
 }
 
@@ -295,7 +304,10 @@ export function resolvePlainBrowserLaunchOptions(
   const headless = options.headless !== false;
   return {
     headless,
-    ...(!headless && options.executablePath ? { executablePath: options.executablePath } : {}),
+    // Honour an explicit system Chrome in headless mode too. Without this, a host
+    // that has Chrome installed but no Playwright-managed headless shell fails to
+    // launch at all, even though the executor already resolved a working binary.
+    ...(options.executablePath ? { executablePath: options.executablePath } : {}),
     args: [
       "--no-sandbox",
       "--disable-dev-shm-usage",
@@ -313,7 +325,12 @@ async function launchBrowserInstance(
   // preference below applies to the headless path only.
   if (!headless) {
     const { chromium } = await import("playwright");
-    return chromium.launch(resolvePlainBrowserLaunchOptions(options));
+    // #15300: no X server (Docker -web image / bare VPS) → start a private Xvfb.
+    const display = await ensureVirtualDisplay();
+    return chromium.launch({
+      ...resolvePlainBrowserLaunchOptions(options),
+      ...(display ? { env: { ...process.env, DISPLAY: display } as Record<string, string> } : {}),
+    });
   }
 
   // #12274: prefer Obscura (lightweight, browser-grade CDP) over a full
@@ -615,6 +632,7 @@ export async function shutdownPool(reason: string): Promise<void> {
   }
   state.launching = null;
   state.headedLaunching = null;
+  stopVirtualDisplay();
   // #12274: the shared Obscura server is owned by ./obscura.ts and reused by
   // executors (cloudflare-playground), so closing the pool's CDP connection is
   // enough — never kill the server here.

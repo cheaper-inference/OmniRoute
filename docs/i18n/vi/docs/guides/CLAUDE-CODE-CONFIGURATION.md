@@ -25,38 +25,39 @@ omniroute launch --profile glm52  # Claude Code sử dụng glm/glm-5.2 thông q
 
 ---
 
-## Cách Claude Code kết nối với gateway
+## Cách mã Claude kết nối với cổng
 
-Claude Code giao tiếp với **Anthropic Messages API** và được trỏ đến một endpoint
-tùy chỉnh bằng các biến môi trường (không có cờ `--base-url`):
+Mã Claude nói về**Anthropic Tin nhắn API** và được trỏ vào điểm cuối tùy chỉnh với các biến môi trường (nó không có cờ `--base-url` ):
 
-| Biến                                         | Mục đích                                                                                                    |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | URL gốc của gateway (Claude Code nối thêm `/v1/messages`). **Không có hậu tố `/v1`.**                       |
-| `ANTHROPIC_AUTH_TOKEN`                       | Được gửi dưới dạng `Authorization: Bearer …` — sử dụng access token / API key OmniRoute của bạn             |
-| `ANTHROPIC_API_KEY`                          | Phương án thay thế: được gửi dưới dạng `x-api-key`. Nếu cả hai đều được đặt, `ANTHROPIC_AUTH_TOKEN` ưu tiên |
-| `ANTHROPIC_MODEL`                            | Buộc sử dụng một mô hình cụ thể (ghi đè lựa chọn mặc định của bộ chọn `/model`)                             |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → bộ chọn `/model` gốc liệt kê các mô hình `claude*`/`anthropic*` từ `/v1/models`                       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Giới hạn số token đầu ra cho mỗi phản hồi (ví dụ: `65536`)                                                  |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ngưỡng token để tự động thu gọn                                                                             |
+| Biến                                         | Mục đích                                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Cổng gốc URL ( Mã Claude nối thêm `/v1/messages`).** Không có hậu tố `/v1`.**                                 |
+| `ANTHROPIC_AUTH_TOKEN`                       | Được gửi dưới dạng `Authorization: Bearer …` — hãy sử dụng mã thông báo truy cập OmniRoute / khóa API của bạn |
+| `ANTHROPIC_API_KEY`                          | Thay thế: gửi dưới dạng `x-api-key`. Nếu cả hai được đặt, `ANTHROPIC_AUTH_TOKEN` sẽ thắng                     |
+| `ANTHROPIC_MODEL`                            | Buộc một mô hình cụ thể (ghi đè mặc định của bộ chọn `/model` )                                               |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → bộ chọn `/model` gốc liệt kê các mô hình `claude*`/`anthropic*` từ `/v1/models`                         |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Giới hạn mã thông báo đầu ra cho mỗi phản hồi (ví dụ `65536`)                                                 |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ngưỡng mã thông báo để tự động nén                                                                            |
 
-> Các biến môi trường chỉ được đọc **một lần khi khởi động** — hãy khởi động lại Claude Code sau khi thay đổi chúng.
+> Các vars Env được đọc** một lần khi khởi động** — khởi động lại Mã Claude sau khi thay đổi chúng.
 
-`omniroute launch` thiết lập tất cả các biến này cho bạn: lệnh này phân giải URL cơ sở + token
-từ ngữ cảnh đang hoạt động (vì vậy, sau khi chạy `omniroute connect <vps>` rồi `omniroute launch`,
-mọi thứ sẽ tự hoạt động), kiểm tra tình trạng máy chủ và thực thi `claude`.
+Đối với thông tin xác thực xoay thay vì chuỗi cố định, hãy đặt `apiKeyHelper` trong `~/.claude/settings.json` thành lệnh in thông tin xác thực hiện tại thành thiết bị xuất chuẩn. Mã Claude lưu trữ đầu ra của nó trong năm phút theo mặc định (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ghi đè điều đó) và gửi giá trị trong cả `Authorization: Bearer` và `x-api-key`. Tập lệnh phải in thông tin xác thực và không có gì khác — một biểu ngữ cùng với nó không hỗ trợ trợ giúp trên v2.1.227 +.
+
+Đây là cách Entra ID SSO hoạt động: `scripts/cli/omniroute-sso.mjs token` in mã thông báo truy cập Entra tồn tại trong thời gian ngắn mà OmniRoute xác minh thay vì khóa API. Xem [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` đặt tất cả những thứ này cho bạn: nó phân giải mã thông báo URL + cơ sở từ ngữ cảnh hoạt động (vì vậy `omniroute connect <vps>` thì `omniroute launch` chỉ hoạt động), kiểm tra tình trạng máy chủ và thực thi `claude`.
 
 ---
 
 ## Bí danh khám phá — hiển thị các mô hình không phải Claude trong bộ chọn `/model`
 
-Tính năng khám phá mô hình gateway của Claude Code chỉ liệt kê các id bắt đầu bằng `claude`
-hoặc `anthropic`, vì vậy khi dùng `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, bộ chọn
-`/model` gốc thường **chỉ** hiển thị các mô hình Claude/Anthropic của OmniRoute — một mô hình
-`kimi/kimi-k2.6` hoặc `glm/glm-5.2` sẽ không bao giờ xuất hiện, dù vẫn được định tuyến bình thường.
+Tính năng khám phá mô hình qua gateway của Claude Code chỉ liệt kê các id bắt đầu bằng `claude`
+hoặc `anthropic`, vì vậy với `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, bộ chọn `/model`
+gốc thường chỉ hiển thị **duy nhất** các mô hình Claude/Anthropic của OmniRoute — một id
+`kimi/kimi-k2.6` hay `glm/glm-5.2` sẽ không bao giờ xuất hiện, mặc dù nó vẫn được định tuyến bình thường.
 
-OmniRoute có thể sao chép bất kỳ mô hình (và tổ hợp) nào đang bật dưới một id `claude/…` để
-id đó vượt qua bộ lọc và xuất hiện trong bộ chọn:
+OmniRoute có thể nhân bản (mirror) bất kỳ mô hình nào đã bật (và cả combo) dưới một id `claude/…`
+để nó vượt qua bộ lọc đó và xuất hiện trong bộ chọn:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,39 +65,47 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Khi bạn chọn một trong các mô hình này trong Claude Code, OmniRoute sẽ loại bỏ lớp bao `claude/`
-để khôi phục id thực trước khi định tuyến — một id `claude/<real-claude-model>` chính thống
-(nhà cung cấp Claude OAuth thực tế) luôn được giữ nguyên.
+Khi bạn chọn một trong số này trong Claude Code, OmniRoute sẽ gỡ bỏ lớp bao `claude/`
+để khôi phục lại id thật trước khi định tuyến — một id `claude/<real-claude-model>` chính thống
+(provider Claude OAuth thực sự) luôn được giữ nguyên.
 
-**Tính năng này mặc định bị tắt** và được kiểm soát bởi một cơ chế ba cấp (cấp cụ thể nhất
-được ưu tiên), do đó OmniRoute thông thường sẽ không nhân đôi danh mục đối với các ứng dụng khách
-không sử dụng Claude Code:
+Theo mặc định, chỉ các id cơ sở được nhân bản. Khi bật feature flag tùy chọn
+`CATALOG_MIRROR_REFINEMENTS_ENABLED`, các biến thể reasoning-effort mà catalog đã liệt kê
+(ví dụ `codex/gpt-6-sol-high`) cũng được nhân bản như bất kỳ id nào khác, nhờ đó Claude Code có thể
+chọn một mức effort cụ thể, còn các id `auto/*` tích hợp sẵn mà đường xử lý yêu cầu
+không thể hiện thực hóa thì không được nhân bản. Việc các biến thể effort có được liệt kê
+hay không vẫn do `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` quyết định — cơ chế nhân bản
+không bao giờ thêm một biến thể mà catalog cơ sở không có.
 
-| Cấp          | Vị trí                                                                                                      |
-| ------------ | ----------------------------------------------------------------------------------------------------------- |
-| Mô hình      | Trang chi tiết nhà cung cấp → nút bật/tắt "Hiển thị trong Claude Code" cho từng mô hình                     |
-| Nhà cung cấp | Trang chi tiết nhà cung cấp → nút bật/tắt cấp nhà cung cấp (áp dụng cho tất cả mô hình của nhà cung cấp đó) |
-| Toàn cục     | Cài đặt → Cờ tính năng → `EXPOSE_CC_DISCOVERY_ALIASES` (mặc định tắt)                                       |
+**Tính năng này tắt theo mặc định** và được kiểm soát bởi một cơ chế ba cấp (cấp cụ thể nhất
+được ưu tiên), nhờ đó một bản OmniRoute thông thường sẽ không bao giờ nhân đôi catalog của nó
+đối với các client không dùng Claude Code:
+
+| Cấp độ   | Vị trí                                                                                        |
+| -------- | --------------------------------------------------------------------------------------------- |
+| Mô hình  | Trang chi tiết provider → công tắc "Expose in Claude Code" theo từng mô hình                  |
+| Provider | Trang chi tiết provider → công tắc cấp provider (áp dụng cho toàn bộ mô hình của provider đó) |
+| Toàn cục | Cài đặt → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (mặc định tắt)                        |
 
 Biến môi trường `EXPOSE_CC_DISCOVERY_ALIASES` buộc bật cấp toàn cục
-và được ưu tiên hơn thiết lập ghi đè trên bảng điều khiển (màn hình Cờ tính năng hiển thị
-ghi chú "đang hoạt động thông qua biến môi trường" khi trường hợp này xảy ra). Các nút bật/tắt
-cho từng nhà cung cấp và từng mô hình tiếp tục tinh chỉnh từ đó — ví dụ: nếu cấp toàn cục tắt
-nhưng nhà cung cấp Kimi bật, thì chỉ các mô hình của Kimi được hiển thị.
+và được ưu tiên hơn thiết lập ghi đè trên dashboard (màn hình Feature Flags sẽ hiển thị
+ghi chú "active via environment variable" khi điều này xảy ra). Các công tắc cấp provider và
+cấp mô hình tinh chỉnh từ đó — ví dụ: toàn cục tắt + provider Kimi bật sẽ chỉ
+hiển thị các mô hình của Kimi.
 
-> ⚠️ **Không khớp cửa sổ trên các mô hình không phải Claude.** Claude Code giả định cửa sổ ngữ cảnh
-> 200K cho mọi id mà nó không nhận diện được (nó không thể đọc cửa sổ thực từ
-> `/v1/models`). Với mô hình có cửa sổ lớn hơn (ví dụ: 256K của Kimi K2), hãy đặt
+> ⚠️ **Lệch cửa sổ ngữ cảnh trên các mô hình không phải Claude.** Claude Code giả định một cửa sổ
+> ngữ cảnh 200K cho bất kỳ id nào nó không nhận ra (nó không thể đọc cửa sổ thực từ
+> `/v1/models`). Đối với mô hình có cửa sổ lớn hơn (ví dụ 256K của Kimi K2), hãy đặt
 > `CLAUDE_CODE_AUTO_COMPACT_WINDOW` thành một giá trị thấp hơn cửa sổ thực của mô hình để
-> tính năng tự động thu gọn không kích hoạt quá sớm. Các cấu hình được tạo ở trên đã
-> thực hiện điều này cho từng mô hình.
+> tính năng tự động nén (auto-compaction) không kích hoạt quá sớm. Các profile được tạo nêu trên
+> đã thực hiện điều này cho từng mô hình.
 
 ---
 
 ## Khối hướng dẫn bắt đầu trên bảng điều khiển
 
 Thẻ công cụ Claude (**Dashboard → CLI Code**) hiển thị chính xác đoạn `settings.json`
-dành cho phiên bản này, bên cạnh nút thông tin về bí danh khám phá, kèm theo nút sao chép:
+cho phiên bản này, bên cạnh nút thông tin về bí danh khám phá, cùng với nút sao chép:
 
 ```jsonc
 {
@@ -108,29 +117,43 @@ dành cho phiên bản này, bên cạnh nút thông tin về bí danh khám ph�
 }
 ```
 
-URL cơ sở là URL được thẻ phân giải (bao gồm cả giá trị ghi đè tùy chỉnh mà bạn đã nhập), đã được
-chuẩn hóa — không có hậu tố `/v1`, không có dấu gạch chéo ở cuối. **Khóa không bao giờ được hiển thị**: khối này sử dụng một
-phần giữ chỗ, vì vậy ảnh chụp màn hình hoặc đoạn mã được dán sẽ không thể làm lộ khóa. Hãy thay thế phần đó bằng khóa của bạn.
+URL cơ sở là URL được thẻ phân giải (bao gồm cả giá trị ghi đè tùy chỉnh mà bạn đã nhập) và đã
+được chuẩn hóa — không có hậu tố `/v1`, không có dấu gạch chéo ở cuối. **Khóa không bao giờ được hiển thị**: khối này sử dụng
+một phần giữ chỗ, vì vậy ảnh chụp màn hình hoặc đoạn mã được dán sẽ không thể làm lộ khóa. Hãy thay phần giữ chỗ bằng khóa của bạn.
 
 Thêm `CLAUDE_CODE_AUTO_COMPACT_WINDOW` vào cùng khối `env` cho bất kỳ mô hình nào có
-cửa sổ ngữ cảnh thực tế không phải là 200K — Claude Code giả định 200K cho mọi id mà nó không nhận dạng được, vì vậy
+cửa sổ ngữ cảnh thực tế không phải 200K — Claude Code giả định 200K cho mọi id mà nó không nhận diện, vì vậy
 nếu không, tính năng tự động thu gọn sẽ kích hoạt sai thời điểm (xem cảnh báo trong phần trước).
-Trình tạo đoạn cấu hình cũng chấp nhận giá trị đó, nhờ vậy bên gọi biết cửa sổ của mô hình đích
+Trình tạo đoạn mã cũng chấp nhận giá trị đó, vì vậy bên gọi biết kích thước cửa sổ của mô hình đích
 có thể xuất trực tiếp giá trị này.
 
-Nguồn: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (trình tạo
-thuần túy, đã được kiểm thử đơn vị) được hiển thị bởi `ClaudeGatewayOnboardingBlock`.
+Nguồn: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (trình tạo thuần túy,
+đã được kiểm thử đơn vị) được hiển thị bởi `ClaudeGatewayOnboardingBlock`.
+
+### Ghim một tài khoản (không bắt buộc)
+
+Để gửi mọi yêu cầu Claude Code qua một tài khoản nhà cung cấp cụ thể, hãy thêm header
+`x-omniroute-connection` thông qua `ANTHROPIC_CUSTOM_HEADERS` trong cùng khối `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Sao chép id từ chip `xxxxxxxx…` trên hàng kết nối của trang nhà cung cấp. Việc ghim chỉ
+áp dụng cho các id mô hình đơn (`provider/model`), không áp dụng cho các tổ hợp. Xem
+[Ghim tài khoản theo từng yêu cầu](../reference/API_REFERENCE.md#account-pinning-per-request) để biết
+chính xác hành vi dự phòng.
 
 ---
 
 ## Hồ sơ (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **không có tệp hồ sơ gốc** (không giống như `~/.codex/<name>.config.toml` của Codex).
-Cơ chế tiêu chuẩn là `CLAUDE_CONFIG_DIR` — một thư mục cấu hình riêng biệt cho mỗi
+Claude Code **không có tệp hồ sơ gốc** (không giống `~/.codex/<name>.config.toml` của Codex).
+Cơ chế tiêu chuẩn là `CLAUDE_CONFIG_DIR` — một thư mục cấu hình riêng cho mỗi
 hồ sơ, mỗi thư mục có `settings.json`, thông tin xác thực, lịch sử và bộ nhớ đệm riêng.
 
-`omniroute setup-claude` truy xuất danh mục `/v1/models` hiện hành và ghi một
-hồ sơ cho mỗi mô hình vào `~/.claude/profiles/<name>/settings.json`, sử dụng lại
+`omniroute setup-claude` lấy danh mục `/v1/models` hiện tại và ghi một
+hồ sơ cho mỗi mô hình tại `~/.claude/profiles/<name>/settings.json`, sử dụng lại
 **cùng tên như `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -153,13 +176,12 @@ hồ sơ cho mỗi mô hình vào `~/.claude/profiles/<name>/settings.json`, s�
 > ngữ cảnh đang hoạt động), hoặc tự xuất `ANTHROPIC_AUTH_TOKEN` rồi chạy
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Tự động đồng bộ sau khi khám phá mô hình (tùy chọn bật).** OmniRoute có thể tự động tạo lại các tệp
-`~/.claude/profiles/<name>/settings.json` này bất cứ khi nào thao tác đồng bộ mô hình của nhà cung cấp
-làm thay đổi danh mục hiện hành — nhờ đó các mô hình mới/được đổi tên sẽ có hồ sơ mà không cần chạy lại
-lệnh. Tính năng này **bị tắt theo mặc định**: bật tính năng từ **bảng điều khiển CLI Code** ("CLI profile
-auto-sync" → Claude Code), hoặc đặt `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (tính năng này cũng tuân theo
-`CLI_ALLOW_CONFIG_WRITES`, được bật theo mặc định). Khi được bật, tính năng này chỉ ghi các tệp hồ sơ; nó không bao giờ
-thay đổi cấu hình Claude đang hoạt động/mặc định, thông tin xác thực hoặc `~/.claude/settings.json` của bạn.
+**Tự động đồng bộ sau khi phát hiện mô hình (tùy chọn bật).** OmniRoute có thể tự động tạo lại
+các tệp `~/.claude/profiles/<name>/settings.json` này bất cứ khi nào thao tác đồng bộ mô hình
+của nhà cung cấp làm thay đổi danh mục hiện tại — nhờ đó các mô hình mới hoặc được đổi tên sẽ có
+hồ sơ mà không cần chạy lại lệnh. Tính năng này **mặc định bị tắt**: bật hoặc tắt từ **bảng điều khiển CLI Code** ("Tự động đồng bộ hồ sơ CLI" → Claude Code), hoặc đặt `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (tính năng này cũng tuân theo
+`CLI_ALLOW_CONFIG_WRITES`, mặc định được bật). Khi được bật, tính năng này chỉ ghi các tệp hồ sơ; nó không bao giờ
+thay đổi cấu hình Claude đang hoạt động/mặc định, thông tin xác thực hoặc `~/.claude/settings.json`.
 
 ### Tạo + sử dụng hồ sơ
 
@@ -172,6 +194,10 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Chỉ một số nhà cung cấp
 omniroute setup-claude --only glm,kimi
+
+# Đồng thời ghi hồ sơ cho các nhà cung cấp CLI cục bộ (zcode, auggie, devin-cli-agentic,
+# codex-app-server) không được phát hiện trên máy này (mặc định bị bỏ qua đối với đích cục bộ)
+omniroute setup-claude --include-local
 
 # Xem trước mà không ghi
 omniroute setup-claude --dry-run

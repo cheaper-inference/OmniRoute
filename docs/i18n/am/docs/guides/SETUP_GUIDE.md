@@ -148,11 +148,11 @@ omniroute providers validate
 
 ```txt
 መሠረታዊ URL: http://localhost:20128/v1
-API ቁልፍ:    [ከEndpoint ገጽ ይቅዱ]
-ሞዴል:        if/qwen3.8-max-preview (ወይም ማንኛውም የአቅራቢ/ሞዴል ቅድመ ቅጥያ)
+API ቁልፍ:     [ከEndpoint ገጽ ይቅዱ]
+ሞዴል:         if/qwen3.8-max-preview (ወይም ማንኛውም የአቅራቢ/ሞዴል ቅድመ ቅጥያ)
 ```
 
-የጽሑፍ አርታዒዎ `Authorization: Bearer ...` መላክ ካልቻለ፣ በምትኩ ቶከን የተካተተበትን ተኳኋኝነት ያለው መሠረታዊ አድራሻ ይጠቀሙ፦
+አርታዒዎ `Authorization: Bearer ...` መላክ ካልቻለ፣ በምትኩ ቶከን የተካተተበትን የተኳኋኝነት መሠረታዊ አድራሻ ይጠቀሙ፦
 
 ```txt
 መሠረታዊ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -161,75 +161,71 @@ API ቁልፍ:    [ከEndpoint ገጽ ይቅዱ]
 የOllama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-ከClaude Code፣ Codex CLI፣ Cursor፣ Cline፣ OpenClaw፣ OpenCode እና ከOpenAI ጋር ተኳኋኝ ከሆኑ SDKዎች ጋር ይሠራል።
+ከClaude Code፣ Codex CLI፣ Cursor፣ Cline፣ OpenClaw፣ OpenCode እና ከOpenAI ጋር ተኳኋኝ ከሆኑ SDKs ጋር ይሠራል።
 
-#### በ`setup-*` በራስ-ሰር ያዋቅሩ
+#### `setup-*`ን በመጠቀም በራስ-ሰር ያዋቅሩ
 
-መሠረታዊ URLን እና ቁልፉን በእጅ ከመለጠፍ ይልቅ፣ OmniRoute ከቀጥታ የሞዴል ካታሎግ በመነሳት የእያንዳንዱን መሣሪያ
-የራሱን ውቅር እንዲጽፍ ያድርጉ። ለእያንዳንዱ መሣሪያ አንድ ትእዛዝ፦
+መሠረታዊ URLን እና ቁልፉን በእጅ ከመለጠፍ ይልቅ፣ OmniRoute ከቀጥታ የሞዴል ካታሎጉ በመነሳት የእያንዳንዱን መሣሪያ የራሱን ውቅር እንዲጽፍ ያድርጉ። ለእያንዳንዱ መሣሪያ አንድ ትዕዛዝ፦
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml መገለጫዎች
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (ከopenai ጋር ተኳኋኝ)
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (ከOpenAI ጋር ተኳኋኝ)
 omniroute setup-cline        # የCline CLI + VS Code ቅጥያ ቅንብሮች
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # የCursor ውስጠ-መተግበሪያ ደረጃዎችን ያትማል
+omniroute setup-cursor       # በCursor መተግበሪያ ውስጥ የሚከናወኑ ደረጃዎችን ያትማል
 omniroute setup-roo          # የRoo Code ማስመጣት + autoImport ጠቋሚ
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-እያንዳንዳቸው አካባቢያዊ መሣሪያን ከ**ሩቅ** OmniRoute ጋር ለማዋቀር `--remote <url> --api-key <key>`ን፣ እንዲሁም ቅድመ ዕይታ ለማድረግ `--dry-run`ን ይቀበላሉ። ትክክለኛው
-env ተጨምሮለት እና ምንም ውቅር ሳይጻፍ CLIን ለማስጀመር፣ አጠቃላይ ማስጀመሪያውን
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ይጠቀሙ፤ የቀድሞዎቹ ለየመሣሪያው የተለዩ ማስጀመሪያዎች `omniroute launch` (Claude Code) እና
-`omniroute launch-codex` (Codex) አሁንም ይገኛሉ።
+እያንዳንዱ፣ አካባቢያዊ መሣሪያን ከ**ርቀት** OmniRoute ጋር ለማዋቀር `--remote <url> --api-key <key>`ን፣ እንዲሁም ቅድመ ዕይታ ለማግኘት `--dry-run`ን ይቀበላል። ትክክለኛው env ተጨምሮለት እና ምንም ውቅር ሳይጻፍ CLIን ለማስጀመር፣ አጠቃላዩን ማስጀመሪያ `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ይጠቀሙ፤ የቀድሞዎቹ ለእያንዳንዱ መሣሪያ የተለዩ ማስጀመሪያዎች `omniroute launch` (Claude Code) እና `omniroute launch-codex` (Codex) አሁንም ይገኛሉ።
 
-ሙሉውን ሰንጠረዥ (እያንዳንዱ ትእዛዝ ምን እንደሚጽፍ፣ ሁሉንም flags፣ አካባቢያዊ ከሩቅ ጋር፣ የመሠረታዊ URL
-`/v1` ስምምነቶች) ለማየት **[የCLI ውህደቶች](./CLI-INTEGRATIONS.md)**ን ይመልከቱ።
+ሙሉውን ሰንጠረዥ (እያንዳንዱ ትዕዛዝ ምን እንደሚጽፍ፣ ሁሉንም ፍላጎች፣ አካባቢያዊ እና የርቀት ልዩነቶችን፣ የመሠረታዊ-URL `/v1` ስምምነቶችን) ለማየት **[የCLI ውህደቶች](./CLI-INTEGRATIONS.md)**ን ይመልከቱ።
 
-ለእያንዳንዱ መሣሪያ ዝርዝር ውቅር (Claude Code፣ Codex CLI፣ Cursor፣ Cline፣ OpenClaw፣ Kilo Code፣ Copilot እና ሌሎችም)፣ የተለየውን **[የCLI መሣሪያዎች መመሪያ](../reference/CLI-TOOLS.md)** ይመልከቱ።
+ለእያንዳንዱ መሣሪያ ዝርዝር ውቅር (Claude Code፣ Codex CLI፣ Cursor፣ Cline፣ OpenClaw፣ Kilo Code፣ Copilot እና ሌሎችም)፣ ራሱን የቻለውን **[የCLI መሣሪያዎች መመሪያ](../reference/CLI-TOOLS.md)** ይመልከቱ።
 
 ---
 
-## የፕሮቶኮል ማዋቀር (MCP + A2A)
+## ፕሮቶኮል ማዋቀር (MCP + A2A)
 
-### MCP ማዋቀር (የሞዴል አውድ ፕሮቶኮል)
+### MCP ማዋቀር (ሞዴል አውድ ፕሮቶኮል)
 
-የMCP ማጓጓዣን በstdio ሁኔታ ያስጀምሩ፦
+MCP መጓጓዣን በስቲዲዮ ሁነታ ይጀምሩ፡-
 
 ```bash
 omniroute --mcp
 ```
 
-የሚመከር የማረጋገጫ ፍሰት፦
+የሚመከር የማረጋገጫ ፍሰት፡
 
 ```bash
-# 1. የMCP አገልጋይን ያስጀምሩ
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. ከMCP ደንበኛዎ የሚከተሉትን ይጥሩ፦
-omniroute_get_health        # የስርዓቱን ጤንነት መመለስ አለበት
-omniroute_list_combos       # ንቁ combosን መመለስ አለበት
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. ወይም ሙሉውን የE2E ስብስብ ያሂዱ፦
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### የMCP ደንበኛ ውቅር
+#### MCP የደንበኛ ውቅር
 
-**Claude Code፦**
+**Claude ኮድ፡-**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
-**Cursor / Cline፦**
+**Cursor / Cline:**
 
-ወደ MCP ቅንብሮችዎ ያክሉ፦
+ወደ MCP ቅንጅቶችህ አክል (stdio፣ ከቁልፍ ጋር ጠሪው ዋና እንዲኖረው):
 
 ```json
 {
@@ -237,23 +233,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**ሙሉ የMCP ሰነድ፦** [የMCP አገልጋይ README](../../open-sse/mcp-server/README.md) — 110 መሣሪያዎች፣ የIDE ውቅሮች፣ Python/TS/Go ደንበኞች።
+ወይም፣ `mcpTransport` `streamable-http` ሲሆን (በ `/dashboard/mcp` ላይ ወይም በ `omniroute mcp enable --transport streamable-http` ላይ ያቀናብሩት)፣ የደንበኛውን የርቀት MCP አገልጋይ ግቤት `http://localhost:20128/api/mcp/stream` ላይ ያመልክቱ።
 
-### A2A ማዋቀር (ከወኪል-ወደ-ወኪል ፕሮቶኮል)
+ቁልፉ የሚጓዘው እንደ `Authorization: Bearer <api-key>` ነው (ለሩቅ አስተናጋጆች [የርቀት መዳረሻን ይመልከቱ MCP Server →](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ይመልከቱ፣ የርቀት ቁልፍ `mcp:connect` እና read/write scopes ያስፈልገዋል)።
 
-Agent Cardን ያረጋግጡ፦
+**ሙሉ MCP ሰነድ፡-** [MCP አገልጋይ README](../../open-sse/mcp-server/README.md) — 110 መሳሪያዎች፣ IDE ውቅሮች፣ Python/TS/Go ደንበኞች። የኦፕሬተር ማመሳከሪያ ለ መጭመቂያ CCR/dedup መሳሪያዎች (ማርከሮች ፣ ቅድመ ሁኔታዎች ፣ በመሳሪያዎች ወሰኖች ፣ የመልሶ ማግኛ pagination ፣ ዲያግኖስቲክስ): [የማመቂያ ሞተርስ → ቅድመ ሁኔታዎች / ኦፕሬተር መመሪያ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A ማዋቀር (ከወኪል-ለወኪል ፕሮቶኮል)
+
+ወኪል ካርዱን ያረጋግጡ፡-
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ተግባር ይላኩ፦
+ተግባር ላክ፡
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -261,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**ሙሉ የA2A ሰነድ፦** [የA2A አገልጋይ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0፣ ክህሎቶች፣ streaming፣ የተግባር የሕይወት ዑደት።
+**ሙሉ A2A ሰነድ፡-** [A2A አገልጋይ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0፣ ችሎታዎች፣ ዥረቶች፣ የተግባር የሕይወት ዑደት።
 
 ---
 
@@ -320,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## የVoid Linux (xbps-src) Template
+## ባዶ Linux (xbps-src) አብነት
 
-ለVoid Linux ተጠቃሚዎች `xbps-src`ን በመጠቀም native package መገንባት ይችላሉ። ይህን ክፍል እንደ `srcpkgs/omniroute/template` ያስቀምጡ፦
+ለVoid Linux ተጠቃሚዎች `xbps-src` በመጠቀም ቤተኛ ጥቅል መገንባት ይችላሉ። ይህን ብሎክ እንደ `srcpkgs/omniroute/template` ያስቀምጡ
 
 ```bash
-# የ'omniroute' Template ፋይል
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -336,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ለእያንዳንዱ release checksumን በሚከተለው እንደገና ይፍጠሩ፦
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

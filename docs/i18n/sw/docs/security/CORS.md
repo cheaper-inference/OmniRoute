@@ -57,11 +57,11 @@ kwa sababu ya ukweli mmoja mahususi wa utekelezaji:
 
 Hivi ndivyo inavyomaanisha kwa kila sehemu, hata ikiwa `CORS_ALLOW_ALL=true`:
 
-| Sehemu                                     | Utaratibu wa uthibitishaji     | Athari ya wildcard CORS                                                                                                                                                                                                                 |
-| ------------------------------------------ | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashibodi / MANAGEMENT `/api/*`            | Kipindi cha cookie             | Asili hurudishwa, lakini **bila `Allow-Credentials`** kivinjari **huzuia** usomaji wenye vitambulisho. Tovuti hasidi ya asili tofauti **haiwezi kusoma** majibu yako ya dashibodi yaliyothibitishwa, na cookie ya kipindi haifichuliwi. |
-| API ya mteja `/v1/*`, `/v1beta/*`          | Header ya Bearer / `x-api-key` | Tayari inaruhusu **kwa makusudi** (`relaxForTokenAuth`): vivinjari haviambatishi `Authorization`/`x-api-key` kiotomatiki, kwa hivyo ukurasa wa mshambulizi hauwezi kutoa ufunguo wako. `CORS_ALLOW_ALL` haipanui hili.                  |
-| Ya umma ya kusoma pekee (`/api/health`, …) | Hakuna                         | Si nyeti; wildcard haina madhara.                                                                                                                                                                                                       |
+| Sehemu                                     | Utaratibu wa uthibitishaji     | Athari ya wildcard CORS                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------ | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashibodi / MANAGEMENT `/api/*`            | Kipindi cha cookie             | Asili hurudishwa, lakini **bila `Allow-Credentials`** kivinjari **huzuia** usomaji wenye vitambulisho. Tovuti hasidi ya asili tofauti **haiwezi kusoma** majibu yako ya dashibodi yaliyothibitishwa, na cookie ya kipindi haifichuliwi.                                                                                                                                                 |
+| API ya mteja `/v1/*`, `/v1beta/*`          | Header ya Bearer / `x-api-key` | Tayari inaruhusu **kwa makusudi** (`relaxForTokenAuth`): vivinjari haviambatishi `Authorization`/`x-api-key` kiotomatiki, kwa hivyo ukurasa wa mshambulizi hauwezi kutoa ufunguo wako. Kurudisha asili hutumika tu wakati ufunguo uliowasilishwa umethibitishwa; majibu ya bila utambulisho (`REQUIRE_API_KEY=false`) hubaki chini ya orodha ya ruhusa. `CORS_ALLOW_ALL` haipanui hili. |
+| Ya umma ya kusoma pekee (`/api/health`, …) | Hakuna                         | Si nyeti; wildcard haina madhara.                                                                                                                                                                                                                                                                                                                                                       |
 
 Kwa hivyo, ufichuzi **uliobaki** wa `CORS_ALLOW_ALL=true` unaishia kwenye: (a)
 **usomaji** wa asili tofauti usio na vitambulisho wa data ambayo tayari haikuhitaji uthibitishaji, na (b)
@@ -123,41 +123,86 @@ kuanzisha upya.
   hivi kiotomatiki kamwe. CORS si kizuizi chenye maana hapa — ufunguo wa API ndio
   kizuizi — na ndiyo sababu sehemu hiyo imeruhusiwa kimakusudi ili wateja wa kivinjari na
   Electron waweze kusoma majibu ambayo tayari wana haki ya kuyapata.
+  Kurudisha asili kwa njia iliyolegezwa hufuata ufunguo uliothibitishwa, si kuwepo tu kwa
+  header: `REQUIRE_API_KEY=false` inapohudumia ombi bila utambulisho, jibu lake lililofaulu
+  hubaki chini ya orodha ya ruhusa inayozuia kila kitu kwa chaguo-msingi. Makataa ya
+  uthibitishaji (401) hubaki yanasomeka ili wateja waweze kuonyesha ufunguo uliobatilishwa au
+  ulioandikwa vibaya (#5242): 401 ya pipeline yenyewe huhifadhi urudishaji wa asili, na route
+  inayokataa ufunguo yenyewe baada ya pipeline kuhudumia ombi kama lisilo na utambulisho
+  (`/v1/models` na `/v1beta/models` wakati uthibitishaji wa usimamizi umesanidiwa, routes za
+  mmiliki pekee `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` na routes za
+  wagombea wa auto-combo) huongeza urudishaji wa asili kwenye 401 hiyo kupitia
+  `credentialRejectionHeaders()`. Urudishaji wa asili hutegemea kama ombi lina header ya
+  vitambulisho (`Authorization`, `x-api-key`, `x-goog-api-key` au cookie ya `auth_token`),
+  si ni ipi kati yake ambayo route iliikagua, na kamwe hauambatani na
+  `Access-Control-Allow-Credentials`; mwili wa jibu ni bahasha ya hitilafu isiyobadilika.
+  Routes za usimamizi chini ya `/api/v1/` zinazolindwa na `requireManagementAuth()`
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) haziongezi urudishaji wa asili: kwa
+  `REQUIRE_API_KEY=false`, majibu yao ya 401/403 hayasomeki kutoka asili tofauti.
 - **Kipindi cha cookie (dashibodi):** hulindwa na chaguo-msingi linalokataa ufikiaji **na**
   kwa kutokuwepo kwa `Access-Control-Allow-Credentials` kwenye njia inayoshirikiwa. Usiweke
   vyanzo vya usimamizi/dashibodi katika usanidi wowote unaoruhusu kwa upana; ni lazima viendelee
   kukataa ufikiaji kikamilifu.
 
-## Mfano: reverse proxy mbele ya OmniRoute
+## Mipeano ya mkono ya WebSocket (`/v1/responses`, `/v1/ws`)
 
-CORS hutekelezwa na OmniRoute yenyewe, kwa hivyo kwa kawaida proxy **haipaswi** kuongeza au
-kuandika upya vichwa vya `Access-Control-*` (vichwa vinavyojirudia huharibu utendaji wa vivinjari). Sitisha TLS
-na uelekeze maombi — acha OmniRoute ijibu preflight:
+Vivinjari havitumii CORS kwa WebSocket, kwa hivyo usafirishaji wa WebSocket unaorudisha
+matokeo ya inference hukagua wenyewe `Origin` ya mpeano wa mkono
+(`src/server/origin/wsOrigin.ts`): WebSocket ya Responses (`/v1/responses`) na, OmniRoute
+inapoendeshwa kupitia `npm start` / `npm run dev`, daraja la `/v1/ws` na `/api/v1/ws`,
+linalotiririsha `/v1/chat/completions`, `/v1/messages` na `/v1/responses` kama fremu.
+Daraja huuliza `/api/v1/ws?handshake=1` ili kupata uamuzi na hukataa kuboresha muunganisho
+isipokuwa route hiyo imeendesha ukaguzi. Mpeano wa mkono hukubaliwa wakati:
+
+- hauna header ya `Origin` (Codex CLI, SDK na wateja wengine wasio vivinjari);
+- `Origin` imekubaliwa na orodha ya ruhusa iliyo hapo juu (`CORS_ALLOWED_ORIGINS`, mpangilio
+  wa `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` ni mojawapo ya asili za umma za OmniRoute yenyewe (URL ya msingi ya umma
+  iliyosanidiwa, asili iliyosambazwa na proksi inayoaminika, au host ya moja kwa moja ya
+  loopback/LAN iliyotolewa kama anwani halisi ya IP au `localhost` — wagombea wale wale
+  wanaotumiwa na ukaguzi wa mabadiliko wa dashibodi); au
+- unabeba ufunguo halali wa API, kama ilivyo kwenye sehemu ya HTTP `/v1/*`.
+
+Kitu kingine chochote hupata `403 ws_origin_forbidden`. Cookie ya kipindi cha dashibodi
+haiondolei `Origin` ya kigeni masharti, kwa sababu kivinjari huiambatisha kwenye socket ya
+ukurasa wowote. `localhost` kwenye port nyingine haichukuliwi kama asili ile ile; ongeza
+asili hizo za usanidi kwenye `CORS_ALLOWED_ORIGINS`.
+
+## Mfano: proksi ya kinyume mbele ya OmniRoute
+
+CORS inatekelezwa na OmniRoute yenyewe, kwa hivyo kwa ujumla proksi **haipaswi** kuongeza au
+kuandika upya vichwa vya `Access-Control-*` (vichwa maradufu huvuruga vivinjari). Sitisha TLS
+na usambaze maombi — acha OmniRoute ijibu ombi la awali:
 
 ```nginx
-# nginx — elekeza kwa OmniRoute; USIINGIZE Access-Control-* hapa
+# nginx — sambaza kwa OmniRoute; USIWEKE Access-Control-* hapa
 location / {
     proxy_pass http://127.0.0.1:20128;
     proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    # USIWEKE X-Forwarded-For kuwa 127.0.0.1 — kufanya hivyo hubatilisha kilinzi cha route ya loopback.
+    # Dumisha vichwa vya usambazaji: proksi kwenye seva hiyo hiyo huunganisha kupitia loopback, navyo
+    # ndivyo vinavyojulisha OmniRoute kwamba mpigaji si mwendeshaji wa ndani. Proksi isiyoongeza hata kimoja
+    # humfanya kila mpigaji wa mbali aonekane kuwa wa ndani. Pia, usiwahi kuweka X-Forwarded-For kuwa 127.0.0.1.
 }
 ```
 
-Weka vyanzo vya kivinjari vinavyoruhusiwa katika OmniRoute (`CORS_ALLOWED_ORIGINS` au kichupo cha
-Security), si katika proxy.
+Weka asili za vivinjari zinazoruhusiwa katika OmniRoute (`CORS_ALLOWED_ORIGINS` au kichupo cha
+Security), si katika proksi.
 
 ## Faili za chanzo
 
-| Jambo linalohusika                                   | Faili                                                                |
-| ---------------------------------------------------- | -------------------------------------------------------------------- |
-| Utatuzi wa allowlist + `getCorsStatus()`             | `src/server/cors/origins.ts`                                         |
-| Utekelezaji wa middleware (chanzo kimoja cha ukweli) | `src/server/authz/pipeline.ts`                                       |
-| Settings → uingizaji wa chanzo wakati wa utekelezaji | `src/lib/config/runtimeSettings.ts`                                  |
-| Hali ya wakati wa utekelezaji kwa dashibodi          | `src/app/api/settings/authz-inventory/route.ts`                      |
-| Bango la onyo la dashibodi                           | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
-| Sehemu ya CORS Allowed Origins                       | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
-| CORS ya Cloud-Agent kwa kila route (hali ya kipekee) | `src/lib/cloudAgent/api.ts`                                          |
+| Jambo linalohusika                                      | Faili                                                                |
+| ------------------------------------------------------- | -------------------------------------------------------------------- |
+| Utatuzi wa allowlist + `getCorsStatus()`                | `src/server/cors/origins.ts`                                         |
+| Utekelezaji wa middleware (chanzo kimoja cha ukweli)    | `src/server/authz/pipeline.ts`                                       |
+| Settings → uingizaji wa chanzo wakati wa utekelezaji    | `src/lib/config/runtimeSettings.ts`                                  |
+| Hali ya wakati wa utekelezaji kwa dashibodi             | `src/app/api/settings/authz-inventory/route.ts`                      |
+| Bango la onyo la dashibodi                              | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
+| Sehemu ya CORS Allowed Origins                          | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
+| CORS ya Cloud-Agent kwa kila route (hali ya kipekee)    | `src/lib/cloudAgent/api.ts`                                          |
+| Ukaguzi wa `Origin` katika mpeano wa mkono wa WebSocket | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Tazama pia
 

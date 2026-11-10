@@ -25,7 +25,8 @@ const { handleChat } = await import("../../src/sse/handlers/chat.ts");
 const providerNodeRoute = await import("../../src/app/api/provider-nodes/[id]/route.ts");
 const { initTranslators } = await import("../../open-sse/translator/index.ts");
 const { clearInflight } = await import("../../open-sse/services/requestDedup.ts");
-const { setCliCompatProviders } = await import("../../open-sse/config/cliFingerprints.ts");
+const { setCliCompatProviders, CLI_FINGERPRINTS } =
+  await import("../../open-sse/config/cliFingerprints.ts");
 const { BaseExecutor } = await import("../../open-sse/executors/base.ts");
 const { getCodexClientVersion } = await import("../../open-sse/config/codexClient.ts");
 const { getCircuitBreaker, resetAllCircuitBreakers } =
@@ -739,6 +740,8 @@ test("chat pipeline applies Codex OAuth fingerprint and priority tier inside com
   assert.notEqual(call.headers["session-id"], "combo-client-session");
   assert.equal(call.headers["session-id"], call.body.client_metadata.session_id);
   assert.equal(call.body.service_tier, "priority");
+  assert.equal(Object.hasOwn(call.body, "instructions"), false);
+  assert.equal(Object.hasOwn(call.body, "include"), false);
 });
 
 test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", async () => {
@@ -769,6 +772,9 @@ test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", 
     buildRequest({
       url: "http://localhost/v1/responses",
       body: {
+        // Deliberately before model: serialization must still use the CLI field order.
+        include: ["reasoning.encrypted_content"],
+        instructions: "Keep the reply concise.",
         model: "codex/gpt-5.5-low",
         stream: false,
         conversation_id: "conv_codex_fingerprint",
@@ -819,12 +825,19 @@ test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", 
   // …reasoning, prompt_cache_key, …, include — i.e. prompt_cache_key precedes include.
   // (#4584 inadvertently flipped these two; fast-gates skip integration tests so it only
   // surfaced on the release PR full CI.)
+  // Explicit native fields are preserved; the combo case above checks omitted fields.
+  const canonical = CLI_FINGERPRINTS.codex.bodyFieldOrder.filter((field) => field in call.body);
   assert.deepEqual(
-    bodyOrder.slice(0, 8),
-    "model stream input instructions store reasoning prompt_cache_key include".split(" ")
+    canonical,
+    "model stream input instructions store reasoning prompt_cache_key include client_metadata".split(
+      " "
+    )
   );
+  assert.deepEqual(bodyOrder.slice(0, canonical.length), canonical);
+  assert.deepEqual(call.body.include, ["reasoning.encrypted_content"]);
   assert.equal(call.body.model, "gpt-5.5");
   assert.equal(call.body.store, false);
+  assert.equal(call.body.instructions, "Keep the reply concise.");
   assert.equal(
     call.body.client_metadata["x-codex-installation-id"],
     "11111111-1111-4111-a111-111111111111"
@@ -1202,16 +1215,16 @@ test("chat pipeline converts Claude SSE streams into OpenAI SSE output", async (
   assert.match(raw, /\[DONE\]/);
 });
 
-test("chat pipeline rejects invalid API keys and malformed JSON bodies", async () => {
+test("chat pipeline surfaces upstream invalid-key errors and rejects malformed JSON", async () => {
   await seedConnection("openai", { apiKey: "sk-openai-invalid-key-path" });
 
+  const invalidKeyMessage = "Incorrect API key provided";
+  const invalidKeyResponseInit = { status: 401, statusText: invalidKeyMessage };
+  globalThis.fetch = async () =>
+    Response.json({ error: { message: invalidKeyMessage } }, invalidKeyResponseInit);
   const invalidKeyResponse = await handleChat(
     buildRequest({
-      authKey: "does-not-exist",
-      body: {
-        model: "openai/gpt-4o-mini",
-        messages: [{ role: "user", content: "Hello" }],
-      },
+      body: { model: "openai/gpt-4o-mini", messages: [{ role: "user", content: "Hello" }] },
     })
   );
   const invalidKeyJson = (await invalidKeyResponse.json()) as any;

@@ -8,27 +8,15 @@
  */
 import { v4 as uuidv4 } from "uuid";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
-import { sanitizeTimingMs } from "@omniroute/open-sse/utils/upstreamStatusCapture.ts";
+import { sanitizeTimingMs } from "@omniroute/open-sse/utils/timingMs.ts";
 import { getDbInstance, isCloud, isBuildPhase } from "./db/core";
 import { ensureProxyLogsColumns } from "./db/schemaColumns";
+import { normalizeProxyHostForLog } from "./proxyLogHost";
+import { isWriteLockError, scheduleWriteRetry } from "./usage/usageWriteRetry";
 
-/**
- * Canonical host normalization for proxy log writes and (host, port) lookups:
- * trim, strip exactly one pair of surrounding brackets from IPv6 literals
- * ("[2001:db8::1]"), re-trim, lowercase. Anything that is not a non-empty
- * string normalizes to null so readers can fall back to today's behavior.
- */
-export function normalizeProxyHostForLog(host: unknown): string | null {
-  if (typeof host !== "string") return null;
-  const trimmed = host.trim();
-  if (!trimmed) return null;
-  const unbracketed =
-    trimmed.startsWith("[") && trimmed.endsWith("]") && trimmed.length > 2
-      ? trimmed.slice(1, -1).trim()
-      : trimmed;
-  if (!unbracketed) return null;
-  return unbracketed.toLowerCase();
-}
+// Re-exported for existing callers; the helper lives in a zero-import leaf so DB modules
+// can use it without loading this module (which hydrates from SQLite at import time).
+export { normalizeProxyHostForLog };
 
 const shouldPersistToDisk = !isCloud && !isBuildPhase;
 
@@ -57,6 +45,10 @@ interface ProxyLogEntry {
    * historical clientIp is the INBOUND IP (x-forwarded-for); egressIp answers
    * "by which IP is this account leaving" — critical for rotating providers. */
   egressIp: string | null;
+  /** Address observed for the IPv4 family (null = that family was not observed). */
+  egressIpv4: string | null;
+  /** Address observed for the IPv6 family (null = that family was not observed). */
+  egressIpv6: string | null;
   latencyMs: number;
   error: string | null;
   connectionId: string | null;
@@ -132,6 +124,8 @@ function loadFromDb() {
         targetUrl: row.target_url || null,
         clientIp: row.public_ip || null,
         egressIp: row.egress_ip || null,
+        egressIpv4: row.egress_ip_v4 || null,
+        egressIpv6: row.egress_ip_v6 || null,
         latencyMs: row.latency_ms || 0,
         error: row.error || null,
         connectionId: row.connection_id || null,
@@ -230,6 +224,9 @@ export function logProxyEvent(entry: ProxyLogInput) {
     targetUrl: entry.targetUrl || null,
     clientIp: entry.clientIp ?? entry.publicIp ?? null,
     egressIp: entry.egressIp ?? null,
+    // Never synthesized: a family that was not observed stays null.
+    egressIpv4: entry.egressIpv4 ?? null,
+    egressIpv6: entry.egressIpv6 ?? null,
     latencyMs: entry.latencyMs || 0,
     error: safeError,
     connectionId: entry.connectionId || null,
@@ -287,9 +284,81 @@ export function logProxyEvent(entry: ProxyLogInput) {
 
 const BATCH_FLUSH_INTERVAL_MS = 1000;
 const BATCH_SIZE_THRESHOLD = 100;
+// Memory cap for one deferred proxy batch: summed targetUrl + error lengths,
+// no serialization on the failure path. A batch above the cap is dropped with
+// the existing log line instead of being held for the retry.
+const PROXY_RETRY_BATCH_BYTES = 256 * 1024;
 
 let pendingLogsQueue: ProxyLogEntry[] = [];
 let batchTimer: NodeJS.Timeout | null = null;
+// Generation guard: clearProxyLogs() bumps the counter, and a deferred retry
+// armed before the clear abandons its batch instead of re-inserting it.
+let proxyLogGeneration = 0;
+
+function proxyBatchSizeBytes(batch: ProxyLogEntry[]): number {
+  let size = 0;
+  for (const entry of batch) {
+    size += (entry.targetUrl?.length ?? 0) + (entry.error?.length ?? 0);
+  }
+  return size;
+}
+
+function logProxyBatchFailure(err: unknown): void {
+  console.warn(
+    "[proxyLogger] Failed to write proxy log batch to disk:",
+    sanitizeErrorMessage(err) || "Proxy log persistence failed"
+  );
+}
+
+function writeProxyBatch(batch: ProxyLogEntry[], db: ReturnType<typeof getDbInstance>): void {
+  const insertStmt = db.prepare(
+    `INSERT INTO proxy_logs (id, timestamp, status, proxy_type, proxy_host, proxy_port, proxy_name,
+      level, level_id, provider, target_url, public_ip, egress_ip, egress_ip_v4, egress_ip_v6,
+      latency_ms, error, connection_id, combo_id, account, rotation_account, correlation_id, tls_fingerprint,
+      upstream_status, attempt_number, attempt_issue, headers_ms, first_chunk_ms)
+    VALUES (@id, @timestamp, @status, @proxyType, @proxyHost, @proxyPort, @proxyName,
+      @level, @levelId, @provider, @targetUrl, @clientIp, @egressIp, @egressIpv4, @egressIpv6,
+      @latencyMs, @error, @connectionId, @comboId, @account, @rotationAccount, @correlationId, @tlsFingerprint,
+      @upstreamStatus, @attemptNumber, @attemptIssue, @headersMs, @firstChunkMs)`
+  );
+
+  const transaction = db.transaction((entries: ProxyLogEntry[]) => {
+    for (const item of entries) {
+      insertStmt.run({
+        id: item.id,
+        timestamp: item.timestamp,
+        status: item.status,
+        proxyType: item.proxy?.type || null,
+        proxyHost: item.proxy?.host || null,
+        proxyPort: item.proxy?.port ? Number(item.proxy.port) : null,
+        proxyName: item.proxy?.name || null,
+        level: item.level,
+        levelId: item.levelId,
+        provider: item.provider,
+        targetUrl: item.targetUrl,
+        clientIp: item.clientIp,
+        egressIp: item.egressIp,
+        egressIpv4: item.egressIpv4,
+        egressIpv6: item.egressIpv6,
+        latencyMs: item.latencyMs,
+        error: item.error,
+        connectionId: item.connectionId,
+        comboId: item.comboId,
+        account: item.account,
+        rotationAccount: item.rotationAccount,
+        correlationId: item.correlationId,
+        tlsFingerprint: item.tlsFingerprint ? 1 : 0,
+        upstreamStatus: item.upstreamStatus,
+        attemptNumber: item.attemptNumber,
+        attemptIssue: item.attemptIssue,
+        headersMs: item.headersMs,
+        firstChunkMs: item.firstChunkMs,
+      });
+    }
+  });
+
+  transaction(batch);
+}
 
 function ensureBatchTimer() {
   if (batchTimer) return;
@@ -333,59 +402,26 @@ export function flushProxyLogsSync() {
     }
   }
 
-  // 2. Persist to SQLite using a single transaction for high-performance non-blocking write
+  // Keep the same database for both attempts; resets must not redirect old batches.
+  let db: ReturnType<typeof getDbInstance> | undefined;
   try {
-    const db = getDbInstance();
-    const insertStmt = db.prepare(
-      `INSERT INTO proxy_logs (id, timestamp, status, proxy_type, proxy_host, proxy_port, proxy_name,
-        level, level_id, provider, target_url, public_ip, egress_ip, latency_ms, error,
-        connection_id, combo_id, account, rotation_account, correlation_id, tls_fingerprint, upstream_status,
-        attempt_number, attempt_issue, headers_ms, first_chunk_ms)
-      VALUES (@id, @timestamp, @status, @proxyType, @proxyHost, @proxyPort, @proxyName,
-        @level, @levelId, @provider, @targetUrl, @clientIp, @egressIp, @latencyMs, @error,
-        @connectionId, @comboId, @account, @rotationAccount, @correlationId, @tlsFingerprint, @upstreamStatus,
-        @attemptNumber, @attemptIssue, @headersMs, @firstChunkMs)`
-    );
-
-    const transaction = db.transaction((entries: ProxyLogEntry[]) => {
-      for (const item of entries) {
-        insertStmt.run({
-          id: item.id,
-          timestamp: item.timestamp,
-          status: item.status,
-          proxyType: item.proxy?.type || null,
-          proxyHost: item.proxy?.host || null,
-          proxyPort: item.proxy?.port ? Number(item.proxy.port) : null,
-          proxyName: item.proxy?.name || null,
-          level: item.level,
-          levelId: item.levelId,
-          provider: item.provider,
-          targetUrl: item.targetUrl,
-          clientIp: item.clientIp,
-          egressIp: item.egressIp,
-          latencyMs: item.latencyMs,
-          error: item.error,
-          connectionId: item.connectionId,
-          comboId: item.comboId,
-          account: item.account,
-          rotationAccount: item.rotationAccount,
-          correlationId: item.correlationId,
-          tlsFingerprint: item.tlsFingerprint ? 1 : 0,
-          upstreamStatus: item.upstreamStatus,
-          attemptNumber: item.attemptNumber,
-          attemptIssue: item.attemptIssue,
-          headersMs: item.headersMs,
-          firstChunkMs: item.firstChunkMs,
-        });
-      }
-    });
-
-    transaction(batch);
+    db = getDbInstance();
+    writeProxyBatch(batch, db);
   } catch (err: any) {
-    console.warn(
-      "[proxyLogger] Failed to write proxy log batch to disk:",
-      sanitizeErrorMessage(err) || "Proxy log persistence failed"
-    );
+    if (!db || !isWriteLockError(err)) {
+      logProxyBatchFailure(err);
+      return;
+    }
+    if (proxyBatchSizeBytes(batch) > PROXY_RETRY_BATCH_BYTES) {
+      logProxyBatchFailure(err);
+      return;
+    }
+    const generation = proxyLogGeneration;
+    const originalDb = db;
+    void scheduleWriteRetry(() => {
+      if (generation !== proxyLogGeneration) return;
+      writeProxyBatch(batch, originalDb);
+    }, logProxyBatchFailure);
   }
 }
 
@@ -512,7 +548,11 @@ export function getProxyLogs(filters: ProxyLogFilters = {}) {
 
 export function clearProxyLogs() {
   proxyLogs.length = 0;
+  pendingLogsQueue = [];
   pendingFirstChunk.clear();
+  // Invalidate deferred retries armed before this clear so they abandon
+  // their batch instead of re-inserting cleared rows.
+  proxyLogGeneration++;
 
   if (shouldPersistToDisk) {
     try {

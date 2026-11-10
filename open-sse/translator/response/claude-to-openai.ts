@@ -1,6 +1,8 @@
 import { register } from "../registry.ts";
+import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { initThinkState, applyThinkTag, flushThinkBuffer } from "../../utils/thinkTagParser.ts";
+import { storeClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
 
 type OpenAIUsage = {
   prompt_tokens: number;
@@ -10,6 +12,9 @@ type OpenAIUsage = {
   prompt_tokens_details?: {
     cached_tokens?: number;
     cache_creation_tokens?: number;
+    cache_creation?: unknown;
+    // false: cache_creation_tokens is not included in prompt_tokens (#2215).
+    cache_creation_in_prompt?: boolean;
   };
   completion_tokens_details?: {
     reasoning_tokens?: number;
@@ -33,6 +38,37 @@ function createChunk(state, delta, finishReason = null) {
   };
 }
 
+// Signed-thinking continuity: the OpenAI client only sees reasoning text, so keep the
+// exact signed thinking / redacted_thinking blocks (per content-block index) and hand
+// them to claudeThinkingStore in their original layout relative to this turn's tool_use
+// blocks when the message ends. openai-to-claude puts them back on the next tool turn.
+function thinkingBlocksOf(state): Map<number, Record<string, string>> {
+  if (!(state.claudeThinkingBlocks instanceof Map)) state.claudeThinkingBlocks = new Map();
+  return state.claudeThinkingBlocks;
+}
+
+function flushThinkingContinuity(state) {
+  if (state.claudeThinkingFlushed) return;
+  state.claudeThinkingFlushed = true;
+  const blocks = thinkingBlocksOf(state);
+  if (blocks.size === 0 || !(state.toolCalls instanceof Map) || state.toolCalls.size === 0) return;
+  const indexed: Array<[number, Record<string, unknown>]> = [
+    ...blocks.entries(),
+    ...[...state.toolCalls.entries()].map(
+      ([index, toolCall]): [number, Record<string, unknown>] => [
+        index,
+        { type: "tool_use", id: toolCall?.id },
+      ]
+    ),
+  ];
+  storeClaudeThinkingBlocks({
+    content: indexed.sort(([left], [right]) => left - right).map(([, block]) => block),
+    provider: state.provider,
+    model: state.model,
+    connectionId: state.connectionId,
+  });
+}
+
 // Convert Claude stream chunk to OpenAI format
 export function claudeToOpenAIResponse(chunk, state) {
   if (!chunk) return null;
@@ -45,6 +81,8 @@ export function claudeToOpenAIResponse(chunk, state) {
       state.messageId = chunk.message?.id || `msg_${Date.now()}`;
       state.model = chunk.message?.model;
       state.toolCallIndex = 0;
+      state.claudeThinkingBlocks = new Map();
+      state.claudeThinkingFlushed = false;
       // #13558: MiniMax-M3's Anthropic-compatible endpoint puts its reasoning
       // inline as <think>...</think> inside ordinary text/text_delta blocks
       // instead of a structured thinking/thinking_delta block. Reuse the
@@ -77,6 +115,7 @@ export function claudeToOpenAIResponse(chunk, state) {
         if (inputTokens > 0 || outputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
           const billableInputTokens = inputTokens + cacheRead;
           state.usage = {
+            ...cacheCreationFields(startUsage),
             prompt_tokens: billableInputTokens,
             completion_tokens: outputTokens,
             input_tokens: billableInputTokens,
@@ -95,11 +134,19 @@ export function claudeToOpenAIResponse(chunk, state) {
       if (block?.type === "text") {
         state.textBlockStarted = true;
       } else if (block?.type === "thinking") {
+        thinkingBlocksOf(state).set(chunk.index, {
+          type: "thinking",
+          thinking: typeof block.thinking === "string" ? block.thinking : "",
+          signature: typeof block.signature === "string" ? block.signature : "",
+        });
         state.inThinkingBlock = true;
         state.currentBlockIndex = chunk.index;
         // Emit empty reasoning_content to signal thinking block start
         // (clients like Claude Code look for reasoning_content, not <think> tags)
         results.push(createChunk(state, { reasoning_content: "" }));
+      } else if (block?.type === "redacted_thinking") {
+        // Opaque to the client (nothing is emitted); kept only for continuity.
+        thinkingBlocksOf(state).set(chunk.index, { type: "redacted_thinking", data: block.data });
       } else if (block?.type === "tool_use") {
         const toolCallIndex = state.toolCallIndex++;
         // Restore original tool name from mapping (Claude OAuth)
@@ -145,9 +192,15 @@ export function claudeToOpenAIResponse(chunk, state) {
           results.push(createChunk(state, { content: textDelta.content }));
         }
       } else if (delta?.type === "thinking_delta" && delta.thinking) {
+        const tracked = thinkingBlocksOf(state).get(chunk.index);
+        if (tracked?.type === "thinking") tracked.thinking += delta.thinking;
         // Map Claude thinking_delta → OpenAI reasoning_content
         // Clients (Claude Code, Cursor, etc.) display reasoning_content as the thinking panel
         results.push(createChunk(state, { reasoning_content: delta.thinking }));
+      } else if (delta?.type === "signature_delta" && typeof delta.signature === "string") {
+        // Never emitted to the client; kept only for continuity.
+        const tracked = thinkingBlocksOf(state).get(chunk.index);
+        if (tracked?.type === "thinking") tracked.signature += delta.signature;
       } else if (delta?.type === "input_json_delta" && delta.partial_json) {
         const toolCall = state.toolCalls.get(chunk.index);
         if (toolCall) {
@@ -247,6 +300,7 @@ export function claudeToOpenAIResponse(chunk, state) {
             ? inputTokens + cacheReadTokens
             : previousInputTokens;
         state.usage = {
+          ...mergeCacheCreationFields(previousUsage, chunk.usage),
           prompt_tokens: billableInputTokens,
           completion_tokens: outputTokens,
           input_tokens: billableInputTokens,
@@ -267,12 +321,16 @@ export function claudeToOpenAIResponse(chunk, state) {
         if (effectiveCacheReadTokens > 0) {
           state.usage.cache_read_input_tokens = effectiveCacheReadTokens;
         }
-        if (effectiveCacheCreationTokens > 0) {
+        if (
+          effectiveCacheCreationTokens > 0 &&
+          state.usage.cache_creation_input_tokens === undefined
+        ) {
           state.usage.cache_creation_input_tokens = effectiveCacheCreationTokens;
         }
       }
 
       if (chunk.delta?.stop_reason) {
+        flushThinkingContinuity(state);
         // Flush any deferred </think> close marker now that we know the stream
         // is finishing. Only emit when there are no tool_calls — if tool_calls
         // were collected the marker must stay suppressed (#5123). Text-based
@@ -327,6 +385,7 @@ export function claudeToOpenAIResponse(chunk, state) {
           const totalTokens = promptTokens + completionTokens;
 
           finalChunk.usage = {
+            ...cacheCreationFields(state.usage),
             prompt_tokens: promptTokens,
             completion_tokens: completionTokens,
             total_tokens: totalTokens,
@@ -342,12 +401,13 @@ export function claudeToOpenAIResponse(chunk, state) {
 
           // Add prompt_tokens_details if cached tokens exist
           if (cachedTokens > 0 || cacheCreationTokens > 0) {
-            finalChunk.usage.prompt_tokens_details = {};
+            finalChunk.usage.prompt_tokens_details = { ...cacheCreationFields(state.usage) };
             if (cachedTokens > 0) {
               finalChunk.usage.prompt_tokens_details.cached_tokens = cachedTokens;
             }
             if (cacheCreationTokens > 0) {
               finalChunk.usage.prompt_tokens_details.cache_creation_tokens = cacheCreationTokens;
+              finalChunk.usage.prompt_tokens_details.cache_creation_in_prompt = false;
             }
           }
         }
@@ -359,6 +419,7 @@ export function claudeToOpenAIResponse(chunk, state) {
     }
 
     case "message_stop": {
+      flushThinkingContinuity(state);
       if (!state.finishReasonSent) {
         const finishReason =
           state.finishReason || (state.toolCalls?.size > 0 ? "tool_calls" : "stop");
@@ -368,6 +429,7 @@ export function claudeToOpenAIResponse(chunk, state) {
           state.usage && typeof state.usage === "object"
             ? {
                 usage: {
+                  ...cacheCreationFields(state.usage),
                   prompt_tokens: state.usage.input_tokens || 0,
                   completion_tokens: state.usage.output_tokens || 0,
                   total_tokens: (state.usage.input_tokens || 0) + (state.usage.output_tokens || 0),
@@ -382,9 +444,13 @@ export function claudeToOpenAIResponse(chunk, state) {
                   ...(cachedTokens > 0 || cacheCreationTokens > 0
                     ? {
                         prompt_tokens_details: {
+                          ...cacheCreationFields(state.usage),
                           ...(cachedTokens > 0 ? { cached_tokens: cachedTokens } : {}),
                           ...(cacheCreationTokens > 0
-                            ? { cache_creation_tokens: cacheCreationTokens }
+                            ? {
+                                cache_creation_tokens: cacheCreationTokens,
+                                cache_creation_in_prompt: false,
+                              }
                             : {}),
                         },
                       }
@@ -416,7 +482,7 @@ export function claudeToOpenAIResponse(chunk, state) {
 }
 
 // Convert Claude stop_reason to OpenAI finish_reason
-function convertStopReason(reason) {
+export function convertStopReason(reason) {
   switch (reason) {
     case "end_turn":
       return "stop";
@@ -426,6 +492,10 @@ function convertStopReason(reason) {
       return "tool_calls";
     case "stop_sequence":
       return "stop";
+    case "refusal":
+      return "content_filter";
+    case "model_context_window_exceeded":
+      return "length";
     default:
       return "stop";
   }

@@ -1,3 +1,7 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../../utils/providerHttpAttempts.ts";
 /**
  * Non-streaming provider leg - one round of provider execution.
  * Extracted from chatCore.ts (lines ~3804-5096) by symbol boundaries.
@@ -17,34 +21,46 @@ import type {
   ProviderExecutionOutcome,
   ProviderExecutionPolicy,
 } from "./providerExecutionPipeline.ts";
+import { bufferedResponsesFailure } from "./bufferedResponsesFailure.ts";
 import { translateNonStreamingClientResponse } from "./nonStreamingClientTranslate.ts";
 import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
+import {
+  NonStreamingResponseTooLargeError,
+  readResponseTextWithinCap,
+} from "./nonStreamingResponseBody.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
+import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
+import {
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE,
+} from "../../config/constants.ts";
 import { unwrapClinepassEnvelope } from "../../utils/clinepassEnvelope.ts";
 import { unwrapClineNonStreamingEnvelope } from "./clineResponseEnvelope.ts";
 import {
   isModelUnavailableError,
-  getNextFamilyFallback,
   isContextOverflowError,
-  findLargerContextModel,
-  getModelFamily,
 } from "../../services/modelFamilyFallback.ts";
 import { isEmptyContentResponse } from "../../services/errorClassifier.ts";
+import { createRequestFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
+import { hasTrustedEmptyTurn } from "../../utils/emptyTurnPolicy.ts";
 import { FORMATS } from "../../translator/formats.ts";
+import { scopeGeminiThoughtSignatureNamespace } from "../../services/geminiThoughtSignatureStore.ts";
 import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
 
 /* -- exported types -------------------------------------------------------- */
 
 export interface ChatCoreExecutorResult {
   response: Response;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   url: string;
   headers: Record<string, string>;
   transformedBody: unknown;
   transport?: string;
+  upstreamDiagnostic?: Record<string, unknown>;
   _executionCredentials?: Record<string, unknown>;
   _accountSemaphoreRelease?: () => void;
 }
@@ -59,10 +75,12 @@ export interface ProviderLegInput {
   expectedConnectionId?: string;
   allowAccountRotation: boolean;
   allowModelFallback: boolean;
+  hasApiKeyMetadata?: boolean;
   executeProviderRequest: (
     model: string,
     allowDedup: boolean,
-    policy?: ProviderLegRotationPolicy
+    policy?: ProviderLegRotationPolicy,
+    rejection?: HttpAttemptRejectionSlot
   ) => Promise<ChatCoreExecutorResult>;
   /**
    * Optional 6b seam. When set, the first send goes through the shared
@@ -70,6 +88,7 @@ export interface ProviderLegInput {
    * retry and empty-content fallback still use executeProviderRequest.
    */
   runProviderExecution?: (input: {
+    upstreamHttpRejection?: HttpAttemptRejectionSlot;
     policy: Readonly<ProviderExecutionPolicy>;
     model: string;
     translatedBody: Record<string, unknown>;
@@ -145,12 +164,16 @@ function extractUsage(
   responseBody: Record<string, unknown>,
   provider: string
 ): ProviderLegUsage | null {
-  const raw = extractUsageFromResponse(responseBody, provider);
+  return summarizeUsage(extractUsageFromResponse(responseBody, provider));
+}
+
+function summarizeUsage(raw: unknown): ProviderLegUsage | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const pt = typeof r.prompt_tokens === "number" ? r.prompt_tokens : 0;
   const ct = typeof r.completion_tokens === "number" ? r.completion_tokens : 0;
   return {
+    ...cacheCreationFields(raw),
     prompt_tokens: pt,
     completion_tokens: ct,
     total_tokens: typeof r.total_tokens === "number" ? r.total_tokens : pt + ct,
@@ -258,10 +281,13 @@ function finishOk(
     clientResponseFormat: string;
     provider: string;
     upstreamResponse?: Response;
+    upstreamHttpSelection?: HttpAttemptSelection | null;
     requestHeaders?: Record<string, string>;
     requestUrl?: string;
   }
 ): NonStreamingProviderLegResult {
+  const failed = bufferedResponsesFailure(input, params, { legError, extractUsage, buildReceipt });
+  if (failed) return failed;
   // F-02: restore + sanitize + translate is the only success tail.
   // Fallback/retry must not skip this with responseToolNameMap: null.
   const restoreClaudeNames = params.sourceFormat === "claude" && params.targetFormat === "claude";
@@ -278,7 +304,12 @@ function finishOk(
     params.transformedBody || params.requestBody,
     params.responsePayloadFormat
   );
-  const usage = extractUsage(body, params.provider);
+  // Full provider usage, read BEFORE translateNonStreamingClientResponse rewrites the
+  // body for the client (applyClientUsageBuffer folds in the #8331 context buffer and
+  // can swap in an estimate). Billing needs this object, not the token-only summary:
+  // it also carries provider-reported cost/credit fields and the estimate marker.
+  const billingUsage = extractUsageFromResponse(body, params.provider);
+  const usage = summarizeUsage(billingUsage);
   const clientTranslate = translateNonStreamingClientResponse({
     responseBody: body,
     responsePayloadFormat: params.responsePayloadFormat,
@@ -287,6 +318,8 @@ function finishOk(
     provider: params.provider,
     model: params.model,
     requestBody: params.requestBody,
+    clientRequestBody: input.sourceBody ?? null,
+    signatureNamespace: scopeGeminiThoughtSignatureNamespace(params.connectionId, params.model),
     historyMessages:
       (input.translatedBody as { messages?: unknown[] } | null | undefined)?.messages ??
       input.reasoningReplayHistory ??
@@ -304,6 +337,7 @@ function finishOk(
     // thinking block; the non-streaming converter used to never receive it.
     requestedThinking: hasActiveClaudeThinking(input.sourceBody ?? {}),
     phase: input.phase === "initial" ? "final" : "intermediate",
+    connectionId: params.connectionId,
   });
   const receipt = buildReceipt(input, {
     httpStatus: 200,
@@ -323,11 +357,13 @@ function finishOk(
     providerBody: body,
     providerRequest: input.translatedBody ?? {},
     usage,
+    billingUsage,
     responsePayloadFormat: params.responsePayloadFormat,
     looksLikeSSE: params.looksLikeSSE,
     connectionId: params.connectionId,
     headers: params.headers,
     upstreamResponse: params.upstreamResponse,
+    upstreamHttpSelection: params.upstreamHttpSelection ?? null,
     requestHeaders: params.requestHeaders,
     requestUrl: params.requestUrl,
     receipt,
@@ -351,6 +387,11 @@ export async function runNonStreamingProviderLeg(
   const targetFormat = input.targetFormat ?? "openai";
   const clientResponseFormat = input.clientResponseFormat ?? "openai";
   const connectionId = input.connectionId ?? "unknown";
+  const familyFallback = createRequestFamilyFallback(provider, {
+    headers: input.clientHeaders,
+    hasApiKeyMetadata: input.hasApiKeyMetadata,
+    connectionId: () => input.getCurrentConnectionId?.() ?? connectionId,
+  });
   const log = input.log;
 
   // -- Phase policy: follow-up blocks rotation and fallback -------------------
@@ -386,14 +427,18 @@ export async function runNonStreamingProviderLeg(
     expectedConnectionId: input.expectedConnectionId,
   };
 
+  let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let executorResult: ChatCoreExecutorResult;
+  const rejection: HttpAttemptRejectionSlot = { selection: null };
   try {
     if (input.runProviderExecution) {
       const outcome = await input.runProviderExecution({
+        upstreamHttpRejection: rejection,
         policy,
         model: currentModel,
         translatedBody: (input.translatedBody ?? input.sourceBody) as Record<string, unknown>,
       });
+      upstreamHttpSelection = outcome.upstreamHttpSelection ?? null;
       if (outcome.kind === "error") {
         if (
           outcome.result.status === 409 &&
@@ -412,6 +457,7 @@ export async function runNonStreamingProviderLeg(
           });
           return {
             kind: "error",
+            upstreamHttpSelection,
             result: outcome.result,
             receipt,
             usage: null,
@@ -440,21 +486,26 @@ export async function runNonStreamingProviderLeg(
         });
         return {
           kind: "error",
+          upstreamHttpSelection,
           result: {
             ...legError(
               outcome.result.status,
               formatted,
               undefined,
-              null,
+              // Keep the upstream retry hint on the sanitized response.
+              outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null,
               outcome.result.errorCode,
               outcome.result.errorType,
               { passthrough: input.sourceFormat === "claude" }
             ),
-            response: outcome.result.response,
+            // Never relay the raw upstream Response (body, Set-Cookie, other headers) to the
+            // client: legError() above built the sanitized one. Upstream headers stay on
+            // `upstreamHeaders` for server-side classification only.
             rawMessage: outcome.result.rawMessage || outcome.result.error,
             upstreamErrorBody: outcome.result.upstreamErrorBody,
             upstreamHeaders: outcome.result.upstreamHeaders ?? outcome.result.response?.headers,
           },
+          upstreamDiagnostic: outcome.upstreamDiagnostic,
           receipt,
           usage: outcome.providerUsage,
         };
@@ -464,12 +515,15 @@ export async function runNonStreamingProviderLeg(
         url: outcome.url,
         headers: outcome.headers,
         transformedBody: outcome.transformedBody,
+        upstreamDiagnostic: outcome.upstreamDiagnostic,
+        upstreamHttpSelection: outcome.upstreamHttpSelection ?? null,
       };
     } else {
       executorResult = await input.executeProviderRequest(
         currentModel,
         input.phase === "initial",
-        rotationPolicy
+        rotationPolicy,
+        rejection
       );
     }
   } catch (error) {
@@ -477,7 +531,8 @@ export async function runNonStreamingProviderLeg(
       !!error &&
       typeof error === "object" &&
       ((error as { code?: unknown }).code === "SEMAPHORE_TIMEOUT" ||
-        (error as { code?: unknown }).code === "SEMAPHORE_QUEUE_FULL")
+        (error as { code?: unknown }).code === "SEMAPHORE_QUEUE_FULL" ||
+        (error as { code?: unknown }).code === "MUSE_OWNERSHIP_REJECTED")
     ) {
       throw error;
     }
@@ -486,6 +541,7 @@ export async function runNonStreamingProviderLeg(
     // provider-failure default (#7907). chatCore classified this through
     // isLocalStreamLifecycleError before this leg took over the first send; mirror it.
     const isRequestAborted = isLocalStreamLifecycleError(error);
+    upstreamHttpSelection = isRequestAborted ? null : rejection.selection;
     const failureStatus = isRequestAborted
       ? 499
       : error instanceof Error && error.name === "TimeoutError"
@@ -499,9 +555,28 @@ export async function runNonStreamingProviderLeg(
       : error instanceof Error
         ? formatProviderError(error, provider, currentModel, failureStatus)
         : "Provider request failed";
+    // The old non-streaming path reduced every TimeoutError to a bare 504.
+    // Preserve only the explicit Antigravity pre-response marker, not arbitrary
+    // upstream 504s: the outer account router needs the original failure type.
+    const requestScopedTimeout =
+      failureStatus === 504 &&
+      !!error &&
+      typeof error === "object" &&
+      (error as { code?: unknown }).code === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
+    const preResponseTimeout =
+      provider === "antigravity" &&
+      failureStatus === 504 &&
+      !!error &&
+      typeof error === "object" &&
+      (error as { code?: unknown }).code === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
+    const timeoutType = requestScopedTimeout
+      ? "request_timeout"
+      : preResponseTimeout
+        ? "upstream_timeout"
+        : undefined;
     const receipt = buildReceipt(input, {
       httpStatus: failureStatus,
-      errorType: null,
+      errorType: timeoutType ?? null,
       usage: null,
       termination: "provider_error",
       latencyMs: Date.now() - startMs,
@@ -510,15 +585,28 @@ export async function runNonStreamingProviderLeg(
       connectionId,
       model: currentModel,
     });
-    const errorResult = legError(failureStatus, failureMessage, error);
+    const errorResult = legError(
+      failureStatus,
+      failureMessage,
+      error,
+      null,
+      requestScopedTimeout
+        ? REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE
+        : preResponseTimeout
+          ? ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE
+          : undefined,
+      timeoutType
+    );
     return {
       kind: "error",
+      upstreamHttpSelection,
       result: errorResult as ChatCoreErrorResult,
       receipt,
       usage: null,
     };
   }
 
+  upstreamHttpSelection = executorResult.upstreamHttpSelection ?? null;
   const providerResponse = executorResult.response;
   const finalBody = executorResult.transformedBody as Record<string, unknown> | null;
 
@@ -547,6 +635,7 @@ export async function runNonStreamingProviderLeg(
       );
       return {
         kind: "error",
+        upstreamHttpSelection: null,
         result: errorResult as ChatCoreErrorResult,
         receipt,
         usage: null,
@@ -564,7 +653,7 @@ export async function runNonStreamingProviderLeg(
     let parsedErrorBody: Record<string, unknown> = {};
 
     try {
-      const errorBodyText = await providerResponse.text();
+      const errorBodyText = await readResponseTextWithinCap(providerResponse);
       try {
         parsedErrorBody = JSON.parse(errorBodyText) as Record<string, unknown>;
       } catch {
@@ -578,8 +667,11 @@ export async function runNonStreamingProviderLeg(
         "Provider request failed";
       upstreamErrorCode = typeof errObj?.code === "string" ? errObj.code : undefined;
       upstreamErrorType = typeof errObj?.type === "string" ? errObj.type : undefined;
-    } catch {
-      message = "Provider request failed";
+    } catch (readErr) {
+      message =
+        readErr instanceof NonStreamingResponseTooLargeError
+          ? "Provider error body exceeded response size limit"
+          : "Provider request failed";
     }
 
     // Parse Retry-After from upstream response headers
@@ -588,7 +680,7 @@ export async function runNonStreamingProviderLeg(
     // -- Model-unavailable -> family fallback (initial only) --------------------
     if (allowModelFallback && isModelUnavailableError(statusCode, message, provider)) {
       const triedModels = new Set<string>([currentModel]);
-      const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getNext(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         input.setRequestWireState({
@@ -648,6 +740,7 @@ export async function runNonStreamingProviderLeg(
                 clientResponseFormat,
                 provider,
                 upstreamResponse: fallbackResult.response,
+                upstreamHttpSelection: fallbackResult.upstreamHttpSelection ?? null,
                 requestHeaders: fallbackResult.headers,
                 requestUrl: fallbackResult.url,
               });
@@ -662,12 +755,7 @@ export async function runNonStreamingProviderLeg(
     // -- Context overflow -> family fallback (initial only) ---------------------
     if (allowModelFallback && isContextOverflowError(statusCode, message)) {
       const triedModels = new Set<string>([currentModel]);
-      const familyCandidates = getModelFamily(currentModel, provider).filter(
-        (m) => m !== currentModel && !triedModels.has(m)
-      );
-      const nextModel =
-        findLargerContextModel(currentModel, familyCandidates, provider) ??
-        getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getForContextOverflow(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         input.setRequestWireState({
@@ -727,6 +815,7 @@ export async function runNonStreamingProviderLeg(
                 clientResponseFormat,
                 provider,
                 upstreamResponse: fallbackResult.response,
+                upstreamHttpSelection: fallbackResult.upstreamHttpSelection ?? null,
                 requestHeaders: fallbackResult.headers,
                 requestUrl: fallbackResult.url,
               });
@@ -782,7 +871,9 @@ export async function runNonStreamingProviderLeg(
     errorResult.upstreamErrorBody = parsedErrorBody;
     return {
       kind: "error",
+      upstreamHttpSelection,
       result: errorResult as ChatCoreErrorResult,
+      upstreamDiagnostic: executorResult.upstreamDiagnostic,
       receipt,
       usage,
     };
@@ -821,6 +912,7 @@ export async function runNonStreamingProviderLeg(
     );
     return {
       kind: "error",
+      upstreamHttpSelection,
       result: errorResult as ChatCoreErrorResult,
       receipt,
       usage: null,
@@ -849,6 +941,7 @@ export async function runNonStreamingProviderLeg(
     );
     return {
       kind: "error",
+      upstreamHttpSelection,
       result: errorResult as ChatCoreErrorResult,
       receipt,
       usage: null,
@@ -904,6 +997,7 @@ export async function runNonStreamingProviderLeg(
               retryParsed.responseBody,
               provider
             ));
+            upstreamHttpSelection = retryResult.upstreamHttpSelection ?? null;
             if (!envError && isJsonRecord(unwrapped)) {
               responseBody = unwrapped as Record<string, unknown>;
             }
@@ -927,6 +1021,7 @@ export async function runNonStreamingProviderLeg(
                 clientResponseFormat,
                 provider,
                 upstreamResponse: retryResult.response,
+                upstreamHttpSelection: retryResult.upstreamHttpSelection ?? null,
                 requestHeaders: retryResult.headers,
                 requestUrl: retryResult.url,
               });
@@ -959,6 +1054,7 @@ export async function runNonStreamingProviderLeg(
       );
       return {
         kind: "error",
+        upstreamHttpSelection,
         result: errorResult as ChatCoreErrorResult,
         receipt,
         usage: null,
@@ -974,11 +1070,16 @@ export async function runNonStreamingProviderLeg(
   // #14160: pass the provider so first-party APIs (antigravity) keep empty
   // completions with a normal stop reason as valid 200s instead of synthetic
   // 502s feeding model lockout.
-  if (isEmptyContentResponse(responseBody, { provider })) {
+  if (
+    isEmptyContentResponse(responseBody, {
+      provider,
+      trustedEmptyTurn: hasTrustedEmptyTurn(executorResult.response),
+    })
+  ) {
     const errMsg = "Provider returned empty content";
     if (allowModelFallback) {
       const triedModels = new Set<string>([currentModel]);
-      const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getNext(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         input.setRequestWireState({
@@ -1039,6 +1140,7 @@ export async function runNonStreamingProviderLeg(
                 clientResponseFormat,
                 provider,
                 upstreamResponse: fallbackResult.response,
+                upstreamHttpSelection: fallbackResult.upstreamHttpSelection ?? null,
                 requestHeaders: fallbackResult.headers,
                 requestUrl: fallbackResult.url,
               });
@@ -1069,6 +1171,7 @@ export async function runNonStreamingProviderLeg(
             );
             return {
               kind: "error",
+              upstreamHttpSelection: fallbackResult.upstreamHttpSelection ?? null,
               result: errorResult as ChatCoreErrorResult,
               receipt,
               usage: null,
@@ -1088,6 +1191,7 @@ export async function runNonStreamingProviderLeg(
             const errorResult = legError(502, errMsg, new Error(errMsg));
             return {
               kind: "error",
+              upstreamHttpSelection,
               result: errorResult as ChatCoreErrorResult,
               receipt,
               usage: null,
@@ -1108,6 +1212,7 @@ export async function runNonStreamingProviderLeg(
           const errorResult = legError(502, errMsg, new Error(errMsg));
           return {
             kind: "error",
+            upstreamHttpSelection,
             result: errorResult as ChatCoreErrorResult,
             receipt,
             usage: null,
@@ -1128,6 +1233,7 @@ export async function runNonStreamingProviderLeg(
         const errorResult = legError(502, errMsg, new Error(errMsg));
         return {
           kind: "error",
+          upstreamHttpSelection,
           result: errorResult as ChatCoreErrorResult,
           receipt,
           usage: null,
@@ -1148,6 +1254,7 @@ export async function runNonStreamingProviderLeg(
       const errorResult = legError(502, errMsg, new Error(errMsg));
       return {
         kind: "error",
+        upstreamHttpSelection,
         result: errorResult as ChatCoreErrorResult,
         receipt,
         usage: null,
@@ -1171,6 +1278,7 @@ export async function runNonStreamingProviderLeg(
     clientResponseFormat,
     provider,
     upstreamResponse: executorResult.response,
+    upstreamHttpSelection: executorResult.upstreamHttpSelection ?? null,
     requestHeaders: executorResult.headers,
     requestUrl: executorResult.url,
   });

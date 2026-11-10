@@ -7,6 +7,7 @@ import {
   useModelVisibilityHandlers,
   type UseModelVisibilityHandlersReturn,
 } from "../hooks/useModelVisibilityHandlers";
+import type { NotificationStore } from "@/store/notificationStore";
 
 type HookResult = UseModelVisibilityHandlersReturn;
 
@@ -15,12 +16,18 @@ const t = ((key: string) => key) as ((key: string) => string) & {
 };
 t.has = () => false;
 
+// The hook takes the notification store itself, so the stub has to satisfy the
+// whole interface, not just the four methods the tests assert on.
 const notify = {
+  notifications: [],
+  addNotification: vi.fn(),
+  removeNotification: vi.fn(),
+  clearAll: vi.fn(),
   success: vi.fn(),
   error: vi.fn(),
   warning: vi.fn(),
   info: vi.fn(),
-};
+} satisfies NotificationStore;
 
 const baseProps = {
   providerId: "anthropic-compatible-cc-test",
@@ -30,6 +37,7 @@ const baseProps = {
   fetchProviderModelMeta: vi.fn().mockResolvedValue(undefined),
   fetchAliases: vi.fn().mockResolvedValue(undefined),
   notify,
+  requestConfirm: vi.fn().mockResolvedValue(true),
   t,
   selectedConnection: { id: "conn-1", provider: "anthropic-compatible-cc-test" },
   providerNode: { id: "anthropic-compatible-cc-test" },
@@ -118,5 +126,118 @@ describe("useModelVisibilityHandlers", () => {
       fetchMock.mock.calls.some(([url]) => String(url).startsWith("/api/provider-models"))
     ).toBe(false);
     expect(hook.get().modelTestStatus["claude-opus-4-8"]).toBe("error");
+  });
+
+  it("#17071 reports a skipped probe as info without marking the model failed", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      json: () =>
+        Promise.resolve({
+          status: "error",
+          skipped: true,
+          error: "Skipped: non-chat generation model",
+        }),
+    } as Response);
+
+    const hook = renderHook();
+
+    await act(async () => {
+      await hook.get().onTestModel("agnes-image-2.5-flash", "agnes/agnes-image-2.5-flash");
+    });
+
+    expect(notify.info).toHaveBeenCalledWith("Skipped: non-chat generation model");
+    expect(notify.error).not.toHaveBeenCalled();
+    expect(hook.get().modelTestStatus["agnes-image-2.5-flash"]).toBeUndefined();
+  });
+
+  it("#19338 editing another compat flag keeps an unset normalizeToolCallId unset", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue({ ok: true, json: () => Promise.resolve({}) } as Response);
+
+    let latestResult: HookResult | null = null;
+    function CustomWrapper() {
+      const result = useModelVisibilityHandlers({
+        ...baseProps,
+        providerId: "mistral",
+        providerStorageAlias: "mistral",
+        customMap: new Map<string, unknown>([
+          ["mistral-large-4", { id: "mistral-large-4", name: "Mistral Large 4" }],
+          ["pinned-off", { id: "pinned-off", name: "Pinned Off", normalizeToolCallId: false }],
+        ]),
+      });
+      React.useEffect(() => {
+        latestResult = result;
+      });
+      return null;
+    }
+
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const root = createRoot(el);
+    act(() => {
+      root.render(<CustomWrapper />);
+    });
+    roots.push({ root, el });
+
+    await act(async () => {
+      await latestResult!.saveModelCompatFlags("mistral-large-4", {
+        preserveOpenAIDeveloperRole: false,
+      });
+      await latestResult!.saveModelCompatFlags("pinned-off", {
+        preserveOpenAIDeveloperRole: false,
+      });
+    });
+
+    const bodies = fetchMock.mock.calls
+      .filter(([url]) => url === "/api/provider-models")
+      .map(([, init]) => JSON.parse(String((init as RequestInit).body)));
+    expect(bodies).toHaveLength(2);
+    // Unset stays unset, so the mistral runtime default is not pinned to false.
+    expect(bodies[0]).not.toHaveProperty("normalizeToolCallId");
+    expect(bodies[0].preserveOpenAIDeveloperRole).toBe(false);
+    // An explicit value already on the row is still carried over.
+    expect(bodies[1].normalizeToolCallId).toBe(false);
+  });
+
+  it("clears models for both storage alias and canonical providerId when they differ", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ cleared: true }),
+    } as Response);
+
+    let latestResult: HookResult | null = null;
+    function CustomWrapper() {
+      const result = useModelVisibilityHandlers({
+        ...baseProps,
+        providerId: "antigravity",
+        providerStorageAlias: "ag",
+      });
+      React.useEffect(() => {
+        latestResult = result;
+      });
+      return null;
+    }
+
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const root = createRoot(el);
+    act(() => {
+      root.render(<CustomWrapper />);
+    });
+    roots.push({ root, el });
+
+    await act(async () => {
+      await latestResult!.handleClearAllModels();
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/provider-models?provider=ag&all=true", {
+      method: "DELETE",
+    });
+    expect(fetchMock).toHaveBeenCalledWith("/api/provider-models?provider=antigravity&all=true", {
+      method: "DELETE",
+    });
+    expect(notify.success).toHaveBeenCalledWith("clearAllModelsSuccess");
   });
 });

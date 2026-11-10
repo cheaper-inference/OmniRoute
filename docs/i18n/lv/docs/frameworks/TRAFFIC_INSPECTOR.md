@@ -40,86 +40,86 @@ Traffic Inspector ir OmniRoute iebūvētais HTTPS datplūsmas atkļūdotājs —
 
 ## §2 Tveršanas režīmi
 
-Traffic Inspector atbalsta **5 vienlaicīgus datplūsmas tveršanas avotus**. Katru no tiem var neatkarīgi ieslēgt vai izslēgt. Katra `InterceptedRequest` (`src/mitm/inspector/types.ts`) lauks `source` satur vienu no šīm vērtībām: `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` vai `"tproxy"`.
+Traffic Inspector atbalsta **5 vienlaicīgus tveršanas avotus**. Katru no tiem var neatkarīgi ieslēgt un izslēgt. Katra `InterceptedRequest` (`src/mitm/inspector/types.ts`) lauks `source` ir `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` vai `"tproxy"`.
 
-### 1. režīms — AgentBridge (noklusējuma režīms, vienmēr ieslēgts)
+### 1. režīms — AgentBridge (noklusējuma, vienmēr ieslēgts)
 
 **Avots:** AgentBridge apstrādātāji (`src/mitm/handlers/base.ts`)
-**Mehānisms:** Katrs `intercept()` izsaukums klasē `MitmHandlerBase` pirms pārsūtīšanas izsauc `hookBufferStart()`, bet pēc pabeigšanas — `hookBufferUpdate()`. Papildu konfigurācija nav nepieciešama — tas darbojas, tiklīdz ir palaists AgentBridge.
+**Mehānisms:** Katrs `intercept()` izsaukums klasē `MitmHandlerBase` pirms pārsūtīšanas izsauc `hookBufferStart()`, bet pēc pabeigšanas — `hookBufferUpdate()`. Nav nepieciešama papildu konfigurācija — darbojas, tiklīdz ir palaists AgentBridge.
 **Tvērums:** 9 IDE aģenti, kas konfigurēti AgentBridge
-**Piezīme:** `InterceptedRequest` lauks `source` = `"agent-bridge"`
+**Piezīme:** `source` lauks objektā `InterceptedRequest` = `"agent-bridge"`
 
-### 2. režīms — Pielāgoti resursdatori (DNS novirzīšana)
+### 2. režīms — pielāgoti resursdatori (DNS novirzīšana)
 
 **Avots:** Lietotāja definēts resursdatoru saraksts (`inspector_custom_hosts` tabula)
-**Mehānisms:** Pievienojot resursdatoru lietotāja saskarnē, failam `/etc/hosts` tiek pievienots `127.0.0.1 <host>` (nepieciešams sudo). Esošais AgentBridge MITM serveris (ports 443) jaunajam resursdatoram dinamiski ģenerē SNI sertifikātu.
-**Tvērums:** Jebkura lietojumprogramma, kas izmanto pievienoto resursdatoru — lietojumprogrammas konfigurācija nav jāmaina
+**Mehānisms:** Pievienojot resursdatoru lietotāja saskarnē, ieraksts `127.0.0.1 <host>` tiek pievienots failam `/etc/hosts` (nepieciešams sudo). Esošais AgentBridge MITM serveris (ports 443) jaunajam resursdatoram dinamiski ģenerē SNI sertifikātu.
+**Tvērums:** Jebkura lietotne, kas izmanto pievienoto resursdatoru — lietotnes konfigurācija nav jāmaina
 **Piezīme:** `source` = `"custom-host"`
 
 Lietošanas piemēri:
 
-- `api.openai.com` pārraudzīšana no Python skriptiem
-- `my-internal-llm.company.com` atkļūdošana
-- Datplūsmas tveršana no mobilajām ierīcēm tajā pašā tīklā (izmantojot ARP viltošanu — papildu iespēja)
+- Pārraudzīt `api.openai.com` no Python skriptiem
+- Atkļūdot `my-internal-llm.company.com`
+- Tvert datplūsmu no mobilajām ierīcēm tajā pašā tīklā (izmantojot ARP viltošanu — pieredzējušiem lietotājiem)
 
 ### 3. režīms — HTTP_PROXY klausītājs (ports 8080)
 
-**Avots:** Lietojumprogrammas, kas izmanto `HTTP_PROXY`/`HTTPS_PROXY` vides mainīgos
+**Avots:** Lietotnes, kas izmanto `HTTP_PROXY`/`HTTPS_PROXY` vides mainīgos
 **Mehānisms:** Sekundārs klausītājs portā 8080 (`src/mitm/inspector/httpProxyServer.ts`), kas darbojas kā standarta tiešais HTTP/HTTPS starpniekserveris. Pieņem `CONNECT` tuneļus (HTTPS) un tiešus HTTP pieprasījumus.
-**Tvērums:** Jebkura lietojumprogramma, kas ņem vērā `HTTP_PROXY` vides mainīgo — nav jāmaina DNS un nav nepieciešams sudo
+**Tvērums:** Jebkura lietotne, kas ievēro `HTTP_PROXY` vides mainīgo — nav jāmaina DNS, nav nepieciešams sudo
 **Piezīme:** `source` = `"http-proxy"`
 
 ```bash
-# Ātra datplūsmas tveršana vienai komandai:
+# Vienas komandas ātrā tveršana:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Pastāvīga datplūsmas tveršana čaulas sesijā:
+# Pastāvīga tveršana čaulas sesijā:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS ierobežojums:** HTTPS `CONNECT` tuneļiem pēc noklusējuma tiek tverti tikai metadati (resursdators, ports un laiks) — TLS saturs netiek atšifrēts. Lai pilnībā pārbaudītu saturu, ieslēdziet opciju "Atšifrēt HTTPS starpniekservera režīmā" (jāiespējo apzināti; AgentBridge sertifikātam jābūt uzticamam).
+**TLS ierobežojums:** HTTPS tiek pārsūtīts caur vienkāršu `CONNECT` tuneli: klausītājs pārsūta šifrētos baitus nemainītus un reģistrē tikai metadatus (resursdatoru, portu, laika informāciju). Tas nekad neatšifrē HTTPS, un šim režīmam nav iestatījuma, ar kuru varētu ieslēgt atšifrēšanu. Lai tvertu HTTPS saturu, novirziet resursdatoru caur 1. režīmu (AgentBridge), 2. režīmu (pielāgoti resursdatori) vai 5. režīmu (TPROXY atšifrēšana).
 
-**Porta konflikts:** Ja ports 8080 jau tiek izmantots, AgentBridge atgriež statusu 409 ar strukturētu kļūdu. Mainiet portu, izmantojot vides mainīgo `INSPECTOR_HTTP_PROXY_PORT`.
+**Porta konflikts:** Ja ports 8080 tiek izmantots, AgentBridge atgriež 409 ar strukturētu kļūdu. Mainiet portu, izmantojot vides mainīgo `INSPECTOR_HTTP_PROXY_PORT`.
 
-### 4. režīms — Sistēmas mēroga starpniekserveris (papildu iespēja, jāiespējo apzināti)
+### 4. režīms — sistēmas mēroga starpniekserveris (pieredzējušiem lietotājiem, pēc izvēles)
 
-**Avots:** Operētājsistēmas līmeņa starpniekservera iestatījumi (attiecas uz visām ierīcē esošajām lietojumprogrammām)
+**Avots:** Operētājsistēmas līmeņa starpniekservera iestatījumi (attiecas uz visām lietotnēm datorā)
 **Mehānisms:** Izmanto operētājsistēmas API, lai visu HTTP/HTTPS datplūsmu novirzītu caur HTTP_PROXY klausītāju:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Tvērums:** Katra ierīcē esošā lietojumprogramma, kas ņem vērā sistēmas starpniekservera iestatījumus
+  **Tvērums:** Visas datorā esošās lietotnes, kas ievēro sistēmas starpniekservera iestatījumus
   **Piezīme:** `source` = `"system-proxy"`
 
 **Drošības mehānismi:**
 
-- Automātiskas atspējošanas taimeris (pēc noklusējuma 30 min.; konfigurējams, izmantojot `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Iepriekšējais sistēmas starpniekservera stāvoklis tiek saglabāts datubāzē un atjaunots, atceļot izmaiņas
-- Ja lietotājs atstāj lapu, kamēr šis režīms ir aktīvs, informācijas panelī tiek parādīts aicinājums "Notiek sistēmas starpniekservera iestatījumu atjaunošana"
-- Lietotāja saskarnē tiek rādīta emblēma `⚠ Papildu iespēja` un nepārprotamas apstiprināšanas izvēles rūtiņa
+- Automātiskās atspējošanas taimeris (pēc noklusējuma 30 min, konfigurējams ar `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Iepriekšējais sistēmas starpniekservera stāvoklis tiek saglabāts DB un atjaunots, veicot atsaukšanu
+- Ja lietotājs dodas prom, kamēr šis režīms ir aktīvs, informācijas panelī tiek rādīts aicinājums „Notiek sistēmas starpniekservera iestatījumu atsaukšana”
+- Lietotāja saskarnē tiek rādīta emblēma `⚠ Papildu` un nepārprotama apstiprinājuma izvēles rūtiņa
 
-### 5. režīms — TPROXY caurspīdīgā atšifrēšana (Linux, root, jāiespējo apzināti)
+### 5. režīms — TPROXY caurspīdīgā atšifrēšana (Linux, root, pēc izvēles)
 
-**Avots:** Kodola TPROXY un uz politikām balstīta maršrutēšana (`src/mitm/tproxy/`)
-**Mehānisms:** Jaunie lokālie izejošie TCP savienojumi ar mērķa portu (pēc noklusējuma `443`) tiek marķēti ķēdē `mangle OUTPUT`; `ip rule` novirza marķētās paketes uz lokālu piegādi, un ķēdes `mangle PREROUTING` mērķis `TPROXY` tās nodod caurspīdīgam (**IP_TRANSPARENT**) klausītājam (pēc noklusējuma ports `8443`). Klausītājs pārtrauc TLS savienojumu, izmantojot dinamiskas CA iestādes pēc pieprasījuma izsniegtu gala sertifikātu **katram SNI resursdatora nosaukumam**, tver atšifrēto datu apmaiņu un atkārtoti šifrētu pieprasījumu pārsūta sākotnējam galamērķim.
-**Tvērums:** **Patvaļīgi** galamērķa resursdatori mērķa portā — nav nepieciešama `/etc/hosts` viltošana, `HTTP_PROXY` vides mainīgais vai sistēmas mēroga starpniekservera iestatījumu mainīšana. Pārtvertā procesa konfigurācija nav jāmaina, taču tam ir jāuzticas dinamiskajai CA iestādei.
+**Avots:** Kodola TPROXY + uz politikām balstīta maršrutēšana (`src/mitm/tproxy/`)
+**Mehānisms:** Jaunie lokālie izejošie TCP savienojumi ar mērķa portu (pēc noklusējuma `443`) tiek marķēti ķēdē `mangle OUTPUT`, `ip rule` pāradresē marķētās paketes lokālai piegādei, un ķēdes `mangle PREROUTING` mērķis `TPROXY` tās nodod caurspīdīgam (**IP_TRANSPARENT**) klausītājam (pēc noklusējuma ports `8443`). Klausītājs pabeidz TLS savienojumu, izmantojot dinamiskas CA **pēc pieprasījuma katram SNI resursdatora nosaukumam izsniegtu** gala sertifikātu, tver atšifrēto apmaiņu un atkārtoti šifrētu pieprasījumu pārsūta sākotnējam galamērķim.
+**Tvērums:** **Patvaļīgi** galamērķa resursdatori mērķa portā — bez `/etc/hosts` viltošanas, bez `HTTP_PROXY` vides mainīgā un bez sistēmas mēroga starpniekservera izmaiņām. Pārtvertā procesa konfigurācija nav jāmaina, taču tam ir jāuzticas dinamiskajai CA.
 **Piezīme:** `source` = `"tproxy"`
 
-**Prasības:** Tikai Linux (**IP_TRANSPARENT** ir pieejams tikai Linux), **CAP_NET_ADMIN** iespēja (root) un vietējais N-API papildinājums, kas jābūvē ar C rīku ķēdi (`npm run build:native:tproxy`). Ja nepieciešamie komponenti nav pieejami, informācijas paneļa slēdzis tiek atspējots un tiek parādīts paskaidrojums "TPROXY atšifrēšanai nepieciešams Linux + root + vietējais papildinājums". Ugunsmūra kārtulas tiek lietotas un atsauktas transakcionāli (avārija nekad neatstāj `mangle` kārtulu), un tās tiek dzēstas pārstartēšanas laikā. Uz SO_MARK balstīts pretcilpas mehānisms novērš starpniekservera paša atkārtoti šifrētās pārsūtīšanas atkārtotu pārtveršanu.
+**Prasības:** Tikai Linux (**IP_TRANSPARENT** ir pieejams tikai Linux), iespēja **CAP_NET_ADMIN** (root) un vietējais N-API papildinājums, kas jābūvē ar C rīku ķēdi (`npm run build:native:tproxy`). Ja tas nav pieejams, informācijas paneļa pārslēgs ir atspējots un tiek rādīts rīka padoms „TPROXY atšifrēšanai ir nepieciešams Linux + root + vietējais papildinājums”. Ugunsmūra kārtulas tiek lietotas/atsauktas transakcionāli (avārija nekad neatstāj `mangle` kārtulu) un restartēšanas laikā tiek notīrītas. Uz SO_MARK balstīta cilpu novēršana nepieļauj paša starpniekservera atkārtoti šifrētās pārsūtīšanas atkārtotu pārtveršanu.
 
-Šī ir apjomīga apakšsistēma ar atsevišķu operatora rokasgrāmatu — pilnu ugunsmūra konfigurāciju, dinamisko CA katram SNI un uzticamības krātuves instalētāju, tikai lokālo maršrutu, pretcilpas mehānisma informāciju un konfigurācijas shēmu skatiet failā `docs/security/MITM-TPROXY-DECRYPT.md` (git; netiek kompilēts sadaļā `/docs`). Slēdzi vada `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (piezīme: maršruts atrodas zem AgentBridge prefiksa, nevis Traffic Inspector prefiksa).
+Šī ir apjomīga apakšsistēma ar atsevišķu operatora rokasgrāmatu — pilnu ugunsmūra konfigurācijas aprakstu, dinamisko CA katram SNI un uzticamības krātuves instalētāju, tikai lokālo maršrutu, informāciju par cilpu novēršanu un konfigurācijas shēmu skatiet failā `docs/security/MITM-TPROXY-DECRYPT.md` (git; netiek kompilēts direktorijā `/docs`). Pārslēgu vada `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (piezīme: maršruts atrodas zem AgentBridge prefiksa, nevis Traffic Inspector prefiksa).
 
 ### Tveršanas režīmu salīdzinājums
 
-| Režīms                | Iestatīšana                                |            Sudo?             | Tvērums                                | Piezīmes                                                                                                                               |
-| --------------------- | ------------------------------------------ | :--------------------------: | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge        | Automātiska                                | Vienreiz (sertifikāts+hosts) | 9 IDE aģenti                           | Ieslēgts pēc noklusējuma                                                                                                               |
-| 2. Pielāgoti hosts    | Ievade katram hostam                       |       Jā (hosts fails)       | Jebkura lietotne, kas izmanto šo hostu | Saglabāts DB                                                                                                                           |
-| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`                   |              Nē              | Lietotnes, kas ievēro vides mainīgos   | Ports 8080, pēc noklusējuma bez TLS atšifrēšanas                                                                                       |
-| 4. Sistēmas mēroga    | Pārslēgt + apstiprināt                     |              Jā              | Visas lietotnes ierīcē                 | Automātiski atspējo pēc 30 min                                                                                                         |
-| 5. TPROXY atšifrēšana | Pārslēgt (Linux + vietējais papildinājums) |  Jā (root + CA instalēšana)  | Jebkurš hosts mērķa portā              | Atšifrē patvaļīgus hostus; pēc noklusējuma izslēgts — skatiet `docs/security/MITM-TPROXY-DECRYPT.md` (git; nav kompilēts mapē `/docs`) |
+| Režīms                | Iestatīšana                               |           Sudo?            | Tvērums                                | Piezīmes                                                                                                                        |
+| --------------------- | ----------------------------------------- | :------------------------: | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge        | Automātiska                               |   Vienreiz (sert.+hosts)   | 9 IDE aģenti                           | Ieslēgts pēc noklusējuma                                                                                                        |
+| 2. Pielāgoti hosts    | Ievade katram hosts                       |      Jā (hosts fails)      | Jebkura lietotne, kas izmanto šo hosts | Saglabāts DB                                                                                                                    |
+| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`                  |             Nē             | Lietotnes, kas ievēro vidi             | Ports 8080; HTTPS tiek tunelēts ar CONNECT (tikai metadati, nekad netiek atšifrēts)                                             |
+| 4. Visai sistēmai     | Slēdzis + apstiprinājums                  |             Jā             | Visas lietotnes ierīcē                 | Automātiska atspējošana pēc 30 min                                                                                              |
+| 5. TPROXY atšifrēšana | Slēdzis (Linux + vietējais papildinājums) | Jā (root + CA instalēšana) | Jebkurš hosts mērķa portā              | Atšifrē patvaļīgus hosts; pēc noklusējuma izslēgts — skatiet `docs/security/MITM-TPROXY-DECRYPT.md` (git; nav iekļauts `/docs`) |
 
 ---
 
@@ -344,16 +344,16 @@ Eksportējiet, izmantojot `GET /api/tools/traffic-inspector/sessions/{id}/export
 
 ## §6 Drošība
 
-Traffic Inspector rāda **visu pārtverto HTTPS datplūsmu**, tostarp autorizācijas galvenes un pieprasījumu ķermeņus. Ir ieviesti šādi drošības pasākumi:
+Traffic Inspector rāda **visu pārtverto HTTPS datplūsmu**, tostarp autorizācijas galvenes un pieprasījumu pamattekstus. Ir ieviesti šādi kontroles mehānismi:
 
-| Drošības pasākums                    | Detalizēta informācija                                                                                                                                                                                                           |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                       | Visi maršruti un WebSocket galapunkts ir pieejami tikai no atgriezeniskās cilpas (to `routeGuard.ts` nodrošina pirms autentifikācijas)                                                                                           |
-| **Noslēpumu maskēšana**              | Lineārais `maskSecret()` skeneris pirms `TrafficBuffer.push()` aizklāj RFC 6750 Bearer akreditācijas datus, atslēgas ar pakalpojumu sniedzēja prefiksu un garus nejaušus marķierus                                               |
-| **Ķermeņa izmēra ierobežojums**      | Ķermeņi, kuru izmērs pārsniedz `INSPECTOR_MAX_BODY_KB` (pēc noklusējuma 1024 KB), tiek saīsināti ar paziņojumu `"(saīsināts veiktspējas dēļ)"`                                                                                   |
-| **Galveņu sanitizēšana**             | Nosaukumi tiek pārveidoti par mazajiem burtiem; kadrēšanas, starpniekmezglu un starpniekservera autentifikācijas galvenes tiek atmestas; sīkfaili tiek pilnībā aizklāti; akreditācijas datu vērtības tiek nodotas `maskSecret()` |
-| **CSP**                              | Traffic Inspector lapās tiek lietota stingra satura drošības politika, lai novērstu XSS, ko var izraisīt ievadīti atbilžu ķermeņi                                                                                                |
-| **Pēc noklusējuma bez persistences** | `TrafficBuffer` tiek glabāts atmiņā un zaudēts pēc servera restartēšanas. Sesijas tiek pastāvīgi saglabātas tikai tad, ja to ierakstīšana ir skaidri sākta                                                                       |
+| Kontroles mehānisms                           | Informācija                                                                                                                                                                                                                   |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                                | Visi maršruti un WebSocket galapunkts ir pieejami tikai lokālajā atgriezeniskajā saskarnē (tas tiek nodrošināts failā `routeGuard.ts` pirms autentifikācijas)                                                                 |
+| **Noslēpumu maskēšana**                       | Lineārais `maskSecret()` skeneris pirms `TrafficBuffer.push()` aizklāj RFC 6750 Bearer akreditācijas datus, ar pakalpojumu sniedzēja prefiksu apzīmētas atslēgas un garus necaurspīdīgus marķierus                            |
+| **Pamatteksta izmēra ierobežojums**           | Pamatteksti, kuru izmērs pārsniedz `INSPECTOR_MAX_BODY_KB` (pēc noklusējuma 1024 KB), tiek saīsināti, pievienojot paziņojumu `"(saīsināts veiktspējas dēļ)"`                                                                  |
+| **Galveņu sanitizēšana**                      | Nosaukumi tiek pārveidoti par mazajiem burtiem; kadrēšanas, posmu līmeņa un starpniekservera autentifikācijas galvenes tiek atmestas; sīkfaili tiek pilnībā aizklāti; akreditācijas datu vērtības tiek nodotas `maskSecret()` |
+| **CSP**                                       | Traffic Inspector lapās tiek izmantota stingra satura drošības politika, lai novērstu XSS, ko var izraisīt ievadīti atbilžu pamatteksti                                                                                       |
+| **Pēc noklusējuma bez pastāvīgas glabāšanas** | `TrafficBuffer` tiek glabāts atmiņā un zaudēts pēc servera restartēšanas. Sesijas tiek pastāvīgi saglabātas tikai tad, ja tās tiek nepārprotami ierakstītas                                                                   |
 
 ### Piemērotie stingrie noteikumi
 
@@ -364,9 +364,9 @@ Traffic Inspector rāda **visu pārtverto HTTPS datplūsmu**, tostarp autorizāc
 
 ### Zināmie ierobežojumi
 
-- **Sistēmas mēroga starpniekservera režīms** ietekmē visas datorā esošās lietotnes, tostarp VPN klientus un SSO. Vienmēr izmantojiet to kopā ar automātiskās atspējošanas taimeri. Neizmantojiet koplietojamos datoros.
-- **CONNECT tuneļa HTTPS**: 3. režīms (HTTP_PROXY) HTTPS galamērķiem uztver tikai tuneļa metadatus, ja vien nav iespējota TLS pārtveršana. Tas ir paredzēti — caurspīdīga uztveršana bez uzticības AgentBridge sertifikātam pārtrauktu TLS verifikāciju šajās lietotnēs.
-- **Dažos komponentos iekodētas virknes**: dažos lietotāja saskarnes komponentos (F7/F8) ir neliels skaits iekodētu virkņu, kuras vēl neaptver i18n atslēgas. Tās i18n trūkumu pārskatā ir dokumentētas kā zināms ierobežojums; tās tiks migrētas nākamajā darba posmā. Ietekmētās virknes ir dekoratīvas lietotāja saskarnes etiķetes, kuru tulkojums nav nepieciešams funkcionālai lietošanai.
+- **Sistēmas mēroga starpniekservera režīms** ietekmē visas datorā esošās lietojumprogrammas, tostarp VPN klientus un SSO. Vienmēr izmantojiet to kopā ar automātiskās atspējošanas taimeri. Neizmantojiet koplietojamos datoros.
+- **CONNECT tuneļa HTTPS**: 3. režīms (HTTP_PROXY) HTTPS galamērķiem tver tikai tuneļa metadatus un nekad tos neatšifrē. Tas ir paredzēti — atšifrēšanai būtu nepieciešams, lai katrs klients uzticētos MITM sertifikātam, tāpēc klausītājs saglabā pilnīgu HTTPS šifrēšanu no gala līdz galam. Izmantojiet AgentBridge, Custom Hosts vai TPROXY atšifrēšanu, ja nepieciešami HTTPS pamatteksti.
+- **Dažos komponentos ir cietkodētas virknes**: dažos UI komponentos (F7/F8) ir neliels skaits cietkodētu virkņu, kuras vēl neaptver i18n atslēgas. Tās ir dokumentētas kā zināms ierobežojums i18n nepilnību pārskatā; tās tiks migrētas nākamajā posmā. Ietekmētās virknes ir UI dekoratīvās etiķetes, kuru tulkošana nav nepieciešama funkcionālai lietošanai.
 
 ---
 
@@ -431,7 +431,7 @@ Kad buferis sasniedz `INSPECTOR_BUFFER_SIZE` (noklusējuma vērtība ir 1000), j
 
 ## §8 API atsauce
 
-Visi maršruti ir `LOCAL_ONLY` (pieejami tikai no lokālās atgriezeniskās cilpas) un `SPAWN_CAPABLE` (sistēmas starpniekservera komandas). Skatiet `src/server/authz/routeGuard.ts`.
+Visi maršruti ir `LOCAL_ONLY` (pieejami tikai lokālajā atgriezeniskajā saskarnē) un `SPAWN_CAPABLE` (sistēmas starpniekservera komandas). Skatiet `src/server/authz/routeGuard.ts`.
 
 Bāzes ceļš: `/api/tools/traffic-inspector/`
 
@@ -440,24 +440,24 @@ Bāzes ceļš: `/api/tools/traffic-inspector/`
 | Metode | Ceļš                        | Apraksts                                                                                     |
 | ------ | --------------------------- | -------------------------------------------------------------------------------------------- |
 | GET    | `/requests`                 | Uzskaitīt pieprasījumus (filtrējami: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET    | `/requests/{id}`            | Atsevišķa pieprasījuma informācija                                                           |
-| DELETE | `/requests`                 | Iztīrīt atmiņas buferi                                                                       |
+| GET    | `/requests/{id}`            | Detalizēta informācija par vienu pieprasījumu                                                |
+| DELETE | `/requests`                 | Notīrīt atmiņā glabāto buferi                                                                |
 | POST   | `/requests/{id}/replay`     | Atkārtoti izpildīt to pašu pieprasījumu, izmantojot OmniRoute maršrutētāju                   |
 | PUT    | `/requests/{id}/annotation` | Saglabāt vai atjaunināt pieprasījuma piezīmi                                                 |
 
 ### WebSocket
 
-| Metode | Ceļš  | Apraksts                                                                                                 |
-| ------ | ----- | -------------------------------------------------------------------------------------------------------- |
-| GET    | `/ws` | Tiešraides WebSocket plūsma. Savienojoties nosūta `snapshot`, pēc tam — `new`/`update`/`clear` notikumus |
+| Metode | Ceļš  | Apraksts                                                                                                          |
+| ------ | ----- | ----------------------------------------------------------------------------------------------------------------- |
+| GET    | `/ws` | Reāllaika WebSocket straume. Pēc savienojuma izveides nosūta `snapshot`, pēc tam `new`/`update`/`clear` notikumus |
 
 ### Eksportēšana
 
-| Metode | Ceļš          | Apraksts                                               |
-| ------ | ------------- | ------------------------------------------------------ |
-| GET    | `/export.har` | Eksportēt pašreizējo filtrēto sarakstu HAR 1.2 formātā |
+| Metode | Ceļš          | Apraksts                                          |
+| ------ | ------------- | ------------------------------------------------- |
+| GET    | `/export.har` | Eksportēt pašreizējo filtrēto sarakstu kā HAR 1.2 |
 
-### Pielāgotie resursdatori
+### Pielāgoti resursdatori
 
 | Metode | Ceļš            | Apraksts                                                 |
 | ------ | --------------- | -------------------------------------------------------- |
@@ -468,17 +468,16 @@ Bāzes ceļš: `/api/tools/traffic-inspector/`
 
 ### Tveršanas režīmi
 
-| Metode | Ceļš                           | Apraksts                                                                                                                  |
-| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/capture-modes`               | AgentBridge / pielāgoto resursdatoru / HTTP_PROXY / sistēmas starpniekservera režīmu stāvoklis un `tls-intercept` slēdzis |
-| POST   | `/capture-modes/http-proxy`    | Palaist/apturēt HTTP_PROXY klausītāju (`{action: "start"\|"stop"}`)                                                       |
-| POST   | `/capture-modes/system-proxy`  | Lietot/atjaunot visas sistēmas starpniekservera iestatījumus (`{action: "apply"\|"revert"}`)                              |
-| POST   | `/capture-modes/tls-intercept` | Pārslēgt HTTPS satura atšifrēšanu starpniekservera režīmā (`{enabled: boolean}`)                                          |
+| Metode | Ceļš                          | Apraksts                                                                                       |
+| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/capture-modes`              | AgentBridge / pielāgoto resursdatoru / HTTP_PROXY / sistēmas starpniekservera režīmu stāvoklis |
+| POST   | `/capture-modes/http-proxy`   | Palaist/apturēt HTTP_PROXY klausītāju (`{action: "start"\|"stop"}`)                            |
+| POST   | `/capture-modes/system-proxy` | Lietot/atsaukt sistēmas mēroga starpniekserveri (`{action: "apply"\|"revert"}`)                |
 
-> **TPROXY atšifrēšanu** (5. tveršanas režīms) pārvalda **atsevišķs** maršruts ar
-> AgentBridge prefiksu — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` —, nevis
+> **TPROXY atšifrēšanu** (5. tveršanas režīms) vada **atsevišķs** maršruts zem
+> AgentBridge prefiksa — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — nevis
 > zem `/api/tools/traffic-inspector/`. Skatiet
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nav kompilēts sadaļā `/docs`).
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; nav kompilēts direktorijā `/docs`).
 
 ### Sesijas
 
@@ -489,12 +488,12 @@ Bāzes ceļš: `/api/tools/traffic-inspector/`
 | GET    | `/sessions`                 | Uzskaitīt visas saglabātās sesijas                                 |
 | GET    | `/sessions/{id}`            | Sesijas momentuzņēmums (visi pieprasījumi)                         |
 | DELETE | `/sessions/{id}`            | Dzēst sesiju                                                       |
-| GET    | `/sessions/{id}/export.har` | Eksportēt sesiju HAR 1.2 formātā                                   |
+| GET    | `/sessions/{id}/export.har` | Eksportēt sesiju kā HAR 1.2                                        |
 
-### Iekšējā uzņemšana (D4 atkāpšanās mehānisms)
+### Iekšējā ievade (D4 atkāpšanās risinājums)
 
 | Metode | Ceļš               | Apraksts                                                                                                            |
 | ------ | ------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/internal/ingest` | Pieņem pārtverto pieprasījumu no `server.cjs` tranzīta ceļa; nepieciešama `INSPECTOR_INTERNAL_INGEST_TOKEN` galvene |
+| POST   | `/internal/ingest` | Pieņem pārtvertu pieprasījumu no `server.cjs` tranzīta ceļa; nepieciešama `INSPECTOR_INTERNAL_INGEST_TOKEN` galvene |
 
 Pilnas OpenAPI shēmas: `docs/openapi.yaml` → tags `Traffic Inspector`.

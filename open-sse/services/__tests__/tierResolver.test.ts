@@ -160,11 +160,9 @@ describe("TierResolver", () => {
 
   describe("classifyTier - caching", () => {
     it("returns cached result on second call", () => {
-      classifyTier("openai", "gpt-4o");
-      const t0 = performance.now();
-      classifyTier("openai", "gpt-4o");
-      const elapsed = performance.now() - t0;
-      expect(elapsed, "cache hit should be <0.1ms").toBeLessThan(0.1);
+      const first = classifyTier("openai", "gpt-4o");
+      const second = classifyTier("openai", "gpt-4o");
+      expect(second).toBe(first);
     });
 
     it("clearTierCache() forces re-classification", () => {
@@ -299,11 +297,12 @@ describe("TierResolver", () => {
 
     it("deriveNoAuthFreeProviders includes all chat-tier noAuth providers", () => {
       const derived = deriveNoAuthFreeProviders();
-      // opencode is one of the no-auth providers the bug report called out
-      expect(derived.includes("opencode"), "opencode should be in derived noAuth-free list").toBe(
+      expect(derived.includes("uncloseai"), "uncloseai should be in derived noAuth-free list").toBe(
         true
       );
       expect(derived.includes("duckduckgo-web")).toBe(true);
+      // The keyless `opencode` provider was removed (docs/reference/REMOVED_PROVIDERS.md).
+      expect(derived.includes("opencode")).toBe(false);
     });
 
     it("deriveNoAuthFreeProviders excludes non-LLM noAuth providers", () => {
@@ -320,10 +319,10 @@ describe("TierResolver", () => {
       expect(actual).toEqual(expected);
     });
 
-    it("classifyTier classifies opencode/big-pickle as free via noAuth derivation", () => {
-      // No provider override, no cost-based match (big-pickle has no KNOWN_MODEL_PRICING row).
-      // The fix is that 'opencode' is now in freeProviders.
-      const result = classifyTier("opencode", "big-pickle");
+    it("classifyTier classifies a noAuth provider model as free via noAuth derivation", () => {
+      // No provider override, no cost-based match (no KNOWN_MODEL_PRICING row).
+      // The fix is that noAuth providers are derived into freeProviders.
+      const result = classifyTier("uncloseai", "Lorbus/Qwen3.6-27B-int4-AutoRound");
       expect(result.tier).toBe(PROVIDER_TIER.FREE);
       expect(result.hasFreeTier).toBe(true);
     });

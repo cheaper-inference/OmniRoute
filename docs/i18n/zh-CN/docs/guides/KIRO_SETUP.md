@@ -98,26 +98,34 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ## API 密钥导入流程
 
-API 密钥身份验证适用于长期有效的 Kiro / AWS CodeWhisperer bearer 凭证。它不使用 OAuth 刷新，因此可避免共享 OIDC 会话失效。
+API 密钥身份验证适用于长期有效的 Kiro / AWS CodeWhisperer Bearer 凭证。它不使用 OAuth 刷新，因此可避免共享 OIDC 会话失效。
 
-### Dashboard
+### 控制面板
 
-1. 打开 **Dashboard -> Providers -> Kiro**。
-2. 选择 **API Key**。
-3. 粘贴 API 密钥以及可选的 AWS 区域（默认为 `us-east-1`）。
-4. OmniRoute 会验证密钥并保存连接。
+1. 打开 **控制面板 -> 提供者 -> Kiro**。
+2. 选择 **API 密钥**。
+3. 粘贴 API 密钥并选择 AWS 区域：**自动检测**（默认）、**美国东部
+   （弗吉尼亚北部）**或**欧洲（法兰克福）**。
+4. OmniRoute 会验证该密钥，并保存连接，将其固定到该密钥可用的区域。
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` 接受 `auto`（默认）、`us-east-1` 或 `eu-central-1`；任何其他值都会被拒绝，并返回 HTTP 400。
 
 ### 内部约定
 
-该 API 路由通过调用 `KiroService.validateApiKey()` 来验证密钥；此方法会针对与区域匹配的 CodeWhisperer/Amazon Q 端点使用 `ListAvailableProfiles`，并解析出 `profileArn`。
+该 API 路由通过调用 `KiroService.validateApiKey()` 来验证密钥，该方法会调用
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+（Amazon Q 接口用于 API 密钥推理的端点），每个区域的超时时间为 10 秒。在
+`auto` 模式下，它会先尝试 `us-east-1`，然后尝试 `eu-central-1`，并存储第一个接受该密钥的区域。如果密钥在所有候选区域中均被拒绝，则导入失败并返回
+HTTP 400。随后会尽力调用 `ListAvailableProfiles`，以发现可选的
+`profileArn`（AWS 会拒绝大多数 API 密钥对此接口的访问）。
 
 保存的连接使用：
 
@@ -132,7 +140,11 @@ curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
 }
 ```
 
-运行时，`KiroExecutor.buildHeaders()` 会将密钥作为 `Authorization: Bearer <key>` 发送，并添加 `tokentype: API_KEY`。配额/配置文件调用使用相同的标记，因此 AWS 会将该 bearer 视为长期有效的 API 密钥，而不是 OIDC 或社交登录访问令牌。
+在运行时，`KiroExecutor.buildHeaders()` 会将密钥作为
+`Authorization: Bearer <key>` 发送，并添加 `tokentype: API_KEY`。配额/配置文件调用使用相同的标记，使 AWS 将该 Bearer 凭证视为长期有效的 API 密钥，而不是
+OIDC 或社交登录访问令牌。`KiroExecutor.execute()` 仅将 API 密钥推理请求发送到
+`https://q.<region>.amazonaws.com/generateAssistantResponse`——包括 `us-east-1`——因为 Kiro IDE 网关会拒绝 `TokenType=API_KEY`，而
+`codewhisperer.us-east-1` 会将 API 密钥负载视为无效的请求正文并拒绝（HTTP 400）。
 
 ---
 

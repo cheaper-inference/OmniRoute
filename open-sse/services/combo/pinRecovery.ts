@@ -42,6 +42,12 @@ export function buildRecoveryHint(
         next_step:
           "Every target in this combo failed with a quota or account-balance exhaustion error. Top up the account/wallet or switch to a combo/provider with available quota — this will not recover on retry.",
       };
+    case "authentication_rejected":
+      return {
+        action: "switch-combo",
+        next_step:
+          "Every combo target was rejected for authentication or permission. Reconnect accounts in /dashboard/providers or switch combos.",
+      };
     case "all_models_failed":
       return {
         action: "try-auto",
@@ -85,6 +91,31 @@ export function buildRecoveryHint(
           "The combo failed transiently. Retry the same combo, or switch to model: auto if the failure repeats.",
       };
   }
+}
+
+/**
+ * #18360: pick the terminalReason for the "every target failed" exit. A raw
+ * upstream error string falls through to buildRecoveryHint's default "retry"
+ * branch, which is wrong for durable failures, so two stable reasons are
+ * promoted first. Quota keeps precedence (#10966). Authentication is promoted
+ * only when a failure was actually observed and every recorded outcome is
+ * auth; mixed or empty outcome lists keep the raw error.
+ */
+export function resolveAllFailedTerminalReason(state: {
+  observedFailure: boolean;
+  allObservedFailuresQuota: boolean;
+  comboErrors: ReadonlyArray<{ kind: string }>;
+  lastError: string | null;
+}): string {
+  if (state.observedFailure && state.allObservedFailuresQuota) return "quota_exhausted";
+  if (
+    state.observedFailure &&
+    state.comboErrors.length > 0 &&
+    state.comboErrors.every((entry) => entry.kind === "auth")
+  ) {
+    return "authentication_rejected";
+  }
+  return state.lastError ?? "all_models_failed";
 }
 
 /**
@@ -149,7 +180,12 @@ export function buildEmptyComboTargetsPayload(
 
 /** Which weighted-selection gate dropped a target before dispatch. */
 export type PreDispatchExclusionReason =
-  "circuit_open" | "provider_cooldown" | "model_lockout" | "free_tier_drained" | "unavailable";
+  | "circuit_open"
+  | "provider_cooldown"
+  | "connection_cooldown"
+  | "model_lockout"
+  | "free_tier_drained"
+  | "unavailable";
 
 export interface PreDispatchExclusion {
   provider: string;
@@ -168,6 +204,7 @@ export interface PreDispatchExclusion {
 const TEMPORARY_EXCLUSION_REASONS: ReadonlySet<PreDispatchExclusionReason> = new Set([
   "circuit_open",
   "provider_cooldown",
+  "connection_cooldown",
   "model_lockout",
 ]);
 
@@ -207,7 +244,7 @@ export function buildAllTargetsCoolingDownResponse(
     known.length > 0 ? Math.max(1, Math.ceil(Math.min(...known) / 1000)) : undefined;
   const response = errorResponseWithComboDiagnostics(
     503,
-    `Service temporarily unavailable: every target in this combo is cooling down (model lockout, circuit breaker or provider cooldown): ${formatPreDispatchExclusions(cooling)}`,
+    `Service temporarily unavailable: every target in this combo is cooling down (model lockout, circuit breaker, provider or connection cooldown): ${formatPreDispatchExclusions(cooling)}`,
     {
       poolSize: exclusions.length,
       attempted: 0,

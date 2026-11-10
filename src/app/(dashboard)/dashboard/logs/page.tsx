@@ -1,10 +1,26 @@
 "use client";
 
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ConfirmModal, RequestLoggerV2 } from "@/shared/components";
 import { useTranslations } from "next-intl";
-import { buildLogExportUrl, readLogExportTruncation } from "@/shared/utils/logExport";
+import { Alert } from "@omniroute/ui-kit/alert";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@omniroute/ui-kit/dropdown-menu";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import {
+  buildLogExportUrl,
+  readLogExportTruncation,
+  readLogExportEmittedCount,
+} from "@/shared/utils/logExport";
 
 const TIME_RANGES = [
   { label: "1h", hours: 1 },
@@ -45,19 +61,8 @@ function LogsPageContent() {
   const [cleaningHistory, setCleaningHistory] = useState(false);
   const [cleanHistoryStatus, setCleanHistoryStatus] = useState<string | null>(null);
   const [requestLogKey, setRequestLogKey] = useState(0);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const requestLoggerRef = useRef<any>(null);
   const t = useTranslations("logs") as LogsTranslator;
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowExport(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   async function handleExport(hours: number) {
     setExporting(true);
@@ -68,8 +73,11 @@ function LogsPageContent() {
       // #13999: ask for the server's maximum row cap instead of silently getting the 10k default.
       const res = await fetch(buildLogExportUrl(hours, logType));
       if (!res.ok) throw new Error(t("exportFailed"));
-      const truncation = readLogExportTruncation(res.headers);
       const blob = await res.blob();
+      const truncation = readLogExportTruncation(
+        res.headers,
+        await readLogExportEmittedCount(blob)
+      );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -136,108 +144,67 @@ function LogsPageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex-shrink-0 flex items-center justify-between gap-4 flex-wrap">
-        <h2 className="text-lg font-semibold text-text-main">{t("requestLogs")}</h2>
-
-        <div className="flex items-center gap-2">
-          <button
-            id="clean-log-history-btn"
-            onClick={() => setShowCleanHistory(true)}
-            disabled={cleaningHistory}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-              border border-red-500/30 bg-red-500/10 text-red-700 hover:bg-red-500/15
-              hover:border-red-500/50 dark:text-red-300 dark:hover:bg-red-500/20 transition-all duration-200
-              disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
+      <PageHeader
+        compact
+        title={t("requestLogs")}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              id="clean-log-history-btn"
+              variant="outline"
+              icon="delete_sweep"
+              onClick={() => setShowCleanHistory(true)}
+              disabled={cleaningHistory}
+              className="border-error/30 text-error hover:bg-error/10"
             >
-              <path
-                d="M6 2h4m-5 2h6m-7 0h8m-1 0-.5 9a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1L5 4m2 3v4m2-4v4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            {logsText(t, "cleanHistoryButton", "Clean history")}
-          </button>
+              {logsText(t, "cleanHistoryButton", "Clean history")}
+            </Button>
 
-          <div className="relative" ref={dropdownRef}>
-            <button
-              id="export-logs-btn"
-              onClick={() => setShowExport(!showExport)}
-              disabled={exporting}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-                bg-[var(--card-bg,#1e1e2e)] border border-[var(--border,#333)]
-                text-[var(--text-secondary,#aaa)] hover:text-[var(--text-primary,#fff)]
-                hover:border-[var(--accent,#7c3aed)] transition-all duration-200
-                disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  d="M8 2v8m0 0l-3-3m3 3l3-3M3 12h10"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              {exporting ? t("exporting") : t("export")}
-            </button>
-
-            {showExport && (
-              <div
-                className="absolute right-0 top-full mt-1 z-50 min-w-[140px] rounded-lg
-                  bg-[var(--card-bg,#1e1e2e)] border border-[var(--border,#333)]
-                  shadow-xl overflow-hidden animate-in fade-in"
-              >
-                <div className="px-3 py-2 text-xs text-[var(--text-muted,#666)] border-b border-[var(--border,#333)] font-medium">
-                  {t("timeRange")}
-                </div>
+            {/* Kit DropdownMenu (Radix): outside click, Escape and focus return are its own. */}
+            <DropdownMenu open={showExport} onOpenChange={setShowExport}>
+              <DropdownMenuTrigger asChild>
+                <Button id="export-logs-btn" variant="outline" icon="download" disabled={exporting}>
+                  {exporting ? t("exporting") : t("export")}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[160px]">
+                <DropdownMenuLabel>{t("timeRange")}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 {TIME_RANGES.map((range) => (
-                  <button
+                  <DropdownMenuItem
                     key={range.hours}
                     id={`export-${range.hours}h-btn`}
-                    onClick={() => handleExport(range.hours)}
-                    className="w-full px-3 py-2 text-sm text-left hover:bg-[var(--hover-bg,#2a2a3e)]
-                      text-[var(--text-secondary,#aaa)] hover:text-[var(--text-primary,#fff)]
-                      transition-colors flex items-center justify-between"
+                    onSelect={() => handleExport(range.hours)}
+                    shortcut={range.hours === 24 ? t("defaultRange") : undefined}
                   >
-                    <span>{t("lastNHours", { hours: range.label })}</span>
-                    <span className="text-xs text-[var(--text-muted,#666)]">
-                      {range.hours === 24 ? t("defaultRange") : ""}
-                    </span>
-                  </button>
+                    {t("lastNHours", { hours: range.label })}
+                  </DropdownMenuItem>
                 ))}
-              </div>
-            )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {exportStatus && (
-        <div
+        <Alert
           id="export-logs-status"
-          role="status"
-          className="flex-shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300"
-        >
-          {exportStatus}
-        </div>
+          variant="warning"
+          icon={<Icon name="warning" size={16} />}
+          dismissLabel={t("close")}
+          onDismiss={() => setExportStatus(null)}
+          description={exportStatus}
+        />
       )}
 
       {cleanHistoryStatus && (
-        <div className="flex-shrink-0 rounded-lg border border-[var(--border,#333)] bg-[var(--card-bg,#1e1e2e)] px-4 py-3 text-sm text-[var(--text-secondary,#aaa)]">
-          {cleanHistoryStatus}
-        </div>
+        <Alert
+          variant="default"
+          icon={<Icon name="info" size={16} />}
+          dismissLabel={t("close")}
+          onDismiss={() => setCleanHistoryStatus(null)}
+          description={cleanHistoryStatus}
+        />
       )}
 
       <div className="min-h-0">
@@ -268,11 +235,12 @@ function LogsPageContent() {
 }
 
 export default function LogsPage() {
+  const t = useTranslations("logs");
   return (
     <Suspense
       fallback={
         <div className="flex items-center justify-center py-12 text-text-muted text-sm">
-          Loading logs...
+          {t("loading")}
         </div>
       }
     >

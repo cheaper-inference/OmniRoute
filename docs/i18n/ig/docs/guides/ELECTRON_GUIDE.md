@@ -4,92 +4,99 @@
 
 ---
 
-> **Isi iyi nke eziokwu:** oghere ọrụ `electron/`
-> **Mmelite ikpeazụ:** 2026-06-28 — v3.8.40
+> **Isi mmalite nke eziokwu:** `electron/` ọrụ** Emelitere ikpeazụ:** 2026-06-28 — v3.8.40
 
-OmniRoute na-eweta ngwa desktọọpụ na-arụ ọrụ n'elu nyiwe dị iche iche (Windows / macOS / Linux), nke e ji
-**Electron 41** + **electron-builder 26.10** wuo. Ngwa desktọọpụ ahụ na-amalite sava standalone nke Next.js
-dị ka child process, na-atụnye `BrowserWindow` aka na ya, ma na-agbakwunye
-tray sistemụ, ihe mmelite akpaka, àkwà mmiri IPC, na mbido nzuzo na-achọghị nhazi.
+OmniRoute na-ebunye ngwa desktọpụ cross-platform (Windows / macOS / Linux) arụnyere na ya**Electron 41** +** Onye nrụpụta elektrọn 26.10** . Ngwa desktọpụ ahụ na-eme ka ihe nkesa Next.js kwụ ọtọ dị ka usoro nwata, tụọ aka `BrowserWindow` na ya, wee gbakwunye tray sistemu, ihe na-emelite akpaaka, akwa IPC, yana bootstrap nzuzo efu.
 
-## Nhazi usoro
+## Nhazi
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Main process Electron (electron/main.js)     │
-│ ├─ Mkpọchi otu instance                      │
-│ ├─ Child process: sava standalone Next.js    │
-│ │   (e ji Node runtime nke Electron malite)  │
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ Tray sistemụ + menu context               │
-│ ├─ Mmelite akpaka site na electron-updater   │
-│ ├─ Content Security Policy (headers session) │
-│ └─ Mbido nzuzo (JWT / API_KEY_SECRET)        │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-            ↕ Àkwà mmiri IPC (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Renderer (dashboard Next.js)                 │
-│   window.electronAPI.* (contextIsolation)    │
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
-## Ụdị
+## Ụdịdị
 
-E kwadoro site na `electron/package.json`:
+Ekwenyere na `electron/package.json`:
 
-| Ngwugwu            | Ụdị                                                            |
+| ngwugwu            | Ụdị                                                            |
 | ------------------ | -------------------------------------------------------------- |
 | `electron`         | `^43.4.1`                                                      |
 | `electron-builder` | `^26.15.3`                                                     |
 | `electron-updater` | `^6.8.9`                                                       |
-| `better-sqlite3`   | root `^13.0.2` (Node-API prebuilds — enweghị Electron rebuild) |
+| `better-sqlite3`   | mgbọrọgwụ `^13.0.2` (Node-API prebuilds — no Electron rebuild) |
 | Ụdị ngwa           | `3.8.0`                                                        |
-| ID ngwa            | `online.omniroute.desktop`                                     |
+| Ngwa id            | `online.omniroute.desktop`                                     |
 | Aha ngwaahịa       | `OmniRoute`                                                    |
 
-## Scripts (`package.json` nke root)
+## Ederede (mgbọrọgwụ `package.json`)
 
-| Script                            | Ebumnuche                                                                         |
-| --------------------------------- | --------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Na-amalite `npm run dev` + na-eche `localhost:20128` + na-ebido Electron          |
-| `npm run electron:build`          | Na-ewu Next.js, emesịa na-agba `electron-builder` maka OS dị ugbu a               |
-| `npm run electron:build:win`      | Na-ewu installer NSIS Windows + portable (x64)                                    |
-| `npm run electron:build:mac`      | Na-ewu DMG macOS (Intel + Apple Silicon)                                          |
-| `npm run electron:build:linux`    | Na-ewu Linux AppImage + DEB (x64 + arm64)                                         |
-| `npm run electron:smoke:packaged` | Na-ebido binary e kwakọtara ma na-anwale `/login` maka HTTP 200, emesịa mechie ya |
+| Ederede                           | Ebumnuche                                                                |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `npm run electron:dev`            | Malite `npm run dev` + na-eche `localhost:20128` + malite Electron       |
+| `npm run electron:build`          | Na-ewuli Next.js wee na-agba `electron-builder` maka OS dị ugbu a        |
+| `npm run electron:build:win`      | Na-ewuli Windows NSIS installer + obere (x64)                            |
+| `npm run electron:build:mac`      | Na-ewuli macOS DMG (Intel + Apple Silicon)                               |
+| `npm run electron:build:linux`    | Na-ewuli Linux AppImage + DEB (x64 + aka64)                              |
+| `npm run electron:smoke:packaged` | Ewelite ọnụọgụ abụọ ngwugwu na nyocha `/login` maka HTTP 200, wee mechie |
 
-Oghere ọrụ `electron/` na-ewepụtakwa:
+Oghere ọrụ `electron/` na-ekpughekwa:
 
 - `npm run prepare:bundle` — na-agba `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — mwube macOS nke otu architecture
-- `npm run pack` — mwube naanị directory maka nnwale mpaghara (enweghị installer)
+- `npm run build:mac-x64` / `build:mac-arm64` — otu-arch macOS -ewuli elu
+- `npm run pack` — ndekọ-na-ewu maka nnwale mpaghara (enweghị installer)
 
-## Nhazi Ndekọ
+## Ngwungwu oge ịgba ọsọ nhọrọ
+
+Ndị na-ewu ụlọ desktọpụ nwere ike ibipụta ebe nchekwa oge ojiri gaa n'akụkụ ndị nrụnye ha. Ịkwụ ụgwọ nkesa arụnyere nwere `optional-packs.index.json` (n'okpuru `resources/app` na Windows na Linux). Maka ntinye `browser-runtime`, gụọ `packs[].tarball` wee budata** aha faịlụ ahụ kpọmkwem site n'otu mwepụta ahụ** . Aha Archive gụnyere mgbari SHA-256 ; ụlọ dị iche iche nwere ike ịchọ ebe nchekwa dị iche iche. Debe aha faịlụ ebudatara agbanweghị.
+
+Detuo ndeksi ngwa arụnyere na ebe nchekwa ahọpụtara ka ọ bụrụ otu ndekọ, wee jiri CLI site na otu mwepụta ahụ:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` na-egosiputa nrụnye na steeti nkwenye, ọ bụghị aha faịlụ Archive. Ndekọ ekpokọtara na-ahọrọ ebe nchekwa. Nwụnye na-enyocha checksum Archive ya tupu mwepụta ya na ngwungwu checksum tupu edochie mkpọ arụnyere. Ọ na-agụ faịlụ mpaghara; ọ naghị ebudata ebe nchekwa na-efu efu. Malitegharịa ekwentị ngwa mgbe echichi. Ọ bụrụ na ntọhapụ ahụ enweghị akụrụngwa dabara na ya, ngwugwu nhọrọ adịghị site na akụ ntọhapụ ahụ.
+
+## Nhazi ndekọ
 
 ```
 electron/
-├── package.json              # Ndabere Electron + nhazi electron-builder
-├── main.js                   # Usoro bụ́ isi (24 KB — lee nkọwa ndị dị n'okpuru)
-├── preload.js                # Njikọ IPC nke contextBridge
-├── types.d.ts                # Ụdị AppInfo / ServerStatus / ElectronAPI
-├── README.md                 # Ihe ndetu dị n'ime ebe ọrụ
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # Ihe electron-builder mepụtara (git leghaara ya anya)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Na-akwadebe ngwugwu .next/electron-standalone
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Nnwale smoke mgbe e wuchara ya
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Ma `main.js` ma `preload.js` bụ **faịlụ CommonJS `.js`**, ọ bụghị TypeScript. Nkọwa ụdị
-n'akụkụ renderer dị na `electron/types.d.ts`.
+Ma `main.js` na `preload.js` bụ**CommonJS `.js` faịlụ** , ọ bụghị TypeScript. Mpịnye-n'akụkụ ihe na-ebi na `electron/types.d.ts`.
 
-## Njikọ IPC (`preload.js`)
+## IPC Bridge (`preload.js`)
 
-Preload ahụ na-ekpughe API e tinyere na ndepụta ikike na `window.electronAPI` site na iji `contextBridge`
-ya na `contextIsolation: true` na `nodeIntegration: false`.
+Ibububu a na-ekpughe API edobere aha na `window.electronAPI` site na iji `contextBridge` nwere `contextIsolation: true` na `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -108,107 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-Ụzọ ndị e kpughere:
+Ụzọ ekpughere:
 
-| Oku renderer                                                      | Ụdị                               |
-| ----------------------------------------------------------------- | --------------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                            |
-| `openExternal(url)`                                               | invoke                            |
-| `getDataDir()`                                                    | invoke                            |
-| `restartServer()`                                                 | invoke                            |
-| `getAppVersion()`                                                 | invoke                            |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                            |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                              |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (na-eweghachite disposer) |
+| Oku oku                                                           | Ụdị                        |
+| ----------------------------------------------------------------- | -------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | kpọkuo                     |
+| `openExternal(url)`                                               | kpọkuo                     |
+| `getDataDir()`                                                    | kpọkuo                     |
+| `restartServer()`                                                 | kpọkuo                     |
+| `getAppVersion()`                                                 | kpọkuo                     |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | kpọkuo                     |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | zipu                       |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | nata (onye na-eweghachite) |
 
-Ndị enyemaka receive na-eweghachite **ọrụ disposer** kama ịdabere na
-`removeAllListeners` — nke a na-egbochi ndị listener ịba ụba mgbe React components
-na-eme remount.
+Ndị na-enyere aka na-anata laghachi a** ọrụ mkpofu** kama ịdabere na `removeAllListeners` — nke a na-egbochi mkpokọta ndị na-ege ntị mgbe akụrụngwa React na-ebuli elu.
 
-## Usoro Ndụ Sava
+## Sava Lifecycle
 
-`main.js` na-eji Electron Node runtime malite ngwugwu Next.js standalone ozugbo
-iji zere ọdịiche ABI nke native-module na Node nke sistemụ:
+`main.js` na-ewepụta ngwugwu Next.js kwụ ọtọ ozugbo na oge ọsọ Electron Node iji zere ndakọrịta ABI nke ala-modul na sistemụ Node:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-Isi ihe ndị pụtara ìhè:
+Isi ihe:
 
-- `waitForServer()` na-enyocha URL ugboro ugboro ruo 30 s tupu o gosi windo ahụ (enweghị ihuenyo efu mgbe mmalite oyi mere).
-- `stdio: "pipe"` na-ejide stdout/stderr; ahịrịokwu njikere (`Ready` / `listening`) na-ezipụ `server-status: running` site na IPC.
-- `before-quit` na-echere ruo 5 s maka SIGTERM ka ọ mechie nke ọma (WAL checkpoint), ma mesịa zipụ SIGKILL.
-- Onye na-agbanwe ọdụ ụgbọ mmiri dị na tray (`20128`, `3000`, `8080`) na-akwụsị ma malitegharịa sava ahụ, ma mesịa bugharịa BrowserWindow ọzọ.
+- `waitForServer()` na-eme ntuli aka URL ruo 30 s tupu igosi windo (enweghị ihuenyo oghere na mmalite oyi).
+- `stdio: "pipe"` na-ejide stdout/stderr; Akpaokwu dị njikere (`Ready` / `listening`) emit `server-status: running` n'elu IPC.
+- `before-quit` chere ruo 5 s maka amara SIGTERM ( ebe nlele WAL ) wee zipu SIGKILL.
+- Ọdụ ụgbọ mmiri na tray (`20128`, `3000`, `8080`) kwụsịrị wee malitegharịa ihe nkesa, wee bugharịa BrowserWindow.
 
-## Nkwalite Nzuzo Na-enweghị Nhazi
+## Bootstrap nzuzo efu-config
 
-Mgbe e mere mmalite mbụ, usoro bụ isi na-emepụta ma na-echekwa nzuzo ndị na-adịghị:
+Na mbido mbụ, usoro bụ isi na-ewepụta onwe ma na-aga n'ihu na-efu ihe nzuzo:
 
-| Nzuzo                    | Isi mmalite                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                       |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (ọ na-ajụ ma ọ bụrụ na kredenshial ezoro ezo adịlarị) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                       |
+| Nzuzo                    | Isi mmalite                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                           |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (jụ ma ọ bụrụ na nzere ezoro ezo adịlarị) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                           |
 
-A na-echekwa ha na `<DATA_DIR>/server.env`. A na-ekpebi `DATA_DIR` dị ka:
+Na-aga n'ihu `<DATA_DIR>/server.env`. `DATA_DIR` kpebiri na:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` ma ọ bụ `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Windo na Tray
+## Nyochaa faịlụ gburugburu
 
-- `BrowserWindow`: 1400×900 (opekempe 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, bọtịnụ traffic-light na `{ x: 16, y: 16 }`.
-- Windows/Linux: ogwe aha nke sistemụ.
-- Bọtịnụ mmechi na-ewedata ya na tray; menu tray nwere **Mepee OmniRoute**, **Mepee Dashboard** (ihe nchọgharị mpụga), menu nta **Ọdụ Ọdụm Sava**, **Lelee Mmelite**, **Kwụsị**.
+Tupu ịmalite ihe nkesa, usoro bụ isi (`getPreferredEnvFilePath()` na `electron/main.js`) na-ahọrọ** otu** `.env` faịlụ: nke mbụ n'ime ndị a dị.
 
-## Iwu Nchekwa Ọdịnaya
+1. `$DATA_DIR/.env`, mgbe emebere `DATA_DIR` na gburugburu ebe eji malite ngwa ahụ.
+2. `<resolved DATA_DIR>/.env`, na-eji otu ndabara dị n'elu: `%APPDATA%\omniroute\.env` na Windows, `$XDG_CONFIG_HOME/omniroute/.env` ma ọ bụ `~/.omniroute/.env` na Linux na macOS.
+3. `.env` na ndekọ ọrụ usoro.
 
-A na-ahazi ya site na `session.defaultSession.webRequest.onHeadersReceived`. Ntụziaka ndị dị mkpa:
+Isi usoro na-agụ naanị faịlụ ahụ; A naghị ejikọta ndị na-aga ime emechaa. A na-ewukwa gburugburu ebe nkesa na nke a ụzọ (nke mbụ kachasị elu):
+
+1. Gburugburu usoro Electron (mgbanwe ketara site na ihe ọ bụla ewepụtara ngwa ahụ).
+2. faịlụ `.env` ahọpụtara.
+3. `<DATA_DIR>/server.env` (ihe nzuzo bootstrap n'elu).
+
+A na-ejide gburugburu usoro ahụ mgbe ngwa ahụ malitere, ya mere usoro ma ọ bụ gburugburu ebe obibi onye ọrụ setịpụrụ mgbe ngwa ahụ na-arụ ọrụ (gụnyere mgbe ọ na-anọdụ na tray mgbe emechichara windo ya) anaghị erute ihe nkesa ahụ ruo mgbe ngwa ahụ kwụsịrị ma malitegharịa. Maka mkpịsị ọsọ ọsọ dị ka `CONTEXT_LENGTH_<PROVIDER>` (lee [mgbanwe gburugburu ebe obibi: Ogologo onodu onye na-enye ihe](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), họrọ faịlụ `.env`, wee kwụsị kpamkpam (trị,** Kwụsị** ) ma malitegharịa.
+
+## Ohere & Tray
+
+- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, okporo ụzọ-ọkụ na `{ x: 16, y: 16 }`.
+- Windows/Linux: mmanya aha obodo.
+- Bọtịnụ mechie na-ebelata ka ọ bụrụ tray; menu tray nwere** Mepee OmniRoute** ,** Mepee dashboard** (nchọgharị mpụga),** Port nke sava** submenu,** Lelee maka mmelite** ,** Kwụsị** .
+
+## Amụma Nchekwa Ọdịnaya
+
+Tọọ site na `session.defaultSession.webRequest.onHeadersReceived`. Ntuziaka ama ama:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Ọnọdụ mmepe na-agbakwunye `'unsafe-eval'` naanị na `script-src`
+- Ụkpụrụ Dev na-agbakwụnye `'unsafe-eval'` na `script-src` naanị
 
-## Mmelite Akpaka
+## Melite onwe ya
 
-Ọ na-eji `electron-updater` ya na onye na-eweta GitHub (`diegosouzapw/OmniRoute`).
+Na-eji `electron-updater` na onye na-eweta GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- A na-ebuga mmemme gaa na renderer site na IPC `update-status`:
-  `checking`, `available`, `not-available`, `downloading` (ya na `percent`), `downloaded`, `error`
-- `installUpdate()` na-akwụsị sava, wee kpọọ `autoUpdater.quitAndInstall()`
-- A na-amafere ya n'ọnọdụ mmepe (`!app.isPackaged`)
+- Ihe omume ezigara onye nrụpụta site na `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (ya na `percent`), `downloaded`, `error`
+- `installUpdate()` na-egbu ihe nkesa wee kpọọ `autoUpdater.quitAndInstall()`
+- Mafere na ọnọdụ dev (`!app.isPackaged`)
 
-## Usoro Nrụpụta
+## Mee Pipeline
 
-1. `npm run build` → Next.js standalone n'ime `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → na-ahazi ya ọzọ n'ime `.next/electron-standalone` ma na-edegharị ụzọ zuru oke dị n'ime `server.js` + `required-server-files.json` ka e nwee ike ibugharị ngwugwu ahụ.
-3. `electron-builder` na-achịkọta `main.js`, `preload.js`, `node_modules`, na `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → Next.js guzoro na `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → ga-abanyekwa n'ime `.next/electron-standalone` wee degharịa ụzọ zuru oke n'ime `server.js` + `required-server-files.json` ya mere enwere ike ibugharị ngwugwu ahụ.
+3. `electron-builder` packages `main.js`, `preload.js`, `node_modules`, and `extraResources: { ../.next/electron-standalone → app }`.
 
-### Ebe nrụpụta na-elekwasị anya
+### Wulite ebumnuche
 
-| OS      | Ebumnuche                                  |
-| ------- | ------------------------------------------ |
-| Windows | Ihe nrụnye NSIS + nke a na-ebugharị (x64)  |
-| macOS   | DMG (Intel + arm64, dọrọ-gaa-Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)               |
+| OS      | Ezubere iche                      |
+| ------- | --------------------------------- |
+| Windows | NSIS installer + obere (x64)      |
+| macOS   | DMG (Intel + arm64, dọrọ-na-ngwa) |
+| Linux   | AppImage + DEB (x64 + aka64)      |
 
-Ntọala NSIS: `oneClick: false`, na-enye onye ọrụ ohere ịhọrọ ndekọ nrụnye, ma na-emepụta ụzọ mkpirisi Desktop na Start-Menu.
+ntọala NSIS : `oneClick: false`, na-ahapụ onye ọrụ ịhọrọ ndekọ nrụnye, mepụta Desktop na mkpirisi mmalite-Menu.
 
-## Nnwale Smoke Maka Ngwugwu E Wuru
+## Nlele anwụrụ ọkụ na-ewu ewu
 
 ```bash
 npm run electron:smoke:packaged
@@ -216,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Na-achọpụta binary e tinyere na ngwugwu n'ime `electron/dist-electron/` na-akpaghị aka maka ikpo okwu dị ugbu a.
-- Na-eji ndekọ `HOME`/`APPDATA`/`XDG_*` ndị e kewapụrụ ewepụta ya ka ọ ghara imetụ data onye mmepe aka.
-- Na-enyocha `http://127.0.0.1:20128/login` ugboro ugboro maka HTTP 200 n'ime 45 s.
-- Na-ele stderr/stdout maka ụkpụrụ njehie dị egwu (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, wdg.).
-- Na-eche 2 s nke oge ọrụ kwụsiri ike mgbe ọ dị njikere, emesịa zipụ SIGTERM ma chere ka ọdụ ahụ tọhapụ.
-- N'ime CI, ọ na-ebufe `--no-sandbox --disable-gpu` na-akpaghị aka (yana `--disable-dev-shm-usage` na Linux).
+- Nchekwa onwe-achọpụta ọnụọgụ abụọ ngwugwu na `electron/dist-electron/` maka ikpo okwu dị ugbu a.
+- Ejiri akwụkwọ ndekọ aha `HOME`/`APPDATA`/`XDG_*` dịpụrụ adịpụ wee malite ka ọ ghara imetụ data onye nrụpụta aka.
+- Ntuli `http://127.0.0.1:20128/login` maka HTTP 200 n'ime 45 s.
+- Na-ekiri stderr/stdout maka ụkpụrụ na-egbu egbu (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, wdg).
+- Na-eche 2 s nke oge ịgba ọsọ kwụsiri ike ka ọ dị njikere, wee wepụta SIGTERM wee chere ka ọdụ ụgbọ mmiri ahụ nweere onwe ya.
+- Na CI, na-akpaghị aka na-agafe `--no-sandbox --disable-gpu` (na `--disable-dev-shm-usage` na Linux).
 
-Mgbanwe gburugburu: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env na-ewepụ: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## Ịbanye Akara na Koodu
+## Ntinye koodu
 
-`electron/package.json` **anaghị** ejikọ nzere ịbanye akara ozugbo. Nyefee ha site na env vars gaa na `electron-builder`:
+`electron/package.json` eme** ọ bụghị** waya mbinye aka nzere ozugbo. Nyefee ha site na env vars gaa `electron-builder`:
 
 ### macOS
 
@@ -250,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-Ịbanye akara na AppImage abụghị iwu — tọọ `LINUX_GPG_KEY` ma ọ bụrụ na a ga-abanye akara.
+mbinye aka AppImage bụ nhọrọ — setịpụrụ `LINUX_GPG_KEY` ma ọ bụrụ na mbinye aka.
 
 ## Nkesa
 
-Faịlụ arụpụtara na-abanye na `electron/dist-electron/`:
+Ihe eji eme ihe na `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-A na-ebipụta mwepụta na GitHub Releases (`diegosouzapw/OmniRoute`), nke bụkwa ebe `electron-updater` na-enyocha maka ụdị ọhụrụ.
+A na-ebipụta mwepụta na GitHub Releases (`diegosouzapw/OmniRoute`), nke bụkwa ebe `electron-updater` na-enyocha nsụgharị ọhụrụ.
 
-## Ndozi Nsogbu
+## Nchọpụta nsogbu
 
-| Ihe mgbaàmà                                                           | Ndozi                                                                                                                                                  |
-| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Cannot find module 'better-sqlite3'` mgbe e buliri ụdị ukwu Electron | better-sqlite3 v13 na-eweta Node-API prebuilds — mee `npm install` ọzọ na mgbọrọgwụ yana `prepare:bundle` (ọ na-enyocha prebuild maka nyiwe dị ugbu a) |
-| `ERR_DLOPEN_FAILED` maka modul native                                 | Mee `prepare:bundle` ọzọ — ọ na-akwụsị ozugbo mgbe Node-API prebuild maka nyiwe dị ugbu a na-efu                                                       |
-| Windo na-apụta oghere na Linux                                        | Gbaa mbọ hụ na sava Next.js jikọtara n'ezie na PORT (lelee ndekọ `[Server]`)                                                                           |
-| Nkwado notarization macOS kwụsịrị                                     | Gbaa mbọ hụ na e mere export nke env vars `APPLE_*`, ọ bụghị naanị itinye ha na `.env`                                                                 |
-| Ịdọ aka ná ntị Windows SmartScreen                                    | Jiri asambodo EV banye akara, ma ọ bụ ka ndị ọrụ pịa aka nri → "Run anyway"                                                                            |
-| Nnwale smoke dara n'ihi na a na-eji port                              | Kwụsị sava mmepe mpaghara ọ bụla na 20128 tupu ịgba `electron:smoke:packaged`                                                                          |
+| Mgbaàmà                                                      | Idozi                                                                                                                                                                |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` mgbe Electron isi bump | better-sqlite3 v13 ụgbọ mmiri Node-API na-ebu ụzọ wuo — na-agbagharị `npm install` na mgbọrọgwụ na `prepare:bundle` (ọ na-enyocha ihe nrụpụta maka ikpo okwu ugbu a) |
+| `ERR_DLOPEN_FAILED` maka modul ala                           | Megharịa `prepare:bundle` — ọ na-ada ngwa ngwa mgbe Node-API prebuild maka ikpo okwu ugbu a na-efu.                                                                  |
+| Window na-egosi oghere na Linux                              | Kwenye n'ezie ihe nkesa Next.js na PORT (lelee ndekọ `[Server]` )                                                                                                    |
+| macOS notarization ụlọ ahịa                                  | Gbaa mbọ hụ na ebupụ `APPLE_*` vars, ọ bụghị naanị na `.env`                                                                                                         |
+| Windows SmartScreen ịdọ aka ná ntị                           | Jiri EV cert banye, ma ọ bụ ndị ọrụ pịa aka nri → "Gbaa na agbanyeghị"                                                                                               |
+| Nnwale anwụrụ ọkụ na-ada site na iji ọdụ ụgbọ mmiri          | Kwụsị ihe nkesa dev mpaghara ọ bụla na 20128 tupu ịgba ọsọ `electron:smoke:packaged`                                                                                 |
 
 ## Hụkwa
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Isi mmalite: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Ngwa enyemaka: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Ndị enyemaka: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

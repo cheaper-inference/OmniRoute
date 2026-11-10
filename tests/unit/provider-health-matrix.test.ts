@@ -276,6 +276,233 @@ test("provider health matrix route requires management auth", async () => {
   assert.equal(body.summary.connectionCount, 1);
 });
 
+test("provider health matrix omits idle models by default and counts them", async () => {
+  const connection = (await providersDb.createProviderConnection({
+    id: "matrix-idle-connection",
+    provider: PROVIDER,
+    authType: "apikey",
+    name: "matrix-key",
+    apiKey: "test-key",
+    isActive: true,
+  })) as Record<string, unknown>;
+  const connectionId = String(connection.id);
+
+  const syncedInputs = Array.from({ length: 600 }, (_, index) => ({
+    id: `matrix-idle-model-${index}`,
+    name: `Matrix Idle Model ${index}`,
+  }));
+  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, connectionId, syncedInputs);
+  const startedAt = Date.now();
+  for (let index = 0; index < 3; index += 1) {
+    await callLogs.saveCallLog({
+      id: `matrix-idle-log-${index}`,
+      timestamp: new Date(startedAt + index).toISOString(),
+      status: 200,
+      provider: PROVIDER,
+      connectionId,
+      model: `matrix-idle-model-${index}`,
+      duration: 100,
+    });
+  }
+
+  const report = await matrix.buildProviderHealthMatrix({
+    provider: PROVIDER,
+    range: "24h",
+    includeHealthy: true,
+  });
+
+  const account = report.providers[0]?.accounts[0];
+  assert.ok(account);
+  assert.equal(account.models.length, 3);
+  assert.equal(account.omittedIdleModelCount, 597);
+  assert.equal(account.modelCount, 600);
+  assert.ok(account.models.every((candidate) => candidate.status !== "idle"));
+  assert.equal(report.summary.modelCount, 600);
+});
+
+test("provider health matrix renders a locked model without traffic", async () => {
+  const connection = (await providersDb.createProviderConnection({
+    id: "matrix-idle-locked-connection",
+    provider: PROVIDER,
+    authType: "apikey",
+    name: "matrix-key",
+    apiKey: "test-key",
+    isActive: true,
+  })) as Record<string, unknown>;
+  const connectionId = String(connection.id);
+
+  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, connectionId, [
+    { id: "matrix-idle-locked-model", name: "Matrix Idle Locked Model" },
+  ]);
+  accountFallback.lockModel(
+    PROVIDER,
+    connectionId,
+    "matrix-idle-locked-model",
+    "quota_exhausted",
+    60_000,
+    {}
+  );
+
+  const report = await matrix.buildProviderHealthMatrix({
+    provider: PROVIDER,
+    range: "24h",
+    includeHealthy: true,
+  });
+
+  const account = report.providers[0]?.accounts[0];
+  assert.ok(account);
+  assert.equal(account.models.length, 1);
+  assert.equal(account.models[0]?.status, "locked");
+  assert.equal(account.omittedIdleModelCount, 0);
+  assert.equal(account.modelCount, 1);
+});
+
+test("provider health matrix renders every synced model when idle models are included", async () => {
+  const connection = (await providersDb.createProviderConnection({
+    id: "matrix-idle-full-connection",
+    provider: PROVIDER,
+    authType: "apikey",
+    name: "matrix-key",
+    apiKey: "test-key",
+    isActive: true,
+  })) as Record<string, unknown>;
+  const connectionId = String(connection.id);
+
+  const syncedInputs = Array.from({ length: 600 }, (_, index) => ({
+    id: `matrix-idle-full-model-${index}`,
+    name: `Matrix Idle Full Model ${index}`,
+  }));
+  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, connectionId, syncedInputs);
+  const startedAt = Date.now();
+  for (let index = 0; index < 3; index += 1) {
+    await callLogs.saveCallLog({
+      id: `matrix-idle-full-log-${index}`,
+      timestamp: new Date(startedAt + index).toISOString(),
+      status: 200,
+      provider: PROVIDER,
+      connectionId,
+      model: `matrix-idle-full-model-${index}`,
+      duration: 100,
+    });
+  }
+
+  const report = await matrix.buildProviderHealthMatrix({
+    provider: PROVIDER,
+    range: "24h",
+    includeHealthy: true,
+    includeIdleModels: true,
+  });
+
+  const account = report.providers[0]?.accounts[0];
+  assert.ok(account);
+  assert.equal(account.models.length, 600);
+  assert.equal(account.omittedIdleModelCount, 0);
+  assert.equal(account.modelCount, 600);
+});
+
+test("provider health matrix route renders every synced model when idle models are included", async () => {
+  await enableManagementAuth();
+  const connection = (await providersDb.createProviderConnection({
+    id: "matrix-idle-route-connection",
+    provider: PROVIDER,
+    authType: "apikey",
+    name: "matrix-key",
+    apiKey: "test-key",
+    isActive: true,
+  })) as Record<string, unknown>;
+  const connectionId = String(connection.id);
+
+  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, connectionId, [
+    { id: "matrix-idle-route-model", name: "Matrix Idle Route Model" },
+  ]);
+
+  const compact = await route.GET(
+    await makeManagementSessionRequest("http://localhost/api/providers/health-matrix")
+  );
+  assert.equal(compact.status, 200);
+  const compactBody = await compact.json();
+  const compactAccount = compactBody.providers[0]?.accounts[0];
+  assert.equal(compactAccount.models.length, 0);
+  assert.equal(compactAccount.omittedIdleModelCount, 1);
+  assert.equal(compactAccount.modelCount, 1);
+
+  const full = await route.GET(
+    await makeManagementSessionRequest(
+      "http://localhost/api/providers/health-matrix?includeIdleModels=true"
+    )
+  );
+  assert.equal(full.status, 200);
+  const fullBody = await full.json();
+  const fullAccount = fullBody.providers[0]?.accounts[0];
+  assert.equal(fullAccount.models.length, 1);
+  assert.equal(fullAccount.omittedIdleModelCount, 0);
+  assert.equal(fullAccount.modelCount, 1);
+});
+
+test("provider health matrix route rejects an invalid idle-models flag", async () => {
+  await enableManagementAuth();
+
+  const invalid = await route.GET(
+    await makeManagementSessionRequest(
+      "http://localhost/api/providers/health-matrix?includeIdleModels=yes"
+    )
+  );
+  assert.equal(invalid.status, 400);
+});
+
+test("provider health matrix leaves an account without synced models unchanged", async () => {
+  await providersDb.createProviderConnection({
+    id: "matrix-idle-empty-connection",
+    provider: PROVIDER,
+    authType: "apikey",
+    name: "matrix-key",
+    apiKey: "test-key",
+    isActive: true,
+  });
+
+  const report = await matrix.buildProviderHealthMatrix({
+    provider: PROVIDER,
+    range: "24h",
+    includeHealthy: true,
+  });
+
+  const account = report.providers[0]?.accounts[0];
+  assert.ok(account);
+  assert.equal(account.models.length, 0);
+  assert.equal(account.modelCount, 0);
+  assert.equal(account.omittedIdleModelCount, 0);
+});
+
+test("provider health matrix counts an account with only idle models as omitted", async () => {
+  const connection = (await providersDb.createProviderConnection({
+    id: "matrix-idle-only-connection",
+    provider: PROVIDER,
+    authType: "apikey",
+    name: "matrix-key",
+    apiKey: "test-key",
+    isActive: true,
+  })) as Record<string, unknown>;
+  const connectionId = String(connection.id);
+
+  const syncedInputs = Array.from({ length: 600 }, (_, index) => ({
+    id: `matrix-idle-only-model-${index}`,
+    name: `Matrix Idle Only Model ${index}`,
+  }));
+  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, connectionId, syncedInputs);
+
+  const report = await matrix.buildProviderHealthMatrix({
+    provider: PROVIDER,
+    range: "24h",
+    includeHealthy: true,
+  });
+
+  const account = report.providers[0]?.accounts[0];
+  assert.ok(account);
+  assert.equal(account.models.length, 0);
+  assert.equal(account.modelCount, 600);
+  assert.equal(account.omittedIdleModelCount, 600);
+});
+
 test("provider health matrix route rejects invalid query parameters", async () => {
   await enableManagementAuth();
 

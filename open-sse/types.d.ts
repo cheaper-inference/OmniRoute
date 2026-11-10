@@ -19,6 +19,12 @@ export interface ProviderCredentials {
   connectionId: string;
   /** Optional per-account concurrency cap */
   maxConcurrent?: number | null;
+  /**
+   * Optional per-model concurrency ceilings for this connection, keyed by
+   * the exact model string passed to the executor after routing resolution
+   * (normally the bare upstream model id). Absent/null means no model gate.
+   */
+  modelConcurrency?: Record<string, number> | null;
   /** User email associated with the connection */
   email?: string;
   /** API key (for apikey auth type) */
@@ -69,7 +75,19 @@ export interface ChatCoreParams {
   /** Connection ID for usage tracking */
   connectionId: string;
   /** API key metadata for usage attribution */
-  apiKeyInfo?: { id?: string; name?: string; compressionEnabled?: boolean } | null;
+  apiKeyInfo?: {
+    id?: string;
+    name?: string;
+    compressionEnabled?: boolean;
+    /** Scopes granted to this key (e.g. "self:usage", "self:account-quota"). */
+    scopes?: string[];
+    /** Connection ids this key is restricted to; a single entry means the key is pinned to one account. */
+    allowedConnections?: string[];
+    /** Providers whose account quota this key may share/see; null = all. */
+    sharedQuotaProviders?: string[] | null;
+    /** Per-key policy for forwarding upstream anthropic-ratelimit-* / anthropic-organization-id headers. */
+    anthropicRateLimitHeaders?: "auto" | "forward" | "strip";
+  } | null;
   /** Client User-Agent header */
   userAgent?: string;
   /** Callback when credentials are refreshed mid-request */
@@ -136,25 +154,4 @@ export interface UsageData {
   prompt_tokens: number;
   completion_tokens: number;
   total_tokens: number;
-}
-
-// ============ Lib gap: Transformer.cancel ============
-
-declare global {
-  /**
-   * The WHATWG Streams standard defines `transformer.cancel(reason)`, invoked when
-   * the readable side is cancelled (for us: an SSE client disconnecting). Node
-   * implements it — verified on v24 — but `lib.dom.d.ts` still omits it from
-   * `Transformer`, so every `new TransformStream({ ..., cancel() {} })` in the
-   * codebase fails with TS2353 ("'cancel' does not exist in type 'Transformer'").
-   *
-   * These `cancel` handlers are load-bearing: they clear heartbeat/progress
-   * intervals and idle timers on disconnect. Deleting them to satisfy the checker
-   * would leak a timer per abandoned stream, so the type is patched instead.
-   *
-   * Remove once the bundled lib declares it.
-   */
-  interface Transformer<I = unknown, O = unknown> {
-    cancel?: (reason?: unknown) => void | PromiseLike<void>;
-  }
 }

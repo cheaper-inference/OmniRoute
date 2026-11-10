@@ -32,8 +32,16 @@ import {
   parseKieResultJson,
 } from "../utils/kieTask.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "@/shared/network/remoteImageFetch";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
+import { handleGeminiMusicGeneration } from "./mediaGeneration/geminiMusic.ts";
+import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
 import { handleMinimaxMusicGeneration } from "./mediaGeneration/minimaxMusic.ts";
+import { handleElevenLabsMusicGeneration } from "./mediaGeneration/elevenLabsMusic.ts";
 
 function normalizeKieSunoModel(model: string): string {
   const map: Record<string, string> = {
@@ -83,7 +91,13 @@ function normalizeKieMusicTracks(recordData: unknown): Array<Record<string, unkn
 /**
  * Handle music generation request
  */
-export async function handleMusicGeneration({ body, credentials, log }) {
+export async function handleMusicGeneration({
+  body,
+  credentials,
+  log,
+  signal = null,
+  prepareFalInput = null,
+}) {
   const { provider, model } = parseMusicModel(body.model);
 
   if (!provider) {
@@ -127,7 +141,32 @@ export async function handleMusicGeneration({ body, credentials, log }) {
   }
 
   if (providerConfig.format === "fal-ai-music") {
-    return handleFalMusicGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleFalMusicGeneration({
+      prepareFalInput,
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
+  }
+
+  if (providerConfig.format === "elevenlabs-music") {
+    return handleElevenLabsMusicGeneration({ model, body, credentials });
+  }
+
+  if (providerConfig.format === "gemini-lyria") {
+    return handleGeminiMusicGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "comfyui") {
@@ -148,7 +187,15 @@ export async function handleMusicGeneration({ body, credentials, log }) {
   }
 
   if (providerConfig.format === "udio-music") {
-    return handleUdioMusicGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleUdioMusicGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "minimax-music") {
@@ -160,6 +207,10 @@ export async function handleMusicGeneration({ body, credentials, log }) {
       credentials,
       log,
     });
+  }
+
+  if (providerConfig.format === "syntx-music") {
+    return handleSyntxMusicGeneration({ model, provider, body, credentials, log, signal });
   }
 
   return {
@@ -439,6 +490,7 @@ async function handleUdioMusicGeneration({
   body,
   credentials,
   log,
+  signal = null,
 }) {
   const startTime = Date.now();
   const cookie = credentials?.apiKey || credentials?.providerSpecificData?.cookie || "";
@@ -492,15 +544,19 @@ async function handleUdioMusicGeneration({
       const songs = await statusRes.json();
       const ready = songs.filter((s) => s.finished && s.song_path);
       if (ready.length > 0) {
-        const audioRes = await fetch(ready[0].song_path);
-        if (!audioRes.ok) {
+        let buf: Buffer;
+        try {
+          ({ buffer: buf } = await downloadUpstreamMedia(ready[0].song_path, {
+            ...UPSTREAM_MEDIA_LIMITS.audio,
+            signal,
+          }));
+        } catch (err) {
           return {
             success: false,
-            status: audioRes.status,
-            error: `Failed to download audio: ${audioRes.status}`,
+            status: 502,
+            error: `Failed to download audio: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
           };
         }
-        const buf = await audioRes.arrayBuffer();
         saveCallLog({
           method: "POST",
           path: "/v1/music/generations",
@@ -513,7 +569,7 @@ async function handleUdioMusicGeneration({
           success: true,
           data: {
             created: Math.floor(Date.now() / 1000),
-            data: [{ b64_json: Buffer.from(buf).toString("base64"), format: "mp3" }],
+            data: [{ b64_json: buf.toString("base64"), format: "mp3" }],
           },
         };
       }

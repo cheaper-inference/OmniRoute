@@ -10,6 +10,7 @@ import { getRegisteredProviderEffortBaseModelId } from "@omniroute/open-sse/util
 import {
   hasUsableCredentialsForModel,
   getUsableConnectionsForModel,
+  isBlockedNoAuthProvider,
 } from "./visionBridgeCredentials";
 import { isVisionBridgeForcedModel } from "@/shared/constants/visionBridgeDefaults";
 import { resolveProviderId } from "@/shared/constants/providers";
@@ -51,6 +52,13 @@ export interface VisionBridgeRouterConfig {
   minLatencySamples: number;
   /** Models to exclude from auto-routing */
   excludedModels: string[];
+  /**
+   * Partition of the selection caches for an API-key-scoped pick (the key's
+   * id + policy). A scoped pick must never be served from, or leak into, the
+   * unscoped cache, and its cached member is re-validated against the scoped
+   * `hasUsableCredentials` before reuse.
+   */
+  cacheScope?: string;
 }
 
 /**
@@ -151,6 +159,12 @@ export interface VisionBridgeRouterDeps {
    * `hasUsableCredentials`: `node:test` has no supported ESM module-mocking.
    */
   isModelLocked?: (provider: string, connectionId: string, model: string) => boolean;
+  /**
+   * Blocked no-auth provider check, defaulting to
+   * `isBlockedNoAuthProvider`. Injectable for the same reason as
+   * `hasUsableCredentials`: `node:test` has no supported ESM module-mocking.
+   */
+  isBlockedNoAuthProvider?: (provider: string) => Promise<boolean>;
 }
 
 export interface VisionModelCatalog {
@@ -239,6 +253,27 @@ async function isModelUsableGivenLockouts(
   return false;
 }
 
+/**
+ * A fixed model is selectable unless its credential check is a confirmed `false`
+ * or every known connection for it is locked out (a model-scoped 400 or a 404 lock).
+ * A bare id without a provider prefix has no lockout scope, so only the credential
+ * check applies.
+ */
+async function isFixedModelSelectable(
+  fixedModel: string,
+  usable: boolean | null,
+  deps: VisionBridgeRouterDeps
+): Promise<boolean> {
+  if (usable === false) return false;
+  const separator = fixedModel.indexOf("/");
+  if (separator < 1) return true;
+  return isModelUsableGivenLockouts(
+    fixedModel.slice(0, separator),
+    fixedModel.slice(separator + 1),
+    deps
+  );
+}
+
 async function cachedModelRemainsAvailable(
   fullModelId: string,
   deps: VisionBridgeRouterDeps
@@ -250,6 +285,15 @@ async function cachedModelRemainsAvailable(
   const modelId = fullModelId.slice(separator + 1);
   const registryModel = PROVIDER_MODELS[providerAlias]?.find((model) => model.id === modelId);
   if (!registryModel) return false;
+
+  // A pick cached before the operator blocked the provider must not keep
+  // serving it for the cache TTL: dispatch refuses a blocked no-auth provider
+  // outright, and getUsableConnectionsForModel's definitive empty set for one
+  // reads as "nothing known — usable" to the lockout check below. So
+  // revalidate blocked status here, mirroring the fresh-scan skip in
+  // getVisionCapableModels.
+  const isBlockedNoAuth = deps.isBlockedNoAuthProvider ?? isBlockedNoAuthProvider;
+  if (await isBlockedNoAuth(providerAlias)) return false;
 
   if (!(await isModelUsableGivenLockouts(providerAlias, modelId, deps))) return false;
 
@@ -271,9 +315,14 @@ async function getVisionCapableModels(
   deps: VisionBridgeRouterDeps = {}
 ): Promise<VisionModelCandidate[]> {
   const checkCreds = deps.hasUsableCredentials ?? hasUsableCredentialsForModel;
+  const isBlockedNoAuth = deps.isBlockedNoAuthProvider ?? isBlockedNoAuthProvider;
   const candidatesByProvider = await Promise.all(
     Object.entries(PROVIDER_MODELS).map(async ([providerAlias, models]) => {
       if (!Array.isArray(models)) return [];
+      // Dispatch refuses a blocked no-auth provider before any credential
+      // path, so it can never serve the describe call. Skip it before the
+      // per-model fan-out — no credential lookups, no candidates.
+      if (await isBlockedNoAuth(providerAlias)) return [];
       const visionModels = models.filter((model) => {
         if (!model?.id) return false;
         const fullModelId = `${providerAlias}/${model.id}`;
@@ -409,15 +458,16 @@ function resolveVirtualCombo(fixedModel: string | undefined): string | undefined
 async function resolveCachedSelection(
   cacheKey: string,
   virtualCombo: string | undefined,
-  deps: VisionBridgeRouterDeps
+  deps: VisionBridgeRouterDeps,
+  scoped = false
 ): Promise<string | null> {
   const cached = selectionCache.get(cacheKey);
   if (!cached || cached.expiresAt <= Date.now()) return null;
 
   if (await cachedModelRemainsAvailable(cached.modelId, deps)) {
-    if (!virtualCombo) return cached.modelId;
     const checkCreds = deps.hasUsableCredentials ?? hasUsableCredentialsForModel;
-    if ((await checkCreds(cached.modelId)) !== false) return virtualCombo;
+    if (!virtualCombo && !scoped) return cached.modelId;
+    if ((await checkCreds(cached.modelId)) !== false) return virtualCombo ?? cached.modelId;
   }
   selectionCache.delete(cacheKey);
   return null;
@@ -448,23 +498,32 @@ export async function getBestVisionModel(
     const usable = await checkCreds(fullConfig.fixedModel);
     // Only skip credential validation when the check is indeterminate (null).
     // A confirmed `false` means fall through to auto-selection.
-    if (usable !== false) {
+    if (await isFixedModelSelectable(fullConfig.fixedModel, usable, deps)) {
       return fullConfig.fixedModel;
     }
   }
 
   // Check selection cache — key includes excluded models to prevent cache pollution
   // across different configurations
-  const cacheKey =
+  const baseCacheKey =
     fullConfig.excludedModels.length > 0
       ? `excl:${[...fullConfig.excludedModels].sort().join(",")}`
       : "default";
-  const cachedPick = await resolveCachedSelection(cacheKey, virtualCombo, deps);
+  const cacheKey = fullConfig.cacheScope
+    ? `scope:${fullConfig.cacheScope}|${baseCacheKey}`
+    : baseCacheKey;
+  const cachedPick = await resolveCachedSelection(
+    cacheKey,
+    virtualCombo,
+    deps,
+    Boolean(fullConfig.cacheScope)
+  );
   if (cachedPick) return cachedPick;
 
   // A recent scan already proved nothing here is usable. Re-running it costs a
   // full PROVIDER_MODELS walk plus a credential lookup per candidate, all on
-  // the request path, and it cannot succeed until credentials change.
+  // the request path, and it cannot succeed until credentials or provider
+  // blocks change.
   const noCandidateUntil = noCandidateCache.get(cacheKey);
   if (noCandidateUntil !== undefined) {
     if (noCandidateUntil > Date.now()) return null;

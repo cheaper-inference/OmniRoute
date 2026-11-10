@@ -8,6 +8,7 @@ import { MAX_REQUEST_BODY_LIMIT_MB, MIN_REQUEST_BODY_LIMIT_MB } from "@/shared/c
 import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
 import { providerAllowsOptionalApiKey } from "@/shared/constants/providers";
 import { HIDEABLE_SIDEBAR_ITEM_IDS } from "@/shared/constants/sidebarVisibility";
+import { OMP_ROLE_IDS } from "@/shared/constants/ompRoles";
 import {
   isForbiddenUpstreamHeaderName,
   isForbiddenCustomHeaderName,
@@ -85,6 +86,15 @@ export const cliModelConfigSchema = z.object({
 });
 
 /**
+ * Codex variant of `cliModelConfigSchema`. `modelCatalog: true` also writes an
+ * OmniRoute `model_catalog_json` so Codex's `/model` picker lists routable ids.
+ * Opt-in: omitted or `false` never writes the catalog.
+ */
+export const codexSettingsConfigSchema = cliModelConfigSchema.extend({
+  modelCatalog: z.boolean().optional(),
+});
+
+/**
  * Multi-model variant of `cliModelConfigSchema`. Adds optional `models`
  * (array of strings, takes precedence over `model`) and `activeModel`
  * (string id to promote to first position). Ported from upstream PR
@@ -99,4 +109,24 @@ export const cliAuthOnlyConfigSchema = z.object({
   baseUrl: z.string().trim().min(1, "baseUrl is required"),
   apiKey: z.string().nullable().optional(),
   overwrite: z.boolean().optional(),
+});
+
+/**
+ * omp-settings POST body: the auth-only shape plus optional `modelRoles`
+ * assignments. Each value is an OmniRoute model id (written as
+ * `omniroute/<id>`), or null/"" to unset a role OmniRoute owns.
+ */
+export const ompSettingsSchema = cliAuthOnlyConfigSchema.extend({
+  roles: z
+    .partialRecord(
+      z.enum(OMP_ROLE_IDS),
+      z
+        .string()
+        .trim()
+        .max(256, "model id is too long")
+        // Reject newlines/control chars: the id is written verbatim into config.yml.
+        .regex(/^[^\u0000-\u001f\u007f]*$/, "model id must be a single line")
+        .nullable()
+    )
+    .optional(),
 });

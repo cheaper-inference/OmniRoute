@@ -1,5 +1,6 @@
 import { isProviderRequestCaptureActive, onDispatchStart } from "./providerRequestLogging.ts";
 import { sanitizeErrorMessage } from "./errorSanitization.ts";
+import { sanitizeTimingMs } from "./timingMs.ts";
 
 /** One request actually sent: the outlet snapshot plus what came back. */
 export type AttemptRecord = {
@@ -54,13 +55,7 @@ function closeAttemptRecord(
   record.durationMs = Date.now() - (record.startedAt ?? Date.now());
 }
 
-/**
- * Non-negative integer durations only: clock skew or malformed values stay
- * null so partially migrated databases never corrupt a row.
- */
-export function sanitizeTimingMs(value: unknown): number | null {
-  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : null;
-}
+export { sanitizeTimingMs };
 
 /**
  * Opt-in switch for the first-byte body envelope and its deferred row patch.

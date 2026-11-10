@@ -23,6 +23,10 @@ process.env.STREAM_READINESS_TIMEOUT_MS = "1000";
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
+const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
+const leaseDb = await import("../../src/lib/db/exclusiveConnectionLeases.ts");
+const callLogs = await import("../../src/lib/usage/callLogs.ts");
 const { handleChat } = await import("../../src/sse/handlers/chat.ts");
 const { initTranslators } = await import("../../open-sse/translator/index.ts");
 const { clearInflight } = await import("../../open-sse/services/requestDedup.ts");
@@ -40,6 +44,7 @@ function setFlag(enabled: boolean) {
 
 async function resetStorage() {
   clearInflight();
+  await callLogs.waitForCallLogSaves(20_000);
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
@@ -115,11 +120,15 @@ function contentStreamResponse(text: string): Response {
   );
 }
 
-function streamRequest() {
+function streamRequest(extraHeaders: Record<string, string> = {}) {
   const nonce = `flush-empty-retry-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   return new Request("http://localhost/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+      ...extraHeaders,
+    },
     body: JSON.stringify({
       model: "gemini/gemini-2.5-flash",
       messages: [{ role: "user", content: `Reply with OK only. ${nonce}` }],
@@ -161,6 +170,7 @@ test.afterEach(async () => {
 
 test.after(async () => {
   globalThis.fetch = originalFetch;
+  await callLogs.closeCallLogSaves();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -263,4 +273,256 @@ test("flag off: a dropped stream is not retried", async () => {
     1,
     `flag off must issue exactly 1 dispatch, got ${dispatches.length}`
   );
+});
+
+test("the retry moves off the connection that returned the empty turn", async () => {
+  await seedGemini("gemini-move-a", "sk-flush-move-a");
+  await seedGemini("gemini-move-b", "sk-flush-move-b");
+  const dispatches: string[] = [];
+  stubFetch(dispatches, (_auth, callIndex) =>
+    callIndex === 0 ? reasoningOnlyStreamResponse() : contentStreamResponse("served-after-retry")
+  );
+  const response = await handleChat(streamRequest());
+  const bodyText = await drainText(response);
+  assert.equal(dispatches.length, 2, `expected initial + 1 retry, got ${dispatches.length}`);
+  assert.notEqual(dispatches[1], dispatches[0], "the retry must not replay the empty connection");
+  assert.match(bodyText, /served-after-retry/, "client must receive the retry content");
+});
+
+test("a failed retry logs the call against the connection that served it", async () => {
+  // Round-robin with a sticky limit of 1 rotates on every pick, so the retry
+  // lands on the other account even without an explicit exclusion.
+  await settingsDb.updateSettings({ fallbackStrategy: "round-robin", stickyRoundRobinLimit: 1 });
+  const served = await seedGemini("gemini-kept-a", "sk-flush-kept-a");
+  const other = await seedGemini("gemini-kept-b", "sk-flush-kept-b");
+  const dispatches: string[] = [];
+  stubFetch(dispatches, (_auth, callIndex) =>
+    callIndex === 0
+      ? reasoningOnlyStreamResponse()
+      : new Response(JSON.stringify({ error: { message: "upstream down" } }), { status: 500 })
+  );
+  const response = await handleChat(streamRequest());
+  await drainText(response);
+  assert.deepEqual(dispatches, [served.apiKey, other.apiKey]);
+  await callLogs.waitForCallLogSaves(2000);
+  const logged = await callLogs.getCallLogs({});
+  assert.equal(logged.length, 2, "logical outcome plus rejected physical retry");
+  const logical = logged.find((row) => row.requestType !== "upstream_http_attempt");
+  assert.equal(logical?.connectionId, served.id, "kept response retains its account");
+  assert.equal(logical?.upstreamHttp?.send?.ordinal, 1);
+  assert.equal(logical?.upstreamHttp?.send?.connectionId, served.id);
+  assert.equal(
+    logged.find((row) => row.requestType === "upstream_http_attempt")?.connectionId,
+    other.id
+  );
+});
+
+test("the retry stays inside the key's connection allowlist", async () => {
+  // Seeded first, so fill-first would pick it for an unrestricted selection.
+  await seedGemini("gemini-outside", "sk-flush-outside");
+  const first = await seedGemini("gemini-allowed-a", "sk-flush-allowed-a");
+  const second = await seedGemini("gemini-allowed-b", "sk-flush-allowed-b");
+  const key = await apiKeysDb.createApiKey("allowlisted-flush", "test", [], {
+    allowedConnections: [first.id, second.id],
+  });
+  const dispatches: string[] = [];
+  stubFetch(dispatches, (_auth, callIndex) =>
+    callIndex === 0 ? reasoningOnlyStreamResponse() : contentStreamResponse("served-after-retry")
+  );
+  const response = await handleChat(streamRequest({ Authorization: `Bearer ${key.key}` }));
+  const bodyText = await drainText(response);
+  assert.deepEqual(dispatches, [first.apiKey, second.apiKey]);
+  assert.match(bodyText, /served-after-retry/, "client must receive the retry content");
+});
+
+test("a pinned connection replays itself instead of rotating", async () => {
+  await seedGemini("gemini-pin-a", "sk-flush-pin-a");
+  const pinned = await seedGemini("gemini-pin-b", "sk-flush-pin-b");
+  const dispatches: string[] = [];
+  stubFetch(dispatches, (_auth, callIndex) =>
+    callIndex === 0 ? reasoningOnlyStreamResponse() : contentStreamResponse("served-after-retry")
+  );
+  const response = await handleChat(streamRequest({ "x-omniroute-connection": pinned.id }));
+  const bodyText = await drainText(response);
+  assert.deepEqual(dispatches, [pinned.apiKey, pinned.apiKey]);
+  assert.match(bodyText, /served-after-retry/, "client must receive the retry content");
+});
+
+test("a managed lease replays the leased connection instead of rotating", async () => {
+  const owner = `vlo_${"E".repeat(43)}`;
+  await seedGemini("gemini-lease-a", "sk-flush-lease-a");
+  const leased = await seedGemini("gemini-lease-b", "sk-flush-lease-b");
+  const key = await apiKeysDb.createApiKey("managed-flush", "test", ["lease:exclusive"], {
+    allowedConnections: [leased.id],
+  });
+  const acquired = leaseDb.acquireExclusiveConnectionLease({
+    leaseOwnerId: owner,
+    apiKeyId: key.id,
+    provider: "gemini",
+    connectionId: leased.id,
+  });
+  assert.equal(acquired.kind, "ACQUIRED");
+  if (acquired.kind !== "ACQUIRED") return;
+  const dispatches: string[] = [];
+  stubFetch(dispatches, (_auth, callIndex) =>
+    callIndex === 0 ? reasoningOnlyStreamResponse() : contentStreamResponse("served-after-retry")
+  );
+  const response = await handleChat(
+    streamRequest({
+      Authorization: `Bearer ${key.key}`,
+      "X-OmniRoute-Lease-Owner": owner,
+      "X-OmniRoute-Lease-Generation": String(acquired.lease.generation),
+    })
+  );
+  const bodyText = await drainText(response);
+  assert.deepEqual(dispatches, [leased.apiKey, leased.apiKey]);
+  assert.match(bodyText, /served-after-retry/, "client must receive the retry content");
+});
+
+// ---------------------------------------------------------------------------
+// #17461: direct (non-translated) openai→openai turns.
+//
+// The hook used to be armed for translate-path streams only, so a direct
+// openai→openai turn — the shape most degenerate turns arrive in — never
+// reached the retry loop, and a turn whose whole output was draft/system-echo
+// markup was classified as a normal turn.
+// ---------------------------------------------------------------------------
+
+async function seedGroq(name: string, apiKey: string) {
+  const row = (await providersDb.createProviderConnection({
+    provider: "groq",
+    authType: "apikey",
+    name,
+    apiKey,
+    isActive: true,
+    testStatus: "active",
+  })) as { id: string };
+  return { id: row.id, apiKey };
+}
+
+// A direct openai→openai turn whose entire content is draft/system-echo
+// markup: nothing usable reaches the client, which strips the tags and is
+// left with an empty turn.
+function draftOnlyOpenAiStreamResponse(): Response {
+  return new Response(
+    `data: ${JSON.stringify({
+      choices: [
+        {
+          index: 0,
+          delta: {
+            role: "assistant",
+            content: "<summary>draft skeleton</summary>\n<analysis>draft skeleton</analysis>",
+          },
+        },
+      ],
+    })}\n\n` +
+      `data: ${JSON.stringify({
+        choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+      })}\n\n` +
+      `data: [DONE]\n\n`,
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+}
+
+function contentOpenAiStreamResponse(text: string): Response {
+  return new Response(
+    `data: ${JSON.stringify({
+      choices: [{ index: 0, delta: { role: "assistant", content: text } }],
+    })}\n\n` +
+      `data: ${JSON.stringify({
+        choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+      })}\n\n` +
+      `data: [DONE]\n\n`,
+    { status: 200, headers: { "Content-Type": "text/event-stream" } }
+  );
+}
+
+function openAiStreamRequest() {
+  const nonce = `flush-empty-retry-openai-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return new Request("http://localhost/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
+    body: JSON.stringify({
+      model: "groq/openai/gpt-oss-20b",
+      messages: [{ role: "user", content: `Reply with OK only. ${nonce}` }],
+      max_tokens: 64,
+      stream: true,
+      temperature: 0,
+    }),
+  });
+}
+
+test("direct openai→openai: a draft-only turn retries on a sibling and serves content (#17461)", async () => {
+  await seedGroq("groq-draft-a", "sk-flush-draft-a");
+  await seedGroq("groq-content-b", "sk-flush-content-b");
+  const dispatches: string[] = [];
+  stubFetch(dispatches, (_auth, callIndex) =>
+    callIndex === 0
+      ? draftOnlyOpenAiStreamResponse()
+      : contentOpenAiStreamResponse("served-after-retry")
+  );
+  const response = await handleChat(openAiStreamRequest());
+  const bodyText = await drainText(response);
+  assert.equal(dispatches.length, 2, `expected initial + 1 retry, got ${dispatches.length}`);
+  assert.match(bodyText, /served-after-retry/, "client must receive the retry content");
+});
+
+test("direct openai→openai: a real answer is served without a retry (#17461)", async () => {
+  await seedGroq("groq-real-a", "sk-flush-real-a");
+  await seedGroq("groq-real-b", "sk-flush-real-b");
+  const dispatches: string[] = [];
+  stubFetch(dispatches, () => contentOpenAiStreamResponse("answered-once"));
+  const response = await handleChat(openAiStreamRequest());
+  const bodyText = await drainText(response);
+  assert.equal(dispatches.length, 1, `a real answer must not be retried, got ${dispatches.length}`);
+  assert.match(bodyText, /answered-once/, "client must receive the answer");
+});
+
+test("adopted empty-turn retries finalize the selected ordinal and account", async () => {
+  for (const [emptySends, rejectLast] of [
+    [1, false],
+    [2, false],
+    [2, true],
+  ] as const) {
+    await resetStorage();
+    await settingsDb.updateSettings({ fallbackStrategy: "round-robin", stickyRoundRobinLimit: 1 });
+    const accounts = [
+      await seedGemini("selected-retry-a", "sk-selected-retry-a"),
+      await seedGemini("selected-retry-b", "sk-selected-retry-b"),
+    ];
+    const dispatches: string[] = [];
+    stubFetch(dispatches, (_auth, index) =>
+      index < emptySends
+        ? reasoningOnlyStreamResponse()
+        : rejectLast
+          ? Response.json({ error: { message: "rejected retry" } }, { status: 500 })
+          : contentStreamResponse("selected-empty-retry")
+    );
+    const response = await handleChat(streamRequest());
+    const text = await drainText(response);
+    if (!rejectLast) assert.match(text, /selected-empty-retry/);
+    assert.equal(dispatches.length, emptySends + 1);
+    assert.equal(await callLogs.waitForCallLogSaves(20_000), true);
+    const rows = await callLogs.getCallLogs({});
+    assert.equal(rows.length, dispatches.length);
+    const logical = rows.find((row) => row.requestType !== "upstream_http_attempt");
+    const ordinal = rejectLast ? emptySends : emptySends + 1;
+    const account = accounts.find((entry) => entry.apiKey === dispatches[ordinal - 1]);
+    assert.ok(account);
+    assert.equal(logical?.upstreamHttp?.send?.ordinal, ordinal);
+    assert.equal(logical?.upstreamHttp?.send?.connectionId, account.id);
+    assert.equal(logical?.connectionId, account.id);
+    assert.deepEqual(
+      rows
+        .filter((row) => row.requestType === "upstream_http_attempt")
+        .map((row) => row.upstreamHttp?.send?.ordinal)
+        .sort(),
+      Array.from({ length: dispatches.length }, (_, index) => index + 1).filter(
+        (value) => value !== ordinal
+      )
+    );
+  }
 });

@@ -165,7 +165,7 @@ async function setupMemoryRoutes(
     settingsCalls: number;
     reindexCalls: number;
     previewCalls: number;
-  },
+  }
 ) {
   // GET/POST /api/memory
   await page.route(/\/api\/memory(\?.*)?$/, async (route) => {
@@ -436,14 +436,19 @@ test.describe("Memory Engine Studio — /dashboard/memory", () => {
       await addBtn.click();
     }).toPass({ timeout: 30_000, intervals: [1000, 2000] });
 
-    // Fill in the add-memory form fields
-    const keyInput = page.getByPlaceholder(/e\.g.*preferences/i).or(page.getByLabel(/key/i)).first();
+    // Fill in the add-memory form fields — scoped to the modal (kit Dialog): the stats cards'
+    // InfoTooltip triggers are also labelled ("…for this API key") and come first in the DOM.
+    const addDialog = page.getByRole("dialog");
+    const keyInput = addDialog
+      .getByPlaceholder(/e\.g.*preferences/i)
+      .or(addDialog.getByLabel(/key/i))
+      .first();
     await expect(keyInput).toBeVisible({ timeout: 10_000 });
     await keyInput.fill("test.new.memory");
 
-    const contentInput = page
+    const contentInput = addDialog
       .getByPlaceholder(/content|value/i)
-      .or(page.getByLabel(/content/i))
+      .or(addDialog.getByLabel(/content/i))
       .first();
     await expect(contentInput).toBeVisible({ timeout: 5_000 });
     await contentInput.fill("New memory added via modal.");
@@ -458,7 +463,11 @@ test.describe("Memory Engine Studio — /dashboard/memory", () => {
   });
 
   test("4. Edit memory — pencil → modal → save → change reflected", async ({ page }) => {
-    const mem = makeMemory({ id: "mem-edit-1", key: "edit.test.key", content: "Original content." });
+    const mem = makeMemory({
+      id: "mem-edit-1",
+      key: "edit.test.key",
+      content: "Original content.",
+    });
     const state = {
       memories: [mem],
       stats: { totalEntries: 1, tokensUsed: 24, hitRate: 0.8, cacheStats: { hits: 4, misses: 1 } },
@@ -487,7 +496,10 @@ test.describe("Memory Engine Studio — /dashboard/memory", () => {
     await editBtn.click();
 
     // The edit modal should appear
-    const contentInput = page.getByLabel(/content/i).or(page.locator("textarea")).first();
+    const contentInput = page
+      .getByLabel(/content/i)
+      .or(page.locator("textarea"))
+      .first();
     await expect(contentInput).toBeVisible({ timeout: 10_000 });
     await contentInput.fill("Updated content via modal.");
 
@@ -502,7 +514,10 @@ test.describe("Memory Engine Studio — /dashboard/memory", () => {
 
   test("5. Playground tab — query and Simulate renders results", async ({ page }) => {
     const state = {
-      memories: [makeMemory(), makeMemory({ id: "mem-2", key: "test.key.2", content: "Second fact." })],
+      memories: [
+        makeMemory(),
+        makeMemory({ id: "mem-2", key: "test.key.2", content: "Second fact." }),
+      ],
       stats: { totalEntries: 2, tokensUsed: 48, hitRate: 0.6, cacheStats: { hits: 3, misses: 2 } },
       settings: defaultSettings(),
       engineStatus: defaultEngineStatus(),
@@ -537,9 +552,9 @@ test.describe("Memory Engine Studio — /dashboard/memory", () => {
     await expect.poll(() => state.previewCalls).toBeGreaterThanOrEqual(1);
 
     // Results section should appear (result count heading)
-    await expect(
-      page.getByText(/result\(s\)|resultado\(s\)/, { exact: false }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/result\(s\)|resultado\(s\)/, { exact: false })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("6. Engine tab — status chips render and toggle transformers", async ({ page }) => {
@@ -569,9 +584,9 @@ test.describe("Memory Engine Studio — /dashboard/memory", () => {
     await expect(reindexBtn).toBeVisible({ timeout: 20_000 });
 
     // Engine status heading
-    await expect(
-      page.getByText(/engine status|status do engine/i, { exact: false }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/engine status|status do engine/i, { exact: false })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("7. Reindex Now button triggers POST /api/memory/reindex", async ({ page }) => {
@@ -579,7 +594,10 @@ test.describe("Memory Engine Studio — /dashboard/memory", () => {
       memories: [],
       stats: { totalEntries: 0, tokensUsed: 0, hitRate: 0, cacheStats: { hits: 0, misses: 0 } },
       settings: defaultSettings(),
-      engineStatus: { ...defaultEngineStatus(), vectorStore: { ...defaultEngineStatus().vectorStore, needsReindex: 5 } },
+      engineStatus: {
+        ...defaultEngineStatus(),
+        vectorStore: { ...defaultEngineStatus().vectorStore, needsReindex: 5 },
+      },
       createCalls: 0,
       updateCalls: 0,
       deleteCalls: 0,

@@ -11,10 +11,22 @@
 import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { formatSearchProviderFailure } from "./providerFailure.ts";
+import { fetchWithCheckedRedirects, isRegistryEndpoint } from "./redirectGuard.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import { isSubscriptionQuotaText } from "../../services/quotaTextCooldowns.ts";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
 import type { SearchResult } from "../search.ts";
+import {
+  computeSearchCostUsd,
+  isReportedCostTrusted,
+  recordReportedErrorCost,
+  resolveSearchUsage,
+  type SearchUsage,
+} from "./reportedCost.ts";
+
+export function saveSearchCallLog(entry: Record<string, unknown>): Promise<void> {
+  return saveCallLog(entry);
+}
 
 export const SEARCH_COOLDOWN_STATUSES = new Set([
   HTTP_STATUS.PAYMENT_REQUIRED,
@@ -36,6 +48,21 @@ export function shouldCoolDownSearchConnection(status: number, errorText: string
   const lower = errorText.toLowerCase();
   if (SEARCH_CREDIT_EXHAUSTION_PHRASES.some((phrase) => lower.includes(phrase))) return true;
   return isSubscriptionQuotaText(lower);
+}
+
+/** Post-dispatch state cleanup shared by JSON and SSE search providers. */
+export async function clearSearchConnectionError(connectionId?: string): Promise<void> {
+  if (!connectionId) return;
+  try {
+    const { getProviderConnectionById } = await import("@/lib/db/providers");
+    const current = await getProviderConnectionById(connectionId);
+    if (current) {
+      const { clearAccountError } = await import("@/sse/services/auth.ts");
+      await clearAccountError(connectionId, current as never);
+    }
+  } catch {
+    /* non-critical - clearing stale error state must not break the search response */
+  }
 }
 
 /** Resolved proxy binding for a single provider attempt. */
@@ -151,7 +178,7 @@ export interface ProviderFetchResult {
     query: string;
     results: SearchResult[];
     answer: null;
-    usage: { queries_used: number; search_cost_usd: number };
+    usage: SearchUsage;
     metrics: {
       response_time_ms: number;
       upstream_latency_ms: number;
@@ -182,6 +209,11 @@ export interface ExecuteProviderFetchParams {
   proxy: unknown;
   proxyLevel: string;
   log?: SearchLog;
+  /**
+   * Operator connection data + API key for provider-reported cost (see
+   * ./reportedCost.ts). Absent or not opted in: usage is `costPerQuery`.
+   */
+  costContext?: { apiKeyId?: string; providerSpecificData?: Record<string, unknown> };
   normalize: (
     providerId: string,
     data: unknown,
@@ -201,7 +233,8 @@ export async function executeProviderFetch(
   p: ExecuteProviderFetchParams
 ): Promise<ProviderFetchResult> {
   const { config, url, init, controller, timer, query, searchType, maxResults, startTime } = p;
-  const { connectionId, proxy, proxyLevel, log, normalize } = p;
+  const { connectionId, proxy, proxyLevel, log, normalize, costContext } = p;
+  const costTrusted = isReportedCostTrusted(config, costContext?.providerSpecificData, url);
   const emitEvent = (status: string, upstreamStatus: number | null = null) =>
     emitSearchProxyEvent(
       config.id,
@@ -229,7 +262,13 @@ export async function executeProviderFetch(
 
   try {
     const response = await fetchWithSearchProxy(proxy, () =>
-      fetch(url, { ...init, signal: controller.signal })
+      fetchWithCheckedRedirects(
+        url,
+        { ...init, signal: controller.signal },
+        config.id,
+        // The fixed registry origin keeps the pooled dispatcher on the first hop.
+        !isRegistryEndpoint(url, config.baseUrl)
+      )
     );
     clearTimeout(timer);
 
@@ -245,6 +284,9 @@ export async function executeProviderFetch(
         } catch {
           /* non-critical - background cooldown mark must not break search response */
         }
+      }
+      if (costTrusted) {
+        recordReportedErrorCost(costContext?.apiKeyId, config.id, errorText, log);
       }
       logCall({
         status: response.status,
@@ -276,18 +318,7 @@ export async function executeProviderFetch(
     // any recorded error (stale failed test, elapsed cooldown) so the dashboard
     // stops painting a serving connection red. clearAccountError() is a no-op
     // when the row is already clean.
-    if (connectionId) {
-      try {
-        const { getProviderConnectionById } = await import("@/lib/db/providers");
-        const current = await getProviderConnectionById(connectionId);
-        if (current) {
-          const { clearAccountError } = await import("@/sse/services/auth.ts");
-          await clearAccountError(connectionId, current as never);
-        }
-      } catch {
-        /* non-critical - clearing stale error state must not break the search response */
-      }
-    }
+    await clearSearchConnectionError(connectionId);
 
     return {
       success: true,
@@ -296,7 +327,13 @@ export async function executeProviderFetch(
         query,
         results,
         answer: null,
-        usage: { queries_used: 1, search_cost_usd: config.costPerQuery },
+        usage: resolveSearchUsage(
+          config,
+          data,
+          costTrusted,
+          log,
+          computeSearchCostUsd(config, init.body, normalized.results.length)
+        ),
         metrics: {
           response_time_ms: duration,
           upstream_latency_ms: duration,

@@ -7,6 +7,8 @@
  * provider knowledge here so discovery, import, and catalog projection agree.
  */
 
+import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
+
 export type ModelEndpointKind =
   "chat" | "image" | "video" | "embedding" | "rerank" | "non-chat" | "unknown";
 
@@ -113,6 +115,11 @@ export function getModelEndpointDecision(
   supportedEndpoints?: readonly string[]
 ): ModelEndpointDecision {
   const explicit = classifyExplicitEndpoints(supportedEndpoints);
+  // Decisions-only providers (TypeSafe Jev, #14498) are never chat models, even
+  // when a stored row carries the synthetic `["chat"]` default.
+  if (isDecisionsOnlyProvider(provider)) {
+    return { kind: "non-chat", chatSelectable: false, reason: "provider-policy" };
+  }
   if (provider?.trim().toLowerCase() === "openrouter") {
     // Unconditional, unlike the OpenAI branch below: there is no "batch"
     // endpoint name an upstream could declare alongside a chat one, and the
@@ -141,6 +148,20 @@ export function getModelEndpointDecision(
 
   if (explicit) return explicit;
   return { kind: "unknown", chatSelectable: true, reason: "unclassified" };
+}
+
+/**
+ * True when a model's own endpoint list names only non-chat endpoints
+ * (`["audio-speech"]`, `["images-generations"]`, …). Unlike
+ * `isChatSelectableModel`, provider id rules are not consulted, so a row stored
+ * with the synthetic `["chat"]` default is never reported as non-chat here.
+ */
+export function declaresOnlyNonChatEndpoints(supportedEndpoints: unknown): boolean {
+  if (!Array.isArray(supportedEndpoints)) return false;
+  const endpoints = supportedEndpoints.filter(
+    (endpoint): endpoint is string => typeof endpoint === "string"
+  );
+  return classifyExplicitEndpoints(endpoints)?.chatSelectable === false;
 }
 
 export function isChatSelectableModel(

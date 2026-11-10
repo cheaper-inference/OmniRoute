@@ -7,24 +7,21 @@ import { v4 as uuidv4 } from "uuid";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { getDbInstance, rowToCamel, cleanNulls } from "./core";
 import { backupDbFile } from "./backup";
-import {
-  encryptConnectionFields,
-  decryptConnectionFields,
-  migrateLegacyEncryptedString,
-} from "./encryption";
+import { encryptConnectionFields, decryptConnectionFields } from "./encryption";
 import { createLazyRowProxy } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
+import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
-import {
-  removeConnectionHealth,
-  removeConnectionIndex,
-} from "@omniroute/open-sse/services/apiKeyRotator.ts";
-import { invalidateReasoningRoutingRuleCache } from "./reasoningRoutingRules";
-import { normalizeProviderSpecificData } from "@/lib/providers/requestDefaults";
-import { withDerivedCookieExpiry } from "@/shared/utils/webCookieExpiry";
-import { WEB_COOKIE_PROVIDERS } from "@/shared/constants/providers";
-import { ensureCodexFingerprintSeed } from "@omniroute/open-sse/config/codexIdentity.ts";
+import { findChatGptConnectionByRegistration } from "./chatgpt";
+import { sanitizeMergedConnectionOverrides } from "./providers/connectionUpdateSanitize";
+import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
+import { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
+import { registerConnectionStore } from "@omniroute/open-sse/utils/registeredConnectionStore.ts";
+import { applyAutomaticDisableMarker } from "@/lib/providers/operatorDisable";
+import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
+import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
 import { bumpProxyConfigGeneration, getSettings } from "./settings";
+import { readNewConnectionProxyDefault } from "./newConnectionProxy.mjs";
 import {
   getStoredManagementPassword,
   isBcryptHash,
@@ -34,6 +31,7 @@ import {
   webSessionCredentialKey,
   parseProviderSpecificData,
   isMatchingOauthIdentity,
+  isWebCookieProviderId,
 } from "./webSessionDedup";
 import { LOCAL_PROVIDERS } from "@/shared/constants/providers";
 import { pickCodexConnectionForUser } from "@/lib/oauth/utils/codexConnectionSelection";
@@ -41,54 +39,8 @@ import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/desi
 import { reconcileCodexUsageHistory } from "./providers/usageIdentityReconciliation";
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { applyCodexChildCooldownClearOnUpdate } from "./providers/codexAccountState";
+import { sameM365Account } from "@/lib/providers/m365Identity";
 
-/**
- * normalizeProviderSpecificData + the Codex fingerprint-seed invariant: Codex
- * OAuth connections whose convergence mode derives account-scoped identities
- * (device/session/full — the default session included) carry a persisted
- * random seed (`codexFingerprintSeed`) as the derivation source. Created here
- * at the persistence choke point so every write path (manual create, OAuth
- * persist, edit, import) is covered; the seed is never regenerated once valid,
- * so identities stay put across saves. Pre-seed connections rotate from the
- * legacy connection-id derivation exactly once on their next write — the
- * OmniRoute analog of sub2api's migration-225 backfill (v0.1.178, #5696).
- */
-function normalizeConnectionProviderSpecificData(
-  provider: string | null,
-  providerSpecificData: unknown,
-  credentials: { accessToken?: unknown; refreshToken?: unknown },
-  existingProviderSpecificData?: unknown
-) {
-  const normalized = normalizeProviderSpecificData(provider, providerSpecificData);
-  const withExpiry = withDerivedCookieExpiryForProvider(provider, normalized, credentials);
-  if (provider !== "codex") return withExpiry;
-  return ensureCodexFingerprintSeed(
-    withExpiry,
-    credentials,
-    (existingProviderSpecificData as Record<string, unknown> | null) ?? null
-  );
-}
-
-function withDerivedCookieExpiryForProvider(
-  provider: string | null,
-  providerSpecificData: unknown,
-  credentials: { accessToken?: unknown; refreshToken?: unknown } | unknown
-): Record<string, unknown> {
-  const key = String(provider || "").toLowerCase();
-  if (!(WEB_COOKIE_PROVIDERS as Record<string, unknown>)[key]) {
-    // Both branches must satisfy the Codex seed signature below; the
-    // passthrough keeps whatever shape normalization already returned.
-    return (providerSpecificData ?? {}) as Record<string, unknown>;
-  }
-  const source = credentials as Record<string, unknown> | null;
-  const credential =
-    source && typeof source === "object"
-      ? (typeof source.apiKey === "string" && source.apiKey) ||
-        (typeof source.cookie === "string" && source.cookie) ||
-        null
-      : null;
-  return withDerivedCookieExpiry(providerSpecificData, credential);
-}
 import {
   withNullableMaxConcurrent,
   withNullableQuotaWindowThresholds,
@@ -279,6 +231,7 @@ export async function getRawProviderConnections(
   columns?: string[]
 ) {
   const db = getDbInstance() as unknown as DbLike;
+  ensureProviderSpecificDataSecretsEncrypted(db);
   let selectCols = "*";
   if (columns?.length) {
     const invalidColumns = columns.filter((col) => !PROVIDER_CONNECTIONS_COLUMNS.has(col));
@@ -360,6 +313,7 @@ export function getProviderConnectionsCount(filter: JsonRecord = {}): number {
 
 export async function getProviderConnectionById(id: string) {
   const db = getDbInstance() as unknown as DbLike;
+  ensureProviderSpecificDataSecretsEncrypted(db);
   const row = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
   if (!row) return null;
 
@@ -441,36 +395,92 @@ function normalizeBaseUrlForDedup(value: unknown): string {
   return typeof value === "string" ? value.trim().replace(/\/+$/, "") : "";
 }
 
+/**
+ * Find the cookie connection an incoming import should overwrite.
+ *
+ * #15159 / B-01 — the credential is the identity; `name` is not. This used to try
+ * the name FIRST ("name-based upsert for parity with the apikey path"), so
+ * re-importing under an existing name returned that row and the caller's
+ * `merged = { ...decryptedExisting, ...data }` wrote the new cookie over it.
+ * Because `name` is a user-editable display label, two different accounts
+ * legitimately share one — and the second import silently destroyed the first
+ * account's stored session, unrecoverably.
+ *
+ * This is the same hazard the OAuth branch of this file already fixed
+ * (:532-540): "two different IdPs ... can share the same email address; matching
+ * on email alone would silently overwrite the other account's connection on the
+ * second login." The cookie branch was never given the same treatment.
+ *
+ * The name lookup is now only a fallback for rows with no derivable credential
+ * key — there the name is genuinely all there is to match on. Every other import
+ * matches on its credential, and one with a different credential gets its own row.
+ *
+ * Trade-off, stated plainly: a *rotated* cookie under a stable name now creates a
+ * second row instead of updating in place. That is the intended direction of the
+ * error — a caller can delete a stale row, but cannot recover a session that was
+ * already overwritten. #3368's actual goal (same cookie under a different name
+ * dedupes) is unaffected: that was always the credential loop's job.
+ */
+/**
+ * Cookie-session identity checks must use plaintext for both sides.
+ * #16836 encrypts selected providerSpecificData cookies with randomized AES-GCM,
+ * so matching a new plaintext cookie against the raw JSON column would always
+ * miss the same session and create duplicate provider connections.
+ * Preserve the existing fallback behavior for legacy unencrypted metadata.
+ */
+function storedCookieCredentialKey(raw: unknown): string | null {
+  const parsed = parseProviderSpecificData(raw);
+  if (!parsed) return null;
+  return webSessionCredentialKey(
+    decryptConnectionFields({ providerSpecificData: parsed }).providerSpecificData
+  );
+}
+
 function findExistingCookieConnection(
   db: DbLike,
   provider: unknown,
   name: unknown,
   normalizedProviderSpecificData: unknown
 ): JsonRecord | null {
-  // 1) Name-based upsert for parity with the apikey path.
-  if (name) {
+  // 1) Credential-value dedup — the authoritative identity for a web session.
+  const newCredKey = webSessionCredentialKey(normalizedProviderSpecificData);
+  if (newCredKey) {
+    const cookieRows = db
+      .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'cookie'")
+      .all(provider) as JsonRecord[];
+    for (const row of cookieRows) {
+      if (storedCookieCredentialKey(row.provider_specific_data) === newCredKey) return row;
+    }
+  }
+
+  // 2) Name fallback, only when this import carries no credential to compare
+  //    against AND the candidate row itself has none. Matching a credential-less
+  //    import onto a row that *does* hold a credential would clobber it with
+  //    nothing — the same data loss, reached from the other direction.
+  if (name && !newCredKey) {
     const byName =
       (db
         .prepare(
           "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'cookie' AND name = ?"
         )
         .get(provider, name) as JsonRecord | undefined) || null;
-    if (byName) return byName;
+    if (byName && !storedCookieCredentialKey(byName.provider_specific_data)) {
+      return byName;
+    }
   }
-  // 2) Credential-value dedup against existing cookie rows.
-  const newCredKey = webSessionCredentialKey(normalizedProviderSpecificData);
-  if (!newCredKey) return null;
-  const cookieRows = db
-    .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'cookie'")
-    .all(provider) as JsonRecord[];
-  for (const row of cookieRows) {
-    const psd = parseProviderSpecificData(row.provider_specific_data);
-    if (psd && webSessionCredentialKey(psd) === newCredKey) return row;
-  }
+
   return null;
 }
 
 export async function createProviderConnection(data: JsonRecord) {
+  // Omission must remain omission through the existing-row merge (including
+  // internal callers that supply an optional property with value undefined).
+  if (data.proxyEnabled === undefined) {
+    data = { ...data };
+    delete data.proxyEnabled;
+  } else if (typeof data.proxyEnabled !== "boolean") {
+    throw new Error("proxyEnabled must be a boolean");
+  }
   await assertApiKeyIsNotManagementPassword(data.apiKey);
   const db = getDbInstance() as unknown as DbLike;
   const now = new Date().toISOString();
@@ -487,7 +497,22 @@ export async function createProviderConnection(data: JsonRecord) {
   const workspaceId = toStringOrNull(providerSpecificData.workspaceId);
   const chatgptUserId = toStringOrNull(providerSpecificData.chatgptUserId);
 
-  if (data.authType === "oauth" && data.provider === "codex" && chatgptUserId) {
+  if (data.authType === "oauth" && data.provider === "chatgpt") {
+    existing = findChatGptConnectionByRegistration(providerSpecificData);
+  } else if (data.authType === "oauth" && data.provider === "copilot-m365-web") {
+    const candidates = db
+      .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth'")
+      .all(data.provider) as JsonRecord[];
+    existing =
+      candidates.find((row) =>
+        sameM365Account(
+          {
+            providerSpecificData: parseProviderSpecificData(row.provider_specific_data),
+          },
+          data
+        )
+      ) || null;
+  } else if (data.authType === "oauth" && data.provider === "codex" && chatgptUserId) {
     const strongSql = workspaceId
       ? "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND json_extract(provider_specific_data, '$.workspaceId') = ? AND json_extract(provider_specific_data, '$.chatgptUserId') = ?"
       : "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND (json_extract(provider_specific_data, '$.workspaceId') IS NULL OR json_extract(provider_specific_data, '$.workspaceId') = '') AND json_extract(provider_specific_data, '$.chatgptUserId') = ?";
@@ -559,8 +584,7 @@ export async function createProviderConnection(data: JsonRecord) {
         ) || null;
     }
   } else if (data.authType === "apikey") {
-    // Name-based upsert (existing behavior): same provider + same name → update.
-    if (data.name) {
+    if (data.name && !isWebCookieProviderId(data.provider)) {
       existing =
         (db
           .prepare(
@@ -695,7 +719,7 @@ export async function createProviderConnection(data: JsonRecord) {
     isActive: data.isActive !== undefined ? data.isActive : true,
     createdAt: now,
     updatedAt: now,
-    proxyEnabled: normalizeBooleanColumn(data.proxyEnabled, true),
+    proxyEnabled: data.proxyEnabled ?? readNewConnectionProxyDefault(db),
     perKeyProxyEnabled: normalizeBooleanColumn(data.perKeyProxyEnabled, false),
     quotaVisible: normalizeBooleanColumn(data.quotaVisible, true),
   };
@@ -731,7 +755,6 @@ export async function createProviderConnection(data: JsonRecord) {
     "rateLimitProtection",
     "group",
     "maxConcurrent",
-    "proxyEnabled",
     "perKeyProxyEnabled",
     "quotaVisible",
     "quotaWindowThresholds",
@@ -969,10 +992,17 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
   ).run(_buildUpdateConnectionRowParams(id, data, now));
 }
 
-export async function updateProviderConnection(id: string, data: JsonRecord) {
+export type ProviderConnectionUpdateOpts = UpdateOpts & {
+  /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
+  permanentBan?: boolean;
+};
+
+export async function updateProviderConnection(
+  id: string,
+  data: JsonRecord,
+  opts?: ProviderConnectionUpdateOpts
+) {
   const db = getDbInstance() as unknown as DbLike;
-  const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
-  if (!existing) return null;
 
   // The incoming value only. A connection that already holds the password has
   // to stay editable, or an operator cannot repair the one this guard exists
@@ -980,72 +1010,79 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
   // on every unrelated field edit.
   await assertApiKeyIsNotManagementPassword(data.apiKey);
 
-  const existingCamel = toRecord(rowToCamel(existing));
-  const merged: JsonRecord = {
-    ...existingCamel,
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-  merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
-    data,
-    normalizeConnectionProviderSpecificData(
-      toStringOrNull(merged.provider),
-      merged.providerSpecificData,
-      merged,
-      existingCamel.providerSpecificData
-    )
-  );
-  // Mirror the sanitization the create path applies — keep the returned
-  // object in lockstep with what we persist.
-  if ("quotaWindowThresholds" in merged) {
-    const result = sanitizeQuotaWindowThresholds(merged.quotaWindowThresholds);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist quotaWindowThresholds with rejected keys: ${result.rejected.join(", ")}`
+  // Read only after asynchronous validation, inside the write transaction.
+  // Otherwise a metadata update can snapshot old credentials, yield to a rotation,
+  // and then write the consumed refresh token back over its replacement.
+  const persisted = db.transaction(() => {
+    const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
+    if (!existing) return null;
+    const existingCamel = toRecord(rowToCamel(existing));
+    const merged: JsonRecord = {
+      ...existingCamel,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
+      data,
+      normalizeConnectionProviderSpecificData(
+        toStringOrNull(merged.provider),
+        merged.providerSpecificData,
+        merged,
+        existingCamel.providerSpecificData
+      )
+    );
+    sanitizeMergedConnectionOverrides(merged);
+    if (typeof data.isActive === "boolean") {
+      merged.providerSpecificData = applyAutomaticDisableMarker(
+        merged.providerSpecificData,
+        existingCamel.isActive,
+        data.isActive,
+        undefined,
+        {
+          stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+          permanentBan: opts?.permanentBan === true,
+        }
       );
     }
-    // For updates we always carry the key forward (even as null) so the read
-    // path surfaces the cleared state to callers that merged it.
-    merged.quotaWindowThresholds = result.sanitized;
-  }
-  if ("rateLimitOverrides" in merged) {
-    const result = sanitizeRateLimitOverrides(merged.rateLimitOverrides);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist rateLimitOverrides with rejected keys: ${result.rejected.join(", ")}`
-      );
-    }
-    merged.rateLimitOverrides = result.sanitized;
-  }
-  const existingRecord = toRecord(existing);
+    const existingRecord = toRecord(existing);
 
-  db.transaction(() => {
     reconcileCodexUsageHistory(db, {
       connectionId: id,
       existing: existingRecord,
       merged,
     });
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
+    return { existing, merged };
   })();
+  if (!persisted) return null;
+  const { existing, merged } = persisted;
   backupDbFile("pre-write");
-  invalidateDbCache("connections"); // Bust connections read cache
+  invalidateConnectionUpdate(id, data, opts);
   bumpProxyConfigGeneration();
 
-  if (data.priority !== undefined) {
+  // Zero is the internal move-to-top sentinel. Explicit positive priorities
+  // are operator-selected values, not ranks to compact after every edit.
+  if (data.priority === 0) {
     const existingRecord = toRecord(existing);
     const providerId =
       typeof existingRecord.provider === "string"
         ? existingRecord.provider
         : String(existingRecord.provider || "");
     reorderConnections(db, providerId);
+    return getProviderConnectionById(id);
   }
 
+  // The write path keeps existing ciphertext in merged.providerSpecificData
+  // to avoid re-encrypting unchanged values. Return a decrypted copy instead:
+  // callers of updateProviderConnection must never see enc:v1 metadata as the
+  // usable console credentials (#16836).
+  const returned = decryptConnectionFields({ ...merged });
   const returnedConnection = withNullableRateLimitOverrides(
     withNullableQuotaWindowThresholds(
-      withNullableMaxConcurrent(cleanNulls(merged), merged),
-      merged
+      withNullableMaxConcurrent(cleanNulls(returned), returned),
+      returned
     ),
-    merged
+    returned
   );
 
   if (
@@ -1058,6 +1095,16 @@ export async function updateProviderConnection(id: string, data: JsonRecord) {
 
   return returnedConnection;
 }
+
+export { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
+
+// open-sse may not import this module (boundary ratchet). Code there that reads
+// one connection by id and patches its providerSpecificData gets both functions
+// from this registration instead (open-sse/utils/registeredConnectionStore.ts).
+registerConnectionStore({
+  getProviderConnectionById,
+  mergeConnectionProviderSpecificData,
+});
 
 export {
   updateCodexScopedQuotaState,
@@ -1118,6 +1165,9 @@ export async function touchConnectionSyncedModelsAt(id: string): Promise<void> {
     updatedAt: now,
     id,
   });
+  // New successful-sync timestamp must be visible without waiting for the
+  // connection row cache to expire.
+  invalidateDbCache("connections", id, { skipModelCatalog: true });
 }
 
 /**

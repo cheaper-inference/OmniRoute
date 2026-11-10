@@ -10,8 +10,11 @@
 
 import { AsyncLocalStorage } from "node:async_hooks";
 import crypto from "crypto";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 
-const correlationStore = new AsyncLocalStorage();
+function getCorrelationStore(): AsyncLocalStorage<string | undefined> {
+  return getProcessStore("correlationId.store", () => new AsyncLocalStorage<string | undefined>());
+}
 
 /**
  * Generate a unique correlation ID.
@@ -26,7 +29,7 @@ function generateCorrelationId() {
  * @returns {string|undefined}
  */
 export function getCorrelationId() {
-  return correlationStore.getStore();
+  return getCorrelationStore().getStore();
 }
 
 /**
@@ -39,5 +42,5 @@ export function getCorrelationId() {
  */
 export function runWithCorrelation(correlationId, fn) {
   const id = correlationId || generateCorrelationId();
-  return correlationStore.run(id, fn);
+  return getCorrelationStore().run(id, fn);
 }

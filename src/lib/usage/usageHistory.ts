@@ -8,18 +8,17 @@
  */
 
 import { getDbInstance } from "../db/core";
-import { resolveProviderId } from "@/shared/constants/providers";
 import { normalizePayloadForLog, protectPayloadForLog } from "../logPayloads";
-import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import {
-  resolveOrphanedUsageAccountIdentity,
-  resolveUsageAccountIdentity,
-} from "./accountIdentity";
+  redactUrlQuerySecrets,
+  sanitizeErrorMessage,
+} from "@omniroute/open-sse/utils/errorSanitization.ts";
 import {
   accumulateLatencySample,
   asRecord,
   buildLatencyStatsEntry,
   createLatencyBucket,
+  mapUsageHistoryRow,
   normalizeServiceTier,
   resolvePositiveOption,
   toNumber,
@@ -35,15 +34,15 @@ import {
   storeCompletedDetail,
   getCompletedDetails,
 } from "./completedRequestDetails";
+import * as sessions from "./usageHistory/agentSessionUsage";
 import { shouldPersistToDisk } from "./migrations";
-import { emitUsageRecorded } from "./usageEvents";
 import {
-  getLoggedInputTokens,
-  getLoggedOutputTokens,
-  getPromptCacheCreationTokens,
-  getPromptCacheReadTokens,
-  getReasoningTokens,
-} from "./tokenAccounting";
+  attemptWrite,
+  isWriteLockError,
+  scheduleWriteRetry,
+  type UsageWriteOptions,
+} from "./usageWriteRetry";
+import { getCallLogApiKeyContext } from "./callLogApiKeyContext";
 
 export type PendingRequestMetadata = {
   clientEndpoint?: string | null;
@@ -70,6 +69,10 @@ export type PendingRequestDetail = {
     compressed: number | null;
   };
   id: string;
+  /** Actual durable ID, assigned only after a successful insert. */
+  persistedLogId?: string;
+  /** Private identity for each attempt sharing a public preview ID. */
+  attemptGeneration?: string;
   model: string;
   provider: string;
   connectionId: string | null;
@@ -98,6 +101,11 @@ export type PendingRequestDetail = {
   } | null;
 };
 
+export type PendingRequestOwner = Readonly<{
+  detailRef: WeakRef<PendingRequestDetail> | null;
+}>;
+export type PendingRequestIdentity = string | PendingRequestOwner;
+
 // The preview is bounded (MAX_PREVIEW_*), the payload is not: chatCore pushes
 // the full provider body through here at every stage of a request, and
 // protecting a multi-megabyte agentic body four times per request was a large
@@ -121,7 +129,9 @@ function normalizePendingMetadata(metadata?: PendingRequestMetadata): PendingReq
     normalized.clientEndpoint = toStringOrNull(metadata.clientEndpoint) || null;
   }
   if (metadata.providerUrl !== undefined) {
-    normalized.providerUrl = toStringOrNull(metadata.providerUrl) || null;
+    // Live pending detail is served to the dashboard: never retain `?key=`-style credentials.
+    const providerUrl = toStringOrNull(metadata.providerUrl);
+    normalized.providerUrl = providerUrl ? redactUrlQuerySecrets(providerUrl) : null;
   }
   if (metadata.stage !== undefined) {
     normalized.stage = toStringOrNull(metadata.stage) || null;
@@ -175,6 +185,8 @@ declare global {
           byAccount: Record<string, Record<string, number>>;
           details: Record<string, Record<string, PendingRequestDetail[]>>;
         };
+        // Absent/non-finite on state created by older module instances; recounted once below.
+        totalPendingDetailBytes: number;
         pendingById: Map<string, PendingRequestDetail>;
         pendingIdByCorrelation: Map<string, { id: string; touchedAt: number }>;
       }
@@ -195,6 +207,7 @@ const pendingState = (globalThis.__omnirouteUsageHistoryPendingState ??= {
     byAccount: Object.create(null) as Record<string, Record<string, number>>,
     details: Object.create(null) as Record<string, Record<string, PendingRequestDetail[]>>,
   },
+  totalPendingDetailBytes: 0,
   pendingById: new Map<string, PendingRequestDetail>(),
   pendingIdByCorrelation: new Map<string, { id: string; touchedAt: number }>(),
 });
@@ -223,8 +236,114 @@ const pendingById = pendingState.pendingById;
 const pendingIdByCorrelation = pendingState.pendingIdByCorrelation;
 
 const DEFAULT_MAX_PENDING_REQUEST_AGE_MS = 60 * 60 * 1000;
-const MAX_PENDING_DETAILS = 5000;
+const DEFAULT_MAX_PENDING_DETAILS = 5000;
 const PENDING_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
+const MAX_PENDING_DETAIL_BYTES = 256 * 1024 * 1024;
+
+/** Monotonic suffix making pending ids unique even inside one millisecond. */
+let pendingIdSequence = 0;
+
+/** Recursive retained-size estimate (string bytes + fixed per-node overhead). */
+function estimatePendingBytes(value: unknown, seen = new WeakSet<object>()): number {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === "string") return Buffer.byteLength(value, "utf8");
+  if (typeof value === "number" || typeof value === "bigint") return 8;
+  if (typeof value === "boolean") return 4;
+  if (typeof value !== "object" || seen.has(value)) return 0;
+  seen.add(value);
+  if (Array.isArray(value)) {
+    return 32 + value.reduce((total, entry) => total + estimatePendingBytes(entry, seen), 0);
+  }
+  let bytes = 64;
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    bytes += Buffer.byteLength(key, "utf8") + estimatePendingBytes(entry, seen);
+  }
+  return bytes;
+}
+
+/**
+ * Payload fields whose size counts against the pending-map byte ceiling. Stream
+ * captures are charged too: updatePendingRequestStreamChunksById stores an owned
+ * snapshot and re-measures it, so removal must subtract the same field.
+ */
+const PENDING_PAYLOAD_FIELDS = [
+  "clientRequest",
+  "providerRequest",
+  "providerResponse",
+  "clientResponse",
+  "streamChunks",
+] as const;
+
+function pendingDetailBytes(detail: PendingRequestDetail): number {
+  let bytes = 256; // scalars: id/model/provider/correlationId/tokens
+  for (const field of PENDING_PAYLOAD_FIELDS) {
+    bytes += estimatePendingBytes(detail[field]);
+  }
+  return bytes;
+}
+
+function removePendingCorrelationFor(detail: PendingRequestDetail): void {
+  if (!detail.correlationId) return;
+  const correlationEntry = pendingIdByCorrelation.get(detail.correlationId);
+  if (correlationEntry?.id === detail.id) {
+    pendingIdByCorrelation.delete(detail.correlationId);
+  }
+}
+
+/**
+ * Accounted pending-preview byte total for `pendingById`
+ * (`pendingState.totalPendingDetailBytes`, shared across module reloads). The
+ * 5000-entry cap bounds COUNT but not preview bytes: each entry retains up to
+ * four payloads (clientRequest + providerRequest + providerResponse +
+ * clientResponse, see pendingRequestScope.ts::PENDING_PAYLOAD_KEYS). Payloads
+ * are preview-truncated first, so a worst-case entry measures ~50 KB and the
+ * 5000 cap lands near 250 MB — close enough to the process ceiling that a byte
+ * ceiling is the safer invariant, and it bounds those previews within a single
+ * burst instead of waiting for the 5-minute age sweep. Mirrors the accounting
+ * completedRequestDetails.ts already does for the same payloads.
+ */
+// Older module instances preserved the map without a shared byte total. Recount
+// that legacy state once, after the payload-size helpers are initialized.
+if (!Number.isFinite(pendingState.totalPendingDetailBytes)) {
+  pendingState.totalPendingDetailBytes = 0;
+  for (const detail of pendingById.values()) {
+    pendingState.totalPendingDetailBytes += pendingDetailBytes(detail);
+  }
+}
+
+/**
+ * Hard byte ceiling on the pending map. Runs after every insert so a burst of
+ * large-context requests cannot push the process past the 85% heap guard before
+ * the 5-minute age sweep runs. Eviction order matches the count-cap path
+ * (stale-marked first, then oldest) so the dashboard's pending counters self-heal.
+ */
+function enforcePendingByteCeiling(): void {
+  if (pendingState.totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) return;
+  const victims = [...pendingById.values()].sort((a, b) => {
+    if (Boolean(a.stale) !== Boolean(b.stale)) return a.stale ? -1 : 1;
+    return a.startedAt - b.startedAt;
+  });
+  for (const detail of victims) {
+    if (pendingState.totalPendingDetailBytes <= MAX_PENDING_DETAIL_BYTES) break;
+    const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
+    forgetPendingDetail(detail);
+    removePendingCorrelationFor(detail);
+    if (detail.connectionId && isSafeKey(modelKey)) {
+      const bucket = pendingRequests.details[detail.connectionId]?.[modelKey];
+      if (bucket) {
+        const index = bucket.indexOf(detail);
+        if (index >= 0) bucket.splice(index, 1);
+      }
+      cleanupPendingDetails(detail.connectionId, modelKey);
+      decrementPendingCounters(modelKey, detail.connectionId);
+    }
+  }
+}
+
+/** Retained bytes currently held by the pending map (diagnostics + tests). */
+export function getPendingRetainedBytes(): number {
+  return pendingState.totalPendingDetailBytes;
+}
 let _pendingSweepTimer: ReturnType<typeof setInterval> | null = null;
 
 export function getMaxPendingRequestAgeMs(
@@ -232,6 +351,21 @@ export function getMaxPendingRequestAgeMs(
 ): number {
   const parsed = Number.parseInt(rawValue ?? "", 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_PENDING_REQUEST_AGE_MS;
+}
+
+export function getMaxPendingDetails(
+  rawValue: string | undefined = process.env.MAX_PENDING_DETAILS
+): number {
+  const parsed = Number(rawValue);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_PENDING_DETAILS;
+}
+
+function enforcePendingCorrelationLimit(maxEntries = getMaxPendingDetails()): void {
+  while (pendingIdByCorrelation.size > maxEntries) {
+    const oldest = pendingIdByCorrelation.keys().next();
+    if (oldest.done) return;
+    pendingIdByCorrelation.delete(oldest.value);
+  }
 }
 
 function ensurePendingSweepTimer(): void {
@@ -249,10 +383,8 @@ function ensurePendingSweepTimer(): void {
 
 /**
  * Marks over-age pending-request details so a stuck request stays visible on the
- * dashboard, and enforces a hard size cap. Marked entries keep their map, detail
- * bucket and counters; only the cap path removes entries (marked first, oldest
- * first), mirroring the normal removal path so the dashboard's pending counts
- * self-heal. Exported for deterministic testing.
+ * dashboard for one sweep interval, then removes the payload-free detail and
+ * enforces a hard size cap. Exported for deterministic testing.
  * @returns number of entries removed.
  */
 export function sweepStalePendingRequests(
@@ -263,31 +395,53 @@ export function sweepStalePendingRequests(
 
   const remove = (detail: PendingRequestDetail): void => {
     const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
-    pendingById.delete(detail.id);
+    forgetPendingDetail(detail);
     if (detail.connectionId && isSafeKey(modelKey)) {
       const bucket = pendingRequests.details[detail.connectionId]?.[modelKey];
       if (bucket) {
-        const index = bucket.findIndex((entry) => entry.id === detail.id);
+        const index = bucket.indexOf(detail);
         if (index >= 0) bucket.splice(index, 1);
       }
       cleanupPendingDetails(detail.connectionId, modelKey);
       decrementPendingCounters(modelKey, detail.connectionId);
     }
+    removePendingCorrelationFor(detail);
     removed++;
   };
 
   for (const detail of pendingById.values()) {
-    if (detail.stale) continue;
+    if (detail.stale) {
+      if (typeof detail.sweptAt === "number" && now - detail.sweptAt >= PENDING_SWEEP_INTERVAL_MS) {
+        remove(detail);
+      }
+      continue;
+    }
     if (now - detail.startedAt > maxAgeMs) {
-      detail.stale = true;
+      // Prune heavyweight payloads while preserving lightweight metadata
+      // needed for dashboard visibility: model, provider, correlationId, tokens,
+      // and the counters. The full request/response bodies are discarded so they
+      // no longer accumulate in RSS.
+      const before = pendingDetailBytes(detail);
+      detail.clientRequest = undefined;
+      detail.providerRequest = undefined;
+      detail.providerResponse = undefined;
+      detail.clientResponse = undefined;
+      detail.streamChunks = undefined;
+      detail.stage = undefined;
+      detail.stageUpdatedAt = undefined;
+      detail.error = undefined;
+      detail.errorCode = undefined;
+      pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
       detail.sweptAt = now;
+      detail.stale = true;
     }
   }
 
   // Hard backstop: if entries are still piling up faster than they age out, drop the oldest
   // beyond the cap.
-  if (pendingById.size > MAX_PENDING_DETAILS) {
-    const overflow = pendingById.size - MAX_PENDING_DETAILS;
+  const maxPendingDetails = getMaxPendingDetails();
+  if (pendingById.size > maxPendingDetails) {
+    const overflow = pendingById.size - maxPendingDetails;
     const oldest = [...pendingById.values()]
       .sort((a, b) => {
         if (Boolean(a.stale) !== Boolean(b.stale)) return a.stale ? -1 : 1;
@@ -303,13 +457,7 @@ export function sweepStalePendingRequests(
   for (const [correlationId, entry] of pendingIdByCorrelation) {
     if (now - entry.touchedAt > maxAgeMs) pendingIdByCorrelation.delete(correlationId);
   }
-  if (pendingIdByCorrelation.size > MAX_PENDING_DETAILS) {
-    const overflow = pendingIdByCorrelation.size - MAX_PENDING_DETAILS;
-    const oldest = [...pendingIdByCorrelation.entries()]
-      .sort((a, b) => a[1].touchedAt - b[1].touchedAt)
-      .slice(0, overflow);
-    for (const [correlationId] of oldest) pendingIdByCorrelation.delete(correlationId);
-  }
+  enforcePendingCorrelationLimit(maxPendingDetails);
 
   return removed;
 }
@@ -318,6 +466,40 @@ export function sweepStalePendingRequests(
 const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 function isSafeKey(key: string): boolean {
   return !UNSAFE_KEYS.has(key);
+}
+
+/** Capture attempt ownership before an async boundary can replace the shared ID view. */
+export function capturePendingRequestOwner(id: string): PendingRequestOwner {
+  const detail = pendingById.get(id);
+  return { detailRef: detail ? new WeakRef(detail) : null };
+}
+
+function resolvePendingIdentity(identity: PendingRequestIdentity | null | undefined) {
+  if (typeof identity === "string") return pendingById.get(identity);
+  const detail = identity?.detailRef?.deref();
+  if (!detail?.connectionId) return undefined;
+  const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
+  const bucket = pendingRequests.details[detail.connectionId]?.[modelKey];
+  return bucket?.includes(detail) ? detail : undefined;
+}
+
+function forgetPendingDetail(detail: PendingRequestDetail, bytes = pendingDetailBytes(detail)) {
+  if (pendingById.get(detail.id) === detail) pendingById.delete(detail.id);
+  pendingState.totalPendingDetailBytes -= bytes;
+}
+
+function removePendingDetail(detail: PendingRequestDetail): boolean {
+  if (!detail.connectionId) return false;
+  const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
+  const bucket = pendingRequests.details[detail.connectionId]?.[modelKey];
+  const index = bucket?.indexOf(detail) ?? -1;
+  if (index < 0) return false;
+  const bytes = pendingDetailBytes(detail);
+  bucket.splice(index, 1);
+  forgetPendingDetail(detail, bytes);
+  cleanupPendingDetails(detail.connectionId, modelKey);
+  decrementPendingCounters(modelKey, detail.connectionId);
+  return true;
 }
 
 /**
@@ -329,16 +511,22 @@ export function trackPendingRequest(
   connectionId: string | null,
   started: boolean,
   metadata?: PendingRequestMetadata,
-  pendingRequestId?: string
+  pendingRequestId?: PendingRequestIdentity
 ) {
+  if (!started && pendingRequestId && typeof pendingRequestId !== "string") {
+    const detail = resolvePendingIdentity(pendingRequestId);
+    if (detail) removePendingDetail(detail);
+    return;
+  }
+  const legacyRequestId = typeof pendingRequestId === "string" ? pendingRequestId : undefined;
   const modelKey = provider ? `${model} (${provider})` : model;
   if (!isSafeKey(modelKey)) return;
   const normalizedMetadata = normalizePendingMetadata(metadata);
   // An id that is no longer listed was already withdrawn (completion and
   // disconnect both end the same request): leave every counter untouched.
-  if (!started && pendingRequestId && connectionId) {
+  if (!started && legacyRequestId && connectionId) {
     const listed = pendingRequests.details[connectionId]?.[modelKey];
-    if (!listed?.some((entry) => entry.id === pendingRequestId)) return;
+    if (!listed?.some((entry) => entry.id === legacyRequestId)) return;
   }
 
   // Ensure the orphaned-pending reaper is running once pending tracking is in use.
@@ -393,7 +581,19 @@ export function trackPendingRequest(
         // crypto RNG (not Math.random) to satisfy CodeQL js/insecure-randomness —
         // this pending-request id flows into attempt logging; it's a correlation
         // id, not a security secret.
-        id: reusableId ?? `${now}-${globalThis.crypto.randomUUID().slice(0, 6)}`,
+        // A pending id must be unique across CONCURRENT requests, and thousands can
+        // be tracked inside one millisecond. The old `${now}-${uuid.slice(0,6)}`
+        // form had only a 24-bit random suffix, so a 5,000-request burst collided
+        // ~52% of the time (birthday bound); `pendingById.set` then silently
+        // overwrote the earlier entry, so a live request's pending row vanished
+        // from the map while its bucket still listed it. Keep the timestamp for
+        // ordering/readability, and add a monotonic counter + full random bytes.
+        id:
+          reusableId ??
+          `${now}-${(globalThis.crypto.randomUUID() as string).replace(/-/g, "").slice(0, 12)}-${(++pendingIdSequence).toString(
+            36
+          )}`,
+        attemptGeneration: globalThis.crypto.randomUUID(),
         model,
         provider,
         connectionId,
@@ -402,24 +602,32 @@ export function trackPendingRequest(
       };
       pendingRequests.details[connectionId][modelKey].push(newDetail);
       pendingById.set(newDetail.id, newDetail);
-      if (normalizedMetadata.correlationId) {
+      pendingState.totalPendingDetailBytes += pendingDetailBytes(newDetail);
+      enforcePendingByteCeiling();
+      if (normalizedMetadata.correlationId && pendingById.get(newDetail.id) === newDetail) {
+        pendingIdByCorrelation.delete(normalizedMetadata.correlationId);
         pendingIdByCorrelation.set(normalizedMetadata.correlationId, {
           id: newDetail.id,
           touchedAt: now,
         });
+        enforcePendingCorrelationLimit();
       }
       return newDetail.id;
     } else if (!started && nextCount >= 0) {
-      if (pendingRequestId) {
+      if (legacyRequestId) {
         const bucket = pendingRequests.details[connectionId][modelKey];
         const [removed] = bucket.splice(
-          bucket.findIndex((entry) => entry.id === pendingRequestId),
+          bucket.findIndex((entry) => entry.id === legacyRequestId),
           1
         );
-        if (removed) pendingById.delete(removed.id);
+        if (removed) {
+          forgetPendingDetail(removed);
+        }
       } else if (pendingRequests.details[connectionId]?.[modelKey]?.length) {
         const removed = pendingRequests.details[connectionId][modelKey].shift();
-        if (removed) pendingById.delete(removed.id);
+        if (removed) {
+          forgetPendingDetail(removed);
+        }
       }
       if (!pendingRequests.details[connectionId]?.[modelKey]?.length) {
         delete pendingRequests.details[connectionId]?.[modelKey];
@@ -443,14 +651,46 @@ export function updatePendingRequest(
   const details = pendingRequests.details[connectionId]?.[modelKey];
   if (!details?.length) return;
   const lastIdx = details.length - 1;
-  Object.assign(details[lastIdx], normalizePendingMetadata(metadata));
+  // providerRequest / providerResponse / clientResponse land HERE, on an
+  // already-tracked entry, not on insert. Without re-measuring, the running total
+  // undercounts and the byte ceiling silently stops enforcing in production.
+  const detail = details[lastIdx];
+  const normalized = normalizePendingMetadata(metadata);
+  if (!pendingRequests.details[connectionId]?.[modelKey]?.includes(detail)) return;
+  const before = pendingDetailBytes(detail);
+  Object.assign(detail, normalized);
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  enforcePendingByteCeiling();
 }
 
-export function updatePendingRequestById(id: string | null, metadata: PendingRequestMetadata) {
-  const detail = id ? pendingById.get(id) : null;
+export function updatePendingRequestById(
+  id: PendingRequestIdentity | null,
+  metadata: PendingRequestMetadata
+) {
+  const detail = resolvePendingIdentity(id);
   if (!detail) return false;
-  Object.assign(detail, normalizePendingMetadata(metadata));
+  const normalized = normalizePendingMetadata(metadata);
+  if (resolvePendingIdentity(id) !== detail) return false;
+  const before = pendingDetailBytes(detail);
+  Object.assign(detail, normalized);
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(detail) - before;
+  enforcePendingByteCeiling();
   return true;
+}
+
+/** Link the first confirmed insert to its exact preview, before or after finalization. */
+export function markRequestPersistedById(
+  id: unknown,
+  attemptGeneration: unknown,
+  persistedLogId: string
+) {
+  if (typeof id !== "string" || typeof attemptGeneration !== "string") return;
+  const pending = pendingById.get(id);
+  if (pending?.attemptGeneration === attemptGeneration) pending.persistedLogId ??= persistedLogId;
+  const completed = getCompletedDetails().get(id);
+  if (completed?.attemptGeneration === attemptGeneration && !completed.persistedLogId) {
+    storeCompletedDetail({ ...completed, persistedLogId });
+  }
 }
 
 /** Attach scalar usage to the exact attempt, even if its stream already finalized. */
@@ -517,24 +757,25 @@ function finalizePendingDetailAt(
   const details = pendingRequests.details[connectionId]?.[modelKey];
   if (!details?.length || index < 0 || index >= details.length) return null;
 
-  const completedAt = Date.now();
-  const updated = {
-    ...details[index],
-    ...normalizePendingMetadata(metadata),
-    completedAt,
-    durationMs: Math.max(0, completedAt - details[index].startedAt),
-  };
-  const storedCompletedDetail = storeCompletedDetail(updated);
-  if (storedCompletedDetail) {
-    maybeEnrichCompletedDetail(updated, connectionId);
-    scheduleCompletedDetailCleanup(updated.id);
+  const detail = details[index];
+  try {
+    const completedAt = Date.now();
+    const updated = {
+      ...detail,
+      ...normalizePendingMetadata(metadata),
+      completedAt,
+      durationMs: Math.max(0, completedAt - detail.startedAt),
+    };
+    const storedCompletedDetail = storeCompletedDetail(updated);
+    if (storedCompletedDetail) {
+      maybeEnrichCompletedDetail(updated, connectionId);
+      scheduleCompletedDetailCleanup(updated.id);
+    }
+    return detail.id;
+  } finally {
+    // Completed-detail retention must not keep a terminal attempt pending.
+    removePendingDetail(detail);
   }
-
-  details.splice(index, 1);
-  pendingById.delete(updated.id);
-  cleanupPendingDetails(connectionId, modelKey);
-  decrementPendingCounters(modelKey, connectionId);
-  return updated.id;
 }
 
 export function finalizePendingRequest(
@@ -549,16 +790,15 @@ export function finalizePendingRequest(
 }
 
 export function finalizePendingRequestById(
-  id: string | null | undefined,
+  id: PendingRequestIdentity | null | undefined,
   metadata: PendingRequestMetadata
 ): boolean {
-  if (!id) return false;
-  const detail = pendingById.get(id);
+  const detail = resolvePendingIdentity(id);
   if (!detail?.connectionId) return false;
   const modelKey = detail.provider ? `${detail.model} (${detail.provider})` : detail.model;
   if (!isSafeKey(modelKey)) return false;
   const details = pendingRequests.details[detail.connectionId]?.[modelKey];
-  const index = details?.findIndex((entry) => entry.id === id) ?? -1;
+  const index = details?.indexOf(detail) ?? -1;
   return finalizePendingDetailAt(detail.connectionId, modelKey, index, metadata) !== null;
 }
 
@@ -582,6 +822,24 @@ export function finalizeMostRecentPendingRequest(
 
 export { getCompletedDetails } from "./completedRequestDetails";
 
+/** Store an owned snapshot so caller array mutations cannot bypass byte accounting. */
+export function updatePendingRequestStreamChunksById(
+  id: string,
+  streamChunks: PendingRequestDetail["streamChunks"]
+): boolean {
+  const entry = pendingById.get(id);
+  if (!entry) return false;
+  const before = pendingDetailBytes(entry);
+  entry.streamChunks = streamChunks
+    ? Object.fromEntries(
+        Object.entries(streamChunks).map(([key, chunks]) => [key, chunks?.slice()])
+      )
+    : streamChunks;
+  pendingState.totalPendingDetailBytes += pendingDetailBytes(entry) - before;
+  enforcePendingByteCeiling();
+  return true;
+}
+
 export function updatePendingRequestStreamChunks(
   model: string,
   provider: string,
@@ -597,7 +855,7 @@ export function updatePendingRequestStreamChunks(
   if (!isSafeKey(modelKey)) return;
   const details = pendingRequests.details[connectionId]?.[modelKey];
   if (!details?.length) return;
-  details[0].streamChunks = streamChunks;
+  updatePendingRequestStreamChunksById(details[0].id, streamChunks);
 }
 
 /**
@@ -628,6 +886,7 @@ export function clearPendingRequests() {
   >;
   pendingById.clear();
   pendingIdByCorrelation.clear();
+  pendingState.totalPendingDetailBytes = 0;
   clearCompletedDetails();
 }
 
@@ -670,32 +929,7 @@ export async function getUsageDb(sinceIso?: string | null, limit?: number, curso
     rows = db.prepare(`SELECT * FROM usage_history ORDER BY timestamp ASC LIMIT ?`).all(maxRows);
   }
 
-  const history = rows.map((row) => {
-    const r = asRecord(row);
-    return {
-      provider: toStringOrNull(r.provider),
-      model: toStringOrNull(r.model),
-      connectionId: toStringOrNull(r.connection_id),
-      apiKeyId: toStringOrNull(r.api_key_id),
-      apiKeyName: toStringOrNull(r.api_key_name),
-      serviceTier: normalizeServiceTier(r.service_tier),
-      tokens: {
-        input: toNumber(r.tokens_input),
-        output: toNumber(r.tokens_output),
-        cacheRead: toNumber(r.tokens_cache_read),
-        cacheCreation: toNumber(r.tokens_cache_creation),
-        reasoning: toNumber(r.tokens_reasoning),
-      },
-      status: toStringOrNull(r.status),
-      success: toNumber(r.success) === 1,
-      latencyMs: toNumber(r.latency_ms),
-      timeToFirstTokenMs: toNumber(r.ttft_ms),
-      errorCode: toStringOrNull(r.error_code),
-      timestamp: toStringOrNull(r.timestamp),
-      cpaAuthIndex: toStringOrNull(r.cpa_auth_index),
-      cpaAccountLabel: null as string | null,
-    };
-  });
+  const history = rows.map(mapUsageHistoryRow);
   await attachCpaAccountLabels(history);
 
   // Provide next cursor if we hit the limit (more rows exist)
@@ -747,128 +981,65 @@ export interface UsageEntry {
   endpoint?: string | null;
   /** Opaque CLIProxyAPI auth_index. Never a label, path, token, or email. */
   cpaAuthIndex?: string | null;
+  /** Coding-agent session and project of the request; attributes the row to an agent session. */
+  agentContext?: sessions.AgentContext | null;
+}
+
+/**
+ * Controls the legacy natural-key guard for one usage write.
+ *
+ * Normal callers keep the default so repeated callbacks for one request remain
+ * one row. A writer that already owns a distinct physical-attempt boundary may
+ * explicitly disable that guard without changing the row, cache, event, or
+ * account-attribution paths below.
+ */
+export interface SaveRequestUsageOptions {
+  deduplicate?: boolean;
 }
 
 /**
  * Save request usage entry to SQLite.
  */
-export async function saveRequestUsage(entry: UsageEntry) {
+export async function saveRequestUsage(entry: UsageEntry, options: SaveRequestUsageOptions = {}) {
   if (!shouldPersistToDisk) return;
 
+  // Freeze the timestamp on the first attempt so the deferred retry replays
+  // the same value and the dedup guard keys both attempts identically.
+  // Fall back to the request-scoped api-key context, exactly as saveCallLogOperation
+  // does. The context exists so callers need not thread identity through every
+  // handler, but this writer only ever read `entry.apiKeyId` — so media paths, which
+  // set the context once in the route, stored an unattributed usage row while their
+  // call-log row came out attributed. Attribution matters here more than in call_logs:
+  // this table is what the per-key usage aggregation reads. Resolved before the write
+  // so a deferred retry (outside the request's async context) keeps the attribution.
+  const apiKeyContext = getCallLogApiKeyContext();
+  const frozenEntry = {
+    ...entry,
+    timestamp: entry.timestamp || new Date().toISOString(),
+    apiKeyId: entry.apiKeyId || apiKeyContext?.apiKeyId || null,
+    apiKeyName: entry.apiKeyName || apiKeyContext?.apiKeyName || null,
+  };
+
+  // Agent-session counters are priced before the write (pricing is async) and replayed
+  // unchanged by the deferred retry; requests without an agent identity skip the await.
+  let writeOptions: UsageWriteOptions = options;
   try {
-    const db = getDbInstance();
-    const timestamp = entry.timestamp || new Date().toISOString();
-    const serviceTier = normalizeServiceTier(entry.serviceTier ?? entry.service_tier);
-
-    const tokensInput = getLoggedInputTokens(entry.tokens);
-    const tokensOutput = getLoggedOutputTokens(entry.tokens);
-    const connection = entry.connectionId
-      ? (db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(entry.connectionId) as
-          Record<string, unknown> | undefined)
-      : undefined;
-    const accountIdentity = connection
-      ? resolveUsageAccountIdentity(connection)
-      : resolveOrphanedUsageAccountIdentity(entry.provider, entry.connectionId);
-
-    // Dedup guard: skip INSERT when an identical row already exists in the same
-    // second. This prevents double-counting when onRequestSuccess fires more
-    // than once (e.g. combo routing calling the callback from both the
-    // streaming and non-streaming paths for the same underlying request).
-    // Keyed on the natural identity of a request: timestamp + provider + model
-    // + connectionId + apiKeyId + token counts. If only the endpoint is missing
-    // on the existing row, fill it in rather than inserting a duplicate.
-    let inserted = false;
-
-    db.transaction(() => {
-      const existing = db
-        .prepare(
-          `SELECT id, endpoint, cpa_auth_index FROM usage_history
-           WHERE timestamp = ?
-             AND COALESCE(provider, '')     = COALESCE(?, '')
-             AND COALESCE(model, '')        = COALESCE(?, '')
-             AND COALESCE(connection_id, '') = COALESCE(?, '')
-             AND COALESCE(api_key_id, '')   = COALESCE(?, '')
-             AND tokens_input  = ?
-             AND tokens_output = ?
-           ORDER BY id DESC LIMIT 1`
-        )
-        .get(
-          timestamp,
-          entry.provider ? resolveProviderId(entry.provider) : null,
-          entry.model || null,
-          entry.connectionId || null,
-          entry.apiKeyId || null,
-          tokensInput,
-          tokensOutput
-        ) as { id: number; endpoint: string | null; cpa_auth_index: string | null } | undefined;
-
-      if (existing) {
-        // Back-fill endpoint if the original row missed it.
-        if (!existing.endpoint && entry.endpoint) {
-          db.prepare(`UPDATE usage_history SET endpoint = ? WHERE id = ?`).run(
-            entry.endpoint,
-            existing.id
-          );
-        }
-        // A later completed attempt can carry the trace the first write missed.
-        if (!existing.cpa_auth_index && entry.cpaAuthIndex) {
-          db.prepare(`UPDATE usage_history SET cpa_auth_index = ? WHERE id = ?`).run(
-            entry.cpaAuthIndex,
-            existing.id
-          );
-        }
-        return; // duplicate — do not insert
-      }
-
-      db.prepare(
-        `
-        INSERT INTO usage_history (provider, model, connection_id, account_key, account_label,
-          account_label_priority, api_key_id, api_key_name, tokens_input, tokens_output,
-          tokens_cache_read, tokens_cache_creation, tokens_reasoning, service_tier, status, success,
-          latency_ms, ttft_ms, error_code, combo_strategy, endpoint, cpa_auth_index, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `
-      ).run(
-        entry.provider ? resolveProviderId(entry.provider) : null,
-        entry.model || null,
-        entry.connectionId || null,
-        accountIdentity.accountKey,
-        accountIdentity.accountLabel,
-        accountIdentity.accountLabelPriority,
-        entry.apiKeyId || null,
-        entry.apiKeyName || null,
-        tokensInput,
-        tokensOutput,
-        getPromptCacheReadTokens(entry.tokens),
-        getPromptCacheCreationTokens(entry.tokens),
-        getReasoningTokens(entry.tokens),
-        serviceTier,
-        entry.status || null,
-        entry.success === false ? 0 : 1,
-        Number.isFinite(Number(entry.latencyMs)) ? Number(entry.latencyMs) : 0,
-        Number.isFinite(Number(entry.timeToFirstTokenMs))
-          ? Number(entry.timeToFirstTokenMs)
-          : Number.isFinite(Number(entry.latencyMs))
-            ? Number(entry.latencyMs)
-            : 0,
-        entry.errorCode || null,
-        entry.comboStrategy || entry.combo_strategy || null,
-        entry.endpoint || null,
-        entry.cpaAuthIndex || null,
-        timestamp
+    if (frozenEntry.agentContext) {
+      const serviceTier = normalizeServiceTier(entry.serviceTier ?? entry.service_tier);
+      const agentSession = await sessions.buildAgentSessionUsage(
+        frozenEntry,
+        frozenEntry.timestamp,
+        serviceTier
       );
-
-      inserted = true;
-    })();
-
-    // Decoupled via the event bus so usageHistory never imports providerLimits
-    // (which would pull the executors/translator graph into the type-check surface).
-    // Only emit when a row was actually inserted — not on dedup no-ops.
-    if (inserted) {
-      emitUsageRecorded(entry.provider, entry.connectionId);
+      writeOptions = { ...options, agentSession };
     }
+    attemptWrite(frozenEntry, writeOptions);
   } catch (error) {
-    console.error("Failed to save usage stats:", error);
+    if (!isWriteLockError(error)) {
+      console.error("Failed to save usage stats:", error);
+      return;
+    }
+    scheduleWriteRetry(frozenEntry, writeOptions);
   }
 }
 
@@ -913,32 +1084,7 @@ export async function getUsageHistory(filter: UsageHistoryFilter = {}) {
   sql += " ORDER BY timestamp ASC";
 
   const rows = db.prepare(sql).all(params);
-  const history = rows.map((row) => {
-    const r = asRecord(row);
-    return {
-      provider: toStringOrNull(r.provider),
-      model: toStringOrNull(r.model),
-      connectionId: toStringOrNull(r.connection_id),
-      apiKeyId: toStringOrNull(r.api_key_id),
-      apiKeyName: toStringOrNull(r.api_key_name),
-      serviceTier: normalizeServiceTier(r.service_tier),
-      tokens: {
-        input: toNumber(r.tokens_input),
-        output: toNumber(r.tokens_output),
-        cacheRead: toNumber(r.tokens_cache_read),
-        cacheCreation: toNumber(r.tokens_cache_creation),
-        reasoning: toNumber(r.tokens_reasoning),
-      },
-      status: toStringOrNull(r.status),
-      success: toNumber(r.success) === 1,
-      latencyMs: toNumber(r.latency_ms),
-      timeToFirstTokenMs: toNumber(r.ttft_ms),
-      errorCode: toStringOrNull(r.error_code),
-      timestamp: toStringOrNull(r.timestamp),
-      cpaAuthIndex: toStringOrNull(r.cpa_auth_index),
-      cpaAccountLabel: null as string | null,
-    };
-  });
+  const history = rows.map(mapUsageHistoryRow);
   await attachCpaAccountLabels(history);
   return history;
 }
@@ -990,6 +1136,7 @@ export async function getModelLatencyStats(
     latency_ms: number | null;
     ttft_ms: number | null;
     tokens_output: number | null;
+    tokens_reasoning: number | null;
   };
 
   const conditions = ["timestamp >= @sinceIso", "provider IS NOT NULL", "model IS NOT NULL"];
@@ -1006,7 +1153,7 @@ export async function getModelLatencyStats(
   const rows = db
     .prepare(
       `
-      SELECT provider, model, success, latency_ms, ttft_ms, tokens_output
+      SELECT provider, model, success, latency_ms, ttft_ms, tokens_output, tokens_reasoning
       FROM usage_history
       WHERE ${conditions.join(" AND ")}
       ORDER BY timestamp DESC
@@ -1036,7 +1183,8 @@ export async function getModelLatencyStats(
       toNumber(row.latency_ms),
       toNumber(row.ttft_ms),
       toNumber(row.tokens_output),
-      isSuccess
+      isSuccess,
+      toNumber(row.tokens_reasoning)
     );
   }
 

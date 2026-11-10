@@ -116,31 +116,40 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## תהליך ייבוא באמצעות מפתח API
+## תהליך ייבוא של מפתח API
 
-אימות באמצעות מפתח API מיועד לפרטי גישה מסוג bearer של Kiro / AWS CodeWhisperer בעלי תוקף ארוך. הוא
-אינו משתמש ברענון OAuth, ולכן נמנע מביטול של הפעלת OIDC משותפת.
+אימות באמצעות מפתח API מיועד לפרטי גישה ארוכי טווח מסוג bearer של Kiro / AWS CodeWhisperer. הוא אינו
+משתמש ברענון OAuth, ולכן נמנע מביטול של הפעלת OIDC משותפת.
 
 ### לוח הבקרה
 
 1. פתחו את **לוח הבקרה -> ספקים -> Kiro**.
 2. בחרו **מפתח API**.
-3. הדביקו את מפתח ה-API ואת אזור AWS האופציונלי (`us-east-1` כברירת מחדל).
-4. OmniRoute מאמת את המפתח ושומר את החיבור.
+3. הדביקו את מפתח ה-API ובחרו את אזור AWS: **זיהוי אוטומטי** (ברירת המחדל), **מזרח ארה"ב
+   (צפון וירג'יניה)** או **אירופה (פרנקפורט)**.
+4. OmniRoute מאמת את המפתח ושומר את החיבור כשהוא משויך לאזור שבו
+   המפתח פועל.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` מקבל `auto` (ברירת המחדל), `us-east-1` או `eu-central-1`; כל ערך אחר
+נדחה עם HTTP 400.
 
 ### חוזה פנימי
 
 נתיב ה-API מאמת את המפתח באמצעות קריאה ל-`KiroService.validateApiKey()`, אשר
-משתמש ב-`ListAvailableProfiles` מול נקודת הקצה של CodeWhisperer/Amazon Q התואמת לאזור
-ומאתר `profileArn`.
+קוראת אל `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(ממשק ה-API שבו משתמשת הסקת מפתח ה-API של Amazon Q), עם פסק זמן של 10 שניות לכל אזור. במצב
+`auto` הוא מנסה את `us-east-1`, לאחר מכן את `eu-central-1`, ושומר את האזור הראשון
+שמקבל את המפתח. מפתח שנדחה בכל האזורים המועמדים גורם לכישלון הייבוא עם
+HTTP 400. לאחר מכן מתבצעת קריאה ל-`ListAvailableProfiles` במתכונת מאמץ מיטבי כדי לגלות
+`profileArn` אופציונלי (AWS דוחה אותה עבור רוב מפתחות ה-API).
 
 החיבור שנשמר משתמש במבנה הבא:
 
@@ -155,10 +164,13 @@ curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
 }
 ```
 
-בזמן הריצה, `KiroExecutor.buildHeaders()` שולח את המפתח בתור
-`Authorization: Bearer <key>` ומוסיף `tokentype: API_KEY`. קריאות למכסה ולפרופיל
-משתמשות באותו סמן, כך ש-AWS מתייחס ל-bearer כמפתח API בעל תוקף ארוך ולא
-כאסימון גישה של OIDC או של חשבון חברתי.
+בזמן ריצה, `KiroExecutor.buildHeaders()` שולח את המפתח בתור
+`Authorization: Bearer <key>` ומוסיף `tokentype: API_KEY`. קריאות למכסה/פרופיל
+משתמשות באותו סמן, כך ש-AWS מתייחס לפרטי הגישה מסוג bearer כמפתח API ארוך טווח ולא
+כאסימון גישה של OIDC או של חשבון חברתי. `KiroExecutor.execute()` שולח הסקה באמצעות מפתח API רק
+אל `https://q.<region>.amazonaws.com/generateAssistantResponse` — כולל `us-east-1`
+— משום ששער Kiro IDE דוחה `TokenType=API_KEY`, ואילו
+`codewhisperer.us-east-1` דוחה מטענים של מפתח API כגוף בקשה לא תקין (HTTP 400).
 
 ---
 

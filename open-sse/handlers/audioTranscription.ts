@@ -1,5 +1,8 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
+import { audioErrorResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
 import { Buffer } from "node:buffer";
+import { buildMultipartBody, getUploadedFileName } from "../utils/audioMultipart.ts";
+export { buildMultipartBody } from "../utils/audioMultipart.ts";
 /**
  * Audio Transcription Handler
  *
@@ -21,11 +24,25 @@ import {
   type AudioProvider,
 } from "../config/audioRegistry.ts";
 import { buildAuthHeaders } from "../config/registryUtils.ts";
+import { SafeOutboundFetchError, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { isSameOrigin } from "../utils/sameOrigin.ts";
 import { kieExecutor } from "../executors/kie.ts";
 import { vertexTranscribe } from "../executors/vertexMedia.ts";
+import {
+  GEMINI_LIVE_MAX_INPUT_BYTES,
+  geminiLiveTranscribe,
+} from "../executors/geminiLiveTranscribe.ts";
 import { errorResponse } from "../utils/error.ts";
+import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { isJsonObject } from "../utils/kieTask.ts";
 import { handleOpenRouterTranscription } from "./openrouterTranscription.ts";
+import { handleGrokTranscription } from "./grokMedia.ts";
+import { handleSyntxTranscription } from "./syntxAudio.ts";
+import {
+  hasTranscriptionInput,
+  resolveTranscriptionFileOrResponse,
+  type RemoteMediaFetcher,
+} from "../utils/transcriptionRemoteAudio.ts";
 
 type TranscriptionCredentials = {
   apiKey?: string;
@@ -33,105 +50,27 @@ type TranscriptionCredentials = {
 };
 
 /**
- * Return a CORS error response from an upstream fetch failure
+ * Return a CORS error response from an upstream fetch failure.
+ *
+ * #15159: re-exported from `open-sse/utils/audioResponse.ts` instead of being defined
+ * here a second time. Two identical helpers is how the raw upstream passthrough
+ * survived in BOTH files unnoticed while ~35 call sites depended on it; the single
+ * definition is what makes the next fix a one-place change.
+ *
+ * Re-exported rather than re-pointed at the importers so
+ * `open-sse/handlers/openrouterTranscription.ts`, which imports this path, keeps
+ * working unchanged.
+ *
+ * Imported AND re-exported: a bare `export … from` does not create a local binding, and
+ * the transcription providers below call `upstreamErrorResponse` by name.
  */
-export function upstreamErrorResponse(res, errText) {
-  // Always return JSON so the client can parse the error reliably
-  let errorMessage: string;
-  try {
-    const parsed = JSON.parse(errText);
-    // Guard against `parsed.error` or `parsed.detail` being objects
-    const raw =
-      parsed?.err_msg ||
-      parsed?.error?.message ||
-      (typeof parsed?.error === "string" ? parsed.error : null) ||
-      parsed?.message ||
-      (typeof parsed?.detail === "string" ? parsed.detail : parsed?.detail?.message) ||
-      null;
-    errorMessage = raw ? String(raw) : errText || `Upstream error (${res.status})`;
-  } catch {
-    errorMessage = errText || `Upstream error (${res.status})`;
-  }
-
-  return Response.json(
-    { error: { message: errorMessage, code: res.status } },
-    {
-      status: res.status,
-      headers: { ...CORS_HEADERS },
-    }
-  );
-}
+export { upstreamErrorResponse };
 
 /**
  * Validate a path segment to prevent path traversal / SSRF.
  */
 function isValidPathSegment(segment: string): boolean {
   return !segment.includes("..") && !segment.includes("//");
-}
-
-/**
- * A `.opus` file is Opus audio in an Ogg container (RFC 7845) — the same bytes
- * a client would otherwise name `.ogg`. Whisper-compatible upstreams pick the
- * decoder from the *filename* and their allow-list
- * (`flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm`) has no `opus`, so
- * `note.opus` 400s while byte-identical `note.ogg` succeeds. Since
- * `/v1/audio/speech` emits `audio/opus` for `response_format=opus`, clients
- * round-tripping their own voice notes hit this constantly. Relabel to the
- * container that actually describes the bytes.
- */
-function normalizeUploadExtension(name: string): string {
-  return name.replace(/\.opus$/i, ".ogg");
-}
-
-function getUploadedFileName(file: Blob & { name?: unknown }): string {
-  return typeof file.name === "string" && file.name.length > 0
-    ? normalizeUploadExtension(file.name)
-    : "audio.wav";
-}
-
-/**
- * `body` is `Uint8Array<ArrayBuffer>`, not bare `Uint8Array`: `new Uint8Array(n)`
- * is always ArrayBuffer-backed, and only that narrower form satisfies `BodyInit`
- * (the bare type widens to `ArrayBufferLike`, which admits `SharedArrayBuffer`).
- */
-export async function buildMultipartBody(
-  file: Blob & { name?: unknown },
-  fields: Record<string, string>,
-  fileFieldName = "file"
-): Promise<{ body: Uint8Array<ArrayBuffer>; contentType: string }> {
-  const boundary = "----OmniRouteAudioBoundary" + Date.now().toString(36);
-  const parts: Uint8Array[] = [];
-  const encoder = new TextEncoder();
-
-  for (const [name, value] of Object.entries(fields)) {
-    parts.push(
-      encoder.encode(
-        `--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n${value}\r\n`
-      )
-    );
-  }
-
-  const fileName = getUploadedFileName(file)
-    .replace(/["]/g, "_")
-    .replace(/[\r\n]/g, "_");
-  const fileBytes = new Uint8Array(await file.arrayBuffer());
-  parts.push(
-    encoder.encode(
-      `--${boundary}\r\nContent-Disposition: form-data; name="${fileFieldName}"; filename="${fileName}"\r\nContent-Type: ${file.type || "application/octet-stream"}\r\n\r\n`
-    )
-  );
-  parts.push(fileBytes);
-  parts.push(encoder.encode(`\r\n--${boundary}--\r\n`));
-
-  const totalLength = parts.reduce((sum, p) => sum + p.length, 0);
-  const body = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const part of parts) {
-    body.set(part, offset);
-    offset += part.length;
-  }
-
-  return { body, contentType: "multipart/form-data; boundary=" + boundary };
 }
 
 /**
@@ -173,6 +112,82 @@ function resolveAudioContentType(file: Blob & { name?: unknown }): string {
   return "application/octet-stream";
 }
 
+function readFormString(formData: FormData | undefined, key: string): string {
+  const value = formData?.get(key);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/**
+ * Opt-in speaker diarization, shared by the Deepgram and Soniox handlers. Callers
+ * reach for whichever spelling their previous provider used: Soniox's
+ * `enable_speaker_diarization`, the generic `diarization`, `speaker_labels`, and
+ * Deepgram's `diarize`. Only truthy values count.
+ */
+function readDiarizationFlag(formData?: FormData): boolean {
+  return ["enable_speaker_diarization", "diarization", "speaker_labels", "diarize"].some((key) =>
+    /^(1|true|yes|on)$/i.test(readFormString(formData, key))
+  );
+}
+
+type DeepgramOptions = {
+  diarize: boolean;
+  diarizeModel: string;
+  verbose: boolean;
+};
+
+/**
+ * Client-settable Deepgram options, read off the multipart form.
+ *
+ * Diarization is opt-in under the same spellings Soniox accepts, plus Deepgram's
+ * own `diarize_model` (`latest`, `v2`, `v1`), which both enables diarization and
+ * pins the diarizer version. Like Soniox, diarization implies the verbose body.
+ */
+function readDeepgramOptions(formData?: FormData): DeepgramOptions {
+  const diarizeModel = readFormString(formData, "diarize_model");
+  const diarize = Boolean(diarizeModel) || readDiarizationFlag(formData);
+  const responseFormat = readFormString(formData, "response_format").toLowerCase();
+  return { diarize, diarizeModel, verbose: diarize || responseFormat === "verbose_json" };
+}
+
+const finiteOr = (value: unknown, fallback: number): number =>
+  typeof value === "number" && Number.isFinite(value) ? value : fallback;
+
+/**
+ * Build the OpenAI `verbose_json` envelope from a Deepgram response, with one
+ * segment per `results.utterances` entry. Provider frames are untrusted: null
+ * entries are skipped and non-numeric fields fall back to 0, so the shape is
+ * the same for every response.
+ */
+function deepgramToVerboseJson(data: unknown, text: string) {
+  const root = isJsonObject(data) ? data : {};
+  const results = isJsonObject(root.results) ? root.results : {};
+  const metadata = isJsonObject(root.metadata) ? root.metadata : {};
+  const rawUtterances = Array.isArray(results.utterances) ? results.utterances : [];
+  const segments = rawUtterances.filter(isJsonObject).map((utterance, index) => ({
+    id: index,
+    start: finiteOr(utterance.start, 0),
+    end: finiteOr(utterance.end, 0),
+    text: typeof utterance.transcript === "string" ? utterance.transcript : "",
+    speaker: finiteOr(utterance.speaker, 0),
+  }));
+
+  // Duration is the last utterance's end; fall back to the response metadata.
+  const lastEnd = segments.length ? segments[segments.length - 1].end : 0;
+  const duration = lastEnd > 0 ? lastEnd : finiteOr(metadata.duration, 0);
+  const channels = Array.isArray(results.channels) ? results.channels : [];
+  const firstChannel = isJsonObject(channels[0]) ? channels[0] : {};
+  const language =
+    typeof firstChannel.detected_language === "string" ? firstChannel.detected_language : "";
+
+  return {
+    task: "transcribe",
+    ...(language ? { language } : {}),
+    duration,
+    text,
+    segments,
+  };
+}
+
 /**
  * Handle Deepgram transcription (raw binary audio, model via query param)
  */
@@ -196,6 +211,16 @@ async function handleDeepgramTranscription(
     url.searchParams.set("detect_language", "true");
   }
 
+  const options = readDeepgramOptions(formData);
+  // Deepgram rejects a request that sets both `diarize` and `diarize_model`, so an
+  // explicit model wins and the boolean is only sent on its own.
+  if (options.diarizeModel) {
+    url.searchParams.set("diarize_model", options.diarizeModel);
+  } else if (options.diarize) {
+    url.searchParams.set("diarize", "true");
+  }
+  if (options.diarize) url.searchParams.set("utterances", "true");
+
   const arrayBuffer = await file.arrayBuffer();
 
   const res = await fetch(url.toString(), {
@@ -217,16 +242,20 @@ async function handleDeepgramTranscription(
 
   // null means the audio had no recognizable speech (music, silence, etc.)
   // Return it explicitly so the client can distinguish from a credentials error
-  return Response.json(
-    { text: text ?? "", noSpeechDetected: text === null || text === "" },
-    { headers: { ...CORS_HEADERS } }
-  );
+  const noSpeechDetected = text === null || text === "";
+  if (options.verbose) {
+    return Response.json(
+      { ...deepgramToVerboseJson(data, text ?? ""), noSpeechDetected },
+      { headers: { ...CORS_HEADERS } }
+    );
+  }
+  return Response.json({ text: text ?? "", noSpeechDetected }, { headers: { ...CORS_HEADERS } });
 }
 
 /**
  * Handle AssemblyAI transcription (async: upload file → submit → poll)
  */
-async function handleAssemblyAITranscription(providerConfig, file, modelId, token) {
+async function handleAssemblyAITranscription(providerConfig, file, modelId, token, formData) {
   const authHeaders = buildAuthHeaders(providerConfig, token);
 
   // Step 1: Upload the audio file
@@ -246,18 +275,26 @@ async function handleAssemblyAITranscription(providerConfig, file, modelId, toke
 
   const { upload_url } = await uploadRes.json();
 
-  // Step 2: Submit transcription request
+  // Step 2: Submit transcription request. An explicit OpenAI-style `language`
+  // field maps to AssemblyAI's `language_code`; otherwise let AssemblyAI detect it.
+  const submitPayload: Record<string, unknown> = {
+    audio_url: upload_url,
+    speech_models: [modelId],
+  };
+  const language = formData?.get("language");
+  if (typeof language === "string" && language.trim()) {
+    submitPayload.language_code = language.trim();
+  } else {
+    submitPayload.language_detection = true;
+  }
+
   const submitRes = await fetch(providerConfig.baseUrl, {
     method: "POST",
     headers: {
       ...authHeaders,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      audio_url: upload_url,
-      speech_models: [modelId],
-      language_detection: true,
-    }),
+    body: JSON.stringify(submitPayload),
   });
 
   if (!submitRes.ok) {
@@ -326,6 +363,12 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
   if (!resultUrl) {
     return errorResponse(502, "Gladia did not return a result_url");
   }
+  // The poll sends x-gladia-key, so only poll Gladia's own API origin. fetch() drops
+  // Authorization on a cross-origin redirect but keeps custom headers, so redirects are
+  // refused rather than followed.
+  if (!isSameOrigin(resultUrl, providerConfig.baseUrl)) {
+    return errorResponse(502, "Gladia returned a result_url outside its API origin");
+  }
 
   // Step 3: Poll for completion (max 120s)
   const maxWait = 120_000;
@@ -333,23 +376,62 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
 
   while (Date.now() - start < maxWait) {
     await new Promise((r) => setTimeout(r, 2000));
+    const polled = await pollGladiaResultOnce(resultUrl, authHeaders);
+    if (polled instanceof Response) return polled;
+    if (!polled) continue;
 
-    const pollRes = await fetch(resultUrl, { headers: authHeaders });
-    if (!pollRes.ok) continue;
-
-    const result = await pollRes.json();
-
-    if (result.status === "done") {
-      const text = result.result?.transcription?.full_transcript || "";
+    if (polled.status === "done") {
+      const text = polled.result?.transcription?.full_transcript || "";
       return Response.json({ text }, { headers: { ...CORS_HEADERS } });
     }
 
-    if (result.status === "error") {
-      return errorResponse(500, result.error_code || result.error || "Gladia transcription failed");
+    if (polled.status === "error") {
+      return errorResponse(500, polled.error_code || polled.error || "Gladia transcription failed");
     }
   }
 
   return errorResponse(504, "Gladia transcription timed out after 120s");
+}
+
+/**
+ * One Gladia result_url poll. Returns the JSON body on a successful HTTP response,
+ * an error Response when the URL redirects or resolves to a blocked address, or null
+ * when the attempt should be retried.
+ */
+type GladiaPollBody = {
+  status?: string;
+  error_code?: string;
+  error?: string;
+  result?: { transcription?: { full_transcript?: string } };
+};
+
+async function pollGladiaResultOnce(
+  resultUrl: string,
+  authHeaders: Record<string, string>
+): Promise<GladiaPollBody | Response | null> {
+  let pollRes: Response;
+  try {
+    pollRes = await safeOutboundFetch(resultUrl, {
+      headers: authHeaders,
+      guard: "public-only",
+      pinDns: true,
+      timeoutMs: 15_000,
+    });
+  } catch (err) {
+    const code = err instanceof SafeOutboundFetchError ? err.code : "";
+    if (code === "REDIRECT_BLOCKED") {
+      return errorResponse(502, "Gladia result_url answered with a redirect");
+    }
+    if (code === "URL_GUARD_BLOCKED") {
+      return errorResponse(502, "Gladia result_url resolves to a blocked address");
+    }
+    return null;
+  }
+  if (!pollRes.ok) {
+    await pollRes.body?.cancel().catch(() => {});
+    return null;
+  }
+  return (await pollRes.json()) as GladiaPollBody;
 }
 
 type SonioxToken = {
@@ -371,24 +453,17 @@ type SonioxOptions = {
 /**
  * Client-settable Soniox job options, read off the multipart form.
  *
- * Diarization is accepted under three spellings because callers reach for
- * whichever their previous provider used: Soniox's own
- * `enable_speaker_diarization`, the generic `diarization`, and Deepgram's
- * `speaker_labels`. Anything absent stays absent from the job body so a
+ * Diarization is accepted under the spellings shared with Deepgram (see
+ * `readDiarizationFlag`). Anything absent stays absent from the job body so a
  * caller who sends nothing produces byte-identical requests to before.
  */
 function readSonioxOptions(formData?: FormData): SonioxOptions {
-  const str = (key: string): string => {
-    const value = formData?.get(key);
-    return typeof value === "string" ? value.trim() : "";
-  };
-  const flag = (...keys: string[]): boolean =>
-    keys.some((key) => /^(1|true|yes|on)$/i.test(str(key)));
+  const str = (key: string): string => readFormString(formData, key);
 
   const granularities = (formData?.getAll?.("timestamp_granularities[]") ?? []).map((value) =>
     String(value).toLowerCase()
   );
-  const diarize = flag("enable_speaker_diarization", "diarization", "speaker_labels");
+  const diarize = readDiarizationFlag(formData);
   const responseFormat = str("response_format").toLowerCase();
 
   return {
@@ -641,18 +716,25 @@ async function handleKieAudioTranscription(providerConfig, file, modelId, token)
       typeof err === "object" && err !== null && "status" in err
         ? Number((err as { status?: unknown }).status) || 502
         : 502;
-    return Response.json(
-      {
-        error: {
-          message: err instanceof Error ? err.message : "Kie transcription createTask failed",
-          code: status,
-        },
-      },
-      {
-        status,
-        headers: { ...CORS_HEADERS },
-      }
+    // E-02 (#15159): the caught error is the RAW upstream body text —
+    // `kieExecutor.createTask` throws `new Error(await res.text())`
+    // (open-sse/executors/kie.ts:57-61) — so building the body by hand put
+    // upstream stack frames and credential-shaped substrings straight into the
+    // client response. Route it through the canonical builder instead; the
+    // sanitizing `errorResponse` is already imported by this file and the Kie
+    // poll path below already uses it.
+    //
+    // CORS headers are merged back on because this route only sets them on the
+    // OPTIONS preflight (src/app/api/v1/audio/transcriptions/route.ts:75-82),
+    // never on the POST response, so dropping them would break browser clients.
+    const response = errorResponse(
+      status,
+      err instanceof Error ? err.message : "Kie transcription createTask failed"
     );
+    for (const [header, value] of Object.entries(CORS_HEADERS)) {
+      response.headers.set(header, value);
+    }
+    return response;
   }
   const taskId = data?.data?.taskId || data?.taskId;
 
@@ -856,6 +938,53 @@ async function handleSpeechmaticsTranscription(providerConfig, file, modelId, to
   return pollSpeechmaticsJob(`${baseUrl}/${jobId}`, authHeaders);
 }
 
+function optionalFormString(formData: FormData, key: string): string | undefined {
+  const value = formData.get(key);
+  return typeof value === "string" ? value : undefined;
+}
+
+/**
+ * Gemini Live (BidiGenerateContent WebSocket) file-mode transcription.
+ * Rejects oversized uploads before buffering them a second time.
+ */
+async function handleGeminiLiveTranscription(
+  providerConfig: AudioProvider,
+  file: Blob,
+  modelId: string | null,
+  credentials: TranscriptionCredentials | null | undefined,
+  formData: FormData,
+  signal?: AbortSignal | null
+): Promise<Response> {
+  if (file.size > GEMINI_LIVE_MAX_INPUT_BYTES) {
+    return errorResponse(413, "Audio file is too large for Gemini Live transcription");
+  }
+  try {
+    const text = await geminiLiveTranscribe(credentials ?? {}, {
+      model: modelId as string,
+      audioBuffer: Buffer.from(await file.arrayBuffer()),
+      prompt: optionalFormString(formData, "prompt"),
+      language: optionalFormString(formData, "language"),
+      baseUrl: providerConfig.baseUrl,
+      signal: signal ?? undefined,
+    });
+    return Response.json({ text }, { headers: { ...CORS_HEADERS } });
+  } catch (err) {
+    const error = err as { message?: string; status?: number };
+    return errorResponse(
+      typeof error?.status === "number" ? error.status : 500,
+      `Gemini Live transcription failed: ${error?.message || "unknown error"}`
+    );
+  }
+}
+
+function resolveTranscriptionToken(
+  providerConfig: AudioProvider,
+  credentials?: TranscriptionCredentials | null
+): string | null | undefined {
+  if (providerConfig.authType === "none") return null;
+  return credentials?.apiKey || credentials?.accessToken;
+}
+
 /**
  * Handle audio transcription request
  *
@@ -869,22 +998,32 @@ export async function handleAudioTranscription({
   credentials,
   resolvedProvider = null,
   resolvedModel = null,
+  remoteMediaFetcher = null,
+  signal = null,
 }: {
   formData: FormData;
   credentials?: TranscriptionCredentials | null;
   resolvedProvider?: AudioProvider | null;
   resolvedModel?: string | null;
+  /** SSRF-hardened downloader for `url` input, injected by the API route. */
+  remoteMediaFetcher?: RemoteMediaFetcher | null;
+  /** Client request abort signal; kills spawned helpers (Gemini Live ffmpeg) on disconnect. */
+  signal?: AbortSignal | null;
 }): Promise<Response> {
   const model = formData.get("model");
   if (typeof model !== "string" || !model) {
     return errorResponse(400, "model is required");
   }
+  // #15067 made the registry parser refuse unsafe ids (dot segments, encoded
+  // delimiters); name the real reason instead of "No transcription provider found".
+  if (hasUnsafeModelIdSyntax(model)) {
+    return errorResponse(400, "Invalid model ID");
+  }
 
-  const fileEntry = formData.get("file");
-  if (!(fileEntry instanceof Blob)) {
+  // Preserve file-only behavior; URL-only audio is resolved after credentials.
+  if (!hasTranscriptionInput(formData)) {
     return errorResponse(400, "file is required");
   }
-  const file = fileEntry as Blob & { name?: unknown };
 
   // Use pre-resolved provider/model from route handler if available (supports dynamic provider_nodes).
   let providerConfig = resolvedProvider;
@@ -898,18 +1037,41 @@ export async function handleAudioTranscription({
   if (!providerConfig) {
     return errorResponse(
       400,
-      `No transcription provider found for model "${model}". Available: openai, openrouter, groq, deepgram, assemblyai, nvidia, huggingface, qwen, gladia, rev-ai, speechmatics`
+      `No transcription provider found for model "${model}". Available: openai, openrouter, groq, deepgram, assemblyai, nvidia, huggingface, qwen, gladia, rev-ai, speechmatics, gemini`
     );
   }
 
   // Skip credential check for local providers (authType: "none")
-  const token =
-    providerConfig.authType === "none" ? null : credentials?.apiKey || credentials?.accessToken;
+  const token = resolveTranscriptionToken(providerConfig, credentials);
   if (providerConfig.authType !== "none" && !token) {
     return errorResponse(401, `No credentials for transcription provider: ${providerConfig.id}`);
   }
 
+  // Fetch URL input into a local file. Never forward Telegram URLs/tokens
+  // or other caller-controlled URLs to the upstream STT provider.
+  const resolvedFile = await resolveTranscriptionFileOrResponse(
+    formData,
+    remoteMediaFetcher ?? undefined
+  );
+  if ("response" in resolvedFile) return resolvedFile.response;
+  const file = resolvedFile.file;
+
   // Route to provider-specific handler
+  if (providerConfig.format === "gemini-live") {
+    return handleGeminiLiveTranscription(
+      providerConfig,
+      file,
+      modelId,
+      credentials,
+      formData,
+      signal
+    );
+  }
+
+  if (providerConfig.format === "grok-stt") {
+    return handleGrokTranscription(providerConfig, file, modelId, credentials, formData);
+  }
+
   if (providerConfig.format === "vertex-gemini") {
     try {
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -941,7 +1103,7 @@ export async function handleAudioTranscription({
   }
 
   if (providerConfig.format === "assemblyai") {
-    return handleAssemblyAITranscription(providerConfig, file, modelId, token);
+    return handleAssemblyAITranscription(providerConfig, file, modelId, token, formData);
   }
 
   if (providerConfig.format === "gladia") {
@@ -974,6 +1136,14 @@ export async function handleAudioTranscription({
 
   if (providerConfig.format === "openrouter-stt") {
     return handleOpenRouterTranscription(providerConfig, file, modelId, token, formData);
+  }
+
+  if (providerConfig.format === "syntx-audio") {
+    return handleSyntxTranscription({
+      model: modelId as string,
+      file: file as Blob & { name?: string },
+      credentials,
+    });
   }
 
   // Default: OpenAI/Groq/Qwen3-compatible multipart proxy
@@ -1016,6 +1186,6 @@ export async function handleAudioTranscription({
     });
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
-    return errorResponse(500, `Transcription request failed: ${error.message}`);
+    return audioErrorResponse(500, `Transcription request failed: ${error.message}`);
   }
 }

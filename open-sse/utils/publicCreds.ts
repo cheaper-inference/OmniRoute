@@ -125,6 +125,8 @@ export function decodePublicCredBytes(bytes: readonly number[]): string {
  * Or use the helper below `embeddedBytesFor()`.
  */
 const EMBEDDED_DEFAULTS = {
+  // Public entrypoint for first-time ChatGPT OSS registration, not an issued client ID.
+  chatgpt_id: [11, 20, 0, 8, 31, 6, 22, 43, 4, 74, 21, 27, 22, 51, 10, 15, 68, 19, 95, 27],
   // Gemini / Code Assist — google oauth client (public, PKCE)
   gemini_id: [
     89, 85, 95, 91, 71, 90, 77, 68, 92, 30, 73, 64, 79, 3, 6, 91, 75, 2, 3, 0, 29, 28, 13, 0, 1, 5,
@@ -170,6 +172,11 @@ const EMBEDDED_DEFAULTS = {
   // Openference OAuth — public PKCE client id. The plaintext equals the first
   // nine bytes of MASK, so its XOR-masked representation is nine zero bytes.
   openference_id: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  // RenderHour OAuth — public PKCE client id (no secret), built into renderhour.com
+  renderhour_id: [29, 5, 13, 54, 29, 2, 27, 29, 23, 66, 5, 1, 7],
+  // MiniMax Code — public oauth client id, the name of the profile directory
+  // the MiniMax Code CLI stores its credential in.
+  minimax_id: [2, 14, 1, 13, 23, 66, 5, 1, 7, 65, 25, 22],
   // Trae Cloud IDE — public oauth client id
   trae_id: [10, 3, 95, 6, 10, 22, 66, 3, 11, 90, 72, 31, 91, 2],
   // Microsoft 365 Copilot web (m365.cloud.microsoft) — public SPA client id
@@ -189,6 +196,14 @@ const EMBEDDED_DEFAULTS = {
   // Firefly credits balance endpoint public x-api-key (`SunbreakWebUI1`) from
   // GET firefly.adobe.io/v1/credits/balance browser traffic.
   adobe_firefly_balance_api_key: [60, 24, 0, 11, 0, 10, 20, 31, 50, 72, 18, 32, 43, 93],
+  // Twinmind web (app.twinmind.com) — public Firebase Web API key used only to
+  // exchange a user refresh token for a short-lived ID token. Firebase Web API
+  // keys are public client identifiers, not secrets.
+  // https://firebase.google.com/docs/projects/api-keys
+  twinmind_fb: [
+    46, 36, 20, 8, 33, 22, 49, 70, 54, 73, 47, 59, 50, 95, 31, 34, 25, 4, 70, 25, 2, 28, 6, 57, 30,
+    49, 17, 3, 93, 40, 47, 7, 47, 36, 39, 117, 21, 120, 62,
+  ],
   // Muse Code CLI — Meta public OAuth client id (device grant, no secret).
   muse_id: [94, 93, 93, 88, 68, 93, 64, 77, 80, 31, 71, 65, 90, 85, 93, 85],
 } as const;

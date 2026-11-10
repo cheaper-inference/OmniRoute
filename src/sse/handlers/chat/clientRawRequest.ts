@@ -10,8 +10,17 @@
  */
 import { mergeAbortSignals } from "@omniroute/open-sse/executors/base.ts";
 import { cloneBoundedForLog } from "@omniroute/open-sse/utils/requestLogger.ts";
+import {
+  INTERNAL_TEST_HEADER,
+  SELF_HOP_HEADER,
+  trustedInternalTestMark,
+} from "@omniroute/open-sse/utils/selfHop.ts";
 
-export function buildClientRawRequest(request: Request, body: unknown) {
+export function buildClientRawRequest(
+  request: Request,
+  body: unknown,
+  signalOverride?: AbortSignal | null
+) {
   const url = new URL(request.url);
   const headers = Object.fromEntries(request.headers.entries());
   delete headers["x-omniroute-lease-owner"];
@@ -19,6 +28,10 @@ export function buildClientRawRequest(request: Request, body: unknown) {
   // Internal slow-keepalive deadline routing token (never client-sent, never
   // upstream-bound): set by withDeadlineSignal, consumed by getDeadlineController.
   delete headers["x-deadline-token"];
+  // Executors read this record, so a forged mark must not outlive the trust check, and the
+  // token that proves a real one must not reach anything that logs or forwards headers.
+  if (trustedInternalTestMark(request.headers) === null) delete headers[INTERNAL_TEST_HEADER];
+  delete headers[SELF_HOP_HEADER];
   return {
     endpoint: url.pathname,
     // #7847: bounded, not a full deep clone. Every consumer of clientRawRequest.body is
@@ -31,7 +44,7 @@ export function buildClientRawRequest(request: Request, body: unknown) {
     // compression), and this has to stay a snapshot of what the client actually sent.
     body: cloneBoundedForLog(body),
     headers,
-    signal: request.signal ?? null,
+    signal: signalOverride === undefined ? (request.signal ?? null) : signalOverride,
   };
 }
 

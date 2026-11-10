@@ -50,6 +50,7 @@ interface SearchTabProps {
 
 import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 
 export default function SearchTab({
   configState,
@@ -142,9 +143,9 @@ export default function SearchTab({
   };
 
   return (
-    <div className="flex h-full" data-testid="search-tab">
+    <div className="flex flex-col lg:flex-row h-full" data-testid="search-tab">
       {/* Left: form + history */}
-      <div className="w-[300px] shrink-0 border-r border-border overflow-y-auto flex flex-col bg-bg-alt">
+      <div className="w-full lg:w-[300px] shrink-0 border-b lg:border-b-0 lg:border-r border-border lg:overflow-y-auto flex flex-col bg-bg-alt">
         <SearchForm
           onSearch={handleSearch}
           loading={loading}
@@ -156,7 +157,7 @@ export default function SearchTab({
       </div>
 
       {/* Right: results + rerank */}
-      <div className="flex-1 overflow-y-auto p-1">
+      <div className="lg:flex-1 lg:overflow-y-auto p-1">
         <ResultsPanel
           response={response}
           rawJson={rawJson}
@@ -169,15 +170,15 @@ export default function SearchTab({
 
         {response && (
           <div className="px-4 py-2 flex gap-2">
-            <button
-              className="flex-1 bg-surface border border-border rounded-lg p-2 text-center hover:border-primary/30 transition-colors flex items-center justify-center gap-2"
+            <Button
+              variant="outline"
+              fullWidth
+              icon="swap_vert"
+              aria-expanded={showRerank}
               onClick={() => setShowRerank(!showRerank)}
             >
-              <span className="text-primary text-sm" aria-hidden="true">
-                &#8645;
-              </span>
-              <span className="text-xs text-text-muted">{t("rerank")}</span>
-            </button>
+              {t("rerank")}
+            </Button>
           </div>
         )}
 

@@ -25,6 +25,7 @@ export const USAGE_FETCHER_PROVIDERS = [
   "antigravity",
   "agy",
   "claude",
+  "anthropic",
   "codex",
   "cursor",
   "kiro",
@@ -41,13 +42,17 @@ export const USAGE_FETCHER_PROVIDERS = [
   "minimax",
   "minimax-cn",
   "crof",
+  // ClinePass 5-hour / weekly / monthly limits (GET /api/v1/users/me/plan/usage-limits)
+  "clinepass",
   "bailian-coding-plan",
   "qwen-cloud-token-plan",
   "nanogpt",
+  // NaN.Builders per-model token counters (GET cloud-api.nan.builders/api/usage/quota)
+  "nan",
+  "apmix",
   "deepseek",
   "moonshot",
   "kimi",
-  "opencode",
   "opencode-zen",
   "xiaomi-mimo",
   "xiaomi-mimo-token-plan",
@@ -58,7 +63,12 @@ export const USAGE_FETCHER_PROVIDERS = [
   "vertex",
   "vertex-partner",
   "codebuddy-cn",
+  "codebuddy-intl",
+  "cbai",
   "openrouter",
+  // Muse Code subscription has no usage API; registered so the generic fetcher
+  // returns persisted subscription metadata instead of "not implemented".
+  "muse-code",
   // LLM Gateway DevPass allowance (GET /v1/key → monthly + weekly premium)
   "llmgateway",
   // Lyceum credit balance (GET /api/v2/external/billing/credits)
@@ -83,6 +93,10 @@ export const USAGE_FETCHER_PROVIDERS = [
   // Tavily monthly credits & quota (GET /usage)
   "tavily-search",
   "tavily",
+  "jina-search",
+  "jina",
+  "jina-ai",
+  "jina-reader",
   // Volcano Ark Plan subscriptions (agent-plan / coding-plan)
   "volcengine-agent-plan",
   "volcengine-coding-plan",
@@ -90,11 +104,28 @@ export const USAGE_FETCHER_PROVIDERS = [
   "command-code",
   "conol-web",
   "cnl",
+  "syntx",
+  "stx",
   // AgentRouter (New-API) console balance (GET /api/user/self)
   "agentrouter",
+  // TokenRouter Management API (optional Management Key in consoleApiKey)
+  "tokenrouter",
   "kilocode",
+  // StepFun account balance (GET /v1/accounts; base URL override selects
+  // China vs international platform, mirroring the chat path)
+  "stepfun",
+  // MegaBrain plan session + weekly limits (GET /api/profile/limits)
+  "megabrain",
+  "mb",
   // Devin CLI agentic quota (Codeium seat-management GetUserStatus, protobuf)
   "devin-cli",
+  // ChatPlayground subscription and daily credits (GET /api/user)
+  "chatplayground",
+  "cpl",
+  // Cloudflare Workers AI daily neurons (GraphQL Analytics aiInferenceAdaptiveGroups)
+  "cloudflare-ai",
+  // Zed Hosted Models USD credit from an optional Orb billing portal link
+  "zed-hosted",
 ] as const;
 
 export type UsageFetcherProvider = (typeof USAGE_FETCHER_PROVIDERS)[number];

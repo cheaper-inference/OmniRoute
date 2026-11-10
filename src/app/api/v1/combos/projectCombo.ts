@@ -14,7 +14,10 @@
  * capabilities (multimodal / reasoning / caching) so importing clients enable
  * those features instead of requiring manual config after import.
  */
-import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
+import {
+  createModelCapabilityResolutionSnapshot,
+  getResolvedModelCapabilities,
+} from "@/lib/modelCapabilities";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo/comboStructure.ts";
 // The shapes live in the combo type module; comboStructure.ts only re-uses them
 // internally, so importing them from there is a TS2459/TS2724 at build time.
@@ -42,6 +45,14 @@ export interface PublicComboStep {
    * another combo and has no account of its own.
    */
   accountPinned?: boolean;
+  /**
+   * #14587: whether the resolved capability sources prove this member accepts
+   * images (`null` = no source knows). Only set on `model` steps when the
+   * projection includes capabilities. A combo's `multimodal` is true exactly
+   * when every member reports `true`, so a `false`/`null` here identifies the
+   * member blocking it.
+   */
+  supportsVision?: boolean | null;
 }
 
 /**
@@ -99,9 +110,10 @@ export function projectComboStep(step: Record<string, unknown>): PublicComboStep
     if (typeof step.providerId === "string" && step.providerId.length > 0) {
       out.providerId = step.providerId;
     }
-    // Same shape test as providerId above. `cleanupComboConnectionRefs` drops the
-    // key when the connection is deleted, so a step whose pinned account is gone
-    // reports false rather than pointing at nothing.
+    // Same shape test as providerId above. This says the step pins an account, not
+    // that the account is live: `cleanupComboConnectionRefs` keeps the key when the
+    // connection is deleted (#18954), so a dead pin reports true and the step fails
+    // closed on it instead of serving from another account.
     out.accountPinned = typeof step.connectionId === "string" && step.connectionId.length > 0;
     return out;
   }
@@ -171,6 +183,17 @@ export function computeComboCapabilities(
   return { multimodal, reasoning, caching };
 }
 
+/** #14587: attach the per-member vision verdict to each direct model step. */
+function annotateMemberVision(
+  steps: PublicComboStep[],
+  resolve: ComboCapabilityResolver = defaultCapabilityResolver
+): void {
+  for (const step of steps) {
+    if (step.kind !== "model" || typeof step.model !== "string") continue;
+    step.supportsVision = resolve(step.model).supportsVision;
+  }
+}
+
 export function projectCombo(
   combo: Record<string, unknown>,
   options?: ProjectComboOptions
@@ -194,6 +217,7 @@ export function projectCombo(
   }
 
   if (options?.includeCapabilities) {
+    annotateMemberVision(out.models, options.resolveCapabilities);
     out.capabilities = computeComboCapabilities(
       combo,
       options.resolveCapabilities,
@@ -202,4 +226,26 @@ export function projectCombo(
   }
 
   return out;
+}
+
+/** Project one request's combo collection with a single bulk capability snapshot. */
+export function projectComboCollectionWithCapabilities(combos: readonly unknown[]): PublicCombo[] {
+  const allCombos = combos.filter(
+    (combo): combo is Record<string, unknown> => Boolean(combo) && typeof combo === "object"
+  );
+  const snapshot = createModelCapabilityResolutionSnapshot();
+  const resolveCapabilities: ComboCapabilityResolver = (model) => {
+    const caps = getResolvedModelCapabilities(model, undefined, snapshot);
+    return { supportsVision: caps.supportsVision, reasoning: caps.reasoning };
+  };
+
+  return allCombos
+    .map((combo) =>
+      projectCombo(combo, {
+        includeCapabilities: true,
+        resolveCapabilities,
+        allCombos,
+      })
+    )
+    .filter((combo): combo is PublicCombo => combo !== null);
 }

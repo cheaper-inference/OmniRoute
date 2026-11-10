@@ -136,23 +136,23 @@ omniroute providers validate
 
 ---
 
-## Cumraíocht na hUirlise CLI
+## Cumraíocht Uirlis CLI
 
 ### 1) Ceangail Soláthraithe agus Cruthaigh Eochair API
 
-1. Oscail Deais → `Providers` agus ceangail soláthraí amháin ar a laghad (OAuth nó eochair API).
-2. Oscail Deais → `Endpoints` agus cruthaigh eochair API.
-3. (Roghnach) Oscail Deais → `Combos` agus socraigh do shlabhra cúltaca.
+1. Oscail Dashboard → `Providers` agus ceangail soláthraí amháin ar a laghad (OAuth nó eochair API).
+2. Oscail Dashboard → `Endpoints` agus cruthaigh eochair API.
+3. (Roghnach) Oscail Dashboard → `Combos` agus socraigh do shlabhra cúltaca.
 
-### 2) Dírigh d’Uirlis Ríomhchláraithe
+### 2) Cumraigh d’Uirlis Ríomhchláraithe
 
 ```txt
-Bun-URL:   http://localhost:20128/v1
+Bun-URL: http://localhost:20128/v1
 Eochair API:  [cóipeáil ón leathanach Endpoint]
-Samhail:   if/qwen3.8-max-preview (nó aon réimír soláthraí/samhla)
+Samhail:    if/qwen3.8-max-preview (nó réimír soláthraí/samhla ar bith)
 ```
 
-Mura féidir le d’eagarthóir `Authorization: Bearer ...` a sheoladh, úsáid an bun-URL comhoiriúnachta comharthaithe ina ionad:
+Mura féidir le d’eagarthóir `Authorization: Bearer ...` a sheoladh, bain úsáid as an mbonn comhoiriúnachta tokenaithe ina ionad:
 
 ```txt
 Bun-URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -166,40 +166,41 @@ Oibríonn sé le Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, agus
 #### Uathchumraigh le `setup-*`
 
 In ionad an bun-URL agus an eochair a ghreamú de láimh, lig do OmniRoute cumraíocht
-féin gach uirlise a scríobh ón gcatalóg bheo samhlacha. Ordú amháin in aghaidh na huirlise:
+gach uirlise a scríobh ón gcatalóg bheo samhlacha. Ordú amháin in aghaidh na huirlise:
 
 ```bash
-omniroute setup-codex        # Próifílí ~/.codex/<name>.config.toml
+omniroute setup-codex        # próifílí ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (comhoiriúnach le OpenAI)
-omniroute setup-cline        # Socruithe Cline CLI + eisínteacht VS Code
+omniroute setup-cline        # socruithe Cline CLI + eisínteacht VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Priontálann sé céimeanna Cursor laistigh den aip
-omniroute setup-roo          # Iompórtáil Roo Code + pointeoir autoImport
+omniroute setup-cursor       # priontálann sé céimeanna Cursor laistigh den aip
+omniroute setup-roo          # iompórtáil Roo Code + pointeoir autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
 Glacann gach ceann acu le `--remote <url> --api-key <key>` chun uirlis áitiúil a chumrú i gcoinne
-OmniRoute **cianda**, chomh maith le `--dry-run` chun réamhamharc a fháil. Chun CLI a sheoladh leis an
+OmniRoute **cianda**, chomh maith le `--dry-run` chun réamhamharc a dhéanamh. Chun CLI a thosú leis an
 timpeallacht cheart insteallta agus gan aon chumraíocht a scríobh ar chor ar bith, úsáid an tosaitheoir ginearálta
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
 tá na tosaitheoirí oidhreachta in aghaidh na huirlise `omniroute launch` (Claude Code) agus
 `omniroute launch-codex` (Codex) ar fáil fós.
 
-Chun an tábla iomlán a fheiceáil (an méid a scríobhann gach ordú, gach bratach, áitiúil i gcomparáid le cianda, coinbhinsiúin
-`/v1` an bhun-URL), féach **[Comhtháthuithe CLI](./CLI-INTEGRATIONS.md)**.
+Chun an tábla iomlán a fheiceáil (cad a scríobhann gach ordú, gach bratach, áitiúil i gcomparáid le cianda, coinbhinsiúin
+`/v1` don bhun-URL), féach **[Comhtháthuithe CLI](./CLI-INTEGRATIONS.md)**.
 
-Le haghaidh cumraíocht mhionsonraithe in aghaidh na huirlise (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, agus tuilleadh), féach an **[Treoir d’Uirlisí CLI](../reference/CLI-TOOLS.md)** tiomnaithe.
+Le haghaidh cumraíocht mhionsonraithe de réir uirlise (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, agus tuilleadh), féach an **[Treoir d’Uirlisí CLI](../reference/CLI-TOOLS.md)** tiomnaithe.
 
 ---
 
 ## Socrú Prótacail (MCP + A2A)
 
-### Socrú MCP (Prótacal Comhthéacs Samhla)
+### MCP Socrú (Prótacal Comhthéacs Samhail)
 
 Tosaigh iompar MCP i mód stdio:
 
@@ -210,28 +211,28 @@ omniroute --mcp
 Sreabhadh bailíochtaithe molta:
 
 ```bash
-# 1. Tosaigh an freastalaí MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Ó do chliant MCP, glaoigh ar:
-omniroute_get_health        # Ba cheart dó sláinte an chórais a thabhairt ar ais
-omniroute_list_combos       # Ba cheart dó teaglamaí gníomhacha a thabhairt ar ais
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Nó rith an tsraith iomlán E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Cumraíocht Chliaint MCP
+#### MCP Cumraíocht Cliant
 
-**Claude Code:**
+**Cód Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Cuir le do shocruithe MCP é:
+Cuir le do shocruithe MCP (stdio, leis an eochair ionas go mbeidh príomhoide ag an nglaoiteoir):
 
 ```json
 {
@@ -239,17 +240,24 @@ Cuir le do shocruithe MCP é:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Doiciméadacht iomlán MCP:** [README Fhreastalaí MCP](../../open-sse/mcp-server/README.md) — 110 uirlis, cumraíochtaí IDE, cliaint Python/TS/Go.
+Nó, nuair a bhíonn `mcpTransport` `streamable-http` (socraigh ar `/dashboard/mcp` nó le `omniroute mcp enable --transport streamable-http`) é, cuir in iúl d'iontráil iargúlta freastalaí MCP an chliaint ag `http://localhost:20128/api/mcp/stream`.
 
-### Socrú A2A (Prótacal Gníomhaire-go-Gníomhaire)
+Taistealaíonn an eochair mar `Authorization: Bearer <api-key>` (féach [MCP Server → Cianrochtain](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) d’óstach iargúlta; tá gá le `mcp:connect` agus a scóip read/write ar eochair iargúlta).
 
-Fíoraigh Cárta an Ghníomhaire:
+**Doiciméadúchán iomlán MCP :** [Freastalaí MCP README](../../open-sse/mcp-server/README.md) — 110 uirlisí, IDE configs, cliaint Python/TS/Go. Tagairt oibreora do na huirlisí comhbhrú CCR/dedup (marcóirí, réamhriachtanais, scopes in aghaidh an uirlis, uimhriú aisghabhála, diagnóisic): [Innill Chomhbhrú → Réamhriachtanais / treoir oibreoir](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Socrú A2A (Prótacal Gníomhaire go Gníomhaire)
+
+Fíoraigh an Cárta Gníomhaire:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -263,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Doiciméadacht iomlán A2A:** [README Fhreastalaí A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, scileanna, sruthú, saolré tascanna.
+**Doiciméadúchán iomlán A2A :** [Freastalaí A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, scileanna, sruthú, saolré tasc.
 
 ---
 
@@ -322,23 +330,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Teimpléad Void Linux (xbps-src)
+## Teimpléad ar neamhní Linux (xbps-src).
 
-Más úsáideoir Void Linux thú, is féidir leat pacáiste dúchasach a thógáil le `xbps-src`. Sábháil an bloc seo mar `srcpkgs/omniroute/template`:
+I gcás úsáideoirí Void Linux, is féidir leat pacáiste dúchais a thógáil ag baint úsáide as `xbps-src`. Sábháil an bloc seo mar `srcpkgs/omniroute/template`:
 
 ```bash
-# Comhad teimpléid le haghaidh 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Geata uilíoch AI le ródú cliste do sholáthraithe iomadúla LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Athghin an tsuim sheiceála do gach eisiúint le:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -38,7 +38,8 @@ test("Radar catalog exposes edit, reset, hide, and restore controls", () => {
     );
   }
   assert.match(controlsSource, /aria-label=\{t\("modelDisplayName"\)\}/);
-  assert.match(controlsSource, /type="checkbox"/);
+  // The enable toggle is the Checkbox adapter (a real <input type="checkbox">, KEA-7886).
+  assert.match(controlsSource, /type="checkbox"|<Checkbox\b/);
 });
 
 test("English and Brazilian Portuguese catalogs include the local state copy", () => {

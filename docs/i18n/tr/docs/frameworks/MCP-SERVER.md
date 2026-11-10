@@ -10,35 +10,30 @@
 
 ## Kurulum
 
-OmniRoute MCP yerleşik olarak gelir. Şu komutla başlatın:
+OmniRoute MCP yerleşiktir. Şununla başlayın:
 
 ```bash
 omniroute --mcp
 ```
 
-Ya da open-sse aktarımı üzerinden:
+Veya open-sse aktarımı yoluyla:
 
 ```bash
-# HTTP üzerinden akışa uygun aktarım (port 20130)
-omniroute --dev  # MCP, /mcp uç noktasında otomatik olarak başlar
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP aktarımları (`sse` / `streamable-http`, pano sunucusu tarafından aynı süreç içinde sunulur)
-varsayılan olarak kapalıdır ve önceden yalnızca `/dashboard/mcp` sayfasından açılıp kapatılabiliyordu. v3.8.51
-itibarıyla CLI da aynı özelliklere sahiptir:
+HTTP aktarımları (`sse` / `streamable-http`, işlem sırasında kontrol paneli sunucusu tarafından sunulur) varsayılan olarak kapalıdır ve önceden yalnızca `/dashboard/mcp` sayfasından değiştirilebilirdi. V3.8.51 itibarıyla CLI eşitliği vardır:
 
 ```bash
-omniroute mcp status                                  # etkin/çevrimiçi, aktarım, araç sayısı
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # etkin sse/streamable-http oturumlarını sıfırlar
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable`, panonun `/api/settings` üzerinden değiştirdiği aynı `mcpEnabled`
-(ve isteğe bağlı olarak `mcpTransport`) ayarına PATCH isteği gönderir. `mcp restart`, `POST /api/mcp/restart`
-çağrısı yapar: bir sonraki isteğin temiz şekilde yeniden başlatılabilmesi için etkin
-`sse`/`streamable-http` oturumlarını sonlandırır; MCP devre dışıysa `409`, `stdio` aktarımı içinse `501`
-döndürür (stdio istemcileri kendi alt süreçlerini yönetir — yeniden başlatılabilecek süreç içi bir tanıtıcı yoktur).
+`mcp enable`/`mcp disable` PATCH aynı `mcpEnabled` (ve isteğe bağlı olarak `mcpTransport`) ayarı, gösterge tablosunun `/api/settings` aracılığıyla geçiş yapmasını sağlar. `mcp restart` `POST /api/mcp/restart` çağırır: aktif `sse`/`streamable-http` oturumlarını yıkar, böylece bir sonraki istek temiz bir şekilde yeniden başlatılır, MCP devre dışı bırakılırsa `409` ve `stdio` aktarımı için `501` döndürür (stdio istemcileri kendi alt süreçlerine sahiptir — yeniden başlatılacak bir işlem içi tanıtıcı yoktur).
 
 ## Aktarımlar
 
@@ -71,6 +66,16 @@ curl -i \
 ```
 
 `manage` kapsamına sahip olmayan bir anahtar (veya Bearer bilgisinin bulunmaması) `403 LOCAL_ONLY` döndürür. Kardeş `/api/cli-tools/runtime/*` öneki kasıtlı olarak bu yöntemle ATLANAMAZ — bkz. [Route Guard Katmanları — Manage kapsamı istisnası](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
+
+### Origin doğrulaması
+
+Kimlik doğrulamasından sonra `/api/mcp/*` adresine giden her isteğin — transport'lar ve `status`, `tools`, `audit`, `restart` gibi yönetim rotaları — `Origin` başlığı, çağıran kim olursa olsun (API anahtarı, CLI token'ı, dashboard oturumu veya oturum açma kapalıyken anonim loopback) doğrulanır. Bu, MCP Streamable HTTP spesifikasyonunun gerektirdiği DNS rebinding korumasıdır.
+
+- **`Origin` başlığı yok** → izin verilir. OmniRoute CLI, SDK ve IDE istemcileri bu başlığı göndermez.
+- **İzin verilen `Origin`** → herhangi bir portta `localhost` / `127.0.0.1` / `[::1]` ya da OmniRoute'un kendi genel origin'i: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, güvenilir bir ters proxy'nin ilettiği origin (`OMNIROUTE_TRUST_PROXY`, yalnızca base URL ayarlanmamışsa) veya doğrudan erişilen loopback/LAN IP host'u. Tek başına `Host` başlığı bir origin'i asla güvenilir yapmaz.
+- **`null` dahil diğer tüm `Origin` değerleri** → JSON-RPC hata gövdesiyle `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Geçerli bir CSRF token'ı sunan dashboard oturumu, diğer dashboard yazma işlemlerinde olduğu gibi kabul edilmeye devam eder.
+
+Ters proxy arkasında sunulan tarayıcı tabanlı bir MCP istemcisi `OMNIROUTE_PUBLIC_BASE_URL` gerektirir; diğer origin'ler için izin listesi yoktur. CORS ön kontrol isteği (`OPTIONS`) Origin açısından denetlenmez; ardından gelen istek denetlenir.
 
 ## IDE Yapılandırması
 
@@ -122,54 +127,40 @@ Claude Desktop, Cursor, Cline ve uyumlu MCP istemcilerinin kurulumu için [MCP �
 
 ## Sıkıştırma Araçları (13)
 
-| Araç                                | Kapsamlar           | Açıklama                                                                                                                        |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | Sıkıştırma ayarları, analiz özeti ve önbellek duyarlı istatistikler (`analytics.mcpDescriptionCompression` meta verileri dâhil) |
-| `omniroute_compression_configure`   | `write:compression` | Sıkıştırma modunu, eşiğini, hedef oranını, sistem istemi korumasını ve MCP açıklama sıkıştırma seçeneğini yapılandırma          |
-| `omniroute_set_compression_engine`  | `write:compression` | Etkin motoru (off/caveman/rtk/stacked) ve Caveman/RTK yoğunluğunu seçme                                                         |
-| `omniroute_list_compression_combos` | `read:compression`  | Adlandırılmış sıkıştırma kombinasyonlarını ve motor işlem hatlarını listeleme                                                   |
-| `omniroute_compression_combo_stats` | `read:compression`  | Sıkıştırma kombinasyonu ve motoruna göre gruplandırılmış analizler                                                              |
-| `omniroute_ccr_store`               | `write:compression` | Çağıranı yalıtılmış içeriği sınırlı bellek içi CCR deposunda saklama ve bir işaretçiyle birlikte `ccr://` referansı döndürme    |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR içeriğini tam olarak veya baş, son, satırlar, grep ve istatistik modlarıyla alma                                            |
-| `omniroute_ccr_inspect`             | `read:compression`  | İçeriği döndürmeden çağırana ait CCR meta verilerini inceleme                                                                   |
-| `omniroute_ccr_list`                | `read:compression`  | Çağırana ait CCR bloklarının sayfalandırılmış meta verilerini listeleme                                                         |
-| `omniroute_ccr_delete`              | `write:compression` | Çağırana ait bir CCR bloğunu silme                                                                                              |
-| `omniroute_ccr_stats`               | `read:compression`  | Çağıran kapsamındaki bellek kullanımını, yaşam döngüsü sayaçlarını ve depo sınırlarını raporlama                                |
-| `omniroute_rtk_discover`            | `read:compression`  | İsteğe bağlı RTK çıktı örneklerinde yinelenen gürültüyü keşfetme                                                                |
-| `omniroute_rtk_learn`               | `read:compression`  | İsteğe bağlı örneklerden incelenebilir bir RTK filtresi taslağı oluşturma                                                       |
+| Alet                                | Kapsamlar           | Tanım                                                                                                                                |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Sıkıştırma ayarları, analiz özeti ve önbelleğe duyarlı istatistikler ( `analytics.mcpDescriptionCompression` meta verilerini içerir) |
+| `omniroute_compression_configure`   | `write:compression` | Sıkıştırma modunu, eşiği, hedef oranı, sistem istemi korumasını, MCP açıklama sıkıştırma geçişini yapılandırın                       |
+| `omniroute_set_compression_engine`  | `write:compression` | Aktif motoru (off/caveman/rtk/stacked) ve Caveman/RTK yoğunluğunu seçin                                                              |
+| `omniroute_list_compression_combos` | `read:compression`  | Adlandırılmış sıkıştırma kombinasyonlarını ve bunların motor işlem hatlarını listeleyin                                              |
+| `omniroute_compression_combo_stats` | `read:compression`  | Sıkıştırma birleşimine ve motora göre gruplandırılmış analizler                                                                      |
+| `omniroute_ccr_store`               | `write:compression` | Arayandan yalıtılmış içeriği sınırlı bellek içi CCR deposunda saklayın ve bir işaretçi artı `ccr://` referansı döndürün              |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR içeriğini tam olarak veya baş, kuyruk, çizgiler, grep ve istatistik modlarıyla alın                                              |
+| `omniroute_ccr_inspect`             | `read:compression`  | Arayanın sahip olduğu CCR meta verilerini, içeriği döndürmeden inceleyin                                                             |
+| `omniroute_ccr_list`                | `read:compression`  | Arayanın sahip olduğu CCR blokları için sayfalandırılmış meta verileri listeleyin                                                    |
+| `omniroute_ccr_delete`              | `write:compression` | Arayanın sahip olduğu CCR bloğunu silme                                                                                              |
+| `omniroute_ccr_stats`               | `read:compression`  | Arayan kapsamlı bellek kullanımını, yaşam döngüsü sayaçlarını ve depolama sınırlarını raporlayın                                     |
+| `omniroute_rtk_discover`            | `read:compression`  | İsteğe bağlı RTK çıktı örneklerinde yinelenen gürültüyü keşfedin                                                                     |
+| `omniroute_rtk_learn`               | `read:compression`  | Katılımcı örneklerden incelenebilir bir RTK filtre taslağı oluşturun                                                                 |
 
-CCR girdileri yalnızca bellekte tutulur ve yeniden başlatma sırasında kaybolur. Her blok 2 MiB, her
-asıl öğe 16 MiB ve genel depo 64 MiB ile sınırlıdır. Girdiler varsayılan olarak 24 saatlik bir TTL'ye
-sahiptir (en fazla yedi gün). Tam MCP alımı 256 KiB ile sınırlıdır; daha büyük bloklara aralık ve grep
-modları üzerinden erişilebilir. Depolama, alma, listeleme, inceleme, silme ve istatistikler, kimliği
-doğrulanmış API anahtarı asıl öğesine göre yalıtılır. Denetim kayıtları hiçbir zaman içerik barındırmaz;
-yalnızca karmaları ve boyut meta verilerini içerir.
+CCR girişleri iki katmanlı bir depo kullanır: yerel bulut dışı çalışma zamanlarında dayanıklı bir SQLite katmanı (`ccr_blocks`, varsayılan olarak açık) tarafından desteklenen sıcak bir bellek içi katman, böylece bir blok, TTL bitene kadar çıkarmadan veya yeniden başlatmadan sağ çıkar —, 512 KB üzerindeki bloklar ve yalnızca bellekte kalan bulut çalışma zamanları hariç. Her blok 2 MiB ile, her ana birim 16 MiB ile ve global mağaza 64 MiB ile sınırlıdır. Girişler varsayılan olarak 24 saatlik TTL (maksimum yedi gün). Tam MCP alımı 256 KiB ile sınırlıdır; daha büyük bloklar aralıklı ve grep modları aracılığıyla kullanılabilir durumda kalır. Depolama, erişim, listeleme, inceleme, silme ve istatistikler, kimliği doğrulanmış API anahtarı ilkesiyle yalıtılır. Denetim kayıtları karmaları ve boyut meta verilerini içerir, asla içerik içermez. Operatörün karşılaştığı ayrıntılar (iki işaretleyici, istemci önkoşulları, `codemode:false`, araç başına kapsamlar, sayfalandırma ve tanılama matrisi) [Sıkıştırma Motorları → Önkoşulları / operatör kılavuzunda](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) mevcuttur.
 
-`omniroute_compression_status`, MCP açıklama sıkıştırmasını
-`analytics.mcpDescriptionCompression` altında ayrı olarak raporlar. Bu değerler, listelenebilir MCP
-açıklamalarına (`tools`, `prompts`, `resources` ve `resourceTemplates`) yönelik meta veri boyutu
-tahminleridir; sağlayıcı kullanım makbuzları değildir ve `source: "mcp_metadata_estimate"` ile
-işaretlenir.
+`omniroute_compression_status` MCP açıklama sıkıştırmasını `analytics.mcpDescriptionCompression` altında ayrı olarak bildirir. Bu değerler, MCP listelenebilir açıklamalara (`tools`, `prompts`, `resources` ve `resourceTemplates`) yönelik meta veri boyutu tahminleridir; bunlar sağlayıcı kullanım makbuzları değildir ve `source: "mcp_metadata_estimate"` ile işaretlenmiştir.
 
 ### MCP Erişilebilirlik Ağacı Filtresi (v3.8.0)
 
-Yukarıdaki sıkıştırma araçlarından ayrı olarak OmniRoute, MCP tarayıcı/erişilebilirlik araçlarının
-**araç sonuçlarını** ajana döndürülmeden önce sıkıştıran bir yürütme sonrası filtresi içerir. Bu filtre
-kendi başına bir araç değildir — ayrıntılı erişilebilirlik ağacı veya tarayıcı anlık görüntüsü metni
-(≥2000 karakter) içeren tüm araç sonuçlarında şeffaf biçimde çalışır.
+Yukarıdaki sıkıştırma araçlarından ayrı olarak OmniRoute, dosyaları sıkıştıran bir yürütme sonrası filtre içerir.** araç sonuçları** temsilciye iade edilmeden önce MCP browser/accessibility araçlarının. Bu filtrenin kendisi bir — aracı değildir; ayrıntılı erişilebilirlik ağacı veya tarayıcı anlık görüntüsü metni (≥ 2000 karakter) içeren herhangi bir araç sonucunda şeffaf bir şekilde çalışır.
 
-Temel davranışlar:
+Anahtar davranışlar:
 
-- Ardışık ≥30 yinelenen eşdüzey satırı baş + son özetine daraltır
-- Playwright/bilgisayar kullanımı için gerekli `[ref=eXX]` bağlantı noktalarını korur
-- Aşırı büyük metni (>50.000 karakter) bir gezinme ipucuyla zorunlu olarak kırpar
-- Beklenen tasarruf: Tarayıcı anlık görüntüsü yüklerinde **%60–80**
+- ≥ 30 ardışık tekrarlanan kardeş satırını başa doğru daraltır + kuyruk özeti
+- Playwright/computer-use gerektirdiği `[ref=eXX]` çapalarını korur
+- Gezinme ipucuyla büyük boyutlu metni (> 50.000 karakter) sert şekilde keser
+- Beklenen tasarruflar:** %60–80** tarayıcı anlık görüntü yüklerinde
 
-Yapılandırma: Genel ayarlarda `compression.mcpAccessibility` (056 numaralı geçiş).
-Uygulama: `open-sse/services/compression/engines/mcpAccessibility/`.
-Tüm belgeler: [Sıkıştırma Motorları — MCP Erişilebilirlik Ağacı Filtresi](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Yapılandırma: genel ayarlarda `compression.mcpAccessibility` (geçiş 056). Uygulama: `open-sse/services/compression/engines/mcpAccessibility/`. Tüm belgeler: [Sıkıştırma Motorları — MCP Erişilebilirlik Ağacı Filtresi](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Bu araçların arkasındaki çalışma zamanı sıkıştırma modeli için [Sıkıştırma Motorları](../compression/COMPRESSION_ENGINES.md) ve [RTK Sıkıştırması](../compression/RTK_COMPRESSION.md) belgelerine bakın.
+Bu araçların arkasındaki çalışma zamanı sıkıştırma modeli için [Sıkıştırma Motorları](../compression/COMPRESSION_ENGINES.md) ve [RTK Sıkıştırma'ya](../compression/RTK_COMPRESSION.md) bakın.
 
 ## 1Proxy Araçları (3)
 
@@ -282,147 +273,135 @@ Hem SSE hem de Akış Destekli HTTP aktarımları, MCP sunucusu Ayarlar'da etkin
 
 ## Kimlik Doğrulama ve Kapsamlar
 
-MCP aracı, çağırandan kapsam dizelerini okur. Bu kontrol, üç bağımsız ad alanından biridir. Bir denetleyiciden geçmek, diğerlerinden geçmek anlamına gelmez. Kurallar [Üç kapsam ad alanı](#three-scope-namespaces) bölümündedir. Araç kataloğu [MCP araç kapsamları](#mcp-tool-scopes) bölümündedir.
+MCP aracı arayan kişiden okuma kapsamı dizelerini çağırır. Bu kontrol üç bağımsız ad alanından biridir. Bir puldan gelen pas, diğerlerinden gelen pas değildir. Kurallar [Üç kapsam ad](#three-scope-namespaces) alanıdır. Araç kataloğu [MCP araç kapsamlarıdır](#mcp-tool-scopes).
 
 ### Üç kapsam ad alanı
 
-Bir API anahtarındaki `manage`, bir MCP aracındaki `read:compression` ve bir `oma_live_…` erişim belirtecindeki `read` üç farklı izindir. Değişiklik yapan bir yönetim rotasına `read` erişim belirteci gönderen çağırıcılar HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` hatası alırlar. Bu rütbe `scopeSatisfies`'dir. MCP tablosuna başvurmaz ve MCP eşleştiricisi de buna başvurmaz.
+API anahtarındaki `manage`, MCP aracındaki `read:compression` ve `oma_live_…` erişim belirtecindeki `read` üç farklı hibedir. Mutasyona uğrayan bir yönetim rotasına `read` erişim belirteci gönderen arayanlar HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` alır. Bu rütbe `scopeSatisfies`. MCP tablosuna başvurmaz ve MCP eşleştirici de buna başvurmaz.
 
-| Ad Alanı              | Kimlik Bilgisi                                                             | Denetleyici                | Geçiş şunlara izin verir                            |
-| :-------------------- | :------------------------------------------------------------------------- | :------------------------- | :-------------------------------------------------- |
-| API anahtarı yönetimi | `api_keys.scopes`                                                          | `hasManageScope`           | O Bearer anahtarı için Yönetim REST                 |
-| API anahtarı ekleme   | aynı dizi, bir tam dize                                                    | aşağıda adı geçen yardımcı | Yalnızca o tek yetenek                              |
-| MCP araç kapsamları   | aynı dizi, aksi takdirde MCP `_meta`, aksi takdirde `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | O araç, zorlama açıldığında                         |
-| Erişim belirteci      | `oma_live_…`                                                               | `scopeSatisfies`           | Yöntemi ve yolu o rütbeyi gerektiren yönetim rotası |
+| Ad alanı                   | Kimlik bilgisi                                                                                | Denetleyici                | Bir geçiş izin verir                                 |
+| :------------------------- | :-------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------- |
+| API anahtarı yönetimi      | `api_keys.scopes`                                                                             | `hasManageScope`           | Bu Taşıyıcı anahtarı için yönetim REST               |
+| API anahtarı katkı maddesi | aynı dizi, tam bir dize                                                                       | aşağıda adı geçen yardımcı | Sadece bu tek yetenek                                |
+| MCP aracı kapsamları       | aynı dizi, aksi takdirde MCP `_meta` ( yalnızca HTTP/SSE ), aksi halde `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Bu araç, yaptırım etkinleştirildiğinde               |
+| Erişim jetonu              | `oma_live_…`                                                                                  | `scopeSatisfies`           | Yöntemi ve yolu bu rütbeyi gerektiren yönetim rotası |
 
-Her kimlik bilgisinin oluşturulması [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md) bölümünde ele alınmıştır.
+Her bir kimlik bilgisinin basılması [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md) kapsamında ele alınmaktadır.
 
 #### API anahtarı kapsamları
 
 Bir `api_keys.scopes` dizisi iki işi besler. Farklı işlevler kullanırlar.
 
-**Yönetim REST.** `manage` ve `admin`, `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) üyeleridir. `hasManageScope`, o anahtar için yönetim rotalarını yetkilendiren şeydir. `admin`, bu rotalarda yönetim yeteneğine sahiptir. Buradaki `admin` kelimesi erişim belirteci rütbesi değildir ve MCP araç kapsamlarına genişlemez.
+**Yönetim REST.** `manage` ve `admin`, `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) üyeleridir. `hasManageScope` bu anahtar için yönetim rotalarına yetki veren şeydir. `admin` bu rotalarda yönetim yeteneğine sahiptir. Buradaki `admin` kelimesi erişim belirteci sıralaması değildir ve MCP aracı kapsamlarına genişlemez.
 
-**Ek dizeler.** Her biri tam bir üyelik testidir ve her biri `MANAGEMENT_API_KEY_SCOPES` dışında kalır.
+**Eklemeli dizeler.** Her biri kesin bir üyelik testidir ve her biri `MANAGEMENT_API_KEY_SCOPES` dışında kalır.
 
-| Kapsam                         | Geçiş şunlara izin verir                                                                                                                                                      |
-| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Yalnızca döngüsel olmayan `/api/mcp/` LOCAL_ONLY oyuğu (`hasMcpConnectOrManageScope`). `manage` veya `admin` içeren bir anahtar yine de bu oyuğu geçer.                       |
-| `self:usage`                   | Bu anahtar için `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` oluşturma sırasında bu kapsamı ekler (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Bu durum yükü içindeki yukarı akış hesap kotaları (`src/lib/usage/apiKeySelfService.ts`). Durum rotası hala `self:usage` gerektirir.                                          |
-| `policy:bypass-provider-quota` | Bu anahtarın çıkarım çağrıları sağlayıcı-kota politikasını atlar (`src/sse/handlers/chat.ts` içindeki `hasProviderQuotaBypassScope`).                                         |
+| Kapsam                         | Bir geçiş izin verir                                                                                                                                                     |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Geridöngü olmayan `/api/mcp/` LOCAL_ONLY yalnızca oyulmuş (`hasMcpConnectOrManageScope`). `manage` veya `admin` bir anahtar hala bu oymayı geçmektedir.                  |
+| `self:usage`                   | bu anahtar için `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` bu kapsamı create (`normalizeSelfServiceScopesForCreate`) öğesine ekler. |
+| `self:account-quota`           | Bu durum yükünün (`src/lib/usage/apiKeySelfService.ts`) içindeki yukarı akış hesap kotaları. Durum rotası hala `self:usage` gerektiriyor.                                |
+| `policy:bypass-provider-quota` | Bu anahtarın çıkarım çağrıları sağlayıcı kotası politikasını (`hasProviderQuotaBypassScope` `src/sse/handlers/chat.ts` atlar.                                            |
 
 #### Eşleştirme
 
-Katalog, [MCP araç kapsamları](#mcp-tool-scopes) altındaki tablodur. `src/shared/constants/mcpScopes.ts` içindeki `MCP_SCOPE_LIST`'i bu katalog olarak ele almayın: bu, orijinal yazılı alt kümedir. Daha sonraki araçlar bunun yanında başka kapsamlar da bildirir (`read:notion`, `read:skills`, `read:local-corpus` ve tablonun geri kalanı).
+Katalog [,MCP araç kapsamları](#mcp-tool-scopes) altındaki tablodur. `src/shared/constants/mcpScopes.ts` `MCP_SCOPE_LIST` bu katalog gibi davranmayın: bu, orijinal yazılan alt kümedir. Daha sonraki araçlar bunun yanında başka kapsamlar da bildirir (`read:notion`, `read:skills`, `read:local-corpus` ve tablonun geri kalanı).
 
-`open-sse/mcp-server/scopeEnforcement.ts` içindeki `evaluateToolScopes`, her gerekli kapsamın bazı verilen kapsamlarla eşleşmesi durumunda bir çağrıya izin verir:
+`open-sse/mcp-server/scopeEnforcement.ts` `evaluateToolScopes` gerekli her kapsam verilen kapsamla eşleştiğinde çağrıya izin verir:
 
-- `*` her gerekli kapsamla eşleşir.
-- `*` ile biten verilen bir kapsam, yıldızdan önceki önekle başlayan gerekli bir kapsamla eşleşir. `read:*`, `read:compression` ile eşleşir.
-- Diğer her verilen kapsam yalnızca aynı gerekli dizeyle eşleşir.
+- `*` gerekli her kapsamla eşleşir.
+- `*` ile biten verilen kapsam, yıldızdan önceki önekle başlayan gerekli kapsamla eşleşir. `read:*` `read:compression` ile eşleşir.
+- Verilen diğer kapsamların tümü yalnızca aynı gerekli dizeyle eşleşir.
 
-Kapsamları `["manage"]` olan bir anahtar, `read:compression` için `scopeMatches`'i geçemez. Aynı çağrı, yalnızca `admin`, `mcp:connect`, `read` ve `write` verilen dizeler olduğunda başarısız olur. Sondaki `*` dışında MCP araç kapsamları arasında bir hiyerarşi yoktur.
+Kapsamları `["manage"]` olan bir anahtar, `read:compression` için `scopeMatches` başarısız olur. Aynı çağrı `admin`, `mcp:connect`, `read` ve `write` için verilen tek dizeler olduğunda başarısız olur. Sondaki `*` ötesinde MCP araç kapsamları arasında hiyerarşi yoktur.
 
-Zorlama, `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (varsayılan `false`) olmadığı sürece kapalıdır. Kapalıyken, `evaluateToolScopes` çağrıya izin verir ve kataloğu atlar. Açıkken, HTTP, Bearer anahtarının `api_keys.scopes`'ini `authInfo` olarak kullanır ([Anahtar başına HTTP kapsam bağlama](#per-key-http-scope-binding-7895) bölümüne bakın). Anahtar kapsamları çözümlenmediğinde, verilen küme MCP `_meta`'ya, ardından `OMNIROUTE_MCP_SCOPES`'e düşer.
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` (varsayılan `false`) olmadığı sürece uygulama kapalıdır. Kapalıyken `evaluateToolScopes` aramaya izin verir ve kataloğu atlar. Açıkken HTTP, Taşıyıcı anahtarının `api_keys.scopes` `authInfo` olarak kullanır (bkz. [Anahtar başına HTTP kapsamı bağlama](#per-key-http-scope-binding-7895) ). Hiçbir anahtar kapsam çözümlenmediğinde, verilen küme MCP `_meta` düşer (yalnızca HTTP kimlik doğrulama bağlamı içindeki HTTP/SSE arayanlar için kabul edilir; bir stdio arayanın `_meta` istemci tarafından kontrol edildiğinden ve arayan başına kimlik taşımadığından göz ardı edilir), ardından `OMNIROUTE_MCP_SCOPES`.
 
 #### Erişim belirteci kapsamları
 
-`oma_live_…` belirteçleri (`src/lib/accessTokens/scopes.ts`) `read`, `write` veya `admin` taşır. `scopeSatisfies` bir rütbedir: `admin`, `write` ve `read`'i kapsar ve `write`, `read`'i kapsar. Bilinmeyen kapsamlar hiçbir şeyi kapsamaz.
+`oma_live_…` tokenleri (`src/lib/accessTokens/scopes.ts`), `read`, `write` veya `admin` taşır. `scopeSatisfies` bir sıralamadır: `admin` `write` ve `read` kapsar ve `write`, `read` kapsar. Bilinmeyen kapsamlar hiçbir şeyi kapsamaz.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`), bu rütbeyi `inferRequiredScope` (`src/server/authz/accessScopes.ts`) ile karşılaştırır:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) bu sıralamayı `inferRequiredScope` (`src/server/authz/accessScopes.ts`) ile karşılaştırır:
 
 - `GET`, `HEAD` ve `OPTIONS` `read` gerektirir.
-- Diğer her yöntem `write` gerektirir.
-- `ADMIN_SCOPE_PREFIXES` içindeki yollar, her yöntem için `admin` gerektirir. `/api/mcp` bu listede olduğundan, bir `write` erişim belirteci yine de MCP HTTP yüzeyini çağıramaz.
-- `ADMIN_MUTATION_PREFIXES` içindeki yollar, yalnızca mutasyonlar için `admin` gerektirir.
+- Diğer tüm yöntemler `write` gerektirir.
+- `ADMIN_SCOPE_PREFIXES` yollar her yöntem için `admin` gerektirir. `/api/mcp` bu listede yer aldığından `write` erişim belirteci yine de MCP HTTP yüzeyini çağıramaz.
+- `ADMIN_MUTATION_PREFIXES` yollar yalnızca mutasyonlar için `admin` ihtiyaç duyar.
+- `ADMIN_MUTATION_EXACT_PATHS` yollar (`/api/settings`, `/api/settings/require-login`) yalnızca mutasyonlar için `admin` ihtiyaç duyar ve yalnızca — diğer `/api/settings/*` alt rotaları `write` tutar.
 
-`PATCH /api/keys/{id}` bir mutasyondur ve bu yönetici listelerinde değildir, bu nedenle bir
-`read` belirteci 403 alır
-`Erişim belirteci kapsamı 'read' yetersiz; 'write' gerekli.`
-Bir `write` veya `admin` erişim belirteci bu rotayı karşılar. Bir kontrol paneli JWT'si,
-loopback CLI makine-kimliği belirteci ve `manage` veya `admin` yetkisine sahip bir API anahtarı
-başka dallara gider ve bu rütbe tarafından daraltılmaz.
+`PATCH /api/keys/{id}` bir mutasyondur ve bu yönetici listelerinde yer almaz, dolayısıyla bir `read` belirteci 403 `Access token scope 'read' is insufficient; 'write' required.` alır. Bir `write` veya `admin` erişim belirteci bu rotayı karşılar. Bir kontrol paneli JWT, geridöngü CLI makine kimliği belirteci ve `manage` veya `admin` içeren bir API anahtarı diğer dalları alır ve bu sıralamaya göre daraltılmaz.
 
-`/api/mcp` için `scopeSatisfies`'ı geçen bir erişim belirteci yalnızca
-yönetim geçidini temizlemiştir. Araç çağrıları hala API anahtarı
-kapsamlarına karşı `scopeMatches`'ı çalıştırır. Erişim belirteci rütbesi `scopeMatches`'a bir girdi değildir.
+`/api/mcp` için `scopeSatisfies` geçen bir erişim belirteci yalnızca yönetim kapısını temizledi. Araç çağrıları hala `scopeMatches` API anahtarı kapsamlarına göre çalıştırıyor. Erişim belirteci sıralaması `scopeMatches` için bir girdi değildir.
 
-### MCP araç kapsamları
+### MCP aracı kapsamları
 
-Kapsam uygulaması `open-sse/mcp-server/scopeEnforcement.ts` içinde merkezileştirilmiştir.
-Her araç belirli kapsamlar gerektirir:
+Kapsamın uygulanması `open-sse/mcp-server/scopeEnforcement.ts` merkezileştirilmiştir. Her araç belirli kapsamlar gerektirir:
 
-| Kapsam                | Araçlar                                                                                                                                                                       |
-| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                             |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                     |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                        |
-| `read:quota`          | `check_quota`                                                                                                                                                                 |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                        |
-| `read:models`         | `list_models_catalog`                                                                                                                                                         |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                 |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                         |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                            |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                   |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                |
-| `read:cache`          | `cache_stats`                                                                                                                                                                 |
-| `write:cache`         | `cache_flush`                                                                                                                                                                 |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                    |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                             |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                         |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                              |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                        |
-| `read:memory`         | `memory_search`                                                                                                                                                               |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                  |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                            |
-| `write:skills`        | `skills_enable`                                                                                                                                                               |
-| `execute:skills`      | `skills_execute`                                                                                                                                                              |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                              |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                       |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                     |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                              |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                            |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                               |
-| `read:obsidian`       | 13 okuma aracı — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 yazma aracı — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                             |
+| Kapsam                | Aletler                                                                                                                                                                      |
+| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                            |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                    |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                       |
+| `read:quota`          | `check_quota`                                                                                                                                                                |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                       |
+| `read:models`         | `list_models_catalog`                                                                                                                                                        |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                        |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                           |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                  |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                               |
+| `read:cache`          | `cache_stats`                                                                                                                                                                |
+| `write:cache`         | `cache_flush`                                                                                                                                                                |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                   |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                            |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                        |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                             |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                       |
+| `read:memory`         | `memory_search`                                                                                                                                                              |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                 |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                           |
+| `write:skills`        | `skills_enable`                                                                                                                                                              |
+| `execute:skills`      | `skills_execute`                                                                                                                                                             |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                             |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                      |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                    |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                             |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                               |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                           |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                              |
+| `read:obsidian`       | 13 okuma aracı — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`,… |
+| `write:obsidian`      | 9 yazma aracı — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`,…                |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
 
-Joker kapsamlar desteklenir: `read:*` tüm okuma kapsamlarını verir, `*` tam erişim sağlar.
+Joker karakter kapsamları desteklenir: `read:*` tüm okuma kapsamlarını verir, `*` tam erişim verir.
 
-### `mcp:connect` — dar yol yeteneği (#7895)
+### `mcp:connect` — dar rota yeteneği (#7895)
 
-HTTP/SSE MCP taşıyıcısına (`/api/mcp/*`) yerel olmayan bir yerden erişmek için
-`/api/mcp/` LOCAL_ONLY istisnası gereklidir (bkz. `docs/security/ROUTE_GUARD_TIERS.md`). Tarihsel olarak
-bu istisna yalnızca tam bir `manage`/`admin` kapsamlı API anahtarını kabul ediyordu — yalnızca MCP ile konuşması gereken bir arayan için çok geniş. `src/shared/constants/managementScopes.ts` şimdi
-`MCP_CONNECT_SCOPE = "mcp:connect"` değerini dışa aktarır: yalnızca `src/server/authz/policies/management.ts` içindeki `/api/mcp/` atlamasını yetkilendiren ek, dar bir kapsamdır (`SELF_USAGE_SCOPE` ile aynı emsal) — başka hiçbir yönetim yolu erişimi sağlamaz ve kasıtlı olarak `MANAGEMENT_API_KEY_SCOPES` dışında tutulur. `manage`/`admin` içeren bir anahtar, istisnayı değişmeden geçer; `mcp:connect`, `hasMcpConnectOrManageScope()` aracılığıyla kontrol edilen, uzaktan yalnızca MCP arayanları için daha düşük ayrıcalıklı bir alternatiftir.
+Geridöngüsüzden HTTP/SSE MCP aktarımına (`/api/mcp/*`) ulaşmak, `/api/mcp/` LOCAL_ONLY ayrıştırılmasını gerektirir (bkz. `docs/security/ROUTE_GUARD_TIERS.md`). Tarihsel olarak bu biçimlendirme yalnızca `manage`/`admin` -scope API anahtarını kabul ediyordu — yalnızca MCP konuşması gereken bir arayan için çok genişti. `src/shared/constants/managementScopes.ts` artık `MCP_CONNECT_SCOPE = "mcp:connect"` dışa aktarıyor: ONLY `src/server/authz/policies/management.ts` — `/api/mcp/` bypass'ına izin veren ilave, dar bir kapsam ( `SELF_USAGE_SCOPE` ile aynı örnek), başka hiçbir yönetim rotası erişimi vermez ve `MANAGEMENT_API_KEY_SCOPES` OUT bilinçli olarak tutulur. `manage`/`admin` tutan bir anahtar hâlâ oyulmuş parçayı değişmeden geçiyor; `mcp:connect`, `hasMcpConnectOrManageScope()` aracılığıyla kontrol edilen, yalnızca uzak MCP arayanlar için daha düşük ayrıcalıklı bir alternatiftir.
 
-### Anahtar başına HTTP kapsam bağlama (#7895)
+### Anahtar başına HTTP kapsamı bağlama (#7895)
 
-HTTP/SSE üzerinden, `open-sse/mcp-server/httpTransport.ts` şimdi arayanın gerçek
-`api_keys.scopes` değerini `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) aracılığıyla çözer
-ve bunu MCP SDK'sının `transport.handleRequest(req, { authInfo })` öğesine iletir, böylece
-her araç çağrısına ulaşan `extra.authInfo.scopes`, Bearer anahtarının kendi kapsamlarını yansıtır.
-`scopeEnforcement.ts`'nin `resolveCallerScopeContext()` öğesi zaten `authInfo`'yu `_meta` ve `OMNIROUTE_MCP_SCOPES` ortam yedeklemesinden öncelikli hale getiriyordu — bu yalnızca daha önce HTTP üzerinden beslenmeyen bu ilk, en yüksek öncelikli kaynağı doldurur. Hiçbir API anahtarı çözülmediğinde (başlık yok, geçersiz anahtar), `authInfo` `undefined` kalır ve çözümleme mevcut `meta`/ortam zincirine değişmeden düşer. Bu, `OMNIROUTE_MCP_ENFORCE_SCOPES`'un varsayılanını DEĞİŞTİRMEZ — uygulama hala açıkça etkinleştirilmelidir; bu değişiklik yalnızca etkinleştirildiğinde anahtar başına yolun öncelik almasını sağlar. stdio'nun arayan başına kimliği yoktur (bkz. `mcpCallerIdentity.ts`) ve etkilenmez — `_meta`/ortam yedekleme zincirinde kalır.
+HTTP/SSE üzerinden, `open-sse/mcp-server/httpTransport.ts` artık arayanın gerçek `api_keys.scopes` `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) aracılığıyla çözer ve bunu MCP SDK `transport.handleRequest(req, { authInfo })` aktarır, böylece her araç çağrısına ulaşan `extra.authInfo.scopes` Taşıyıcı anahtarının kendi kapsamlarını yansıtır. `scopeEnforcement.ts` `resolveCallerScopeContext()` zaten `authInfo` `_meta` ve `OMNIROUTE_MCP_SCOPES` env geri dönüşüne göre öncelik vermiştir — bu yalnızca daha önce HTTP üzerinden beslenmemiş olan ilk, en yüksek öncelikli kaynağı doldurur. Hiçbir API anahtarı çözülmediğinde (başlık yok, geçersiz anahtar), `authInfo`, `undefined` kalır ve çözünürlük, değişmeden mevcut `meta`/env zincirine düşer. stdio'nun arayan başına kimliği yoktur (bkz. `mcpCallerIdentity.ts`) ve anahtar başına bağlamadan etkilenmez —, `_meta` adımını atlar (`_meta` yalnızca HTTP kimlik doğrulama bağlamı #15159 içinde dikkate alınır) ve yalnızca `OMNIROUTE_MCP_SCOPES` env anahtarından çözümlenir.
+
+**`OMNIROUTE_MCP_ENFORCE_SCOPES` bağımsız olarak dar kapsamlı HTTP/SSE arayanlar için yaptırım zorunlu hale getirildi.** `OMNIROUTE_MCP_ENFORCE_SCOPES` varsayılan olarak `false` olarak ayarlanması yalnızca kapsam dahilinde arayan başına kimliğin bulunmadığı local/stdio tek operatör akışı için güvenlidir. `open-sse/mcp-server/server.ts::withScopeEnforcement()` `resolveCallerScopeContext()` (yani gerçek bir anahtar başına HTTP Yetkilendirme başlığı, HTTP/SSE-only) AND anahtarının tam `manage`/`admin` kapsamını içermediği durumlarda çözdüğünde `source === "authInfo"`, araç başına kapsam uygulamasını koşulsuz olarak ( `scopeEnforcement.ts` içinde `shouldForceScopeEnforcement()` ) açar. Bu, yukarıda `/api/mcp/` LOCAL_ONLY oyma — başka hiçbir şeye yetki vermediği şekilde belgelenen ONLY dar `mcp:connect` bypass kapsamını tutan — tutan bir anahtarın, `OMNIROUTE_MCP_ENFORCE_SCOPES` varsayılan olarak `false` göndermesi nedeniyle bir operatör remote/non-loopback MCP erişimini etkinleştirdiğinde her MCP aracını çağırabileceği boşluğu kapatır. HTTP üzerinde tam bir `manage`/`admin` anahtarı ve her stdio/local arayan, mevcut `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated davranışını değiştirmeden tutar.
 
 ---
 
 ## Ortam Değişkenleri
 
-| Değişken                                | Varsayılan                                | Amaç                                                                                                                                              |
-| :-------------------------------------- | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                  | MCP sunucusunun OmniRoute dahili API'lerini çağırırken kullandığı temel URL                                                                       |
-| `OMNIROUTE_API_KEY`                     | (boş)                                     | Dahili API çağrılarına `Authorization: Bearer` olarak iletilen API anahtarı                                                                       |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (yalnızca `"true"` etkinleştirir) | Etkinleştirildiğinde, eksik kapsamlar araç çağrılarını reddeder ve denetim günlüğüne `scope_denied:<reason>` kaydını ekler                        |
-| `OMNIROUTE_MCP_SCOPES`                  | (boş)                                     | Varsayılan olarak "kullanılabilir" kabul edilen kapsamların virgülle ayrılmış izin listesi (çağıran kendi kapsamlarını sağlamadığında kullanılır) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (ayarlanmamış = açık)                     | `0/false/off/no` olarak ayarlandığında, kayıt sırasında MCP açıklama sıkıştırmasını devre dışı bırakır                                            |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (ayarlanmamış = açık)                     | Yukarıdaki ayarla aynı işlevi gören alternatif takma ad                                                                                           |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                   | Dahili yönetim okumaları (sağlık, dayanıklılık, kombinasyonlar, kota, kullanım) için iptal zaman sınırı                                           |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                   | Bir sağlayıcıyı bekleyen geçişler (`route_request`, `web_search`, `web_fetch`) için iptal zaman sınırı                                            |
-| `MCP_TOOL_DENY`                         | (ayarlanmamış = filtre yok)               | `tools/list` listesinden çıkarılacak, virgülle ayrılmış araç adları (araç sayısını azaltma — aşağıya bakın)                                       |
-| `MCP_TOOL_ALLOW`                        | (ayarlanmamış = filtre yok)               | Yalnızca tutulacak, virgülle ayrılmış araç adları (izin listesi modu — aşağıya bakın)                                                             |
-| `DATA_DIR`                              | `~/.omniroute`                            | Sinyal dosyası `${DATA_DIR}/runtime/mcp-heartbeat.json` konumuna yazılır                                                                          |
+| Değişken                                | Varsayılan                                | Amaç                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :-------------------------------------- | :---------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                  | MCP sunucusunun OmniRoute dahili API'lerini çağırırken kullandığı temel URL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `OMNIROUTE_API_KEY`                     | (boş)                                     | Dahili API çağrılarına `Authorization: Bearer` olarak iletilen API anahtarı                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (yalnızca `"true"` etkinleştirir) | Etkinleştirildiğinde, eksik kapsamlar araç çağrılarını reddeder ve denetim günlüğüne `scope_denied:<reason>` kaydını ekler. Bu bayrağın değerinden bağımsız olarak, anahtar başına Authorization üst bilgisinden çözümlenen (`source === "authInfo"`) ve tam `manage`/`admin` kapsamına sahip olmayan tüm HTTP/SSE çağıranları için de zorlama etkinleştirilir; örneğin yalnızca dar kapsamlı `mcp:connect` atlama kapsamına sahip bir anahtar. Bu nedenle bu varsayılan yalnızca yerel/stdio tek operatörlü akış için güvenlidir, uzak geri döngü dışı erişim için asla güvenli değildir |
+| `OMNIROUTE_MCP_SCOPES`                  | (boş)                                     | Varsayılan olarak "kullanılabilir" kabul edilen kapsamların virgülle ayrılmış izin listesi (çağıran kendi kapsamlarını sağlamadığında kullanılır)                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (ayarlanmamış = açık)                     | `0/false/off/no` olarak ayarlandığında, kayıt sırasında MCP açıklama sıkıştırmasını devre dışı bırakır                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (ayarlanmamış = açık)                     | Yukarıdakiyle aynı geçiş seçeneği için alternatif takma ad                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                   | Dahili yönetim okumaları (sağlık, dayanıklılık, kombinasyonlar, kota, kullanım) için iptal zaman bütçesi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                   | Bir sağlayıcıyı bekleyen geçişler (`route_request`, `web_search`, `web_fetch`) için iptal zaman bütçesi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `MCP_TOOL_DENY`                         | (ayarlanmamış = filtre yok)               | `tools/list` listesinden çıkarılacak, virgülle ayrılmış araç adları (araç kardinalitesini azaltma — aşağıya bakın)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `MCP_TOOL_ALLOW`                        | (ayarlanmamış = filtre yok)               | Yalnızca tutulacak araç adlarının virgülle ayrılmış listesi (izin listesi modu — aşağıya bakın)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `DATA_DIR`                              | `~/.omniroute`                            | Sinyal dosyası `${DATA_DIR}/runtime/mcp-heartbeat.json` konumuna yazılır                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ---
 

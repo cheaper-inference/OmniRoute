@@ -3,6 +3,11 @@
  * Pure data; merged by default-pricing.ts via spread (god-file decomposition; semantic split).
  */
 export const DEFAULT_PRICING_INFERENCE = {
+  typesafe: {
+    "jev-latest": { input: 0.042, output: 0, cached: 0.042, reasoning: 0 },
+    "jev-preview": { input: 0.042, output: 0, cached: 0.042, reasoning: 0 },
+    "jev-1.13.0": { input: 0.042, output: 0, cached: 0.042, reasoning: 0 },
+  },
   agentrouter: {
     auto: { input: 2.0, output: 8.0 },
   },
@@ -237,13 +242,25 @@ export const DEFAULT_PRICING_INFERENCE = {
     },
   },
   orcarouter: {
+    // Orca's own USD/1M base rates, verified 2026-10-08 at
+    // https://www.orcarouter.ai/pricing and /models/<full model id>.
+    // These are token-price estimates, not exact billed cost. The current
+    // calculator does not apply context tiers or timed multipliers (#15151).
+    // GPT >272k uses 10/45/1 upstream; this row is the <=272k base tier.
+    "openai/gpt-5.5": { input: 5, output: 30, cached: 0.5 },
+    "anthropic/claude-opus-4.8": { input: 5, output: 25, cached: 0.5, cache_creation: 6.25 },
+    "grok/grok-4.3": { input: 1.25, output: 2.5, cached: 0.2 },
+    // DeepSeek applies 2x at 01:00–04:00 and 06:00–10:00 UTC upstream.
+    "deepseek/deepseek-v4-pro": { input: 0.66, output: 1.98, cached: 0.022 },
+    "minimax/minimax-m2.7": { input: 0.3, output: 1.2, cached: 0.06, cache_creation: 0.375 },
+    "qwen/qwen3.7-max": { input: 1.25, output: 3.75, cached: 0.25, cache_creation: 1.563 },
     "google/gemini-3.6-flash": {
-      input: 1.5,
-      output: 7.5,
-      cached: 0.15,
-      reasoning: 7.5,
-      cache_creation: 1.5,
+      input: 0.75,
+      output: 3.75,
+      cached: 0.075,
     },
+    // orcarouter/auto has no fixed published rate. Keep it unpriced so budget
+    // callers can fail closed; absent cache-write prices are not invented.
   },
   synthetic: {
     "hf:openai/gpt-oss-120b": {
@@ -368,30 +385,49 @@ export const DEFAULT_PRICING_INFERENCE = {
     "nvidia/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "moonshotai/kimi-k2.5": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "z-ai/glm4.7": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "deepseek-ai/deepseek-v3.2": {
+    // #18464: NVIDIA hosted free endpoints. build.nvidia.com rate limits them and lists no
+    // per-token price, so they are priced at zero. Without a row, usage is unpriced and
+    // USD-limited API keys fail closed (#12341) after one request.
+    "meta/muse-glimmer-30b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
+    "poolside/laguna-xs-2.1": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
+    "google/gemma-4-31b-it": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
+    "google/diffusiongemma-26b-a4b-it": {
       input: 0,
       output: 0,
       cached: 0,
       reasoning: 0,
       cache_creation: 0,
     },
-    "nvidia/llama-3.3-70b-instruct": {
+    "nvidia/nemotron-3-ultra-550b-a55b": {
       input: 0,
       output: 0,
       cached: 0,
       reasoning: 0,
       cache_creation: 0,
     },
-    "meta/llama-4-maverick-17b-128e-instruct": {
+    "nvidia/nemotron-3.5-lightning-30b-a3b": {
       input: 0,
       output: 0,
       cached: 0,
       reasoning: 0,
       cache_creation: 0,
     },
-    "deepseek/deepseek-r1": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {
+      input: 0,
+      output: 0,
+      cached: 0,
+      reasoning: 0,
+      cache_creation: 0,
+    },
+    // #18418: emergency fallback default (free endpoint). Without a row, usage is
+    // unpriced and USD-limited API keys fail closed (#12341) after one fallback.
+    "nvidia/nemotron-3.5-super-vl-120b-a12b": {
+      input: 0,
+      output: 0,
+      cached: 0,
+      reasoning: 0,
+      cache_creation: 0,
+    },
   },
   nebius: {
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
@@ -445,6 +481,17 @@ export const DEFAULT_PRICING_INFERENCE = {
       cached: 0,
       reasoning: 0,
       cache_creation: 0,
+    },
+  },
+  // OpenCode Go per-1M rates from https://opencode.ai/docs/go/ (2026-10-23). The models.dev
+  // sync layer overrides these when it carries the same id.
+  "opencode-go": {
+    "kimi-k3.1-pro": {
+      input: 2.0,
+      output: 10.0,
+      cached: 0.2,
+      reasoning: 10.0,
+      cache_creation: 2.0,
     },
   },
   hyperbolic: {

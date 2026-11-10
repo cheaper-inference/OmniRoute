@@ -4,96 +4,99 @@
 
 ---
 
-> **სანდო წყარო:** `electron/` სამუშაო სივრცე
-> **ბოლოს განახლდა:** 2026-06-28 — v3.8.40
+> **სიმართლის წყარო:** `electron/` სამუშაო სივრცე** ბოლო განახლება:** 2026-06-28 — v3.8.40
 
-OmniRoute მოიცავს **Electron 41**-სა და **electron-builder 26.10**-ზე აგებულ
-კროსპლატფორმულ დესკტოპ აპლიკაციას (Windows / macOS / Linux). დესკტოპ აპლიკაცია
-Next.js-ის დამოუკიდებელ სერვერს შვილობილი პროცესის სახით უშვებს, `BrowserWindow`-ს
-მის მისამართზე მიუთითებს და ამატებს სისტემურ პანელს, ავტომატურ განახლებას, IPC ხიდსა
-და ნულოვანი კონფიგურაციის მქონე საიდუმლო მნიშვნელობების საწყის გამართვას.
+OmniRoute აგზავნის მრავალ პლატფორმის დესკტოპის აპლიკაციას (Windows / macOS / Linux)**Electron 41** +** ელექტრონმაშენებელი 26.10** . დესკტოპის აპი ქმნის Next.js დამოუკიდებელ სერვერს, როგორც ბავშვური პროცესი, მიუთითებს მასზე `BrowserWindow` და ამატებს სისტემის უჯრას, ავტომატურ განახლებას, IPC ხიდი და ნულოვანი კონფიგურაციის საიდუმლო ჩამტვირთველს.
 
 ## არქიტექტურა
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Electron-ის მთავარი პროცესი (electron/main.js)│
-│ ├─ ერთი ეგზემპლარის ბლოკირება                │
-│ ├─ შვილობილი პროცესი: Next.js-ის             │
-│ │   დამოუკიდებელი სერვერი (გაშვებული         │
-│ │   Electron-ის Node გარემოში)               │
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ სისტემური პანელი + კონტექსტური მენიუ      │
-│ ├─ ავტომატური განახლება electron-updater-ით  │
-│ ├─ კონტენტის უსაფრთხოების პოლიტიკა           │
-│ │   (სესიის სათაურები)                       │
-│ └─ საიდუმლო მნიშვნელობების საწყისი გამართვა  │
-│    (JWT / API_KEY_SECRET)                    │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-            ↕ IPC ხიდი (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ რენდერერი (Next.js-ის მართვის პანელი)        │
+│ Renderer (Next.js dashboard)                  │
 │   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
 ## ვერსიები
 
-დადასტურებულია `electron/package.json`-იდან:
+დადასტურებულია `electron/package.json` დან:
 
-| პაკეტი             | ვერსია                                                                                            |
-| ------------------ | ------------------------------------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                                                         |
-| `electron-builder` | `^26.15.3`                                                                                        |
-| `electron-updater` | `^6.8.9`                                                                                          |
-| `better-sqlite3`   | ძირეული `^13.0.2` (Node-API-ის წინასწარი აგებები — Electron-ისთვის ხელახალი აგება არ არის საჭირო) |
-| აპლიკაციის ვერსია  | `3.8.0`                                                                                           |
-| აპლიკაციის ID      | `online.omniroute.desktop`                                                                        |
-| პროდუქტის სახელი   | `OmniRoute`                                                                                       |
+| პაკეტი               | ვერსია                                                                   |
+| -------------------- | ------------------------------------------------------------------------ |
+| `electron`           | `^43.4.1`                                                                |
+| `electron-builder`   | `^26.15.3`                                                               |
+| `electron-updater`   | `^6.8.9`                                                                 |
+| `better-sqlite3`     | root `^13.0.2` (Node-API წინასწარ აშენებს — არა Electron რეკონსტრუქციას) |
+| აპლიკაციის ვერსია    | `3.8.0`                                                                  |
+| აპლიკაციის ID        | `online.omniroute.desktop`                                               |
+| პროდუქტის დასახელება | `OmniRoute`                                                              |
 
-## სკრიპტები (ძირეული `package.json`)
+## სკრიპტები (root `package.json`)
 
-| სკრიპტი                           | დანიშნულება                                                                          |
-| --------------------------------- | ------------------------------------------------------------------------------------ |
-| `npm run electron:dev`            | უშვებს `npm run dev`-ს + ელოდება `localhost:20128`-ს + უშვებს Electron-ს             |
-| `npm run electron:build`          | აგებს Next.js-ს, შემდეგ კი მიმდინარე OS-ისთვის უშვებს `electron-builder`-ს           |
-| `npm run electron:build:win`      | აგებს Windows-ის NSIS ინსტალატორს + პორტატიულ ვერსიას (x64)                          |
-| `npm run electron:build:mac`      | აგებს macOS-ის DMG-ს (Intel + Apple Silicon)                                         |
-| `npm run electron:build:linux`    | აგებს Linux-ის AppImage-ს + DEB-ს (x64 + arm64)                                      |
-| `npm run electron:smoke:packaged` | უშვებს შეფუთულ ბინარულ ფაილს, ამოწმებს `/login`-ზე HTTP 200 პასუხს, შემდეგ კი თიშავს |
+| სკრიპტი                           | მიზანი                                                                      |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `npm run electron:dev`            | იწყებს `npm run dev` + ელოდება `localhost:20128` + გაშვებას Electron        |
+| `npm run electron:build`          | აშენებს Next.js და აწარმოებს `electron-builder` მიმდინარე OS სთვის          |
+| `npm run electron:build:win`      | აშენებს Windows NSIS ინსტალერი + პორტატული (x64)                            |
+| `npm run electron:build:mac`      | აშენებს macOS DMG (Intel + Apple Silicon)                                   |
+| `npm run electron:build:linux`    | აშენებს Linux AppImage + DEB (x64 + arm64)                                  |
+| `npm run electron:smoke:packaged` | ამუშავებს შეფუთულ ორობით და ზონდებს `/login` სთვის HTTP 200, შემდეგ ითიშება |
 
-`electron/` სამუშაო სივრცე ასევე ხელმისაწვდომს ხდის:
+`electron/` სამუშაო სივრცე ასევე ასახავს:
 
-- `npm run prepare:bundle` — უშვებს `scripts/build/prepare-electron-standalone.mjs`-ს
-- `npm run build:mac-x64` / `build:mac-arm64` — ერთი არქიტექტურისთვის განკუთვნილი macOS-ის აგებები
-- `npm run pack` — მხოლოდ დირექტორიის აგება ლოკალური ტესტირებისთვის (ინსტალატორის გარეშე)
+- `npm run prepare:bundle` — გადის `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — ერთთაღოვანი macOS აშენებს
+- `npm run pack` — დირექტორია მხოლოდ ადგილობრივი ტესტირებისთვის (ინსტალატორის გარეშე)
 
-## დირექტორიების სტრუქტურა
+## არჩევითი გაშვების პაკეტები
+
+Desktop build-ებს შეუძლიათ გამოაქვეყნონ არჩევითი გაშვების არქივები თავიანთ ინსტალერებთან ერთად. დაინსტალირებული სერვერის დატვირთვა შეიცავს `optional-packs.index.json` ( `resources/app` ზე Windows ზე და Linux). `browser-runtime` ჩანაწერისთვის წაიკითხეთ `packs[].tarball` და გადმოწერეთ** ფაილის ზუსტად ეს სახელი იმავე გამოშვებიდან** . არქივის სახელები მოიცავს SHA-256 დაიჯესტს; სხვადასხვა კონსტრუქციებს შეიძლება დასჭირდეთ სხვადასხვა არქივები. შეინახეთ გადმოწერილი ფაილის სახელი უცვლელი.
+
+დააკოპირეთ დაინსტალირებული აპლიკაციის ინდექსი და არჩეული არქივი ერთ დირექტორიაში, შემდეგ გამოიყენეთ CLI იმავე გამოშვებიდან:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` აჩვენებს ინსტალაციისა და გადამოწმების მდგომარეობას და არა არქივის ფაილის სახელს. შეფუთული ინდექსი ირჩევს არქივს. ინსტალაცია ამოწმებს არქივის საკონტროლო ჯამს ამოღებამდე და პაკეტის შემოწმებამდე დაინსტალირებული პაკეტის შეცვლამდე. ის კითხულობს ადგილობრივ ფაილებს; ის არ ჩამოტვირთავს დაკარგული არქივებს. გადატვირთეთ აპლიკაცია ინსტალაციის შემდეგ. თუ გამოშვებას არ აქვს შესაბამისი აქტივი, არჩევითი პაკეტი მიუწვდომელია ამ გამოშვების აქტივების მეშვეობით.
+
+## დირექტორია განლაგება
 
 ```
 electron/
-├── package.json              # Electron-ის დამოკიდებულებები + electron-builder-ის კონფიგურაცია
-├── main.js                   # მთავარი პროცესი (24 KB — იხილეთ ქვემოთ მოცემული ანოტაციები)
-├── preload.js                # contextBridge IPC ხიდი
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI ტიპები
-├── README.md                 # სამუშაო სივრცის შენიშვნები
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder-ის გამომავალი მონაცემები (git-ის მიერ იგნორირებული)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # ამზადებს .next/electron-standalone პაკეტს
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # აგების შემდგომი smoke-ტესტი
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-ორივე, `main.js` და `preload.js`, არის **CommonJS `.js` ფაილი** და არა TypeScript.
-რენდერერის მხარის ტიპების აღწერები განთავსებულია `electron/types.d.ts`-ში.
+`main.js` და `preload.js` არის**CommonJS `.js` ფაილები** , არა TypeScript. რენდერის მხარის აკრეფა ცხოვრობს `electron/types.d.ts` ში.
 
 ## IPC ხიდი (`preload.js`)
 
-preload `window.electronAPI`-ში `contextBridge`-ის გამოყენებით აქვეყნებს ნებადართული API-ების სიას,
-სადაც `contextIsolation: true` და `nodeIntegration: false`.
+წინასწარ ჩატვირთვა ავლენს თეთრ სიაში შეტანილ API `window.electronAPI` ზე `contextBridge` გამოყენებით `contextIsolation: true` თან და `nodeIntegration: false` ერთად.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -112,107 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-გამოქვეყნებული მეთოდები:
+გამოვლენილი მეთოდები:
 
-| რენდერერის გამოძახება                                             | ტიპი                                 |
-| ----------------------------------------------------------------- | ------------------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                               |
-| `openExternal(url)`                                               | invoke                               |
-| `getDataDir()`                                                    | invoke                               |
-| `restartServer()`                                                 | invoke                               |
-| `getAppVersion()`                                                 | invoke                               |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                               |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                 |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (აბრუნებს გამთიშავ ფუნქციას) |
+| რენდერის ზარი                                                     | ტიპი                         |
+| ----------------------------------------------------------------- | ---------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | გამოძახება                   |
+| `openExternal(url)`                                               | გამოძახება                   |
+| `getDataDir()`                                                    | გამოძახება                   |
+| `restartServer()`                                                 | გამოძახება                   |
+| `getAppVersion()`                                                 | გამოძახება                   |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | გამოძახება                   |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | გაგზავნა                     |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | მიღება (აბრუნებს გამყიდველი) |
 
-მიღების დამხმარე ფუნქციები `removeAllListeners`-ზე დაყრდნობის ნაცვლად აბრუნებენ
-**გამთიშავ ფუნქციას** — ეს ხელს უშლის მსმენელების დაგროვებას React-ის კომპონენტების
-ხელახლა დამონტაჟებისას.
+მიმღები დამხმარეები ბრუნდებიან ა** განკარგვის ფუნქცია** ვიდრე `removeAllListeners` — ზე დაყრდნობით, ეს ხელს უშლის მსმენელის დაგროვებას React კომპონენტების ხელახლა დამონტაჟებისას.
 
-## სერვერის სასიცოცხლო ციკლი
+## სერვერის სიცოცხლის ციკლი
 
-`main.js` Next.js-ის standalone პაკეტს პირდაპირ Electron-ის Node-ის
-გაშვების გარემოში უშვებს, რათა თავიდან აიცილოს ნატიური მოდულების ABI-ის შეუსაბამობა სისტემურ Node-თან:
+`main.js` აყალიბებს Next.js დამოუკიდებელ პაკეტს პირდაპირ Electron Node-ის გაშვებასთან ერთად, რათა თავიდან აიცილოს მშობლიური მოდულის ABI შეუსაბამობა სისტემის Node-თან:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-მნიშვნელოვანი ასპექტები:
+მაჩვენებლები:
 
-- `waitForServer()` ფანჯრის ჩვენებამდე URL-ს 30 წმ-მდე პერიოდულად ამოწმებს (ცივი გაშვებისას ცარიელი ეკრანი არ გამოჩნდება).
-- `stdio: "pipe"` stdout/stderr-ს აფიქსირებს; მზადყოფნის ფრაზები (`Ready` / `listening`) IPC-ის მეშვეობით აგზავნის `server-status: running` მოვლენას.
-- `before-quit` კორექტული SIGTERM-ისთვის (WAL checkpoint) 5 წმ-მდე ელოდება, შემდეგ კი SIGKILL-ს აგზავნის.
-- სისტემურ პანელში არსებული პორტის გადამრთველი (`20128`, `3000`, `8080`) აჩერებს და ხელახლა უშვებს სერვერს, შემდეგ კი BrowserWindow-ს თავიდან ტვირთავს.
+- `waitForServer()` გამოკითხავს URL ს 30 წამამდე ფანჯრის ჩვენებამდე (ცივი დაწყებისას ცარიელი ეკრანი არ არის).
+- `stdio: "pipe"` იჭერს stdout/stderr; მზა ფრაზები (`Ready` / `listening`) ასხივებენ `server-status: running` IPC ზე.
+- `before-quit` ელოდება 5 წამამდე მოხდენილ SIGTERM (WAL გამშვები პუნქტი), შემდეგ აგზავნის SIGKILL.
+- პორტის გადამრთველი უჯრაში (`20128`, `3000`, `8080`) აჩერებს და გადატვირთავს სერვერს, შემდეგ გადატვირთავს BrowserWindow ს.
 
-## საიდუმლოებების ნულოვანი კონფიგურაციით ინიციალიზაცია
+## ნულოვანი კონფიგურაციის საიდუმლო ჩამტვირთავი
 
-პირველი გაშვებისას მთავარი პროცესი ავტომატურად აგენერირებს და ინახავს არარსებულ საიდუმლოებებს:
+პირველი გაშვებისას, მთავარი პროცესი ავტომატურად წარმოქმნის საიდუმლოებებს და აგრძელებს გამოტოვებულ საიდუმლოებებს:
 
-| საიდუმლო                 | წყარო                                                                                                      |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                   |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (უარს ამბობს, თუ დაშიფრული ავტორიზაციის მონაცემები უკვე არსებობს) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                   |
+| საიდუმლო                 | წყარო                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                     |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (უარს ამბობს, თუ დაშიფრული კრედიტები უკვე არსებობს) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                     |
 
-ინახება `<DATA_DIR>/server.env`-ში. `DATA_DIR` განისაზღვრება შემდეგნაირად:
+აგრძელებდა `<DATA_DIR>/server.env`. `DATA_DIR` გადაწყვეტს:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` ან `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## ფანჯარა და სისტემური პანელი
+## გარემოს ფაილების ძიება
 
-- `BrowserWindow`: 1400×900 (მინ. 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, ფანჯრის მართვის ღილაკები მდებარეობს `{ x: 16, y: 16 }`-ზე.
-- Windows/Linux: სისტემის მშობლიური სათაურის ზოლი.
-- დახურვის ღილაკი აპლიკაციას სისტემურ პანელში კეცავს; სისტემური პანელის მენიუ შეიცავს **OmniRoute-ის გახსნას**, **მართვის პანელის გახსნას** (გარე ბრაუზერში), **სერვერის პორტის** ქვემენიუს, **განახლებების შემოწმებასა** და **გასვლას**.
+სერვერის ქვირითობის დაწყებამდე არჩევს ძირითად პროცესს (`getPreferredEnvFilePath()` in `electron/main.js`).** ერთი** `.env` ფაილი: პირველი მათგანი, რომელიც არსებობს.
+
+1. `$DATA_DIR/.env`, როდესაც `DATA_DIR` დაყენებულია გარემოში, რომლითაც აპლიკაცია გაშვებული იყო.
+2. `<resolved DATA_DIR>/.env`, იგივე ნაგულისხმევის გამოყენებით, როგორც ზემოთ: `%APPDATA%\omniroute\.env` Windows ზე, `$XDG_CONFIG_HOME/omniroute/.env` ან `~/.omniroute/.env` Linux ზე და macOS.
+3. `.env` პროცესის სამუშაო დირექტორიაში.
+
+ძირითადი პროცესი მხოლოდ იმ ფაილს კითხულობს; მოგვიანებით კანდიდატები არ არის გაერთიანებული. შემდეგ სერვერის გარემო აგებულია ამ პრიორიტეტით (პირველი უმაღლესი):
+
+1. Electron პროცესის გარემო (ცვლადები, რომლებიც მემკვიდრეობით მიიღება აპის გაშვებისგან).
+2. არჩეული `.env` ფაილი.
+3. `<DATA_DIR>/server.env` (ზემოთ ჩატვირთვის საიდუმლოებები).
+
+პროცესის გარემო აღირიცხება აპლიკაციის გაშვებისას, ამიტომ სისტემის ან მომხმარებლის გარემოს ცვლადი დაყენებულია აპის გაშვების დროს (მათ შორის, როცა ის უჯრაში ზის მისი ფანჯრის დახურვის შემდეგ) არ აღწევს სერვერს, სანამ აპი სრულად არ გამორთულია და ხელახლა გაშვება. სამუშაო დროის ღილაკებისთვის, როგორიცაა `CONTEXT_LENGTH_<PROVIDER>` (იხ. [გარემოს ცვლადები: თითო პროვაიდერის კონტექსტის სიგრძე](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), უპირატესობა მიანიჭეთ `.env` ფაილს, შემდეგ კი სრულად გამორთვა (უჯრა,** თავი დაანებე** ) და ხელახლა გაშვება.
+
+## ფანჯარა და უჯრა
+
+- `BrowserWindow`: 1400 × 900 (მინ. 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, შუქნიშანი `{ x: 16, y: 16 }` ზე.
+- Windows/Linux: მშობლიური სათაურის ზოლი.
+- დახურვის ღილაკი ამცირებს უჯრას; უჯრის მენიუს აქვს** გახსენით OmniRoute** ,** გახსენით დაფა** (გარე ბრაუზერი),** სერვერის პორტი** ქვემენიუ,** შეამოწმეთ განახლებები** ,** თავი დაანებე** .
 
 ## კონტენტის უსაფრთხოების პოლიტიკა
 
-კონფიგურირდება `session.defaultSession.webRequest.onHeadersReceived`-ის მეშვეობით. მნიშვნელოვანი დირექტივები:
+დააყენეთ `session.defaultSession.webRequest.onHeadersReceived` მეშვეობით. აღსანიშნავია დირექტივები:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- დეველოპმენტის რეჟიმში `'unsafe-eval'` ემატება მხოლოდ `script-src`-ს
+- Dev რეჟიმი ამატებს `'unsafe-eval'` მხოლოდ `script-src` ს
 
 ## ავტომატური განახლება
 
-იყენებს `electron-updater`-ს GitHub-ის პროვაიდერთან (`diegosouzapw/OmniRoute`).
+იყენებს `electron-updater` GitHub პროვაიდერთან (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- მოვლენები რენდერერს გადაეცემა `update-status` IPC-ის მეშვეობით:
-  `checking`, `available`, `not-available`, `downloading` (`percent`-ით), `downloaded`, `error`
-- `installUpdate()` აჩერებს სერვერს, შემდეგ კი იძახებს `autoUpdater.quitAndInstall()`-ს
-- დეველოპმენტის რეჟიმში გამოტოვებულია (`!app.isPackaged`)
+- მოვლენები გადაგზავნილი რენდერისთვის `update-status` IPC მეშვეობით: `checking`, `available`, `not-available`, `downloading` ( `percent`), `downloaded`, `error`
+- `installUpdate()` კლავს სერვერს და შემდეგ რეკავს `autoUpdater.quitAndInstall()`
+- გამოტოვებული Dev-ის რეჟიმში (`!app.isPackaged`)
 
-## აგების კონვეიერი
+## მილსადენის აშენება
 
-1. `npm run build` → Next.js-ის ავტონომიური ვერსია `.next/standalone`-ში.
-2. `prepare-electron-standalone.mjs` → ხელახლა ათავსებს `.next/electron-standalone`-ში და `server.js`-ისა და `required-server-files.json`-ის შიგნით აბსოლუტურ ბილიკებს გადაწერს, რათა პაკეტის გადაადგილება შესაძლებელი იყოს.
-3. `electron-builder` აპაკეტებს `main.js`-ს, `preload.js`-ს, `node_modules`-სა და `extraResources: { ../.next/electron-standalone → app }`-ს.
+1. `npm run build` → Next.js დამოუკიდებელი in `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → ხელახლა გადადის `.next/electron-standalone` ში და ხელახლა წერს აბსოლუტურ ბილიკებს `server.js` + `required-server-files.json` ში, ასე რომ, ნაკრები შეიძლება გადაადგილდეს.
+3. `electron-builder` პაკეტები `main.js`, `preload.js`, `node_modules` და `extraResources: { ../.next/electron-standalone → app }`.
 
-### აგების სამიზნეები
+### ააშენეთ მიზნები
 
-| OS      | სამიზნეები                                      |
-| ------- | ----------------------------------------------- |
-| Windows | NSIS ინსტალატორი + პორტატიული ვერსია (x64)      |
-| macOS   | DMG (Intel + arm64, Applications-ში გადათრევით) |
-| Linux   | AppImage + DEB (x64 + arm64)                    |
+| OS      | სამიზნეები                                   |
+| ------- | -------------------------------------------- |
+| Windows | NSIS ინსტალერი + პორტატული (x64)             |
+| macOS   | DMG (Intel + arm64, გადაათრიეთ აპლიკაციებში) |
+| Linux   | AppImage + DEB (x64 + arm64)                 |
 
-NSIS-ის პარამეტრები: `oneClick: false`, მომხმარებელს ინსტალაციის დირექტორიის არჩევის საშუალებას აძლევს და ქმნის მალსახმობებს სამუშაო მაგიდასა და Start მენიუში.
+NSIS პარამეტრები: `oneClick: false`, საშუალებას აძლევს მომხმარებელს აირჩიოს ინსტალაციის დირექტორია, შექმნას Desktop და Start-Menu მალსახმობები.
 
-## დაფასოებული ვერსიის სწრაფი ტესტირება
+## კვამლის ტესტირების შეფუთული აგება
 
 ```bash
 npm run electron:smoke:packaged
@@ -220,27 +229,27 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- მიმდინარე პლატფორმისთვის დაფასოებულ შესრულებად ფაილს ავტომატურად პოულობს `electron/dist-electron/`-ში.
-- ეშვება იზოლირებული `HOME`/`APPDATA`/`XDG_*` დირექტორიებით, რათა დეველოპერის მონაცემებს არ შეეხოს.
-- 45 s-ის განმავლობაში ამოწმებს `http://127.0.0.1:20128/login`-ს HTTP 200 პასუხის მისაღებად.
-- stderr/stdout-ში აკვირდება ფატალურ შაბლონებს (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` და სხვ.).
-- მზადყოფნის მიღწევის შემდეგ ელოდება 2 s სტაბილურ მუშაობას, შემდეგ აგზავნის SIGTERM-ს და ელოდება პორტის გათავისუფლებას.
-- CI-ში ავტომატურად გადასცემს `--no-sandbox --disable-gpu`-ს (ხოლო Linux-ზე ასევე `--disable-dev-shm-usage`-ს).
+- ავტომატურად აღმოაჩენს შეფუთულ ბინარს `electron/dist-electron/` ში მიმდინარე პლატფორმისთვის.
+- გაშვება იზოლირებული `HOME`/`APPDATA`/`XDG_*` დირექტორიებით, რათა არ შეეხოს დეველოპერის მონაცემებს.
+- გამოკითხვა `http://127.0.0.1:20128/login` HTTP 200-ზე 45 წამში.
+- საათები stderr/stdout ფატალური ნიმუშებისთვის (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` და ა.შ.).
+- მზადყოფნის შემდეგ ელოდება სტაბილურ გაშვებას 2 წმ, შემდეგ გამოსცემს SIGTERM და ელოდება პორტის გათავისუფლებას.
+- CI ში ავტომატურად გადის `--no-sandbox --disable-gpu` (და `--disable-dev-shm-usage` Linux ზე).
 
-გარემოს ცვლადებით გადაფარვა: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env აჭარბებს: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## კოდის ხელმოწერა
 
-`electron/package.json` ხელმოწერის ავტორიზაციის მონაცემებს პირდაპირ **არ** აკავშირებს. ისინი გარემოს ცვლადების მეშვეობით გადაეცით `electron-builder`-ს:
+`electron/package.json` აკეთებს** არა** მავთულის ხელმოწერის რწმუნებათა სიგელები პირდაპირ. გადაიტანეთ ისინი env vars-ით `electron-builder` ზე:
 
 ### macOS
 
 ```bash
-export APPLE_ID=<ელფოსტა>
-export APPLE_APP_SPECIFIC_PASSWORD=<პაროლი>
-export APPLE_TEAM_ID=<იდენტიფიკატორი>
+export APPLE_ID=<email>
+export APPLE_APP_SPECIFIC_PASSWORD=<password>
+export APPLE_TEAM_ID=<id>
 export CSC_LINK=path/to/cert.p12
-export CSC_KEY_PASSWORD=<სერტიფიკატის-პაროლი>
+export CSC_KEY_PASSWORD=<cert-password>
 npm run electron:build:mac
 ```
 
@@ -248,38 +257,38 @@ npm run electron:build:mac
 
 ```bash
 export CSC_LINK=path/to/cert.pfx
-export CSC_KEY_PASSWORD=<სერტიფიკატის-პაროლი>
+export CSC_KEY_PASSWORD=<cert-password>
 npm run electron:build:win
 ```
 
 ### Linux
 
-AppImage-ის ხელმოწერა არასავალდებულოა — ხელმოწერისთვის დააყენეთ `LINUX_GPG_KEY`.
+AppImage ხელმოწერა არის სურვილისამებრ — მითითებული `LINUX_GPG_KEY` ხელმოწერის შემთხვევაში.
 
 ## დისტრიბუცია
 
-არტეფაქტები თავსდება `electron/dist-electron/`-ში:
+არტეფაქტები ჩამოდის `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-რელიზები ქვეყნდება GitHub Releases-ში (`diegosouzapw/OmniRoute`), სადაც `electron-updater` ასევე ამოწმებს ახალი ვერსიების არსებობას.
+რელიზები ქვეყნდება GitHub Releases-ში (`diegosouzapw/OmniRoute`), სადაც ასევე `electron-updater` ამოწმებს ახალ ვერსიებს.
 
-## პრობლემების აღმოფხვრა
+## პრობლემების მოგვარება
 
-| სიმპტომი                                                                             | გამოსწორება                                                                                                                                                                                     |
-| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Electron-ის ძირითადი ვერსიის განახლების შემდეგ `Cannot find module 'better-sqlite3'` | better-sqlite3 v13-ს მოჰყვება Node-API-ის წინასწარი ანაწყობები — ხელახლა გაუშვით `npm install` ძირეულ დირექტორიაში და `prepare:bundle` (ის ამოწმებს წინასწარ ანაწყობს მიმდინარე პლატფორმისთვის) |
-| `ERR_DLOPEN_FAILED` ნატიური მოდულისთვის                                              | ხელახლა გაუშვით `prepare:bundle` — თუ მიმდინარე პლატფორმისთვის Node-API-ის წინასწარი ანაწყობი არ არსებობს, ის მუშაობას დაუყოვნებლივ შეწყვეტს                                                    |
-| Linux-ზე ფანჯარა ცარიელია                                                            | დარწმუნდით, რომ Next.js-ის სერვერი ნამდვილად მიება PORT-ს (შეამოწმეთ `[Server]`-ის ჟურნალები)                                                                                                   |
-| macOS-ის ნოტარიზაცია ყოვნდება                                                        | დარწმუნდით, რომ `APPLE_*` ცვლადები ექსპორტირებულია და მხოლოდ `.env`-ში არ არის მითითებული                                                                                                       |
-| Windows SmartScreen-ის გაფრთხილება                                                   | ხელი მოაწერეთ EV სერტიფიკატით, ან მომხმარებლებმა უნდა დააწკაპუნონ მარჯვენა ღილაკით → „მაინც გაშვება“                                                                                            |
-| სწრაფი ტესტი დაკავებული პორტის გამო ვერ სრულდება                                     | `electron:smoke:packaged`-ის გაშვებამდე შეაჩერეთ 20128 პორტზე მომუშავე ნებისმიერი ლოკალური დეველოპერული სერვერი                                                                                 |
+| სიმპტომი                                                            | გაასწორე                                                                                                                                                                       |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Cannot find module 'better-sqlite3'` შემდეგ Electron ძირითადი bump | better-sqlite3 v13 აგზავნის Node-API-ს წინასწარ აშენებს — ხელახლა აწარმოებს `npm install` root-ში და `prepare:bundle` (ის ამოწმებს წინასწარ აშენებას მიმდინარე პლატფორმისთვის) |
+| `ERR_DLOPEN_FAILED` მშობლიური მოდულისთვის                           | ხელახლა გაუშვით `prepare:bundle` — ის სწრაფად ვერ ხერხდება, როდესაც Node-API prebuild მიმდინარე პლატფორმისთვის აკლია                                                           |
+| ფანჯარა ცარიელი ჩანს Linux ზე                                       | დაადასტურეთ Next.js სერვერი, რომელიც რეალურად არის დაკავშირებული PORT (შეამოწმეთ `[Server]` ჟურნალები)                                                                         |
+| macOS სანოტარო დამოწმების სადგომები                                 | დარწმუნდით, რომ `APPLE_*` vars ექსპორტირებულია და არა მხოლოდ `.env` ში                                                                                                         |
+| Windows SmartScreen გაფრთხილება                                     | შედით EV cert-ით, ან მომხმარებლებმა დააწკაპუნეთ მაუსის მარჯვენა ღილაკით → „მაინც გაუშვით“                                                                                      |
+| კვამლის ტესტი ვერ ხერხდება გამოყენების პორტით                       | შეაჩერე ნებისმიერი ადგილობრივი დეველ სერვერი 20128-ზე `electron:smoke:packaged` გაშვებამდე                                                                                     |
 
-## აგრეთვე იხილეთ
+## აგრეთვე
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- საწყისი კოდი: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- დამხმარე სკრიპტები: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- წყარო: `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- დამხმარეები: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

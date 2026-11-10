@@ -26,6 +26,7 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "github",
   "codex",
   "claude",
+  "anthropic",
   "cursor",
   "qoder",
   "kimi-coding",
@@ -39,8 +40,16 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "minimax",
   "minimax-cn",
   "crof",
+  "clinepass",
   "nanogpt",
+  "nan",
+  // Apmix (apmix.ai) — monthly weighted-token allowance + self-set daily/weekly caps
+  // + top-up credits (GET https://api.apmix.ai/v1/usage, Bearer key)
+  "apmix",
   "deepseek",
+  // StepFun account balance (GET /v1/accounts; see usage/stepfun.ts — the
+  // base-URL override selects China vs international platform)
+  "stepfun",
   "moonshot",
   "kimi",
   "xiaomi-mimo",
@@ -48,6 +57,8 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "vertex",
   "vertex-partner",
   "codebuddy-cn",
+  "codebuddy-intl",
+  "cbai",
   // PromptQL playground credits (getCreditSummary → USD micros)
   "promptql",
   "pql",
@@ -67,6 +78,10 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   // Tavily monthly credits & quota (GET /usage)
   "tavily-search",
   "tavily",
+  "jina-search",
+  "jina",
+  "jina-ai",
+  "jina-reader",
   // Volcano Ark Plan subscriptions (agent-plan / coding-plan)
   "volcengine-agent-plan",
   "volcengine-coding-plan",
@@ -74,20 +89,36 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "command-code",
   "conol-web",
   "cnl",
+  "syntx",
+  "stx",
   // Alibaba Coding Plan triple-window quota (#9603 UI gap — fetcher existed, list entry missing)
   "bailian-coding-plan",
   // Qwen Cloud / Model Studio personal Token Plan (cookie-authenticated console gateway)
   "qwen-cloud-token-plan",
   // AgentRouter (New-API) console balance quota (consoleApiKey + newApiUserId)
   "agentrouter",
+  // TokenRouter wallet + per-key quota (optional Management Key in consoleApiKey)
+  "tokenrouter",
   // Kilo Code personal USD balance (GET /api/profile/balance, existing OAuth token)
   "kilocode",
+  // MegaBrain plan session + weekly limits (GET /api/profile/limits, OAuth token or mb-v1 key)
+  "megabrain",
+  "mb",
   // OpenRouter key limits + account credits (GET /api/v1/key + /api/v1/credits)
   "openrouter",
+  // Muse Code has no live quota endpoint; its fetcher surfaces persisted subscription metadata.
+  "muse-code",
   // LLM Gateway DevPass allowance (GET /v1/key → monthly + weekly premium)
   "llmgateway",
   // Lyceum credit balance (GET /api/v2/external/billing/credits)
   "lyceum",
   // Devin CLI agentic quota (Codeium seat-management GetUserStatus, protobuf)
   "devin-cli",
+  // ChatPlayground subscription and daily credits (GET /api/user)
+  "chatplayground",
+  "cpl",
+  // Cloudflare Workers AI daily neurons vs the 10k/day free allocation (needs Analytics: Read)
+  "cloudflare-ai",
+  // Zed Hosted Models USD credit (optional Orb billing portal link)
+  "zed-hosted",
 ];

@@ -1,8 +1,19 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 // ── i18n stub — returns fallback key so we can assert on translateOrFallback ──
 vi.mock("next-intl", () => ({
@@ -169,8 +180,8 @@ describe("MonitorTab", () => {
     const hint = container.querySelector("[data-testid='monitor-origin-hint']");
     expect(hint).toBeTruthy();
     // The hint should contain the info icon
-    const icons = hint?.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons ?? []).map((el) => el.textContent?.trim());
+    const icons = hint?.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons ?? []).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("info");
   });
 
@@ -182,8 +193,8 @@ describe("MonitorTab", () => {
     await mountAndFlushInitialFetch(<MonitorTab />, container);
 
     // Stat card icons: translate, check_circle, error, speed, hub, lan
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("translate");
     expect(iconTexts).toContain("check_circle");
     expect(iconTexts).toContain("error");
@@ -335,7 +346,7 @@ describe("MonitorTab", () => {
   });
 
   // ── 4. Auto-refresh toggle ───────────────────────────────────────────────────
-  it("toggle auto-refresh button is present with aria-label and shows live state text", async () => {
+  it("toggle auto-refresh button is named by its visible action text (label-in-name, #18074)", async () => {
     mockFetchEmpty();
     const { default: MonitorTab } =
       await import("@/app/(dashboard)/dashboard/translator/components/MonitorTab");
@@ -348,12 +359,16 @@ describe("MonitorTab", () => {
     expect(toggleBtn).toBeTruthy();
 
     // Initial state: auto-refresh is ON — translateOrFallback detects key === translation → uses fallback
-    expect(toggleBtn?.textContent?.trim()).toContain("Atualizando ao vivo");
-    // aria-label should be set
-    expect(toggleBtn?.getAttribute("aria-label")).toBeTruthy();
+    expect(toggleBtn?.textContent?.trim()).toBe("Pause auto-refresh");
+    // WCAG 2.5.3: no aria-label/title overriding the visible text, so the accessible name IS
+    // the visible action; the state is shown by the Live/Paused badge beside it.
+    expect(toggleBtn?.hasAttribute("aria-label")).toBe(false);
+    expect(toggleBtn?.hasAttribute("title")).toBe(false);
+    const badge = container.querySelector("[data-testid='badge']");
+    expect(badge?.textContent).toBe("Live");
   });
 
-  it("clicking toggle changes button text from live to paused", async () => {
+  it("clicking toggle switches the button to the resume action and the badge to paused", async () => {
     mockFetchEmpty();
     const { default: MonitorTab } =
       await import("@/app/(dashboard)/dashboard/translator/components/MonitorTab");
@@ -371,7 +386,9 @@ describe("MonitorTab", () => {
     });
 
     // After pause: button text should switch to the "paused" fallback
-    expect(toggleBtn?.textContent?.trim()).toContain("Pausado");
+    expect(toggleBtn?.textContent?.trim()).toBe("Resume auto-refresh");
+    expect(toggleBtn?.hasAttribute("aria-label")).toBe(false);
+    expect(container.querySelector("[data-testid='badge']")?.textContent).toBe("Paused");
   });
 
   it("auto-refresh polling fires fetch again after 3 seconds", async () => {

@@ -1,8 +1,14 @@
+import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
+import { credentialCooldownResponse } from "./credentialCooldownResponse";
 import {
   getModelInfo,
   getComboForModel,
   getModelInfoOrRetirementResponse,
 } from "../services/model";
+import {
+  withModalityBridgeResponseHeaders,
+  type ModalityBridgeResponseHeaders,
+} from "@/lib/guardrails/modalityBridge/bridgeResponseHeaders";
 import {
   clearAccountError,
   markAccountUnavailable,
@@ -11,7 +17,11 @@ import {
 import { maybeReactivateAfterExplicitProbe } from "../services/explicitInactiveProbe";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { clearRequestRejectedStreak } from "@omniroute/open-sse/services/requestRejectedStreak.ts";
-import { createBuiltinAutoCombo } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
+import { clearAntigravityVerificationUrl } from "@omniroute/open-sse/handlers/chatCore/antigravityVerificationState.ts";
+import {
+  createBuiltinAutoCombo,
+  prepareBuiltinAutoComboInputs,
+} from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
 import * as log from "../utils/logger";
 import { updateProviderCredentials } from "../services/tokenRefresh";
 import { detectFormatFromEndpoint } from "@omniroute/open-sse/services/provider.ts";
@@ -23,7 +33,6 @@ import {
 } from "@omniroute/open-sse/utils/resourcePressure.ts";
 import {
   errorResponse,
-  modelCooldownResponse,
   providerCircuitOpenResponse,
   unavailableResponse,
 } from "@omniroute/open-sse/utils/error.ts";
@@ -43,19 +52,33 @@ import {
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { hasBlockingProxyAssignment } from "@/lib/db/proxies";
 import {
+  type CircuitBreaker,
   CircuitBreakerOpenError,
   getCircuitBreaker,
   isLocalStreamLifecycleError,
 } from "../../shared/utils/circuitBreaker";
 import { classify429FromError, type FailureKind } from "../../shared/utils/classify429";
 import { resolveUseUpstream429BreakerHints } from "../../shared/utils/providerHints";
-import { isFeatureFlagEnabled } from "../../shared/utils/featureFlags";
+import { resolveProviderId } from "../../shared/constants/providers";
+import { classifyProviderProbeResult } from "./providerProbeClassification";
+import { markProviderProbeResponse } from "../../shared/utils/providerProbeResult";
+import {
+  isAutoRequestResolvedCapabilitiesEnabled,
+  isFeatureFlagEnabled,
+} from "../../shared/utils/featureFlags";
 
 import { noteProxyOutcome } from "./proxyOutcomeMemory";
 import { logProxyJournal } from "./proxyJournal";
 import type { AttemptJournalEntry } from "./proxyJournal";
 import { logTranslationEvent } from "../../lib/translatorEvents";
 import { getRuntimeProviderProfile } from "@omniroute/open-sse/services/accountFallback.ts";
+import { recordConnectionOutcome } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
+import { describeConnectionRestriction } from "../services/credentialSelectionDiagnostics.ts";
+
+// #14960: circuit-open 503 that also names the breaker's classified failure kind.
+function breakerOpenResponse(provider: string, breaker: CircuitBreaker, retryAfterSec: number) {
+  return providerCircuitOpenResponse(provider, retryAfterSec, breaker.getStatus().lastFailureKind);
+}
 
 // Models that explicitly cannot run on the codex/ChatGPT-Pro OAuth pool — when
 // a caller writes `codex/deepseek-v4-pro` we transparently reroute to the
@@ -81,7 +104,7 @@ type ExecuteChatWithBreakerOptions = {
 };
 
 type ExecuteChatWithBreakerResult =
-  | { result: any; tlsFingerprintUsed: boolean }
+  | { result: any; tlsFingerprintUsed: boolean; wasProviderProbe?: boolean }
   | { localResourcePressureResult: ResourcePressureGuardResult; tlsFingerprintUsed: false };
 
 async function hasOnlyActiveCodexAccount() {
@@ -191,8 +214,19 @@ export async function resolveModelOrError(
       }
     }
 
+    // One pool preparation shared by the attempt below and the fuzzy fallbacks,
+    // built only when an id actually materializes (unknown ids never prepare).
+    // Default: the same inputs as createVirtualAutoCombo() (capabilities resolve on
+    // demand). AUTO_REQUEST_RESOLVED_CAPABILITIES (opt-in) resolves them up front,
+    // which also feeds them to the snapshot weights.
+    let prepared: Awaited<ReturnType<typeof prepareBuiltinAutoComboInputs>> | undefined;
+    const loadPrepared = async () =>
+      (prepared ??= await prepareBuiltinAutoComboInputs(undefined, {
+        includeResolvedCapabilities: isAutoRequestResolvedCapabilitiesEnabled(),
+      }));
+
     try {
-      const virtualCombo = await createBuiltinAutoCombo(modelStr, suffix);
+      const virtualCombo = await createBuiltinAutoCombo(modelStr, suffix, loadPrepared);
       const poolSize = virtualCombo.candidatePool?.length || 0;
       log.info(
         "AUTO",
@@ -217,7 +251,8 @@ export async function resolveModelOrError(
       try {
         const virtualCombo = await createBuiltinAutoCombo(
           candidate,
-          candidate.replace(/^auto\/?/, "")
+          candidate.replace(/^auto\/?/, ""),
+          loadPrepared
         );
         log.info(
           "AUTO",
@@ -322,7 +357,21 @@ export async function resolveModelOrError(
     extendedContext,
     apiFormat,
     resolvedThinkingEffort: modelInfo.resolvedThinkingEffort,
+    modelInfo,
   };
+}
+
+// Credential-provider override for a combo target. An explicit providerId wins;
+// otherwise the target's own provider still applies (#11840: an alias-prefixed
+// passthrough target such as kilocode/cline must keep routing to that provider),
+// except the "unknown" sentinel getTargetProvider() stamps on bare model ids,
+// which must never override the provider inferred from the model (#14743).
+export function comboTargetCredentialProviderId(
+  target?: { providerId?: string | null; provider?: string | null } | null
+): string | null {
+  if (target?.providerId != null) return target.providerId;
+  const provider = target?.provider;
+  return provider && provider !== "unknown" ? provider : null;
 }
 
 export async function checkPipelineGates(
@@ -348,12 +397,11 @@ export async function checkPipelineGates(
     provider,
     (providerProfile as { useUpstream429BreakerHints?: boolean }).useUpstream429BreakerHints
   );
-  const breaker = getCircuitBreaker(provider, {
+  const breaker = getCircuitBreaker(resolveProviderId(provider), {
     failureThreshold: providerProfile.failureThreshold ?? providerProfile.circuitBreakerThreshold,
     degradationThreshold: providerProfile.degradationThreshold,
     resetTimeout: providerProfile.resetTimeoutMs ?? providerProfile.circuitBreakerReset,
-    // #4602: a local WS-bridge "Controller is already closed" throw is not an
-    // upstream outage — keep it from tripping the whole-provider breaker.
+    // A local stream lifecycle error never reached the provider.
     isFailure: (e) => !isLocalStreamLifecycleError(e),
     onStateChange: (name: string, from: string, to: string) =>
       log.info("CIRCUIT", `${name}: ${from} → ${to}`),
@@ -373,9 +421,8 @@ export async function checkPipelineGates(
     const retryAfterMs = breaker.getRetryAfterMs();
     const retryAfterSec = Math.max(Math.ceil(retryAfterMs / 1000), 1);
     log.warn("CIRCUIT", `Circuit breaker OPEN for ${provider}, rejecting request`);
-    return providerCircuitOpenResponse(provider, retryAfterSec);
+    return breakerOpenResponse(provider, breaker, retryAfterSec);
   }
-
   return null;
 }
 
@@ -387,13 +434,8 @@ export function checkResourcePressureBeforeProviderWork(): ResourcePressureGuard
   }
 }
 
-// #12254: handleChatCore resolves `{ success: false, status: 5xx }` for most upstream
-// failures, so execute() must not read a resolution as a success (it used to, and that
-// spurious _onSuccess() cancelled the call site's _onFailure() for the same attempt).
-// The chat path accounts for the outcome exactly once where the request context lives:
-// chat.ts via classifyProviderBreakerResult(), combo.ts via recordProviderFailure/Success.
+// Resolved failures are accounted by callers; acquired probes settle inside execute()'s fence.
 const chatPathOwnsBreakerAccounting = () => "ignore" as const;
-
 export async function executeChatWithBreaker({
   bypassCircuitBreaker,
   breaker,
@@ -416,6 +458,7 @@ export async function executeChatWithBreaker({
   extendedContext,
   modelApiFormat,
   modelTargetFormat,
+  runtimeModelInfo,
   resolvedThinkingEffort,
   providerProfile,
   cachedSettings,
@@ -428,11 +471,14 @@ export async function executeChatWithBreaker({
   reasoningTransportFallback = "drop",
   sessionAffinityKey = null,
   managedLease = null,
+  beforeUpstreamAttempt = undefined,
   // #12150 P1b: additive, optional video-bridge log/Memory shadow — undefined for every
   // non-video request. Passed straight through to handleChatCore; see its own destructure default.
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
+  requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null,
+  allowedConnections = null,
   // optional resume flag from a rehydrated previous_response_id —
   // forwarded to handleChatCore, which notes it under the attempt store.
   previousResponseResumed = undefined,
@@ -474,13 +520,10 @@ export async function executeChatWithBreaker({
         runWithProxyContext(proxyInfo?.proxy || null, () =>
           (handleChatCore as any)({
             body: { ...body, model: `${provider}/${model}` },
-            // #2905-followup: forward the already-resolved custom-model targetFormat
-            // override through as modelInfo.targetFormat. Without this, chatCore.ts's
-            // own resolveChatCoreRequestSetup() reads customModelTargetFormat off THIS
-            // modelInfo object (not the one resolveModelOrError computed it from) and
-            // finds nothing, silently re-deriving targetFormat from the static registry
-            // / provider default and discarding the DB override a second time.
+            // Preserve the resolved catalog metadata and per-model wire format
+            // through the dispatch boundary, including native reasoning tiers.
             modelInfo: {
+              ...runtimeModelInfo,
               provider,
               model,
               extendedContext,
@@ -509,10 +552,13 @@ export async function executeChatWithBreaker({
             sessionAffinityKey,
             reasoningTransportFallback,
             managedLease,
+            beforeUpstreamAttempt,
             videoBridgeLog,
             previousResponseResumed,
             fallbackAttempts,
+            requestUpstreamStartTimeoutMs,
             forcedConnectionId,
+            allowedConnections,
             skipResourcePressureGuard: true,
             onCredentialsRefreshed: async (newCreds: any) => {
               await updateProviderCredentials(credentials.connectionId, {
@@ -530,10 +576,18 @@ export async function executeChatWithBreaker({
             },
             onRequestSuccess: async () => {
               if (isShadowTraffic) return;
-              // A healthy response ends any run of per-request refusals
-              // (#12859) — only a real success does, not an elapsed cooldown.
-              if (credentials.connectionId) clearRequestRejectedStreak(credentials.connectionId);
+              // Only a real success ends the per-request refusal streak (#12859), and only for
+              // the model that succeeded: a sibling model's success must not reset another
+              // model's refusal count (the streak is keyed by connection + model).
+              if (credentials.connectionId) {
+                clearRequestRejectedStreak(credentials.connectionId, model);
+              }
               await clearAccountError(credentials.connectionId, credentials);
+              await clearAntigravityVerificationUrl(
+                provider,
+                credentials.connectionId,
+                credentials.providerSpecificData
+              );
               await maybeReactivateAfterExplicitProbe({
                 connectionId: credentials.connectionId,
                 reactivatedFromInactive: credentials.reactivatedFromInactive,
@@ -554,9 +608,7 @@ export async function executeChatWithBreaker({
               ) {
                 return;
               }
-              // A3 guard: if 401 and connection has extra keys, skip connection-level disable
-              // (key-level failure already recorded in chatCore.ts via T07)
-              // Check extra keys directly from credentials for reliability across restarts
+              // A3: a 401 with extra keys is handled per key, not per connection.
               const extraKeys =
                 (credentials.providerSpecificData?.extraApiKeys as string[] | undefined) ?? [];
               const hasExtraKeys =
@@ -569,6 +621,7 @@ export async function executeChatWithBreaker({
                 );
                 return;
               }
+              const streamOutputEmitted = failure?.outputEmitted === true;
               await markAccountUnavailable(
                 credentials.connectionId,
                 Number(failure?.status || HTTP_STATUS.BAD_GATEWAY),
@@ -576,7 +629,7 @@ export async function executeChatWithBreaker({
                 provider,
                 model,
                 providerProfile,
-                buildExhaustionOptions(correlationId ?? null, { isCombo })
+                buildExhaustionOptions(correlationId ?? null, { isCombo, streamOutputEmitted })
               );
             },
           })
@@ -598,7 +651,7 @@ export async function executeChatWithBreaker({
         return {
           result: {
             success: false,
-            response: providerCircuitOpenResponse(provider, Math.ceil(retryAfterMs / 1000)),
+            response: breakerOpenResponse(provider, breaker, Math.ceil(retryAfterMs / 1000)),
             status: HTTP_STATUS.SERVICE_UNAVAILABLE,
           },
           tlsFingerprintUsed: false,
@@ -624,25 +677,29 @@ export async function executeChatWithBreaker({
       return { result, tlsFingerprintUsed: false };
     }
 
-    if (tlsFingerprintActive) {
-      const tracked = await breaker.execute(
-        async () => runWithTlsTracking(tlsTrackingIdentity, chatFn),
-        { classifyResult: chatPathOwnsBreakerAccounting }
-      );
-      return { result: tracked.result, tlsFingerprintUsed: tracked.tlsFingerprintUsed };
-    }
-
-    const result = await breaker.execute(chatFn, {
+    let wasProviderProbe = false;
+    const probeOptions = {
       classifyResult: chatPathOwnsBreakerAccounting,
-    });
-    return { result, tlsFingerprintUsed: false };
+      classifyProbeResult: (value: Parameters<typeof classifyProviderProbeResult>[0]) =>
+        classifyProviderProbeResult(value, provider),
+      onProbeAcquired: () => (wasProviderProbe = true),
+    };
+    const tracked = await breaker.execute(
+      () =>
+        tlsFingerprintActive
+          ? runWithTlsTracking(tlsTrackingIdentity, chatFn)
+          : chatFn().then((result: any) => ({ result, tlsFingerprintUsed: false })),
+      probeOptions
+    );
+    if (wasProviderProbe) markProviderProbeResponse(tracked.result.response);
+    return { ...tracked, wasProviderProbe };
   } catch (cbErr: any) {
     if (cbErr instanceof CircuitBreakerOpenError) {
       log.warn("CIRCUIT", `${provider} circuit open during retry: ${cbErr.message}`);
       return {
         result: {
           success: false,
-          response: providerCircuitOpenResponse(provider, Math.ceil(cbErr.retryAfterMs / 1000)),
+          response: breakerOpenResponse(provider, breaker, Math.ceil(cbErr.retryAfterMs / 1000)),
           status: HTTP_STATUS.SERVICE_UNAVAILABLE,
         },
         tlsFingerprintUsed: false,
@@ -658,6 +715,7 @@ export async function executeChatWithBreaker({
           response: unavailableResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, detail, 2),
           status: HTTP_STATUS.SERVICE_UNAVAILABLE,
           error: detail,
+          errorCode: "proxy_unreachable",
         },
         tlsFingerprintUsed: false,
       };
@@ -743,6 +801,11 @@ function asShadowedCompatibleNode(
   return { id, name: trimmedString(record.name) || null, prefix };
 }
 
+// The status-table defaults read as "your OmniRoute API key is invalid" (401) or
+// "unknown model" (404); the actual fix is connecting an account in the dashboard.
+// Only the code is overridden so the status/type pairing SDKs rely on is kept.
+const PROVIDER_NOT_CONFIGURED = { code: "provider_not_configured" } as const;
+
 export function handleNoCredentials(
   credentials: any,
   excludeConnectionId: string | null,
@@ -756,37 +819,7 @@ export function handleNoCredentials(
   correlationId?: string | null
 ) {
   if (credentials?.allRateLimited) {
-    const errorMsg = lastError || credentials.lastError || "Unavailable";
-    const status =
-      lastStatus || Number(credentials.lastErrorCode) || HTTP_STATUS.SERVICE_UNAVAILABLE;
-    const cooldownModel =
-      typeof credentials.cooldownModel === "string" && credentials.cooldownModel.trim().length > 0
-        ? credentials.cooldownModel.trim()
-        : model;
-
-    if (credentials.cooldownScope === "model" && Number(status) === HTTP_STATUS.RATE_LIMITED) {
-      log.warn(
-        "CHAT",
-        `[${provider}/${cooldownModel}] all credentials cooling down${
-          credentials.retryAfterHuman ? ` (${credentials.retryAfterHuman})` : ""
-        }`
-      );
-      return modelCooldownResponse({
-        model: cooldownModel,
-        retryAfter: credentials.retryAfter,
-        retryAfterAt: typeof credentials.retryAfter === "string" ? credentials.retryAfter : null,
-        credentialsCoolingCount:
-          typeof credentials.connectionsCount === "number" ? credentials.connectionsCount : null,
-      });
-    }
-
-    log.warn("CHAT", `[${provider}/${model}] ${errorMsg} (${credentials.retryAfterHuman})`);
-    return unavailableResponse(
-      status,
-      `[${provider}/${model}] ${errorMsg}`,
-      credentials.retryAfter,
-      credentials.retryAfterHuman
-    );
+    return credentialCooldownResponse(credentials, provider, model, lastError, lastStatus);
   }
 
   if (lastError && lastStatus) {
@@ -823,19 +856,11 @@ export function handleNoCredentials(
     return errorResponse(httpStatus, message);
   }
   if (credentials?.blockedByKeyPolicy) {
-    // #13832: the provider HAS active connections — they were filtered out by the
-    // gateway API key's connection allowlist (`allowed_connections`) or its quota
-    // scope, so the pool arrived empty and the generic "No active credentials"
-    // below was indistinguishable from "this provider was never configured". That
-    // cost the reporter a full investigation: their key passed `/test` and synced
-    // 82 models (both address the connection by id and never consult the key's
-    // scope), while chat kept failing. The classic shape is a key minted before
-    // the provider existed, which is why older providers keep working on it.
-    // 403, not 401: the credential is fine, this principal is not allowed to use it.
+    // #15889: the effective restriction is not necessarily an API-key policy.
     const count = credentials.blockedCount || 1;
     const message =
-      `[${provider}] ${count} connection(s) exist but are excluded by this API key's ` +
-      `connection allowlist / quota scope — add them to the key in the dashboard, or use a key without that scope`;
+      `[${provider}] ${count} connection(s) exist but are excluded by ` +
+      `${describeConnectionRestriction(credentials.connectionRestrictionSources)} — review the connection routing constraints in the dashboard`;
     log.warn("AUTH", message);
     return errorResponse(HTTP_STATUS.FORBIDDEN, message);
   }
@@ -896,13 +921,15 @@ export function handleNoCredentials(
           : HTTP_STATUS.SERVICE_UNAVAILABLE;
       return errorResponse(
         singleModelStatus,
-        `No active credentials for provider: ${provider}.${hint}`
+        `No active credentials for provider: ${provider}.${hint}`,
+        singleModelStatus === HTTP_STATUS.UNAUTHORIZED ? PROVIDER_NOT_CONFIGURED : undefined
       );
     }
 
     return errorResponse(
       HTTP_STATUS.NOT_FOUND,
-      `No active credentials for provider: ${provider}.${hint}`
+      `No active credentials for provider: ${provider}.${hint}`,
+      PROVIDER_NOT_CONFIGURED
     );
   }
   log.warn("CHAT", "No more accounts available", { provider });
@@ -942,6 +969,7 @@ export const STREAM_EARLY_EOF_MAX_RETRIES = 1;
 const RETRYABLE_STREAM_EMPTY_CODES: ReadonlySet<string> = new Set([
   "STREAM_EARLY_EOF",
   "empty_response",
+  "empty_content",
 ]);
 
 export function shouldRetryStreamEarlyEof(
@@ -952,6 +980,22 @@ export function shouldRetryStreamEarlyEof(
     typeof errorCode === "string" &&
     RETRYABLE_STREAM_EMPTY_CODES.has(errorCode) &&
     attempt < STREAM_EARLY_EOF_MAX_RETRIES
+  );
+}
+
+export const STREAM_READINESS_TIMEOUT_MAX_RETRIES = 1;
+
+export function shouldRetryStreamReadinessTimeout(
+  errorCode: string | null | undefined,
+  attempt: number,
+  isCombo: boolean,
+  clientAborted: boolean
+): boolean {
+  return (
+    !isCombo &&
+    !clientAborted &&
+    errorCode === "STREAM_READINESS_TIMEOUT" &&
+    attempt < STREAM_READINESS_TIMEOUT_MAX_RETRIES
   );
 }
 
@@ -1119,6 +1163,8 @@ export async function safeLogEvents({
   } catch {
     // proxy selection feedback is best-effort; never break the request path
   }
+  // Rolling per-connection TTFB/outcome for the opt-in p2c latency term (never throws).
+  recordConnectionOutcome(credentials?.connectionId, model, proxyLatency, result?.success === true);
 
   try {
     await logProxyJournal({
@@ -1152,6 +1198,10 @@ export async function safeLogEvents({
   } catch {}
 }
 
+/**
+ * Returns the response with a session ID header, or unchanged when no session ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withSessionHeader(response: Response, sessionId: string | null): Response {
   if (!response || !sessionId) return response;
 
@@ -1165,10 +1215,17 @@ export function withSessionHeader(response: Response, sessionId: string | null):
       headers: response.headers,
     });
     cloned.headers.set("X-OmniRoute-Session-Id", sessionId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 
+/**
+ * Returns the response with a correlation ID header, or unchanged when no ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withCorrelationId(response: Response, correlationId: string | null): Response {
   if (!response || !correlationId) return response;
 
@@ -1182,7 +1239,10 @@ export function withCorrelationId(response: Response, correlationId: string | nu
       headers: response.headers,
     });
     cloned.headers.set("X-Correlation-Id", correlationId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 
@@ -1194,21 +1254,11 @@ export function withCorrelationId(response: Response, correlationId: string | nu
  * Same try-set/clone-fallback shape as withSessionHeader — the clone reuses
  * `response.body`, so SSE streams pass through untouched.
  */
-export function withModalityBridgeHeader(response: Response, value: string | null): Response {
-  if (!response || !value) return response;
-
-  try {
-    response.headers.set("x-omniroute-modality-bridge", value);
-    return response;
-  } catch {
-    const cloned = new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-    cloned.headers.set("x-omniroute-modality-bridge", value);
-    return cloned;
-  }
+export function withModalityBridgeHeader(
+  response: Response,
+  value: string | ModalityBridgeResponseHeaders | null
+): Response {
+  return withModalityBridgeResponseHeaders(response, value);
 }
 
 export function withConversationId(response: Response, conversationId: string | null): Response {
@@ -1228,22 +1278,4 @@ export function withConversationId(response: Response, conversationId: string | 
   }
 }
 
-export function withSelectedConnectionHeader(
-  response: Response,
-  connectionId: string | null | undefined
-): Response {
-  if (!response || !connectionId) return response;
-
-  try {
-    response.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    return response;
-  } catch {
-    const cloned = new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-    cloned.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
-  }
-}
+export { withSelectedConnectionHeader } from "./chat/selectedConnectionHeader.ts";

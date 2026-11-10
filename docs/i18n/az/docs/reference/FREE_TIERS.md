@@ -4,364 +4,397 @@
 
 ---
 
-> **İstifadəçilər üçün**: Sadə bir bələdçi axtarırsınız? Pulsuz süni intellekt əldə etmək üçün addım-addım təlimatlar üçün [Pulsuz Səviyyələr Bələdçisinə](../getting-started/FREE-TIERS-GUIDE.md) baxın.
+> **İstifadəçilər üçün**: Sadə bir bələdçi axtarırsınız? Pulsuz süni intellekt əldə etmək üçün addım-addım təlimatlara [Pulsuz səviyyələr bələdçisi](../getting-started/FREE-TIERS-GUIDE.md) səhifəsində baxın.
 
-> **Son araşdırma:** 2026-06-17 — hər bir pulsuz səviyyə kvotasını + Xidmət Şərtlərini yeniləyən provayderlər üzrə veb araşdırma (rəsmi sənədlər + son 7 günün xəbərləri, rəqib yoxlama ilə 50 agent keçidi). **Qismən təkrar audit 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — aşağıdakı tarixli qeydə baxın).
-> **Həqiqət mənbəyi (kataloq):** `open-sse/config/freeModelCatalog.ts` (MODEL üzrə büdcələr, hovuzdan təkrarsızlaşdırılmış). Aşağıdakı token-büdcə rəqəmləri canlı veb araşdırmalarından əldə edilmişdir və **təxminidir** — [Metodologiya və xəbərdarlıqlara](#methodology--caveats) baxın.
+> **Son araşdırma tarixi:** 2026-06-17 — hər provayder üzrə veb araşdırması (rəsmi sənədlər + son 7 günün xəbərləri, ziddiyyətli yoxlama ilə 50 agentlik keçid); bütün pulsuz səviyyə kvotaları və ToS yenilənib. **Qismən təkrar audit: 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — aşağıdakı tarixli qeydə baxın).
+> **Əsas mənbə (kataloq):** `open-sse/config/freeModelCatalog.ts` (hər model üzrə büdcələr, hovuzlar üzrə təkrarlar çıxarılıb). Aşağıdakı token büdcəsi rəqəmləri canlı veb araşdırmasından əldə edilib və **təxminidir** — [Metodologiya və məhdudiyyətlərə](#methodology--caveats) baxın.
 
-## TL;DR — OmniRoute əslində nə qədər pulsuz nəticə toplayır?
+## Qısa xülasə — OmniRoute əslində nə qədər pulsuz inferensiyanı birləşdirir?
 
-| Metrik                                          | Token / ay                    | Mənası                                                                                                                                                                                                                                                                                                                       |
-| :---------------------------------------------- | :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sənədləşdirilmiş təkrarlanan qrant (sabit)**  | **~1.62B**                    | Pulsuz səviyyəli **hovuzlar** (model üzrə kataloq), hər bir paylaşılan hovuz **bir dəfə** sayılır. `/api/free-tier/summary` arxasında olan canlı mənbə və idarəetmə panelinin Pulsuz Səviyyə Büdcəsi səhifəsi. **Bu rəqəmdən istifadə edin.**                                                                                |
-| **+ qeydiyyat kreditləri ilə ilk ay**           | **~2.22B**                    | Sabit + birdəfəlik qeydiyyat kreditləri (Z.AI 20M, DeepSeek 5M, …), hər hesab üçün təkrarsızlaşdırılmış. **Yalnız ilk ay** — təkrarlanmır.                                                                                                                                                                                   |
-| **+ daimi pulsuz, dərc edilmiş limit yoxdur**   | _kəmiyyəti müəyyən edilməyən_ | `siliconflow`, `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud` — real təkrarlanan giriş, sürət/eyni vaxtda məhdudlaşdırılmış, **sayılacaq token limiti yoxdur**. Siyahıya alınmış, heç vaxt cəmlənməmişdir (onları `RPM×24/7` ilə saymaq rədd etdiyimiz inflyasiyadır). |
-| **+ depozit-kilidini açma artımı**              | **+~24M**                     | Birdəfəlik **$10** OpenRouter əlavəsi onun pulsuz hovuzunu gündə 50 → 1000 sorğuya qaldırır. Ayrı-ayrılıqda bildirilir ki, sabit rəqəmi heç vaxt şişirtməsin.                                                                                                                                                                |
-| **+ regional şəxsiyyət yoxlamasının arxasında** | **+~6M**                      | `modelscope` (Alibaba Cloud bağlantısı + materik Çin real ad yoxlaması). `gatedRecurringTokens` / `gatedProviders` kimi və idarəetmə panelində göstərilən real təkrarlanan kvota. Başlığa heç vaxt cəmlənməyib: regional şəxsiyyət yoxlamasının arxasında +~6M.                                                              |
-| Nəzəri tavan (bütün sürət limitləri, 24/7)      | ~10B                          | Hər bir provayderin sürət limitinin fasiləsiz istifadəyə ekstrapolyasiya edilmiş cəmi. **Zəmanət deyil** — bunu başlıq kimi istifadə etməyin.                                                                                                                                                                                |
+Bu rəqəmlər kataloqdakı ayrı-ayrı üçüncü tərəf hesablarını və uyğunluq şərtlərini təsvir edir. OmniRoute bu büdcəni təqdim etmir: tələb olunan hesabları və ya giriş məlumatlarını əldə etməli, uyğun provayderləri qoşmalı və onların limitlərinə riayət etməlisiniz. Faktiki istifadə edilə bilən tutum daha aşağı, o cümlədən uyğun marşrutu olmayan yeni quraşdırmada sıfır ola bilər. `tos: avoid` ilə işarələnmiş provayderlər standart olaraq avtomatik marşrutlaşdırmadan xaric edilir.
 
-**Dürüst başlıq:** _OmniRoute 35 pulsuz səviyyəli hovuzda **ayda ~1.62B sənədləşdirilmiş pulsuz token** (qeydiyyat kreditləri ilə ilk ayınızda ~2.22B-ə qədər) toplayır — üstəgəl daimi pulsuz, limitsiz provayderlərin uzun bir siyahısı — və RTK + Caveman sıxılması (15–95% token qənaəti) bunu daha da genişləndirir._
+**2026-10-08 tarixində yoxlanılıb:** [Cerebras](https://www.cerebras.ai/pricing) ödəniş üsulu tələb edən və 30 gündən sonra etibarlılığını itirən birdəfəlik $5 promosyon krediti təqdim edir. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) layihə/model/səviyyə üzrə sürət limitlərini dərc edir; o, aylıq əsas kəmiyyət göstəricisinə daxil edilmir.
 
-> **Niyə bu, əvvəlki ~1.94B-dən aşağı düşdü.** 2026-06-17 yenilənməsi itki deyil, dürüstlük düzəlişidir: `gemini` indi pool-deduped edilib (hər Flash variantını ayrı-ayrı saymaqla şişirdilmişdi, 462M → 60M), `cloudflare-ai` real 10k-Neurons/day səviyyəsinə düzəldilib (122M → 30M), `doubao` birdəfəlik qeydiyyat krediti kimi yenidən təsnif edilib (təkrarlanan deyil), və bağlanmış səviyyələr silinib (`chutes`/`phind`/`kluster` dayandırılıb). Qismən `llm7` (düzgün 5M/gün → 150M) və yeni pulsuz provayderlər (Kilo, OpenCode Zen, Z.AI GLM-Flash) tərəfindən kompensasiya edilib.
+| Göstərici                                       | Token / ay                      | Mənası                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Sənədləşdirilmiş dövri kvota (sabit)**        | **~1.62B**                      | Pulsuz səviyyə **hovuzları** (hər model üzrə kataloq); hər ortaq hovuz **yalnız bir dəfə** hesablanır. `/api/free-tier/summary` və idarəetmə panelindəki Pulsuz Səviyyə Büdcəsi səhifəsinin arxasındakı canlı mənbə. **Bu rəqəmdən istifadə edin.**                                                                            |
+| **+ qeydiyyat kreditləri ilə ilk ay**           | **~2.22B**                      | Sabit kvota + birdəfəlik qeydiyyat kreditləri (Z.AI 20M, DeepSeek 5M, …), hər hesab üzrə təkrarlar çıxarılıb. **Yalnız ilk ay** — təkrarlanmır.                                                                                                                                                                                |
+| **+ daimi pulsuz, dərc edilmiş limit yoxdur**   | _kəmiyyətlə ifadə edilə bilməz_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud` — real dövri giriş mövcuddur, sürət/paralelliklə məhdudlaşdırılır, **hesablamaq üçün token limiti yoxdur**. Siyahıya alınır, lakin heç vaxt cəmlənmir (onları `RPM×24/7` əsasında hesablamaq rədd etdiyimiz şişirtmədir). |
+| **+ depozitlə açılan artım**                    | **+~24M**                       | Birdəfəlik **$10** OpenRouter balans artırması onun pulsuz hovuzunu 50-dən → 1000 sorğu/günədək yüksəldir. Sabit rəqəmi heç vaxt şişirtməməsi üçün ayrıca göstərilir.                                                                                                                                                          |
+| **+ regional şəxsiyyət yoxlamasının arxasında** | **+~6M**                        | `modelscope` (Alibaba Cloud əlaqələndirməsi + materik Çində həqiqi adla təsdiqləmə). Real dövri kvotadır, `gatedRecurringTokens` / `gatedProviders` kimi və idarəetmə panelində göstərilir. Heç vaxt əsas göstəriciyə əlavə edilmir: regional şəxsiyyət yoxlamasının arxasında +~6M.                                           |
+| Nəzəri maksimum (bütün sürət limitləri, 24/7)   | ~10B                            | Bütün provayderlərin sürət limitlərinin fasiləsiz istifadəyə ekstrapolyasiya edilmiş cəmi. **Zəmanət deyil** — bunu əsas göstərici kimi təqdim etməyin.                                                                                                                                                                        |
+
+**Dürüst əsas göstərici:** _OmniRoute 34 pulsuz səviyyə kvota hovuzu üzrə **ayda ~1.62B sənədləşdirilmiş pulsuz tokeni** birləşdirir (qeydiyyat kreditləri ilə ilk ayınızda ~2.22B-yə qədər) — üstəlik daimi pulsuz, limitsiz provayderlərin uzun siyahısını təqdim edir — RTK + Caveman sıxılması isə bunu daha da artırır (15–95% token qənaəti)._
+
+> **Bu göstəricinin əvvəlki ~1.94B səviyyəsindən niyə aşağı düşdüyü.** 2026-06-17 yeniləməsi itki deyil, dürüstlük düzəlişidir: `gemini` artıq hovuz üzrə dublikatlardan təmizlənib (əvvəllər hər Flash variantı ayrıca hesablandığı üçün şişirdilmişdi, 462M → 60M), `cloudflare-ai` real gündəlik 10k Neuron limitinə uyğun düzəldilib (122M → 30M), `doubao` birdəfəlik qeydiyyat krediti kimi yenidən təsnif edilib (təkrarlanan deyil) və bağlanmış səviyyələr silinib (`chutes`/`phind`/`kluster` dayandırılıb). Bu azalma qismən `llm7` (düzgün göstərici: gündə 5M → 150M) və yeni pulsuz provayderlərlə (Kilo, OpenCode Zen, Z.AI GLM-Flash) kompensasiya edilib.
 >
-> **v3.8.42-də ~1.37B-ə qədər əlavə düzəliş edilib:** `longcat` pulsuz önizləməsi bitdikdən sonra 150M/ay təkrarlanan qrantdan birdəfəlik 10M qeydiyyat kreditinə yenidən təsnif edilib. Eyni dürüstlük qaydası — heç bir provayder səhvən silinməyib.
+> **v3.8.42 versiyasında əlavə olaraq ~1.37B səviyyəsinə düzəldildi:** pulsuz önbaxış müddəti bitdikdən sonra `longcat` aylıq təkrarlanan 150M qrantdan birdəfəlik 10M qeydiyyat kreditinə yenidən təsnif edildi. Eyni dürüstlük qaydası tətbiq olunur — heç bir provayder səhvən silinməyib.
 >
-> **Felo Web istifadədən çıxarıldıqdan sonra 2026-08-26 tarixində yenilənib:** Felo Web, GPL-dən törəyən mənşəyi/lisenziyalaşdırılması GÖZLƏMƏDƏ qaldığı müddətdə istisna edilir; mənbə o zaman 38 pool açarı bildirmişdi. Pool sayı canlıdır və CI-gated-dir (`check:docs-counts` yuxarıdakı rəqəmlər `computeFreeModelTotals()`-dan fərqlənərsə, quruluşu uğursuz edir).
+> **Felo Web istifadədən çıxarıldıqdan sonra 2026-08-26 tarixində yeniləndi:** GPL-dən törəyən mənşə/lisenziyalaşdırma məsələsi GÖZLƏMƏDƏ qaldığı müddətdə Felo Web daxil edilmir; həmin vaxt mənbədə 38 hovuz açarı göstərilirdi. Hovuz sayı canlıdır və CI yoxlaması ilə qorunur (`check:docs-counts`, yuxarıdakı rəqəmlər `computeFreeModelTotals()` nəticəsindən fərqlənərsə, yığmanı uğursuz edir).
 >
-> **2026-09-02 tarixində provayderlərin öz səhifələrinə qarşı yenidən yoxlanılıb** (mənbələr: `open-sse/config/freeModelCatalog.data.ts` faylındakı hər yenidən yoxlanılmış girişin yanındakı `// evidence:` şərhləri): `gemini` və `ollama-cloud` artıq token rəqəmi dərc etmir (Google 2025-12-23 tarixində model başına pulsuz cədvəli silib; Ollama-nın Pulsuz planı "başlanğıc istifadə kreditləri"dir) və indi **limitsiz** olaraq qeyd olunur, heç vaxt cəmlənmir (−80M); `groq` üç istifadədən çıxarılmış ID ilə beş **model başına** 200K-TPD limitidir (hər biri 6M, +15M); `nara` bir 7M/gün həcmidir (+60M, 210M). `mistral`'ın 1B-i yalnız hesab konsolunda görünür — Metodologiya altında _Sübut sinifləri_nə baxın.
+> **2026-09-02 tarixində provayderlərin öz səhifələri əsasında yenidən audit edildi** (mənbələr: `open-sse/config/freeModelCatalog.data.ts` faylındakı hər yenidən audit edilmiş qeydin yanında yerləşən `// evidence:` şərhləri): `gemini` və `ollama-cloud` artıq token göstəricisi dərc etmir (Google 2025-12-23 tarixində model üzrə pulsuz cədvəli sildi; Ollama-nın Free planı «başlanğıc istifadə kreditləri» təqdim edir) və indi **limitsiz** kimi göstərilir, heç vaxt cəmlənmir (−80M); `groq` model üzrə beş ayrı 200K-TPD limitindən ibarətdir (hər biri 6M, +15M), istifadədən çıxarılmış üç ID isə silinib; `nara` gündəlik vahid 7M hovuzdur (+60M, 210M). `mistral`-ın 1B göstəricisi yalnız hesab konsolunda görünür — Metodologiya bölməsindəki _Sübut sinifləri_ hissəsinə baxın.
 >
-> **2026-09-03 tarixində düzəldilib (#11773):** `cerebras` 30M/ay təkrarlanan qrantdan (köhnə kart tələb etməyən 1M token/gün sınağı) ödəniş metodu tələb edən birdəfəlik $5 qeydiyyat kreditinə yenidən təsnif edilib. LongCat ilə eyni dürüstlük qaydası.
+> **2026-09-03 tarixində düzəldildi (#11773):** `cerebras` aylıq təkrarlanan 30M qrantdan (əvvəlki, kart tələb etməyən gündəlik 1M token sınağı) ödəniş üsulu tələb edən birdəfəlik $5 qeydiyyat kreditinə yenidən təsnif edildi. LongCat üçün tətbiq olunan eyni dürüstlük qaydasıdır.
 >
-> **Üstəlik xKiro (2026-09-03):** yeni `xkiro-free` pool (150M/ay) 35-ci təkrarlanan pool açarı əlavə edir. Felo Web, GPL-dən törəyən mənşəyi/lisenziyalaşdırılması GÖZLƏMƏDƏ qaldığı müddətdə istisna edilir. Mənbə indi **35 təkrarlanan pool açarı** və **~1.62B sabit** bildirir — canlı, CI-gated rəqəm (`check:docs-counts` bu rəqəm `computeFreeModelTotals()`-dan fərqlənərsə, quruluşu uğursuz edir).
+> **Həmçinin xKiro (2026-09-03):** yeni `xkiro-free` hovuzu (150M/ay) 35-ci təkrarlanan hovuz açarını əlavə edir. GPL-dən törəyən mənşə/lisenziyalaşdırma məsələsi GÖZLƏMƏDƏ qaldığı müddətdə Felo Web daxil edilmir. Mənbə indi **34 təkrarlanan hovuz açarı** və **~1.62B sabit həcm** göstərir — bu, canlı və CI yoxlaması ilə qorunan rəqəmdir (`check:docs-counts`, bu göstərici `computeFreeModelTotals()` nəticəsindən fərqlənərsə, yığmanı uğursuz edir).
 
-Ən böyük **sənədləşdirilmiş** töhfə verənlər: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (beş model başına limit), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` istisna edilir — onun 10M LongCat-2.0 qrantı birdəfəlik, KYC-gated qeydiyyat kreditidir, təkrarlanan aylıq büdcə deyil.)
+Ən böyük **sənədləşdirilmiş** töhfəçilər: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (model üzrə beş ayrı limit), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` daxil edilmir — onun 10M LongCat-2.0 qrantı təkrarlanan aylıq büdcə deyil, KYC tələbi olan birdəfəlik qeydiyyat kreditidir.)
 
-> ⚠️ Nəzəri tavan (~10B) **dərc edilmiş token limiti olmayan** (`tencent`, `siliconflow`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) yalnız sürət limiti olan provayderlər tərəfindən şişirdilir, onların rəqəmləri `RPM/TPM × 24/7 × 30d` olardı — heç bir tək hesabın davam etdirə bilməyəcəyi nəzəri maksimum. Onlar müdafiə oluna bilən rəqəmdən **istisna edilir** (əvəzinə "daimi pulsuz, limitsiz" sətrində göstərilir). Bu, rəqiblərin milyardlarla dollarlıq iddialarını etibarsız edən eyni şişirtmədir.
+> ⚠️ Nəzəri maksimum (~10B) **dərc edilmiş token limiti olmayan**, yalnız sorğu sürəti məhdudiyyətinə malik provayderlər (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`) tərəfindən şişirdilir; onların göstəriciləri `RPM/TPM × 24/7 × 30d` əsasında hesablanardı — bu, heç bir fərdi hesabın davamlı şəkildə təmin edə bilməyəcəyi nəzəri maksimumdur. Onlar müdafiə edilə bilən rəqəmə **daxil edilmir** (əvəzində «daimi pulsuz, limitsiz» sətrində göstərilir). Rəqiblərin çoxmilyardlıq iddialarını etibarsız edən də məhz bu cür şişirtmədir.
 
 ---
 
 ## 2026-06-17 yenilənməsi — 2026-06-05-dən bəri nə dəyişdi
 
-50 agentli veb-araşdırma keçidi (rəsmi sənədlər + son 7 günün xəbərləri, rəqib tərəfindən təsdiqlənmiş) bütün kataloqu yenilədi. Əsas məqamlar:
+50 agentlik veb-tədqiqat keçidi (rəsmi sənədlər + son 7 günün xəbərləri, rəqib yoxlaması ilə təsdiqlənib) bütün kataloqu yenilədi. Əsas məqamlar:
 
-- **Silindi / pulsuz səviyyə yoxdur (2026):** `chutes` (pulsuz səviyyə 2026-03-də bitdi), `phind` (şirkət 2026-01-də bağlandı), `kluster` (2026-06-09-da dayandırıldı → MITO), `gitlawb` + `gitlawb-gmi` (MiMo pulsuz girişi 2026-05-24-də ləğv edildi, Nemotron promosyonu 2026-06-da bitdi — 2026-06-18-də yenidən təsdiqləndi), `aimlapi` (pulsuz səviyyə dayandırıldı — 2026-06-18-də yenidən təsdiqləndi), `yi` (Yi-Light istifadədən çıxarıldı, istifadə etdikcə ödə — 2026-06-18-də yenidən təsdiqləndi), `featherless-ai` (cari pulsuz səviyyə yoxdur), `chipotle` (Chipotle-nin "Pepper AI" — provayderin danışdığı `amelia.chipotle.com` Amelia çat vidceti indi kök daxil olmaqla hər marşrutda 404 səhvi verir; arxa tərəf istifadədən çıxarıldı/köçürüldü, 2026-09-15-də təsdiqləndi — kataloqdan tamamilə silindi, #13131/#4037). `iflytek` / `sparkdesk` siyahıda qalır, lakin Xidmət Şərtləri xəbərdarlığı ilə (Spark Lite pulsuzdur; Xidmət Şərtləri proksi/rele istifadəsini məhdudlaşdırır).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01-də dayandırıldı və `2.5 Pro` pulsuz səviyyədən çıxdı (2026-04); pulsuz səviyyə indi **yalnız Flash-ailəsidir** (2.5/3/3.1/3.5 Flash + Gemma). Kataloq indi Flash ailəsini **birləşdirir** (hər variantı ayrı-ayrı saymaqla şişirdilmişdi: 462M → 60M).
-- **Düzəldilmiş rəqəmlər:** `cloudflare-ai` 122M → **30M** (həqiqi 10k-Neyron/gün), `doubao` birdəfəlik qeydiyyat krediti kimi yenidən təsnif edildi (təkrarlanan deyil), `llm7` 4M → **150M** (sənədləşdirilmiş 5M token/gün), `together` "-Free" son nöqtələri dayandırıldı → $25 qeydiyyat krediti də silindi (minimum $5 alış tələb edir, pulsuz sınaq yoxdur), `longcat` Önizləmə bitdi + Flash modelləri istifadədən çıxarıldı → **yalnız LongCat-2.0**, birdəfəlik **10M**-token qeydiyyat krediti kimi yenidən təsnif edildi (KYC-gated, təkrarlanan deyil).
-- **Kəşf edilmiş yeni pulsuz provayderlər:** ⭐ **Kilo Code** (`kilo-gateway` — dəyişən "Avtomatik Pulsuz" dəsti: NVIDIA Nemotron 3 ailəsi, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 dəyişən pulsuz kodlaşdırma modeli), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash daimi pulsuz + 20M qeydiyyat bonusu), və `arcee-ai` Trinity Large Preview.
-- **Yeni dürüst səviyyələr** (Metodologiyaya baxın): _daimi pulsuz, lakin məhdudiyyətsiz_ kateqoriya (həqiqi təkrarlanan giriş, saymaq üçün token limiti yoxdur) və _depozitlə açılan gücləndirmə_ (OpenRouter $10 → +24M/ay), hər ikisi **ayrıca** göstərilmişdir ki, heç vaxt başlıqları şişirtməsin.
+- **Silinib / pulsuz səviyyə yoxdur (2026):** `chutes` (pulsuz səviyyə 2026-03-də bitdi), `phind` (şirkət 2026-01-də bağlandı), `kluster` (2026-06-09-da istismardan çıxarıldı → MITO), `gitlawb` + `gitlawb-gmi` (MiMo pulsuz girişi 2026-05-24-də ləğv edildi, Nemotron promosu 2026-06-da bitdi — 2026-06-18-də yenidən yoxlanılıb), `aimlapi` (pulsuz səviyyə dayandırılıb — 2026-06-18-də yenidən yoxlanılıb), `yi` (Yi-Light çıxarıldı, istifadəyə görə ödəniş — 2026-06-18-də yenidən yoxlanılıb), `featherless-ai` (hazırda pulsuz səviyyə yoxdur), `chipotle` (Chipotle-un "Pepper AI"-sı — provayderin əlaqə saxladığı tərs mühəndisliklə açılmış `amelia.chipotle.com` Amelia söhbət vidceti indi kök daxil olmaqla bütün marşrutlarda 404 qaytarır; backend istismardan çıxarılıb/köçürülüb, 2026-09-15-də təsdiqlənib — kataloqdan tamamilə silinib, #13131/#4037). `iflytek` / `sparkdesk` siyahıda qalır, lakin ToS ilə bağlı ehtiyat qeydi daşıyır (Spark Lite pulsuzdur; ToS proxy/relay istifadəsini məhdudlaşdırır).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01-də söndürülüb və `2.5 Pro` pulsuz səviyyədən çıxıb (2026-04); pulsuz səviyyə indi **yalnız Flash ailəsidir** (2.5/3/3.1/3.5 Flash + Gemma). Kataloq indi Flash ailəsini **vahid hovuzda birləşdirir** (əvvəllər hər variant ayrıca sayıldığı üçün şişirdilmişdi: 462M → 60M).
+- **Düzəldilmiş rəqəmlər:** `cloudflare-ai` 122M → **30M** (real 10k Neyron/gün), `doubao` birdəfəlik qeydiyyat krediti kimi yenidən təsnif edilib (təkrarlanan deyil), `llm7` 4M → **150M** (sənəddə göstərilən 5M token/gün), `together` "-Free" endpoint-ləri dayandırılıb → $25 qeydiyyat krediti də silinib (minimum $5 alış tələb olunur, pulsuz sınaq yoxdur), `longcat` Preview bitdi + Flash modelləri çıxarıldı → yalnız **LongCat-2.0**, birdəfəlik **10M**-token qeydiyyat krediti kimi yenidən təsnif edilib (KYC ilə məhdudlaşdırılıb, təkrarlanan deyil).
+- **Poolside-un birbaşa inferensi dayanır (2026-10-20-də yoxlanılıb):** [rəsmi platforma](https://platform.poolside.ai/) **2026-10-31**-də bağlanacağını elan edir və istifadəçiləri öz-hostinq üçün modellərini Hugging Face-dən yükləməyə yönləndirir. Birbaşa `poolside` provayderi bu xəbərdarlığı daşıyır. Əl ilə hazırlanan pulsuz kataloqda birbaşa Poolside qeydləri yoxdur; onun Poolside adlı qeydləri `kilo-gateway`-ə aiddir. Bu elan Kilo, Cline, NVIDIA və ya digər gateway-lər tərəfindən təqdim edilən modellərin mövcudluğunu təsdiq etmir, ona görə də həmin siyahılar bu əsasla ləğv edilmir.
+- **Kəşf edilən yeni pulsuz provayderlər:** ⭐ **Kilo Code** (`kilo-gateway` — dövri dəyişən "Auto Free" dəsti: NVIDIA Nemotron 3 ailəsi, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — dövri dəyişən 10 pulsuz kodlaşdırma modeli, 2026-10-20-də yenilənib), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash daimi pulsuz + 20M qeydiyyat bonusu) və `arcee-ai` Trinity Large Preview.
+- **Yeni dürüst səviyyələr** (Metodologiyaya baxın): _daimi-pulsuz-lakin-məhdudiyyətsiz_ kateqoriyası (real təkrarlanan giriş, sayılacaq token limiti yoxdur) və _depozitlə açılan artım_ (OpenRouter $10 → +24M/ay), hər ikisi **ayrıca** göstərilir ki, əsas rəqəmi heç vaxt şişirtməsinlər.
 
-> Aşağıdakı ətraflı provayder cədvəli **2026-06-05 anlıq görüntüsüdür**; yuxarıdakı fərqlər onu əvəz edir. Canlı, kanonik mənbə model üzrə kataloq `open-sse/config/freeModelCatalog.ts` faylıdır.
-
----
-
-## İki rejim — sayma və qərar vermə
-
-OmniRoute "pulsuzdurmu?" sualına qəsdən fərqli mənbələri oxuyan iki rejim vasitəsilə cavab verir:
-
-| Rejim                | Həqiqət mənbəyi                                                                                                                                                                         | Səthlər                                                                                                                                            |
-| :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sayma / göstərmə** | Həll edilmiş kataloq — Radar axını (`getRadarCatalog`) ilə üst-üstə düşən göndərilmiş baza                                                                                              | Pulsuz səviyyə cəmləri, büdcə kartı, idarəetmə panelləri                                                                                           |
-| **Qərar vermə**      | Yalnız göndərilmiş kataloq (`open-sse/config/freeModelCatalog.data.ts` faylında `FREE_MODEL_BUDGETS`) üstəgəl yerli heuristikalar (`:free` şəkilçisi, sıfır qiymət, `grantsFreeAccess`) | `src/shared/utils/freeModels.ts` faylının hər bir istehlakçısı: model idxalı, `auto/*` marşrutlaşdırması, `GET /v1/models` və brauzer önizləmələri |
-
-Axın mövcud olduqda sayma yaxşılaşdırıla bilər. Qərar vermə buraxılış artefaktında qalır, buna görə də cavab brauzerdə və serverdə eynidir, oflayn təkrarlana bilər və verilənlər bazası olmadan sınaqdan keçirilə bilər. Brauzer önizləməsinin bir mənbəyi oxumasına, server idxalının isə başqa bir mənbəyi oxumasına icazə vermək, klikləndikdə baş verənlərlə razılaşmayan bir önizləmə yaradacaq — bu ayrılıq qəsdən saxlanılır.
-
-## Metodologiya və qeydlər
-
-- Rəqəmlər veb araşdırması vasitəsilə toplanmış, hər bir provayderin **2026-06-17** tarixinə sənədləşdirilmiş pulsuz səviyyə limitlərinə əsaslanan **yuxarı hədd təxminləridir**. Pulsuz səviyyələr daim dəyişir — hər hansı rəqəmə güvənməzdən əvvəl onu yenidən yoxlayın.
-- **Hər bir qeydin əslində nəyə zəmanət verdiyi.** Heç bir qeydin sətir üzrə etibarlılıq reytinqi yoxdur və API də belə reytinq təqdim etmir — yuxarıdakı hər bir rəqəmi eyni, açıqlanmamış keyfiyyət səviyyəsinə malik təxmin kimi qəbul edin. İki fakt fərqlidir, çünki onlar nəticə çıxarılmaq əvəzinə əl ilə seçilib: 44 qeyddə müstəqil şəkildə sənədləşdirilmiş sərt dayandırma mövcuddur (onlardan 39-u eyni gündəlik limiti paylaşan xKiro sətirləridir), 13 qeyddə isə sorğuların təlim üçün istifadəsi barədə açıqlama var. `hardStopGuaranteed` yalnız provayderin öz şərtlərində pulsuz limitin aşılmasının sizdən xəbərsiz ödəniş tutulmasına başlanması əvəzinə sorğunun rədd edilməsinə səbəb olduğu bildirildikdə təyin edilir və mənbə qeydin yanındakı şərhdə göstərilir; bu parametr heç vaxt standart olaraq `true` təyin edilmir və heç kimin yoxlamadığı qeyddə təyin edilməmiş qalır. Buna görə də sərt dayandırma bayrağının olmaması «ödəniş tutulduğu məlumdur» deyil, «müəyyən edilməyib» deməkdir. **STRICT rejimi** (seçim əsasında aktivləşdirilən `freeAccessPolicy=strict` marşrutlaşdırma qoruyucusu) yalnız bu bayrağı daşıyan qeydlərə etibar edir; bütün digər pulsuz səviyyələr `no-hard-stop` kimi istisna edilir (bax: `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Qoruyucu hovuzu filtrlədikdə, operatorun görə bildiyi jurnalda həm istisnaların sayı, həm də onların `no-hard-stop` payı göstərilir.
-- `estMonthlyFreeTokens` = yalnız hər ay yenilənən tokenlər. **Qeydiyyat zamanı verilən birdəfəlik kreditlər yenilənmir** və 0 kimi hesablanır. Dayandırılmış səviyyələr də 0-dır.
-- Gündəlik token limiti → `monthly = daily × 30`. Yalnız RPD sənədləşdirilibsə → `RPD × ~800 çıxış tokeni × 30`. Yalnız RPM/TPM varsa (gündəlik limit yoxdursa) → **limitsiz** (aşağıya baxın).
-- **Daimi pulsuzdur, lakin dərc edilmiş token limiti yoxdur** (`siliconflow`, `glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): bunlar sürət/paralellik ilə məhdudlaşdırılan, real və müntəzəm pulsuz giriş imkanlarıdır. Onları `recurring-uncapped` kimi təsnif edir və **heç vaxt cəmləmirik** — `RPM × 24/7 × 30d` hesablaması qeyri-real yuxarı hədd yaradardı (rədd etdiyimiz şişirtmə məhz budur). Onlar mövcud olduqlarını bilməyiniz üçün siyahıya daxil edilib.
-- **Depozitlə açılan artım:** pulsuz kvotanı daimi olaraq artıran kiçik, birdəfəlik balans artırımı (OpenRouter: $10 → gündə 1000 sorğu ≈ ayda +24M). Ayrı rəqəm kimi bildirilir və sabit əsas göstəriciyə daxil edilmir.
-- **Uyğunluq şərtli kvotalar** (`eligibilityGate: "regional-identity"`): yalnız regionla bağlı şəxsiyyət yoxlamasından sonra açılan real, müntəzəm kvota (hazırda materik Çində həqiqi adla doğrulama). Eyni hovuz-dedublikasiya qaydası ilə ayrıca rəqəmə (`gatedRecurringTokens`) daxil edilir, lakin heç vaxt sabit əsas göstəriciyə daxil edilmir. Rejim (`freeType`) dəyişmədiyindən marşrutlaşdırma da dəyişmir.
-- **Sübut sinifləri.** Qayda belədir: kataloqdakı rəqəmin mənbəyi qeydin yanındakı `// evidence:` şərhində göstərilir — `public-page` (hər kəsin oxuya bildiyi provayder səhifəsi), `api-public` (provayderin autentifikasiya tələb etməyən son nöqtəsi, məsələn, NaraRouter-in router.bynara.id ünvanındakı ictimai planlar son nöqtəsi) və ya `console-verified <date> por <who>` (rəqəm yalnız hesab konsolunda görünür; şərhdə onu kimin və nə zaman gördüyü, həmçinin limitin mövcud olduğunu bildirən ictimai səhifə qeydə alınır). Hazırkı vəziyyət: 2026-09-02 tarixində yenidən audit edilmiş beş blokda bu məlumat var (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); 2026-09-02 tarixli yenidən auditdən əvvəl yaradılmış qeydlər yenilənənədək əvvəlki araşdırmanı miras alır; sübut şərhi olmayan hər hansı **yeni və ya dəyişdirilmiş** rəqəm xətadır. Hazırda yalnız `mistral` konsolda yoxlanılıb.
+> Aşağıdakı ətraflı provayder-cədvəli **2026-06-05 snapshot-ıdır**; yuxarıdakı dəyişikliklər onu əvəz edir. Aktual, kanonik mənbə model-üzrə kataloq `open-sse/config/freeModelCatalog.ts` faylıdır.
 
 ---
 
-## Niyə bizim rəqəmimiz digər aqreqatorlardan daha kiçikdir
+## 2026-10-18 SiliconFlow pulsuz model düzəlişi (#17028)
 
-Bu sahədəki əksər "aylıq pulsuz tokenlər" rəqəmləri model başına etiketlərin cəmidir. Bizimki isə qəsdən belə deyil:
+Dərc edilmiş müsbət token qiymətlərinə malik on SiliconFlow flaqman modeli səhvən
+`recurring-uncapped` pulsuz giriş kimi təqdim edilmişdi. Həmin on sətir indi
+statik kataloqdan **silinib** və kataloqda hazırda **467 qeyd** var. SiliconFlow artıq
+statik ümumi göstəricilərə qeyd-şərtsiz pulsuz model sətri və ya daimi pulsuz provayder əlavə etmir.
 
-- **Hər bir paylaşılan hovuz bir dəfə sayılır.** Mistral-ın pulsuz planı təşkilat başına ayda bir 1B icazədir; onu beş model altında qeyd etmək 5B etmir. Model başına cəmləndikdə, öz kataloqumuz **~7.4B** olardı (2026-09-03 tarixində yenidən hesablanıb; bu rəqəm CI-gated deyil — kataloq dəyişdikdə yenidən ölçün) — başlıqda **~1.47B** yazılır, çünki hər bir provayderin bir hesabı əslində bu qədər xərcləyə bilər.
-- **Gündəlik limitlər çevrilir, dərəcələr isə yox.** Sənədləşdirilmiş tokens/gün limiti `× 30` olur; sənədləşdirilmiş requests/gün limiti `RPD × ~800 tokens × 30` olur; yalnız dəqiqə başına sorğu yayımlayan provayderin aylıq rəqəmi **yoxdur** və _limitsiz_ kimi qeyd olunur, heç vaxt cəmlənmir. Limit dərəcəsini 24/7-yə vurmaq bizim rədd etdiyimiz inflyasiyadır.
-- **Regional identifikasiya yoxlamasının arxasında olan kvotalar ayrı göstərilir** (`+~6M behind regional identity verification`), çünki əksər oxucular onlardan istifadə edə bilməz.
-- **Qeydiyyat kreditləri yalnız ilk ay üçündür** və sabit rəqəmə qarışdırılmadan ikinci bir rəqəm kimi bildirilir.
-- **Rəqəm CI tərəfindən tətbiq edilir.** `npm run check:docs-counts` kataloqdan ümumi məbləğləri yenidən hesablayır və bu fayl, README və ya büdcə kartı onlardan fərqləndikdə quruluşu uğursuz edir.
+Bu, SiliconFlow-un pulsuz modellərinin olmadığı demək **deyil**. Yalnız pulsuz modellərin idxalı və Free nişanı
+indi **provayderin canlı model məlumatlarında hər model üzrə müsbət sübut** tələb edir; məsələn,
+açıq şəkildə göstərilən məntiqi pulsuzluq işarəsi və ya hər iki token qiymətinin sıfır olması. Açıq ödənişli işarəsi və ya istənilən
+müsbət ədədi qiymət optimist pulsuzluq işarəsindən üstün tutulur. Əlçatan canlı sübutu olmayan model
+pulsuz **hesab edilmir**; yeni hesab üçün birdəfəlik kredit təkrarlanan pulsuz ayrılmanı
+təsdiqləyə bilməz. Cari provayder API-si model səviyyəsində etibarlı
+qiymətləndirmə məlumatı təqdim edə bilmirsə, yönləndirmədən əvvəl bunu provayder konsolunda təsdiqləyin. Bu konservativ
+yanaşma yalnız pulsuz modellərin idxalı və avtomatik kombinasiyalar vasitəsilə gözlənilməz ödənişlərin qarşısını alır.
 
----
-
-## Xidmət Şərtləri diqqət cədvəli
-
-> **Xidmət Şərtləri bayrağı məsləhət xarakterlidir, marşrutlaşdırma qapısı deyil.** `tos` ilə işarələnmiş provayderlər marşrutlaşdırmaya və kombinasiya/ehtiyat rejiminə standart olaraq daxil edilir; bayraq yalnız `/dashboard/free-tiers` və `/api/free-tier/summary` səhifələrində görünür. `excludeTosAvoid` sorğu parametri yalnız xülasə görünüşünə təsir edir, qlobal marşrutlaşdırmaya yox. Qərar `open-sse/config/freeTierCatalog.ts` faylında yerləşir (məlumat xarakterlidir, marşrutlaşdırma mühərrikləri tərəfindən oxunmur).
-
-> Hər bir provayderin öz-özünə host edilmiş, tək istifadəçili şəxsi proksi üçün şərtlərinin qısa icmalı. `caution` = yoxlamağa dəyər şəxsi istifadə və ya proksi bəndi; `ambiguous` = qeyri-müəyyən; `ok` = açıq şəkildə icazə verilir. Məlumat xarakterlidir, hüquqi məsləhət deyil — qərarı siz verirsiniz.
-
-### ⚠️ Diqqət — yoxlamağa dəyər şəxsi istifadə / proksi bəndləri (16)
-
-> Onların pulsuz girişi realdır və OmniRoute onlara marşrutlaşdıra bilər; aşağıdakı bəndləri bilmək sadəcə dəyərlidir. OAuth/keyless olanlar tokenlə ölçülə bilməz, buna görə də başlıq rəqəmində yoxdur (istifadəyə yararsız olduqları üçün deyil).
-
-| Provayder        | Qeyd                                                                                                                                                                                                               |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `agy`            | Google Antigravity Xidmət Şərtləri OAuth vasitəsilə xidmətə daxil olmaq üçün üçüncü tərəf proqram təminatı, alətlər və ya xidmətlərdən (proksilər daxil olmaqla) istifadəni açıq şəkildə qadağan edir; bunu etmək… |
-| `ai21`           | Xidmət Şərtləri §4.2/§8.2 API girişinin üçüncü tərəflərə sublicensing və ya paylanmasını qadağan edir; §3.3 sınaq/qiymətləndirmə məhsullarını "daxili qiymətləndirmə ilə" məhdudlaşdırır…                          |
-| `amazon-q`       | Məhsul yeni qeydiyyatlar üçün dayandırılıb; mövcud istifadəçilər idarə olunan xidmətlərin istifadəsini tənzimləyən AWS Müştəri Müqaviləsinə tabedirlər — öz-özünə host edilmiş pro…                                |
-| `blackbox`       | Xidmət Şərtləri sublicensing, yenidən satış, xidmətin üçüncü tərəflərə təqdim edilməsi və törəmə xidmətlərin qurulmasını açıq şəkildə qadağan edir — öz-özünə host edilmiş şəxsi…                                  |
-| `coze`           | Coze Xidmət Şərtləri istifadəni açıq şəkildə "şəxsi və qeyri-kommersiya məqsədləri üçün" məhdudlaşdırır və xidmətin icarəyə verilməsini, paylanmasını, sublicensing və ya yenidən satışını qadağan edir; a…        |
-| `duckduckgo-web` | Duck.ai Xidmət Şərtləri (duckduckgo.com/duckai/privacy-terms) "avtomatlaşdırılmış sorğu göndərməyi və AI xidmətləri inkişaf etdirməyi və ya təklif etməyi" və yan keçməyi açıq şəkildə qadağan edir…               |
-| `featherless-ai` | Fərdi planlar açıq şəkildə "alıcı tərəfindən interaktiv istifadə və ya prototipləşdirmə və eksperimentlər" ilə məhdudlaşdırılır — nəticənin yenidən satışı və proksi istifadəsi tələb olunur…                      |
-| `fireworks`      | Xidmət Şərtləri proksi/vasitəçi istifadəsini, API açarlarının ötürülməsini və sublicensing-i açıq şəkildə qadağan edir (Bölmələr 2.1 və 2.2(i)(j)); öz-özünə host edilmiş şəxsi proksilər yoxdur…                  |
-| `friendliai`     | Xidmət Şərtləri Bölmə 8(e) və 8(f) FriendliAI-dan proksi kimi istifadəni və ya üçüncü tərəfə müstəqil əsasda girişə icazə verilməsini açıq şəkildə qadağan edir və yenidən satışı qadağan edir/…                   |
-| `iflytek`        | iFlytek Spark LLM Xidmət Müqaviləsinin 2.4(3) Bölməsi "məlumat və ya çıxış əldə etmək üçün hər hansı avtomatlaşdırılmış və ya proqramlaşdırılmış metodlardan istifadəni" açıq şəkildə qadağan edir…                |
-| `kiro`           | Kiro FAQ "OpenClaw və üçüncü tərəf qoşqularından istifadə edən oxşar alətlərlə" istifadəni açıq şəkildə qadağan edir — öz-özünə host edilmiş AI proksi (OmniRoute kimi) marşrutlaşdırır…                           |
-| `modal`          | Xidmət Şərtləri Bölmə 1.3 "xidməti icarəyə vermək, yenidən satmaq və ya hər hansı üçüncü tərəfə birbaşa girişə və ya istifadəyə icazə vermək"i açıq şəkildə qadağan edir — öz-özünə host edilmiş qurmaq…           |
-| `muse-spark-web` | Meta Xidmət Şərtləri əvvəlcədən icazə olmadan avtomatlaşdırılmış girişi, yazılı icazə olmadan əks mühəndisliyi və texnologiyaları yan keçməyi açıq şəkildə qadağan edir…                                           |
-| `nlpcloud`       | Xidmət Şərtləri "başqalarına onun vasitəsilə Xidmətə daxil olmağa imkan verən proksi və ya digər cihaz qurmağı" açıq şəkildə qadağan edir və yalnız ötürülməyən…                                                   |
-| `opencode`       | Xidmət Şərtləri (Anomaly Innovations, Inc.) istifadəni açıq şəkildə "öz daxili istifadəniz üçün, üçüncü tərəfin adından və ya xeyrinə deyil" məhdudlaşdırır — açıq…                                                |
-| `t3-web`         | Xidmət Şərtləri hesabları açıq şəkildə yalnız şəxsi istifadə ilə məhdudlaşdırır, üçüncü tərəflərlə etimadnamə mübadiləsini qadağan edir və avtomatlaşdırılmış/bot/skrapinq girişini qadağan edir — a s…            |
-
-### ✅ Ümumiyyətlə icazə verən — diqqət / qeyri-müəyyən / ok (qalanları)
-
-| Provider         | ToS       | Note                                                                                                                                                                                                     |
-| ---------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `aimlapi`        | ambiguous | Xidmət Şərtləri qeyri-eksklüziv istifadə lisenziyası verir, lakin öz-özünə host edilmiş proksi və ya təkrar satışı açıq şəkildə icazə vermir və ya qadağan etmir; "şəxsi..." yoxdur.                     |
-| `baichuan`       | ambiguous | Açıq şəkildə əlçatan sənədlərdə öz-özünə host edilmiş şəxsi proksilərə dair açıq qadağa tapılmadı; lakin, M3 Plus pulsuz planı...                                                                        |
-| `bluesminds`     | ambiguous | Öz-özünə host edilmiş proksi və ya təkrar satışla bağlı açıq Xidmət Şərtləri bəndləri tapılmadı; qiymət səhifəsi xüsusiyyət/sürət limitlərinə fokuslanır...                                              |
-| `bytez`          | ambiguous | Açıq Xidmət Şərtləri səhifəsi əlçatan deyildi (404); sənədlərdə ictimai qiymətləndirmə-yalnız və ya proksi-yox bəndləri tapılmadı, lakin platforma...                                                    |
-| `doubao`         | ambiguous | Açıq şəkildə indekslənmiş sənədlərdə açıq proksi/təkrar satış qadağası tapılmadı; Volcengine tərtibatçı yönümlü bulud...                                                                                 |
-| `gitlawb-gmi`    | ambiguous | Öz-özünə host edilmiş şəxsi proksi istifadəsini qadağan edən açıq Xidmət Şərtləri bəndi tapılmadı; pulsuz Nemotron modeli NVIDIA imtina bəyanatı daşıyır...                                              |
-| `monsterapi`     | ambiguous | MonsterAPI-nin Xidmət Şərtləri səhifəsi (monsterapi.ai/terms-of-service) araşdırma zamanı əlçatan deyildi; xüsusi proksi/təkrar satış/şəxsi... yoxdur.                                                   |
-| `nous-research`  | ambiguous | Nous Portal özü bir aqreqator/proksi xidmətidir; onu başqa bir öz-özünə host edilmiş proksi üçün arxa tərəf kimi istifadə etmək proksi-... yaradır.                                                      |
-| `ollama-cloud`   | ambiguous | Xidmət Şərtləri xidmətdən "rəqabət aparan məhsullar inkişaf etdirmək" üçün istifadəni qadağan edir, lakin öz-özünə host edilmiş şəxsi proksilərə açıq qadağa yoxdur...                                   |
-| `stepfun`        | ambiguous | Öz-özünə host edilmiş şəxsi proksiyə dair açıq qadağa tapılmadı, lakin Step Plan Xidmət Şərtləri müəyyən kodlardan istifadə edən tərtibatçıları hədəf alır...                                            |
-| `api-airforce`   | caution   | Xidmət Şərtləri açıq şəkildə "icazəsiz rəqabət aparan xidmətlər qurmağı" və "etimadnamə paylaşımını" qadağan edir — öz-özünə host edilmiş şəxsi...                                                       |
-| `arcee-ai`       | caution   | Pulsuz giriş OpenRouter-in :free marşrutlaşdırma qatı vasitəsilədir (Arcee-nin birbaşa API şərtləri deyil); OpenRouter Xidmət Şərtləri şəxsi inkişafa icazə verir...                                     |
-| `baidu`          | caution   | Xidmət Şərtləri proksi/təkrar satış bəndləri üçün açıq şəkildə nəzərdən keçirilməyib, lakin platforma real adla autentifikasiya tələb edir (tipik olaraq Çin şəxsiyyət vəsiqəsi)...                      |
-| `baseten`        | caution   | Xidmət Şərtləri istifadəni "Müştərinin daxili iş məqsədləri" ilə məhdudlaşdırır və açıq şəkildə alt-lisenziyalaşdırmağı, təkrar satmağı və ya icazə verməyi qadağan edir...                              |
-| `bazaarlink`     | caution   | Xidmət Şərtləri API açarlarını üçüncü tərəflərə təkrar satmağı və ya alt-lisenziyalaşdırmağı açıq şəkildə qadağan edir; şəxsi üçün öz-özünə host edilmiş şəxsi proksi...                                 |
-| `brave-search`   | caution   | Xidmət Şərtləri axtarış nəticələrinin yenidən paylanmasını, təkrar satışını və alt-lisenziyalaşdırılmasını qadağan edir; API-dən "təkrarlamaq və ya təkrarlamağa cəhd etmək" üçün istifadə...            |
-| `byteplus`       | caution   | Tokenlər köçürülə bilməz və yalnız tək hesaba aiddir; açıq proksi qadağası yoxdur, lakin BytePlus hüququnu özündə saxlayır...                                                                            |
-| `cerebras`       | caution   | Xidmət Şərtləri şəxsi və ya işgüzar istifadə üçün qeyri-eksklüziv, köçürülə bilməyən, alt-lisenziyalaşdırıla bilməyən hüquq verir; təkrar satışı, alt-lisenziyalaşdırmanı qadağan edir...                |
-| `cloudflare-ai`  | caution   | Cloudflare Self-Serve Xidmət Şərtləri §2.2.1(j) Xidmətlərdən "virtual şəxsi şəbəkə və ya digər oxşar proqram təmin etmək" üçün istifadəni qadağan edir...                                                |
-| `cohere`         | caution   | Cohere sınaq açarlarını "istehsal və ya kommersiya məqsədləri" üçün açıq şəkildə qadağan edir; öz-özünə host edilmiş şəxsi proksi marşrutlaşdırması...                                                   |
-| `deepinfra`      | caution   | Xidmət Şərtləri qanuni kommersiya istifadəsinə geniş şəkildə icazə verir, lakin "birbaşa və ya dolayısı ilə şirkətin hər hansı bir işi ilə rəqabət aparan" istifadəni qadağan edir...                    |
-| `deepseek`       | caution   | Açıq Platforma Xidmət Şərtləri (2026-04-29 tarixindən etibarən qüvvədədir) "törəmə məhsul inkişafı" və şəxsi/kommersiya daxil olmaqla geniş istifadəyə icazə verir...                                    |
-| `dify`           | caution   | Öz-özünə host edilmiş tək istifadəçili şəxsi proksi dəyişdirilmiş Apache 2.0 lisenziyası altında icazəlidir; lakin, çox-kirayəçi yerləşdirmə...                                                          |
-| `exa-search`     | caution   | Açıq "proksi yoxdur" və ya "yalnız qiymətləndirmə" bəndləri tapılmadı; Exa aktiv şəkildə API-yə icazə verən təkrar satıcı tərəfdaş proqramı təklif edir...                                               |
-| `firecrawl`      | caution   | Bulud API Xidmət Şərtlərində açıq şəxsi-proksi qadağası tapılmadı, lakin açıq mənbəli öz-özünə host edilmiş versiya AGPL-3.0-dır (yenidən...                                                             |
-| `gemini`         | caution   | Xidmət Şərtləri açıq şəkildə bildirir ki, pulsuz səviyyə "peşəkar və ya işgüzar məqsədlər üçün Google AI modelləri ilə quran tərtibatçılar" üçündür...                                                   |
-| `groq`           | caution   | Xidmətlər Müqaviləsi §6.3 API girişinin təkrar satışını, alt-lisenziyalaşdırılmasını və ya paylanmasını qadağan edir; §3.2 hesabların təkrar satışını/icarəyə verilməsini qadağan edir...                |
-| `huggingchat`    | caution   | Hugging Face Xidmət Şərtləri şəxsi öz-özünə host edilmiş proksiləri açıq şəkildə qadağan etmir, lakin əlavə şərtlər (istinad edilmiş, lakin tam deyil)...                                                |
-| `huggingface`    | caution   | Xidmət Şərtləri xidmətə daxil olmaq/istifadə etmək üçün məhdud lisenziya verir; sənəd tək istifadəçili... açıq şəkildə icazə vermir və ya qadağan etmir.                                                 |
-| `hyperbolic`     | caution   | Xidmət Şərtləri API girişini "yalnız öz şəxsi və ya daxili iş məqsədləriniz üçün" verir və açıq şəkildə lisenziyalaşdırmağı qadağan edir...                                                              |
-| `inference-net`  | caution   | Xidmət Şərtləri açıq şəkildə "alt-lisenziyalaşdırmağı, təkrar satmağı, paylamağı" və yazılı razılıq olmadan API açarlarını köçürməyi qadağan edir; tək istifadəçili...                                   |
-| `jina-ai`        | caution   | Pulsuz 10M token açıq şəkildə qeyri-kommersiyadır (CC-BY-NC 4.0 model lisenziyası); şəxsi LLM üçün tək istifadəçili şəxsi proksi...                                                                      |
-| `jina-reader`    | caution   | Xidmət Şərtləri çıxışlardan rəqabət aparan xidmətlər qurmaq üçün istifadəni qadağan edir və "skrapinq vasitəsilə məlumat çıxarmaq üçün avtomatlaşdırılmış metodları" qadağan edir...                     |
-| `llm7`           | caution   | Xidmət Şərtləri xidməti "eksperimentasiya, inkişaf və tədqiqat" üçün təqdim edir; öz-özünə host edilmiş şəxsi proksilərə açıq qadağa yoxdur...                                                           |
-| `longcat`        | caution   | API Platform Xidmət Müqaviləsi (longcat.chat/platform/private/) kommersiya inteqrasiyasına və öz-özünə host edilmiş tətbiqlərə icazə verir...                                                            |
-| `mistral`        | caution   | İstehlakçı Xidmət Şərtləri açıq şəkildə bildirir ki, API-lər yalnız "şəxsi ehtiyaclar" üçün istifadə edilə bilər və API açarlarını üçüncü tərəflərə təqdim etməyi qadağan edir...                        |
-| `morph`          | caution   | Xidmətlər Şərtləri ümumiyyətlə kommersiya istifadəyə icazə verir; öz-özünə yerləşdirilən proksi yerləşdirmələri satışlarla açıq razılaşma tələb edir. Bölmə 18.…                                         |
-| `nebius`         | caution   | Xidmətlər Şərtləri (Bölmə 5f) xidmətin yenidən satışını, yenidən paylanmasını və ya "müstəqil əsasda" təklif edilməsini açıq şəkildə qadağan edir — öz-özünə…                                            |
-| `nomic`          | caution   | Xidmətlər Şərtləri qeyri-eksklüziv, ötürülməyən API lisenziyası verir; Bölmə 6.b rəqabətli xidmət qurmağı qadağan edir. İstifadəsi…                                                                      |
-| `novita`         | caution   | Xidmətlər Şərtləri yenidən satışı və rəqabətli xidmətləri qadağan edir, lakin şəxsi öz-özünə yerləşdirilən proksiləri açıq şəkildə qeyd etmir; şəxsi istifadə…                                           |
-| `nscale`         | caution   | AUP "Nscale Platformunun bütün hissələrini və ya hər hansı bir hissəsini kopyalamaq, dəyişdirmək, dublikat etmək... çərçivəyə salmaq, əks etdirmək, yenidən nəşr etmək... paylamaq" qadağan edir…        |
-| `nvidia`         | caution   | Pulsuz səviyyə yalnız prototipləşdirmə/inkişaf/tədqiqat/qiymətləndirmə üçündür — istehsal istifadəsi (real son istifadəçilərə xidmət etmək) tələb edir…                                                  |
-| `openrouter`     | caution   | Xidmətlər Şərtləri API girişinin yenidən satışını və ya rəqabətli xidmətin inkişafını açıq şəkildə qadağan edir; tək istifadəçili öz-özünə yerləşdirilən şəxsi proksi…                                   |
-| `pollinations`   | caution   | API sənədlərində qeyd olunan MIT Lisenziyası sərbəst təkrar istifadəni təklif edir; öz-özünə yerləşdirilən proksi istifadəsinə açıq qadağa tapılmadı. Lakin, istifadəsi…                                 |
-| `predibase`      | caution   | Predibase müəssisə səviyyəli incə tənzimləmə/xidmət platforması kimi yerləşdirilib; pulsuz sınaq yalnız kəşfiyyat üçündür və…                                                                            |
-| `publicai`       | caution   | Xidmətlər Şərtləri (publicai.co/tc) xidmətləri "əsasən tədqiqat və təhsil məqsədləri üçün" təyin edir; açıq proksi və ya yenidən satış qadağası yoxdur…                                                  |
-| `qoder`          | caution   | Xidmətlər Şərtləri səhifəsi oxunaqlı məzmun qaytarmadı; Qoder bir kodlaşdırma IDE müştərisidir (ictimai API deyil) və üçüncü tərəf proksi qablaşdırıcıları…                                              |
-| `reka`           | caution   | Biznes Şərtləri üçüncü tərəflərə sub-lisenziya verməyi və ya girişi paylamağı qadağan edir; şəxsi tək istifadəçili proksi ehtimal ki…                                                                    |
-| `sambanova`      | caution   | Xidmətlər Şərtləri Bölmə 1.5(c) xidmətin yenidən satışını, sub-lisenziya verilməsini və ya üçüncü tərəflərə təqdim edilməsini açıq şəkildə qadağan edir; bir…                                            |
-| `sensenova`      | caution   | Nəzərdən keçirilmiş Xidmətlər Şərtlərində açıq proksi və ya yenidən satış qadağası tapılmadı, lakin pulsuz səviyyə SLA olmayan promosyon beta versiyasıdır, Sen…                                         |
-| `serper-search`  | caution   | Xidmətlər Şərtləri "heç bir əlavə dəyər olmadan materialları başqa serverdə olduğu kimi əks etdirməyi" açıq şəkildə qadağan edir — sadə bir keçid pro…                                                   |
-| `siliconflow`    | caution   | Xidmətlər Şərtləri (Maddə 3.4(e)(f)(p)) xidmətin hər hansı üçüncü tərəfə təqdim edilməsini, yenidən satışını/sub-lisenziya verilməsini açıq şəkildə qadağan edir,…                                       |
-| `sparkdesk`      | caution   | SparkDesk İstifadəçi Müqaviləsi yalnız şəxsi, qeyri-kommersiya istifadə hüquqları verir; API İnterfeys Siyasəti avtomatlaşdırılmış məlumatları qadağan edir…                                             |
-| `tavily-search`  | caution   | Xidmətlər Şərtləri açıq şəkildə bildirir ki, API "ötürülə, təyin edilə, paylaşıla və ya başqa şəkildə hər hansı üçüncü tərəfə təqdim edilə bilməz…                                                       |
-| `tencent`        | caution   | Tencent Cloud Xidmətlər Şərtləri API girişinin sub-lisenziya verilməsini və ya yenidən satışını açıq şəkildə qadağan edir; şəxsi istifadə üçün öz-özünə yerləşdirilən şəxsi proksi…                      |
-| `together`       | caution   | Xidmətlər Şərtləri Bölmə 4.3(d) Xidmətlərin ötürülməsini, paylanmasını, yenidən satışını, icarəyə verilməsini və ya təklif edilməsini açıq şəkildə qadağan edir…                                         |
-| `uncloseai`      | caution   | Şəxsi proksi istifadəsi mümkündür, lakin açıq şəkildə icazə verilmir; Xidmətlər Şərtləri "rəqabətli maşın öyrənmə xidmətləri" qurmağı qadağan edir…                                                      |
-| `veoaifree-web`  | caution   | Xidmətlər Şərtləri "qeyri-insani sürətlə" işləyən avtomatlaşdırılmış botları və ya skriptləri açıq şəkildə qadağan edir və platformanı kopyalayaraq yaratmağı qadağan edir…                              |
-| `vertex`         | caution   | Google Cloud Xidmət Şərtləri yenidən satışı yalnız səlahiyyətli dilerlərə məhdudlaşdırır (Bölmə 14 Diler Müqaviləsi tələb edir); bir…                                                                    |
-| `voyage-ai`      | caution   | Xidmətlər Şərtləri sayt məzmunu üçün "şəxsi, qeyri-kommersiya istifadəsi" verir və üçüncü tərəflərlə etimadnamə/hesab paylaşımını qadağan edir;…                                                         |
-| `xkiro`          | caution   | Xidmətlər Şərtləri (2026-07-30) xidmətin yenidən satışını/yenidən paylanmasını və yuxarı axın təminatçılarının şərtlərini pozmağı qadağan edir; şəxsi pro…                                               |
-| `360ai`          | unknown   | İnkişaf etdirici API üçün Xidmətlər Şərtləri qeydiyyat olmadan ictimaiyyətə açıq deyil; giriş tətbiqin təsdiqini tələb edir ki, bu da…                                                                   |
-| `chutes`         | unknown   | Xidmətlər Şərtləri səhifəsi chutes.ai/terms ünvanında mövcuddur, lakin məzmun fetch vasitəsilə əlçatan deyildi; nəzərdən keçirilmiş Xidmətlər Şərtlərində açıq proksi/yenidən satış maddələri tapılmadı… |
-| `freemodel-dev`  | unknown   | Xidmət Şərtləri səhifəsi (freemodel.dev/terms) WebFetch vasitəsilə yalnız başlıq qaytardı, oxunaqlı məzmun yox idi; heç bir maddə…                                                                       |
-| `gitlawb`        | unknown   | Xidmətlər Şərtləri və ya məqbul istifadə siyasəti tapılmadı; proksi/yenidən satış məhdudiyyətləri məlum deyil — öz-özünə yerləşdirilən proksi istifadəsi üçün ehtiyatlı olun.                            |
-| `liquid`         | unknown   | Proksi üçün yerləşdirilən API mövcud deyil; açıq mənbəli modelin kommersiya istifadəsi illik gəliri 10 milyon dollardan az olan təşkilatlar üçün pulsuzdur. Öz-özünə yerləşdirilən yoxdur…               |
-| `yi`             | unknown   | Xidmətlər Şərtləri giriş olmadan ictimaiyyətə açıq deyil; heç bir proksi/yenidən satış maddəsi nəzərdən keçirilə bilmədi. Öz-özünə yerləşdirilən şəxsi proksi istifadəsi hələ də…                        |
-| `comfyui`        | ok        | GPL-3.0 açıq mənbəli lisenziyası öz-özünə yerləşdirilən şəxsi proksi istifadəsinə açıq şəkildə icazə verir; Comfy Org Xidmətlər Şərtləri kommersiya istifadəsini təsdiqləyir…                            |
-| `scaleway`       | ok        | Scaleway-in Ümumi Xidmət Şərtləri öz-özünə yerləşdirilən proksi istifadəsinə açıq qadağa qoymayan standart kommersiya bulud müqaviləsidir…                                                               |
-| `sdwebui`        | ok        | AGPL-3.0 lisenziyası: istifadə həcminə məhdudiyyət qoymadan şəxsi istifadə üçün öz-özünə yerləşdirmək pulsuzdur; bu istifadə edərək şəxsi proksi…                                                        |
-| `searxng-search` | ok        | AGPL-3.0 açıq mənbəli lisenziyası istifadə növünə, yenidən satışa məhdudiyyət qoymadan öz-özünə yerləşdirilən şəxsi proksi istifadəsinə açıq şəkildə icazə verir…                                        |
+Aşağıdakı tarixi provayder cədvəli aktual əlçatanlıq vədi deyil. Onun əvvəlki
+SiliconFlow limitsiz/10-model qeydi müəyyən edilmiş təkrarlanan pulsuz ayrılmanı artıq
+təmsil etmədiyi üçün qəsdən daxil edilməyib.
 
 ---
 
-## Hər provayder üçün pulsuz səviyyə (yenidən yoxlanılmış sətirlər üçün 2026-09-02 tarixində yenilənib; digərləri üçün 2026-06-17 tarixində)
+## 2026-10-15 Bytez və Nous düzəlişi
 
-> Model kataloqundan (`open-sse/config/freeModelCatalog.ts`) yenidən yaradılıb, hovuzdan deduplikasiya edilib. Aylıq təkrarlanan sabit tokenlərə görə sıralanıb. `uncapped*` = daimi pulsuz, lakin dərc edilmiş token limiti yoxdur (sürət/eyni vaxtda məhdudlaşdırılmış) — real giriş, başlıqda **cəmlənməyib**. `—` = yalnız kredit / açarsız / tokenlə ölçülə bilməyən.
+[Bytez hesablaşması](https://docs.bytez.com/model-api/docs/billing) Free planında açıq modelləri
+7B parametrlə məhdudlaşdırır. 70B və 72B qeydləri satın alınmış kreditlə
+kiliddən çıxarılma tələb edir və silinib. Mistral-7B `recurring-credit` olaraq qalır: kreditlər
+hər dörd həftədən bir yenilənir, lakin hesablaşma hər inferensiya saniyəsinə görə aparılır və heç bir token
+limiti dərc edilməyib. Onun token sayğacları naməlum miqdarı göstərmək üçün sıfırdır
+və dəstəklənməyən 1M tokenlik təxmini əvəz edir; bu, pulsuz
+kreditlərin sıfır olması demək deyil. Nous dəyişiklikləri aşağıdakı provayder qeydində ətraflı izah edilir.
 
-| Provayder        | Pulsuz növü       | Sabit tokenlər/ay | İlk ay krediti | Xidmət Şərtləri | Modellər |
-| ---------------- | ----------------- | ----------------- | -------------- | --------------- | -------- |
-| `mistral`        | təkrarlanan       | ~1.00B            | —              | diqqət          | 5        |
-| `nara`           | təkrarlanan       | ~210M             | —              | diqqət          | 8        |
-| `llm7`           | təkrarlanan       | ~150M             | —              | diqqət          | 4        |
-| `xkiro`          | təkrarlanan       | ~150M             | —              | diqqət          | 39       |
-| `longcat`        | birdəfəlik        | —                 | 10M            | diqqət          | 1        |
-| `cerebras`       | birdəfəlik        | —                 | $5 kredit      | diqqət          | 2        |
-| `cloudflare-ai`  | təkrarlanan       | ~30M              | —              | diqqət          | 9        |
-| `groq`           | təkrarlanan       | ~30M              | —              | diqqət          | 5        |
-| `api-airforce`   | təkrarlanan       | ~24M              | —              | diqqət          | 7        |
-| `bluesminds`     | təkrarlanan       | ~7M               | —              | qeyri-müəyyən   | 22       |
-| `sambanova`      | təkrarlanan       | ~6M               | —              | diqqət          | 5        |
-| `arcee-ai`       | təkrarlanan       | ~5M               | —              | diqqət          | 1        |
-| `bazaarlink`     | təkrarlanan       | ~4M               | —              | diqqət          | 32       |
-| `openrouter`     | təkrarlanan       | ~1M               | —              | diqqət          | 1        |
-| `cohere`         | təkrarlanan       | ~800K             | —              | diqqət          | 6        |
-| `huggingchat`    | təkrarlanan       | ~500K             | —              | diqqət          | 4        |
-| `morph`          | təkrarlanan       | ~400K             | —              | ok              | 2        |
-| `huggingface`    | təkrarlanan       | ~200K             | —              | diqqət          | 6        |
-| `kiro`           | təkrarlanan       | ~25K              | —              | çəkinin         | 12       |
-| `glm-cn`         | məhdudiyyətsiz    | məhdudiyyətsiz\*  | ~20M           | ok              | 4        |
-| `baidu`          | məhdudiyyətsiz    | məhdudiyyətsiz\*  | —              | diqqət          | 1        |
-| `gemini`         | məhdudiyyətsiz    | məhdudiyyətsiz\*  | —              | diqqət          | 4        |
-| `kilo-gateway`   | məhdudiyyətsiz    | məhdudiyyətsiz\*  | —              | diqqət          | 7        |
-| `ollama-cloud`   | məhdudiyyətsiz    | məhdudiyyətsiz\*  | —              | qeyri-müəyyən   | 8        |
-| `opencode-zen`   | məhdudiyyətsiz    | məhdudiyyətsiz\*  | —              | diqqət          | 6        |
-| `siliconflow`    | məhdudiyyətsiz    | məhdudiyyətsiz\*  | —              | diqqət          | 10       |
-| `tencent`        | məhdudiyyətsiz    | məhdudiyyətsiz\*  | —              | diqqət          | 1        |
-| `vertex`         | qeydiyyat krediti | —                 | ~300M          | diqqət          | 10       |
-| `agentrouter`    | qeydiyyat krediti | —                 | ~200M          | diqqət          | 4        |
-| `predibase`      | qeydiyyat krediti | —                 | ~25M           | diqqət          | 1        |
-| `doubao`         | qeydiyyat krediti | —                 | ~15M           | qeyri-müəyyən   | 1        |
-| `ai21`           | qeydiyyat krediti | —                 | ~10M           | çəkinin         | 2        |
-| `deepseek`       | qeydiyyat krediti | —                 | ~5M            | ok              | 2        |
-| `hyperbolic`     | qeydiyyat krediti | —                 | ~5M            | ok              | 8        |
-| `nscale`         | qeydiyyat krediti | —                 | ~5M            | diqqət          | 6        |
-| `bytez`          | qeydiyyat krediti | —                 | ~1M            | qeyri-müəyyən   | 3        |
-| `deepinfra`      | qeydiyyat krediti | —                 | ~1M            | diqqət          | 22       |
-| `fireworks`      | qeydiyyat krediti | —                 | ~1M            | çəkinin         | 10       |
-| `nebius`         | qeydiyyat krediti | —                 | ~1M            | diqqət          | 1        |
-| `qoder`          | qeydiyyat krediti | —                 | ~1M            | diqqət          | 14       |
-| `scaleway`       | qeydiyyat krediti | —                 | ~1M            | ok              | 6        |
-| `novita`         | qeydiyyat krediti | —                 | ~500K          | diqqət          | 1        |
-| `agy`            | açarsız           | —                 | —              | çəkinin         | 16       |
-| `baichuan`       | açarsız           | —                 | —              | qeyri-müəyyən   | 1        |
-| `blackbox`       | açarsız           | —                 | —              | çəkinin         | 6        |
-| `coze`           | açarsız           | —                 | —              | çəkinin         | 1        |
-| `duckduckgo-web` | açarsız           | —                 | —              | çəkinin         | 6        |
-| `freemodel-dev`  | açarsız           | —                 | —              | naməlum         | 4        |
-| `friendliai`     | açarsız           | —                 | —              | çəkinin         | 2        |
-| `iflytek`        | açarsız           | —                 | —              | çəkinin         | 1        |
-| `inference-net`  | açarsız           | —                 | —              | diqqət          | 3        |
-| `liquid`         | açarsız           | —                 | —              | naməlum         | 1        |
-| `monsterapi`     | açarsız           | —                 | —              | qeyri-müəyyən   | 1        |
-| `muse-spark-web` | açarsız           | —                 | —              | çəkinin         | 3        |
-| `nlpcloud`       | açarsız           | —                 | —              | çəkinin         | 1        |
-| `nous-research`  | açarsız           | —                 | —              | qeyri-müəyyən   | 2        |
-| `nvidia`         | açarsız           | —                 | —              | diqqət          | 13       |
-| `opencode`       | açarsız           | —                 | —              | çəkinin         | 7        |
-| `pollinations`   | açarsız           | —                 | —              | diqqət          | 31       |
-| `publicai`       | keyless           | —                 | —              | caution         | 3        |
-| `reka`           | keyless           | —                 | —              | caution         | 2        |
-| `sensenova`      | keyless           | —                 | —              | caution         | 1        |
-| `sparkdesk`      | keyless           | —                 | —              | caution         | 1        |
-| `stepfun`        | keyless           | —                 | —              | ok              | 1        |
-| `t3-web`         | keyless           | —                 | —              | avoid           | 23       |
-| `uncloseai`      | keyless           | —                 | —              | caution         | 3        |
+## İki rejim — sayma və qərarvermə
+
+OmniRoute "bu pulsuzdurmu?" sualını qəsdən fərqli
+mənbələri oxuyan iki rejim vasitəsilə cavablandırır:
+
+| Rejim                | Həqiqət mənbəyi                                                                                                                                                                        | Tətbiq sahələri                                                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sayma / göstərmə** | Həll edilmiş kataloq — Radar axını (`getRadarCatalog`) ilə üst-üstə tətbiq olunan təchiz edilmiş baza versiyası                                                                        | Pulsuz səviyyə üzrə yekunlar, büdcə kartı, idarə panelləri                                                                                        |
+| **Qərarvermə**       | Yalnız təchiz edilmiş kataloq (`FREE_MODEL_BUDGETS` — `open-sse/config/freeModelCatalog.data.ts` daxilində) və yerli evristikalar (`:free` suffiksi, sıfır qiymət, `grantsFreeAccess`) | `src/shared/utils/freeModels.ts` faylının bütün istehlakçıları: model idxalı, `auto/*` marşrutlaşdırması, `GET /v1/models` və brauzer önbaxışları |
+
+Axın əlçatan olduqda sayma nəticələri təkmilləşə bilər. Qərarvermə isə
+buraxılış artefaktına əsaslanır, buna görə cavab brauzerdə və serverdə eynidir,
+oflayn rejimdə təkrarlana bilir və verilənlər bazası olmadan sınaqdan keçirilə bilir. Brauzer
+önbaxışının bir mənbəni, server idxalının isə başqa mənbəni oxumasına icazə vermək,
+klikdən sonra baş verənlərlə ziddiyyət təşkil edən önbaxış yaradardı — bu bölgü
+qəsdən saxlanılır.
+
+## Metodologiya və xəbərdarlıqlar
+
+- Nömrələrdir** yuxarı həddə olan təxminlər** hər bir provayderin sənədləşdirilmiş pulsuz səviyyə limitlərindən** 17-06-2026** , veb araşdırması ilə toplanmışdır. Pulsuz səviyyələr daim dəyişir — rəqəmə etibar etməzdən əvvəl yenidən yoxlayın.
+- **Bir giriş əslində nəyə zəmanət verir.** Heç bir giriş hər sətir üçün etibarlılıq reytinqi daşımır və API heç bir — xidmət etmir. Yuxarıdakı hər rəqəmi eyni, qeyd olunmamış keyfiyyətin təxmini kimi qəbul edin. İki fakt fərqlidir, çünki onlar nəticə çıxarmaq əvəzinə əl ilə tərtib edilir: 44 giriş müstəqil şəkildə sənədləşdirilmiş sərt dayanma nöqtəsini daşıyır (onlardan 39-u xKiro sətirləridir, hamısı bir gündəlik müavinəti bölüşür) və 21 giriş təcili təlim açıqlamasını daşıyır. `hardStopGuaranteed` yalnız provayderin öz şərtləri dedikdə təyin edilir ki, pulsuz müavinətin aşılması səssizcə sizə hesab verməyə başlamaq əvəzinə sorğunu rədd edir, mənbə girişin yanında şərhdə; o, heç vaxt `true`-ə defolt edilmir və heç kimin təsdiq etmədiyi giriş təyin olunmamış qalır. Belə ki, itkin sərt dayanma bayrağı "müəyyən edilməmiş" mənasını verir, "sizə ödəniş üçün məlum deyil".**STRICT rejimi** (seçilmiş `freeAccessPolicy=strict` marşrutlaşdırma qoruyucusu) yalnız bayrağı daşıyan qeydlərə etibar edir; hər bir digər pulsuz səviyyə `no-hard-stop` kimi xaric edilir (bax `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Mühafizəçi hovuzu süzgəcdən keçirdikdə, operator tərəfindən görünən jurnal həm istisnaların sayını, həm də onun `no-hard-stop` payını bildirir.
+- `estMonthlyFreeTokens` = yalnız təkrarlanan aylıq tokenlər.** Birdəfəlik qeydiyyat kreditləri təkrarlanmır** və 0 hesab edin. Dayandırılmış səviyyələr də 0-dır.
+- Gündəlik token qapağı → `monthly = daily × 30`. Yalnız RPD sənədləşdirilmiş → `RPD × ~800 output tokens × 30`. Yalnız RPM/TPM (gündəlik məhdudiyyət yoxdur) →** qapaqsız** (aşağıya bax).
+- **Daimi pulsuzdur, lakin dərc edilmiş nişan qapağı yoxdur** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): bunlar real təkrarlanan sərbəst girişdir, rate/concurrency-limited. Biz onları `recurring-uncapped` və təsnif edirik** onları heç vaxt cəmləmə** — çarpan `RPM × 24/7 × 30d` fantaziya tavanı (inflyasiyanı rədd etdiyimiz) yaradar. Onlar siyahıya salınıb ki, onların mövcud olduğunu biləsiniz.
+- **Depozitin kilidini açan sürət:** pulsuz kvotanı daimi olaraq artıran birdəfəlik kiçik əlavə (OpenRouter: $10 → 1000 req/day ≈ +24M/mo). Ayrı bir rəqəm olaraq bildirildi, sabit başlıq xaricində tutuldu.
+- **Uyğunluq qapalı kvotalar** (`eligibilityGate: "regional-identity"`): yalnız bölgəyə bağlı şəxsiyyət yoxlanışından sonra açılan real təkrarlanan kvota (bu gün materik-Çin real adın yoxlanılması). Eyni hovuz-dedupe qaydası ilə ayrı bir rəqəmə (`gatedRecurringTokens`) hesablanır, heç vaxt sabit başlığa daxil edilmir. Rejim (`freeType`) dəyişməz, ona görə də marşrutlaşdırma dəyişməzdir.
+- **Sübut sinifləri.** Qayda: kataloqdakı nömrə mənbəsini girişin yanındakı `// evidence:` şərhində göstərir — `public-page` (hər kəsin oxuya biləcəyi provayder səhifəsi), `api-public` (provayderin təsdiqlənməmiş son nöqtəsi, məsələn, NaraRouter-nin router.bynara.id saytındakı ictimai planlarının son nöqtəsi) və ya `console-verified <date> por <who>` (şərh yalnız onu görən və kimin görə biləcəyini görür) qapağın mövcud olduğunu bildirən ictimai səhifə). Bu gün dövlət: 2026-09-02 tarixində yenidən yoxlanılan beş blok onu daşıyır (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); 2026-09-02 təkrar auditdən əvvəl olan qeydlər onlara toxunana qədər əvvəlki tədqiqatı miras alır; hər hansı** yeni və ya dəyişdirilmiş** dəlil şərhi olmayan nömrə bir səhvdir. Bu gün yalnız `mistral` konsol tərəfindən təsdiqlənir.
 
 ---
 
-## OpenCode Free: müştəri-müqavilə məhdudiyyəti (#14313)
+## Niyə bizim rəqəmimiz digər aqreqatorlarınkından daha kiçikdir
 
-Açarsız `opencode` provayderi (ictimai `https://opencode.ai/zen/v1`) OpenCode müştəri müqaviləsinə uyğun gəlməyən istənilən sorğunu **403 `FreeTierError`** ilə və _"OpenCode-un pulsuz səviyyəsi yalnız OpenCode daxilindən istifadə edilə bilər"_ cümləsi ilə rədd edir. Bu, sorğuya əsaslanan bir rədddir (eyni sorğu forması üçün hər hesabda eyni qərar), model qadağası və ya əlaqənin soyuması deyil — OmniRoute bunu `project_route_error` olaraq təsnif edir, modelin kilidlənməsini / soyumasını atlayır və (sintetik `noauth` yolunda) qısa bir TTL üçün avtomatik-kombo yenidən seçimi dayandırır. Boş olmayan alət siyahısı, `stream: true` və OpenCode sessiya/UA başlıqları (`opencodeFreeTierContract.ts`) daşıyan sorğuları göndərin və ya 403 gözləyin.
+Bu sahədəki əksər "aylıq pulsuz token" göstəriciləri model üzrə etiketlərin cəmidir. Bizimki qəsdən belə deyil:
 
-## Göndərilmiş kataloqdan bəri nə dəyişdi (`freeNote`)
-
-> v3.8.0 dövrünə aid `freeNote` sətirləri köhnəlmişdir. Bu araşdırma nəticəsində tapılan düzəlişlər (bunlar `_tasks/features-v3.8.12` daxilində kataloq yeniləməsini təmin edir):
-
-- **`360ai`** — Göndərilən freeNote "Free 360 AI Brain models" köhnəlmiş görünür. Cari giriş tətbiq-qapalı və ödənişlidir. 2023-cü ilin buraxılış dövründəki promosyon tokenləri (100M–250M birdəfəlik) bunun əsası ola bilərdi…
-- **`agentrouter`** — Göndərilən freeNote-umuzda "Qeydiyyat zamanı 200 dollar pulsuz kredit" yazılıb. Cari reallıq göstərir ki, standart (referral olmayan) qeydiyyatlar yalnız 100 dollar alır; referral qeydiyyatları 200 dollar ala bilər, lakin 2026-cı ilin aprel ayından bir icma şərhi…
-- **`agy`** — Göndərilən freeNote-umuzda "(yoxdur)" yazılıb, bu da pulsuz səviyyənin olmadığını göstərir, lakin Antigravity-nin pulsuz OAuth-qapalı səviyyəsi var. Lakin, Xidmət Şərtləri bu pulsuz səviyyədən OmniRoute kimi bir proksi vasitəsilə istifadəni açıq şəkildə qadağan edir…
-- **`ai21`** — Sıxlaşdırıldı: sınaq müddəti "3 ay"dan 7 günə qədər azaldıldı. 10 dollarlıq kredit məbləği eyni qalır, lakin etibarlılıq ~90 gündən 7 günə qədər kəskin şəkildə azaldı.
-- **`aimlapi`** — Əhəmiyyətli dərəcədə dəyişdi. Göndərilən freeNote "$0.025/gün pulsuz kreditlər — 200+ model" reklam edirdi, lakin pulsuz səviyyə indi dayandırılıb/ləğv edilib. $0.025/gün kredit ayırması (50,000 kredit/gün, 10 sorğu/gün…
-- **`amazon-q`** — Göndərilən freeNote-umuzda "(yoxdur)" yazılıb — reallıq daha pisdir: məhsul yeni qeydiyyatlar üçün dayandırılıb (15 may 2026). Əvvəllər pulsuz səviyyə ayda 50 agent sorğusu + limitsiz daxili…
-- **`api-airforce`** — Kataloqda freeNote "(yoxdur)" yazılıb, lakin sənədləşdirilmiş pulsuz səviyyə mövcuddur: 1 RPM / 1,000 RPD təkrarlanan, hesab qeydiyyatı tələb olunur, əsas modellərlə məhdudlaşır.
-- **`arcee-ai`** — Göndərilən freeNote ("Free Trinity Large Thinking model (262K context)") qismən doğrudur — Trinity Large Thinking həqiqətən OpenRouter vasitəsilə 262K kontekstlə pulsuzdur — lakin qeyddə bunun…
-- **`baichuan`** — Göndərilən freeNote-umuzda "Pulsuz Baichuan modelləri" yazılıb, bu da davamlı pulsuz girişi nəzərdə tutur, lakin cari reallıq yalnız yeni istifadəçilər üçün birdəfəlik 80 CNY sınaq kreditidir (3 ay etibarlıdır). Daimi…
-- **`baidu`** — Kataloqda "Pulsuz ERNIE Speed/Lite modelləri" yazılıb, bu ümumiyyətlə doğrudur, lakin əhatə dairəsini azaldır: ERNIE-Tiny və bir neçə kontekst-pəncərə variantları (8K və 128K) da pulsuzdur. Pulsuz səviyyə görünür…
-- **`bazaarlink`** — Ümumiyyətlə uyğun gəlir — göndərilən freeNote sıfır xərcli nəticə üçün avtomatik:pulsuz marşrutlaşdırmanı dəqiq təsvir edir. Lakin, cari reallıq qeyd olunmayan açıq sürət limitlərini (10-20 RPM, ~150 RPD) ehtiva edir…
-- **`blackbox`** — Göndərilən freeNote-umuz "limitsiz əsas söhbət plus Minimax-M2.5" iddia edir. Reallıqda, limitsiz Minimax-M2.5 agent sorğuları ödənişli plan xüsusiyyətidir (Pro+), pulsuz səviyyənin bir hissəsi deyil. Pulsuz səviyyənin məhdudiyyətləri var…
-- **`bluesminds`** — Göndərilən freeNote-umuz "(yoxdur)" idi — lakin BluesMinds-in sənədləşdirilmiş pulsuz səviyyəsi var: 500 pi kredit, 20 RPM, 300 RPD, daimi pulsuz plan. Kataloq təklifi əhəmiyyətli dərəcədə azaldır.
-- **`brave-search`** — Kataloqda "(yoxdur)" qeyd olunur, bu da pulsuz səviyyənin izlənilmədiyini göstərir, lakin reallıqda 12 fevral 2026-cı ilə qədər ayda 5,000 sorğu pulsuz səviyyəsi (kart yoxdur) var idi, bu da o vaxtdan bəri ayda 5 dollarlıq…
-- **`byteplus`** — Kataloqumuzda "(yoxdur)" yazılıb, lakin BytePlus ModelArk-ın pulsuz səviyyəsi var: yeni hesablar üçün hər LLM modeli üçün birdəfəlik 500k token sınaq krediti. Kataloq bunu az bildirir.
-- **`cerebras`** — Kart tələb olunmayan 1M token/gün sınağı artıq yoxdur. Canlı cerebras.ai/pricing (2026-09-03) birdəfəlik 5 dollarlıq qeydiyyat kreditidir, ödəniş metodu tələb olunur, 30 gün etibarlıdır. `one-time-initial` (LongCat-şəkilli) olaraq yenidən təsnif edildi; `LEGACY_FREE_PROVIDERS` və təkrarlanan büdcədən çıxarıldı.
-- **`chutes`** — Göndərilən freeNote-da "Pulsuz səviyyə mövcuddur" yazılıb, lakin 15 mart 2026-cı il tarixindən etibarən pulsuz səviyyə rəsmi olaraq dayandırılıb. Kataloq qeydi köhnəlmişdir və pulsuz səviyyənin olmadığını əks etdirmək üçün yenilənməlidir…
-- **`coze`** — Göndərilən "Pulsuz ByteDance agent platforması" qeydi istiqamətli olaraq doğrudur, lakin pulsuz səviyyənin indi sıx kreditlə məhdudlaşdırıldığını (10 kredit/gün ≈ modeldən asılı olaraq 5–100 mesaj), bu məhdudiyyəti…
-- **`deepinfra`** — Göndərilən freeNote-umuzda "API sınaqları üçün pulsuz qeydiyyat kreditləri" yazılıb — bu köhnəlmiş görünür. Rəsmi qiymət səhifəsi indi ümumi pulsuz qeydiyyat krediti olmadan kart/əvvəlcədən ödəniş tələb edir. Pulsuz səviyyə…
-- **`deepseek`** — Göndərilən qeydimizdə "Qeydiyyat zamanı 5M pulsuz token - kredit kartı tələb olunmur" yazılıb — bu, birdəfəlik qrant üçün hələ də doğrudur, lakin əhəmiyyətlisi odur ki, kreditlər 30 gündən sonra bitir (göndərilən qeyddə qeyd olunmayıb)…
-- **`dify`** — Göndərilən freeNote ("Pulsuz açıq mənbəli AI tətbiq qurucusu + RAG") istiqamətli olaraq doğrudur, lakin natamamdır. Bulud pulsuz səviyyəsi nəzərdə tutulduğundan daha məhduddur: 200 mesaj krediti birdəfəlik görünür…
-- **`doubao`** — Göndərilən freeNote "Pulsuz Doubao modelləri (ByteDance)" istiqamətli olaraq doğrudur, lakin qeyri-dəqiqdir. Cari reallıq daha strukturlaşdırılmışdır: kəmiyyətli təkrarlanan gündəlik pulsuz səviyyə (2M token/gün vs…
-- **`duckduckgo-web`** — Əsas "pulsuz anonim giriş" təsviri hələ də keçərlidir, lakin xidmət əhəmiyyətli dərəcədə inkişaf etmişdir: indi daha yüksək limitləri olan açıq ödənişli səviyyələr (Plus/Pro) var, bu da pulsuz səviyyənin sürətlə məhdudlaşdırıldığını göstərir…
-- **`exa-search`** — Kataloqda freeNote "(yoxdur)" yazılıb, lakin Exa-nın ayda 1,000 sorğu təkrarlanan sənədləşdirilmiş pulsuz səviyyəsi var. Bu əhəmiyyətli bir boşluqdur — pulsuz səviyyə mövcuddur və daimidir.
-- **`featherless-ai`** — Göndərilən freeNote-umuzda "Pulsuz səviyyə mövcuddur" yazılıb, lakin ümumi pulsuz səviyyə yoxdur. Yeganə pulsuz giriş dəvət/tətbiq əsaslı Builder Series proqramı vasitəsilədir, bu da standart pulsuz…
-- **`firecrawl`** — Kataloqumuzda freeNote "(yoxdur)" yazılıb, bu da pulsuz səviyyənin olmadığını göstərir. Reallıqda Firecrawl-ın ayda 1,000 kreditlə sənədləşdirilmiş təkrarlanan pulsuz planı var — kataloq qeydi səhvdir.
-- **`freemodel-dev`** — Göndərilən freeNote-umuz "(yoxdur)" — bu, yəqin ki, provayderin hələ kataloqlaşdırılmadığını bildirən bir yer tutucu idi. Reallıqda provayderin 300 dollarlıq birdəfəlik sınaq kredit təklifi var. Lakin, bu bir…
-- **`friendliai`** — Göndərilən freeNote ("Serverless inference üçün pulsuz səviyyə") qismən dəqiqdir, lakin yanıltıcıdır. Tier 0 vasitəsilə pulsuz giriş və pulsuz təyin edilmiş modellər mövcuddur, lakin sürət limitləri müəyyən edilməyib və əlavə...
-- **`gemini`** — Göndərilən freeNote "Gemini 2.5 Flash üçün gündə 1,500 sorğu" deyir — bu, 2025-ci ilin dekabrına qədər dəqiq idi. Google 2025-ci ilin dekabrında pulsuz səviyyə limitlərini 50-80% azaltdı, Gemini 2.5 Flash-ı 1,500 R-dən aşağı saldı...
-- **`gitlawb`** — Göndərilən freeNote "Pulsuz səviyyə mövcuddur" faktiki olaraq köhnəlmişdir. Orijinal pulsuz MiMo girişi 2026-cı ilin mayında ləğv edildi; qalan yeganə "pulsuz" seçim müvəqqəti promosyon modelidir (Nemotron 3 U...
-- **`gitlawb-gmi`** — Qismən hələ də dəqiqdir — pulsuz səviyyə mövcuddur, lakin 2026-cı ilin may ayının sonunda MiMo pulsuz girişi ləğv edildikdən sonra indi tək bir modelə (Nemotron 3 Ultra) daraldılmışdır. Göndərilən "Pulsuz səviyyə mövcuddur" qeydi az...
-- **`groq`** — Göndərilən freeNote "30 RPM / 14.4K RPD" yalnız llama-3.1-8b-instant üçün dəqiqdir. Digər modellərin əksəriyyətinin (o cümlədən llama-3.3-70b-versatile) RPD limiti 1K-dan xeyli aşağıdır. Qeyd modelə xas... **2026-09-02 tarixində həll edildi:** `freeNote` indi "Pulsuz plan: model başına limitlər (hər çat modeli üçün gündə 200K token; RPM/RPD üçün console.groq.com/docs/rate-limits səhifəsinə baxın) — faylda ödəniş metodu yoxdur." kimi oxunur və kataloqda model başına beş 6M limiti var (llama-3.3-70b-versatile 2026-08-16 tarixində pulsuz səviyyədən çıxarıldı) — [2026-09-02 təkrar audit qeydinə](#tldr--how-much-free-inference-does-omniroute-actually-aggregate) baxın.
-- **`huggingchat`** — Göndərilən freeNote ("Pulsuz LLM çat — abunə tələb olunmur. Sürət limitləri tətbiq olunur.") qismən dəqiqdir, lakin məhdudiyyətləri əhəmiyyətli dərəcədə azaldır. Pulsuz səviyyə indi sərt 0.10$/... ilə işləyir.
-- **`huggingface`** — Əhəmiyyətli dərəcədə sərtləşdirildi. Göndərilən freeNote ("Minlərlə model üçün Pulsuz Inference API") limitsiz/səxavətli pulsuz girişi nəzərdə tuturdu, lakin 2025-ci ilin ortalarından etibarən pulsuz səviyyə ayda 0.10$ təkrar... ilə məhdudlaşdırılır.
-- **`hyperbolic`** — Göndərilən freeNote-umuz "qeydiyyat zamanı 1-5$ sınaq krediti" deyir — 1$ sınaq krediti hissəsi dəqiqdir, lakin "5$" rəqəmi GPU icarəsini açmaq üçün tələb olunan minimum depozitə aiddir (pulsuz kreditlər deyil...
-- **`iflytek`** — Kataloqda "Pulsuz Spark Lite modelləri" yazılıb — bu, ümumilikdə dəqiqdir. Lakin mövcud reallıq daha incədir: yalnız Spark Lite pulsuzdur (Max 100M token təklifi tək dəfəlik promo idi, təkrarlanan deyil); ...
-- **`inference-net`** — Göndərilən freeNote "qeydiyyat zamanı 25$ pulsuz kreditlər və tədqiqat qrantları" ifadəsini bildirir. Mövcud qiymət səhifəsi yalnız 1$ təkrarlanan aylıq kreditləri göstərir, 25$ qeydiyyat bonusu və ya tədqiqat qrantı haqqında heç bir qeyd yoxdur...
-- **`jina-reader`** — Göndərilən freeNote-umuz "(yoxdur)" idi, bu səhvdir. Jina Reader işə salındığı gündən bəri ictimai sənədləşdirilmiş pulsuz səviyyəyə malikdir: 20 RPM-də açarsız giriş, üstəgəl pulsuz API açarı ilə 10M tək dəfəlik token qrantı. ...
-- **`kiro`** — Kataloqda "(yoxdur)" freeNote göndərildi — lakin Kiro-nun sənədləşdirilmiş, daimi ayda 50 kreditlik pulsuz səviyyəsi var. Pulsuz səviyyə Kiro-nun ictimaiyyətə təqdim edildiyi vaxtdan bəri mövcuddur (qiymətlər ~2025-ci ilin oktyabrında rəsmiləşdirildi). Bu, bir...
-- **`llm7`** — Sürət limitləri göndərilən freeNote-dan (20 RPM / 100 req/saat → 40 RPM / 200 req/saat) artırılmışdır. "Qeydiyyat tələb olunmur" iddiası indi köhnəlmişdir — token.llm7.io-dan pulsuz token indi tələb olunur (baxmayaraq ki...
-- **`longcat`** — İctimai önizləmə/beta başa çatdı və Flash modelləri ləğv edildi; yalnız GA `LongCat-2.0` qaldı. Pulsuz səviyyə hesab qeydiyyatı + **KYC yoxlamasından** sonra açılan **tək dəfəlik 10M token qrantıdır** — bu, gündəlik və ya aylıq olaraq sıfırlanmır. Qrantdan sonra ödəniş istifadəyə görədir.
-- **`mistral`** — Göndərilən freeNote ("Pulsuz Eksperiment səviyyəsi: bütün modellərə sürət məhdudiyyətli giriş") istiqamətli olaraq doğrudur, lakin azaldılmışdır. Mövcud reallıq xüsusi sənədləşdirilmiş limitlər əlavə edir: 2 RPM, 500K TPM, 1B token/…
-- **`monsterapi`** — Göndərilən freeNote "Mərkəzləşdirilməmiş GPU inference üçün pulsuz kreditlər" deyir ki, bu da qismən dəqiqdir — qeydiyyat zamanı tək dəfəlik sınaq kreditləri var. Lakin, təkrarlanan pulsuz səviyyədə ayda 0 kredit var...
-- **`morph`** — Göndərilən freeNote "ayda 250K kredit" qeyd edir ki, bu da mövcud kredit bölgüsü ilə uyğun gəlir; lakin, daha əhəmiyyətli məhdudiyyət ayda 200 sorğudur ki, bu da orijinalda qeyd edilməmişdir...
-- **`muse-spark-web`** — Göndərilən freeNote ("Girişlə pulsuz — Llama modelləri ilə Meta AI platforması") giriş tələbi və Llama modelinə girişlə bağlı ümumilikdə dəqiqdir. Pulsuz səviyyənin sərtləşdirilməsi aşkar edilmədi; o, qalır...
-- **`nlpcloud`** — Göndərilən freeNote "Yeni hesablar üçün sınaq kreditləri" deyir ki, bu da tək dəfəlik sınağı nəzərdə tutur. Reallıqda, NLP Cloud-un pulsuz səviyyəsi tək dəfəlik sınaq kreditləri deyil, təkrarlanan aylıq pulsuz plandır (ayda 10,000 sorğu)...
-- **`nomic`** — Göndərilən freeNote-umuz "Pulsuz Nomic Embed API" deyir, heç bir ixtisaslaşma olmadan, davamlı pulsuz girişi nəzərdə tutur. Reallıq yalnız tək dəfəlik 1M token sınaq kreditidir — bu token büdcəsi istifadə edildikdən sonra ödənişli abunə...
-- **`nous-research`** — Göndərilən freeNote ("Pulsuz səviyyə: 50 RPM, 500,000 TPM") mövcud Nous Portal məhsulu ilə uyğun gəlmir. Portal 2026-cı il aprelin 27-də işə salındı və pulsuz səviyyəsini ayda 0.10$ təkrarlanan kreditlər şəklində qurur...
-- **`nvidia`** — "40 RPM, 70+ model" sürət limiti elementi kataloqla uyğun gəlir, lakin freeNote-un sadə bir inkişafçı-giriş səviyyəsi kimi təqdim edilməsi köhnə tək dəfəlik kredit hovuzunun ləğv edildiyini azaldır — giriş indi həqiqətən...
-- **`ollama-cloud`** — Göndərilən freeNote-umuz "(yoxdur)" — bu köhnəlmişdir. Ollama Cloud, host edilmiş açıq modellərə yüngül həftəlik GPU-vaxt əsaslı giriş təmin edən həqiqi pulsuz səviyyəyə malik bulud inference məhsulu işə saldı.
-- **`openrouter`** — Sıfır kreditli hesablar üçün RPD 200-dən 50-yə endirildi (RPM 20 olaraq dəyişməz qaldı). Kataloq qeydi RPM üzrə dəqiq idi, lakin kredit olmayan baza səviyyəsi üçün RPD-ni 4 dəfə şişirtmişdi. **İşləmə müddətinin izlənməsi (#6842)**: bu artıq sadəcə statik bir qeyd deyil — `open-sse/services/openrouterQuotaFetcher.ts` `/api/v1/key` + `/api/v1/credits` ünvanlarını hər açar üçün kredit limiti/qalan/sıfırlanma və gündəlik/həftəlik/aylıq USD xərcləri üçün sorğulayır, və `open-sse/services/openrouterFreeWindow.ts` yuxarıda təsvir edilən `:free` modelinin gündə 50 və ya 1000 + 20 RPM pəncərələrini yerli olaraq izləyir (429-larda `X-RateLimit-*` cavab başlıqlarından düzəldilmişdir), Dashboard → Provider Quota-da göstərilir.
-- **`phind`** — Phind 16 yanvar 2026-cı ildə fəaliyyətini dayandırdı. Provayder indi kataloqdan (qeydiyyat, icraçı, həm veb-kuki, həm də API-açar kataloq qeydləri) **tamamilə silinmişdir** — bu, fəaliyyətini dayandırmış xidmətlərin silinməsi presedentinə uyğundur (#5246 Gemini CLI).
-- **`pollinations`** — Qismən uyğundur — "API açarı tələb olunmur" iddiası anonim giriş üçün hələ də doğrudur, lakin kataloqdakı freeNote bunu qeyd etmir: (1) sürət limitləri tətbiq olunur (anonim istifadəçilər üçün ~1 sorğu/6-15s interval tənzimləməsi …
-- **`predibase`** — Göndərilən freeNote (25$ pulsuz sınaq kreditləri, 30 günlük etibarlılıq) hələ də mövcud sənədlərə uyğundur. Lakin, kataloq eyni vaxtda tətbiq olunan 20,000 token/gün serverless sürət limitini qeyd etmir…
-- **`publicai`** — Göndərilən freeNote ("Pulsuz icma nəticə çıxarma səviyyəsi") ümumilikdə dəqiqdir, lakin spesifikliyi azaldır: 20 RPM sürət limiti indi sənədləşdirilmişdir. Böyük bir sərtləşmə tapılmadı; xidmət pulsuz qalır…
-- **`puter`** — Puter-in sahibi (Nariman Celveh) tərəfindən edilən xahişlə kataloqdan (qeydiyyat, icraçı, pulsuz-model kataloqu və API-açar girişi) **tamamilə silinmişdir** — yuxarıdakı fəaliyyətini dayandırmış xidmətlərin silinməsi presedentinə baxın (`phind`).
-- **`qoder`** — Kataloqumuz freeNote "(yoxdur)" göndərir, lakin Qoder-in pulsuz səviyyəsi var: limitsiz əsas model tamamlamaları (gündəlik məhdudlaşdırılmış, qeyri-müəyyən limit) olan Community Edition, üstəgəl birdəfəlik 14 günlük/300 kreditli Pr…
-- **`sambanova`** — Göndərilən qeydimiz yalnız birdəfəlik 5$ krediti (30 günlük etibarlılıq) təsvir edirdi. Mövcud reallıq, sənədləşdirilmiş sürət limitləri (20 RPM, 20 RPD, 200k TPD) ilə daimi təkrarlanan pulsuz səviyyəni əhatə edir ki, bu da…
-- **`sensenova`** — Göndərilən freeNote "Pulsuz SenseTime modelləri" deyir ki, bu qeyri-müəyyən, lakin istiqamətli olaraq doğrudur — pulsuz giriş mövcuddur. Lakin, reallıq daha incədir: pulsuz giriş vaxtla məhdudlaşdırılmış ictimai beta-dır (Token…
-- **`serper-search`** — Göndərilən freeNote "(yoxdur)" deyir ki, bu qismən dəqiqdir — təkrarlanan pulsuz plan yoxdur — lakin Serper qeydiyyat zamanı 2,500 birdəfəlik sınaq krediti təklif edir. Kataloq qeydi daha dəqiq ola bilər…
-- **`siliconflow`** — Qismən uyğundur, lakin daha incədir: 1$ pulsuz kreditlər birdəfəlik sınaqdır (təkrarlanan deyil), "daimi pulsuz modellər" komponenti isə hələ də qüvvədədir — pulsuz 0$ modellər mövcud olmağa davam edir (Qwen3-8B, D…
-- **`sparkdesk`** — Qismən uyğundur — göndərilən freeNote "Pulsuz iFlytek Spark modelləri" Spark Lite-ın daimi pulsuz olması baxımından dəqiqdir, lakin məhdudiyyəti (hər App ID üçün 2 QPS) azaldır və əhatə dairəsini (yalnız S…) şişirdir.
-- **`stepfun`** — Göndərilən freeNote "Pulsuz Step-2 modelləri" köhnəlmişdir. Step-2 LLM-ə pulsuz giriş artıq təklif edilmir; platforma ödənişli token əsasında Step 3.x modellərinə keçmişdir və pulsuz LLM səviyyəsi yoxdur. Yalnız…
-- **`t3-web`** — Göndərilən freeNote ümumilikdə dəqiqdir (məhdud model girişi, Pro ayda 8$-a 50+ modeli açır), lakin iki əsas yeniləməni qaçırır: (1) pulsuz səviyyə indi aylıq əvəzinə gündəlik sıfırlanır (təxminən dəyişdirildi…
-- **`tavily-search`** — Kataloq freeNote "(yoxdur)" göndərir ki, bu da pulsuz səviyyənin olmadığını nəzərdə tutur, lakin Tavily əslində kredit kartı tələb olunmadan ayda 1,000 kreditlik sənədləşdirilmiş təkrarlanan pulsuz səviyyə təklif edir. Bu, əhəmiyyətli bir fərqdir…
-- **`tencent`** — Əsasən uyğundur — göndərilən freeNote ("Pulsuz Hunyuan Lite modelləri") dəqiqdir. Hunyuan-lite 2024-cü ilin may ayından bəri daimi pulsuz olub və 2026-cı ilə qədər də belə qalır. Kataloq qeydi detalları azaldır…
-- **`together`** — Göndərilən qeyddə "25$ qeydiyyat krediti + 3 daimi pulsuz model" deyilir, lakin Together indi minimum 5$ kredit alışını tələb edir və pulsuz sınaq təklif etmir. 25$ qeydiyyat krediti kataloqdan silindi (#12526). Provayder hələ də ~80 daimi pulsuz modeli yerləşdirir, lakin Xidmət Şərtləri (Bölmə 4.3(d)) Xidmətlərin ötürülməsini, paylanmasını, yenidən satışını və ya təklif edilməsini açıq şəkildə qadağan edir.
-- **`uncloseai`** — Əsasən uyğundur — qeydiyyat olmadan hələ də əbədi pulsuzdur. Lakin, Xidmət Şərtləri (terms-of-use.html) həddindən artıq istifadə üçün IP-əsaslı tənzimləmənin mövcud olduğunu və rəqabətli ML xidmətləri qurmağı qadağan etdiyini aydınlaşdırır…
-- **`veoaifree-web`** — Göndərilən freeNote "6 sorğu/saat" deyir, lakin veoaifree.com saytında belə bir açıq limit hazırda heç bir yerdə sənədləşdirilməyib. Sayt giriş olmadan limitsiz pulsuz generasiya tələb edir. Siyahıda göstərilən modellər…
-- **`voyage-ai`** — Göndərilən freeNote "embeddings və reranking üçün 200M pulsuz token" token sayına görə istiqamətli olaraq doğrudur, lakin yanıltıcıdır — bu, təkrarlanan deyil, birdəfəlik hesab başına ayrılan bir paylama olduğunu qeyd etmir…
-- **`yi`** — Göndərilən freeNote "Pulsuz Yi-Light modelləri" hazırkı 01.AI sənədlərində və ya model kataloqunda görünməyən bir model adına ("Yi-Light") istinad edir — platform.01.ai saytında belə bir model siyahıda yoxdur…
+- **Hər ortaq hovuz yalnız bir dəfə hesablanır.** Mistral-ın pulsuz planı hər təşkilat üçün aylıq vahid 1B limitdir; onu beş model altında göstərmək bu limiti 5B etmir. Model üzrə toplandıqda öz kataloqumuz **~7.4B** göstərərdi (2026-09-03 tarixində yenidən hesablanıb; bu göstərici CI tərəfindən yoxlanılmır — kataloq hər dəfə dəyişəndə onu yenidən ölçün) — başlıqda **~1.47B** göstərilir, çünki hər provayderdə bir hesabın faktiki xərcləyə biləcəyi məbləğ budur.
+- **Gündəlik limitlər çevrilir, sürət limitləri isə yox.** Sənədləşdirilmiş token/gün limiti `× 30` olur; sənədləşdirilmiş sorğu/gün limiti `RPD × ~800 token × 30` olur; yalnız dəqiqədə sorğu sayını dərc edən provayder üçün aylıq göstərici **yoxdur** və o, _limitsiz_ kimi göstərilir, heç vaxt cəmə daxil edilmir. Sürət limitini 24/7 müddətinə vurmaq bizim qəbul etmədiyimiz şişirtmədir.
+- **Regional şəxsiyyət yoxlaması tələb edən kvotalar ayrıca göstərilir** (`+~6M regional şəxsiyyət təsdiqindən sonra`), çünki oxucuların əksəriyyəti onlardan istifadə edə bilmir.
+- **Qeydiyyat kreditləri yalnız ilk ay üçündür** və sabit göstəriciyə heç vaxt qarışdırılmadan ikinci rəqəm kimi təqdim edilir.
+- **Göstərici CI tərəfindən yoxlanılır.** `npm run check:docs-counts` kataloq əsasında yekunları yenidən hesablayır və bu fayldakı, README-dəki və ya büdcə kartındakı rəqəmlər onlardan fərqləndikdə yığmanı uğursuz edir.
 
 ---
+
+## ToS diqqət cədvəli
+
+> **ToS bayrağı tövsiyə xarakterlidir, marşrutlaşdırma maneəsi deyil.** `tos` ilə işarələnmiş provayderlər standart olaraq yenə də marşrutlaşdırmaya və combo/fallback mexanizminə daxil edilir; bayraq yalnız `/dashboard/free-tiers` və `/api/free-tier/summary` bölmələrində göstərilir. `excludeTosAvoid` sorğu parametri qlobal marşrutlaşdırmaya deyil, yalnız icmal görünüşünə təsir edir. Qərar `open-sse/config/freeTierCatalog.ts` daxilindədir (məlumat xarakterlidir, marşrutlaşdırma mühərrikləri tərəfindən oxunmur).
+
+> Öz hostinqində işləyən, tək istifadəçili şəxsi proksi üçün hər provayderin şərtlərinə qısa baxış. `caution` = yoxlanmağa dəyər şəxsi istifadə və ya proksi bəndi; `ambiguous` = qeyri-müəyyən; `ok` = açıq şəkildə icazə verilir. Məlumat xarakterlidir, hüquqi məsləhət deyil — qərarı siz verirsiniz.
+
+### ⚠️ Diqqət — yoxlanmağa dəyər şəxsi istifadə / proksi bəndləri (16)
+
+> Onların pulsuz girişi realdır və OmniRoute sorğuları onlara marşrutlaşdıra bilər; aşağıdakı bəndləri sadəcə bilmək faydalıdır. OAuth/açarsız olanların həcmini tokenlə ölçmək mümkün deyil, buna görə onlar əsas göstəriciyə daxil edilməyib (istifadəyə yararsız olduqları üçün deyil).
+
+| Provayder        | Qeyd                                                                                                                                                                                                           |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agy`            | Google Antigravity ToS üçüncü tərəf proqram təminatı, alətləri və ya xidmətlərindən (proksilər daxil olmaqla) istifadə edərək xidmətə OAuth vasitəsilə daxil olmağı açıq şəkildə qadağan edir; bunu etmək…     |
+| `ai21`           | ToS §4.2/§8.2 API girişinin üçüncü tərəflərə sublisenziyalaşdırılmasını və ya paylanmasını qadağan edir; §3.3 sınaq/qiymətləndirmə məhsullarını "daxili qiymətləndirmə ilə…                                    |
+| `amazon-q`       | Məhsula yeni qeydiyyatlar dayandırılıb; mövcud istifadəçilərə idarə olunan xidmətlərin istifadəsini tənzimləyən AWS Customer Agreement tətbiq olunur — öz hostinqində işləyən pro…                             |
+| `blackbox`       | ToS sublisenziyalaşdırmanı, yenidən satışı, xidməti üçüncü tərəflərə təqdim etməyi və törəmə xidmətlər yaratmağı açıq şəkildə qadağan edir — öz hostinqində işləyən şəxsi pro…                                 |
+| `coze`           | Coze ToS istifadəni açıq şəkildə "şəxsi və qeyri-kommersiya istifadəsi" ilə məhdudlaşdırır və xidmətin icarəyə verilməsini, paylanmasını, sublisenziyalaşdırılmasını və ya yenidən satılmasını qadağan edir; … |
+| `duckduckgo-web` | Duck.ai ToS (duckduckgo.com/duckai/privacy-terms) "avtomatlaşdırılmış sorğuları və AI xidmətlərinin hazırlanmasını və ya təklif edilməsini", həmçinin məhdudiyyətlərin aşılmasını açıq şəkildə qadağan edir…   |
+| `featherless-ai` | Fərdi planlar açıq şəkildə "alıcı tərəfindən interaktiv istifadə və ya prototipləşdirmə və təcrübə aparılması" ilə məhdudlaşdırılıb — inferensiyanın yenidən satışı və proksi istifadəsi üçün tə…              |
+| `fireworks`      | ToS proksi/vasitəçi istifadəsini, API açarlarının ötürülməsini və sublisenziyalaşdırmanı açıq şəkildə qadağan edir (Bölmələr 2.1 və 2.2(i)(j)); öz hostinqində işləyən şəxsi proksilər …                       |
+| `friendliai`     | ToS Bölmə 8(e) və 8(f) FriendliAI-dan proksi kimi istifadə etməyi və ya ayrıca əsasda üçüncü tərəf girişinə icazə verməyi açıq şəkildə qadağan edir, həmçinin yenidən satışı qadağan edir/…                    |
+| `iflytek`        | iFlytek Spark LLM Service Agreement sənədinin 2.4(3) bölməsi "məlumatları və ya çıxış nəticələrini əldə etmək üçün hər hansı avtomatlaşdırılmış və ya proqramlaşdırılmış üsuldan istifadə etməyi…              |
+| `kiro`           | Kiro FAQ "üçüncü tərəf mexanizmlərindən istifadə edən OpenClaw və oxşar alətlərlə" istifadəni açıq şəkildə qadağan edir — sorğuları marşrutlaşdıran öz hostinqində işləyən AI proksisi (OmniRoute kimi)…       |
+| `modal`          | ToS Bölmə 1.3 "icarəyə vermək, yenidən satmaq və ya hər hansı üçüncü tərəfə Xidmətə birbaşa giriş və ya ondan istifadə imkanı yaratmağı" açıq şəkildə qadağan edir — öz hostinqində işləyən…                   |
+| `muse-spark-web` | Meta ToS əvvəlcədən icazə olmadan avtomatlaşdırılmış girişi, yazılı icazə olmadan əks mühəndisliyi və texnoloji vasitələrin aşılmasını açıq şəkildə qadağan edir…                                              |
+| `nlpcloud`       | ToS "başqalarının onun vasitəsilə Xidmətə daxil olmasına imkan verən proksi və ya başqa cihaz qurmağı" açıq şəkildə qadağan edir və yalnız ötürülə bilməyən,…                                                  |
+| `t3-web`         | ToS hesabları açıq şəkildə yalnız şəxsi istifadə ilə məhdudlaşdırır, giriş məlumatlarının üçüncü tərəflərlə paylaşılmasını qadağan edir və avtomatlaşdırılmış/bot/scraping girişini yasaqlayır — …             |
+
+### ✅ Ümumən icazəverici — diqqət / qeyri-müəyyən / uyğundur (qalanları)
+
+| Təchizatçı       | Xidmət şərtləri | Qeyd                                                                                                                                                                                                      |
+| ---------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aimlapi`        | qeyri-müəyyən   | Xidmət şərtləri qeyri-eksklüziv istifadə lisenziyası verir, lakin öz serverində yerləşdirilən proksiyə və ya təkrar satışa açıq şəkildə icazə vermir və ya onları qadağan etmir; "şəx…                    |
+| `baichuan`       | qeyri-müəyyən   | İctimaiyyət üçün əlçatan sənədlərdə öz serverində yerləşdirilən şəxsi proksilərə dair açıq qadağa tapılmadı; lakin M3 Plus pulsuz pl…                                                                     |
+| `bluesminds`     | qeyri-müəyyən   | Öz serverində proksiləmə və ya təkrar satışla bağlı açıq Xidmət şərtləri müddəaları tapılmadı; qiymətlər səhifəsi funksiyalara/sürət limitlərinə diqqət yetirir…                                          |
+| `bytez`          | qeyri-müəyyən   | Açıq Xidmət şərtləri səhifəsinə daxil olmaq mümkün olmadı (404); sənədlərdə yalnız qiymətləndirmə məqsədli istifadə və ya proksi qadağası ilə bağlı açıq müddəalar tapılmadı, lakin platfor…              |
+| `doubao`         | qeyri-müəyyən   | İctimai olaraq indekslənmiş sənədlərdə proksi/təkrar satışla bağlı açıq qadağa tapılmadı; Volcengine tərtibatçılara yönəlmiş bulud …                                                                      |
+| `gitlawb-gmi`    | qeyri-müəyyən   | Öz serverində yerləşdirilən şəxsi proksinin istifadəsini qadağan edən açıq Xidmət şərtləri müddəası tapılmadı; pulsuz Nemotron modeli NVIDIA bildiri…                                                     |
+| `monsterapi`     | qeyri-müəyyən   | Araşdırma zamanı MonsterAPI-nin Xidmət şərtləri səhifəsi (monsterapi.ai/terms-of-service) əlçatmaz idi; proksi/təkrar satış/şəx… ilə bağlı xüsusi müddəalar tapılmadı                                     |
+| `nous-research`  | qeyri-müəyyən   | Nous Portal özü aqreqator/proksi xidmətidir; ondan başqa bir öz serverində yerləşdirilən proksi üçün arxa xidmət kimi istifadə edilməsi proksi-…                                                          |
+| `ollama-cloud`   | qeyri-müəyyən   | Xidmət şərtləri xidmətdən "rəqabət aparan məhsullar hazırlamaq üçün" istifadəni qadağan edir, lakin öz serverində yerləşdirilən şəxsi proksilərə dair açıq qadağa yoxdur…                                 |
+| `stepfun`        | qeyri-müəyyən   | Öz serverində yerləşdirilən şəxsi proksiyə dair açıq qadağa tapılmadı, lakin Step Plan Xidmət şərtləri konkret ko… istifadə edən tərtibatçılara yönəlib                                                   |
+| `api-airforce`   | diqqət          | Xidmət şərtləri "icazəsiz rəqabət aparan xidmətlər yaratmağı" və "giriş məlumatlarını paylaşmağı" açıq şəkildə qadağan edir — öz serverində yerləşdirilən şəxs…                                           |
+| `arcee-ai`       | diqqət          | Pulsuz giriş Arcee-nin birbaşa API şərtləri vasitəsilə deyil, OpenRouter-in :free yönləndirmə təbəqəsi vasitəsilə təmin edilir; OpenRouter Xidmət şərtləri şəxsi tərt… istifadəsinə icazə verir           |
+| `baidu`          | diqqət          | Xidmət şərtləri proksi/təkrar satış müddəaları baxımından açıq şəkildə nəzərdən keçirilməyib, lakin platforma real adla autentifikasiya tələb edir (adətən Çin şəxsiyyət vəsiqəsi…                        |
+| `baseten`        | diqqət          | Xidmət şərtləri istifadəni "Müştərinin daxili biznes məqsədləri" ilə məhdudlaşdırır və sublisenziyalaşdırmanı, təkrar satışı və ya icazə verməyi açıq şəkildə qadağan edir…                               |
+| `bazaarlink`     | diqqət          | Xidmət şərtləri API açarlarının üçüncü tərəflərə təkrar satışını və ya sublisenziyalaşdırılmasını açıq şəkildə qadağan edir; şəxsi istifadə üçün öz serverində yerləşdirilən şəxsi proksi…                |
+| `brave-search`   | diqqət          | Xidmət şərtləri axtarış nəticələrinin yenidən paylanmasını, təkrar satışını və sublisenziyalaşdırılmasını qadağan edir; API-dən "təkrarlamaq və ya təkrarlamağa cəhd etmək…                               |
+| `byteplus`       | diqqət          | Tokenlər ötürülə bilməz və yalnız bir hesab üçün nəzərdə tutulub; proksiyə dair açıq qadağa yoxdur, lakin BytePlus … hüququnu özündə saxlayır                                                             |
+| `cerebras`       | diqqət          | Xidmət şərtləri şəxsi və ya biznes istifadəsi üçün qeyri-eksklüziv, ötürülə bilməyən və sublisenziyalaşdırıla bilməyən hüquq verir; təkrar satışı, s… qadağan edir                                        |
+| `cloudflare-ai`  | diqqət          | Cloudflare Self-Serve Xidmət şərtlərinin §2.2.1(j) bəndi Xidmətlərdən "virtual özəl şəbəkə və ya digər oxşar pro… təmin etmək" üçün istifadəni qadağan edir                                               |
+| `cohere`         | diqqət          | Cohere sınaq açarlarının "istehsal və ya kommersiya məqsədləri" üçün istifadəsini açıq şəkildə qadağan edir; sorğuları yönləndirən öz serverində yerləşdirilən şəxsi proksi…                              |
+| `deepinfra`      | diqqət          | Xidmət şərtləri ümumilikdə qanuni kommersiya istifadəsinə icazə verir, lakin "… hər hansı biznesi ilə birbaşa və ya dolayı yolla rəqabət aparan" istifadəni qadağan edir                                  |
+| `deepseek`       | diqqət          | Open Platform Xidmət şərtləri (2026-04-29 tarixindən qüvvədədir) "törəmə məhsulların hazırlanması" və şəxsi/komm… daxil olmaqla geniş istifadəyə icazə verir                                              |
+| `dify`           | diqqət          | Öz serverində yerləşdirilən, bir istifadəçili şəxsi proksiyə dəyişdirilmiş Apache 2.0 lisenziyası çərçivəsində icazə verilir; lakin çoxsaylı icarəçi üçün yerləşdirmə…                                    |
+| `exa-search`     | diqqət          | Açıq "proksi qadağası" və ya "yalnız qiymətləndirmə üçün" müddəaları tapılmadı; Exa API … imkan verən təkrar satıcı tərəfdaş proqramını fəal şəkildə təklif edir                                          |
+| `firecrawl`      | diqqət          | Cloud API Xidmət şərtlərində şəxsi proksiyə dair açıq qadağa tapılmadı, lakin açıq mənbəli, öz serverində yerləşdirilən versiya AGPL-3.0 lisenziyalıdır (tə…                                              |
+| `gemini`         | diqqət          | Xidmət şərtləri pulsuz səviyyənin "peşəkar və ya biznes məqsədləri üçün Google AI modelləri ilə məhsul yaradan tərtibatçılar" üçün nəzərdə tutulduğunu açıq şəkildə bildirir…                             |
+| `groq`           | diqqət          | Services Agreement sənədinin §6.3 bəndi API girişinin təkrar satışını, sublisenziyalaşdırılmasını və ya paylanmasını qadağan edir; §3.2 hesabın təkrar satışını/icarəyə verilməsini qadağan edir…         |
+| `huggingchat`    | diqqət          | Hugging Face Xidmət şərtləri öz serverində yerləşdirilən şəxsi proksiləri açıq şəkildə qadağan etmir, lakin əlavə şərtlər (istinad edilib, lakin tam…                                                     |
+| `huggingface`    | diqqət          | Xidmət şərtləri xidmətə giriş/istifadə üçün məhdud lisenziya verir; sənəd bir istifadəçili… istifadəyə açıq şəkildə icazə vermir və ya onu qadağan etmir                                                  |
+| `hyperbolic`     | diqqət          | Xidmət şərtləri API girişini "yalnız öz şəxsi və ya daxili biznes məqsədləriniz üçün" verir və lisenziyalaşdırmanı, … açıq şəkildə qadağan edir                                                           |
+| `inference-net`  | diqqət          | Xidmət şərtləri "sublisenziyalaşdırmağı, təkrar satmağı, paylamağı" və yazılı razılıq olmadan API açarlarını ötürməyi açıq şəkildə qadağan edir; bir istifadəçili…                                        |
+| `jina-ai`        | diqqət          | Pulsuz 10M token açıq şəkildə qeyri-kommersiya məqsədlidir (CC-BY-NC 4.0 model lisenziyası); şəxsi L… üçün bir istifadəçili şəxsi proksi                                                                  |
+| `jina-reader`    | diqqət          | Xidmət şərtləri nəticələrdən rəqabət aparan xidmətlər yaratmaq üçün istifadəni qadağan edir və "veb-skrepinq vasitəsilə məlumat çıxarmaq üçün avtomatlaşdırılmış üsulları…                                |
+| `llm7`           | diqqət          | Xidmət şərtləri xidməti "təcrübə, tərtibat və tədqiqat" üçün nəzərdə tutulmuş kimi təqdim edir; öz serverində yerləşdirilən şəxsi … istifadəyə dair açıq qadağa yoxdur                                    |
+| `longcat`        | diqqət          | API Platform Service Agreement (longcat.chat/platform/private/) kommersiya inteqrasiyasına və öz serverində yerləşdirilən tətbiqlərə… icazə verir                                                         |
+| `mistral`        | diqqət          | İstehlakçı Xidmət şərtləri API-lərin yalnız "şəxsi ehtiyaclar" üçün istifadə oluna biləcəyini açıq şəkildə bildirir və API açarlarının üçüncü… üçün əlçatan edilməsini qadağan edir                       |
+| `morph`          | ehtiyatlı       | Xidmət Şərtləri ümumilikdə kommersiya istifadəsinə icazə verir; öz serverində yerləşdirilən proksi tətbiqləri üçün satış şöbəsi ilə açıq razılaşma tələb olunur. Bölmə 18.…                               |
+| `nebius`         | ehtiyatlı       | Xidmət Şərtləri (Bölmə 5f) yenidən satışı, təkrar paylanmanı və ya xidmətin «müstəqil əsasda» təklif edilməsini açıq şəkildə qadağan edir — öz serverində yerləşdirilən…                                  |
+| `nomic`          | ehtiyatlı       | Xidmət Şərtləri qeyri-eksklüziv, ötürülə bilməyən API lisenziyası verir; Bölmə 6.b rəqabət aparan xidmət yaratmağı qadağan edir. Bundan istifadə…                                                         |
+| `novita`         | ehtiyatlı       | Xidmət Şərtləri yenidən satışı və rəqabət aparan xidmətləri qadağan edir, lakin şəxsi məqsədlə öz serverində yerləşdirilən proksiləri açıq şəkildə nəzərdə tutmur; şəxsi istifadə…                        |
+| `nscale`         | ehtiyatlı       | Məqbul İstifadə Siyasəti «Nscale Platformasının hamısını və ya hər hansı hissəsini köçürməyi, dəyişdirməyi, təkrarlamağı... çərçivəyə salmağı, güzgüləməyi, yenidən dərc etməyi... yaymağı» qadağan edir… |
+| `nvidia`         | ehtiyatlı       | Pulsuz səviyyə açıq şəkildə yalnız prototipləşdirmə/işlənib-hazırlanma/tədqiqat/qiymətləndirmə üçündür — istehsal mühitində istifadə (real son istifadəçilərə xidmət göstərilməsi) tələb edir…            |
+| `openrouter`     | ehtiyatlı       | Xidmət Şərtləri API girişinin yenidən satılmasını və ya rəqabət aparan xidmətin hazırlanmasını açıq şəkildə qadağan edir; tək istifadəçi üçün öz serverində yerləşdirilən şəxsi proksi…                   |
+| `pollinations`   | ehtiyatlı       | API sənədlərində göstərilən MIT License sərbəst təkrar istifadənin mümkün olduğunu bildirir; öz serverində proksiləmə ilə bağlı açıq qadağa tapılmayıb. Bununla belə, i…                                  |
+| `predibase`      | ehtiyatlı       | Predibase korporativ səviyyəli əlavə təlim/xidmət platforması kimi təqdim olunur; pulsuz sınaq açıq şəkildə araşdırma və…                                                                                 |
+| `publicai`       | ehtiyatlı       | Xidmət Şərtləri (publicai.co/tc) xidmətləri «əsasən tədqiqat və təhsil məqsədli» kimi müəyyən edir; proksi və ya yenidən satışla bağlı açıq qadağa…                                                       |
+| `qoder`          | ehtiyatlı       | Xidmət Şərtləri səhifəsi oxuna bilən məzmun qaytarmadı; Qoder kodlaşdırma üçün IDE klientidir (ictimai API deyil) və üçüncü tərəf proksi örtükləri…                                                       |
+| `reka`           | ehtiyatlı       | Biznes Şərtləri üçüncü tərəflərə sublisenziya verilməsini və ya girişin paylanmasını qadağan edir; tək istifadəçili şəxsi proksi böyük ehtimalla uyğundur…                                                |
+| `sambanova`      | ehtiyatlı       | Xidmət Şərtlərinin 1.5(c) bölməsi xidmətin yenidən satılmasını, sublisenziyalaşdırılmasını və ya üçüncü tərəflərə təqdim edilməsini açıq şəkildə qadağan edir; öz serverində…                             |
+| `sensenova`      | ehtiyatlı       | Nəzərdən keçirilmiş Xidmət Şərtlərində proksi və ya yenidən satışla bağlı açıq qadağa tapılmayıb, lakin pulsuz səviyyə SLA-sı olmayan tanıtım xarakterli beta versiyasıdır, Sen…                          |
+| `serper-search`  | ehtiyatlı       | Xidmət Şərtləri «materialların əlavə dəyər yaradılmadan olduğu kimi hər hansı digər serverdə güzgülənməsini» açıq şəkildə qadağan edir — sadə tranzit proksi…                                             |
+| `siliconflow`    | ehtiyatlı       | Xidmət Şərtləri (3.4(e)(f)(p) bəndi) xidmətin hər hansı üçüncü tərəfə təqdim edilməsini, yenidən satılmasını/sublisenziyalaşdırılmasını açıq şəkildə qadağan edir,…                                       |
+| `sparkdesk`      | ehtiyatlı       | SparkDesk İstifadəçi Müqaviləsi yalnız şəxsi, qeyri-kommersiya məqsədli istifadə hüquqları verir; API İnterfeysi Siyasəti avtomatlaşdırılmış məlumat…                                                     |
+| `tavily-search`  | ehtiyatlı       | Xidmət Şərtlərində API-nin «ötürülə, həvalə edilə, paylaşıla və ya başqa şəkildə hər hansı üçüncü tərəfə təqdim edilə bilməyəcəyi» açıq şəkildə bildirilir…                                               |
+| `tencent`        | ehtiyatlı       | Tencent Cloud Xidmət Şərtləri API girişinin sublisenziyalaşdırılmasını və ya yenidən satılmasını açıq şəkildə qadağan edir; şəxsi istifadə üçün öz serverində yerləşdirilən şəxsi proksi…                 |
+| `together`       | ehtiyatlı       | Xidmət Şərtlərinin 4.3(d) bölməsi Xidmətlərin ötürülməsini, paylanmasını, yenidən satılmasını, icarəyə verilməsini və ya müstəqil şəkildə təklif edilməsini açıq şəkildə qadağan edir…                    |
+| `uncloseai`      | ehtiyatlı       | Şəxsi proksi istifadəsi mümkündür, lakin buna açıq şəkildə icazə verilmir; Xidmət Şərtləri «rəqabət aparan maşın öyrənməsi xidmətlərinin… yaradılmasını» qadağan edir…                                    |
+| `veoaifree-web`  | ehtiyatlı       | Xidmət Şərtləri «insan imkanlarını aşan sürətlərdə» işləyən avtomatlaşdırılmış botları və ya skriptləri açıq şəkildə qadağan edir və platformanı köçürərək… yaratmağı qadağan edir…                       |
+| `vertex`         | ehtiyatlı       | Google Cloud Xidmət Şərtləri yenidən satışı yalnız səlahiyyətli satıcılarla məhdudlaşdırır (Bölmə 14 Reseller Agreement tələb edir); öz serverində…                                                       |
+| `voyage-ai`      | ehtiyatlı       | Xidmət Şərtləri sayt məzmunu üçün «şəxsi, qeyri-kommersiya istifadəsi» hüququ verir və giriş məlumatlarının/hesabın üçüncü tərəflərlə paylaşılmasını qadağan edir;…                                       |
+| `xkiro`          | ehtiyatlı       | Xidmət Şərtləri (2026-07-30) xidmətin yenidən satılmasını/təkrar paylanmasını və yuxarı səviyyəli provayderlərin şərtlərinin pozulmasını qadağan edir; şəxsi pro…                                         |
+| `360ai`          | naməlum         | Tərtibatçı API-si üçün Xidmət Şərtləri qeydiyyat olmadan ictimaiyyət üçün əlçatan deyil; giriş müraciətin təsdiqlənməsini tələb edir ki, bu da…                                                           |
+| `chutes`         | naməlum         | Xidmət Şərtləri səhifəsi chutes.ai/terms ünvanında mövcuddur, lakin məzmunu əldə etmək mümkün olmadı; nəzərdən keçirilmiş… mənbələrdə proksi/yenidən satışla bağlı açıq bənd tapılmadı                    |
+| `freemodel-dev`  | naməlum         | Xidmət Şərtləri səhifəsi (freemodel.dev/terms) WebFetch vasitəsilə yalnız başlıq qaytardı və oxuna bilən məzmun təqdim etmədi; heç bir bənd…                                                              |
+| `gitlawb`        | naməlum         | Xidmət Şərtləri və ya məqbul istifadə siyasəti tapılmadı; proksi/yenidən satış məhdudiyyətləri naməlumdur — öz serverində yerləşdirilən proksi istifadəsində ehtiyatlı olun.                              |
+| `liquid`         | naməlum         | Proksiləmək üçün hostinq edilən API mövcud deyil; açıq mənbəli modeldən kommersiya məqsədli istifadə illik gəliri $10M-dan az olan təşkilatlar üçün pulsuzdur. Öz serverində…                             |
+| `yi`             | naməlum         | Xidmət Şərtləri daxil olmadan ictimaiyyət üçün əlçatan deyil; proksi/yenidən satışla bağlı bəndləri nəzərdən keçirmək mümkün olmadı. Öz serverində yerləşdirilən şəxsi proksi istifadəsi…                 |
+| `comfyui`        | uyğundur        | GPL-3.0 açıq mənbə lisenziyası öz serverində yerləşdirilən şəxsi proksi istifadəsinə açıq şəkildə icazə verir; Comfy Org Xidmət Şərtləri… kommersiya istifadəsini təsdiqləyir                             |
+| `scaleway`       | uyğundur        | Scaleway-in Ümumi Xidmət Şərtləri, öz serverində yerləşdirilən… istifadəyə dair açıq qadağası olmayan standart kommersiya bulud müqaviləsidir                                                             |
+| `sdwebui`        | uyğundur        | AGPL-3.0 lisenziyası: istifadə həcminə heç bir məhdudiyyət qoyulmadan şəxsi istifadə üçün öz serverində sərbəst yerləşdirilə bilər; bundan istifadə edən şəxsi proksi…                                    |
+| `searxng-search` | uyğundur        | AGPL-3.0 açıq mənbə lisenziyası istifadə növünə, yenidən satışa… heç bir məhdudiyyət qoymadan öz serverində yerləşdirilən şəxsi proksi istifadəsinə açıq şəkildə icazə verir                              |
+
+---
+
+## Provayder üzrə pulsuz səviyyə (Bytez/Nous 2026-10-15 tarixində yoxlanılıb; sətirlər 2026-09-02 tarixində yenidən yoxlanılıb; digərləri 2026-06-17 tarixində)
+
+> Modellər üzrə kataloqdan (`open-sse/config/freeModelCatalog.ts`) yenidən yaradılıb və hovuz üzrə təkrarlananlar çıxarılıb. Aylıq təkrarlanan sabit token sayına görə sıralanıb. `uncapped*` = daimi olaraq pulsuzdur, lakin dərc edilmiş token limiti yoxdur (sürət/müştərək icra məhdudiyyətlidir) — real girişdir, başlıqdakı cəmə **daxil edilməyib**. `—` = yalnız kreditlə / açarsız / tokenlə ölçülə bilməz.
+
+| Provayder        | Pulsuz növü       | Stabil token/ay | İlk ay krediti | İstifadə şərtləri | Modellər |
+| ---------------- | ----------------- | --------------- | -------------- | ----------------- | -------- |
+| `mistral`        | təkrarlanan       | ~1.00B          | —              | ehtiyatlı olun    | 5        |
+| `nara`           | təkrarlanan       | ~210M           | —              | ehtiyatlı olun    | 8        |
+| `llm7`           | təkrarlanan       | ~150M           | —              | ehtiyatlı olun    | 4        |
+| `xkiro`          | təkrarlanan       | ~150M           | —              | ehtiyatlı olun    | 39       |
+| `longcat`        | birdəfəlik        | —               | 10M            | ehtiyatlı olun    | 1        |
+| `cerebras`       | birdəfəlik        | —               | $5 kredit      | ehtiyatlı olun    | 2        |
+| `cloudflare-ai`  | təkrarlanan       | ~30M            | —              | ehtiyatlı olun    | 9        |
+| `groq`           | təkrarlanan       | ~30M            | —              | ehtiyatlı olun    | 5        |
+| `api-airforce`   | təkrarlanan       | ~24M            | —              | ehtiyatlı olun    | 7        |
+| `bluesminds`     | təkrarlanan       | ~7M             | —              | qeyri-müəyyən     | 22       |
+| `sambanova`      | təkrarlanan       | ~6M             | —              | ehtiyatlı olun    | 5        |
+| `arcee-ai`       | təkrarlanan       | ~5M             | —              | ehtiyatlı olun    | 1        |
+| `bazaarlink`     | təkrarlanan       | ~4M             | —              | ehtiyatlı olun    | 32       |
+| `openrouter`     | təkrarlanan       | ~1M             | —              | ehtiyatlı olun    | 1        |
+| `cohere`         | təkrarlanan       | ~800K           | —              | ehtiyatlı olun    | 6        |
+| `huggingchat`    | təkrarlanan       | ~500K           | —              | ehtiyatlı olun    | 4        |
+| `morph`          | təkrarlanan       | ~400K           | —              | uyğundur          | 2        |
+| `huggingface`    | təkrarlanan       | ~200K           | —              | ehtiyatlı olun    | 6        |
+| `kiro`           | təkrarlanan       | ~25K            | —              | çəkinin           | 12       |
+| `glm-cn`         | limitsiz          | limitsiz\*      | ~20M           | uyğundur          | 4        |
+| `baidu`          | limitsiz          | limitsiz\*      | —              | ehtiyatlı olun    | 1        |
+| `gemini`         | limitsiz          | limitsiz\*      | —              | ehtiyatlı olun    | 4        |
+| `kilo-gateway`   | limitsiz          | limitsiz\*      | —              | ehtiyatlı olun    | 7        |
+| `ollama-cloud`   | limitsiz          | limitsiz\*      | —              | qeyri-müəyyən     | 8        |
+| `opencode-zen`   | limitsiz          | limitsiz\*      | —              | ehtiyatlı olun    | 10       |
+| `tencent`        | limitsiz          | limitsiz\*      | —              | ehtiyatlı olun    | 1        |
+| `vertex`         | qeydiyyat krediti | —               | ~300M          | ehtiyatlı olun    | 10       |
+| `agentrouter`    | qeydiyyat krediti | —               | ~200M          | ehtiyatlı olun    | 4        |
+| `predibase`      | qeydiyyat krediti | —               | ~25M           | ehtiyatlı olun    | 1        |
+| `doubao`         | qeydiyyat krediti | —               | ~15M           | qeyri-müəyyən     | 1        |
+| `ai21`           | qeydiyyat krediti | —               | ~10M           | çəkinin           | 2        |
+| `deepseek`       | qeydiyyat krediti | —               | ~5M            | uyğundur          | 2        |
+| `hyperbolic`     | qeydiyyat krediti | —               | ~5M            | uyğundur          | 8        |
+| `nscale`         | qeydiyyat krediti | —               | ~5M            | ehtiyatlı olun    | 6        |
+| `bytez`          | kredit (təkr.)    | —               | naməlum        | qeyri-müəyyən     | 1        |
+| `deepinfra`      | qeydiyyat krediti | —               | ~1M            | ehtiyatlı olun    | 22       |
+| `fireworks`      | qeydiyyat krediti | —               | ~1M            | çəkinin           | 10       |
+| `nebius`         | qeydiyyat krediti | —               | ~1M            | ehtiyatlı olun    | 1        |
+| `qoder`          | qeydiyyat krediti | —               | ~1M            | ehtiyatlı olun    | 14       |
+| `scaleway`       | qeydiyyat krediti | —               | ~1M            | uyğundur          | 6        |
+| `novita`         | qeydiyyat krediti | —               | ~500K          | ehtiyatlı olun    | 1        |
+| `agy`            | açarsız           | —               | —              | çəkinin           | 16       |
+| `baichuan`       | açarsız           | —               | —              | qeyri-müəyyən     | 1        |
+| `blackbox`       | açarsız           | —               | —              | çəkinin           | 6        |
+| `coze`           | açarsız           | —               | —              | çəkinin           | 1        |
+| `duckduckgo-web` | açarsız           | —               | —              | çəkinin           | 6        |
+| `freemodel-dev`  | açarsız           | —               | —              | naməlum           | 4        |
+| `friendliai`     | açarsız           | —               | —              | çəkinin           | 2        |
+| `iflytek`        | açarsız           | —               | —              | çəkinin           | 1        |
+| `inference-net`  | açarsız           | —               | —              | ehtiyatlı olun    | 3        |
+| `liquid`         | açarsız           | —               | —              | naməlum           | 1        |
+| `monsterapi`     | açarsız           | —               | —              | qeyri-müəyyən     | 1        |
+| `muse-spark-web` | açarsız           | —               | —              | çəkinin           | 3        |
+| `nlpcloud`       | açarsız           | —               | —              | çəkinin           | 1        |
+| `nvidia`         | limitsiz          | limitsiz\*      | —              | ehtiyatlı olun    | 2        |
+| `pollinations`   | açarsız           | —               | —              | ehtiyatlı olun    | 31       |
+| `publicai`       | açarsız           | —               | —              | ehtiyatlı olun    | 3        |
+| `reka`           | açarsız           | —               | —              | ehtiyatlı olun    | 2        |
+| `sensenova`      | açarsız           | —               | —              | ehtiyatlı olun    | 1        |
+| `sparkdesk`      | açarsız           | —               | —              | ehtiyat           | 1        |
+| `stepfun`        | açarsız           | —               | —              | uyğun             | 1        |
+| `t3-web`         | açarsız           | —               | —              | çəkinin           | 23       |
+| `uncloseai`      | açarsız           | —               | —              | ehtiyat           | 3        |
+
+---
+
+## Təchiz edilmiş kataloqdan (`freeNote`) sonra nə dəyişdi
+
+> v3.8.0 dövrünə aid `freeNote` sətirləri köhnəlib. Bu araşdırma nəticəsində müəyyən edilmiş düzəlişlər (bunlar `_tasks/features-v3.8.12` kataloq yeniləməsini müəyyən edir):
+
+- **`360ai`** — Göndərilmiş pulsuz qeyd — "Free 360 AI Brain models" — köhnəlmiş görünür. Hazırkı giriş tətbiq tərəfindən məhdudlaşdırılır və ödənişlidir. 2023-cü il buraxılış dövrünün promosyon tokenləri (birdəfəlik 100M–250M) … üçün əsas ola bilərdi.
+- **`agentrouter`** — Göndərilmiş pulsuz qeydimiz "$200 free credits on signup." deyir. Hazırkı reallıq göstərir ki, standart (referalsız) qeydiyyatdan keçənlər yalnız $100 alır; referal vasitəsilə qeydiyyatdan keçənlər $200 əldə edə bilər, lakin 2026-cı ilin aprelindən olan icma şərhi …
+- **`agy`** — Göndərilmiş pulsuz qeydimiz "(none)" deyərək pulsuz səviyyənin olmadığını ehtimal etdirir, lakin Antigravity-də həqiqətən pulsuz, OAuth ilə məhdudlaşdırılan səviyyə var. Bununla belə, Xidmət Şərtləri bu pulsuz səviyyədən OmniRoute kimi proksi vasitəsilə istifadəni açıq şəkildə qadağan edir …
+- **`ai21`** — Sərtləşdirilib: sınaq müddəti "3 months"dən 7 günə endirilib. $10 kredit məbləği dəyişməz qalıb, lakin etibarlılıq müddəti təxminən 90 gündən 7 günə kəskin şəkildə azalıb.
+- **`aimlapi`** — Əhəmiyyətli dərəcədə dəyişib. Göndərilmiş pulsuz qeyd "$0.025/day free credits — 200+ models" elan edirdi, lakin pulsuz səviyyə hazırda dayandırılıb/ləğv edilib. $0.025/gün kredit ayırması (gündə 50,000 kredit, 10 sorğu/g …
+- **`amazon-q`** — Göndərilmiş pulsuz qeydimiz "(none)" deyir — reallıq isə daha pisdir: məhsul artıq yeni qeydiyyatlar üçün dayandırılıb (15 may 2026). Əvvəllər pulsuz səviyyə ayda 50 agent sorğusu + limitsiz daxili …
+- **`api-airforce`** — Kataloqda pulsuz qeyd "(none)" göstərilir, lakin sənədləşdirilmiş pulsuz səviyyə mövcuddur: təkrarlanan şəkildə 1 RPM / 1,000 RPD, hesab qeydiyyatı tələb olunur və yalnız əsas modellərlə məhdudlaşır.
+- **`arcee-ai`** — Göndərilmiş pulsuz qeyd ("Free Trinity Large Thinking model (262K context)") qismən doğrudur — Trinity Large Thinking həqiqətən 262K kontekstlə OpenRouter vasitəsilə pulsuzdur — lakin qeyddə bunun …
+- **`baichuan`** — Göndərilmiş pulsuz qeydimiz "Free Baichuan models" deyir ki, bu da davamlı pulsuz girişi nəzərdə tutur, lakin hazırkı reallıq yeni istifadəçilər üçün yalnız birdəfəlik 80 CNY sınaq kreditidir (3 ay etibarlıdır). Daimi …
+- **`baidu`** — Kataloqda "Free ERNIE Speed/Lite models" yazılır ki, bu, ümumilikdə doğrudur, lakin əhatə dairəsini kiçildir: ERNIE-Tiny və bir neçə kontekst pəncərəsi variantı (8K və 128K) də pulsuzdur. Pulsuz səviyyə görünür ki …
+- **`bazaarlink`** — Ümumilikdə uyğun gəlir — göndərilmiş pulsuz qeyd sıfır ödənişli inferensiya üçün auto:free marşrutlaşdırmasını dəqiq təsvir edir. Lakin hazırkı reallığa qeyddə göstərilməyən açıq sürət limitləri (10–20 RPM, təxminən 150 RPD) də daxildir …
+- **`blackbox`** — Göndərilmiş pulsuz qeydimiz "unlimited basic chat plus Minimax-M2.5." iddia edir. Əslində limitsiz Minimax-M2.5 agent sorğuları pulsuz səviyyənin deyil, ödənişli planın (Pro+) xüsusiyyətidir. Pulsuz səviyyədə …
+- **`bluesminds`** — Göndərilmiş pulsuz qeydimiz "(none)" idi — lakin BluesMinds-in sənədləşdirilmiş pulsuz səviyyəsi var: 500 pi kredit, 20 RPM, 300 RPD, daimi pulsuz plan. Kataloq bu təklifi əhəmiyyətli dərəcədə kiçildir.
+- **`brave-search`** — Kataloqda "(none)" qeyd olunur və bu, heç bir pulsuz səviyyənin izlənmədiyini göstərir, lakin əslində 12 fevral 2026-cı ilədək (kart tələb olunmadan) ayda 5,000 sorğulu pulsuz səviyyə mövcud idi və sonradan $5/aylıq …
+- **`byteplus`** — Kataloqda "(none)" göndərilib, lakin BytePlus ModelArk-ın pulsuz səviyyəsi var: yeni hesablar üçün hər LLM modeli üzrə birdəfəlik 500k token sınaq krediti. Kataloq bunu olduğundan az göstərir.
+- **`cerebras`** — Kart tələb etməyən gündəlik 1M token sınağı artıq mövcud deyil. Canlı cerebras.ai/pricing səhifəsinə görə (2026-09-03) bu, birdəfəlik $5 qeydiyyat kreditidir, ödəniş üsulu tələb edir və 30 gün etibarlıdır. `one-time-initial` kimi yenidən təsnif edilib (LongCat formasında); `LEGACY_FREE_PROVIDERS` və təkrarlanan büdcədən çıxarılıb.
+- **`chutes`** — Göndərilmiş pulsuz qeyd "Free tier available" deyir, lakin 15 mart 2026-cı il tarixindən etibarən pulsuz səviyyə rəsmi olaraq ləğv edilib. Kataloq qeydi köhnəlib və heç bir r … olmadığını əks etdirmək üçün yenilənməlidir.
+- **`coze`** — Göndərilmiş "Free ByteDance agent platform" qeydi ümumi istiqamət baxımından doğrudur, lakin pulsuz səviyyənin hazırda ciddi kredit limiti ilə məhdudlaşdırıldığını (gündə 10 kredit ≈ modeldən asılı olaraq 5–100 mesaj) və bunun bir məhdudiyyət …
+- **`deepinfra`** — Göndərilmiş pulsuz qeydimiz "Free signup credits for API testing" deyir — bu, köhnəlmiş görünür. Rəsmi qiymətləndirmə səhifəsi indi kart/öncədən ödəniş tələb edir və ümumi pulsuz qeydiyyat krediti barədə sənədləşdirilmiş məlumat yoxdur. Pulsuz səviyyə …
+- **`deepseek`** — Göndərilmiş qeydimiz "5M free tokens on signup - no credit card required" deyir — bu, birdəfəlik veriliş üçün hələ də doğrudur, lakin əsas məqam odur ki, kreditlər 30 gündən sonra başa çatır (göndərilmiş qeyddə bu göstərilməyib …
+- **`dify`** — Göndərilmiş pulsuz qeyd ("Free open-source AI app builder + RAG") ümumi istiqamət baxımından doğrudur, lakin natamamdır. Bulud üzrə pulsuz səviyyə nəzərdə tutulduğundan daha məhduddur: 200 mesaj krediti birdəfəlik …
+- **`doubao`** — Göndərilmiş pulsuz qeyd "Free Doubao models (ByteDance)" ümumi olaraq doğrudur, lakin kifayət qədər konkret deyil. Hazırkı reallıq daha strukturlaşdırılmışdır: ölçüsü müəyyən edilmiş təkrarlanan gündəlik pulsuz səviyyə mövcuddur (gündə 2M token v …
+- **`duckduckgo-web`** — Əsas "free anonymous access" təsviri hələ də qüvvədədir, lakin xidmət əhəmiyyətli dərəcədə inkişaf edib: indi daha yüksək limitlərə malik açıq ödənişli səviyyələr (Plus/Pro) var ki, bu da pulsuz səviyyənin sürət baxımından məhdudlaşdırıldığını göstərir …
+- **`exa-search`** — Kataloqda pulsuz qeyd "(none)" göstərilir, lakin Exa-nın sənədləşdirilmiş, təkrarlanan pulsuz səviyyəsi var: ayda 1,000 sorğu. Bu, əhəmiyyətli boşluqdur — pulsuz səviyyə daimi olaraq mövcuddur.
+- **`featherless-ai`** — Göndərilmiş pulsuz qeydimiz "Free tier available" deyir, lakin ümumi pulsuz səviyyə yoxdur. Yeganə pulsuz giriş dəvət/müraciət əsasında olan Builder Series proqramı vasitəsilə mümkündür; bu, standart pulsuz …
+- **`firecrawl`** — Kataloqumuzda pulsuz qeyd "(none)" göndərilib və bu, heç bir pulsuz səviyyənin olmadığını nəzərdə tutur. Əslində Firecrawl-ın ayda 1,000 kredit təqdim edən sənədləşdirilmiş, təkrarlanan pulsuz planı var — kataloq qeydi yanlışdır.
+- **`freemodel-dev`** — Göndərilmiş pulsuz qeydimiz "(none)"dir — bu, ehtimal ki, provayderin hələ kataloqa daxil edilmədiyini bildirən yer tutucu idi. Əslində provayderin $300 məbləğində birdəfəlik sınaq krediti təklifi var. Lakin bu, a …
+- **`friendliai`** — Göndərilmiş freeNote ("Serverless inference üçün pulsuz səviyyə") qismən doğrudur, lakin yanıltıcıdır. Tier 0 və pulsuz təyin edilmiş modellər vasitəsilə pulsuz giriş mövcuddur, amma sorğu limitləri müəyyən edilməyib və ada…
+- **`gemini`** — Göndərilmiş freeNote "Gemini 2.5 Flash üçün gündə 1 500 sorğu" deyir — bu, 2025-ci ilin dekabrından əvvəl doğru idi. Google 2025-ci ilin dekabrında pulsuz səviyyə limitlərini 50–80% azaltdı və Gemini 2.5 Flash limitini 1 500 R…
+- **`gitlawb`** — Göndərilmiş freeNote "Pulsuz səviyyə mövcuddur" faktiki olaraq köhnəlib. İlkin pulsuz MiMo girişi 2026-cı ilin mayında ləğv edildi; qalan yeganə "pulsuz" seçim müvəqqəti promosiya modelidir (Nemotron 3 U…
+- **`gitlawb-gmi`** — Qismən hələ də doğrudur — pulsuz səviyyə mövcuddur, lakin 2026-cı ilin may ayının sonlarında MiMo-ya pulsuz giriş ləğv edildikdən sonra artıq yalnız bir modellə (Nemotron 3 Ultra) məhdudlaşır. Göndərilmiş "Pulsuz səviyyə mövcuddur" qeydi…
+- **`groq`** — Göndərilmiş freeNote "30 RPM / 14,4K RPD" yalnız llama-3.1-8b-instant üçün doğrudur. Digər modellərin əksəriyyətində (llama-3.3-70b-versatile daxil olmaqla) 1K RPD kimi xeyli aşağı limit var. Qeyddə modelə xas … **2026-09-02 tarixində həll edildi:** `freeNote` indi "Pulsuz plan: model üzrə limitlər (hər çat modeli üçün gündə 200K token; RPM/RPD üçün console.groq.com/docs/rate-limits səhifəsinə baxın) — hesabda ödəniş metodu yoxdur." şəklindədir və kataloqda model üzrə beş 6M limit var (llama-3.3-70b-versatile 2026-08-16 tarixində pulsuz səviyyədən çıxarılıb) — [2026-09-02 tarixli təkrar audit qeydinə](#tldr--how-much-free-inference-does-omniroute-actually-aggregate) baxın.
+- **`huggingchat`** — Göndərilmiş freeNote ("Pulsuz LLM çat — abunə tələb olunmur. Sorğu limitləri tətbiq edilir.") qismən doğrudur, lakin məhdudiyyətləri əhəmiyyətli dərəcədə kiçik göstərir. Pulsuz səviyyə artıq sərt şəkildə $0,10/…
+- **`huggingface`** — Əhəmiyyətli dərəcədə sərtləşdirilib. Göndərilmiş freeNote ("Minlərlə model üçün pulsuz Inference API") limitsiz və ya geniş pulsuz giriş təəssüratı yaradırdı, lakin 2025-ci ilin ortalarından etibarən pulsuz səviyyə aylıq $0,10 məbləği ilə məhdudlaşdırılır və…
+- **`hyperbolic`** — Göndərdiyimiz freeNote "$1–5 qeydiyyat sınaq kreditləri" deyir — $1 sınaq krediti hissəsi doğrudur, lakin "$5" rəqəmi pulsuz kreditlər deyil, GPU icarəsini aktivləşdirmək üçün tələb olunan minimum depozitə aiddir…
+- **`iflytek`** — Kataloqda "Pulsuz Spark Lite modelləri" deyilir — bu, ümumilikdə doğrudur. Lakin mövcud vəziyyət daha mürəkkəbdir: yalnız Spark Lite pulsuzdur (Max üçün 100M token təklifi təkrarlanan deyil, birdəfəlik promosiya idi); …
+- **`inference-net`** — Göndərilmiş freeNote "Qeydiyyat zamanı $25 pulsuz kredit və tədqiqat qrantları" deyir. Cari qiymət səhifəsində isə yalnız aylıq təkrarlanan $1 kredit göstərilir və $25 qeydiyyat bonusu və ya tədqiqat qrantı barədə heç bir qeyd yoxdur…
+- **`jina-reader`** — Göndərdiyimiz freeNote "(none)" idi və bu, yanlışdır. Jina Reader istifadəyə verildiyi vaxtdan etibarən açıq şəkildə sənədləşdirilmiş pulsuz səviyyəyə malikdir: açarsız giriş üçün 20 RPM, pulsuz API açarı ilə isə birdəfəlik 10M token hədiyyəsi. …
+- **`kiro`** — Kataloqda göndərilmiş freeNote "(none)" göstərilir — lakin Kiro-nun aylıq 50 kreditlik sənədləşdirilmiş və daimi pulsuz səviyyəsi var. Pulsuz səviyyə Kiro-nun ictimai istifadəyə verildiyi vaxtdan mövcud idi (qiymətləndirmə təxminən 2025-ci ilin oktyabrında rəsmiləşdirilib). Bu, …
+- **`llm7`** — Limitlər göndərilmiş freeNote-dakı göstəricilərdən (20 RPM / saatda 100 sorğu → 40 RPM / saatda 200 sorğu) artırılıb. "Qeydiyyat tələb olunmur" iddiası artıq köhnəlib — indi token.llm7.io ünvanından pulsuz token tələb olunur (baxmayaraq ki…
+- **`longcat`** — İctimai preview/beta mərhələsi başa çatıb və Flash modelləri istifadədən çıxarılıb; yalnız GA `LongCat-2.0` qalır. Pulsuz səviyyə hesab qeydiyyatı + **KYC doğrulamasından** sonra aktivləşdirilən **birdəfəlik 10M token hədiyyəsidir** — bu hədiyyə gündəlik və ya aylıq sıfırlanmır. Hədiyyədən sonra istifadə etdikcə ödə prinsipi tətbiq olunur.
+- **`mistral`** — Göndərilmiş freeNote ("Pulsuz Experiment səviyyəsi: bütün modellərə limitli giriş") ümumi istiqamətdə doğrudur, lakin detalları əks etdirmir. Mövcud vəziyyətə xüsusi sənədləşdirilmiş limitlər də daxildir: 2 RPM, 500K TPM, 1B token/…
+- **`monsterapi`** — Göndərilmiş freeNote "Desentralizasiya edilmiş GPU inference üçün pulsuz kreditlər" deyir ki, bu qismən doğrudur — qeydiyyat zamanı birdəfəlik sınaq kreditləri verilir. Lakin təkrarlanan pulsuz səviyyədə aylıq 0 kredit var…
+- **`morph`** — Göndərilmiş freeNote-da cari kredit bölgüsünə uyğun gələn "aylıq 250K kredit" qeyd olunur; lakin daha mühüm məhdudiyyət ayda 200 sorğudur və bu, ilkin k…
+- **`muse-spark-web`** — Göndərilmiş freeNote ("Girişlə pulsuz — Llama modelləri olan Meta AI platforması") giriş tələbini və Llama modellərinə çıxışı ümumilikdə düzgün əks etdirir. Pulsuz səviyyənin sərtləşdirildiyinə dair heç bir hal aşkarlanmayıb; o…
+- **`nlpcloud`** — Göndərilmiş freeNote "Yeni hesablar üçün sınaq kreditləri" deyir ki, bu da birdəfəlik sınaq təəssüratı yaradır. Əslində NLP Cloud-un pulsuz səviyyəsi sınaq krediti deyil, aylıq təkrarlanan pulsuz plandır (ayda 10 000 sorğu)…
+- **`nomic`** — Göndərdiyimiz freeNote heç bir əlavə şərt olmadan "Pulsuz Nomic Embed API" deyir və davamlı pulsuz giriş təəssüratı yaradır. Əslində isə bu, yalnız birdəfəlik 1M tokenlik sınaq kreditidir — həmin token büdcəsi bitdikdən sonra ödənişli abun…
+- **`nous-research`** — 2026-10-15 tarixində yenidən yoxlanılıb: [Nous Portal pulsuz planı](https://portal.nousresearch.com/) aylıq $0 kreditlərlə pulsuz modellər təklif edir, lakin Hermes-4-405B və ya Hermes-4-70B üçün pulsuz girişi təsdiqləmir. Hər iki təsdiqlənməmiş giriş göndərilmiş pulsuz kataloqdan çıxarılıb. Bu, Nous-un heç bir pulsuz modelinin olmadığını göstərmir.
+- **`nvidia`** — İki aktiv pulsuz kataloq endpoint-i (Gemma 4 31B və Nemotron 3.5 Super VL) `recurring-uncapped` kimi təsnif edilir: [NVIDIA-nın FAQ-sı](https://docs.api.nvidia.com/nim/docs/product) Developer Program üzvlərinə prototipləşdirmə üçün pulsuz API girişinin verildiyini bildirir və onların model səhifələrində pulsuz endpoint-lər təqdim olunur. Hesab və API açarı tələb olunur. [Kataloqun sürət limiti bildirişi](https://build.nvidia.com/search) modelə və trafik məhdudiyyətlərinə tabe olmaqla dəqiqədə 40-a qədər sorğu və gündə 10.000 sorğu dərc edir; rəqəmsal token limiti göstərilmir. Sıfır token/kredit məbləğləri ölçülməmiş girişi bildirir, limitsiz ötürmə qabiliyyətini və ya ödəniş zəmanətini yox. Sınaq istifadəsi məhdudiyyətləri qüvvədə qalır (`tos: caution`); sınaq şərtləri kreditlərə icazə verə bilər. Təqaüdə göndərilmiş `openai/gpt-oss-120b` köhnə sətri [#18443](https://github.com/cheaper-inference/OmniRoute/pull/18443) bölməsində ayrıca işlənir və yuxarıdakı iki aktiv modelə daxil edilmir.
+- **`ollama-cloud`** — Göndərdiyimiz freeNote "(none)"-dir — bu məlumat köhnəlib. Ollama Cloud yerləşdirilmiş açıq modellərə həftəlik GPU vaxtına əsaslanan həqiqi pulsuz səviyyə təqdim edən bulud inferensiyası məhsulunu istifadəyə verib.
+- **`openrouter`** — Sıfır kreditli hesablar üçün RPD 200-dən 50-yə endirilib (RPM dəyişməz olaraq 20-dir). Kataloq qeydi RPM üzrə dəqiq idi, lakin kreditsiz baza səviyyəsi üçün RPD-ni 4 dəfə çox göstərirdi. **İş vaxtı izlənməsi (#6842)**: bu artıq sadəcə statik qeyd deyil — `open-sse/services/openrouterQuotaFetcher.ts` hər açar üzrə kredit limitini/qalıqını/sıfırlanmasını və gündəlik/həftəlik/aylıq USD xərclərini `/api/v1/key` + `/api/v1/credits` sorğuları ilə yoxlayır, `open-sse/services/openrouterFreeWindow.ts` isə yuxarıda təsvir edilən `:free`-model üzrə gündəlik 50 və ya 1000 sorğu + 20 RPM pəncərələrini yerli olaraq izləyir (429 zamanı `X-RateLimit-*` cavab başlıqlarından düzəldilir); bunlar Dashboard → Provider Quota bölməsində göstərilir.
+- **`phind`** — Phind 16 yanvar 2026-cı ildə fəaliyyətini dayandırıb. Provayder artıq kataloqdan tamamilə silinib (reyestr, icraçı və həm veb-cookie, həm də API-açar kataloq qeydləri) — xidmətin dayandırılması üzrə presedentə (#5246 Gemini CLI) uyğun olaraq.
+- **`pollinations`** — Qismən uyğun gəlir — "API açarı tələb olunmur" iddiası anonim giriş üçün hələ də doğrudur, lakin kataloqun freeNote-unda bunlar qeyd edilmir: (1) sürət limitləri tətbiq olunur (anonim istifadə üçün təxminən hər 6-15 saniyədə 1 sorğu interval məhdudiyyəti …
+- **`predibase`** — Göndərilən freeNote ($25 pulsuz sınaq krediti, 30 gün etibarlılıq) cari sənədlərlə hələ də uyğun gəlir. Lakin kataloq sınaq müddətində tətbiq olunan paralel 20.000 token/gün serverless sürət limitini qeyd etmir…
+- **`publicai`** — Göndərilən freeNote ("Free community inference tier") ümumilikdə doğrudur, lakin konkretliyi kifayət qədər əks etdirmir: dəqiqədə 20 sorğu sürət limiti artıq sənədləşdirilib. Əhəmiyyətli sərtləşdirmə aşkar edilməyib; xidmət hələ də pulsuz…
+- **`puter`** — Puter sahibinin (Nariman Jelveh) tələbi ilə kataloqdan tamamilə silinib (reyestr, icraçı, pulsuz model kataloqu və API-açar qeydi) — yuxarıdakı xidmətin dayandırılması presedentinə (`phind`) baxın.
+- **`qoder`** — Kataloqumuz freeNote "(none)" təqdim edir, lakin Qoder-in pulsuz səviyyəsi var: limitsiz əsas-model tamamlamaları (gündəlik limitli, dəqiq limit göstərilmir) təqdim edən Community Edition, həmçinin birdəfəlik 14 günlük/300 kreditlik Pr…
+- **`sambanova`** — Göndərdiyimiz qeyd yalnız birdəfəlik $5 krediti (30 gün etibarlılıq) təsvir edirdi. Cari vəziyyətə sənədləşdirilmiş sürət limitləri (20 RPM, 20 RPD, 200k TPD) olan daimi, təkrarlanan pulsuz səviyyə də daxildir və bu səviyyə…
+- **`sensenova`** — Göndərdiyimiz freeNote "Free SenseTime models" deyir; bu, qeyri-müəyyən olsa da, mahiyyət etibarilə doğrudur — pulsuz giriş həqiqətən mövcuddur. Lakin reallıq daha mürəkkəbdir: pulsuz giriş müddətlə məhdudlaşdırılmış ictimai beta proqramıdır (Token…
+- **`serper-search`** — Göndərilən freeNote "(none)" qismən doğrudur — təkrarlanan pulsuz plan yoxdur — lakin Serper qeydiyyat zamanı birdəfəlik 2.500 sınaq krediti təklif edir. Kataloq qeydi daha dəqiq ola bilər…
+- **`siliconflow`** — 2026-10-18 tarixində yenilənib (#17028): qeydiyyat krediti təkrarlanan pulsuz plan deyil, birdəfəlik sınaqdır. On billable flagship id-si statik pulsuz kataloqdan silinib. Bəzi modellər hələ də SiliconFlow-un canlı model üzrə kataloqunda pulsuz kimi işarələnə bilər; idxal və Free nişanı bu sübutu tələb edir (istənilən müsbət qiymət bunu ləğv edir). Heç bir statik limitsiz pulsuz kvota iddia edilmir.
+- **`sparkdesk`** — Qismən uyğun gəlir — göndərilən freeNote "Free iFlytek Spark models" Spark Lite-ın daimi olaraq pulsuz olması baxımından doğrudur, lakin məhdudiyyəti (App ID başına 2 QPS) kifayət qədər göstərmir və əhatə dairəsini həddən artıq geniş təqdim edir (yalnız S…
+- **`stepfun`** — Göndərilən freeNote "Free Step-2 models" köhnəlib. Step-2 LLM üçün pulsuz giriş artıq təklif edilmir; platforma token başına ödəniş əsasında Step 3.x modellərinə keçib və pulsuz LLM səviyyəsi yoxdur. Yalnız…
+- **`t3-web`** — Göndərilən freeNote ümumilikdə doğrudur (məhdud model girişi, Pro isə ayda $8 qarşılığında 50-dən çox modeli açır), lakin iki əsas yeniləməni əks etdirmir: (1) pulsuz səviyyə artıq aylıq deyil, gündəlik sıfırlanır (təxminən … tarixində dəyişdirilib
+- **`tavily-search`** — Kataloqda pulsuz səviyyənin olmadığını bildirən freeNote "(none)" göstərilir, lakin Tavily əslində kredit kartı tələb etməyən, ayda 1.000 kreditlik sənədləşdirilmiş təkrarlanan pulsuz səviyyə təklif edir. Bu, əhəmiyyətli uyğunsuzluqdur…
+- **`tencent`** — Əsasən uyğun gəlir — göndərilən freeNote ("Free Hunyuan Lite models") doğrudur. Hunyuan-lite 2024-cü ilin mayından etibarən daimi olaraq pulsuzdur və 2026-cı ilə qədər də belə qalır. Kataloq qeydi təfərrüatları kifayət qədər əks etdirmir…
+- **`together`** — Göndərilən qeyd "$25 signup credits + 3 permanently free models" deyir, lakin Together indi minimum $5 kredit alışını tələb edir və pulsuz sınaq təklif etmir. $25 qeydiyyat krediti kataloqdan silinib (#12526). Provayder hələ də təxminən 80 daimi pulsuz model yerləşdirir, lakin ToS (Section 4.3(d)) Xidmətlərin ötürülməsini, paylanmasını, yenidən satışını və ya təklif edilməsini açıq şəkildə qadağan edir.
+- **`uncloseai`** — Əsasən uyğun gəlir — qeydiyyatsız, həmişəlik pulsuz olaraq qalır. Lakin ToS (terms-of-use.html) həddindən artıq istifadə zamanı IP əsaslı məhdudiyyətlərin mövcud olduğunu aydınlaşdırır və rəqib ML xidmətlərinin yaradılmasını qadağan edir…
+- **`veoaifree-web`** — Göndərilən `freeNote` "saatda 6 sorğu" qeyd edir, lakin hazırda veoaifree.com saytında belə açıq limit heç yerdə sənədləşdirilməyib. Sayt giriş tələb etmədən limitsiz pulsuz generasiya imkanı təqdim etdiyini bildirir. Siyahıda göstərilən modellər …
+- **`voyage-ai`** — Göndərilən `freeNote` "embedding və reranking üçün 200M pulsuz token" məlumatı token sayı baxımından əsasən doğrudur, lakin yanıltıcıdır — bunun təkrarlanan deyil, hesab başına birdəfəlik təqdim edilən paket olduğunu qeyd etmir…
+- **`yi`** — Göndərilən `freeNote` "Pulsuz Yi-Light modelləri" ifadəsində hazırda heç bir 01.AI sənədlərində və ya model kataloqunda rast gəlinməyən ("Yi-Light") model adına istinad edilir — platform.01.ai saytında belə bir model göstərilmir, …
 
 ## Lüğət
 
-| Termin                  | Məna                                                                                       |
-| :---------------------- | :----------------------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**     | Dəqiqə / gün / saat başına sorğular                                                        |
-| **TPM / TPD**           | Dəqiqə / gün başına tokenlər                                                               |
-| **Documented grant**    | Provayder açıq şəkildə gündəlik/aylıq token limitini dərc edir (müdafiə oluna bilən büdcə) |
-| **Theoretical ceiling** | `rate-limit × 24/7 × 30d` — maksimumdur, verilmiş büdcə deyil                              |
-| **Neuron**              | Cloudflare hesablama vahidi (~1 çıxış tokeni)                                              |
+| Termin                     | Mənası                                                                             |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| **RPM / RPD / RPH**        | Dəqiqə / gün / saat üzrə sorğular                                                  |
+| **TPM / TPD**              | Dəqiqə / gün üzrə tokenlər                                                         |
+| **Sənədləşdirilmiş limit** | Provayder açıq gündəlik/aylıq token limitini dərc edir (əsaslandırıla bilən büdcə) |
+| **Nəzəri maksimum**        | `rate-limit × 24/7 × 30d` — ayrılmış büdcə deyil, maksimum göstəricidir            |
+| **Neyron**                 | Cloudflare hesablama vahidi (~1 çıxış tokeni)                                      |
 
-> 2026-06-05 tarixində provayderlər üzrə aparılan araşdırmadan yaradılmışdır. Yeniləmək üçün araşdırma iş axınını (bax: `_tasks/features-v3.8.12`) yenidən işə salın.
+> 2026-06-05 tarixində provayderlər üzrə aparılmış araşdırma əsasında yaradılıb. Yeniləmək üçün araşdırma iş axınını (bax: `_tasks/features-v3.8.12`) yenidən işə salın.

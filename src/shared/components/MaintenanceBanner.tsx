@@ -8,9 +8,11 @@
  * comes back online.
  */
 
-import { useState, useEffect } from "react";
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import Icon from "./Icon";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 
 export default function MaintenanceBanner() {
   const [show, setShow] = useState(false);
@@ -56,32 +58,28 @@ export default function MaintenanceBanner() {
       }
     };
 
-    // Run immediately on mount, then every 10 seconds
-    checkHealth();
-    const interval = setInterval(checkHealth, 10000);
-    return () => clearInterval(interval);
+    // Run on mount, then every 10 seconds while the tab is visible
+    return startVisiblePolling(checkHealth, 10000);
   }, [t]);
+
+  const dismiss = useCallback(() => {
+    dismissedUntilRecoveryRef.current = true;
+    setShow(false);
+  }, []);
 
   if (!show) return null;
 
+  // Kit warning Alert (role="status"), inline layout. Square, side-less and top-less so it stays
+  // a strip under the Header rather than a card.
   return (
-    <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2.5 flex items-center justify-between gap-3 animate-in slide-in-from-top">
-      <div className="flex items-center gap-2.5">
-        <span className="material-symbols-outlined text-amber-500 text-[18px] animate-pulse">
-          warning
-        </span>
-        <span className="text-sm text-amber-200">{message}</span>
-      </div>
-      <button
-        onClick={() => {
-          dismissedUntilRecoveryRef.current = true;
-          setShow(false);
-        }}
-        className="p-1 rounded hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
-        aria-label={t("close")}
-      >
-        <span className="material-symbols-outlined text-[16px]">close</span>
-      </button>
-    </div>
+    <Alert
+      variant="warning"
+      layout="inline"
+      icon={<Icon name="warning" size={16} />}
+      description={message}
+      dismissLabel={t("close")}
+      onDismiss={dismiss}
+      className="rounded-none border-x-0 border-t-0"
+    />
   );
 }

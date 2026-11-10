@@ -43,9 +43,9 @@ A2A کو **Endpoints → A2A** ٹوگل کے ذریعے کنٹرول کیا جا
 
 ---
 
-## JSON-RPC 2.0 میتھڈز
+## JSON-RPC 2.0 طریقے
 
-### `message/send` — ہم وقت عمل درآمد
+### `message/send` — ہم وقت اجرا
 
 کسی اسکل کو پیغام بھیجتا ہے اور مکمل جواب کا انتظار کرتا ہے۔
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` کے لیے، `metadata.combo` گیٹ وے کی درخواست میں
+`metadata.model` کو واضح طور پر اوور رائیڈ کرتا ہے؛ اسے نظر انداز کردہ `x-combo`
+JSON فیلڈ کے بجائے حقیقی `model` کے طور پر بھیجا جاتا ہے۔ گیٹ وے کی معمول کی API کلید اور
+فی ہدف اجازت بدستور لاگو ہوتی ہے۔ نامعتبر یا خالی combo مسترد کر دیا جاتا ہے۔
+
+نتیجہ `requested_combo` (کالر کا ارادہ)، `dispatched_model`
+(گیٹ وے کی اصل درخواست)، `response_model` (گیٹ وے کا جواب) اور
+`confirmed_combo` ظاہر کرتا ہے۔ آخری فیلڈ اس وقت تک `null` رہتی ہے جب تک گیٹ وے واضح طور پر
+کسی combo کی شناخت نہ کرے۔ A2A فیصلے کے لاگز اجرا کو صرف تصدیق شدہ
+combo سے منسوب کرتے ہیں، جبکہ غیر تصدیق شدہ درخواست کو `requestedCombo` کے طور پر برقرار رکھتے ہیں۔
+
 **جواب:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE اسٹریمنگ
 
-یہ `message/send` جیسا ہی ہے، لیکن حقیقی وقت کی اسٹریمنگ کے لیے Server-Sent Events واپس کرتا ہے۔
+`message/send` جیسا ہی ہے، لیکن حقیقی وقت کی اسٹریمنگ کے لیے Server-Sent Events واپس کرتا ہے۔
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — ٹاسک کی حالت دریافت کریں
+### `tasks/get` — ٹاسک کی حیثیت دریافت کریں
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,72 +150,80 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## دستیاب مہارتیں
+## دستیاب ہنر
 
-OmniRoute ایسی 6 A2A مہارتیں پیش کرتا ہے جو `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` میں منسلک ہیں۔ ہر مہارت کا ماڈیول `src/lib/a2a/skills/` میں موجود ہے۔
+OmniRoute نے `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` میں وائرڈ 6 A2A مہارتوں کو اجاگر کیا۔ ہر مہارت کا ماڈیول `src/lib/a2a/skills/` میں رہتا ہے۔
 
-| مہارت             | ID                   | تفصیل                                                                                                                                                                 | ٹیگز                    | مثالیں                                        |
-| :---------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :-------------------------------------------- |
-| اسمارٹ روٹنگ      | `smart-routing`      | OmniRoute کے combo انجن + اسکورنگ کے ذریعے کسی پرامپٹ کو موزوں ترین provider/combo تک بھیجتی ہے                                                                       | روٹنگ، providers        | "اس پرامپٹ کو بہترین ماڈل کے ذریعے روٹ کریں"  |
-| کوٹہ مینجمنٹ      | `quota-management`   | ہر provider کے کوٹے کی حالت کی اطلاع دیتی ہے، اور کال کرنے والوں کو یہ فیصلہ کرنے میں مدد دیتی ہے کہ کب رفتار محدود یا provider تبدیل کیا جائے                        | کوٹہ، providers         | "anthropic کا کوٹہ چیک کریں"                  |
-| پرووائیڈر دریافت  | `provider-discovery` | انسٹال شدہ providers کو ان کی صلاحیتوں، مفت درجے کے اشاریوں اور OAuth حالت کے ساتھ فہرست کرتی ہے                                                                      | providers، دریافت       | "کون سے providers دستیاب ہیں؟"                |
-| لاگت کا تجزیہ     | `cost-analysis`      | کیٹلاگ + حالیہ استعمال کی بنیاد پر کسی درخواست/گفتگو کی لاگت کا تخمینہ لگاتی ہے                                                                                       | لاگت، استعمال           | "اس گفتگو کی لاگت کا تخمینہ لگائیں"           |
-| صحت کی رپورٹ      | `health-report`      | ہر provider کے لیے circuit breaker، cooldown اور lockout کی حالت یکجا کرتی ہے                                                                                         | صحت، لچک                | "تمام providers کی صحت کی حالت دکھائیں"       |
-| صلاحیتوں کی فہرست | `list-capabilities`  | مکمل 45-اندراجی Agent Skills کیٹلاگ (23 API + 21 CLI + 1 config) کو سیاق و سباق شامل کرنے کے لیے خام SKILL.md URLs کے ساتھ ایک markdown جدول کی صورت میں واپس کرتی ہے | کیٹلاگ، دریافت، مہارتیں | "OmniRoute کی تمام صلاحیتوں کی فہرست دکھائیں" |
+| ہنر                   | ID                   | تفصیل                                                                                                                                                  | ٹیگز                    | مثالیں                                       |
+| :-------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :------------------------------------------- |
+| اسمارٹ روٹنگ          | `smart-routing`      | OmniRoute کے کومبو انجن + اسکورنگ کا استعمال کرتے ہوئے بہترین provider/combo کے ذریعے پرامپٹ کو روٹ کرتا ہے                                            | روٹنگ، فراہم کرنے والے  | "اس پرامپٹ کو بہترین ماڈل کے ذریعے روٹ کریں" |
+| کوٹہ مینجمنٹ          | `quota-management`   | رپورٹ فی فراہم کنندہ کوٹہ ریاست، کال کرنے والوں کو یہ فیصلہ کرنے میں مدد کرتا ہے کہ throttle/switch کب کرنا ہے۔                                        | کوٹہ، فراہم کنندگان     | "انسانیت کے لیے کوٹہ چیک کریں"               |
+| فراہم کنندہ کی دریافت | `provider-discovery` | انسٹال کردہ فراہم کنندگان کی فہرست بنائیں جن میں قابلیت، آزاد درجے کے جھنڈے، OAuth سٹیٹس ہوں۔                                                          | فراہم کرنے والے، دریافت | "کون سے فراہم کنندگان دستیاب ہیں؟"           |
+| لاگت کا تجزیہ         | `cost-analysis`      | کیٹلاگ + کے حالیہ استعمال کے پیش نظر request/conversation کی لاگت کا تخمینہ لگاتا ہے۔                                                                  | لاگت، استعمال           | "اس گفتگو کے لیے تخمینہ لاگت"                |
+| صحت کی رپورٹ          | `health-report`      | مجموعی طور پر سرکٹ بریکر، کولڈاؤن، لاک آؤٹ اسٹیٹ فی فراہم کنندہ                                                                                        | صحت، لچک                | "تمام فراہم کنندگان کی صحت کی حیثیت دکھائیں" |
+| فہرست کی صلاحیتیں     | `list-capabilities`  | سیاق و سباق کے انجیکشن کے لیے خام SKILL.md URLs کے ساتھ مارک ڈاؤن ٹیبل کے بطور مکمل 45-انٹری ایجنٹ سکلز کیٹلاگ (23 API + 21 CLI + 1 config) لوٹاتا ہے۔ | کیٹلاگ، دریافت، مہارت   | "تمام OmniRoute صلاحیتوں کی فہرست بنائیں"    |
 
-> Agent Card کو فعال 352-provider کیٹلاگ کے مطابق رکھا جانا چاہیے؛ providers کی تعداد اور مفت/بغیر تصدیق کے metadata رن ٹائم رجسٹری سے حاصل کیے جاتے ہیں۔
+> ایجنٹ کارڈ کو لائیو 381 فراہم کرنے والے کیٹلاگ کے ساتھ منسلک رکھا جانا چاہیے۔ فراہم کنندہ شمار اور free/no-auth میٹا ڈیٹا رن ٹائم رجسٹری سے حاصل کیا جاتا ہے۔
 
 ### `list-capabilities` مہارت کی تفصیل
 
-`list-capabilities` مہارت بالخصوص ان بیرونی agents کے لیے مفید ہے جنہیں API کالز بھیجنے سے پہلے یہ دریافت کرنا ہو کہ OmniRoute کیا کچھ پیش کرتا ہے۔ یہ ایک منظم markdown جدول artifact واپس کرتی ہے:
+`list-capabilities` مہارت خاص طور پر بیرونی ایجنٹوں کے لیے مفید ہے جنہیں یہ دریافت کرنے کی ضرورت ہے کہ API کالز بھیجنے سے پہلے OmniRoute کیا ظاہر کرتا ہے۔ یہ ایک منظم مارک ڈاون ٹیبل آرٹفیکٹ واپس کرتا ہے:
 
 ```
-| ID | نام | زمرہ | شعبہ | Endpoints/Commands | خام URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | تصدیق اور سیشنز | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-ہر قطار میں `rawUrl` کالم شامل ہوتا ہے تاکہ agents فوری طور پر مکمل SKILL.md حاصل کر سکیں۔ `metadata.totalSkills` فیلڈ کیٹلاگ کے حجم کی عکاسی کرتی ہے (آج 45)۔ نفاذ: `src/lib/a2a/skills/listCapabilities.ts`۔ [AGENT-SKILLS.md](./AGENT-SKILLS.md) بھی دیکھیں۔
+ہر قطار میں `rawUrl` کالم شامل ہوتا ہے تاکہ ایجنٹ فوری طور پر مکمل SKILL.md حاصل کر سکیں۔ `metadata.totalSkills` فیلڈ کیٹلاگ کے سائز (45 آج) کا آئینہ دار ہے۔ نفاذ: `src/lib/a2a/skills/listCapabilities.ts`۔ [AGENT-SKILLS.md](./AGENT-SKILLS.md) بھی دیکھیں۔
 
 ---
 
 ## REST API (معاون)
 
-JSON-RPC اینڈ پوائنٹ `/a2a` مستند A2A نقطۂ داخلہ ہے۔ ذیل کے REST اینڈ پوائنٹس ڈیش بورڈز اور بیرونی ٹولنگ کے لیے معاون رسائی فراہم کرتے ہیں:
+JSON-RPC اینڈ پوائنٹ `/a2a` کینونیکل A2A انٹری پوائنٹ ہے۔ ذیل میں REST اختتامی نکات ڈیش بورڈز اور بیرونی ٹولنگ کے لیے معاون رسائی فراہم کرتے ہیں:
 
-| اینڈ پوائنٹ                  | طریقہ | تفصیل                                                    | توثیق                                             |
-| :--------------------------- | :---- | :------------------------------------------------------- | :------------------------------------------------ |
-| `/api/a2a/status`            | GET   | سرور کی حالت، رجسٹر شدہ مہارتیں                          | (عوامی)                                           |
-| `/api/a2a/tasks`             | GET   | فلٹرز کے ساتھ ٹاسکس کی فہرست                             | انتظامی                                           |
-| `/api/a2a/tasks/[id]`        | GET   | ID کے ذریعے ٹاسک حاصل کریں                               | انتظامی                                           |
-| `/api/a2a/tasks/[id]/cancel` | POST  | زیرِ عمل ٹاسک منسوخ کریں                                 | انتظامی                                           |
-| `/.well-known/agent.json`    | GET   | ایجنٹ کارڈ (A2A دریافت)                                  | (عوامی، 3600s تک کیش شدہ)                         |
-| `/api/a2a/tasks`             | POST  | OmniConductor فلیٹ کو آنے والی تفویض (Conductor PRD RF5) | Bearer بمقابلہ `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| اختتامی نقطہ                 | طریقہ | تفصیل                                                     | تصنیف                                                                                                |
+| :--------------------------- | :---- | :-------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET   | سرور کی حیثیت، رجسٹرڈ ہنر                                 | (عوامی)                                                                                              |
+| `/api/a2a/tasks`             | GET   | فلٹرز کے ساتھ کاموں کی فہرست بنائیں                       | مینجمنٹ یا API کلید (نیچے ملاحظہ کریں)                                                               |
+| `/api/a2a/tasks/[id]`        | GET   | ID کے ذریعہ کام حاصل کریں۔                                | مینجمنٹ یا API کلید (نیچے ملاحظہ کریں)                                                               |
+| `/api/a2a/tasks/[id]/cancel` | POST  | چلنے والے کام کو منسوخ کریں۔                              | مینجمنٹ یا API کلید (نیچے ملاحظہ کریں)                                                               |
+| `/.well-known/agent.json`    | GET   | ایجنٹ کارڈ (A2A دریافت)                                   | (عوامی، کیشڈ 3600s)                                                                                  |
+| `/api/a2a/tasks`             | POST  | OmniConductor بیڑے کے اندر جانے والا وفد (کنڈکٹر PRD RF5) | جیسا کہ `GET`، علاوہ `OMNIROUTE_API_KEY` اگر سیٹ کیا جائے جبکہ `REQUIRE_API_KEY` آف ہو؛ `a2aEnabled` |
 
-**آنے والی Conductor تفویض (`POST /api/a2a/tasks`):** بیرونی A2A ایجنٹس OmniRoute کے ذریعے کوڈنگ کا کام OmniConductor فلیٹ کو تفویض کرتے ہیں۔ باڈی: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — صرف Conductor فلیٹ کی مہارتیں (جو ایجنٹ کارڈ پر مشتہر کی گئی ہیں) تفویض کی جا سکتی ہیں؛ `metadata.conductor.repo.url` درکار ہے (فلیٹ git ریپوز پر کام کرتا ہے)۔ روٹ، سرور سائیڈ `CONDUCTOR_ORCHESTRATOR_TOKEN` (متبادل `CONDUCTOR_HUB_TOKEN`) استعمال کرتے ہوئے، اسے ہب کے `POST /v1/tasks` میں تبدیل کرتا ہے اور `201 { conductor_task_id, state: "submitted" }` واپس کرتا ہے؛ ٹاسک کی حالتیں SSE→A2A مرر (RF1) کے ذریعے واپس منتقل ہوتی ہیں اور `GET /api/a2a/tasks?skill=conductor` کے ذریعے دیکھی جا سکتی ہیں۔
+`/api/a2a/tasks*` کے راستوں تک کون پہنچتا ہے اس کا انحصار لاگ ان اور API کلیدی ترتیبات پر ہے:
+
+- `requireLogin=true` (پہلے سے طے شدہ): مڈل ویئر صرف انتظامی اسناد (ڈیش بورڈ سیشن، `manage` -scope API کلید، `oma_` رسائی ٹوکن) اور `OMNIROUTE_API_KEY` تسلیم کرتا ہے۔ ایک سادہ inference کلید `403` ہو جاتی ہے۔ `Authorization` ہیڈر میں مڈل ویئر صرف `OMNIROUTE_API_KEY` `Bearer <key>` کے طور پر لیتا ہے۔ `Bearer` `401` ہونے کے بعد ایک ننگی کلید یا ٹیب۔
+- `requireLogin=false`، یا آن بورڈنگ سے پہلے لوپ بیک ونڈو: `REQUIRE_API_KEY=true` کے ساتھ کسی بھی درست OmniRoute API کلید یا انتظامی اسناد کو قبول کیا جاتا ہے اور گمنام کال کرنے والوں کو `401` مل جاتا ہے؛ `REQUIRE_API_KEY` کے ساتھ راستے کھلے ہیں۔
+- `POST /api/a2a/tasks` `Authorization` ہیڈر میں `OMNIROUTE_API_KEY` کی ضرورت ہوتی ہے جب وہ متغیر سیٹ ہو اور `REQUIRE_API_KEY` آف ہو۔ دوسرے ہیڈر، جیسے `x-api-key`، وہاں شمار نہیں ہوتے ہیں۔ لاگ ان آف کے ساتھ یا آن بورڈنگ سے پہلے کلید `Bearer` سابقہ کے ساتھ یا اس کے بغیر گزر جاتی ہے۔ لاگ ان کے ساتھ، صرف `Bearer <key>` مڈل ویئر سے گزر جاتا ہے۔
+
+جہاں ایک سند درکار ہے، `read` -scope `oma_` ٹوکن صرف `GET` کے لیے کام کرتا ہے۔
+
+**ان باؤنڈ کنڈکٹر وفد (`POST /api/a2a/tasks`):** بیرونی A2A ایجنٹ OmniRoute کے ذریعے OmniConductor فلیٹ کو کوڈنگ کا کام سونپتے ہیں۔ باڈی: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — صرف کنڈکٹر فلیٹ کی مہارتیں (جن کا اعلان ایجنٹ کارڈ پر کیا گیا ہے) قابل تفویض ہیں۔ `metadata.conductor.repo.url` کی ضرورت ہے (بیڑا گٹ ریپوز پر کام کرتا ہے)۔ روٹ سرور سائیڈ `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) کا استعمال کرتے ہوئے حب کے `POST /v1/tasks` میں ترجمہ کرتا ہے اور `201 { conductor_task_id, state: "submitted" }` واپس کرتا ہے۔ ٹاسک سٹیٹس SSE→A2A مرر (RF1) کے ذریعے واپس آتی ہیں اور `GET /api/a2a/tasks?skill=conductor` کے ذریعے دکھائی دیتی ہیں۔
 
 ---
 
-## نئی مہارت شامل کرنا
+## ایک نیا ہنر شامل کرنا
 
 1. **مہارت کی فائل بنائیں:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   ایک async فنکشن `(task: A2ATask) => Promise<{ artifacts, metadata }>` ایکسپورٹ کریں۔ `smartRouting.ts` جیسی موجودہ مہارتوں کی ساخت پر عمل کریں۔
+   ایک async فنکشن `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` برآمد کریں۔ موجودہ مہارتوں کی شکل پر عمل کریں جیسے `smartRouting.ts`۔ اگر ہنر دوبارہ HTTP پر OmniRoute میں کال کرتا ہے، `src/lib/a2a/selfLoopAuth.ts` سے `buildSelfLoopHeaders(caller)` کے ساتھ ہیڈرز بنائیں تاکہ کال A2A کالر کی کلید سے چلے، `OMNIROUTE_API_KEY` نہیں، اور `redirect: "error"` کو `fetch` پر منتقل کریں تاکہ ری ڈائریکٹ کو کبھی کلید نہ ملے۔ مددگار صرف ہیڈرز بناتا ہے۔ ہر ہنر ری ڈائریکٹ پالیسی خود سیٹ کرتا ہے۔ جب حل شدہ بنیاد URL نجی نیٹ ورک سے باہر سادہ HTTP ہو (لوپ بیک، ایک کنٹینر یا سروس کا نام، اور نجی پتے ٹھیک ہیں) یا اسناد رکھتا ہے تو یہ کلید کو منسلک کرنے کے بجائے `UnsafeSelfLoopTargetError` کو پھینک دیتا ہے، لہذا ایسی مہارت جو مسترد شدہ کالوں کو نگلتی ہے اس غلطی کو دوبارہ ختم کرنا چاہیے۔
 
-2. **ہینڈلر رجسٹر کریں:** `src/lib/a2a/taskExecution.ts` میں، `A2A_SKILL_HANDLERS` میں ایک اندراج شامل کریں:
+2. **رجسٹر ہینڈلر:** `src/lib/a2a/taskExecution.ts` میں، `A2A_SKILL_HANDLERS` میں ایک اندراج شامل کریں:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...موجودہ مہارتیں
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **ایجنٹ کارڈ میں ظاہر کریں:** `src/app/.well-known/agent.json/route.ts` میں، `skills` ارے میں شامل کریں:
+3. **ایجنٹ کارڈ میں ظاہر کریں:** `src/lib/a2a/agentCardMetadata.ts` میں ( `/.well-known/agent.json` اور `/.well-known/agent-card.json` کے ذریعے اشتراک کردہ)، `skills` صف میں شامل کریں:
 
    ```json
    {
@@ -223,9 +235,9 @@ JSON-RPC اینڈ پوائنٹ `/a2a` مستند A2A نقطۂ داخلہ ہے۔ 
    }
    ```
 
-4. **ٹیسٹس لکھیں:** `tests/unit/a2a-<your-skill>.test.ts`۔ کامیاب راستے + خرابی کے راستے کا احاطہ کریں۔
+4. **ٹیسٹ لکھیں:** `tests/unit/a2a-<your-skill>.test.ts` کور ہیپی پاتھ + ایرر پاتھ۔
 
-5. اس فائل کے `Available Skills` ٹیبل میں نئی مہارت کو **دستاویزی شکل دیں**۔
+5. **دستاویز** اس فائل کے `Available Skills` ٹیبل میں نئی مہارت۔
 
 ---
 
@@ -262,9 +274,9 @@ JSON-RPC اینڈ پوائنٹ `/a2a` مستند A2A نقطۂ داخلہ ہے۔ 
 
 ---
 
-## انٹیگریشن کی مثالیں
+## انضمام کی مثالیں۔
 
-### Python (requests)
+### ازگر (درخواستیں)
 
 ```python
 import requests
@@ -283,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (لانے)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

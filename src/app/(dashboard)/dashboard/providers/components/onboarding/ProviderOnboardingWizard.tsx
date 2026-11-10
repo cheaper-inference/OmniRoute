@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Icon from "@/shared/components/Icon";
+
+import { useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -13,8 +15,12 @@ import {
   Input,
   KiroOAuthWrapper,
   OAuthModal,
+  Select,
 } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
+
+import ProviderOnboardingHeader from "./ProviderOnboardingHeader";
 
 import {
   buildProviderSpecificData,
@@ -125,24 +131,22 @@ function StepPill({ active, done, label }: { active: boolean; done: boolean; lab
             : "border-border bg-bg-subtle text-text-muted"
       }`}
     >
-      <span className="material-symbols-outlined text-[16px]">
-        {done ? "check" : active ? "radio_button_checked" : "radio_button_unchecked"}
-      </span>
+      <Icon
+        name={done ? "check" : active ? "radio_button_checked" : "radio_button_unchecked"}
+        size={16}
+      />
       {label}
     </div>
   );
 }
 
+// Kit chart tint + its AA ink (never white on the solid chart hue: 2.4–3.5:1 in dark).
 function getProviderIconClass(providerId: string): string {
   const classes = [
-    "bg-indigo-500",
-    "bg-sky-500",
-    "bg-emerald-500",
-    "bg-violet-500",
-    "bg-amber-500",
-    "bg-rose-500",
-    "bg-cyan-500",
-    "bg-fuchsia-500",
+    "bg-[var(--ci-chart-2-subtle)] text-[var(--ci-chart-2-ink)]",
+    "bg-[var(--ci-chart-3-subtle)] text-[var(--ci-chart-3-ink)]",
+    "bg-[var(--ci-chart-4-subtle)] text-[var(--ci-chart-4-ink)]",
+    "bg-[var(--ci-chart-5-subtle)] text-[var(--ci-chart-5-ink)]",
   ];
   const index = [...providerId].reduce((sum, char) => sum + char.charCodeAt(0), 0) % classes.length;
   return classes[index];
@@ -160,20 +164,18 @@ function ProviderOptionCard({
   t: ProviderMessageTranslator;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`flex h-full flex-col gap-3 rounded-xl border p-4 text-left transition-colors ${
-        selected
-          ? "border-primary/60 bg-primary/10"
-          : "border-border bg-bg-card hover:border-primary/40 hover:bg-bg-subtle"
+      className={`h-full w-full flex-col items-stretch justify-start gap-3 whitespace-normal rounded-xl p-4 text-left font-normal ${
+        selected ? "border-primary/60 bg-primary/10" : "hover:border-primary/40"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div
-            className={`flex size-10 items-center justify-center rounded-lg text-white ${getProviderIconClass(
+            className={`flex size-10 items-center justify-center rounded-lg ${getProviderIconClass(
               option.id
             )}`}
           >
@@ -200,7 +202,7 @@ function ProviderOptionCard({
           {providerText(t, "onboardingApiKeyOptional", "API key optional")}
         </span>
       )}
-    </button>
+    </Button>
   );
 }
 
@@ -231,9 +233,7 @@ function ResultSummary({
                   : "bg-primary/10 text-primary"
             }`}
           >
-            <span className="material-symbols-outlined text-[28px]">
-              {valid ? "check_circle" : failed ? "error" : "dns"}
-            </span>
+            <Icon name={valid ? "check_circle" : failed ? "error" : "dns"} size={28} />
           </div>
           <div>
             <h2 className="text-xl font-semibold text-text-main">
@@ -289,7 +289,7 @@ function ResultSummary({
               detailsHref && (
                 <Link
                   href={detailsHref}
-                  className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+                  className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-primary/90"
                 >
                   {providerText(t, "onboardingOpenProviderDetails", "Open provider details")}
                 </Link>
@@ -333,6 +333,7 @@ export default function ProviderOnboardingWizard() {
   const [step, setStep] = useState<WizardStep>("type");
   const [query, setQuery] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<WizardProviderOption | null>(null);
+  const providerListHeadingId = useId();
   const [apiKeyForm, setApiKeyForm] = useState<ApiKeyFormState>(EMPTY_API_KEY_FORM);
   const [customForm, setCustomForm] = useState<CustomFormState>(DEFAULT_CUSTOM_FORM);
   const [status, setStatus] = useState("");
@@ -539,28 +540,16 @@ export default function ProviderOnboardingWizard() {
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <Link
-            href="/dashboard/providers"
-            className="text-sm text-text-muted hover:text-text-main"
-          >
-            ← {text("backToProviders", "Back to providers")}
-          </Link>
-          <h1 className="mt-2 text-3xl font-bold text-text-main">
-            {text("onboardingWizard", "Provider Onboarding Wizard")}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-text-muted">
-            {text(
-              "onboardingWizardDescription",
-              "Connect API-key, custom compatible, and OAuth providers with validation, persistence, and an immediate connection test."
-            )}
-          </p>
-        </div>
-        <Button variant="ghost" onClick={() => router.push("/dashboard/providers")}>
-          {text("close", "Close")}
-        </Button>
-      </div>
+      <ProviderOnboardingHeader
+        title={text("onboardingWizard", "Provider Onboarding Wizard")}
+        description={text(
+          "onboardingWizardDescription",
+          "Connect API-key, custom compatible, and OAuth providers with validation, persistence, and an immediate connection test."
+        )}
+        backLabel={text("backToProviders", "Back to providers")}
+        closeLabel={text("close", "Close")}
+        onClose={() => router.push("/dashboard/providers")}
+      />
 
       <div className="flex flex-wrap gap-2">
         <StepPill
@@ -589,6 +578,10 @@ export default function ProviderOnboardingWizard() {
         <div className="rounded-lg border border-primary/25 bg-primary/10 p-3 text-sm text-primary">
           {status}
         </div>
+      )}
+
+      {selectedProvider && (step === "credentials" || step === "oauth") && (
+        <ProviderTosNotice providerId={selectedProvider.id} />
       )}
 
       {step === "type" && (
@@ -623,18 +616,19 @@ export default function ProviderOnboardingWizard() {
                 ),
               },
             ].map((item) => (
-              <button
+              <Button
                 key={item.id}
-                type="button"
+                variant="outline"
                 onClick={() => resetProviderSelection(item.id)}
-                className="rounded-xl border border-border bg-bg-card p-5 text-left transition-colors hover:border-primary/50 hover:bg-bg-subtle"
+                className="h-auto w-full flex-col items-start justify-start gap-0 whitespace-normal rounded-xl p-5 text-left font-normal hover:border-primary/50"
               >
-                <span className="material-symbols-outlined text-[32px] text-primary">
-                  {item.icon}
+                {/* Wrapped: the kit sizes direct svg children of .ci-button to the icon token. */}
+                <span aria-hidden className="text-primary">
+                  <Icon name={item.icon} size={32} />
                 </span>
                 <h2 className="mt-3 text-lg font-semibold text-text-main">{item.title}</h2>
                 <p className="mt-2 text-sm text-text-muted">{item.text}</p>
-              </button>
+              </Button>
             ))}
           </div>
         </Card>
@@ -645,7 +639,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-text-main">
+                <h2 id={providerListHeadingId} className="text-xl font-semibold text-text-main">
                   {kind === "oauth"
                     ? text("onboardingChooseOAuthProvider", "Choose an OAuth provider")
                     : text("onboardingChooseApiKeyProvider", "Choose an API-key provider")}
@@ -667,7 +661,11 @@ export default function ProviderOnboardingWizard() {
               placeholder={text("onboardingSearchProviders", "Search providers…")}
               icon="search"
             />
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div
+              role="group"
+              aria-labelledby={providerListHeadingId}
+              className="grid gap-3 md:grid-cols-2 xl:grid-cols-3"
+            >
               {filteredOptions.map((option) => (
                 <ProviderOptionCard
                   key={option.id}
@@ -787,38 +785,35 @@ export default function ProviderOnboardingWizard() {
               </Button>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              <label className="flex flex-col gap-1 text-sm font-medium text-text-main">
-                {text("onboardingProtocol", "Protocol")}
-                <select
-                  className="rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-main outline-none focus:border-primary"
-                  value={customForm.mode}
-                  onChange={(event) =>
-                    setCustomForm({
-                      ...customForm,
-                      mode: event.target.value as CompatibleNodeMode,
-                      baseUrl:
-                        event.target.value === "openai"
-                          ? "https://api.openai.com/v1"
-                          : event.target.value === "anthropic"
-                            ? "https://api.anthropic.com/v1"
-                            : "",
-                      chatPath: event.target.value === "cc" ? "/v1/messages?beta=true" : "",
-                    })
-                  }
-                >
-                  <option value="openai">
-                    {text("onboardingOpenAiCompatible", "OpenAI-compatible")}
+              <Select
+                label={text("onboardingProtocol", "Protocol")}
+                value={customForm.mode}
+                onChange={(event) =>
+                  setCustomForm({
+                    ...customForm,
+                    mode: event.target.value as CompatibleNodeMode,
+                    baseUrl:
+                      event.target.value === "openai"
+                        ? "https://api.openai.com/v1"
+                        : event.target.value === "anthropic"
+                          ? "https://api.anthropic.com/v1"
+                          : "",
+                    chatPath: event.target.value === "cc" ? "/v1/messages?beta=true" : "",
+                  })
+                }
+              >
+                <option value="openai">
+                  {text("onboardingOpenAiCompatible", "OpenAI-compatible")}
+                </option>
+                <option value="anthropic">
+                  {text("onboardingAnthropicCompatible", "Anthropic-compatible")}
+                </option>
+                {ccCompatibleProviderEnabled && (
+                  <option value="cc">
+                    {text("onboardingClaudeCodeCompatible", "Claude Code-compatible")}
                   </option>
-                  <option value="anthropic">
-                    {text("onboardingAnthropicCompatible", "Anthropic-compatible")}
-                  </option>
-                  {ccCompatibleProviderEnabled && (
-                    <option value="cc">
-                      {text("onboardingClaudeCodeCompatible", "Claude Code-compatible")}
-                    </option>
-                  )}
-                </select>
-              </label>
+                )}
+              </Select>
               <Input
                 label={text("displayName", "Display name")}
                 value={customForm.name}

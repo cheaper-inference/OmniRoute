@@ -11,16 +11,18 @@
 PII सिकाइहरू)। यसलाई पूर्ण रूपमा पढ्नुहोस्; परियोजनाका नियमहरू यहाँ पुनः नथप्नुहोस्। तलका सबै कुरा
 Claude Code मा मात्र लागू हुन्छन् — `AGENTS.md` मा पहिले नै परिभाषित नियमहरूका सञ्चालनगत परिष्करणहरू।
 
-## Worktree पृथकीकरण — Claude Code का विशिष्टताहरू
+## Worktree अलगाव — Claude Code विशिष्ट कुराहरू
 
-पूर्ण अनिवार्य worktree प्रोटोकल (आधार शाखा पुष्टि, `.claude/worktrees/` को प्रामाणिक
-पथ, `cp -al` node_modules, हटाउने नियमहरू) `AGENTS.md` → Git कार्यप्रवाह → "Worktree
-पृथकीकरण" मा छ। Claude-Code-विशिष्ट बुँदाहरू:
+पूर्ण अनिवार्य worktree प्रोटोकल (base-branch पुष्टिकरण, `.claude/worktrees/` आधिकारिक
+पथ, `cp -al` node_modules, teardown नियमहरू)
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) मा छ (`AGENTS.md` →
+Git वर्कफ्लो → "Worktree अलगाव" मा सारांशित)। Claude-Code-विशिष्ट कुराहरू:
 
-- सञ्चालकले पहिले नै नभनेसम्म `AskUserQuestion` मार्फत आधार शाखा पुष्टि गर्नुहोस् (कडा नियम #19)।
-- मूल `EnterWorktree` उपकरणलाई प्राथमिकता दिनुहोस् — यसले worktree हरू पहिले नै
-  `.claude/worktrees/` (प्रामाणिक पथ) अन्तर्गत सिर्जना गर्छ। दस्तावेजीकृत `git
-worktree add` आदेशद्वारा worktree सिर्जना गर्नुहोस्, त्यसपछि यसको `path` सहित `EnterWorktree` बोलाउनुहोस्।
+- `AskUserQuestion` (कडा नियम #19) मार्फत अपरेटरसँग base branch पुष्टि गर्नुहोस्, उनीहरूले
+  पहिल्यै भनिसकेका छैनन् भने बाहेक।
+- नेटिभ `EnterWorktree` उपकरणलाई प्राथमिकता दिनुहोस् — यसले पहिल्यै नै
+  `.claude/worktrees/` (आधिकारिक पथ) मुनि worktree हरू सिर्जना गर्छ। लेखिएको `git
+worktree add` आदेशबाट worktree सिर्जना गर्नुहोस्, त्यसपछि यसको `path` सहित `EnterWorktree` कल गर्नुहोस्।
 
 ## सत्र-पार सुरक्षा — Claude Code का विशिष्टताहरू
 

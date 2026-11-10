@@ -170,6 +170,42 @@ vi.mock("next-intl", () => ({
 }));
 
 describe("EndpointPageClient", () => {
+  it("requires credential-upload consent before enabling cloud sync", async () => {
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      if (getRequestPath(input) === "/api/settings")
+        return Promise.resolve(
+          jsonResponse({
+            cloudEnabled: false,
+            cloudConfigured: true,
+            cloudUrl: "https://cloud.example",
+            hideEndpointCloudflaredTunnel: true,
+            hideEndpointTailscaleFunnel: true,
+            hideEndpointNgrokTunnel: true,
+          })
+        );
+      return Promise.resolve(jsonResponse({ data: [], providers: [], keys: [] }));
+    });
+    renderEndpointPage();
+    await waitForText("https://cloud.example");
+    const enable = Array.from(document.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("enableCloud")
+    );
+    expect(enable).toBeDefined();
+    act(() => enable!.click());
+    expect(document.body.textContent).toContain("OAuth access/refresh tokens");
+    const consent = document.querySelector<HTMLInputElement>(
+      // Toggles are kit switches (input[type=checkbox][role=switch]) since KEA-7886
+      "input[type=checkbox]:not([role=switch])"
+    )!;
+    expect(consent.checked).toBe(false);
+    const submit = Array.from(document.querySelectorAll("button")).find(
+      (b) => b.getAttribute("class")?.includes("w-full") && b.textContent?.includes("enable")
+    );
+    expect(submit).toBeDefined();
+    expect(submit!.disabled).toBe(true);
+    act(() => consent.click());
+    expect(submit!.disabled).toBe(false);
+  });
   const fetchMock = vi.fn();
 
   beforeEach(() => {
@@ -239,6 +275,60 @@ describe("EndpointPageClient", () => {
     expect(displayedUrls.indexOf("https://api.example.com/v1")).toBeLessThan(
       displayedUrls.indexOf("http://localhost:20131/v1")
     );
+  });
+
+  // F4 (wave-1 checkpoint): the whole destination line was break-all, so at 390 px the label
+  // split mid-word ("Cloud sync d|estination"). Only the URL may break anywhere now, and the
+  // row wraps instead of squeezing the text block.
+  it("breaks only the cloud destination URL, never the label words", async () => {
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      if (getRequestPath(input) === "/api/settings")
+        return Promise.resolve(
+          jsonResponse({
+            cloudEnabled: false,
+            cloudConfigured: true,
+            cloudUrl: "https://cloud.example",
+            hideEndpointCloudflaredTunnel: true,
+            hideEndpointTailscaleFunnel: true,
+            hideEndpointNgrokTunnel: true,
+          })
+        );
+      return Promise.resolve(jsonResponse({ data: [], providers: [], keys: [] }));
+    });
+    renderEndpointPage();
+    await waitForText("https://cloud.example");
+    const line = document.querySelector<HTMLElement>('[data-testid="cloud-sync-destination"]')!;
+    expect(line).not.toBeNull();
+    expect(line.className).not.toMatch(/\bbreak-all\b/);
+    expect(line.className).toMatch(/\bbreak-words\b/);
+    expect(line.querySelector("span.break-all")?.textContent).toContain("https://cloud.example");
+    expect(line.parentElement!.parentElement!.className).toMatch(/\bflex-wrap\b/);
+  });
+
+  it("does not break-all the 'not configured' fallback when no cloud URL is set", async () => {
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      if (getRequestPath(input) === "/api/settings")
+        return Promise.resolve(
+          jsonResponse({
+            cloudEnabled: false,
+            cloudConfigured: false,
+            hideEndpointCloudflaredTunnel: true,
+            hideEndpointTailscaleFunnel: true,
+            hideEndpointNgrokTunnel: true,
+          })
+        );
+      return Promise.resolve(jsonResponse({ data: [], providers: [], keys: [] }));
+    });
+    renderEndpointPage();
+    await waitForText("notConfigured");
+    const line = document.querySelector<HTMLElement>('[data-testid="cloud-sync-destination"]')!;
+    expect(line).not.toBeNull();
+    const fallback = [...line.querySelectorAll("span")].find(
+      (s) => s.textContent === "notConfigured"
+    );
+    expect(fallback).toBeDefined();
+    expect(fallback!.className).not.toMatch(/\bbreak-all\b/);
+    expect(line.querySelector(".break-all")).toBeNull();
   });
 
   it("renders the endpoint shell before models finish and skips hidden tunnel probes", async () => {
@@ -359,6 +449,136 @@ describe("EndpointPageClient", () => {
     const requestPaths = fetchMock.mock.calls.map(([input]) => getRequestPath(input));
     expect(requestPaths.length).toBeGreaterThan(0);
     expect(requestPaths.every((path) => path === "/api/settings")).toBe(true);
+  });
+
+  // #18071: axe `nested-interactive` — the Tailscale and ngrok rows were `div role="button"`
+  // wrapping the copy/action Buttons. The expand control is now a real button beside them.
+  function mockTunnelRows() {
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const path = getRequestPath(input);
+      if (path === "/api/settings") {
+        return Promise.resolve(
+          jsonResponse({
+            cloudEnabled: false,
+            cloudConfigured: false,
+            hideEndpointCloudflaredTunnel: false,
+            hideEndpointTailscaleFunnel: false,
+            hideEndpointNgrokTunnel: false,
+          })
+        );
+      }
+      if (path === "/api/network/info") {
+        return Promise.resolve(
+          jsonResponse({ lanUrls: [], tailscaleIpUrl: "http://100.64.0.7:20128" })
+        );
+      }
+      if (path === "/api/tunnels/cloudflared") {
+        return Promise.resolve(
+          jsonResponse({ phase: "stopped", supported: true, installed: true, running: false })
+        );
+      }
+      if (path === "/api/tunnels/tailscale") {
+        return Promise.resolve(
+          jsonResponse({ phase: "unsupported", supported: false, installed: false })
+        );
+      }
+      if (path === "/api/tunnels/ngrok") {
+        return Promise.resolve(
+          jsonResponse({ phase: "needs_auth", supported: false, installed: false })
+        );
+      }
+      if (path === "/v1/models") return Promise.resolve(jsonResponse({ data: [] }));
+      if (path === "/api/mcp/status") return Promise.resolve(jsonResponse({ online: false }));
+      if (path === "/api/a2a/status") {
+        return Promise.resolve(jsonResponse({ status: "ok", tasks: { activeStreams: 0 } }));
+      }
+      if (path === "/api/search/providers") return Promise.resolve(jsonResponse({ providers: [] }));
+      if (path === "/api/cli-tools/keys") return Promise.resolve(jsonResponse({ keys: [] }));
+      throw new Error(`Unexpected request: ${path}`);
+    });
+  }
+
+  it("does not nest interactive controls inside the tunnel rows (#18071)", async () => {
+    mockTunnelRows();
+    renderEndpointPage();
+    await waitForText("Tailscale Funnel");
+    await waitForText("ngrok Tunnel");
+    await waitForText("100.64.0.7:20128");
+
+    for (const el of Array.from(document.querySelectorAll('[role="button"]'))) {
+      expect(el.querySelector("button, a[href], input, select, textarea")).toBeNull();
+    }
+    for (const button of Array.from(document.querySelectorAll("button"))) {
+      expect(button.querySelector("button")).toBeNull();
+    }
+  });
+
+  it("expands a tunnel row from a real button and copies without toggling it (#18071)", async () => {
+    mockTunnelRows();
+    renderEndpointPage();
+    await waitForText("100.64.0.7:20128");
+    // Status responses keep landing after the first paint: query the live nodes every time.
+    const tsToggle = () =>
+      document.querySelector(
+        'button[aria-controls="endpoint-tunnel-ts-details"]'
+      ) as HTMLButtonElement | null;
+    const ngrokToggle = () =>
+      document.querySelector(
+        'button[aria-controls="endpoint-tunnel-ngrok-details"]'
+      ) as HTMLButtonElement | null;
+
+    expect(tsToggle()).not.toBeNull();
+    expect(tsToggle()?.textContent).toContain("Tailscale Funnel");
+    expect(tsToggle()?.getAttribute("aria-expanded")).toBe("false");
+
+    // The inline copy control sits beside the toggle, not inside it, and does not toggle.
+    const copyButton = document.querySelector(
+      'button[aria-label="Copy http://100.64.0.7:20128"]'
+    ) as HTMLButtonElement | null;
+    expect(copyButton).not.toBeNull();
+    expect(tsToggle()?.contains(copyButton)).toBe(false);
+    act(() => {
+      copyButton?.click();
+    });
+    expect(tsToggle()?.getAttribute("aria-expanded")).toBe("false");
+    act(() => {
+      tsToggle()?.click();
+    });
+    expect(tsToggle()?.getAttribute("aria-expanded")).toBe("true");
+    expect(document.getElementById("endpoint-tunnel-ts-details")).not.toBeNull();
+
+    act(() => {
+      tsToggle()?.click();
+    });
+    expect(tsToggle()?.getAttribute("aria-expanded")).toBe("false");
+    expect(document.getElementById("endpoint-tunnel-ts-details")).toBeNull();
+
+    expect(ngrokToggle()?.textContent).toContain("ngrok Tunnel");
+    act(() => {
+      ngrokToggle()?.click();
+    });
+    expect(ngrokToggle()?.getAttribute("aria-expanded")).toBe("true");
+    expect(document.getElementById("endpoint-tunnel-ngrok-details")).not.toBeNull();
+  });
+
+  it("draws the tunnel phase chips as kit badges with semantic tones (#18071)", async () => {
+    mockTunnelRows();
+    renderEndpointPage();
+    await waitForText("Unsupported");
+    await waitForText("Needs Auth");
+    await waitForText("Stopped");
+
+    const chips = Array.from(document.querySelectorAll('[data-slot="badge"]'));
+    const toneOf = (label: string) =>
+      chips.find((el) => el.textContent === label)?.getAttribute("data-tone");
+    expect(toneOf("Unsupported")).toBe("warning"); // Tailscale
+    expect(toneOf("Needs Auth")).toBe("warning"); // ngrok
+    expect(toneOf("Stopped")).toBe("neutral"); // Cloudflare
+    // The phase chips no longer carry the hand-tinted classes (axe contrast node).
+    for (const label of ["Unsupported", "Needs Auth", "Stopped"]) {
+      const chip = chips.find((el) => el.textContent === label);
+      expect(chip?.className).not.toMatch(/border-(warning|border)\/\d+|bg-warning\/10/);
+    }
   });
 
   it("does not load compression settings on the Endpoint page", async () => {

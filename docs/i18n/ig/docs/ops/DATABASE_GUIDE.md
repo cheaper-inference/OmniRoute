@@ -530,21 +530,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 
 ### Ọnọdụ 2: Faịlụ DB Bụ Isi Mebiri Emebi
 
-Weghachite ya site na ndabere:
+Weghachite ya site na nkwado ndabere:
 
 ```bash
-omniroute sync pull --merge   # ma ọ bụ: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Ọnọdụ 3: Igodo Nzuzo Furu Efu
+`omniroute sync pull [outPath]` na-ebudata naanị ebe nchekwa `.tar.gz` zuru ezu site na sava na-arụ ọrụ
+(`GET /api/db-backups/exportAll`, a chọrọ nzere onye njikwa); ọ naghị eweghachi ihe ọ bụla.
 
-**Enweghị ụzọ mgbake ọ bụla** ma ọ bụrụ na igodo ahụ adịghị. Enweghị ike ịgụ mpaghara ndị ezoro ezo. Jiri aka tinye ndị na-eweta ọrụ niile ọzọ site na iji ozi nzere ọhụrụ.
+### Ọnọdụ 3: Igodo Izo Ezo Furu Efu
 
-> **Mbelata ihe ize ndụ**: Na-edobe ndabere igodo nzuzo ahụ iche mgbe niile, ọ kacha mma n'ime njikwa okwuntughe ma ọ bụ KMS.
+**Enweghị ike iweghachi ya** ma ọ bụrụ na igodo ahụ adịghị. Enweghị ike ịgụ oghere ndị ezoro ezo. Jiri aka tinye ndị na-eweta ọrụ niile ọzọ site na iji nzere ọhụrụ.
+
+> **Mbelata Ihe Ize Ndụ**: Na-edobe nkwado ndabere nke igodo izo ezo iche mgbe niile, ọ kachasị mma n'ime njikwa okwuntughe ma ọ bụ KMS.
 
 ### Ọnọdụ 4: Diski Jupụtara
 
-SQLite ga-eweghachi njehie `SQLITE_FULL`. Hapụ ohere na diski, wee mee:
+SQLite ga-eweghachi njehie `SQLITE_FULL`. Hapụ ohere na diski, wee mee nke a:
 
 ```bash
 # Mee checkpoint WAL iji hapụ ohere

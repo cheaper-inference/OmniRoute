@@ -10,44 +10,49 @@
 
 ## Mi az a szolgáltató?
 
-Gondoljon a szolgáltatóra úgy, mint egy **mobilszolgáltatóra**. Ahogyan a telefonáláshoz mobilszolgáltatóra van szüksége, az AI-modellek használatához AI-szolgáltatóra van szüksége. Az OmniRoute olyan, mint egy telefon, amely **minden szolgáltatóval** működik — automatikusan válthat közöttük.
+Gondoljon a szolgáltatóra úgy, mint egy **mobilszolgáltatóra**. Ahogyan a telefonáláshoz mobilszolgáltatóra van szüksége, úgy az AI-modellek használatához AI-szolgáltatóra van szüksége. Az OmniRoute olyan, mint egy **minden szolgáltatóval** működő telefon — automatikusan válthat közöttük.
 
 ### Szolgáltatótípusok
 
-| Típus          | Mit jelent                        | Példák                            | Költség                      |
-| -------------- | --------------------------------- | --------------------------------- | ---------------------------- |
-| **Ingyenes**   | Nem szükséges fizetés             | Kiro, OpenCode Free, Pollinations | $0                           |
-| **API-kulcs**  | API-kulcsra van szüksége          | OpenAI, Anthropic, Google         | Használat alapján fizetendő  |
-| **OAuth**      | Bejelentkezés a saját fiókjával   | Claude Code, GitHub Copilot       | Előfizetés                   |
-| **Webes süti** | A böngésző-munkamenetét használja | ChatGPT Web (Codex), Gemini Web   | $0 (az Ön fiókját használja) |
+| Típus          | Mit jelent                        | Példák                          | Költség                      |
+| -------------- | --------------------------------- | ------------------------------- | ---------------------------- |
+| **Ingyenes**   | Nem szükséges fizetés             | Kiro, Pollinations              | $0                           |
+| **API-kulcs**  | API-kulcsra van szüksége          | OpenAI, Anthropic, Google       | Használat alapján fizetendő  |
+| **OAuth**      | Bejelentkezés saját fiókkal       | Claude Code, GitHub Copilot     | Előfizetés                   |
+| **Webes süti** | A böngésző munkamenetét használja | ChatGPT Web (Codex), Gemini Web | $0 (az Ön fiókját használja) |
 
 ### Webes sütit használó szolgáltatók
 
-Az általános beállítási útmutatást, a korlátozásokat, a hibaelhárítást és a szolgáltatóspecifikus hitelesítési útmutatást lásd a **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** dokumentumban.
+Az általános beállítási utasításokat, korlátozásokat, hibaelhárítási lépéseket és szolgáltatóspecifikus hitelesítési útmutatást lásd a **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** dokumentumban.
 ---
 
-## Gyors kezdés: az első szolgáltató csatlakoztatása
+## Gyors kezdés: Az első szolgáltató csatlakoztatása
 
 ### Opcionális kezdeti beállítás ingyenes szolgáltatókhoz
 
-Az első indításkor megjelenő varázsló külön **Ingyenes szolgáltatók beállítása** kártyát kínál. Az OmniRoute hitelesítést nem igénylő szolgáltatói nyilvántartásából állítja össze az aktuálisan használható listát, majd a megerősítés előtt lehetővé teszi az egyes szolgáltatók áttekintését és kijelölésük megszüntetését. Az OmniRoute megjeleníti a szolgáltató figyelmeztetését és a webhelyére mutató hivatkozást, így először áttekintheti a harmadik fél feltételeit, adatvédelmi szabályait, elérhetőségét és sebességkorlátait.
+Az első indításkor megjelenő varázsló egy külön **Ingyenes szolgáltatók beállítása** kártyát kínál. Az aktuálisan
+jogosult szolgáltatók listáját az OmniRoute hitelesítést nem igénylő szolgáltatói nyilvántartásából állítja össze, majd lehetővé teszi az egyes
+szolgáltatók áttekintését és kijelölésük megszüntetését a megerősítés előtt. Az OmniRoute megjeleníti a szolgáltató figyelmeztetését és a webhelyére mutató hivatkozást,
+így előzetesen áttekintheti a harmadik fél feltételeit, adatvédelmi szabályzatát, rendelkezésre állását és használati korlátait.
 
-Ez a művelet opcionális: a varázsló befejezése soha nem hoz létre észrevétlenül kapcsolatokat ingyenes szolgáltatókhoz. Csak a még hiányzó szolgáltatókat hozza létre, a meglévő, testreszabott kapcsolatokat változatlanul hagyja, és egyenként jelenti a létrehozott, a már beállított és a sikertelen szolgáltatókat. Részleges eredmény után biztonságosan újrapróbálhatja csak a sikertelen műveleteket.
+Ez a művelet opcionális: a varázsló befejezése soha nem hoz létre észrevétlenül kapcsolatokat ingyenes szolgáltatókhoz.
+Csak a még hiányzó szolgáltatókat hozza létre, a már meglévő, testreszabott kapcsolatokat
+érintetlenül hagyja, és külön-külön jelzi a létrehozott, már konfigurált és sikertelen szolgáltatókat. Részleges eredmény után
+biztonságosan újrapróbálhatja csak a sikertelen műveleteket.
 
-### A lehetőség: Ingyenes szolgáltató (nem szükséges bankkártya)
+### A lehetőség: Ingyenes szolgáltató (bankkártya nélkül)
 
-1. Nyissa meg a vezérlőpultot a `http://localhost:20128` címen
+1. Nyissa meg az irányítópultot a `http://localhost:20128` címen
 2. Lépjen a **Szolgáltatók** → **Szolgáltató hozzáadása** menüpontra
 3. Válasszon egyet az alábbi ingyenes szolgáltatók közül:
-   - **Kiro AI** — Ingyenes Claude-modellek (nem szükséges hitelesítés)
-   - **OpenCode Free** — Ingyenes GPT-modellek (nem szükséges hitelesítés)
-   - **Pollinations** — Ingyenes GPT-5, Claude és Gemini (nem szükséges kulcs)
+   - **Kiro AI** — Ingyenes Claude-modellek (nincs szükség hitelesítésre)
+   - **Pollinations** — Ingyenes GPT-5, Claude és Gemini (nincs szükség kulcsra)
    - **LongCat** — 10M ingyenes token (egyszeri keret, fiók és KYC szükséges)
    - **Cloudflare AI** — Több mint 50 modell, napi 10K neuron
-   - **MLX Gemma 26B** — Helyi Apple Silicon-modell (~38.5 token/mp, ~15.9GB RAM)
-   - **MLX Qwen 3.8 27B** — Helyi Apple Silicon-modell (~9.1 token/mp, ~13.1GB RAM)
+   - **MLX Gemma 26B** — Helyi Apple Silicon-modell (~38.5 tok/s, ~15.9GB RAM)
+   - **MLX Qwen 3.8 27B** — Helyi Apple Silicon-modell (~9.1 tok/s, ~13.1GB RAM)
 4. Kattintson a **Csatlakozás** gombra
-5. Kész! Mostantól ingyenesen hozzáférhet az AI-hoz.
+5. Kész! Mostantól ingyenes AI-hozzáféréssel rendelkezik.
 
 ### B lehetőség: API-kulcsot használó szolgáltató (fizetős)
 
@@ -57,25 +62,25 @@ Ez a művelet opcionális: a varázsló befejezése soha nem hoz létre észrev�
    - **Google**: https://aistudio.google.com/apikey
    - **DeepSeek**: https://platform.deepseek.com/
    - **Groq**: https://console.groq.com/
-2. Nyissa meg a vezérlőpultot a `http://localhost:20128` címen
+2. Nyissa meg az irányítópultot a `http://localhost:20128` címen
 3. Lépjen a **Szolgáltatók** → **Szolgáltató hozzáadása** menüpontra
-4. Válassza ki a szolgáltatóját
+4. Válassza ki a szolgáltatót
 5. Illessze be az API-kulcsát
 6. Kattintson a **Csatlakozás** gombra
 7. Kész! Mostantól hozzáfér a szolgáltató modelljeihez.
 
 ### C lehetőség: OAuth-szolgáltató (előfizetés)
 
-1. Nyissa meg a vezérlőpultot a `http://localhost:20128` címen
+1. Nyissa meg az irányítópultot a `http://localhost:20128` címen
 2. Lépjen a **Szolgáltatók** → **Szolgáltató hozzáadása** menüpontra
-3. Válassza ki a szolgáltatóját (például Claude Code vagy GitHub Copilot)
+3. Válassza ki a szolgáltatót (például Claude Code, GitHub Copilot)
 4. Kattintson a **Csatlakozás OAuth használatával** gombra
 5. Jelentkezzen be a fiókjával
-6. Kész! Mostantól hozzáfér az előfizetéséhez tartozó modellekhez.
+6. Kész! Mostantól hozzáfér az előfizetésében szereplő modellekhez.
 
 ### D lehetőség: Helyi MLX-modellek (Apple Silicon)
 
-Az egyesített memóriával rendelkező Apple Silicon Mac gépeken az OmniRoute támogatja a `mlx-lm.server` segítségével futtatott helyi MLX-modellek csatlakoztatását szokványos, OpenAI-kompatibilis helyi szolgáltatókként.
+Az egyesített memóriával rendelkező Apple Silicon Mac gépeken az OmniRoute támogatja a `mlx-lm.server` használatával futtatott helyi MLX-modellek normál, OpenAI-kompatibilis helyi szolgáltatóként való csatlakoztatását.
 
 #### Előfeltételek
 
@@ -105,10 +110,10 @@ Az egyesített memóriával rendelkező Apple Silicon Mac gépeken az OmniRoute 
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Csatlakoztatás az OmniRoute vezérlőpultján**:
+3. **Csatlakoztatás az OmniRoute irányítópultján**:
    - Lépjen a **Szolgáltatók** → **Szolgáltató hozzáadása** menüpontra
    - Válassza az **MLX Gemma 26B** vagy az **MLX Qwen 3.8 27B** lehetőséget
-   - Kattintson a **Csatlakozás** gombra (nem szükséges API-kulcs)
+   - Kattintson a **Csatlakozás** gombra (nincs szükség API-kulcsra)
 
 4. **Használat az OpenCode-dal**:
    ```bash
@@ -125,20 +130,20 @@ Az egyesített memóriával rendelkező Apple Silicon Mac gépeken az OmniRoute 
 
 **Fontos**: 24GB egyesített memória esetén egyszerre csak **egy nagy MLX-modell futhat**.
 
-- Gemma 26B: ~15.9GB maximális memóriahasználat
-- Qwen 3.8 27B: ~13.1GB maximális memóriahasználat
+- Gemma 26B: ~15.9GB memóriahasználati csúcs
+- Qwen 3.8 27B: ~13.1GB memóriahasználati csúcs
 
 Ezt kézzel kell kezelnie:
 
 - Egyszerre csak egy MLX-kiszolgálót futtasson, vagy
-- Futtassa a kettőt külön gépeken, vagy
-- Állítsa le az egyiket, mielőtt elindítaná a másikat
+- Futtassa őket külön gépeken, vagy
+- Állítsa le az egyiket, mielőtt elindítja a másikat
 
-Az OmniRoute nem kezeli automatikusan az MLX-kiszolgálófolyamatokat — csak a beállított OpenAI-kompatibilis végpontokhoz irányítja a kéréseket.
+Az OmniRoute nem kezeli automatikusan az MLX-kiszolgálófolyamatokat — csak a beállított OpenAI-kompatibilis végpontokra irányítja a kéréseket.
 
 #### Eszközhívások támogatása
 
-Mindkét modell támogatja az OpenAI-kompatibilis eszközhívásokat. Tesztelés:
+Mindkét modell támogatja az OpenAI-kompatibilis eszközhívásokat. Tesztelje a következővel:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -146,39 +151,37 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "Mennyi 2+2? Használd a számológép eszközt."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Számítás", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Hibaelhárítás
 
-| Probléma                  | Megoldás                                                                                                             |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| A szerver nem indul el    | Ellenőrizd az `uv run mlx_lm.server --help` paranccsal, és vizsgáld meg a modellazonosítókat                         |
-| Elfogyott a memória       | Győződj meg arról, hogy csak egy modell fut; zárd be a többi alkalmazást; ellenőrizd az Activity Monitor alkalmazást |
-| A kapcsolat elutasítva    | Ellenőrizd, hogy a szerver a megfelelő porton (11435/11436) fut-e                                                    |
-| Lassú válaszok            | Az első kérés betölti a modellt a memóriába (~30–60 mp); a további kérések gyorsak                                   |
-| Az eszközhívás sikertelen | Győződj meg arról, hogy a modell támogatja az eszközöket; keresd a fordítási hibákat az OmniRoute naplóiban          |
+| Probléma                  | Megoldás                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| A kiszolgáló nem indul el | Ellenőrizze az `uv run mlx_lm.server --help` kimenetét és a modellazonosítókat                                           |
+| Nincs elegendő memória    | Győződjön meg arról, hogy csak egy modell fut; zárja be a többi alkalmazást; ellenőrizze az Activity Monitor alkalmazást |
+| A kapcsolat elutasítva    | Ellenőrizze, hogy a kiszolgáló a megfelelő porton (11435/11436) fut-e                                                    |
+| Lassú válaszok            | Az első kérés betölti a modellt a memóriába (~30-60s); a további kérések gyorsak                                         |
+| Az eszközhívás sikertelen | Győződjön meg arról, hogy a modell támogatja az eszközöket; ellenőrizze az OmniRoute naplóit fordítási hibákért          |
 
 ---
 
 ## Legjobb ingyenes szolgáltatók
 
-Ezek a szolgáltatók **ingyenes hozzáférést** biztosítanak, bankkártya nélkül:
+Ezek a szolgáltatók **ingyenes hozzáférést** kínálnak hitelkártya nélkül:
 
-| Szolgáltató       | Ingyenes kvóta          | Modellek                                 | Csatlakozás módja           |
+| Szolgáltató       | Ingyenes keret          | Modellek                                 | Csatlakozás módja           |
 | ----------------- | ----------------------- | ---------------------------------------- | --------------------------- |
-| **Kiro AI**       | 50 kredit/hónap         | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Nincs szükség hitelesítésre |
-| **OpenCode Free** | Korlátlan               | GPT-4o, Claude, Gemini                   | Nincs szükség hitelesítésre |
+| **Kiro AI**       | 50 kredit/hó            | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Nincs szükség hitelesítésre |
 | **Pollinations**  | Nincs szükség kulcsra   | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Nincs szükség hitelesítésre |
 | **LongCat**       | Egyszeri 10M            | LongCat-2.0                              | API-kulcs + KYC             |
 | **Cloudflare AI** | 10K neuron/nap          | Több mint 50 modell                      | Nincs szükség hitelesítésre |
 | **NVIDIA NIM**    | ~40 RPM                 | 129 modell                               | API-kulcs szükséges         |
-| **Cerebras**      | $5 regisztrációs kredit | GLM 4.7, GPT-OSS 120B                    | API-kulcs + bankkártya      |
-| **Qoder**         | Korlátlan               | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Nincs szükség hitelesítésre |
+| **Cerebras**      | $5 regisztrációs kredit | GLM 4.7, GPT-OSS 120B                    | API-kulcs + kártya          |
 
-**Tipp**: Csatlakoztass több ingyenes szolgáltatót a **korlátlan ingyenes MI-használathoz**, automatikus tartalékra váltással!
+**Tipp**: Csatlakoztasson több ingyenes szolgáltatót a **korlátlan, ingyenes AI-használathoz**, automatikus tartalékra váltással!
 
 ---
 
@@ -233,7 +236,7 @@ A szolgáltatód most már csatlakoztatva van. Használhatod a `model: "auto"` b
 
 ## Több szolgáltató használata
 
-Az OmniRoute **több szolgáltatóval** működik a legjobban. Ez a következő előnyöket nyújtja:
+Az OmniRoute **több szolgáltatóval** működik a legjobban. Ez a következő előnyöket biztosítja:
 
 - **Automatikus tartalékra váltás** — Ha az egyik szolgáltató meghibásodik, az OmniRoute megpróbálja a következőt
 - **Költségoptimalizálás** — Az OmniRoute minden kéréshez a legolcsóbb szolgáltatót választja
@@ -242,13 +245,13 @@ Az OmniRoute **több szolgáltatóval** működik a legjobban. Ez a következő 
 
 ### Ajánlott beállítás
 
-A legjobb élmény érdekében csatlakoztass legalább **3 szolgáltatót**:
+A legjobb felhasználói élmény érdekében csatlakoztasson legalább **3 szolgáltatót**:
 
-1. **Egy ingyenes szolgáltató** (Kiro, OpenCode Free vagy Pollinations) — Mindig elérhető
-2. **Egy gyors szolgáltató** (Groq, Cerebras) — A gyors válaszokhoz
-3. **Egy minőségi szolgáltató** (OpenAI, Anthropic, Google) — Az összetett feladatokhoz
+1. **Egy ingyenes szolgáltató** (Kiro vagy Pollinations) — Mindig elérhető
+2. **Egy gyors szolgáltató** (Groq, Cerebras) — Gyors válaszokhoz
+3. **Egy minőségi szolgáltató** (OpenAI, Anthropic, Google) — Összetett feladatokhoz
 
-Ezután használd a `model: "auto"` beállítást, és az OmniRoute automatikusan kiválasztja az egyes kérésekhez legmegfelelőbb szolgáltatót.
+Ezután használja a `model: "auto"` beállítást, és az OmniRoute automatikusan kiválasztja az egyes kérésekhez legmegfelelőbb szolgáltatót.
 
 ---
 
@@ -278,6 +281,28 @@ Ezután használd a `model: "auto"` beállítást, és az OmniRoute automatikusa
 2. Az OmniRoute-ban: Szolgáltatók → Szolgáltató hozzáadása → DeepSeek
 3. Illessze be az API-kulcsot → Csatlakozás
 
+### Qoder: válassza ki a hitelesítő adatok továbbítási módját
+
+A Qoder hitelesítő adatokat igényel. A két továbbítási mód eltérő képességekkel rendelkezik; önmagában a modell neve nem határozza meg, hogy egy adott kapcsolat mire képes.
+
+| Hitelesítő adat                                 | OmniRoute-továbbítási mód                         | A hívó eszközhívásai                                    | Streamelés                                                                               |
+| ----------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `pt-` kezdetű PAT                               | Helyi `qodercli` folyamat az OmniRoute-gazdagépen | Nem támogatott                                          | Pufferelt: az SSE csak azután kerül kibocsátásra, hogy a CLI visszaadta a teljes választ |
+| Nem PAT típusú hozzáférési token vagy API-kulcs | DashScope OpenAI-kompatibilis HTTP-végpont        | Továbbítva, a felsőbb szintű modelltől/kulcstól függően | Felsőbb szintű HTTP/SSE-útvonal                                                          |
+
+PAT használata esetén telepítse a Qoder CLI-t ugyanarra a gazdagépre vagy konténerbe, amelyen az OmniRoute fut. A végrehajtható fájlnak `qodercli` néven elérhetőnek kell lennie, vagy állítsa a `CLI_QODER_BIN` értékét a végrehajtható fájl elérési útjára. A csak a Docker-gazdagépre telepített CLI nem lesz automatikusan elérhető a konténerben. A hiányzó bináris fájlok egyértelmű hibaüzenetet eredményeznek, amely a telepítésre vagy az elérési út beállítására irányítja.
+
+A PAT-alapú csevegési útvonal folyamat-időtúllépése 45 másodperc. A beszélgetést egyetlen prompttá alakítja, és nem streamelő nyomtatási módban hívja meg a CLI-t. A `stream: true` kérése SSE-re módosítja a válasz burkolóformátumát; nem biztosítja a felsőbb szintű tokenek fokozatos továbbítását. A CLI-ellenőrzés és a modelllista lekérése különálló, 20 másodperces időtúllépést használ. Ezek a kód jelenlegi alapértelmezései, nem konfigurálható irányítópult-beállítások.
+
+Egyszerű csevegéshez használjon PAT-kapcsolatokat. A `tools` vagy a régi `functions` mezőt tartalmazó ügynökkérések kizárják a PAT-fiókokat a hitelesítő adatok kiválasztásakor, beleértve a rögzített kombinált célokat is. Egy vegyes Qoder-készlet továbbra is kiválaszthatja a HTTP-fiókját. A PAT-végrehajtó közvetlen hívásai szintén egyértelmű hibával meghiúsulnak a CLI elindítása előtt, ahelyett, hogy észrevétlenül elhagynák az eszközdefiníciókat. Ez a korlátozás az API hívója által megadott eszközökre vonatkozik, nem pedig a Qoder CLI által esetlegesen használt belső eszközökre. Egy HTTP-kulcs nem garantálja, hogy minden modell támogatja az eszközöket; a szokásos modellképesség-ellenőrzések továbbra is érvényesek.
+
+A böngészős OAuth csak akkor érhető el, ha a rendszergazda mind az öt beállítást konfigurálja: `QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`, `QODER_OAUTH_CLIENT_ID` és `QODER_OAUTH_CLIENT_SECRET`. Ezek alapértelmezés szerint üresek; egy nem konfigurált telepítésnél támogatott hitelesítőadat-importot kell használni ahelyett, hogy késznek feltételezné a böngészős bejelentkezési folyamatot.
+
+Megvalósítási hivatkozások: [Qoder-végrehajtó](../../open-sse/executors/qoder.ts),
+[CLI-futtatókörnyezet](../../open-sse/services/qoderCli.ts) és
+[OAuth-konfiguráció](../../src/lib/oauth/constants/oauth.ts). A fokozatos PAT-streamelés
+és a konfigurálható időtúllépés különálló továbbfejlesztések; ez a működés nem ígéri ezek elérhetőségét.
+
 ### Groq
 
 1. API-kulcs beszerzése: https://console.groq.com/
@@ -290,27 +315,27 @@ Ezután használd a `model: "auto"` beállítást, és az OmniRoute automatikusa
 
 ### „Kell fizetnem az OmniRoute használatáért?”
 
-**Nem!** Az OmniRoute ingyenes és nyílt forráskódú. Az ingyenes szolgáltatókat (Kiro, OpenCode Free, Pollinations) fizetés nélkül használhatja. Csak akkor kell fizetnie, ha fizetős szolgáltatók használata mellett dönt.
+**Nem!** Az OmniRoute ingyenes és nyílt forráskódú. Az ingyenes szolgáltatókat (Kiro, Pollinations) fizetés nélkül használhatod. Csak akkor kell fizetned, ha fizetős szolgáltatókat választasz.
 
-### „Melyik szolgáltatóval kezdjek?”
+### „Melyik szolgáltatóval érdemes kezdenem?”
 
-Kezdje a **Kiro AI** szolgáltatóval — ingyenes, nem igényel API-kulcsot, és hozzáférést biztosít a Claude modellekhez. Ezután szükség szerint további szolgáltatókat adhat hozzá.
+Kezdd a **Kiro AI** szolgáltatóval — ingyenes, nem igényel API-kulcsot, és hozzáférést biztosít a Claude modellekhez. Ezután szükség szerint további szolgáltatókat is hozzáadhatsz.
 
 ### „Használhatok egyszerre több szolgáltatót?”
 
-**Igen!** Pontosan ez az OmniRoute lényege. Csatlakoztasson több szolgáltatót, és használja a `model: "auto"` beállítást, hogy az OmniRoute minden kéréshez kiválaszthassa a legjobbat.
+**Igen!** Pontosan ez az OmniRoute lényege. Csatlakoztass több szolgáltatót, és használd a `model: "auto"` beállítást, hogy az OmniRoute minden kéréshez kiválaszthassa a legmegfelelőbbet.
 
 ### „Mi történik, ha egy szolgáltató leáll?”
 
-Az OmniRoute automatikusan kihagyja a sikertelen szolgáltatókat, és megpróbálkozik a következővel. Önnek semmit sem kell tennie.
+Az OmniRoute automatikusan átugorja a hibás szolgáltatókat, és megpróbálja a következőt. Neked semmit sem kell tenned.
 
 ### „Hogyan választhatok le egy szolgáltatót?”
 
-Lépjen a Szolgáltatók menüpontba → kattintson a szolgáltatóra → kattintson a **Leválasztás** lehetőségre.
+Lépj a Providers menübe → kattints a szolgáltatóra → kattints a **Disconnect** gombra.
 
 ### „Használhatom a meglévő API-kulcsaimat?”
 
-**Igen!** Ha már rendelkezik API-kulcsokkal az OpenAI, Anthropic, Google stb. szolgáltatásokhoz, használhatja őket az OmniRoute-ban. Egyszerűen illessze be őket a szolgáltató csatlakoztatásakor.
+**Igen!** Ha már rendelkezel API-kulcsokkal az OpenAI, az Anthropic, a Google stb. szolgáltatásaihoz, használhatod őket az OmniRoute-ban. Egyszerűen illeszd be őket a szolgáltató csatlakoztatásakor.
 
 ---
 

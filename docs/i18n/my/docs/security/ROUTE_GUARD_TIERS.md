@@ -12,178 +12,174 @@ OmniRoute စီမံခန့်ခွဲမှု API route အားလု�
 
 ## အဆင့်များ
 
-### အဆင့် 1 — LOCAL_ONLY
+### အဆင့် ၁ — LOCAL_ONLY
 
-**ပြဋ္ဌာန်းသည့်နေရာ:** `isLocalOnlyPath(path)` → loopback host စစ်ဆေးမှု  
-**ကျော်လွှားခွင့်:** မူလသတ်မှတ်ချက်အရ မရှိပါ။ တောင်းဆိုမှုတွင် `manage` scope ပါဝင်သည့် အကျုံးဝင်သော API key ပါရှိပါက `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` အတွင်းရှိ path များအတွက်သာ အကန့်အသတ်ဖြင့် ခြွင်းချက်ပေးထားသည် ([Manage-scope ခြွင်းချက်](#manage-scope-carve-out) ကိုကြည့်ပါ)။
+**အတင်းအကျပ် စစ်ဆေးဆောင်ရွက်သူ:** `isLocalOnlyPath(path)` → loopback host စစ်ဆေးမှု
+**ရှောင်လွှဲနိုင်မှု (Bypass):** မူလအားဖြင့် မရှိပါ။ တောင်းခံမှုတွင် `manage` scope ပါရှိသော တရားဝင် API key တစ်ခု ရှိနေသောအခါ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ထဲရှိ path များအတွက် ကျဉ်းမြောင်းသော ခြွင်းချက်သာ ရှိပါသည် ([Manage-scope ခြွင်းချက်](#manage-scope-carve-out) ကို ကြည့်ပါ)။
 
-ဤ route များသည် child process များကို စတင်လုပ်ဆောင်စေသည် သို့မဟုတ် runtime code ကို execute လုပ်သည်။ ၎င်းတို့ကို loopback မဟုတ်သော traffic ဖြင့် ဝင်ရောက်နိုင်အောင် ဖွင့်ထားခြင်းသည် အကျုံးဝင်သော JWT တစ်ခုကို ရရှိထားသည့် တိုက်ခိုက်သူအား (ဥပမာ၊ Cloudflared/Ngrok tunnel မှတစ်ဆင့်) process များ စတင်လုပ်ဆောင်စေနိုင်မည်ဖြစ်ပြီး၊ ၎င်းသည် လူသိများသော CVE အမျိုးအစားတစ်ခုဖြစ်သည် ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj))။
+ဤ route များသည် child process များကို spawn လုပ်ခြင်း သို့မဟုတ် runtime code ကို execute လုပ်ခြင်း ပြုလုပ်ပါသည်။ ၎င်းတို့ကို non-loopback traffic သို့ ထိတွေ့အောင် ထားရှိခြင်းက တရားဝင် JWT တစ်ခု ရရှိထားသော တိုက်ခိုက်သူ (ဥပမာ — Cloudflared/Ngrok tunnel မှတဆင့်) အား process spawning ကို အစဉ်ပြုနိုင်စေမည် ဖြစ်ပြီး၊ ၎င်းသည် လူသိများသော CVE အမျိုးအစား တစ်ခု ဖြစ်ပါသည် ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj))။
 
-**GHSA-fhh6-4qxv-rpqj ဆိုသည်မှာ (တိုက်ခိုက်မှုပုံစံ):** စီမံခန့်ခွဲရေး/agent server တစ်ခုက subprocess တစ်ခုကို စတင်သည့် endpoint ကို ဖွင့်ပေးထားခြင်းဖြစ်သည် (`npm install`, `node`, browser တစ်ခု၊ proxy တစ်ခု၊ `git`, `tar`, …)။ အဆိုပါ endpoint ကို host ပြင်ပမှ ဝင်ရောက်နိုင်ပါက — operator က OmniRoute ကို nginx/Cloudflare/Tailscale tunnel နောက်တွင် ထားရှိပြီး JWT ပေါက်ကြားသွားခြင်း သို့မဟုတ် auth ကို မှားယွင်းစွာ စီစဉ်ထားခြင်းကြောင့် — တိုက်ခိုက်သူသည် "API တစ်ခုကို ခေါ်ဆိုခြင်း" ကို "host ပေါ်တွင် command တစ်ခုကို run ခြင်း" (remote code execution) အဖြစ် ပြောင်းလဲနိုင်သည်။ OmniRoute သည် spawn လုပ်နိုင်သော route တိုင်းတွင် **မည်သည့် auth စစ်ဆေးမှုမတိုင်မီ loopback host စစ်ဆေးမှုကို ခြွင်းချက်မရှိ ပြဋ္ဌာန်းခြင်းဖြင့်** ယင်းအား ပိတ်ဆို့ထားသည်။ ထို့ကြောင့် tunnel မှတစ်ဆင့် token ပေါက်ကြားသွားသော်လည်း spawn လုပ်ဆောင်ချက်ကို မရောက်ရှိနိုင်ပါ။
+**GHSA-fhh6-4qxv-rpqj ဆိုသည်မှာ (တိုက်ခိုက်မှု အမျိုးအစား):** management/agent server တစ်ခုက subprocess တစ်ခု (`npm install`, `node`, browser တစ်ခု, proxy တစ်ခု, `git`, `tar`, …) ကို စတင်လုပ်ဆောင်နိုင်သော endpoint တစ်ခုကို ဖွင့်ထားခြင်း ဖြစ်ပါသည်။ အကယ်၍ ၎င်း endpoint ကို host ပြင်ပမှ ရောက်ရှိနိုင်ပါက — operator က OmniRoute ကို nginx/Cloudflare/Tailscale tunnel တစ်ခု၏ နောက်ခံထားပြီး JWT ယိုစိမ့်သွားခြင်း၊ သို့မဟုတ် auth ကို မှားယွင်းစွာ configure လုပ်ထားခြင်း ကြောင့် — တိုက်ခိုက်သူသည် "API ကို ခေါ်ဆိုခြင်း" ကို "host ပေါ်တွင် command run ခြင်း" (remote code execution) အဖြစ်သို့ ပြောင်းလဲစေနိုင်ပါသည်။ OmniRoute သည် spawn-capable route တိုင်းတွင် **အခြေအနေမခံ၊ မည်သည့် auth စစ်ဆေးမှုမပြုလုပ်မှီ loopback host စစ်ဆေးမှု** ကို အတင်းအကျပ် ကျင့်သုံးခြင်းဖြင့် ဤပြဿနာကို ပိတ်ဆို့ထားပါသည်။ tunnel မှတဆင့် ယိုစိမ့်သွားသော token တစ်ခုသည်လည်း spawn ကို မရောက်ရှိနိုင်ပါ။
 
-**LOCAL_ONLY အစုအပြည့်အစုံ။** တရားဝင်ရင်းမြစ်မှာ `src/server/authz/routeGuard.ts` အတွင်းရှိ `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ဖြစ်ပြီး၊ အောက်ပါဇယားသည် လက်ရှိအခြေအနေကို ထင်ဟပ်ဖော်ပြထားသည်။ `check-route-guard-membership` gate သည် spawn လုပ်နိုင်သော prefix များအောက်ရှိ `route.ts` တိုင်းကို စာရင်းပြုစုစစ်ဆေးပြီး၊ တစ်ခုခုကို local-only အဖြစ် အမျိုးအစားမခွဲထားပါက CI ကို မအောင်မြင်စေသည်။
+**LOCAL_ONLY set အပြည့်အစုံ။** ရှင်းလင်းသည့် အရင်းအမြစ်မှာ `src/server/authz/routeGuard.ts` ထဲရှိ `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ဖြစ်ပြီး၊ အောက်ပါ ဇယားက လက်ရှိ အခြေအနေကို ထင်ဟပ်စေပါသည်။ `check-route-guard-membership` gate သည် spawn-capable prefix များ အောက်ရှိ `route.ts` တိုင်းကို ရေတွက်စာရင်းပြုစုပြီး၊ ၎င်းတို့အနက် တစ်ခုခုကို local-only အဖြစ် အမျိုးအစားခွဲခြားမထားပါက CI ကို ကျရှုံးစေပါသည်။
 
-| ရှေ့ဆက်စာလုံး / ပုံစံ                                                                                    | စက်တွင်း၌သာ အသုံးပြုရသည့် အကြောင်းရင်း                                                                                          |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP ဆာဗာ — stdio bridge များ + SSE handler များကို စတင်လုပ်ဆောင်သည်                                                             |
-| `/api/cli-tools/runtime/`                                                                                | CLI ကိရိယာ runtime — မည်သည့် plugin code ကိုမဆို လုပ်ဆောင်သည်                                                                   |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | host ပေါ်ရှိ ကိရိယာ binary/config များကို ပြင်ဆင်နိုင်သော ကိရိယာတစ်ခုချင်းစီအလိုက် ဆက်တင်ရေးသားပေးသည့် လုပ်ဆောင်ချက်များ        |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | အထက်ပါ မျိုးတူကိရိယာ ခြောက်ခုကဲ့သို့ တူညီသော `getCliRuntimeStatus()` စတင်လုပ်ဆောင်မှု (GHSA-35fw-cv32-2373)                     |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI စာရင်းစစ်ဆေးမှုများ — ကိရိယာတစ်ခုစီအတွက် `command -v` / `--version` ကို စတင်လုပ်ဆောင်သည် (GHSA-35fw-cv32-2373)              |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM proxy ထိန်းချုပ်မှု (စနစ် proxy ကို စတင်လုပ်ဆောင်/ညွှန်ပြသည်)                                                  |
-| `/api/modality-bridge/video/`                                                                            | ယုံကြည်ရသော loopback ကိုသာ တင်းကျပ်စွာခွင့်ပြုသည့် Video Bridge runtime စစ်ဆေးမှုနှင့် အတွင်းပိုင်း ထုတ်ယူရေး bridge            |
-| `/api/services/`                                                                                         | ထည့်သွင်းမြှုပ်နှံထားသော ဝန်ဆောင်မှုများ (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + စတင်လုပ်ဆောင်မှု        |
-| `/dashboard/providers/services/`                                                                         | ထည့်သွင်းမြှုပ်နှံထားသော ဝန်ဆောင်မှု UI များသို့ reverse proxy                                                                  |
-| `/api/tunnels/cloudflared`                                                                               | cloudflared binary ကို ထည့်သွင်းပြီး စတင်လုပ်ဆောင်သည်                                                                           |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | host ပေါ်တွင် tailscaled ကို ထည့်သွင်း/ထိန်းချုပ်သည်                                                                            |
-| `/api/copilot/`                                                                                          | စစ်မှန်ကြောင်း အတည်မပြုထားသော LLM driver — ပုံသေအားဖြင့် CLI အတွက်သာ                                                            |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM ဆာဗာကို စတင်လုပ်ဆောင်ပြီး DNS ကို ပြင်ဆင်သည်                                                                 |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + စနစ် proxy                                                                            |
-| `/api/settings/mitm`                                                                                     | MITM ကြားဖြတ်ဖမ်းယူမှုကို ဖွင့်ပေးသည် (စနစ်အဆင့် proxy အခြေအနေ)                                                                 |
-| `/api/issue-agent/`                                                                                      | Issue agent — repo ကို ပစ်မှတ်ထား၍ စက်တွင်းကိရိယာများကို စတင်လုပ်ဆောင်သည်                                                       |
-| `/api/plugins/`, `/api/plugins`                                                                          | Plugin များ — `worker_threads` + `child_process` မှတစ်ဆင့် တင်သွင်း/လုပ်ဆောင်သည်                                                |
-| `/api/middleware/`                                                                                       | အသုံးပြုသူ middleware — operator code ကို process အတွင်း တင်သွင်း/လုပ်ဆောင်သည်                                                  |
-| `/api/system/version`                                                                                    | အလိုအလျောက် အပ်ဒိတ်လုပ်ခြင်း (POST သာ; GET/HEAD/OPTIONS ကင်းလွတ်ခွင့်ရှိ) — `git checkout` + `npm install` ကို စတင်လုပ်ဆောင်သည် |
-| `/api/db-backups/exportAll`                                                                              | export archive အတွက် `tar` ကို စတင်လုပ်ဆောင်သည်                                                                                 |
-| `/api/local/`                                                                                            | တစ်ချက်နှိပ် စက်တွင်း launcher များ (လက်ရှိ Redis) — podman/docker ကို စတင်လုပ်ဆောင်သည်                                         |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom proxy သက်တမ်းစက်ဝန်း — python CLI ကို စတင်လုပ်ဆောင်သည် / PID သို့ signal ပို့သည်                                       |
-| `/api/jobs`, `/api/jobs/`                                                                                | Job runner ထိန်းချုပ်မှု — အချိန်ဇယားသတ်မှတ်ထားသော host ဘက်ခြမ်းအလုပ်များကို လုပ်ဆောင်သည်                                       |
-| `/api/oauth/cursor/auto-import`                                                                          | အထောက်အထားများကို ထည့်သွင်းမတင်သွင်းမီ `execFile("which", ["cursor"])` ကို လုပ်ဆောင်သည်                                         |
-| `/api/oauth/kiro/auto-import`                                                                            | host မှ Kiro CLI အထောက်အထားဖိုင်များကို ဖတ်သည်                                                                                  |
-| `/api/skills/collect/`                                                                                   | Skill စုဆောင်းမှု — စက်တွင်းကိရိယာများကို ရှာဖွေ/ထည့်သွင်းသည်                                                                   |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Skill handler မှတ်ပုံတင်ခြင်း + လုပ်ဆောင်ခြင်း — sandbox container စတင်လုပ်ဆောင်မှုသို့ ရောက်ရှိနိုင်သည် (GHSA-jx89)            |
-| `/api/discovery/`                                                                                        | စက်တွင်းကွန်ရက်/provider ရှာဖွေစစ်ဆေးမှုများ                                                                                    |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | အပြန်အလှန် login ဝင်ရန်အတွက် headful browser + VNC session တစ်ခုကို စတင်ပေးသည်                                                  |
-| `/api/acp/agents`                                                                                        | ACP — စက်တွင်း CLI agent binary များကို ရှာဖွေပြီး စတင်ပေးသည်                                                                   |
-| `/api/resilience/connections`                                                                            | Account တစ်ခုချင်းစီအလိုက် resilience JSON (cooldown, breaker, lockout)။ Dashboard HTML သည် local-only မဟုတ်ပါ။                 |
-| `/api/providers/cursor/agent-availability`                                                               | Dashboard တပ်ဆင်ရန် သတိပေးချက် စစ်ဆေးမှု — `cursor-agent status --format json` ကို စတင်သည်                                      |
-| `/api/providers/{id}/login` (regex)                                                                      | Web-cookie login အတွက် headful Playwright Chromium ကို စတင်သည်                                                                  |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | ကိုယ်တိုင်လုပ်ဆောင်ရသော headful flow + session အခြေပြု ဖုန်း/SMS အလိုအလျောက် login (Playwright ကို စတင်သည်)                     |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Cursor session ကို ကိုယ်တိုင် သက်တမ်းတိုးခြင်း — `cursor-agent` ကို နှိုးဆော်သည်                                                |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | စက်တွင်း Codex CLI တပ်ဆင်မှုကို စစ်ဆေးဖော်ထုတ်သည် (binary ကို စတင်သည်)                                                          |
+| ရှေ့ဆက် / ပုံစံ                                                                                          | အဘယ်ကြောင့် local-only ဖြစ်သနည်း                                                                                 |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP ဆာဗာ — stdio bridge များနှင့် SSE handler များကို spawn လုပ်သည်                                              |
+| `/api/cli-tools/runtime/`                                                                                | CLI tool runtime — မည်သည့် plugin code ကိုမဆို execute လုပ်သည်                                                   |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | host ပေါ်ရှိ tool binary/config များကို ထိတွေ့ပြင်ဆင်နိုင်သော tool အလိုက် settings writer များ                   |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | အထက်ပါ ညီအစ်ကို ခြောက်ခုနှင့်အတူတူဖြစ်သော `getCliRuntimeStatus()` spawn (GHSA-35fw-cv32-2373)                    |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI inventory probes — tool တစ်ခုချင်းစီအတွက် `command -v` / `--version` ကို spawn လုပ်သည် (GHSA-35fw-cv32-2373) |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM proxy ထိန်းချုပ်မှု (system proxy ကို spawn/point လုပ်သည်)                                      |
+| `/api/modality-bridge/video/`                                                                            | တင်းကြပ်သော trusted-loopback Video Bridge runtime probe နှင့် internal extraction bridge                         |
+| `/api/services/`                                                                                         | Embedded service များ (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn                       |
+| `/dashboard/providers/services/`                                                                         | embedded-service UI များသို့ reverse proxy                                                                       |
+| `/api/tunnels/cloudflared`                                                                               | cloudflared binary ကို install/spawn လုပ်သည်                                                                     |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | host ပေါ်ရှိ tailscaled ကို install/ထိန်းချုပ်သည်                                                                |
+| `/api/copilot/`                                                                                          | စစ်ဆေးအတည်ပြုခြင်းမလိုအပ်သော LLM driver — ပုံသေအားဖြင့် CLI-only                                                 |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM ဆာဗာကို spawn လုပ်ပြီး DNS ကို ပြင်ဆင်သည်                                                     |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + system proxy                                                           |
+| `/api/settings/mitm`                                                                                     | MITM interception ကို ဖွင့်ပေးသည် (system-level proxy state)                                                     |
+| `/api/issue-agent/`                                                                                      | Issue agent — repo ပေါ်တွင် local tooling ကို spawn လုပ်သည်                                                      |
+| `/api/plugins/`, `/api/plugins`                                                                          | Plugin များ — `worker_threads` + `child_process` မှတစ်ဆင့် load/execute လုပ်သည်                                  |
+| `/api/middleware/`                                                                                       | User middleware — operator code ကို process အတွင်းတွင် load/execute လုပ်သည်                                      |
+| `/api/system/version`                                                                                    | Auto-update (POST သက်သက်သာ; GET/HEAD/OPTIONS ကင်းလွတ်) — `git checkout` + `npm install` ကို spawn လုပ်သည်        |
+| `/api/db-backups/exportAll`                                                                              | export archive အတွက် `tar` ကို spawn လုပ်သည်                                                                     |
+| `/api/local/`                                                                                            | 1-click local launcher များ (လောလောဆယ် Redis) — podman/docker ကို spawn လုပ်သည်                                  |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom proxy lifecycle — python CLI ကို spawn လုပ်သည် / PID ကို signal ပေးသည်                                  |
+| `/api/jobs`, `/api/jobs/`                                                                                | Job runner ထိန်းချုပ်မှု — အချိန်ဇယားသတ်မှတ်ထားသော host-side အလုပ်များကို execute လုပ်သည်                        |
+| `/api/oauth/cursor/auto-import`                                                                          | creds များ import လုပ်ခြင်းမပြုမီ `execFile("which", ["cursor"])`                                                |
+| `/api/oauth/kiro/auto-import`                                                                            | host ပေါ်မှ Kiro CLI credential ဖိုင်များကို ဖတ်သည်                                                              |
+| `/api/skills/collect/`                                                                                   | Skill collection — local tooling ကို detect/install လုပ်သည်                                                      |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Skill handler မှတ်ပုံတင်ခြင်း + လည်ပတ်ခြင်း — sandbox container spawn သို့ ရောက်ရှိနိုင်သည် (GHSA-jx89)          |
+| `/api/discovery/`                                                                                        | ဒေသတွင်း ကွန်ရက်/provider ရှာဖွေတွေ့ရှိမှု probe များ                                                            |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | အပြန်အလှန် login များအတွက် headful browser + VNC session ကို spawn လုပ်သည်                                       |
+| `/api/acp/agents`                                                                                        | ACP — ဒေသတွင်း CLI agent binary များကို ရှာဖွေတွေ့ရှိပြီး spawn လုပ်သည်                                          |
+| `/api/resilience/connections`                                                                            | အကောင့်တစ်ခုချင်းစီအတွက် resilience JSON (cooldown, breaker, lockout)။ dashboard HTML မှာ local-only မဟုတ်ပါ။    |
+| `/api/providers/cursor/agent-availability`                                                               | Dashboard install-nudge စစ်ဆေးမှု — `cursor-agent status --format json` ကို spawn လုပ်သည်                        |
+| `/api/providers/{id}/login` (regex)                                                                      | web-cookie login အတွက် headful Playwright Chromium ကို ဖွင့်လှစ်သည်                                              |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | လက်လုပ် headful flow + session အခြေခံ ဖုန်း/SMS auto-login (Playwright ကို spawn လုပ်သည်)                        |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | လက်လုပ် Cursor session သက်တမ်းတိုးခြင်း — `cursor-agent` ကို nudge လုပ်သည်                                       |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | ဒေသတွင်း Codex CLI install ကို စစ်ဆေးရှာဖွေသည် (binary ကို spawn လုပ်သည်)                                        |
 
-**ချိုးဖောက်မှုအတွက် တုံ့ပြန်ချက်:** `403 LOCAL_ONLY`
+**ချိုးဖောက်မှုအပေါ် တုံ့ပြန်မှု:** `403 LOCAL_ONLY`
 
-#### Manage scope အတွက် ခြွင်းချက်
+#### Manage-scope ခြွင်းချက်
 
-တောင်းဆိုမှုတွင် metadata ထဲ၌ `manage` scope (သို့မဟုတ် `admin`) ပါဝင်သော
-`Authorization: Bearer <api-key>` ပါရှိမှသာ LOCAL_ONLY path များ၏ အစိတ်အပိုင်းတစ်ခုကို
-non-loopback မှလည်း ဝင်ရောက်အသုံးပြုနိုင်ပါသည်။ ခြွင်းချက်ကို path တစ်ခုချင်းစီအလိုက်
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` မှတစ်ဆင့် အတိအလင်း ထိန်းချုပ်ထားသဖြင့်
-LOCAL_ONLY path အသစ်တိုင်းအတွက် ပုံသေသတ်မှတ်ချက်မှာ strict-loopback အဖြစ် ဆက်လက်ရှိနေသည်။
-အထောက်အထားမပြထားသော တောင်းဆိုမှုများနှင့် manage မဟုတ်သော key များပါသည့် တောင်းဆိုမှုများကို
-`403 LOCAL_ONLY` ဖြင့် ဆက်လက်ငြင်းပယ်သည်။
+LOCAL_ONLY path များ၏ အစိတ်အပိုင်းတစ်ခုကို၊ request တွင် metadata ၌ `manage` scope (သို့မဟုတ် `admin`) ပါဝင်သော `Authorization: Bearer <api-key>` ကို ကိုင်ဆောင်လာမှသာ non-loopback မှလည်း ဝင်ရောက်အသုံးပြုနိုင်သည်။ LOCAL_ONLY path အသစ်တိုင်းအတွက် ပုံသေအခြေအနေမှာ strict-loopback ဆက်လက်ဖြစ်နေစေရန်၊ ထိုခြွင်းချက်ကို `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` မှတစ်ဆင့် path တစ်ခုချင်းစီအလိုက် အထ显explicitly gate လုပ်ထားသည်။ Authentication မပြုလုပ်ထားသော request များနှင့် manage မဟုတ်သော key များ ပါဝင်သော request များကိုမူ `403 LOCAL_ONLY` ဖြင့် ဆက်လက်ပယ်ချသည်။
 
-လက်ရှိတွင် bypass လုပ်နိုင်သော prefix မှာ `/api/mcp/` တစ်ခုတည်းသာ ဖြစ်သည်။ `/api/cli-tools/runtime/` နှင့်
-`/api/services/` တို့သည် မည်သည့် subprocess ကိုမဆို (`npm install`, `node`) စတင်နိုင်သောကြောင့်
-ရည်ရွယ်ချက်ရှိရှိ ချန်လှပ်ထားသည်။ ယင်းသည် LOCAL_ONLY အဆင့်က ကာကွယ်ရန် တည်ရှိနေသည့်
-CVE အမျိုးအစား အတိအကျပင် ဖြစ်သည်။
+ယနေ့တွင် bypass လုပ်နိုင်သော prefix မှာ `/api/mcp/` တစ်ခုသာဖြစ်သည်။ `/api/cli-tools/runtime/` နှင့် `/api/services/` များကိုမူ အကြံမဖွယ်ရာ subprocess များ (`npm install`, `node`) ကို spawn လုပ်နိုင်သောကြောင့် ရည်ရွယ်ချက်ရှိရှိ ချန်လှပ်ထားသည် — ၎င်းမှာ LOCAL_ONLY tier တည်ရှိရခြင်း ရည်ရွယ်ချက်ဖြစ်သော CVE အမျိုးအစား အတိအကျဖြစ်သည်။
 
-**#7895 — `mcp:connect` ကန့်သတ်ထားသော scope:** `/api/mcp/` ခြွင်းချက်သည်
-ကန့်သတ်ထားသော `mcp:connect` scope ပါဝင်သည့် Bearer key ကိုလည်း လက်ခံသည်
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`)။ ၎င်းကို
-`src/server/authz/policies/management.ts` ရှိ `hasMcpConnectOrManageScope()` မှတစ်ဆင့်
-စစ်ဆေးသည်။ ဤခွင့်ပြုချက်သည် `/api/mcp/` အတွက်သာ ကန့်သတ်ထားသည် — `mcp:connect` သည်
-အခြားမည်သည့် management route တွင်မျှ ခွင့်ပြုချက်မပေးပါ (နောင်တွင် ထည့်သွင်းလာနိုင်သည့်
-အခြား LOCAL_ONLY bypass prefix အားလုံးအပါအဝင်)။ ထို့ပြင် ၎င်းကို
-`MANAGEMENT_API_KEY_SCOPES` မှ တမင်ချန်လှပ်ထားသည်။ `manage`/`admin` ပါသော key သည်
-ယခင်အတိုင်းပင် ခြွင်းချက်မှတစ်ဆင့် ဖြတ်သန်းနိုင်ဆဲဖြစ်သည်။ `mcp:connect` သည် ကျယ်ပြန့်သော
-management access မလိုအပ်သင့်သည့် အဝေးမှ MCP-only ခေါ်ယူသူများအတွက် အခွင့်အရေးနည်းသော
-ရွေးချယ်စရာတစ်ခု ဖြစ်သည်။
+**#7895 — `mcp:connect` ကျဉ်းမြောင်းသော scope:** `/api/mcp/` ခြွင်းချက်သည် ကျဉ်းမြောင်းသော `mcp:connect` scope ကို ကိုင်ဆောင်ထားသော Bearer key ကိုလည်း လက်ခံသည် (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`)၊ `src/server/authz/policies/management.ts` ရှိ `hasMcpConnectOrManageScope()` မှတစ်ဆင့် စစ်ဆေးသည်။ ၎င်းကို `/api/mcp/` အတွက်သာ scope သတ်မှတ်ထားသည် — `mcp:connect` သည် အခြား management route မည်သည့်အရာတွင်မျှ (နောက်ပိုင်းတွင် ထပ်ပေါင်းနိုင်သော အခြား LOCAL_ONLY bypass prefix အားလုံးအပါအဝင်) ဘာမျှ အခွင့်အရေးမပေးပါ၊ ထို့အပြင် `MANAGEMENT_API_KEY_SCOPES` မှလည်း ရည်ရွယ်ချက်ရှိရှိ ဖယ်ထုတ်ထားသည်။ `manage`/`admin` ကိုင်ဆောင်ထားသော key သည် ယခင်အတိုင်း ခြွင်းချက်ကို အတိအကျ ဖြတ်ကျော်နိုင်ဆဲဖြစ်သည်။ `mcp:connect` မှာ ကျယ်ပြန့်သော management access မလိုအပ်သင့်သော အဝေးမှ MCP-only caller များအတွက် အခွင့်အရေးနိမ့်သော အခြားရွေးချယ်စရာတစ်ခုဖြစ်သည်။
 
-| တောင်းဆိုမှု                                       | Path                       | ရလဒ်                           |
-| -------------------------------------------------- | -------------------------- | ------------------------------ |
-| Non-loopback၊ Bearer မပါ                           | `/api/mcp/*`               | 403 LOCAL_ONLY                 |
-| Non-loopback၊ `manage` scope ပါသော Bearer          | `/api/mcp/*`               | ခွင့်ပြုသည်                    |
-| Non-loopback၊ `mcp:connect` scope ပါသော Bearer     | `/api/mcp/*`               | ခွင့်ပြုသည်                    |
-| Non-loopback၊ `manage`/`mcp:connect` မပါသော Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY                 |
-| Non-loopback၊ `mcp:connect` scope ပါသော Bearer     | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                 |
-| Non-loopback၊ `manage` scope ပါသော Bearer          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                 |
-| Loopback၊ Bearer ရှိသည်ဖြစ်စေ/မရှိသည်ဖြစ်စေ        | မည်သည့် LOCAL_ONLY မဆို    | ခွင့်ပြုသည် (gate ဖြတ်သန်းသည်) |
+| တောင်းဆိုမှု                                        | လမ်းကြောင်း                | ရလဒ်                      |
+| --------------------------------------------------- | -------------------------- | ------------------------- |
+| Non-loopback၊ Bearer မရှိ                           | `/api/mcp/*`               | 403 LOCAL_ONLY            |
+| Non-loopback၊ `manage` scope ရှိသော Bearer          | `/api/mcp/*`               | ခွင့်ပြု                  |
+| Non-loopback၊ `mcp:connect` scope ရှိသော Bearer     | `/api/mcp/*`               | ခွင့်ပြု                  |
+| Non-loopback၊ `manage`/`mcp:connect` မရှိသော Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY            |
+| Non-loopback၊ `mcp:connect` scope ရှိသော Bearer     | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY            |
+| Non-loopback၊ `manage` scope ရှိသော Bearer          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY            |
+| Loopback၊ Bearer မည်သည်ဖြစ်စေ/မရှိစေ                | LOCAL_ONLY မည်သည့်အရာမဆို  | ခွင့်ပြု (gate အောင်မြင်) |
 
-#### Operator လမ်းညွှန်ချက်နှင့် စစ်ဆေးခြင်း
+#### Operator လမ်းညွှန်ချက်နှင့် စာရင်းစစ်ခြင်း
 
-OmniRoute ကို reverse proxy သို့မဟုတ် tunnel (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok) နောက်ကွယ်တွင် အသုံးပြုပါက loopback စစ်ဆေးမှုသည် အထက်ပါ
-spawn လုပ်နိုင်သော route များကို ဆက်လက်ကာကွယ်ပေးသည် — client address သည်
-non-loopback ဖြစ်သော တောင်းဆိုမှုကို **auth မလုပ်ဆောင်မီ** `403 LOCAL_ONLY` ဖြင့်
-ငြင်းပယ်သောကြောင့် ပေါက်ကြားသွားသည့် JWT ဖြင့် spawn တစ်ခုကို မရောက်ရှိနိုင်ပါ။
-Operator တွင် တာဝန်နှစ်ရပ် ကျန်ရှိသည်-
+OmniRoute ကို reverse proxy သို့မဟုတ် tunnel (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) နောက်ကွယ်တွင် လည်ပတ်နေပါက၊ loopback စစ်ဆေးမှုသည် အထက်ပါ spawn လုပ်နိုင်သော route များကို ဆက်လက်ကာကွယ်ပေးနေဆဲ ဖြစ်သည် — client address သည် non-loopback ဖြစ်သော request ကို **auth မလည်ပတ်မီ** `403 LOCAL_ONLY` ဖြင့် ပယ်ချလိုက်သောကြောင့်၊ ပေါက်ကြားသွားသော JWT သည် spawn သို့ မရောက်နိုင်ပါ။ Operator တာဝန်ဝတ္တရား နှစ်ခုကျန် ကြွင်းရှိနေဆဲဖြစ်သည်-
 
-- **Client IP ကို loopback အဖြစ် အတုလုပ်၍ 403 ကို "မပြင်ပါနှင့်"။**
-  `X-Forwarded-For: 127.0.0.1` ဟု သတ်မှတ်ခြင်း သို့မဟုတ် source address ကို
-  loopback အဖြစ် ပြန်ရေးသော proxy ကို အသုံးပြုခြင်းသည် ဤအဆင့်က ပိတ်ထားသည့်
-  RCE အမျိုးအစားကို အတိအကျ ပြန်ဖွင့်ပေးလိုက်သည်။ Dashboard/API ကို proxy မှတစ်ဆင့်
-  ဖော်ထုတ်ပါ — spawn လုပ်နိုင်သော route များကို မည်သည့်အခါမျှ မဖော်ထုတ်ပါနှင့်။
-- **Manage scope bypass ကို အနည်းဆုံးသာ ထားရှိပါ။** `/api/mcp/` တစ်ခုတည်းကိုသာ
-  bypass လုပ်နိုင်ပြီး `manage` scope ပါသော API key ဖြင့်သာ လုပ်နိုင်သည်။
-  `SPAWN_CAPABLE_PREFIXES` ကို bypass list ထဲသို့ မည်သည့်အခါမျှ ထည့်၍မရပါ —
-  zod schema က ၎င်းတို့ကို ငြင်းပယ်ပြီး runtime တွင်
-  `isLocalOnlyBypassableByManageScope` ကလည်း ငြင်းပယ်သည် (အလွှာစုံကာကွယ်မှု)။
-  Dashboard ရှိ "bypass လုပ်နိုင်အောင် ပြုလုပ်၍မရပါ" ဟူသော အဓိပ္ပာယ်မှာလည်း ဤအချက်ပင်ဖြစ်သည်။
-  `/api/providers/` အောက်ရှိ dynamic-segment နှင့် static-path spawn လုပ်နိုင်သော route များ
-  (ဥပမာ `/login`, `/refresh-cursor`) ကို flat `SPAWN_CAPABLE_PREFIXES` array ဖြင့်
-  မဟုတ်ဘဲ `src/shared/constants/spawnCapablePrefixes.ts` ရှိ regex အခြေပြု
-  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` တွဲဖက်စနစ်ဖြင့်
-  လွှမ်းခြုံထားသည် — flat array ဖြင့် ၎င်းတို့ကို ဖမ်းယူရန် `/api/providers/` prefix
-  တစ်ခုလုံးကို လွှမ်းခြုံရမည်ဖြစ်ပြီး၊ ယင်းက remote dashboard များသည် provider CRUD အတွက်
-  တရားဝင်အသုံးပြုနေသော route tree ကို လိုအပ်သည်ထက် အလွန်ကျယ်ပြန့်စွာ ကန့်သတ်မိစေမည်ဖြစ်သည်။
+- **403 ကို client IP ကို loopback အဖြစ်အတုယတ်၍ "ပြင်ဆင်"ခြင်း မပြုပါနှင့်။**
+  `X-Forwarded-For: 127.0.0.1` ကို သတ်မှတ်ခြင်း၊ သို့မဟုတ် source address ကို
+  loopback သို့ ပြန်လည်ရေးသားသော proxy တစ်ခုသည် ဤအဆင့်က ပိတ်ထားသော RCE class ကို
+  အတိအကျ ပြန်လည်ဖွင့်လှစ်နေခြင်းပင် ဖြစ်သည်။ dashboard/API ကို proxy မှတစ်ဆင့်
+  ထုတ်ဖော်ပြသပါ — spawn-capable routes များကိုမူ ဘယ်တော့မျှ မထုတ်ဖော်ပါနှင့်။
+- **manage-scope bypass ကို အနည်းဆုံးထားပါ။** `/api/mcp/` သာ bypass လုပ်နိုင်ပြီး၊
+  `manage`-scoped API key ဖြင့်သာ bypass လုပ်နိုင်သည်။ `SPAWN_CAPABLE_PREFIXES`
+  ကို bypass စာရင်းသို့ ဘယ်တော့မျှ ထည့်သွင်း၍ မရပါ — zod schema က ၎င်းတို့ကို
+  ငြင်းပယ်ပြီး `isLocalOnlyBypassableByManageScope` က runtime တွင် ငြင်းပယ်သည်
+  (defence-in-depth)၊ ၎င်းသည် dashboard က "bypass လုပ်၍ မရနိုင်ပါ" ဟု ဆိုလိုသည့်
+  အဓိပ္ပာယ်ပင် ဖြစ်သည်။ တူညီသော deny-list တွင် spawn မလုပ်သော်လည်း အဝေးမှ
+  ဝင်ရောက်ခွင့် ဘယ်တော့မျှ မရှိစေရသော LOCAL_ONLY routes အချို့လည်း ပါဝင်သည် —
+  `/api/oauth/kiro/auto-import` (host-local Kiro credential ဖိုင်များကို ဖတ်ရှုသည်)၊
+  `/api/discovery/` နှင့် `/api/issue-agent/`။ runtime snapshot loader ကလည်း
+  သိုလှောင်ထားသော settings row မှ ထိုသို့သော entry များကို ဖျက်ပစ်ပြီး၊
+  legacy JSON import (`/api/settings/import-json`) ကလည်း bypass key များကို
+  ဘယ်တော့မျှ မရေးသားပါ။ `LOCAL_ONLY_API_PREFIXES` entry တိုင်းသည် deny-list
+  အတွင်းတွင် ရှိရမည် သို့မဟုတ် bypass-eligible အဖြစ် ပြန်လည်သုံးသပ်ခံရမည်
+  (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`)။ `/api/providers/`
+  အောက်ရှိ dynamic-segment နှင့် static-path spawn-capable routes များ
+  (ဥပမာ `/login`၊ `/refresh-cursor`) ကို
+  `src/shared/constants/spawnCapablePrefixes.ts` ရှိ regex-based
+  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` companion က
+  ဖုံးအုပ်ထားခြင်း ဖြစ်ပြီး၊ flat `SPAWN_CAPABLE_PREFIXES` array က ဖုံးအုပ်ထားခြင်း
+  မဟုတ်ပါ — flat array သည် ၎င်းတို့ကို ဖမ်းဆီးနိုင်ရန်အတွက် `/api/providers/`
+  prefix တစ်ခုလုံးကို ဖုံးအုပ်ရမည် ဖြစ်ကာ၊ remote dashboards များက provider CRUD
+  အတွက် တရားဝင်စွာ အသုံးပြုနေသော route tree ကို လိုအပ်ချက်ထက်
+  ကျယ်ပြန့်လွန်းစေပါလိမ့်မည်။
 
-**ဝင်ရောက်အသုံးပြုမှု စစ်ဆေးခြင်း** — host ပြင်ပမှ မည်သည့်အရာမျှ ဤ route များသို့ မရောက်ရှိကြောင်း အတည်ပြုရန်-
+**ဝင်ရောက်မှုကို စစ်ဆေးခြင်း** — host အပြင်ဘက်မှ မည်သည့်အရာမျှ ဤ routes များသို့ မရောက်ရှိနေကြောင်း အတည်ပြုရန်:
 
-- `/dashboard/settings/security` ရှိ **Authorization Inventory** ကို ဖွင့်ပါ။ ၎င်းသည် လက်ရှိအသုံးပြုနေသော LOCAL_ONLY ရှေ့ဆက်စာရင်း၊ ကျော်လွှားနိုင်သည့် ရှေ့ဆက်များနှင့် compile လုပ်ချိန်တွင် သတ်မှတ်ထားသည့်
-  spawn လုပ်နိုင်သော ("ကျော်လွှားနိုင်အောင် မပြုလုပ်နိုင်သော") အစုကို ဖော်ပြပေးသည်။
-- အထက်ပါ ရှေ့ဆက်များနှင့် loopback မဟုတ်သော client လိပ်စာတို့ တွဲလျက်ရှိမှုကို ရှာရန် သင်၏ reverse-proxy / access logs များတွင် Grep လုပ်ပါ။
-  ထိုကဲ့သို့သော hit တစ်ခုခုက `403 LOCAL_ONLY` အစား `200` ကို ပြန်ပေးခဲ့ပါက
-  proxy သည် client IP အစစ်ကို ဖုံးကွယ်နေခြင်းဖြစ်သည် — proxy ကို ပြင်ဆင်ပါ။
-- ဤ path များထဲမှ တစ်ခုအတွက် OmniRoute ၏ logs များတွင် `403 LOCAL_ONLY` ရှိနေခြင်းသည် guard က
-  ရည်ရွယ်ထားသည့်အတိုင်း အလုပ်လုပ်နေခြင်းဖြစ်ပြီး ဖျောက်ထားရမည့် error မဟုတ်ပါ။
+- `/dashboard/settings/security` ရှိ **Authorization Inventory** ကို ဖွင့်ပါ:
+  ၎င်းသည် လက်ရှိ LOCAL_ONLY prefix စာရင်း၊ မည်သည့် prefix များ bypass
+  လုပ်နိုင်သနည်း၊ နှင့် compile-time spawn-capable ("bypass လုပ်၍ မရနိုင်သော")
+  set ကို ပြသပေးသည်။
+- သင်၏ reverse-proxy / access logs များတွင် အထက်ပါ prefix များကို non-loopback
+  client address နှင့် တွဲဖက်၍ grep လုပ်ပါ။ `403 LOCAL_ONLY` အစား `200`
+  ပြန်ပေးခဲ့သော ထိုသို့သော hit မည်သည်မဆိုသည် proxy က အစစ်အမှန် client IP ကို
+  ဖုံးကွယ်နေကြောင်း ဆိုလိုသည် — proxy ကို ပြင်ဆင်ပါ။
+- ဤ path များထဲမှ တစ်ခုအတွက် OmniRoute ၏ logs တွင် `403 LOCAL_ONLY` သည် guard
+  ရည်ရွယ်ထားသည့်အတိုင်း အလုပ်လုပ်နေခြင်း ဖြစ်ပြီး၊ ဖုံးကွယ်ရမည့် error မဟုတ်ပါ။
 
-### Tier 2 — ALWAYS_PROTECTED
+#### call-site probe gate ပါရှိသော အဝေးမှ ဝင်ရောက်နိုင်သော routes
 
-**အတည်ပြုကျင့်သုံးသည့်အရာ:** `isAlwaysProtectedPath(path)` → `requireLogin=false` bypass ကို ကျော်သွားသည်
-**ကျော်လွှားမှု:** `requireLogin=false` ဖြစ်သည့်အခါ မရှိပါ။ JWT အမြဲလိုအပ်သည်
+routes အချို့သည် remote dashboard မှ ဆက်လက်ဝင်ရောက်နိုင်ရန် လိုအပ်သော်လည်း local callers များအတွက် host-side probe (`which <binary>`၊ `<binary> --version`၊ `tailscale status --json`) ကို လည်ပတ်စေသည်။ ၎င်းတို့သည် `GET` အတွက် LOCAL_ONLY မဟုတ်ပါ; ၎င်းအစား handler က `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ဖြင့် ယုံကြည်စိတ်ချရသော peer verdict ကို ဖတ်ရှုပြီး၊ `loopback` / `lan` callers များအတွက်သာ probe ကို လည်ပတ်စေသည်။ `remote` caller တစ်ဦးကမူ non-spawning sources များ (persisted state၊ settings၊ fs checks) မှ တည်ဆောက်ထားသော တူညီသော response shape ကို `probed: false` ဟု မှတ်သားထားသော ပုံစံဖြင့် ရရှိသည်။
 
-ဤ routes များသည် အချက်အလက်များကို ဖျက်ဆီးနိုင်သည် သို့မဟုတ် ပြန်ပြင်၍မရနိုင်ပါ။ ၎င်းတို့ကို "စကားဝှက်မပါသော"
-တပ်ဆင်မှုတစ်ခုတွင် ခွင့်ပြုခြင်းသည် LAN တစ်ခုတည်းရှိ မည်သူမဆို database ကို အပြီးဖျက်နိုင်ခြင်း သို့မဟုတ်
-server process ကို ရပ်ပစ်နိုင်ခြင်းကို ဆိုလိုမည်ဖြစ်သည်။
+| Route                                                             | Remote caller များအတွက် ကျော်သွားသော probe                            |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`      | CLI runtime probe (`allowLocalRuntimeProbe`) နှင့် CLI-fallback spawn |
+| `GET /api/headroom/status`                                        | `which headroom` နှင့် python `--version` probes များ                 |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check`  | `which tailscale`, `tailscale status/funnel --json`, `which brew`     |
+| `GET /api/tunnels/cloudflared` (LOCAL_ONLY မှ GET-လွတ်ငြိမ်းချက်) | `which cloudflared` PATH ရှာဖွေမှု                                    |
 
-| Path                                      | အကြောင်းရင်း                                                                             |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `/api/shutdown`                           | server process ကို ရပ်တန့်စေသည်                                                          |
-| `/api/settings/database`                  | Database export၊ import နှင့် အပြီးဖျက်ခြင်း                                             |
-| `/api/db-backups`                         | Database backup archive အပြည့်အစုံကို ဝင်ရောက်အသုံးပြုခြင်း                              |
-| `/api/settings/export-json`               | settings blob အပြည့်အစုံကို export လုပ်သည် (လျှို့ဝှက်ချက်များ အပါအဝင်)                  |
-| `/api/settings/import-json`               | settings blob အပြည့်အစုံကို အစားထိုးသည်                                                  |
-| `/api/providers/health-autopilot/actions` | autopilot ပြန်လည်ကုစားရေး လုပ်ဆောင်ချက်များကို လုပ်ဆောင်သည်                              |
-| `/api/settings/obsidian`                  | မည်သည့် vault root အတွက်မဆို ပြန်လည်အသုံးပြုနိုင်သော WebDAV အထောက်အထားများကို ထုတ်ပေးသည် |
+host ကို probe လုပ်သော read route အသစ်တစ်ခုသည် တူညီသော pattern ကို လိုက်နာရမည်၊ သို့မဟုတ် LOCAL_ONLY အဖြစ် တိုက်ရိုက် ခွဲခြားသတ်မှတ်ခံရမည်။
 
-**ချိုးဖောက်မှုအတွက် တုံ့ပြန်ချက်:** `401 Authentication required`
+### အဆင့် 2 — ALWAYS_PROTECTED
 
-`/api/settings/obsidian` သည် ၎င်း၏ `/webdav` child ကို အကျုံးဝင်စေသည်။ `POST` သည် ဤ pipeline ပြင်ပရှိ Next.js မတိုင်မီ
-custom Node layer က ပံ့ပိုးသည့် WebDAV file service ကို ခေါ်ဆိုသူရွေးချယ်ထားသော root သို့
-ညွှန်ပြပြီး အသစ်ထုတ်ပေးထားသော Basic အထောက်အထားများကို ပြန်လည်ဖော်ပြသည်၊ `DELETE` သည် ၎င်းတို့ကို လှည့်လည်ပြောင်းလဲပေးပြီး parent `POST` သည်
-Obsidian REST API token ကို သိမ်းဆည်းသည်။ GHSA-62vw သည် `GET` မှ စကားဝှက်ဖော်ပြမှုကိုသာ ဖုံးကွယ်ခဲ့ပြီး ထုတ်ပေးမှုမှာ
-fail-open tier ပေါ်တွင် ဆက်ရှိနေခဲ့သည် (GHSA-7pq4-8pvv-rx7r)။ ထို့အပြင် `enableObsidianVaultSync()` သည်
-data directory ကိုယ်တိုင်ဖြစ်သော၊ ၎င်းအတွင်းရှိသော သို့မဟုတ် ၎င်းကို အတွင်းတွင် ထည့်သွင်းထားသော vault တစ်ခုကို ငြင်းပယ်သည်။
+**စည်းကမ်းချက်ချမှတ်ခြင်း:** `isAlwaysProtectedPath(path)` → `requireLogin=false` bypass ကို ကျော်သွားပါ
+**Bypass:** `requireLogin=false` ဖြစ်နေစဉ် ဘာမျှမရှိ; JWT ကို အမြဲတမ်း လိုအပ်သည်
 
-### အသစ်တပ်ဆင်မှု bootstrap သည် loopback အတွက်သာဖြစ်သည် — `Host` အရမဟုတ်ဘဲ peer အစစ်အရ
+ဤ routes များသည် ဖျက်ဆီးမှုဖြစ်စေနိုင်သော သို့မဟုတ် ပြန်လည်ရွေးချယ်၍ မရနိုင်သော အရာများဖြစ်သည်။ ၎င်းတို့ကို "စကားဝှက်မလို" install တစ်ခုတွင် ခွင့်ပြုခြင်းဆိုသည်မှာ တူညီသော LAN ပေါ်ရှိ မည်သူမဆို ဒေတာဘေ့စ်ကို ရှင်းလင်းဖျက်ဆီးနိုင်သော သို့မဟုတ် server process ကို ပိတ်သိမ်းနိုင်မည်ဟု ဆိုလိုသည်။
 
-စီမံခန့်ခွဲမှု စကားဝှက် သတ်မှတ်မထားသည့်အခါ (နှင့် `INITIAL_PASSWORD` မရှိသည့်အခါ)၊
-`src/shared/utils/apiAuth.ts` ရှိ `isAuthRequired()` သည် အမည်မသိ bootstrap ကို **loopback peers အတွက်သာ**
-ဖွင့်ထားသည်။ Loopback ဟုတ်မဟုတ်ကို ယုံကြည်ရသော peer signal များမှ အောက်ပါအစဉ်အတိုင်း ဆုံးဖြတ်သည်။ token ဖြင့် တံဆိပ်ခတ်ထားသော TCP peer အစစ်
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`၊ policy က မြင်ရသည့်အရာ)၊ pipeline ကိုယ်တိုင်၏
-`AUTHZ_HEADER_PEER_LOCALITY` ဆုံးဖြတ်ချက် (route handlers များက မြင်ရသည့်အရာဖြစ်ပြီး
-`OMNIROUTE_PEER_STAMP_TOKEN` သတ်မှတ်ထားစဉ်တွင်သာ ယုံကြည်ရသည်) သို့မဟုတ် တိုက်ရိုက်ခေါ်ဆိုသူများအတွက် socket peer အစစ်တို့ဖြစ်သည်။ `Host` /
-`nextUrl.hostname` ကို လုံးဝ မစစ်ဆေးဘဲ ပထမဆုံးစကားဝှက် ရေးသားမှု
-(`POST /api/settings/require-login`) ကိုလည်း network peer အားလုံးအတွက် ဖွင့်ပေးထားခြင်းမဟုတ်ဘဲ တူညီသော
-ကန့်သတ်ချက်အောက်တွင် ထားရှိသည် (GHSA-7pq4-8pvv-rx7r)။ `managementPolicy` သည် ၎င်း၏ကိုယ်ပိုင် `peerContext` ဆုံးဖြတ်ချက်ကို
-အောက်သို့ အတိအလင်း ပေးပို့သောကြောင့် ORIGINAL (မဖယ်ရှားမီ) request ၏ headers များက ၎င်းကို မဆုံးဖြတ်နိုင်ပါ။
+| Path                                      | အကြောင်းရင်း                                                                         |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| `/api/shutdown`                           | server process ကို ရပ်ဆိုင်းပစ်သည်                                                   |
+| `/api/settings/database`                  | ဒေတာဘေ့စ် ကို export လုပ်ခြင်း၊ import လုပ်ခြင်းနှင့် ရှင်းလင်းဖျက်ဆီးခြင်း          |
+| `/api/db-backups`                         | ဒေတာဘေ့စ် backup archive အပြည့်အစုံသို့ ဝင်ရောက်ခွင့်                                |
+| `/api/settings/export-json`               | settings blob အပြည့်အစုံကို export လုပ်သည် (secrets အပါအဝင်)                         |
+| `/api/settings/import-json`               | settings blob အပြည့်အစုံကို အစားထိုးသည်                                              |
+| `/api/providers/health-autopilot/actions` | autopilot remediation action များကို ဆောင်ရွက်သည်                                    |
+| `/api/settings/obsidian`                  | မည်သည့် vault root အတွက်မဆို ပြန်လည်အသုံးပြုနိုင်သော WebDAV creds ကို ထုတ်လုပ်ပေးသည် |
+| `/api/relay/tokens`                       | relay token များကို ထုတ်လုပ်၊ စာရင်းပြုစု၊ ပြင်ဆင်နှင့် ရုပ်သိမ်းသည်                 |
+| `/api/cli-tools/apply`                    | operator ၏ host CLI config ကို ပြန်လည်ရေးသားပေးသည်                                   |
+| `/api/cli-tools/guide-settings`           | guide-driven CLI config ဖိုင်များကို ရေးသားပေးသည်                                    |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes agent config ကို ရေးသားပေးသည်                                                 |
+| `/api/cli-tools/backups`                  | CLI config backup များကို ပြန်လည်ထားရှိခြင်းနှင့် ဖျက်ပစ်ခြင်း                       |
+| `/api/log-export`                         | call log များကို သတ်မှတ်ထားသော destination သို့ ပေးပို့သည်                           |
+| `/api/restart`                            | server process ကို ပြန်လည်စတင်သည်                                                    |
 
-### Tier 3 — MANAGEMENT (မူလသတ်မှတ်ချက်)
+**ချိုးဖောက်မှုအပေါ် တုံ့ပြန်ချက်:** `401 Authentication required`
 
-အခြား management routes အားလုံး။ `requireLogin=false` ကို
-သတ်မှတ်မထားပါက authentication လိုအပ်သည်။ CLI tokens များသည် ဤ routes များကို authenticate လုပ်နိုင်သည် (loopback + မှန်ကန်သော HMAC)။
+`/api/settings/obsidian` သည် ၎င်း၏ `/webdav` child ကို လွှမ်းခြုံထားသည်: `POST` သည် WebDAV ဖိုင်ဝန်ဆောင်မှု — Next.js မတိုင်မီ custom Node အလွှာက ဆက်လက်ပေးအပ်နေသည့်၊ ဤ pipeline ၏ အပြင်ဘက်ရှိ — ကို ခေါ်ဆိုသူ ရွေးချယ်ထားသော root သို့ ညွှန်ပြပြီး အသစ်စက်စက် ထုတ်လုပ်ထားသော Basic credential များကို ပြန်လည်ပေးအပ်သည်၊ `DELETE` သည် ၎င်းတို့ကို လှည့်ပတ်ပြောင်းလဲပေးသည်၊ parent `POST` ကမူ Obsidian REST API token ကို သိမ်းဆည်းသည်။ GHSA-62vw သည် `GET` စကားဝှက်ပေါက်ကြားမှုကိုသာ ဖုံးကွယ်ပေးထားခြင်းဖြစ်ပြီး၊ ထုတ်ပေးမှုကမူ fail-open အဆင့်ပေါ်တွင် ရှိနေဆဲဖြစ်သည် (GHSA-7pq4-8pvv-rx7r)။ ထို့အပြင် `enableObsidianVaultSync()` သည် data directory ဖြစ်နေသော၊ ၎င်း၏ အတွင်းတွင် ရှိနေသော၊ သို့မဟုတ် ၎င်းကို ပါဝင်နေသော vault ကို ငြင်းပယ်သည်။
+
+#### Credential export များနှင့် restore များသည် operator သီးသန့်ဖြစ်သည်
+
+အထက်ပါအဆင့်က credential _တစ်ခုခု_ လိုအပ်သည် မလိုအပ်ဘူးကိုသာ ဆုံးဖြတ်သည်။ သိမ်းဆည်းထားသော credential များကို download လုပ်သော route များသည် handler အတွင်းတွင် ဒုတိယစစ်ဆေးမှုတစ်ခု ထပ်တိုးထားသည်: `GET /api/settings/export-json` (စာဝှက်ဖြေလျှော်ထားသော provider ချိတ်ဆက်မှုများနှင့် raw API key များ)၊ `GET /api/db-backups/export` (SQLite ဖိုင်) နှင့် `GET /api/db-backups/exportAll` (အပြည့်အဝ archive) တို့သည် `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`) ကို ခေါ်သည်။ ၎င်းသည် dashboard session၊ local CLI subject၊ သို့မဟုတ် login ပိတ်ထားသော instance ကို လက်ခံပြီး၊ မည်သည့် scope ရှိ API key များကိုမဆို (`manage` နှင့် `admin` အပါအဝင်) နှင့် `oma_` access token များကိုမဆို `403` ဖြင့် တုံ့ပြန်သည်။ ဖျက်ဆီးမှုဖက် မိတ်ဖက်များကလည်း နယ်စည်းမျဉ်းတူတူကို ထိန်းသိမ်းထားသည်: `POST /api/db-backups/import` (တင်သွင်းထားသော `.sqlite`၊ `dryRun=true` ပါဝင်)၊ `POST /api/db-backups` (သိမ်းဆည်းထားသော backup ကို id ဖြင့် restore လုပ်ခြင်း) နှင့် `POST /api/settings/import-json` (legacy JSON restore) တို့သည် လက်ရှိ database သို့မဟုတ် settings/connections/API-key အစုလုံးကို အစားထိုးသွားသည်၊ ထို့ကြောင့် machine credential တစ်ခုကလည်း ၎င်းတို့ကို လှုပ်ရှားစေနိုင်ခြင်း မရှိပါ။ restore point များကို ဖျက်ဆီးခြင်းကလည်း နယ်စည်းမျဉ်းတူတူကို ထိန်းသိမ်းထားသည်: `DELETE /api/db-backups` (သန့်ရှင်းရေး — နောက်ဆုံး N ခုကို သိမ်းထားခြင်း / D ရက်ထက် ပိုဟောင်းသော များကို ဖျက်ပစ်ခြင်း) နှင့် `PATCH /api/db-backups` (retention ဆက်တင်များ)၊ အဘယ်ကြောင့်ဆိုသော် သိမ်းဆည်းပြီးသား retention သည် `cleanupDbBackups()` က အလိုအလျောက် backup တိုင်း၏နောက်တွင် အသုံးပြုသည့် အရာအတိအကျဖြစ်နေသောကြောင့် (`src/lib/db/backup.ts`)၊ `keepLatest: 1` ကို သိမ်းဆည်းနိုင်သော machine credential တစ်ခုက နောက်ထပ် snapshot တွင် အရာအားလုံးကို ရှင်းလင်းဖျက်ပစ်သွားနိုင်မည်ဖြစ်သည်။ Backup များကို စာရင်းပြုစုခြင်းနှင့် ဖန်တီးခြင်း (`GET`/`PUT /api/db-backups`) တို့သည် ပုံမှန် management auth ကို ဆက်လက်ထားရှိသည်။ Sync token ထုတ်ပေးခြင်း (`POST /api/sync/tokens`) သည်လည်း helper တူတူကို အသုံးပြုပြီး၊ ယုံကြည်စိတ်ချရသော loopback internal-service token ကို ထပ်ပေါင်းထားသည်။
+
+### အသစ်တပ်ဆင်မှု bootstrap သည် loopback သီးသန့် — အစစ်အမှန် peer ဖြင့်သာ၊ `Host` ဖြင့်မဟုတ်ပါ
+
+management စကားဝှက် မသတ်မှတ်ရသေးခြင်း (နှင့် `INITIAL_PASSWORD` မရှိခြင်း) ဖြစ်ပါက၊ `src/shared/utils/apiAuth.ts` ရှိ `isAuthRequired()` သည် anonymous bootstrap ကို **loopback peer များအတွက်သာ** ဆက်လက်ဖွင့်ထားသည်။ Loopback ဖြစ်မဖြစ်ကို ယုံကြည်စိတ်ချရသော peer signal များမှ အောက်ပါအစဉ်လိုက် ဆုံးဖြတ်သည်: token တံဆိပ်ခတ်ထားသော အစစ်အမှန် TCP peer (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`၊ policy မြင်တွေ့ရသည့် အရာ)၊ pipeline ကိုယ်ပိုင် `AUTHZ_HEADER_PEER_LOCALITY` ဆုံးဖြတ်ချက် (route handler များ မြင်တွေ့ရသည့် အရာ၊ `OMNIROUTE_PEER_STAMP_TOKEN` သတ်မှတ်ထားစဉ်တွင်သာ ယုံကြည်စိတ်ချရသည်)၊ သို့မဟုတ် တိုက်ရိုက်ခေါ်ဆိုသူများအတွက် အစစ်အမှန် socket peer။ `Host` / `nextUrl.hostname` များကို ဘယ်တော့မျှ ရည်ညွှန်းစစ်ဆေးခြင်း မပြုပါ၊ ပထမဆုံး-စကားဝှက် ရေးသားမှု (`POST /api/settings/require-login`) သည်လည်း ကွန်ရက် peer တိုင်းအတွက် ဖွင့်ထားခြင်းမဟုတ်ဘဲ ကန့်သတ်ချက်တူတူ၏အောက်တွင် ရှိသည် (GHSA-7pq4-8pvv-rx7r)။ `managementPolicy` သည် ၎င်း၏ကိုယ်ပိုင် `peerContext` ဆုံးဖြတ်ချက်ကို တိကျစွာဖြင့် အောက်သို့ ပေးပို့သည်၊ ထို့ကြောင့် မူရင်း (strip မလုပ်ရသေးသော) request ၏ header များက ၎င်းကို ဘယ်တော့မျှ ဆုံးဖြတ်စေခြင်း မရှိပါ။
+
+### Tier 3 — စီမံခန့်ခွဲမှု (မူလတ်)
+
+အခြား management route အားလုံး။ `requireLogin=false` ကို သတ်မှတ်ထားမှ မဟုတ်ပါက auth လိုအပ်သည်။ CLI token များက ဤ route များအတွက် စစ်မှန်ကြောင်း အထောက်အထားပြုနိုင်သည် (loopback + မှန်ကန်သော HMAC)။
 
 ## အကဲဖြတ်မှု အစီအစဉ်
 

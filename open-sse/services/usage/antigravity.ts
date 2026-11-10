@@ -20,11 +20,12 @@ import {
   isUserVisibleAntigravityQuotaModelId,
   toClientAntigravityQuotaModelId,
 } from "../../config/antigravityModelAliases.ts";
-import { isDiscoverableAgyModelId } from "../../config/agyModels.ts";
+import { isUserVisibleAgyQuotaModelId } from "../../config/agyModels.ts";
 import { getDbInstance } from "@/lib/db/core";
 import {
   applyAntigravityClientProfileHeaders,
   getAntigravityClientProfile,
+  resolveAntigravityClientVersion,
   type AntigravityClientProfile,
 } from "../antigravityClientProfile.ts";
 import {
@@ -43,7 +44,11 @@ import {
 } from "../codeAssistSubscription.ts";
 import { toRecord, toNumber, getFieldValue } from "./scalars.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
-import { fetchAndParseAntigravityWeeklyQuotas } from "./antigravityWeeklyQuota.ts";
+import {
+  fetchAndParseAntigravityQuotaSummary,
+  type AntigravityQuotaGroup,
+} from "./antigravityWeeklyQuota.ts";
+import { getAntigravityQuotaFamily } from "../antigravityQuotaFamily.ts";
 
 type JsonRecord = Record<string, unknown>;
 type SubscriptionCacheEntry = {
@@ -557,6 +562,15 @@ async function probeAntigravityCreditBalanceUncached(
  * buckets, so prefer it when present and fall back to fetchAvailableModels only for
  * models that have no retrieveUserQuota entry (for example Claude/GPT OSS buckets).
  */
+/** Ultra always includes the Argon pool; otherwise trust the quota summary when it says. */
+function antigravityHasArgonField(
+  plan: string,
+  quotaSummary: { hasArgon?: boolean }
+): { hasArgon?: boolean } {
+  if (plan === "Ultra") return { hasArgon: true };
+  return typeof quotaSummary.hasArgon === "boolean" ? { hasArgon: quotaSummary.hasArgon } : {};
+}
+
 export async function getAntigravityUsage(
   provider: "antigravity" | "agy",
   accessToken?: string,
@@ -572,6 +586,15 @@ export async function getAntigravityUsage(
   let subscriptionInfo: unknown = null;
   try {
     const clientProfile = getAntigravityClientProfile({ providerSpecificData });
+    // Warm the client-version cache before any Cloud Code call: every request below builds
+    // its User-Agent from the synchronous cache, and on a cold process (dashboard poll before
+    // any chat request) that would otherwise be the static fallback. Best-effort — the
+    // resolver swallows feed errors, caches for 6h and coalesces concurrent lookups.
+    // retrieveUserQuotaSummary below always uses the `cli` fingerprint, so warm that too.
+    await Promise.all([
+      resolveAntigravityClientVersion(clientProfile),
+      resolveAntigravityClientVersion("cli"),
+    ]);
     subscriptionInfo = await getAntigravitySubscriptionInfoCached(
       accessToken,
       providerSpecificData,
@@ -612,10 +635,11 @@ export async function getAntigravityUsage(
       );
     }
 
-    const [data, userQuotaData, weeklyQuotas] = await Promise.all([
+    const plan = getAntigravityPlanLabel(subscriptionInfo, providerSpecificData);
+    const [data, userQuotaData, quotaSummary] = await Promise.all([
       fetchAntigravityAvailableModelsCached(accessToken, projectId, clientProfile, options),
       fetchAntigravityUserQuotaCached(accessToken, projectId, clientProfile, options),
-      fetchAndParseAntigravityWeeklyQuotas(accessToken, projectId, clientProfile, options), // #4017
+      fetchAndParseAntigravityQuotaSummary(accessToken, projectId, "cli", { ...options, plan }),
     ]);
     const dataObj = toRecord(data);
     if (dataObj.__antigravityForbidden === true) {
@@ -633,6 +657,13 @@ export async function getAntigravityUsage(
       }
     }
     const quotas: Record<string, UsageQuota> = {};
+    const liveModelIds: string[] = [];
+    const seenLiveModelIds = new Set<string>();
+    const addLiveModelId = (modelId: string): void => {
+      if (seenLiveModelIds.has(modelId)) return;
+      seenLiveModelIds.add(modelId);
+      liveModelIds.push(modelId);
+    };
 
     // Parse per-model quota info from fetchAvailableModels response.
     for (const [rawModelKey, infoValue] of Object.entries(modelEntries)) {
@@ -645,13 +676,14 @@ export async function getAntigravityUsage(
         !modelKey ||
         info.isInternal === true ||
         !(provider === "agy"
-          ? isDiscoverableAgyModelId(modelKey)
+          ? isUserVisibleAgyQuotaModelId(modelKey)
           : isUserVisibleAntigravityQuotaModelId(modelKey)) ||
         Object.keys(quotaInfo).length === 0
       ) {
         continue;
       }
 
+      addLiveModelId(modelKey);
       const liveQuota = userQuotaEntries.get(modelKey);
       const quotaSource = liveQuota || quotaInfo;
       const rawFraction = toNumber(quotaSource.remainingFraction, Number.NaN);
@@ -702,11 +734,12 @@ export async function getAntigravityUsage(
       if (
         quotas[modelKey] ||
         !(provider === "agy"
-          ? isDiscoverableAgyModelId(modelKey)
+          ? isUserVisibleAgyQuotaModelId(modelKey)
           : isUserVisibleAntigravityQuotaModelId(modelKey))
       ) {
         continue;
       }
+      addLiveModelId(modelKey);
       const rawFraction = toNumber(bucket.remainingFraction, -1);
       if (rawFraction < 0) continue;
       const remainingFraction = Math.max(0, Math.min(1, rawFraction));
@@ -726,11 +759,24 @@ export async function getAntigravityUsage(
       };
     }
 
+    const quotaGroups: AntigravityQuotaGroup[] = quotaSummary.groups.map((group) => ({
+      ...group,
+      models: liveModelIds.filter((modelId) => {
+        const family = getAntigravityQuotaFamily(modelId);
+        return (
+          (group.id === "gemini" && family === "gemini") ||
+          (group.id === "claude_gpt" && family === "claude") ||
+          (group.id === "gemini_4_argon" && family === "argon")
+        );
+      }),
+    }));
+
     return {
-      plan: getAntigravityPlanLabel(subscriptionInfo, providerSpecificData),
+      plan,
+      quotaGroups,
       quotas: {
         ...quotas,
-        ...weeklyQuotas,
+        ...quotaSummary.quotas,
         ...(creditBalance !== null && {
           credits: {
             used: 0,
@@ -742,6 +788,7 @@ export async function getAntigravityUsage(
         }),
       },
       subscriptionInfo,
+      ...antigravityHasArgonField(plan, quotaSummary),
     };
   } catch (error) {
     return {
@@ -793,7 +840,7 @@ async function getAntigravitySubscriptionInfo(
     const response = await fetch(ANTIGRAVITY_CONFIG.loadProjectApiUrl, {
       method: "POST",
       headers: getAntigravityContentHeaders(profile, accessToken),
-      body: JSON.stringify({ metadata: getAntigravityLoadCodeAssistMetadata() }),
+      body: JSON.stringify({ metadata: getAntigravityLoadCodeAssistMetadata(profile) }),
     });
 
     if (!response.ok) return null;

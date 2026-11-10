@@ -1,20 +1,24 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   REQUIRED_SQLJS_RUNTIME_FILES,
   REQUIRED_MACHINE_TOKEN_RUNTIME_FILES,
+  REQUIRED_DOCS_I18N_RUNTIME_FILES,
   pickTarball,
   evaluateBoot,
   pickPort,
   findMissingSqlJsRuntimeFiles,
   findMissingMachineTokenRuntimeFiles,
+  findMissingDocsI18nRuntimeFiles,
   evaluateMachineTokenAuth,
   evaluateSqlJsRoundTrip,
   evaluateRestartPersistence,
+  derivePackagedCliToken,
 } from "../../scripts/check/check-pack-boot.mjs";
 
 // WS1.2 (T1, v3.8.49 quality plan) — pure-function guards for the tarball boot-smoke
@@ -78,6 +82,22 @@ test("installed package contract requires sql.js metadata, entrypoint, and WASM"
   assert.deepEqual(
     findMissingSqlJsRuntimeFiles("/pkg", (file) => present.has(file)),
     ["node_modules/sql.js/dist/sql-wasm.wasm"]
+  );
+});
+
+test("installed package contract requires the translated docs mirrors and jsdom", () => {
+  const present = new Set(REQUIRED_DOCS_I18N_RUNTIME_FILES.map((file) => path.join("/pkg", file)));
+  assert.deepEqual(
+    findMissingDocsI18nRuntimeFiles("/pkg", (file) => present.has(file)),
+    []
+  );
+
+  // jsdom is a declared dependency, so npm places it at <packageRoot>/node_modules.
+  present.delete(path.join("/pkg", "node_modules/jsdom/package.json"));
+  present.delete(path.join("/pkg", "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md"));
+  assert.deepEqual(
+    findMissingDocsI18nRuntimeFiles("/pkg", (file) => present.has(file)),
+    ["dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md", "node_modules/jsdom/package.json"]
   );
 });
 
@@ -243,4 +263,34 @@ test("source guard: final shutdown only deletes the workspace after a CONFIRMED 
     src.includes("hasExited(child)"),
     "stopChild/waitForHealthy must read authoritative exit state, not a stale boolean"
   );
+});
+
+// #13679/#13909 made the CLI token salt per-install, persisted under <DATA_DIR>. The
+// smoke boots the server on an isolated DATA_DIR, so the token it sends must be derived
+// against that SAME DATA_DIR — derived without it, the CLI resolves a different salt,
+// the server rejects the token, and /api/monitoring/health answers the anonymous view
+// ("version undefined", release PR #11442 Package Artifact).
+test("derivePackagedCliToken derives the token against the server's DATA_DIR salt", () => {
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+  const dataDir = mkdtempSync(path.join(os.tmpdir(), "pack-boot-cli-token-"));
+  const otherDataDir = mkdtempSync(path.join(os.tmpdir(), "pack-boot-cli-token-other-"));
+  const savedCliSalt = process.env.OMNIROUTE_CLI_SALT;
+  delete process.env.OMNIROUTE_CLI_SALT;
+  try {
+    const token = derivePackagedCliToken(repoRoot, dataDir);
+    assert.match(token, /^[0-9a-f]{64}$/);
+    assert.equal(
+      existsSync(path.join(dataDir, "cli-token-salt.json")),
+      true,
+      "the salt must be established inside the smoke's DATA_DIR"
+    );
+    // Stable for the same DATA_DIR, different for another install's DATA_DIR.
+    assert.equal(derivePackagedCliToken(repoRoot, dataDir), token);
+    assert.notEqual(derivePackagedCliToken(repoRoot, otherDataDir), token);
+  } finally {
+    if (savedCliSalt === undefined) delete process.env.OMNIROUTE_CLI_SALT;
+    else process.env.OMNIROUTE_CLI_SALT = savedCliSalt;
+    rmSync(dataDir, { recursive: true, force: true });
+    rmSync(otherDataDir, { recursive: true, force: true });
+  }
 });

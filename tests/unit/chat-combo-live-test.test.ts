@@ -11,12 +11,19 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const chatRoute = await import("../../src/app/api/v1/chat/completions/route.ts");
-const { generateSignature, invalidateBySignature, setCachedResponse } =
+const { generateSignature, invalidateBySignature, setCachedResponse, outputContractOf } =
   await import("../../src/lib/semanticCache.ts");
 const { getCircuitBreaker, resetAllCircuitBreakers, STATE } =
   await import("../../src/shared/utils/circuitBreaker.ts");
 
+const { SELF_HOP_HEADER, ownListenerSelfHopToken } =
+  await import("../../open-sse/utils/selfHop.ts");
+
 const originalFetch = globalThis.fetch;
+const LIVE_TEST_HEADERS = {
+  "X-Internal-Test": "combo-health-check",
+  [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
+};
 
 async function flushBackgroundWork() {
   await new Promise((resolve) => setTimeout(resolve, 50));
@@ -53,6 +60,14 @@ async function seedHealthyConnection() {
   });
 }
 
+const DEFAULT_REQUEST_BODY = {
+  model: "openai/gpt-4.1",
+  messages: [{ role: "user", content: "Reply with OK only." }],
+  max_tokens: 16,
+  stream: false,
+  temperature: 0,
+};
+
 function makeRequest(extraHeaders = {}) {
   return new Request("http://localhost/v1/chat/completions", {
     method: "POST",
@@ -60,13 +75,7 @@ function makeRequest(extraHeaders = {}) {
       "Content-Type": "application/json",
       ...extraHeaders,
     },
-    body: JSON.stringify({
-      model: "openai/gpt-4.1",
-      messages: [{ role: "user", content: "Reply with OK only." }],
-      max_tokens: 16,
-      stream: false,
-      temperature: 0,
-    }),
+    body: JSON.stringify(DEFAULT_REQUEST_BODY),
   });
 }
 
@@ -167,9 +176,7 @@ test("combo live test bypasses connection cooldown and breaker state to perform 
   assert.equal(blockedByBreaker.status, 503);
   assert.equal(fetchCalls.length, 0);
 
-  const liveResponse = await chatRoute.POST(
-    makeRequest({ "X-Internal-Test": "combo-health-check" })
-  );
+  const liveResponse = await chatRoute.POST(makeRequest(LIVE_TEST_HEADERS));
   const liveBody = (await liveResponse.json()) as any;
 
   assert.equal(liveResponse.status, 200);
@@ -185,11 +192,16 @@ test("combo live test bypasses connection cooldown and breaker state to perform 
 test("combo live test bypasses semantic cache and forces a fresh upstream request", async () => {
   await seedHealthyConnection();
 
+  // Seed under the signature the production read/store paths compute: the request
+  // carries generation params (max_tokens — #15149) that outputContractOf folds into
+  // the digest, so a bare legacy signature would miss this entry entirely.
   const signature = generateSignature(
     "gpt-4.1",
-    [{ role: "user", content: "Reply with OK only." }],
+    DEFAULT_REQUEST_BODY.messages,
     0,
-    1
+    1,
+    undefined,
+    outputContractOf(DEFAULT_REQUEST_BODY)
   );
 
   setCachedResponse(signature, "gpt-4.1", {
@@ -230,7 +242,7 @@ test("combo live test bypasses semantic cache and forces a fresh upstream reques
 
     const liveResponse = await chatRoute.POST(
       makeRequest({
-        "X-Internal-Test": "combo-health-check",
+        ...LIVE_TEST_HEADERS,
         "X-OmniRoute-No-Cache": "true",
         "X-Request-Id": "combo-test-cache-bypass",
       })
@@ -337,9 +349,7 @@ test("combo live test does not use cooldown-aware request retry on upstream fail
     );
   };
 
-  const liveResponse = await chatRoute.POST(
-    makeRequest({ "X-Internal-Test": "combo-health-check" })
-  );
+  const liveResponse = await chatRoute.POST(makeRequest(LIVE_TEST_HEADERS));
   const liveBody = (await liveResponse.json()) as any;
 
   assert.equal(liveResponse.status, 503);

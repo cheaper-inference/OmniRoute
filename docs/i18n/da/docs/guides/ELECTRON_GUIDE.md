@@ -4,92 +4,99 @@
 
 ---
 
-> **Sandhedskilde:** `electron/`-arbejdsområdet
-> **Senest opdateret:** 2026-06-28 — v3.8.40
+> **Sandhedens kilde:** `electron/` arbejdsområde** Sidst opdateret:** 2026-06-28 — v3.8.40
 
-OmniRoute leveres med en skrivebordsapp til flere platforme (Windows / macOS / Linux), der er bygget med
-**Electron 41** + **electron-builder 26.10**. Skrivebordsappen starter den selvstændige Next.js-server
-som en underproces, dirigerer et `BrowserWindow` til den og tilføjer et
-systembakkeikon, automatiske opdateringer, en IPC-bro og konfigurationsfri initialisering af hemmeligheder.
+OmniRoute sender en desktop-app på tværs af platforme (Windows / macOS / Linux) bygget på**Electron 41** +** elektronbygger 26.10** . Desktop-appen afføder Next.js standalone-serveren som en underordnet proces, peger en `BrowserWindow` på den og tilføjer en systembakke, auto-updater, IPC bridge og nul-config hemmelig bootstrap.
 
 ## Arkitektur
 
 ```
-┌────────────────────────────────────────────────────┐
-│ Electrons hovedproces (electron/main.js)            │
-│ ├─ Lås til én enkelt instans                        │
-│ ├─ Underproces: Selvstændig Next.js-server          │
-│ │   (startet med Electrons Node-kørselsmiljø)       │
-│ ├─ BrowserWindow → http://localhost:PORT            │
-│ ├─ Systembakkeikon + genvejsmenu                    │
-│ ├─ Automatisk opdatering via electron-updater       │
-│ ├─ Content Security Policy (sessionsheadere)        │
-│ └─ Initialisering af hemmeligheder (JWT / API_KEY_SECRET) │
-└────────────────────────────────────────────────────┘
-            ↕ IPC-bro (electron/preload.js)
-┌────────────────────────────────────────────────────┐
-│ Renderer (Next.js-kontrolpanel)                     │
-│   window.electronAPI.* (contextIsolation)           │
-└────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
+│ ├─ BrowserWindow → http://localhost:PORT     │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────┘
+            ↕ IPC bridge (electron/preload.js)
+┌──────────────────────────────────────────────┐
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
+└──────────────────────────────────────────────┘
 ```
 
 ## Versioner
 
-Bekræftet ud fra `electron/package.json`:
+Bekræftet fra `electron/package.json`:
 
-| Pakke              | Version                                                                   |
-| ------------------ | ------------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                                 |
-| `electron-builder` | `^26.15.3`                                                                |
-| `electron-updater` | `^6.8.9`                                                                  |
-| `better-sqlite3`   | rod `^13.0.2` (Node-API-prækompileringer — ingen Electron-genkompilering) |
-| Appversion         | `3.8.0`                                                                   |
-| App-id             | `online.omniroute.desktop`                                                |
-| Produktnavn        | `OmniRoute`                                                               |
+| Pakke              | Version                                                           |
+| ------------------ | ----------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                         |
+| `electron-builder` | `^26.15.3`                                                        |
+| `electron-updater` | `^6.8.9`                                                          |
+| `better-sqlite3`   | root `^13.0.2` (Node-API præbuilds — ingen Electron genopbygning) |
+| App version        | `3.8.0`                                                           |
+| App-id             | `online.omniroute.desktop`                                        |
+| Produktnavn        | `OmniRoute`                                                       |
 
-## Scripts (`package.json` i roden)
+## Scripts (root `package.json`)
 
-| Script                            | Formål                                                                                         |
-| --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Starter `npm run dev` + venter på `localhost:20128` + starter Electron                         |
-| `npm run electron:build`          | Bygger Next.js og kører derefter `electron-builder` for det aktuelle operativsystem            |
-| `npm run electron:build:win`      | Bygger Windows NSIS-installationsprogram + portabel version (x64)                              |
-| `npm run electron:build:mac`      | Bygger macOS-DMG (Intel + Apple Silicon)                                                       |
-| `npm run electron:build:linux`    | Bygger Linux AppImage + DEB (x64 + arm64)                                                      |
-| `npm run electron:smoke:packaged` | Starter den pakkede binære fil og kontrollerer `/login` for HTTP 200, hvorefter den lukkes ned |
+| Manuskript                        | Formål                                                                      |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Starter `npm run dev` + venter på `localhost:20128` + starter Electron      |
+| `npm run electron:build`          | Bygger Next.js og kører derefter `electron-builder` for den aktuelle OS     |
+| `npm run electron:build:win`      | Bygger Windows NSIS installer + bærbar (x64)                                |
+| `npm run electron:build:mac`      | Bygger macOS DMG (Intel + Apple Silicon)                                    |
+| `npm run electron:build:linux`    | Bygger Linux AppImage + DEB (x64 + arm64)                                   |
+| `npm run electron:smoke:packaged` | Starter pakket binær og prober `/login` til HTTP 200 og lukker derefter ned |
 
-`electron/`-arbejdsområdet tilbyder også:
+`electron/` arbejdsområdet afslører også:
 
 - `npm run prepare:bundle` — kører `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — macOS-builds til en enkelt arkitektur
-- `npm run pack` — build kun som mappe til lokal test (intet installationsprogram)
+- `npm run build:mac-x64` / `build:mac-arm64` — single-arch macOS builds
+- `npm run pack` — mappe-kun build til lokal test (ingen installationsprogram)
 
-## Mappestruktur
+## Valgfri runtime-pakker
+
+Desktop builds kan udgive valgfri runtime-arkiver sammen med deres installatører. Den installerede servernyttelast indeholder `optional-packs.index.json` (under `resources/app` på Windows og Linux). For `browser-runtime` -posten, læs `packs[].tarball` og download** det nøjagtige filnavn fra den samme udgivelse** . Arkivnavne inkluderer en SHA-256 digest; forskellige builds kan kræve forskellige arkiver. Hold det downloadede filnavn uændret.
+
+Kopier den installerede apps indeks og det valgte arkiv til én mappe, og brug derefter CLI fra samme udgivelse:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` viser installations- og bekræftelsestilstand, ikke arkivfilnavnet. Det medfølgende indeks vælger arkivet. Installationen verificerer dens arkivkontrolsum før udtrækning og dens pakkekontrolsummer, før den erstatter en installeret pakke. Den læser lokale filer; den downloader ikke manglende arkiver. Genstart programmet efter installationen. Hvis udgivelsen ikke har noget matchende aktiv, er den valgfri pakke ikke tilgængelig gennem den pågældende udgivelses aktiver.
+
+## Directory Layout
 
 ```
 electron/
-├── package.json              # Electron-afhængigheder + electron-builder-konfiguration
-├── main.js                   # Hovedproces (24 KB — se annoteringer nedenfor)
-├── preload.js                # contextBridge IPC-bro
-├── types.d.ts                # AppInfo-/ServerStatus-/ElectronAPI-typer
-├── README.md                 # Noter i arbejdsområdet
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # Output fra electron-builder (ignoreres af git)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Klargør .next/electron-standalone-pakken
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Smoke-test efter build
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Både `main.js` og `preload.js` er **CommonJS-`.js`-filer**, ikke TypeScript.
-Typedefinitionerne på renderer-siden findes i `electron/types.d.ts`.
+Både `main.js` og `preload.js` er**CommonJS `.js` filer** , ikke TypeScript. Indtastningerne på gengiversiden lever i `electron/types.d.ts`.
 
-## IPC-bro (`preload.js`)
+## IPC bro (`preload.js`)
 
-Preload-scriptet eksponerer en hvidlistet API på `window.electronAPI` ved hjælp af `contextBridge`
-med `contextIsolation: true` og `nodeIntegration: false`.
+Forudlæsningen afslører en hvidlistet API på `window.electronAPI` ved hjælp `contextBridge` med `contextIsolation: true` og `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -108,107 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-Eksponerede metoder:
+Udsatte metoder:
 
-| Kald fra rendereren                                               | Type                                    |
-| ----------------------------------------------------------------- | --------------------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                                  |
-| `openExternal(url)`                                               | invoke                                  |
-| `getDataDir()`                                                    | invoke                                  |
-| `restartServer()`                                                 | invoke                                  |
-| `getAppVersion()`                                                 | invoke                                  |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                                  |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                    |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (returnerer oprydningsfunktion) |
+| Renderer opkald                                                   | Type                             |
+| ----------------------------------------------------------------- | -------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | påberåbe sig                     |
+| `openExternal(url)`                                               | påberåbe sig                     |
+| `getDataDir()`                                                    | påberåbe sig                     |
+| `restartServer()`                                                 | påberåbe sig                     |
+| `getAppVersion()`                                                 | påberåbe sig                     |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | påberåbe sig                     |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | sende                            |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | modtage (returnerer bortskaffer) |
 
-Receive-hjælpefunktionerne returnerer en **oprydningsfunktion** i stedet for at være afhængige af
-`removeAllListeners` — dette forhindrer ophobning af listeners, når React-komponenter
-genmonteres.
+De modtagende hjælpere returnerer en** bortskaffelsesfunktion** i stedet for at stole på `removeAllListeners` — forhindrer dette lytterakkumulering, når React komponenter genmonteres.
 
-## Serverens livscyklus
+## Server livscyklus
 
-`main.js` starter den selvstændige Next.js-pakke direkte med Electrons Node-
-runtime for at undgå uoverensstemmelser i native modulers ABI med systemets Node:
+`main.js` afføder Next.js standalone-pakken direkte med Electron Node-runtime for at undgå native-modul ABI mismatch med system Node:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
 Højdepunkter:
 
-- `waitForServer()` poller URL'en i op til 30 s, før vinduet vises (ingen tom skærm ved koldstart).
-- `stdio: "pipe"` opfanger stdout/stderr; klar-meddelelser (`Ready` / `listening`) udsender `server-status: running` via IPC.
-- `before-quit` venter i op til 5 s på en kontrolleret SIGTERM (WAL-checkpoint) og sender derefter SIGKILL.
-- Portvælgeren i systembakken (`20128`, `3000`, `8080`) stopper og genstarter serveren og genindlæser derefter BrowserWindow.
+- `waitForServer()` poller URL op til 30 s, før vinduet vises (ingen blank skærm ved koldstart).
+- `stdio: "pipe"` fanger stdout/stderr; klar-sætninger (`Ready` / `listening`) udsender `server-status: running` over IPC.
+- `before-quit` venter op til 5 s på yndefuld SIGTERM (WAL checkpoint) og sender derefter SIGKILL.
+- Port switcher i bakken (`20128`, `3000`, `8080`) stopper og genstarter serveren og genindlæser derefter BrowserWindow.
 
-## Nulkonfigurations-bootstrap af hemmeligheder
+## Zero-config Secret Bootstrap
 
-Ved første start genererer og gemmer hovedprocessen automatisk manglende hemmeligheder:
+Ved første lancering genererer hovedprocessen automatisk og fortsætter manglende hemmeligheder:
 
-| Hemmelighed              | Kilde                                                                                                            |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                         |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (afviser, hvis der allerede findes krypterede legitimationsoplysninger) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                         |
+| Hemmelighed              | Kilde                                                                                         |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                      |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (afviser, hvis der allerede findes krypterede creds) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                      |
 
-Gemmes i `<DATA_DIR>/server.env`. `DATA_DIR` fortolkes som:
+Vedblev til `<DATA_DIR>/server.env`. `DATA_DIR` løser til:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` eller `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Vindue og systembakke
+## Opslag i miljøfil
 
-- `BrowserWindow`: 1400×900 (min. 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, trafiklysknapper ved `{ x: 16, y: 16 }`.
-- Windows/Linux: indbygget titellinje.
-- Luk-knappen minimerer til systembakken; systembakkemenuen indeholder **Åbn OmniRoute**, **Åbn kontrolpanel** (ekstern browser), undermenuen **Serverport**, **Søg efter opdateringer**, **Afslut**.
+Inden serveren spawner, vælger hovedprocessen (`getPreferredEnvFilePath()` in `electron/main.js`).** en** `.env` -fil: den første af disse, der findes.
 
-## Politik for indholdssikkerhed
+1. `$DATA_DIR/.env`, når `DATA_DIR` er indstillet i det miljø, appen blev lanceret med.
+2. `<resolved DATA_DIR>/.env`, med de samme standardindstillinger som ovenfor: `%APPDATA%\omniroute\.env` på Windows, `$XDG_CONFIG_HOME/omniroute/.env` eller `~/.omniroute/.env` på Linux og macOS.
+3. `.env` i processens arbejdsmappe.
 
-Indstilles via `session.defaultSession.webRequest.onHeadersReceived`. Bemærkelsesværdige direktiver:
+Hovedprocessen læser kun den fil; senere kandidater flettes ikke ind. Servermiljøet bygges derefter med denne forrang (højest først):
+
+1. Electron -procesmiljøet (variabler arvet fra det, der lancerede appen).
+2. Den valgte `.env` fil.
+3. `<DATA_DIR>/server.env` (bootstrap-hemmelighederne ovenfor).
+
+Procesmiljøet fanges, når appen starter, så en system- eller brugermiljøvariabel, der er indstillet, mens appen kører (inklusive mens den sidder i bakken, efter dens vindue er lukket) ikke når serveren, før appen er helt afsluttet og genstartet. For runtime-knapper såsom `CONTEXT_LENGTH_<PROVIDER>` (se [Miljøvariabler: Per-udbyder kontekstlængde](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), foretræk `.env` filen, og luk derefter helt (bakke,** Forlade** ) og genstart.
+
+## Vindue & Bakke
+
+- `BrowserWindow`: 1400 × 900 (min. 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, trafiklys ved `{ x: 16, y: 16 }`.
+- Windows/Linux: indfødt titellinje.
+- Luk-knap minimerer til bakke; bakkemenuen har** Åbn OmniRoute** ,** Åbn Dashboard** (ekstern browser),** Server port** undermenu,** Se efter opdateringer** ,** Forlade** .
+
+## Indholdssikkerhedspolitik
+
+Indstillet via `session.defaultSession.webRequest.onHeadersReceived`. Bemærkelsesværdige direktiver:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Udviklingstilstand føjer kun `'unsafe-eval'` til `script-src`
+- Dev-tilstand tilføjer kun `'unsafe-eval'` til `script-src`
 
 ## Automatisk opdatering
 
-Bruger `electron-updater` med GitHub-udbyderen (`diegosouzapw/OmniRoute`).
+Bruger `electron-updater` med GitHub udbyderen (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Hændelser videresendes til renderprocessen via `update-status`-IPC:
-  `checking`, `available`, `not-available`, `downloading` (med `percent`), `downloaded`, `error`
-- `installUpdate()` stopper serveren og kalder derefter `autoUpdater.quitAndInstall()`
-- Springes over i udviklingstilstand (`!app.isPackaged`)
+- Begivenheder videresendt til renderer via `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (med `percent`), `downloaded`, `error`
+- `installUpdate()` dræber serveren og kalder derefter `autoUpdater.quitAndInstall()`
+- Sprang over i udviklertilstand (`!app.isPackaged`)
 
-## Build-pipeline
+## Byg rørledning
 
-1. `npm run build` → selvstændig Next.js-build i `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → klargør igen i `.next/electron-standalone` og omskriver absolutte stier i `server.js` + `required-server-files.json`, så pakken kan flyttes.
-3. `electron-builder` pakker `main.js`, `preload.js`, `node_modules` og `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → Next.js selvstændig i `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → omfases til `.next/electron-standalone` og omskriver absolutte stier inde i `server.js` + `required-server-files.json`, så bundtet kan flyttes.
+3. `electron-builder` -pakker `main.js`, `preload.js`, `node_modules` og `extraResources: { ../.next/electron-standalone → app }`.
 
-### Build-mål
+### Byg mål
 
-| OS      | Mål                                        |
-| ------- | ------------------------------------------ |
-| Windows | NSIS-installationsprogram + portabel (x64) |
-| macOS   | DMG (Intel + arm64, træk til Programmer)   |
-| Linux   | AppImage + DEB (x64 + arm64)               |
+| OS      | Mål                                         |
+| ------- | ------------------------------------------- |
+| Windows | NSIS installer + bærbar (x64)               |
+| macOS   | DMG (Intel + arm64, træk-til-applikationer) |
+| Linux   | AppImage + DEB (x64 + arm64)                |
 
-NSIS-indstillinger: `oneClick: false`, lader brugeren vælge installationsmappen og opretter genveje på skrivebordet og i Startmenuen.
+NSIS indstillinger: `oneClick: false`, lader brugeren vælge installationsmappen, opretter skrivebords- og startmenugenveje.
 
-## Røgtest af pakket build
+## Røgtestning pakket bygning
 
 ```bash
 npm run electron:smoke:packaged
@@ -216,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Finder automatisk den pakkede binære fil i `electron/dist-electron/` for den aktuelle platform.
-- Starter med isolerede `HOME`/`APPDATA`/`XDG_*`-mapper, så udviklerdata ikke berøres.
-- Forespørger gentagne gange `http://127.0.0.1:20128/login` efter HTTP 200 inden for 45 sek.
-- Overvåger stderr/stdout for fatale mønstre (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` osv.).
-- Venter på 2 sek. stabil kørsel efter klarmelding, sender derefter SIGTERM og venter på, at porten frigives.
-- I CI videregives `--no-sandbox --disable-gpu` automatisk (og `--disable-dev-shm-usage` på Linux).
+- Opdager automatisk den pakkede binære i `electron/dist-electron/` for den aktuelle platform.
+- Starter med isolerede `HOME`/`APPDATA`/`XDG_*` mapper, så det ikke rører udviklerdata.
+- Afstemninger `http://127.0.0.1:20128/login` for HTTP 200 inden for 45 s.
+- Urer stderr/stdout for fatale mønstre (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` osv.).
+- Venter 2 s stabil kørselstid efter klargøring, udsteder derefter SIGTERM og venter på, at porten bliver fri.
+- I CI sender automatisk `--no-sandbox --disable-gpu` (og `--disable-dev-shm-usage` på Linux).
 
-Miljøvariabeltilsidesættelser: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env tilsidesætter: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Kodesignering
 
-`electron/package.json` konfigurerer **ikke** signeringslegitimationsoplysninger direkte. Overfør dem via miljøvariabler til `electron-builder`:
+`electron/package.json` gør** ikke** wire signering legitimationsoplysninger direkte. Send dem via env vars til `electron-builder`:
 
 ### macOS
 
@@ -250,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage-signering er valgfri — angiv `LINUX_GPG_KEY`, hvis der skal signeres.
+AppImage -signering er valgfri — sæt `LINUX_GPG_KEY` hvis signering.
 
-## Distribution
+## Fordeling
 
-Artefakter placeres i `electron/dist-electron/`:
+Artefakter lander i `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Udgivelser publiceres på GitHub Releases (`diegosouzapw/OmniRoute`), hvor `electron-updater` også søger efter nye versioner.
+Udgivelser udgives til GitHub Releases (`diegosouzapw/OmniRoute`), som også er der, hvor `electron-updater` tjekker for nye versioner.
 
 ## Fejlfinding
 
-| Symptom                                                                    | Løsning                                                                                                                                                                                     |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` efter en større Electron-opgradering | better-sqlite3 v13 leveres med færdigbyggede Node-API-filer — kør `npm install` igen i roden og derefter `prepare:bundle` (den verificerer den færdigbyggede fil for den aktuelle platform) |
-| `ERR_DLOPEN_FAILED` for et oprindeligt modul                               | Kør `prepare:bundle` igen — den stopper straks med en fejl, hvis den færdigbyggede Node-API-fil til den aktuelle platform mangler                                                           |
-| Vinduet er tomt på Linux                                                   | Bekræft, at Next.js-serveren faktisk er bundet til PORT (kontrollér `[Server]`-logfilerne)                                                                                                  |
-| macOS-notarisering går i stå                                               | Sørg for, at `APPLE_*`-variablerne er eksporteret og ikke kun angivet i `.env`                                                                                                              |
-| Windows SmartScreen-advarsel                                               | Signér med et EV-certifikat, eller bed brugerne om at højreklikke → "Kør alligevel"                                                                                                         |
-| Smoke-test mislykkes, fordi porten er i brug                               | Stop enhver lokal udviklingsserver på 20128, før du kører `electron:smoke:packaged`                                                                                                         |
+| Symptom                                                          | Lave                                                                                                                                                    |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` efter Electron større bump | better-sqlite3 v13 sender node-API prebuilds — genkør `npm install` ved roden og `prepare:bundle` (det bekræfter prebuilden for den nuværende platform) |
+| `ERR_DLOPEN_FAILED` for native modul                             | Kør `prepare:bundle` — igen, det fejler hurtigt, når Node-API-forudbygningen til den aktuelle platform mangler                                          |
+| Vinduet vises tomt på Linux                                      | Bekræft, at Next.js serveren faktisk er bundet til PORT (tjek `[Server]` logfiler)                                                                      |
+| macOS notarisering går i stå                                     | Sørg for, at `APPLE_*` vars eksporteres, ikke kun i `.env`                                                                                              |
+| Windows SmartScreen advarsel                                     | Signer med EV cert, eller brugere højreklikker → "Kør alligevel"                                                                                        |
+| Røgtest mislykkes med port-in-use                                | Stop enhver lokal dev-server på 20128, før du kører `electron:smoke:packaged`                                                                           |
 
 ## Se også
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Kilde: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Hjælpeværktøjer: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Hjælpere: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

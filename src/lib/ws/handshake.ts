@@ -1,4 +1,8 @@
-import { verifyDashboardSessionToken } from "@/shared/utils/dashboardSessionToken";
+import {
+  verifyDashboardSessionToken,
+  getDashboardJwtSecret,
+  DASHBOARD_SESSION_COOKIE,
+} from "@/shared/utils/dashboardSessionToken";
 import { getSettings } from "@/lib/db/settings";
 import { validateApiKey } from "@/lib/db/apiKeys";
 
@@ -36,15 +40,13 @@ function getCookieValue(cookieHeader: string | null, cookieName: string): string
 }
 
 async function hasValidSessionCookie(request: Request): Promise<boolean> {
-  const secretValue = process.env.JWT_SECRET;
-  if (typeof secretValue !== "string" || secretValue.trim().length === 0) {
-    return false;
-  }
+  const secret = getDashboardJwtSecret();
+  if (!secret) return false;
 
-  const token = getCookieValue(request.headers.get("cookie"), "auth_token");
+  const token = getCookieValue(request.headers.get("cookie"), DASHBOARD_SESSION_COOKIE);
   if (!token) return false;
 
-  return (await verifyDashboardSessionToken(token, new TextEncoder().encode(secretValue))) !== null;
+  return (await verifyDashboardSessionToken(token, secret)) !== null;
 }
 
 export function extractWsTokenFromUrl(input: string | URL): string | null {
@@ -76,15 +78,25 @@ export async function getWsRuntimeConfig(): Promise<WsRuntimeConfig> {
   };
 }
 
+export interface WsHandshakeAuthOptions {
+  /**
+   * Require a valid API key or dashboard session even when the `wsAuth` setting is off.
+   * WebSocket transports that serve inference pass `isRequireApiKeyEnabled()` here so they
+   * honour `REQUIRE_API_KEY` like the HTTP `clientApiPolicy` does.
+   */
+  requireAuth?: boolean;
+}
+
 export async function authorizeWebSocketHandshake(
-  request: Request
+  request: Request,
+  options: WsHandshakeAuthOptions = {}
 ): Promise<WsHandshakeAuthResult> {
   const config = await getWsRuntimeConfig();
   const token = extractWsTokenFromRequest(request);
   const hasCredential = typeof token === "string" && token.length > 0;
   const validApiKey = hasCredential ? await validateApiKey(token) : false;
 
-  if (!config.wsAuth) {
+  if (!config.wsAuth && options.requireAuth !== true) {
     return {
       ...config,
       authorized: true,

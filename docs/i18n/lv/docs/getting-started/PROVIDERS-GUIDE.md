@@ -10,48 +10,47 @@
 
 ## Kas ir pakalpojumu sniedzējs?
 
-Iztēlojieties pakalpojumu sniedzēju kā **mobilo sakaru operatoru**. Tāpat kā zvanu veikšanai nepieciešams mobilo sakaru operators, MI modeļu izmantošanai nepieciešams MI pakalpojumu sniedzējs. OmniRoute ir kā tālrunis, kas darbojas ar **visiem operatoriem** — varat automātiski pārslēgties starp tiem.
+Uztveriet pakalpojumu sniedzēju kā **mobilo sakaru operatoru**. Tāpat kā zvanu veikšanai ir nepieciešams mobilo sakaru operators, AI modeļu izmantošanai ir nepieciešams AI pakalpojumu sniedzējs. OmniRoute ir kā tālrunis, kas darbojas ar **visiem operatoriem** — starp tiem var pārslēgties automātiski.
 
 ### Pakalpojumu sniedzēju veidi
 
-| Veids                | Kas tas ir                           | Piemēri                           | Izmaksas                    |
-| -------------------- | ------------------------------------ | --------------------------------- | --------------------------- |
-| **Bezmaksas**        | Maksājums nav nepieciešams           | Kiro, OpenCode Free, Pollinations | $0                          |
-| **API atslēga**      | Nepieciešama API atslēga             | OpenAI, Anthropic, Google         | Maksa atbilstoši lietojumam |
-| **OAuth**            | Pieteikšanās ar savu kontu           | Claude Code, GitHub Copilot       | Abonements                  |
-| **Tīmekļa sīkfails** | Izmanto jūsu pārlūkprogrammas sesiju | ChatGPT Web (Codex), Gemini Web   | $0 (izmanto jūsu kontu)     |
+| Veids                | Kas tas ir                           | Piemēri                         | Izmaksas                    |
+| -------------------- | ------------------------------------ | ------------------------------- | --------------------------- |
+| **Bezmaksas**        | Maksājums nav nepieciešams           | Kiro, Pollinations              | $0                          |
+| **API atslēga**      | Nepieciešama API atslēga             | OpenAI, Anthropic, Google       | Maksa atbilstoši lietojumam |
+| **OAuth**            | Pieteikšanās ar savu kontu           | Claude Code, GitHub Copilot     | Abonements                  |
+| **Tīmekļa sīkfails** | Izmanto jūsu pārlūkprogrammas sesiju | ChatGPT Web (Codex), Gemini Web | $0 (izmanto jūsu kontu)     |
 
 ### Tīmekļa sīkfailu pakalpojumu sniedzēji
 
-Vispārīgas iestatīšanas instrukcijas, ierobežojumus, problēmu novēršanas norādes un konkrētiem pakalpojumu sniedzējiem paredzētus autentifikācijas norādījumus skatiet failā **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
+Vispārīgus iestatīšanas norādījumus, ierobežojumus, problēmu novēršanas padomus un konkrētiem pakalpojumu sniedzējiem paredzētos autentifikācijas norādījumus skatiet **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
 ---
 
-## Ātrā darba sākšana: pievienojiet savu pirmo pakalpojumu sniedzēju
+## Ātrā sākšana: pievienojiet savu pirmo pakalpojumu sniedzēju
 
 ### Neobligāta bezmaksas pakalpojumu sniedzēju iestatīšana pirmajā palaišanas reizē
 
-Pirmās palaišanas vednis piedāvā atsevišķu kartīti **Iestatīt bezmaksas pakalpojumu sniedzējus**. Tas iegūst pašreizējo
-piemēroto pakalpojumu sniedzēju sarakstu no OmniRoute pakalpojumu sniedzēju reģistra, kuriem nav nepieciešama autentifikācija, un pēc tam ļauj pārskatīt katru
-pakalpojumu sniedzēju un noņemt tā atlasi pirms apstiprināšanas. OmniRoute parāda pakalpojumu sniedzēja brīdinājumu un saiti uz tā vietni,
-lai jūs vispirms varētu pārskatīt trešās puses noteikumus, konfidencialitāti, pieejamību un ātruma ierobežojumus.
+Pirmās palaišanas vednī ir pieejama atsevišķa kartīte **Iestatīt bezmaksas pakalpojumu sniedzējus**. Tas iegūst pašreizējo
+piemēroto pakalpojumu sniedzēju sarakstu no OmniRoute pakalpojumu sniedzēju reģistra, kuriem nav nepieciešama autentifikācija, un pēc tam ļauj pārskatīt un atcelt katra
+pakalpojumu sniedzēja atlasi pirms apstiprināšanas. OmniRoute parāda pakalpojumu sniedzēja brīdinājumu un saiti uz tā vietni,
+lai vispirms varētu pārskatīt trešās puses noteikumus, privātuma nosacījumus, pieejamību un ātruma ierobežojumus.
 
 Šī darbība nav obligāta: vedņa pabeigšana nekad nemanāmi neizveido savienojumus ar bezmaksas pakalpojumu sniedzējiem.
-Tas izveido tikai tos pakalpojumu sniedzējus, kuru vēl nav, atstāj esošos pielāgotos savienojumus
-nemainītus un atsevišķi ziņo par izveidotajiem, jau konfigurētajiem pakalpojumu sniedzējiem un tiem, kurus neizdevās izveidot. Pēc daļēji veiksmīga rezultāta varat
-droši atkārtoti mēģināt izveidot tikai neveiksmīgos savienojumus.
+Tas izveido tikai tos pakalpojumu sniedzējus, kuru vēl nav, nemaina esošos pielāgotos savienojumus
+un atsevišķi ziņo par izveidotajiem, jau konfigurētajiem un neveiksmīgajiem pakalpojumu sniedzējiem. Pēc daļēji veiksmīga rezultāta varat
+droši atkārtoti mēģināt tikai neveiksmīgos savienojumus.
 
 ### A variants: bezmaksas pakalpojumu sniedzējs (nav nepieciešama kredītkarte)
 
 1. Atveriet informācijas paneli adresē `http://localhost:20128`
 2. Dodieties uz **Pakalpojumu sniedzēji** → **Pievienot pakalpojumu sniedzēju**
 3. Atlasiet kādu no šiem bezmaksas pakalpojumu sniedzējiem:
-   - **Kiro AI** — Bezmaksas Claude modeļi (autentifikācija nav nepieciešama)
-   - **OpenCode Free** — Bezmaksas GPT modeļi (autentifikācija nav nepieciešama)
-   - **Pollinations** — Bezmaksas GPT-5, Claude un Gemini (atslēga nav nepieciešama)
+   - **Kiro AI** — bezmaksas Claude modeļi (autentifikācija nav nepieciešama)
+   - **Pollinations** — bezmaksas GPT-5, Claude, Gemini (atslēga nav nepieciešama)
    - **LongCat** — 10M bezmaksas marķieru (vienreizējs piešķīrums, nepieciešams konts un KYC)
-   - **Cloudflare AI** — Vairāk nekā 50 modeļu, 10K neironu dienā
-   - **MLX Gemma 26B** — Lokāls Apple Silicon modelis (~38.5 marķieri/s, ~15.9GB RAM)
-   - **MLX Qwen 3.8 27B** — Lokāls Apple Silicon modelis (~9.1 marķieri/s, ~13.1GB RAM)
+   - **Cloudflare AI** — vairāk nekā 50 modeļu, 10K neironu dienā
+   - **MLX Gemma 26B** — lokāls Apple Silicon modelis (~38.5 marķieri/s, ~15.9GB RAM)
+   - **MLX Qwen 3.8 27B** — lokāls Apple Silicon modelis (~9.1 marķieri/s, ~13.1GB RAM)
 4. Noklikšķiniet uz **Savienot**
 5. Gatavs! Tagad jums ir bezmaksas piekļuve MI.
 
@@ -74,8 +73,8 @@ droši atkārtoti mēģināt izveidot tikai neveiksmīgos savienojumus.
 
 1. Atveriet informācijas paneli adresē `http://localhost:20128`
 2. Dodieties uz **Pakalpojumu sniedzēji** → **Pievienot pakalpojumu sniedzēju**
-3. Atlasiet savu pakalpojumu sniedzēju (piemēram, Claude Code vai GitHub Copilot)
-4. Noklikšķiniet uz **Savienot ar OAuth**
+3. Atlasiet savu pakalpojumu sniedzēju (piemēram, Claude Code, GitHub Copilot)
+4. Noklikšķiniet uz **Savienot, izmantojot OAuth**
 5. Piesakieties ar savu kontu
 6. Gatavs! Tagad jums ir piekļuve abonementā iekļautajiem modeļiem.
 
@@ -89,7 +88,7 @@ Apple Silicon Mac datoros ar vienoto atmiņu OmniRoute atbalsta savienojumu ar l
 - **uv** pakotņu pārvaldnieks: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
-#### Ātrā darba sākšana
+#### Ātrā sākšana
 
 1. **Instalējiet atkarības**:
 
@@ -118,7 +117,7 @@ Apple Silicon Mac datoros ar vienoto atmiņu OmniRoute atbalsta savienojumu ar l
 
 4. **Izmantojiet ar OpenCode**:
    ```bash
-   # Konfigurējiet OpenCode, lai tas izmantotu OmniRoute
+   # Konfigurējiet OpenCode, lai izmantotu OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
    opencode config set api.key <your-omniroute-api-key>
 
@@ -129,7 +128,7 @@ Apple Silicon Mac datoros ar vienoto atmiņu OmniRoute atbalsta savienojumu ar l
 
 #### Atmiņas pārvaldība
 
-**Svarīgi**: Ja pieejama 24GB vienotā atmiņa, vienlaikus var darboties tikai **viens liels MLX modelis**.
+**Svarīgi**: izmantojot 24GB vienoto atmiņu, vienlaikus var darboties tikai **viens liels MLX modelis**.
 
 - Gemma 26B: ~15.9GB maksimālais atmiņas patēriņš
 - Qwen 3.8 27B: ~13.1GB maksimālais atmiņas patēriņš
@@ -140,7 +139,7 @@ Tas jāpārvalda manuāli:
 - Darbiniet abus atsevišķās ierīcēs, vai
 - Apturiet vienu pirms otra palaišanas
 
-OmniRoute automātiski nepārvalda MLX serveru procesus — tas tikai maršrutē pieprasījumus uz jūsu konfigurētajiem ar OpenAI saderīgajiem galapunktiem.
+OmniRoute automātiski nepārvalda MLX serveru procesus — tas tikai novirza pieprasījumus uz jūsu konfigurētajiem ar OpenAI saderīgajiem galapunktiem.
 
 #### Rīku izsaukšanas atbalsts
 
@@ -161,10 +160,10 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 | Problēma                  | Risinājums                                                                                               |
 | ------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Serveri nevar palaist     | Pārbaudiet `uv run mlx_lm.server --help` un modeļu ID                                                    |
+| Serveri nevar palaist     | Pārbaudiet `uv run mlx_lm.server --help` un modeļu ID pareizību                                          |
 | Nepietiek atmiņas         | Pārliecinieties, ka darbojas tikai viens modelis; aizveriet citas lietotnes; pārbaudiet Activity Monitor |
-| Savienojums noraidīts     | Pārbaudiet, vai serveris darbojas pareizajā portā (11435/11436)                                          |
-| Lēnas atbildes            | Pirmais pieprasījums ielādē modeli atmiņā (~30-60 s); nākamie pieprasījumi tiek apstrādāti ātri          |
+| Savienojums noraidīts     | Pārliecinieties, ka serveris darbojas pareizajā portā (11435/11436)                                      |
+| Lēnas atbildes            | Pirmais pieprasījums ielādē modeli atmiņā (~30-60s); nākamie pieprasījumi ir ātri                        |
 | Rīku izsaukšana neizdodas | Pārliecinieties, ka modelis atbalsta rīkus; pārbaudiet OmniRoute žurnālus, vai nav tulkošanas kļūdu      |
 
 ---
@@ -173,18 +172,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Šie pakalpojumu sniedzēji piedāvā **bezmaksas piekļuvi** bez kredītkartes:
 
-| Pakalpojumu sniedzējs | Bezmaksas kvota          | Modeļi                                   | Kā izveidot savienojumu          |
-| --------------------- | ------------------------ | ---------------------------------------- | -------------------------------- |
-| **Kiro AI**           | 50 kredīti mēnesī        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Autentifikācija nav nepieciešama |
-| **OpenCode Free**     | Neierobežoti             | GPT-4o, Claude, Gemini                   | Autentifikācija nav nepieciešama |
-| **Pollinations**      | Atslēga nav nepieciešama | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Autentifikācija nav nepieciešama |
-| **LongCat**           | 10M vienreizēji          | LongCat-2.0                              | API atslēga + KYC                |
-| **Cloudflare AI**     | 10K neironu dienā        | Vairāk nekā 50 modeļu                    | Autentifikācija nav nepieciešama |
-| **NVIDIA NIM**        | ~40 RPM                  | 129 modeļi                               | Nepieciešama API atslēga         |
-| **Cerebras**          | $5 reģistrācijas kredīts | GLM 4.7, GPT-OSS 120B                    | API atslēga + karte              |
-| **Qoder**             | Neierobežoti             | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Autentifikācija nav nepieciešama |
+| Pakalpojumu sniedzējs | Bezmaksas kvota          | Modeļi                                   | Savienojuma izveide           |
+| --------------------- | ------------------------ | ---------------------------------------- | ----------------------------- |
+| **Kiro AI**           | 50 kredīti mēnesī        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Autorizācija nav nepieciešama |
+| **Pollinations**      | Atslēga nav nepieciešama | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Autorizācija nav nepieciešama |
+| **LongCat**           | Vienreizēji 10M          | LongCat-2.0                              | API atslēga + KYC             |
+| **Cloudflare AI**     | 10K neironu dienā        | 50+ modeļi                               | Autorizācija nav nepieciešama |
+| **NVIDIA NIM**        | ~40 RPM                  | 129 modeļi                               | Nepieciešama API atslēga      |
+| **Cerebras**          | $5 reģistrācijas kredīts | GLM 4.7, GPT-OSS 120B                    | API atslēga + karte           |
 
-**Padoms**: Savienojiet vairākus bezmaksas pakalpojumu sniedzējus, lai iegūtu **neierobežotu bezmaksas MI** ar automātisku pārslēgšanos kļūmes gadījumā!
+**Padoms**: Savienojiet vairākus bezmaksas pakalpojumu sniedzējus, lai iegūtu **neierobežotu bezmaksas MI** ar automātisku pārslēgšanos rezerves variantu!
 
 ---
 
@@ -239,22 +236,22 @@ Jūsu pakalpojumu sniedzējs tagad ir savienots. Varat to izmantot ar `model: "a
 
 ## Vairāku pakalpojumu sniedzēju izmantošana
 
-OmniRoute vislabāk darbojas ar **vairākiem pakalpojumu sniedzējiem**. Tas sniedz jums:
+OmniRoute vislabāk darbojas ar **vairākiem pakalpojumu sniedzējiem**. Tas nodrošina:
 
-- **Automātisku pārslēgšanos kļūmes gadījumā** — ja viens pakalpojumu sniedzējs nedarbojas, OmniRoute izmēģina nākamo
+- **Automātisku pārslēgšanos** — ja viens pakalpojumu sniedzējs nedarbojas, OmniRoute izmēģina nākamo
 - **Izmaksu optimizāciju** — OmniRoute katram pieprasījumam izvēlas lētāko pakalpojumu sniedzēju
 - **Ātruma optimizāciju** — OmniRoute katram pieprasījumam izvēlas ātrāko pakalpojumu sniedzēju
 - **Kvalitātes optimizāciju** — OmniRoute katram uzdevumam izvēlas labāko pakalpojumu sniedzēju
 
 ### Ieteicamā konfigurācija
 
-Lai iegūtu vislabāko pieredzi, savienojiet vismaz **3 pakalpojumu sniedzējus**:
+Lai iegūtu vislabāko pieredzi, pievienojiet vismaz **3 pakalpojumu sniedzējus**:
 
-1. **Vienu bezmaksas pakalpojumu sniedzēju** (Kiro, OpenCode Free vai Pollinations) — vienmēr pieejams
-2. **Vienu ātru pakalpojumu sniedzēju** (Groq, Cerebras) — ātrām atbildēm
-3. **Vienu augstas kvalitātes pakalpojumu sniedzēju** (OpenAI, Anthropic, Google) — sarežģītiem uzdevumiem
+1. **Viens bezmaksas pakalpojumu sniedzējs** (Kiro vai Pollinations) — vienmēr pieejams
+2. **Viens ātrs pakalpojumu sniedzējs** (Groq, Cerebras) — ātrām atbildēm
+3. **Viens augstas kvalitātes pakalpojumu sniedzējs** (OpenAI, Anthropic, Google) — sarežģītiem uzdevumiem
 
-Pēc tam izmantojiet `model: "auto"`, un OmniRoute katram pieprasījumam automātiski izvēlēsies labāko pakalpojumu sniedzēju.
+Pēc tam izmantojiet `model: "auto"`, un OmniRoute automātiski izvēlēsies labāko pakalpojumu sniedzēju katram pieprasījumam.
 
 ---
 
@@ -263,60 +260,100 @@ Pēc tam izmantojiet `model: "auto"`, un OmniRoute katram pieprasījumam automā
 ### OpenAI
 
 1. Iegūstiet API atslēgu: https://platform.openai.com/api-keys
-2. OmniRoute sadaļā: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → OpenAI
+2. OmniRoute saskarnē: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → OpenAI
 3. Ielīmējiet API atslēgu → Savienot
 
 ### Anthropic
 
 1. Iegūstiet API atslēgu: https://console.anthropic.com/
-2. OmniRoute sadaļā: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → Anthropic
+2. OmniRoute saskarnē: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → Anthropic
 3. Ielīmējiet API atslēgu → Savienot
 
 ### Google (Gemini)
 
 1. Iegūstiet API atslēgu: https://aistudio.google.com/apikey
-2. OmniRoute sadaļā: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → Gemini
+2. OmniRoute saskarnē: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → Gemini
 3. Ielīmējiet API atslēgu → Savienot
 
 ### DeepSeek
 
 1. Iegūstiet API atslēgu: https://platform.deepseek.com/
-2. OmniRoute sadaļā: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → DeepSeek
+2. OmniRoute saskarnē: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → DeepSeek
 3. Ielīmējiet API atslēgu → Savienot
+
+### Qoder: izvēlieties akreditācijas datu transportu
+
+Qoder nepieciešami akreditācijas dati. Abiem tā transportiem ir atšķirīgas iespējas; modeļa nosaukums
+vien neidentificē, ko konkrētais savienojums spēj paveikt.
+
+| Akreditācijas dati                              | OmniRoute transports                             | Izsaucēja rīku izsaukšana                                              | Straumēšana                                                              |
+| ----------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| PAT, kas sākas ar `pt-`                         | Lokāls `qodercli` process OmniRoute resursdatorā | Netiek atbalstīta                                                      | Buferēta: SSE tiek izvadīts tikai pēc tam, kad CLI atgriež pilnu atbildi |
+| Piekļuves pilnvara vai API atslēga, kas nav PAT | Ar OpenAI saderīgs DashScope HTTP galapunkts     | Tiek pārsūtīta, ievērojot augšupstraumes modeļa/atslēgas ierobežojumus | Augšupstraumes HTTP/SSE ceļš                                             |
+
+PAT gadījumā instalējiet Qoder CLI tajā pašā resursdatorā vai konteinerā, kurā darbojas OmniRoute. Izpildāmajam failam
+jābūt atrodamam kā `qodercli`, vai arī iestatiet `CLI_QODER_BIN` uz tā izpildāmā faila ceļu. CLI,
+kas instalēts tikai Docker resursdatorā, nav automātiski pieejams konteinerā. Ja binārie faili
+nav pieejami, tiek parādīta skaidra kļūda, kas norāda uz instalēšanu vai ceļa iestatīšanu.
+
+PAT tērzēšanas ceļam ir 45 sekunžu procesa taimauts. Tas pārveido sarunu vienā
+uzvednē un izsauc CLI nestraumēšanas drukāšanas režīmā. Pieprasot `stream: true`, atbildes
+apvalks tiek mainīts uz SSE; tas nenodrošina pakāpenisku augšupstraumes pilnvarvienību piegādi.
+CLI validācijai/modeļu uzskaitīšanai tiek izmantots atsevišķs 20 sekunžu taimauts. Šīs ir pašreizējās koda
+noklusējuma vērtības, nevis informācijas panelī konfigurējami iestatījumi.
+
+Izmantojiet PAT savienojumus parastai tērzēšanai. Aģenta pieprasījumos, kuros ir `tools` vai mantotais `functions`,
+akreditācijas datu atlases laikā PAT konti tiek izslēgti, tostarp piesaistītajiem kombinētajiem mērķiem. Jaukts
+Qoder pūls joprojām var atlasīt tā HTTP kontu. Arī tieši izsaukumi uz PAT izpildītāju beidzas
+ar skaidru kļūdu pirms CLI palaišanas, nevis klusējot atmet rīku definīcijas. Šis
+ierobežojums attiecas uz API izsaucēja nodrošinātajiem rīkiem, nevis uz iekšējiem rīkiem, ko Qoder
+CLI varētu izmantot pats. HTTP atslēga negarantē, ka katrs modelis atbalsta rīkus; joprojām
+tiek piemērotas parastās modeļa iespēju pārbaudes.
+
+Pārlūka OAuth ir pieejams tikai tad, ja administrators konfigurē visus piecus iestatījumus:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID` un `QODER_OAUTH_CLIENT_SECRET`. Pēc noklusējuma tie ir tukši; nekonfigurētā
+instalācijā jāizmanto atbalstīta akreditācijas datu importēšana, nevis jāpieņem, ka
+pārlūka pierakstīšanās plūsma ir gatava.
+
+Ieviešanas atsauces: [Qoder izpildītājs](../../open-sse/executors/qoder.ts),
+[CLI izpildlaika vide](../../open-sse/services/qoderCli.ts) un
+[OAuth konfigurācija](../../src/lib/oauth/constants/oauth.ts). Pakāpeniska PAT straumēšana
+un konfigurējams taimauts ir atsevišķi uzlabojumi; šī darbība tos nesola.
 
 ### Groq
 
 1. Iegūstiet API atslēgu: https://console.groq.com/
-2. OmniRoute sadaļā: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → Groq
+2. OmniRoute saskarnē: Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → Groq
 3. Ielīmējiet API atslēgu → Savienot
 
 ---
 
-## Bieži uzdotie jautājumi
+## Biežāk uzdotie jautājumi
 
-### "Vai man ir jāmaksā par OmniRoute izmantošanu?"
+### "Vai man ir jāmaksā par OmniRoute lietošanu?"
 
-**Nē!** OmniRoute ir bezmaksas atvērtā pirmkoda programmatūra. Varat izmantot bezmaksas pakalpojumu sniedzējus (Kiro, OpenCode Free, Pollinations), neko nemaksājot. Jums jāmaksā tikai tad, ja izvēlaties izmantot maksas pakalpojumu sniedzējus.
+**Nē!** OmniRoute ir bezmaksas un atvērtā pirmkoda risinājums. Varat izmantot bezmaksas pakalpojumu sniedzējus (Kiro, Pollinations), neko nemaksājot. Jums jāmaksā tikai tad, ja izvēlaties izmantot maksas pakalpojumu sniedzējus.
 
-### "Ar kuru pakalpojumu sniedzēju man vajadzētu sākt?"
+### "Ar kuru pakalpojumu sniedzēju man sākt?"
 
 Sāciet ar **Kiro AI** — tas ir bezmaksas, tam nav nepieciešama API atslēga, un tas nodrošina piekļuvi Claude modeļiem. Pēc tam pēc vajadzības pievienojiet citus pakalpojumu sniedzējus.
 
 ### "Vai varu vienlaikus izmantot vairākus pakalpojumu sniedzējus?"
 
-**Jā!** Tieši tam OmniRoute ir paredzēts. Pievienojiet vairākus pakalpojumu sniedzējus un izmantojiet `model: "auto"`, lai OmniRoute katram pieprasījumam izvēlētos piemērotāko.
+**Jā!** Tieši tam ir paredzēts OmniRoute. Pievienojiet vairākus pakalpojumu sniedzējus un izmantojiet `model: "auto"`, lai OmniRoute katram pieprasījumam izvēlētos piemērotāko.
 
-### "Ko darīt, ja pakalpojumu sniedzējs pārtrauc darboties?"
+### "Kas notiek, ja pakalpojumu sniedzējs pārstāj darboties?"
 
 OmniRoute automātiski izlaiž pakalpojumu sniedzējus, kuriem radušās kļūmes, un izmēģina nākamo. Jums nekas nav jādara.
 
 ### "Kā atvienot pakalpojumu sniedzēju?"
 
-Atveriet sadaļu Pakalpojumu sniedzēji → noklikšķiniet uz pakalpojumu sniedzēja → noklikšķiniet uz **Atvienot**.
+Atveriet sadaļu Providers → noklikšķiniet uz pakalpojumu sniedzēja → noklikšķiniet uz **Disconnect**.
 
 ### "Vai varu izmantot savas esošās API atslēgas?"
 
-**Jā!** Ja jums jau ir OpenAI, Anthropic, Google u.c. API atslēgas, varat tās izmantot OmniRoute. Pievienojot pakalpojumu sniedzēju, vienkārši ielīmējiet tās.
+**Jā!** Ja jums jau ir OpenAI, Anthropic, Google u.c. API atslēgas, varat tās izmantot OmniRoute. Vienkārši ielīmējiet tās, kad pievienojat pakalpojumu sniedzēju.
 
 ---
 

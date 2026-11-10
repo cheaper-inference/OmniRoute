@@ -20,6 +20,7 @@ export const vertexProvider: RegistryEntry = {
   authType: "apikey",
   authHeader: "bearer",
   models: [
+    { id: "gemini-4-argon", name: "Gemini 4 Argon (Vertex)" },
     { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash (Vertex)" },
     { id: "gemini-3.6-flash", name: "Gemini 3.6 Flash (Vertex)" },
     { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash (Vertex)" },
@@ -49,8 +50,10 @@ export const vertexProvider: RegistryEntry = {
     ...VERTEX_XAI_MODELS,
     { id: "claude-fable-5-1", name: "Claude Fable 5.1 (Vertex)", targetFormat: "claude" },
     { id: "claude-fable-5", name: "Claude Fable 5 (Vertex)", targetFormat: "claude" },
+    { id: "claude-opus-5-5", name: "Claude Opus 5.5 (Vertex)", targetFormat: "claude" },
     { id: "claude-opus-5", name: "Claude Opus 5 (Vertex)", targetFormat: "claude" },
     { id: "claude-sonnet-5", name: "Claude Sonnet 5 (Vertex)", targetFormat: "claude" },
+    { id: "claude-sonnet-5-5", name: "Claude Sonnet 5.5 (Vertex)", targetFormat: "claude" },
     { id: "claude-opus-4-8", name: "Claude Opus 4.8 (Vertex)", targetFormat: "claude" },
     { id: "claude-opus-4-7", name: "Claude Opus 4.7 (Vertex)", targetFormat: "claude" },
     { id: "claude-opus-4-6", name: "Claude Opus 4.6 (Vertex)", targetFormat: "claude" },
@@ -59,6 +62,7 @@ export const vertexProvider: RegistryEntry = {
     { id: "claude-sonnet-4-5", name: "Claude Sonnet 4.5 (Vertex)", targetFormat: "claude" },
     { id: "claude-opus-4-5", name: "Claude Opus 4.5 (Vertex)", targetFormat: "claude" },
     { id: "claude-haiku-4-5", name: "Claude Haiku 4.5 (Vertex)", targetFormat: "claude" },
+    { id: "claude-haiku-5-5", name: "Claude Haiku 5.5 (Vertex)", targetFormat: "claude" },
   ],
   passthroughModels: true,
   // Gemini + publisher discovery are independent APIs. A partial successful response must not

@@ -8,39 +8,39 @@
 
 > Zelfbeherende modelketens met adaptieve scoring + automatische routering zonder configuratie
 
-## Automatische routering zonder configuratie (prefix `auto/`)
+## Automatische routering zonder configuratie (`auto/`-voorvoegsel)
 
-> **NIEUW:** Het aanmaken van een combo is niet vereist. Gebruik de prefix `auto/` rechtstreeks in elke client.
+> **NIEUW:** Het aanmaken van een combo is niet vereist. Gebruik het voorvoegsel `auto/` rechtstreeks in elke client.
 
 ### Snelle voorbeelden
 
-| Model-ID       | Variant | Gedrag                                                                           |
-| -------------- | ------- | -------------------------------------------------------------------------------- |
-| `auto`         | default | Alle verbonden providers, LKGP-strategie, gebalanceerde gewichten                |
-| `auto/coding`  | coding  | Kwaliteitsgerichte gewichten, geschikt voor codegeneratie                        |
-| `auto/fast`    | fast    | Gewogen selectie met lage latentie                                               |
-| `auto/cheap`   | cheap   | Kostengeoptimaliseerde routering (laagste kosten eerst)                          |
-| `auto/offline` | offline | Geeft voorrang aan providers met de hoogste quotumbeschikbaarheid                |
-| `auto/smart`   | smart   | Kwaliteitsgericht + hoger exploratiepercentage (10%) voor betere modelontdekking |
-| `auto/lkgp`    | lkgp    | Expliciete LKGP (hetzelfde als standaard `auto`)                                 |
-| `auto/chaos`   | chaos   | Gewichten voor foutinjectie om veerkracht te testen (chaosengineering)           |
+| Model-ID       | Variant   | Gedrag                                                                           |
+| -------------- | --------- | -------------------------------------------------------------------------------- |
+| `auto`         | standaard | Alle verbonden providers, LKGP-strategie, gebalanceerde gewichten                |
+| `auto/coding`  | coding    | Gewichten gericht op kwaliteit, geschikt voor het genereren van code             |
+| `auto/fast`    | fast      | Gewogen selectie met lage latentie                                               |
+| `auto/cheap`   | cheap     | Kostengeoptimaliseerde routering (laagste kosten eerst)                          |
+| `auto/offline` | offline   | Geeft de voorkeur aan providers met de hoogste beschikbare quota                 |
+| `auto/smart`   | smart     | Gericht op kwaliteit + hogere verkenningsgraad (10%) voor betere modelontdekking |
+| `auto/lkgp`    | lkgp      | Expliciete LKGP (hetzelfde als standaard `auto`)                                 |
+| `auto/chaos`   | chaos     | Parallelle fan-out, één model per provider (geen foutinjectie)                   |
 
 ### Samenstelling van categorie × niveau (`auto/<category>:<tier>`)
 
-Achtervoegsels in OpenRouter-stijl scheiden **welk soort route** (categorie) van **hoe deze moet worden geoptimaliseerd** (niveau), zodat u ze vrij kunt combineren (#4235 fase B, `open-sse/services/autoCombo/suffixComposition.ts`):
+Achtervoegsels in OpenRouter-stijl scheiden **welk soort route** (categorie) van **hoe deze moet worden geoptimaliseerd** (niveau), zodat u ze vrij kunt combineren (#4235 Fase B, `open-sse/services/autoCombo/suffixComposition.ts`):
 
-- **Categorieën** (filteren de kandidatenpool op mogelijkheid): `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal` behouden modellen met ondersteuning voor beeldverwerking; `reasoning` behoudt modellen voor redeneren/denken.
-- **Niveaus** (bepalen de scoringgewichten / het poolfilter): `fast` (snelle oplevering) · `cheap` (alias `floor`, kostenbesparend) · `reliable` (status van circuitonderbreker + latentiestabiliteit) · `free` / `pro` (filteren de pool op modelniveau via `classifyTier` — gratis niveau versus premium).
+- **Categorieën** (filteren de kandidatenpool op functionaliteit): `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal` behouden modellen die beeldverwerking ondersteunen; `reasoning` behoudt modellen voor redeneren/denken.
+- **Niveaus** (bepalen de scoringsgewichten / het poolfilter): `fast` (snel opleveren) · `cheap` (alias `floor`, kostenbesparend) · `reliable` (status van circuitonderbreker + stabiliteit van latentie) · `free` / `pro` (filteren de pool op modelniveau via `classifyTier` — gratis niveau versus premium).
 
-| Voorbeeld              | Wordt omgezet naar                                                                      |
-| ---------------------- | --------------------------------------------------------------------------------------- |
-| `auto/coding:fast`     | codingpool, gewichten voor lage latentie                                                |
-| `auto/coding:cheap`    | codingpool, kostengeoptimaliseerd (alias `auto/coding:floor`)                           |
-| `auto/reasoning:pro`   | alleen modellen voor redeneren/denken, premiumniveau                                    |
-| `auto/vision`          | modellen met ondersteuning voor beeldverwerking (geen niveau → gebalanceerde gewichten) |
-| `auto/multimodal:free` | modellen met multimodale ondersteuning, alleen gratis niveau                            |
+| Voorbeeld              | Wordt omgezet naar                                                   |
+| ---------------------- | -------------------------------------------------------------------- |
+| `auto/coding:fast`     | coding-pool, gewichten voor lage latentie                            |
+| `auto/coding:cheap`    | coding-pool, kostengeoptimaliseerd (alias `auto/coding:floor`)       |
+| `auto/reasoning:pro`   | alleen modellen voor redeneren/denken, premiumniveau                 |
+| `auto/vision`          | modellen met beeldverwerking (geen niveau → gebalanceerde gewichten) |
+| `auto/multimodal:free` | modellen met multimodale mogelijkheden, alleen gratis niveau         |
 
-Elke geldige `auto/<category>[:<tier>]` wordt op aanvraag omgezet; een zorgvuldig samengestelde subset wordt vermeld in `/v1/models` en het dashboard (`AUTO_SUFFIX_VARIANTS` in `open-sse/services/autoCombo/builtinCatalog.ts`). Filteren werkt volgens het **fail-open-principe** — als geen enkel verbonden model aan een beperking voldoet, wordt de volledige pool gebruikt, zodat de routering nooit uitvalt. De kernscorer (`combo.ts`) blijft ongewijzigd; het categorie-/niveaufilter wordt toegepast in `buildAutoCandidates`.
+Elke geldige `auto/<category>[:<tier>]` wordt op aanvraag omgezet; een zorgvuldig samengestelde subset wordt gepubliceerd in `/v1/models` en het dashboard (`AUTO_SUFFIX_VARIANTS` in `open-sse/services/autoCombo/builtinCatalog.ts`). Filteren gebeurt **fail-open** — als geen enkel verbonden model aan een beperking voldoet, wordt de volledige pool gebruikt, zodat de routering nooit wordt onderbroken. De kernscorefunctie (`combo.ts`) blijft ongewijzigd; het categorie-/niveaufilter wordt toegepast in `buildAutoCandidates`.
 
 > **Live modelinformatie:** de geschiktheid voor automatische routering wordt gebaseerd op live **Arena ELO**-ranglijsten + niveaugegevens van **models.dev** wanneer de vlag `ARENA_ELO_SYNC_ENABLED` is ingeschakeld (anders wordt teruggevallen op de statische geschiktheidskaart).
 
@@ -48,84 +48,106 @@ Elke geldige `auto/<category>[:<tier>]` wordt op aanvraag omgezet; een zorgvuldi
 
 ```bash
 # Elke IDE of CLI-tool die de OpenAI-indeling ondersteunt
-Base URL: http://localhost:20128/v1
-API Key:  <uw-endpoint-sleutel>
+Basis-URL: http://localhost:20128/v1
+API-sleutel:  <uw-endpointsleutel>
 
-# Stel het model in uw code/configuratie in op:
+# Stel in uw code/configuratie het model in op:
 model: "auto"                 # gebalanceerde standaardinstelling
-model: "auto/coding"          # het beste voor programmeertaken
+model: "auto/coding"          # het meest geschikt voor programmeertaken
 model: "auto/fast"            # snelst beschikbare optie
 model: "auto/cheap"           # goedkoopst per token
 ```
 
-**Wat gebeurt er:**
+**Wat er gebeurt:**
 
-1. OmniRoute detecteert de prefix `auto/` in `src/sse/handlers/chat.ts`
+1. OmniRoute detecteert het voorvoegsel `auto/` in `src/sse/handlers/chat.ts`
 2. Vraagt alle **actieve providerverbindingen** op uit de database
-3. Filtert deze op geldige referenties (API-sleutel of OAuth-token)
+3. Filtert op verbindingen met geldige referenties (API-sleutel of OAuth-token)
 4. Bepaalt het model per verbinding (`connection.defaultModel` of het eerste model van de provider)
-5. Bouwt in het geheugen een **virtuele combo** (niet opgeslagen in de database)
+5. Bouwt een **virtuele combo** in het geheugen (niet opgeslagen in de database)
 6. Routeert met het gewichtsprofiel van de geselecteerde variant + de LKGP-strategie
 
 **Belangrijkste eigenschappen:**
 
 - ✅ **Altijd actief:** Geen schakeloptie, geen combo-aanmaak en geen configuratie nodig
 - ✅ **Dynamisch:** Weerspiegelt automatisch de momenteel verbonden providers
-- ✅ **Sessiestabiliteit:** LKGP zorgt ervoor dat de laatst succesvolle provider prioriteit krijgt
+- ✅ **Sessiestabiliteit:** LKGP zorgt dat de laatst succesvolle provider prioriteit krijgt
 - ✅ **Ondersteuning voor meerdere accounts:** Elke providerverbinding wordt een afzonderlijke kandidaat
-- ✅ **Geen schrijfbewerkingen naar de database:** De virtuele combo bestaat alleen voor het verzoek, zonder overhead voor persistente opslag
+- ✅ **Geen schrijfacties naar de database:** De virtuele combo bestaat alleen voor het verzoek, zonder persistentie-overhead
 
-### Kandidatenbeheer per sleutel (#7819, niveau 1+2)
+### Kandidaatbeheer per sleutel (#7819, niveau 1+2)
 
 `GET /v1/auto-combo/{channel}/candidates` (`{channel}` = het achtervoegsel na `auto/`, of
 de letterlijke waarde `auto` voor het basiskanaal) is een **alleen-lezen**-endpoint dat de
-huidige kandidatenpool van een `auto/*`-kanaal toont, aangevuld met actuele bereikbaarheidsinformatie,
-waarbij de bestaande uitleesfuncties voor veerkracht worden hergebruikt (nooit de ruwe `state` van de circuitonderbreker):
+huidige kandidatenpool van een `auto/*`-kanaal weergeeft, aangevuld met live bereikbaarheidsinformatie,
+waarbij de bestaande weerbaarheidsuitlezingen worden hergebruikt (nooit de onbewerkte `state`
+van de circuitonderbreker):
 
 - circuitonderbreker van de provider — `getCircuitBreaker(provider).getStatus()` / `.canExecute()`
-- afkoelperiode van de verbinding — `rateLimitedUntil` / `testStatus` in de gevonden rij van
-  `provider_connections`
-- modelblokkering — `isModelLocked(provider, connectionId, model)`
+- afkoelperiode van de verbinding — `rateLimitedUntil` / `testStatus` in de gevonden
+  rij van `provider_connections`
+- modelvergrendeling — `isModelLocked(provider, connectionId, model)`
 
 Elke kandidaat bevat ook de vlag `excluded` voor deze API-sleutel. Uitsluitingen worden
 per API-sleutel opgeslagen (tabel `auto_candidate_overrides`, migratie `128`) — OmniRoute
 is single-tenant en heeft geen tabel `users`, waardoor `apiKeyId` de meest geschikte echte
-identiteit per aanroeper is — en worden afgedwongen op het centrale punt voor de kandidatenpool in
-`open-sse/services/autoCombo/virtualFactory.ts` via de pure, met unittests geteste functie
-`filterExcludedCandidates()` (`open-sse/services/autoCombo/candidateOverrides.ts`).
-Het filter werkt volgens het **fail-open-principe**: bij een ontbrekende apiKeyId/kanaalwaarde of een mislukte
-databasequery blijft de pool ongefilterd, zodat een beheerder zonder geconfigureerde overschrijvingen routering
-ontvangt die byte voor byte identiek is aan de situatie vóór deze functie.
+identiteit per aanroeper is — en worden afgedwongen op het centrale controlepunt van de
+kandidatenpool in `open-sse/services/autoCombo/virtualFactory.ts` via de zuivere, met unittests
+geteste functie `filterExcludedCandidates()` (`open-sse/services/autoCombo/candidateOverrides.ts`).
+Het filter werkt **fail-open**: een niet-ingestelde apiKeyId/een niet-ingesteld kanaal of een
+mislukte databaseopzoeking laat de pool ongefilterd, zodat een beheerder zonder geconfigureerde
+overschrijvingen routering ziet die byte voor byte identiek is aan die van vóór deze functie.
 
 **Uitgesteld naar een vervolgissue:** gewichten per kandidaat + expliciete volgorde (niveau 3
-— wordt doorgegeven aan de bestaande strategieën voor weging/prioriteit) en het vastzetten van een specifieke
+— wordt verwerkt via de bestaande strategieën voor weging/prioriteit) en het vastzetten van een specifieke
 `combo.ts`-strategie per `auto/*`-kanaal (niveau 4). Zie het plan van #7819 voor de openstaande
-vraag of overrides per API-sleutel moeten blijven of globaal moeten worden vanwege het
+vraag of overrides per API-sleutel moeten blijven gelden of globaal moeten worden vanwege het
 single-tenantmodel.
 
 **Achter de schermen:**
 
 ```txt
-Verzoek: { model: "auto/coding" }
+Request: { model: "auto/coding" }
    ↓
-src/sse/handlers/chat.ts detecteert voorvoegsel
+src/sse/handlers/chat.ts detecteert het voorvoegsel
    ↓
 createVirtualAutoCombo('coding') → candidatePool uit actieve verbindingen
    ↓
 handleComboChat (dezelfde engine als voor persistente combo's)
    ↓
-Automatische scoring selecteert per verzoek de beste provider/het beste model
+Automatische scoring selecteert per request de beste provider/het beste model
 ```
 
 **Implementatiebestanden:**
 
-| Bestand                                                   | Doel                                                 |
-| --------------------------------------------------------- | ---------------------------------------------------- |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | Parser voor voorvoegsels (`parseAutoPrefix`)         |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | Maakt virtuele `AutoComboConfig`-objecten            |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Testhook voor het mocken van het providerregister    |
-| `src/sse/handlers/chat.ts`                                | Integratie: vroegtijdige afhandeling van auto-prefix |
-| `src/shared/constants/providers.ts`                       | Systeemvermelding `SYSTEM_PROVIDERS.auto`            |
+| Bestand                                                   | Doel                                                       |
+| --------------------------------------------------------- | ---------------------------------------------------------- |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | Voorvoegselparser (`parseAutoPrefix`)                      |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | Maakt virtuele `AutoComboConfig`-objecten                  |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Testhook voor het mocken van het providerregister          |
+| `src/sse/handlers/chat.ts`                                | Integratie: kortsluiting voor het automatische voorvoegsel |
+| `src/shared/constants/providers.ts`                       | Systeemvermelding `SYSTEM_PROVIDERS.auto`                  |
+
+## Accountvoorkeuren voor opgeslagen automatische combo's
+
+De Intelligent Auto-editor biedt een optionele** Accountvoorkeuren** sectie. Elke verbinding kan Voorkeur, Normaal (standaard), Reserve of Uitgesloten zijn. Meerdere verbindingen kunnen een laag delen. Automatische selectie binnen het eerste in aanmerking komende niveau, waarbij het scoring/router gedrag daar behouden blijft; mislukte pogingen sijpelen door naar de resterende concrete rekeningen, die de voorkeur verdienen boven normaal boven reserve. Uitgesloten verbindingen worden door deze combo nooit gebruikt.
+
+De instelling wordt opgeslagen als `config.accountPreferences`, ingetoetst door verbinding ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Een weggelaten of lege kaart behoudt de bestaande route. Voorkeuren schakelen geen uitgeschakelde verbindingen in, verlenen geen API-sleuteltoegang, herstellen door quota geblokkeerde kandidaten of omzeilen budgetcontroles. Elke poging is beperkt tot de concrete verbinding, dus account fallback kan niet tussen niveaus achter de combo-router springen. Bestaande sessieaffiniteit kan een in aanmerking komend account behouden; het uitsluiten van het account dat aan een native beurt is gebonden, stopt die beurt in plaats van stil van account te wisselen.
+
+Geconfigureerde voorkeuren gebruiken het accountbewuste automatische pad: ongebonden contextcache, slimme pijplijn, chaos en schaduwsnelkoppelingen worden niet verzonden. Speculatieve hedging is uitgeschakeld voor deze verzoeken, zodat reserverekeningen niet kunnen racen met voorkeursrekeningen. Andere combostrategieën interpreteren deze instelling niet. Als u een combo buiten Auto wijzigt, blijven de opgeslagen voorkeuren behouden zodat u later terug kunt schakelen.
 
 ## Combonamen die overeenkomen met een echte model-id
 
@@ -212,11 +234,13 @@ De Auto-Combo Engine selecteert voor elke aanvraag dynamisch de beste provider e
 | `quality`             | 0.03             | Door feedback gestuurd signaal voor de uitvoerkwaliteit vanuit de kwaliteitstracker voor routeringsgebeurtenissen; kandidaten zonder waarnemingen krijgen een neutrale score van 0.5                                                                     |
 | `reliability`         | 0.00             | Waargenomen succespercentage, `1 - failureRate`, op basis van 24 uur gebruiksgeschiedenis met een minimum van tien steekproeven (anders realtime metrische gegevens); kandidaten zonder waarnemingen krijgen een waarde van 1.0. Standaard uitgeschakeld |
 
+`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+
 **Som:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`, zoals gedeclareerd in `DEFAULT_WEIGHTS`; door de gebruiker geconfigureerde gewichten worden vóór de scoreberekening door `normalizeScoringWeights()` opnieuw genormaliseerd tot een verdeling.
 
 ## Moduspakketten
 
-6 vooraf gedefinieerde gewichtsprofielen in `open-sse/services/autoCombo/modePacks.ts`. Elk pakket vervangt de standaardgewichten volledig om de selectie op één doel te richten. Elk pakket telt al op tot `1.0` (`0.9999` zoals weergegeven met vier decimalen), dus `normalizeScoringWeights()` heeft niets wezenlijks te corrigeren wanneer een pakket actief is — de onderstaande waarden zijn, behoudens afronding, de waarden die de scorer toepast.
+6 vooraf gedefinieerde gewichtsprofielen in `open-sse/services/autoCombo/modePacks.ts`. Elk pakket vervangt de standaardgewichten volledig om de selectie op één doel te richten. Elk pakket telt al op tot `1.0` (`0.9999` zoals weergegeven met vier decimalen), dus `normalizeScoringWeights()` heeft niets wezenlijks te corrigeren wanneer een pakket actief is — de onderstaande waarden zijn, afgezien van afronding, de waarden die het scoremechanisme toepast.
 
 | Factor                | ship-fast  | cost-saver | quality-first | offline-friendly | reliability-first | chaos-mode |
 | :-------------------- | :--------- | :--------- | :------------ | :--------------- | :---------------- | :--------- |
@@ -238,32 +262,32 @@ De Auto-Combo Engine selecteert voor elke aanvraag dynamisch de beste provider e
 
 Opmerkingen:
 
-- **Pakketten bevatten `quality` en `reliability`** (`quality 0.02`, `quality-first 0.03`; `reliability 0.03`, `reliability-first 0.04`) en vervangen de gewichtstoewijzing volledig (`weights = pack`, geen samenvoeging). `DEFAULT_WEIGHTS` bevat `quality 0.03 / reliability 0`; bij selectie van `balanced`/`default` blijven die standaardwaarden behouden, terwijl bij selectie van een pakket de bovenstaande waarden van dat pakket worden gebruikt. In een koude pool (nog geen waarnemingen, dus `quality 0.5` en `reliability 1`) voegen deze twee factoren `+0.04` toe bij een generiek pakket (`0.03 + 0.01`), `+0.045` bij `quality-first` en `+0.05` bij `reliability-first`.
+- **Pakketten bevatten `quality` en `reliability`** (`quality 0.02`, `quality-first 0.03`; `reliability 0.03`, `reliability-first 0.04`) en vervangen de gewichtstoewijzing volledig (`weights = pack`, geen samenvoeging). `DEFAULT_WEIGHTS` bevat `quality 0.03 / reliability 0`; bij selectie van `balanced`/`default` blijven die standaardwaarden behouden, terwijl bij selectie van een pakket de bovenstaande waarden van dat pakket worden gebruikt. In een cold pool (nog geen waarnemingen, dus `quality 0.5` en `reliability 1`) voegen deze twee factoren `+0.04` toe bij een algemeen pakket (`0.03 + 0.01`), `+0.045` bij `quality-first` en `+0.05` bij `reliability-first`.
 - `tierAffinity`, `specificityMatch` en `resetWindowAffinity` zijn in elk pakket expliciet ingesteld op `0`.
 - De nadruk van elk pakket in één oogopslag:
-  - **ship-fast** → latencyInv 0.3048 + health 0.2667 (gezonde verbindingen met lage latentie)
+  - **ship-fast** → latencyInv 0.3048 + health 0.2667 (verbindingen met lage latentie en een goede status)
   - **cost-saver** → costInv 0.3324 (de goedkoopste tokens winnen)
-  - **quality-first** → taskFit 0.3524 + stability 0.1429 + quality 0.03, het hoogste van alle pakketten (beste model voor de taak, consistent)
+  - **quality-first** → taskFit 0.3524 + stability 0.1429 + quality 0.03, het hoogste van alle pakketten (het beste model voor de taak, consistent)
   - **offline-friendly** → quota 0.3324 + health 0.2667 (maximale speelruimte, ongeacht snelheid/kosten)
-  - **reliability-first** → health 0.3524 + stability 0.1905 + reliability 0.04, het hoogste van alle pakketten (minste verrassingen)
-  - **chaos-mode** → health 0.4000 + taskFit 0.1905 (profiel voor foutinjectie)
+  - **reliability-first** → health 0.3524 + stability 0.1905 + reliability 0.04, het hoogste van alle pakketten (de minste verrassingen)
+  - **chaos-mode** → health 0.4000 + taskFit 0.1905 (het gewichtspakket dat `auto/chaos` aan de leden van zijn panel toewijst; de parallelle fan-out leest deze gewichten niet en dit is geen profiel voor foutinjectie, zie [CHAOS-MODE.md](../guides/CHAOS-MODE.md#autochaos-parallel-fan-out))
 
-### Besturing per aanvraag (headers) — #6023 / #6024 / #6025 / #3470
+### Besturing per verzoek (headers) — #6023 / #6024 / #6025 / #3470
 
-Een `auto`-combinatie kan **per aanvraag** worden aangestuurd via drie headers, zonder de
-opgeslagen configuratie van de combinatie te wijzigen. Deze zijn alleen van toepassing op de `auto`-strategie en alleen op de aanvraag
-die ze bevat; de opgeslagen `modePack`/`budgetCap`/`budgetFallback` van de combinatie worden gebruikt
+Een `auto`-combo kan **per verzoek** worden aangestuurd via drie headers, zonder de opgeslagen configuratie van de
+combo te wijzigen. Deze zijn alleen van toepassing op de `auto`-strategie en alleen op het verzoek
+dat ze bevat; de opgeslagen `modePack`/`budgetCap`/`budgetFallback` van de combo worden gebruikt
 wanneer de header ontbreekt.
 
-| Header                        | Accepteert                                                                                                                                                                                                     | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-Mode`            | een vooraf ingestelde alias (`fast`, `balanced`, `quality`, `cheap`, `reliable`, `offline`) of een onbewerkte pakketnaam (`ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first`) | Overschrijft de scoringsgewichten voor deze aanvraag. `balanced`/`default` dwingen de standaardgewichten af (geen pakket). Onbekende waarden worden genegeerd (configuratie blijft behouden).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `X-OmniRoute-Budget`          | een positief getal (maximaal USD per aanvraag)                                                                                                                                                                 | Harde kostenlimiet: kandidaten waarvan de geschatte kosten deze limiet overschrijden, worden vóór de selectie uitgefilterd. Wat er gebeurt wanneer **elke** kandidaat de limiet overschrijdt, wordt bepaald door `X-OmniRoute-Budget-Fallback` hieronder.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `X-OmniRoute-Budget-Fallback` | `cheapest` (standaard, aliassen: `cheapest-viable`, `soft`) of `strict` (aliassen: `block`, `hard`)                                                                                                            | `cheapest`: valt terug op de wereldwijd goedkoopste kandidaat, ook al overschrijdt deze nog steeds de limiet (verouderd gedrag). `strict`: weigert een selectie te maken — de aanvraag mislukt direct met `HTTP 402` in plaats van stilzwijgend het budget te overschrijden. Onbekende waarden worden genegeerd.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `X-OmniRoute-Effort`          | `auto` (andere waarden gereserveerd)                                                                                                                                                                           | Adaptief denkbudget: wanneer de aanvraag **geen** redeneerveld van welke vorm dan ook bevat (`reasoning_effort`, `reasoning`, `thinking`), zet de gateway `auto` om in `low`/`medium`/`high` op basis van deterministische signalen uit de aanvraagstructuur (lengte van het laatste gebruikersbericht, contextomvang tot en met het laatste gebruikersbericht, eerdere toolresultaten, diepte van de tool-lus). Signalen zijn beperkt tot de huidige beurt — alles na het laatste gebruikersbericht wordt genegeerd — zodat elke aanvraag in een tool-lus op hetzelfde niveau uitkomt (statusloze vastzetting per beurt, geen sessiestatus, geen opschaling halverwege de lus die bovenliggende prompt-cacheprefixen zou verbreken). Een expliciet redeneerveld van de client heeft altijd voorrang. Beperkt tot aanvragen waarvan de bovenliggende dispatch wordt omgezet naar de OpenAI Chat Completions-vorm (`targetFormat === FORMATS.OPENAI`) — `reasoning_effort` is een veld in OpenAI-vorm, dus de header heeft geen effect op een aanvraag die op Claude of Gemini is gericht (zie `open-sse/handlers/chatCore/adaptiveEffortWiring.ts`). |
+| Header                        | Accepteert                                                                                                                                                                                                     | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-Mode`            | een vooraf ingestelde alias (`fast`, `balanced`, `quality`, `cheap`, `reliable`, `offline`) of een onbewerkte pakketnaam (`ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first`) | Overschrijft de scoringsgewichten voor deze aanvraag. `balanced`/`default` dwingen de standaardgewichten af (geen pakket). Onbekende waarden worden genegeerd (configuratie blijft behouden).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `X-OmniRoute-Budget`          | een positief getal (maximaal USD per aanvraag)                                                                                                                                                                 | Harde kostenlimiet: kandidaten waarvan de geschatte kosten deze limiet overschrijden, worden vóór de selectie uitgefilterd. Wat er gebeurt wanneer **elke** kandidaat deze limiet overschrijdt, wordt bepaald door `X-OmniRoute-Budget-Fallback` hieronder.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `X-OmniRoute-Budget-Fallback` | `cheapest` (standaard, aliassen: `cheapest-viable`, `soft`) of `strict` (aliassen: `block`, `hard`)                                                                                                            | `cheapest`: valt terug op de wereldwijd goedkoopste kandidaat, ook al overschrijdt deze nog steeds de limiet (verouderd gedrag). `strict`: weigert een selectie te maken — de aanvraag mislukt onmiddellijk met `HTTP 402` in plaats van stilzwijgend het budget te overschrijden. Onbekende waarden worden genegeerd.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `X-OmniRoute-Effort`          | `auto` (andere waarden gereserveerd)                                                                                                                                                                           | Adaptief denkbudget: wanneer de aanvraag **geen enkel** redeneerveld bevat, in welke vorm dan ook (`reasoning_effort`, `reasoning`, `thinking`), zet de gateway `auto` op basis van deterministische signalen uit de aanvraagstructuur om naar `low`/`medium`/`high` (lengte van het laatste gebruikersbericht, contextgrootte tot en met het laatste gebruikersbericht, eerdere toolresultaten, diepte van de tool-lus). Signalen zijn beperkt tot de huidige beurt — alles na het laatste gebruikersbericht wordt genegeerd — zodat elke aanvraag in een tool-lus op hetzelfde niveau uitkomt (toewijzing per beurt zonder status, geen sessiestatus en geen opschaling halverwege de lus die bovenliggende prompt-cacheprefixen zou verstoren). Een expliciet redeneerveld van de client heeft altijd voorrang. Beperkt tot aanvragen waarvan de bovenliggende routering wordt omgezet naar de OpenAI Chat Completions-structuur (`targetFormat === FORMATS.OPENAI`) — `reasoning_effort` is een veld volgens de OpenAI-structuur, dus de header heeft geen effect op een aanvraag die op Claude of Gemini is gericht (zie `open-sse/handlers/chatCore/adaptiveEffortWiring.ts`). |
 
 ```bash
-# Forceer het snelste profiel, beperk deze aanvraag tot $0.05 en blokkeer strikt in plaats van het budget te overschrijden
+# Dwing het snelste profiel af, beperk deze aanvraag tot $0.05 en blokkeer strikt in plaats van het budget te overschrijden
 curl -sS http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "X-OmniRoute-Mode: fast" \
@@ -272,67 +296,58 @@ curl -sS http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"hi"}]}'
 ```
 
-De resolutie is een zuivere functie (`open-sse/services/autoCombo/requestControls.ts`); de
-opgeloste waarden worden doorgegeven aan de bestaande invoerparameters `config.modePack` / `config.budgetCap` /
+De omzetting is een zuivere functie (`open-sse/services/autoCombo/requestControls.ts`); de
+omgezette waarden worden doorgegeven aan de bestaande invoerwaarden `config.modePack` / `config.budgetCap` /
 `config.budgetFallback` van de engine. De opgeslagen `config.budgetFallback` van een combinatie ("strict" |
-"cheapest") bepaalt het permanente beleid; de header overschrijft dit voor één enkele aanvraag.
+"cheapest") bepaalt het permanente beleid; de header overschrijft dit voor één aanvraag.
 
 ## Alle routeringsstrategieën
 
-De combo-engine van OmniRoute ondersteunt **19 routeringsstrategieën** (gedeclareerd in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). De Auto Combo-engine zelf is beschikbaar via de strategie `auto`; de andere strategieën zijn beschikbaar voor opgeslagen combo's.
+OmniRoute's combo-engine ondersteunt** 20 routeringsstrategieën** (aangegeven in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). De Auto Combo-engine zelf valt onder de `auto` strategie; de anderen zijn beschikbaar voor aanhoudende combo's.
 
-| Strategie           | Beschrijving                                                                                                                                                                                                                               |
-| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Geordende lijst waarbij het eerste doel voorrang heeft, met expliciete prioriteit                                                                                                                                                          |
-| `weighted`          | Gewogen willekeurige selectie op basis van het gewicht per doel                                                                                                                                                                            |
-| `round-robin`       | Doorloop doelen cyclisch in volgorde (in batches; zie hieronder)                                                                                                                                                                           |
-| `context-relay`     | Geef context door tussen doelen (lange gesprekken)                                                                                                                                                                                         |
-| `fill-first`        | Vul het quotum van elk doel voordat naar het volgende wordt overgegaan                                                                                                                                                                     |
-| `p2c`               | Willekeurige load balancing volgens het Power-of-2-choices-principe                                                                                                                                                                        |
-| `random`            | Uniforme willekeurige selectie                                                                                                                                                                                                             |
-| `least-used`        | Kies het doel met de laagste huidige belasting                                                                                                                                                                                             |
-| `cost-optimized`    | Minimaliseer de kosten per aanvraag op basis van catalogusprijzen                                                                                                                                                                          |
-| `reset-aware` ⭐    | Prioriteer op basis van het tijdstip waarop het quotum wordt gereset — korte resetvensters krijgen een hogere rang                                                                                                                         |
-| `reset-window`      | Geef de voorkeur aan doelen waarvan het quotumvenster het snelst wordt gereset                                                                                                                                                             |
-| `headroom`          | Kies het doel met de meeste resterende quotumruimte                                                                                                                                                                                        |
-| `strict-random`     | Willekeurige selectie zonder ontdubbeling van herhalingen                                                                                                                                                                                  |
-| `auto`              | Gebruik Auto Combo-scoring (16 factoren) — **aanbevolen**                                                                                                                                                                                  |
-| `lkgp`              | Laatst bekende werkende route (wordt vastgezet op de laatst succesvolle provider en valt daarna terug op regels)                                                                                                                           |
-| `context-optimized` | Kies het doel dat het beste past bij de huidige contextgrootte                                                                                                                                                                             |
-| `cache-optimized`   | Rangschik doelen opnieuw op basis van promptcache-affiniteit — de verbinding die waarschijnlijk al het gecachte voorvoegsel van deze aanvraag bevat, wordt als eerste geprobeerd (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Stuur de aanvraag parallel naar een panel van modellen en synthetiseer vervolgens één antwoord via een beoordelend model (zie hieronder)                                                                                                   |
-| `pipeline`          | Voer doelen achtereenvolgens uit en geef de uitvoer van elke stap door als invoer voor de volgende stap; alleen het uiteindelijke antwoord wordt geretourneerd (#6396)                                                                     |
+| Strategie           | Beschrijving                                                                                                                                                                                                                                                    |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Eerste doel geordende lijst met expliciete prioriteit                                                                                                                                                                                                           |
+| `weighted`          | Willekeurig gewogen op basis van het doelgewicht                                                                                                                                                                                                                |
+| `round-robin`       | Blader op volgorde door doelen (batch; zie hieronder)                                                                                                                                                                                                           |
+| `context-relay`     | Context doorgeven aan doelen (lange gesprekken)                                                                                                                                                                                                                 |
+| `fill-first`        | Vul het quotum van elk doel voordat u naar het volgende gaat                                                                                                                                                                                                    |
+| `p2c`               | Power-of-2-choices willekeurige taakverdeling                                                                                                                                                                                                                   |
+| `random`            | Uniforme willekeurige selectie                                                                                                                                                                                                                                  |
+| `least-used`        | Kies een doel met de laagste stroombelasting                                                                                                                                                                                                                    |
+| `cost-optimized`    | Minimaliseer $ per aanvraag op basis van catalogusprijzen                                                                                                                                                                                                       |
+| `reset-aware` ⭐    | Prioriteer op basis van de quota-resettijd — korte reset-vensters hoger scoren                                                                                                                                                                                  |
+| `reset-window`      | Geef de voorkeur aan doelen waarvan de quotaperiode het snelst wordt gereset                                                                                                                                                                                    |
+| `headroom`          | Kies het doel met de meeste resterende quotumruimte                                                                                                                                                                                                             |
+| `quota-weighted`    | Sla uitgeputte accounts over en kies vervolgens een van de rest in verhouding tot het overgebleven quotum gedeeld door de lading tijdens de vlucht; bestaande gesprekken blijven vastgezet                                                                      |
+| `strict-random`     | Willekeurig zonder ontdubbeling van herhalingen                                                                                                                                                                                                                 |
+| `auto`              | Gebruik Auto Combo scoring (16-factor) —** aanbevolen**                                                                                                                                                                                                         |
+| `lkgp`              | Laatst bekende goede pad (pint vast aan de laatste succesvolle provider en valt vervolgens terug op regels)                                                                                                                                                     |
+| `context-optimized` | Kies het doel dat het beste past bij de huidige contextgrootte                                                                                                                                                                                                  |
+| `cache-optimized`   | Doelen opnieuw rangschikken op basis van prompt-cache affiniteit — de verbinding die het meest waarschijnlijk al het in de cache opgeslagen voorvoegsel van dit verzoek bevat, wordt eerst geprobeerd (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Waaier uit naar een panel van parallelle modellen en synthetiseer vervolgens één antwoord via een rechter (zie hieronder)                                                                                                                                       |
+| `pipeline`          | Voer doelen opeenvolgend uit, waarbij de uitvoer van elke stap wordt samengevoegd met de invoer van de volgende stap; alleen het uiteindelijke antwoord wordt geretourneerd (#6396)                                                                             |
 
 ⭐ = Nieuw in v3.8.0 · 🧬 = Nieuw in v3.8.36
 
-### Semantiek van `weighted`
+### `weighted` semantiek
 
-`weighted` is een **proportionele willekeurige trekking per aanvraag**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), geen mechanisme om de verdeling gelijk te trekken:
+`weighted` is een** proportionele willekeurige trekking per verzoek** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), geen equalizer:
 
-- Bij elke aanvraag wordt **één** stap getrokken met waarschijnlijkheid `weight / totalWeight`; de resterende stappen
-  worden voor die aanvraag in aflopende volgorde van gewicht gerangschikt als terugvalketen.
-- Een stap waarvan het gewicht `0` is (of ontbreekt), wordt **nooit getrokken** zolang een andere stap een
-  gewicht > 0 heeft — deze kan alleen als terugvaloptie dienen nadat de getrokken stap mislukt. Alleen wanneer **alle**
-  gewichten 0 zijn, wordt de selectie uniform.
-- Stappen waarvan alle doelen niet beschikbaar zijn — provider-circuitbreaker `OPEN`, afkoelperiode van de verbinding,
-  modelblokkering — worden vóór de trekking verwijderd
-  (`open-sse/services/combo/targetResolution.ts`), zodat één gezonde stap tijdelijk
-  elke aanvraag kan winnen.
-- `stickyWeightedLimit` (combo-configuratie, standaard `1` = uit) zet de getrokken stap vast voor dat aantal
-  opeenvolgende successen voordat er opnieuw wordt getrokken.
+- Elk verzoek trekt** een** stap met waarschijnlijkheid `weight / totalWeight`; de overige stappen worden geordend op aflopend gewicht als terugvalketen voor dat verzoek.
+- Een stap waarvan het gewicht `0` is (of ontbreekt).** nooit getekend** terwijl elke andere stap een gewicht > 0 — heeft, kan deze alleen als terugval dienen nadat de getekende stap mislukt. Alleen wanneer** alle** gewichten zijn 0, wordt de selectie uniform.
+- Stappen waarvan de doelen allemaal niet beschikbaar zijn — provider stroomonderbreker `OPEN`, verbinding cooldown, model lockout — worden verwijderd uit de trekking voordat het gebeurt (`open-sse/services/combo/targetResolution.ts`), zodat een enkele gezonde stap tijdelijk elk verzoek kan winnen.
+- `stickyWeightedLimit` (combo config, standaard `1` = uit) zet de getekende stap vast voor zoveel opeenvolgende successen voordat er opnieuw wordt getekend.
 
-Gebruik `round-robin` voor strikte rotatie; gelijke gewichten bij `weighted` leveren een statistisch — niet
-strikt — evenwicht op.
+Gebruik voor strikte rotatie `round-robin`; Gelijke gewichten op `weighted` geven een statistisch — geen strikt — saldo.
 
-### Agentische pipelinemodus
+### Agentische pijplijnmodus
 
-Een tweestapscombinatie met `pipeline` kan planner-/executorroutering inschakelen met
-`config.agenticOrchestration.enabled`. Het eerste doel verzorgt de planning en definitieve antwoorden;
-het tweede doel genereert toolaanroepen in de systeemeigen indeling van de client. OmniRoute detecteert vervolgaanvragen
-met toolresultaten op basis van het aanvraagprotocol, vraagt de planner of er nog een toolronde
-nodig is en maakt dynamisch de executor of de planner tot de laatste
-clientgerichte stap.
+Een `pipeline` combo met ten minste twee modellen kan zich aanmelden voor planner/executor routering met `config.agenticOrchestration.enabled`. Het eerste doelwit is eigenaar van de planning en de eindantwoorden; het tweede doel zendt client-native tooloproepen uit. OmniRoute detecteert voortzettingen van toolresultaten uit het aanvraagprotocol, vraagt de planner of er nog een toolronde nodig is, en maakt op dynamische wijze de uitvoerder of planner de klantgerichte laatste stap.
+
+Bij voortzetting van gereedschapsresultaten stopt OmniRoute ook met de uitvoering wanneer twee opeenvolgende voltooide rondes dezelfde tooloproepen herhalen met ongewijzigde resultaten, of wanneer elk expliciet gemarkeerd resultaat in twee opeenvolgende rondes mislukt. Gewijzigde resultaten maken herhaalde oproepen mogelijk (bijvoorbeeld polling). De bewaker wordt gereset bij een nieuw gebruikersverzoek, groepeert parallelle oproepen in één ronde en ondersteunt Anthropic, chatvoltooiingen, reacties en Gemini geschiedenissen. De planner ontvangt de reden en is eigenaar van het uiteindelijke antwoord, ook als hij om een nieuwe gereedschapsronde vraagt.
+
+Extra modellen na het tweede doel zijn bestelde executor-back-ups. Een mislukte HTTP -reactie of transportuitzondering gaat door naar de volgende uitvoerder, met dezelfde plannerbeslissing en eigen tools, maar de eigen stapprompt en opgeloste verbinding van die uitvoerder. Het eerste succesvolle antwoord wordt ongewijzigd geretourneerd, inclusief SSE streaming; Mislukkingen nadat een succesvolle stream is gestart, kunnen hier niet opnieuw worden geprobeerd. Als alle executeurs falen, wordt de laatste fout geretourneerd. Klant breekt verzending stop.
 
 ```json
 {
@@ -344,35 +359,17 @@ clientgerichte stap.
 }
 ```
 
-De executor kan in één antwoord meerdere onafhankelijke aanroepen genereren. Afhankelijke aanroepen worden
-afgehandeld in latere clientbeurten met toolresultaten, waarbij de planner elk resultaat beoordeelt.
-`maxToolRounds` is standaard `8` en accepteert `1`–`32`; zodra deze limiet is bereikt, moet de planner
-het best beschikbare definitieve antwoord produceren. Interne beslissingen van de planner worden gebufferd, terwijl
-het geselecteerde clientgerichte antwoord de oorspronkelijke streamingvoorkeur behoudt.
+De uitvoerder kan in één reactie meerdere onafhankelijke oproepen uitzenden. Afhankelijke oproepen worden afgehandeld in latere resultaatbeurten van de clienttool, waarbij de planner elk resultaat beoordeelt. `maxToolRounds` is standaard `8` en accepteert `1`–`32`; eenmaal bereikt, moet de planner het best beschikbare eindantwoord produceren. De beslissingen van de interne planner worden gebufferd, terwijl het geselecteerde klantgerichte antwoord de oorspronkelijke streamingvoorkeur behoudt.
 
-### Sticky batches en accountexpansie voor `round-robin`
+### `round-robin` sticky batch- en accountuitbreiding
 
-Round-robin werkt in batches, niet met één aanvraag per stap:
+Round-robin is batchgewijs, niet één verzoek per stap:
 
-- `stickyRoundRobinLimit` (eerst de combinatieconfiguratie, vervolgens `comboStickyRoundRobinLimit` en daarna
-  `settings.stickyRoundRobinLimit`, standaard **3**) behoudt hetzelfde doel gedurende dat aantal
-  opeenvolgende geslaagde aanvragen voordat wordt geroteerd. Stel de combinatie-override in op `1` voor rotatie
-  per aanvraag. De combinatie-editor toont de effectieve waarde en uit welke laag deze afkomstig is.
-- `connectionAwareExpansion` (eerst de combinatieconfiguratie en vervolgens de instellingen, standaard **false**) breidt
-  elke stap op providerniveau uit naar doelen per account voordat wordt geroteerd. Strategieën van groep B
-  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
-  fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) behouden een weergave op providerniveau totdat dit is ingeschakeld. De combinatie-editor biedt
-  overnemen / aan / uit; overnemen gebruikt de algemene standaardwaarde (uit).
-- Routering op basis van promptcachelokaliteit (`promptCacheAffinityEnabled`, standaard **true**) herschikt
-  vastgezette verbindingen, zodat overeenkomende cachesleutels aan één account gekoppeld blijven. Dit heeft voorrang op
-  round-robin- en gewogen rotatie tussen vastgezette stappen per account. Schakel dit uit onder
-  Instellingen → Combinatiestandaarden als u strikte rotatie nodig hebt. Er is geen override per combinatie.
+- `stickyRoundRobinLimit` (combo config, dan `comboStickyRoundRobinLimit`, dan `settings.stickyRoundRobinLimit`, standaard** 3** ) behoudt hetzelfde doel voor zoveel opeenvolgende successen voordat het roteert. Stel de combo-overschrijving in op `1` voor rotatie met één verzoek. De combo-editor toont de effectieve waarde en uit welke laag deze afkomstig is.
+- `connectionAwareExpansion` (comboconfiguratie, vervolgens instellingen, standaard** vals** ) breidt elke stap op providerniveau uit naar doelen per account vóór rotatie. Groep-B-strategieën (prioriteit, gewogen, round-robin, willekeurig, p2c, minst gebruikt, kostengeoptimaliseerd, lkgp, eerst vullen, strikt willekeurig, context-geoptimaliseerd, cache-geoptimaliseerd, context-relay, fusie, pijplijn) behouden een weergave op providerniveau totdat dit is ingeschakeld. De combo-editor stelt overnemen / aan / uit bloot; inherit gebruikt de globale standaard (uit).
+- Lokale routering met prompt-cache (`promptCacheAffinityEnabled`, standaard** WAAR** ) herschikt vastgezette verbindingen zodat overeenkomende cachesleutels op één account blijven. Het heeft voorrang op round-robin en gewogen rotatie over vastgezette stappen per account. Schakel het uit onder Instellingen → Combo-standaardinstellingen als u strikte rotatie nodig heeft. Er is geen overschrijving per combinatie.
 
-Voor rotatie tussen meerdere accounts voor één model gebruikt u bij voorkeur **één stap met dynamische accountselectie** (lege
-`connectionId`, volledige pool) met sticky-limiet `1`, en niet drie vastgezette `connectionId`-waarden.
-Vastgezette stappen in combinatie met affiniteit komen steeds bij hetzelfde account terecht, zelfs terwijl de RR-teller
-oploopt.
+Voor rotatie van meerdere accounts op één model heeft u de voorkeur** één dynamische accountstap** (lege `connectionId`, hele pool) met vaste limiet `1`, niet drie vastgezette `connectionId`'s. Vastgezette stappen plus affiniteit vallen samen op hetzelfde account, zelfs als de RR teller vooruitgaat.
 
 ## Fusiestrategie
 
@@ -478,13 +475,13 @@ Dit betekent dat **het toevoegen van een nieuwe provider waarvoor `auto/*` is in
 
 ## API
 
-Er is **geen afzonderlijk `POST /api/combos/auto`-endpoint** — Auto-Combo wordt op twee manieren gebruikt:
+Er is **geen specifiek `POST /api/combos/auto`-endpoint** — Auto-Combo wordt op twee manieren gebruikt:
 
-1. **Zonder configuratie (aanbevolen):** Verstuur een willekeurige chatcompletion-aanvraag met `model: "auto"` of `model: "auto/<variant>"`. De virtuele factory bouwt de combo per aanvraag — geen persistentie en geen API-aanroepen nodig.
+1. **Zonder configuratie (aanbevolen):** Verstuur een willekeurig verzoek voor chatvoltooiing met `model: "auto"` of `model: "auto/<variant>"`. De virtuele factory bouwt de combo per verzoek — persistentie en API-aanroepen zijn niet nodig.
 
-2. **Opgeslagen combo met `strategy: "auto"`:** Maak via `POST /api/combos` een reguliere combo en stel `strategy: "auto"` in, samen met `config.auto.weights` / `config.auto.candidatePool`. Dezelfde scoring-engine wordt gebruikt; de combo wordt opgeslagen in `combos` en kan via de ID opnieuw worden gebruikt.
+2. **Persistente combo met `strategy: "auto"`:** Maak een reguliere combo via `POST /api/combos` en stel `strategy: "auto"` in, samen met `config.auto.weights` / `config.auto.candidatePool`. Dezelfde score-engine wordt gebruikt; de combo wordt opgeslagen in `combos` en kan via ID opnieuw worden gebruikt.
 
-Voor detectie vermeldt `GET /api/combos/auto` elke variant met de opgeloste kandidatenpool plus `context_length` / `max_output_tokens` — de MAXIMUMWAARDE van de vensters in de kandidatenpool. Clients (bijvoorbeeld de opencode-plugin) moeten deze waarden in plaats van `0` bekendmaken: een context van nul schakelt de automatische compactie van opencode volledig uit, waardoor sessies blijven groeien totdat het opschonen van de geschiedenis door de gateway de context vernietigt. MAX kan veilig bekendgemaakt worden, omdat het contextvoorfilter van de auto-combo te grote aanvragen naar kandidaten met grote vensters routeert.
+Voor detectie geeft `GET /api/combos/auto` elke variant weer met de herleide kandidatenpool plus `context_length` / `max_output_tokens` — de MAXIMUMWAARDE van de vensters in de kandidatenpool. Clients (zoals de opencode-plug-in) moeten deze waarden publiceren in plaats van `0`: een context van nul schakelt de automatische compactie van opencode volledig uit, waardoor sessies blijven groeien totdat het opschonen van de geschiedenis door de gateway de context vernietigt. Het is veilig om de MAXIMUMWAARDE te publiceren, omdat het contextvoorfilter van de auto-combo te grote verzoeken naar kandidaten met een groot venster routeert.
 
 ```bash
 # Gebruik zonder configuratie (geen combo aanmaken)
@@ -493,39 +490,41 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Opgeslagen auto-combo via het reguliere combo-endpoint
+# Persistente auto-combo via het reguliere combo-endpoint
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Auto-routerstrategieën
+### Strategieën voor de automatische router
 
-Opgeslagen combo's met `strategy: "auto"` kunnen `config.routerStrategy` (of het verouderde
-`config.auto.routerStrategy`) instellen op een van de volgende opties:
+Persistente combo's met `strategy: "auto"` kunnen `config.routerStrategy` (of het verouderde
+`config.auto.routerStrategy`) instellen op een van de volgende waarden:
 
-- `rules` — standaard gewogen scoring
-- `score` — selecteert de hoogst geconfigureerde gewogen score. Bij exact gelijke scores blijft de geconfigureerde
+- `rules` — standaard gewogen scoreberekening
+- `score` — selecteert de hoogste geconfigureerde gewogen score. Bij exacte gelijke scores blijft de geconfigureerde
   volgorde van kandidaten behouden; de bestaande `explorationRate` neemt steekproeven uit de volledige gerangschikte pool.
 - `cost` / `eco` — goedkoopste gezonde provider
-- `latency` / `fast` — laagste p95-latentie met betrouwbaarheidsstraf
+- `latency` / `fast` — laagste p95-latentie met een betrouwbaarheidsstraf
 - `sla-aware` / `sla` — geeft de voorkeur aan kandidaten die voldoen aan SLO's voor p95-latentie, foutpercentage en optionele
   kosten
-- `lkgp` — laatst bekende goede provider eerst
+- `lkgp` — eerst de laatst bekende werkende provider
+- `nadir` — vraagt de beslissings-API van [Nadir](https://getnadir.com) welk model in de pool nodig is voor de
+  prompt; opt-in, valt bij fouten terug op `rules`
 
 ### Routerstrategieën in detail
 
-De auto-combo-engine biedt 6 verwisselbare **RouterStrategy**-implementaties die
-u via `config.routerStrategy` (of het verouderde `config.auto.routerStrategy`) kunt selecteren.
+De auto-combo-engine biedt 7 verwisselbare **RouterStrategy**-implementaties die
+je kunt wisselen via `config.routerStrategy` (of het verouderde `config.auto.routerStrategy`).
 Elke strategie kiest één provider uit de kandidatenpool op basis van een `RoutingContext`
-(taaktype, hints voor tools/visie, tokenschatting, optioneel SLA-beleid, optionele
-laatst bekende goede provider).
+(taaktype, aanwijzingen voor tools/vision, tokenschatting, optioneel SLA-beleid, optionele
+laatst bekende werkende provider).
 
-#### 1. `rules` (standaard) — gewogen scoring met 16 factoren
+#### 1. `rules` (standaard) — gewogen scoreberekening met 16 factoren
 
-Omhult de bestaande scoring-engine. Filtert kandidaten met een `OPEN` circuit breaker
-uit en voert vervolgens `scorePool()` uit met het huidige taaktype en `getTaskFitness()`,
-waarna de provider met de hoogste score wordt gekozen.
+Omsluit de bestaande score-engine. Filtert kandidaten met een circuitbreakerstatus
+van `OPEN` weg en voert vervolgens `scorePool()` uit met het huidige taaktype en `getTaskFitness()`,
+waarbij de provider met de hoogste score wordt gekozen.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -545,7 +544,7 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wanneer te gebruiken**: Standaard. Gebruik dit wanneer u een evenwichtige afweging tussen alle signalen wilt.
+**Wanneer te gebruiken**: Standaard. Gebruik dit wanneer je een evenwichtige afweging tussen alle signalen wilt.
 
 **Alias**: `rules` (geen alias)
 
@@ -554,7 +553,7 @@ class RulesStrategyImpl implements RouterStrategy {
 #### 2. `cost` / `eco` — goedkoopste gezonde provider
 
 Sorteert de kandidatenpool op `costPer1MTokens` (oplopend) en kiest de goedkoopste.
-Filtert eerst `OPEN`-kandidaten uit.
+Filtert eerst kandidaten met de status `OPEN` weg.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -577,8 +576,8 @@ class CostStrategyImpl implements RouterStrategy {
 
 #### 3. `latency` / `fast` — laagste p95-latentie met betrouwbaarheidsstraf
 
-Sorteert op `p95LatencyMs + (errorRate * 1000)`. De straf voor het foutpercentage zorgt ervoor dat
-onbetrouwbare providers lager worden gerangschikt, zelfs als hun nominale latentie laag is.
+Sorteert op `p95LatencyMs + (errorRate * 1000)`. De straf voor het foutpercentage zorgt ervoor
+dat onbetrouwbare providers lager worden gerangschikt, zelfs als hun nominale latentie laag is.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -604,17 +603,17 @@ interactieve programmeerassistenten.
 
 #### 4. `sla-aware` / `sla` — naleving van SLO's voor latentie/fouten/kosten
 
-Geeft elke kandidaat een score op basis van hoe goed deze aan het geconfigureerde SLO-beleid voldoet:
+Geeft elke kandidaat een score op basis van hoe goed deze voldoet aan het geconfigureerde SLO-beleid:
 
-| Factor            | Gewicht | Formule                                                      |
-| ----------------- | ------- | ------------------------------------------------------------ |
-| Latentiescore     | 35%     | `threshold / max(value, ε)`                                  |
-| Foutscore         | 35%     | `threshold / max(value, ε)`                                  |
-| Gezondheidsscore  | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)            |
-| Kostenscore       | 10%     | `threshold / max(value, ε)` of omgekeerd genormaliseerd      |
-| Stabiliteitsscore | 5%      | omgekeerd genormaliseerde standaardafwijking van de latentie |
+| Factor            | Gewicht | Formule                                                   |
+| ----------------- | ------- | --------------------------------------------------------- |
+| Latentiescore     | 35%     | `threshold / max(value, ε)`                               |
+| Foutscore         | 35%     | `threshold / max(value, ε)`                               |
+| Gezondheidsscore  | 15%     | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)         |
+| Kostenscore       | 10%     | `threshold / max(value, ε)` of omgekeerd genormaliseerd   |
+| Stabiliteitsscore | 5%      | omgekeerd genormaliseerde standaardafwijking van latentie |
 
-Wanneer `hardConstraints: true` is, worden kandidaten primair gesorteerd op **overtredingsscore**
+Wanneer `hardConstraints: true` is ingesteld, worden kandidaten primair gesorteerd op **overtredingsscore**
 (de mate waarin ze een SLO overschrijden) en vervolgens op samengestelde score. Anders wordt alleen
 de samengestelde score gebruikt.
 
@@ -625,12 +624,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... geeft elke kandidaat een score ten opzichte van het beleid: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... scoort elke kandidaat aan de hand van het beleid: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**SLA-velden** (ingesteld in de comboconfiguratie):
+**SLA-velden** (ingesteld in de combinatieconfiguratie):
 
 ```json
 {
@@ -645,7 +644,7 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wanneer te gebruiken**: Productieworkloads met strikte budgetten voor latentie, foutpercentage of kosten.
+**Wanneer gebruiken**: Productieworkloads met strikte budgetten voor latentie, foutpercentages of kosten.
 
 **Aliassen**: `sla-aware`, `sla`
 
@@ -654,7 +653,7 @@ class SLAStrategyImpl implements RouterStrategy {
 #### 5. `lkgp` — laatst bekende goede provider eerst
 
 Probeert eerst de **laatst bekende goede provider** (indien ingesteld) en valt daarna terug op de
-`rules`-strategie. Nuttig voor sessie-affiniteit: dezelfde provider verwerkt
+`rules`-strategie. Nuttig voor sessieaffiniteit — dezelfde provider verwerkt
 vervolgverzoeken in een gesprek.
 
 ```ts
@@ -682,16 +681,64 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Wanneer te gebruiken**: Gesprekken met meerdere beurten waarbij dezelfde provider
-vervolgverzoeken moet verwerken (bijvoorbeeld voor caching, contextcontinuïteit of consistente prijzen).
+**Wanneer gebruiken**: Gesprekken met meerdere beurten waarbij je wilt dat dezelfde provider
+vervolgverzoeken verwerkt (bijvoorbeeld voor caching, contextcontinuïteit of consistente prijzen).
 
 **Alias**: `lkgp` (geen alias)
 
 ---
 
+#### 6. `nadir` — promptbewuste modelkeuze via Nadir
+
+Elke bovenstaande strategie rangschikt de kandidaten op basis van de eigen telemetrie; geen enkele leest
+het verzoek. `nadir` stuurt de laatste gebruikersbeurt plus de model-ID's van de pool naar
+de beslissings-API van [Nadir](https://getnadir.com) (`POST /v1/bucket`) en routeert naar het model
+dat Nadir uit dat aanbod selecteert (`simple` → het goedkoopste geschikte model, `complex` → het
+grensverleggende model). De verbinding die dat model aanbiedt, wordt nog steeds door `rules` gekozen, zodat quota,
+gezondheid en kosten blijven bepalen welk account wordt gebruikt.
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "nadir",
+    "nadir": {
+      "apiKey": "ndr_...",
+      "baseUrl": "https://api.getnadir.com",
+      "timeoutMs": 2000
+    }
+  }
+}
+```
+
+`OMNIROUTE_NADIR_API_KEY` en `OMNIROUTE_NADIR_BASE_URL` zijn omgevingsvariabelen die als terugvaloptie voor de twee
+tekenreeksen dienen. `baseUrl` is alleen nodig voor een zelfgehoste Nadir (een afsluitende `/v1` wordt geaccepteerd).
+Aanroepen zonder sleutel komen terecht in de anonieme laag van Nadir, waarvoor een frequentielimiet per IP geldt. Met een sleutel
+([maak er een aan](https://app.getnadir.com/dashboard/api-keys)) wordt elke beslissing
+in je Nadir-dashboard geregistreerd. Volledige configuratie en verificatie:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
+
+Wat de omgeving verlaat: de tekst van het laatste gebruikersbericht (de eerste 16.000 tekens), de model-ID's van de kandidaten
+en een kanaaltag `source: "omniroute"`. Geen systeemprompt, geschiedenis, tools of
+headers.
+
+Het foutgedrag is fail-open: een time-out (standaard 2000 ms), een niet-2xx-respons, een onbereikbare
+host, een onjuist opgemaakte respons of een selectie buiten de pool resulteert in de `rules`-beslissing,
+waarbij de reden wordt voorafgegaan door `NadirStrategy: fallback (…)`. Na een mislukte aanroep slaat de
+strategie het netwerk gedurende 30 s over, zodat een storing één time-out per 30 s kost in plaats van
+één per verzoek. Routeringsgebeurtenissen rapporteren alleen `strategy: "nadir"` wanneer Nadir daadwerkelijk
+de keuze heeft gemaakt.
+
+**Wanneer gebruiken**: verkeer met uiteenlopende moeilijkheidsgraden in een pool met verschillende modellagen (een klein, een middelgroot
+en een grensverleggend model), wanneer je de kosten van het altijd gebruiken van het grensverleggende model wilt verlagen.
+
+**Alias**: `nadir` (geen alias)
+
+---
+
 ### Aangepaste routerstrategieën
 
-U kunt uw eigen implementatie van `RouterStrategy` registreren via de openbare API:
+Je kunt je eigen `RouterStrategy`-implementatie registreren via de openbare API:
 
 ```ts
 import {
@@ -704,7 +751,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Uw routeringslogica hier
+    // Je routeringslogica komt hier
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -732,15 +779,16 @@ Gebruik deze vervolgens:
 
 ---
 
-### Keuzehulp voor routerstrategieën
+### Selectiegids voor routerstrategieën
 
-| Gebruikssituatie          | Strategie   | Reden                                            |
-| ------------------------- | ----------- | ------------------------------------------------ |
-| Gebalanceerde workload    | `rules`     | Standaard — houdt rekening met alle factoren     |
-| Kosten minimaliseren      | `cost`      | Kiest altijd de goedkoopste                      |
-| Latentie minimaliseren    | `latency`   | Kiest de snelste betrouwbare provider            |
-| Strikte SLO's             | `sla-aware` | Filtert op drempelwaarden voor p95/fouten/kosten |
-| Chat met meerdere beurten | `lkgp`      | Sessie-affiniteit                                |
+| Gebruikssituatie          | Strategie   | Reden                                        |
+| ------------------------- | ----------- | -------------------------------------------- |
+| Evenwichtige werklast     | `rules`     | Standaard — houdt rekening met alle factoren |
+| Kosten minimaliseren      | `cost`      | Kiest altijd de goedkoopste                  |
+| Latentie minimaliseren    | `latency`   | Kiest de snelste betrouwbare provider        |
+| Strikte SLO's             | `sla-aware` | Filtert op drempels voor p95/fouten/kosten   |
+| Chat met meerdere beurten | `lkgp`      | Sessiegebondenheid                           |
+| Gemengde moeilijkheid     | `nadir`     | Kiest per prompt het juiste modelniveau      |
 
 SLA-bewuste velden:
 
@@ -769,13 +817,19 @@ Inclusief de kale `auto` (standaard) plus de 6 `AutoVariant`-waarden die in `aut
 
 (`AutoVariant` zelf somt 6 waarden op; de 7e optie is "geen variant" — kale `auto` — die door `parseAutoPrefix()` wordt verwerkt als `variant: undefined`.)
 
-## Hoe niveaus binnen Auto-Combo passen
+## Hoe niveaus in Auto-Combo passen
 
-De scoringsfunctie met 16 factoren (`open-sse/services/autoCombo/scoring.ts`) behandelt het behoren tot een niveau als twee signalen: `tierPriority` (0.0476) en `tierAffinity` (0.0476). Zie de canonieke [tabel met scoringsfactoren](#how-it-works-persisted-auto-combos) hierboven voor de volledige set `DEFAULT_WEIGHTS` — de overschrijvingen per pakket (ship-fast/cost-saver/quality-first/offline-friendly) staan vermeld in de tabel "Gewichtsprofielen per pakket".
+De scorefunctie met 16 factoren (`open-sse/services/autoCombo/scoring.ts`) behandelt
+lidmaatschap van een niveau als twee signalen: `tierPriority` (0.0476) en `tierAffinity` (0.0476). Zie de
+canonieke [tabel met scorefactoren](#how-it-works-persisted-auto-combos) hierboven voor de volledige
+`DEFAULT_WEIGHTS`-set — de overschrijvingen per pakket (ship-fast/cost-saver/quality-first/
+offline-friendly) staan in de tabel "Gewichtsprofielen per pakket".
 
-Het niveau alleen dwingt **niet** af dat niveau 1 als eerste komt — als de latentie van niveau 1 slecht is of de verhouding tussen kosten en kwaliteit niet optimaal is, wint niveau 2. Gebruik de combostrategie `priority` en rangschik providers per niveau om de volgorde van niveaus af te dwingen.
+Alleen het niveau zorgt er **niet** voor dat Niveau 1 als eerste komt — als de latentie van Niveau 1 slecht is of
+de verhouding tussen kosten en kwaliteit niet optimaal is, wint Niveau 2. Gebruik de combostrategie
+`priority` en rangschik providers per niveau om de niveauvolgorde af te dwingen.
 
-Verhoog het gewicht van `tierPriority` om niveau 1 (abonnement) sterk te bevoordelen:
+Verhoog het gewicht van `tierPriority` om Niveau 1 (abonnement) sterk te bevoordelen:
 
 ```json
 {
@@ -784,7 +838,7 @@ Verhoog het gewicht van `tierPriority` om niveau 1 (abonnement) sterk te bevoord
 }
 ```
 
-Zie `docs/marketing/TIERS.md` voor niveaudefinities en providerclassificatie.
+Zie [`docs/guides/TIERS.md`](../guides/TIERS.md) voor definities van niveaus en de classificatie van providers.
 
 ## Testen en dekking
 
@@ -820,7 +874,7 @@ Deze rooktests testen het echte communicatiepad (combo → provider → voltooii
 | `open-sse/services/autoCombo/selfHealing.ts`              | Uitsluiting, probes, incidentmodus                                                                          |
 | `open-sse/services/autoCombo/modePacks.ts`                | 6 gewichtsprofielen (ship-fast, cost-saver, quality-first, offline-friendly, reliability-first, chaos-mode) |
 | `open-sse/services/autoCombo/autoPrefix.ts`               | Parser voor het voorvoegsel `auto/` + 6 varianten                                                           |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | Bouwt een `AutoComboConfig` in het geheugen op basis van actieve verbindingen                               |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | Bouwt `AutoComboConfig` in het geheugen op basis van actieve verbindingen                                   |
 | `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Testhook voor het mocken van het providerregister                                                           |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (19 strategieën)                                                                  |
-| `src/sse/handlers/chat.ts`                                | Integratie: kortsluiting voor auto-prefix                                                                   |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 strategieën)                                                                  |
+| `src/sse/handlers/chat.ts`                                | Integratie: vroegtijdige afhandeling van het auto-voorvoegsel                                               |

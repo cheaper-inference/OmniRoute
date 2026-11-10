@@ -14,7 +14,7 @@ set -uo pipefail
 PVE_HOST="${PVE_HOST:-192.168.0.100}"   # Proxmox host
 VPS_HOST="${VPS_HOST:-192.168.0.113}"   # a VM dos runners
 VM_ID="${VM_ID:-113}"
-REPO="${REPO:-diegosouzapw/OmniRoute}"
+REPO="${REPO:-cheaper-inference/OmniRoute}"
 LABEL="${RUNNER_LABEL:-omni-release}"
 TIMEOUT="${1:-120}"
 SSH="ssh -o BatchMode=yes -o ConnectTimeout=8"

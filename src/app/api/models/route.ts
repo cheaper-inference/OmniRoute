@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getModelAliases, setModelAlias, getProviderConnections } from "@/models";
 import { AI_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { updateModelAliasSchema } from "@/shared/validation/schemas";
@@ -8,6 +9,8 @@ import { getSettings } from "@/lib/db/settings";
 import {
   createModelCapabilityResolutionSnapshot,
   getResolvedModelCapabilities,
+  getResolvedModelCapabilitiesWithLimitSources,
+  type ModelCapabilityResolutionSnapshot,
 } from "@/lib/modelCapabilities";
 import { isFreeModel, providerHasFreeModels } from "@/shared/utils/freeModels";
 import { getAllActiveSyncedModels } from "@/lib/db/models/activeSyncedCatalog";
@@ -16,6 +19,10 @@ import {
   buildSyncedModelIdsByCanonicalProvider,
   shouldSuppressStaticModelForExclusiveListing,
 } from "@/app/api/v1/models/catalogSyncedCoverage";
+import {
+  isModelInLiveCatalog,
+  loadAuthoritativeLiveCatalogs,
+} from "@/app/api/models/liveCatalogAvailability";
 import { buildAliasMaps } from "@/app/api/v1/models/catalogProviderMaps";
 import { resolveCanonicalProviderId as resolveCanonicalProviderIdFromMaps } from "@/app/api/v1/models/catalogProviderMaps";
 
@@ -23,11 +30,50 @@ interface GetModelsDependencies {
   createCapabilitySnapshot?: typeof createModelCapabilityResolutionSnapshot;
 }
 
+// `withLimits=1` opts into per-model token limits plus their provenance (`capsSource`).
+const getModelsQuerySchema = z.object({
+  withLimits: z
+    .enum(["1", "true", "0", "false"])
+    .optional()
+    .transform((value) => value === "1" || value === "true"),
+});
+
+function resolveModelCapabilityFields(
+  fullModel: string,
+  snapshot: ModelCapabilityResolutionSnapshot,
+  withLimits: boolean
+) {
+  if (!withLimits) {
+    return {
+      supportsVision:
+        getResolvedModelCapabilities(fullModel, undefined, snapshot).supportsVision === true,
+    };
+  }
+  const { capabilities, limitSources } = getResolvedModelCapabilitiesWithLimitSources(
+    fullModel,
+    snapshot
+  );
+  return {
+    supportsVision: capabilities.supportsVision === true,
+    contextWindow: capabilities.contextWindow,
+    maxInputTokens: capabilities.maxInputTokens,
+    maxOutputTokens: capabilities.maxOutputTokens,
+    capsSource: limitSources,
+  };
+}
+
 // GET /api/models - Get models with aliases (only from active providers by default)
 export async function handleGetModels(request: Request, dependencies: GetModelsDependencies = {}) {
   try {
     const { searchParams } = new URL(request.url);
     const showAll = searchParams.get("all") === "true";
+    const query = validateBody(getModelsQuerySchema, {
+      withLimits: searchParams.get("withLimits") ?? undefined,
+    });
+    if (isValidationFailure(query)) {
+      return NextResponse.json({ error: query.error }, { status: 400 });
+    }
+    const { withLimits } = query.data;
 
     const modelAliases = await getModelAliases();
 
@@ -123,7 +169,9 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
     let syncedModelIdsByCanonicalProvider = new Map<string, Set<string>>();
     let resolveCanonicalProviderIdForStatic: (alias: string) => string = (alias) => alias;
     try {
-      const syncedModelsByProvider = await getAllActiveSyncedModels();
+      const syncedModelsByProvider = await getAllActiveSyncedModels({
+        customModelsByProvider: capabilitySnapshot.customModelsByProvider,
+      });
       const { aliasToProviderId, providerIdToAlias } = buildAliasMaps();
       const resolve = (aliasOrId: string, fallbackProviderId?: string) =>
         resolveCanonicalProviderIdFromMaps(aliasToProviderId, aliasOrId, fallbackProviderId);
@@ -138,6 +186,20 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
       // Synced catalog unavailable — fall through with static-only availability.
     }
 
+    // #15585: for providers with an authoritative live catalog, dispatch rejects any
+    // model the catalog omits — so that verdict overrides the static-coverage heuristic.
+    // Only providers with an active synced catalog can be authoritative, so skip the rest
+    // (avoids a per-provider catalog + customModels read for every static provider).
+    const authoritativeLive = await loadAuthoritativeLiveCatalogs(
+      candidates
+        .map((m: any) => m.provider as string)
+        .filter(
+          (provider: string) =>
+            (syncedModelIdsByCanonicalProvider.get(resolveCanonicalProviderIdForStatic(provider))
+              ?.size ?? 0) > 0
+        )
+    );
+
     const models = candidates.map((m: any) => {
       const fullModel = `${m.provider}/${m.model}`;
       const canonicalProviderId = resolveCanonicalProviderIdForStatic(m.provider);
@@ -149,16 +211,16 @@ export async function handleGetModels(request: Request, dependencies: GetModelsD
         staticModelId: m.model,
         syncedModelIds: syncedForProvider ? [...syncedForProvider] : [],
       });
+      const liveIds = authoritativeLive.get(m.provider);
       const available =
-        (!activeProviders || activeProviders.has(m.provider)) && !suppressedBySync;
+        (!activeProviders || activeProviders.has(m.provider)) &&
+        (liveIds ? isModelInLiveCatalog(m.provider, m.model, liveIds) : !suppressedBySync);
       return {
         ...m,
         fullModel,
         alias: modelAliases[fullModel] || m.model,
         available,
-        supportsVision:
-          getResolvedModelCapabilities(fullModel, undefined, capabilitySnapshot).supportsVision ===
-          true,
+        ...resolveModelCapabilityFields(fullModel, capabilitySnapshot, withLimits),
       };
     });
 

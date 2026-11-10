@@ -19,29 +19,28 @@
  *     protocol translation + node selection). Without it, those nodes are
  *     reported but not routed.
  */
-import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { randomUUID } from "crypto";
+import fs from "node:fs";
 import { getDbInstance } from "../db/core";
 import { backupDbFile } from "../db/backup";
 import { encrypt } from "../db/encryption";
+import { clearCoreReloadState, resolveRecordReloadMode } from "./coreConfig/reload";
 import {
-  addProxiesToScopePool,
-  bumpProxyRegistryGeneration,
-  deleteProxyById,
-  updateProxy,
-  upsertProxy,
-} from "../db/proxies";
+  generateCoreConfigIntention,
+  generateCoreConfigIntentionMulti,
+  mergeParsedSources,
+} from "./coreConfig/sync";
+import { reloadAfterReplace } from "./reloadSecret";
+import { addProxiesToScopePool, bumpProxyRegistryGeneration } from "../db/proxies";
 import { bumpProxyConfigGeneration } from "../db/settings";
-import { isSubscriptionDue } from "./due";
-import {
-  isLocalCoreEndpointAllowed,
-  parseLocalCoreEndpoints,
-  redactCoreEntryForDetail,
-} from "./coreEndpoint";
-import { isProxyReachable } from "../proxyHealth";
+import { isSubscriptionDue, isFeedlessSubscription, feedlessSyncResult } from "./due";
+import { parseLocalCoreEndpoints } from "./coreEndpoint";
+import { detachOrDeleteSubscriptionRow, removeStaleSubscriptionNodes } from "./staleNodes";
+import { throwIfFeedlessUpdate, throwIfFeedlessWithoutControl } from "./schema";
 import { resolveTargetScopes } from "./scopes";
 import { clampSelectorGapSeconds, setAnyControlUrlConfigured } from "./selectorTrigger";
-import { stripSelectorSuffix } from "./selectorEndpoint";
+import { SELECTOR_TAG_RE, parseSelectorTag } from "./selectorEndpoint";
+import { removeSubscriptionSideFiles } from "./coreConfig/apply";
 import {
   isSubscriptionFetchUrlAllowed,
   isIpLiteral,
@@ -50,45 +49,50 @@ import {
 } from "./fetchGuard";
 import { areLocalProviderUrlsAllowed } from "@/shared/network/outboundUrlGuardPolicy";
 import { withRetry } from "./fetchRetry";
-import {
-  isUsableSubscriptionContent,
-  parseSubscription,
-  redactedNodeSummary,
-  type ParsedSubscription,
-} from "./parse";
+import { redactedNodeSummary, type ParsedSubscription } from "./parse";
+import { coerceMirrorUrls, parseMirrorUrls, restoreRedactedMirrors } from "./mirrorUrls";
+import { insertSubscriptionRow, updateSubscriptionRow } from "./subscriptionRows";
+import { fetchSubscriptionFeeds, type SubscriptionFeed } from "./multiSource";
+import { subscriptionColumns } from "./subscriptionColumns";
+import { upsertUnionPool } from "./unionPool";
 
 export type ProxySubscriptionMode = "global" | "rule";
 export type ProxySubscriptionStatus = "ok" | "error" | "empty";
 
-/** Stable, language-neutral error codes stored in the subscription `error`
- * column (as JSON) so the dashboard can localize them via i18n instead of
- * showing server-side strings. */
-export type ProxySubscriptionErrorCode =
-  | "LOCAL_CORE_ENDPOINT_INVALID"
-  | "NEEDS_CORE_NOT_CONFIGURED"
-  | "NO_USABLE_NODES"
-  | "SELECTOR_SWITCH_FAILED";
+export type { ProxySubscriptionErrorCode } from "./subscriptionErrorCode";
+import { subscriptionErrorCode } from "./subscriptionErrorCode";
+export { subscriptionErrorCode };
 
-/** Encode a user-facing error as `{ code, detail? }` for i18n on the client. */
-export function subscriptionErrorCode(code: ProxySubscriptionErrorCode, detail?: string): string {
-  return JSON.stringify(detail ? { code, detail } : { code });
+import type { CoreReloadMode as CoreReloadModeValue } from "./coreConfig/reload";
+export type { CoreReloadModeValue };
+
+export interface SelectorLastSwitchEntry {
+  at: string;
+  result: string;
+  member: string | null;
+  kind: string | null;
 }
 
 export interface ProxySubscriptionRecord {
   id: string;
   name: string;
   url: string;
+  mirrorUrls: string[];
   enabled: boolean;
   mode: ProxySubscriptionMode;
   ruleProviders: string[] | null;
   localCoreEndpoint: string | null;
   updateIntervalMinutes: number;
   controlUrl: string | null;
+  coreConfigPath: string | null;
   hasControlSecret: boolean;
   selectorMinGapSeconds: number;
   selectorLastSwitchAt: string | null;
   selectorLastSwitchResult: string | null;
   selectorLastSwitchMember: string | null;
+  selectorLastSwitchKind: string | null;
+  selectorLastSwitchBySelector: Record<string, SelectorLastSwitchEntry> | null;
+  coreReloadMode: CoreReloadModeValue;
   lastFetchedAt: string | null;
   status: ProxySubscriptionStatus;
   error: string | null;
@@ -102,12 +106,14 @@ export interface ProxySubscriptionRecord {
 export interface ProxySubscriptionPayload {
   name: string;
   url: string;
+  mirrorUrls?: string[] | null;
   enabled?: boolean;
   mode?: ProxySubscriptionMode;
   ruleProviders?: string[] | null;
   localCoreEndpoint?: string | null;
   updateIntervalMinutes?: number;
   controlUrl?: string | null;
+  coreConfigPath?: string | null;
   controlSecret?: string | null;
   selectorMinGapSeconds?: number;
 }
@@ -140,19 +146,68 @@ function readSelectorBase(r: Record<string, unknown>): {
   };
 }
 
+/** Narrow one raw trace entry to the stored shape. Never throws. */
+function asSelectorLastSwitchEntry(tag: string, entry: unknown): SelectorLastSwitchEntry | null {
+  if (!SELECTOR_TAG_RE.test(tag)) return null;
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
+  const e = entry as Record<string, unknown>;
+  if (typeof e.at !== "string" || typeof e.result !== "string") return null;
+  return {
+    at: e.at,
+    result: e.result,
+    member: typeof e.member === "string" ? e.member : null,
+    kind: typeof e.kind === "string" ? e.kind : null,
+  };
+}
+
+/** Parse the per-selector switch trace column. Invalid JSON or keys
+ * outside the selector tag shape are dropped, never thrown. */
+export function parseSelectorLastSwitchBySelector(
+  value: unknown
+): Record<string, SelectorLastSwitchEntry> | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const out: Record<string, SelectorLastSwitchEntry> = {};
+    for (const [tag, entry] of Object.entries(parsed as Record<string, unknown>)) {
+      const kept = asSelectorLastSwitchEntry(tag, entry);
+      if (kept) out[tag] = kept;
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
+/** Tags of the subscription's `localCoreEndpoint` lines (same parser as the
+ * switch trigger, so the stored keys stay bounded to the declared lines). */
+export function selectorTagsForEndpoint(field: string | null): string[] {
+  const tags: string[] = [];
+  for (const line of parseLocalCoreEndpoints(field ?? null)) {
+    const tag = parseSelectorTag(line);
+    if (tag && !tags.includes(tag)) tags.push(tag);
+  }
+  return tags;
+}
+
 function readControlMeta(r: Record<string, unknown>): {
   controlUrl: string | null;
+  coreConfigPath: string | null;
   hasControlSecret: boolean;
   selectorMinGapSeconds: number;
   selectorLastSwitchAt: string | null;
   selectorLastSwitchResult: string | null;
   selectorLastSwitchMember: string | null;
+  selectorLastSwitchKind: string | null;
+  selectorLastSwitchBySelector: Record<string, SelectorLastSwitchEntry> | null;
 } {
   // control_secret_enc is write-only: exposed only as a presence bit, never
   // in clear. Any future writer of control_url MUST update the selector
   // trigger cache (selectorTrigger.setAnyControlUrlConfigured).
   return {
     controlUrl: typeof r.control_url === "string" ? r.control_url : null,
+    coreConfigPath: typeof r.core_config_path === "string" ? r.core_config_path : null,
     hasControlSecret: typeof r.control_secret_enc === "string" && r.control_secret_enc.length > 0,
     selectorMinGapSeconds: clampSelectorGapSeconds(r.selector_min_gap_seconds),
     selectorLastSwitchAt:
@@ -161,6 +216,11 @@ function readControlMeta(r: Record<string, unknown>): {
       typeof r.selector_last_switch_result === "string" ? r.selector_last_switch_result : null,
     selectorLastSwitchMember:
       typeof r.selector_last_switch_member === "string" ? r.selector_last_switch_member : null,
+    selectorLastSwitchKind:
+      typeof r.selector_last_switch_kind === "string" ? r.selector_last_switch_kind : null,
+    selectorLastSwitchBySelector: parseSelectorLastSwitchBySelector(
+      r.selector_last_switch_by_selector
+    ),
   };
 }
 
@@ -187,6 +247,8 @@ function mapSubscriptionRow(row: unknown): ProxySubscriptionRecord {
   return {
     ...readSelectorBase(r),
     ...readControlMeta(r),
+    mirrorUrls: parseMirrorUrls((r as Record<string, unknown>).mirror_urls),
+    coreReloadMode: resolveRecordReloadMode(r),
     mode: r.mode === "rule" ? "rule" : "global",
     ruleProviders: parseList(r.rule_providers),
     localCoreEndpoint: typeof r.local_core_endpoint === "string" ? r.local_core_endpoint : null,
@@ -206,9 +268,10 @@ function mapSubscriptionRow(row: unknown): ProxySubscriptionRecord {
 
 export async function listSubscriptions(): Promise<ProxySubscriptionRecord[]> {
   const db = getDbInstance();
+  const columns = subscriptionColumns(db);
   const rows = db
     .prepare(
-      "SELECT id, name, url, enabled, mode, rule_providers, local_core_endpoint, update_interval_minutes, control_url, control_secret_enc, selector_min_gap_seconds, selector_last_switch_at, selector_last_switch_result, selector_last_switch_member, last_fetched_at, status, error, last_nodes, last_error_at, consecutive_failures, created_at, updated_at FROM proxy_subscriptions ORDER BY datetime(updated_at) DESC, name ASC"
+      `SELECT ${columns} FROM proxy_subscriptions ORDER BY datetime(updated_at) DESC, name ASC`
     )
     .all();
   return rows.map(mapSubscriptionRow);
@@ -216,11 +279,8 @@ export async function listSubscriptions(): Promise<ProxySubscriptionRecord[]> {
 
 export async function getSubscriptionById(id: string): Promise<ProxySubscriptionRecord | null> {
   const db = getDbInstance();
-  const row = db
-    .prepare(
-      "SELECT id, name, url, enabled, mode, rule_providers, local_core_endpoint, update_interval_minutes, control_url, control_secret_enc, selector_min_gap_seconds, selector_last_switch_at, selector_last_switch_result, selector_last_switch_member, last_fetched_at, status, error, last_nodes, last_error_at, consecutive_failures, created_at, updated_at FROM proxy_subscriptions WHERE id = ?"
-    )
-    .get(id);
+  const columns = subscriptionColumns(db);
+  const row = db.prepare(`SELECT ${columns} FROM proxy_subscriptions WHERE id = ?`).get(id);
   return row ? mapSubscriptionRow(row) : null;
 }
 
@@ -232,33 +292,29 @@ export async function createSubscription(
   const enabled = payload.enabled === true ? 1 : 0;
   const db = getDbInstance();
   const controlUrl = payload.controlUrl ?? null;
-  const controlSecretEnc =
-    payload.controlSecret != null && payload.controlSecret.length > 0
-      ? ((encrypt(payload.controlSecret) ?? null) as string | null)
-      : null;
+  throwIfFeedlessWithoutControl(payload.url, controlUrl);
+  const coreConfigPath = payload.coreConfigPath ?? null;
+  const controlSecretEnc = encryptSecretField(payload.controlSecret) ?? null;
   const gapSeconds = clampSelectorGapSeconds(payload.selectorMinGapSeconds ?? 60);
-  db.prepare(
-    `INSERT INTO proxy_subscriptions
-      (id, name, url, enabled, mode, rule_providers, local_core_endpoint, update_interval_minutes, control_url, control_secret_enc, selector_min_gap_seconds, status, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'empty', ?, ?)`
-  ).run(
+  insertSubscriptionRow(db, {
     id,
-    payload.name,
-    payload.url,
+    name: payload.name,
+    url: payload.url,
+    mirrorUrls: coerceMirrorUrls(payload.mirrorUrls ?? null, payload.url),
     enabled,
-    payload.mode || "global",
-    payload.ruleProviders ? JSON.stringify(payload.ruleProviders) : null,
-    payload.localCoreEndpoint || null,
-    payload.updateIntervalMinutes || 60,
+    mode: payload.mode || "global",
+    ruleProviders: payload.ruleProviders ?? null,
+    localCoreEndpoint: payload.localCoreEndpoint || null,
+    updateIntervalMinutes: payload.updateIntervalMinutes || 60,
     controlUrl,
-    controlSecretEnc,
+    coreConfigPath,
     gapSeconds,
     now,
-    now
-  );
+    controlSecretEnc,
+  });
   if (controlUrl) setAnyControlUrlConfigured(true);
   const created = (await getSubscriptionById(id))!;
-  if (created.enabled) {
+  if (created.enabled && !isFeedlessSubscription(created.url)) {
     await syncSubscription(id);
   }
   // Re-read so the returned record reflects the post-sync status/error/lastNodes.
@@ -283,60 +339,50 @@ function encryptSecretField(secret: string | null | undefined): string | null | 
 }
 
 function persistSubscriptionRow(
-  db: { prepare: (sql: string) => { run: (...args: unknown[]) => unknown } },
+  db: Parameters<typeof updateSubscriptionRow>[0],
   args: {
     id: string;
-    name: string;
-    url: string;
-    enabled: number;
-    mode: string;
-    ruleProviders: string[] | null;
-    localCoreEndpoint: string | null;
-    updateIntervalMinutes: number;
+    existing: ProxySubscriptionRecord;
+    payload: Partial<ProxySubscriptionPayload>;
     controlUrl: string | null;
-    controlSecretEnc: string | null | undefined;
     gapSeconds: number;
     now: string;
   }
 ): void {
-  if (args.controlSecretEnc === undefined) {
-    db.prepare(
-      `UPDATE proxy_subscriptions
-         SET name = ?, url = ?, enabled = ?, mode = ?, rule_providers = ?, local_core_endpoint = ?, update_interval_minutes = ?, control_url = ?, selector_min_gap_seconds = ?, updated_at = ?
-       WHERE id = ?`
-    ).run(
-      args.name,
-      args.url,
-      args.enabled,
-      args.mode,
-      args.ruleProviders ? JSON.stringify(args.ruleProviders) : null,
-      args.localCoreEndpoint || null,
-      args.updateIntervalMinutes,
-      args.controlUrl,
-      args.gapSeconds,
-      args.now,
-      args.id
-    );
-  } else {
-    db.prepare(
-      `UPDATE proxy_subscriptions
-         SET name = ?, url = ?, enabled = ?, mode = ?, rule_providers = ?, local_core_endpoint = ?, update_interval_minutes = ?, control_url = ?, control_secret_enc = ?, selector_min_gap_seconds = ?, updated_at = ?
-       WHERE id = ?`
-    ).run(
-      args.name,
-      args.url,
-      args.enabled,
-      args.mode,
-      args.ruleProviders ? JSON.stringify(args.ruleProviders) : null,
-      args.localCoreEndpoint || null,
-      args.updateIntervalMinutes,
-      args.controlUrl,
-      args.controlSecretEnc,
-      args.gapSeconds,
-      args.now,
-      args.id
-    );
-  }
+  const { existing, payload } = args;
+  const enabled =
+    payload.enabled !== undefined ? (payload.enabled ? 1 : 0) : existing.enabled ? 1 : 0;
+  // The SET lists ONLY the columns this writer owns plus the three
+  // selector-control columns, the opt-in core-config path and the opt-in
+  // mirror feed list — every other column is untouched (byte-identical off
+  // opt-in). Secret is write-only: payload.controlSecret replaces
+  // control_secret_enc when present (encrypt at rest); absent leaves it.
+  // Mirrors coerce against the effective primary URL; absent leaves them.
+  const nextUrl = payload.url ?? existing.url;
+  updateSubscriptionRow(db, {
+    id: args.id,
+    name: payload.name ?? existing.name,
+    url: nextUrl,
+    mirrorUrls:
+      payload.mirrorUrls !== undefined
+        ? coerceMirrorUrls(restoreRedactedMirrors(payload.mirrorUrls, existing.mirrorUrls), nextUrl)
+        : existing.mirrorUrls,
+    enabled,
+    mode: payload.mode ?? existing.mode,
+    ruleProviders:
+      payload.ruleProviders !== undefined ? payload.ruleProviders : existing.ruleProviders,
+    localCoreEndpoint:
+      payload.localCoreEndpoint !== undefined
+        ? payload.localCoreEndpoint
+        : existing.localCoreEndpoint,
+    updateIntervalMinutes: payload.updateIntervalMinutes ?? existing.updateIntervalMinutes,
+    controlUrl: args.controlUrl,
+    coreConfigPath:
+      payload.coreConfigPath !== undefined ? payload.coreConfigPath : existing.coreConfigPath,
+    controlSecretEnc: encryptSecretField(payload.controlSecret),
+    gapSeconds: args.gapSeconds,
+    now: args.now,
+  });
 }
 
 async function refreshAfterUpdate(
@@ -356,7 +402,9 @@ async function refreshAfterUpdate(
     } else if (
       enabledChanged ||
       payload.url !== undefined ||
-      payload.localCoreEndpoint !== undefined
+      payload.mirrorUrls !== undefined ||
+      payload.localCoreEndpoint !== undefined ||
+      payload.coreConfigPath !== undefined
     ) {
       // Same scopes: just refresh nodes (re-applies idempotently to same scopes).
       await syncSubscription(id);
@@ -377,30 +425,13 @@ export async function updateSubscription(
   const db = getDbInstance();
   const { controlUrl, gapSeconds } = readControlFields(payload, existing);
   const now = new Date().toISOString();
+  throwIfFeedlessUpdate(payload, existing);
   const enabledChanged = payload.enabled !== undefined && payload.enabled !== existing.enabled;
-  const enabled =
-    payload.enabled !== undefined ? (payload.enabled ? 1 : 0) : existing.enabled ? 1 : 0;
-
-  // The SET lists ONLY the columns this writer owns plus the three
-  // selector-control columns — every other column is untouched (byte-identical
-  // off opt-in). Secret is write-only: payload.controlSecret replaces
-  // control_secret_enc when present (encrypt at rest); absent leaves it.
-  const controlSecretEnc = encryptSecretField(payload.controlSecret);
   persistSubscriptionRow(db, {
     id,
-    name: payload.name ?? existing.name,
-    url: payload.url ?? existing.url,
-    enabled,
-    mode: payload.mode ?? existing.mode,
-    ruleProviders:
-      payload.ruleProviders !== undefined ? payload.ruleProviders : existing.ruleProviders,
-    localCoreEndpoint:
-      payload.localCoreEndpoint !== undefined
-        ? payload.localCoreEndpoint
-        : existing.localCoreEndpoint,
-    updateIntervalMinutes: payload.updateIntervalMinutes ?? existing.updateIntervalMinutes,
+    existing,
+    payload,
     controlUrl,
-    controlSecretEnc,
     gapSeconds,
     now,
   });
@@ -423,17 +454,26 @@ export async function deleteSubscription(id: string): Promise<boolean> {
   await unapplySubscription(id);
   // Remove subscription-sourced proxy rows (force-clears their assignments).
   const db = getDbInstance();
+  const doomed = db
+    .prepare("SELECT core_config_path FROM proxy_subscriptions WHERE id = ?")
+    .get(id) as { core_config_path?: unknown } | undefined;
   const rows = db
-    .prepare("SELECT id FROM proxy_registry WHERE subscription_id = ?")
-    .all(id) as Array<{ id: string }>;
+    .prepare("SELECT id, source FROM proxy_registry WHERE subscription_id = ?")
+    .all(id) as Array<{ id: string; source: string }>;
   for (const r of rows) {
     try {
-      await deleteProxyById(r.id, { force: true });
+      await detachOrDeleteSubscriptionRow(r);
     } catch {
       // ignore individual failures
     }
   }
+  clearCoreReloadState(id);
   const res = db.prepare("DELETE FROM proxy_subscriptions WHERE id = ?").run(id);
+  // Best-effort: remove the side files this subscription owned. A missing
+  // or locked file must not fail the delete (row already gone).
+  if (typeof doomed?.core_config_path === "string") {
+    removeSubscriptionSideFiles(fs, doomed.core_config_path, id);
+  }
   // Cache maintenance: a delete may have removed the last
   // control_url — reset to lazy so the next trigger re-reads (never stale-true).
   if (res.changes > 0) setAnyControlUrlConfigured(null);
@@ -548,37 +588,105 @@ async function fetchSubscriptionContent(url: string): Promise<string> {
   });
 }
 
-/**
- * Keep a synced node only when this subscription owns its registry row. A row created
- * by hand, or owned by another subscription, comes back as "skipped" and stays out of
- * this pool. An owned row that pool validation flagged `error` is healed, since the feed
- * just listed it again; `inactive` and `dead` are operator or health decisions and stay.
- */
-async function keepOwnedSyncedRow(
-  upserted: Awaited<ReturnType<typeof upsertProxy>>,
-  keptIds: string[]
-): Promise<void> {
-  if (upserted.action === "skipped" || !upserted.proxy?.id) return;
-  keptIds.push(upserted.proxy.id);
-  if (upserted.proxy.status === "error") {
-    await updateProxy(upserted.proxy.id, { status: "active" });
-  }
+// Total refusal: every feed unfetched or unrecognized. Zero writes, the
+// persisted last-known-good nodes stay. Single-feed rows keep the exact
+// historical error shape (`Fetch failed: …` vs NO_USABLE_NODES); multi-feed
+// totals always report NO_USABLE_NODES. Returns null when at least one feed
+// is healthy (no refusal).
+async function refuseWhenAllFeedsFailed(
+  id: string,
+  sub: ProxySubscriptionRecord,
+  feeds: SubscriptionFeed[],
+  healthy: SubscriptionFeed[]
+): Promise<SyncResult | null> {
+  if (healthy.length > 0) return null;
+  const singleFetchError = feeds.length === 1 && feeds[0].fetchFailed ? feeds[0].error : undefined;
+  const refuseError = singleFetchError
+    ? `Fetch failed: ${singleFetchError}`
+    : subscriptionErrorCode("NO_USABLE_NODES");
+  const invalidConsec = (sub.consecutiveFailures || 0) + 1;
+  await updateSubscriptionStatus(
+    id,
+    "error",
+    refuseError,
+    sub.lastNodes,
+    new Date().toISOString(),
+    invalidConsec
+  );
+  return {
+    subscriptionId: id,
+    nodes: 0,
+    needsCore: 0,
+    boundProxies: 0,
+    status: "error",
+    error: refuseError,
+    applied: false,
+  };
 }
 
-/**
- * Build the URL the reachability probe dials for a validated core entry.
- *
- * The probe resolves a missing port via its own scheme default (socks5→1080)
- * while the registry row uses the upsert rule (https→443, else 8080) — so the
- * probe must carry the row's effective port explicitly, otherwise verdict and
- * row disagree on port-less entries. Userinfo is preserved for the connection;
- * the warning `detail` always uses the redacted entry, never this URL.
- */
-function buildProbeUrl(coreUrl: URL, coreType: string, port: number): string {
-  const auth = coreUrl.username
-    ? `${coreUrl.username}${coreUrl.password ? `:${coreUrl.password}` : ""}@`
-    : "";
-  return `${coreType}://${auth}${coreUrl.hostname.toLowerCase()}:${port}`;
+interface UnionWrites {
+  keptIds: string[];
+  warning: string | null;
+  failed: SyncResult | null;
+}
+
+// The upsert loop + stale-removal are the multi-write section. upsertProxy /
+// deleteProxyById each run their own internal db.transaction, so each write
+// is atomic, and a re-sync is idempotent (self-heals partial state). A single
+// outer db.transaction around `await` calls would NOT be atomic under
+// better-sqlite3, so instead we guard against an unexpected DB error so a
+// half-completed sync can never be left flagged "ok".
+async function syncUnionWrites(
+  db: ReturnType<typeof getDbInstance>,
+  id: string,
+  sub: ProxySubscriptionRecord,
+  parsed: ParsedSubscription,
+  partial: boolean
+): Promise<UnionWrites> {
+  try {
+    const outcome = await upsertUnionPool(
+      id,
+      { name: sub.name, localCoreEndpoint: sub.localCoreEndpoint },
+      parsed.nodes,
+      parsed.needsCore
+    );
+    // Remove stale subscription nodes no longer present in the fetched set.
+    // A disabled subscription keeps its rows: the refresh still upserts the
+    // fetched nodes as a preview, but skips stale removal while disabled.
+    // A partial fetch (some feeds unavailable) defers removal too: the
+    // unavailable feeds keep their last nodes until every feed answers again,
+    // so a mirror that drops out for one cycle doesn't churn its rows.
+    if (sub.enabled && !partial) {
+      await removeStaleSubscriptionNodes(db, id, outcome.keptIds);
+    } else if (sub.enabled) {
+      console.warn(`[ProxySubscription] stale removal deferred for ${id}: some feeds unavailable`);
+    }
+    return { keptIds: outcome.keptIds, warning: outcome.warning, failed: null };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    const writeConsec = (sub.consecutiveFailures || 0) + 1;
+    await updateSubscriptionStatus(
+      id,
+      "error",
+      `Sync write failed: ${msg}`,
+      sub.lastNodes,
+      new Date().toISOString(),
+      writeConsec
+    );
+    return {
+      keptIds: [],
+      warning: null,
+      failed: {
+        subscriptionId: id,
+        nodes: 0,
+        needsCore: 0,
+        boundProxies: 0,
+        status: "error",
+        error: msg,
+        applied: false,
+      },
+    };
+  }
 }
 
 /** Fetch + parse + sync nodes into proxy_registry, then (if enabled) (re)bind. */
@@ -595,282 +703,58 @@ async function syncSubscriptionUnsafe(id: string): Promise<SyncResult> {
       applied: false,
     };
   }
+  const feedless = feedlessSyncResult(sub);
+  if (feedless) return { subscriptionId: id, ...feedless };
 
-  let body: string;
-  try {
-    body = await fetchSubscriptionContent(sub.url);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    const fetchConsec = (sub.consecutiveFailures || 0) + 1;
-    await updateSubscriptionStatus(
-      id,
-      "error",
-      `Fetch failed: ${msg}`,
-      sub.lastNodes,
-      new Date().toISOString(),
-      fetchConsec
-    );
-    return {
-      subscriptionId: id,
-      nodes: 0,
-      needsCore: 0,
-      boundProxies: 0,
-      status: "error",
-      error: msg,
-      applied: false,
-    };
-  }
-
-  const parsed: ParsedSubscription = parseSubscription(body);
+  // One feed per URL, fetched concurrently: the primary plus every mirror.
+  // A slow or failing feed never blocks the others; fetch failures arrive
+  // as unusable content and the merge gate below isolates them per source.
+  const feeds: SubscriptionFeed[] = await fetchSubscriptionFeeds(sub, fetchSubscriptionContent);
+  const parsedList: ParsedSubscription[] = feeds.map((feed) => feed.parsed);
 
   // Refuse unrecognized content before any registry write: an invalid or
-  // temporarily broken feed must never empty the pool. Serve the persisted
-  // last-known-good nodes instead and leave every registry row untouched.
-  if (!isUsableSubscriptionContent(parsed)) {
-    const refuseError = subscriptionErrorCode("NO_USABLE_NODES");
-    const invalidConsec = (sub.consecutiveFailures || 0) + 1;
-    await updateSubscriptionStatus(
-      id,
-      "error",
-      refuseError,
-      sub.lastNodes,
-      new Date().toISOString(),
-      invalidConsec
-    );
-    return {
-      subscriptionId: id,
-      nodes: 0,
-      needsCore: 0,
-      boundProxies: 0,
-      status: "error",
-      error: refuseError,
-      applied: false,
-    };
-  }
-  const db = getDbInstance();
+  // temporarily broken feed must never empty the pool. With mirrors, only a
+  // total failure refuses (every feed unfetched or unrecognized); a partial
+  // failure syncs the union of the healthy feeds and keeps the unavailable
+  // feeds' last nodes (stale removal waits for a complete fetch). Serve the
+  // persisted last-known-good nodes on total refusal and leave every
+  // registry row untouched.
+  const healthy = feeds.filter((feed) => feed.ok);
+  const refused = await refuseWhenAllFeedsFailed(id, sub, feeds, healthy);
+  if (refused) return refused;
 
-  const keptIds: string[] = [];
-  let warning: string | null = null;
-
-  // The upsert loop + stale-removal are the multi-write section. upsertProxy /
-  // deleteProxyById each run their own internal db.transaction, so each write
-  // is atomic, and a re-sync is idempotent (self-heals partial state). A single
-  // outer db.transaction around `await` calls would NOT be atomic under
-  // better-sqlite3, so instead we guard against an unexpected DB error so a
-  // half-completed sync can never be left flagged "ok".
-  try {
-    // Directly-usable nodes → upsert into the registry as a pool.
-    for (const node of parsed.nodes) {
-      // No status: a refresh must not revive a node the operator or auto-disable turned off.
-      const upserted = await upsertProxy(
-        {
-          name: node.name || `${sub.name} (${node.host}:${node.port})`,
-          type: node.type,
-          host: node.host,
-          port: node.port,
-          username: node.username,
-          password: node.password,
-          source: "subscription",
-          subscriptionId: id,
-        },
-        { claimOwnership: false }
-      );
-      await keepOwnedSyncedRow(upserted, keptIds);
-    }
-
-    // needsCore nodes → bind each operator-supplied local core endpoint (one
-    // line of the field becomes its own registry row and pool member).
-    if (parsed.needsCore.length > 0) {
-      const entries = parseLocalCoreEndpoints(sub.localCoreEndpoint);
-      if (entries.length === 0) {
-        const nodes = parsed.needsCore
-          .map((n) => `${n.rawProtocol}://${n.host ?? ""}${n.port ? ":" + n.port : ""}`)
-          .join(", ");
-        warning = subscriptionErrorCode("NEEDS_CORE_NOT_CONFIGURED", nodes);
-      } else {
-        // Normalize per entry for keying: gate first, then dedup on
-        // (scheme, host, port, username). The port default follows the upsert
-        // rule below (https→443, else 8080) — not the probe default.
-        const invalid: string[] = [];
-        const unreachable: string[] = [];
-        const collisions: string[] = [];
-        const seenKeys = new Set<string>();
-        const validEntries: Array<{
-          entry: string;
-          probeUrl: string;
-          coreUrl: URL;
-          coreType: string;
-          port: number;
-          username?: string;
-          password?: string;
-        }> = [];
-        for (const entry of entries) {
-          // Strip a valid `selector=<tag>` suffix BEFORE any URL use: otherwise
-          // `new URL("socks5://… selector=g")` throws and a tagged line would be
-          // misclassified as invalid. An invalid tag leaves the line untouched
-          // (pinned → never switched) and falls through to the invalid branch.
-          const bare = stripSelectorSuffix(entry);
-          if (!isLocalCoreEndpointAllowed(bare)) {
-            invalid.push(redactCoreEntryForDetail(bare));
-            continue;
-          }
-          let coreUrl: URL;
-          try {
-            coreUrl = new URL(bare);
-          } catch {
-            invalid.push(redactCoreEntryForDetail(bare));
-            continue;
-          }
-          const coreType =
-            coreUrl.protocol === "https:"
-              ? "https"
-              : coreUrl.protocol === "socks5:"
-                ? "socks5"
-                : "http";
-          const port = Number(coreUrl.port) || (coreType === "https" ? 443 : 8080);
-          let username = "";
-          let password: string | undefined;
-          try {
-            username = coreUrl.username ? decodeUserinfo(coreUrl.username) : "";
-            password = coreUrl.password ? decodeUserinfo(coreUrl.password) : undefined;
-          } catch {
-            invalid.push(redactCoreEntryForDetail(bare));
-            continue;
-          }
-          const key = `${coreType}://${coreUrl.hostname.toLowerCase()}:${port}:${username}`;
-          if (seenKeys.has(key)) continue;
-          // A scheme collision shares (host, port, username) with an already
-          // accepted entry: the registry keys on that tuple without the scheme,
-          // so a second upsert would silently overwrite the first row's type.
-          // Keep the first entry, report the loser.
-          const ownerKey = `://${coreUrl.hostname.toLowerCase()}:${port}:${username}`;
-          let collided = false;
-          for (const seen of seenKeys) {
-            if (seen.endsWith(ownerKey)) {
-              collided = true;
-              break;
-            }
-          }
-          if (collided) {
-            collisions.push(redactCoreEntryForDetail(bare));
-            continue;
-          }
-          seenKeys.add(key);
-          // Probe the normalized URL, not the raw entry: the probe resolves a
-          // missing port via its own scheme default (socks5→1080) while the
-          // row uses the upsert rule (https→443, else 8080). Probing the raw
-          // entry would test a different port than the row serves.
-          const probeUrl = buildProbeUrl(coreUrl, coreType, port);
-          validEntries.push({
-            entry: bare,
-            probeUrl,
-            coreUrl,
-            coreType,
-            port,
-            username: username || undefined,
-            password,
-          });
-        }
-        // Probe reachability per entry, concurrently: the TCP probes are
-        // independent reads, so they fan out under Promise.all instead of
-        // stacking N sequential timeouts on the periodic sync path. Upserts
-        // stay sequential below. The verdict only feeds the warning detail —
-        // a row is created even when the core is unreachable.
-        const probeVerdicts = await Promise.all(
-          validEntries.map(async (valid) => {
-            try {
-              return await isProxyReachable(valid.probeUrl, undefined, 0);
-            } catch {
-              return false;
-            }
-          })
-        );
-        probeVerdicts.forEach((reachable, i) => {
-          if (!reachable) unreachable.push(redactCoreEntryForDetail(validEntries[i].entry));
-        });
-        for (const valid of validEntries) {
-          try {
-            const upserted = await upsertProxy(
-              {
-                name:
-                  validEntries.length > 1
-                    ? `${sub.name} (local core :${valid.port}/${valid.coreType})`
-                    : `${sub.name} (local core)`,
-                type: valid.coreType,
-                host: valid.coreUrl.hostname,
-                port: valid.port,
-                username: valid.username,
-                password: valid.password,
-                source: "subscription",
-                subscriptionId: id,
-              },
-              { claimOwnership: false }
-            );
-            await keepOwnedSyncedRow(upserted, keptIds);
-          } catch {
-            invalid.push(redactCoreEntryForDetail(valid.entry));
-          }
-        }
-        const parts: string[] = [];
-        if (invalid.length > 0) parts.push(`invalid: ${invalid.join("; ")}`);
-        if (unreachable.length > 0) parts.push(`unreachable: ${unreachable.join("; ")}`);
-        if (collisions.length > 0) parts.push(`key-collision: ${collisions.join("; ")}`);
-        if (parts.length > 0) {
-          warning = subscriptionErrorCode("LOCAL_CORE_ENDPOINT_INVALID", parts.join(" | "));
-        }
-      }
-    }
-
-    // Remove stale subscription nodes no longer present in the fetched set.
-    if (keptIds.length > 0) {
-      const placeholders = keptIds.map(() => "?").join(",");
-      const stale = db
-        .prepare(
-          `SELECT id FROM proxy_registry WHERE subscription_id = ? AND id NOT IN (${placeholders})`
-        )
-        .all(id, ...keptIds) as Array<{ id: string }>;
-      for (const r of stale) {
-        try {
-          await deleteProxyById(r.id, { force: true });
-        } catch {
-          // ignore
-        }
-      }
-    } else {
-      const stale = db
-        .prepare("SELECT id FROM proxy_registry WHERE subscription_id = ?")
-        .all(id) as Array<{ id: string }>;
-      for (const r of stale) {
-        try {
-          await deleteProxyById(r.id, { force: true });
-        } catch {
-          // ignore
-        }
-      }
-    }
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    const writeConsec = (sub.consecutiveFailures || 0) + 1;
-    await updateSubscriptionStatus(
-      id,
-      "error",
-      `Sync write failed: ${msg}`,
-      sub.lastNodes,
-      new Date().toISOString(),
-      writeConsec
-    );
-    return {
-      subscriptionId: id,
-      nodes: 0,
-      needsCore: 0,
-      boundProxies: 0,
-      status: "error",
-      error: msg,
-      applied: false,
-    };
-  }
+  // Union of the healthy feeds, deduplicated first-arrival-wins (primary
+  // first): the same list feeds the pool upserts below and the file
+  // generation further down, so pool and beside-file never diverge.
+  // lastNodes stores the union summary; per-source skips stay server-side.
+  const merged = mergeParsedSources(healthy.map((feed) => feed.parsed));
+  const parsed: ParsedSubscription = {
+    nodes: merged.nodes,
+    needsCore: merged.needsCore,
+    format: healthy[0].parsed.format,
+  };
+  const outcome = await syncUnionWrites(
+    getDbInstance(),
+    id,
+    sub,
+    parsed,
+    healthy.length < feeds.length
+  );
+  if (outcome.failed) return outcome.failed;
+  let warning = outcome.warning;
+  const keptIds = outcome.keptIds;
 
   const lastNodes = redactedNodeSummary(parsed);
+
+  // Opt-in core-config generation. Without OMNIROUTE_PROXY_CORE_BINARY_PATH
+  // the beside-file is written directly, never the adopted file. With it, the rendered
+  // text is verified with the native check before replacing the adopted
+  // file (miss → beside-file + warning). Skipped when an earlier warning
+  // already owns the `error` column — the skip is logged server-side so a
+  // stale beside-file never goes silent. Multi-feed rows render through the
+  // multi gate (same union list, per-source isolation in the log); single
+  // feeds keep the historical mono path byte-identical.
+  warning = await resolveGenerationWarning(sub, id, parsed, parsedList, warning);
 
   // A failed control-call switch leaves a standing warning on the
   // subscription: the sync rewrites `error` from its own `warning` alone, so
@@ -886,16 +770,7 @@ async function syncSubscriptionUnsafe(id: string): Promise<SyncResult> {
   // rows with a bound pool stay "ok" with the warning code, rows with no
   // bound pool keep their sync error (the switch outcome stays readable
   // through the dedicated columns either way).
-  let status: ProxySubscriptionStatus;
-  let error: string | null = warning;
-  if (keptIds.length === 0) {
-    status = "error";
-    error = warning || subscriptionErrorCode("NO_USABLE_NODES");
-  } else if (warning) {
-    status = "ok";
-  } else {
-    status = parsed.nodes.length === 0 && parsed.needsCore.length === 0 ? "empty" : "ok";
-  }
+  const { status, error } = resolveSyncStatus(parsed, keptIds, warning);
 
   // Reset the consecutive-failure counter on a successful (ok/empty) sync; bump
   // it on error. Record the error timestamp only when there is an error.
@@ -929,6 +804,50 @@ async function syncSubscriptionUnsafe(id: string): Promise<SyncResult> {
   };
 }
 
+// Opt-in core-config generation: beside-file directly, or native-checked
+// replace when the host configures a core binary. Skipped when an earlier
+// warning already owns the `error` column (logged server-side). Multi-feed
+// rows render through the multi gate (same union list, per-source
+// isolation in the log); single feeds keep the historical mono path.
+async function resolveGenerationWarning(
+  sub: ProxySubscriptionRecord,
+  id: string,
+  parsed: ParsedSubscription,
+  parsedList: ParsedSubscription[],
+  warning: string | null
+): Promise<string | null> {
+  if (!sub.coreConfigPath) return warning;
+  if (warning) {
+    console.warn(`[ProxySubscription] core config generation skipped for ${id}`);
+    return warning;
+  }
+  const intention =
+    parsedList.length > 1
+      ? await generateCoreConfigIntentionMulti({ ...sub, id }, parsedList)
+      : await generateCoreConfigIntention({ ...sub, id }, parsed);
+  if (intention.warning) return intention.warning;
+  if (intention.status === "replaced" && intention.digestChanged)
+    return reloadAfterReplace(id, sub.controlUrl, intention.configPath);
+  return warning;
+}
+
+// Determine status. A standing switch warning never flips the status:
+// rows with a bound pool stay "ok" with the warning code, rows with no
+// bound pool keep their sync error (the switch outcome stays readable
+// through the dedicated columns either way).
+function resolveSyncStatus(
+  parsed: ParsedSubscription,
+  keptIds: string[],
+  warning: string | null
+): { status: ProxySubscriptionStatus; error: string | null } {
+  if (keptIds.length === 0) {
+    return { status: "error", error: warning || subscriptionErrorCode("NO_USABLE_NODES") };
+  }
+  if (warning) return { status: "ok", error: warning };
+  const empty = parsed.nodes.length === 0 && parsed.needsCore.length === 0;
+  return { status: empty ? "empty" : "ok", error: warning };
+}
+
 // Deduplicate concurrent syncs for the same subscription. A manual refresh and
 // the scheduled ticker can otherwise fire `syncSubscription` for the same id at
 // the same time and race on the upsert / stale-removal writes.
@@ -957,8 +876,30 @@ export function readStaleSwitchWarning(subscriptionId: string): string | null {
       .get(subscriptionId) as { selector_last_switch_result?: unknown } | undefined;
     const result =
       typeof row?.selector_last_switch_result === "string" ? row.selector_last_switch_result : null;
-    if (!result || result === "ok") return null;
+    if (!result || result === "ok" || result === "throttled") return null;
     return subscriptionErrorCode("SELECTOR_SWITCH_FAILED", result);
+  } catch {
+    return null;
+  }
+}
+
+/** Merge one selector entry into the stored trace map, keeping only the
+ * subscription's current line tags plus the written selector. Never throws. */
+function mergeSelectorSwitchEntry(
+  stored: Record<string, SelectorLastSwitchEntry> | null,
+  tags: Set<string>,
+  selector: string,
+  entry: SelectorLastSwitchEntry
+): string | null {
+  try {
+    const next: Record<string, SelectorLastSwitchEntry> = {};
+    if (stored) {
+      for (const [tag, kept] of Object.entries(stored)) {
+        if (tags.has(tag)) next[tag] = kept;
+      }
+    }
+    next[selector] = entry;
+    return JSON.stringify(next);
   } catch {
     return null;
   }
@@ -967,22 +908,63 @@ export function readStaleSwitchWarning(subscriptionId: string): string | null {
 /** Record a switch outcome on the subscription row (columns from the
  * selector-control migration). On failure also sets `error` directly —
  * without touching `status` — so the warning shows before the next sync.
- * Never throws. */
+ * The kind (the refusal motive that fired the switch) is recorded on both
+ * outcomes: a failed attempt still documents why it was tried. Never throws. */
 export async function recordSelectorSwitchOutcome(args: {
   subscriptionId: string;
+  selector: string;
   result: string;
   member?: string | null;
+  kind?: string | null;
 }): Promise<void> {
   try {
     const db = getDbInstance();
     const now = new Date().toISOString();
+    // Merge the per-selector entry into the stored map, bounded to the
+    // subscription's current line tags: a tag removed from the lines drops
+    // out on the next write, so the map never grows past the declared lines.
+    let merged: string | null = null;
+    try {
+      const current = db
+        .prepare(
+          "SELECT selector_last_switch_by_selector, local_core_endpoint FROM proxy_subscriptions WHERE id = ?"
+        )
+        .get(args.subscriptionId) as
+        { selector_last_switch_by_selector?: unknown; local_core_endpoint?: unknown } | undefined;
+      if (current) {
+        const stored = parseSelectorLastSwitchBySelector(current.selector_last_switch_by_selector);
+        const tags = new Set(
+          selectorTagsForEndpoint(
+            typeof current.local_core_endpoint === "string" ? current.local_core_endpoint : null
+          )
+        );
+        tags.add(args.selector);
+        merged = mergeSelectorSwitchEntry(stored, tags, args.selector, {
+          at: now,
+          result: args.result,
+          member: args.member ?? null,
+          kind: args.kind ?? null,
+        });
+      }
+    } catch {
+      merged = null;
+    }
     db.prepare(
       `UPDATE proxy_subscriptions
           SET selector_last_switch_at = ?, selector_last_switch_result = ?,
-              selector_last_switch_member = ?, updated_at = ?
+              selector_last_switch_member = ?, selector_last_switch_kind = ?,
+              selector_last_switch_by_selector = ?, updated_at = ?
         WHERE id = ?`
-    ).run(now, args.result, args.member ?? null, now, args.subscriptionId);
-    if (args.result !== "ok") {
+    ).run(
+      now,
+      args.result,
+      args.member ?? null,
+      args.kind ?? null,
+      merged,
+      now,
+      args.subscriptionId
+    );
+    if (args.result !== "ok" && args.result !== "throttled") {
       db.prepare(
         `UPDATE proxy_subscriptions SET error = ?, updated_at = ? WHERE id = ? AND status = 'ok'`
       ).run(subscriptionErrorCode("SELECTOR_SWITCH_FAILED", args.result), now, args.subscriptionId);
@@ -1042,7 +1024,7 @@ export async function applySubscription(id: string): Promise<void> {
 export async function unapplySubscription(id: string): Promise<void> {
   const db = getDbInstance();
   const rows = db
-    .prepare("SELECT id FROM proxy_registry WHERE subscription_id = ?")
+    .prepare("SELECT id FROM proxy_registry WHERE subscription_id = ? AND source = 'subscription'")
     .all(id) as Array<{ id: string }>;
 
   // Detach every subscription proxy from ALL scopes in one batched delete.

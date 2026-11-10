@@ -7,9 +7,8 @@
  * @module shared/utils/apiAuth
  */
 
-import { cookies } from "next/headers";
 import { getOrCreateBootstrapToken, peekBootstrapToken } from "@/lib/auth/bootstrapToken";
-import { getSettings } from "@/lib/db/settings";
+import { getCachedSettings } from "@/lib/db/readCache";
 import {
   AUTHZ_HEADER_PEER_LOCALITY,
   BOOTSTRAP_TOKEN_HEADER,
@@ -19,7 +18,10 @@ import {
 import { classifyStampedPeerLocality } from "@/server/authz/peerStamp";
 import { classifyHostLocality } from "@/server/authz/routeGuard";
 import { isPublicApiRoute } from "@/shared/constants/publicApiRoutes";
-import { verifyDashboardSessionToken } from "@/shared/utils/dashboardSessionToken";
+import {
+  verifyDashboardSessionToken,
+  DASHBOARD_SESSION_COOKIE,
+} from "@/shared/utils/dashboardSessionToken";
 import { extractApiKey } from "@/sse/services/auth";
 
 type RequestLike = {
@@ -44,6 +46,13 @@ export interface AuthRequiredOptions {
    * pipeline's own locality header could still be present.
    */
   loopback?: boolean;
+  /**
+   * Judge a public-classified path as if it were a management path. A public route
+   * that does its own management check (`requireManagementAuth`) must not inherit the
+   * "public, no auth needed" shortcut of the fresh-install window, or a remote caller
+   * passes the check before a password exists.
+   */
+  ignorePublicRoute?: boolean;
 }
 
 export function hasConfiguredPassword(settings: Record<string, unknown>): boolean {
@@ -340,6 +349,30 @@ async function validateBearerApiKeyForManagement(apiKey: string | null): Promise
   }
 }
 
+/**
+ * Whether the bearer key on this request holds `scope`, or a full management
+ * scope. Used by the cache routes so a machine client with `read:cache` or
+ * `write:cache` can reach them without a dashboard session (#14304). A key
+ * with only one of those scopes does not pass `isAuthenticated`, which is
+ * what keeps it out of every other management route.
+ */
+export async function isCacheScopedKey(request: Request, scope: string): Promise<boolean> {
+  const apiKey = extractApiKey(request, { allowUrl: false });
+  if (!apiKey) return false;
+  try {
+    const [{ validateApiKey, getApiKeyMetadata }, { hasCacheScope }] = await Promise.all([
+      import("@/lib/db/apiKeys"),
+      import("@/shared/constants/managementScopes"),
+    ]);
+    if (!(await validateApiKey(apiKey))) return false;
+    const metadata = await getApiKeyMetadata(apiKey);
+    if (!metadata) return false;
+    return hasCacheScope(metadata.scopes, scope);
+  } catch {
+    return false;
+  }
+}
+
 export function isManagementApiRequest(request: RequestLike | Request): boolean {
   const pathname = getRequestPathname(request);
   if (!pathname?.startsWith("/api/")) return false;
@@ -356,21 +389,25 @@ export async function isDashboardSessionAuthenticated(
     request &&
     typeof request === "object" &&
     "cookies" in request &&
-    request.cookies?.get?.("auth_token")?.value
-      ? request.cookies.get("auth_token")?.value || null
+    request.cookies?.get?.(DASHBOARD_SESSION_COOKIE)?.value
+      ? request.cookies.get(DASHBOARD_SESSION_COOKIE)?.value || null
       : null;
 
   const requestHeaders =
     request && typeof request === "object" && "headers" in request ? request.headers : undefined;
 
   if (!token) {
-    token = getCookieValueFromHeader(requestHeaders, "auth_token");
+    token = getCookieValueFromHeader(requestHeaders, DASHBOARD_SESSION_COOKIE);
   }
 
   if (!token) {
     try {
+      // Lazy: `next/headers` only resolves inside the Next.js runtime. The MCP server
+      // bundle now reaches this module through keyConnectionScope → comboTargetKeyPolicy
+      // → apiKeyPolicy (#16499) and must stay importable on plain Node.
+      const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      token = cookieStore.get("auth_token")?.value || null;
+      token = cookieStore.get(DASHBOARD_SESSION_COOKIE)?.value || null;
     } catch {
       token = null;
     }
@@ -458,7 +495,11 @@ export async function isAuthRequired(
   options?: AuthRequiredOptions
 ): Promise<boolean> {
   try {
-    const settings = await getSettings();
+    // Cached read (5s TTL): updateSettings() busts it synchronously, so
+    // requireLogin flips take effect on the very next request. Writers that
+    // bypass updateSettings() (the CLI settings-store.mjs in another process)
+    // can lag by up to the 5s TTL.
+    const settings = await getCachedSettings();
     if (settings.requireLogin === false) return false;
 
     if (
@@ -474,7 +515,7 @@ export async function isAuthRequired(
         return false;
       }
 
-      if (pathname && isPublicApiRoute(pathname, method)) {
+      if (!options?.ignorePublicRoute && pathname && isPublicApiRoute(pathname, method)) {
         return false;
       }
 

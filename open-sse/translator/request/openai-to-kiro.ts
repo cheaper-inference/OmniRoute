@@ -734,6 +734,51 @@ function convertMessages(messages, tools, model) {
     }
   }
 
+  // Strip orphaned toolUses: an assistantResponseMessage that advertises a
+  // toolUse with no matching toolResult anywhere in history (or the current
+  // message) produces an invalid Kiro/Bedrock transcript -- Bedrock rejects it
+  // with "Expected toolResult blocks at messages.N.content for the following
+  // Ids: ...". This mirrors the orphaned-toolResult cleanup above, but for the
+  // opposite direction (a tool_use that never got answered, e.g. because the
+  // client lost one of two parallel tool results). The same defense
+  // (fixToolPairs, open-sse/services/contextManager.ts) already applies on the
+  // Claude and post-#7822 Antigravity paths; KiroExecutor.execute() never
+  // calls BaseExecutor.execute(), so it never got this guard.
+  const answeredToolUseIds = new Set<string>();
+  for (const item of mergedHistory) {
+    const toolResults = item.userInputMessage?.userInputMessageContext?.toolResults as
+      | Array<{ toolUseId?: string }>
+      | undefined;
+    if (Array.isArray(toolResults)) {
+      for (const result of toolResults) {
+        if (result?.toolUseId) answeredToolUseIds.add(result.toolUseId);
+      }
+    }
+  }
+  const currentToolResultsForOrphanCheck = currentMessage?.userInputMessage
+    ?.userInputMessageContext?.toolResults as Array<{ toolUseId?: string }> | undefined;
+  if (Array.isArray(currentToolResultsForOrphanCheck)) {
+    for (const result of currentToolResultsForOrphanCheck) {
+      if (result?.toolUseId) answeredToolUseIds.add(result.toolUseId);
+    }
+  }
+  for (const item of mergedHistory) {
+    const toolUses = item.assistantResponseMessage?.toolUses as
+      | Array<{ toolUseId?: string }>
+      | undefined;
+    if (!Array.isArray(toolUses)) continue;
+    const filtered = toolUses.filter(
+      (use) => use?.toolUseId && answeredToolUseIds.has(use.toolUseId)
+    );
+    if (filtered.length !== toolUses.length) {
+      if (filtered.length > 0) {
+        item.assistantResponseMessage!.toolUses = filtered;
+      } else {
+        delete item.assistantResponseMessage!.toolUses;
+      }
+    }
+  }
+
   // Ensure alternating roles by inserting synthetic assistant messages
   // between consecutive user turns that couldn't be merged.
   const alternatingHistory: typeof mergedHistory = [];
@@ -862,6 +907,9 @@ export function buildKiroPayload(model, body, stream, credentials) {
   // so Kiro accepts the request instead of returning `Improperly formed
   // request`. This preserves tool-call history and is a no-op when body.tools
   // is already populated.
+  // The synthesized names are recorded because the client never declared them
+  // (#18675): the executor must not read a synthesized `tool_call` as a client tool.
+  let synthesizedToolNames: string[] = [];
   if (tools.length === 0) {
     const seen = new Set<string>();
     const synthesized: Array<Record<string, unknown>> = [];
@@ -896,6 +944,7 @@ export function buildKiroPayload(model, body, stream, credentials) {
     }
     if (synthesized.length > 0) {
       tools = synthesized;
+      synthesizedToolNames = [...seen];
     }
   }
 
@@ -935,6 +984,7 @@ export function buildKiroPayload(model, body, stream, credentials) {
       history: unknown[];
     };
     profileArn?: string;
+    _kiroSynthesizedToolNames?: Map<string, true>;
     inferenceConfig?: {
       maxTokens?: number;
       temperature?: number;
@@ -1008,6 +1058,11 @@ export function buildKiroPayload(model, body, stream, credentials) {
 
   if (profileArn) {
     payload.profileArn = profileArn;
+  }
+  // In-memory channel (Map, like `_toolNameMap`): survives post-translation compression and
+  // is dropped by the Kiro executor's transformRequest allowlist before the wire send.
+  if (synthesizedToolNames.length > 0) {
+    payload._kiroSynthesizedToolNames = new Map(synthesizedToolNames.map((n) => [n, true]));
   }
 
   if (maxTokens || temperature !== undefined || topP !== undefined) {

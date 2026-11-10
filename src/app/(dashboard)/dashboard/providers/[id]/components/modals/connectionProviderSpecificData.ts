@@ -22,12 +22,15 @@ type FormData = QuotaScrapingFieldValues &
     ccCompatibleContext1m: boolean;
     ccCompatibleRedactThinking: boolean;
     ccCompatibleSummarizeThinking: boolean;
+    commandCodeZdrEnabled?: boolean;
     consoleApiKey: string;
     customUserAgent: string;
+    huggingfaceBillTo: string;
     cx: string;
     excludedModels: string;
     importFreeModelsOnly: boolean;
     m365Tier?: M365TierValue;
+    m365RefreshToken?: string;
     newApiAggregatorBalance: boolean;
     newApiUserId: string;
     passthroughModels: boolean;
@@ -45,7 +48,20 @@ type ProviderSpecificData = Record<string, unknown>;
 // bailian-coding-plan reuses consoleApiKey as its console token; agentrouter (#6850)
 // reuses the same generic field for its New-API System Access Token, paired with
 // newApiUserId (the New-Api-User header value). See agentrouterQuotaFetcher.ts.
-const CONSOLE_API_KEY_PROVIDERS = new Set(["bailian-coding-plan", "agentrouter"]);
+// tokenrouter stores its optional Management Key here (open-sse/services/usage/tokenrouter.ts).
+const CONSOLE_API_KEY_PROVIDERS = new Set(["bailian-coding-plan", "agentrouter", "tokenrouter"]);
+
+export function assignM365RefreshToken(
+  provider: string | undefined,
+  formData: Pick<FormData, "m365RefreshToken">,
+  target: ProviderSpecificData
+) {
+  if (provider !== "copilot-m365-web") return;
+  // Only explicit input may replace a credential, never copied/validation metadata.
+  delete target.refreshToken;
+  const token = formData.m365RefreshToken?.trim();
+  if (token) target.refreshToken = token;
+}
 
 export function buildAddProviderSpecificData(options: {
   provider?: string;
@@ -87,8 +103,14 @@ export function buildAddProviderSpecificData(options: {
   if (CONSOLE_API_KEY_PROVIDERS.has(provider ?? "") && formData.consoleApiKey.trim()) {
     data.consoleApiKey = formData.consoleApiKey.trim();
   }
+  if (provider === "huggingface" && formData.huggingfaceBillTo.trim()) {
+    data.billTo = formData.huggingfaceBillTo.trim();
+  }
   if (provider === "agentrouter" && formData.newApiUserId.trim()) {
     data.newApiUserId = formData.newApiUserId.trim();
+  }
+  if (provider === "command-code" && formData.commandCodeZdrEnabled === true) {
+    data.zdrEnabled = true;
   }
   assignQuotaScrapingProviderData(provider, formData, data);
   if (isGooglePse && formData.cx.trim()) data.cx = formData.cx.trim();
@@ -117,7 +139,17 @@ export function buildAddProviderSpecificData(options: {
     if (formData.tunnelId.trim()) data.tunnelId = formData.tunnelId.trim();
     if (formData.connectorName.trim()) data.connectorName = formData.connectorName.trim();
   }
+  assignM365RefreshToken(provider, formData, data);
   return Object.keys(data).length > 0 ? data : undefined;
+}
+
+/** Edit: an explicit boolean (never undefined) so the PUT merge can turn ZDR back off. */
+function assignCommandCodeZdrOnEdit(
+  provider: string,
+  formData: FormData,
+  target: ProviderSpecificData
+): void {
+  if (provider === "command-code") target.zdrEnabled = formData.commandCodeZdrEnabled === true;
 }
 
 export function assignEditApiKeyProviderSpecificData(options: {
@@ -150,9 +182,18 @@ export function assignEditApiKeyProviderSpecificData(options: {
   if (CONSOLE_API_KEY_PROVIDERS.has(o.provider)) {
     o.target.consoleApiKey = o.formData.consoleApiKey.trim() || undefined;
   }
+  if (o.provider === "huggingface") {
+    // Explicit `null`, not `undefined`: the PUT route merges
+    // { ...existing, ...incoming } and JSON.stringify drops `undefined`, so
+    // an omitted key would keep the previously-saved value and clearing the
+    // field would never take effect. `null` survives the wire and the
+    // normalizer deletes it, removing the stored value.
+    o.target.billTo = o.formData.huggingfaceBillTo.trim() || null;
+  }
   if (o.provider === "agentrouter") {
     o.target.newApiUserId = o.formData.newApiUserId.trim() || undefined;
   }
+  assignCommandCodeZdrOnEdit(o.provider, o.formData, o.target);
   assignQuotaScrapingProviderData(o.provider, o.formData, o.target);
   if (o.formData.validationModelId) o.target.validationModelId = o.formData.validationModelId;
   if (o.isGooglePse) o.target.cx = o.formData.cx.trim() || undefined;
@@ -195,4 +236,5 @@ export function assignEditApiKeyProviderSpecificData(options: {
     o.target.tunnelId = o.formData.tunnelId.trim() || undefined;
     o.target.connectorName = o.formData.connectorName.trim() || undefined;
   }
+  assignM365RefreshToken(o.provider, o.formData, o.target);
 }

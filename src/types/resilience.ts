@@ -1,4 +1,5 @@
 import type { TransitionRecord } from "@/shared/utils/circuitBreaker";
+import type { ProviderAvailability } from "@/lib/providerAvailability";
 
 // Shared contract between the connections API (src/app/api/resilience/connections/route.ts)
 // and any future UI consumer. Keep in sync with the route's GET response shape.
@@ -49,11 +50,16 @@ export interface ConnectionState {
     failureCount: number;
     retryAfterMs: number;
     lastFailureKind: string | null;
+    lastClose?: { at: number; from: string; reason: string | null } | null;
   } | null;
   lockouts: Array<{ model: string; reason: string; remainingMs: number }>;
   /** Per-account rotation state (loopback-gated read-only) — null when the
    * attribution flag is off or no rotation snapshot was recorded. */
   rotation: RotationAccountState[] | null;
+  /** Typed availability derived from the connection's stored state (Section 2):
+   * NO_CREDENTIAL / AUTH_EXPIRED / QUOTA_EXHAUSTED / DISABLED / STALE_TERMINAL /
+   * UNHEALTHY / AVAILABLE, instead of the single coarse `connectionStatus` badge. */
+  availability: ProviderAvailability;
 }
 
 export interface BreakerWithHistory {

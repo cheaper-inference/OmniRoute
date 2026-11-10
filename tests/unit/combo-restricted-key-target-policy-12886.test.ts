@@ -5,7 +5,10 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { comboTargetPassesKeyModelPolicy } from "../../src/sse/handlers/chat/comboTargetKeyPolicy.ts";
+import {
+  comboTargetPassesKeyModelPolicy,
+  evaluateComboTargetPreflight,
+} from "../../src/sse/handlers/chat/comboTargetKeyPolicy.ts";
 
 const KEY = "sk-test-12886";
 const COMBO = "combo-deepseek-v4-flash";
@@ -60,6 +63,51 @@ test("#9057: disableNonPublicModels still rejects a keyless inner target", async
     isModelAllowedForKey: async () => false,
   });
   assert.equal(ok, false);
+});
+
+test("#9057: restricted auto combo checks an inner target even without allow-list entries", async () => {
+  let calls = 0;
+  const ok = await comboTargetPassesKeyModelPolicy({
+    apiKey: KEY,
+    apiKeyInfo: { modelAccessMode: "restricted", allowedModels: [] },
+    requestedModelStr: "auto/best",
+    targetModelStr: "private/target",
+    isModelAllowedForKey: async () => {
+      calls += 1;
+      return false;
+    },
+  });
+  assert.equal(ok, false, "a restricted key must not gain access through auto routing");
+  assert.equal(calls, 1, "the concrete target must be checked");
+});
+
+test("combo live-test requests cannot bypass a denied target policy", async () => {
+  let calls = 0;
+  const decision = await evaluateComboTargetPreflight({
+    apiKey: KEY,
+    apiKeyInfo: { modelAccessMode: "restricted", allowedModels: ["public/*"] },
+    requestedModelStr: "auto/best",
+    targetModelStr: "private/target",
+    isComboLiveTest: true,
+    isModelAllowedForKey: async () => {
+      calls += 1;
+      return false;
+    },
+  });
+  assert.equal(decision, "deny");
+  assert.equal(calls, 1, "the client live-test marker must not grant model authority");
+});
+
+test("combo live-test requests bypass availability only after named-combo admission", async () => {
+  const decision = await evaluateComboTargetPreflight({
+    apiKey: KEY,
+    apiKeyInfo: { modelAccessMode: "restricted", allowedModels: [COMBO] },
+    requestedModelStr: COMBO,
+    targetModelStr: INNER,
+    isComboLiveTest: true,
+    isModelAllowedForKey: async () => false,
+  });
+  assert.equal(decision, "bypass-availability");
 });
 
 test("#12886: unrestricted key skips the gate", async () => {
@@ -193,7 +241,7 @@ test("auto/* combo still enforces per-candidate allowedModels even if auto/* is 
   assert.equal(ok, false, "auto combo candidate not in allowedModels must stay blocked per #9057");
 });
 
-test("explicit allowedCombos overrides blockedModels for inner targets", async () => {
+test("a combo named in allowedCombos overrides blockedModels for inner targets", async () => {
   const ok = await comboTargetPassesKeyModelPolicy({
     apiKey: KEY,
     apiKeyInfo: {
@@ -206,10 +254,10 @@ test("explicit allowedCombos overrides blockedModels for inner targets", async (
     targetModelStr: INNER,
     isModelAllowedForKey: allowListChecker(["gemini/*"]),
   });
-  assert.equal(ok, true, "an explicitly allowed combo must admit its blocked direct-model target");
+  assert.equal(ok, true, "a combo named in allowedCombos must admit its blocked target");
 });
 
-test("combo/* overrides blockedModels for every stored combo", async () => {
+test("combo/* does not override blockedModels for stored combos", async () => {
   const ok = await comboTargetPassesKeyModelPolicy({
     apiKey: KEY,
     apiKeyInfo: {
@@ -222,7 +270,7 @@ test("combo/* overrides blockedModels for every stored combo", async () => {
     targetModelStr: INNER,
     isModelAllowedForKey: allowListChecker(["gemini/*"]),
   });
-  assert.equal(ok, true, "combo/* must admit inner targets for every stored combo");
+  assert.equal(ok, false, "blockedModels applies under the default combo/* grant");
 });
 
 test("a combo without allowedCombos permission remains blocked by blockedModels", async () => {

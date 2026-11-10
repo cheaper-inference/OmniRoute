@@ -123,7 +123,9 @@
       "maxCostOpt": "Costul maxim pe zi (USD)",
       "allowedModelsOpt": "Listă de modele permise, separate prin virgulă",
       "nothingToSet": "Nu au fost furnizate câmpuri pentru politică. Utilizați --rate-limit, --max-cost sau --allowed-models.",
-      "updated": "Politica a fost actualizată."
+      "updated": "Politica a fost actualizată.",
+      "modelAccessModeOpt": "Mod de acces la modele (all | restricted)",
+      "unrestrictedOpt": "Permite toate modelele (--model-access-mode all)"
     },
     "expiration": {
       "title": "Expirarea cheii",
@@ -254,6 +256,7 @@
     "log": "Afișează jurnalele serverului în linie",
     "no_recovery": "Dezactivează repornirea automată în caz de eroare (mod de depanare)",
     "max_restarts": "Numărul maxim de reporniri după erori în interval de 30 s înainte de abandonare (implicit: 2)",
+    "headless": "Rulează doar motorul proxy: panou dezactivat (404), subsisteme opționale omise (setează OMNIROUTE_HEADLESS=1)",
     "tray": "Pornește în bara de sistem (doar pe desktop, opțional)",
     "no_tray": "Dezactivează pictograma din bara de sistem",
     "ready_timeout": "Timpul de expirare al verificării disponibilității, în ms (și OMNIROUTE_READY_TIMEOUT_MS, implicit 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sincronizează configurația între instanțele OmniRoute",
     "push": {
-      "description": "Trimite configurația în cloud sau către instanța la distanță",
-      "target": "Ținta (cloud sau context:name)",
-      "bundle": "Componentele pachetului de sincronizat",
-      "dryRun": "Previzualizează fără aplicare"
+      "description": "Trimite configurația în cloud sau către instanța la distanță"
     },
     "pull": {
-      "description": "Preia configurația din cloud sau de la distanță",
-      "source": "Sursa (cloud sau context:name)",
-      "merge": "Îmbină cu configurația existentă",
-      "replace": "Înlocuiește configurația existentă",
-      "dryRun": "Previzualizează fără aplicare"
-    },
-    "diff": {
-      "source": "Contextul sursă",
-      "target": "Contextul țintă"
+      "description": "Preia configurația din cloud sau de la distanță"
     },
     "bundle": {
       "description": "Exportă configurația ca fișier-pachet",
-      "include": "Componente de inclus (separate prin virgulă)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importă un fișier-pachet",
       "dryRun": "Validează fără aplicare"
-    },
-    "initialize": {
-      "fromCloud": "Inițializează din copia de siguranță din cloud"
     },
     "tokens": {
       "description": "Gestionează tokenurile de sincronizare",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Omite confirmarea"
       }
-    },
-    "resolve": {
-      "description": "Rezolvă interactiv conflictele de sincronizare"
     }
   },
   "config": {

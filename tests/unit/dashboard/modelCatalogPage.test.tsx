@@ -1,12 +1,33 @@
 // @vitest-environment jsdom
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
+
+import enMessages from "@/i18n/messages/en.json";
 
 vi.mock("next-intl", () => ({
-  useTranslations: () => {
-    const translate = (key: string) => key;
-    return Object.assign(translate, { has: () => false });
+  useTranslations: (ns: string = "common") => {
+    const bag = ((enMessages as Record<string, unknown>)[ns] || {}) as Record<string, string>;
+    const translate = (key: string, params?: Record<string, unknown>) => {
+      let str = bag[key] ?? key;
+      if (params) {
+        for (const [pKey, pVal] of Object.entries(params)) {
+          str = str.replace(new RegExp(`\\{${pKey}\\}`, "g"), String(pVal));
+        }
+      }
+      return str;
+    };
+    return Object.assign(translate, { has: (key: string) => key in bag });
   },
 }));
 
@@ -17,20 +38,30 @@ describe("ModelCatalogPage", () => {
   let root: Root;
 
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval"] });
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true;
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
+    window.history.replaceState(null, "", "/dashboard/models");
   });
 
   afterEach(() => {
     act(() => root.unmount());
     container.remove();
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
+
+  /** Mount effects are deferred with setTimeout; run them and settle the fetch promises. */
+  async function flush() {
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+  }
 
   it("loads all provider models and only labels flags the API actually reports", async () => {
     vi.stubGlobal(
@@ -70,9 +101,9 @@ describe("ModelCatalogPage", () => {
     act(() => {
       root.render(<ModelCatalogPage />);
     });
-    await act(async () => new Promise((resolve) => window.setTimeout(resolve, 0)));
+    await flush();
 
-    expect(fetch).toHaveBeenCalledWith("/api/models/catalog", expect.anything());
+    expect(fetch).toHaveBeenCalledWith("/api/models/catalog?includeHidden=1", expect.anything());
     expect(container.textContent).toContain("Alpha Labs");
     expect(container.textContent).toContain("Beta AI");
     expect(container.textContent).toContain("Free");
@@ -94,7 +125,7 @@ describe("ModelCatalogPage", () => {
       providerFilter.value = "all";
       providerFilter.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    const modelSort = [...container.querySelectorAll("th button")].find(
+    const modelSort = [...container.querySelectorAll<HTMLButtonElement>("th button")].find(
       (button) => button.textContent === "Model"
     )!;
     act(() => modelSort.click());
@@ -109,7 +140,7 @@ describe("ModelCatalogPage", () => {
     act(() => {
       root.render(<ModelCatalogPage />);
     });
-    await act(async () => new Promise((resolve) => window.setTimeout(resolve, 0)));
+    await flush();
 
     expect(container.querySelector('[role="alert"]')?.textContent).toContain(
       "Unable to load the model catalog."

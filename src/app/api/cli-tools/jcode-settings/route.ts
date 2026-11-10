@@ -16,6 +16,7 @@ import { cliModelConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey } from "@/shared/services/apiKeyResolver";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { readExistingConfig } from "../_lib/readExistingConfig";
 
 const TOOL_ID = "jcode";
 
@@ -159,13 +160,10 @@ export async function POST(request: Request) {
     // Backup current config before modifying
     await createBackup(TOOL_ID, configPath);
 
-    // Read existing config (TOML text) or start fresh
-    let existing = "";
-    try {
-      existing = await fs.readFile(configPath, "utf-8");
-    } catch {
-      /* No existing config */
-    }
+    // Read existing config (TOML text) or start fresh. Only ENOENT is "absent":
+    // an unreadable file (EACCES, EISDIR, ...) must not be treated as empty and
+    // overwritten with just the managed block.
+    const existing = (await readExistingConfig(configPath, (raw) => raw)) ?? "";
 
     // Refuse to double-define the table if the user hand-wrote a
     // [providers.omniroute] profile outside our managed block — duplicate

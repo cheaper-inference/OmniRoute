@@ -38,34 +38,34 @@ Studio yenye vichupo vitatu inayounganisha utafutaji wa wavuti, uchambuaji wa ma
 
 ### Kichupo cha Utafutaji
 
-Huboresha `SearchForm` + `ResultsPanel` + `RerankPanel` zilizopo kuwa kichupo:
+Hubadilisha `SearchForm` + `ResultsPanel` + `RerankPanel` zilizopo kuwa kichupo:
 
-- Hoja → matokeo (kichwa, URL, dondoo, alama ya uhusiano).
-- Metadata ya mtoa huduma katika kidirisha cha Usanidi (gharama, mgao, hali).
-- Sehemu ya kupanga upya: chagua muundo wa kupanga upya, panga upya matokeo, onyesha `positionDelta`.
+- Hoja → matokeo (kichwa, URL, dondoo, alama ya umuhimu).
+- Metadata ya mtoa huduma katika kidirisha cha Usanidi (gharama, kikomo, hali).
+- Sehemu ya kupanga upya: chagua modeli ya kupanga upya, panga matokeo upya, onyesha `positionDelta`.
 - Hali tupu yenye CTA wakati hakuna watoa huduma za utafutaji waliosanidiwa.
 - Historia ya utafutaji kupitia `SearchHistory.tsx`.
 - Huita `POST /v1/search` (endpoint iliyopo, hakuna mabadiliko).
 
-### Kichupo cha Uchambuaji
+### Kichupo cha Uchotaji
 
-Kichupo kipya cha kutoa maudhui kutoka URL kupitia `POST /v1/web/fetch` (iliyoundwa katika mpango wa 05):
+Kichupo kipya cha kutoa maudhui kutoka kwa URL kupitia `POST /v1/web/fetch` (iliyoundwa katika mpango wa 05):
 
-- Ingizo: URL + swichi ya ukurasa mzima + kiteuzi cha umbizo (markdown / maandishi / HTML).
+- Ingizo: URL + kigeuzi cha ukurasa mzima + kiteuzi cha umbizo (markdown / maandishi / HTML).
 - Wasilisha → chota → onyesha `ScrapeResult.tsx`.
-- `ScrapeResult` huonyesha onyesho la awali la markdown + swichi ya maudhui ghafi.
-- Kikomo: ikiwa kiini cha jibu ni zaidi ya **KB 256**, UI huonyesha `(imekatwa, tazama maudhui ghafi)` na kuyafungua katika modali ya Monaco (D21).
-- Kidirisha cha metadata: mtoa huduma (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), muda wa kusubiri, gharama, ukubwa wa jibu, idadi ya viungo.
+- `ScrapeResult` huonyesha onyesho la awali la markdown + kigeuzi cha maudhui ghafi.
+- Kikomo: ikiwa mwili wa jibu ni zaidi ya **256 KB**, UI huonyesha `(imekatwa, angalia maudhui ghafi)` na kufungua maudhui ghafi katika modal ya Monaco (D21).
+- Paneli ya metadata: mtoa huduma (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), muda wa kusubiri, gharama, ukubwa wa jibu, idadi ya viungo.
 - Hutumia hook ya `useScrapeFetch.ts`.
 
-### Kichupo cha Ulinganishaji
+### Kichupo cha Ulinganisho
 
-Huendesha hoja/URL ileile kwa hadi **watoa huduma 4 sambamba** (D22):
+Huendesha hoja/URL ileile kwa hadi **watoa huduma 4 kwa sambamba** (D22):
 
-- Safu sambamba kwa kila mtoa huduma.
+- Safu wima za kila mtoa huduma zilizowekwa bega kwa bega.
 - Vipimo: muda wa kusubiri, gharama, idadi ya matokeo, ukubwa wa jibu.
-- Ukokotoaji wa mwingiliano wa URL kwa utafutaji (idadi ya URL zinazofanana dhidi ya matokeo ya awali).
-- Huita `POST /v1/search` (utafutaji) au `POST /v1/web/fetch` (uchambuaji) kwa kila mtoa huduma.
+- Hesabu ya mwingiliano wa URL kwa utafutaji (idadi ya URL zinazofanana ikilinganishwa na matokeo ya awali).
+- Huita `POST /v1/search` (utafutaji) au `POST /v1/web/fetch` (uchotaji) kwa kila mtoa huduma.
 
 ---
 
@@ -101,12 +101,12 @@ Huendesha hoja/URL ileile kwa hadi **watoa huduma 4 sambamba** (D22):
 ## Katalogi ya Watoa Huduma
 
 `ProviderCatalog.tsx` huonyesha orodha kamili ya watoa huduma kutoka `GET /api/search/providers`
-(iliyopanuliwa katika F4 ili kujumuisha watoa huduma wa uchotaji):
+(iliyopanuliwa katika F4 ili kujumuisha watoa huduma wa fetch):
 
-| `kind` | `"search"` (watoa huduma 20) au `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (watoa huduma 20) au `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Hali **hubainishwa wakati wa ombi** kwa kukagua ikiwa vitambulisho vipo na ikiwa
-funguo zote kwa sasa ziko katika kipindi cha kusubiri.
+Hali **hubainishwa wakati wa ombi** kwa kuangalia ikiwa vitambulisho vipo na ikiwa
+funguo zote ziko katika kipindi cha kusubiri kwa sasa.
 
 ---
 
@@ -120,16 +120,16 @@ Kishikilia nafasi cha ufunguo wa API daima ni `$OMNIROUTE_API_KEY` (D11, kinashi
 
 ## Mabadiliko ya Backend
 
-Mabadiliko moja tu ya backend yalihitajika kwa kipengele hiki:
+Ni badiliko moja tu la backend lililohitajika kwa kipengele hiki:
 
 ### `GET /api/search/providers` Iliyopanuliwa
 
 `src/app/api/search/providers/route.ts` ilipanuliwa ili:
 
-- Kujumuisha watoa huduma wote 6 wa uchotaji (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) katika safu.
+- Kujumuisha kila mtoa huduma wa fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) kwenye safu.
 - Kuongeza `kind: "search" | "fetch"` kwa kila kipengee.
-- Kuongeza `status: "configured" | "missing" | "rate_limited"` inayobainishwa kutokana na hali halisi ya vitambulisho.
-- Kudumisha utangamano wa nyuma — sehemu zilizopo (`id`, `name`, n.k.) hazijabadilishwa.
+- Kuongeza `status: "configured" | "missing" | "rate_limited"` inayotokana na hali ya sasa ya vitambulisho.
+- Kudumisha uoanifu wa nyuma — sehemu zilizopo (`id`, `name`, n.k.) hazijabadilishwa.
 
 ---
 

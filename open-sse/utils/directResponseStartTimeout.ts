@@ -1,7 +1,11 @@
+import { isPrivateHost } from "@/shared/network/privateHost";
+
 type DirectFetchOptions = RequestInit & { dispatcher?: unknown };
 type DirectFetch = (input: RequestInfo | URL, options: DirectFetchOptions) => Promise<Response>;
 
 const DEFAULT_DIRECT_HEADERS_TIMEOUT_MS = 30_000;
+/** Local/self-hosted backends (Ollama, LM Studio, host.docker.internal) often need >30s TTFB. */
+const DEFAULT_LOCAL_DIRECT_HEADERS_TIMEOUT_MS = 300_000;
 const DIRECT_RESPONSE_START_TIMEOUT_CODE = "DIRECT_RESPONSE_START_TIMEOUT";
 
 // #13703 — the fresh-socket RETRY (2nd direct attempt) reused the pooled
@@ -30,6 +34,89 @@ function hasHighReasoningEffort(body?: string | null): boolean {
   return HIGH_REASONING_EFFORT_PATTERN.test(body);
 }
 
+function isLocalDirectTarget(targetUrl?: string | null): boolean {
+  if (!targetUrl) return false;
+  try {
+    return isPrivateHost(new URL(targetUrl).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function resolveLocalDirectHeadersFloorMs(
+  env: Record<string, string | undefined> = process.env
+): number {
+  const raw = env.OMNIROUTE_LOCAL_DIRECT_HEADERS_TIMEOUT_MS;
+  if (raw == null || raw.trim() === "") return DEFAULT_LOCAL_DIRECT_HEADERS_TIMEOUT_MS;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+}
+
+// Volume-aware probe-window tier. Prefill scales with input size: a large
+// context legitimately sits silent well past the 30s default before the first
+// byte, with no reasoning selector in the body for the ceiling above to key
+// on — so the flat floor cut healthy slow-prefill upstreams at exactly the
+// floor. Tiers: ≤512KB unchanged (a small body overrunning the probe still
+// smells like a dead connection), >512KB ×2, >2MB ×3, capped at 180s.
+// OMNIROUTE_DIRECT_HEADERS_VOLUME_ADAPTIVE=0/false/off pins the flat behavior.
+const LARGE_BODY_TIER_BYTES = 512 * 1024;
+const HUGE_BODY_TIER_BYTES = 2 * 1024 * 1024;
+const VOLUME_AWARE_WINDOW_CAP_MS = 180_000;
+
+function isVolumeAdaptiveDirectHeadersEnabled(
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  const raw = env.OMNIROUTE_DIRECT_HEADERS_VOLUME_ADAPTIVE;
+  if (raw == null || raw.trim() === "") return true;
+  return !["0", "false", "off"].includes(raw.trim().toLowerCase());
+}
+
+function bodyByteLength(body: string | null | undefined): number {
+  if (!body) return 0;
+  return new TextEncoder().encode(body).length;
+}
+
+export function resolveVolumeAwareDirectHeadersTimeoutMs(
+  baseMs: number,
+  bodyBytes: number,
+  env: Record<string, string | undefined> = process.env
+): number {
+  if (!(baseMs > 0) || !(bodyBytes > 0)) return baseMs;
+  if (!isVolumeAdaptiveDirectHeadersEnabled(env)) return baseMs;
+  let factor = 1;
+  if (bodyBytes > HUGE_BODY_TIER_BYTES) factor = 3;
+  else if (bodyBytes > LARGE_BODY_TIER_BYTES) factor = 2;
+  if (factor === 1) return baseMs;
+  // Raise-only: the ceiling must never pull the window below an
+  // already-higher floor (operator override or the local/LAN floor).
+  return Math.max(baseMs, Math.min(baseMs * factor, VOLUME_AWARE_WINDOW_CAP_MS));
+}
+
+function resolveFlatDirectHeadersFloorMs(
+  env: Record<string, string | undefined>,
+  body?: string | null,
+  targetUrl?: string | null
+): number {
+  const raw = env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS;
+  let base =
+    raw == null || raw.trim() === ""
+      ? DEFAULT_DIRECT_HEADERS_TIMEOUT_MS
+      : Number.isFinite(Number(raw)) && Number(raw) > 0
+        ? Math.floor(Number(raw))
+        : 0;
+  // Operator override is a FLOOR: reasoning/local awareness only raises the budget,
+  // never lowers it. An override above the ceiling (e.g. 240s) is preserved.
+  if (hasHighReasoningEffort(body)) {
+    base = Math.max(base, REASONING_READINESS_CEILING_MS);
+  }
+  if (isLocalDirectTarget(targetUrl)) {
+    base = Math.max(base, resolveLocalDirectHeadersFloorMs(env));
+  }
+  // Volume tier applies last with raise-only semantics, so it composes with
+  // the effort/local raises above without order dependence.
+  return resolveVolumeAwareDirectHeadersTimeoutMs(base, bodyByteLength(body), env);
+}
+
 // #13703: `attempt` 0 is the pooled dispatcher (flat floor, #10214's
 // zombie-socket rationale); attempt 1+ is the fresh-socket retry, which has
 // no zombie to detect and so defers to resolveDirectRetryTimeoutMs instead.
@@ -37,22 +124,28 @@ export function resolveDirectHeadersTimeoutMs(
   env: Record<string, string | undefined> = process.env,
   body?: string | null,
   attempt = 0,
-  hasCallerDeadline = false
+  hasCallerDeadline = false,
+  targetUrl?: string | null
 ): number {
-  const raw = env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS;
-  const base =
-    raw == null || raw.trim() === ""
-      ? DEFAULT_DIRECT_HEADERS_TIMEOUT_MS
-      : Number.isFinite(Number(raw)) && Number(raw) > 0
-        ? Math.floor(Number(raw))
-        : 0;
-  // Operator override is a FLOOR: reasoning awareness only raises the budget,
-  // never lowers it. An override above the ceiling (e.g. 240s) is preserved.
-  const flatFloorMs = hasHighReasoningEffort(body)
-    ? Math.max(base, REASONING_READINESS_CEILING_MS)
-    : base;
+  const flatFloorMs = resolveFlatDirectHeadersFloorMs(env, body, targetUrl);
   if (attempt === 0) return flatFloorMs;
   return resolveDirectRetryTimeoutMs(flatFloorMs, hasCallerDeadline, env);
+}
+
+/**
+ * Per-request resolver for the direct no-proxy attempts in proxyFetch: binds the
+ * request body (reasoning-effort awareness), caller-deadline presence (retry
+ * ceiling) and target URL (local/LAN floor) once, so each attempt
+ * (0 = pooled dispatcher, 1+ = fresh-socket retry) resolves its own budget.
+ */
+export function directHeadersTimeoutResolver(
+  options: { body?: unknown; signal?: unknown },
+  targetUrl?: string | null
+): (attempt: number) => number {
+  const body = typeof options.body === "string" ? options.body : null;
+  const hasCallerDeadline = !!options.signal;
+  return (attempt) =>
+    resolveDirectHeadersTimeoutMs(process.env, body, attempt, hasCallerDeadline, targetUrl);
 }
 
 /**
@@ -92,9 +185,9 @@ export function resolveDirectRetryTimeoutMs(
 }
 
 function createDirectResponseStartTimeout(timeoutMs: number): Error & { code: string } {
-  const err = new Error(
-    `Direct response did not start within ${timeoutMs}ms — retrying on a fresh socket`
-  ) as Error & { code: string };
+  const err = new Error(`Direct response did not start within ${timeoutMs}ms`) as Error & {
+    code: string;
+  };
   err.name = "TimeoutError";
   err.code = DIRECT_RESPONSE_START_TIMEOUT_CODE;
   return err;

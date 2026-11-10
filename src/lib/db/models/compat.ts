@@ -3,7 +3,9 @@
 import { getDbInstance } from "../core";
 import {
   MODEL_COMPAT_PROTOCOL_KEYS,
+  isThinkingReplayMode,
   type ModelCompatProtocolKey,
+  type ThinkingReplayMode,
 } from "@/shared/constants/modelCompat";
 import { isForbiddenUpstreamHeaderName } from "@/shared/constants/upstreamHeaders";
 import { isHiddenForModality } from "@/shared/utils/modelVisibility";
@@ -16,7 +18,7 @@ const MODEL_COMPAT_NAMESPACE = "modelCompatOverrides";
 export { MODEL_COMPAT_PROTOCOL_KEYS, type ModelCompatProtocolKey };
 
 export type ModelCompatPerProtocol = {
-  normalizeToolCallId?: boolean;
+  normalizeToolCallId?: boolean | null;
   preserveOpenAIDeveloperRole?: boolean;
   preserveVideoUrl?: boolean;
   /** Merged into upstream HTTP requests for this model (after default auth headers). */
@@ -128,7 +130,13 @@ export type ModelCompatOverride = {
   apiFormat?: string;
   targetFormat?: string;
   supportsVision?: boolean;
+  /** Thinking-replay contract for this node's upstream — "redacted" | "text" | "none"
+   *  (see open-sse/translator/helpers/thinkingReplayMode.ts). */
+  thinkingReplay?: ThinkingReplayMode;
 };
+
+/** Nested provider → model map of explicit model-compat vision overrides. */
+export type ModelCompatVisionOverrideMap = ReadonlyMap<string, ReadonlyMap<string, boolean>>;
 
 /**
  * Resolve whether an override hides its model for a given modality.
@@ -188,6 +196,80 @@ export function getModelCompatOverrides(providerId: string): ModelCompatOverride
   return readCompatList(providerId);
 }
 
+/**
+ * Resolve one exact provider/model `supportsVision` compat override.
+ * A supplied bulk map performs no SQLite work.
+ */
+export function getModelCompatVisionOverride(
+  providerId: string,
+  modelIds: readonly string[],
+  bulk?: ModelCompatVisionOverrideMap | null
+): boolean | null {
+  if (!providerId || modelIds.length === 0) return null;
+  const candidates = new Set(modelIds.filter(Boolean));
+  if (candidates.size === 0) return null;
+
+  try {
+    const overrides = bulk
+      ? bulk.get(providerId)
+      : new Map(
+          readCompatList(providerId).flatMap((entry) =>
+            typeof entry.supportsVision === "boolean"
+              ? [[entry.id, entry.supportsVision] as const]
+              : []
+          )
+        );
+    if (!overrides) return null;
+    for (const modelId of candidates) {
+      const value = overrides.get(modelId);
+      if (typeof value === "boolean") return value;
+    }
+  } catch {
+    // Capability resolution must remain available when the override store is unavailable.
+  }
+  return null;
+}
+
+function parseCompatVisionOverrides(value: string): Map<string, boolean> {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!Array.isArray(parsed)) return new Map<string, boolean>();
+    return new Map(
+      parsed.flatMap((candidate) => {
+        if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return [];
+        const { id, supportsVision } = candidate as {
+          id?: unknown;
+          supportsVision?: unknown;
+        };
+        return typeof id === "string" && typeof supportsVision === "boolean"
+          ? [[id, supportsVision] as const]
+          : [];
+      })
+    );
+  } catch {
+    return new Map<string, boolean>();
+  }
+}
+
+/** Bulk-load all explicit model-compat vision overrides with one SQLite query. */
+export function listModelCompatVisionOverrides(): ModelCompatVisionOverrideMap {
+  try {
+    const rows = getDbInstance()
+      .prepare("SELECT key, value FROM key_value WHERE namespace = 'modelCompatOverrides'")
+      .all();
+    const result = new Map<string, Map<string, boolean>>();
+    for (const row of rows) {
+      const { key, value } = getKeyValue(row);
+      if (!key || !value) continue;
+      const byModel = parseCompatVisionOverrides(value);
+      if (byModel.size > 0) result.set(key, byModel);
+    }
+    return result;
+  } catch {
+    return new Map<string, Map<string, boolean>>();
+  }
+}
+
 export type ModelCompatPatch = {
   normalizeToolCallId?: boolean;
   preserveOpenAIDeveloperRole?: boolean | null;
@@ -206,6 +288,7 @@ export type ModelCompatPatch = {
   apiFormat?: string | null;
   targetFormat?: string | null;
   supportsVision?: boolean | null;
+  thinkingReplay?: ThinkingReplayMode | null;
 };
 
 export function compatByProtocolHasEntries(map: CompatByProtocolMap | undefined): boolean {
@@ -216,6 +299,17 @@ export function compatByProtocolHasEntries(map: CompatByProtocolMap | undefined)
   });
 }
 
+/**
+ * Merge compatibility flags for a model into the provider's compat overrides list.
+ * Preserves explicit boolean false values so overrides can explicitly disable defaults
+ * (e.g. normalizeToolCallId: false on Mistral), and preserves the compat row even when
+ * normalizeToolCallId: false is its only property. Passing null for an override unsets
+ * it, reverting to default.
+ *
+ * @param providerId - Target provider identifier.
+ * @param modelId - Target model identifier.
+ * @param patch - Partial compatibility flags patch to merge.
+ */
 export function mergeModelCompatOverride(
   providerId: string,
   modelId: string,
@@ -225,9 +319,19 @@ export function mergeModelCompatOverride(
   const idx = list.findIndex((e) => e.id === modelId);
   const prev = idx >= 0 ? { ...list[idx] } : { id: modelId };
   const next: ModelCompatOverride = { ...prev, id: modelId };
+  if ("thinkingReplay" in patch) {
+    if (patch.thinkingReplay === null) {
+      delete next.thinkingReplay; // unset: revert to default prefix-assumed behavior
+    } else if (isThinkingReplayMode(patch.thinkingReplay)) {
+      next.thinkingReplay = patch.thinkingReplay;
+    }
+  }
   if ("normalizeToolCallId" in patch) {
-    if (patch.normalizeToolCallId) next.normalizeToolCallId = true;
-    else delete next.normalizeToolCallId;
+    if (patch.normalizeToolCallId === null) {
+      delete next.normalizeToolCallId;
+    } else {
+      next.normalizeToolCallId = Boolean(patch.normalizeToolCallId);
+    }
   }
   if ("preserveOpenAIDeveloperRole" in patch) {
     if (patch.preserveOpenAIDeveloperRole === null) {
@@ -258,6 +362,10 @@ export function mergeModelCompatOverride(
     }
   }
   const filtered = list.filter((e) => e.id !== modelId);
+  const hasNormalizeToolCallIdFlag = Object.prototype.hasOwnProperty.call(
+    next,
+    "normalizeToolCallId"
+  );
   const hasPreserveFlag = Object.prototype.hasOwnProperty.call(next, "preserveOpenAIDeveloperRole");
   const hasVideoUrlFlag = Object.prototype.hasOwnProperty.call(next, "preserveVideoUrl");
   const hasTopUpstream = next.upstreamHeaders && Object.keys(next.upstreamHeaders).length > 0;
@@ -305,13 +413,15 @@ export function mergeModelCompatOverride(
   const hasApiFormat = Object.prototype.hasOwnProperty.call(next, "apiFormat");
   const hasTargetFormat = Object.prototype.hasOwnProperty.call(next, "targetFormat");
   const hasVisionFlag = Object.prototype.hasOwnProperty.call(next, "supportsVision");
+  const hasThinkingReplayFlag = Object.prototype.hasOwnProperty.call(next, "thinkingReplay");
   if (
-    next.normalizeToolCallId ||
+    hasNormalizeToolCallIdFlag ||
     hasPreserveFlag ||
     hasVideoUrlFlag ||
     hasHiddenFlag ||
     hasApiFormat ||
     hasTargetFormat ||
+    hasThinkingReplayFlag ||
     hasVisionFlag ||
     compatByProtocolHasEntries(next.compatByProtocol) ||
     hasTopUpstream
@@ -326,4 +436,8 @@ export function removeModelCompatOverride(providerId: string, modelId: string) {
   const filtered = list.filter((e) => e.id !== modelId);
   if (filtered.length === list.length) return;
   writeCompatList(providerId, filtered);
+}
+
+export function clearModelCompatOverrides(providerId: string) {
+  writeCompatList(providerId, []);
 }

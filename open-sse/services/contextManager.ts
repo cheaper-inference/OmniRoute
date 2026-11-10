@@ -11,7 +11,7 @@ import {
   type ModelCapabilityResolutionSnapshot,
 } from "../../src/lib/modelCapabilities.ts";
 import { parseModel } from "./model.ts";
-import { jsonLength } from "../utils/jsonSize.ts";
+import { encodedStringLength, jsonLength } from "../utils/jsonSize.ts";
 
 // Default token limits per provider (fallbacks when not in registry)
 const DEFAULT_LIMITS: Record<string, number> = {
@@ -41,6 +41,15 @@ function getEnvOverride(provider: string): number | null {
     if (!isNaN(parsed) && parsed > 0) return parsed;
   }
   return null;
+}
+
+/**
+ * True when the operator set a positive `CONTEXT_LENGTH_<PROVIDER>` /
+ * `CONTEXT_LENGTH_DEFAULT` override. `resolveTokenLimit` treats it as a sourced
+ * limit, so callers that gate on "has limit evidence" (combo catalog, #18609) must too.
+ */
+export function hasContextLengthEnvOverride(provider: string): boolean {
+  return getEnvOverride(provider) !== null;
 }
 
 // Reserve tokens override from environment variable
@@ -163,6 +172,31 @@ export function isInlineBase64DocumentBlock(node: Record<string, unknown>): bool
   return matchesOpenAIFileShape(node) || matchesClaudeDocumentShape(node);
 }
 
+/** Binary audio/video is not millions of text tokens of base64 encoding. */
+function isInlineAudioVideoBlock(node: Record<string, unknown>): boolean {
+  const audio = node.input_audio;
+  if (node.type === "input_audio" && audio && typeof audio === "object") {
+    return typeof (audio as Record<string, unknown>).data === "string";
+  }
+  const carrier = node.video_url ?? node.input_video ?? node.audio_url;
+  const url =
+    typeof carrier === "string"
+      ? carrier
+      : carrier && typeof carrier === "object"
+        ? (carrier as Record<string, unknown>).url
+        : null;
+  return typeof url === "string" && /^data:(?:audio|video)\/[a-z0-9.+-]{1,64};base64,/i.test(url);
+}
+
+/** Recognize Gemini audio/video bytes that must not enter image pruning. */
+function isNonImageGeminiMedia(node: Record<string, unknown>): boolean {
+  const data = node.inlineData ?? node.inline_data;
+  if (!data || typeof data !== "object") return false;
+  const record = data as Record<string, unknown>;
+  const mime = record.mimeType ?? record.mime_type;
+  return typeof mime === "string" && !mime.toLowerCase().startsWith("image/");
+}
+
 /**
  * Detect the 5 documented inline-base64 image content-block shapes (see the
  * shape-specific matchers above).
@@ -212,7 +246,8 @@ export function pruneOlderInlineImages(
         part &&
         typeof part === "object" &&
         !Array.isArray(part) &&
-        isInlineBase64ImageBlock(part as Record<string, unknown>)
+        isInlineBase64ImageBlock(part as Record<string, unknown>) &&
+        !isNonImageGeminiMedia(part as Record<string, unknown>)
       ) {
         locations.push({ messageIndex, contentIndex });
       }
@@ -230,6 +265,35 @@ export function pruneOlderInlineImages(
   });
   let pruned = 0;
 
+  if (targetTokens != null) {
+    // One full virtual measurement, then exact pre-rounding deltas per removal
+    // instead of a full history re-scan per removed image. Valid only when the
+    // walk saw no revisited object: JSON-parsed bodies are alias-free trees, so
+    // every prunable slot's block contributed exactly its placeholder chars +
+    // media budget. Any aliasing (programmatic input) falls back to the
+    // original full-recount loop, which is alias-agnostic.
+    const flags: MeasureFlags = {};
+    const measure = measureVirtual(next, new Set(), flags);
+    if (!flags.aliasedObject) {
+      let chars = measure.chars;
+      let mediaTokens = measure.mediaTokens;
+      for (const location of prunable) {
+        if (Math.ceil(chars / CHARS_PER_TOKEN) + mediaTokens <= targetTokens) break;
+        const content = next[location.messageIndex].content as unknown[];
+        const block = content[location.contentIndex] as Record<string, unknown>;
+        const replacement = replaceImageBlockWithPlaceholder(block);
+        content[location.contentIndex] = replacement;
+        // Exact delta in the pre-rounding measure space: the substituted block
+        // cost its placeholder serialization + budget; the plain replacement
+        // costs its own serialization. Rounding happens once per comparison.
+        chars += jsonLength(replacement) - IMAGE_PLACEHOLDER_CHARS;
+        mediaTokens -= IMAGE_TOKEN_ESTIMATE;
+        pruned += 1;
+      }
+      return { messages: next, pruned };
+    }
+  }
+
   for (const location of prunable) {
     if (targetTokens != null && estimateTokens(next) <= targetTokens) break;
     const content = next[location.messageIndex].content as unknown[];
@@ -242,87 +306,157 @@ export function pruneOlderInlineImages(
 }
 
 /**
- * Recursively walk a structured node, replacing every recognized inline
- * base64 image block with a short placeholder (so its bulk is excluded from
- * the char-count pass below) while accumulating a bounded per-image token
- * cost. Returns the accumulated image token cost; the caller measures the
- * placeholder-substituted structure with the normal char/4 heuristic.
+ * Fused form of the former `extractImageTokens` + `jsonLength(node)` pipeline:
+ * one walk that returns the serialized character count of the
+ * media-substituted tree plus the accumulated media token budgets, WITHOUT
+ * materializing that tree. On a multi-megabyte agent body the old path
+ * allocated a full placeholder copy of the structure only to measure it.
  *
- * Non-image content (including remote image URLs and generic base64 text)
- * is left untouched and continues to flow through the text-estimation path.
+ * Semantics are frozen by tests/unit/context-manager-estimation-parity.test.ts
+ * against the pre-optimization implementation
+ * (tests/helpers/context-estimation-reference.ts), including its quirks:
+ * - a node matching a media shape collapses entirely to its placeholder
+ *   serialization + budget (other fields of that node are not measured); at
+ *   ARRAY-ITEM positions this applies at every occurrence, seen or not (the
+ *   old walk's pre-recursion fast path, kept exactly);
+ * - objects are measured over own enumerable string keys — no `toJSON`, no
+ *   symbol keys, prototypes ignored (the old rebuild normalized them away);
+ * - a revisited container reached through recursion (object value / nested
+ *   position) is measured raw via `jsonLength`, with no media substitution
+ *   and no budgets — exactly what the old walk produced at repeat positions;
+ * - BigInt throws and circular structures throw, as before;
+ * - omitted values (undefined/function/symbol) render as `null` inside arrays
+ *   and disappear from objects.
+ *
+ * Two intentional deltas from the old implementation, pinned by
+ * context-manager-estimation-parity.test.ts ("intentional deltas" section):
+ * an own `__proto__` key is now measured as a normal key (the old rebuild's
+ * assignment swallowed it, undercounting bodies JSON.parse can produce), and
+ * an own enumerable `toJSON` function is skipped rather than invoked
+ * (unreachable from JSON.parse; functions cannot survive it).
  */
-function extractImageTokens(node: unknown, seen: Set<unknown>): { node: unknown; tokens: number } {
-  if (node === null || typeof node !== "object") {
-    return { node, tokens: 0 };
-  }
-  // Guard against cycles in structured request bodies.
-  if (seen.has(node)) return { node, tokens: 0 };
-  seen.add(node);
+type VirtualMeasure = { chars: number; mediaTokens: number };
+type MeasureFlags = { aliasedObject?: boolean };
 
-  if (Array.isArray(node)) {
-    let tokens = 0;
-    const out = node.map((item) => {
-      const record =
-        item && typeof item === "object" && !Array.isArray(item)
-          ? (item as Record<string, unknown>)
-          : null;
-      if (record && isInlineBase64ImageBlock(record)) {
-        tokens += IMAGE_TOKEN_ESTIMATE;
-        return { __image_token_estimate__: IMAGE_TOKEN_ESTIMATE };
-      }
-      if (record && isInlineBase64DocumentBlock(record)) {
-        tokens += DOCUMENT_TOKEN_ESTIMATE;
-        return { __document_token_estimate__: DOCUMENT_TOKEN_ESTIMATE };
-      }
-      const result = extractImageTokens(item, seen);
-      tokens += result.tokens;
-      return result.node;
-    });
-    return { node: out, tokens };
-  }
+const IMAGE_PLACEHOLDER_CHARS = JSON.stringify({
+  __image_token_estimate__: IMAGE_TOKEN_ESTIMATE,
+}).length;
+const DOCUMENT_PLACEHOLDER_CHARS = JSON.stringify({
+  __document_token_estimate__: DOCUMENT_TOKEN_ESTIMATE,
+}).length;
 
-  const record = node as Record<string, unknown>;
-  if (isInlineBase64ImageBlock(record)) {
+function isOmittedValue(value: unknown): boolean {
+  return value === undefined || typeof value === "function" || typeof value === "symbol";
+}
+
+/** Estimate context text while excluding opaque attachment bytes from token accounting. */
+function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags): VirtualMeasure {
+  if (node === null) return { chars: 4, mediaTokens: 0 };
+  const type = typeof node;
+  if (type === "string") return { chars: encodedStringLength(node as string), mediaTokens: 0 };
+  if (type === "boolean") return { chars: node ? 4 : 5, mediaTokens: 0 };
+  if (type === "number") {
     return {
-      node: { __image_token_estimate__: IMAGE_TOKEN_ESTIMATE },
-      tokens: IMAGE_TOKEN_ESTIMATE,
+      chars: Number.isFinite(node as number) ? String(node).length : 4,
+      mediaTokens: 0,
     };
+  }
+  if (type === "bigint") {
+    // Match JSON.stringify, which throws rather than guessing an encoding.
+    throw new TypeError("Do not know how to serialize a BigInt");
+  }
+  if (type !== "object") return { chars: 0, mediaTokens: 0 };
+
+  const obj = node as object;
+  if (seen.has(obj)) {
+    // Repeat occurrence: the old walk re-inserted the original subtree here,
+    // so it was measured raw — no substitution, no budgets. Any aliasing makes
+    // per-slot deltas unsound, so pruning callers fall back to recounting.
+    if (flags) flags.aliasedObject = true;
+    return { chars: jsonLength(obj), mediaTokens: 0 };
+  }
+  seen.add(obj);
+
+  if (Array.isArray(obj)) {
+    let chars = 2;
+    let mediaTokens = 0;
+    for (let i = 0; i < obj.length; i++) {
+      if (i > 0) chars += 1;
+      const item = obj[i];
+      // Media fast path BEFORE any seen consultation, mirroring the old walk's
+      // array loop exactly: a revisited media block at an array-item position
+      // is re-priced placeholder + budget at every occurrence (aliased blocks
+      // shared between content slots must not fall to the raw path below).
+      if (item && typeof item === "object" && !Array.isArray(item)) {
+        const record = item as Record<string, unknown>;
+        if (isInlineBase64ImageBlock(record)) {
+          chars += IMAGE_PLACEHOLDER_CHARS;
+          mediaTokens += IMAGE_TOKEN_ESTIMATE;
+          continue;
+        }
+        if (isInlineBase64DocumentBlock(record)) {
+          chars += DOCUMENT_PLACEHOLDER_CHARS;
+          mediaTokens += DOCUMENT_TOKEN_ESTIMATE;
+          continue;
+        }
+        if (isInlineAudioVideoBlock(record)) {
+          chars += DOCUMENT_PLACEHOLDER_CHARS;
+          mediaTokens += DOCUMENT_TOKEN_ESTIMATE;
+          continue;
+        }
+      }
+      if (isOmittedValue(item)) {
+        chars += 4; // omitted values render as null inside arrays
+        continue;
+      }
+      const result = measureVirtual(item, seen, flags);
+      chars += result.chars;
+      mediaTokens += result.mediaTokens;
+    }
+    return { chars, mediaTokens };
+  }
+
+  const record = obj as Record<string, unknown>;
+  if (isInlineBase64ImageBlock(record)) {
+    return { chars: IMAGE_PLACEHOLDER_CHARS, mediaTokens: IMAGE_TOKEN_ESTIMATE };
   }
   if (isInlineBase64DocumentBlock(record)) {
-    return {
-      node: { __document_token_estimate__: DOCUMENT_TOKEN_ESTIMATE },
-      tokens: DOCUMENT_TOKEN_ESTIMATE,
-    };
+    return { chars: DOCUMENT_PLACEHOLDER_CHARS, mediaTokens: DOCUMENT_TOKEN_ESTIMATE };
+  }
+  if (isInlineAudioVideoBlock(record)) {
+    return { chars: DOCUMENT_PLACEHOLDER_CHARS, mediaTokens: DOCUMENT_TOKEN_ESTIMATE };
   }
 
-  let tokens = 0;
-  const out: Record<string, unknown> = {};
+  let chars = 2;
+  let mediaTokens = 0;
+  let first = true;
   for (const [key, value] of Object.entries(record)) {
-    const result = extractImageTokens(value, seen);
-    out[key] = result.node;
-    tokens += result.tokens;
+    if (isOmittedValue(value)) continue; // the whole entry disappears
+    if (!first) chars += 1;
+    first = false;
+    const result = measureVirtual(value, seen, flags);
+    chars += encodedStringLength(key) + 1 + result.chars;
+    mediaTokens += result.mediaTokens;
   }
-  return { node: out, tokens };
+  return { chars, mediaTokens };
 }
 
 /**
  * Estimate token count from text length.
  *
- * Structured input is first walked for inline base64 image blocks (#8368):
- * each recognized image block is substituted with a bounded per-image token
+ * Structured input is measured in its media-substituted serialized form (#8368):
+ * each recognized image/document block is priced at a bounded per-media token
  * budget instead of measuring its base64 payload as raw text, then the
- * remainder of the structure is measured normally via the char/4 heuristic.
+ * remainder of the structure is measured normally via the char/4 heuristic —
+ * all in one pass, without building the substituted tree.
  */
 export function estimateTokens(text: unknown): number {
   if (!text) return 0;
   if (typeof text === "string") {
     return Math.ceil(text.length / CHARS_PER_TOKEN);
   }
-  const { node, tokens: imageTokens } = extractImageTokens(text, new Set());
-  // #7847: count the serialized length instead of building the string. Only `.length` was ever
-  // used, and on a multi-megabyte agent body that string is a pure transient allocation.
-  // jsonLength is exact (property-tested against JSON.stringify), so the estimate is unchanged.
-  return Math.ceil(jsonLength(node) / CHARS_PER_TOKEN) + imageTokens;
+  const { chars, mediaTokens } = measureVirtual(text, new Set());
+  return Math.ceil(chars / CHARS_PER_TOKEN) + mediaTokens;
 }
 
 /**
@@ -366,6 +500,14 @@ export function getSourcedTokenLimit(
  *
  * `ResolvedComboTarget.provider` is populated independently of `modelStr`, so fall
  * back to it before calling `getTokenLimit` (#8716).
+ *
+ * Known sources only (#14931): a target whose window resolves solely to the
+ * generic catch-all default returns `undefined` instead of that guess, so the
+ * runtime combo `Math.min()` in `resolveComboContextLimit` drops it — the
+ * sibling-side counterpart of the #10734 rule `getSourcedTokenLimit` already
+ * applies to advertised combos. An uncataloged member must not clamp the whole
+ * combo to a 128000 it may not have; when every member is unknown the resolver
+ * still falls back to the generic default on its own (source=fallback).
  */
 export function getComboTargetTokenLimit(options: {
   modelStr?: string | null;
@@ -373,7 +515,7 @@ export function getComboTargetTokenLimit(options: {
   parsedProvider?: string | null;
   parsedModel?: string | null;
   targetProvider?: string | null;
-}): number {
+}): number | undefined {
   let parsedProvider = options.parsedProvider;
   let parsedModel = options.parsedModel;
   if (
@@ -385,7 +527,7 @@ export function getComboTargetTokenLimit(options: {
     if (parsedModel === undefined) parsedModel = parsed.model;
   }
   const provider = parsedProvider ?? options.targetProvider ?? options.provider ?? "unknown";
-  return getTokenLimit(provider, parsedModel ?? null);
+  return getSourcedTokenLimit(provider, parsedModel ?? null);
 }
 
 /**
@@ -617,30 +759,47 @@ function purifyHistory(messages: Record<string, unknown>[], targetTokens: number
   const system = messages.filter((m) => m.role === "system" || m.role === "developer");
   const nonSystem = messages.filter((m) => m.role !== "system" && m.role !== "developer");
 
-  // Binary search for how many messages to keep from the end
-  let keep = nonSystem.length;
-  while (keep > 2) {
-    let candidate = [...system, ...nonSystem.slice(-keep)];
+  // Agentic sessions are one user task plus many assistant/tool pairs, so the kept
+  // tail can hold no user turn at all. vLLM chat templates (Qwen) reject that with
+  // HTTP 400 "No user query found in messages", so re-anchor the newest real user
+  // query (not a tool_result carrier) right after the system message.
+  let lastUserIdx = -1;
+  for (let i = nonSystem.length - 1; i >= 0; i--) {
+    const m = nonSystem[i];
+    if (
+      m.role === "user" &&
+      (!Array.isArray(m.content) ||
+        (m.content as Record<string, unknown>[]).some((b) => b?.type !== "tool_result"))
+    ) {
+      lastUserIdx = i;
+      break;
+    }
+  }
+
+  const build = (k: number) => {
+    const anchor =
+      lastUserIdx >= 0 && lastUserIdx < nonSystem.length - k ? [nonSystem[lastUserIdx]] : [];
+    let candidate = [...system, ...anchor, ...nonSystem.slice(-k)];
     candidate = fixToolPairs(candidate);
     candidate = fixToolAdjacency(candidate);
     // Re-run pair fix: fixToolAdjacency may have stripped tool_use blocks, leaving
-    // orphan tool_results that Claude rejects ("tool_result without preceding tool_use").
+    // orphan tool_results that Claude rejects ("tool_result without preceding tool_use",
+    // discussion #2410 — orphan tool_result -> upstream 400).
     candidate = fixToolPairs(candidate);
-    candidate = stripTrailingAssistantOrphanToolUse(candidate);
+    return stripTrailingAssistantOrphanToolUse(candidate);
+  };
+
+  // Binary search for how many messages to keep from the end
+  let keep = nonSystem.length;
+  while (keep > 2) {
     // #8594: measure the candidate structure directly so image-bearing turns are not
     // over-counted and pruned during the binary search.
-    const tokens = estimateTokens(candidate);
+    const tokens = estimateTokens(build(keep));
     if (tokens <= targetTokens) break;
     keep = Math.max(2, Math.floor(keep * 0.7)); // Drop 30% each iteration
   }
 
-  let result = [...system, ...nonSystem.slice(-keep)];
-  result = fixToolPairs(result);
-  result = fixToolAdjacency(result);
-  // Re-run pair fix to drop any tool_result whose matching tool_use was removed by
-  // fixToolAdjacency (discussion #2410 — orphan tool_result -> upstream 400).
-  result = fixToolPairs(result);
-  result = stripTrailingAssistantOrphanToolUse(result);
+  const result = build(keep);
 
   // Add summary of dropped messages. Merge the notice INTO the leading
   // system/developer message instead of splicing a second system-role message
@@ -940,12 +1099,13 @@ export function stripTrailingAssistantOrphanToolUse(
 }
 
 /**
- * Providers that strictly require the last message to be `user` or `tool`.
- * A trailing `assistant` message with plain text content (no tool_use) is
- * valid for Anthropic/OpenAI (signals "continue from here") but rejected by
- * Mistral with: "Expected last role User or Tool … but got assistant" (#3396).
+ * Some providers reject a trailing text-only assistant turn.
+ * Mistral: "Expected last role User or Tool but got assistant" (#3396).
+ * Official Claude OAuth: "This model does not support assistant message
+ * prefill. The conversation must end with a user message." (live 2026-09-13
+ * on claude/claude-opus-5).
  */
-const PROVIDERS_REQUIRING_USER_LAST_MESSAGE = new Set(["mistral"]);
+const PROVIDERS_REQUIRING_USER_LAST_MESSAGE = new Set(["mistral", "claude"]);
 
 /**
  * Strip a trailing `assistant` message that contains ONLY plain text (no
@@ -973,4 +1133,21 @@ export function stripTrailingAssistantForProvider(
   if (hasToolUse || hasToolCalls) return messages;
 
   return messages.slice(0, messages.length - 1);
+}
+
+/**
+ * The same rule for a Responses `input` array, where tool calls are items of their own: only a
+ * trailing assistant message is dropped, with the reasoning items of that turn.
+ */
+export function stripTrailingAssistantInputForProvider<T>(input: T, provider: string): T {
+  if (!PROVIDERS_REQUIRING_USER_LAST_MESSAGE.has(provider) || !Array.isArray(input)) return input;
+
+  const items = input as Record<string, unknown>[];
+  const last = items[items.length - 1];
+  const isMessage = last?.type === undefined || last.type === "message";
+  if (last?.role !== "assistant" || !isMessage) return input;
+
+  let end = items.length - 1;
+  while (end > 0 && items[end - 1]?.type === "reasoning") end--;
+  return items.slice(0, end) as T;
 }

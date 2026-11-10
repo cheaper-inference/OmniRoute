@@ -169,6 +169,26 @@ test("an out-of-range port or an unsupported scheme gives a null key", () => {
   assert.equal(memory.proxyEgressKey("ftp://h:21"), null);
 });
 
+test("a region refusal follows the same short curve as an unreachable probe", () => {
+  const key = "http://@geo:8080";
+  const periods: Array<number | null> = [];
+  let now = START_MS;
+  for (let i = 0; i < 4; i++) {
+    const period = memory.noteProxyRefusal(key, "geo_blocked", now);
+    periods.push(period);
+    now += period ?? 0;
+  }
+  assert.deepEqual(periods, [MIN, 2 * MIN, 4 * MIN, 8 * MIN]);
+});
+
+test("a served response also forgets a region refusal", () => {
+  const key = "http://@geo-served:8080";
+  memory.noteProxyRefusal(key, "geo_blocked", START_MS);
+  assert.equal(memory.isProxyAvoided(key, START_MS + 1), true);
+  memory.noteProxyServed(key);
+  assert.equal(memory.isProxyAvoided(key, START_MS + 2), false);
+});
+
 test("set-aside events are ordered, and only the one in force is reported", () => {
   const a = "http://@a:8080";
   const b = "http://@b:8080";
@@ -196,4 +216,25 @@ test("set-aside events are ordered, and only the one in force is reported", () =
 
   // Once every period is over nothing is in force.
   assert.equal(memory.proxySetAsideSeq(b, START_MS + 4 + 5 * MIN), null);
+});
+
+test("entry and member snapshots share newest-event selection without mixing their states", () => {
+  const key = "http://@snapshot.example:8080";
+  const member = "member one";
+  memory.noteProxyRefusal(key, "transport", START_MS);
+  memory.noteProxyMemberRefusal(key, member, "transport", START_MS);
+  const period = memory.noteProxyRefusal(key, "ip_quota_429", START_MS + 10);
+  memory.noteProxyMemberRefusal(key, member, "ip_quota_429", START_MS + 10);
+  assert.ok(period !== null);
+  const expected = {
+    kind: "ip_quota_429",
+    setAsideAt: START_MS + 10,
+    endsAt: START_MS + 10 + period,
+    streak: 1,
+  };
+  assert.deepEqual(memory.snapshotProxySetAside(key, START_MS + 11), expected);
+  assert.deepEqual(memory.snapshotMemberSetAside(key, member, START_MS + 11), expected);
+  assert.equal(memory.snapshotMemberSetAside(key, "other", START_MS + 11), null);
+  assert.equal(memory.snapshotProxySetAside(null, START_MS + 11), null);
+  assert.equal(memory.snapshotMemberSetAside(key, null, START_MS + 11), null);
 });

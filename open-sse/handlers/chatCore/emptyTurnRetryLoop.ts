@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Flush-empty-retry loop, extracted from chatCore so the credential swap
  * and its rollback live in one place (#14715).
@@ -8,15 +9,18 @@
  * rate-limit writes have to stay on the connection that produced it.
  */
 import { getProviderCredentials as defaultGetProviderCredentials } from "@/sse/services/auth";
-import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
+import { convertJsonBodyWithinCap } from "./jsonBodyToSse.ts";
 import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import {
   formatBufferedVerdictLog,
   judgeBufferedTurn,
   readBoundedResponseOutcome,
   FLUSH_EMPTY_RETRY_MAX_BYTES,
+  pickEmptyTurnRetryCredentials,
+  type RetryRouting,
 } from "../../utils/emptyTurnRetry.ts";
 import { noteBufferedVerdictOutcome } from "./emptyTurnResilienceNotes.ts";
+import { hasTrustedEmptyTurn } from "../../utils/emptyTurnPolicy.ts";
 import { STREAM_RECOVERY } from "../../config/constants.ts";
 
 type LoggerLike = {
@@ -28,6 +32,7 @@ type LoggerLike = {
 type Verdict = ReturnType<typeof judgeBufferedTurn>;
 
 export interface EmptyTurnRetryDeps {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   providerResponse: Response;
   credentials: Record<string, unknown>;
   provider: string;
@@ -49,6 +54,13 @@ export interface EmptyTurnRetryDeps {
   traceId: string | null;
   log: LoggerLike;
   getProviderCredentials?: typeof defaultGetProviderCredentials;
+  /**
+   * Routing constraints of the original selection (#14715): a managed lease or a
+   * pinned connection replays itself, and the key's connection allowlist bounds
+   * the retry. Absent = no constraint (the connection that served the turn is
+   * still excluded first).
+   */
+  routing?: RetryRouting;
   executeProviderRequest: (model: string, allowDedup: boolean) => Promise<unknown>;
   noteOutcome?: typeof noteBufferedVerdictOutcome;
   logTargetRequest: (url: string, headers: Record<string, string>, body: unknown) => void;
@@ -56,6 +68,7 @@ export interface EmptyTurnRetryDeps {
 }
 
 export interface EmptyTurnRetryResult {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   providerResponse: Response;
   finalBody: unknown;
   adopted: boolean;
@@ -69,20 +82,20 @@ export async function runEmptyTurnRetryLoop(
   // Named `getProviderCredentials` so the hard-session-lease inventory still sees this call site.
   const getProviderCredentials = deps.getProviderCredentials ?? defaultGetProviderCredentials;
   let providerResponse = deps.providerResponse;
+  let upstreamHttpSelection = deps.upstreamHttpSelection ?? null;
   let finalBody: unknown = deps.finalBody;
   let adopted = false;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const verdict = judgeBufferedTurn(
-      await readBoundedResponseOutcome(
-        providerResponse,
-        FLUSH_EMPTY_RETRY_MAX_BYTES,
-        deps.timeoutMs
-      ),
-      deps.targetFormat,
-      deps.clientResponseFormat,
-      deps.isAborted()
+    const read = await readBoundedResponseOutcome(
+      providerResponse,
+      FLUSH_EMPTY_RETRY_MAX_BYTES,
+      deps.timeoutMs
     );
+    const verdict: Verdict =
+      read.kind === "text" && !deps.isAborted() && hasTrustedEmptyTurn(providerResponse)
+        ? { kind: "pass", why: "native execution completed normally" }
+        : judgeBufferedTurn(read, deps.targetFormat, deps.clientResponseFormat, deps.isAborted());
     if (verdict.kind === "pass") {
       notePass(deps, note, verdict);
       break;
@@ -100,11 +113,12 @@ export async function runEmptyTurnRetryLoop(
     );
     if (!adoptedRetry) break;
     providerResponse = adoptedRetry.response;
+    upstreamHttpSelection = adoptedRetry.upstreamHttpSelection ?? null;
     finalBody = adoptedRetry.body;
     adopted = true;
   }
 
-  return { providerResponse, finalBody, adopted };
+  return { providerResponse, finalBody, adopted, upstreamHttpSelection };
 }
 
 function notePass(
@@ -127,6 +141,7 @@ function noteBudgetExhausted(
 }
 
 interface AdoptedRetry {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   response: Response;
   body: unknown;
 }
@@ -148,12 +163,20 @@ async function attemptRetry(
     false
   );
 
-  const nextCreds = (await getProviderCredentials(
-    deps.provider,
-    null,
-    null,
-    deps.currentModel
-  ).catch(() => null)) as { connectionId?: string } | null;
+  // A direct getProviderCredentials call (not a bare reference) keeps this site in the
+  // hard-session-lease inventory; the retry is fenced by executeProviderRequest().
+  const selectRetryCredentials = (
+    provider: string,
+    excludeConnectionId: string | null,
+    allowedConnections: string[] | null,
+    requestedModel: string | null
+  ) => getProviderCredentials(provider, excludeConnectionId, allowedConnections, requestedModel);
+  const nextCreds = (await pickEmptyTurnRetryCredentials(selectRetryCredentials, {
+    ...(deps.routing ?? { leased: false, forcedConnectionId: null, apiKey: null }),
+    provider: deps.provider,
+    model: deps.currentModel,
+    current: deps.credentials,
+  })) as { connectionId?: string } | null;
   if (!nextCreds?.connectionId) return null;
 
   const snapshot = { ...deps.credentials };
@@ -197,7 +220,7 @@ async function runRetryRequest(
     if (retryResponse) await retryResponse.body?.cancel().catch(() => {});
     return null;
   }
-  const prepared = await maybeConvertJsonBodyToSse(retryResponse, {
+  const { response: prepared } = await convertJsonBodyWithinCap(retryResponse, {
     log: deps.log,
     provider: deps.provider,
     model: deps.model,
@@ -220,5 +243,11 @@ async function runRetryRequest(
     (retryResult as { transformedBody?: unknown })?.transformedBody ?? deps.translatedBody
   );
   deps.logTargetRequest(deps.providerUrl, deps.providerHeaders, body);
-  return { response: preparedStream, body };
+  return {
+    response: preparedStream,
+    body,
+    upstreamHttpSelection:
+      (retryResult as { upstreamHttpSelection?: HttpAttemptSelection | null })
+        ?.upstreamHttpSelection ?? null,
+  };
 }

@@ -7,6 +7,7 @@ export type PressureReason =
   | "none"
   | "v8_heap_ratio"
   | "v8_heap_absolute"
+  | "rss_absolute"
   | "cgroup_ratio"
   | "cgroup_high"
   | "psi_some"
@@ -248,6 +249,13 @@ export function classifyAdaptiveResourcePressure(
   thresholds: ResourcePressureThresholds
 ): RawLevel {
   let best: RawLevel = { severity: "normal", reason: "none" };
+  if (
+    thresholds.heapAbsoluteThresholdMb != null &&
+    signals.v8.heapUsedBytes >= thresholds.heapAbsoluteThresholdMb * MB
+  ) {
+    best = maxLevel(best, { severity: "critical", reason: "v8_heap_absolute" });
+  }
+
   best = maxLevel(
     best,
     ratioLevel(signals.v8.heapUsedBytes, signals.v8.heapLimitBytes, thresholds, "v8_heap_ratio")
@@ -270,12 +278,32 @@ export function classifyAdaptiveResourcePressure(
   return maxLevel(best, psiLevel(signals.psi?.fullAvg10 ?? null, thresholds, "psi_full"));
 }
 
+/**
+ * History-aware pressure classification, used by the sampled tracker. Applies the absolute heap
+ * fuse, the heap and cgroup ratios and the PSI levels like the stateless classifier, but a cgroup
+ * total above its `high` mark stays critical only with kernel proof of real throttling
+ * (memory.events counters rising since `previousEvents`, or PSI); without proof it is capped at
+ * high.
+ *
+ * @param signals - the current resource sample
+ * @param thresholds - effective thresholds; a null `heapAbsoluteThresholdMb` disables the fuse
+ * @param previousEvents - memory.events counters from the previous sample, or null on the first
+ * @returns the most severe level any signal reached, with its reason
+ */
 export function classifyAdaptiveResourcePressureWithHistory(
   signals: ResourceSignals,
   thresholds: ResourcePressureThresholds,
   previousEvents: ThrottleCounters | null = null
 ): RawLevel {
   let best: RawLevel = { severity: "normal", reason: "none" };
+  // The tracker uses this history-aware path, so honor the same explicit
+  // absolute heap fuse as the stateless classifier above.
+  if (
+    thresholds.heapAbsoluteThresholdMb != null &&
+    signals.v8.heapUsedBytes >= thresholds.heapAbsoluteThresholdMb * MB
+  ) {
+    best = maxLevel(best, { severity: "critical", reason: "v8_heap_absolute" });
+  }
   best = maxLevel(
     best,
     ratioLevel(signals.v8.heapUsedBytes, signals.v8.heapLimitBytes, thresholds, "v8_heap_ratio")

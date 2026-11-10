@@ -1,4 +1,6 @@
 import { MCP_TOOL_MAP } from "./schemas/tools.ts";
+import { hasManageScope } from "../../src/shared/constants/managementScopes.ts";
+import { hasMcpHttpAuthContext } from "./httpAuthContext.ts";
 
 type AuthInfoLike = {
   clientId?: string;
@@ -69,23 +71,34 @@ function scopeMatches(grantedScope: string, requiredScope: string): boolean {
   return false;
 }
 
+function resolveCallerId(extra: McpToolExtraLike | undefined): string {
+  return (
+    (typeof extra?.authInfo?.clientId === "string" && extra.authInfo.clientId.trim()) ||
+    (typeof extra?.sessionId === "string" && extra.sessionId.trim()) ||
+    "anonymous"
+  );
+}
+
 export function resolveCallerScopeContext(
   extra: McpToolExtraLike | undefined,
   fallbackScopes: readonly string[] = []
 ): CallerScopeContext {
-  const callerId =
-    (typeof extra?.authInfo?.clientId === "string" && extra.authInfo.clientId.trim()) ||
-    (typeof extra?.sessionId === "string" && extra.sessionId.trim()) ||
-    "anonymous";
+  const callerId = resolveCallerId(extra);
 
   const authScopes = normalizeScopeList(extra?.authInfo?.scopes);
   if (authScopes.length > 0) {
     return { callerId, scopes: authScopes, source: "authInfo" };
   }
 
-  const metaScopes = extractMetaScopeList(extra?._meta);
-  if (metaScopes.length > 0) {
-    return { callerId, scopes: metaScopes, source: "meta" };
+  // #15159: request _meta is client-controlled and carries no per-caller identity on a local
+  // transport, so it is only honored inside an HTTP auth context. A stdio caller falls through
+  // to the env key instead — the operator's own grant — rather than to scopes the caller
+  // claims for itself.
+  if (hasMcpHttpAuthContext()) {
+    const metaScopes = extractMetaScopeList(extra?._meta);
+    if (metaScopes.length > 0) {
+      return { callerId, scopes: metaScopes, source: "meta" };
+    }
   }
 
   const fallback = normalizeScopeList(fallbackScopes);
@@ -94,6 +107,19 @@ export function resolveCallerScopeContext(
   }
 
   return { callerId, scopes: [], source: "none" };
+}
+
+/**
+ * OMNIROUTE_MCP_ENFORCE_SCOPES is opt-in (default off) to keep the documented local/stdio
+ * single-operator flow friction-free. That default must never extend to a caller resolved from a
+ * real per-key HTTP `Authorization` header (`source === "authInfo"` — populated HTTP/SSE-only)
+ * unless that key already holds full `manage`/`admin` scope. Otherwise an API key granted ONLY the
+ * narrow `mcp:connect` bypass scope (authorized for nothing but the /api/mcp/ LOCAL_ONLY
+ * carve-out) could invoke every MCP tool once an operator enables remote MCP access, because
+ * `evaluateToolScopes()` short-circuits to `allowed: true` while enforcement is off.
+ */
+export function shouldForceScopeEnforcement(context: CallerScopeContext): boolean {
+  return context.source === "authInfo" && !hasManageScope(context.scopes);
 }
 
 export function evaluateToolScopes(
@@ -132,4 +158,24 @@ export function evaluateToolScopes(
     missing,
     reason: missing.length > 0 ? "missing_scopes" : undefined,
   };
+}
+
+/**
+ * The client-facing text for a scope denial.
+ *
+ * S-04 (#15159): this deliberately carries only what the caller can act on — the
+ * tool name and the missing scopes. It must NOT include `Caller=`/`source=`: the
+ * caller id is caller-influenced (`resolveCallerScopeContext` derives it from
+ * `extra.authInfo.clientId`, a caller-supplied string, then `extra.sessionId`, then
+ * "anonymous"), so interpolating it reflected arbitrary caller text back on a
+ * pre-auth error surface and echoed it into logs. The identity is still recorded in
+ * the `_scopeCheck` audit payload in `withScopeEnforcement`, which is where an
+ * operator needs it.
+ *
+ * Extracted here rather than inlined in server.ts so the composition is directly
+ * testable instead of being asserted through a copy of the literal.
+ */
+export function buildScopeDenialMessage(toolName: string, missing: readonly string[]): string {
+  const missingScopes = missing.length > 0 ? missing.join(", ") : "unavailable";
+  return `Insufficient MCP scopes for ${toolName}. Missing: ${missingScopes}.`;
 }

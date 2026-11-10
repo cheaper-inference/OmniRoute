@@ -18,6 +18,9 @@ export const VOLCENGINE_PLAN_PROVIDERS = new Set([
   "volcengine-agent-plan",
 ]);
 
+/** Providers whose Token Plan quota lives behind the Xiaomi MiMo console (#15753). */
+export const XIAOMI_MIMO_PROVIDERS = new Set(["xiaomi-mimo", "xiaomi-mimo-token-plan"]);
+
 export type QuotaScrapingFieldValues = {
   ollamaCloudUsageCookie: string;
   alibabaConsoleCookie: string;
@@ -25,6 +28,8 @@ export type QuotaScrapingFieldValues = {
   qwenCloudCookie: string;
   qwenCloudSecToken: string;
   volcConsoleCookie: string;
+  xiaomiMimoConsoleCookie: string;
+  billingPortalUrl: string;
 };
 
 export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
@@ -34,9 +39,32 @@ export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
   qwenCloudCookie: "",
   qwenCloudSecToken: "",
   volcConsoleCookie: "",
+  xiaomiMimoConsoleCookie: "",
+  billingPortalUrl: "",
 };
 
 export function assignQuotaScrapingProviderData(
+  provider: string | undefined,
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
+  if (provider === "zed-hosted") {
+    assignZedHostedBillingPortalUrl(values, target);
+    return;
+  }
+  assignConsoleSessionProviderData(provider, values, target);
+}
+
+function assignZedHostedBillingPortalUrl(
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
+  // Empty/absent leaves the stored link alone on the edit round-trip.
+  const link = values.billingPortalUrl?.trim();
+  if (link) target.billingPortalUrl = link;
+}
+
+function assignConsoleSessionProviderData(
   provider: string | undefined,
   values: QuotaScrapingFieldValues,
   target: Record<string, unknown>
@@ -61,5 +89,9 @@ export function assignQuotaScrapingProviderData(
     }
   } else if (VOLCENGINE_PLAN_PROVIDERS.has(provider ?? "") && values.volcConsoleCookie?.trim()) {
     target.volcConsoleCookie = values.volcConsoleCookie.trim();
+  } else if (XIAOMI_MIMO_PROVIDERS.has(provider ?? "") && values.xiaomiMimoConsoleCookie?.trim()) {
+    // Optional access: callers may pass a partial form object without the newer
+    // fields (same contract as the qwen branch above).
+    target.xiaomiMimoConsoleCookie = values.xiaomiMimoConsoleCookie.trim();
   }
 }

@@ -298,13 +298,13 @@ Ključna vedenja:
 
 ## 🔑 Sinhronizacijski žetoni in konfiguracijski paket _(v3.6.6+)_
 
-Dostop iz več naprav in dostop zunanjih upravljavcev sta zdaj mogoča prek **sinhronizacijskih žetonov z določenim obsegom**:
+Dostop iz več naprav in dostop zunanjih operaterjev sta zdaj mogoča prek **sinhronizacijskih žetonov z omejenim obsegom**:
 
-- **`POST /api/sync/tokens`** — Izdaja novega sinhronizacijskega žetona (z določenim obsegom in neobveznim potekom veljavnosti)
-- **`DELETE /api/sync/tokens/:id`** — Preklic žetona
-- **`GET /api/sync/bundle`** — Prenos različičenega posnetka JSON vseh neobčutljivih nastavitev, vezanega na ETag (gesla so prekrita)
+- **`POST /api/sync/tokens`** — Izdaja novega sinhronizacijskega žetona (z omejenim obsegom in izbirnim potekom veljavnosti)
+- **`DELETE /api/sync/tokens/:id`** — Prekliče žeton
+- **`GET /api/sync/bundle`** — Prenese različičen posnetek konfiguracije JSON, določen z `ETag` (overjanje je mogoče samo s sinhronizacijskim žetonom). Nastavitve overjanja, kot je geslo nadzorne plošče, so odstranjene, vendar so poverilnice ponudnikov in ključi API vključeni, zato datoteko obravnavajte kot skrivnost
 
-Konfiguracijski paket ustvari `src/lib/sync/bundle.ts`. Odjemalci primerjajo glavo odgovora `ETag`, da zaznajo spremembe brez ponovnega prenosa celotne vsebine.
+Konfiguracijski paket ustvari `src/lib/sync/bundle.ts`. Odjemalci primerjajo glavo odgovora `ETag`, da zaznajo spremembe brez ponovnega prenosa celotne vsebine. V CLI-ju ga ukaz `omniroute sync bundle <outPath> --token <syncToken>` (ali `OMNIROUTE_SYNC_TOKEN`) shrani v datoteko, dostopno samo lastniku.
 
 ---
 
@@ -318,12 +318,12 @@ V v3.6.6 je uvedeno tudi **hibridno štetje žetonov**: ko ponudnik, združljiv 
 
 ## 🛡️ Varen odhodni prenos in zaščita pred SSRF _(v3.6.6+)_
 
-Vsi klici za preverjanje ponudnikov in odkrivanje modelov zdaj potekajo prek dvoplastne zaščite odhodnega prometa:
+Vsi klici za preverjanje ponudnikov in odkrivanje modelov zdaj potekajo skozi dvonivojsko zaščito odhodnih povezav:
 
-1. **Zaščita URL-jev** (`src/shared/network/outboundUrlGuard.ts`) — Blokira zasebne, povratne in lokalne IP-obsege, preden se odpre vtičnica.
-2. **Ovoj za varen prenos** (`src/shared/network/safeOutboundFetch.ts`) — Uporabi zaščito URL-jev, poenoti časovne omejitve in ob prehodnih napakah znova poskusi z eksponentnim podaljševanjem premora.
+1. **Zaščita URL-jev** (`src/shared/network/outboundUrlGuard.ts`) — Najprej preveri ime gostitelja ali dobesedno zapisan naslov IP cilja; v načinu, ki dovoljuje samo javne naslove, ovoj za varen prenos razreši tudi ime in zavrne zasebne naslove. Privzeto blokira končne točke metapodatkov v oblaku — celoten obseg 169.254.0.0/16 in znana imena gostiteljev za metapodatke; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blokira tudi zasebne gostitelje in gostitelje povratne zanke; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (ali podedovana nastavitev `OUTBOUND_SSRF_GUARD_ENABLED=false`) izklopi preverjanja. Vrednost, shranjena prek preklopnega stikala zastavice na nadzorni plošči, ima prednost pred njeno spremenljivko, vgrajeni lokalni ponudniki pa med preverjanjem ključa preskočijo zaščito. Glejte `docs/reference/ENVIRONMENT.md`.
+2. **Ovoj za varen prenos** (`src/shared/network/safeOutboundFetch.ts`) — Uporabi zaščito URL-jev, poenoti časovne omejitve in ob prehodnih napakah ponovi zahteve z eksponentnim podaljševanjem premora.
 
-Kršitve zaščite se prikažejo kot HTTP 422 (`URL_GUARD_BLOCKED`) in se prek `providerAudit.ts` zapišejo v dnevnik revizije skladnosti.
+Kršitve zaščite se prikažejo kot `URL_GUARD_BLOCKED` — HTTP 503 prek `getSafeOutboundFetchErrorStatus` (400 na poti za odkrivanje modelov) — dejanske blokade SSRF med preverjanjem pa se v revizijski dnevnik zapišejo kot dogodki `provider.validation.ssrf_blocked`.
 
 ---
 

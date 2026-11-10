@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import dns from "node:dns";
+
+import { setSafeOutboundPinnedFetchTestOverride } from "../../src/shared/network/safeOutboundFetch.ts";
 
 const { handleAudioTranscription } = await import("../../open-sse/handlers/audioTranscription.ts");
 
@@ -10,6 +13,29 @@ function buildFile(contents, name, type) {
 function immediateTimeout(callback, _ms, ...args) {
   if (typeof callback === "function") callback(...args);
   return 0;
+}
+
+// The Gladia poll goes through safeOutboundFetch, whose DNS deadline is itself a timer, so
+// only the 2s poll interval is skipped here; the host resolves to a public TEST-NET address
+// and the pinned connection is routed back to the test's fetch mock.
+const realSetTimeout = globalThis.setTimeout;
+function pollIntervalOnlyTimeout(callback, ms, ...args) {
+  return ms === 2000
+    ? immediateTimeout(callback, ms, ...args)
+    : realSetTimeout(callback, ms, ...args);
+}
+
+function stubGladiaPollSeams() {
+  const originalLookup = dns.promises.lookup;
+  (dns.promises as { lookup: unknown }).lookup = (async (host: string, options?: unknown) =>
+    host === "api.gladia.io"
+      ? [{ address: "203.0.113.30", family: 4 }]
+      : originalLookup(host, options as never)) as typeof dns.promises.lookup;
+  setSafeOutboundPinnedFetchTestOverride(() => (input, init) => globalThis.fetch(input, init));
+  return () => {
+    (dns.promises as { lookup: unknown }).lookup = originalLookup;
+    setSafeOutboundPinnedFetchTestOverride(undefined);
+  };
 }
 
 test("handleAudioTranscription requires model", async () => {
@@ -308,6 +334,91 @@ test("handleAudioTranscription routes AssemblyAI uploads and polls until complet
   }
 });
 
+type AssemblyCall = { url: string; headers: Record<string, string>; body: unknown };
+
+async function runAssemblyAITranscription(language?: string) {
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+  const calls: AssemblyCall[] = [];
+
+  globalThis.setTimeout = immediateTimeout as unknown as typeof globalThis.setTimeout;
+  globalThis.fetch = (async (url: string | URL | Request, options: RequestInit = {}) => {
+    const stringUrl = String(url);
+    calls.push({
+      url: stringUrl,
+      headers: (options.headers || {}) as Record<string, string>,
+      body: options.body,
+    });
+
+    if (stringUrl === "https://api.assemblyai.com/v2/upload") {
+      return Response.json({ upload_url: "https://upload.example.com/audio.wav" });
+    }
+    if (stringUrl === "https://api.assemblyai.com/v2/transcript") {
+      return Response.json({ id: "transcript-3" });
+    }
+    if (stringUrl === "https://api.assemblyai.com/v2/transcript/transcript-3") {
+      return Response.json({ status: "completed", text: "hello world" });
+    }
+    throw new Error(`Unexpected URL: ${stringUrl}`);
+  }) as typeof globalThis.fetch;
+
+  try {
+    const formData = new FormData();
+    formData.append("model", "assemblyai/universal-2");
+    formData.append("file", buildFile("abc", "clip.wav", "audio/wav"));
+    if (language !== undefined) formData.append("language", language);
+
+    const response = await handleAudioTranscription({
+      formData,
+      credentials: { apiKey: "assembly-key" },
+    });
+    return { response, calls };
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+  }
+}
+
+test("handleAudioTranscription sends the AssemblyAI key as a raw Authorization header on upload, submit and poll", async () => {
+  const { response, calls } = await runAssemblyAITranscription("en");
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { text: "hello world" });
+  assert.deepEqual(
+    calls.map((call) => call.url),
+    [
+      "https://api.assemblyai.com/v2/upload",
+      "https://api.assemblyai.com/v2/transcript",
+      "https://api.assemblyai.com/v2/transcript/transcript-3",
+    ]
+  );
+  for (const call of calls) {
+    assert.equal(call.headers.Authorization, "assembly-key", `raw key expected for ${call.url}`);
+  }
+});
+
+test("handleAudioTranscription maps the language field to AssemblyAI language_code", async () => {
+  const { calls } = await runAssemblyAITranscription(" en ");
+  const submit = calls.find((call) => call.url === "https://api.assemblyai.com/v2/transcript");
+
+  assert.deepEqual(JSON.parse(String(submit?.body)), {
+    audio_url: "https://upload.example.com/audio.wav",
+    speech_models: ["universal-2"],
+    language_code: "en",
+  });
+});
+
+test("handleAudioTranscription keeps AssemblyAI language detection when language is blank", async () => {
+  const { calls } = await runAssemblyAITranscription("   ");
+  const submit = calls.find((call) => call.url === "https://api.assemblyai.com/v2/transcript");
+
+  assert.deepEqual(JSON.parse(String(submit?.body)), {
+    audio_url: "https://upload.example.com/audio.wav",
+    speech_models: ["universal-2"],
+    language_detection: true,
+  });
+});
+
 test("handleAudioTranscription returns an error when AssemblyAI reports a terminal failure", async () => {
   const originalFetch = globalThis.fetch;
   const originalSetTimeout = globalThis.setTimeout;
@@ -525,7 +636,7 @@ test("handleAudioTranscription routes HuggingFace providers with raw audio uploa
 
     assert.equal(
       capturedUrl,
-      "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
+      "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3"
     );
     assert.equal(capturedHeaders.Authorization, "Bearer hf-key");
     assert.equal(capturedHeaders["Content-Type"], "audio/mpeg");
@@ -666,7 +777,8 @@ test("handleAudioTranscription routes Gladia uploads and polls result_url until 
   const originalSetTimeout = globalThis.setTimeout;
   const calls = [];
 
-  globalThis.setTimeout = immediateTimeout;
+  globalThis.setTimeout = pollIntervalOnlyTimeout as unknown as typeof globalThis.setTimeout;
+  const restoreGladiaSeams = stubGladiaPollSeams();
   globalThis.fetch = async (url, options = {}) => {
     const stringUrl = String(url);
     calls.push({ url: stringUrl, method: options?.method || "GET", headers: options?.headers });
@@ -727,6 +839,7 @@ test("handleAudioTranscription routes Gladia uploads and polls result_url until 
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;
+    restoreGladiaSeams();
   }
 });
 
@@ -734,7 +847,8 @@ test("handleAudioTranscription returns an error when Gladia reports a terminal f
   const originalFetch = globalThis.fetch;
   const originalSetTimeout = globalThis.setTimeout;
 
-  globalThis.setTimeout = immediateTimeout;
+  globalThis.setTimeout = pollIntervalOnlyTimeout as unknown as typeof globalThis.setTimeout;
+  const restoreGladiaSeams = stubGladiaPollSeams();
   globalThis.fetch = async (url) => {
     const stringUrl = String(url);
 
@@ -778,6 +892,7 @@ test("handleAudioTranscription returns an error when Gladia reports a terminal f
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;
+    restoreGladiaSeams();
   }
 });
 

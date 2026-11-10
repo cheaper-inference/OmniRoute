@@ -7,16 +7,18 @@ import { normalizeClaudeToolInputSchema, sanitizeToolId } from "../helpers/schem
 import { safeParseJSON } from "../helpers/jsonUtil.ts";
 import {
   applyKimiCodingThinking,
+  createClaudeTailCacheControl,
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
+import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
 import {
   getDefaultThinkingBudget,
   isAdaptiveThinkingOnly,
 } from "../../../src/shared/constants/modelSpecs.ts";
 import { fitThinkingToMaxTokens } from "./openai-to-claude/thinkingBudget.ts";
 import { enforceToolResultAdjacency } from "./openai-to-claude/toolResultAdjacency.ts";
-import { sanitizeToolResultId } from "./openai-to-claude/sanitizeToolResultId.ts";
+import { unwrapOpenAIToolDefinition } from "./openai-to-claude/unwrapToolDefinition.ts";
+import { resolveToolResultId } from "./openai-to-claude/sanitizeToolResultId.ts";
 import {
   openAiImagePartToClaudeBlock,
   normalizeToolResultImages,
@@ -75,6 +77,7 @@ type ClaudeTool = {
   input_schema: Record<string, unknown>;
   cache_control?: { type: string; ttl?: string };
   defer_loading?: boolean;
+  strict?: boolean;
 };
 
 /**
@@ -83,6 +86,36 @@ type ClaudeTool = {
  * text block has text: "". Must also recurse into nested tool_result.content.
  * Ref: sub2api PR #1212
  */
+/**
+ * Anthropic rejects `cache_control` anywhere inside `tool_result.content`:
+ *
+ *   messages.N.content.0.tool_result.content.0.cache_control: cache_control may
+ *   not be specified within `tool_result.content`. Instead, place it directly
+ *   on `tool_result`
+ *
+ * Strip every nested marker off a tool_result's content blocks and return the
+ * first one so the caller can place it on the `tool_result` block itself. The
+ * marker is only meaningful once per block, so the first wins.
+ */
+export function hoistNestedToolResultCacheControl(content: unknown): {
+  content: unknown;
+  cacheControl: unknown;
+} {
+  if (!Array.isArray(content)) return { content, cacheControl: undefined };
+  let cacheControl: unknown;
+  let found = false;
+  const cleaned = content.map((block) => {
+    if (!block || typeof block !== "object") return block;
+    const rec = block as Record<string, unknown>;
+    if (rec.cache_control === undefined) return block;
+    found = true;
+    const { cache_control, ...rest } = rec;
+    if (cacheControl === undefined) cacheControl = cache_control;
+    return rest;
+  });
+  return { content: found ? cleaned : content, cacheControl };
+}
+
 export function stripEmptyTextBlocks(content: unknown[] | undefined): unknown[] {
   if (!Array.isArray(content)) return content ?? [];
   return content
@@ -132,7 +165,12 @@ export function normalizeContentToString(content: string | unknown[] | null | un
 }
 
 // Convert OpenAI request to Claude format
-export function openaiToClaudeRequest(model, body, stream, credentials = null) {
+export function openaiToClaudeRequest(
+  model,
+  body,
+  stream,
+  credentials: { _provider?: string; [key: string]: unknown } | null = null
+) {
   // Check if tool prefix should be disabled (configured per-provider or global)
   const disableToolPrefix = body?._disableToolPrefix === true;
   const routedProvider = credentials?._provider;
@@ -154,7 +192,8 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
     _toolNameMap?: Map<string, string>;
   } = {
     model: model,
-    max_tokens: adjustMaxTokens(body),
+    // An explicit OpenAI cap is a hard limit (e.g. 1-token prompt-cache warm requests).
+    max_tokens: adjustMaxTokens(body, { honorExplicitCap: true }),
     stream: stream,
     messages: [],
   };
@@ -182,8 +221,13 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
   if (body.temperature === undefined && body.top_p !== undefined) {
     result.top_p = body.top_p;
   }
-  if (body.stop !== undefined) {
-    result.stop_sequences = Array.isArray(body.stop) ? body.stop : [body.stop];
+  // `stop: null` is how many OpenAI-compatible clients serialize "no stop"; wrapping it
+  // would send `stop_sequences: [null]`, which Anthropic rejects with a 400.
+  const stopSequences = (Array.isArray(body.stop) ? body.stop : [body.stop]).filter(
+    (value) => typeof value === "string" && value !== ""
+  );
+  if (stopSequences.length > 0) {
+    result.stop_sequences = stopSequences;
   }
 
   // Thinking configuration
@@ -300,10 +344,10 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
   // Whether the OUTBOUND request actually has extended thinking enabled. Anthropic's
   // schema only requires a precursor thinking/redacted_thinking block before a tool_use
   // block when thinking mode is active for THIS request — never unconditionally (#5945).
-  const thinkingEnabledForRequest = Boolean(result.thinking) && result.thinking.type !== "disabled";
+  const thinkingEnabledForRequest = !!result.thinking && result.thinking.type !== "disabled";
 
   // Messages
-  const systemParts = [];
+  const systemParts: string[] = [];
 
   if (body.messages && Array.isArray(body.messages)) {
     // Extract system messages (T15: handle both string and array content)
@@ -334,6 +378,28 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
       }
     };
 
+    // tool_use ids of the latest assistant turn still waiting for a result; an id-less
+    // tool result is paired with the oldest of them instead of being dropped.
+    let pendingToolUseIds: string[] = [];
+
+    // Tool_call ids that appear on more than one assistant turn in the client history
+    // (a retried turn re-sends the same id for a different generation of the answer).
+    // The signed-thinking store is keyed by tool_use id and holds only the newest
+    // generation, so restoring into an older turn replays a block Anthropic never saw
+    // in that position and it answers 400 "…blocks in the latest assistant message
+    // cannot be modified". Skip the restore entirely for such turns: a request without
+    // thinking blocks is valid and is what older clients sent.
+    const toolUseIdCounts = new Map<string, number>();
+    for (const m of nonSystemMessages) {
+      for (const tc of Array.isArray(m?.tool_calls) ? m.tool_calls : []) {
+        const id = typeof tc?.id === "string" ? tc.id : "";
+        if (id) toolUseIdCounts.set(id, (toolUseIdCounts.get(id) ?? 0) + 1);
+      }
+    }
+    const ambiguousToolUseIds = new Set(
+      [...toolUseIdCounts.entries()].filter(([, n]) => n > 1).map(([id]) => id)
+    );
+
     for (const msg of nonSystemMessages) {
       const newRole = msg.role === "user" || msg.role === "tool" ? "user" : "assistant";
       const blocks = getContentBlocksFromMessage(
@@ -341,8 +407,23 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
         toolNameMap,
         disableToolPrefix,
         thinkingEnabledForRequest,
-        isKimiCoding
+        isKimiCoding,
+        {
+          provider: routedProvider,
+          model,
+          disabled: credentials?._videoTranscriptSensitive === true,
+          ambiguousToolUseIds,
+          connectionId:
+            typeof credentials?._connectionId === "string" ? credentials._connectionId : undefined,
+        },
+        pendingToolUseIds,
+        result.thinking && typeof result.thinking.type === "string"
+          ? result.thinking.type
+          : undefined
       );
+      if (newRole === "assistant") {
+        pendingToolUseIds = blocks.filter((b) => b.type === "tool_use").map((b) => String(b.id));
+      }
       const hasToolUse = blocks.some((b) => b.type === "tool_use");
       const hasToolResult = blocks.some((b) => b.type === "tool_result");
 
@@ -398,26 +479,25 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
       ) {
         const lastBlock = message.content[message.content.length - 1];
         if (lastBlock) {
-          lastBlock.cache_control = { type: "ephemeral" };
+          lastBlock.cache_control = createClaudeTailCacheControl(routedProvider);
           break;
         }
       }
     }
   }
 
+  const allowedTools = extractAllowedTools(body.tool_choice);
+
   // Tools - convert from OpenAI format to Claude format with prefix for OAuth
   if (body.tools && Array.isArray(body.tools)) {
-    result.tools = body.tools
+    const translatedTools: ClaudeTool[] = body.tools
       .map((tool) => {
-        // Function-shaped tools arrive in two flavors from real clients:
-        //   (a) openai-spec: { type: "function", function: { name, ... } }
-        //   (b) bare/loose:  { function: { name, ... } }   (no parent `type`)
-        // Unwrap `tool.function` whenever it is present, regardless of the
-        // parent `type` field — some OpenAI-shape clients omit the wrapper's
-        // `type: "function"` entirely. Previously that bare shape fell
-        // through to `toolData = tool` (the wrapper itself, with no `.name`),
-        // producing an empty `originalName` and silently dropping the tool.
-        const toolData = tool.function ?? tool;
+        // `tools` is not validated entry by entry: a null (or non-object) entry is dropped, as
+        // an entry without a name already is, instead of failing the whole request.
+        if (!tool || typeof tool !== "object") return null;
+        // Unwrap spec, bare `{ function }` and Chat Completions `{ type: "custom", custom }`
+        // tools; reading the name off the wrapper itself silently dropped the tool.
+        const toolData = unwrapOpenAIToolDefinition(tool);
         const originalName = typeof toolData.name === "string" ? toolData.name.trim() : "";
 
         if (!originalName) {
@@ -435,8 +515,11 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
 
         // Normalize input_schema: Anthropic requires `properties` when type is "object" (#595).
         // MCP tools (e.g. pencil, computer_use) may omit properties on object-type schemas.
-        const rawSchema: Record<string, unknown> = toolData.parameters ||
-          toolData.input_schema || { type: "object", properties: {}, required: [] };
+        const rawSchema = (toolData.parameters ||
+          toolData.input_schema || { type: "object", properties: {}, required: [] }) as Record<
+          string,
+          unknown
+        >;
         const withProperties =
           rawSchema.type === "object" && !rawSchema.properties
             ? { ...rawSchema, properties: {} }
@@ -449,12 +532,27 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
           name: toolName,
           description: toolData.description || "",
           input_schema: normalizedSchema,
+          // Anthropic tools accept `strict` (structured tool inputs); dropping it silently
+          // relaxed schema enforcement the client asked for (9router#4172).
+          ...(toolData.strict === true ? { strict: true } : {}),
         };
       })
       .filter((tool): tool is ClaudeTool => Boolean(tool));
 
     // Filter out tools with empty names (would cause Claude 400 error)
-    result.tools = result.tools.filter((tool) => tool.name && tool.name?.trim());
+    result.tools = translatedTools.filter((tool) => tool.name && tool.name?.trim());
+
+    // OpenAI `allowed_tools` restricts the callable subset; Claude has no equivalent
+    // tool_choice, so narrow the declared tools instead (9router#4171).
+    if (allowedTools) {
+      const originalNameOf = (tool: ClaudeTool) =>
+        disableToolPrefix ? tool.name : (toolNameMap.get(tool.name) ?? tool.name);
+      const allowed = result.tools.filter((tool) => allowedTools.names.has(originalNameOf(tool)));
+      if (allowed.length > 0) {
+        result.tools = allowed;
+        allowedTools.kept = allowed.map(originalNameOf);
+      }
+    }
 
     // Cache breakpoint on the last non-defer-loading tool — Anthropic
     // rejects cache_control on defer_loading tools.
@@ -467,8 +565,29 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
   }
 
   // Tool choice
-  if (body.tool_choice) {
+  if (allowedTools) {
+    result.tool_choice = convertAllowedToolsChoice(allowedTools);
+  } else if (body.tool_choice) {
     result.tool_choice = convertOpenAIToolChoice(body.tool_choice);
+  }
+  // A forced tool must use the prefixed name `tools` declares, or Claude rejects the request.
+  const forced = result.tool_choice;
+  const prefixedForced = typeof forced === "object" && CLAUDE_OAUTH_TOOL_PREFIX + forced.name;
+  if (prefixedForced && forced.type === "tool" && toolNameMap.has(prefixedForced)) {
+    result.tool_choice = { ...forced, name: prefixedForced };
+  }
+
+  // OpenAI `parallel_tool_calls: false` ↔ Claude `tool_choice.disable_parallel_tool_use`.
+  // Claude carries the flag on tool_choice, so synthesize `auto` when none was sent; it is
+  // only valid alongside tools and not on `none` (9router#4171).
+  if (body.parallel_tool_calls === false && result.tools?.length) {
+    const choice =
+      result.tool_choice && typeof result.tool_choice === "object"
+        ? result.tool_choice
+        : { type: "auto" };
+    if (choice.type !== "none") {
+      result.tool_choice = { ...choice, disable_parallel_tool_use: true };
+    }
   }
 
   // response_format: inject JSON structured output instruction into system prompt.
@@ -479,11 +598,11 @@ export function openaiToClaudeRequest(model, body, stream, credentials = null) {
     if (fmt.type === "json_schema" && fmt.json_schema?.schema) {
       const schemaJson = JSON.stringify(fmt.json_schema.schema, null, 2);
       systemParts.push(
-        `You must respond with valid JSON that strictly follows this JSON schema:\n\`\`\`json\n${schemaJson}\n\`\`\`\nRespond ONLY with the JSON object, no other text.`
+        `You must respond with valid JSON that strictly follows this JSON schema:\n\`\`\`json\n${schemaJson}\n\`\`\`\nRespond ONLY with the JSON object, no other text and no markdown code fences.`
       );
     } else if (fmt.type === "json_object") {
       systemParts.push(
-        "You must respond with valid JSON. Respond ONLY with a JSON object, no other text."
+        "You must respond with valid JSON. Respond ONLY with a JSON object, no other text and no markdown code fences."
       );
     }
   }
@@ -539,22 +658,45 @@ function getContentBlocksFromMessage(
   toolNameMap = new Map(),
   disableToolPrefix = false,
   thinkingEnabledForRequest = false,
-  isKimiCoding = false
+  isKimiCoding = false,
+  thinkingBinding: {
+    provider?: unknown;
+    model?: unknown;
+    disabled?: boolean;
+    connectionId?: unknown;
+    ambiguousToolUseIds?: Set<string>;
+  } = {},
+  pendingToolUseIds: string[] = [],
+  thinkingTypeForRequest: string | undefined = undefined
 ) {
-  const blocks = [];
+  const blocks: ClaudeContentBlock[] = [];
 
   if (msg.role === "tool") {
-    const sanitizedToolUseId = sanitizeToolResultId(msg.tool_call_id); // #7705
+    const sanitizedToolUseId = resolveToolResultId(msg.tool_call_id, pendingToolUseIds); // #7705
     if (!sanitizedToolUseId) return blocks;
     // T02: Strip empty text blocks from nested tool_result content to avoid Anthropic 400
     // #9692: rewrite OpenAI image_url parts to Claude image blocks (same as user turns)
     const toolContent = normalizeToolResultImages(
       Array.isArray(msg.content) ? stripEmptyTextBlocks(msg.content) : msg.content
     );
+    // A nested `cache_control` is invalid inside `tool_result.content`; hoist it
+    // onto the tool_result block. Also accept a marker already hoisted onto the
+    // tool MESSAGE by filterToOpenAIFormat (openai-compat passthrough path).
+    const { content: hoistedContent, cacheControl } =
+      hoistNestedToolResultCacheControl(toolContent);
+    const toolResultCacheControl =
+      msg.cache_control !== undefined ? msg.cache_control : cacheControl;
     blocks.push({
       type: "tool_result",
       tool_use_id: sanitizedToolUseId,
-      content: toolContent,
+      content: hoistedContent,
+      // Zed's cloud proxy (cloud.zed.dev/completions) strictly requires
+      // `is_error` on every Anthropic tool_result block. OpenAI tool messages
+      // carry no such flag, so default to false unless the caller set it explicitly.
+      is_error: msg.is_error ?? false,
+      // The hoisted `cache_control` marker belongs on the tool_result block
+      // itself — Anthropic rejects it inside `tool_result.content`.
+      ...(toolResultCacheControl !== undefined && { cache_control: toolResultCacheControl }),
     });
   } else if (msg.role === "user") {
     if (typeof msg.content === "string") {
@@ -566,18 +708,27 @@ function getContentBlocksFromMessage(
         if (part.type === "text" && part.text) {
           blocks.push({ type: "text", text: part.text });
         } else if (part.type === "tool_result") {
-          // Skip tool_result with no tool_use_id (would be useless and may cause errors)
-          if (!part.tool_use_id) continue;
+          // Pair an id-less tool_result with the oldest pending tool_use; skip it only
+          // when nothing is pending (it would be useless and may cause errors).
+          const toolUseId = resolveToolResultId(part.tool_use_id, pendingToolUseIds);
+          if (!toolUseId) continue;
           // T02: strip empty text blocks from nested content before passing to Anthropic
           // #9692: convert OpenAI image_url nested in tool_result the same way
           const resultContent = normalizeToolResultImages(
             Array.isArray(part.content) ? stripEmptyTextBlocks(part.content) : part.content
           );
+          // Same tool_result.content restriction as the role:"tool" branch above.
+          const hoisted = hoistNestedToolResultCacheControl(resultContent);
+          const partCacheControl =
+            part.cache_control !== undefined ? part.cache_control : hoisted.cacheControl;
           blocks.push({
             type: "tool_result",
-            tool_use_id: sanitizeToolId(part.tool_use_id), // #7705
-            content: resultContent,
-            ...(part.is_error && { is_error: part.is_error }),
+            tool_use_id: toolUseId, // #7705
+            content: hoisted.content,
+            // Always emit a boolean: Zed's strict Anthropic parser rejects
+            // tool_result blocks with a missing `is_error` field.
+            is_error: part.is_error ?? false,
+            ...(partCacheControl !== undefined && { cache_control: partCacheControl }),
           });
         } else if (part.type === "image_url" || part.type === "image") {
           const imageBlock = openAiImagePartToClaudeBlock(part);
@@ -641,10 +792,9 @@ function getContentBlocksFromMessage(
           if (part.type === "redacted_thinking" && part.data === "") {
             continue; // drop — same: empty data from non-Anthropic provider
           }
-          blocks.push({
-            ...part,
-            signature: part.signature || DEFAULT_THINKING_CLAUDE_SIGNATURE,
-          });
+          // Never fabricate a signature: the DEFAULT blob is a real encrypted thought from an
+          // unrelated session and Claude decrypts it as its own reasoning.
+          blocks.push({ ...part });
         } else if (part.type === "tool_use") {
           // Tool name already has prefix from tool declarations, keep as-is
           // CRITICAL: Skip tool_use blocks with empty name (causes Claude 400 error)
@@ -678,7 +828,7 @@ function getContentBlocksFromMessage(
             type: "tool_use",
             id: sanitizeToolId(tc.id),
             name: toolName,
-            input: tryParseJSON(tc.function.arguments),
+            input: parseToolInput(tc.function.arguments),
           });
         }
       }
@@ -704,29 +854,100 @@ function getContentBlocksFromMessage(
     // the "Pi" harness) detect the extra block and refuse the turn as prompt injection.
     // Drop reasoning_content silently when it is not required by the schema, mirroring
     // how other echo-only fields are dropped (see OPENAI_INCOMPATIBLE_ECHO_FIELDS).
-    const hasThinkingBlock = blocks.some(
+    let hasThinkingBlock = blocks.some(
       (b) => b.type === "thinking" || b.type === "redacted_thinking"
     );
     const hasToolUseBlock = blocks.some((b) => b.type === "tool_use");
+    // Signed-thinking continuity: the client (OpenAI Chat / Responses) never held the
+    // signed blocks Claude produced for this tool turn, but claude-to-openai stored them
+    // keyed by the tool_use ids. Put each run back where Claude emitted it: after the
+    // turn's previous tool_use (or at the front), before the tool_use it preceded —
+    // only for MANUAL extended thinking (`type:"enabled"`), for the same provider +
+    // model + connection, only when the client sent no thinking block of its own,
+    // never for a video-derived request. A fragment that does not carry a run's
+    // tool_use skips that run, so a turn the client split into several messages
+    // replays every block once (#18607). A miss injects nothing.
+    // #17324 recurrence (2026-10-27): adaptive-only models (Opus 4.7+/5.x, Fable 5)
+    // accept a tool_use turn with NO thinking block at all, but replaying stored
+    // signed blocks there breaks Anthropic's warm-cache block-equality whenever the
+    // restore hits/misses differently than the turn that warmed the cache (TTL,
+    // eviction, completed-turn rewrite) → 400 "latest assistant message cannot be
+    // modified".
+    const ownToolUseIds = blocks.filter((b) => b.type === "tool_use").map((b) => String(b.id));
+    // A duplicated tool_call id makes the store's entry ambiguous (it may belong to a
+    // different generation of this turn); restoring it replays a block the upstream
+    // did not see here and it answers 400 "cannot be modified". Skip instead: an
+    // assistant turn without thinking blocks is accepted.
+    const hasAmbiguousToolUseId = ownToolUseIds.some((id) =>
+      thinkingBinding.ambiguousToolUseIds?.has(id)
+    );
+    if (
+      !isKimiCoding &&
+      !thinkingBinding.disabled &&
+      thinkingEnabledForRequest &&
+      thinkingTypeForRequest === "enabled" &&
+      hasToolUseBlock &&
+      !hasThinkingBlock &&
+      !hasAmbiguousToolUseId
+    ) {
+      const restored = restoreClaudeThinkingBlocks({
+        toolUseIds: ownToolUseIds,
+        provider: thinkingBinding.provider,
+        model: thinkingBinding.model,
+        connectionId: thinkingBinding.connectionId,
+      });
+      let cursor = 0;
+      for (const { toolUseId, blocks: signed } of restored ?? []) {
+        const owner = blocks.findIndex(
+          (b, i) => i >= cursor && b.type === "tool_use" && b.id === toolUseId
+        );
+        if (owner < 0) continue;
+        blocks.splice(cursor, 0, ...signed);
+        cursor = owner + signed.length + 1;
+        hasThinkingBlock = true;
+      }
+    }
     if (isKimiCoding && typeof msg.reasoning_content === "string" && !hasThinkingBlock) {
       blocks.unshift({ type: "thinking", thinking: msg.reasoning_content });
-    } else if (
-      msg.reasoning_content &&
-      thinkingEnabledForRequest &&
-      hasToolUseBlock &&
-      !hasThinkingBlock
-    ) {
-      blocks.unshift({
-        type: "redacted_thinking",
-        data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-      });
     }
+    // A store miss injects nothing: adaptive thinking has no precursor requirement, and
+    // prepareClaudeRequest disables manual thinking when the final tool turn has no
+    // genuine block.
   }
 
   return blocks;
 }
 
 // Convert OpenAI tool choice to Claude format
+type AllowedTools = { required: boolean; names: Set<string>; kept: string[] };
+
+// OpenAI `allowed_tools` arrives as Chat Completions
+// `{type:"allowed_tools", allowed_tools:{mode, tools}}` or Responses-style
+// `{type:"allowed_tools", mode, tools}`; tool entries carry `function.name` or `name`.
+function extractAllowedTools(choice: unknown): AllowedTools | null {
+  if (!choice || typeof choice !== "object") return null;
+  const record = choice as Record<string, unknown>;
+  if (record.type !== "allowed_tools") return null;
+  const spec =
+    record.allowed_tools && typeof record.allowed_tools === "object"
+      ? (record.allowed_tools as Record<string, unknown>)
+      : record;
+  const names = new Set<string>();
+  for (const entry of Array.isArray(spec.tools) ? spec.tools : []) {
+    if (!entry || typeof entry !== "object") continue;
+    const fn = (entry as Record<string, unknown>).function as Record<string, unknown> | undefined;
+    const name = fn?.name ?? (entry as Record<string, unknown>).name;
+    if (typeof name === "string" && name.trim()) names.add(name.trim());
+  }
+  return { required: spec.mode === "required", names, kept: [] };
+}
+
+function convertAllowedToolsChoice(allowed: AllowedTools) {
+  if (!allowed.required) return { type: "auto" };
+  if (allowed.kept.length === 1) return { type: "tool", name: allowed.kept[0] };
+  return { type: CLAUDE_TOOL_CHOICE_REQUIRED };
+}
+
 function convertOpenAIToolChoice(choice) {
   if (!choice) return { type: "auto" };
   if (typeof choice === "object" && choice.type) {
@@ -766,9 +987,10 @@ function extractTextContent(content) {
   return "";
 }
 
-// Try parse JSON (passthrough fallback: return the raw input string on parse error).
-function tryParseJSON(str: unknown): unknown {
-  return safeParseJSON(str, str);
+function parseToolInput(args: unknown): Record<string, unknown> {
+  const parsed = safeParseJSON(args, null);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+  return parsed as Record<string, unknown>;
 }
 
 function stripCacheControl(value: unknown): unknown {
@@ -805,6 +1027,17 @@ function openaiToClaudeRequestForAntigravity(model, body, stream) {
       return tool;
     });
   }
+  const forced = result.tool_choice;
+  if (
+    typeof forced === "object" &&
+    forced.type === "tool" &&
+    String(forced.name).startsWith(CLAUDE_OAUTH_TOOL_PREFIX)
+  ) {
+    result.tool_choice = {
+      ...forced,
+      name: String(forced.name).slice(CLAUDE_OAUTH_TOOL_PREFIX.length),
+    };
+  }
 
   // Strip prefix from tool_use in messages
   if (result.messages && Array.isArray(result.messages)) {
@@ -840,4 +1073,4 @@ function openaiToClaudeRequestForAntigravity(model, body, stream) {
 export { openaiToClaudeRequestForAntigravity };
 
 // Register
-register(FORMATS.OPENAI, FORMATS.CLAUDE, openaiToClaudeRequest, null);
+register(FORMATS.OPENAI, FORMATS.CLAUDE, openaiToClaudeRequest);

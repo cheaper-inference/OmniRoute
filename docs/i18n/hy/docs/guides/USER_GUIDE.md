@@ -120,35 +120,40 @@ $20 վճարելու և սահմանափակումներին բախվելու փ
 
 ## 📖 Մատակարարի կարգավորում
 
-CSV կամ JSON ֆայլից API բանալիներով կապեր զանգվածաբար ավելացնելու համար օգտագործեք **Կառավարման վահանակ → Մատակարարներ → Ներմուծել ֆայլից**։ Սյունակների հերթականությունը ֆիքսված է (`provider,name,apiKey,baseUrl,priority`), իսկ `provider`-ը պետք է արդեն գոյություն ունենա որպես կառավարվող մատակարար կամ համատեղելի հանգույց։ Տե՛ս [Մատակարարների ներմուծում CSV կամ JSON ֆայլից](../providers/CSV-IMPORT.md)։
+CSV կամ JSON ֆայլից API-բանալիով կապերը զանգվածաբար ավելացնելու համար օգտագործեք **Վահանակ → Մատակարարներ → Ներմուծել ֆայլից**։ Սյունակները դիրքային են (`provider,name,apiKey,baseUrl,priority`), իսկ `provider`-ը պետք է արդեն գոյություն ունենա որպես կառավարվող մատակարար կամ համատեղելի հանգույց։ Տեսեք [Մատակարարների ներմուծում CSV կամ JSON ֆայլից](../providers/CSV-IMPORT.md)։
 
 ### 🔐 Բաժանորդագրությամբ մատակարարներ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել Claude Code-ը
-→ OAuth մուտք → Թոքենի ավտոմատ թարմացում
+Վահանակ → Մատակարարներ → Միացնել Claude Code-ը
+→ Մուտք OAuth-ով → Նշանի ավտոմատ թարմացում
 → 5-ժամյա + շաբաթական քվոտայի հետևում
 
-Մոդելներ.
+Մոդելներ:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Մասնագիտական խորհուրդ․** Բարդ առաջադրանքների համար օգտագործեք Opus, իսկ արագության համար՝ Sonnet։ OmniRoute-ը հետևում է յուրաքանչյուր մոդելի քվոտային։
+**Մասնագիտական խորհուրդ․** Բարդ առաջադրանքների համար օգտագործեք Opus-ը, իսկ արագության համար՝ Sonnet-ը։ OmniRoute-ը հետևում է քվոտային ըստ մոդելի։
 
-Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները պահպանում են Opus և Sonnet մոդելների մտածողության ջանքի `max` մակարդակը։ Haiku մոդելները չեն ընդունում ջանքի `max` մակարդակը, ուստի OmniRoute-ը, նախքան հարցումը վերին հոսքի ծառայությանը ուղարկելը, այն իջեցնում է մինչև մտածողության բարձր բյուջե։
+OmniRoute-ի հոսքերը, որոնք համատեղելի են Claude-ի և Claude Code-ի հետ, Opus և Sonnet
+մոդելների համար պահպանում են մտածողության `max` ջանքը։ Haiku մոդելները չեն ընդունում
+`max` ջանքի մակարդակը, ուստի OmniRoute-ը այդ հարցումը դեպի վերին հոսք ուղարկելուց առաջ
+իջեցնում է մինչև բարձր մտածողության բյուջե։
+
+OmniRoute-ի հոսթում զննարկիչ չկա՞։ Ցանկացած վայրում, որտեղ Claude Code-ը մուտք է գործած, գործարկեք `claude setup-token` և մեկ տարվա նշանը տեղադրեք **Կարգավորման նշան** ներդիրում։ Տեսեք [Claude Code-ը կարգավորման նշանով](../providers/CLAUDE_CODE_SETUP_TOKEN.md)։
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել Codex-ը
-→ OAuth մուտք (պորտ 1455)
+Վահանակ → Մատակարարներ → Միացնել Codex-ը
+→ Մուտք OAuth-ով (պորտ 1455)
 → 5-ժամյա + շաբաթական վերականգնում
 
-Մոդելներ.
+Մոդելներ:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -158,11 +163,11 @@ Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները �
 #### GitHub Copilot
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել GitHub-ը
-→ OAuth՝ GitHub-ի միջոցով
+Վահանակ → Մատակարարներ → Միացնել GitHub-ը
+→ OAuth GitHub-ի միջոցով
 → Ամսական վերականգնում (ամսվա 1-ին օրը)
 
-Մոդելներ.
+Մոդելներ:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -170,56 +175,76 @@ Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները �
   gh/gemini-3.1-pro-preview
 ```
 
+**AI կրեդիտներ (նշանների վրա հիմնված հաշվարկ)։** Երբ GitHub-ը հաշվի համար հաղորդում է
+`credits_used`, Մատակարարի սահմանաչափերի քարտում ցուցադրվում է **AI կրեդիտներ** տողը՝
+ընթացիկ հաշվարկային ժամանակահատվածում սպառված կրեդիտներով, այդ թվում՝ անսահմանափակ
+կազմակերպությունների պլաններում։
+
+**AI կրեդիտների տեղական սահմանաչափ։** Խմբագրեք GitHub-ի կապը և սահմանեք **AI կրեդիտների
+սահմանաչափը յուրաքանչյուր հաշվարկային ժամանակահատվածի համար** (`providerSpecificData.githubCreditLimit`)։
+Դատարկ արժեքը անջատում է այն, իսկ `0`-ն միշտ բաց է թողնում այդ կապը։ Երբ օգտագործման
+վերջին ընթերցված արժեքը հավասար է կամ գերազանցում է սահմանաչափը, հաշվի ընտրությունը բաց է
+թողնում այդ կապը, իսկ երթուղավորումը անցնում է ձեր մյուս կապերին՝ նույն կերպ, ինչպես
+քվոտայի քաղաքականության դադարեցման դեպքում։ Ստուգումն օգտագործում է այն օգտագործման
+տվյալները, որոնք պարբերական քվոտայի թարմացումն արդեն հավաքում է. այն երբեք GitHub-ին չի
+դիմում հարցման ճանապարհին, և գործում է թույլատրող ռեժիմով․ բացակայող կամ հնացած ընթերցված
+արժեքը (15 րոպեից ավելի հին, կամ արդեն վերականգնված հաշվարկային ժամանակահատվածից) չի
+արգելափակում կապը։ Սա տեղական պաշտպանիչ մեխանիզմ է, **ոչ թե ծախսերի երաշխավորված
+առաստաղ**․ GitHub-ի հաղորդման ուշացումները, թարմացման պարբերականությունը, ընթացքի մեջ
+գտնվող հարցումները և OmniRoute-ից դուրս կատարված օգտագործումը կարող են գերազանցել այն։
+Կոշտ սահմանաչափի համար օգտագործեք GitHub-ի սեփական ծախսերի վերահսկման գործիքները։
+
 ### 💰 Էժան մատակարարներ
 
 #### GLM-4.7 (օրական վերականգնում, $0.6/1M)
 
 1. Գրանցվեք՝ [Zhipu AI](https://open.bigmodel.cn)
-2. Ստացեք API բանալին Coding Plan-ից
-3. Կառավարման վահանակ → Ավելացնել API բանալի. Մատակարար՝ `glm`, API բանալի՝ `your-key`
+2. Coding Plan-ից ստացեք API բանալի
+3. Վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `glm`, API բանալի՝ `your-key`
 
-**Օգտագործում․** `glm/glm-4.7` — **Մասնագիտական խորհուրդ․** Coding Plan-ն առաջարկում է 3× քվոտա՝ արժեքի 1/7-ի դիմաց։ Վերականգնվում է ամեն օր՝ ժամը 10:00-ին։
+**Օգտագործում․** `glm/glm-4.7` — **Մասնագիտական խորհուրդ․** Coding Plan-ն առաջարկում է 3× քվոտա՝ արժեքի 1/7-ի դիմաց։ Վերականգնումն ամեն օր ժամը 10:00-ին է։
 
 #### MiniMax M2.1 (5-ժամյա վերականգնում, $0.20/1M)
 
 1. Գրանցվեք՝ [MiniMax](https://www.minimax.io)
-2. Ստացեք API բանալին → Կառավարման վահանակ → Ավելացնել API բանալի
+2. Ստացեք API բանալի → Վահանակ → Ավելացնել API բանալի
 
-**Օգտագործում․** `minimax/MiniMax-M2.1` — **Մասնագիտական խորհուրդ․** Երկար համատեքստի համար ամենաէժան տարբերակն է (1M թոքեն)։
+**Օգտագործում․** `minimax/MiniMax-M2.1` — **Մասնագիտական խորհուրդ․** Երկար կոնտեքստի համար ամենաէժան տարբերակն է (1M նշան)։
 
-#### Kimi K2 (ամսական հաստատագրված $9)
+#### Kimi K2 ($9/ամիս հաստատագրված)
 
 1. Բաժանորդագրվեք՝ [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Ստացեք API բանալին → Կառավարման վահանակ → Ավելացնել API բանալի
+2. Ստացեք API բանալի → Վահանակ → Ավելացնել API բանալի
 
-**Օգտագործում․** `kimi/kimi-k2.5` — **Մասնագիտական խորհուրդ․** Ամսական հաստատագրված $9՝ 10M թոքենի համար = արդյունավետ արժեքը՝ $0.90/1M։
+**Օգտագործում․** `kimi/kimi-k2.5` — **Մասնագիտական խորհուրդ․** Հաստատագրված $9/ամիս՝ 10M նշանի համար = $0.90/1M արդյունավետ արժեք։
 
 #### Baidu Qianfan / ERNIE
 
 1. Գրանցվեք՝ [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Ստեղծեք Qianfan API բանալի → Կառավարման վահանակ → Ավելացնել API բանալի. Մատակարար՝ `qianfan`
+2. Ստեղծեք Qianfan API բանալի → Վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `qianfan`
 
-**Օգտագործում․** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` կամ Qianfan-ի՝ OpenAI-ի հետ համատեղելի մեկ այլ մոդելի ID։
+**Օգտագործում․** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` կամ Qianfan-ի հետ OpenAI-ի համատեղելի մեկ այլ մոդելի ID։
 
 ### 🆓 ԱՆՎՃԱՐ մատակարարներ
 
-Նույնականացում չպահանջող անվճար մատակարարների էջում **Նույնականացում չի պահանջվում** ընտրանքի կողքին կա անջատիչ։
-Այն անջատելու դեպքում տվյալ մատակարարն անջատվում է, հեռացվում է Մատակարարների կարգավորված/սեղմ տեսքերից, իսկ դրա մոդելները հեռացվում են `/v1/models`-ից։
+Առանց նույնականացման անվճար մատակարարների էջում **Նույնականացում չի պահանջվում** ընտրանքի կողքին կա անջատիչ։
+Այն անջատելը անջատում է տվյալ մատակարարին, հեռացնում է այն Կազմաձևված մատակարարների/կոմպակտ տեսքերից
+և հեռացնում է դրա մոդելները `/v1/models`-ից։
 
 #### Qoder (9 ԱՆՎՃԱՐ մոդել)
 
 ```bash
-Կառավարման վահանակ → Միացնել Qoder-ը → OAuth մուտք → Հասանելիությունը ենթակա է մատակարարի ընթացիկ սահմանափակումներին
+Վահանակ → Միացնել Qoder-ը → Մուտք OAuth-ով → Մատչելիությունը կախված է մատակարարի ընթացիկ սահմանաչափերից
 
-Մոդելներ. if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Մոդելներ՝ if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude ԱՆՎՃԱՐ)
 
 ```bash
-Կառավարման վահանակ → Միացնել Kiro-ն → AWS Builder ID կամ Google/GitHub → ամսական մոտ 50 կրեդիտ
+Վահանակ → Միացնել Kiro-ն → AWS Builder ID կամ Google/GitHub → մոտ 50 կրեդիտ/ամիս
 
-Մոդելներ. kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Մոդելներ՝ kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -332,65 +357,65 @@ API բանալի՝ [կառավարման վահանակից]
 
 ---
 
-## 🚀 Տեղակայում
+## 🚀 տեղակայում
 
-### npm-ի գլոբալ տեղադրում (խորհուրդ է տրվում)
+### Համաշխարհային npm տեղադրում (Առաջարկվում է)
 
 ```bash
 npm install -g omniroute
 
-# Ստեղծել կազմաձևման պանակը
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ստեղծել .env ֆայլը (տե՛ս .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Գործարկել սերվերը
+# Start server
 omniroute
-# Կամ հատուկ պորտով՝
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-ն ավտոմատ կերպով բեռնում է `.env`-ը `~/.omniroute/.env`-ից կամ `./.env`-ից։
+CLI ավտոմատ կերպով բեռնում է `.env` `~/.omniroute/.env` ից կամ `./.env`: Աշխատանքային գրացուցակում `./.env` կարող է սահմանել ստեղների միայն կարճ թույլատրելի ցուցակ (պորտ, `REQUIRE_API_KEY`, տեղայնություն և գույնի կարգավորումներ); մնացած ամեն ինչ դրեք `~/.omniroute/.env` ում: Տես [CLI գործարկման պայմանագրերը](CLI-LAUNCH-CONTRACTS.md#working-directory-env) :
 
-### Համակարգային դարակի ռեժիմ
+### Սկուտեղի ռեժիմ
 
-Գործարկեք OmniRoute-ը համակարգային դարակում․
+Սկսեք OmniRoute համակարգի սկուտեղում.
 
 ```bash
 omniroute serve --tray
 ```
 
-Հրամանի կատարումն ավարտվում է սերվերի և համակարգային դարակի պատրաստ լինելուց հետո։
+Հրամանը վերադառնում է սերվերի և սկուտեղի պատրաստ լինելուց հետո:
 
-Սերվերը շարունակում է աշխատել առանց տերմինալի։
+Սերվերը շարունակում է առանց տերմինալի:
 
-Համակարգային դարակի ռեժիմն աջակցում է macOS-ը, Windows-ը և գրաֆիկական Linux աշխատաշրջանները։ Համակարգային դարակի ռեժիմը կառավարման վահանակն ավտոմատ չի բացում։
+Սկուտեղի ռեժիմն աջակցում է macOS, Windows և գրաֆիկական Linux նիստերին: Սկուտեղի ռեժիմը ավտոմատ կերպով չի բացում վահանակը:
 
-Օգտագործեք համակարգային դարակի ընտրացանկը հետևյալ գործողությունների համար․
+Օգտագործեք սկուտեղի ընտրացանկը հետևյալ գործողությունների համար.
 
-- Բացել կառավարման վահանակը։
-- Բացել `/dashboard/logs`-ը։
-- Փոխել ավտոմատ գործարկման կարգավորումը։
-- Կանգնեցնել OmniRoute-ը։
+- Բացեք վահանակը:
+- Բացեք `/dashboard/logs`.
+- Փոխել ավտոմատ մեկնարկը:
+- Stop OmniRoute.
 
-Մի՛ համակցեք `--tray`-ը հետևյալ ընտրանքների հետ․
+Մի համատեղեք `--tray` այս տարբերակների հետ.
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Այս ռեժիմները պահանջում են գործընթացների կառավարման տարբեր եղանակներ։
+Այս ռեժիմները պահանջում են տարբեր գործընթացների սեփականություն:
 
-Միացրեք գործարկումը համակարգ հաջորդ մուտք գործելիս․
+Միացնել գործարկումը հաջորդ մեքենայի մուտքի ժամանակ.
 
 ```bash
 omniroute autostart enable
 ```
 
-Ավտոմատ գործարկումն օգտագործում է համակարգային դարակի ռեժիմը macOS-ում, Windows-ում և գրաֆիկական Linux աշխատաշրջաններում։ Առանց գրաֆիկական միջավայրի Linux-ն օգտագործում է գոյություն ունեցող systemd օգտատիրոջ ծառայությունը։
+Ավտոմատ մեկնարկը օգտագործում է սկուտեղի ռեժիմը macOS, Windows և գրաֆիկական Linux նիստերում: Headless Linux օգտագործում է առկա systemd օգտվողի ծառայությունը:
 
-Անջատեք մուտք գործելիս ավտոմատ գործարկումը․
+Անջատել գործարկումը մուտքի ժամանակ.
 
 ```bash
 omniroute autostart disable
@@ -398,16 +423,16 @@ omniroute autostart disable
 
 ### Ապատեղադրում
 
-Երբ OmniRoute-ն այլևս անհրաժեշտ չէ, մաքուր հեռացման համար տրամադրում ենք երկու արագ սկրիպտ․
+Երբ դուք այլևս OmniRoute կարիք չունեք, մենք տրամադրում ենք երկու արագ սցենար մաքուր հեռացման համար.
 
-| Հրաման                   | Գործողություն                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | Հեռացնում է համակարգային հավելվածը, բայց **պահպանում է ձեր ՏԲ-ն և կազմաձևումները** `~/.omniroute`-ում։ |
-| `npm run uninstall:full` | Հեռացնում է հավելվածը ԵՎ ընդմիշտ **ջնջում է բոլոր կազմաձևումները, բանալիներն ու տվյալների բազաները**։  |
+| Հրաման                   | Գործողություն                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Հեռացնում է համակարգի հավելվածը, բայց** պահպանում է ձեր DB և կոնֆիգուրացիաները** `~/.omniroute`.        |
+| `npm run uninstall:full` | Ընդմիշտ հեռացնում է AND հավելվածը** ջնջում է բոլոր կոնֆիգուրացիաները, ստեղները և տվյալների բազաները** . |
 
-> Նշում․ այս հրամանները գործարկելու համար անցեք OmniRoute նախագծի պանակ (եթե կլոնավորել եք այն) և գործարկեք դրանք։ Որպես այլընտրանք, եթե այն տեղադրված է գլոբալ կերպով, կարող եք պարզապես գործարկել `npm uninstall -g omniroute`։
+> Նշում. Այս հրամանները գործարկելու համար անցեք OmniRoute նախագծի թղթապանակ (եթե այն կլոնավորել եք) և գործարկեք դրանք: Այլապես, եթե գլոբալ տեղադրման դեպքում, կարող եք պարզապես գործարկել `npm uninstall -g omniroute`:
 
-### Տեղակայում VPS-ում
+### VPS տեղակայում
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -423,25 +448,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Կամ՝ pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 տեղակայում (քիչ հիշողությամբ)
+### PM2 տեղակայում (ցածր հիշողություն)
 
-Սահմանափակ RAM ունեցող սերվերների համար օգտագործեք հիշողության սահմանաչափի ընտրանքը․
+Սահմանափակ RAM ունեցող սերվերների համար օգտագործեք հիշողության սահմանաչափի տարբերակը.
 
 ```bash
-# 512MB սահմանաչափով (լռելյայն)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Կամ հիշողության հատուկ սահմանաչափով
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Կամ՝ օգտագործելով ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Ստեղծեք `ecosystem.config.js`․
+Ստեղծել `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -466,24 +491,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Կառուցել պատկերը (լռելյայն = runner-cli՝ նախապես տեղադրված codex/claude/droid-ով)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Դյուրակիր ռեժիմ (խորհուրդ է տրվում)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI բինար ֆայլերով հոսթին ինտեգրված ռեժիմի համար տե՛ս հիմնական փաստաթղթերի Docker բաժինը։
+Հոսթին ինտեգրված ռեժիմի համար CLI երկուական սարքերով տե՛ս Docker բաժինը հիմնական փաստաթղթերում:
 
-### Void Linux (xbps-src)
+### Անվավեր Linux (xbps-src)
 
-Void Linux-ի օգտատերերը կարող են փաթեթավորել և տեղադրել OmniRoute-ը բնիկ եղանակով՝ օգտագործելով `xbps-src` խաչաձև կոմպիլյացիայի շրջանակը։ Այն ավտոմատացնում է Node.js-ի ինքնուրույն հավաքումը՝ անհրաժեշտ `better-sqlite3` բնիկ կապակցումների հետ միասին։
+Void Linux օգտվողները կարող են փաթեթավորել և տեղադրել OmniRoute ՝ օգտագործելով `xbps-src` խաչաձև կոմպիլյացիայի շրջանակը: Սա ավտոմատացնում է Node.js ինքնուրույն կառուցումը անհրաժեշտ `better-sqlite3` մայրենի կապակցումների հետ միասին:
 
 <details>
-<summary><b>Դիտել xbps-src ձևանմուշը</b></summary>
+<summary><b>Դիտեք xbps-src ձևանմուշը</b></summary>
 
 ```bash
-# «omniroute»-ի ձևանմուշի ֆայլ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -504,7 +529,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Որոշել node-gyp-ի նպատակային պրոցեսորի ճարտարապետությունը
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -513,29 +538,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Տեղադրել բոլոր կախվածությունները՝ բաց թողնելով սկրիպտները
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Հավաքել Next.js-ի ինքնուրույն փաթեթը
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Պատճենել ստատիկ ռեսուրսներն ինքնուրույն փաթեթի մեջ
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Կոմպիլացնել better-sqlite3-ի բնիկ կապակցումը
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Կոմպիլացված կապակցումը տեղադրել ինքնուրույն փաթեթի մեջ
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Հեռացնել ճարտարապետությանը հատուկ sharp փաթեթները
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Պատճենել Next.js-ի ստատիկ վերլուծության կողմից բաց թողնված pino-ի կատարման միջավայրի կախվածությունները.
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -549,7 +574,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Կանխել Next.js հավելվածի երթուղիչի դատարկ պանակների հեռացումը հետտեղադրման մշակիչի կողմից
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -575,32 +600,32 @@ post_install() {
 
 </details>
 
-### Միջավայրի փոփոխականներ
+### Շրջակա միջավայրի փոփոխականներ
 
-| Փոփոխական                               | Լռելյայն արժեք                       | Նկարագրություն                                                                                                                                                          |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT ստորագրման գաղտնիք (**փոխեք արտադրական միջավայրում**)                                                                                                               |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Առաջին մուտքի գաղտնաբառ                                                                                                                                                 |
-| `DATA_DIR`                              | `~/.omniroute`                       | Տվյալների գրացուցակ (տվյալների բազա, օգտագործման տվյալներ, մատյաններ)                                                                                                   |
-| `PORT`                                  | ֆրեյմվորկի լռելյայն արժեք            | Ծառայության միացք (օրինակներում՝ `20128`)                                                                                                                               |
-| `HOSTNAME`                              | ֆրեյմվորկի լռելյայն արժեք            | Կապակցման հոսթ (Docker-ի լռելյայն արժեքը՝ `0.0.0.0`)                                                                                                                    |
-| `NODE_ENV`                              | գործարկման միջավայրի լռելյայն արժեք  | Տեղակայման համար սահմանեք `production`                                                                                                                                  |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Հանրային բազային URL, որը հասանելի է կառավարման վահանակին և սերվերին (փոխարինում է հնացած `BASE_URL`-ը)                                                                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Ամպային համաժամացման վերջնակետի բազային URL (փոխարինում է հնացած `CLOUD_URL`-ը)                                                                                         |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC գաղտնիք՝ API բանալիներ ստեղծելու համար                                                                                                                             |
-| `REQUIRE_API_KEY`                       | `false`                              | Պահանջել Bearer API բանալի `/v1/*` հասցեների համար                                                                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Թույլատրել նույնականացված կառավարման վահանակի օգտատերերին ըստ պահանջի ցուցադրել պահված API բանալիների ամբողջական արժեքները                                              |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Քեշավորված մատակարարների սահմանաչափերի տվյալների՝ սերվերի կողմից թարմացման հաճախականություն․ միջերեսի թարմացման կոճակները շարունակում են գործարկել ձեռքով համաժամացումը |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Անջատել SQLite-ի ավտոմատ պատճենահանումը գրառումից, ներմուծումից կամ վերականգնումից առաջ․ ձեռքով պատճենահանումը շարունակում է աշխատել                                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | Միացնում է հավելվածի և աուդիտի մատյանների գրանցումը սկավառակի վրա                                                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Պարտադրել նույնականացման `Secure` cookie-ի օգտագործումը (HTTPS հակադարձ պրոքսիի հետևում)                                                                                |
-| `CLOUDFLARED_BIN`                       | սահմանված չէ                         | Կառավարվող ներբեռնման փոխարեն օգտագործել առկա `cloudflared` երկուական ֆայլը                                                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Կառավարվող Quick Tunnels-ի փոխանցման արձանագրություն (`http2`, `quic` կամ `auto`)                                                                                       |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-ի heap հիշողության սահմանաչափը՝ MB-ով                                                                                                                           |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Հուշումների քեշի գրառումների առավելագույն քանակը                                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Իմաստային քեշի գրառումների առավելագույն քանակը                                                                                                                          |
+| Փոփոխական                               | Կանխադրված                   | Նկարագրություն                                                                                                                                                   |
+| --------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ավտոգեներացված)_           | JWT ստորագրման գաղտնի — ավտոմատ ստեղծվել է առաջին գործարկման ժամանակ և շարունակվել է `server.env` ին: սահմանել այն հստակ, երբ տվյալների գրացուցակը ժամանակավոր է |
+| `INITIAL_PASSWORD`                      | _(չսահմանված)_               | Առաջին մուտքի գաղտնաբառը: npm/source տեղադրումը սկսվում է `CHANGEME` ով. փոխարինեք այն: Չկարգավորված՝ միացման հրաշագործ                                          |
+| `DATA_DIR`                              | `~/.omniroute`               | Տվյալների գրացուցակ (db, օգտագործում, տեղեկամատյաններ)                                                                                                           |
+| `PORT`                                  | շրջանակի լռելյայն            | Սպասարկման նավահանգիստ (`20128` օրինակներով)                                                                                                                     |
+| `HOSTNAME`                              | շրջանակի լռելյայն            | Կապել հոսթին (Docker կանխադրված է `0.0.0.0` ին)                                                                                                                  |
+| `NODE_ENV`                              | գործարկման ժամանակի լռելյայն | Սահմանել `production` տեղակայման համար                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Հանրային URL բազան հայտնվել է վահանակի վրա և ենթարկվել սերվերին (փոխարինում է հին `BASE_URL`)                                                                    |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | Cloud sync վերջնական կետի բազային URL (փոխարինում է ժառանգված `CLOUD_URL`)                                                                                       |
+| `API_KEY_SECRET`                        | _(ավտոգեներացված)_           | HMAC գաղտնիքը գեներացված API ստեղների համար — ավտոմատ ստեղծվել է առաջին գործարկման ժամանակ և պահպանվել է `server.env` ում                                        |
+| `REQUIRE_API_KEY`                       | `false`                      | Կիրառեք կրող API բանալին `/v1/*` ում                                                                                                                             |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                      | Թույլատրել վավերացված վահանակի օգտատերերին՝ ըստ պահանջի, բացահայտել ամբողջական պահպանված API հիմնական արժեքները                                                  |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                         | Սերվերի կողմից թարմացման արագություն քեշավորված Մատակարարի սահմանաչափերի տվյալների համար; UI թարմացման կոճակները դեռ գործարկում են ձեռքով համաժամացումը          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                      | Անջատել ավտոմատ SQLite snapshot-ները writes/import/restore ից առաջ; ձեռքով կրկնօրինակումները դեռ աշխատում են                                                     |
+| `APP_LOG_TO_FILE`                       | `true`                       | Միացնում է հավելվածի և աուդիտի գրանցամատյանի ելքը սկավառակի վրա                                                                                                  |
+| `AUTH_COOKIE_SECURE`                    | `false`                      | Ստիպել `Secure` auth քուքի ( HTTPS հակադարձ պրոքսիի հետևում)                                                                                                     |
+| `CLOUDFLARED_BIN`                       | չկարգավորված                 | Օգտագործեք գոյություն ունեցող `cloudflared` երկուական տարբերակը կառավարվող ներբեռնման փոխարեն                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                      | Տրանսպորտ կառավարվող արագ թունելների համար (`http2`, `quic` կամ `auto`)                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                        | Node.js կույտի սահմանը MB ում                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                         | Առավելագույն հուշում քեշի գրառումները                                                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                        | Առավելագույն իմաստային քեշի մուտքերը                                                                                                                             |
 
-Միջավայրի փոփոխականների ամբողջական տեղեկատուի համար տե՛ս [README](../README.md)-ն։
+Շրջակա միջավայրի փոփոխականի ամբողջական հղումի համար տե՛ս [README](../README.md) :
 
 ---
 
@@ -609,89 +634,131 @@ post_install() {
 <details>
 <summary><b>Դիտել բոլոր հասանելի մոդելները</b></summary>
 
-> Ստորև ներկայացված ցանկը կազմված է `open-sse/config/providerRegistry.ts`-ից՝ v3.8.0-ի համար։ Ամպային կատալոգները (Gemini, OpenRouter և այլն) համաժամացվում են դինամիկ կերպով․ ամբողջական ընթացիկ կատալոգը տեսնելու համար բացեք **Կառավարման վահանակ → Մատակարարներ → [provider] → Հասանելի մոդելներ** կամ կանչեք `GET /api/models/catalog`։
+> Ստորև բերված ցանկը կազմված է `open-sse/config/providerRegistry.ts`-ից՝ v3.8.0-ի համար։ Ամպային կատալոգները (Gemini, OpenRouter և այլն) համաժամացվում են դինամիկ եղանակով — ամբողջական ընթացիկ կատալոգը բացելու համար անցեք **Dashboard → Providers → [provider] → Available Models** կամ կանչեք `GET /api/models/catalog`։
 >
-> Եթե մատակարարի ներկառուցված ցանկը հնացել է, այդ էջում օգտագործեք **Ներմուծել /models-ից** (կամ միացրեք **Ավտոմատ համաժամացումը**)՝ վերին հոսքի ընթացիկ կատալոգը ներբեռնելու համար։ Սա ստուգվել է v3.8.50-ում՝ LLM7.io-ի (`gemini-3.1-flash-lite`) և UncloseAI-ի (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) համար․ նույն փորձարկման ընթացքում Pollinations-ի անանուն հասանելիությունը շարունակել է սահմանափակված մնալ վերին հոսքի կողմից։
+> Եթե մատակարարի ներկառուցված ցանկը հնացել է, այդ էջում օգտագործեք **Import from /models** (կամ միացրեք **Auto-Sync**)՝ ընթացիկ upstream կատալոգը ներբեռնելու համար։ Սա ստուգվել է v3.8.50-ում՝ LLM7.io-ի (`gemini-3.1-flash-lite`) և UncloseAI-ի (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) համար․ նույն փորձարկման ընթացքում Pollinations-ի անանուն հասանելիությունը մնացել էր upstream-ի կողմից սահմանափակված։
 
-**Claude Code (`cc/`)** — Pro/Max OAuth՝ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth․ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth՝ `cx/gpt-5.5` (+ ջանքի մակարդակներ՝ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth․ `cx/gpt-5.5` (+ ջանքի մակարդակներ․ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth՝ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth․ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ԱՆՎՃԱՐ OAuth՝ օգտագործեք **Կառավարման վահանակ → Մատակարարներ → Kiro → Հասանելի մոդելներ** բաժնում ցուցադրվող ընթացիկ կատալոգը։ Հասանելիությունը կախված է հաշվից և սակագնային պլանից։
+**Kiro (`kr/`)** — ԱՆՎՃԱՐ OAuth․ օգտագործեք ընթացիկ կատալոգը, որը ցուցադրվում է **Dashboard → Providers → Kiro → Available Models** բաժնում։ Հասանելիությունը կախված է հաշվից և պլանից։
 
-**Qoder (`if/`)** — ԱՆՎՃԱՐ OAuth՝ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ԱՆՎՃԱՐ OAuth․ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M՝ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M․ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M՝ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M․ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ամսական ֆիքսված $9 կամ ըստ օգտագործման՝ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ամիս հաստատագրված կամ ըստ օգտագործման․ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API բանալի՝ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API բանալի․ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Գերարագ՝ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Գերարագ․ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Բնիկ Grok՝ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-ի բնիկ աջակցություն․ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — ԵՄ-ում հոսթինգով՝ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Հոսթինգ ԵՄ-ում․ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Որոնմամբ ընդլայնված՝ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Որոնմամբ ընդլայնված․ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Բաց կոդով՝ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (անվճար), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Բաց կոդով․ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (անվճար), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Արագ ինֆերենս՝ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Արագ inference․ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Վաֆերային մասշտաբ՝ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Վաֆերային մասշտաբով․ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-կենտրոնացված՝ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Կենտրոնացած RAG-ի վրա․ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Ձեռնարկությունների համար՝ `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Կորպորատիվ․ `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE՝ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE․ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**՝ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**՝ ընթացիկ տվյալներով համաժամացվում է Google-ից՝ ըստ API բանալու․ ստատիկ ցանկ չկա։ Բանալին միացրեք **Կառավարման վահանակ → Մատակարարներ** բաժնում, ապա օգտագործեք **Հասանելի մոդելներ** տարբերակը՝ ընթացիկ կատալոգը ներմուծելու համար (օրինակ՝ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)։
+**Gemini (Google Cloud `gemini/`)**՝ համաժամացվում է ընթացիկ վիճակով՝ ըստ Google-ի API բանալու․ ստատիկ ցանկ չկա։ Միացրեք բանալին **Dashboard → Providers** բաժնում, այնուհետև օգտագործեք **Available Models**-ը՝ ընթացիկ կատալոգը ներմուծելու համար (օրինակ՝ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)։
 
-**Այլ համատեղելի մատակարարներ** (ընտրված)՝ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-ի միջոցով), `azure-ai`, `openrouter` (միջանցիկ կատալոգ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`։ Յուրաքանչյուրը պահպանում է մոդելների իր սեփական ցանկը `providerRegistry.ts`-ում և կարող է ավտոմատ համաժամացվել, երբ մատակարարը տրամադրում է `/models` վերջնակետ։
+**Այլ համատեղելի մատակարարներ** (ընտրված)՝ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-ի միջոցով), `azure-ai`, `openrouter` (passthrough կատալոգ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`։ Յուրաքանչյուրը պահպանում է իր մոդելների ցանկը `providerRegistry.ts`-ում և կարող է ավտոմատ համաժամացվել, երբ մատակարարը տրամադրում է `/models` վերջնակետ։
 
-**Նշում մոդելների ID-ների մասին․** OmniRoute-ն օգտագործում է մատակարարի բնիկ ID-ները (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)։ Որոշ ID-ներ ներառում են կետերով տարբերակներ, քանի որ վերին հոսքի API-ն դրանք հենց այդ ձևաչափով է ակնկալում։ Եթե որևէ մոդել վերևում նշված չէ, հասանելիությունը հաստատելու համար գործարկեք `omniroute models --search <term>` կամ դիմեք `GET /api/models/catalog` հասցեին։
+**Նշում մոդելների ID-ների վերաբերյալ․** OmniRoute-ն օգտագործում է մատակարարների բնիկ ID-ները (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)։ Որոշ ID-ներ պարունակում են կետով գրված տարբերակներ, քանի որ upstream API-ն հենց այդ ձևաչափն է ակնկալում։ Եթե որևէ մոդել վերևում նշված չէ, գործարկեք `omniroute models --search <term>` կամ ուղարկեք `GET /api/models/catalog` հարցումը՝ հասանելիությունը հաստատելու համար։
 
 </details>
 
 ---
 
-## 🧩 Ընդլայնված հնարավորություններ
+## 🧩 Ընդլայնված հատկանիշներ
 
-### Հատուկ մոդելներ
+### Պատվերով մոդելներ
 
-Ավելացրեք ցանկացած մոդելի ID ցանկացած մատակարարի՝ առանց հավելվածի թարմացմանը սպասելու.
+Ավելացրեք ID ցանկացած մոդել ցանկացած մատակարարին՝ առանց հավելվածի թարմացման սպասելու.
 
 ```bash
-# API-ի միջոցով
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Ցանկը՝ curl http://localhost:20128/api/provider-models?provider=openai
-# Հեռացնել՝ curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Կամ օգտագործեք կառավարման վահանակը՝ **Մատակարարներ → [Մատակարար] → Հատուկ մոդելներ**։
+Կամ օգտագործեք վահանակը՝** Մատակարարներ → [Provider] → Պատվերով մոդելներ** .
 
-Նշումներ.
+Նշումներ:
 
-- OpenRouter-ը և OpenAI/Anthropic-ի հետ համատեղելի մատակարարները կառավարվում են միայն **Հասանելի մոդելներ** բաժնից։ Ձեռքով ավելացումը, ներմուծումը և ավտոմատ համաժամացումը կատարվում են հասանելի մոդելների նույն ցանկում, ուստի այդ մատակարարների համար առանձին «Հատուկ մոդելներ» բաժին չկա։
-- **Հատուկ մոդելներ** բաժինը նախատեսված է այն մատակարարների համար, որոնք չեն տրամադրում կառավարվող հասանելի մոդելների ներմուծում։
+- OpenRouter և OpenAI/Anthropic-compatible մատակարարները կառավարվում են** Հասանելի մոդելներ** միայն. Ձեռքով ավելացնել, ներմուծել և ավտոմատ կերպով համաժամացնել բոլոր հողերը նույն մատչելի մոդելների ցանկում, այնպես որ այդ մատակարարների համար առանձին Custom Models բաժին չկա:
+- Այն** Պատվերով մոդելներ** բաժինը նախատեսված է մատակարարների համար, որոնք չեն բացահայտում կառավարվող մատչելի մոդելի ներմուծումները:
 
-### OmniRoute հանգույցների շղթայակցում
+### Պատվերով OpenAI-համատեղելի մատակարարներ
 
-Մեկ այլ OmniRoute դարպաս կարող է ավելացվել որպես **Հատուկ OpenAI-համատեղելի** մատակարար։ Օգտագործեք
-հանգույցի `/v1` բազային URL-ը և այդ հանգույցի կողմից տրամադրված՝ նվազագույն արտոնություններով առանձին API բանալի։
+Ցանկացած դարպաս, որը խոսում է OpenAI API (ինքնակառավարվող վստահված անձ, vLLM, երրորդ կողմի ագրեգատոր) կարող է ավելացվել որպես սեփական մատակարարի հանգույց.
 
-Փոխադարձ կամ բազմափուլ շղթաների համար յուրաքանչյուր դարպասում միացրեք ըստ ցանկության ակտիվացվող ցիկլերից պաշտպանությունը.
+1. **Մատակարարներ → Ավելացնել OpenAI Համատեղելի** .
+2. **Անուն** : հանգույցի ցուցադրման պիտակ:
+3. **Նախածանց** երթուղային անվանումը: Հաճախորդները մոդելները անվանում են `<prefix>/<model>`, ուստի `mygw` նախածանցով հանգույցը ծառայում է `mygw/gpt-4o-mini`: Պահանջվում է; բնավորության սահմանափակում չկա.
+4. **API Տեսակ** վերջնակետի ընտանիքը, որը ծառայում է դարպասը (Զրույցի լրացումներ, պատասխաններ, ներկառուցումներ, աուդիո, պատկերներ):
+5. **Հիմք URL** API արմատը, մինչև `/v1` ներառյալ (օրինակ `https://gateway.example.com/v1`), ոչ թե ամբողջական `/chat/completions` ուղին: Ոչ ստանդարտ ուղիներով դարպասները դրանք դնում են տակ** Ընդլայնված կարգավորումներ** (զրույցի ուղի, մոդելների ուղի):
+6. Այն**API բանալի (ստուգման համար)** դաշտը միայն փորձարկում է կապը: Հանգույցը ստեղծելուց հետո բացեք այն և օգտագործեք** Ավելացնել կապ** պահելու բանալին, որը կօգտագործեն հարցումները:
+
+Հանգույցը ստանում է `openai-compatible-<apiType>-<uuid>` ձևի ներքին id; դուք երբեք պետք չէ մուտքագրել այն, նախածանցը հանրային անունն է:
+
+#### Պահպանված նախածանցներ
+
+Նախածանցը չի կարող լինել ներկառուցված մատակարարի id կամ կեղծանունը (օրինակ `openai`, `cf`), ոչ էլ պաշտոնաթող մատակարարի id-ն: Մոդելի լուծիչը ստուգում է ներկառուցված ID-ները և փոխանունները հատուկ հանգույցներից առաջ, ուստի այդ նախածանցներից որևէ մեկը օգտագործող հանգույցը երբեք չի ստանա տրաֆիկ. փոխարենը `<prefix>/model` կգնա ներկառուցված մատակարարին, կամ կփակվի, եթե այդ մատակարարը պաշտոնաթող լինի: Նման նախածանցով հանգույց ստեղծելը կամ խմբագրելը մերժվում է հետևյալով.
+
+```text
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+```
+
+Ընտրեք հստակ նախածանց (`mygw`, `acme-proxy`): Եթե հարմարեցված հանգույցի հարցումները ձախողվում են ներկառուցված մատակարարի կամ նրա հավատարմագրերի անունները, ստուգեք, արդյոք հանգույցի նախածանցը վերապահված է. մինչ այս կանոնի գոյությունը պահպանված հանգույցները դեռ պահպանվում են, բայց դրանց նախածանցը երթուղիներ է անցնում դեպի ներկառուցված մատակարար: Խմբագրել հանգույցը և տալ նոր նախածանց:
+
+#### Միացման համար դարպասի ընտրանքներ
+
+Այս ստեղները մտնում են կապի `providerSpecificData` (օրինակ՝ `PUT /api/providers/{id}` միջոցով).
+
+- `toolNameMaxLength` (ամբողջ թիվ, 1–1024) — OpenAI չաթի ձևաչափով համատեղելի կապերի համար, որոնց դարպասը մերժում է երկար գործիքների անունները: Ավելի երկար անուններ ուղարկվում են որպես կարճ անուններ և վերականգնվում են պատասխանում:
+- `quotaEndpoint` — դարպասի quota/credits վերջնակետը, կարդացեք վահանակի քվոտայի շերտի և քվոտաների մասին տեղեկացված երթուղիների համար: Աշխատում է ինչպես OpenAI-ի, այնպես էլ Anthropic-ի հետ համատեղելի կապերի վրա; ամբողջական ձևը փաստաթղթավորված է `open-sse/services/usage/openaiCompatible.ts` ում:
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### Շղթայելով OmniRoute Peers
+
+Մեկ այլ OmniRoute դարպաս կարող է ավելացվել որպես a** Պատվերով OpenAI-ի հետ համատեղելի** մատակարար. Օգտագործեք գործընկերների `/v1` բազան URL և հատուկ, նվազագույն արտոնություններ ունեցող API բանալի, որը թողարկվել է այդ գործընկերոջ կողմից:
+
+Փոխադարձ կամ բազմաճոճ շղթաների համար միացրեք «opt-in loop» պաշտպանիչը յուրաքանչյուր դարպասի վրա.
 
 ```bash
 # gateway-a
@@ -707,17 +774,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Միայն հստակ թույլատրված հանգույցի URL-ին ուղարկված հարցումներն են ստանում
-`X-OmniRoute-Peer-Trace` վերնագիրը։ Դարպասը մերժում է կրկնվող օրինակի ID-ով կամ սպառված անցումների
-սահմանաչափով հարցումը՝ վերադարձնելով HTTP `508 Loop Detected`, իսկ սովորական վերին հոսքի մատակարարները չեն ստանում հանգույցի մետատվյալներ։
+Միայն այն հարցումները, որոնք ուղարկվում են բացահայտ թույլատրելի ցուցակում գտնվող գործընկեր URL ին, ստանում են `X-OmniRoute-Peer-Trace` վերնագիր: Դարպասը մերժում է ID կրկնվող օրինակը կամ սպառված hop բյուջեն HTTP `508 Loop Detected` ով; սովորական մատակարարները չեն ստանում գործընկերների մետատվյալներ:
 
-Հանգույցների շղթայակցումը տվյալների բազայի կրկնօրինակում կամ հոսթի խափանումների փոխհատուցում չէ։ Յուրաքանչյուր դարպաս պահպանում է անկախ
-SQLite վիճակ, քեշեր, հաճախականության հաշվիչներ և աշխատաշրջաններ։ Ակտիվ/պասիվ կամ ակտիվ/ակտիվ հասանելիության համար օգտագործեք առողջական վիճակը ստուգող հակադարձ վստահված սերվեր կամ հաճախորդային
-խափանումների փոխհատուցում և երբեք մի միակցեք մեկ SQLite տվյալների բազան միաժամանակ աշխատող OmniRoute-ի մի քանի օրինակների։
+Գործընկերների շղթայականացումը տվյալների բազայի կրկնօրինակում կամ հոսթինգի ձախողում չէ: Յուրաքանչյուր դարպաս պահում է անկախ SQLite վիճակ, քեշեր, տոկոսադրույքների հաշվիչներ և նիստեր: active/passive կամ active/active հասանելիության համար օգտագործեք առողջական ստուգված հակադարձ պրոքսի կամ հաճախորդի ձախողում և երբեք մի միացրեք մեկ SQLite տվյալների բազա մի քանի գործող OmniRoute օրինակների մեջ:
 
-### Մատակարարների հատուկ երթուղիներ
+### Նվիրված մատակարարի երթուղիներ
 
-Հարցումներն ուղղորդեք անմիջապես որոշակի մատակարարի՝ մոդելի վավերացմամբ.
+Երթուղիների հարցումները ուղղակիորեն մոդելի վավերացմամբ կոնկրետ մատակարարին.
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -725,140 +788,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Մատակարարի նախածանցը բացակայելու դեպքում ավելացվում է ավտոմատ կերպով։ Չհամապատասխանող մոդելների դեպքում վերադարձվում է `400`։
+Մատակարարի նախածանցը ավտոմատ կերպով ավելացվում է, եթե բացակայում է: Չհամապատասխանող մոդելները վերադարձնում են `400`:
 
-### Ցանցային պրոքսիի կազմաձևում
+### Ցանցի վստահված անձի կոնֆիգուրացիա
 
 ```bash
-# Սահմանել համընդհանուր պրոքսի
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Պրոքսի՝ ըստ մատակարարի
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Փորձարկել պրոքսին
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Առաջնահերթություն.** Բանալուն հատուկ → Համակցությանը հատուկ → Մատակարարին հատուկ → Համընդհանուր → Միջավայր։
+**Նախապատվությունը:** Բանալին հատուկ → Combo-specific → Մատակարարի հատուկ → Գլոբալ → միջավայր:
 
-### Մոդելների կատալոգի API
+### Մոդելների կատալոգ API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Վերադարձնում է ըստ մատակարարի խմբավորված մոդելներ՝ տեսակներով (`chat`, `embedding`, `image`)։
+Վերադարձնում է մոդելները, որոնք խմբավորված են ըստ մատակարարի՝ տեսակներով (`chat`, `embedding`, `image`):
 
-### Ամպային համաժամացում
+### Cloud Sync
 
-- Համաժամացրեք մատակարարները, համակցությունները և կարգավորումները սարքերի միջև
-- Ավտոմատ ֆոնային համաժամացում՝ ժամանակի սահմանափակմամբ և արագ ընդհատմամբ
-- Արտադրական միջավայրում նախընտրեք սերվերային `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
+- Համաժամեցրեք մատակարարներին, կոմբինատները և կարգավորումները սարքերում
+- Ֆոնային ավտոմատ համաժամեցում + արագ դադարի հետ
+- Նախընտրեք սերվերի կողմի `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` արտադրության մեջ
 
-### Cloudflare արագ թունել
+### Cloudflare Արագ թունել
 
-- Հասանելի է **Կառավարման վահանակ → Վերջնակետեր** բաժնում՝ Docker-ի և ինքնուրույն հոսթինգով այլ տեղակայումների համար
-- Ստեղծում է ժամանակավոր `https://*.trycloudflare.com` URL, որը փոխանցում է հարցումները ձեր ընթացիկ՝ OpenAI-ի հետ համատեղելի `/v1` վերջնակետին
-- Առաջին ակտիվացման ժամանակ `cloudflared`-ը տեղադրվում է միայն անհրաժեշտության դեպքում․ հետագա վերագործարկումներն օգտագործում են կառավարվող նույն երկուական ֆայլը
-- Արագ թունելներն ավտոմատ չեն վերականգնվում OmniRoute-ի կամ կոնտեյների վերագործարկումից հետո․ անհրաժեշտության դեպքում կրկին ակտիվացրեք դրանք կառավարման վահանակից
-- Թունելի URL-ները ժամանակավոր են և փոխվում են ամեն անգամ, երբ կանգնեցնում կամ գործարկում եք թունելը
-- Կառավարվող արագ թունելները լռելյայն օգտագործում են HTTP/2 փոխադրամիջոց՝ սահմանափակ կոնտեյներներում QUIC UDP բուֆերի աղմկոտ նախազգուշացումներից խուսափելու համար
-- Սահմանեք `CLOUDFLARED_PROTOCOL=quic` կամ `auto`, եթե ցանկանում եք վերասահմանել կառավարվող փոխադրամիջոցի ընտրությունը
-- Սահմանեք `CLOUDFLARED_BIN`, եթե կառավարվող ներբեռնման փոխարեն նախընտրում եք օգտագործել նախապես տեղադրված `cloudflared` երկուական ֆայլ
-- Cloudflare արագ թունելի, Tailscale Funnel-ի և ngrok թունելի վահանակները կարող են ցուցադրվել կամ թաքցվել **Կարգավորումներ → Արտաքին տեսք** բաժնում։ Վահանակը թաքցնելը չի կանգնեցնում աշխատող թունելը։
+- Հասանելի է** Կառավարման վահանակ → վերջնակետեր** Docker և այլ ինքնակառավարվող տեղակայումների համար
+- Ստեղծում է ժամանակավոր `https://*.trycloudflare.com` URL, որը փոխանցվում է ձեր ընթացիկ OpenAI-ի հետ համատեղելի `/v1` վերջնակետին
+- Նախ միացնել `cloudflared` տեղադրում է միայն անհրաժեշտության դեպքում; ավելի ուշ վերսկսում է նորից օգտագործել նույն կառավարվող երկուականը
+- Արագ թունելները ավտոմատ կերպով չեն վերականգնվում OmniRoute կամ կոնտեյների վերագործարկումից հետո; անհրաժեշտության դեպքում դրանք նորից միացրեք վահանակից
+- Թունելի URLs անցողիկ է և փոխվում է ամեն անգամ, երբ դուք stop/start թունելը
+- Կառավարվող Quick Tunnels-ը կանխադրված է HTTP/2 transport՝ խուսափելու աղմկոտ QUIC UDP բուֆերային նախազգուշացումներից սահմանափակ բեռնարկղերում
+- Սահմանեք `CLOUDFLARED_PROTOCOL=quic` կամ `auto` եթե ցանկանում եք անտեսել կառավարվող տրանսպորտի ընտրությունը
+- Սահմանեք `CLOUDFLARED_BIN` եթե նախընտրում եք օգտագործել նախապես տեղադրված `cloudflared` երկուական տարբերակ՝ կառավարվող ներբեռնման փոխարեն
+- Cloudflare Quick Tunnel, Tailscale Funnel և ngrok Թունելի վահանակները կարող են ցուցադրվել կամ թաքցվել** Կարգավորումներ → Արտաքին տեսք** . Վահանակը թաքցնելը չի կանգնեցնում վազող թունելը:
 
-### LLM դարպասի բանական հնարավորություններ (Փուլ 9)
+### LLM Gateway Intelligence (փուլ 9)
 
-- **Իմաստաբանական քեշ** — Ավտոմատ քեշավորում է ոչ հոսքային, temperature=0 պատասխանները (շրջանցեք `X-OmniRoute-No-Cache: true`-ի միջոցով)
-- **Հարցումների նույնականություն** — `Idempotency-Key` կամ `X-Request-Id` վերնագրի միջոցով 5 վրկ-ի ընթացքում կրկնվող հարցումները միավորում է մեկի մեջ
-- **Առաջընթացի հետևում** — Ըստ ցանկության ակտիվացվող SSE `event: progress` իրադարձություններ՝ `X-OmniRoute-Progress: true` վերնագրի միջոցով
+- **Իմաստային քեշ** — Ավտոմատ պահում է ոչ հոսքային, ջերմաստիճանի = 0 պատասխաններ (շրջանցում `X-OmniRoute-No-Cache: true` ով)
+- **Պահանջել անզորություն** — Կրկնօրինակում է հարցումները 5 վայրկյանում `Idempotency-Key` կամ `X-Request-Id` վերնագրի միջոցով
+- **Առաջընթացի Հետևում** — Միացրեք SSE `event: progress` իրադարձությունները `X-OmniRoute-Progress: true` վերնագրի միջոցով
 
 ---
 
-### Թարգմանչի փորձադաշտ
+### Թարգմանչի խաղահրապարակ
 
-Մուտք գործեք **Կառավարման վահանակ → Թարգմանիչ** ուղիով։ Վրիպազերծեք և պատկերավոր ներկայացրեք, թե OmniRoute-ն ինչպես է թարգմանում API հարցումները մատակարարների միջև։
+Մուտք գործելու միջոցով** Վահանակ → թարգմանիչ** . Վրիպազերծեք և պատկերացրեք, թե ինչպես է OmniRoute թարգմանում API հարցումները մատակարարների միջև:
 
-| Ռեժիմ                 | Նպատակ                                                                                                            |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Փորձադաշտ**         | Ընտրեք սկզբնաղբյուրի/նպատակային ձևաչափերը, տեղադրեք հարցումը և անմիջապես տեսեք թարգմանված արդյունքը               |
-| **Զրույցի փորձարկիչ** | Ուղարկեք զրույցի հաղորդագրություններ պրոքսիի միջոցով և ստուգեք հարցում/պատասխան ամբողջ ցիկլը                      |
-| **Փորձարկման հարթակ** | Գործարկեք փաթեթային փորձարկումներ ձևաչափերի մի քանի համակցություններով՝ թարգմանության ճշտությունը ստուգելու համար |
-| **Ուղիղ մոնիտորինգ**  | Դիտեք իրական ժամանակում կատարվող թարգմանությունները, երբ հարցումներն անցնում են պրոքսիի միջով                     |
+| Ռեժիմ                  | Նպատակը                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Խաղահրապարակ**       | Ընտրեք source/target ձևաչափեր, տեղադրեք հարցումը և անմիջապես տեսեք թարգմանված արդյունքը                      |
+| **Զրույցի փորձարկող**  | Ուղարկեք ուղիղ զրույցի հաղորդագրություններ վստահված անձի միջոցով և ստուգեք request/response ամբողջական ցիկլը |
+| **Փորձարկման նստարան** | Գործարկեք խմբաքանակային թեստեր բազմաթիվ ձևաչափերի համակցություններում՝ ստուգելու թարգմանության ճիշտությունը  |
+| **Ուղիղ մոնիտոր**      | Դիտեք իրական ժամանակի թարգմանությունները, երբ հարցումները հոսում են վստահված անձի միջոցով                    |
 
 **Օգտագործման դեպքեր.**
 
-- Վրիպազերծեք, թե ինչու է որոշակի հաճախորդի/մատակարարի համակցությունը ձախողվում
-- Ստուգեք, որ մտածողության թեգերը, գործիքների կանչերը և համակարգային հուշումները ճիշտ են թարգմանվում
-- Համեմատեք OpenAI, Claude, Gemini և Responses API ձևաչափերի տարբերությունները
+- Վրիպազերծել, թե ինչու կոնկրետ client/provider համակցությունը ձախողվում է
+- Ստուգեք, որ մտածող պիտակները, գործիքների կանչերը և համակարգի հուշումները ճիշտ են թարգմանվում
+- Համեմատեք ձևաչափի տարբերությունները OpenAI, Claude, Gemini և Responses API ձևաչափերի միջև
 
 ---
 
-### Երթուղավորման ռազմավարություններ
+### Ուղղորդման ռազմավարություններ
 
-Կարգավորեք **Կառավարման վահանակ → Կարգավորումներ → Երթուղավորում** բաժնում։ Կառավարման վահանակը ներկայացնում է ամենաշատ օգտագործվող վեց ռազմավարությունները, իսկ համակցությունները և ավտոմատ երթուղիչը ներքին մակարդակում աջակցում են ավելի լայն հավաքածուի։
+Կարգավորել միջոցով** Գործակալության վահանակ → Կարգավորումներ → Ուղղորդում** . Վահանակի վահանակը բացահայտում է ամենաշատ օգտագործվող վեց ռազմավարությունները. կոմբինատները և ավտոմատ երթուղիչը ներքին աջակցում են ավելի լայն հավաքածուի:
 
-**Կառավարման վահանակում հասանելի ռազմավարություններ (հաշվի մակարդակով երթուղավորում).**
+**Վահանակի տեսանելի ռազմավարություններ (հաշվի մակարդակի երթուղղում).**
 
-| Ռազմավարություն                | Նկարագրություն                                                                                                                    |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Առաջինը մինչև վերջ**         | Հաշիվներն օգտագործում է ըստ առաջնահերթության. հիմնական հաշիվը մշակում է բոլոր հարցումները, մինչև անհասանելի դառնալը               |
-| **Շրջանաձև հերթափոխ**          | Հերթով անցնում է բոլոր հաշիվներով՝ կարգավորվող ամրագրման սահմանաչափով (կանխադրված՝ 3 կանչ յուրաքանչյուր հաշվի համար)              |
-| **P2C (Երկու ընտրության ուժ)** | Ընտրում է 2 պատահական հաշիվ և երթուղավորում դեպի ավելի առողջը՝ բաշխելով բեռը՝ հաշվի առնելով առողջական վիճակը                      |
-| **Պատահական**                  | Յուրաքանչյուր հարցման համար պատահականորեն ընտրում է հաշիվ՝ օգտագործելով Fisher-Yates խառնումը                                     |
-| **Ամենաքիչ օգտագործված**       | Երթուղավորում է դեպի ամենահին `lastUsedAt` ժամանակային դրոշմ ունեցող հաշիվ՝ հավասարաչափ բաշխելով տրաֆիկը                          |
-| **Ծախսերի օպտիմալացում**       | Երթուղավորում է դեպի առաջնահերթության ամենացածր արժեքն ունեցող հաշիվ՝ օպտիմալացնելով ամենացածր արժեքով մատակարարների ընտրությունը |
+| Ռազմավարություն                | Նկարագրություն                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Լրացրեք առաջինը**            | Օգտագործում է հաշիվները առաջնահերթ կարգով. հիմնական հաշիվը մշակում է բոլոր հարցումները մինչև անհասանելի լինելը                        |
+| **Round Robin**                | Անցնում է բոլոր հաշիվների միջոցով կարգավորելի կպչուն սահմանաչափով (կանխադրված՝ 3 զանգ մեկ հաշվի համար)                                |
+| **P2C (Երկու ընտրության ուժ)** | Ընտրում է 2 պատահական հաշիվ և երթուղի դեպի ավելի առողջը. հավասարակշռում է ծանրաբեռնվածությունը առողջության մասին տեղեկացվածության հետ |
+| **Պատահական**                  | Յուրաքանչյուր հարցման համար պատահականորեն ընտրում է հաշիվ՝ օգտագործելով Fisher-Yates shuffle-ը                                        |
+| **Ամենաքիչ օգտագործված**       | Երթուղիներ դեպի հաշիվ ամենահին `lastUsedAt` ժամադրոշմով՝ հավասարաչափ բաշխելով երթևեկությունը                                          |
+| **Ծախսերի օպտիմիզացված**       | Երթուղիներ դեպի հաշիվ ամենացածր առաջնահերթ արժեքով, օպտիմալացնելով ամենաէժան մատակարարների համար                                      |
 
-**Ընդլայնված համակցված և ավտոմատ ռազմավարություններ** (կարգավորվում են յուրաքանչյուր համակցության համար կամ `auto/*` նախածանցների միջոցով. տե՛ս [AUTO-COMBO.md](../routing/AUTO-COMBO.md)).
+**Ընդլայնված համակցված և ավտոմատ ռազմավարություններ** (կարելի է կարգավորել մեկ կոմբինատի կամ `auto/*` նախածանցների միջոցով — տես [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — խիստ հերթականություն՝ առանց շրջանաձև հերթափոխի
-- `weighted` — տրաֆիկի համամասնական բաշխում՝ ըստ յուրաքանչյուր մոդելի կշիռների
-- `fill-first` — օգտագործում է առաջին մոդելը մինչև սահմանաչափերին հասնելը
+- `priority` — խիստ կարգուկանոն, երբեք շրջանաձև
+- `weighted` — համամասնական երթևեկությունը բաժանված ըստ մոդելի կշիռների
+- `fill-first` — ցամաքեցնել առաջին մոդելը, մինչև սահմանները հասնեն
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Երկու ընտրության ուժ)
-- `least-used` և `cost-optimized`
-- `auto` — գնահատականների վրա հիմնված ընտրություն բոլոր թեկնածուներից
-- `lkgp` (Վերջին հայտնի լավ մատակարար) — ամրագրվում է վերջին հաջողված մատակարարին, ապա ձախողման դեպքում անցնում է կանոններին
-- `context-optimized` — ընտրում է ամենամեծ ազատ համատեքստային պատուհան ունեցող մոդելը
-- `context-relay` — հաջորդող քայլերի համար շղթայում է երկար համատեքստով մոդելները
+- `least-used` եւ `cost-optimized`
+- `auto` - միավորներով պայմանավորված բոլոր թեկնածուների համար
+- `lkgp` (Վերջին հայտնի լավ մատակարարը) – կապում է վերջին հաջողակ մատակարարին, այնուհետև վերադառնում է կանոններին
+- `context-optimized` — ընտրում է մոդելը, որն ունի ամենամեծ ազատ համատեքստային պատուհանը
+- `context-relay` — շղթաներ երկար համատեքստի մոդելներ հետագա շրջադարձերի համար
 
-#### Արտաքին ամրագրված աշխատաշրջանի վերնագիր
+#### Արտաքին կպչուն նստաշրջանի վերնագիր
 
-Արտաքին աշխատաշրջանի կապակցվածության համար (օրինակ՝ հետադարձ պրոքսիների հետևում գտնվող Claude Code/Codex գործակալների դեպքում) ուղարկեք՝
+Արտաքին նստաշրջանի մերձեցման համար (օրինակ՝ Claude Code/Codex գործակալները հակադարձ վստահվածների հետևում), ուղարկեք՝
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute-ը նաև ընդունում է `x_session_id` և արդյունավետ աշխատաշրջանի բանալին վերադարձնում է `X-OmniRoute-Session-Id`-ում։
+OmniRoute նույնպես ընդունում է `x_session_id` և վերադարձնում է արդյունավետ նիստի բանալին `X-OmniRoute-Session-Id` ում:
 
-Եթե օգտագործում եք Nginx և ուղարկում եք ընդգծման նշանով վերնագրեր, միացրեք՝
+Եթե օգտագործում եք Nginx և ուղարկում եք ընդգծման ձևի վերնագրեր, միացրեք՝
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Մոդելների կեղծանուններ՝ փոխարինման նշաններով
+#### Wildcard մոդելի կեղծանուններ
 
-Ստեղծեք փոխարինման նշաններով ձևանմուշներ՝ մոդելների անունները վերաքարտեզագրելու համար.
-
-```
-Ձևանմուշ՝ claude-sonnet-*     →  Թիրախ՝ cc/claude-sonnet-4-6
-Ձևանմուշ՝ gpt-*               →  Թիրախ՝ gh/gpt-5.3-codex
-```
-
-Փոխարինման նշաններն աջակցում են `*`-ին (ցանկացած նիշեր) և `?`-ին (մեկ նիշ)։
-
-#### Պահուստային անցման շղթաներ
-
-Սահմանեք գլոբալ պահուստային անցման շղթաներ, որոնք կիրառվում են բոլոր հարցումների նկատմամբ.
+Մոդելների անունները նորից քարտեզագրելու համար ստեղծեք նիշերի նախշեր.
 
 ```
-Շղթա՝ production-fallback
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+```
+
+Վայրի նշանները աջակցում են `*` (ցանկացած նիշ) և `?` (մեկ նիշ):
+
+#### Հետադարձ շղթաներ
+
+Սահմանեք գլոբալ հետադարձ շղթաներ, որոնք կիրառվում են բոլոր հարցումների համար.
+
+```
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -866,153 +929,208 @@ underscores_in_headers on;
 
 ---
 
-### Կայունություն և շղթայի անջատիչներ
+### Մատակարարների ընդհանուր համակցություններ և երթուղիների ձևեր
 
-Կարգավորեք **Կառավարման վահանակ → Կարգավորումներ → Կայունություն** բաժնում։
+Ահա մի քանի պրովայդերների միավորման և OmniRoute ում նրանց միջև երթուղիների օրինակներ.
 
-OmniRoute-ն իրականացնում է մատակարարի մակարդակով կայունություն՝ հինգ բաղադրիչի միջոցով.
+#### 1. Coding Agent Combo. High-End Reasoning Cost/Speed Fallback-ով
 
-1. **Հարցումների հերթ և տեմպավորում** — համակարգային մակարդակով հարցումների հոսքի կառավարում.
-   - **Հարցումներ րոպեում (RPM)** — մեկ հաշվի համար մեկ րոպեում հարցումների առավելագույն քանակը
-   - **Հարցումների միջև նվազագույն ժամանակ** — հարցումների միջև նվազագույն ընդմիջումը միլիվայրկյաններով
-   - **Միաժամանակյա հարցումների առավելագույն քանակ** — մեկ հաշվի համար միաժամանակյա հարցումների առավելագույն քանակը
+Իդեալական է կոդավորման գործակալների համար (OpenCode, Claude Code, Cursor, Cline): Սկզբում երթուղիներ դեպի սահմանային հիմնավորման մոդելներ, վերադառնալով արագ կոդավորման մոդելներին՝ քվոտայի սպառման կամ սխալների դեպքում:
 
-2. **Կապի սպասման շրջան** — յուրաքանչյուր նույնականացման տեսակի համար մեկ կապի կարգավորում՝ կրկնելի խափանումներից հետո.
-   - **Հիմնական սպասման շրջան** — վերին մակարդակի կրկնելի խափանումների համար սպասման կանխադրված ժամանակահատվածը
-   - **Օգտագործել վերին մակարդակի կրկնման հուշումները** — առկայության դեպքում հետևում է հեղինակավոր `Retry-After` կամ վերակայման հուշումներին
-   - **Հետաձգման քայլերի առավելագույն քանակ** — կրկնվող խափանումների դեպքում էքսպոնենցիալ հետաձգման առավելագույն մակարդակը
+- **Վահանակ** Combos → Նոր Combo → Անուն. `agent-coding` → Ռազմավարություն. `Priority`
+- **Մոդելներ** :
+  1. `claude/claude-sonnet-4-6` (Առաջնային կոդավորման գործակալ)
+  2. `openai/gpt-4o` (երկրորդական բարձր հզորության հետադարձ կապ)
+  3. `deepseek/deepseek-v4-flash` (Բարձր արդյունավետ, ծախսարդյունավետ վերադարձ)
 
-3. **Մատակարարի շղթայի անջատիչ** — հետևում է մատակարարի ամբողջական խափանումներին, կազմաձևված նախազգուշացման շեմին հասնելիս մատակարարին նշում է որպես վատթարացած և բացում է անջատիչը, երբ հասնում է կազմաձևված խափանումների շեմին.
-   - **Վատթարացման շեմ** — մատակարարի հաջորդական խափանումների քանակը՝ նախքան `DEGRADED` վիճակին անցնելը
-   - **Խափանումների շեմ** — մատակարարի հաջորդական խափանումների քանակը՝ նախքան `OPEN` վիճակին անցնելը
-   - **Վերակայման ժամանակահատված** — ժամանակահատվածը, որից հետո մատակարարը կրկին փորձարկվում է
-   - **CLOSED** (Առողջ) — հարցումները մշակվում են բնականոն կերպով
-   - **DEGRADED** — հարցումները շարունակում են մշակվել, մինչ հետևվում են խափանումների բարձրացած ցուցանիշները
-   - **OPEN** — կրկնվող խափանումներից հետո մատակարարը ժամանակավորապես արգելափակված է
-   - **HALF_OPEN** — փորձարկվում է՝ արդյոք մատակարարը վերականգնվել է
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   Կապի շրջանակով `429` արագության սահմանափակումները մնում են **Կապի սպասման շրջանում** և չեն հաշվարկվում մատակարարի անջատիչի համար։
+#### 2. Free-Tier Auto Failover Combo
 
-   Մատակարարի անջատիչի կատարման ընթացիկ վիճակը ցուցադրվում է միայն **Կառավարման վահանակ → Առողջական վիճակ** բաժնում։
+Շղթաներ մի քանի անվճար մակարդակի և առանց բանալի մատակարարների՝ առավելագույնի հասցնելու գործարկման ժամանակը առանց API ծախսերի:
 
-4. **Սպասել սպասման շրջանին** — եթե բոլոր թեկնածու կապերն արդեն սպասման շրջանում են, OmniRoute-ը կարող է սպասել ամենավաղ սպասման շրջանի ավարտին և ինքնաբերաբար կրկնել նույն հաճախորդի հարցումը։
+- **Ռազմավարություն** `Least Used` կամ `Round Robin` (բաշխում է բեռը քվոտաներով)
+- **Մոդելներ** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-5. **Արագության սահմանաչափի ավտոմատ հայտնաբերում** — երբ վերին մակարդակի մատակարարները վերադարձնում են սպասման հստակ ժամանակահատվածներ, այդ հուշումները փոխարինում են կապի տեղային սպասման շրջանը, եթե կարգավորումը միացված է։
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
 
-**Մասնագիտական խորհուրդ.** Օգտագործեք **Առողջական վիճակ** էջը՝ խափանումից հետո մատակարարների գործող անջատիչները ստուգելու և վերակայելու համար։ Կայունության էջը փոխում է միայն կազմաձևումը։
+#### 3. Multimodal / Vision & Text Pipeline
+
+Տեսողության մասնագիտացված մոդելների զուգակցում բարձր արագությամբ տեքստի ստեղծման հետ՝ աշխատանքային հոսքերի համար, որոնք ներառում են պատկերների ընկալում և կոդի ստեղծում:
+
+- **Կաղապար** `Priority` կոմբինացիա, որն առաջինը թվարկում է տեսանելիություն ունեցող մոդելները, իսկ վերջում՝ բարձր թողունակությամբ text/code մոդելները:
+- **Մոդելներ** :
+  1. `gemini/gemini-2.5-pro` (ուժեղ image/multimodal ըմբռնում)
+  2. `openai/gpt-4o` (հավասարակշռված տեսողություն և գործիքների օգտագործում)
+  3. `deepseek/deepseek-v4-flash` (Text/code սերունդ)
 
 ---
 
-### Տվյալների բազայի արտահանում / ներմուծում
+### Ճկունություն և անջատիչներ
 
-Կառավարեք տվյալների բազայի պահուստային պատճենները **Կառավարման վահանակ → Կարգավորումներ → Համակարգ և պահեստավորում** բաժնում։
+Կարգավորել միջոցով** Վահանակի վահանակ → Կարգավորումներ → Ճկունություն** .
 
-| Գործողություն                  | Նկարագրություն                                                                                                                                                                            |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Արտահանել տվյալների բազան**  | Ներբեռնում է ընթացիկ SQLite տվյալների բազան՝ որպես `.sqlite` ֆայլ                                                                                                                         |
-| **Արտահանել բոլորը (.tar.gz)** | Ներբեռնում է ամբողջական պահուստային արխիվ՝ ներառյալ տվյալների բազան, կարգավորումները, կոմբոները, մատակարարների կապերը (առանց հավատարմագրերի) և API բանալիների մետատվյալները               |
-| **Ներմուծել տվյալների բազան**  | Վերբեռնում է `.sqlite` ֆայլ՝ ընթացիկ տվյալների բազան փոխարինելու համար։ Մինչ ներմուծումը պահուստային պատճենն ինքնաբերաբար ստեղծվում է, եթե սահմանված չէ `DISABLE_SQLITE_AUTO_BACKUP=true` |
+OmniRoute իրականացնում է մատակարարի մակարդակի ճկունություն հինգ բաղադրիչով.
+
+1. **Հերթ և տեմպերի հարցում** — Համակարգի մակարդակի հարցումների ձևավորում.
+   - **Հարցումներ րոպեում (RPM)** - Մեկ րոպեի համար առավելագույն հարցումներ յուրաքանչյուր հաշվի համար
+   - **Min Time հայտերի միջև** — Հարցումների միջև միլիվայրկյանների նվազագույն բացը
+   - **Առավելագույն միաժամանակյա հարցումներ** — Մեկ հաշվի առավելագույն միաժամանակյա հարցումներ
+
+2. **Միացման սառեցում** — Վերստուգվող ձախողումներից հետո մեկ կապի համար ըստ հեղինակային տիպի կազմաձևում.
+   - **Բազային սառեցում** — Լռելյայն սառեցման պատուհան՝ վերևից վեր փորձարկվող ձախողումների համար
+   - **Օգտագործեք վերևի փորձի հուշումներ** — Հարգում է հեղինակավոր `Retry-After` կամ վերակայման ակնարկները, երբ տրամադրվում է
+   - **Max Backoff քայլերը** — Կրկնվող ձախողումների համար առավելագույն էքսպոնենցիալ հետադարձ մակարդակ
+
+3. **Մատակարարի անջատիչ** — Հետևում է ծայրից ծայր մատակարարի ձախողումներին, նշում է մատակարարին, որը նսեմացել է կազմաձևված նախազգուշացման շեմին և բացում է անջատիչը, երբ հասնում է կազմաձևված ձախողման շեմը.
+   - **Դեգրադացիայի շեմը** — Ապահովողի անընդմեջ ձախողումներ՝ նախքան `DEGRADED` մտնելը
+   - **Անհաջողության շեմը** — Ապահովողի անընդմեջ ձախողումներ՝ նախքան `OPEN` մտնելը
+   - **Վերականգնել ժամանակի ավարտը** — Ժամկետային պատուհան՝ նախքան մատակարարի կրկին փորձարկումը
+   - **CLOSED** (Առողջ) — Հարցումները նորմալ են հոսում
+   - **DEGRADED** — Հարցումները դեռևս հոսում են, մինչդեռ բարձրացված ձախողումները հետագծվում են
+   - **OPEN** — Մատակարարը ժամանակավորապես արգելափակված է կրկնվող ձախողումներից հետո
+   - **HALF_OPEN** - Փորձարկում, եթե մատակարարը վերականգնվել է
+
+   Միացման շրջանակով `429` տոկոսադրույքի սահմանաչափերը մնում են** Միացման սառեցում** և մի հաշվեք մատակարարի անջատիչի վրա:
+
+   Մատակարարի անջատիչի գործարկման ժամանակի վիճակը ցուցադրված է** Վահանակ → Health** միայն.
+
+4. **Սպասեք սառեցմանը** — Եթե յուրաքանչյուր թեկնածուի միացում արդեն սառչում է, OmniRoute կարող է սպասել ամենավաղ սառեցմանը և ինքնաբերաբար կրկնել նույն հաճախորդի հարցումը:
+
+5. **Գնահատման սահմանաչափի ավտոմատ հայտնաբերում** — Երբ վերին հոսքի մատակարարները վերադարձնում են սպասման հստակ պատուհանները, այդ ակնարկները անտեսում են տեղական կապի սառեցումը, երբ կարգավորումը միացված է:
+
+**Pro Tip:** Օգտագործեք** Առողջություն** էջ՝ անջատումից հետո ուղիղ պրովայդերների անջատիչները ստուգելու և վերակայելու համար: Resilience էջը փոխում է միայն կոնֆիգուրացիան:
+
+---
+
+### Տվյալների բազա Արտահանում / Ներմուծում
+
+Կառավարեք տվյալների բազայի կրկնօրինակները** Կառավարման վահանակ → Կարգավորումներ → Համակարգ և պահեստավորում** .
+
+| Գործողություն                    | Նկարագրություն                                                                                                                                                        |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Արտահանման տվյալների բազա**    | Ներբեռնում է ընթացիկ SQLite տվյալների բազան որպես `.sqlite` ֆայլ                                                                                                      |
+| **Արտահանել բոլորը (.tar.gz)**   | Ներբեռնում է ամբողջական պահուստային արխիվ, ներառյալ՝ տվյալների բազա, կարգավորումներ, կոմբինացիաներ, մատակարարի կապեր (առանց հավատարմագրերի), API բանալի մետատվյալներ  |
+| **Ներմուծել տվյալների շտեմարան** | Ներբեռնեք `.sqlite` ֆայլ՝ ընթացիկ տվյալների բազան փոխարինելու համար: Նախաներմուծման կրկնօրինակը ինքնաբերաբար ստեղծվում է, եթե `DISABLE_SQLITE_AUTO_BACKUP=true` չլինի |
 
 ```bash
-# API․ արտահանել տվյալների բազան
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API․ արտահանել ամբողջը (ամբողջական արխիվ)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API․ ներմուծել տվյալների բազան
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Ներմուծման վավերացում․** Ներմուծված ֆայլը ստուգվում է ամբողջականության (SQLite pragma ստուգում), պարտադիր աղյուսակների (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) և չափի (առավելագույնը՝ 100 ՄԲ) առումով։
+**Ներմուծման վավերացում.** Ներմուծված ֆայլը վավերացված է ամբողջականության (SQLite pragma ստուգում), պահանջվող աղյուսակների (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) և չափի (առավելագույնը 100 ՄԲ):
 
-**Օգտագործման դեպքեր․**
+**Օգտագործման դեպքեր.**
 
-- OmniRoute-ը տեղափոխել համակարգիչների միջև
-- Ստեղծել արտաքին պահուստային պատճեններ՝ աղետից հետո վերականգնման համար
-- Կիսվել կազմաձևերով թիմի անդամների միջև (արտահանել ամբողջը → կիսվել արխիվով)
+- Տեղափոխեք OmniRoute մեքենաների միջև
+- Ստեղծեք արտաքին կրկնօրինակներ աղետի վերականգնման համար
+- Կիսվեք կազմաձևերով թիմի անդամների միջև (արտահանեք բոլոր → բաժնետոմսերի արխիվը)
 
 ---
 
 ### Կարգավորումների վահանակ
 
-Հեշտ նավարկման համար կարգավորումների էջը բաժանված է **7 ներդիրի**․
+Կարգավորումների էջը կազմակերպված է** 7 ներդիր** հեշտ նավարկության համար.
 
-| Ներդիր                | Բովանդակություն                                                                                                                                                                                                                   |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ընդհանուր**         | Համակարգային պահեստավորման գործիքներ, լռելյայն վարքագիծ, վերջնակետի թունելի տեսանելիություն                                                                                                                                       |
-| **Արտաքին տեսք**      | Թեմայի կառավարում (բաց/մուգ/համակարգային), կողագոտու տեսանելիություն, Cloudflare/Tailscale/ngrok թունելների քարտերի վահանակների փոխարկիչներ                                                                                       |
-| **ԱԲ**                | Մտածողության բյուջե (անփոփոխ փոխանցում / ինքնահեռացում / հատուկ / հարմարվողական — տե՛ս [THINKING_BUDGET.md](./THINKING_BUDGET.md)), համընդհանուր համակարգային հուշում, հուշումների քեշի վիճակագրություն                           |
-| **Անվտանգություն**    | Մուտքանվան/գաղտնաբառի կարգավորումներ, IP մուտքի կառավարում, API նույնականացում `/models`-ի համար, մատակարարների արգելափակում, հուշումների ներարկումից պաշտպանություն                                                              |
-| **Ուղղորդում**        | Համընդհանուր ուղղորդման ռազմավարություն (լրացնել առաջինը / շրջանաձև / P2C / պատահական / ամենաքիչ օգտագործված / ծախսերով օպտիմալացված), մոդելների ընդհանրացված այլանուններ, պահուստային շղթաներ, կոմբոների լռելյայն կարգավորումներ |
-| **Դիմակայունություն** | Հարցումների հերթ, կապի սառեցման ժամանակահատված, մատակարարի անջատիչի կազմաձև և սառեցման ավարտին սպասելու վարքագիծ                                                                                                                  |
-| **Ընդլայնված**        | Պրոքսիի համընդհանուր կազմաձև (HTTP/SOCKS5), յուրաքանչյուր մատակարարի համար պրոքսիի վերասահմանումներ                                                                                                                               |
+| Ներդիր             | Բովանդակություն                                                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Գեներալ**        | Համակարգի պահպանման գործիքներ, լռելյայն վարքագիծ, վերջնակետի թունելի տեսանելիություն                                                                                                                       |
+| **Արտաքին տեսք**   | Թեմայի կառավարում (light/dark/system), կողագոտի տեսանելիություն, վահանակի անջատիչներ Cloudflare/Tailscale/ngrok թունելային քարտերի համար                                                                   |
+| **AI**             | Մտածող բյուջե (անցում / ավտոմատ ժապավեն / հարմարեցված / հարմարվողական — տես [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), գլոբալ համակարգի հուշում, արագ քեշի վիճակագրություն                              |
+| **Անվտանգություն** | Login/Password կարգավորումներ, IP մուտքի վերահսկում, API վավերացում `/models` համար, մատակարարի արգելափակում, արագ ներարկման պահակ                                                                         |
+| **Երթուղիավորում** | Համաշխարհային երթուղային ռազմավարություն (Լրացնել առաջինը / Round Robin / P2C / Պատահական / Նվազագույն օգտագործված / Օպտիմիզացված ծախսեր), նիշերի մոդելի անուններ, հետադարձ շղթաներ, համակցված լռելյայններ |
+| **Ճկունություն**   | Հարցման հերթ, կապի սառեցում, մատակարարի անջատիչի կոնֆիգուրացիա և սպասել հովացման պահվածք                                                                                                                   |
+| **Ընդլայնված**     | Համաշխարհային վստահված անձի կազմաձևում (HTTP/SOCKS5), յուրաքանչյուր մատակարարի վստահված անձի անտեսում                                                                                                      |
 
-«Ընդհանուր» բաժինն այլևս չի կրկնօրինակում միայն ընթերցման համար նախատեսված գրանցամատյանի և քեշի նշումները։ Տվյալների բազայի պահպանման և
-օպտիմալացման կարգավորումները պահպանվում են `/api/settings/database`-ի միջոցով, իսկ քեշը ձեռքով մաքրելու համար օգտագործվում է
-`DELETE /api/cache`։ Հարցումների և պրոքսիի գրանցամատյանների տողերի առավելագույն քանակը կառավարվում է
-`CALL_LOGS_TABLE_MAX_ROWS` և `PROXY_LOGS_TABLE_MAX_ROWS` փոփոխականներով։
+General-ն այլևս չի կրկնօրինակում միայն կարդալու տեղեկամատյանները և քեշի նշումները: Տվյալների բազայի պահպանման և օպտիմալացման կարգավորումները պահպանվում են `/api/settings/database` միջոցով; Քեշի ձեռքով մաքրումը օգտագործում է `DELETE /api/cache`: Հարցման և վստահված անձի գրանցամատյանի տողերի գլխարկները վերահսկվում են `CALL_LOGS_TABLE_MAX_ROWS` և `PROXY_LOGS_TABLE_MAX_ROWS` կողմից:
 
 ---
 
-### Ծախսերի և բյուջեի կառավարում
+### Ծախսեր և բյուջեի կառավարում
 
-Մուտք գործեք **Վահանակ → Ծախսեր** ուղիով։
+Մուտք գործելու միջոցով** Վահանակի → ծախսերը** .
 
-| Ներդիր          | Նպատակ                                                                                                                           |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Բյուջե**      | Սահմանել ծախսերի սահմանաչափեր յուրաքանչյուր API բանալու համար՝ օրական/շաբաթական/ամսական բյուջեներով և իրական ժամանակում հետևմամբ |
-| **Գնագոյացում** | Դիտել և խմբագրել մոդելների գնային գրառումները՝ յուրաքանչյուր մատակարարի համար 1K մուտքային/ելքային թոքենի արժեքը                 |
+| Ներդիր          | Նպատակը                                                                                                                |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Բյուջե**      | Սահմանեք ծախսերի սահմանաչափեր յուրաքանչյուր API բանալիով daily/weekly/monthly բյուջեներով և իրական ժամանակում հետևելով |
+| **Գնագոյացում** | Դիտեք և խմբագրեք մոդելի գնագոյացման գրառումները — արժեքը 1K input/output նշանի համար մեկ մատակարարի համար              |
 
 ```bash
-# API․ սահմանել բյուջե
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API․ ստանալ բյուջեի ընթացիկ կարգավիճակը
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Ծախսերի հետևում․** Յուրաքանչյուր հարցման համար գրանցվում է թոքենների օգտագործումը, և արժեքը հաշվարկվում է գնագոյացման աղյուսակի միջոցով։ Ըստ մատակարարի, մոդելի և API բանալու մանրամասները դիտեք **Վահանակ → Օգտագործում** բաժնում։
+**Արժեքի հետևում.** Յուրաքանչյուր հարցում գրանցում է նշանի օգտագործումը և հաշվարկում արժեքը՝ օգտագործելով գնագոյացման աղյուսակը: Դիտեք խափանումները** Վահանակ → Օգտագործում** մատակարարի, մոդելի և API բանալիով:
 
 ---
 
-### Ձայնագրության տառադարձում
+### Աուդիո տառադարձում
 
-OmniRoute-ն աջակցում է ձայնագրությունների տառադարձմանը OpenAI-ի հետ համատեղելի վերջնակետի միջոցով․
+OmniRoute աջակցում է աուդիո տառադարձմանը OpenAI-ի հետ համատեղելի վերջնակետի միջոցով.
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Օրինակ՝ curl-ի միջոցով
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3`-ը Deepgram-ի բնիկ երթուղին է և պահանջում է Deepgram API բանալի։
-Եթե կազմաձևված է միայն OpenRouter-ը, օգտագործեք `openrouter/deepgram/nova-3`։
+`deepgram/nova-3` Deepgram-ի բնիկ երթուղին է և կարիք ունի Deepgram API ստեղնի: Եթե կազմաձևված է միայն OpenRouter, օգտագործեք `openrouter/deepgram/nova-3`:
 
-**Խոսքից տեքստ (տառադարձում)** մատակարարներ․
+**Խոսքի վերածում տեքստի (տառադարձում)** մատակարարներ.
 
-- `openai/` (whisper-ի հետ համատեղելի)
+- `openai/` (շշուկով համատեղելի)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova ընտանիք)
+- `deepgram/` (Նովա ընտանիք)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper տարբերակներ)
+- `huggingface/` (շշուկի տարբերակներ)
 - `qwen/`
 
-**Տեքստից խոսք (`POST /v1/audio/speech`)** մատակարարներ․
+**Տեքստից խոսք (`POST /v1/audio/speech`)** մատակարարներ.
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
+- `deepgram/` (Աուրա)
 - `nvidia/` (Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
@@ -1025,56 +1143,45 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Տառադարձման համար աջակցվող ձայնային ձևաչափերն են՝ `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`։ TTS-ի ելքային ձևաչափերը կախված են մատակարարից (mp3, wav, opus, pcm, mulaw)։
+Տառադարձման համար աջակցվող աուդիո ձևաչափեր՝ `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`: TTS ելքային ձևաչափերը կախված են մատակարարից (mp3, wav, opus, pcm, mulaw):
 
 ---
 
-### Կոմբոների հավասարակշռման ռազմավարություններ
+### Համակցված հավասարակշռման ռազմավարություններ
 
-Յուրաքանչյուր կոմբոյի հավասարակշռումը կազմաձևեք **Վահանակ → Կոմբոներ → Ստեղծել/Խմբագրել → Ռազմավարություն** բաժնում։
+Կազմաձևեք համակցված հավասարակշռումը** Վահանակ → Combos → Create/Edit → ռազմավարություն** .
 
-| Ռազմավարություն           | Նկարագրություն                                                                                      |
-| ------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Շրջանաձև**              | Հաջորդաբար հերթափոխում է մոդելները                                                                  |
-| **Առաջնահերթությամբ**     | Միշտ նախ փորձում է առաջին մոդելը․ պահուստայինին անցնում է միայն սխալի դեպքում                       |
-| **Պատահական**             | Յուրաքանչյուր հարցման համար համակցությունից պատահական մոդել է ընտրում                               |
-| **Կշռված**                | Ուղղորդում է համամասնորեն՝ յուրաքանչյուր մոդելին նշանակված կշիռների հիման վրա                       |
-| **Ամենաքիչ օգտագործված**  | Ուղղորդում է ամենաքիչ վերջին հարցումներն ունեցող մոդելին (օգտագործում է համակցության չափորոշիչները) |
-| **Ծախսերի օպտիմալացմամբ** | Ուղղորդում է հասանելի ամենաէժան մոդելին (օգտագործում է գնային աղյուսակը)                            |
+| Ռազմավարություն          | Նկարագրություն                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| **Round-Robin**          | Հերթականորեն պտտվում է մոդելների միջով                                                  |
+| **Առաջնահերթություն**    | Միշտ փորձում է առաջին մոդելը; հետ է ընկնում միայն սխալի վրա                             |
+| **Պատահական**            | Յուրաքանչյուր հարցման համար ընտրում է պատահական մոդել կոմբից                            |
+| **կշռված**               | Երթուղիները համամասնորեն հիմնված են յուրաքանչյուր մոդելի նշանակված կշիռների վրա         |
+| **Ամենաքիչ օգտագործված** | Երթուղիներ դեպի մոդել՝ ամենաքիչ վերջին հարցումներով (օգտագործում է համակցված չափումներ) |
+| **Ծախսերի օպտիմիզացված** | Երթուղիներ դեպի ամենաէժան մատչելի մոդելը (օգտագործում է գների աղյուսակը)                |
 
-Համակցությունների գլոբալ լռելյայն կարգավորումները կարելի է սահմանել **Dashboard → Settings → Routing → Combo Defaults** բաժնում։
-Համակցության թիրախների սպասման ժամանակը լռելյայն ժառանգում է ընթացիկ հարցման սպասման ժամանակը։ Օգտագործեք **Target timeout
-(seconds)**-ը համակցության լռելյայն կարգավորումներում կամ առանձին համակցության համար միայն այն դեպքում, երբ յուրաքանչյուր թիրախի համար ավելի կարճ սահմանաչափը պետք է
-ավելի արագ գործարկի պահուստային տարբերակին անցումը։
+Համաշխարհային համակցված կանխադրումները կարող են սահմանվել** Գործակալի վահանակ → Կարգավորումներ → Ուղղորդում → Combo Defaults** . Համակցված նպատակային ժամանակի վերջնաժամկետը լռելյայնորեն ժառանգում է ընթացիկ հարցման ժամանակի ավարտը: Օգտագործեք** Թիրախային ժամանակի ավարտ (վայրկյաններ)** համակցված լռելյայն կամ անհատական համակցման դեպքում միայն այն դեպքում, երբ մեկ թիրախի համար ավելի կարճ սահմանաչափը պետք է ավելի արագ հետադարձ գործարկի:
 
-Զրոյական ուշացմամբ համակցությունների օպտիմալացումները միացվում են ըստ ցանկության։ Թողեք **Zero-latency optimizations**-ն անջատված՝
-կանխելու համար, որ ուշացման այս գործառույթները մրցակցեն պահուստային թիրախների հետ, բաց թողնեն թիրախները՝ հիմնվելով TTFT-ի
-պատմության վրա, կամ սեղմեն պահուստային հարցումները․ այն միացնելը թույլ է տալիս կազմաձևված կանխարգելիչ զուգահեռ հարցումներին, կանխատեսողական TTFT
-բացթողումներին և պահուստային հարցումների կանխ proactive սեղմմանը՝ ուղղորդման/հարցման ճշգրտությունը փոխանակել վերջնամասային ավելի ցածր
-ուշացման հետ։
+Զրոյական ուշացման համակցված օպտիմալացումները միացված են: Հեռանալ** Զրոյական ուշացման օպտիմալացումներ** անջատված է՝ այս ուշացման հատկանիշները կանխելու հետադարձ թիրախների մրցավազքը, TTFT պատմության հիման վրա թիրախները բաց թողնելը կամ հետադարձ պահանջները սեղմելը. հնարավորություն տալով այն թույլ է տալիս կազմաձևված հեջավորում, կանխատեսող TTFT բացումներ և ակտիվ հետադարձ սեղմում՝ routing/request հավատարմությունը վաճառելու համար ավելի ցածր պոչի հետաձգման համար:
 
-Անջատեք **Reasoning token buffer**-ը, երբ վերին հոսքի մատակարարները պահանջում են խիստ
-`max_tokens` / `maxOutputTokens` սահմանաչափեր։ Երբ այն միացված է, համակցված ուղղորդումը դատողություն կատարող մոդելների համար
-լրացուցիչ պաշար է ավելացնում միայն ելքի հայտնի սահմանաչափ ունեցող մոդելներին և հաճախորդի թոքենների սահմանաչափը չի փոխում, երբ
-անվտանգ բուֆերացված արժեքը կգերազանցեր այդ սահմանաչափը։ Եթե հաճախորդի սահմանաչափն արդեն գերազանցում է հայտնի սահմանաչափը,
-OmniRoute-ն այն նվազեցնում է մինչև այդ սահմանաչափը՝ նախքան հարցումը վերին հոսք ուղարկելը։
+Անջատել** Պատճառաբանության նշան բուֆեր** երբ հոսանքին հակառակ մատակարարները պահանջում են խիստ `max_tokens` / `maxOutputTokens` սահմաններ: Երբ միացված է, համակցված երթուղին ավելացնում է միայն հիմնավորման մոդելի գլխամասը հայտնի ելքային գլխարկ ունեցող մոդելների համար և անփոփոխ է թողնում հաճախորդի նշանի սահմանաչափը, երբ անվտանգ բուֆերային արժեքը գերազանցում է այդ սահմանաչափը: Եթե հաճախորդի սահմանաչափն արդեն գերազանցում է հայտնի գլխարկը, OmniRoute այն սեղմում է այդ գլխարկի վրա՝ նախքան հոսանքին հակառակ հարցումն ուղարկելը:
 
 ---
 
-### Համակարգի առողջության վահանակ
+### Առողջության վահանակ
 
-Մուտք գործեք **Dashboard → Health** բաժնից։ Համակարգի առողջության իրական ժամանակի ակնարկ՝ 6 քարտով․
+Մուտք գործելու միջոցով** Վահանակ → Health** . Իրական ժամանակի համակարգի առողջության ակնարկ 6 քարտերով.
 
-| Քարտ                             | Ինչ է ցուցադրում                                                                        |
-| -------------------------------- | --------------------------------------------------------------------------------------- |
-| **Համակարգի կարգավիճակ**         | Անխափան աշխատանքի տևողություն, տարբերակ, հիշողության օգտագործում, տվյալների գրացուցակ   |
-| **Մատակարարների առողջություն**   | Մատակարարների գլոբալ անջատիչի ընթացիկ աշխատանքային վիճակը                               |
-| **Հաճախականության սահմանաչափեր** | Յուրաքանչյուր հաշվի ակտիվ կապերի սառեցման ժամանակահատվածները՝ մնացած ժամանակով          |
-| **Ակտիվ արգելափակումներ**        | Ակտիվ՝ մոդելի մակարդակով արգելափակումներ և ժամանակավոր բացառումներ                      |
-| **Ստորագրությունների քեշ**       | Կրկնօրինակումների վերացման քեշի վիճակագրություն (ակտիվ բանալիներ, համընկնումների տոկոս) |
-| **Ուշացման հեռաչափություն**      | Յուրաքանչյուր մատակարարի p50/p95/p99 ուշացումների ագրեգացված տվյալները                  |
+| Քարտ                        | Ինչ է ցույց տալիս                                                          |
+| --------------------------- | -------------------------------------------------------------------------- |
+| **Համակարգի կարգավիճակը**   | Uptime, տարբերակ, հիշողության օգտագործում, տվյալների գրացուցակ             |
+| **Մատակարարի Առողջություն** | Համաշխարհային մատակարարի միացման անջատիչի գործարկման ժամանակի վիճակը       |
+| **Գնահատման սահմանները**    | Ակտիվ կապի սառեցումներ յուրաքանչյուր հաշվի հետ՝ մնացած ժամանակով           |
+| **Ակտիվ արգելափակումներ**   | Ակտիվ մոդելային շրջանակներով արգելափակումներ և ժամանակավոր բացառումներ     |
+| **Ստորագրության քեշ**       | Կրկնօրինակման քեշի վիճակագրություն (ակտիվ ստեղներ, հարվածների արագություն) |
+| **Latency Telemetry**       | p50/p95/p99 հետաձգման համախմբում յուրաքանչյուր մատակարարի համար            |
 
-**Մասնագիտական խորհուրդ․** Health էջն ինքնաբերաբար թարմացվում է յուրաքանչյուր 10 վայրկյանը մեկ։ Օգտագործեք անջատիչի քարտը՝ պարզելու համար, թե որ մատակարարներն ունեն խնդիրներ։
+**Pro Tip:** Առողջություն էջը ինքնաթարմացվում է 10 վայրկյանը մեկ: Օգտագործեք անջատիչի քարտը՝ պարզելու, թե որ մատակարարներն են խնդիրներ ունենում:
 
 ---
 

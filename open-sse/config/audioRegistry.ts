@@ -9,6 +9,12 @@
 
 import { getProviderAlias } from "@/shared/constants/providers";
 import { isLoopbackNodeHost } from "@/shared/network/loopbackNodeHost";
+import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import { RENDERHOUR_SPEECH_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
+import {
+  toRegistrySpeechModels as toSyntxSpeechModels,
+  toRegistryTranscriptionModels as toSyntxTranscriptionModels,
+} from "../services/syntxMediaCatalog.ts";
 
 interface AudioModel {
   id: string;
@@ -25,16 +31,36 @@ export interface AudioProvider {
    * id already is the credential key.
    */
   credentialProviderId?: string;
+  alias?: string;
   baseUrl: string;
   authType: string;
   authHeader: string;
   format?: string;
   supportedFormats?: string[];
   async?: boolean;
+  /**
+   * Voice sent by the OpenAI-compatible speech path when the request omits `voice`.
+   * Absent means the OpenAI stock default ("alloy").
+   */
+  defaultVoice?: string;
+  /**
+   * The adapter can only run the models listed in `models` (e.g. Gemini Live's
+   * BidiGenerateContent socket), not every model the provider tags with this
+   * endpoint. Endpoint-adapter evidence (#16929) is then scoped per model.
+   */
+  modelScoped?: boolean;
   models: AudioModel[];
 }
 
 export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
+  "grok-cli": {
+    id: "grok-cli",
+    baseUrl: "https://api.x.ai/v1/stt",
+    authType: "oauth",
+    authHeader: "bearer",
+    format: "grok-stt",
+    models: [{ id: "grok-voice-transcribe-2.0", name: "Grok Voice Transcribe 2.0 (OAuth)" }],
+  },
   vertex: {
     id: "vertex",
     baseUrl: "https://us-central1-aiplatform.googleapis.com/v1",
@@ -56,6 +82,18 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     models: [
       { id: "whisper-1", name: "Whisper 1" },
       { id: "gpt-4o-transcription", name: "GPT-4o Transcription" },
+    ],
+  },
+
+  mistral: {
+    id: "mistral",
+    baseUrl: "https://api.mistral.ai/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      { id: "voxtral-mini-latest", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-2602", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-transcribe-3", name: "Voxtral Mini Transcribe 3" },
     ],
   },
 
@@ -123,6 +161,19 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     models: [{ id: "whisper", name: "Pollinations Whisper (Free)" }],
   },
 
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    // Ct2 adds native word-level timestamps and diarized_json.
+    models: [
+      { id: "WhisperLargeV3Ct2", name: "Whisper Large v3 CT2 (deAPI)" },
+      { id: "WhisperLargeV3", name: "Whisper Large v3 (deAPI)" },
+    ],
+  },
+
   together: {
     id: "together",
     baseUrl: "https://api.together.xyz/v1/audio/transcriptions",
@@ -139,7 +190,8 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     id: "assemblyai",
     baseUrl: "https://api.assemblyai.com/v2/transcript",
     authType: "apikey",
-    authHeader: "bearer",
+    // AssemblyAI expects `Authorization: <API_KEY>` with no "Bearer" scheme.
+    authHeader: "authorization",
     async: true,
     format: "assemblyai",
     models: [
@@ -175,7 +227,10 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
 
   huggingface: {
     id: "huggingface",
-    baseUrl: "https://api-inference.huggingface.co/models",
+    // HF retired api-inference.huggingface.co; ASR now routes through
+    // router.huggingface.co with the hf-inference provider pinned in the path
+    // (same convention as the image entry in imageRegistryData.ts).
+    baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
     format: "huggingface-asr",
@@ -261,6 +316,37 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gpt-4o-transcription", name: "GPT-4o Transcription" },
     ],
   },
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "whisper", name: "Whisper" }],
+  },
+  syntx: {
+    id: "syntx",
+    alias: "stx",
+    baseUrl: "https://api.syntx.ai/api/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "syntx-audio",
+    models: toSyntxTranscriptionModels(),
+  },
+  // Kept last on purpose: the audio/video bridges auto-pick the FIRST catalog
+  // model with usable credentials (selectAudioBridgeModel), so a Gemini key must
+  // not pre-empt the established STT providers' auto-selection order.
+  gemini: {
+    id: "gemini",
+    baseUrl:
+      "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-live",
+    // Only Live-capable models run over BidiGenerateContent; other Gemini models
+    // tagged audio-transcriptions keep having no adapter (#16929).
+    modelScoped: true,
+    models: [{ id: "gemini-3.5-transcribe-live", name: "Gemini 3.5 Transcribe Live" }],
+  },
 };
 
 /**
@@ -288,6 +374,14 @@ export const AUDIO_TRANSLATION_PROVIDERS: Record<string, AudioProvider> = {
 };
 
 export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
+  "grok-cli": {
+    id: "grok-cli",
+    baseUrl: "https://api.x.ai/v1/tts",
+    authType: "oauth",
+    authHeader: "bearer",
+    format: "grok-tts",
+    models: [{ id: "grok-tts", name: "Grok Text to Speech (OAuth)" }],
+  },
   google: {
     id: "google",
     credentialProviderId: "gemini",
@@ -299,6 +393,8 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gemini-3.1-flash-tts-preview", name: "Gemini 3.1 Flash TTS" },
       { id: "gemini-2.5-flash-preview-tts", name: "Gemini 2.5 Flash TTS" },
       { id: "gemini-2.5-pro-preview-tts", name: "Gemini 2.5 Pro TTS" },
+      { id: "gemini-3.8-flash-tts", name: "Gemini 3.8 Flash TTS" },
+      { id: "gemini-3.8-flash-lite-tts", name: "Gemini 3.8 Flash-Lite TTS" },
     ],
   },
   vertex: {
@@ -311,6 +407,8 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gemini-3.1-flash-tts-preview", name: "Gemini 3.1 Flash TTS (Vertex)" },
       { id: "gemini-2.5-flash-preview-tts", name: "Gemini 2.5 Flash TTS (Vertex)" },
       { id: "gemini-2.5-pro-preview-tts", name: "Gemini 2.5 Pro TTS (Vertex)" },
+      { id: "gemini-3.8-flash-tts", name: "Gemini 3.8 Flash TTS (Vertex)" },
+      { id: "gemini-3.8-flash-lite-tts", name: "Gemini 3.8 Flash-Lite TTS (Vertex)" },
     ],
   },
 
@@ -325,6 +423,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gpt-4o-mini-tts", name: "GPT-4o Mini TTS" },
     ],
   },
+
+  // Mistral is deliberately absent. Its /v1/audio/speech takes `voice_id` and answers
+  // JSON `{ "audio_data": "<base64>" }`, while the default path below sends `voice` and
+  // streams the body back as audio. Listing it needs a dedicated format handler.
 
   hyperbolic: {
     id: "hyperbolic",
@@ -366,7 +468,12 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     authType: "apikey",
     authHeader: "bearer",
     format: "soniox-tts",
-    models: [{ id: "tts-rt-v1", name: "Soniox TTS RT v1" }],
+    // tts-rt-v1 is deprecated upstream (2026-08-31) and now served by tts-rt-v2;
+    // kept so existing clients that pin v1 still resolve.
+    models: [
+      { id: "tts-rt-v2", name: "Soniox TTS RT v2" },
+      { id: "tts-rt-v1", name: "Soniox TTS RT v1" },
+    ],
   },
 
   elevenlabs: {
@@ -383,7 +490,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
 
   huggingface: {
     id: "huggingface",
-    baseUrl: "https://api-inference.huggingface.co/models",
+    // HF retired api-inference.huggingface.co; TTS now routes through
+    // router.huggingface.co with the hf-inference provider pinned in the path
+    // (same convention as the image entry in imageRegistryData.ts).
+    baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
     format: "huggingface-tts",
@@ -419,6 +529,20 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "none",
     format: "openai",
     models: [{ id: "qwen3-tts", name: "Qwen3 TTS" }],
+  },
+
+  // Qwen Cloud Token Plan — DashScope SpeechSynthesizer (JSON → inline base64 or an
+  // expiring audio URL). The host follows the connection's region (Singapore/Beijing).
+  "qwen-cloud-token-plan": {
+    id: "qwen-cloud-token-plan",
+    alias: "qct",
+    baseUrl:
+      "https://token-plan.ap-southeast-1.maas.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "dashscope-tts",
+    supportedFormats: ["mp3"],
+    models: [{ id: "qwen-audio-3.0-tts-plus", name: "Qwen Audio 3.0 TTS Plus" }],
   },
 
   // ── Cloud TTS Providers (#248) ────────────────────────────────────────────
@@ -537,6 +661,24 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     models: [{ id: "speech-2.8-hd", name: "Speech 2.8 HD" }],
   },
 
+  // deAPI maps the OpenAI stock voices (alloy, nova, ...) onto each model's own
+  // voices, so the default "alloy" works on every model; native ids (af_bella,
+  // Vivian, ...) are accepted too. mp3 only. VoiceDesign needs `instructions`.
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    supportedFormats: ["mp3"],
+    models: [
+      { id: "Kokoro", name: "Kokoro (deAPI)" },
+      { id: "Chatterbox", name: "Chatterbox (deAPI)" },
+      { id: "Qwen3_TTS_12Hz_1_7B_CustomVoice", name: "Qwen3 TTS 1.7B (deAPI)" },
+      { id: "Qwen3_TTS_12Hz_1_7B_VoiceDesign", name: "Qwen3 TTS Voice Design (deAPI)" },
+    ],
+  },
+
   together: {
     id: "together",
     baseUrl: "https://api.together.xyz/v1/audio/speech",
@@ -589,6 +731,17 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
+  // Kokoro has no OpenAI stock voices, so a request without `voice` must not fall
+  // back to "alloy" — defaultVoice supplies a Kokoro voice id instead.
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    defaultVoice: "af_heart",
+    models: [{ id: "kokoro", name: "Kokoro" }],
+  },
+
   // UC (uncensored.com) voice synthesis over its dedicated TTS WebSocket. Auth is
   // a Clerk session JWT minted per-connect from the durable connection cred; the
   // `format: "uc-tts"` branch in audioSpeech.ts drives the socket. The baseUrl is
@@ -602,6 +755,16 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     format: "uc-tts",
     models: [{ id: "jade", name: "UC Voice (Jade)" }],
   },
+  syntx: {
+    id: "syntx",
+    alias: "stx",
+    baseUrl: "https://api.syntx.ai/api/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "syntx-audio",
+    models: toSyntxSpeechModels(),
+  },
+  renderhour: RENDERHOUR_SPEECH_PROVIDER,
 };
 
 /**
@@ -645,16 +808,18 @@ export { isLoopbackNodeHost };
  * Build a dynamic AudioProvider from a provider_node DB entry.
  *
  * Loopback nodes keep `authType: "none"` — a local Ollama/LM Studio has no key and
- * must not be blocked on a missing credential. A remote node is the opposite: it is
- * only reachable when the operator opted in, and it must present the credential
- * stored on its connection, so it is built as an api-key provider keyed by the node
- * id (`credentialProviderId`) rather than by the caller-facing prefix.
+ * must not be blocked on a missing credential. Every other node — a remote node the
+ * operator opted into, or a hostname listed in `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`
+ * (#14635) — must present the credential stored on its connection, so it is built as an
+ * api-key provider keyed by the node id (`credentialProviderId`) rather than by the
+ * caller-facing prefix.
  */
 export function buildDynamicAudioProvider(node: ProviderNodeRow, audioPath: string): AudioProvider {
   if (!node.prefix || !node.baseUrl) {
     throw new Error(`Invalid provider_node: missing prefix or baseUrl`);
   }
   const baseUrl = node.baseUrl.replace(/\/+$/, "");
+  // Auth follows the built-in loopback class only (see above).
   const isLocal = isLoopbackNodeHost(node.baseUrl);
   return {
     id: node.prefix,
@@ -671,7 +836,7 @@ function parseAudioModel(
   registry: Record<string, AudioProvider>,
   dynamicProviders?: AudioProvider[]
 ): { provider: string | null; model: string | null } {
-  if (!modelStr) return { provider: null, model: null };
+  if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
 
   // Phase 1: prefix match in hardcoded registry
   for (const [providerId] of Object.entries(registry)) {

@@ -247,28 +247,40 @@ test("F1: cache GET returns correct shapes + trend window after batching (#11396
 
 // ─── N1: apiKeys permission probe ───────────────────────────────────────────
 test("N1: apiKeys fetches synced + custom models in parallel (#11396)", () => {
-  const src = readSource("src/lib/db/apiKeys.ts");
+  // The published-model lookup behind isModelAllowedForKey lives in its own module.
+  const src = readSource("src/lib/db/apiKeys/publishedModelLookup.ts");
 
-  const pair = src.match(
-    /const \[syncedModelsByConnection, customModels\] = await Promise\.all\(\[([\s\S]*?)\]\);/s
+  const reads = src.match(
+    /const \[syncedModelsByConnection, admissionRefs, customModels\] = await Promise\.all\(\[([\s\S]*?)\]\);/s
   );
-  assert.ok(pair, "expected `[syncedModelsByConnection, customModels] = await Promise.all([...])`");
-  assert.match(pair![1], /getSyncedAvailableModelsByConnection\(providerId\)/);
-  assert.match(pair![1], /getCustomModels\(providerId\)/);
-  // destructuring order must stay (synced first, custom second)
   assert.ok(
-    pair![1].indexOf("getSyncedAvailableModelsByConnection(providerId)") <
-      pair![1].indexOf("getCustomModels(providerId)")
+    reads,
+    "expected `[syncedModelsByConnection, admissionRefs, customModels] = await Promise.all([...])`"
+  );
+  const order = [
+    "getSyncedAvailableModelsByConnection(providerId)",
+    "getActiveConnectionAdmissionRefs(providerId)",
+    "getCustomModels(providerId)",
+  ].map((call) => reads![1].indexOf(call));
+  // every read is in the one Promise.all, in destructuring order
+  assert.ok(
+    order.every((index) => index >= 0),
+    JSON.stringify(order)
+  );
+  assert.deepEqual(
+    [...order].sort((a, b) => a - b),
+    order
   );
 
-  // the merged view feeding the deny/allow decision is unchanged
+  // the view feeding the deny/allow decision: the admitted synced rows, then custom rows
   assert.match(
     src,
-    /allDiscoveredModels = Object\.values\(syncedModelsByConnection\)\s*\.flat\(\)\s*\.concat\(customModels\)/
+    /syncedModels = unionAdmittedModels\(\s*admitSyncedModelsByConnection\(providerId, syncedModelsByConnection, admissionRefs\)\s*\);[\s\S]*?syncedModels\s*\.concat\(customModels\)/
   );
 
   // no serial awaits left behind
   assert.doesNotMatch(src, /await getSyncedAvailableModelsByConnection\(providerId\)/);
+  assert.doesNotMatch(src, /await getActiveConnectionAdmissionRefs\(providerId\)/);
   assert.doesNotMatch(src, /await getCustomModels\(providerId\)/);
 });
 

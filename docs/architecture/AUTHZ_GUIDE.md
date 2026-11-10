@@ -37,13 +37,15 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 A cookie is a session only when the JWT verifies **and** carries `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Every
-consumer of the cookie (route guard, authz pipeline refresh, WebSocket handshake, live
+consumer of the cookie (dashboard route guard (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live
 server, `/api/settings/require-login`, `/api/auth/status`) goes through that helper.
 Other JWTs signed with `JWT_SECRET` exist — the Cursor CLI passthrough mints
 `iss "omniroute" / aud "cursor-cli"` tokens for key holders — and are never sessions
 (#13298).
 
 Verified by `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. The pipeline auto-refreshes the JWT when it has fewer than 7 days left in its 30-day lifetime.
+
+A session can also end before its 30 days are up, because every minter goes through `mintDashboardSessionToken` (an issue time `iat` and an id `jti`) and the verifier checks two settings: `sessionsValidAfter`, set by a password change so every session issued before it stops verifying (the browser that changed the password gets a fresh cookie), and `revokedDashboardSessions`, to which `POST /api/auth/logout` adds the signed-out session's `jti`. Sessions minted by an older release carry neither claim and stay valid until the first password change. If the settings cannot be read, the session is not trusted.
 
 Some management routes accept **either** mode: cookie OR `Bearer <key>` when the API key has the `manage` (or `admin`) scope. This is what enables the "configurable via API calls" workflow added in v3.8.
 
@@ -64,14 +66,84 @@ supplemented:
 - `GET /api/auth/oidc/callback` validates `state`, exchanges the authorization
   code, and verifies the ID token's signature via the issuer's JWKS
   (`jose`'s `createRemoteJWKSet`, cached per JWKS URI) with `issuer`/`audience`
-  checks. An optional `oidcAllowedSubjects` allowlist matches the token's
-  `sub` claim or its `email` claim — the email claim is only honored when
-  `email_verified === true`, so an unverified email at the IdP can never pass
-  the gate.
+  checks. Dashboard admission requires a nonempty `oidcAllowedSubjects` list,
+  an `oidcAdmissionClaim` policy, or both. The subject list matches `sub` or
+  `email` only when `email_verified === true`. The optional claim policy takes
+  a dot-separated ID-token claim path (for example, `realm_access.roles`) and
+  an array of accepted values; the resolved claim must be an array of strings
+  containing at least one accepted value. If both policies are configured,
+  both must pass. Missing/malformed claims fail closed, and without either
+  policy the callback refuses login (`not_configured`). Existing subject-only
+  configurations continue unchanged.
+- Keycloak normally maps realm roles into access tokens, not necessarily ID
+  tokens. To require the realm role `admin`, configure a protocol mapper for
+  this client that includes `realm_access.roles` in its **ID token**, then set
+  `oidcAdmissionClaim` to `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Check the actual ID-token claim for this client before enabling role-only
+  admission; the application does not read access-token roles. IdP-side token
+  refusal can supplement but does not replace this application-side check.
 - On success it mints the **exact same** 30-day `auth_token` JWT the password
   login issues (`src/app/api/auth/login/route.ts`), so the rest of the
   dashboard session pipeline (auto-refresh, cookie flags) is unchanged —
-  OIDC only replaces how the cookie gets minted, not what it grants.
+  OIDC only replaces how the cookie gets minted, not what it grants. Changes
+  to IdP roles/groups do not invalidate existing OmniRoute sessions; logout,
+  password rotation, or session expiry still govern their lifetime.
+- Every `oidc*` setting (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) is in `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  answers `400 PASSWORD_REQUIRED` unless the body carries the management
+  password as `currentPassword` (`401 PASSWORD_MISMATCH` when it is wrong).
+  `oidcDisablePasswordLogin` refuses password _login_ (`POST /api/auth/login`)
+  but keeps the stored password hash, and re-auth still checks
+  `currentPassword` against it.
+- `corsOrigins` and `bruteForceProtection` are in `SECURITY_IMPACTING_SETTINGS_KEYS`
+  too: loosening either weakens the login defenses, so they take the same
+  `currentPassword` re-auth (the Security tab asks for it) and the JSON import
+  drops them.
+- Every security-policy key — the `SECURITY_IMPACTING_SETTINGS_KEYS` entries,
+  every `oidc*` key and the dashboard session state — is **operator-only** on
+  `PATCH /api/settings`: a manage-scoped API key or an `oma_` access token is
+  refused with `403` even when it sends the right `currentPassword`, and the
+  refusal is audited as `settings.update_failed` with `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`).
+  Ordinary settings (theme, display preferences) stay writable for a `manage` key
+  or an `admin` access token. Every mutation of `/api/settings` itself (and of
+  `/api/settings/require-login`) also needs the `admin` access-token scope
+  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`, exact-path
+  match); `GET` stays `read`, and the other `/api/settings/*` sub-routes (proxies,
+  combo defaults, model aliases, compression, purges…) keep the method-inferred
+  `write` scope.
+- `POST /api/settings/import-json` skips that re-auth, so it drops every key in
+  `IMPORT_STRIPPED_SETTINGS_KEYS` (same file) before writing: the password and
+  `currentPassword`, every `SECURITY_IMPACTING_SETTINGS_KEYS` entry, and the
+  dashboard session state (`sessionsValidAfter`, `revokedDashboardSessions`).
+  Importing an older backup therefore cannot revive a session that a password
+  change or a sign-out already ended.
+
+#### Optional TOTP two-factor login (#16619)
+
+Enrolled from Settings → Security; off until the operator turns it on
+(`src/server/auth/dashboardMfa.ts`).
+
+- **What it covers:** password login (`POST /api/auth/login`, which then needs
+  `POST /api/auth/mfa/verify`) and `omniroute connect` (`POST /api/cli/connect`,
+  which refuses a password-only exchange and takes the code as `totp`).
+- **What it does not cover:** OIDC / SSO sign-in (`/api/auth/oidc/callback`) does
+  not ask for the OmniRoute TOTP. It relies on the identity provider's own second
+  factor, so enforce MFA in the IdP if OIDC is enabled.
+- **Recovery** (lost device, no recovery codes left, or a factor that can no longer
+  be verified, for example after `STORAGE_ENCRYPTION_KEY` changed):
+  1. Restart the server with `OMNIROUTE_DISABLE_MFA=true`.
+  2. On the host itself (loopback peer and loopback `Host`, such as
+     `http://localhost:20128`), sign in with the password. The second factor is
+     skipped for that origin only; every other origin still needs the code.
+  3. In Settings → Security → Disable, enter the password and leave the code
+     blank. `POST /api/auth/mfa/disable` accepts a body without `code` only while
+     the variable is set and the request comes from the host; it still requires
+     the dashboard session and the current password, and is audited as
+     `auth.mfa.disabled` with `secondFactor: "recovery_switch"`.
+  4. Unset `OMNIROUTE_DISABLE_MFA`, restart, and enroll again if needed.
 
 ## Route Classes
 
@@ -79,9 +151,29 @@ supplemented:
 
 | Class        | Description                                                                                                                                          | Auth required                                                           |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `PUBLIC`     | Explicitly safe routes — login, logout, status, init, health, onboarding bootstrap.                                                                  | None                                                                    |
+| `PUBLIC`     | Explicitly safe routes — login, logout, status, health, onboarding bootstrap.                                                                        | None                                                                    |
 | `CLIENT_API` | Model-serving endpoints — `/api/v1/*`, `/api/v1beta/*`, plus aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key when the effective `REQUIRE_API_KEY` feature flag is enabled |
 | `MANAGEMENT` | Dashboard pages, settings, providers, keys, admin and diagnostics endpoints.                                                                         | Dashboard session OR Bearer with `manage` scope                         |
+
+A few `MANAGEMENT` actions are **operator-only**: a `manage` key is not enough. Exporting stored
+credentials (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), restoring a backup over the live data
+(`POST /api/db-backups/import` including `dryRun=true`, `POST /api/db-backups` restore by id,
+`POST /api/settings/import-json`), destroying restore points (`DELETE /api/db-backups` cleanup,
+and `PATCH /api/db-backups` because the retention it persists drives the automatic pruning after
+every backup) require a dashboard session, the local CLI subject, or login disabled. Issuing a
+sync token (`POST /api/sync/tokens`) and minting an `admin` CLI access token
+(`POST /api/cli/tokens`) require a dashboard session or the local CLI subject in every login mode.
+API keys of any scope and `oma_` access tokens are not operator credentials: they get `403`
+whenever one is required. The check
+lives in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`). Changing the login settings is operator-only too:
+`POST /api/settings/require-login` (set the management password / toggle `requireLogin`) accepts
+only those credentials once a password exists — the first-run bootstrap window (no password yet)
+is unchanged — and a dashboard session must send `currentPassword` to replace the password
+(`403` when it is missing or wrong, audited as `settings.update_failed`). The local CLI and an
+instance with login disabled keep the recovery path and may set a password without it, since both
+are bound to the host that owns the data directory.
 
 ## Pipeline
 
@@ -108,9 +200,10 @@ Each route class has a policy in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — always returns `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extracts Bearer, validates via `validateApiKey()`. Falls through to anonymous only when the effective `REQUIRE_API_KEY` feature flag is disabled. The effective flag is resolved through `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) so Dashboard Feature Flags and environment variables govern `/api/v1/*`, `/api/v1beta/*`, and aliases consistently; resolver failures fail closed. Allows dashboard-session requests on client API routes (including `/api/v1/models`, used by the dashboard model catalog).
+  When Entra ID SSO is enabled, a Bearer that is structurally an Entra token (three base64url segments, `RS*` alg, `kid`) is handled by the SSO branch **before** `validateApiKey()` and its verdict is final — it never falls through to the API-key path or the degrade-to-anonymous branch, so an identity-provider outage cannot become open access. Static API keys are unaffected. See [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — accepts dashboard session, internal model-sync requests (matched against `/api/providers/[name]/(sync-models|models)`), or skips entirely if `isAuthRequired()` returns false. Returns 403 (`AUTH_001`) when a Bearer token is present but invalid, 401 otherwise. Also enforces the route-guard tiers (LOCAL_ONLY / ALWAYS_PROTECTED) before any auth branch — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY paths in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (today: `/api/mcp/`) may be accessed from non-loopback when the Bearer key carries the `manage` scope; all other LOCAL_ONLY paths remain strict-loopback regardless of scope.
 
-A successful policy returns `AuthSubject` with `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Downstream handlers can read it via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` instead of re-running auth logic.
+A successful policy returns `AuthSubject` with `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Downstream handlers can read it via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` instead of re-running auth logic.
 
 ## Public Routes List
 
@@ -137,7 +230,7 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
@@ -239,8 +332,17 @@ credential only. See [Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
 `isAuthRequired()` in `src/shared/utils/apiAuth.ts` decides whether **any** auth is enforced for a request:
 
-- `settings.requireLogin === false` → auth is globally disabled.
-- No password configured **and** no `INITIAL_PASSWORD` env var → bootstrap mode allows the onboarding wizard and loopback requests, but exposed network requests still need credentials.
+- `settings.requireLogin === false` → auth is globally disabled, except for the always-protected
+  tier (see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) and the calls that hand out a
+  credential it accepts, which need the same credential as with login on: issuing sync tokens,
+  minting CLI access tokens at any scope, and creating an API key with the `manage`/`admin` scope,
+  granting that scope to a key, or regenerating or revealing such a key
+  (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`).
+  Inference-only keys stay open. Writing a protected feature flag (`REQUIRE_API_KEY`, the other
+  Security flags, and the SSRF / TLS / MCP-scope / sandbox flags listed in
+  [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api)) and saving the PII masking settings
+  (`PUT /api/settings/pii`) also keep needing a credential.
+- No password configured **and** no `INITIAL_PASSWORD` env var → bootstrap mode allows the onboarding wizard and loopback requests, but exposed network requests still need credentials. Exception: writing a protected feature flag and saving the PII masking settings (`PUT /api/settings/pii`) need a credential even from loopback, so loopback by itself is not enough there.
 - Any DB error → fails closed (secure-by-default).
 
 Client API key enforcement uses `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, not a direct `process.env.REQUIRE_API_KEY` read. This matters for deployed instances: toggling `REQUIRE_API_KEY` in Dashboard → Feature Flags stores a DB override and immediately affects `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, and other client-API auth checks that share this helper. If the feature flag store cannot be read, client API auth fails closed and requires a key.
@@ -271,8 +373,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 For authenticated requests the upstream (handler-side) request headers also include:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```

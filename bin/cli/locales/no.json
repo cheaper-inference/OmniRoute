@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimal kostnad per dag (USD)",
       "allowedModelsOpt": "Kommaseparert liste over tillatte modeller",
       "nothingToSet": "Ingen policyfelter angitt. Bruk --rate-limit, --max-cost eller --allowed-models.",
-      "updated": "Policy oppdatert."
+      "updated": "Policy oppdatert.",
+      "modelAccessModeOpt": "Tilgangsmodus for modeller (all | restricted)",
+      "unrestrictedOpt": "Tillat alle modeller (--model-access-mode all)"
     },
     "expiration": {
       "title": "Nøkkelutløp",
@@ -254,6 +256,7 @@
     "log": "Vis serverlogger fortløpende",
     "no_recovery": "Deaktiver automatisk omstart ved krasj (feilsøkingsmodus)",
     "max_restarts": "Maksimalt antall omstarter etter krasj innen 30 s før det gis opp (standard: 2)",
+    "headless": "Kjør bare proxy-motoren: dashbord deaktivert (404), valgfrie delsystemer hoppes over (setter OMNIROUTE_HEADLESS=1)",
     "tray": "Start i systemstatusfeltet (kun skrivebord, må aktiveres)",
     "no_tray": "Deaktiver ikonet i systemstatusfeltet",
     "ready_timeout": "Tidsavbrudd for klarhetssjekk i ms (også OMNIROUTE_READY_TIMEOUT_MS, standard 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Synkroniser konfigurasjon mellom OmniRoute-forekomster",
     "push": {
-      "description": "Send konfigurasjon til skyen eller en ekstern forekomst",
-      "target": "Mål (cloud eller context:name)",
-      "bundle": "Pakkedeler som skal synkroniseres",
-      "dryRun": "Forhåndsvis uten å bruke endringene"
+      "description": "Send konfigurasjon til skyen eller en ekstern forekomst"
     },
     "pull": {
-      "description": "Hent konfigurasjon fra skyen eller en ekstern forekomst",
-      "source": "Kilde (cloud eller context:name)",
-      "merge": "Slå sammen med eksisterende konfigurasjon",
-      "replace": "Erstatt eksisterende konfigurasjon",
-      "dryRun": "Forhåndsvis uten å bruke endringene"
-    },
-    "diff": {
-      "source": "Kildekontekst",
-      "target": "Målkontekst"
+      "description": "Hent konfigurasjon fra skyen eller en ekstern forekomst"
     },
     "bundle": {
       "description": "Eksporter konfigurasjon som en pakkefil",
-      "include": "Deler som skal inkluderes (kommadelt)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importer en pakkefil",
       "dryRun": "Valider uten å bruke endringene"
-    },
-    "initialize": {
-      "fromCloud": "Initialiser fra sikkerhetskopi i skyen"
     },
     "tokens": {
       "description": "Administrer synkroniseringstokener",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Hopp over bekreftelse"
       }
-    },
-    "resolve": {
-      "description": "Løs synkroniseringskonflikter interaktivt"
     }
   },
   "config": {

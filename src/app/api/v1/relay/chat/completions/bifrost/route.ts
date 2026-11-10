@@ -81,7 +81,7 @@ export async function OPTIONS() {
 
 export async function POST(request: Request) {
   const startTime = Date.now();
-  const clientIp = getClientIp(request);
+  const { forensic: clientIp, throttleKey } = getClientIp(request);
   const userAgent = sanitizeForensicHeader(request.headers.get("user-agent"));
 
   if (!BIFROST_ENABLED) {
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
 
     // 2a. Per-(token,IP) gate — mirrors the TypeScript relay fallback so the
     // sidecar path does not weaken leaked-token abuse protection.
-    const ipCheck = checkIpRateLimit(token.id, clientIp);
+    const ipCheck = checkIpRateLimit(token.id, throttleKey);
     if (!ipCheck.allowed) {
       recordRelayUsage(token.id, {
         requestId: request.headers.get("x-request-id") || undefined,

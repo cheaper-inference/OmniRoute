@@ -14,13 +14,15 @@ import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
-  isAllRateLimitedCredentials,
-  rateLimitedProviderResponse,
-} from "@/app/api/v1/_shared/rateLimit";
+  createComboTargetKeyGate,
+  keylessProviderRejection,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
+import { unusableCredentialsResponse } from "@/app/api/v1/_shared/keyScopedRoute";
 import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { getComboByName, getCombos } from "@/lib/db/combos";
-import { getDatabaseSettings } from "@/lib/db/databaseSettings";
+import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { handleComboChat } from "@omniroute/open-sse/services/combo.ts";
 import { log } from "@omniroute/open-sse/utils/logger.ts";
 import { saveCallLog } from "@/lib/usageDb";
@@ -52,6 +54,47 @@ export async function OPTIONS() {
   });
 }
 
+type TranslationCredentials = Awaited<
+  ReturnType<typeof getProviderCredentialsWithQuotaPreflight>
+> | null;
+
+/**
+ * Credentials for a translation provider, bounded by the caller key's connection
+ * scope (GHSA-3w2r) — or the response that refuses the request. Local providers
+ * (authType "none") need none.
+ */
+async function resolveTranslationCredentials(
+  provider: string,
+  providerConfig: { authType?: string; credentialProviderId?: string } | null,
+  allowedConnections: string[] | null
+): Promise<{ credentials: TranslationCredentials } | { response: Response }> {
+  if (!providerConfig) return { credentials: null };
+  const credentialKey = providerConfig.credentialProviderId || provider;
+  if (providerConfig.authType === "none") {
+    // A keyless provider (local default or a keyless remote) is reachable by a
+    // connection-scoped key only when its allowlist admits keyless providers or
+    // an in-scope connection serves it (chat's #9057).
+    const keylessRejection = await keylessProviderRejection(provider, allowedConnections, () =>
+      getProviderCredentialsWithQuotaPreflight(credentialKey, null, allowedConnections)
+    );
+    return keylessRejection ? { response: keylessRejection } : { credentials: null };
+  }
+  // NOTE: the 2nd arg of this helper is `excludeConnectionId`, not "use this
+  // connection" — a combo target's connectionId must never be passed here.
+  const credentials = await getProviderCredentialsWithQuotaPreflight(
+    credentialKey,
+    null,
+    allowedConnections
+  );
+  if (!credentials) {
+    return {
+      response: errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`),
+    };
+  }
+  const unusable = unusableCredentialsResponse(provider, credentials);
+  return unusable ? { response: unusable } : { credentials };
+}
+
 /**
  * Translate with one concrete `provider/model` string. Split out of POST so combo
  * fan-out can invoke it once per target.
@@ -61,7 +104,8 @@ async function translateWithModel(
   modelStr: string,
   startTime: number,
   apiKeyId?: string | null,
-  apiKeyName?: string | null
+  apiKeyName?: string | null,
+  allowedConnections: string[] | null = null
 ): Promise<Response> {
   // Translation is served by the transcription-capable nodes (Whisper-style
   // endpoints expose both), plus general chat/responses gateways. Remote hosts are
@@ -84,19 +128,16 @@ async function translateWithModel(
     getTranslationProvider(provider) || dynamicProviders.find((dp) => dp.id === provider) || null;
 
   // Get credentials — skip for local providers (authType: "none")
-  let credentials = null;
-  if (providerConfig && providerConfig.authType !== "none") {
-    const credentialKey = providerConfig.credentialProviderId || provider;
-    // NOTE: the 2nd arg of this helper is `excludeConnectionId`, not "use this
-    // connection" — a combo target's connectionId must never be passed here.
-    credentials = await getProviderCredentialsWithQuotaPreflight(credentialKey);
-    if (!credentials) {
-      return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${provider}`);
-    }
-    if (isAllRateLimitedCredentials(credentials)) {
-      return rateLimitedProviderResponse(provider, credentials);
-    }
-  }
+  const selection = await resolveTranslationCredentials(
+    provider,
+    providerConfig,
+    allowedConnections
+  );
+  if (!("credentials" in selection)) return selection.response;
+  // The DB connection row is wider than the handler's credentials shape (it reads a subset).
+  const credentials = selection.credentials as Parameters<
+    typeof handleAudioTranslation
+  >[0]["credentials"];
 
   let response = await handleAudioTranslation({
     formData,
@@ -182,6 +223,11 @@ export async function POST(request) {
   // request, matching the pattern every other proxied route follows (#13544).
   const apiKeyId = policy.apiKeyInfo?.id || null;
   const apiKeyName = policy.apiKeyInfo?.name || null;
+  // GHSA-3w2r: credential selection (direct and per combo target) stays inside
+  // the key's connection scope, the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  const { allowedConnections } = scope;
 
   // A bare name (no "/") may be a combo. /v1/models advertises combos, and chat,
   // embeddings and the sibling /v1/audio/transcriptions all resolve them —
@@ -197,7 +243,7 @@ export async function POST(request) {
         } catch {}
         let settings = {};
         try {
-          settings = getDatabaseSettings();
+          settings = getUserDatabaseSettings();
         } catch {}
 
         return handleComboChat({
@@ -209,9 +255,10 @@ export async function POST(request) {
               targetModelStr,
               startTime,
               apiKeyId,
-              apiKeyName
+              apiKeyName,
+              allowedConnections
             ),
-          isModelAvailable: undefined,
+          isModelAvailable: createComboTargetKeyGate(policy, modelStr),
           log,
           settings,
           allCombos: allCombos as any,
@@ -224,5 +271,12 @@ export async function POST(request) {
     }
   }
 
-  return translateWithModel(formData, modelStr, startTime, apiKeyId, apiKeyName);
+  return translateWithModel(
+    formData,
+    modelStr,
+    startTime,
+    apiKeyId,
+    apiKeyName,
+    allowedConnections
+  );
 }

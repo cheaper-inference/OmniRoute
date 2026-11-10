@@ -511,12 +511,12 @@ Si devuelve cualquier valor distinto de `ok`, **deje de usar la base de datos in
 
 ## Recuperación ante desastres
 
-### Escenario 1: archivo WAL perdido
+### Escenario 1: Pérdida del archivo WAL
 
 Falta el archivo `-wal`, pero `-shm` y la base de datos principal están intactos:
 
 ```bash
-# Se recupera automáticamente al abrirse de nuevo
+# Se recupera automáticamente la próxima vez que se abre
 omniroute
 ```
 
@@ -528,26 +528,29 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Escenario 2: archivo principal de la base de datos dañado
+### Escenario 2: Archivo de la base de datos principal dañado
 
 Restaure desde una copia de seguridad:
 
 ```bash
-omniroute sync pull --merge   # o bien: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Escenario 3: clave de cifrado perdida
+`omniroute sync pull [outPath]` solo descarga un archivo `.tar.gz` completo desde un servidor en ejecución
+(`GET /api/db-backups/exportAll`, se requieren credenciales de operador); no restaura nada.
 
-**No es posible recuperar los datos** sin la clave. Los campos cifrados no se pueden leer. Vuelva a añadir manualmente todos los proveedores con credenciales nuevas.
+### Escenario 3: Pérdida de la clave de cifrado
+
+**No es posible recuperar los datos** sin la clave. Los campos cifrados son ilegibles. Vuelva a añadir manualmente todos los proveedores con credenciales nuevas.
 
 > **Mitigación**: Haga siempre una copia de seguridad de la clave de cifrado por separado, preferiblemente en un gestor de contraseñas o KMS.
 
-### Escenario 4: disco lleno
+### Escenario 4: Disco lleno
 
-SQLite devolverá errores `SQLITE_FULL`. Libere espacio en disco y, a continuación:
+SQLite devolverá errores `SQLITE_FULL`. Libere espacio en disco y, a continuación, ejecute:
 
 ```bash
-# Cree un punto de control del WAL para liberar espacio
+# Crea un punto de control del WAL para liberar espacio
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

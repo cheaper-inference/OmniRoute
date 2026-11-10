@@ -9,7 +9,10 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Stat, StatRow } from "@omniroute/ui-kit/stat";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+import Icon from "@/shared/components/Icon";
 
 interface CompressionAnalyticsSummary {
   totalRequests: number;
@@ -37,6 +40,10 @@ interface CompressionAnalyticsSummary {
   };
 }
 
+/**
+ * KPI tile — the kit `Stat` in text mode: every value here is already a formatted string
+ * (`toLocaleString()`, "%", "ms"), so the kit number formatting stays out of the way.
+ */
 function StatCard({
   icon,
   label,
@@ -45,18 +52,17 @@ function StatCard({
 }: {
   icon: string;
   label: string;
-  value: string | number;
+  value: string;
   sub?: string;
 }) {
   return (
-    <div className="card p-4 flex flex-col gap-1">
-      <div className="flex items-center gap-2 text-text-muted text-sm">
-        <span className="material-symbols-outlined text-[18px]">{icon}</span>
-        {label}
-      </div>
-      <div className="text-2xl font-bold text-text">{value}</div>
-      {sub && <div className="text-xs text-text-muted">{sub}</div>}
-    </div>
+    <Stat
+      format="text"
+      icon={<Icon name={icon} size={18} />}
+      label={label}
+      value={value}
+      hint={sub}
+    />
   );
 }
 
@@ -87,7 +93,7 @@ function ModeBar({
           {skipped > 0 && (
             // #4268: attempted-but-no-op runs (e.g. Stacked saved nothing) are
             // recorded now, so this mode is visible even when count is 0.
-            <span className="text-text-muted/70">
+            <span className="text-text-muted">
               {t("compressionAnalyticsSkipped", { count: skipped.toLocaleString() })}
             </span>
           )}
@@ -163,7 +169,7 @@ export default function CompressionAnalyticsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 text-text-muted">
-        <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+        <Icon name="progress_activity" className="animate-spin mr-2" />
         {t("compressionAnalyticsLoading")}
       </div>
     );
@@ -172,7 +178,7 @@ export default function CompressionAnalyticsTab() {
   if (error || !stats) {
     return (
       <div className="card p-6 text-center text-text-muted">
-        <span className="material-symbols-outlined text-[32px] mb-2 block">compress</span>
+        <Icon name="compress" size={32} className="mb-2 block" />
         {error || t("compressionAnalyticsNoDataYet")}
         <p className="text-xs mt-2">{t("compressionAnalyticsNoDataDescription")}</p>
       </div>
@@ -190,30 +196,22 @@ export default function CompressionAnalyticsTab() {
   return (
     <div className="flex flex-col gap-6">
       {/* Time Range Selector */}
-      <div className="flex gap-2">
-        {(["24h", "7d", "30d", "all"] as const).map((range) => (
-          <button
-            key={range}
-            onClick={() => setSince(range)}
-            className={`px-3 py-1 rounded text-sm transition-colors ${
-              since === range
-                ? "bg-primary text-primary-foreground"
-                : "bg-bg-muted text-text-muted hover:bg-bg-muted/80"
-            }`}
-          >
-            {range === "24h"
-              ? t("rangeLast24h")
-              : range === "7d"
-                ? t("rangeLast7d")
-                : range === "30d"
-                  ? t("rangeLast30d")
-                  : t("rangeAllTime")}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        size="sm"
+        aria-label={t("compressionAnalyticsTitle")}
+        value={since}
+        onChange={(next) => setSince(next as typeof since)}
+        options={[
+          { value: "24h", label: t("rangeLast24h") },
+          { value: "7d", label: t("rangeLast7d") },
+          { value: "30d", label: t("rangeLast30d") },
+          { value: "all", label: t("rangeAllTime") },
+        ]}
+        className="w-fit"
+      />
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      {/* KPI tiles: kit StatRow — 3 columns, 2 up to 64rem and 1 up to 42rem (kit responsive rule) */}
+      <StatRow columns={3}>
         <StatCard
           icon="compress"
           label={t("compressionAnalyticsTotalRequests")}
@@ -248,12 +246,12 @@ export default function CompressionAnalyticsTab() {
           value={stats.validationFallbacks.toLocaleString()}
           sub={t("compressionAnalyticsValidationRestores")}
         />
-      </div>
+      </StatRow>
 
       {stats.realUsage.requestsWithReceipts > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
+            <Icon name="receipt_long" size={20} className="text-primary" />
             {t("compressionAnalyticsRealUsageReceipts")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
@@ -299,7 +297,7 @@ export default function CompressionAnalyticsTab() {
       {modes.length > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">tune</span>
+            <Icon name="tune" size={20} className="text-primary" />
             {t("compressionAnalyticsModeBreakdown")}
           </h3>
           <div className="flex flex-col gap-4">
@@ -321,7 +319,7 @@ export default function CompressionAnalyticsTab() {
       {providers.length > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">hub</span>
+            <Icon name="hub" size={20} className="text-primary" />
             {t("compressionAnalyticsProviderBreakdown")}
           </h3>
           <div className="flex flex-col gap-4">
@@ -342,34 +340,50 @@ export default function CompressionAnalyticsTab() {
       {stats.last24h.length > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">show_chart</span>
+            <Icon name="show_chart" size={20} className="text-primary" />
             {t("compressionAnalyticsLast24HoursActivity")}
           </h3>
-          <div className="flex items-end gap-2 h-48">
-            {stats.last24h.map((entry, idx) => {
-              const countPct = (entry.count / maxCountPerHour) * 100;
-              const tokenPct = (entry.tokensSaved / maxTokensPerHour) * 100;
-              return (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                  <div
-                    className="w-full rounded-t-sm bg-gradient-to-b from-primary to-primary/70 transition-all hover:opacity-80 cursor-pointer group relative"
-                    style={{ height: `${Math.max(countPct, 5)}%` }}
-                    title={t("compressionAnalyticsChartPoint", {
-                      hour: entry.hour,
-                      count: entry.count,
-                      tokens: entry.tokensSaved.toLocaleString(),
-                    })}
-                  >
-                    <div className="absolute -top-6 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-text-muted whitespace-nowrap text-center">
-                      {entry.count}
+          {/* 24 columns + gaps do not fit a 390 px card: the track keeps a floor width and the
+              region scrolls sideways. The region is focusable and named so keyboard users can
+              scroll it (axe scrollable-region-focusable); pt/pb keep the hover count and the
+              rotated hour labels inside the scroll box. */}
+          <div
+            data-testid="compression-hourly-chart"
+            role="region"
+            aria-label={t("compressionAnalyticsLast24HoursActivity")}
+            tabIndex={0}
+            className="min-w-0 overflow-x-auto pt-6 pb-6 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          >
+            <div className="flex items-end gap-2 h-48 min-w-[36rem]">
+              {stats.last24h.map((entry, idx) => {
+                const countPct = (entry.count / maxCountPerHour) * 100;
+                return (
+                  <div key={idx} className="flex-1 h-full flex flex-col items-center gap-2">
+                    {/* items-end on the row leaves the column height indefinite, so the bar's %
+                        height would resolve to 0: h-full gives the column a definite height and
+                        this flex-1 wrapper a definite bar area for the % to resolve against. */}
+                    <div className="flex min-h-0 w-full flex-1 items-end">
+                      <div
+                        className="w-full rounded-t-sm bg-gradient-to-b from-primary to-primary/70 transition-all hover:opacity-80 cursor-pointer group relative"
+                        style={{ height: `${Math.max(countPct, 5)}%` }}
+                        title={t("compressionAnalyticsChartPoint", {
+                          hour: entry.hour,
+                          count: entry.count,
+                          tokens: entry.tokensSaved.toLocaleString(),
+                        })}
+                      >
+                        <div className="absolute -top-6 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-text-muted whitespace-nowrap text-center">
+                          {entry.count}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-text-muted rotate-45 origin-left">
+                      {entry.hour.substring(11, 13)}
                     </div>
                   </div>
-                  <div className="text-xs text-text-muted rotate-45 origin-left">
-                    {entry.hour.substring(11, 13)}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-text-muted">
             <div>{t("compressionAnalyticsMaxRequests", { count: maxCountPerHour })}</div>
@@ -385,9 +399,7 @@ export default function CompressionAnalyticsTab() {
       {/* Empty state */}
       {totalAttempts === 0 && (
         <div className="card p-8 text-center text-text-muted">
-          <span className="material-symbols-outlined text-[48px] mb-3 block text-primary opacity-50">
-            compress
-          </span>
+          <Icon name="compress" size={48} className="mb-3 block text-primary opacity-50" />
           <p className="font-medium text-text">{t("compressionAnalyticsNoDataYet")}</p>
           <p className="text-sm mt-1">
             {t.rich("compressionAnalyticsStartTracking", {
@@ -399,7 +411,7 @@ export default function CompressionAnalyticsTab() {
 
       {/* Info note */}
       <div className="text-xs text-text-muted border border-border rounded-lg p-3 flex items-start gap-2">
-        <span className="material-symbols-outlined text-[16px] text-blue-500 mt-0.5">info</span>
+        <Icon name="info" size={16} className="text-info mt-0.5" />
         <span>
           {t.rich("compressionAnalyticsInfo", {
             strong: (chunks) => <strong>{chunks}</strong>,

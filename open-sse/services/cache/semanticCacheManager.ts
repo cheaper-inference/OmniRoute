@@ -12,7 +12,7 @@
  */
 
 import crypto from "crypto";
-import { outputContractOf } from "@/lib/semanticCache";
+import { canonicalJson, outputContractOf, SEMANTIC_CACHE_KEY_SCHEMA } from "@/lib/semanticCache";
 import {
   type SemanticCacheConfig,
   type SemanticCacheType,
@@ -28,6 +28,8 @@ import {
   type EmbeddingGenerator,
 } from "./embeddingClient.ts";
 import { synthesizeOpenAiSseFromJson } from "../../utils/jsonToSse.ts";
+import { conversationSignatureFields } from "../../utils/conversationSignatureFields.ts";
+import { isCompleteTextProjection } from "./semanticProjection";
 
 export interface CacheLookupParams {
   body: Record<string, unknown> & {
@@ -115,6 +117,7 @@ function normalizeMessagesForHash(conversation: unknown): Array<{ role: string; 
     return {
       role,
       content: stringifyValue(record.content),
+      ...conversationSignatureFields(record),
     };
   });
 }
@@ -141,15 +144,20 @@ export function generateDirectHash(
   // request. Mirrors the #12307 fix already applied to the legacy signature path.
   outputContract?: unknown
 ): string {
-  const payload = JSON.stringify({
-    model: scoping?.cacheByModel !== false ? model : "*",
-    provider: scoping?.cacheByProvider ? scoping.provider || "*" : "*",
-    cacheKey: scoping?.cacheKey || undefined,
-    messages: normalizeMessagesForHash(conversation),
-    temperature,
-    top_p: topP,
-    outputContract: outputContract ?? undefined,
-  });
+  const payload = canonicalJson(
+    JSON.parse(
+      JSON.stringify({
+        schema: SEMANTIC_CACHE_KEY_SCHEMA,
+        model: scoping?.cacheByModel !== false ? model : "*",
+        provider: scoping?.cacheByProvider ? scoping.provider || "*" : "*",
+        cacheKey: scoping?.cacheKey || undefined,
+        messages: normalizeMessagesForHash(conversation),
+        temperature,
+        top_p: topP,
+        outputContract: outputContract ?? undefined,
+      })
+    )
+  );
 
   const digest = crypto.createHash("sha256").update(payload).digest("hex");
   return scoping?.apiKeyId ? `${scoping.apiKeyId}.${digest}` : digest;
@@ -289,7 +297,16 @@ export class SemanticCacheManager {
     }
 
     // ── Layer 2: Semantic Vector Similarity Lookup ──
-    if (cacheTypeHeader === "direct" || !this.embeddingGenerator) {
+    if (
+      cacheTypeHeader === "direct" ||
+      !this.embeddingGenerator ||
+      outputContractOf(params.body) ||
+      !isCompleteTextProjection(
+        conv,
+        this.config.conversationHistoryDepth,
+        this.config.excludeSystemPrompt
+      )
+    ) {
       return { hit: false };
     }
 
@@ -331,7 +348,11 @@ export class SemanticCacheManager {
         threshold,
         1
       );
-      if (nearest.length > 0 && nearest[0].similarity >= threshold) {
+      if (
+        nearest.length > 0 &&
+        nearest[0].similarity >= threshold &&
+        nearest[0].entry.semanticProjectionVersion === 1
+      ) {
         return {
           hit: true,
           type: "semantic",
@@ -397,7 +418,16 @@ export class SemanticCacheManager {
     }
 
     let embedding: number[] | undefined;
-    if (this.embeddingGenerator && promptText) {
+    if (
+      this.embeddingGenerator &&
+      promptText &&
+      !outputContractOf(params.body) &&
+      isCompleteTextProjection(
+        conv,
+        this.config.conversationHistoryDepth,
+        this.config.excludeSystemPrompt
+      )
+    ) {
       const embedResult = await generateEmbeddingWithTimeout(promptText, this.embeddingGenerator, {
         model: this.config.embeddingModel,
         provider: this.config.embeddingProvider,
@@ -414,6 +444,7 @@ export class SemanticCacheManager {
       hash: directHash,
       signature: params.signature || undefined,
       embedding,
+      semanticProjectionVersion: embedding ? 1 : undefined,
       promptText,
       model: params.model,
       provider: params.provider,

@@ -1,3 +1,8 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../../utils/providerHttpAttempts.ts";
+import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
 import type { getProviderCredentials } from "@/sse/services/auth.ts";
 import type { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
@@ -9,21 +14,31 @@ import type {
 } from "../../services/accountFallback.ts";
 import { createErrorResult } from "../../utils/error.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
+import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 import { recoverAnthropicThinkingSignature } from "./thinkingSignatureRecovery.ts";
 import {
+  isAnthropicThinkingSignatureError,
+  isAnthropicThinkingModifiedError,
+} from "./passthroughHelpers.ts";
+import {
   isModelUnavailableError,
-  getNextFamilyFallback as defaultGetNextFamilyFallback,
+  getNextEligibleFamilyFallback,
+  isFamilyFallbackEligible,
 } from "../../services/modelFamilyFallback.ts";
 import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
+import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   url: string;
   headers: Record<string, string>;
   transformedBody: unknown;
   transport?: string;
+  upstreamDiagnostic?: Record<string, unknown>;
   _executionCredentials?: Record<string, unknown>;
   _accountSemaphoreRelease?: () => void;
 }
@@ -37,17 +52,21 @@ export interface ProviderExecutionPolicy {
 export type ProviderExecutionOutcome =
   | {
       kind: "response";
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       response: Response;
       url: string;
       headers: Record<string, string>;
       transformedBody: unknown;
+      upstreamDiagnostic?: Record<string, unknown>;
       model: string;
       connectionId: string;
     }
   | {
       kind: "error";
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       result: ChatCoreErrorResult;
       providerUsage: ProviderLegUsage | null;
+      upstreamDiagnostic?: Record<string, unknown>;
       model: string;
       connectionId: string;
     };
@@ -68,6 +87,12 @@ export interface PipelineConnectionContext {
   onCredentialsRefreshed: (next: Record<string, unknown>) => void | Promise<void>;
   assertManagedLeaseFence: (connectionId: string) => void;
   getProviderCredentials: typeof getProviderCredentials;
+  /**
+   * Connection allowlist the request was routed under (API key allowlist ∩ combo
+   * step allowlist ∩ quota pool). Account rotation must stay inside it; null means
+   * the request carried no constraint.
+   */
+  allowedConnections?: string[] | null;
   refreshCredentials?: (
     credentials: Record<string, unknown>
   ) => Promise<Record<string, unknown> | null>;
@@ -116,12 +141,27 @@ export interface ProviderExecutionPipelineInput {
   connection: PipelineConnectionContext;
   wire: PipelineWireState;
   state: PipelineStateHooks;
-  sendProviderAttempt: (model: string, allowDedup: boolean) => Promise<ChatCoreExecutorResult>;
+  upstreamHttpRejection?: HttpAttemptRejectionSlot;
+  sendProviderAttempt: (
+    model: string,
+    allowDedup: boolean,
+    rejection?: HttpAttemptRejectionSlot
+  ) => Promise<ChatCoreExecutorResult>;
+  getLastOutboundBody?: (attempt: ChatCoreExecutorResult) => unknown;
+  onSignatureFailure?: (failure: {
+    status: number;
+    message: string;
+    outboundBody: unknown;
+    outboundBodyCaptured: boolean;
+    model: string;
+    recoveryAttempted: boolean;
+    recoverySucceeded: boolean;
+  }) => void;
   getNextFamilyFallback?: (
     currentModel: string,
     triedModels: Set<string>,
     providerHint?: string | null
-  ) => string | null;
+  ) => string | null | Promise<string | null>;
 }
 
 const LEASE_MISMATCH_STATUS = 409;
@@ -163,22 +203,29 @@ async function recordUpstreamRateLimit(
   connectionId: string,
   model: string,
   attempt: ChatCoreExecutorResult
-): Promise<void> {
-  if (!connectionId) return;
+): Promise<boolean> {
+  if (!connectionId) return false;
   const status = attempt.response.status;
   try {
     state.recordRateLimitHeaders(provider, connectionId, attempt.response.headers, status, model);
   } catch {
     // best-effort
   }
+  let capacity429 = false;
   try {
-    const text = await attempt.response.clone().text();
+    const text = await readResponseTextWithinCap(attempt.response.clone());
+    capacity429 =
+      provider === "codex" && isTransientCodexCapacity429(status, text, attempt.response.headers);
     // parseRetryAfterFromBody JSON.parses a string and falls back to "unknown"
     // on non-JSON, so the raw text is the safest thing to hand over.
-    if (text) state.recordRateLimitBody(provider, connectionId, text, status, model);
+    // Do not turn one Codex model-capacity response into a shared quota pause.
+    if (text && !capacity429) {
+      state.recordRateLimitBody(provider, connectionId, text, status, model);
+    }
   } catch {
     // Body already consumed/unreadable — the header signal above still applied.
   }
+  return capacity429;
 }
 
 function leaseMismatch(model: string, connectionId: string): ProviderExecutionOutcome {
@@ -231,6 +278,8 @@ async function toOutcome(
       url: attempt.url,
       headers: attempt.headers,
       transformedBody: attempt.transformedBody,
+      upstreamDiagnostic: attempt.upstreamDiagnostic,
+      upstreamHttpSelection: attempt.upstreamHttpSelection ?? null,
       model,
       connectionId,
     };
@@ -241,7 +290,7 @@ async function toOutcome(
   try {
     // clone() is the drain. sendProviderAttempt must not cancel() a streaming
     // non-2xx body before we get here (BYOP 422 / Codex 429 Retry-After).
-    const text = await attempt.response.clone().text();
+    const text = await readResponseTextWithinCap(attempt.response.clone());
     try {
       body = JSON.parse(text);
       fields = readUpstreamErrorFields(body);
@@ -280,11 +329,13 @@ async function toOutcome(
       error: result.error,
       errorCode: result.errorCode,
       errorType: result.errorType,
-      rawMessage: message,
+      rawMessage: appendGoogleDailyQuotaViolation(message, body),
       upstreamErrorBody: body,
       upstreamHeaders: attempt.response.headers,
     },
     providerUsage: null,
+    upstreamDiagnostic: attempt.upstreamDiagnostic,
+    upstreamHttpSelection: attempt.upstreamHttpSelection ?? null,
     model,
     connectionId,
   };
@@ -315,8 +366,19 @@ function maxAttemptsFor(provider: string): number {
 export async function runProviderExecutionPipeline(
   input: ProviderExecutionPipelineInput
 ): Promise<ProviderExecutionOutcome> {
-  const { policy, target, connection, wire, state, sendProviderAttempt } = input;
+  const { policy, target, connection, wire, state } = input;
+  const sendProviderAttempt = async (model: string, allowDedup: boolean) => {
+    const rejection: HttpAttemptRejectionSlot = { selection: null };
+    if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
+    try {
+      return await input.sendProviderAttempt(model, allowDedup, rejection);
+    } catch (error) {
+      if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = rejection.selection;
+      throw error;
+    }
+  };
   const maxAttempts = maxAttemptsFor(target.provider);
+  const allowedConnections = connection.allowedConnections ?? null;
   const excludedIds: string[] = [];
   let attempts = 0;
   let lastAttempt: ChatCoreExecutorResult | null = null;
@@ -324,7 +386,29 @@ export async function runProviderExecutionPipeline(
   let authRefreshPending = false;
   let authRefreshed = false;
   let modelFallbackPending = false;
-  const resolveFamilyFallback = input.getNextFamilyFallback ?? defaultGetNextFamilyFallback;
+  const resolveFamilyFallback = async (
+    currentModel: string,
+    triedModels: Set<string>,
+    providerHint?: string | null
+  ) => {
+    const connectionId = currentConnectionId(connection);
+    if (!input.getNextFamilyFallback) {
+      return getNextEligibleFamilyFallback(
+        currentModel,
+        triedModels,
+        providerHint ?? target.provider,
+        connectionId
+      );
+    }
+
+    const excluded = new Set(triedModels);
+    while (true) {
+      const candidate = await input.getNextFamilyFallback(currentModel, excluded, providerHint);
+      if (!candidate || excluded.has(candidate)) return null;
+      if (isFamilyFallbackEligible(candidate, target.provider, connectionId)) return candidate;
+      excluded.add(candidate);
+    }
+  };
 
   while (
     attempts < maxAttempts ||
@@ -359,7 +443,7 @@ export async function runProviderExecutionPipeline(
     // updateFromHeaders/updateFromResponseBody pair only runs on the streaming
     // leg — the non-streaming leg returns this pipeline's error outcome straight
     // to the caller, so without this the reservoir was never drained (#12945).
-    await recordUpstreamRateLimit(
+    const codexCapacity429 = await recordUpstreamRateLimit(
       state,
       target.provider,
       currentConnectionId(connection),
@@ -380,16 +464,18 @@ export async function runProviderExecutionPipeline(
       const retryAfterMs = retryAfterMsFrom(attempt);
       if (failedId && !excludedIds.includes(failedId)) excludedIds.push(failedId);
       if (failedId) {
-        await state.onCodexScopeRateLimited?.({
-          failedConnectionId: failedId,
-          model: wire.currentModel || target.requestedModel || null,
-          rateLimitedUntil: new Date(Date.now() + (retryAfterMs || 60_000)).toISOString(),
-          credentials: connection.getCredentials(),
-        });
+        if (!codexCapacity429) {
+          await state.onCodexScopeRateLimited?.({
+            failedConnectionId: failedId,
+            model: wire.currentModel || target.requestedModel || null,
+            rateLimitedUntil: new Date(Date.now() + (retryAfterMs || 60_000)).toISOString(),
+            credentials: connection.getCredentials(),
+          });
+        }
         await state.onClearSessionAffinity?.({ failedConnectionId: failedId });
       }
       const nextCreds = await connection
-        .getProviderCredentials("codex", null, null, wire.currentModel, {
+        .getProviderCredentials("codex", null, allowedConnections, wire.currentModel, {
           excludeConnectionIds: [...excludedIds],
         })
         .catch(() => null);
@@ -410,10 +496,7 @@ export async function runProviderExecutionPipeline(
     if (canRotateAccount && target.provider === "antigravity" && status === 422) {
       // Same drain as toOutcome: clone the Response. A prior body.cancel()
       // makes this throw "Body has already been consumed" and skips rotate.
-      const byopBody = await attempt.response
-        .clone()
-        .text()
-        .catch(() => "");
+      const byopBody = await readResponseTextWithinCap(attempt.response.clone()).catch(() => "");
       if (byopBody.includes("gcp_project_required")) {
         const failedId = currentConnectionId(connection);
         if (failedId && !excludedIds.includes(failedId)) excludedIds.push(failedId);
@@ -424,7 +507,7 @@ export async function runProviderExecutionPipeline(
           );
         }
         const nextCreds = await connection
-          .getProviderCredentials("antigravity", null, null, wire.currentModel, {
+          .getProviderCredentials("antigravity", null, allowedConnections, wire.currentModel, {
             excludeConnectionIds: [...excludedIds],
           })
           .catch(() => null);
@@ -442,6 +525,7 @@ export async function runProviderExecutionPipeline(
       typeof connection.refreshCredentials === "function" &&
       !(await shouldSkipCredentialRefresh(target.provider, attempt.response))
     ) {
+      if (isPassiveCodex(target.provider)) recordRejectedToken(connection.getCredentials());
       const refreshed = await connection.refreshCredentials(connection.getCredentials());
       if (refreshed && (refreshed.accessToken || refreshed.copilotToken)) {
         connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
@@ -455,7 +539,7 @@ export async function runProviderExecutionPipeline(
     {
       let signatureMessage = attempt.response.statusText || "upstream error";
       try {
-        const parsed = JSON.parse(await attempt.response.clone().text()) as {
+        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
           error?: { message?: unknown };
         };
         if (typeof parsed?.error?.message === "string" && parsed.error.message) {
@@ -464,35 +548,91 @@ export async function runProviderExecutionPipeline(
       } catch {
         // keep statusText
       }
-      const signatureRecovery = await recoverAnthropicThinkingSignature({
-        provider: target.provider,
-        statusCode: status,
-        message: signatureMessage,
-        body: wire.body,
-        execute: async (recoveryBody) => {
-          if (recoveryBody && typeof recoveryBody === "object" && !Array.isArray(recoveryBody)) {
-            wire.setBodyAndModel(recoveryBody as Record<string, unknown>, wire.currentModel);
-          }
-          return sendProviderAttempt(wire.currentModel, false);
-        },
-        parseError: async (response) => {
-          let message = response.statusText || "upstream error";
-          let responseBody: unknown = null;
-          try {
-            responseBody = JSON.parse(await response.clone().text());
-            const err = (responseBody as { error?: { message?: unknown } } | null)?.error;
-            if (typeof err?.message === "string" && err.message) message = err.message;
-          } catch {
-            // keep statusText
-          }
-          return {
-            statusCode: response.status,
-            message,
-            retryAfterMs: null,
-            responseBody,
-          };
-        },
-      });
+      // Snapshot the first failed wire body before recovery sends a second request.
+      // The caller receives it only for the two thinking-block validation 400s
+      // recoverAnthropicThinkingSignature understands (signature rejection, #17324
+      // "cannot be modified").
+      const signatureFailure =
+        isAnthropicThinkingSignatureError({
+          provider: target.provider,
+          model: wire.currentModel,
+          status,
+          message: signatureMessage,
+        }) ||
+        isAnthropicThinkingModifiedError({
+          provider: target.provider,
+          status,
+          message: signatureMessage,
+        });
+      const capturedOutboundBody = signatureFailure
+        ? input.getLastOutboundBody?.(attempt)
+        : undefined;
+      const failedOutboundBody = capturedOutboundBody ?? attempt.transformedBody;
+      const outboundBodyCaptured = capturedOutboundBody !== undefined;
+      const failedModel = wire.currentModel;
+      let recoveryDispatchStarted = false;
+      let signatureRecovery;
+      try {
+        signatureRecovery = await recoverAnthropicThinkingSignature({
+          provider: target.provider,
+          model: wire.currentModel,
+          statusCode: status,
+          message: signatureMessage,
+          body: wire.body,
+          execute: async (recoveryBody) => {
+            recoveryDispatchStarted = true;
+            if (recoveryBody && typeof recoveryBody === "object" && !Array.isArray(recoveryBody)) {
+              wire.setBodyAndModel(recoveryBody as Record<string, unknown>, wire.currentModel);
+            }
+            return sendProviderAttempt(wire.currentModel, false);
+          },
+          parseError: async (response) => {
+            let message = response.statusText || "upstream error";
+            let responseBody: unknown = null;
+            try {
+              responseBody = JSON.parse(await readResponseTextWithinCap(response.clone()));
+              const err = (responseBody as { error?: { message?: unknown } } | null)?.error;
+              if (typeof err?.message === "string" && err.message) message = err.message;
+            } catch {
+              // keep statusText
+            }
+            return {
+              statusCode: response.status,
+              message,
+              retryAfterMs: null,
+              responseBody,
+            };
+          },
+        });
+      } catch (error) {
+        const rejectedSelection = input.upstreamHttpRejection?.selection ?? null;
+        if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
+        if (signatureFailure) {
+          input.onSignatureFailure?.({
+            status,
+            message: signatureMessage,
+            outboundBody: failedOutboundBody,
+            outboundBodyCaptured,
+            model: failedModel,
+            recoveryAttempted: recoveryDispatchStarted,
+            recoverySucceeded: false,
+          });
+        }
+        if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = rejectedSelection;
+        throw error;
+      }
+      if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
+      if (signatureFailure) {
+        input.onSignatureFailure?.({
+          status,
+          message: signatureMessage,
+          outboundBody: failedOutboundBody,
+          outboundBodyCaptured,
+          model: failedModel,
+          recoveryAttempted: signatureRecovery.attempted,
+          recoverySucceeded: signatureRecovery.succeeded,
+        });
+      }
       if (
         signatureRecovery.attempted &&
         signatureRecovery.succeeded &&
@@ -504,6 +644,8 @@ export async function runProviderExecutionPipeline(
           headers:
             (signatureRecovery.execution.headers as Record<string, string>) ?? attempt.headers,
           transformedBody: signatureRecovery.execution.transformedBody ?? attempt.transformedBody,
+          upstreamDiagnostic: signatureRecovery.execution.upstreamDiagnostic,
+          upstreamHttpSelection: signatureRecovery.execution.upstreamHttpSelection ?? null,
         };
         return toOutcome(
           lastAttempt,
@@ -517,7 +659,7 @@ export async function runProviderExecutionPipeline(
     if (policy.allowModelFallback) {
       let fallbackMessage = attempt.response.statusText || "upstream error";
       try {
-        const parsed = JSON.parse(await attempt.response.clone().text()) as {
+        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
           error?: { message?: unknown };
         };
         if (typeof parsed?.error?.message === "string" && parsed.error.message) {
@@ -527,13 +669,16 @@ export async function runProviderExecutionPipeline(
         // keep statusText
       }
       if (isModelUnavailableError(status, fallbackMessage, target.provider)) {
-        const nextModel = resolveFamilyFallback(
+        const nextModel = await resolveFamilyFallback(
           wire.currentModel,
           wire.triedModels,
           target.provider
         );
         if (nextModel) {
-          wire.setBodyAndModel({ ...wire.body, model: nextModel }, nextModel);
+          wire.body = { ...wire.body, model: nextModel };
+          wire.currentModel = nextModel;
+          wire.triedModels.add(nextModel);
+          wire.setBodyAndModel(wire.body, nextModel);
           modelFallbackPending = true;
           continue;
         }

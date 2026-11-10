@@ -46,16 +46,22 @@ import {
 } from "../../../src/lib/db/modelIntelligence.ts";
 import { readFileSync } from "node:fs";
 import { resolveScoresAs } from "./scoresAs.ts";
+import {
+  clearIntelligenceLookupCache,
+  lookupIntelligenceCached,
+} from "./intelligenceLookupCache.ts";
 import { isVendorRetiredId } from "../modelLifecycle.ts";
+import {
+  TIER_TASK_FITNESS,
+  deriveTierFromCapabilities,
+  type TierCapabilityRow,
+} from "./tierFitness.ts";
 
 // #11508 — vendor lifecycle snapshot (#11507). An id the vendor has retired
 // must never earn a capability-derived tier score: models.dev keeps listing
 // retired models with their capabilities, so without this veto layer 3
 // recreates the ranking inversion that #11503 removed from layer 4.
-const LIFECYCLE_JSON_URL = new URL(
-  "../../../config/quality/model-lifecycle.json",
-  import.meta.url,
-);
+const LIFECYCLE_JSON_URL = new URL("../../../config/quality/model-lifecycle.json", import.meta.url);
 let _retiredModels: Set<string> | null = null;
 
 function loadRetiredModels(): Set<string> {
@@ -153,90 +159,26 @@ const WILDCARD_BOOSTS: Array<{ pattern: string; taskType: string; boost: number 
 
 // ─── Models.dev tier → task fitness mapping (resolution layer 3) ────────
 
-/**
- * Intelligence tier derived from models.dev capability data.
- * Tier assignment rules:
- * - `reasoning === true` → "premium"
- * - `tool_call === true && context >= 128000` → "standard"
- * - `tool_call === true` → "fast"
- * - everything else → "budget"
- */
-const TIER_TASK_FITNESS: Record<string, Record<string, number>> = {
-  premium: {
-    coding: 0.92,
-    review: 0.93,
-    planning: 0.94,
-    analysis: 0.95,
-    debugging: 0.9,
-    documentation: 0.88,
-    default: 0.85,
-  },
-  standard: {
-    coding: 0.85,
-    review: 0.84,
-    planning: 0.85,
-    analysis: 0.85,
-    debugging: 0.82,
-    documentation: 0.85,
-    default: 0.78,
-  },
-  fast: {
-    coding: 0.78,
-    review: 0.72,
-    planning: 0.7,
-    analysis: 0.72,
-    debugging: 0.75,
-    documentation: 0.8,
-    default: 0.72,
-  },
-  budget: {
-    coding: 0.65,
-    review: 0.6,
-    planning: 0.55,
-    analysis: 0.58,
-    debugging: 0.6,
-    documentation: 0.7,
-    default: 0.55,
-  },
-};
+// TIER_TASK_FITNESS / deriveTierFromCapabilities live in ./tierFitness.ts so the persisted
+// models_dev_tier rebuild (src/lib/db/modelIntelligence.ts) shares the same table.
+
 // ─── DB access helpers ──────────────────────────────────────────────────
 
-const _intelligenceCache = new Map<string, number | null>();
-
 function queryModelIntelligence(model: string, category: string, source: string): number | null {
-  const cacheKey = `${model}:${category}:${source}`;
-  if (_intelligenceCache.has(cacheKey)) {
-    return _intelligenceCache.get(cacheKey)!;
-  }
-
-  try {
-    const entry = getModelIntelligenceBySource(model, source, category);
-    if (entry) {
-      _intelligenceCache.set(cacheKey, entry.score);
-      return entry.score;
+  return lookupIntelligenceCached(`${model}:${category}:${source}`, () => {
+    try {
+      return getModelIntelligenceBySource(model, source, category)?.score ?? null;
+    } catch {
+      return null;
     }
-    return null;
-  } catch {
-    return null;
-  }
+  });
 }
 
 // ─── Models.dev capability → tier → fitness resolution ──────────────────
 
 let _capabilitiesCache: Record<string, ModelCapRow> | null = null;
 
-interface ModelCapRow {
-  tool_call: boolean | null;
-  reasoning: boolean | null;
-  limit_context: number | null;
-}
-
-function deriveTierFromCapabilities(cap: ModelCapRow): string {
-  if (cap.reasoning === true) return "premium";
-  if (cap.tool_call === true && (cap.limit_context ?? 0) >= 128000) return "standard";
-  if (cap.tool_call === true) return "fast";
-  return "budget";
-}
+type ModelCapRow = TierCapabilityRow;
 
 /**
  * #11508: `model_capabilities` is keyed per (provider, model_id), and the same
@@ -516,7 +458,10 @@ export function getTaskFitnessWithSource(
       return { score: staticScore, source: "fitness_table" };
     }
 
-    return { score: lookupWildcardBoosts(normalizedModel, normalizedTask), source: "wildcard_boost" };
+    return {
+      score: lookupWildcardBoosts(normalizedModel, normalizedTask),
+      source: "wildcard_boost",
+    };
   }
 
   // Retired: 0.5 is "no evidence", never a quality claim and never a *codex boost.
@@ -577,5 +522,5 @@ export function getTaskTypes(): string[] {
 
 export function invalidateFitnessCache(): void {
   _capabilitiesCache = null;
-  _intelligenceCache.clear();
+  clearIntelligenceLookupCache();
 }

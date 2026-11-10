@@ -2,10 +2,15 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { useProviderModels } from "../../providers/hooks/useProviderModels";
 import { buildCurl } from "../../providers/utils/buildCurl";
-import { PLAYGROUND_KEY_ID_HEADER, resolvePlaygroundKeyId } from "../../providers/utils/playgroundAuth";
+import {
+  PLAYGROUND_KEY_ID_HEADER,
+  resolvePlaygroundKeyId,
+} from "../../providers/utils/playgroundAuth";
 import { PlaygroundCard } from "./PlaygroundCard";
 
 interface Props {
@@ -98,31 +103,20 @@ export function EmbeddingExampleCard({ providerId }: Props) {
       error={error}
     >
       {/* Model select */}
-      <div>
-        <label className="block text-xs text-text-muted mb-1">{t("model")}</label>
-        <select
-          value={model || firstModel}
-          onChange={(e) => setModel(e.target.value)}
-          className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          {modelOptions.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.id}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label={t("model")}
+        value={model || firstModel}
+        onChange={(e) => setModel(e.target.value)}
+        options={modelOptions.map((m) => ({ value: m.id, label: m.id }))}
+      />
       {/* Input text */}
-      <div>
-        <label className="block text-xs text-text-muted mb-1">{t("input")}</label>
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder={t("embeddingSample")}
-          className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-        />
-      </div>
+      <Input
+        label={t("input")}
+        type="text"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder={t("embeddingSample")}
+      />
     </PlaygroundCard>
   );
 }

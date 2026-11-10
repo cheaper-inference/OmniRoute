@@ -45,9 +45,9 @@ Authorization: Bearer YOUR_OMNIROUTE_API_KEY
 
 ## Μέθοδοι JSON-RPC 2.0
 
-### `message/send` — Σύγχρονη Εκτέλεση
+### `message/send` — Σύγχρονη εκτέλεση
 
-Αποστέλλει ένα μήνυμα σε μια δεξιότητα και αναμένει την πλήρη απόκριση.
+Στέλνει ένα μήνυμα σε μια δεξιότητα και περιμένει την πλήρη απόκριση.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Για το `smart-routing`, το `metadata.combo` αποτελεί ρητή παράκαμψη του
+`metadata.model` για το αίτημα προς την πύλη· αποστέλλεται ως το πραγματικό `model`
+και όχι ως ένα αγνοούμενο πεδίο JSON `x-combo`. Εξακολουθούν να ισχύουν το κανονικό κλειδί API της πύλης και
+η εξουσιοδότηση ανά προορισμό. Ένα μη έγκυρο ή κενό combo απορρίπτεται.
+
+Το αποτέλεσμα εκθέτει τα `requested_combo` (πρόθεση καλούντος), `dispatched_model`
+(το πραγματικό αίτημα προς την πύλη), `response_model` (απόκριση πύλης) και
+`confirmed_combo`. Το τελευταίο πεδίο είναι `null`, εκτός εάν η πύλη
+προσδιορίσει ρητά ένα combo. Τα αρχεία καταγραφής αποφάσεων A2A αποδίδουν την εκτέλεση μόνο σε ένα
+επιβεβαιωμένο combo, διατηρώντας ένα μη επιβεβαιωμένο αίτημα ως `requestedCombo`.
+
 **Απόκριση:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Ροή SSE
 
-Ίδιο με το `message/send` αλλά επιστρέφει Server-Sent Events για ροή σε πραγματικό χρόνο.
+Όπως το `message/send`, αλλά επιστρέφει Server-Sent Events για ροή σε πραγματικό χρόνο.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Ερώτημα Κατάστασης Εργασίας
+### `tasks/get` — Έλεγχος κατάστασης εργασίας
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Ακύρωση Εργασίας
+### `tasks/cancel` — Ακύρωση εργασίας
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,22 +152,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Διαθέσιμες Δεξιότητες
 
-Το OmniRoute εκθέτει 6 δεξιότητες A2A που καταχωρούνται στο `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Κάθε module δεξιότητας βρίσκεται στο `src/lib/a2a/skills/`.
+OmniRoute εκθέτει 6 δεξιότητες A2A ενσωματωμένες στο `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Κάθε ενότητα δεξιοτήτων ζει στο `src/lib/a2a/skills/`.
 
-| Δεξιότητα          | ID                   | Περιγραφή                                                                                                                                          | Ετικέτες                   | Παραδείγματα                           |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------- |
-| Smart Routing      | `smart-routing`      | Δρομολογεί ένα prompt μέσω του βέλτιστου παρόχου/συνδυασμού χρησιμοποιώντας τη μηχανή συνδυασμών και βαθμολόγησης του OmniRoute                    | routing, providers         | "Route this prompt via the best model" |
-| Quota Management   | `quota-management`   | Αναφέρει την κατάσταση ορίου χρήσης ανά πάροχο, βοηθά τους καλούντες να αποφασίσουν πότε να περιορίσουν ή να αλλάξουν πάροχο                       | quota, providers           | "Check quota for anthropic"            |
-| Provider Discovery | `provider-discovery` | Παραθέτει τους εγκατεστημένους παρόχους με τις δυνατότητές τους, σημαίες δωρεάν επιπέδου και κατάσταση OAuth                                       | providers, discovery       | "What providers are available?"        |
-| Cost Analysis      | `cost-analysis`      | Εκτιμά το κόστος ενός αιτήματος/συνομιλίας βάσει του καταλόγου και της πρόσφατης χρήσης                                                            | cost, usage                | "Estimate cost for this conversation"  |
-| Health Report      | `health-report`      | Συγκεντρώνει την κατάσταση του circuit breaker, της περιόδου αναμονής και του αποκλεισμού ανά πάροχο                                               | health, resilience         | "Show health status of all providers"  |
-| List Capabilities  | `list-capabilities`  | Επιστρέφει τον πλήρη κατάλογο 45 δεξιοτήτων Agent (23 API + 21 CLI + 1 διαμόρφωση) ως πίνακα markdown με raw SKILL.md URLs για έγχυση περιεχομένου | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| Επιδεξιότητα           | ID                   | Περιγραφή                                                                                                                                                          | Ετικέτες                         | Παραδείγματα                                                  |
+| :--------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------------------ |
+| Έξυπνη δρομολόγηση     | `smart-routing`      | Δρομολογεί μια προτροπή μέσω του βέλτιστου provider/combo χρησιμοποιώντας τη βαθμολόγηση + του σύνθετου κινητήρα του OmniRoute                                     | δρομολόγηση, πάροχοι             | "Δρομολογήστε αυτήν την προτροπή μέσω του καλύτερου μοντέλου" |
+| Διαχείριση ποσοστώσεων | `quota-management`   | Αναφέρει την κατάσταση ορίου ανά πάροχο, βοηθά τους καλούντες να αποφασίσουν πότε θα κάνουν throttle/switch                                                        | ποσόστωση, πάροχοι               | "Έλεγχος ποσόστωσης για ανθρωπόμορφο"                         |
+| Ανακάλυψη παρόχου      | `provider-discovery` | Παραθέτει εγκατεστημένους παρόχους με δυνατότητες, σημαίες ελεύθερης βαθμίδας, κατάσταση OAuth                                                                     | πάροχοι, ανακάλυψη               | "Ποιοι πάροχοι είναι διαθέσιμοι;"                             |
+| Ανάλυση Κόστους        | `cost-analysis`      | Εκτιμά το κόστος ενός request/conversation με βάση τον κατάλογο + πρόσφατη χρήση                                                                                   | κόστος, χρήση                    | "Εκτιμώ κόστος για αυτήν τη συνομιλία"                        |
+| Έκθεση Υγείας          | `health-report`      | Διακόπτης κυκλώματος αδρανών, ψύξη, κατάσταση κλειδώματος ανά πάροχο                                                                                               | υγεία, ανθεκτικότητα             | "Εμφάνιση κατάστασης υγείας όλων των παρόχων"                 |
+| Δυνατότητες λίστας     | `list-capabilities`  | Επιστρέφει τον πλήρη κατάλογο Agent Skills με 45 καταχωρήσεις (23 API + 21 CLI + 1 config) ως πίνακα σήμανσης με ακατέργαστο SKILL.md URLs για ένεση περιβάλλοντος | κατάλογος, ανακάλυψη, δεξιότητες | "Κατάλογος όλων των δυνατοτήτων OmniRoute "                   |
 
-> Το Agent Card θα πρέπει να παραμένει συγχρονισμένο με τον ενεργό κατάλογο 352 παρόχων· τα πλήθη παρόχων και τα μεταδεδομένα δωρεάν/χωρίς-πιστοποίηση αντλούνται από το μητρώο εκτέλεσης.
+> Η Κάρτα Αντιπροσώπου θα πρέπει να διατηρείται ευθυγραμμισμένη με τον ζωντανό κατάλογο παρόχων 381. Οι μετρήσεις παρόχων και τα μεταδεδομένα free/no-auth προέρχονται από το μητρώο χρόνου εκτέλεσης.
 
-### Λεπτομέρειες Δεξιότητας `list-capabilities`
+### Λεπτομέρεια δεξιοτήτων `list-capabilities`
 
-Η δεξιότητα `list-capabilities` είναι ιδιαίτερα χρήσιμη για εξωτερικούς agents που χρειάζεται να ανακαλύψουν τι εκθέτει το OmniRoute πριν στείλουν κλήσεις API. Επιστρέφει ένα δομημένο artifact πίνακα markdown:
+Η ικανότητα `list-capabilities` είναι ιδιαίτερα χρήσιμη για εξωτερικούς πράκτορες που πρέπει να ανακαλύψουν τι εκθέτει OmniRoute πριν στείλουν κλήσεις API. Επιστρέφει ένα τεχνούργημα δομημένου πίνακα σήμανσης:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -172,60 +176,68 @@ curl -X POST http://localhost:20128/a2a \
 ...
 ```
 
-Κάθε γραμμή περιλαμβάνει τη στήλη `rawUrl` ώστε οι agents να μπορούν αμέσως να ανακτήσουν το πλήρες SKILL.md. Το πεδίο `metadata.totalSkills` αντικατοπτρίζει το μέγεθος του καταλόγου (45 σήμερα). Υλοποίηση: `src/lib/a2a/skills/listCapabilities.ts`. Δείτε επίσης [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Κάθε σειρά περιλαμβάνει τη στήλη `rawUrl`, ώστε οι πράκτορες να μπορούν να ανακτήσουν αμέσως το πλήρες SKILL.md. Το πεδίο `metadata.totalSkills` αντικατοπτρίζει το μέγεθος του καταλόγου (45 σήμερα). Υλοποίηση: `src/lib/a2a/skills/listCapabilities.ts`. Δείτε επίσης [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
 ## REST API (βοηθητικό)
 
-Το endpoint JSON-RPC `/a2a` είναι το κανονικό σημείο εισόδου A2A. Τα παρακάτω REST endpoints παρέχουν βοηθητική πρόσβαση για dashboards και εξωτερικά εργαλεία:
+Το τελικό σημείο JSON-RPC `/a2a` είναι το κανονικό σημείο εισόδου A2A. Τα παρακάτω σημεία REST παρέχουν βοηθητική πρόσβαση για πίνακες εργαλείων και εξωτερικά εργαλεία:
 
-| Endpoint                     | Μέθοδος | Περιγραφή                                                       | Έλεγχος ταυτότητας                           |
-| :--------------------------- | :------ | :-------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET     | Κατάσταση διακομιστή, καταχωρημένες δεξιότητες                  | (δημόσιο)                                    |
-| `/api/a2a/tasks`             | GET     | Λίστα εργασιών με φίλτρα                                        | management                                   |
-| `/api/a2a/tasks/[id]`        | GET     | Ανάκτηση εργασίας βάσει ID                                      | management                                   |
-| `/api/a2a/tasks/[id]/cancel` | POST    | Ακύρωση εκτελούμενης εργασίας                                   | management                                   |
-| `/.well-known/agent.json`    | GET     | Agent Card (ανακάλυψη A2A)                                      | (δημόσιο, cached 3600s)                      |
-| `/api/a2a/tasks`             | POST    | Εισερχόμενη ανάθεση στο OmniConductor fleet (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Τελικό σημείο                | Μέθοδος | Περιγραφή                                                              | Auth                                                                                                            |
+| :--------------------------- | :------ | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET     | Κατάσταση διακομιστή, εγγεγραμμένες δεξιότητες                         | (κοινό)                                                                                                         |
+| `/api/a2a/tasks`             | GET     | Λίστα εργασιών με φίλτρα                                               | διαχείριση ή κλειδί API (δείτε παρακάτω)                                                                        |
+| `/api/a2a/tasks/[id]`        | GET     | Λάβετε καθήκοντα από ID                                                | διαχείριση ή κλειδί API (δείτε παρακάτω)                                                                        |
+| `/api/a2a/tasks/[id]/cancel` | POST    | Ακύρωση εκτελούμενης εργασίας                                          | διαχείριση ή κλειδί API (δείτε παρακάτω)                                                                        |
+| `/.well-known/agent.json`    | GET     | Κάρτα πράκτορα (ανακάλυψη A2A )                                        | (δημόσιο, αποθηκευμένο στην κρυφή μνήμη 3600s)                                                                  |
+| `/api/a2a/tasks`             | POST    | Εισερχόμενη αντιπροσωπεία στον στόλο OmniConductor (Conductor PRD RF5) | το ίδιο με `GET`, συν `OMNIROUTE_API_KEY` αν οριστεί ενώ `REQUIRE_API_KEY` είναι απενεργοποιημένο. `a2aEnabled` |
 
-**Εισερχόμενη ανάθεση Conductor (`POST /api/a2a/tasks`):** εξωτερικοί A2A agents αναθέτουν εργασίες κώδικα στο OmniConductor fleet μέσω OmniRoute. Body: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — μόνο οι δεξιότητες του Conductor fleet (αυτές που ανακοινώνονται στο Agent Card) είναι αναθέσιμες· το `metadata.conductor.repo.url` είναι υποχρεωτικό (το fleet εργάζεται σε git repos). Η διαδρομή μεταφράζεται στο `POST /v1/tasks` του hub χρησιμοποιώντας το `CONDUCTOR_ORCHESTRATOR_TOKEN` από την πλευρά του διακομιστή (εναλλακτικά `CONDUCTOR_HUB_TOKEN`) και επιστρέφει `201 { conductor_task_id, state: "submitted" }`· οι καταστάσεις εργασιών ρέουν πίσω μέσω του SSE→A2A mirror (RF1) και είναι ορατές μέσω `GET /api/a2a/tasks?skill=conductor`.
+Το ποιος θα περάσει στις διαδρομές `/api/a2a/tasks*` εξαρτάται από τη σύνδεση και τις ρυθμίσεις κλειδιού API:
+
+- `requireLogin=true` (προεπιλογή): το ενδιάμεσο λογισμικό δέχεται μόνο διαπιστευτήρια διαχείρισης (συνεδρία πίνακα εργαλείων, κλειδί `manage` -scope API, διακριτικό πρόσβασης `oma_` ) και `OMNIROUTE_API_KEY`. Ένα απλό κλειδί συμπερασμάτων παίρνει `403`. Στην κεφαλίδα `Authorization` το ενδιάμεσο λογισμικό παίρνει μόνο `OMNIROUTE_API_KEY` ως `Bearer <key>`. ένα γυμνό κλειδί ή μια καρτέλα μετά `Bearer` παίρνει `401`.
+- `requireLogin=false`, ή το παράθυρο επαναφοράς πριν από την επιβίβαση: με `REQUIRE_API_KEY=true` γίνεται αποδεκτό οποιοδήποτε έγκυρο κλειδί OmniRoute API ή διαπιστευτήριο διαχείρισης και οι ανώνυμοι καλούντες λαμβάνουν `401`. με `REQUIRE_API_KEY` εκτός τα δρομολόγια είναι ανοιχτά.
+- `POST /api/a2a/tasks` απαιτεί επιπλέον `OMNIROUTE_API_KEY` στην κεφαλίδα `Authorization` όταν αυτή η μεταβλητή έχει οριστεί και `REQUIRE_API_KEY` είναι απενεργοποιημένο. Άλλες κεφαλίδες, όπως `x-api-key`, δεν υπολογίζονται εκεί. Όταν η σύνδεση είναι απενεργοποιημένη ή πριν από την επιβίβαση, το κλειδί περνά με ή χωρίς πρόθεμα `Bearer`. με ενεργοποιημένη τη σύνδεση, μόνο `Bearer <key>` ξεπερνά το ενδιάμεσο λογισμικό.
+
+Όπου απαιτείται διαπιστευτήριο, ένα διακριτικό `read` -scope `oma_` λειτουργεί μόνο για `GET`.
+
+**Αντιπροσωπεία εισερχόμενου μαέστρου (`POST /api/a2a/tasks`):** Εξωτερικοί πράκτορες A2A αναθέτουν την εργασία κωδικοποίησης στον στόλο OmniConductor μέσω OmniRoute. Σώμα: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — μόνο Οι δεξιότητες στόλου μαέστρου (αυτές που ανακοινώνονται στην Κάρτα Αντιπροσώπου) είναι μεταβιβάσιμες. Απαιτείται `metadata.conductor.repo.url` (ο στόλος λειτουργεί σε git repos). Η διαδρομή μεταφράζεται σε `POST /v1/tasks` του διανομέα χρησιμοποιώντας το `CONDUCTOR_ORCHESTRATOR_TOKEN` από την πλευρά του διακομιστή (εναλλακτικό `CONDUCTOR_HUB_TOKEN`) και επιστρέφει `201 { conductor_task_id, state: "submitted" }`. Οι καταστάσεις εργασιών ρέουν πίσω μέσω του SSE→A2A mirror (RF1) και είναι ορατές μέσω `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Προσθήκη Νέας Δεξιότητας
+## Προσθήκη νέας ικανότητας
 
-1. **Δημιουργία αρχείου δεξιότητας:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Δημιουργία αρχείου δεξιοτήτων:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Εξάγετε μια ασύγχρονη συνάρτηση `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ακολουθήστε τη μορφή υπαρχουσών δεξιοτήτων όπως το `smartRouting.ts`.
+   Εξαγωγή μιας ασύγχρονης συνάρτησης `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Ακολουθήστε το σχήμα των υπαρχουσών δεξιοτήτων όπως `smartRouting.ts`. Εάν η δεξιότητα καλεί ξανά σε OmniRoute πάνω από HTTP, δημιουργήστε τις κεφαλίδες με `buildSelfLoopHeaders(caller)` από `src/lib/a2a/selfLoopAuth.ts`, ώστε η κλήση να εκτελείται με το κλειδί καλούντος A2A και όχι με `OMNIROUTE_API_KEY` και περάστε `redirect: "error"` στο `fetch` ώστε μια ανακατεύθυνση να μην λάβει ποτέ το κλειδί. Ο βοηθός δημιουργεί μόνο κεφαλίδες. Κάθε δεξιότητα ορίζει την ίδια την πολιτική ανακατεύθυνσης. Ρίχνει `UnsafeSelfLoopTargetError` αντί να επισυνάψει ένα κλειδί όταν η επιλυμένη βάση URL είναι απλή http εκτός του ιδιωτικού δικτύου (loopback, ένα όνομα κοντέινερ ή υπηρεσίας και οι ιδιωτικές διευθύνσεις είναι εντάξει) ή διατηρεί διαπιστευτήρια, επομένως μια ικανότητα που καταπίνει τις απορριφθείσες κλήσεις πρέπει να επαναφέρει αυτό το σφάλμα.
 
-2. **Καταχώρηση handler:** στο `src/lib/a2a/taskExecution.ts`, προσθέστε μια εγγραφή στο `A2A_SKILL_HANDLERS`:
+2. **Διαχειριστής εγγραφής:** στο `src/lib/a2a/taskExecution.ts`, προσθέστε μια καταχώρηση στο `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...υπάρχουσες δεξιότητες
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Έκθεση στο Agent Card:** στο `src/app/.well-known/agent.json/route.ts`, προσθέστε στον πίνακα `skills`:
+3. **Έκθεση στην κάρτα αντιπροσώπου:** σε `src/lib/a2a/agentCardMetadata.ts` (κοινόχρηστο από `/.well-known/agent.json` και `/.well-known/agent-card.json`), προσαρτήστε στον πίνακα `skills` :
 
    ```json
    {
      "id": "your-skill",
      "name": "Your Skill",
-     "description": "Σύντομη, εστιασμένη στην πρόθεση περιγραφή",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Παράδειγμα κλήσης σε φυσική γλώσσα"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Γράψτε δοκιμές:** `tests/unit/a2a-<your-skill>.test.ts`. Καλύψτε το ευτυχές μονοπάτι + το μονοπάτι σφάλματος.
+4. **Γράψτε τεστ:** `tests/unit/a2a-<your-skill>.test.ts`. Διαδρομή σφάλματος κάλυψης happy path +.
 
-5. **Τεκμηριώστε** τη νέα δεξιότητα στον πίνακα `Available Skills` αυτού του αρχείου.
+5. **Εγγραφο** η νέα ικανότητα στον πίνακα `Available Skills` αυτού του αρχείου.
 
 ---
 
@@ -262,9 +274,9 @@ submitted → working → completed
 
 ---
 
-## Παραδείγματα Ενσωμάτωσης
+## Παραδείγματα ολοκλήρωσης
 
-### Python (requests)
+### Python (αιτήματα)
 
 ```python
 import requests
@@ -283,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (φέρω)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

@@ -682,6 +682,62 @@ test("runAuthzPipeline clears stale dashboard JWTs without error-stack noise", a
   }
 });
 
+test("runAuthzPipeline throttles the stale-dashboard-cookie warning to once per process, not once per request (#13684 LEDGER-12)", async () => {
+  // Auth itself must succeed on every request so refreshDashboardSessionIfNeeded runs
+  // (it only fires for a MANAGEMENT dashboard route the auth gate already allowed) —
+  // requireLogin=false makes /dashboard anonymously allowed (it is not always-protected),
+  // independent of the foreign cookie below. getSettings() force-sets requireLogin back
+  // to true on first read whenever INITIAL_PASSWORD is set and setup isn't complete yet
+  // (the headless-deploy auto-onboarding branch), so INITIAL_PASSWORD must be unset for
+  // this explicit override to stick.
+  const originalInitialPassword = process.env.INITIAL_PASSWORD;
+  delete process.env.INITIAL_PASSWORD;
+  await settingsDb.updateSettings({ requireLogin: false });
+
+  // A foreign token: signed with the SAME secret the dashboard uses (so it is not
+  // an "invalid signature" case), but missing the `authenticated: true` claim — the
+  // shape of the Cursor CLI passthrough token from #13298. `verifyDashboardSessionToken`
+  // treats this as "not a session" (returns null) on every call, which is exactly the
+  // steady-state condition (e.g. a background dashboard tab with a foreign cookie)
+  // that must not flood the log once per request.
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const foreignToken = await new SignJWT({ iss: "omniroute", aud: "cursor-cli" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(secret);
+
+  const warnCalls: unknown[][] = [];
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    warnCalls.push(args);
+  };
+
+  try {
+    for (let i = 0; i < 3; i++) {
+      const response = await pipeline.runAuthzPipeline(
+        request("http://localhost/dashboard", {
+          headers: { cookie: `auth_token=${foreignToken}` },
+        }),
+        { enforce: true }
+      );
+      assert.equal(response.status, 200);
+    }
+
+    const staleCookieWarnings = warnCalls.filter((args) =>
+      String(args[0]).includes("Dropped stale dashboard session cookie")
+    );
+    assert.equal(
+      staleCookieWarnings.length,
+      1,
+      `expected the stale-cookie warning to fire once across 3 requests, got ${staleCookieWarnings.length}`
+    );
+  } finally {
+    console.warn = originalWarn;
+    if (originalInitialPassword === undefined) delete process.env.INITIAL_PASSWORD;
+    else process.env.INITIAL_PASSWORD = originalInitialPassword;
+  }
+});
+
 test("authenticated remote dashboard page is not a login redirect that clears the session", async () => {
   await forceAuthRequired();
   process.env.OMNIROUTE_PEER_STAMP_TOKEN = "pipeline-test-peer-stamp-token";
@@ -701,4 +757,93 @@ test("authenticated remote dashboard page is not a login redirect that clears th
   const setCookie = response.headers.get("set-cookie") || "";
   assert.doesNotMatch(setCookie, /Max-Age=0|Expires=Thu, 01 Jan 1970/i);
   assert.equal(response.headers.get("location"), null);
+});
+
+test("runAuthzPipeline does not echo Origin for an unvalidated credential on a keyless install", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const junkHeaders: Record<string, string>[] = [
+    { authorization: "Bearer junk" },
+    { "x-api-key": "junk" },
+    { authorization: "Basic Zm9vOmJhcg==" },
+  ];
+  for (const headers of junkHeaders) {
+    const response = await pipeline.runAuthzPipeline(
+      request("http://localhost/v1/models", {
+        headers: { ...headers, origin: "https://evil.example" },
+      }),
+      { enforce: true }
+    );
+    assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+    // Still served anonymously (#2257), but cross-origin pages must not read it.
+    assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+  }
+});
+
+test("runAuthzPipeline still echoes Origin for a valid API key on a keyless install (#5242)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+  const created = await apiKeysDb.createApiKey("cors-valid", "0123456789abcdef");
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: `Bearer ${created.key}`, origin: "https://app.example" },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline keeps a CLIENT_API auth rejection readable for browser clients (#5242)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "true";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: "Bearer junk", origin: "https://app.example" },
+    }),
+    { enforce: true }
+  );
+  // A fixed 401 envelope carries no data; echoing lets the client show "invalid key".
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline still answers a CLIENT_API CORS preflight on a keyless install", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/chat/completions", {
+      method: "OPTIONS",
+      headers: {
+        origin: "https://app.example",
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "authorization,content-type",
+      },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline keeps Vary: Accept-Encoding on an anonymous CLIENT_API response (#6737)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: "Bearer junk", origin: "https://evil.example" },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+  assert.match(response.headers.get("Vary") || "", /Accept-Encoding/);
 });

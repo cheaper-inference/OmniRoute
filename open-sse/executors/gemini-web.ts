@@ -16,6 +16,13 @@
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { isMissingBrowserExecutable } from "./browserExecutableCheck.ts";
+import {
+  abortStatus,
+  isBrowserClosedError,
+  isSelectorFailure,
+  resolveResponseTimeoutMs,
+} from "./gemini-web/browserErrors.ts";
+import { getStableLauncher } from "./gemini-web/browserLease.ts";
 import { normalizeGeminiCookieInput } from "../utils/geminiCookies.ts";
 import { prepareToolMessages } from "../translator/webTools.ts";
 import { buildToolModeResponse } from "./chatgptWebTools.ts";
@@ -170,15 +177,60 @@ export function buildGeminiPrompt(messages: Array<{ role: string; content: unkno
  * matching that dual-placement design intent.
  */
 export function buildGeminiToolPrompt(
-  effectiveMessages: Array<{ role: string; content: unknown }>
+  effectiveMessages: Array<{
+    role: string;
+    content: unknown;
+    tool_calls?: unknown;
+    tool_call_id?: unknown;
+  }>
 ): string {
   const toolPrompt = effectiveMessages
     .filter((m) => m.role === "system" && typeof m.content === "string")
     .map((m) => m.content as string)
     .join("\n\n");
-  const lastUserMsg = [...effectiveMessages].reverse().find((m) => m.role === "user");
+  const lastUserIdx = effectiveMessages.map((m) => m.role).lastIndexOf("user");
+  const lastUserMsg = lastUserIdx >= 0 ? effectiveMessages[lastUserIdx] : undefined;
   const userText = typeof lastUserMsg?.content === "string" ? lastUserMsg.content : "";
-  return toolPrompt ? `${toolPrompt}\n\n${userText}` : userText;
+
+  // Everything except the current ask has to be rendered: an assistant turn that
+  // called a tool and the `role: "tool"` result for it are the only evidence
+  // Gemini Web gets that the tool already ran. Dropping them (this function used
+  // to keep only system + last user) made the model re-issue the same call with a
+  // fresh id, looping until the client's tool limit stopped it (#14368).
+  //
+  // The boundary must be the current ask itself, not "everything before it": a
+  // tool round usually arrives as `system, user, assistant(tool_calls), tool`
+  // with NO message after the result, so slicing at `lastUserIdx` threw away the
+  // very turns the fix was for (#14374 review).
+  const prior: string[] = [];
+  for (const [index, m] of effectiveMessages.entries()) {
+    if (index === lastUserIdx) continue; // rendered below as the current ask
+    if (typeof m.content === "string" && m.content.trim()) {
+      if (m.role === "user") prior.push(`User: ${m.content}`);
+      else if (m.role === "assistant") prior.push(`Assistant: ${m.content}`);
+      else if (m.role === "tool") {
+        const id = typeof m.tool_call_id === "string" ? m.tool_call_id : "";
+        prior.push(id ? `Tool result [${id}]: ${m.content}` : `Tool result: ${m.content}`);
+      }
+    }
+    const calls = Array.isArray(m.tool_calls) ? m.tool_calls : [];
+    for (const entry of calls) {
+      const call = entry as { id?: unknown; function?: { name?: unknown; arguments?: unknown } };
+      const name = typeof call.function?.name === "string" ? call.function.name : "tool";
+      const args = typeof call.function?.arguments === "string" ? call.function.arguments : "{}";
+      const id = typeof call.id === "string" ? ` [${call.id}]` : "";
+      prior.push(`Assistant requested tool${id}: ${name}(${args})`);
+    }
+  }
+
+  // Single-turn: byte-for-byte the shape #7286 pinned.
+  if (prior.length === 0) return toolPrompt ? `${toolPrompt}\n\n${userText}` : userText;
+
+  const parts: string[] = [];
+  if (toolPrompt) parts.push(toolPrompt);
+  parts.push(`Previous conversation:\n${prior.join("\n\n")}`);
+  parts.push(`Current user message:\n${userText}`);
+  return parts.join("\n\n");
 }
 
 /**
@@ -523,14 +575,22 @@ export class GeminiWebExecutor extends BaseExecutor {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
       const { chromium } = await import("playwright");
+      const launchChromium = getStableLauncher(chromium);
       const { acquireGeminiBrowser } = await import("./gemini-web/browserLease.ts");
-      browser = await acquireGeminiBrowser((options) => chromium.launch(options));
+      browser = await acquireGeminiBrowser(launchChromium);
       abortBrowser = () => {
         void context?.close().catch(() => {});
       };
       signal?.addEventListener("abort", abortBrowser, { once: true });
 
-      context = await browser.newContext({ userAgent: GEMINI_USER_AGENT });
+      // #15076: apply the proxy configured for gemini-web (provider/global scope). Resolved per
+      // context so the shared leased browser needs no invalidation when the proxy changes.
+      const { resolvePlaywrightProxy } = await import("../services/browserPool.ts");
+      const proxy = await resolvePlaywrightProxy("gemini-web");
+      context = await browser.newContext({
+        userAgent: GEMINI_USER_AGENT,
+        ...(proxy ? { proxy } : {}),
+      });
 
       // Parse cookies — strips attributes like Path, Domain, Expires
       const cookiePairs = parseCookies(cookie);
@@ -549,8 +609,27 @@ export class GeminiWebExecutor extends BaseExecutor {
       // Capture first StreamGenerate response
       let responseText = "";
       let captured = false;
+      // #19073: remember which endpoints answered while we waited (origin + path only,
+      // never the query string), so a "No response" 502 says whether the page posted
+      // nowhere, somewhere else, or to StreamGenerate with an unreadable body. Collection
+      // starts at submission: the navigation document and page-load assets would otherwise
+      // fill the cap and make "the page never posted" impossible to read from the list.
+      const seenResponseUrls: string[] = [];
+      const MAX_SEEN_RESPONSE_URLS = 20;
+      let promptSubmitted = false;
       const responsePromise = new Promise<void>((resolve) => {
         page.on("response", async (resp: any) => {
+          try {
+            const seen = new URL(resp.url());
+            const bare = `${seen.origin}${seen.pathname}`;
+            if (
+              promptSubmitted &&
+              !seenResponseUrls.includes(bare) &&
+              seenResponseUrls.length < MAX_SEEN_RESPONSE_URLS
+            ) {
+              seenResponseUrls.push(bare);
+            }
+          } catch {} // a non-URL (about:blank, data:) is not worth reporting
           if (!resp.url().includes("StreamGenerate")) return;
           if (captured) return;
           // Resolve even if reading the body throws, so the flow falls through
@@ -653,19 +732,29 @@ export class GeminiWebExecutor extends BaseExecutor {
       // cost that made long prompts race the 30s response-wait timeout.
       await page.keyboard.insertText(prompt);
       await page.waitForTimeout(300);
+      promptSubmitted = true;
       await page.keyboard.press("Enter");
 
-      await Promise.race([responsePromise, page.waitForTimeout(30000)]);
+      await Promise.race([responsePromise, page.waitForTimeout(resolveResponseTimeoutMs(modelId))]);
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
 
       if (!responseText) {
         return {
-          response: new Response(JSON.stringify({ error: "No response from Gemini" }), {
-            status: 502,
-            headers: { "Content-Type": "application/json" },
-          }),
+          response: new Response(
+            JSON.stringify({
+              error: "No response from Gemini",
+              // Distinguish a StreamGenerate body the parser could not read from no
+              // StreamGenerate response at all (#19073).
+              code: captured ? "gemini_web_unparseable_response" : "gemini_web_no_response",
+              seen_response_urls: seenResponseUrls,
+            }),
+            {
+              status: 502,
+              headers: { "Content-Type": "application/json" },
+            }
+          ),
           url: GEMINI_URL,
           headers: {},
           transformedBody: body,
@@ -766,14 +855,19 @@ export class GeminiWebExecutor extends BaseExecutor {
       // the page DOM does not match expectations (e.g. Gemini changed their UI or
       // the session is so expired it lands on a different page). Return 400 so the
       // account-fallback system does NOT retry this request as a transient 5xx.
-      if (
-        error instanceof Error &&
-        (error.name === "TimeoutError" ||
-          rawMessage.includes("waitForSelector") ||
-          rawMessage.includes("Timeout") ||
-          rawMessage.includes("actionability") ||
-          rawMessage.includes("interception"))
-      ) {
+      const abortedStatus = abortStatus(signal);
+      if (abortedStatus || isBrowserClosedError(rawMessage)) {
+        return {
+          response: new Response(JSON.stringify({ error: sanitizeErrorMessage(rawMessage) }), {
+            status: abortedStatus ?? 502,
+            headers: { "Content-Type": "application/json" },
+          }),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+      if (error instanceof Error && isSelectorFailure(error)) {
         return {
           response: new Response(
             JSON.stringify({

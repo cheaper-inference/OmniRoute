@@ -4,10 +4,14 @@
  * custom nodes (src/app/api/provider-nodes/route.ts).
  *
  * Generated shapes (all four must match):
- *   - openai-compatible-chat-<uuid>
- *   - openai-compatible-responses-<uuid>
- *   - anthropic-compatible-<uuid>
- *   - anthropic-compatible-cc-<uuid>
+ *   - openai-compatible-chat-<suffix>
+ *   - openai-compatible-responses-<suffix>
+ *   - anthropic-compatible-<suffix>
+ *   - anthropic-compatible-cc-<suffix>
+ *
+ * <suffix> is a random UUID by default, or the operator-chosen `providerIdSuffix`
+ * (charset [A-Za-z0-9_.-], validated in createProviderNodeSchema) — so the suffix
+ * is matched by that charset, not by hex only.
  *
  * Built from the same prefix constants used at ID-generation time
  * (src/shared/constants/providers.ts) so the generator and the validator can
@@ -18,10 +22,13 @@
  * @module shared/utils/compatibleProviderId
  */
 
-import { OPENAI_COMPATIBLE_PREFIX, ANTHROPIC_COMPATIBLE_PREFIX } from "@/shared/constants/providers";
+import {
+  OPENAI_COMPATIBLE_PREFIX,
+  ANTHROPIC_COMPATIBLE_PREFIX,
+} from "@/shared/constants/providers";
 
 const COMPATIBLE_PROVIDER_ID_PATTERN = new RegExp(
-  `^(?:${OPENAI_COMPATIBLE_PREFIX}(?:chat|responses)-|${ANTHROPIC_COMPATIBLE_PREFIX}(?:cc-)?)[0-9a-f-]+$`,
+  `^(?:${OPENAI_COMPATIBLE_PREFIX}(?:chat|responses)-|${ANTHROPIC_COMPATIBLE_PREFIX}(?:cc-)?)[A-Za-z0-9_.-]+$`,
   "i"
 );
 

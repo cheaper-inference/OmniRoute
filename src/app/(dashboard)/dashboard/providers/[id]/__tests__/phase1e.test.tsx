@@ -21,6 +21,7 @@ import {
   anyNormalizeCompatBadge,
   anyNoPreserveCompatBadge,
   formatProviderModelsErrorResponse,
+  endpointsForApiFormatChange,
 } from "../providerPageHelpers";
 
 // ---------------------------------------------------------------------------
@@ -51,9 +52,10 @@ vi.mock("@/store/notificationStore", () => ({
   }),
 }));
 
-vi.mock("@/shared/components", () => ({
+vi.mock("@/shared/components", async () => ({
+  // KEA-7886: form adapters (Button/Input/Checkbox/Select/FilterPills) as DOM-faithful stubs
+  ...(await import("../../../../../../../tests/helpers/sharedComponentStubs")).formStubs,
   Badge: ({ children }: any) => <span>{children}</span>,
-  Button: ({ children, onClick }: any) => <button onClick={onClick}>{children}</button>,
 }));
 
 // ---------------------------------------------------------------------------
@@ -102,6 +104,24 @@ describe("providerPageHelpers — model-compat pure functions", () => {
     expect(effectiveNormalizeForProtocol("unknown", "openai", customMap, overrideMap)).toBe(false);
   });
 
+  it("effectiveNormalizeForProtocol mirrors the mistral runtime default (#19338)", () => {
+    const empty = buildCompatMap([]);
+    // No flag anywhere: mistral normalizes by default, other providers do not.
+    expect(
+      effectiveNormalizeForProtocol("mistral-large-4", "openai", empty, empty, "mistral")
+    ).toBe(true);
+    expect(effectiveNormalizeForProtocol("gpt-4o", "openai", empty, empty, "openai")).toBe(false);
+    expect(effectiveNormalizeForProtocol("gpt-4o", "openai", empty, empty)).toBe(false);
+    // An explicit false (override or custom row) wins over the provider default.
+    const explicitOff = buildCompatMap([{ id: "mistral-large-4", normalizeToolCallId: false }]);
+    expect(
+      effectiveNormalizeForProtocol("mistral-large-4", "openai", empty, explicitOff, "mistral")
+    ).toBe(false);
+    expect(
+      effectiveNormalizeForProtocol("mistral-large-4", "openai", explicitOff, empty, "mistral")
+    ).toBe(false);
+  });
+
   it("effectivePreserveForProtocol returns correct flag", () => {
     const customMap = buildCompatMap(customModels);
     const overrideMap = buildCompatMap(overrideModels);
@@ -143,6 +163,23 @@ describe("providerPageHelpers — model-compat pure functions", () => {
 // ---------------------------------------------------------------------------
 // Component render smoke tests
 // ---------------------------------------------------------------------------
+
+describe("endpointsForApiFormatChange (#17071)", () => {
+  it("replaces the endpoint ticks with the generation format's endpoint", () => {
+    expect(endpointsForApiFormatChange("chat-completions", "images-generations")).toEqual([
+      "images",
+    ]);
+    expect(endpointsForApiFormatChange("chat-completions", "video")).toEqual(["videos"]);
+  });
+
+  it("restores the chat default when leaving a generation format", () => {
+    expect(endpointsForApiFormatChange("images-generations", "chat-completions")).toEqual(["chat"]);
+  });
+
+  it("keeps the ticks between non-generation formats", () => {
+    expect(endpointsForApiFormatChange("chat-completions", "embeddings")).toBeNull();
+  });
+});
 
 describe("ModelRow — render smoke test", () => {
   let container: HTMLElement;

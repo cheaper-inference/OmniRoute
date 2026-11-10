@@ -4,13 +4,9 @@
 
 ---
 
-> **الإصدار:** v3.8.44
-> **آخر تحديث:** 2026-09-09
-> **الجمهور المستهدف:** المهندسون الذين يضيفون الخدمات المضمّنة أو يصونونها أو يصححون أخطاءها (9Router، CLIProxyAPI، Mux، Bifrost، open-wa).
+> **إصدار:** v3.8.44** آخر تحديث:** 2026-10-28** جمهور:** يقوم المهندسون بإضافة الخدمات المضمنة أو صيانتها أو تصحيح أخطاءها (9Router و CLIProxyAPI وMux وBifrost وopen-wa و LLMLingua وsing-box).
 
-الخدمات المضمّنة هي أدوات عمليات جانبية مثبّتة محليًا يقوم OmniRoute بتثبيتها والإشراف عليها
-وإتاحتها كوجهات توجيه من الدرجة الأولى. بخلاف المزوّدين الخارجيين (الذين يجري الوصول إليهم عبر الإنترنت
-باستخدام مفاتيح API)، تعمل الخدمات المضمّنة على الجهاز نفسه الذي يعمل عليه OmniRoute وتتواصل عبر واجهة الاسترجاع الحلقي.
+الخدمات المضمنة هي أدوات جانبية للعمليات مثبتة محليًا والتي تقوم OmniRoute بتثبيتها والإشراف عليها وكشفها كأهداف توجيه من الدرجة الأولى. على عكس مقدمي الخدمات الخارجيين (الذي يتم الوصول إليهم عبر الإنترنت عبر مفاتيح API )، تعمل الخدمات المضمنة على نفس الجهاز مثل OmniRoute وتتواصل عبر الاسترجاع.
 
 ---
 
@@ -29,57 +25,59 @@
 
 ## 1. نظرة عامة
 
-### لماذا الخدمات المضمّنة؟
+### لماذا الخدمات المدمجة؟
 
-تم تضمين ست خدمات:
+تم تضمين ثماني خدمات:
 
-| الخدمة          | حزمة npm                                    | المنفذ الافتراضي | الغرض                                                                                                                                                                                |
-| --------------- | ------------------------------------------- | :--------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **9Router**     | `9router`                                   |      20130       | موجّه ذكاء اصطناعي يمكن لـ OmniRoute استخدامه كمزوّد فرعي. تُعرض النماذج بصيغة `9router/{sub}/{model}`                                                                               |
-| **CLIProxyAPI** | ملف ثنائي من إصدار GitHub (`cliproxy`)      |       8317       | محوّل وكيل محلي لتدفقات مصادقة Anthropic CLI. يوفّر توجيهًا احتياطيًا عند انتهاء صلاحية رموز OAuth                                                                                   |
-| **Mux**         | `mux` (تشغيل `mux server` دون واجهة رسومية) |       8322       | برنامج خفي محلي لتنسيق الوكلاء (coder/mux). تُدار دورة حياته فقط — وليس هدفًا للتوجيه (لا ينفّذ تمريرًا وكيلاً لطلبات LLM).                                                          |
-| **Bifrost**     | `@maximhq/bifrost`                          |       8080       | واجهة خلفية لترحيل بوابة ذكاء اصطناعي مكتوبة بلغة Go. عند تشغيلها، يجري اختيارها تلقائيًا بواسطة مسار الترحيل (`/v1/relay/`)                                                         |
-| **Dario**       | `@askalf/dario`                             |       3456       | وكيل لاشتراك Claude — بديل/خيار تجاوز فشل لـ CLIProxyAPI لحركة البيانات المتوافقة مع Claude Code؛ يصبح المفتاح المحقون `DARIO_ADMIN_TOKEN` الذي يحمي مستوى تحكم OAuth ضمن `/admin/*` |
-| **open-wa**     | `@open-wa/wa-automate`                      |       8323       | أتمتة WhatsApp Web (متصفح Chromium دون واجهة رسومية عبر Puppeteer). تُدار دورة حياته فقط — وليس هدفًا للتوجيه.                                                                       |
+| خدمة              | حزمة npm                          | المنفذ الافتراضي | غاية                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | --------------------------------- | :--------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9جهاز التوجيه** | `9router`                         |      20130       | جهاز التوجيه AI الذي يمكن أن يستخدمه OmniRoute كموفر فرعي. النماذج المكشوفة كـ `9router/{sub}/{model}`                                                                                                                                                                                                                                        |
+| **CLIProxyAPI**   | إصدار GitHub الثنائي (`cliproxy`) |       8317       | محول الوكيل المحلي لتدفقات مصادقة Anthropic CLI. يوفر التوجيه الاحتياطي عند انتهاء صلاحية الرموز المميزة OAuth                                                                                                                                                                                                                                |
+| **مكس**           | `mux` (مقطوعة الرأس `mux server`) |       8322       | البرنامج الخفي للتنسيق مع الوكيل المحلي (coder/mux). تتم إدارة دورة الحياة فقط — وليس هدف توجيه (لا يوجد وكيل LLM ).                                                                                                                                                                                                                          |
+| **بيفروست**       | `@maximhq/bifrost`                |       8080       | انتقل إلى الواجهة الخلفية لترحيل بوابة الذكاء الاصطناعي. عند التشغيل، يتم تحديده تلقائيًا بواسطة مسار الترحيل (`/v1/relay/`)                                                                                                                                                                                                                  |
+| **داريو**         | `@askalf/dario`                   |       3456       | وكيل اشتراك Claude — alternative/failover إلى CLIProxyAPI لحركة المرور على شكل Claude-Code؛ يصبح المفتاح المحقون `DARIO_ADMIN_TOKEN` بوابات لمستوى التحكم `/admin/*` OAuth الخاص به                                                                                                                                                           |
+| **مفتوح وا**      | `@open-wa/wa-automate`            |       8323       | WhatsApp أتمتة الويب (Chromium مقطوعة الرأس عبر محرك الدمى). تتم إدارة دورة الحياة فقط بواسطة — وليس هدف التوجيه.                                                                                                                                                                                                                             |
+| **LLMLingua**     | `@atjsh/llmlingua-2`              |      20135       | نموذج السيارة الجانبية ذات الضغط الفوري — real LLMLingua-2 ONNX (منفذ JS/TS لخوارزمية Microsoft). يرسل `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` عبر HTTP إليه، ويعود إلى الواجهة الخلفية لمؤشر ترابط العامل قيد التشغيل عندما يكون الجانب الجانبي معطلاً. دورة الحياة المُدارة بواسطة — فقط ليست هدفًا للتوجيه. |
+| **صندوق الغناء**  | إصدار GitHub الثنائي (`singbox`)  |      20140       | TPROXY Sidecar يدعم اعتراض الوكيل الشفاف لـ `applyTproxy()`(`src/mitm/tproxy/setup.ts`). يقوم برنامج التثبيت بتنزيل الإصدار المثبت الذي تم التحقق من المجموع الاختباري له. تتم إدارة دورة الحياة فقط — وليس هدف توجيه (بدون وكيل LLM )                                                                                                        |
 
-تتبع الخدمات الست جميعها نموذج الإشراف نفسه:
+جميع الثمانية يتبعون نفس النموذج الإشرافي:
 
-- يثبّتها OmniRoute ضمن `DATA_DIR/services/{name}/` (بمعزل عن ملف `package.json` الخاص بـ OmniRoute)
-- يشغّلها OmniRoute ويراقبها كعمليات فرعية
-- يحقن OmniRoute مفتاح API مؤقتًا في بيئة العملية الفرعية ويدوّره دون توقف الخدمة (حيثما ينطبق)
-- جميع مسارات الإدارة (`/api/services/*`) هي **LOCAL_ONLY** — ولا يمكن الوصول إليها إلا من عنوان الاسترجاع المحلي (القاعدة الصارمة رقم 17)
+- يقوم OmniRoute بتثبيتها تحت `DATA_DIR/services/{name}/` (معزولة عن `package.json` الخاص بـ OmniRoute)
+- OmniRoute تفرز وتراقبها كعمليات فرعية
+- يقوم OmniRoute بإدخال مفتاح API سريع الزوال في بيئة الطفل ويقوم بتدويره دون توقف (حيثما أمكن)
+- جميع طرق الإدارة (`/api/services/*`) هي**LOCAL_ONLY** يمكن الوصول إلى — فقط من خلال الاسترجاع (القاعدة الثابتة رقم 17)
 
 ### القرارات الرئيسية (من خطة التصميم)
 
-| القرار                                        | القيمة                                                                             |
-| --------------------------------------------- | ---------------------------------------------------------------------------------- |
-| وصول لوحة المعلومات إلى واجهة 9Router الأصلية | وكيل عكسي عند `/dashboard/providers/services/9router/embed/*`                      |
-| آلية التثبيت                                  | `npm install {package}` عبر `execFile` (دون استيفاء أوامر الصدفة)                  |
-| وضع الاستخدام                                 | تسجيل المزوّد بصيغة `9router/{sub}/{model}` في محرك التوجيه                        |
-| إدارة مفتاح API                               | ينشئ OmniRoute المفتاح ويشفّره عند التخزين (AES-256-GCM) ويحقنه عبر متغيرات البيئة |
-| موقع لوحة المعلومات                           | `/dashboard/providers/services` (ثلاث علامات تبويب)                                |
-| التشغيل التلقائي                              | مفتاح تبديل لكل خدمة، ويكون معطّلًا افتراضيًا                                      |
+| قرار                                               | قيمة                                                          |
+| -------------------------------------------------- | ------------------------------------------------------------- |
+| الوصول إلى لوحة المعلومات إلى UI الأصلي لـ 9Router | عكس الوكيل في `/dashboard/providers/services/9router/embed/*` |
+| آلية التثبيت                                       | `npm install {package}` عبر `execFile` (بدون استيفاء shell)   |
+| وضع الاستهلاك                                      | الموفر مسجل كـ `9router/{sub}/{model}` في محرك التوجيه        |
+| إدارة المفاتيح API                                 | يقوم OmniRoute بإنشاء وتشفير (AES-256-GCM) وإدخاله عبر env    |
+| موقع لوحة القيادة                                  | `/dashboard/providers/services` (ثلاث علامات تبويب)           |
+| التشغيل التلقائي                                   | التبديل لكل خدمة، OFF الافتراضي                               |
 
 ---
 
-## 2. البنية المعمارية — 4 طبقات
+## 2.زقعة معمارية — طبقات
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  الطبقة 1 — واجهة المستخدم                                        │
-│  /dashboard/providers/services  (علامات التبويب: CLIProxyAPI | 9Router | Mux)│
-│  السجلات المباشرة (SSE)، بدء/إيقاف/إعادة تشغيل/تحديث، الإعدادات، التثبيت│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               الغلاف + توجيه علامات التبويب عبر ?tab=│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
 │                               ServiceLogsPanel, ApiKeyCard, ...    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP (طلب Next.js عبر fetch)
+                       │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  الطبقة 2 — واجهة API (LOCAL_ONLY — عبر loopback فقط)              │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -88,73 +86,74 @@
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (وكيل عكسي لـ HTTP وWebSocket ← المنبع 9Router)                 │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  البوابة: تتضمن LOCAL_ONLY_API_PREFIXES المسار "/api/services/" و  │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ استدعاءات داخل العملية
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  الطبقة 3 — ServiceSupervisor ‏(src/lib/services/)                  │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   مشرف عام (child_process.spawn)             │
-│    ├── التثبيت:    execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── البدء:      spawn(node, [entrypoint], {env, cwd})           │
-│    ├── مفتاح API:  crypto.randomBytes(32) ← env NINEROUTER_API_KEY  │
-│    ├── المنفذ:     20130 لـ 9Router (قابل للتهيئة)                 │
-│    ├── السجلات:    مخزن حلقي لـ stdio بحجم 5 MB ← أحداث SSE        │
-│    ├── الصحة:      HTTP GET /health كل 2–5 ثوانٍ، استرداد كسول    │
-│    └── دورة الحياة: SIGTERM لمدة 15 ثانية ← SIGKILL               │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       يهيئ جميع SERVICES[] عند بدء العملية           │
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       طلب GET /v1/models دوري ← جدول service_models │
-│  ringBuffer.ts      مخزن سجلات دائري (5 MB لكل خدمة)               │
-│  healthCheck.ts     مسبار دوري لفحص صحة HTTP                       │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (مهايئات التثبيت)                             │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP متوافق مع OpenAI ‏(loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  الطبقة 4 — المزوّد / التوجيه                                     │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    يعيد البحث عن المنفذ ومفتاح API لكل طلب (من دون تخزين مؤقت).   │
-│    يزيل البادئة "9router/" من معرّف النموذج قبل تمريره عبر الوكيل. │
-│    يعيد 503 service_not_running إذا لم يكن المشرف في حالة "running".│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    إدخال لـ "9router":‏ isEmbeddedService: true                    │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    تُخزّن النماذج بصيغة "9router/{sub}/{model}" (ببادئة).          │
-│    تتم مزامنتها كل 5 دقائق بواسطة modelSync.ts.                    │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  تتم إدارة دورة حياة Mux فقط (الطبقات 1-3) — فهو برنامج خفي       │
-│  لتنسيق الوكلاء، وليس وكيل LLM، لذلك لا يملك منفّذًا أو إدخال      │
-│  مزوّد في الطبقة 4، ولا يُستخدم مطلقًا هدفًا للتوجيه.              │
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### ملفات المصدر الرئيسية
 
-| الملف                                       | الدور                                                    |
-| ------------------------------------------- | -------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | الفئة الأساسية: دورة الحياة، القفل، الصحة، المخزن الحلقي |
-| `src/lib/services/bootstrap.ts`             | التسجيل على مستوى العملية والبدء التلقائي                |
-| `src/lib/services/registry.ts`              | خريطة مفردة `tool → supervisor`                          |
-| `src/lib/services/apiKey.ts`                | إنشاء المفاتيح وتشفير AES-256-GCM للبيانات المخزنة       |
-| `src/lib/services/modelSync.ts`             | مزامنة دورية للنماذج (5 دقائق) + عند الطلب               |
-| `src/lib/services/ringBuffer.ts`            | مخزن دائري للسجلات بسعة 5 MB مع الاشتراك عبر SSE         |
-| `src/lib/services/healthCheck.ts`           | فحص صحة HTTP (بفاصل زمني قابل للتهيئة)                   |
-| `src/lib/services/installers/ninerouter.ts` | تثبيت 9Router وتحديثه وإلغاء تثبيته باستخدام npm         |
-| `src/lib/services/installers/cliproxy.ts`   | تثبيت CLIProxyAPI وتحديثه وإلغاء تثبيته باستخدام npm     |
-| `src/lib/services/installers/mux.ts`        | تثبيت Mux وتحديثه وإلغاء تثبيته باستخدام npm             |
-| `src/lib/services/installers/openwa.ts`     | تثبيت open-wa وتحديثه وإلغاء تثبيته باستخدام npm         |
-| `src/app/api/services/9router/_lib.ts`      | الدالة المساعدة `getOrInitSupervisor()`                  |
-| `src/app/api/services/[name]/logs/route.ts` | نقطة نهاية مشتركة لسجلات SSE                             |
-| `open-sse/executors/ninerouter.ts`          | منفّذ المزوّد (الطبقة 4)                                 |
+| ملف                                         | دور                                                             |
+| ------------------------------------------- | --------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | الفئة الأساسية: دورة الحياة، القفل، الصحة، المخزن المؤقت للحلقة |
+| `src/lib/services/bootstrap.ts`             | التسجيل على مستوى العملية والبدء التلقائي                       |
+| `src/lib/services/registry.ts`              | خريطة سينجلتون `tool → supervisor`                              |
+| `src/lib/services/apiKey.ts`                | توليد المفاتيح، تشفير AES-256-GCM أثناء الراحة                  |
+| `src/lib/services/modelSync.ts`             | مزامنة دورية للنموذج (5 دقائق) + الطلب                          |
+| `src/lib/services/ringBuffer.ts`            | 5 MB مخزن سجل دائري مع الاشتراك SSE                             |
+| `src/lib/services/healthCheck.ts`           | مسبار الصحة HTTP (فاصل زمني قابل للتكوين)                       |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall لجهاز التوجيه 9                    |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall لـ CLIProxyAPI                     |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall لـ Mux                             |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall لـ open-wa                         |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall لـ LLMLingua                       |
+| `src/app/api/services/9router/_lib.ts`      | مساعد `getOrInitSupervisor()`                                   |
+| `src/app/api/services/[name]/logs/route.ts` | نقطة النهاية لسجلات SSE المشتركة                                |
+| `open-sse/executors/ninerouter.ts`          | منفذ الموفر (الطبقة 4)                                          |
 
 ---
 
@@ -210,56 +209,52 @@
 
 ## 4. مرجع API
 
-جميع المسارات ضمن `/api/services/` هي **LOCAL_ONLY** (واجهة الاسترجاع فقط، القاعدة الصارمة رقم 17).
-تتلقى الطلبات الواردة من خارج واجهة الاسترجاع `403 LOCAL_ONLY` بغض النظر عن رمز المصادقة.
+جميع الطرق تحت `/api/services/` هي**LOCAL_ONLY** (الاسترجاع فقط، القاعدة الصعبة رقم 17). تتلقى طلبات عدم الاسترجاع `403 LOCAL_ONLY` بغض النظر عن رمز المصادقة المميز.
 
-### 4.1 نقاط نهاية 9Router (11 مسارًا)
+### 4.1 9 نقاط نهاية جهاز التوجيه (11 مسارًا)
 
 #### `POST /api/services/9router/install`
 
-تثبيت 9Router من npm. ينشئ `DATA_DIR/services/9router/` مع ملف
-`package.json` ومجلد `node_modules/` خاصين به. لا يتعارض مع تبعيات OmniRoute الخاصة.
+تثبيت 9Router من npm. يخلق `DATA_DIR/services/9router/` مع `package.json` و `node_modules/` الخاصة به. لا يتعارض مع عروض OmniRoute الخاصة.
 
-**نص الطلب** (جميع الحقول اختيارية):
+**هيئة الطلب** (كلها اختيارية):
 
 ```json
 { "version": "latest" }
 ```
 
-| الحقل     | النوع    | القيمة الافتراضية | الوصف                                 |
-| --------- | -------- | ----------------- | ------------------------------------- |
-| `version` | `string` | `"latest"`        | وسم إصدار npm أو semver المراد تثبيته |
+| مجال      | يكتب     | تقصير      | وصف                               |
+| --------- | -------- | ---------- | --------------------------------- |
+| `version` | `string` | `"latest"` | علامة إصدار npm أو semver للتثبيت |
 
-**الاستجابات:**
+**الردود:**
 
-| الحالة | الوصف                                                   |
-| ------ | ------------------------------------------------------- |
-| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`  |
-| `400`  | نص طلب غير صالح (فشل تحقق Zod)                          |
-| `409`  | التثبيت جارٍ بالفعل (القفل محجوز)                       |
-| `500`  | فشل تثبيت npm — راجع `message` لمعرفة الخطأ بصيغة واضحة |
+| حالة  | وصف                                                    |
+| ----- | ------------------------------------------------------ |
+| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }` |
+| `400` | نص الطلب غير صالح (فشل التحقق من صحة Zod )             |
+| `409` | تم التثبيت بالفعل (تم القفل)                           |
+| `500` | فشل تثبيت npm — راجع `message` لمعرفة الخطأ المألوف    |
 
-**ملاحظات:** يستخدم `execFile('npm', [...])` — بلا shell وبلا استيفاء (القاعدة الصارمة رقم 13).
-تُعرض أخطاء EACCES في صورة رسائل واضحة.
+**ملحوظات:** يستخدم `execFile('npm', [...])` — بدون غلاف، بدون استيفاء (القاعدة الصعبة رقم 13). تظهر أخطاء EACCES كرسائل ودية.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-بدء تشغيل 9Router. يسجّل مشرفًا إذا لم يكن مسجلًا بالفعل، ثم يستدعي
-`supervisor.start()`. العملية متكررة آمنة إذا كانت الخدمة قيد التشغيل بالفعل.
+بدء تشغيل 9 جهاز التوجيه. يقوم بتسجيل مشرف إذا لم يكن مسجلاً بالفعل، ثم يتصل بـ `supervisor.start()`. عاجز عند التشغيل بالفعل.
 
-**نص الطلب:** لا يوجد
+**هيئة الطلب:** لا أحد
 
-**الاستجابات:**
+**الردود:**
 
-| الحالة | الوصف                                               |
-| ------ | --------------------------------------------------- |
-| `200`  | كائن `ServiceStatus` (راجع المخطط أدناه)            |
-| `409`  | 9Router غير مثبت (`status: "not_installed"`)        |
-| `503`  | فشل بدء التشغيل (خطأ في العملية — راجع `lastError`) |
+| حالة  | وصف                                                |
+| ----- | -------------------------------------------------- |
+| `200` | كائن `ServiceStatus` (انظر المخطط أدناه)           |
+| `409` | 9جهاز التوجيه غير مثبت (`status: "not_installed"`) |
+| `503` | فشل البدء (خطأ في العملية — راجع `lastError`)      |
 
-**مخطط ServiceStatus:**
+**مخطط ServiceStatus :**
 
 ```json
 {
@@ -277,82 +272,76 @@
 
 #### `POST /api/services/9router/stop`
 
-إيقاف 9Router بأمان. يرسل SIGTERM، وينتظر 15 ثانية، ثم يرسل SIGKILL إذا ظلت العملية قيد التشغيل.
-العملية متكررة آمنة إذا كانت الخدمة متوقفة بالفعل.
+أوقف 9Router برشاقة. يرسل SIGTERM وينتظر 15 ثانية ثم SIGKILL إذا كان لا يزال على قيد الحياة. عاجز عندما توقف بالفعل.
 
-**نص الطلب:** لا يوجد
+**هيئة الطلب:** لا أحد
 
-**الاستجابات:**
+**الردود:**
 
-| الحالة | الوصف                                 |
-| ------ | ------------------------------------- |
-| `200`  | `ServiceStatus` (الحالة: `"stopped"`) |
-| `503`  | فشل الإيقاف على نحو غير متوقع         |
+| حالة  | وصف                              |
+| ----- | -------------------------------- |
+| `200` | `ServiceStatus` (الحالة: "توقف") |
+| `503` | فشل الإيقاف بشكل غير متوقع       |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-يكافئ تنفيذ `stop()` ثم `start()` ضمن قفل العملية.
+أي ما يعادل `stop()` ثم `start()` تحت قفل التشغيل.
 
-**نص الطلب:** لا يوجد
+**هيئة الطلب:** لا أحد
 
-**الاستجابات:** مماثلة لـ `start` (تعيد كائن `ServiceStatus` النهائي).
+**الردود:** نفس `start` (إرجاع `ServiceStatus` النهائي).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-يحدّث 9Router إلى إصدار npm أحدث. إذا كانت الخدمة قيد التشغيل، فتُوقَف
-أولًا، ثم يُشغَّل تثبيت npm (لتثبيت الإصدار الأحدث في الموضع نفسه)، وبعد ذلك
-تُعاد عملية تشغيل الخدمة.
+تحديثات 9Router إلى إصدار npm أحدث. إذا كانت الخدمة قيد التشغيل، فسيتم إيقافها أولاً، وتشغيل تثبيت npm (تثبيت الإصدار الأحدث في مكانه)، ثم يتم إعادة تشغيل الخدمة.
 
-**نص الطلب** (جميع الحقول اختيارية):
+**هيئة الطلب** (كلها اختيارية):
 
 ```json
 { "version": "latest" }
 ```
 
-**الاستجابات:**
+**الردود:**
 
-| الحالة | الوصف                                                           |
-| ------ | --------------------------------------------------------------- |
-| `200`  | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400`  | نص غير صالح                                                     |
-| `500`  | فشل تحديث npm                                                   |
+| حالة  | وصف                                                             |
+| ----- | --------------------------------------------------------------- |
+| `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
+| `400` | جسم غير صالح                                                    |
+| `500` | فشل تحديث npm                                                   |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-ينشئ مفتاح API جديدًا لـ 9Router، ويشفّره عند التخزين، ويعيد تشغيل الخدمة
-(إذا كانت قيد التشغيل) لكي تستخدم المفتاح الجديد من بيئتها. يُلغى المفتاح القديم
-فورًا.
+ينشئ مفتاح API جديدًا لـ 9Router، ويقوم بتشفيره أثناء عدم التشغيل، ويعيد تشغيل الخدمة (إذا كانت قيد التشغيل) حتى يلتقط المفتاح الجديد من بيئته. يتم إبطال المفتاح القديم على الفور.
 
-**نص الطلب:** لا يوجد
+**هيئة الطلب:** لا أحد
 
-**الاستجابات:**
+**الردود:**
 
-| الحالة | الوصف                                      |
-| ------ | ------------------------------------------ |
-| `200`  | `{ keyRotated: true, restarted: boolean }` |
-| `500`  | فشل تدوير المفتاح                          |
+| حالة  | وصف                                        |
+| ----- | ------------------------------------------ |
+| `200` | `{ keyRotated: true, restarted: boolean }` |
+| `500` | فشل التدوير                                |
 
-**الأمان:** لا يُعاد المفتاح الجديد مطلقًا في الاستجابة (لمنع تسريب بيانات الاعتماد).
-ويُخزَّن مشفرًا (AES-256-GCM) في جدول `version_manager`.
+**حماية:** لا يتم إرجاع المفتاح الجديد مطلقًا في الاستجابة (لا يوجد تسرب لبيانات الاعتماد). يتم تخزينه مشفرًا (AES-256-GCM) في جدول `version_manager`.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-يعيد الحالة المجمعة المباشرة ومن قاعدة البيانات، بما يشمل بيانات تعريف الإصدار ومعاينة مفتاح API.
+إرجاع حالة + DB المباشرة المدمجة بما في ذلك بيانات تعريف الإصدار ومعاينة مفتاح API.
 
-**الاستجابات:**
+**الردود:**
 
-| الحالة | الوصف             |
-| ------ | ----------------- |
-| `200`  | راجع المخطط أدناه |
-| `500`  | فشلت قراءة الحالة |
+| حالة  | وصف               |
+| ----- | ----------------- |
+| `200` | انظر المخطط أدناه |
+| `500` | فشلت قراءة الحالة |
 
 **مخطط الاستجابة:**
 
@@ -378,193 +367,197 @@
 
 #### `POST /api/services/9router/auto-start`
 
-تبديل علامة البدء التلقائي. عندما تكون `enabled: true`، تبدأ الخدمة تلقائيًا
-في المرة التالية التي يبدأ فيها OmniRoute (إذا كانت الخدمة مثبتة).
+تبديل علامة البدء التلقائي. عند `enabled: true`، تبدأ الخدمة تلقائيًا في المرة التالية التي يتم فيها تشغيل OmniRoute (إذا كانت الخدمة مثبتة).
 
-**نص الطلب:**
+**هيئة الطلب:**
 
 ```json
 { "enabled": true }
 ```
 
-**الاستجابات:**
+**الردود:**
 
-| الحالة | الوصف                 |
-| ------ | --------------------- |
-| `200`  | `{ autoStart: true }` |
-| `400`  | نص غير صالح           |
+| حالة  | وصف                   |
+| ----- | --------------------- |
+| `200` | `{ autoStart: true }` |
+| `400` | جسم غير صالح          |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-تدفق SSE للسجلات المباشرة من المخزن المؤقت الحلقي لـ stdout/stderr الخاص بـ 9Router.
+SSE تيار من السجلات الحية من المخزن المؤقت الدائري stdout/stderr الخاص بـ 9Router.
 
-**معاملات الاستعلام:**
+**معلمات الاستعلام:**
 
-| المعامل  | النوع     | القيمة الافتراضية | الوصف                                                             |
-| -------- | --------- | ----------------- | ----------------------------------------------------------------- |
-| `tail`   | `integer` | 200               | عدد أسطر السجل السابقة التي تُرسل أولًا (الحد الأقصى 1000)        |
-| `filter` | `string`  | لا شيء            | مرشح سلسلة فرعية غير حساس لحالة الأحرف (بلا regex — آمن من ReDoS) |
+| بارام    | يكتب      | تقصير  | وصف                                                                 |
+| -------- | --------- | ------ | ------------------------------------------------------------------- |
+| `tail`   | `integer` | 200    | كم عدد الخطوط التاريخية المراد إرسالها أولاً (بحد أقصى 1000)        |
+| `filter` | `string`  | لا أحد | مرشح سلسلة فرعية غير حساس لحالة الأحرف (لا يوجد regex — ReDoS-safe) |
 
-**أحداث SSE:**
+**أحداث SSE :**
 
-| الحدث       | البيانات    | الوصف                           |
-| ----------- | ----------- | ------------------------------- |
-| `snapshot`  | `LogLine[]` | الجزء السابق الأولي من السجل    |
-| `log`       | `LogLine`   | سطر سجل مباشر                   |
-| `heartbeat` | `{}`        | إبقاء الاتصال نشطًا كل 15 ثانية |
+| حدث         | بيانات      | وصف                               |
+| ----------- | ----------- | --------------------------------- |
+| `snapshot`  | `LogLine[]` | الذيل التاريخي الأولي             |
+| `log`       | `LogLine`   | خط السجل المباشر                  |
+| `heartbeat` | `{}`        | البقاء على قيد الحياة كل 15 ثانية |
 
-**مخطط LogLine:**
+**مخطط LogLine :**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
-**الاستجابات:**
+**الردود:**
 
-| الحالة | الوصف                                       |
-| ------ | ------------------------------------------- |
-| `200`  | `text/event-stream`                         |
-| `400`  | المعامل `filter` طويل جدًا (> 200 حرف)      |
-| `404`  | لم يتم العثور على الخدمة (المشرف غير مسجّل) |
-
----
-
-### 4.2 نقاط نهاية CLIProxyAPI (10 مسارات)
-
-يمتلك CLIProxyAPI بنية نقاط النهاية نفسها الخاصة بـ 9Router باستثناء `rotate-key`، بالإضافة إلى
-`accounts` و`provider-expose` و`auto-restart-adopted`. ويتلقى الآن
-مفتاح API مخصصًا لمستوى البيانات يُحقن عند التشغيل (`needsApiKey: true` في
-`bootstrap.ts`، ويُستخدم لمزامنة النماذج)؛ ويتضمن `status` حقولًا أقل.
-
-| الطريقة | المسار                              | الوصف                                                         |
-| ------- | ----------------------------------- | ------------------------------------------------------------- |
-| `POST`  | `/api/services/cliproxy/install`    | تثبيت CLIProxyAPI من npm                                      |
-| `POST`  | `/api/services/cliproxy/start`      | بدء تشغيل CLIProxyAPI                                         |
-| `POST`  | `/api/services/cliproxy/stop`       | إيقاف CLIProxyAPI                                             |
-| `POST`  | `/api/services/cliproxy/restart`    | إعادة تشغيل CLIProxyAPI                                       |
-| `POST`  | `/api/services/cliproxy/update`     | التحديث إلى إصدار أحدث                                        |
-| `GET`   | `/api/services/cliproxy/status`     | الحالة المباشرة + حالة قاعدة البيانات (من دون `apiKeyMasked`) |
-| `POST`  | `/api/services/cliproxy/auto-start` | تبديل التشغيل التلقائي                                        |
-
-تعمل نقطة النهاية المشتركة `GET /api/services/{name}/logs` (راجع §4.1) مع
-الخدمات الأربع جميعها باستخدام المقطع الديناميكي `[name]`.
+| حالة  | وصف                                        |
+| ----- | ------------------------------------------ |
+| `200` | `text/event-stream`                        |
+| `400` | معلمة `filter` طويلة جدًا (> 200 حرفًا)    |
+| `404` | لم يتم العثور على الخدمة (المشرف غير مسجل) |
 
 ---
 
-### 4.3 نقاط نهاية Mux (8 مسارات)
+### 4.2 نقاط النهاية CLIProxyAPI (10 مسارات)
 
-يمتلك Mux بنية نقاط النهاية نفسها الخاصة بـ CLIProxyAPI — لا يوجد مسار `rotate-key` ضمن واجهة
-API (يُنشأ رمز الحامل بالطريقة نفسها المتبعة في 9Router عبر
-`getOrCreateApiKey("mux")` ويُحقن من خلال متغير البيئة `MUX_SERVER_AUTH_TOKEN`، ولكن
-لا توجد حتى الآن نقطة نهاية مخصصة للتدوير). تتم إدارة دورة حياة Mux فقط: فعلى خلاف
-9Router، لا يمتلك منفّذًا للطبقة 4 ولا يُسجّل أبدًا كمزوّد توجيه.
+CLIProxyAPI له نفس شكل نقطة النهاية مثل 9Router ناقص `rotate-key`، بالإضافة إلى `accounts` و `provider-expose` و `auto-restart-adopted`. يتلقى الآن مفتاح API مخصصًا لمستوى البيانات، ويتم حقنه عند النشر (`needsApiKey: true` in `bootstrap.ts`، يُستخدم لمزامنة النموذج)؛ يتضمن `status` حقولًا أقل.
 
-| الطريقة | المسار                         | الوصف                                 |
-| ------- | ------------------------------ | ------------------------------------- |
-| `POST`  | `/api/services/mux/install`    | تثبيت Mux من npm (`npm i mux`)        |
-| `POST`  | `/api/services/mux/start`      | بدء تشغيل Mux (`mux server`)          |
-| `POST`  | `/api/services/mux/stop`       | إيقاف Mux                             |
-| `POST`  | `/api/services/mux/restart`    | إعادة تشغيل Mux                       |
-| `POST`  | `/api/services/mux/update`     | التحديث إلى إصدار npm أحدث            |
-| `GET`   | `/api/services/mux/status`     | الحالة المباشرة + حالة قاعدة البيانات |
-| `POST`  | `/api/services/mux/auto-start` | تبديل التشغيل التلقائي                |
+| طريقة  | طريق                                | وصف                                   |
+| ------ | ----------------------------------- | ------------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | تثبيت CLIProxyAPI من npm              |
+| `POST` | `/api/services/cliproxy/start`      | ابدأ CLIProxyAPI                      |
+| `POST` | `/api/services/cliproxy/stop`       | توقف CLIProxyAPI                      |
+| `POST` | `/api/services/cliproxy/restart`    | أعد تشغيل CLIProxyAPI                 |
+| `POST` | `/api/services/cliproxy/update`     | التحديث إلى الإصدار الأحدث            |
+| `GET`  | `/api/services/cliproxy/status`     | حالة + DB الحية (بدون `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/auto-start` | تبديل البدء التلقائي                  |
+
+تعمل نقطة النهاية `GET /api/services/{name}/logs` المشتركة (انظر الفقرة 1.4) مع جميع الخدمات الأربع باستخدام المقطع الديناميكي `[name]`.
+
+---
+
+### 4.3 نقاط النهاية Mux (8 مسارات)
+
+Mux له نفس شكل نقطة النهاية مثل مسار CLIProxyAPI — no `rotate-key` على سطح API (يتم إنشاء الرمز المميز لحامله بنفس طريقة 9Router's عبر `getOrCreateApiKey("mux")` ويتم حقنه عبر `MUX_SERVER_AUTH_TOKEN` env var، ولكن لا توجد نقطة نهاية دوران مخصصة حتى الآن). تتم إدارة Mux لدورة الحياة فقط: على عكس 9Router، لا يحتوي على منفذ تنفيذ من الطبقة الرابعة ولم يتم تسجيله مطلقًا كموفر توجيه.
+
+| طريقة  | طريق                           | وصف                              |
+| ------ | ------------------------------ | -------------------------------- |
+| `POST` | `/api/services/mux/install`    | تثبيت Mux من npm (`npm i mux`)   |
+| `POST` | `/api/services/mux/start`      | بداية موكس (`mux server`)        |
+| `POST` | `/api/services/mux/stop`       | توقف مكس                         |
+| `POST` | `/api/services/mux/restart`    | أعد تشغيل موكس                   |
+| `POST` | `/api/services/mux/update`     | قم بالتحديث إلى إصدار npm الأحدث |
+| `GET`  | `/api/services/mux/status`     | حالة + DB الحية                  |
+| `POST` | `/api/services/mux/auto-start` | تبديل البدء التلقائي             |
 
 ---
 
 ### 4.4 نقاط نهاية Bifrost (8 مسارات)
 
-Bifrost هو نظام خلفي لترحيل بوابة ذكاء اصطناعي مكتوب بلغة Go (`@maximhq/bifrost`). ويستخدم بنية
-نقاط النهاية نفسها الخاصة بـ CLIProxyAPI (من دون `rotate-key` — يدير Bifrost مفاتيح المزوّدين
-الخاصة به في `config.json` ضمن `-app-dir`).
+Bifrost عبارة عن واجهة خلفية لترحيل بوابة Go AI (`@maximhq/bifrost`). يستخدم نفس شكل نقطة النهاية مثل CLIProxyAPI (لا يوجد `rotate-key` — Bifrost يدير مفاتيح الموفر الخاصة به في `config.json` ضمن `-app-dir`).
 
-| الطريقة | المسار                             | الوصف                                                     |
-| ------- | ---------------------------------- | --------------------------------------------------------- |
-| `POST`  | `/api/services/bifrost/install`    | تثبيت Bifrost من npm (`@maximhq/bifrost`)                 |
-| `POST`  | `/api/services/bifrost/start`      | بدء تشغيل Bifrost على المنفذ 8080 (افتراضيًا)             |
-| `POST`  | `/api/services/bifrost/stop`       | إيقاف Bifrost                                             |
-| `POST`  | `/api/services/bifrost/restart`    | إعادة تشغيل Bifrost                                       |
-| `POST`  | `/api/services/bifrost/update`     | التحديث إلى إصدار أحدث                                    |
-| `GET`   | `/api/services/bifrost/status`     | الحالة المباشرة + حالة قاعدة البيانات                     |
-| `POST`  | `/api/services/bifrost/auto-start` | تبديل التشغيل التلقائي                                    |
-| `GET`   | `/api/services/bifrost/logs`       | ذيل سجل SSE (عبر المسار الديناميكي المشترك `[name]/logs`) |
+| طريقة  | طريق                               | وصف                                                        |
+| ------ | ---------------------------------- | ---------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | تثبيت Bifrost من npm (`@maximhq/bifrost`)                  |
+| `POST` | `/api/services/bifrost/start`      | بدء تشغيل Bifrost على المنفذ 8080 (افتراضي)                |
+| `POST` | `/api/services/bifrost/stop`       | أوقف بيفروست                                               |
+| `POST` | `/api/services/bifrost/restart`    | أعد تشغيل بيفروست                                          |
+| `POST` | `/api/services/bifrost/update`     | التحديث إلى الإصدار الأحدث                                 |
+| `GET`  | `/api/services/bifrost/status`     | حالة + DB الحية                                            |
+| `POST` | `/api/services/bifrost/auto-start` | تبديل البدء التلقائي                                       |
+| `GET`  | `/api/services/bifrost/logs`       | ذيل سجل SSE (عبر المسار الديناميكي المشترك `[name]/logs` ) |
 
-**ربط التوجيه:** عندما لا يكون `BIFROST_BASE_URL` معيّنًا وتكون نسخة Bifrost
-الخاضعة للإشراف قيد التشغيل، تستخدم `getBifrostRoutingConfig()` (في `routingBackend.ts`) تلقائيًا
-`http://127.0.0.1:{port}` بوصفه عنوان URL الأساسي للترحيل. تكون الأولوية دائمًا لمتغير البيئة
-`BIFROST_BASE_URL` الصريح.
+**توجيه الأسلاك:** عند إلغاء تعيين `BIFROST_BASE_URL` وتشغيل مثيل Bifrost الخاضع للإشراف، يستخدم `getBifrostRoutingConfig()` (في `routingBackend.ts`) تلقائيًا `http://127.0.0.1:{port}` باعتباره قاعدة الترحيل URL. الصريحة `BIFROST_BASE_URL` env لها الأسبقية دائمًا.
 
 ---
 
-### 4.5 نقاط نهاية Dario (12 مسارًا)
+### 4.5 نقاط نهاية داريو (12 مسارًا)
 
-بنية دورة الحياة نفسها الخاصة بالخدمات الأخرى (`install` و`start` و`stop` و`restart`
-و`update` و`status` و`auto-start` و`auto-restart-adopted`)، بالإضافة إلى مستوى تحكم OAuth
-محمي برمز ضمن `admin/`: ‏`admin/accounts` و`admin/import-from-omniroute`
-و`admin/login-start` و`admin/login-complete` (جميعها محمية بواسطة `DARIO_ADMIN_TOKEN`).
+نفس شكل دورة الحياة مثل الخدمات الأخرى (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) بالإضافة إلى مستوى التحكم OAuth البوابات الرمزية تحت `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (الكل خلف `DARIO_ADMIN_TOKEN`).
 
-### 4.6 نقاط نهاية open-wa (7 مسارات)
+### 4.6 نقاط نهاية مفتوحة (7 مسارات)
 
-يشغّل open-wa (`@open-wa/wa-automate`) نسخة Chromium بلا واجهة رسومية (عبر
-Puppeteer) لأتمتة WhatsApp Web. ويستخدم بنية نقاط النهاية نفسها الخاصة بـ Mux (لا يوجد
-مسار `rotate-key` حتى الآن). تتم إدارة دورة حياته فقط — فهو ليس هدفًا للتوجيه،
-ولا يملك منفّذًا للطبقة 4 أو إدخال مزوّد.
+يقوم open-wa (`@open-wa/wa-automate`) بتشغيل مثيل Chromium بدون رأس (عبر محرك الدمى) لأتمتة WhatsApp Web. يستخدم نفس شكل نقطة النهاية مثل Mux (لا يوجد مسار `rotate-key` حتى الآن). إنه مُدار من خلال دورة الحياة فقط — وليس هدف توجيه، ولا يوجد إدخال executor/provider من الطبقة الرابعة.
 
-| الطريقة | المسار                            | الوصف                                                     |
-| ------- | --------------------------------- | --------------------------------------------------------- |
-| `POST`  | `/api/services/openwa/install`    | تثبيت open-wa من npm (`@open-wa/wa-automate`)             |
-| `POST`  | `/api/services/openwa/start`      | تشغيل open-wa على المنفذ 8323 (افتراضيًا)                 |
-| `POST`  | `/api/services/openwa/stop`       | إيقاف open-wa                                             |
-| `POST`  | `/api/services/openwa/restart`    | إعادة تشغيل open-wa                                       |
-| `POST`  | `/api/services/openwa/update`     | التحديث إلى إصدار أحدث                                    |
-| `GET`   | `/api/services/openwa/status`     | الحالة المباشرة + حالة قاعدة البيانات                     |
-| `POST`  | `/api/services/openwa/auto-start` | تبديل التشغيل التلقائي                                    |
-| `GET`   | `/api/services/openwa/logs`       | ذيل سجل SSE (عبر المسار الديناميكي المشترك `[name]/logs`) |
+| طريقة  | طريق                              | وصف                                                        |
+| ------ | --------------------------------- | ---------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | تثبيت open-wa من npm (`@open-wa/wa-automate`)              |
+| `POST` | `/api/services/openwa/start`      | ابدأ open-wa على المنفذ 8323 (افتراضي)                     |
+| `POST` | `/api/services/openwa/stop`       | وقف مفتوحة وا                                              |
+| `POST` | `/api/services/openwa/restart`    | أعد تشغيل open-wa                                          |
+| `POST` | `/api/services/openwa/update`     | التحديث إلى الإصدار الأحدث                                 |
+| `GET`  | `/api/services/openwa/status`     | حالة + DB الحية                                            |
+| `POST` | `/api/services/openwa/auto-start` | تبديل البدء التلقائي                                       |
+| `GET`  | `/api/services/openwa/logs`       | ذيل سجل SSE (عبر المسار الديناميكي المشترك `[name]/logs` ) |
 
-**مفتاح API:** يُحقن باسم `WA_KEY` — ويحوّله تجاوز متغيرات البيئة العام في open-wa، الذي يستخدم البادئة `WA_*`، إلى خيار CLI‏ `--key`/`-k`
-(`dist/cli/setup.js::envArgs()`، جرى التحقق منه مقابل الحزمة المثبتة بالإصدار 4.76.0).
-تُضاف إليه البادئة `ow_` عند إنشائه بواسطة `generateServiceApiKey()`. يقرأ open-wa
-المفتاح مجددًا من ترويسة HTTP باسم `key`/`api_key` (وليس `Authorization:
-Bearer`)؛ ويُعفى `/api-docs*` صراحةً من عملية التحقق
-(`setupAuthenticationLayer` في `dist/cli/server.js`)، لذلك لا يحتاج فحص السلامة
-إلى ترويسة مصادقة.
+**مفتاح API :** تم إدخاله كـ `WA_KEY` — open-wa، حيث يقوم تجاوز `WA_*` -prefixed env العام بتعيينه على خيار `--key`/`-k` CLI (`dist/cli/setup.js::envArgs()`، تم التحقق منه مقابل الحزمة 4.76.0 المثبتة). يتم إضافة البادئة `ow_` عند إنشاؤها بواسطة `generateServiceApiKey()`. open-wa يقرأ المفتاح مرة أخرى من رأس `key`/`api_key` HTTP (وليس `Authorization: Bearer`) ؛ يتم استثناء `/api-docs*` بشكل صريح من الفحص (`setupAuthenticationLayer` في `dist/cli/server.js`)، لذلك لا يحتاج مسبار الصحة إلى رأس مصادقة.
 
-**الاقتران:** open-wa غير رسمي وغير تابع لـ WhatsApp — والرقم
-المتصل معرض لخطر الحظر بسبب آليات اكتشاف الأتمتة الخاصة بـ WhatsApp.
-عند التشغيل لأول مرة، تُطبع شفرة QR الخاصة بالاقتران إلى stdout وتُعرض عبر
-لوحة السجلات/تدفق SSE الموجود — ولا توجد بعد نقطة نهاية مخصصة لصورة QR
-في هذا التكامل.
+**الاقتران:** open-wa غير رسمي وغير تابع لـ WhatsApp — الرقم المتصل يحمل خطر الحظر من الكشف الآلي الخاص بـ WhatsApp. في البداية الأولى، تتم طباعة كود QR الاقتران على stdout ويظهر على السطح من خلال تدفق Logs panel/SSE الموجود — ولا توجد نقطة نهاية مخصصة لصورة QR في هذا التكامل حتى الآن.
 
 ---
 
-### 4.7 الوكيل العكسي (تضمين لوحة معلومات 9Router)
+### 4.7 نقاط النهاية LLMLingua (8 مسارات)
 
-تُضمّن لوحة المعلومات واجهة ويب 9Router داخل iframe عبر وكيل عكسي داخلي
-على:
+LLMLingua عبارة عن غلاف جانبي للضغط السريع `@atjsh/llmlingua-2` (نموذج تصنيف الرمز المميز ONNX الحقيقي، تم تنزيله من Hugging Face عند أول مكالمة `/compress` ). يستخدم نفس شكل نقطة النهاية مثل Bifrost (لا يوجد مفتاح API — `needsApiKey: false`، ولا يتعامل مطلقًا مع بيانات الاعتماد).
+
+| طريقة  | طريق                                           | وصف                                                                           |
+| ------ | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + أقرانهم، اكتب البرنامج النصي لخادم Sidecar |
+| `POST` | `/api/services/llmlingua/start`                | بدء تشغيل السيارة الجانبية على المنفذ 20135 (افتراضي)                         |
+| `POST` | `/api/services/llmlingua/stop`                 | أوقف العربة الجانبية                                                          |
+| `POST` | `/api/services/llmlingua/restart`              | أعد تشغيل السيارة الجانبية                                                    |
+| `POST` | `/api/services/llmlingua/update`               | التحديث إلى إصدار الحزمة الأحدث                                               |
+| `GET`  | `/api/services/llmlingua/status`               | حالة + DB الحية                                                               |
+| `POST` | `/api/services/llmlingua/auto-start`           | تبديل البدء التلقائي                                                          |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | تبديل إعادة التشغيل التلقائي للمثيل المعتمد (الموجود مسبقًا).                 |
+| `GET`  | `/api/services/llmlingua/logs`                 | ذيل سجل SSE (عبر المسار الديناميكي المشترك `[name]/logs` )                    |
+
+**عقد السيارة الجانبية:** يعرض البرنامج النصي للخادم `GET /health` (لا ينتظر — الفوري على النموذج) و `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). يتم تحميل النموذج بتكاسل عند استدعاء `/compress` الأول.
+
+**أسلاك الضغط:** `open-sse/services/compression/engines/llmlingua/index.ts`'s `httpSidecarBackend` يستدعي `LLMLINGUA_BASE_URL` (افتراضي `http://127.0.0.1:20135`) ويقبل فقط استجابة السيارة الجانبية عندما تكون أقصر تمامًا من الإدخال؛ أي فشل (عدم التشغيل، انتهاء المهلة، استجابة عدم التشغيل) يعود إلى الواجهة الخلفية لمؤشر الترابط العامل قيد التشغيل (`./worker.ts`).
+
+---
+
+### 4.8 نقاط نهاية صندوق الغناء (8 مسارات)
+
+يحتوي صندوق الغناء على نفس شكل نقطة النهاية مثل Mux — no `rotate-key` road، ولا يوجد حقن مفتاح API (`needsApiKey: false` في `bootstrap.ts`). إنها مُدارة لدورة الحياة فقط: لا تكون أبدًا موفرًا routing/LLM. يقوم `install()` بتنزيل الإصدار الثنائي الرسمي لإصدار GitHub (`SagerNet/sing-box`) للإصدار المثبت (`SINGBOX_PINNED_VERSION` في `src/lib/services/installers/singbox.ts`) ويتحقق من SHA256 مقابل المجموع الاختباري المخبأ في نفس الملف قبل كتابته على القرص — ويتم رفض أي إصدار آخر مطلوب.
+
+| طريقة  | طريق                                         | وصف                                                            |
+| ------ | -------------------------------------------- | -------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | قم بتنزيل + وتحقق من إصدار صندوق الغناء المثبت                 |
+| `POST` | `/api/services/singbox/start`                | ابدأ صندوق الغناء (`sing-box run -c config.json`)              |
+| `POST` | `/api/services/singbox/stop`                 | توقف عن الغناء                                                 |
+| `POST` | `/api/services/singbox/restart`              | أعد تشغيل صندوق الغناء                                         |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall الإصدار المثبت                             |
+| `GET`  | `/api/services/singbox/status`               | حالة + DB الحية                                                |
+| `POST` | `/api/services/singbox/auto-start`           | تبديل البدء التلقائي                                           |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | قم بتبديل إعادة التشغيل التلقائي لعملية معتمدة (موجود مسبقًا). |
+| `GET`  | `/api/services/singbox/logs`                 | ذيل سجل SSE (عبر المسار الديناميكي المشترك `[name]/logs` )     |
+
+**الأسلاك TPROXY :** يكتب `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` ويبدأ تشغيل المشرف قبل أن يقوم `applyTproxy()` بتثبيت قواعد جدار الحماية TPROXY. إذا كان المشرف مفقودًا أو فشل في الوصول إلى `running`، فإنه يقوم الآن بالتسجيل عند مستوى الخطأ (بدلاً من ابتلاع الفشل بصمت) حتى يتمكن المشغل من معرفة أن قواعد TPROXY تم تطبيقها دون وجود مستمع يعمل خلفها.
+
+---
+
+### 4.9 الوكيل العكسي (تضمين لوحة معلومات جهاز التوجيه 9)
+
+تقوم لوحة المعلومات بتضمين 9Router web UI داخل إطار iframe عبر وكيل عكسي داخلي على:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-يقوم هذا الوكيل بما يلي:
+هذا الوكيل:
 
-- يعيد توجيه الطلب إلى `http://127.0.0.1:{port}/{path}` (عبر الاسترجاع الحلقي فقط)
-- يزيل ترويستي `cookie` و`authorization` الواردتين (لمنع تسرب جلسة OmniRoute)
-- يحقن `Authorization: Bearer {apiKey}` لمصادقة 9Router
-- يزيل `set-cookie` و`content-security-policy` و`x-frame-options` و`cross-origin-*` من الاستجابة
-- يعيد كتابة استجابات HTML لحقن `<base href>` وتوحيد المسارات المطلقة (`/foo` → `/dashboard/.../embed/foo`)
+- إعادة توجيه الطلب إلى `http://127.0.0.1:{port}/{path}` (الاسترجاع فقط)
+- إزالة رؤوس `cookie` و `authorization` الواردة (لا يوجد تسرب لجلسة OmniRoute )
+- يقوم بإدخال `Authorization: Bearer {apiKey}` لمصادقة 9Router
+- يزيل `set-cookie` و `content-security-policy` و `x-frame-options` `cross-origin-*` من الاستجابة
+- يعيد كتابة استجابات HTML لحقن `<base href>` وتطبيع المسارات المطلقة (`/foo` → `/dashboard/.../embed/foo`)
 
-تتولى خادومة مصاحبة على منفذ مخصص معالجة ترقيات WebSocket الخاصة بلوحة المعلومات
-المضمّنة (راجع `src/lib/services/embedWsProxy.ts`).
+تتم معالجة ترقيات WebSocket للوحة المعلومات المضمنة بواسطة خادم مصاحب على منفذ مخصص (راجع `src/lib/services/embedWsProxy.ts`).
 
-**الأمان:** تُصنّف مسارات وكيل التضمين ضمن `LOCAL_ONLY_API_PREFIXES`
-ولا يمكن الوصول إليها إلا من خلال الاسترجاع الحلقي. ولا يمكن لمهاجم يحصل على JWT عبر
-نفق Cloudflare/Ngrok استخدام الوكيل للوصول إلى الخدمات المضمّنة.
+**حماية:** يتم تصنيف مسارات الوكيل المضمنة ضمن `LOCAL_ONLY_API_PREFIXES` ولا يمكن الوصول إليها إلا من خلال الاسترجاع. لا يمكن للمهاجم الذي يحصل على JWT عبر نفق Cloudflare/Ngrok التوكيل في الخدمات المضمنة.
 
 ---
 

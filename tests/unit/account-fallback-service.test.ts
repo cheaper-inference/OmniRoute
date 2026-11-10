@@ -38,6 +38,7 @@ const {
   lockModelIfPerModelQuota,
   isModelLocked,
   getModelLockoutInfo,
+  clearAllModelLockouts,
   hasPerModelQuota,
   getProviderProfile,
   recordModelLockoutFailure,
@@ -47,7 +48,6 @@ const {
   isProviderInCooldown,
   getProviderCooldownRemainingMs,
   clearProviderFailure,
-  isProviderFailureCode,
   getProvidersInCooldown,
   getProviderBreakerState,
   isCreditsExhausted,
@@ -602,19 +602,13 @@ test("recordModelLockoutFailure uses provider profile cooldowns, backoff, and re
 });
 
 // Provider-level failure circuit breaker tests
-test("isProviderFailureCode correctly identifies provider-wide transient error codes", () => {
-  assert.equal(isProviderFailureCode(429), true);
-  assert.equal(isProviderFailureCode(408), true);
-  assert.equal(isProviderFailureCode(500), true);
-  assert.equal(isProviderFailureCode(502), true);
-  assert.equal(isProviderFailureCode(503), true);
-  assert.equal(isProviderFailureCode(504), true);
-  assert.equal(isProviderFailureCode(401), false);
-  assert.equal(isProviderFailureCode(403), false);
-  assert.equal(isProviderFailureCode(400), false);
-  assert.equal(isProviderFailureCode(404), false);
-  assert.equal(isProviderFailureCode(200), false);
-});
+// B-04 (#15159): the `isProviderFailureCode` case that used to live here was deleted
+// along with the dead export it pinned. It asserted `isProviderFailureCode(429) === true`,
+// which is the OPPOSITE of the breaker policy — 429 is per-connection cooldown / model
+// lockout scope and must never open the whole-provider breaker. The single source of
+// truth is `PROVIDER_BREAKER_FAILURE_STATUSES` in src/sse/handlers/chatPredicates.ts,
+// and `tests/unit/breaker-status-set-single-source-15159.test.ts` now guards both that
+// set and this file's local copy against drift. Do NOT restore a 429-inclusive set here.
 
 test("recordProviderFailure tracks failures and triggers cooldown after threshold", () => {
   const originalNow = Date.now;
@@ -1638,6 +1632,10 @@ async function resetStorage10460() {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR_10460, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR_10460, { recursive: true });
+  // The in-memory model-lock map outlives the DB reset, and an unpinned combo
+  // target now resolves locks across connections (#16551) — without this, a lock
+  // seeded by an earlier test in this block pre-empts the next test's dispatch.
+  clearAllModelLockouts();
 }
 
 async function seedConn10460(provider: string): Promise<string> {

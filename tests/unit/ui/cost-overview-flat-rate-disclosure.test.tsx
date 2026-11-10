@@ -17,7 +17,17 @@
  */
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 import en from "../../../src/i18n/messages/en.json";
 
@@ -216,5 +226,50 @@ describe("costs dashboard — flat-rate estimate disclosure (#11459)", () => {
       DISCLOSURE_RE.test(text),
       "billed-cost mode must not claim the numbers are estimates"
     ).toBe(false);
+  });
+});
+
+// #19066 block 5: the spend headlines are the kit MetricCard/Stat instead of a local card.
+describe("costs dashboard — spend headlines on the kit MetricCard (#19066)", () => {
+  function spendCard(label: string): HTMLElement {
+    const card = Array.from(container.querySelectorAll<HTMLElement>(".ci-metric-card")).find(
+      (node) => node.querySelector(".ci-stat__label-text")?.textContent === label
+    );
+    expect(card, `kit MetricCard for "${label}"`).not.toBeUndefined();
+    return card!;
+  }
+
+  it("renders the four spend headlines as kit metric cards with the same currency text", async () => {
+    await renderWith(
+      buildPayload({
+        presetSummaries: {
+          "1d": { totalCost: 0.0042 },
+          "7d": { totalCost: 0.5 },
+          "30d": { totalCost: 30 },
+        },
+      })
+    );
+    expect(container.querySelectorAll(".ci-metric-card").length).toBeGreaterThanOrEqual(4);
+    // formatCurrencyCost precision: 6 digits under $0.01, 4 under $1, 2 above.
+    expect(spendCard("Spend Today").querySelector(".ci-stat__value")?.textContent).toBe(
+      "$0.004200"
+    );
+    expect(spendCard("Spend 7D").querySelector(".ci-stat__value")?.textContent).toBe("$0.5000");
+    expect(spendCard("Spend 30D").querySelector(".ci-stat__value")?.textContent).toBe("$30.00");
+    const selected = spendCard("Selected Window");
+    expect(selected.querySelector(".ci-stat__value")?.textContent).toBe("$30.00");
+    expect(selected.querySelector(".ci-stat__hint")?.textContent).toBeTruthy();
+  });
+
+  it("keeps each headline's chart colour through the text-safe -ink token", async () => {
+    await renderWith(buildPayload());
+    const inks = ["Spend Today", "Spend 7D", "Spend 30D", "Selected Window"].map(
+      (label) => spendCard(label).querySelector(".ci-stat")?.className ?? ""
+    );
+    expect(inks[0]).toContain("text-chart-4-ink");
+    expect(inks[1]).toContain("text-chart-2-ink");
+    expect(inks[2]).toContain("text-chart-3-ink");
+    expect(inks[3]).toContain("text-chart-5-ink");
+    for (const cls of inks) expect(cls).not.toMatch(/(^|\s)text-chart-[1-8](\s|$)/);
   });
 });

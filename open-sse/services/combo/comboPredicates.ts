@@ -6,9 +6,14 @@
  * predicates are re-exported from combo.ts for backward compatibility.
  */
 
-import { EXECUTOR_CONTRACT_VIOLATION_CODE } from "../../config/constants.ts";
-import { remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
+import { isMarkedLocalProcessPressureResponse } from "../../utils/localPressureResponse.ts";
+import {
+  EXECUTOR_CONTRACT_VIOLATION_CODE,
+  LOCAL_CONFIGURATION_ERROR_CODES,
+} from "../../config/constants.ts";
+import { finitePercentUsed, remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
+import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { parseModel } from "../model.ts";
 import { isSelfInflictedUpstreamTimeout } from "../../handlers/chatCore/cooldownClassification.ts";
 import {
@@ -17,18 +22,24 @@ import {
   isModelCapacityOverloadError,
 } from "@/shared/utils/circuitBreaker";
 import {
-  CONTEXT_OVERFLOW_PATTERNS,
+  isContextOverflowText,
+  isTokenRateLimitWording,
   PARAM_VALIDATION_PATTERNS,
   RATE_LIMIT_TEXT_PATTERNS,
   AUTH_CREDENTIAL_ERROR_PATTERNS,
   isProviderModelUnsupported400,
   cooldownUntilMs,
 } from "../accountFallback.ts";
+import { isModelNotFound404 } from "../accountFallback/perModelFailureScope.ts";
 import { isRequestScoped400 } from "../accountFallback/requestScoped400.ts";
+import { isAssistantPrefillUnsupported400 } from "../assistantPrefillError.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
+import { isChatGptWebBridgeFailure } from "../../utils/chatgptWebBridgeFailure.ts";
 import { getTrustedLocalRateLimitResponse } from "../rateLimitManager/errors.ts";
 import { TRANSLATION_FAILURE_CODE } from "../../handlers/chatCore/translationFailure.ts";
+import { isLocalModelPolicyResponse } from "../resolvedModelAccess.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 import {
   classifyComboOutcome,
@@ -142,7 +153,7 @@ export function hasIdenticalModelErrorStreak(
   if (comboErrors.length < streak) return false;
   const tail = comboErrors.slice(-streak);
   const [first, ...rest] = tail;
-  if (first.kind !== "model") return false;
+  if (first.kind !== "model" || first.status !== 400) return false;
   return rest.every(
     (e) => e.kind === first.kind && e.status === first.status && e.error === first.error
   );
@@ -174,6 +185,45 @@ export function clampGlobalAttempts(value: unknown): number {
   return Math.min(n, MAX_GLOBAL_ATTEMPTS_HARD_CAP);
 }
 
+/**
+ * Opt-in sub-budget for READINESS-DEADLINE failures across one combo run,
+ * controlled by OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES. The global-attempts
+ * cap is calibrated for fast failures (429/5xx swap-outs that cost seconds);
+ * a stream-readiness deadline failure instead burns a full readiness window
+ * (tens of seconds to minutes) plus a heavyweight body re-dispatch each
+ * time, so a handful of them already multiplies user latency and gateway
+ * memory footprint while the combo rotates through every remaining target.
+ * Unset / 0 / invalid → 0 = disabled (the default: current rotation
+ * behavior, no behavior change). A positive integer caps how many
+ * readiness-deadline failures a single combo run tolerates before
+ * terminating with a clean 504 instead of rotating further.
+ */
+export function clampDeadlineFailureBudget(value: unknown): number {
+  if (value === undefined || value === null || value === "") return 0;
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n) || n < 1) return 0;
+  return Math.min(n, MAX_GLOBAL_ATTEMPTS_HARD_CAP);
+}
+
+/**
+ * Classify a failed combo attempt as a stream-readiness deadline failure.
+ * Reads the STRUCTURED `error.code` of the failure body (`structuredError.code`
+ * from readAttemptFailure), never the human message: the readiness watchdog
+ * (open-sse/utils/streamReadiness.ts) puts the STREAM_READINESS_TIMEOUT marker
+ * only in `error.code`, while `errorText` carries `error.message`
+ * ("Stream produced no non-ping SSE event within …"). The same code also
+ * covers a source stream that failed before its first non-ping event (an
+ * executor watchdog giving up on a stalled upstream) — both are stalls.
+ * Distinct from fast upstream rejections (429/5xx), from other 504 shapes and
+ * from STREAM_EARLY_EOF (a fast close, which keeps its own retry path).
+ */
+export function isReadinessDeadlineFailure(
+  status: number,
+  code: string | null | undefined
+): boolean {
+  return status === 504 && code === "STREAM_READINESS_TIMEOUT";
+}
+
 /** Minimum recorded requests before the predictive-TTFT breaker trusts the average. */
 export const PREDICTIVE_TTFT_MIN_SAMPLES = 5;
 
@@ -197,10 +247,11 @@ export function shouldSkipForPredictedTtft(
 
 /**
  * Whole-provider circuit-breaker failure statuses for the combo path. Kept byte-identical
- * to the single-model path's `PROVIDER_BREAKER_FAILURE_STATUSES` (src/sse/handlers/chat.ts:206)
- * — the source of truth. 429 is deliberately EXCLUDED: a plain rate-limit must not open the
- * whole-provider breaker (it's connection-cooldown / model-lockout scope). Defined locally
- * rather than imported to avoid a cross-layer (open-sse → src/sse) import cycle.
+ * to the single-model path's `PROVIDER_BREAKER_FAILURE_STATUSES`
+ * (src/sse/handlers/chatPredicates.ts) — the source of truth. 429 is deliberately
+ * EXCLUDED: a plain rate-limit must not open the whole-provider breaker (it's
+ * connection-cooldown / model-lockout scope). Defined locally rather than imported to
+ * avoid a cross-layer (open-sse → src/sse) import cycle.
  */
 const PROVIDER_BREAKER_FAILURE_STATUSES = new Set([408, 500, 502, 503, 504]);
 
@@ -217,10 +268,9 @@ const PROVIDER_BREAKER_FAILURE_STATUSES = new Set([408, 500, 502, 503, 504]);
  * - Only whole-provider failure statuses (408/500/502/503/504) count. A plain rate-limit
  *   429 is deliberately EXCLUDED — it belongs to connection cooldown / model lockout scope
  *   (a genuine quota/token-limit 429 is handled there), NOT the whole-provider breaker. This
- *   mirrors the single-model path's `PROVIDER_BREAKER_FAILURE_STATUSES` (src/sse/handlers/
- *   chat.ts:206) — the source of truth — and the documented RESILIENCE_GUIDE policy. NOTE:
- *   this intentionally differs from `isProviderFailureCode` (accountFallback.ts), which
- *   INCLUDES 429 for connection-cooldown purposes and must not be changed here.
+ *   mirrors the single-model path's `PROVIDER_BREAKER_FAILURE_STATUSES`
+ *   (src/sse/handlers/chatPredicates.ts) — the source of truth — and the documented
+ *   RESILIENCE_GUIDE policy.
  * - When the next combo target is on the SAME provider, don't trip the provider breaker:
  *   a different model on that provider may still succeed. #8376: EXCEPT when the failure
  *   itself is a transport-level "proxy unreachable" event (`isProxyUnreachable`) — a dead
@@ -255,8 +305,10 @@ export function shouldRecordProviderBreakerFailure(args: {
   /** #8376: transport-level "proxy unreachable" signal — overrides the `sameProviderNext`
    * exemption only; every other AND-term still gates the trip. */
   isProxyUnreachable?: boolean;
+  providerCircuitOpen?: boolean;
 }): boolean {
   return (
+    !args.providerCircuitOpen &&
     (!args.isStreamReadinessFailure || args.isStreamEarlyEof === true) &&
     // Overloaded 502 (STREAM_EARLY_EOF wrapping "Overloaded") must not trip
     // the whole-provider breaker. The status=529 check is defense in depth:
@@ -273,21 +325,58 @@ export function shouldRecordProviderBreakerFailure(args: {
   );
 }
 
+const CREDENTIAL_AUTH_ERROR_CODES = new Set([
+  "token_expired",
+  "expired_token",
+  "invalid_token",
+  "invalid_api_key",
+  "authentication_error",
+  "unauthorized",
+]);
+
 const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   context_length_exceeded: true,
   context_window_exceeded: true,
   upstream_empty_response: true,
   upstream_response_failed: true,
+  // The upstream cancelled THIS attempt (the request itself was fine, the
+  // provider is healthy — other requests to the same provider succeed in
+  // parallel). The ZCode app-server reports it as `model_request_cancelled`
+  // / "Model request was cancelled."; the executor re-tags it as
+  // `upstream_request_cancelled` so every resilience consumer below sees one
+  // request-scoped marker: no model lockout, no provider circuit-breaker
+  // failure, no provider cooldown, and no same-connection target skip.
+  upstream_request_cancelled: true,
   // Local combo per-target timer (targetTimeoutRunner) — not a connection health signal.
   combo_target_timeout: true,
+  // A hedge loser superseded by a sibling target (streamingResponse sentinel) —
+  // no failure of the provider or the connection.
+  hedge_cancelled: true,
   // Local limiter queue-capacity codes — not a provider/connection health signal.
   rate_limit_queue_timeout: true,
   rate_limit_queue_full: true,
   rate_limit_queue_wedged: true,
+  // Local account-semaphore capacity — same verdict, different gate.
+  semaphore_timeout: true,
+  semaphore_queue_full: true,
   token_limit_exceeded: true,
   // #10360: our own executor-result contract violation. An internal defect, not
   // a provider/account fault — it must never cool a connection or trip a breaker.
   [EXECUTOR_CONTRACT_VIOLATION_CODE]: true,
+  // Local memory-pressure guard sheds (resourcePressure.ts / heapPressure.ts).
+  // The 503 is decided before any upstream call based on this process's own
+  // V8/cgroup state — the connection was never dialed, so the shed is not a
+  // connection health signal and must never feed lockout/cooldown/disable.
+  resource_pressure: true,
+  heap_pressure: true,
+  // #17132: Quota Share absolute-cap block — OUR OWN per-API-key policy decision,
+  // emitted by the chatCore quota-share pre-hook. The shared connection is healthy
+  // and keeps serving the other pool keys, so this code must never feed
+  // markAccountUnavailable, the provider breaker, or the #1731/#1731v2 combo
+  // skip-marking — in a combo it only skips this one target.
+  quota_share_blocked: true,
+  // #18019: missing/unsafe local executor config (see LOCAL_CONFIGURATION_ERROR_CODES).
+  ...Object.fromEntries([...LOCAL_CONFIGURATION_ERROR_CODES].map((code) => [code, true])),
 };
 
 /** Request/model-specific failures must not poison provider-wide resilience state. */
@@ -311,16 +400,102 @@ export function isRequestScopedUpstreamFailure(error?: {
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+
+  // OpenAI/Codex wraps some credential failures in the generic
+  // `invalid_request_error` type (notably `code=token_expired`). Those are
+  // connection-scoped auth failures: the current account must be excluded so
+  // sibling-account fallback can continue. Letting the generic type win here
+  // stops rotation after the first such account and leaks its 401 to the client.
+  if (CREDENTIAL_AUTH_ERROR_CODES.has(code)) return false;
+
   return (
     REQUEST_SCOPED_UPSTREAM_ERROR_CODES[code] === true ||
+    isContentPolicyRefusal(error) ||
     type === "invalid_request_error" ||
     type === "context_length_exceeded" ||
     type === "local_queue_capacity" ||
+    type === "account_semaphore_capacity" ||
     // #14313: OpenCode free-tier refusal (FreeTierError) — same verdict on every
     // account for the same request; never a connection/model health signal.
     type === "freetiererror" ||
     code === "freetiererror"
   );
+}
+
+/**
+ * The status-599 `hedge_cancelled` sentinel a hedge loser returns once a
+ * sibling target has resolved the combo. It is not a failure: the combo loop
+ * must neither record it nor advance fallback state because of it.
+ */
+export function isHedgeCancelledSentinel(
+  status: number,
+  error?: { code?: string | null } | null
+): boolean {
+  return (
+    status === 599 &&
+    typeof error?.code === "string" &&
+    error.code.toLowerCase() === "hedge_cancelled"
+  );
+}
+
+/**
+ * A full per-account concurrency gate. It stays request-scoped (no lockout, no
+ * cooldown, no connection blame), but unlike the other request-scoped failures
+ * it is momentary, so the combo keeps its same-target retry for it: a slot can
+ * free up while the retry waits.
+ */
+export function isAccountSemaphoreCapacityFailure(error?: {
+  code?: string | null;
+  type?: string | null;
+}): boolean {
+  const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
+  const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+  return (
+    code === "semaphore_timeout" ||
+    code === "semaphore_queue_full" ||
+    type === "account_semaphore_capacity"
+  );
+}
+
+/** Process-wide shedding cannot recover by retrying another combo target. Only a shed this
+ * process created is terminal: an upstream can return the same 503 body and keeps fallback. */
+export function isLocalProcessPressureResponse(response: Response, body: unknown): boolean {
+  if (response.status !== 503 || !isMarkedLocalProcessPressureResponse(response)) return false;
+  if (!body || typeof body !== "object") return false;
+  const error = (body as Record<string, unknown>).error;
+  if (!error || typeof error !== "object") return false;
+  const code = (error as Record<string, unknown>).code;
+  return code === "resource_pressure" || code === "heap_pressure";
+}
+
+export function isComboTargetTimeoutFailure(error?: {
+  code?: string | null;
+  type?: string | null;
+}): boolean {
+  const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
+  const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+  return code === "combo_target_timeout" || type === "combo_target_timeout";
+}
+
+/**
+ * Model lockout is per model, not per provider. A local target timeout must
+ * lock that model so the next request does not spend another gate wait on it.
+ * Other request-scoped failures (context length, local queue) stay unlocked.
+ * The provider breaker still uses the request-scoped flag and does not see this.
+ * While the instance is draining (graceful shutdown), no failure is recorded as
+ * a model lockout at all — a self-inflicted teardown is not a model-health signal.
+ */
+export function shouldRecordModelLockoutForComboFailure(
+  requestScopedFailure: boolean,
+  error?: { code?: string | null; type?: string | null }
+): boolean {
+  // A graceful shutdown tears down provider clients while requests are still in
+  // flight. The resulting failure is evidence about OUR shutdown, not about the
+  // model's health, so it must never lock the model out of every later combo.
+  // The drain flag is read live on every call — it never latches.
+  if (isDraining()) return false;
+  if (!requestScopedFailure) return true;
+  return isComboTargetTimeoutFailure(error);
 }
 
 /** Request-scoped classification that also has access to the HTTP body. */
@@ -330,11 +505,14 @@ export function isComboRequestScopedFailure(
   error?: { code?: string | null; type?: string | null }
 ): boolean {
   return (
+    isLocalModelPolicyResponse(response) ||
     getTrustedLocalRateLimitResponse(response) !== null ||
     isRequestScopedUpstreamFailure(error) ||
     (response.status === 404 && isResourceNotFoundResponse(errorText)) ||
     // #14313: body-only free-tier refusals (relayed sentence, no error.type kept).
-    isOpencodeFreeTierRefusal(response.status, errorText)
+    isOpencodeFreeTierRefusal(response.status, errorText) ||
+    // Prefill ban: the body's shape, not the model/connection — even without error.type.
+    isAssistantPrefillUnsupported400(response.status, errorText)
   );
 }
 
@@ -365,7 +543,7 @@ export function isInputBoundRequestFailure(error?: {
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
-  return INPUT_BOUND_ERROR_CODES.has(code) || type === "context_length_exceeded";
+  return INPUT_BOUND_ERROR_CODES.has(code) || INPUT_BOUND_ERROR_CODES.has(type);
 }
 
 /**
@@ -423,6 +601,9 @@ export function shouldSkipConnDisable(
         result.errorType === "context_length_exceeded"));
 
   return (
+    // Local turn deduplication is not an account or provider failure.
+    (result.status === 409 &&
+      (result.errorCode === "turn_in_progress" || result.errorType === "turn_in_progress")) ||
     result.status === 499 ||
     result.errorCode === "client_disconnected" ||
     result.errorType === "client_disconnected" ||
@@ -436,8 +617,14 @@ export function shouldSkipConnDisable(
     // #14815: translation fails locally on the client's body — no account is at fault.
     result.errorCode === TRANSLATION_FAILURE_CODE ||
     (is401 && hasExtraKeys) ||
-    isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) ||
+    // Cursor's typed model-unavailable 404 is not a malformed request. Reuse
+    // the same model attribution predicate as failure persistence; ordinary
+    // invalid_request_error (including 400) remains request-scoped.
+    (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
+      !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
+    // #14948: a ChatGPT Web browser-bridge failure is local, not an account failure.
+    isChatGptWebBridgeFailure(provider, result.error) ||
     isReqScoped400
   );
 }
@@ -580,12 +767,23 @@ export function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, value));
 }
 
+/**
+ * Remaining quota (0..100) from a fetched quota snapshot, or `null` when the snapshot is
+ * UNREADABLE: missing, not an object, or an object with no parseable window and no finite
+ * `percentUsed` (#15347). A telemetry failure is evidence about the telemetry, not the
+ * provider, so it must never be reported as full quota; callers decide how it ranks.
+ *
+ * `null` from a quota fetcher means "could not read it" (network error, missing credentials,
+ * message-only usage). A provider with no cap is NOT that: it reports `unlimited: true`
+ * (see `convertUsageToQuotaInfo`), which is a real reading of full headroom.
+ */
 export function quotaRemainingPercentFromQuota(
   quota: unknown,
   scope?: { provider?: string | null; requestedModel?: string | null }
-): number {
-  if (!quota || typeof quota !== "object") return 100;
+): number | null {
+  if (!quota || typeof quota !== "object") return null;
   const record = quota as Record<string, unknown>;
+  if (record.unlimited === true) return 100;
 
   const windows = record.windows;
   if (windows && typeof windows === "object" && !Array.isArray(windows)) {
@@ -595,9 +793,9 @@ export function quotaRemainingPercentFromQuota(
 
   if (record.limitReached === true) return 0;
 
-  const percentUsed = Number(record.percentUsed);
-  if (Number.isFinite(percentUsed)) return clampPercent((1 - percentUsed) * 100);
-  return 100;
+  const percentUsed = finitePercentUsed(record.percentUsed);
+  if (percentUsed !== null) return clampPercent((1 - percentUsed) * 100);
+  return null;
 }
 
 export const QUOTA_BLOCKING_CONNECTION_STATUSES = new Set([
@@ -741,12 +939,21 @@ export async function resolvePersistedConnectionCooldownSkipReason(
 export function isContextOverflow400(errorText: string | null | undefined): boolean {
   const text = String(errorText || "");
   if (!text) return false;
+  if (isTokenRateLimitWording(text)) return false;
   return (
     /\bcontext.*(?:length_exceeded|too long|overflow|exceeded|window|limit)\b/i.test(text) ||
     /exceeds.*context/i.test(text) ||
+    /input exceeds maximum input tokens(?:\s*[,.]|$)/i.test(text) ||
     /your input exceeds/i.test(text) ||
-    CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(text))
+    isContextOverflowText(text)
   );
+}
+
+export function isContextOverflowFailure(
+  errorText: string | null | undefined,
+  error?: { code?: string | null; type?: string | null }
+): boolean {
+  return isInputBoundRequestFailure(error) || isContextOverflow400(errorText);
 }
 
 /** @param {string} errorText */

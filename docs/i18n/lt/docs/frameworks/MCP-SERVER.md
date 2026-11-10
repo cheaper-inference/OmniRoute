@@ -8,37 +8,32 @@
 >
 > Pirminis tiesos šaltinis: `open-sse/mcp-server/server.ts`, naudodamas `countUniqueMcpTools()`, apskaičiuoja **110 unikalių įrankių**: 45 kanoninius aprašus (įskaitant šešis CCR gyvavimo ciklo įrankius, agento įgūdžių trejetą, `omniroute_radar_catalog` ir `omniroute_x_search`), taip pat atminties (3), įgūdžių (4), GitHub įgūdžių (3), telkinio (6), žaidybinimo (8), papildinių (8), Notion (6), Obsidian (22), vietinio tekstyno (3) ir du tik RTK skirtus glaudinimo įrankius.
 
-## Diegimas
+## Montavimas
 
-„OmniRoute MCP“ yra integruotas. Paleiskite jį taip:
+OmniRoute MCP yra įmontuotas. Pradėkite nuo:
 
 ```bash
 omniroute --mcp
 ```
 
-Arba naudodami `open-sse` transportą:
+Arba per atvirą transportą:
 
 ```bash
-# HTTP srautinis transportas (prievadas 20130)
-omniroute --dev  # MCP automatiškai paleidžiamas /mcp galiniame taške
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transportai (`sse` / `streamable-http`, kuriuos tame pačiame procese teikia valdymo skydelio serveris) pagal numatytuosius nustatymus yra
-išjungti ir anksčiau juos buvo galima perjungti tik puslapyje `/dashboard/mcp`. Nuo v3.8.51
-CLI turi tokias pačias galimybes:
+HTTP transportavimas (`sse` / `streamable-http`, procese aptarnaujamas prietaisų skydelio serverio) pagal numatytuosius nustatymus yra išjungtas ir anksčiau juos buvo galima perjungti tik iš `/dashboard/mcp` puslapio. Nuo 3.8.51 versijos CLI paritetas:
 
 ```bash
-omniroute mcp status                                  # įjungimo / veikimo būsena, transportas, įrankių skaičius
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # iš naujo nustato aktyvius sse/streamable-http seansus
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable` / `mcp disable` siunčia PATCH užklausą tam pačiam `mcpEnabled` nustatymui (ir pasirinktinai `mcpTransport`),
-kurį valdymo skydelis perjungia per `/api/settings`. `mcp restart` iškviečia `POST /api/mcp/restart`: jis nutraukia
-aktyvius `sse` / `streamable-http` seansus, kad kita užklausa būtų švariai inicijuota iš naujo, grąžina
-`409`, jei MCP išjungtas, ir `501`, kai naudojamas `stdio` transportas (`stdio` klientai valdo savo
-antrinį procesą — nėra tame pačiame procese veikiančios sąsajos, kurią būtų galima paleisti iš naujo).
+`mcp enable`/`mcp disable` PATCH tas pats `mcpEnabled` (ir pasirinktinai `mcpTransport`) prietaisų skydelio nustatymas perjungiamas per `/api/settings`. `mcp restart` iškviečia `POST /api/mcp/restart`: išardo aktyvias `sse`/`streamable-http` sesijas, todėl kita užklausa iš naujo inicijuojama švariai, grąžina `409` jei MCP išjungtas, ir `501` `stdio` transportavimui (stdio klientai turi savo subprocesą — nėra proceso rankenėlės, kurią būtų galima paleisti iš naujo).
 
 ## Transportai
 
@@ -71,6 +66,16 @@ curl -i \
 ```
 
 Raktas be `manage` aprėpties (arba be Bearer) grąžina `403 LOCAL_ONLY`. Susijusio prefikso `/api/cli-tools/runtime/*` tyčia NEGALIMA apeiti — žr. [Maršrutų apsaugos lygiai — `manage` aprėpties išimtis](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
+
+### Origin tikrinimas
+
+Po autentifikavimo kiekvienos užklausos į `/api/mcp/*` — transportų ir valdymo maršrutų, tokių kaip `status`, `tools`, `audit`, `restart` — `Origin` antraštė tikrinama nepriklausomai nuo kviečiančiojo (API raktas, CLI žetonas, valdymo skydelio sesija ar anoniminis loopback išjungus prisijungimą). Tai MCP Streamable HTTP specifikacijos reikalaujama apsauga nuo DNS rebinding.
+
+- **Nėra `Origin` antraštės** → leidžiama. OmniRoute CLI, SDK ir IDE klientai jos nesiunčia.
+- **Leidžiamas `Origin`** → `localhost` / `127.0.0.1` / `[::1]` bet kuriame prievade arba paties OmniRoute viešasis origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, patikimo atvirkštinio tarpinio serverio persiųstas origin (`OMNIROUTE_TRUST_PROXY`, tik kai nenustatytas base URL) arba tiesiogiai pasiekiamas loopback/LAN IP serveris. Vien `Host` antraštė niekada nepadaro origin patikimu.
+- **Bet koks kitas `Origin`, įskaitant `null`** → `403` su JSON-RPC klaidos turiniu: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Valdymo skydelio sesija su galiojančiu CSRF žetonu vis tiek priimama, kaip ir kitų valdymo skydelio rašymų atveju.
+
+Naršyklės MCP klientui už atvirkštinio tarpinio serverio reikia `OMNIROUTE_PUBLIC_BASE_URL`; kitiems origin leidžiamųjų sąrašo nėra. Išankstinė CORS užklausa (`OPTIONS`) pagal Origin netikrinama; po jos einanti užklausa — tikrinama.
 
 ## IDE konfigūracija
 
@@ -121,55 +126,42 @@ Cursor, Cline ir suderinamiems MCP klientams nustatyti.
 | `omniroute_cache_stats` | `read:cache`  | Semantinio podėlio, raginimų podėlio ir idempotentiškumo statistika |
 | `omniroute_cache_flush` | `write:cache` | Išvalyti podėlį visuotinai arba pagal parašą / modelį               |
 
-## Glaudinimo įrankiai (13)
+## Suspaudimo įrankiai (13)
 
-| Įrankis                             | Aprėptys            | Aprašymas                                                                                                                                |
-| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Glaudinimo nuostatos, analizės suvestinė ir podėlį įvertinanti statistika (įskaitant `analytics.mcpDescriptionCompression` metaduomenis) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigūruoti glaudinimo režimą, slenkstį, tikslinį santykį, sistemos raginimo išsaugojimą ir MCP aprašymų glaudinimo perjungiklį         |
-| `omniroute_set_compression_engine`  | `write:compression` | Pasirinkti aktyvų variklį (off/caveman/rtk/stacked) ir Caveman / RTK intensyvumą                                                         |
-| `omniroute_list_compression_combos` | `read:compression`  | Pateikti įvardytų glaudinimo derinių ir jų variklių konvejerių sąrašą                                                                    |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analizė, sugrupuota pagal glaudinimo derinį ir variklį                                                                                   |
-| `omniroute_ccr_store`               | `write:compression` | Saugoti nuo kvietėjo izoliuotą turinį ribotoje atmintinėje CCR saugykloje ir grąžinti žymeklį bei `ccr://` nuorodą                       |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Gauti visą CCR turinį arba naudoti head, tail, lines, grep ir stats režimus                                                              |
-| `omniroute_ccr_inspect`             | `read:compression`  | Patikrinti kvietėjui priklausančius CCR metaduomenis negrąžinant turinio                                                                 |
-| `omniroute_ccr_list`                | `read:compression`  | Pateikti puslapiais suskirstytus kvietėjui priklausančių CCR blokų metaduomenis                                                          |
-| `omniroute_ccr_delete`              | `write:compression` | Pašalinti kvietėjui priklausantį CCR bloką                                                                                               |
-| `omniroute_ccr_stats`               | `read:compression`  | Pateikti kvietėjo aprėpties atminties naudojimą, gyvavimo ciklo skaitiklius ir saugyklos ribas                                           |
-| `omniroute_rtk_discover`            | `read:compression`  | Aptikti pasikartojantį triukšmą pasirinktiniu būdu pateiktuose RTK išvesties pavyzdžiuose                                                |
-| `omniroute_rtk_learn`               | `read:compression`  | Iš pasirinktiniu būdu pateiktų pavyzdžių sugeneruoti peržiūrimą RTK filtro juodraštį                                                     |
+| Įrankis                             | Taikymo sritis      | Aprašymas                                                                                                                           |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Suspaudimo nustatymai, analizės suvestinė ir talpyklos statistika (įskaitant `analytics.mcpDescriptionCompression` metaduomenis)    |
+| `omniroute_compression_configure`   | `write:compression` | Konfigūruoti glaudinimo režimą, slenkstį, tikslinį santykį, sistemos raginimą išsaugoti, MCP aprašymo glaudinimo jungiklį           |
+| `omniroute_set_compression_engine`  | `write:compression` | Pasirinkite aktyvų variklį (off/caveman/rtk/stacked) ir Caveman/RTK intensyvumą                                                     |
+| `omniroute_list_compression_combos` | `read:compression`  | Išvardykite suspaudimo kombinacijas ir jų variklio vamzdynus                                                                        |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analizė, sugrupuota pagal glaudinimo kombinaciją ir variklį                                                                         |
+| `omniroute_ccr_store`               | `write:compression` | Išsaugokite skambinančiojo izoliuotą turinį ribotoje atmintyje esančioje CCR parduotuvėje ir grąžinkite žymeklį ir `ccr://` nuorodą |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Gaukite visą CCR turinį arba naudodami galvos, uodegos, linijų, grep ir statistikos režimus                                         |
+| `omniroute_ccr_inspect`             | `read:compression`  | Patikrinkite skambintojui priklausančius CCR metaduomenis negrąžindami turinio                                                      |
+| `omniroute_ccr_list`                | `read:compression`  | Išvardykite skambintojui priklausančių CCR blokų puslapių metaduomenis                                                              |
+| `omniroute_ccr_delete`              | `write:compression` | Ištrinkite skambintojui priklausantį CCR bloką                                                                                      |
+| `omniroute_ccr_stats`               | `read:compression`  | Praneškite apie skambintojo apimties atminties naudojimą, gyvavimo ciklo skaitiklius ir saugyklos apribojimus                       |
+| `omniroute_rtk_discover`            | `read:compression`  | Atraskite pasikartojantį triukšmą pasirenkamuose RTK išvesties pavyzdžiuose                                                         |
+| `omniroute_rtk_learn`               | `read:compression`  | Sukurkite peržiūrimą RTK filtro juodraštį iš pasirenkamų pavyzdžių                                                                  |
 
-CCR įrašai saugomi tik atmintyje ir paleidus iš naujo išnyksta. Kiekvieno bloko dydis ribojamas iki 2 MiB, kiekvieno
-subjekto — iki 16 MiB, o visos saugyklos — iki 64 MiB. Pagal numatytąsias nuostatas įrašų TTL yra 24 valandos (daugiausia
-septynios dienos). Visas MCP išgavimas ribojamas iki 256 KiB; didesnius blokus vis tiek galima pasiekti naudojant
-diapazonų ir grep režimus. Saugojimas, išgavimas, sąrašų pateikimas, tikrinimas, šalinimas ir statistika izoliuojami pagal
-autentifikuotą API rakto subjektą. Audito įrašuose pateikiamos maišos ir dydžio metaduomenys, bet niekada ne pats turinys.
+CCR įrašai naudoja dviejų pakopų saugyklą: įkaitusią atminties pakopą vietinėse ne debesies vykdymo sąlygomis palaiko patvari SQLite pakopa (`ccr_blocks`, pagal numatytuosius nustatymus įjungta), todėl blokas išliks iškeldintas arba paleistas iš naujo, kol jo TTL baigsis — išskyrus blokus, viršijančius 512 atminties KB -sqf. Kiekvienas blokas apribotas iki 2 MiB, kiekvienas pagrindinis iki 16 MiB, o pasaulinė parduotuvė iki 64 MiB. Įrašai pagal numatytuosius nustatymus yra 24 valandų TTL (daugiausia septynios dienos). Visas MCP gavimas ribojamas iki 256 KiB; didesni blokai lieka pasiekiami per diapazono ir grep režimus. Saugojimas, gavimas, įtraukimas į sąrašą, tikrinimas, ištrynimas ir statistika yra atskirti autentifikuotu API rakto principu. Audito įrašuose yra maišos ir dydžio metaduomenys, niekada nėra turinio. Į operatorių nukreipta informacija (du žymekliai, kliento sąlygos, `codemode:false`, kiekvieno įrankio apimtys, puslapių numeravimas ir diagnostinė matrica) pateikiama [suspaudimo varikliuose → Būtinosios sąlygos / operatoriaus vadovas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` pateikia MCP aprašymų glaudinimą atskirai, skiltyje
-`analytics.mcpDescriptionCompression`. Šios reikšmės yra MCP sąrašuose pateikiamų
-aprašymų (`tools`, `prompts`, `resources` ir `resourceTemplates`) metaduomenų dydžio įverčiai; tai nėra teikėjo naudojimo
-apskaitos įrašai, ir jie pažymėti `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` praneša apie MCP aprašymo glaudinimą atskirai pagal `analytics.mcpDescriptionCompression`. Šios reikšmės yra MCP sąrašo aprašų (`tools`, `prompts`, `resources` ir `resourceTemplates`) metaduomenų dydžio įvertinimai; jie nėra paslaugų teikėjo naudojimo kvitai ir yra pažymėti `source: "mcp_metadata_estimate"`.
 
 ### MCP pritaikymo neįgaliesiems medžio filtras (v3.8.0)
 
-Be pirmiau nurodytų glaudinimo įrankių, OmniRoute apima filtrą, kuris po vykdymo
-suglaudina MCP naršyklės / pritaikymo neįgaliesiems įrankių **rezultatus**, prieš juos grąžinant
-agentui. Pats šis filtras nėra įrankis — jis skaidriai vykdomas bet kokiam įrankio rezultatui, kuriame yra
-išsamus pritaikymo neįgaliesiems medžio arba naršyklės momentinės kopijos tekstas (≥2000 simbolių).
+Atskirai nuo aukščiau pateiktų suspaudimo įrankių, OmniRoute apima filtrą po vykdymo, kuris suspaudžia** įrankio rezultatai** MCP browser/accessibility įrankių prieš grąžinant juos agentui. Šis filtras pats savaime nėra įrankis — jis skaidriai veikia bet kuriame įrankio rezultate, kuriame yra išsamus pritaikymo neįgaliesiems medis arba naršyklės momentinės nuotraukos tekstas (≥ 2000 simbolių).
 
-Pagrindinės ypatybės:
+Pagrindiniai elgesys:
 
-- Sutraukia ≥30 iš eilės pasikartojančių to paties lygmens eilučių į pradžios ir pabaigos suvestinę
-- Išsaugo `[ref=eXX]` inkarus, reikalingus Playwright / kompiuterio valdymui
-- Griežtai sutrumpina per didelį tekstą (>50,000 simbolių), pateikdamas naršymo užuominą
-- Tikėtinas sutaupymas: **60–80%** naršyklės momentinių kopijų duomenims
+- Sutraukia ≥ 30 iš eilės pasikartojančių brolių eilučių į head + uodegos santrauką
+- Išsaugo `[ref=eXX]` inkarus, kurių reikalauja Playwright/computer-use
+- Sunkiai sutrumpinamas per didelis tekstas (> 50 000 simbolių) su naršymo užuomina
+- Tikimasi sutaupyti:** 60–80 proc.** naršyklės momentinių kopijų naudingose apkrovose
 
-Konfigūracija: `compression.mcpAccessibility` visuotinėse nuostatose (migracija 056).
-Įgyvendinimas: `open-sse/services/compression/engines/mcpAccessibility/`.
-Visa dokumentacija: [Glaudinimo varikliai — MCP pritaikymo neįgaliesiems medžio filtras](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfigūracija: `compression.mcpAccessibility` visuotiniuose nustatymuose (migracija 056). Įgyvendinimas: `open-sse/services/compression/engines/mcpAccessibility/`. Visi dokumentai: [Kompresiniai varikliai — MCP Prieinamumo medžio filtras](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Žr. [Glaudinimo varikliai](../compression/COMPRESSION_ENGINES.md) ir [RTK glaudinimas](../compression/RTK_COMPRESSION.md), kur aprašytas
-šių įrankių vykdymo metu naudojamas glaudinimo modelis.
+Žr. [Compression Engines](../compression/COMPRESSION_ENGINES.md) ir [RTK Compression,](../compression/RTK_COMPRESSION.md) kad sužinotumėte apie šių įrankių vykdymo laiko suspaudimo modelį.
 
 ## 1Proxy įrankiai (3)
 
@@ -289,187 +281,137 @@ SSE ir srautinis HTTP transportas blokuojami, kol MCP serveris neįjungtas nusta
 
 ---
 
-## Autentifikavimas ir aprėptys
+## Autentifikavimas ir taikymo sritis
 
-MCP įrankis nuskaito aprėpties eilutes iš iškvietėjo. Šis patikrinimas yra viena iš trijų
-nepriklausomų vardų erdvių. Vienos tikrintuvo leidimas nereiškia leidimo iš kitų.
-Taisyklės yra [Trys aprėpties vardų erdvės](#trys-aprėpties-vardų-erdvės).
-Įrankių katalogas yra [MCP įrankių aprėptys](#mcp-įrankių-aprėptys).
+MCP įrankio skambučiai nuskaito skambinančiojo apimties eilutes. Šis patikrinimas yra viena iš trijų nepriklausomų vardų erdvių. Perdavimas iš vienos šaškės nėra perdavimas iš kitų. Taisyklės yra [trys apimties vardų erdvės](#three-scope-namespaces). Įrankių katalogas yra [MCP įrankių apimtis](#mcp-tool-scopes).
 
-### Trys aprėpties vardų erdvės
+### Trys apimties vardų erdvės
 
-`manage` API rakte, `read:compression` MCP įrankyje ir `read`
-`oma_live_…` prieigos žetone yra trys skirtingi leidimai. Iškvietėjai, kurie siunčia `read`
-prieigos žetoną keičiančiam valdymo maršrutui, gauna HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Šis rangas yra `scopeSatisfies`. Jis nekonsultuoja MCP lentelės, o MCP
-atitikmuo jo nekonsultuoja.
+`manage` ant API rakto, `read:compression` ant MCP įrankio ir `read` ant `oma_live_…` prieigos rakto yra trys skirtingos suteikimai. Skambintojai, siunčiantys `read` prieigos raktą į mutuojantį valdymo maršrutą, gauna HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Tas rangas yra `scopeSatisfies`. Jis neatsižvelgia į MCP lentelę, o MCP atitikmuo jos neatsižvelgia.
 
-| Vardų erdvė          | Kredencialas                                                        | Tikrintuvas                    | Leidimas leidžia                                               |
-| :------------------- | :------------------------------------------------------------------ | :----------------------------- | :------------------------------------------------------------- |
-| API rakto valdymas   | `api_keys.scopes`                                                   | `hasManageScope`               | Valdymo REST tam Bearer raktui                                 |
-| API rakto papildomas | tas pats masyvas, viena tiksli eilutė                               | toliau nurodytas pagalbininkas | Tik tas vienas gebėjimas                                       |
-| MCP įrankių aprėptys | tas pats masyvas, kitaip MCP `_meta`, kitaip `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Tas įrankis, kai įjungtas vykdymas                             |
-| Prieigos žetonas     | `oma_live_…`                                                        | `scopeSatisfies`               | Valdymo maršrutas, kurio metodas ir kelias reikalauja to rango |
+| Vardų erdvė              | Kredencialas                                                                      | Šaškė                          | Leidimas leidžia                                                  |
+| :----------------------- | :-------------------------------------------------------------------------------- | :----------------------------- | :---------------------------------------------------------------- |
+| API rakto valdymas       | `api_keys.scopes`                                                                 | `hasManageScope`               | Valdymo REST tam Nešėjo raktui                                    |
+| API rakto priedas        | tas pats masyvas, viena tiksli eilutė                                             | toliau nurodytas pagalbininkas | Tik ta viena galimybė                                             |
+| MCP įrankių taikikliai   | tas pats masyvas, kitur MCP `_meta` (tik HTTP/SSE ), kitur `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Šis įrankis, kai tik bus vykdomas vykdymas                        |
+| Prieigos prieigos raktas | `oma_live_…`                                                                      | `scopeSatisfies`               | Valdymo maršrutas, kurio metodas ir kelias reikalauja tokio rango |
 
-Kiekvieno kredencialo kūrimas aprašytas
-[Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md).
+Kiekvieno kredencialo kaldinimas apima [valdymo autentifikavimą](../guides/MANAGEMENT-AUTH.md).
 
-#### API rakto aprėptys
+#### API rakto apimtys
 
-Vienas `api_keys.scopes` masyvas atlieka du darbus. Jie naudoja skirtingas funkcijas.
+Vienas `api_keys.scopes` masyvas tiekia du darbus. Jie naudoja skirtingas funkcijas.
 
-**Valdymo REST.** `manage` ir `admin` yra
-`MANAGEMENT_API_KEY_SCOPES` nariai (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` yra tai, kas autorizuoja valdymo maršrutus tam raktui. `admin` yra
-valdymo galimybėmis tuose maršrutuose. Žodis `admin` čia nėra
-prieigos žetono rangas ir jis neišplečiamas į MCP įrankių aprėptis.
+**Valdymas REST.** `manage` ir `admin` yra `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) nariai. `hasManageScope` leidžia valdyti to rakto maršrutus. `admin` galima valdyti šiuose maršrutuose. Žodis `admin` čia nėra prieigos rakto rangas ir jis neišplečiamas į MCP įrankių taikymo sritį.
 
-**Papildomos eilutės.** Kiekviena iš jų yra tikslus narystės testas, ir kiekviena iš jų lieka
-už `MANAGEMENT_API_KEY_SCOPES` ribų.
+**Papildomos stygos.** Kiekvienas iš jų yra tikslus narystės testas ir kiekvienas lieka už `MANAGEMENT_API_KEY_SCOPES` ribų.
 
-| Aprėptis                       | Leidimas leidžia                                                                                                                                                     |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Tik negrįžtamasis `/api/mcp/` LOCAL_ONLY išskyrimas (`hasMcpConnectOrManageScope`). Raktas su `manage` arba `admin` vis tiek praeina tą išskyrimą.                   |
-| `self:usage`                   | `GET /api/v1/me/status` šiam raktui (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` prideda šią aprėptį kūrimo metu (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Aukštesnio lygio paskyros kvotos tame būsenos duomenų pakete (`src/lib/usage/apiKeySelfService.ts`). Būsenos maršrutas vis dar reikalauja `self:usage`.              |
-| `policy:bypass-provider-quota` | Šio rakto išvedimo iškvietimai praleidžia teikėjo kvotos politiką (`hasProviderQuotaBypassScope` `src/sse/handlers/chat.ts`).                                        |
+| Taikymo sritis                 | Leidimas leidžia                                                                                                                                               |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Tik neciklinis `/api/mcp/` LOCAL_ONLY carve-out (`hasMcpConnectOrManageScope`). Raktas su `manage` arba `admin` vis tiek perduoda tą iškarpymą.                |
+| `self:usage`                   | `GET /api/v1/me/status` šiam raktui (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` prideda šią sritį kuriant (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Ankstesnės paskyros kvotos toje būsenos naudingojoje apkrovoje (`src/lib/usage/apiKeySelfService.ts`). Būsenos maršrutui vis tiek reikia `self:usage`.         |
+| `policy:bypass-provider-quota` | Šio rakto išvadų skambučiai praleidžia teikėjo kvotos politiką (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                  |
 
 #### Atitikimas
 
-Katalogas yra lentelė po [MCP įrankių aprėptys](#mcp-įrankių-aprėptys). Nereikia
-traktuoti `MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts` kaip to katalogo:
-tai yra originalus tipizuotas poaibis. Vėlesni įrankiai deklaruoja papildomas aprėptis šalia jo
-(`read:notion`, `read:skills`, `read:local-corpus` ir likusi lentelė).
+Katalogas yra lentelė su [MCP įrankių apimtimis](#mcp-tool-scopes). Nelaikykite `MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts` kaip katalogą: tai yra originalus įvestas poaibis. Vėlesni įrankiai šalia jo deklaruoja kitas sritis (`read:notion`, `read:skills`, `read:local-corpus` ir likusi lentelės dalis).
 
-`evaluateToolScopes` `open-sse/mcp-server/scopeEnforcement.ts` leidžia iškvietimą
-kai kiekviena reikalinga aprėptis atitinka kokią nors suteiktą aprėptį:
+`evaluateToolScopes` `open-sse/mcp-server/scopeEnforcement.ts` leidžia skambinti, kai kiekviena reikalinga sritis atitinka tam tikrą suteiktą sritį:
 
-- `*` atitinka kiekvieną reikalingą aprėptį.
-- Suteikta aprėptis, kuri baigiasi `*`, atitinka reikalingą aprėptį, kuri prasideda
-  prieš žvaigždutę esančiu priešdėliu. `read:*` atitinka `read:compression`.
-- Kiekviena kita suteikta aprėptis atitinka tik identišką reikalingą eilutę.
+- `*` atitinka visas reikalingas sritis.
+- Suteikta apimtis, kuri baigiasi `*` atitinka būtiną sritį, kuri prasideda priešdėliu prieš žvaigždę. `read:*` atitinka `read:compression`.
+- Kiekviena kita suteikta sritis atitinka tik identišką būtiną eilutę.
 
-Raktas, kurio aprėptys yra `["manage"]`, nepavyksta `scopeMatches` `read:compression`.
-Tas pats iškvietimas nepavyksta `admin`, `mcp:connect`, `read` ir `write`, kai
-tai yra vienintelės suteiktos eilutės. Nėra hierarchijos tarp MCP įrankių aprėpčių
-išskyrus pabaigos `*`.
+Raktas, kurio taikymo sritis yra `["manage"]` nepavyksta `scopeMatches` `read:compression`. Tas pats skambutis nepavyksta `admin`, `mcp:connect`, `read` ir `write` kai tai yra vienintelės suteiktos eilutės. Nėra jokios hierarchijos tarp MCP įrankių apimčių už `*`.
 
-Vykdymas išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (numatytoji reikšmė
-`false`). Kol jis išjungtas, `evaluateToolScopes` leidžia iškvietimą ir praleidžia
-katalogą. Kol jis įjungtas, HTTP naudoja Bearer rakto `api_keys.scopes` kaip
-`authInfo` (žr. [HTTP aprėpties susiejimas kiekvienam raktui](#per-key-http-scope-binding-7895)).
-Kai raktų aprėptys neišsprendžiamos, suteiktas rinkinys pereina į MCP `_meta`, tada
-`OMNIROUTE_MCP_SCOPES`.
+Vykdymas išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (numatytasis `false`). Kai jis išjungtas, `evaluateToolScopes` leidžia skambinti ir praleidžia katalogą. Kai jis įjungtas, HTTP naudoja nešiklio klavišo `api_keys.scopes` kaip `authInfo` (žr. [HTTP apimties susiejimą pagal raktą](#per-key-http-scope-binding-7895) ). Kai neišsprendžiamos jokios raktų apimtys, suteiktas rinkinys patenka į MCP `_meta` (gerbiamas tik HTTP/SSE skambintojams, HTTP autentifikavimo kontekste; stdio skambintojo `_meta` nepaisoma, nes klientas jį valdo ir jame nėra vieno skambinančiojo tapatybės), tada `OMNIROUTE_MCP_SCOPES`.
 
-#### Prieigos žetono aprėptys
+#### Prieigos prieigos raktų apimtis
 
-`oma_live_…` žetonai (`src/lib/accessTokens/scopes.ts`) turi `read`, `write`
-arba `admin`. `scopeSatisfies` yra rangas: `admin` apima `write` ir `read`, o
-`write` apima `read`. Nežinomos aprėptys nieko neapima.
+`oma_live_…` žetonai (`src/lib/accessTokens/scopes.ts`) turi `read`, `write` arba `admin`. `scopeSatisfies` yra rangas: `admin` apima `write` ir `read`, o `write` apima `read`. Nežinomos apimtys nieko neapima.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) palygina tą
-rangą su `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) lygina tą reitingą su `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD` ir `OPTIONS` reikalauja `read`.
+- `GET`, `HEAD` ir `OPTIONS` reikia `read`.
 - Kiekvienas kitas metodas reikalauja `write`.
-- Keliai `ADMIN_SCOPE_PREFIXES` reikalauja `admin` kiekvienam metodui. `/api/mcp`
-  yra tame sąraše, todėl `write` prieigos žetonas vis tiek negali iškviesti MCP HTTP
-  sąsajos.
-- Keliai `ADMIN_MUTATION_PREFIXES` reikalauja `admin` tik mutacijoms.
+- Keliai `ADMIN_SCOPE_PREFIXES` reikalauja `admin` kiekvienam metodui. `/api/mcp` yra tame sąraše, todėl `write` prieigos raktas vis tiek negali iškviesti MCP HTTP paviršiaus.
+- Keliai `ADMIN_MUTATION_PREFIXES` reikalauja `admin` tik dėl mutacijų.
+- Keliai `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) reikalauja `admin` tik mutacijoms, ir tik tame tiksliame kelyje — kiti `/api/settings/*` antriniai maršrutai išlaiko `write`.
 
-`PATCH /api/keys/{id}` yra mutacija ir nėra tuose administratoriaus sąrašuose, todėl `read` prieigos raktas gauna 403
-`Prieigos rakto sritis 'read' yra nepakankama; reikalinga 'write'.`
-`write` arba `admin` prieigos raktas tinka šiam maršrutui. Prietaisų skydelio JWT, `loopback` CLI `machine-id` prieigos raktas ir API raktas su `manage` arba `admin` naudoja kitas šakas ir nėra apribojami šio rango.
+`PATCH /api/keys/{id}` yra mutacija ir nėra tuose administratorių sąrašuose, todėl `read` raktas gauna 403 `Access token scope 'read' is insufficient; 'write' required.` `write` arba `admin` prieigos raktas atitinka tą maršrutą. Prietaisų skydelis JWT, atgalinis CLI mašinos ID prieigos raktas ir API klavišas su `manage` arba `admin` perima kitas šakas ir nėra susiaurintas pagal šį reitingą.
 
-Prieigos raktas, kuris praeina `scopeSatisfies` patikrinimą `/api/mcp`, yra įveikęs tik valdymo vartus. Įrankių iškvietimai vis dar vykdo `scopeMatches` prieš API rakto sritis. Prieigos rakto rangas nėra `scopeMatches` įvestis.
+Prieigos prieigos raktas, kuris perduoda `scopeSatisfies` už `/api/mcp` išvalė tik valdymo vartus. Įrankių iškvietimai vis dar vykdomi `scopeMatches` API rakto srityse. Prieigos prieigos rakto rangas nėra `scopeMatches` įvestis.
 
-### MCP įrankių sritys
+### MCP įrankių taikikliai
 
-Srities vykdymas centralizuotas `open-sse/mcp-server/scopeEnforcement.ts`.
-Kiekvienam įrankiui reikalingos specifinės sritys:
+Apimties vykdymas yra centralizuotas `open-sse/mcp-server/scopeEnforcement.ts`. Kiekvienam įrankiui reikia tam tikros apimties:
 
-| Apimtis               | Įrankiai                                                                                                                                                                            |
-| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                   |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                           |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                              |
-| `read:quota`          | `check_quota`                                                                                                                                                                       |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                              |
-| `read:models`         | `list_models_catalog`                                                                                                                                                               |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                       |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                               |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                  |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                         |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                      |
-| `read:cache`          | `cache_stats`                                                                                                                                                                       |
-| `write:cache`         | `cache_flush`                                                                                                                                                                       |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                          |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                   |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                               |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                    |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                              |
-| `read:memory`         | `memory_search`                                                                                                                                                                     |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                        |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                  |
-| `write:skills`        | `skills_enable`                                                                                                                                                                     |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                    |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                    |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                             |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                           |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                    |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                      |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                  |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                     |
-| `read:obsidian`       | 13 skaitymo įrankiai — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 rašymo įrankiai — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                  |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                   |
+| Taikymo sritis        | Įrankiai                                                                                                                                                                             |
+| :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                    |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                            |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                               |
+| `read:quota`          | `check_quota`                                                                                                                                                                        |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                               |
+| `read:models`         | `list_models_catalog`                                                                                                                                                                |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                        |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                                   |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                          |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                       |
+| `read:cache`          | `cache_stats`                                                                                                                                                                        |
+| `write:cache`         | `cache_flush`                                                                                                                                                                        |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                           |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                    |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                     |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                               |
+| `read:memory`         | `memory_search`                                                                                                                                                                      |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                         |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                   |
+| `write:skills`        | `skills_enable`                                                                                                                                                                      |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                     |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                     |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                              |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                            |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                     |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                       |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                   |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                      |
+| `read:obsidian`       | 13 skaitymo įrankių — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, ... |
+| `write:obsidian`      | 9 rašymo įrankiai — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                   |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                    |
 
-Palaikomos pakaitos simbolių aprėptys: `read:*` suteikia visas skaitymo aprėptis, `*` suteikia visišką prieigą.
+Palaikomos pakaitos simbolių apimtys: `read:*` suteikia visas skaitymo sritis, `*` suteikia visišką prieigą.
 
-### `mcp:connect` – siaura maršruto galimybė (#7895)
+### `mcp:connect` — siauro maršruto galimybė (#7895)
 
-Norint pasiekti HTTP/SSE MCP transportą (`/api/mcp/*`) iš ne-loopback, reikalingas
-`/api/mcp/` LOCAL_ONLY išskyrimas (žr. `docs/security/ROUTE_GUARD_TIERS.md`). Istoriškai
-tas išskyrimas priėmė tik pilną `manage`/`admin` aprėpties API raktą – per platus
-skambinančiajam, kuriam reikia tik kalbėtis su MCP. `src/shared/constants/managementScopes.ts` dabar
-eksportuoja `MCP_CONNECT_SCOPE = "mcp:connect"`: papildoma, siaura aprėptis (tas pats precedentas kaip
-`SELF_USAGE_SCOPE`), kuri leidžia TIK `/api/mcp/` apėjimą
-`src/server/authz/policies/management.ts` – ji nesuteikia jokios kitos valdymo maršruto prieigos
-ir sąmoningai laikoma UŽ `MANAGEMENT_API_KEY_SCOPES`. Raktas, turintis `manage`/`admin`,
-vis dar praeina išskyrimą nepakeistas; `mcp:connect` yra mažesnių privilegijų alternatyva
-nuotoliniams tik MCP skambinantiesiems, tikrinama per `hasMcpConnectOrManageScope()`.
+Norint pasiekti HTTP/SSE MCP transportą (`/api/mcp/*`) iš neciklinio atgalinio ryšio, reikalingas `/api/mcp/` LOCAL_ONLY carve-out (žr. `docs/security/ROUTE_GUARD_TIERS.md`). Istoriškai šis iškirpimas priėmė tik pilną `manage`/`admin` -scope API klavišą — per platus skambinančiajam, kuriam reikia tik kalbėti MCP. `src/shared/constants/managementScopes.ts` dabar eksportuoja `MCP_CONNECT_SCOPE = "mcp:connect"`: priedas, siaura apimtis (tas pats precedentas kaip `SELF_USAGE_SCOPE`), leidžiantis ONLY `/api/mcp/` apeiti `src/server/authz/policies/management.ts` —, nesuteikia jokios kitos valdymo maršruto prieigos ir yra sąmoningai išlaikomas OUT `MANAGEMENT_API_KEY_SCOPES`. Raktas, laikantis `manage`/`admin`, vis tiek praeina nepakitęs; `mcp:connect` yra žemesnių privilegijų alternatyva tik nuotoliniams MCP skambintojams, tikrinama naudojant `hasMcpConnectOrManageScope()`.
 
-### Kiekvieno rakto HTTP aprėpties susiejimas (#7895)
+### HTTP apimties įrišimas kiekvienam klavišui (#7895)
 
-Per HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` dabar išsprendžia skambinančiojo tikrąsias
-`api_keys.scopes` per `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-ir perduoda jas MCP SDK `transport.handleRequest(req, { authInfo })`, todėl
-`extra.authInfo.scopes`, pasiekiantys kiekvieną įrankio iškvietimą, atspindi Bearer rakto aprėptis.
-`scopeEnforcement.ts` `resolveCallerScopeContext()` jau teikė pirmenybę `authInfo` prieš
-`_meta` ir `OMNIROUTE_MCP_SCOPES` aplinkos kintamojo atsarginį variantą – tai tik užpildo tą pirmąjį,
-aukščiausios prioriteto šaltinį, kuris anksčiau nebuvo maitinamas per HTTP. Kai API raktas neišsprendžiamas
-(nėra antraštės, neteisingas raktas), `authInfo` lieka `undefined` ir sprendimas pereina prie
-esamų `meta`/aplinkos kintamojo grandinės nepakeistas. Tai NEPAKEIČIA `OMNIROUTE_MCP_ENFORCE_SCOPES`
-numatytosios reikšmės – vykdymas vis dar turi būti aiškiai įjungtas; šis pakeitimas tik užtikrina, kad
-kiekvieno rakto kelias turėtų pirmenybę, kai jis įjungtas. stdio neturi kiekvieno skambinančiojo tapatybės (žr.
-`mcpCallerIdentity.ts`) ir jam tai neturi įtakos – jis lieka `_meta`/aplinkos kintamojo atsarginėje grandinėje.
+Per HTTP/SSE `open-sse/mcp-server/httpTransport.ts` dabar išsprendžia skambinančiojo tikrąjį `api_keys.scopes` per `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ir perduoda jį MCP SDK `transport.handleRequest(req, { authInfo })`, todėl `extra.authInfo.scopes` pasiekiantis kiekvieną įrankio iškvietimą, atspindi paties nešiklio klavišo taikymo sritį. `scopeEnforcement.ts` `resolveCallerScopeContext()` jau suteikė pirmenybę `authInfo` o ne `_meta` ir `OMNIROUTE_MCP_SCOPES` env atsarginį — tai tik užpildo pirmąjį, aukščiausio prioriteto šaltinį, kuris anksčiau nebuvo tiekiamas HTTP. Kai neišsprendžiamas joks API raktas (nėra antraštės, netinkamas raktas), `authInfo` lieka `undefined`, o skiriamoji geba patenka į esamą `meta`/env grandinę nepakitusi. stdio neturi vieno skambinančiojo tapatybės (žr. `mcpCallerIdentity.ts`) ir jam nedaro įtakos susiejimas pagal raktą — jis praleidžia `_meta` veiksmą (`_meta` yra gerbiamas tik HTTP autentifikavimo kontekste, #15159) ir išsprendžia tik iš `OMNIROUTE_MCP_SCOPES` env rakto.
+
+**Vykdymas yra privalomas siauros apimties HTTP/SSE skambintojams, neatsižvelgiant į `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` pagal numatytuosius nustatymus `false` yra saugus tik local/stdio vieno operatoriaus srautui, kai nėra vieno skambinančiojo tapatybės, į kurią būtų galima kreiptis. `open-sse/mcp-server/server.ts::withScopeEnforcement()` besąlygiškai įjungia kiekvieno įrankio taikymo srities vykdymą (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`), kai `resolveCallerScopeContext()` išsprendžia `source === "authInfo"` (ty tikra rakto HTTP autorizacijos antraštė, HTTP/SSE-only) AND tas raktas neturi visos `manage`/`admin` apimties. Tai užpildo spragą, kur raktas, turintis ONLY siaurą `mcp:connect` apėjimo sritį — kaip anksčiau dokumentuotas kaip leidžiantis nieko, išskyrus `/api/mcp/` LOCAL_ONLY carve-out — kitu atveju galėtų iškviesti kiekvieną MCP įrankį, kai operatorius įjungs remote/non-loopback MCP prieigą, nes `OMNIROUTE_MCP_ENFORCE_SCOPES` pagal numatytuosius nustatymus pristato `false`. Visas `manage`/`admin` klavišas virš HTTP ir kiekvienas stdio/local skambinantis asmuo nepakeis esamos `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated elgsenos.
+
+---
 
 ## Aplinkos kintamieji
 
-| Kintamasis                              | Numatytoji reikšmė             | Paskirtis                                                                                                                                                             |
-| :-------------------------------------- | :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`       | Bazinis URL, kurį MCP serveris naudoja iškviesdamas vidines OmniRoute API                                                                                             |
-| `OMNIROUTE_API_KEY`                     | (tuščia)                       | API raktas, persiunčiamas kaip `Authorization: Bearer` vidinėms API užklausoms                                                                                        |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (įjungia tik `"true"`) | Kai įjungta, trūkstamos aprėptys neleidžia iškviesti įrankių, o audito žurnale įrašoma `scope_denied:<reason>`                                                        |
-| `OMNIROUTE_MCP_SCOPES`                  | (tuščia)                       | Kableliais atskirtas aprėpčių, kurios pagal numatytąją nuostatą laikomos „pasiekiamomis“, leidžiamasis sąrašas (naudojamas, kai iškvietėjas nepateikia savo aprėpčių) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (nenustatyta = įjungta)        | Nustačius `0/false/off/no`, išjungiamas MCP aprašų glaudinimas registracijos metu                                                                                     |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (nenustatyta = įjungta)        | Alternatyvus pirmiau nurodyto perjungiklio pseudonimas                                                                                                                |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                        | Nutraukimo laiko limitas vidinėms valdymo skaitymo operacijoms (būklė, atsparumas, deriniai, kvota, naudojimas)                                                       |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                        | Nutraukimo laiko limitas etapams, kurie laukia paslaugų teikėjo (`route_request`, `web_search`, `web_fetch`)                                                          |
-| `MCP_TOOL_DENY`                         | (nenustatyta = nėra filtro)    | Kableliais atskirti įrankių pavadinimai, kuriuos reikia pašalinti iš `tools/list` (įrankių kardinalumo mažinimas — žr. toliau)                                        |
-| `MCP_TOOL_ALLOW`                        | (nenustatyta = nėra filtro)    | Kableliais atskirti įrankių pavadinimai, kuriuos reikia išimtinai palikti (leidžiamojo sąrašo režimas — žr. toliau)                                                   |
-| `DATA_DIR`                              | `~/.omniroute`                 | Gyvybingumo signalų failas įrašomas į `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                        |
+| Kintamasis                              | Numatytoji reikšmė             | Paskirtis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| :-------------------------------------- | :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`       | Bazinis URL, kurį MCP serveris naudoja kreipdamasis į vidines OmniRoute API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `OMNIROUTE_API_KEY`                     | (tuščia)                       | API raktas, persiunčiamas kaip `Authorization: Bearer` vidinėms API užklausoms                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (įjungia tik `"true"`) | Kai įjungta, trūkstant sričių įrankių iškvietimai atmetami, o audito žurnale įrašoma `scope_denied:<reason>`. Vykdymas TAIP PAT priverstinai įjungiamas neatsižvelgiant į šią žymą bet kuriam HTTP/SSE kvietėjui, nustatytam pagal konkrečiam raktui skirtą Authorization antraštę (`source === "authInfo"`), kuris neturi visos `manage`/`admin` srities, pvz., raktui, turinčiam tik siaurąją `mcp:connect` apėjimo sritį, todėl ši numatytoji reikšmė yra saugi tik vietiniam/stdio vieno operatoriaus srautui ir niekada nėra saugi nuotolinei ne grįžtamojo ryšio sąsajos prieigai |
+| `OMNIROUTE_MCP_SCOPES`                  | (tuščia)                       | Kableliais atskirtas sričių, pagal numatytąsias nuostatas laikomų „prieinamomis“, leidžiamųjų reikšmių sąrašas (naudojamas, kai kvietėjas nepateikia savo sričių)                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (nenustatyta = įjungta)        | Nustačius `0/false/off/no`, išjungiamas MCP aprašų glaudinimas registracijos metu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (nenustatyta = įjungta)        | Alternatyvus tos pačios pirmiau nurodytos perjungimo nuostatos pseudonimas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                        | Nutraukimo laiko limitas vidiniams valdymo nuskaitymams (būklės, atsparumo, derinių, kvotos, naudojimo)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                        | Nutraukimo laiko limitas etapams, kuriuose laukiama paslaugų teikėjo (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `MCP_TOOL_DENY`                         | (nenustatyta = nėra filtro)    | Kableliais atskirti įrankių pavadinimai, pašalintini iš `tools/list` (įrankių kardinalumo mažinimas — žr. toliau)                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `MCP_TOOL_ALLOW`                        | (nenustatyta = nėra filtro)    | Kableliais atskirti įrankių pavadinimai, kuriuos išimtinai palikti (leidžiamų sąrašų režimas — žr. toliau)                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `DATA_DIR`                              | `~/.omniroute`                 | Periodinio būsenos signalo failas įrašomas į `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ---
 

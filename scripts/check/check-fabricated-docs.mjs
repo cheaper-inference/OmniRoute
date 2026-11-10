@@ -114,6 +114,7 @@ const ENV_VAR_ALLOWLIST = new Set([
   "OPENAI_BASE_URL", // env var OmniRoute passes to downstream CLIs (AGENT_PROTOCOLS_GUIDE.md)
   "NINEROUTER_API_KEY", // injected into the 9router subprocess at spawn (EMBEDDED-SERVICES.md)
   "CLAUDE_CODE_MAX_OUTPUT_TOKENS", // Claude Code CLI's own env var (CODEX-CLI-CONFIGURATION.md)
+  "ANTHROPIC_CUSTOM_HEADERS", // Claude Code CLI's own env var (API_REFERENCE.md, CLAUDE-CODE-CONFIGURATION.md)
   "CODEX_HOME", // Codex CLI's own config-home env var (CODEX-CLI-CONFIGURATION.md)
   // Gemini CLI's own auth-routing env vars. `omniroute run gemini` DELETES them
   // from the spawned child's env (bin/cli/commands/run.mjs) so a stored Vertex /
@@ -371,6 +372,8 @@ const ENDPOINT_ALLOWLIST = new Set([
   // paths on the UPSTREAM service (Claude.ai web, Blackbox), not OmniRoute routes.
   "/api/organizations/{orgId}/chat_conversations/{convId}/completion", // claude-web upstream
   "/api/chat", // Blackbox Web upstream (validated-token target)
+  "/api/dispatch", // notrack-web upstream (chat dispatch endpoint on notrack.ai)
+  "/api/chats", // notrack-web upstream (chat history listing on notrack.ai)
 ]);
 
 /** Doc files to skip (auto-generated, vendored, or third-party). */
@@ -580,15 +583,22 @@ export function buildCodebaseIndex(root = ROOT) {
   // literal `process.env.<KEY>`, so the code-read index cannot see those reads.
   // Every key in FEATURE_FLAG_DEFINITIONS is therefore a real, env-overridable
   // knob (docs/reference/FEATURE_FLAGS.md documents the catalog 1:1).
+  // The catalog also spreads per-area modules (searchFeatureFlagDefinitions.ts, #17933).
   function readFeatureFlagContract() {
+    const dir = path.join(root, "src", "shared", "constants");
+    let names = [];
     try {
-      const t = fs.readFileSync(
-        path.join(root, "src", "shared", "constants", "featureFlagDefinitions.ts"),
-        "utf8"
-      );
-      for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);
+      names = fs.readdirSync(dir).filter((name) => /featureflagdefinitions\.ts$/i.test(name));
     } catch {
       /* ignore */
+    }
+    for (const name of names) {
+      try {
+        const t = fs.readFileSync(path.join(dir, name), "utf8");
+        for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);
+      } catch {
+        /* ignore */
+      }
     }
   }
   readFeatureFlagContract();

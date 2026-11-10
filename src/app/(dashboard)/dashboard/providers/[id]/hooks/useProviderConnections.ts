@@ -23,9 +23,14 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { z } from "zod";
 import { useNotificationStore } from "@/store/notificationStore";
 import { isClaudeCodeCompatibleProvider } from "@/shared/constants/providers";
 import type { ConnectionRowConnection } from "../components/ConnectionRow";
+import {
+  buildSwapPriorityUpdates,
+  persistPriorityUpdates,
+} from "../components/connectionRowHelpers";
 import {
   connectionBelongsToProviderPage,
   getProviderConnectionsRequestUrl,
@@ -33,6 +38,8 @@ import {
 import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers";
 import { useProviderQuotaVisibility } from "./useProviderQuotaVisibility";
 import { useReorderByAvailability } from "./useReorderByAvailability";
+import { resolveBatchTestOpener, restoreBatchTestFocus } from "./batchTestFocus";
+import { useCodexPaidCreditsToggle } from "./useCodexPaidCreditsToggle";
 import {
   useConnectionDeleteConfirm,
   type ConnectionDeleteConfirmState,
@@ -107,28 +114,59 @@ async function loadProxyConfigData(): Promise<{ config: any } | null> {
   }
 }
 
-async function resolveConnectionProxies(
-  conns: { id?: string }[]
-): Promise<Record<string, { proxy: any; level: string } | null> | null> {
+/** Cap matching the API's `?resolveIds=` limit; larger lists are batched. */
+const MAX_RESOLVE_IDS = 200;
+
+/**
+ * `?resolveIds=` response shape: one entry per requested connection, `null`
+ * when that connection resolves to no proxy.
+ */
+const resolvedProxiesSchema = z.object({
+  results: z.record(z.string(), z.object({ proxy: z.unknown(), level: z.string() }).nullable()),
+});
+type ResolvedConnectionProxy = { proxy: unknown; level: string } | null;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let index = 0; index < items.length; index += size)
+    out.push(items.slice(index, index + size));
+  return out;
+}
+
+async function resolveProxyChunk(
+  ids: string[]
+): Promise<Record<string, ResolvedConnectionProxy> | null> {
   try {
-    const results = await Promise.all(
-      conns
-        .filter((c) => c.id)
-        .map((c) =>
-          fetch(`/api/settings/proxy?resolve=${encodeURIComponent(c.id!)}`, { cache: "no-store" })
-            .then((r) => (r.ok ? r.json() : null))
-            .then((data) => [c.id!, data] as [string, any])
-            .catch(() => [c.id!, null] as [string, any])
-        )
-    );
-    const map: Record<string, { proxy: any; level: string } | null> = {};
-    for (const [id, data] of results) {
-      map[id] = data?.proxy ? data : null;
+    const res = await fetch(`/api/settings/proxy?resolveIds=${encodeURIComponent(ids.join(","))}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const parsed = resolvedProxiesSchema.safeParse(await res.json());
+    if (!parsed.success) return null;
+
+    const map: Record<string, ResolvedConnectionProxy> = {};
+    for (const id of ids) {
+      const entry = parsed.data.results[id];
+      map[id] = entry && entry.proxy ? entry : null;
     }
     return map;
   } catch {
     return null;
   }
+}
+
+async function resolveConnectionProxies(
+  conns: { id?: string }[]
+): Promise<Record<string, ResolvedConnectionProxy> | null> {
+  const ids = [...new Set(conns.map((c) => c.id).filter((id): id is string => Boolean(id)))];
+  if (ids.length === 0) return {};
+
+  // One request per 200 connections: a request per connection was an O(n)
+  // burst against the same process that serves the LLM proxy. Batching keeps
+  // every connection covered, so no row is left without its proxy badge.
+  const chunks = await Promise.all(chunk(ids, MAX_RESOLVE_IDS).map(resolveProxyChunk));
+  if (chunks.some((result) => result === null)) return null;
+  return Object.assign({}, ...chunks);
 }
 
 // ──── types ─────────────────────────────────────────────────────────────────
@@ -189,7 +227,7 @@ export interface UseProviderConnectionsReturn {
   setProviderNode: (node: any) => void;
 
   // Connection fetch
-  fetchConnections: () => Promise<void>;
+  fetchConnections: () => Promise<boolean>;
   fetchProxyConfig: () => Promise<void>;
   refreshProxyState: () => Promise<void>;
 
@@ -199,6 +237,7 @@ export interface UseProviderConnectionsReturn {
   handleToggleRateLimit: (connectionId: string, enabled: boolean) => Promise<void>;
   handleToggleQuotaVisibility: (connectionId: string, visible: boolean) => Promise<void>;
   handleToggleClaudeExtraUsage: (connectionId: string, enabled: boolean) => Promise<void>;
+  handleToggleCodexPaidCredits: (connectionId: string, enabled: boolean) => Promise<void>;
   handleToggleCodexLimit: (connectionId: string, field: string, enabled: boolean) => Promise<void>;
   handleToggleCliproxyapiMode: (connectionId: string, enabled: boolean) => Promise<void>;
   handleSetUpstreamProxyMode: (
@@ -228,8 +267,8 @@ export interface UseProviderConnectionsReturn {
   handleBatchSetActive: (isActive: boolean) => Promise<void>;
   handleBatchDeleteOpenModal: () => void;
   handleBatchDeleteConfirm: (onAfter?: () => Promise<void>) => Promise<void>;
-  handleBatchRetest: () => Promise<void>;
-  handleBatchTestAll: () => Promise<void>;
+  handleBatchRetest: (event?: { currentTarget?: unknown }) => Promise<void>;
+  handleBatchTestAll: (event?: { currentTarget?: unknown }) => Promise<void>;
 
   // Selection helpers
   handleToggleSelectOne: (id: string) => void;
@@ -266,7 +305,16 @@ export function useProviderConnections(
   const [retestingId, setRetestingId] = useState<string | null>(null);
   const [clearingCooldownId, setClearingCooldownId] = useState<string | null>(null);
   const [batchTesting, setBatchTesting] = useState(false);
-  const [batchTestResults, setBatchTestResults] = useState<BatchTestResults>(null);
+  const [batchTestResults, setBatchTestResultsState] = useState<BatchTestResults>(null);
+  // The trigger that started the current batch; focused again when the results close.
+  const batchTestOpenerRef = useRef<HTMLElement | null>(null);
+  // Public setter: dismissing the results (null) returns focus to the batch trigger.
+  const setBatchTestResults = useCallback((results: BatchTestResults) => {
+    setBatchTestResultsState(results);
+    if (results !== null) return;
+    restoreBatchTestFocus(batchTestOpenerRef.current);
+    batchTestOpenerRef.current = null;
+  }, []);
 
   // ── selection + batch state ─────────────────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -344,14 +392,21 @@ export function useProviderConnections(
     if (map) setConnProxyMap(map);
   }, []);
 
+  const connectionsGeneration = useRef(0);
   const fetchConnections = useCallback(async () => {
+    const generation = ++connectionsGeneration.current;
     const result = await loadProviderConnectionsData(providerId, isCompatible);
+    if (generation !== connectionsGeneration.current) return false;
     if (result) {
       if (result.connections) setConnections(result.connections);
       if (result.nodeResolved) setProviderNode(result.node);
     }
     setLoading(false);
+    return result?.connections !== null && result?.connections !== undefined;
   }, [providerId, isCompatible]);
+  const refreshConnectionsWithoutResult = useCallback(async () => {
+    await fetchConnections();
+  }, [fetchConnections]);
 
   // ── effects ──────────────────────────────────────────────────────────────
   // The async work is defined INSIDE each effect (a component-scope loader
@@ -359,21 +414,24 @@ export function useProviderConnections(
   // every setState below runs after an await.
 
   useEffect(() => {
+    let active = true;
     const run = async () => {
-      const result = await loadProviderConnectionsData(providerId, isCompatible);
-      if (result) {
-        if (result.connections) setConnections(result.connections);
-        if (result.nodeResolved) setProviderNode(result.node);
-      }
-      setLoading(false);
+      // fetchConnections' generation counter drops an obsolete connection load (#17253):
+      // the cleanup below bumps it, so a response for a previous provider is ignored.
+      await fetchConnections();
     };
     void run();
     const runProxyConfig = async () => {
       const result = await loadProxyConfigData();
+      if (!active) return;
       if (result) setProxyConfig(result.config);
     };
     void runProxyConfig();
-  }, [providerId, isCompatible]);
+    return () => {
+      active = false;
+      connectionsGeneration.current += 1;
+    };
+  }, [fetchConnections]);
 
   // Per-connection proxy (handles registry assignments)
   useEffect(() => {
@@ -432,7 +490,7 @@ export function useProviderConnections(
   // Single-connection handlers
   // ────────────────────────────────────────────────────────────────────────
 
-  const deleteConfirm = useConnectionDeleteConfirm(fetchConnections, notify);
+  const deleteConfirm = useConnectionDeleteConfirm(refreshConnectionsWithoutResult, notify);
 
   const handleUpdateConnectionStatus = async (id: string, isActive: boolean) => {
     try {
@@ -545,6 +603,15 @@ export function useProviderConnections(
       );
     }
   };
+
+  // Codex paid-credits toggle — extracted to its own hook (see
+  // useCodexPaidCreditsToggle.ts) to keep this file under the file-size cap.
+  const { handleToggleCodexPaidCredits } = useCodexPaidCreditsToggle({
+    connections,
+    setConnections,
+    notify,
+    t,
+  });
 
   const handleToggleCodexLimit = async (connectionId: string, field: string, enabled: boolean) => {
     try {
@@ -775,6 +842,9 @@ export function useProviderConnections(
         }
       } else {
         notify.error(data.error || t("tokenRefreshFailed"));
+        if (conn?.provider === "chatgpt" && data.requiresReauth) {
+          await fetchConnections();
+        }
       }
     } catch (error) {
       console.error("Error refreshing token:", error);
@@ -787,35 +857,13 @@ export function useProviderConnections(
   const handleSwapPriority = async (conn1: any, conn2: any) => {
     if (!conn1 || !conn2) return;
     try {
-      let p1 = conn2.priority;
-      let p2 = conn1.priority;
-
-      if (p1 === p2) {
-        const isConn1MovingUp =
-          (connections as any[]).indexOf(conn1) > (connections as any[]).indexOf(conn2);
-        if (isConn1MovingUp) {
-          p1 = conn2.priority - 0.5;
-        } else {
-          p1 = conn2.priority + 0.5;
-        }
-      }
-
-      await Promise.all([
-        fetch(`/api/providers/${conn1.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ priority: p1 }),
-        }),
-        fetch(`/api/providers/${conn2.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ priority: p2 }),
-        }),
-      ]);
-      await fetchConnections();
+      // 1-based integer writes only — a tie used to send `priority ± 0.5` (400).
+      await persistPriorityUpdates(buildSwapPriorityUpdates(connections, conn1, conn2));
     } catch (error) {
       console.log("Error swapping priority:", error);
+      notify.error(t("failedSaveConnectionRetry"));
     }
+    await fetchConnections();
   };
 
   // Reorder-by-availability toolbar action — extracted to its own hook
@@ -823,7 +871,7 @@ export function useProviderConnections(
   const { reorderingByAvailability, handleReorderByAvailability } = useReorderByAvailability({
     connections,
     setConnections,
-    fetchConnections,
+    fetchConnections: refreshConnectionsWithoutResult,
     notify,
     t,
   });
@@ -939,7 +987,7 @@ export function useProviderConnections(
 
   // Shared runner for batch connection tests (all-for-provider or selected IDs)
   const runBatchTest = async (payload: Record<string, unknown>) => {
-    setBatchTestResults(null);
+    setBatchTestResultsState(null);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120_000); // 2min max
     try {
@@ -955,7 +1003,7 @@ export function useProviderConnections(
       } catch {
         data = { error: t("providerTestFailed"), results: [], summary: null };
       }
-      setBatchTestResults({
+      setBatchTestResultsState({
         ...data,
         error: data.error
           ? typeof data.error === "object"
@@ -973,7 +1021,7 @@ export function useProviderConnections(
     } catch (error: any) {
       const isAbort = error?.name === "AbortError";
       const msg = isAbort ? t("providerTestTimeout") : t("providerTestFailed");
-      setBatchTestResults({ error: msg, results: [], summary: null });
+      setBatchTestResultsState({ error: msg, results: [], summary: null });
       notify.error(msg);
     } finally {
       clearTimeout(timeoutId);
@@ -981,8 +1029,9 @@ export function useProviderConnections(
   };
 
   // Batch test all connections for this provider
-  const handleBatchTestAll = async () => {
+  const handleBatchTestAll = async (event?: { currentTarget?: unknown }) => {
     if (batchTesting || (connections as any[]).length === 0) return;
+    batchTestOpenerRef.current = resolveBatchTestOpener(event);
     setBatchTesting(true);
     try {
       await runBatchTest({ mode: "provider", providerId });
@@ -992,7 +1041,7 @@ export function useProviderConnections(
   };
 
   // Batch retest only the selected connections
-  const handleBatchRetest = async () => {
+  const handleBatchRetest = async (event?: { currentTarget?: unknown }) => {
     if (batchRetesting || selectedIds.size === 0) return;
     // Live-testing a huge selection risks the 120s client abort; bound it to
     // the same cap the API enforces and tell the user to narrow the selection.
@@ -1000,6 +1049,7 @@ export function useProviderConnections(
       notify.warning(t("batchRetestLimit", { max: MAX_BULK_IDS }));
       return;
     }
+    batchTestOpenerRef.current = resolveBatchTestOpener(event);
     setBatchRetesting(true);
     try {
       await runBatchTest({ mode: "selected", connectionIds: Array.from(selectedIds) });
@@ -1146,6 +1196,7 @@ export function useProviderConnections(
     handleToggleRateLimit,
     handleToggleQuotaVisibility,
     handleToggleClaudeExtraUsage,
+    handleToggleCodexPaidCredits,
     handleToggleCodexLimit,
     handleToggleCliproxyapiMode,
     handleSetUpstreamProxyMode,

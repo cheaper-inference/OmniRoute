@@ -297,13 +297,13 @@ Asosiy ishlash xususiyatlari:
 
 ## 🔑 Sinxronlash tokenlari va konfiguratsiya toʻplami _(v3.6.6+)_
 
-Endi **qamrovli sinxronlash tokenlari** orqali bir nechta qurilmadan va tashqi operator tomonidan kirish mumkin:
+Endi **qamrovi cheklangan sinxronlash tokenlari** orqali bir nechta qurilmadan va tashqi operatorlar tomonidan kirish mumkin:
 
-- **`POST /api/sync/tokens`** — Yangi sinxronlash tokenini yaratish (qamrovli, amal qilish muddati ixtiyoriy)
+- **`POST /api/sync/tokens`** — Yangi sinxronlash tokenini yaratish (qamrovi cheklangan, amal qilish muddati ixtiyoriy)
 - **`DELETE /api/sync/tokens/:id`** — Tokenni bekor qilish
-- **`GET /api/sync/bundle`** — Barcha maxfiy boʻlmagan sozlamalarning versiyalangan, ETag kalitli JSON nusxasini yuklab olish (parollar yashirilgan)
+- **`GET /api/sync/bundle`** — Konfiguratsiyaning versiyalangan, ETag kalitli JSON nusxasini yuklab olish (faqat sinxronlash tokeni bilan autentifikatsiya qilinadi). Boshqaruv paneli paroli kabi autentifikatsiya sozlamalari olib tashlanadi, ammo provayder hisob maʼlumotlari va API kalitlari kiritiladi, shuning uchun faylni maxfiy maʼlumot sifatida saqlang
 
-Konfiguratsiya toʻplami `src/lib/sync/bundle.ts` tomonidan yaratiladi. Isteʼmolchilar toʻliq maʼlumotlarni qayta yuklab olmasdan oʻzgarishlarni aniqlash uchun `ETag` javob sarlavhasini solishtiradi.
+Konfiguratsiya toʻplami `src/lib/sync/bundle.ts` tomonidan yaratiladi. Isteʼmolchilar toʻliq foydali yuklamani qayta yuklab olmasdan oʻzgarishlarni aniqlash uchun `ETag` javob sarlavhasini solishtiradi. CLI orqali `omniroute sync bundle <outPath> --token <syncToken>` (yoki `OMNIROUTE_SYNC_TOKEN`) uni faqat egasi kira oladigan faylga saqlaydi.
 
 ---
 

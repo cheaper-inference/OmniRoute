@@ -69,10 +69,10 @@ describe("catalog enrichment source", () => {
       combosFetcher: async () => [],
       enrichmentFetcher: async () => enrichment,
     });
-    assert.deepEqual(res, { models: 1, combos: 0, autoCombos: 0 });
+    assert.deepEqual(res, { models: 1, combos: 0 });
     const m = models.get("omniroute/cc/m1");
     assert.ok(m);
-    assert.equal(m?.name, "Model One");
+    assert.equal(m?.name, "cc - Model One");
     assert.equal(m?.cost[0].input, 3);
     assert.equal(m?.cost[0].output, 15);
   });
@@ -92,7 +92,7 @@ describe("catalog enrichment source", () => {
           throw new Error("pricing down");
         },
       });
-      assert.deepEqual(res, { models: 1, combos: 0, autoCombos: 0 });
+      assert.deepEqual(res, { models: 1, combos: 0 });
       assert.ok(models.get("omniroute/cc/m1"));
     } finally {
       console.warn = origWarn;

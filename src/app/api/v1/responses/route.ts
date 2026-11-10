@@ -1,10 +1,14 @@
 import { z } from "zod";
 import { handleChat } from "@/sse/handlers/chat";
+import { maybeQueueQuotaSessionRecovery } from "@/lib/quota/quotaSessionRecovery";
+import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { resolveResponsesApiModel } from "@/app/api/internal/codex-responses-ws/modelResolution";
 import { getModelInfo, getComboForModel } from "@/sse/services/model";
 import { generateRequestId } from "@/shared/utils/requestId";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
+import { resolveIncomingCorrelationId } from "@/shared/utils/correlationPreserve.ts";
 import {
   admitChatRequest,
   admitChatStructure,
@@ -17,13 +21,19 @@ import { SSE_HEARTBEAT_INTERVAL_MS } from "@omniroute/open-sse/config/constants"
 import { resolveStreamFlag } from "@omniroute/open-sse/utils/aiSdkCompat";
 import { errorResponse } from "@omniroute/open-sse/utils/error";
 import {
-  getDeadlineController,
-  withDeadlineSignal,
   withEarlyStreamKeepalive,
   OPENAI_RESPONSES_ERROR_FRAME,
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
-import { OPENAI_RESPONSES_IN_PROGRESS_FRAME } from "@omniroute/open-sse/utils/sseHeartbeat";
+import {
+  buildKeepaliveResponseId,
+  buildResponsesInProgressFrame,
+} from "@omniroute/open-sse/utils/responsesKeepaliveFrame";
+import {
+  isResponsesTransportKeepaliveEnabled,
+  RESPONSES_KEEPALIVE_FRAME,
+} from "@omniroute/open-sse/utils/sseHeartbeat";
 
 // NOTE: We do NOT call initTranslators() here — the translator registry is
 // bootstrapped at module level inside open-sse/translator/index.ts when it
@@ -99,17 +109,41 @@ export async function withCodexPreferredModel(
  * POST /v1/responses - OpenAI Responses API format
  * Handled by the unified chat handler (openai-responses format auto-detected).
  */
+// #17825: per-request complete frame (stable id, request-time created_at, request model).
+export function buildRequestKeepaliveFrame(body: { model?: unknown } | null | undefined) {
+  if (isResponsesTransportKeepaliveEnabled()) return RESPONSES_KEEPALIVE_FRAME;
+  const model = body?.model;
+  return buildResponsesInProgressFrame({
+    id: buildKeepaliveResponseId(),
+    model: typeof model === "string" ? model : undefined,
+  });
+}
+
 async function postHandler(request: any) {
-  // Deadline wrap first so admission, model rewrite, parse, handleChat and lease
-  // release all observe the combined signal (client abort OR deadline abort).
-  const { wrappedReq: deadlineReq } = withDeadlineSignal(request);
-  request = deadlineReq;
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
+
+  // Keep the framework Request untouched until the route has parsed enough state
+  // to know this is a streaming response. Deadline lifecycle belongs to that branch.
   const sessionId = resolveSessionId(request);
   const admissionResult = await admitChatRequest(request, {
     sessionId,
     queueMs: CHAT_ADMISSION_QUEUE_MAX_MS,
   });
-  if (admissionResult.admit === false) return admissionResult.response;
+  if (admissionResult.admit === false) {
+    void logAdmissionRejection(admissionResult.response, {
+      path: new URL(request.url).pathname,
+      model: "-",
+      requestBody: null,
+      apiKeyId: null,
+      apiKeyName: null,
+      correlationId: resolveIncomingCorrelationId(request.headers.get("x-correlation-id")),
+    });
+    return admissionResult.response;
+  }
 
   const admission = admissionResult;
   request = admission.request;
@@ -135,6 +169,14 @@ async function postHandler(request: any) {
       signal: request.signal,
     });
     if (structuralAdmission.admit === false) {
+      void logAdmissionRejection(structuralAdmission.response, {
+        path: new URL(request.url).pathname,
+        model: typeof parsedBody?.model === "string" && parsedBody.model ? parsedBody.model : "-",
+        requestBody: parsedBody ?? null,
+        apiKeyId: null,
+        apiKeyName: null,
+        correlationId: resolveIncomingCorrelationId(request.headers.get("x-correlation-id")),
+      });
       admission.lease?.release();
       return finishAdmission(structuralAdmission.response);
     }
@@ -181,36 +223,51 @@ async function postHandler(request: any) {
     // Codex CLI (wire_api="responses") consumes this endpoint over SSE and its reqwest
     // client drops the connection if no bytes arrive within ~5s. Keep the connection
     // warm with transport comments plus sparse parser-visible events while the upstream
-    // produces its first token (#2544).
+    // produces its first token (#2544). RESPONSES_TRANSPORT_KEEPALIVE_ENABLED sends only bytes.
     const { request: resolved, body: resolvedBody } = await withCodexPreferredModel(
       request,
       parsedBody
     );
     const accept = String(request.headers?.get?.("accept") || "");
+    const correlationId =
+      resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ??
+      resolveIncomingCorrelationId(request.headers.get("x-request-id")) ??
+      generateRequestId();
     const wantsStreaming = resolveStreamFlag(resolvedBody?.stream, accept, "openai-responses");
     if (wantsStreaming) {
       const thresholdMs = resolveKeepaliveThreshold(resolvedBody?.model);
-      const correlationId = generateRequestId();
-      const handlerResponse = releaseChatAdmissionAfterHandler(
-        handleChat(resolved, null, resolvedBody, correlationId),
-        admission.lease,
-        { signal: request.signal }
+      const { signal: streamSignal, deadlineController } = createStreamDeadlineSignal(
+        request.signal
       );
+      const handlerResponse = releaseChatAdmissionAfterHandler(
+        handleChat(resolved, null, resolvedBody, correlationId, streamSignal),
+        admission.lease,
+        { signal: streamSignal }
+      );
+      const keepaliveFrame = buildRequestKeepaliveFrame(resolvedBody);
       return await withEarlyStreamKeepalive(handlerResponse, {
-        signal: request.signal,
+        signal: streamSignal,
         thresholdMs,
-        startupFrame: OPENAI_RESPONSES_IN_PROGRESS_FRAME,
+        startupFrame: keepaliveFrame,
         applicationKeepalive: {
-          frame: OPENAI_RESPONSES_IN_PROGRESS_FRAME,
+          frame: keepaliveFrame,
           intervalMs: SSE_HEARTBEAT_INTERVAL_MS,
         },
         errorFrame: OPENAI_RESPONSES_ERROR_FRAME,
+        extraHeaders: { "X-Correlation-Id": correlationId },
         correlationId,
-        deadlineController: getDeadlineController(request),
+        deadlineController,
       });
     }
 
-    return finishAdmission(await handleChat(resolved, null, resolvedBody));
+    const handlerResponse = await handleChat(resolved, null, resolvedBody, correlationId);
+    const recoveryResponse = await maybeQueueQuotaSessionRecovery({
+      request: resolved,
+      body: resolvedBody,
+      response: handlerResponse,
+      endpoint: "responses",
+    });
+    return finishAdmission(recoveryResponse);
   } catch (error) {
     admission.lease?.release();
     throw error;

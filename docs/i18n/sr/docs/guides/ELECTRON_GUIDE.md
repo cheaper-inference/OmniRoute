@@ -4,92 +4,99 @@
 
 ---
 
-> **Извор истине:** радни простор `electron/`
-> **Последње ажурирање:** 2026-06-28 — v3.8.40
+> **Извор истине:** `electron/` радни простор** Последње ажурирано:** 2026-06-28 — в3.8.40
 
-OmniRoute се испоручује као вишеплатформска десктоп апликација (Windows / macOS / Linux) изграђена на
-**Electron 41** + **electron-builder 26.10**. Десктоп апликација покреће самостални Next.js
-сервер као подређени процес, усмерава `BrowserWindow` ка њему и додаје
-системску палету, аутоматско ажурирање, IPC мост и иницијализацију тајни без конфигурације.
+OmniRoute испоручује десктоп апликацију за више платформи (Windows / macOS / Linux) изграђену на**Electron 41** +** градитељ електрона 26.10** . Апликација за десктоп рачунаре покреће Next.js самостални сервер као подређени процес, усмерава `BrowserWindow` на њега и додаје системску палету, аутоматско ажурирање, IPC бридге и тајни стартер са нултом конфигурацијом.
 
 ## Архитектура
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Главни Electron процес (electron/main.js)    │
-│ ├─ Закључавање на једну инстанцу             │
-│ ├─ Подређени процес: самостални Next.js      │
-│ │   сервер (покренут Electron Node окружењем)│
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ Системска палета + контекстни мени        │
-│ ├─ Аутоматско ажурирање преко electron-updater│
-│ ├─ Content Security Policy (заглавља сесије) │
-│ └─ Иницијализација тајни (JWT / API_KEY_SECRET)│
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-            ↕ IPC мост (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Приказивач (Next.js контролна табла)         │
-│   window.electronAPI.* (contextIsolation)    │
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
 ## Верзије
 
-Потврђено на основу `electron/package.json`:
+Потврђено од `electron/package.json`:
 
-| Пакет              | Верзија                                                                      |
-| ------------------ | ---------------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                                    |
-| `electron-builder` | `^26.15.3`                                                                   |
-| `electron-updater` | `^6.8.9`                                                                     |
-| `better-sqlite3`   | коренски `^13.0.2` (Node-API готове верзије — без Electron поновне изградње) |
-| Верзија апликације | `3.8.0`                                                                      |
-| ID апликације      | `online.omniroute.desktop`                                                   |
-| Назив производа    | `OmniRoute`                                                                  |
+| Пакет              | Верзија                                                         |
+| ------------------ | --------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                       |
+| `electron-builder` | `^26.15.3`                                                      |
+| `electron-updater` | `^6.8.9`                                                        |
+| `better-sqlite3`   | роот `^13.0.2` (Ноде-АПИ унапред гради — без ребуилд Electron ) |
+| Верзија апликације | `3.8.0`                                                         |
+| ИД апликације      | `online.omniroute.desktop`                                      |
+| Назив производа    | `OmniRoute`                                                     |
 
-## Скрипте (коренски `package.json`)
+## Скрипте (роот `package.json`)
 
-| Скрипта                           | Намена                                                                                             |
-| --------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Покреће `npm run dev` + чека `localhost:20128` + покреће Electron                                  |
-| `npm run electron:build`          | Израђује Next.js, а затим покреће `electron-builder` за тренутни оперативни систем                 |
-| `npm run electron:build:win`      | Израђује Windows NSIS инсталер + преносиву верзију (x64)                                           |
-| `npm run electron:build:mac`      | Израђује macOS DMG (Intel + Apple Silicon)                                                         |
-| `npm run electron:build:linux`    | Израђује Linux AppImage + DEB (x64 + arm64)                                                        |
-| `npm run electron:smoke:packaged` | Покреће упаковану бинарну датотеку и проверава да ли `/login` враћа HTTP 200, а затим је искључује |
+| Скрипта                           | Сврха                                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Покреће `npm run dev` + чека `localhost:20128` + покреће Electron                   |
+| `npm run electron:build`          | Гради Next.js а затим покреће `electron-builder` за тренутни OS                     |
+| `npm run electron:build:win`      | Израђује Windows NSIS инсталатер + портабле (к64)                                   |
+| `npm run electron:build:mac`      | Израђује macOS DMG (Интел + Аппле Силицон)                                          |
+| `npm run electron:build:linux`    | Прави Linux AppImage + DEB (к64 + арм64)                                            |
+| `npm run electron:smoke:packaged` | Покреће упаковану бинарну датотеку и испитује `/login` за HTTP 200, а затим се гаси |
 
-Радни простор `electron/` такође пружа:
+`electron/` радни простор такође излаже:
 
 - `npm run prepare:bundle` — покреће `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — macOS израде за појединачне архитектуре
-- `npm run pack` — израда само директоријума за локално тестирање (без инсталера)
+- `npm run build:mac-x64` / `build:mac-arm64` — једнолучне macOS граде
+- `npm run pack` — верзија само за директоријум за локално тестирање (без инсталатера)
 
-## Распоред директоријума
+## Опциони пакети за време извршавања
+
+Десктоп верзије могу да објаве опционе архиве времена извршавања заједно са својим инсталатерима. Инсталирани сервер садржи `optional-packs.index.json` (под `resources/app` на Windows и Linux). За унос `browser-runtime`, прочитајте `packs[].tarball` и преузмите** то тачно име датотеке из истог издања** . Имена архива укључују SHA-256 сажетак; различите грађе могу захтевати различите архиве. Задржите назив преузете датотеке непромењен.
+
+Копирајте индекс инсталиране апликације и изабрану архиву у један директоријум, а затим користите CLI из истог издања:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` приказује стање инсталације и верификације, а не име архивске датотеке. Индекс у пакету бира архиву. Инсталација верификује контролну суму архиве пре екстракције и контролну суму свог пакета пре замене инсталираног пакета. Чита локалне датотеке; не преузима архиве које недостају. Поново покрените апликацију након инсталације. Ако издање нема одговарајуће средство, опциони пакет није доступан преко средстава тог издања.
+
+## Изглед директоријума
 
 ```
 electron/
-├── package.json              # Electron зависности + electron-builder конфигурација
-├── main.js                   # Главни процес (24 KB — погледајте напомене испод)
-├── preload.js                # contextBridge IPC мост
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI типови
-├── README.md                 # Напомене унутар радног простора
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder излаз (игнорише га git)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Припрема .next/electron-standalone пакет
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Smoke тест након изградње
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-И `main.js` и `preload.js` су **CommonJS `.js` датотеке**, а не TypeScript. Типови
-за renderer страну налазе се у `electron/types.d.ts`.
+И `main.js` и `preload.js` су**CommonJS `.js` датотеке** , не TypeScript. Откуцаји на страни рендерера живе у `electron/types.d.ts`.
 
 ## IPC мост (`preload.js`)
 
-Preload излаже API са листом дозвољених метода на `window.electronAPI` користећи `contextBridge`
-са `contextIsolation: true` и `nodeIntegration: false`.
+Предучитавање излаже API са беле листе на `window.electronAPI` користећи `contextBridge` са `contextIsolation: true` и `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -110,105 +117,111 @@ const VALID_CHANNELS = {
 
 Изложене методе:
 
-| Позив из renderer-а                                               | Тип                     |
-| ----------------------------------------------------------------- | ----------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                  |
-| `openExternal(url)`                                               | invoke                  |
-| `getDataDir()`                                                    | invoke                  |
-| `restartServer()`                                                 | invoke                  |
-| `getAppVersion()`                                                 | invoke                  |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                  |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                    |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (враћа уклањач) |
+| Рендерер цалл                                                     | Тип                      |
+| ----------------------------------------------------------------- | ------------------------ |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | призивати                |
+| `openExternal(url)`                                               | призивати                |
+| `getDataDir()`                                                    | призивати                |
+| `restartServer()`                                                 | призивати                |
+| `getAppVersion()`                                                 | призивати                |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | призивати                |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | послати                  |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | примити (враћа диспосер) |
 
-Помоћне receive функције враћају **функцију за уклањање** уместо да се ослањају на
-`removeAllListeners` — тиме се спречава нагомилавање слушалаца када се React компоненте
-поново монтирају.
+Примаоци враћају а** функција диспозера** уместо ослањања на `removeAllListeners` — ово спречава акумулацију слушалаца када се React компоненте поново монтирају.
 
 ## Животни циклус сервера
 
-`main.js` директно покреће самостални Next.js пакет помоћу Electron Node
-окружења како би се избегла неусклађеност ABI-ја изворних модула са системским Node-ом:
+`main.js` покреће Next.js самостални пакет директно са Electron ноде рунтиме-ом да би се избегло неслагање ABI изворног модула са системским чвором:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
 Најважније:
 
-- `waitForServer()` проверава URL до 30 s пре приказивања прозора (нема празног екрана при хладном покретању).
-- `stdio: "pipe"` хвата stdout/stderr; фразе које означавају спремност (`Ready` / `listening`) емитују `server-status: running` преко IPC-а.
-- `before-quit` чека до 5 s на уредан SIGTERM (WAL checkpoint), а затим шаље SIGKILL.
-- Прекидач порта у системској палети (`20128`, `3000`, `8080`) зауставља и поново покреће сервер, а затим поново учитава BrowserWindow.
+- `waitForServer()` анкетира URL до 30 с пре него што прикаже прозор (нема празног екрана при хладном старту).
+- `stdio: "pipe"` хвата stdout/stderr; спремне фразе (`Ready` / `listening`) емитују `server-status: running` преко IPC.
+- `before-quit` чека до 5 с на грациозан SIGTERM (WAL контролна тачка), а затим шаље SIGKILL.
+- Пребацивач портова у траи (`20128`, `3000`, `8080`) зауставља и поново покреће сервер, а затим поново учитава BrowserWindow.
 
-## Аутоматско иницијализовање тајни без конфигурације
+## Тајни Боотстрап са нултом конфигурацијом
 
-При првом покретању, главни процес аутоматски генерише и трајно чува недостајуће тајне:
+Приликом првог покретања, главни процес аутоматски генерише и задржава тајне које недостају:
 
-| Тајна                    | Извор                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                               |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (одбија ако шифровани акредитиви већ постоје) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                               |
+| Тајна                    | Извор                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                            |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (одбија ако шифровани кредити већ постоје) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                            |
 
-Трајно се чувају у `<DATA_DIR>/server.env`. `DATA_DIR` се разрешава на:
+Упорно `<DATA_DIR>/server.env`. `DATA_DIR` решава на:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` или `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Прозор и системска палета
+## Тражење датотеке окружења
 
-- `BrowserWindow`: 1400×900 (минимално 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, дугмад за управљање прозором на `{ x: 16, y: 16 }`.
+Пре покретања сервера, главни процес (`getPreferredEnvFilePath()` у `electron/main.js`) бира** један** `.env` датотека: прва од ових која постоји.
+
+1. `$DATA_DIR/.env`, када је `DATA_DIR` подешен у окружењу са којим је апликација покренута.
+2. `<resolved DATA_DIR>/.env`, користећи исте подразумеване вредности као горе: `%APPDATA%\omniroute\.env` на Windows, `$XDG_CONFIG_HOME/omniroute/.env` или `~/.omniroute/.env` на Linux и macOS.
+3. `.env` у радном директорију процеса.
+
+Главни процес чита само ту датотеку; каснији кандидати се не спајају. Серверско окружење се тада гради са овим приоритетом (прво највише):
+
+1. Electron процесно окружење (варијабле наслеђене од онога што је покренуло апликацију).
+2. Изабрана `.env` датотека.
+3. `<DATA_DIR>/server.env` (горе тајне за покретање).
+
+Процесно окружење се снима када се апликација покрене, тако да променљива системског или корисничког окружења постављена док је апликација покренута (укључујући и док се налази у траци након што је прозор затворен) не стиже до сервера док се апликација потпуно не затвори и поново покрене. За дугмад за време извршавања као што је `CONTEXT_LENGTH_<PROVIDER>` (погледајте [Променљиве окружења: дужина контекста по добављачима](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), дајте предност `.env` фајлу, а затим га потпуно затворите (треј,** Одустани** ) и поново покрените.
+
+## Прозор и лежиште
+
+- `BrowserWindow`: 1400 × 900 (мин 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, семафор на `{ x: 16, y: 16 }`.
 - Windows/Linux: изворна насловна трака.
-- Дугме за затварање минимизује апликацију у системску палету; мени системске палете садржи **Отвори OmniRoute**, **Отвори контролну таблу** (у спољном прегледачу), подмени **Порт сервера**, **Провери ажурирања**, **Изађи**.
+- Дугме за затварање минимизира у лежиште; мени у траци има** Отвори OmniRoute** ,** Отворите контролну таблу** (спољни претраживач),** Порт сервера** подмени,** Проверите ажурирања** ,** Одустани** .
 
 ## Политика безбедности садржаја
 
-Поставља се преко `session.defaultSession.webRequest.onHeadersReceived`. Значајне директиве:
+Поставите преко `session.defaultSession.webRequest.onHeadersReceived`. Значајне директиве:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Режим развоја додаје `'unsafe-eval'` само у `script-src`
+- Дев режим додаје `'unsafe-eval'` само у `script-src`
 
 ## Аутоматско ажурирање
 
-Користи `electron-updater` са GitHub добављачем (`diegosouzapw/OmniRoute`).
+Користи `electron-updater` са GitHub провајдером (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Догађаји се прослеђују процесу за приказ преко `update-status` IPC-а:
-  `checking`, `available`, `not-available`, `downloading` (са `percent`), `downloaded`, `error`
-- `installUpdate()` зауставља сервер, а затим позива `autoUpdater.quitAndInstall()`
-- Прескаче се у режиму развоја (`!app.isPackaged`)
+- Догађаји се прослеђују рендереру преко `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (са `percent`), `downloaded`, `error`
+- `installUpdate()` убија сервер, а затим позива `autoUpdater.quitAndInstall()`
+- Прескочено у дев моду (`!app.isPackaged`)
 
-## Процес изградње
+## Буилд Пипелине
 
-1. `npm run build` → самостална Next.js апликација у `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → поново смешта садржај у `.next/electron-standalone` и преписује апсолутне путање унутар `server.js` + `required-server-files.json` како би пакет могао да се премешта.
-3. `electron-builder` пакује `main.js`, `preload.js`, `node_modules` и `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → Next.js самостално у `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → поново ступа у `.next/electron-standalone` и поново пише апсолутне путање унутар `server.js` + `required-server-files.json` тако да се пакет може премештати.
+3. `electron-builder` пакети `main.js`, `preload.js`, `node_modules` и `extraResources: { ../.next/electron-standalone → app }`.
 
-### Циљеви изградње
+### Изградите мете
 
-| ОС      | Циљеви                                         |
-| ------- | ---------------------------------------------- |
-| Windows | NSIS инсталатор + преносива верзија (x64)      |
-| macOS   | DMG (Intel + arm64, превлачење у Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)                   |
+| OS      | Циљеви                                      |
+| ------- | ------------------------------------------- |
+| Windows | NSIS инсталатер + портабле (к64)            |
+| macOS   | DMG (Интел + арм64, превуците у апликације) |
+| Linux   | AppImage + DEB (к64 + арм64)                |
 
-NSIS подешавања: `oneClick: false`, омогућава кориснику да изабере директоријум за инсталацију и креира пречице на радној површини и у менију Start.
+NSIS подешавања: `oneClick: false`, омогућава кориснику да изабере директоријум за инсталацију, креира пречице за радну површину и мени Старт.
 
-## Основно тестирање упаковане верзије
+## Упакована верзија за тестирање дима
 
 ```bash
 npm run electron:smoke:packaged
@@ -216,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Аутоматски проналази упаковану извршну датотеку у `electron/dist-electron/` за тренутну платформу.
-- Покреће је са изолованим директоријумима `HOME`/`APPDATA`/`XDG_*` како не би приступала подацима програмера.
-- Проверава `http://127.0.0.1:20128/login` док не добије HTTP 200 у року од 45 s.
-- Надгледа stderr/stdout ради фаталних образаца (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, итд.).
-- Након што апликација постане спремна, чека 2 s стабилног рада, затим шаље SIGTERM и чека да се порт ослободи.
-- У CI окружењу аутоматски прослеђује `--no-sandbox --disable-gpu` (и `--disable-dev-shm-usage` на Linux-у).
+- Аутоматски открива упаковану бинарну датотеку у `electron/dist-electron/` за тренутну платформу.
+- Покреће се са изолованим директоријумима `HOME`/`APPDATA`/`XDG_*` тако да не додирује податке програмера.
+- Анкете `http://127.0.0.1:20128/login` за HTTP 200 у року од 45 с.
+- Гледа stderr/stdout на фаталне обрасце (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, итд.).
+- Чека 2 с стабилног времена рада након спремности, затим издаје SIGTERM и чека да се порт ослободи.
+- У CI, аутоматски прослеђује `--no-sandbox --disable-gpu` (и `--disable-dev-shm-usage` на Linux).
 
-Замене преко променљивих окружења: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Енв замењује: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Потписивање кода
 
-`electron/package.json` **не** повезује директно акредитиве за потписивање. Проследите их алатки `electron-builder` путем променљивих окружења:
+`electron/package.json` доес** не** директно потписивање акредитива. Проследите их преко енв варс у `electron-builder`:
 
 ### macOS
 
@@ -250,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-Потписивање AppImage датотеке је опционо — подесите `LINUX_GPG_KEY` ако је потребно потписивање.
+AppImage потписивање је опционо — сет `LINUX_GPG_KEY` ако потписивање.
 
 ## Дистрибуција
 
-Артефакти се смештају у `electron/dist-electron/`:
+Артефакти слете у `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Издања се објављују у GitHub Releases (`diegosouzapw/OmniRoute`), где и `electron-updater` проверава да ли постоје нове верзије.
+Издања се објављују у GitHub издањима (`diegosouzapw/OmniRoute`), где `electron-updater` проверава да ли постоје нове верзије.
 
 ## Решавање проблема
 
-| Симптом                                                                                | Решење                                                                                                                                                                                                                        |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` након преласка на нову главну верзију Electron-а | better-sqlite3 v13 испоручује унапред изграђене Node-API бинарне датотеке — поново покрените `npm install` у кореном директоријуму и `prepare:bundle` (он проверава унапред изграђену бинарну датотеку за тренутну платформу) |
-| `ERR_DLOPEN_FAILED` за изворни модул                                                   | Поново покрените `prepare:bundle` — он одмах пријављује грешку када недостаје унапред изграђена Node-API бинарна датотека за тренутну платформу                                                                               |
-| Прозор је празан на Linux-у                                                            | Потврдите да се Next.js сервер заиста повезао са променљивом PORT (проверите `[Server]` евиденције)                                                                                                                           |
-| Нотаризација на macOS-у се зауставља                                                   | Уверите се да су променљиве `APPLE_*` извезене, а не само наведене у `.env` датотеци                                                                                                                                          |
-| Windows SmartScreen упозорење                                                          | Потпишите EV сертификатом или нека корисници кликну десним тастером миша → „Ипак покрени“                                                                                                                                     |
-| Брзи тест не успева јер је порт заузет                                                 | Зауставите све локалне развојне сервере на порту 20128 пре покретања `electron:smoke:packaged`                                                                                                                                |
+| Симптом                                                          | Поправи                                                                                                                                                       |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` после Electron главни удар | better-sqlite3 в13 испоручује ноде-АПИ пре-буилдс — поново покрените `npm install` у корену и `prepare:bundle` (он верификује пребуилд за тренутну платформу) |
+| `ERR_DLOPEN_FAILED` за изворни модул                             | Поново покрените `prepare:bundle` — брзо не успева када недостаје Ноде-АПИ унапред изграђен за тренутну платформу                                             |
+| Прозор је празан на Linux                                        | Потврдите Next.js сервер стварно везан за PORT (проверите `[Server]` евиденције)                                                                              |
+| macOS оверавање тезги                                            | Уверите се да се `APPLE_*` варс извозе, не само у `.env`                                                                                                      |
+| Windows SmartScreen упозорење                                    | Потпишите се са EV цертом или корисници кликну десним тастером → „Ипак покрени“                                                                               |
+| Тест дима не успева са прикључком у употреби                     | Зауставите било који локални дев сервер на 20128 пре него што покренете `electron:smoke:packaged`                                                             |
 
-## Погледајте и
+## Види такође
 
-- [SETUP_GUIDE.md](./SETUP_GUIDE.md)
-- [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- Изворни код: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Помоћне скрипте: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- [SETUP_GUIDE.мд](./SETUP_GUIDE.md)
+- [RELEASE_CHECKLIST.мд](../ops/RELEASE_CHECKLIST.md)
+- Извор: `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- Помоћници: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

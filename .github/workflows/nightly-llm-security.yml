@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   promptfoo-guard:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: promptfoo — injection guard (block mode, no secret)
     # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
     # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
@@ -20,11 +21,32 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with: { node-version: "24", cache: npm }
+      # Fresh runtime state per run (same contract as nightly-schemathesis.yml). The
+      # omni-light runner keeps a persistent $HOME, so the server used to boot on
+      # $HOME/.omniroute, where the database left by older nights sat at migration 134
+      # while the tip ships 200+: the mass-migration guard (#3416, threshold 50) refused
+      # to migrate it, the catalog warm-up hit `no such table: model_capability_overrides`
+      # and the health wait failed every night (no verdict since 2026-08-27). A DATA_DIR
+      # under $RUNNER_TEMP is a new database every run, so every migration applies and
+      # nothing on the box is touched. Auto-backups stay off: one pre-migration backup
+      # per boot had piled up 1.6 GB under the runner's home.
+      - name: Prepare isolated runtime state
+        id: runtime
+        run: |
+          data_dir=$(mktemp -d "$RUNNER_TEMP/omniroute-llm-security.XXXXXX")
+          mkdir "$data_dir/plugins"
+          {
+            echo "DATA_DIR=$data_dir"
+            echo "OMNIROUTE_PLUGINS_DIR=$data_dir/plugins"
+          } >> "$GITHUB_ENV"
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
       - name: Build CLI bundle
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           OMNIROUTE_BUILD_BACKEND_ONLY: "1"
+          OMNIROUTE_USE_TURBOPACK: "0"
         run: npm run build:cli
       # Own port: this box also hosts the deployed server (the a11y job's
       # "20128 is already used" nights prove it). A test server that dies on
@@ -36,6 +58,7 @@ jobs:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           PORT: "21778"
           INJECTION_GUARD_MODE: block
+          DISABLE_SQLITE_AUTO_BACKUP: "true"
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
@@ -46,8 +69,15 @@ jobs:
           echo "::error::Test server did not come up on 21778 in 120s — see server.log. Refusing to run the guard eval against an unknown target."
           tail -40 server.log || true
           exit 1
+      # Pin the CLI to the lockfile version and execute outside the checkout so
+      # npx cannot select a conflicting local dependency tree (#17017).
+      # 0.125.1 still treats object.error as a scheduler failure (#10866); the
+      # config requires HTTP 400 and serializes the complete JSON body before
+      # assertions inspect SECURITY_001. The offline HTTP fixture verifies both
+      # accepted blocks and rejected wrong-code/status responses.
       - name: promptfoo guard-validation
-        run: npx --yes promptfoo@latest eval -c promptfooconfig.yaml --no-cache
+        working-directory: ${{ runner.temp }}
+        run: npx --yes promptfoo@0.125.1 eval -c "$GITHUB_WORKSPACE/promptfooconfig.yaml" --no-cache
         env:
           OMNIROUTE_URL: http://localhost:21778
           OMNIROUTE_API_KEY: not-needed-blocked-before-upstream
@@ -56,6 +86,7 @@ jobs:
         run: kill "$(cat server.pid)" || true
 
   garak:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: garak probes (skip without provider secret)
     # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
     # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
@@ -84,13 +115,28 @@ jobs:
       - uses: actions/setup-node@v7
         if: steps.gate.outputs.run == 'true'
         with: { node-version: "24", cache: npm }
+      # Same isolation as the promptfoo job above: a fresh DATA_DIR per run, never the
+      # runner's persistent $HOME/.omniroute (stale schema → migration guard → no boot).
+      - name: Prepare isolated runtime state
+        id: runtime
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          data_dir=$(mktemp -d "$RUNNER_TEMP/omniroute-llm-security.XXXXXX")
+          mkdir "$data_dir/plugins"
+          {
+            echo "DATA_DIR=$data_dir"
+            echo "OMNIROUTE_PLUGINS_DIR=$data_dir/plugins"
+          } >> "$GITHUB_ENV"
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
         if: steps.gate.outputs.run == 'true'
       - name: Build CLI bundle
         if: steps.gate.outputs.run == 'true'
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           OMNIROUTE_BUILD_BACKEND_ONLY: "1"
+          OMNIROUTE_USE_TURBOPACK: "0"
         run: npm run build:cli
       # Same contract as the promptfoo job above: dedicated port, and the
       # health wait must fail the job instead of letting garak probe whatever
@@ -100,6 +146,7 @@ jobs:
         env:
           JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
           PORT: "21779"
+          DISABLE_SQLITE_AUTO_BACKUP: "true"
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid

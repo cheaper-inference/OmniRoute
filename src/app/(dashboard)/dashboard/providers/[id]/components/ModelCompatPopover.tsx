@@ -4,9 +4,10 @@
 // ModelCompatPopover and its local helper (recordToHeaderRows) moved out of
 // ProviderDetailPageClient.tsx. Leaf deps: @/shared + providerPageHelpers.
 
-import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
-import { Input, Toggle } from "@/shared/components";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Input as KitInput } from "@omniroute/ui-kit/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
+import { Button, Input, Select, Toggle } from "@/shared/components";
 import { MODEL_COMPAT_PROTOCOL_KEYS } from "@/shared/constants/modelCompat";
 import {
   upstreamHeadersRecordsEqual,
@@ -159,14 +160,6 @@ export default function ModelCompatPopover({
   const [paramSaveFailed, setParamSaveFailed] = useState(false);
   const [valuePeekRowId, setValuePeekRowId] = useState<string | null>(null);
   const [valueFocusRowId, setValueFocusRowId] = useState<string | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const [portalPanelRect, setPortalPanelRect] = useState<{
-    top?: number;
-    bottom?: number;
-    left: number;
-    width: number;
-  } | null>(null);
   const headerRowIdRef = useRef(0);
   // Mirror of headerRows, kept in sync by applyHeaderRows below (every state
   // write goes through it), so blur/close commits read the freshest rows
@@ -300,8 +293,9 @@ export default function ModelCompatPopover({
     setValueFocusRowId(null);
   };
 
-  const handleToggleOpen = () => {
-    const next = !open;
+  // Radix (kit Popover) opens on the trigger and closes on Escape, an outside press or the
+  // trigger, returning focus to the trigger when the close did not come from outside (#18070).
+  const handleOpenChange = (next: boolean) => {
     setOpen(next);
     resetValueVisibility();
     if (next) loadHeaderRowsFor(protocol);
@@ -470,272 +464,222 @@ export default function ModelCompatPopover({
     queueMicrotask(() => tryCommitHeaderRows(normalized));
   };
 
-  useEffect(() => {
-    if (!open) return;
-    const onDocClick = (e: MouseEvent) => {
-      const target = e.target as Node;
-      const insideTrigger = ref.current?.contains(target);
-      const insidePanel = panelRef.current?.contains(target);
-      if (!insideTrigger && !insidePanel) {
-        setOpen(false);
-        setValuePeekRowId(null);
-        setValueFocusRowId(null);
-      }
-    };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [open]);
-
-  const updatePortalPanelRect = useCallback(() => {
-    if (!open || !ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const margin = 10;
-    const width = Math.min(window.innerWidth - 2 * margin, 24 * 16);
-    let left = rect.right - width;
-    left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
-    // Estimated panel height: capped at min(82vh, 42rem=672px)
-    const estimatedPanelHeight = Math.min(window.innerHeight * 0.82, 672);
-    const spaceBelow = window.innerHeight - rect.bottom - margin;
-    const spaceAbove = rect.top - margin;
-    if (spaceBelow < estimatedPanelHeight && spaceAbove > spaceBelow) {
-      // Not enough space below — open upward
-      setPortalPanelRect({ bottom: window.innerHeight - rect.top + 8, left, width });
-    } else {
-      setPortalPanelRect({ top: rect.bottom + 8, left, width });
-    }
-  }, [open]);
-
-  useLayoutEffect(() => {
-    // No rect reset on close: the portal render is gated on `open`, and
-    // reopening recomputes the rect below before the browser paints, so a
-    // stale rect is never visible.
-    if (!open) return;
-    updatePortalPanelRect();
-    window.addEventListener("resize", updatePortalPanelRect);
-    window.addEventListener("scroll", updatePortalPanelRect, true);
-    return () => {
-      window.removeEventListener("resize", updatePortalPanelRect);
-      window.removeEventListener("scroll", updatePortalPanelRect, true);
-    };
-  }, [open, updatePortalPanelRect]);
-
+  // The kit popover frame, sized to the old panel: 24rem (capped by the viewport), no inner
+  // padding (header and body pad themselves), and a height capped by the space Radix finds.
   const panelChromeClass =
-    "flex max-h-[min(82vh,42rem)] flex-col overflow-hidden rounded-xl border-2 border-zinc-200 bg-white shadow-2xl dark:border-zinc-600 dark:bg-zinc-950";
+    "z-[10040] flex w-[min(24rem,calc(100vw-20px))] max-h-[min(82vh,42rem,var(--radix-popover-content-available-height))] flex-col overflow-hidden p-0";
 
   return (
-    <div className="relative inline-flex" ref={ref}>
-      <button
-        type="button"
-        onClick={handleToggleOpen}
-        disabled={disabled}
-        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg border border-border bg-background text-text-muted hover:bg-muted hover:text-text-main disabled:opacity-50 transition-colors"
-        title={t("compatAdjustmentsTitle")}
-      >
-        <span className="material-symbols-outlined text-base leading-none">tune</span>
-        {!compact && t("compatButtonLabel")}
-      </button>
-      {open &&
-        typeof document !== "undefined" &&
-        portalPanelRect &&
-        createPortal(
-          <div
-            ref={panelRef}
-            className={panelChromeClass}
-            style={{
-              position: "fixed",
-              ...(portalPanelRect.top !== undefined
-                ? { top: portalPanelRect.top }
-                : { bottom: portalPanelRect.bottom }),
-              left: portalPanelRect.left,
-              width: portalPanelRect.width,
-              zIndex: 10040,
-            }}
-          >
-            <div className="shrink-0 border-b-2 border-zinc-200 bg-zinc-100 px-3 py-2.5 dark:border-zinc-600 dark:bg-zinc-900">
-              <p className="text-xs font-semibold text-text-main">{t("compatAdjustmentsTitle")}</p>
-              <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
-                {t("compatProtocolHint")}
-              </p>
-            </div>
-            <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-white p-3 [scrollbar-gutter:stable] [scrollbar-width:thin] dark:bg-zinc-950">
-              <label className="block text-[11px] font-medium text-text-muted mb-1.5">
-                {t("compatProtocolLabel")}
-              </label>
-              <select
-                value={protocol}
-                onChange={(e) => handleProtocolChange(e.target.value)}
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <Button
+          size="sm"
+          variant="outline"
+          icon="tune"
+          disabled={disabled}
+          className="gap-1.5 px-1.5 text-xs text-text-muted sm:px-2.5"
+          title={t("compatAdjustmentsTitle")}
+          aria-label={compact ? t("compatAdjustmentsTitle") : undefined}
+        >
+          {/* Phones: icon only (the title keeps the label), so a model card fits in two lines. */}
+          {!compact && <span className="hidden sm:inline">{t("compatButtonLabel")}</span>}
+        </Button>
+      </PopoverTrigger>
+      {/* Built only while open: a model list renders one popover per row (the old portal was
+          gated the same way). */}
+      {open && (
+        <PopoverContent
+          align="end"
+          collisionPadding={10}
+          aria-label={t("compatAdjustmentsTitle")}
+          className={panelChromeClass}
+        >
+          <div className="shrink-0 border-b-2 border-border bg-bg-subtle px-3 py-2.5">
+            <p className="text-xs font-semibold text-text-main">{t("compatAdjustmentsTitle")}</p>
+            <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
+              {t("compatProtocolHint")}
+            </p>
+          </div>
+          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto bg-surface p-3 [scrollbar-gutter:stable] [scrollbar-width:thin]">
+            <Select
+              label={t("compatProtocolLabel")}
+              value={protocol}
+              onChange={(e) => handleProtocolChange(e.target.value)}
+              disabled={disabled}
+              className="mb-4"
+              selectClassName="text-xs"
+            >
+              {MODEL_COMPAT_PROTOCOL_KEYS.map((p) => (
+                <option key={p} value={p}>
+                  {t(compatProtocolLabelKey(p))}
+                </option>
+              ))}
+            </Select>
+            <div className="flex flex-col gap-3.5">
+              <Toggle
+                size="sm"
+                label={t("compatToolIdShort")}
+                title={t("normalizeToolCallIdLabel")}
+                checked={normalizeToolCallId}
+                onChange={(v) => onCompatPatch(protocol, { normalizeToolCallId: v })}
                 disabled={disabled}
-                className="mb-4 w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-xs text-text-main focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-zinc-600 dark:bg-zinc-900"
-              >
-                {MODEL_COMPAT_PROTOCOL_KEYS.map((p) => (
-                  <option key={p} value={p}>
-                    {t(compatProtocolLabelKey(p))}
-                  </option>
-                ))}
-              </select>
-              <div className="flex flex-col gap-3.5">
+              />
+              {devToggle && (
                 <Toggle
                   size="sm"
-                  label={t("compatToolIdShort")}
-                  title={t("normalizeToolCallIdLabel")}
-                  checked={normalizeToolCallId}
-                  onChange={(v) => onCompatPatch(protocol, { normalizeToolCallId: v })}
+                  label={t("compatDoNotPreserveDeveloper")}
+                  title={t("preserveDeveloperRoleLabel")}
+                  checked={preserveDeveloperRole === false}
+                  onChange={(checked) =>
+                    onCompatPatch(protocol, { preserveOpenAIDeveloperRole: !checked })
+                  }
                   disabled={disabled}
                 />
-                {devToggle && (
-                  <Toggle
-                    size="sm"
-                    label={t("compatDoNotPreserveDeveloper")}
-                    title={t("preserveDeveloperRoleLabel")}
-                    checked={preserveDeveloperRole === false}
-                    onChange={(checked) =>
-                      onCompatPatch(protocol, { preserveOpenAIDeveloperRole: !checked })
-                    }
-                    disabled={disabled}
-                  />
-                )}
-              </div>
+              )}
+            </div>
 
-              {/* Param filters — model-level block/allow (#6625) */}
-              <div className="mt-4 space-y-2.5">
-                <label className="block text-[11px] font-semibold text-text-main">
-                  {providerText(t, "compatParamFiltersLabel", "Param Filters")}
-                </label>
-                <div>
-                  <input
-                    type="text"
-                    value={blockText}
-                    onChange={(e) => editParamDraft("block", e.target.value)}
-                    onBlur={() => saveModelParamFilters()}
-                    placeholder={t("compatBlockedParamsPlaceholder")}
-                    disabled={disabled}
-                    className="mb-1 w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] font-mono text-text-main placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 dark:border-zinc-600 dark:bg-zinc-900"
-                  />
-                  <p className="text-[10px] text-text-muted">
-                    {providerText(
-                      t,
-                      "compatBlockedParamsHint",
-                      "Blocked params (stripped from requests)"
-                    )}
-                    {paramSaving && ` ● ${t("compatSaving")}`}
-                    {paramSaveFailed && !paramSaving && (
-                      <span
-                        role="alert"
-                        className="ml-1 font-medium text-red-600 dark:text-red-400"
-                        title={t("failedSaveConnectionRetry")}
-                      >
-                        ● {t("failed")}
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    value={allowText}
-                    onChange={(e) => editParamDraft("allow", e.target.value)}
-                    onBlur={() => saveModelParamFilters()}
-                    placeholder={t("compatAllowedParamsPlaceholder")}
-                    disabled={disabled}
-                    className="mb-1 w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] font-mono text-text-main placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 dark:border-zinc-600 dark:bg-zinc-900"
-                  />
-                  <p className="text-[10px] text-text-muted">
-                    {providerText(
-                      t,
-                      "compatAllowedParamsHint",
-                      "Allowed params (re-added after deny)"
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-3 dark:border-zinc-600 dark:bg-zinc-900">
-                <label className="block text-[11px] font-semibold text-text-main mb-1">
-                  {t("compatUpstreamHeadersLabel")}
-                </label>
-                <p className="text-[11px] text-text-muted mb-3 leading-relaxed">
-                  {t("compatUpstreamHeadersHint")}
-                </p>
-                <div className="space-y-2">
-                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-1.5 items-end text-[10px] font-medium uppercase tracking-wide text-text-muted px-0.5">
-                    <span>{t("compatUpstreamHeaderName")}</span>
-                    <span className="col-span-1">{t("compatUpstreamHeaderValue")}</span>
-                    <span className="w-8 shrink-0" aria-hidden />
-                  </div>
-                  {headerRows.map((row) => (
-                    <div
-                      key={row.id}
-                      className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-1.5 items-center"
+            {/* Param filters — model-level block/allow (#6625) */}
+            <div className="mt-4 space-y-2.5">
+              <p className="block text-[11px] font-semibold text-text-main">
+                {providerText(t, "compatParamFiltersLabel", "Param Filters")}
+              </p>
+              <div>
+                <KitInput
+                  type="text"
+                  size="sm"
+                  value={blockText}
+                  onChange={(e) => editParamDraft("block", e.target.value)}
+                  onBlur={() => saveModelParamFilters()}
+                  placeholder={t("compatBlockedParamsPlaceholder")}
+                  aria-label={t("compatBlockedParamsPlaceholder")}
+                  disabled={disabled}
+                  className="mb-1 font-mono text-[11px]"
+                />
+                <p className="text-[10px] text-text-muted">
+                  {providerText(
+                    t,
+                    "compatBlockedParamsHint",
+                    "Blocked params (stripped from requests)"
+                  )}
+                  {paramSaving && ` ● ${t("compatSaving")}`}
+                  {paramSaveFailed && !paramSaving && (
+                    <span
+                      role="alert"
+                      className="ml-1 font-medium text-error"
+                      title={t("failedSaveConnectionRetry")}
                     >
-                      <Input
-                        value={row.name}
-                        onChange={(e) => updateHeaderRow(row.id, { name: e.target.value })}
-                        onBlur={onHeaderFieldBlur}
-                        disabled={disabled}
-                        placeholder={t("compatUpstreamHeaderNamePlaceholder")}
-                        className="gap-0 min-w-0"
-                        inputClassName="h-9 bg-white py-1.5 px-2 text-xs font-mono dark:bg-zinc-900"
-                        autoComplete="off"
-                      />
-                      <div
-                        className="min-w-0"
-                        onMouseEnter={() => setValuePeekRowId(row.id)}
-                        onMouseLeave={() =>
-                          setValuePeekRowId((cur) => (cur === row.id ? null : cur))
-                        }
-                      >
-                        <Input
-                          type={
-                            valuePeekRowId === row.id || valueFocusRowId === row.id
-                              ? "text"
-                              : "password"
-                          }
-                          value={row.value}
-                          onChange={(e) => updateHeaderRow(row.id, { value: e.target.value })}
-                          onFocus={() => setValueFocusRowId(row.id)}
-                          onBlur={() => {
-                            setValueFocusRowId((cur) => (cur === row.id ? null : cur));
-                            onHeaderFieldBlur();
-                          }}
-                          disabled={disabled}
-                          placeholder={t("compatUpstreamHeaderValuePlaceholder")}
-                          className="gap-0 min-w-0"
-                          inputClassName="h-9 bg-white py-1.5 px-2 text-xs dark:bg-zinc-900"
-                          autoComplete="off"
-                          spellCheck={false}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        disabled={
-                          disabled ||
-                          (headerRows.length <= 1 && !row.name.trim() && !row.value.trim())
-                        }
-                        onClick={() => removeHeaderRow(row.id)}
-                        title={t("compatUpstreamRemoveRow")}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/80 text-text-muted hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-muted transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-lg leading-none">
-                          close
-                        </span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  disabled={disabled || !canAddHeaderRow}
-                  onClick={addHeaderRow}
-                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-2 text-xs font-medium text-primary hover:bg-primary/5 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
-                >
-                  <span className="material-symbols-outlined text-base leading-none">add</span>
-                  {t("compatUpstreamAddRow")}
-                </button>
+                      ● {t("failed")}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div>
+                <KitInput
+                  type="text"
+                  size="sm"
+                  value={allowText}
+                  onChange={(e) => editParamDraft("allow", e.target.value)}
+                  onBlur={() => saveModelParamFilters()}
+                  placeholder={t("compatAllowedParamsPlaceholder")}
+                  aria-label={t("compatAllowedParamsPlaceholder")}
+                  disabled={disabled}
+                  className="mb-1 font-mono text-[11px]"
+                />
+                <p className="text-[10px] text-text-muted">
+                  {providerText(
+                    t,
+                    "compatAllowedParamsHint",
+                    "Allowed params (re-added after deny)"
+                  )}
+                </p>
               </div>
             </div>
-          </div>,
-          document.body
-        )}
-    </div>
+
+            <div className="mt-4 rounded-lg border-2 border-border bg-bg-subtle p-3">
+              <p className="block text-[11px] font-semibold text-text-main mb-1">
+                {t("compatUpstreamHeadersLabel")}
+              </p>
+              <p className="text-[11px] text-text-muted mb-3 leading-relaxed">
+                {t("compatUpstreamHeadersHint")}
+              </p>
+              <div className="space-y-2">
+                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-1.5 items-end text-[10px] font-medium uppercase tracking-wide text-text-muted px-0.5">
+                  <span>{t("compatUpstreamHeaderName")}</span>
+                  <span className="col-span-1">{t("compatUpstreamHeaderValue")}</span>
+                  <span className="w-8 shrink-0" aria-hidden />
+                </div>
+                {headerRows.map((row) => (
+                  <div
+                    key={row.id}
+                    className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-1.5 items-center"
+                  >
+                    <Input
+                      value={row.name}
+                      onChange={(e) => updateHeaderRow(row.id, { name: e.target.value })}
+                      onBlur={onHeaderFieldBlur}
+                      disabled={disabled}
+                      placeholder={t("compatUpstreamHeaderNamePlaceholder")}
+                      className="gap-0 min-w-0"
+                      inputClassName="h-9 py-1.5 px-2 text-xs font-mono"
+                      autoComplete="off"
+                    />
+                    <div
+                      className="min-w-0"
+                      onMouseEnter={() => setValuePeekRowId(row.id)}
+                      onMouseLeave={() => setValuePeekRowId((cur) => (cur === row.id ? null : cur))}
+                    >
+                      <Input
+                        type={
+                          valuePeekRowId === row.id || valueFocusRowId === row.id
+                            ? "text"
+                            : "password"
+                        }
+                        value={row.value}
+                        onChange={(e) => updateHeaderRow(row.id, { value: e.target.value })}
+                        onFocus={() => setValueFocusRowId(row.id)}
+                        onBlur={() => {
+                          setValueFocusRowId((cur) => (cur === row.id ? null : cur));
+                          onHeaderFieldBlur();
+                        }}
+                        disabled={disabled}
+                        placeholder={t("compatUpstreamHeaderValuePlaceholder")}
+                        className="gap-0 min-w-0"
+                        inputClassName="h-9 py-1.5 px-2 text-xs"
+                        autoComplete="off"
+                        spellCheck={false}
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      icon="close"
+                      disabled={
+                        disabled ||
+                        (headerRows.length <= 1 && !row.name.trim() && !row.value.trim())
+                      }
+                      onClick={() => removeHeaderRow(row.id)}
+                      title={t("compatUpstreamRemoveRow")}
+                      aria-label={t("compatUpstreamRemoveRow")}
+                      className="size-9 min-h-9 shrink-0 rounded-lg text-text-muted hover:bg-error/10 hover:text-error"
+                    />
+                  </div>
+                ))}
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                icon="add"
+                fullWidth
+                disabled={disabled || !canAddHeaderRow}
+                onClick={addHeaderRow}
+                className="mt-3 border-dashed text-xs"
+              >
+                {t("compatUpstreamAddRow")}
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      )}
+    </Popover>
   );
 }

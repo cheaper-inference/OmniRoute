@@ -9,20 +9,23 @@
  */
 import { preserveOpencodeSessionIdentity } from "../../utils/opencodeSessionIdentity.ts";
 
+// Pre-compiled set for O(1) lease control header checks (hot path)
+const LEASE_CONTROL_HEADERS = new Set([
+  "x-omniroute-lease-owner",
+  "x-omniroute-lease-generation",
+  "x-deadline-token",
+]);
+
+function isLeaseControlHeader(key: string): boolean {
+  return LEASE_CONTROL_HEADERS.has(key.toLowerCase());
+}
+
 export function buildExecutorClientHeaders(
   headers: Headers | Record<string, unknown> | null | undefined,
   userAgent?: string | null,
   request?: { provider?: string; body?: unknown }
 ) {
   const normalized: Record<string, string> = {};
-  const isLeaseControlHeader = (key: string) => {
-    const lowerKey = key.toLowerCase();
-    return (
-      lowerKey === "x-omniroute-lease-owner" ||
-      lowerKey === "x-omniroute-lease-generation" ||
-      lowerKey === "x-deadline-token"
-    );
-  };
 
   if (headers instanceof Headers) {
     headers.forEach((value, key) => {

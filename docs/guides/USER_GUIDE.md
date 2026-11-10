@@ -1,7 +1,7 @@
 ---
 title: "User Guide"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.52
+lastUpdated: 2026-10-05
 ---
 
 # User Guide
@@ -141,6 +141,8 @@ Models:
 
 **Pro Tip:** Use Opus for complex tasks, Sonnet for speed. OmniRoute tracks quota per model!
 
+No browser on the OmniRoute host? Run `claude setup-token` anywhere Claude Code is logged in and paste the one-year token into the **Setup Token** tab. See [Claude Code with a setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+
 Claude and Claude Code-compatible routes preserve `max` thinking effort for Opus and Sonnet
 models. Haiku models do not accept the `max` effort tier, so OmniRoute downgrades that
 request to a high thinking budget before sending it upstream.
@@ -173,6 +175,22 @@ Models:
   gh/claude-opus-4.7
   gh/gemini-3.1-pro-preview
 ```
+
+**AI Credits (token-based billing).** When GitHub reports `credits_used` for the
+account, the Provider Limits card shows an **AI Credits** row with the credits
+consumed in the current billing period, including on unlimited organization plans.
+
+**Local AI Credits limit.** Edit a GitHub connection and set **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Blank disables it; `0`
+always skips the connection. When the last usage reading is at or above the limit,
+account selection skips that connection and routing falls back to your other
+connections, the same way a quota-policy cutoff does. The check reads the usage that
+the periodic quota refresh already collects — it never calls GitHub on the request
+path — and it fails open: a missing or stale reading (older than 15 minutes, or from
+a billing period that already reset) does not block the connection. This is a local
+safeguard, **not a guaranteed spending ceiling**: GitHub reporting delays, the refresh
+interval, in-flight requests and usage outside OmniRoute can exceed it. Use GitHub's
+own spending controls for a hard cap.
 
 ### 💰 Cheap Providers
 
@@ -356,7 +374,10 @@ omniroute
 omniroute --port 3000
 ```
 
-The CLI automatically loads `.env` from `~/.omniroute/.env` or `./.env`.
+The CLI automatically loads `.env` from `~/.omniroute/.env` or `./.env`. A `./.env` in the
+working directory may set only a short allowlist of keys (ports, `REQUIRE_API_KEY`, locale and
+color settings); put everything else in `~/.omniroute/.env`. See
+[CLI launch contracts](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Tray mode
 
@@ -582,28 +603,28 @@ post_install() {
 
 ### Environment Variables
 
-| Variable                                | Default                              | Description                                                                                               |
-| --------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT signing secret (**change in production**)                                                             |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | First login password                                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | Data directory (db, usage, logs)                                                                          |
-| `PORT`                                  | framework default                    | Service port (`20128` in examples)                                                                        |
-| `HOSTNAME`                              | framework default                    | Bind host (Docker defaults to `0.0.0.0`)                                                                  |
-| `NODE_ENV`                              | runtime default                      | Set `production` for deploy                                                                               |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Public base URL surfaced to the dashboard and exposed to the server (replaces legacy `BASE_URL`)          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Cloud sync endpoint base URL (replaces legacy `CLOUD_URL`)                                                |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC secret for generated API keys                                                                        |
-| `REQUIRE_API_KEY`                       | `false`                              | Enforce Bearer API key on `/v1/*`                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Allow authenticated dashboard users to reveal full stored API key values on demand                        |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Server-side refresh cadence for cached Provider Limits data; UI refresh buttons still trigger manual sync |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Disable automatic SQLite snapshots before writes/import/restore; manual backups still work                |
-| `APP_LOG_TO_FILE`                       | `true`                               | Enables application and audit log output to disk                                                          |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Force `Secure` auth cookie (behind HTTPS reverse proxy)                                                   |
-| `CLOUDFLARED_BIN`                       | unset                                | Use an existing `cloudflared` binary instead of managed download                                          |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport for managed Quick Tunnels (`http2`, `quic`, or `auto`)                                          |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js heap limit in MB                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Max prompt cache entries                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Max semantic cache entries                                                                                |
+| Variable                                | Default                  | Description                                                                                                                            |
+| --------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(auto-generated)_       | JWT signing secret — auto-generated on first run and persisted to `server.env`; set it explicitly when the data directory is ephemeral |
+| `INITIAL_PASSWORD`                      | _(unset)_                | First login password. npm/source installs start with `CHANGEME`: replace it. Unset: onboarding wizard                                  |
+| `DATA_DIR`                              | `~/.omniroute`           | Data directory (db, usage, logs)                                                                                                       |
+| `PORT`                                  | framework default        | Service port (`20128` in examples)                                                                                                     |
+| `HOSTNAME`                              | framework default        | Bind host (Docker defaults to `0.0.0.0`)                                                                                               |
+| `NODE_ENV`                              | runtime default          | Set `production` for deploy                                                                                                            |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Public base URL surfaced to the dashboard and exposed to the server (replaces legacy `BASE_URL`)                                       |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync endpoint base URL (replaces legacy `CLOUD_URL`)                                                                             |
+| `API_KEY_SECRET`                        | _(auto-generated)_       | HMAC secret for generated API keys — auto-generated on first run and persisted to `server.env`                                         |
+| `REQUIRE_API_KEY`                       | `false`                  | Enforce Bearer API key on `/v1/*`                                                                                                      |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Allow authenticated dashboard users to reveal full stored API key values on demand                                                     |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Server-side refresh cadence for cached Provider Limits data; UI refresh buttons still trigger manual sync                              |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Disable automatic SQLite snapshots before writes/import/restore; manual backups still work                                             |
+| `APP_LOG_TO_FILE`                       | `true`                   | Enables application and audit log output to disk                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Force `Secure` auth cookie (behind HTTPS reverse proxy)                                                                                |
+| `CLOUDFLARED_BIN`                       | unset                    | Use an existing `cloudflared` binary instead of managed download                                                                       |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport for managed Quick Tunnels (`http2`, `quic`, or `auto`)                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js heap limit in MB                                                                                                               |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Max prompt cache entries                                                                                                               |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Max semantic cache entries                                                                                                             |
 
 For the full environment variable reference, see the [README](../README.md).
 
@@ -640,7 +661,7 @@ For the full environment variable reference, see the [README](../README.md).
 
 **xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-hosted: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-hosted: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — Search-augmented: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
@@ -652,7 +673,7 @@ For the full environment variable reference, see the [README](../README.md).
 
 **Cohere (`cohere/`)** — RAG-focused: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
@@ -727,6 +748,31 @@ Pick a distinct prefix (`mygw`, `acme-proxy`). If requests to a custom node fail
 error that names a built-in provider or its credentials, check whether the node's prefix is
 reserved: nodes saved before this rule existed are still stored, but their prefix routes to
 the built-in provider. Edit the node and give it a new prefix.
+
+#### Per-connection gateway options
+
+These keys go in a connection's `providerSpecificData` (for example via
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (integer, 1–1024) — for OpenAI chat-format compatible connections whose
+  gateway rejects long tool names. Longer names are sent as short aliases and restored in the
+  response.
+- `quotaEndpoint` — the gateway's quota/credits endpoint, read for the dashboard quota strip and
+  quota-aware routing. Works on both OpenAI- and Anthropic-compatible connections; the full shape
+  is documented in `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### Chaining OmniRoute Peers
 
@@ -906,6 +952,65 @@ Chain: production-fallback
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
 ```
+
+---
+
+### Common Provider Combinations & Routing Patterns
+
+Here are example patterns for combining multiple providers and routing between them in OmniRoute:
+
+#### 1. Coding Agent Combo: High-End Reasoning with Cost/Speed Fallback
+
+Ideal for coding agents (OpenCode, Claude Code, Cursor, Cline). Routes initially to frontier reasoning models, falling back to fast coding models on quota exhaustion or errors.
+
+- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
+- **Models**:
+  1. `claude/claude-sonnet-4-6` (Primary coding agent)
+  2. `openai/gpt-4o` (Secondary high-capacity fallback)
+  3. `deepseek/deepseek-v4-flash` (High-efficiency, cost-effective fallback)
+
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
+
+#### 2. Free-Tier Auto Failover Combo
+
+Chains multiple free-tier and keyless providers to maximize uptime without API costs.
+
+- **Strategy**: `Least Used` or `Round Robin` (distributes load across quotas)
+- **Models**:
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
+
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
+
+#### 3. Multimodal / Vision & Text Pipeline
+
+Pairing specialized vision models with high-speed text generation for workflows involving image understanding and code generation.
+
+- **Pattern**: A `Priority` combo that lists vision-capable models first and a high-throughput text/code model last.
+- **Models**:
+  1. `gemini/gemini-2.5-pro` (Strong image/multimodal comprehension)
+  2. `openai/gpt-4o` (Balanced vision and tool usage)
+  3. `deepseek/deepseek-v4-flash` (Text/code generation)
 
 ---
 

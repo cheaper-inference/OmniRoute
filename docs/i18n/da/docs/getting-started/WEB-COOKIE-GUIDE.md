@@ -4,7 +4,7 @@
 
 ---
 
-Web Cookie-udbydere giver OmniRoute mulighed for at bruge en AI-tjeneste via din eksisterende browsersession i stedet for en API-nøgle. De er nyttige, når du allerede har adgang til en tjeneste via dens websted og ønsker, at OmniRoute bruger den samme godkendte session.
+Web Cookie-udbydere gør det muligt for OmniRoute at bruge en AI-tjeneste via din eksisterende browsersession i stedet for en API-nøgle. De er nyttige, når du allerede har adgang til en tjeneste via dens websted og ønsker, at OmniRoute bruger den samme godkendte session.
 
 I modsætning til udbydere med API-nøgler godkender Web Cookie-udbydere ved hjælp af de legitimationsoplysninger, som din browser sender til webstedet.
 
@@ -12,7 +12,7 @@ I modsætning til udbydere med API-nøgler godkender Web Cookie-udbydere ved hj�
 
 # Før du begynder
 
-> **Vigtigt:** Kopiér altid legitimationsoplysninger fra en **aktiv netværksanmodning**, **ikke** fra browserens cookielager.
+> **Vigtigt:** Kopiér altid legitimationsoplysninger fra en **aktiv netværksanmodning**, **ikke** fra din browsers cookielager.
 
 Mange godkendelsesproblemer skyldes, at cookies kopieres fra det forkerte sted.
 
@@ -21,8 +21,8 @@ Mange godkendelsesproblemer skyldes, at cookies kopieres fra det forkerte sted.
 De fleste browsere viser gemte cookies via:
 
 ```
-Udviklerværktøjer
-→ Applikation (eller Lager)
+DevTools
+→ Application (eller Storage)
 → Cookies
 ```
 
@@ -36,18 +36,18 @@ Brug af disse værdier kan medføre godkendelsesfejl, selvom de ser gyldige ud.
 
 ## Kopiér fra en aktiv anmodning
 
-Brug i stedet cookies fra en vellykket anmodning:
+Brug i stedet cookies fra en gennemført anmodning:
 
 ```
-Udviklerværktøjer
-→ Netværk
+DevTools
+→ Network
 → Opdater siden
 → Åbn en chat- eller samtaleanmodning
-→ Anmodningsheadere
+→ Request Headers
 → Cookie
 ```
 
-Anmodningsheaderen `Cookie` indeholder præcis de godkendelsesoplysninger, som din browser brugte med succes.
+Requestheaderen `Cookie` indeholder de præcise godkendelsesoplysninger, som din browser har anvendt korrekt.
 
 For de fleste Web Cookie-udbydere er dette den værdi, der skal indsættes i OmniRoute.
 
@@ -59,46 +59,96 @@ Opsætningsprocessen er den samme for de fleste Web Cookie-udbydere.
 
 1. Log ind på udbyderens websted.
 2. Åbn browserens udviklerværktøjer.
-3. Åbn fanen **Netværk**.
+3. Åbn fanen **Network**.
 4. Opdater siden.
 5. Åbn en godkendt chat- eller samtaleanmodning.
 6. Kopiér de nødvendige godkendelsesoplysninger.
 7. Åbn OmniRoute.
-8. Gå til **Udbydere → Tilføj udbyder**.
+8. Gå til **Providers → Add Provider**.
 9. Vælg din Web Cookie-udbyder.
 10. Indsæt legitimationsoplysningerne.
-11. Klik på **Test forbindelse**.
+11. Klik på **Test Connection**.
 12. Gem udbyderen.
 
-De præcise legitimationsoplysninger, der kræves, afhænger af udbyderen.
+De præcise legitimationsoplysninger afhænger af udbyderen.
 
 ---
 
 # Formater for udbyderlegitimationsoplysninger
 
-Forskellige websteder gemmer godkendelsesoplysninger på forskellige måder. Nogle kræver kun cookies, mens andre kan kræve yderligere headere eller tokens.
+Forskellige websteder gemmer godkendelsesoplysninger på forskellige måder. Nogle kræver kun cookies, mens andre kan kræve yderligere headers eller tokens.
 
 | Udbyder                         | Format for legitimationsoplysninger | Udbydervejledning                |
 | ------------------------------- | ----------------------------------- | -------------------------------- |
-| Claude Web                      | Fuld Cookie-anmodningsheader        | `docs/providers/CLAUDE_WEB.md`   |
-| ChatGPT Web (Codex)             | Fuld Cookie-header                  | `docs/providers/CHATGPT_WEB.md`  |
-| Gemini Web                      | _(skal bekræftes)_                  |                                  |
-| Copilot Web                     | _(skal bekræftes)_                  | `docs/providers/COPILOT-M365.md` |
+| Claude Web                      | Komplet Cookie-requestheader        | `docs/providers/CLAUDE_WEB.md`   |
+| ChatGPT Web (Codex)             | Komplet Cookie-header               | `docs/providers/CHATGPT_WEB.md`  |
+| Gemini Web                      | _(bekræft)_                         |                                  |
+| Copilot Web                     | _(bekræft)_                         | `docs/providers/COPILOT-M365.md` |
 | Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath       | `docs/providers/COPILOT-M365.md` |
-| Grok Web                        | _(skal bekræftes)_                  |                                  |
+| Grok Web                        | _(bekræft)_                         |                                  |
 | ...                             | ...                                 | ...                              |
 
-> Opdater denne tabel, når nye Web Cookie-udbydere tilføjes, eller eksisterende udbydere ændrer deres godkendelseskrav.
+> Opdater denne tabel, når nye Web Cookie-udbydere tilføjes, eller når eksisterende udbydere ændrer deres godkendelseskrav.
+
+## NoTrack (notrack-web)
+
+NoTrack ([notrack.ai](https://notrack.ai)) er en gratis chatplatform til privatbrugere, som ikke kræver tilmelding — sessionen oprettes anonymt ved første besøg og bevares via tre cookies: `uid`, `si_usr_id` og `si_ses_id`. OmniRoute videresender det samme `/api/dispatch`-slutpunkt via et enkelt model-id (`notrack-c`, alias `ntw`).
+
+### Trin til at oprette forbindelse
+
+1. Åbn [notrack.ai](https://notrack.ai) i din browser, og lad den anonyme sessionscookie blive indstillet.
+2. Åbn **Udviklerværktøjer → Netværk**, genindlæs siden, og klik på en vilkårlig `/api`-anmodning.
+3. Under **Anmodningsheadere** skal du kopiere hele værdien af `Cookie`-headeren.
+4. Gå i OmniRoute til **Udbydere → Tilføj udbyder → NoTrack Web (gratis)**.
+5. Indsæt cookie-strengen i feltet `apiKey`, og vælg **Gem**.
+
+OmniRoute udtrækker `uid`, `si_usr_id` og `si_ses_id` fra den indsatte streng og opbygger en ren `Cookie`-header, der kun indeholder disse par — samt `nt_session` (`ntk_…`-tokenet, der indstilles for konti, som er logget ind), når den findes. Hvis en af de tre mangler, videresendes den rå indsatte streng uændret, så operatører kan eksperimentere med alternative formater.
+
+### Model-id'er
+
+| Model-id    | Vist navn | Bemærkninger                                      |
+| ----------- | --------- | ------------------------------------------------- |
+| `notrack-c` | NoTrack C | Standard — upstream-dispatchmodellen `C`.         |
+| `C`         | NoTrack C | Alias for `notrack-c` (rå upstream-dispatchkode). |
+| `notrack`   | NoTrack C | Alias for `notrack-c`.                            |
+| `ntw`       | NoTrack C | Kort alias for `notrack-c`.                       |
+
+Alle fire model-id'er peger på den samme upstream-dispatchmodel (`C`).
+
+### Anmodningsindstillinger
+
+Eksekveringskomponenten accepterer disse valgfrie felter i anmodningens body:
+
+| Body-felt             | Standardværdi | Formål                                                             |
+| --------------------- | ------------- | ------------------------------------------------------------------ |
+| `notrack_mode`        | `usual`       | Dispatchtilstand (fritekststreng; upstream accepterer `usual`, …)  |
+| `notrack_max_turns`   | `6`           | Antal interne ture, upstream må foretage før svaret.               |
+| `notrack_chat_id`     | `null`        | Genoptag en eksisterende upstream-chat (udelad for en ny chat).    |
+| `notrack_attachments` | `[]`          | Direkte overført array med upstream-beskrivelser af vedhæftninger. |
+| `notrack_regenerate`  | `false`       | Indstil til `true` for at anmode om et nyt svar til forrige tur.   |
+
+### Funktioner
+
+- **Streamede og ikke-streamede** chatfuldførelser.
+- **Værktøjskald** — angiv `tools: [...]` i anmodningen; eksekveringskomponenten serialiserer dem til en envelope-kontrakt for værktøjskald og fortolker modellens svar tilbage til OpenAI `tool_calls`.
+- **`response_format`** — `json_object` og `json_schema` understøttes. Eksekveringskomponenten udtrækker det første JSON-objekt fra modellens svar og konverterer det til en streng, før det returneres.
+- **Ræsonneringsindikator** — eksekveringskomponenten udsender et `reasoning`-delta, når upstream sender en `thinking`-hændelse.
+
+### Begrænsninger
+
+- Upstream håndhæver kvoter for anonym brug — når de overskrides, returnerer eksekveringskomponenten en 429-status med en brugervenlig meddelelse.
+- Alle model-id'er peger på den samme upstream-dispatchmodel; der kan ikke skiftes mellem individuelle modeller.
+- Eksekveringskomponenten kalder ikke upstreams `/api/chats`-slutpunkt, så chathistorik/sessioner administreres ikke automatisk. Brug `notrack_chat_id` til at genoptage en eksisterende upstream-chat.
 
 ---
 
-# Hvad Web Cookie-udbydere kan og ikke kan
+# Hvad webcookie-udbydere kan og ikke kan
 
-Web Cookie-udbydere genbruger et websteds chatgrænseflade. De tilbyder **ikke** de samme funktioner som officielle API'er.
+Webcookie-udbydere genbruger et websteds chatgrænseflade. De tilbyder **ikke** de samme funktioner som officielle API'er.
 
 ## Understøttet
 
-- Godkendelse via din eksisterende browsersession
+- Godkendelse ved hjælp af din eksisterende browsersession
 - Adgang til modeller, der er tilgængelige via din konto
 - Streaming af chatsvar
 - Ingen API-nøgle påkrævet
@@ -109,40 +159,40 @@ Web Cookie-udbydere genbruger et websteds chatgrænseflade. De tilbyder **ikke**
 - Værktøjskald
 - Automatisk filredigering
 - Agentbaserede IDE-arbejdsgange
-- Funktioner, der kun er tilgængelige via API'er
+- Funktioner, der kun er tilgængelige via API
 
 Dette er forventet adfærd og er **ikke** en fejl.
 
-Hvis du har brug for værktøjsudførelse, automatisk filredigering eller andre agentarbejdsgange, skal du bruge en **udbyder med API-nøgle** i stedet for en Web Cookie-udbyder.
+Hvis du har brug for udførelse af værktøjer, automatisk filredigering eller andre agentbaserede arbejdsgange, skal du bruge en **API-nøgleudbyder** i stedet for en Web Cookie-udbyder.
 
 ---
 
 # Forbehold ved validering
 
-En vellykket **Test forbindelse** eller cookievalidering bekræfter kun, at de angivne legitimationsoplysninger ser ud til at være i det forventede format.
+En gennemført **Test Connection** eller cookievalidering bekræfter kun, at de angivne legitimationsoplysninger ser ud til at være i det forventede format.
 
-Indtil Issue #7857 er løst, er en vellykket validering **ingen garanti for**, at udbyderen kan godkendes.
+Indtil Issue #7857 er løst, er en gennemført validering **ingen garanti** for, at udbyderen kan godkende forbindelsen.
 
-Hvis godkendelsen stadig mislykkes, skal du kontrollere, at du kopierede legitimationsoplysningerne fra en aktiv netværksanmodning og ikke fra browserens cookielager.
+Hvis godkendelsen stadig mislykkes, skal du kontrollere, at du har kopieret legitimationsoplysningerne fra en aktiv netværksanmodning og ikke fra browserens cookielager.
 
 ---
 
 # Fejlfinding
 
-## Godkendelsen mislykkes
+## Godkendelse mislykkes
 
 Kontrollér, at legitimationsoplysningerne blev kopieret fra:
 
 ```
-Netværk
-→ Anmodningsheadere
+Network
+→ Request Headers
 → Cookie
 ```
 
 og **ikke** fra:
 
 ```
-Applikation
+Application
 → Cookies
 ```
 
@@ -150,9 +200,9 @@ Applikation
 
 ## Cookien virker i browseren, men ikke i OmniRoute
 
-Nogle udbydere medtager cookies, der kun sendes ved godkendte anmodninger.
+Nogle udbydere inkluderer cookies, der kun sendes under godkendte anmodninger.
 
-Kopiér legitimationsoplysningerne igen fra en ny netværksanmodning, efter du har åbnet en samtale.
+Kopiér legitimationsoplysningerne igen fra en ny netværksanmodning, efter at du har åbnet en samtale.
 
 ---
 
@@ -160,25 +210,42 @@ Kopiér legitimationsoplysningerne igen fra en ny netværksanmodning, efter du h
 
 Web Cookie-udbydere bruger din eksisterende browsersession.
 
-Hvis din browsersession udløber, eller du logger ud, skal du kopiere et nyt sæt legitimationsoplysninger.
+Hvis din browsersession udløber, eller du logger ud, skal du kopiere et nyt sæt legitimationsoplysninger. Se det tilhørende værktøj [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md) for at automatisere fornyelse af cookies for understøttede webudbydere.
 
 ---
 
-## Test forbindelse lykkes, men anmodninger mislykkes
+## Test Connection gennemføres, men anmodninger mislykkes
 
-Indtil Issue #7857 er løst, er en bestået validering ingen garanti for, at godkendelsesanmodningen lykkes.
+Indtil Issue #7857 er løst, er en gennemført validering ingen garanti for, at godkendelsesanmodningen lykkes.
 
 Kopiér dine legitimationsoplysninger igen fra en ny godkendt anmodning, før du fortsætter fejlfindingen.
 
 ---
 
-# Eksempel på en udbyder
+## ChatGPT Web mislykkes med "Unsupported ChatGPT integrity dependency"
 
-Du kan finde en komplet udbyderspecifik vejledning her:
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Legitimationsoplysningerne er korrekte — fejlen kommer fra broen, ikke fra sessionen. chatgpt.com tildeler sine
+modul-id'er for hver udrulning, og broen plejede at fastholde id'et for den Sentinel-hjælper, den opretter, så en
+genopbygning af chatgpt.com, der omdøbte hjælperen, fik hver tur til at mislykkes, selvom cookien stadig var gyldig. En ny godkendelse
+af forbindelsen kan ikke løse problemet.
+
+Builds, der finder modulet gennem sidens egen runtime, fastholder ikke noget id og rammes ikke af dette. Hvis du ser
+fejlen, skal du opgradere OmniRoute og køre forbindelseskontrollen igen.
+
+---
+
+# Eksempel på udbyder
+
+Se følgende for en komplet udbyderspecifik trinvis vejledning:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Claude Web-vejledningen viser hele opsætningsprocessen for en Web Cookie-udbyder og fungerer som referenceimplementering.
+Claude Web-vejledningen demonstrerer hele opsætningsprocessen for en Web Cookie-udbyder og fungerer som referenceimplementering.
 
 ---
 
@@ -188,4 +255,4 @@ Claude Web-vejledningen viser hele opsætningsprocessen for en Web Cookie-udbyde
 - Undgå at genbruge gamle cookies.
 - Hold din browsersession aktiv, mens du bruger Web Cookie-udbydere.
 - Behandl kopierede cookies som følsomme legitimationsoplysninger.
-- Brug udbydere med API-nøgler, når du har brug for funktionskald eller agentarbejdsgange.
+- Brug API-nøgleudbydere, når du har brug for funktionskald eller agentbaserede arbejdsgange.

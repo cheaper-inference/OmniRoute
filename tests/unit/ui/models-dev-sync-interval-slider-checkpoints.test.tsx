@@ -39,9 +39,11 @@ function getSlider(container: HTMLDivElement): HTMLInputElement {
 }
 
 function getLabel(container: HTMLDivElement): string {
-  const span = container.querySelector("span.text-blue-400");
-  if (!span?.textContent) throw new Error("interval label not found");
-  return span.textContent;
+  // KEA-7886: the interval label is the kit Slider's value <output> bound to the range input.
+  const slider = getSlider(container);
+  const output = container.querySelector(`output[for="${slider.id}"]`);
+  if (!output?.textContent) throw new Error("interval label not found");
+  return output.textContent;
 }
 
 async function setSliderValue(container: HTMLDivElement, value: string) {
@@ -49,10 +51,7 @@ async function setSliderValue(container: HTMLDivElement, value: string) {
   // NOTE: synchronous act() on purpose — wrapping this in async act() lets the
   // commit flush late, so the change handler would read the pre-dispatch value.
   act(() => {
-    const setter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      "value"
-    )?.set;
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
     setter?.call(input, value);
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
@@ -126,6 +125,38 @@ describe("ModelsDevSyncTab interval slider checkpoints", () => {
     await waitFor(() => getSlider(container).value === "2", "saved interval to load");
 
     expect(getLabel(container)).toBe("24h");
+  });
+
+  it("draws the checkpoint ruler as kit slider marks under the track (#18073)", async () => {
+    const container = await render();
+    await waitFor(() => getSlider(container).value === "2", "saved interval to load");
+
+    const marks = Array.from(container.querySelectorAll<HTMLElement>(".ci-slider__mark"));
+    expect(marks.map((mark) => mark.textContent)).toEqual(["1h", "6h", "24h", "7d"]);
+    // One tick per checkpoint position, evenly spread across [0, 3].
+    expect(marks.map((mark) => mark.style.getPropertyValue("--ci-slider-mark-position"))).toEqual([
+      "0",
+      String(1 / 3),
+      String(2 / 3),
+      "1",
+    ]);
+    // The hand-made flex ruler that used to sit under the slider is gone.
+    const sliderRoot = getSlider(container).closest(".ci-slider");
+    expect(sliderRoot?.nextElementSibling?.textContent ?? "").not.toContain("1h6h24h7d");
+  });
+
+  it("keeps the marks on the track's direction and names the value for screen readers", async () => {
+    const container = await render();
+    await waitFor(() => getSlider(container).value === "2", "saved interval to load");
+
+    // The kit positions marks with `left`, so the slider is pinned LTR: in an RTL page the
+    // range minimum (1h) would otherwise sit on the right while its mark stays on the left.
+    expect(getSlider(container).closest("[dir]")?.getAttribute("dir")).toBe("ltr");
+    // The kit draws the marks aria-hidden and the input runs 0..3, so the value is spoken
+    // as the formatted interval.
+    expect(getSlider(container).getAttribute("aria-valuetext")).toBe("24h");
+    await setSliderValue(container, "1.5");
+    expect(getSlider(container).getAttribute("aria-valuetext")).toBe("15h");
   });
 
   it("shows interpolated hours while dragging between checkpoints", async () => {

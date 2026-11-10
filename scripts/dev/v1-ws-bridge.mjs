@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
-import { STATUS_CODES } from "node:http";
+import { relayForwardingHeaders } from "./peer-stamp.mjs";
+import { getHandshakeOriginHeaders, writeHttpError } from "./responses-ws-proxy.mjs";
 
 export const WS_PUBLIC_PATHS = new Set(["/v1/ws", "/api/v1/ws"]);
 export const WS_ALLOWED_ENDPOINTS = new Set([
@@ -14,10 +15,39 @@ export const WS_ALLOWED_ENDPOINTS = new Set([
 ]);
 
 const HANDSHAKE_PATH = "/api/v1/ws";
+// Carries the browser's upgrade headers to the handshake route for its Origin check.
+// Must match WS_HANDSHAKE_ORIGIN_HEADER in src/server/origin/wsOrigin.ts.
+const HANDSHAKE_ORIGIN_HEADER = "x-omniroute-ws-handshake";
 const WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 const WS_QUERY_TOKEN_KEYS = ["api_key", "token", "access_token"];
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
+// Same cap as responses-ws-proxy. Applies to one frame and to a fragmented message.
+const DEFAULT_MAX_WS_MESSAGE_BYTES = 16 * 1024 * 1024;
+// Same default as ws's WebSocketServer maxFragments. Each kept fragment costs a Buffer object
+// (about 100-270 bytes of heap), so the byte cap alone does not bound memory for tiny fragments.
+const DEFAULT_MAX_WS_FRAGMENTS = 16 * 1024;
+const EMPTY_BUFFER = Buffer.alloc(0);
+
+class WebSocketInputTooLargeError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "WebSocketInputTooLargeError";
+  }
+}
+
+// RFC 6455 5.1: the server MUST close the connection on an unmasked client frame.
+class WebSocketProtocolError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "WebSocketProtocolError";
+  }
+}
+
+function normalizePositiveInteger(value, fallback) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
 
 function isText(value) {
   return typeof value === "string" && value.length > 0;
@@ -57,9 +87,11 @@ function encodeWsFrame(opcode, payload = Buffer.alloc(0)) {
   return Buffer.concat([header, payloadBuffer]);
 }
 
-function decodeClientFrames(buffer) {
+function decodeClientFrames(buffer, maxPayloadBytes) {
   const frames = [];
   let offset = 0;
+  // Bytes the first incomplete frame needs in total, or 0 while its header is incomplete.
+  let nextFrameBytes = 0;
 
   while (buffer.length - offset >= 2) {
     const byte1 = buffer[offset];
@@ -71,7 +103,7 @@ function decodeClientFrames(buffer) {
     let headerLength = 2;
 
     if (!masked) {
-      throw new Error("Client WebSocket frames must be masked");
+      throw new WebSocketProtocolError("Client WebSocket frames must be masked");
     }
 
     if (payloadLength === 126) {
@@ -82,14 +114,21 @@ function decodeClientFrames(buffer) {
       if (buffer.length - offset < 10) break;
       const bigLength = buffer.readBigUInt64BE(offset + 2);
       if (bigLength > BigInt(Number.MAX_SAFE_INTEGER)) {
-        throw new Error("WebSocket payload too large");
+        throw new WebSocketInputTooLargeError("WebSocket payload too large");
       }
       payloadLength = Number(bigLength);
       headerLength = 10;
     }
 
+    if (payloadLength > maxPayloadBytes) {
+      throw new WebSocketInputTooLargeError("WebSocket payload exceeds configured limit");
+    }
+
     const totalLength = headerLength + 4 + payloadLength;
-    if (buffer.length - offset < totalLength) break;
+    if (buffer.length - offset < totalLength) {
+      nextFrameBytes = totalLength;
+      break;
+    }
 
     const mask = buffer.subarray(offset + headerLength, offset + headerLength + 4);
     const payload = Buffer.from(buffer.subarray(offset + headerLength + 4, offset + totalLength));
@@ -104,30 +143,8 @@ function decodeClientFrames(buffer) {
   return {
     frames,
     remaining: buffer.subarray(offset),
+    nextFrameBytes,
   };
-}
-
-function writeHttpError(socket, status, body, headers = {}) {
-  if (!socket.writable || socket.destroyed) return;
-
-  const bodyBuffer = Buffer.from(body || "", "utf8");
-  const statusText = STATUS_CODES[status] || "Error";
-  const responseHeaders = {
-    Connection: "close",
-    "Content-Length": String(bodyBuffer.length),
-    "Content-Type": "application/json; charset=utf-8",
-    ...headers,
-  };
-
-  const head = [
-    `HTTP/1.1 ${status} ${statusText}`,
-    ...Object.entries(responseHeaders).map(([name, value]) => `${name}: ${value}`),
-    "",
-    "",
-  ].join("\r\n");
-
-  socket.write(head);
-  socket.end(bodyBuffer);
 }
 
 function isWsPath(pathname) {
@@ -155,11 +172,13 @@ function normalizeEndpoint(rawEndpoint) {
   return `${parsed.pathname}${parsed.search}`;
 }
 
-function getForwardHeaders(requestUrl, requestHeaders) {
+function getForwardHeaders(requestUrl, requestHeaders, forwarding) {
   const headers = {
     accept: "text/event-stream",
     "content-type": "application/json",
   };
+
+  Object.assign(headers, forwarding);
 
   const authorization = requestHeaders.authorization;
   if (isText(authorization)) {
@@ -200,7 +219,14 @@ function getForwardHeaders(requestUrl, requestHeaders) {
   return headers;
 }
 
-async function performHandshake(fetchImpl, baseUrl, requestUrl, requestHeaders) {
+async function performHandshake(
+  fetchImpl,
+  baseUrl,
+  requestUrl,
+  requestHeaders,
+  forwarding,
+  originHeaders = {}
+) {
   const incomingUrl = new URL(requestUrl, baseUrl);
   const handshakeUrl = new URL(HANDSHAKE_PATH, baseUrl);
 
@@ -215,7 +241,8 @@ async function performHandshake(fetchImpl, baseUrl, requestUrl, requestHeaders) 
       authorization: requestHeaders.authorization || "",
       cookie: requestHeaders.cookie || "",
       origin: requestHeaders.origin || "",
-      "x-forwarded-for": requestHeaders["x-forwarded-for"] || "",
+      ...forwarding,
+      [HANDSHAKE_ORIGIN_HEADER]: JSON.stringify(originHeaders),
     },
   });
 
@@ -241,15 +268,26 @@ class WebSocketSession {
     this.baseUrl = options.baseUrl;
     this.fetchImpl = options.fetchImpl;
     this.idleTimeoutMs = options.idleTimeoutMs;
+    this.maxMessageBytes = normalizePositiveInteger(
+      options.maxMessageBytes,
+      DEFAULT_MAX_WS_MESSAGE_BYTES
+    );
     this.pingIntervalMs = options.pingIntervalMs;
     this.socket = options.socket;
     this.requestHeaders = options.requestHeaders;
     this.requestUrl = options.requestUrl;
     this.sessionId = randomUUID();
     this.closed = false;
-    this.buffer = Buffer.alloc(0);
+    // Unparsed input lives in one buffer that grows by doubling (see appendPending), and the
+    // frame is decoded once it is complete, so a large frame costs linear copying and one
+    // object however small the TCP chunks are.
+    this.pendingBuffer = EMPTY_BUFFER;
+    this.pendingBytes = 0;
+    this.pendingFrameBytes = 0;
     this.fragmentOpcode = null;
     this.fragmentParts = [];
+    this.fragmentBytes = 0;
+    this.fragmentCount = 0;
     this.activeRequests = new Map();
     this.lastSeenAt = Date.now();
 
@@ -265,16 +303,30 @@ class WebSocketSession {
 
     this.socket.setNoDelay(true);
     this.socket.on("data", (chunk) => {
-      this.onData(chunk).catch((error) => {
-        this.sendProtocolError(
-          "frame_decode_failed",
-          error instanceof Error ? error.message : String(error)
-        );
-      });
+      this.onData(chunk).catch((error) => this.handleInputError(error));
     });
     this.socket.on("close", () => this.dispose());
     this.socket.on("end", () => this.dispose());
     this.socket.on("error", () => this.dispose());
+  }
+
+  handleInputError(error) {
+    if (this.closed) return;
+    if (error instanceof WebSocketInputTooLargeError) {
+      this.sendProtocolError("message_too_large", error.message);
+      this.close(1009, "message_too_large");
+      return;
+    }
+    if (error instanceof WebSocketProtocolError) {
+      // The input stream cannot be resynchronised; drop it instead of re-decoding it per chunk.
+      this.sendProtocolError("frame_decode_failed", error.message);
+      this.close(1002, "protocol_error");
+      return;
+    }
+    this.sendProtocolError(
+      "frame_decode_failed",
+      error instanceof Error ? error.message : String(error)
+    );
   }
 
   sendFrame(opcode, payload) {
@@ -295,13 +347,54 @@ class WebSocketSession {
     });
   }
 
+  appendPending(chunk) {
+    const needed = this.pendingBytes + chunk.length;
+    if (needed > this.pendingBuffer.length) {
+      // Double the capacity, but not past the frame being assembled (its length was already
+      // checked against maxMessageBytes) unless this chunk runs past its end. Total copying
+      // stays linear and the buffer is less than twice the bytes received, so a header alone
+      // cannot make the bridge allocate the length it claims.
+      let capacity = Math.max(needed, this.pendingBuffer.length * 2);
+      if (this.pendingFrameBytes > 0) {
+        capacity = Math.max(needed, Math.min(capacity, this.pendingFrameBytes));
+      }
+      const grown = Buffer.allocUnsafe(capacity);
+      this.pendingBuffer.copy(grown, 0, 0, this.pendingBytes);
+      this.pendingBuffer = grown;
+    }
+    chunk.copy(this.pendingBuffer, this.pendingBytes);
+    this.pendingBytes = needed;
+  }
+
   async onData(chunk) {
+    if (this.closed) return;
     this.lastSeenAt = Date.now();
-    this.buffer = Buffer.concat([this.buffer, chunk]);
-    const parsed = decodeClientFrames(this.buffer);
-    this.buffer = parsed.remaining;
+    let buffer = chunk;
+    if (this.pendingBytes > 0) {
+      this.appendPending(chunk);
+      if (this.pendingBytes < this.pendingFrameBytes) return;
+      buffer = this.pendingBuffer.subarray(0, this.pendingBytes);
+    }
+
+    let parsed;
+    try {
+      parsed = decodeClientFrames(buffer, this.maxMessageBytes);
+    } catch (error) {
+      // Handle a header error before returning. Chunks that queued up while the handshake
+      // was in flight are emitted back to back, and a rejection handler would only run
+      // after all of them had been buffered and decoded.
+      this.handleInputError(error);
+      return;
+    }
+    // Copy the incomplete tail so neither the grown buffer nor the socket's chunk is kept. The
+    // tail lies past the frame that was just completed, so it is never longer than this chunk
+    // (or than a frame header), and the copy keeps the total linear.
+    this.pendingBuffer = parsed.remaining.length > 0 ? Buffer.from(parsed.remaining) : EMPTY_BUFFER;
+    this.pendingBytes = parsed.remaining.length;
+    this.pendingFrameBytes = parsed.nextFrameBytes;
 
     for (const frame of parsed.frames) {
+      if (this.closed) return;
       await this.handleFrame(frame);
     }
   }
@@ -313,12 +406,24 @@ class WebSocketSession {
           this.sendProtocolError("unexpected_continuation", "Unexpected continuation frame");
           return;
         }
-        this.fragmentParts.push(frame.payload);
+        this.fragmentBytes += frame.payload.length;
+        if (this.fragmentBytes > this.maxMessageBytes) {
+          throw new WebSocketInputTooLargeError(
+            "Fragmented WebSocket message exceeds configured limit"
+          );
+        }
+        this.fragmentCount += 1;
+        if (this.fragmentCount > DEFAULT_MAX_WS_FRAGMENTS) {
+          throw new WebSocketInputTooLargeError("Too many WebSocket message fragments");
+        }
+        if (frame.payload.length > 0) this.fragmentParts.push(frame.payload);
         if (frame.fin) {
-          const payload = Buffer.concat(this.fragmentParts);
+          const payload = Buffer.concat(this.fragmentParts, this.fragmentBytes);
           const opcode = this.fragmentOpcode;
           this.fragmentOpcode = null;
           this.fragmentParts = [];
+          this.fragmentBytes = 0;
+          this.fragmentCount = 0;
           await this.handleDataFrame(opcode, payload);
         }
         return;
@@ -327,6 +432,8 @@ class WebSocketSession {
         if (!frame.fin) {
           this.fragmentOpcode = frame.opcode;
           this.fragmentParts = [frame.payload];
+          this.fragmentBytes = frame.payload.length;
+          this.fragmentCount = 1;
           return;
         }
         await this.handleDataFrame(frame.opcode, frame.payload);
@@ -550,12 +657,19 @@ class WebSocketSession {
       active.abortController.abort();
     }
     this.activeRequests.clear();
+    this.pendingBuffer = EMPTY_BUFFER;
+    this.pendingBytes = 0;
+    this.pendingFrameBytes = 0;
+    this.fragmentParts = [];
 
     const reasonBuffer = Buffer.from(reason, "utf8");
     const payload = Buffer.allocUnsafe(2 + reasonBuffer.length);
     payload.writeUInt16BE(code, 0);
     reasonBuffer.copy(payload, 2);
-    this.sendFrame(0x8, payload);
+    // sendFrame() drops frames once `closed` is set, so write the close frame directly.
+    if (!this.socket.destroyed && this.socket.writable) {
+      this.socket.write(encodeWsFrame(0x8, payload));
+    }
     this.socket.end();
     setTimeout(() => {
       if (!this.socket.destroyed) {
@@ -580,6 +694,7 @@ export function createOmnirouteWsBridge({
   fetchImpl = fetch,
   pingIntervalMs = 25000,
   idleTimeoutMs = 90000,
+  maxMessageBytes = DEFAULT_MAX_WS_MESSAGE_BYTES,
 } = {}) {
   if (!isText(baseUrl)) {
     throw new Error("createOmnirouteWsBridge requires a baseUrl");
@@ -610,9 +725,36 @@ export function createOmnirouteWsBridge({
       }
 
       try {
-        const handshake = await performHandshake(fetchImpl, baseUrl, req.url || "/", req.headers);
+        const forwarding = relayForwardingHeaders(
+          req.socket && req.socket.remoteAddress,
+          req.headers
+        );
+        const handshake = await performHandshake(
+          fetchImpl,
+          baseUrl,
+          req.url || "/",
+          req.headers,
+          forwarding,
+          getHandshakeOriginHeaders(req)
+        );
         if (!handshake.ok) {
           writeHttpError(socket, handshake.status, handshake.bodyText || "{}", handshake.headers);
+          return true;
+        }
+        // Browsers skip CORS for WebSocket, and this bridge returns inference output as
+        // frames. Upgrade only when the route ran its Origin check; a route that predates
+        // the check (or any other backend) fails closed.
+        if (handshake.bodyJson?.originChecked !== true) {
+          writeHttpError(
+            socket,
+            403,
+            JSON.stringify({
+              error: {
+                message: "WebSocket origin check unavailable",
+                code: "ws_origin_unchecked",
+              },
+            })
+          );
           return true;
         }
 
@@ -652,9 +794,10 @@ export function createOmnirouteWsBridge({
           fetchImpl,
           idleTimeoutMs,
           pingIntervalMs,
+          maxMessageBytes,
           socket,
           requestUrl: req.url || pathname,
-          requestHeaders: getForwardHeaders(req.url || pathname, req.headers),
+          requestHeaders: getForwardHeaders(req.url || pathname, req.headers, forwarding),
         });
         session.sendJson({
           type: "session.ready",

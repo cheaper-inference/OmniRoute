@@ -123,7 +123,9 @@
       "maxCostOpt": "Costas uasta in aghaidh an lae (USD)",
       "allowedModelsOpt": "Liosta de mhúnlaí ceadaithe scartha le camóga",
       "nothingToSet": "Níor soláthraíodh aon réimsí polasaí. Úsáid --rate-limit, --max-cost, nó --allowed-models.",
-      "updated": "Polasaí nuashonraithe."
+      "updated": "Polasaí nuashonraithe.",
+      "modelAccessModeOpt": "Mód rochtana samhlacha (all | restricted)",
+      "unrestrictedOpt": "Ceadaigh gach samhail (--model-access-mode all)"
     },
     "expiration": {
       "title": "Seanlá Eochrach",
@@ -254,6 +256,7 @@
     "log": "Taispeáin logaí an fhreastalaí inlíne",
     "no_recovery": "Díchumasaigh atosú uathoibríoch ar thitim (mód dífhabhtaithe)",
     "max_restarts": "Uaslíon atosuithe titim laistigh de 30 sula bhfágann tú suas (réamhshocrú: 2)",
+    "headless": "Rith an t-inneall seachfhreastalaí amháin: deais díchumasaithe (404), fochórais roghnacha scipeáilte (socraíonn OMNIROUTE_HEADLESS=1)",
     "tray": "Tosaigh i mbosca córas (leicsitheoir amháin, roghnach)",
     "no_tray": "Díchumasaigh deilbhín bosca córas",
     "ready_timeout": "Teorainn ama an tseiceála ullmhachta i ms (OMNIROUTE_READY_TIMEOUT_MS freisin, réamhshocrú 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sioncronaigh cumraíocht idir imthaispíní OmniRoute",
     "push": {
-      "description": "Brúigh cumraíocht go scamall nó imthaispín iargúlta",
-      "target": "Sprioc (scamall nó comhthéacs:ainm)",
-      "bundle": "Pacáiste páirteanna le sioncronú",
-      "dryRun": "Réamhamharc gan iarratas"
+      "description": "Brúigh cumraíocht go scamall nó imthaispín iargúlta"
     },
     "pull": {
-      "description": "Íoslódáil cumraíocht ó scamall nó iargúlta",
-      "source": "Foinse (scamall nó comhthéacs:ainm)",
-      "merge": "Cumaisc le cumraíocht reatha",
-      "replace": "Athshocraigh cumraíocht reatha",
-      "dryRun": "Réamhamharc gan cur i bhfeidhm"
-    },
-    "diff": {
-      "source": "Comhthéacs foinse",
-      "target": "Comhthéacs sprioc"
+      "description": "Íoslódáil cumraíocht ó scamall nó iargúlta"
     },
     "bundle": {
       "description": "Easpórtáil cumraíocht mar chomhad bundle",
-      "include": "Páirteanna le cur isteach (le cultacha leithliseach)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Iompórtáil comhad bundle",
       "dryRun": "Fíorú gan cur i bhfeidhm"
-    },
-    "initialize": {
-      "fromCloud": "Tús cur le cúltaca ón scáil"
     },
     "tokens": {
       "description": "Bainistigh comharthaí sioncronaithe",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Scipeáil deimhniú"
       }
-    },
-    "resolve": {
-      "description": "Réitigh coinbhleachtaí sioncronaithe idirghníomhach"
     }
   },
   "config": {

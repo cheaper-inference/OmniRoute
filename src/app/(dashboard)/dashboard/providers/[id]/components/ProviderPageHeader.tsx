@@ -1,7 +1,11 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // Phase 1t.1 extraction — Issue #3501
 import Link from "next/link";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Button } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { getHeaderIconProviderId, providerText } from "../providerPageHelpers";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
@@ -74,84 +78,87 @@ export default function ProviderPageHeader({
       href={noticeUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-sm font-medium underline underline-offset-2 opacity-70 hover:opacity-100 transition-opacity inline-flex items-center gap-1"
-      style={{ color: providerInfo.color }}
+      className="text-sm font-medium text-primary underline underline-offset-2 hover:text-text-main transition-colors inline-flex items-center gap-1"
     >
-      <span className="material-symbols-outlined text-base">open_in_new</span>
+      <Icon name="open_in_new" size={16} />
       {t("getApiKey")}
     </a>
   ) : null;
 
   return (
-    <div>
-      <Link
-        href="/dashboard/providers"
-        className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-primary transition-colors mb-4"
-      >
-        <span className="material-symbols-outlined text-lg">arrow_back</span>
-        {t("backToProviders")}
-      </Link>
-      <div className="flex items-center gap-4">
-        <div
-          className="rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: `${providerInfo.color}15` }}
+    <PageHeader
+      compact
+      breadcrumbs={
+        <Link
+          href="/dashboard/providers"
+          className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-primary transition-colors"
         >
-          <ProviderIcon
-            providerId={getHeaderIconProviderId(
-              isOpenAICompatible,
-              isAnthropicProtocolCompatible,
-              providerInfo.id,
-              providerInfo.apiType
-            )}
-            size={48}
-            type="color"
-            src={providerInfo.iconUrl}
-            alt={providerInfo.name}
-            fallbackText={providerInfo.textIcon}
-            fallbackColor={providerInfo.color}
-          />
-        </div>
-        <div>
+          <Icon name="arrow_back" size={18} />
+          {t("backToProviders")}
+        </Link>
+      }
+      title={
+        <span className="inline-flex items-center gap-4">
+          {/* The brand colour is only a tint behind the icon; text uses neutral/primary tokens. */}
+          <span
+            className="inline-flex items-center justify-center rounded-lg"
+            style={{ backgroundColor: `${providerInfo.color}15` }}
+          >
+            <ProviderIcon
+              providerId={getHeaderIconProviderId(
+                isOpenAICompatible,
+                isAnthropicProtocolCompatible,
+                providerInfo.id,
+                providerInfo.apiType
+              )}
+              size={48}
+              type="color"
+              src={providerInfo.iconUrl}
+              alt={providerInfo.name}
+              fallbackText={providerInfo.textIcon}
+              fallbackColor={providerInfo.color}
+            />
+          </span>
           {providerInfo.website ? (
             <a
               href={providerInfo.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-3xl font-semibold tracking-tight hover:underline inline-flex items-center gap-2"
-              style={{ color: providerInfo.color }}
+              className="hover:underline hover:text-primary inline-flex items-center gap-2"
               title={showPartnerNote ? kimiPartnerLinkNote : undefined}
               aria-label={
                 showPartnerNote ? `${providerInfo.name} — ${kimiPartnerLinkNote}` : undefined
               }
             >
               {providerInfo.name}
-              <span className="material-symbols-outlined text-lg opacity-60">open_in_new</span>
+              <Icon name="open_in_new" size={18} className="opacity-60" />
             </a>
           ) : (
-            <h1 className="text-3xl font-semibold tracking-tight">{providerInfo.name}</h1>
+            providerInfo.name
           )}
-          <div className="flex items-center gap-2">
-            <p className="text-text-muted">
-              {t("connectionCountLabel", { count: connectionsCount })}
-            </p>
-            {showPartnerNote && providerInfo.website && (
-              <span className="text-[10px] font-medium uppercase tracking-wide text-text-muted/70">
-                {kimiPartnerLinkNote}
-              </span>
-            )}
-            {apiKeyLink}
-            {providerId === "adapta-web" && (
-              <button
-                onClick={onOpenTutorial}
-                className="text-sm font-medium underline underline-offset-2 opacity-70 hover:opacity-100 transition-opacity"
-                style={{ color: providerInfo.color }}
-              >
-                Tutorial
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+        </span>
+      }
+      description={
+        <span className="flex flex-wrap items-center gap-2">
+          <span>{t("connectionCountLabel", { count: connectionsCount })}</span>
+          {showPartnerNote && providerInfo.website && (
+            <span className="text-[10px] font-medium uppercase tracking-wide text-text-muted/70">
+              {kimiPartnerLinkNote}
+            </span>
+          )}
+          {apiKeyLink}
+          {providerId === "adapta-web" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onOpenTutorial}
+              className="h-auto min-h-0 px-0 text-sm font-medium text-primary underline underline-offset-2 hover:bg-transparent hover:text-text-main"
+            >
+              Tutorial
+            </Button>
+          )}
+        </span>
+      }
+    />
   );
 }

@@ -1,7 +1,7 @@
 ---
 title: "OmniRoute Architecture"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.52
+lastUpdated: 2026-10-05
 ---
 
 # OmniRoute Architecture
@@ -17,13 +17,13 @@ It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic acr
 
 Core capabilities:
 
-- OpenAI-compatible API surface for CLI/tools (355 providers, 108 executors)
+- OpenAI-compatible API surface for CLI/tools (388 providers, 159 executor modules)
 - Request/response translation across provider formats
 - Model combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`
 - Account-level fallback (multi-account per provider)
 - Quota preflight and quota-aware P2C account selection in the main chat path
-- OAuth + API-key provider connection management (22 OAuth provider modules)
+- OAuth + API-key provider connection management (27 OAuth provider modules)
 - Embedding generation via `/v1/embeddings` (18 providers)
 - Image generation via `/v1/images/generations` (10+ providers, 20+ models)
 - Audio transcription via `/v1/audio/transcriptions` (18 providers)
@@ -153,6 +153,14 @@ Main pages under `src/app/(dashboard)/dashboard/`:
 - `/dashboard/usage` — per-request usage browser tied to `usage_history`
 - `/dashboard/compression` — compression analytics, statistics, and pipeline assignment
 - `/dashboard/api-manager` — API key lifecycle and model permissions
+
+UI layer: every page renders inside one shell — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (the kit's
+`SidebarProvider`/`SidebarInset`, OmniRoute's `Sidebar.tsx` and `Header.tsx`). Pages import their
+building blocks from `@/shared/components` (adapters over the vendored Keak CI UI Kit in
+`packages/ui-kit`) or from kit component subpaths (`@omniroute/ui-kit/table`, `…/page-header`), and
+icons through `<Icon>` (`ICON_MAP` → Lucide). Theme (`system` by default, light/dark) and tokens come
+from the kit via the bridge in `src/app/globals.css`. Details: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## High-Level System Context
 
@@ -299,7 +307,7 @@ Services (business logic):
 - Codex quota fetcher: `open-sse/services/codexQuotaFetcher.ts` — fetches Codex quota for context-relay handoff decisions
 - Cooldown-aware retry: `src/sse/services/cooldownAwareRetry.ts` — per-model cooldown retries with configurable `requestRetry` / `maxRetryIntervalSec`
 - Safe outbound fetch: `src/shared/network/safeOutboundFetch.ts` — guarded provider/model fetch with SSRF guard, private-URL blocking, retry, and timeout
-- Outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — validates provider URLs against private/localhost CIDR ranges
+- Outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — host checks on provider URLs; `src/shared/network/outboundUrlGuardPolicy.ts` picks the mode from `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, and their dashboard toggles (see `docs/reference/ENVIRONMENT.md`)
 - Provider request defaults: `open-sse/services/providerRequestDefaults.ts` — provider-level `maxTokens`, `temperature`, `thinkingBudgetTokens` defaults
 - GLM provider constants: `open-sse/config/glmProvider.ts` — shared GLM models, quota URLs, GLMT timeout/defaults
 - Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — base URL and discovery path constants
@@ -321,10 +329,11 @@ Domain layer modules:
 - Eval runner: `src/lib/evals/evalRunner.ts`
 - Domain state persistence: `src/lib/db/domainState.ts` — SQLite CRUD for fallback chains, budgets, cost history, lockout state, circuit breakers
 
-OAuth provider modules (22 individual files under `src/lib/oauth/providers/`):
+OAuth provider modules (27 individual files under `src/lib/oauth/providers/`):
 
 - Registry index: `src/lib/oauth/providers/index.ts`
-- Individual providers: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Individual providers: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Shared helpers: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl device flow), `museCodeDeviceResponse.ts`
 - Thin wrapper: `src/lib/oauth/providers.ts` — re-exports from individual modules
 
 ## 5) Embedded Services (v3.8.4)
@@ -365,9 +374,10 @@ relying on a static combo definition. It powers the `auto/*` model prefix family
 
 Key capabilities:
 
-- **19 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random,
-  **auto**, lkgp, context-optimized, context-relay, **fusion**, plus a fallback path) —
+- **20 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
+  pipeline) —
   auto is the headline addition in v3.8.0; `fusion` (panel fan-out + judge synthesis,
   `open-sse/services/fusion.ts`) is new in v3.8.36.
 - **16-factor scoring**: quota, health, inverse cost, inverse latency, task fit and
@@ -435,7 +445,13 @@ have to assemble lockout/budget/fallback logic themselves.
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Model availability snapshots: `src/domain/modelAvailability.ts`
 - Provider expiration tracking: `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI
+  dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter
+  attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's
+  full window set: a window known earlier but absent from it is retired, in the cache, in the
+  `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted
+  Codex quota state and in Claude's saturation buckets. Partial evidence (response headers,
+  stale copies) only updates the windows it carries.
 - Degradation state: `src/domain/degradation.ts`
 - Configuration audit: `src/domain/configAudit.ts`
 - OmniRoute response metadata builder: `src/domain/omnirouteResponseMeta.ts`
@@ -486,6 +502,10 @@ the global circuit breaker / connection cooldown / model lockout layers:
   identity, scrubs response headers, drives credits/version tracking via
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (per-request budget of
+  upstream 429s across all hosts, `ANTIGRAVITY_MAX_429_ATTEMPTS`; an identical re-send of a
+  refused body is answered locally; `src/sse/handlers/chat.ts` does not restart such a request
+  through the cooldown-aware retry)
 - ModelScope quota policy: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
   plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
@@ -541,10 +561,11 @@ Domain State DB (SQLite):
 - API key generation/verification: `src/shared/utils/apiKey.ts`
 - Provider secrets persisted in `providerConnections` entries
 - Outbound proxy support via `open-sse/utils/proxyFetch.ts` (env vars) and `open-sse/utils/networkProxy.ts` (configurable per-provider or global)
-- SSRF / outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — blocks private/loopback/link-local ranges for all provider calls
+- SSRF / outbound URL guard: `src/shared/network/outboundUrlGuard.ts` — host checks on provider calls and webhook targets; the mode comes from `src/shared/network/outboundUrlGuardPolicy.ts` (flags in `docs/reference/ENVIRONMENT.md`)
 - Runtime env validation: `src/lib/env/runtimeEnv.ts` — Zod schema for all environment variables, surfaced as startup errors/warnings
 - Sync tokens: `src/lib/db/syncTokens.ts` — scoped tokens for config bundle download endpoints; backed by `sync_tokens` SQLite table (migration `024_create_sync_tokens.sql`)
 - WebSocket handshake auth: `src/lib/ws/handshake.ts` — validates WS upgrade requests via API key or session cookie
+- Live dashboard WebSocket auth: `src/server/ws/liveServer.ts` — the sidecar (port `LIVE_WS_PORT`) accepts a dashboard session cookie or a Bearer API key holding a management scope (`manage`/`admin`); inference-only keys are refused. Its internal `POST /__omniroute_event` publisher endpoint accepts loopback peers only when no proxy-hop header (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) is present
 
 ## 5) Cloud Sync
 
@@ -931,6 +952,22 @@ Each provider has a specialized executor extending `BaseExecutor` (in `open-sse/
 
 All other providers (including custom compatible nodes) use the `DefaultExecutor`.
 
+### Automated probes and web-session accounts
+
+Model tests, Test All, combo tests and assessments send real chat requests. A web-session
+provider acts as the signed-in user, so each of those requests would be saved as a
+conversation on that account; automated probes that left such conversations got an account
+suspended (#14780). The chat pipeline therefore refuses every target an automated probe
+reaches whose provider takes a web-session credential, once the target's provider is
+resolved and before a credential is chosen (`src/lib/providers/chatProbePolicy.ts`). The
+refusal is `422` with `error.code` `chat_probe_not_isolated`, and the probe runners report
+it as a skip, not a failure.
+
+An executor that runs every chat in the provider's own no-history mode declares it with
+`ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); probes to that
+provider are then allowed. ChatGPT Web declares `temporary-chat`. Pin a declaration to its
+mechanism with a test, so the claim cannot outlive the code that makes it true.
+
 ## Provider Compatibility Matrix
 
 > **Note:** The matrix below is a representative sample of the 351 registered providers in
@@ -1095,9 +1132,9 @@ legacy compatibility. The current runtime contract uses:
 
 ## 6) SSRF / Outbound URL Guard
 
-- `src/shared/network/outboundUrlGuard.ts` blocks all private/loopback/link-local target URLs before they reach provider executors
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) applies `src/shared/network/outboundUrlGuard.ts` to chat requests dispatched through `BaseExecutor.execute()`. In public-only mode (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` with the private flag off) it blocks private and loopback hosts and 169.254.0.0/16; in every other mode it blocks cloud-metadata hosts. It checks the hostname or IP literal as written, before any DNS lookup. Built-in local providers skip it.
 - Provider model discovery and validation routes use `src/shared/network/safeOutboundFetch.ts` which applies the guard before every outbound request
-- Guard errors surface as `URL_GUARD_BLOCKED` with HTTP 422 and are logged to the compliance audit trail via `providerAudit.ts`
+- Guard errors surface as `URL_GUARD_BLOCKED` with HTTP 503 (`getSafeOutboundFetchErrorStatus`; the model-discovery route returns 400), and genuine SSRF blocks during validation are logged to the audit trail as `provider.validation.ssrf_blocked` events
 
 ## Observability and Operational Signals
 

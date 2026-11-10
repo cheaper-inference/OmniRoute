@@ -44,9 +44,9 @@ const OMNI_PROXY_ITEMS: readonly SidebarItemDefinition[] = [
     id: "model-catalog",
     href: "/dashboard/models",
     i18nKey: "modelCatalog",
-    labelFallback: "Model catalog",
+    labelFallback: "Models & Combos",
     subtitleKey: "modelCatalogSubtitle",
-    subtitleFallback: "Browse models across providers",
+    subtitleFallback: "Browse models and combos across providers",
     icon: "view_list",
   },
   {
@@ -472,6 +472,13 @@ const SYSTEM_GROUP: SidebarItemGroup = {
       subtitleKey: "resilienceConnectionsSubtitle",
       icon: "shield",
     },
+    {
+      id: "resilience-cooldowns",
+      href: "/dashboard/resilience/cooldowns",
+      i18nKey: "resilienceCooldowns",
+      subtitleKey: "resilienceCooldownsSubtitle",
+      icon: "timer_off",
+    },
   ],
 };
 
@@ -489,6 +496,13 @@ const COSTS_ITEMS: readonly SidebarItemDefinition[] = [
     i18nKey: "costsPricing",
     subtitleKey: "costsPricingSubtitle",
     icon: "price_change",
+  },
+  {
+    id: "costs-teams",
+    href: "/dashboard/costs/teams",
+    i18nKey: "costsTeams",
+    subtitleKey: "costsTeamsSubtitle",
+    icon: "groups",
   },
   {
     id: "costs-budget",
@@ -800,7 +814,7 @@ const HELP_ITEMS: readonly SidebarItemDefinition[] = [
   },
   {
     id: "issues",
-    href: "https://github.com/diegosouzapw/OmniRoute/issues",
+    href: "https://github.com/cheaper-inference/OmniRoute/issues",
     i18nKey: "issues",
     subtitleKey: "issuesSubtitle",
     icon: "bug_report",

@@ -11,16 +11,18 @@
 የPII ትምህርቶች)። ሙሉውን ያንብቡ፤ የፕሮጀክት ደንቦችን እዚህ እንደገና አይጨምሩ። ከዚህ በታች ያለው ሁሉ ለClaude Code ብቻ
 ይሠራል — በ`AGENTS.md` ውስጥ አስቀድመው የተገለጹ ደንቦች የአሠራር ማሻሻያዎች ናቸው።
 
-## የWorktree መነጠል — የClaude Code ዝርዝሮች
+## Worktree መለየት — የClaude Code ልዩ ነጥቦች
 
-ሙሉው አስገዳጅ የworktree ፕሮቶኮል (የመሠረት branch ማረጋገጫ፣ `.claude/worktrees/` መደበኛ
-path፣ `cp -al` node_modules፣ የማፍረስ ደንቦች) በ`AGENTS.md` → Git Workflow → "Worktree
-isolation" ውስጥ ይገኛል። ለClaude Code የተለዩ ነጥቦች፦
+ሙሉው የግዴታ worktree ፕሮቶኮል (የbase-branch ማረጋገጫ፣ `.claude/worktrees/` canonical
+መንገድ፣ `cp -al` node_modules፣ የማስወገጃ ህጎች) በ
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) ውስጥ ነው (በ`AGENTS.md` →
+Git Workflow → "Worktree isolation" ውስጥ በማጠቃለያ ተጠቅሷል)። ለClaude-Code የተወሰኑ ነጥቦች፦
 
-- ኦፕሬተሩ አስቀድሞ ካልነገረዎት በስተቀር፣ የመሠረት branchን በ`AskUserQuestion` (ጥብቅ ደንብ #19) አረጋግጡ።
-- አገርኛውን `EnterWorktree` tool ይምረጡ — እሱ ቀድሞውኑ worktreesን በ
-  `.claude/worktrees/` (መደበኛው path) ሥር ይፈጥራል። በሰነድ የተገለጸውን `git
-worktree add` command በመጠቀም worktreeውን ይፍጠሩ፣ ከዚያም `EnterWorktree`ን ከ`path` ጋር ይጥሩ።
+- base branchን ከኦፕሬተሩ ጋር በ`AskUserQuestion` (ጥብቅ ህግ #19) ያረጋግጡ፣ አስቀድመው
+  ካልነገሩዎት በቀር።
+- አብሮ-የተሠራውን `EnterWorktree` መሳሪያ ይምረጡ — እሱ አስቀድሞ worktreesን በ
+  `.claude/worktrees/` ሥር (canonical መንገዱ) ይፈጥራል። worktreeን በሰነዱ የተጠቀሰው `git
+worktree add` ትእዛዝ ይፍጠሩ፣ ከዚያ `EnterWorktree`ን በ`path` ይደውሉ።
 
 ## የክፍለ-ጊዜ ተሻጋሪ ደህንነት — የClaude Code ዝርዝሮች
 

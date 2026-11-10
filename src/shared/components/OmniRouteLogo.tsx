@@ -1,87 +1,58 @@
-/**
- * OmniRoute logo SVG — network hub icon with connected nodes.
- * Matches the favicon and app icon design.
- */
-type OmniRouteLogoProps = {
-  size?: number;
-  className?: string;
-};
+"use client";
 
+// Deep import of the brand module only: the package barrel pulls all 73 kit files (Radix,
+// charts…) into every importer of the logo — Sidebar, landing, login, error pages.
+import { ProductIcon, ProductLockup } from "@omniroute/ui-kit/keak-brand";
+import { cn } from "@/shared/utils/cn";
+
+type OmniRouteLogoProps = { size?: number; className?: string };
+
+/** Product glyph (connected waypoints) from the Keak brand system — inline SVG, basePath-safe. */
 export default function OmniRouteLogo({ size = 20, className = "" }: OmniRouteLogoProps) {
   return (
-    <svg
+    <ProductIcon
+      product="omniroute"
+      variant="glyph"
       width={size}
       height={size}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
+      // The kit's `.ci-keak-product-icon { width: 2em; height: 2em }` beats SVG presentation
+      // attributes; inline style is what actually sizes the glyph in a browser.
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+      className={cn(className)}
       suppressHydrationWarning
-    >
-      {/* Central node */}
-      <circle cx="16" cy="16" r="3" fill="currentColor" />
-      {/* Outer nodes */}
-      <circle cx="8" cy="8" r="2" fill="currentColor" />
-      <circle cx="24" cy="8" r="2" fill="currentColor" />
-      <circle cx="8" cy="24" r="2" fill="currentColor" />
-      <circle cx="24" cy="24" r="2" fill="currentColor" />
-      <circle cx="16" cy="5" r="1.5" fill="currentColor" />
-      <circle cx="16" cy="27" r="1.5" fill="currentColor" />
-      {/* Connection lines */}
-      <line
-        x1="16"
-        y1="13"
-        x2="8"
-        y2="8"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      <line
-        x1="16"
-        y1="13"
-        x2="24"
-        y2="8"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      <line
-        x1="16"
-        y1="19"
-        x2="8"
-        y2="24"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      <line
-        x1="16"
-        y1="19"
-        x2="24"
-        y2="24"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      <line
-        x1="16"
-        y1="13"
-        x2="16"
-        y2="5"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-      <line
-        x1="16"
-        y1="19"
-        x2="16"
-        y2="27"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-    </svg>
+    />
   );
+}
+
+interface OmniRouteLockupProps {
+  name?: string | null;
+  logoSrc?: string | null;
+  className?: string;
+}
+
+/** Full "Keak OmniRoute" lockup; white-label operators get their own name/logo instead. */
+export function OmniRouteLockup({ name, logoSrc, className }: OmniRouteLockupProps) {
+  if (name || logoSrc) {
+    return (
+      <span
+        role="img"
+        aria-label={name || "OmniRoute"}
+        className={cn("inline-flex items-center gap-2", className)}
+      >
+        {logoSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element -- operator-supplied white-label logo (data: or remote URL), not a static/known asset
+          <img src={logoSrc} alt="" className="size-6 object-contain" />
+        ) : (
+          <OmniRouteLogo size={24} />
+        )}
+        {name && (
+          <span aria-hidden="true" className="truncate font-semibold">
+            {name}
+          </span>
+        )}
+      </span>
+    );
+  }
+  return <ProductLockup product="omniroute" className={className} />;
 }

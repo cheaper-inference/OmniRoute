@@ -1,9 +1,12 @@
+import { logicalCallSql, logicalCallWhere } from "./logicalCallSql";
 import { getDbInstance } from "./core";
 import { ERROR_TYPE_CONTRACT } from "@omniroute/open-sse/services/errorClassifier.ts";
 import {
   SEARCH_CREDENTIAL_FALLBACKS,
   SEARCH_PROVIDERS,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
+import { foldUsageRowsByFamily } from "@/lib/providerFamilyAgg";
+import { NOAUTH_PROVIDERS } from "@/shared/constants/providers/noauth";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 
 /**
@@ -29,6 +32,8 @@ export interface ProviderMetricRow {
   lastErrorAt: string | null;
   lastStatus: number | null;
   lastErrorStatus: number | null;
+  /** COUNT(duration) — weight for folding avgLatencyMs across a family. */
+  latencySamples?: number | null;
 }
 
 /** One provider's traffic over a bounded window. See `getProviderUsageSince`. */
@@ -38,6 +43,7 @@ export interface ProviderUsageRow {
   successes: number;
   avgLatencyMs: number | null;
   lastRequestAt: string | null;
+  latencySamples?: number | null;
 }
 
 export interface SearchProviderStatRow {
@@ -69,57 +75,74 @@ export interface SearchProviderCountRow {
 // /api/provider-metrics — aggregate per-provider stats
 // ---------------------------------------------------------------------------
 
+// Ids and aliases of the no-auth providers. They are catalogue constants, but filtered to
+// a safe charset anyway since they are inlined into the SQL text below.
+const NOAUTH_PROVIDER_KEYS = Object.values(NOAUTH_PROVIDERS)
+  .flatMap((provider: { id: string; alias?: string }) => [provider.id, provider.alias])
+  .filter((key): key is string => typeof key === "string" && /^[a-z0-9._-]+$/i.test(key));
+
+/**
+ * `call_logs c` rows whose provider still exists: it has a `provider_connections` row
+ * (#10714 — a deleted provider must not resurface from retained logs), or it is a
+ * no-auth provider, which works without one and logs with connection_id "noauth".
+ */
+const LIVE_PROVIDER_FILTER_SQL = `(
+        EXISTS (SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider)
+        OR c.provider IN (${NOAUTH_PROVIDER_KEYS.map((key) => `'${key}'`).join(", ") || "NULL"})
+      )`;
+
 /**
  * Returns one row per provider with call-level aggregates plus last-status
  * subselects. Excludes rows where provider is NULL or '-', and excludes
  * providers with no live row in `provider_connections` — a deleted provider
  * connection must not keep surfacing as a ghost topology node forever from
- * its retained historical call_logs rows. See #10714.
+ * its retained historical call_logs rows. See #10714. No-auth providers never
+ * get a connection row (they are on unless blocked), so they are admitted by id
+ * instead — see `LIVE_PROVIDER_FILTER_SQL`.
+ *
+ * Rows stay per raw provider (one per topology node, index-backed subqueries);
+ * family totals are folded in JS by `foldMetricRowsByFamily` (#15005).
  */
-export function getProviderMetrics(): ProviderMetricRow[] {
-  const db = getDbInstance();
-  return db
-    .prepare(
-      `SELECT
-          c.provider,
-          COUNT(*) as totalRequests,
-          SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) as totalSuccesses,
-          ROUND(AVG(duration)) as avgLatencyMs,
-          MAX(timestamp) as lastRequestAt,
-          MAX(
-            CASE
-              WHEN (status IS NOT NULL AND (status < 200 OR status >= 400))
-                OR error_summary IS NOT NULL
-              THEN timestamp
-              ELSE NULL
-            END
-          ) as lastErrorAt,
-          (
-            SELECT c2.status
-            FROM call_logs c2
-            WHERE c2.provider = c.provider
-            ORDER BY c2.timestamp DESC, c2.id DESC
-            LIMIT 1
-          ) as lastStatus,
-          (
-            SELECT c3.status
-            FROM call_logs c3
-            WHERE c3.provider = c.provider
-              AND (
-                (c3.status IS NOT NULL AND (c3.status < 200 OR c3.status >= 400))
-                OR c3.error_summary IS NOT NULL
-              )
-            ORDER BY c3.timestamp DESC, c3.id DESC
-            LIMIT 1
-          ) as lastErrorStatus
-        FROM call_logs c
-        WHERE c.provider IS NOT NULL AND c.provider != '-'
-          AND EXISTS (
-            SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider
+export const PROVIDER_METRICS_SQL = `SELECT
+      c.provider,
+      COUNT(*) as totalRequests,
+      SUM(CASE WHEN status >= 200 AND status < 400 THEN 1 ELSE 0 END) as totalSuccesses,
+      ROUND(AVG(duration)) as avgLatencyMs,
+      COUNT(duration) as latencySamples,
+      MAX(timestamp) as lastRequestAt,
+      MAX(
+        CASE
+          WHEN (status IS NOT NULL AND (status < 200 OR status >= 400))
+            OR error_summary IS NOT NULL
+          THEN timestamp
+          ELSE NULL
+        END
+      ) as lastErrorAt,
+      (
+        SELECT c2.status
+        FROM call_logs c2
+        WHERE ${logicalCallSql("c2")} AND c2.provider = c.provider
+        ORDER BY c2.timestamp DESC, c2.id DESC
+        LIMIT 1
+      ) as lastStatus,
+      (
+        SELECT c3.status
+        FROM call_logs c3
+        WHERE ${logicalCallSql("c3")} AND c3.provider = c.provider
+          AND (
+            (c3.status IS NOT NULL AND (c3.status < 200 OR c3.status >= 400))
+            OR c3.error_summary IS NOT NULL
           )
-        GROUP BY c.provider`
-    )
-    .all() as ProviderMetricRow[];
+        ORDER BY c3.timestamp DESC, c3.id DESC
+        LIMIT 1
+      ) as lastErrorStatus
+    FROM call_logs c
+    WHERE ${logicalCallSql("c")} AND c.provider IS NOT NULL AND c.provider != '-'
+      AND ${LIVE_PROVIDER_FILTER_SQL}
+    GROUP BY c.provider`;
+
+export function getProviderMetrics(): ProviderMetricRow[] {
+  return getDbInstance().prepare(PROVIDER_METRICS_SQL).all() as ProviderMetricRow[];
 }
 
 // ---------------------------------------------------------------------------
@@ -139,23 +162,24 @@ export function getProviderMetrics(): ProviderMetricRow[] {
  */
 export function getProviderUsageSince(since: string): ProviderUsageRow[] {
   const db = getDbInstance();
-  return db
+  const rows = db
     .prepare(
       `SELECT
           c.provider,
           COUNT(*) as requests,
           SUM(CASE WHEN c.status >= 200 AND c.status < 400 THEN 1 ELSE 0 END) as successes,
           ROUND(AVG(c.duration)) as avgLatencyMs,
+          COUNT(c.duration) as latencySamples,
           MAX(c.timestamp) as lastRequestAt
         FROM call_logs c
-        WHERE c.provider IS NOT NULL AND c.provider != '-'
+        WHERE ${logicalCallSql("c")} AND c.provider IS NOT NULL AND c.provider != '-'
           AND c.timestamp >= @since
-          AND EXISTS (
-            SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider
-          )
+          AND ${LIVE_PROVIDER_FILTER_SQL}
         GROUP BY c.provider`
     )
     .all({ since }) as ProviderUsageRow[];
+  // Grouped by the raw column in SQL, folded per connection family here (#15005).
+  return foldUsageRowsByFamily(rows);
 }
 
 // ---------------------------------------------------------------------------
@@ -356,7 +380,7 @@ export function getFallbackStats(
           THEN 1 ELSE 0 END
         ), 0) as fallbacks
       FROM call_logs
-      ${whereClause}
+      ${logicalCallWhere(whereClause)}
     `
     )
     .get(params) as FallbackStatsRow | undefined;
@@ -411,7 +435,7 @@ export function getErrorTypeBreakdown(
         END AS errorType,
         COUNT(*) AS count
       FROM call_logs
-      ${whereClause} ${whereClause ? "AND" : "WHERE"} (status >= 400 OR error_summary IS NOT NULL)
+      ${logicalCallWhere(whereClause)} AND (status >= 400 OR error_summary IS NOT NULL)
       GROUP BY 1
       ORDER BY count DESC, errorType ASC
       `

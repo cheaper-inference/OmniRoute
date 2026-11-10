@@ -27,11 +27,18 @@ process.env.API_KEY_SECRET = "operator-disable-test-secret";
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 
 const VALIDATION_BASE_URL = "https://proxy.operator-disable.example.com/v1";
+// Initialize the production wrapper before installing the probe stub. Otherwise
+// its first import replaces the stub and sends fake provider URLs to the proxy.
+await import("../../open-sse/utils/proxyFetch.ts");
 const originalFetch = globalThis.fetch;
-globalThis.fetch = (async (input: string | URL | Request) => {
+// When set, every validation probe waits on this promise before answering, so a
+// test can hold a connection test mid-probe while the operator acts.
+let probeGate: Promise<void> | null = null;
+const probeFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   if (url === `${VALIDATION_BASE_URL}/models`) {
+    if (probeGate) await probeGate;
     return new Response(JSON.stringify({ data: [] }), { status: 200 });
   }
   return new Response("not found", { status: 404 });
@@ -42,7 +49,8 @@ const providerNodesRoute = await import("../../src/app/api/provider-nodes/route.
 const providersRoute = await import("../../src/app/api/providers/route.ts");
 const providerByIdRoute = await import("../../src/app/api/providers/[id]/route.ts");
 const { testSingleConnection } = await import("../../src/app/api/providers/[id]/test/route.ts");
-const { OPERATOR_DISABLED_AT_KEY } = await import("../../src/lib/providers/operatorDisable.ts");
+const { OPERATOR_DISABLED_AT_KEY, isOperatorDisabled } =
+  await import("../../src/lib/providers/operatorDisable.ts");
 
 async function readJsonObject(response: Response): Promise<Record<string, unknown>> {
   const text = await response.text();
@@ -106,10 +114,24 @@ function readRow(connectionId: string): { isActive: number; psd: Record<string, 
   };
 }
 
+// Importing the routes installs the patched fetch. Put the probe in its place afterwards, so a
+// test reaches it directly and does not depend on the real lookup of a fake host failing first.
+globalThis.fetch = probeFetch;
+
 test.after(() => {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("operator-disable intent remains authoritative if isActive is true", () => {
+  assert.equal(
+    isOperatorDisabled({
+      isActive: true,
+      providerSpecificData: { [OPERATOR_DISABLED_AT_KEY]: new Date().toISOString() },
+    }),
+    true
+  );
 });
 
 test("a passing test does not re-enable a connection the operator switched off", async () => {
@@ -191,4 +213,41 @@ test("a skipped (unverifiable) test does not re-enable an operator-disabled conn
     0,
     "an unverifiable test must leave an operator-disabled connection disabled"
   );
+});
+
+test("an operator disable during an in-flight probe is not undone when the probe passes", async () => {
+  // The probe of a connection test can take seconds, and POST /api/providers
+  // fires one in the background on create. When the operator switched the
+  // connection off while such a probe was still in flight, the test decided on
+  // the snapshot it read before the probe and turned the connection back on
+  // (this race made the two tests above flaky in CI).
+  let releaseProbe: () => void = () => {};
+  probeGate = new Promise<void>((resolve) => {
+    releaseProbe = resolve;
+  });
+  try {
+    const nodeId = await createCompatibleNode("opdisable-inflight");
+    const connectionId = await createConnection(nodeId, "Operator Disable In-Flight");
+    assert.equal(readRow(connectionId).isActive, 0, "a new connection starts inactive");
+
+    const inFlight = testSingleConnection(connectionId);
+    // Let the test read its snapshot and reach the gated probe.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    await setActive(connectionId, false);
+    assert.equal(typeof readRow(connectionId).psd[OPERATOR_DISABLED_AT_KEY], "string");
+
+    releaseProbe();
+    const result = await inFlight;
+    assert.equal(result.valid, true, `expected a passing test, got ${JSON.stringify(result)}`);
+    // The create route's background auto-test was held by the same gate.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const row = readRow(connectionId);
+    assert.equal(row.isActive, 0, "an in-flight passing probe must not undo an operator disable");
+    assert.equal(typeof row.psd[OPERATOR_DISABLED_AT_KEY], "string");
+  } finally {
+    releaseProbe();
+    probeGate = null;
+  }
 });

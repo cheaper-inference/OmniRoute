@@ -37,6 +37,17 @@ export const anthropicProvider: RegistryEntry = {
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
     {
+      id: "claude-opus-5-5",
+      name: "Claude Opus 5.5",
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+      supportsXHighEffort: true,
+      supportsVision: true,
+      unsupportedParams: ["temperature", "top_p", "top_k"],
+    },
+    {
       id: "claude-opus-5",
       name: "Claude Opus 5",
       contextLength: 1000000,
@@ -85,8 +96,24 @@ export const anthropicProvider: RegistryEntry = {
       // Sonnet 5 rejects non-default sampling params with a 400 (adaptive-only).
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
+    {
+      id: "claude-sonnet-5-5",
+      name: "Claude Sonnet 5.5",
+      contextLength: 1048576,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
+      unsupportedParams: ["temperature", "top_p", "top_k"],
+    },
     { id: "claude-sonnet-4.6", name: "Claude Sonnet 4.6" },
     { id: "claude-sonnet-4.5", name: "Claude Sonnet 4.5" },
     { id: "claude-haiku-4.5", name: "Claude Haiku 4.5" },
+    {
+      id: "claude-haiku-5-5",
+      name: "Claude Haiku 5.5",
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+      unsupportedParams: ["temperature", "top_p", "top_k"],
+    },
   ],
 };

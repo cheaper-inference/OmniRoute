@@ -9,7 +9,7 @@ type TransformedBody = Record<string, unknown> & {
 };
 
 function transform(model: string, body: Record<string, unknown>) {
-  const executor = new OpencodeExecutor("opencode");
+  const executor = new OpencodeExecutor("opencode-zen");
 
   return executor.transformRequest(model, body, false, {}) as TransformedBody;
 }
@@ -208,5 +208,49 @@ describe("OpenCode DeepSeek json_schema fallback", () => {
       result.messages.some((message: Record<string, unknown>) => message.role === "system"),
       false
     );
+  });
+
+  describe("prompt uses real newlines", () => {
+    const schema = { type: "object", properties: { ok: { type: "boolean" } }, required: ["ok"] };
+    const rf = { type: "json_schema", json_schema: { name: "nl_probe", schema } };
+    const BACKSLASH_N = String.raw`\n`;
+    const expectedPrompt =
+      "You must respond with valid JSON that strictly follows this JSON schema:\n```json\n" +
+      JSON.stringify(schema, null, 2) +
+      "\n```\nRespond ONLY with the JSON object, no other text and no markdown code fences.";
+
+    const run = (messages: Array<Record<string, unknown>>) =>
+      transform("deepseek-v4-flash-free", {
+        model: "deepseek-v4-flash-free",
+        messages,
+        response_format: rf,
+      });
+
+    it("no system message: prompt is inserted with real newlines", () => {
+      const system = run([{ role: "user", content: "Hi" }]).messages[0];
+      assert.equal(system.role, "system");
+      assert.equal(system.content, expectedPrompt);
+      assert.ok(!(system.content as string).includes(BACKSLASH_N));
+    });
+
+    it("string system content: separator and prompt use real newlines", () => {
+      const system = run([
+        { role: "system", content: "Be brief." },
+        { role: "user", content: "Hi" },
+      ]).messages[0];
+      assert.equal(system.content, "Be brief.\n\n" + expectedPrompt);
+      assert.ok(!(system.content as string).includes(BACKSLASH_N));
+    });
+
+    it("array system content: appended part uses real newlines", () => {
+      const system = run([
+        { role: "system", content: [{ type: "text", text: "Be brief." }] },
+        { role: "user", content: "Hi" },
+      ]).messages[0];
+      const parts = system.content as Array<{ type: string; text: string }>;
+      assert.equal(parts.length, 2);
+      assert.equal(parts[1].text, "\n\n" + expectedPrompt);
+      assert.ok(!parts[1].text.includes(BACKSLASH_N));
+    });
   });
 });

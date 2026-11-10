@@ -9,17 +9,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getDbInstance } from "../db/core";
+import { expirePendingCallLogDetails } from "../db/callLogDetails";
 import {
   findReferencedArtifacts,
   selectCallLogIdsBefore,
   selectOverflowArtifactPaths,
 } from "./callLogsBoundedQueries";
-import {
-  CALL_LOGS_DIR,
-  deleteCallArtifact,
-  type CallLogDetailState,
-} from "./callLogArtifacts";
-import { getCallLogMaxEntries, getCallLogRetentionDays, getCallLogsTableMaxRows } from "../logEnv";
+import { getCallLogsDir, deleteCallArtifact, type CallLogDetailState } from "./callLogArtifacts";
+import { getCallLogMaxEntries, getCallLogsTableMaxRows } from "../logEnv";
+import { resolveCallLogRetentionDays } from "./callLogRetention";
 import { isSqlitePagerCorruptError, notePagerCorruption } from "../db/healthCheck";
 
 const CALL_LOG_ROTATE_THROTTLE_MS = 60_000;
@@ -53,6 +51,18 @@ export function clearArtifactReference(relativePath: string, nextState: CallLogD
 // ids in one `IN (...)` → "too many SQL variables" aborted trimming. Chunk well
 // under the limit so each DELETE/SELECT stays valid.
 const DELETE_ID_CHUNK_SIZE = 500;
+
+function takeOverflowArtifactSlot(relativePath: string, baseDir: string): boolean {
+  if (deleteCallArtifact(relativePath, baseDir)) {
+    clearArtifactReference(relativePath, "missing");
+    return true;
+  }
+  if (relativePath && fs.existsSync(path.join(baseDir, relativePath))) return false;
+  // Reference without a file: free it like a detail read does,
+  // so later passes select new rows instead of stalling.
+  clearArtifactReference(relativePath, "missing");
+  return true;
+}
 
 function deleteCallLogRowsByIds(ids: string[]): DeleteResult {
   if (ids.length === 0) {
@@ -178,7 +188,7 @@ function readOrphanCandidates(
 }
 
 export function cleanupOrphanCallLogFiles(
-  baseDir = CALL_LOGS_DIR,
+  baseDir: string | null = getCallLogsDir(),
   options: { maxCandidates?: number; maxScanEntries?: number; minAgeMs?: number } = {}
 ) {
   if (!baseDir || !fs.existsSync(baseDir)) return 0;
@@ -223,7 +233,7 @@ export function cleanupOrphanCallLogFiles(
 }
 
 export function cleanupOverflowCallLogFiles(
-  baseDir = CALL_LOGS_DIR,
+  baseDir: string | null = getCallLogsDir(),
   maxEntries?: number,
   maxDeletes = Number.POSITIVE_INFINITY
 ) {
@@ -242,12 +252,9 @@ export function cleanupOverflowCallLogFiles(
       if (paths.length === 0) break;
       let progress = 0;
       for (const relativePath of paths) {
-        if (deleteCallArtifact(relativePath, baseDir)) {
-          clearArtifactReference(relativePath, "missing");
-          deleted++;
-          progress++;
-        }
+        if (takeOverflowArtifactSlot(relativePath, baseDir)) progress++;
       }
+      deleted += progress;
       if (progress === 0) break;
     }
     return deleted;
@@ -333,15 +340,19 @@ export function handleCallLogRotateError(error: unknown): void {
 export function rotateCallLogs() {
   if (callLogRotatePaused) return;
   try {
-    if (!CALL_LOGS_DIR || !fs.existsSync(CALL_LOGS_DIR)) return;
+    const logsDir = getCallLogsDir();
+    if (!logsDir || !fs.existsSync(logsDir)) return;
 
-    const retentionMs = getCallLogRetentionDays() * 24 * 60 * 60 * 1000;
+    const retentionMs = resolveCallLogRetentionDays() * 24 * 60 * 60 * 1000;
     const cutoff = new Date(Date.now() - retentionMs).toISOString();
 
+    // A process that died mid-write leaves its row 'pending'; once the insert-time
+    // deadline passes, the write can no longer publish, so make it terminal 'missing'.
+    expirePendingCallLogDetails(getDbInstance());
     deleteCallLogsBefore(cutoff, CALL_LOG_ROTATE_BATCH_SIZE);
     trimCallLogsToMaxRows(getCallLogsTableMaxRows(), CALL_LOG_ROTATE_BATCH_SIZE);
-    cleanupOverflowCallLogFiles(CALL_LOGS_DIR, getCallLogMaxEntries(), CALL_LOG_ROTATE_BATCH_SIZE);
-    cleanupOrphanCallLogFiles(CALL_LOGS_DIR, {
+    cleanupOverflowCallLogFiles(logsDir, getCallLogMaxEntries(), CALL_LOG_ROTATE_BATCH_SIZE);
+    cleanupOrphanCallLogFiles(logsDir, {
       maxCandidates: CALL_LOG_ROTATE_BATCH_SIZE,
       maxScanEntries: CALL_LOG_ROTATE_BATCH_SIZE,
       minAgeMs: CALL_LOG_ORPHAN_MIN_AGE_MS,
@@ -366,7 +377,7 @@ function runScheduledCallLogRotation() {
 }
 
 export function scheduleCallLogRotation() {
-  if (!CALL_LOGS_DIR) return;
+  if (!getCallLogsDir()) return;
   const elapsed = Date.now() - lastCallLogRotationScheduledAt;
   if (elapsed >= CALL_LOG_ROTATE_THROTTLE_MS) {
     lastCallLogRotationScheduledAt = Date.now();

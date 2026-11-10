@@ -38,8 +38,11 @@ import {
   isSelectorMemberAvoided,
   leastRecentlySetAside,
   noteProxyMemberRefusal,
+  snapshotProxySetAside,
+  type ProxyRefusalKind,
 } from "@omniroute/open-sse/utils/proxyRefusalMemory.ts";
 import { parseSelectorTag } from "./selectorEndpoint";
+import { noteSelectorEarlyReason } from "./selectorEarlyReasons";
 import { getGroupMembers, switchSelector, type SelectorSwitchReason } from "./selectorClient";
 import { isSelectorControlUrlAllowedAtFetchTime, resolveSelectorAllowlist } from "./selectorGuard";
 import { recordSelectorSwitchOutcome } from "./subscriptionService";
@@ -228,22 +231,26 @@ async function currentSelectorChoice(
 
 /**
  * First member in declared order that is neither excluded by the caller nor
- * set aside in the refusal memory for this entry. Falls back to the least
- * recently set-aside member when every candidate is set aside (progress over
- * refusal); null only when nothing is eligible at all (e.g. single member).
- * `nowMs` is frozen by the caller for the whole switch (no clock drift
- * between the record and the pick).
+ * set aside in the refusal memory for this entry. Members served by a sibling
+ * selector of the same core rank last at equal refusal state. Falls back to
+ * the least recently set-aside member when every candidate is set aside
+ * (progress over refusal); null only when nothing is eligible at all (e.g.
+ * single member). `nowMs` is frozen by the caller for the whole switch (no
+ * clock drift between the record and the pick).
  */
 export function pickLiveMember(
   entryKey: string,
   members: string[],
   excluded: Set<string>,
-  nowMs: number
+  nowMs: number,
+  served?: Set<string>
 ): string | null {
   const candidates = members.filter((m) => !excluded.has(m));
   if (candidates.length === 0) return null;
-  const fresh = candidates.find((m) => !isSelectorMemberAvoided(entryKey, m, nowMs));
-  if (fresh) return fresh;
+  const fresh = candidates.filter((m) => !isSelectorMemberAvoided(entryKey, m, nowMs));
+  const unserved = fresh.find((m) => !(served?.has(m) ?? false));
+  if (unserved) return unserved;
+  if (fresh.length > 0) return fresh[0]!;
   return leastRecentlySetAside(entryKey, candidates, nowMs);
 }
 
@@ -258,14 +265,16 @@ function avoidExtraForSwitch(
   live: { members: string[]; current: string | null } | null,
   setAsideKey: string,
   currentName: string | null,
-  now: number
+  now: number,
+  servedBySiblings?: Set<string>
 ): string[] | undefined {
   if (live == null) return undefined;
   const memoryTarget = pickLiveMember(
     setAsideKey,
     live.members,
     new Set([currentName ?? setAsideKey, setAsideKey].filter((x): x is string => !!x)),
-    now
+    now,
+    servedBySiblings
   );
   if (!memoryTarget) return undefined;
   const avoidExtra = live.members.filter((m) => m !== memoryTarget);
@@ -352,7 +361,9 @@ function readSwitchSecret(secretEnc: string | null): string | null {
 async function runSwitch(
   hit: { controlUrl: string; selector: string; secretEnc: string | null; subscriptionId: string },
   setAsideKey: string,
-  now: number
+  now: number,
+  kind: ProxyRefusalKind,
+  siblings?: Array<{ selector: string; secretEnc: string | null }>
 ): Promise<SelectorTriggerResult> {
   const throttleKey = `${hit.subscriptionId} ${hit.selector}`;
   // Reserve the slot BEFORE the await: two concurrent triggers for the same
@@ -366,7 +377,9 @@ async function runSwitch(
     restoreSlot(throttleKey, prevSlot);
     await recordSelectorSwitchOutcome({
       subscriptionId: hit.subscriptionId,
+      selector: hit.selector,
       result: guarded.reason ?? "blocked",
+      kind,
     });
     return { switched: false, reason: guarded.reason };
   }
@@ -378,7 +391,9 @@ async function runSwitch(
     restoreSlot(throttleKey, prevSlot);
     await recordSelectorSwitchOutcome({
       subscriptionId: hit.subscriptionId,
+      selector: hit.selector,
       result: "incomplete",
+      kind,
     });
     return { switched: false, reason: "incomplete" };
   }
@@ -392,14 +407,29 @@ async function runSwitch(
   // key, so the repeat doubles from that key's own streak).
   const live = await currentSelectorChoice(hit.controlUrl, secret, hit.selector);
   const currentName = live?.current ?? null;
-  if (currentName) noteProxyMemberRefusal(setAsideKey, currentName, "ip_quota_429", now);
+  if (currentName) noteProxyMemberRefusal(setAsideKey, currentName, kind, now);
+  // Sibling choice read: one best-effort GET per steered selector of the same
+  // core known to resolvePairs (same controlUrl). Each sibling uses its own
+  // stored secret; an unreadable sibling reads as unknown and never blocks
+  // the switch. A single-selector core reads no sibling at all.
+  const servedBySiblings = new Set<string>();
+  for (const sibling of siblings ?? []) {
+    if (sibling.selector === hit.selector) continue;
+    const siblingSecret = readSwitchSecret(sibling.secretEnc);
+    const siblingLive = await currentSelectorChoice(
+      hit.controlUrl,
+      siblingSecret,
+      sibling.selector
+    );
+    if (siblingLive?.current) servedBySiblings.add(siblingLive.current);
+  }
   const res = await switchSelector(
     {
       controlUrl: hit.controlUrl,
       secret,
       selector: hit.selector,
       avoidName: currentName ?? setAsideKey,
-      avoidExtra: avoidExtraForSwitch(live, setAsideKey, currentName, now),
+      avoidExtra: avoidExtraForSwitch(live, setAsideKey, currentName, now, servedBySiblings),
     },
     undefined
   );
@@ -408,22 +438,120 @@ async function runSwitch(
     restoreSlot(throttleKey, prevSlot);
     await recordSelectorSwitchOutcome({
       subscriptionId: hit.subscriptionId,
+      selector: hit.selector,
       result: res.reason,
+      kind,
     });
     return { switched: false, reason: res.reason };
   }
   await recordSelectorSwitchOutcome({
     subscriptionId: hit.subscriptionId,
+    selector: hit.selector,
     result: "ok",
     member: res.target ?? null,
+    kind,
   });
   return { switched: true, reason: "ok" };
 }
 
-/** Hand back a pre-reserved throttle slot after a failed switch attempt. */
+/**
+ * Refusal motive behind the current set-aside entry: the live decision reads
+ * the newest still-in-force (entry, kind) state, so the persisted switch kind
+ * always names the live motive, not a stale earlier write. Never throws.
+ */
+function setAsideKind(entryKey: string, now: number): ProxyRefusalKind | null {
+  try {
+    return snapshotProxySetAside(entryKey, now)?.kind ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Last persisted switch motive for a subscription, reused when a throttled
+ * repeat has no propagated kind: the refusal memory only knows the live
+ * snapshot, so without this the throttled row would overwrite the propagated
+ * motive (e.g. "transport" from the transition subscriber) with the live
+ * snapshot or the hard default. Unknown or unreadable values fall through to
+ * the live snapshot path. Never throws.
+ */
+/** Read one selector's stored kind from the per-selector trace column.
+ * Unknown, missing or unreadable entries fall through to the caller. */
+function selectorEntryKind(raw: unknown, selector: string): ProxyRefusalKind | null {
+  try {
+    const stored = typeof raw === "string" ? (JSON.parse(raw) as Record<string, unknown>) : null;
+    if (!stored || typeof stored !== "object" || Array.isArray(stored)) return null;
+    const entry = stored[selector];
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
+    const kind = (entry as Record<string, unknown>).kind;
+    return typeof kind === "string" && kind.length > 0 ? (kind as ProxyRefusalKind) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Read the stored kind from the select row: the per-selector entry first,
+ * then the subscription-wide summary column. Never throws. */
+function kindFromExtendedRow(
+  row:
+    { selector_last_switch_kind?: unknown; selector_last_switch_by_selector?: unknown } | undefined,
+  selector?: string
+): ProxyRefusalKind | null {
+  if (selector !== undefined) {
+    const kept = selectorEntryKind(row?.selector_last_switch_by_selector, selector);
+    if (kept !== null) return kept;
+  }
+  return asRefusalKind(row?.selector_last_switch_kind);
+}
+
+/** Narrow an unknown DB value to a stored kind. Never throws. */
+function asRefusalKind(value: unknown): ProxyRefusalKind | null {
+  return typeof value === "string" && value.length > 0 ? (value as ProxyRefusalKind) : null;
+}
+
+function lastPersistedSwitchKind(
+  subscriptionId: string,
+  selector?: string
+): ProxyRefusalKind | null {
+  try {
+    const db = getDbInstance();
+    const row = db
+      .prepare(
+        "SELECT selector_last_switch_kind, selector_last_switch_by_selector FROM proxy_subscriptions WHERE id = ?"
+      )
+      .get(subscriptionId) as
+      | { selector_last_switch_kind?: unknown; selector_last_switch_by_selector?: unknown }
+      | undefined;
+    return kindFromExtendedRow(row, selector);
+  } catch {
+    return null;
+  }
+}
+
 function restoreSlot(throttleKey: string, prev: number | undefined): void {
   if (prev === undefined) lastSwitch.delete(throttleKey);
   else lastSwitch.set(throttleKey, prev);
+}
+/**
+ * Resolve the refusal motive for a persisted switch outcome: the caller that
+ * set the member aside knows why (propagated kind first); on the throttled
+ * path the last persisted motive wins over the live snapshot (same entry,
+ * earlier outcome); live snapshot as fallback for the synchronous quota
+ * caller; hard default last so the column never stays unexplained.
+ */
+function switchOutcomeKind(
+  setAsideKey: string,
+  now: number,
+  propagated?: ProxyRefusalKind,
+  subscriptionId?: string,
+  selector?: string
+): ProxyRefusalKind {
+  if (propagated !== undefined) return propagated;
+  if (subscriptionId !== undefined) {
+    const kept = lastPersistedSwitchKind(subscriptionId, selector);
+    if (kept !== null) return kept;
+  }
+  return setAsideKind(setAsideKey, now) ?? "ip_quota_429";
 }
 /**
  * Maybe switch a selector group after a set-aside. Fire-and-forget entry:
@@ -432,25 +560,47 @@ function restoreSlot(throttleKey: string, prev: number | undefined): void {
  */
 export async function maybeSwitchOnSetAside(
   setAsideKey: string,
-  opts?: { nowMs?: number }
+  opts?: { nowMs?: number; kind?: ProxyRefusalKind }
 ): Promise<SelectorTriggerResult> {
   try {
+    // Flag off: nothing touched, not even the in-memory skip counters.
     if (!isProxySkipRecentlyFailedEnabled()) return { switched: false, reason: "flag-off" };
     if (anyControlUrlConfigured === false) {
+      noteSelectorEarlyReason("no-control");
       return { switched: false, reason: "no-control" };
     }
     if (anyControlUrlConfigured === null && !refreshControlUrlCache()) {
+      noteSelectorEarlyReason("no-control");
       return { switched: false, reason: "no-control" };
     }
     const pairs = resolvePairs(setAsideKey);
-    if (pairs.length === 0) return { switched: false, reason: "unmapped" };
+    if (pairs.length === 0) {
+      noteSelectorEarlyReason("unmapped");
+      return { switched: false, reason: "unmapped" };
+    }
     // Deterministic tie-break: first pair in (updated_at DESC, id ASC) order.
     const hit = pairs[0]!;
     const now = typeof opts?.nowMs === "number" ? opts.nowMs : Date.now();
     if (isThrottled(hit, now)) {
+      // A throttled repeat still documents why nothing moved: the list shows
+      // the last outcome, and a throttle is normal backoff, never a failure.
+      await recordSelectorSwitchOutcome({
+        subscriptionId: hit.subscriptionId,
+        selector: hit.selector,
+        result: "throttled",
+        kind: switchOutcomeKind(setAsideKey, now, opts?.kind, hit.subscriptionId, hit.selector),
+      });
       return { switched: false, reason: "throttled" };
     }
-    return runSwitch(hit, setAsideKey, now);
+    return runSwitch(
+      hit,
+      setAsideKey,
+      now,
+      switchOutcomeKind(setAsideKey, now, opts?.kind),
+      pairs
+        .filter((p) => p.controlUrl === hit.controlUrl && p.selector !== hit.selector)
+        .map((p) => ({ selector: p.selector, secretEnc: p.secretEnc }))
+    );
   } catch {
     return { switched: false, reason: "network-error" };
   }

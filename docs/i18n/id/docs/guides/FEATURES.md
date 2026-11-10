@@ -298,13 +298,13 @@ Perilaku utama:
 
 ## 🔑 Token Sinkronisasi & Bundel Konfigurasi _(v3.6.6+)_
 
-Akses multi-perangkat dan operator eksternal kini dimungkinkan melalui **token sinkronisasi dengan cakupan tertentu**:
+Akses multi-perangkat dan operator eksternal kini dapat dilakukan melalui **token sinkronisasi dengan cakupan tertentu**:
 
 - **`POST /api/sync/tokens`** — Terbitkan token sinkronisasi baru (dengan cakupan tertentu dan masa berlaku opsional)
 - **`DELETE /api/sync/tokens/:id`** — Cabut token
-- **`GET /api/sync/bundle`** — Unduh snapshot JSON berversi dan berkunci ETag dari semua pengaturan non-sensitif (kata sandi disamarkan)
+- **`GET /api/sync/bundle`** — Unduh snapshot JSON berversi dari konfigurasi, yang diidentifikasi dengan ETag (diautentikasi hanya dengan token sinkronisasi). Pengaturan autentikasi seperti kata sandi dasbor dihapus, tetapi kredensial penyedia dan kunci API disertakan, jadi perlakukan file tersebut sebagai rahasia
 
-Bundel konfigurasi dibuat oleh `src/lib/sync/bundle.ts`. Konsumen membandingkan header respons `ETag` untuk mendeteksi perubahan tanpa mengunduh ulang seluruh payload.
+Bundel konfigurasi dibuat oleh `src/lib/sync/bundle.ts`. Konsumen membandingkan header respons `ETag` untuk mendeteksi perubahan tanpa mengunduh ulang seluruh payload. Dari CLI, `omniroute sync bundle <outPath> --token <syncToken>` (atau `OMNIROUTE_SYNC_TOKEN`) menyimpannya ke file yang hanya dapat diakses oleh pemilik.
 
 ---
 

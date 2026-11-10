@@ -3,30 +3,28 @@ import {
   optionalTierFingerprint,
   catalogContentFingerprint,
   createLogger,
-  defaultOmniRouteAutoCombosFetcher,
+  setHostSink,
   defaultOmniRouteCombosFetcher,
   defaultOmniRouteEnrichmentFetcher,
   defaultOmniRouteModelsFetcher,
   defaultOmniRouteProvidersFetcher,
+  type LogLevel,
   type OmniRouteEnrichmentMap,
   type OmniRouteProviderConnection,
 } from "./shared/index.js";
-import type {
-  OmniRouteRawAutoCombo,
-  OmniRouteRawCombo,
-  OmniRouteRawModelEntry,
-} from "./shared/index.js";
-import type { ResolvedOptions } from "./catalog.js";
+import type { OmniRouteRawCombo, OmniRouteRawModelEntry } from "./shared/index.js";
 import { buildProviderPayload, collectCatalog } from "./catalog.js";
+import { usesModelsComboSource } from "./combos-source.js";
 import {
-  DEFAULT_MODEL_CACHE_TTL_MS,
   UNREACHABLE_COOLDOWN_MS,
+  MIN_REFRESH_INTERVAL_MS,
   memoryCacheKey,
   readDiskSnapshot,
   snapshotIdentityFingerprint,
   writeDiskSnapshot,
   type CatalogSnapshot,
 } from "./cache.js";
+import { startRefreshLoop } from "./refresh-loop.js";
 import { assertContext } from "./compat.js";
 import { type ApiKeyOrigin, resolveApiKey, warnIfMissing } from "./credentials.js";
 import { createSourceErrorReporter } from "./enrichment-report.js";
@@ -35,9 +33,8 @@ import {
   MANAGEMENT_TOKEN_ENV_VAR,
   PLUGIN_ID,
   parsePluginOptions,
-  resolveManagementReadToken,
   resolveTimeouts,
-  type PluginOptions,
+  toResolvedOptions,
 } from "./options.js";
 
 /**
@@ -47,6 +44,9 @@ import {
  * should be kept or dropped.
  */
 type SourceResult<T> = { ok: true; value: T } | { ok: false };
+
+/** Warn-once guard for the usage-memory startup notice (one warn per process). */
+let warnedMemoryNoToken = false;
 
 interface RefreshState {
   entries: Map<string, CatalogSnapshot>;
@@ -63,29 +63,7 @@ interface RefreshState {
   unreachableUntil: number;
 }
 
-function toResolvedOptions(parsed: PluginOptions): ResolvedOptions {
-  return {
-    providerId: parsed.providerId,
-    baseURL: parsed.baseURL,
-    apiKey: parsed.apiKey ?? process.env.OMNIROUTE_API_KEY ?? "",
-    managementReadToken: resolveManagementReadToken(parsed.managementReadToken),
-    timeoutMs: parsed.timeoutMs,
-    timeouts: parsed.timeouts,
-    logLevel: parsed.logLevel,
-    startupDebug: parsed.startupDebug,
-    providerTag: parsed.providerTag,
-    modelCacheTtlMs:
-      typeof parsed.modelCacheTtlMs === "number" && parsed.modelCacheTtlMs > 0
-        ? parsed.modelCacheTtlMs
-        : DEFAULT_MODEL_CACHE_TTL_MS,
-    displayName: parsed.displayName,
-    apiFormat: parsed.apiFormat,
-    visibleModels: parsed.visibleModels,
-    hiddenModels: parsed.hiddenModels,
-    usableOnly: parsed.usableOnly,
-    enrichment: parsed.enrichment,
-  };
-}
+export { toResolvedOptions } from "./options.js";
 
 export default Plugin.define({
   id: PLUGIN_ID,
@@ -99,6 +77,31 @@ export default Plugin.define({
     resolved.logger = log;
     resolved.logLevel = parsed.logLevel;
     resolved.startupDebug = parsed.startupDebug;
+    // Forward plugin lines to the host log when the host exposes one, so a
+    // service install (stdout lost) still records warnings. Defensive at
+    // every level: without it the console output above stays the only copy.
+    try {
+      const maybeClient = (ctx as { client?: unknown }).client as
+        { app?: { log?: unknown } } | undefined;
+      const appLog = maybeClient?.app?.log;
+      if (typeof appLog === "function") {
+        const hostLog = appLog as (input: {
+          body: { service: string; level: LogLevel; message: string };
+        }) => unknown;
+        setHostSink((level, message) => {
+          const out = hostLog({
+            body: { service: "[omniroute-plugin]", level, message },
+          });
+          return out;
+        });
+      }
+    } catch (err) {
+      // The probe itself threw (a throwing getter on the host object):
+      // trace it on the console so a missed host log is never silent.
+      console.warn(
+        `[omniroute-plugin] [WARN] host log probe failed, keeping console output: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
     log.info(`[omniroute-v2] init providerId=${X}`);
     // The inference key stands in below when no management token is set, and
     // gateways usually reject that stand-in with 401/403. Say so once here,
@@ -108,6 +111,16 @@ export default Plugin.define({
         `[omniroute-v2] no management token configured: management endpoints (/api/*) will reuse the inference key, ` +
           `which gateways usually reject with 401/403. Set "managementReadToken" in the plugin options ` +
           `or export ${MANAGEMENT_TOKEN_ENV_VAR}.`
+      );
+    }
+    if (
+      resolved.usageMemory !== false &&
+      resolved.managementReadToken === undefined &&
+      !warnedMemoryNoToken
+    ) {
+      warnedMemoryNoToken = true;
+      log.warn(
+        "[omniroute-v2] usage history inactive without management token: statically dropped models stay unpublished."
       );
     }
 
@@ -124,6 +137,11 @@ export default Plugin.define({
       optionalFingerprint: undefined,
       unreachableUntil: 0,
     };
+
+    // Per-installation stopped flag for the background refresh loop. Declared
+    // up front so the closures below can reference it without a temporal
+    // dead zone, and so a tick that lands after teardown publishes nothing.
+    let stopped = false;
 
     // The credential the host holds wins over one written in config, so a
     // user who connected the integration from the UI never has to paste a
@@ -153,9 +171,16 @@ export default Plugin.define({
       if (credentialChecked && apiKeyOrigin !== "missing") return;
       const next = await resolveApiKey(ctx, X, parsed.apiKey, log);
       const moved = next.key !== resolved.apiKey;
+      const previousCacheKey = cacheKey;
       resolved.apiKey = next.key;
       apiKeyOrigin = next.origin;
-      if (moved) ({ cacheKey, identityFingerprint } = credentialsOf());
+      if (moved) {
+        ({ cacheKey, identityFingerprint } = credentialsOf());
+        // Drop the stale entry so the memory cache does not grow across a
+        // credential change.
+        state.entries.delete(previousCacheKey);
+        state.inFlight.delete(previousCacheKey);
+      }
       if (!credentialChecked) warnIfMissing(next, X, log);
       else if (moved) log.info(`[omniroute-v2] API key picked up from the ${next.origin} source`);
       credentialChecked = true;
@@ -183,6 +208,10 @@ export default Plugin.define({
       resolved.managementReadToken === undefined
     );
     const fetchCombosSafe = async (): Promise<SourceResult<OmniRouteRawCombo[]>> => {
+      if (resolved.combos === false) return { ok: true, value: [] };
+      // Opt-in models source: the combo rows already arrive in /v1/models,
+      // so /api/combos is not requested at all (default "api" keeps it).
+      if (usesModelsComboSource(resolved)) return { ok: true, value: [] };
       try {
         return {
           ok: true,
@@ -243,31 +272,10 @@ export default Plugin.define({
         return { ok: false };
       }
     };
-    const fetchAutoCombosSafe = async (): Promise<SourceResult<OmniRouteRawAutoCombo[]>> => {
-      try {
-        return {
-          ok: true,
-          value: await defaultOmniRouteAutoCombosFetcher(
-            resolved.baseURL,
-            resolved.managementReadToken ?? resolved.apiKey,
-            timeouts.autoCombos,
-            log,
-            reportSourceError
-          ),
-        };
-      } catch (err) {
-        // The default fetcher reports the refusal itself (with the
-        // management-token hint); this warn is the fallback for injected
-        // stubs that throw without reporting.
-        const reason = err instanceof Error ? err.message : String(err);
-        log.warn(`[omniroute-v2] auto combos fetch failed, keeping the last known ones: ${reason}`);
-        return { ok: false };
-      }
-    };
 
     /**
      * Fetch in two tiers. Models are what a catalog *is*: without them there
-     * is nothing to publish. Everything else — combos, auto-combos, the
+     * is nothing to publish. Everything else — combos, the
      * provider list, the enrichment overlay — improves an already usable
      * catalog, so awaiting any of them before publishing makes the catalog
      * hostage to the slowest source: a gateway that accepts the connection
@@ -286,7 +294,6 @@ export default Plugin.define({
       const essential = fetchModelsSafe();
       const optional = Promise.all([
         fetchCombosSafe(),
-        fetchAutoCombosSafe(),
         fetchProvidersSafe(),
         fetchEnrichmentSafe(),
       ]);
@@ -307,12 +314,11 @@ export default Plugin.define({
       const snapshot: CatalogSnapshot = {
         models,
         combos: previous?.combos ?? [],
-        autoCombos: previous?.autoCombos ?? [],
         providers: previous?.providers ?? [],
         enrichment: previous?.enrichment ?? new Map(),
         fetchedAt: Date.now(),
       };
-      if (models.length > 0) {
+      if (!stopped && models.length > 0) {
         state.entries.set(cacheKey, snapshot);
         await writeDiskSnapshot(X, snapshot, identityFingerprint, log);
       }
@@ -336,26 +342,24 @@ export default Plugin.define({
      */
     async function upgradeWithOptional(
       base: CatalogSnapshot,
-      [combos, autoCombos, providers, enrichment]: [
+      [combos, providers, enrichment]: [
         SourceResult<OmniRouteRawCombo[]>,
-        SourceResult<OmniRouteRawAutoCombo[]>,
         SourceResult<OmniRouteProviderConnection[]>,
         SourceResult<OmniRouteEnrichmentMap>,
       ]
     ): Promise<void> {
+      if (stopped) return;
       if (state.entries.get(cacheKey) !== base) return;
       // Per source: a success replaces (even with an empty answer — that is
       // the gateway's answer), a failure keeps what we had.
       const upgraded: CatalogSnapshot = {
         ...base,
         combos: combos.ok ? combos.value : base.combos,
-        autoCombos: autoCombos.ok ? autoCombos.value : base.autoCombos,
         providers: providers.ok ? providers.value : base.providers,
         enrichment: enrichment.ok ? enrichment.value : base.enrichment,
       };
       const unchanged =
         upgraded.combos === base.combos &&
-        upgraded.autoCombos === base.autoCombos &&
         upgraded.providers === base.providers &&
         upgraded.enrichment === base.enrichment;
       if (unchanged) return;
@@ -367,14 +371,13 @@ export default Plugin.define({
       // fingerprint covers ids alone, so without this the host would rebuild
       // its catalog once per TTL window for an identical result.
       const optionalFingerprint = optionalTierFingerprint(
-        upgraded.autoCombos ?? [],
         upgraded.providers ?? [],
         upgraded.enrichment,
         upgraded.combos
       );
       const optionalChanged = state.optionalFingerprint !== optionalFingerprint;
       state.optionalFingerprint = optionalFingerprint;
-      if (optionalChanged) {
+      if (optionalChanged && !stopped) {
         try {
           await ctx.provider.reload();
         } catch (err) {
@@ -385,10 +388,11 @@ export default Plugin.define({
       }
     }
 
-    function loadSnapshot(): Promise<CatalogSnapshot> {
+    function loadSnapshot(force = false): Promise<CatalogSnapshot> {
       const now = Date.now();
       const hit = state.entries.get(cacheKey);
-      if (hit && hit.fetchedAt + resolved.modelCacheTtlMs > now) return Promise.resolve(hit);
+      if (!force && hit && hit.fetchedAt + resolved.modelCacheTtlMs > now)
+        return Promise.resolve(hit);
       // Cooldown after a total models failure: skip the network until it
       // lapses. Serves last-known-good when one exists; otherwise the refresh
       // below still runs (nothing to serve, no point pretending).
@@ -439,10 +443,13 @@ export default Plugin.define({
     // setup publishes first, then the host replays the callback (during
     // registration and on every reload) and reads the published snapshot.
     let latest: { info: unknown; models: unknown[] } | undefined;
-    const refreshAndPublish = async (): Promise<void> => {
+    const refreshAndPublish = async (options?: { force?: boolean }): Promise<void> => {
+      if (stopped) return;
       await ensureCredential();
+      if (stopped) return;
       await ensureWarmSnapshot();
-      const snapshot = await loadSnapshot();
+      const snapshot = await loadSnapshot(options?.force === true);
+      if (stopped) return;
       let effective = snapshot;
       if (snapshot.models.length === 0) {
         const stale = state.entries.get(cacheKey);
@@ -456,7 +463,6 @@ export default Plugin.define({
       const counts = await (async (): Promise<{
         models: number;
         combos: number;
-        autoCombos: number;
       }> => {
         // fetcher-level fail-open covers fetches; this guard covers mapper throws.
         try {
@@ -464,7 +470,6 @@ export default Plugin.define({
             onSourceError: reportSourceError,
             models: async () => effective.models,
             combos: async () => effective.combos,
-            autoCombos: async () => effective.autoCombos,
             providers: async () => effective.providers ?? [],
             enrichment: async () => effective.enrichment ?? new Map(),
           });
@@ -475,18 +480,14 @@ export default Plugin.define({
           log.warn(
             `[omniroute-v2] catalog publish failed, keeping current catalog: ${err instanceof Error ? err.message : String(err)}`
           );
-          return { models: 0, combos: 0, autoCombos: 0 };
+          return { models: 0, combos: 0 };
         }
       })();
       void counts;
-      const fingerprint = catalogContentFingerprint(
-        effective.models,
-        effective.combos,
-        effective.autoCombos
-      );
+      const fingerprint = catalogContentFingerprint(effective.models, effective.combos);
       const changed = state.fingerprint !== undefined && state.fingerprint !== fingerprint;
       state.fingerprint = fingerprint;
-      if (changed) {
+      if (changed && !stopped) {
         await Promise.resolve();
         try {
           await ctx.provider.reload();
@@ -639,5 +640,53 @@ export default Plugin.define({
         );
       }
     }
+
+    // Background refresh loop: keep the served catalog aligned with the
+    // gateway. The first publish above already populated `latest`; the loop
+    // only re-runs refreshAndPublish on the configured TTL.
+    // Registry of live loops, keyed by providerId, scoped to globalThis so it
+    // survives module re-evaluation (the host loads the plugin up to ~20
+    // times per process). Defense in depth behind the Cleanup returned below.
+    const registryKey = Symbol.for("omniroute.opencode-plugin-v2.refresh-loops");
+    const g = globalThis as unknown as Record<
+      symbol,
+      Map<string, { stop: () => void; state: RefreshState }>
+    >;
+    if (!g[registryKey]) g[registryKey] = new Map();
+    const registry = g[registryKey];
+    // Stop any loop already registered for this providerId.
+    const existing = registry.get(X);
+    if (existing) {
+      try {
+        existing.stop();
+      } catch {
+        // ignore
+      }
+      registry.delete(X);
+    }
+
+    const stopLoop = startRefreshLoop({
+      intervalMs: Math.max(MIN_REFRESH_INTERVAL_MS, resolved.modelCacheTtlMs),
+      refresh: () => refreshAndPublish({ force: true }),
+      logger: log,
+    });
+
+    // Cleanup returned to the host: flag the installation as stopped (a tick
+    // already in flight then publishes nothing), clear the timer and drop the
+    // registry entry. The entry carries `state` only so tests can inspect the
+    // memory cache.
+    const stop = () => {
+      stopped = true;
+      try {
+        stopLoop();
+      } catch {
+        // ignore
+      }
+      registry.delete(X);
+    };
+
+    registry.set(X, { stop, state });
+
+    return stop;
   },
 });

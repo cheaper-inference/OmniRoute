@@ -40,32 +40,32 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ነባሩን `SearchForm` + `ResultsPanel` + `RerankPanel` ወደ አንድ ትር ያሳድጋል፦
 
-- ጥያቄ → ውጤቶች (ርዕስ፣ URL፣ ቅንጭብ፣ የተዛማጅነት ነጥብ)።
-- በውቅር ክፍሉ ውስጥ የአቅራቢ ሜታዳታ (ወጪ፣ ኮታ፣ ሁኔታ)።
-- የዳግም ደረጃ ክፍል፦ የዳግም ደረጃ ሞዴል ይምረጡ፣ ውጤቶችን እንደገና ያስቀምጡ፣ `positionDelta`ን ያሳዩ።
-- ምንም የፍለጋ አቅራቢዎች ባልተዋቀሩበት ጊዜ CTA ያለው ባዶ ሁኔታ።
+- መጠይቅ → ውጤቶች (ርዕስ፣ URL፣ አጭር መግለጫ፣ የተዛማጅነት ነጥብ)።
+- በConfig ፓነል ውስጥ የአቅራቢ ሜታዳታ (ወጪ፣ ኮታ፣ ሁኔታ)።
+- የዳግም ደረጃ አሰጣጥ ክፍል፦ የዳግም ደረጃ አሰጣጥ ሞዴል ይምረጡ፣ ውጤቶችን እንደገና ደርድሩ፣ `positionDelta`ን ያሳዩ።
+- ምንም የፍለጋ አቅራቢዎች ካልተዋቀሩ፣ CTA ያለው ባዶ ሁኔታ።
 - የፍለጋ ታሪክ በ`SearchHistory.tsx` በኩል።
-- `POST /v1/search`ን ይጠራል (ነባር endpoint፣ ምንም ለውጥ የለም)።
+- `POST /v1/search`ን ይጠራል (ነባር መገልገያ ነጥብ፣ ምንም ለውጥ የለም)።
 
-### ይዘት የማውጣት ትር
+### የመረጃ መሰብሰቢያ ትር
 
-በ`POST /v1/web/fetch` በኩል ከURL ይዘት ለማውጣት የሚያገለግል አዲስ ትር (በዕቅድ 05 የተፈጠረ)፦
+በ`POST /v1/web/fetch` (በዕቅድ 05 የተፈጠረ) አማካኝነት ከURL ይዘት ለማውጣት የሚያገለግል አዲስ ትር፦
 
-- ግቤት፦ URL + የሙሉ-ገጽ መቀያየሪያ + የቅርጸት መራጭ (markdown / text / HTML)።
-- ማስገባት → ማምጣት → `ScrapeResult.tsx`ን ማቅረብ።
-- `ScrapeResult` የmarkdown ቅድመ-እይታን + የጥሬ ውሂብ መቀያየሪያን ያቀርባል።
-- ገደብ፦ የምላሹ ይዘት ከ**256 KB** በላይ ከሆነ፣ UI `(ተቆርጧል፣ ጥሬውን ይመልከቱ)` ያሳያል እና ጥሬ ውሂቡን በMonaco modal ውስጥ ይከፍታል (D21)።
-- የሜታዳታ ፓነል፦ አቅራቢ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search)፣ የምላሽ ጊዜ፣ ወጪ፣ የምላሽ መጠን፣ የአገናኞች ብዛት።
+- ግቤት፦ URL + የሙሉ ገጽ ማብሪያ/ማጥፊያ + የቅርጸት መምረጫ (markdown / ጽሑፍ / HTML)።
+- ያስገቡ → ያምጡ → `ScrapeResult.tsx`ን ያቅርቡ።
+- `ScrapeResult` የmarkdown ቅድመ ዕይታን + የጥሬ ይዘት ማብሪያ/ማጥፊያን ያቀርባል።
+- ገደብ፦ የምላሹ ይዘት > **256 KB** ከሆነ፣ UI `(ተቆርጧል፣ ጥሬውን ይመልከቱ)` ያሳያል እና ጥሬ ይዘቱን በMonaco ሞዳል (D21) ውስጥ ይከፍታል።
+- የሜታዳታ ፓነል፦ አቅራቢ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)፣ መዘግየት፣ ወጪ፣ የምላሽ መጠን፣ የአገናኞች ብዛት።
 - `useScrapeFetch.ts` hookን ይጠቀማል።
 
-### የንጽጽር ትር
+### የማነጻጸሪያ ትር
 
-ተመሳሳዩን ጥያቄ/URL በአንድ ጊዜ እስከ **4 አቅራቢዎች** ድረስ ያስኬዳል (D22)፦
+ተመሳሳዩን መጠይቅ/URL እስከ **4 በሚደርሱ አቅራቢዎች ላይ በትይዩ** ያስኬዳል (D22)፦
 
-- ለእያንዳንዱ አቅራቢ በጎን ለጎን የተቀመጡ ዓምዶች።
-- መለኪያዎች፦ የምላሽ ጊዜ፣ ወጪ፣ የውጤቶች ብዛት፣ የምላሽ መጠን።
-- ለፍለጋ የURL መደራረብ ስሌት (ከመጀመሪያው ውጤት ጋር የሚጋሩ የURL ብዛት)።
-- ለእያንዳንዱ አቅራቢ `POST /v1/search`ን (ፍለጋ) ወይም `POST /v1/web/fetch`ን (ይዘት ማውጣት) ይጠራል።
+- ለእያንዳንዱ አቅራቢ ጎን ለጎን የቀረቡ ዓምዶች።
+- መለኪያዎች፦ መዘግየት፣ ወጪ፣ የውጤት ብዛት፣ የምላሽ መጠን።
+- ለፍለጋ የURL መደራረብ ስሌት (ከመጀመሪያው ውጤት ጋር የሚጋሩ የURLዎች ብዛት)።
+- ለእያንዳንዱ አቅራቢ `POST /v1/search`ን (ፍለጋ) ወይም `POST /v1/web/fetch`ን (መረጃ መሰብሰብ) ይጠራል።
 
 ---
 
@@ -100,13 +100,12 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ## የአቅራቢዎች ካታሎግ
 
-`ProviderCatalog.tsx` ሙሉውን የአቅራቢዎች ዝርዝር ከ`GET /api/search/providers`
-ያቀርባል (fetch አቅራቢዎችን ለማካተት በF4 የተስፋፋ)፦
+`ProviderCatalog.tsx` ሙሉውን የአቅራቢዎች ዝርዝር ከ`GET /api/search/providers` ያቀርባል
+(fetch አቅራቢዎችን ለማካተት በF4 የተስፋፋ):
 
-| `kind` | `"search"` (20 አቅራቢዎች) ወይም `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 አቅራቢዎች) ወይም `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-ሁኔታው ማረጋገጫ መረጃዎች መኖራቸውን እና ሁሉም
-ቁልፎች በአሁኑ ጊዜ በ cooldown ውስጥ መሆናቸውን በመፈተሽ **ጥያቄው በሚቀርብበት ጊዜ ይወሰናል**።
+ሁኔታው ማረጋገጫዎች መኖራቸውን እና ሁሉም ቁልፎች በአሁኑ ጊዜ በ cooldown ውስጥ መሆናቸውን በመፈተሽ **ጥያቄው በሚቀርብበት ጊዜ ይወሰናል**።
 
 ---
 
@@ -118,18 +117,18 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ---
 
-## የBackend ለውጦች
+## የባክኤንድ ለውጦች
 
-ለዚህ ባህሪ አንድ የBackend ለውጥ ብቻ አስፈልጎ ነበር፦
+ለዚህ ባህሪ ያስፈለገው አንድ የባክኤንድ ለውጥ ብቻ ነበር፦
 
 ### የተስፋፋ `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` እንዲከተለው ተስፋፍቷል፦
+`src/app/api/search/providers/route.ts` የሚከተሉትን እንዲያካትት ተስፋፍቷል፦
 
-- ሁሉንም 6 fetch አቅራቢዎች (`firecrawl`፣ `jina-reader`፣ `tavily-search`፣ `tinyfish`፣ `nimble-search`፣ `anysearch-search`) በarray ውስጥ ማካተት።
-- በእያንዳንዱ item ላይ `kind: "search" | "fetch"` መጨመር።
-- ከቀጥታ የማረጋገጫ መረጃ ሁኔታ የሚወሰን `status: "configured" | "missing" | "rate_limited"` መጨመር።
-- ከነባር ስሪቶች ጋር ተኳሃኝነትን መጠበቅ — ነባር fields (`id`፣ `name`፣ ወዘተ) ሳይለወጡ ይቆያሉ።
+- እያንዳንዱን የማምጫ አቅራቢ (`firecrawl`፣ `jina-reader`፣ `tavily-search`፣ `tinyfish`፣ `nimble-search`፣ `anysearch-search`፣ `parallel-search`) በድርድሩ ውስጥ ማካተት።
+- ወደ እያንዳንዱ ንጥል `kind: "search" | "fetch"` ማከል።
+- ከቀጥታ የማረጋገጫ መረጃ ሁኔታ የተወሰደ `status: "configured" | "missing" | "rate_limited"` ማከል።
+- ከቀደሙ ስሪቶች ጋር ተኳኋኝነትን መጠበቅ — ነባር መስኮች (`id`፣ `name`፣ ወዘተ) ሳይቀየሩ ቀርተዋል።
 
 ---
 

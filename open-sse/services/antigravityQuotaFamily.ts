@@ -1,6 +1,6 @@
 const ANTIGRAVITY_PROVIDER_ID = "antigravity";
 
-export type AntigravityQuotaFamily = "gemini" | "claude" | "other";
+export type AntigravityQuotaFamily = "gemini" | "claude" | "argon" | "other";
 
 function normalizeModelId(model: string | null | undefined): string {
   return String(model || "")
@@ -22,6 +22,14 @@ export function getAntigravityQuotaFamily(
   const slashIndex = normalized.indexOf("/");
   const bare = slashIndex >= 0 ? normalized.slice(slashIndex + 1) : normalized;
 
+  if (
+    bare === "argon_weekly" ||
+    bare === "gemini_4_argon_weekly" ||
+    bare.includes("argon") ||
+    bare.startsWith("gemini-4")
+  ) {
+    return "argon";
+  }
   if (bare.startsWith("gemini-") || bare.includes("/gemini-") || bare.includes("gemini")) {
     return "gemini";
   }
@@ -73,7 +81,25 @@ export function quotaWindowNamesForScope(
 ): string[] {
   if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider)) return names;
   const scoped = selectAntigravityQuotaWindowNames(names, scope.requestedModel);
-  return scoped.length > 0 ? scoped : names;
+  if (scoped.length > 0) return scoped;
+  // Argon has its own pool: a window set with neither Argon nor Gemini buckets says nothing
+  // about it, so scan none (fail open). Gemini and Claude keep the shipped all-windows fallback.
+  if (getAntigravityQuotaFamily(scope.requestedModel) === "argon") return [];
+  return names;
+}
+
+/**
+ * Finite `percentUsed` from a raw quota field, or `null` when it is absent, blank or
+ * non-numeric. `Number(null)`, `Number("")`, `Number(" ")` and `Number(false)` are all 0,
+ * which would read an unreported window as "0% used" (#15347).
+ */
+export function finitePercentUsed(raw: unknown): number | null {
+  if (typeof raw === "number") return Number.isFinite(raw) ? raw : null;
+  if (typeof raw === "string" && raw.trim() !== "") {
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }
 
 /** Min remaining % across scoped windows, or 100 when an Antigravity family scope matched none. */
@@ -87,14 +113,33 @@ export function remainingPercentFromQuotaWindows(
   for (const name of namesToScan) {
     const windowInfo = rawWindows[name];
     if (!windowInfo || typeof windowInfo !== "object") continue;
-    const percentUsed = Number((windowInfo as Record<string, unknown>).percentUsed);
-    if (!Number.isFinite(percentUsed)) continue;
+    const percentUsed = finitePercentUsed((windowInfo as Record<string, unknown>).percentUsed);
+    if (percentUsed === null) continue;
     const remaining = Math.max(0, Math.min(100, (1 - percentUsed) * 100));
     minRemaining = minRemaining === null ? remaining : Math.min(minRemaining, remaining);
   }
   if (minRemaining !== null) return minRemaining;
   if (scope?.requestedModel && namesToScan !== names) return 100;
   return null;
+}
+
+const FAMILY_AGGREGATE_WINDOWS: Record<AntigravityQuotaFamily, string[]> = {
+  gemini: ["gemini_session", "gemini_weekly"],
+  claude: ["claude_gpt_session", "claude_gpt_weekly"],
+  argon: ["gemini_4_argon_weekly", "argon_weekly"],
+  other: [],
+};
+
+/**
+ * Argon with no dedicated Argon window (e.g. Ultra plans) draws from the Gemini pool:
+ * prefer the Gemini aggregates, then any Gemini-family window.
+ */
+function argonFallbackWindowNames(quotaNames: string[]): string[] {
+  const geminiAggregates = FAMILY_AGGREGATE_WINDOWS.gemini.filter((key) =>
+    quotaNames.includes(key)
+  );
+  if (geminiAggregates.length > 0) return geminiAggregates;
+  return quotaNames.filter((windowName) => getAntigravityQuotaFamily(windowName) === "gemini");
 }
 
 /**
@@ -119,12 +164,7 @@ export function selectAntigravityQuotaWindowNames(
     });
   }
 
-  const familyAggregates =
-    requestedFamily === "gemini"
-      ? ["gemini_weekly"]
-      : requestedFamily === "claude"
-        ? ["claude_gpt_weekly"]
-        : [];
+  const familyAggregates = FAMILY_AGGREGATE_WINDOWS[requestedFamily];
 
   let exactWindows = quotaNames.filter((windowName) => {
     const bare = windowName.replace(/^(antigravity|agy)\//, "");
@@ -137,9 +177,7 @@ export function selectAntigravityQuotaWindowNames(
   // unrelated Gemini sibling can never dilute exact-model exhaustion. This is
   // intentionally version-agnostic for newly discovered Gemini Flash releases.
   if (exactWindows.length === 0) {
-    const flashMatch = bareModel.match(
-      /^(gemini-\d+(?:\.\d+)*-flash)(?:-(?:high|medium|low))?$/
-    );
+    const flashMatch = bareModel.match(/^(gemini-\d+(?:\.\d+)*-flash)(?:-(?:high|medium|low))?$/);
     if (flashMatch) {
       const technicalTieredModel = `${flashMatch[1]}-tiered`;
       exactWindows = quotaNames.filter((windowName) => {
@@ -152,6 +190,9 @@ export function selectAntigravityQuotaWindowNames(
   const aggregateWindows = familyAggregates.filter((key) => quotaNames.includes(key));
   const scoped = [...exactWindows, ...aggregateWindows];
   if (scoped.length > 0) return scoped;
+  if (requestedFamily === "argon") return argonFallbackWindowNames(quotaNames);
 
-  return quotaNames.filter((windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily);
+  return quotaNames.filter(
+    (windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily
+  );
 }

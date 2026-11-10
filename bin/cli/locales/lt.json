@@ -123,7 +123,9 @@
       "maxCostOpt": "Didžiausios išlaidos per dieną (USD)",
       "allowedModelsOpt": "Kableliais atskirtas leidžiamų modelių sąrašas",
       "nothingToSet": "Nepateiktas nė vienas politikos laukas. Naudokite --rate-limit, --max-cost arba --allowed-models.",
-      "updated": "Politika atnaujinta."
+      "updated": "Politika atnaujinta.",
+      "modelAccessModeOpt": "Prieigos prie modelių režimas (all | restricted)",
+      "unrestrictedOpt": "Leisti visus modelius (--model-access-mode all)"
     },
     "expiration": {
       "title": "Rakto galiojimo pabaiga",
@@ -254,6 +256,7 @@
     "log": "Rodyti serverio žurnalus tiesiogiai",
     "no_recovery": "Išjungti automatinį paleidimą iš naujo po strigties (derinimo režimas)",
     "max_restarts": "Didžiausias paleidimų iš naujo po strigties skaičius per 30 s prieš nutraukiant bandymus (numatyta: 2)",
+    "headless": "Paleisti tik tarpinio serverio variklį: valdymo skydelis išjungtas (404), pasirenkamos posistemės praleidžiamos (nustato OMNIROUTE_HEADLESS=1)",
     "tray": "Paleisti sistemos dėkle (tik darbalaukio programoje, pasirenkama)",
     "no_tray": "Išjungti sistemos dėklo piktogramą",
     "ready_timeout": "Parengties patikros skirtasis laikas ms (taip pat OMNIROUTE_READY_TIMEOUT_MS, numatytoji reikšmė 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sinchronizuoti konfigūraciją tarp OmniRoute egzempliorių",
     "push": {
-      "description": "Nusiųsti konfigūraciją į debesiją arba nuotolinį egzempliorių",
-      "target": "Paskirties vieta (cloud arba context:name)",
-      "bundle": "Sinchronizuojamos paketo dalys",
-      "dryRun": "Peržiūrėti nepritaikant"
+      "description": "Nusiųsti konfigūraciją į debesiją arba nuotolinį egzempliorių"
     },
     "pull": {
-      "description": "Gauti konfigūraciją iš debesijos arba nuotolinio egzemplioriaus",
-      "source": "Šaltinis (cloud arba context:name)",
-      "merge": "Sujungti su esama konfigūracija",
-      "replace": "Pakeisti esamą konfigūraciją",
-      "dryRun": "Peržiūrėti netaikant"
-    },
-    "diff": {
-      "source": "Šaltinio kontekstas",
-      "target": "Paskirties kontekstas"
+      "description": "Gauti konfigūraciją iš debesijos arba nuotolinio egzemplioriaus"
     },
     "bundle": {
       "description": "Eksportuoti konfigūraciją kaip paketo failą",
-      "include": "Įtrauktinos dalys (atskirtos kableliais)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importuoti paketo failą",
       "dryRun": "Patikrinti netaikant"
-    },
-    "initialize": {
-      "fromCloud": "Inicijuoti iš atsarginės kopijos debesyje"
     },
     "tokens": {
       "description": "Tvarkyti sinchronizavimo prieigos raktus",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Praleisti patvirtinimą"
       }
-    },
-    "resolve": {
-      "description": "Interaktyviai spręsti sinchronizavimo konfliktus"
     }
   },
   "config": {

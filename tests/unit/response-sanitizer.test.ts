@@ -539,7 +539,7 @@ test("sanitizeResponsesApiResponse preserves native continuation reasoning state
   assert.deepEqual(sanitized.output, [plaintext, opaque]);
 });
 
-test("sanitizeStreamingChunk keeps only safe chunk fields and preserves readable reasoning aliases", () => {
+test("sanitizeStreamingChunk keeps safe fields, readable reasoning aliases and content whitespace", () => {
   const sanitized = sanitizeStreamingChunk({
     id: "chunk_1",
     object: "chat.completion.chunk",
@@ -573,7 +573,8 @@ test("sanitizeStreamingChunk keeps only safe chunk fields and preserves readable
         index: 3,
         delta: {
           role: "assistant",
-          content: "Line 1\n\nLine 2",
+          // Chunk boundaries must not decide how many meaningful blank lines survive.
+          content: "Line 1\n\n\nLine 2",
           reasoning: "stream reasoning",
           tool_calls: [{ id: "call_1" }],
         },
@@ -1097,6 +1098,48 @@ test("sanitizeStreamingChunk strips zero-width joiners from OpenAI chat tool-cal
     '{"command":"cd /tmp/opencode && pwd"}'
   );
   assert.equal(output.includes("\u200d"), false);
+});
+
+test("sanitizeStreamingChunk stringifies object-form OpenAI tool-call arguments", () => {
+  const inputArguments = { command: "echo hello" };
+  const sanitized = sanitizeStreamingChunk({
+    object: "chat.completion.chunk",
+    choices: [
+      {
+        index: 0,
+        delta: {
+          tool_calls: [
+            {
+              index: 0,
+              id: "call_1",
+              type: "function",
+              function: { name: "run", arguments: inputArguments },
+            },
+          ],
+        },
+      },
+    ],
+  }) as unknown as {
+    choices: {
+      delta: {
+        tool_calls: {
+          id: string;
+          index: number;
+          type: string;
+          function: { name: string; arguments: unknown };
+        }[];
+      };
+    }[];
+  };
+
+  const toolCall = sanitized.choices[0].delta.tool_calls[0];
+  assert.equal(typeof toolCall.function.arguments, "string");
+  assert.equal(toolCall.function.arguments, '{"command":"echo hello"}');
+  assert.deepEqual(toolCall.function, { name: "run", arguments: '{"command":"echo hello"}' });
+  assert.equal(toolCall.id, "call_1");
+  assert.equal(toolCall.index, 0);
+  assert.equal(toolCall.type, "function");
+  assert.deepEqual(inputArguments, { command: "echo hello" });
 });
 
 test("sanitizeOpenAIResponse strips zero-width joiners from non-stream tool-call arguments", () => {

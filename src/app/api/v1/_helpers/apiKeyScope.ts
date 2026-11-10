@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getApiKeyMetadata, validateApiKey } from "@/lib/db/apiKeys";
 import { extractApiKey } from "@/sse/services/auth";
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
-import { CORS_HEADERS } from "@/shared/utils/cors";
+import { CORS_HEADERS, credentialRejectionHeaders } from "@/shared/utils/cors";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { ANONYMOUS_OWNER_ID } from "@/shared/constants/anonymousOwner";
 import { hasManageScope } from "@/shared/constants/managementScopes";
@@ -176,8 +176,10 @@ export type OwnedListScope =
   | { mode: "instance" }
   | { mode: "rejected"; response: Response };
 
-function unauthorized(message: string): Response {
-  return NextResponse.json(buildErrorBody(401, message), { status: 401, headers: CORS_HEADERS });
+function unauthorized(message: string, request?: Request): Response {
+  // A refused key keeps the Origin echo (#5242); see credentialRejectionHeaders().
+  const headers = request ? credentialRejectionHeaders(request) : CORS_HEADERS;
+  return NextResponse.json(buildErrorBody(401, message), { status: 401, headers });
 }
 
 /**
@@ -203,15 +205,28 @@ function unauthorized(message: string): Response {
  * reads `undefined` as "no owner filter" — so the anonymous caller landed in the
  * same unfiltered bucket as the operator.
  */
-export function resolveListScope(scope: ApiKeyRequestScope): OwnedListScope {
-  if (scope.apiKey && !scope.apiKeyId) {
-    return { mode: "rejected", response: unauthorized("Invalid API key") };
+export function resolveListScope(
+  scope: ApiKeyRequestScope,
+  policy?: {
+    apiKey: string | null;
+    apiKeyInfo: { id: string; scopes?: string[] } | null;
+  },
+  request?: Request
+): OwnedListScope {
+  // Call only after policy.rejection has been handled. Bare x-api-key is
+  // resolved by policy even when the legacy extractor cannot see it (#14481).
+  // Preserve the presented key so an unknown key cannot fall back to a session.
+  const apiKey = scope.apiKey ?? policy?.apiKey;
+  const apiKeyId = scope.apiKeyId ?? policy?.apiKeyInfo?.id;
+  const metadata = scope.apiKeyMetadata ?? policy?.apiKeyInfo;
+  if (apiKey && !apiKeyId) {
+    return { mode: "rejected", response: unauthorized("Invalid API key", request) };
   }
-  if (scope.apiKeyId && hasManageScope(scope.apiKeyMetadata?.scopes ?? [])) {
+  if (apiKeyId && hasManageScope(metadata?.scopes ?? [])) {
     return { mode: "instance" };
   }
-  if (scope.apiKeyId) {
-    return { mode: "api_key", apiKeyId: scope.apiKeyId };
+  if (apiKeyId) {
+    return { mode: "api_key", apiKeyId };
   }
   if (scope.isSessionAuth) {
     return { mode: "instance" };

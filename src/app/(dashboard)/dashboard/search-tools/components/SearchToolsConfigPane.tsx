@@ -1,8 +1,9 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Select } from "@/shared/components";
+import { Checkbox, Select } from "@/shared/components";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
 import type { ActiveTab } from "./SearchToolsTopBar";
 
@@ -40,7 +41,7 @@ export default function SearchToolsConfigPane({
 
   return (
     <aside
-      className="w-[220px] shrink-0 border-l border-border bg-bg-alt overflow-y-auto flex flex-col"
+      className="w-full lg:w-[220px] shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-bg-alt lg:overflow-y-auto flex flex-col"
       data-testid="search-tools-config-pane"
       aria-label={t("configurationPane")}
     >
@@ -52,10 +53,8 @@ export default function SearchToolsConfigPane({
 
       {/* Provider selector */}
       <div className="p-3 border-b border-border space-y-2">
-        <label className="block text-[10px] text-text-muted uppercase tracking-wider mb-1">
-          {t("provider")}
-        </label>
         <Select
+          label={t("provider")}
           value={config.provider}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
             onConfigChange({ provider: e.target.value })
@@ -112,10 +111,8 @@ export default function SearchToolsConfigPane({
       {/* Search tab options */}
       {activeTab === "search" && (
         <div className="p-3 border-b border-border space-y-2">
-          <label className="block text-[10px] text-text-muted uppercase tracking-wider mb-1">
-            {t("searchType")}
-          </label>
           <Select
+            label={t("searchType")}
             value={config.searchType}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               onConfigChange({ searchType: e.target.value as "web" | "news" })
@@ -132,10 +129,8 @@ export default function SearchToolsConfigPane({
       {/* Scrape tab options */}
       {activeTab === "scrape" && (
         <div className="p-3 border-b border-border space-y-2">
-          <label className="block text-[10px] text-text-muted uppercase tracking-wider mb-1">
-            {t("scrapeFormat")}
-          </label>
           <Select
+            label={t("scrapeFormat")}
             value={config.fetchFormat}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               onConfigChange({ fetchFormat: e.target.value as ConfigState["fetchFormat"] })
@@ -147,15 +142,12 @@ export default function SearchToolsConfigPane({
             ]}
             className="w-full"
           />
-          <label className="flex items-center gap-2 cursor-pointer mt-2">
-            <input
-              type="checkbox"
-              checked={config.fullPage}
-              onChange={(e) => onConfigChange({ fullPage: e.target.checked })}
-              className="rounded"
-            />
-            <span className="text-xs text-text-main">{t("scrapeFullPage")}</span>
-          </label>
+          <Checkbox
+            className="mt-2 text-xs"
+            label={t("scrapeFullPage")}
+            checked={config.fullPage}
+            onChange={(e) => onConfigChange({ fullPage: e.target.checked })}
+          />
         </div>
       )}
 
@@ -169,10 +161,8 @@ export default function SearchToolsConfigPane({
       {/* Rerank model (only for search tab) */}
       {activeTab === "search" && rerankModels.length > 0 && (
         <div className="p-3 border-b border-border space-y-1">
-          <label className="block text-[10px] text-text-muted uppercase tracking-wider mb-1">
-            {t("rerankModelLabel")}
-          </label>
           <Select
+            label={t("rerankModelLabel")}
             value={config.rerankModel}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               onConfigChange({ rerankModel: e.target.value })
@@ -185,21 +175,16 @@ export default function SearchToolsConfigPane({
 
       {/* History section (collapsible placeholder) */}
       <div className="p-3 flex-1">
-        <button
-          className="flex justify-between items-center w-full"
-          onClick={() => setHistoryExpanded((e) => !e)}
-          aria-expanded={historyExpanded}
-        >
-          <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-            {t("history")}
-          </span>
-          <span className="text-text-muted text-xs" aria-hidden="true">
-            {historyExpanded ? "▼" : "▶"}
-          </span>
-        </button>
-        {historyExpanded && (
-          <div className="mt-2 text-[10px] text-text-muted">{t("historyHint")}</div>
-        )}
+        <Disclosure open={historyExpanded} onOpenChange={setHistoryExpanded}>
+          <DisclosureTrigger>
+            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+              {t("history")}
+            </span>
+          </DisclosureTrigger>
+          <DisclosureContent className="mt-2 text-[10px] text-text-muted">
+            {t("historyHint")}
+          </DisclosureContent>
+        </Disclosure>
       </div>
     </aside>
   );

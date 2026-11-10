@@ -120,16 +120,16 @@
 
 ## 📖 הגדרת ספקים
 
-כדי להוסיף בכמות גדולה חיבורי מפתחות API מקובץ CSV או JSON, השתמשו ב-**לוח הבקרה → ספקים → ייבוא מקובץ**. העמודות מסודרות לפי מיקום (`provider,name,apiKey,baseUrl,priority`); הערך `provider` חייב כבר להתקיים כספק מנוהל או כצומת תואם. ראו [ייבוא ספקים מקובץ CSV או JSON](../providers/CSV-IMPORT.md).
+כדי להוסיף בכמות גדולה חיבורים עם מפתחות API מקובץ CSV או JSON, השתמשו ב־**לוח הבקרה → ספקים → ייבוא מקובץ**. העמודות הן לפי מיקום (`provider,name,apiKey,baseUrl,priority`); `provider` חייב כבר להתקיים כספק מנוהל או כצומת תואם. ראו [ייבוא ספקים מקובץ CSV או JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 ספקי מנוי
+### 🔐 ספקי מנויים
 
 #### Claude Code (Pro/Max)
 
 ```bash
-לוח הבקרה → ספקים → חיבור Claude Code
-→ התחברות באמצעות OAuth → רענון אוטומטי של האסימון
-→ מעקב אחר מכסה של 5 שעות + מכסה שבועית
+לוח הבקרה → ספקים → התחברות ל-Claude Code
+→ התחברות OAuth → רענון אוטומטי של האסימון
+→ מעקב אחר מכסה של 5 שעות ומכסה שבועית
 
 מודלים:
   cc/claude-opus-4-7
@@ -137,16 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**טיפ מקצועי:** השתמשו ב-Opus למשימות מורכבות וב-Sonnet לקבלת מהירות. OmniRoute עוקב אחר המכסה לכל מודל!
+**טיפ מקצועי:** השתמשו ב-Opus למשימות מורכבות וב-Sonnet למהירות. OmniRoute עוקב אחר המכסה לפי מודל!
 
-נתיבים התואמים ל-Claude ול-Claude Code משמרים את רמת מאמץ החשיבה `max` עבור מודלי Opus ו-Sonnet. מודלי Haiku אינם מקבלים את רמת המאמץ `max`, ולכן OmniRoute מוריד בקשה זו לתקציב חשיבה גבוה לפני שליחתה לספק במעלה הזרם.
+אין דפדפן במארח של OmniRoute? הריצו `claude setup-token` בכל מקום שבו אתם מחוברים ל-Claude Code, והדביקו את האסימון לשנה אחת בכרטיסייה **Setup Token**. ראו [Claude Code עם אסימון הגדרה](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+
+נתיבים תואמי Claude ו-Claude Code משמרים את מאמץ החשיבה `max` עבור
+מודלי Opus ו-Sonnet. מודלי Haiku אינם מקבלים את דרגת המאמץ `max`, ולכן OmniRoute
+מוריד את הבקשה לתקציב חשיבה גבוה לפני שליחתה לשירות upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-לוח הבקרה → ספקים → חיבור Codex
-→ התחברות באמצעות OAuth (יציאה 1455)
-→ איפוס לאחר 5 שעות + איפוס שבועי
+לוח הבקרה → ספקים → התחברות ל-Codex
+→ התחברות OAuth (יציאה 1455)
+→ איפוס של 5 שעות ואיפוס שבועי
 
 מודלים:
   cx/gpt-5.5
@@ -158,9 +162,9 @@
 #### GitHub Copilot
 
 ```bash
-לוח הבקרה → ספקים → חיבור GitHub
+לוח הבקרה → ספקים → התחברות ל-GitHub
 → OAuth דרך GitHub
-→ איפוס חודשי (ב-1 בחודש)
+→ איפוס חודשי (ביום הראשון של החודש)
 
 מודלים:
   gh/gpt-5.5
@@ -170,53 +174,71 @@
   gh/gemini-3.1-pro-preview
 ```
 
+**זיכויי AI (חיוב לפי אסימונים).** כאשר GitHub מדווח על `credits_used` עבור החשבון,
+כרטיס מגבלות הספק מציג שורת **זיכויי AI** עם כמות הזיכויים שנצרכה בתקופת החיוב הנוכחית,
+כולל בתוכניות ארגוניות ללא הגבלה.
+
+**מגבלת זיכויי AI מקומית.** ערכו חיבור GitHub והגדירו **מגבלת זיכויי AI לכל
+תקופת חיוב** (`providerSpecificData.githubCreditLimit`). שדה ריק משבית את המגבלה; `0`
+מדלג תמיד על החיבור. כאשר קריאת השימוש האחרונה שווה למגבלה או גבוהה ממנה,
+בחירת החשבון מדלגת על החיבור הזה והניתוב חוזר לחיבורים האחרים שלכם, באותו אופן שבו
+חיתוך של מדיניות מכסה מפעיל זאת. הבדיקה קוראת את נתוני השימוש שרענון המכסה המחזורי
+כבר אוסף — היא אף פעם לא פונה ל-GitHub במהלך נתיב הבקשה — והיא פועלת במצב
+fail open: קריאה חסרה או לא עדכנית (ישנה יותר מ־15 דקות, או מתקופת חיוב שכבר
+התאפסה) אינה חוסמת את החיבור. זהו אמצעי הגנה מקומי, **ולא תקרת הוצאה מובטחת**:
+עיכובים בדיווח של GitHub, מרווח הרענון, בקשות בתהליך ושימוש מחוץ ל-OmniRoute
+עלולים לגרום לחריגה מהמגבלה. השתמשו בבקרות ההוצאה של GitHub עצמו כדי להגדיר
+תקרה קשיחה.
+
 ### 💰 ספקים זולים
 
-#### GLM-4.7 (איפוס יומי, $0.6 למיליון)
+#### GLM-4.7 (איפוס יומי, $0.6/1M)
 
 1. הירשמו: [Zhipu AI](https://open.bigmodel.cn)
 2. קבלו מפתח API מתוכנית Coding Plan
 3. לוח הבקרה → הוספת מפתח API: ספק: `glm`, מפתח API: `your-key`
 
-**שימוש:** `glm/glm-4.7` — **טיפ מקצועי:** תוכנית Coding Plan מציעה מכסה גדולה פי 3 בשביעית מהעלות! האיפוס מתבצע מדי יום בשעה 10:00 בבוקר.
+**שימוש:** `glm/glm-4.7` — **טיפ מקצועי:** תוכנית Coding Plan מציעה מכסה פי 3 בעלות של 1/7! האיפוס מתבצע מדי יום בשעה 10:00.
 
-#### MiniMax M2.1 (איפוס לאחר 5 שעות, $0.20 למיליון)
+#### MiniMax M2.1 (איפוס כל 5 שעות, $0.20/1M)
 
 1. הירשמו: [MiniMax](https://www.minimax.io)
 2. קבלו מפתח API → לוח הבקרה → הוספת מפתח API
 
 **שימוש:** `minimax/MiniMax-M2.1` — **טיפ מקצועי:** האפשרות הזולה ביותר להקשר ארוך (מיליון אסימונים)!
 
-#### Kimi K2 (מחיר קבוע של $9 לחודש)
+#### Kimi K2 ($9 לחודש במחיר קבוע)
 
-1. הירשמו כמנויים: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. הירשמו: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. קבלו מפתח API → לוח הבקרה → הוספת מפתח API
 
-**שימוש:** `kimi/kimi-k2.5` — **טיפ מקצועי:** מחיר קבוע של $9 לחודש עבור 10 מיליון אסימונים = עלות אפקטיבית של $0.90 למיליון!
+**שימוש:** `kimi/kimi-k2.5` — **טיפ מקצועי:** $9 קבועים לחודש עבור 10 מיליון אסימונים = עלות אפקטיבית של $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. הירשמו: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. צרו מפתח API של Qianfan → לוח הבקרה → הוספת מפתח API: ספק: `qianfan`
 
-**שימוש:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, או מזהה מודל אחר של Qianfan התואם ל-OpenAI.
+**שימוש:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, או מזהה מודל אחר תואם OpenAI של Qianfan.
 
 ### 🆓 ספקים חינמיים
 
-לספקים חינמיים שאינם דורשים אימות יש מתג לצד **לא נדרש אימות** בדף הספק שלהם. כיבוי המתג משבית את הספק, מסיר אותו מתצוגות הספקים המוגדרים/המצומצמות ומסיר את המודלים שלו מ-`/v1/models`.
+לספקים חינמיים ללא אימות יש מתג לצד **אין צורך באימות** בדף הספק.
+כיבוי המתג משבית את הספק, מסיר אותו מתצוגות הספקים שהוגדרו/הקומפקטיות,
+ומסיר את המודלים שלו מ־`/v1/models`.
 
 #### Qoder (9 מודלים חינמיים)
 
 ```bash
-לוח הבקרה → חיבור Qoder → התחברות באמצעות OAuth → הגישה כפופה למגבלות הספק הנוכחיות
+לוח הבקרה → התחברות ל-Qoder → התחברות OAuth → הגישה כפופה למגבלות הספק הנוכחיות
 
 מודלים: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude בחינם)
+#### Kiro (Claude חינמי)
 
 ```bash
-לוח הבקרה → חיבור Kiro → AWS Builder ID או Google/GitHub → כ-50 נקודות זכות בחודש
+לוח הבקרה → התחברות ל-Kiro → AWS Builder ID או Google/GitHub → כ־50 זיכויים בחודש
 
 מודלים: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -331,82 +353,82 @@ codex "your prompt"
 
 ---
 
-## 🚀 פריסה
+## פריסת 🚀
 
-### התקנת npm גלובלית (מומלץ)
+### התקנה גלובלית npm (מומלץ)
 
 ```bash
 npm install -g omniroute
 
-# יצירת תיקיית תצורה
+# Create config directory
 mkdir -p ~/.omniroute
 
-# יצירת קובץ .env (ראו .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# הפעלת השרת
+# Start server
 omniroute
-# או עם יציאה מותאמת אישית:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-ה-CLI טוען אוטומטית את `.env` מתוך `~/.omniroute/.env` או `./.env`.
+ה- CLI טוען אוטומטית `.env` מ- `~/.omniroute/.env` או `./.env`. `./.env` בספריית העבודה עשויה להגדיר רק רשימת הרשאות קצרה של מפתחות (יציאות, `REQUIRE_API_KEY`, מיקום והגדרות צבע); שים את כל השאר ב- `~/.omniroute/.env`. ראה [חוזי השקה של CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### מצב מגש מערכת
+### מצב מגש
 
-הפעילו את OmniRoute במגש המערכת:
+התחל את OmniRoute במגש המערכת:
 
 ```bash
 omniroute serve --tray
 ```
 
-הפקודה מסתיימת לאחר שהשרת ומגש המערכת מוכנים.
+הפקודה חוזרת לאחר שהשרת והמגש מוכנים.
 
-השרת ממשיך לפעול ללא המסוף.
+השרת ממשיך ללא הטרמינל.
 
-מצב מגש המערכת נתמך ב-macOS, ב-Windows ובהפעלות Linux גרפיות. מצב מגש המערכת אינו פותח את לוח הבקרה באופן אוטומטי.
+מצב מגש תומך בהפעלות macOS, Windows ו- Linux גרפיות. מצב מגש אינו פותח את לוח המחוונים באופן אוטומטי.
 
-השתמשו בתפריט מגש המערכת עבור הפעולות הבאות:
+השתמש בתפריט המגש עבור הפעולות הבאות:
 
-- פתיחת לוח הבקרה.
-- פתיחת `/dashboard/logs`.
-- שינוי ההפעלה האוטומטית.
-- עצירת OmniRoute.
+- פתח את לוח המחוונים.
+- פתח `/dashboard/logs`.
+- שנה הפעלה אוטומטית.
+- עצור OmniRoute.
 
-אין לשלב את `--tray` עם האפשרויות הבאות:
+אל תשלב `--tray` עם האפשרויות הבאות:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-מצבים אלה דורשים בעלות שונה על התהליך.
+מצבים אלה דורשים בעלות שונה על תהליך.
 
-הפעילו את OmniRoute בעת הכניסה הבאה למחשב:
+אפשר את האתחול בכניסה הבאה למחשב:
 
 ```bash
 omniroute autostart enable
 ```
 
-ההפעלה האוטומטית משתמשת במצב מגש המערכת ב-macOS, ב-Windows ובהפעלות Linux גרפיות. Linux ללא ממשק גרפי משתמש בשירות המשתמש הקיים של systemd.
+הפעלה אוטומטית משתמשת במצב מגש בהפעלות macOS, Windows ו- Linux גרפיות. Headless Linux משתמש בשירות המשתמש הקיים של systemd.
 
-השביתו הפעלה בעת הכניסה:
+השבת את האתחול בעת הכניסה:
 
 ```bash
 omniroute autostart disable
 ```
 
-### הסרת התקנה
+### מסיר התקנה
 
-כאשר OmniRoute אינו נחוץ עוד, אנו מספקים שני סקריפטים מהירים להסרה נקייה:
+כאשר אתה כבר לא צריך OmniRoute, אנו מספקים שני סקריפטים מהירים להסרה נקייה:
 
-| פקודה                    | פעולה                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | מסירה את יישום המערכת, אך **שומרת את מסד הנתונים ואת ההגדרות שלכם** בתוך `~/.omniroute`. |
-| `npm run uninstall:full` | מסירה את היישום וגם **מוחקת לצמיתות את כל ההגדרות, המפתחות ומסדי הנתונים**.              |
+| פְּקוּדָה                | פְּעוּלָה                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `npm run uninstall`      | מסיר את אפליקציית המערכת אבל** שומר על DB והתצורות שלך** ב- `~/.omniroute`.   |
+| `npm run uninstall:full` | מסיר את האפליקציה AND לצמיתות** מוחק את כל התצורות, המפתחות ומסדי הנתונים** . |
 
-> הערה: כדי להריץ פקודות אלה, עברו לתיקיית הפרויקט של OmniRoute (אם שיבטתם אותו) והפעילו אותן. לחלופין, אם הוא הותקן באופן גלובלי, ניתן פשוט להריץ `npm uninstall -g omniroute`.
+> הערה: כדי להפעיל את הפקודות הללו, נווט לתיקיית OmniRoute project (אם שיבטת אותה) והפעל אותן. לחלופין, אם מותקן ברחבי העולם, אתה יכול פשוט להפעיל `npm uninstall -g omniroute`.
 
-### פריסה ב-VPS
+### פריסת VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -422,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# או: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### פריסה באמצעות PM2 (צריכת זיכרון נמוכה)
+### פריסת PM2 (זיכרון נמוך)
 
-עבור שרתים עם זיכרון RAM מוגבל, השתמשו באפשרות הגבלת הזיכרון:
+עבור שרתים עם RAM מוגבל, השתמש באפשרות הגבלת הזיכרון:
 
 ```bash
-# עם מגבלה של 512MB (ברירת המחדל)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# או עם מגבלת זיכרון מותאמת אישית
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# או באמצעות ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-צרו את `ecosystem.config.js`:
+צור `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -465,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# בניית image (ברירת המחדל = runner-cli עם codex/claude/droid מותקנים מראש)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# מצב נייד (מומלץ)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-למצב המשולב עם המארח וכולל קובצי CLI בינאריים, ראו את סעיף Docker בתיעוד הראשי.
+עבור מצב משולב מארח עם קבצים בינאריים CLI, עיין בסעיף Docker במסמכים הראשיים.
 
 ### Void Linux (xbps-src)
 
-משתמשי Void Linux יכולים לארוז ולהתקין את OmniRoute באופן מקורי באמצעות מסגרת ההידור הצולב `xbps-src`. מסגרת זו הופכת לאוטומטיים את בניית החבילה העצמאית של Node.js ואת הקישורים המקוריים הנדרשים של `better-sqlite3`.
+משתמשי Void Linux יכולים לארוז ולהתקין OmniRoute באופן מקורי באמצעות מסגרת ההידור הצולבת `xbps-src`. זה הופך את הבנייה העצמאית Node.js לאוטומטית יחד עם הכריכות המקוריות `better-sqlite3` הנדרשות.
 
 <details>
-<summary><b>הצגת תבנית xbps-src</b></summary>
+<summary><b>צפה בתבנית xbps-src</b></summary>
 
 ```bash
-# קובץ תבנית עבור 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -503,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# קביעת ארכיטקטורת המעבד היעד עבור node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -512,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) התקנת כל יחסי התלות – דילוג על סקריפטים
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) בניית החבילה העצמאית של Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) העתקת נכסים סטטיים אל החבילה העצמאית
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) הידור הקישור המקורי של better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) הצבת הקישור המהודר בחבילה העצמאית
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) הסרת חבילות sharp ייעודיות לארכיטקטורה
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) העתקת יחסי התלות בזמן הריצה של pino שהושמטו בניתוח הסטטי של Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -548,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# מניעת הסרת תיקיות ריקות של נתב היישום של Next.js באמצעות וו שלאחר ההתקנה
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -576,30 +598,30 @@ post_install() {
 
 ### משתני סביבה
 
-| משתנה                                   | ברירת מחדל                           | תיאור                                                                                                   |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | סוד לחתימת JWT (**יש לשנות בסביבת ייצור**)                                                              |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | סיסמת ההתחברות הראשונה                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                       | ספריית הנתונים (מסד נתונים, שימוש, יומנים)                                                              |
-| `PORT`                                  | ברירת המחדל של המסגרת                | יציאת השירות (`20128` בדוגמאות)                                                                         |
-| `HOSTNAME`                              | ברירת המחדל של המסגרת                | כתובת המארח להאזנה (ברירת המחדל של Docker היא `0.0.0.0`)                                                |
-| `NODE_ENV`                              | ברירת המחדל של סביבת הריצה           | יש להגדיר `production` לפריסה                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | כתובת ה-URL הבסיסית הציבורית המוצגת בלוח הבקרה ונחשפת לשרת (מחליפה את `BASE_URL` הישנה)                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | כתובת ה-URL הבסיסית של נקודת הקצה לסנכרון בענן (מחליפה את `CLOUD_URL` הישנה)                            |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | סוד HMAC עבור מפתחות API שנוצרו                                                                         |
-| `REQUIRE_API_KEY`                       | `false`                              | אכיפת מפתח API מסוג Bearer ב-`/v1/*`                                                                    |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | מתן אפשרות למשתמשים מאומתים בלוח הבקרה לחשוף לפי דרישה את הערכים המלאים של מפתחות API שמורים            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | תדירות הרענון בצד השרת עבור נתוני Provider Limits במטמון; כפתורי הרענון בממשק עדיין מפעילים סנכרון ידני |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | השבתת תמונות מצב אוטומטיות של SQLite לפני כתיבה/ייבוא/שחזור; גיבויים ידניים עדיין פועלים                |
-| `APP_LOG_TO_FILE`                       | `true`                               | הפעלת פלט של יומני היישום והביקורת לדיסק                                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | אילוץ מאפיין `Secure` עבור קובץ Cookie לאימות (מאחורי פרוקסי הפוך מסוג HTTPS)                           |
-| `CLOUDFLARED_BIN`                       | לא מוגדר                             | שימוש בקובץ בינארי קיים של `cloudflared` במקום בהורדה מנוהלת                                            |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | תעבורה עבור Quick Tunnels מנוהלות (`http2`,‏ `quic` או `auto`)                                          |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | מגבלת ערימת הזיכרון של Node.js ב-MB                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | המספר המרבי של רשומות במטמון ההנחיות                                                                    |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | המספר המרבי של רשומות במטמון הסמנטי                                                                     |
+| מִשְׁתַנֶה                              | בְּרִירַת מֶחדָל         | תֵאוּר                                                                                                             |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(נוצר אוטומטי)_         | סוד חתימת JWT — נוצר אוטומטית בהפעלה הראשונה ונמשך ל- `server.env`; הגדר אותו במפורש כאשר ספריית הנתונים היא ארעית |
+| `INITIAL_PASSWORD`                      | _(לא מוגדר)_             | סיסמת כניסה ראשונה. התקנות npm/source מתחילות ב- `CHANGEME`: החלף אותו. לא מוגדר: אשף ההטמעה                       |
+| `DATA_DIR`                              | `~/.omniroute`           | ספריית נתונים (db, שימוש, יומנים)                                                                                  |
+| `PORT`                                  | ברירת המחדל של המסגרת    | יציאת שירות (`20128` בדוגמאות)                                                                                     |
+| `HOSTNAME`                              | ברירת המחדל של המסגרת    | מארח קשר (Docker ברירת המחדל ל- `0.0.0.0`)                                                                         |
+| `NODE_ENV`                              | ברירת המחדל של זמן ריצה  | הגדר `production` לפריסה                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | הבסיס הציבורי URL עלה ללוח המחוונים ונחשף לשרת (מחליף `BASE_URL` מדור קודם)                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | בסיס נקודת קצה של סנכרון ענן URL (מחליף `CLOUD_URL` מדור קודם)                                                     |
+| `API_KEY_SECRET`                        | _(נוצר אוטומטי)_         | סוד HMAC למפתחות API שנוצרו — נוצר אוטומטית בהפעלה הראשונה ונמשך ל- `server.env`                                   |
+| `REQUIRE_API_KEY`                       | `false`                  | לאכוף את מפתח ה-Bearer API על `/v1/*`                                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | אפשר למשתמשי לוח מחוונים מאומתים לחשוף ערכי מפתח API מאוחסנים מלאים לפי דרישה                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | קצב רענון בצד השרת עבור נתוני מגבלות ספקים המאוחסנים במטמון; לחצני הרענון UI עדיין מפעילים סנכרון ידני             |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | השבת צילומי SQLite אוטומטיים לפני writes/import/restore; גיבויים ידניים עדיין עובדים                               |
+| `APP_LOG_TO_FILE`                       | `true`                   | מאפשר פלט של יומן אפליקציות וביקורת לדיסק                                                                          |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | כפה קובץ Cookie של `Secure` (מאחורי HTTPS proxy הפוך)                                                              |
+| `CLOUDFLARED_BIN`                       | לא מוגדר                 | השתמש בקובץ בינארי `cloudflared` קיים במקום בהורדה מנוהלת                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | הובלה עבור מנהרות מהירות מנוהלות (`http2`, `quic` או `auto`)                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | מגבלת ערימת Node.js ב- MB                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | מקסימום ערכי מטמון פקודות                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | מקסימום ערכי מטמון סמנטי                                                                                           |
 
-לעיון ברשימה המלאה של משתני הסביבה, ראו את [README](../README.md).
+להתייחסות מלאה למשתנה הסביבה, עיין ב- [README](../README.md).
 
 ---
 
@@ -608,25 +630,25 @@ post_install() {
 <details>
 <summary><b>הצגת כל המודלים הזמינים</b></summary>
 
-> הרשימה שלהלן נבחרה מתוך `open-sse/config/providerRegistry.ts` עבור v3.8.0. קטלוגים בענן (Gemini, OpenRouter וכו׳) מסונכרנים באופן דינמי — לקטלוג החי המלא, פתחו את **לוח הבקרה → ספקים → [ספק] → מודלים זמינים** או בצעו קריאה אל `GET /api/models/catalog`.
+> הרשימה שלהלן נאספה מתוך `open-sse/config/providerRegistry.ts` עבור v3.8.0. קטלוגי הענן (Gemini, OpenRouter וכו') מסונכרנים באופן דינמי — לקבלת הקטלוג החי המלא, פתחו **לוח הבקרה → ספקים → [ספק] → מודלים זמינים** או קראו ל־`GET /api/models/catalog`.
 >
-> אם הרשימה המובנית של ספק אינה מעודכנת, השתמשו באפשרות **ייבוא מתוך /models** באותו עמוד (או הפעילו **סנכרון אוטומטי**) כדי למשוך את הקטלוג החי ממקור הספק. הדבר אומת ב-v3.8.50 עבור LLM7.io (`gemini-3.1-flash-lite`) ועבור UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); במהלך אותו סבב בדיקות, הגישה האנונימית של Pollinations נותרה מוגבלת מצד ספק המקור.
+> אם הרשימה המובנית של ספק כלשהו אינה מעודכנת, השתמשו באפשרות **ייבוא מ־/models** בדף זה (או הפעילו **סנכרון אוטומטי**) כדי למשוך את הקטלוג העדכני במעלה הזרם. הדבר אומת ב־v3.8.50 עבור LLM7.io (`gemini-3.1-flash-lite`) ו־UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); הגישה האנונימית ל־Pollinations נותרה מוגבלת על ידי המקור במעלה הזרם במהלך אותה סדרת בדיקות.
 
-**Claude Code (`cc/`)** — OAuth מסוג Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth של Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth מסוג Plus/Pro: `cx/gpt-5.5` (+ רמות מאמץ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth של Plus/Pro: `cx/gpt-5.5` (בתוספת רמות מאמץ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth בחינם: השתמשו בקטלוג החי המוצג תחת **לוח הבקרה → ספקים → Kiro → מודלים זמינים**. הזמינות תלויה בחשבון ובתוכנית.
+**Kiro (`kr/`)** — OAuth **חינמי**: השתמשו בקטלוג החי המוצג תחת **לוח הבקרה → ספקים → Kiro → מודלים זמינים**. הזמינות תלויה בחשבון ובתוכנית.
 
-**Qoder (`if/`)** — OAuth בחינם: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth **חינמי**: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9 לחודש במחיר קבוע או לפי שימוש: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9 לחודש בתעריף קבוע או לפי שימוש: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — מפתח API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -634,29 +656,29 @@ post_install() {
 
 **xAI (`xai/`)** — Grok מקורי: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — מתארח באיחוד האירופי: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — מתארח באיחוד האירופי: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — מועשר בחיפוש: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — קוד פתוח: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (בחינם), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — קוד פתוח: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (חינמי), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — הסקה מהירה: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — בקנה מידה של פרוסת סיליקון: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — בקנה מידה של פרוסה: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — ממוקד RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — ממוקד ב־RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — לארגונים: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — לארגונים: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: מסונכרן בזמן אמת מ-Google לפי מפתח API — אין רשימה סטטית. חברו מפתח תחת **לוח הבקרה → ספקים**, ולאחר מכן השתמשו באפשרות **מודלים זמינים** כדי לייבא את הקטלוג הנוכחי (למשל `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: מסונכרן בזמן אמת לפי מפתח API מ־Google — אין רשימה סטטית. חברו מפתח ב־**לוח הבקרה → ספקים** ולאחר מכן השתמשו ב־**מודלים זמינים** כדי לייבא את הקטלוג העדכני (לדוגמה `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**ספקים תואמים נוספים** (רשימה נבחרת): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (דרך `aws-bedrock`), `azure-ai`, `openrouter` (קטלוג מועבר כפי שהוא), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. כל אחד מהם מתחזק רשימת מודלים משלו ב-`providerRegistry.ts`, וניתן לסנכרן אותה אוטומטית כאשר הספק חושף נקודת קצה מסוג `/models`.
+**ספקים תואמים אחרים** (נבחרים): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (באמצעות `aws-bedrock`), `azure-ai`, `openrouter` (קטלוג מועבר), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. כל אחד מהם מנהל רשימת מודלים משלו ב־`providerRegistry.ts`, וניתן לסנכרן אותה אוטומטית כאשר הספק חושף נקודת קצה `/models`.
 
-**הערה לגבי מזהי מודלים:** OmniRoute משתמש במזהים המקוריים של הספק (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). חלק מהמזהים כוללים גרסאות עם נקודות, משום שכך מצפה לקבל אותם ה-API של הספק. אם מודל אינו מופיע לעיל, הפעילו `omniroute models --search <term>` או פנו אל `GET /api/models/catalog` כדי לאמת את זמינותו.
+**הערה לגבי מזהי מודלים:** OmniRoute משתמש במזהים מקוריים של הספק (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). חלק מהמזהים כוללים גרסאות עם נקודות, מכיוון שכך ה־API במעלה הזרם מצפה לקבל אותן. אם מודל אינו מופיע ברשימה שלעיל, הריצו `omniroute models --search <term>` או פנו אל `GET /api/models/catalog` כדי לאשר את זמינותו.
 
 </details>
 
@@ -664,32 +686,75 @@ post_install() {
 
 ## 🧩 תכונות מתקדמות
 
-### מודלים מותאמים אישית
+### דגמים מותאמים אישית
 
-הוסיפו כל מזהה מודל לכל ספק, ללא צורך להמתין לעדכון האפליקציה:
+הוסף כל דגם ID לכל ספק מבלי לחכות לעדכון אפליקציה:
 
 ```bash
-# באמצעות ה-API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# הצגה: curl http://localhost:20128/api/provider-models?provider=openai
-# הסרה: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-לחלופין, השתמשו בלוח הבקרה: **ספקים → [ספק] → מודלים מותאמים אישית**.
+או השתמש בלוח המחוונים:** ספקים → [ספק] → דגמים מותאמים אישית** .
 
 הערות:
 
-- ספקים תואמי OpenRouter ו-OpenAI/Anthropic מנוהלים דרך **מודלים זמינים** בלבד. הוספה ידנית, ייבוא וסנכרון אוטומטי מגיעים כולם לאותה רשימת מודלים זמינים, ולכן אין מקטע נפרד של מודלים מותאמים אישית עבור ספקים אלה.
-- המקטע **מודלים מותאמים אישית** מיועד לספקים שאינם מציעים ייבוא מנוהל של מודלים זמינים.
+- ספקי OpenRouter ו- OpenAI/Anthropic-compatible מנוהלים מ** דגמים זמינים** רַק. הוספה ידנית, יבוא וסנכרון אוטומטי, כולם מגיעים באותה רשימת דגמים זמינים, כך שאין סעיף נפרד של דגמים מותאמים אישית עבור אותם ספקים.
+- ה** דגמים מותאמים אישית** הסעיף מיועד לספקים שאינם חושפים ייבוא מנוהל של מודלים זמינים.
 
-### שרשור עמיתי OmniRoute
+### ספקים תואמי OpenAI מותאמים אישית
 
-ניתן להוסיף שער OmniRoute אחר כספק **מותאם אישית תואם OpenAI**. השתמשו בכתובת ה-URL הבסיסית `/v1` של העמית ובמפתח API ייעודי בעל הרשאות מינימליות שהונפק על ידי אותו עמית.
+ניתן להוסיף כל שער שמדבר את OpenAI API (פרוקסי מתארח בעצמו, vLLM, צבר צד שלישי) כצומת ספק משלו:
 
-עבור שרשראות הדדיות או מרובות דילוגים, הפעילו את הגנת הלולאה האופציונלית בכל שער:
+1. **ספקי → הוסף תואם OpenAI** .
+2. **שֵׁם** : תווית תצוגה עבור הצומת.
+3. **קידומת** : שם הניתוב. לקוחות קוראים למודלים בשם `<prefix>/<model>`, כך שצומת עם קידומת `mygw` משרת את `mygw/gpt-4o-mini`. דָרוּשׁ; אין הגבלת אופי.
+4. **סוג API** : משפחת נקודות הקצה שהשער משרת (השלמות צ'אט, תגובות, הטמעות, אודיו, תמונות).
+5. **בסיס URL** : השורש API, עד וכולל `/v1` (לדוגמה `https://gateway.example.com/v1`), לא הנתיב המלא `/chat/completions`. שערים עם נתיבים לא סטנדרטיים קובעים אותם** הגדרות מתקדמות** (נתיב צ'אט, נתיב מודלים).
+6. ה** מפתח API (לצ'ק)** השדה רק בודק את החיבור. לאחר יצירת הצומת, פתח אותו והשתמש בו** הוסף חיבור** כדי לאחסן את המפתח שבו הבקשות ישתמשו.
+
+הצומת מקבל מזהה פנימי בצורת `openai-compatible-<apiType>-<uuid>`; אתה אף פעם לא צריך להקליד אותו, הקידומת היא השם הציבורי.
+
+#### קידומות שמורות
+
+קידומת לא יכולה להיות המזהה או הכינוי של ספק מובנה (לדוגמה `openai`, `cf`), וגם לא המזהה של ספק שפרש. פותר המודל בודק מזהים וכינויים מובנים לפני צמתים מותאמים אישית, כך שצומת המשתמש באחת מהקידומות הללו לעולם לא יקבל תעבורה: `<prefix>/model` יעבור לספק המובנה במקום זאת, או ייכשל נסגר אם הספק הזה הופסק. יצירה או עריכה של צומת עם קידומת כזו נדחתה עם:
+
+```text
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+```
+
+בחר קידומת ברורה (`mygw`, `acme-proxy`). אם בקשות לצומת מותאם אישית נכשלות עם שגיאה הנותנת שם לספק מובנה או האישורים שלו, בדוק אם הקידומת של הצומת שמורה: צמתים שנשמרו לפני שהכלל הזה היה קיים עדיין מאוחסנים, אבל הקידומת שלהם מנותבת לספק המובנה. ערוך את הצומת ותן לו קידומת חדשה.
+
+#### אפשרויות שער לכל חיבור
+
+המקשים האלה נכנסים ל- `providerSpecificData` של חיבור (לדוגמה דרך `PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (מספר שלם, 1-1024) - עבור חיבורים תואמים בפורמט צ'אט OpenAI שהשער שלהם דוחה שמות כלים ארוכים. שמות ארוכים יותר נשלחים ככינוי קצר ומשוחזרים בתגובה.
+- `quotaEndpoint` - נקודת הקצה quota/credits של השער, קרא עבור רצועת המכסה של לוח המחוונים והניתוב המודע למכסה. עובד גם על חיבורים תואמי OpenAI וגם על Anthropic; הצורה המלאה מתועדת ב- `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### שרשור OmniRoute עמיתים
+
+ניתן להוסיף שער OmniRoute נוסף בתור a** תואם OpenAI מותאם אישית** ספק. השתמש בבסיס `/v1` URL של עמית ובמפתח API ייעודי, לפחות הרשאות, שהונפקו על ידי אותו עמית.
+
+עבור שרשראות הדדיות או מרובות הופ, אפשר את מגן לולאת ההצטרפות בכל שער:
 
 ```bash
 # gateway-a
@@ -705,13 +770,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-רק בקשות הנשלחות לכתובת URL של עמית שנכללה במפורש ברשימת ההיתרים מקבלות את הכותרת `X-OmniRoute-Peer-Trace`. שער דוחה מזהה מופע חוזר או תקציב דילוגים שמוצה באמצעות HTTP `508 Loop Detected`; ספקי upstream רגילים אינם מקבלים מטא-נתונים של עמיתים.
+רק בקשות שנשלחות ל- URL עמית רשום במפורש מקבלות את הכותרת `X-OmniRoute-Peer-Trace`. שער דוחה מופע חוזר ID או תקציב הופ מיצוי עם HTTP `508 Loop Detected`; ספקים רגילים במעלה הזרם לא מקבלים מטא נתונים של עמיתים.
 
-שרשור עמיתים אינו שכפול מסד נתונים או מעבר לגיבוי במקרה של כשל במארח. כל שער שומר מצב SQLite, מטמונים, מוני קצב והפעלות נפרדים. עבור זמינות בתצורת פעיל/סביל או פעיל/פעיל, השתמשו בפרוקסי הפוך עם בדיקות תקינות או במעבר לגיבוי מצד הלקוח, ולעולם אל תעגנו מסד נתונים אחד של SQLite למספר מופעי OmniRoute פעילים.
+שרשרת עמיתים אינה שכפול מסד נתונים או כשל במארח. כל שער שומר על מצב SQLite עצמאי, מטמונים, מוני תעריפים והפעלות. השתמש בפרוקסי הפוך שנבדק תקינות או ב-failover של לקוח עבור זמינות active/passive או active/active, ולעולם אל תעלה מסד נתונים SQLite אחד למספר מופעי OmniRoute פועלים.
 
-### נתיבים ייעודיים לספקים
+### מסלולי ספקים ייעודיים
 
-נתבו בקשות ישירות לספק מסוים, עם אימות המודל:
+נתב בקשות ישירות לספק ספציפי עם אימות מודל:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -719,140 +784,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-תחילית הספק נוספת אוטומטית אם היא חסרה. מודלים שאינם תואמים מחזירים `400`.
+קידומת הספק מתווספת אוטומטית אם חסרה. דגמים לא תואמים מחזירים `400`.
 
-### הגדרת פרוקסי רשת
+### תצורת פרוקסי רשת
 
 ```bash
-# הגדרת פרוקסי גלובלי
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# פרוקסי לפי ספק
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# בדיקת הפרוקסי
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**סדר קדימויות:** ספציפי למפתח → ספציפי לשילוב → ספציפי לספק → גלובלי → סביבה.
+**עֲדִיפוּת:** למפתח ספציפי → Combo ספציפי → לספק ספציפי → Global → סביבה.
 
-### API של קטלוג המודלים
+### קטלוג דגמים API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-מחזיר מודלים המקובצים לפי ספק וכוללים סוגים (`chat`, `embedding`, `image`).
+מחזירה מודלים מקובצים לפי ספק עם סוגים (`chat`, `embedding`, `image`).
 
-### סנכרון בענן
+### סנכרון ענן
 
 - סנכרון ספקים, שילובים והגדרות בין מכשירים
-- סנכרון רקע אוטומטי עם זמן קצוב וכשל מהיר
-- בסביבת ייצור, העדיפו את `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` בצד השרת
+- סנכרון רקע אוטומטי עם זמן קצוב + נכשל מהיר
+- העדיפו `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` בצד השרת בייצור
 
-### מנהרה מהירה של Cloudflare
+### Cloudflare המנהרה המהירה
 
-- זמינה דרך **לוח הבקרה → נקודות קצה** עבור Docker ופריסות אחרות באירוח עצמי
-- יוצרת כתובת URL זמנית בתבנית `https://*.trycloudflare.com`, המעבירה תעבורה לנקודת הקצה הנוכחית שלכם `/v1` התואמת ל-OpenAI
-- בהפעלה הראשונה, `cloudflared` מותקן רק בעת הצורך; הפעלות מחדש בהמשך משתמשות שוב באותו קובץ בינארי מנוהל
-- מנהרות מהירות אינן משוחזרות אוטומטית לאחר הפעלה מחדש של OmniRoute או של הקונטיינר; הפעילו אותן מחדש מלוח הבקרה בעת הצורך
-- כתובות ה-URL של המנהרות הן ארעיות ומשתנות בכל עצירה והפעלה של המנהרה
-- מנהרות מהירות מנוהלות משתמשות כברירת מחדל בתעבורת HTTP/2, כדי למנוע אזהרות מרובות על מאגר UDP של QUIC בקונטיינרים מוגבלים
-- הגדירו `CLOUDFLARED_PROTOCOL=quic` או `auto` אם ברצונכם לעקוף את בחירת התעבורה המנוהלת
-- הגדירו `CLOUDFLARED_BIN` אם אתם מעדיפים להשתמש בקובץ בינארי `cloudflared` מותקן מראש במקום בהורדה המנוהלת
-- ניתן להציג או להסתיר את החלוניות של Cloudflare Quick Tunnel, Tailscale Funnel ו-ngrok Tunnel דרך **הגדרות → מראה**. הסתרת חלונית אינה עוצרת מנהרה פעילה.
+- זמין ב** לוח המחוונים → נקודות קצה** עבור Docker ופריסות אחרות באירוח עצמי
+- יוצר `https://*.trycloudflare.com` URL זמני שמעביר לנקודת הקצה הנוכחית שלך ב- `/v1` תואמת OpenAI
+- תחילה אפשר להתקין `cloudflared` רק בעת הצורך; מאוחר יותר מפעיל מחדש שימוש חוזר באותו בינארי מנוהל
+- מנהרות מהירות אינן משוחזרות אוטומטית לאחר הפעלה מחדש OmniRoute או מיכל; הפעל אותם מחדש מלוח המחוונים בעת הצורך
+- המנהרה URLs הן ארעיות ומשתנות בכל פעם שאתה stop/start למנהרה
+- מנהרות מהירות מנוהלות כברירת מחדל להעברת HTTP/2 כדי למנוע אזהרות מאגר QUIC UDP רועשות במכולות מוגבלות
+- הגדר `CLOUDFLARED_PROTOCOL=quic` או `auto` אם ברצונך לעקוף את בחירת התחבורה המנוהלת
+- הגדר `CLOUDFLARED_BIN` אם אתה מעדיף להשתמש ב- `cloudflared` בינארי מותקן מראש במקום בהורדה המנוהלת
+- ניתן להציג או להסתיר את החלוניות Cloudflare Quick Tunnel, Tailscale Funnel ו- ngrok Tunnel** הגדרות → מראה** . הסתרת פאנל אינה עוצרת מנהרה רצה.
 
-### יכולות חכמות של שער LLM (שלב 9)
+### LLM Gateway Intelligence (שלב 9)
 
-- **מטמון סמנטי** — שומר אוטומטית במטמון תגובות שאינן מוזרמות ושבהן temperature=0 (ניתן לעקוף באמצעות `X-OmniRoute-No-Cache: true`)
-- **אידמפוטנטיות של בקשות** — מסיר כפילויות מבקשות בתוך 5 שניות באמצעות הכותרת `Idempotency-Key` או `X-Request-Id`
-- **מעקב התקדמות** — אירועי SSE אופציונליים מסוג `event: progress` באמצעות הכותרת `X-OmniRoute-Progress: true`
+- **מטמון סמנטי** - מטמון אוטומטי ללא סטרימינג, תגובות טמפרטורה = 0 (עקוף עם `X-OmniRoute-No-Cache: true`)
+- **בקש אידמפוטנציה** - ביטול כפילות של בקשות תוך 5 שניות באמצעות כותרת `Idempotency-Key` או `X-Request-Id`
+- **מעקב אחר התקדמות** - הצטרפות לאירועי SSE `event: progress` באמצעות כותרת `X-OmniRoute-Progress: true`
 
 ---
 
-### סביבת הניסוי של המתרגם
+### מגרש משחקים של מתרגמים
 
-הגישה זמינה דרך **לוח הבקרה → מתרגם**. ניפוי שגיאות והמחשה חזותית של האופן שבו OmniRoute מתרגם בקשות API בין ספקים.
+גישה דרך** לוח מחוונים → מתרגם** . נפה באגים ודמיין כיצד OmniRoute מתרגם בקשות API בין ספקים.
 
-| מצב             | מטרה                                                                   |
-| --------------- | ---------------------------------------------------------------------- |
-| **סביבת ניסוי** | בחירת תבניות מקור ויעד, הדבקת בקשה והצגה מיידית של הפלט המתורגם        |
-| **בודק צ'אט**   | שליחת הודעות צ'אט חיות דרך הפרוקסי ובחינת מחזור הבקשה/תגובה המלא       |
-| **מערך בדיקות** | הרצת בדיקות באצווה על פני מספר שילובי תבניות כדי לאמת את נכונות התרגום |
-| **ניטור חי**    | צפייה בתרגומים בזמן אמת כאשר בקשות זורמות דרך הפרוקסי                  |
+| מצב                     | מַטָרָה                                                                |
+| ----------------------- | ---------------------------------------------------------------------- |
+| **מִגרָשׁ מִשְׂחָקִים** | בחר פורמטים source/target, הדבק בקשה וראה את הפלט המתורגם באופן מיידי  |
+| **בודק צ'אט**           | שלח הודעות צ'אט חי דרך ה-proxy ובדוק את מחזור request/response המלא    |
+| **ספסל מבחן**           | הפעל בדיקות אצווה על פני מספר שילובי פורמטים כדי לאמת את נכונות התרגום |
+| **צג חי**               | צפה בתרגומים בזמן אמת כאשר בקשות זורמות דרך ה-proxy                    |
 
 **מקרי שימוש:**
 
-- ניפוי הסיבה לכשל של שילוב מסוים בין לקוח לספק
-- אימות שתגיות חשיבה, קריאות לכלים והנחיות מערכת מתורגמים כהלכה
-- השוואת הבדלים בתבניות בין OpenAI, Claude, Gemini ותבניות Responses API
+- נפה באגים מדוע שילוב client/provider ספציפי נכשל
+- ודא שתגי חשיבה, קריאות לכלים והנחיות מערכת מתורגמות כהלכה
+- השווה הבדלי פורמטים בין הפורמטים OpenAI, Claude, Gemini ו-Responses API
 
 ---
 
 ### אסטרטגיות ניתוב
 
-הגדירו דרך **לוח הבקרה → הגדרות → ניתוב**. לוח הבקרה מציג את שש האסטרטגיות הנפוצות ביותר; שילובים והנתב האוטומטי תומכים באופן פנימי במגוון רחב יותר.
+הגדר באמצעות** לוח המחוונים → הגדרות → ניתוב** . לוח המחוונים חושף את שש האסטרטגיות הנפוצות ביותר; שילובים והנתב האוטומטי תומכים באופן פנימי בסט רחב יותר.
 
-**אסטרטגיות המוצגות בלוח הבקרה (ניתוב ברמת החשבון):**
+**אסטרטגיות גלויות ללוח המחוונים (ניתוב ברמת החשבון):**
 
-| אסטרטגיה                   | תיאור                                                                                      |
-| -------------------------- | ------------------------------------------------------------------------------------------ |
-| **מילוי ראשון**            | שימוש בחשבונות לפי סדר עדיפות — החשבון הראשי מטפל בכל הבקשות עד שאינו זמין                 |
-| **סבב מחזורי**             | מעבר מחזורי בין כל החשבונות עם מגבלת הצמדה הניתנת להגדרה (ברירת מחדל: 3 קריאות לכל חשבון)  |
-| **P2C (בחירה מבין שתיים)** | בחירה אקראית של 2 חשבונות וניתוב לחשבון הבריא יותר — איזון עומסים תוך התחשבות במצב התקינות |
-| **אקראי**                  | בחירה אקראית של חשבון לכל בקשה באמצעות ערבוב Fisher-Yates                                  |
-| **הכי פחות בשימוש**        | ניתוב לחשבון בעל חותמת הזמן `lastUsedAt` הישנה ביותר, לצורך חלוקה אחידה של התעבורה         |
-| **מיטוב עלויות**           | ניתוב לחשבון בעל ערך העדיפות הנמוך ביותר, לצורך מיטוב לשימוש בספקים הזולים ביותר           |
+| אִסטרָטֶגִיָה                 | תֵאוּר                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| **תמלא קודם**                 | משתמש בחשבונות בסדר עדיפות - החשבון הראשי מטפל בכל הבקשות עד שהוא לא זמין         |
+| **רובין עגול**                | עובר דרך כל החשבונות עם מגבלה דביקה הניתנת להגדרה (ברירת מחדל: 3 שיחות לכל חשבון) |
+| **P2C (כוח של שתי אפשרויות)** | בוחר 2 חשבונות אקראיים ומסלולים לאחד הבריא יותר - מאזן עומס עם מודעות לבריאות     |
+| **אַקרַאִי**                  | בוחר באקראי חשבון עבור כל בקשה באמצעות פישר-ייטס ערבוב                            |
+| **הכי פחות בשימוש**           | מסלולים לחשבון עם חותמת הזמן הישנה ביותר `lastUsedAt`, חלוקת התנועה באופן שווה    |
+| **אופטימיזציית עלות**         | מנתב לחשבון עם ערך העדיפות הנמוך ביותר, אופטימיזציה לספקים בעלות הנמוכה ביותר     |
 
-**אסטרטגיות מתקדמות לשילובים ולניתוב אוטומטי** (ניתנות להגדרה לכל שילוב או באמצעות קידומות `auto/*` — ראו [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**אסטרטגיות משולבות ואוטומטיות מתקדמות** (ניתן להגדרה לכל שילוב או באמצעות קידומות `auto/*` - ראה [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — סדר קפדני, ללא סבב מחזורי
-- `weighted` — חלוקת תעבורה יחסית לפי משקלים לכל מודל
-- `fill-first` — מיצוי המודל הראשון עד להגעה למגבלות
+- `priority` - סדר קפדני, לעולם לא עגול
+- `weighted` - תנועה פרופורציונלית מפוצלת לפי משקלים לכל דגם
+- `fill-first` - רוקנו את הדגם הראשון עד שהמגבלות יגיעו
 - `round-robin` / `strict-random` / `random`
-- `p2c` (בחירה מבין שתיים)
-- `least-used` ו-`cost-optimized`
-- `auto` — ניתוב מבוסס ניקוד בין כל המועמדים
-- `lkgp` (הספק התקין האחרון הידוע) — הצמדה לספק האחרון שהצליח, ולאחר מכן חזרה לכללים
-- `context-optimized` — בחירת המודל בעל חלון ההקשר הפנוי הגדול ביותר
-- `context-relay` — שרשור מודלים בעלי הקשר ארוך עבור סבבי המשך
+- `p2c` (כוח של שתי אפשרויות)
+- `least-used` `cost-optimized`
+- `auto` - מונחה ציונים בכל המועמדים
+- `lkgp` (הספק האחרון הידוע הטוב) - מצמידים לספק המצליח האחרון, ואז חוזר לכללים
+- `context-optimized` - בוחר את המודל עם חלון ההקשר הפנוי הגדול ביותר
+- `context-relay` - משרשרת מודלים עם הקשר ארוך להמשך פניות
 
-#### כותרת חיצונית להפעלה מוצמדת
+#### כותרת הפעלה דביקה חיצונית
 
-לצורך זיקה להפעלה חיצונית (לדוגמה, סוכני Claude Code/Codex מאחורי שרתי Proxy הפוכים), שלחו:
+עבור זיקה להפעלה חיצונית (לדוגמה, סוכני Claude Code/Codex מאחורי פרוקסי הפוכים), שלח:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute מקבל גם את `x_session_id` ומחזיר את מפתח ההפעלה שבפועל בתוך `X-OmniRoute-Session-Id`.
+OmniRoute גם מקבל `x_session_id` ומחזיר את מפתח ההפעלה האפקטיבי ב- `X-OmniRoute-Session-Id`.
 
-אם אתם משתמשים ב-Nginx ושולחים כותרות עם קווים תחתונים, הפעילו:
+אם אתה משתמש ב-Nginx ושולח כותרות בצורת קו תחתון, הפעל:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### כינויים למודלים עם תווים כלליים
+#### כינויים של דגם Wildcard
 
-צרו תבניות עם תווים כלליים למיפוי מחדש של שמות מודלים:
-
-```
-תבנית: claude-sonnet-*     →  יעד: cc/claude-sonnet-4-6
-תבנית: gpt-*               →  יעד: gh/gpt-5.3-codex
-```
-
-תווים כלליים תומכים ב-`*` (תווים כלשהם) וב-`?` (תו יחיד).
-
-#### שרשראות גיבוי
-
-הגדירו שרשראות גיבוי גלובליות שחלות על כל הבקשות:
+צור דפוסי תווים כלליים למיפוי מחדש של שמות מודלים:
 
 ```
-שרשרת: production-fallback
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+```
+
+תווים כלליים תומכים `*` (כל תווים) וב- `?` (תו בודד).
+
+#### שרשראות Fallback
+
+הגדר שרשראות חילופין גלובליות החלות על כל הבקשות:
+
+```
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -860,153 +925,208 @@ underscores_in_headers on;
 
 ---
 
-### עמידות ומפסקי זרם
+### שילובי ספקים נפוצים ודפוסי ניתוב
 
-הגדירו דרך **לוח הבקרה → הגדרות → עמידות**.
+להלן דפוסים לדוגמה לשילוב ספקים מרובים ולניתוב ביניהם ב- OmniRoute:
 
-OmniRoute מממש עמידות ברמת הספק באמצעות חמישה רכיבים:
+#### 1. Coding Agent Combo: High-End Reasoning עם Cost/Speed Fallback
 
-1. **תור בקשות וקיצוב** — ויסות בקשות ברמת המערכת:
-   - **בקשות לדקה (RPM)** — מספר הבקשות המרבי לדקה לכל חשבון
-   - **זמן מינימלי בין בקשות** — המרווח המינימלי באלפיות השנייה בין בקשות
-   - **מספר מרבי של בקשות מקבילות** — מספר הבקשות המרבי בו-זמנית לכל חשבון
+אידיאלי עבור סוכני קידוד (OpenCode, Claude Code, Cursor, Cline). מסלול תחילה למודלים של חשיבה גבולית, נופל חזרה למודלים של קידוד מהיר על מיצוי מכסות או שגיאות.
 
-2. **תקופת צינון לחיבור** — הגדרה לכל סוג אימות עבור חיבור יחיד לאחר כשלים הניתנים לניסיון חוזר:
-   - **תקופת צינון בסיסית** — חלון הצינון המוגדר כברירת מחדל לכשלי upstream הניתנים לניסיון חוזר
-   - **שימוש בהנחיות ניסיון חוזר מה-upstream** — כיבוד הנחיות מוסמכות מסוג `Retry-After` או איפוס, כאשר הן מסופקות
-   - **מספר מרבי של שלבי השהיה** — רמת ההשהיה המעריכית המרבית עבור כשלים חוזרים
+- **לוּחַ מַחווָנִים** : Combos → חדש Combo → שם: `agent-coding` → אסטרטגיה: `Priority`
+- **דגמים** :
+  1. `claude/claude-sonnet-4-6` (סוכן קידוד ראשי)
+  2. `openai/gpt-4o` (ניצול משני בעל קיבולת גבוהה)
+  3. `deepseek/deepseek-v4-flash` (ניצול יעיל וחסכוני)
 
-3. **מפסק זרם של ספק** — מעקב אחר כשלי ספק מקצה לקצה, סימון ספק כבעל ביצועים ירודים בסף האזהרה שהוגדר, ופתיחת המפסק כאשר מגיעים לסף הכשל שהוגדר:
-   - **סף ירידה בביצועים** — מספר כשלי הספק הרצופים לפני מעבר למצב `DEGRADED`
-   - **סף כשל** — מספר כשלי הספק הרצופים לפני מעבר למצב `OPEN`
-   - **זמן קצוב לאיפוס** — חלון הזמן לפני בדיקה חוזרת של הספק
-   - **CLOSED** (תקין) — הבקשות זורמות כרגיל
-   - **DEGRADED** — הבקשות ממשיכות לזרום תוך מעקב אחר שיעור הכשלים המוגבר
-   - **OPEN** — הספק נחסם זמנית לאחר כשלים חוזרים
-   - **HALF_OPEN** — בדיקה אם הספק התאושש
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
 
-   מגבלות קצב `429` בהיקף החיבור נשארות תחת **תקופת צינון לחיבור** ואינן נספרות עבור מפסק הספק.
+#### 2. Combo Auto Failover משולב שכבה חופשית
 
-   מצב זמן הריצה של מפסק הספק מוצג רק תחת **לוח הבקרה → תקינות**.
+משרשרת מספר רב של ספקים ללא מפתח וללא מפתחות כדי למקסם את זמן הפעולה ללא עלויות API.
 
-4. **המתנה לסיום תקופת הצינון** — אם כל החיבורים המועמדים כבר בתקופת צינון, OmniRoute יכול להמתין לסיום תקופת הצינון המוקדמת ביותר ולנסות שוב את אותה בקשת לקוח באופן אוטומטי.
+- **אִסטרָטֶגִיָה** : `Least Used` או `Round Robin` (מחלק עומס בין מכסות)
+- **דגמים** :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
 
-5. **זיהוי אוטומטי של מגבלת קצב** — כאשר ספקי upstream מחזירים חלונות המתנה מפורשים, ההנחיות האלה עוקפות את תקופת הצינון המקומית של החיבור כאשר ההגדרה מופעלת.
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
 
-**טיפ מקצועי:** השתמשו בדף **תקינות** כדי לבדוק ולאפס מפסקי ספק פעילים לאחר השבתה. דף העמידות משנה את התצורה בלבד.
+#### 3. Multimodal / Vision & Text Pipeline
+
+שילוב מודלים מיוחדים של חזון עם יצירת טקסט במהירות גבוהה עבור תהליכי עבודה הכוללים הבנת תמונה ויצירת קוד.
+
+- **תַבְנִית** : שילוב של `Priority` שמפרט דגמים בעלי יכולת ראייה תחילה ודגם text/code בעל תפוקה גבוהה אחרון.
+- **דגמים** :
+  1. `gemini/gemini-2.5-pro` (הבנה חזקה image/multimodal )
+  2. `openai/gpt-4o` (ראייה מאוזנת ושימוש בכלים)
+  3. `deepseek/deepseek-v4-flash` (דור Text/code )
 
 ---
 
-### ייצוא / ייבוא של מסד הנתונים
+### חוסן ומפסקי חשמל
 
-נהלו גיבויים של מסד הנתונים דרך **לוח הבקרה → הגדרות → מערכת ואחסון**.
+הגדר באמצעות** לוח המחוונים → הגדרות → חוסן** .
 
-| פעולה                    | תיאור                                                                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| **ייצוא מסד הנתונים**    | הורדת מסד הנתונים הנוכחי של SQLite כקובץ `.sqlite`                                                                       |
-| **ייצוא הכול (.tar.gz)** | הורדת ארכיון גיבוי מלא הכולל: מסד נתונים, הגדרות, שילובים, חיבורי ספקים (ללא פרטי גישה) ומטא-נתונים של מפתחות API        |
-| **ייבוא מסד נתונים**     | העלאת קובץ `.sqlite` להחלפת מסד הנתונים הנוכחי. גיבוי טרום-ייבוא נוצר אוטומטית, אלא אם `DISABLE_SQLITE_AUTO_BACKUP=true` |
+OmniRoute מיישמת חוסן ברמת הספק עם חמישה מרכיבים:
+
+1. **בקש תור וקצב** - עיצוב בקשות ברמת המערכת:
+   - **בקשות לדקה (RPM)** - מקסימום בקשות לדקה לחשבון
+   - **זמן מינימלי בין בקשות** - פער מינימלי באלפיות שניות בין בקשות
+   - **מקסימום בקשות במקביל** - מקסימום בקשות בו זמנית לכל חשבון
+
+2. **קירור חיבור** - תצורה לפי אישור עבור חיבור יחיד לאחר כשלים שניתנים לניסיון חוזר:
+   - **Cooldown בסיס** - חלון קירור ברירת מחדל עבור כשלים שניתנים לניסיון חוזר במעלה הזרם
+   - **השתמש ב-Upstream נסה שוב עצות** - מכבד רמזים סמכותיים `Retry-After` או איפוס כאשר הם מסופקים
+   - **מקסימום שלבי גיבוי** - רמת גיבוי אקספוננציאלית מקסימלית עבור כשלים חוזרים
+
+3. **מפסק חשמל של ספק** — עוקב אחר כשלים של ספקים מקצה לקצה, מסמן ספק שירד בסף האזהרה שהוגדר, ופותח את המפסק כאשר סף הכשל שהוגדר הושג:
+   - **סף השפלה** - כשלים רצופים של ספק לפני הכניסה `DEGRADED`
+   - **סף כשל** - כשלים רצופים של ספק לפני הכניסה `OPEN`
+   - **אפס פסק זמן** — חלון זמן לפני שהספק נבדק שוב
+   - **CLOSED** (בריא) - הבקשות זורמות כרגיל
+   - **DEGRADED** - בקשות עדיין זורמות בזמן מעקב אחר כשלים מוגברים
+   - **OPEN** - הספק נחסם זמנית לאחר כשלים חוזרים ונשנים
+   - **HALF_OPEN** - בדיקה אם הספק התאושש
+
+   מגבלות תעריף `429` בהיקף חיבור נשארות** קירור חיבור** ואל תספרו כלפי מפסק הספק.
+
+   מצב זמן הריצה של מפסק הספק מוצג** לוח המחוונים → Health** רַק.
+
+4. **המתן להתקררות** - אם כל חיבור מועמד כבר מתקרר, OmniRoute יכול לחכות להתקררות המוקדמת ביותר ולנסות שוב את אותה בקשת לקוח באופן אוטומטי.
+
+5. **זיהוי אוטומטי של מגבלת שיעור** - כאשר ספקים במעלה הזרם מחזירים חלונות המתנה מפורשים, הרמזים הללו עוקפים את התקררות החיבור המקומי כאשר ההגדרה מופעלת.
+
+**טיפ מקצועי:** השתמש ב-** בְּרִיאוּת** דף כדי לבדוק ולאפס פורצי ספקים חיים לאחר הפסקה. דף החוסן משנה רק תצורה.
+
+---
+
+### ייצוא/ייבוא של מסדי נתונים
+
+נהל גיבויים של מסדי נתונים ב** לוח המחוונים → הגדרות → מערכת ואחסון** .
+
+| פְּעוּלָה              | תֵאוּר                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **ייצוא מסד נתונים**   | מוריד את מסד הנתונים הנוכחי SQLite כקובץ `.sqlite`                                                                              |
+| **ייצא הכל (.tar.gz)** | מוריד ארכיון גיבוי מלא כולל: מסד נתונים, הגדרות, שילובים, חיבורי ספקים (ללא אישורים), מטא נתונים של מפתח API                    |
+| **ייבוא מסד נתונים**   | העלה קובץ `.sqlite` כדי להחליף את מסד הנתונים הנוכחי. גיבוי טרום יבוא נוצר אוטומטית אלא אם כן `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: ייצוא מסד הנתונים
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: ייצוא הכול (ארכיון מלא)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: ייבוא מסד הנתונים
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**אימות הייבוא:** הקובץ המיובא נבדק כדי לוודא את תקינותו (בדיקת pragma של SQLite), את קיומן של הטבלאות הנדרשות (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) ואת גודלו (לכל היותר 100MB).
+**אימות יבוא:** הקובץ המיובא מאומת עבור תקינות (SQLite pragma check), טבלאות נדרשות (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) וגודל (מקסימום 100MB).
 
-**תרחישי שימוש:**
+**מקרי שימוש:**
 
-- העברת OmniRoute בין מכונות
-- יצירת גיבויים חיצוניים להתאוששות מאסון
-- שיתוף תצורות בין חברי צוות (ייצוא הכול → שיתוף הארכיון)
+- העבר OmniRoute בין מכונות
+- צור גיבויים חיצוניים להתאוששות מאסון
+- שתף תצורות בין חברי הצוות (ייצא את כל ארכיון השיתוף → )
 
 ---
 
-### לוח הבקרה של ההגדרות
+### לוח המחוונים של הגדרות
 
-דף ההגדרות מאורגן ב-**7 לשוניות** לניווט קל:
+דף ההגדרות מאורגן ב** 7 כרטיסיות** לניווט קל:
 
-| לשונית     | תוכן                                                                                                                                                                  |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **כללי**   | כלי אחסון מערכת, התנהגות ברירת מחדל, נראות מנהרת נקודת הקצה                                                                                                           |
-| **מראה**   | פקדי ערכת נושא (בהירה/כהה/מערכת), נראות סרגל הצד, מתגים ללוחות כרטיסי המנהרות של Cloudflare/Tailscale/ngrok                                                           |
-| **AI**     | תקציב חשיבה (העברה ללא שינוי / הסרה אוטומטית / מותאם אישית / מסתגל — ראו [THINKING_BUDGET.md](./THINKING_BUDGET.md)), הנחיית מערכת גלובלית, נתוני מטמון הנחיות        |
-| **אבטחה**  | הגדרות כניסה/סיסמה, בקרת גישה לפי IP, אימות API עבור `/models`, חסימת ספקים, הגנה מפני הזרקת הנחיות                                                                   |
-| **ניתוב**  | אסטרטגיית ניתוב גלובלית (מילוי ראשון / סבב מחזורי / P2C / אקראי / הכי פחות בשימוש / מיטוב עלויות), כינויי מודלים עם תווים כלליים, שרשראות גיבוי, ברירות מחדל לשילובים |
-| **עמידות** | תור בקשות, תקופת צינון לחיבורים, תצורת מפסק ספקים והתנהגות המתנה לסיום תקופת הצינון                                                                                   |
-| **מתקדם**  | תצורת proxy גלובלית (HTTP/SOCKS5), דריסות proxy לכל ספק                                                                                                               |
+| כרטיסייה                    | תוֹכֶן                                                                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **כְּלָלִי**                | כלי אחסון מערכת, התנהגות ברירת מחדל, נראות מנהרת נקודת קצה                                                                                                                     |
+| **הוֹפָעָה**                | פקדי ערכת נושא (light/dark/system), נראות של סרגל צד, החלפת חלוניות עבור כרטיסי מנהרת Cloudflare/Tailscale/ngrok                                                               |
+| **AI**                      | תקציב חשיבה (מעבר / רצועה אוטומטית / מותאם אישית / אדפטיבי - ראה [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), הנחיית מערכת גלובלית, סטטיסטיקות מטמון פקודות                   |
+| **בִּטָחוֹן**               | הגדרות Login/Password, בקרת גישה של IP, אישור API עבור `/models`, חסימת ספקים, שמירה על הזרקה מיידית                                                                           |
+| **ניתוב**                   | אסטרטגיית ניתוב גלובלית (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), כינויים של מודלים עם תווים כלליים לחיפוש, שרשראות חוזרות, ברירות מחדל משולבות |
+| **כּוֹשֵׁר הִתאוֹשְׁשׁוּת** | תור בקשה, צינון חיבור, תצורת מפסק ספק והתנהגות המתנה לקירור                                                                                                                    |
+| **מִתקַדֵם**                | תצורת פרוקסי גלובלית (HTTP/SOCKS5), עקיפות פרוקסי לכל ספק                                                                                                                      |
 
-הלשונית „כללי” אינה משכפלת עוד הערות לקריאה בלבד בנוגע לרישום ולמטמון. הגדרות השמירה והמיטוב של מסד הנתונים
-נשמרות דרך `/api/settings/database`; ניקוי ידני של המטמון מתבצע באמצעות
-`DELETE /api/cache`. המכסות למספר השורות ביומני הבקשות וה-proxy נשלטות באמצעות
-`CALL_LOGS_TABLE_MAX_ROWS` ו-`PROXY_LOGS_TABLE_MAX_ROWS`.
+General כבר לא משכפל רישום והערות מטמון לקריאה בלבד. הגדרות שמירה ואופטימיזציה של מסדי נתונים נמשכות באמצעות `/api/settings/database`; ניקוי מטמון ידני משתמש `DELETE /api/cache`. מכסי שורה של בקשות ו-proxy יומן נשלטים על ידי `CALL_LOGS_TABLE_MAX_ROWS` ו- `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
 ### ניהול עלויות ותקציב
 
-הגישה מתבצעת דרך **לוח הבקרה → עלויות**.
+גישה דרך** לוח המחוונים → עלויות** .
 
-| לשונית    | מטרה                                                                              |
-| --------- | --------------------------------------------------------------------------------- |
-| **תקציב** | הגדרת מגבלות הוצאה לכל מפתח API, עם תקציבים יומיים/שבועיים/חודשיים ומעקב בזמן אמת |
-| **תמחור** | הצגה ועריכה של רשומות תמחור מודלים — עלות לכל 1K אסימוני קלט/פלט לכל ספק          |
+| כרטיסייה    | מַטָרָה                                                                      |
+| ----------- | ---------------------------------------------------------------------------- |
+| **תַקצִיב** | הגדר מגבלות הוצאה לכל מפתח API עם תקציבי daily/weekly/monthly ומעקב בזמן אמת |
+| **תמחור**   | הצג וערוך ערכי תמחור של מודל - עלות לכל אסימוני input/output 1K לכל ספק      |
 
 ```bash
-# API: הגדרת תקציב
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: קבלת מצב התקציב הנוכחי
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**מעקב עלויות:** כל בקשה מתעדת את השימוש באסימונים ומחשבת את העלות באמצעות טבלת התמחור. ניתן להציג פילוחים לפי ספק, מודל ומפתח API תחת **לוח הבקרה → שימוש**.
+**מעקב אחר עלויות:** כל בקשה מתעדת את השימוש באסימונים ומחשבת עלות באמצעות טבלת התמחור. הצג פירוטים ב** לוח המחוונים → שימוש** לפי ספק, דגם ומפתח API.
 
 ---
 
-### תמלול שמע
+### תמלול אודיו
 
-OmniRoute תומך בתמלול שמע באמצעות נקודת הקצה התואמת ל-OpenAI:
+OmniRoute תומך בתמלול אודיו דרך נקודת הקצה התואמת OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# דוגמה עם curl
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` הוא מסלול Deepgram המקורי ודורש מפתח API של Deepgram.
-אם מוגדר רק OpenRouter, השתמשו ב-`openrouter/deepgram/nova-3`.
+`deepgram/nova-3` הוא המסלול המקורי של Deepgram וצריך מפתח Deepgram API. אם רק OpenRouter מוגדר, השתמש `openrouter/deepgram/nova-3`.
 
-ספקי **דיבור לטקסט (תמלול)**:
+**דיבור לטקסט (תמלול)** ספקים:
 
-- `openai/` (תואם Whisper)
+- `openai/` (תואם לחישה)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (משפחת Nova)
+- `deepgram/` (משפחת נובה)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (גרסאות Whisper)
+- `nvidia/` (פרקט, קנרי)
+- `huggingface/` (גרסאות לחישה)
 - `qwen/`
 
-ספקי **טקסט לדיבור (`POST /v1/audio/speech`)**:
+**טקסט לדיבור (`POST /v1/audio/speech`)** ספקים:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
+- `deepgram/` (הילה)
 - `nvidia/` (Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
@@ -1019,56 +1139,45 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-תבניות השמע הנתמכות לתמלול: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. תבניות הפלט של TTS תלויות בספק (mp3, wav, opus, pcm, mulaw).
+פורמטי שמע נתמכים לתמלול: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. פורמטים של פלט TTS תלויים בספק (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### אסטרטגיות איזון לשילובים
+### אסטרטגיות איזון משולבת
 
-הגדירו איזון לכל שילוב בנפרד תחת **לוח הבקרה → שילובים → יצירה/עריכה → אסטרטגיה**.
+הגדר איזון לכל שילוב** לוח מחוונים → Combos → Create/Edit → אסטרטגיית** .
 
-| אסטרטגיה            | תיאור                                                                 |
-| ------------------- | --------------------------------------------------------------------- |
-| **סבב מחזורי**      | עוברת בין המודלים ברצף                                                |
-| **עדיפות**          | תמיד מנסה תחילה את המודל הראשון; עוברת לחלופה רק במקרה של שגיאה       |
-| **אקראית**          | בוחרת מודל אקראי מהשילוב עבור כל בקשה                                 |
-| **משוקללת**         | מנתבת באופן יחסי על סמך המשקלים שהוקצו לכל מודל                       |
-| **הכי פחות בשימוש** | מנתבת למודל עם מספר הבקשות האחרונות הנמוך ביותר (משתמשת במדדי השילוב) |
-| **מותאמת לעלות**    | מנתבת למודל הזמין הזול ביותר (משתמשת בטבלת התמחור)                    |
+| אִסטרָטֶגִיָה         | תֵאוּר                                                     |
+| --------------------- | ---------------------------------------------------------- |
+| **עגול-רובין**        | מסתובב בין דגמים ברצף                                      |
+| **עֲדִיפוּת**         | תמיד מנסה את הדגם הראשון; נופל רק על טעות                  |
+| **אַקרַאִי**          | בוחר דגם אקראי מהשילוב עבור כל בקשה                        |
+| **מְשׁוּקלָל**        | מסלולים באופן פרופורציונלי על בסיס משקלים שהוקצו לכל דגם   |
+| **הכי פחות בשימוש**   | מנתב למודל עם הכי מעט בקשות אחרונות (משתמש במדדים משולבים) |
+| **אופטימיזציית עלות** | מסלולים לדגם הזול ביותר הזמין (משתמש בטבלת תמחור)          |
 
-ניתן להגדיר ברירות מחדל גלובליות לשילובים דרך **לוח הבקרה → הגדרות → ניתוב → ברירות מחדל לשילובים**.
-כברירת מחדל, זמני הקצוב של יעדי השילוב יורשים את זמן הקצוב הנוכחי של הבקשה. השתמשו באפשרות **זמן קצוב ליעד
-(שניות)** בברירות המחדל לשילובים או בשילוב בודד רק כאשר מגבלה קצרה יותר לכל יעד אמורה
-להפעיל מעבר מהיר יותר לחלופה.
+ניתן להגדיר ברירת מחדל משולבת גלובלית** לוח המחוונים → הגדרות → ניתוב → Combo ברירת מחדל** . תפוגת יעד משולבת יורשת את הזמן הקצוב של הבקשה הנוכחית כברירת מחדל. לְהִשְׁתַמֵשׁ** פסק זמן יעד (שניות)** ברירות מחדל משולבות או משולבות בודדות רק כאשר מגבלה קצרה יותר לכל יעד אמורה להפעיל ירידה מהירה יותר.
 
-מיטובי שילוב ללא השהיה דורשים הפעלה מפורשת. השאירו את האפשרות **מיטובים ללא השהיה** מושבתת כדי
-למנוע מתכונות השהיה אלה להתחרות ביעדי מעבר לחלופה, לדלג על יעדים על סמך היסטוריית TTFT
-או לדחוס בקשות מעבר לחלופה; הפעלתה מאפשרת גידור מוגדר, דילוגים חזויים לפי TTFT
-ודחיסה יזומה של המעבר לחלופה, תוך ויתור מסוים על נאמנות הניתוב/הבקשה לטובת השהיית זנב
-נמוכה יותר.
+אופטימיזציות משולבות של אפס השהייה הן הסכמה. לַעֲזוֹב** אופטימיזציות של אפס השהייה** מושבתת כדי למנוע מתכונות האחזור הללו למרוץ מטרות חילוף, דילוג על יעדים המבוססים על היסטוריית TTFT, או דחיסת בקשות חזרה; הפעלתו מאפשרת גידור מוגדר, דילוגים חזויים TTFT ודחיסת fallback פרואקטיבית כדי לסחור בנאמנות routing/request עבור חביון זנב נמוך יותר.
 
-השביתו את **מאגר אסימוני החשיבה** כאשר ספקים במעלה הזרם דורשים מגבלות מחמירות של
-`max_tokens` / `maxOutputTokens`. כאשר האפשרות מופעלת, ניתוב השילוב מוסיף מרווח לאסימוני חשיבה
-רק עבור מודלים בעלי מגבלת פלט ידועה, ומשאיר את מגבלת האסימונים של הלקוח ללא שינוי כאשר
-הערך הבטוח הכולל את המאגר היה חורג ממגבלה זו. אם מגבלת הלקוח כבר גבוהה ממגבלה ידועה,
-OmniRoute מקטינה אותה למגבלה זו לפני שליחת הבקשה במעלה הזרם.
+השבת** חיץ אסימון נימוק** כאשר ספקים במעלה הזרם דורשים מגבלות מחמירות `max_tokens` / `maxOutputTokens`. כאשר מופעל, ניתוב משולב מוסיף רק מרווח ראש למודל חשיבה עבור דגמים עם מכסת פלט ידועה ומשאיר את מגבלת אסימון הלקוח ללא שינוי כאשר הערך המאוחץ הבטוח יעלה על מכסה זו. אם מגבלת הלקוח כבר מעל מכסה ידוע, OmniRoute מצמיד אותו למכסה זה לפני שליחת הבקשה במעלה הזרם.
 
 ---
 
-### לוח בקרת תקינות
+### לוח מחוונים לבריאות
 
-הגישה מתבצעת דרך **לוח הבקרה → תקינות**. סקירה בזמן אמת של תקינות המערכת, הכוללת 6 כרטיסים:
+גישה דרך** לוח המחוונים → Health** . סקירת תקינות מערכת בזמן אמת עם 6 כרטיסים:
 
-| כרטיס              | מה הוא מציג                                               |
-| ------------------ | --------------------------------------------------------- |
-| **מצב המערכת**     | זמן פעילות, גרסה, שימוש בזיכרון, ספריית נתונים            |
-| **תקינות הספקים**  | מצב זמן הריצה של מפסקי הזרם הגלובליים של הספקים           |
-| **מגבלות קצב**     | תקופות צינון פעילות של חיבורים לכל חשבון, כולל הזמן שנותר |
-| **חסימות פעילות**  | חסימות פעילות ברמת המודל והחרגות זמניות                   |
-| **מטמון חתימות**   | נתוני מטמון מניעת כפילויות (מפתחות פעילים, שיעור פגיעות)  |
-| **טלמטריית השהיה** | צבירת השהיות p50/p95/p99 לכל ספק                          |
+| כַּרְטִיס          | מה זה מראה                                                             |
+| ------------------ | ---------------------------------------------------------------------- |
+| **מצב מערכת**      | זמן פעולה, גרסה, שימוש בזיכרון, ספריית נתונים                          |
+| **בריאות הספק**    | מצב זמן ריצה של מפסק זרם ספק עולמי                                     |
+| **מגבלות תעריף**   | צינון חיבור פעיל לכל חשבון עם הזמן שנותר                               |
+| **נעילה אקטיבית**  | נעילה אקטיבית בהיקף דגם והחרגות זמניות                                 |
+| **מטמון חתימה**    | נתונים סטטיסטיים של ביטול כפילויות של מטמון (מפתחות פעילים, קצב התאמה) |
+| **טלמטריית אחזור** | צבירה של חביון p50/p95/p99 לכל ספק                                     |
 
-**טיפ מקצועי:** דף התקינות מתרענן אוטומטית כל 10 שניות. השתמשו בכרטיס מפסק הזרם כדי לזהות אילו ספקים חווים בעיות.
+**טיפ מקצועי:** דף הבריאות מתרענן אוטומטית כל 10 שניות. השתמש בכרטיס המפסק כדי לזהות אילו ספקים נתקלים בבעיות.
 
 ---
 

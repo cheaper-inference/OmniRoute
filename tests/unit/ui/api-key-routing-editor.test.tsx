@@ -1,11 +1,14 @@
 // @vitest-environment jsdom
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import messages from "../../../src/i18n/messages/en.json";
 import ReasoningRoutingRules from "../../../src/shared/components/ReasoningRoutingRules";
 import RoutingPageClient from "../../../src/app/(dashboard)/dashboard/api-manager/routing/RoutingPageClient";
+// The editor's pickers are kit (Radix) Selects since KEA-7886 (Select adapter, `options`
+// mode): no DOM <select>, so changes go through the menu instead of fireEvent.change.
+import { chooseKitSelectValue, kitSelectValue } from "../../helpers/kitSelect";
 
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams() }));
 
@@ -121,11 +124,17 @@ describe("isolated routing editor", () => {
   it("stores a selected source combo NAME while keeping the key scope", async () => {
     const writes = setup();
     fireEvent.click(await screen.findByRole("button", { name: "Edit" }));
-    fireEvent.change(screen.getByLabelText("Match requests for"), { target: { value: "combo" } });
-    fireEvent.change(screen.getByRole("combobox", { name: "Source combo" }), {
-      target: { value: "gpt-5.6-luna-combo" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    // Keep accessible-role/name assertions scoped to the form being edited.
+    // Scanning unrelated picker controls repeatedly is expensive in jsdom.
+    const editor = within(
+      screen.getByRole("textbox", { name: "Name", exact: true }).closest("form")!
+    );
+    chooseKitSelectValue(editor.getByRole("combobox", { name: "Match requests for" }), "combo");
+    chooseKitSelectValue(
+      editor.getByRole("combobox", { name: "Source combo" }),
+      "gpt-5.6-luna-combo"
+    );
+    fireEvent.click(editor.getByRole("button", { name: "Save changes" }));
     await waitFor(() => expect(writes).toHaveLength(1));
     expect(writes[0]).toMatchObject({
       modelPattern: "gpt-5.6-luna-combo",
@@ -158,19 +167,23 @@ describe("isolated routing editor", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Name", exact: true }), {
       target: { value: "Changed draft" },
     });
-    fireEvent.change(screen.getByRole("combobox", { name: "API key" }), {
-      target: { value: "second" },
-    });
-    expect(screen.getByRole("dialog")).not.toBeNull();
-    fireEvent.click(screen.getByRole("dialog").querySelector("button")!);
-    expect((screen.getByRole("combobox", { name: "API key" }) as HTMLSelectElement).value).toBe(
-      "key"
-    );
+    chooseKitSelectValue(screen.getByRole("combobox", { name: "API key" }), "second");
+    expect(screen.getByRole("alertdialog")).not.toBeNull();
+    fireEvent.click(screen.getByRole("alertdialog").querySelector("button")!);
+    expect(kitSelectValue(screen.getByRole("combobox", { name: "API key" }))).toBe("key");
   });
 
   it("does not offer writes after a failed configuration load", async () => {
     setup({ failLoad: true });
-    await screen.findByRole("alert");
+    // #13554 adds the per-key Codex service-mode section to this workspace; it
+    // raises its own load-error alert, so target the routing editor's alert.
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("alert")
+          .some((el) => el.textContent === "Reasoning rules could not be loaded.")
+      ).toBe(true)
+    );
     expect((screen.getByRole("button", { name: "New rule" }) as HTMLButtonElement).disabled).toBe(
       true
     );

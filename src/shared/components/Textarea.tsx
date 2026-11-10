@@ -1,29 +1,59 @@
 "use client";
 
+import { forwardRef, useId } from "react";
+import { Field } from "@omniroute/ui-kit/field";
+import { Textarea as KitTextarea } from "@omniroute/ui-kit/textarea";
 import { cn } from "@/shared/utils/cn";
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: boolean;
+  /** Visible label: wraps the control in the kit `Field` (like `Input`). */
+  label?: React.ReactNode;
+  /** Helper text under the control, announced through aria-describedby. Needs `label`. */
+  hint?: React.ReactNode;
+  /** Classes for the `Field` wrapper; `className` stays on the textarea. */
+  fieldClassName?: string;
 }
 
 /**
- * Textarea — token-driven multiline input mirroring the Input primitive (same border,
- * focus ring and control radius). Replaces ad-hoc raw `<textarea>` styling at call sites.
+ * Textarea — adapter over the kit Textarea (same border, focus ring and radius as Input).
+ * `error` maps to the kit's error border and marks the control `aria-invalid`. Without a
+ * `label` it renders the bare control, as it always did.
  */
-export default function Textarea({ className, error = false, ...props }: TextareaProps) {
-  return (
-    <textarea
-      className={cn(
-        "w-full py-2 px-3 text-sm text-text-main",
-        "bg-white dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-control",
-        "placeholder-text-muted/60",
-        "focus:ring-1 focus:ring-accent/30 focus:border-accent/50 focus:outline-none",
-        "transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-        "text-[16px] sm:text-sm",
-        error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "",
-        className
-      )}
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
+  { error = false, className, label, hint, fieldClassName, id: externalId, ...props },
+  ref
+) {
+  const generatedId = useId();
+  const hasLabel = label != null && label !== "";
+  const textareaId = externalId || (hasLabel ? generatedId : undefined);
+  const hintId = hasLabel && hint ? `${textareaId}-hint` : undefined;
+  const describedBy = [props["aria-describedby"], hintId].filter(Boolean).join(" ") || undefined;
+
+  const control = (
+    <KitTextarea
+      ref={ref}
+      id={textareaId}
+      error={error}
+      aria-invalid={error || undefined}
+      className={className}
       {...props}
+      aria-describedby={describedBy}
     />
   );
-}
+  if (!hasLabel) return control;
+
+  return (
+    <Field
+      htmlFor={textareaId}
+      label={label}
+      required={props.required}
+      hint={hint ? <span id={hintId}>{hint}</span> : undefined}
+      className={cn("gap-1.5", fieldClassName)}
+    >
+      {control}
+    </Field>
+  );
+});
+
+export default Textarea;

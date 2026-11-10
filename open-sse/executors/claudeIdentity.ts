@@ -11,6 +11,11 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 
 import {
+  isClaudeOAuthSummarizedThinkingUnredacted,
+  shouldSuppressRedactThinking,
+} from "./base/redactThinkingBeta.ts";
+
+import {
   CLAUDE_CODE_CLIENT_VERSION,
   CLAUDE_CODE_SDK_PACKAGE_VERSION,
   getClaudeCodeClientVersion,
@@ -148,6 +153,13 @@ export type ClaudeBootstrap = {
   organization_name: string | null;
   organization_type: string | null;
   organization_rate_limit_tier: string | null;
+  /** The account's own tier inside its org (a Team seat's tier), e.g. `default_claude_max_5x`. */
+  user_rate_limit_tier: string | null;
+  /**
+   * Team seat, e.g. `team_standard` or `team_*_premium`. A member with no seat never
+   * sees it here: the bootstrap itself answers 403 oauth_not_allowed_for_organization.
+   */
+  seat_tier: string | null;
 };
 
 /** GET /api/claude_cli/bootstrap with the same headers real CLI uses. */
@@ -179,6 +191,8 @@ export async function fetchClaudeBootstrap(accessToken: string): Promise<ClaudeB
       organization_name: stringOrNull(account.organization_name),
       organization_type: stringOrNull(account.organization_type),
       organization_rate_limit_tier: stringOrNull(account.organization_rate_limit_tier),
+      user_rate_limit_tier: stringOrNull(account.user_rate_limit_tier),
+      seat_tier: stringOrNull(account.seat_tier),
     };
   } catch {
     return null;
@@ -309,7 +323,12 @@ const HEAVY_AGENT_BETA_MODEL_PREFIXES = ["claude-opus", "claude-sonnet"];
  */
 const CONTEXT_1M_BETA_MODEL_PREFIXES = ["claude-opus"];
 const CONTEXT_1M_NATIVE_MODEL_PREFIXES = ["claude-opus-5"];
-const MID_CONVERSATION_SYSTEM_MODEL_PREFIXES = ["claude-opus", "claude-fable"];
+const MID_CONVERSATION_SYSTEM_MODEL_PREFIXES = [
+  "claude-opus",
+  "claude-fable",
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5",
+];
 
 function matchesModelPrefix(model: unknown, prefixes: string[]): boolean {
   if (typeof model !== "string") return false;
@@ -400,21 +419,52 @@ export function selectBetaFlags(
   const isHeavyAgent = isFullAgent && isHeavyAgentModel(effectiveModel);
   const isOpusAgent = shouldUseMidConversationSystem(b, effectiveModel);
   const isContext1m = isFullAgent && isContext1mModel(effectiveModel);
+  // Message-level output_config (per-message effort directive, #14746): Anthropic
+  // rejects it with 400 `messages.N.output_config: Extra inputs are not permitted`
+  // unless its gating beta ships on the same request.
+  const hasMessageOutputConfig = Array.isArray(b.messages)
+    ? (b.messages as unknown[]).some(
+        (m) => !!m && typeof m === "object" && "output_config" in (m as Record<string, unknown>)
+      )
+    : false;
+  // Top-level `speed` (Anthropic Fast Mode): Anthropic rejects it with 400 "To use the
+  // `speed` parameter with '<model>', send the `anthropic-beta: fast-mode-2026-02-01`
+  // header" unless its gating beta ships on the same request.
+  const hasSpeed = b.speed !== undefined && b.speed !== null;
 
   const flags: string[] = [];
   if (isFullAgent) flags.push("claude-code-20250219");
   flags.push("oauth-2025-04-20");
   if (isContext1m) flags.push("context-1m-2025-08-07");
   if (isOpusAgent) flags.push("mid-conversation-system-2026-04-07");
+  // Derive the per-message effort beta from the body shape — same rule as
+  // mid-conversation-system above — so a directive-carrying body is valid even
+  // when the client negotiated no anthropic-beta of its own (#14746). The
+  // token is Anthropic's documented beta for the feature ("requires the beta
+  // header mid-conversation-output-config-2026-07-01",
+  // https://platform.claude.com/docs/en/build-with-claude/effort); a body
+  // without the field never gains it (fingerprint: shape-matched sets only).
+  if (hasMessageOutputConfig) flags.push("mid-conversation-output-config-2026-07-01");
+  // Same rule for the Fast Mode beta: Claude Code sends `speed` on both `/fast on` and
+  // `/fast off`, and the field is valid only with its beta. A body without the field
+  // never gains it (fingerprint: shape-matched sets only).
+  if (hasSpeed) flags.push("fast-mode-2026-02-01");
   // Thinking betas: gated on the client header (#3415). interleaved-thinking forces
   // interleaved-thinking semantics that conflict with a tool_choice-forced turn,
   // producing malformed opus tool_use streams when the client never asked for it.
   if (allowThinking) {
-    flags.push(
-      "interleaved-thinking-2025-05-14",
-      "redact-thinking-2026-02-12",
-      "thinking-token-count-2026-05-13"
-    );
+    flags.push("interleaved-thinking-2025-05-14");
+    // A client that explicitly asks for summarized (readable) thinking must not
+    // have it blanked by a redact beta it never negotiated. This shape-derived set
+    // is the Claude Code (OAuth) fingerprint, so the redact beta is only dropped
+    // here behind the default-off CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED flag;
+    // non-OAuth requests are cleaned at dispatch (stripRedactThinkingBetaForVisibleThinking).
+    if (!(
+      isClaudeOAuthSummarizedThinkingUnredacted() && shouldSuppressRedactThinking(b, clientBeta)
+    )) {
+      flags.push("redact-thinking-2026-02-12");
+    }
+    flags.push("thinking-token-count-2026-05-13");
   }
   flags.push("context-management-2025-06-27", "prompt-caching-scope-2026-01-05");
   if (hasStructuredOutput || isFullAgent) flags.push("advisor-tool-2026-03-01");

@@ -41,12 +41,12 @@ Common problems and solutions for OmniRoute.
 
 ### Rate Limiting on Free Providers (429 / 400 / 401)
 
-**Symptom**: When using `model: "auto"` with free/no-auth providers (opencode, auggie, etc.), you intermittently get `HTTP 429`, `400`, or `401` instead of answers. The requests succeed when retrying the same prompt moments later, but automation (cron jobs, agents, scripts) breaks on the first failure.
+**Symptom**: When using `model: "auto"` with free/no-auth providers (auggie, etc.), you intermittently get `HTTP 429`, `400`, or `401` instead of answers. The requests succeed when retrying the same prompt moments later, but automation (cron jobs, agents, scripts) breaks on the first failure.
 
 **Root cause**: Three independent failure modes stack up:
 
 1. **Provider rate-limit (`429`)**: Free tiers can enforce a per-window quota. A burst of parallel calls exhausts it, so the next request is refused until the window resets.
-2. **Broken model in passthrough (`400`/`401`)**: `auto/*` pools can include passthrough models from `opencode` that are registered in the catalog but have no live credentials (e.g. `oc/north-mini-code-free` → `401`). The auto-router tries one, fails, and the error propagates before fallback kicks in.
+2. **Broken model in passthrough (`400`/`401`)**: `auto/*` pools can include passthrough models that are registered in the catalog but have no live credentials (→ `401`). The auto-router tries one, fails, and the error propagates before fallback kicks in.
 3. **Concurrency amplification (`429` under load)**: When multiple agent/cron sessions hit `auto` at once, the aggregate request rate exceeds what free providers tolerate, so legitimate calls get flagged as abusive.
 
 **Verified fix (community-reported, 2026-08-10)**: tune three environment variables so that rotation, concurrency, and fallback absorb the free-tier churn instead of dying on it:
@@ -54,12 +54,18 @@ Common problems and solutions for OmniRoute.
 ```bash
 export OMNIROUTE_ROTATE_ON_400=true           # hop to another model/provider on 400/401 (skips broken passthrough models)
 export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicit heavyweight admission ceiling (unset by default: no request-count cap, see note below)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=5000 # longer bounded wait for heavyweight capacity instead of an immediate retryable 503
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # raise the bounded wait past the RATE_LIMIT_MAX_WAIT_MS default for slow upstreams
 ```
 
 Set these in the OmniRoute process environment (the daemon, e.g. via the LaunchAgent plist or `systemctl edit`), then restart OmniRoute. The rotation flag is the single highest-leverage lever: it converts a hard failure into a transparent retry against a healthy provider in the pool.
 
-**Note**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` caps how many heavyweight — long-context — requests run at once; the bound is an admission gate, not a provider rate limiter. **#503-fanout update:** this var is no longer set by default (it now binds only when explicitly configured, as above) — heavyweight admission is instead gated by an auto-derived byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) that scales itself from the host's real memory ceiling, so a fresh deployment should see far fewer `503 chat_admission_busy` rejects without setting this var at all; explicitly setting it here still works exactly as documented. Explicit byte-budget overrides clamp to 8 MiB–2 GiB. A `413 body_exceeds_budget` is not transient: increase that byte budget, lower `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, or increase the process memory ceiling. An `inflight_bytes_budget` shed is temporary contention and remains retryable. The per-provider rate limiting (`open-sse/services/rateLimitManager.ts`) is governed separately by `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, and `RATE_LIMIT_AUTO_ENABLE` — see `.env.example`.
+**Note**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` caps how many heavyweight — long-context — requests run at once; the bound is an admission gate, not a provider rate limiter. **#503-fanout update:** this var is no longer set by default (it now binds only when explicitly configured, as above) — heavyweight admission is instead gated by an auto-derived byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) that scales itself from the host's real memory ceiling, so a fresh deployment should see far fewer `503 chat_admission_busy` rejects without setting this var at all; explicitly setting it here still works exactly as documented. Explicit byte-budget overrides clamp to 8 MiB–2 GiB. A `413 body_exceeds_budget` is not transient: increase that byte budget, lower `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` or the saved request body limit, or increase the process memory ceiling. An `inflight_bytes_budget` shed is temporary contention and remains retryable. The per-provider rate limiting (`open-sse/services/rateLimitManager.ts`) is governed separately by `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, and `RATE_LIMIT_AUTO_ENABLE` — see `.env.example`.
+
+**Upgrade note: a saved request body limit now also applies to chat.** A limit saved earlier under Settings > Advanced > Request Body Limit (`maxBodySizeMb`) now also applies to `/v1/chat/completions` and `/v1/responses`. Before this change those two routes accepted up to 50 MB whatever was saved, so an install with a lower saved limit starts rejecting chat bodies above it. An install that never saved a limit keeps the 50 MB default.
+
+The rejection is an HTTP `413` with `error.code` set to `PAYLOAD_TOO_LARGE` and `error.type` set to `payload_too_large`. The message names the limit in force: `Request body too large. Maximum allowed: 10 MB` when the declared `Content-Length` is over it, or `Request body too large for chat completions (max 10 MB).` when the bytes actually read are. This is not the same as `413 body_exceeds_budget` above, which comes from the memory budget and is not changed by this setting.
+
+To raise the limit, save a higher value at `/dashboard/settings/advanced`, or send `PATCH /api/settings` with `{"maxBodySizeMb": 50}`. Values from 1 to 500 MB are accepted, it applies without a restart, and 50 restores the previous chat limit. Two other limits can still stop a larger body: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, when set, also caps a saved limit, and the Kubernetes ingress annotation `proxy-body-size` (`50m` in the shipped manifests) has to be raised separately for anything above 50 MB.
 
 **How to verify it worked**: run your agent/cron twice in quick succession and confirm both succeed. Before the fix, the second run typically throws `429`/`401`. After the fix, failures (if any) are retried transparently and the call completes. You can also `curl /monitoring/health` and watch the `rateLimitedUntil` field on the provider connections and the `circuitBreakers.providerBreakers[].state` for the affected providers — the state is one of `CLOSED`, `DEGRADED`, `OPEN`, or `HALF_OPEN` (see `src/shared/utils/circuitBreaker.ts`), and a provider that keeps failing will flip `CLOSED → DEGRADED → OPEN` before the reset window lets a probe through (`HALF_OPEN`).
 
@@ -89,6 +95,55 @@ The warnings come from stale peer-dependency ranges in third-party packages Omni
    provider transport setup failed.
 
 **No action needed** — the warnings cannot be fully silenced without forking upstream packages.
+
+---
+
+## npm install-scripts Blocked Warning (global install)
+
+<a name="npm-install-scripts-blocked-warning-global-install"></a>
+
+When running `npm install -g omniroute`, newer npm versions (v11+ and v12+) block package lifecycle scripts by default and display an install-scripts warning:
+
+```
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+  omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
+  keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
+```
+
+### Can this warning be ignored?
+
+**Partially, but running without scripts is not recommended.** OmniRoute includes graceful fallbacks: if native `better-sqlite3` bindings cannot be loaded from the standalone bundle, the application falls back through alternative drivers such as `node:sqlite` or `sql.js` (see [SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md)). The server will still start, but running on WASM fallbacks like `sql.js` disables SQLite WAL (Write-Ahead Logging) mode and increases memory and disk-sync overhead.
+
+### Which scripts are actually required?
+
+Not all blocked scripts are essential for running OmniRoute:
+
+- **Essential (`omniroute`, `better-sqlite3`):** OmniRoute runs from a Next.js standalone application bundle (`dist/`). During installation, npm downloads or compiles the host-specific native SQLite driver in the top-level `node_modules/better-sqlite3/`. OmniRoute's `postinstall` script (`scripts/build/postinstall.mjs`) then verifies and copies these host-specific binaries into `dist/node_modules/` so the standalone server can access them. If `omniroute`'s postinstall script is blocked, this copy step is skipped.
+- **Optional/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** These are build helpers, watcher tools, or system keychain utilities. Allowing them prevents build warnings, but they are not required for core routing functionality.
+- **Excluded (`onnxruntime-node`):** An optional dependency for local AI embeddings and is **not** required for OmniRoute to run. Its postinstall script downloads ~300MB of CUDA assets from NuGet; do not include it in the allow-list unless you explicitly intend to use local ONNX acceleration on supported hardware.
+
+### Recommended fix
+
+To allow the required install scripts during a global install and silence warnings, pass `--allow-scripts` for OmniRoute and its native dependencies:
+
+```bash
+npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
+```
+
+Alternatively, to configure this permanently for all global installations on your user account:
+
+```bash
+npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
+npm install -g omniroute
+```
+
+### Verify your installation
+
+After installation, run the built-in diagnostic tool to ensure that native bindings and the runtime environment are healthy:
+
+```bash
+omniroute doctor
+```
 
 ---
 
@@ -615,7 +670,7 @@ heavy request arrived at once. The old count cap (`OMNIROUTE_CHAT_MAX_HEAVY_IN_F
 still honored, but only if you explicitly set it.
 
 When capacity is busy, a heavyweight request first waits up to
-`OMNIROUTE_CHAT_ADMISSION_QUEUE_MS` (default `2000`, `0` disables the wait) for a slot to free up
+`OMNIROUTE_CHAT_ADMISSION_QUEUE_MS` (defaults to `RATE_LIMIT_MAX_WAIT_MS`; `0` disables the wait) for a slot to free up
 before answering the retryable `503`. The bounded wait exists so agent-style clients
 (OpenCode, Claude Code, Cursor) that fan out heavy sub-requests concurrently serialize the burst
 instead of burning their whole retry budget on immediate rejections and dying mid-task.
@@ -794,6 +849,32 @@ continues starting in the background and will be reachable once boot completes.
 
 See [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) for full
 details on `OMNIROUTE_READY_TIMEOUT_MS`.
+
+---
+
+## CCR / dedup issues
+
+Diagnostic matrix for the compression CCR (`ccr`) and `session-dedup` tools. For the full
+operator reference (markers, prerequisites, per-tool scopes, retrieval pagination) see
+[Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Symptom                                                                                                 | Likely cause                                                                                                                                 | Verify                                                                                                                        | Fix                                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                          | Route-guard loopback auth, not a transport bug. No `Bearer`, or a key without `mcp:connect`/`manage`/`admin`, reached the `/api/mcp/` route. | The request carried no/invalid `Authorization` header.                                                                        | Send a valid `Bearer` key. A remote key can hold `mcp:connect` (authorizes the `/api/mcp/` local-only carve-out) plus the specific read/write scope it needs.                                                                                                 |
+| **block not found** — `omniroute_ccr_retrieve` rejects the hash                                         | Hash is not a 24-hex value or was copied wrong, or the block already expired / was evicted.                                                  | Compare the hash against the 24-hex value in the `[CCR retrieve hash=…]` marker; check `omniroute_ccr_stats` for store state. | Copy the 24-hex hash verbatim from the marker. If the block is genuinely gone, it was past its TTL or never reached the durable store (blocks over 512 KB, and every block on a cloud runtime, stay memory-only and do not survive a restart).                |
+| **CCR no-op** — a block is not compressed (text comes back unchanged)                                   | Block below the compression threshold, or the CCR engine / mode is inactive.                                                                 | Check the active compression `strategy`/`enabled` and the block size vs the threshold.                                        | Enable CCR (or a stacked mode that runs it) and confirm the block is large enough to be worth storing. A no-op is not an error — it is "nothing to compress."                                                                                                 |
+| **dedup marker** — `[dedup:ref sha=…]` appears in output                                                | **Intentional look-back**, not a loss or an error. `session-dedup` elided text already sent in an earlier turn of the same session.          | Confirm the same text appears earlier in the session.                                                                         | Do nothing — do not call a tool and do not try to reconstruct it. The first occurrence is the canonical copy; the current turn is never rewritten, it is deduped on a later turn.                                                                             |
+| **Code Mode** — `omniroute_ccr_*` tools absent from `tools[]` / CCR instruction not injected (OpenCode) | OpenCode Code Mode (the default) advertises only native tools to the model, hiding MCP tools from `tools[]`.                                 | Check the OpenCode MCP server entry for `codemode`.                                                                           | Set `codemode: false` on the server entry (a **client** setting) so the MCP tools are advertised. The CCR retrieve-protocol instruction stays off: a server named `omniroute` exposes `omniroute_omniroute_ccr_retrieve`, and `_` is not a matched separator. |
+
+More symptoms:
+
+| Symptom                                                                                                | Likely cause                                                                                                                                                                   | Fix                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                | An MCP tool error result (`isError: true`), not an HTTP 403. The caller's key lacks the required scope.                                                                        | Add the scope from the per-tool table (see the operator guide). E.g. `omniroute_ccr_retrieve` needs `read:compression`.                                                            |
+| `Unknown Mcp-Session-Id`                                                                               | Streamable-HTTP session idled out and was reaped (`OMNIROUTE_MCP_SESSION_IDLE_MS`); the server answers HTTP 404.                                                               | Reconnect or restart the session — do **not** rotate a key, change a scope, or rename a tool. It is not a 401/403.                                                                 |
+| `JSON Parse error` / `Unterminated string` in a tool result                                            | MCP tool text clipped around `mcpAccessibility.maxTextChars` (default `50000`) mid-JSON.                                                                                       | Use a paged `mode` instead of a bare full: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"`, or `mode:"stats"`. Rule of thumb: `chars > 40000` → use a `mode`.          |
+| `Failed to open SSE stream`                                                                            | Client hit the legacy `/api/mcp/sse` singleton while the transport is `streamable`.                                                                                            | Point the client at `/api/mcp/stream` (the streamable endpoint) instead of `/api/mcp/sse`.                                                                                         |
+| **Dead stdio heartbeat** — `mcp-heartbeat.json` shows `pidAlive: false` while the HTTP transport is up | The heartbeat file is a stdio leftover (stale PID, or a different version); HTTP transports are in-process and report state from `getMcpHttpStatus()` instead (no file write). | No action — the transport is healthy. The truth is `httpTransport.online` / `startedAt` from `/api/mcp/status`, not the heartbeat file. Do not restart the server or rotate a key. |
 
 ---
 

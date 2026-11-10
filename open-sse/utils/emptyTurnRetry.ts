@@ -12,6 +12,7 @@ import {
 import { isEmptyTurnCore } from "./streamEmptyChoices.ts";
 import { sanitizeStreamingChunk } from "../handlers/responseSanitizer.ts";
 import { getAnyReasoningValue, getReadableReasoningValue } from "./reasoningFields.ts";
+import { SYSTEM_ECHO_THRESHOLD } from "./directivePreambleStripper.ts";
 
 /** Max upstream bytes buffered for flush-empty-retry classification (flag-gated). */
 export const FLUSH_EMPTY_RETRY_MAX_BYTES = 256_000;
@@ -32,6 +33,46 @@ export type EmptyTurnSummary = {
 };
 
 /**
+ * Draft / system-echo blocks a model can emit instead of an answer:
+ * `<summary>…</summary>`, `<analysis>…</analysis>`, `<system-reminder>…</system-reminder>`.
+ *
+ * OmniRoute already treats exactly these constructs as system echoes that must
+ * not reach the client (see `directivePreambleStripper.ts`), so a turn whose
+ * ENTIRE content is such markup carries no answer — the downstream consumer
+ * strips the tags and is left with an empty turn (#17461).
+ *
+ * A block carrying >= `SYSTEM_ECHO_THRESHOLD` chars of content is NOT a draft
+ * skeleton: `directivePreambleStripper` preserves it as the model's real response
+ * (e.g. a Claude Code compaction reply `<analysis>…</analysis><summary>…</summary>`),
+ * so it counts as usable here too and is never retried as an empty turn.
+ *
+ * Bounded, non-overlapping repetition: one pass over the text, no nested
+ * quantifiers, so it cannot backtrack on untrusted content.
+ */
+const DRAFT_BLOCK_PATTERN = /<(summary|analysis|system-reminder)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
+
+/**
+ * True when the text carries something a client can use as an answer.
+ *
+ * Draft/system-echo markup alone does not count: the turn is then "empty" for
+ * the flush-empty-retry classifier, so the recovery path can retry it on
+ * another connection instead of shipping a degenerate turn. Whitespace-only
+ * text does not count either (it used to, via `length > 0`).
+ */
+export function hasUsableContentText(contentText: string | null | undefined): boolean {
+  const text = typeof contentText === "string" ? contentText : "";
+  if (!text.trim()) return false;
+  let hasSubstantialBlock = false;
+  // `String.prototype.replace` with a global regex always starts at index 0 and
+  // leaves `lastIndex` reset, so no manual state handling is needed.
+  const stripped = text.replace(DRAFT_BLOCK_PATTERN, (_match, _tag, inner: string) => {
+    if (inner.length >= SYSTEM_ECHO_THRESHOLD) hasSubstantialBlock = true;
+    return "";
+  });
+  return hasSubstantialBlock || stripped.trim().length > 0;
+}
+
+/**
  * Unified "turn with no usable content" classifier (one mechanism, two arms:
  * reasoning-only turn with stop + empty text + non-empty reasoning, and
  * zero-valuable-chunk turn via shared `isEmptyTurnCore`). Legit empty stops
@@ -40,7 +81,12 @@ export type EmptyTurnSummary = {
 export function isUselessEmptyTurn(summary: EmptyTurnSummary): boolean {
   if (LEGIT_EMPTY_TURN_FINISH.has(summary.finishReason)) return false;
   if (summary.toolCallsPresent) return false;
-  if (summary.contentText.length > 0) return false;
+  if (hasUsableContentText(summary.contentText)) return false;
+  // Draft-only turn (#17461): the chunks carried content, but only
+  // `<summary>`/`<analysis>`/`<system-reminder>` markup, so nothing usable
+  // reached the client. The forwarded-chunk / usage arms below would call
+  // this a normal turn — it is not.
+  if (summary.contentText.trim().length > 0) return true;
   // Reasoning-only arm: non-empty reasoning with no content. The stop gate
   // applies to chat turns (finish=stop disambiguates from mid-stream deltas);
   // Responses translators never set a probe finish reason, so Responses
@@ -52,6 +98,41 @@ export function isUselessEmptyTurn(summary: EmptyTurnSummary): boolean {
   )
     return true;
   return isEmptyTurnCore(summary.forwardedValuableChunk, summary.hasValidUsage);
+}
+
+/**
+ * Which rule judges a buffered turn.
+ *
+ * - `translated`: the historical classifier (`isUselessEmptyTurn`).
+ * - `direct`: the upstream answer reaches the client untranslated in the
+ *   chat-completions shape, which the bounded probe reads exactly: the usable
+ *   output of the turn decides (`isMuteDirectTurn`).
+ *
+ * Every other pair (including a same-format claude or gemini pair) keeps the
+ * historical classifier.
+ */
+export type EmptyTurnReplayPath = "translated" | "direct";
+
+export function resolveEmptyTurnReplayPath(
+  upstreamFormat: string,
+  clientFormat: string
+): EmptyTurnReplayPath {
+  return upstreamFormat === FORMATS.OPENAI && clientFormat === FORMATS.OPENAI
+    ? "direct"
+    : "translated";
+}
+
+/**
+ * The direct-path rule: a turn is mute when it produced neither usable text nor
+ * a tool call, whatever number of tokens it spent. `isUselessEmptyTurn` lets a
+ * blank turn pass when the upstream reported usage; on the direct path that
+ * usage is the cost of the missing answer, so the turn is replayed instead.
+ * Legit empty stops (length, tool_calls, content_filter) are never mute.
+ */
+export function isMuteDirectTurn(summary: EmptyTurnSummary): boolean {
+  if (LEGIT_EMPTY_TURN_FINISH.has(summary.finishReason)) return false;
+  if (summary.toolCallsPresent) return false;
+  return !hasUsableContentText(summary.contentText);
 }
 
 /** A read that outlived the idle budget, kept distinct from a real chunk. */
@@ -378,7 +459,13 @@ export function judgeBufferedTurn(
   }
   const summary = summarizeReplayedUpstreamTurn(read.text, targetFormat, clientFormat);
   if (!summary) return { kind: "pass", why: "turn could not be summarized" };
-  return isUselessEmptyTurn(summary)
+  // The replay path picks the rule: the direct path judges the usable output,
+  // every other path keeps the historical classifier.
+  const mute =
+    resolveEmptyTurnReplayPath(targetFormat, clientFormat) === "direct"
+      ? isMuteDirectTurn(summary)
+      : isUselessEmptyTurn(summary);
+  return mute
     ? { kind: "retry", reason: "empty turn" }
     : { kind: "pass", why: "turn has usable content" };
 }
@@ -391,6 +478,80 @@ export async function readBoundedResponseText(
 ): Promise<string | null> {
   const outcome = await readBoundedResponseOutcome(response, maxBytes, idleMs);
   return outcome.kind === "text" ? outcome.text : null;
+}
+
+/** The `getProviderCredentials` positional signature, as far as the retry uses it. */
+type RetryCredentialSelector = (
+  provider: string,
+  excludeConnectionId: string | null,
+  allowedConnections: string[] | null,
+  requestedModel: string | null
+) => Promise<unknown>;
+
+/** The routing constraints of the original selection that the retry has to keep. */
+export type RetryRouting = {
+  leased: boolean;
+  forcedConnectionId: string | null;
+  apiKey: { allowedConnections?: unknown; allowedQuotas?: unknown } | null;
+};
+
+function nonEmptyIds(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null;
+  const ids = value.filter((id): id is string => typeof id === "string" && id.trim().length > 0);
+  return ids.length > 0 ? ids : null;
+}
+
+/**
+ * Credentials for the next empty-turn retry, or null when no connection can take
+ * it. A managed lease, a pinned connection (`x-omniroute-connection` or a combo
+ * step pin) and a quota-scoped key (whose pool is not known here) replay the
+ * connection that served the turn: the lease fence refuses any other connection,
+ * and the others are routing constraints the retry must not escape. Otherwise
+ * the connection that just returned the empty turn is excluded first, inside the
+ * key's connection allowlist; when nothing else is eligible the normal selection
+ * runs again, so a single slot still replays itself.
+ */
+export async function pickEmptyTurnRetryCredentials(
+  select: RetryCredentialSelector,
+  input: RetryRouting & {
+    provider: string;
+    model: string | null;
+    current: Record<string, unknown>;
+  }
+): Promise<Record<string, unknown> | null> {
+  if (input.leased || input.forcedConnectionId || nonEmptyIds(input.apiKey?.allowedQuotas)) {
+    return input.current;
+  }
+  const allowed = nonEmptyIds(input.apiKey?.allowedConnections);
+  const pick = async (excludeConnectionId: string | null) => {
+    const creds = asRecord(
+      await select(input.provider, excludeConnectionId, allowed, input.model).catch(() => null)
+    );
+    return creds?.connectionId ? creds : null;
+  };
+  const currentId =
+    typeof input.current.connectionId === "string" ? input.current.connectionId : null;
+  return (await pick(currentId)) ?? (currentId ? pick(null) : null);
+}
+
+/**
+ * Point `target` at `next` in place and return the undo. The retry has to run on
+ * the new credentials, but every fallback keeps the original response, and
+ * `target` must keep describing the connection that served it.
+ */
+export function swapCredentialsInPlace(
+  target: Record<string, unknown>,
+  next: Record<string, unknown>
+): () => void {
+  if (next === target) return () => undefined;
+  const previous = { ...target };
+  Object.assign(target, next);
+  return () => {
+    for (const key of Object.keys(target)) {
+      if (!Object.hasOwn(previous, key)) delete target[key];
+    }
+    Object.assign(target, previous);
+  };
 }
 
 type ProbeAccum = {
@@ -573,10 +734,14 @@ function buildProbeSummary(probe: ProbeAccum): EmptyTurnSummary {
  * summary already carries usable content or a tool call. Reasoning-only
  * never stops (judged by the idle branch + `isUselessEmptyTurn`).
  * Pure read of the summary — never throws on a well-formed summary.
+ *
+ * #17461: draft-only content (`<summary>`/`<analysis>` markup) is not usable
+ * content, so it must not end the read early and hide the turn from the
+ * judge.
  */
 export function isUsefulSummary(summary: EmptyTurnSummary | null): boolean {
   if (!summary) return false;
-  return summary.contentText.length > 0 || summary.toolCallsPresent;
+  return hasUsableContentText(summary.contentText) || summary.toolCallsPresent;
 }
 
 /**

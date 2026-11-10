@@ -1,148 +1,50 @@
-/**
- * Console Log API — GET /api/logs/console
- *
- * Reads the application log file and returns entries from the last 1 hour.
- * Supports filtering by level and limiting the number of entries.
- *
- * Query params:
- *   - level: minimum log level (debug|info|warn|error) — default: all
- *   - limit: max entries to return — default: 500
- *   - component: filter by component/module name
- */
-
-import { NextRequest, NextResponse } from "next/server";
-import { readFileSync, existsSync } from "fs";
-import { getAppLogFilePath } from "@/lib/logEnv";
+/** Retained application-console history, newest page first, returned in display order. */
+import { NextResponse, type NextRequest } from "next/server";
+import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
-import { matchesSearch } from "@/shared/utils/turkishText";
-import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import {
+  ConsoleLogHistoryError,
+  consoleLogQuerySchema,
+  readConsoleLogHistory,
+} from "@/lib/consoleLogHistory";
 
-const LEVEL_ORDER: Record<string, number> = {
-  trace: 5,
-  debug: 10,
-  info: 20,
-  warn: 30,
-  error: 40,
-  fatal: 50,
-};
+const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate" };
 
-// Map pino numeric levels to string levels
-const NUMERIC_LEVEL_MAP: Record<number, string> = {
-  10: "trace",
-  20: "debug",
-  30: "info",
-  40: "warn",
-  50: "error",
-  60: "fatal",
-};
-
-function getLogFilePath(): string {
-  return getAppLogFilePath();
-}
-
-function parseLevel(raw: string | number): string {
-  if (typeof raw === "number") {
-    return NUMERIC_LEVEL_MAP[raw] || "info";
-  }
-  return String(raw).toLowerCase();
-}
-
-function stringifyLogValue(value: unknown): string {
-  if (value === undefined || value === null) return "";
-  if (typeof value === "string") return value;
-  if (value instanceof Error) return value.message || value.name;
-  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
-    return String(value);
-  }
-
-  try {
-    const json = JSON.stringify(value);
-    return typeof json === "string" ? json : String(value);
-  } catch {
-    return String(value);
-  }
-}
-
-export async function GET(req: NextRequest) {
-  const authError = await requireManagementAuth(req);
+export async function GET(request: NextRequest) {
+  // Authorize before inspecting the filesystem, or even interpreting a history cursor.
+  const authError = await requireManagementAuth(request);
   if (authError) return authError;
-
+  const query = consoleLogQuerySchema.safeParse(
+    Object.fromEntries(new URL(request.url).searchParams)
+  );
+  if (!query.success)
+    return NextResponse.json(buildErrorBody(400, "Invalid log history query."), {
+      status: 400,
+      headers: NO_STORE,
+    });
   try {
-    const { searchParams } = new URL(req.url);
-    const levelFilter = searchParams.get("level") || "all";
-    const rawLimit = parseInt(searchParams.get("limit") || "500", 10);
-    const limit = Math.min(Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : 500, 2000);
-    const componentFilter = searchParams.get("component") || "";
-
-    const logPath = getLogFilePath();
-
-    if (!existsSync(logPath)) {
-      return NextResponse.json([], { status: 200 });
-    }
-
-    const raw = readFileSync(logPath, "utf-8");
-    const lines = raw.trim().split("\n").filter(Boolean);
-
-    const oneHourAgo = Date.now() - 60 * 60 * 1000;
-    const minLevel = LEVEL_ORDER[levelFilter] || 0;
-
-    const entries: any[] = [];
-
-    for (const line of lines) {
-      try {
-        const entry = JSON.parse(line);
-
-        // Filter by time (last 1 hour)
-        const ts = entry.time || entry.timestamp;
-        if (ts) {
-          const entryTime = new Date(ts).getTime();
-          if (entryTime < oneHourAgo) continue;
-        }
-
-        // Normalize render-sensitive fields so malformed structured logs cannot crash the viewer.
-        entry.level = parseLevel(entry.level);
-        entry.msg = stringifyLogValue(entry.msg ?? entry.message ?? "");
-        entry.message = stringifyLogValue(entry.message ?? entry.msg);
-        if (entry.component !== undefined) entry.component = stringifyLogValue(entry.component);
-        if (entry.module !== undefined) entry.module = stringifyLogValue(entry.module);
-        if (entry.correlationId !== undefined) {
-          entry.correlationId = stringifyLogValue(entry.correlationId);
-        }
-
-        // Filter by level
-        const entryLevelNum = LEVEL_ORDER[entry.level] || 0;
-        if (minLevel > 0 && entryLevelNum < minLevel) continue;
-
-        // Filter by component
-        if (componentFilter) {
-          const comp = entry.component || entry.module || "";
-          if (!matchesSearch(comp, componentFilter)) continue;
-        }
-
-        // Normalize timestamp field
-        if (entry.time && !entry.timestamp) {
-          entry.timestamp = entry.time;
-        }
-
-        entries.push(entry);
-      } catch {
-        // Skip unparseable lines
-      }
-    }
-
-    // Return last N entries (most recent)
-    const result = entries.slice(-limit);
-
-    return NextResponse.json(result, {
+    const result = await readConsoleLogHistory(query.data);
+    return NextResponse.json(result.entries, {
       status: 200,
       headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate",
+        ...NO_STORE,
+        ...(result.nextCursor ? { "X-Console-Next-Cursor": result.nextCursor } : {}),
+        "X-Console-Truncated": String(result.truncated),
       },
     });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: sanitizeErrorMessage(err?.message) || "Failed to read logs" },
-      { status: 500 }
+  } catch (error: unknown) {
+    if (error instanceof ConsoleLogHistoryError)
+      return NextResponse.json(buildErrorBody(error.status, error.message), {
+        status: error.status,
+        headers: NO_STORE,
+      });
+    console.error(
+      "[consoleHistory] Unable to read retained logs:",
+      error instanceof Error ? error.name : "unknown"
     );
+    return NextResponse.json(buildErrorBody(500, "Failed to read logs."), {
+      status: 500,
+      headers: NO_STORE,
+    });
   }
 }

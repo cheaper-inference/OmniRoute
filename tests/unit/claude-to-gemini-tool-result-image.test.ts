@@ -1,8 +1,11 @@
 // A base64 image inside a Claude tool_result (the Read tool on a PNG, an MCP screenshot)
 // was JSON.stringify'd into the functionResponse, handing Gemini the base64 as text.
 // claude-to-openai.ts lifts it out (#5100); the direct Claude -> Gemini path now sends it
-// as an inlineData part right after the tool responses and ahead of any text that follows,
-// which is where the Claude -> OpenAI -> Gemini path puts it.
+// as an inlineData part right after the tool responses, which is where the
+// Claude -> OpenAI -> Gemini path puts it. Text that follows the tool_result is folded into
+// functionResponse.response.result (#16601): Vertex Gemini 3.6+ Flash rejects a user turn
+// that carries a text part next to a functionResponse (#16443), and Gemini 3 takes
+// multimodal tool output inside the function response itself.
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -58,23 +61,32 @@ test("a tool_result image becomes inlineData, not base64 text", () => {
   ]);
 });
 
-test("the image goes before text that follows the tool_result", () => {
+test("text that follows an image tool_result is folded into the response; the image still follows it", () => {
   const parts = convert("tool-image-trailing-text", [
     imageResult(),
     { type: "text", text: "<system-reminder>keep going</system-reminder>" },
   ]);
 
-  assert.deepEqual(parts.slice(-3), [
+  // The image is neither lost nor reordered: it stays right after the functionResponse,
+  // and the trailing text reaches the model inside the response instead of as a loose
+  // text part next to it (#16601 / #16443).
+  assert.deepEqual(parts.slice(-2), [
     {
       functionResponse: {
         id: "tu_img",
         name: "read_file",
-        response: { result: "[tool returned an image; see attached]" },
+        response: {
+          result:
+            "[tool returned an image; see attached]\n<system-reminder>keep going</system-reminder>",
+        },
       },
     },
     PNG,
-    { text: "<system-reminder>keep going</system-reminder>" },
   ]);
+  assert.ok(
+    !parts.some((p) => typeof p.text === "string" && p.text.includes("keep going")),
+    "the trailing text must not also survive as a standalone text part"
+  );
 });
 
 test("signature-less history keeps the image out of the context text", () => {

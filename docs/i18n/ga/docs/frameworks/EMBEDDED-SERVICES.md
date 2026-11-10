@@ -4,13 +4,9 @@
 
 ---
 
-> **Leagan:** v3.8.44
-> **Nuashonrú deireanach:** 2026-09-09
-> **Lucht léitheoireachta:** Innealtóirí a chuireann seirbhísí leabaithe leis, a chothabhálann iad, nó a dhéanann dífhabhtú orthu (9Router, CLIProxyAPI, Mux, Bifrost, open-wa).
+> **Leagan:** v3.8.44** Nuashonraithe is déanaí:** 2026-10-28** Lucht Féachana:** Innealtóirí ag cur, ag cothabháil, nó ag dífhabhtú seirbhísí leabaithe (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Is uirlisí próisis taobhcharr iad seirbhísí leabaithe a shuiteáiltear go háitiúil agus a shuiteálann agus a mhaoirsíonn OmniRoute, agus
-a nochtann sé mar spriocanna ródúcháin den chéad scoth. Murab ionann agus soláthraithe seachtracha (a mbaintear amach iad thar an idirlíon
-trí eochracha API), ritheann seirbhísí leabaithe ar an ríomhaire céanna le OmniRoute agus déanann siad cumarsáid thar an gcomhéadan aisfhillte.
+Is uirlisí taobhcharr próisis iad seirbhísí leabaithe a shuiteálann go háitiúil a shuiteálann OmniRoute, a mhaoirsíonn agus a nochtar mar spriocanna ródaithe den chéad scoth. Murab ionann agus soláthraithe seachtracha (a mbaintear amach ar an idirlíon trí eochracha API ), ritheann seirbhísí leabaithe ar an meaisín céanna le OmniRoute agus cumarsáid a dhéanamh thar loopback.
 
 ---
 
@@ -29,57 +25,59 @@ trí eochracha API), ritheann seirbhísí leabaithe ar an ríomhaire céanna le 
 
 ## 1. Forbhreathnú
 
-### Cén fáth seirbhísí leabaithe?
+### Cén fáth a bhfuil seirbhísí leabaithe?
 
-Tá sé sheirbhís leabaithe:
+Tá ocht seirbhís leabaithe:
 
-| Seirbhís        | pacáiste npm                                | Port réamhshocraithe | Cuspóir                                                                                                                                                                                                                  |
-| --------------- | ------------------------------------------- | :------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **9Router**     | `9router`                                   |        20130         | Ródaire AI is féidir le OmniRoute a úsáid mar fhofhoshnáthraí. Nochtar samhlacha mar `9router/{sub}/{model}`                                                                                                             |
-| **CLIProxyAPI** | Dénártha eisiúna GitHub (`cliproxy`)        |         8317         | Cuibheoir seachfhreastalaí logánta le haghaidh sreafaí fíordheimhnithe Anthropic CLI. Soláthraíonn sé ródú cúltaca nuair a théann comharthaí OAuth in éag                                                                |
-| **Mux**         | `mux` (`mux server` gan chomhéadan grafach) |         8322         | Deamhan logánta ceolfhoirneoireachta gníomhairí (coder/mux). Ní dhéantar ach a shaolré a bhainistiú — ní sprioc ródaithe é (gan seachfhreastalaíocht LLM).                                                               |
-| **Bifrost**     | `@maximhq/bifrost`                          |         8080         | Inneall sealaíochta geata AI Go. Nuair atá sé ag rith, roghnaítear go huathoibríoch é ag an mbealach sealaíochta (`/v1/relay/`)                                                                                          |
-| **Dario**       | `@askalf/dario`                             |         3456         | Seachfhreastalaí síntiúis Claude — rogha mhalartach/chúltaca ar CLIProxyAPI do thrácht i bhformáid Claude Code; déantar `DARIO_ADMIN_TOKEN` den eochair insteallta, rud a gheataíonn a phlána rialaithe OAuth `/admin/*` |
-| **open-wa**     | `@open-wa/wa-automate`                      |         8323         | Uathoibriú WhatsApp Web (Chromium gan chomhéadan grafach trí Puppeteer). Ní dhéantar ach a shaolré a bhainistiú — ní sprioc ródaithe é.                                                                                  |
+| Seirbhís         | pacáiste npm                            | Port réamhshocraithe | Cuspóir                                                                                                                                                                                                                                                                                                                                             |
+| ---------------- | --------------------------------------- | :------------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9 Ródaire**    | `9router`                               |        20130         | ródaire AI is féidir le OmniRoute a úsáid mar fho-sholáthraí. Samhlacha nochta mar `9router/{sub}/{model}`                                                                                                                                                                                                                                          |
+| **CLIProxyAPI**  | dénártha scaoileadh GitHub (`cliproxy`) |         8317         | Adaptóir seachfhreastalaí áitiúil le haghaidh sreafaí auth Anthropic CLI. Soláthraíonn sé ródú cúltaca nuair a théann comharthaí OAuth in éag                                                                                                                                                                                                       |
+| **Mux**          | `mux` ( `mux server` gan cheann)        |         8322         | Deamhan gníomhaire-cheolfhoireann áitiúil (coder/mux). Saolré-bhainistithe — amháin nach sprioc ródaithe é (gan seachfhreastalaí LLM ).                                                                                                                                                                                                             |
+| **Déreoite**     | `@maximhq/bifrost`                      |         8080         | Téigh inneall sealaíochta AI-geata. Agus tú ag rith, uathroghnaigh an bealach sealaíochta (`/v1/relay/`)                                                                                                                                                                                                                                            |
+| **Dario**        | `@askalf/dario`                         |         3456         | Seachfhreastalaí Claude-síntiúis — alternative/failover go CLIProxyAPI le haghaidh tráchta Claude-Cód-chruthach; éiríonn an eochair instealladh `DARIO_ADMIN_TOKEN` geataí a eitleán rialaithe `/admin/*` OAuth                                                                                                                                     |
+| **oscailte-wa**  | `@open-wa/wa-automate`                  |         8323         | WhatsApp Uathoibriú Gréasáin (Cróimiam gan cheann trí Phuipéadóir). Saolré-bhainistithe — amháin nach sprioc ródaithe é.                                                                                                                                                                                                                            |
+| **LLMLingua**    | `@atjsh/llmlingua-2`                    |        20135         | Sidecar pras-chomhbhrú — fíor- LLMLingua-2 ONNX samhail (port JS/TS de algartam Microsoft). seoltar `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` thar HTTP chuige, ag titim ar ais go dtí an t-inneall snáithe oibrithe in-phróiseas nuair a bhíonn an taobhcharr síos. Saolré-bhainistithe ach — nach sprioc ródaithe é. |
+| **bosca amhrán** | dénártha scaoileadh GitHub (`singbox`)  |        20140         | tacaíocht TPROXY sidecar le hidircheapadh trédhearcach seachfhreastalaí `applyTproxy()`(`src/mitm/tproxy/setup.ts`). Íoslódálann an suiteálaí an scaoileadh pinnáilte, dearbhaithe le seice. Saolré bainistithe ach — nach sprioc ródaithe é (gan seachfhreastalaí LLM )                                                                            |
 
-Leanann na sé cinn ar fad an tsamhail mhaoirseachta chéanna:
+Leanann na hocht gcinn go léir an tsamhail mhaoirseachta céanna:
 
-- Suiteálann OmniRoute iad faoi `DATA_DIR/services/{name}/` (scoite ó `package.json` OmniRoute féin)
-- Seolann agus déanann OmniRoute monatóireacht orthu mar phróisis mhac
-- Insteallann OmniRoute eochair API ghearrshaolach isteach i dtimpeallacht an phróisis mhic agus rothlaíonn sé í gan aga neamhfhónaimh (nuair is infheidhme)
-- Tá gach bealach bainistíochta (`/api/services/*`) **LOCAL_ONLY** — níl rochtain orthu ach ón gcomhéadan lúb-ais (riail dhocht #17)
+- suiteálann OmniRoute iad faoi `DATA_DIR/services/{name}/` ( scoite ó OmniRoute féin `package.json`)
+- OmniRoute sceith agus monatóireacht orthu mar phróisis linbh
+- OmniRoute eochair API gearrshaolach isteach i dtimpeallacht an linbh agus rothlaíonn sé í gan aga neamhfhónaimh (nuair is cuí)
+- Tá gach bealach bainistíochta (`/api/services/*`).**LOCAL_ONLY** — inrochtana ó loopback amháin (riail chrua #17)
 
 ### Príomhchinntí (ón bplean dearaidh)
 
-| Cinneadh                                          | Luach                                                                                         |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Rochtain ón deais ar chomhéadan dúchasach 9Router | Seachfhreastalaí droim ar ais ag `/dashboard/providers/services/9router/embed/*`              |
-| Meicníocht suiteála                               | `npm install {package}` trí `execFile` (gan idirshuíomh blaosc)                               |
-| Mód úsáide                                        | Soláthraí cláraithe mar `9router/{sub}/{model}` san inneall ródaithe                          |
-| Bainistiú eochracha API                           | Gineann OmniRoute iad, criptíonn sé iad ar fos (AES-256-GCM), agus insteallann sé trí env iad |
-| Suíomh na deaise                                  | `/dashboard/providers/services` (trí chluaisín)                                               |
-| Uath-thosú                                        | Scorán do gach seirbhís, MÚCHTA de réir réamhshocraithe                                       |
+| Cinneadh                                      | Luach                                                                            |
+| --------------------------------------------- | -------------------------------------------------------------------------------- |
+| Rochtain ar an bpainéal ar UI dúchais 9Router | seachfhreastalaí droim ar ais ag `/dashboard/providers/services/9router/embed/*` |
+| Meicníocht suiteála                           | `npm install {package}` via `execFile` (gan idirshuíomh sliogáin)                |
+| Modh tomhaltais                               | Soláthraí cláraithe mar `9router/{sub}/{model}` san inneall ródaithe             |
+| API bainistíochta eochair                     | gineann OmniRoute, criptíonn at-fos (AES-256-GCM), agus instealladh trí env      |
+| Suíomh an phainéil                            | `/dashboard/providers/services` (trí chluaisín)                                  |
+| Uath-tús                                      | Scoránaigh in aghaidh na seirbhíse, OFF réamhshocraithe                          |
 
 ---
 
-## 2. Ailtireacht — 4 shraith
+## 2. Ailtireacht — 4 sraitheanna
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Sraith 1 — Comhéadan úsáideora                                    │
-│  /dashboard/providers/services  (cluaisíní: CLIProxyAPI | 9Router | Mux)│
-│  Logaí beo (SSE), Tosaigh/Stop/Aththosaigh/Nuashonraigh, Socruithe, Suiteáil│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Blaosc + ródú cluaisíní de réir ?tab=│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
 │                               ServiceLogsPanel, ApiKeyCard, ...    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP (fetch Next.js)
+                       │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Sraith 2 — API (LOCAL_ONLY — aisfhillte amháin)                   │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -88,74 +86,74 @@ Leanann na sé cinn ar fad an tsamhail mhaoirseachta chéanna:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (seachfhreastalaí HTTP + WebSocket → 9Router réamhtheachtach)   │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  Geata: cuimsíonn LOCAL_ONLY_API_PREFIXES "/api/services/" agus   │
-│         "/dashboard/providers/services/*/embed/"                   │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ glaonna laistigh den phróiseas
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Sraith 3 — ServiceSupervisor (src/lib/services/)                  │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   Maoirseoir ginearálta (child_process.spawn)│
-│    ├── suiteáil:   execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── tosú:       spawn(node, [entrypoint], {env, cwd})           │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
 │    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       20130 do 9Router (inchumraithe)                 │
-│    ├── logaí:      maolán fáinne stdio 5 MB → teagmhais SSE       │
-│    ├── sláinte:    HTTP GET /health gach 2–5 s, athshlánú leisciúil│
-│    └── saolré:     SIGTERM 15 s → SIGKILL                          │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Tosaíonn gach SERVICES[] ag tosú an phróisis  │
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       GET tréimhsiúil /v1/models → tábla service_models│
-│  ringBuffer.ts      Maolán loga ciorclach (5 MB in aghaidh na seirbhíse)│
-│  healthCheck.ts     Tóireadóir sláinte HTTP a dhéanann vótaíocht   │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (cuibheoirí suiteálaí)                        │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP comhoiriúnach le OpenAI (aisfhillte)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Sraith 4 — Soláthraí / Ródú                                      │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Aimsíonn sé an port agus an eochair API arís do gach iarratas (gan taisceadh).│
-│    Baineann sé an réimír "9router/" d'aitheantas na samhla roimh sheachfhreastal.│
-│    Filleann sé 503 service_not_running mura bhfuil an maoirseoir i "running".│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Iontráil le haghaidh "9router": isEmbeddedService: true         │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Stóráiltear samhlacha mar "9router/{sub}/{model}" (le réimír).  │
-│    Sioncronaíonn modelSync.ts iad gach 5 nóiméad.                  │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Ní dhéantar bainistiú ach ar shaolré Mux (Sraitheanna 1-3) — is   │
-│  deamhan ceolfhoirneoireachta gníomhairí é, ní seachfhreastalaí LLM,│
-│  mar sin níl iontráil seiceadóra/soláthraí i Sraith 4 aige agus ní │
-│  sprioc ródaithe é riamh.                                         │
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### Príomhchomhaid foinse
+### Comhaid foinse eochair
 
-| Comhad                                      | Ról                                                      |
-| ------------------------------------------- | -------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Croí-aicme: saolré, glas, sláinte, maolán fáinneach      |
-| `src/lib/services/bootstrap.ts`             | Clárú ar leibhéal an phróisis agus uath-thosú            |
-| `src/lib/services/registry.ts`              | Léarscáil aonáin `tool → supervisor`                     |
-| `src/lib/services/apiKey.ts`                | Giniúint eochracha, criptiú AES-256-GCM ar fos           |
-| `src/lib/services/modelSync.ts`             | Sioncronú tréimhsiúil samhlacha (5 nóiméad) + ar éileamh |
-| `src/lib/services/ringBuffer.ts`            | Maolán loga ciorclach 5 MB le síntiús SSE                |
-| `src/lib/services/healthCheck.ts`           | Tóraíocht sláinte HTTP (eatramh inchumraithe)            |
-| `src/lib/services/installers/ninerouter.ts` | Suiteáil/nuashonrú/díshuiteáil npm do 9Router            |
-| `src/lib/services/installers/cliproxy.ts`   | Suiteáil/nuashonrú/díshuiteáil npm do CLIProxyAPI        |
-| `src/lib/services/installers/mux.ts`        | Suiteáil/nuashonrú/díshuiteáil npm do Mux                |
-| `src/lib/services/installers/openwa.ts`     | Suiteáil/nuashonrú/díshuiteáil npm do open-wa            |
-| `src/app/api/services/9router/_lib.ts`      | Feidhm chúnta `getOrInitSupervisor()`                    |
-| `src/app/api/services/[name]/logs/route.ts` | Críochphointe comhroinnte do logaí SSE                   |
-| `open-sse/executors/ninerouter.ts`          | Seiceadóir soláthraí (Sraith 4)                          |
+| Comhad                                      | Ról                                                  |
+| ------------------------------------------- | ---------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Aicme lárnach: saolré, glas, sláinte, maolán fáinne  |
+| `src/lib/services/bootstrap.ts`             | Clárú ar leibhéal próisis agus tús uathoibríoch      |
+| `src/lib/services/registry.ts`              | Léarscáil Singleton `tool → supervisor`              |
+| `src/lib/services/apiKey.ts`                | Giniúint eochair, criptiú AES-256-GCM ar fos         |
+| `src/lib/services/modelSync.ts`             | Sioncronú samhail tréimhsiúil (5 nóim) + ar-éileamh  |
+| `src/lib/services/ringBuffer.ts`            | Maolán loga ciorclach 5 MB le liostáil SSE           |
+| `src/lib/services/healthCheck.ts`           | taiscéalaí sláinte HTTP (eatramh inchumraithe)       |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall do 9 Ródaire            |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall le haghaidh CLIProxyAPI |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall do Mux                  |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall le haghaidh oscailt-wa  |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall le haghaidh LLMLingua   |
+| `src/app/api/services/9router/_lib.ts`      | cúntóir `getOrInitSupervisor()`                      |
+| `src/app/api/services/[name]/logs/route.ts` | críochphointe logs SSE roinnte                       |
+| `open-sse/executors/ninerouter.ts`          | Seiceadóir soláthraí (Ciseal 4)                      |
 
 ---
 
@@ -211,58 +209,54 @@ mar shampla, a ghníomhaíonn uath-thosú agus cnaipe sa chomhéadan úsáideora
 
 ---
 
-## 4. Tagairt API
+## 4. tagairt API
 
-Tá gach bealach faoi `/api/services/` **LOCAL_ONLY** (aisfhillte amháin, riail dhocht #17).
-Faigheann iarratais nach iarratais aisfhillte iad `403 LOCAL_ONLY` beag beann ar an gcomhartha fíordheimhnithe.
+Tá gach bealach faoi `/api/services/`**LOCAL_ONLY** (loopback amháin, riail chrua #17). Faigheann iarratais neamh-lúbtha `403 LOCAL_ONLY` beag beann ar chomhartha an údair.
 
-### 4.1 Críochphointí 9Router (11 bhealach)
+### 4.1 9Críochphointí ródaire (11 bhealach)
 
 #### `POST /api/services/9router/install`
 
-Suiteáil 9Router ó npm. Cruthaítear `DATA_DIR/services/9router/` lena
-`package.json` agus `node_modules/` féin. Ní thagann sé salach ar spleáchais OmniRoute féin.
+Suiteáil 9Router ó npm. Cruthaíonn `DATA_DIR/services/9router/` lena `package.json` agus `node_modules/` féin. Ní thagann salach ar a chéile le deps OmniRoute féin.
 
-**Corp an iarratais** (iad uile roghnach):
+**Comhlacht iarratais** (gach rogha):
 
 ```json
 { "version": "latest" }
 ```
 
-| Réimse    | Cineál   | Réamhshocrú | Cur síos                               |
-| --------- | -------- | ----------- | -------------------------------------- |
-| `version` | `string` | `"latest"`  | Clib leagain npm nó semver le suiteáil |
+| Réimse    | Cineál   | Réamhshocrú | Cur síos                              |
+| --------- | -------- | ----------- | ------------------------------------- |
+| `version` | `string` | `"latest"`  | clib leagan npm nó semver le suiteáil |
 
 **Freagraí:**
 
-| Stádas | Cur síos                                                                 |
-| ------ | ------------------------------------------------------------------------ |
-| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                   |
-| `400`  | Corp iarratais neamhbhailí (teip bhailíochtaithe Zod)                    |
-| `409`  | Suiteáil ar siúl cheana féin (glas á choinneáil)                         |
-| `500`  | Theip ar shuiteáil npm — féach `message` le haghaidh earráide sothuigthe |
+| Stádas | Cur síos                                                                |
+| ------ | ----------------------------------------------------------------------- |
+| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                  |
+| `400`  | Comhlacht iarratais neamhbhailí (teip bailíochtaithe Zod )              |
+| `409`  | Suiteáil cheana féin (glas ar siúl)                                     |
+| `500`  | Theip ar shuiteáil npm — féach `message` le haghaidh earráid chairdiúil |
 
-**Nótaí:** Úsáidtear `execFile('npm', [...])` — gan bhlaosc, gan idirshuíomh (riail dhocht #13).
-Cuirtear earráidí EACCES i láthair mar theachtaireachtaí sothuigthe.
+**Nótaí:** Úsáideann sé `execFile('npm', [...])` — gan bhlaosc, gan idirshuíomh (riail chrua #13). tugtar aghaidh ar earráidí EACCES mar theachtaireachtaí cairdiúil.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Tosaigh 9Router. Cláraítear maoirseoir mura bhfuil ceann cláraithe cheana féin, agus ansin glaoitear ar
-`supervisor.start()`. Idé-phoitéinseach nuair atá sé ag rith cheana féin.
+Tosaigh 9 Ródaire. Cláraíonn maoirseoir mura bhfuil sé cláraithe cheana féin, glaonna ansin `supervisor.start()`. Impotent nuair a rith cheana féin.
 
-**Corp an iarratais:** faic
+**Comhlacht iarratais:** aon cheann
 
 **Freagraí:**
 
-| Stádas | Cur síos                                                |
-| ------ | ------------------------------------------------------- |
-| `200`  | Oibiacht `ServiceStatus` (féach an scéimre thíos)       |
-| `409`  | Níl 9Router suiteáilte (`status: "not_installed"`)      |
-| `503`  | Theip ar an tosú (earráid phróisis — féach `lastError`) |
+| Stádas | Cur síos                                                  |
+| ------ | --------------------------------------------------------- |
+| `200`  | réad `ServiceStatus` (féach scéimre thíos)                |
+| `409`  | Níl 9Router suiteáilte (`status: "not_installed"`)        |
+| `503`  | Theip ar an tosú (earráid phróiseála — féach `lastError`) |
 
-**Scéimre ServiceStatus:**
+**scéimre ServiceStatus :**
 
 ```json
 {
@@ -280,37 +274,34 @@ Tosaigh 9Router. Cláraítear maoirseoir mura bhfuil ceann cláraithe cheana fé
 
 #### `POST /api/services/9router/stop`
 
-Stop 9Router go rianúil. Seoltar SIGTERM, fantar 15 s, agus ansin seoltar SIGKILL má tá sé fós beo.
-Idé-phoitéinseach nuair atá sé stoptha cheana féin.
+Stop gracefully 9Router. Seolann SIGTERM, fanann sé 15 s, ansin SIGKILL má tá sé fós beo. Impotent nuair a stopadh cheana féin.
 
-**Corp an iarratais:** faic
+**Comhlacht iarratais:** aon cheann
 
 **Freagraí:**
 
-| Stádas | Cur síos                           |
-| ------ | ---------------------------------- |
-| `200`  | `ServiceStatus` (state: "stopped") |
-| `503`  | Theip ar an stopadh gan choinne    |
+| Stádas | Cur síos                            |
+| ------ | ----------------------------------- |
+| `200`  | `ServiceStatus` (luaigh: "stopadh") |
+| `503`  | Theip ar an stad gan choinne        |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Comhionann le `stop()` agus ansin `start()` faoi ghlas na hoibríochta.
+Coibhéiseach le `stop()` ansin `start()` faoi ghlas na hoibríochta.
 
-**Corp an iarratais:** faic
+**Comhlacht iarratais:** aon cheann
 
-**Freagraí:** mar an gcéanna le `start` (seoltar an `ServiceStatus` deiridh ar ais).
+**Freagraí:** mar an gcéanna le `start` (ar ais deiridh `ServiceStatus`).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Nuashonraítear 9Router go leagan npm níos nuaí. Má tá an tseirbhís ag rith, stoptar í
-ar dtús, ritear suiteáil npm (agus an leagan níos nuaí á shuiteáil san áit chéanna), agus ansin
-atosaítear an tseirbhís.
+Nuashonraítear 9Router go leagan npm níos nuaí. Má tá an tseirbhís ag rith, stoptar é ar dtús, reáchtáiltear suiteáil npm (tá an leagan níos nuaí á shuiteáil), agus ansin atosaítear an tseirbhís.
 
-**Corp an iarratais** (iad uile roghnach):
+**Comhlacht iarratais** (gach rogha):
 
 ```json
 { "version": "latest" }
@@ -321,43 +312,40 @@ atosaítear an tseirbhís.
 | Stádas | Cur síos                                                        |
 | ------ | --------------------------------------------------------------- |
 | `200`  | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400`  | Corp neamhbhailí                                                |
+| `400`  | Comhlacht neamhbhailí                                           |
 | `500`  | Theip ar nuashonrú npm                                          |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-Gintear eochair API nua do 9Router, criptítear í ar fos, agus atosaítear an tseirbhís
-(má tá sí ag rith) ionas go bhfaighidh sí an eochair nua óna timpeallacht. Déantar an tseaneochair
-neamhbhailí láithreach.
+Gineann sé eochair API nua do 9Router, criptíonn sé ar fos, agus atosaíonn sé an tseirbhís (má tá sé ag rith) ionas go mbaintear amach an eochair nua óna thimpeallacht. Tá an seaneochair neamhbhailí láithreach.
 
-**Corp an iarratais:** faic
+**Comhlacht iarratais:** aon cheann
 
 **Freagraí:**
 
 | Stádas | Cur síos                                   |
 | ------ | ------------------------------------------ |
 | `200`  | `{ keyRotated: true, restarted: boolean }` |
-| `500`  | Theip ar rothlú na heochrach               |
+| `500`  | Theip ar an rothlú                         |
 
-**Slándáil:** Ní sheoltar an eochair nua ar ais sa fhreagra riamh (gan aon sceitheadh dintiúr).
-Stóráiltear í criptithe (AES-256-GCM) sa tábla `version_manager`.
+**Slándáil:** Ní chuirtear an eochair nua ar ais sa fhreagra (gan aon sceitheadh inchreidte). Stóráiltear é criptithe (AES-256-GCM) sa tábla `version_manager`.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Seoltar stádas comhcheangailte beo + DB ar ais, lena n-áirítear meiteashonraí leagain agus réamhamharc ar an eochair API.
+Tuairisceáin comhcheangailte stádas + DB beo lena n-áirítear meiteashonraí leagan agus réamhamharc eochair API.
 
 **Freagraí:**
 
-| Stádas | Cur síos                  |
-| ------ | ------------------------- |
-| `200`  | Féach an scéimre thíos    |
-| `500`  | Theip ar léamh an stádais |
+| Stádas | Cur síos                 |
+| ------ | ------------------------ |
+| `200`  | Féach scéimre thíos      |
+| `500`  | Theip ar an stádas léite |
 
-**Scéimre an fhreagra:**
+**Scéimre freagartha:**
 
 ```json
 {
@@ -381,10 +369,9 @@ Seoltar stádas comhcheangailte beo + DB ar ais, lena n-áirítear meiteashonra�
 
 #### `POST /api/services/9router/auto-start`
 
-Scoránaigh an bhratach uath-thosaithe. Nuair atá `enabled: true`, tosaíonn an tseirbhís go huathoibríoch
-an chéad uair eile a thosaíonn OmniRoute (má tá an tseirbhís suiteáilte).
+Scoránaigh an bhratach tosaithe uathoibríoch. Nuair a `enabled: true`, tosaíonn an tseirbhís go huathoibríoch an chéad uair eile buataisí OmniRoute (má tá an tseirbhís suiteáilte).
 
-**Corp an iarratais:**
+**Comhlacht iarratais:**
 
 ```json
 { "enabled": true }
@@ -395,188 +382,184 @@ an chéad uair eile a thosaíonn OmniRoute (má tá an tseirbhís suiteáilte).
 | Stádas | Cur síos              |
 | ------ | --------------------- |
 | `200`  | `{ autoStart: true }` |
-| `400`  | Corp neamhbhailí      |
+| `400`  | Comhlacht neamhbhailí |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-Sruth SSE de logaí beo ó mhaolán fáinne stdout/stderr 9Router.
+sruth SSE de logaí beo ó mhaolán fáinne stdout/stderr 9Router.
 
 **Paraiméadair iarratais:**
 
-| Paraiméadar | Cineál    | Réamhshocrú | Cur síos                                                                     |
-| ----------- | --------- | ----------- | ---------------------------------------------------------------------------- |
-| `tail`      | `integer` | 200         | Líon na línte stairiúla atá le seoladh ar dtús (uasmhéid 1000)               |
-| `filter`    | `string`  | faic        | Scagaire fotheaghráin nach bhfuil cásíogair (gan regex — sábháilte ar ReDoS) |
+| Param    | Cineál    | Réamhshocrú | Cur síos                                                    |
+| -------- | --------- | ----------- | ----------------------------------------------------------- |
+| `tail`   | `integer` | 200         | Cé mhéad línte stairiúla le seoladh ar dtús (uasmhéid 1000) |
+| `filter` | `string`  | aon cheann  | Scagaire fotheaghrán cás-íogair (gan regex — ReDoS-safe)    |
 
-**Teagmhais SSE:**
+**imeachtaí SSE :**
 
-| Teagmhas    | Sonraí      | Cur síos                    |
+| Imeacht     | Sonraí      | Cur síos                    |
 | ----------- | ----------- | --------------------------- |
 | `snapshot`  | `LogLine[]` | Eireaball stairiúil tosaigh |
-| `log`       | `LogLine`   | Líne loga bheo              |
-| `heartbeat` | `{}`        | Coinneáil beo gach 15 s     |
+| `log`       | `LogLine`   | Líne logáil beo             |
+| `heartbeat` | `{}`        | Coinnigh beo gach 15 s      |
 
-**Scéimre LogLine:**
+**scéimre LogLine :**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **Freagraí:**
 
-| Stádas | Cur síos                                                 |
-| ------ | -------------------------------------------------------- |
-| `200`  | `text/event-stream`                                      |
-| `400`  | Paraiméadar `filter` rófhada (> 200 carachtar)           |
-| `404`  | Níor aimsíodh an tseirbhís (níl an maoirseoir cláraithe) |
+| Stádas | Cur síos                                       |
+| ------ | ---------------------------------------------- |
+| `200`  | `text/event-stream`                            |
+| `400`  | paraiméadar `filter` rófhada (> 200 chars)     |
+| `404`  | Seirbhís gan aimsiú (an maoirseoir gan chlárú) |
 
 ---
 
-### 4.2 Críochphointí CLIProxyAPI (10 mbealach)
+### 4.2 críochphointe CLIProxyAPI (10 mbealach)
 
-Tá an struchtúr críochphointe céanna ag CLIProxyAPI agus atá ag 9Router, seachas
-`rotate-key`, agus cuirtear `accounts`, `provider-expose` agus `auto-restart-adopted`
-leis. Faigheann sé anois eochair API thiomnaithe don phlána sonraí a instealltar
-nuair a sheoltar é (`needsApiKey: true` in `bootstrap.ts`, a úsáidtear chun
-samhlacha a shioncronú); tá níos lú réimsí in `status`.
+Tá an cruth críochphointe céanna ag CLIProxyAPI agus atá ag 9Router lúide `rotate-key`, móide `accounts`, `provider-expose` agus `auto-restart-adopted`. Faigheann sé anois eochair sonraí-eitleán API tiomnaithe a instealladh ag sceith (`needsApiKey: true` i `bootstrap.ts`, a úsáidtear le haghaidh sioncronaithe samhail); Áirítear `status` níos lú réimsí.
 
-| Modh   | Conair                              | Cur síos                             |
-| ------ | ----------------------------------- | ------------------------------------ |
-| `POST` | `/api/services/cliproxy/install`    | Suiteáil CLIProxyAPI ó npm           |
-| `POST` | `/api/services/cliproxy/start`      | Tosaigh CLIProxyAPI                  |
-| `POST` | `/api/services/cliproxy/stop`       | Stop CLIProxyAPI                     |
-| `POST` | `/api/services/cliproxy/restart`    | Atosaigh CLIProxyAPI                 |
-| `POST` | `/api/services/cliproxy/update`     | Nuashonraigh go leagan níos nuaí     |
-| `GET`  | `/api/services/cliproxy/status`     | Stádas beo + DB (gan `apiKeyMasked`) |
-| `POST` | `/api/services/cliproxy/auto-start` | Scoránaigh an t-uath-thosú           |
+| Modh   | Conair                              | Cur síos                         |
+| ------ | ----------------------------------- | -------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | Suiteáil CLIProxyAPI ó npm       |
+| `POST` | `/api/services/cliproxy/start`      | Tosaigh CLIProxyAPI              |
+| `POST` | `/api/services/cliproxy/stop`       | Stop CLIProxyAPI                 |
+| `POST` | `/api/services/cliproxy/restart`    | Atosaigh CLIProxyAPI             |
+| `POST` | `/api/services/cliproxy/update`     | Nuashonraigh go leagan níos nuaí |
+| `GET`  | `/api/services/cliproxy/status`     | Stádas + DB (gan `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/auto-start` | Scoránaigh uath-tús              |
 
-Oibríonn an críochphointe comhroinnte `GET /api/services/{name}/logs` (féach §4.1)
-do na ceithre sheirbhís ar fad agus an deighleog dhinimiciúil `[name]` á húsáid.
+Oibríonn an críochphointe `GET /api/services/{name}/logs` roinnte (féach §4.1) do na ceithre sheirbhís go léir ag baint úsáide as an deighleog dinimiciúil `[name]`.
 
 ---
 
-### 4.3 Críochphointí Mux (8 mbealach)
+### 4.3 críochphointí Mux (8 mbealach)
 
-Tá an struchtúr críochphointe céanna ag Mux agus atá ag CLIProxyAPI — níl bealach
-`rotate-key` sa dromchla API (gineann `getOrCreateApiKey("mux")` an comhartha
-iompróra ar an mbealach céanna le comhartha 9Router agus instealltar é tríd an
-athróg timpeallachta `MUX_SERVER_AUTH_TOKEN`, ach níl críochphointe tiomnaithe
-rothlaithe ann fós). Ní bhainistítear ach saolré Mux: murab ionann agus 9Router,
-níl aon seiceadóir Sraith 4 aige agus ní chláraítear riamh é mar sholáthraí
-ródaithe.
+Tá an cruth críochphointe céanna ag Mux agus atá CLIProxyAPI — no bealach `rotate-key` sa dromchla API (ghintear an comhartha iompróra ar an mbealach céanna le 9Router's via `getOrCreateApiKey("mux")` agus a instealladh tríd an `MUX_SERVER_AUTH_TOKEN` env var, ach níl aon chríochphointe rothlaithe tiomnaithe fós). Is é Mux amháin a bhainistítear saolré: murab ionann agus 9Router, níl aon seiceadóir Ciseal 4 aige agus ní chláraítear riamh mar sholáthraí ródaithe.
 
-| Modh   | Conair                         | Cur síos                             |
-| ------ | ------------------------------ | ------------------------------------ |
-| `POST` | `/api/services/mux/install`    | Suiteáil Mux ó npm (`npm i mux`)     |
-| `POST` | `/api/services/mux/start`      | Tosaigh Mux (`mux server`)           |
-| `POST` | `/api/services/mux/stop`       | Stop Mux                             |
-| `POST` | `/api/services/mux/restart`    | Atosaigh Mux                         |
-| `POST` | `/api/services/mux/update`     | Nuashonraigh go leagan npm níos nuaí |
-| `GET`  | `/api/services/mux/status`     | Stádas beo + DB                      |
-| `POST` | `/api/services/mux/auto-start` | Scoránaigh an t-uath-thosú           |
+| Modh   | Conair                         | Cur síos                                    |
+| ------ | ------------------------------ | ------------------------------------------- |
+| `POST` | `/api/services/mux/install`    | Suiteáil Mux ó npm (`npm i mux`)            |
+| `POST` | `/api/services/mux/start`      | Tosaigh Mux (`mux server`)                  |
+| `POST` | `/api/services/mux/stop`       | Stop Mux                                    |
+| `POST` | `/api/services/mux/restart`    | Atosaigh Mux                                |
+| `POST` | `/api/services/mux/update`     | Nuashonraigh go dtí an leagan npm níos nuaí |
+| `GET`  | `/api/services/mux/status`     | Stádas + DB                                 |
+| `POST` | `/api/services/mux/auto-start` | Scoránaigh uath-tús                         |
 
 ---
 
-### 4.4 Críochphointí Bifrost (8 mbealach)
+### 4.4 Críochphointí déshriochta (8 mbealach)
 
-Is inneall sealaíochta tairsí IS in Go é Bifrost (`@maximhq/bifrost`). Úsáideann
-sé an struchtúr críochphointe céanna le CLIProxyAPI (gan `rotate-key` — bainistíonn
-Bifrost a eochracha soláthraí féin in `config.json` faoina `-app-dir`).
+Inneall sealaíochta Go AI-geata is ea Bifrost (`@maximhq/bifrost`). Úsáideann sé an cruth críochphointe céanna le CLIProxyAPI (ní bhainistíonn `rotate-key` — Bifrost a chuid eochracha soláthraithe féin i `config.json` faoina `-app-dir`).
 
-| Modh   | Conair                             | Cur síos                                                                    |
-| ------ | ---------------------------------- | --------------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Suiteáil Bifrost ó npm (`@maximhq/bifrost`)                                 |
-| `POST` | `/api/services/bifrost/start`      | Tosaigh Bifrost ar phort 8080 (réamhshocrú)                                 |
-| `POST` | `/api/services/bifrost/stop`       | Stop Bifrost                                                                |
-| `POST` | `/api/services/bifrost/restart`    | Atosaigh Bifrost                                                            |
-| `POST` | `/api/services/bifrost/update`     | Nuashonraigh go leagan níos nuaí                                            |
-| `GET`  | `/api/services/bifrost/status`     | Stádas beo + DB                                                             |
-| `POST` | `/api/services/bifrost/auto-start` | Scoránaigh an t-uath-thosú                                                  |
-| `GET`  | `/api/services/bifrost/logs`       | Eireaball loga SSE (tríd an mbealach dinimiciúil comhroinnte `[name]/logs`) |
+| Modh   | Conair                             | Cur síos                                                             |
+| ------ | ---------------------------------- | -------------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | Suiteáil Bifrost ó npm (`@maximhq/bifrost`)                          |
+| `POST` | `/api/services/bifrost/start`      | Tosaigh Bifrost ar phort 8080 (réamhshocraithe)                      |
+| `POST` | `/api/services/bifrost/stop`       | Stop Bifrost                                                         |
+| `POST` | `/api/services/bifrost/restart`    | Atosaigh Bifrost                                                     |
+| `POST` | `/api/services/bifrost/update`     | Nuashonraigh go leagan níos nuaí                                     |
+| `GET`  | `/api/services/bifrost/status`     | Stádas + DB                                                          |
+| `POST` | `/api/services/bifrost/auto-start` | Scoránaigh uath-tús                                                  |
+| `GET`  | `/api/services/bifrost/logs`       | eireaball loga SSE (trí bhealach dinimiciúil roinnte `[name]/logs` ) |
 
-**Sreangú ródaithe:** Nuair nach bhfuil `BIFROST_BASE_URL` socraithe agus an
-t-ásc Bifrost atá faoi mhaoirseacht ar siúl, úsáideann
-`getBifrostRoutingConfig()` (in `routingBackend.ts`) `http://127.0.0.1:{port}`
-go huathoibríoch mar bhun-URL an tseachadáin. Bíonn tosaíocht i gcónaí ag athróg
-timpeallachta shainráite `BIFROST_BASE_URL`.
+**Sreangú ródaithe:** Nuair nach bhfuil `BIFROST_BASE_URL` socraithe agus an cás Bifrost maoirsithe ag rith, úsáideann `getBifrostRoutingConfig()` (in `routingBackend.ts`) go huathoibríoch `http://127.0.0.1:{port}` mar an bonn sealaíochta URL. Bíonn tosaíocht i gcónaí ag env `BIFROST_BASE_URL` follasach.
 
 ---
 
-### 4.5 Críochphointí Dario (12 bhealach)
+### 4.5 críochphointe Dario (12 bhealach)
 
-An struchtúr saolré céanna leis na seirbhísí eile (`install`, `start`, `stop`,
-`restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`), chomh maith
-le plána rialaithe OAuth faoi `admin/` a bhfuil comhartha riachtanach dó:
-`admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`,
-`admin/login-complete` (iad uile faoi chosaint `DARIO_ADMIN_TOKEN`).
+Cruth saolré céanna leis na seirbhísí eile (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) chomh maith le eitleán rialaithe OAuth comharthaithe faoi `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (ar fad taobh thiar de `DARIO_ADMIN_TOKEN`).
 
-### 4.6 Críochphointí open-wa (7 mbealach)
+### 4.6 críochphointe oscailte (7 mbealach)
 
-Tiomáineann open-wa (`@open-wa/wa-automate`) ásc Chromium gan chomhéadan grafach
-(trí Puppeteer) chun WhatsApp Web a uathoibriú. Úsáideann sé an struchtúr
-críochphointe céanna le Mux (níl bealach `rotate-key` ann fós). Ní bhainistítear
-ach a shaolré — ní sprioc ródaithe é, agus níl aon seiceadóir Sraith 4 ná iontráil
-soláthraí aige.
+Tiomáineann open-wa (`@open-wa/wa-automate`) shampla Cróimiam gan cheann (trí Puipéadóir) chun WhatsApp Web a uathoibriú. Úsáideann sé an cruth críochphointe céanna le Mux (gan aon bhealach `rotate-key` fós). Tá sé á bhainistiú ag saolré amháin — ní sprioc ródaithe é, níl aon iontráil Sraith 4 executor/provider.
 
-| Modh   | Conair                            | Cur síos                                                           |
-| ------ | --------------------------------- | ------------------------------------------------------------------ |
-| `POST` | `/api/services/openwa/install`    | Suiteáil open-wa ó npm (`@open-wa/wa-automate`)                    |
-| `POST` | `/api/services/openwa/start`      | Tosaigh open-wa ar phort 8323 (réamhshocrú)                        |
-| `POST` | `/api/services/openwa/stop`       | Stop open-wa                                                       |
-| `POST` | `/api/services/openwa/restart`    | Atosaigh open-wa                                                   |
-| `POST` | `/api/services/openwa/update`     | Nuashonraigh go leagan níos nuaí                                   |
-| `GET`  | `/api/services/openwa/status`     | Stádas beo + DB                                                    |
-| `POST` | `/api/services/openwa/auto-start` | Scoránaigh an t-uath-thosú                                         |
-| `GET`  | `/api/services/openwa/logs`       | Deireadh loga SSE (trí róda dinimiciúil comhroinnte `[name]/logs`) |
+| Modh   | Conair                            | Cur síos                                                             |
+| ------ | --------------------------------- | -------------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | Suiteáil open-wa ó npm (`@open-wa/wa-automate`)                      |
+| `POST` | `/api/services/openwa/start`      | Tosaigh oscailte-wa ar phort 8323 (réamhshocraithe)                  |
+| `POST` | `/api/services/openwa/stop`       | Stop oscailte-wa                                                     |
+| `POST` | `/api/services/openwa/restart`    | Atosaigh oscailte-wa                                                 |
+| `POST` | `/api/services/openwa/update`     | Nuashonraigh go leagan níos nuaí                                     |
+| `GET`  | `/api/services/openwa/status`     | Stádas + DB                                                          |
+| `POST` | `/api/services/openwa/auto-start` | Scoránaigh uath-tús                                                  |
+| `GET`  | `/api/services/openwa/logs`       | eireaball loga SSE (trí bhealach dinimiciúil roinnte `[name]/logs` ) |
 
-**Eochair API:** insteallta mar `WA_KEY` — mapálann sárú cineálach athróige
-timpeallachta open-wa, leis an réimír `WA_*`, í chuig an rogha CLI `--key`/`-k`
-(`dist/cli/setup.js::envArgs()`, fíoraithe i gcoinne an phacáiste suiteáilte
-4.76.0). Cuirtear an réimír `ow_` léi nuair a ghineann
-`generateServiceApiKey()` í. Léann open-wa an eochair ar ais ó cheanntásc HTTP
-`key`/`api_key` (ní ó `Authorization: Bearer`); tá `/api-docs*` díolmhaithe go
-sainráite ón tseiceáil (`setupAuthenticationLayer` in
-`dist/cli/server.js`), mar sin ní theastaíonn ceanntásc fíordheimhnithe ón
-tóireadóir sláinte.
+**eochair API :** ghann mar `WA_KEY` — oscailte-wa's cineálach `WA_*` -prefixed sáraíonn env mapáil sé isteach ar an rogha `--key`/`-k` CLI (`dist/cli/setup.js::envArgs()`, fíoraithe i gcoinne an phacáiste suiteáilte 4.76.0). `ow_` réamhshocraithe nuair a ghineann `generateServiceApiKey()`. léann open-wa an eochair ar ais ó cheanntásc `key`/`api_key` HTTP (ní `Authorization: Bearer`); Tá `/api-docs*` díolmhaithe go sainráite ón seic (`setupAuthenticationLayer` in `dist/cli/server.js`), mar sin níl aon cheanntásc údaráis ag teastáil ón taiscéalaí sláinte.
 
-**Péireáil:** tá open-wa neamhoifigiúil agus níl sé cleamhnaithe le WhatsApp —
-tá baol ann go gcuirfidh WhatsApp cosc ar an uimhir nasctha mar gheall ar a
-bhrath uathoibrithe féin. Ar an gcéad tosú, priontáiltear an cód QR péireála
-chuig stdout agus cuirtear ar fáil é tríd an bpainéal Logaí/sruth SSE atá ann
-cheana — níl aon chríochphointe tiomnaithe d’íomhá QR sa chomhtháthú seo fós.
+**Péireáil:** tá open-wa neamhoifigiúil agus neamhchleamhnaithe le WhatsApp — tá riosca toirmisc ag baint leis an uimhir nasctha ó bhrath uathoibrithe WhatsApp féin. Ar an gcéad tosú, déantar an cód péireála QR a phriontáil go stdout agus dromchla a chur air trí na Logs panel/SSE stream — atá ann cheana féin níl aon chríochphointe QR-image tiomnaithe sa chomhtháthú seo fós.
 
 ---
 
-### 4.7 Seachfhreastalaí droim ar ais (leabú dheais 9Router)
+### 4.7 críochphointí LLMLingua (8 mbealach)
 
-Leabaíonn an deais comhéadan gréasáin 9Router laistigh de iframe trí
-sheachfhreastalaí inmheánach droim ar ais ag:
+Is éard atá i LLMLingua ná beartán taobhcharr pras-chomhbhrúite `@atjsh/llmlingua-2` (samhail aicmithe dearbhán ONNX fíor, arna íoslódáil ó Hugging Face ar an gcéad ghlao `/compress` ). Úsáideann sé an cruth críochphointe céanna le Bifrost (gan eochair API — `needsApiKey: false`, ní láimhseálann sé dintiúir riamh).
+
+| Modh   | Conair                                         | Cur síos                                                                        |
+| ------ | ---------------------------------------------- | ------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + piaraí, scríobh an script freastalaí sidecar |
+| `POST` | `/api/services/llmlingua/start`                | Cuir tús leis an taobhcharr ar phort 20135 (réamhshocraithe)                    |
+| `POST` | `/api/services/llmlingua/stop`                 | Stop an taobhcharr                                                              |
+| `POST` | `/api/services/llmlingua/restart`              | Atosaigh an taobhcharr                                                          |
+| `POST` | `/api/services/llmlingua/update`               | Nuashonraigh go dtí an leagan pacáiste níos nuaí                                |
+| `GET`  | `/api/services/llmlingua/status`               | Stádas + DB                                                                     |
+| `POST` | `/api/services/llmlingua/auto-start`           | Scoránaigh uath-tús                                                             |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Scoránaigh uath-atosú sampla glactha (atá ann cheana).                          |
+| `GET`  | `/api/services/llmlingua/logs`                 | eireaball loga SSE (trí bhealach dinimiciúil roinnte `[name]/logs` )            |
+
+**Conradh taobhcharr:** nochtann script an fhreastalaí `GET /health` (ní fhanann — ar an toirt ar an tsamhail) agus `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Luchtaíonn an tsamhail go leisciúil ar an gcéad ghlao `/compress`.
+
+**Sreangú comhbhrúite:** glaonna `open-sse/services/compression/engines/llmlingua/index.ts`'s `httpSidecarBackend` `LLMLINGUA_BASE_URL` (réamhshocraithe `http://127.0.0.1:20135`) agus ní ghlacann sé ach le freagra an chairr taobh nuair a bhíonn sé i bhfad níos giorra ná an t-ionchur; titeann aon chliseadh (gan rith, teorainn ama, freagra gan feidhmchlár) ar ais go dtí an t-inneall snáithe oibrithe in-phróiseas (`./worker.ts`).
+
+---
+
+### 4.8 críochphointe bosca amhránaíochta (8 mbealach)
+
+tá an cruth críochphointe céanna ag an mbosca canta agus atá ag Mux — no bealach `rotate-key`, gan aon instealladh eochair API (`needsApiKey: false` in `bootstrap.ts`). Is é an saolré amháin a bhainistítear é: ní soláthraí routing/LLM riamh é. íoslódálann `install()` an scaoileadh dénártha oifigiúil GitHub (`SagerNet/sing-box`) don leagan pinned (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) agus fíoraíonn sé a SHA256 i gcoinne seiceála a bhácáiltear isteach sa chomhad céanna sula scríobhtar chuig diosca — é riamh ní dhiúltaítear aon leagan eile a iarrtar.
+
+| Modh   | Conair                                       | Cur síos                                                             |
+| ------ | -------------------------------------------- | -------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Íoslódáil + fíoraigh an scaoileadh bosca amhránaíochta pinned        |
+| `POST` | `/api/services/singbox/start`                | Tosaigh bosca amhránaíochta (`sing-box run -c config.json`)          |
+| `POST` | `/api/services/singbox/stop`                 | Stop bosca amhrán                                                    |
+| `POST` | `/api/services/singbox/restart`              | Atosaigh an bosca amhránaíochta                                      |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall an scaoileadh pinned                             |
+| `GET`  | `/api/services/singbox/status`               | Stádas + DB                                                          |
+| `POST` | `/api/services/singbox/auto-start`           | Scoránaigh uath-tús                                                  |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Scoránaigh uath-atosú do phróiseas glactha (atá ann cheana).         |
+| `GET`  | `/api/services/singbox/logs`                 | eireaball loga SSE (trí bhealach dinimiciúil roinnte `[name]/logs` ) |
+
+**sreangú TPROXY :** scríobhann `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` agus cuireann sé tús leis an maoirseoir sula suiteálann `applyTproxy()` na rialacha balla dóiteáin TPROXY. Má tá an maoirseoir ar iarraidh nó má theipeann air `running` a bhaint amach, logálann sé anois ag leibhéal na hearráide (seachas an teip a shlogadh go ciúin) ionas gur féidir le hoibreoir a rá gur cuireadh na rialacha TPROXY i bhfeidhm gan éisteoir atá ag obair taobh thiar díobh.
+
+---
+
+### 4.9 Seachfhreastalaí droim ar ais (leabú deais 9 Ródaire)
+
+Leabaíonn an painéal an UI gréasáin 9Router taobh istigh d’iframe trí sheachvótálaí droim ar ais inmheánach ag:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-Déanann an seachfhreastalaí seo na nithe seo a leanas:
+an seachfhreastalaí seo:
 
-- Cuireann sé an t-iarratas ar aghaidh chuig `http://127.0.0.1:{port}/{path}` (aischúrsáil amháin)
-- Baineann sé na ceanntásca isteach `cookie` agus `authorization` (gan seisiún OmniRoute a sceitheadh)
-- Insteallann sé `Authorization: Bearer {apiKey}` le haghaidh fhíordheimhniú 9Router
-- Baineann sé `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` den fhreagra
-- Athscríobhann sé freagraí HTML chun `<base href>` a instealladh agus conairí absalóideacha a normalú (`/foo` → `/dashboard/.../embed/foo`)
+- Cuir an t-iarratas ar aghaidh chuig `http://127.0.0.1:{port}/{path}` (lúb siar amháin)
+- Stiallacha ag teacht isteach ceanntásca `cookie` agus `authorization` (gan aon sceitheadh sa seisiún OmniRoute )
+- Instealladh `Authorization: Bearer {apiKey}` le haghaidh fíordheimhnithe 9 Ródaire
+- Stiallacha `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` ón bhfreagra
+- Athscríobhtar freagraí HTML chun `<base href>` a instealladh agus normalú cosáin absalóideacha (`/foo` → `/dashboard/.../embed/foo`)
 
-Láimhseálann freastalaí compánach ar phort tiomnaithe uasghráduithe WebSocket don
-deais leabaithe (féach `src/lib/services/embedWsProxy.ts`).
+láimhseálann freastalaí compánach uasghráduithe WebSocket don deais leabaithe ar phort tiomnaithe (féach `src/lib/services/embedWsProxy.ts`).
 
-**Slándáil:** aicmítear na róid seachfhreastalaí leabaithe faoi
-`LOCAL_ONLY_API_PREFIXES` agus ní féidir iad a rochtain ach ón aischúrsáil. Ní
-féidir le hionsaitheoir a fhaigheann JWT trí thollán Cloudflare/Ngrok
-seachfhreastalú isteach i seirbhísí leabaithe.
+**Slándáil:** Aicmítear na bealaí seachfhreastalaí leabaithe faoi `LOCAL_ONLY_API_PREFIXES` agus ní féidir iad a bhaint amach ach ó loopback. Ní féidir le hionsaí a fhaigheann JWT trí thollán Cloudflare/Ngrok seachfhreastalaí isteach i seirbhísí leabaithe.
 
 ---
 

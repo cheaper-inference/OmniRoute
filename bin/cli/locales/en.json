@@ -123,7 +123,9 @@
       "maxCostOpt": "Max cost per day (USD)",
       "allowedModelsOpt": "Comma-separated list of allowed models",
       "nothingToSet": "No policy fields provided. Use --rate-limit, --max-cost, or --allowed-models.",
-      "updated": "Policy updated."
+      "updated": "Policy updated.",
+      "modelAccessModeOpt": "Model access mode (all | restricted)",
+      "unrestrictedOpt": "Allow all models (--model-access-mode all)"
     },
     "expiration": {
       "title": "Key Expiration",
@@ -254,6 +256,7 @@
     "log": "Show server logs inline",
     "no_recovery": "Disable auto-restart on crash (debugging mode)",
     "max_restarts": "Max crash restarts within 30s before giving up (default: 2)",
+    "headless": "Run only the proxy engine: dashboard disabled (404), optional subsystems skipped (sets OMNIROUTE_HEADLESS=1)",
     "tray": "Start in the system tray (desktop only, opt-in)",
     "no_tray": "Disable system tray icon",
     "ready_timeout": "Readiness probe timeout in ms (also OMNIROUTE_READY_TIMEOUT_MS, default 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sync configuration between OmniRoute instances",
     "push": {
-      "description": "Push config to cloud or remote instance",
-      "target": "Target (cloud or context:name)",
-      "bundle": "Bundle parts to sync",
-      "dryRun": "Preview without applying"
+      "description": "Run a cloud sync now (cloud sync must already be enabled)"
     },
     "pull": {
-      "description": "Pull config from cloud or remote",
-      "source": "Source (cloud or context:name)",
-      "merge": "Merge with existing config",
-      "replace": "Replace existing config",
-      "dryRun": "Preview without applying"
-    },
-    "diff": {
-      "source": "Source context",
-      "target": "Target context"
+      "description": "Download the server's full backup archive (.tar.gz) to [outPath]"
     },
     "bundle": {
-      "description": "Export config as a bundle file",
-      "include": "Parts to include (comma-separated)"
+      "description": "Download the config-sync bundle (JSON, includes credentials) with a sync token",
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
-      "description": "Import a bundle file",
-      "dryRun": "Validate without applying"
-    },
-    "initialize": {
-      "fromCloud": "Initialize from cloud backup"
+      "description": "Replace the server database with a .sqlite backup",
+      "dryRun": "Validate the backup locally; never contacts the server"
     },
     "tokens": {
       "description": "Manage sync tokens",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Skip confirmation"
       }
-    },
-    "resolve": {
-      "description": "Resolve sync conflicts interactively"
     }
   },
   "config": {

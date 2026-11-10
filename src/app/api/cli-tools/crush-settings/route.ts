@@ -10,11 +10,17 @@ import {
   getCliRuntimeStatus,
 } from "@/shared/services/cliRuntime";
 import { createBackup } from "@/shared/services/backupService";
+import { cliModelLabel } from "../_lib/modelLabel";
 import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
 import { cliModelConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey } from "@/shared/services/apiKeyResolver";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import {
+  configClobberRefusalResponse,
+  parseJsonObject,
+  readExistingConfig,
+} from "../_lib/readExistingConfig";
 
 const TOOL_ID = "crush";
 
@@ -27,6 +33,20 @@ const getCrushConfigPath = (): string =>
   path.join(process.env.HOME ?? "~", ".config", "crush", "crush.json");
 
 const getCrushDir = () => path.dirname(getCrushConfigPath());
+
+// `providers` is merged into below; a non-object value would be spread into
+// index keys, so refuse it like an unparsable file.
+const parseCrushConfig = (raw: string): Record<string, unknown> => {
+  const parsed = parseJsonObject(raw);
+  const providers = parsed.providers;
+  if (
+    providers !== undefined &&
+    (providers === null || typeof providers !== "object" || Array.isArray(providers))
+  ) {
+    throw new TypeError("crush.json `providers` must be an object");
+  }
+  return parsed;
+};
 
 /**
  * Crush's config uses a `providers.<id>` map. OmniRoute is registered under
@@ -149,21 +169,23 @@ export async function POST(request: Request) {
     // Backup current config before modifying
     await createBackup(TOOL_ID, configPath);
 
-    // Read existing config or start fresh
-    let existing: Record<string, unknown> = {};
-    try {
-      const raw = await fs.readFile(configPath, "utf-8");
-      existing = JSON.parse(raw) as Record<string, unknown>;
-    } catch {
-      /* No existing config */
-    }
+    // Read existing config or start fresh. Only a missing file starts fresh —
+    // an unreadable/unparsable one is refused (409) instead of being replaced.
+    const existing: Record<string, unknown> =
+      (await readExistingConfig(configPath, parseCrushConfig)) ?? {};
 
     const normalizedBaseUrl = ensureV1(baseUrl);
     const provider: CrushProvider = {
       type: "openai-compat",
       base_url: normalizedBaseUrl,
       api_key: apiKey,
-      models: [{ id: model, name: `OmniRoute: ${model}`, context_window: DEFAULT_CONTEXT_WINDOW }],
+      models: [
+        {
+          id: model,
+          name: `OmniRoute: ${cliModelLabel(model)}`,
+          context_window: DEFAULT_CONTEXT_WINDOW,
+        },
+      ],
     };
 
     const updated: Record<string, unknown> = {
@@ -189,6 +211,8 @@ export async function POST(request: Request) {
       configPath,
     });
   } catch (err) {
+    const refusal = configClobberRefusalResponse(err);
+    if (refusal) return refusal;
     return NextResponse.json({ error: { message: sanitizeErrorMessage(err) } }, { status: 500 });
   }
 }

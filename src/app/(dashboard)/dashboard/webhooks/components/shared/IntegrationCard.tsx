@@ -1,5 +1,9 @@
 "use client";
 
+import { Tile } from "@omniroute/ui-kit/tile";
+import Badge from "@/shared/components/Badge";
+import Icon from "@/shared/components/Icon";
+
 export type WebhookKind = "slack" | "telegram" | "discord" | "custom";
 export type ComingSoonKind = "email" | "pagerduty" | "teams";
 type AnyKind = WebhookKind | ComingSoonKind;
@@ -15,10 +19,10 @@ const KIND_ICONS: Record<AnyKind, string> = {
 };
 
 const KIND_COLORS: Record<AnyKind, string> = {
-  slack: "text-emerald-500",
-  telegram: "text-blue-500",
-  discord: "text-violet-500",
-  custom: "text-amber-500",
+  slack: "text-chart-1",
+  telegram: "text-chart-2",
+  discord: "text-chart-3",
+  custom: "text-chart-4",
   email: "text-text-muted",
   pagerduty: "text-text-muted",
   teams: "text-text-muted",
@@ -34,6 +38,12 @@ interface IntegrationCardProps {
   comingSoonLabel?: string;
 }
 
+/** Kind glyph. A component of its own so the icon-name scanner (icon-map-object-values) reads
+ *  only KIND_ICONS as names in the Tile's `icon` slot, not the KIND_COLORS classes. */
+function KindGlyph({ kind }: { kind: AnyKind }) {
+  return <Icon name={KIND_ICONS[kind]} className={KIND_COLORS[kind]} />;
+}
+
 export function IntegrationCard({
   kind,
   name,
@@ -43,36 +53,18 @@ export function IntegrationCard({
   disabled,
   comingSoonLabel,
 }: IntegrationCardProps) {
+  // Kit Tile as a toggle (aria-pressed + the kit check indicator); a "coming soon" kind is a
+  // disabled tile with no pressed state, as before.
   return (
-    <button
-      type="button"
+    <Tile
+      layout="stacked"
+      pressed={!disabled ? selected : undefined}
       onClick={!disabled && onSelect ? () => onSelect(kind as WebhookKind) : undefined}
       disabled={disabled}
-      className={`relative flex w-full flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
-        disabled
-          ? "border-border bg-surface"
-          : selected
-            ? "border-primary bg-primary/5 shadow-sm"
-            : "border-border bg-surface hover:border-primary/40 hover:bg-primary/5"
-      }`}
-    >
-      {comingSoonLabel && (
-        <span className="absolute right-2 top-2 rounded-full bg-surface px-1.5 py-0.5 text-[10px] font-medium text-text-muted ring-1 ring-border">
-          {comingSoonLabel}
-        </span>
-      )}
-      <span className={`material-symbols-outlined text-[28px] ${KIND_COLORS[kind]}`}>
-        {KIND_ICONS[kind]}
-      </span>
-      <div>
-        <p className="text-sm font-semibold text-text-main">{name}</p>
-        <p className="mt-0.5 text-xs text-text-muted">{description}</p>
-      </div>
-      {selected && !disabled && (
-        <span className="ml-auto mt-auto flex size-5 items-center justify-center rounded-full bg-primary">
-          <span className="material-symbols-outlined text-[14px] text-white">check</span>
-        </span>
-      )}
-    </button>
+      icon={<KindGlyph kind={kind} />}
+      title={name}
+      description={description}
+      meta={comingSoonLabel ? <Badge size="sm">{comingSoonLabel}</Badge> : undefined}
+    />
   );
 }

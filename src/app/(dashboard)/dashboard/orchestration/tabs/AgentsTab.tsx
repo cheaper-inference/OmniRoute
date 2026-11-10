@@ -3,6 +3,8 @@ import { useMemo } from "react";
 import type { NodeTypes, EdgeTypes, NodeMouseHandler } from "@xyflow/react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Button from "@/shared/components/Button";
+import Checkbox from "@/shared/components/Checkbox";
 import { FlowCanvas } from "@/shared/components/flow/FlowCanvas";
 import { orchestrationToFlow } from "../model/orchestrationToFlow";
 import { EMPTY_FILTER, isEmptyFilter } from "../model/filterSnapshot";
@@ -70,18 +72,18 @@ export function AgentsTab({
   // advice — offer to clear the filter instead.
   if (!hasWork && !isEmptyFilter(filter)) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 text-muted">
+      <div className="flex flex-col items-center justify-center h-full gap-3 text-text-muted">
         <p className="text-sm">{t("noMatches")}</p>
-        <button type="button" className="text-xs underline" onClick={() => onClearFilters?.()}>
+        <Button variant="outline" size="sm" onClick={() => onClearFilters?.()}>
           {t("clearFilters")}
-        </button>
+        </Button>
       </div>
     );
   }
 
   if (!hasWork) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 text-muted">
+      <div className="flex flex-col items-center justify-center h-full gap-3 text-text-muted">
         <p className="text-sm">{t("emptyTitle")}</p>
         <div className="flex gap-2 text-xs">
           <Link className="underline" href="/dashboard/cloud-agents">
@@ -99,14 +101,12 @@ export function AgentsTab({
   }
   return (
     <div className="relative h-full orchestration-canvas">
-      <label className="absolute top-2 right-2 z-10 flex items-center gap-1.5 text-xs text-muted">
-        <input
-          type="checkbox"
-          checked={showCompleted}
-          onChange={(e) => onToggleCompleted(e.target.checked)}
-        />
-        {t("showCompleted")}
-      </label>
+      <Checkbox
+        className="absolute top-2 right-2 z-10 rounded-md bg-surface/90 px-2 py-1 text-xs"
+        label={t("showCompleted")}
+        checked={showCompleted}
+        onChange={(e) => onToggleCompleted(e.target.checked)}
+      />
       <FlowCanvas
         nodes={nodes}
         edges={edges}

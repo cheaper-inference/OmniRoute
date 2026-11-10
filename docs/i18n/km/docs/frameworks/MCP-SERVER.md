@@ -10,35 +10,30 @@
 
 ## ការដំឡើង
 
-OmniRoute MCP ត្រូវបានបង្កើតឡើង។ ចាប់ផ្តើមវាជាមួយ:
+OmniRoute MCP ត្រូវបានភ្ជាប់មកជាមួយ។ ចាប់ផ្តើមវាជាមួយ៖
 
 ```bash
 omniroute --mcp
 ```
 
-ឬតាមរយៈការដឹកជញ្ជូន open-sse:
+ឬតាមរយៈការដឹកជញ្ជូនបើកចំហរ៖
 
 ```bash
-# ការដឹកជញ្ជូនស្ទ្រីម HTTP (ច្រក 20130)
-omniroute --dev  # MCP ចាប់ផ្តើមដោយស្វ័យប្រវត្តិនៅលើ /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-ការដឹកជញ្ជូន HTTP (`sse` / `streamable-http`, បម្រើក្នុងដំណើរការដោយម៉ាស៊ីនមេផ្ទាំងគ្រប់គ្រង) ត្រូវបាន
-បិទតាមលំនាំដើម ហើយពីមុនអាចបិទបើកបានតែពីទំព័រ `/dashboard/mcp` ប៉ុណ្ណោះ។ ចាប់ពី v3.8.51
-CLI មានភាពស្មើគ្នា:
+ការដឹកជញ្ជូន HTTP (`sse` / `streamable-http` បម្រើក្នុងដំណើរការដោយម៉ាស៊ីនមេនៃផ្ទាំងគ្រប់គ្រង) ត្រូវបានបិទតាមលំនាំដើម ហើយពីមុនអាចបិទបើកបានតែពីទំព័រ `/dashboard/mcp` ប៉ុណ្ណោះ។ គិតត្រឹម v3.8.51 CLI មាន parity:
 
 ```bash
-omniroute mcp status                                  # អាចប្រើបាន/អនឡាញ, ការដឹកជញ្ជូន, ចំនួនឧបករណ៍
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # កំណត់ឡើងវិញនូវវគ្គ sse/streamable-http សកម្ម
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` PATCH ការកំណត់ `mcpEnabled` (និងជាជម្រើស `mcpTransport`) ដូចគ្នា
-ដែលផ្ទាំងគ្រប់គ្រងបិទបើកតាមរយៈ `/api/settings`។ `mcp restart` ហៅ `POST /api/mcp/restart`: វាបិទ
-វគ្គ `sse`/`streamable-http` សកម្ម ដូច្នេះសំណើបន្ទាប់ចាប់ផ្តើមឡើងវិញដោយស្អាត, ត្រឡប់
-`409` ប្រសិនបើ MCP ត្រូវបានបិទ, និង `501` សម្រាប់ការដឹកជញ្ជូន `stdio` (អតិថិជន stdio គ្រប់គ្រង
-ដំណើរការរងរបស់ពួកគេផ្ទាល់ — មិនមានការគ្រប់គ្រងក្នុងដំណើរការដើម្បីចាប់ផ្តើមឡើងវិញទេ)។
+`mcp enable`/`mcp disable` PATCH ដូចគ្នា `mcpEnabled` (និងជាជម្រើស `mcpTransport`) ការកំណត់ផ្ទាំងគ្រប់គ្រងបិទបើកតាមរយៈ `/api/settings`។ `mcp restart` ហៅ `POST /api/mcp/restart`: វាធ្វើឱ្យខូចវគ្គ `sse`/`streamable-http` សកម្ម ដូច្នេះសំណើបន្ទាប់ចាប់ផ្តើមឡើងវិញយ៉ាងស្អាត ត្រឡប់ `409` ប្រសិនបើ MCP ត្រូវបានបិទ ហើយ `501` សម្រាប់ការដឹកជញ្ជូន `stdio` (ម៉ាស៊ីនភ្ញៀវ stdio គ្រប់គ្រងដំណើរការរងរបស់ពួកគេ — មិនមានចំណុចទាញក្នុងដំណើរការដើម្បីចាប់ផ្តើមឡើងវិញទេ) ។
 
 ## ការដឹកជញ្ជូន
 
@@ -71,6 +66,16 @@ curl -i \
 ```
 
 គន្លឹះដែលមិនមែនជាការគ្រប់គ្រង (ឬគ្មាន Bearer) ត្រឡប់ `403 LOCAL_ONLY`។ បុព្វបទបងប្អូន `/api/cli-tools/runtime/*` មិនអាចរំលងបានដោយចេតនា — សូមមើល [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)។
+
+### ការផ្ទៀងផ្ទាត់ Origin
+
+បន្ទាប់ពីការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ រាល់សំណើទៅកាន់ `/api/mcp/*` — transport និងផ្លូវគ្រប់គ្រងដូចជា `status`, `tools`, `audit`, `restart` — ត្រូវបានផ្ទៀងផ្ទាត់ header `Origin` មិនថាអ្នកហៅជានរណាទេ (API key, token CLI, វគ្គ dashboard ឬ loopback អនាមិកនៅពេលបិទការចូល)។ នេះគឺជាការការពារ DNS rebinding ដែលលក្ខណៈបច្ចេកទេស MCP Streamable HTTP តម្រូវ។
+
+- **គ្មាន header `Origin`** → អនុញ្ញាត។ OmniRoute CLI, SDK និងម៉ាស៊ីនភ្ញៀវ IDE មិនផ្ញើវាទេ។
+- **`Origin` ដែលអនុញ្ញាត** → `localhost` / `127.0.0.1` / `[::1]` លើ port ណាមួយ ឬ origin សាធារណៈរបស់ OmniRoute ផ្ទាល់៖ `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin ដែល reverse proxy ដែលទុកចិត្តបានបញ្ជូនបន្ត (`OMNIROUTE_TRUST_PROXY` តែនៅពេលមិនបានកំណត់ base URL), ឬម៉ាស៊ីន IP loopback/LAN ដែលចូលដោយផ្ទាល់។ header `Host` តែឯងមិនដែលធ្វើឱ្យ origin ណាមួយក្លាយជាគួរទុកចិត្តឡើយ។
+- **`Origin` ផ្សេងទៀតណាមួយ រួមទាំង `null`** → `403` ជាមួយតួកំហុស JSON-RPC៖ `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`។ វគ្គ dashboard ដែលបង្ហាញ token CSRF ត្រឹមត្រូវ នៅតែត្រូវបានទទួលយក ដូចការសរសេរ dashboard ផ្សេងទៀត។
+
+ម៉ាស៊ីនភ្ញៀវ MCP លើកម្មវិធីរុករកដែលបម្រើនៅពីក្រោយ reverse proxy ត្រូវការ `OMNIROUTE_PUBLIC_BASE_URL`; គ្មានបញ្ជីអនុញ្ញាតសម្រាប់ origin ផ្សេងទៀតទេ។ សំណើ preflight CORS (`OPTIONS`) មិនត្រូវបានពិនិត្យ Origin ទេ តែសំណើបន្ទាប់ត្រូវបានពិនិត្យ។
 
 ## ការកំណត់រចនាសម្ព័ន្ធ IDE
 
@@ -120,51 +125,42 @@ curl -i \
 | `omniroute_cache_stats` | `read:cache`  | Semantic cache, prompt-cache, និង idempotency stats |
 | `omniroute_cache_flush` | `write:cache` | Flush cache ជាសកល ឬតាម signature/model              |
 
-## ឧបករណ៍បង្រួម (13)
+## ឧបករណ៍បង្ហាប់ (13)
 
-| ឧបករណ៍                              | វិសាលភាព            | ការពិពណ៌នា                                                                                                                                                       |
-| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | ការកំណត់ការបង្រួម, សេចក្តីសង្ខេបការវិភាគ, និង cache-aware stats (រួមបញ្ចូល metadata `analytics.mcpDescriptionCompression`)                                       |
-| `omniroute_compression_configure`   | `write:compression` | កំណត់រចនាសម្ព័ន្ធរបៀបបង្រួម, កម្រិតកំណត់, សមាមាត្រគោលដៅ, ការរក្សា system-prompt, ការបិទ/បើកការបង្រួមការពិពណ៌នា MCP                                               |
-| `omniroute_set_compression_engine`  | `write:compression` | ជ្រើសរើស engine សកម្ម (off/caveman/rtk/stacked) និងកម្រិត Caveman/RTK                                                                                            |
-| `omniroute_list_compression_combos` | `read:compression`  | រាយបញ្ជី compression combos ដែលមានឈ្មោះ និង engine pipelines របស់ពួកគេ                                                                                           |
-| `omniroute_compression_combo_stats` | `read:compression`  | ការវិភាគដែលបានដាក់ជាក្រុមតាម compression combo និង engine                                                                                                        |
-| `omniroute_ccr_store`               | `write:compression` | រក្សាទុកមាតិកាដែលដាច់ដោយឡែកពីអ្នកហៅ (caller-isolated) នៅក្នុងឃ្លាំង CCR ក្នុងអង្គចងចាំដែលមានកំណត់ (bounded in-memory) ហើយប្រគល់ marker បូកនឹង reference `ccr://` |
-| `omniroute_ccr_retrieve`            | `read:compression`  | ទាញយកមាតិកា CCR ទាំងស្រុង ឬជាមួយនឹងរបៀប head, tail, lines, grep, និង stats                                                                                       |
-| `omniroute_ccr_inspect`             | `read:compression`  | ត្រួតពិនិត្យ metadata CCR ដែលជាកម្មសិទ្ធិរបស់អ្នកហៅ (caller-owned) ដោយមិនប្រគល់មាតិកា                                                                            |
-| `omniroute_ccr_list`                | `read:compression`  | រាយបញ្ជី metadata ដែលបានបែងចែកទំព័រ (paginated) សម្រាប់ caller-owned CCR blocks                                                                                  |
-| `omniroute_ccr_delete`              | `write:compression` | លុប caller-owned CCR block                                                                                                                                       |
-| `omniroute_ccr_stats`               | `read:compression`  | រាយការណ៍ការប្រើប្រាស់អង្គចងចាំតាម caller (caller-scoped), lifecycle counters, និងដែនកំណត់ឃ្លាំង                                                                  |
-| `omniroute_rtk_discover`            | `read:compression`  | ស្វែងរកសំឡេងរំខានដែលកើតឡើងដដែលៗនៅក្នុង opt-in RTK output samples                                                                                                 |
-| `omniroute_rtk_learn`               | `read:compression`  | បង្កើត RTK filter draft ដែលអាចពិនិត្យបានពី opt-in samples                                                                                                        |
+| ឧបករណ៍                              | វិសាលភាព            | ការពិពណ៌នា                                                                                                                           |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | ការកំណត់ការបង្ហាប់ ការសង្ខេបការវិភាគ និងស្ថិតិដែលដឹងអំពីឃ្លាំងសម្ងាត់ (រួមបញ្ចូលទិន្នន័យមេតា `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | កំណត់រចនាសម្ព័ន្ធរបៀបបង្ហាប់ កម្រិតកំណត់ សមាមាត្រគោលដៅ ការរក្សាទុកប្រព័ន្ធភ្លាមៗ បិទបើកការបង្ហាប់ការពិពណ៌នា MCP                      |
+| `omniroute_set_compression_engine`  | `write:compression` | ជ្រើសរើសម៉ាស៊ីនសកម្ម (off/caveman/rtk/stacked) និងអាំងតង់ស៊ីតេ Caveman/RTK                                                           |
+| `omniroute_list_compression_combos` | `read:compression`  | រាយឈ្មោះ Combos Combos និងបំពង់ម៉ាស៊ីនរបស់វា។                                                                                        |
+| `omniroute_compression_combo_stats` | `read:compression`  | ការវិភាគត្រូវបានដាក់ជាក្រុមដោយបន្សំការបង្ហាប់ និងម៉ាស៊ីន                                                                             |
+| `omniroute_ccr_store`               | `write:compression` | រក្សាទុកមាតិកាដាច់ដោយឡែកពីអ្នកហៅចូលនៅក្នុងហាង CCR ក្នុងសតិដែលមានព្រំដែន ហើយត្រឡប់សញ្ញាសម្គាល់បូកនឹងឯកសារយោង `ccr://`                 |
+| `omniroute_ccr_retrieve`            | `read:compression`  | ទាញយកមាតិកា CCR ពេញ ឬដោយប្រើក្បាល កន្ទុយ បន្ទាត់ grep និងរបៀបស្ថិតិ                                                                  |
+| `omniroute_ccr_inspect`             | `read:compression`  | ពិនិត្យទិន្នន័យមេតា CCR ដែលគ្រប់គ្រងដោយអ្នកហៅទូរសព្ទដោយមិនត្រឡប់មាតិកា                                                               |
+| `omniroute_ccr_list`                | `read:compression`  | រាយបញ្ជីទិន្នន័យមេតាសម្រាប់ប្លុក CCR របស់អ្នកហៅចូល                                                                                   |
+| `omniroute_ccr_delete`              | `write:compression` | លុបប្លុក CCR របស់អ្នកហៅចូល                                                                                                           |
+| `omniroute_ccr_stats`               | `read:compression`  | រាយការណ៍អំពីការប្រើប្រាស់អង្គចងចាំតាមវិសាលភាពអ្នកហៅទូរសព្ទ ការរាប់វដ្តជីវិត និងដែនកំណត់ហាង                                           |
+| `omniroute_rtk_discover`            | `read:compression`  | ស្វែងរកសំលេងរំខានដែលកើតឡើងដដែលៗនៅក្នុងគំរូលទ្ធផល RTK ជ្រើសរើស                                                                        |
+| `omniroute_rtk_learn`               | `read:compression`  | បង្កើតសេចក្តីព្រាងតម្រង RTK ដែលអាចពិនិត្យឡើងវិញបានពីគំរូជ្រើសរើស                                                                     |
 
-ធាតុ CCR គឺស្ថិតនៅក្នុងអង្គចងចាំតែប៉ុណ្ណោះ ហើយបាត់ទៅវិញនៅពេលចាប់ផ្តើមឡើងវិញ។ block នីមួយៗត្រូវបានកំណត់ត្រឹម 2 MiB, principal នីមួយៗត្រឹម 16 MiB, និងឃ្លាំងសកលត្រឹម 64 MiB។ ធាតុមាន TTL លំនាំដើម 24 ម៉ោង (អតិបរមាប្រាំពីរថ្ងៃ)។ ការទាញយក MCP ពេញលេញត្រូវបានកំណត់ត្រឹម 256 KiB; blocks ដែលធំជាងនេះនៅតែអាចប្រើបានតាមរយៈរបៀប ranged និង grep។ ការផ្ទុក, ការទាញយក, ការរាយបញ្ជី, ការត្រួតពិនិត្យ, ការលុប, និង stats ត្រូវបានញែកដាច់ដោយឡែកដោយ API-key principal ដែលបានផ្ទៀងផ្ទាត់។ កំណត់ត្រា Audit មាន hashes និង metadata ទំហំ មិនមែនមាតិកាឡើយ។
+ធាតុCCR ប្រើហាងពីរជាន់៖ ថ្នាក់ក្នុងអង្គចងចាំក្តៅដែលបានគាំទ្រនៅលើម៉ោងដំណើរការដែលមិនមែនពពកក្នុងមូលដ្ឋានដោយលំដាប់ SQLite ជាប់លាប់ (`ccr_blocks` តាមលំនាំដើម) ដូច្នេះប្លុកអាចរួចផុតពីការបណ្តេញចេញ ឬចាប់ផ្ដើមឡើងវិញរហូតដល់ TTL របស់វាអស់ — លើកលែងតែប្លុកលើស 512 KB និង cloud-runtimes អង្គចងចាំដដែល។ ប្លុកនីមួយៗត្រូវបានកំណត់ត្រឹម 2 MiB មួយដើមដល់ 16 MiB និងហាងសកលដល់ 64 MiB។ ធាតុលំនាំដើមទៅ TTL 24 ម៉ោង (អតិបរមាប្រាំពីរថ្ងៃ) ។ ការទាញយក MCP ពេញលេញត្រូវបានកំណត់ត្រឹម 256 KiB; ប្លុកធំ ៗ នៅតែមានតាមរយៈរបៀបជួរនិង grep ។ ការផ្ទុក ការទាញយក ការចុះបញ្ជី ការត្រួតពិនិត្យ ការលុប និងស្ថិតិត្រូវបានញែកដាច់ពីគ្នាដោយមេ API-key ដែលបានផ្ទៀងផ្ទាត់។ កំណត់ត្រាសវនកម្មមានសញ្ញាមេតា និងទំហំ ដែលមិនដែលមានមាតិកា។ ព័ត៌មានលម្អិតដែលប្រឈមមុខនឹងប្រតិបត្តិករ (សញ្ញាសម្គាល់ទាំងពីរ តម្រូវការជាមុនរបស់អតិថិជន `codemode:false` វិសាលភាពឧបករណ៍នីមួយៗ ការកំណត់ទំព័រ និងម៉ាទ្រីសវិនិច្ឆ័យ) រស់នៅក្នុង [ម៉ាស៊ីនបង្ហាប់ → តម្រូវការជាមុន / មគ្គុទ្ទេសក៍ប្រតិបត្តិករ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ។
 
-`omniroute_compression_status` រាយការណ៍ពីការបង្ហាប់ការពិពណ៌នា MCP ដោយឡែកពីគ្នានៅក្រោម
-`analytics.mcpDescriptionCompression`។ តម្លៃទាំងនោះគឺជាការប៉ាន់ស្មានទំហំទិន្នន័យមេតាសម្រាប់
-ការពិពណ៌នា MCP ដែលអាចរាយបញ្ជីបាន (`tools`, `prompts`, `resources`, និង `resourceTemplates`);
-ពួកវាមិនមែនជាបង្កាន់ដៃប្រើប្រាស់របស់អ្នកផ្តល់សេវាទេ ហើយត្រូវបានសម្គាល់ដោយ `source: "mcp_metadata_estimate"`។
+`omniroute_compression_status` រាយការណ៍ការបង្ហាប់ការពិពណ៌នា MCP ដោយឡែកពីគ្នានៅក្រោម `analytics.mcpDescriptionCompression`។ តម្លៃទាំងនោះគឺជាការប៉ាន់ប្រមាណទំហំទិន្នន័យមេតាសម្រាប់ការពិពណ៌នាដែលអាចរាយបញ្ជីបាន MCP (`tools`, `prompts`, `resources`, និង `resourceTemplates`); ពួកគេមិនមែនជាវិក័យប័ត្រប្រើប្រាស់របស់អ្នកផ្តល់សេវាទេ ហើយត្រូវបានសម្គាល់ដោយ `source: "mcp_metadata_estimate"`។
 
-### តម្រងដើមឈើភាពងាយស្រួលប្រើ MCP (MCP Accessibility Tree Filter) (v3.8.0)
+### MCP Accessibility Tree Filter (v3.8.0)
 
-ក្រៅពីឧបករណ៍បង្ហាប់ខាងលើ OmniRoute រួមបញ្ចូលតម្រងក្រោយការប្រតិបត្តិដែល
-បង្ហាប់**លទ្ធផលឧបករណ៍**នៃឧបករណ៍រុករក/ភាពងាយស្រួលប្រើ MCP មុនពេលពួកវាត្រូវបានបញ្ជូនត្រឡប់ទៅ
-ភ្នាក់ងារវិញ។ តម្រងនេះមិនមែនជាឧបករណ៍ដោយខ្លួនឯងទេ — វាដំណើរការដោយតម្លាភាពលើលទ្ធផលឧបករណ៍ណាមួយ
-ដែលមានអត្ថបទដើមឈើភាពងាយស្រួលប្រើ ឬរូបថតអេក្រង់កម្មវិធីរុករកលម្អិត (≥2000 តួអក្សរ)។
+ដោយដាច់ដោយឡែកពីឧបករណ៍បង្ហាប់ខាងលើ OmniRoute រួមបញ្ចូលតម្រងក្រោយការប្រតិបត្តិដែលបង្ហាប់** លទ្ធផលឧបករណ៍** នៃឧបករណ៍ MCP browser/accessibility មុនពេលពួកវាត្រូវបានបញ្ជូនត្រឡប់ទៅភ្នាក់ងារវិញ។ តម្រងនេះមិនមែនជាឧបករណ៍ — ទេ វាដំណើរការដោយតម្លាភាពលើលទ្ធផលឧបករណ៍ណាមួយដែលមាន verbose accessibility-tree ឬ browser-snapshot text (≥ 2000 chars)។
 
 ឥរិយាបថសំខាន់ៗ៖
 
-- បង្រួមបន្ទាត់បងប្អូនដែលកើតឡើងដដែលៗជាប់គ្នា ≥30 ទៅជាសេចក្តីសង្ខេបផ្នែកក្បាល + កន្ទុយ
-- រក្សាទុក `[ref=eXX]` anchors ដែលតម្រូវដោយ Playwright/computer-use
-- កាត់ផ្តាច់អត្ថបទធំពេក (>50,000 តួអក្សរ) ជាមួយនឹងការណែនាំអំពីការរុករក
-- ការសន្សំដែលរំពឹងទុក៖ **60–80%** លើទិន្នន័យរូបថតអេក្រង់កម្មវិធីរុករក
+- បង្រួម ≥ 30 បន្តបន្ទាប់គ្នាបន្ទាត់បងប្អូនបង្កើតទៅជាការសង្ខេបកន្ទុយ + ក្បាល
+- រក្សាយុថ្កា `[ref=eXX]` ដែលតម្រូវដោយ Playwright/computer-use
+- កាត់អត្ថបទដែលមានទំហំធំ (> 50,000 chars) ដោយមានតម្រុយរុករក
+- ការសន្សំដែលរំពឹងទុក៖** 60-80%** នៅលើកម្មវិធីរុករកតាមអ៊ីនធឺណិត
 
-ការកំណត់រចនាសម្ព័ន្ធ៖ `compression.mcpAccessibility` នៅក្នុងការកំណត់សកល (migration 056)។
-ការអនុវត្ត៖ `open-sse/services/compression/engines/mcpAccessibility/`។
-ឯកសារពេញលេញ៖ [ម៉ាស៊ីនបង្ហាប់ — តម្រងដើមឈើភាពងាយស្រួលប្រើ MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)។
+ការកំណត់រចនាសម្ព័ន្ធ៖ `compression.mcpAccessibility` នៅក្នុងការកំណត់សកល (ការធ្វើចំណាកស្រុក 056) ។ ការអនុវត្ត៖ `open-sse/services/compression/engines/mcpAccessibility/`។ ឯកសារពេញ៖ [ម៉ាស៊ីនបង្ហាប់ — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter) ។
 
-សូមមើល [ម៉ាស៊ីនបង្ហាប់](../compression/COMPRESSION_ENGINES.md) និង [ការបង្ហាប់ RTK](../compression/RTK_COMPRESSION.md) សម្រាប់
-គំរូការបង្ហាប់ពេលដំណើរការនៅពីក្រោយឧបករណ៍ទាំងនេះ។
+សូមមើល [Compression Engines](../compression/COMPRESSION_ENGINES.md) និង [RTK Compression](../compression/RTK_COMPRESSION.md) សម្រាប់គំរូការបង្ហាប់ពេលដំណើរការនៅពីក្រោយឧបករណ៍ទាំងនេះ។
 
 ## ឧបករណ៍ 1Proxy (3)
 
@@ -287,162 +283,137 @@ guardrail **មុន** វាទៅដល់ស្រទាប់អនុវ�
 
 ---
 
-## ការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ និងវិសាលភាព
+## ការផ្ទៀងផ្ទាត់ និងវិសាលភាព
 
-ឧបករណ៍ MCP ហៅខ្សែអក្សរវិសាលភាពអានពីអ្នកហៅ។ ការត្រួតពិនិត្យនោះគឺជាផ្នែកមួយនៃលំហឈ្មោះឯករាជ្យចំនួនបី។ ការអនុញ្ញាតពីអ្នកត្រួតពិនិត្យមួយមិនមែនជាការអនុញ្ញាតពីអ្នកដទៃទេ។
-ច្បាប់គឺ [លំហឈ្មោះវិសាលភាពបី](#three-scope-namespaces)។
-កាតាឡុកឧបករណ៍គឺ [វិសាលភាពឧបករណ៍ MCP](#mcp-tool-scopes)។
+ឧបករណ៍MCP ហៅអានខ្សែវិសាលភាពពីអ្នកហៅចូល។ ធីកនោះគឺជាលំហឈ្មោះឯករាជ្យមួយក្នុងចំណោមឈ្មោះទាំងបី។ សំបុត្រឆ្លងពីអ្នកត្រួតពិនិត្យម្នាក់ មិនមែនជាសំបុត្រពីអ្នកផ្សេងទេ។ ច្បាប់គឺ [វិសាលភាពឈ្មោះបី](#three-scope-namespaces) ។ កាតាឡុកឧបករណ៍គឺជា [វិសាលភាពឧបករណ៍MCP](#mcp-tool-scopes) ។
 
-### លំហឈ្មោះវិសាលភាពបី
+### វិសាលភាពចំនួនបី
 
-`manage` នៅលើ API key, `read:compression` នៅលើឧបករណ៍ MCP, និង `read` នៅលើ access token `oma_live_…` គឺជាការអនុញ្ញាតបីផ្សេងគ្នា។ អ្នកហៅដែលផ្ញើ access token `read` ទៅកាន់ management route ដែលផ្លាស់ប្តូរទិន្នន័យ នឹងទទួលបាន HTTP 403 `Access token scope 'read' is insufficient; 'write' required.`
-ចំណាត់ថ្នាក់នោះគឺ `scopeSatisfies`។ វាមិនពិគ្រោះតារាង MCP ទេ ហើយ MCP matcher ក៏មិនពិគ្រោះវាដែរ។
+`manage` នៅលើគ្រាប់ចុច API, `read:compression` នៅលើឧបករណ៍ MCP និង `read` នៅលើនិមិត្តសញ្ញាចូលប្រើ `oma_live_…` គឺជាជំនួយបីផ្សេងគ្នា។ អ្នកហៅទូរសព្ទដែលផ្ញើសញ្ញាសម្ងាត់ចូលប្រើ `read` ទៅកាន់ផ្លូវគ្រប់គ្រងដែលផ្លាស់ប្តូរទទួលបាន HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` ចំណាត់ថ្នាក់នោះគឺ `scopeSatisfies`។ វាមិនពិគ្រោះជាមួយតារាង MCP ហើយអ្នកផ្គូផ្គង MCP មិនពិគ្រោះជាមួយវាទេ។
 
-| លំហឈ្មោះ             | ព័ត៌មានសម្ងាត់                                                                   | អ្នកត្រួតពិនិត្យ              | ការអនុញ្ញាតអនុញ្ញាត                                                 |
-| :------------------- | :------------------------------------------------------------------------------- | :---------------------------- | :------------------------------------------------------------------ |
-| ការគ្រប់គ្រង API-key | `api_keys.scopes`                                                                | `hasManageScope`              | Management REST សម្រាប់ Bearer key នោះ                              |
-| API-key បន្ថែម       | array ដូចគ្នា, ខ្សែអក្សរពិតប្រាកដមួយ                                             | ជំនួយការដែលបានរៀបរាប់ខាងក្រោម | សមត្ថភាពតែមួយគត់នោះ                                                 |
-| វិសាលភាពឧបករណ៍ MCP   | array ដូចគ្នា, បើមិនដូច្នោះទេ MCP `_meta`, បើមិនដូច្នោះទេ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | ឧបករណ៍នោះ, នៅពេលដែលការអនុវត្តត្រូវបានបើក                            |
-| Access token         | `oma_live_…`                                                                     | `scopeSatisfies`              | management route ដែលវិធីសាស្ត្រ និងផ្លូវរបស់វាទាមទារចំណាត់ថ្នាក់នោះ |
+| Namespace            | លិខិតសម្គាល់                                                                             | អ្នកត្រួតពិនិត្យ            | សំបុត្រអនុញ្ញាត                                               |
+| :------------------- | :--------------------------------------------------------------------------------------- | :-------------------------- | :------------------------------------------------------------ |
+| ការគ្រប់គ្រង API-key | `api_keys.scopes`                                                                        | `hasManageScope`            | ការគ្រប់គ្រង REST សម្រាប់សោអ្នកកាន់នោះ។                       |
+| សារធាតុបន្ថែម API    | អារេដូចគ្នា ខ្សែអក្សរពិតប្រាកដមួយ។                                                       | ជំនួយការដែលមានឈ្មោះខាងក្រោម | សមត្ថភាពតែមួយគត់                                              |
+| វិសាលភាពឧបករណ៍MCP    | អារេដូចគ្នា, ផ្សេងទៀត MCP `_meta` (HTTP/SSE តែប៉ុណ្ណោះ), ផ្សេងទៀត `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | ឧបករណ៍នោះនៅពេលមានការអនុវត្តច្បាប់                             |
+| សញ្ញាសម្ងាត់ចូលប្រើ  | `oma_live_…`                                                                             | `scopeSatisfies`            | ផ្លូវគ្រប់គ្រងដែលវិធីសាស្រ្ត និងផ្លូវត្រូវការចំណាត់ថ្នាក់នោះ។ |
 
-ការបង្កើតព័ត៌មានសម្ងាត់នីមួយៗត្រូវបានគ្របដណ្តប់នៅក្នុង
-[ការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវនៃការគ្រប់គ្រង](../guides/MANAGEMENT-AUTH.md)។
+ការកំណត់អត្តសញ្ញាណនីមួយៗត្រូវបានគ្របដណ្តប់នៅក្នុង [ការគ្រប់គ្រងការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ](../guides/MANAGEMENT-AUTH.md) ។
 
-#### វិសាលភាព API-key
+#### វិសាលភាពគន្លឹះ API
 
-array `api_keys.scopes` មួយផ្តល់ការងារពីរ។ ពួកវាប្រើមុខងារផ្សេងគ្នា។
+អារេ `api_keys.scopes` មួយផ្តល់ការងារពីរ។ ពួកគេប្រើមុខងារផ្សេងៗគ្នា។
 
-**Management REST។** `manage` និង `admin` គឺជាសមាជិកនៃ
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`)។
-`hasManageScope` គឺជាអ្វីដែលអនុញ្ញាត management routes សម្រាប់ key នោះ។ `admin` គឺ
-មានសមត្ថភាពគ្រប់គ្រងលើ routes ទាំងនោះ។ ពាក្យ `admin` នៅទីនេះមិនមែនជា
-access-token rank ទេ ហើយវាមិនពង្រីកទៅជាវិសាលភាពឧបករណ៍ MCP ទេ។
+**ការគ្រប់គ្រង REST។** `manage` និង `admin` គឺជាសមាជិកនៃ `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) ។ `hasManageScope` គឺជាអ្វីដែលផ្តល់សិទ្ធិឱ្យផ្លូវគ្រប់គ្រងសម្រាប់សោនោះ។ `admin` គឺអាចគ្រប់គ្រងបាននៅលើផ្លូវទាំងនោះ។ ពាក្យ `admin` នៅទីនេះមិនមែនជាចំណាត់ថ្នាក់សញ្ញាសម្ងាត់ចូលប្រើទេ ហើយវាមិនពង្រីកទៅក្នុងវិសាលភាពឧបករណ៍ MCP ទេ។
 
-**ខ្សែអក្សរបន្ថែម។** នីមួយៗគឺជាការធ្វើតេស្តសមាជិកភាពពិតប្រាកដ ហើយនីមួយៗនៅ
-ក្រៅ `MANAGEMENT_API_KEY_SCOPES`។
+**ខ្សែអក្សរបន្ថែម។** នីមួយៗគឺជាការធ្វើតេស្តសមាជិកភាពពិតប្រាកដ ហើយម្នាក់ៗស្នាក់នៅខាងក្រៅ `MANAGEMENT_API_KEY_SCOPES`។
 
-| វិសាលភាព                       | ការអនុញ្ញាតអនុញ្ញាត                                                                                                                                                   |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | ការកាត់ចេញ `/api/mcp/` LOCAL_ONLY ដែលមិនមែនជា loopback តែប៉ុណ្ណោះ (`hasMcpConnectOrManageScope`)។ key ដែលមាន `manage` ឬ `admin` នៅតែឆ្លងកាត់ការកាត់ចេញនោះ។            |
-| `self:usage`                   | `GET /api/v1/me/status` សម្រាប់ key នេះ (`src/app/api/v1/me/status/route.ts`)។ `POST /api/keys` បន្ថែមវិសាលភាពនេះនៅពេលបង្កើត (`normalizeSelfServiceScopesForCreate`)។ |
-| `self:account-quota`           | កូតាគណនី upstream នៅក្នុង status payload នោះ (`src/lib/usage/apiKeySelfService.ts`)។ status route នៅតែទាមទារ `self:usage`។                                            |
-| `policy:bypass-provider-quota` | ការហៅ inference របស់ key នេះរំលងគោលការណ៍ provider-quota (`hasProviderQuotaBypassScope` នៅក្នុង `src/sse/handlers/chat.ts`)។                                           |
+| វិសាលភាព                       | សំបុត្រអនុញ្ញាត                                                                                                                                                      |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | មិនមែនរង្វិលជុំវិញ `/api/mcp/` LOCAL_ONLY ឆ្លាក់ចេញតែប៉ុណ្ណោះ (`hasMcpConnectOrManageScope`) ។ សោដែលមាន `manage` ឬ `admin` នៅតែឆ្លងកាត់ការឆ្លាក់នោះ។                 |
+| `self:usage`                   | `GET /api/v1/me/status` សម្រាប់សោនេះ (`src/app/api/v1/me/status/route.ts`) ។ `POST /api/keys` បន្ថែមវិសាលភាពនេះលើការបង្កើត (`normalizeSelfServiceScopesForCreate`) ។ |
+| `self:account-quota`           | កូតាគណនីខាងលើនៅក្នុងបន្ទុកស្ថានភាពនោះ (`src/lib/usage/apiKeySelfService.ts`) ។ ផ្លូវស្ថានភាពនៅតែទាមទារ `self:usage`។                                                 |
+| `policy:bypass-provider-quota` | ការហៅតាមការសន្និដ្ឋានរបស់គន្លឹះនេះរំលងគោលការណ៍កូតាអ្នកផ្តល់សេវា (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`)។                                       |
 
 #### ការផ្គូផ្គង
 
-កាតាឡុកគឺជាតារាងក្រោម [វិសាលភាពឧបករណ៍ MCP](#mcp-tool-scopes)។ កុំ
-ចាត់ទុក `MCP_SCOPE_LIST` នៅក្នុង `src/shared/constants/mcpScopes.ts` ជាកាតាឡុកនោះ៖
-វាគឺជា typed subset ដើម។ ឧបករណ៍ក្រោយៗមកប្រកាសវិសាលភាពបន្ថែមទៀតនៅក្បែរវា
-(`read:notion`, `read:skills`, `read:local-corpus`, និងនៅសល់នៃតារាង)។
+កាតាឡុកគឺជាតារាងក្រោម [វិសាលភាពឧបករណ៍MCP](#mcp-tool-scopes) ។ កុំចាត់ទុក `MCP_SCOPE_LIST` ក្នុង `src/shared/constants/mcpScopes.ts` ជាកាតាឡុកនោះ៖ វាគឺជាសំណុំរងដែលបានវាយដើម។ ឧបករណ៍ក្រោយៗទៀតប្រកាសវិសាលភាពបន្ថែមទៀតនៅក្បែរវា (`read:notion`, `read:skills`, `read:local-corpus`, និងតារាងដែលនៅសល់)។
 
-`evaluateToolScopes` នៅក្នុង `open-sse/mcp-server/scopeEnforcement.ts` អនុញ្ញាតការហៅ
-នៅពេលដែលវិសាលភាពដែលត្រូវការទាំងអស់ផ្គូផ្គងវិសាលភាពដែលបានផ្តល់មួយចំនួន៖
+`evaluateToolScopes` ក្នុង `open-sse/mcp-server/scopeEnforcement.ts` អនុញ្ញាតឱ្យមានការហៅទូរស័ព្ទនៅពេលដែលគ្រប់វិសាលភាពតម្រូវការត្រូវគ្នានឹងវិសាលភាពដែលបានផ្តល់មួយចំនួន:
 
-- `*` ផ្គូផ្គងវិសាលភាពដែលត្រូវការទាំងអស់។
-- វិសាលភាពដែលបានផ្តល់ដែលបញ្ចប់ដោយ `*` ផ្គូផ្គងវិសាលភាពដែលត្រូវការដែលចាប់ផ្តើមដោយ
-  បុព្វបទមុនសញ្ញាផ្កាយ។ `read:*` ផ្គូផ្គង `read:compression`។
-- វិសាលភាពដែលបានផ្តល់ផ្សេងទៀតទាំងអស់ផ្គូផ្គងតែខ្សែអក្សរដែលត្រូវការដូចគ្នាប៉ុណ្ណោះ។
+- `*` ផ្គូផ្គងគ្រប់វិសាលភាពដែលត្រូវការ។
+- វិសាលភាពដែលបានអនុញ្ញាតដែលបញ្ចប់ដោយ `*` ត្រូវនឹងវិសាលភាពដែលត្រូវការដែលចាប់ផ្តើមដោយបុព្វបទមុនផ្កាយ។ `read:*` ផ្គូផ្គង `read:compression`។
+- រាល់វិសាលភាពដែលបានផ្តល់ផ្សេងទៀតត្រូវគ្នាតែខ្សែអក្សរដែលត្រូវការដូចគ្នា។
 
-key ដែលវិសាលភាពរបស់វាគឺ `["manage"]` បរាជ័យ `scopeMatches` សម្រាប់ `read:compression`។
-ការហៅដូចគ្នាបរាជ័យសម្រាប់ `admin`, `mcp:connect`, `read`, និង `write` នៅពេលដែលទាំងនោះ
-គឺជាខ្សែអក្សរដែលបានផ្តល់តែមួយគត់។ មិនមានឋានានុក្រមក្នុងចំណោមវិសាលភាពឧបករណ៍ MCP
-ក្រៅពី `*` ដែលនៅខាងចុងឡើយ។
+សោដែលវិសាលភាពគឺ `["manage"]` បរាជ័យ `scopeMatches` សម្រាប់ `read:compression`។ ការហៅដូចគ្នានេះបរាជ័យសម្រាប់ `admin`, `mcp:connect`, `read`, និង `write` នៅពេលដែលខ្សែទាំងនោះគឺជាខ្សែដែលបានផ្តល់តែមួយគត់។ មិនមានឋានានុក្រមក្នុងចំណោមវិសាលភាពឧបករណ៍ MCP លើសពី `*` ដែលនៅពីក្រោយនោះទេ។
 
-ការអនុវត្តត្រូវបានបិទលុះត្រាតែ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (លំនាំដើម
-`false`)។ ខណៈពេលដែលវាបិទ, `evaluateToolScopes` អនុញ្ញាតការហៅ និងរំលងកាតាឡុក។
-ខណៈពេលដែលវាបើក, HTTP ប្រើ Bearer key's `api_keys.scopes` ជា
-`authInfo` (សូមមើល [ការចងវិសាលភាព HTTP តាម key](#per-key-http-scope-binding-7895))។
-នៅពេលដែលគ្មាន key scopes ត្រូវបានដោះស្រាយ, granted set ធ្លាក់ទៅ MCP `_meta`, បន្ទាប់មក
-`OMNIROUTE_MCP_SCOPES`។
+ការអនុវត្តត្រូវបានបិទ លុះត្រាតែ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` ( `false` លំនាំដើម)។ ខណៈពេលដែលវាបិទ `evaluateToolScopes` អនុញ្ញាតឱ្យហៅចេញ ហើយរំលងកាតាឡុក។ ខណៈពេលដែលវាបើក HTTP ប្រើ `api_keys.scopes` របស់ Bearer key ជា `authInfo` (សូមមើល [Per-key HTTP scope binding](#per-key-http-scope-binding-7895) )។ នៅពេលដែលគ្មានវិសាលភាពគន្លឹះដោះស្រាយ សំណុំដែលបានផ្តល់នឹងធ្លាក់ដល់ MCP `_meta` (កិត្តិយសសម្រាប់តែអ្នកហៅ HTTP/SSE ប៉ុណ្ណោះនៅក្នុងបរិបទ HTTP auth; `_meta` របស់អ្នកហៅ stdio មិនត្រូវបានអើពើទេ ពីព្រោះម៉ាស៊ីនភ្ញៀវគ្រប់គ្រងវា ហើយវាមិនមានអត្តសញ្ញាណអ្នកហៅចូលម្នាក់) បន្ទាប់មក `OMNIROUTE_MCP_SCOPES`។
 
-#### វិសាលភាព Access-token
+#### វិសាលភាពនៃសញ្ញាសម្ងាត់ចូលប្រើ
 
-tokens `oma_live_…` (`src/lib/accessTokens/scopes.ts`) ផ្ទុក `read`, `write`,
-ឬ `admin`។ `scopeSatisfies` គឺជាចំណាត់ថ្នាក់៖ `admin` គ្របដណ្តប់ `write` និង `read`, និង
-`write` គ្របដណ្តប់ `read`។ វិសាលភាពដែលមិនស្គាល់មិនគ្របដណ្តប់អ្វីទាំងអស់។
+`oma_live_…` tokens (`src/lib/accessTokens/scopes.ts`) អនុវត្ត `read`, `write`, ឬ `admin`។ `scopeSatisfies` គឺជាចំណាត់ថ្នាក់៖ `admin` គ្របដណ្តប់ `write` និង `read` ហើយ `write` គ្របដណ្តប់ `read`។ វិសាលភាពដែលមិនស្គាល់គ្របដណ្តប់អ្វីទាំងអស់។
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ប្រៀបធៀបចំណាត់ថ្នាក់នោះ
-ជាមួយ `inferRequiredScope` (`src/server/authz/accessScopes.ts`)៖
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ប្រៀបធៀបចំណាត់ថ្នាក់នោះជាមួយ `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD`, និង `OPTIONS` ទាមទារ `read`។
-- វិធីសាស្ត្រផ្សេងទៀតទាំងអស់ទាមទារ `write`។
-- ផ្លូវនៅក្នុង `ADMIN_SCOPE_PREFIXES` ទាមទារ `admin` សម្រាប់វិធីសាស្ត្រនីមួយៗ។ `/api/mcp`
-  ស្ថិតនៅក្នុងបញ្ជីនោះ ដូច្នេះ access token `write` នៅតែមិនអាចហៅ MCP HTTP
-  surface បានទេ។
-- ផ្លូវនៅក្នុង `ADMIN_MUTATION_PREFIXES` ទាមទារ `admin` តែសម្រាប់ការផ្លាស់ប្តូរទិន្នន័យប៉ុណ្ណោះ។
+- រាល់វិធីសាស្រ្តផ្សេងទៀតទាមទារ `write`។
+- ផ្លូវនៅក្នុង `ADMIN_SCOPE_PREFIXES` ទាមទារ `admin` សម្រាប់គ្រប់វិធីសាស្រ្ត។ `/api/mcp` ស្ថិតនៅក្នុងបញ្ជីនោះ ដូច្នេះ សញ្ញាសម្ងាត់ចូលប្រើ `write` នៅតែមិនអាចហៅផ្ទៃ MCP HTTP បានទេ។
+- ផ្លូវនៅក្នុង `ADMIN_MUTATION_PREFIXES` ត្រូវការ `admin` សម្រាប់តែការផ្លាស់ប្តូរប៉ុណ្ណោះ។
+- ផ្លូវនៅក្នុង `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) ត្រូវការ `admin` សម្រាប់ការផ្លាស់ប្តូរតែប៉ុណ្ណោះ ហើយមានតែនៅលើផ្លូវពិតប្រាកដនោះ — ផ្លូវរង `/api/settings/*` ផ្សេងទៀតរក្សា `write`។
 
-`PATCH /api/keys/{id}` គឺជាការផ្លាស់ប្តូរ (mutation) ហើយមិនមាននៅក្នុងបញ្ជីអ្នកគ្រប់គ្រងទាំងនោះទេ ដូច្នេះថូខឹន `read` នឹងទទួលបាន 403
-`Access token scope 'read' is insufficient; 'write' required.`
-ថូខឹនចូលប្រើ `write` ឬ `admin` អាចបំពេញតាមផ្លូវនោះ។ JWT របស់ផ្ទាំងគ្រប់គ្រង (dashboard JWT), ថូខឹន machine-id របស់ loopback CLI, និង API key ដែលមាន `manage` ឬ `admin` នឹងប្រើសាខាផ្សេងទៀត ហើយមិនត្រូវបានកំណត់ដោយចំណាត់ថ្នាក់នេះទេ។
+`PATCH /api/keys/{id}` គឺជាការផ្លាស់ប្តូរមួយ ហើយមិនមាននៅក្នុងបញ្ជីអ្នកគ្រប់គ្រងទាំងនោះទេ ដូច្នេះសញ្ញា `read` ទទួលបាន 403 `Access token scope 'read' is insufficient; 'write' required.` A `write` ឬ `admin` access token បំពេញផ្លូវនោះ។ ផ្ទាំងគ្រប់គ្រង JWT និមិត្តសញ្ញាលេខសម្គាល់ម៉ាស៊ីនរង្វិលជុំថយក្រោយ CLI និងគ្រាប់ចុច API ដែលមាន `manage` ឬ `admin` យកសាខាផ្សេងទៀត ហើយមិនត្រូវបានរួមតូចដោយចំណាត់ថ្នាក់នេះទេ។
 
-ថូខឹនចូលប្រើដែលឆ្លងកាត់ `scopeSatisfies` សម្រាប់ `/api/mcp` បានជម្រះច្រកគ្រប់គ្រងតែប៉ុណ្ណោះ។ ការហៅឧបករណ៍នៅតែដំណើរការ `scopeMatches` ប្រឆាំងនឹង scope របស់ API-key ។ ចំណាត់ថ្នាក់ថូខឹនចូលប្រើមិនមែនជាធាតុបញ្ចូលទៅក្នុង `scopeMatches` ទេ។
+សញ្ញាសម្ងាត់ចូលប្រើដែលឆ្លងកាត់ `scopeSatisfies` សម្រាប់ `/api/mcp` បានសម្អាតច្រកគ្រប់គ្រងតែប៉ុណ្ណោះ។ ការហៅឧបករណ៍នៅតែដំណើរការ `scopeMatches` ប្រឆាំងនឹងវិសាលភាព API-key ។ ចំណាត់ថ្នាក់សញ្ញាសម្ងាត់ចូលប្រើមិនមែនជាធាតុបញ្ចូលទៅ `scopeMatches` ទេ។
 
-### Scope ឧបករណ៍ MCP
+### វិសាលភាពឧបករណ៍MCP
 
-ការអនុវត្ត Scope ត្រូវបានប្រមូលផ្តុំនៅកណ្តាលក្នុង `open-sse/mcp-server/scopeEnforcement.ts` ។
-ឧបករណ៍នីមួយៗតម្រូវឱ្យមាន scope ជាក់លាក់៖
+ការអនុវត្តវិសាលភាពត្រូវបានដាក់កណ្តាលនៅក្នុង `open-sse/mcp-server/scopeEnforcement.ts`។ ឧបករណ៍នីមួយៗទាមទារវិសាលភាពជាក់លាក់៖
 
-| វិសាលភាព              | ឧបករណ៍                                                                                                                                                                           |
-| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                        |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                           |
-| `read:quota`          | `check_quota`                                                                                                                                                                    |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                           |
-| `read:models`         | `list_models_catalog`                                                                                                                                                            |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                    |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                            |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                               |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                      |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                   |
-| `read:cache`          | `cache_stats`                                                                                                                                                                    |
-| `write:cache`         | `cache_flush`                                                                                                                                                                    |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                       |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                            |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                 |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                           |
-| `read:memory`         | `memory_search`                                                                                                                                                                  |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                     |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                               |
-| `write:skills`        | `skills_enable`                                                                                                                                                                  |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                 |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                 |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                          |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                        |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                 |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                   |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                               |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                  |
-| `read:obsidian`       | ឧបករណ៍អានចំនួន 13 — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | ឧបករណ៍សរសេរចំនួន 9 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                |
+| វិសាលភាព              | ឧបករណ៍                                                                                                                                                                      |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                           |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                   |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                      |
+| `read:quota`          | `check_quota`                                                                                                                                                               |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                      |
+| `read:models`         | `list_models_catalog`                                                                                                                                                       |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                               |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                       |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                          |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                 |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                              |
+| `read:cache`          | `cache_stats`                                                                                                                                                               |
+| `write:cache`         | `cache_flush`                                                                                                                                                               |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                  |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                           |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                       |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                            |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                      |
+| `read:memory`         | `memory_search`                                                                                                                                                             |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                          |
+| `write:skills`        | `skills_enable`                                                                                                                                                             |
+| `execute:skills`      | `skills_execute`                                                                                                                                                            |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                            |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                     |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                   |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                            |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                              |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                          |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                             |
+| `read:obsidian`       | 13 ឧបករណ៍អាន — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 ឧបករណ៍សរសេរ — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                           |
 
-Wildcard scopes ត្រូវបានគាំទ្រ៖ `read:*` ផ្ដល់សិទ្ធិអានទាំងអស់, `*` ផ្ដល់សិទ្ធិចូលប្រើពេញលេញ។
+វិសាលភាពតួអក្សរជំនួសត្រូវបានគាំទ្រ៖ `read:*` ផ្តល់វិសាលភាពអានទាំងអស់ `*` ផ្តល់សិទ្ធិចូលប្រើពេញលេញ។
 
 ### `mcp:connect` — សមត្ថភាពផ្លូវតូចចង្អៀត (#7895)
 
-ការចូលទៅកាន់ HTTP/SSE MCP transport (`/api/mcp/*`) ពី non-loopback តម្រូវឱ្យមានការបែងចែក LOCAL_ONLY សម្រាប់ `/api/mcp/` (សូមមើល `docs/security/ROUTE_GUARD_TIERS.md`)។ ជាប្រវត្តិសាស្ត្រ ការបែងចែកនោះទទួលយកតែ API key ដែលមាន `manage`/`admin`-scope ពេញលេញប៉ុណ្ណោះ — ដែលធំទូលាយពេកសម្រាប់អ្នកហៅដែលគ្រាន់តែត្រូវការទំនាក់ទំនងជាមួយ MCP។ `src/shared/constants/managementScopes.ts` ឥឡូវនេះ export `MCP_CONNECT_SCOPE = "mcp:connect"`៖ ជា scope បន្ថែម និងតូចចង្អៀត (មានបុព្វហេតុដូច `SELF_USAGE_SCOPE`) ដែលអនុញ្ញាតត្រឹមតែការឆ្លងកាត់ `/api/mcp/` នៅក្នុង `src/server/authz/policies/management.ts` ប៉ុណ្ណោះ — វាមិនផ្ដល់សិទ្ធិចូលប្រើផ្លូវគ្រប់គ្រងផ្សេងទៀតទេ ហើយត្រូវបានរក្សាទុកដោយចេតនានៅក្រៅ `MANAGEMENT_API_KEY_SCOPES`។ Key ដែលមាន `manage`/`admin` នៅតែឆ្លងកាត់ការបែងចែកដោយមិនផ្លាស់ប្តូរ; `mcp:connect` គឺជាជម្រើសដែលមានសិទ្ធិទាបជាងសម្រាប់អ្នកហៅពីចម្ងាយដែលប្រើ MCP តែប៉ុណ្ណោះ ដែលត្រូវបានត្រួតពិនិត្យតាមរយៈ `hasMcpConnectOrManageScope()`។
+ការឈានដល់ការដឹកជញ្ជូន HTTP/SSE MCP (`/api/mcp/*`) ពី non-loopback តម្រូវឱ្យមានការឆ្លាក់ `/api/mcp/` LOCAL_ONLY (សូមមើល `docs/security/ROUTE_GUARD_TIERS.md`) ។ ជាប្រវត្តិសាស្ត្រដែលការឆ្លាក់ចេញបានទទួលយកតែ `manage`/`admin` -scope API គ្រាប់ចុច — ទូលំទូលាយពេកសម្រាប់អ្នកហៅចូលដែលត្រូវការនិយាយ MCP ប៉ុណ្ណោះ។ ឥឡូវនេះ `src/shared/constants/managementScopes.ts` នាំចេញ `MCP_CONNECT_SCOPE = "mcp:connect"`: សារធាតុបន្ថែម វិសាលភាពតូចចង្អៀត (ដូចមុនដូច `SELF_USAGE_SCOPE`) ដែលអនុញ្ញាត ONLY ផ្លូវវាង `/api/mcp/` ក្នុង `src/server/authz/policies/management.ts` — វាផ្តល់ការចូលប្រើផ្លូវគ្រប់គ្រងផ្សេងទៀត ហើយត្រូវបានរក្សាទុកដោយចេតនា OUT នៃ `MANAGEMENT_API_KEY_SCOPES`។ គ្រាប់ចុចដែលកាន់ `manage`/`admin` នៅតែឆ្លងកាត់ការឆ្លាក់មិនផ្លាស់ប្តូរ។ `mcp:connect` គឺជាជម្រើសដែលមានសិទ្ធិទាបសម្រាប់អ្នកហៅទូរស័ព្ទសម្រាប់តែ MCP ពីចម្ងាយ ដែលបានពិនិត្យតាមរយៈ `hasMcpConnectOrManageScope()`។
 
-### ការចង HTTP scope តាម Key នីមួយៗ (#7895)
+### ការចងវិសាលភាព HTTP ក្នុងមួយគន្លឹះ (#7895)
 
-លើ HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` ឥឡូវនេះដោះស្រាយ `api_keys.scopes` ពិតប្រាកដរបស់អ្នកហៅតាមរយៈ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ហើយបញ្ជូនវាទៅ `transport.handleRequest(req, { authInfo })` របស់ MCP SDK ដូច្នេះ `extra.authInfo.scopes` ដែលទៅដល់ការហៅឧបករណ៍នីមួយៗឆ្លុះបញ្ចាំងពី scopes របស់ Bearer key ផ្ទាល់។ `resolveCallerScopeContext()` របស់ `scopeEnforcement.ts` បានផ្ដល់អាទិភាពរួចហើយដល់ `authInfo` លើ `_meta` និង `OMNIROUTE_MCP_SCOPES` env fallback — នេះគ្រាន់តែបំពេញប្រភពដែលមានអាទិភាពខ្ពស់បំផុតដំបូងគេប៉ុណ្ណោះ ដែលពីមុនមិនត្រូវបានបញ្ចូលតាម HTTP ទេ។ នៅពេលដែលគ្មាន API key ត្រូវបានដោះស្រាយ (គ្មាន header, key មិនត្រឹមត្រូវ), `authInfo` នៅតែ `undefined` ហើយការដោះស្រាយនឹងបន្តទៅខ្សែសង្វាក់ `meta`/env ដែលមានស្រាប់ដោយមិនផ្លាស់ប្តូរ។ នេះមិនផ្លាស់ប្ដូរតម្លៃលំនាំដើមរបស់ `OMNIROUTE_MCP_ENFORCE_SCOPES` ទេ — ការអនុវត្តនៅតែត្រូវបើកដំណើរការដោយជាក់លាក់; ការផ្លាស់ប្តូរនេះគ្រាន់តែធ្វើឱ្យផ្លូវតាម key នីមួយៗមានអាទិភាពនៅពេលដែលវាត្រូវបានបើកដំណើរការប៉ុណ្ណោះ។ stdio មិនមានអត្តសញ្ញាណតាមអ្នកហៅនីមួយៗទេ (សូមមើល `mcpCallerIdentity.ts`) ហើយមិនត្រូវបានប៉ះពាល់ទេ — វាស្ថិតនៅលើខ្សែសង្វាក់ `_meta`/env fallback ។
+លើសពី HTTP/SSE ឥឡូវនេះ `open-sse/mcp-server/httpTransport.ts` ដោះស្រាយ `api_keys.scopes` ពិតប្រាកដរបស់អ្នកហៅតាមរយៈ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ហើយបញ្ជូនវាទៅ MCP SDK របស់ `transport.handleRequest(req, { authInfo })` ដូច្នេះ `extra.authInfo.scopes` ឈានដល់ការហៅឧបករណ៍នីមួយៗឆ្លុះបញ្ចាំងពីវិសាលភាពផ្ទាល់ខ្លួនរបស់អ្នកកាន់សោ។ `resolveCallerScopeContext()` របស់ `scopeEnforcement.ts` បានផ្តល់អាទិភាពដល់ `authInfo` រួចហើយលើ `_meta` និង `OMNIROUTE_MCP_SCOPES` env fallback — នេះបង្ហាញតែប្រភពដែលមានអាទិភាពខ្ពស់បំផុតដំបូងប៉ុណ្ណោះ ដែលពីមុនមិនត្រូវបានបញ្ចូលលើសពី HTTP. នៅពេលដែលគ្មាន API key ដោះស្រាយ (គ្មានបឋមកថា កូនសោមិនត្រឹមត្រូវ) `authInfo` នៅតែ `undefined` ហើយដំណោះស្រាយធ្លាក់ទៅខ្សែសង្វាក់ `meta`/env ដែលមានស្រាប់មិនផ្លាស់ប្តូរ។ stdio មិនមានអត្តសញ្ញាណអ្នកហៅចូលម្នាក់ទេ (មើល `mcpCallerIdentity.ts`) ហើយមិនរងផលប៉ះពាល់ដោយការចងលេខមួយ — វារំលងជំហាន `_meta` (`_meta` ត្រូវបានផ្តល់កិត្តិយសតែនៅក្នុងបរិបទ HTTP auth, #15159) ហើយដោះស្រាយពី `OMNIROUTE_MCP_SCOPES` env key តែម្នាក់ឯង។
+
+**Enforcement is forced on for narrow-scoped HTTP/SSE callers regardless of `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` defaulting to `false` is only safe for the local/stdio single-operator flow, where there is no per-caller identity to scope against. `open-sse/mcp-server/server.ts::withScopeEnforcement()` turns per-tool scope enforcement on unconditionally (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) whenever `resolveCallerScopeContext()` resolved `source === "authInfo"` (i.e. a real per-key HTTP Authorization header, HTTP/SSE-only) AND that key does not hold full `manage`/`admin` scope. This closes the gap where a key holding ONLY the narrow `mcp:connect` bypass scope — documented above as authorizing nothing but the `/api/mcp/` LOCAL_ONLY carve-out — could otherwise invoke every MCP tool once an operator enabled remote/non-loopback MCP access, simply because `OMNIROUTE_MCP_ENFORCE_SCOPES` ships `false` by default. A full `manage`/`admin` key over HTTP, and every stdio/local caller, keep the existing `OMNIROUTE_MCP_ENFORCE_SCOPES`-gated behavior unchanged.
+
+---
 
 ## អថេរបរិស្ថាន
 
-| អថេរ                                    | លំនាំដើម                                  | គោលបំណង                                                                                                                         |
-| :-------------------------------------- | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                  | URL មូលដ្ឋានដែលម៉ាស៊ីនមេ MCP ប្រើនៅពេលហៅ API ផ្ទៃក្នុងរបស់ OmniRoute                                                            |
-| `OMNIROUTE_API_KEY`                     | (ទទេ)                                     | កូនសោ API ដែលបញ្ជូនបន្តជា `Authorization: Bearer` ទៅការហៅ API ផ្ទៃក្នុង                                                         |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (មានតែ `"true"` ប៉ុណ្ណោះដែលបើកវា) | នៅពេលបើកដំណើរការ វិសាលភាពដែលបាត់បង់នឹងបដិសេធការហៅឧបករណ៍ និងកត់ត្រា `scope_denied:<reason>` នៅក្នុងកំណត់ហេតុសវនកម្ម              |
-| `OMNIROUTE_MCP_SCOPES`                  | (ទទេ)                                     | បញ្ជីអនុញ្ញាតដែលបំបែកដោយសញ្ញាក្បៀសនៃវិសាលភាពដែលត្រូវបានចាត់ទុកថា "មាន" តាមលំនាំដើម (ប្រើនៅពេលអ្នកហៅមិនផ្តល់វិសាលភាពផ្ទាល់ខ្លួន) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (មិនបានកំណត់ = បើក)                       | នៅពេលកំណត់ទៅ `0/false/off/no` វានឹងបិទការបង្ហាប់ការពិពណ៌នា MCP នៅពេលចុះឈ្មោះ                                                    |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (មិនបានកំណត់ = បើក)                       | ឈ្មោះហៅក្រៅជំនួសសម្រាប់ប៊ូតុងបិទបើកដូចខាងលើ                                                                                     |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                   | ថវិកាបោះបង់ចោលសម្រាប់ការអានការគ្រប់គ្រងផ្ទៃក្នុង (សុខភាព ភាពធន់ បន្សំ កូតា ការប្រើប្រាស់)                                       |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                   | ថវិកាបោះបង់ចោលសម្រាប់ការលោតដែលរង់ចាំអ្នកផ្តល់សេវា (`route_request`, `web_search`, `web_fetch`)                                  |
-| `MCP_TOOL_DENY`                         | (មិនបានកំណត់ = គ្មានតម្រង)                | ឈ្មោះឧបករណ៍ដែលបំបែកដោយសញ្ញាក្បៀសដើម្បីទម្លាក់ចេញពី `tools/list` (ការកាត់បន្ថយចំនួនឧបករណ៍ — សូមមើលខាងក្រោម)                      |
-| `MCP_TOOL_ALLOW`                        | (មិនបានកំណត់ = គ្មានតម្រង)                | ឈ្មោះឧបករណ៍ដែលបំបែកដោយសញ្ញាក្បៀសដើម្បីរក្សាទុកតែប៉ុណ្ណោះ (របៀបបញ្ជីអនុញ្ញាត — សូមមើលខាងក្រោម)                                   |
-| `DATA_DIR`                              | `~/.omniroute`                            | ឯកសារ Heartbeat ត្រូវបានសរសេរទៅ `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                        |
+| អថេរ                                    | លំនាំដើម                                  | គោលបំណង                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :-------------------------------------- | :---------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                  | URL មូលដ្ឋានដែលម៉ាស៊ីនមេ MCP ប្រើនៅពេលហៅ API ផ្ទៃក្នុងរបស់ OmniRoute                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `OMNIROUTE_API_KEY`                     | (ទទេ)                                     | សោ API ដែលត្រូវបានបញ្ជូនបន្តជា `Authorization: Bearer` ទៅកាន់ការហៅ API ផ្ទៃក្នុង                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (មានតែ `"true"` ប៉ុណ្ណោះដែលបើកវា) | នៅពេលបើក scope ដែលបាត់នឹងបដិសេធការហៅឧបករណ៍ ហើយកត់ត្រា `scope_denied:<reason>` ក្នុងកំណត់ហេតុសវនកម្ម។ ការអនុវត្តក៏ត្រូវបានបង្ខំឱ្យបើកដោយមិនគិតពីទង់នេះផងដែរ សម្រាប់អ្នកហៅ HTTP/SSE ណាមួយដែលត្រូវបានកំណត់ពីបឋមកថា Authorization តាមសោនីមួយៗ (`source === "authInfo"`) ដែលមិនមាន scope `manage`/`admin` ពេញលេញ — ឧទាហរណ៍ សោដែលមានតែ scope ឆ្លងកាត់ដ៏ចង្អៀត `mcp:connect` — ដូច្នេះលំនាំដើមនេះមានសុវត្ថិភាពសម្រាប់តែលំហូរ local/stdio ដែលមានប្រតិបត្តិករតែម្នាក់ប៉ុណ្ណោះ មិនមែនសម្រាប់ការចូលប្រើពីចម្ងាយដែលមិនមែនជា loopback ឡើយ |
+| `OMNIROUTE_MCP_SCOPES`                  | (ទទេ)                                     | បញ្ជីអនុញ្ញាតនៃ scope ដែលបំបែកដោយសញ្ញាក្បៀស និងត្រូវបានចាត់ទុកថា "មាន" តាមលំនាំដើម (ប្រើនៅពេលអ្នកហៅមិនផ្តល់ scope របស់ខ្លួន)                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (មិនបានកំណត់ = បើក)                       | នៅពេលកំណត់ជា `0/false/off/no` វាបិទការបង្ហាប់សេចក្ដីពិពណ៌នា MCP នៅពេលចុះឈ្មោះ                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (មិនបានកំណត់ = បើក)                       | ឈ្មោះជំនួសសម្រាប់ការបិទបើកដូចគ្នាខាងលើ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                   | ថវិកាពេលវេលាបោះបង់សម្រាប់ការអានគ្រប់គ្រងផ្ទៃក្នុង (សុខភាព ភាពធន់ បន្សំ កូតា ការប្រើប្រាស់)                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                   | ថវិកាពេលវេលាបោះបង់សម្រាប់ដំណាក់កាលដែលរង់ចាំអ្នកផ្តល់សេវា (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `MCP_TOOL_DENY`                         | (មិនបានកំណត់ = គ្មានតម្រង)                | ឈ្មោះឧបករណ៍ដែលបំបែកដោយសញ្ញាក្បៀស ដើម្បីដកចេញពី `tools/list` (ការកាត់បន្ថយចំនួនប្រភេទឧបករណ៍ — សូមមើលខាងក្រោម)                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `MCP_TOOL_ALLOW`                        | (មិនបានកំណត់ = គ្មានតម្រង)                | ឈ្មោះឧបករណ៍ដែលបំបែកដោយសញ្ញាក្បៀស ដើម្បីរក្សាទុកតែឧបករណ៍ទាំងនោះប៉ុណ្ណោះ (របៀបបញ្ជីអនុញ្ញាត — សូមមើលខាងក្រោម)                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `DATA_DIR`                              | `~/.omniroute`                            | ឯកសារ heartbeat ត្រូវបានសរសេរទៅកាន់ `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ---
 

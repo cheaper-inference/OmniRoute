@@ -4,92 +4,99 @@
 
 ---
 
-> **Orísun òtítọ́:** ibi iṣẹ́ `electron/`
-> **Ìgbà ìmúdójúìwọ̀n tó kẹ́yìn:** 2026-06-28 — v3.8.40
+> **Orisun otitọ:** `electron/` aaye iṣẹ** Imudojuiwọn to kẹhin:** 2026-06-28 — v3.8.40
 
-OmniRoute pèsè ètò ìṣàmúlò kọ̀ǹpútà oríṣiríṣi ẹ̀rọ (Windows / macOS / Linux) tí a kọ́ lórí
-**Electron 41** + **electron-builder 26.10**. Ètò ìṣàmúlò kọ̀ǹpútà náà máa ń dá olupin adádúró Next.js
-sílẹ̀ gẹ́gẹ́ bí ìlànà ọmọ, ó máa ń darí `BrowserWindow` sí i, ó sì ń fi
-àpótí ètò, olùmúdójúìwọ̀n aládàáṣiṣẹ́, afárá IPC, àti ìpilẹ̀ṣẹ̀ àṣírí láìsí àtòpọ̀ kún un.
+OmniRoute gbe ohun elo tabili ori ẹrọ agbelebu kan (Windows / macOS / Linux) ti a ṣe lori**Electron 41** +** elekitironi-Akole 26.10** . Ohun elo tabili tabili naa nfa olupin iduroṣinṣin Next.js bi ilana ọmọde, tọka `BrowserWindow` kan si i, o si ṣafikun atẹ eto, imudojuiwọn adaṣe, afara IPC, ati bootstrap aṣiri odo-iṣeto.
 
-## Ìṣètò-ẹ̀rọ
+## Faaji
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Ìlànà àkọ́kọ́ Electron (electron/main.js)    │
-│ ├─ Títì pa sí ẹ̀dà kan ṣoṣo                  │
-│ ├─ Ìlànà ọmọ: olupin adádúró Next.js         │
-│ │   (tí a dá sílẹ̀ pẹ̀lú Node runtime Electron)│
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ Àpótí ètò + àkójọ àṣàyàn àyíká           │
-│ ├─ Ìmúdójúìwọ̀n aládàáṣiṣẹ́ nípasẹ̀ electron-updater │
-│ ├─ Òfin Ààbò Àkóónú (àwọn àkọlé session)     │
-│ └─ Ìpilẹ̀ṣẹ̀ àṣírí (JWT / API_KEY_SECRET)    │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-            ↕ Afárá IPC (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Olùṣàfihàn (pátákó ìṣàkóso Next.js)          │
+│ Renderer (Next.js dashboard)                  │
 │   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
-## Àwọn ẹ̀yà
+## Awọn ẹya
 
-A ti fìdí wọn múlẹ̀ láti inú `electron/package.json`:
+Timo lati `electron/package.json`:
 
-| Package            | Ẹ̀yà                                                                  |
-| ------------------ | -------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                            |
-| `electron-builder` | `^26.15.3`                                                           |
-| `electron-updater` | `^6.8.9`                                                             |
-| `better-sqlite3`   | gbòǹgbò `^13.0.2` (àwọn prebuild Node-API — kò nílò àtúnkọ́ Electron) |
-| Ẹ̀yà ètò ìṣàmúlò    | `3.8.0`                                                              |
-| Id ètò ìṣàmúlò     | `online.omniroute.desktop`                                           |
-| Orúkọ ọjà          | `OmniRoute`                                                          |
+| Package            | Ẹya                                                      |
+| ------------------ | -------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                |
+| `electron-builder` | `^26.15.3`                                               |
+| `electron-updater` | `^6.8.9`                                                 |
+| `better-sqlite3`   | root `^13.0.2` (Node-API prebuilds — no Electron atunkọ) |
+| App version        | `3.8.0`                                                  |
+| App id             | `online.omniroute.desktop`                               |
+| Orukọ ọja          | `OmniRoute`                                              |
 
-## Àwọn script (`package.json` gbòǹgbò)
+## Awọn iwe afọwọkọ (root `package.json`)
 
-| Script                            | Ète                                                                                                   |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Bẹ̀rẹ̀ `npm run dev` + dúró de `localhost:20128` + ṣe ìfilọ́lẹ̀ Electron                                  |
-| `npm run electron:build`          | Kọ Next.js lẹ́yìn náà kí ó ṣiṣẹ́ `electron-builder` fún OS tó wà lọ́wọ́lọ́wọ́                               |
-| `npm run electron:build:win`      | Kọ olùṣàgbéwọlé Windows NSIS + ẹ̀yà àgbéwọlé (x64)                                                     |
-| `npm run electron:build:mac`      | Kọ macOS DMG (Intel + Apple Silicon)                                                                  |
-| `npm run electron:build:linux`    | Kọ Linux AppImage + DEB (x64 + arm64)                                                                 |
-| `npm run electron:smoke:packaged` | Ṣe ìfilọ́lẹ̀ fáìlì executable tí a ti di àpò, kí ó sì dán `/login` wò fún HTTP 200, lẹ́yìn náà kí ó pa á |
+| Iwe afọwọkọ                       | Idi                                                                             |
+| --------------------------------- | ------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Bẹrẹ `npm run dev` + nduro fun `localhost:20128` + awọn ifilọlẹ Electron        |
+| `npm run electron:build`          | Kọ Next.js lẹhinna nṣiṣẹ `electron-builder` fun OS lọwọlọwọ                     |
+| `npm run electron:build:win`      | Kọ Windows NSIS insitola + to ṣee gbe (x64)                                     |
+| `npm run electron:build:mac`      | Kọ macOS DMG (Intel + Apple Silicon)                                            |
+| `npm run electron:build:linux`    | Kọ Linux AppImage + DEB (x64 + apa64)                                           |
+| `npm run electron:smoke:packaged` | Ṣe ifilọlẹ alakomeji akopọ ati awọn iwadii `/login` fun HTTP 200, lẹhinna tiipa |
 
-Ibi iṣẹ́ `electron/` tún ń pèsè:
+Aaye iṣẹ `electron/` tun ṣafihan:
 
-- `npm run prepare:bundle` — ń ṣiṣẹ́ `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — àwọn ìkọ́lé macOS fún arch kan ṣoṣo
-- `npm run pack` — ìkọ́lé àkójọpọ̀-nìkan fún àyẹ̀wò agbègbè (kò sí olùṣàgbéwọlé)
+- `npm run prepare:bundle` — nṣiṣẹ `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — ọkan-arch macOS kọ
+- `npm run pack` — liana-kikọ fun idanwo agbegbe (ko si insitola)
 
-## Ìṣètò Àkójọfáìlì
+## Iyan awọn akopọ asiko isise
+
+Awọn ile-iṣẹ kọǹpútà le ṣe atẹjade awọn ile-ipamọ akoko asiko iyan lẹgbẹẹ awọn fifi sori ẹrọ wọn. Isanwo olupin ti a fi sori ẹrọ ni `optional-packs.index.json` (labẹ `resources/app` lori Windows ati Linux). Fun titẹsi `browser-runtime`, ka `packs[].tarball` ati igbasilẹ** orukọ faili gangan yẹn lati itusilẹ kanna** . Awọn orukọ pamosi pẹlu kan SHA-256 Daijesti; o yatọ si kọ le beere o yatọ si pamosi. Jeki orukọ faili ti a gbasile ko yipada.
+
+Daakọ atọka ohun elo ti a fi sori ẹrọ ati ibi ipamọ ti o yan sinu itọsọna kan, lẹhinna lo CLI lati itusilẹ kanna:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` ṣafihan fifi sori ẹrọ ati ipo ijẹrisi, kii ṣe orukọ faili pamosi. Atọka ti a ṣajọpọ yan ile-ipamọ naa. Fifi sori ẹrọ jẹri checksum pamosi rẹ ṣaaju isediwon ati awọn sọwedowo package rẹ ṣaaju rirọpo idii ti a fi sori ẹrọ. O ka awọn faili agbegbe; ko ṣe igbasilẹ awọn iwe ipamọ ti o padanu. Tun ohun elo bẹrẹ lẹhin fifi sori ẹrọ. Ti itusilẹ ko ba ni dukia ibaamu, idii iyan ko si nipasẹ awọn ohun-ini itusilẹ yẹn.
+
+## Ilana Itọsọna
 
 ```
 electron/
-├── package.json              # Àwọn ìgbẹ́kẹ̀lé Electron + àtòpọ̀ electron-builder
-├── main.js                   # Ìlànà àkọ́kọ́ (24 KB — wo àwọn àlàyé ní ìsàlẹ̀)
-├── preload.js                # afárá IPC contextBridge
-├── types.d.ts                # Àwọn irú AppInfo / ServerStatus / ElectronAPI
-├── README.md                 # Àwọn àkọsílẹ̀ inú workspace
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # àbájáde electron-builder (gitignored)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Ṣètò bundle .next/electron-standalone sípò
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Ìdánwò smoke lẹ́yìn build
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Àwọn méjèèjì `main.js` àti `preload.js` jẹ́ **àwọn fáìlì CommonJS `.js`**, wọn kì í ṣe TypeScript. Àwọn
-ìtumọ̀ irú ti ẹ̀ka renderer wà nínú `electron/types.d.ts`.
+Mejeeji `main.js` ati `preload.js` ni** awọn faili CommonJS `.js`** , kii ṣe TypeScript. Awọn titẹ-ẹgbẹ oluṣe n gbe ni `electron/types.d.ts`.
 
-## Afárá IPC (`preload.js`)
+## Afara IPC (`preload.js`)
 
-Preload náà ṣí API tí a ti fi sínú àkójọ ààyè sílẹ̀ lórí `window.electronAPI` nípa lílo `contextBridge`
-pẹ̀lú `contextIsolation: true` àti `nodeIntegration: false`.
+Iṣaju iṣaju ṣe afihan API ti o jẹ funfun lori `window.electronAPI` nipa lilo `contextBridge` pẹlu `contextIsolation: true` ati `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -108,107 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-Àwọn method tí a ṣí sílẹ̀:
+Awọn ọna ti a fi han:
 
-| Ìpè renderer                                                      | Irú                          |
-| ----------------------------------------------------------------- | ---------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                       |
-| `openExternal(url)`                                               | invoke                       |
-| `getDataDir()`                                                    | invoke                       |
-| `restartServer()`                                                 | invoke                       |
-| `getAppVersion()`                                                 | invoke                       |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                       |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                         |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (ó dá disposer padà) |
+| Renderer ipe                                                      | Iru                   |
+| ----------------------------------------------------------------- | --------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | epe                   |
+| `openExternal(url)`                                               | epe                   |
+| `getDataDir()`                                                    | epe                   |
+| `restartServer()`                                                 | epe                   |
+| `getAppVersion()`                                                 | epe                   |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | epe                   |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | firanṣẹ               |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | gba (olupada ipadabọ) |
 
-Àwọn olùrànlọ́wọ́ receive náà máa ń dá **fúnkíṣọ̀nù disposer** padà dípò gbígbẹ́kẹ̀lé
-`removeAllListeners` — èyí ń dènà ìkójọpọ̀ listener nígbà tí àwọn component React
-bá tún mount.
+Awọn oluranlọwọ gbigba pada a** isọnu iṣẹ** dipo gbigbekele `removeAllListeners` — eyi ṣe idilọwọ ikojọpọ olutẹtisi nigbati awọn paati React tun gbe soke.
 
-## Ìgbésí-ayé Server
+## Server Lifecycle
 
-`main.js` máa ń spawn bundle standalone Next.js náà tààrà pẹ̀lú runtime Node ti Electron
-láti yẹra fún àìbáramu ABI module abinibi pẹ̀lú Node ètò:
+`main.js` fa idii adaduro Next.js taara pẹlu akoko asiko ṣiṣe Node Electron lati yago fun ibaamu ABI -module abinibi pẹlu Node eto:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-Àwọn kókó pàtàkì:
+Awọn pataki:
 
-- `waitForServer()` máa ń ṣàyẹ̀wò URL náà léraléra fún tó 30 s kí ó tó fi window hàn (kò sí ojú ìbòjú òfìfo ní ìbẹ̀rẹ̀ tútù).
-- `stdio: "pipe"` máa ń gba stdout/stderr; àwọn gbólóhùn ìmúrasílẹ̀ (`Ready` / `listening`) máa ń fi `server-status: running` ránṣẹ́ lórí IPC.
-- `before-quit` máa ń dúró fún tó 5 s fún SIGTERM aláìlágbára (ààyè ìṣàyẹ̀wò WAL), lẹ́yìn náà ó máa ń fi SIGKILL ránṣẹ́.
-- Olùyí port inú tray (`20128`, `3000`, `8080`) máa ń dá server dúró, ó sì tún un bẹ̀rẹ̀, lẹ́yìn náà ó tún BrowserWindow load.
+- `waitForServer()` ṣe idibo URL titi di 30 s ṣaaju iṣafihan window naa (ko si iboju òfo ni ibẹrẹ tutu).
+- `stdio: "pipe"` gba stdout/stderr; awọn gbolohun ọrọ ti o ṣetan (`Ready` / `listening`) emit `server-status: running` lori IPC.
+- `before-quit` duro de 5 s fun ore-ọfẹ SIGTERM ( aaye ayẹwo WAL ) lẹhinna firanṣẹ SIGKILL.
+- Port switcher ninu atẹ (`20128`, `3000`, `8080`) duro ati tun bẹrẹ olupin naa, lẹhinna tun gbe BrowserWindow naa.
 
-## Ìpilẹ̀ṣẹ̀ Àṣírí Láìsí Àtòpọ̀
+## Zero-konfigi Asiri Bootstrap
 
-Ní ìgbà ìṣíṣẹ́ àkọ́kọ́, iṣẹ́ àkọ́kọ́ máa ń ṣe àgbéjáde àwọn àṣírí tí kò sí láìfọwọ́sí, ó sì máa ń tọ́jú wọn:
+Ni ifilọlẹ akọkọ, ilana akọkọ n ṣe ipilẹṣẹ ati pe o tẹsiwaju awọn aṣiri ti o padanu:
 
-| Àṣírí                    | Orísun                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                          |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (kò ní tẹ̀síwájú bí àwọn ẹ̀rí ìwọlé tí a ti paró bá ti wà) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                          |
+| Asiri                    | Orisun                                                                             |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                           |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (ko ti awọn iwe-ẹri ti paroko ti wa tẹlẹ) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                           |
 
-A tọ́jú rẹ̀ sínú `<DATA_DIR>/server.env`. `DATA_DIR` máa ń yanjú sí:
+Tẹra mọ `<DATA_DIR>/server.env`. `DATA_DIR` pinnu lati:
 
 - Windows: `%APPDATA%\omniroute`
-- Linux: `$XDG_CONFIG_HOME/omniroute` tàbí `~/.omniroute`
+- Linux: `$XDG_CONFIG_HOME/omniroute` tabi `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Fèrèsé & Àpótí Ètò
+## Ṣiṣayẹwo faili ayika
 
-- `BrowserWindow`: 1400×900 (ó kéré jù lọ 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, àmì ìṣàkóso fèrèsé wà ní `{ x: 16, y: 16 }`.
-- Windows/Linux: ọ̀pá àkọlé abinibi.
-- Bọ́tìnì títì máa ń dín un kù sínú àpótí ètò; àkojọ aṣàyàn àpótí ètò ní **Ṣí OmniRoute**, **Ṣí Pátákó Ìdarí** (aṣàwákiri ìta), àkojọ abẹ́ **Pọ́ọ̀tì Sẹ́fà**, **Ṣàyẹ̀wò fún Àwọn Ìmúdójúìwọ̀n**, **Jáde**.
+Ṣaaju ki o to spawning olupin, ilana akọkọ (`getPreferredEnvFilePath()` in `electron/main.js`) yan** ọkan** faili `.env` : akọkọ ti awọn wọnyi ti o wa.
 
-## Ìlànà Ààbò Àkóónú
+1. `$DATA_DIR/.env`, nigbati `DATA_DIR` ti ṣeto ni ayika app ti ṣe ifilọlẹ pẹlu.
+2. `<resolved DATA_DIR>/.env`, ni lilo awọn aṣiṣe kanna bi loke: `%APPDATA%\omniroute\.env` lori Windows, `$XDG_CONFIG_HOME/omniroute/.env` tabi `~/.omniroute/.env` lori Linux ati macOS.
+3. `.env` ninu ilana iṣẹ ilana.
 
-A ṣètò rẹ̀ nípasẹ̀ `session.defaultSession.webRequest.onHeadersReceived`. Àwọn ìtọ́sọ́nà pàtàkì:
+Ilana akọkọ ka faili yẹn nikan; nigbamii awọn oludije ko dapọ mọ. Ayika olupin ti wa ni itumọ ti pẹlu iṣaaju yii (akọkọ ti o ga julọ):
+
+1. Ayika ilana Electron (awọn iyatọ jogun lati ohunkohun ti o ṣe ifilọlẹ app naa).
+2. Faili `.env` ti o yan.
+3. `<DATA_DIR>/server.env` (awọn aṣiri bootstrap loke).
+
+Ayika ilana naa ti mu nigbati ohun elo ba bẹrẹ, nitorinaa eto tabi oluyipada ayika olumulo ṣeto lakoko ti ohun elo nṣiṣẹ (pẹlu lakoko ti o joko ninu atẹ lẹhin ti window rẹ) ko de ọdọ olupin naa titi ti ohun elo yoo fi pari ni kikun ati tun bẹrẹ. Fun awọn koko akoko asiko bii `CONTEXT_LENGTH_<PROVIDER>` (wo [Awọn iyipada Ayika: Ipari ọrọ-ọrọ Olupese](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), fẹran faili `.env`, lẹhinna dawọ kuro ni kikun (atẹ,** Jade** ) ati tun bẹrẹ.
+
+## Ferese & Atẹ
+
+- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, ijabọ-ina ni `{ x: 16, y: 16 }`.
+- Windows/Linux: abinibi akọle bar.
+- Bọtini pipade dinku si atẹ; akojọ atẹ ni o ni** Ṣii OmniRoute** ,** Ṣii Dasibodu** (aṣawakiri ita),** Ibudo olupin** akojọ aṣayan,** Ṣayẹwo fun awọn imudojuiwọn** ,** Jade** .
+
+## Akoonu Aabo Afihan
+
+Ṣeto nipasẹ `session.defaultSession.webRequest.onHeadersReceived`. Awọn ilana pataki:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Ipò ìdàgbàsókè ṣàfikún `'unsafe-eval'` sí `script-src` nìkan
+- Ipo Dev ṣafikun `'unsafe-eval'` si `script-src` nikan
 
-## Ìmúdójúìwọ̀n Aládàáṣiṣẹ́
+## Imudojuiwọn laifọwọyi
 
-Ó ń lo `electron-updater` pẹ̀lú olùpèsè GitHub (`diegosouzapw/OmniRoute`).
+Nlo `electron-updater` pẹlu olupese GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Àwọn ìṣẹ̀lẹ̀ ni a fi ránṣẹ́ sí olùṣàfihàn nípasẹ̀ `update-status` IPC:
-  `checking`, `available`, `not-available`, `downloading` (pẹ̀lú `percent`), `downloaded`, `error`
-- `installUpdate()` máa ń dá sẹ́fà dúró, lẹ́yìn náà ó máa ń pe `autoUpdater.quitAndInstall()`
-- A máa ń fò ó kọjá ní ipò ìdàgbàsókè (`!app.isPackaged`)
+- Awọn iṣẹlẹ ti a firanṣẹ siwaju si oluṣe nipasẹ `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (pẹlu `percent`), `downloaded`, `error`
+- `installUpdate()` pa olupin naa lẹhinna pe `autoUpdater.quitAndInstall()`
+- Ti fo ni ipo dev (`!app.isPackaged`)
 
-## Ìṣàn Ìkọ́lé
+## Kọ Pipeline
 
-1. `npm run build` → Next.js standalone nínú `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → tún ṣètò rẹ̀ sínú `.next/electron-standalone`, ó sì tún àwọn ipa ọ̀nà pípé inú `server.js` + `required-server-files.json` kọ kí a lè gbé àkójọpọ̀ náà lọ sí ibòmíràn.
-3. `electron-builder` máa ń di `main.js`, `preload.js`, `node_modules`, àti `extraResources: { ../.next/electron-standalone → app }` sínú àkójọpọ̀.
+1. `npm run build` → Next.js adaduro ni `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → tun-ipele sinu `.next/electron-standalone` o si tun kọ awọn ipa ọna pipe inu `server.js` + `required-server-files.json` nitori naa idii naa jẹ atunlo.
+3. awọn akojọpọ `electron-builder` `main.js`, `preload.js`, `node_modules`, ati `extraResources: { ../.next/electron-standalone → app }`.
 
-### Àwọn ibi-àfojúsùn ìkọ́lé
+### Kọ awọn ibi-afẹde
 
-| OS      | Àwọn ibi-àfojúsùn                           |
-| ------- | ------------------------------------------- |
-| Windows | Olùṣàgbékalẹ̀ NSIS + ẹ̀yà alágbèéká (x64)     |
-| macOS   | DMG (Intel + arm64, wọ́ọ́ lọ sí Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)                |
+| OS      | Awọn ibi-afẹde                           |
+| ------- | ---------------------------------------- |
+| Windows | NSIS insitola + šee gbe (x64)            |
+| macOS   | DMG (Intel + arm64, fa-si-Awọn ohun elo) |
+| Linux   | AppImage + DEB (x64 + apa64)             |
 
-Àwọn ààtò NSIS: `oneClick: false`, ó jẹ́ kí aṣàmúlò yan atọ́ka ìgbékalẹ̀, ó sì ṣẹ̀dá àwọn ọ̀nà-àbùjá Desktop àti Start-Menu.
+NSIS eto: `oneClick: false`, jẹ ki olumulo yan ilana fifi sori ẹrọ, ṣẹda Ojú-iṣẹ ati awọn ọna abuja Akojọ aṣyn.
 
-## Ìdánwò Ẹ̀fin fún Àkójọpọ̀ Ìkọ́lé
+## Ẹfin Igbeyewo Packaged Kọ
 
 ```bash
 npm run electron:smoke:packaged
@@ -216,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Máa ń ṣàwárí fáìlì ìṣiṣẹ́ tí a ti kó sínú `electron/dist-electron/` fún pèpéle tó ń lò lọ́wọ́ láìfọwọ́sí.
-- Máa ń bẹ̀rẹ̀ rẹ̀ pẹ̀lú àwọn atọ́ka `HOME`/`APPDATA`/`XDG_*` tí a yà sọ́tọ̀, kí ó má bàa fọwọ́ kan dátà olùgbéejáde.
-- Máa ń ṣàyẹ̀wò `http://127.0.0.1:20128/login` léraléra fún HTTP 200 láàárín 45 s.
-- Máa ń ṣọ stderr/stdout fún àwọn àpẹẹrẹ àṣìṣe apanirun (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ).
-- Máa ń dúró fún 2 s ti àkókò ìṣiṣẹ́ tó dúró ṣinṣin lẹ́yìn tí ó bá ti ṣetán, lẹ́yìn náà ó máa ń fi SIGTERM ránṣẹ́, ó sì dúró de kí pọ́ọ̀tì náà ṣí sílẹ̀.
-- Nínú CI, ó máa ń fi `--no-sandbox --disable-gpu` kọjá láìfọwọ́sí (àti `--disable-dev-shm-usage` lórí Linux).
+- Laifọwọyi ṣe awari alakomeji akopọ ni `electron/dist-electron/` fun iru ẹrọ lọwọlọwọ.
+- Ṣe ifilọlẹ pẹlu awọn ilana `HOME`/`APPDATA`/`XDG_*` ti o ya sọtọ nitorina ko fi ọwọ kan data idagbasoke.
+- Idibo `http://127.0.0.1:20128/login` fun HTTP 200 laarin 45 s.
+- Wiwo stderr/stdout fun awọn ilana apaniyan (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, ati bẹbẹ lọ).
+- Nduro 2 s ti akoko asiko iduroṣinṣin lẹhin imurasilẹ, lẹhinna gbejade SIGTERM ati duro de ibudo lati ni ọfẹ.
+- Ni CI, laifọwọyi kọja `--no-sandbox --disable-gpu` (ati `--disable-dev-shm-usage` lori Linux).
 
-Àwọn àyípadà àyíká fún ìkọlù ààtò: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env dojukọ: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## Fífi Ìbuwọ́lù sí Kóòdù
+## Iforukọsilẹ koodu
 
-`electron/package.json` **kò** so àwọn ẹ̀rí ìdánimọ̀ fún fífi ìbuwọ́lù pọ̀ tààrà. Fi wọ́n ránṣẹ́ sí `electron-builder` nípasẹ̀ àwọn env vars:
+`electron/package.json` ṣe** kii ṣe** waya fawabale ẹrí taara. Ṣe wọn nipasẹ env vars si `electron-builder`:
 
 ### macOS
 
@@ -250,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-Fífi ìbuwọ́lù sí AppImage jẹ́ àṣàyàn — ṣètò `LINUX_GPG_KEY` bí o bá fẹ́ fi ìbuwọ́lù sí i.
+wíwọlé AppImage jẹ aṣayan — ṣeto `LINUX_GPG_KEY` ti o ba forukọsilẹ.
 
-## Pípínkiri
+## Pinpin
 
-Àwọn artifact yóò wà nínú `electron/dist-electron/`:
+Awọn ohun-ọṣọ ilẹ ni `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-A máa ń tẹ àwọn ìtújáde jáde sí GitHub Releases (`diegosouzapw/OmniRoute`), ibẹ̀ náà sì ni `electron-updater` ti máa ń ṣàyẹ̀wò àwọn ẹ̀yà tuntun.
+Awọn idasilẹ ti wa ni atẹjade si awọn idasilẹ GitHub (`diegosouzapw/OmniRoute`), eyiti o tun wa nibiti `electron-updater` n ṣayẹwo fun awọn ẹya tuntun.
 
-## Yíyanjú Ìṣòro
+## Laasigbotitusita
 
-| Àmì Ìṣòro                                                              | Àtúnṣe                                                                                                                                                               |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` lẹ́yìn ìgbéga ẹ̀yà pàtàkì Electron | better-sqlite3 v13 ní àwọn Node-API prebuild — tún `npm install` ṣiṣẹ́ ní root, lẹ́yìn náà ṣiṣẹ́ `prepare:bundle` (ó máa ń ṣàyẹ̀wò prebuild fún platform tó wà lọ́wọ́lọ́wọ́) |
-| `ERR_DLOPEN_FAILED` fún module abinibi                                 | Tún `prepare:bundle` ṣiṣẹ́ — ó máa ń dá iṣẹ́ dúró lẹ́sẹ̀kẹsẹ̀ tí Node-API prebuild fún platform tó wà lọ́wọ́lọ́wọ́ kò bá sí                                                   |
-| Window hàn ní òfìfo lórí Linux                                         | Jẹ́rìí pé server Next.js so mọ́ PORT ní tòótọ́ (ṣàyẹ̀wò àwọn log `[Server]`)                                                                                             |
-| Ìfọwọ́sí notarization macOS dúró                                        | Rí i dájú pé a export àwọn vars `APPLE_*`, kì í ṣe pé wọ́n kàn wà nínú `.env`                                                                                         |
-| Ìkìlọ̀ Windows SmartScreen                                              | Fi EV cert buwọ́ sí i, tàbí kí àwọn olumulo tẹ bọ́tìnì ọ̀tún → "Ṣiṣe lọ́nàkọnà"                                                                                          |
-| Smoke test kùnà nítorí port wà ní lílò                                 | Dá dev server agbègbè èyíkéyìí tó ń ṣiṣẹ́ lórí 20128 dúró kí o tó ṣiṣẹ́ `electron:smoke:packaged`                                                                      |
+| Aisan                                                             | Ṣe atunṣe                                                                                                                                              |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Cannot find module 'better-sqlite3'` lẹhin Electron ijalu pataki | better-sqlite3 v13 awọn ọkọ oju omi Node-API ti ṣatunkọ — tun-ṣiṣẹ `npm install` ni gbongbo ati `prepare:bundle` (o jẹri iṣaju tẹlẹ fun pẹpẹ lọwọlọwọ) |
+| `ERR_DLOPEN_FAILED` fun abinibi module                            | Tun-ṣiṣẹ `prepare:bundle` — o kuna ni iyara nigbati Node-API kọkọ fun pẹpẹ lọwọlọwọ ti nsọnu                                                           |
+| Ferese han ni ofo lori Linux                                      | Jẹrisi olupin Next.js gangan ni asopọ si PORT (ṣayẹwo awọn iwe `[Server]` )                                                                            |
+| macOS notarization ibùso                                          | Rii daju pe `APPLE_*` var ti wa ni okeere, kii ṣe ni `.env` nikan                                                                                      |
+| Windows SmartScreen ìkìlọ                                         | Wọlé pẹlu EV cert, tabi awọn olumulo tẹ-ọtun → "Ṣiṣe lonakona"                                                                                         |
+| Idanwo ẹfin kuna pẹlu ibudo-ni lilo                               | Duro eyikeyi olupin dev agbegbe ni 20128 ṣaaju ṣiṣe `electron:smoke:packaged`                                                                          |
 
-## Wo Pẹ̀lú
+## Wo Tun
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- Orísun: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Àwọn irinṣẹ́ ìrànlọ́wọ́: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Orisun: `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- Awọn oluranlọwọ: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

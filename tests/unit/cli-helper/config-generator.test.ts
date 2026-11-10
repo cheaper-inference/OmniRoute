@@ -149,8 +149,8 @@ describe("config-generator", () => {
         apiKey: "sk-xxx",
       });
       assert.ok(Array.isArray(results));
-      // claude, codex, opencode, cline, kilocode, continue, omp, hermes
-      assert.strictEqual(results.length, 8);
+      // claude, codex, opencode, cline, kilocode, continue, omp, hermes, whycodes (#14107)
+      assert.strictEqual(results.length, 9);
       const omp = results.find((r) => r.configPath.endsWith(".omp/agent/models.yml"));
       assert.ok(omp, "omp generator is registered in generateAllConfigs");
       assert.strictEqual(omp?.success, true);

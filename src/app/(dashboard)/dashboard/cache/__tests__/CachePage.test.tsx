@@ -1,9 +1,19 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, cleanup, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import React from "react";
 import CachePage from "../page";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 const notifications = {
   success: vi.fn(),
@@ -190,7 +200,7 @@ describe("CachePage", () => {
     render(<CachePage />);
 
     await waitFor(() => {
-      expect(screen.getByText("Prompt Cache (Provider-Side)")).toBeInTheDocument();
+      expect(screen.getByText("Breakdown by Provider")).toBeInTheDocument();
     });
 
     expect(screen.getByText("Breakdown by Provider")).toBeInTheDocument();
@@ -198,7 +208,7 @@ describe("CachePage", () => {
     expect(screen.getAllByText("60.0%").length).toBeGreaterThan(0);
     expect(screen.queryByText("Semantic cache is disabled.")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Semantic Cache" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Semantic Cache" }));
 
     await waitFor(() => {
       expect(screen.getByText("Semantic cache is disabled.")).toBeInTheDocument();
