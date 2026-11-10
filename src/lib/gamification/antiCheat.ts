@@ -119,6 +119,9 @@ async function computeZScore(apiKeyId: string): Promise<number | null> {
     )
     .get(apiKeyId) as { total: number };
 
+  // The unary plus on GROUP BY keeps SQLite from ordering by the (api_key_id, created_at)
+  // index, which without sqlite_stat1 it prefers and scans in full. The hourly range then
+  // uses idx_xp_audit_log_created_cover (migration 238) as a covering range search.
   const statsRow = d
     .prepare(
       `SELECT AVG(hourly_total) AS mean,
@@ -129,7 +132,7 @@ async function computeZScore(apiKeyId: string): Promise<number | null> {
          SELECT api_key_id, SUM(xp_earned) AS hourly_total
          FROM xp_audit_log
          WHERE created_at > datetime('now', '-1 hour')
-         GROUP BY api_key_id
+         GROUP BY +api_key_id
        )`
     )
     .get() as { mean: number; variance: number } | undefined;
