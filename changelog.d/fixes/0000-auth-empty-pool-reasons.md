@@ -1,1 +1,0 @@
-- **fix(auth):** when every account of a provider is skipped, the warning log and the selection result now say why, as counts per reason (for example `rateLimited=2, terminalStatus=1`), so an operator can see at a glance whether accounts are cooling, locked or banned.
