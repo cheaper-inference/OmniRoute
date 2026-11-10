@@ -1,1 +1,0 @@
-- **fix(sse):** A stalled client no longer lets the response stream read thousands of frames ahead; the client-facing queue is now capped in bytes (16 KiB), not in chunks.

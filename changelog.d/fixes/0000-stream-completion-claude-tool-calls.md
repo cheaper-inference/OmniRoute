@@ -1,1 +1,0 @@
-- **fix(sse):** a streamed answer sent to a Claude client now saves the same tool calls, with full arguments, that the client received. Before, the saved and cached copy could lose the arguments or the call itself.

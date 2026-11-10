@@ -1,0 +1,1 @@
+- **fix(sse):** a chat request whose body carries a session or thread id with non-Latin-1 characters (for example Chinese text or emoji) no longer fails with a header error. The id now maps to a stable hashed value, so one conversation keeps one upstream session. ([#19703](https://github.com/cheaper-inference/OmniRoute/pull/19703))

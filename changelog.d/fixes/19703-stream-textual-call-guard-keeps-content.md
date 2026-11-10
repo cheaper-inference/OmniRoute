@@ -1,0 +1,1 @@
+- **fix(sse):** a streamed answer that starts like a textual tool call but never completes no longer loses its first characters or sends text after the finish frame. ([#19703](https://github.com/cheaper-inference/OmniRoute/pull/19703))
