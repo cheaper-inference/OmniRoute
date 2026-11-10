@@ -16,6 +16,7 @@ import { testComboSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { ownListenerSelfHopToken, SELF_HOP_HEADER } from "@omniroute/open-sse/utils/selfHop";
 import { isAutoComboId, materializeAutoCombo } from "@/lib/combos/autoVirtual";
 import type { ComboRecord } from "@/domain/persistence/comboRepositories";
 
@@ -164,6 +165,9 @@ async function testComboTarget(
         "Content-Type": "application/json",
         ...(internalApiKey ? { Authorization: `Bearer ${internalApiKey}` } : {}),
         "X-Internal-Test": "combo-health-check",
+        // Sent here, not left to the fetch stamp: that only fires for listenPort(), and this
+        // targets apiPort, which differs when the API has its own port.
+        [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
         // Force a fresh execution path so combo tests cannot be satisfied by
         // OmniRoute's semantic cache or other request reuse layers.
         "X-OmniRoute-No-Cache": "true",

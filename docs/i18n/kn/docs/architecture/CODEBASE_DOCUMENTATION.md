@@ -444,9 +444,9 @@ server/
 
 ---
 
-## 4. `open-sse/` - ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ಕಾರ್ಯಕ್ಷೇತ್ರ
+## 4. `open-sse/` — ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ಕಾರ್ಯಕ್ಷೇತ್ರ
 
-ಪ್ರತ್ಯೇಕ npm ಕಾರ್ಯಸ್ಥಳವನ್ನು `@omniroute/open-sse` ಎಂದು ಪ್ರಕಟಿಸಲಾಗಿದೆ. ವಿನಂತಿ ಪ್ರಕ್ರಿಯೆ, ಕಾರ್ಯನಿರ್ವಾಹಕರು, ಅನುವಾದಕರು, ಸೇವೆಗಳು, ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್ ಮತ್ತು MCP ಸರ್ವರ್ ಅನ್ನು ಹೊಂದಿದ್ದಾರೆ.
+ಪ್ರತ್ಯೇಕ npm ಕಾರ್ಯಕ್ಷೇತ್ರವನ್ನು `@omniroute/open-sse` ಎಂದು ಪ್ರಕಟಿಸಲಾಗಿದೆ. ವಿನಂತಿ ಪ್ರಕ್ರಿಯೆ, ಕಾರ್ಯನಿರ್ವಾಹಕರು, ಅನುವಾದಕರು, ಸೇವೆಗಳು, ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್ ಮತ್ತು MCP ಸರ್ವರ್ ಅನ್ನು ಹೊಂದಿದ್ದಾರೆ.
 
 ```
 open-sse/
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ಉನ್ನತ ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ಮೈನಸ್ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳು - ಎಣಿಕೆ `npm run check:docs-counts` ಅಳತೆಗಳು). ಪ್ರತಿ ಎಕ್ಸಿಕ್ಯೂಟರ್ ವರ್ಗವು `BaseExecutor` (`base.ts`) ಅನ್ನು ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಇನ್ನೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕರು (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, fetch/TTS ಅಡಾಪ್ಟರ್ಗಳು, ಕ್ವಿರ್ಕ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಕಾರ್ಯನಿರ್ವಾಹಕರು ಸೇರಿವೆ:
+159 ಉನ್ನತ ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ಮೈನಸ್ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳು — ಎಣಿಕೆ `npm run check:docs-counts` ಅಳತೆಗಳು). ಪ್ರತಿ ಎಕ್ಸಿಕ್ಯೂಟರ್ ವರ್ಗವು `BaseExecutor` (`base.ts`) ಅನ್ನು ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಇನ್ನೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕರು (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, fetch/TTS ಅಡಾಪ್ಟರ್ಗಳು, ಕ್ವಿರ್ಕ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಕಾರ್ಯನಿರ್ವಾಹಕರು ಸೇರಿವೆ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `qoder`, ಜೊತೆಗೆ `devin-desktop` `pollinations` ಹಂಚಿದ ಗುರುತಿನ ಸಹಾಯಕ) ಮತ್ತು `claudeIdentity.ts` (ನೋಂದಣಿ) `index.ts`
 
-> ಗಮನಿಸಿ: ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡದಿರುವ ಪೂರೈಕೆದಾರರು ಸಾಮಾನ್ಯ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು `default.ts` ಮೂಲಕ ಸೇವೆ ಸಲ್ಲಿಸುತ್ತಾರೆ. ಪೂರ್ಣ ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (377 ಪೂರೈಕೆದಾರರು) `src/shared/constants/providers.ts` ನಲ್ಲಿ ವಾಸಿಸುತ್ತದೆ.
+> ಗಮನಿಸಿ: ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡದಿರುವ ಪೂರೈಕೆದಾರರು ಸಾಮಾನ್ಯ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು `default.ts` ಮೂಲಕ ಸೇವೆ ಸಲ್ಲಿಸುತ್ತಾರೆ. ಪೂರ್ಣ ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ (381 ಪೂರೈಕೆದಾರರು) `src/shared/constants/providers.ts` ನಲ್ಲಿ ವಾಸಿಸುತ್ತದೆ.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based ಪ್ರತಿಕ್ರಿಯೆಗಳು API ↔ ಚಾಟ್ ಪೂರ್ಣಗೊಳಿಸುವಿಕೆ ಪರಿವರ್ತಕ ( `responses/` ಮಾರ್ಗ ಕ್ಯಾಚ್-ಆಲ್ ಬಳಸಲಾಗಿದೆ).
+- `responsesTransformer.ts` — `TransformStream` -based ಪ್ರತಿಕ್ರಿಯೆಗಳು API ↔ ಚಾಟ್ ಪೂರ್ಣಗೊಳಿಸುವಿಕೆ ಪರಿವರ್ತಕ ( `responses/` ಮಾರ್ಗ ಕ್ಯಾಚ್-ಆಲ್ನಿಂದ ಬಳಸಲಾಗುತ್ತದೆ).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ open-sse/
 | ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳುವುದು  | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | ರೂಟಿಂಗ್ ಬುದ್ಧಿಮತ್ತೆ   | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | ಮಾದರಿ ನಿರ್ವಹಣೆ        | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ಸಂಕೋಚನ                | `compression/` - ಪೂರ್ಣ ಕಂಪ್ರೆಷನ್ ಎಂಜಿನ್ ವೈರಿಂಗ್                                                                                                                                                                                                          |
+| ಸಂಕೋಚನ                | `compression/` — ಪೂರ್ಣ ಕಂಪ್ರೆಷನ್ ಎಂಜಿನ್ ವೈರಿಂಗ್                                                                                                                                                                                                          |
 | ಟೋಕನ್ + ಸೆಷನ್         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | ಶ್ರೇಣಿ / ಮ್ಯಾನಿಫೆಸ್ಟ್ | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / ನೆಟ್ವರ್ಕ್        | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,9 +528,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ಅನನ್ಯ ಪರಿಕರಗಳು** `server.ts` ನಲ್ಲಿ ವೈರ್ಡ್ ( `schemas/tools.ts` + ಮೆಮೊರಿಯಲ್ಲಿ 45 ಅಂಗೀಕೃತ, ಕೌಶಲ್ಯಗಳು, GitHub-ಕೌಶಲ್ಯಗಳು, ಪೂಲ್, ಗ್ಯಾಮಿಫಿಕೇಶನ್, ಪ್ಲಗಿನ್, Notion, Obsidian, ಲೋಕಲ್-ಕಾರ್ಪಸ್ ಮತ್ತು ಕಂಪ್ರೆಷನ್ ಮಾಡ್ಯೂಲ್ಗಳು - ಯೂನಿಯನ್ `countUniqueMcpTools` ನಿಂದ ಎಣಿಕೆ ಮಾಡಲಾಗಿದೆ).
+- **110 ಅನನ್ಯ ಪರಿಕರಗಳು** `server.ts` ನಲ್ಲಿ ವೈರ್ಡ್ ( `schemas/tools.ts` + ಮೆಮೊರಿಯಲ್ಲಿ 45 ಅಂಗೀಕೃತ, ಕೌಶಲ್ಯಗಳು, GitHub-ಕೌಶಲ್ಯಗಳು, ಪೂಲ್, ಗ್ಯಾಮಿಫಿಕೇಶನ್, ಪ್ಲಗಿನ್, Notion, Obsidian, ಲೋಕಲ್-ಕಾರ್ಪಸ್ ಮತ್ತು ಕಂಪ್ರೆಷನ್ ಮಾಡ್ಯೂಲ್ಗಳು — ಯೂನಿಯನ್ `countUniqueMcpTools` ನಿಂದ ಎಣಿಕೆ ಮಾಡಲಾಗಿದೆ ).
 - **3 ಸಾರಿಗೆ** : stdio, HTTP ಸ್ಟ್ರೀಮಬಲ್, SSE.
-- **33 ವ್ಯಾಪ್ತಿಗಳು** ರನ್ಟೈಮ್ನಲ್ಲಿ ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ - `src/shared/constants/mcpScopes.ts` ನಲ್ಲಿ ಮೂಲ ಪಟ್ಟಿ, ಪೂರ್ಣ ಸೆಟ್ ಪ್ರತಿ ಟೂಲ್ ಮಾಡ್ಯೂಲ್ನಿಂದ ಘೋಷಿಸಲಾದ ಸ್ಕೋಪ್ಗಳ ಒಕ್ಕೂಟವಾಗಿದೆ.
+- **33 ವ್ಯಾಪ್ತಿಗಳು** `src/shared/constants/mcpScopes.ts` ನಲ್ಲಿ ರನ್ಟೈಮ್ — ಬೇಸ್ ಲಿಸ್ಟ್ನಲ್ಲಿ ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ, ಪೂರ್ಣ ಸೆಟ್ ಪ್ರತಿ ಟೂಲ್ ಮಾಡ್ಯೂಲ್ನಿಂದ ಘೋಷಿಸಲಾದ ಸ್ಕೋಪ್ಗಳ ಒಕ್ಕೂಟವಾಗಿದೆ.
 - ಆಡಿಟ್ ಟೇಬಲ್: `mcp_tool_audit` ( `audit.ts` ನಿಂದ ಜನಸಂಖ್ಯೆಯನ್ನು ಹೊಂದಿದೆ).
 - ಫೈಲ್ಗಳು: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, ಜೊತೆಗೆ `__tests__/` ಅಡಿಯಲ್ಲಿ ಪರೀಕ್ಷೆಗಳು.
 - ಸಂಪೂರ್ಣ ಟೂಲ್ ಕ್ಯಾಟಲಾಗ್ಗಾಗಿ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ನೋಡಿ.

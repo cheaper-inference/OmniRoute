@@ -11,55 +11,73 @@ OmniRoute ಆಡಳಿತಾತ್ಮಕ ಕ್ರಿಯೆಗಳು, ದೃಢ�
 
 ಅನುಷ್ಠಾನವು `src/lib/compliance/index.ts` (T-43 — "ಅನುಸರಣೆ ನಿಯಂತ್ರಣಗಳು") ಮತ್ತು `src/lib/compliance/providerAudit.ts` ನಲ್ಲಿ ಇದೆ. ಆಡಿಟ್ ಬರವಣಿಗೆಗಳು ಎಂದಿಗೂ ದೋಷವನ್ನು ಎಸೆಯುವುದಿಲ್ಲ: ಯಾವುದೇ ವೈಫಲ್ಯ ಸಂಭವಿಸಿದಾಗ ಕರೆ ಮೌನವಾಗಿ ನಿರ್ಲಕ್ಷಿಸಲ್ಪಡುತ್ತದೆ; ಹೀಗಾಗಿ ಆಡಿಟ್ ಲಾಗಿಂಗ್ ಮುಖ್ಯ ವಿನಂತಿಯ ಹರಿವಿಗೆ ಅಡ್ಡಿಯಾಗುವುದಿಲ್ಲ.
 
-## ಲಾಗ್ ಮಾಡಲಾಗುವ ಅಂಶಗಳು
+## ಏನು ಲಾಗ್ ಆಗುತ್ತದೆ
 
-### ಆಡಳಿತಾತ್ಮಕ ಆಡಿಟ್ ಘಟನೆಗಳು (`audit_log`)
+### ಆಡಳಿತಾತ್ಮಕ ಆಡಿಟ್ ಈವೆಂಟ್ಗಳು (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })` ಗೆ ಮಾಡುವ ಪ್ರತಿಯೊಂದು ಕರೆಯೂ ಒಂದು ಸಾಲನ್ನು ರಚಿಸುತ್ತದೆ. ಕ್ರಿಯೆಯ ಸ್ಟ್ರಿಂಗ್ಗಳು `domain.verb` (ಅಥವಾ `domain.verb.outcome`) ಮಾದರಿಯನ್ನು ಅನುಸರಿಸುತ್ತವೆ. ಮೂಲ ವೃಕ್ಷದಲ್ಲಿ ದೃಢೀಕರಿಸಲಾದ ಕ್ರಿಯೆ ಪ್ರಕಾರಗಳು ಇವುಗಳನ್ನು ಒಳಗೊಂಡಿವೆ:
+`logAuditEvent({ action, actor, target, details, ... })` ಗೆ ಮಾಡುವ ಪ್ರತಿಯೊಂದು ಕರೆಯೂ
+ಒಂದು ಸಾಲನ್ನು ಸೃಷ್ಟಿಸುತ್ತದೆ. ಆಕ್ಷನ್ ಸ್ಟ್ರಿಂಗ್ಗಳು `domain.verb` (ಅಥವಾ
+`domain.verb.outcome`) ಮಾದರಿಯನ್ನು ಅನುಸರಿಸುತ್ತವೆ. ಟ್ರೀನಲ್ಲಿ ದೃಢೀಕರಿಸಲಾದ
+ಆಕ್ಷನ್ ಪ್ರಕಾರಗಳು:
 
-| ಕ್ರಿಯೆ                               | ಮೂಲ                                     |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| ಆಕ್ಷನ್                               | ಮೂಲ                                      |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-ಪ್ರತಿಯೊಂದು ನಮೂದು `action`, `actor` (ಡೀಫಾಲ್ಟ್ ಆಗಿ `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` ಮತ್ತು `timestamp` ಅನ್ನು ಸೆರೆಹಿಡಿಯುತ್ತದೆ. ಸೂಕ್ಷ್ಮ ಕೀಗಳನ್ನು (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಯಾವುದೇ ಕೀ ಇತ್ಯಾದಿ) ಸಾಲನ್ನು ಬರೆಯುವ ಮೊದಲು ಪುನರಾವರ್ತಿತವಾಗಿ `"[redacted]"` ಎಂದು ಮರೆಮಾಡಲಾಗುತ್ತದೆ.
+ಪ್ರತಿಯೊಂದು ನಮೂದು `action`, `actor` (ಡೀಫಾಲ್ಟ್ ಆಗಿ `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, ಮತ್ತು `timestamp` ಅನ್ನು ದಾಖಲಿಸುತ್ತದೆ. ಸೂಕ್ಷ್ಮ ಕೀಗಳನ್ನು
+(`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey`
+ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಯಾವುದಾದರೂ ಕೀ ಇತ್ಯಾದಿ) ಸಾಲನ್ನು ಬರೆಯುವ ಮೊದಲು ಪುನರಾವರ್ತಿತವಾಗಿ
+`"[redacted]"` ಆಗಿ ಮರೆಮಾಡಲಾಗುತ್ತದೆ.
 
-### MCP ಪರಿಕರ ಕರೆಗಳು (`mcp_tool_audit`)
+`api_key.auth.touch` ಸಾಲುಗಳು ಯಶಸ್ವಿಯಾದ API ಕೀ ಮೆಟಾಡೇಟಾ ಮತ್ತು ವಿನಂತಿ ಲಾಗ್ಗೆ
+ತಲುಪದ ಡಿಸ್ಕವರಿ ರೀಡ್ಗಳನ್ನು (GET/HEAD) ದಾಖಲಿಸುತ್ತವೆ: ಯಾವ ಕೀ, ಯಾವಾಗ, ಮತ್ತು
+ಸಾಮಾನ್ಯೀಕರಿಸಿದ ಪಥ; ಇವುಗಳನ್ನು ಒಟ್ಟುಗೂಡಿಸಿ ಗರಿಷ್ಠ 1,000 ಸಾಲುಗಳಿಗೆ ಮಿತಿಗೊಳಿಸಲಾಗುತ್ತದೆ.
+`noLog` ಹೊಂದಿರುವ ಕీలు ಮತ್ತು ಪರಿಸರ ಕೀಯನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತದೆ. ಕರೆಮಾಡುವವರ IP
+ವಿಳಾಸ ಮತ್ತು user-agent ಅನ್ನು `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` ಫೀಚರ್
+ಫ್ಲ್ಯಾಗ್ ಆನ್ ಇರುವಾಗ ಮಾತ್ರ ಸೇರಿಸಲಾಗುತ್ತದೆ (ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್).
 
-ಪ್ರತಿಯೊಂದು MCP ಪರಿಕರ ಆಹ್ವಾನವು `open-sse/mcp-server/audit.ts` ಮೂಲಕ ಒಂದು ಸಾಲನ್ನು ಬರೆಯುತ್ತದೆ. ಸ್ಕೀಮಾ (`src/lib/db/migrations/002_mcp_a2a_tables.sql` ನಿಂದ):
+### MCP ಟೂಲ್ ಕರೆಗಳು (`mcp_tool_audit`)
 
-| ಕಾಲಮ್            | ಟಿಪ್ಪಣಿಗಳು                                          |
-| ---------------- | --------------------------------------------------- |
-| `id`             | ಸ್ವಯಂ-ವೃದ್ಧಿ                                        |
-| `tool_name`      | MCP ಪರಿಕರ ಗುರುತಿಸುವಿಕೆ                              |
-| `input_hash`     | ಇನ್ಪುಟ್ನ sha256 (ಯಾವುದೇ ಪೇಲೋಡ್ ಸಂಗ್ರಹಿಸಲಾಗುವುದಿಲ್ಲ) |
-| `output_summary` | ಚಿಕ್ಕದಾದ, ಮೊಟಕುಗೊಳಿಸಿದ ಸಾರಾಂಶ                       |
-| `duration_ms`    | ಒಟ್ಟು ಕಳೆದ ಸಮಯ                                      |
-| `api_key_id`     | ಕರೆ ಮಾಡಿದವರು (ಶೂನ್ಯವಾಗಿರಬಹುದು)                      |
-| `success`        | `1` / `0`                                           |
-| `error_code`     | ವೈಫಲ್ಯದ ಸಂದರ್ಭದಲ್ಲಿ ಅಂತಿಮ ದೋಷ ಕೋಡ್                  |
-| `created_at`     | ISO ಕಾಲಮುದ್ರೆ                                       |
+ಪ್ರತಿಯೊಂದು MCP ಟೂಲ್ ಆವಾಹನೆಯೂ `open-sse/mcp-server/audit.ts` ಮೂಲಕ ಒಂದು ಸಾಲನ್ನು
+ಬರೆಯುತ್ತದೆ. ಸ್ಕೀಮಾ (`src/lib/db/migrations/002_mcp_a2a_tables.sql` ನಿಂದ):
+
+| ಕಾಲಮ್            | ಟಿಪ್ಪಣಿಗಳು                                   |
+| ---------------- | -------------------------------------------- |
+| `id`             | ಸ್ವಯಂ-ವರ್ಧನೆ                                 |
+| `tool_name`      | MCP ಟೂಲ್ ಗುರುತಿಸುವಿಕೆ                        |
+| `input_hash`     | ಇನ್ಪುಟ್ನ sha256 (ಪೇಲೋಡ್ ಸಂಗ್ರಹಿಸಲಾಗುವುದಿಲ್ಲ) |
+| `output_summary` | ಚಿಕ್ಕದಾದ, ಕತ್ತರಿಸಲಾದ ಸಾರಾಂಶ                  |
+| `duration_ms`    | ಒಟ್ಟು ಕಳೆದ ಸಮಯ                               |
+| `api_key_id`     | ಕರೆಮಾಡುವವರು (ಶೂನ್ಯವಾಗಿರಬಹುದು)                |
+| `success`        | `1` / `0`                                    |
+| `error_code`     | ವಿಫಲವಾದಾಗ ಅಂತಿಮ ದೋಷ ಕೋಡ್                     |
+| `created_at`     | ISO ಟೈಮ್ಸ್ಟ್ಯಾಂಪ್                            |
 
 ### ವಿನಂತಿ / ಬಳಕೆ ಲಾಗ್ಗಳು
 
-ಇವು ಕಾರ್ಯಾಚರಣಾತ್ಮಕ ಟೆಲಿಮೆಟ್ರಿಯಾಗಿವೆ (ಕಟ್ಟುನಿಟ್ಟಾಗಿ ಆಡಳಿತಾತ್ಮಕ ಆಡಿಟ್ ಅಲ್ಲ), ಆದರೆ ಅದೇ ಧಾರಣಾ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತವೆ:
+ಇವು ಕಾರ್ಯಾಚರಣಾತ್ಮಕ ಟೆಲಿಮೆಟ್ರಿಯಾಗಿದ್ದು (ಕಟ್ಟುನಿಟ್ಟಾಗಿ ಆಡಳಿತಾತ್ಮಕ ಆಡಿಟ್ ಅಲ್ಲ), ಆದರೆ
+ಅದೇ ಉಳಿವಿನ ಪೈಪ್ಲೈನ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುತ್ತವೆ:
 
 - `usage_history` — ಪ್ರತಿ ವಿನಂತಿಯ ಬಳಕೆಯ ಒಟ್ಟುಗೂಡಿಕೆ
-- `call_logs` — ಪ್ರತಿ ವಿನಂತಿಯ ಸಂಪೂರ್ಣ ಲಾಗ್ (ಸಾಲು ಮಿತಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತದೆ; ಕೆಳಗೆ ನೋಡಿ)
-- `proxy_logs` — ಪ್ರಾಕ್ಸಿ ಸಂಚಾರ ಲಾಗ್ (ಸಾಲು ಮಿತಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತದೆ)
-- `request_detail_logs` — ಹಳೆಯ ವಿವರವಾದ ವಿನಂತಿ ಲಾಗ್ (ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದರೆ ಇನ್ನೂ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ)
+- `call_logs` — ಪ್ರತಿ ವಿನಂತಿಯ ಸಂಪೂರ್ಣ ಲಾಗ್ (ಸಾಲು-ಮಿತಿಗೆ ಒಳಪಟ್ಟಿದೆ, ಕೆಳಗೆ ನೋಡಿ)
+- `proxy_logs` — ಪ್ರಾಕ್ಸಿ ಟ್ರಾಫಿಕ್ ಲಾಗ್ (ಸಾಲು-ಮಿತಿಗೆ ಒಳಪಟ್ಟಿದೆ)
+- `request_detail_logs` — ಪರಂಪರೆಯ ವಿವರವಾದ ವಿನಂತಿ ಲಾಗ್ (ಇದ್ದರೆ ಇನ್ನೂ ಶುದ್ಧೀಕರಿಸಲಾಗುತ್ತದೆ)
 
 ## ಸಂಗ್ರಹಣೆ ಸ್ಕೀಮಾ
 

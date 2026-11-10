@@ -1,4 +1,5 @@
 import test from "node:test";
+import { EventEmitter } from "node:events";
 import assert from "node:assert/strict";
 import {
   CopilotM365WebExecutor,
@@ -7,26 +8,40 @@ import {
 import { encodeFrame } from "../../open-sse/executors/copilot-m365-frames.ts";
 
 function makeFakeWsCtor(frames: Array<Record<string, unknown>>) {
-  return class FakeWS {
-    private handlers: Record<string, (arg?: unknown) => void> = {};
+  return class FakeWS extends EventEmitter {
+    readyState = 0;
     constructor(_url: string) {
-      setImmediate(() => this.handlers.open?.());
-    }
-    on(event: string, cb: (arg?: unknown) => void) {
-      this.handlers[event] = cb;
-      return this;
+      super();
+      setImmediate(() => {
+        if (this.readyState !== 0) return;
+        this.readyState = 1;
+        this.emit("open");
+      });
     }
     send(data: unknown) {
+      assert.equal(this.readyState, 1, "cannot send unless the socket is OPEN");
       const str = typeof data === "string" ? data : String(data);
       if (str.includes('"protocol":"json"')) {
-        setImmediate(() => this.handlers.message?.(Buffer.from(encodeFrame({}))));
+        setImmediate(() => this.emit("message", Buffer.from(encodeFrame({}))));
       } else if (str.includes('"target":"chat"')) {
         setImmediate(() => {
-          for (const frame of frames) this.handlers.message?.(Buffer.from(encodeFrame(frame)));
+          for (const frame of frames) this.emit("message", Buffer.from(encodeFrame(frame)));
         });
       }
     }
-    close() {}
+    close() {
+      if (this.readyState >= 2) return;
+      this.readyState = 2;
+      setImmediate(() => {
+        this.readyState = 3;
+        this.emit("close", 1000, Buffer.alloc(0));
+      });
+    }
+    terminate() {
+      if (this.readyState === 3) return;
+      this.readyState = 3;
+      setImmediate(() => this.emit("close", 1006, Buffer.alloc(0)));
+    }
   };
 }
 
@@ -86,7 +101,10 @@ test("copilot-m365-web: a legitimate content-bearing turn is unaffected [#7858 r
     restore();
   }
 
-  assert.ok(!body.includes('"error"'), `expected no error for a content-bearing turn, got: ${body}`);
+  assert.ok(
+    !body.includes('"error"'),
+    `expected no error for a content-bearing turn, got: ${body}`
+  );
   assert.ok(body.includes("hello there"), `expected the streamed content, got: ${body}`);
   assert.ok(body.includes('"finish_reason":"stop"'), `expected a stop chunk, got: ${body}`);
 });

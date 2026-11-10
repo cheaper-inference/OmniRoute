@@ -1,3 +1,5 @@
+import { readAttemptFailure } from "./attemptFailure.ts";
+import { isLocalProcessPressureResponse } from "./comboPredicates.ts";
 import type {
   ComboLogger,
   HandleSingleModel,
@@ -37,6 +39,7 @@ export interface CompatFallbackContext {
  * upstream `Response`. Targets that are unavailable, in cooldown, or return a non-ok
  * response are skipped. Returns `null` when no rejected target yields a success, so the
  * caller can fall through to its existing error/503 path with an unchanged error surface.
+ * Process-wide pressure instead returns its original terminal response, never a success.
  */
 export async function attemptCompatRejectedFallback(
   rejectedTargets: ResolvedComboTarget[],
@@ -75,6 +78,11 @@ export async function attemptCompatRejectedFallback(
       effectiveComboStrategy: ctx.strategy,
       fallbackAttempts: i,
     });
+    if (
+      result.status === 503 &&
+      isLocalProcessPressureResponse(result, (await readAttemptFailure(result)).errorBody)
+    )
+      return result;
     if (result.ok) {
       ctx.log.info("COMBO", `Last-resort compat fallback succeeded via ${target.modelStr}`);
       return result;

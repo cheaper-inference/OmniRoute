@@ -444,7 +444,7 @@ server/
 
 ---
 
-## 4. `open-sse/` - סביבת עבודה של מנוע סטרימינג
+## 4. אזור עבודה של מנוע סטרימינג `open-sse/` —
 
 סביבת עבודה נפרדת npm שפורסם כ- `@omniroute/open-sse`. בעלת עיבוד בקשות, מבצעים, מתרגמים, שירותים, שנאי ושרת MCP.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 מודולי ביצוע ברמה העליונה (`*.ts` מינוס `base.ts`, `index.ts` ובדיקות - ספירת `npm run check:docs-counts` מודד). כל מחלקת executor משתרעת על `BaseExecutor` (`base.ts`), ישירות או דרך `DefaultExecutor` או executor אחר; המודולים הנותרים הם עוזרים לכל ספק (סכימות כלים, מתאמי fetch/TTS, מטפלי מוזרויות). המבצעים כוללים:
+159 מודולי ביצוע ברמה העליונה (`*.ts` מינוס `base.ts`, `index.ts` ובדיקות — ספירת `npm run check:docs-counts` מודד). כל מחלקה executor משתרעת על `BaseExecutor` (`base.ts`), ישירות או דרך `DefaultExecutor` או executor אחר; המודולים הנותרים הם עוזרים לכל ספק (סכימות כלים, מתאמי fetch/TTS, מטפלי מוזרויות). המבצעים כוללים:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` `muse-spark-web` `claudeIdentity.ts` `index.ts` (רישום).
 
-> הערה: ספקים שאינם רשומים כאן מוגשת על ידי `default.ts` באמצעות ה-executor הגנרי תואם OpenAI. קטלוג הספקים המלא (377 ספקים) חי ב- `src/shared/constants/providers.ts`.
+> הערה: ספקים שאינם רשומים כאן מוגשת על ידי `default.ts` באמצעות ה-executor הגנרי תואם OpenAI. קטלוג הספקים המלא (381 ספקים) חי ב- `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -519,7 +519,7 @@ open-sse/
 | שמירה במטמון            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | ניתוב מודיעין           | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | טיפול בדגם              | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| דְחִיסָה                | `compression/` - חיווט מנוע דחיסה מלאה                                                                                                                                                                                                                   |
+| דְחִיסָה                | חיווט מנוע דחיסה מלא `compression/` —                                                                                                                                                                                                                    |
 | סשן + אסימון            | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | שכבה / מניפסט           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / רשת                | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,20 +528,20 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 כלים ייחודיים** חוטי ב- `server.ts` (45 קנוניים בזיכרון `schemas/tools.ts` +, מיומנויות, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus ו-compression modules - איחוד נספר לפי `countUniqueMcpTools`).
+- **110 כלים ייחודיים** חווט ב- `server.ts` (45 קנוניים בזיכרון `schemas/tools.ts` +, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus and compression union — union counted by `countUniqueMcpTools`).
 - **3 הובלות** : stdio, HTTP Streamable, SSE.
-- **33 היקפים** נאכף בזמן ריצה - רשימת בסיס ב- `src/shared/constants/mcpScopes.ts`, הסט המלא הוא האיחוד של ההיקפים המוצהרים על ידי כל מודול כלי.
+- **33 היקפים** נאכף בזמן ריצה — base list ב- `src/shared/constants/mcpScopes.ts`, הסט המלא הוא האיחוד של ההיקפים המוצהרים על ידי כל מודול כלי.
 - טבלת ביקורת: `mcp_tool_audit` (מאוכלסת ב- `audit.ts`).
 - קבצים: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, בתוספת בדיקות תחת `__tests__/`.
 - ראה [MCP-SERVER.md](../frameworks/MCP-SERVER.md) לקטלוג הכלים המלא.
 
 ### 4.7 `open-sse/config/`
 
-רישומי ספקים (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), רישום מודל לפי `antigravityModelAliases.ts`(`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), עוזרי זהות (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `cliFingerprints.ts` `defaultThinkingSignature.ts`), `toolCloaking.ts` r עוזרי אישורים (`credentialLoader.ts`, `codexClient.ts`), ומתאמי ענן (`azureAi.ts`, `bedrock.ts`, zqx, `datarobot.ts`, `oci.ts` `glmProvider.ts` `maritalk.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `registryUtils.ts`.
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-פרימיטיביות זרימה ועוזרים ספקים: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `awsSigV4.ts`, `networkProxy.ts`, `cursorAgentProtobuf.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, zq, zq `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
+זרימה פרימיטיבים ועוזרים ספקים: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `awsSigV4.ts`, `networkProxy.ts`, `cursorAgentProtobuf.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, zq, zq `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 

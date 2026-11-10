@@ -236,19 +236,18 @@ MITM endpoint အားလုံးတွင် စီမံခန့်ခွ�
 
 ---
 
-## User-Agent အစားထိုးသတ်မှတ်ချက်များ — env vars (`.env.example` အပိုင်း 12)
+## အသုံးပြုသူ-အေးဂျင့်သည် — env vars ကို အစားထိုးသည် (`.env.example` အပိုင်း 12)
 
-| Variable                 | မူလတန်ဖိုး                                                      |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| ပြောင်းလဲနိုင်သော   | ပုံသေ                                         |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Dynamic lookup မှတစ်ဆင့် `open-sse/executors/base.ts::buildHeaders()` က အသုံးပြုသည်။ **Provider များက CLI version အသစ်များ ထုတ်လွှင့်သည့်အခါ ဤတန်ဖိုးများကို မြှင့်တင်ပါ** — ခေတ်မမီတော့သော UA string များကို client အဟောင်းများအဖြစ် စတင်ငြင်းပယ်လာမည်ဖြစ်သည်။
+ရွေ့လျားရှာဖွေမှုမှတစ်ဆင့် `open-sse/executors/base.ts::buildHeaders()` မှစားသုံးသည်။** ဝန်ဆောင်မှုပေးသူများသည် CLI ဗားရှင်းအသစ်များထုတ်သည့်အခါ ၎င်းတို့ကို ဆောင့်ကန်ပါ။** — stale UA strings များသည် ခေတ်မမီတော့သော ဖောက်သည်များအဖြစ် စတင်ပယ်ချခံရတော့သည်။
 
 ## CLI လိုက်ဖက်ညီမှုမုဒ် Toggle များ (`.env.example` အပိုင်း 13)
 

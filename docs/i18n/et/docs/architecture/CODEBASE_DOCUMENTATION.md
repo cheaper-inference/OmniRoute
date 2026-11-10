@@ -444,7 +444,7 @@ Jaotatud sihipärasteks alamkataloogideks:
 
 ---
 
-## 4. `open-sse/` – voogedastusmootori tööala
+## 4. `open-sse/` — Voogedastusmootori tööala
 
 Eraldi npm tööruum on avaldatud kui `@omniroute/open-sse`. Omab taotluste töötlemist, täitjaid, tõlkijaid, teenuseid, trafot ja MCP serverit.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 tipptasemel täiturimoodulit (`*.ts` miinus `base.ts`, `index.ts` ja testid - loendus `npm run check:docs-counts` mõõdab). Iga täituriklass laiendab `BaseExecutor` (`base.ts`) otse või läbi `DefaultExecutor` või mõne teise täituri; ülejäänud moodulid on pakkujapõhised abilised (tööriistaskeemid, fetch/TTS adapterid, veidruse töötlejad). Täitjate hulka kuuluvad:
+159 tipptasemel täiturimoodulit (`*.ts` miinus `base.ts`, `index.ts` ja testid — loendus `npm run check:docs-counts` mõõdud). Iga täituriklass laiendab `BaseExecutor` (`base.ts`) otse või läbi `DefaultExecutor` või mõne teise täituri; ülejäänud moodulid on pakkujapõhised abilised (tööriistaskeemid, fetch/TTS adapterid, keerdkäitlejad). Täitjate hulka kuuluvad:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder` `vertex`, pluss `devin-desktop`(jagatud identiteedi abimees) ja `claudeIdentity.ts` (register) `index.ts`
 
-> Märkus: pakkujaid, mida siin pole loetletud, teenindab `default.ts`, kasutades üldist OpenAI-ga ühilduvat täiturit. Täielik pakkujate kataloog (377 pakkujat) asub `src/shared/constants/providers.ts`.
+> Märkus: pakkujaid, mida siin pole loetletud, teenindab `default.ts`, kasutades üldist OpenAI-ga ühilduvat täiturit. Täielik pakkujate kataloog (381 pakkujat) asub `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Rummu ja kodara tõlge (OpenAI on keskus).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based vastused API ↔ vestluse lõpuleviimise konverter (kasutab `responses/` marsruudi kõikehõlmav).
+- `responsesTransformer.ts` — `TransformStream` -based Vastuste API ↔ vestluse lõpuleviimise konverter (kasutab `responses/` marsruudi kõikehõlmav).
 
 ### 4.5 `open-sse/services/`
 
@@ -528,9 +528,9 @@ Tähtsündmused (täielik nimekiri `open-sse/services/` all):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ainulaadset tööriista** `server.ts` juhtmega (45 kanoonilist `schemas/tools.ts` + mälu, oskused, GitHubi oskused, bassein, gamification, pistikprogramm, Notion, Obsidian, kohalik korpus ja tihendusmoodulid – liit loetakse `countUniqueMcpTools`).
+- **110 ainulaadset tööriista** `server.ts` juhtmega (45 kanoonilist `schemas/tools.ts` + mälu, oskused, GitHubi oskused, bassein, gamifitseerimine, pistikprogramm, Notion, Obsidian, kohaliku korpuse ja tihendusmoodulite — liit loendatakse `countUniqueMcpTools`).
 - **3 transporti** : stdio, HTTP voogedastus, SSE.
-- **33 ulatust** jõustatakse käitusajal – `src/shared/constants/mcpScopes.ts` põhiloend, täiskomplekt on iga tööriistamooduli deklareeritud ulatuste liit.
+- **33 ulatust** jõustatakse käitusajal — põhiloendis `src/shared/constants/mcpScopes.ts`, täiskomplekt on iga tööriistamooduli deklareeritud ulatuste liit.
 - Audititabel: `mcp_tool_audit` (asustatud `audit.ts`).
 - Failid: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, pluss testid `__tests__/`.
 - Täieliku tööriistakataloogi leiate saidilt [MCP-SERVER.md](../frameworks/MCP-SERVER.md).

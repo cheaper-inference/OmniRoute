@@ -15,6 +15,7 @@ import { cliModelConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey } from "@/shared/services/apiKeyResolver";
 import { readJsoncConfig } from "../_lib/jsoncConfig";
+import { cliModelLabel } from "../_lib/modelLabel";
 import {
   configClobberRefusalResponse,
   parseJsoncObject,
@@ -150,7 +151,7 @@ export async function POST(request: Request) {
       models: [
         {
           id: model,
-          name: model.split("/").pop() || model,
+          name: cliModelLabel(model),
         },
       ],
     };

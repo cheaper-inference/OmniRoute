@@ -19,6 +19,8 @@ const oauthModule = await import("../../src/lib/oauth/constants/oauth.ts");
 const antigravityHeadersModule = await import("../../open-sse/services/antigravityHeaders.ts");
 const antigravityVersionModule = await import("../../open-sse/services/antigravityVersion.ts");
 const oauthHelpersModule = await import("../../src/lib/oauth/providers.ts");
+const { M365_NATIVE_OAUTH_CONFIG } =
+  await import("../../src/lib/oauth/providers/copilot-m365-web.ts");
 
 const PROVIDERS = providersModule.default;
 const { resolveBrowserOAuthRedirectUri } = oauthHelpersModule;
@@ -41,6 +43,7 @@ const {
   GROK_BUILD_OAUTH_CONFIG,
   KILOCODE_CONFIG,
   KIMI_CODING_CONFIG,
+  MEGABRAIN_CONFIG,
   KIRO_CONFIG,
   OAUTH_TIMEOUT,
   PROVIDERS: OAUTH_PROVIDER_IDS,
@@ -48,8 +51,10 @@ const {
   TRAE_CONFIG,
   XAI_OAUTH_CONFIG,
   OPENFERENCE_CONFIG,
+  RENDERHOUR_CONFIG,
   ZED_HOSTED_CONFIG,
   MUSE_CODE_CONFIG,
+  MINIMAX_CODE_CONFIG,
 } = oauthModule;
 const { getAntigravityLoadCodeAssistMetadata } = antigravityHeadersModule;
 const {
@@ -75,6 +80,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "cursor",
   "trae",
   "kilocode",
+  "megabrain",
   "cline",
   "clinepass",
   "devin-desktop",
@@ -82,6 +88,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "grok-cli",
   "xai-oauth",
   "openference",
+  "renderhour",
   "codebuddy-cn",
   "freebuff",
   "codebuddy-intl",
@@ -89,6 +96,8 @@ const EXPECTED_PROVIDER_KEYS = [
   "zed",
   "zed-hosted",
   "muse-code",
+  "minimax-code",
+  "copilot-m365-web",
 ];
 
 const browserUrl = "http://localhost:20128/callback";
@@ -112,6 +121,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   "amazon-q": KIRO_CONFIG,
   cursor: CURSOR_CONFIG,
   kilocode: KILOCODE_CONFIG,
+  megabrain: MEGABRAIN_CONFIG,
   cline: CLINE_CONFIG,
   clinepass: CLINE_CONFIG, // reuses the Cline WorkOS flow (clinepass: cline in providers/index.ts)
   "devin-desktop": DEVIN_DESKTOP_CONFIG,
@@ -120,6 +130,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   "grok-cli": GROK_BUILD_OAUTH_CONFIG,
   "xai-oauth": XAI_OAUTH_CONFIG,
   openference: OPENFERENCE_CONFIG,
+  renderhour: RENDERHOUR_CONFIG,
   "codebuddy-cn": CODEBUDDY_CN_CONFIG,
   freebuff: FREEBUFF_CONFIG,
   "codebuddy-intl": CODEBUDDY_INTL_CONFIG,
@@ -127,6 +138,8 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   zed: ZED_CONFIG,
   "zed-hosted": ZED_HOSTED_CONFIG,
   "muse-code": MUSE_CODE_CONFIG,
+  "minimax-code": MINIMAX_CODE_CONFIG,
+  "copilot-m365-web": M365_NATIVE_OAUTH_CONFIG,
 };
 
 const KIRO_REQUIRED_FIELDS = [
@@ -163,6 +176,7 @@ const REQUIRED_FIELDS_BY_PROVIDER = {
   "amazon-q": KIRO_REQUIRED_FIELDS,
   cursor: ["apiEndpoint", "api3Endpoint", "agentEndpoint", "agentNonPrivacyEndpoint", "dbKeys"],
   kilocode: ["apiBaseUrl", "initiateUrl", "pollUrlBase"],
+  megabrain: ["apiBaseUrl", "initiateUrl", "pollUrlBase"],
   cline: ["appBaseUrl", "apiBaseUrl", "authorizeUrl", "tokenExchangeUrl", "refreshUrl"],
   clinepass: ["appBaseUrl", "apiBaseUrl", "authorizeUrl", "tokenExchangeUrl", "refreshUrl"],
   "devin-desktop": ["apiServerUrl", "inferenceUrl", "ideName", "defaultVersion"],
@@ -172,11 +186,13 @@ const REQUIRED_FIELDS_BY_PROVIDER = {
   "xai-oauth": ["authorizeUrl", "tokenUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
   // prettier-ignore
   openference: ["authorizeUrl", "tokenUrl", "userinfoUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
+  renderhour: ["authorizeUrl", "tokenUrl", "userinfoUrl", "codeChallengeMethod", "clientId"],
   // prettier-ignore
   "grok-cli": ["authorizeUrl", "tokenUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
   // prettier-ignore
   "zed-hosted": ["webBaseUrl", "cloudBaseUrl", "llmBaseUrl", "userInfoUrl", "llmTokenUrl", "modelsUrl"],
   "muse-code": ["deviceCodeUrl", "tokenUrl", "clientId", "mintUrl"],
+  "minimax-code": ["deviceCodeUrl", "tokenUrl", "clientId", "scope", "audience"],
 };
 
 function getByPath(object, path) {
@@ -271,6 +287,9 @@ test("OAuth constants include all provider ids and use a sane timeout", () => {
   }
 });
 
+/** Providers whose token mapper validates the token response and fails closed on bad input. */
+const FAIL_CLOSED_TOKEN_MAPPERS = new Set(["copilot-m365-web"]);
+
 test("every registered OAuth provider has a valid config object, flow type and token mapper", () => {
   const allowedFlowTypes = new Set([
     "authorization_code",
@@ -284,6 +303,16 @@ test("every registered OAuth provider has a valid config object, flow type and t
     assert.ok(allowedFlowTypes.has(provider.flowType), `${providerId} has unsupported flowType`);
     assert.equal(typeof provider.mapTokens, "function", `${providerId} must expose mapTokens`);
 
+    if (FAIL_CLOSED_TOKEN_MAPPERS.has(providerId)) {
+      // Rejecting an empty token response is this provider's contract: it never becomes a
+      // connection, and only a fixed message crosses the boundary.
+      assert.throws(
+        () => provider.mapTokens({}),
+        /token response is invalid/,
+        `${providerId} mapTokens must reject an empty token response`
+      );
+      continue;
+    }
     const mapped = provider.mapTokens({});
     assert.ok(
       mapped && typeof mapped === "object",
@@ -472,6 +501,7 @@ test("device and import-token providers expose the flow-specific fields expected
     "kiro",
     "amazon-q",
     "kilocode",
+    "megabrain",
     "workbuddy",
     "muse-code",
     "freebuff",

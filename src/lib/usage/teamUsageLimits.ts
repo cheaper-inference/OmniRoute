@@ -8,6 +8,7 @@ import {
 import { calculateCostDetailed } from "./costCalculator";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { toNumber } from "@/shared/utils/numeric";
+import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
 import { parseShapeCounts } from "@/lib/usage/teamCostShapes";
 
 export interface TeamUsageLimitStatus {
@@ -203,15 +204,6 @@ export async function getTeamUsageLimitStatusForTeam(
     hasUnpricedUsage: spend.hasUnpricedUsage,
     exceeded: spend.estimatedListCostUsd >= maxBudgetUsd || spend.hasUnpricedUsage,
   };
-}
-
-function isAnthropicMessagesRequest(request: Request): boolean {
-  if (request.headers.has("anthropic-version")) return true;
-  try {
-    return new URL(request.url).pathname.endsWith("/v1/messages");
-  } catch {
-    return false;
-  }
 }
 
 export async function buildTeamUsageLimitPolicyRejection(

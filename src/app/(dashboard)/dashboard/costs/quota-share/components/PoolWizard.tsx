@@ -823,7 +823,8 @@ export default function PoolWizard({
                       aria-label={tPlans("dimensionLabel")}
                       value={dim.unit}
                       onChange={(e) => updateDimension(i, { unit: e.target.value as QuotaUnit })}
-                      selectClassName="ci-select-native--sm text-xs"
+                      nativeSize="sm"
+                      selectClassName="text-xs"
                     >
                       {UNIT_OPTIONS.map((u) => (
                         <option key={u} value={u}>
@@ -837,7 +838,8 @@ export default function PoolWizard({
                       onChange={(e) =>
                         updateDimension(i, { window: e.target.value as QuotaWindow })
                       }
-                      selectClassName="ci-select-native--sm text-xs"
+                      nativeSize="sm"
+                      selectClassName="text-xs"
                     >
                       {WINDOW_OPTIONS.map((w) => (
                         <option key={w} value={w}>
@@ -951,7 +953,8 @@ export default function PoolWizard({
                         onChange={(e) =>
                           updateAllocationPolicy(a.apiKeyId, e.target.value as Policy)
                         }
-                        selectClassName="ci-select-native--sm text-xs"
+                        nativeSize="sm"
+                        selectClassName="text-xs"
                       >
                         <option value="hard">{t("policyHard")}</option>
                         <option value="soft">{t("policySoft")}</option>
@@ -992,7 +995,8 @@ export default function PoolWizard({
                     aria-label={t("addKey")}
                     value=""
                     onChange={(e) => e.target.value && addKey(e.target.value)}
-                    selectClassName="ci-select-native--sm text-xs"
+                    nativeSize="sm"
+                    selectClassName="text-xs"
                   >
                     <option value="">{t("addKey")}</option>
                     {availableKeys.map((k) => (

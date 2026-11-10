@@ -5,6 +5,7 @@ import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
+import type { JSX } from "react";
 
 export interface OmniSkill {
   id: string;

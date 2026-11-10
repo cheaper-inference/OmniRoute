@@ -237,19 +237,18 @@ Ina theannta sin, suiteálann `updateNssDatabases()` i mbunachair sonraí NSS in
 
 Éilíonn gach críochphointe MITM fíordheimhniú bainistíochta (`requireCliToolsAuth`). Cuirtear an focal faire sudo i dtaisce i scóip an mhodúil (`globalThis` riamh) agus glantar é ar `stopMitm()`.
 
-## Sáruithe User-Agent — athróga timpeallachta (`.env.example` rannán 12)
+## Sáraíonn Gníomhaire Úsáideora — env vars (`.env.example` alt 12)
 
-| Athróg                   | Réamhshocrú                                                     |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Athróg              | Réamhshocrú                                   |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Úsáideann `open-sse/executors/base.ts::buildHeaders()` iad trí chuardach dinimiciúil. **Nuashonraigh iad seo nuair a eisíonn soláthraithe leaganacha nua dá CLI** — tosaítear ar theaghráin UA atá as dáta a dhiúltú mar chliaint atá as dáta.
+Arna ithe ag `open-sse/executors/base.ts::buildHeaders()` trí chuardach dinimiciúil.** Buail iad seo nuair a scaoileann soláthraithe leaganacha nua CLI** tosaíonn teaghráin — stale UA ag fáil diúltaithe mar chliaint atá as dáta.
 
 ## Scoránaigh Mhód Comhoiriúnachta CLI (`.env.example` rannán 13)
 

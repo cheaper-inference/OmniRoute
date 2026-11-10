@@ -14,7 +14,7 @@ OmniRoute é um gateway de roteamento AI local e painel construído em Next.js. 
 
 Capacidades principais:
 
-- Superfície API compatível com OpenAI para CLI/tools (377 provedores, 156 módulos executores)
+- Superfície API compatível com OpenAI para CLI/tools (381 provedores, 159 módulos executores)
 - Tradução Request/response em formatos de provedores
 - Fallback de combinação de modelos (sequência de vários modelos)
 - Etapas combinadas estruturadas (`provider + model + connection`) com ordenação de tempo de execução por `compositeTiers`
@@ -69,7 +69,7 @@ Capacidades principais:
 - ponte WebSocket para clientes WS compatíveis com OpenAI (`/v1/ws`)
 - Gerenciamento de token de sincronização (issue/revoke, download do pacote de configuração com versão ETag)
 - GLM Thinking (`glmt`) predefinição de provedor de primeira classe
-- Contagem de tokens híbridos ( `/messages/count_tokens` do lado do provedor com retorno de estimativa)
+- Contagem de tokens híbridos ( `/messages/count_tokens` do lado do provedor com fallback de estimativa)
 - Propagação automática de alias de modelo (30 normalizações de dialeto de proxy cruzado + na inicialização)
 - Busca de saída segura com SSRF guard, bloqueio URL privado e nova tentativa configurável
 - Novas tentativas de bate-papo com reconhecimento de resfriamento com `requestRetry` e `maxRetryIntervalSec` configuráveis
@@ -414,7 +414,7 @@ O namespace `src/domain/` centraliza as decisões políticas para que os manipul
 - juntador de regras Connection/model : `src/domain/connectionModelRules.ts`
 - Instantâneos de disponibilidade do modelo: `src/domain/modelAvailability.ts`
 - Rastreamento de expiração do provedor: `src/domain/providerExpiration.ts`
-- Cache de cota: `src/domain/quotaCache.ts`
+- Cache de cota: `src/domain/quotaCache.ts`. Os provedores adicionam e removem janelas de cota (OpenAI eliminou a janela Codex de 5 horas para alguns planos), portanto, uma leitura de uso do adaptador do provedor atesta como completo (`quotasComplete`, consulte `src/lib/usage/usageReading.ts`) é o conjunto completo de janelas da conta: uma janela conhecida anteriormente, mas ausente dela, é retirada, no cache, no `quota_snapshots` uma reinicialização reidrata (um registro de aposentadoria anexado), no estado de cota Codex persistente e nos intervalos de saturação de Claude. Evidências parciais (cabeçalhos de resposta, cópias obsoletas) atualizam apenas as janelas que carregam.
 - Estado de degradação: `src/domain/degradation.ts`
 - Auditoria de configuração: `src/domain/configAudit.ts`
 - Construtor de metadados de resposta OmniRoute : `src/domain/omnirouteResponseMeta.ts`

@@ -30,6 +30,7 @@ interface ComboMetricsEntry {
   totalSuccesses: number;
   totalFailures: number;
   totalFallbacks: number;
+  requestsWithFallback: number;
   totalLatencyMs: number;
   strategy: string;
   lastUsedAt: string | null;
@@ -63,6 +64,7 @@ interface ComboMetricsView extends ComboMetricsEntry {
   avgLatencyMs: number;
   successRate: number;
   fallbackRate: number;
+  skipsPerRequest: number;
   persistedSkipBypassed: number;
   byModel: Record<string, ModelMetricsView>;
   byTarget: Record<string, ComboTargetMetricsView>;
@@ -113,6 +115,7 @@ function createComboEntry(strategy: string): ComboMetricsEntry {
     totalSuccesses: 0,
     totalFailures: 0,
     totalFallbacks: 0,
+    requestsWithFallback: 0,
     totalLatencyMs: 0,
     strategy,
     lastUsedAt: null,
@@ -299,6 +302,7 @@ export function recordComboRequest(
   combo.totalRequests++;
   combo.totalLatencyMs += latencyMs;
   combo.totalFallbacks += fallbackCount;
+  if (fallbackCount > 0) combo.requestsWithFallback++;
   combo.lastUsedAt = usedAt;
   combo.strategy = strategy;
 
@@ -446,7 +450,13 @@ export function getComboMetrics(comboName: string): ComboMetricsView | null {
     successRate:
       combo.totalRequests > 0 ? Math.round((combo.totalSuccesses / combo.totalRequests) * 100) : 0,
     fallbackRate:
-      combo.totalRequests > 0 ? Math.round((combo.totalFallbacks / combo.totalRequests) * 100) : 0,
+      combo.totalRequests > 0
+        ? Math.round((combo.requestsWithFallback / combo.totalRequests) * 100)
+        : 0,
+    skipsPerRequest:
+      combo.totalRequests > 0
+        ? Math.round((combo.totalFallbacks / combo.totalRequests) * 10) / 10
+        : 0,
     intentCounts: { ...combo.intentCounts },
     byModel: Object.fromEntries(
       Object.entries(combo.byModel).map(([model, metric]) => [model, toMetricView(metric)])

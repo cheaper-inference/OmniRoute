@@ -16,11 +16,11 @@ AgentBridge는 IDE AI 에이전트의 HTTPS 트래픽을 가로채 OmniRoute의 
 
 ### AgentBridge 란 무엇입니까?
 
-IDE 에이전트(예: GitHub Copilot, Cursor, Claude 코드)가 API 호출을 수행하면 업스트림 AI 공급자(OpenAI, Anthropic 등)에 직접 연결됩니다. AgentBridge 에이전트 구성 변경 없이 TLS 수준에서 해당 연결을 투명하게 가로채고 OmniRoute 통해 요청을 다시 작성합니다.
+IDE 에이전트(예: GitHub Copilot, Cursor, Claude 코드)가 API 호출을 수행하면 업스트림 AI 공급자(OpenAI, Anthropic 등)에 직접 연결됩니다. AgentBridge 에이전트 구성 변경 — 요구하지 않고 TLS 레벨 — 에서 투명하게 해당 연결을 가로채고 OmniRoute 통해 요청을 다시 작성합니다.
 
 이는 다음을 수행할 수 있음을 의미합니다.
 
-- **모든 에이전트를 모든 제공업체로 재라우팅** : Copilot OpenAI 와 대화 중인가요? Anthropic Claude, Gemini 또는 OmniRoute 의 377 공급자로 리디렉션하세요.
+- **모든 에이전트를 모든 제공업체로 재라우팅** : Copilot OpenAI 와 대화 중인가요? Anthropic Claude, Gemini 또는 OmniRoute 의 381 공급자로 리디렉션하세요.
 - **모델 매핑 적용** : `gemini-3-flash` → `claude-sonnet-4.7` 핸들러 수준에서 투명하게 수행됩니다.
 - **모든 에이전트 트래픽 관찰** : 차단된 모든 요청은 [Traffic Inspector](./TRAFFIC_INSPECTOR.md) 에 게시됩니다.
 - **OmniRoute 탄력성 적용** : IDE 에이전트 트래픽에 대한 콤보 라우팅, 회로 차단기, 폴백 및 비용 추적 작업도 수행됩니다.

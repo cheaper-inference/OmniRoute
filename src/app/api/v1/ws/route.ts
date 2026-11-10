@@ -1,6 +1,7 @@
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { getLiveWsPath, resolveLiveWsPublicUrl } from "@/shared/utils/wsPath";
 import { authorizeWebSocketHandshake } from "@/lib/ws/handshake";
+import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import {
   WS_HANDSHAKE_ORIGIN_HEADER,
   buildHandshakeOriginRequest,
@@ -143,7 +144,12 @@ function handshakeResponse(request: Request, auth: WsHandshakeAuth): Response {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const handshake = url.searchParams.get("handshake") === "1";
-  const auth = await authorizeWebSocketHandshake(request);
+  // A bridge upgrade honours REQUIRE_API_KEY like `/v1/responses`. The dashboard's plain
+  // handshake GET carries no bridge header and only reads connection metadata.
+  const isBridgeUpgrade = handshake && request.headers.has(WS_HANDSHAKE_ORIGIN_HEADER);
+  const auth = await authorizeWebSocketHandshake(request, {
+    requireAuth: isBridgeUpgrade && isRequireApiKeyEnabled(),
+  });
 
   if (handshake) return handshakeResponse(request, auth);
 

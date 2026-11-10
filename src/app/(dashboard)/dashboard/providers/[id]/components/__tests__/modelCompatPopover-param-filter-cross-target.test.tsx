@@ -72,7 +72,11 @@ async function openPopover() {
 
 async function closePopoverByOutsideClick() {
   await act(async () => {
-    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    // The kit Popover (Radix) listens for outside presses from the next task on and dismisses
+    // on the click that ends a primary-button press.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    document.body.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
   await flushEffects();
 }

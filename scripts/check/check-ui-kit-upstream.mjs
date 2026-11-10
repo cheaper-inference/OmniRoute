@@ -8,7 +8,7 @@
 //
 // The upstream repo is private: the tag listing goes through `git ls-remote`, which uses the local
 // git credentials (gh auth) or, in CI, `UI_KIT_READ_TOKEN`. Without access the check reports
-// "unknown" and exits 0 — it never blocks anyone.
+// "unknown" with a `reason` and `detail`, and exits 0 — it never blocks anyone.
 //
 // Usage: node scripts/check/check-ui-kit-upstream.mjs [--json] [--strict]
 //   --strict  exit 1 when behind (for a scheduled job that opens an issue)
@@ -54,6 +54,34 @@ export function pinnedVersion(upstreamMd) {
   };
 }
 
+/**
+ * Pure: why the state is "unknown". `git ls-remote` can't tell us whether a failure was a bad token
+ * or the network, so the wording only states what is known. The workflow prints `detail` as is and
+ * uses `reason` to title its tracking issue.
+ */
+export function describeUnknown({ tokenSet, listingFailed }) {
+  if (!listingFailed) {
+    return {
+      reason: "no-release-tags",
+      detail: `Listed the tags of ${REPO}, but none of them looks like a vX.Y.Z release.`,
+    };
+  }
+  if (!tokenSet) {
+    return {
+      reason: "no-token",
+      detail:
+        `Could not list the tags of ${REPO}: UI_KIT_READ_TOKEN isn't set, ` +
+        "and no other git credentials gave access.",
+    };
+  }
+  return {
+    reason: "listing-failed",
+    detail:
+      `Could not list the tags of ${REPO} with UI_KIT_READ_TOKEN: the token may be invalid, ` +
+      "expired or without read access to that repo, or GitHub may have been unreachable.",
+  };
+}
+
 function listRemoteTags() {
   const token = process.env.UI_KIT_READ_TOKEN;
   const env = { ...process.env, GIT_TERMINAL_PROMPT: "0" };
@@ -80,23 +108,26 @@ function main() {
     readFileSync(path.join(ROOT, "packages/ui-kit/UPSTREAM.md"), "utf8")
   );
   let latest = null;
+  let listingFailed = false;
   try {
     latest = latestTag(listRemoteTags());
   } catch {
-    latest = null;
+    listingFailed = true;
   }
   const state = !latest
     ? "unknown"
     : compareVersions(latest.version, pinned.version) > 0
       ? "behind"
       : "up-to-date";
-  const report = { state, pinned, latest, repo: REPO };
+  const unknown =
+    state === "unknown"
+      ? describeUnknown({ tokenSet: Boolean(process.env.UI_KIT_READ_TOKEN), listingFailed })
+      : {};
+  const report = { state, pinned, latest, repo: REPO, ...unknown };
   if (args.has("--json")) {
     console.log(JSON.stringify(report, null, 2));
   } else if (state === "unknown") {
-    console.log(
-      `[ui-kit-upstream] unknown — could not list ${REPO} tags (no access); pinned ${pinned.version}`
-    );
+    console.log(`[ui-kit-upstream] unknown — ${report.detail} Pinned ${pinned.version}.`);
   } else if (state === "behind") {
     console.log(
       `[ui-kit-upstream] BEHIND — pinned ${pinned.version}, latest release v${latest.version} (${latest.commit.slice(0, 7)}).\n` +

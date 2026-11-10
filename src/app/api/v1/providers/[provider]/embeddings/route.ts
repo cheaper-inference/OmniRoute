@@ -8,6 +8,8 @@ import {
   isValidApiKey,
 } from "@/sse/services/auth";
 import { handleEmbedding } from "@omniroute/open-sse/handlers/embeddings.ts";
+import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
+import { ensureCopilotEmbeddingToken } from "@/lib/embeddings/copilotToken";
 import * as log from "@/sse/utils/logger";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
@@ -102,7 +104,11 @@ export async function POST(request, { params }) {
 
   const result = await handleEmbedding({
     body,
-    credentials,
+    credentials: await ensureCopilotEmbeddingToken(
+      getEmbeddingProvider(providerEntry.id),
+      providerEntry.id,
+      credentials
+    ),
     log,
     // #10347 — thread the selected connection id so a hard upstream failure cools
     // the account instead of re-hitting it on every request.

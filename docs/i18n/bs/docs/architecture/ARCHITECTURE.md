@@ -14,7 +14,7 @@ OmniRoute je lokalni AI gateway i nadzorna ploča izgrađena na Next.js. Pruža 
 
 Osnovne mogućnosti:
 
-- OpenAI kompatibilna API površina za CLI/tools (377 provajdera, 156 izvršnih modula)
+- OpenAI kompatibilna API površina za CLI/tools (381 provajdera, 159 izvršnih modula)
 - Request/response prijevod preko formata provajdera
 - Kombinirani model (slijed više modela)
 - Strukturirani kombinovani koraci (`provider + model + connection`) sa poredanjem vremena izvođenja po `compositeTiers`
@@ -39,7 +39,7 @@ Osnovne mogućnosti:
 - Opcionalna sinhronizacija u oblaku za multi-device/state sinhronizaciju
 - IP allowlist/blocklist za API kontrolu pristupa
 - Razmišljanje o upravljanju budžetom (passthrough/auto/custom/adaptive)
-- Promptna injekcija globalnog sistema
+- Promptno ubrizgavanje globalnog sistema
 - Praćenje sesije i uzimanje otisaka prstiju
 - Poboljšano ograničenje stope po računu sa profilima specifičnim za provajdera
 - Uzorak prekidača za otpornost provajdera
@@ -57,11 +57,11 @@ Osnovne mogućnosti:
 - Zdravstvena kontrolna tabla sa statusom prekidača dobavljača u realnom vremenu
 - MCP server (110 alata) sa 3 transporta (stdio/SSE/Streamable HTTP)
 - A2A server (JSON-RPC 2.0 + SSE) sa vještinama i životnim ciklusom zadataka
-- Memorijski sistem (vađenje, ubrizgavanje, pronalaženje, sumiranje)
+- Sistem memorije (vađenje, ubrizgavanje, pronalaženje, sumiranje)
 - Sistem vještina (registrator, izvršilac, sandbox, ugrađene vještine)
 - MITM proxy sa upravljanjem certifikatima i DNS rukovanjem
 - Prompt injection guard Middleware
-- Promptni kompresijski cjevovod s Cavemanom, RTK, naslaganim cjevovodima, kombinacijama kompresije, jezičkim paketima i analitikom
+- Promptni kompresijski cjevovod s Cavemanom, RTK, složenim cjevovodima, kombinacijama kompresije, jezičkim paketima i analitikom
 - ACP (Agent Communication Protocol) registar
 - Modularni OAuth provajderi (22 pojedinačna modula pod `src/lib/oauth/providers/`)
 - Uninstall/full-uninstall skripte
@@ -414,7 +414,7 @@ Imenski prostor `src/domain/` centralizira odluke politike tako da rukovaoci rut
 - Connection/model pravilo stolar: `src/domain/connectionModelRules.ts`
 - Snimci dostupnosti modela: `src/domain/modelAvailability.ts`
 - Praćenje isteka provajdera: `src/domain/providerExpiration.ts`
-- Keš kvota: `src/domain/quotaCache.ts`
+- Keš kvota: `src/domain/quotaCache.ts`. Provajderi dodaju i uklanjaju prozore kvota (OpenAI je izbacio 5-satni Codex prozor za neke planove), tako da upotreba čitanja adaptera provajdera potvrđuje da je kompletna (`quotasComplete`, vidi `src/lib/usage/usageReading.ts`) je kompletan set prozora naloga: prozor poznat ranije, ali odsutan iz njega je povučen, u keš memoriji, u `quota_snapshots`, rehydratesre a restart app. Codex kvotno stanje i u Claude-ovim segmentima zasićenja. Djelomični dokazi (zaglavlja odgovora, zastarjele kopije) ažuriraju samo prozore koje nose.
 - Degradacijsko stanje: `src/domain/degradation.ts`
 - Revizija konfiguracije: `src/domain/configAudit.ts`
 - OmniRoute odgovor za izgradnju metapodataka: `src/domain/omnirouteResponseMeta.ts`

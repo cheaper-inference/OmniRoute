@@ -6,6 +6,8 @@
  */
 
 import { NextRequest } from "next/server";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { createBoundedEventStream } from "@/lib/api/boundedEventStream";
 import { type LeaderboardScope, getTopN } from "@/lib/gamification/leaderboard";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -34,40 +36,38 @@ export async function GET(request: NextRequest) {
     ? (rawScope as LeaderboardScope)
     : "global";
 
-  const stream = new ReadableStream({
-    start(controller) {
-      const encoder = new TextEncoder();
-
-      const sendUpdate = async () => {
-        try {
-          const entries = await getTopN(scope, 50);
-          const data = JSON.stringify({ type: "leaderboard", scope, entries });
-          controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
-          controller.enqueue(
-            encoder.encode(`event: error\ndata: ${JSON.stringify({ error: msg })}\n\n`)
-          );
-        }
-      };
-
-      // Send initial state
-      sendUpdate();
-
-      // Heartbeat every 15s
-      const heartbeat = setInterval(() => {
-        controller.enqueue(encoder.encode(`: heartbeat ${Date.now()}\n\n`));
-      }, 15_000);
-
-      // Update every 5s
-      const updater = setInterval(sendUpdate, 5_000);
-
-      request.signal.addEventListener("abort", () => {
-        clearInterval(heartbeat);
-        clearInterval(updater);
-        controller.close();
-      });
-    },
+  const stream = createBoundedEventStream(request.signal, (sink) => {
+    const encoder = new TextEncoder();
+    let updating = false;
+    const sendUpdate = async () => {
+      if (sink.isClosed() || updating) return;
+      updating = true;
+      try {
+        const entries = await getTopN(scope, 50);
+        if (sink.isClosed()) return;
+        const data = JSON.stringify({ type: "leaderboard", scope, entries });
+        sink.send(encoder.encode(`data: ${data}\n\n`));
+      } catch (error) {
+        sink.send(
+          encoder.encode(
+            `event: error\ndata: ${JSON.stringify({ error: sanitizeErrorMessage(error) })}\n\n`
+          )
+        );
+      } finally {
+        updating = false;
+      }
+    };
+    void sendUpdate();
+    const heartbeat = setInterval(() => {
+      sink.send(encoder.encode(`: heartbeat ${Date.now()}\n\n`));
+    }, 15_000);
+    const updater = setInterval(() => {
+      void sendUpdate();
+    }, 5_000);
+    sink.onCleanup(() => {
+      clearInterval(heartbeat);
+      clearInterval(updater);
+    });
   });
 
   return new Response(stream, {

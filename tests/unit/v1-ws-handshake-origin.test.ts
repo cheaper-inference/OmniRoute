@@ -23,6 +23,7 @@ const ENV_KEYS = [
   "CORS_ORIGIN",
   "OMNIROUTE_PUBLIC_BASE_URL",
   "OMNIROUTE_TRUST_PROXY",
+  "REQUIRE_API_KEY",
 ] as const;
 
 const coreDb = await import("../../src/lib/db/core.ts");
@@ -155,6 +156,53 @@ test("plain GET without the bridge header gets no verdict and is not blocked", a
   });
 });
 
+test("bridge handshake: REQUIRE_API_KEY refuses a missing or invalid key before upgrading", async () => {
+  setEnv({ REQUIRE_API_KEY: "true" });
+  assert.deepEqual(await verdict(handshakeGet()), {
+    status: 401,
+    code: "ws_auth_required",
+    originChecked: null,
+  });
+  assert.deepEqual(await verdict(handshakeGet({ apiKey: "sk-bogus" })), {
+    status: 403,
+    code: "ws_auth_invalid",
+    originChecked: null,
+  });
+  const key = await apiKeysDb.createApiKey("v1 ws require key", "machine-v1-ws-require");
+  assert.deepEqual(await verdict(handshakeGet({ apiKey: key.key })), {
+    status: 200,
+    code: null,
+    originChecked: true,
+  });
+});
+
+test("bridge handshake: REQUIRE_API_KEY accepts a dashboard session", async () => {
+  setEnv({ REQUIRE_API_KEY: "true" });
+  const previousSecret = process.env.JWT_SECRET;
+  process.env.JWT_SECRET = "v1-ws-origin-jwt-secret";
+  try {
+    const sessionToken = await import("../../src/shared/utils/dashboardSessionToken.ts");
+    const token = await sessionToken.mintDashboardSessionToken(
+      sessionToken.getDashboardJwtSecret() as Uint8Array
+    );
+    const request = handshakeGet();
+    request.headers.set("cookie", `${sessionToken.DASHBOARD_SESSION_COOKIE}=${token}`);
+    assert.deepEqual(await verdict(request), { status: 200, code: null, originChecked: true });
+  } finally {
+    if (previousSecret === undefined) delete process.env.JWT_SECRET;
+    else process.env.JWT_SECRET = previousSecret;
+  }
+});
+
+test("REQUIRE_API_KEY leaves the dashboard's plain handshake GET open", async () => {
+  setEnv({ REQUIRE_API_KEY: "true" });
+  assert.deepEqual(await verdict(handshakeGet({ bridge: null })), {
+    status: 200,
+    code: null,
+    originChecked: false,
+  });
+});
+
 function listen(server: http.Server): Promise<number> {
   return new Promise((resolve) => {
     server.listen(0, "127.0.0.1", () => resolve((server.address() as { port: number }).port));
@@ -225,6 +273,40 @@ test("bridge forwards the browser handshake and fails closed without originCheck
     answerOriginChecked = true;
     assert.equal(await rawUpgrade(frontPort, {}), "101");
     assert.equal(inferenceCalls, 0);
+  } finally {
+    front.close();
+    backend.close();
+  }
+});
+
+test("bridge in front of the real route refuses a keyless upgrade under REQUIRE_API_KEY", async () => {
+  setEnv({ REQUIRE_API_KEY: "true" });
+  const key = await apiKeysDb.createApiKey("v1 ws bridge key", "machine-v1-ws-bridge");
+  const backend = http.createServer(async (req, res) => {
+    const response = await wsRoute.GET(
+      new Request(`http://127.0.0.1${req.url || "/"}`, {
+        headers: Object.entries(req.headers).flatMap(([name, value]) =>
+          typeof value === "string" ? [[name, value] as [string, string]] : []
+        ),
+      })
+    );
+    res.writeHead(response.status, { "content-type": "application/json" });
+    res.end(await response.text());
+  });
+  const backendPort = await listen(backend);
+  const bridge = createOmnirouteWsBridge({ baseUrl: `http://127.0.0.1:${backendPort}` });
+  const front = http.createServer();
+  front.on("upgrade", (req, socket, head) => {
+    void bridge.handleUpgrade(req, socket, head);
+  });
+  const frontPort = await listen(front);
+
+  try {
+    assert.equal(await rawUpgrade(frontPort, {}), "401");
+    // This harness has no middleware. In the real stack clientApiPolicy answers a bogus
+    // Bearer key with 401 AUTH_002 before the route runs; here the route itself says 403.
+    assert.equal(await rawUpgrade(frontPort, { authorization: "Bearer sk-bogus" }), "403");
+    assert.equal(await rawUpgrade(frontPort, { authorization: `Bearer ${key.key}` }), "101");
   } finally {
     front.close();
     backend.close();

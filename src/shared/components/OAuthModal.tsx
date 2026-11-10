@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
 import Modal from "./Modal";
+import M365OAuthModal from "./M365OAuthModal";
 import Button from "./Button";
 import Input from "./Input";
 import Textarea from "./Textarea";
@@ -39,8 +40,15 @@ export { formatDeviceCodeRemaining } from "./OAuthModalPanels";
 
 const GOOGLE_OAUTH_PROVIDERS = new Set(["antigravity", "agy"]);
 
+/**
+ * Providers whose OAuth server accepts only loopback redirects (any port, RFC 8252 §7.3).
+ * On a remote install the browser lands on the operator's own loopback and the callback URL
+ * is pasted back, as for the Google providers.
+ */
+const LOOPBACK_REDIRECT_PROVIDERS = new Set(["renderhour"]);
+
 /** Providers that use a local callback server on a random port (PKCE browser flow). */
-const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex", "xai-oauth", "grok-cli"]);
+const PKCE_CALLBACK_SERVER_PROVIDERS = new Set(["codex", "xai-oauth", "grok-cli", "devin-desktop"]);
 
 // grok-cli is wired into BOTH the device-code panel (its default, #7358) and
 // the browser PKCE + import-token paths above/below (#7013) — the user picks
@@ -53,6 +61,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "amazon-q",
   "kimi-coding",
   "kilocode",
+  "megabrain",
   "codebuddy-cn",
   "freebuff",
   "codebuddy-intl",
@@ -60,11 +69,22 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "grok-cli",
   "muse-code",
   "workbuddy",
+  // MiniMax Code: the account service issues a device code the user confirms
+  // in the browser; the credential lands in the local MiniMax Code profile.
+  "minimax-code",
 ]);
 
-const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
-const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
-const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "claude"]);
+const TOKEN_PASTE_PROVIDERS = new Set([
+  "devin-desktop",
+  "devin-cli",
+  "grok-cli",
+  "claude",
+  "antigravity",
+  "agy",
+]);
+const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-cli"]);
+// Devin Desktop opens on the key import (its long-standing default); browser sign-in is a tab.
+const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "devin-desktop", "claude"]);
 
 // POST a bare Codex access token to the access-token-only import endpoint
 // (#1290); shared by the bare-JWT and session-JSON paste branches (#6636).
@@ -140,7 +160,21 @@ async function pollDeviceCodeOnce(
  * - Localhost: Auto callback via popup message
  * - Remote: Manual paste callback URL
  */
-export default function OAuthModal({
+export default function OAuthModal(props: OAuthModalProps) {
+  if (props.provider === "copilot-m365-web") {
+    return props.isOpen ? (
+      <M365OAuthModal
+        key={props.reauthConnection?.id || "new"}
+        connectionId={props.reauthConnection?.id}
+        onClose={props.onClose}
+        onSuccess={props.onSuccess}
+      />
+    ) : null;
+  }
+  return <LegacyOAuthModal {...props} />;
+}
+
+function LegacyOAuthModal({
   isOpen,
   provider,
   providerInfo,
@@ -270,7 +304,7 @@ export default function OAuthModal({
                 .filter(Boolean)
                 .join("; ")
             : "";
-          throw new Error(details ? `${errMsg} (${details})` : errMsg);
+          throw new Error(details ? `${errMsg} (${details})` : String(errMsg));
         }
 
         setStep("success");
@@ -514,6 +548,9 @@ export default function OAuthModal({
                   getErrorMessage(serverData, serverRes.status, t("errorCallbackServerFailed"))
                 );
 
+              if (typeof serverData.authUrl !== "string" || !serverData.authUrl) {
+                throw new Error(errorMessageFromBody(serverData, t("errorBrowserUnavailable")));
+              }
               setAuthData({ ...serverData, redirectUri: serverData.redirectUri });
               setStep("waiting");
               popupRef.current = window.open(serverData.authUrl, "oauth_auth");
@@ -544,8 +581,10 @@ export default function OAuthModal({
 
                 if (pollData.error && !pollData.pending) {
                   throw new Error(
-                    pollData.errorDescription ||
-                      errorMessageFromBody(pollData, t("errorAuthorizationFailed"))
+                    String(
+                      pollData.errorDescription ||
+                        errorMessageFromBody(pollData, t("errorAuthorizationFailed"))
+                    )
                   );
                 }
               }
@@ -587,7 +626,10 @@ export default function OAuthModal({
           // Fixed native-app loopback callback, distinct ports so both can run concurrently (#7013).
           const grokBuildPort = provider === "xai-oauth" ? 56121 : 56122;
           redirectUri = `http://127.0.0.1:${grokBuildPort}/callback`;
-        } else if (provider === "devin-desktop" || provider === "devin-cli") {
+        } else if (provider === "devin-desktop") {
+          // Fixed loopback registered by the Devin CLI login (paste-URL fallback off-host).
+          redirectUri = "http://127.0.0.1:59653/callback";
+        } else if (provider === "devin-cli") {
           // Retained callback-path fallback for the retired browser flow.
           const port = window.location.port || "20128";
           redirectUri = `http://localhost:${port}/auth/callback`;
@@ -596,6 +638,11 @@ export default function OAuthModal({
           // Even in remote deployments we use loopback — user copies the callback URL manually.
           const port = window.location.port || "20128";
           redirectUri = `http://127.0.0.1:${port}/callback`;
+        } else if (LOOPBACK_REDIRECT_PROVIDERS.has(provider)) {
+          // Same origin as the dashboard on localhost, so the /callback relay reaches it.
+          const host = isTrueLocalhost ? window.location.hostname : "localhost";
+          const port = window.location.port || "20128";
+          redirectUri = `http://${host}:${port}/callback`;
         } else if (!isLocalhost) {
           // Behind reverse proxy: use actual origin (e.g., https://omniroute.example.com/callback)
           // Supports PUBLIC_URL env var override, or falls back to window.location.origin.
@@ -620,7 +667,7 @@ export default function OAuthModal({
           throw new Error(errMsg);
         }
 
-        if (!data.authUrl) {
+        if (typeof data.authUrl !== "string" || !data.authUrl) {
           throw new Error(errorMessageFromBody(data, t("errorBrowserUnavailable")));
         }
 

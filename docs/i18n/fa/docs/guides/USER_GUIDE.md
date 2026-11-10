@@ -118,18 +118,18 @@
 
 ---
 
-## 📖 راهاندازی ارائهدهنده
+## 📖 راهاندازی Provider
 
-برای افزودن انبوه اتصالهای کلید API از یک فایل CSV یا JSON، از مسیر **داشبورد ← ارائهدهندگان ← درونریزی از فایل** استفاده کنید. ستونها موقعیتی هستند (`provider,name,apiKey,baseUrl,priority`)؛ مقدار `provider` باید از قبل بهعنوان یک ارائهدهنده مدیریتشده یا یک گره سازگار وجود داشته باشد. به [درونریزی ارائهدهندگان از فایل CSV یا JSON](../providers/CSV-IMPORT.md) مراجعه کنید.
+برای افزودن گروهی اتصالهای کلید API از یک فایل CSV یا JSON، از **Dashboard → Providers → Import from file** استفاده کنید. ستونها ترتیبی هستند (`provider,name,apiKey,baseUrl,priority`)؛ مقدار `provider` باید از قبل بهعنوان یک ارائهدهنده مدیریتشده یا یک نود سازگار وجود داشته باشد. به [وارد کردن ارائهدهندهها از فایل CSV یا JSON](../providers/CSV-IMPORT.md) مراجعه کنید.
 
-### 🔐 ارائهدهندگان اشتراکی
+### 🔐 ارائهدهندههای اشتراکی
 
 #### Claude Code (Pro/Max)
 
 ```bash
-داشبورد ← ارائهدهندگان ← اتصال Claude Code
-← ورود با OAuth ← نوسازی خودکار توکن
-← پیگیری سهمیه ۵ ساعته + هفتگی
+Dashboard → Providers → Connect Claude Code
+→ ورود با OAuth → تازهسازی خودکار توکن
+→ رهگیری سهمیه ۵ ساعته + هفتگی
 
 مدلها:
   cc/claude-opus-4-7
@@ -137,20 +137,18 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**نکته حرفهای:** برای وظایف پیچیده از Opus و برای سرعت از Sonnet استفاده کنید. OmniRoute سهمیه را بهازای هر مدل پیگیری میکند!
+**نکته حرفهای:** برای کارهای پیچیده از Opus و برای سرعت بیشتر از Sonnet استفاده کنید. OmniRoute سهمیه را برای هر مدل رهگیری میکند!
 
-روی میزبان OmniRoute مرورگر ندارید؟ دستور `claude setup-token` را در هر جایی که Claude Code وارد حساب شده است اجرا کنید و توکن یکساله را در زبانه **Setup Token** جایگذاری کنید. به [استفاده از Claude Code با setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md) مراجعه کنید.
+به میزبان OmniRoute دسترسی به مرورگر ندارید؟ هر جا که Claude Code در آن وارد شده است، `claude setup-token` را اجرا کنید و توکن یکساله را در زبانه **Setup Token** وارد کنید. به [Claude Code با توکن راهاندازی](../providers/CLAUDE_CODE_SETUP_TOKEN.md) مراجعه کنید.
 
-مسیرهای سازگار با Claude و Claude Code، میزان تلاش تفکر `max` را برای مدلهای Opus و Sonnet
-حفظ میکنند. مدلهای Haiku سطح تلاش `max` را نمیپذیرند؛ بنابراین OmniRoute پیش از ارسال درخواست
-به سرویس بالادستی، آن را به بودجه تفکر بالا کاهش میدهد.
+مسیریابیهای سازگار با Claude و Claude Code، سطح تلاش فکری `max` را برای مدلهای Opus و Sonnet حفظ میکنند. مدلهای Haiku سطح تلاش `max` را نمیپذیرند؛ بنابراین OmniRoute پیش از ارسال درخواست به سرویس بالادستی، آن را به بودجه فکری زیاد کاهش میدهد.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-داشبورد ← ارائهدهندگان ← اتصال Codex
-← ورود با OAuth (درگاه 1455)
-← بازنشانی ۵ ساعته + هفتگی
+Dashboard → Providers → Connect Codex
+→ ورود با OAuth (درگاه ۱۴۵۵)
+→ بازنشانی ۵ ساعته + هفتگی
 
 مدلها:
   cx/gpt-5.5
@@ -162,9 +160,9 @@
 #### GitHub Copilot
 
 ```bash
-داشبورد ← ارائهدهندگان ← اتصال GitHub
-← OAuth از طریق GitHub
-← بازنشانی ماهانه (روز اول ماه)
+Dashboard → Providers → Connect GitHub
+→ OAuth از طریق GitHub
+→ بازنشانی ماهانه (روز اول ماه)
 
 مدلها:
   gh/gpt-5.5
@@ -174,47 +172,49 @@
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 ارائهدهندگان ارزان
+**اعتبارهای AI (صورتحساب مبتنی بر توکن).** هنگامی که GitHub مقدار `credits_used` را برای حساب گزارش میکند، کارت محدودیتهای ارائهدهنده یک ردیف **اعتبارهای AI** را با اعتبارهای مصرفشده در دوره صورتحساب فعلی نشان میدهد؛ این مورد شامل طرحهای سازمانی نامحدود نیز میشود.
 
-#### GLM-4.7 (بازنشانی روزانه، $0.6/1M)
+**محدودیت محلی اعتبارهای AI.** یک اتصال GitHub را ویرایش کنید و گزینه **محدودیت اعتبارهای AI در هر دوره صورتحساب** (`providerSpecificData.githubCreditLimit`) را تنظیم کنید. خالی گذاشتن آن، این محدودیت را غیرفعال میکند؛ مقدار `0` باعث میشود اتصال همیشه نادیده گرفته شود. هنگامی که آخرین مقدار استفاده برابر یا بیشتر از محدودیت باشد، انتخاب حساب این اتصال را نادیده میگیرد و مسیریابی به سایر اتصالهای شما بازمیگردد؛ درست مانند زمانی که سیاست سهمیه به حد قطع برسد. این بررسی از مقدار استفادهای میخواند که تازهسازی دورهای سهمیه از قبل جمعآوری کرده است — و هرگز در مسیر درخواست با GitHub تماس نمیگیرد — و بهصورت باز عمل میکند: مقدار گمشده یا قدیمی (قدیمیتر از ۱۵ دقیقه، یا مربوط به دوره صورتحسابی که قبلاً بازنشانی شده است) اتصال را مسدود نمیکند. این یک محافظ محلی است، **نه سقف تضمینی هزینه**: تأخیر در گزارشدهی GitHub، فاصله زمانی تازهسازی، درخواستهای در حال اجرا و استفاده خارج از OmniRoute میتوانند باعث عبور از این مقدار شوند. برای تعیین سقف قطعی، از کنترلهای هزینه خود GitHub استفاده کنید.
 
-1. ثبتنام کنید: [Zhipu AI](https://open.bigmodel.cn)
-2. کلید API را از Coding Plan دریافت کنید
-3. داشبورد ← افزودن کلید API: ارائهدهنده: `glm`، کلید API: `your-key`
+### 💰 ارائهدهندههای ارزان
 
-**استفاده:** `glm/glm-4.7` — **نکته حرفهای:** Coding Plan با یکهفتم هزینه، ۳ برابر سهمیه ارائه میدهد! بازنشانی روزانه در ساعت ۱۰:۰۰ صبح انجام میشود.
+#### GLM-4.7 (بازنشانی روزانه، ۰٫۶ دلار/۱ میلیون)
 
-#### MiniMax M2.1 (بازنشانی ۵ ساعته، $0.20/1M)
+1. ثبتنام: [Zhipu AI](https://open.bigmodel.cn)
+2. دریافت کلید API از Coding Plan
+3. Dashboard → Add API Key: ارائهدهنده: `glm`، کلید API: `your-key`
 
-1. ثبتنام کنید: [MiniMax](https://www.minimax.io)
-2. کلید API را دریافت کنید ← داشبورد ← افزودن کلید API
+**استفاده:** `glm/glm-4.7` — **نکته حرفهای:** Coding Plan با هزینه یکهفتم، سهمیهای ۳ برابر ارائه میدهد! بازنشانی روزانه ساعت ۱۰:۰۰ صبح.
+
+#### MiniMax M2.1 (بازنشانی ۵ ساعته، ۰٫۲۰ دلار/۱ میلیون)
+
+1. ثبتنام: [MiniMax](https://www.minimax.io)
+2. دریافت کلید API → Dashboard → Add API Key
 
 **استفاده:** `minimax/MiniMax-M2.1` — **نکته حرفهای:** ارزانترین گزینه برای زمینه طولانی (۱ میلیون توکن)!
 
-#### Kimi K2 (ماهانه ثابت $9)
+#### Kimi K2 (ماهانه ۹ دلار ثابت)
 
-1. مشترک شوید: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. کلید API را دریافت کنید ← داشبورد ← افزودن کلید API
+1. اشتراک: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. دریافت کلید API → Dashboard → Add API Key
 
-**استفاده:** `kimi/kimi-k2.5` — **نکته حرفهای:** ماهانه $9 ثابت برای ۱۰ میلیون توکن، یعنی هزینه مؤثر $0.90/1M!
+**استفاده:** `kimi/kimi-k2.5` — **نکته حرفهای:** ۹ دلار ثابت در ماه برای ۱۰ میلیون توکن = هزینه مؤثر ۰٫۹۰ دلار بهازای هر ۱ میلیون!
 
 #### Baidu Qianfan / ERNIE
 
-1. ثبتنام کنید: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. یک کلید API برای Qianfan ایجاد کنید ← داشبورد ← افزودن کلید API: ارائهدهنده: `qianfan`
+1. ثبتنام: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. ایجاد کلید API برای Qianfan → Dashboard → Add API Key: ارائهدهنده: `qianfan`
 
-**استفاده:** `qianfan/ernie-5.1`، `qianfan/ernie-x1.1`، یا شناسه یک مدل دیگر Qianfan که با OpenAI سازگار است.
+**استفاده:** `qianfan/ernie-5.1`، `qianfan/ernie-x1.1` یا شناسه مدل دیگری سازگار با OpenAI در Qianfan.
 
-### 🆓 ارائهدهندگان رایگان
+### 🆓 ارائهدهندههای رایگان
 
-ارائهدهندگان رایگانِ بدون نیاز به احراز هویت، در صفحه ارائهدهنده خود کلیدی در کنار **نیازی به احراز هویت نیست** دارند.
-خاموش کردن آن، ارائهدهنده را غیرفعال میکند، آن را از نماهای پیکربندیشده/فشرده ارائهدهندگان حذف میکند و
-مدلهایش را از `/v1/models` حذف میکند.
+ارائهدهندههای رایگان بدون احراز هویت، در صفحه ارائهدهنده خود در کنار گزینه **احراز هویت لازم نیست** یک کلید تغییر وضعیت دارند. خاموش کردن آن، ارائهدهنده را غیرفعال میکند، آن را از نماهای پیکربندیشده/فشرده ارائهدهندهها حذف میکند و مدلهای آن را از `/v1/models` حذف میکند.
 
 #### Qoder (۹ مدل رایگان)
 
 ```bash
-داشبورد ← اتصال Qoder ← ورود با OAuth ← دسترسی تابع محدودیتهای فعلی ارائهدهنده است
+Dashboard → Connect Qoder → ورود با OAuth → دسترسی تابع محدودیتهای فعلی ارائهدهنده است
 
 مدلها: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -222,7 +222,7 @@
 #### Kiro (Claude رایگان)
 
 ```bash
-داشبورد ← اتصال Kiro ← AWS Builder ID یا Google/GitHub ← حدود ۵۰ اعتبار در ماه
+Dashboard → Connect Kiro → AWS Builder ID یا Google/GitHub → حدود ۵۰ اعتبار در ماه
 
 مدلها: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -337,82 +337,82 @@ codex "your prompt"
 
 ---
 
-## 🚀 استقرار
+## استقرار 🚀
 
-### نصب سراسری npm (توصیهشده)
+### نصب جهانی npm (توصیه می شود)
 
 ```bash
 npm install -g omniroute
 
-# ایجاد پوشهٔ پیکربندی
+# Create config directory
 mkdir -p ~/.omniroute
 
-# ایجاد فایل .env (به .env.example مراجعه کنید)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# راهاندازی سرور
+# Start server
 omniroute
-# یا با درگاه سفارشی:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI بهطور خودکار `.env` را از `~/.omniroute/.env` یا `./.env` بارگذاری میکند.
+CLI به طور خودکار `.env` از `~/.omniroute/.env` یا `./.env` بارگیری می کند. یک `./.env` در دایرکتوری کاری ممکن است فقط یک لیست مجاز کوتاه از کلیدها (پورت ها، `REQUIRE_API_KEY`، محلی و تنظیمات رنگ) را تنظیم کند. بقیه چیزها را در `~/.omniroute/.env` قرار دهید. به [قراردادهای راه اندازی CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env) مراجعه کنید.
 
-### حالت سینی سیستم
+### حالت سینی
 
-OmniRoute را در سینی سیستم اجرا کنید:
+OmniRoute در سینی سیستم شروع کنید:
 
 ```bash
 omniroute serve --tray
 ```
 
-پس از آمادهشدن سرور و سینی سیستم، فرمان خاتمه مییابد.
+این فرمان پس از آماده شدن سرور و سینی باز می گردد.
 
-سرور بدون ترمینال به کار خود ادامه میدهد.
+سرور بدون ترمینال ادامه می دهد.
 
-حالت سینی سیستم از macOS، Windows و نشستهای گرافیکی Linux پشتیبانی میکند. حالت سینی سیستم داشبورد را بهطور خودکار باز نمیکند.
+حالت سینی از جلسات macOS، Windows و گرافیکی Linux پشتیبانی می کند. حالت سینی داشبورد را به طور خودکار باز نمی کند.
 
-برای انجام اقدامات زیر از منوی سینی سیستم استفاده کنید:
+از منوی سینی برای این اقدامات استفاده کنید:
 
-- بازکردن داشبورد.
-- بازکردن `/dashboard/logs`.
-- تغییر راهاندازی خودکار.
+- داشبورد را باز کنید.
+- `/dashboard/logs` را باز کنید.
+- شروع خودکار را تغییر دهید.
 - توقف OmniRoute.
 
-از `--tray` همراه با گزینههای زیر استفاده نکنید:
+`--tray` با این گزینه ها ترکیب نکنید:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-این حالتها به مالکیت فرایند متفاوتی نیاز دارند.
+این حالت ها به مالکیت فرآیند متفاوتی نیاز دارند.
 
-راهاندازی در ورود بعدی به سیستم را فعال کنید:
+راه اندازی را در ورود به دستگاه بعدی فعال کنید:
 
 ```bash
 omniroute autostart enable
 ```
 
-راهاندازی خودکار در macOS، Windows و نشستهای گرافیکی Linux از حالت سینی سیستم استفاده میکند. Linux بدون رابط گرافیکی از سرویس کاربری systemd موجود استفاده میکند.
+شروع خودکار از حالت سینی در جلسات macOS، Windows و گرافیکی Linux استفاده می کند. Headless Linux از سرویس کاربر systemd موجود استفاده می کند.
 
-راهاندازی در هنگام ورود را غیرفعال کنید:
+غیرفعال کردن راه اندازی در هنگام ورود:
 
 ```bash
 omniroute autostart disable
 ```
 
-### حذف نصب
+### در حال حذف نصب
 
-هنگامی که دیگر به OmniRoute نیاز ندارید، دو اسکریپت سریع برای حذف کامل ارائه میکنیم:
+هنگامی که دیگر OmniRoute نیاز ندارید، ما دو اسکریپت سریع را برای حذف تمیز ارائه می دهیم:
 
-| فرمان                    | عملکرد                                                                                             |
-| ------------------------ | -------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | برنامهٔ سیستم را حذف میکند، اما **پایگاه داده و پیکربندیهای شما** را در `~/.omniroute` نگه میدارد. |
-| `npm run uninstall:full` | برنامه را حذف میکند و همچنین **تمام پیکربندیها، کلیدها و پایگاههای داده را برای همیشه پاک میکند**. |
+| فرمان                    | اقدام                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | برنامه سیستم را حذف می کند اما** DB و تنظیمات شما را حفظ می کند** در `~/.omniroute`.       |
+| `npm run uninstall:full` | برنامه AND برای همیشه حذف می کند** تمام تنظیمات، کلیدها و پایگاه داده ها را پاک می کند** . |
 
-> نکته: برای اجرای این فرمانها، به پوشهٔ پروژهٔ OmniRoute بروید (اگر آن را کلون کردهاید) و فرمانها را اجرا کنید. در غیر این صورت، اگر بهصورت سراسری نصب شده است، میتوانید بهسادگی `npm uninstall -g omniroute` را اجرا کنید.
+> توجه: برای اجرای این دستورات، به پوشه پروژه OmniRoute (اگر آن را شبیه سازی کرده اید) بروید و آنها را اجرا کنید. از طرف دیگر، اگر به صورت سراسری نصب شده باشد، می توانید به سادگی `npm uninstall -g omniroute` را اجرا کنید.
 
-### استقرار روی VPS
+### استقرار VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,25 +428,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# یا: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### استقرار با PM2 (حافظهٔ کم)
+### استقرار PM2 (حافظه کم)
 
-برای سرورهایی با RAM محدود، از گزینهٔ محدودیت حافظه استفاده کنید:
+برای سرورهایی با RAM محدود، از گزینه محدودیت حافظه استفاده کنید:
 
 ```bash
-# با محدودیت 512MB (پیشفرض)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# یا با محدودیت حافظهٔ سفارشی
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# یا با استفاده از ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-فایل `ecosystem.config.js` را ایجاد کنید:
+`ecosystem.config.js` را ایجاد کنید:
 
 ```javascript
 module.exports = {
@@ -471,24 +471,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# ساخت ایمیج (پیشفرض = runner-cli با codex/claude/droid ازپیشنصبشده)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# حالت قابلحمل (توصیهشده)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-برای حالت یکپارچه با میزبان و دارای فایلهای اجرایی CLI، به بخش Docker در مستندات اصلی مراجعه کنید.
+برای حالت یکپارچه میزبان با باینریهای CLI ، بخش Docker را در اسناد اصلی ببینید.
 
-### Void Linux (xbps-src)
+### Linux خالی (xbps-src)
 
-کاربران Void Linux میتوانند OmniRoute را با استفاده از چارچوب کامپایل متقابل `xbps-src` بهصورت بومی بستهبندی و نصب کنند. این چارچوب، ساخت مستقل Node.js را همراه با بایندینگهای بومی موردنیاز `better-sqlite3` خودکار میکند.
+کاربران Void Linux می توانند OmniRoute به صورت بومی با استفاده از چارچوب کامپایل متقابل `xbps-src` بسته بندی و نصب کنند. این کار ساخت مستقل Node.js را به همراه اتصالات بومی `better-sqlite3` به صورت خودکار انجام می دهد.
 
 <details>
 <summary><b>مشاهده قالب xbps-src</b></summary>
 
 ```bash
-# فایل قالب برای 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +509,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# تعیین معماری CPU هدف برای node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +518,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) نصب تمام وابستگیها – بدون اجرای اسکریپتها
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) ساخت بسته مستقل Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) کپیکردن داراییهای ایستا در بسته مستقل
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) کامپایل بایندینگ بومی better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) قراردادن بایندینگ کامپایلشده در بسته مستقل
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) حذف بستههای sharp مختص معماری
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) کپیکردن وابستگیهای زمان اجرای pino که توسط تحلیل ایستای Next.js حذف شدهاند:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +554,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# جلوگیری از حذف دایرکتوریهای خالی مسیریاب برنامه Next.js توسط هوک پس از نصب
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -582,30 +582,30 @@ post_install() {
 
 ### متغیرهای محیطی
 
-| متغیر                                   | مقدار پیشفرض                         | توضیحات                                                                                                                                  |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | کلید محرمانه امضای JWT (**در محیط عملیاتی تغییر دهید**)                                                                                  |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | رمز عبور اولین ورود                                                                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | دایرکتوری دادهها (پایگاه داده، میزان استفاده، گزارشها)                                                                                   |
-| `PORT`                                  | پیشفرض چارچوب                        | درگاه سرویس (`20128` در مثالها)                                                                                                          |
-| `HOSTNAME`                              | پیشفرض چارچوب                        | میزبان اتصال (مقدار پیشفرض Docker برابر با `0.0.0.0` است)                                                                                |
-| `NODE_ENV`                              | پیشفرض زمان اجرا                     | برای استقرار روی `production` تنظیم کنید                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL پایه عمومی که در داشبورد نمایش داده شده و در اختیار سرور قرار میگیرد (جایگزین `BASE_URL` قدیمی)                                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL پایه نقطه پایانی همگامسازی ابری (جایگزین `CLOUD_URL` قدیمی)                                                                          |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | کلید محرمانه HMAC برای کلیدهای API تولیدشده                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | الزام کلید API از نوع Bearer برای `/v1/*`                                                                                                |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | اجازه به کاربران احراز هویتشده داشبورد برای نمایش مقادیر کامل کلیدهای API ذخیرهشده در صورت درخواست                                       |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | تناوب بهروزرسانی سمت سرور برای دادههای ذخیرهشده محدودیتهای ارائهدهنده؛ دکمههای تازهسازی رابط کاربری همچنان همگامسازی دستی را آغاز میکنند |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | غیرفعالسازی اسنپشاتهای خودکار SQLite پیش از نوشتن/درونریزی/بازیابی؛ پشتیبانگیری دستی همچنان کار میکند                                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | خروجی گزارشهای برنامه و ممیزی روی دیسک را فعال میکند                                                                                     |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | اجبار ویژگی `Secure` برای کوکی احراز هویت (پشت پراکسی معکوس HTTPS)                                                                       |
-| `CLOUDFLARED_BIN`                       | تنظیمنشده                            | استفاده از باینری موجود `cloudflared` بهجای دانلود مدیریتشده                                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | روش انتقال برای Quick Tunnels مدیریتشده (`http2`، `quic` یا `auto`)                                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | محدودیت حافظه heap در Node.js بر حسب MB                                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | حداکثر تعداد ورودیهای کش پرامپت                                                                                                          |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | حداکثر تعداد ورودیهای کش معنایی                                                                                                          |
+| متغیر                                   | پیش فرض                  | توضیحات                                                                                                                                           |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(تولید خودکار)_         | امضای JWT مخفی — به طور خودکار در اولین اجرا تولید شد و تا `server.env` ادامه یافت. زمانی که دایرکتوری داده زودگذر است، آن را به صراحت تنظیم کنید |
+| `INITIAL_PASSWORD`                      | _(تنظیم نشده)_           | اولین رمز ورود به سیستم نصب npm/source با `CHANGEME` شروع می شود: آن را جایگزین کنید. تنظیم نشده: جادوگر سوار شدن                                 |
+| `DATA_DIR`                              | `~/.omniroute`           | فهرست داده ها (db، استفاده، گزارش ها)                                                                                                             |
+| `PORT`                                  | پیش فرض چارچوب           | پورت سرویس (در مثالها `20128` )                                                                                                                   |
+| `HOSTNAME`                              | پیش فرض چارچوب           | اتصال میزبان (Docker پیش فرض به `0.0.0.0` است)                                                                                                    |
+| `NODE_ENV`                              | پیش فرض زمان اجرا        | `production` برای استقرار تنظیم کنید                                                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | پایه عمومی URL روی داشبورد ظاهر شد و در معرض سرور قرار گرفت (جایگزین `BASE_URL` قدیمی)                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | پایه نقطه پایانی همگام سازی ابری URL (جایگزین `CLOUD_URL` قدیمی می شود)                                                                           |
+| `API_KEY_SECRET`                        | _(تولید خودکار)_         | رمز HMAC برای کلیدهای API تولید شده — به طور خودکار در اولین اجرا تولید شد و تا `server.env` ادامه یافت                                           |
+| `REQUIRE_API_KEY`                       | `false`                  | اجرای کلید API حامل در `/v1/*`                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | به کاربران داشبورد تأیید شده اجازه دهید مقادیر کامل کلید API ذخیره شده را در صورت تقاضا آشکار کنند                                                |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | سرعت بهروزرسانی سمت سرور برای دادههای محدودیتهای ارائهدهنده حافظه پنهان؛ دکمه های تازه سازی UI همچنان همگام سازی دستی را فعال می کنند             |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | غیرفعال کردن snapshot های خودکار SQLite قبل از writes/import/restore. پشتیبان گیری دستی هنوز کار می کند                                           |
+| `APP_LOG_TO_FILE`                       | `true`                   | خروجی گزارش برنامه و ممیزی را روی دیسک فعال می کند                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | اجبار کوکی تأیید `Secure` (پشت پراکسی معکوس HTTPS )                                                                                               |
+| `CLOUDFLARED_BIN`                       | تنظیم نشده               | به جای دانلود مدیریت شده از یک باینری `cloudflared` موجود استفاده کنید                                                                            |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | حمل و نقل برای تونل های سریع مدیریت شده (`http2`، `quic`، یا `auto`)                                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | حد پشته Node.js در MB                                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | حداکثر ورودی های حافظه پنهان                                                                                                                      |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | حداکثر ورودی های کش معنایی                                                                                                                        |
 
-برای مرجع کامل متغیرهای محیطی، به [README](../README.md) مراجعه کنید.
+برای مرجع کامل متغیر محیطی، [README](../README.md) را ببینید.
 
 ---
 
@@ -614,55 +614,55 @@ post_install() {
 <details>
 <summary><b>مشاهده همه مدلهای موجود</b></summary>
 
-> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 گردآوری شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کاتالوگ کامل و بهروز، مسیر **Dashboard → Providers → [provider] → Available Models** را باز کنید یا `GET /api/models/catalog` را فراخوانی کنید.
+> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 تهیه شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کاتالوگ کامل و زنده، **داشبورد → ارائهدهندگان → [ارائهدهنده] → مدلهای موجود** را باز کنید یا `GET /api/models/catalog` را فراخوانی کنید.
 >
-> اگر فهرست داخلی یک ارائهدهنده قدیمی شده باشد، از **Import from /models** در همان صفحه استفاده کنید (یا **Auto-Sync** را فعال کنید) تا کاتالوگ بهروز upstream را دریافت کنید. این مورد در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شد؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان از سمت upstream محدود باقی ماند.
+> اگر فهرست داخلی یک ارائهدهنده بهروز نیست، از گزینه `Import from /models` در همان صفحه استفاده کنید (یا **همگامسازی خودکار** را فعال کنید) تا کاتالوگ زنده بالادستی دریافت شود. این مورد در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شده است؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان به محدودیتهای بالادستی وابسته بود.
 
-**Claude Code (`cc/`)** — OAuth از نوع Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — احراز هویت OAuth برای Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth از نوع Plus/Pro: `cx/gpt-5.5` (+ سطوح effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — احراز هویت OAuth برای Plus/Pro: `cx/gpt-5.5` (بهعلاوه سطوح تلاش: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — احراز هویت OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth رایگان: از کاتالوگ بهروزی که در مسیر **Dashboard → Providers → Kiro → Available Models** نمایش داده میشود استفاده کنید. دسترسیپذیری بسته به حساب کاربری و طرح متفاوت است.
+**Kiro (`kr/`)** — احراز هویت OAuth رایگان: از کاتالوگ زندهای که در **داشبورد → ارائهدهندگان → Kiro → مدلهای موجود** نمایش داده میشود استفاده کنید. دسترسپذیری به حساب و طرح بستگی دارد.
 
-**Qoder (`if/`)** — OAuth رایگان: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — احراز هویت OAuth رایگان: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`، `glm-cn/`، `zai/`، `glmt/`)** — ۰٫۲ تا ۰٫۶ دلار بهازای هر ۱ میلیون: `glm/glm-5.1`، `glm/glm-5`، `glm/glm-5-turbo`، `glm/glm-4.7`، `glm/glm-4.7-flash`، `glm/glm-4.6`، `glm/glm-4.6v`، `glm/glm-4.5`، `glm/glm-4.5v`، `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`، `minimax-cn/`)** — ۰٫۲ دلار بهازای هر ۱ میلیون: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — تعرفه ثابت $9 در ماه یا پرداخت بهازای مصرف: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`، `kimi-coding/`، `kimi-coding-apikey/`)** — اشتراک ثابت ۹ دلار در ماه یا پرداخت بهازای مصرف: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — کلید API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — کلید API: `ds/deepseek-v4-pro`، `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — فوقسریع: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — فوقسریع: `groq/llama-3.3-70b-versatile`، `groq/meta-llama/llama-4-maverick-17b-128e-instruct`، `groq/qwen/qwen3-32b`، `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok بومی: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok بومی: `xai/grok-4.3`، `xai/grok-4.20-multi-agent-0309`، `xai/grok-4.20-0309-reasoning`، `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — میزبانیشده در اتحادیه اروپا: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — میزبانیشده در اتحادیه اروپا: `mistral/mistral-large-latest`، `mistral/mistral-medium-3-5`، `mistral/mistral-small-latest`، `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — تقویتشده با جستجو: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — تقویتشده با جستوجو: `pplx/sonar-deep-research`، `pplx/sonar-reasoning-pro`، `pplx/sonar-pro`، `pplx/sonar`
 
-**Together AI (`together/`)** — متنباز: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (رایگان), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — متنباز: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (رایگان)، `together/meta-llama/Llama-Vision-Free`، `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`، `together/deepseek-ai/DeepSeek-R1`، `together/Qwen/Qwen3-235B-A22B`، `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — استنتاج سریع: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — استنتاج سریع: `fireworks/accounts/fireworks/models/kimi-k2p6`، `fireworks/accounts/fireworks/models/minimax-m2p7`، `fireworks/accounts/fireworks/models/qwen3p6-plus`، `fireworks/accounts/fireworks/models/glm-5p1`، `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — مقیاس ویفر: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — در مقیاس ویفر: `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — متمرکز بر RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — متمرکز بر RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — سازمانی: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — سازمانی: `nvidia/google/gemma-4-31b-it`، `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`، `nvidia/nvidia/nemotron-3-ultra-550b-a55b`، `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`، `qianfan/ernie-5.0-thinking-latest`، `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`، `ollama-cloud/deepseek-v4-flash`، `ollama-cloud/kimi-k2.6`، `ollama-cloud/glm-5.1`، `ollama-cloud/minimax-m2.7`، `ollama-cloud/gemma4:31b`، `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: بهصورت زنده و بهازای هر کلید API از Google همگامسازی میشود — فهرست ثابتی وجود ندارد. یک کلید را در **Dashboard → Providers** متصل کنید و سپس از **Available Models** برای واردکردن کاتالوگ فعلی استفاده کنید (مثلاً `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: بر اساس کلید API از Google بهصورت زنده همگامسازی میشود — فهرست ثابتی وجود ندارد. یک کلید را در **داشبورد → ارائهدهندگان** متصل کنید، سپس برای وارد کردن کاتالوگ فعلی از **مدلهای موجود** استفاده کنید (برای مثال `gemini/gemini-3-pro`، `gemini/gemini-3-flash`).
 
-**سایر ارائهدهندگان سازگار** (منتخب): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (از طریق `aws-bedrock`), `azure-ai`, `openrouter` (کاتالوگ عبوری), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و در صورتی که ارائهدهنده یک endpoint به نام `/models` ارائه دهد، میتوانند بهصورت خودکار همگامسازی شوند.
+**سایر ارائهدهندگان سازگار** (منتخب): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (از طریق `aws-bedrock`)، `azure-ai`، `openrouter` (کاتالوگ عبوری)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و زمانی که ارائهدهنده نقطه پایانی `/models` ارائه دهد، میتوان آن را بهصورت خودکار همگامسازی کرد.
 
-**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومیِ هر ارائهدهنده استفاده میکند (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). برخی شناسهها شامل نسخههای نقطهدار هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در فهرست بالا ذکر نشده است، دستور `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید تا از در دسترس بودن آن مطمئن شوید.
+**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومی ارائهدهنده استفاده میکند (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`). برخی شناسهها شامل نسخههای دارای نقطه هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در فهرست بالا وجود ندارد، برای تأیید دسترسپذیری آن، `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید.
 
 </details>
 

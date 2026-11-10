@@ -32,6 +32,7 @@ export type ExpiryFirstQuotaMetrics = {
 };
 
 type QuotaCacheEntryView = {
+  provider?: string;
   quotas?: Record<
     string,
     { remainingPercentage?: number; resetAt?: string | null; windowSeconds?: number | null }
@@ -87,6 +88,38 @@ export function getExpiryFirstPlan(connectionData: unknown): string | undefined 
   return typeof plan === "string" ? plan : undefined;
 }
 
+/**
+ * Providers whose plan-wide monthly window is stored under another key (#18541).
+ * getOpencodeUsage, shared by opencode-go and opencode-zen, files the $60/month
+ * window as `mcp_monthly` so the usage page puts it in GLM's Monthly column.
+ * Scoped per provider on purpose: GLM's own `mcp_monthly` is its MCP tool
+ * allowance, not a token budget, and must not set an account's deadline.
+ */
+const MONTHLY_WINDOW_KEY_BY_PROVIDER: Readonly<Record<string, string>> = Object.freeze({
+  "opencode-go": "mcp_monthly",
+  "opencode-zen": "mcp_monthly",
+});
+
+/**
+ * Provider whose window names a cached entry carries: the entry's own provider,
+ * or the request scope's when the entry has none. The quota view and the burn
+ * metrics both resolve it here so they always agree on the alias.
+ */
+export function expiryFirstQuotaProvider(entryProvider: unknown, scopeProvider?: string): string {
+  return (typeof entryProvider === "string" && entryProvider) || scopeProvider || "";
+}
+
+/** Name the scorer reads a cached quota window under; a real `monthly` window wins. */
+export function expiryFirstWindowName(
+  provider: string,
+  windowName: string,
+  quotaNames: readonly string[]
+): string {
+  const alias = MONTHLY_WINDOW_KEY_BY_PROVIDER[provider];
+  const isMonthlyAlias = alias !== undefined && windowName === alias;
+  return isMonthlyAlias && !quotaNames.includes("monthly") ? "monthly" : windowName.toLowerCase();
+}
+
 export function selectExpiryFirstQuotaWindowNames(
   quotaNames: string[],
   scope: Pick<ExpiryFirstScope, "provider" | "requestedModel">
@@ -104,7 +137,11 @@ export function selectExpiryFirstQuotaWindowNames(
   return quotaNames;
 }
 
-/** Reads cached quota trends and plan metadata; no database access on the hot path. */
+/**
+ * Reads quota trends from the in-memory entry and plan metadata; no database
+ * access here. On the request path `buildConnectionQuotaWindowsView` runs first
+ * and hydrates a missing entry from `quota_snapshots`.
+ */
 export function getExpiryFirstQuotaMetrics(
   connectionId: string,
   plan: unknown,
@@ -112,11 +149,12 @@ export function getExpiryFirstQuotaMetrics(
 ): ExpiryFirstQuotaMetrics {
   const entry = getQuotaCache(connectionId) as QuotaCacheEntryView | null;
   const quotas = entry?.quotas || {};
+  const provider = expiryFirstQuotaProvider(entry?.provider, scope.provider);
   const scopedNames = selectExpiryFirstQuotaWindowNames(Object.keys(quotas), scope);
   const cachedBurnMetrics = filterQuotaBurnMetrics(entry?.burnMetrics, scopedNames);
   const burnFractionPerHourByWindow: Record<string, number> = Object.fromEntries(
     Object.entries(cachedBurnMetrics?.rates || {}).map(([key, rate]) => [
-      key.toLowerCase(),
+      expiryFirstWindowName(provider, key, Object.keys(quotas)),
       rate.fractionPerHour,
     ])
   );
