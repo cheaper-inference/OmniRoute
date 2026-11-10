@@ -128,6 +128,36 @@ test("proactive Muse mint timeout returns the original usable credentials and pr
   assert.deepEqual(await readConnection(created.id as string), before);
 });
 
+test("proactive Muse mint timeout on a device-token credential keeps it instead of rejecting", async (t) => {
+  const suffix = ++sequence;
+  const dcaToken = `dca:offline-review-${suffix}`;
+  const created = await providers.createProviderConnection({
+    provider: "muse-code",
+    authType: "oauth",
+    name: `Muse offline review ${suffix}`,
+    accessToken: dcaToken,
+    refreshToken: dcaToken,
+    providerSpecificData: { dcaToken },
+    expiresAt: OLD_EXPIRY,
+    tokenExpiresAt: OLD_EXPIRY,
+    isActive: true,
+    testStatus: "active",
+  });
+  const before = await readConnection(created.id as string);
+  const credentials = { ...before, connectionId: created.id };
+  let mintCalls = 0;
+  t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL) => {
+    assert.equal(requestUrl(input), MUSE_CODE_MINT_URL);
+    mintCalls++;
+    throw new DOMException("Offline mint timeout", "TimeoutError");
+  });
+  // A rejection here escapes handleChat as a bare 500 and skips the account fallback.
+  const result = await checkAndRefreshToken("muse-code", credentials);
+  assert.equal(mintCalls, 1);
+  assert.deepEqual(result, credentials);
+  assert.deepEqual(await readConnection(created.id as string), before);
+});
+
 test("proactive refresh still propagates a nontransient credential programming error", async (t) => {
   const created = await createMuse();
   const defect = new TypeError("Offline credential adapter defect");

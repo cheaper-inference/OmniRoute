@@ -2,7 +2,6 @@
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
-import { isMuseDcaToken } from "@omniroute/open-sse/config/museCode.ts";
 import { isTransientRefreshError } from "@omniroute/open-sse/services/tokenRefresh/transientError.ts";
 import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
@@ -265,15 +264,9 @@ export async function updateProviderCredentials(connectionId: string, newCredent
   }
 }
 
-// A usable Muse inference key survives a transient remint failure; a device token does not.
-function keepsMuseKeyAfterRefreshError(provider: string, accessToken: unknown, error: unknown) {
-  return (
-    provider === "muse-code" &&
-    typeof accessToken === "string" &&
-    accessToken.trim() !== "" &&
-    !isMuseDcaToken(accessToken) &&
-    isTransientRefreshError(error)
-  );
+// A transient Muse remint failure says nothing about the credential: keep it, as a null refresh does.
+function keepsMuseCredentialsAfterRefreshError(provider: string, error: unknown) {
+  return provider === "muse-code" && isTransientRefreshError(error);
 }
 
 function resolveExpiryWithoutAbsolute(newCredentials: any, currentExpiresAt: unknown) {
@@ -322,7 +315,7 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
       try {
         newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
       } catch (error) {
-        if (!keepsMuseKeyAfterRefreshError(provider, credentials.accessToken, error)) throw error;
+        if (!keepsMuseCredentialsAfterRefreshError(provider, error)) throw error;
         return { ...credentials };
       }
 
