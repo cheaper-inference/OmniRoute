@@ -50,7 +50,8 @@ test("a report that takes 150 ms is served from the cache on the second read", a
 
 test("a report that builds in a few milliseconds is still read live", async () => {
   const counter = { calls: 0 };
-  const compute = slowCompute(0, counter);
+  // No timer: a busy runner cannot stretch this build past the 100 ms threshold.
+  const compute = async () => jsonResponse({ n: ++counter.calls });
 
   await cache.serveAnalyticsCached("?range=7d", compute);
   const second = await cache.serveAnalyticsCached("?range=7d", compute);
