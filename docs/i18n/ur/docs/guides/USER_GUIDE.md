@@ -355,63 +355,63 @@ API کلید: [ڈیش بورڈ سے]
 
 ## 🚀 تعیناتی
 
-### عالمی npm انسٹالیشن (تجویز کردہ)
+### گلوبل این پی ایم انسٹال (تجویز کردہ)
 
 ```bash
 npm install -g omniroute
 
-# کنفیگریشن ڈائریکٹری بنائیں
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env فائل بنائیں (.env.example دیکھیں)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# سرور شروع کریں
+# Start server
 omniroute
-# یا حسبِ ضرورت پورٹ کے ساتھ:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI خودکار طور پر `~/.omniroute/.env` یا `./.env` سے `.env` لوڈ کرتا ہے۔
+CLI خود بخود `.env` `~/.omniroute/.env` یا `./.env` سے لوڈ کرتا ہے۔ ورکنگ ڈائرکٹری میں ایک `./.env` کلیدوں کی صرف ایک مختصر اجازت کی فہرست ترتیب دے سکتا ہے (بندرگاہیں، `REQUIRE_API_KEY`، locale اور رنگ کی ترتیبات)؛ باقی سب کچھ `~/.omniroute/.env` میں ڈالیں۔ [CLI لانچ کے معاہدے](CLI-LAUNCH-CONTRACTS.md#working-directory-env) دیکھیں۔
 
 ### ٹرے موڈ
 
-OmniRoute کو سسٹم ٹرے میں شروع کریں:
+سسٹم ٹرے میں OmniRoute شروع کریں:
 
 ```bash
 omniroute serve --tray
 ```
 
-سرور اور ٹرے تیار ہونے کے بعد کمانڈ واپس آ جاتی ہے۔
+سرور اور ٹرے تیار ہونے کے بعد کمانڈ واپس آجاتی ہے۔
 
-سرور ٹرمینل کے بغیر چلتا رہتا ہے۔
+سرور ٹرمینل کے بغیر جاری رہتا ہے۔
 
-ٹرے موڈ macOS، Windows اور گرافیکل Linux سیشنز کو سپورٹ کرتا ہے۔ ٹرے موڈ ڈیش بورڈ کو خودکار طور پر نہیں کھولتا۔
+ٹرے موڈ macOS، Windows، اور گرافیکل Linux سیشنز کو سپورٹ کرتا ہے۔ ٹرے موڈ خود بخود ڈیش بورڈ نہیں کھولتا۔
 
-ان کارروائیوں کے لیے ٹرے مینیو استعمال کریں:
+ان اعمال کے لیے ٹرے مینو کا استعمال کریں:
 
 - ڈیش بورڈ کھولیں۔
 - `/dashboard/logs` کھولیں۔
-- خودکار آغاز تبدیل کریں۔
-- OmniRoute روکیں۔
+- آٹو اسٹارٹ کو تبدیل کریں۔
+- OmniRoute بند کرو۔
 
-`--tray` کو ان اختیارات کے ساتھ یکجا نہ کریں:
+`--tray` ان اختیارات کے ساتھ نہ جوڑیں:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-ان موڈز کے لیے مختلف پراسیس ملکیت درکار ہوتی ہے۔
+ان طریقوں کو مختلف عمل کی ملکیت کی ضرورت ہوتی ہے۔
 
-مشین میں اگلی بار لاگ اِن ہونے پر آغاز فعال کریں:
+اگلی مشین لاگ ان پر اسٹارٹ اپ کو فعال کریں:
 
 ```bash
 omniroute autostart enable
 ```
 
-خودکار آغاز macOS، Windows اور گرافیکل Linux سیشنز پر ٹرے موڈ استعمال کرتا ہے۔ ہیڈ لیس Linux موجودہ systemd صارف سروس استعمال کرتا ہے۔
+آٹو اسٹارٹ macOS، Windows، اور گرافیکل Linux سیشنز پر ٹرے موڈ کا استعمال کرتا ہے۔ ہیڈ لیس Linux موجودہ سسٹمڈ یوزر سروس کا استعمال کرتا ہے۔
 
-لاگ اِن پر آغاز غیر فعال کریں:
+لاگ ان پر اسٹارٹ اپ کو غیر فعال کریں:
 
 ```bash
 omniroute autostart disable
@@ -419,14 +419,14 @@ omniroute autostart disable
 
 ### ان انسٹال کرنا
 
-جب آپ کو مزید OmniRoute کی ضرورت نہ رہے تو مکمل طور پر ہٹانے کے لیے ہم دو فوری اسکرپٹس فراہم کرتے ہیں:
+جب آپ کو OmniRoute مزید ضرورت نہیں ہے، تو ہم صاف ہٹانے کے لیے دو فوری اسکرپٹ فراہم کرتے ہیں:
 
-| کمانڈ                    | کارروائی                                                                                |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | سسٹم ایپ ہٹاتی ہے، لیکن `~/.omniroute` میں **آپ کا DB اور کنفیگریشنز برقرار رکھتی ہے**۔ |
-| `npm run uninstall:full` | ایپ ہٹاتی ہے اور **تمام کنفیگریشنز، کلیدیں اور ڈیٹابیسز مستقل طور پر مٹا دیتی ہے**۔     |
+| حکم                      | ایکشن                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | سسٹم ایپ کو ہٹاتا ہے لیکن** آپ کے DB اور کنفیگریشنز کو برقرار رکھتا ہے۔** `~/.omniroute` میں |
+| `npm run uninstall:full` | ایپ AND مستقل طور پر ہٹاتا ہے۔** تمام کنفیگریشنز، چابیاں اور ڈیٹا بیس کو مٹا دیتا ہے۔** .    |
 
-> نوٹ: یہ کمانڈز چلانے کے لیے OmniRoute پروجیکٹ فولڈر پر جائیں (اگر آپ نے اسے کلون کیا ہے) اور انہیں چلائیں۔ متبادل طور پر، اگر اسے عالمی طور پر انسٹال کیا گیا ہے تو آپ صرف `npm uninstall -g omniroute` چلا سکتے ہیں۔
+> نوٹ: ان کمانڈز کو چلانے کے لیے، OmniRoute پروجیکٹ فولڈر پر جائیں (اگر آپ نے اسے کلون کیا ہے) اور انہیں چلائیں۔ متبادل طور پر، اگر عالمی سطح پر انسٹال ہو تو، آپ آسانی سے `npm uninstall -g omniroute` چلا سکتے ہیں۔
 
 ### VPS تعیناتی
 
@@ -444,21 +444,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# یا: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 تعیناتی (کم میموری)
 
-محدود RAM والے سرورز کے لیے میموری کی حد کا اختیار استعمال کریں:
+محدود RAM والے سرورز کے لیے، میموری کی حد کا اختیار استعمال کریں:
 
 ```bash
-# 512MB کی حد کے ساتھ (ڈیفالٹ)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# یا حسبِ ضرورت میموری کی حد کے ساتھ
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# یا ecosystem.config.js استعمال کرتے ہوئے
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# امیج بنائیں (ڈیفالٹ = runner-cli جس میں codex/claude/droid پہلے سے انسٹال ہیں)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# پورٹیبل موڈ (تجویز کردہ)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI بائنریز کے ساتھ ہوسٹ سے مربوط موڈ کے لیے مرکزی دستاویزات میں Docker سیکشن دیکھیں۔
+CLI بائنریز کے ساتھ ہوسٹ انٹیگریٹڈ موڈ کے لیے، مرکزی دستاویزات میں Docker سیکشن دیکھیں۔
 
-### Void Linux (xbps-src)
+### باطل Linux (xbps-src)
 
-Void Linux کے صارفین `xbps-src` کراس کمپائلیشن فریم ورک استعمال کرتے ہوئے OmniRoute کو مقامی طور پر پیکیج اور انسٹال کر سکتے ہیں۔ یہ مطلوبہ `better-sqlite3` مقامی بائنڈنگز کے ساتھ Node.js کی اسٹینڈ الون بِلڈ کو خودکار بناتا ہے۔
+Void Linux صارفین `xbps-src` کراس کمپائلیشن فریم ورک کا استعمال کرتے ہوئے OmniRoute مقامی طور پر پیکیج اور انسٹال کر سکتے ہیں۔ یہ ضروری `better-sqlite3` مقامی پابندیوں کے ساتھ Node.js اسٹینڈ اسٹون بلڈ کو خودکار کرتا ہے۔
 
 <details>
 <summary><b>xbps-src ٹیمپلیٹ دیکھیں</b></summary>
 
 ```bash
-# 'omniroute' کے لیے ٹیمپلیٹ فائل
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp کے لیے ہدف CPU آرکیٹیکچر کا تعین کریں
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) تمام انحصارات انسٹال کریں – اسکرپٹس کو چھوڑ دیں
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js اسٹینڈ الون بنڈل بِلڈ کریں
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) جامد اثاثوں کو اسٹینڈ الون میں کاپی کریں
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 مقامی بائنڈنگ کمپائل کریں
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) کمپائل شدہ بائنڈنگ کو اسٹینڈ الون بنڈل میں رکھیں
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) آرکیٹیکچر سے مخصوص sharp بنڈلز ہٹائیں
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js کے جامد تجزیے سے رہ جانے والے pino رن ٹائم انحصارات کاپی کریں:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# پوسٹ انسٹال ہُک کے ذریعے خالی Next.js ایپ راؤٹر ڈائریکٹریوں کو ہٹائے جانے سے روکیں
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### ماحولیاتی متغیرات
 
-| متغیر                                   | ڈیفالٹ                               | تفصیل                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT دستخطی راز (**پروڈکشن میں تبدیل کریں**)                                                                  |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | پہلے لاگ اِن کا پاس ورڈ                                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | ڈیٹا ڈائریکٹری (db، استعمال، لاگز)                                                                           |
-| `PORT`                                  | فریم ورک ڈیفالٹ                      | سروس پورٹ (مثالوں میں `20128`)                                                                               |
-| `HOSTNAME`                              | فریم ورک ڈیفالٹ                      | بائنڈ ہوسٹ (Docker میں ڈیفالٹ `0.0.0.0` ہے)                                                                  |
-| `NODE_ENV`                              | رن ٹائم ڈیفالٹ                       | تعیناتی کے لیے `production` مقرر کریں                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ڈیش بورڈ پر ظاہر اور سرور کو مہیا کیا جانے والا عوامی بنیادی URL (فرسودہ `BASE_URL` کی جگہ لیتا ہے)          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | کلاؤڈ سنک اینڈ پوائنٹ کا بنیادی URL (فرسودہ `CLOUD_URL` کی جگہ لیتا ہے)                                      |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | تیار کردہ API کلیدوں کے لیے HMAC راز                                                                         |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` پر Bearer API کلید لازمی بنائیں                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | تصدیق شدہ ڈیش بورڈ صارفین کو حسبِ مطالبہ ذخیرہ شدہ API کلید کی مکمل قدریں ظاہر کرنے کی اجازت دیں             |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | کیش شدہ Provider Limits ڈیٹا کی سرور سائیڈ تازہ کاری کا وقفہ؛ UI کے ریفریش بٹن اب بھی دستی سنک شروع کرتے ہیں |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | لکھنے/درآمد/بحالی سے پہلے خودکار SQLite اسنیپ شاٹس غیر فعال کریں؛ دستی بیک اپ بدستور کام کرتے ہیں            |
-| `APP_LOG_TO_FILE`                       | `true`                               | ایپلیکیشن اور آڈٹ لاگ کا آؤٹ پٹ ڈسک پر فعال کرتا ہے                                                          |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` توثیقی کوکی لازمی بنائیں (HTTPS ریورس پراکسی کے پیچھے)                                              |
-| `CLOUDFLARED_BIN`                       | غیر مقرر                             | منظم ڈاؤن لوڈ کے بجائے موجودہ `cloudflared` بائنری استعمال کریں                                              |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | منظم Quick Tunnels کے لیے ٹرانسپورٹ (`http2`، `quic`، یا `auto`)                                             |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js ہیپ کی حد، MB میں                                                                                    |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | پرامپٹ کیش اندراجات کی زیادہ سے زیادہ تعداد                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | سیمینٹک کیش اندراجات کی زیادہ سے زیادہ تعداد                                                                 |
+| متغیر                                   | طے شدہ                         | تفصیل                                                                                                                                                 |
+| --------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(خود کار طریقے سے تیار کردہ)_ | JWT پر دستخط کرنے والا خفیہ — پہلی بار خود کار طریقے سے تیار ہوا اور `server.env` پر قائم رہا۔ جب ڈیٹا ڈائرکٹری عارضی ہو تو اسے واضح طور پر سیٹ کریں۔ |
+| `INITIAL_PASSWORD`                      | _(غیر سیٹ)_                    | پہلے لاگ ان پاس ورڈ۔ npm/source انسٹالز `CHANGEME` سے شروع ہوتے ہیں: اسے تبدیل کریں۔ غیر سیٹ کریں: آن بورڈنگ وزرڈ                                     |
+| `DATA_DIR`                              | `~/.omniroute`                 | ڈیٹا ڈائرکٹری (ڈی بی، استعمال، لاگز)                                                                                                                  |
+| `PORT`                                  | فریم ورک ڈیفالٹ                | سروس پورٹ (مثال کے طور پر `20128` )                                                                                                                   |
+| `HOSTNAME`                              | فریم ورک ڈیفالٹ                | میزبان کو پابند کریں (Docker ڈیفالٹس `0.0.0.0` پر )                                                                                                   |
+| `NODE_ENV`                              | رن ٹائم ڈیفالٹ                 | تعیناتی کے لیے `production` سیٹ کریں۔                                                                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`       | عوامی بنیاد URL ڈیش بورڈ پر آ گیا اور سرور کے سامنے آ گیا (وراثت `BASE_URL` کی جگہ لے لیتا ہے)                                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`        | کلاؤڈ سنک اینڈ پوائنٹ بیس URL (لیگیسی `CLOUD_URL` کی جگہ لے لیتا ہے)                                                                                  |
+| `API_KEY_SECRET`                        | _(خود کار طریقے سے تیار کردہ)_ | HMAC سیکریٹ فار جنریٹڈ API کیز — پہلے رن پر خود کار طریقے سے تیار کی گئی اور `server.env` پر برقرار رہی                                               |
+| `REQUIRE_API_KEY`                       | `false`                        | `/v1/*` پر Bearer API کلید کو نافذ کریں۔                                                                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                        | تصدیق شدہ ڈیش بورڈ صارفین کو مطالبہ پر مکمل ذخیرہ شدہ API کلیدی اقدار کو ظاہر کرنے کی اجازت دیں۔                                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                           | کیشڈ پرووائیڈر لمٹس ڈیٹا کے لیے سرور سائیڈ ریفریش کیڈینس؛ UI ریفریش بٹن اب بھی دستی مطابقت پذیری کو متحرک کرتے ہیں۔                                   |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                        | writes/import/restore سے پہلے خودکار SQLite سنیپ شاٹس کو غیر فعال کریں۔ دستی بیک اپ اب بھی کام کرتے ہیں۔                                              |
+| `APP_LOG_TO_FILE`                       | `true`                         | ایپلیکیشن اور آڈٹ لاگ آؤٹ پٹ کو ڈسک پر فعال کرتا ہے۔                                                                                                  |
+| `AUTH_COOKIE_SECURE`                    | `false`                        | `Secure` auth کوکی کو مجبور کریں ( HTTPS ریورس پراکسی کے پیچھے)                                                                                       |
+| `CLOUDFLARED_BIN`                       | غیر سیٹ                        | منظم ڈاؤن لوڈ کے بجائے موجودہ `cloudflared` بائنری استعمال کریں۔                                                                                      |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                        | منظم فوری سرنگوں کے لیے ٹرانسپورٹ (`http2`، `quic`، یا `auto`)                                                                                        |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                          | MB میں Node.js ہیپ کی حد                                                                                                                              |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                           | زیادہ سے زیادہ پرامپٹ کیشے اندراجات                                                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                          | زیادہ سے زیادہ سیمنٹک کیشے اندراجات                                                                                                                   |
 
-ماحولیاتی متغیرات کے مکمل حوالہ کے لیے [README](../README.md) دیکھیں۔
+مکمل ماحولیاتی متغیر حوالہ کے لیے، [README](../README.md) دیکھیں۔
 
 ---
 

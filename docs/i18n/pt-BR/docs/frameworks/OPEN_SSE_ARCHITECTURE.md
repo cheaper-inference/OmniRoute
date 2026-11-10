@@ -488,7 +488,7 @@ Isso processa:
 
 | Arquivo                       | Propósito                                                     |
 | ----------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`         | Registro de modelo de bate-papo no catálogo de 380 provedores |
+| `providerRegistry.ts`         | Registro de modelo de bate-papo no catálogo de 381 provedores |
 | `providerModels.ts`           | Aliases de modelo, mapeamento de formato                      |
 | `constants.ts`                | Tempos limite, limites, códigos de status                     |
 | `defaultThinkingSignature.ts` | Assinatura de pensamento Claude padrão                        |

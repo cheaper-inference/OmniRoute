@@ -19,8 +19,9 @@ omniroute --mcp
 Jew permezz tat-trasport open-sse:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 It-trasporti HTTP (`sse` / `streamable-http`, moqdija waqt il-proċess mis-server tad-dashboard) huma mitfija awtomatikament u qabel kienu toggleable biss mill-paġna `/dashboard/mcp`. Minn v3.8.51 iż- CLI għandu parità:
@@ -131,18 +132,18 @@ Ara [l-Konfigurazzjoni tal-Klijent MCP](../guides/SETUP_GUIDE.md#mcp-client-conf
 | `omniroute_compression_status`      | `read:compression`  | Issettjar tal-kompressjoni, sommarju analitiku, u stats konxji mill-cache (jinkludi metadejta `analytics.mcpDescriptionCompression` )                           |
 | `omniroute_compression_configure`   | `write:compression` | Ikkonfigura l-mod tal-kompressjoni, il-limitu, il-proporzjon fil-mira, il-preservazzjoni fil-pront tas-sistema, it-toggle tal-kompressjoni tad-deskrizzjoni MCP |
 | `omniroute_set_compression_engine`  | `write:compression` | Agħżel il-magna attiva (off/caveman/rtk/stacked) u l-intensità Caveman/RTK                                                                                      |
-| `omniroute_list_compression_combos` | `read:compression`  | Elenka l-combos tal-kompressjoni msemmija u l-pipelines tal-magni tagħhom                                                                                       |
+| `omniroute_list_compression_combos` | `read:compression`  | Lista combos ta' kompressjoni msemmija u l-pipelines tal-magni tagħhom                                                                                          |
 | `omniroute_compression_combo_stats` | `read:compression`  | Analitiċi raggruppati skont kompressjoni u magna                                                                                                                |
 | `omniroute_ccr_store`               | `write:compression` | Aħżen il-kontenut iżolat minn min iċempel fil-maħżen CCR mlimitat fil-memorja u rritorna markatur flimkien ma' referenza `ccr://`                               |
 | `omniroute_ccr_retrieve`            | `read:compression`  | Irkupra l-kontenut CCR b'mod sħiħ jew b'modi ta' ras, denb, linji, grep, u stats                                                                                |
-| `omniroute_ccr_inspect`             | `read:compression`  | Spezzjona l-metadata CCR li tkun proprjetà ta' min iċempel mingħajr ma tirritorna l-kontenut                                                                    |
+| `omniroute_ccr_inspect`             | `read:compression`  | Spezzjona l-metadata CCR ta' min iċempel mingħajr ma tirritorna l-kontenut                                                                                      |
 | `omniroute_ccr_list`                | `read:compression`  | Elenka l-metadejta paġnata għall-blokki CCR ta' min iċempel                                                                                                     |
 | `omniroute_ccr_delete`              | `write:compression` | Ħassar blokk CCR ta' min iċempel                                                                                                                                |
 | `omniroute_ccr_stats`               | `read:compression`  | Irrapporta l-użu tal-memorja b'ambitu ta' min iċempel, il-counters taċ-ċiklu tal-ħajja, u l-limiti tal-maħżen                                                   |
 | `omniroute_rtk_discover`            | `read:compression`  | Skopri storbju rikorrenti fil-kampjuni tal-output RTK opt-in                                                                                                    |
-| `omniroute_rtk_learn`               | `read:compression`  | Iġġenera abbozz ta' filtru RTK li jista' jiġi rivedut minn kampjuni ta' opt-in                                                                                  |
+| `omniroute_rtk_learn`               | `read:compression`  | Iġġenera abbozz ta' filtru RTK li jista' jiġi rivedut minn kampjuni opt-in                                                                                      |
 
-L-entrati CCR huma fil-memorja biss u jisparixxu mal-bidu mill-ġdid. Kull blokka hija limitata għal 2 MiB, kull prinċipali għal 16 MiB, u l-maħżen globali għal 64 MiB. L-iskrizzjonijiet default għal TTL ta' 24 siegħa (massimu ta' sebat ijiem). L-irkupru sħiħ MCP huwa limitat għal 256 KiB; blokki akbar jibqgħu disponibbli permezz tal-modi ranged u grep. Il-ħażna, l-irkupru, l-elenkar, l-ispezzjoni, it-tħassir u l-istatistiċi huma iżolati mill-prinċipal awtentikat taċ-ċavetta API. Ir-rekords tal-awditjar fihom hashes u metadata tad-daqs, qatt kontenut.
+L-entrati CCR jużaw maħżen b'żewġ saffi: saff sħun fil-memorja appoġġjat, fuq runtimes lokali mhux cloud, minn saff SQLite durabbli (`ccr_blocks`, fuq awtomatikament) sabiex blokka tibqa 'ħajja żgumbrament jew bidu mill-ġdid sakemm TTL tagħha jispiċċa — ħlief blokki ta' aktar minn 512 KB u runtimes cloud-only, li jibqgħu runtimes. Kull blokka hija limitata għal 2 MiB, kull prinċipali għal 16 MiB, u l-maħżen globali għal 64 MiB. L-iskrizzjonijiet default għal TTL ta' 24 siegħa (massimu ta' sebat ijiem). L-irkupru sħiħ MCP huwa limitat għal 256 KiB; blokki akbar jibqgħu disponibbli permezz tal-modi ranged u grep. Il-ħażna, l-irkupru, l-elenkar, l-ispezzjoni, it-tħassir u l-istatistiċi huma iżolati mill-prinċipal awtentikat taċ-ċavetta API. Ir-rekords tal-awditjar fihom hashes u metadata tad-daqs, qatt kontenut. Dettalji li jiffaċċjaw l-operatur (iż-żewġ markaturi, il-prerekwiżiti tal-klijenti, `codemode:false`, ambiti għal kull għodda, paġnar, u matriċi dijanjostika) jgħixu f'Compression [Engines → Prerekwiżiti / gwida tal-operatur](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` tirrapporta MCP deskrizzjoni kompressjoni separatament taħt `analytics.mcpDescriptionCompression`. Dawk il-valuri huma stimi tad-daqs tal-metadejta għal deskrizzjonijiet listabbli MCP (`tools`, `prompts`, `resources`, u `resourceTemplates`); mhumiex irċevuti tal-użu tal-fornitur u huma mmarkati `source: "mcp_metadata_estimate"`.
 
@@ -152,7 +153,7 @@ Separati mill-għodod ta' kompressjoni ta' hawn fuq, OmniRoute jinkludi filtru t
 
 Imġieba ewlenin:
 
-- Jiġġarrab ≥ 30 linja ripetuta konsekuttiva aħwa fis-sommarju tar-ras + denb
+- Jiġġarraf ≥ 30 linja ripetuta konsekuttiva aħwa fis-sommarju tar-ras + denb
 - Preserves `[ref=eXX]` ankri mitluba minn Playwright/computer-use
 - Tnaqqas b'mod iebes test kbir (> 50,000 karattri) b'ħjiel ta' navigazzjoni
 - Iffrankar mistenni:** 60–80%** fuq payloads ta' snapshot tal-browser

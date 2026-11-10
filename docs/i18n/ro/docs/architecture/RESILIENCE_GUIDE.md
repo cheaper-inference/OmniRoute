@@ -266,108 +266,109 @@ Mecanismele asociate rămân separate:
 - Semafoarele conturilor acordă permise de concurență pentru solicitări și se încheie când o solicitare este finalizată.
 - Lease-urile exclusive ale sesiunilor gestionate reprezintă deținerea durabilă pe durata ciclului de viață, cu o barieră de generație.
 
-## 3. Blocarea modelelor
+## 3. Blocarea modelului
 
-**Domeniu:** triplul furnizor + conexiune + model.
+**Domeniu:** tripletul provider + conexiune + model.
 
-**Domeniul cheii în funcție de status:** statusul eșuat decide în care cheie se scrie o blocare
-(`resolveLockoutScope()` din `open-sse/services/accountFallback/exactModelLock.ts`):
+**Domeniul în funcție de status:** statusul care a eșuat decide cheia în care scrie blocarea
+(`resolveLockoutScope()` în `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — un semnal de cotă sau de drepturi de acces — blochează **familia de cotă**:
-  pentru codex întregul domeniu `codex` / `spark` (fiecare model `gpt-5*` al
-  conexiunii), pentru alți furnizori `getQuotaScopedModelForProvider()`.
+- `429` / `403` / `402` — un semnal de cotă sau drepturi — blochează **familia cotei**:
+  pentru codex, întregul domeniu `codex` / `spark` (fiecare model `gpt-5*` al
+  conexiunii), iar pentru ceilalți provideri `getQuotaScopedModelForProvider()`.
 - `404` blochează modelul simplu (`getModelLockKey()` restrânge `not_found`).
-- Orice alt status — eșecurile de transport/server `5xx` și `502`-ul sintetizat de
-  OmniRoute din validarea calității — blochează doar tuplul **exact**
-  furnizor/conexiune/model. Un stream defect pe un model nu este o dovadă
-  despre cota contului; înainte de această regulă, un singur răspuns gol pe
-  `codex/gpt-5.6-luna` elimina din rutare toate modelele `gpt-5*` ale acelei
-  conexiuni timp de 2–30 min (escaladat), deși cota nu era deloc afectată.
-- Opțiunea explicită `scope` a apelantului are întotdeauna prioritate (Antigravity transmite `"exact"`).
+- Orice alt status — erori de transport/server `5xx` și `502` sintetizat de OmniRoute
+  în urma validării calității — blochează doar tuplul **exact**
+  provider/conexiune/model. Un flux defect pentru un model nu oferă dovezi despre
+  cota contului; înainte de această regulă, un singur răspuns gol pentru
+  `codex/gpt-5.6-luna` elimina din rutare fiecare model `gpt-5*` al acelei conexiuni
+  timp de 2–30 de minute (cu escaladare), în timp ce cota sa rămânea neafectată.
+- Opțiunea explicită `scope` a apelantului are întotdeauna prioritate (Antigravity
+  transmite `"exact"`).
 
-**Scop:** a evita dezactivarea unei întregi conexiuni atunci când un singur model este indisponibil sau limitat de cotă.
+**Scop:** evitarea dezactivării unei conexiuni întregi atunci când un singur model este indisponibil sau limitat de cotă.
 
 **Exemple:**
 
-- Furnizori cu cotă per model care returnează 429
-- Furnizori locali care returnează 404 pentru un model lipsă
-- Eșecuri de permisiune specifice furnizorului pentru moduri/modele (de ex., modurile Grok)
+- Provideri cu cote per model care returnează 429
+- Provideri locali care returnează 404 pentru un model lipsă
+- Eșecuri de permisiuni specifice providerului pentru mod/model (de exemplu, modurile Grok)
 
 **Implementare:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Panoul Răciri modele (v3.8.0)
+### Tabloul de bord pentru perioadele de așteptare ale modelelor (v3.8.0)
 
-UI: Setări → Răciri modele (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+Interfață: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Listează blocările active cu: furnizor, conexiune, model, motiv, expiresAt. Operatorii pot reactiva manual un model din card.
+Afișează blocările active cu: provider, conexiune, model, motiv, expiresAt. Operatorii pot reactiva manual un model din card.
 
 **API REST:**
 
 - `GET /api/resilience/model-cooldowns` — listează blocările active
 - `DELETE /api/resilience/model-cooldowns` — reactivare manuală. Corp: `{provider, connection, model}`. Autentificare: management.
 
-### Managerul de răciri
+### Managerul perioadelor de așteptare
 
-UI: Monitorizare → Manager de răciri (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+Interfață: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-O singură pagină pentru fiecare conexiune scoasă din rutare dintr-un motiv tranzitoriu, în loc să
-deschizi fiecare pagină de furnizor în parte. Listează răcirile conexiunilor, blocările de modele și stările
-terminale, le șterge per conexiune, pentru o selecție sau pentru toate conexiunile unui furnizor,
-și editează cele mai frecvent ajustate reguli de răcire: `streamStallCooldown.enabled` și răcirea de bază
-`connectionCooldown` pentru OAuth / cheie API, plus pașii maximi de backoff (salvați prin
+O singură pagină pentru fiecare conexiune care nu mai este disponibilă pentru rutare dintr-un motiv tranzitoriu, în loc să
+deschidă pagina fiecărui provider. Listează perioadele de așteptare ale conexiunilor, blocările modelelor și
+stările terminale, le șterge pentru fiecare conexiune, pentru o selecție sau pentru toate conexiunile unui provider
+și editează cele mai utilizate reguli pentru perioadele de așteptare: `streamStallCooldown.enabled` și perioada de așteptare de bază
+`connectionCooldown` și numărul maxim de pași de backoff pentru conexiunile OAuth / cu cheie API (salvate prin
 `PATCH /api/resilience`). Stările terminale (`banned`, `expired`, `credits_exhausted`) sunt
-listate, dar nu sunt niciodată șterse aici.
+listate, dar nu sunt șterse niciodată de aici.
+
+Cardul **Reguli pentru perioadele de așteptare ale erorilor** de pe aceeași pagină editează regulile pentru erorile operatorului
+(`settings.providerErrorRules`) și valorile implicite generale per provider
+(`settings.providerErrorDefaults`) prin `PATCH /api/settings` — consultați „Reguli declarate de operator”
+din §7 pentru modul în care sunt potrivite. Duratele sunt Implicit (fără perioadă de așteptare explicită), 30 de minute,
+1 oră, 5 ore, 24 de ore sau o valoare personalizată între 1 și 43.200 de minute (30 de zile).
 
 **API REST** (`src/lib/resilience/cooldownManager.ts`, autentificare: management):
 
-- `GET /api/resilience/cooldowns[?provider=]` — conexiuni cu status, răcire rămasă,
-  nivel de backoff, ultimul tip de eroare și blocări de modele (fără credențiale)
+- `GET /api/resilience/cooldowns[?provider=]` — conexiuni cu status, perioada de așteptare rămasă,
+  nivelul backoff, ultimul tip de eroare și blocările modelelor (fără credențiale)
 - `POST /api/resilience/cooldowns` — corp `{connectionIds: string[]}` sau
   `{all: true, provider?}`; returnează `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### UI-ul setărilor de blocare + recuperarea prin atenuare la succes (v3.8.23)
+### Interfața pentru setările blocării modelelor + recuperarea prin reducerea succesului (v3.8.23)
 
-Blocarea modelelor a trecut de la un comportament permanent, hardcodat, la o funcționalitate
-complet configurabilă, de tip opt-in, cu propriul card de setări și o cale de recuperare cu auto-vindecare.
+Blocarea modelelor a trecut de la un comportament mereu activ, hardcodat, la o funcție complet configurabilă,
+activată opțional, cu propriul card de setări și o cale de recuperare cu autoreparare.
 
-**Card de setări:** Setări → Blocare model
+**Card de setări:** Settings → Model Lockout
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Acesta este **distinct** față de `ModelCooldownsCard`-ul read-only de mai sus (care doar
-_listează_ blocările active) — noul card _configurează parametrii_. Valorile implicite
+Acesta este **distinct** de `ModelCooldownsCard` disponibil doar pentru citire de mai sus (care doar
+_ listează_ blocările active) — noul card _configurează parametrii_. Valorile implicite
 se află în `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Setare                  | Implicit                         | Semnificație                                                            |
-| ----------------------- | -------------------------------- | ----------------------------------------------------------------------- |
-| `enabled`               | `false`                          | Comutator principal — blocarea modelelor este **dezactivată implicit**. |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Statusurile upstream care contează ca eșec la nivel de model.           |
-| `baseCooldownMs`        | `120_000` (120 s)                | Durata inițială a blocării pentru primul eșec.                          |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Limita superioară a răcirii escalate.                                   |
-| `maxBackoffSteps`       | `10`                             | Numărul maxim de pași de escaladare a backoff-ului exponențial.         |
-| `useExponentialBackoff` | `true`                           | Dacă eșecurile repetate escaladează exponențial răcirea.                |
+| Setare                  | Implicit                         | Semnificație                                                                  |
+| ----------------------- | -------------------------------- | ----------------------------------------------------------------------------- |
+| `enabled`               | `false`                          | Comutator principal — blocarea modelului este **dezactivată implicit**.       |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Statusurile upstream care sunt considerate eșecuri pentru domeniul modelului. |
+| `baseCooldownMs`        | `120_000` (120 s)                | Durata inițială a blocării pentru primul eșec.                                |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Limita perioadei de așteptare escaladate.                                     |
+| `maxBackoffSteps`       | `10`                             | Numărul maxim de pași de escaladare prin backoff exponențial.                 |
+| `useExponentialBackoff` | `true`                           | Dacă eșecurile repetate escaladează exponențial perioada de așteptare.        |
 
-Setările persistă prin store-ul obișnuit de setări și se validează prin
-schema de setări de reziliență; cardul constrânge `baseCooldownMs`/`maxCooldownMs`
-(cu `maxCooldownMs ≥ baseCooldownMs`) și `maxBackoffSteps`.
+Setările sunt persistate prin magazinul normal de setări și validate prin schema setărilor de reziliență; cardul limitează
+`baseCooldownMs`/`maxCooldownMs` (cu `maxCooldownMs ≥ baseCooldownMs`) și `maxBackoffSteps`.
 
-**Recuperare prin atenuare la succes:** recuperarea **nu** este doar
-expirarea temporizatorului. Un răspuns sănătos reduce treptat numărul de eșecuri
-al modelului, astfel încât un model care s-a recuperat la mijlocul ferestrei
-nu mai escaladează (și se deblochează) înainte ca temporizatorul să expire.
-La o țintă combo reușită, `open-sse/services/combo.ts` apelează `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), care **înjunătățește** `failureCount`-ul
-stocat (`Math.floor(failureCount / 2)`); când acesta ajunge la `0`, intrarea
-de blocare este ștearsă complet. Omologul `recordModelLockoutFailure()`
-incrementează numărul (și escaladează răcirea) la eșecurile din
-fereastra de escaladare. Această atenuare la succes este în plus față de
-simpla expirare a temporizatorului — oricare dintre cele două căi poate
-reactiva un model.
+**Recuperarea prin reducerea succesului:** recuperarea nu constă **doar** în expirarea temporizatorului. Un
+răspuns sănătos reduce treptat numărul de eșecuri al modelului, astfel încât un model care și-a revenit
+în timpul intervalului să nu mai escaladeze (și să fie deblocat) înainte de expirarea temporizatorului. Pentru o țintă combo
+reușită, `open-sse/services/combo.ts` apelează `decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`), care **înjumătățește** `failureCount` stocat
+(`Math.floor(failureCount / 2)`); când ajunge la `0`, intrarea de blocare este ștearsă complet. Contrapartea
+`recordModelLockoutFailure()` incrementează numărul (și escaladează perioada de așteptare) pentru eșecurile din intervalul de escaladare. Această reducere prin succes se adaugă expirării simple a temporizatorului —
+oricare dintre cele două căi poate reactiva un model.
 
-**Stare:** blocările sunt păstrate **în memorie** (`Map`-uri per proces de
-`ModelLockoutEntry` cu cheia `provider:connectionId:model`, blocările cu domeniu exact
-cu `provider:connectionId:exact:model`), nu sunt persistate în baza de
-date — se pierd la repornire. _Setările_ sunt persistate; _starea_
-activă a blocărilor este efemeră.
+**Stare:** blocările sunt păstrate **în memorie** (instanțe `Map` per proces, cu chei
+`ModelLockoutEntry` de forma `provider:connectionId:model`, iar blocările cu domeniu exact de forma
+`provider:connectionId:exact:model`), nu sunt persistate în
+baza de date — se pierd la repornire. _Setările_ sunt persistate; _starea_ activă a blocării este efemeră.
 
 ---
 
@@ -569,298 +570,267 @@ Când este activată, o întrerupere a supravegherii este aplicată numai încer
 
 ## 7. Reformularea statusului upstream (erori de cotă raportate greșit)
 
-**Domeniu de aplicare:** un singur gateway upstream care raportează epuizarea temporară a cotei cu un status HTTP greșit.
+**Domeniu:** un gateway upstream care raportează epuizarea temporară a cotei cu un status HTTP greșit.
 
-**Scop:** corectarea unui status înșelător ÎNAINTE de clasificare, astfel încât consumatorii downstream (motorul de fallback, agregarea combo, răspunsul către client) să vadă adevărata natură reîncercabilă a eșecului.
+**Scop:** corectarea unui status înșelător ÎNAINTE de clasificare, astfel încât consumatorii din aval (motorul de fallback, agregarea combinațiilor, răspunsul adresat clientului) să vadă natura reală, reîncercabilă, a eșecului.
 
-Unele gateway-uri semnalează epuizarea TEMPORARĂ a cotei cu un status HTTP
-ce nu permite reîncercarea. `agentrouter.org` returnează `403` (uneori `400`)
-cu un corp în chineză (`用户额度不足` / `额度不足`) în locul statusului standard
-`429`. Clienți precum Claude Code tratează `403` ca permanent și întrerup
-sesiunea, iar fără corecție, motorul de fallback l-ar clasifica drept
-`AUTH_ERROR` în loc de un eveniment de cotă.
+Unele gateway-uri semnalează epuizarea TEMPORARĂ a cotei cu un status HTTP care
+nu permite reîncercarea. `agentrouter.org` returnează `403` (uneori `400`) cu un corp
+în chineză (`用户额度不足` / `额度不足`) în locul valorii standard `429`. Clienții precum
+Claude Code tratează `403` ca fiind permanent și abandonează sesiunea, iar fără corecție
+motorul de fallback l-ar clasifica drept `AUTH_ERROR` în locul unui
+eveniment de cotă.
 
 **Implementare:**
 
-- Registru + comparator: `open-sse/config/upstreamStatusRestatement.ts` — o
+- Registru + matcher: `open-sse/config/upstreamStatusRestatement.ts` — o
   listă de reguli per furnizor (`{id, fromStatuses, toStatus, textMarkers,
 excludeMarkers, defaultRetryAfterMs}`), potrivite prin `applyStatusRestatement()`.
-- Locul apelului: blocul `providerFailure:` din `open-sse/handlers/chatCore.ts`
+- Punct de apelare: blocul `providerFailure:` din `open-sse/handlers/chatCore.ts`
   (în jurul liniei 3654), imediat după ce `parseUpstreamError()` analizează un
-  răspuns upstream cu un status HTTP de eroare (`!providerResponse.ok`) și
-  înainte de rularea oricărei clasificări, astfel încât fiecare consumator
-  downstream să vadă statusul corectat. Erorile încorporate într-un flux SSE
-  `200` urmează o cale separată, ulterioară, de analiză a fluxului și **nu**
-  sunt acoperite de acest hook în prezent — o limitare cunoscută, încă
-  nenecesară pentru statusul greșit al agentrouter (care apare ca un status
-  HTTP de eroare).
-- Eligibilitatea pentru reîncercare: `429` se află în
-  `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), deci o eroare
-  reformulată poartă o fereastră reală de reîncercare în loc să apară ca un
-  `403` mort.
-- Valoarea sintetică `60s` `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  este doar ceea ce răspunsul reformulat comunică **clientului**; nu este ea
-  însăși durata internă de cooldown/blocare a conexiunii — aceasta este
-  guvernată separat de mecanismul care tratează efectiv eroarea reformulată
-  (backoff-ul escaladant al Connection Cooldown, §2, bază `3s` pentru
-  furnizorii cu cheie API; sau Model Lockout, §3, pentru furnizorii cu cotă
-  per model precum agentrouter). Routerul poate deveni eligibil pentru
-  reîncercare intern mai devreme decât fereastra de 60s pe care o anunță
-  clientului — o marjă intenționată, nu un bug.
+  răspuns upstream cu un status HTTP de eroare (`!providerResponse.ok`) și înainte
+  de orice clasificare, astfel încât fiecare consumator din aval să vadă statusul corectat. Erorile
+  incluse într-un flux SSE `200` urmează o cale separată, ulterioară, de analizare a fluxului
+  și **nu** sunt acoperite de acest hook în prezent — o limitare cunoscută, care nu este încă
+  necesară pentru statusul greșit al agentrouter (care apare ca status HTTP de eroare).
+- Eligibilitatea pentru reîncercare: `429` se află în `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`), astfel încât o eroare reformulată
+  poartă o fereastră reală pentru reîncercare, în loc să fie prezentată ca un `403` fără
+  posibilitate de recuperare.
+- Valoarea sintetică `60s` pentru `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
+  este doar ceea ce răspunsul reformulat îi comunică **clientului**; aceasta nu este durata
+  internă de cooldown/blocare a conexiunii — ea este guvernată separat de mecanismul care
+  gestionează efectiv eroarea reformulată (backoff-ul escaladant al Connection Cooldown,
+  §2, cu valoarea de bază `3s` pentru furnizorii cu chei API; sau Model Lockout, §3, pentru
+  furnizorii cu cotă per model, precum agentrouter). Routerul poate deveni eligibil pentru
+  reîncercare internă mai devreme decât fereastra de 60s pe care o anunță clientului —
+  o rezervă intenționată, nu o eroare.
 
-Erorile permanente (`无权访问模型` de la agentrouter — fără acces la acest
-model) nu sunt NICIODATĂ reformulate: `excludeMarkers` pune veto pe regulă
-chiar și atunci când `textMarkers` se potrivește, astfel încât eroarea își
-păstrează statusul original și nimic nu o reîncearcă la infinit. Regula de
-clasificare a furnizorului corespunzătoare
+Erorile permanente (agentrouter `无权访问模型` — lipsă de acces la acest model) nu sunt
+NICIODATĂ reformulate: `excludeMarkers` anulează regula chiar și atunci când
+`textMarkers` se potrivesc, astfel încât eroarea își păstrează statusul original și nimic
+nu o reîncearcă la nesfârșit. Regula de clasificare a furnizorului corespunzătoare
 (`agentrouter-model-access-denied` din `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, un cooldown de bază declarat de `6h`)
-este consultată de `checkFallbackError` (`open-sse/services/accountFallback.ts`)
-_înainte_ de returnarea timpurie `FORBIDDEN` generică din categoria apikey,
-condiționată de `honorsRuleLockScope(provider)` (#10334 — în prezent exclusiv
-pentru agentrouter prin lista de permisiuni `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-din `providerErrorRules.ts`). Cooldown-ul de 6h declarat al regulii circulă ca
-`fallbackResult.baseCooldownMs`, dar alimentează în continuare calea de
-blocare a cotei per model preexistentă (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, neschimbată de #10334 cu excepția sursei
-cooldown-ului): este limitată la `mlSettings.maxCooldownMs` al operatorului
-(implicit `1_800_000ms` / 30min), ca orice altă blocare de model, iar
-_motivul blocării persistat_ rămâne cel preexistent, hardcodat `"forbidden"`,
-nu `"auth_error"` al regulii — doar durata cooldown-ului este respectată
-cap-coadă, nu și șirul motivului. Conexiunea în sine rămâne activă; modelele
-înrudite de pe aceeași conexiune nu sunt afectate.
+`reason: "auth_error"`, `scope: "model"`, un cooldown de bază declarat de `6h`) este
+consultată de `checkFallbackError` (`open-sse/services/accountFallback.ts`)
+_înainte de_ returnarea anticipată generică pentru categoria apikey `FORBIDDEN`,
+condiționată de `honorsRuleLockScope(provider)` (#10334 — în prezent exclusivă pentru
+agentrouter prin lista de furnizori permisă `HONORS_RULE_LOCK_SCOPE_PROVIDERS` din
+`providerErrorRules.ts`). Cooldown-ul de 6h declarat de regulă este transmis prin
+`fallbackResult.baseCooldownMs`, dar alimentează în continuare calea existentă de blocare
+per model pentru cotele per model (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, nemodificată de #10334, cu excepția sursei cooldown-ului):
+este limitat la valoarea `mlSettings.maxCooldownMs` a operatorului
+(implicit `1_800_000ms` / 30min), la fel ca orice altă blocare per model, iar
+_motivul blocării persistat_ rămâne valoarea hardcodată existentă `"forbidden"`,
+nu `"auth_error"` din regulă — doar durata cooldown-ului este respectată de la un capăt la
+altul, nu și șirul motivului. Conexiunea în sine rămâne activă;
+modelele surori de pe aceeași conexiune nu sunt afectate.
 
-Erorile de cotă reformulate (`额度不足`) ajung la o regulă de furnizor în
-producție (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`,
-`scope: "connection"`, fără un cooldown propriu declarat — se aplică valoarea
-implicită de backoff scalat a stratului de persistență). De la #10334,
-`scope` de pe `ProviderErrorRuleMatch` ESTE consumat cap-coadă, dar **doar**
-pentru furnizorii din lista de permisiuni `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+Erorile de cotă reformulate (`额度不足`) ajung în producție la o regulă a furnizorului
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+"connection"`, fără un cooldown declarat propriu — se aplică valoarea implicită pentru
+backoff-ul scalat al stratului de persistență). Începând cu #10334, `scope` din
+`ProviderErrorRuleMatch` ESTE consumat de la un capăt la altul, dar **doar** pentru
+furnizorii incluși în lista permisă `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
 (`providerErrorRules.ts` — astăzi doar `"agentrouter"`, condiționat prin
-`honorsRuleLockScope()`). Pentru orice alt furnizor, `scope` rămâne
-informativ, exact ca înainte de #10334. `checkFallbackError` expune scope-ul
-regulii potrivite ca `fallbackResult.ruleScope`;
-`isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) este
-gardianul comun care confirmă că un `ruleScope` este cu adevărat sigur de
-onorat ca un semnal la nivel de conexiune, cu auto-recuperare (scope
-`"connection"`, motiv `quota_exhausted`, niciodată `permanent`, niciodată
-`creditsExhausted` — o apărare împotriva unei reguli viitoare care ar asocia
-scope-ul `"connection"` cu o stare permanentă a contului). Doi consumatori îl
-apelează:
+`honorsRuleLockScope()`). Pentru orice alt furnizor, `scope` rămâne informativ, exact ca
+înainte de #10334. `checkFallbackError` expune domeniul regulii potrivite ca
+`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
+(`src/sse/services/auth.ts`) este mecanismul comun de verificare care confirmă că un
+`ruleScope` poate fi considerat în siguranță un semnal valabil la nivelul întregii
+conexiuni, cu recuperare automată (scope `"connection"`, motiv `quota_exhausted`, niciodată
+`permanent`, niciodată `creditsExhausted` — o protecție împotriva unei viitoare asocieri
+a scope-ului `"connection"` cu o stare permanentă a contului). Doi consumatori îl apelează:
 
 - **Persistență** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  în loc să intre pe ramura de blocare **per-model** a providerului passthrough
+  în loc să ajungă în ramura de blocare **per-model** a furnizorului passthrough
   (agentrouter are `passthroughModels: true` → `hasPerModelQuota()`
-  returnează `true`), aplică un **cooldown temporar al conexiunii** —
+  returnează `true`), aplică o **perioadă temporară de răcire a conexiunii** —
   `testStatus: "unavailable"` + `rateLimitedUntil`, niciodată un status terminal
-  (`credits_exhausted`/`banned`/`expired`) — astfel încât conexiunea se
-  recuperează singură odată ce cooldown-ul expiră, în loc să necesite o
-  resetare manuală a credențialelor. Este omis pentru conexiunile cu
-  `disableCooling: true` (#2997): acea renunțare (opt-out) trece în schimb
-  pe ramura de blocare per-model (un compromis documentat —
-  vezi comentariul din cod de deasupra ramurii).
-- **Rutarea combo în cadrul aceleiași cereri** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): același gardian (guard) marchează
-  conexiunea în setul din memorie `exhaustedConnections`, cu cheia
-  `${provider}:${connectionId}`. Aceasta omite doar o țintă rămasă DIN ACEEAȘI
-  CERERE care _ea însăși poartă deja exact acel `connectionId`_ pe propriul
-  obiect țintă (`getExhaustedTargetSkipReason()`,
+  (`credits_exhausted`/`banned`/`expired`) — astfel încât conexiunea să se
+  recupereze automat după expirarea perioadei de răcire, fără a necesita
+  resetarea manuală a acreditărilor.
+  Se omite pentru conexiunile cu `disableCooling: true` (#2997): această
+  opțiune de renunțare ajunge în schimb la blocarea per-model (un compromis
+  documentat — consultați comentariul din cod de deasupra ramurii).
+- **Rutarea combinației în aceeași cerere** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): același guard marchează
+  conexiunea în setul `exhaustedConnections` din memorie, cu cheia
+  `${provider}:${connectionId}`. Acest lucru omite doar o țintă rămasă din
+  ACEEAȘI CERERE care _conține deja ea însăși acel `connectionId` exact_ în
+  propriul obiect de țintă (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` înainte de căutarea în `exhaustedConnections`) — un combo
-  simplu cu listă de modele, unde țintele surori nu poartă niciun `connectionId`
-  fixat al lor și unul este rezolvat doar per-dispatch din header-ul
-  `X-OmniRoute-Selected-Connection-Id` al răspunsului, nu atinge niciodată
-  acea potrivire de cheie. Pentru acest caz comun, protecția reală împotriva
-  reutilizării contului tocmai epuizat de către o etapă (leg) rămasă NU este
-  acest Set — ci stratul de persistență de mai sus (`rateLimitedUntil` al
-  conexiunii este acum în viitor) combinat cu același gardian care suprimă
-  `transientRateLimitedProviders` pentru eșec (vezi „Design în două etape"
-  și comentariul din cod de pe ramura `isAgentrouterConnectionQuotaScope`
-  din `targetExhaustion.ts`): cu acel Set lăsat nemarcat, force-allow-ul
-  `allowRateLimitedConnection` din `combo.ts`
-  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NU intră în vigoare
-  pentru etapele rămase ale providerului, astfel încât filtrul `rateLimitedUntil`
-  din selecția credențialelor (`src/sse/services/auth.ts:1238`) este respectat
-  normal, iar o etapă rămasă fie alege o conexiune agentrouter diferită, încă
-  eligibilă, fie eșuează fără credențiale disponibile — nu își forțează
-  drumul înapoi pe conexiunea pe care această ramură tocmai a răcit-o.
+connectionId)` înainte de căutarea în `exhaustedConnections`) — o combinație
+  simplă bazată pe lista de modele, în care țintele surori nu au propriul
+  `connectionId` fixat și unul este rezolvat o singură dată la fiecare
+  expediere din antetul `X-OmniRoute-Selected-Connection-Id` al răspunsului,
+  nu ajunge niciodată la această potrivire de cheie. În acest caz obișnuit,
+  protecția reală împotriva reutilizării contului tocmai epuizat de către o
+  etapă rămasă NU este acest Set — ci stratul de persistență de mai sus
+  (`rateLimitedUntil` al conexiunii este acum în viitor), combinat cu același
+  guard care suprimă `transientRateLimitedProviders` pentru eroare (consultați
+  „Design în două etape” și comentariul din cod despre ramura
+  `isAgentrouterConnectionQuotaScope` din `targetExhaustion.ts`): cu acel Set
+  nemarcat, forțarea permiterii `allowRateLimitedConnection` din `combo.ts`
+  (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) NU este activată
+  pentru etapele rămase ale furnizorului, astfel încât filtrul
+  `rateLimitedUntil` al selecției acreditărilor (`src/sse/services/auth.ts:1238`)
+  este respectat în mod normal, iar o etapă rămasă fie selectează o altă
+  conexiune agentrouter încă eligibilă, fie eșuează deoarece nu sunt
+  disponibile acreditări — nu forțează revenirea la conexiunea căreia această
+  ramură tocmai i-a aplicat perioada de răcire.
 
 ### Design în două etape: reformularea statusului, apoi clasificarea
 
 Reformularea statusului (`upstreamStatusRestatement.ts`) și regulile de
-clasificare ale providerului (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) sunt registre separate care ambele au ca cheie id-ul
-providerului și markeri text, dar rulează în locuri diferite și servesc scopuri
-diferite: reformularea rescrie statusul HTTP devreme în `chatCore.ts`;
-regulile de clasificare aleg `reason`-ul de fallback și blochează `scope`-ul
-(`model` / `provider` / `connection`) în interiorul `checkFallbackError()`
-(`open-sse/services/accountFallback.ts`).
+clasificare ale furnizorilor (`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) sunt registre separate care folosesc ambele
+identificatorul furnizorului și marcatori de text drept chei, dar rulează în
+locuri diferite și au scopuri diferite: reformularea rescrie statusul HTTP
+devreme, în `chatCore.ts`; regulile de clasificare aleg `reason` de rezervă și
+blochează `scope` (`model` / `provider` / `connection`) în
+`checkFallbackError()` (`open-sse/services/accountFallback.ts`).
 
 Regulile de clasificare văd doar **textul** complet al erorii (necesar pentru
-a potrivi markeri din corp precum `额度不足`) pentru providerii listați în
-lista de permisiuni `FULL_TEXT_RULE_PROVIDERS` din `providerErrorRules.ts` —
-în prezent doar `"agentrouter"`. Pentru orice alt provider din **catalogul
-integrat**, `checkFallbackError` transmite lui `getProviderErrorRuleMatch`
-doar eroarea structurată (`{code, type}`), ceea ce este suficient pentru
-regulile bazate pe headere/status/cod, dar oarbe la markerii din textul
-corpului. Funcția ajutătoare `resolveRuleMatchBody()` efectuează această
-selecție: textul complet al erorii pentru providerii din lista de permisiuni,
-eroarea structurată în caz contrar. Adăugarea unui provider **integrat** la
-`FULL_TEXT_RULE_PROVIDERS` este o activare (opt-in) explicită per-provider —
-există pentru ca calea implicită pentru fiecare provider care nu este pe
-listă să rămână neschimbată byte-cu-byte.
+potrivirea marcatorilor din corp, precum `额度不足`) pentru furnizorii listați
+în lista permisă `FULL_TEXT_RULE_PROVIDERS` din `providerErrorRules.ts` —
+în prezent doar `"agentrouter"`. Pentru orice alt furnizor din **catalogul
+încorporat**, `checkFallbackError` îi transmite lui
+`getProviderErrorRuleMatch` doar eroarea structurată (`{code, type}`), ceea ce
+este suficient pentru regulile bazate pe antet/status/cod, dar nu poate vedea
+marcatorii din textul corpului. Helperul `resolveRuleMatchBody()` efectuează
+această selecție: textul complet al erorii pentru furnizorii din lista permisă,
+iar în caz contrar eroarea structurată. Adăugarea unui furnizor **încorporat**
+la `FULL_TEXT_RULE_PROVIDERS` este o activare explicită per furnizor — aceasta
+există pentru ca traseul implicit pentru fiecare furnizor care nu se află în
+listă să rămână neschimbat byte cu byte.
 
-`scope`-ul unei reguli (`model` / `provider` / `connection`) este o activare
-(opt-in) separată de `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` îl
-expune doar ca `fallbackResult.ruleScope`, iar consumatorii din aval îl
-respectă ca altceva decât o etichetă informativă numai pentru providerii din
-lista de permisiuni `HONORS_RULE_LOCK_SCOPE_PROVIDERS` din același fișier
-(controlat prin `honorsRuleLockScope()` — astăzi doar `"agentrouter"`). Vezi
-„Erori de cotă reformulate" mai sus pentru ceea ce face de fapt o potrivire
-`scope: "connection"` odată ce un provider se află pe acea listă de
-permisiuni.
+`scope` al unei reguli (`model` / `provider` / `connection`) este o activare
+separată de `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` îl expune doar ca
+`fallbackResult.ruleScope`, iar consumatorii din aval îl respectă ca altceva
+decât o etichetă informativă doar pentru furnizorii din lista permisă
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` din același fișier (controlată prin
+`honorsRuleLockScope()` — în prezent doar `"agentrouter"`). Consultați
+„Erori de cotă reformulate” de mai sus pentru ce face efectiv o potrivire cu
+`scope: "connection"` după ce un furnizor se află în acea listă permisă.
 
-**#11104 — regulile declarate de operator ocolesc ambele liste de
-permisiuni.** Un operator poate declara o regulă per-provider la rulare prin
+**#11104 — regulile declarate de operator ocolesc ambele liste permise.** Un
+operator poate declara în timpul rulării o regulă per furnizor prin
 `settings.providerErrorRules`
 (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-fără a edita acest fișier. Conditionarea unei reguli de operator de
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — liste de
-permisiuni menite să protejeze comportamentul **implicit** al regulilor din
-catalogul integrat — ar face mecanismul de setări inert pentru fiecare
-provider, cu excepția celor deja listați acolo, întrucât declararea regulii
-este deja activarea (opt-in) explicită a operatorului. `resolveRuleMatchBody()`
-și `honorsRuleLockScope()` verifică ambele mai întâi
-`hasOperatorRuleForProvider()`: un provider cu o regulă de operator primește
-textul brut al erorii și are `scope`-ul declarat respectat, indiferent dacă
-apare sau nu în vreuna dintre listele de permisiuni.
+fără a edita acest fișier. Controlarea unei reguli de operator prin
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — liste destinate
+protejării comportamentului **implicit** al regulilor furnizorilor din
+catalogul încorporat — ar face mecanismul de setări inoperant pentru orice
+furnizor cu excepția celor deja listați, deoarece declararea regulii este deja
+activarea explicită a operatorului. `resolveRuleMatchBody()` și
+`honorsRuleLockScope()` verifică mai întâi `hasOperatorRuleForProvider()`:
+un furnizor cu o regulă de operator primește textul brut al erorii și are
+`scope` declarat respectat, indiferent dacă apare și în vreuna dintre listele
+permise.
 
-**Lacună cunoscută — `providerRuleRegistry` nu este niciodată consultat
-pentru HTTP 400.** Ramura `BAD_REQUEST` din `checkFallbackError` clasifică
-statusul 400 în întregime prin propriile array-uri de tipare
-(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, etc. în
-`accountFallback.ts`) și returnează înainte ca ramura
-`configuredRule`/`getProviderErrorRuleMatch` de deasupra ei să fie atinsă.
-O regulă din catalogul integrat (sau o regulă de operator) cu `status: 400`
-este validă sintactic, dar nu se va declanșa niciodată. Nicio regulă
-existentă nu vizează 400 astăzi, deci nimic din producție nu este afectat —
-dar o viitoare regulă pentru 400 necesită modificarea mai întâi a acestei
-ramuri, ceea ce este o schimbare mai mare decât adăugarea unei reguli
-(reclasifică 400 pentru fiecare provider care se bazează deja pe
-comportamentul array-urilor de tipare) și depășește scopul unei adăugări
-de regulă pentru un singur provider.
+**Reguli declarate de operator** (`OperatorProviderErrorRule`): fiecare regulă
+are un `status` opțional și un `match` opțional (un substring simplu,
+insensibil la scriere, al textului erorii, niciodată un RegExp, astfel încât nu
+poate cauza ReDoS) și trebuie să seteze cel puțin unul dintre cele două. Când
+ambele sunt setate, sunt combinate prin AND; un câmp omis se potrivește cu
+orice, astfel încât `{match: "insufficient_quota"}` se potrivește cu orice
+status care conține acel cod. Prima regulă potrivită câștigă. `cooldownMs`
+acceptă cel mult 30 de zile; în total sunt permise cel mult 50 de reguli.
 
-### Adăugarea unui nou gateway care raportează greșit cota
+**Valori implicite generale** (`settings.providerErrorDefaults`, opțional, setat prin
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+cu `cooldownMs` de la 1 minut la 30 de zile. O valoare implicită se aplică numai atunci când nicio regulă de operator și nicio regulă din catalogul încorporat nu s-au potrivit și numai pentru erorile 402, 403, 408, 429 și 5xx. Erorile privind forma solicitării (400, 404, 409, 413, 422) și erorile 401 fără alte informații își păstrează tratarea proprie. Fără un `reason` explicit, motivul este determinat din status, în același mod ca în `classifyError`. Declararea unei valori implicite este considerată o regulă de operator de către `hasOperatorRuleForProvider()`, astfel încât `scope` (implicit
+`"connection"`) este respectat. Perioada efectivă de răcire a unei valori implicite este cea mai lungă dintre `cooldownMs` și indicația proprie de reîncercare a furnizorului (`Retry-After`,
+`x-ratelimit-reset` sau o indicație de resetare din corp, aceeași indicație pe care motorul o respectă atunci când setarea de răcire a conexiunii „utilizează indicațiile upstream pentru reîncercare” este activată), astfel încât o valoare implicită poate prelungi o indicație upstream scurtă, dar nu poate scurta niciodată un reset real. O regulă explicită de operator își păstrează exact valoarea `cooldownMs`. Nici o regulă și nici o valoare implicită nu ocolesc protecțiile de răcire a conexiunii din `markAccountUnavailable`: o răcire activă și mai lungă nu este niciodată scurtată, iar un status terminal nu este niciodată suprascris. Detectoarele de text încorporate care rulează mai devreme în `checkFallbackError` (credite epuizate, cotă zilnică, cont dezactivat) au în continuare prioritate pentru expresiile proprii.
 
-1. Înregistrează un singur array de reguli în `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). Păstrează `textMarkers`
-   specifice furnizorului; nu reutiliza niciodată expresii generice în engleză
-   care se suprapun cu `CREDITS_EXHAUSTED_SIGNALS`
-   (`open-sse/services/accountFallback.ts`).
-2. Opțional, înregistrează reguli de clasificare în
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) pentru a
-   alege domeniul de blocare corect (`connection` pentru cota la nivel de
-   cont, `model` pentru erorile per-model). Acest pas are efect în producție
-   doar pentru furnizorii ale căror reguli au nevoie de textul complet al
-   erorii (markeri din corp): adaugă id-ul furnizorului în
-   `FULL_TEXT_RULE_PROVIDERS` în același fișier — altfel `checkFallbackError`
-   transmite regulii doar eroarea structurată `{code, type}`, iar o regulă
-   bazată pe textul corpului nu se va potrivi niciodată cu traficul real.
-   Regulile care se potrivesc pur pe `status`/`headers` (cum sunt cele ale
-   Opencode sau Minimax) nu au nevoie de acest opt-in. Separat, dacă regula
-   declară `scope: "connection"` și intenția este o perioadă de răcire
-   efectivă la nivel de conexiune plus omiterea combo-ului în aceeași cerere
-   (nu doar o etichetă informativă), adaugă id-ul furnizorului în
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` în același fișier — acesta este ceea ce
-   controlează consumul în stil `isAgentrouterConnectionQuotaScope()` în
-   `markAccountUnavailable()` (`src/sse/services/auth.ts`) și
+**Lacunoscută cunoscută — `providerRuleRegistry` nu este consultat niciodată pentru HTTP 400.**
+Ramura `BAD_REQUEST` din `checkFallbackError` clasifică statusul 400 exclusiv prin propriile tablouri de tipare (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS` etc. din `accountFallback.ts`) și returnează rezultatul înainte ca ramura `configuredRule`/`getProviderErrorRuleMatch` de mai sus să fie atinsă.
+O regulă din catalogul încorporat (sau o regulă de operator) cu `status: 400` este validă sintactic, dar nu va fi niciodată aplicată. În prezent, nicio regulă existentă nu vizează 400, astfel încât nimic din producție nu este afectat — însă o regulă 400 viitoare necesită mai întâi modificarea acestei ramuri, ceea ce reprezintă o schimbare mai amplă decât adăugarea unei reguli (reclasifică 400 pentru fiecare furnizor care se bazează deja pe comportamentul tablourilor de tipare) și nu intră în domeniul de aplicare al adăugării unei reguli pentru un singur furnizor.
+
+### Adăugarea unui gateway nou care denaturează informațiile despre cotă
+
+1. Înregistrați un singur tablou de reguli în `statusRestatementRegistry`
+   (`open-sse/config/upstreamStatusRestatement.ts`). Păstrați `textMarkers`
+   specifice furnizorului; nu reutilizați niciodată expresii generice în engleză care intră în conflict cu
+   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
+2. Opțional, înregistrați reguli de clasificare în
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) pentru a alege domeniul corect al blocării (`connection` pentru cota la nivelul întregului cont, `model` pentru erori specifice unui model). Acest pas produce efecte în producție numai pentru furnizorii ale căror reguli necesită textul complet al erorii (marcatori din corp): adăugați identificatorul furnizorului la `FULL_TEXT_RULE_PROVIDERS` în același fișier — în caz contrar, `checkFallbackError` transmite regulii numai eroarea structurată
+   `{code, type}`, iar o regulă bazată pe textul corpului nu se va potrivi niciodată traficului real.
+   Regulile care se potrivesc exclusiv pe baza `status`/`headers` (precum cele pentru Opencode sau Minimax) nu necesită această activare. Separat, dacă regula declară `scope: "connection"` și intenția este o răcire reală la nivelul întregii conexiuni, împreună cu omiterea combinației pentru aceeași solicitare (nu doar o etichetă informativă), adăugați identificatorul furnizorului la `HONORS_RULE_LOCK_SCOPE_PROVIDERS` în același fișier — acest lucru controlează consumarea de tip `isAgentrouterConnectionQuotaScope()` în `markAccountUnavailable()` (`src/sse/services/auth.ts`) și
    `applyComboTargetExhaustion()`
    (`open-sse/services/combo/targetExhaustion.ts`); fără aceasta, `scope`
-   circulă în continuare prin `fallbackResult.ruleScope`, dar nimic nu
-   acționează asupra lui.
-3. Adaugă teste unitare care reflectă
-   `tests/unit/upstream-status-restatement.test.ts` și
-   `tests/unit/agentrouter-error-rules.test.ts` (inclusiv protecțiile
-   not-permanent / not-creditsExhausted și — dacă furnizorul are nevoie de
-   lista de permisiuni — un test care verifică că `resolveRuleMatchBody()`
-   returnează textul complet doar pentru acel furnizor).
+   continuă să fie transmis prin `fallbackResult.ruleScope`, dar nimic nu acționează pe baza lui.
+3. Adăugați teste unitare care să reflecte
+   `tests/unit/upstream-status-restatement.test.ts`
+   și `tests/unit/agentrouter-error-rules.test.ts` (inclusiv protecțiile
+   not-permanent / not-creditsExhausted și — dacă furnizorul are nevoie de allowlist —
+   un test care verifică faptul că `resolveRuleMatchBody()` returnează textul complet numai pentru acel furnizor).
 
 Nu sunt necesare modificări în `chatCore.ts`, `classifyError` sau combo.
 
-#### Blocare pe compartimente de egress (#10880)
+#### Blocare grupată pe compartimentul de ieșire (#10880)
 
-Furnizorii din `EGRESS_BUCKETED_LOCK_PROVIDERS` (familia opencode) sunt
-tratați ca upstream segmentat pe IP (nivelul gratuit opencode este segmentat
-pe IP, nu pe cont — vezi #9611): un status-429 clasificat `quota_exhausted`
-**sau** `rate_limit_exceeded` răcește fiecare conexiune din familia aflată în
-lista de permisiuni al cărei ultim IP de ieșire cunoscut se potrivește cu cel
-al conexiunii eșuate, înainte ca rotația să le poată încerca
-— evitând N-1 apeluri upstream garantat eșuate (aceeași formă ca #10460/#10525).
-`rate_limit_exceeded` este inclus deliberat: pe calea `markAccountUnavailable`
-regulile specifice opencode nu se potrivesc niciodată (niciun antet/corp nu
-este transmis către `checkFallbackError`, opencode nu se află în
-`FULL_TEXT_RULE_PROVIDERS`), așa că un 429 al cărui corp poartă textul privind
-cota abonamentului ("monthly usage limit reached") este clasificat
-`quota_exhausted` de fallback-ul bazat pe textul cotei
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; răcire de 1 oră)
-înainte ca regula `status_429` să fie vreodată atinsă — în timp ce un 429
-fără text de cotă (limitare simplă a ratei) se clasifică prin regula
-`status_429` ca `rate_limit_exceeded` și tot răcește familia de IP-uri.
-Pentru un furnizor aflat în lista de permisiuni, o limită de rată segmentată
-pe IP este același semnal ca o cotă epuizată. Limitări oneste:
+Furnizorii din `EGRESS_BUCKETED_LOCK_PROVIDERS` (familia opencode) sunt tratați
+ca upstream grupat după IP (nivelul gratuit opencode este grupat după IP, nu
+după cont — consultați #9611): un status-429 clasificat ca `quota_exhausted`
+**sau** `rate_limit_exceeded` răcește fiecare conexiune din familia permisă
+a cărei ultimă adresă IP de ieșire cunoscută corespunde celei a conexiunii care a eșuat, înainte ca rotația să le poată încerca
+— evitând N-1 apeluri upstream garantat eșuate (aceeași structură ca în #10460/#10525).
+`rate_limit_exceeded` este inclus în mod intenționat: pe calea `markAccountUnavailable`
+regulile specifice opencode nu se potrivesc niciodată (nu sunt transmise antetele/corpul către
+`checkFallbackError`, iar opencode nu se află în `FULL_TEXT_RULE_PROVIDERS`), astfel încât un 429 al cărui corp conține textul privind cota abonamentului („limita lunară de utilizare a fost atinsă”) este clasificat ca `quota_exhausted` de către fallback-ul pentru textul cotei
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; răcire de 1 oră) înainte ca regula
+`status_429` să fie atinsă — în timp ce un 429 fără text privind cota (limitare simplă a ratei) este clasificat prin regula `status_429` ca `rate_limit_exceeded`
+și răcește în continuare familia IP. Pentru un furnizor permis, o limitare a ratei grupată după IP transmite același semnal ca o cotă epuizată. Limite reale:
 
-- **Best-effort**: blocarea rezolvă ultimul `egress_ip` cunoscut al conexiunii
-  din `proxy_logs` (fereastră de 24h, sincron, fără cache). Cache rece (IP-ul
-  de egress nu a fost niciodată sondat) sau niciun rând → conexiunea care a
-  eșuat este în continuare răcită de ramură (înregistrată ca până acum), doar
-  că nu este blocată nicio conexiune înrudită.
-- **Niciodată terminal**: cooldown-ul este o fereastră de cotă care se
-  reînnoiește (`testStatus: "unavailable"`); o stare permanentă nu este
-  niciodată derivată dintr-un semnal la nivel de IP. Conexiunile
-  `disableCooling` sar complet peste această ramură.
-- **Granularitatea blocării se schimbă pentru familia din lista permisă**:
-  aceasta este o schimbare de scope, nu doar o optimizare pentru conexiunile
-  înrudite. opencode este un furnizor `passthroughModels`, deci înainte de
-  această ramură un 429 producea o blocare per-MODEL; acum produce un cooldown
-  al conexiunii — inclusiv pentru un operator care rulează o singură conexiune,
-  fără nicio înrudită. Aceasta este granularitatea pe care tabelul de reguli
-  opencode o declară deja corectă (`scope: "connection"`,
-  `providerErrorRules.ts`), niciodată respectată până acum, deoarece opencode
-  nu se află în `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Ramura scrie ea însăși
-  cooldown-ul conexiunii care a eșuat + `backoffLevel`, oglindind ramura
-  agentrouter cu scope la nivel de conexiune, și returnează — blocul per-model
-  și calea generică de mai jos nu sunt niciodată atinse.
-- **Combo inclus**: la fel ca ramura agentrouter, scope-ul ignoră deliberat
-  downgrade-ul `persistUnavailableState`/`isCombo` pe care un apelant combo îl
-  aplică unui 429. O blocare per-model nu este o formă mai slabă a acestui
-  scope, ci unitatea greșită: nu spune nimic despre IP-ul epuizat, deci rotația
-  combo ar continua să ardă câte un apel garantat eșuat pe fiecare conexiune
-  înrudită.
-- **Siguranța conexiunilor înrudite**: o conexiune înrudită deja terminală
-  (banned/credits_exhausted) sau deja într-un cooldown mai lung nu este
-  niciodată suprascrisă.
-- **Listă permisă exclusivă**: extinderea `EGRESS_BUCKETED_LOCK_PROVIDERS`
-  este o decizie explicită a proprietarului; fără cablare generică (pattern
-  #10334/#10419). Interogarea pentru conexiunile înrudite leagă aceeași listă
-  permisă în loc să o repete ca literal SQL, astfel încât extinderea ei rămâne
-  o modificare de o singură linie.
-- **Rotația IP-ului de egress, în ambele direcții**: fereastra de căutare
-  (24h) este mult mai largă decât TTL-ul cache-ului pentru IP-ul de egress
-  (5 min), deci „ultimul IP cunoscut" este istoric, nu stare curentă. Dacă
-  proxy-ul unei conexiuni s-a rotat în interiorul ferestrei, blocarea poate
-  **rata** un IP cu adevărat partajat (IP-ul înregistrat este cel nou,
-  neepuizat) — și, simetric, poate **răci o conexiune înrudită care între timp
-  s-a rotat departe** de IP-ul epuizat. Al doilea caz costă acea conexiune
-  înrudită o fereastră de cooldown; ambele sunt limite best-effort acceptate
-  ale unei căutări bazate pe istoric.
-- **Cost**: două scanări mărginite ale `proxy_logs` (filtrate pe fereastră prin
-  `idx_pl_timestamp`), doar la frecvența erorilor 429. Niciun index nou
-  (migrația 134 YAGNI). Măsurat pe o copie a bazei de date cu trafic real, de
-  dimensiune moderată; o instanță cu trafic mare deține proporțional mai multe
-  rânduri în aceeași fereastră.
-
----
+- **Cel mai bun efort**: lock-ul rezolvă `egress_ip` cunoscut ultima dată al conexiunii
+  din `proxy_logs` (fereastră de 24 h, sincron, fără cache). Cache rece (`egress
+IP` nu a fost niciodată testat) sau nicio înregistrare → conexiunea care a eșuat
+  este în continuare răcită de ramură (înregistrată ca astăzi), doar că niciun
+  sibling nu este blocat.
+- **Niciodată terminal**: perioada de răcire este o fereastră de cotă care se
+  reînnoiește (`testStatus: "unavailable"`); o stare permanentă nu este derivată
+  niciodată dintr-un semnal la nivel de IP. Conexiunile `disableCooling` omit
+  complet ramura.
+- **Granularitatea lock-ului se schimbă pentru familia din lista permisă**: aceasta
+  este o schimbare de domeniu, nu doar o optimizare pentru sibling. opencode este
+  un provider `passthroughModels`, astfel încât înainte de această ramură un 429
+  producea un lockout per-MODEL; acum produce o perioadă de răcire a conexiunii —
+  inclusiv pentru un operator care rulează o singură conexiune, fără niciun sibling.
+  Aceasta este granularitatea pe care tabelul de reguli opencode o declară deja ca
+  fiind corectă (`scope: "connection"`,
+  `providerErrorRules.ts`), dar care nu a fost respectată până acum deoarece
+  opencode nu se află în `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Ramura scrie
+  direct perioada de răcire a conexiunii care a eșuat + `backoffLevel`, reflectând
+  ramura cu domeniu connection-scoped a agentrouter, apoi returnează — blocarea
+  per-model și calea generică de mai jos nu sunt niciodată atinse.
+- **Combinația este inclusă**: la fel ca ramura agentrouter, domeniul ignoră în mod
+  deliberat downgrade-ul `persistUnavailableState`/`isCombo` aplicat de un apelant
+  combo unui 429. Un lockout per-model nu este o formă mai slabă a acestui domeniu,
+  ci unitatea greșită: nu spune nimic despre IP-ul epuizat, astfel încât rotația
+  combo ar continua să consume câte un apel garantat-eșuat pentru fiecare sibling.
+- **Siguranța sibling-urilor**: un sibling deja terminal (banned/credits_exhausted)
+  sau aflat deja într-o perioadă de răcire mai lungă nu este niciodată suprascris.
+- **Lista permisă exclusivă**: extinderea `EGRESS_BUCKETED_LOCK_PROVIDERS` este o
+  decizie explicită a proprietarului; nu există o integrare generică (pattern #10334/#10419).
+  Interogarea sibling-urilor folosește aceeași listă permisă, în loc să o repete ca
+  literal SQL, astfel încât extinderea ei rămâne o modificare de o singură linie.
+- **Rotația IP-ului de ieșire, în ambele direcții**: fereastra de căutare (24 h) este
+  mult mai largă decât TTL-ul cache-ului IP-ului de ieșire (5 min), astfel încât
+  „ultimul IP cunoscut” reprezintă istoricul, nu starea curentă. Dacă proxy-ul unei
+  conexiuni s-a rotit în interiorul ferestrei, lock-ul poate **rata** un IP partajat
+  în mod real (IP-ul înregistrat este cel nou, neepuizat) — și, simetric, poate
+  **răci un sibling care între timp s-a rotit** de la IP-ul epuizat. Al doilea caz
+  costă acelui sibling o fereastră de răcire; ambele sunt limite acceptate, de cel
+  mai bun efort, ale unei căutări bazate pe istoric.
+- **Cost**: două scanări limitate ale `proxy_logs` (filtrate după fereastră prin
+  `idx_pl_timestamp`), doar la frecvența 429. Niciun index nou (migrarea 134
+  YAGNI). Măsurat pe o copie a unei baze de date cu trafic real, de dimensiune
+  moderată; o instanță cu debit mare păstrează proporțional mai multe rânduri în
+  aceeași fereastră.
 
 ## Alte funcționalități de reziliență
 

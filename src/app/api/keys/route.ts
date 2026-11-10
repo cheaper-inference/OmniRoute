@@ -5,6 +5,7 @@ import {
   createApiKey,
   updateApiKeyPermissions,
 } from "@/lib/db/apiKeys";
+import { getApiKeySelfServiceSettings } from "@/lib/db/apiKeySelfServiceSettings";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncKeysToCloudIfEnabled } from "@/lib/api/keyCloudSync";
 import { createKeySchema } from "@/shared/validation/schemas";
@@ -42,6 +43,7 @@ function createPermissionOverrides(data: {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   chaosModeEnabled?: boolean;
 }) {
   const overrides = {
@@ -51,6 +53,9 @@ function createPermissionOverrides(data: {
     ...(data.dailyUsageLimitUsd !== undefined && { dailyUsageLimitUsd: data.dailyUsageLimitUsd }),
     ...(data.weeklyUsageLimitUsd !== undefined && {
       weeklyUsageLimitUsd: data.weeklyUsageLimitUsd,
+    }),
+    ...(data.fiveHourUsageLimitUsd !== undefined && {
+      fiveHourUsageLimitUsd: data.fiveHourUsageLimitUsd,
     }),
     ...(data.chaosModeEnabled === true && { chaosModeEnabled: true }),
   };
@@ -69,6 +74,7 @@ export async function GET(request: Request) {
     const keys = await getApiKeys(dbLimit, offset);
     const maskedKeys = keys.map((k) => ({
       ...k,
+      ...getApiKeySelfServiceSettings(typeof k.id === "string" ? k.id : ""),
       key: maskStoredApiKey(k.key),
     }));
 
@@ -109,6 +115,7 @@ export async function POST(request) {
       usageLimitEnabled,
       dailyUsageLimitUsd,
       weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd,
       chaosModeEnabled,
       expiresAt,
     } = validation.data;
@@ -156,6 +163,7 @@ export async function POST(request) {
         usageLimitEnabled: usageLimitEnabled === true,
         dailyUsageLimitUsd: dailyUsageLimitUsd ?? null,
         weeklyUsageLimitUsd: weeklyUsageLimitUsd ?? null,
+        fiveHourUsageLimitUsd: fiveHourUsageLimitUsd ?? null,
         chaosModeEnabled: chaosModeEnabled === true,
         expiresAt: expiresAt ?? null,
         streamDefaultMode: "legacy",

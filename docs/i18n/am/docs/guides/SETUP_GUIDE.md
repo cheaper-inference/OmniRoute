@@ -191,41 +191,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## የፕሮቶኮል ማዋቀር (MCP + A2A)
+## ፕሮቶኮል ማዋቀር (MCP + A2A)
 
-### MCP ማዋቀር (የሞዴል አውድ ፕሮቶኮል)
+### MCP ማዋቀር (ሞዴል አውድ ፕሮቶኮል)
 
-የMCP ማጓጓዣን በstdio ሁኔታ ያስጀምሩ፦
+MCP መጓጓዣን በስቲዲዮ ሁነታ ይጀምሩ፡-
 
 ```bash
 omniroute --mcp
 ```
 
-የሚመከር የማረጋገጫ ፍሰት፦
+የሚመከር የማረጋገጫ ፍሰት፡
 
 ```bash
-# 1. የMCP አገልጋይን ያስጀምሩ
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. ከMCP ደንበኛዎ የሚከተሉትን ይጥሩ፦
-omniroute_get_health        # የስርዓቱን ጤንነት መመለስ አለበት
-omniroute_list_combos       # ንቁ combosን መመለስ አለበት
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. ወይም ሙሉውን የE2E ስብስብ ያሂዱ፦
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### የMCP ደንበኛ ውቅር
+#### MCP የደንበኛ ውቅር
 
-**Claude Code፦**
+**Claude ኮድ፡-**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
-**Cursor / Cline፦**
+**Cursor / Cline:**
 
-ወደ MCP ቅንብሮችዎ ያክሉ፦
+ወደ MCP ቅንጅቶችህ አክል (stdio፣ ከቁልፍ ጋር ጠሪው ዋና እንዲኖረው):
 
 ```json
 {
@@ -233,23 +233,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**ሙሉ የMCP ሰነድ፦** [የMCP አገልጋይ README](../../open-sse/mcp-server/README.md) — 110 መሣሪያዎች፣ የIDE ውቅሮች፣ Python/TS/Go ደንበኞች።
+ወይም፣ `mcpTransport` `streamable-http` ሲሆን (በ `/dashboard/mcp` ላይ ወይም በ `omniroute mcp enable --transport streamable-http` ላይ ያቀናብሩት)፣ የደንበኛውን የርቀት MCP አገልጋይ ግቤት `http://localhost:20128/api/mcp/stream` ላይ ያመልክቱ።
 
-### A2A ማዋቀር (ከወኪል-ወደ-ወኪል ፕሮቶኮል)
+ቁልፉ የሚጓዘው እንደ `Authorization: Bearer <api-key>` ነው (ለሩቅ አስተናጋጆች [የርቀት መዳረሻን ይመልከቱ MCP Server →](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ይመልከቱ፣ የርቀት ቁልፍ `mcp:connect` እና read/write scopes ያስፈልገዋል)።
 
-Agent Cardን ያረጋግጡ፦
+**ሙሉ MCP ሰነድ፡-** [MCP አገልጋይ README](../../open-sse/mcp-server/README.md) — 110 መሳሪያዎች፣ IDE ውቅሮች፣ Python/TS/Go ደንበኞች። የኦፕሬተር ማመሳከሪያ ለ መጭመቂያ CCR/dedup መሳሪያዎች (ማርከሮች ፣ ቅድመ ሁኔታዎች ፣ በመሳሪያዎች ወሰኖች ፣ የመልሶ ማግኛ pagination ፣ ዲያግኖስቲክስ): [የማመቂያ ሞተርስ → ቅድመ ሁኔታዎች / ኦፕሬተር መመሪያ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A ማዋቀር (ከወኪል-ለወኪል ፕሮቶኮል)
+
+ወኪል ካርዱን ያረጋግጡ፡-
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ተግባር ይላኩ፦
+ተግባር ላክ፡
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**ሙሉ የA2A ሰነድ፦** [የA2A አገልጋይ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0፣ ክህሎቶች፣ streaming፣ የተግባር የሕይወት ዑደት።
+**ሙሉ A2A ሰነድ፡-** [A2A አገልጋይ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0፣ ችሎታዎች፣ ዥረቶች፣ የተግባር የሕይወት ዑደት።
 
 ---
 
@@ -316,23 +323,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) አብነት
+## ባዶ Linux (xbps-src) አብነት
 
-ለVoid Linux ተጠቃሚዎች፣ `xbps-src`ን በመጠቀም ቤተኛ ጥቅል መገንባት ይችላሉ። ይህን ብሎክ እንደ `srcpkgs/omniroute/template` ያስቀምጡ፦
+ለVoid Linux ተጠቃሚዎች `xbps-src` በመጠቀም ቤተኛ ጥቅል መገንባት ይችላሉ። ይህን ብሎክ እንደ `srcpkgs/omniroute/template` ያስቀምጡ
 
 ```bash
-# የ'omniroute' አብነት ፋይል
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="ለበርካታ LLM አቅራቢዎች ብልህ ማዘዋወር ያለው ሁለንተናዊ AI መግቢያ"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ለእያንዳንዱ ልቀት checksumን በሚከተለው እንደገና ያመንጩ፦
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"
