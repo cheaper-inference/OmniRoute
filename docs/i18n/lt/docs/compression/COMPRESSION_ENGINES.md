@@ -301,6 +301,95 @@ Glaudinimo deriniai – tai pavadinti glaudinimo profiliai, kuriuos galima prisk
 
 Valdymo skydelio vieta: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Būtinos sąlygos / operatoriaus vadovas (CCR & session-dedup)
+
+CCR (`ccr`) ir `session-dedup` pakeiskite arba panaikinkite tekstą ir palikite a** žymeklis** už nugaros. Šis skyrius yra operatoriaus nuoroda, kaip prijungti klientą, nuskaityti du žymeklius ir nuskaityti arba diagnozuoti pašalintą turinį. Kiekvieno variklio mechanika aprašyta aukščiau; tai sluoksnis „kaip man tai paleisti“.
+
+### Transportas ir galutiniai taškai
+
+MCP serverį, kuris atskleidžia „ CCR įrankius, galima pasiekti trimis būdais. Numatytoji bazė URL yra `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transportas                              | URL / komanda                           | Pastabos                                                                                                                                         |
+| ---------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Srautinė HTTP (klientas, rekomenduojama) | `http://localhost:20128/api/mcp/stream` | Galutinis taškas, su kuriuo kalba dabartiniai MCP klientai.                                                                                      |
+| Senas SSE vienvietis                     | `http://localhost:20128/api/mcp/sse`    | Senesnis vienvietis transportas. Tai** užsidaro** transliuojamos sesijos; naudokite `streamable-http` klientus prieš `/api/mcp/stream`, o ne šį. |
+| stdio                                    | `omniroute --mcp`                       | IDE MCP konfigūracijai, kuri sukelia procesą. Nėra `--dev` vėliavos; `omniroute --mcp` yra stdio įėjimo taškas.                                  |
+
+### Saugyklos pakopos (kas išgyvena paleidus iš naujo)
+
+CCR yra a** dviejų pakopų** parduotuvėje, ne tik atmintyje:
+
+- **Karšta atminties pakopa** — bloko dangtelis 2 MiB, vienas pagrindinis 16 MiB, pasaulinis 64 MiB. Įrašai pagal numatytuosius nustatymus yra 24 h TTL (daugiausia 7 dienos). Visas MCP gavimas iš atminties yra apribotas iki 256 KiB; bet kas didesnis vis tiek pasiekiamas naudojant diapazono / grep režimus.
+- **Patvari SQLite pakopa** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, įjungta pagal numatytuosius nustatymus) — palaiko atmintyje esančią pakopą, todėl blokas išgyvena LRU iškeldinimą, paleidimą iš naujo arba gavimo nukreipimą į kitą egzempliorių. Eilėje išlaikomas bloko TTL, todėl blokas, esantis už jo TTL dingsta iš abiejų pakopų.
+
+Trys apsaugos apsaugo patvarią pakopą apribotą — blokas lieka tik atmintyje, kai:
+
+1. blokas baigėsi** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. vykdymo laikas yra debesies vykdymo laikas (nėra vietinio disko);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Taigi „blokas dingo“ nėra visapusiška iš naujo paleidimo istorija: sub-512 KB blokas vietinėje, ne debesų vykdymo aplinkoje, išlaiko paleidimą iš naujo per patvarią pakopą, kol baigiasi jo TTL. Žr. [Aplinkos nuorodą](../reference/ENVIRONMENT.md) apie kintamąjį.
+
+### Du žymekliai
+
+| Žymeklis                              | Reikšmė                                                                                                                                                  | Ką turėtų daryti modelis                                                                                                                                                                                              |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Didelis blokas buvo saugomas pagal turinį.                                                                                                               | Paskambinkite `omniroute_ccr_retrieve` su** 24 šešioliktainė maiša nukopijuota pažodžiui** kad atgautumėte originalų tekstą.                                                                                          |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided tekstas jau išsiųstas ankstesniame tos pačios sesijos eigoje. Tai yra an** tyčinis žvilgsnis atgal** , o ne praradimas ar klaida. | Daryk** ne** paskambink bet kokiam įrankiui ir padaryk** ne** pabandyk tai „rekonstruoti“. Pirmasis teksto atvejis yra kanoninė kopija; dabartinis posūkis niekada neperrašomas, jis pašalinamas vėlesniame posūkyje. |
+
+`[dedup:ref]` peržiūra yra apgalvotas protokolinis sprendimas, — nėra rekonstrukcijos prieš siuntimą. Laikykite tai kaip „šis tikslus tekstas jau buvo paskelbtas anksčiau šios sesijos metu“.
+
+### Būtinos sąlygos klientui
+
+- **Raktas (stdio):** stdio skambinantysis neturi užklausos tapatybės, todėl jis autentifikuojamas naudojant `OMNIROUTE_API_KEY` (nustatytas MCP serverio `env`). Be jo skambinantysis yra anoniminis, o įrankiai, kuriems reikia vadovo, gali susilpnėti.
+- **`tools[]` yra išankstinė injekcijos sąlyga.** Įvedama CCR retrieve-protocol instrukcija (#8033).** tik** kai užklausos reklamuojamas `tools[]` įrodo, kad klientas iš tikrųjų gali pasiekti `omniroute_ccr_retrieve`. Atitiktis yra paskutinio segmento atitikmuo, apribotas skyrikliu (`__`, `.`, `/`, `:`) — niekada nėra tuščios poeilutės — todėl pavadinimas su vardų erdve, pvz. `mcp__gateway__omniroute_ccr_retrieve` vis tiek skaičiuojamas. Jei `tools[]` nėra arba jis neatitinka, tai reiškia, kad instrukcija _neįšvirkščiama pagal dizainą.
+- **`codemode:false` (OpenCode klientai).** OpenCode numatytasis kodo režimas, kuris reklamuoja tik savo įrankius modeliui ir** ne** įtraukite MCP įrankius į vietinį `tools[]` sąrašą. Nustatykite `codemode: false` MCP serverio įraše, kad būtų reklamuojami `omniroute_ccr_*` įrankiai. Tai yra a** klientas** nustatymas, o ne OmniRoute. Jame dar nėra įvesta CCR instrukcijos: OpenCode įrankį pavadina `<server>_<tool>`, todėl serveris, vadinamas `omniroute` atskleidžia `omniroute_omniroute_ccr_retrieve`, o `_` nėra vienas iš suderintų separatorių.
+- **Direktoriai.** Saugojimas ir gavimas yra atskirti pagal autentifikuotą pagrindinį (už API raktą). Raktas mato tik savo blokus.
+
+### Taikymo sritis pagal įrankį
+
+Apimties užtikrinimas visada įjungtas siauros apimties HTTP/SSE skambintojams. `omniroute_` CCR įrankiams reikia:
+
+| Įrankis                  | Taikymo sritis      |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Trūksta apimtis grąžina an**MCP įrankio klaidos rezultatas** (`isError: true`, o ne HTTP 403 — `403 LOCAL_ONLY` yra atskiras atgalinio maršruto apsaugos autentifikavimas): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Minimaliame nuotolinio valdymo mygtuke gali būti `mcp:connect` (įgalioja `/api/mcp/` tik vietinį iškirpimą) ir specifinę read/write sritį, kurios jam reikia.
+
+### Kliento matrica
+
+| Klientas              | Transportas                                      | Konfigūracija naudoti                                                                                                                                                                                                                           | `tools[]` reklamavosi? (suleidžiama → CCR instrukcija)                                                                                                                              |
+| --------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude kodas          | transliuojamas - http                            | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                               | Taip — MCP; suleisti.                                                                                                                                                               |
+| Cursor / Cline        | `stdio`** arba** `streamable-http`               | stdio: `omniroute --mcp` su `OMNIROUTE_API_KEY` `env`; arba nuotolinis MCP įrašas, nukreiptas į `http://localhost:20128/api/mcp/stream` (žr. [sąrankos vadovą → MCP kliento konfigūracija](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Taip, — reklamuoja `omniroute_ccr_*` įrankius.                                                                                                                                      |
+| OpenCode              | transliuojamas - http                            | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plius `codemode: false`                                                                                                                                               | Įrankiai reklamuojami tik su `codemode: false`; instrukcija vis tiek neįvesta, nes `omniroute_omniroute_ccr_retrieve` nesutampa (žr. [Kliento prielaidos](#client-prerequisites) ). |
+| Suderinamas su OpenAI | Su OpenAI suderinamas HTTP (pokalbių užbaigimai) | standartinis pokalbių užbaigimo klientas su OpenAI suderinamu galutiniu tašku                                                                                                                                                                   | **Niekada** — paprastam su OpenAI suderinamam skambinančiajam niekada nesakoma skambinti į įrankį, o instrukcija neįvedama.                                                         |
+
+### Paieškos ribos ir puslapių skaičius
+
+MCP įrankio teksto rezultatai iškirpti aplink `mcpAccessibility.maxTextChars` (numatytasis `50000`). Bloko `full` gavimas yra 256 KiB —** nėra neapriboto pilno atkūrimo** . Kai bloko `chars=N` yra didelis, perbraukite jį, o ne traukite visą:
+
+- Nykščio taisyklė:**`chars > 40000` → naudokite `mode`** , niekada plikas pilnas.
+- `mode:"grep"` — regex `pattern` atitinka eilutę po eilutės, iki 1 000 atitinkančių eilučių (`unique: true` drops pasikartoja), pigiausia už „rasti vieną man reikalingą eilutę“.
+- `mode:"lines"` — 1 indeksuotų linijų diapazonas; reikia ir `start`, ir `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` linijos.
+- `mode:"stats"` — eilutės, simboliai ir baitai skaičiuojami be kūno.
+
+Naudokite `mode:"lines"` su `start`/`end`, jei norite nueiti ilgą puslapių bloką, o ne prašyti viso iš karto.
+
+### Įrankio įvardijimas
+
+Šiuo metu gavimo įrankis pavadintas `omniroute_ccr_retrieve` (priešdėlis `omniroute_` yra pasenęs kelių serverių pavadinimų susidūrimų sprendimas). Švaresnis apribotos priesagos įrankio pavadinimas ir MCP JSON rezultatų sutrumpintos eilutės vidurio pataisa stebimi kaip tolesni veiksmai; šiame puslapyje dokumentuojama tik dabartinė siuntimo elgsena.
+
+### Sesijos gyvavimo ciklas
+
+Streamable-HTTP sesijos neveikia ir serveris jas naudoja; tuščiosios eigos langas nustatytas `OMNIROUTE_MCP_SESSION_IDLE_MS` (numatytasis 5 minutės; nurodomas pavadinimu, o ne užkoduota reikšmė, todėl šis puslapis nejuda, kai jis keičiasi). Nenaudojamo seanso požymis yra HTTP 404 su `Unknown Mcp-Session-Id` — Ištaisyti galima iš naujo prisijungti arba paleisti seansą iš naujo,** ne** norėdami pasukti raktą, pakeisti taikymo sritį arba pervardyti įrankį.
+
 ## API sąsaja
 
 | Maršrutas                              | Paskirtis                                                                      |
@@ -373,9 +462,9 @@ vertinimai, podėliui jautrūs prefiksai ir t. t.).
 - **Caveman kalbų paketai `de` / `fr` / `ja` yra daliniai.** Juose pateikiamos `context` + `filler` + `structural` taisyklės, tačiau nėra `dedup` / `ultra` paketų, todėl toms kalboms `ultra` intensyvumas nėra stipresnis už `full` (naudojamos tik jų pačių taisyklės — nėra nebylaus atsarginio perėjimo prie angliškų `dedup`/`ultra` taisyklių, kurios sugadintų tekstą užsienio kalba). `en` / `es` / `id` / `pt-BR` paketai yra išsamūs. Laukiami `dedup.json` + `ultra.json` papildymai daliniams paketams.
 - **Sudėtinės telemetrijos duomenyse pateikiami tik glaudinimą atlikę varikliai.** Sudėtinio konvejerio veiksmas, kurio variklis buvo paleistas, bet nesutaupė vietos (0 %), grąžina `stats:null`, todėl nėra rodomas `engineBreakdown` — jo neįmanoma atskirti nuo praleisto veiksmo. Norint atskirti „paleista, 0 %“ nuo „praleista“, reikėtų pakeisti išskaidymo modelį, todėl tai atidedama.
 
-## Validavimas
+## Patvirtinimas
 
-Šiai sričiai skirti patikrinimai yra:
+Šios srities vartai yra šie:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

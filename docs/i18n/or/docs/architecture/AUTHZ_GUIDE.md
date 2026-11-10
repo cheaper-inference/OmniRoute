@@ -152,17 +152,17 @@ Settings → Securityରୁ enroll କରାଯାଏ; operator ଏହାକୁ 
   4. `OMNIROUTE_DISABLE_MFA` ଅନସେଟ୍ କରନ୍ତୁ, ପୁନରାରମ୍ଭ କରନ୍ତୁ ଏବଂ ଆବଶ୍ୟକ ହେଲେ ପୁଣିଥରେ
      ନିବନ୍ଧନ କରନ୍ତୁ।
 
-## ରାଉଟ୍ ଶ୍ରେଣୀ
+## ମାର୍ଗ ଶ୍ରେଣୀଗୁଡିକ।
 
-`src/server/authz/types.ts` ତିନୋଟି ଶ୍ରେଣୀ ନିର୍ଦ୍ଧାରଣ କରେ; ନିର୍ଦ୍ଧାରିତ ଭାବେ ଶ୍ରେଣୀଭୁକ୍ତ ହୋଇପାରୁନଥିବା ଯେକୌଣସି ରାଉଟ୍ `MANAGEMENT` କୁ ଫଲ୍‌ବ୍ୟାକ୍ ହୁଏ।
+`src/server/authz/types.ts` ତିନୋଟି ଶ୍ରେଣୀକୁ ବ୍ୟାଖ୍ୟା କରେ; ଯେକ any ଣସି ମାର୍ଗ ଯାହା ନିର୍ଦ୍ଦିଷ୍ଟ ଭାବରେ ବର୍ଗୀକୃତ ହୋଇପାରିବ ନାହିଁ `MANAGEMENT` କୁ ଫେରିଯାଏ।
 
-| ଶ୍ରେଣୀ       | ବିବରଣୀ                                                                                                                                          | ପ୍ରାମାଣିକରଣ ଆବଶ୍ୟକ                                             |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `PUBLIC`     | ସ୍ପଷ୍ଟଭାବେ ନିରାପଦ ରାଉଟ୍ — ଲଗଇନ୍, ଲଗଆଉଟ୍, ସ୍ଥିତି, ଇନିଟ୍, ସ୍ୱାସ୍ଥ୍ୟ, ଅନବୋର୍ଡିଙ୍ଗ୍ ବୁଟ୍‌ଷ୍ଟ୍ରାପ୍।                                                  | କିଛି ନାହିଁ                                                     |
-| `CLIENT_API` | ମଡେଲ୍-ସେବା endpoints — `/api/v1/*`, `/api/v1beta/*`, ଏବଂ ଆଲିଆସ୍ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`। | ପ୍ରଭାବଶାଳୀ `REQUIRE_API_KEY` ଫିଚର୍ ଫ୍ଲାଗ୍ ସକ୍ଷମ ଥିଲେ Bearer କୀ |
-| `MANAGEMENT` | ଡ୍ୟାସବୋର୍ଡ ପୃଷ୍ଠା, ସେଟିଂସ୍, ପ୍ରଦାତା, କୀ, ଆଡ୍‌ମିନ୍ ଏବଂ ଡାଏଗ୍ନୋଷ୍ଟିକ୍ endpoints।                                                                  | ଡ୍ୟାସବୋର୍ଡ ସେସନ୍ କିମ୍ବା `manage` ସ୍କୋପ୍ ସହିତ Bearer            |
+| କ୍ଲାସ୍       | ବର୍ଣ୍ଣନା                                                                                                                                                    | Auth ଆବଶ୍ୟକ।                                                                 |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `PUBLIC`     | ସ୍ପଷ୍ଟ ଭାବରେ ସୁରକ୍ଷିତ ମାର୍ଗ — ଲଗଇନ୍, ଲଗଆଉଟ୍, ସ୍ଥିତି, ସ୍ୱାସ୍ଥ୍ୟ, ଅନ୍ବୋର୍ଡିଂ ବୁଟ୍ ଷ୍ଟ୍ରାପ୍।                                                                   | କିଛି ନୁହେଁ।                                                                  |
+| `CLIENT_API` | ମଡେଲ୍-ସର୍ଭିସିଂ ଏଣ୍ଡପଏଣ୍ଟଗୁଡିକ — `/api/v1/*`, `/api/v1beta/*`, ପ୍ଲସ୍ ଛଦ୍ମନାମ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`। | ପ୍ରଭାବଶାଳୀ `REQUIRE_API_KEY` feature ଶିଷ୍ଟ୍ୟ ପତାକା ସକ୍ଷମ ହେଲେ ଧାରଣକାରୀ ଚାବି। |
+| `MANAGEMENT` | ଡ୍ୟାସବୋର୍ଡ ପୃଷ୍ଠାଗୁଡ଼ିକ, ସେଟିଂସମୂହ, ପ୍ରଦାନକାରୀ, କି, ଆଡମିନି ଏବଂ ଡାଇଗ୍ନୋଷ୍ଟିକ୍ ଏଣ୍ଡପଏଣ୍ଟ।                                                                     | `manage` ପରିସର ସହିତ ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ OR ଧାରକ।                              |
 
-କିଛି `MANAGEMENT` କାର୍ଯ୍ୟ **କେବଳ ଅପରେଟର୍** ଅଟେ: `manage` କୀ ଯଥେଷ୍ଟ ନୁହେଁ। ସଂରକ୍ଷିତ କ୍ରେଡେନସିଆଲ୍ ରପ୍ତାନି (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ଜୀବନ୍ତ ଡାଟା ଉପରେ ବ୍ୟାକଅପ୍ ପୁନଃସ୍ଥାପନ (`dryRun=true` ସମେତ `POST /api/db-backups/import`, id ଦ୍ୱାରା `POST /api/db-backups` ପୁନଃସ୍ଥାପନ, `POST /api/settings/import-json`), ପୁନଃସ୍ଥାପନ ବିନ୍ଦୁ ନଷ୍ଟ କରିବା (`DELETE /api/db-backups` ସଫାସୁତରା, ଏବଂ `PATCH /api/db-backups` କାରଣ ଏହା ସଞ୍ଚୟ କରୁଥିବା ରିଟେନସନ୍ ପ୍ରତି ବ୍ୟାକଅପ୍ ପରେ ସ୍ୱୟଂଚାଳିତ ପ୍ରୁନିଂ ଚଳାଏ) ଡ୍ୟାସବୋର୍ଡ ସେସନ୍, ସ୍ଥାନୀୟ CLI ବିଷୟ, କିମ୍ବା ଲଗଇନ୍ ଅକ୍ଷମ ଥିବା ଆବଶ୍ୟକ କରେ। ସିଙ୍କ୍ ଟୋକେନ୍ ଜାରି କରିବା (`POST /api/sync/tokens`) ଏବଂ `admin` CLI ଆକ୍ସେସ୍ ଟୋକେନ୍ ଜାରି କରିବା (`POST /api/cli/tokens`) ପ୍ରତ୍ୟେକ ଲଗଇନ୍ ମୋଡ୍‌ରେ ଡ୍ୟାସବୋର୍ଡ ସେସନ୍ କିମ୍ବା ସ୍ଥାନୀୟ CLI ବିଷୟ ଆବଶ୍ୟକ କରେ। ଯେକୌଣସି ସ୍କୋପ୍‌ର API କୀ ଏବଂ `oma_` ଆକ୍ସେସ୍ ଟୋକେନ୍ ଅପରେଟର୍ କ୍ରେଡେନସିଆଲ୍ ନୁହଁନ୍ତି: ଯେତେବେଳେ ଏକ ଅପରେଟର୍ ଆବଶ୍ୟକ ହୁଏ, ସେମାନେ `403` ପାଆନ୍ତି। ଯାଞ୍ଚଟି `src/lib/api/operatorCredential.ts` ରେ ଅଛି (`resolveOperatorCredential()` / `requireOperatorCredential()`)। ଲଗଇନ୍ ସେଟିଂସ୍ ବଦଳାଇବା ମଧ୍ୟ କେବଳ ଅପରେଟର୍: `POST /api/settings/require-login` (ପରିଚାଳନା ପାସୱାର୍ଡ ସେଟ୍ / `requireLogin` ଟଗଲ୍) ଏକ ପାସୱାର୍ଡ ଥିଲେ କେବଳ ସେହି କ୍ରେଡେନସିଆଲ୍ ଗ୍ରହଣ କରେ — ପ୍ରଥମ-ଚାଲନା ବୁଟଷ୍ଟ୍ରାପ୍ ୱିଣ୍ଡୋ (ଏପର୍ଯ୍ୟନ୍ତ ପାସୱାର୍ଡ ନାହିଁ) ଅପରିବର୍ତ୍ତିତ ରହେ — ଏବଂ ପାସୱାର୍ଡ ବଦଳାଇବାକୁ ଡ୍ୟାସବୋର୍ଡ ସେସନ୍‌କୁ `currentPassword` ପଠାଇବାକୁ ପଡ଼େ (ଏହା ନଥିଲେ କିମ୍ବା ଭୁଲ ହେଲେ `403`, `settings.update_failed` ଭାବରେ ଅଡିଟ୍ ହୁଏ)। ସ୍ଥାନୀୟ CLI ଏବଂ ଲଗଇନ୍ ଅକ୍ଷମ ଥିବା ଇନଷ୍ଟାନ୍ସ ପୁନରୁଦ୍ଧାର ପଥ ରଖନ୍ତି ଏବଂ ତାହା ବିନା ପାସୱାର୍ଡ ସେଟ୍ କରିପାରନ୍ତି, କାରଣ ଉଭୟ ଡାଟା ଡାଇରେକ୍ଟ୍ରୀର ମାଲିକ ହୋଷ୍ଟ ସହ ବନ୍ଧା।
+କିଛି `MANAGEMENT` କାର୍ଯ୍ୟଗୁଡ଼ିକ ହେଉଛି।** କେବଳ ଅପରେଟର୍।** : ଏକ `manage` କି ଯଥେଷ୍ଟ ନୁହେଁ। ଗଚ୍ଛିତ ପରିଚୟପତ୍ର (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) ରପ୍ତାନି କରିବା, ଲାଇଭ ଡାଟା ଉପରେ`POST /api/db-backups/import` ( `dryRun=true`, `POST /api/db-backups` ପୁନ id ପୁନ id ସ୍ଥାପନ, `POST /api/settings/import-json` ଅନ୍ତର୍ଭୂକ୍ତ କରି), ପୁନ restore ସ୍ଥାପନ ପଏଣ୍ଟଗୁଡ଼ିକୁ ନଷ୍ଟ କରିବା (`DELETE /api/db-backups` କ୍ଲିନଅପ୍, ଏବଂ `PATCH /api/db-backups` କାରଣ ପ୍ରତ୍ୟେକ ବ୍ୟାକଅପ୍ ପରେ ସ୍ୱୟଂଚାଳିତ ଛେଦନକୁ ଡ୍ରାଇଭ୍ କରିଥାଏ) ଏକ ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ, କିମ୍ବା ସ୍ଥାନୀୟ CLI ବିଷୟ ଆବଶ୍ୟକ କରେ। ଏକ ସିଙ୍କ ଟୋକେନ୍ (`POST /api/sync/tokens`) ପ୍ରଦାନ କରିବା ଏବଂ ଏକ `admin` CLI ଆକସେସ୍ ଟୋକେନ୍ (`POST /api/cli/tokens`) ମେଣ୍ଟ କରିବା ପ୍ରତ୍ୟେକ ଲଗଇନ୍ ମୋଡ୍ ରେ ଏକ ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ କିମ୍ବା ସ୍ଥାନୀୟ CLI ବିଷୟ ଆବଶ୍ୟକ କରେ। ଯେକ scope ଣସି ପରିସରର API କି ଏବଂ `oma_` ଆକ୍ସେସ୍ ଟୋକେନ୍ ଅପରେଟର ପରିଚୟପତ୍ର ନୁହେଁ: ଯେତେବେଳେ ବି ଆବଶ୍ୟକ ହୁଏ ସେମାନେ `403` ପାଆନ୍ତି। ଚେକ୍ `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) ରେ ରୁହେ। ଲଗଇନ୍ ସେଟିଂସମୂହକୁ ପରିବର୍ତ୍ତନ କରିବା କେବଳ ଅପରେଟର୍ ଅଟେ: `POST /api/settings/require-login` (ପରିଚାଳନା ପାସୱାର୍ଡ ସେଟ୍ କରନ୍ତୁ / `requireLogin` ଟୋଗଲ୍ କରନ୍ତୁ) କେବଳ ସେହି ପରିଚୟପତ୍ର ଗ୍ରହଣ କରେ — ପ୍ରଥମ ପାସୱାର୍ଡ ବୁଟ୍ ଷ୍ଟ୍ରାପ୍ ୱିଣ୍ଡୋ (ଏପର୍ଯ୍ୟନ୍ତ କ password ଣସି ପାସୱାର୍ଡ ନାହିଁ) ଅପରିବର୍ତ୍ତିତ — ଅଟେ ଏବଂ ଏକ ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ `currentPassword` ପଠାଇବା ଉଚିତ ଯେତେବେଳେ`403` ଅନୁପସ୍ଥିତ କିମ୍ବା ଭୁଲ, `settings.update_failed` କରାଯାଇଥାଏ। ସ୍ଥାନୀୟ CLI ଏବଂ ଲଗଇନ୍ ଅକ୍ଷମ ଥିବା ଏକ ଉଦାହରଣ ପୁନରୁଦ୍ଧାର ପଥ ରଖେ ଏବଂ ଏହା ବିନା ପାସୱାର୍ଡ ସେଟ୍ କରିପାରେ, ଯେହେତୁ ଉଭୟ ଡାଟା ଡିରେକ୍ଟୋରୀର ମାଲିକ ସହିତ ବନ୍ଧା।
 
 ## ପାଇପଲାଇନ
 
@@ -193,53 +193,49 @@ Incoming request → src/proxy.ts
 
 ଏକ ସଫଳ ନୀତି `AuthSubject` ସହିତ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ଫେରସ୍ତ କରେ \| ଡାଉନ୍ଷ୍ଟ୍ରିମ୍ ହ୍ୟାଣ୍ଡେଲର୍ମାନେ auth ତର୍କକୁ ପୁନ running ଚଲାଇବା ପରିବର୍ତ୍ତେ `src/server/authz/assertAuth.ts` ରେ `assertAuth(request, "CLIENT_API")` ମାଧ୍ୟମରେ ପ read ିପାରିବେ \|
 
-## ସାର୍ବଜନୀନ ରୁଟ୍ ତାଲିକା
+## ସର୍ବସାଧାରଣ ମାର୍ଗ ତାଲିକା।
 
-`src/shared/constants/publicApiRoutes.ts` ହେଉଛି ସ୍ପଷ୍ଟ ଅନୁମୋଦିତ ତାଲିକା:
+`src/shared/constants/publicApiRoutes.ts` ହେଉଛି ସ୍ପଷ୍ଟ ଅନୁମତି ତାଲିକା:
 
-ତାଲିକାଟି **ଆକୃତି** ଅନୁସାରେ ବିଭକ୍ତ, ଏବଂ ଏହି ବିଭାଜନଟି ଅତ୍ୟନ୍ତ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ (GHSA-74g9-q8f6-793h): ଏକ prefix କୁ
-`startsWith()` ଦ୍ୱାରା ମେଳ କରାଯାଏ, ତେଣୁ ଏହା ଆରମ୍ଭିକ ଅକ୍ଷରଗୁଡ଼ିକ ସମାନ ଥିବା ପ୍ରତ୍ୟେକ ସନ୍ନିହିତ path ସହିତ ମଧ୍ୟ ମେଳ ଖାଏ।
-`/api/usage/om-usage` କୁ prefix ଭାବେ ଚିହ୍ନିତ କରି `/api/usage/om-usage<anything>` କୁ PUBLIC କରାଯାଇଛି, ଏବଂ Next ଏହାକୁ
-`/api/usage/[connectionId]` ରେ resolve କରେ — ଯାହାର ନିଜସ୍ୱ auth ନାହିଁ।
+ତାଲିକା ଦ୍ୱାରା ବିଭକ୍ତ।** ଆକୃତି।** , ଏବଂ ବିଭାଜନ ହେଉଛି ଭାର ଧାରଣକାରୀ (GHSA-74g9-q8f6-793h): ଏକ ଉପସର୍ଗ `startsWith()` ସହିତ ମେଳ ହୋଇଛି, ତେଣୁ ଏହା ଏହାର ଅଗ୍ରଣୀ ଅକ୍ଷରଗୁଡ଼ିକୁ ଅଂଶୀଦାର କରୁଥିବା ପ୍ରତ୍ୟେକ ସଂଲଗ୍ନ ପଥ ସହିତ ମଧ୍ୟ ମେଳ ଖାଉଛି। `/api/usage/om-usage` ଏକ ଉପସର୍ଗ ଭାବରେ `/api/usage/om-usage<anything>` PUBLIC ଚିହ୍ନିତ ହୋଇଛି, ଏବଂ ପରବର୍ତ୍ତୀ ସମାଧାନ କରେ ଯେ `/api/usage/[connectionId]` — କୁ ଏକ ହ୍ୟାଣ୍ଡେଲର୍ ନିଜର କ aut ଣସି auth ବିନା।
 
 ```ts
-// ପ୍ରକୃତ subtrees। ପ୍ରତ୍ୟେକ entry ନିଶ୍ଚିତ ଭାବେ "/" ରେ ଶେଷ ହେବା ଆବଶ୍ୟକ (ଏକ unit test ଦ୍ୱାରା ଯାଞ୍ଚିତ)।
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify ରେ CLIENT_API ଭାବେ ବିବେଚିତ, "no-auth public" ଭାବେ ନୁହେଁ
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// କେବଳ ଏକକ ରୁଟ୍, ନିଖୁତ ଭାବେ ମେଳ କରାଯାଏ (ଶେଷରେ trailing slash ଥାଉ କିମ୍ବା ନଥାଉ)।
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP ପାଇଁ login ପଦକ୍ରମ 2; MFA-pending cookie ଆବଶ୍ୟକ
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// କେବଳ ପଢ଼ିବାଯୋଗ୍ୟ ଏକକ ରୁଟ୍, ଯେଉଁଗୁଡ଼ିକ CORS origin relaxation ମଧ୍ୟ ଗ୍ରହଣ କରନ୍ତି।
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS relaxation ବିନା କେବଳ ପଢ଼ିବାଯୋଗ୍ୟ ଏକକ ରୁଟ୍।
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-କେବଳ ସୁରକ୍ଷିତ methods ପାଇଁ ହିଁ କେବଳ ପଢ଼ିବାଯୋଗ୍ୟ ରୁଟ୍ଗୁଡ଼ିକ ସାର୍ବଜନୀନ। ଟିପ୍ପଣୀ: `classifyRoute()` PUBLIC fall-through ରୁ `/api/v1/*` ଏବଂ `/api/v1beta/*` କୁ ବାଦ ଦିଏ — ତେଣୁ ସେଗୁଡ଼ିକ ସର୍ବଦା `CLIENT_API`, ଏବଂ Bearer-key policy ଏଥିରେ ପ୍ରୟୋଗ ହୁଏ।
+କେବଳ ପଠନ ମାର୍ଗଗୁଡ଼ିକ ସର୍ବସାଧାରଣ ଅଟେ।** କେବଳ** ସୁରକ୍ଷିତ ପଦ୍ଧତି ପାଇଁ। ଟିପନ୍ତୁ: `classifyRoute()` `/api/v1/*` ଏବଂ `/api/v1beta/*` PUBLIC fall-through — ରୁ ବାଦ ଦେଇଥାଏ ଯାହା ସର୍ବଦା `CLIENT_API` ଅଟେ ତେଣୁ ବିୟର-କି ନୀତି ପ୍ରଯୁଜ୍ୟ।
 
 ## ଏକ ନୂତନ ରୁଟ୍ ଯୋଡ଼ିବା
 
@@ -314,15 +310,15 @@ API କି'ଗୁଡ଼ିକ ଏକ `scopes` ଆରେ ଧାରଣ କରନ�
 (`src/lib/accessTokens/scopes.ts`) ଦ୍ୱାରା ମାନ୍ୟତାପ୍ରାପ୍ତ। ଏହି ମାନ୍ୟତା କେବଳ
 ଆକ୍ସେସ୍-ଟୋକେନ୍ କ୍ରେଡେନ୍ସିଆଲ୍ ପାଇଁ ପ୍ରଯୁଜ୍ୟ। [ପରିଚାଳନା ପ୍ରମାଣୀକରଣ](../guides/MANAGEMENT-AUTH.md) ଦେଖନ୍ତୁ।
 
-## Auth ଆବଶ୍ୟକ ଟଗଲ୍
+## Auth ଟୋଗଲ୍ ଆବଶ୍ୟକ।
 
-`src/shared/utils/apiAuth.ts` ରେ `isAuthRequired()` ନିର୍ଣ୍ଣୟ କରେ ଯେ ଏକ ଅନୁରୋଧ ପାଇଁ **କୌଣସି** ପ୍ରାମାଣିକରଣ ବାଧ୍ୟତାମୂଳକ ହେବ କି ନାହିଁ:
+`src/shared/utils/apiAuth.ts` ରେ`isAuthRequired()` ସ୍ଥିର କରେ କି ନାହିଁ।** ଯେକ any ଣସି** ଏକ ଅନୁରୋଧ ପାଇଁ auth ବାଧ୍ୟତାମୂଳକ:
 
-- `settings.requireLogin === false` → ପ୍ରାମାଣିକରଣ ବିଶ୍ୱସ୍ତରରେ ଅକ୍ଷମ, ସର୍ବଦା-ସୁରକ୍ଷିତ ସ୍ତର ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ଏବଂ ଯେ କଲ୍ ଏହା ଗ୍ରହଣ କରୁଥିବା କ୍ରେଡେନସିଆଲ୍ ଦିଏ ସେଗୁଡ଼ିକ ବ୍ୟତୀତ — ଲଗଇନ୍ ଚାଲୁ ଥିବା ପରି ସେହି କ୍ରେଡେନସିଆଲ୍ ଆବଶ୍ୟକ: ସିଙ୍କ୍ ଟୋକେନ୍ ଜାରି କରିବା, ଯେ କୌଣସି ସ୍କୋପ୍‌ରେ CLI ଆକ୍ସେସ୍ ଟୋକେନ୍ ଜାରି କରିବା, ଏବଂ `manage`/`admin` ସ୍କୋପ୍ ସହ API କୀ ସୃଷ୍ଟି କରିବା, ସେହି ସ୍କୋପ୍ କୀକୁ ଦେବା, କିମ୍ବା ଏପରି କୀ ପୁନର୍ଜନନ କିମ୍ବା ପ୍ରକାଶ କରିବା (`src/lib/api/requireManagementAuth.ts` ରେ `requireCredentialForManagementScopedKey()`)। କେବଳ-ଇନଫରେନ୍ସ କୀ ଖୋଲା ରହେ।
-- କୌଣସି ପାସୱାର୍ଡ ସେଟ୍ ନାହିଁ **ଏବଂ** `INITIAL_PASSWORD` ପରିବେଶ ଭେରିଏବଲ୍ ନାହିଁ → ବୁଟଷ୍ଟ୍ରାପ୍ ମୋଡ୍ ଅନବୋର୍ଡିଙ୍ଗ୍ ୱିଜାର୍ଡ ଏବଂ loopback ଅନୁରୋଧକୁ ଅନୁମତି ଦିଏ, କିନ୍ତୁ ଏକ୍ସପୋଜ୍ ହୋଇଥିବା ନେଟୱାର୍କ ଅନୁରୋଧକୁ ତଥାପି କ୍ରେଡେନସିଆଲ୍ ଆବଶ୍ୟକ।
-- ଯେକୌଣସି DB ତ୍ରୁଟି → ବିଫଳ-ବନ୍ଦ (ସୁରକ୍ଷା-ଡିଫଲ୍ଟ)।
+- `settings.requireLogin === false` → auth ସର୍ବଦା ସୁରକ୍ଷିତ ସ୍ତର ( [ରୁଟ୍ ଗାର୍ଡ ଟାୟର୍ସ](../security/ROUTE_GUARD_TIERS.md) ଦେଖନ୍ତୁ) ଏବଂ କଲ୍ ଗ୍ରହଣ କରୁଥିବା ଏକ ପ୍ରମାଣପତ୍ର ବ୍ୟତୀତ, ସର୍ବଭାରତୀୟ ସ୍ତରରେ ଅକ୍ଷମ ହୋଇଛି, ଯାହାକି ଲଗ୍ ଇନ୍ ସହିତ ସମାନ ପ୍ରମାଣପତ୍ର ଆବଶ୍ୟକ କରେ: ସିଙ୍କ ଟୋକେନ୍ ପ୍ରଦାନ, CLI ଆକ୍ସେସ୍ ଟୋକେନ୍ଗୁଡ଼ିକୁ ମେଣ୍ଟ କରିବା, କିମ୍ବା `manage`/`admin` ପରିସର ସହିତ ଏକ API ଚାବି ସୃଷ୍ଟି କରିବା। `src/lib/api/requireManagementAuth.ts` ରେ`requireCredentialForManagementScopedKey()` ) ସୂଚନା-କେବଳ ଚାବିଗୁଡ଼ିକ ଖୋଲା ରହିଥାଏ। ଏକ ସଂରକ୍ଷିତ ବ feature ଶିଷ୍ଟ୍ୟ ପତାକା ଲେଖିବା (`REQUIRE_API_KEY`, ଅନ୍ୟାନ୍ୟ ସୁରକ୍ଷା ପତାକା, ଏବଂ ବ [q ଶିଷ୍ଟ୍ୟ ଫ୍ଲାଗରେ](../reference/FEATURE_FLAGS.md#rest-api) ତାଲିକାଭୁକ୍ତ SSRF / TLS / MCP- ପରିସର / ସ୍ୟାଣ୍ଡବକ୍ସ ଫ୍ଲାଗ୍) ଏବଂ PII ମାସ୍କିଂ ସେଟିଂସମୂହ (`PUT /api/settings/pii`) ସଂରକ୍ଷଣ କରିବା ମଧ୍ୟ ଏକ ପ୍ରମାଣପତ୍ରର ଆବଶ୍ୟକତା ରଖେ।
+- କ password ଣସି ପାସୱାର୍ଡ ବିନ୍ୟାସ ହୋଇନାହିଁ।** ଏବଂ** କ z `INITIAL_PASSWORD` env var → ବୁଟ୍ ଷ୍ଟ୍ରାପ୍ ମୋଡ୍ ଅନ୍ବୋର୍ଡିଂ ୱିଜାର୍ଡ ଏବଂ ଲୁପ୍ ବ୍ୟାକ୍ ଅନୁରୋଧକୁ ଅନୁମତି ଦିଏ, କିନ୍ତୁ ଉନ୍ମୋଚିତ ନେଟୱାର୍କ ଅନୁରୋଧଗୁଡ଼ିକ ତଥାପି ପ୍ରମାଣପତ୍ର ଆବଶ୍ୟକ କରେ। ବ୍ୟତିକ୍ରମ: ଏକ ସଂରକ୍ଷିତ ବ feature ଶିଷ୍ଟ୍ୟ ପତାକା ଲେଖିବା ଏବଂ PII ମାସ୍କିଂ ସେଟିଂସମୂହ (`PUT /api/settings/pii`) କୁ ଲୁପବ୍ୟାକ୍ ଠାରୁ ମଧ୍ୟ ଏକ ପ୍ରମାଣପତ୍ର ଆବଶ୍ୟକ କରେ, ତେଣୁ ନିଜେ ଲୁପ୍ ବ୍ୟାକ୍ ଯଥେଷ୍ଟ ନୁହେଁ।
+- ଯେକ Any ଣସି DB ତ୍ରୁଟି → ବନ୍ଦ ହୋଇଯାଏ (ସୁରକ୍ଷିତ-ବାଇ-ଡିଫଲ୍ଟ)।
 
-Client API କୀ ବାଧ୍ୟତା `src/shared/utils/featureFlags.ts` ରେ `isRequireApiKeyEnabled()` ବ୍ୟବହାର କରେ, ସିଧାସଳଖ `process.env.REQUIRE_API_KEY` ପଢ଼ା ନୁହେଁ। ଏହା ଡିପ୍ଲୟ୍ କରାଯାଇଥିବା ଇନଷ୍ଟାନ୍ସ ପାଇଁ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ: ଡ୍ୟାସବୋର୍ଡ → Feature Flags ରେ `REQUIRE_API_KEY` ଟଗଲ୍ କରିବା ଏକ DB ଓଭରରାଇଡ୍ ସଞ୍ଚୟ କରେ ଏବଂ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ଓ ଏହି ସହାୟକ ବାଣ୍ଟୁଥିବା ଅନ୍ୟ client-API ପ୍ରାମାଣିକରଣ ଯାଞ୍ଚକୁ ତୁରନ୍ତ ପ୍ରଭାବିତ କରେ। ଫିଚର୍ ଫ୍ଲାଗ୍ ଷ୍ଟୋର୍ ପଢ଼ାଯାଇ ନ ପାରିଲେ, client API ପ୍ରାମାଣିକରଣ ବିଫଳ-ବନ୍ଦ ହୁଏ ଏବଂ ଏକ କୀ ଆବଶ୍ୟକ କରେ।
+କ୍ଲାଏଣ୍ଟ API କି ପ୍ରୟୋଗ `src/shared/utils/featureFlags.ts` ରେ `isRequireApiKeyEnabled()` ବ୍ୟବହାର କରେ, ସିଧାସଳଖ `process.env.REQUIRE_API_KEY` ପଠନ ନୁହେଁ। ନିୟୋଜିତ ଉଦାହରଣଗୁଡିକ ପାଇଁ ଏହା ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ: ଡ୍ୟାସବୋର୍ଡରେ `REQUIRE_API_KEY` ଟୋଗଲ୍ କରିବା → ବ ature ଶିଷ୍ଟ୍ୟ ଫ୍ଲାଗଗୁଡିକ ଏକ DB ଓଭରଡାଇଡ୍ ଗଚ୍ଛିତ କରେ ଏବଂ ତୁରନ୍ତ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, ଏବଂ ଅନ୍ୟ କ୍ଲାଏଣ୍ଟ- API auth ଯାଞ୍ଚଗୁଡ଼ିକୁ ଏହି ହେଲପର ଅଂଶୀଦାର କରିଥାଏ। ଯଦି ବ feature ଶିଷ୍ଟ୍ୟ ଫ୍ଲାଗ୍ ଷ୍ଟୋର୍ ପ read ିହେବ ନାହିଁ, କ୍ଲାଏଣ୍ଟ API auth ବନ୍ଦ ହୋଇଯାଏ ଏବଂ ଏକ ଚାବି ଆବଶ୍ୟକ କରେ।
 
 ## ବ୍ରେକିଂ ପରିବର୍ତ୍ତନ — v3.8.0
 
