@@ -23,11 +23,13 @@ import { kiro } from "./kiro";
 import { cursor } from "./cursor";
 import { trae } from "./trae";
 import { kilocode } from "./kilocode";
+import { megabrain } from "./megabrain";
 import { cline } from "./cline";
 import { devinCli, devinDesktop } from "./devin-desktop";
 import { grokCli } from "./grok-cli";
 import { xaiOauth } from "./xai-oauth";
 import { openference } from "./openference";
+import { renderhour } from "./renderhour";
 import { codebuddyCn } from "./codebuddy-cn";
 import { freebuff } from "./freebuff";
 import { codebuddyIntl } from "./codebuddy-intl";
@@ -53,6 +55,7 @@ export const PROVIDERS = {
   cursor,
   trae,
   kilocode,
+  megabrain,
   cline,
   // clinepass reuses the Cline WorkOS OAuth flow 1:1 (same api.cline.bot host, same token
   // type) — it is a separate catalog entry advertising the cline-pass/* (ClinePass
@@ -66,6 +69,7 @@ export const PROVIDERS = {
   "grok-cli": grokCli,
   "xai-oauth": xaiOauth,
   openference,
+  renderhour,
   "codebuddy-cn": codebuddyCn,
   freebuff,
   "codebuddy-intl": codebuddyIntl,

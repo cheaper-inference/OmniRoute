@@ -60,6 +60,8 @@ const DUAL_AUTH_PROVIDER_IDS = new Set([
   "muse-code",
   "cline",
   "kilocode",
+  "renderhour",
+  "megabrain",
   "freebuff",
 ]);
 
@@ -122,6 +124,7 @@ export const IMAGE_ONLY_PROVIDER_IDS = new Set([
   "segmind",
   "magnific",
   "deepai",
+  "deapi",
 ]);
 
 export const AGGREGATOR_PROVIDER_IDS = new Set([
@@ -223,6 +226,7 @@ export const VIDEO_PROVIDER_IDS = new Set([
   "leonardo",
   "segmind",
   "novita",
+  "deapi",
 ]);
 
 // IDE Providers: editors with built-in AI subscription (separate section in UI).

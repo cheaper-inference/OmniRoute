@@ -226,8 +226,11 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // MiniMax Code (#17286) registers id "minimax-code" and alias "mmcode" — two
   // more (436 -> 438).
   // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
-  // LLMTR (#18536) registers id "llmtr" with the same alias (+1 distinct prefix: 439 -> 440).
-  assert.equal(RESERVED_PREFIX_COUNT, 440);
+  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
+  // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 441 -> 443).
+  // Sign in with ChatGPT (#15201) registers id "chatgpt" with the same alias (+1: 443 -> 444).
+  // LLMTR (#18536) registers id "llmtr" with the same alias (+1 distinct prefix: 444 -> 445).
+  assert.equal(RESERVED_PREFIX_COUNT, 445);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);
@@ -235,6 +238,9 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("minimax-code"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("mmcode"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("empiriolabs"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("megabrain"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("mb"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("chatgpt"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("llmtr"), true);
 });
 

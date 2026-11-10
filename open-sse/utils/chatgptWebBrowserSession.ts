@@ -56,6 +56,17 @@ const COMPOSER_EMPTY_ASSISTANT_GRACE_MS = 6_000;
  */
 const COMPOSER_NO_ANSWER_DEADLINE_MS = 25_000;
 
+// Prefer legacy role markers when present, then the current ChatGPT turn markers.
+// Keep this list shared by counting, response capture, and diagnostics.
+const ASSISTANT_NODE_SELECTORS = [
+  '[data-message-author-role="assistant"]',
+  '[data-content-search-unit-key$=":assistant"]',
+  '[data-chatgpt-search-unit-key$=":assistant"]',
+  '[data-conversation-role="assistant"]',
+  '[data-turn-key]:has([data-conversation-role="assistant"],[data-chatgpt-agent-turn-start])',
+  'section[data-turn="assistant"]',
+];
+
 export interface ChatGptWebBrowserSession {
   url(): string;
   start(handlers: ChatGptWebBrowserSessionHandlers): Promise<() => Promise<void>>;
@@ -757,7 +768,11 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
         return {
           url: location.href.replace("https://chatgpt.com", ""),
           activeId: (document.activeElement as HTMLElement | null)?.id ?? null,
-          promptLen: (document.querySelector("#prompt-textarea")?.textContent ?? "").length,
+          promptLen:
+            (
+              document.querySelector('div.ProseMirror[contenteditable="true"]') ??
+              document.querySelector("#prompt-textarea")
+            )?.textContent?.length ?? 0,
           editables: nodes.map((node) => ({
             id: node.id,
             cls: String(node.className).slice(0, 28),
@@ -777,7 +792,7 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
     // A pooled page can be left in a state where the composer accepts no text (observed as
     // "0 chars present" after a previous turn or a challenge redirect). Reload the first-party
     // page and retry once before failing the turn.
-    const insertOnce = async (): Promise<boolean> => {
+    const insertOnce = async (): Promise<import("playwright").Locator | null> => {
       const composer = await this.resolveComposer();
       await composer.click();
       await composer.focus().catch(() => {});
@@ -794,12 +809,15 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
       const deadline = Date.now() + COMPOSER_TYPED_TIMEOUT_MS;
       while (Date.now() < deadline) {
         await this.page.waitForTimeout(COMPOSER_SETTLE_MS);
-        if (composerAcceptedPrompt(expectedTail, await this.readComposerText())) return true;
+        if (composerAcceptedPrompt(expectedTail, await this.readComposerText(composer))) {
+          return composer;
+        }
       }
-      return false;
+      return null;
     };
 
-    if (!(await insertOnce())) {
+    let composer = await insertOnce();
+    if (!composer) {
       console.warn(
         `[chatgpt-web] composer rejected the first insert: ${JSON.stringify(await this.describeComposerState())}`
       );
@@ -807,7 +825,8 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
         .goto(this.pageUrl, { waitUntil: "domcontentloaded", timeout: 30_000 })
         .catch(() => {});
       await this.page.waitForTimeout(COMPOSER_SETTLE_MS);
-      if (!(await insertOnce())) {
+      composer = await insertOnce();
+      if (!composer) {
         console.warn(
           `[chatgpt-web] composer rejected the reload retry: ${JSON.stringify(await this.describeComposerState())}`
         );
@@ -820,9 +839,7 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
     // Enter is the reliable submit; the send button can render before it is enabled.
     await this.page.keyboard.press("Enter");
     await this.page.waitForTimeout(COMPOSER_SUBMIT_MS);
-    const submitted = await this.page.evaluate(
-      () => (document.querySelector("#prompt-textarea")?.textContent ?? "").trim().length === 0
-    );
+    const submitted = (await this.readComposerText(composer).catch(() => "")).trim().length === 0;
     if (!submitted) {
       const send = this.page.locator('[data-testid="send-button"]').first();
       if (await send.isEnabled().catch(() => false)) await send.click();
@@ -864,42 +881,51 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
     return retry;
   }
 
-  /** Whitespace-normalised composer text, so ProseMirror's block boundaries do not matter. */
-  private async readComposerText(): Promise<string> {
-    return this.page.evaluate(() =>
-      (document.querySelector("#prompt-textarea")?.textContent ?? "").replace(/\s+/g, " ")
-    );
+  /** Read the same visible composer that received the text, even if hidden nodes remain. */
+  private async readComposerText(composer: import("playwright").Locator): Promise<string> {
+    return ((await composer.textContent({ timeout: 1_000 })) ?? "").replace(/\s+/g, " ");
   }
 
   private async countAssistantMessages(): Promise<number> {
-    return this.page.evaluate(
-      () => document.querySelectorAll('[data-message-author-role="assistant"]').length
-    );
+    return this.page.evaluate((selectors) => {
+      for (const selector of selectors) {
+        const count = document.querySelectorAll(selector).length;
+        if (count) return count;
+      }
+      return 0;
+    }, ASSISTANT_NODE_SELECTORS);
   }
 
-  /** Wait for a new assistant message and return its rendered text once it stops growing. */
-  /** Count of assistant messages plus the current text of the last one, read atomically. */
+  /** Count and read the most recent assistant turn from either ChatGPT DOM layout. */
   private async readAssistantState(): Promise<{
     count: number;
     text: string;
     streaming: boolean;
     emptyNode: boolean;
   }> {
-    return this.page.evaluate(() => {
-      const nodes = Array.from(
-        document.querySelectorAll<HTMLElement>('[data-message-author-role="assistant"]')
-      );
+    return this.page.evaluate((selectors) => {
+      let nodes: HTMLElement[] = [];
+      for (const selector of selectors) {
+        const matches = Array.from(document.querySelectorAll<HTMLElement>(selector));
+        if (matches.length) {
+          nodes = matches;
+          break;
+        }
+      }
       const lastNode = nodes[nodes.length - 1];
-      // textContent, not innerText: the message node can mount with its content not yet laid
-      // out, and innerText returns "" for a visible-but-unrendered subtree.
-      const text = lastNode ? (lastNode.textContent ?? "").trim() : "";
+      const content =
+        lastNode?.querySelector<HTMLElement>(
+          '[data-markdown-text-style="assistant-message"],.markdown'
+        ) ?? lastNode;
+      // Use textContent: the assistant may mount before layout is complete.
+      const text = (content?.textContent ?? "").trim();
       return {
         count: nodes.length,
         text,
         streaming: Boolean(document.querySelector('[data-testid="stop-button"]')),
         emptyNode: Boolean(lastNode) && !text,
       };
-    });
+    }, ASSISTANT_NODE_SELECTORS);
   }
 
   async awaitRenderedAssistantText(timeoutMs: number): Promise<string | null> {
@@ -959,14 +985,27 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
   /** Page snapshot logged when a rendered read gives up. Never returned to clients. */
   private async readRenderedDiagnostics(): Promise<Record<string, unknown>> {
     return this.page
-      .evaluate(() => {
-        const nodes = Array.from(
-          document.querySelectorAll<HTMLElement>("[data-message-author-role]")
-        );
-        const last = nodes[nodes.length - 1] as HTMLElement | undefined;
+      .evaluate((selectors) => {
+        let nodes: HTMLElement[] = [];
+        let matchedSelector: string | null = null;
+        for (const selector of selectors) {
+          const matches = Array.from(document.querySelectorAll<HTMLElement>(selector));
+          if (matches.length) {
+            nodes = matches;
+            matchedSelector = selector;
+            break;
+          }
+        }
+        const last = nodes[nodes.length - 1];
         return {
           url: location.href.replace("https://chatgpt.com", ""),
-          roles: nodes.map((n) => n.getAttribute("data-message-author-role")),
+          assistantSelector: matchedSelector,
+          roles: nodes.map(
+            (n) =>
+              n.getAttribute("data-message-author-role") ??
+              n.getAttribute("data-conversation-role") ??
+              "assistant"
+          ),
           lastHtml: (last?.innerHTML ?? "").slice(0, 240),
           lastChildClasses: Array.from(last?.querySelectorAll("*") ?? [])
             .slice(0, 6)
@@ -975,7 +1014,7 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
           sendButton: Boolean(document.querySelector('[data-testid="send-button"]')),
           bodyTextHead: (document.body?.innerText ?? "").replace(/\s+/g, " ").slice(0, 200),
         };
-      })
+      }, ASSISTANT_NODE_SELECTORS)
       .catch((error) => ({ evaluateFailed: String(error).slice(0, 120) }));
   }
 }
