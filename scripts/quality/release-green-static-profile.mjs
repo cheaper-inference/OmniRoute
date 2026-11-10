@@ -85,7 +85,20 @@ export function validateFullCiProfile(profile, scripts, ci, quality) {
   return profile.gates.map(({ id, job, args, env, kind }) => ({ id, job, args, env, kind }));
 }
 
-export function loadFullCiProfile(root) {
+/** Resolve `origin/<ref>` to a commit SHA in the checkout at `root`. */
+function resolveOriginCommit(root, ref) {
+  return execFileSync("git", ["rev-parse", "--verify", `origin/${ref}^{commit}`], {
+    cwd: root,
+    encoding: "utf8",
+    timeout: 30000,
+  }).trim();
+}
+
+/**
+ * `resolveBaseSha(root, ref)` pins a gate's GITHUB_BASE_REF to a fixed SHA. It defaults to the
+ * checkout's `origin/<ref>`; callers without that remote ref (a shallow CI checkout) inject it.
+ */
+export function loadFullCiProfile(root, resolveBaseSha = resolveOriginCommit) {
   const read = (path) => readFileSync(join(root, path), "utf8");
   const gates = validateFullCiProfile(
     JSON.parse(read("config/quality/release-green-static-profile.json")),
@@ -95,16 +108,7 @@ export function loadFullCiProfile(root) {
   );
   for (const gate of gates) {
     if (gate.env?.GITHUB_BASE_REF) {
-      const base = execFileSync(
-        "git",
-        ["rev-parse", "--verify", `origin/${gate.env.GITHUB_BASE_REF}^{commit}`],
-        {
-          cwd: root,
-          encoding: "utf8",
-          timeout: 30000,
-        }
-      ).trim();
-      gate.env = { GITHUB_BASE_SHA: base };
+      gate.env = { GITHUB_BASE_SHA: resolveBaseSha(root, gate.env.GITHUB_BASE_REF) };
     }
   }
   return gates;

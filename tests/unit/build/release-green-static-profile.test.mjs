@@ -13,9 +13,16 @@ import {
 } from "../../../scripts/quality/release-green-static-profile.mjs";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
+// The CI unit checkout is shallow and has no `origin/main`; pin base refs without git.
+const FIXED_BASE_SHA = "0123456789abcdef0123456789abcdef01234567";
+const resolvedRefs = [];
+const fixedBase = (_root, ref) => {
+  resolvedRefs.push(ref);
+  return FIXED_BASE_SHA;
+};
 
 test("full static requirements include audit, mutation and translation drift", async () => {
-  const gates = loadFullCiProfile(root);
+  const gates = loadFullCiProfile(root, fixedBase);
   for (const id of [
     "audit:deps",
     "check:mutation-test-coverage",
@@ -133,7 +140,7 @@ test("an interrupted static process never has complete measurement evidence", ()
 });
 
 test("the real profile has executable absolute boundary arguments", () => {
-  const gate = loadFullCiProfile(root).find((g) => g.id === "check:boundary:ratchet");
+  const gate = loadFullCiProfile(root, fixedBase).find((g) => g.id === "check:boundary:ratchet");
   assert.deepEqual(gate.args, ["run", "check:boundary:ratchet"]);
 });
 
@@ -146,7 +153,10 @@ test("declared required policy cannot be weakened by an old curated drift bucket
 });
 
 test("test-masking receives a fixed base SHA in the full profile", () => {
-  const gate = loadFullCiProfile(root).find((g) => g.id === "check:test-masking");
+  resolvedRefs.length = 0;
+  const gate = loadFullCiProfile(root, fixedBase).find((g) => g.id === "check:test-masking");
   assert.match(gate.env.GITHUB_BASE_SHA, /^[0-9a-f]{40}$/);
+  assert.equal(gate.env.GITHUB_BASE_SHA, FIXED_BASE_SHA);
   assert.equal(gate.env.GITHUB_BASE_REF, undefined);
+  assert.ok(resolvedRefs.includes("main"), "the declared base ref is the one pinned");
 });
