@@ -91,6 +91,8 @@ const MIGRATED_FILES = [
   "src/server/authz/entra/evaluate.ts",
   "open-sse/executors/m365ImageGeneration.ts",
   "open-sse/services/combo/handoffSessionScope.ts",
+  "src/lib/db/agentSessions.ts",
+  "src/lib/db/proxyTraffic.ts",
 ];
 
 test("migrated call sites import the helper instead of hashing inline", () => {
