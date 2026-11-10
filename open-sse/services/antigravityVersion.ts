@@ -11,6 +11,23 @@ export const ANTIGRAVITY_VERSION_FETCH_TIMEOUT_MS = 5_000;
 export const ANTIGRAVITY_IDE_FALLBACK_VERSION = "2.5.5";
 export const ANTIGRAVITY_CLI_FALLBACK_VERSION = "1.3.4";
 
+// Operator override for the advertised client version. Google periodically raises the
+// minimum Antigravity client version its backend accepts; when the floor moves past the
+// pinned fallbacks above, every request fails with "This version of Antigravity is no
+// longer supported" and the public release feeds can lag behind the new minimum, so the
+// resolver cannot recover on its own until a release ships a bumped fallback. These env
+// vars let an operator advertise a currently-accepted version immediately, without a new
+// build (mirrors CODEX_CLIENT_VERSION in config/codexClient.ts). The override is
+// authoritative — it wins over the feed and the fallback, including when the accepted
+// version is LOWER than the pinned floor — and is validated by normalizeVersion so only a
+// well-formed x.y.z string ever reaches the wire.
+export const ANTIGRAVITY_IDE_VERSION_OVERRIDE_ENV = "ANTIGRAVITY_IDE_CLIENT_VERSION";
+export const ANTIGRAVITY_CLI_VERSION_OVERRIDE_ENV = "ANTIGRAVITY_CLI_CLIENT_VERSION";
+
+function getAntigravityVersionOverride(envName: string): string | null {
+  return normalizeVersion(process.env[envName]);
+}
+
 type VersionCache = {
   fetchedAt: number;
   version: string;
@@ -139,6 +156,8 @@ function seedVersionCache(state: ProductVersionState, version: string, fetchedAt
 }
 
 export function resolveAntigravityIdeVersion(fetchImpl: FetchLike = fetch): Promise<string> {
+  const override = getAntigravityVersionOverride(ANTIGRAVITY_IDE_VERSION_OVERRIDE_ENV);
+  if (override) return Promise.resolve(override);
   return resolveProductVersion(
     ideState,
     ANTIGRAVITY_IDE_FALLBACK_VERSION,
@@ -149,6 +168,8 @@ export function resolveAntigravityIdeVersion(fetchImpl: FetchLike = fetch): Prom
 }
 
 export function resolveAntigravityCliVersion(fetchImpl: FetchLike = fetch): Promise<string> {
+  const override = getAntigravityVersionOverride(ANTIGRAVITY_CLI_VERSION_OVERRIDE_ENV);
+  if (override) return Promise.resolve(override);
   return resolveProductVersion(
     cliState,
     ANTIGRAVITY_CLI_FALLBACK_VERSION,
@@ -159,11 +180,19 @@ export function resolveAntigravityCliVersion(fetchImpl: FetchLike = fetch): Prom
 }
 
 export function getCachedAntigravityIdeVersion(): string {
-  return ideState.cache?.version ?? ANTIGRAVITY_IDE_FALLBACK_VERSION;
+  return (
+    getAntigravityVersionOverride(ANTIGRAVITY_IDE_VERSION_OVERRIDE_ENV) ??
+    ideState.cache?.version ??
+    ANTIGRAVITY_IDE_FALLBACK_VERSION
+  );
 }
 
 export function getCachedAntigravityCliVersion(): string {
-  return cliState.cache?.version ?? ANTIGRAVITY_CLI_FALLBACK_VERSION;
+  return (
+    getAntigravityVersionOverride(ANTIGRAVITY_CLI_VERSION_OVERRIDE_ENV) ??
+    cliState.cache?.version ??
+    ANTIGRAVITY_CLI_FALLBACK_VERSION
+  );
 }
 
 export function seedAntigravityIdeVersionCache(version: string, fetchedAt = Date.now()): void {
