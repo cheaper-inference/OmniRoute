@@ -167,9 +167,11 @@ export function buildClaudePassthroughBody({
   // Anthropic returns a 400 on the legacy field; some clients (e.g. ForgeCode)
   // still emit it. Preserves an existing output_config.format if present.
   if (translatedBody.output_format !== undefined) {
+    // Copy-on-write: output_config may be the caller's shared object (shallow
+    // body copy per combo leg); writing format into it leaks to the other legs.
     const oc =
       translatedBody.output_config && typeof translatedBody.output_config === "object"
-        ? (translatedBody.output_config as Record<string, unknown>)
+        ? { ...(translatedBody.output_config as Record<string, unknown>) }
         : {};
     if (oc.format === undefined) oc.format = translatedBody.output_format;
     translatedBody.output_config = oc;

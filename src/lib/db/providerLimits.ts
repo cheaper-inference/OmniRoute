@@ -38,6 +38,8 @@ export interface ProviderLimitsCacheEntry {
   limitReached?: boolean;
   sparkLimitReached?: boolean;
   rateLimitReachedType?: string;
+  /** Cursor only: per-model tokens + Cursor-billed cost for the current cycle (display-only). */
+  modelUsage?: Array<Record<string, unknown>>;
 }
 
 const PROVIDER_LIMITS_CACHE_NAMESPACE = "providerLimitsCache";
@@ -92,6 +94,9 @@ function normalizeOptionalCacheFields(record: JsonRecord): Partial<ProviderLimit
     ...(billing ? { billing } : {}),
     ...(Array.isArray(record.quotaGroups)
       ? { quotaGroups: record.quotaGroups as Array<Record<string, unknown>> }
+      : {}),
+    ...(Array.isArray(record.modelUsage)
+      ? { modelUsage: record.modelUsage as Array<Record<string, unknown>> }
       : {}),
   };
 }

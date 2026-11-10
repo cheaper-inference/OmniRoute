@@ -1,3 +1,5 @@
+import type { PreferredAccountFailoverSettings } from "@/lib/resilience/settings/types";
+
 /**
  * Preferred-account response-start failover, scoped to connections selected
  * through the API key's soft preference list (never forced pins / combo steps).
@@ -6,12 +8,7 @@
  * Timeouts are response-start (upstream headers), not token-generation/TTFT.
  * Off by default. Operators can supply provider/model overrides via Resilience.
  */
-export type PreferredFailoverSettings = {
-  enabled: boolean;
-  defaultTimeoutMs: number;
-  providerTimeoutsMs: Record<string, number>;
-  modelTimeoutsMs: Record<string, number>;
-};
+export type PreferredFailoverSettings = PreferredAccountFailoverSettings;
 
 export const DEFAULT_PREFERRED_FAILOVER_SETTINGS: PreferredFailoverSettings = {
   enabled: false,
