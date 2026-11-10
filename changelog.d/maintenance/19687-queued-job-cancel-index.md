@@ -1,0 +1,1 @@
+- **perf(rate-limit):** abandoning a queued request no longer walks the whole limiter queue, so a burst of expiring waits cleans up in linear time. ([#19687](https://github.com/cheaper-inference/OmniRoute/pull/19687))

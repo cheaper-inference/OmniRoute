@@ -1,0 +1,1 @@
+- **perf(combo):** Combo metrics eviction at the 500-entry cap now compares stored timestamps as numbers, with no date parsing per new combo name. ([#19687](https://github.com/cheaper-inference/OmniRoute/pull/19687))

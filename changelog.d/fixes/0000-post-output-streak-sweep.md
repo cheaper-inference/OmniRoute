@@ -1,1 +1,0 @@
-- **fix(routing):** Post-output failure streaks for connections that are never used again are now dropped after the 10-minute streak window, so the in-memory streak map no longer grows for the process life.

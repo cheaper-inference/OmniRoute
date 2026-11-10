@@ -1,1 +1,0 @@
-- **perf(rate-limit):** abandoning a queued request no longer walks the whole limiter queue, so a burst of expiring waits cleans up in linear time.
