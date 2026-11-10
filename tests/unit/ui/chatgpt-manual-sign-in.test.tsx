@@ -32,6 +32,8 @@ afterEach(() => {
 });
 const callback =
   "http://127.0.0.1:1455/auth/callback?code=one-time-code&state=test-state&client_id=oaiapp_test";
+// The dialog starts its server attempt from a timer; a busy runner needs longer than the 1 s default.
+const ATTEMPT_READY = { timeout: 10_000 };
 
 it("offers manual paste without helper controls and completes the current attempt", async () => {
   const calls: Record<string, unknown>[] = [];
@@ -49,10 +51,9 @@ it("offers manual paste without helper controls and completes the current attemp
   );
   const success = vi.fn();
   render(<ChatGptOAuthModal isOpen onClose={vi.fn()} onSuccess={success} />);
-  expect(await screen.findByRole("link", { name: "Sign in with ChatGPT" })).toHaveAttribute(
-    "href",
-    "https://auth.openai.com/fixture"
-  );
+  expect(
+    await screen.findByRole("link", { name: "Sign in with ChatGPT" }, ATTEMPT_READY)
+  ).toHaveAttribute("href", "https://auth.openai.com/fixture");
   expect(screen.queryByRole("combobox")).toBeNull();
   expect(screen.queryByText("Download sign-in helper")).toBeNull();
   const field = screen.getByRole("textbox", { name: "Callback URL" });
@@ -92,7 +93,7 @@ it("uses Continue for reauthentication and never repeats the welcome", async () 
       reauthConnection={{ id: "fixture" }}
     />
   );
-  await screen.findByRole("link", { name: "Continue with ChatGPT" });
+  await screen.findByRole("link", { name: "Continue with ChatGPT" }, ATTEMPT_READY);
   fireEvent.change(screen.getByRole("textbox", { name: "Callback URL" }), {
     target: { value: callback },
   });
@@ -113,7 +114,7 @@ it("does not announce plan use when authorization was declined", async () => {
     )
   );
   render(<ChatGptOAuthModal isOpen onClose={vi.fn()} onSuccess={vi.fn()} />);
-  await screen.findByRole("link");
+  await screen.findByRole("link", {}, ATTEMPT_READY);
   fireEvent.change(screen.getByRole("textbox", { name: "Callback URL" }), {
     target: { value: callback },
   });
@@ -134,7 +135,7 @@ it("cancels a pending attempt on close", async () => {
   );
   vi.stubGlobal("fetch", fetcher);
   const view = render(<ChatGptOAuthModal isOpen onClose={vi.fn()} onSuccess={vi.fn()} />);
-  await screen.findByRole("link");
+  await screen.findByRole("link", {}, ATTEMPT_READY);
   view.unmount();
   await waitFor(() =>
     expect(fetcher).toHaveBeenLastCalledWith(
