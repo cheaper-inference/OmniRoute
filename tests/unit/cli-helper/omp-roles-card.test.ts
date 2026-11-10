@@ -6,6 +6,7 @@ import {
   apiErrorText,
   buildOmpRolesPreview,
   buildOmpRolesRequest,
+  groupOmpModels,
   ompRolesMatch,
 } from "../../../src/app/(dashboard)/dashboard/cli-code/components/ompRolesCard.ts";
 import { ompSettingsSchema } from "../../../src/shared/validation/schemas/cli.ts";
@@ -65,4 +66,20 @@ test("error text reads both route error shapes", () => {
     "refused"
   );
   assert.equal(apiErrorText({}, "fallback"), "fallback");
+});
+
+test("role options come from the active models, grouped by prefix", () => {
+  assert.deepEqual(
+    groupOmpModels([
+      { value: "cc/claude-sonnet-5", alias: "cc" },
+      { value: "cx/gpt-5.6" },
+      { value: "cc/claude-haiku-5", alias: "cc" },
+      { value: "" },
+      { value: 42 },
+    ]),
+    [
+      ["cc", ["cc/claude-sonnet-5", "cc/claude-haiku-5"]],
+      ["cx", ["cx/gpt-5.6"]],
+    ]
+  );
 });

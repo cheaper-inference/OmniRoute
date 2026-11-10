@@ -42,3 +42,23 @@ export function ompRolesMatch(
     ([role, model]) => (onDisk[role as OmpRoleId] ?? "") === (model ?? "")
   );
 }
+
+/** One entry of the dashboard's active-model list (`availableModels`). */
+export interface OmpAvailableModel {
+  value?: unknown;
+  alias?: string;
+}
+
+/** Active OmniRoute model ids grouped by prefix (cc/, cx/, gc/, …) for the role selects. */
+export function groupOmpModels(availableModels: OmpAvailableModel[]): Array<[string, string[]]> {
+  const groups = new Map<string, string[]>();
+  for (const m of availableModels) {
+    const id = typeof m?.value === "string" ? m.value : "";
+    if (!id) continue;
+    const slash = id.indexOf("/");
+    const group = m.alias || (slash > 0 ? id.slice(0, slash) : "combos");
+    if (!groups.has(group)) groups.set(group, []);
+    groups.get(group)!.push(id);
+  }
+  return Array.from(groups.entries());
+}
