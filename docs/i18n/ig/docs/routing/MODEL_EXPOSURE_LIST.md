@@ -4,72 +4,47 @@
 
 ---
 
-> A ga-ahọrọ iji ya, agbanyụrụ ya na ndabara (`modelVisibilityAllowlist`/`modelVisibilityDenylist` ma ha abụọ tọgbọ chakoo,
-> katalọgụ `/v1/models` NA ọdọ ndị ndoro-ndoro `auto/*` niile ga-anọgide bụrụ otu n'ụzọ byte). Ọ bụ nwanne nke
-> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) maka ndị na-ahụ maka sistemụ chọrọ ndepụta
-> model a họpụtara nke ọma n’ihi ihe ndị na-enweghị ihe jikọrọ ha na ọnụ ahịa.
+> Wepụ, gbanyụọ na ndabara (`modelVisibilityAllowlist`/`modelVisibilityDenylist` ha abụọ efu na-ahapụ `/v1/models` katalọgụ AND ọ bụla `auto/*` ndoro-ndoro ọdọ mmiri byte-yiri). Nwanne nke `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) maka ndị na-arụ ọrụ na-achọ ndepụta ihe atụ curated maka ihe ndị na-enweghị ihe jikọrọ ya na ọnụ ahịa.
 
-## Ihe mere nke a ji dị
+## Ihe kpatara nke a ji dịrị
 
-`hidePaidModels` na-aza "model a ọ bụ n’efu?" ebe `hideAutoCombos` na-aza "à ga-akpọsa
-id mebere `auto/*` ma ọlị?" — ọ dịghị nke ọ bụla n’ime ha na-enye onye na-ahụ maka sistemụ ohere ịhọrọ obere akụkụ
-model ọ bụla masịrị ya (dịka ọmụmaatụ, igosi kpọmkwem model ndị otu klienti Claude Code / OpenCode kwesịrị ịhụ,
-n’agbanyeghị ọnụ ahịa). #11481 na-agbakwụnye nke ahụ dịka ntọala string-array abụọ nọọrọ onwe ha, nke a ga-ahọrọ iji.
+`hidePaidModels` zara "ihe nlereanya a ọ bụ n'efu?" na `hideAutoCombos` zara "Ekwesịrị ịkpọsa `auto/*` virtual ids ma ọlị?" — adịghịkwa ekwe ka onye na-arụ ọrụ wepụta ụdị nke usoro aka ike (dịka ọmụmaatụ na-egosi kpọmkwem ụdị nke koodu Claude nyere / onye ahịa OpenCode kwesịrị ịhụ, na-adabereghị na ọnụahịa). #11481 na-agbakwụnye na dị ka abụọ nọọrọ onwe ha, Nwepu ntọala eriri-array.
 
 ## Ntọala
 
-| Igodo                      | Ụdị        | Ndabara | Ihe ọ pụtara                                                                                             |
-| -------------------------- | ---------- | ------- | -------------------------------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`    | Ndenye kwekọrọ na onye ndoro-ndoro na-ezochi ya na katalọgụ/ọdọ ndị ndoro-ndoro.                         |
-| `modelVisibilityAllowlist` | `string[]` | `[]`    | Mgbe ọ na-adịghị tọgbọ chakoo, Ọ BỤRỤ naanị ndenye kwekọrọ na onye ndoro-ndoro ka a ga-anọgide na-egosi. |
+| Igodo                      | Ụdị        | Ọdabara | Pụtara                                                                             |
+| -------------------------- | ---------- | ------- | ---------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`    | Ndenye dabara onye ndoro-ndoro zoo ya na ọdọ mmiri catalog/candidate.              |
+| `modelVisibilityAllowlist` | `string[]` | `[]`    | Mgbe enweghị ihe efu, ndenye ONLY dabara na onye ndoro-ndoro anya ga-ekpughere ya. |
 
-Ha abụọ na-anabata ihe ruru ndenye 500, nke ọ bụla nwere ihe ruru mkpụrụedemede 200 (Zod na-enyocha ha na
-`src/shared/validation/settingsSchemas.ts`). Ndenye nwere ike ịbụ:
+Ha abụọ na-anabata ihe ruru ndenye 500 nke ruru mkpụrụedemede 200 nke ọ bụla (Zod-validated in `src/shared/validation/settingsSchemas.ts`). Ntinye bụ ma:
 
-- id katalọgụ kpọmkwem — `"gpt-4o"` (id model naanị ya) ma ọ bụ `"openai/gpt-4o"` (nke e tinyere prefix onye na-eweta), ma ọ bụ
-- ụkpụrụ glob na-eji `*`/`?` — dịka `"openai/gpt-4*"` ma ọ bụ `"anthropic/*"` — nke a na-edozi site na
-  matcher `globToRegex()` ahụ a na-ekekọrịta (`src/shared/utils/globPattern.ts`) nke
-  mappings combo kwa-model nke `ModelRoutingSection` na `freeModels.ts::matchesOnlyPaidModels` na-eji ugbua.
+- kpọmkwem katalọgụ id — `"gpt-4o"` (idi ihe nlere efu) ma ọ bụ `"openai/gpt-4o"` (nke onye na-eweta), ma ọ bụ
+- A na-edozi ụkpụrụ glob site na iji `*`/`?` — eg `"openai/gpt-4*"` ma ọ bụ `"anthropic/*"` — site na otu `globToRegex()` matcher (`src/shared/utils/globPattern.ts`) kekọrịtara nke `ModelRoutingSection`'s kwa-model combo mappings na `freeModels.ts::matchesOnlyPaidModels` ejirila ya.
 
-Usoro mkpa: a na-ebu ụzọ lelee denylist (a na-ezochi ndenye a jụrụ mgbe niile, ọbụna ma ọ bụrụ na ọ
-kwekọkwara na allowlist); mgbe allowlist na-adịghị tọgbọ chakoo, naanị ndenye ndị kwekọrọ na ya ka ga-afọdụ.
+Ọdịmma: a na-enyocha onye ngọnarị nke mbụ (a na-ezobe ntinye anabataghị mgbe niile, ọ bụrụgodị na ọ dabara na ndepụta ikike); mgbe ndepụta ikike na-adịghị efu, naanị ndenye ọ dabara na-adị ndụ.
 
-## Ebe mgbochi abụọ, ọ bụghị otu
+## Abụọ chokepoint, ọ bụghị otu
 
-Ihe mmụta sitere na #6512 (filter katalọgụ nke `hidePaidModels` naanị ka na-ahapụ `auto/*` ka ọ duzie gaa na
-model akwụ ụgwọ, n’ihi na e wuru ọdọ ndị ndoro-ndoro combo n’ụzọ nọọrọ onwe ya) na-emetụtakwa ebe a otu aka ahụ.
-A na-akpọ predicate ndakọrịta `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) site na HA ABỤỌ:
+Ihe nkuzi sitere na #6512 (a `hidePaidModels` -only katalọgụ nzacha ka na-ahapụ ụzọ `auto/*` gaa n'ụdị akwụ ụgwọ, ebe ọ bụ na e wuru ọdọ mmiri n'onwe ya) na-emetụta n'otu aka ahụ. A na-akpọ predicate `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) site na BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — ndepụta `/v1/models` n’onwe ya, n’otu ebe mgbochi 5 kwa isi mmalite
-  nke `shouldHidePaid()` na-achịkwa ugbua (`PROVIDER_MODELS` static, ahịrị onye na-eweta emekọrịtara,
-  ahịrị omenala, ahịrị alias na-akwado, ahịrị ndabere a na-achịkwa).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — nke a na-akpọ
-  site na `virtualFactory.ts::buildPreparedPool`, ozugbo oku kwekọrọ na ya nke
-  `filterPaidOnlyCandidates()` gachara, ka a ghara ịhọrọ model a jụrụ n’ọdọ ndị ndoro-ndoro `auto/*`
-  ọ bụla.
+- `src/app/api/v1/models/catalog.ts` — nke `/v1/models` na-edepụta onwe ya, n'otu ebe ahụ 5 kwa-isi iyi chokepoints `shouldHidePaid()` ugbua ọnụ ụzọ (static `PROVIDER_MODELS`, ahịrị ndị na-eweta synced, ahịrị omenala, ahịrị ndị na-akwado utu aha, ahịrị ndị a na-achịkwa-adaghachi azụ).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — a na-akpọ site na `virtualFactory.ts::buildPreparedPool`, ozugbo oku `filterPaidOnlyCandidates()` dakọtara, yabụ enweghị ike ịhọrọ ụdị agọnarị n'ime ọdọ mmiri `auto/*` nke ọ bụla.
 
-## Ihe a NA-ANAGHỊ enyocha
+## Gịnị bụ NOT filter
 
-Ọ na-eme ka omume `hideAutoCombos` dị ugbu a: a naghị egbochi model id ezitere **kpọmkwem** (ọ bụghị site na `auto/*`,
-ma ọ bụghịkwa nke a chọpụtara site na ndepụta katalọgụ) mgbe a na-ezipụ ya — naanị
-mgbasa ozi/ịbụ onye otu ọdọ ndị ndoro-ndoro ka a na-enyocha. Nke a anaghị adabere na `hidePaidModels`;
-onye na-ahụ maka sistemụ nwere ike ịchọ set a họpụtara nke ọma n’ihi ihe ndị na-enweghị ihe jikọrọ ha na ọnụ ahịa, ya mere
-ntọala abụọ ahụ na-arụkọ ọrụ dịka filter AND nọọrọ onwe ha, dịka njikọta ọkọlọtọ ọtụtụ dị ugbu a na
-`catalog.ts`.
+Ngosipụta omume dị adị nke `hideAutoCombos`: ezigara id nlereanya** hoo haa** (ọ bụghị site na `auto/*`, na achọpụtaghị ya site na ndepụta katalọgụ) anaghị egbochi ya na izipu — naanị otu advertisement/candidate-pool ka a na-enyocha. Nke a na-adabere na `hidePaidModels`; onye na-ahụ maka ọrụ nwere ike chọọ nhazi echekwabara n'ihi ihe ndị na-enweghị ihe jikọrọ ya na ọnụ ahịa, yabụ ntọala abụọ a debere dị ka ihe nzacha AND-ed nọọrọ onwe ha, otu ihe mejupụtara ọtụtụ ọkọlọtọ dị na `catalog.ts`.
 
-Mbupụ ntọala (`GET /api/settings/export-json`) na-agụnye arrays abụọ ahụ kpọmkwem dịka ha dị, dịka field ntọala
-ọ bụla ọzọ — n’adịghị ka filter mbupụ combo-step nke `hidePaidModels`, enweghị ihe egwu
-ịbughachite data ebe a: id a jụrụ nke dị n’ime combo step e bupụrụ bụ nhọrọ routing onye na-ahụ maka sistemụ
-mere n’onwe ya, ọ bụghị ihe ókè mbupụ kwesịrị iwepụ.
+Mbupụ ntọala (`GET /api/settings/export-json`) gụnyere usoro abụọ ahụ verbatim, dị ka ntọala ntọala ọ bụla ọzọ — n'adịghị ka `hidePaidModels`'s combo-step mbupụ mbupụ, ọ dịghị ihe ize ndụ re-hydration ebe a: a agọnahụ id agbakwunyere na mbupụ combo nzọụkwụ bụ onye ọrụ n'onwe ya n'ụzọ doro anya nhọrọ ntụgharị, ọ bụghị ihe oke mbupụ kwesịrị dọpụ.
 
-## Ndepụta combo naanị (`exposeCombosOnly`)
+## Ndepụta naanị combos (`exposeCombosOnly`)
 
-Boolean dị iche, nke a ga-ahọrọ ịgbanye kwa ma bụrụ `false` na ndabara, maka deployment ebe combo bụ model ọha na provider bụ naanị backend. Mgbe ọ bụ `true`, ndepụta ọha (`GET /v1/models`, `GET /v1`, na route nchọpụta `/v1` ndị ọzọ e wuru na `getUnifiedModelsResponse()`) na-edobe naanị row nwere `owned_by: "combo"`: combo onye ọrụ na built-in combo `auto/*` (ọ gwụla ma `hideAutoCombos` zoro ha). Ọ na-eji otu nyocha row dịka `catalogScope: "combos"` nke key ọ bụla, filter allow/deny/scope nke key n'onwe ya ka na-arụkwa ọrụ n'elu ya.
+Boolean dị iche, Nwepu na `false` site na ndabara, maka mbugharị ebe combos bụ ihe nlere ọha na eze na ndị na-eweta bụ naanị azụ azụ. Mgbe ọ bụ `true`, ndepụta ọha (`GET /v1/models`, `GET /v1`, na ụzọ nchọpụta `/v1` ndị ọzọ e wuru na `getUnifiedModelsResponse()`) na-edobe naanị ahịrị na `owned_by: "combo"`: combos onye ọrụ gbakwunyere n'ime `auto/*` combos (ọ gwụla ma `hideAutoCombos` zoro ha). Ọ na-eji otu ule ahịrị dị ka kwa igodo `catalogScope: "combos"`, yana nzacha allow/deny/scope igodo nke ya ka na-etinye n'elu.
 
-Gbanwee ya na **Settings → Routing → Models API listing**, ma ọ bụ site na `PATCH /api/settings {"exposeCombosOnly": true}`.
+Gbanwee ya n'ime ya** Ntọala → ụzọ → Model API ndepụta** , ma ọ bụ ya na `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Dịka ndepụta ndị dị n'elu, ọ na-agbanwe naanị ihe a na-akpọsa:
+Dị ka ndepụta ndị dị n'elu, ọ na-agbanwe naanị mgbasa ozi:
 
-- id `provider/model` e kwuru kpọmkwem ka na-eziga arịrịọ, `GET /v1/models/{id}` ka na-achọtakwa ya;
-- a naghị ebelata dashboard catalog (`GET /api/models/catalog`, nke model picker na-eji);
-- a naghị edepụta ya na candidate pool `auto/*`, ya mere combo `auto/*` na-edobe pool ha dum.
+- `provider/model` id doro anya ka na-ezipụ, ma `GET /v1/models/{id}` ka na-edozi ya;
+- katalọgụ dashboard (`GET /api/models/catalog`, nke ndị na-ahọrọ ihe nlereanya na-eji) adịghị warara;
+- anaghị egosipụta ya n'ime ọdọ mmiri ndị chọrọ `auto/*`, yabụ `auto/*` combos na-edobe ọdọ mmiri ha zuru oke.

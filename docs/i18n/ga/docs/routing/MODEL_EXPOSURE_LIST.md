@@ -4,81 +4,47 @@
 
 ---
 
-> Roghnach, díchumasaithe de réir réamhshocraithe (má tá `modelVisibilityAllowlist`/`modelVisibilityDenylist`
-> araon folamh, fágtar catalóg `/v1/models` AGUS gach comhthiomsú iarrthóirí `auto/*` comhionann
-> beart ar bheart). Comhshocrú de chuid `hidePaidModels`/`hideAutoCombos`
-> (`src/lib/db/settings.ts`) atá ann d’oibreoirí ar mian leo liosta coimeádta samhlacha a bheith acu
-> ar chúiseanna nach mbaineann ar chor ar bith le costas.
+> Diúltú isteach, amach de réir réamhshocraithe (`modelVisibilityAllowlist`/`modelVisibilityDenylist` fágann an dá fholamh an chatalóg `/v1/models` AND gach `auto/*` iarrthóir comhthiomsú beart-comhionann). Deartháir nó deirfiúr de `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) le haghaidh oibreoirí atá ag iarraidh liosta samhlacha coimeádta ar chúiseanna nach bhfuil baint ar bith acu le costas.
 
-## Cén fáth a bhfuil sé seo ann
+## Cén fáth go bhfuil sé seo ann
 
-Freagraíonn `hidePaidModels` an cheist "an bhfuil an tsamhail seo saor in aisce?" agus freagraíonn
-`hideAutoCombos` an cheist "ar cheart aitheantais fhíorúla `auto/*` a fhógairt ar chor ar bith?" —
-ní ligeann ceachtar acu d’oibreoir fo-thacar treallach samhlacha a choimeád (m.sh. na samhlacha
-cruinne ba cheart do chliant áirithe Claude Code / OpenCode a fheiceáil a chur i láthair, neamhspleách
-ar phraghsáil). Cuireann #11481 é sin leis mar dhá shocrú neamhspleácha, roghnacha d’eagair teaghrán.
+Freagraíonn `hidePaidModels` "an bhfuil an tsamhail seo saor?" agus freagraí `hideAutoCombos` "ar cheart ids fíorúil `auto/*` a fhógairt ar chor ar bith?" ní ligeann — d’oibreoir fo-thacar samhlacha treallach a choimeád (m.sh. na samhlacha a chur i láthair go díreach ar cheart do chliant Cód Claude / OpenCode tugtha a fheiceáil, neamhspleách ar phraghsáil). Cuireann #11481 é sin leis mar dhá shocrú rogha diúltaithe i sraith teaghrán neamhspleách.
 
 ## Socruithe
 
-| Eochair                    | Cineál     | Réamhshocrú | Brí                                                                                      |
-| -------------------------- | ---------- | ----------- | ---------------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`        | Folaíonn iontrálacha a mheaitseálann iarrthóir é ón gcatalóg/gcomhthiomsú iarrthóirí.    |
-| `modelVisibilityAllowlist` | `string[]` | `[]`        | Nuair nach bhfuil sé folamh, fanann AMHÁIN iontrálacha a mheaitseálann iarrthóir nochta. |
+| eochair                    | Cineál     | Réamhshocrú | Brí                                                                                          |
+| -------------------------- | ---------- | ----------- | -------------------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`        | Folaíonn iontrálacha a mheaitseálann iarrthóir é ón linn catalog/candidate.                  |
+| `modelVisibilityAllowlist` | `string[]` | `[]`        | Nuair nach mbíonn siad folamh, fanann iontrálacha ONLY a mheaitseálann le hiarrthóir nochta. |
 
-Glacann an dá cheann le suas le 500 iontráil, suas le 200 carachtar an ceann (arna mbailíochtú
-ag Zod in `src/shared/validation/settingsSchemas.ts`). Is éard atá in iontráil ná:
+Glacann an bheirt le suas le 500 iontráil suas le 200 carachtar an ceann (Zod-validated in `src/shared/validation/settingsSchemas.ts`). Tá iontráil ceachtar:
 
-- aitheantas cruinn catalóige — `"gpt-4o"` (aitheantas lom samhla) nó `"openai/gpt-4o"`
-  (le réimír soláthraí), nó
-- patrún saoróige a úsáideann `*`/`?` — m.sh. `"openai/gpt-4*"` nó `"anthropic/*"` — arna réiteach
-  leis an meaitseálaí comhroinnte céanna `globToRegex()` (`src/shared/utils/globPattern.ts`) atá
-  in úsáid cheana ag mapálacha teaglama in aghaidh na samhla de chuid `ModelRoutingSection` agus
-  ag `freeModels.ts::matchesOnlyPaidModels`.
+- id catalóige beacht — `"gpt-4o"` (aitheantas múnla lom) nó `"openai/gpt-4o"` (réamhshocrú an tsoláthraí), nó
+- patrún glob ag baint úsáide as `*`/`?` — eg `"openai/gpt-4*"` nó `"anthropic/*"` — réitithe tríd an gcomhoiriúnóir `globToRegex()` céanna (`src/shared/utils/globPattern.ts`) atá in úsáid cheana féin ag mapálacha teaglama in aghaidh an mhúnla `ModelRoutingSection` agus `freeModels.ts::matchesOnlyPaidModels`.
 
-Tosaíocht: seiceáiltear an liosta diúltaithe ar dtús (bíonn iontráil dhiúltaithe i bhfolach i
-gcónaí, fiú má mheaitseálann sí an liosta ceadaithe freisin); nuair nach bhfuil an liosta ceadaithe
-folamh, ní mhaireann ach iontrálacha a mheaitseálann sé.
+Tosaíocht: déantar an séanadh a sheiceáil ar dtús (bíonn iontráil diúltaithe i bhfolach i gcónaí, fiú má thagann sé leis an liosta ceadaithe freisin); nuair a bhíonn an liosta ceadaithe neamhfholamh, ní mhaireann ach iontrálacha a mheaitseálann sé.
 
-## Dhá scrogall, ní ceann amháin
+## Dhá chokepoint, ní ceann amháin
 
-Baineann an ceacht ó #6512 (lig scagaire catalóige `hidePaidModels`-amháin fós do `auto/*`
-ródú chuig samhail íoctha, óir tógadh comhthiomsú iarrthóirí an teaglama go neamhspleách) leis
-anseo ar an mbealach céanna. Glaoitear an tuar meaitseála `isModelExposureAllowed()`
-(`src/shared/utils/modelExposureList.ts`) ón DÁ cheann seo:
+Baineann an ceacht ó #6512 (scagaire catalóige `hidePaidModels` -only fós le bealach `auto/*` chuig samhail íoctha, ós rud é gur tógadh an linn iarrthóirí teaglama go neamhspleách) go comhionann anseo. Glaoitear an tuar meaitseála `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) ó BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — liostú `/v1/models` féin, ag na 5 scrogall in aghaidh na
-  foinse céanna a rialaíonn `shouldHidePaid()` cheana féin (`PROVIDER_MODELS` statach,
-  rónna soláthraí sioncronaithe, rónna saincheaptha, rónna le halias mar thaca leo,
-  rónna cúltaca bhainistithe).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — glaoitear
-  air ó `virtualFactory.ts::buildPreparedPool`, díreach tar éis an ghlao choibhéisigh
-  `filterPaidOnlyCandidates()`, ionas nach féidir samhail dhiúltaithe a roghnú isteach i
-  gcomhthiomsú iarrthóirí `auto/*` choíche ach an oiread.
+- `src/app/api/v1/models/catalog.ts` — an liostú `/v1/models` féin, ag an gcéanna 5 in aghaidh na foinse chokepoints `shouldHidePaid()` geataí cheana féin ( `PROVIDER_MODELS` statach , sraitheanna soláthraí synced, sraitheanna saincheaptha, sraitheanna ailias-tacaíocht, sraitheanna bhainistiú-fallback).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — ar a dtugtar ó `virtualFactory.ts::buildPreparedPool`, díreach tar éis an glaoch coibhéiseach `filterPaidOnlyCandidates()`, mar sin ní féidir samhail diúltaithe a roghnú i linn iarrthóirí `auto/*` ach an oiread.
 
-## Cad NACH ndéantar a scagadh
+## Cad é NOT scagtha
 
-Léiríonn sé seo iompraíocht reatha `hideAutoCombos`: ní chuirtear bac choíche ag seoladh ar
-aitheantas samhla a sheoltar **go sainráite** (ní trí `auto/*`, ná trína aimsiú i liostú na
-catalóige) — ní scagtar ach fógairt/ballraíocht sa chomhthiomsú iarrthóirí. Tá sé seo neamhspleách
-ar `hidePaidModels`; d’fhéadfadh oibreoir tacar coimeádta a bheith ag teastáil uaidh ar chúiseanna
-nach mbaineann ar chor ar bith le costas, mar sin cuirtear an dá shocrú le chéile mar scagairí
-neamhspleácha atá nasctha le AGUS, ar aon dul leis an gcomhdhéanamh ilbhrataí atá ann cheana in
-`catalog.ts`.
+Scátháin iompar reatha `hideAutoCombos`: samhail aitheantais seolta** go follasach** (ní trí `auto/*`, agus ní bhfuarthas amach tríd an liosta catalóg) nach bhfuil bac ar a sheoladh — ach amháin ballraíocht advertisement/candidate-pool scagtha. Tá sé seo neamhspleách ar `hidePaidModels`; d'fhéadfadh go mbeadh tacar coimeádaithe ag teastáil ó oibreoir ar chúiseanna nach bhfuil baint ar bith acu le costas, agus mar sin comhdhéanann an dá shuíomh mar scagairí neamhspleácha AND-ed, mar an gcéanna leis an gcomhdhéanamh ilbhratach atá ann cheana féin in `catalog.ts`.
 
-Áirítear an dá eagar focal ar fhocal san easpórtáil socruithe (`GET /api/settings/export-json`),
-mar aon le gach réimse socruithe eile — murab ionann agus scagaire easpórtála chéimeanna teaglama
-`hidePaidModels`, níl aon bhaol ath-hiodráitithe anseo: is éard atá in aitheantas diúltaithe atá
-leabaithe i gcéim teaglama easpórtáilte ná rogha ródaithe shainráite an oibreora féin, ní rud
-nach mór don teorainn easpórtála a bhaint.
+Áirítear le honnmhairiú socruithe (`GET /api/settings/export-json`) an dá eagar focal ar fhocal, cosúil le haon réimse socruithe eile — murab ionann agus scagaire easpórtála comhchéime `hidePaidModels`, níl aon riosca ath-hiodráitithe anseo: is é id dhiúltú atá leabaithe i gcéim teaglama easpórtáilte rogha ródaithe sainráite an oibreora féin, ní rud nach mór don teorainn onnmhairithe a bhaint de.
 
-## Liostú teaglamaí amháin (`exposeCombosOnly`)
+## Liostú teaglama amháin (`exposeCombosOnly`)
 
-Luach Boole ar leith, roghnach freisin agus `false` de réir réamhshocraithe, le haghaidh imscaradh ina bhfuil teaglamaí mar dhromchla poiblí na samhlacha agus soláthraithe mar innill chúil amháin. Nuair atá sé `true`, ní choinníonn an liostú poiblí (`GET /v1/models`, `GET /v1`, agus na bealaí fionnachtana `/v1` eile atá bunaithe ar `getUnifiedModelsResponse()`) ach rónna le `owned_by: "combo"`: teaglamaí úsáideora agus teaglamaí ionsuite `auto/*` (mura bhfolaíonn `hideAutoCombos` iad). Úsáideann sé an tástáil ró chéanna le `catalogScope: "combos"` in aghaidh na heochrach, agus cuirtear scagairí ceadaithe/diúltaithe/scóipe na heochrach féin i bhfeidhm anuas air fós.
+Boole ar leith, freisin rogha an diúltaithe agus `false` de réir réamhshocraithe, le haghaidh imscaradh ina bhfuil combos mar dhromchla an tsamhail phoiblí agus nach bhfuil soláthraithe ach ina n-ais. Nuair a bhíonn sé `true`, coinníonn an liostú poiblí (`GET /v1/models`, `GET /v1`, agus na bealaí fionnachtana `/v1` eile a tógadh ar `getUnifiedModelsResponse()`) ach sraitheanna le `owned_by: "combo"`: combos úsáideora móide na combos `auto/*` ionsuite (mura seithí `hideAutoCombos` iad). Úsáideann sé an tástáil ró céanna leis an `catalogScope: "combos"` per-eochair, agus tá scagairí allow/deny/scope na heochrach féin i bhfeidhm fós ar an mbarr.
 
-Scoránaigh é in **Settings → Routing → Models API listing**, nó le `PATCH /api/settings {"exposeCombosOnly": true}`.
+Scoránaigh isteach é** Socruithe → Routing → Models API liostú** , nó le `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Cosúil leis na liostaí thuas, ní athraíonn sé ach fógairt:
+Cosúil leis na liostaí thuas, ní athraíonn sé ach fógra:
 
-- seoltar ID follasach `provider/model` fós, agus réitíonn `GET /v1/models/{id}` é fós;
-- ní chaolaítear catalóg na deaise (`GET /api/models/catalog`, a úsáideann roghnóirí samhlacha);
-- ní léirítear é sna linnte iarrthóirí `auto/*`, mar sin coinníonn teaglamaí `auto/*` a linn iomlán.
+- seoltar id sainráite `provider/model` fós, agus réitíonn `GET /v1/models/{id}` é fós;
+- níl an chatalóg deais (`GET /api/models/catalog`, in úsáid ag na roghnóirí samhlacha) cúngaithe;
+- ní léirítear é sna linnte iarrthóra `auto/*`, mar sin coinníonn combos `auto/*` a linn iomlán.

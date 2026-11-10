@@ -15,7 +15,7 @@ abubuwan da aka koya game da PII). Karanta shi gaba ɗaya; kada ka sake ƙara ƙ
 
 Cikakken tsarin worktree na tilas (tabbatar da base-branch, hanyar doka ta `.claude/worktrees/`,
 `cp -al` node_modules, dokokin teardown) yana cikin
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (an taƙaita shi a `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (an taƙaita shi a `AGENTS.md` →
 Tsarin Aikin Git → "Keɓe worktree"). Abubuwan musamman na Claude Code:
 
 - Tabbatar da base branch tare da mai amfani ta hanyar `AskUserQuestion` (Doka Mai Ƙarfi #19) sai dai idan

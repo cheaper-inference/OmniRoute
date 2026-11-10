@@ -15,7 +15,7 @@
 
 ሙሉው የግዴታ worktree ፕሮቶኮል (የbase-branch ማረጋገጫ፣ `.claude/worktrees/` canonical
 መንገድ፣ `cp -al` node_modules፣ የማስወገጃ ህጎች) በ
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) ውስጥ ነው (በ`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) ውስጥ ነው (በ`AGENTS.md` →
 Git Workflow → "Worktree isolation" ውስጥ በማጠቃለያ ተጠቅሷል)። ለClaude-Code የተወሰኑ ነጥቦች፦
 
 - base branchን ከኦፕሬተሩ ጋር በ`AskUserQuestion` (ጥብቅ ህግ #19) ያረጋግጡ፣ አስቀድመው

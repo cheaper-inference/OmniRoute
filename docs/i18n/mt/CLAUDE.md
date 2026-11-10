@@ -15,7 +15,7 @@ għal Claude Code — irfinar operazzjonali tar-regoli diġà definiti f’`AGEN
 
 Il-protokoll obbligatorju sħiħ tal-worktree (konferma tal-base branch, il-mogħdija kanonika
 `.claude/worktrees/`, `cp -al` node_modules, regoli tat-teardown) jinstab fi
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (mqassar f'`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (mqassar f'`AGENTS.md` →
 Workflow tal-Git → "Iżolament tal-worktree"). Punti speċifiċi għal Claude Code:
 
 - Ikkonferma l-base branch mal-operatur permezz ta' `AskUserQuestion` (Regola Stretta #19) sakemm

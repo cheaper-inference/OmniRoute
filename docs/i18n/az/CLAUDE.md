@@ -16,7 +16,7 @@ artıq müəyyən edilmiş qaydaların əməliyyat dəqiqləşdirmələridir.
 
 Tam məcburi worktree protokolu (baza branch-inin təsdiqi, `.claude/worktrees/` kanonik
 yolu, `cp -al` node_modules, sökmə qaydaları)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) faylındadır (xülasəsi `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) faylındadır (xülasəsi `AGENTS.md` →
 Git iş axını → "Worktree izolyasiyası" bölməsində verilib). Claude Code-a xas məqamlar:
 
 - Operatorla baza branch-ini `AskUserQuestion` vasitəsilə təsdiqləyin (Sərt Qayda #19) — əgər

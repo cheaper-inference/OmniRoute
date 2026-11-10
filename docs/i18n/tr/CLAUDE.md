@@ -12,7 +12,7 @@
 
 Zorunlu worktree protokolünün tamamı (temel dal onayı, `.claude/worktrees/` standart yolu,
 `cp -al` node_modules, kaldırma kuralları)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) dosyasındadır (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) dosyasındadır (`AGENTS.md` →
 Git Workflow → "Worktree isolation" bölümünde özetlenmiştir). Claude Code'a özgü noktalar:
 
 - Operatör size önceden söylemediyse, temel dalı `AskUserQuestion` aracılığıyla operatörden

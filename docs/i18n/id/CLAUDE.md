@@ -15,7 +15,7 @@ untuk Claude Code — penyempurnaan operasional dari aturan yang sudah ditetapka
 
 Protokol worktree wajib yang lengkap (konfirmasi branch dasar, path kanonik
 `.claude/worktrees/`, `cp -al` node_modules, aturan teardown) ada di
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (dirangkum di `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (dirangkum di `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Poin-poin spesifik Claude Code:
 
 - Konfirmasi branch dasar dengan operator melalui `AskUserQuestion` (Aturan Keras #19) kecuali

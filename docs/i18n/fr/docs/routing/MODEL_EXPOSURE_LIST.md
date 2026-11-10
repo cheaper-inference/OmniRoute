@@ -4,83 +4,47 @@
 
 ---
 
-> Fonctionnalité activable, désactivée par défaut (si `modelVisibilityAllowlist` et
-> `modelVisibilityDenylist` sont toutes deux vides, le catalogue `/v1/models` ET chaque groupe
-> de candidats `auto/*` restent identiques octet pour octet). Fonctionnalité apparentée à
-> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`), destinée aux opérateurs souhaitant
-> une liste de modèles organisée pour des raisons sans rapport avec le coût.
+> Opt-in, désactivé par défaut (`modelVisibilityAllowlist`/`modelVisibilityDenylist` tous deux vides laisse le catalogue `/v1/models` AND chaque octet du pool de candidats `auto/*` est identique). Un frère de `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) pour les opérateurs qui souhaitent une liste de modèles organisée pour des raisons qui n'ont rien à voir avec le coût.
 
-## Pourquoi cette fonctionnalité existe
+## Pourquoi cela existe
 
-`hidePaidModels` répond à la question « ce modèle est-il gratuit ? » et `hideAutoCombos` à la
-question « les identifiants virtuels `auto/*` doivent-ils être annoncés ? » — aucun des deux ne
-permet à un opérateur de sélectionner un sous-ensemble arbitraire de modèles (par exemple, pour
-présenter exactement les modèles qu'un client Claude Code / OpenCode donné doit voir,
-indépendamment de la tarification). #11481 ajoute cette possibilité sous la forme de deux
-paramètres indépendants et activables de type tableau de chaînes.
+`hidePaidModels` répond "ce modèle est-il gratuit ?" et `hideAutoCombos` répond "les identifiants virtuels `auto/*` devraient-ils être annoncés?" — ne permet pas non plus à un opérateur de gérer un sous-ensemble arbitraire de modèles (par exemple, présenter exactement les modèles qu'un client Claude Code / OpenCode donné devrait voir, indépendamment des prix). # #11481 ajoute cela sous la forme de deux paramètres de tableau de chaînes indépendants et opt-in.
 
 ## Paramètres
 
-| Clé                        | Type       | Valeur par défaut | Signification                                                                                |
-| -------------------------- | ---------- | ----------------- | -------------------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`              | Les entrées correspondant à un candidat le masquent du catalogue/groupe de candidats.        |
-| `modelVisibilityAllowlist` | `string[]` | `[]`              | Lorsqu'elle n'est pas vide, SEULES les entrées correspondant à un candidat restent exposées. |
+| Clé                        | Taper      | Défaut | Signification                                                                                  |
+| -------------------------- | ---------- | ------ | ---------------------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`   | Les entrées correspondant à un candidat le masquent du pool catalog/candidate.                 |
+| `modelVisibilityAllowlist` | `string[]` | `[]`   | Lorsqu'elles ne sont pas vides, les entrées ONLY correspondant à un candidat restent exposées. |
 
-Les deux acceptent jusqu'à 500 entrées comportant chacune jusqu'à 200 caractères (validation Zod
-dans `src/shared/validation/settingsSchemas.ts`). Une entrée est soit :
+Les deux acceptent jusqu'à 500 entrées de 200 caractères chacune maximum (validées par Zod dans `src/shared/validation/settingsSchemas.ts`). Une entrée est soit :
 
-- un identifiant exact du catalogue — `"gpt-4o"` (identifiant de modèle seul) ou
-  `"openai/gpt-4o"` (préfixé par le fournisseur), soit
-- un motif glob utilisant `*`/`?` — par exemple `"openai/gpt-4*"` ou `"anthropic/*"` — résolu avec
-  le même comparateur partagé `globToRegex()` (`src/shared/utils/globPattern.ts`) déjà utilisé par
-  les associations de combinaisons par modèle de `ModelRoutingSection` et par
-  `freeModels.ts::matchesOnlyPaidModels`.
+- un identifiant de catalogue exact — `"gpt-4o"` (identifiant de modèle nu) ou `"openai/gpt-4o"` (préfixé par le fournisseur), ou
+- un modèle global utilisant `*`/`?` — par exemple `"openai/gpt-4*"` ou `"anthropic/*"` — résolu via le même `globToRegex()` matcher partagé (`src/shared/utils/globPattern.ts`) déjà utilisé par les mappages combo par modèle de `ModelRoutingSection` et `freeModels.ts::matchesOnlyPaidModels`.
 
-Priorité : la liste d'exclusion est vérifiée en premier (une entrée exclue est toujours masquée,
-même si elle correspond également à la liste d'autorisation) ; lorsque la liste d'autorisation
-n'est pas vide, seules les entrées auxquelles elle correspond sont conservées.
+Priorité : la liste de refus est vérifiée en premier (une entrée refusée est toujours masquée, même si elle correspond également à la liste autorisée) ; lorsque la liste verte n'est pas vide, seules les entrées auxquelles elle correspond survivent.
 
-## Deux points de contrôle, pas un seul
+## Deux points d'étranglement, pas un
 
-La leçon tirée de #6512 (un filtre de catalogue basé uniquement sur `hidePaidModels` permettait
-encore à `auto/*` d'acheminer les requêtes vers un modèle payant, puisque le groupe de candidats
-de la combinaison était construit indépendamment) s'applique ici de manière identique. Le
-prédicat de correspondance `isModelExposureAllowed()`
-(`src/shared/utils/modelExposureList.ts`) est appelé aux DEUX endroits suivants :
+La leçon du # #6512 (un filtre de catalogue `hidePaidModels` -only permet toujours `auto/*` de se diriger vers un modèle payant, puisque le pool de candidats combo a été construit indépendamment) s'applique de manière identique ici. Le prédicat correspondant `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) est appelé depuis BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — la liste `/v1/models` elle-même, aux mêmes 5 points de
-  contrôle par source que ceux déjà régis par `shouldHidePaid()` (`PROVIDER_MODELS` statiques,
-  lignes de fournisseur synchronisées, lignes personnalisées, lignes reposant sur un alias,
-  lignes de secours gérées).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — appelé
-  depuis `virtualFactory.ts::buildPreparedPool`, immédiatement après l'appel équivalent à
-  `filterPaidOnlyCandidates()`, afin qu'un modèle exclu ne puisse jamais être sélectionné dans
-  un groupe de candidats `auto/*`.
+- `src/app/api/v1/models/catalog.ts` — la liste `/v1/models` elle-même, aux mêmes 5 points d'étranglement par source `shouldHidePaid()` déjà portes ( `PROVIDER_MODELS` statique, lignes de fournisseur synchronisées, lignes personnalisées, lignes sauvegardées par alias, lignes de secours gérées).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — appelé depuis `virtualFactory.ts::buildPreparedPool`, immédiatement après l'appel `filterPaidOnlyCandidates()` équivalent, de sorte qu'un modèle refusé ne peut jamais non plus être sélectionné dans un pool de candidats `auto/*`.
 
-## Ce qui n'est PAS filtré
+## Qu'est-ce que NOT filtré
 
-Reproduit le comportement existant de `hideAutoCombos` : un identifiant de modèle envoyé
-**explicitement** (et non via `auto/*`, ni découvert par l'intermédiaire de la liste du catalogue)
-n'est jamais bloqué lors de l'envoi — seuls son référencement et son appartenance au groupe de
-candidats sont filtrés. Cela est indépendant de `hidePaidModels` ; un opérateur peut souhaiter un
-ensemble organisé pour des raisons sans rapport avec le coût, de sorte que les deux paramètres
-se combinent comme des filtres indépendants reliés par un ET, à l'instar de la composition
-multidrapeau existante dans `catalog.ts`.
+Reflète le comportement existant de `hideAutoCombos`: un identifiant de modèle envoyé** explicitement** (pas via `auto/*` et non découvert via la liste du catalogue) n'est jamais bloqué lors de l'expédition — seule l'adhésion advertisement/candidate-pool est filtrée. Ceci est indépendant de `hidePaidModels`; un opérateur peut souhaiter un ensemble organisé pour des raisons qui n'ont rien à voir avec le coût, de sorte que les deux paramètres sont composés comme des filtres AND indépendants, comme la composition multi-drapeaux existante dans `catalog.ts`.
 
-L'exportation des paramètres (`GET /api/settings/export-json`) inclut les deux tableaux tels
-quels, comme tout autre champ de paramètres — contrairement au filtre d'exportation des étapes de
-combinaison de `hidePaidModels`, il n'existe ici aucun risque de réhydratation : un identifiant
-exclu intégré à une étape de combinaison exportée représente le choix explicite de routage de
-l'opérateur, et non un élément que la limite d'exportation doit supprimer.
+L'exportation des paramètres (`GET /api/settings/export-json`) inclut les deux tableaux textuellement, comme tout autre champ de paramètres — contrairement au filtre d'exportation par étape combinée de `hidePaidModels`, il n'y a aucun risque de réhydratation ici : un identifiant refusé intégré dans une étape combinée exportée est le choix de routage explicite de l'opérateur, et non quelque chose que la limite d'exportation doit supprimer.
 
-## Liste limitée aux combos (`exposeCombosOnly`)
+## Liste des combos uniquement (`exposeCombosOnly`)
 
-Un booléen distinct, également sur activation explicite et `false` par défaut, pour les déploiements où les combos constituent l'interface publique des modèles et les fournisseurs ne sont que des backends. Lorsqu'il vaut `true`, la liste publique (`GET /v1/models`, `GET /v1` et les autres routes de découverte `/v1` construites sur `getUnifiedModelsResponse()`) ne conserve que les lignes avec `owned_by: "combo"` : les combos de l'utilisateur et les combos intégrés `auto/*` (sauf si `hideAutoCombos` les masque). Il utilise le même test de ligne que `catalogScope: "combos"` par clé, et les filtres propres à la clé d'autorisation/refus/périmètre continuent de s'appliquer en complément.
+Un booléen distinct, également opt-in et `false` par défaut, pour les déploiements où les combos sont la surface du modèle public et les fournisseurs ne sont que des backends. Lorsqu'il s'agit de `true`, la liste publique (`GET /v1/models`, `GET /v1` et les autres routes de découverte `/v1` construites sur `getUnifiedModelsResponse()`) ne conserve que les lignes avec `owned_by: "combo"`: les combos utilisateur plus les combos `auto/*` intégrés (sauf si `hideAutoCombos` les cache). Il utilise le même test de ligne que le `catalogScope: "combos"` par clé, et les filtres allow/deny/scope d'une clé s'appliquent toujours par-dessus.
 
-Activez ou désactivez-le dans **Paramètres → Routage → Liste de l'API des modèles**, ou avec `PATCH /api/settings {"exposeCombosOnly": true}`.
+Activez-le** Paramètres → Routage → Modèles API listing** , ou avec `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Comme les listes ci-dessus, cela ne change que ce qui est annoncé :
+Comme les listes ci-dessus, cela ne change que la publicité :
 
-- un ID explicite `provider/model` continue d'être envoyé, et `GET /v1/models/{id}` continue de le résoudre ;
-- le catalogue du tableau de bord (`GET /api/models/catalog`, utilisé par les sélecteurs de modèles) n'est pas réduit ;
-- cela n'est pas répercuté dans les pools de candidats `auto/*`, donc les combos `auto/*` conservent leur pool complet.
+- un identifiant `provider/model` explicite est toujours distribué et `GET /v1/models/{id}` le résout toujours ;
+- le catalogue du tableau de bord (`GET /api/models/catalog`, utilisé par les sélectionneurs de modèles) n'est pas restreint ;
+- il n'est pas reflété dans les pools de candidats `auto/*`, donc les combos `auto/*` conservent leur pool complet.

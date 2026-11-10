@@ -4,34 +4,28 @@
 
 ---
 
-> **Foinse na fírinne:** spás oibre `electron/`
-> **Nuashonraithe go deireanach:** 2026-06-28 — v3.8.40
+> **Foinse na fírinne:** `electron/` spás oibre** Nuashonraithe is déanaí:** 2026-06-28 — v3.8.40
 
-Soláthraíonn OmniRoute aip deisce trasardáin (Windows / macOS / Linux) atá tógtha ar
-**Electron 41** + **electron-builder 26.10**. Tosaíonn an aip deisce freastalaí
-neamhspleách Next.js mar phróiseas mac, díríonn sí `BrowserWindow` air, agus cuireann sí
-tráidire córais, uathnuashonraitheoir, droichead IPC, agus túsú rúin gan chumraíocht leis.
+OmniRoute ships a cross-platform desktop app (Windows / macOS / Linux) built on **Electron 41** + **electron-builder 26.10**. The desktop app spawns the Next.js standalone server as a child process, points a `BrowserWindow` at it, and adds a system tray, auto-updater, IPC bridge, and zero-config secret bootstrap.
 
 ## Ailtireacht
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Príomhphróiseas Electron (electron/main.js)  │
-│ ├─ Glas aon ásc amháin                       │
-│ ├─ Próiseas mac: freastalaí neamhspleách    │
-│ │   Next.js (tosaithe le ham rite Node       │
-│ │   Electron)                               │
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ Tráidire córais + roghchlár comhthéacs    │
-│ ├─ Uathnuashonrú trí electron-updater        │
-│ ├─ Beartas Slándála Inneachair               │
-│ │   (ceanntásca seisiúin)                    │
-│ └─ Túsú rúin (JWT / API_KEY_SECRET)          │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-            ↕ Droichead IPC (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Rindreálaí (deais Next.js)                   │
-│   window.electronAPI.* (contextIsolation)    │
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
@@ -39,72 +33,70 @@ tráidire córais, uathnuashonraitheoir, droichead IPC, agus túsú rúin gan ch
 
 Deimhnithe ó `electron/package.json`:
 
-| Pacáiste            | Leagan                                                                 |
-| ------------------- | ---------------------------------------------------------------------- |
-| `electron`          | `^43.4.1`                                                              |
-| `electron-builder`  | `^26.15.3`                                                             |
-| `electron-updater`  | `^6.8.9`                                                               |
-| `better-sqlite3`    | fréamh `^13.0.2` (réamhleaganacha Node-API — ní gá Electron a atógáil) |
-| Leagan na haipe     | `3.8.0`                                                                |
-| Aitheantas na haipe | `online.omniroute.desktop`                                             |
-| Ainm an táirge      | `OmniRoute`                                                            |
+| Pacáiste            | Leagan                                                      |
+| ------------------- | ----------------------------------------------------------- |
+| `electron`          | `^43.4.1`                                                   |
+| `electron-builder`  | `^26.15.3`                                                  |
+| `electron-updater`  | `^6.8.9`                                                    |
+| `better-sqlite3`    | root `^13.0.2` (réamhthógann Nód-API — no Electron rebuild) |
+| Leagan app          | `3.8.0`                                                     |
+| Aitheantas na haipe | `online.omniroute.desktop`                                  |
+| Ainm an táirge      | `OmniRoute`                                                 |
 
-## Scripteanna (`package.json` fréimhe)
+## Scripteanna ( root `package.json`)
 
-| Script                            | Cuspóir                                                                                               |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Tosaíonn `npm run dev` + fanann sé le `localhost:20128` + seolann sé Electron                         |
-| `npm run electron:build`          | Tógann sé Next.js agus ansin ritheann sé `electron-builder` don OS reatha                             |
-| `npm run electron:build:win`      | Tógann sé suiteálaí Windows NSIS + leagan iniompartha (x64)                                           |
-| `npm run electron:build:mac`      | Tógann sé DMG macOS (Intel + Apple Silicon)                                                           |
-| `npm run electron:build:linux`    | Tógann sé Linux AppImage + DEB (x64 + arm64)                                                          |
-| `npm run electron:smoke:packaged` | Seolann sé an dénártha pacáistithe agus promhann sé `/login` le haghaidh HTTP 200, ansin múchann sé é |
+| Script                            | Cuspóir                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------ |
+| `npm run electron:dev`            | Tosaíonn `npm run dev` + ag fanacht le `localhost:20128` + Seolann Electron          |
+| `npm run electron:build`          | Tógann Next.js ansin ritheann `electron-builder` don OS reatha                       |
+| `npm run electron:build:win`      | Tógann sé suiteálaí Windows NSIS + iniompartha (x64)                                 |
+| `npm run electron:build:mac`      | Tógann macOS DMG (Intel + Apple Silicon)                                             |
+| `npm run electron:build:linux`    | Tógann sé Linux AppImage + DEB (x64 + arm64)                                         |
+| `npm run electron:smoke:packaged` | Seolann dénártha pacáistithe agus probes `/login` do HTTP 200, ansin stopann sé síos |
 
-Nochtann an spás oibre `electron/` na nithe seo freisin:
+Nochtann spás oibre `electron/` freisin:
 
-- `npm run prepare:bundle` — ritheann sé `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — tógálacha macOS d'ailtireacht aonair
-- `npm run pack` — tógáil eolaire amháin le haghaidh tástála áitiúla (gan suiteálaí)
+- ritheann `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs`
+- Tógann `npm run build:mac-x64` / `build:mac-arm64` — aon-áirse macOS
+- Tógáil eolaire `npm run pack` — amháin le haghaidh tástála áitiúil (gan suiteálaí)
 
 ## Pacáistí ama rite roghnacha
 
-Féadfaidh tógálacha deisce cartlanna ama rite roghnacha a fhoilsiú taobh lena suiteálaithe. Tá `optional-packs.index.json` san inneachar freastalaí suiteáilte (faoi `resources/app` ar Windows agus Linux). Don iontráil `browser-runtime`, léigh `packs[].tarball` agus íoslódáil **an t-ainm comhaid cruinn sin ón eisiúint chéanna**. Tá díolaim SHA-256 in ainmneacha na gcartlann; d'fhéadfadh cartlanna éagsúla a bheith de dhíth ar thógálacha éagsúla. Ná hathraigh ainm an chomhaid íoslódáilte.
+Is féidir le tógálacha deasc cartlanna roghnacha ama rite a fhoilsiú in éineacht lena suiteálaithe. Tá `optional-packs.index.json` (faoi `resources/app` ar Windows agus Linux) sa phálasta freastalaí suiteáilte. Le haghaidh an iontráil `browser-runtime`, léigh `packs[].tarball` agus íoslódáil** an comhadainm cruinn sin ón eisiúint céanna** . I measc na n-ainmneacha cartlainne tá achoimre SHA-256 ; d'fhéadfadh cartlanna éagsúla a bheith ag teastáil le haghaidh tógála éagsúla. Coinnigh an t-ainm comhaid íosluchtaithe gan athrú.
 
-Cóipeáil innéacs na haipe suiteáilte agus an chartlann roghnaithe isteach in aon eolaire amháin, ansin úsáid CLI ón eisiúint chéanna:
+Cóipeáil innéacs na haipe suiteáilte agus an chartlann roghnaithe in aon eolaire amháin, ansin bain úsáid as an CLI ón scaoileadh céanna:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-Taispeánann `packs list` staid suiteála agus fíoraithe, ní ainm comhaid na cartlainne. Roghnaíonn an t-innéacs cuachta an chartlann. Fíoraíonn an tsuiteáil suim sheiceála na cartlainne roimh eastóscadh agus suimeanna seiceála na bpacáistí sula n-athsholáthraítear pacáiste suiteáilte. Léann sí comhaid áitiúla; ní íoslódálann sí cartlanna atá ar iarraidh. Atosaigh an feidhmchlár tar éis suiteála. Mura bhfuil sócmhainn mheaitseála san eisiúint, níl an pacáiste roghnach ar fáil trí shócmhainní na heisiúna sin.
+Taispeánann `packs list` staid na suiteála agus an fhíoraithe, ní ainm an chomhaid cartlainne. Roghnaíonn an t-innéacs cuachta an chartlann. Fíoraíonn an suiteáil a seiceálacha cartlainne roimh eastóscadh agus a shuimeanna seiceála pacáiste sula n-athshocraítear pacáiste suiteáilte. Léann sé comhaid áitiúla; ní íoslódálann sé cartlanna in easnamh. Atosaigh an feidhmchlár tar éis é a shuiteáil. Mura bhfuil aon sócmhainn chomhoiriúnaithe ag an scaoileadh, níl an pacáiste roghnach ar fáil trí shócmhainní an scaoileadh sin.
 
-## Leagan Amach na nEolairí
+## Leagan Amach Eolaire
 
 ```
 electron/
-├── package.json              # Spleáchais Electron + cumraíocht electron-builder
-├── main.js                   # Príomhphróiseas (24 KB — féach na nótaí thíos)
-├── preload.js                # Droichead IPC contextBridge
-├── types.d.ts                # Cineálacha AppInfo / ServerStatus / ElectronAPI
-├── README.md                 # Nótaí laistigh den spás oibre
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # Aschur electron-builder (neamhaird ag git air)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Ullmhaíonn sé beart .next/electron-standalone
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Tástáil deataigh iar-thógála
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Is **comhaid CommonJS `.js`** iad `main.js` agus `preload.js`, ní comhaid TypeScript. Tá na
-cineálacha ar thaobh an rindreálaí in `electron/types.d.ts`.
+Tá an dá `main.js` agus `preload.js`** Comhaid CommonJS `.js`** , ní TypeScript. Is i `electron/types.d.ts` a mhaireann na clóscríobháin rindreálaí.
 
 ## Droichead IPC (`preload.js`)
 
-Nochtann an réamhlódáil API bánliostaithe ar `window.electronAPI` trí `contextBridge`
-agus `contextIsolation: true` agus `nodeIntegration: false` in úsáid.
+Nochtann an réamhualach API bánliostaithe ar `window.electronAPI` ag baint úsáide as `contextBridge` le `contextIsolation: true` agus `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -125,129 +117,111 @@ const VALID_CHANNELS = {
 
 Modhanna nochta:
 
-| Glao ón rindreálaí                                                | Cineál                               |
-| ----------------------------------------------------------------- | ------------------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                               |
-| `openExternal(url)`                                               | invoke                               |
-| `getDataDir()`                                                    | invoke                               |
-| `restartServer()`                                                 | invoke                               |
-| `getAppVersion()`                                                 | invoke                               |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                               |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                 |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (tugann sé diúscróir ar ais) |
+| Glao rindreálaí                                                   | Cineál                          |
+| ----------------------------------------------------------------- | ------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | agairt                          |
+| `openExternal(url)`                                               | agairt                          |
+| `getDataDir()`                                                    | agairt                          |
+| `restartServer()`                                                 | agairt                          |
+| `getAppVersion()`                                                 | agairt                          |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | agairt                          |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | seol                            |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | faigh ( diúscróir tuairisceáin) |
 
-Tugann na cúntóirí glactha **feidhm diúscróra** ar ais seachas a bheith ag brath ar
-`removeAllListeners` — cuireann sé seo cosc ar charnadh éisteoirí nuair a ghléasann
-comhpháirteanna React arís.
+Filleann na cúntóirí glacadóireachta a** feidhm diúscartha** seachas a bheith ag brath ar `removeAllListeners` — cuireann sé seo cosc ar charnadh éisteoir nuair a athshuiteálann comhpháirteanna React.
 
-## Saolré an Fhreastalaí
+## Saolré Freastalaí
 
-Seolann `main.js` beart neamhspleách Next.js go díreach le ham rite Node de chuid
-Electron chun neamhréir ABI modúil dhúchasaigh le Node an chórais a sheachaint:
+sceitheann `main.js` an beart neamhspleách Next.js go díreach le ham rite Nód Electron chun neamhréiriú ABI modúl dúchais le Nód an chórais a sheachaint:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
 Buaicphointí:
 
-- Fiosraíonn `waitForServer()` an URL ar feadh suas le 30 s sula dtaispeántar an fhuinneog (gan scáileán bán ar thosú fuar).
-- Gabhann `stdio: "pipe"` stdout/stderr; astaíonn frásaí réidh (`Ready` / `listening`) `server-status: running` thar IPC.
-- Fanann `before-quit` suas le 5 s le SIGTERM rathúil (seicphointe WAL) agus ansin seolann sé SIGKILL.
-- Stopann agus atosaíonn an lascaire poirt sa tráidire (`20128`, `3000`, `8080`) an freastalaí, agus athlódálann sé an BrowserWindow ansin.
+- Déanann `waitForServer()` vótaíocht ar an URL suas le 30 s sula dtaispeánfar an fhuinneog (gan aon scáileán bán ar thús fuar).
+- gabhann `stdio: "pipe"` stdout/stderr; astaíonn frásaí réidh (`Ready` / `listening`) `server-status: running` thar IPC.
+- fanann `before-quit` suas le 5 s le haghaidh SIGTERM galánta (seicphointe WAL ) ansin cuireann SIGKILL.
+- Stopann lascóir calafoirt sa tráidire (`20128`, `3000`, `8080`) agus atosaíonn sé an freastalaí, ansin athlódálann sé an BrowserWindow.
 
-## Túsú Rúin gan Chumraíocht
+## Bootstrap Rúnda nialais-config
 
-Ar an gcéad seoladh, gineann agus stórálann an príomhphróiseas rúin atá in easnamh go huathoibríoch:
+Ar an gcéad seoladh, gineann an príomhphróiseas go huathoibríoch agus leanann sé de rún in easnamh:
 
-| Rún                      | Foinse                                                                                        |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                      |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (diúltaíonn sé má tá dintiúir chriptithe ann cheana) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                      |
+| Rúnda                    | Foinse                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                        |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (diúltaíonn sé má tá creidiúintí criptithe ann cheana) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                        |
 
-Stóráiltear iad in `<DATA_DIR>/server.env`. Réitítear `DATA_DIR` mar seo:
+D'fhan sé go `<DATA_DIR>/server.env`. Tá rún ag `DATA_DIR` :
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` nó `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Cuardach comhaid timpeallachta
+## Cuardach comhaid comhshaoil
 
-Sula seoltar an freastalaí, roghnaíonn an príomhphróiseas (`getPreferredEnvFilePath()` in
-`electron/main.js`) **comhad amháin** `.env`: an chéad cheann díobh seo atá ann.
+Sula sceitear an freastalaí, roghnóidh an príomhphróiseas (`getPreferredEnvFilePath()` in `electron/main.js`).** aon** `.env` file: an chéad cheann díobh seo atá ann.
 
-1. `$DATA_DIR/.env`, nuair atá `DATA_DIR` socraithe sa timpeallacht lenar seoladh an aip.
-2. `<resolved DATA_DIR>/.env`, ag úsáid na réamhshocruithe céanna thuas: `%APPDATA%\omniroute\.env` ar
-   Windows, `$XDG_CONFIG_HOME/omniroute/.env` nó `~/.omniroute/.env` ar Linux agus macOS.
-3. `.env` i gcomhadlann oibre an phróisis.
+1. `$DATA_DIR/.env`, nuair atá `DATA_DIR` socraithe sa timpeallacht a seoladh an aip leis.
+2. `<resolved DATA_DIR>/.env`, ag baint úsáide as na réamhshocruithe céanna atá thuas: `%APPDATA%\omniroute\.env` ar Windows, `$XDG_CONFIG_HOME/omniroute/.env` nó `~/.omniroute/.env` ar Linux agus macOS.
+3. `.env` san eolaire oibre próisis.
 
-Ní léann an príomhphróiseas ach an comhad sin; ní chumascfar iarrthóirí níos déanaí isteach. Tógtar
-timpeallacht an fhreastalaí ansin leis an ord tosaíochta seo (an ceann is airde ar dtús):
+Ní léann an príomhphróiseas ach an comhad sin; ní dhéantar iarrthóirí níos déanaí a chumasc isteach. Tógtar timpeallacht an fhreastalaí ansin leis an tosaíocht seo (an ceann is airde ar dtús):
 
-1. Timpeallacht phróiseas Electron (athróga a fuarthas le hoidhreacht ó cibé rud a sheol an aip).
+1. Timpeallacht an phróisis Electron (athróga a fuarthas le hoidhreacht ó cibé seoladh an app).
 2. An comhad `.env` roghnaithe.
-3. `<DATA_DIR>/server.env` (na rúin tosaigh thuas).
+3. `<DATA_DIR>/server.env` (na rúin bootstrap thuas).
 
-Gabhtar timpeallacht an phróisis nuair a thosaíonn an aip, mar sin ní shroicheann athróg timpeallachta
-córais nó úsáideora a shocraítear agus an aip ar siúl (lena n-áirítear agus í sa tráidire tar éis a fuinneog a
-dhúnadh) an freastalaí go dtí go scoirtear den aip go hiomlán agus go seoltar arís í. Maidir le socruithe am rite
-amhail `CONTEXT_LENGTH_<PROVIDER>` (féach
-[Athróga Timpeallachta: Fad comhthéacs de réir soláthraí](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
-b’fhearr an comhad `.env` a úsáid, ansin scor go hiomlán (tráidire, **Scoir**) agus seoladh arís.
+Gabhtar timpeallacht an phróisis nuair a thosaíonn an app, mar sin ní shroicheann sraith athróg córais nó timpeallachta úsáideora agus an app ag rith (lena n-áirítear cé go suíonn sé sa tráidire tar éis a fhuinneog a dhúnadh) an freastalaí go dtí go scorfar an app go hiomlán agus athsheoladh. Le haghaidh snaidhmeanna rite ar nós `CONTEXT_LENGTH_<PROVIDER>` (féach [Athróga Comhshaoil: fad comhthéacs an tsoláthraí](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), b'fhearr leat an comhad `.env`, ansin scor go hiomlán (tráidire,** Scoir** ) agus athsheoladh.
 
 ## Fuinneog & Tráidire
 
-- `BrowserWindow`: 1400×900 (íosmhéid 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, na cnaipí tráchta ag `{ x: 16, y: 16 }`.
-- Windows/Linux: barra teidil dúchasach.
-- Íoslaghdaíonn an cnaipe dúnta go dtí an tráidire; tá **Oscail OmniRoute**, **Oscail an Deais** (brabhsálaí seachtrach), fo-roghchlár **Port an Fhreastalaí**, **Seiceáil le haghaidh Nuashonruithe**, **Scoir** i roghchlár an tráidire.
+- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, solas tráchta ag `{ x: 16, y: 16 }`.
+- Windows/Linux: barra teidil dúchais.
+- Íoslaghdaíonn an cnaipe dúnta don tráidire; tá an roghchlár tráidire** Oscail OmniRoute** ,** Oscail Painéal na nIonstraimí** (brabhsálaí seachtrach),** Port Freastalaí** fo-roghchlár,** Seiceáil le haghaidh Nuashonruithe** ,** Scoir** .
 
-## Beartas Slándála Inneachair
+## Beartas Slándála Ábhar
 
-Socraítear é trí `session.defaultSession.webRequest.onHeadersReceived`. Treoracha suntasacha:
+Socraigh trí `session.defaultSession.webRequest.onHeadersReceived`. Treoracha suntasacha:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Ní chuireann mód forbartha `'unsafe-eval'` ach le `script-src`
+- Cuireann mód Dev `'unsafe-eval'` le `script-src` amháin
 
-## Uathnuashonrú
+## Nuashonrú uathoibríoch
 
 Úsáideann sé `electron-updater` leis an soláthraí GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Cuirtear imeachtaí ar aghaidh chuig an rindreálaí trí IPC `update-status`:
-  `checking`, `available`, `not-available`, `downloading` (le `percent`), `downloaded`, `error`
-- Maraíonn `installUpdate()` an freastalaí agus ansin glaonn sé `autoUpdater.quitAndInstall()`
-- Scipeáiltear é sa mhód forbartha (`!app.isPackaged`)
+- Imeachtaí curtha ar aghaidh chuig rindreálaí trí `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (le `percent`), `downloaded`, `error`
+- Maraíonn `installUpdate()` an freastalaí ansin glaonna `autoUpdater.quitAndInstall()`
+- Léimeadh i mód dev (`!app.isPackaged`)
 
-## Píblíne Tógála
+## Tógáil Píblíne
 
-1. `npm run build` → leagan neamhspleách Next.js in `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → athchéimníonn sé isteach i `.next/electron-standalone` agus athscríobhann sé cosáin absalóideacha taobh istigh de `server.js` + `required-server-files.json` ionas gur féidir an beart a athlonnú.
-3. Pacálann `electron-builder` `main.js`, `preload.js`, `node_modules`, agus `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → Next.js ina aonar i `.next/standalone`.
+2. déanann `prepare-electron-standalone.mjs` → athchéimniú isteach i `.next/electron-standalone` agus athscríobhann sé cosáin iomlána taobh istigh `server.js` + `required-server-files.json` ionas gur féidir an beart a athlonnú.
+3. pacáistí `electron-builder` `main.js`, `preload.js`, `node_modules`, agus `extraResources: { ../.next/electron-standalone → app }`.
 
-### Spriocanna tógála
+### Tóg spriocanna
 
-| OS      | Spriocanna                                       |
-| ------- | ------------------------------------------------ |
-| Windows | Suiteálaí NSIS + leagan iniompartha (x64)        |
-| macOS   | DMG (Intel + arm64, tarraing chuig Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)                     |
+| OS      | Spriocanna                                    |
+| ------- | --------------------------------------------- |
+| Windows | suiteálaí NSIS + iniompartha (x64)            |
+| macOS   | DMG (Intel + arm64, tarraing go Feidhmchláir) |
+| Linux   | AppImage + DEB (x64 + arm64)                  |
 
-Socruithe NSIS: `oneClick: false`, ligeann sé don úsáideoir an chomhadlann suiteála a roghnú, agus cruthaíonn sé aicearraí ar an Deasc agus sa roghchlár Tosaigh.
+socruithe NSIS : `oneClick: false`, ligeann don úsáideoir an t-eolaire suiteála a roghnú, cruthaíonn sé aicearraí Deisce agus Roghchláir Tosaigh.
 
-## Tástáil Deataigh ar an Leagan Pacáistithe
+## Tógáil Pacáilte Tástáil Smoke
 
 ```bash
 npm run electron:smoke:packaged
@@ -255,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Aimsíonn sé an dénártha pacáistithe go huathoibríoch in `electron/dist-electron/` don ardán reatha.
-- Seolann sé é le comhadlanna leithlisithe `HOME`/`APPDATA`/`XDG_*` ionas nach mbaineann sé le sonraí an fhorbróra.
-- Déanann sé fiosrú rialta ar `http://127.0.0.1:20128/login` le haghaidh HTTP 200 laistigh de 45 s.
-- Déanann sé monatóireacht ar stderr/stdout le haghaidh patrúin mharfacha (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, srl.).
-- Fanann sé 2 s d’am rite cobhsaí tar éis don chóras a bheith réidh, ansin eisíonn sé SIGTERM agus fanann sé go dtí go mbeidh an port saor.
-- In CI, cuireann sé `--no-sandbox --disable-gpu` ar aghaidh go huathoibríoch (agus `--disable-dev-shm-usage` ar Linux).
+- Auto-aimsíonn an dénártha pacáistithe i `electron/dist-electron/` don ardán reatha.
+- Seoltar le heolairí scoite `HOME`/`APPDATA`/`XDG_*` ionas nach ndéanann sé teagmháil le sonraí forbróra.
+- Vótaí `http://127.0.0.1:20128/login` do HTTP 200 laistigh de 45 s.
+- Uaireadóirí stderr/stdout le haghaidh patrúin marfach (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, etc .).
+- Fanann sé 2 s d'am rite cobhsaí tar éis ullmhachta, eisíonn sé SIGTERM ansin agus fanfaidh sé go mbeidh an calafort saor.
+- I CI, téann `--no-sandbox --disable-gpu` (agus `--disable-dev-shm-usage` ar Linux) go huathoibríoch.
 
-Sáruithe timpeallachta: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Sáraíonn Env: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Síniú Cóid
 
-Ní nascann `electron/package.json` dintiúir sínithe go díreach. Cuir ar aghaidh iad trí athróga timpeallachta chuig `electron-builder`:
+dhéanann `electron/package.json`** nach bhfuil** dintiúir síniú sreinge go díreach. Cuir ar aghaidh iad trí env vars go `electron-builder`:
 
 ### macOS
 
@@ -289,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-Tá síniú AppImage roghnach — socraigh `LINUX_GPG_KEY` más mian leat síniú.
+Tá síniú AppImage roghnach — set `LINUX_GPG_KEY` má tá tú ag síniú.
 
 ## Dáileadh
 
-Cuirtear déantáin in `electron/dist-electron/`:
+Artifacts i dtír i `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Foilsítear eisiúintí chuig GitHub Releases (`diegosouzapw/OmniRoute`), arb é sin an áit a seiceálann `electron-updater` le haghaidh leaganacha nua freisin.
+Foilsítear eisiúintí chuig GitHub Releases (`diegosouzapw/OmniRoute`), agus is é sin freisin an áit a seiceálann `electron-updater` le haghaidh leaganacha nua.
 
 ## Fabhtcheartú
 
-| Siomptóm                                                             | Réiteach                                                                                                                                                                                      |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` tar éis mór-uasghrádú Electron | Soláthraíonn better-sqlite3 v13 leaganacha réamhthógtha Node-API — rith `npm install` arís ag an bhfréamh agus ansin `prepare:bundle` (deimhníonn sé an leagan réamhthógtha don ardán reatha) |
-| `ERR_DLOPEN_FAILED` do mhodúl dúchasach                              | Rith `prepare:bundle` arís — teipeann sé láithreach nuair atá an leagan réamhthógtha Node-API don ardán reatha ar iarraidh                                                                    |
-| Bíonn an fhuinneog bán ar Linux                                      | Deimhnigh gur cheangail an freastalaí Next.js le PORT i ndáiríre (seiceáil logaí `[Server]`)                                                                                                  |
-| Stopann nótárú macOS de dhul chun cinn                               | Cinntigh go bhfuil athróga `APPLE_*` easpórtáilte, seachas iad a bheith in `.env` amháin                                                                                                      |
-| Rabhadh Windows SmartScreen                                          | Sínigh le teastas EV, nó cliceálann úsáideoirí ar dheis → "Run anyway"                                                                                                                        |
-| Teipeann ar an tástáil deataigh toisc go bhfuil an port in úsáid     | Stop aon fhreastalaí forbartha áitiúil ar 20128 sula ritear `electron:smoke:packaged`                                                                                                         |
+| Siomptóim                                                       | Deisigh                                                                                                                                                                  |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Cannot find module 'better-sqlite3'` tar éis Electron bump mór | déanann better-sqlite3 v13 longa Nód-API réamhthógáil — athreáchtáil `npm install` ag an bhfréamh agus `prepare:bundle` (deimhníonn sé an réamhthógáil don ardán reatha) |
+| `ERR_DLOPEN_FAILED` don mhodúl dúchais                          | Reáchtáil `prepare:bundle` — teipeann air go tapa nuair atá réamhthógáil Node-API don ardán reatha in easnamh                                                            |
+| Tá an chuma ar an bhfuinneog bán ar Linux                       | Deimhnigh freastalaí Next.js i ndáiríre faoi cheangal PORT (seiceáil logaí `[Server]` )                                                                                  |
+| stallaí notarization macOS                                      | Cinntigh go ndéantar `APPLE_*` vars a onnmhairiú, ní hamháin i `.env`                                                                                                    |
+| rabhadh Windows SmartScreen                                     | Sínigh le EV cert, nó cliceáil ar dheis ag úsáideoirí → "Rith ar aon nós"                                                                                                |
+| Teipeann ar thástáil deataigh leis an bport-in-úsáide           | Stop aon fhreastalaí dev áitiúil ar 20128 roimh rith `electron:smoke:packaged`                                                                                           |
 
-## Féach Freisin
+## Féach Chomh maith leis sin
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Foinse: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Uirlisí cúnta: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Cúntóirí: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

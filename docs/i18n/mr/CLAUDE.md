@@ -15,7 +15,7 @@ Claude Code ला लागू होतात — `AGENTS.md` मध्ये 
 
 संपूर्ण अनिवार्य वर्कट्री प्रोटोकॉल (बेस-ब्रँच पुष्टीकरण, `.claude/worktrees/` कॅनॉनिकल
 पथ, `cp -al` node_modules, टिअरडाउन नियम)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) मध्ये आहे (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) मध्ये आहे (`AGENTS.md` →
 Git Workflow → "Worktree isolation" मध्ये सारांशित). Claude-Code-विशिष्ट मुद्दे:
 
 - `AskUserQuestion` द्वारे ऑपरेटरकडून बेस ब्रँचची पुष्टी करा (कठोर नियम #19), जर त्यांनी

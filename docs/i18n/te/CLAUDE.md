@@ -12,7 +12,7 @@
 
 పూర్తి తప్పనిసరి worktree ప్రోటోకాల్ (base-branch నిర్ధారణ, `.claude/worktrees/` ప్రామాణిక
 పాత్, `cp -al` node_modules, టియర్డౌన్ నియమాలు)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) లో ఉంది (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) లో ఉంది (`AGENTS.md` →
 Git వర్క్ఫ్లో → "Worktree ఐసోలేషన్" లో సంక్షిప్తంగా ఇవ్వబడింది). Claude-Code-కి ప్రత్యేకమైన అంశాలు:
 
 - ఆపరేటర్ ఇప్పటికే చెప్పకపోతే, `AskUserQuestion` ద్వారా ఆపరేటర్తో బేస్ బ్రాంచ్ను

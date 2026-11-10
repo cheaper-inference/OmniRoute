@@ -15,7 +15,7 @@
 
 פרוטוקול ה-worktree המחייב המלא (אישור base-branch, הנתיב הקנוני `.claude/worktrees/`,
 `cp -al` node_modules, כללי teardown) נמצא ב-
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (מסוכם ב-`AGENTS.md` ←
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (מסוכם ב-`AGENTS.md` ←
 זרימת עבודה ב-Git ← "בידוד worktree"). נקודות ספציפיות ל-Claude Code:
 
 - אשר את ה-base branch מול המפעיל באמצעות `AskUserQuestion` (כלל קשיח מס' 19), אלא אם

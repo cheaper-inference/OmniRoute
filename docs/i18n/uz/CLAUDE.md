@@ -12,7 +12,7 @@
 
 Toʻliq majburiy worktree protokoli (bazaviy branch tasdigʻi, `.claude/worktrees/` kanonik
 yoʻli, `cp -al` node_modules, teardown qoidalari)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) faylida keltirilgan (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) faylida keltirilgan (`AGENTS.md` →
 Git Workflow → "Worktree isolation" boʻlimida qisqacha bayon etilgan). Claude Code'ga xos jihatlar:
 
 - Bazaviy branchni operator bilan `AskUserQuestion` orqali tasdiqlang (Qattiq qoida №19), agar ular

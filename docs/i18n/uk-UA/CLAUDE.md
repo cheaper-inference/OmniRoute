@@ -15,7 +15,7 @@ Claude Code — це операційні уточнення правил, уж�
 
 Повний обов'язковий протокол ізоляції worktree (підтвердження базової гілки, канонічний шлях
 `.claude/worktrees/`, `cp -al` node_modules, правила завершення роботи) наведено в
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (стисло викладено в `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (стисло викладено в `AGENTS.md` →
 Робочий процес Git → «Ізоляція worktree»). Специфічні для Claude Code моменти:
 
 - Підтвердьте базову гілку в оператора через `AskUserQuestion` (Жорстке правило №19), якщо він

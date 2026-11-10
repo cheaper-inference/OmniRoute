@@ -14,7 +14,7 @@ Claude Code ਉੱਤੇ ਲਾਗੂ ਹੁੰਦੀ ਹੈ — `AGENTS.md` ਵ
 ## ਵਰਕਟਰੀ ਆइसोलेशन — Claude Code ਸੰਬੰਧੀ ਖਾਸ ਗੱਲਾਂ
 
 ਪੂਰਾ ਲਾਜ਼ਮੀ ਵਰਕਟਰੀ ਪ੍ਰੋਟੋਕੋਲ (ਬੇਸ-ਬ੍ਰਾਂਚ ਪੁਸ਼ਟੀ, `.claude/worktrees/` ਮਾਨਕ ਪਾਥ, `cp -al` node_modules, ਟੀਅਰਡਾਊਨ ਨਿਯਮ)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) ਵਿੱਚ ਹੈ (`AGENTS.md` → Git Workflow →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) ਵਿੱਚ ਹੈ (`AGENTS.md` → Git Workflow →
 "Worktree isolation" ਵਿੱਚ ਸੰਖੇਪ ਕੀਤਾ ਗਿਆ)। Claude Code ਨਾਲ ਸੰਬੰਧਿਤ ਖਾਸ ਨੁਕਤੇ:
 
 - `AskUserQuestion` ਰਾਹੀਂ ਓਪਰੇਟਰ ਨਾਲ ਬੇਸ ਬ੍ਰਾਂਚ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ (ਸਖ਼ਤ ਨਿਯਮ #19), ਜਦੋਂ ਤੱਕ ਉਸਨੇ ਪਹਿਲਾਂ ਹੀ

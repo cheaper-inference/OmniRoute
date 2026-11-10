@@ -15,7 +15,7 @@ Claude Code — są to operacyjne doprecyzowania reguł już zdefiniowanych w `A
 
 Pełny obowiązkowy protokół worktree (potwierdzenie gałęzi bazowej, kanoniczna ścieżka
 `.claude/worktrees/`, `cp -al` dla node_modules, zasady usuwania) znajduje się w
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (streszczony w `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (streszczony w `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Kwestie specyficzne dla Claude Code:
 
 - Potwierdź gałąź bazową z operatorem za pomocą `AskUserQuestion` (Hard Rule #19), chyba że
