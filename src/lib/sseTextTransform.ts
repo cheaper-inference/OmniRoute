@@ -234,11 +234,11 @@ export function createSseTextTransform(
   let currentEventLine = "";
   let lastEventLine = "";
   let pendingEventLine = "";
-  const responses = createResponsesSseText(
-    processor,
-    opts?.processToolArgs,
-    opts?.releaseResponsesLane
-  );
+  const responses = createResponsesSseText(processor, {
+    processToolArgs: opts?.processToolArgs,
+    release: opts?.releaseResponsesLane,
+    classify: classifyField,
+  });
   let responsesStream = false;
   const emitResponses = (
     events: Record<string, unknown>[],

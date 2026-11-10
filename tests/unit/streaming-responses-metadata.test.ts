@@ -76,6 +76,17 @@ const message = (value: string) => ({
   phase: "final_answer",
   content: [{ type: "output_text", text: value, annotations: [{ text: "citation metadata" }] }],
 });
+/**
+ * Expected frame after the uppercasing test processor: payload snapshots and every other
+ * non-protocol string are processed where they sit (here: uppercased), never buffered;
+ * protocol keys keep their exact value.
+ */
+const PROTOCOL_KEYS = new Set(["type", "id", "name", "role", "phase", "call_id", "status"]);
+function redactedInPlace<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value), (key, field) =>
+    typeof field === "string" && !PROTOCOL_KEYS.has(key) ? field.toUpperCase() : field
+  );
+}
 const delta = (value: string, index = 0): Event => ({
   type: "response.output_text.delta",
   item_id: index === 0 ? "msg_fixture" : `msg_other_${index}`,
@@ -203,7 +214,7 @@ test("credential: reasoning, refusal and tool arguments never drain into answer 
   assert.equal(text(out, "response.refusal.delta"), "refused");
 });
 
-test("Responses snapshot selection sanitizes payloads without touching schema or metadata", async () => {
+test("Responses snapshot selection sanitizes payloads and redacts metadata only in place", async () => {
   const item = {
     type: "function_call",
     call_id: "call_1",
@@ -238,15 +249,20 @@ test("Responses snapshot selection sanitizes payloads without touching schema or
       },
     ]
   );
-  assert.deepEqual(out[0].response, {
-    ...metadata,
-    tools: [{ type: "function", name: "f", parameters: { description: "opaque" } }],
-  });
-  assert.deepEqual(out[1].item, { ...item, arguments: "SENSITIVE" });
+  assert.equal(out.length, 4, "metadata strings never produce a buffered delta frame");
+  assert.deepEqual(
+    out[0].response,
+    redactedInPlace({
+      ...metadata,
+      tools: [{ type: "function", name: "f", parameters: { description: "opaque" } }],
+    })
+  );
+  assert.deepEqual(out[1].item, redactedInPlace(item));
+  assert.equal((out[1].item as typeof item).arguments, "SENSITIVE");
   assert.deepEqual(out[2].part, {
     type: "refusal",
     refusal: "SENSITIVE",
-    annotations: [{ text: "opaque" }],
+    annotations: [{ text: "OPAQUE" }],
   });
   assert.deepEqual(out[3].part, { type: "summary_text", text: "SENSITIVE" });
 });
@@ -398,7 +414,7 @@ test("credential: Responses lane budget still fails closed", async () => {
   );
 });
 
-test("added snapshots sanitize independently and unknown Responses deltas remain metadata", async () => {
+test("added snapshots sanitize independently and unknown Responses deltas stay out of buffers", async () => {
   const out = await run(
     [createSseTextTransform((value) => value.toUpperCase())],
     [
@@ -408,14 +424,14 @@ test("added snapshots sanitize independently and unknown Responses deltas remain
       delta("answer"),
     ]
   );
-  assert.deepEqual(out[0].item, message("SENSITIVE"));
+  assert.deepEqual(out[0].item, redactedInPlace(message("sensitive")));
   assert.deepEqual(out[1].part, { type: "output_text", text: "SENSITIVE" });
   assert.deepEqual(out[2], {
     type: "response.future_metadata.delta",
-    delta: "opaque",
-    metadata: { text: "opaque" },
+    delta: "OPAQUE",
+    metadata: { text: "OPAQUE" },
   });
-  assert.equal(text(out), "ANSWER");
+  assert.equal(text(out), "ANSWER", "the unknown delta is redacted in place, not spliced");
 });
 
 for (const [family, field, itemType] of [
@@ -441,6 +457,57 @@ for (const [family, field, itemType] of [
     assert.ok(!JSON.stringify(out).includes(secret));
   });
 }
+
+test("credential: non-payload strings are masked in place, never buffered as answer text", async () => {
+  const secret = "sk-proj-" + "m".repeat(40);
+  const mcpCall = {
+    id: "mcp_1",
+    type: "mcp_call",
+    server_label: "files",
+    name: "read",
+    arguments: "{}",
+    output: `token=${secret}`,
+  };
+  const search = {
+    id: "ws_1",
+    type: "web_search_call",
+    status: "completed",
+    action: { type: "search", query: `find ${secret}` },
+  };
+  const annotated = {
+    ...message("answer"),
+    content: [
+      {
+        type: "output_text",
+        text: "answer",
+        annotations: [{ type: "url_citation", url: `https://x.test/?k=${secret}`, title: "t" }],
+      },
+    ],
+  };
+  const out = await run(
+    [createCredentialSseTransform()],
+    [
+      { type: "response.output_item.done", output_index: 0, item: mcpCall },
+      { type: "response.output_item.done", output_index: 1, item: search },
+      delta("answer", 2),
+      { type: "response.output_item.done", output_index: 2, item: annotated },
+      {
+        type: "response.completed",
+        response: { ...metadata, output: [mcpCall, search, annotated] },
+      },
+    ]
+  );
+  assert.ok(!JSON.stringify(out).includes(secret), "no frame leaks the secret");
+  const items = out.filter((e) => e.type === "response.output_item.done");
+  assert.equal(
+    (items[0].item as typeof mcpCall).output,
+    "token=[REDACTED:openai]",
+    "mcp_call.output is masked where it sits"
+  );
+  assert.equal((items[0].item as typeof mcpCall).name, "read", "protocol names stay intact");
+  assert.equal((items[1].item as typeof search).action.query, "find [REDACTED:openai]");
+  assert.equal(text(out, undefined, 2), "answer", "metadata never splices into answer text");
+});
 
 test("credential: audio transcript text is masked but audio bytes are opaque", async () => {
   const secret = "sk-proj-" + "e".repeat(40);
