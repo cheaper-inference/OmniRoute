@@ -709,6 +709,7 @@
       "tests/unit/combo/combo-target-exhaustion.test.ts",
       "tests/unit/combo/execute-target-attempt.test.ts",
       "tests/unit/emergency-fallback-response-header.test.ts",
+      "tests/unit/malformed-tool-call-arguments-classification.test.ts",
       "tests/unit/malformed-translated-no-same-account-retry.test.ts",
       "tests/unit/model-sync-keeps-imported-media-models.test.ts",
       "tests/unit/provider-breaker-connection-success-closes-provider.test.ts",
