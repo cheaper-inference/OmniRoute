@@ -120,9 +120,11 @@ interface ParsedImageEditInput {
 }
 
 export const MAX_CODEX_IMAGE_EDIT_BYTES = 20 * 1024 * 1024;
-export const MAX_CODEX_IMAGE_EDIT_REFERENCES = 8;
-// GPT Image models use the dedicated Images edits API and allow up to 16 inputs;
-// keep the legacy hosted Responses tool bound at eight until independently verified.
+// A bounded input guard, NOT the backend's absolute maximum. On 2026-11-10,
+// the hosted Codex Responses image_generation edit returned real PNGs with
+// 9, 17, 24, 32, 64 and 128 ordered PNG references in isolated OAuth smokes.
+export const MAX_CODEX_IMAGE_EDIT_REFERENCES = 128;
+// Dedicated GPT Image edits use the separate Images API, documented at 16 inputs.
 export const MAX_CODEX_GPT_IMAGE_EDIT_REFERENCES = 16;
 export const MAX_CODEX_IMAGE_EDIT_TOTAL_BYTES = 20 * 1024 * 1024;
 
