@@ -21,6 +21,7 @@ const files = [
   "233_api_key_self_service_settings.sql",
   "234_agent_sessions.sql",
   "235_usage_history_agent_session_id.sql",
+  "236_key_templates.sql",
   accountingFile,
 ];
 // Copy actual SQL under its actual filename: no test-only collision workaround.
@@ -47,7 +48,8 @@ const expectedLedger = [
   { version: "233", name: "api_key_self_service_settings" },
   { version: "234", name: "agent_sessions" },
   { version: "235", name: "usage_history_agent_session_id" },
-  { version: "236", name: accountingName },
+  { version: "236", name: "key_templates" },
+  { version: "237", name: accountingName },
 ];
 
 test.after(() => {
@@ -103,7 +105,7 @@ function assertComplete(db: SqliteAdapter, cacheReadTokens: number | null = null
   assert.ok(
     db.prepare("SELECT name FROM sqlite_master WHERE name = 'proxy_payload_traffic'").get()
   );
-  for (const table of ["api_key_self_service_settings", "agent_sessions"]) {
+  for (const table of ["api_key_self_service_settings", "agent_sessions", "key_templates"]) {
     assert.ok(db.prepare("SELECT name FROM sqlite_master WHERE name = ?").get(table));
   }
   assert.ok(
@@ -172,8 +174,8 @@ function applyLegacyBilling(db: SqliteAdapter) {
   );
 }
 
-test("accounting uses 236, leaving upstream's 228–235 migrations intact", () => {
-  assert.equal(accountingFile, "236_usage_history_calculated_cost.sql");
+test("accounting uses 237, leaving upstream's 228–236 migrations intact", () => {
+  assert.equal(accountingFile, "237_usage_history_calculated_cost.sql");
   for (const file of files) assert.ok(fs.existsSync(path.join(realDir, file)));
   assert.equal(fs.existsSync(path.join(realDir, "228_usage_history_calculated_cost.sql")), false);
   assert.equal(fs.existsSync(path.join(realDir, "231_usage_history_calculated_cost.sql")), false);
@@ -182,7 +184,7 @@ test("accounting uses 236, leaving upstream's 228–235 migrations intact", () =
 test("pre-228 schema applies cleanup, five-hour limits and billing; second run is a no-op", async () => {
   const db = await createDb();
   try {
-    assert.equal(runMigrations(db), 9);
+    assert.equal(runMigrations(db), 10);
     assertComplete(db);
     assert.equal(
       db
@@ -205,7 +207,7 @@ test("canonical 228 cleanup ledger row is not rehomed as accounting", async () =
   try {
     db.exec(cleanupSql);
     record(db, "228", "purge_orphaned_provider_catalogs");
-    assert.equal(runMigrations(db), 8);
+    assert.equal(runMigrations(db), 9);
     assertComplete(db);
     assert.equal(
       db
@@ -220,19 +222,19 @@ test("canonical 228 cleanup ledger row is not rehomed as accounting", async () =
   }
 });
 
-for (const legacyVersion of ["228", "231", "233"]) {
-  test(`legacy ${legacyVersion} accounting is rehomed to 236 without replay or data loss`, async () => {
+for (const legacyVersion of ["228", "231", "233", "236"]) {
+  test(`legacy ${legacyVersion} accounting is rehomed to 237 without replay or data loss`, async () => {
     const db = await createDb();
     try {
       applyLegacyBilling(db);
       record(db, legacyVersion, accountingName);
-      assert.equal(runMigrations(db), 8);
+      assert.equal(runMigrations(db), 9);
       assertComplete(db);
       assertLegacyBillingUnchanged(db);
       assert.equal(
         db
           .prepare<{ applied_at: string }>(
-            "SELECT applied_at FROM _omniroute_migrations WHERE version = '236'"
+            "SELECT applied_at FROM _omniroute_migrations WHERE version = '237'"
           )
           .get()?.applied_at,
         appliedAt
@@ -253,7 +255,8 @@ test("legacy and canonical accounting markers coexist safely during repair", asy
     record(db, "231", accountingName);
     record(db, "233", accountingName);
     record(db, "236", accountingName);
-    assert.equal(runMigrations(db), 8);
+    record(db, "237", accountingName);
+    assert.equal(runMigrations(db), 9);
     assertComplete(db);
     assertLegacyBillingUnchanged(db);
     assert.equal(runMigrations(db), 0);
@@ -276,11 +279,11 @@ test("genuine upstream 231/232 markers and measured data survive legacy billing 
     const trafficBefore = db.prepare("SELECT * FROM proxy_payload_traffic").all();
     applyLegacyBilling(db);
     record(db, "228", accountingName);
-    assert.equal(runMigrations(db), 6);
+    assert.equal(runMigrations(db), 7);
     assertComplete(db, 7);
     assertLegacyBillingUnchanged(db);
     assert.deepEqual(db.prepare("SELECT * FROM proxy_payload_traffic").all(), trafficBefore);
-    for (const version of ["231", "232", "236"]) {
+    for (const version of ["231", "232", "237"]) {
       assert.equal(
         db
           .prepare<{ applied_at: string }>(
@@ -305,10 +308,10 @@ test("legacy cache at 228 and billing at 231 rehome in order without blocking ei
     record(db, "228", "daily_cached_input");
     applyLegacyBilling(db);
     record(db, "231", accountingName);
-    assert.equal(runMigrations(db), 7);
+    assert.equal(runMigrations(db), 8);
     assertComplete(db, 9);
     assertLegacyBillingUnchanged(db);
-    for (const version of ["231", "236"]) {
+    for (const version of ["231", "237"]) {
       assert.equal(
         db
           .prepare<{ applied_at: string }>(
@@ -324,15 +327,15 @@ test("legacy cache at 228 and billing at 231 rehome in order without blocking ei
   }
 });
 
-test("an unrelated migration occupying 236 is rejected before deleting ledger or catalog data", async () => {
+test("an unrelated migration occupying 237 is rejected before deleting ledger or catalog data", async () => {
   const db = await createDb();
   try {
     applyLegacyBilling(db);
     record(db, "228", accountingName);
-    record(db, "236", "unrelated_migration");
+    record(db, "237", "unrelated_migration");
     const before = ledger(db);
     const usageBefore = db.prepare("SELECT * FROM usage_history WHERE id = 1").get();
-    assert.throws(() => runMigrations(db), /target version 236 is occupied by unknown migration/);
+    assert.throws(() => runMigrations(db), /target version 237 is occupied by unknown migration/);
     assert.deepEqual(ledger(db), before);
     assert.deepEqual(db.prepare("SELECT * FROM usage_history WHERE id = 1").get(), usageBefore);
     assert.equal(
@@ -344,13 +347,14 @@ test("an unrelated migration occupying 236 is rejected before deleting ledger or
   }
 });
 
-test("upstream 233–235 settings and agent-session data survive legacy accounting repair", async () => {
+test("upstream 233–236 settings, sessions and templates survive legacy accounting repair", async () => {
   const db = await createDb();
   try {
     for (const [index, version, name] of [
       [5, "233", "api_key_self_service_settings"],
       [6, "234", "agent_sessions"],
       [7, "235", "usage_history_agent_session_id"],
+      [8, "236", "key_templates"],
     ] as const) {
       db.exec(fs.readFileSync(path.join(realDir, files[index]), "utf8"));
       record(db, version, name);
@@ -360,9 +364,12 @@ test("upstream 233–235 settings and agent-session data survive legacy accounti
       VALUES ('synthetic-key', '["fixture"]', 'strip');
       INSERT INTO agent_sessions (id, api_key_id, first_seen_at, last_seen_at, request_count, cost_usd)
       VALUES ('synthetic-session', 'synthetic-key', 'before', 'before', 2, 0.7);
-      UPDATE usage_history SET agent_session_id = 'synthetic-session' WHERE id = 1;`);
+      UPDATE usage_history SET agent_session_id = 'synthetic-session' WHERE id = 1;
+      INSERT INTO key_templates (id, name, policy, created_at, updated_at)
+      VALUES ('synthetic-template', 'Retained policy', '{"key":{}}', 'before', 'before');`);
     const settingsBefore = db.prepare("SELECT * FROM api_key_self_service_settings").all();
     const sessionsBefore = db.prepare("SELECT * FROM agent_sessions").all();
+    const templatesBefore = db.prepare("SELECT * FROM key_templates").all();
     applyLegacyBilling(db);
     record(db, "228", accountingName);
     assert.equal(runMigrations(db), 5);
@@ -373,7 +380,38 @@ test("upstream 233–235 settings and agent-session data survive legacy accounti
       settingsBefore
     );
     assert.deepEqual(db.prepare("SELECT * FROM agent_sessions").all(), sessionsBefore);
-    for (const version of ["233", "234", "235", "236"]) {
+    assert.deepEqual(db.prepare("SELECT * FROM key_templates").all(), templatesBefore);
+    for (const version of ["233", "234", "235", "236", "237"]) {
+      assert.equal(
+        db
+          .prepare<{ applied_at: string }>(
+            "SELECT applied_at FROM _omniroute_migrations WHERE version = ?"
+          )
+          .get(version)?.applied_at,
+        appliedAt
+      );
+    }
+    assert.equal(runMigrations(db), 0);
+  } finally {
+    db.close();
+  }
+});
+
+test("legacy templates at 228 and billing at 236 rehome without blocking upstream migrations", async () => {
+  const db = await createDb();
+  try {
+    db.exec(fs.readFileSync(path.join(realDir, "236_key_templates.sql"), "utf8"));
+    db.exec(`INSERT INTO key_templates (id, name, policy, created_at, updated_at)
+      VALUES ('legacy-template', 'Retained policy', '{"key":{}}', 'before', 'before');`);
+    const templatesBefore = db.prepare("SELECT * FROM key_templates").all();
+    record(db, "228", "key_templates");
+    applyLegacyBilling(db);
+    record(db, "236", accountingName);
+    assert.equal(runMigrations(db), 8);
+    assertComplete(db);
+    assertLegacyBillingUnchanged(db);
+    assert.deepEqual(db.prepare("SELECT * FROM key_templates").all(), templatesBefore);
+    for (const version of ["236", "237"]) {
       assert.equal(
         db
           .prepare<{ applied_at: string }>(
@@ -393,7 +431,7 @@ test("already-present billing columns with a missing marker are not applied twic
   const db = await createDb();
   try {
     applyLegacyBilling(db);
-    assert.equal(runMigrations(db), 9);
+    assert.equal(runMigrations(db), 10);
     assertComplete(db);
     assertLegacyBillingUnchanged(db);
     assert.equal(runMigrations(db), 0);
@@ -410,7 +448,7 @@ test("a partial billing schema receives missing columns without rewriting stored
     db.exec(
       "UPDATE usage_history SET calculated_cost_usd = 0.62, billing_unit = 'page' WHERE id = 1;"
     );
-    assert.equal(runMigrations(db), 9);
+    assert.equal(runMigrations(db), 10);
     assertComplete(db);
     assert.deepEqual(db.prepare("SELECT * FROM usage_history WHERE id = 1").get(), {
       id: 1,
