@@ -159,11 +159,11 @@ OmniRoute paljastaa 6 A2A -taitoa yhdistettynä `src/lib/a2a/taskExecution.ts::A
 | Älykäs reititys         | `smart-routing`      | Ohjaa kehotteen optimaalisen provider/combo läpi käyttämällä OmniRoute:n yhdistelmämoottoria + -pisteytystä                                                  | reititys, palveluntarjoajat | "Reittiä tämä kehote parhaan mallin kautta"       |
 | Kiintiöiden hallinta    | `quota-management`   | Raportoi palveluntarjoajan kiintiön tilan, auttaa soittajia päättämään, milloin throttle/switch                                                              | kiintiö, palveluntarjoajat  | "Tarkista antrooppinen kiintiö"                   |
 | Palveluntarjoajan löytö | `provider-discovery` | Luetteloi asennetut palveluntarjoajat, joilla on ominaisuudet, vapaan tason liput, OAuth tila                                                                | tarjoajat, löytö            | "Mitä palveluntarjoajia on saatavilla?"           |
-| Kustannusanalyysi       | `cost-analysis`      | Arvio request/conversation :n hinnasta luettelon + viimeaikaisen käytön perusteella                                                                          | hinta, käyttö               | "Arvio tämän keskustelun kustannuksista"          |
-| Terveysraportti         | `health-report`      | Aggregaatit katkaisija, jäähdytys, lukitustila palveluntarjoajan mukaan                                                                                      | terveyttä, kestävyyttä      | "Näytä kaikkien palveluntarjoajien terveydentila" |
+| Kustannusanalyysi       | `cost-analysis`      | Arvioi request/conversation :n kustannukset luettelon + viimeaikaisen käytön perusteella                                                                     | hinta, käyttö               | "Arvio tämän keskustelun kustannuksista"          |
+| Terveysraportti         | `health-report`      | Aggregaatit katkaisija, jäähdytys, lukitustila palveluntarjoajakohtaisesti                                                                                   | terveyttä, kestävyyttä      | "Näytä kaikkien palveluntarjoajien terveydentila" |
 | Listaa ominaisuudet     | `list-capabilities`  | Palauttaa koko 45 merkinnän Agent Skills -luettelon (23 API + 21 CLI + 1 config) merkintätaulukkona, jossa on raaka SKILL.md URLs kontekstin lisäystä varten | luettelo, löytö, taidot     | "Lista kaikki OmniRoute -ominaisuudet"            |
 
-> Agenttikortti tulee pitää linjassa reaaliaikaisen 380-palveluntarjoajan luettelon kanssa. palveluntarjoajien määrät ja free/no-auth metatiedot saadaan ajonaikaisesta rekisteristä.
+> Agenttikortti tulee pitää linjassa reaaliaikaisen 381-palveluntarjoajan luettelon kanssa; palveluntarjoajien määrät ja free/no-auth metatiedot saadaan ajonaikaisesta rekisteristä.
 
 ### `list-capabilities` Skill Detail
 
@@ -180,20 +180,28 @@ Jokainen rivi sisältää `rawUrl` sarakkeen, jotta agentit voivat heti hakea ko
 
 ---
 
-## REST API (täydentävä)
+## REST API (apu)
 
-JSON-RPC-päätepiste `/a2a` on ensisijainen A2A-käyttöpiste. Alla olevat REST-päätepisteet tarjoavat täydentävän käyttöliittymän koontinäytöille ja ulkoisille työkaluille:
+JSON-RPC-päätepiste `/a2a` on kanoninen A2A tulopiste. Alla olevat REST päätepisteet tarjoavat lisäpääsyn kojelaudoille ja ulkoisille työkaluille:
 
-| Päätepiste                   | Menetelmä | Kuvaus                                                          | Todennus                                     |
-| :--------------------------- | :-------- | :-------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET       | Palvelimen tila, rekisteröidyt taidot                           | (julkinen)                                   |
-| `/api/a2a/tasks`             | GET       | Tehtävien luettelo suodattimilla                                | hallinta                                     |
-| `/api/a2a/tasks/[id]`        | GET       | Hae tehtävä tunnuksen perusteella                               | hallinta                                     |
-| `/api/a2a/tasks/[id]/cancel` | POST      | Peruuta käynnissä oleva tehtävä                                 | hallinta                                     |
-| `/.well-known/agent.json`    | GET       | Agenttikortti (A2A-haku)                                        | (julkinen, välimuistissa 3600 s)             |
-| `/api/a2a/tasks`             | POST      | Saapuva delegointi OmniConductor-kalustolle (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Päätepiste                   | Menetelmä | Kuvaus                                                           | Tod                                                                                                        |
+| :--------------------------- | :-------- | :--------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET       | Palvelimen tila, rekisteröidyt taidot                            | (julkinen)                                                                                                 |
+| `/api/a2a/tasks`             | GET       | Listaa tehtävät suodattimilla                                    | hallinta tai API -avain (katso alla)                                                                       |
+| `/api/a2a/tasks/[id]`        | GET       | Hae tehtävä ID                                                   | hallinta tai API -avain (katso alla)                                                                       |
+| `/api/a2a/tasks/[id]/cancel` | POST      | Peruuta käynnissä oleva tehtävä                                  | hallinta tai API -avain (katso alla)                                                                       |
+| `/.well-known/agent.json`    | GET       | Agenttikortti (A2A -löytö)                                       | (julkinen, välimuistissa 3600s)                                                                            |
+| `/api/a2a/tasks`             | POST      | Saapuva delegaatio OmniConductor -laivastoon (Conductor PRD RF5) | sama kuin `GET`, plus `OMNIROUTE_API_KEY` jos asetettu, kun `REQUIRE_API_KEY` on pois päältä; `a2aEnabled` |
 
-**Saapuva Conductor-delegointi (`POST /api/a2a/tasks`):** ulkoiset A2A-agentit delegoivat ohjelmointityötä OmniConductor-kalustolle OmniRouten kautta. Runko: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — vain Conductor-kaluston taidot (Agent Cardissa ilmoitetut) ovat delegoitavissa; `metadata.conductor.repo.url` on pakollinen (kalusto työskentelee git-repositorioiden parissa). Reitti muunnetaan keskittimen `POST /v1/tasks` -pyynnöksi käyttämällä palvelinpuolen `CONDUCTOR_ORCHESTRATOR_TOKEN`-tunnusta (varalla `CONDUCTOR_HUB_TOKEN`) ja palauttaa vastauksen `201 { conductor_task_id, state: "submitted" }`; tehtävien tilat välittyvät takaisin SSE→A2A-peilauksen (RF1) kautta ja näkyvät pyynnöllä `GET /api/a2a/tasks?skill=conductor`.
+Kuka pääsee `/api/a2a/tasks*` -reiteille, riippuu kirjautumis- ja API-avaimen asetuksista:
+
+- `requireLogin=true` (oletus): väliohjelmisto hyväksyy vain hallintatiedot (kojelautaistunto, `manage` -scope API avain, `oma_` -käyttöoikeustunnus) ja `OMNIROUTE_API_KEY`. Tavallinen päättelyavain saa `403`. `Authorization` otsikossa väliohjelmisto ottaa `OMNIROUTE_API_KEY` vain nimellä `Bearer <key>`; paljas avain tai sarkain `Bearer` jälkeen saa `401`.
+- `requireLogin=false` tai silmukkaikkuna ennen käyttöönottoa: `REQUIRE_API_KEY=true` llä kaikki kelvolliset OmniRoute API -avain- tai hallintatiedot hyväksytään ja anonyymit soittajat saavat `401`; `REQUIRE_API_KEY` pois reitit ovat auki.
+- `POST /api/a2a/tasks` vaatii lisäksi `OMNIROUTE_API_KEY` `Authorization` -otsikossa, kun kyseinen muuttuja on asetettu ja `REQUIRE_API_KEY` on pois päältä. Muita otsikoita, kuten `x-api-key`, ei lasketa mukaan. Kun kirjautuminen on pois päältä tai ennen käyttöönottoa, avain kulkee `Bearer` etuliitteellä tai ilman; Kun kirjautuminen on päällä, vain `Bearer <key>` pääsee väliohjelmiston ohi.
+
+Kun valtuustieto vaaditaan, `read` -scope `oma_` -tunnus toimii vain `GET`.
+
+**Saapuvien johtajien delegaatio (`POST /api/a2a/tasks`):** ulkoiset A2A agentit delegoivat koodaustyöt OmniConductor laivastolle OmniRoute kautta. Runko: vain `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Kapellimestari taidot (agenttikortilla ilmoitetut) ovat siirrettävissä; `metadata.conductor.repo.url` vaaditaan (laivasto toimii git repoissa). Reitti muuttuu keskittimen `POST /v1/tasks` ksi käyttämällä palvelinpuolen `CONDUCTOR_ORCHESTRATOR_TOKEN` (varausvaihtoehto `CONDUCTOR_HUB_TOKEN`) ja palauttaa `201 { conductor_task_id, state: "submitted" }`; tehtävätilat virtaavat takaisin SSE→A2A peilin (RF1) läpi ja ovat näkyvissä `GET /api/a2a/tasks?skill=conductor` kautta .
 
 ---
 
@@ -201,16 +209,16 @@ JSON-RPC-päätepiste `/a2a` on ensisijainen A2A-käyttöpiste. Alla olevat REST
 
 1. **Luo taitotiedosto:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Vie asynkroninen funktio `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Seuraa olemassa olevien taitojen, kuten `smartRouting.ts` muotoa.
+   Vie asynkroninen funktio `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Seuraa olemassa olevien taitojen, kuten `smartRouting.ts` muotoa. Jos taito kutsuu takaisin OmniRoute HTTP kautta, rakenna otsikot `buildSelfLoopHeaders(caller)` llä `src/lib/a2a/selfLoopAuth.ts` :stä, jotta puhelu suoritetaan A2A -soittajan avaimella, ei `OMNIROUTE_API_KEY`, ja välitä `redirect: "error"` `fetch` lle, jotta uudelleenohjaus ei koskaan saa avainta. Auttaja rakentaa vain otsikot; jokainen taito määrittää itse uudelleenohjauskäytännön. Se heittää `UnsafeSelfLoopTargetError` avaimen liittämisen sijaan, kun ratkaistu perus- URL on pelkkä http yksityisen verkon ulkopuolella (palautus, säilön tai palvelun nimi ja yksityiset osoitteet ovat kunnossa) tai sillä on valtuustiedot, joten taidon, joka nielee hylätyt puhelut, on poistettava tämä virhe.
 
 2. **Rekisterinpitäjä:** `src/lib/a2a/taskExecution.ts`:ssa lisää merkintä `A2A_SKILL_HANDLERS`:hen:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```

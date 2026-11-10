@@ -411,7 +411,15 @@ export async function executeTargetAttempt(
         deps.clientRequestedStream,
         deps.log,
         deps.config.responseValidation as ResponseValidationConfig | null | undefined,
-        preContentTransportRecovery ? deps.signal : null,
+        targetSignal
+          ? preContentTransportRecovery
+            ? AbortSignal.any(
+                [deps.signal, targetSignal].filter((signal): signal is AbortSignal => !!signal)
+              )
+            : targetSignal
+          : preContentTransportRecovery
+            ? deps.signal
+            : null,
         await isTrustedEmptyTurn(provider, result, target.connectionId),
         preContentTransportRecovery
       );
@@ -420,6 +428,14 @@ export async function executeTargetAttempt(
         void quality.clonedResponse?.body?.cancel().catch(() => {});
         releaseRejectedQualityResponse(qualityClone, result);
         return { ok: false, response: errorResponse(499, "Client disconnected") };
+      }
+      // The per-target timers are gone once the first-output gate passed, so an abort here comes
+      // from the parent (a hedge sibling won, a fatal sibling, or the loop safety). The quality
+      // peek reports such an abort as valid; it is not a success of this target.
+      if (targetSignal?.aborted) {
+        void quality.clonedResponse?.body?.cancel().catch(() => {});
+        releaseRejectedQualityResponse(qualityClone, result);
+        return null;
       }
       if (!quality.valid) {
         releaseRejectedQualityResponse(qualityClone, result);
