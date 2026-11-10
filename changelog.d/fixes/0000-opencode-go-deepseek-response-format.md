@@ -1,1 +1,0 @@
-- **fix(sse):** Structured-output requests (`response_format`) to OpenCode Go deepseek models no longer fail with an unclassifiable 400; the field is dropped for that model family on that relay.

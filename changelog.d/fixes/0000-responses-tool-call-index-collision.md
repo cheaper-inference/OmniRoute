@@ -1,1 +1,0 @@
-- **fix(sse):** Chat-to-Responses streams no longer give two tool calls the same `output_index` when a text message that moved to a later index sits between them. The third call used to reuse the second call's index, so a client could drop one call. Follow-up to [#19006](https://github.com/cheaper-inference/OmniRoute/pull/19006).
