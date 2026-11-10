@@ -16,6 +16,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROUTE_FILE = path.resolve("src/app/api/providers/[id]/test/route.ts");
+// #15201: the helper moved out of route.ts (frozen file-size ceiling) into this leaf.
+const HELPER_FILE = path.resolve("src/app/api/providers/[id]/test/cliRuntimeProviderMap.ts");
 
 test("#2247 — route.ts exposes Qoder PAT disambiguation message", () => {
   const source = fs.readFileSync(ROUTE_FILE, "utf8");
@@ -29,10 +31,14 @@ test("#2247 — route.ts exposes Qoder PAT disambiguation message", () => {
 });
 
 test("#2247 — hasQoderToken helper detects connection-level apiKey", () => {
-  const source = fs.readFileSync(ROUTE_FILE, "utf8");
+  const source = fs.readFileSync(HELPER_FILE, "utf8");
   // Helper must be exported as a function so the dis-ambiguation branch
   // resolves the token presence correctly.
-  assert.match(source, /function hasQoderToken\(connection: any\): boolean/);
+  assert.match(source, /export function hasQoderToken\(connection: any\): boolean/);
+  assert.match(
+    fs.readFileSync(ROUTE_FILE, "utf8"),
+    /import \{[^}]*hasQoderToken[^}]*\} from "\.\/cliRuntimeProviderMap"/
+  );
   // It checks both apiKey and providerSpecificData.{personalAccessToken,pat,accessToken}
   assert.match(source, /connection\?\.apiKey/);
   assert.match(source, /personalAccessToken/);
