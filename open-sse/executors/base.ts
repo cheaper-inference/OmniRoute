@@ -150,7 +150,10 @@ import {
   clampTopLevelMaxTokens,
   getLearnedMaxTokensCap,
 } from "../services/learnedMaxTokensCaps.ts";
-import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
+import {
+  applyFieldDowngradeRecovery,
+  getLearnedStrippedFields,
+} from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
 import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
 
@@ -910,6 +913,11 @@ export class BaseExecutor {
     const strippedFields = new Set<string>();
     // Explicit per-key tiers are policy, not optional compatibility hints.
     const forcedCodexTier = this.provider === "codex" && getApiKeyCodexServiceTier(credentials);
+    // Fields an earlier request to this provider and model learned the upstream rejects: drop
+    // them before the first send (the strip below runs on every URL). A forced tier stays.
+    for (const field of getLearnedStrippedFields(this.provider, model)) {
+      if (!(forcedCodexTier && field === "service_tier")) strippedFields.add(field);
+    }
     // thinking_budget 400 clamp-and-retry below: upstream's learned max applied to
     // later retry URLs (bounded per URL); also recorded via recordLearnedThinkingCap.
     let thinkingBudgetClampedMax: number | null = null;
