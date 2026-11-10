@@ -1,0 +1,1 @@
+- **perf(providers):** resolving a provider alias or id is now one map lookup instead of a scan of the whole provider catalog on every routing step. ([#19724](https://github.com/cheaper-inference/OmniRoute/pull/19724))

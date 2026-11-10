@@ -1,1 +1,0 @@
-- **fix(resilience):** a circuit breaker with `halfOpenRequests` above 1 now needs that many probe successes in a row before it closes, so one lucky probe no longer restores a flapping provider.

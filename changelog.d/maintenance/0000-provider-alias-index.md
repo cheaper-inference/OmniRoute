@@ -1,1 +1,0 @@
-- **perf(providers):** resolving a provider alias or id is now one map lookup instead of a scan of the whole provider catalog on every routing step.
