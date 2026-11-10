@@ -13,7 +13,10 @@ import { buildQoderCliNotFoundHint } from "@omniroute/open-sse/services/qoderCli
 // Use the shared open-sse token refresh with built-in dedup/race-condition cache
 import { getAccessToken, isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh.ts";
 import { isMuseDcaToken } from "@omniroute/open-sse/config/museCode.ts";
-import { redactVerificationUrls } from "@omniroute/open-sse/services/antigravityVerification.ts";
+import {
+  readStoredVerificationUrl,
+  redactVerificationUrls,
+} from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   clearAntigravityVerificationUrl,
   recordAntigravityVerificationUrl,
@@ -847,6 +850,7 @@ export async function testOAuthConnection(
           ? await res.text().catch(() => "")
           : "";
 
+    let recordedVerificationUrl: string | null = null;
     if (connection.provider === "antigravity" || connection.provider === "agy") {
       console.log(
         `[OAuthTest] ${connection.provider} probe returned HTTP ${res.status}:`,
@@ -855,13 +859,14 @@ export async function testOAuthConnection(
       // The probe is the only place the dashboard Test and the hourly credential-health run
       // see Google's raw 403, so keep its "verify your account" link for the Verify button.
       if (res.status === 403) {
-        await recordAntigravityVerificationUrl({
+        recordedVerificationUrl = await recordAntigravityVerificationUrl({
           provider: connection.provider,
           connectionId: connection.id,
           upstreamErrorBody: bodyText,
           message: "",
         }).catch(() => {
           console.warn("[OAuthTest] Could not store the antigravity verification link");
+          return null;
         });
       }
     }
@@ -888,22 +893,45 @@ export async function testOAuthConnection(
       connection.provider === "gitlab-duo" && res.status === 403
         ? `Access denied: ${sanitizeUpstreamBodyText(bodyText)}`
         : "Access denied";
+    const storedVUrl =
+      (connection.provider === "antigravity" || connection.provider === "agy") && res.status === 403
+        ? (recordedVerificationUrl ?? readStoredVerificationUrl(connection.providerSpecificData))
+        : null;
+
+    const isVerificationChallenge = Boolean(storedVUrl);
+    const isAgeVerification = Boolean(storedVUrl && storedVUrl.includes("age-verification"));
+
+    const verificationErrorMessage = isAgeVerification
+      ? "Age verification required by Google (https://myaccount.google.com/age-verification). Click the verification button to unlock."
+      : "Account verification required by Google. Click the verification button to unlock.";
+
     const error = isGeoBlockedError(bodyText)
       ? "Egress location blocked by Google (User location is not supported). The Cloud Code API is not offered from this server's proxy exit region — route antigravity/agy through a proxy in a supported region (e.g. US/EU) or use a different provider. This is NOT an account problem."
       : isAccountDeactivatedMessage(bodyText)
         ? "Account deactivated by the provider"
-        : res.status === 401
-          ? "Token invalid or revoked"
-          : res.status === 403
-            ? gitlabDuoAccessDeniedMessage
-            : `API returned ${res.status}${upstreamDetail}`;
+        : isVerificationChallenge
+          ? verificationErrorMessage
+          : res.status === 401
+            ? "Token invalid or revoked"
+            : res.status === 403
+              ? gitlabDuoAccessDeniedMessage
+              : `API returned ${res.status}${upstreamDetail}`;
+
+    const diagnosis = isVerificationChallenge
+      ? makeDiagnosis(
+          isAgeVerification ? "age_verification_required" : "verification_required",
+          "upstream",
+          verificationErrorMessage,
+          isAgeVerification ? "age_verification_required" : "verification_required"
+        )
+      : classifyFailure({ error, statusCode: res.status });
 
     return {
       valid: false,
       error,
       refreshed,
       statusCode: res.status,
-      diagnosis: classifyFailure({ error, statusCode: res.status }),
+      diagnosis,
     };
   } catch (err) {
     // AbortSignal.timeout(...) surfaces as an AbortError/TimeoutError once the probe

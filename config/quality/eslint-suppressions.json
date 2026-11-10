@@ -326,11 +326,6 @@
       "count": 1
     }
   },
-  "open-sse/services/antigravityProjectBootstrap.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "open-sse/services/antigravityQuotaFamily.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -681,11 +676,6 @@
   "src/app/(dashboard)/dashboard/providers/[id]/components/CompatibleModelsSection.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "src/app/(dashboard)/dashboard/providers/[id]/components/ConnectionRow.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
     }
   },
   "src/app/(dashboard)/dashboard/providers/[id]/components/ConnectionsHeaderToolbar.tsx": {
