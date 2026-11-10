@@ -26,10 +26,8 @@ const {
   exportModelLockoutStateForPersistence,
   restoreModelLockoutStateForPersistence,
 } = await import("../../open-sse/services/accountFallback.ts");
-const {
-  serializeModelLockoutState,
-  parsePersistedModelLockoutState,
-} = await import("../../open-sse/services/accountFallback/lockoutPersistence.ts");
+const { serializeModelLockoutState, parsePersistedModelLockoutState } =
+  await import("../../open-sse/services/accountFallback/lockoutPersistence.ts");
 const {
   saveModelLockoutSnapshotToDb,
   restoreModelLockoutsFromDb,
@@ -55,7 +53,13 @@ test("serialize/parse roundtrip preserves lockout and failure entries", () => {
     lockouts: [
       [
         "openai::conn-1::gpt-x",
-        { until: now + 60_000, lockedAt: now, failureCount: 2, lastFailureAt: now, resetAfterMs: 300_000 },
+        {
+          until: now + 60_000,
+          lockedAt: now,
+          failureCount: 2,
+          lastFailureAt: now,
+          resetAfterMs: 300_000,
+        },
       ],
     ],
     failures: [
@@ -91,7 +95,13 @@ test("parse rejects malformed payloads without throwing", () => {
       ["bad", { until: "soon", lockedAt: 1, failureCount: 1, lastFailureAt: 1, resetAfterMs: 1 }],
       [
         "good",
-        { until: Date.now() + 60_000, lockedAt: 1, failureCount: 1, lastFailureAt: 1, resetAfterMs: 1 },
+        {
+          until: Date.now() + 60_000,
+          lockedAt: 1,
+          failureCount: 1,
+          lastFailureAt: 1,
+          resetAfterMs: 1,
+        },
       ],
     ],
     failures: [["bad", { failureCount: "two", lastFailureAt: 1, resetAfterMs: 1 }]],
@@ -123,18 +133,56 @@ test("restore drops already-expired lockouts and out-of-window failure state", (
 
   const restored = restoreModelLockoutStateForPersistence(
     [
-      ["k-live", { until: now + 120_000, lockedAt: now, failureCount: 1, lastFailureAt: now, resetAfterMs: 300_000 }],
-      ["k-expired", { until: now - 1_000, lockedAt: now, failureCount: 1, lastFailureAt: now, resetAfterMs: 300_000 }],
+      [
+        "k-live",
+        {
+          until: now + 120_000,
+          lockedAt: now,
+          failureCount: 1,
+          lastFailureAt: now,
+          resetAfterMs: 300_000,
+        },
+      ],
+      [
+        "k-expired",
+        {
+          until: now - 1_000,
+          lockedAt: now,
+          failureCount: 1,
+          lastFailureAt: now,
+          resetAfterMs: 300_000,
+        },
+      ],
     ],
     [
       // Still inside the escalation window — kept.
-      ["k-live", { failureCount: 3, lastFailureAt: now - 1_000, resetAfterMs: 300_000, lastCooldownMs: 10_000 }],
+      [
+        "k-live",
+        {
+          failureCount: 3,
+          lastFailureAt: now - 1_000,
+          resetAfterMs: 300_000,
+          lastCooldownMs: 10_000,
+        },
+      ],
       // Escalation window long over — restoring it would wrongly keep counts alive.
-      ["k-expired", { failureCount: 9, lastFailureAt: now - 10 * 60_000, resetAfterMs: 300_000, lastCooldownMs: 10_000 }],
+      [
+        "k-expired",
+        {
+          failureCount: 9,
+          lastFailureAt: now - 10 * 60_000,
+          resetAfterMs: 300_000,
+          lastCooldownMs: 10_000,
+        },
+      ],
     ]
   );
   assert.equal(restored, 1, "only the still-active lockout re-arms");
-  assert.equal(isModelLocked("openai", "anything", "whatever"), false, "raw-key restore is not name-addressable here; count is the contract");
+  assert.equal(
+    isModelLocked("openai", "anything", "whatever"),
+    false,
+    "raw-key restore is not name-addressable here; count is the contract"
+  );
 });
 
 test("restored failure state keeps escalation across a restart", () => {
@@ -163,7 +211,9 @@ test("DB snapshot roundtrip survives a simulated restart and drops expired entri
   assert.equal(saveModelLockoutSnapshotToDb(), true);
 
   const row = getDbInstance()
-    .prepare("SELECT value FROM key_value WHERE namespace = 'resilience' AND key = 'modelLockoutState'")
+    .prepare(
+      "SELECT value FROM key_value WHERE namespace = 'resilience' AND key = 'modelLockoutState'"
+    )
     .get() as { value: string } | undefined;
   assert.ok(row, "snapshot must be persisted in key_value");
 
