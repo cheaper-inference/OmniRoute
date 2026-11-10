@@ -1,1 +1,0 @@
-- **fix(audit):** Creating and deleting an API key now writes an audit row (action, key id, key name; never the key value).
