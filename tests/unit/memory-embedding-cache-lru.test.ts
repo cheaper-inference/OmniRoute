@@ -7,10 +7,13 @@ const dateNow = Date as unknown as { now: () => number };
 
 describe("memory-embedding-cache least-recently-used eviction", () => {
   const origMax = process.env.MEMORY_EMBEDDING_CACHE_MAX;
+  const origTtl = process.env.MEMORY_EMBEDDING_CACHE_TTL_MS;
   const origNow = Date.now;
 
   beforeEach(() => {
     process.env.MEMORY_EMBEDDING_CACHE_MAX = "2";
+    // The TTL test below reads at 200_000 ms and 360_000 ms: pin the 300_000 ms default.
+    process.env.MEMORY_EMBEDDING_CACHE_TTL_MS = "300000";
     invalidate();
   });
 
@@ -18,6 +21,8 @@ describe("memory-embedding-cache least-recently-used eviction", () => {
     dateNow.now = origNow;
     if (origMax === undefined) delete process.env.MEMORY_EMBEDDING_CACHE_MAX;
     else process.env.MEMORY_EMBEDDING_CACHE_MAX = origMax;
+    if (origTtl === undefined) delete process.env.MEMORY_EMBEDDING_CACHE_TTL_MS;
+    else process.env.MEMORY_EMBEDDING_CACHE_TTL_MS = origTtl;
     invalidate();
   });
 

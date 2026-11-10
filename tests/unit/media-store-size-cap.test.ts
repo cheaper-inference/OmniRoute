@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-media-cap-"));
+const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const mediaStore = await import("../../src/lib/media/mediaStore.ts");
@@ -18,6 +19,9 @@ test.beforeEach(() => {
 });
 
 test.after(() => {
+  // Files can share one process (test:unit:fast): do not leave DATA_DIR on the deleted directory.
+  if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
@@ -89,4 +93,43 @@ test("writeMediaFile bounds the media directory with the built-in cap, with noth
   assert.ok(resolveMediaPath(id!), "the new file must stay");
   assert.equal(resolveMediaPath(oldest), null, "the oldest file must be evicted by the size cap");
   assert.ok(resolveMediaPath(middle), "the next file fits under the cap and must stay");
+});
+
+// Equal mtimes make "the newest file" ambiguous. The file writeMediaFile just returned must be
+// protected by its id, whatever the sort order of files that share an mtime.
+test("pruneExpiredMedia protects the file named by id when every mtime is equal", () => {
+  const ids = ["a", "b", "c", "d", "e", "f"].map((name) => plant(name, 10, 10));
+
+  for (const keep of ids) {
+    // 60 bytes against a 25 byte cap: some files must go, but never `keep`.
+    for (const id of ids) fs.closeSync(fs.openSync(path.join(MEDIA_DIR as string, id), "a"));
+    pruneExpiredMedia(Date.now(), 25, keep);
+    assert.ok(resolveMediaPath(keep), `${keep} was named as just written and must stay`);
+    // Put the evicted files back for the next round.
+    for (const id of ids) {
+      const file = path.join(MEDIA_DIR as string, id);
+      if (!fs.existsSync(file)) {
+        fs.closeSync(fs.openSync(file, "w"));
+        fs.truncateSync(file, 10);
+        const when = new Date(Date.now() - 10 * HOUR_MS);
+        fs.utimesSync(file, when, when);
+      }
+    }
+  }
+});
+
+test("writeMediaFile never returns an id whose file its own size cap just evicted", () => {
+  const GIB = 1024 ** 3;
+  // Two files that are NEWER than the one about to be written, together over the cap: the new
+  // file sorts first, so a "newest stays" rule would delete it and still hand back its id.
+  for (const name of ["a", "b"]) {
+    const id = plant(name, 1.5 * GIB, 0);
+    const later = new Date(Date.now() + HOUR_MS);
+    fs.utimesSync(path.join(MEDIA_DIR as string, id), later, later);
+  }
+
+  const id = writeMediaFile(Buffer.from("fresh clip"), "mp4", NO_OWNER_TAG);
+
+  assert.ok(id, "media should be stored");
+  assert.ok(resolveMediaPath(id!), "the id that writeMediaFile returned must resolve to a file");
 });
