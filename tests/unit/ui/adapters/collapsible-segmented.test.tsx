@@ -83,6 +83,11 @@ describe("Collapsible / CollapsibleSection / SegmentedControl adapters", () => {
     expect(list.className).toContain("sm:w-auto");
     expect(list.className).toContain("[&>*]:flex-1");
     expect(list.className).toContain("sm:[&>*]:flex-none");
+    // #18068: at 390 px a long set (Endpoint: APIs/MCP/A2A/Context Sources) wrapped the capsule
+    // onto two lines. It stays one line and scrolls sideways instead.
+    expect(list.className).not.toMatch(/(^|\s)flex-wrap(\s|$)/);
+    expect(list.className).toContain("flex-nowrap");
+    expect(list.className).toContain("overflow-x-auto");
     for (const tab of screen.getAllByRole("tab")) {
       expect(tab.className).toContain("h-7");
       // The kit capsule trigger has a ~30px min-height that would beat h-7 alone.

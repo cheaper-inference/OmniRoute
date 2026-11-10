@@ -10,6 +10,7 @@
 import { getProviderAlias } from "@/shared/constants/providers";
 import { isLoopbackNodeHost } from "@/shared/network/loopbackNodeHost";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import { RENDERHOUR_SPEECH_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
 import {
   toRegistrySpeechModels as toSyntxSpeechModels,
   toRegistryTranscriptionModels as toSyntxTranscriptionModels,
@@ -170,6 +171,19 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "bearer",
     format: "openai",
     models: [{ id: "whisper", name: "Pollinations Whisper (Free)" }],
+  },
+
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    // Ct2 adds native word-level timestamps and diarized_json.
+    models: [
+      { id: "WhisperLargeV3Ct2", name: "Whisper Large v3 CT2 (deAPI)" },
+      { id: "WhisperLargeV3", name: "Whisper Large v3 (deAPI)" },
+    ],
   },
 
   together: {
@@ -659,6 +673,24 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     models: [{ id: "speech-2.8-hd", name: "Speech 2.8 HD" }],
   },
 
+  // deAPI maps the OpenAI stock voices (alloy, nova, ...) onto each model's own
+  // voices, so the default "alloy" works on every model; native ids (af_bella,
+  // Vivian, ...) are accepted too. mp3 only. VoiceDesign needs `instructions`.
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    supportedFormats: ["mp3"],
+    models: [
+      { id: "Kokoro", name: "Kokoro (deAPI)" },
+      { id: "Chatterbox", name: "Chatterbox (deAPI)" },
+      { id: "Qwen3_TTS_12Hz_1_7B_CustomVoice", name: "Qwen3 TTS 1.7B (deAPI)" },
+      { id: "Qwen3_TTS_12Hz_1_7B_VoiceDesign", name: "Qwen3 TTS Voice Design (deAPI)" },
+    ],
+  },
+
   together: {
     id: "together",
     baseUrl: "https://api.together.xyz/v1/audio/speech",
@@ -744,6 +776,7 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     format: "syntx-audio",
     models: toSyntxSpeechModels(),
   },
+  renderhour: RENDERHOUR_SPEECH_PROVIDER,
 };
 
 /**
