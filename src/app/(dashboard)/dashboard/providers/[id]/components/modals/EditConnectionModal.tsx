@@ -1467,6 +1467,7 @@ export default function EditConnectionModal({
         {isGlm && (
           <div className="flex flex-col gap-3">
             <Select
+              native
               label={t("apiRegionLabel")}
               hint={t("apiRegionHint")}
               value={formData.apiRegion}

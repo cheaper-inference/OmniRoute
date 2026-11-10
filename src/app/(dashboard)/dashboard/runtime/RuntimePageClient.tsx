@@ -827,6 +827,7 @@ export default function RuntimePageClient() {
             trailing={
               <div className="flex items-center gap-1.5">
                 <Select
+                  native
                   compact
                   aria-label={t("feedFilterLabel")}
                   value={feedFilter}
