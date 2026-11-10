@@ -256,6 +256,11 @@ let autoLatencyStatsCache: {
 } | null = null;
 let autoLatencyStatsInFlight: Promise<Record<string, HistoricalLatencyStatsEntry>> | null = null;
 
+/** Test-only: forget the cached 24-hour latency stats read. */
+export function resetAutoLatencyStatsCache(): void {
+  autoLatencyStatsCache = null;
+}
+
 async function loadAutoLatencyStats(): Promise<Record<string, HistoricalLatencyStatsEntry>> {
   if (autoLatencyStatsCache && autoLatencyStatsCache.expiresAt > Date.now()) {
     return autoLatencyStatsCache.stats;

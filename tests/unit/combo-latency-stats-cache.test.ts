@@ -8,7 +8,8 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-combo-lat
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
-const { buildAutoCandidates } = await import("../../open-sse/services/combo.ts");
+const { buildAutoCandidates, resetAutoLatencyStatsCache } =
+  await import("../../open-sse/services/combo.ts");
 
 const target = {
   kind: "model" as const,
@@ -28,6 +29,9 @@ test.after(() => {
 });
 
 test("buildAutoCandidates coalesces and reuses the 24-hour latency stats read", async () => {
+  // Another test file in a shared process (--test-isolation=none) may have warmed the cache.
+  await buildAutoCandidates([target], "latency-cache-warm");
+  resetAutoLatencyStatsCache();
   const db = core.getDbInstance() as unknown as { prepare: (sql: string) => unknown };
   const originalPrepare = db.prepare.bind(db);
   let statsReads = 0;
