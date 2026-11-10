@@ -88,6 +88,24 @@ export function stripTrailingAssistantTurns(
   return { messages: current, removedTurns, noUserTurn: false };
 }
 
+/** Trim the last text block; a tail text block that trims to empty is removed (repeat). */
+function trimFinalTextBlocks(
+  content: Array<Record<string, unknown> | null>
+): Array<Record<string, unknown> | null> {
+  const blocks = [...content];
+  let tail = blocks.at(-1);
+  while (tail?.type === "text") {
+    const text = typeof tail.text === "string" ? tail.text.trimEnd() : "";
+    if (text) {
+      blocks[blocks.length - 1] = { ...tail, text };
+      break;
+    }
+    blocks.pop();
+    tail = blocks.at(-1);
+  }
+  return blocks;
+}
+
 /**
  * Anthropic reads an assistant-last turn as a prefill and rejects it with
  *   400 "final assistant content cannot end with trailing whitespace".
@@ -105,16 +123,7 @@ export function normalizeClaudeFinalAssistantWhitespace(
   if (typeof last.content === "string") {
     content = last.content.trimEnd();
   } else if (Array.isArray(last.content)) {
-    const blocks = [...(last.content as Array<Record<string, unknown> | null>)];
-    for (let tail = blocks[blocks.length - 1]; tail?.type === "text"; tail = blocks.at(-1)) {
-      const text = typeof tail.text === "string" ? tail.text.trimEnd() : "";
-      if (text) {
-        blocks[blocks.length - 1] = { ...tail, text };
-        break;
-      }
-      blocks.pop();
-    }
-    content = blocks;
+    content = trimFinalTextBlocks(last.content as Array<Record<string, unknown> | null>);
   } else {
     return messages;
   }
