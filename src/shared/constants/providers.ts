@@ -69,6 +69,7 @@ const DUAL_AUTH_PROVIDER_IDS = new Set([
   "muse-code",
   "cline",
   "kilocode",
+  "renderhour",
   "megabrain",
   "freebuff",
 ]);

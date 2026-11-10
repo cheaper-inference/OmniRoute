@@ -33,7 +33,7 @@ const INV = KIT.dark;
 // The gate-checked provider total (scripts/check/check-docs-counts-sync.mjs reads
 // "<n> providers" from the title); the health line and the "… N more providers" footer of the
 // providers screen derive from it so the three numbers can never disagree.
-const PROVIDER_TOTAL = 388;
+const PROVIDER_TOTAL = 390;
 
 // The three screens: command, then header + 4 lines + a dim footer line. Segments are plain
 // strings or { t, c } with c ∈ ok | warn | err | dim.
@@ -94,7 +94,7 @@ const SCREENS = [
     typing: "0;0.348;0.351;0.357;0.363;0.369;0.375;0.381;0.387;1",
     caret: "0;0.344;0.348;0.355;0.365;0.375;0.385;0.407;1",
     group: { values: "0;0;1;1;0;0", keyTimes: "0;0.333;0.348;0.648;0.663;1" },
-    reveal: ["0.378;0.38", "0.386;0.388", "0.394;0.396", "0.402;0.404", "0.41;0.412", "0.418;0.42"],
+    reveal: ["0.378;0.38", "0.386;0.390", "0.394;0.396", "0.402;0.404", "0.41;0.412", "0.418;0.42"],
   },
   {
     cmd: "omniroute health",
