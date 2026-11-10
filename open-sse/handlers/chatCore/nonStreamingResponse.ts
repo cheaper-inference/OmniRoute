@@ -1233,6 +1233,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       persistAttemptLogs({
         status: HTTP_STATUS.BAD_GATEWAY,
         error: result.error,
+        upstreamHttpSelection,
         providerRequest: finalBody || translatedBody,
         clientResponse: buildErrorBody(
           HTTP_STATUS.BAD_GATEWAY,
@@ -1263,6 +1264,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           status: HTTP_STATUS.BAD_GATEWAY,
           finishReason: null,
           connectionId: credentials?.connectionId ?? null,
+          apiKeyId: apiKeyInfo?.id ?? null,
         })
       );
       return {

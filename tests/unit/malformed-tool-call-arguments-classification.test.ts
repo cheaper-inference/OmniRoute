@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { normalizeHeaders } from "../../open-sse/utils/headers.ts";
 import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 // A provider that answers 200 with malformed tool-call arguments is reachable and
 // healthy at the transport level; only that response is unusable. The non-streaming
@@ -11,8 +12,15 @@ import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.t
 // and combo fallback to the next target without counting a provider failure.
 
 const harness = await createChatPipelineHarness("malformed-tool-args");
-const { BaseExecutor, buildClaudeResponse, combosDb, getLatestCallLog, resetStorage, settingsDb } =
-  harness;
+const {
+  BaseExecutor,
+  buildClaudeResponse,
+  callLogsDb,
+  combosDb,
+  resetStorage,
+  settingsDb,
+  waitFor,
+} = harness;
 const providersDb = await import("../../src/lib/db/providers.ts");
 const { getCircuitBreaker, STATE } = await import("../../src/shared/utils/circuitBreaker.ts");
 const { getAllModelLockouts } = await import("../../open-sse/services/accountFallback.ts");
@@ -121,11 +129,19 @@ function mockUpstream(mode: () => UpstreamMode) {
   };
 }
 
-const postMessages = (model: string, content = "use a tool") =>
+const postMessages = (
+  model: string,
+  content = "use a tool",
+  extraHeaders: Record<string, string> = {}
+) =>
   messagesRoute.POST(
     new Request("http://localhost/v1/messages", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-omniroute-no-cache": "true" },
+      headers: {
+        "content-type": "application/json",
+        "x-omniroute-no-cache": "true",
+        ...extraHeaders,
+      },
       body: JSON.stringify({
         model,
         max_tokens: 100,
@@ -165,6 +181,21 @@ async function createFallbackCombo(name: string) {
     config: { maxRetries: 0, retryDelayMs: 0 },
     models: ["openai/o3-mini", "claude/claude-sonnet-4.6"],
   });
+}
+
+// Call-log persistence is fire-and-forget (#12780): poll until the latest row has settled
+// instead of reading it once right after the response.
+async function getSettledLatestCallLog() {
+  const rows = await callLogsDb.getCallLogs({ limit: 5 });
+  if (!Array.isArray(rows) || rows.length === 0 || rows[0].detailState === "pending") return null;
+  return callLogsDb.getCallLogById(rows[0].id);
+}
+
+// The breaker leaves OPEN, and frees a consumed HALF_OPEN probe slot, lazily once its reset
+// window lapses. Poll for that instead of sleeping a fixed margin past the window.
+async function waitUntilBreakerAdmits(breaker: { canExecute(): boolean }) {
+  const admitted = await waitFor(() => breaker.canExecute(), 30_000);
+  assert.equal(admitted, true, "the breaker must admit a probe once its reset window lapses");
 }
 
 const openAIModelLockouts = async () => {
@@ -298,7 +329,10 @@ test("a malformed tool call returns a structured, content-free 502", async () =>
   assert.ok(!text.includes(MARKER), "the response must not echo tool-call argument content");
   assert.ok(!text.includes("rm -rf"), "the response must not echo tool-call argument content");
 
-  const log = (await getLatestCallLog()) as Record<string, unknown> | null;
+  const log = (await waitFor(getSettledLatestCallLog, CALL_LOG_SETTLE_TIMEOUT_MS)) as Record<
+    string,
+    unknown
+  > | null;
   assert.equal(log?.status, 502);
   assert.ok(!String(log?.error ?? "").includes(MARKER));
 
@@ -307,6 +341,25 @@ test("a malformed tool call returns a structured, content-free 502", async () =>
     (e) => e.provider === "openai" && e.outcome === "malformed" && e.status === 502
   );
   assert.ok(event, "a malformed routing event must be recorded for the model");
+});
+
+test("the malformed routing event is attributed to the calling API key", async () => {
+  await seedOpenAI();
+  const key = await harness.seedApiKey({ name: "malformed-tool-args-key" });
+  mockUpstream(() => "malformed");
+
+  const response = await postMessages("openai/o3-mini", "attributed", {
+    authorization: `Bearer ${key.key}`,
+  });
+  assert.equal(response.status, 502);
+  await response.arrayBuffer();
+
+  // Every other routing event carries the key since #14736; the malformed branch must too.
+  const event = recentRoutingEvents(50).find(
+    (e) => e.provider === "openai" && e.outcome === "malformed" && e.status === 502
+  );
+  assert.ok(event, "a malformed routing event must be recorded for the model");
+  assert.equal(event.apiKeyId, key.id);
 });
 
 test("repeated malformed responses neither open the breaker nor cool the connection", async () => {
@@ -462,7 +515,7 @@ test("a malformed response to a HALF_OPEN probe neither reopens the breaker nor 
   for (let i = 0; i < FAILURE_THRESHOLD; i++) breaker._onFailure();
   assert.equal(breaker.state, STATE.OPEN);
   const failuresWhenOpened = breaker.failureCount;
-  await new Promise((resolve) => setTimeout(resolve, resetTimeoutMs + 50));
+  await waitUntilBreakerAdmits(breaker);
 
   const probe = await postMessages("openai/o3-mini", "probe");
   await probe.arrayBuffer();
@@ -473,7 +526,7 @@ test("a malformed response to a HALF_OPEN probe neither reopens the breaker nor 
 
   // Once the probe window lapses, a valid probe closes the breaker.
   mode = "valid";
-  await new Promise((resolve) => setTimeout(resolve, resetTimeoutMs + 50));
+  await waitUntilBreakerAdmits(breaker);
   const healthy = await postMessages("openai/o3-mini", "healthy probe");
   await healthy.arrayBuffer();
   assert.equal(healthy.status, 200);
