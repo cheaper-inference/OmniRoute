@@ -1,7 +1,8 @@
 // Earlier #14833 builds shipped agent_sessions / usage_history.agent_session_id as 190/191,
-// 197/198, 198/199, 208/209, 214/215 and 229/230 — slots upstream assigns to its own migrations. A
-// database that ran one of those builds must move its rows to 234/235, keep its sessions, and still receive
-// the upstream migrations of those slots (the runner treats a version as applied by number).
+// 197/198, 198/199, 208/209, 214/215, 230/231 and 229/230 — slots upstream assigns to its own
+// migrations. A database that ran one of those builds must move its rows to 234/235, keep its
+// sessions, and still receive the upstream migrations of those slots (the runner treats a
+// version as applied by number).
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -111,20 +112,24 @@ const HISTORICAL_BUILDS = [
       hasObject(db, "index", "idx_usage_history_billing_team_time"),
   },
   {
+    // 230's CHECK-constrained call_logs columns cannot be dropped; it re-runs as a
+    // duplicate-column no-op, so only 229's column is removed and checked here.
     sessions: "229",
     usage: "230",
     upstream: ["api_key_five_hour_limit", "call_logs_cache_write_tiers"],
     undo: `
       ALTER TABLE api_keys DROP COLUMN five_hour_usage_limit_usd;
-      ALTER TABLE call_logs DROP COLUMN tokens_cache_creation_5m;
-      ALTER TABLE call_logs DROP COLUMN tokens_cache_creation_1h;
-      ALTER TABLE call_logs DROP COLUMN cache_creation_tier_status;
-      ALTER TABLE call_logs DROP COLUMN cache_write_cost_usd;
-      ALTER TABLE call_logs DROP COLUMN cache_write_priced_tokens;
     `,
-    restored: (db: Db) =>
-      columns(db, "api_keys").includes("five_hour_usage_limit_usd") &&
-      columns(db, "call_logs").includes("cache_write_priced_tokens"),
+    restored: (db: Db) => columns(db, "api_keys").includes("five_hour_usage_limit_usd"),
+  },
+  {
+    sessions: "230",
+    usage: "231",
+    upstream: ["call_logs_cache_write_tiers", "daily_cached_input"],
+    undo: `
+      ALTER TABLE daily_usage_summary DROP COLUMN total_cache_read_tokens;
+    `,
+    restored: (db: Db) => columns(db, "daily_usage_summary").includes("total_cache_read_tokens"),
   },
 ];
 

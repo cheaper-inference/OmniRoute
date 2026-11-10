@@ -1,5 +1,5 @@
 // Agent sessions: saveRequestUsage aggregates each attributed request into its session row
-// (234_agent_sessions) and links the usage row to it (235_usage_history_agent_session_id).
+// (229_agent_sessions) and links the usage row to it (230_usage_history_agent_session_id).
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -326,4 +326,31 @@ test("a write deferred by a database lock records the row and its session once, 
   assert.deepEqual(usageSessionIds("key-locked"), [session.id]);
   // The lock is not reported as a failed session write that dropped the attribution.
   assert.deepEqual(warnings, []);
+});
+
+test("client session row ids keep their persisted digest format (CodeQL #1239 migration)", () => {
+  // Vectors are the historical `as_` + sha256(apiKeyId \x1f clientSessionId)[0..32], computed once
+  // with node:crypto. The list filter looks sessions up by this id, so it must never drift.
+  const db = core.getDbInstance();
+  const usage = (apiKeyId: string | null) => ({
+    context: agentContext({ clientSessionId: "sess-pin", projectName: "pin" }),
+    apiKeyId,
+    apiKeyName: null,
+    timestamp: "2026-11-10T10:00:00.000Z",
+    success: true,
+    tokens: { input: 1, output: 1, cacheRead: 0, cacheCreation: 0, reasoning: 0 },
+    costUsd: 0,
+    priced: true,
+    provider: "openai",
+    model: "gpt-4o-mini",
+    connectionId: null,
+  });
+  const keyed = agentSessionsDb.recordAgentSessionUsage(db, usage("key-pin"));
+  assert.equal(keyed, "as_d70a21deaf1ed1a483a227ee1c2d7395");
+  assert.equal(agentSessionsDb.recordAgentSessionUsage(db, usage("key-pin")), keyed);
+  assert.equal(
+    agentSessionsDb.recordAgentSessionUsage(db, usage(null)),
+    "as_d2a4d57f0e77ac878eecd071ab88c4e4"
+  );
+  assert.equal(agentSessionsDb.getAgentSessionById(db, keyed)?.requestCount, 2);
 });

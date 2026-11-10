@@ -319,6 +319,41 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "232",
     toName: "proxy_payload_traffic",
   },
+  // PR #19311 (key policy templates) published key_templates in slots 228, 230, 231,
+  // 232 and 234 before release claimed them (purge_orphaned_provider_catalogs,
+  // call_logs_cache_write_tiers, daily_cached_input, proxy_payload_traffic,
+  // agent_sessions). Rehome those ledger rows to 236 so the canonical release
+  // migrations in the vacated slots still run.
+  {
+    fromVersion: "228",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
+  {
+    fromVersion: "230",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
+  {
+    fromVersion: "231",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
+  {
+    fromVersion: "232",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
+  {
+    fromVersion: "234",
+    fromName: "key_templates",
+    toVersion: "236",
+    toName: "key_templates",
+  },
   // PR #10409 circulated through these draft slots before the current release
   // claimed them. The name guard is mandatory: canonical migrations using the
   // same numbers must never be rehomed as Team state.
@@ -371,46 +406,6 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "recreate_turn_nodes_content_hash_index",
     toVersion: "211",
     toName: "recreate_turn_nodes_content_hash_index",
-  },
-  // The stack builds (#14771, #14833, #14860) shipped 229–231 and later 228–230 before the
-  // release claimed 228–232 (purge_orphaned_provider_catalogs, api_key_five_hour_limit,
-  // call_logs_cache_write_tiers, daily_cached_input, proxy_payload_traffic). They now live
-  // at 233–235, past every slot a published stack build used.
-  {
-    fromVersion: "231",
-    fromName: "usage_history_agent_session_id",
-    toVersion: "235",
-    toName: "usage_history_agent_session_id",
-  },
-  {
-    fromVersion: "230",
-    fromName: "agent_sessions",
-    toVersion: "234",
-    toName: "agent_sessions",
-  },
-  {
-    fromVersion: "229",
-    fromName: "api_key_self_service_settings",
-    toVersion: "233",
-    toName: "api_key_self_service_settings",
-  },
-  {
-    fromVersion: "228",
-    fromName: "api_key_self_service_settings",
-    toVersion: "233",
-    toName: "api_key_self_service_settings",
-  },
-  {
-    fromVersion: "229",
-    fromName: "agent_sessions",
-    toVersion: "234",
-    toName: "agent_sessions",
-  },
-  {
-    fromVersion: "230",
-    fromName: "usage_history_agent_session_id",
-    toVersion: "235",
-    toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "134",
@@ -506,9 +501,23 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "api_key_self_service_settings",
   },
   {
-    // Agent-session builds (#14833) shipped agent_sessions + usage_history.agent_session_id
-    // as 190/191, then 197/198, 198/199, 208/209 and 214/215. Upstream owns all of those
-    // slots (call_logs_content_provenance … team_cost_centers); they now live at 234/235.
+    // #14771 builds then used 228, now purge_orphaned_provider_catalogs.
+    fromVersion: "228",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // #14771 builds then used 229, now api_key_five_hour_limit.
+    fromVersion: "229",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  // Agent-session builds (#14833) shipped agent_sessions + usage_history.agent_session_id
+  // as 190/191, 197/198, 198/199, 208/209, 214/215, 230/231 and 229/230. Upstream owns all of
+  // those slots; the migrations now live at 234/235. Each entry is name-locked.
+  {
     fromVersion: "190",
     fromName: "agent_sessions",
     toVersion: "234",
@@ -564,6 +573,30 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
   },
   {
     fromVersion: "215",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "229",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "230",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "230",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "231",
     fromName: "usage_history_agent_session_id",
     toVersion: "235",
     toName: "usage_history_agent_session_id",

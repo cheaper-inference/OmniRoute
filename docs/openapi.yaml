@@ -1395,6 +1395,13 @@ paths:
         `xquik_search` resolve to the same provider.
         AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`)
         provides free fallback-only web search.
+        Codex Web Search (`codex-search`, alias `codex_search`) reuses connected
+        Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection
+        (a credentialed last resort before keyless search) needs the
+        `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag, off by default.
+        It spends subscription quota (not a free API), typically takes 10–40 seconds,
+        and uses a 60-second timeout unless the operator sets a lower search timeout.
+        Time range and domain filters are instruction hints, not hard filters.
       security:
         - BearerAuth: []
       requestBody:
@@ -2901,22 +2908,190 @@ paths:
     post:
       tags: [API Keys]
       summary: Create API key
+      description: |
+        Submit the legacy key settings, or name with a complete policy and optional
+        templateRef containing id and revision. Policy-based creation writes the key
+        and related settings atomically. Submitted edits are final; templateRef is
+        provenance and never replaces the policy. The fresh secret is returned once
+        with Cache-Control no-store. Blocking missing references return 422.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [label]
+              required: [name]
               properties:
-                label:
+                name:
                   type: string
+                policy:
+                  type: object
+                  description: Complete schemaVersion, key, related and expiry policy snapshot.
+                templateRef:
+                  type: object
+                  required: [id, revision]
+                  properties:
+                    id:
+                      type: string
+                    revision:
+                      type: integer
+                      minimum: 1
       responses:
         "201":
           description: Created API key (includes full key value)
         "401":
           description: Authentication required
 
+  /api/key-templates:
+    get:
+      tags: [API Keys]
+      summary: List reusable key policy templates
+      description: Requires management authentication. Responses never contain key credentials.
+      responses:
+        "200":
+          description: Healthy templates and unreadable identities; corrupt policies stay stored and deletable by id. Cache-Control is no-store.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [templates, unreadable]
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      type: object
+                  unreadable:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, name, revision, code]
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        revision:
+                          type: integer
+                        code:
+                          type: string
+        "401":
+          description: Authentication required
+    post:
+      tags: [API Keys]
+      summary: Save a policy or an existing key as a template
+      description: |
+        Submit name, optional description, and either a complete policy or fromKeyId.
+        Existing-key capture may require acknowledge with warning codes. Policies include
+        schemaVersion, key, related and relative-or-unlimited expiry. Credentials, identity,
+        usage and history are excluded. Management-granting policies require a credential.
+        Remote CLI tokens need admin scope for mutations; read scope remains sufficient for GET.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                policy:
+                  type: object
+                fromKeyId:
+                  type: string
+                acknowledge:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Object containing template and warnings; Cache-Control is no-store.
+        "400":
+          description: Invalid policy or request
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "409":
+          description: Template name conflict or acknowledgement required
+        "422":
+          description: Existing source policy cannot be captured safely
+  /api/key-templates/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ResourceId"
+    get:
+      tags: [API Keys]
+      summary: Read a template and its reference issues
+      responses:
+        "200":
+          description: Object containing template and referenceIssues; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "404":
+          description: Template not found
+    patch:
+      tags: [API Keys]
+      summary: Edit a template with an optimistic revision check
+      description: Existing keys retain their applied policy snapshot. Remote CLI mutations require admin scope.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [revision]
+              properties:
+                revision:
+                  type: integer
+                  minimum: 1
+                name:
+                  type: string
+                description:
+                  type: string
+                policy:
+                  type: object
+      responses:
+        "200":
+          description: Object containing the updated template; Cache-Control is no-store.
+        "400":
+          description: Invalid policy or request
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "404":
+          description: Template not found
+        "409":
+          description: Revision or name conflict
+    delete:
+      tags: [API Keys]
+      summary: Delete a template without changing existing keys
+      responses:
+        "200":
+          description: Object containing success true; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "403":
+          description: Remote CLI token lacks admin scope
+        "404":
+          description: Template not found
+  /api/keys/{id}/template-policy:
+    get:
+      tags: [API Keys]
+      summary: Preview a key policy without revealing its credential
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Object containing policy, warnings and referenceIssues; Cache-Control is no-store.
+        "401":
+          description: Authentication required
+        "404":
+          description: Key not found
+        "422":
+          description: Source policy contains unreadable or unsupported values
   /api/keys/import:
     post:
       tags: [API Keys]
