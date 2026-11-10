@@ -42,3 +42,10 @@ test("estimateTokens gives supplementary Han (Extension B) characters the CJK we
   const messages = [{ role: "user", content: "\u{2A6D6}".repeat(400) }];
   assert.ok(estimateTokens(messages) >= 300);
 });
+
+test("estimateTokens weights CJK in a repeated (aliased) object like a fresh copy", () => {
+  const shared = { text: "中".repeat(400) };
+  const aliased = [shared, shared];
+  const copies = [{ text: "中".repeat(400) }, { text: "中".repeat(400) }];
+  assert.equal(estimateTokens(aliased), estimateTokens(copies));
+});

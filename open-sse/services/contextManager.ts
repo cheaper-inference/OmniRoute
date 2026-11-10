@@ -400,7 +400,10 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
     // so it was measured raw — no substitution, no budgets. Any aliasing makes
     // per-slot deltas unsound, so pruning callers fall back to recounting.
     if (flags) flags.aliasedObject = true;
-    return { chars: jsonLength(obj), mediaTokens: 0 };
+    // shortcut: builds the JSON string (aliasing only comes from programmatic input, never JSON.parse); add a CJK-aware jsonLength if this ever shows up in a profile.
+    // Throws on a cycle like jsonLength. Raw length plus the CJK weight of its strings.
+    const json = JSON.stringify(obj) ?? "";
+    return { chars: json.length + cjkExtraChars(json), mediaTokens: 0 };
   }
   seen.add(obj);
 
