@@ -57,6 +57,23 @@ describe("ImprovePromptButton", () => {
     expect(btn?.textContent).toContain("Improve prompt");
   });
 
+  // #18071: the ✨ emoji rendered as an empty box without an emoji font.
+  it("draws the sparkle as a Lucide icon in the button and the dialog, not an emoji (#18071)", async () => {
+    const el = renderButton();
+    const btn = el.querySelector("[aria-label='Improve prompt using AI']") as HTMLButtonElement;
+    expect(btn.querySelector("svg[data-icon='auto_awesome']")).not.toBeNull();
+    expect(btn.textContent).not.toContain("✨");
+
+    await act(async () => {
+      btn.click();
+    });
+
+    const modal = document.querySelector("[role='alertdialog']") as HTMLElement;
+    expect(modal.textContent).not.toContain("✨");
+    // The body glyph and the confirm-button glyph.
+    expect(modal.querySelectorAll("svg[data-icon='auto_awesome']").length).toBe(2);
+  });
+
   it("button is disabled when model is empty", () => {
     const config = { ...BASE_CONFIG, model: "" };
     const el = renderButton(config);
