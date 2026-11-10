@@ -9,6 +9,8 @@ import assert from "node:assert/strict";
 
 const retryAfterJson = await import("../../open-sse/services/retryAfterJson.ts");
 const accountFallback = await import("../../open-sse/services/accountFallback.ts");
+const { buildSubscriptionQuotaFallback } =
+  await import("../../open-sse/services/quotaTextCooldowns.ts");
 const { parseDetailedRetryHintFromJsonBody, parseRetryHintFromJsonBody } = retryAfterJson;
 const { lockExactModel, isModelLocked, getModelLockoutInfo, evictModelLockoutOverflow } =
   accountFallback;
@@ -105,9 +107,6 @@ test("non-authoritative hint still never shortens an existing lock (old behavior
 });
 
 // ── CodeRabbit review follow-up (PR #19027) ──────────────────────────────────
-
-const { buildSubscriptionQuotaFallback } =
-  await import("../../open-sse/services/quotaTextCooldowns.ts");
 
 const REVIEW_PROFILE_DISABLED = {
   baseCooldownMs: 125,
