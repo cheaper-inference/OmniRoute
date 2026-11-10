@@ -1,1 +1,0 @@
-- **responses:** Assistant text snapshots in OpenAI Responses streaming translation match tracked items by `output_index` when event `item_id` rotates across chunks, preventing GitHub Copilot and obfuscated event streams from duplicating prose chunks at `output_text.done`, `output_item.done`, and `response.completed`.

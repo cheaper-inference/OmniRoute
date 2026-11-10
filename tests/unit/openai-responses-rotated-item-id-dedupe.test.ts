@@ -126,3 +126,38 @@ test("distinct output indices with rotating item IDs remain independent (#19218)
   const chunks = run(events);
   assert.equal(text(chunks), "FirstSecond");
 });
+
+test("a reused output_index with a new item_id keeps the second message (#19575)", () => {
+  // Item `a` streams "A" at output_index 0, then item `b` arrives only as an
+  // output_text.done "B" at the same output_index. "B" is not a continuation
+  // of "A", so the index must not merge the two items and drop "B".
+  const events: Event[] = [
+    delta("A", { output_index: 0, content_index: 0, item_id: "a" }),
+    done("A", { output_index: 0, content_index: 0, item_id: "a" }),
+    done("B", { output_index: 0, content_index: 0, item_id: "b" }),
+    null,
+  ];
+  assert.equal(text(run(events)), "AB");
+});
+
+test("a reused output_index keeps both messages through response.completed (#19575)", () => {
+  const events: Event[] = [
+    delta("A", { output_index: 0, content_index: 0, item_id: "a" }),
+    done("A", { output_index: 0, content_index: 0, item_id: "a" }),
+    done("B", { output_index: 0, content_index: 0, item_id: "b" }),
+    completed(message("a", "A"), message("b", "B")),
+    null,
+  ];
+  assert.equal(text(run(events)), "AB");
+});
+
+test("deltas of a new item_id on a closed part do not join the previous item (#19575)", () => {
+  const events: Event[] = [
+    delta("A", { output_index: 0, content_index: 0, item_id: "a" }),
+    done("A", { output_index: 0, content_index: 0, item_id: "a" }),
+    delta("B", { output_index: 0, content_index: 0, item_id: "b" }),
+    done("B", { output_index: 0, content_index: 0, item_id: "b2" }),
+    null,
+  ];
+  assert.equal(text(run(events)), "AB");
+});
