@@ -1,0 +1,1 @@
+- **perf(analytics):** the usage analytics page runs one grouped database scan, not four, for the daily cost, model, provider cost and service-tier views, so a cache miss on a large history is about 3.6x faster for those queries. ([#19716](https://github.com/cheaper-inference/OmniRoute/pull/19716))
