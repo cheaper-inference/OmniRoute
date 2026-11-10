@@ -69,7 +69,7 @@ test("Kimi keeps the text of a signed thinking block and drops the foreign signa
 
 test("an Anthropic target still drops an unsigned thinking block", () => {
   const blocks = assistantBlocks("claude", { type: "thinking", thinking: "plan A" });
-  assert.ok(!blocks.some((b) => b.type === "thinking" && b.thinking === "plan A"));
+  assert.ok(!blocks.some((b) => b.type === "thinking"));
 });
 
 test("Kimi uses reasoning_content when its only thinking block is unsigned and empty", () => {
