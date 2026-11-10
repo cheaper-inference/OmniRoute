@@ -28,6 +28,30 @@ export function isCortecsRerankUrl(value: string): boolean {
 const isCount = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 
+/** Read the nonnegative-integer token counts the upstream reported. */
+function readTokenCounts(source: Record<string, unknown>): Usage {
+  const usage: Usage = {};
+  for (const key of ["prompt_tokens", "completion_tokens", "total_tokens"]) {
+    if (isCount(source[key])) usage[key] = source[key];
+  }
+  return usage;
+}
+
+/** A USD response carries any finite, nonnegative amount verbatim. */
+function readUsdCost(cost: unknown): number | null {
+  return typeof cost === "number" && Number.isFinite(cost) && cost >= 0 ? cost : null;
+}
+
+/** Credits become USD only with an explicit positive operator rate; zero stays zero. */
+function convertCreditsToUsd(credits: number | null, creditPriceUsd?: string): number | null {
+  if (credits === 0) return 0;
+  if (credits === null) return null;
+  const rate = creditPriceUsd?.trim() ? Number(creditPriceUsd) : Number.NaN;
+  if (!Number.isFinite(rate) || rate <= 0) return null;
+  const converted = credits * rate;
+  return Number.isFinite(converted) && converted >= 0 ? converted : null;
+}
+
 /**
  * Default responses use credits; requests with x-cortecs-cost-unit: USD
  * receive USD instead. The trusted outbound request selects the unit, never
@@ -41,28 +65,15 @@ export function normalizeCortecsRerankUsage(
 ): CortecsRerankBill {
   const source =
     raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
-  const usage: Usage = {};
-  for (const key of ["prompt_tokens", "completion_tokens", "total_tokens"]) {
-    if (isCount(source[key])) usage[key] = source[key];
-  }
+  const usage = readTokenCounts(source);
+  let costUsd: number | null;
   if (costUnit === "USD") {
-    const costUsd =
-      typeof source.cost === "number" && Number.isFinite(source.cost) && source.cost >= 0
-        ? source.cost
-        : null;
-    if (costUsd !== null) usage.cost_usd = costUsd;
-    return { usage, costUsd };
+    costUsd = readUsdCost(source.cost);
+  } else {
+    const credits = isCount(source.cost) ? source.cost : null;
+    if (credits !== null) usage.provider_credits = credits;
+    costUsd = convertCreditsToUsd(credits, creditPriceUsd);
   }
-  const credits = isCount(source.cost) ? source.cost : null;
-  if (credits !== null) usage.provider_credits = credits;
-  const rate = creditPriceUsd?.trim() ? Number(creditPriceUsd) : Number.NaN;
-  const converted =
-    credits === 0
-      ? 0
-      : credits !== null && Number.isFinite(rate) && rate > 0
-        ? credits * rate
-        : Number.NaN;
-  const costUsd = Number.isFinite(converted) && converted >= 0 ? converted : null;
   if (costUsd !== null) usage.cost_usd = costUsd;
   return { usage, costUsd };
 }
