@@ -395,6 +395,11 @@
       "configSource": "<custom-config>",
       "provider": "inner-ai"
     },
+    "inf-code": {
+      "className": "InfCodeExecutor",
+      "configSource": "inf-code",
+      "provider": "inf-code"
+    },
     "inner-ai": {
       "className": "InnerAiExecutor",
       "configSource": "<custom-config>",
@@ -711,6 +716,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 142,
+  "keyCount": 143,
   "sharedInstances": []
 }
