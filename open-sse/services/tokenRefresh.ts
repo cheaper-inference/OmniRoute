@@ -18,7 +18,7 @@ import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
 import { serializeRefresh } from "./refreshSerializer.ts";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
-import { preservesRefreshTokenOnUnrecoverable } from "@/lib/tokenRefreshCircuit";
+import { preservesRefreshTokenOnUnrecoverable } from "./refreshTokenPreservation.ts";
 import {
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
