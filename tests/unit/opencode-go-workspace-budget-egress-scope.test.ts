@@ -6,6 +6,9 @@ import path from "node:path";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-workspace-budget-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
+// Pinned before the imports: the allowlist is read at module load, and an inherited
+// "none" would let this test pass without the exemption.
+process.env.OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS = "opencode-go,opencode-cli";
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
@@ -71,7 +74,7 @@ test("Issue #19314: 429 Policy budget exceeded cools failing connection but leav
   );
   assert.equal(result.shouldFallback, true);
 
-  const [, b] = await Promise.all([
+  const [a, b] = await Promise.all([
     providersDb.getProviderConnectionById(connA),
     providersDb.getProviderConnectionById(connB),
   ]);
@@ -83,6 +86,12 @@ test("Issue #19314: 429 Policy budget exceeded cools failing connection but leav
     accountFallback.isModelLocked("opencode-go", connA, "model-x"),
     true,
     "model-x must be locked for account A"
+  );
+
+  assert.doesNotMatch(
+    String(a!.lastError ?? ""),
+    /Shared egress IP/,
+    "account A must not be labelled as an egress-IP exhaustion"
   );
 
   // Account B (sibling with independent quota) must NOT be cooled or locked by account A's workspace budget
@@ -99,5 +108,10 @@ test("Issue #19314: 429 Policy budget exceeded cools failing connection but leav
   assert.ok(
     !b!.rateLimitedUntil,
     "sibling B must not carry a rateLimitedUntil cooldown from account A's workspace budget"
+  );
+  assert.doesNotMatch(
+    String(b!.lastError ?? ""),
+    /Shared egress IP/,
+    "sibling B must not record the egress-IP lockout"
   );
 });

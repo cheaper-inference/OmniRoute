@@ -220,6 +220,7 @@
       "tests/unit/security-route-guard-tiers.test.ts",
       "tests/unit/egress-ip-lock-10880.test.ts",
       "tests/unit/egress-lock-allowlist-10880.test.ts",
+      "tests/unit/opencode-go-workspace-budget-egress-scope.test.ts",
       "tests/unit/api/jobs.test.ts",
       "tests/unit/appearance-widget-settings-schema.test.ts",
       "tests/unit/auth-anonymous-fallback-toggle.test.ts",
