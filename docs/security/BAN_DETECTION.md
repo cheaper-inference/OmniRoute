@@ -90,8 +90,9 @@ upstream error response
 
 - The match is a **case-insensitive substring** search on the response **body**
   (`isAccountDeactivated`, `accountFallback.ts`).
-- The permanent `banned` terminalization fires on a banned-signal body at **any
-  HTTP status** (via `markAccountUnavailable` → `checkFallbackError`). The
+- The permanent `banned` terminalization fires on a banned-signal body at any
+  HTTP status **except 408, 429 and 5xx** (a transient status that only quotes a
+  ban phrase is not a ban), via `markAccountUnavailable` → `checkFallbackError`. The
   narrower **`deactivated`** label (`isActive=false` when the connection has no
   spare API keys) is written by the inline `chatCore.ts` path on **HTTP 401 / 403**
   (classified via `classifyProviderError` → `ACCOUNT_DEACTIVATED`). Note the
