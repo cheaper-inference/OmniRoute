@@ -1,0 +1,1 @@
+- **fix(bedrock):** Bedrock models that reject system prompts (Titan text, Cohere Command text, Mistral 7B and Mixtral instruct) now get the system text folded into the first user turn instead of failing with an opaque 400. ([#19723](https://github.com/cheaper-inference/OmniRoute/pull/19723))

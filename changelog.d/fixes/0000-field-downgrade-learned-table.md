@@ -1,1 +1,0 @@
-- **fix(sse):** after an upstream 400 names a request field and the retry without it succeeds, the executor remembers the field for that provider and model for an hour, so the next request does not pay the rejected round trip again.

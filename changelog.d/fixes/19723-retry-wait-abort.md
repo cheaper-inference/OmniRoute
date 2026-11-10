@@ -1,0 +1,1 @@
+- **fix(sse):** the 429 and WAF same-URL retry waits now end as soon as the client disconnects, and the discarded 429 or WAF response body is cancelled before the wait, instead of the request sitting out the whole delay. ([#19723](https://github.com/cheaper-inference/OmniRoute/pull/19723))
