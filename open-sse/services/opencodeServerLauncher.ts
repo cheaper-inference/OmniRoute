@@ -203,25 +203,35 @@ async function spawnServer(url: string): Promise<OpencodeServerStatus> {
 
   const health = await waitForHealth(url, () => spawnError !== null || exited);
   if (health) return statusOf(url, health);
-
   if (state.pid === childPid) state.pid = null;
-  const failure = spawnError as NodeJS.ErrnoException | null;
-  if (failure) {
-    throw new Error(
-      failure.code === "ENOENT"
+  throw startFailure({ url, binary, childPid, spawnError, exited });
+}
+
+// Why a spawned server never became healthy. ENOENT alone means "not installed".
+function startFailure(args: {
+  url: string;
+  binary: string;
+  childPid: number | null;
+  spawnError: NodeJS.ErrnoException | null;
+  exited: boolean;
+}): Error {
+  const { url, binary, childPid, spawnError, exited } = args;
+  if (spawnError) {
+    return new Error(
+      spawnError.code === "ENOENT"
         ? `[opencode-server] opencode binary not found: ${binary} (set OPENCODE_SERVER_BIN)`
-        : `[opencode-server] could not start ${binary}: ${failure.code || failure.message}`
+        : `[opencode-server] could not start ${binary}: ${spawnError.code || spawnError.message}`
     );
   }
   if (exited) {
-    throw new Error(
+    return new Error(
       `[opencode-server] opencode serve exited before it became healthy on ${url}; see opencode-serve.err.log`
     );
   }
   // Timed out with the child still running: stop it, or it could turn healthy
   // later as an orphan that the next start would not know about.
   if (pidAlive(childPid)) terminateServer(childPid as number);
-  throw new Error(
+  return new Error(
     `[opencode-server] opencode serve did not become healthy on ${url} (pid ${childPid ?? "?"}); see opencode-serve.err.log`
   );
 }
