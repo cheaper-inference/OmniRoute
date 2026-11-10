@@ -127,47 +127,52 @@ interface SseChunkState {
 }
 
 /**
+ * Hand the stripped block to the client as reasoning, exactly once, and only
+ * when the gateway never sent reasoning_content on its own channel.
+ * @returns true when `delta` gained the promoted text.
+ */
+function promoteStrippedThinking(delta: JsonRecord, state: SseChunkState): boolean {
+  const { filter } = state;
+  if (state.sawReasoningContent || state.promotedThinking) return false;
+  if (!filter.thinking || filter.isInsideThinking()) return false;
+  delta.reasoning_content = filter.thinking;
+  state.promotedThinking = true;
+  return true;
+}
+
+/** @returns true when the choice's delta was mutated. */
+function rewriteChoiceDelta(choice: unknown, state: SseChunkState): boolean {
+  const choiceRecord = asRecord(choice);
+  const delta = asRecord(choiceRecord?.delta);
+  if (!delta) return false;
+  if (nonEmptyString(delta.reasoning_content) || nonEmptyString(delta.reasoning)) {
+    state.sawReasoningContent = true;
+  }
+  // Clients stop reading at finish_reason, so a held partial tag has to leave here.
+  const finishing = choiceRecord?.finish_reason != null;
+  if (typeof delta.content !== "string" && !finishing) return false;
+
+  const original = typeof delta.content === "string" ? delta.content : "";
+  const visible = state.filter.push(original) + (finishing ? state.filter.flush() : "");
+
+  const promoted = promoteStrippedThinking(delta, state);
+  if (visible === original) return promoted;
+  if (visible) delta.content = visible;
+  else delete delta.content;
+  return true;
+}
+
+/**
  * Strip the reasoning block from one upstream chat chunk in place.
  * @returns true when the object was mutated (the caller re-serializes it).
  */
 function rewriteChatChunk(chunk: unknown, state: SseChunkState): boolean {
-  const record = asRecord(chunk);
-  if (!record) return false;
-  const choices = record.choices;
+  const choices = asRecord(chunk)?.choices;
   if (!Array.isArray(choices)) return false;
 
   let changed = false;
   for (const choice of choices) {
-    const choiceRecord = asRecord(choice);
-    const delta = asRecord(choiceRecord?.delta);
-    if (!delta) continue;
-    if (nonEmptyString(delta.reasoning_content) || nonEmptyString(delta.reasoning)) {
-      state.sawReasoningContent = true;
-    }
-    // Clients stop reading at finish_reason, so a held partial tag has to leave here.
-    const finishing = choiceRecord?.finish_reason != null;
-    if (typeof delta.content !== "string" && !finishing) continue;
-
-    const original = typeof delta.content === "string" ? delta.content : "";
-    const visible = state.filter.push(original) + (finishing ? state.filter.flush() : "");
-
-    // Only when the gateway never sent reasoning_content on its own channel:
-    // hand the stripped block to the client as reasoning, exactly once.
-    if (
-      !state.sawReasoningContent &&
-      !state.promotedThinking &&
-      state.filter.thinking &&
-      !state.filter.isInsideThinking()
-    ) {
-      delta.reasoning_content = state.filter.thinking;
-      state.promotedThinking = true;
-      changed = true;
-    }
-    if (visible !== original) {
-      if (visible) delta.content = visible;
-      else delete delta.content;
-      changed = true;
-    }
+    if (rewriteChoiceDelta(choice, state)) changed = true;
   }
   return changed;
 }
