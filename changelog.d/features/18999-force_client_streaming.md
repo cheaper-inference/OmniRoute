@@ -1,1 +1,1 @@
-- #18999: feat(chat): optionally convert client stream=false to stream=true for immediate 
+- #18999: feat(chat): optional `OMNIROUTE_FORCE_CLIENT_STREAMING` (default off) answers an explicit `stream: false` on `/v1/chat/completions` with SSE, for clients that accept it, so they see first bytes immediately

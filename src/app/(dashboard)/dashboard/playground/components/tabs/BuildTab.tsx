@@ -122,7 +122,7 @@ export default function BuildTab({ configState }: BuildTabProps) {
     try {
       const res = await fetch(`${configState.baseUrl}/v1/chat/completions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(buildRequestBody(msgs)),
         signal: controller.signal,
       });

@@ -527,6 +527,7 @@ export async function handleTestCombo(args: { comboId: string; testPrompt: strin
           const resp = toRecord(
             await apiFetch("/v1/chat/completions", {
               method: "POST",
+              headers: { Accept: "application/json" },
               body: JSON.stringify({
                 model: model.model || "auto",
                 messages: [{ role: "user", content: prompt }],

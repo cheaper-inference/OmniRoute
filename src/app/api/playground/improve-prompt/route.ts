@@ -86,6 +86,7 @@ export async function POST(request: Request): Promise<Response> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
         Authorization: `Bearer ${apiKeyRaw ?? ""}`,
       },
       body: JSON.stringify(chatBody),

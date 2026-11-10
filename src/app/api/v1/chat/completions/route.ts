@@ -13,6 +13,10 @@ import { initTranslators } from "@omniroute/open-sse/translator/index.ts";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { acceptHeaderForcesStream } from "@omniroute/open-sse/utils/aiSdkCompat.ts";
 import {
+  applyForceClientStreaming,
+  isForceClientStreamingEnabled,
+} from "@omniroute/open-sse/handlers/chatCore/forceClientStreaming.ts";
+import {
   OPENAI_CHAT_ERROR_FRAME,
   OPENAI_KEEPALIVE_FRAME,
   OPENAI_STARTUP_FRAME,
@@ -33,7 +37,9 @@ import {
   withCompressionHeaderEcho,
 } from "@/shared/utils/compressionHeaderEcho";
 import { resolveModelAliasWithSeedFallbackOnBody } from "@/lib/modelAliasResolver";
-import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { enforceApiKeyPolicy, resolvePolicyApiKey } from "@/shared/utils/apiKeyPolicy";
+import { getApiKeyMetadata } from "@/lib/db/apiKeys";
+import { getIdempotencyKey } from "@/lib/idempotencyLayer";
 import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import {
   assertRuntimeModelProviderAvailable,
@@ -102,6 +108,25 @@ const chatCompletionsRouteShapeSchema = z
     messages: z.array(z.unknown()).optional(),
   })
   .passthrough();
+
+/**
+ * OMNIROUTE_FORCE_CLIENT_STREAMING opt-in. The key lookup runs only for a
+ * candidate request; if it fails the body stays as the client sent it.
+ */
+async function forceClientStreamingForRequest(body: unknown, request: Request) {
+  if (!isForceClientStreamingEnabled() || !isRecord(body) || body.stream !== false) return body;
+  try {
+    const apiKey = await resolvePolicyApiKey(request);
+    const apiKeyInfo = apiKey ? await getApiKeyMetadata(apiKey) : null;
+    return applyForceClientStreaming(body, {
+      acceptHeader: request.headers.get("accept"),
+      idempotencyKey: getIdempotencyKey(request.headers),
+      streamDefaultMode: apiKeyInfo?.streamDefaultMode,
+    });
+  } catch {
+    return body;
+  }
+}
 
 /**
  * Handle CORS preflight
@@ -308,9 +333,12 @@ export async function POST(request) {
       console.error("[SECURITY] Prompt injection guard failed:", error);
     }
 
+    // Runs before the keepalive gate so a converted request gets early bytes too.
+    parsedBody = await forceClientStreamingForRequest(parsedBody, request);
+
     // Gate the early SSE keepalive wrapper: only wrap when the client explicitly
     // asks for streaming (body `stream: true`) or the Accept header forces SSE.
-    // The parsed body is passed through UNTOUCHED — the actual stream/JSON framing
+    // The parsed body is otherwise passed through UNTOUCHED — the actual stream/JSON framing
     // stays decided by chatCore/resolveStreamFlag (legacy streaming default and the
     // per-key `streamDefaultMode: "json"` opt-in are preserved).
     const parsedBodyIsRecord = isRecord(parsedBody);

@@ -60,6 +60,7 @@ export class Assessor {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
