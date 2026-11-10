@@ -230,6 +230,15 @@ export function getSyncedPricing(): PricingByProvider {
     return pricingMemo;
   }
 
+  const synced = readStoredPricingRows();
+  remapHistoricalLitellmRows(synced);
+  pricingMemo = synced;
+  pricingMemoVersion = currentVersion;
+  return synced;
+}
+
+/** The `pricing_synced` rows as stored: no alias remap, so each model is present once. */
+function readStoredPricingRows(): PricingByProvider {
   const db = getDbInstance();
   const rows = db
     .prepare("SELECT key, value FROM key_value WHERE namespace = 'pricing_synced'")
@@ -246,10 +255,25 @@ export function getSyncedPricing(): PricingByProvider {
       console.warn(`[PRICING_SYNC] Corrupted data for provider "${key}", skipping`);
     }
   }
-  remapHistoricalLitellmRows(synced);
-  pricingMemo = synced;
-  pricingMemoVersion = currentVersion;
   return synced;
+}
+
+function countPricingModels(map: PricingByProvider): number {
+  return Object.values(map).reduce((sum, models) => sum + Object.keys(models).length, 0);
+}
+
+/**
+ * A truncated upstream file must not replace a good map: saveSyncedPricing() is a full
+ * replace. Half the stored size still passes, so real removals sync. The stored side is
+ * counted before the historical-alias remap, which would list some models twice.
+ */
+function assertFetchedPriceMapNotTruncated(modelCount: number): void {
+  const storedCount = countPricingModels(readStoredPricingRows());
+  if (modelCount === 0 || modelCount * 2 < storedCount) {
+    throw new Error(
+      `Fetched price map rejected: ${modelCount} models, stored map has ${storedCount}`
+    );
+  }
 }
 
 /**
@@ -373,24 +397,11 @@ export async function syncPricingFromSources(opts?: {
       }
     }
 
-    const modelCount = Object.values(aggregated).reduce(
-      (sum, models) => sum + Object.keys(models).length,
-      0
-    );
+    const modelCount = countPricingModels(aggregated);
     const providerCount = Object.keys(aggregated).length;
 
     if (!dryRun) {
-      // A truncated upstream file must not replace a good map: saveSyncedPricing() is a
-      // full replace. Half the stored size still passes, so real removals sync.
-      const storedCount = Object.values(getSyncedPricing()).reduce(
-        (sum, models) => sum + Object.keys(models).length,
-        0
-      );
-      if (modelCount === 0 || modelCount * 2 < storedCount) {
-        throw new Error(
-          `Fetched price map rejected: ${modelCount} models, stored map has ${storedCount}`
-        );
-      }
+      assertFetchedPriceMapNotTruncated(modelCount);
       saveSyncedPricing(aggregated);
       lastSyncTime = new Date().toISOString();
       lastSyncModelCount = modelCount;

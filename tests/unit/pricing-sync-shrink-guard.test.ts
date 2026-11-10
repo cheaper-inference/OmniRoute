@@ -106,3 +106,28 @@ test("a dry run never trips the guard and never saves", async () => {
   assert.equal(result.success, true);
   assert.equal(storedModelCount(), 10);
 });
+
+test("a historical row stored under a LiteLLM provider name is counted once", async () => {
+  // Old syncs saved OpenCode Go prices under `opencode_go`; getSyncedPricing() also returns
+  // them under the `opencode-go` alias, so a count over its result sees every model twice.
+  const stored: Record<string, unknown> = {};
+  const fetched: Record<string, unknown> = {};
+  for (let i = 0; i < 100; i++) {
+    stored[`model-${i}`] = { input: 1, output: 2 };
+  }
+  for (let i = 0; i < 60; i++) {
+    fetched[`opencode_go/model-${i}`] = {
+      input_cost_per_token: 0.000001,
+      output_cost_per_token: 0.000002,
+      litellm_provider: "opencode_go",
+      mode: "chat",
+    };
+  }
+  pricingSync.saveSyncedPricing({ opencode_go: stored } as never);
+  fetchReturns(fetched);
+
+  const result = await pricingSync.syncPricingFromSources({});
+
+  assert.equal(result.success, true, String(result.error));
+  assert.equal(Object.keys(pricingSync.getSyncedPricing()["opencode-go"] ?? {}).length, 60);
+});
