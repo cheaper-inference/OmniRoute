@@ -996,7 +996,7 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     authHint:
       "Create a LunaRoute API key in the dashboard, then paste the lr_ key here. OmniRoute sends it as a Bearer token.",
     apiHint:
-      "LunaRoute serves OpenAI chat and legacy completions, Responses, Anthropic Messages and token counting, embeddings, rerank, audio transcription and preprocessing, System One decisions, plus image generation/upload/edit from https://gw.lunaroute.com/v1. Live catalogs are available at /models, /embeddings/models, /rerank/models, /audio/transcriptions/models, and /images/models.",
+      "LunaRoute serves /chat/completions, /completions, /responses (also root /responses), /messages, /messages/count_tokens, /embeddings, /rerank, /audio/transcriptions, /audio/preprocess, /audio/preprocess/capabilities, /systemone, /images/generations, /images/uploads, /images/edits, /images/{id}, and /images/{id}/content from https://gw.lunaroute.com. Live catalogs are available at /v1/models, /v1/embeddings/models, /v1/rerank/models, /v1/audio/transcriptions/models, and /v1/images/models.",
   },
   // NaN.Builders (https://nan.builders) — OpenAI-compatible /v1 covering chat, vision,
   // embeddings, STT, TTS, images and rerank; per-model token quotas feed the limits panel.

@@ -47,7 +47,9 @@ test("LunaRoute is a selectable API-key provider with dynamically derived media 
   assert.match(provider.apiHint ?? "", /\/embeddings\/models/);
   assert.match(provider.apiHint ?? "", /\/rerank\/models/);
   assert.match(provider.apiHint ?? "", /\/audio\/transcriptions\/models/);
+  assert.match(provider.apiHint ?? "", /\/audio\/preprocess\/capabilities/);
   assert.match(provider.apiHint ?? "", /\/images\/models/);
+  assert.match(provider.apiHint ?? "", /\/images\/\{id\}\/content/);
 });
 
 test("LunaRoute registers every current chat model and every documented text protocol", () => {
