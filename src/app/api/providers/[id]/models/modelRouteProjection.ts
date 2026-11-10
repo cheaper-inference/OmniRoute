@@ -9,6 +9,7 @@ import { getStaticModelsForProvider } from "@/lib/providers/staticModels";
 import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { getModelsByProviderId } from "@/shared/constants/models";
+import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { applyDiscoveryDegradation, type DiscoveryFailure } from "@/shared/discovery/degradedCause";
 import { mergeLocalCatalogModels } from "./discovery/helpers";
@@ -36,6 +37,18 @@ export function filterModelsForRoute<
 >(provider: string, models: readonly T[], chatOnly: boolean): T[] {
   const selectable = filterSelectableModels(provider, models);
   return chatOnly ? filterChatSelectableModels(provider, selectable) : selectable;
+}
+
+/** The no-auth provider a models request targets, by provider id or by its connection's provider. */
+export function resolveNoAuthProviderId(
+  id: string,
+  connectionProvider: string | null
+): string | null {
+  const noAuth = NOAUTH_PROVIDERS as Record<string, { noAuth?: boolean }>;
+  if (noAuth[id]?.noAuth === true) return id;
+  return connectionProvider && noAuth[connectionProvider]?.noAuth === true
+    ? connectionProvider
+    : null;
 }
 
 function toLiveModel(item: Record<string, unknown>): { id: string; name: string } | null {

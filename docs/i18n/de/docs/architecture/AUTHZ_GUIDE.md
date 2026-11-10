@@ -166,17 +166,35 @@ der Betreiber sie aktiviert
   4. Heben Sie die Setzung von `OMNIROUTE_DISABLE_MFA` auf, starten Sie den Server neu
      und führen Sie die Registrierung bei Bedarf erneut durch.
 
-## Routenklassen
+## Routenkategorien
 
-`src/server/authz/types.ts` definiert drei Klassen. Jede Route, die sich nicht eindeutig klassifizieren lässt, fällt auf `MANAGEMENT` zurück.
+`src/server/authz/types.ts` definiert drei Kategorien; jede Route, die nicht deterministisch klassifiziert werden kann, fällt auf `MANAGEMENT` zurück.
 
-| Klasse       | Beschreibung                                                                                                                                                      | Authentifizierung erforderlich                                                   |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `PUBLIC`     | Ausdrücklich sichere Routen: Login, Logout, Status, Initialisierung, Health-Check, Onboarding-Bootstrap.                                                          | Keine                                                                            |
-| `CLIENT_API` | Endpunkte zur Modellbereitstellung: `/api/v1/*`, `/api/v1beta/*`, plus die Aliase `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-Schlüssel, wenn das wirksame Feature-Flag `REQUIRE_API_KEY` aktiviert ist |
-| `MANAGEMENT` | Dashboard-Seiten, Einstellungen, Provider, Schlüssel, Admin- und Diagnose-Endpunkte.                                                                              | Dashboard-Sitzung ODER Bearer mit Scope `manage`                                 |
+| Kategorie    | Beschreibung                                                                                                                                                           | Erforderliche Authentifizierung                                                   |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `PUBLIC`     | Ausdrücklich sichere Routen — Login, Logout, Status, Health und Onboarding-Bootstrap.                                                                                  | Keine                                                                             |
+| `CLIENT_API` | Endpunkte für die Modellbereitstellung — `/api/v1/*`, `/api/v1beta/*` sowie die Aliase `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-Schlüssel, wenn das effektive Feature-Flag `REQUIRE_API_KEY` aktiviert ist |
+| `MANAGEMENT` | Dashboard-Seiten sowie Endpunkte für Einstellungen, Provider, Schlüssel, Administration und Diagnose.                                                                  | Dashboard-Sitzung ODER Bearer mit dem Scope `manage`                              |
 
-Einige Aktionen der Klasse `MANAGEMENT` sind **nur für Operatoren** zugänglich: Ein Schlüssel mit `manage` reicht nicht aus. Das Exportieren gespeicherter Zugangsdaten (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), das Wiederherstellen eines Backups über die aktiven Daten (`POST /api/db-backups/import` einschließlich `dryRun=true`, `POST /api/db-backups` mit Wiederherstellung per ID, `POST /api/settings/import-json`) sowie das Vernichten von Wiederherstellungspunkten (`DELETE /api/db-backups` zur Bereinigung und `PATCH /api/db-backups`, da die darin gespeicherte Aufbewahrung die automatische Bereinigung nach jedem Backup steuert) erfordern eine Dashboard-Sitzung, die lokale CLI-Identität oder deaktivierte Anmeldung. Das Ausstellen eines Sync-Tokens (`POST /api/sync/tokens`) und das Prägen eines CLI-Access-Tokens mit Scope `admin` (`POST /api/cli/tokens`) erfordern in jedem Anmeldemodus eine Dashboard-Sitzung oder die lokale CLI-Identität. API-Schlüssel jedes Scopes und `oma_`-Access-Tokens sind keine Operator-Zugangsdaten: Wo eines davon erforderlich ist, erhalten sie `403`. Die Prüfung liegt in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Auch das Ändern der Anmeldeeinstellungen ist nur für Operatoren möglich: `POST /api/settings/require-login` (Verwaltungspasswort setzen / `requireLogin` umschalten) akzeptiert, sobald ein Passwort existiert, ausschließlich diese Zugangsdaten. Das Bootstrap-Fenster der Erstinbetriebnahme (noch kein Passwort) bleibt unverändert. Eine Dashboard-Sitzung muss `currentPassword` senden, um das Passwort zu ersetzen (`403`, wenn es fehlt oder falsch ist, protokolliert als `settings.update_failed`). Die lokale CLI und eine Instanz mit deaktivierter Anmeldung behalten den Wiederherstellungspfad und dürfen ein Passwort ohne diesen Schritt setzen, da beide an den Host gebunden sind, der das Datenverzeichnis besitzt.
+Einige `MANAGEMENT`-Aktionen sind **nur für Betreiber**: Ein Schlüssel mit dem Scope `manage` reicht nicht aus. Das Exportieren gespeicherter
+Anmeldedaten (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), das Wiederherstellen eines Backups über die Live-Daten
+(`POST /api/db-backups/import` einschließlich `dryRun=true`, `POST /api/db-backups` Wiederherstellung nach ID,
+`POST /api/settings/import-json`), das Löschen von Wiederherstellungspunkten (`DELETE /api/db-backups` Bereinigung
+und `PATCH /api/db-backups`, da die darin gespeicherte Aufbewahrungsdauer das automatische Bereinigen nach
+jedem Backup steuert) erfordern eine Dashboard-Sitzung, das lokale CLI-Subjekt oder deaktiviertes Login.
+Das Ausstellen eines Synchronisierungstokens (`POST /api/sync/tokens`) und das Erzeugen eines
+`admin`-CLI-Zugriffstokens (`POST /api/cli/tokens`) erfordern in jedem Login-Modus eine Dashboard-Sitzung oder
+das lokale CLI-Subjekt. API-Schlüssel mit beliebigem Scope und `oma_`-Zugriffstokens sind keine Betreiberanmeldedaten:
+Sie erhalten `403`, wann immer solche erforderlich sind. Die Prüfung
+befindet sich in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`). Das Ändern der Login-Einstellungen ist ebenfalls nur Betreibern erlaubt:
+`POST /api/settings/require-login` (Festlegen des Verwaltungspassworts / Umschalten von `requireLogin`) akzeptiert
+nur diese Anmeldedaten, sobald ein Passwort vorhanden ist — das Bootstrap-Fenster beim ersten Start (noch kein
+Passwort vorhanden) bleibt unverändert — und eine Dashboard-Sitzung muss zum Ersetzen des Passworts
+`currentPassword` senden (`403`, wenn dieses fehlt oder falsch ist, protokolliert als `settings.update_failed`). Das
+lokale CLI und eine Instanz mit deaktiviertem Login behalten den Wiederherstellungspfad bei und dürfen ohne dieses
+Passwort ein Passwort festlegen, da beide an den Host gebunden sind, der das Datenverzeichnis besitzt.
 
 ## Pipeline
 
@@ -207,20 +225,18 @@ Jede Routenklasse hat eine Richtlinie in `src/server/authz/policies/`:
 
 Eine erfolgreiche Richtlinie gibt `AuthSubject` mit `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` zurück. Downstream-Handler können es über `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` lesen, anstatt die Authentifizierungslogik erneut ausführen zu müssen.
 
-## Liste der öffentlichen Routen
+## Liste öffentlicher Routen
 
 `src/shared/constants/publicApiRoutes.ts` ist die explizite Allowlist:
 
-Die Liste ist nach **Form** aufgeteilt, und diese Aufteilung ist sicherheitsrelevant (GHSA-74g9-q8f6-793h): Ein Präfix
-wird mit `startsWith()` abgeglichen und stimmt daher auch mit jedem benachbarten Pfad überein, der dieselben
-führenden Zeichen enthält. Das Präfix `/api/usage/om-usage` markierte `/api/usage/om-usage<anything>` als PUBLIC, und Next löst
-dies zu `/api/usage/[connectionId]` auf — einem Handler ohne eigene Authentifizierung.
+Die Liste ist nach **Struktur** aufgeteilt, und diese Aufteilung ist sicherheitsrelevant (GHSA-74g9-q8f6-793h): Ein Präfix wird mit `startsWith()` abgeglichen und passt daher auch auf jeden angrenzenden Pfad, der dieselben führenden Zeichen enthält.
+`/api/usage/om-usage` als Präfix markierte `/api/usage/om-usage<anything>` als PUBLIC, und Next löst diesen Pfad zu `/api/usage/[connectionId]` auf — einem Handler ohne eigene Authentifizierung.
 
 ```ts
 // Echte Teilbäume. Jeder Eintrag MUSS mit "/" enden (wird durch einen Unit-Test überprüft).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // in classify als CLIENT_API behandelt, nicht als "no-auth public"
+  "/api/v1/", // in classify als CLIENT_API behandelt, nicht als „öffentlich ohne Authentifizierung“
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
@@ -232,28 +248,27 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // Login-Schritt 2 für optional aktiviertes TOTP; benötigt das MFA-pending-Cookie
-  "/api/init",
+  "/api/auth/mfa/verify", // Anmeldeschritt 2 für optional aktiviertes TOTP; benötigt das MFA-pending-Cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Schreibgeschützte Einzelrouten, die ebenfalls die CORS-Ursprungslockerung erhalten.
+// Einzelne schreibgeschützte Routen, für die ebenfalls die CORS-Ursprungslockerung gilt.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Schreibgeschützte Einzelroute OHNE CORS-Ursprungslockerung.
+// Einzelne schreibgeschützte Route OHNE CORS-Ursprungslockerung.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Schreibgeschützte Routen sind **nur** für sichere Methoden öffentlich. Hinweis: `classifyRoute()` schließt `/api/v1/*` und `/api/v1beta/*` vom PUBLIC-Fallback aus — diese sind immer `CLIENT_API`, sodass die Bearer-Key-Richtlinie weiterhin gilt.
+Schreibgeschützte Routen sind nur für sichere Methoden öffentlich. Hinweis: `classifyRoute()` schließt `/api/v1/*` und `/api/v1beta/*` vom PUBLIC-Fallback aus — diese sind immer `CLIENT_API`, sodass die Bearer-Key-Richtlinie weiterhin gilt.
 
 ## Hinzufügen einer neuen Route
 
@@ -331,15 +346,35 @@ ermittelt hat. Sie bleibt deaktiviert, sofern nicht `OMNIROUTE_MCP_ENFORCE_SCOPE
 (`src/lib/accessTokens/scopes.ts`). Diese Rangfolge gilt nur für die Zugriffstoken-
 Anmeldeinformationen. Siehe [Verwaltungsauthentifizierung](../guides/MANAGEMENT-AUTH.md).
 
-## Schalter für erforderliche Authentifizierung
+## Umschalter „Authentifizierung erforderlich“
 
 `isAuthRequired()` in `src/shared/utils/apiAuth.ts` entscheidet, ob für eine Anfrage **irgendeine** Authentifizierung erzwungen wird:
 
-- `settings.requireLogin === false` → die Authentifizierung ist global deaktiviert, mit Ausnahme der immer geschützten Stufe (siehe [Route-Guard-Stufen](../security/ROUTE_GUARD_TIERS.md)) und der Aufrufe, die ein Credential ausgeben, das die Anmeldung akzeptiert. Diese benötigen dasselbe Credential wie bei aktivierter Anmeldung: das Ausstellen von Sync-Tokens, das Prägen von CLI-Access-Tokens mit beliebigem Scope sowie das Erstellen eines API-Schlüssels mit Scope `manage`/`admin`, das Gewähren dieses Scopes an einen Schlüssel oder das Erneuern bzw. Anzeigen eines solchen Schlüssels (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Reine Inferenz-Schlüssel bleiben offen.
-- Kein Passwort konfiguriert **und** keine Umgebungsvariable `INITIAL_PASSWORD` → der Bootstrap-Modus erlaubt den Onboarding-Assistenten und Loopback-Anfragen, aber exponierte Netzwerkanfragen benötigen weiterhin Credentials.
-- Jeder DB-Fehler → schlägt sicher fehl (fail-closed, sicherer Standard).
+- `settings.requireLogin === false` → Die Authentifizierung ist global deaktiviert, außer für die immer geschützte
+  Stufe (siehe [Stufen des Routenschutzes](../security/ROUTE_GUARD_TIERS.md)) und für Aufrufe, die ein
+  akzeptiertes Zugangsmittel ausgeben. Diese benötigen dasselbe Zugangsmittel wie bei aktivierter Anmeldung:
+  das Ausstellen von Sync-Token, das Erstellen von CLI-Zugriffstoken mit beliebigem Geltungsbereich sowie das
+  Erstellen eines API-Schlüssels mit dem Geltungsbereich `manage`/`admin`, das Gewähren dieses Geltungsbereichs
+  für einen Schlüssel oder das Erneuern bzw. Anzeigen eines solchen Schlüssels
+  (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`).
+  Schlüssel ohne Inferencing bleiben offen. Das Schreiben eines geschützten Feature-Flags
+  (`REQUIRE_API_KEY`, der anderen Security-Flags sowie der in
+  [Feature-Flags](../reference/FEATURE_FLAGS.md#rest-api) aufgeführten SSRF-/TLS-/MCP-Geltungsbereichs-/
+  Sandbox-Flags) und das Speichern der PII-Maskierungseinstellungen
+  (`PUT /api/settings/pii`) erfordern ebenfalls weiterhin ein Zugangsmittel.
+- Kein Passwort konfiguriert **und** keine Umgebungsvariable `INITIAL_PASSWORD` → Der Bootstrap-Modus erlaubt den
+  Onboarding-Assistenten und Loopback-Anfragen, für Anfragen aus dem exponierten Netzwerk sind jedoch weiterhin
+  Zugangsmittel erforderlich. Ausnahme: Das Schreiben eines geschützten Feature-Flags und das Speichern der
+  PII-Maskierungseinstellungen (`PUT /api/settings/pii`) erfordern auch bei Loopback ein Zugangsmittel.
+  Loopback allein reicht dort daher nicht aus.
+- Jeder Datenbankfehler → Die Anfrage wird standardmäßig sicher abgelehnt.
 
-Die Durchsetzung der Client-API-Schlüssel verwendet `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts` und nicht einen direkten Lesezugriff auf `process.env.REQUIRE_API_KEY`. Das ist für produktive Instanzen wichtig: Wird `REQUIRE_API_KEY` unter Dashboard → Feature-Flags umgeschaltet, speichert das eine Überschreibung in der Datenbank und wirkt sofort auf `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` und die übrigen Client-API-Prüfungen, die diesen Helper teilen. Kann der Speicher der Feature-Flags nicht gelesen werden, schlägt die Client-API-Authentifizierung fehl und verlangt einen Schlüssel.
+Die Erzwingung von Client-API-Schlüsseln verwendet `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`,
+nicht einen direkten Lesezugriff auf `process.env.REQUIRE_API_KEY`. Dies ist für bereitgestellte Instanzen relevant:
+Wenn `REQUIRE_API_KEY` unter Dashboard → Feature-Flags umgeschaltet wird, speichert die Datenbank eine Überschreibung,
+die sich sofort auf `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` und andere
+Authentifizierungsprüfungen der Client-API auswirkt, die diesen Helper gemeinsam verwenden. Wenn der Feature-Flag-Speicher
+nicht gelesen werden kann, schlägt die Authentifizierung der Client-API sicher fehl und erfordert einen Schlüssel.
 
 ## Inkompatible Änderung — v3.8.0
 
