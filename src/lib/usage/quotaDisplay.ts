@@ -17,8 +17,56 @@ function metadata(value: string | null): Quota {
     return {};
   }
 }
+function datedQuotas(cached: ProviderLimitsCacheEntry | undefined): Record<string, Quota> {
+  return Object.fromEntries(
+    Object.entries(cached?.quotas || {}).map(([key, value]) => {
+      const quota = record(value);
+      return [key, { ...quota, observedAt: quota.observedAt ?? cached?.fetchedAt }];
+    })
+  );
+}
+function applyWindow(
+  cached: ProviderLimitsCacheEntry | undefined,
+  row: QuotaDisplaySnapshot
+): ProviderLimitsCacheEntry {
+  const info = metadata(row.raw_data);
+  // Restamping the envelope must not make an untouched sibling appear newly observed.
+  const quotas = datedQuotas(cached);
+  if (info.retired === true) delete quotas[row.window_key];
+  else
+    quotas[row.window_key] = {
+      ...record(cached?.quotas?.[row.window_key]),
+      used: 0,
+      total: 0,
+      isPercentageOnly: true,
+      remainingPercentage: row.remaining_percentage,
+      resetAt: row.next_reset_at,
+      observedAt: row.created_at,
+      fractionReported: info.fractionReported !== false,
+      staleAfterReset: false,
+    };
+  const fetchedAt = Math.max(Date.parse(row.created_at), Date.parse(cached?.fetchedAt || "") || 0);
+  return {
+    ...cached,
+    quotas,
+    plan: cached?.plan ?? null,
+    message: cached?.message ?? null,
+    fetchedAt: new Date(fetchedAt).toISOString(),
+    source: "quota-snapshot",
+  };
+}
+function validObservation(row: QuotaDisplaySnapshot, now: number): boolean {
+  const observed = Date.parse(row.created_at);
+  if (!Number.isFinite(observed) || observed > now) return false;
+  const info = metadata(row.raw_data);
+  return (
+    info.retired === true ||
+    info.fractionReported === false ||
+    (typeof row.remaining_percentage === "number" && Number.isFinite(row.remaining_percentage))
+  );
+}
 
-/** Overlay durable facts only; never use routing's optimistic reset advancement as a reading. */
+/** Overlay observations only; never use routing's optimistic reset advancement as a reading. */
 export function projectQuotaDisplay(
   caches: Record<string, ProviderLimitsCacheEntry>,
   snapshots: QuotaDisplaySnapshot[],
@@ -27,54 +75,19 @@ export function projectQuotaDisplay(
   const result = { ...caches };
   const latest = new Map<string, QuotaDisplaySnapshot>();
   for (const row of snapshots) {
+    if (!validObservation(row, now)) continue;
     const key = JSON.stringify([row.connection_id, row.window_key]);
     const previous = latest.get(key);
     if (!previous || Date.parse(row.created_at) > Date.parse(previous.created_at))
       latest.set(key, row);
   }
   for (const row of latest.values()) {
-    const cached = result[row.connection_id];
-    const previous = record(cached?.quotas?.[row.window_key]);
-    const observed = Date.parse(row.created_at);
+    const previous = record(result[row.connection_id]?.quotas?.[row.window_key]);
     const prior = Date.parse(
       String(previous.observedAt ?? caches[row.connection_id]?.fetchedAt ?? "")
     );
-    if (!Number.isFinite(observed) || observed > now || observed <= prior) continue;
-    const info = metadata(row.raw_data);
-    if (
-      info.retired !== true &&
-      info.fractionReported !== false &&
-      (row.remaining_percentage === null || !Number.isFinite(row.remaining_percentage))
-    )
-      continue;
-    const quotas = { ...cached?.quotas };
-    // Restamping the envelope must not make an untouched sibling appear newly observed.
-    for (const [key, value] of Object.entries(quotas)) {
-      const quota = record(value);
-      quotas[key] = { ...quota, observedAt: quota.observedAt ?? cached?.fetchedAt };
-    }
-    if (info.retired === true) delete quotas[row.window_key];
-    else
-      quotas[row.window_key] = {
-        ...previous,
-        used: 0,
-        total: 0,
-        isPercentageOnly: true,
-        remainingPercentage: row.remaining_percentage,
-        resetAt: row.next_reset_at,
-        observedAt: row.created_at,
-        fractionReported: info.fractionReported !== false,
-        staleAfterReset: false,
-      };
-    const fetchedAt = Math.max(observed, Date.parse(cached?.fetchedAt || "") || 0);
-    result[row.connection_id] = {
-      ...cached,
-      quotas,
-      plan: cached?.plan ?? null,
-      message: cached?.message ?? null,
-      fetchedAt: new Date(fetchedAt).toISOString(),
-      source: "quota-snapshot",
-    };
+    if (Date.parse(row.created_at) <= prior) continue;
+    result[row.connection_id] = applyWindow(result[row.connection_id], row);
   }
   return result;
 }
