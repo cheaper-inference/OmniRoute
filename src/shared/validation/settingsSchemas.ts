@@ -732,6 +732,8 @@ export const databaseSettingsSchema = z
       compressionCacheStats: z.number().int().min(1).max(365).optional(),
       xpAuditLog: z.number().int().min(1).max(365),
       compressionRunTelemetry: z.number().int().min(1).max(365).optional(),
+      // MiB, not days. 1 TiB is the ceiling.
+      mediaStoreMaxMb: z.number().int().min(1).max(1048576).optional(),
       autoCleanupEnabled: z.boolean(),
     }),
 

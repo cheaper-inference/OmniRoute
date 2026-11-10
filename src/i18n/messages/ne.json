@@ -8474,6 +8474,8 @@
     "retentionUsageHistory": "प्रयोग इतिहास (दिन)",
     "retentionMemoryEntries": "मेमोरी प्रविष्टिहरू (दिन)",
     "retentionXpAuditLog": "XP अडिट लग (दिन)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "अवधारण सेटिङहरू सुरक्षित गर्नुहोस्",
     "storageAutoVacuumMode": "स्वचालित भ्याकुम मोड",
     "storageScheduledVacuum": "निर्धारित भ्याकुम",

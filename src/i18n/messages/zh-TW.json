@@ -8474,6 +8474,8 @@
     "retentionUsageHistory": "使用歷史（天）",
     "retentionMemoryEntries": "記憶體條目（天）",
     "retentionXpAuditLog": "XP 稽核記錄（天數）",
+    "mediaStoreMaxMb": "媒體儲存大小上限（MiB）",
+    "mediaStoreMaxMbHint": "已儲存的生成媒體的總大小。先刪除最舊的檔案。設定環境變數 MEDIA_STORE_MAX_MB 時以它為準。預設 2048。",
     "saveRetentionSettings": "儲存保留設定",
     "storageAutoVacuumMode": "自動真空模式",
     "storageScheduledVacuum": "預定真空",

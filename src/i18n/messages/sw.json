@@ -8474,6 +8474,8 @@
     "retentionUsageHistory": "Historia ya Matumizi (siku)",
     "retentionMemoryEntries": "Maingizo ya Kumbukumbu (siku)",
     "retentionXpAuditLog": "Kumbukumbu ya Ukaguzi wa XP (siku)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Hifadhi mipangilio ya muda wa kuweka",
     "storageAutoVacuumMode": "Hali ya Utupu Kiotomatiki",
     "storageScheduledVacuum": "Utupu Uliopangwa",

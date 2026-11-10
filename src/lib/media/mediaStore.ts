@@ -3,6 +3,7 @@ import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { resolveDataDir } from "@/lib/dataPaths";
 import { getCallLogRetentionDays } from "@/lib/logEnv";
+import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 
 /**
  * On-disk storage for generated media the caller could not otherwise fetch.
@@ -26,11 +27,32 @@ const DATA_DIR = resolveDataDir({ isCloud });
 export const MEDIA_DIR = isCloud || isBuildPhase ? null : path.join(DATA_DIR, "media");
 
 /**
- * Upper bound for the bytes kept in MEDIA_DIR. Age alone does not bound the directory: a
- * burst of video jobs inside the retention window can fill the disk. Past this size the
- * oldest files are evicted first (the file just written is never evicted).
+ * Default upper bound for the bytes kept in MEDIA_DIR (2 GiB). Age alone does not bound the
+ * directory: a burst of video jobs inside the retention window can fill the disk. Past the
+ * cap the oldest files are evicted first (the file just written is never evicted). The cap in
+ * force comes from `resolveMediaStoreMaxBytes()`.
  */
 export const MAX_MEDIA_BYTES = 2 * 1024 ** 3;
+
+const MIB = 1024 ** 2;
+
+/**
+ * The size cap in force, in bytes. The env `MEDIA_STORE_MAX_MB` wins when it is a whole number
+ * above 0 (anything else is ignored, so a typo cannot turn the cap off). Otherwise the Storage
+ * setting `retention.mediaStoreMaxMb` applies, then the 2 GiB default. Read at every write, so
+ * a dashboard change takes effect without a restart.
+ */
+export function resolveMediaStoreMaxBytes(): number {
+  const raw = process.env.MEDIA_STORE_MAX_MB?.trim();
+  if (raw && /^[1-9]\d*$/.test(raw)) return Number(raw) * MIB;
+  try {
+    const stored = getUserDatabaseSettings().retention.mediaStoreMaxMb;
+    if (Number.isInteger(stored) && stored > 0) return stored * MIB;
+  } catch {
+    // Settings unavailable (very early startup): keep the default.
+  }
+  return MAX_MEDIA_BYTES;
+}
 
 /**
  * Owner tag for media written with no owner key (a dashboard-session request with no API key).
@@ -91,12 +113,12 @@ export function writeMediaFile(
     return null;
   }
   // Bound the directory without a scheduler: every write sweeps expired files and trims
-  // the total to MAX_MEDIA_BYTES, so growth tracks generation activity rather than running
+  // the total to the size cap, so growth tracks generation activity rather than running
   // away between sweeps.
   // ponytail: O(files) scan per write, and nothing expires while no generation runs.
   // Both are fine at this scale (a few dozen files); move to a scheduled sweep if the
   // directory ever reaches thousands of entries.
-  pruneExpiredMedia(Date.now(), MAX_MEDIA_BYTES, id);
+  pruneExpiredMedia(Date.now(), resolveMediaStoreMaxBytes(), id);
   return id;
 }
 
@@ -167,7 +189,7 @@ function sweepExpiredMedia(
  */
 export function pruneExpiredMedia(
   now = Date.now(),
-  maxBytes = MAX_MEDIA_BYTES,
+  maxBytes = resolveMediaStoreMaxBytes(),
   protectId: string | null = null
 ): number {
   if (!MEDIA_DIR) return 0;

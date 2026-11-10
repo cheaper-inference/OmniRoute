@@ -8474,6 +8474,8 @@
     "retentionUsageHistory": "Историја коришћења (дани)",
     "retentionMemoryEntries": "Ставке меморије (дани)",
     "retentionXpAuditLog": "XP лог ревизије (дани)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Сачувај подешавања периода чувања",
     "storageAutoVacuumMode": "Режим аутоматског чишћења (Vacuum)",
     "storageScheduledVacuum": "Заказани Vacuum",

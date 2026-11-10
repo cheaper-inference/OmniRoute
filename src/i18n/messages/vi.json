@@ -8474,6 +8474,8 @@
     "retentionUsageHistory": "Lịch sử sử dụng (ngày)",
     "retentionMemoryEntries": "Mục nhập bộ nhớ (ngày)",
     "retentionXpAuditLog": "Nhật ký kiểm toán XP (ngày)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Lưu cài đặt thời hạn lưu giữ",
     "storageAutoVacuumMode": "Chế độ dọn dẹp tự động",
     "storageScheduledVacuum": "Dọn dẹp theo lịch",

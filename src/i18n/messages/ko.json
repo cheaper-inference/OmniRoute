@@ -8474,6 +8474,8 @@
     "retentionUsageHistory": "이용내역(일)",
     "retentionMemoryEntries": "메모리 항목(일)",
     "retentionXpAuditLog": "XP 감사 로그 보존 기간(일)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "보존 설정 저장",
     "storageAutoVacuumMode": "자동 VACUUM 모드",
     "storageScheduledVacuum": "예약된 VACUUM",

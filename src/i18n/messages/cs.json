@@ -8551,6 +8551,8 @@
     "retentionUsageHistory": "Historie využití (dny)",
     "retentionMemoryEntries": "Záznamy paměti (dny)",
     "retentionXpAuditLog": "Protokol auditu XP (dny)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Uložit nastavení uchovávání",
     "storageAutoVacuumMode": "Režim Auto Vacuum",
     "storageScheduledVacuum": "Plánované vakuum",

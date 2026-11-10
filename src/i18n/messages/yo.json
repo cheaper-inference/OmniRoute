@@ -8474,6 +8474,8 @@
     "retentionUsageHistory": "Ìtàn Ìlò (ọjọ́)",
     "retentionMemoryEntries": "Àwọn Àkọsílẹ̀ Ìrántí (ọjọ́)",
     "retentionXpAuditLog": "Àkọsílẹ̀ Àyẹ̀wò XP (ọjọ́)",
+    "mediaStoreMaxMb": "Media store size cap (MiB)",
+    "mediaStoreMaxMbHint": "Total size of stored generated media. The oldest files go first. The env MEDIA_STORE_MAX_MB wins when it is set. Default 2048.",
     "saveRetentionSettings": "Fi àwọn ààtò ìdádúró dátà pamọ́",
     "storageAutoVacuumMode": "Ìpo Vacuum Aládàáṣiṣẹ́",
     "storageScheduledVacuum": "Vacuum Tí A Ṣètò Àkókò Fún",
