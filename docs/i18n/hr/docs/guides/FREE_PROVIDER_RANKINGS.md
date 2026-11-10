@@ -13,13 +13,13 @@
 
 ## Što je to
 
-OmniRoute registrira 377 ponuđača, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Vodič za besplatne razine](../getting-started/FREE-TIERS-GUIDE.md) i cijeli [imenik besplatnih razina](../reference/FREE_TIERS.md) ). Kvaka: besplatni pružatelji jako variraju u kvaliteti modela. Davatelj bez autentifikacije koji poslužuje granični model mnogo je korisniji od onog koji služi malom naslijeđenom modelu.
+OmniRoute registrira 381 ponuđača, uključujući 155 označenih kataloških zapisa**free/no-auth** (no-auth, free-tier OAuth ili free-tier API ključ — pogledajte [Vodič za besplatne razine](../getting-started/FREE-TIERS-GUIDE.md) i puni [direktorij besplatnih razina](../reference/FREE_TIERS.md) ). Kvaka: besplatni pružatelji jako variraju u kvaliteti modela. Davatelj bez autentifikacije koji poslužuje granični model mnogo je korisniji od onog koji služi malom naslijeđenom modelu.
 
 **Rangiranje besplatnih pružatelja usluga** odgovori "** koji mi besplatni pružatelj nudi najbolji model?** " pridruživanjem katalogu svakog besplatnog pružatelja usluge** ocjene kvalitete dobivene iz mnoštva** iz** Arena AI ljestvica** (human-preference ELO, ista ideja iza LMArena chatbot arene). Pružatelji se zatim rangiraju prema snazi svojih** najbolji besplatni model** .
 
 Poredak se izračunava iz tri stvarna izvora:
 
-1. Popisi besplatnih pružatelja — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` unosi označeni `hasFree` (`src/shared/constants/providers.ts`).
+1. Besplatni pružatelj navodi — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` unose označene `hasFree` (`src/shared/constants/providers.ts`).
 2. Katalog modela svakog pružatelja iz registra pružatelja (`open-sse/config/providerRegistry.ts`).
 3. Rezultati prilagođeni zadatku izvedeni iz ELO-a pohranjeni u `model_intelligence` DB tablici od strane Arena ELO sync engine (`src/lib/arenaEloSync.ts`).
 

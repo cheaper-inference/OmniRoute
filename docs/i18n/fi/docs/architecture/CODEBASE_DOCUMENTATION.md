@@ -444,7 +444,7 @@ Jaettu tarkoituksenmukaisiin alihakemistoihin:
 
 ---
 
-## 4. `open-sse/` — Suoratoistomoottorin työtila
+## 4. `open-sse/` — Streaming engine -työtila
 
 Erillinen npm-työtila julkaistu nimellä `@omniroute/open-sse`. Omistaa pyyntöjen käsittelyn, toteuttajat, kääntäjät, palvelut, muuntajan ja MCP palvelimen.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 huipputason suoritusmoduulia (`*.ts` miinus `base.ts`, `index.ts` ja testit - `npm run check:docs-counts` -määrä). Jokainen suorittajaluokka laajentaa `BaseExecutor` (`base.ts`), suoraan tai `DefaultExecutor` tai muun suorittajan kautta; loput moduulit ovat palveluntarjoajakohtaisia apuohjelmia (työkalukaaviot, fetch/TTS -sovittimet, quirk-käsittelijät). Toteuttajiin kuuluvat:
+159 huipputason suoritusmoduulia (`*.ts` miinus `base.ts`, `index.ts` ja testit — count `npm run check:docs-counts` -mitat). Jokainen suorittajaluokka laajentaa `BaseExecutor` :n (`base.ts`), suoraan tai `DefaultExecutor` tai muun suorittajan kautta; loput moduulit ovat palveluntarjoajakohtaisia avustajia (työkalukaaviot, fetch/TTS -sovittimet, quirk-käsittelijät). Toteuttajiin kuuluvat:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex` `devin-desktop` `claudeIdentity.ts` `nlpcloud` jaettu identiteettiapu) ja `index.ts` (rekisteri).
 
-> Huomautus: `default.ts` palvelee palveluntarjoajia, joita ei ole lueteltu tässä, käyttämällä yleistä OpenAI-yhteensopivaa suorittajaa. Täydellinen tarjoajaluettelo (377 tarjoajaa) sijaitsee `src/shared/constants/providers.ts` ssä.
+> Huomautus: `default.ts` palvelee palveluntarjoajia, joita ei ole lueteltu tässä, käyttämällä yleistä OpenAI-yhteensopivaa suorittajaa. Täydellinen tarjoajaluettelo (381 tarjoajaa) sijaitsee `src/shared/constants/providers.ts` ssä.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,11 +504,11 @@ Keskitetty käännös (OpenAI on keskus).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Vastaukset API ↔ Chat Completions -muunnin (käyttää `responses/` -reitin keräilykerralla).
+- `responsesTransformer.ts` — `TransformStream` -based Vastaukset API ↔ Chat Completions -muunnin (käytetään `responses/` -reitin keräilyssä).
 
 ### 4.5 `open-sse/services/`
 
-Kohokohdat (täydellinen luettelo kohdassa `open-sse/services/`):
+Kohokohdat (koko luettelo kohdassa `open-sse/services/`):
 
 | Koskea              | Tiedostot                                                                                                                                                                                                                                                |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -519,7 +519,7 @@ Kohokohdat (täydellinen luettelo kohdassa `open-sse/services/`):
 | Välimuisti          | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Reititysäly         | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Mallin käsittely    | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Puristus            | `compression/` — täydellinen kompressiomoottorin johdotus                                                                                                                                                                                                |
+| Puristus            | `compression/` — täysi puristusmoottorin johdotus                                                                                                                                                                                                        |
 | Token + -istunto    | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Taso/luettelo       | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / verkko         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,16 +528,16 @@ Kohokohdat (täydellinen luettelo kohdassa `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ainutlaatuista työkalua** langallinen `server.ts` :ssa (45 kanonista `schemas/tools.ts` ssä + -muisti, taidot, GitHub-taidot, pooli, gamification, plugin, Notion, Obsidian, paikallinen korpus ja pakkausmoduulit – liitto lasketaan `countUniqueMcpTools`:llä).
+- **110 ainutlaatuista työkalua** langallinen `server.ts` ssa (45 kanonista `schemas/tools.ts` ssä + -muisti, taidot, GitHub-taidot, pooli, gamification, plugin, Notion, Obsidian, paikallinen korpus ja pakkausmoduulit — liitto laskettuna `countUniqueMcpTools`:llä).
 - **3 kuljetusta** : stdio, HTTP Streamable, SSE.
-- **33 kiikaritähtää** pakotettu ajon aikana — perusluettelo `src/shared/constants/mcpScopes.ts` ssa, täysi joukko on kunkin työkalumoduulin ilmoittamien laajuuksien liitto.
+- **33 kiikaritähtää** pakotettu ajon aikana — -perusluettelossa `src/shared/constants/mcpScopes.ts` ssä, täysi joukko on kunkin työkalumoduulin ilmoittamien laajuuksien liitto.
 - Tarkastustaulukko: `mcp_tool_audit` (asuttama `audit.ts`).
 - Tiedostot: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus testit alla `__tests__/`.
 - Katso täydellinen työkaluluettelo [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### 4.7 `open-sse/config/`
 
-Palveluntarjoajarekisterit (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), muotokohtaiset mallirekisterit (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identiteetin apuohjelmat (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts` `antigravityModelAliases.ts`, `cliFingerprints.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, käyttöoikeusapuohjelmat (`credentialLoader.ts`, `codexClient.ts`) ja pilvisovittimet (`azureAi.ts`, `bedrock.ts`, zqx , `datarobot.ts`, `oci.ts`, `petals.ts`, `glmProvider.ts`, `maritalk.ts`, `sap.ts` `ollamaModels.ts` `watsonx.ts`,, `runway.ts` `errorConfig.ts`, `constants.ts` `registryUtils.ts`.
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

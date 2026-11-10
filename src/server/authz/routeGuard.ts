@@ -100,6 +100,7 @@ export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
   "/api/resilience/connections", // Per-account resilience state. NOTE: prefix matching also gates future /api/resilience/connections-* paths.
   // Dashboard HTML stays out of this list: a reverse proxy is not loopback, so
   // gating the page logged the session out. The JSON API above stays local-only.
+  "/api/providers/agy-auth/apply-local", // spawns `secret-tool` through detectLocalAgyTokenRaw() and reads host-local token files (Hard Rules #15 + #17). Exact entry on purpose: the sibling import, import-bulk and zip-extract routes only parse what the request carries, and tunnel-served dashboards use them.
   "/api/providers/cursor/agent-availability", // credential-free dashboard-nudge check: spawns `cursor-agent status --format json` via checkCursorAgentAvailability()/getCachedCursorAgentAvailability() (src/lib/cursor/renewal.ts) — RCE-via-tunnel surface (Hard Rules #15 + #17). Narrow-scoped like /login and /refresh-cursor, not the whole /api/providers/ tree. Placed under /api/providers/ rather than /api/oauth/ because /api/oauth/ is PUBLIC-classified and never reaches this LOCAL_ONLY gate.
   "/api/modality-bridge/video/", // Video Bridge status + extraction broker; fixed ffmpeg/ffprobe subprocesses, strict loopback only (Hard Rules #15 + #17)
 ];
@@ -202,9 +203,11 @@ export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   // which defaults to true), so a POST+PUT pair repoints the CLI at attacker
   // credentials or an attacker base URL. Found sweeping the same class.
   "/api/cli-tools/codex-profiles",
-  // Writes into ~/.gemini/antigravity-cli/antigravity-oauth-token. Same family
-  // as the {claude,codex}-auth/apply-local pattern below; a plain path because
-  // it carries no dynamic segment.
+  // Imports the host's local Antigravity login (token files, Linux keyring through
+  // `secret-tool`). Same family as the {claude,codex}-auth/apply-local pattern below;
+  // a plain path because it carries no dynamic segment. Also LOCAL_ONLY above, for
+  // the spawn; this entry keeps auth mandatory for loopback callers under
+  // requireLogin=false.
   "/api/providers/agy-auth/apply-local",
   // Obsidian integration. POST /webdav points the WebDAV file service — served by
   // the custom Node layer BEFORE Next.js, outside this pipeline — at a

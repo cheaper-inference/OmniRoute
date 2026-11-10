@@ -444,7 +444,7 @@ server/
 
 ---
 
-## 4. `open-sse/` — လွှင့်အင်ဂျင်အလုပ်ခွင်
+## 4. `open-sse/` — လွှင့်အင်ဂျင် အလုပ်ခွင်
 
 သီးခြား npm အလုပ်ခွင်ကို `@omniroute/open-sse` အဖြစ်ထုတ်ဝေသည်။ တောင်းဆိုမှုလုပ်ဆောင်ခြင်း၊ စီမံဆောင်ရွက်ပေးသူ၊ ဘာသာပြန်သူများ၊ ဝန်ဆောင်မှုများ၊ ထရန်စဖော်မာနှင့် MCP ဆာဗာတို့ကို ပိုင်ဆိုင်သည်။
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -469,7 +469,7 @@ open-sse/
 | ကိုင်တွယ်သူ             | ရည်ရွယ်ချက်                                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------------- |
 | `chatCore.ts`           | ပင်မချတ်ပိုက်လိုင်း (ကက်ရှ်၊ နှုန်းကန့်သတ်ချက်၊ ပေါင်းစပ်လမ်းကြောင်းပြခြင်း၊ စီမံအုပ်ချုပ်သူ ဖြန့်ဝေမှု) |
-| `responsesHandler.ts`   | OpenAI တုံ့ပြန်မှု API ဝင်ခွင့်အမှတ်                                                                     |
+| `responsesHandler.ts`   | OpenAI တုံ့ပြန်မှုများ API ဝင်ခွင့်အမှတ်                                                                 |
 | `embeddings.ts`         | တသားတည်း                                                                                                 |
 | `imageGeneration.ts`    | ပုံရိပ်မျိုးဆက်                                                                                          |
 | `audioSpeech.ts`        | စာသားမှစကားပြော                                                                                          |
@@ -481,20 +481,20 @@ open-sse/
 | `search.ts`             | ဝဘ်ရှာဖွေမှု                                                                                             |
 | `sseParser.ts`          | SSE event parser                                                                                         |
 | `usageExtractor.ts`     | အထက်စီးကြောင်းများမှ တိုကင်နံပါတ်များကို ဆွဲထုတ်ပါ။                                                      |
-| `responseSanitizer.ts`  | ချွတ်ပေးသူ- တိကျသော ဆူညံသံ                                                                               |
+| `responseSanitizer.ts`  | ချွတ်ပေးသူ- တိကျသောဆူညံသံ                                                                                |
 | `responseTranslator.ts` | ဝန်ဆောင်မှုပေးသူတုံ့ပြန်မှုနှင့် ဘာသာပြန်အလွှာကြားတွင် ကော်ထားပါ။                                        |
 
 ### 4.2 `open-sse/executors/`
 
-156 ထိပ်တန်းအဆင့် executor modules (`*.ts` အနှုတ် `base.ts`၊ `index.ts` နှင့် စမ်းသပ်မှုများ — `npm run check:docs-counts` အစီအမံများ)။ executor အတန်းတိုင်းသည် `BaseExecutor` (`base.ts`) ကို တိုက်ရိုက် သို့မဟုတ် `DefaultExecutor` သို့မဟုတ် အခြားသော executor မှတဆင့် တိုးချဲ့သည်။ ကျန်ရှိသော module များသည် per-provider helpers (tool schemas၊ fetch/TTS adapters၊ quirk handlers) များဖြစ်သည်။ စီမံဆောင်ရွက်သူများ ပါဝင်သည်-
+159 ထိပ်တန်းအဆင့် executor modules (`*.ts` အနှုတ် `base.ts`၊ `index.ts` နှင့် စမ်းသပ်မှုများ — အရေအတွက် `npm run check:docs-counts` အစီအမံများ)။ executor အတန်းတိုင်းသည် `BaseExecutor` (`base.ts`) ကို တိုက်ရိုက် သို့မဟုတ် `DefaultExecutor` သို့မဟုတ် အခြားသော executor မှတဆင့် တိုးချဲ့သည်။ ကျန်ရှိသော module များသည် per-provider helpers (tool schemas၊ fetch/TTS adapters၊ quirk handlers) များဖြစ်သည်။ စီမံဆောင်ရွက်သူများ ပါဝင်သည်-
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `claudeIdentity.ts` (အကူအညီ) နှင့် `index.ts`
 
-> မှတ်ချက်- ဤနေရာတွင် စာရင်းမသွင်းထားသော ဝန်ဆောင်မှုပေးသူများကို ယေဘူယျ OpenAI-သဟဇာတဖြစ်သော executor ကို အသုံးပြု၍ `default.ts` မှ ဆောင်ရွက်ပေးပါသည်။ ဝန်ဆောင်မှုပေးသူ ကတ်တလောက် အပြည့်အစုံ (377 ဝန်ဆောင်မှုပေးသူ) သည် `src/shared/constants/providers.ts` တွင် နေထိုင်သည်။
+> မှတ်ချက်- ဤနေရာတွင် စာရင်းမသွင်းထားသော ဝန်ဆောင်မှုပေးသူများကို ယေဘူယျ OpenAI-သဟဇာတဖြစ်သော executor ကို အသုံးပြု၍ `default.ts` မှ ဆောင်ရွက်ပေးပါသည်။ ဝန်ဆောင်မှုပေးသူ ကတ်တလောက် အပြည့်အစုံ (381 ဝန်ဆောင်မှုပေးသူ) သည် `src/shared/constants/providers.ts` တွင် နေထိုင်သည်။
 
 ### 4.3 `open-sse/translator/`
 
-Hub-and-spoke ဘာသာပြန်ဆိုချက် (OpenAI သည် အချက်အချာကျသည်)။
+Hub-and-spoke ဘာသာပြန်ဆိုချက် (OpenAI သည် အချက်အချာဖြစ်သည်)။
 
 - **9 ဘာသာပြန်များတောင်းဆိုခြင်း။** (`translator/request/`) : `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
 - **တုံ့ပြန်ဘာသာပြန်များ ၉** (`translator/response/`) : `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
@@ -504,11 +504,11 @@ Hub-and-spoke ဘာသာပြန်ဆိုချက် (OpenAI သည် �
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based တုံ့ပြန်မှုများ API ↔ Chat Completions converter ( `responses/` လမ်းကြောင်းဖမ်း-အားလုံးသုံးသည်)။
+- `responsesTransformer.ts` — `TransformStream` -based တုံ့ပြန်မှုများ API ↔ Chat Completions converter ( `responses/` လမ်းကြောင်းမှ အားလုံးကို ဖမ်းယူအသုံးပြုသည်)။
 
 ### 4.5 `open-sse/services/`
 
-ပေါ်လွင်ချက်များ ( `open-sse/services/` အောက်တွင် စာရင်းအပြည့်အစုံ ):
+ပေါ်လွင်ချက်များ ( `open-sse/services/` အောက်တွင် စာရင်းအပြည့်အစုံ) :
 
 | စိုးရိမ်စရာ              | ဖို                                                                                                                                                                                                                                                      |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -519,7 +519,7 @@ Hub-and-spoke ဘာသာပြန်ဆိုချက် (OpenAI သည် �
 | သိမ်းဆည်းခြင်း။          | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | ထောက်လှမ်းရေးလမ်းကြောင်း | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | မော်ဒယ်ကိုင်တွယ်         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| နှိမ်တယ်။                | `compression/` — အပြည့်ချုံ့အင်ဂျင်ဝိုင်ယာကြိုး                                                                                                                                                                                                          |
+| နှိမ်တယ်။                | `compression/` — full compression engine wiring                                                                                                                                                                                                          |
 | တိုကင် + စက်ရှင်         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | အဆင့် / ထင်ရှား          | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / ကွန်ရက်             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -530,7 +530,7 @@ Hub-and-spoke ဘာသာပြန်ဆိုချက် (OpenAI သည် �
 
 - **ထူးခြားသောကိရိယာ ၁၁၀** `server.ts` တွင် ကြိုးတပ်ထားသည် ( `schemas/tools.ts` + memory တွင် 45 canonical၊ ကျွမ်းကျင်မှု၊ GitHub-skills၊ pool၊ gamification၊ plugin၊ Notion၊ Obsidian၊ local-corpus နှင့် compression modules — union ကို `countUniqueMcpTools` ဖြင့် ရေတွက်သည်)။
 - **သယ်ယူပို့ဆောင်ရေး ၃** : stdio၊ HTTP ထုတ်လွှင့်နိုင်သော၊ SSE။
-- **နယ်ပယ် ၃၃** runtime တွင်ပြဌာန်းထားသည် — `src/shared/constants/mcpScopes.ts` တွင်အခြေခံစာရင်း၊ အစုံသည် tool module တစ်ခုစီမှကြေငြာထားသောနယ်ပယ်များစုစည်းမှုဖြစ်သည်။
+- **နယ်ပယ် ၃၃** `src/shared/constants/mcpScopes.ts` ရှိ runtime — အခြေစိုက်စာရင်းတွင် ပြဌာန်းထားသည်၊ အပြည့်အစုံသည် tool module တစ်ခုစီမှ ကြေညာထားသော နယ်ပယ်များ စုပေါင်းဖြစ်သည်။
 - စာရင်းစစ်ဇယား- `mcp_tool_audit` ( `audit.ts` ဖြင့် ပြည့်နေသည်)။
 - ဖိုင်များ- `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, အပေါင်း `__tests__/` အောက်တွင် စမ်းသပ်မှုများ။
 - ကိရိယာအစုံအလင်အတွက် [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ကြည့်ပါ။
@@ -541,7 +541,7 @@ Hub-and-spoke ဘာသာပြန်ဆိုချက် (OpenAI သည် �
 
 ### 4.8 `open-sse/utils/`
 
-ထုတ်လွှ `awsSigV4.ts` `thinkTagParser.ts` `tlsClient.ts` `stream.ts` `streamHandler.ts` `streamHelpers.ts` `streamPayloadCollector.ts` `streamReadiness.ts` `sseHeartbeat.ts` `proxyFetch.ts` `proxyDispatcher.ts` `networkProxy.ts` `cacheControlPolicy.ts` `cursorChecksum.ts` `cursorAgentProtobuf.ts` `cursorVersionDetector.ts` `comfyuiClient.ts` `kieTask.ts` `bypassHandler.ts` `aiSdkCompat.ts` `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
+ထုတ်လွှ `thinkTagParser.ts`် `awsSigV4.ts` `tlsClient.ts` `stream.ts` `streamHandler.ts` `streamHelpers.ts` `streamPayloadCollector.ts` `streamReadiness.ts` `sseHeartbeat.ts` `proxyFetch.ts` `proxyDispatcher.ts` `networkProxy.ts` `cacheControlPolicy.ts` `cursorChecksum.ts` `cursorAgentProtobuf.ts` `cursorVersionDetector.ts` `comfyuiClient.ts` `kieTask.ts` `bypassHandler.ts` `aiSdkCompat.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 

@@ -30,95 +30,95 @@ Permintaan Klien
 
 ---
 
-## Mod Mampatan
+## Mod Pemampatan
 
-### Mati
+### Dimatikan
 
-Tiada mampatan digunakan. Semua mesej melalui tanpa sebarang perubahan.
+Tiada pemampatan digunakan. Semua mesej dihantar tanpa perubahan.
 
-### Mod Lite (~15% penjimatan, <1ms kependaman)
+### Mod Lite (~15% penjimatan, kependaman <1ms)
 
-Mod paling selamat — tiada perubahan semantik, hanya pembersihan format:
+Mod paling selamat — pembersihan pemformatan. Pemendekan hasil alatnya bersifat kehilangan data, jadi laluan lalai
+(tanpa `allow-lossy`, `engine:lite` atau pilihan masuk kombi bernama) menjalankan Lite dengan
+`compressToolResults: false`: hasil alat terdahulu sampai kepada penyedia tanpa perubahan.
 
-| Teknik                   | Penerangan                                               |
-| ------------------------ | -------------------------------------------------------- |
-| `collapseWhitespace`     | Gabungkan baris kosong berturut-turut dan ruang belakang |
-| `dedupSystemPrompt`      | Buang mesej sistem pendua                                |
-| `compressToolResults`    | Mampatkan output alat/fungsi yang bertele-tele           |
-| `removeRedundantContent` | Buang arahan yang berulang                               |
-| `replaceImageUrls`       | Pendekkan URI data imej base64                           |
+| Teknik                   | Penerangan                                                                                                |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Menggabungkan baris kosong berturutan dan ruang di hujung                                                 |
+| `dedupSystemPrompt`      | Mengalih keluar mesej sistem pendua                                                                       |
+| `compressToolResults`    | Memendekkan hasil alat terdahulu kepada had Lite (kehilangan data: hanya dengan pilihan masuk permintaan) |
+| `removeRedundantContent` | Menanggalkan arahan berulang                                                                              |
+| `replaceImageUrls`       | Memendekkan URI data imej base64                                                                          |
 
 **Terbaik untuk:** Penggunaan sentiasa aktif, aliran kerja kritikal keselamatan.
 
 ### Mod Standard (~30% penjimatan)
 
-Diilhamkan oleh [Caveman](https://github.com/JuliusBrussee/caveman) — membuang kata pengisi dan frasa bertele-tele sambil mengekalkan makna:
+Diilhamkan oleh [Caveman](https://github.com/JuliusBrussee/caveman) — mengalih keluar kata pengisi dan frasa berlebihan sambil mengekalkan maksud:
 
-- Membuang kata pengisi ("please", "I think", "basically", "actually")
-- Memadatkan frasa bertele-tele ("in order to" → "to", "as a result of" → "because")
-- Membuang ayat berlapik sopan ("Would you mind...", "If you could possibly...")
-- 30+ peraturan regex yang ditala untuk prompt pengekodan
+- Mengalih keluar kata pengisi ("please", "I think", "basically", "actually")
+- Memadatkan frasa berlebihan ("in order to" → "to", "as a result of" → "because")
+- Menanggalkan ungkapan berlapik yang sopan ("Would you mind...", "If you could possibly...")
+- Lebih daripada 30 peraturan regex yang ditala untuk gesaan pengekodan
 
-**Terbaik untuk:** Aliran kerja pengekodan harian, pasukan yang peka kos.
+**Terbaik untuk:** Aliran kerja pengekodan harian, pasukan yang peka terhadap kos.
 
-### Mod Aggressive (~50% penjimatan)
+### Mod Agresif (~50% penjimatan)
 
 Pengurusan sejarah pintar untuk sesi yang panjang:
 
-- **Penuaan Mesej** — mesej lama dimampatkan secara berperingkat
-- **Mampatan Hasil Alat** — output alat yang panjang dipendekkan atau disingkat (baris pertama/terakhir,
+- **Penuaan Mesej** — mesej lama dimampatkan secara beransur-ansur
+- **Pemampatan Hasil Alat** — output alat yang panjang dipendekkan atau disembunyikan (baris pertama/terakhir,
   penapisan baris padanan, pemadatan kunci JSON)
 - **Pengawal Integriti Struktur** — memastikan pasangan `tool_use` + `tool_result` kekal konsisten
-- **Kesedaran Tetingkap Konteks** — menghormati had token setiap model
+- **Kesedaran Tetingkap Konteks** — mematuhi had token bagi setiap model
 
-**Terbaik untuk:** Sesi penyahpepijatan lanjutan, pangkalan kod yang besar.
+**Terbaik untuk:** Sesi penyahpepijatan lanjutan, pangkalan kod besar.
 
 ### Mod Ultra (~75% penjimatan)
 
-Mampatan maksimum untuk senario kritikal token:
+Pemampatan maksimum untuk senario yang kritikal terhadap token:
 
-- **Pemangkasan Heuristik** — pemangkasan token prosa berasaskan skor
-- **Pemeliharaan Struktur** — blok kod berpagar, kod sebaris, URL dan pengecam ditandakan sebagai
-  tombstone dan dijahit semula secara verbatim, tidak pernah dipangkas
-- **Tingkat SLM pilihan** — model tempatan kecil boleh memperhalusi pangkasan apabila dikonfigurasikan
-- Bebas daripada mod Aggressive: ia tidak menjalankan penuaan mesej, mampatan hasil alat
-  atau peringkas sandaran (hanya kegagalan tingkat SLM boleh menghalakan laluan sandaran
-  melalui aggressive)
+- **Pemangkasan Heuristik** — pemangkasan token berasaskan skor pada prosa
+- **Pengekalan Struktur** — blok kod berpagar, kod sebaris, URL dan pengecam
+  ditanda dan dicantum semula secara verbatim, tidak pernah dipangkas
+- **Peringkat SLM Pilihan** — model tempatan kecil boleh memperhalus pemangkasan apabila dikonfigurasikan
+- Tidak bergantung pada mod Agresif: ia tidak menjalankan penuaan mesej, pemampatan hasil alat
+  atau peringkas sandaran (hanya kegagalan peringkat SLM boleh menghala pemprosesan sandaran melalui
+  agresif)
 
-**Terbaik untuk:** Apabila anda berulang kali mencapai had konteks.
+**Terbaik untuk:** Apabila anda berulang kali menghadapi had konteks.
 
-### Mod RTK (julat hulu 60-90%)
+### Mod RTK (julat huluan 60-90%)
 
-Mod RTK dioptimumkan untuk output alat bertele-tele yang muncul dalam sesi ejen pengekodan:
+Mod RTK dioptimumkan untuk output alat yang berlebihan yang muncul dalam sesi ejen pengekodan:
 
-- Mengesan kelas perintah/output seperti `git status`, `git diff`, `git log`, pelari ujian,
-  binaan TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, log Docker, output
-  infra, dan output shell generik
+- Mengesan kelas perintah/output seperti `git status`, `git diff`, `git log`, pelaksana ujian,
+  binaan TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audit/pemasangan npm, log Docker, output infrastruktur
+  dan output shell generik
 - Menggunakan pek penapis JSON daripada `open-sse/services/compression/engines/rtk/filters/`
-- Mengimport penapis RTK TOML skema v1 daripada fail `filters.toml` projek atau global, dengan
-  pengesahan ujian sebaris dan trust-gating untuk fail projek
-- Disediakan dengan 56 penapis terbina dalam berserta sampel pengesahan sebaris
-- Membuang jujukan kawalan ANSI, bar kemajuan, baris berulang, dan hingar yang tidak boleh diambil tindakan
-- Mengekalkan kegagalan, ralat, amaran, fail yang diubah, ringkasan, dan bahagian akhir output panjang
-- Menyokong penapis projek trust-gated, penapis global, dan pemulihan output mentah tersensor secara pilihan
+- Mengimport penapis skema TOML RTK v1 daripada fail `filters.toml` projek atau global, dengan pengesahan
+  ujian sebaris dan kawalan kepercayaan untuk fail projek
+- Menyertakan 56 penapis terbina dalam dengan sampel pengesahan sebaris
+- Mengalih keluar jujukan kawalan ANSI, bar kemajuan, baris berulang dan hingar yang tidak boleh diambil tindakan
+- Mengekalkan kegagalan, ralat, amaran, fail yang berubah, ringkasan dan penghujung output yang panjang
+- Menyokong penapis projek berkawal kepercayaan, penapis global dan pemulihan output mentah yang disunting secara pilihan
 
-**Terbaik untuk:** Sesi ejen dengan transkrip shell, binaan, ujian, git, grep, dan output fail.
+**Terbaik untuk:** Sesi ejen dengan transkrip shell, binaan, ujian, git, grep dan output fail.
 
-### Mod Stacked (julat layak 78-95%)
+### Mod Bertindan (julat layak 78-95%)
 
-Mod Stacked menjalankan berbilang enjin mampatan dalam susunan berketentuan. Saluran paip lalai ialah:
+Mod Bertindan menjalankan berbilang enjin pemampatan dalam susunan yang deterministik. Saluran paip lalai ialah:
 
 ```txt
 RTK -> Caveman
 ```
 
-Susunan itu memastikan output terminal/alat padat dahulu, kemudian menggunakan pemadatan semantik
-Caveman pada prompt bahasa semula jadi yang tinggal. Saluran paip Stacked boleh dikonfigurasikan
-secara global atau melalui kombo mampatan yang ditetapkan kepada kombo penghalaan.
+Susunan ini memastikan output terminal/alat dipadatkan dahulu, kemudian pemeluwapan semantik Caveman digunakan pada
+gesaan bahasa semula jadi yang selebihnya. Saluran paip bertindan boleh dikonfigurasikan secara global atau melalui
+kombi pemampatan yang ditetapkan kepada kombi penghalaan.
 
-**Terbaik untuk:** Konteks campuran dengan log alat yang besar serta arahan manusia atau ringkasan pembantu.
-
----
+**Terbaik untuk:** Konteks bercampur dengan log alat yang besar serta arahan manusia atau ringkasan pembantu.
 
 ## Matematik Penjimatan Upstream
 
@@ -190,60 +190,67 @@ Dengan Stacked:      10K-2.5K token dihantar     (julat RTK+Caveman layak sebany
 
 Navigasi ke `Dashboard → Context & Cache`:
 
-- **Caveman** — pemilihan mod, pek bahasa, pratonton dan tetapan lalai global
+- **Caveman** — pemilihan mod, pek bahasa, pratonton dan lalai global
 - **RTK** — pratonton penapis perintah, tetapan keselamatan RTK dan katalog penapis
-- **Compression Combos** — saluran pemprosesan enjin bernama yang ditetapkan kepada kombo penghalaan
-- **Auto-Trigger Threshold** — aktifkan pemampatan secara automatik apabila kiraan token melebihi ambang
+- **Compression Combos** — saluran paip enjin bernama yang ditetapkan kepada kombo penghalaan
+- **Auto-Trigger Threshold** — aktifkan pemampatan secara automatik apabila jumlah token melebihi ambang
 
-### Penggantian Per Kombo
+### Penggantian Per-Combo
 
-Dalam `Dashboard → Context & Cache → Compression Combos`, tetapkan kombo pemampatan kepada kombo
-penghalaan:
+Dalam `Dashboard → Context & Cache → Compression Combos`, tetapkan kombo pemampatan kepada
+kombo penghalaan:
 
 ```txt
-Kombo: "free-tier-fallback"
-  Kombo Pemampatan: "coding-agent-stack"
-  Saluran Pemprosesan: RTK -> Caveman
-  Sasaran:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Ini membolehkan anda menggunakan pemampatan bertindan pada penyedia percuma/pengekodan sambil mengekalkan mod ringkas pada
-langganan berbayar.
+Ini membolehkan anda menggunakan pemampatan bertingkat pada pembekal percuma/pengekodan sambil
+mengekalkan mod lite pada langganan berbayar.
 
-Penetapan "Penggantian Per Kombo" ini ialah kawalan yang berbeza daripada penggantian **mod pemampatan kombo
-penghalaan** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — skema medan tersebut
-turut menerima `rtk`, `stacked` dan `omniglyph`) — penggantian itu tidak memilih saluran pemprosesan
-kombo pemampatan bernama; ia hanya menetapkan medan `compressionMode` yang dirujuk oleh
-`resolveCompressionPlan`. Ia boleh ditetapkan sama ada pada kad kombo (`Dashboard → Combos`) atau, sejak
-#6760, bagi setiap kombo penghalaan dalam senarai "Assign to routing" pada
-`Dashboard → Context & Cache → Compression Combos`, betul-betul di sebelah kotak pilihan penetapan saluran pemprosesan
-yang didokumenkan di atas. Kedua-dua antara muka menyimpan perubahan melalui titik akhir `PUT /api/combos/{id}` yang sama.
+Tugasan "Per-Combo Override" ini ialah kawalan yang berbeza daripada penggantian **routing-combo compression
+mode** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — skema medan itu juga menerima
+`rtk`, `stacked` dan `omniglyph`) — penggantian tersebut tidak memilih saluran paip
+compression-combo yang bernama; sebaliknya, ia hanya menetapkan medan `compressionMode` yang
+dirujuk oleh `resolveCompressionPlan`. Ia boleh ditetapkan sama ada pada kad kombo
+(`Dashboard → Combos`) atau, sejak #6760, bagi setiap kombo penghalaan dalam senarai "Assign to routing" di
+`Dashboard → Context & Cache → Compression Combos`, betul-betul di sebelah kotak pilihan penetapan saluran paip
+yang didokumenkan di atas. Kedua-dua permukaan menyimpan data melalui titik akhir `PUT /api/combos/{id}` yang sama.
 
-### Penggantian per permintaan
+### Penggantian bagi setiap permintaan
 
 Hantar pengepala permintaan `x-omniroute-compression` untuk menggantikan pelan pemampatan bagi satu
-permintaan. Ia mempunyai keutamaan tertinggi — ia mengatasi penggantian kombo penghalaan, profil aktif,
-pencetus automatik dan Default panel. Nilai yang tidak diketahui akan diabaikan (permintaan tidak akan ditolak) dan
-suis induk global masih mengawal segala-galanya: apabila pemampatan dimatikan secara global, pengepala tidak boleh
-menghidupkannya. Nilai:
+permintaan. Ia mempunyai keutamaan tertinggi — ia mengatasi penggantian kombo penghalaan, profil
+aktif, pencetus automatik dan Default panel. Nilai yang tidak diketahui diabaikan (permintaan tidak
+pernah ditolak) dan suis induk global masih mengawal segala-galanya: apabila pemampatan dimatikan
+secara global, pengepala ini tidak boleh menghidupkannya. Nilai:
 
-| Nilai         | Kesan                                                                                                                  |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Tiada pemampatan untuk permintaan ini.                                                                                 |
-| `default`     | Profil Default yang diperoleh daripada panel (mengabaikan profil aktif). Enjin lossy kekal dimatikan.                  |
-| `safe`        | Sama seperti tidak menyertakan pengepala: nyahduplikasi dan pelipatan ruang putih sahaja.                              |
-| `allow-lossy` | Kekalkan pelan pengendali permintaan ini, termasuk ringkasan, penapis kerelevanan dan penulisan semula gaya.           |
-| `engine:<id>` | Satu enjin apabila didayakan, contohnya `engine:rtk`. Ini ialah pilihan ikut serta per permintaan bagi enjin tersebut. |
-| `<combo>`     | Kombo bernama, dipadankan mengikut nama (tanpa mengira huruf besar atau kecil) terlebih dahulu, kemudian mengikut id.  |
+| Nilai         | Kesan                                                                                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Tiada pemampatan untuk permintaan ini.                                                                                          |
+| `default`     | Profil Default yang diperoleh daripada panel (mengabaikan profil aktif). Enjin lossy dibiarkan dimatikan.                       |
+| `safe`        | Sama seperti tidak menyertakan pengepala.                                                                                       |
+| `allow-lossy` | Kekalkan pelan operator permintaan ini, termasuk ringkasan, penapis perkaitan dan penulisan semula gaya.                        |
+| `engine:<id>` | Satu enjin apabila didayakan, contohnya `engine:rtk`. Ini ialah pilihan ikut serta bagi setiap permintaan untuk enjin tersebut. |
+| `<combo>`     | Kombo bernama, dipadankan mengikut nama (tidak peka huruf besar-kecil) terlebih dahulu, kemudian mengikut id.                   |
 
-Tanpa `allow-lossy`, `engine:<id>` atau kombo bernama, enjin lossy tidak digunakan. Permintaan
-masih menerima nyahduplikasi sesi dan pelipatan ruang putih apabila pemampatan dihidupkan.
+Tanpa `allow-lossy`, `engine:<id>` atau kombo bernama, enjin lossy tidak akan digunakan. Apabila
+Default lossy, pencetus automatik atau penggantian penghalaan diturunkan taraf, OmniRoute
+mengekalkan langkah lossless yang dikenali daripada saluran paip bertingkat yang dikonfigurasikan,
+mengikut susunan yang dikonfigurasikan. Ia kembali kepada `session-dedup → lite` hanya apabila tiada
+langkah lossless yang dikonfigurasikan kekal.
 
-Pelan yang digunakan dipantulkan kembali dalam pengepala respons `X-OmniRoute-Compression: <mode>; source=<source>`,
-dengan `<source>` ialah salah satu daripada `request-header`, `routing-override`, `active-profile`,
-`auto-trigger`, `default` atau `off`.
+Pratonton **Effective pipeline** panel Settings memaparkan pelan biasa pada keadaan rehat. Apabila
+pencetus automatik boleh dijalankan, pratonton yang sama turut memaparkan saluran paip berkesan
+bersyaratnya supaya penyelesaian masa jalan panel dan tanpa pengepala kekal selaras.
+
+Pelan yang digunakan dikembalikan dalam pengepala respons
+`X-OmniRoute-Compression: <mode>; source=<source>`, dengan `<source>` ialah salah satu daripada
+`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` atau `off`.
 
 ### API
 
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/api/compression/preview \
 # Senaraikan pek penapis RTK
 curl http://localhost:20128/api/context/rtk/filters
 
-# Uji RTK secara langsung dengan metadata perintah pilihan
+# Uji RTK secara terus dengan metadata perintah pilihan
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'

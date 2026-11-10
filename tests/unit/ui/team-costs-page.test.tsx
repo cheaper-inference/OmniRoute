@@ -336,7 +336,7 @@ describe("real team costs components", () => {
     expect(writes()).toHaveLength(0);
     await click("Assign");
     expect(writes()).toHaveLength(0);
-    expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain(
+    expect(document.body.querySelector('[role="alertdialog"]')?.textContent).toContain(
       "from “Beta” to “Alpha”"
     );
     await click("Confirm");
@@ -350,7 +350,7 @@ describe("real team costs components", () => {
     expect(writes()).toHaveLength(0);
     mutationStatus = 403;
     await click("Confirm");
-    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.body.querySelector('[role="alertdialog"]')).not.toBeNull();
     expect(document.body.textContent).toContain(en.teamCosts.forbidden);
     expect(writes()[0][0]).toBe("/api/teams/a/members?apiKeyId=member");
   });

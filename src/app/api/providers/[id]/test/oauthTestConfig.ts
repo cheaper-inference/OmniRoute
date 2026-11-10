@@ -324,6 +324,15 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     checkExpiry: true,
     refreshable: false,
   },
+  "copilot-m365-web": {
+    // "Sign in with Microsoft" stores this provider as an OAuth connection.
+    // Copilot answers over a SignalR WebSocket and has no side-effect-free HTTP
+    // probe, so validate the access token's expiry and renew an expired one
+    // through the tenant's token endpoint: a successful renewal proves the
+    // refresh token is still good. Every chat request proves connectivity.
+    checkExpiry: true,
+    refreshable: true,
+  },
   "grok-cli": {
     // #7610: was entirely absent from OAUTH_TEST_CONFIG, so "Test Connection"
     // always fell through to the generic "Provider test not supported" branch
@@ -366,5 +375,21 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     authPrefix: "Bearer ",
     refreshable: true,
     acceptStatuses: [402],
+  },
+  // RenderHour: the account's balance is a free authenticated read (credits and dollars).
+  renderhour: {
+    url: "https://renderhour.com/v1/balance",
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    refreshable: true,
+  },
+  // MegaBrain: the plan's usage limits are a free authenticated read that accepts both the
+  // device-code token and an mb-v1 API key (its public /models route needs no auth).
+  megabrain: {
+    url: "https://api.getmegabrain.com/api/profile/limits",
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
   },
 };

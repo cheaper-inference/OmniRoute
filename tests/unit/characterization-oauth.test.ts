@@ -100,12 +100,15 @@ test("oauth constants (src/lib/oauth/constants/oauth.ts) export exactly this sur
     "KILOCODE_CONFIG",
     "KIMI_CODING_CONFIG",
     "KIRO_CONFIG",
+    "MEGABRAIN_CONFIG",
+    "MINIMAX_CODE_CONFIG",
     "MUSE_CODE_CONFIG",
     "OAUTH_TIMEOUT",
     "OPENAI_CONFIG",
     "OPENFERENCE_CONFIG",
     "PROVIDERS",
     "QODER_CONFIG",
+    "RENDERHOUR_CONFIG",
     "TRAE_CONFIG",
     "WORKBUDDY_CONFIG",
     "XAI_OAUTH_CONFIG",
@@ -134,6 +137,7 @@ test("OAuth provider registry: ids and flow types", () => {
     cursor: "import_token",
     trae: "import_token",
     kilocode: "device_code",
+    megabrain: "device_code",
     cline: "authorization_code",
     clinepass: "authorization_code",
     "devin-desktop": "import_token",
@@ -141,6 +145,7 @@ test("OAuth provider registry: ids and flow types", () => {
     "grok-cli": "device_code",
     "xai-oauth": "authorization_code_pkce",
     openference: "authorization_code_pkce",
+    renderhour: "authorization_code_pkce",
     "codebuddy-cn": "device_code",
     freebuff: "device_code",
     "codebuddy-intl": "device_code",
@@ -148,11 +153,15 @@ test("OAuth provider registry: ids and flow types", () => {
     zed: "import_token",
     "zed-hosted": "authorization_code",
     "muse-code": "device_code",
+    "minimax-code": "device_code",
+    "copilot-m365-web": "authorization_code_pkce",
   });
   // Aliases share the same module object.
   assert.equal(registry.PROVIDERS["amazon-q"], registry.PROVIDERS.kiro);
   assert.equal(registry.PROVIDERS.clinepass, registry.PROVIDERS.cline);
-  assert.equal(registry.PROVIDERS["devin-cli"], registry.PROVIDERS["devin-desktop"]);
+  // contract changed by the Devin CLI browser sign-in: devin-cli no longer aliases the
+  // devin-desktop module (which gained supportsBrowserPkce) but still shares its token config.
+  assert.equal(registry.PROVIDERS["devin-cli"].config, registry.PROVIDERS["devin-desktop"].config);
   // Every provider exposes config + mapTokens.
   for (const [id, p] of Object.entries(registry.PROVIDERS)) {
     const provider = p as { config: unknown; mapTokens: unknown };

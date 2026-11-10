@@ -4,6 +4,7 @@ import {
 } from "@/shared/utils/providerBilling";
 import { getDbInstance, isBuildPhase, isCloud } from "./core";
 import { parseCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
+import { projectCodexQuotaDisplay } from "@/lib/providers/codexQuotaDisplay";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -37,9 +38,24 @@ export interface ProviderLimitsCacheEntry {
   limitReached?: boolean;
   sparkLimitReached?: boolean;
   rateLimitReachedType?: string;
+  /** Cursor only: per-model tokens + Cursor-billed cost for the current cycle (display-only). */
+  modelUsage?: Array<Record<string, unknown>>;
 }
 
 const PROVIDER_LIMITS_CACHE_NAMESPACE = "providerLimitsCache";
+
+interface CodexQuotaDisplayRow {
+  id: string;
+  quota_data: string | null;
+}
+
+// Exclude credentials and potentially large synced model catalogs even from the read result.
+const CODEX_QUOTA_DISPLAY_SQL = `SELECT id,
+  CASE WHEN json_valid(provider_specific_data) THEN json_object(
+    'codexQuotaStateByScope', json_extract(provider_specific_data, '$.codexQuotaStateByScope'),
+    'codexQuotaState', json_extract(provider_specific_data, '$.codexQuotaState')
+  ) ELSE NULL END AS quota_data
+  FROM provider_connections WHERE provider = 'codex'`;
 
 function parseJson(raw: string): unknown {
   try {
@@ -79,6 +95,9 @@ function normalizeOptionalCacheFields(record: JsonRecord): Partial<ProviderLimit
     ...(Array.isArray(record.quotaGroups)
       ? { quotaGroups: record.quotaGroups as Array<Record<string, unknown>> }
       : {}),
+    ...(Array.isArray(record.modelUsage)
+      ? { modelUsage: record.modelUsage as Array<Record<string, unknown>> }
+      : {}),
   };
 }
 function normalizeCacheEntry(value: unknown): ProviderLimitsCacheEntry | null {
@@ -105,8 +124,12 @@ export function getProviderLimitsCache(connectionId: string): ProviderLimitsCach
   const row = db
     .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
     .get(PROVIDER_LIMITS_CACHE_NAMESPACE, connectionId) as KeyValueRow | undefined;
-  if (!row?.value) return null;
-  return normalizeCacheEntry(parseJson(row.value));
+  const cached = row?.value ? normalizeCacheEntry(parseJson(row.value)) : null;
+  const connection = db.prepare(`${CODEX_QUOTA_DISPLAY_SQL} AND id = ?`).get(connectionId) as
+    CodexQuotaDisplayRow | undefined;
+  return connection
+    ? projectCodexQuotaDisplay(cached, parseJson(connection.quota_data || "null"))
+    : cached;
 }
 
 export function getAllProviderLimitsCache(): Record<string, ProviderLimitsCacheEntry> {
@@ -122,6 +145,15 @@ export function getAllProviderLimitsCache(): Record<string, ProviderLimitsCacheE
     if (parsed) {
       result[row.key] = parsed;
     }
+  }
+  // Only quota metadata is read: no credential decryption, network calls or per-account writes.
+  const observations = db.prepare(CODEX_QUOTA_DISPLAY_SQL).all() as CodexQuotaDisplayRow[];
+  for (const observation of observations) {
+    const entry = projectCodexQuotaDisplay(
+      result[observation.id] ?? null,
+      parseJson(observation.quota_data || "null")
+    );
+    if (entry) result[observation.id] = entry;
   }
   return result;
 }

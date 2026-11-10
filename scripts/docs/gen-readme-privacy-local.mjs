@@ -8,12 +8,19 @@
 //
 //   node scripts/docs/gen-readme-privacy-local.mjs [--out path.svg]
 //
-// Everything the diagram draws lives in PRIVACY_LOCAL_COPY: it is both the drawn text and the
-// subset input for the embedded fonts, so a glyph can never be drawn without being embedded.
+// Everything the diagram draws lives in PRIVACY_LOCAL_COPY: it is both the drawn text and what the
+// outlining step shapes (scripts/docs/readme-outline.mjs).
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildFontFaceCss } from "./readme-fonts.mjs";
-import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
+import { outlineSvg } from "./readme-outline.mjs";
+import {
+  SWITZER_ROLES,
+  svgOpen,
+  gridDefs,
+  esc,
+  afterKicker,
+  roleWidth,
+} from "./readme-diagram-theme.mjs";
 
 export const PRIVACY_LOCAL_COPY = {
   kicker: ["PRIVATE & LOCAL-FIRST"],
@@ -79,9 +86,8 @@ const ROW_TOP = 140;
 const ROW_H = 44;
 const LEFT = 40;
 const RIGHT = 1160;
-// IBM Plex Mono advances exactly 0.6 em; .mono-sm is 11 px → 6.6 px per glyph.
-const CHIP_CHAR_W = 6.6;
 const CHIP_PAD = 12;
+const TAG_PAD = 6;
 const CHIP_H = 22;
 
 // The shield-check icon: two strokes, geometry kept from the previous file.
@@ -91,12 +97,6 @@ const SHIELD =
 
 export async function renderPrivacyLocal() {
   const C = PRIVACY_LOCAL_COPY;
-  const { css } = await buildFontFaceCss({
-    ui: C.details.join(""),
-    uiBold: [...C.headline, ...C.titles].join(""),
-    mono: [...C.kicker, ...C.chips].join(""),
-  });
-
   // The green sweep: a --ok-bg row that steps down the eleven rows over 16 s (discrete y),
   // fading in at the loop start and out at its end — same keyTimes as before.
   const sweepYs = C.titles.map((_, i) => ROW_TOP + i * ROW_H).join(";");
@@ -110,10 +110,10 @@ export async function renderPrivacyLocal() {
   const rows = C.titles.map((title, i) => {
     const top = ROW_TOP + i * ROW_H;
     const chip = C.chips[i];
-    const chipW = Math.ceil(chip.length * CHIP_CHAR_W + 2 * CHIP_PAD);
+    const chipW = Math.ceil(roleWidth("label-sm", chip) + 2 * CHIP_PAD);
     const chipX = RIGHT - chipW;
     const chipY = top + (ROW_H - CHIP_H) / 2;
-    // Row 1 is the "local" indicator — the one lime pill of the diagram; the others are
+    // Row 1 is the "local" indicator — the one accent pill of the diagram; the others are
     // neutral receipt chips on the subtle surface.
     const chipRect =
       i === 0
@@ -121,8 +121,8 @@ export async function renderPrivacyLocal() {
         : `<rect x="${chipX}" y="${chipY}" width="${chipW}" height="${CHIP_H}" rx="11" class="surface-subtle rule" stroke-width="1"/>`;
     const chipText =
       i === 0
-        ? `<text x="${chipX + chipW / 2}" y="${top + 26}" text-anchor="middle" class="mono-sm" style="fill:var(--accent-ink)">${esc(chip)}</text>`
-        : `<text x="${chipX + chipW / 2}" y="${top + 26}" text-anchor="middle" class="mono-sm">${esc(chip)}</text>`;
+        ? `<text x="${chipX + chipW / 2}" y="${top + 26}" text-anchor="middle" class="label-sm" style="fill:var(--accent-ink)">${esc(chip)}</text>`
+        : `<text x="${chipX + chipW / 2}" y="${top + 26}" text-anchor="middle" class="label-sm">${esc(chip)}</text>`;
     const divider =
       i < C.titles.length - 1
         ? `\n  <line x1="${LEFT}" y1="${top + ROW_H}" x2="${RIGHT}" y2="${top + ROW_H}" class="rule" stroke-width="1"/>`
@@ -137,28 +137,34 @@ export async function renderPrivacyLocal() {
   });
 
   const H = C.headline;
-  return (
+  const h3Tracking = SWITZER_ROLES.h3.tracking * SWITZER_ROLES.h3.size;
+  const tagX = Math.round(LEFT + roleWidth("h3", H[0]) + h3Tracking);
+  const tagText = tagX + TAG_PAD;
+  const tagW = Math.ceil(roleWidth("h3", H[1])) + 2 * TAG_PAD;
+  const afterTag = tagX + tagW + 2;
+
+  return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 650",
       title: TITLE,
       desc: DESC,
-      fontFaceCss: css,
     }) +
-    gridDefs("pvl-grid") +
-    `  <rect class="bg" x="0" y="0" width="1200" height="650"/>\n` +
-    `  <rect x="0" y="0" width="1200" height="650" fill="url(#pvl-grid)"/>\n` +
-    `  <text x="${LEFT}" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
-    `  <line x1="248" y1="51" x2="${RIGHT}" y2="51" class="rule" stroke-width="1"/>\n` +
-    // Headline: ink throughout; the "no hosted hop" claim sits on a muted inline tag, the
-    // "off by default" guarantee reads in --ok. The tagged tspan is pinned to its measured
-    // extent (x 391–661 with the embedded Inter 600) so the tag's padding (6 px left, 3 px
-    // right — the semicolon follows immediately) holds on every renderer.
-    `  <rect x="385" y="84" width="279" height="24" rx="6" class="surface-muted"/>\n` +
-    `  <text x="${LEFT}" y="100" class="h3">${esc(H[0])}<tspan textLength="270" lengthAdjust="spacing">${esc(H[1])}</tspan>${esc(H[2])}<tspan class="ok">${esc(H[3])}</tspan>${esc(H[4])}</text>\n` +
-    `  <line x1="${LEFT}" y1="122" x2="${RIGHT}" y2="122" class="rule" stroke-width="1"/>\n` +
-    sweep +
-    rows.join("\n") +
-    "\n</svg>\n"
+      gridDefs("pvl-grid") +
+      `  <rect class="bg" x="0" y="0" width="1200" height="650"/>\n` +
+      `  <rect x="0" y="0" width="1200" height="650" fill="url(#pvl-grid)"/>\n` +
+      `  <text x="${LEFT}" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
+      `  <line x1="${afterKicker(LEFT, C.kicker[0])}" y1="51" x2="${RIGHT}" y2="51" class="rule" stroke-width="1"/>\n` +
+      // Headline: ink throughout; the "no hosted hop" claim sits on a muted inline tag, the
+      // "off by default" guarantee reads in --ok. Three pieces placed by the real metrics so the tag
+      // keeps its padding and the words around it keep their spaces.
+      `  <text x="${LEFT}" y="100" class="h3">${esc(H[0])}</text>\n` +
+      `  <rect x="${tagX}" y="84" width="${tagW}" height="24" rx="6" class="surface-muted"/>\n` +
+      `  <text x="${tagText}" y="100" class="h3">${esc(H[1])}</text>\n` +
+      `  <text x="${afterTag}" y="100" class="h3">${esc(H[2])}<tspan class="ok">${esc(H[3])}</tspan>${esc(H[4])}</text>\n` +
+      `  <line x1="${LEFT}" y1="122" x2="${RIGHT}" y2="122" class="rule" stroke-width="1"/>\n` +
+      sweep +
+      rows.join("\n") +
+      "\n</svg>\n"
   );
 }
 

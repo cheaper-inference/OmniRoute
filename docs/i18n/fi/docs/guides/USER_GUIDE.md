@@ -118,18 +118,18 @@ Käyttö seuraavien kautta: WhatsApp, Telegram, Slack, Discord, iMessage, Signal
 
 ---
 
-## 📖 Palveluntarjoajien määritys
+## 📖 Palveluntarjoajan määritys
 
-Voit lisätä API-avainyhteyksiä joukkona CSV- tai JSON-tiedostosta valitsemalla **Hallintapaneeli → Palveluntarjoajat → Tuo tiedostosta**. Sarakkeet ovat paikkasidonnaisia (`provider,name,apiKey,baseUrl,priority`); `provider`-arvon on jo oltava hallittu palveluntarjoaja tai yhteensopiva solmu. Katso [Palveluntarjoajien tuominen CSV- tai JSON-tiedostosta](../providers/CSV-IMPORT.md).
+Voit lisätä API-avaimia käyttävät yhteydet joukkona CSV- tai JSON-tiedostosta valitsemalla **Dashboard → Providers → Import from file**. Sarakkeet ovat sijaintiperusteisia (`provider,name,apiKey,baseUrl,priority`); `provider`-arvon on oltava jo olemassa oleva hallittu palveluntarjoaja tai yhteensopiva solmu. Katso [Palveluntarjoajien tuominen CSV- tai JSON-tiedostosta](../providers/CSV-IMPORT.md).
 
-### 🔐 Tilauspohjaiset palveluntarjoajat
+### 🔐 Tilauspalveluntarjoajat
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä Claude Code
-→ OAuth-kirjautuminen → Tunnuksen automaattinen päivitys
-→ 5 tunnin ja viikoittaisen kiintiön seuranta
+Dashboard → Providers → Connect Claude Code
+→ OAuth-kirjautuminen → Tunnisteen automaattinen päivitys
+→ 5 tunnin + viikoittaisen kiintiön seuranta
 
 Mallit:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Mallit:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Ammattilaisen vinkki:** Käytä Opusta monimutkaisiin tehtäviin ja Sonnetia nopeutta vaativiin tehtäviin. OmniRoute seuraa kunkin mallin kiintiötä!
+**Vinkki:** Käytä Opusta monimutkaisiin tehtäviin ja Sonnetia nopeuteen. OmniRoute seuraa kiintiötä mallikohtaisesti!
 
-Eikö OmniRoute-isännällä ole selainta? Suorita `claude setup-token` missä tahansa, missä Claude Codeen on kirjauduttu, ja liitä vuoden voimassa oleva tunnus **Setup Token** -välilehdelle. Katso [Claude Coden käyttäminen asetustunnuksella](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Eikö OmniRoute-isännässä ole selainta? Suorita `claude setup-token` missä tahansa, missä Claude Code on kirjautuneena, ja liitä yhden vuoden tunniste **Setup Token** -välilehdelle. Katso [Claude Code määritystunnisteella](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude- ja Claude Code -yhteensopivat reitit säilyttävät Opus- ja Sonnet-mallien `max`-päättelytason. Haiku-mallit eivät hyväksy `max`-tasoa, joten OmniRoute alentaa pyynnön korkeaan päättelybudjettiin ennen sen lähettämistä ylävirran palveluun.
+Claude- ja Claude Code -yhteensopivat reitit säilyttävät Opus- ja Sonnet-malleille `max`-ajattelupanostuksen.
+Haiku-mallit eivät hyväksy `max`-panostustasoa, joten OmniRoute pienentää kyseisen
+pyynnön suureksi ajattelubudjetiksi ennen sen lähettämistä palveluntarjoajalle.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä Codex
+Dashboard → Providers → Connect Codex
 → OAuth-kirjautuminen (portti 1455)
-→ Nollaus 5 tunnin välein ja viikoittain
+→ 5 tunnin + viikoittainen nollaus
 
 Mallit:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Mallit:
 #### GitHub Copilot
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth GitHubin kautta
-→ Kuukausittainen nollaus (kuukauden 1. päivänä)
+→ Kuukausittainen nollaus (kuukauden 1. päivä)
 
 Mallit:
   gh/gpt-5.5
@@ -172,55 +174,72 @@ Mallit:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI-hyvitykset (tunnisteisiin perustuva laskutus).** Kun GitHub ilmoittaa tilille
+`credits_used`-arvon, Palveluntarjoajan rajoitukset -kortissa näkyy **AI-hyvitykset**-rivi,
+joka näyttää kuluvan laskutuskauden aikana käytetyt hyvitykset myös rajattomissa organisaatiopaketeissa.
+
+**Paikallinen AI-hyvitysten rajoitus.** Muokkaa GitHub-yhteyttä ja määritä **AI-hyvitysten
+rajoitus laskutuskautta kohden** (`providerSpecificData.githubCreditLimit`). Tyhjä arvo poistaa
+rajoituksen käytöstä; `0` ohittaa yhteyden aina. Kun viimeisin käyttöarvo on yhtä suuri tai
+suurempi kuin rajoitus, tilin valinta ohittaa kyseisen yhteyden ja reititys siirtyy muihin
+yhteyksiisi samalla tavalla kuin kiintiökäytännön rajoituksen kohdalla. Tarkistus käyttää
+käyttötietoa, jonka jaksottainen kiintiön päivitys kerää jo valmiiksi — GitHubiin ei koskaan
+soiteta pyynnön käsittelypolulla — ja se sallii toiminnan puuttuvan tai vanhentuneen tiedon
+tapauksessa: puuttuva tai vanhentunut lukema (yli 15 minuuttia vanha tai jo nollautuneelta
+laskutuskaudelta peräisin oleva) ei estä yhteyttä. Tämä on paikallinen suojatoiminto, **ei
+taattu kulutuskatto**: GitHubin raportointiviiveet, päivitysväli, käynnissä olevat pyynnöt ja
+OmniRouten ulkopuolinen käyttö voivat ylittää rajan. Käytä kiinteään kattoon GitHubin omia
+kulutusrajoituksia.
+
 ### 💰 Edulliset palveluntarjoajat
 
-#### GLM-4.7 (Päivittäinen nollaus, $0.6/1M)
+#### GLM-4.7 (päivittäinen nollaus, 0,6 $/1 M)
 
 1. Rekisteröidy: [Zhipu AI](https://open.bigmodel.cn)
-2. Hanki API-avain Coding Plan -tilauksesta
-3. Hallintapaneeli → Lisää API-avain: Palveluntarjoaja: `glm`, API-avain: `your-key`
+2. Hanki API-avain Coding Planista
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Käyttö:** `glm/glm-4.7` — **Ammattilaisen vinkki:** Coding Plan tarjoaa kolminkertaisen kiintiön seitsemäsosalla hinnasta! Nollaus päivittäin klo 10.00.
+**Käyttö:** `glm/glm-4.7` — **Vinkki:** Coding Plan tarjoaa kolminkertaisen kiintiön seitsemäsosalla hinnasta! Nollaus päivittäin klo 10.00.
 
-#### MiniMax M2.1 (Nollaus 5 tunnin välein, $0.20/1M)
+#### MiniMax M2.1 (5 tunnin nollaus, 0,20 $/1 M)
 
 1. Rekisteröidy: [MiniMax](https://www.minimax.io)
-2. Hanki API-avain → Hallintapaneeli → Lisää API-avain
+2. Hanki API-avain → Dashboard → Add API Key
 
-**Käyttö:** `minimax/MiniMax-M2.1` — **Ammattilaisen vinkki:** Edullisin vaihtoehto pitkälle kontekstille (1M tunnistetta)!
+**Käyttö:** `minimax/MiniMax-M2.1` — **Vinkki:** Edullisin vaihtoehto pitkälle kontekstille (1 M tokenia)!
 
-#### Kimi K2 (Kiinteästi $9/kuukausi)
+#### Kimi K2 (9 $/kuukausi kiinteä hinta)
 
 1. Tilaa: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Hanki API-avain → Hallintapaneeli → Lisää API-avain
+2. Hanki API-avain → Dashboard → Add API Key
 
-**Käyttö:** `kimi/kimi-k2.5` — **Ammattilaisen vinkki:** Kiinteä $9/kuukausi 10 miljoonasta tunnisteesta = todellinen kustannus $0.90/1M!
+**Käyttö:** `kimi/kimi-k2.5` — **Vinkki:** Kiinteä 9 $/kuukausi 10 miljoonalle tokenille = todellinen hinta 0,90 $/1 M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Rekisteröidy: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Luo Qianfan API-avain → Hallintapaneeli → Lisää API-avain: Palveluntarjoaja: `qianfan`
+2. Luo Qianfan API-avain → Dashboard → Add API Key: Provider: `qianfan`
 
-**Käyttö:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` tai jokin muu Qianfanin OpenAI-yhteensopiva mallitunnus.
+**Käyttö:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` tai jokin muu Qianfanin OpenAI-yhteensopiva mallitunniste.
 
 ### 🆓 ILMAISET palveluntarjoajat
 
-Todennusta edellyttämättömillä ilmaisilla palveluntarjoajilla on kytkin **Todennusta ei vaadita** -kohdan vieressä niiden palveluntarjoajasivulla.
-Sen poistaminen käytöstä poistaa kyseisen palveluntarjoajan käytöstä ja Palveluntarjoajien määritetyistä ja tiiviistä näkymistä sekä
-poistaa sen mallit `/v1/models`-luettelosta.
+Todennusta vaatimattomilla ilmaisilla palveluntarjoajilla on palveluntarjoajan sivulla **Todennusta ei tarvita** -kohdan vieressä oleva kytkin.
+Sen poistaminen käytöstä poistaa palveluntarjoajan käytöstä, poistaa sen Määritetyt palveluntarjoajat- ja Tiivis-näkymistä
+sekä poistaa sen mallit kohteesta `/v1/models`.
 
 #### Qoder (9 ILMAISTA mallia)
 
 ```bash
-Hallintapaneeli → Yhdistä Qoder → OAuth-kirjautuminen → Käyttöön sovelletaan palveluntarjoajan nykyisiä rajoituksia
+Dashboard → Connect Qoder → OAuth-kirjautuminen → Käyttö määräytyy palveluntarjoajan voimassa olevien rajoitusten mukaan
 
 Mallit: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude ILMAISEKSI)
+#### Kiro (ILMAINEN Claude)
 
 ```bash
-Hallintapaneeli → Yhdistä Kiro → AWS Builder ID tai Google/GitHub → ~50 krediittiä kuukaudessa
+Dashboard → Connect Kiro → AWS Builder ID tai Google/GitHub → noin 50 hyvitystä/kuukausi
 
 Mallit: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -335,82 +354,82 @@ Malli: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Käyttöönotto
+## 🚀 käyttöönotto
 
 ### Globaali npm-asennus (suositus)
 
 ```bash
 npm install -g omniroute
 
-# Luo määrityshakemisto
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Luo .env-tiedosto (katso .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Käynnistä palvelin
+# Start server
 omniroute
-# Tai mukautetulla portilla:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI lataa `.env`-tiedoston automaattisesti sijainnista `~/.omniroute/.env` tai `./.env`.
+CLI lataa `.env` automaattisesti `~/.omniroute/.env` tai `./.env`. Työhakemiston `./.env` voi asettaa vain lyhyen sallittujen näppäinluettelon (portit, `REQUIRE_API_KEY`, alue- ja väriasetukset); laita kaikki muu `~/.omniroute/.env`. Katso [CLI käynnistyssopimukset](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Ilmoitusaluetila
+### Lokerotila
 
-Käynnistä OmniRoute järjestelmän ilmoitusalueella:
+Käynnistä OmniRoute ilmaisinalueella:
 
 ```bash
 omniroute serve --tray
 ```
 
-Komento päättyy, kun palvelin ja ilmoitusaluekuvake ovat valmiina.
+Komento palaa, kun palvelin ja lokero ovat valmiita.
 
-Palvelin jatkaa toimintaansa ilman päätettä.
+Palvelin jatkaa ilman päätettä.
 
-Ilmoitusaluetilaa tuetaan macOS:ssä, Windowsissa ja graafisissa Linux-istunnoissa. Ilmoitusaluetila ei avaa hallintapaneelia automaattisesti.
+Lokerotila tukee macOS, Windows ja graafisia Linux istuntoja. Lokerotila ei avaa kojelautaa automaattisesti.
 
-Käytä ilmoitusaluevalikkoa seuraaviin toimintoihin:
+Käytä lokerovalikkoa näihin toimiin:
 
-- Avaa hallintapaneeli.
+- Avaa kojelauta.
 - Avaa `/dashboard/logs`.
-- Muuta automaattisen käynnistyksen asetusta.
-- Pysäytä OmniRoute.
+- Muuta automaattista käynnistystä.
+- Lopeta OmniRoute.
 
-Älä käytä valitsinta `--tray` yhdessä seuraavien valitsimien kanssa:
+Älä yhdistä `--tray` näiden vaihtoehtojen kanssa:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Nämä tilat edellyttävät erilaista prosessin omistajuutta.
+Nämä tilat edellyttävät erilaista prosessiomistusta.
 
-Ota käynnistys käyttöön koneen seuraavan sisäänkirjautumisen yhteydessä:
+Ota käynnistys käyttöön seuraavan koneen sisäänkirjautumisen yhteydessä:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automaattinen käynnistys käyttää ilmoitusaluetilaa macOS:ssä, Windowsissa ja graafisissa Linux-istunnoissa. Graafista käyttöliittymää vailla oleva Linux käyttää olemassa olevaa systemd-käyttäjäpalvelua.
+Automaattinen käynnistys käyttää lokerotilaa macOS, Windows ja graafisissa Linux istunnoissa. Headless Linux käyttää olemassa olevaa systemd-käyttäjäpalvelua.
 
-Poista sisäänkirjautumisen yhteydessä tapahtuva käynnistys käytöstä:
+Poista käynnistys käytöstä kirjautumisen yhteydessä:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Asennuksen poistaminen
+### Poistetaan
 
-Kun et enää tarvitse OmniRoutea, tarjoamme kaksi nopeaa komentosarjaa siistiä poistamista varten:
+Kun et enää tarvitse OmniRoute, tarjoamme kaksi nopeaa skriptiä puhtaaseen poistoon:
 
-| Komento                  | Toiminto                                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Poistaa järjestelmäsovelluksen, mutta **säilyttää tietokantasi ja määrityksesi** hakemistossa `~/.omniroute`. |
-| `npm run uninstall:full` | Poistaa sovelluksen JA **hävittää kaikki määritykset, avaimet ja tietokannat pysyvästi**.                     |
+| Komento                  | Toiminta                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | Poistaa järjestelmäsovelluksen, mutta** säilyttää DB ja kokoonpanosi** `~/.omniroute` ssä. |
+| `npm run uninstall:full` | Poistaa sovelluksen AND pysyvästi** poistaa kaikki kokoonpanot, avaimet ja tietokannat** . |
 
-> Huomautus: Suorita nämä komennot siirtymällä OmniRoute-projektikansioon (jos kloonasit sen) ja suorittamalla ne siellä. Jos asensit sen globaalisti, voit vaihtoehtoisesti suorittaa komennon `npm uninstall -g omniroute`.
+> Huomautus: Suorita nämä komennot siirtymällä OmniRoute -projektikansioon (jos kloonasit sen) ja suorittamalla ne. Vaihtoehtoisesti voit suorittaa `npm uninstall -g omniroute`, jos se on asennettu maailmanlaajuisesti.
 
-### VPS-käyttöönotto
+### VPS käyttöönotto
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -426,21 +445,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Tai: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-käyttöönotto (vähäinen muistinkäyttö)
+### PM2 -käyttöönotto (vähän muistia)
 
-Käytä muistirajoitusvalintaa palvelimilla, joilla on rajallisesti RAM-muistia:
+Jos palvelimissa on rajoitettu RAM, käytä muistirajoitusvaihtoehtoa:
 
 ```bash
-# 512MB:n rajoituksella (oletus)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Tai mukautetulla muistirajoituksella
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Tai käyttämällä tiedostoa ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -469,30 +488,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Koosta levykuva (oletus = runner-cli, jossa codex/claude/droid on esiasennettu)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Siirrettävä tila (suositus)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Katso CLI-binäärit sisältävää isäntäjärjestelmään integroitua tilaa koskevat tiedot päädokumentaation Docker-osiosta.
+Katso isäntäintegroitu tila CLI binäärien kanssa pääasiakirjojen Docker osiosta.
 
 ### Void Linux (xbps-src)
 
-Void Linuxin käyttäjät voivat paketoida ja asentaa OmniRouten natiivisti käyttämällä `xbps-src`-ristiinkäännöskehystä. Tämä automatisoi itsenäisen Node.js-koontiversion luomisen sekä tarvittavat natiivit `better-sqlite3`-sidokset.
+Void Linux -käyttäjät voivat pakata ja asentaa OmniRoute natiivisti `xbps-src` -ristikäännöskehyksen avulla. Tämä automatisoi Node.js itsenäisen koontiversion sekä tarvittavat `better-sqlite3` -natiivisidokset.
 
 <details>
-<summary><b>Näytä xbps-src-mallipohja</b></summary>
+<summary><b>Näytä xbps-src-malli</b></summary>
 
 ```bash
-# Mallipohjatiedosto paketille 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Yleiskäyttöinen tekoäly-yhdyskäytävä älykkäällä reitityksellä useille LLM-palveluntarjoajille"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -507,7 +526,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Määritä node-gypin kohdesuoritinarkkitehtuuri
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -516,29 +535,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Asenna kaikki riippuvuudet – ohita komentosarjat
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Kokoa itsenäinen Next.js-paketti
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Kopioi staattiset resurssit itsenäiseen pakettiin
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Käännä better-sqlite3:n natiivi sidos
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Sijoita käännetty sidos itsenäiseen pakettiin
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Poista arkkitehtuurikohtaiset sharp-paketit
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Kopioi Next.js:n staattisen analyysin ohittamat pinon suorituksenaikaiset riippuvuudet:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -552,7 +571,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Estä asennuksen jälkeistä käsittelijää poistamasta tyhjiä Next.js-sovellusreitittimen hakemistoja
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,87 +599,87 @@ post_install() {
 
 ### Ympäristömuuttujat
 
-| Muuttuja                                | Oletusarvo                           | Kuvaus                                                                                                                                                              |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT-allekirjoituksen salaisuus (**vaihda tuotantoympäristössä**)                                                                                                    |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Ensimmäisen kirjautumisen salasana                                                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datahakemisto (tietokanta, käyttötilastot, lokit)                                                                                                                   |
-| `PORT`                                  | kehyksen oletusarvo                  | Palvelun portti (esimerkeissä `20128`)                                                                                                                              |
-| `HOSTNAME`                              | kehyksen oletusarvo                  | Kuunteluosoite (Dockerin oletusarvo on `0.0.0.0`)                                                                                                                   |
-| `NODE_ENV`                              | ajonaikainen oletusarvo              | Aseta käyttöönottoa varten arvoksi `production`                                                                                                                     |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Koontinäytössä näkyvä ja palvelimelle välitettävä julkinen perus-URL (korvaa vanhan `BASE_URL`-muuttujan)                                                           |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Pilvisynkronoinnin päätepisteen perus-URL (korvaa vanhan `CLOUD_URL`-muuttujan)                                                                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Luotujen API-avainten HMAC-salaisuus                                                                                                                                |
-| `REQUIRE_API_KEY`                       | `false`                              | Vaadi Bearer API -avain reitillä `/v1/*`                                                                                                                            |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Salli todennettujen koontinäytön käyttäjien näyttää tallennettujen API-avainten täydet arvot pyynnöstä                                                              |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Välimuistiin tallennettujen palveluntarjoajarajojen palvelinpuolen päivitysväli; käyttöliittymän päivityspainikkeet käynnistävät edelleen manuaalisen synkronoinnin |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Poista automaattiset SQLite-tilannevedokset käytöstä ennen kirjoitusta, tuontia tai palautusta; manuaaliset varmuuskopiot toimivat edelleen                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | Ottaa käyttöön sovellus- ja auditointilokien kirjoittamisen levylle                                                                                                 |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Pakota todennusevästeen `Secure`-asetus (HTTPS-käänteisvälityspalvelimen takana)                                                                                    |
-| `CLOUDFLARED_BIN`                       | ei asetettu                          | Käytä olemassa olevaa `cloudflared`-binääriä hallitun latauksen sijaan                                                                                              |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Hallittujen Quick Tunnels -tunneleiden siirtoprotokolla (`http2`, `quic` tai `auto`)                                                                                |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-keon enimmäiskoko megatavuina                                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Kehotevälimuistin merkintöjen enimmäismäärä                                                                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Semanttisen välimuistin merkintöjen enimmäismäärä                                                                                                                   |
+| Muuttuva                                | Oletus                    | Kuvaus                                                                                                                                                               |
+| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automaattisesti luotu)_ | JWT allekirjoitussalaisuus — luotiin automaattisesti ensimmäisellä kerralla ja säilyi `server.env`:ssä; aseta se nimenomaisesti, kun tietohakemisto on lyhytaikainen |
+| `INITIAL_PASSWORD`                      | _(unset)_                 | Ensimmäinen kirjautumissalasana. npm/source -asennukset alkavat `CHANGEME`:llä: vaihda se. Unset: ohjattu käyttöönottotoiminto                                       |
+| `DATA_DIR`                              | `~/.omniroute`            | Tietohakemisto (db, käyttö, lokit)                                                                                                                                   |
+| `PORT`                                  | kehyksen oletusarvo       | Huoltoportti (`20128` esimerkeissä)                                                                                                                                  |
+| `HOSTNAME`                              | kehyksen oletusarvo       | Sido isäntä (Docker oletuksena `0.0.0.0`)                                                                                                                            |
+| `NODE_ENV`                              | ajonaikainen oletusarvo   | Aseta `production` käyttöönottoa varten                                                                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Julkinen perus- URL nousi kojelautaan ja paljastettiin palvelimelle (korvaa vanhan `BASE_URL` n)                                                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Pilvisynkronoinnin päätepisteen perusta URL (korvaa vanhan `CLOUD_URL`)                                                                                              |
+| `API_KEY_SECRET`                        | _(automaattisesti luotu)_ | HMAC salaisuus luoduille API avaimille — luotiin automaattisesti ensimmäisellä kerralla ja säilyi `server.env` ssä                                                   |
+| `REQUIRE_API_KEY`                       | `false`                   | Pakota Bearer API -näppäin `/v1/*`:ssä                                                                                                                               |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Salli todennettujen kojelautakäyttäjien paljastaa kaikki tallennetut API -avainarvot pyynnöstä                                                                       |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Palvelinpuolen päivitystiheys välimuistissa oleville palveluntarjoajan rajoitustiedoille; UI päivityspainikkeet laukaisevat silti manuaalisen synkronoinnin          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Poista käytöstä automaattiset SQLite -tilanteet ennen writes/import/restore:tä; Manuaalinen varmuuskopiointi toimii edelleen                                         |
+| `APP_LOG_TO_FILE`                       | `true`                    | Sallii sovellusten ja tarkastuslokien tulostuksen levylle                                                                                                            |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | Pakota `Secure` -todennuseväste ( HTTPS -käänteisen välityspalvelimen takana)                                                                                        |
+| `CLOUDFLARED_BIN`                       | pois päältä               | Käytä olemassa olevaa `cloudflared` binaaria hallitun latauksen sijaan                                                                                               |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Kuljetus hallituille pikatunneleille (`http2`, `quic` tai `auto`)                                                                                                    |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js keon raja MB ssä                                                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Maksimi välimuistin kehotteet                                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Enintään semanttinen välimuisti                                                                                                                                      |
 
-Täydellinen ympäristömuuttujien luettelo on [README-tiedostossa](../README.md).
+Täydellinen ympäristömuuttujaviittaus on kohdassa [README](../README.md).
 
 ---
 
-## 📊 Käytettävissä olevat mallit
+## 📊 Saatavilla olevat mallit
 
 <details>
-<summary><b>Näytä kaikki käytettävissä olevat mallit</b></summary>
+<summary><b>Näytä kaikki saatavilla olevat mallit</b></summary>
 
-> Alla oleva lista on koottu tiedostosta `open-sse/config/providerRegistry.ts` versiolle v3.8.0. Pilvikatalogit (Gemini, OpenRouter jne.) synkronoidaan dynaamisesti — täyden reaaliaikaisen katalogin näet valitsemalla **Hallintapaneeli → Palveluntarjoajat → [palveluntarjoaja] → Käytettävissä olevat mallit** tai kutsumalla `GET /api/models/catalog`.
+> Alla oleva luettelo on koottu tiedostosta `open-sse/config/providerRegistry.ts` versiota v3.8.0 varten. Pilvipalveluluettelot (Gemini, OpenRouter jne.) synkronoidaan dynaamisesti — avaa täydellinen ajantasainen luettelo valitsemalla **Hallintapaneeli → Palveluntarjoajat → [palveluntarjoaja] → Saatavilla olevat mallit** tai kutsumalla `GET /api/models/catalog`.
 >
-> Jos palveluntarjoajan sisäänrakennettu lista on vanhentunut, käytä kyseisellä sivulla olevaa toimintoa **Tuo /models-rajapinnasta** (tai ota käyttöön **Automaattinen synkronointi**) hakeaksesi ajantasaisen ylävirran katalogin. Tämä varmistettiin versiossa v3.8.50 LLM7.io:lle (`gemini-3.1-flash-lite`) ja UncloseAI:lle (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinationsin anonyymi käyttö pysyi ylävirran rajoittamana saman testikierroksen aikana.
+> Jos palveluntarjoajan sisäinen luettelo on vanhentunut, käytä kyseisellä sivulla toimintoa **Tuo osoitteesta /models** (tai ota käyttöön **Automaattinen synkronointi**) ladataksesi ajantasaisen ylemmän tason luettelon. Tämä vahvistettiin versiossa v3.8.50 palveluille LLM7.io (`gemini-3.1-flash-lite`) ja UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinationsin anonyymi käyttö oli saman testikierroksen aikana edelleen ylemmän tason rajoittamaa.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort-tasot: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ tehokkuustasot: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ILMAINEN OAuth: käytä reaaliaikaista katalogia, joka näkyy kohdassa **Hallintapaneeli → Palveluntarjoajat → Kiro → Käytettävissä olevat mallit**. Saatavuus riippuu tilistä ja tilaustasosta.
+**Kiro (`kr/`)** — ILMAINEN OAuth: käytä ajantasaista luetteloa, joka näkyy kohdassa **Hallintapaneeli → Palveluntarjoajat → Kiro → Saatavilla olevat mallit**. Saatavuus riippuu tilistä ja tilauksesta.
 
 **Qoder (`if/`)** — ILMAINEN OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 $/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/kk kiinteä tai käytön mukaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/kk kiinteänä hintana tai käytön mukaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-avain: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Erittäin nopea: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok-natiivit: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-natiivi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU:ssa isännöity: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-isännöity: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Haulla tehostettu: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Hakua hyödyntävä: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Avoimen lähdekoodin: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ilmainen), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Nopea päättely: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-mittakaavainen: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-painotteinen: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-keskeinen: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Yrityskäyttöön: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Yrityskäyttöön: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkronoidaan reaaliajassa API-avaimella Googlelta — ei staattista listaa. Yhdistä avain kohdassa **Hallintapaneeli → Palveluntarjoajat** ja tuo sen jälkeen ajantasainen katalogi valitsemalla **Käytettävissä olevat mallit** (esim. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkronoidaan reaaliaikaisesti Googlelta API-avaimen perusteella — staattista luetteloa ei ole. Yhdistä avain kohdassa **Hallintapaneeli → Palveluntarjoajat** ja tuo nykyinen luettelo valitsemalla **Saatavilla olevat mallit** (esim. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Muut yhteensopivat palveluntarjoajat** (valikoima): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (kautta `aws-bedrock`), `azure-ai`, `openrouter` (läpikulkukatalogi), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Jokainen ylläpitää omaa mallilistaansa tiedostossa `providerRegistry.ts`, ja ne voidaan synkronoida automaattisesti, kun palveluntarjoaja tarjoaa `/models`-päätepisteen.
+**Muut yhteensopivat palveluntarjoajat** (valikoima): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (palvelun `aws-bedrock` kautta), `azure-ai`, `openrouter` (välitetty luettelo), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kukin ylläpitää omaa malliluetteloaan tiedostossa `providerRegistry.ts`, ja luettelo voidaan synkronoida automaattisesti, jos palveluntarjoaja tarjoaa `/models`-päätepisteen.
 
-**Huomautus mallitunnisteista:** OmniRoute käyttää palveluntarjoajien natiiveja tunnisteita (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Jotkin tunnisteet sisältävät pisteellisiä versioita, koska ylävirran API odottaa niitä sellaisina. Jos mallia ei ole lueteltu yllä, suorita `omniroute models --search <term>` tai tee pyyntö `GET /api/models/catalog` vahvistaaksesi saatavuuden.
+**Huomautus mallitunnisteista:** OmniRoute käyttää palveluntarjoajan natiiveja tunnisteita (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Joissakin tunnisteissa on pisteitä sisältäviä versioita, koska ylemmän tason API odottaa niitä tässä muodossa. Jos mallia ei ole lueteltu yllä, suorita `omniroute models --search <term>` tai kutsu `GET /api/models/catalog` varmistaaksesi saatavuuden.
 
 </details>
 

@@ -445,7 +445,7 @@ server/
 
 ---
 
-## 4. `open-sse/` — ストリーミング エンジン ワークスペース
+## 4. `open-sse/` —ストリーミング エンジン ワークスペース
 
 `@omniroute/open-sse`として公開された個別の npm ワークスペース。リクエスト処理、エグゼキューター、トランスレーター、サービス、トランスフォーマー、およびMCPサーバーを所有します。
 
@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,11 +487,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 個のトップレベル エグゼキューター モジュール (`*.ts`から`base.ts`、 `index.ts` 、およびテストを差し引いた数 - `npm run check:docs-counts`が測定する数)。すべてのエグゼキューター クラスは、直接または`DefaultExecutor`または別のエグゼキューターを通じて`BaseExecutor` (`base.ts`) を拡張します。残りのモジュールは、プロバイダーごとのヘルパー (ツール スキーマ、 fetch/TTSアダプター、quirk ハンドラー) です。執行者には次のものが含まれます。
+159 個のトップレベル エグゼキューター モジュール (`*.ts`から`base.ts`、 `index.ts` 、およびテスト—た数、 `npm run check:docs-counts`が測定する数)。すべてのエグゼキューター クラスは、直接または`DefaultExecutor`または別のエグゼキューターを通じて`BaseExecutor` (`base.ts`) を拡張します。残りのモジュールは、プロバイダーごとのヘルパー (ツール スキーマ、 fetch/TTSアダプター、quirk ハンドラー) です。執行者には次のものが含まれます。
 
 `antigravity`、 `azure-openai`、 `blackbox-web`、 `cliproxyapi`、 `chatgpt-web-codex`、 `cloudflare-ai`、 `codex`、 `commandCode`、 `cursor`、 `default`、 `devin-cli`、 `muse-spark-web`、 `nlpcloud`、 `opencode`、 `perplexity-web`、 `petals`、 `pollinations`、 `qoder`、 `vertex`、 `devin-desktop`、さらに`claudeIdentity.ts` (共有 ID ヘルパー) と`index.ts` (レジストリ)。
 
-> 注: ここにリストされていないプロバイダーは、汎用の OpenAI 互換エグゼキューターを使用して`default.ts`によって提供されます。完全なプロバイダー カタログ (377 プロバイダー) は`src/shared/constants/providers.ts`にあります。
+> 注: ここにリストされていないプロバイダーは、汎用の OpenAI 互換エグゼキューターを使用して`default.ts`によって提供されます。完全なプロバイダー カタログ (381 プロバイダー) は`src/shared/constants/providers.ts`にあります。
 
 ### 4.3 `open-sse/translator/`
 
@@ -505,7 +505,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based応答API ↔チャット完了コンバータ ( `responses/`ルート キャッチオールで使用)。
+- `responsesTransformer.ts` — `TransformStream` -based応答API ↔チャット完了コンバーター ( `responses/`ルート キャッチオールで使用)。
 
 ### 4.5 `open-sse/services/`
 
@@ -520,7 +520,7 @@ open-sse/
 | キャッシング                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | ルーティングインテリジェンス | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | モデルの取り扱い             | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| 圧縮                         | `compression/` — 全圧縮エンジンの配線                                                                                                                                                                                                                    |
+| 圧縮                         | `compression/` —フルコンプレッションエンジンの配線                                                                                                                                                                                                       |
 | トークン+セッション          | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | 階層/マニフェスト            | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / ネットワーク            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -529,16 +529,16 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 個のユニークなツール**`server.ts`で接続されています ( `schemas/tools.ts` +メモリ、スキル、GitHub スキル、プール、ゲーミフィケーション、プラグイン、 Notion、 Obsidian、ローカル コーパスおよび圧縮モジュールの 45 の標準 — ユニオンは`countUniqueMcpTools`によってカウントされます)。
+- **110 個のユニークなツール**`server.ts`で接続されています ( `schemas/tools.ts` +メモリ、スキル、GitHub スキル、プール、ゲーミフィケーション、プラグイン、 Notion、 Obsidian、ローカル コーパスおよび圧縮モジュール— Union の`countUniqueMcpTools`によってカウントされる 45 の正規)。
 - **3つのトランスポート**: stdio、 HTTPストリーミング可能、 SSE。
-- **33 スコープ**実行時に適用 — `src/shared/constants/mcpScopes.ts`の基本リスト。完全なセットは、各ツール モジュールによって宣言されたスコープの結合です。
+- **33 スコープ**`src/shared/constants/mcpScopes.ts`内の—ベース リストは実行時に適用され、フル セットは各ツール モジュールによって宣言されたスコープの結合です。
 - 監査テーブル: `mcp_tool_audit` ( `audit.ts`によって設定されます)。
 - ファイル: `server.ts`、 `index.ts`、 `httpTransport.ts`、 `audit.ts`、 `scopeEnforcement.ts`、 `runtimeHeartbeat.ts`、 `descriptionCompressor.ts`、 `schemas/{tools, a2a, audit, index}.ts`、 `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`、および`__tests__/`でのテスト。
 - 完全なツール カタログについては、 [MCP-SERVER.md](../frameworks/MCP-SERVER.md)参照してください。
 
 ### 4.7 `open-sse/config/`
 
-プロバイダー レジストリ (`providerRegistry.ts`、 `providerModels.ts`、 `providerHeaderProfiles.ts`)、フォーマットごとのモデル レジストリ (`audioRegistry.ts`、 `embeddingRegistry.ts`、 `imageRegistry.ts`、 `moderationRegistry.ts`、 `musicRegistry.ts`、 `rerankRegistry.ts`、 `searchRegistry.ts`、 `videoRegistry.ts`)、アイデンティティ ヘルパー (`codexIdentity.ts`、 `codexInstructions.ts`、 `anthropicHeaders.ts`、 `antigravityUpstream.ts`、 `antigravityModelAliases.ts`、 `cliFingerprints.ts`、 `toolCloaking.ts`、 `defaultThinkingSignature.ts`)、資格情報ヘルパー (`credentialLoader.ts`、 `codexClient.ts`)、およびクラウド アダプター (`azureAi.ts`、 `bedrock.ts`、 `datarobot.ts`、 `glmProvider.ts`、 `maritalk.ts`、 zqba 、 `oci.ts`、 `petals.ts`、 `runway.ts`、 `sap.ts`、 `watsonx.ts`、 `ollamaModels.ts`、 `errorConfig.ts`、 `constants.ts` `registryUtils.ts`。
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

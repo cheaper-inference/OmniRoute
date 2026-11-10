@@ -158,6 +158,20 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     hasFree: true,
     freeNote: "$1-5 trial credits on signup for serverless inference",
   },
+  // ParalonCloud (https://paraloncloud.com) — OpenAI-compatible /v1 for chat + embeddings.
+  paraloncloud: {
+    id: "paraloncloud",
+    serviceKinds: ["llm", "embedding"],
+    alias: "paralon",
+    name: "ParalonCloud",
+    icon: "cloud",
+    color: "#2EE6A6",
+    textIcon: "PC",
+    website: "https://paraloncloud.com",
+    notice: {
+      apiKeyUrl: "https://paraloncloud.com/console",
+    },
+  },
   "ollama-cloud": {
     id: "ollama-cloud",
     serviceKinds: ["llm"],

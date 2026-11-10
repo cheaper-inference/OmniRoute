@@ -1,6 +1,6 @@
 "use client";
 
-import { cloneElement, forwardRef, useEffect, useId, useRef } from "react";
+import { cloneElement, forwardRef, useEffect, useId, useRef, useState } from "react";
 import type { ComponentProps, MutableRefObject, ReactNode } from "react";
 import { cn } from "./lib/utils";
 
@@ -19,9 +19,18 @@ import { cn } from "./lib/utils";
  * `:checked` / `:indeterminate` states; `indeterminate` is applied to the input
  * via ref since it has no HTML attribute. Pass `label` / `description` / `card`
  * for the built row, or nothing for just the control (compose your own layout).
+ * The state is mirrored as `data-state` ("checked" | "unchecked" | "indeterminate") on the input, control and row.
  */
 
 export type CheckboxSide = "left" | "right";
+
+/**
+ * Mirrors the native state for styling and tests: `data-state` on the input, control and row.
+ * It follows controlled props, `defaultChecked` and user toggles. An uncontrolled checkbox
+ * reset by `form.reset()` keeps its last `data-state`, because React is not notified of the
+ * reset; control `checked` when the mirror must follow form resets.
+ */
+export type CheckboxState = "checked" | "unchecked" | "indeterminate";
 
 export interface CheckboxProps extends Omit<ComponentProps<"input">, "type"> {
   label?: ReactNode;
@@ -60,6 +69,17 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     const descriptionId =
       description != null ? `${reactId}-description` : undefined;
     const innerRef = useRef<HTMLInputElement | null>(null);
+    const isControlled = props.checked !== undefined;
+    const [uncontrolledChecked, setUncontrolledChecked] = useState(
+      Boolean(props.defaultChecked),
+    );
+    const [mixed, setMixed] = useState(indeterminate);
+    const checked = isControlled ? Boolean(props.checked) : uncontrolledChecked;
+    const state: CheckboxState = mixed
+      ? "indeterminate"
+      : checked
+        ? "checked"
+        : "unchecked";
 
     const setRef = (node: HTMLInputElement | null) => {
       innerRef.current = node;
@@ -69,14 +89,16 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           node;
     };
 
-    // `indeterminate` is a DOM property, not an attribute — keep it in sync.
+    // `indeterminate` is a DOM property, not an attribute — keep it (and data-state) in sync.
     useEffect(() => {
       if (innerRef.current) innerRef.current.indeterminate = indeterminate;
+      setMixed(indeterminate);
     }, [indeterminate, props.checked]);
 
     const control = (
       <span
         className="ci-checkbox__control"
+        data-state={state}
         data-error={error || undefined}
         data-disabled={disabled || undefined}
       >
@@ -85,10 +107,14 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           type="checkbox"
           id={inputId}
           className="ci-checkbox__input"
+          data-state={state}
           disabled={disabled}
           aria-invalid={error || undefined}
           aria-describedby={descriptionId}
           onChange={(event) => {
+            // A user toggle clears the native mixed state; mirror it before notifying.
+            setMixed(event.target.indeterminate);
+            if (!isControlled) setUncontrolledChecked(event.target.checked);
             onChange?.(event);
             onCheckedChange?.(event.target.checked);
           }}
@@ -138,6 +164,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       <label
         htmlFor={inputId}
         data-slot="checkbox"
+        data-state={state}
         data-side={side}
         data-card={card || undefined}
         data-error={error || undefined}

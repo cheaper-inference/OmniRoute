@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import type { AgentSkill } from "@/lib/agentSkills/types";
+import type { JSX } from "react";
 
 interface SkillCardProps {
   skill: AgentSkill;

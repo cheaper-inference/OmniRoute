@@ -21,7 +21,7 @@ OmniRoute to lokalna brama routingowa i pulpit nawigacyjny AI zbudowane na Next.
 
 Podstawowe możliwości:
 
-- Powierzchnia API kompatybilna z OpenAI dla CLI/tools (377 dostawców, 156 modułów wykonawczych)
+- Powierzchnia API kompatybilna z OpenAI dla CLI/tools (381 dostawców, 159 modułów wykonawczych)
 - Tłumaczenie Request/response w różnych formatach dostawców
 - Zastępczy zestaw modeli (sekwencja obejmująca wiele modeli)
 - Ustrukturyzowane kroki kombi (`provider + model + connection`) z porządkowaniem czasu wykonania przez `compositeTiers`
@@ -40,7 +40,7 @@ Podstawowe możliwości:
 - Pomyśl o analizie tagów (`<think>...</think>`) w celu uzyskania modeli rozumowania
 - Odkażanie odpowiedzi w celu zapewnienia ścisłej kompatybilności OpenAI SDK
 - Normalizacja ról (programista systemu →, użytkownik systemu →) w celu zapewnienia kompatybilności między dostawcami
-- Ustrukturyzowana konwersja danych wyjściowych (json_schema → Gemini respondSchema)
+- Konwersja danych wyjściowych strukturalnych (json_schema → Gemini responseSchema)
 - Lokalna trwałość dostawców, kluczy, aliasów, kombinacji, ustawień, cen (122 modułów DB )
 - śledzenie Usage/cost i rejestrowanie żądań
 - Opcjonalna synchronizacja w chmurze dla synchronizacji multi-device/state
@@ -374,7 +374,7 @@ Funkcja Auto Combo dynamicznie ocenia i wybiera cele routingu w momencie żądan
 - Deska rozdzielcza: `/dashboard/auto-combo`
 - Telemetria: tabela `auto_combo_decisions` SQLite
 
-Kluczowe możliwości:
+Key capabilities:
 
 - **20 strategii routingu** (priorytet, ważony, pierwsze wypełnienie, działanie okrężne, P2C, losowy, najrzadziej używany, zoptymalizowany pod względem kosztów, uwzględniający resetowanie, okno resetowania, zapas mocy, ważony przydziałem, ściśle losowy,** automatyczny** , lkgp, zoptymalizowany pod kątem kontekstu, zoptymalizowany pod kątem pamięci podręcznej, przekaźnik kontekstowy,** połączenie** , potok) — auto jest głównym dodatkiem w wersji 3.8.0; `fusion` (panelowa synteza + sędzia, `open-sse/services/fusion.ts`) jest nowością w wersji 3.8.36.
 - **Punktacja 16-czynnikowa** : limit, zdrowie, koszt odwrotny, opóźnienie odwrotne, dopasowanie zadań i dziesięć innych. Kanoniczna tabela czynników i ich domyślnych wag znajduje się w [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — Przekształcenie jej w tym miejscu dałoby jej drugie miejsce do utraty aktualności.
@@ -382,7 +382,7 @@ Kluczowe możliwości:
 - **Automatyczne prefiksy** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — każdy wspierany przez dostrojony profil wagi.
 - **6 pakietów trybów** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` i `chaos-mode` — gotowe konfiguracje wag, które można wywołać z pulpitu nawigacyjnego. (Nie mylić z powyższymi przedrostkami `auto/*`, które są wariantami czasu żądania.)
 
-Aby uzyskać pełne szczegóły algorytmiczne (wzory na czynniki, dostrajanie wagi), zobacz [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Pełne szczegóły algorytmiczne (wzory na czynniki, dostrajanie wagi) można znaleźć w [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
 ### B. Agenci w chmurze
 
@@ -421,7 +421,7 @@ Przestrzeń nazw `src/domain/` centralizuje decyzje polityczne, dzięki czemu pr
 - łącznik reguł Connection/model : `src/domain/connectionModelRules.ts`
 - Migawki dostępności modelu: `src/domain/modelAvailability.ts`
 - Śledzenie wygaśnięcia dostawcy: `src/domain/providerExpiration.ts`
-- Pamięć podręczna kwot: `src/domain/quotaCache.ts`
+- Pamięć podręczna kwot: `src/domain/quotaCache.ts`. Dostawcy dodają i usuwają okna przydziałów (OpenAI porzucił 5-godzinne okno Codex w przypadku niektórych planów), więc odczyt użycia adaptera dostawcy potwierdza, że został ukończony (`quotasComplete`, zobacz `src/lib/usage/usageReading.ts`) jest ustawionym pełnym oknem konta: znane wcześniej, ale nieobecne w nim okno jest wycofywane, w pamięci podręcznej, w `quota_snapshots` ponowne nawodnienie (dołączony rekord wycofania), w utrwalonym stanie przydziału Codex i w nasyceniu Claude wiadra. Częściowe dowody (nagłówki odpowiedzi, nieaktualne kopie) aktualizują jedynie okna, które zawierają.
 - Stan degradacji: `src/domain/degradation.ts`
 - Audyt konfiguracji: `src/domain/configAudit.ts`
 - Kreator metadanych odpowiedzi OmniRoute : `src/domain/omnirouteResponseMeta.ts`

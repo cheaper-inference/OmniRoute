@@ -22,9 +22,10 @@ import type { ConnectionRowProps } from "./connectionRowTypes";
 import { getStatusPresentation } from "./connectionRowStatus";
 import { getCodexEffectiveServiceTier } from "@/lib/providers/codexFastTier";
 import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers";
-import { getCodexPlanLabel } from "../codexPlanLabel";
+import { formatCodexPlanLabel, getCodexAccountSummary, getCodexPlanLabel } from "../codexPlanLabel";
 import CodexAccountDetails from "./CodexAccountDetails";
 import ConnectionQuotaPanel from "./ConnectionQuotaPanel";
+import ConnectionQuotaRefreshButton from "./ConnectionQuotaRefreshButton";
 import ConnectionIdChip from "./ConnectionIdChip";
 import {
   isProviderQuotaVisible,
@@ -139,6 +140,7 @@ export default function ConnectionRow({
   onToggleProxyEnabled,
   quotaCache,
   quotaRefreshing,
+  quotaRefreshState,
   onRefreshQuota,
 }: ConnectionRowProps) {
   const t = useTranslations("providers");
@@ -270,6 +272,7 @@ export default function ConnectionRow({
     : false;
   const codexPaidCreditsEnabled = connection.providerSpecificData?.allowPaidCredits === true;
   const codexPlanLabel = getCodexPlanLabel(!!isCodex, connection.providerSpecificData);
+  const codexAccount = getCodexAccountSummary(!!isCodex, connection.providerSpecificData);
   // Per-account quota strip — gated per connection (not per page) so family
   // aliases and openai-compatible-* nodes with their own quotaEndpoint qualify.
   const quotaPanelSupported =
@@ -349,15 +352,33 @@ export default function ConnectionRow({
           className="hidden text-text-muted sm:inline-block"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium break-words sm:truncate">{displayName}</p>
+          <p className="text-sm font-medium break-words sm:truncate">
+            {displayName}
+            {codexAccount && (
+              <span
+                className="font-normal text-text-muted"
+                title={
+                  codexAccount.role ? t("codexAccountRole", { role: codexAccount.role }) : undefined
+                }
+              >
+                {" · "}
+                {t(
+                  codexAccount.kind === "business" ? "codexAccountBusiness" : "codexAccountPersonal"
+                )}
+                {codexAccount.workspaceName ? ` · ${codexAccount.workspaceName}` : ""}
+              </span>
+            )}
+          </p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <Badge variant={statusPresentation.statusVariant as any} size="sm" dot>
               {statusPresentation.statusLabel}
             </Badge>
             {codexPlanLabel && (
-              <Badge variant="primary" size="sm" className="capitalize">
-                {codexPlanLabel}
-              </Badge>
+              <span title={codexPlanLabel}>
+                <Badge variant="primary" size="sm">
+                  {formatCodexPlanLabel(codexPlanLabel)}
+                </Badge>
+              </span>
             )}
             {planLabel && (
               <span title={t("quotaPlanBadge")}>
@@ -400,6 +421,14 @@ export default function ConnectionRow({
               <Badge variant={statusPresentation.errorBadge.variant} size="sm">
                 {t(statusPresentation.errorBadge.labelKey)}
               </Badge>
+            )}
+            {connection.prefixShadowed && connection.isActive !== false && (
+              <span
+                className="text-xs text-warning truncate max-w-[300px]"
+                title={connection.prefixShadowed.message}
+              >
+                {connection.prefixShadowed.code}: {connection.prefixShadowed.message}
+              </span>
             )}
             {shouldShowConnectionLastError(connection) && (
               <span
@@ -448,6 +477,13 @@ export default function ConnectionRow({
               <ProviderQuotaVisibilityToggle
                 visible={quotaVisible}
                 onToggle={onToggleQuotaVisibility}
+              />
+            )}
+            {connection.provider === "codex" && onRefreshQuota && (
+              <ConnectionQuotaRefreshButton
+                refreshing={quotaRefreshing}
+                state={quotaRefreshState}
+                onRefresh={onRefreshQuota}
               />
             )}
             {onToggleAutoSync && (
@@ -893,7 +929,7 @@ export default function ConnectionRow({
             connection={connection}
             cache={quotaCache}
             refreshing={quotaRefreshing}
-            onRefresh={onRefreshQuota}
+            onRefresh={connection.provider === "codex" ? undefined : onRefreshQuota}
           />
         </div>
       ) : null}

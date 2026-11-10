@@ -488,9 +488,9 @@ createResponsesApiTransformStream(): TransformStream
 
 | فایل                          | هدف                                           |
 | ----------------------------- | --------------------------------------------- |
-| `providerRegistry.ts`         | رجیستری مدل چت بر روی کاتالوگ ارائه دهنده 377 |
+| `providerRegistry.ts`         | رجیستری مدل چت بر روی کاتالوگ ارائه دهنده 381 |
 | `providerModels.ts`           | نام مستعار مدل، نگاشت قالب                    |
-| `constants.ts`                | وقفه ها، محدودیت ها، کدهای وضعیت              |
+| `constants.ts`                | مهلت زمانی، محدودیت ها، کدهای وضعیت           |
 | `defaultThinkingSignature.ts` | امضای پیش فرض تفکر Claude                     |
 | `modelStrip.ts` (در خدمات)    | حذف زمینه به ازای هر ارائه دهنده              |
 

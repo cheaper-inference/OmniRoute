@@ -156,14 +156,14 @@ OmniRoute afslører 6 A2A -færdigheder kablet i `src/lib/a2a/taskExecution.ts::
 
 | Dygtighed          | ID                   | Beskrivelse                                                                                                                                        | Tags                            | Eksempler                               |
 | :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :-------------------------------------- |
-| Smart Routing      | `smart-routing`      | Leder en prompt gennem den optimale provider/combo ved hjælp af OmniRoute's combo engine + scoring                                                 | routing, udbydere               | "Rut denne prompt via den bedste model" |
+| Smart Routing      | `smart-routing`      | Leder en prompt gennem den optimale provider/combo ved hjælp af OmniRoute combo engine + scoring                                                   | routing, udbydere               | "Rut denne prompt via den bedste model" |
 | Kvotestyring       | `quota-management`   | Rapporterer kvotetilstand pr. udbyder, hjælper opkaldere med at beslutte, hvornår de skal throttle/switch                                          | kvote, udbydere                 | "Tjek kvote for antropisk"              |
-| Udbyder opdagelse  | `provider-discovery` | Viser installerede udbydere med funktioner, fritliggende flag, OAuth status                                                                        | udbydere, opdagelse             | "Hvilke udbydere er tilgængelige?"      |
+| Udbyder opdagelse  | `provider-discovery` | Viser installerede udbydere med kapaciteter, free-tier flag, OAuth -status                                                                         | udbydere, opdagelse             | "Hvilke udbydere er tilgængelige?"      |
 | Omkostningsanalyse | `cost-analysis`      | Anslår prisen på en request/conversation givet kataloget + seneste brug                                                                            | omkostninger, brug              | "Estimer pris for denne samtale"        |
 | Sundhedsrapport    | `health-report`      | Aggregerer strømafbryder, nedkøling, lockout-tilstand pr. udbyder                                                                                  | sundhed, robusthed              | "Vis sundhedsstatus for alle udbydere"  |
 | Liste muligheder   | `list-capabilities`  | Returnerer hele 45-indgange Agent Skills-katalog (23 API + 21 CLI + 1 config) som en nedskrivningstabel med rå SKILL.md URLs til kontekstinjektion | katalog, opdagelse, færdigheder | "List alle OmniRoute funktioner"        |
 
-> Agentkortet skal holdes på linje med det levende 377-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
+> Agentkortet skal holdes på linje med det levende 381-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
 
 ### `list-capabilities` Færdighedsdetaljer
 
@@ -180,20 +180,28 @@ Hver række inkluderer `rawUrl` kolonnen, så agenter straks kan hente den fulde
 
 ---
 
-## REST API (supplerende)
+## REST API (hjælpe)
 
-JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkterne nedenfor giver supplerende adgang til dashboards og eksterne værktøjer:
+JSON-RPC-endepunktet `/a2a` er det kanoniske A2A indgangspunkt. REST -endepunkterne nedenfor giver ekstra adgang til dashboards og eksternt værktøj:
 
-| Slutpunkt                    | Metode | Beskrivelse                                                       | Godkendelse                                   |
-| :--------------------------- | :----- | :---------------------------------------------------------------- | :-------------------------------------------- |
-| `/api/a2a/status`            | GET    | Serverstatus, registrerede færdigheder                            | (offentlig)                                   |
-| `/api/a2a/tasks`             | GET    | Vis opgaver med filtre                                            | administration                                |
-| `/api/a2a/tasks/[id]`        | GET    | Hent opgave efter ID                                              | administration                                |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Annuller igangværende opgave                                      | administration                                |
-| `/.well-known/agent.json`    | GET    | Agentkort (A2A-registrering)                                      | (offentlig, cachelagret i 3600s)              |
-| `/api/a2a/tasks`             | POST   | Indgående delegering til OmniConductor-flåden (Conductor PRD RF5) | Bearer mod `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Slutpunkt                    | Metode | Beskrivelse                                                       | Auth                                                                                                      |
+| :--------------------------- | :----- | :---------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Serverstatus, registrerede færdigheder                            | (offentlig)                                                                                               |
+| `/api/a2a/tasks`             | GET    | Liste opgaver med filtre                                          | management eller API -nøgle (se nedenfor)                                                                 |
+| `/api/a2a/tasks/[id]`        | GET    | Få opgave af ID                                                   | management eller API -nøgle (se nedenfor)                                                                 |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Annuller kørende opgave                                           | management eller API -nøgle (se nedenfor)                                                                 |
+| `/.well-known/agent.json`    | GET    | Agentkort (A2A discovery)                                         | (offentlig, cachelagret 3600s)                                                                            |
+| `/api/a2a/tasks`             | POST   | Indgående delegation til OmniConductor flåden (Conductor PRD RF5) | samme som `GET`, plus `OMNIROUTE_API_KEY` hvis indstillet mens `REQUIRE_API_KEY` er slukket; `a2aEnabled` |
 
-**Indgående Conductor-delegering (`POST /api/a2a/tasks`):** Eksterne A2A-agenter delegerer programmeringsarbejde til OmniConductor-flåden gennem OmniRoute. Brødtekst: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — kun Conductor-flådens færdigheder (dem, der annonceres på agentkortet) kan delegeres; `metadata.conductor.repo.url` er påkrævet (flåden arbejder på git-repositorier). Ruten oversættes til hubbens `POST /v1/tasks` ved hjælp af `CONDUCTOR_ORCHESTRATOR_TOKEN` på serversiden (med `CONDUCTOR_HUB_TOKEN` som reserve) og returnerer `201 { conductor_task_id, state: "submitted" }`; opgavetilstande sendes tilbage gennem SSE→A2A-spejlingen (RF1) og kan ses via `GET /api/a2a/tasks?skill=conductor`.
+Hvem der kommer igennem til `/api/a2a/tasks*` ruterne afhænger af login- og API-nøgleindstillingerne:
+
+- `requireLogin=true` (standard): middlewaren tillader kun ledelseslegitimationsoplysninger (dashboardsession, `manage` -scope API nøgle, `oma_` -adgangstoken) og `OMNIROUTE_API_KEY`. En almindelig slutningsnøgle får `403`. I `Authorization` headeren tager middlewaren kun `OMNIROUTE_API_KEY` som `Bearer <key>`; en bare nøgle eller en tabulator efter `Bearer` får `401`.
+- `requireLogin=false`, eller loopback-vinduet før onboarding: med `REQUIRE_API_KEY=true` accepteres enhver gyldig OmniRoute API nøgle eller ledelseslegitimationsoplysninger, og anonyme opkaldere får `401`; med `REQUIRE_API_KEY` off er ruterne åbne.
+- `POST /api/a2a/tasks` kræver desuden `OMNIROUTE_API_KEY` i `Authorization` headeren, når denne variabel er indstillet, og `REQUIRE_API_KEY` er slået fra. Andre overskrifter, såsom `x-api-key`, tæller ikke med der. Med login fra eller før onboarding passerer nøglen med eller uden et `Bearer` -præfiks; med login på er det kun `Bearer <key>`, der kommer forbi middlewaren.
+
+Hvor der kræves legitimationsoplysninger, virker et `read` -scope `oma_` token kun for `GET`.
+
+**Indgående dirigent delegation (`POST /api/a2a/tasks`):** eksterne A2A agenter uddelegerer kodningsarbejde til OmniConductor flåden gennem OmniRoute. Brødtekst: kun `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Konduktørflådefærdigheder (dem, der er annonceret på agentkortet) kan delegeres; `metadata.conductor.repo.url` er påkrævet (flåden arbejder på git repos). Ruten oversættes til hub'ens `POST /v1/tasks` ved hjælp af server-side `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) og returnerer `201 { conductor_task_id, state: "submitted" }`; opgavetilstande flyder tilbage gennem SSE→A2A spejlet (RF1) og er synlige via `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
@@ -201,21 +209,21 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
 
 1. **Opret færdighedsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportér en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg strukturen for eksisterende færdigheder såsom `smartRouting.ts`.
+   Eksporter en asynkron funktion `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Følg formen af eksisterende færdigheder såsom `smartRouting.ts`. Hvis færdigheden kalder tilbage til OmniRoute over HTTP, skal du bygge overskrifterne med `buildSelfLoopHeaders(caller)` fra `src/lib/a2a/selfLoopAuth.ts`, så opkaldet kører med A2A -kalderens nøgle, ikke `OMNIROUTE_API_KEY`, og videregive `redirect: "error"` til `fetch` så en omdirigering aldrig får nøglen. Hjælperen bygger kun overskrifter; hver færdighed angiver selve omdirigeringspolitikken. Det kaster `UnsafeSelfLoopTargetError` i stedet for at vedhæfte en nøgle, når den løste base URL er almindelig http uden for det private netværk (loopback, et container- eller tjenestenavn og private adresser er i orden) eller har legitimationsoplysninger, så en færdighed, der sluger afviste opkald, skal genindlæse den fejl.
 
-2. **Registrér handler:** Tilføj en post i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
+2. **Registerbehandler:** i `src/lib/a2a/taskExecution.ts`, tilføj en post til `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...eksisterende færdigheder
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Eksponér i agentkortet:** Tilføj til arrayet `skills` i `src/lib/a2a/agentCardMetadata.ts` (som deles af `/.well-known/agent.json` og `/.well-known/agent-card.json`):
+3. **Eksponering i agentkort:** i `src/lib/a2a/agentCardMetadata.ts` (delt af `/.well-known/agent.json` og `/.well-known/agent-card.json`), føj til `skills` arrayet:
 
    ```json
    {
@@ -227,9 +235,9 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
    }
    ```
 
-4. **Skriv tests:** `tests/unit/a2a-<your-skill>.test.ts`. Dæk både det forventede forløb og fejlforløbet.
+4. **Skriv test:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + fejlsti.
 
-5. **Dokumentér** den nye færdighed i tabellen `Available Skills` i denne fil.
+5. **Dokument** den nye færdighed i denne fils `Available Skills` tabel.
 
 ---
 

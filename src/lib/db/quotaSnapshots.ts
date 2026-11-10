@@ -107,22 +107,41 @@ function maybeLiftCodexCooldownOnHeadroom(
   }
 }
 
+function snapshotMetadata(
+  snapshot: QuotaSnapshotRow
+): { fractionReported?: unknown; retired?: unknown } | null {
+  const view = snapshot as unknown as { rawData?: unknown; raw_data?: unknown };
+  const rawData = view.rawData ?? view.raw_data;
+  if (rawData == null) return null;
+  try {
+    const metadata = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+    return metadata && typeof metadata === "object" ? metadata : null;
+  } catch {
+    return null;
+  }
+}
+
+/** `raw_data` of the record appended when a complete usage reading no longer reports a window. */
+export const RETIRED_QUOTA_WINDOW_RAW_DATA = JSON.stringify({ retired: true });
+
+/**
+ * A provider stopped reporting this window (see `isCompleteUsageReading`). The row is appended,
+ * never a deletion, so history stays; while it is a window's latest row the window is not current.
+ */
+export function isRetiredQuotaSnapshot(snapshot: QuotaSnapshotRow): boolean {
+  return snapshotMetadata(snapshot)?.retired === true;
+}
+
 /**
  * #10095 — a window the upstream did not report a fraction for is persisted as
  * `remaining_percentage = 0` with `raw_data = {"fractionReported":false}`. That
  * 0 is a placeholder, not a reading: consumers that rank or average remaining
- * quota must skip these rows. Accepts raw and `rowToCamel` shapes.
+ * quota must skip these rows. A retirement record is no reading either.
+ * Accepts raw and `rowToCamel` shapes.
  */
 export function isUnreportedQuotaSnapshot(snapshot: QuotaSnapshotRow): boolean {
-  const view = snapshot as unknown as { rawData?: unknown; raw_data?: unknown };
-  const rawData = view.rawData ?? view.raw_data;
-  if (rawData == null) return false;
-  try {
-    const metadata = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
-    return (metadata as { fractionReported?: unknown } | null)?.fractionReported === false;
-  } catch {
-    return false;
-  }
+  const metadata = snapshotMetadata(snapshot);
+  return metadata?.fractionReported === false || metadata?.retired === true;
 }
 
 export function getQuotaSnapshots(opts: {
@@ -192,7 +211,10 @@ export function getLatestQuotaSnapshotsForConnection(connectionId: string): Quot
       )
       .all(connectionId);
 
-    return rows.map((row) => rowToCamel(row) as unknown as QuotaSnapshotRow);
+    // A window whose latest row retires it is no longer one of the connection's windows.
+    return rows
+      .map((row) => rowToCamel(row) as unknown as QuotaSnapshotRow)
+      .filter((row) => !isRetiredQuotaSnapshot(row));
   } catch (err: any) {
     if (err?.message?.includes("no such table")) {
       return [];
@@ -219,8 +241,9 @@ export function getAggregatedSnapshots(opts: {
   aggregateBy?: "provider" | "connection";
 }): ProviderUtilizationPoint[] {
   const db = getDbInstance() as unknown as DbLike;
-  const conditions: string[] = ["created_at >= ?"];
-  const params: unknown[] = [opts.since];
+  // Retirement records mark a window's end; they are not utilization samples.
+  const conditions: string[] = ["created_at >= ?", "(raw_data IS NULL OR raw_data <> ?)"];
+  const params: unknown[] = [opts.since, RETIRED_QUOTA_WINDOW_RAW_DATA];
 
   if (opts.provider) {
     conditions.push("provider = ?");

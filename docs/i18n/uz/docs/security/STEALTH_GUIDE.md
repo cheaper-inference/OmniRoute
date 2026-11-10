@@ -231,19 +231,18 @@ Barcha MITM endpointlari boshqaruv autentifikatsiyasini (`requireCliToolsAuth`) 
 
 ---
 
-## User-Agent qiymatlarini qayta belgilash — muhit o‘zgaruvchilari (`.env.example` 12-bo‘lim)
+## Foydalanuvchi agenti — env varslarini bekor qiladi (`.env.example` 12-bo'lim)
 
-| O‘zgaruvchi              | Standart qiymat                                                 |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| O'zgaruvchan        | Standart                                      |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-`open-sse/executors/base.ts::buildHeaders()` tomonidan dinamik qidiruv orqali ishlatiladi. **Provayderlar yangi CLI versiyalarini chiqarganda bu qiymatlarni yangilang** — eskirgan UA satrlari eski mijozlarga tegishli deb rad etila boshlaydi.
+Dinamik qidiruv orqali `open-sse/executors/base.ts::buildHeaders()` tomonidan iste'mol qilinadi.** Provayderlar yangi CLI versiyalarini chiqarganda, bularni buzing** — eskirgan UA satrlari eskirgan mijozlar sifatida rad etila boshlaydi.
 
 ## CLI moslik rejimi almashtirgichlari (`.env.example` 13-boʻlim)
 

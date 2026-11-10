@@ -13,53 +13,71 @@ OmniRoute записва административни действия, съб
 
 ## Какво се регистрира
 
-### Административни одитни събития (`audit_log`)
+### Събития от административния одит (`audit_log`)
 
-Всяко извикване на `logAuditEvent({ action, actor, target, details, ... })` създава един ред. Низовете за действия следват шаблон `domain.verb` (или `domain.verb.outcome`). Потвърдените в кодовото дърво типове действия включват:
+Всяко извикване на `logAuditEvent({ action, actor, target, details, ... })` създава
+един ред. Низовете за действия следват шаблона `domain.verb` (или
+`domain.verb.outcome`). Потвърдените типове действия в дървото на изходния код включват:
 
-| Действие                             | Източник                                |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Действие                             | Източник                                 |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Всеки запис съдържа `action`, `actor` (по подразбиране `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` и `timestamp`. Чувствителните ключове (`apiKey`, `accessToken`, `refreshToken`, `password`, всичко, съответстващо на `*token`/`*secret`/`*apikey` и т.н.) се редактират рекурсивно до `"[redacted]"`, преди редът да бъде записан.
+Всеки запис съдържа `action`, `actor` (по подразбиране `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` и `timestamp`. Чувствителните ключове (`apiKey`, `accessToken`,
+`refreshToken`, `password`, всичко, което съвпада с `*token`/`*secret`/`*apikey`,
+и т.н.) се редактират рекурсивно до `"[redacted]"`, преди редът да бъде записан.
+
+Редовете за `api_key.auth.touch` регистрират успешни четения на метаданни и
+откриване на API ключове (GET/HEAD), които никога не достигат до дневника на
+заявките: кой ключ, кога и нормализираният път; записите се обединяват и са
+ограничени до 1 000 реда. Ключовете с `noLog` и ключът на средата се пропускат.
+IP адресът и user-agent-ът на извикващия се добавят само когато функционалният
+флаг `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` е включен (по подразбиране е
+изключен).
 
 ### Извиквания на MCP инструменти (`mcp_tool_audit`)
 
-Всяко извикване на MCP инструмент записва ред чрез `open-sse/mcp-server/audit.ts`. Схема (от `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Всяко извикване на MCP инструмент записва ред чрез
+`open-sse/mcp-server/audit.ts`. Схема (от
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Колона           | Бележки                                         |
-| ---------------- | ----------------------------------------------- |
-| `id`             | автоматично увеличаване                         |
-| `tool_name`      | идентификатор на MCP инструмент                 |
-| `input_hash`     | sha256 на входа (не се съхранява полезен товар) |
-| `output_summary` | кратко, съкратено обобщение                     |
-| `duration_ms`    | изминало реално време                           |
-| `api_key_id`     | извикваща страна (може да е null)               |
-| `success`        | `1` / `0`                                       |
-| `error_code`     | краен код на грешка при неуспех                 |
-| `created_at`     | ISO времеви печат                               |
+| Колона           | Бележки                                           |
+| ---------------- | ------------------------------------------------- |
+| `id`             | автоматично увеличаване                           |
+| `tool_name`      | идентификатор на MCP инструмента                  |
+| `input_hash`     | sha256 на входа (полезният товар не се съхранява) |
+| `output_summary` | кратко, съкратено обобщение                       |
+| `duration_ms`    | изминало време                                    |
+| `api_key_id`     | извикващ (може да е null)                         |
+| `success`        | `1` / `0`                                         |
+| `error_code`     | краен код на грешката при неуспех                 |
+| `created_at`     | времеви печат в ISO формат                        |
 
-### Регистри на заявки / използване
+### Дневници на заявките / използването
 
-Това са оперативни телеметрични данни (не строго административен одит), но използват същия процес за съхранение:
+Това са оперативни телеметрични данни (не са строго административен одит), но
+използват същия процес за съхранение:
 
-- `usage_history` — обобщена информация за използването за всяка заявка
-- `call_logs` — пълен регистър за всяка заявка (ограничен до максимален брой редове, вижте по-долу)
-- `proxy_logs` — регистър на прокси трафика (ограничен до максимален брой редове)
-- `request_detail_logs` — наследен подробен регистър на заявките (все още се прочиства, ако съществува)
+- `usage_history` — обобщение на използването за всяка заявка
+- `call_logs` — пълен дневник за всяка заявка (подлежи на ограничение на броя редове, вижте по-долу)
+- `proxy_logs` — дневник на прокси трафика (подлежи на ограничение на броя редове)
+- `request_detail_logs` — наследен подробен дневник на заявките (все още се изчистват, ако съществуват)
 
 ## Схема за съхранение
 

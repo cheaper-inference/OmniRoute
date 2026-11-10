@@ -134,6 +134,9 @@ test("vscode raw models route exposes native GPT-5.6 IDs and effort tiers", asyn
   assert.equal(defaultModel.max_output_tokens, 128000);
   assert.equal(defaultModel.max_input_tokens, 872000);
   assert.deepEqual(defaultModel.capabilities, {
+    audio_input: false,
+    video_input: false,
+    file_input: false,
     vision: true,
     tool_calling: true,
     reasoning: true,

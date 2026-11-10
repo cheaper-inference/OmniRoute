@@ -1,6 +1,7 @@
 // Re-export from open-sse with local logger
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
@@ -146,7 +147,7 @@ export function resolveCopilotTokenBaseUrl(
   if (provider !== "ghe-copilot") return undefined;
   const gheUrl = credentials?.providerSpecificData?.gheUrl;
   if (typeof gheUrl === "string" && gheUrl.trim().length > 0) {
-    return `${gheUrl.trim().replace(/\/+$/, "")}/api/v3`;
+    return `${stripTrailingSlashes(gheUrl.trim())}/api/v3`;
   }
   return undefined;
 }
@@ -172,7 +173,20 @@ export const refreshTokenByProvider = async (provider: string, credentials: any)
 export const formatProviderCredentials = (provider: string, credentials: any) =>
   _formatProviderCredentials(provider, credentials, log);
 
-export const getAllAccessTokens = (userInfo: any) => _getAllAccessTokens(userInfo, log);
+export const getAllAccessTokens = (userInfo: any) =>
+  _getAllAccessTokens(userInfo, log, {
+    // Per-connection proxy parity with the single-connection refresh path
+    // (#13470): a connection with an assigned proxy pool must not egress its
+    // refresh directly. Resolution failure fails closed (the connection
+    // counts as failed, never refreshed on a direct connection).
+    resolveProxy: (provider: string, connectionId: string | null) =>
+      resolveProxyForCredentials(provider, { connectionId: connectionId ?? undefined }),
+    // Rotated tokens are persisted by the caller (open-sse stays free of
+    // `@/lib/db` imports); the write is atomic with the refresh inside the
+    // per-connection mutex.
+    onPersist: (connectionId: string, result: any) =>
+      updateProviderCredentials(connectionId, result),
+  });
 
 // Local-specific: Update credentials in localDb
 export async function updateProviderCredentials(connectionId: string, newCredentials: any) {

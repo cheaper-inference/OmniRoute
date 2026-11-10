@@ -14,7 +14,7 @@ OmniRoute er en lokal AI routing gateway og dashboard bygget på Next.js. Det gi
 
 Kerneegenskaber:
 
-- OpenAI-kompatibel API overflade til CLI/tools (377 udbydere, 156 eksekveringsmoduler)
+- OpenAI-kompatibel API overflade til CLI/tools (381 udbydere, 159 eksekveringsmoduler)
 - Request/response -oversættelse på tværs af udbyderformater
 - Model combo fallback (multi-model sekvens)
 - Strukturerede combo-trin (`provider + model + connection`) med runtime-bestilling efter `compositeTiers`
@@ -39,7 +39,7 @@ Kerneegenskaber:
 - Valgfri skysynkronisering til multi-device/state synkronisering
 - IP allowlist/blocklist til API adgangskontrol
 - Tænkende budgetstyring (passthrough/auto/custom/adaptive)
-- Global systemprompt injektion
+- Global system prompt injektion
 - Sessionssporing og fingeraftryk
 - Forbedret prisbegrænsning pr. konto med udbyderspecifikke profiler
 - Circuit breaker mønster for udbyderens modstandsdygtighed
@@ -58,7 +58,7 @@ Kerneegenskaber:
 - MCP Server (110 værktøjer) med 3 transporter (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) med færdigheder og opgavelivscyklus
 - Hukommelsessystem (ekstraktion, injektion, genfinding, opsummering)
-- Færdighedssystem (registrering, eksekvering, sandkasse, indbyggede færdigheder)
+- Færdighedssystem (registrering, udfører, sandkasse, indbyggede færdigheder)
 - MITM proxy med certifikathåndtering og DNS -håndtering
 - Hurtig mellemvare til injektionsbeskyttelse
 - Spørg komprimeringspipeline med Caveman, RTK, stacked pipelines, kompressionskombinationer, sprogpakker og analyser
@@ -414,7 +414,7 @@ For regelsætforfattelse og tærskeljustering, se [`docs/security/GUARDRAILS.md`
 - Connection/model regel snedker: `src/domain/connectionModelRules.ts`
 - Snapshots af modeltilgængelighed: `src/domain/modelAvailability.ts`
 - Sporing af udbyderens udløb: `src/domain/providerExpiration.ts`
-- Kvote cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - Nedbrydningstilstand: `src/domain/degradation.ts`
 - Konfigurationsrevision: `src/domain/configAudit.ts`
 - OmniRoute respons metadata builder: `src/domain/omnirouteResponseMeta.ts`

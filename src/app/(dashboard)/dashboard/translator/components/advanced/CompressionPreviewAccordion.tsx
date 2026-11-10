@@ -1,13 +1,11 @@
 "use client";
 
-// Header toggle imports the Button module directly so tests can keep stubbing the barrel.
-import HeaderButton from "@/shared/components/Button";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Select } from "@/shared/components";
-import { cn } from "@/shared/utils/cn";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -60,7 +58,7 @@ const COMPRESSION_MODE_LABEL_KEYS = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Inner content (always mounted when hasOpened is true)
+// Inner content (mounted only while the disclosure is open)
 // ---------------------------------------------------------------------------
 
 function CompressionPreviewContent({ inputContent = "" }: { inputContent?: string }) {
@@ -195,15 +193,10 @@ function CompressionPreviewContent({ inputContent = "" }: { inputContent?: strin
  * CompressionPreviewAccordion — F7
  *
  * Extracted from PlaygroundMode.tsx lines 506-584 (Compression Preview Panel).
- * Uses a self-contained collapsible header (matches Collapsible visual style)
- * with an explicit `open` state so we can implement:
- *   - D7 lazy-render guard (mount content only after first open)
+ * A controlled kit `Disclosure`, so we can implement:
+ *   - D7 lazy-render guard (the preview mounts only while open)
  *   - `onOpenChange` callback for deep-link URL sync
  *   - `forceOpen` prop for deep-link initial state
- *
- * Note: We manage open state here rather than delegating to Collapsible because
- * Collapsible is purely uncontrolled (no onOpenChange prop). D7 requires knowing
- * when the accordion opens to set hasOpened, which requires controlled state.
  */
 export default function CompressionPreviewAccordion({
   forceOpen = false,
@@ -212,8 +205,6 @@ export default function CompressionPreviewAccordion({
 }: CompressionPreviewAccordionProps) {
   const t = useTranslations("translator");
 
-  // Lazy-render guard (D7): track whether the accordion has ever been opened.
-  const [hasOpened, setHasOpened] = useState(forceOpen);
   const [open, setOpen] = useState(forceOpen);
   // Track previous forceOpen so the effect only reacts to false→true transitions.
   // Without this, a manual close while forceOpen stays true would re-open the accordion
@@ -227,63 +218,45 @@ export default function CompressionPreviewAccordion({
     if (prev || !forceOpen) return;
     const openFromDeepLink = setTimeout(() => {
       setOpen(true);
-      setHasOpened(true);
       onOpenChange?.(true);
     }, 0);
     return () => clearTimeout(openFromDeepLink);
   }, [forceOpen, onOpenChange]);
 
-  const handleToggle = useCallback(() => {
-    const next = !open;
-    if (next && !hasOpened) {
-      setHasOpened(true);
-    }
-    setOpen(next);
-    onOpenChange?.(next);
-  }, [open, hasOpened, onOpenChange]);
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      setOpen(next);
+      onOpenChange?.(next);
+    },
+    [onOpenChange]
+  );
 
   const title = t("advancedCompressionTitle");
   const subtitle = t("advancedCompressionSubtitle");
 
   return (
-    <div
+    <Disclosure
+      open={open}
+      onOpenChange={handleOpenChange}
       className="rounded-lg border border-border bg-surface w-full"
       data-testid="compression-accordion"
     >
-      {/* Header row — matches Collapsible visual style */}
-      <div
-        className={cn(
-          "flex items-center gap-3 p-4 transition-colors hover:bg-bg-subtle",
-          open && "border-b border-border"
-        )}
-      >
-        <HeaderButton
-          variant="ghost"
-          onClick={handleToggle}
-          aria-expanded={open}
-          aria-controls="compression-preview-content"
-          className="-m-1 h-auto min-w-0 flex-1 justify-start gap-3 p-1 text-left"
-        >
-          <Icon
-            name={open ? "expand_more" : "chevron_right"}
-            size={20}
-            className="text-text-muted"
-          />
+      <DisclosureTrigger className="gap-3 p-4">
+        <span className="flex min-w-0 items-center gap-3">
           <Icon name="compress" size={18} className="text-text-muted" />
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-text-main truncate">{title}</div>
-            <div className="text-xs text-text-muted truncate">{subtitle}</div>
-          </div>
-        </HeaderButton>
-      </div>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium text-text-main">{title}</span>
+            <span className="block truncate text-xs text-text-muted">{subtitle}</span>
+          </span>
+        </span>
+      </DisclosureTrigger>
 
-      {/* Content — D7 lazy-render */}
-      {open && (
+      {/* Content — D7 lazy-render: the kit renders children only while open. */}
+      <DisclosureContent className="border-t border-border">
         <div id="compression-preview-content" className="p-4">
-          {/* hasOpened is set to true before we set open=true, so this is always true when open */}
-          {hasOpened && <CompressionPreviewContent inputContent={inputContent} />}
+          <CompressionPreviewContent inputContent={inputContent} />
         </div>
-      )}
-    </div>
+      </DisclosureContent>
+    </Disclosure>
   );
 }

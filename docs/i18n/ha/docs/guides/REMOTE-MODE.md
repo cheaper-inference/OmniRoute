@@ -51,30 +51,34 @@ kwamfutar tafi-da-gidanka                 OmniRoute na nesa (VPS)
 ```bash
 omniroute connect 192.168.0.15
 # Kalmar sirrin gudanarwa ta http://192.168.0.15:20128: ********
-# ✔ An haɗa da http://192.168.0.15:20128 — context '192.168.0.15' (scope: admin)
+# ✔ An haɗa zuwa http://192.168.0.15:20128 — mahallin '192.168.0.15' (iyaka: admin)
 ```
 
-Tsarin kalmar sirri yana ƙirƙirar token na **admin** ta tsohuwa (tun da kana da kalmar sirrin,
-to kana da cikakken iko). Rage scope da `--scope`:
+Tsarin kalmar sirri yana ƙirƙirar alamar **admin** ta tsohuwa (tunda kana riƙe da kalmar sirrin, kana da cikakken iko tun farko). Rage ikon ta hanyar `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Zaɓuɓɓuka: `--port <p>` (idan host ɗin ba shi da port), `--name <ctx>` (sunan context),
-`--scope read|write|admin`. Ana amfani da cikakken URL yadda yake:
+Zaɓuɓɓuka: `--port <p>` (idan mai masaukin ba shi da port), `--name <ctx>` (sunan mahallin),
+`--scope read|write|admin`. Ana amfani da cikakkiyar URL yadda take:
 `omniroute connect https://omni.example.com`.
+
+Lokacin da aka kunna tantancewa mai matakai biyu ta dashboard na uwar garke (Settings →
+Security), ba a karɓar kalmar sirri ita kaɗai: CLI zai tambaye ka lambar daga
+manhajar tantancewa (ko lambar dawowa). Aika ta tun farko da `--totp <code>` don
+amfani ba tare da hulɗa ba.
 
 ### Da token da aka riga aka ƙirƙira
 
-Ƙirƙiri token mai iyakancewar izini a dashboard (ko da `omniroute tokens create`) sannan
-ka liƙa shi — ba a buƙatar kalmar sirri:
+Ƙirƙiri token mai takamaiman iyaka a dashboard (ko da `omniroute tokens create`) sannan
+ka manna shi — ba a buƙatar kalmar sirri:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI yana tabbatar da ingancinsa ta `GET /api/cli/whoami` sannan ya adana shi a matsayin context mai aiki.
+CLI yana tantance shi ta hanyar `GET /api/cli/whoami` sannan ya adana shi a matsayin mahallin mai aiki.
 
 ---
 
@@ -429,14 +433,14 @@ omniroute contexts remove 192-168-0-15 --yes   # cire local context (ko da yana 
 
 ---
 
-## Wuraren ƙarshen API (manazarta)
+## Maɓallan API (bayani)
 
-| Hanya  | Route                 | Tantancewa              | Iyaka                                     |
-| ------ | --------------------- | ----------------------- | ----------------------------------------- |
-| POST   | `/api/cli/connect`    | kalmar sirrin gudanarwa | — (na jama'a, an killace da kalmar sirri) |
-| GET    | `/api/cli/whoami`     | token na samun dama     | karantawa                                 |
-| GET    | `/api/cli/tokens`     | token na samun dama     | gudanarwa                                 |
-| POST   | `/api/cli/tokens`     | token na samun dama     | gudanarwa                                 |
-| DELETE | `/api/cli/tokens/:id` | token na samun dama     | gudanarwa                                 |
+| Hanya  | Hanya                 | Tabbatarwa                      | Faɗin izini                             |
+| ------ | --------------------- | ------------------------------- | --------------------------------------- |
+| POST   | `/api/cli/connect`    | kalmar sirri; 2FA idan an kunna | — (na jama'a, ana buƙatar kalmar sirri) |
+| GET    | `/api/cli/whoami`     | alamar samun dama               | karatu                                  |
+| GET    | `/api/cli/tokens`     | alamar samun dama               | mai gudanarwa                           |
+| POST   | `/api/cli/tokens`     | alamar samun dama               | mai gudanarwa                           |
+| DELETE | `/api/cli/tokens/:id` | alamar samun dama               | mai gudanarwa                           |
 
-Duba [openapi.yaml](../openapi.yaml) don cikakkun tsare-tsare.
+Duba [openapi.yaml](../openapi.yaml) don cikakkun tsarin bayanai.
