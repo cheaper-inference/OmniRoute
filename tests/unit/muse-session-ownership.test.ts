@@ -10,6 +10,8 @@ import {
 } from "../../src/sse/services/museSessionOwnership.ts";
 import { lockModel, clearAllModelLockouts } from "../../open-sse/services/accountFallback.ts";
 import { getDbInstance, resetDbInstance } from "../../src/lib/db/core.ts";
+import { readMuseOwnershipValue } from "../../src/lib/db/museSessionOwnership.ts";
+import { opaqueTokenFingerprint } from "../../open-sse/utils/opaqueTokenFingerprint.ts";
 
 const candidates = [{ id: "account-a" }, { id: "account-b" }];
 test("fresh sessions alternate while tool continuations preserve exact encrypted output and owner", async () => {
@@ -73,6 +75,8 @@ test("fresh sessions alternate while tool continuations preserve exact encrypted
     bindMuseGeneration(scope, "account-a", "private-test-key-a", "identity-a"),
     generation
   );
+  // Pinned scopes self-heal foreign call: references under the current generation;
+  // item references and opaque history stay fail-closed.
   assert.equal(
     claimMuseSession(
       scope,
@@ -80,6 +84,10 @@ test("fresh sessions alternate while tool continuations preserve exact encrypted
       candidates
     ).connectionId,
     "account-a"
+  );
+  assert.equal(
+    readMuseOwnershipValue(`reference:${scope}:${opaqueTokenFingerprint("call:foreign-call")}`),
+    generation
   );
 });
 
@@ -101,27 +109,12 @@ test("unknown replay, missing identity and another API client cannot adopt encry
     /explicit session/
   );
   const scope = museSessionScope({ prompt_cache_key: "unknown-session" }, undefined, "client");
-  assert.throws(
-    () =>
-      claimMuseSession(
-        scope,
-        { input: [{ type: "reasoning", encrypted_content: "foreign" }] },
-        candidates
-      ),
-    /no recorded owner/
-  );
-  const plainHistory = museSessionScope({ prompt_cache_key: "plain-history" }, undefined, "client");
-  assert.ok(
-    candidates.some(
-      (candidate) =>
-        candidate.id ===
-        claimMuseSession(
-          plainHistory,
-          { input: [{ type: "function_call_output", call_id: "old", output: "old result" }] },
-          candidates
-        ).connectionId
-    )
-  );
+  for (const input of [
+    [{ type: "reasoning", encrypted_content: "foreign" }],
+    [{ type: "function_call_output", call_id: "old", output: "old result" }],
+  ]) {
+    assert.throws(() => claimMuseSession(scope, { input }, candidates), /no recorded owner/);
+  }
   assert.throws(
     () => claimMuseSession(scope, { previous_response_id: "old" }, candidates),
     /no recorded owner/
@@ -152,7 +145,7 @@ test("JSON output records ownership, and upstream errors retain their original b
   assert.equal(await failure.text(), "caller mismatch");
 });
 
-test("chat tool history acquires a fresh owner and emitted calls remain usable", async () => {
+test("chat tool history cannot acquire a fresh owner and emitted calls remain usable", async () => {
   const scope = museSessionScope({ session_id: "chat-tools" }, undefined, "client");
   const messages = [
     {
@@ -163,17 +156,19 @@ test("chat tool history acquires a fresh owner and emitted calls remain usable",
     },
     { role: "tool", tool_call_id: "chat-call", content: "result" },
   ];
-  const owner = claimMuseSession(scope, { messages }, candidates);
+  assert.throws(() => claimMuseSession(scope, { messages }, candidates), /no recorded owner/);
+  const owner = claimMuseSession(
+    scope,
+    { messages: [{ role: "user", content: "hi" }] },
+    candidates
+  );
   const generation = bindMuseGeneration(scope, owner.connectionId, "chat-key", "chat-account");
   const wire = JSON.stringify({ choices: [{ message: messages[0] }] });
   assert.equal(await recordMuseOutput(new Response(wire), scope, generation).text(), wire);
   assert.equal(claimMuseSession(scope, { messages }, candidates).connectionId, owner.connectionId);
   const foreign = museSessionScope({ session_id: "foreign-chat" }, undefined, "client");
-  const foreignOwner = claimMuseSession(foreign, { input: "fresh" }, candidates);
-  assert.equal(
-    claimMuseSession(foreign, { messages }, candidates).connectionId,
-    foreignOwner.connectionId
-  );
+  claimMuseSession(foreign, { input: "fresh" }, candidates);
+  assert.throws(() => claimMuseSession(foreign, { messages }, candidates), /not issued/);
 });
 
 test("exhausted account is skipped for new sessions and unserved pins move to a healthy account", async () => {
@@ -200,12 +195,8 @@ test("exhausted account is skipped for new sessions and unserved pins move to a 
     served,
     generation
   ).text();
-  assert.throws(
-    () => claimMuseSession(served, { input: "continue" }, [{ id: "account-b" }]),
-    (error: { status?: number; message?: string }) =>
-      error.status === 503 && /cross-account continuation is forbidden/.test(error.message || "")
-  );
-  // A present owner that is cooling down keeps its session: selection is pinned to it.
+  // The owner exists but is cooling down: the session keeps it, and the caller answers
+  // 429 with the reset instead of a cross-account 503 (which made clients retry-loop).
   assert.equal(
     claimMuseSession(served, { input: "continue" }, exhausted).connectionId,
     "account-a"

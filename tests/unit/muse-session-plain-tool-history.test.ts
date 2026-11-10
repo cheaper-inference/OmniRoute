@@ -67,19 +67,10 @@ test("a served session continues with tool calls another provider issued", async
   assert.equal(claimMuseSession(scope, { messages }, candidates).connectionId, owner.connectionId);
 });
 
-test("a fresh session adopts plain tool history and keeps account rotation", () => {
-  resetOwnership();
-  const first = museSessionScope({ session_id: "fresh-plain-1" }, undefined, "client");
-  const second = museSessionScope({ session_id: "fresh-plain-2" }, undefined, "client");
-  const a = claimMuseSession(first, { input: foreignToolTurn("2") }, candidates);
-  const b = claimMuseSession(second, { input: foreignToolTurn("3") }, candidates);
-  assert.notEqual(a.connectionId, b.connectionId);
-  // The claim is durable: the next turn stays on the same account.
-  assert.equal(
-    claimMuseSession(first, { input: foreignToolTurn("4") }, candidates).connectionId,
-    a.connectionId
-  );
-});
+// A fresh session that starts with imported tool history is adopted only when exactly one
+// Muse account is usable (upstream's adoption rule). Multi-account adoption is a separate
+// follow-up: plain call ids carry no provider-bound payload, but widening it changes how an
+// owner is invented for a session that never had one, so it stays a deliberate decision.
 
 test("encrypted reasoning and item references stay bound to their issuing session", async () => {
   resetOwnership();
