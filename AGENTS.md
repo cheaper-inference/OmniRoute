@@ -29,7 +29,7 @@ Running tests: see [Testing](#testing) below (run the most focused test for chan
 
 ## Project at a Glance
 
-**OmniRoute** — unified AI proxy/router. One endpoint, 384 LLM providers, auto-fallback.
+**OmniRoute** — unified AI proxy/router. One endpoint, 387 LLM providers, auto-fallback.
 
 - API Routes — `src/app/api/v1/` (Next.js App Router entry points)
 - Handlers — `open-sse/handlers/` (request processing: chat, embeddings, etc)
@@ -37,7 +37,7 @@ Running tests: see [Testing](#testing) below (run the most focused test for chan
 - Translators — `open-sse/translator/` (format conversion OpenAI↔Claude↔Gemini)
 - Transformer — `open-sse/transformer/` (Responses API ↔ Chat Completions)
 - Services — `open-sse/services/` (combo routing, rate limits, caching, etc)
-- Database — `src/lib/db/` (SQLite domain modules, 232 migrations)
+- Database — `src/lib/db/` (SQLite domain modules, 233 migrations)
 - Domain services — `src/domain/` (cost, quota, routing helpers and reserved contracts). Live API-key policy: `src/shared/utils/apiKeyPolicy.ts`; resolved-target authorization: `src/sse/handlers/chat/resolvedModelPolicy.ts`. The tested `policyEngine.ts` / `comboResolver.ts` / `src/lib/container.ts` trio does not wire the inspected chat request path.
 - MCP Server — `open-sse/mcp-server/` (110 tools: 45 canonical + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modules; 3 transports: stdio / SSE / Streamable HTTP; 33 scopes)
 - A2A Server — `src/lib/a2a/` (JSON-RPC 2.0 agent protocol)
