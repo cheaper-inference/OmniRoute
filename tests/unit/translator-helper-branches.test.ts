@@ -479,6 +479,8 @@ test("geminiHelper converts content, safely parses JSON and cleans complex schem
   assert.equal(cleaned.properties, undefined);
   assert.deepEqual(cleaned.enum, ["1", "2"]);
   assert.equal(cleaned.items.type, "integer");
+  // The surviving child node is still cleaned: its integer enum becomes a range.
+  assert.deepEqual(cleaned.items, { type: "integer", minimum: 1, maximum: 2 });
   assert.equal(cleaned.additionalProperties, undefined);
   assert.equal(cleaned.patternProperties, undefined);
   assert.equal(cleaned.if, undefined);

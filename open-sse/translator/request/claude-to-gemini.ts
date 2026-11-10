@@ -70,20 +70,26 @@ function urlImagePart(url) {
  */
 function documentPart(block) {
   const source = block?.source;
-  if (source?.type === "base64" && typeof source.data === "string" && source.data) {
-    return {
-      inlineData: { mimeType: source.media_type || "application/pdf", data: source.data },
-    };
-  }
-  if (source?.type === "url" && typeof source.url === "string" && /^https:\/\//i.test(source.url)) {
-    return {
-      fileData: { fileUri: source.url, mimeType: source.media_type || "application/pdf" },
-    };
-  }
+  if (source?.type === "base64") return base64DocumentPart(source);
+  if (source?.type === "url") return urlDocumentPart(source);
   if (source?.type === "text" && typeof source.data === "string" && source.data) {
     return { text: source.data };
   }
   return null;
+}
+
+function base64DocumentPart(source) {
+  if (typeof source.data !== "string" || !source.data) return null;
+  return {
+    inlineData: { mimeType: source.media_type || "application/pdf", data: source.data },
+  };
+}
+
+function urlDocumentPart(source) {
+  if (typeof source.url !== "string" || !/^https:\/\//i.test(source.url)) return null;
+  return {
+    fileData: { fileUri: source.url, mimeType: source.media_type || "application/pdf" },
+  };
 }
 
 function isPlainTextPart(part: { text?: unknown }): boolean {
