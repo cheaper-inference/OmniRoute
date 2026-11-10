@@ -156,17 +156,17 @@ Settings → Security-ல் பதிவு செய்யப்படும�
      `secondFactor: "recovery_switch"` உடன் தணிக்கையிடப்படும்.
   4. `OMNIROUTE_DISABLE_MFA`-ஐ unset செய்து, மறுதொடக்கம் செய்யவும்; தேவைப்பட்டால் மீண்டும் enrollment செய்யவும்.
 
-## ரூட் வகைகள்
+## பாதை வகுப்புகள்
 
-`src/server/authz/types.ts` மூன்று வகைகளை வரையறுக்கிறது; தீர்மானகரமாக வகைப்படுத்த முடியாத எந்த route-உம் `MANAGEMENT`-க்குத் திரும்பும்.
+`src/server/authz/types.ts` மூன்று வகுப்புகளை வரையறுக்கிறது; நிர்ணயம் செய்ய முடியாத எந்த வழியும் `MANAGEMENT` க்கு திரும்பும்.
 
-| Class        | Description                                                                                                                                             | Auth required                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC`     | வெளிப்படையாகவே பாதுகாப்பான routes — login, logout, status, init, health, onboarding bootstrap.                                                          | எதுவும் தேவையில்லை                                              |
-| `CLIENT_API` | Model-serving endpoints — `/api/v1/*`, `/api/v1beta/*`, மற்றும் aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | `REQUIRE_API_KEY` feature flag செயலில் இருக்கும்போது Bearer key |
-| `MANAGEMENT` | Dashboard பக்கங்கள், settings, providers, keys, admin மற்றும் diagnostics endpoints.                                                                    | Dashboard session அல்லது `manage` scope உடைய Bearer             |
+| வகுப்பு      | விளக்கம்                                                                                                                                | அங்கீகாரம் தேவை                                                             |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `PUBLIC`     | வெளிப்படையான பாதுகாப்பான வழிகள் — உள்நுழைவு, வெளியேறுதல், நிலை, ஆரோக்கியம், உள் நுழைவு பூட்ஸ்ட்ராப்.                                    | இல்லை                                                                       |
+| `CLIENT_API` | — `/api/v1/*`, `/api/v1beta/*`, மேலும் மாற்றுப்பெயர்கள் `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | பயனுள்ள `REQUIRE_API_KEY` அம்சக் கொடி இயக்கப்பட்டிருக்கும் போது தாங்கி விசை |
+| `MANAGEMENT` | டாஷ்போர்டு பக்கங்கள், அமைப்புகள், வழங்குநர்கள், விசைகள், நிர்வாகம் மற்றும் கண்டறியும் முனைப்புள்ளிகள்.                                  | `manage` நோக்கம் கொண்ட டாஷ்போர்டு அமர்வு OR தாங்கி                          |
 
-சில `MANAGEMENT` செயல்கள் **operator-only** ஆகும்: `manage` key மட்டும் போதாது. சேமிக்கப்பட்ட credentials-ஐ ஏற்றுமதி செய்தல் (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), live data-வின் மேல் backup-ஐ மீட்டமைத்தல் (`dryRun=true` உட்பட `POST /api/db-backups/import`, id மூலம் `POST /api/db-backups` restore, `POST /api/settings/import-json`), restore points-ஐ அழித்தல் (`DELETE /api/db-backups` cleanup, மற்றும் `PATCH /api/db-backups` ஏனெனில் அது சேமிக்கும் retention ஒவ்வொரு backup-க்குப் பின்னும் தானியங்கு நீக்கத்தை இயக்குகிறது) ஆகியவற்றுக்கு dashboard session, உள்ளூர் CLI subject, அல்லது login முடக்கப்பட்டிருப்பது தேவை. Sync token-ஐ வழங்குதல் (`POST /api/sync/tokens`) மற்றும் `admin` CLI access token-ஐ உருவாக்குதல் (`POST /api/cli/tokens`) ஒவ்வொரு login mode-இலும் dashboard session அல்லது உள்ளூர் CLI subject தேவை. எந்த scope-இன் API keys-உம், `oma_` access tokens-உம் operator credentials அல்ல: தேவைப்படும்போதெல்லாம் அவை `403` பெறும். இச்சரிபார்ப்பு `src/lib/api/operatorCredential.ts`-இல் உள்ளது (`resolveOperatorCredential()` / `requireOperatorCredential()`). Login settings-ஐ மாற்றுவதும் operator-only: ஒரு கடவுச்சொல் ஏற்கனவே இருந்தால் `POST /api/settings/require-login` (நிர்வாகக் கடவுச்சொல்லை அமைத்தல் / `requireLogin`-ஐ மாற்றுதல்) அந்த credentials-ஐ மட்டுமே ஏற்கும் — கடவுச்சொல் இல்லாத முதல்-முறை bootstrap சாளரம் மாறாது — மேலும் கடவுச்சொல்லை மாற்ற dashboard session `currentPassword` அனுப்ப வேண்டும் (அது இல்லாவிட்டால் அல்லது தவறாக இருந்தால் `403`, `settings.update_failed` என தணிக்கை செய்யப்படும்). உள்ளூர் CLI-உம், login முடக்கப்பட்ட instance-உம் மீட்புப் பாதையைத் தக்கவைக்கின்றன; அவை data directory-ஐ வைத்திருக்கும் host-உடன் பிணைக்கப்பட்டிருப்பதால், அது இல்லாமலேயே கடவுச்சொல்லை அமைக்கலாம்.
+ஒரு சில `MANAGEMENT` செயல்கள்** ஆபரேட்டர்-மட்டும்** : ஒரு `manage` விசை போதாது. சேமிக்கப்பட்ட நற்சான்றிதழ்களை ஏற்றுமதி செய்தல் (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), நேரடி தரவு மீது காப்புப்பிரதியை மீட்டமைத்தல் (`POST /api/db-backups/import`, ஐடி மூலம் `dryRun=true` மீட்டமைத்தல் , `POST /api/settings/import-json`), மீட்டெடுப்பு புள்ளிகளை அழித்தல் (`DELETE /api/db-backups` சுத்தப்படுத்துதல் மற்றும் `PATCH /api/db-backups`, லோக்கல் பேக்-அப் தொடர்ந்து இயங்குவதால் `POST /api/db-backups` தானாக இயங்கும் ஒவ்வொரு அமர்விற்குப் பிறகும் தானாக இயங்கும் dash CLI இயக்க வேண்டும்) பொருள், அல்லது உள்நுழைவு முடக்கப்பட்டது. ஒத்திசைவு டோக்கனை (`POST /api/sync/tokens`) வழங்குவதற்கும் `admin` CLI அணுகல் டோக்கனை (`POST /api/cli/tokens`) உருவாக்குவதற்கும் ஒவ்வொரு உள்நுழைவு பயன்முறையிலும் டாஷ்போர்டு அமர்வு அல்லது உள்ளூர் CLI பொருள் தேவைப்படுகிறது. எந்த நோக்கத்தின் API விசைகள் மற்றும் `oma_` அணுகல் டோக்கன்கள் ஆபரேட்டர் நற்சான்றிதழ்கள் அல்ல: அவை தேவைப்படும் போதெல்லாம் `403` கிடைக்கும். காசோலை `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) இல் வாழ்கிறது. உள்நுழைவு அமைப்புகளை மாற்றுவது ஆபரேட்டருக்கு மட்டுமே: `POST /api/settings/require-login` (நிர்வாக கடவுச்சொல்லை அமைக்கவும் / `requireLogin` மாற்றவும்) அந்த நற்சான்றிதழ்களை மட்டுமே ஏற்றுக்கொள்கிறது — முதல்-ரன் பூட்ஸ்ட்ராப் சாளரம் (இதுவரை கடவுச்சொல் இல்லை) — மாறாமல் உள்ளது மற்றும் டேஷ்போர்டு அமர்வு `currentPassword` அனுப்ப வேண்டும் அல்லது கடவுச்சொல்லை மாற்றினால் (`403` `settings.update_failed` இருந்தால்). உள்ளூர் CLI மற்றும் உள்நுழைவு முடக்கப்பட்ட ஒரு நிகழ்வு மீட்புப் பாதையை வைத்திருக்கும் மற்றும் அது இல்லாமல் கடவுச்சொல்லை அமைக்கலாம், ஏனெனில் இவை இரண்டும் தரவு கோப்பகத்தை வைத்திருக்கும் ஹோஸ்டுடன் பிணைக்கப்பட்டுள்ளன.
 
 ## குழாய்
 
@@ -197,53 +197,49 @@ Incoming request → src/proxy.ts
 
 வெற்றிகரமான கொள்கையானது `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` உடன் வழங்கும். கீழ்நிலை கையாளுபவர்கள் அங்கீகார தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக `src/server/authz/assertAuth.ts` இல் `assertAuth(request, "CLIENT_API")` வழியாகப் படிக்கலாம்.
 
-## பொது வழித்தடங்களின் பட்டியல்
+## பொது வழிகள் பட்டியல்
 
-`src/shared/constants/publicApiRoutes.ts` என்பது வெளிப்படையான அனுமதிப்பட்டியல் ஆகும்:
+`src/shared/constants/publicApiRoutes.ts` என்பது வெளிப்படையான அனுமதிப்பட்டியல்:
 
-இந்தப் பட்டியல் **வடிவமைப்பின்** அடிப்படையில் பிரிக்கப்பட்டுள்ளது; இந்தப் பிரிப்பு முக்கியமானது (GHSA-74g9-q8f6-793h): ஒரு முன்னொட்டு
-`startsWith()` மூலம் பொருத்தப்படுகிறது, ஆகவே அதே தொடக்க எழுத்துகளைப் பகிரும் ஒவ்வொரு அருகிலுள்ள பாதையுடனும் அது பொருந்தும்.
-`/api/usage/om-usage` என்ற முன்னொட்டு `/api/usage/om-usage<anything>` ஐ PUBLIC எனக் குறிக்கிறது, மேலும் Next அதை
-`/api/usage/[connectionId]` எனத் தீர்மானிக்கிறது — தனிப்பட்ட auth இல்லாத handler.
+பட்டியல் பிரிக்கப்பட்டுள்ளது** வடிவம்** , மற்றும் பிளவு சுமை தாங்கும் (GHSA-74g9-q8f6-793h): ஒரு முன்னொட்டு `startsWith()` உடன் பொருந்துகிறது, எனவே இது அதன் முன்னணி எழுத்துக்களைப் பகிர்ந்து கொள்ளும் ஒவ்வொரு அருகிலுள்ள பாதைக்கும் பொருந்தும். `/api/usage/om-usage` ஒரு முன்னொட்டாக `/api/usage/om-usage<anything>` PUBLIC எனக் குறிக்கப்பட்டது, மேலும் அதன் சொந்த அங்கீகாரம் இல்லாத ஒரு ஹேண்ட்லரை `/api/usage/[connectionId]` — என்று அடுத்து தீர்க்கிறது.
 
 ```ts
-// உண்மையான துணைமரங்கள். ஒவ்வொரு பதிவும் "/"-இல் முடிவடைய வேண்டும் (unit test மூலம் சரிபார்க்கப்படுகிறது).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify-ல் CLIENT_API ஆகக் கருதப்படுகிறது, "no-auth public" ஆக அல்ல
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// EXACT ஆகப் பொருத்தப்படும் ஒற்றைப் பாதைகள் (முடிவில் trailing slash இருந்தாலும் இல்லாவிட்டாலும்).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP-க்கான login படி 2; MFA-pending cookie தேவை
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin தளர்வையும் பெறும், வாசிக்க-மட்டுமான ஒற்றைப் பாதைகள்.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS தளர்வு இல்லாத, வாசிக்க-மட்டுமான ஒற்றைப் பாதை.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-வாசிக்க-மட்டுமான பாதைகள் பாதுகாப்பான methods-க்கு மட்டும் பொதுவாகக் கிடைக்கும். குறிப்பு: `classifyRoute()` ஆனது PUBLIC fall-through-இலிருந்து `/api/v1/*` மற்றும் `/api/v1beta/*` ஆகியவற்றை விலக்குகிறது — அவை எப்போதும் `CLIENT_API` ஆக இருப்பதால் Bearer-key policy தொடர்ந்து பொருந்தும்.
+படிக்க மட்டும் வழிகள் பொது** மட்டுமே** பாதுகாப்பான முறைகளுக்கு. குறிப்பு: `classifyRoute()` PUBLIC Fal-through — இலிருந்து `/api/v1/*` மற்றும் `/api/v1beta/*` விலக்குகிறது `CLIENT_API`
 
 ## புதிய Route ஒன்றைச் சேர்த்தல்
 
@@ -307,15 +303,15 @@ API கீகள் ஒரு `scopes` வரிசையைக் கொண்�
 
 `oma_live_…` டோக்கன்களில் `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) மூலம் தரவரிசைப்படுத்தப்பட்டுள்ளது. இந்த தரவரிசை அணுகல்-டோக்கன் நற்சான்றிதழுக்கு மட்டுமே பொருந்தும். [மேலாண்மை அங்கீகாரம்](../guides/MANAGEMENT-AUTH.md) ஐப் பார்க்கவும்.
 
-## Auth Required மாற்று (toggle)
+## அங்கீகாரம் தேவை மாற்று
 
-`src/shared/utils/apiAuth.ts`-இல் உள்ள `isAuthRequired()`, ஒரு request-க்கு **ஏதேனும்** auth கட்டாயமா என்பதை முடிவு செய்கிறது:
+என்பதை `src/shared/utils/apiAuth.ts` இல் உள்ள `isAuthRequired()` தீர்மானிக்கிறது** ஏதேனும்** ஒரு கோரிக்கைக்கு அங்கீகாரம் செயல்படுத்தப்படுகிறது:
 
-- `settings.requireLogin === false` → auth உலகளவில் முடக்கப்படும், ஆனால் எப்போதும்-பாதுகாக்கப்பட்ட அடுக்கு ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) தவிர, மற்றும் ஏற்கப்படும் credential-ஐ வழங்கும் calls தவிர — அவை login இயக்கத்தில் இருக்கும்போது தேவைப்படும் அதே credential-ஐக் கோரும்: sync tokens வழங்குதல், எந்த scope-இலும் CLI access tokens உருவாக்குதல், மற்றும் `manage`/`admin` scope கொண்ட API key-ஐ உருவாக்குதல், ஒரு key-க்கு அந்த scope-ஐ வழங்குதல், அல்லது அத்தகைய key-ஐ மீண்டும் உருவாக்குதல் அல்லது வெளிப்படுத்துதல் (`src/lib/api/requireManagementAuth.ts`-இல் `requireCredentialForManagementScopedKey()`). Inference-only keys திறந்தே இருக்கும்.
-- கடவுச்சொல் அமைக்கப்படவில்லை **மற்றும்** `INITIAL_PASSWORD` env var இல்லை → bootstrap mode onboarding wizard-ஐயும் loopback requests-ஐயும் அனுமதிக்கும், ஆனால் வெளிப்படும் network requests-க்கு இன்னும் credentials தேவை.
-- ஏதேனும் DB error → fail closed (secure-by-default).
+- `settings.requireLogin === false` → auth உலகளவில் முடக்கப்பட்டுள்ளது, எப்போதும்-பாதுகாக்கப்பட்ட அடுக்கு ( [பாதை காவலர் அடுக்குகளைப்](../security/ROUTE_GUARD_TIERS.md) பார்க்கவும்) மற்றும் அது ஏற்றுக்கொள்ளும் நற்சான்றிதழை வழங்கும் அழைப்புகள் தவிர, உள்நுழைவுடன் அதே நற்சான்றிதழ் தேவை: ஒத்திசைவு டோக்கன்களை வழங்குதல், CLI அணுகல் டோக்கன்களை எந்த ஸ்கோப்பிலும் உருவாக்குதல், API ஸ்கோப்பில் உருவாக்குதல், மற்றும் விசையை உருவாக்குதல் ஒரு விசைக்கு அந்த நோக்கத்தை வழங்குதல், அல்லது அத்தகைய `requireCredentialForManagementScopedKey()` மீண்டும் உருவாக்குதல் அல்லது வெளிப்படுத்துதல் ( `manage` `src/lib/api/requireManagementAuth.ts` `admin` ). அனுமானம் மட்டுமே விசைகள் திறந்திருக்கும். பாதுகாக்கப்பட்ட அம்சக் கொடியை எழுதுதல் (`REQUIRE_API_KEY`, மற்ற பாதுகாப்புக் கொடிகள் மற்றும் SSRF / TLS / MCP- ஸ்கோப் / சாண்ட்பாக்ஸ் கொடிகள் [அம்சக் கொடிகளில்](../reference/FEATURE_FLAGS.md#rest-api) பட்டியலிடப்பட்டுள்ளன ) மற்றும் PII மறைக்கும் அமைப்புகளைச் சேமிப்பதற்கும் (`PUT /api/settings/pii`) நற்சான்றிதழ் தேவைப்படுகிறது.
+- கடவுச்சொல் கட்டமைக்கப்படவில்லை** மற்றும்** `INITIAL_PASSWORD` env var → பூட்ஸ்டார்ப் பயன்முறையானது ஆன்போர்டிங் வழிகாட்டி மற்றும் லூப்பேக் கோரிக்கைகளை அனுமதிக்கிறது, ஆனால் வெளிப்படும் நெட்வொர்க் கோரிக்கைகளுக்கு இன்னும் நற்சான்றிதழ்கள் தேவை. விதிவிலக்கு: பாதுகாக்கப்பட்ட அம்சக் கொடியை எழுதுவதற்கும், PII முகமூடி அமைப்புகளைச் சேமிப்பதற்கும் (`PUT /api/settings/pii`) லூப்பேக்கிலிருந்தும் ஒரு நற்சான்றிதழ் தேவை, எனவே லூப்பேக் தானாகவே போதுமானதாக இல்லை.
+- எந்த DB பிழை → மூடப்படும் (பாதுகாப்பான-இயல்புநிலை).
 
-Client API key enforcement, நேரடியாக `process.env.REQUIRE_API_KEY`-ஐப் படிப்பதற்குப் பதிலாக, `src/shared/utils/featureFlags.ts`-இல் உள்ள `isRequireApiKeyEnabled()`-ஐப் பயன்படுத்துகிறது. இது deployed instances-க்கு முக்கியம்: Dashboard → Feature Flags-இல் `REQUIRE_API_KEY`-ஐ மாற்றினால் DB override சேமிக்கப்பட்டு, `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, மேலும் இந்த helper-ஐப் பகிரும் பிற client-API auth சோதனைகள் உடனடியாகப் பாதிக்கப்படும். Feature flag store படிக்க முடியாவிட்டால், client API auth fail closed ஆகி key-ஐக் கோரும்.
+கிளையண்ட் API விசை அமலாக்கம் `src/shared/utils/featureFlags.ts` இல் `isRequireApiKeyEnabled()` பயன்படுத்துகிறது, நேரடி `process.env.REQUIRE_API_KEY` வாசிப்பு அல்ல. பயன்படுத்தப்பட்ட நிகழ்வுகளுக்கு இது முக்கியமானது: டாஷ்போர்டில் `REQUIRE_API_KEY` மாற்றுவது → அம்சக் கொடிகள் DB மேலெழுதலைச் சேமித்து, உடனடியாக `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, மற்றும் பிற கிளையன்ட்-ஏபிஐ அங்கீகாரச் சரிபார்ப்புகளைப் பகிரும் இந்த உதவிச் சரிபார்ப்பைப் பாதிக்கிறது. அம்சக் கொடி அங்காடியைப் படிக்க முடியாவிட்டால், கிளையன்ட் API அங்கீகாரம் மூடப்படுவதில் தோல்வியடைந்து, விசை தேவைப்படுகிறது.
 
 ## இணக்கமுறிவு மாற்றம் — v3.8.0
 
