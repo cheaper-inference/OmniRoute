@@ -20,9 +20,6 @@ export function UsageLimitSettings({
   weeklyLimitUsd: string;
   /** Rolling 5-hour USD window (spend ages out 5 h after each request). */
   fiveHourLimitUsd: string;
-  /** Kept for callers; the switch state is conveyed by the kit Switch itself. */
-  enabledLabel: string;
-  disabledLabel: string;
   onEnabledChange: (enabled: boolean) => void;
   onDailyLimitUsdChange: (value: string) => void;
   onWeeklyLimitUsdChange: (value: string) => void;
