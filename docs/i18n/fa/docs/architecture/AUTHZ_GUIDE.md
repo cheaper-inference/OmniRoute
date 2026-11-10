@@ -147,17 +147,17 @@ JWTهای دیگری که با `JWT_SECRET` امضا شدهاند وجود دا�
   3. در تنظیمات → امنیت → غیرفعالسازی، گذرواژه را وارد کنید و کد را خالی بگذارید. `POST /api/auth/mfa/disable` فقط زمانی که این متغیر تنظیم شده باشد و درخواست از میزبان آمده باشد، بدنهای بدون `code` را میپذیرد؛ این درخواست همچنان به نشست داشبورد و گذرواژه فعلی نیاز دارد و با `auth.mfa.disabled` و `secondFactor: "recovery_switch"` ثبت میشود.
   4. `OMNIROUTE_DISABLE_MFA` را unset کنید، سرور را مجدداً راهاندازی کنید و در صورت نیاز دوباره ثبتنام کنید.
 
-## کلاس‌های مسیر
+## کلاس های مسیر
 
-`src/server/authz/types.ts` سه کلاس را تعریف می‌کند؛ هر مسیری که نتوان آن را به‌طور قطعی دسته‌بندی کرد، به `MANAGEMENT` بازمی‌گردد.
+`src/server/authz/types.ts` سه طبقه را تعریف می کند. هر مسیری که نمی تواند به طور قطعی طبقه بندی شود به `MANAGEMENT` باز می گردد.
 
-| کلاس         | توضیح                                                                                                                                                           | احراز هویت لازم است                                             |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC`     | مسیرهایی که صراحتاً امن هستند — ورود، خروج، وضعیت، راه‌اندازی اولیه، سلامت، آغاز به کار آنبوردینگ.                                                              | هیچ                                                             |
-| `CLIENT_API` | نقاط پایانی ارائه‌ی مدل — `/api/v1/*`، `/api/v1beta/*`، به‌همراه نام‌های مستعار `/v1/*`، `/v1beta/*`، `/chat/completions`، `/responses`، `/models`، `/codex/*`. | کلید Bearer وقتی که پرچم ویژگی مؤثر `REQUIRE_API_KEY` فعال باشد |
-| `MANAGEMENT` | صفحات داشبورد، تنظیمات، ارائه‌دهندگان، کلیدها، نقاط پایانی مدیریت و عیب‌یابی.                                                                                   | نشست داشبورد یا Bearer با محدوده‌ی `manage`                     |
+| کلاس         | توضیحات                                                                                                                                                         | احراز هویت مورد نیاز است                                       |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `PUBLIC`     | مسیرهای صریح ایمن ورود به سیستم — ، خروج از سیستم، وضعیت، سلامت، بوت استرپ ورود.                                                                                | هیچ کدام                                                       |
+| `CLIENT_API` | نقاط پایانی ارائه دهنده مدل — `/api/v1/*`، `/api/v1beta/*`، به علاوه نام مستعار `/v1/*`، `/v1beta/*`، `/chat/completions`، `/responses`، `/models`، `/codex/*`. | کلید حامل زمانی که پرچم ویژگی موثر `REQUIRE_API_KEY` فعال باشد |
+| `MANAGEMENT` | صفحات داشبورد، تنظیمات، ارائه دهندگان، کلیدها، ادمین و نقاط پایانی تشخیصی.                                                                                      | نشست داشبورد OR Bearer با دامنه `manage`                       |
 
-چند اقدام `MANAGEMENT` **فقط برای اپراتور** هستند: داشتن کلید `manage` کافی نیست. خروجی گرفتن از اعتبارنامه‌های ذخیره‌شده (`GET /api/settings/export-json`، `GET /api/db-backups/export`، `GET /api/db-backups/exportAll`)، بازیابی یک نسخه‌ی پشتیبان روی داده‌های زنده (`POST /api/db-backups/import` از جمله با `dryRun=true`، `POST /api/db-backups` بازیابی بر اساس شناسه، `POST /api/settings/import-json`) و از بین بردن نقاط بازیابی (پاکسازی `DELETE /api/db-backups` و `PATCH /api/db-backups`، چون نگهداری‌ای که ذخیره می‌کند، هرس خودکار را پس از هر پشتیبان‌گیری هدایت می‌کند) به نشست داشبورد، هویت CLI محلی یا غیرفعال بودن ورود نیاز دارند. صدور توکن همگام‌سازی (`POST /api/sync/tokens`) و ساختن یک توکن دسترسی CLI با محدوده‌ی `admin` (`POST /api/cli/tokens`) در هر حالت ورود به نشست داشبورد یا هویت CLI محلی نیاز دارند. کلیدهای API با هر محدوده‌ای و توکن‌های دسترسی `oma_` اعتبارنامه‌ی اپراتور نیستند: هر وقت یکی از آن‌ها لازم باشد، `403` دریافت می‌کنند. بررسی در `src/lib/api/operatorCredential.ts` قرار دارد (`resolveOperatorCredential()` / `requireOperatorCredential()`). تغییر تنظیمات ورود هم فقط برای اپراتور است: `POST /api/settings/require-login` (تنظیم رمز عبور مدیریت / تغییر `requireLogin`) پس از وجود رمز عبور فقط آن اعتبارنامه‌ها را می‌پذیرد — پنجره‌ی راه‌اندازی اولیه‌ی اجرای نخست (هنوز رمز عبوری نیست) بدون تغییر می‌ماند — و نشست داشبورد برای جایگزینی رمز عبور باید `currentPassword` را بفرستد (`403` وقتی که نبود یا نادرست باشد، با ثبت به‌عنوان `settings.update_failed`). CLI محلی و نمونه‌ای که ورود در آن غیرفعال است مسیر بازیابی را حفظ می‌کنند و می‌توانند بدون آن رمز عبور تنظیم کنند، زیرا هر دو به میزبانی متصل‌اند که پوشه‌ی داده را در اختیار دارد.
+چند عمل `MANAGEMENT` هستند** فقط اپراتور** : یک کلید `manage` کافی نیست. صادر کردن اطلاعات کاربری ذخیره شده (`GET /api/settings/export-json`، `GET /api/db-backups/export`، `GET /api/db-backups/exportAll`)، بازیابی یک نسخه پشتیبان از روی دادههای زنده (`POST /api/db-backups/import` شامل `dryRun=true`، بازیابی `POST /api/db-backups` توسط id، `POST /api/settings/import-json`)، از بین بردن نقاط بازیابی (پاکسازی `DELETE /api/db-backups` ، و `PATCH /api/db-backups` زیرا حفظ آن باعث میشود که هرس خودکار پس از هر جلسه صفحه پشتیبانگیری یا نسخه پشتیبانگیری محلی CLI انجام شود. صدور یک نشانه همگام سازی (`POST /api/sync/tokens`) و برش رمز دسترسی `admin` CLI (`POST /api/cli/tokens`) به یک جلسه داشبورد یا موضوع محلی CLI در هر حالت ورود نیاز دارد. کلیدهای API با هر دامنه و نشانههای دسترسی `oma_` اعتبار اپراتور نیستند: هر زمان که نیاز باشد `403` دریافت میکنند. چک در `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) زندگی می کند. تغییر تنظیمات ورود به سیستم نیز فقط برای اپراتور است: `POST /api/settings/require-login` (رمز عبور مدیریت را تنظیم کنید / `requireLogin` را تغییر دهید) زمانی که رمز عبور وجود داشته باشد تنها آن اطلاعات را میپذیرد. — اولین پنجره راهاندازی (هنوز رمز عبور وجود ندارد) بدون تغییر — است و جلسه داشبورد باید `currentPassword` برای جایگزینی رمز عبور ارسال کند (`403` زمانی که رمز عبور اشتباه است یا ممیزی `settings.update_failed` است). CLI محلی و نمونهای با غیرفعال بودن ورود، مسیر بازیابی را حفظ میکنند و ممکن است بدون آن رمز عبور تعیین کنند، زیرا هر دو به میزبانی که دایرکتوری دادهها را دارد محدود میشوند.
 
 ## خط لوله
 
@@ -192,49 +192,45 @@ Incoming request → src/proxy.ts
 
 `src/shared/constants/publicApiRoutes.ts` فهرست مجاز صریح است:
 
-این فهرست بر اساس **شکل** تقسیم شده است و این تقسیمبندی برای عملکرد ضروری است (GHSA-74g9-q8f6-793h): یک پیشوند با
-`startsWith()` تطبیق داده میشود، بنابراین با هر مسیر مجاور دیگری که نویسههای ابتدایی مشترک داشته باشد نیز تطبیق پیدا میکند.
-`/api/usage/om-usage` بهعنوان پیشوند، `/api/usage/om-usage<anything>` را PUBLIC علامتگذاری میکند و Next آن را به
-`/api/usage/[connectionId]` resolve میکند — یک handler که احراز هویت مستقلی ندارد.
+لیست تقسیم شده است** شکل** و تقسیم باربر است (GHSA-74g9-q8f6-793h): یک پیشوند با `startsWith()` مطابقت دارد، بنابراین با هر مسیر مجاور که کاراکترهای اصلی خود را به اشتراک میگذارند نیز مطابقت دارد. `/api/usage/om-usage` به عنوان یک پیشوند، `/api/usage/om-usage<anything>` PUBLIC را علامت گذاری کرده است، و Next حل می کند که `/api/usage/[connectionId]` — یک handler بدون اعتبار خاص خود را حل می کند.
 
 ```ts
-// زیردرختهای واقعی. هر ورودی MUST به "/" ختم شود (با یک آزمون واحد بررسی میشود).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // در classify بهعنوان CLIENT_API در نظر گرفته میشود، نه «عمومی بدون احراز هویت»
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// مسیرهای منفرد که بهصورت EXACTLY تطبیق داده میشوند (با یا بدون اسلش انتهایی).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // مرحلهٔ دوم ورود برای TOTP اختیاری؛ به کوکی MFA-pending نیاز دارد
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// مسیرهای منفرد فقطخواندنی که relaxed شدن مبدأ CORS را نیز دریافت میکنند.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// مسیر منفرد فقطخواندنی بدون relaxed شدن مبدأ CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-مسیرهای فقطخواندنی **فقط** برای روشهای ایمن عمومی هستند. توجه: `classifyRoute()`، `/api/v1/*` و `/api/v1beta/*` را از مسیر fall-through مربوط به PUBLIC خارج میکند — این مسیرها همیشه `CLIENT_API` هستند، بنابراین سیاست کلید Bearer همچنان برای آنها اعمال میشود.
+مسیرهای فقط خواندنی عمومی هستند** فقط** برای روش های ایمن توجه: `classifyRoute()` `/api/v1/*` و `/api/v1beta/*` از PUBLIC fall-through — مستثنی میکند که همیشه `CLIENT_API` هستند، بنابراین خطمشی کلید حامل همچنان اعمال میشود.
 
 ## افزودن یک مسیر جدید
 
@@ -298,15 +294,15 @@ export async function POST(request: Request) {
 
 `read` / `write` / `admin` بر روی توکنهای `oma_live_…`، رتبهبندی شده توسط `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). این رتبه فقط برای اعتبارنامه توکن دسترسی اعمال میشود. به [احراز هویت مدیریت](../guides/MANAGEMENT-AUTH.md) مراجعه کنید.
 
-## تغییر وضعیت الزام احراز هویت
+## Auth Required Toggle
 
-`isAuthRequired()` در `src/shared/utils/apiAuth.ts` تعیین می‌کند که آیا برای یک درخواست **هیچ** احراز هویتی اعمال شود:
+`isAuthRequired()` در `src/shared/utils/apiAuth.ts` تصمیم می گیرد که آیا** هر** auth برای یک درخواست اجرا می شود:
 
-- `settings.requireLogin === false` → احراز هویت به‌طور کلی غیرفعال است، به‌جز سطح همیشه‌محافظت‌شده (نگاه کنید به [سطوح محافظت مسیر](../security/ROUTE_GUARD_TIERS.md)) و فراخوانی‌هایی که اعتبارنامه‌ای تحویل می‌دهند که پذیرفته می‌شود و همان اعتباری را لازم دارند که با فعال بودن ورود لازم است: صدور توکن‌های همگام‌سازی، ساختن توکن‌های دسترسی CLI با هر محدوده‌ای، و ساختن کلید API با محدوده‌ی `manage`/`admin`، اعطای آن محدوده به یک کلید، یا بازتولید یا نمایش چنین کلیدی (`requireCredentialForManagementScopedKey()` در `src/lib/api/requireManagementAuth.ts`). کلیدهای فقط‌استنتاج باز می‌مانند.
-- هیچ رمز عبوری پیکربندی نشده **و** متغیر محیطی `INITIAL_PASSWORD` وجود ندارد → حالت راه‌اندازی اولیه، ویزارد آنبوردینگ و درخواست‌های loopback را مجاز می‌کند، اما درخواست‌های شبکه‌ای در معرض دید همچنان به اعتبارنامه نیاز دارند.
-- هر خطای پایگاه داده → بسته می‌ماند (امن به‌طور پیش‌فرض).
+- `settings.requireLogin === false` → auth در سراسر جهان غیرفعال است، به جز ردیف همیشه محافظت شده (نگاه کنید به [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) و تماس هایی که اعتباری را که می پذیرد، ارائه می دهند، که به اعتباری مشابه با ورود به سیستم نیاز دارند: صدور نشانه های همگام سازی، برش توکن های دسترسی CLI در هر محدوده، و ایجاد یک API اعطای کلید `manage` `admin` کلید، یا بازسازی یا آشکار کردن چنین کلیدی (`requireCredentialForManagementScopedKey()` در `src/lib/api/requireManagementAuth.ts`). کلیدهای فقط استنتاج باز می مانند. نوشتن یک پرچم ویژگی محافظت شده (`REQUIRE_API_KEY`، سایر پرچمهای امنیتی، و پرچمهای SSRF / TLS / MCP-scope / sandbox فهرستشده در [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) و ذخیره تنظیمات پنهانسازی PII (`PUT /api/settings/pii`) همچنان به یک اعتبار نیاز دارد.
+- هیچ رمز عبوری پیکربندی نشده است** و** حالت بوت استرپ `INITIAL_PASSWORD` env var → به جادوگر ورود و درخواستهای حلقه بک اجازه میدهد، اما درخواستهای شبکه در معرض هنوز به اعتبار نیاز دارند. استثنا: نوشتن یک پرچم ویژگی محافظت شده و ذخیره تنظیمات پوشش PII (`PUT /api/settings/pii`) نیاز به یک اعتبار حتی از Loopback دارد، بنابراین Loopback به خودی خود در آنجا کافی نیست.
+- هر گونه خطای DB → با شکست مواجه می شود (ایمن به صورت پیش فرض).
 
-اعمال کلید API کلاینت از `isRequireApiKeyEnabled()` در `src/shared/utils/featureFlags.ts` استفاده می‌کند، نه خواندن مستقیم `process.env.REQUIRE_API_KEY`. این برای نمونه‌های مستقرشده اهمیت دارد: تغییر `REQUIRE_API_KEY` در داشبورد → پرچم‌های ویژگی، یک بازنویسی پایگاه داده ذخیره می‌کند و بلافاصله بر `/v1/*`، `/v1beta/*`، `/models`، `/responses`، `/chat/completions`، `/codex/*` و سایر بررسی‌های احراز هویت API کلاینت که از این تابع کمکی استفاده می‌کنند اثر می‌گذارد. اگر فروشگاه پرچم‌های ویژگی خوانده نشود، احراز هویت API کلاینت بسته می‌ماند و کلید لازم است.
+اجرای کلید API کلاینت `isRequireApiKeyEnabled()` در `src/shared/utils/featureFlags.ts` استفاده می کند، نه از خواندن مستقیم `process.env.REQUIRE_API_KEY`. این برای نمونههای مستقر شده مهم است: جابهجایی `REQUIRE_API_KEY` در داشبورد → Feature Flags یک لغو DB ذخیره میکند و بلافاصله `/v1/*`، `/v1beta/*`، `/models`، `/responses`، `/chat/completions`، `/codex/*` و سایر بررسیهای تأیید اعتبار کلاینت-API که این کمککننده را به اشتراک میگذارند، تحت تأثیر قرار میدهد. اگر فروشگاه پرچم ویژگی قابل خواندن نباشد، کلاینت API auth بسته نمی شود و به یک کلید نیاز دارد.
 
 ## تغییر ناسازگار — v3.8.0
 
