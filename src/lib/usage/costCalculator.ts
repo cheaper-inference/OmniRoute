@@ -107,15 +107,11 @@ function extractExactCostUsd(tokens: CostTokenUsage | null | undefined): number 
 /** Only rerank usage, not a configurable Cortecs chat/embedding alias, forbids token pricing. */
 function isCortecsRerankUsage(
   provider: string | null | undefined,
-  tokens: CostTokenUsage,
   endpoint?: string | null
 ): boolean {
-  const credits = tokens.provider_credits;
   return (
     provider?.trim().toLowerCase() === "cortecs" &&
-    (endpoint === "/v1/rerank" ||
-      endpoint === "/rerank" ||
-      (typeof credits === "number" && Number.isFinite(credits) && credits >= 0))
+    (endpoint === "/v1/rerank" || endpoint === "/rerank")
   );
 }
 
@@ -272,7 +268,7 @@ export function computeCostFromPricing(
   // never a cost basis: pricing them would bill the request a second time.
   if (
     isCreditMeteredProvider(options.provider) ||
-    isCortecsRerankUsage(options.provider, tokens, options.endpoint)
+    isCortecsRerankUsage(options.provider, options.endpoint)
   )
     return 0;
   const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
@@ -369,10 +365,9 @@ export async function calculateCostDetailed(
   // cost is present (xAI ticks or OpenRouter's USD cost — see extractExactCostUsd).
   const exactCostUsd = extractExactCostUsd(tokens);
   if (exactCostUsd !== null) return { costUsd: exactCostUsd, priced: true };
-  // Native Cortecs credits need an explicit USD valuation. A token catalogue
-  // entry must not turn an unknown conversion into a free or guessed USD bill.
-  if (isCortecsRerankUsage(provider, tokens, options.endpoint))
-    return { costUsd: 0, priced: false };
+  // Cortecs rerank is billed only by the USD amount it reports (handled above).
+  // A token catalogue entry must not turn a missing amount into a free or guessed bill.
+  if (isCortecsRerankUsage(provider, options.endpoint)) return { costUsd: 0, priced: false };
 
   try {
     const pricing = await resolvePricingRow(provider, model);

@@ -797,9 +797,8 @@ POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 > **Cortecs cost units:** dynamic rerank requests to the official HTTPS Cortecs rerank
 > endpoint include `x-cortecs-cost-unit: USD`. The returned `usage.cost` is recorded
 > directly as USD for usage history, caller budgets and response-cost metadata; it is
-> not multiplied by `CORTECS_CREDIT_PRICE_USD` or repriced by token tariffs. Missing
-> or invalid costs stay unknown, not free. Legacy credit-unit normalization remains
-> available with an explicit conversion rate. Other providers receive no Cortecs header.
+> never converted or repriced by token tariffs. Missing or invalid costs stay unknown,
+> not free. Other providers receive no Cortecs header.
 > See [Cortecs' cost-unit documentation](https://docs.cortecs.ai/integration-examples/tooling/litellm.md).
 
 > **Local server shapes:** the node is called at `<base>/v1/rerank` and, on 404, at `<base>/rerank`

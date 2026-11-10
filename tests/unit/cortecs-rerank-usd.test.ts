@@ -10,7 +10,7 @@ const metered = { prompt_tokens: 34, completion_tokens: 0, total_tokens: 34 };
 
 test("requested USD is persisted verbatim, never credit-converted or fabricated as credits", () => {
   for (const cost of [0, 0.000004466, 1, 17]) {
-    const bill = normalizeCortecsRerankUsage({ ...metered, cost }, "1000", "USD");
+    const bill = normalizeCortecsRerankUsage({ ...metered, cost });
     assert.deepEqual(bill, { costUsd: cost, usage: { ...metered, cost_usd: cost } });
     assert.deepEqual(readReportedCost("cortecs", bill.usage), {
       providerCredits: null,
@@ -22,27 +22,17 @@ test("requested USD is persisted verbatim, never credit-converted or fabricated 
 test("USD selection comes from the outgoing request contract, not a response field", () => {
   const source = { ...metered, cost: 0.000004466, cost_usd: 999, provider_credits: 999 };
   const original = structuredClone(source);
-  assert.equal(normalizeCortecsRerankUsage(source, "1000", "USD").costUsd, source.cost);
+  assert.equal(normalizeCortecsRerankUsage(source).costUsd, source.cost);
   assert.deepEqual(source, original);
-  assert.equal(normalizeCortecsRerankUsage(source, "1000").costUsd, null);
+  assert.equal(normalizeCortecsRerankUsage(source).usage.provider_credits, undefined);
 });
 
 for (const cost of [undefined, null, "0.000004466", -1, NaN, Infinity, -Infinity]) {
-  test(`invalid USD remains unknown even with an available legacy rate: ${String(cost)}`, () => {
-    const bill = normalizeCortecsRerankUsage({ ...metered, cost, cost_usd: 10 }, "1000", "USD");
+  test(`invalid USD remains unknown, never read from a USD-looking field: ${String(cost)}`, () => {
+    const bill = normalizeCortecsRerankUsage({ ...metered, cost, cost_usd: 10 });
     assert.deepEqual(bill, { usage: metered, costUsd: null });
   });
 }
-
-test("legacy credit callers retain explicit conversion without changing USD requests", () => {
-  const legacy = normalizeCortecsRerankUsage({ ...metered, cost: 4 }, "0.0000011165");
-  assert.equal(legacy.usage.provider_credits, 4);
-  assert.equal(legacy.costUsd, 0.000004466);
-  assert.equal(
-    normalizeCortecsRerankUsage({ cost: 0.000004466 }, undefined, "USD").costUsd,
-    legacy.costUsd
-  );
-});
 
 test("one USD request produces one attributed usage entry and one unchanged debit", async () => {
   let writes = 0;
@@ -52,7 +42,6 @@ test("one USD request produces one attributed usage entry and one unchanged debi
     {
       upstreamUrl: "https://api.cortecs.ai/v1/rerank",
       usage: { ...metered, cost },
-      costUnit: "USD",
       model: "synthetic-reranker",
       connectionId: "synthetic-connection",
       apiKeyId: "synthetic-caller",

@@ -2,7 +2,13 @@ import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { saveRequestUsage } from "./usageHistory";
 
 type Usage = Record<string, number>;
-export type CortecsRerankCostUnit = "credits" | "USD";
+/**
+ * Sent on every request to the Cortecs rerank endpoint so `usage.cost` comes
+ * back in USD: Cortecs converts, OmniRoute never applies a credit rate.
+ */
+export const CORTECS_USD_COST_HEADERS: Readonly<Record<string, string>> = {
+  "x-cortecs-cost-unit": "USD",
+};
 /** Numerical provenance and the optional request-time USD valuation. */
 export interface CortecsRerankBill {
   usage: Usage;
@@ -24,7 +30,7 @@ export function isCortecsRerankUrl(value: string): boolean {
   }
 }
 
-/** Credit and token quantities use the upstream's nonnegative-integer contract. */
+/** Token quantities use the upstream's nonnegative-integer contract. */
 const isCount = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 
@@ -42,38 +48,17 @@ function readUsdCost(cost: unknown): number | null {
   return typeof cost === "number" && Number.isFinite(cost) && cost >= 0 ? cost : null;
 }
 
-/** Credits become USD only with an explicit positive operator rate; zero stays zero. */
-function convertCreditsToUsd(credits: number | null, creditPriceUsd?: string): number | null {
-  if (credits === 0) return 0;
-  if (credits === null) return null;
-  const rate = creditPriceUsd?.trim() ? Number(creditPriceUsd) : Number.NaN;
-  if (!Number.isFinite(rate) || rate <= 0) return null;
-  const converted = credits * rate;
-  return Number.isFinite(converted) && converted >= 0 ? converted : null;
-}
-
 /**
- * Default responses use credits; requests with x-cortecs-cost-unit: USD
- * receive USD instead. The trusted outbound request selects the unit, never
- * a guessed magnitude or a raw USD-looking field. Only the legacy credit
- * path uses an optional operator-supplied rate; USD must not be converted twice.
+ * Every accounted request carries {@link CORTECS_USD_COST_HEADERS}, so
+ * `usage.cost` is a USD amount and is recorded verbatim. The trusted outbound
+ * request selects the unit, never a guessed magnitude or a raw USD-looking
+ * field; a missing or invalid amount stays unknown.
  */
-export function normalizeCortecsRerankUsage(
-  raw: unknown,
-  creditPriceUsd = process.env.CORTECS_CREDIT_PRICE_USD,
-  costUnit: CortecsRerankCostUnit = "credits"
-): CortecsRerankBill {
+export function normalizeCortecsRerankUsage(raw: unknown): CortecsRerankBill {
   const source =
     raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
   const usage = readTokenCounts(source);
-  let costUsd: number | null;
-  if (costUnit === "USD") {
-    costUsd = readUsdCost(source.cost);
-  } else {
-    const credits = isCount(source.cost) ? source.cost : null;
-    if (credits !== null) usage.provider_credits = credits;
-    costUsd = convertCreditsToUsd(credits, creditPriceUsd);
-  }
+  const costUsd = readUsdCost(source.cost);
   if (costUsd !== null) usage.cost_usd = costUsd;
   return { usage, costUsd };
 }
@@ -87,7 +72,6 @@ export async function accountCortecsRerankRequest(
   input: {
     upstreamUrl: string;
     usage: unknown;
-    costUnit?: CortecsRerankCostUnit;
     model: string;
     connectionId?: string | null;
     apiKeyId?: string | null;
@@ -102,7 +86,7 @@ export async function accountCortecsRerankRequest(
   } = {}
 ): Promise<CortecsRerankBill | null> {
   if (!isCortecsRerankUrl(input.upstreamUrl)) return null;
-  const bill = normalizeCortecsRerankUsage(input.usage, undefined, input.costUnit);
+  const bill = normalizeCortecsRerankUsage(input.usage);
   const identity = {
     provider: "cortecs",
     model: input.model,

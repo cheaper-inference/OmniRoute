@@ -53,8 +53,7 @@ const isNonNegativeNumber = (value: unknown): value is number =>
  * priced from its tokens. The precedence mirrors `extractExactCostUsd` in
  * {@link module:lib/usage/costCalculator}: `cost_in_usd_ticks` (xAI, credit-metered
  * providers) first, then the normalized `cost_usd` (OpenRouter's `usage.cost`).
- * Credits are provenance, kept for credit-metered providers and explicitly
- * normalized Cortecs credit usage; the latter does not classify every alias call.
+ * Credits are provenance, kept only for credit-metered providers.
  */
 export function readReportedCost(
   providerId: string | null | undefined,
@@ -73,10 +72,7 @@ export function readReportedCost(
   else if (isNonNegativeNumber(costUsd)) providerCostUsd = costUsd;
   return {
     providerCredits:
-      (isCreditMeteredProvider(providerId) || providerId?.trim().toLowerCase() === "cortecs") &&
-      isNonNegativeNumber(credits)
-        ? credits
-        : null,
+      isCreditMeteredProvider(providerId) && isNonNegativeNumber(credits) ? credits : null,
     providerCostUsd,
   };
 }

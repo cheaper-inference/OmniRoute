@@ -136,18 +136,13 @@ token-tariff estimate or second conversion. Fractional and whole-dollar USD
 amounts are both accepted, including explicit zero. USD amounts are not stored
 as native credits or used to invent a credit quantity.
 
-`CORTECS_CREDIT_PRICE_USD` remains supported only by legacy callers of the
-credit-unit normalizer. It is ignored for requests explicitly made in USD.
-Legacy conversion has no default; only genuine reported credit quantities are
-stored in `usage_history.provider_credits`. The numerical USD cost is
-snapshotted in `provider_cost_usd` for reporting and key budgets. Later rate or
-token-catalogue edits do not reprice already-valued requests.
+The numerical USD cost is snapshotted in `provider_cost_usd` for reporting and
+key budgets. Later token-catalogue edits do not reprice already-valued requests.
 
-Missing or invalid reported USD costs remain **unknown**, never guessed from a
-legacy rate. Positive legacy credits without a valid conversion also stay unknown:
-the response omits its numeric cost header, sets
-`X-OmniRoute-Cost-Status: unknown`, and existing unpriced-budget safeguards
-apply to limited keys. Explicit zero credits remain known zero cost.
+Missing or invalid reported USD costs remain **unknown**, never guessed: the
+response omits its numeric cost header, sets `X-OmniRoute-Cost-Status: unknown`,
+and existing unpriced-budget safeguards apply to limited keys. An explicit zero
+remains a known zero cost.
 Unknown credit spending is not estimated from token tariffs.
 
 The usage vendor is canonical `cortecs`, independent of the node alias.

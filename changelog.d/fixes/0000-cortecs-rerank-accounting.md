@@ -1,1 +1,0 @@
-- **fix(usage):** Record Cortecs dynamic rerank tokens and native credits in usage history; value credits in USD only with an explicit `CORTECS_CREDIT_PRICE_USD` rate, charge the matching caller budget once, and retain unknown-versus-zero costs without changing other rerank providers.

@@ -33,6 +33,7 @@ import { generateRequestId } from "@/shared/utils/requestId";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import {
   accountCortecsRerankRequest,
+  CORTECS_USD_COST_HEADERS,
   isCortecsRerankUrl,
 } from "@/lib/usage/cortecsRerankAccounting";
 import { CORS_HEADERS } from "@omniroute/open-sse/utils/cors.ts";
@@ -323,13 +324,13 @@ export async function handleValidatedRerankRequestBody(
           return_documents: body.return_documents as boolean | undefined,
         })
       );
-      const cortecsCostUnit = isCortecsRerankUrl(localProvider.baseUrl) ? "USD" : undefined;
+      const isCortecsRerank = isCortecsRerankUrl(localProvider.baseUrl);
       const upstreamInit: RequestInit = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-          ...(cortecsCostUnit ? { "x-cortecs-cost-unit": cortecsCostUnit } : {}),
+          ...(isCortecsRerank ? CORTECS_USD_COST_HEADERS : {}),
         },
         body: upstreamBody,
       };
@@ -391,7 +392,6 @@ export async function handleValidatedRerankRequestBody(
         const bill = await accountCortecsRerankRequest({
           upstreamUrl: localProvider.baseUrl,
           usage: data?.usage,
-          costUnit: cortecsCostUnit,
           model: localModel,
           connectionId: (credentials as { connectionId?: string } | null)?.connectionId || null,
           apiKeyId: meta.apiKeyId,

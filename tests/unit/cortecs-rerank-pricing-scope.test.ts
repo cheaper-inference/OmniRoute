@@ -44,13 +44,15 @@ test("explicit rerank usage remains unpriced even when a token tariff exists", a
       { costUsd: 0, priced: false }
     );
   }
-  const legacy = { ...tokens, provider_credits: 4 };
-  assert.deepEqual(await calculateCostDetailed("cortecs", "synthetic-model", legacy), {
-    costUsd: 0,
-    priced: false,
+  // Only the endpoint marks rerank usage: a stray credit field neither keeps a
+  // credit quantity nor turns a Cortecs chat/embedding row into rerank usage.
+  const strayCredits = { ...tokens, provider_credits: 4 };
+  assert.deepEqual(await calculateCostDetailed("cortecs", "synthetic-model", strayCredits), {
+    costUsd: 0.004,
+    priced: true,
   });
-  assert.deepEqual(readReportedCost("cortecs", legacy), {
-    providerCredits: 4,
+  assert.deepEqual(readReportedCost("cortecs", strayCredits), {
+    providerCredits: null,
     providerCostUsd: null,
   });
 });

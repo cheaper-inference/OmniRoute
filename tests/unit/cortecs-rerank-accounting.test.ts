@@ -32,7 +32,6 @@ test.beforeEach(async () => {
   core.resetDbInstance();
   fs.rmSync(fixture, { recursive: true, force: true });
   fs.mkdirSync(fixture, { recursive: true });
-  delete process.env.CORTECS_CREDIT_PRICE_USD;
 });
 test.after(async () => {
   globalThis.fetch = originalFetch;
@@ -100,7 +99,6 @@ function mockUpstream(
 }
 
 test("the serialized Cortecs HTTP request asks for USD and records the returned fraction once", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "1000";
   const { key } = await seed();
   const cost = 0.000004466;
   let calls = 0;
@@ -135,8 +133,7 @@ test("the serialized Cortecs HTTP request asks for USD and records the returned 
   assert.equal(calls, 1);
 });
 
-test("reported Cortecs USD becomes one charge despite an obsolete credit conversion", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
+test("reported Cortecs USD becomes one charge", async () => {
   const { key, connection } = await seed();
   const calls = mockUpstream();
   const result = await POST(request(key.key), {});
@@ -204,7 +201,6 @@ test("the existing /rerank fallback retains the USD header and charges its succe
 
 test("a whole-dollar USD cost is not mistaken for integer credits", async () => {
   const { key } = await seed(100);
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.000001";
   mockUpstream({ ...responseBody, usage: { ...responseBody.usage, cost: 17 } });
   const response = await POST(request(key.key), {});
   assert.equal(response.status, 200);
@@ -273,7 +269,6 @@ test("missing rerank USD cannot be repriced from a configured token tariff in du
 });
 
 test("a completed paid rerank counts against the next request's budget", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed(0.2);
   const calls = mockUpstream();
   assert.equal((await POST(request(key.key), {})).status, 200);
@@ -282,7 +277,6 @@ test("a completed paid rerank counts against the next request's budget", async (
 });
 
 test("Cortecs-shaped usage on a different host does not change other dynamic providers", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed(10, "https://rerank.example.com/v1", "cortecs");
   mockUpstream(responseBody, 200, "https://rerank.example.com/v1/rerank");
   const result = await POST(request(key.key, "cortecs/bge-reranker-v2-m3"), {});
@@ -295,7 +289,6 @@ test("Cortecs-shaped usage on a different host does not change other dynamic pro
 });
 
 test("a failed upstream rerank does not create successful billing", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed();
   mockUpstream({ error: "synthetic failure" }, 503);
   assert.equal((await POST(request(key.key), {})).status, 503);
@@ -325,7 +318,6 @@ test("zero USD is genuinely zero without a conversion setting or invented credit
 });
 
 test("same-millisecond physical calls remain separate and their stored charges are not repriced", async (t) => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed();
   const calls = mockUpstream();
   t.mock.timers.enable({ apis: ["Date"], now: new Date("2030-01-01T00:00:00Z") });
@@ -334,7 +326,6 @@ test("same-millisecond physical calls remain separate and their stored charges a
     results.map((r) => r.status),
     [200, 200]
   );
-  process.env.CORTECS_CREDIT_PRICE_USD = "1000";
   const { updatePricing } = await import("../../src/lib/db/settings/pricing.ts");
   await updatePricing({ cortecs: { "bge-reranker-v2-m3": { input: 999, output: 999 } } });
   const db = core.getDbInstance();
@@ -373,7 +364,6 @@ test("same-millisecond physical calls remain separate and their stored charges a
 });
 
 test("no-log callers retain numerical metering without document payloads", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed();
   await keys.updateApiKeyPermissions(key.id, { noLog: true });
   keys.clearApiKeyCaches();
@@ -397,7 +387,6 @@ test("no-log callers retain numerical metering without document payloads", async
 });
 
 test("usage-table failure never turns a paid success into a retry", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed();
   core
     .getDbInstance()
@@ -411,7 +400,6 @@ test("usage-table failure never turns a paid success into a retry", async () => 
 });
 
 test("a combo charges only its successful physical Cortecs target", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed();
   await providers.createProviderNode({
     id: "openai-compatible-rerank-primary",
@@ -466,7 +454,6 @@ test("a combo charges only its successful physical Cortecs target", async () => 
 });
 
 test("reported USD spend stays isolated to the caller key", async () => {
-  process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed();
   const other = await keys.createApiKey("Other synthetic caller", "other-machine");
   costs.setBudget(other.id, { dailyLimitUsd: 10, resetInterval: "daily" });

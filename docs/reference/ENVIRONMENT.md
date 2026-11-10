@@ -797,7 +797,6 @@ process.env[`${PROVIDER_ID}_USER_AGENT`]
 | `KIRO_OAUTH_CLIENT_ID` | `kiro-cli` | Override the Kiro social device-code `clientId` (public id) |
 | `KIRO_VERIFY_FULL_CRC` | `false` | Opt-in: full per-frame message CRC validation on the Kiro event stream (debug corrupted streams) |
 | `KIRO_CREDIT_PRICE_USD` | `0.02` | USD per Kiro credit; converts `meteringEvent` credits into the exact per-request cost |
-| `CORTECS_CREDIT_PRICE_USD` | _(unset)_ | Legacy-only positive USD value per raw Cortecs credit. Dynamic Cortecs reranking requests USD directly and ignores this rate. Legacy callers with missing/invalid rates retain credits and tokens but leave positive-credit USD cost unknown; zero credits remain zero. |
 | `KIRO_REQUIRE_CREDITS` | `false` | Fail a Kiro response that reports no credit metering instead of recording it unbilled |
 | `QODER_USER_AGENT` | `Qoder-Cli` | When Qoder CLI updates |
 | `CURSOR_USER_AGENT` | `Cursor/3.3` | When Cursor updates |
