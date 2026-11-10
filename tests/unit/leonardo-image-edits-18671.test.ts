@@ -19,6 +19,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "leonardo-edits-test-
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
+const combosDb = await import("../../src/lib/db/combos.ts");
 const imageEditRoute = await import("../../src/app/api/v1/images/edits/route.ts");
 const { handleLeonardoImageGeneration } =
   await import("../../open-sse/handlers/imageGeneration/providers/leonardo.ts");
@@ -212,7 +213,6 @@ test("POST /v1/images/edits routes a leonardo model to the Leonardo edit instead
 
 // A combo target takes one reference too: the single-model route answers 400 for two, and a
 // combo must not upload only the first and silently drop the rest.
-const combosDb = await import("../../src/lib/db/combos.ts");
 
 function comboEdit(model: string) {
   return imageEditRoute.POST(
