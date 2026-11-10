@@ -19,8 +19,9 @@ omniroute --mcp
 અથવા ઓપન-એસએસઇ પરિવહન દ્વારા:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 HTTP ટ્રાન્સપોર્ટ્સ (`sse` / `streamable-http`, ડેશબોર્ડ સર્વર દ્વારા પ્રક્રિયામાં સેવા આપવામાં આવે છે) મૂળભૂત રીતે બંધ છે અને અગાઉ ફક્ત `/dashboard/mcp` પૃષ્ઠથી ટૉગલ કરી શકાય તેવું હતું. v3.8.51 મુજબ CLI ની સમાનતા છે:
@@ -32,7 +33,7 @@ omniroute mcp disable
 omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` PATCH સમાન `mcpEnabled` (અને વૈકલ્પિક રીતે `mcpTransport`) ડેશબોર્ડને `/api/settings` દ્વારા ટૉગલ કરવાનું સેટ કરે છે. `mcp restart` `POST /api/mcp/restart` ને કૉલ કરે છે : તે સક્રિય `sse`/`streamable-http` સત્રોને તોડી નાખે છે જેથી આગળની વિનંતી સ્વચ્છ રીતે ફરી શરૂ થાય, જો MCP અક્ષમ હોય તો `409` પરત કરે છે, અને `stdio` પરિવહન માટે `501` (stdio ક્લાયન્ટ્સ તેમની પોતાની સબપ્રોસેસ — ધરાવે છે પુનઃપ્રારંભ કરવા માટે કોઈ ઇન-પ્રોસેસ હેન્ડલ નથી).
+`mcp enable`/`mcp disable` PATCH સમાન `mcpEnabled` (અને વૈકલ્પિક રીતે `mcpTransport`) ડેશબોર્ડને `/api/settings` દ્વારા ટૉગલ કરવાનું સેટ કરે છે. `mcp restart` `POST /api/mcp/restart` ને કૉલ કરે છે : તે સક્રિય `sse`/`streamable-http` સત્રોને ફાડી નાખે છે જેથી આગળની વિનંતી સ્વચ્છ રીતે ફરી શરૂ થાય, MCP અક્ષમ હોય તો `409` પરત કરે છે, અને `stdio` પરિવહન માટે `501` (stdio ક્લાયન્ટ્સ તેમની પોતાની સબપ્રોસેસ — ધરાવે છે પુનઃપ્રારંભ કરવા માટે કોઈ ઇન-પ્રોસેસ હેન્ડલ નથી).
 
 ## પરિવહન
 
@@ -142,7 +143,7 @@ Claude ડેસ્કટોપ, Cursor, Cline, અને સુસંગત MCP
 | `omniroute_rtk_discover`            | `read:compression`  | ઑપ્ટ-ઇન RTK આઉટપુટ નમૂનાઓમાં રિકરિંગ અવાજ શોધો                                                                             |
 | `omniroute_rtk_learn`               | `read:compression`  | ઑપ્ટ-ઇન નમૂનાઓમાંથી સમીક્ષા કરવા યોગ્ય RTK ફિલ્ટર ડ્રાફ્ટ બનાવો                                                            |
 
-CCR એન્ટ્રીઓ ફક્ત મેમરીમાં હોય છે અને પુનઃપ્રારંભ પર અદૃશ્ય થઈ જાય છે. દરેક બ્લોક 2 MiB સુધી મર્યાદિત છે, દરેક મુખ્ય 16 MiB સુધી અને વૈશ્વિક સ્ટોર 64 MiB સુધી મર્યાદિત છે. એન્ટ્રી ડિફોલ્ટ 24-કલાક TTL (મહત્તમ સાત દિવસ) પર હોય છે. સંપૂર્ણ MCP પુનઃપ્રાપ્તિ 256 KiB સુધી મર્યાદિત છે; રેન્જ્ડ અને grep મોડ દ્વારા મોટા બ્લોક્સ ઉપલબ્ધ રહે છે. સ્ટોરેજ, પુનઃપ્રાપ્તિ, સૂચિ, નિરીક્ષણ, કાઢી નાખવું અને આંકડા પ્રમાણિત API-કી પ્રિન્સિપલ દ્વારા અલગ કરવામાં આવે છે. ઓડિટ રેકોર્ડ્સમાં હેશ અને કદના મેટાડેટા હોય છે, ક્યારેય સામગ્રી હોતી નથી.
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB and cloud runtimes, which stay memory-only. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression` હેઠળ MCP વર્ણન કમ્પ્રેશનને અલગથી રિપોર્ટ કરે છે. તે મૂલ્યો MCP સૂચિબદ્ધ વર્ણનો માટે મેટાડેટા-કદના અંદાજો છે (`tools`, `prompts`, `resources`, અને `resourceTemplates`); તે પ્રદાતા વપરાશ રસીદો નથી અને `source: "mcp_metadata_estimate"` સાથે ચિહ્નિત થયેલ છે.
 
