@@ -87,3 +87,33 @@ test("classify429: plain rate-limit and budget-token wording stay rate_limit", (
   );
   assert.equal(looksLikeQuotaExhausted("Rate limit exceeded"), false);
 });
+
+// Decision order step 3: a sub-hour retry window beats quota keywords (#9504). A spent budget
+// whose body also declares a short retry delay therefore stays a rate limit; one without a hint
+// is quota exhaustion (test above). A retry delay of an hour or more does not override it.
+test("classify429: a spent budget with a short retry hint is a rate limit, with a long one it is quota", () => {
+  assert.equal(
+    classify429({
+      status: 429,
+      body: {
+        error: {
+          message: `${LITELLM_SPENT_KEY}. Please retry in 30s`,
+          details: [{ "@type": "type.googleapis.com/google.rpc.RetryInfo", retryDelay: "30s" }],
+        },
+      },
+    }),
+    "rate_limit"
+  );
+  assert.equal(
+    classify429({
+      status: 429,
+      body: {
+        error: {
+          message: LITELLM_SPENT_KEY,
+          details: [{ "@type": "type.googleapis.com/google.rpc.RetryInfo", retryDelay: "86400s" }],
+        },
+      },
+    }),
+    "quota_exhausted"
+  );
+});
