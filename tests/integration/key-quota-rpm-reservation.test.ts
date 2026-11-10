@@ -267,3 +267,23 @@ test("E8: a throw inside the policy after the quota gate gives the slot back", a
   assert.equal(quota.countKeyQuotaReservations(key.id), 0, "the slot must not stay held");
   assert.equal(quota.checkKeyQuota(key.id, { reserve: false }).allowed, true);
 });
+
+test("E9: a combo that fails over from a 500 counts the client call once and leaves no slot", async () => {
+  await seedConnection("claude", { apiKey: "sk-test-" + "y".repeat(12) });
+  await h.combosDb.createCombo({
+    name: "quota-failover",
+    strategy: "priority",
+    config: { maxRetries: 0, retryDelayMs: 0, fallbackDelayMs: 0 },
+    models: [MODEL, "claude/claude-sonnet-4-6"],
+  });
+  const key = await keyWithRpm(2);
+  h.installRecordingFetch((call) => (call.provider === "openai" ? h.failure(500) : undefined));
+  const response = await handleChat(
+    buildRequest({ body: { ...body(), model: "quota-failover" }, authKey: key.key })
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+  assert.deepEqual(h.providersSeen().slice(0, 2), ["openai", "claude"], "it failed over");
+  await h.waitFor(() => keyQuotaDb.getKeyQuotaCounters(key.id).rpmUsed >= 1);
+  assert.equal(quota.countKeyQuotaReservations(key.id), 0);
+  assert.equal(keyQuotaDb.getKeyQuotaCounters(key.id).rpmUsed, 1, "one client call, one count");
+});
