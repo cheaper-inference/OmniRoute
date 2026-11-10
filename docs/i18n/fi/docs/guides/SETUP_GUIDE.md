@@ -198,41 +198,41 @@ Yksityiskohtaiset työkalukohtaiset määritysohjeet (Claude Code, Codex CLI, Cu
 
 ---
 
-## Protokollien määritys (MCP + A2A)
+## Protokollan asetukset (MCP + A2A)
 
-### MCP:n määritys (Model Context Protocol)
+### MCP Setup (mallikontekstiprotokolla)
 
-Käynnistä MCP-siirto stdio-tilassa:
+Aloita MCP -siirto stdio-tilassa:
 
 ```bash
 omniroute --mcp
 ```
 
-Suositeltu validointiprosessi:
+Suositeltu vahvistuskulku:
 
 ```bash
-# 1. Käynnistä MCP-palvelin
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Kutsu MCP-asiakkaastasi:
-omniroute_get_health        # Pitäisi palauttaa järjestelmän tila
-omniroute_list_combos       # Pitäisi palauttaa aktiiviset yhdistelmät
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Tai suorita koko päästä päähän -testisarja:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP-asiakkaan määritys
+#### MCP -asiakasmääritykset
 
-**Claude Code:**
+**Claude koodi:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Lisää MCP-asetuksiisi:
+Lisää MCP asetuksiin (stdio, avaimella, jotta soittajalla on päämies):
 
 ```json
 {
@@ -240,17 +240,24 @@ Lisää MCP-asetuksiisi:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Täydellinen MCP-dokumentaatio:** [MCP-palvelimen README](../../open-sse/mcp-server/README.md) — 110 työkalua, IDE-määritykset sekä Python/TS/Go-asiakkaat.
+Tai kun `mcpTransport` on `streamable-http` (aseta se kohtaan `/dashboard/mcp` tai `omniroute mcp enable --transport streamable-http`), osoita asiakkaan MCP etäpalvelimen merkintä kohtaan `http://localhost:20128/api/mcp/stream`.
 
-### A2A:n määritys (Agent-to-Agent Protocol)
+Avain kulkee `Authorization: Bearer <api-key>` (katso [MCP -palvelin → Etäkäyttö](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) etäisännille; etäavain tarvitsee `mcp:connect` ja sen read/write kiinnittimet).
 
-Tarkista Agent Card:
+**Täydellinen MCP -dokumentaatio:** [MCP palvelin README](../../open-sse/mcp-server/README.md) — 110 työkalut, IDE -asetukset, Python/TS/Go asiakkaat. Käyttäjäviite CCR/dedup pakkaustyökaluille (merkit, esitiedot, työkalukohtaiset laajuudet, hakusivut, diagnostiikka): [Compression Engines → Edellytykset / käyttäjän opas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A asetukset (agenttien välinen protokolla)
+
+Vahvista agenttikortti:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -261,10 +268,10 @@ Lähetä tehtävä:
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Anna minulle lyhyt yhteenveto kiintiöstä."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Täydellinen A2A-dokumentaatio:** [A2A-palvelimen README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, taidot, suoratoisto ja tehtävän elinkaari.
+**Täydellinen A2A -dokumentaatio:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, taidot, suoratoisto, tehtävien elinkaari.
 
 ---
 
@@ -323,23 +330,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linuxin (xbps-src) mallipohja
+## Tyhjä Linux (xbps-src) -malli
 
-Void Linuxin käyttäjät voivat rakentaa natiivin paketin `xbps-src`-työkalulla. Tallenna tämä lohko tiedostoksi `srcpkgs/omniroute/template`:
+Void Linux -käyttäjille voit rakentaa alkuperäisen paketin käyttämällä `xbps-src`. Tallenna tämä lohko nimellä `srcpkgs/omniroute/template`:
 
 ```bash
-# Mallipohjatiedosto paketille 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Yleiskäyttöinen tekoäly-yhdyskäytävä älykkäällä reitityksellä useille LLM-palveluntarjoajille"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Luo tarkistussumma uudelleen jokaista julkaisua varten komennolla:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"
