@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -362,4 +362,36 @@ test("cleanupExpiredLogs keeps the usage rows when the rollup fails", async () =
   const remaining = (db.prepare("SELECT COUNT(*) AS n FROM usage_history").get() as { n: number })
     .n;
   assert.equal(remaining, 1, "the uncounted row is still on disk");
+});
+
+// daily_usage_summary replaces a day's totals on every rollup, so the boot pass must
+// never roll up and delete only part of a day: the next periodic rollup would rebuild
+// that day from the rows left and drop the ones the boot pass removed.
+test("cleanupExpiredLogs never splits a day between the boot pass and the next rollup", async () => {
+  const { rollupUsageHistoryBeforeDate } = await import("../../src/lib/usage/aggregateHistory.ts");
+  const db = core.getDbInstance();
+  db.exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary");
+  // CALL_LOG_RETENTION_DAYS=5, so the usage cutoff is 2026-11-05T03:18:00Z.
+  mock.timers.enable({ apis: ["Date"], now: Date.parse("2026-11-10T03:18:00.000Z") });
+  try {
+    const insert = db.prepare(
+      "INSERT INTO usage_history (provider, model, tokens_input, tokens_output, timestamp) VALUES (?, ?, ?, ?, ?)"
+    );
+    insert.run("openai", "gpt-4o", 100, 50, "2026-11-05T03:17:00.000Z");
+    insert.run("openai", "gpt-4o", 100, 50, "2026-11-05T03:19:00.000Z");
+
+    await compliance.cleanupExpiredLogs();
+    // The periodic retention job rolls up every whole day before its own cutoff.
+    const later = await rollupUsageHistoryBeforeDate("2026-11-06");
+    assert.equal(later.errors, 0);
+  } finally {
+    mock.timers.reset();
+  }
+
+  const summary = db
+    .prepare(
+      "SELECT COALESCE(SUM(total_requests), 0) AS n FROM daily_usage_summary WHERE date = '2026-11-05'"
+    )
+    .get() as { n: number };
+  assert.equal(summary.n, 2, "both requests of the split day stay in the summary");
 });
