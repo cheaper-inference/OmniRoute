@@ -228,9 +228,10 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
   // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
   // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 441 -> 443).
+  // Sign in with ChatGPT (#15201) registers id "chatgpt" with the same alias (+1: 443 -> 444).
   // opencode-server (#16995) registers id "opencode-server" plus the distinct alias "ocs" —
-  // two more (443 -> 445). Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 445.
-  assert.equal(RESERVED_PREFIX_COUNT, 445);
+  // two more (444 -> 446). Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 446.
+  assert.equal(RESERVED_PREFIX_COUNT, 446);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
@@ -242,6 +243,7 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("empiriolabs"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("megabrain"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("mb"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("chatgpt"), true);
 });
 
 test("notrack-web registry id and alias stay reserved", () => {

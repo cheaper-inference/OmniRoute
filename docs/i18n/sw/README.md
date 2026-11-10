@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Endpoint moja na watoa huduma 387. Fallback ya kiotomatiki huendeleza uelekezaji mradi walengwa wengine wenye afya wanapatikana. Nguzo sita: fallback thabiti kati ya watoa huduma 388 · hadi 95% ya uokoaji wa tokeni kwenye mizigo ya kazi inayostahiki · $0 kuanza, ikiwa na viwango 150+ vya bure na watoa huduma 52 wa bure milele wenye kujirudia/wasiohitaji ufunguo · miunganisho 39 ya CLI/agent kupitia usanidi mmoja · uoanifu na OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji vinavyojumuisha circuit breakers, TLS stealth, zana 110 za MCP, A2A, memory, guardrails, evals na matamko ya majaribio tuli 56,000+ katika faili za majaribio 7,800+ zinazofuatiliwa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Endpoint moja na watoa huduma 388. Fallback ya kiotomatiki huendeleza uelekezaji mradi walengwa wengine wenye afya wanapatikana. Nguzo sita: fallback thabiti kati ya watoa huduma 388 · hadi 95% ya uokoaji wa tokeni kwenye mizigo ya kazi inayostahiki · $0 kuanza, ikiwa na viwango 150+ vya bure na watoa huduma 52 wa bure milele wenye kujirudia/wasiohitaji ufunguo · miunganisho 39 ya CLI/agent kupitia usanidi mmoja · uoanifu na OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji vinavyojumuisha circuit breakers, TLS stealth, zana 110 za MCP, A2A, memory, guardrails, evals na matamko ya majaribio tuli 56,000+ katika faili za majaribio 7,800+ zinazofuatiliwa."/>
 
 <br/>
 <br/>

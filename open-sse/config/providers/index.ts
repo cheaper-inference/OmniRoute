@@ -217,6 +217,7 @@ import { baiduProvider } from "./registry/baidu/index.ts";
 import { pollinationsProvider } from "./registry/pollinations/index.ts";
 import { veoaifree_webProvider } from "./registry/veoaifree-web/index.ts";
 import { codexProvider } from "./registry/codex/index.ts";
+import { chatgptProvider } from "./registry/chatgpt/index.ts";
 import { codexAppServerProvider } from "./registry/codex-app-server/index.ts";
 import { maxaiProvider } from "./registry/maxai/index.ts";
 import { ucProvider } from "./registry/uc/index.ts";
@@ -516,6 +517,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   pollinations: pollinationsProvider,
   "veoaifree-web": veoaifree_webProvider,
   codex: codexProvider,
+  chatgpt: chatgptProvider,
   "codex-app-server": codexAppServerProvider,
   maxai: maxaiProvider,
   uc: ucProvider,
