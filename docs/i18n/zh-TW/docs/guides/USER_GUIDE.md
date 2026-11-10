@@ -341,65 +341,65 @@ API 金鑰：[來自儀表板]
 
 ---
 
-## 🚀 部署
+## 🚀部署
 
 ### 全域 npm 安裝（建議）
 
 ```bash
 npm install -g omniroute
 
-# 建立設定目錄
+# Create config directory
 mkdir -p ~/.omniroute
 
-# 建立 .env 檔案（請參閱 .env.example）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 啟動伺服器
+# Start server
 omniroute
-# 或使用自訂連接埠：
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI 會自動從 `~/.omniroute/.env` 或 `./.env` 載入 `.env`。
+CLI自動從`~/.omniroute/.env`或`./.env`載入`.env` 。工作目錄中的`./.env`只能設定一個簡短的鍵允許清單（連接埠、 `REQUIRE_API_KEY`、區域設定和顏色設定）；將其他所有內容放入`~/.omniroute/.env`中。參見[CLI啟動合約](CLI-LAUNCH-CONTRACTS.md#working-directory-env)。
 
-### 系統匣模式
+### 托盤模式
 
-在系統匣中啟動 OmniRoute：
+在系統托盤中啟動OmniRoute ：
 
 ```bash
 omniroute serve --tray
 ```
 
-伺服器與系統匣準備就緒後，此命令便會返回。
+該命令在伺服器和托盤準備就緒後返回。
 
-伺服器會在沒有終端機的情況下繼續執行。
+伺服器在沒有終端的情況下繼續運作。
 
-系統匣模式支援 macOS、Windows 與具有圖形介面的 Linux 工作階段。系統匣模式不會自動開啟儀表板。
+托盤模式支援macOS、 Windows和圖形Linux會話。托盤模式不會自動打開儀表板。
 
-使用系統匣選單執行下列操作：
+使用托盤選單執行以下操作：
 
-- 開啟儀表板。
-- 開啟 `/dashboard/logs`。
-- 變更自動啟動設定。
-- 停止 OmniRoute。
+- 打開儀表板。
+- 打開`/dashboard/logs`.
+- 更改自動啟動。
+- 停止OmniRoute。
 
-請勿將 `--tray` 與下列選項搭配使用：
+不要將`--tray`與以下選項結合使用：
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-這些模式需要不同的程序擁有權。
+這些模式需要不同的進程所有權。
 
-啟用下次登入機器時自動啟動：
+啟用下次機器登入時啟動：
 
 ```bash
 omniroute autostart enable
 ```
 
-在 macOS、Windows 與具有圖形介面的 Linux 工作階段中，自動啟動會使用系統匣模式。無頭 Linux 則使用現有的 systemd 使用者服務。
+自動啟動在macOS、 Windows和圖形Linux會話上使用托盤模式。 Headless Linux使用現有的 systemd 使用者服務。
 
-停用登入時自動啟動：
+停用登入時啟動：
 
 ```bash
 omniroute autostart disable
@@ -407,16 +407,16 @@ omniroute autostart disable
 
 ### 解除安裝
 
-當你不再需要 OmniRoute 時，我們提供兩個快速指令碼，可乾淨地將其移除：
+當您不再需要OmniRoute時，我們提供兩個快速腳本來徹底刪除：
 
-| 命令                     | 動作                                                             |
-| ------------------------ | ---------------------------------------------------------------- |
-| `npm run uninstall`      | 移除系統應用程式，但會**保留 `~/.omniroute` 中的資料庫與設定**。 |
-| `npm run uninstall:full` | 移除應用程式，並永久**清除所有設定、金鑰與資料庫**。             |
+| 命令                     | 行動                                                      |
+| ------------------------ | --------------------------------------------------------- |
+| `npm run uninstall`      | 刪除系統應用程序，但**保留您的DB和配置**在`~/.omniroute`. |
+| `npm run uninstall:full` | 永久刪除應用程式AND**刪除所有配置、金鑰和資料庫**。       |
 
-> 注意：若要執行這些命令，請前往 OmniRoute 專案資料夾（如果你已複製該專案），然後執行命令。或者，若是以全域方式安裝，只需執行 `npm uninstall -g omniroute`。
+> 注意：要執行這些命令，請導航至OmniRoute專案資料夾（如果您克隆了它）並運行它們。或者，如果全域安裝，您可以簡單地執行`npm uninstall -g omniroute`。
 
-### VPS 部署
+### VPS部署
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -432,25 +432,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# 或：pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 部署（低記憶體）
+### PM2部署（低記憶體）
 
-對於 RAM 有限的伺服器，請使用記憶體限制選項：
+對於RAM有限的伺服器，請使用記憶體限制選項：
 
 ```bash
-# 使用 512MB 限制（預設）
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# 或使用自訂記憶體限制
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# 或使用 ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-建立 `ecosystem.config.js`：
+創建`ecosystem.config.js`：
 
 ```javascript
 module.exports = {
@@ -475,24 +475,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# 建置映像檔（預設 = 預先安裝 codex/claude/droid 的 runner-cli）
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# 可攜式模式（建議）
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-如需包含 CLI 二進位檔的主機整合模式，請參閱主要文件中的 Docker 章節。
+使用CLI二進位檔案的主機整合模式，請參閱主文件中的Docker部分。
 
-### Void Linux (xbps-src)
+### 作廢Linux (xbps-src)
 
-Void Linux 使用者可以透過 `xbps-src` 交叉編譯框架，以原生方式封裝並安裝 OmniRoute。此框架會自動執行 Node.js 獨立建置，並包含所需的 `better-sqlite3` 原生繫結。
+void Linux使用者可以使用`xbps-src`交叉編譯框架原生打包安裝OmniRoute 。這會自動執行Node.js獨立建置以及所需的`better-sqlite3`本機綁定。
 
 <details>
-<summary><b>檢視 xbps-src 範本</b></summary>
+<summary><b>查看xbps-src模板</b></summary>
 
 ```bash
-# 'omniroute' 的範本檔案
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -513,7 +513,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# 判斷 node-gyp 的目標 CPU 架構
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -522,29 +522,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) 安裝所有相依套件 – 略過指令碼
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) 建置 Next.js 獨立套件
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 將靜態資源複製到獨立套件中
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) 編譯 better-sqlite3 原生繫結
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) 將已編譯的繫結放入獨立套件中
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) 移除架構特定的 sharp 套件
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) 複製 Next.js 靜態分析所遺漏的 pino 執行階段相依套件：
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -558,7 +558,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# 防止安裝後掛鉤移除空的 Next.js 應用程式路由器目錄
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -586,30 +586,30 @@ post_install() {
 
 ### 環境變數
 
-| 變數                                    | 預設值                               | 說明                                                                             |
-| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 簽署密鑰（**在正式環境中請務必更改**）                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 首次登入密碼                                                                     |
-| `DATA_DIR`                              | `~/.omniroute`                       | 資料目錄（資料庫、使用量、日誌）                                                 |
-| `PORT`                                  | 框架預設值                           | 服務連接埠（範例中為 `20128`）                                                   |
-| `HOSTNAME`                              | 框架預設值                           | 綁定主機（Docker 預設為 `0.0.0.0`）                                              |
-| `NODE_ENV`                              | 執行階段預設值                       | 部署時設為 `production`                                                          |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | 提供給儀表板並公開給伺服器的公開基礎 URL（取代舊版的 `BASE_URL`）                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | 雲端同步端點的基礎 URL（取代舊版的 `CLOUD_URL`）                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 用於產生 API 金鑰的 HMAC 密鑰                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | 強制要求在 `/v1/*` 使用 Bearer API 金鑰                                          |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 允許已驗證的儀表板使用者視需要顯示完整的已儲存 API 金鑰值                        |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | 伺服器端重新整理快取 Provider Limits 資料的頻率；UI 重新整理按鈕仍會觸發手動同步 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 停用寫入／匯入／還原前的自動 SQLite 快照；手動備份仍可運作                       |
-| `APP_LOG_TO_FILE`                       | `true`                               | 啟用將應用程式與稽核日誌輸出至磁碟                                               |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | 強制使用 `Secure` 驗證 Cookie（位於 HTTPS 反向代理之後）                         |
-| `CLOUDFLARED_BIN`                       | 未設定                               | 使用現有的 `cloudflared` 二進位檔，而非受管理的下載版本                          |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 受管理 Quick Tunnels 的傳輸協定（`http2`、`quic` 或 `auto`）                     |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js 堆積記憶體限制（MB）                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | 提示詞快取項目的最大數量                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | 語意快取項目的最大數量                                                           |
+| 多變的                                  | 預設                     | 描述                                                                                     |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _（自動產生）_           | JWT簽章秘密—在第一次執行時自動產生並保留到`server.env`；當資料目錄是暫存目錄時明確設定它 |
+| `INITIAL_PASSWORD`                      | _（未設定）_             | 第一個登入密碼。 npm/source安裝以`CHANGEME`開頭：取代它。取消設定：入門精靈              |
+| `DATA_DIR`                              | `~/.omniroute`           | 資料目錄（資料庫、使用情況、日誌）                                                       |
+| `PORT`                                  | 框架預設                 | 服務連接埠（範例中為`20128` ）                                                           |
+| `HOSTNAME`                              | 框架預設                 | 綁定主機（Docker預設為`0.0.0.0`）                                                        |
+| `NODE_ENV`                              | 運行時預設值             | 設定`production`進行部署                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | 公共基礎URL出現在儀表板上並暴露給伺服器（取代舊版`BASE_URL`）                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | 雲端同步端點基礎URL （取代舊版`CLOUD_URL`）                                              |
+| `API_KEY_SECRET`                        | _（自動產生）_           | HMAC產生的API金鑰的秘密—在第一次執行時自動產生並儲存到`server.env`                       |
+| `REQUIRE_API_KEY`                       | `false`                  | 在`/v1/*`上強制執行 Bearer API金鑰                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | 允許經過驗證的儀表板使用者按需顯示完整儲存的API金鑰值                                    |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 快取的提供者限制資料的伺服器端刷新節奏； UI刷新按鈕仍會觸發手動同步                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | 在writes/import/restore之前停用自動SQLite快照；手動備份仍然有效                          |
+| `APP_LOG_TO_FILE`                       | `true`                   | 啟用應用程式和審核日誌輸出到磁碟                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | 強制`Secure` auth cookie（在HTTPS反向代理後面）                                          |
+| `CLOUDFLARED_BIN`                       | 未設定                   | 使用現有的`cloudflared`二進位檔案而不是託管下載                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | 託管快速隧道的傳輸（`http2`、 `quic`或`auto`）                                           |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB中的Node.js堆限制                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | 最大提示快取條目數                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | 最大語意快取條目數                                                                       |
 
-如需完整的環境變數參考，請參閱 [README](../README.md)。
+有關完整的環境變數參考，請參閱[README](../README.md) 。
 
 ---
 
@@ -1285,36 +1285,36 @@ OmniRoute 可與雲端程式設計代理程式（**OpenAI Codex Cloud**、**Devi
 
 ---
 
-## 🛠️ 程式化管理
+## 🛠️程式化管理
 
-您可以使用具有 `manage` scope 的 **Bearer 金鑰**，透過 HTTP 管理每個 OmniRoute 資源（providers、combos、keys、settings）。
+您可以使用HTTP來管理每個OmniRoute資源（提供者、組合、鍵、設定）**具有`manage`範圍的承載金鑰**。
 
-在 **儀表板 → API 金鑰 → 新增金鑰 → 範圍：manage** 中產生金鑰，然後：
+產生金鑰**儀表板→ API密鑰→新密鑰→範圍：管理**， 然後：
 
 ```bash
-# 列出 providers
+# List providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# 新增 provider 連線
+# Add a provider connection
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# 建立 combo
+# Create a combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# 列出／建立 API 金鑰
+# List/create API keys
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-如需完整的端點目錄與要求／回應結構描述，請參閱 [API_REFERENCE.md](../reference/API_REFERENCE.md)。
+有關完整端點目錄和request/response架構，請參閱[API_REFERENCE.md](../reference/API_REFERENCE.md) 。
 
 ---
 

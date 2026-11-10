@@ -21,6 +21,7 @@ import {
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
+  isCodexPoolPlanIneligibleForModel,
 } from "@/sse/services/auth";
 import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
 import {
@@ -724,6 +725,17 @@ async function postHandler(request: Request, _context?: unknown) {
       allowedConnections,
       resolvedModel
     );
+    // Paid-only Codex models skip Free/Go accounts during selection; a pool made only of
+    // them still gets the explicit paid-plan answer instead of "no credentials".
+    if (
+      !credentials &&
+      (await isCodexPoolPlanIneligibleForModel(resolvedModel, allowedConnections))
+    ) {
+      return errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        "Codex image editing requires a paid ChatGPT/Codex plan"
+      );
+    }
     if (!credentials) {
       return errorResponse(
         HTTP_STATUS.UNAUTHORIZED,

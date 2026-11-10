@@ -87,6 +87,7 @@ import {
   fixToolAdjacency,
   stripTrailingAssistantOrphanToolUse,
   stripTrailingAssistantForProvider,
+  stripTrailingAssistantInputForProvider,
 } from "../services/contextManager.ts";
 import {
   requiresUserLastMessage,
@@ -1438,6 +1439,9 @@ export class BaseExecutor {
         // user message. Both are idempotent on clean histories.
         {
           const tb = transformedBody as Record<string, unknown>;
+          if (Array.isArray(tb?.input)) {
+            tb.input = stripTrailingAssistantInputForProvider(tb.input, this.provider);
+          }
           if (Array.isArray(tb?.messages)) {
             const fixed = fixToolPairs(tb.messages as Record<string, unknown>[]);
             // fixToolAdjacency enforces Claude's strict adjacency rule

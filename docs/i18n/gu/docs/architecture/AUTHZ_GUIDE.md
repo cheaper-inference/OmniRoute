@@ -143,17 +143,17 @@ Settings → Security માં નોંધણી કરવામાં આવ�
      `secondFactor: "recovery_switch"` સાથે થાય છે.
   4. `OMNIROUTE_DISABLE_MFA` અનસેટ કરો, સર્વર પુનઃશરૂ કરો અને જરૂર હોય તો ફરીથી નોંધણી કરો.
 
-## રૂટ ક્લાસ
+## રૂટ વર્ગો
 
-`src/server/authz/types.ts` ત્રણ ક્લાસ વ્યાખ્યાયિત કરે છે; જે રૂટને નિર્ધારક રીતે વર્ગીકૃત ન કરી શકાય તે `MANAGEMENT` પર ફોલબેક થાય છે.
+`src/server/authz/types.ts` ત્રણ વર્ગો વ્યાખ્યાયિત કરે છે; કોઈપણ માર્ગ કે જેનું વર્ગીકરણ નિશ્ચિત રીતે કરી શકાતું નથી તે `MANAGEMENT` પર પાછા આવે છે.
 
-| ક્લાસ        | વર્ણન                                                                                                                                                 | જરૂરી પ્રમાણીકરણ                                               |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `PUBLIC`     | સ્પષ્ટપણે સુરક્ષિત રૂટ્સ — લૉગિન, લૉગઆઉટ, સ્ટેટસ, ઇનિટ, હેલ્થ, ઓનબોર્ડિંગ બૂટસ્ટ્રેપ.                                                                 | કોઈ નહીં                                                       |
-| `CLIENT_API` | મોડેલ-સર્વિંગ એન્ડપોઇન્ટ્સ — `/api/v1/*`, `/api/v1beta/*`, તથા ઉપનામો `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | અસરકારક `REQUIRE_API_KEY` ફીચર ફ્લેગ ચાલુ હોય ત્યારે Bearer કી |
-| `MANAGEMENT` | ડેશબોર્ડ પેજ, સેટિંગ્સ, પ્રોવાઇડર્સ, કીઝ, એડમિન અને ડાયગ્નોસ્ટિક એન્ડપોઇન્ટ્સ.                                                                        | ડેશબોર્ડ સેશન અથવા `manage` સ્કોપ સાથે Bearer                  |
+| વર્ગ         | વર્ણન                                                                                                                                                  | પ્રમાણીકરણ જરૂરી છે                                                   |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `PUBLIC`     | સ્પષ્ટ રીતે સુરક્ષિત રૂટ્સ — લોગિન, લોગઆઉટ, સ્ટેટસ, હેલ્થ, ઓનબોર્ડિંગ બુટસ્ટ્રેપ.                                                                      | કોઈ નહિ                                                               |
+| `CLIENT_API` | મોડલ-સર્વિંગ એન્ડપોઇન્ટ્સ — `/api/v1/*`, `/api/v1beta/*`, વત્તા ઉપનામો `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | જ્યારે અસરકારક `REQUIRE_API_KEY` લક્ષણ ફ્લેગ સક્ષમ હોય ત્યારે બેરર કી |
+| `MANAGEMENT` | ડેશબોર્ડ પૃષ્ઠો, સેટિંગ્સ, પ્રદાતાઓ, કી, એડમિન અને ડાયગ્નોસ્ટિક્સ એન્ડપોઇન્ટ્સ.                                                                        | `manage` સ્કોપ સાથે ડેશબોર્ડ સત્ર OR બેરર                             |
 
-કેટલીક `MANAGEMENT` ક્રિયાઓ **ફક્ત ઓપરેટર-માટે** છે: `manage` કી પૂરતી નથી. સંગ્રહિત ક્રેડેન્શિયલ્સ એક્સપોર્ટ કરવા (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), લાઇવ ડેટા પર બેકઅપ રિસ્ટોર કરવો (`dryRun=true` સહિત `POST /api/db-backups/import`, id દ્વારા રિસ્ટોર `POST /api/db-backups`, `POST /api/settings/import-json`), અને રિસ્ટોર પોઇન્ટ નષ્ટ કરવા (`DELETE /api/db-backups` ક્લીનઅપ, અને `PATCH /api/db-backups` કારણ કે તે જે રીટેન્શન સાચવે છે તે દરેક બેકઅપ પછી આપમેળે પ્રૂનિંગ ચલાવે છે) માટે ડેશબોર્ડ સેશન, લોકલ CLI સબ્જેક્ટ, અથવા લૉગિન બંધ હોવું જરૂરી છે. સિંક ટોકન ઇશ્યૂ કરવું (`POST /api/sync/tokens`) અને `admin` CLI એક્સેસ ટોકન બનાવવું (`POST /api/cli/tokens`) દરેક લૉગિન મોડમાં ડેશબોર્ડ સેશન અથવા લોકલ CLI સબ્જેક્ટ માંગે છે. કોઈ પણ સ્કોપની API કીઓ અને `oma_` એક્સેસ ટોકન ઓપરેટર ક્રેડેન્શિયલ નથી: જ્યારે પણ તે જરૂરી હોય ત્યારે તેમને `403` મળે છે. આ તપાસ `src/lib/api/operatorCredential.ts` માં છે (`resolveOperatorCredential()` / `requireOperatorCredential()`). લૉગિન સેટિંગ્સ બદલવી પણ ફક્ત ઓપરેટર-માટે છે: `POST /api/settings/require-login` (મેનેજમેન્ટ પાસવર્ડ સેટ કરવો / `requireLogin` ટૉગલ કરવું) પાસવર્ડ અસ્તિત્વમાં હોય ત્યારે ફક્ત તે જ ક્રેડેન્શિયલ્સ સ્વીકારે છે — પ્રથમ-રન બૂટસ્ટ્રેપ વિન્ડો (હજી પાસવર્ડ નથી) યથાવત રહે છે — અને ડેશબોર્ડ સેશનને પાસવર્ડ બદલવા માટે `currentPassword` મોકલવો પડે છે (ગેરહાજર અથવા ખોટો હોય તો `403`, `settings.update_failed` તરીકે ઓડિટ થાય છે). લોકલ CLI અને લૉગિન બંધ હોય તેવી ઇન્સ્ટન્સ રિકવરી પાથ જાળવે છે અને તેના વિના પાસવર્ડ સેટ કરી શકે છે, કારણ કે બંને ડેટા ડિરેક્ટરીના માલિક હોસ્ટ સાથે બંધાયેલા છે.
+થોડી `MANAGEMENT` ક્રિયાઓ છે** માત્ર ઓપરેટર** : એક `manage` કી પર્યાપ્ત નથી. સંગ્રહિત ઓળખપત્રોની નિકાસ કરવી (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), લાઇવ ડેટા પર બેકઅપ પુનઃસ્થાપિત કરવું (`POST /api/db-backups/import` સહિત `dryRun=true`, `POST /api/db-backups` id દ્વારા પુનઃસ્થાપિત, `POST /api/settings/import-json`), પુનઃસ્થાપિત બિંદુઓનો નાશ કરવો (`DELETE /api/db-backups` ક્લિનઅપ અને `PATCH /api/db-backups` કારણ કે રીટેન્શન તે ચાલુ રહે છે જે સ્થાનિક સત્ર ચલાવ્યા પછી સ્થાનિક સત્ર ચાલુ રહે છે) CLI વિષય, અથવા લૉગિન અક્ષમ. સિંક ટોકન (`POST /api/sync/tokens`) જારી કરવા અને `admin` CLI એક્સેસ ટોકન (`POST /api/cli/tokens`) મિન્ટ કરવા માટે દરેક લોગિન મોડમાં ડેશબોર્ડ સત્ર અથવા સ્થાનિક CLI વિષયની જરૂર પડે છે. કોઈપણ સ્કોપની API કી અને `oma_` એક્સેસ ટોકન્સ ઓપરેટર ઓળખપત્રો નથી: જ્યારે પણ જરૂરી હોય ત્યારે તેઓ `403` મેળવે છે. ચેક `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) માં રહે છે. લોગિન સેટિંગ્સ બદલવી એ ફક્ત ઓપરેટર માટે પણ છે: `POST /api/settings/require-login` (મેનેજમેન્ટ પાસવર્ડ સેટ કરો / `requireLogin` ટૉગલ કરો ) માત્ર તે ઓળખપત્રો સ્વીકારે છે જ્યારે પાસવર્ડ અસ્તિત્વમાં હોય ત્યારે — પ્રથમ-રન બુટસ્ટ્રેપ વિન્ડો (હજી સુધી કોઈ પાસવર્ડ નથી) — અપરિવર્તિત છે અને ડેશબોર્ડ સત્રને પાસવર્ડ બદલવા માટે `currentPassword` મોકલવો આવશ્યક છે (`403` અથવા `settings.update_failed` થાય ત્યારે). સ્થાનિક CLI અને લોગિન અક્ષમ કરેલ ઉદાહરણ પુનઃપ્રાપ્તિ પાથ રાખે છે અને તેના વિના પાસવર્ડ સેટ કરી શકે છે, કારણ કે બંને ડેટા ડિરેક્ટરીની માલિકી ધરાવતા હોસ્ટ સાથે બંધાયેલા છે.
 
 ## પાઇપલાઇન
 
@@ -184,53 +184,49 @@ Incoming request → src/proxy.ts
 
 સફળ પોલિસી `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` સાથે `AuthSubject` પરત કરે છે. ડાઉનસ્ટ્રીમ હેન્ડલર્સ તેને ઓથ લોજિકને ફરીથી ચલાવવાને બદલે `src/server/authz/assertAuth.ts` માં `assertAuth(request, "CLIENT_API")` દ્વારા વાંચી શકે છે.
 
-## જાહેર રૂટ્સની યાદી
+## જાહેર માર્ગોની સૂચિ
 
-`src/shared/constants/publicApiRoutes.ts` સ્પષ્ટ allowlist છે:
+`src/shared/constants/publicApiRoutes.ts` એ સ્પષ્ટ મંજૂર સૂચિ છે:
 
-આ યાદીને **આકાર** પ્રમાણે વિભાજિત કરવામાં આવી છે, અને આ વિભાજન અત્યંત મહત્વપૂર્ણ છે (GHSA-74g9-q8f6-793h): prefix ને
-`startsWith()` વડે મેળ પાડવામાં આવે છે, તેથી તે આગળના અક્ષરો સમાન હોય તેવા દરેક નજીકના path સાથે પણ મેળ ખાય છે.
-`/api/usage/om-usage` ને prefix તરીકે ચિહ્નિત કરવાથી `/api/usage/om-usage<anything>` PUBLIC બને છે, અને Next તેને
-`/api/usage/[connectionId]` તરીકે resolve કરે છે — જેનું પોતાનું કોઈ auth નથી.
+દ્વારા યાદી વિભાજિત થયેલ છે** આકાર** , અને વિભાજન લોડ-બેરિંગ છે (GHSA-74g9-q8f6-793h): ઉપસર્ગ `startsWith()` સાથે મેળ ખાય છે, તેથી તે તેના અગ્રણી અક્ષરોને શેર કરતા દરેક અડીને આવેલા પાથ સાથે પણ મેળ ખાય છે. `/api/usage/om-usage` ઉપસર્ગ તરીકે `/api/usage/om-usage<anything>` PUBLIC ચિહ્નિત કરે છે, અને આગળ તેની પોતાની કોઈ અધિકૃતતા વિના હેન્ડલરને `/api/usage/[connectionId]` — કરવાનું નક્કી કરે છે.
 
 ```ts
-// વાસ્તવિક subtrees. દરેક entry નો અંત "/" થી થવો MUST છે (unit test દ્વારા તેની ખાતરી કરવામાં આવે છે).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify માં CLIENT_API તરીકે ગણવામાં આવે છે, "no-auth public" તરીકે નહીં
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// એકલાં routes, trailing slash સાથે અથવા તેના વિના EXACT રીતે મેળ પાડવામાં આવે છે.
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP માટે login પગલું 2; MFA-pending cookie જરૂરી છે
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// read-only એકલાં routes, જે CORS origin relaxation પણ મેળવે છે.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS relaxation વિના read-only એકલું route.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Read-only routes માત્ર સુરક્ષિત methods માટે જ જાહેર હોય છે. નોંધ: `classifyRoute()` PUBLIC fall-throughમાંથી `/api/v1/*` અને `/api/v1beta/*` ને બહાર રાખે છે — આ હંમેશાં `CLIENT_API` હોય છે, તેથી Bearer-key policy લાગુ પડે છે.
+ફક્ત વાંચવા માટેના રૂટ સાર્વજનિક છે** માત્ર** સલામત પદ્ધતિઓ માટે. નોંધ: `classifyRoute()` PUBLIC ફૉલ-થ્રુ — માંથી `/api/v1/*` અને `/api/v1beta/*` બાકાત રાખે છે તે હંમેશા `CLIENT_API` હોય છે તેથી બેરર-કી નીતિ હજુ પણ લાગુ પડે છે.
 
 ## નવો Route ઉમેરવો
 
@@ -294,15 +290,15 @@ API કી `scopes` એરે ધરાવે છે (જે `api_keys.scopes` �
 
 `oma_live_…` ટોકન્સ પર `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) દ્વારા ક્રમાંકિત. આ ક્રમ ફક્ત એક્સેસ-ટોકન ક્રેડેન્શિયલને લાગુ પડે છે. જુઓ [મેનેજમેન્ટ ઓથેન્ટિકેશન](../guides/MANAGEMENT-AUTH.md).
 
-## Auth Required ટૉગલ
+## ઑથ જરૂરી ટૉગલ
 
-`src/shared/utils/apiAuth.ts` માં `isAuthRequired()` નક્કી કરે છે કે કોઈ વિનંતી માટે **કોઈ પણ** પ્રમાણીકરણ લાગુ થવું જોઈએ કે નહીં:
+`src/shared/utils/apiAuth.ts` માં`isAuthRequired()` નક્કી કરે છે કે શું** કોઈપણ** વિનંતી માટે auth લાગુ કરવામાં આવે છે:
 
-- `settings.requireLogin === false` → પ્રમાણીકરણ વૈશ્વિક રીતે બંધ છે, સિવાય કે હંમેશા-સુરક્ષિત ટિયર (જુઓ [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) અને તે કૉલ્સ જે એવા ક્રેડેન્શિયલ આપે છે જે તે સ્વીકારે છે, જેમને લૉગિન ચાલુ હોય ત્યારે જેવો જ ક્રેડેન્શિયલ જોઈએ: સિંક ટોકન ઇશ્યૂ કરવા, કોઈ પણ સ્કોપમાં CLI એક્સેસ ટોકન બનાવવા, અને `manage`/`admin` સ્કોપવાળી API કી બનાવવી, તે સ્કોપ કોઈ કીને આપવો, અથવા એવી કી ફરીથી જનરેટ કરવી કે દેખાડવી (`src/lib/api/requireManagementAuth.ts` માં `requireCredentialForManagementScopedKey()`). ઇન્ફરન્સ-ફક્ત કીઓ ખુલ્લી રહે છે.
-- કોઈ પાસવર્ડ ગોઠવાયો નથી **અને** કોઈ `INITIAL_PASSWORD` એન્વાયર્નમેન્ટ વેરિએબલ નથી → બૂટસ્ટ્રેપ મોડ ઓનબોર્ડિંગ વિઝાર્ડ અને લોકલ વિનંતીઓને મંજૂરી આપે છે, પરંતુ ખુલ્લી નેટવર્ક વિનંતીઓને હજુ પણ ક્રેડેન્શિયલ્સ જોઈએ.
-- કોઈ પણ DB ભૂલ → બંધ થઈને નિષ્ફળ (secure-by-default).
+- `settings.requireLogin === false` → auth વૈશ્વિક સ્તરે અક્ષમ છે, હંમેશ-સંરક્ષિત ટાયર (જુઓ [રૂટ ગાર્ડ ટિયર્સ](../security/ROUTE_GUARD_TIERS.md) ) અને કૉલ્સ કે જે તે સ્વીકારે છે તે ઓળખપત્ર આપે છે, જેને લોગિન ઓન સાથે સમાન ઓળખપત્રની જરૂર હોય છે: સિંક ટોકન્સ જારી કરવા, કોઈપણ સ્કોપ પર CLI API ટોકન્સને મિન્ટિંગ કરવા, અને `manage`/`admin` સાથે કી બનાવવી. કીને તે અવકાશ આપવો, અથવા આવી કીને ફરીથી બનાવવી અથવા જાહેર કરવી ( `src/lib/api/requireManagementAuth.ts` માં`requireCredentialForManagementScopedKey()` ). અનુમાન-માત્ર કીઓ ખુલ્લી રહે છે. પ્રોટેક્ટેડ ફીચર ફ્લેગ (`REQUIRE_API_KEY`, અન્ય સિક્યુરિટી ફ્લેગ્સ અને [ફીચર ફ્લેગ્સમાં](../reference/FEATURE_FLAGS.md#rest-api) સૂચિબદ્ધ SSRF / TLS /MCP-સ્કોપ/સેન્ડબોક્સ ફ્લેગ્સ) લખવા અને PII માસ્કિંગ સેટિંગ્સ (`PUT /api/settings/pii`) ને સાચવવા માટે પણ ઓળખપત્રની જરૂર રહે છે.
+- કોઈ પાસવર્ડ ગોઠવેલ નથી** અને** કોઈ `INITIAL_PASSWORD` env var → બુટસ્ટ્રેપ મોડ ઓનબોર્ડિંગ વિઝાર્ડ અને લૂપબેક વિનંતીઓને મંજૂરી આપે છે, પરંતુ ખુલ્લી નેટવર્ક વિનંતીઓને હજુ પણ ઓળખપત્રોની જરૂર છે. અપવાદ: સંરક્ષિત ફીચર ફ્લેગ લખવા અને PII માસ્કિંગ સેટિંગ્સ (`PUT /api/settings/pii`) ને સાચવવા માટે લૂપબેકમાંથી પણ ઓળખપત્રની જરૂર છે, તેથી લૂપબેક પોતે જ પૂરતું નથી.
+- કોઈપણ DB ભૂલ → બંધ થઈ જાય છે (સુરક્ષિત-બાય-ડિફોલ્ટ).
 
-ક્લાયન્ટ API કી અમલીકરણ `src/shared/utils/featureFlags.ts` માં `isRequireApiKeyEnabled()` વાપરે છે, સીધું `process.env.REQUIRE_API_KEY` વાંચતું નથી. આ તૈનાત ઇન્સ્ટન્સ માટે મહત્વનું છે: ડેશબોર્ડ → Feature Flags માં `REQUIRE_API_KEY` ટૉગલ કરવાથી DB ઓવરરાઇડ સંગ્રહાય છે અને તરત જ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` અને આ હેલ્પર વહેંચતા અન્ય ક્લાયન્ટ-API પ્રમાણીકરણ તપાસો પર અસર કરે છે. જો ફીચર ફ્લેગ સ્ટોર વાંચી ન શકાય, તો ક્લાયન્ટ API પ્રમાણીકરણ બંધ થઈને નિષ્ફળ જાય છે અને કીની જરૂર પડે છે.
+ક્લાયંટ API કી અમલીકરણ `src/shared/utils/featureFlags.ts` માં `isRequireApiKeyEnabled()` ઉપયોગ કરે છે, ડાયરેક્ટ `process.env.REQUIRE_API_KEY` રીડ નહીં. તૈનાત દાખલાઓ માટે આ મહત્વપૂર્ણ છે: ડેશબોર્ડ → ફીચર ફ્લેગ્સમાં `REQUIRE_API_KEY` ટોગલ કરવું એ DB ઓવરરાઇડને સંગ્રહિત કરે છે અને તરત જ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, અને અન્ય ક્લાયંટ-API પ્રમાણીકરણ તપાસને અસર કરે છે જે આ સહાયકને શેર કરે છે. જો ફીચર ફ્લેગ સ્ટોર વાંચી શકાતો નથી, તો ક્લાયંટ API auth બંધ થઈ જાય છે અને તેને કીની જરૂર પડે છે.
 
 ## બ્રેકિંગ ફેરફાર — v3.8.0
 

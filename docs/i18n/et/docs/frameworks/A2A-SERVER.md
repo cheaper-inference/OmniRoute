@@ -163,7 +163,7 @@ OmniRoute paljastab 6 A2A oskust, mis on ühendatud `src/lib/a2a/taskExecution.t
 | Tervisearuanne        | `health-report`      | Agregeerib kaitselülitit, jahtumist, lukustuse olekut pakkuja kohta                                                                                                                  | tervis, vastupidavus       | "Kuva kõigi teenuseosutajate tervislik seisund" |
 | Loetlege võimalused   | `list-capabilities`  | Tagastab täieliku 45 kirjest koosneva agendioskuste kataloogi (23 API + 21 CLI + 1 konfiguratsioon) allahindluste tabelina koos töötlemata SKILL.md URLs iga konteksti sisestamiseks | kataloog, avastus, oskused | "Loetlege kõik OmniRoute võimalused"            |
 
-> Agendikaarti tuleks hoida vastavuses reaalajas 380-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaja registrist.
+> Agendikaarti tuleks hoida vastavuses reaalajas 381-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaja registrist.
 
 ### `list-capabilities` oskuste üksikasjad
 
@@ -180,20 +180,28 @@ Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe kogu SKILL.md laadida
 
 ---
 
-## REST API (abiseadmed)
+## REST API (abi)
 
-JSON-RPC-i lõpp-punkt `/a2a` on kanoniline A2A sisenemispunkt. Allpool toodud REST lõpp-punktid pakuvad lisapääsu juhtpaneelidele ja välistööriistadele:
+JSON-RPC lõpp-punkt `/a2a` on kanooniline A2A sisendpunkt. Allolevad REST lõpp-punktid pakuvad lisajuurdepääsu armatuurlaudadele ja välistele tööriistadele.
 
-| Lõpp-punkt                   | Meetod | Kirjeldus                                                            | Autentimine                                  |
-| :--------------------------- | :----- | :------------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET    | Serveri staatus, registreeritud oskused                              | (avalik)                                     |
-| `/api/a2a/tasks`             | GET    | Tegevuste loend filtritega                                           | haldus                                       |
-| `/api/a2a/tasks/[id]`        | GET    | Tegevuse saamine ID järgi                                            | haldus                                       |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Töötava tegevuse tühistamine                                         | haldus                                       |
-| `/.well-known/agent.json`    | GET    | Agent Card (A2A avastus)                                             | (avalik, vahemälu 3600s)                     |
-| `/api/a2a/tasks`             | POST   | Sisenev delegeerimine OmniConductor laevastikule (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Lõpp-punkt                   | meetod | Kirjeldus                                                             | Aut                                                                                                                   |
+| :--------------------------- | :----- | :-------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Serveri staatus, registreeritud oskused                               | (avalik)                                                                                                              |
+| `/api/a2a/tasks`             | GET    | Loetlege ülesanded filtritega                                         | juhtimine või API klahv (vt allpool)                                                                                  |
+| `/api/a2a/tasks/[id]`        | GET    | Hangi ülesanne ID kaudu                                               | juhtimine või API klahv (vt allpool)                                                                                  |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Tühista tööülesanne                                                   | juhtimine või API klahv (vt allpool)                                                                                  |
+| `/.well-known/agent.json`    | GET    | Agendikaart (A2A discovery)                                           | (avalik, vahemällu salvestatud 3600)                                                                                  |
+| `/api/a2a/tasks`             | POST   | Sissetulev delegatsioon OmniConductor laevastikule (dirigent PRD RF5) | sama mis `GET`, pluss `OMNIROUTE_API_KEY` kui see on määratud, kui `REQUIRE_API_KEY` on välja lülitatud; `a2aEnabled` |
 
-**Sisenev Conductor delegeerimine (`POST /api/a2a/tasks`):** välised A2A agendid delegeerivad programmeerimistööd OmniConductor laevastikule OmniRoute'i kaudu. Sisu: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ainult Conductor laevastiku oskused (need, mis on teatatud Agent Cardis) on delegeeritavad; `metadata.conductor.repo.url` on kohustuslik (laevastik töötab git-hoidlatest). Marsruut tõlgitakse keskuse `POST /v1/tasks` kasutades serveripoolset `CONDUCTOR_ORCHESTRATOR_TOKEN` (tagasivõte `CONDUCTOR_HUB_TOKEN`) ja tagastab `201 { conductor_task_id, state: "submitted" }`; tegevuste olekud edastatakse tagasi läbi SSE→A2A peegelduse (RF1) ja on nähtavad `GET /api/a2a/tasks?skill=conductor` abil.
+Kes pääseb `/api/a2a/tasks*` marsruutidele, sõltub sisselogimise ja API-võtme seadetest:
+
+- `requireLogin=true` (vaikimisi): vahevara lubab ainult haldusmandaate (armatuurlaua seanss, `manage` -scope API võti, `oma_` juurdepääsuluba) ja `OMNIROUTE_API_KEY`. Lihtne järeldusvõti saab `403`. `Authorization` päises võtab vahevara ainult `OMNIROUTE_API_KEY` kui `Bearer <key>`; tühi klahv või tabeldusmärk pärast `Bearer` saab `401`.
+- `requireLogin=false` või loopback aken enne liitumist: `REQUIRE_API_KEY=true` ga aktsepteeritakse mis tahes kehtivat OmniRoute API -võtit või haldusmandaati ja anonüümsed helistajad saavad `401`; `REQUIRE_API_KEY` ga väljas marsruudid on avatud.
+- `POST /api/a2a/tasks` nõuab lisaks `OMNIROUTE_API_KEY` `Authorization` päises, kui see muutuja on määratud ja `REQUIRE_API_KEY` on välja lülitatud. Muud päised, näiteks `x-api-key`, ei lähe sinna arvesse. Kui sisselogimine on välja lülitatud või enne pardale sisenemist, läheb võti `Bearer` -prefiksiga või ilma; sisselogimisel pääseb vahevarast mööda ainult `Bearer <key>`.
+
+Kui mandaati on vaja, töötab `read` -scope `oma_` luba ainult `GET` puhul.
+
+**Sissetulevate juhtide delegatsioon (`POST /api/a2a/tasks`):** välised A2A agendid delegeerivad kodeerimistööd OmniConductor laevastikule OmniRoute kaudu. Keha: ainult `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Dirigendipargi oskused (need, mis on märgitud agendikaardil) on delegeeritavad; `metadata.conductor.repo.url` on nõutav (parkett töötab git repos). Marsruut teisendub jaoturi `POST /v1/tasks`, kasutades serveripoolset `CONDUCTOR_ORCHESTRATOR_TOKEN` (varumine `CONDUCTOR_HUB_TOKEN`) ja tagastab `201 { conductor_task_id, state: "submitted" }`; ülesande olekud voolavad tagasi läbi SSE→A2A peegli (RF1) ja on nähtavad `GET /api/a2a/tasks?skill=conductor` kaudu .
 
 ---
 
@@ -201,16 +209,16 @@ JSON-RPC-i lõpp-punkt `/a2a` on kanoniline A2A sisenemispunkt. Allpool toodud R
 
 1. **Loo oskuste fail:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportige asünkroonimisfunktsioon `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Järgige olemasolevate oskuste, näiteks `smartRouting.ts` kuju.
+   Eksportige asünkroonimisfunktsioon `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Järgige olemasolevate oskuste, näiteks `smartRouting.ts` kuju. Kui oskus kutsub tagasi OmniRoute -sse HTTP kaudu, looge päised `buildSelfLoopHeaders(caller)` -ga `src/lib/a2a/selfLoopAuth.ts` -st, nii et kõne käiks A2A -helistaja võtmega, mitte `OMNIROUTE_API_KEY`, ja edastage `redirect: "error"` `fetch` -le, nii et ümbersuunamine ei saaks kunagi võtit. Abimees koostab ainult päised; iga oskus määrab ümbersuunamispoliitika ise. Kui lahendatud põhi- URL on väljaspool privaatvõrku tavaline http (loopback, konteineri või teenuse nimi ja privaatsed aadressid on korras) viskab pigem `UnsafeSelfLoopTargetError` kui lisab võtme, kui tal on volitused, nii et tagasilükatud kõnesid neelav oskus peab selle vea uuesti viskama.
 
 2. **Registrihaldur:** `src/lib/a2a/taskExecution.ts` s lisage `A2A_SKILL_HANDLERS`-sse kirje:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
