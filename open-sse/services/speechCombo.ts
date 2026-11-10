@@ -46,12 +46,16 @@ import {
  * `keyScope` (GHSA-3w2r) keeps the fan-out inside the caller API key's scope:
  * targets its model policy refuses are dropped and every credential lookup is
  * bounded by its allowed connections. Omitted = unrestricted (unchanged).
+ * `onPricedCall` receives the priced call of the target that served the request (the
+ * caller charges it to the key; injected so open-sse does not import the key store).
  */
 export async function executeSpeechCombo(
   comboName: string,
   body: Record<string, unknown>,
   startTime: number,
-  keyScope: ComboKeyScope = {}
+  keyScope: ComboKeyScope & {
+    onPricedCall?: (call: { provider: string; model: string; costUsd: number }) => void;
+  } = {}
 ): Promise<Response> {
   const combo = await getComboByName(comboName);
   if (!combo) {
@@ -194,6 +198,11 @@ export async function executeSpeechCombo(
         resolvedModel || target.modelStr,
         { characters }
       );
+      keyScope.onPricedCall?.({
+        provider: targetProvider,
+        model: resolvedModel || target.modelStr,
+        costUsd,
+      });
       return attachOmniRouteMetaToResponse(response, {
         provider: targetProvider,
         model: resolvedModel || target.modelStr,
