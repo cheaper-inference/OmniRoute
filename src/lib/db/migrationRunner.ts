@@ -27,6 +27,7 @@ import {
 } from "./migrationRunner/constants";
 import { getExtraMigrationFiles } from "./migrationRunner/extraDirs";
 import { migrationConsole as console } from "./migrationRunner/logger";
+import { acquireSnapshotLease } from "./backupRetention";
 import {
   createPreMigrationBackup,
   hashFileSync,
@@ -909,6 +910,36 @@ export function runMigrations(
   db: SqliteAdapter,
   options?: { isNewDb?: boolean; databaseExistedBeforeInitialization?: boolean }
 ): number {
+  // Pin the restore point for the whole run so pruning in any process keeps it until the
+  // upgrade ends, whether it succeeds or throws.
+  const lease = { release: () => {} };
+  try {
+    return runMigrationsLeased(db, options, lease);
+  } finally {
+    lease.release();
+  }
+}
+
+function leasePreMigrationBackup(
+  db: SqliteAdapter,
+  lease: { release: () => void },
+  receipt: PreMigrationBackupReceipt | null
+): PreMigrationBackupReceipt | null {
+  if (receipt) {
+    lease.release();
+    lease.release = acquireSnapshotLease(
+      path.join(path.dirname(db.name), "db_backups"),
+      receipt.path
+    );
+  }
+  return receipt;
+}
+
+function runMigrationsLeased(
+  db: SqliteAdapter,
+  options: { isNewDb?: boolean; databaseExistedBeforeInitialization?: boolean } | undefined,
+  lease: { release: () => void }
+): number {
   const isNewDb = options?.isNewDb === true;
   // `isNewDb` also covers a setup-created skeleton so it can bypass the mass-migration
   // false positive. Snapshot eligibility must use the independent physical-file fact:
@@ -973,7 +1004,7 @@ export function runMigrations(
       databaseExistedBeforeInitialization;
 
     if (needsSnapshot) {
-      preMigrationBackup = createPreMigrationBackup(db);
+      preMigrationBackup = leasePreMigrationBackup(db, lease, createPreMigrationBackup(db));
       if (!preMigrationBackup) {
         throw new Error(
           "[Migration] Refusing to migrate an existing database without a durable snapshot. " +
@@ -1012,7 +1043,7 @@ export function runMigrations(
               "refusing to export from inside the rollback savepoint."
           );
         }
-        preMigrationBackup = createPreMigrationBackup(db);
+        preMigrationBackup = leasePreMigrationBackup(db, lease, createPreMigrationBackup(db));
         if (!preMigrationBackup) {
           throw new Error(
             "[Migration] Refusing to migrate an existing database without a durable snapshot. " +
