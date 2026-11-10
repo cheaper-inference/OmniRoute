@@ -177,6 +177,36 @@ const RESPONSES_USAGE_DETAIL_COUNTERS: Array<[string, string[], string[]]> = [
   ["output_tokens_details", ["reasoning_tokens"], []],
 ];
 
+function finiteUsageNumber(value: unknown): number | null {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+/**
+ * Coerce the known counters of the usage details objects to integers, writing a copy into
+ * `normalized` only when something changed. Upstream detail objects are never mutated, and
+ * a details field that is absent or not an object (including an explicit
+ * `input_tokens_details: null`) is deliberately left untouched.
+ */
+function normalizeUsageDetailCounters(current: JsonRecord, normalized: JsonRecord): boolean {
+  let changed = false;
+  for (const [field, required, optional] of RESPONSES_USAGE_DETAIL_COUNTERS) {
+    const details = current[field];
+    if (!details || typeof details !== "object" || Array.isArray(details)) continue;
+    const source = details as JsonRecord;
+    const fixed: JsonRecord = { ...source };
+    for (const key of required) fixed[key] = finiteUsageNumber(source[key]) ?? 0;
+    for (const key of optional.filter((name) => name in source)) {
+      fixed[key] = finiteUsageNumber(source[key]) ?? 0;
+    }
+    if (Object.keys(fixed).some((key) => fixed[key] !== source[key])) {
+      normalized[field] = fixed;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 /**
  * Keep the terminal Responses payload compatible with strict clients such as Codex.
  * Upstreams may expose only input/output counts (or omit usage entirely), while the
@@ -196,15 +226,11 @@ export function normalizeResponsesCompletedUsage(parsed: unknown): boolean {
     response.usage && typeof response.usage === "object" && !Array.isArray(response.usage)
       ? (response.usage as JsonRecord)
       : {};
-  const finiteNumber = (value: unknown): number | null => {
-    const numeric = Number(value);
-    return Number.isFinite(numeric) ? numeric : null;
-  };
   const inputTokens =
-    finiteNumber(current.input_tokens) ?? finiteNumber(current.prompt_tokens) ?? 0;
+    finiteUsageNumber(current.input_tokens) ?? finiteUsageNumber(current.prompt_tokens) ?? 0;
   const outputTokens =
-    finiteNumber(current.output_tokens) ?? finiteNumber(current.completion_tokens) ?? 0;
-  const totalTokens = finiteNumber(current.total_tokens) ?? inputTokens + outputTokens;
+    finiteUsageNumber(current.output_tokens) ?? finiteUsageNumber(current.completion_tokens) ?? 0;
+  const totalTokens = finiteUsageNumber(current.total_tokens) ?? inputTokens + outputTokens;
 
   const normalized: JsonRecord = {
     ...current,
@@ -212,27 +238,14 @@ export function normalizeResponsesCompletedUsage(parsed: unknown): boolean {
     output_tokens: outputTokens,
   };
   normalized.total_tokens = totalTokens;
-  let changed =
+  const totalsChanged =
     !response.usage ||
     current.input_tokens !== inputTokens ||
     current.output_tokens !== outputTokens ||
     current.total_tokens !== totalTokens;
-  for (const [field, required, optional] of RESPONSES_USAGE_DETAIL_COUNTERS) {
-    const details = current[field];
-    if (!details || typeof details !== "object" || Array.isArray(details)) continue;
-    const source = details as JsonRecord;
-    const fixed: JsonRecord = { ...source };
-    for (const key of required) fixed[key] = finiteNumber(source[key]) ?? 0;
-    for (const key of optional) {
-      if (key in source) fixed[key] = finiteNumber(source[key]) ?? 0;
-    }
-    if (Object.keys(fixed).some((key) => fixed[key] !== source[key])) {
-      normalized[field] = fixed;
-      changed = true;
-    }
-  }
+  const detailsChanged = normalizeUsageDetailCounters(current, normalized);
   response.usage = normalized;
-  return changed;
+  return totalsChanged || detailsChanged;
 }
 
 const RESPONSES_LIFECYCLE_EVENT_TYPES = new Set([
