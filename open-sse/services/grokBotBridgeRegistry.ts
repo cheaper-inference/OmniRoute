@@ -204,14 +204,20 @@ export function challengeTokenConstantTimeEqual(
   presented: string | null | undefined,
   challenge: string
 ): boolean {
-  if (!presented || presented.length !== challenge.length) return false;
+  if (!presented) return false;
+  // Compare encoded byte lengths, not UTF-16 string lengths: a latin1 character
+  // in 0x80..0xFF is one code unit but two UTF-8 bytes, so a same-length string
+  // would reach timingSafeEqual with unequal buffers and make it throw.
   const a = Buffer.from(presented, "utf8");
   const b = Buffer.from(challenge, "utf8");
+  // Nothing was compared yet, and both source strings outlive these copies, so
+  // zeroing here would be ceremony rather than a mitigation.
+  if (a.length !== b.length) return false;
   const ok = timingSafeEqual(a, b);
-  // Best-effort zeroization of the comparison copies. The source strings
-  // themselves live as long as the entry and the request headers do; a
-  // runtime with true secret strings would need a different challenge
-  // representation altogether.
+  // Clears the two comparison copies. The strings they were built from stay
+  // alive as long as the registry entry and the request headers, so this only
+  // keeps the extra buffers off the heap for the rest of the call; a runtime
+  // with real secret strings would need a different challenge representation.
   a.fill(0);
   b.fill(0);
   return ok;

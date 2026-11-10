@@ -8,6 +8,7 @@ const {
   extractBridgeNonce,
   validateBridgeTarget,
   challengeMatches,
+  challengeTokenConstantTimeEqual,
   BRIDGE_ABSOLUTE_CAP_MS,
   BRIDGE_IDLE_TTL_MS,
   BRIDGE_MAX_ACTIVE_SESSIONS,
@@ -163,6 +164,12 @@ describe("bridge nonce and target validation", () => {
     assert.equal(challengeMatches(entry, challenge.slice(0, -1) + "X"), false);
     assert.equal(challengeMatches(entry, challenge.slice(0, -1)), false);
     assert.equal(challengeMatches(entry, null), false);
+    // Same UTF-16 length, more UTF-8 bytes: a latin1 char in 0x80..0xFF is one
+    // code unit but two bytes. Comparing string lengths first would hand
+    // timingSafeEqual unequal buffers and make it throw.
+    const latin1 = "\u00e9".repeat(challenge.length);
+    assert.equal(challengeMatches(entry, latin1), false);
+    assert.equal(challengeTokenConstantTimeEqual(latin1, challenge), false);
     assert.equal(challengeMatches(entry, ""), false);
   });
 });

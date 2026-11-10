@@ -14,6 +14,11 @@ export const WATCH_IDLE_TIMEOUT_MS = 240_000;
 // the upstream/proxy idle cut. Measured live: a settled turn idles the stream
 // within seconds, and every reconnect replays from the generation-0 baseline.
 export const WATCH_READ_TIMEOUT_MS = 20_000;
+/**
+ * Deadline for the RPCs that start a turn (tool discovery and the send itself).
+ * Without one, a stalled upstream holds the request until undici gives up.
+ */
+export const TURN_START_TIMEOUT_MS = 60_000;
 // Connect-protocol envelope: streaming RPC request bodies are framed like the
 // response (flag 0 + u32be length + JSON). Sending a bare JSON body gets
 // "protocol error: incomplete envelope" (measured live 2026-09-23).

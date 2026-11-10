@@ -193,8 +193,15 @@ it("supports dismissing a widget without a value", async () => {
   assert.equal(h.calls[0].method, "DismissGrokBotWidget");
 });
 
-async function agentHarness(existing = true, leased = false) {
+async function agentHarness(
+  existing = true,
+  leased = false,
+  opts: { tokenError?: boolean; tokenThrows?: string; manageError?: string } = {}
+) {
   const admin = await import("../../src/lib/grokBotAgentAdmin.ts");
+  // The real sanitizer, not a pass-through: a stub here would make the
+  // no-credential-echo assertion vacuous.
+  const errorUtils = await import("../../open-sse/utils/error.ts");
   const events: string[] = [];
   const calls: Array<{ method: string; payload: Record<string, unknown> }> = [];
   const modules: Record<string, unknown> = {
@@ -227,7 +234,23 @@ async function agentHarness(existing = true, leased = false) {
         events.push("save");
       },
     },
-    "@/lib/grokBotAgentAdmin": admin,
+    "../grok-bot/tokenSource": {
+      grokBotToken: async (connection: { accessToken?: string }) => {
+        if (opts.tokenThrows) throw new Error(opts.tokenThrows);
+        return opts.tokenError
+          ? { error: "reauth_required" }
+          : { accessToken: connection.accessToken ?? "" };
+      },
+    },
+    "@omniroute/open-sse/utils/error.ts": errorUtils,
+    "@/lib/grokBotAgentAdmin": opts.manageError
+      ? {
+          ...admin,
+          runGrokBotAgentAction: async () => {
+            throw new Error(opts.manageError);
+          },
+        }
+      : admin,
     "@/sse/services/grokBotAgentRpc": {
       grokBotAgentRpc: () => async (method: string, payload: Record<string, unknown>) => {
         calls.push({ method, payload });
@@ -276,6 +299,36 @@ async function agentHarness(existing = true, leased = false) {
       }),
   };
 }
+
+it("asks for re-auth instead of an opaque failure when the token is spent", async () => {
+  const h = await agentHarness(true, false, { tokenError: true });
+  const response = await h.get();
+  assert.equal(response.status, 409);
+  const body = (await response.json()) as { error?: string };
+  assert.equal(body.error, "reauth_required");
+});
+
+it("answers instead of crashing when the token refresh itself fails", async () => {
+  const h = await agentHarness(true, false, {
+    tokenThrows: "refresh network error sk-live-abcdef123456",
+  });
+  const response = await h.get();
+  assert.equal(response.status, 400);
+  const body = (await response.json()) as { error?: string };
+  assert.ok(body.error, "a message is returned");
+  assert.ok(!body.error!.includes("sk-live-abcdef123456"), "the key is not echoed");
+});
+
+it("never echoes an upstream credential in the error body", async () => {
+  const h = await agentHarness(true, false, {
+    manageError: "upstream rejected key sk-live-abcdef123456",
+  });
+  const response = await h.get();
+  assert.equal(response.status, 400);
+  const body = (await response.json()) as { error?: string };
+  assert.ok(body.error, "an error message is returned");
+  assert.ok(!body.error!.includes("sk-live-abcdef123456"), "the key is not echoed");
+});
 
 describe("Grok agent POST validation", () => {
   for (const [label, body] of [

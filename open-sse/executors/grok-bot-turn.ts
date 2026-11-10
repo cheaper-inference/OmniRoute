@@ -5,6 +5,7 @@ import { sanitizeErrorMessage } from "../utils/error.ts";
 import { enqueueCleanup } from "./grok-bot-cleanup-queue.ts";
 import {
   CREATE_TIMEOUT_MS,
+  TURN_START_TIMEOUT_MS,
   DELETE_TIMEOUT_MS,
   HARNESS_TEMPORAL,
   EMPTY_SESSION_ID,
@@ -35,6 +36,13 @@ type RequestBody = {
 };
 type DiscoveredTool = { name?: string; toolName?: string };
 type Discovery = { tools?: DiscoveredTool[]; servers?: Array<{ tools?: DiscoveredTool[] }> };
+/**
+ * The executor outlives every request, so the per-turn records it collects must
+ * not grow without bound. These are diagnostics and a replay guard, not a log:
+ * keeping the most recent entries is enough.
+ */
+const MAX_TURN_RECORDS = 256;
+
 type TurnOwner = {
   machineId: string;
   bridgeController: BridgeController | null;
@@ -130,6 +138,13 @@ export class GrokBotTurn {
   private advertised: AdvertisedTool[] = [];
   private startedBridge: StartedBridge | null = null;
   private readonly turnController = new AbortController();
+  /**
+   * One start-phase budget shared by tool discovery and the send. Created on
+   * first use and cleared when the turn ends, so a completed turn leaves no
+   * timer behind: AbortSignal.timeout cannot be cancelled once started.
+   */
+  private startController: AbortController | null = null;
+  private startTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly input: ExecuteInput,
@@ -165,6 +180,7 @@ export class GrokBotTurn {
     } catch (error) {
       return this.failureResponse(error);
     } finally {
+      this.stopStartDeadline();
       await this.cleanup();
     }
   }
@@ -268,7 +284,7 @@ export class GrokBotTurn {
 
   private async startControllerBridge(controller: BridgeController): Promise<Response | undefined> {
     this.bridgeStartAttempted = true;
-    this.owner.bridgeLifecycle.push("start");
+    this.recordLifecycle("start");
     this.advertised = advertisedTools(this.clientToolList);
     const options: BridgeTurnOptions = {
       signal: this.turnController.signal,
@@ -287,7 +303,25 @@ export class GrokBotTurn {
     ) {
       return bridgeError("Request bridge URL must use a public HTTPS path-nonce endpoint");
     }
-    this.owner.usedBridgeNonces.add(url);
+    this.recordBridgeNonce(url);
+  }
+
+  private recordLifecycle(event: string): void {
+    const list = this.owner.bridgeLifecycle;
+    list.push(event);
+    // One entry per call, so at most one falls off the front.
+    if (list.length > MAX_TURN_RECORDS) list.shift();
+  }
+
+  private recordBridgeNonce(url: string): void {
+    const used = this.owner.usedBridgeNonces;
+    used.add(url);
+    if (used.size > MAX_TURN_RECORDS) {
+      // ECMAScript defines Set iteration as insertion order, so the first value
+      // is the oldest one issued.
+      const oldest = used.values().next().value;
+      if (oldest !== undefined) used.delete(oldest);
+    }
   }
 
   private challenge(): string | undefined {
@@ -300,14 +334,40 @@ export class GrokBotTurn {
 
   private async discoverBridge(): Promise<Response | undefined> {
     const remote = remoteMcpServers();
-    const discovery = (await this.transport.rpc("aiserver.v1.DashboardService/ListSandMcpTools", {
-      serverIdentifiers: ["bridge", ...Object.keys(remote)],
-      mcpConfigJson: JSON.stringify({ mcpServers: { bridge: this.bridgeServer(), ...remote } }),
-    })) as Discovery;
+    const discovery = (await this.transport.rpc(
+      "aiserver.v1.DashboardService/ListSandMcpTools",
+      {
+        serverIdentifiers: ["bridge", ...Object.keys(remote)],
+        mcpConfigJson: JSON.stringify({ mcpServers: { bridge: this.bridgeServer(), ...remote } }),
+      },
+      { signal: this.startSignal() }
+    )) as Discovery;
     const registered = new Set(this.advertised.map((tool) => tool.name));
     const found = discoveryTools(discovery).find((tool) => isBridgeTool(tool, registered));
     if (!found) return bridgeError("Request bridge tool was not discovered");
     this.advertisedToolName = found.toolName || found.name;
+  }
+
+  /**
+   * Turn cancellation plus the start deadline. The deadline is created once for
+   * the turn, so tool discovery and the send share one 60s budget instead of
+   * each starting a fresh one.
+   */
+  private startSignal(): AbortSignal {
+    if (!this.startController) {
+      this.startController = new AbortController();
+      this.startTimer = setTimeout(() => this.startController?.abort(), TURN_START_TIMEOUT_MS);
+      // Same contract as AbortSignal.timeout: never hold the process open for a
+      // turn that is already finishing.
+      (this.startTimer as { unref?: () => void }).unref?.();
+    }
+    const turn = this.turnSignal();
+    return turn ? AbortSignal.any([turn, this.startController.signal]) : this.startController.signal;
+  }
+
+  private stopStartDeadline(): void {
+    if (this.startTimer) clearTimeout(this.startTimer);
+    this.startTimer = null;
   }
 
   private turnSignal(): AbortSignal | null {
@@ -342,7 +402,7 @@ export class GrokBotTurn {
       Object.assign(servers, remote);
       payload.mcpConfigJson = JSON.stringify({ mcpServers: servers });
     }
-    await this.transport.rpc("SendGrokBotUserMessage", payload);
+    await this.transport.rpc("SendGrokBotUserMessage", payload, { signal: this.startSignal() });
     return {
       collect: watchGrokBotTurn(
         this.transport,
@@ -412,14 +472,14 @@ export class GrokBotTurn {
     // Remote cleanup precedes bridge stop and has its own independent timeout.
     if (this.createdOk) await this.deleteAgent();
     if (this.startedBridge?.close) {
-      this.owner.bridgeLifecycle.push("close");
+      this.recordLifecycle("close");
       this.startedBridge.close("normal");
     } else if (this.bridgeStartAttempted && this.owner.bridgeController) {
-      this.owner.bridgeLifecycle.push("stop");
+      this.recordLifecycle("stop");
       try {
         await this.owner.bridgeController.stop();
       } catch (error) {
-        this.owner.bridgeLifecycle.push("stop-failed");
+        this.recordLifecycle("stop-failed");
         this.log?.warn?.("GROK_BOT", `bridge stop failed: ${sanitizeErrorMessage(error)}`);
       }
     }

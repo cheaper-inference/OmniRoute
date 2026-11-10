@@ -9,6 +9,8 @@ import {
   withGrokBotAgentLock,
 } from "@/lib/grokBotAgentAdmin";
 import { grokBotAgentRpc } from "@/sse/services/grokBotAgentRpc";
+import { grokBotToken } from "../grok-bot/tokenSource";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 
 export function postAction(body: { action?: string }) {
   const action = body.action ?? "";
@@ -58,8 +60,24 @@ async function run(
     return NextResponse.json({ error: "Connection is not grok-bot" }, { status: 422 });
   }
   const connection = loaded;
-  const token = typeof connection.accessToken === "string" ? connection.accessToken : "";
-  if (!token) return NextResponse.json({ error: "missing access token" }, { status: 422 });
+  // Refresh first, as every sibling Grok Bot route does: an expired token would
+  // otherwise reach the RPC and come back as a generic failure instead of a
+  // re-auth prompt. The refresh itself can fail on the network, so it is caught
+  // here rather than escaping as an unhandled route error.
+  let accessToken: string;
+  try {
+    const token = await grokBotToken(connection);
+    if (!token || "error" in token) {
+      return NextResponse.json({ error: "reauth_required" }, { status: 409 });
+    }
+    accessToken = token.accessToken;
+  } catch (error) {
+    const raw = error instanceof Error ? error.message : "Token refresh failed";
+    return NextResponse.json(
+      { error: sanitizeErrorMessage(raw) || "Token refresh failed" },
+      { status: 400 }
+    );
+  }
   const runAction = () =>
     runGrokBotAgentAction({
       action,
@@ -70,7 +88,7 @@ async function run(
       manage: (value) =>
         manage({
           ...value,
-          rpc: grokBotAgentRpc(token),
+          rpc: grokBotAgentRpc(accessToken),
           save: async (providerSpecificData) => {
             await updateProviderConnection(id, { providerSpecificData });
           },
@@ -80,7 +98,10 @@ async function run(
     const result = action === "get" ? await runAction() : await withGrokBotAgentLock(id, runAction);
     return NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Request failed";
+    // An upstream RPC failure carries provider text; strip anything that looks
+    // like a credential before it reaches the client.
+    const raw = error instanceof Error ? error.message : "Request failed";
+    const message = sanitizeErrorMessage(raw) || "Request failed";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

@@ -6,6 +6,7 @@
  */
 
 import { resolvePublicCred } from "../../../utils/publicCreds.ts";
+import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
 
 const GROK_BOT_REFRESH_URL = "https://api2.cursor.sh/oauth/token";
 // Production desktop OAuth client identity for api2.cursor.sh.
@@ -59,7 +60,7 @@ export type RefreshGrokBotTokenOptions = {
 export async function refreshGrokBotToken(
   refreshToken: string,
   log?: { error?: (...args: unknown[]) => void; info?: (...args: unknown[]) => void },
-  _proxyConfig: unknown = null,
+  proxyConfig: unknown = null,
   options: RefreshGrokBotTokenOptions = {}
 ) {
   const doFetch = options.fetchImpl ?? fetch;
@@ -73,16 +74,18 @@ export async function refreshGrokBotToken(
       await new Promise((r) => setTimeout(r, refreshRetryDelayMs(attempt - 1, retryBaseMs)));
     }
     try {
-      const response = await doFetch(GROK_BOT_REFRESH_URL, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          client_id: GROK_BOT_OAUTH_CLIENT_ID,
-          grant_type: "refresh_token",
-          refresh_token: refreshToken,
-        }),
-        signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
-      });
+      const response = await runWithProxyContext(proxyConfig, () =>
+        doFetch(GROK_BOT_REFRESH_URL, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            client_id: GROK_BOT_OAUTH_CLIENT_ID,
+            grant_type: "refresh_token",
+            refresh_token: refreshToken,
+          }),
+          signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
+        })
+      );
 
       const outcome = await readRefreshOutcome(response, refreshToken, log, options);
       if (outcome.retry && attempt < attempts - 1) {
@@ -133,6 +136,11 @@ async function readRefreshOutcome(
   if (!response.ok) {
     const retry = isRetryableRefreshStatus(response.status);
     const code = typeof parsed.error === "string" ? parsed.error : `http_${response.status}`;
+    // A revoked or malformed grant never becomes valid on a later attempt, and
+    // the shared refresher stops retrying on this error shape.
+    if (code === "invalid_grant" || code === "invalid_request") {
+      return { result: { error: "unrecoverable_refresh_error", code }, retry: false };
+    }
     const result = { error: "refresh_http_error", code: retry ? `http_${response.status}` : code };
     return { result, retry };
   }

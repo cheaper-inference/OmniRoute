@@ -125,14 +125,17 @@ describe("refreshGrokBotToken", () => {
       assert.equal(calls.length, 2);
     });
   }
-  it("does not retry an unrecoverable HTTP error", async () => {
+  it("reports a revoked grant as unrecoverable instead of a retryable HTTP error", async () => {
+    // invalid_grant never becomes valid on a later attempt, and the shared
+    // refresher stops retrying on unrecoverable_refresh_error. Reporting it as
+    // refresh_http_error kept a revoked token in the retry loop.
     const { impl, calls } = fakeFetch([{ status: 401, body: { error: "invalid_grant" } }]);
     assert.deepEqual(
       await refreshGrokBotToken("r", undefined, null, {
         fetchImpl: impl as unknown as typeof fetch,
         retryBaseMs: 0,
       }),
-      { error: "refresh_http_error", code: "invalid_grant" }
+      { error: "unrecoverable_refresh_error", code: "invalid_grant" }
     );
     assert.equal(calls.length, 1);
   });
