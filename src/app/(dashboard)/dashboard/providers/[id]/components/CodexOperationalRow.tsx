@@ -99,6 +99,26 @@ function useNow(intervalMs: number): number {
   return now;
 }
 
+function CodexPlanSummary({ props, t }: { props: ConnectionRowProps; t: Translate }) {
+  const { connection, quotaCache } = props;
+  const plan =
+    getCodexPlanLabel(true, connection.providerSpecificData) ||
+    (typeof quotaCache?.plan === "string" ? quotaCache.plan : "");
+  const account = getCodexAccountSummary(true, connection.providerSpecificData);
+  return (
+    <>
+      <span title={plan || undefined}>{plan ? formatCodexPlanLabel(plan) : "—"}</span>
+      {account && (
+        <span title={account.role ? t("codexAccountRole", { role: account.role }) : undefined}>
+          {" · "}
+          {t(account.kind === "business" ? "codexAccountBusiness" : "codexAccountPersonal")}
+          {account.workspaceName ? ` · ${account.workspaceName}` : ""}
+        </span>
+      )}
+    </>
+  );
+}
+
 function IdentityCell({
   props,
   name,
@@ -109,10 +129,6 @@ function IdentityCell({
   t: Translate;
 }) {
   const { connection, quotaCache } = props;
-  const plan =
-    getCodexPlanLabel(true, connection.providerSpecificData) ||
-    (typeof quotaCache?.plan === "string" ? quotaCache.plan : "");
-  const account = getCodexAccountSummary(true, connection.providerSpecificData);
   const resetCredits =
     connection.quotaVisible !== false ? (quotaCache?.bankedResetCredits ?? 0) : 0;
   return (
@@ -125,14 +141,7 @@ function IdentityCell({
           {name}
         </p>
         <p className="mt-1 text-xs text-text-muted">
-          <span title={plan || undefined}>{plan ? formatCodexPlanLabel(plan) : "—"}</span>
-          {account && (
-            <span title={account.role ? t("codexAccountRole", { role: account.role }) : undefined}>
-              {" · "}
-              {t(account.kind === "business" ? "codexAccountBusiness" : "codexAccountPersonal")}
-              {account.workspaceName ? ` · ${account.workspaceName}` : ""}
-            </span>
-          )}
+          <CodexPlanSummary props={props} t={t} />
           <span className="mx-2 text-border">/</span>#{connection.priority ?? "—"}
           {resetCredits > 0 && (
             <span className="ml-2 text-text-muted">
