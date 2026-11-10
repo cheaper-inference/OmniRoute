@@ -32,93 +32,86 @@ Mijoz so‘rovi
 
 ## Siqish rejimlari
 
-### Oʻchiq
+### O‘chirilgan
 
-Siqish qoʻllanilmaydi. Barcha xabarlar oʻzgarishsiz oʻtadi.
+Hech qanday siqish qo‘llanmaydi. Barcha xabarlar o‘zgartirilmagan holda uzatiladi.
 
-### Lite rejimi (~15% tejash, <1ms kechikish)
+### Lite rejimi (~15% tejalish, <1ms kechikish)
 
-Eng xavfsiz rejim — semantik oʻzgarish mutlaqo yoʻq, faqat formatlash tozalanadi:
+Eng xavfsiz rejim — formatlashni tozalash. Uning vosita natijalarini qisqartirishi yo‘qotishli bo‘lgani sababli, standart yo‘l (`allow-lossy`, `engine:lite` yoki nomlangan kombinatsiyaga aniq qo‘shilishsiz) `compressToolResults: false` bilan lite rejimida ishlaydi: avvalgi vosita natijalari provayderga o‘zgartirilmagan holda yetib boradi.
 
-| Texnika                  | Tavsif                                                                 |
-| ------------------------ | ---------------------------------------------------------------------- |
-| `collapseWhitespace`     | Ketma-ket boʻsh qatorlarni va qator oxiri boʻshliqlarini birlashtiradi |
-| `dedupSystemPrompt`      | Takroriy tizim xabarlarini oʻchiradi                                   |
-| `compressToolResults`    | Uzun tool/function chiqishlarini siqadi                                |
-| `removeRedundantContent` | Takroriy koʻrsatmalarni olib tashlaydi                                 |
-| `replaceImageUrls`       | base64 rasm data URI larini qisqartiradi                               |
+| Usul                     | Tavsif                                                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Ketma-ket bo‘sh qatorlar va oxiridagi bo‘sh joylarni birlashtirish                                                |
+| `dedupSystemPrompt`      | Takroriy tizim xabarlarini olib tashlash                                                                          |
+| `compressToolResults`    | Avvalgi vosita natijalarini lite chegarasigacha qisqartirish (yo‘qotishli: faqat so‘rov orqali ruxsat berilganda) |
+| `removeRedundantContent` | Takroriy ko‘rsatmalarni olib tashlash                                                                             |
+| `replaceImageUrls`       | Base64 tasvir ma’lumotlari URI’larini qisqartirish                                                                |
 
-**Tavsiya etiladi:** Doimiy yoqib qoʻyiladigan foydalanish, xavfsizlik jihatidan muhim ish oqimlari.
+**Quyidagilar uchun eng ma’qul:** Har doim yoqilgan foydalanish, xavfsizlik muhim bo‘lgan ish jarayonlari.
 
-### Standart rejim (~30% tejash)
+### Standard rejimi (~30% tejalish)
 
-[Caveman](https://github.com/JuliusBrussee/caveman) dan ilhomlangan — maʼnoni saqlagan holda toʻldiruvchi soʻzlarni va uzun ifodalarni olib tashlaydi:
+[Caveman](https://github.com/JuliusBrussee/caveman) dan ilhomlangan — ma’noni saqlagan holda to‘ldiruvchi so‘zlar va sergap iboralarni olib tashlaydi:
 
-- Toʻldiruvchi soʻzlarni olib tashlaydi ("please", "I think", "basically", "actually")
-- Uzun iboralarni ixchamlaydi ("in order to" → "to", "as a result of" → "because")
-- Muloyim ikkilanish iboralarini olib tashlaydi ("Would you mind...", "If you could possibly...")
-- Kodlash promptlari uchun sozlangan 30+ regex qoidasi
+- To‘ldiruvchi so‘zlarni olib tashlaydi ("please", "I think", "basically", "actually")
+- Serhasham iboralarni ixchamlashtiradi ("in order to" → "to", "as a result of" → "because")
+- Muloyim ehtiyotkor iboralarni olib tashlaydi ("Would you mind...", "If you could possibly...")
+- Kodlash so‘rovlari uchun moslashtirilgan 30 dan ortiq regex qoidalaridan foydalanadi
 
-**Tavsiya etiladi:** Kundalik kodlash ish oqimlari, xarajatlarni tejashga intiluvchi jamoalar.
+**Quyidagilar uchun eng ma’qul:** Kundalik kodlash ish jarayonlari, xarajatlarni tejashga e’tibor beradigan jamoalar.
 
-### Agresiv rejim (~50% tejash)
+### Aggressive rejimi (~50% tejalish)
 
-Uzun sessiyalar uchun aqlli tarix boshqaruvi:
+Uzoq sessiyalar uchun aqlli tarix boshqaruvi:
 
-- **Xabar eskirishi** — eski xabarlar bosqichma-bosqich kuchroq siqiladi
-- **Tool natijalarini siqish** — uzun tool chiqishlari qisqartiriladi yoki kesiladi (birinchi/oxirgi
-  qatorlar, mos qatorlarni filtrlash, JSON kalitlarini ixchamlash)
-- **Strukturaviy yaxlitlik himoyasi** — `tool_use` + `tool_result` juftliklarining izchil qolishini taʼminlaydi
-- **Kontekst oynasini hisobga olish** — har bir modelning token limitlariga rioya etadi
+- **Xabarlarni eskirtirish** — eski xabarlar bosqichma-bosqich siqiladi
+- **Vositа natijalarini siqish** — uzun vosita chiqishlari qisqartiriladi yoki olib tashlanadi (birinchi/oxirgi qatorlar,
+  moslik qatorlarini filtrlash, JSON kalitlarini ixchamlashtirish)
+- **Strukturaviy yaxlitlik himoyalari** — `tool_use` + `tool_result` juftliklari izchil qolishini ta’minlaydi
+- **Kontekst oynasidan xabardorlik** — har bir model uchun token cheklovlariga rioya qiladi
 
-**Tavsiya etiladi:** Uzoq davom etadigan debugging sessiyalari, katta kod bazalari.
+**Quyidagilar uchun eng ma’qul:** Uzoq davom etadigan nosozliklarni tuzatish sessiyalari, katta kod bazalari.
 
-### Ultra rejimi (~75% tejash)
+### Ultra rejimi (~75% tejalish)
 
-Token jihatidan kritik stsenariylar uchun maksimal siqish:
+Tokenlar muhim bo‘lgan vaziyatlar uchun maksimal siqish:
 
-- **Evristik qirqish** — proza tokenlarini ball asosida qirqish
-- **Strukturani saqlash** — fenced code bloklar, inline code, URL lar va identifikatorlar
-  tombstone qilinadi va soʻzma-soʻz qayta tiklanadi, hech qachon qirqilmaydi
-- **Ixtiyoriy SLM darajasi** — sozlanganda kichik mahalliy model qirqishni aniqlashtirishi mumkin
-- Agresiv rejimdan mustaqil: u xabar eskirtirish, tool-natija siqish yoki fallback summarizerni
-  ishga tushirmaydi (faqat SLM darajasidagi xatolik fallback oʻtishni agresiv rejim orqali
-  yoʻnaltirishi mumkin)
+- **Evristik qisqartirish** — matn tokenlarini ball asosida qisqartirish
+- **Strukturani saqlash** — bloklangan kod qismlari, ichki kod, URL’lar va identifikatorlar tombstone qilinadi va so‘zma-so‘z qayta tiklanadi, hech qachon qisqartirilmaydi
+- **Ixtiyoriy SLM darajasi** — sozlanganda kichik lokal model qisqartirishni takomillashtirishi mumkin
+- Aggressive rejimdan mustaqil: u xabarlarni eskirtirish, vosita natijalarini siqish yoki zaxira summarizatorni ishga tushirmaydi (faqat SLM darajasidagi nosozlik zaxira jarayonini aggressive orqali yo‘naltirishi mumkin)
 
-**Tavsiya etiladi:** Kontekst limitlariga qayta-qayta duch kelayotganingizda.
+**Quyidagilar uchun eng ma’qul:** Kontekst cheklovlariga qayta-qayta duch kelganda.
 
-### RTK rejimi (60-90% upstream oraligʻi)
+### RTK rejimi (yuqori oqimda 60–90%)
 
-RTK rejimi kodlash-agent sessiyalarida uchraydigan uzun tool chiqishlari uchun optimallashtirilgan:
+RTK rejimi kodlash agenti sessiyalarida uchraydigan sergap vosita chiqishlari uchun optimallashtirilgan:
 
-- `git status`, `git diff`, `git log`, test runnerlar, TypeScript/Vite/Webpack buildlar,
-  ESLint/Biome/Prettier, npm audit/install lar, Docker loglar, infra chiqishi va umumiy shell
-  chiqishi kabi buyruq/chiqish sinflarini aniqlaydi
-- `open-sse/services/compression/engines/rtk/filters/` ichidan JSON filtr paketlarini qoʻllaydi
-- Loyiha yoki global `filters.toml` fayllaridan RTK TOML schema v1 filtrlarini import qiladi,
-  loyiha fayllari uchun inline-test validatsiyasi va trust-gating bilan
-- Inline verify namunalari bilan 56 ta oʻrnatilgan filtr bilan keladi
-- ANSI boshqaruv ketma-ketliklari, progress barlar, takroriy qatorlar va harakat talab qilmaydigan shovqinni olib tashlaydi
-- Muvaffaqiyatsizliklar, xatolar, ogohlantirishlar, oʻzgarган fayllar, xulosalar va uzun chiqishning oxirgi qismini saqlaydi
-- Trust-gated loyiha filtrlari, global filtrlar va ixtiyoriy redacted raw-output tiklashni qoʻllab-quvvatlaydi
+- `git status`, `git diff`, `git log`, test runner’lari,
+  TypeScript/Vite/Webpack build’lari, ESLint/Biome/Prettier, npm audit/o‘rnatishlari, Docker log’lari, infratuzilma
+  chiqishlari va umumiy shell chiqishi kabi buyruq/chiqish sinflarini aniqlaydi
+- `open-sse/services/compression/engines/rtk/filters/` ichidagi JSON filtr to‘plamlarini qo‘llaydi
+- Inline-test
+  tekshiruvi va loyiha fayllari uchun ishonch nazorati bilan loyiha yoki global `filters.toml` fayllaridan RTK TOML sxemasi v1 filtrlarini import qiladi
+- Inline tekshiruv namunalari bilan birga 56 ta o‘rnatilgan filtrni taqdim etadi
+- ANSI boshqaruv ketma-ketliklari, jarayon indikatorlari, takroriy qatorlar va amaliy qiymatga ega bo‘lmagan shovqinni olib tashlaydi
+- Muvaffaqiyatsizliklar, xatolar, ogohlantirishlar, o‘zgargan fayllar, xulosalar va uzun chiqishlarning oxirgi qismini saqlab qoladi
+- Ishonch nazoratidagi loyiha filtrlari, global filtrlar va ixtiyoriy redaktsiya qilingan xom chiqishni tiklashni qo‘llab-quvvatlaydi
 
-**Tavsiya etiladi:** Shell, build, test, git, grep va fayl-chiqish transkriptlari boʻlgan agent sessiyalari.
+**Quyidagilar uchun eng ma’qul:** Shell, build, test, git, grep va fayl chiqishlari transkriptlariga ega agent sessiyalari.
 
-### Stacked rejimi (78-95% qoʻllaniladigan oraliq)
+### Birlashtirilgan rejim (mos keladigan diapazonda 78–95%)
 
-Stacked rejimi bir nechta siqish dvigatelini deterministik tartibda ishga tushiradi. Standart pipeline:
+Birlashtirilgan rejim bir nechta siqish mexanizmlarini deterministik tartibda ishga tushiradi. Standart konveyer:
 
 ```txt
 RTK -> Caveman
 ```
 
-Bu tartib avval terminal/tool chiqishini ixcham holga keltiradi, soʻng qolgan tabiiy-til promptiga
-Caveman semantik ixchamlashini qoʻllaydi. Stacked pipelinelarni global yoki routing kombolariga
-biriktirilgan siqish kombolari orqali sozlash mumkin.
+Bu tartib avval terminal/vosita chiqishini ixchamlashtiradi, so‘ng qolgan tabiiy til so‘roviga Caveman semantik ixchamlashtirishini qo‘llaydi. Birlashtirilgan konveyerlar global miqyosda yoki marshrutlash kombinatsiyalariga biriktirilgan siqish kombinatsiyalari orqali sozlanishi mumkin.
 
-**Tavsiya etiladi:** Katta tool loglari hamda inson koʻrsatmalari yoki assistant xulosalari aralashgan kontekstlar.
-
----
+**Quyidagilar uchun eng ma’qul:** Katta vosita loglari hamda inson ko‘rsatmalari yoki yordamchi xulosalarini o‘z ichiga olgan aralash kontekst.
 
 ## Yuqori oqimdagi tejash hisobi
 
@@ -191,62 +184,70 @@ Stacked bilan:           10K-2.5K token yuboriladi     (mos keladigan RTK+Cavema
 
 `Dashboard → Context & Cache` bo‘limiga o‘ting:
 
-- **Caveman** — rejim tanlash, til paketlari, oldindan ko‘rish va global standart sozlamalar
-- **RTK** — buyruq filtri natijasini oldindan ko‘rish, RTK xavfsizlik sozlamalari va filtrlar katalogi
-- **Compression Combos** — marshrutlash kombinatsiyalariga biriktirilgan, nomlangan mexanizm konveyerlari
-- **Auto-Trigger Threshold** — tokenlar soni chegaradan oshganda siqishni avtomatik ravishda ishga tushiradi
+- **Caveman** — rejim tanlovi, til paketlari, oldindan ko‘rish va global standartlar
+- **RTK** — buyruq filtri oldindan ko‘rishi, RTK xavfsizlik sozlamalari va filtr katalogi
+- **Compression Combos** — marshrutlash kombinatsiyalariga biriktirilgan nomlangan dvigatel konveyerlari
+- **Auto-Trigger Threshold** — tokenlar soni belgilangan chegaradan oshganda siqishni avtomatik yoqish
 
-### Har bir kombinatsiya uchun alohida sozlama
+### Har bir kombinatsiya uchun qayta belgilash
 
-`Dashboard → Context & Cache → Compression Combos` bo‘limida marshrutlash kombinatsiyasiga siqish
-kombinatsiyasini biriktiring:
+`Dashboard → Context & Cache → Compression Combos` bo‘limida marshrutlash
+kombinatsiyasiga siqish kombinatsiyasini biriktiring:
 
 ```txt
-Kombinatsiya: "free-tier-fallback"
-  Siqish kombinatsiyasi: "coding-agent-stack"
-  Konveyer: RTK -> Caveman
-  Nishonlar:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Bu pulli obunalarda yengil rejimni saqlagan holda bepul/kodlash provayderlarida ketma-ket siqishdan
-foydalanish imkonini beradi.
+Bu pulli obunalarda lite rejimini saqlagan holda, bepul/kodlash provayderlarida bosqichma-bosqich
+siqishdan foydalanish imkonini beradi.
 
-Ushbu "Har bir kombinatsiya uchun alohida sozlama" biriktiruvi **marshrutlash kombinatsiyasining siqish
-rejimi** ustuvor sozlamasidan (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — maydon
-sxemasi `rtk`, `stacked` va `omniglyph` qiymatlarini ham qabul qiladi) farqli boshqaruv elementidir —
-bu ustuvor sozlama nomlangan siqish kombinatsiyasi konveyerini tanlamaydi; u faqat
-`resolveCompressionPlan` tomonidan tekshiriladigan `compressionMode` maydonini o‘rnatadi. Uni
-kombinatsiya kartasida (`Dashboard → Combos`) yoki #6760 dan boshlab,
-`Dashboard → Context & Cache → Compression Combos` bo‘limidagi "Assign to routing" ro‘yxatida, yuqorida
-hujjatlashtirilgan konveyerni biriktirish katakchasi yonida har bir marshrutlash kombinatsiyasi uchun
-alohida o‘rnatish mumkin. Har ikki interfeys sozlamalarni bir xil `PUT /api/combos/{id}` endpointi
-orqali saqlaydi.
+Ushbu "Per-Combo Override" biriktiruvi **routing-combo compression
+mode** qayta belgilashidan (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — maydon sxemasi
+`rtk`, `stacked` va `omniglyph` qiymatlarini ham qabul qiladi) farqli boshqaruv vositasidir — bu qayta
+belgilash nomlangan siqish kombinatsiyasi konveyerini tanlamaydi; u faqat
+`resolveCompressionPlan` tomonidan foydalaniladigan `compressionMode` maydonini o‘rnatadi. Uni
+kombinatsiya kartasida (`Dashboard → Combos`) yoki #6760 versiyasidan boshlab,
+yuqorida hujjatlashtirilgan konveyerga biriktirish katagi yonidagi
+`Dashboard → Context & Cache → Compression Combos` bo‘limidagi "Assign to routing" ro‘yxatida
+har bir marshrutlash kombinatsiyasi uchun o‘rnatish mumkin. Har ikkala interfeys ham bir xil
+`PUT /api/combos/{id}` endpointi orqali saqlanadi.
 
-### Har bir so‘rov uchun alohida sozlama
+### Har bir so‘rov uchun qayta belgilash
 
-Bitta so‘rov uchun siqish rejasini almashtirish maqsadida `x-omniroute-compression` so‘rov sarlavhasini
-yuboring. U eng yuqori ustuvorlikka ega — u marshrutlash kombinatsiyasi ustuvor sozlamasi, faol profil,
-avtomatik ishga tushirish va paneldagi Default sozlamasidan ustun turadi. Noma’lum qiymatlar e’tiborsiz
-qoldiriladi (so‘rov hech qachon rad etilmaydi), global asosiy kalit esa hamon barcha amallarni boshqaradi:
-siqish global miqyosda o‘chirilgan bo‘lsa, sarlavha uni yoqa olmaydi. Qiymatlar:
+Bitta so‘rov uchun siqish rejasini qayta belgilash uchun `x-omniroute-compression` so‘rov
+sarlavhasini yuboring. U eng yuqori ustuvorlikka ega — marshrutlash kombinatsiyasi qayta belgilanishi,
+faol profil, avtomatik ishga tushirish va paneldagi Default qiymatidan ustun turadi. Noma’lum qiymatlar
+e’tiborsiz qoldiriladi (so‘rov hech qachon rad etilmaydi) va global asosiy kalit baribir hammasini
+boshqaradi: siqish global ravishda o‘chirilganida, sarlavha uni yoqa olmaydi. Qiymatlar:
 
-| Qiymat        | Ta’siri                                                                                                                     |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Bu so‘rov uchun siqish qo‘llanmaydi.                                                                                        |
-| `default`     | Panel asosida aniqlangan Default profil (faol profilni e’tiborsiz qoldiradi). Yo‘qotishli mexanizmlar o‘chiq qoladi.        |
-| `safe`        | Sarlavhani kiritmaslik bilan bir xil: faqat takrorlarni olib tashlash va bo‘sh joylarni birlashtirish.                      |
-| `allow-lossy` | Ushbu so‘rovning operator rejasini, jumladan xulosalar, dolzarblik filtrlari va uslubni qayta yozishni saqlab qoladi.       |
-| `engine:<id>` | Yoqilgan bo‘lsa, bitta mexanizm, masalan, `engine:rtk`. Bu ushbu so‘rov uchun o‘sha mexanizmni ixtiyoriy yoqish usulidir.   |
-| `<combo>`     | Avval nomi bo‘yicha (katta-kichik harflarni farqlamasdan), keyin esa id bo‘yicha moslashtiriladigan nomlangan kombinatsiya. |
+| Qiymat        | Ta’siri                                                                                                                           |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Ushbu so‘rov uchun siqish amalga oshirilmaydi.                                                                                    |
+| `default`     | Paneldan olingan Default profili (faol profil e’tiborga olinmaydi). Yo‘qotishli dvigatellar o‘chiq qoladi.                        |
+| `safe`        | Sarlavhani kiritmaslik bilan bir xil.                                                                                             |
+| `allow-lossy` | Ushbu so‘rovning operator rejasini, jumladan xulosalar, relevatlik filtrlari va uslub qayta yozishlarini saqlab qoladi.           |
+| `engine:<id>` | Yoqilganida bitta dvigatel, masalan, `engine:rtk`. Bu ushbu dvigatel uchun so‘rov darajasidagi aniq yoqishdir.                    |
+| `<combo>`     | Nomi bo‘yicha (katta-kichik harflarni farqlamasdan), keyin esa identifikatori bo‘yicha moslashtiriladigan nomlangan kombinatsiya. |
 
-`allow-lossy`, `engine:<id>` yoki nomlangan kombinatsiyasiz yo‘qotishli mexanizmlar qo‘llanmaydi.
-Siqish yoqilgan bo‘lsa, so‘rovga seansdagi takrorlarni olib tashlash va bo‘sh joylarni birlashtirish
-baribir qo‘llanadi.
+`allow-lossy`, `engine:<id>` yoki nomlangan kombinatsiyasiz yo‘qotishli dvigatellar qo‘llanmaydi. Yo‘qotishli
+Default, avtomatik ishga tushirish yoki marshrutlash qayta belgilanishi pasaytirilganda, OmniRoute
+sozlangan bosqichma-bosqich konveyerdan tanilgan yo‘qotishsiz bosqichlarni sozlangan tartibda saqlab
+qoladi. `session-dedup → lite` zaxira variantiga faqat sozlangan yo‘qotishsiz bosqichlardan hech biri
+saqlanib qolmaganda o‘tiladi.
 
-Qo‘llangan reja javobdagi `X-OmniRoute-Compression: <mode>; source=<source>` sarlavhasida qaytariladi,
-bunda `<source>` quyidagilardan biri bo‘ladi: `request-header`, `routing-override`, `active-profile`,
+Sozlamalar panelidagi **Effective pipeline** oldindan ko‘rishi odatiy saqlangan holatdagi rejani
+ko‘rsatadi. Avtomatik ishga tushirish bajarilishi mumkin bo‘lganda, xuddi shu oldindan ko‘rish uning
+shartli samarali konveyerini ham ko‘rsatadi, shuning uchun panel va sarlavhasiz ish vaqtidagi
+aniqlash bir-biriga mos bo‘lib qoladi.
+
+Qo‘llangan reja `X-OmniRoute-Compression: <mode>; source=<source>` javob
+sarlavhasida qaytariladi; bunda `<source>` quyidagilardan biri bo‘ladi:
+`request-header`, `routing-override`, `active-profile`,
 `auto-trigger`, `default` yoki `off`.
 
 ### API

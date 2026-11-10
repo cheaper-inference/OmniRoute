@@ -6,7 +6,6 @@ const { DEFAULT_THINKING_CLAUDE_SIGNATURE } =
   await import("../../open-sse/config/defaultThinkingSignature.ts");
 const reasoningCache = await import("../../open-sse/services/reasoningCache.ts");
 
-
 function multiTurnBodyWithoutThinkingBlock() {
   return {
     thinking: { type: "enabled", budget_tokens: 4096 },
@@ -46,19 +45,18 @@ function multiTurnBodyWithThinkingBlock(thinkingText: string, toolUseId = "call_
 
 // ──────────────── Anthropic-native (claude, anthropic-compatible-*) ────────────────
 
-test("claude provider — empty content, injects redacted_thinking{data} before tool_use", () => {
+test("claude provider — empty content, injects nothing and disables manual thinking", () => {
   const body = multiTurnBodyWithoutThinkingBlock();
   const result = prepareClaudeRequest(body as any, "claude");
   const content = (result as any).messages[1].content;
-  assert.equal(content.length, 2);
-  assert.equal(content[0].type, "redacted_thinking");
-  assert.equal(content[0].data, DEFAULT_THINKING_CLAUDE_SIGNATURE);
-  assert.equal(content[0].thinking, undefined);
-  assert.equal(content[0].signature, undefined);
-  assert.equal(content[1].type, "tool_use");
+  assert.equal(content.length, 1);
+  assert.equal(content[0].type, "tool_use");
+  assert.equal(content[0].data, undefined);
+  assert.equal(JSON.stringify(result).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
+  assert.equal(result.thinking, undefined, "manual thinking off without a final block");
 });
 
-test("claude provider — existing thinking block converted to redacted_thinking{data} on older messages", () => {
+test("claude provider — genuine signed thinking is kept verbatim on older messages", () => {
   // Uses a two-assistant-turn body: the first assistant (with thinking) is an
   // older turn; the second (latest) assistant's thinking must stay verbatim.
   // This verifies that older assistant thinking blocks ARE rewritten.
@@ -85,17 +83,13 @@ test("claude provider — existing thinking block converted to redacted_thinking
     ],
   };
   prepareClaudeRequest(body, "claude");
-  // Older assistant: thinking rewritten to redacted_thinking
   const olderContent = body.messages[1].content;
   assert.equal(olderContent.length, 2, "no double-inject");
-  assert.equal(olderContent[0].type, "redacted_thinking");
-  assert.equal(olderContent[0].data, DEFAULT_THINKING_CLAUDE_SIGNATURE);
-  assert.equal(
-    olderContent[0].thinking,
-    undefined,
-    "plain text stripped (Anthropic does not trust replay text)"
-  );
-  assert.equal(olderContent[0].signature, undefined);
+  assert.equal(olderContent[0].type, "thinking");
+  assert.equal(olderContent[0].thinking, "real thinking text");
+  assert.equal(olderContent[0].signature, "client-stored-sig");
+  assert.equal(olderContent[0].data, undefined);
+  assert.equal(JSON.stringify(olderContent).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
   assert.equal(olderContent[1].type, "tool_use");
   // Latest assistant: thinking preserved verbatim
   const latestContent = body.messages[3].content;
@@ -104,12 +98,36 @@ test("claude provider — existing thinking block converted to redacted_thinking
   assert.equal(latestContent[0].signature, "latest-sig");
 });
 
-test("anthropic-compatible-* provider — same as claude (redacted_thinking)", () => {
+test("anthropic-compatible-* provider — same as claude (nothing injected)", () => {
   const body = multiTurnBodyWithoutThinkingBlock();
   const result = prepareClaudeRequest(body as any, "anthropic-compatible-abc123");
   const content = (result as any).messages[1].content;
-  assert.equal(content[0].type, "redacted_thinking");
-  assert.equal(content[0].data, DEFAULT_THINKING_CLAUDE_SIGNATURE);
+  assert.equal(content[0].type, "tool_use");
+  assert.equal(JSON.stringify(result).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
+});
+
+test("claude provider — unsigned thinking and the blob are dropped; adaptive stays on", () => {
+  const body: Parameters<typeof prepareClaudeRequest>[0] = {
+    thinking: { type: "adaptive" },
+    messages: [
+      { role: "user", content: [{ type: "text", text: "hi" }] },
+      {
+        role: "assistant",
+        content: [
+          { type: "thinking", thinking: "no signature" },
+          { type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE },
+          { type: "tool_use", id: "call_u", name: "ls", input: {} },
+        ],
+      },
+      { role: "user", content: [{ type: "tool_result", tool_use_id: "call_u", content: "ok" }] },
+    ],
+  };
+  prepareClaudeRequest(body, "claude");
+  assert.deepEqual(
+    (body.messages![1].content as Array<{ type?: string }>).map((b) => b.type),
+    ["tool_use"]
+  );
+  assert.deepEqual(body.thinking, { type: "adaptive" });
 });
 
 // ──────────────── Non-Anthropic Claude-shape (kimi-coding, glmt, zai, …) ────────────────
@@ -245,7 +263,7 @@ test("thinking enabled + no tool_use — no precursor inject (single-turn text)"
 
 // ──────────────── Latest-assistant preservation (Anthropic & non-Anthropic) ────────────────
 
-test("preserves verbatim thinking on the LATEST assistant message; rewrites only older ones", () => {
+test("preserves genuine signed thinking verbatim on every assistant message", () => {
   const body: any = {
     thinking: { type: "enabled", budget_tokens: 4096 },
     model: "claude-opus-4-7",
@@ -274,13 +292,12 @@ test("preserves verbatim thinking on the LATEST assistant message; rewrites only
   const olderAssistant = body.messages[0];
   const latestAssistant = body.messages[2];
 
-  // Older assistant thinking: rewritten to redacted_thinking { data }
-  assert.equal(olderAssistant.content[0].type, "redacted_thinking");
-  assert.ok(
-    typeof olderAssistant.content[0].data === "string" && olderAssistant.content[0].data.length > 0
-  );
-  assert.equal(olderAssistant.content[0].thinking, undefined);
-  assert.equal(olderAssistant.content[0].signature, undefined);
+  // Older assistant thinking: genuine signed block kept verbatim
+  assert.equal(olderAssistant.content[0].type, "thinking");
+  assert.equal(olderAssistant.content[0].thinking, "older thought");
+  assert.equal(olderAssistant.content[0].signature, "sig-OLD");
+  assert.equal(olderAssistant.content[0].data, undefined);
+  assert.equal(JSON.stringify(olderAssistant).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
 
   // Latest assistant thinking: untouched (type, text, signature all preserved)
   assert.equal(latestAssistant.content[0].type, "thinking");

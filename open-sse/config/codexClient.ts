@@ -1,10 +1,12 @@
 import { z } from "zod";
 import type { SafeOutboundFetchOptions } from "@/shared/network/safeOutboundFetch";
+import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
 import {
   CODEX_CLI_RS_ORIGINATOR,
   DEFAULT_CODEX_CLIENT_VERSION,
   getCodexCliRsHeaders as buildCodexCliRsHeaders,
 } from "@/shared/constants/codexClient";
+import { getCliVersionOverride, type CliVersionSource } from "./cliVersions.ts";
 
 export {
   DEFAULT_CODEX_CLIENT_VERSION,
@@ -53,6 +55,10 @@ type FetchLike = typeof fetch;
 
 let versionCache: CodexVersionCache | null = null;
 let versionInFlight: Promise<string> | null = null;
+// A failed lookup caches nothing, so without this every hot-path call would retry it —
+// against an anonymous GitHub API budget of 60 requests/hour per IP.
+let versionLookupFailedAt = 0;
+export const CODEX_VERSION_RETRY_AFTER_FAILURE_MS = 15 * 60 * 1000;
 
 function describeError(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -78,9 +84,12 @@ function reportCodexVersionFallback(reason: string): void {
  * last refresh failed and the catalog may be short (#16714); `registry` means
  * the npm metadata was applied; `pinned` means the registry answered but is not
  * newer than the built-in floor (healthy, nothing to fix); `override` means
- * CODEX_CLIENT_VERSION won.
+ * the dashboard override or CODEX_CLIENT_VERSION won (no refresh runs then).
+ * For the operator-facing layer name (settings/env/discovered/default) see
+ * getCodexAdvertisedVersionSource().
  */
 export function getCodexClientVersionSource(): CodexClientVersionSource {
+  if (getCliVersionOverride("codex")) return "override";
   if (getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "override";
   return codexVersionSource;
 }
@@ -156,6 +165,9 @@ export function resolveCodexClientVersion(fetchImpl: FetchLike = fetch): Promise
     const version = pickCodexVersionAtLeastPin(fetched ?? versionCache?.version ?? null);
     if (fetched) {
       versionCache = { fetchedAt: Date.now(), version };
+      versionLookupFailedAt = 0;
+    } else {
+      versionLookupFailedAt = Date.now();
     }
     return version;
   })();
@@ -179,10 +191,13 @@ export function seedCodexClientVersionCache(version: string, fetchedAt = Date.no
 export function clearCodexClientVersionCache(): void {
   versionCache = null;
   versionInFlight = null;
+  versionLookupFailedAt = 0;
 }
 
 export function getCodexClientVersion(): string {
-  const override = getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
+  const override =
+    getCliVersionOverride("codex") ||
+    getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
   if (override) return override;
   // Discovery may cache a registry version, but never below the release pin.
   if (
@@ -191,7 +206,13 @@ export function getCodexClientVersion(): string {
   ) {
     return cachedCodexVersion;
   }
-  if (!process.env.NODE_TEST_CONTEXT && !versionCache && !versionInFlight) {
+  if (
+    canStartBackgroundRefresh() &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !versionCache &&
+    !versionInFlight &&
+    Date.now() - versionLookupFailedAt >= CODEX_VERSION_RETRY_AFTER_FAILURE_MS
+  ) {
     void resolveCodexClientVersion();
   }
   return getCachedCodexClientVersion();
@@ -230,7 +251,9 @@ async function readCodexVersionMetadata(response: Response, signal: AbortSignal)
 
 /** Refresh only during model discovery. Inference reads the validated cache synchronously. */
 export function refreshCodexClientVersion(fetchImpl: CodexClientVersionFetch): Promise<string> {
-  const override = getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
+  const override =
+    getCliVersionOverride("codex") ||
+    getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN);
   if (override || Date.now() < codexVersionRefreshAt) {
     return Promise.resolve(getCodexClientVersion());
   }
@@ -301,6 +324,24 @@ export function resetCodexClientVersionCacheForTests(): void {
 }
 
 /**
+ * Which layer produced `getCodexClientVersion()` right now. Resolution is
+ * dashboard override -> `CODEX_CLIENT_VERSION` env -> a discovered registry /
+ * release version newer than the pin ("discovered") -> the captured default.
+ * Side-effect free: unlike getCodexClientVersion() it never starts a refresh.
+ * Note this is the NON-caller-aware chain; see resolveCodexAdvertisedVersion for
+ * the inference path, which additionally forwards the caller's own version.
+ */
+export function getCodexAdvertisedVersionSource(): CliVersionSource {
+  if (getCliVersionOverride("codex")) return "settings";
+  if (getSafeEnvValue(CODEX_VERSION_OVERRIDE_ENV, SAFE_HEADER_TOKEN_PATTERN)) return "env";
+  const discovered =
+    cachedCodexVersion && compareDottedTriple(cachedCodexVersion, DEFAULT_CODEX_CLIENT_VERSION) >= 0
+      ? cachedCodexVersion
+      : getCachedCodexClientVersion();
+  return discovered !== DEFAULT_CODEX_CLIENT_VERSION ? "discovered" : "default";
+}
+
+/**
  * Extract the Codex client version the CALLER actually reported, so OmniRoute
  * forwards it upstream instead of substituting a pinned default. The official
  * CLI sends it in User-Agent, e.g.
@@ -347,6 +388,33 @@ export function getCodexClientVersionFromHeaders(
 
   const version = match[1];
   return SAFE_HEADER_TOKEN_PATTERN.test(version) ? version : null;
+}
+
+/**
+ * The version to advertise on the chatgpt.com/backend-api inference face.
+ *
+ * Precedence, highest first:
+ *   1. the dashboard override (`settings.cliVersionOverrides.codex`), which is an
+ *      explicit operator choice and therefore outranks the caller;
+ *   2. the version the CALLER reported (see getCodexClientVersionFromHeaders);
+ *   3. `CODEX_CLIENT_VERSION` env;
+ *   4. a discovered registry/release version newer than the pin;
+ *   5. the captured default.
+ *
+ * Layer 2 exists because the ChatGPT backend gates newer models on the client
+ * version, so forwarding what the caller actually runs keeps a stale pin from
+ * locking operators out of a model their own CLI supports. Step 1 was added
+ * later so an operator can force one advertised version regardless of what the
+ * caller sends.
+ */
+export function resolveCodexAdvertisedVersion(
+  clientHeaders?: Record<string, string> | null
+): string {
+  return (
+    getCliVersionOverride("codex") ||
+    getCodexClientVersionFromHeaders(clientHeaders) ||
+    getCodexClientVersion()
+  );
 }
 
 export function getCodexUserAgent(versionOverride?: string | null): string {

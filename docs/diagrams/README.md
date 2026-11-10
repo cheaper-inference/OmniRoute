@@ -50,14 +50,17 @@ section); `pool-fair-share.svg` and `combo-always-on.svg` are the two still draw
 The twelve README diagrams above are not edited by hand: each is the output of its
 `scripts/docs/gen-readme-<name>.mjs`, and `npm run docs:readme-diagrams`
 (`scripts/docs/gen-readme-diagrams.mjs`) regenerates all of them in README order, printing one
-line per file with its size. Three shared modules do the common work:
+line per file with its size. These shared modules do the common work:
 
-- `scripts/docs/readme-fonts.mjs` — subsets the kit's `@fontsource` woff2 files (Instrument
-  Serif, Inter, IBM Plex Mono) to the glyphs a diagram draws and returns `@font-face` rules as
-  `data:` URIs. GitHub Markdown carries no CSS and no fonts, and the camo proxy blocks every
-  external fetch, fonts included; inline data survives. The subsets are latin-only, so arrows
-  and geometric symbols fall back to the system stack on purpose, each one allowed by name in
-  `SYMBOL_FALLBACKS`; any other uncovered glyph throws before a font is subset.
+- `scripts/docs/readme-outline.mjs` — the last step of every generator. GitHub Markdown carries
+  no CSS and no fonts, and the camo proxy blocks every external fetch, so type has to travel
+  inside the file. Every text role except code is the kit's Switzer, shaped with HarfBuzz and
+  drawn as vector outlines, because its licence (`packages/ui-kit/src/fonts/FFL.txt`) forbids
+  subsetting: never embed Switzer in any form. Arrows and geometric symbols it lacks are drawn on
+  its own metrics; any other missing glyph throws.
+- `scripts/docs/readme-fonts.mjs` — subsets the OFL IBM Plex Mono `@fontsource` woff2 to the
+  characters that stay real code text and returns the one `@font-face` rule as a `data:` URI; a
+  character outside the latin subset throws.
 - `scripts/docs/readme-diagram-theme.mjs` — the kit palette (copied from
   `packages/ui-kit/src/ci-tokens.css`) and the text roles. Every file is self-themed: light
   values on `:root`, dark values behind `prefers-color-scheme: dark`, evaluated by the viewer's
@@ -67,9 +70,9 @@ line per file with its size. Three shared modules do the common work:
   `image/svg+xml` content type, captures a light and a dark frame, and reports how many
   external font requests the page made (must be 0).
 
-Rules: numbers stay in `<text>` nodes, never outlined to paths, because `check:docs-counts`
-reads them from the raw file; every string a diagram draws is also its font-subset input, so a
-glyph cannot be drawn without being embedded; each file stays under the 200 KB target (its
+Rules: every outlined string stays in the file as invisible `<text>` (`fill-opacity:0`), because
+`check:docs-counts` reads numbers from the raw file; only commands, URLs, identifiers and terminal
+screens may use the code roles, so a label is never set in the mono face; each file stays under the 200 KB target (its
 staleness test asserts it) — 500 KB is the hard cap for any README image (the SVG studio
 validator's rule). Workflow: change the
 generator (or the data it reads), run `npm run docs:readme-diagrams`, commit the generator and

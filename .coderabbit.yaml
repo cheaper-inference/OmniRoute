@@ -14,9 +14,30 @@ language: en-US
 reviews:
   profile: chill
   high_level_summary: true
+  # Keep the summary in the walkthrough comment. Writing it into the PR description fires a
+  # pull_request "edited" event, which ci.yml and quality.yml listen to, so every review
+  # restarted (and cancelled) the PR's CI and Quality Gates runs.
+  high_level_summary_in_walkthrough: true
   poem: false
+  # Single maintainer identity and a lot of walkthrough already: keep the summary lean.
+  sequence_diagrams: false
+  suggested_reviewers: false
+  # Anti-slop for public repos: label low-quality PRs instead of spending a review on them.
+  slop_detection:
+    enabled: true
+    label: "slop"
   auto_review:
     enabled: true
+    # The open-source plan allows ~1-10 PR reviews per hour per developer (scaled by stars)
+    # and most PRs here come from one maintainer identity used by several sessions, each
+    # pushing many commits. Review each PR once; re-run on demand with
+    # `@coderabbitai review` (or `@coderabbitai full review`).
+    auto_incremental_review: false
+    # Bot PRs would burn the hourly allowance; Dependabot bumps are covered by CI and the
+    # security wave, Mergify queue candidates are drafts anyway.
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "mergify[bot]"
     # Drafts are skipped; the Mergify merge-queue candidates are drafts too.
     drafts: false
     base_branches:
@@ -27,18 +48,25 @@ reviews:
     ignore_title_keywords:
       - "[skip review]"
       - "WIP"
+      # Release-train validation PRs: 400+ files, over the review file limit, never merged.
+      - "do not merge"
   path_filters:
     # 66 translated doc mirrors and the translation state are produced by the i18n waves.
     - "!docs/i18n/**"
     - "!.i18n-state.json"
     # Translated UI catalogs; the English source catalog stays in review.
-    - "!src/i18n/messages/**"
-    - "src/i18n/messages/en.json"
+    # Exclusions only: a pattern without "!" turns the filter into an allowlist, and
+    # exclusions always win, so an "en.json" include left every file out of review.
+    # The two classes match every catalog except en.json (el, es, et start with "e").
+    - "!src/i18n/messages/[a-df-z]*.json"
+    - "!src/i18n/messages/e[a-mo-z]*.json"
     - "!**/package-lock.json"
     # Generated files.
     - "!docs/reference/PROVIDER_REFERENCE.md"
     - "!**/*.svg"
     - "!CHANGELOG.md"
+    # Vendored CI UI Kit: fixes belong upstream, and the snapshot check rejects local edits.
+    - "!packages/ui-kit/**"
   path_instructions:
     - path: "src/app/api/**"
       instructions: >-
@@ -105,9 +133,9 @@ chat:
 knowledge_base:
   code_guidelines:
     enabled: true
+    # **/AGENTS.md, **/CLAUDE.md, **/GEMINI.md and .github/copilot-instructions.md are read
+    # by default (each scoped to its own directory); these patterns only add the security
+    # references the hard rules point to.
     filePatterns:
-      - "AGENTS.md"
-      - "open-sse/services/AGENTS.md"
-      - "src/lib/db/AGENTS.md"
       - "docs/security/ERROR_SANITIZATION.md"
       - "docs/security/PUBLIC_CREDS.md"

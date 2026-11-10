@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
 import { Badge, Button, Card, Input, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
 
 type ModelLockoutSettings = {
@@ -331,8 +332,8 @@ export default function ModelLockoutCard() {
   if (loading) {
     return (
       <Card className="p-6">
-        <div className="flex items-center gap-2 text-sm text-text-muted">
-          <Icon name="progress_activity" className="animate-spin" />
+        <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
+          <Spinner decorative size="sm" />
           {t("modelLockoutLoading")}
         </div>
       </Card>

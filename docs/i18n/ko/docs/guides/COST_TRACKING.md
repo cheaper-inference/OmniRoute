@@ -20,7 +20,7 @@ CLI, CSV/JSON 내보내기, API 키별 예산에 사용됩니다.
 > **대시보드의 "비용"은 청구 금액이 아니라 절감액 추적기입니다.** OmniRoute는
 > 사용자에게 비용을 청구하지 않습니다. 사용자가 이미 연결한 제공업체(자체 구독,
 > 무료 등급 및 API 키)로 요청을 라우팅할 뿐입니다. 무료 모델에서만 누적된
-> "$290 총비용"은 유료 API에 대략 **$290를 지불하지 _않았다_**는 의미입니다.
+> "$290 총비용"은 유료 API에 대략 **$290를 지불하지 *않았다***는 의미입니다.
 > 이 수치는 동일한 트래픽을 표준 정가로 처리했다면 발생했을 비용의 _추정치_이므로,
 > 사용량이 어디에 집중되는지와 더 저렴하거나 무료인 제공업체로 라우팅하여 얼마나
 > 절약하고 있는지 확인할 수 있습니다.
@@ -37,65 +37,61 @@ CLI, CSV/JSON 내보내기, API 키별 예산에 사용됩니다.
 
 ---
 
-## 비용 추정 방식
+## 비용 추정 방법
 
-### 가격 정보 출처
+### 가격 소스
 
-비용은 다음 우선순위에 따라 결정되는 가격표에서 가져옵니다
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+비용은 다음 우선순위에 따라 [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) 의 병합된 가격표에서 나옵니다(** 가장 높은 것부터** ):
 
-1. **사용자 재정의** — 대시보드 또는 `PATCH /api/pricing`을 통해 설정한 가격입니다.
-2. **동기화된 외부 가격 정보** — 동기화가 활성화된 경우 LiteLLM의 공개
-   `model_prices_and_context_window.json`에서 가져옵니다(사용자의 재정의 값을
-   덮어쓰지 않도록 별도의 `pricing_synced` 네임스페이스에 저장됨).
-3. **하드코딩된 기본값** — OmniRoute에 포함되어 제공됩니다.
+1. **사용자 재정의** — 가격은 대시보드 또는 `PATCH /api/pricing` ( `pricing` 네임스페이스)를 통해 설정됩니다.
+2. **models.dev 동기화** `https://models.dev/api.json` ( `models_dev_pricing` 네임스페이스)에서 가져온 — 가격입니다.
+3. **LiteLLM 동기화** LiteLLM 의 공개 `model_prices_and_context_window.json` ( `pricing_synced` 네임스페이스)에서 가져온 — 가격입니다.
+4. **하드코딩된 기본값** — 요금은 [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) 로 배송됩니다.
 
-외부 가격 정보 동기화는 **선택 사항**이며 기본적으로 비활성화되어 있습니다. 관련 환경 변수는
-[`.env.example`](../../.env.example)을 참조하세요.
+동일한 provider/model 의 경우 우선순위가 더 높은 레이어의 값이 하위 레이어의 일치하는 필드를 덮어씁니다. 상위 레이어에 없는 필드가 하위 레이어에서 나올 수도 있습니다. 두 개의 독립적인 동기화 작업이 동시에 실행되는 경우에도 순서는 고정됩니다. `GET /api/pricing?includeSources=1` `pricing` 및 `sourceMap` 반환하며, 모델별 레이블(`user`, `modelsDev`, `litellm`, `default`)은 해당 모델을 포함하는 우선순위가 가장 높은 레이어를 식별합니다.
 
-| 환경 변수               | 기본값    | 용도                                                        |
-| ----------------------- | --------- | ----------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | 시작 시 백그라운드 LiteLLM 가격 정보 동기화를 활성화합니다. |
-| `PRICING_SYNC_INTERVAL` | `86400`   | 동기화 간격(**초** 단위, 기본값은 매일)입니다.              |
-| `PRICING_SYNC_SOURCES`  | `litellm` | 쉼표로 구분된 소스 목록입니다(현재는 `litellm`만 지원됨).   |
+**LiteLLM 동기화** 선택되어 있으며 기본적으로 비활성화되어 있습니다. 환경 변수( [`.env.example`](../../.env.example) 참조)는 다음과 같습니다.
 
-### 비용 계산 공식
+| 환경변수                | 기본      | 목적                                                            |
+| ----------------------- | --------- | --------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | 백그라운드 LiteLLM 가격 동기화를 활성화합니다.                  |
+| `PRICING_SYNC_INTERVAL` | `86400`   | 동기화 간격(초)(매일)                                           |
+| `PRICING_SYNC_SOURCES`  | `litellm` | 이 동기화에 대해서만 소스 선택. 현재는 `litellm` 만 지원됩니다. |
 
-비용은 [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)의
-(`computeCostFromPricing` / `calculateCost`)를 사용하여 토큰 수와 백만 토큰당 요금을
-기준으로 요청별로 계산됩니다.
+**models.dev 동기화** LiteLLM 동기화와 별개이며 기본적으로 비활성화되어 있습니다. 설정(models.dev sync)에서 활성화하거나 다음 변수를 사용하세요.
 
-- **입력 토큰**(캐시 읽기 및 캐시 생성 토큰 제외) × `input` 요금.
-- **캐시 읽기 토큰** × `cached` 요금(없으면 입력 요금 사용).
-- **캐시 생성 토큰** × `cache_creation` 요금(없으면 입력 요금 사용).
-- **출력 토큰** × `output` 요금.
-- **추론 토큰** × `reasoning` 요금(없으면 출력 요금 사용).
+| 환경변수                   | 기본              | 목적                                                                                                                                   |
+| -------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(설정되지 않음)_ | 설정 해제는 설정 토글을 따릅니다. `1/true/on/yes` 강제로 켜지고 `0/false/off/no` 강제로 꺼집니다(설정에서 활성화한 경우에도 마찬가지). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | 기본 models.dev 동기화 간격(초)(매일)                                                                                                  |
 
-모든 요금은 토큰 1,000,000개당 USD로 해석됩니다. Codex "fast"/"priority" 또는
-"flex" 서비스 등급에는 비용 배율(`getCodexFastCostMultiplier`)이 적용됩니다. 예를
-들어 flex는 토큰 비용에 50% 할인이 적용되며, 대시보드에서 **flex 절감액**으로 표시됩니다.
+`PRICING_SYNC_SOURCES` 그렇습니다** ~ 아니다** models.dev를 활성화합니다. 이는 LiteLLM 동기화만 제어합니다. 사용자 재정의를 삭제해도 동기화된 네임스페이스는 지워지지 않습니다. 사용 가능한 다음 가격 책정 계층이 적용됩니다. 가격이 책정되지 않은 모델의 경우 수동 재정의를 추가하기 전에 동기화 설정과 `sourceMap` 모두 확인하세요.
 
-먼저 모델 이름을 정규화하여(`openai/` 또는 `accounts/fireworks/models/` 같은
-제공업체 경로 접두사 제거) 과거 행도 계속 가격 정보와 일치하도록 합니다.
+### 비용 공식
 
-### 지출 기록 방식
+비용은 요청당 토큰 수와 [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`)의 백만 개당 요율로 계산됩니다.
 
-- 요청별 비용은 응답 후 계산되고 파이어 앤 포겟 방식으로 기록되므로 클라이언트에
-  지연 시간을 추가하지 않습니다. 공유 할당량 소비는
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)를 통해
-  다음 이벤트 루프 틱에 예약됩니다.
-- API 키 지출은 [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts)에 의해
-  버퍼링되고 배치 단위로 플러시됩니다(기본 플러시 간격 60초, 버퍼 항목 1,000개).
-  다음 변수를 통해 조정할 수 있습니다.
+- **입력 토큰** (캐시 읽기 및 캐시 생성 토큰 제외) × `input` 속도.
+- **캐시 읽기 토큰** × `cached` 속도(입력 속도로 돌아감)
+- **캐시 생성 토큰** × `cache_creation` 속도(입력 속도로 돌아감)
+- **출력 토큰** × `output` 속도.
+- **추론 토큰** × `reasoning` 속도(출력 속도로 되돌아갑니다).
 
-  | 환경 변수                           | 기본값  | 용도                                       |
-  | ----------------------------------- | ------- | ------------------------------------------ |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 플러시 간격(밀리초)입니다.                 |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 플러시 전까지 버퍼링할 최대 항목 수입니다. |
+모든 요율은 1,000,000개 토큰당 USD 로 해석됩니다. Codex "fast"/"priority" 또는 "flex" 서비스 계층은 비용 승수(`getCodexFastCostMultiplier`)를 적용합니다. — 예를 들어 flex는 50% 토큰 할인으로 청구되며 다음과 같이 표시됩니다.** 플렉스 저축** 대시보드에서.
 
-대시보드의 비용 수치는 저장된 행별 금액에서 읽어오는 것이 아니라, 분석 엔드포인트가
-실행될 때마다 토큰 수와 현재 가격표를 사용하여 즉석에서 다시 계산됩니다. 따라서 잘못된
-가격을 수정하고 다시 동기화하면 과거 비용 추정치도 소급하여 업데이트됩니다.
+모델 이름이 먼저 정규화되므로( `openai/` 또는 `accounts/fireworks/models/` 와 같은 제공자 경로 접두사는 제거됨) 과거 행이 여전히 가격과 일치합니다.
+
+### 지출이 기록되는 방식
+
+- 요청당 비용은 응답 후 계산되고 실행 후 잊어버리기 때문에 클라이언트에 대기 시간이 추가되지 않습니다. 공유 할당량 소비는 [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) 통해 다음 이벤트 루프 틱에서 예약됩니다.
+- API 키 지출은 [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (기본값 60초 플러시 간격, 1,000개 항목 버퍼)에 의해 일괄적으로 버퍼링되고 플러시됩니다. 다음을 통해 조정 가능:
+
+  | 환경변수                            | 기본    | 목적                              |
+  | ----------------------------------- | ------- | --------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | 플러시 간격(밀리초)입니다.        |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | 플러시 전 최대 버퍼링 항목입니다. |
+
+대시보드의 비용 수치는 다음과 같습니다.** ~ 아니다** 분석 엔드포인트가 실행될 때 — 토큰 수와 현재 가격표에서 즉석에서 다시 계산되는 저장된 행별 달러 금액에서 읽습니다. 이는 잘못된 가격을 수정하고 재동기화하면 과거 비용 추정치를 소급하여 업데이트한다는 의미입니다.
 
 ---
 
@@ -143,51 +139,48 @@ CLI, CSV/JSON 내보내기, API 키별 예산에 사용됩니다.
 
 ## API 엔드포인트
 
-별도 언급이 없는 한, 다음 엔드포인트는 모두 관리 인증(`requireManagementAuth`를
-통한 루프백/JWT)이 필요합니다.
+별도로 언급하지 않는 한 이들 모두에는 관리 인증(loopback/JWT, `requireManagementAuth` 통해)이 필요합니다.
 
 ### 사용량 및 비용 분석
 
-| 메서드 | 엔드포인트               | 용도                                                                                                                                          |
-| ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | 전체 비용/사용량 분석: 요약, 일별 추이, 제공자/모델/API 키/계정/티어별 데이터. 쿼리: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | 시간대별 제공자별 할당량 사용률. 쿼리: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                           |
-| `GET`  | `/api/usage/history`     | 원시 사용량 기록 행.                                                                                                                          |
-| `GET`  | `/api/usage/call-logs`   | 요청별 호출 로그(모델, 토큰, 비용, 지연 시간, 상태).                                                                                          |
-| `GET`  | `/api/usage/quota`       | 제공자 할당량 상태.                                                                                                                           |
-| `GET`  | `/api/usage/proxy-logs`  | 프록시 요청 로그.                                                                                                                             |
+| 방법  | 엔드포인트               | 목적                                                                                                                                       |
+| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET` | `/api/usage/analytics`   | 전체 cost/usage 분석: 요약, 일일 추세, provider/model/API key/account/tier. 쿼리: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | 시간 경과에 따른 공급자별 할당량 활용도입니다. 쿼리: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                          |
+| `GET` | `/api/usage/history`     | 원시 사용 기록 행.                                                                                                                         |
+| `GET` | `/api/usage/call-logs`   | 요청별 호출 로그(모델, 토큰, 비용, 대기 시간, 상태)                                                                                        |
+| `GET` | `/api/usage/quota`       | 공급자 할당량 상태.                                                                                                                        |
+| `GET` | `/api/usage/proxy-logs`  | 프록시 요청 로그.                                                                                                                          |
 
 ### 예산
 
-| 메서드 | 엔드포인트               | 용도                                                                      |
+| 방법   | 엔드포인트               | 목적                                                                      |
 | ------ | ------------------------ | ------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | API 키 하나에 대한 비용 요약 및 예산 확인(`apiKeyId` 쿼리 매개변수 필수). |
-| `POST` | `/api/usage/budget`      | API 키의 일간/주간/월간 USD 한도 및 경고 임계값 설정.                     |
-| `GET`  | `/api/usage/budget/bulk` | 여러 API 키의 예산 요약 일괄 조회.                                        |
+| `GET`  | `/api/usage/budget`      | 하나의 API 키에 대한 비용 요약 + 예산 확인(`apiKeyId` 쿼리 매개변수 필요) |
+| `POST` | `/api/usage/budget`      | daily/weekly/monthly USD API 키에 대한 + 경고 임계값을 제한합니다.        |
+| `GET`  | `/api/usage/budget/bulk` | API 키 전체에 대한 대량 예산 요약입니다.                                  |
 
-> 예산 API의 범위는 **API 키**(`apiKeyId`)별로 지정됩니다.
-> `GET /api/usage/budget`에서 반환되는 한도에는 `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold` 및 누적 합계(`totalCostToday`, `totalCostMonth`, …)가 포함됩니다.
+> 예산 API 의 범위는 다음과 같습니다.**API 키** (`apiKeyId`). `GET /api/usage/budget` 가 반환하는 제한에는 `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` 및 누계(`totalCostToday`, `totalCostMonth`, …)가 포함됩니다.
 
 ### 가격
 
-| 메서드   | 엔드포인트              | 용도                                                                                                   |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | 현재 병합된 가격(사용자 + 동기화 + 기본값). 항목별 출처를 확인하려면 `?includeSources=1`을 사용합니다. |
-| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }`의 가격을 재정의합니다.                         |
-| `DELETE` | `/api/pricing`          | 가격을 기본값으로 재설정합니다(선택적으로 `?provider=&model=`을 사용해 범위 지정).                     |
-| `GET`    | `/api/pricing/defaults` | 100만 개당 기본 폴백 요율을 표시합니다.                                                                |
-| `GET`    | `/api/pricing/models`   | 모델을 키로 사용하는 가격 정보입니다.                                                                  |
-| `POST`   | `/api/pricing/sync`     | 외부 소스(LiteLLM)에서 수동 동기화를 시작합니다.                                                       |
-| `GET`    | `/api/pricing/sync`     | 현재 동기화 상태입니다.                                                                                |
-| `DELETE` | `/api/pricing/sync`     | 동기화된 모든 가격 데이터를 삭제합니다.                                                                |
+| 방법     | 엔드포인트              | 목적                                                                                                                            |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | 4계층 가격을 병합했습니다(user, models.dev, LiteLLM, 기본값). `?includeSources=1` `pricing` + `sourceMap` 를 반환합니다.        |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` 가격을 재정의합니다.                                                    |
+| `DELETE` | `/api/pricing`          | 사용자 가격 재정의를 제거합니다(선택적으로 `?provider=&model=` 범위 지정). 동기화된 요율이나 내장된 기본값은 대체로 유지됩니다. |
+| `GET`    | `/api/pricing/defaults` | 기본 per-1M 대체 비율을 표시합니다.                                                                                             |
+| `GET`    | `/api/pricing/models`   | 모델별로 가격이 결정됩니다.                                                                                                     |
+| `POST`   | `/api/pricing/sync`     | 외부 소스(LiteLLM)에서 수동 동기화를 트리거합니다.                                                                              |
+| `GET`    | `/api/pricing/sync`     | 현재 동기화 상태.                                                                                                               |
+| `DELETE` | `/api/pricing/sync`     | LiteLLM 동기화 가격만 지우기(`pricing_synced`); models.dev 데이터는 별개입니다.                                                 |
 
 ### 기타 비용 관련 엔드포인트
 
-| 메서드 | 엔드포인트                    | 용도                                                           |
-| ------ | ----------------------------- | -------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | 무료 모델의 총 토큰, 이번 달 사용량 및 남은 무료 할당량입니다. |
-| `GET`  | `/api/quota/pools/[id]/usage` | 공유 할당량 풀의 사용량입니다.                                 |
+| 방법  | 엔드포인트                    | 목적                                                              |
+| ----- | ----------------------------- | ----------------------------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | 무료 모델 토큰 총액, 이번 달 사용한 금액, 남은 무료 허용량입니다. |
+| `GET` | `/api/quota/pools/[id]/usage` | 공유 할당량 풀의 사용량입니다.                                    |
 
 ---
 

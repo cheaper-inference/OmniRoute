@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
@@ -209,7 +210,7 @@ export default function FilesListTab({
               <TableRow>
                 <TableCell colSpan={8} className="py-10 text-center text-text-muted">
                   <div role="status" className="flex items-center justify-center gap-2">
-                    <Icon name="progress_activity" size={20} className="animate-spin text-accent" />
+                    <Spinner decorative size="sm" className="text-accent" />
                     {t("loading")}
                   </div>
                 </TableCell>

@@ -120,16 +120,16 @@
 
 ## 📖 Налаштування провайдерів
 
-Щоб масово додати підключення за API-ключами з файлу CSV або JSON, скористайтеся пунктом **Панель керування → Провайдери → Імпортувати з файлу**. Стовпці є позиційними (`provider,name,apiKey,baseUrl,priority`); `provider` має вже існувати як керований провайдер або сумісний вузол. Див. [Імпорт провайдерів із файлу CSV або JSON](../providers/CSV-IMPORT.md).
+Щоб масово додати підключення за API-ключами з файлу CSV або JSON, скористайтеся **Панель керування → Провайдери → Імпорт із файлу**. Стовпці є позиційними (`provider,name,apiKey,baseUrl,priority`); `provider` має вже існувати як керований провайдер або сумісний вузол. Див. [Імпорт провайдерів із файлу CSV або JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Провайдери за підпискою
+### 🔐 Провайдери підписок
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Панель керування → Провайдери → Підключити Claude Code
 → Вхід через OAuth → Автоматичне оновлення токена
-→ Відстеження 5-годинної та тижневої квоти
+→ Відстеження квот на 5 годин + тиждень
 
 Моделі:
   cc/claude-opus-4-7
@@ -137,18 +137,18 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**Порада:** Використовуйте Opus для складних завдань, а Sonnet — для швидкості. OmniRoute відстежує квоту для кожної моделі!
+**Порада:** використовуйте Opus для складних завдань, а Sonnet — для швидкості. OmniRoute відстежує квоту для кожної моделі!
 
-На хості OmniRoute немає браузера? Запустіть `claude setup-token` будь-де, де виконано вхід у Claude Code, і вставте токен із терміном дії один рік на вкладці **Токен налаштування**. Див. [Claude Code із токеном налаштування](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Немає браузера на хості OmniRoute? Виконайте `claude setup-token` у будь-якому місці, де виконано вхід у Claude Code, і вставте однорічний токен на вкладці **Токен налаштування**. Див. [Claude Code із токеном налаштування](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Маршрути Claude та сумісні з Claude Code зберігають рівень інтенсивності міркування `max` для моделей Opus і Sonnet. Моделі Haiku не підтримують рівень інтенсивності `max`, тому перед надсиланням запиту до зовнішнього сервісу OmniRoute знижує його до високого бюджету міркування.
+Маршрути, сумісні з Claude і Claude Code, зберігають максимальний рівень зусиль міркування `max` для моделей Opus і Sonnet. Моделі Haiku не приймають рівень зусиль `max`, тому OmniRoute перед надсиланням угору знижує цей запит до високого бюджету міркування.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Панель керування → Провайдери → Підключити Codex
 → Вхід через OAuth (порт 1455)
-→ Скидання кожні 5 годин і щотижня
+→ Скидання кожні 5 годин + щотижневе скидання
 
 Моделі:
   cx/gpt-5.5
@@ -172,6 +172,12 @@
   gh/gemini-3.1-pro-preview
 ```
 
+**Кредити ШІ (оплата на основі токенів).** Коли GitHub повідомляє
+`credits_used` для облікового запису, картка лімітів провайдера показує рядок
+**Кредити ШІ** із кількістю кредитів, використаних у поточному розрахунковому періоді, зокрема для необмежених планів організацій.
+
+**Локальний ліміт кредитів ШІ.** Відредагуйте підключення GitHub і встановіть параметр **Ліміт кредитів ШІ на розрахунковий період** (`providerSpecificData.githubCreditLimit`). Порожнє значення вимикає ліміт; `0` завжди пропускає це підключення. Коли останнє показання використання дорівнює ліміту або перевищує його, вибір облікового запису пропускає це підключення, а маршрутизація переходить до інших підключень — так само, як у разі досягнення обмеження політики квот. Перевірка використовує дані про використання, які вже збираються під час періодичного оновлення квот — вона ніколи не звертається до GitHub під час обробки запиту — і працює за принципом відкритого доступу: відсутнє або застаріле показання (старше за 15 хвилин або отримане в розрахунковому періоді, який уже завершився) не блокує підключення. Це локальний запобіжний механізм, **а не гарантована межа витрат**: затримки у звітах GitHub, інтервал оновлення, запити в процесі виконання та використання поза OmniRoute можуть призвести до перевищення ліміту. Для жорсткого обмеження використовуйте власні засоби контролю витрат GitHub.
+
 ### 💰 Недорогі провайдери
 
 #### GLM-4.7 (щоденне скидання, $0.6/1M)
@@ -180,47 +186,47 @@
 2. Отримайте API-ключ у Coding Plan
 3. Панель керування → Додати API-ключ: Провайдер: `glm`, API-ключ: `your-key`
 
-**Використання:** `glm/glm-4.7` — **Порада:** Coding Plan пропонує втричі більшу квоту за 1/7 вартості! Щоденне скидання о 10:00.
+**Використання:** `glm/glm-4.7` — **Порада:** Coding Plan пропонує квоту в 3 рази більшу за 1/7 вартості! Щоденне скидання о 10:00.
 
-#### MiniMax M2.1 (скидання кожні 5 год, $0.20/1M)
+#### MiniMax M2.1 (скидання кожні 5 годин, $0.20/1M)
 
 1. Зареєструйтеся: [MiniMax](https://www.minimax.io)
 2. Отримайте API-ключ → Панель керування → Додати API-ключ
 
-**Використання:** `minimax/MiniMax-M2.1` — **Порада:** Найдешевший варіант для довгого контексту (1M токенів)!
+**Використання:** `minimax/MiniMax-M2.1` — **Порада:** найдешевший варіант для великого контексту (1M токенів)!
 
-#### Kimi K2 (фіксовані $9/місяць)
+#### Kimi K2 ($9/місяць, фіксована плата)
 
-1. Оформте підписку: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. Оформіть підписку: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Отримайте API-ключ → Панель керування → Додати API-ключ
 
-**Використання:** `kimi/kimi-k2.5` — **Порада:** Фіксовані $9/місяць за 10M токенів = фактична вартість $0.90/1M!
+**Використання:** `kimi/kimi-k2.5` — **Порада:** фіксовані $9/місяць за 10M токенів = ефективна вартість $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Зареєструйтеся: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Створіть API-ключ Qianfan → Панель керування → Додати API-ключ: Провайдер: `qianfan`
 
-**Використання:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` або інший ідентифікатор моделі Qianfan, сумісної з OpenAI.
+**Використання:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` або інший ідентифікатор моделі, сумісної з Qianfan OpenAI.
 
 ### 🆓 БЕЗКОШТОВНІ провайдери
 
-Безкоштовні провайдери без автентифікації мають перемикач поруч із параметром **Автентифікація не потрібна** на сторінці відповідного провайдера.
-Його вимкнення деактивує цього провайдера, вилучає його з налаштованого та компактного подань списку провайдерів,
-а також вилучає його моделі з `/v1/models`.
+Провайдери без автентифікації мають перемикач поруч із пунктом **Автентифікація не потрібна** на сторінці провайдера.
+Його вимкнення деактивує провайдера, вилучає його з подань налаштованих/компактних провайдерів
+і вилучає його моделі з `/v1/models`.
 
 #### Qoder (9 БЕЗКОШТОВНИХ моделей)
 
 ```bash
-Панель керування → Підключити Qoder → Вхід через OAuth → Доступ залежить від поточних обмежень провайдера
+Панель керування → Підключити Qoder → Вхід через OAuth → Доступ залежить від поточних лімітів провайдера
 
 Моделі: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude БЕЗКОШТОВНО)
+#### Kiro (БЕЗКОШТОВНИЙ Claude)
 
 ```bash
-Панель керування → Підключити Kiro → AWS Builder ID або Google/GitHub → ~50 кредитів/місяць
+Панель керування → Підключити Kiro → AWS Builder ID або Google/GitHub → приблизно 50 кредитів/місяць
 
 Моделі: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -335,65 +341,65 @@ codex "ваш запит"
 
 ---
 
-## 🚀 Розгортання
+## Розгортання 🚀
 
-### Глобальне встановлення через npm (Рекомендовано)
+### Глобальне встановлення npm (рекомендовано)
 
 ```bash
 npm install -g omniroute
 
-# Створіть каталог конфігурації
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Створіть файл .env (див. .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Запустіть сервер
+# Start server
 omniroute
-# Або з власним портом:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI автоматично завантажує `.env` з `~/.omniroute/.env` або `./.env`.
+CLI автоматично завантажує `.env` із `~/.omniroute/.env` або `./.env`. `./.env` у робочому каталозі може встановлювати лише короткий список дозволених ключів (порти, `REQUIRE_API_KEY`, параметри локалі та кольору); помістіть все інше в `~/.omniroute/.env`. Див. [контракти на запуск CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Режим системного трея
+### Режим лотка
 
-Запустіть OmniRoute у системному треї:
+Запустіть OmniRoute в системному треї:
 
 ```bash
 omniroute serve --tray
 ```
 
-Команда завершує роботу після того, як сервер і значок у треї будуть готові.
+Команда повертається після того, як сервер і трей будуть готові.
 
-Сервер продовжує працювати без термінала.
+Сервер продовжує роботу без терміналу.
 
-Режим системного трея підтримує macOS, Windows і графічні сеанси Linux. У режимі системного трея панель керування не відкривається автоматично.
+Режим трея підтримує сеанси macOS, Windows і графічні Linux. Режим трея не відкриває інформаційну панель автоматично.
 
-Використовуйте меню системного трея для таких дій:
+Використовуйте меню трея для таких дій:
 
-- Відкрити панель керування.
-- Відкрити `/dashboard/logs`.
-- Змінити налаштування автоматичного запуску.
+- Відкрийте інформаційну панель.
+- Відкрийте `/dashboard/logs`.
+- Змінити автозапуск.
 - Зупинити OmniRoute.
 
-Не поєднуйте `--tray` із такими параметрами:
+Не поєднуйте `--tray` з цими параметрами:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Ці режими потребують іншого керування процесами.
+Ці режими вимагають різного володіння процесом.
 
-Увімкніть запуск під час наступного входу в систему:
+Увімкнути запуск під час наступного входу в систему:
 
 ```bash
 omniroute autostart enable
 ```
 
-Автоматичний запуск використовує режим системного трея в macOS, Windows і графічних сеансах Linux. Linux без графічного інтерфейсу використовує наявну користувацьку службу systemd.
+Автозапуск використовує режим трея в сеансах macOS, Windows і графічного Linux. Headless Linux використовує наявну службу користувача systemd.
 
-Вимкніть запуск під час входу в систему:
+Вимкнути запуск під час входу:
 
 ```bash
 omniroute autostart disable
@@ -401,46 +407,46 @@ omniroute autostart disable
 
 ### Видалення
 
-Коли OmniRoute вам більше не потрібен, ми пропонуємо два швидкі сценарії для повного видалення:
+Якщо вам більше не потрібен OmniRoute, ми пропонуємо два швидких сценарії для чистого видалення:
 
-| Команда                  | Дія                                                                                     |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Видаляє системний застосунок, але **зберігає вашу БД і конфігурації** в `~/.omniroute`. |
-| `npm run uninstall:full` | Видаляє застосунок І назавжди **стирає всі конфігурації, ключі та бази даних**.         |
+| Команда                  | Дія                                                                                 |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Видаляє системну програму але** зберігає ваш DB та конфігурації** в `~/.omniroute`. |
+| `npm run uninstall:full` | Назавжди видаляє програму AND** стирає всі конфігурації, ключі та бази даних** .    |
 
-> Примітка: Щоб виконати ці команди, перейдіть до папки проєкту OmniRoute (якщо ви його клонували) і запустіть їх. Якщо застосунок установлено глобально, можна просто виконати `npm uninstall -g omniroute`.
+> Примітка. Щоб запустити ці команди, перейдіть до папки проекту OmniRoute (якщо ви її клонували) і запустіть їх. Крім того, якщо встановлено глобально, ви можете просто запустити `npm uninstall -g omniroute`.
 
-### Розгортання на VPS
+### Розгортання VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
-export JWT_SECRET="змініть-на-власний-безпечний-секрет"
-export INITIAL_PASSWORD="ваш-пароль"
+export JWT_SECRET="your-secure-secret-change-this"
+export INITIAL_PASSWORD="your-password"
 export DATA_DIR="/var/lib/omniroute"
 export PORT="20128"
 export HOSTNAME="0.0.0.0"
 export NODE_ENV="production"
 export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
-export API_KEY_SECRET="секрет-api-ключа-проксі-кінцевої-точки"
+export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Або: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Розгортання з PM2 (Мало пам’яті)
+### Розгортання PM2 (мало пам’яті)
 
-Для серверів з обмеженим обсягом оперативної пам’яті використовуйте параметр обмеження пам’яті:
+Для серверів з обмеженим RAM використовуйте опцію обмеження пам’яті:
 
 ```bash
-# З обмеженням 512 МБ (за замовчуванням)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Або з власним обмеженням пам’яті
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Або за допомогою ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -456,8 +462,8 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         OMNIROUTE_MEMORY_MB: "512",
-        JWT_SECRET: "ваш-секрет",
-        INITIAL_PASSWORD: "ваш-пароль",
+        JWT_SECRET: "your-secret",
+        INITIAL_PASSWORD: "your-password",
       },
       node_args: "--max-old-space-size=512",
       max_memory_restart: "300M",
@@ -469,24 +475,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Зберіть образ (за замовчуванням = runner-cli із попередньо встановленими codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Портативний режим (рекомендовано)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Щодо інтегрованого з хостом режиму з бінарними файлами CLI див. розділ Docker в основній документації.
+Для інтегрованого режиму з двійковими файлами CLI див. розділ Docker в основних документах.
 
 ### Void Linux (xbps-src)
 
-Користувачі Void Linux можуть пакувати та встановлювати OmniRoute нативно за допомогою фреймворку кроскомпіляції `xbps-src`. Це автоматизує створення автономної збірки Node.js разом із необхідними нативними прив’язками `better-sqlite3`.
+Користувачі Void Linux можуть пакувати та інсталювати OmniRoute нативно за допомогою фреймворку крос-компіляції `xbps-src`. Це автоматизує окрему збірку Node.js разом із необхідними власними зв’язками `better-sqlite3`.
 
 <details>
 <summary><b>Переглянути шаблон xbps-src</b></summary>
 
 ```bash
-# Файл шаблону для 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -507,7 +513,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Визначення цільової архітектури ЦП для node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -516,29 +522,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Установлення всіх залежностей без виконання скриптів
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Створення автономної збірки Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Копіювання статичних ресурсів до автономної збірки
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Компіляція нативної прив’язки better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Розміщення скомпільованої прив’язки в автономній збірці
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Видалення залежних від архітектури збірок sharp
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Копіювання залежностей середовища виконання pino, пропущених статичним аналізом Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -552,7 +558,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Запобігання видаленню порожніх каталогів маршрутизатора застосунку Next.js обробником після встановлення
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,30 +586,30 @@ post_install() {
 
 ### Змінні середовища
 
-| Змінна                                  | Значення за замовчуванням            | Опис                                                                                                                                  |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Секрет для підпису JWT (**змініть у продакшені**)                                                                                     |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Пароль для першого входу                                                                                                              |
-| `DATA_DIR`                              | `~/.omniroute`                       | Каталог даних (база даних, використання, журнали)                                                                                     |
-| `PORT`                                  | значення за замовчуванням фреймворку | Порт сервісу (`20128` у прикладах)                                                                                                    |
-| `HOSTNAME`                              | значення за замовчуванням фреймворку | Хост прив’язки (у Docker за замовчуванням — `0.0.0.0`)                                                                                |
-| `NODE_ENV`                              | значення за замовчуванням середовища | Установіть `production` для розгортання                                                                                               |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Публічна базова URL-адреса, що відображається на панелі керування та доступна серверу (замінює застарілу `BASE_URL`)                  |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Базова URL-адреса кінцевої точки хмарної синхронізації (замінює застарілу `CLOUD_URL`)                                                |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Секрет HMAC для згенерованих ключів API                                                                                               |
-| `REQUIRE_API_KEY`                       | `false`                              | Вимагати Bearer-ключ API для `/v1/*`                                                                                                  |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Дозволити автентифікованим користувачам панелі керування переглядати повні збережені значення ключів API за запитом                   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Інтервал оновлення кешованих даних про ліміти постачальників на сервері; кнопки оновлення в інтерфейсі запускають ручну синхронізацію |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Вимкнути автоматичні знімки SQLite перед записом, імпортом або відновленням; резервне копіювання вручну й надалі працюватиме          |
-| `APP_LOG_TO_FILE`                       | `true`                               | Вмикає запис журналів застосунку та аудиту на диск                                                                                    |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Примусово використовувати атрибут `Secure` для файлу cookie автентифікації (за зворотним проксі HTTPS)                                |
-| `CLOUDFLARED_BIN`                       | не задано                            | Використовувати наявний бінарний файл `cloudflared` замість керованого завантаження                                                   |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Транспорт для керованих швидких тунелів (`http2`, `quic` або `auto`)                                                                  |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Обмеження купи Node.js у МБ                                                                                                           |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Максимальна кількість записів у кеші запитів                                                                                          |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Максимальна кількість записів у семантичному кеші                                                                                     |
+| змінна                                  | За замовчуванням               | опис                                                                                                                                                      |
+| --------------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(створено автоматично)_       | секрет підпису JWT — автоматично генерується під час першого запуску та зберігається в `server.env`; встановіть його явно, якщо каталог даних є ефемерним |
+| `INITIAL_PASSWORD`                      | _(не встановлено)_             | Перший пароль для входу. Встановлення npm/source починаються з `CHANGEME`: замініть його. Не встановлено: майстер адаптації                               |
+| `DATA_DIR`                              | `~/.omniroute`                 | Каталог даних (база даних, використання, журнали)                                                                                                         |
+| `PORT`                                  | рамка за замовчуванням         | Службовий порт (у прикладах `20128` )                                                                                                                     |
+| `HOSTNAME`                              | рамка за замовчуванням         | Прив’язати хост (Docker за умовчанням має значення `0.0.0.0`)                                                                                             |
+| `NODE_ENV`                              | час виконання за замовчуванням | Налаштуйте `production` для розгортання                                                                                                                   |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`       | Загальнодоступна база URL з’явилася на інформаційній панелі та доступна серверу (замінює застарілу `BASE_URL`)                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`        | База кінцевої точки хмарної синхронізації URL (замінює застарілий `CLOUD_URL`)                                                                            |
+| `API_KEY_SECRET`                        | _(створено автоматично)_       | секрет HMAC для згенерованих ключів API — автоматично генерується під час першого запуску та зберігається в `server.env`                                  |
+| `REQUIRE_API_KEY`                       | `false`                        | Примусове застосування ключа API на `/v1/*`                                                                                                               |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                        | Дозвольте автентифікованим користувачам інформаційної панелі відкривати повні збережені значення ключів API на вимогу                                     |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                           | Частота оновлення на стороні сервера для кешованих даних про обмеження постачальника; Кнопки оновлення UI все ще запускають ручну синхронізацію           |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                        | Вимкнути автоматичні знімки SQLite перед writes/import/restore; ручне резервне копіювання все ще працює                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                         | Дозволяє виводити журнали програм і аудиту на диск                                                                                                        |
+| `AUTH_COOKIE_SECURE`                    | `false`                        | Примусова автентифікація `Secure` cookie (за зворотним проксі HTTPS )                                                                                     |
+| `CLOUDFLARED_BIN`                       | не встановлено                 | Використовуйте наявний двійковий файл `cloudflared` замість керованого завантаження                                                                       |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                        | Транспорт для керованих швидких тунелів (`http2`, `quic` або `auto`)                                                                                      |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                          | обмеження купи Node.js в MB                                                                                                                               |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                           | Максимальна кількість записів у кеші підказок                                                                                                             |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                          | Максимальна кількість записів семантичного кешу                                                                                                           |
 
-Повний довідник змінних середовища дивіться у файлі [README](../README.md).
+Повну довідку про змінні середовища див. у [README](../README.md).
 
 ---
 
@@ -612,17 +618,17 @@ post_install() {
 <details>
 <summary><b>Переглянути всі доступні моделі</b></summary>
 
-> Наведений нижче список підготовлено на основі `open-sse/config/providerRegistry.ts` для v3.8.0. Хмарні каталоги (Gemini, OpenRouter тощо) синхронізуються динамічно — повний актуальний каталог дивіться в **Панель керування → Провайдери → [provider] → Доступні моделі** або виконайте запит `GET /api/models/catalog`.
+> Наведений нижче список укладено на основі `open-sse/config/providerRegistry.ts` для v3.8.0. Хмарні каталоги (Gemini, OpenRouter тощо) синхронізуються динамічно — щоб переглянути повний актуальний каталог, відкрийте **Панель керування → Постачальники → [provider] → Доступні моделі** або виконайте запит `GET /api/models/catalog`.
 >
-> Якщо вбудований список провайдера застарів, скористайтеся **Імпорт з /models** на цій сторінці (або увімкніть **Автосинхронізацію**), щоб отримати актуальний апстрим-каталог. Це було перевірено у v3.8.50 для LLM7.io (`gemini-3.1-flash-lite`) та UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонімний доступ Pollinations під час того ж тестового прогону залишався обмеженим на боці апстріму.
+> Якщо вбудований список постачальника застарів, скористайтеся пунктом **Імпортувати з /models** на цій сторінці (або ввімкніть **Автосинхронізацію**), щоб отримати актуальний каталог із джерела. Це було перевірено у v3.8.50 для LLM7.io (`gemini-3.1-flash-lite`) і UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонімний доступ Pollinations під час того самого тестування залишався обмеженим джерелом.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ рівні effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ рівні effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — БЕЗКОШТОВНИЙ OAuth: використовуйте актуальний каталог, показаний у **Панель керування → Провайдери → Kiro → Доступні моделі**. Доступність залежить від облікового запису та тарифного плану.
+**Kiro (`kr/`)** — БЕЗКОШТОВНИЙ OAuth: використовуйте актуальний каталог, наведений у розділі **Панель керування → Постачальники → Kiro → Доступні моделі**. Доступність залежить від облікового запису й тарифного плану.
 
 **Qoder (`if/`)** — БЕЗКОШТОВНИЙ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +636,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/міс фіксовано або оплата за використання: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — фіксована плата $9/місяць або оплата за використання: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — Ключ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — ключ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Надшвидкий: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — надзвичайно швидкий: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Нативний Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — нативний Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Розміщено в ЄС: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — розміщений у ЄС: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — З пошуковим доповненням: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — доповнений пошуком: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Відкритий код: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (безкоштовна), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — із відкритим кодом: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (безкоштовна), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Швидкий інференс: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — швидкий висновок: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — ваферного масштабу: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Орієнтований на RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — орієнтований на RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Корпоративний: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — для підприємств: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Синхронізується наживо для кожного ключа API від Google — статичного списку немає. Підключіть ключ у **Панель керування → Провайдери**, потім скористайтеся **Доступні моделі**, щоб імпортувати поточний каталог (напр., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: синхронізується в реальному часі за ключем API від Google — статичного списку немає. Підключіть ключ у **Панель керування → Постачальники**, а потім скористайтеся пунктом **Доступні моделі**, щоб імпортувати актуальний каталог (наприклад, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Інші сумісні провайдери** (вибрані): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (через `aws-bedrock`), `azure-ai`, `openrouter` (транзитний каталог), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Кожен підтримує власний список моделей у `providerRegistry.ts` і може автоматично синхронізуватися, якщо провайдер надає ендпоінт `/models`.
+**Інші сумісні постачальники** (вибрані): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (через `aws-bedrock`), `azure-ai`, `openrouter` (каталог із наскрізною передачею), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Кожен із них підтримує власний список моделей у `providerRegistry.ts` і може автоматично синхронізуватися, якщо постачальник надає кінцеву точку `/models`.
 
-**Примітка щодо ідентифікаторів моделей:** OmniRoute використовує нативні ідентифікатори провайдерів (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Деякі ідентифікатори містять версії з крапками, оскільки саме так їх очікує апстрим-API. Якщо моделі немає у списку вище, виконайте `omniroute models --search <term>` або надішліть запит `GET /api/models/catalog`, щоб підтвердити доступність.
+**Примітка щодо ідентифікаторів моделей:** OmniRoute використовує нативні ідентифікатори постачальників (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Деякі ідентифікатори містять версії з крапками, оскільки саме такого формату очікує висхідний API. Якщо моделі немає у списку вище, виконайте `omniroute models --search <term>` або надішліть запит `GET /api/models/catalog`, щоб перевірити її доступність.
 
 </details>
 

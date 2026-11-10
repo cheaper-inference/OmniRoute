@@ -7,10 +7,12 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { Request as UndiciRequest } from "undici";
 
 import {
   __getDeadlineTokenRegistrySizeForTests,
   getDeadlineController,
+  releaseDeadlineController,
   withDeadlineSignal,
   withEarlyStreamKeepalive,
   ANTHROPIC_PING_FRAME,
@@ -116,7 +118,7 @@ test("OPENAI_KEEPALIVE_FRAME is a JSON-parseable OpenAI streaming chunk", () => 
 
   const payload = JSON.parse(decoded.slice("data: ".length).trim());
   assert.equal(payload.object, "chat.completion.chunk");
-  assert.deepEqual(payload.choices, [{ index: 0, delta: {}, finish_reason: null }]);
+  assert.deepEqual(payload.choices, []);
 });
 
 test("slow handler emits the custom OpenAI keepalive chunk before the body", async () => {
@@ -137,14 +139,14 @@ test("slow handler emits the custom OpenAI keepalive chunk before the body", asy
   assert.match(body, /data: \[DONE\]/);
 });
 
-test("OPENAI_STARTUP_FRAME is a parseable empty delta", () => {
+test("OPENAI_STARTUP_FRAME is a parseable chunk without application choices", () => {
   const decoded = new TextDecoder().decode(OPENAI_STARTUP_FRAME);
   assert.match(decoded, /^data: /);
   assert.doesNotMatch(decoded, /^:/, "must not be an SSE comment");
 
   const payload = JSON.parse(decoded.slice("data: ".length).trim());
   assert.equal(payload.object, "chat.completion.chunk");
-  assert.deepEqual(payload.choices, [{ index: 0, delta: {}, finish_reason: null }]);
+  assert.deepEqual(payload.choices, []);
 });
 
 test("slow handler emits startupFrame once, then falls back to keepaliveFrame on later ticks", async () => {
@@ -165,7 +167,7 @@ test("slow handler emits startupFrame once, then falls back to keepaliveFrame on
   const body = await readAll(result);
   const frames = body.split("\n\n").filter(Boolean);
   const firstPayload = JSON.parse(frames[0].slice("data: ".length));
-  assert.deepEqual(firstPayload.choices[0].delta, {});
+  assert.deepEqual(firstPayload.choices, []);
 
   // At least one subsequent keepalive tick should have fired before the real
   // body arrived (interval 30ms, handler resolves at 150ms) — those ticks use
@@ -175,7 +177,7 @@ test("slow handler emits startupFrame once, then falls back to keepaliveFrame on
     .map((f) => JSON.parse(f.slice("data: ".length)));
   assert.ok(laterKeepalives.length > 0, "expected at least one interval keepalive tick");
   for (const tick of laterKeepalives) {
-    assert.deepEqual(tick.choices[0].delta, {}, "interval ticks stay the lightweight empty delta");
+    assert.deepEqual(tick.choices, [], "interval ticks must not create application choices");
   }
   assert.match(body, /data: \[DONE\]/);
 });
@@ -196,8 +198,8 @@ test("startupFrame defaults to keepaliveFrame when omitted (no behavior change)"
   const firstFrame = body.split("\n\n")[0];
   const firstPayload = JSON.parse(firstFrame.slice("data: ".length));
   assert.deepEqual(
-    firstPayload.choices[0].delta,
-    {},
+    firstPayload.choices,
+    [],
     "first frame falls back to the plain keepaliveFrame when no startupFrame is configured"
   );
 });
@@ -480,6 +482,26 @@ test("aborting the client signal stops the keepalive stream (#2544)", async () =
   })();
   const timed = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5000));
   assert.equal(await Promise.race([drained, timed]), true, "stream should close after abort");
+});
+
+test("withDeadlineSignal accepts a foreign Undici Request brand", async () => {
+  const foreign = new UndiciRequest("http://localhost/v1/responses", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Test": "foreign-brand" },
+    body: JSON.stringify({ model: "foreign-model", stream: false }),
+  });
+  assert.equal(foreign instanceof Request, false, "fixture must use a different Request brand");
+
+  const { wrappedReq, deadlineController } = withDeadlineSignal(foreign as unknown as Request);
+  try {
+    assert.equal(wrappedReq.url, "http://localhost/v1/responses");
+    assert.equal(wrappedReq.method, "POST");
+    assert.equal(wrappedReq.headers.get("x-test"), "foreign-brand");
+    assert.deepEqual(await wrappedReq.json(), { model: "foreign-model", stream: false });
+    assert.equal(getDeadlineController(wrappedReq), deadlineController);
+  } finally {
+    releaseDeadlineController(deadlineController);
+  }
 });
 
 // Last-resort slow-path deadline: a handler that never resolves must not hold the

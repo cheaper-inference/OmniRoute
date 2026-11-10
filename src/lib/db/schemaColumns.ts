@@ -208,6 +208,16 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE call_logs ADD COLUMN tokens_reasoning INTEGER DEFAULT NULL");
       console.log("[DB] Added call_logs.tokens_reasoning column");
     }
+    // Nullable diagnostic columns: never backfill legacy tier or financial records.
+    for (const [column, type] of [
+      ["tokens_cache_creation_5m", "REAL"],
+      ["tokens_cache_creation_1h", "REAL"],
+      ["cache_creation_tier_status", "TEXT"],
+      ["cache_write_cost_usd", "REAL"],
+      ["cache_write_priced_tokens", "REAL"],
+    ]) {
+      if (!columnNames.has(column)) db.exec(`ALTER TABLE call_logs ADD COLUMN ${column} ${type}`);
+    }
     if (!columnNames.has("cache_source")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN cache_source TEXT DEFAULT 'upstream'");
       console.log("[DB] Added call_logs.cache_source column");
@@ -270,6 +280,11 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
     if (!columnNames.has("added_wait_ms")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN added_wait_ms INTEGER DEFAULT NULL");
       console.log("[DB] Added call_logs.added_wait_ms column");
+    }
+    // The call-log INSERT names this column on every write (migration 224).
+    if (!columnNames.has("queue_wait_ms")) {
+      db.exec("ALTER TABLE call_logs ADD COLUMN queue_wait_ms INTEGER DEFAULT NULL");
+      console.log("[DB] Added call_logs.queue_wait_ms column");
     }
     if (!columnNames.has("added_wait_cause")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN added_wait_cause TEXT DEFAULT NULL");
@@ -359,6 +374,14 @@ export function ensureProxyLogsColumns(db: SqliteDatabase) {
     if (!columnNames.has("egress_ip")) {
       db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip TEXT");
       console.log("[DB] Added proxy_logs.egress_ip column");
+    }
+    if (!columnNames.has("egress_ip_v4")) {
+      db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip_v4 TEXT");
+      console.log("[DB] Added proxy_logs.egress_ip_v4 column");
+    }
+    if (!columnNames.has("egress_ip_v6")) {
+      db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip_v6 TEXT");
+      console.log("[DB] Added proxy_logs.egress_ip_v6 column");
     }
     if (!columnNames.has("upstream_status")) {
       db.exec("ALTER TABLE proxy_logs ADD COLUMN upstream_status INTEGER");

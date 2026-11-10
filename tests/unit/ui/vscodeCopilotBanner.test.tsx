@@ -54,6 +54,17 @@ describe("VscodeCopilotBanner", () => {
     expect(link?.getAttribute("rel")).toContain("noopener");
   });
 
+  it("tints the banner with the partner brand and leaves the CTA to the kit button", async () => {
+    const container = await renderBanner();
+    const banner = container.querySelector<HTMLElement>("[role='complementary']");
+    expect(banner?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(banner?.style.getPropertyValue("--ci-brand")).toBe("#007acc");
+    const cta = container.querySelector("a[href]");
+    expect(cta?.className).toContain("ci-button");
+    expect(cta?.className).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    expect(cta?.className).not.toContain("text-white");
+  });
+
   it("shows the Open VSX secondary note near the CTA", async () => {
     const container = await renderBanner();
     expect(container.textContent).toContain("secondaryNote");

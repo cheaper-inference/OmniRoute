@@ -14,7 +14,7 @@ OmniRoute on paikallinen AI -reititysyhdyskäytävä ja kojelauta, joka on raken
 
 Ydinominaisuudet:
 
-- OpenAI-yhteensopiva API pinta CLI/tools (377 tarjoajaa, 156 toteuttajamoduulia)
+- OpenAI-yhteensopiva API pinta CLI/tools (381 tarjoajaa, 159 toteuttajamoduulia)
 - Request/response -käännös eri palveluntarjoajien formaateissa
 - Mallin yhdistelmävara (usean mallin sarja)
 - Strukturoidut yhdistelmäaskeleet (`provider + model + connection`) `compositeTiers`:n ajonaikaisessa järjestyksessä
@@ -29,7 +29,7 @@ Ydinominaisuudet:
 - Musiikin luominen `/v1/music/generations` kautta (ComfyUI)
 - Verkkohaku `/v1/search` kautta (20 palveluntarjoajaa)
 - Moderointi `/v1/moderations` kautta
-- Uudelleenjärjestys `/v1/rerank` kautta
+- Uudelleensijoitus `/v1/rerank` kautta
 - Ajattele tagien jäsentämistä (`<think>...</think>`) päättelymalleille
 - Vastauksen desinfiointi tiukan OpenAI SDK -yhteensopivuuden takaamiseksi
 - Roolin normalisointi (kehittäjä-→ järjestelmä, järjestelmän → käyttäjä) palveluntarjoajien välisen yhteensopivuuden varmistamiseksi
@@ -49,7 +49,7 @@ Ydinominaisuudet:
 - Kontekstivälitys: istunnon vaihdon yhteenvedot tilin vuorottelun jatkuvuudesta
 - Verkkotunnuksen tilan pysyvyys (SQLite -välimuisti varauksille, budjeteille, lukituksille, katkaisimille)
 - Käytäntömoottori keskitettyä pyyntöjen arviointia varten (lockout → budget → backback)
-- Pyydä telemetriaa p50/p95/p99 viiveiden yhdistämisellä
+- Pyydä telemetriaa p50/p95/p99 -latenssikoostumuksella
 - Yhdistelmäkohdetelemetria ja historiallinen yhdistelmäkohdekuvio `combo_execution_key` / `combo_step_id` kautta
 - Korrelaatio ID (X-Request-Id) päästä päähän -jäljitykseen
 - Vaatimustenmukaisuuden tarkastuksen kirjaaminen opt-out-toiminnolla API -avaimella
@@ -63,7 +63,7 @@ Ydinominaisuudet:
 - Nopea ruiskutussuojan väliohjelmisto
 - Nopea pakkausputki, jossa on Caveman, RTK, pinotut putkistot, pakkausyhdistelmät, kielipaketit ja analytiikka
 - ACP (Agent Communication Protocol) -rekisteri
-- Modulaariset OAuth toimittajat (22 yksittäistä moduulia `src/lib/oauth/providers/` n alla)
+- Modular OAuth providers (22 individual modules under `src/lib/oauth/providers/`)
 - Uninstall/full-uninstall -skriptit
 - OAuth ympäristön korjaustoimet
 - WebSocket silta OpenAI-yhteensopiville WS asiakkaille (`/v1/ws`)
@@ -414,7 +414,7 @@ Katso sääntöjoukkojen luomisesta ja kynnyksen virityksestä [`docs/security/G
 - Connection/model -säännön liittäjä: `src/domain/connectionModelRules.ts`
 - Mallin saatavuuden tilannekuvat: `src/domain/modelAvailability.ts`
 - Palveluntarjoajan vanhenemisen seuranta: `src/domain/providerExpiration.ts`
-- Kiintiön välimuisti: `src/domain/quotaCache.ts`
+- Kiintiön välimuisti: `src/domain/quotaCache.ts`. Palveluntarjoajat lisäävät ja poistavat kiintiöikkunoita (OpenAI pudotti 5 tunnin Codex ikkunan joissakin suunnitelmissa), joten palveluntarjoajan sovittimen käyttölukeman todistaa olevan täydellinen (`quotasComplete`, katso `src/lib/usage/usageReading.ts`) on tilin koko ikkunasarja: aiemmin tunnettu ikkuna, joka puuttuu siitä, on poistettu käytöstä, välimuistissa, rependedqreteften (rependedqretef) pysyi Codex -kiintiön tilassa ja `quota_snapshots` : Claude kyllästymisryhmissä. Osittaiset todisteet (vastausten otsikot, vanhentuneet kopiot) päivittävät vain siinä olevat ikkunat.
 - Hajoamistila: `src/domain/degradation.ts`
 - Kokoonpanon tarkastus: `src/domain/configAudit.ts`
 - OmniRoute -vastauksen metatietojen rakentaja: `src/domain/omnirouteResponseMeta.ts`

@@ -14,7 +14,7 @@ OmniRoute este un gateway local de rutare AI și un tablou de bord construit pe 
 
 Capacitățile de bază:
 
-- Suprafață API compatibilă cu OpenAI pentru CLI/tools (377 de furnizori, 156 de module de executare)
+- Suprafață API compatibilă cu OpenAI pentru CLI/tools (381 de furnizori, 159 de module de executare)
 - traducerea Request/response în diferite formate de furnizor
 - Combo de rezervă de model (secvență cu mai multe modele)
 - Pași combinați structurați (`provider + model + connection`) cu ordonarea timpului de execuție după `compositeTiers`
@@ -73,7 +73,7 @@ Capacitățile de bază:
 - Însămânare automată a aliasului de model (30 de normalizări de dialecte inter-proxy + la pornire)
 - Preluare de ieșire sigură cu SSRF guard, blocare URL privată și reîncercare configurabilă
 - Reîncercări de chat care țin cont de cooldown cu `requestRetry` și `maxRetryIntervalSec` configurabile
-- Validarea mediului de rulare cu Zod la pornire
+- Runtime environment validation with Zod at startup
 - Audit de conformitate v2 cu paginare, evenimente CRUD ale furnizorului și înregistrare în jurnal de validare blocată de SSRF
 
 Model de rulare principal:
@@ -414,7 +414,7 @@ Spațiul de nume `src/domain/` centralizează deciziile de politică, astfel în
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Instantanee despre disponibilitatea modelului: `src/domain/modelAvailability.ts`
 - Urmărirea expirării furnizorului: `src/domain/providerExpiration.ts`
-- Cota cache: `src/domain/quotaCache.ts`
+- Cota cache: `src/domain/quotaCache.ts`. Furnizorii adaugă și elimină ferestre de cotă (OpenAI a renunțat la fereastra Codex de 5 ore pentru unele planuri), astfel încât o citire de utilizare a adaptorului furnizorului atestă ca fiind completă (`quotasComplete`, vezi `src/lib/usage/usageReading.ts`) este setul complet de ferestre ale contului: o fereastră cunoscută mai devreme, dar absentă din ea este retrasă, în cache, în `quota_snapshots` rehidratate, înregistrările anexate (o restul rehidratate). starea cotei Codex și în gălețile de saturație ale lui Claude. Dovezile parțiale (anteturi de răspuns, copii învechite) actualizează doar ferestrele pe care le poartă.
 - Stare de degradare: `src/domain/degradation.ts`
 - Audit configurare: `src/domain/configAudit.ts`
 - Generator de metadate de răspuns OmniRoute : `src/domain/omnirouteResponseMeta.ts`

@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,11 +487,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ટોપ-લેવલ એક્ઝિક્યુટર મોડ્યુલ્સ (`*.ts` માઈનસ `base.ts`, `index.ts` અને પરીક્ષણો - કાઉન્ટ `npm run check:docs-counts` માપદંડો). દરેક એક્ઝિક્યુટર વર્ગ `BaseExecutor` (`base.ts`), સીધા અથવા `DefaultExecutor` અથવા અન્ય એક્ઝિક્યુટર દ્વારા વિસ્તરે છે; બાકીના મોડ્યુલો પ્રતિ-પ્રદાતા સહાયકો છે (ટૂલ સ્કીમા, fetch/TTS એડેપ્ટર્સ, ક્વિર્ક હેન્ડલર્સ). વહીવટકર્તાઓમાં શામેલ છે:
+159 ટોપ-લેવલ એક્ઝિક્યુટર મોડ્યુલ્સ (`*.ts` માઈનસ `base.ts`, `index.ts` અને પરીક્ષણો — કાઉન્ટ `npm run check:docs-counts` માપદંડો). દરેક એક્ઝિક્યુટર વર્ગ `BaseExecutor` (`base.ts`), સીધા અથવા `DefaultExecutor` અથવા અન્ય એક્ઝિક્યુટર દ્વારા વિસ્તરે છે; બાકીના મોડ્યુલો પ્રતિ-પ્રદાતા સહાયક છે (ટૂલ સ્કીમા, fetch/TTS એડેપ્ટર્સ, ક્વિર્ક હેન્ડલર્સ). વહીવટકર્તાઓમાં શામેલ છે:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, વત્તા `devin-desktop`(શેર્ડ આઇડેન્ટિટી હેલ્પર) અને `claudeIdentity.ts` (રજિસ્ટ્રી `index.ts`.
 
-> નોંધ: અહીં સૂચિબદ્ધ ન હોય તેવા પ્રદાતાઓ જેનરિક OpenAI- સુસંગત એક્ઝિક્યુટરનો ઉપયોગ કરીને `default.ts` દ્વારા સેવા આપવામાં આવે છે. સંપૂર્ણ પ્રદાતા સૂચિ (377 પ્રદાતાઓ) `src/shared/constants/providers.ts` માં રહે છે.
+> નોંધ: અહીં સૂચિબદ્ધ ન હોય તેવા પ્રદાતાઓ જેનરિક OpenAI- સુસંગત એક્ઝિક્યુટરનો ઉપયોગ કરીને `default.ts` દ્વારા સેવા આપવામાં આવે છે. સંપૂર્ણ પ્રદાતા સૂચિ (381 પ્રદાતાઓ) `src/shared/constants/providers.ts` માં રહે છે.
 
 ### 4.3 `open-sse/translator/`
 
@@ -505,7 +505,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based પ્રતિભાવો API ↔ ચેટ કમ્પ્લીશન કન્વર્ટર ( `responses/` રૂટ કેચ-ઓલ દ્વારા ઉપયોગમાં લેવાય છે).
+- `responsesTransformer.ts` — `TransformStream` -based જવાબો API ↔ ચેટ કમ્પ્લીશન કન્વર્ટર ( `responses/` રૂટ કેચ-ઓલ દ્વારા ઉપયોગમાં લેવાય છે).
 
 ### 4.5 `open-sse/services/`
 
@@ -529,9 +529,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 અનન્ય સાધનો** `server.ts` માં વાયર્ડ ( `schemas/tools.ts` + મેમરીમાં 45 પ્રમાણભૂત, કૌશલ્યો, GitHub-કૌશલ્યો, પૂલ, ગેમિફિકેશન, પ્લગઇન, Notion, Obsidian, સ્થાનિક-કોર્પસ અને કમ્પ્રેશન મોડ્યુલ્સ — યુનિયન `countUniqueMcpTools` દ્વારા ગણવામાં આવે છે).
+- **110 અનન્ય સાધનો** `server.ts` માં વાયર્ડ ( `schemas/tools.ts` + મેમરીમાં 45 પ્રમાણભૂત, કૌશલ્ય, GitHub-સ્કિલ્સ, પૂલ, ગેમિફિકેશન, પ્લગઇન, Notion, Obsidian, સ્થાનિક-કોર્પસ અને કમ્પ્રેશન મોડ્યુલ્સ — યુનિયન `countUniqueMcpTools` દ્વારા ગણવામાં આવે છે).
 - **3 પરિવહન** : stdio, HTTP સ્ટ્રીમેબલ, SSE.
-- **33 સ્કોપ્સ** રનટાઇમ પર લાગુ કરવામાં આવે છે — `src/shared/constants/mcpScopes.ts` માં બેઝ લિસ્ટ, સંપૂર્ણ સેટ એ દરેક ટૂલ મોડ્યુલ દ્વારા જાહેર કરાયેલ સ્કોપ્સનું યુનિયન છે.
+- **33 સ્કોપ્સ** `src/shared/constants/mcpScopes.ts` માં રનટાઈમ — બેઝ લિસ્ટ પર લાગુ કરવામાં આવે છે, સંપૂર્ણ સેટ દરેક ટૂલ મોડ્યુલ દ્વારા જાહેર કરાયેલ સ્કોપ્સનું યુનિયન છે.
 - ઓડિટ ટેબલ: `mcp_tool_audit` ( `audit.ts` દ્વારા વસતી).
 - ફાઇલો: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, વત્તા `__tests__/` હેઠળ પરીક્ષણો.
 - સંપૂર્ણ ટૂલ કેટલોગ માટે [MCP-SERVER.md](../frameworks/MCP-SERVER.md) જુઓ.

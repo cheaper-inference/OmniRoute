@@ -260,6 +260,8 @@ export const liteEngine: CompressionEngine = {
     const result = applyLiteCompression(adapter.body, {
       ...options,
       preserveSystemPrompt: options?.config?.preserveSystemPrompt !== false,
+      // Request-scoped safe plans preserve tool bytes independently of clipping settings.
+      preserveToolWhitespace: options?.stepConfig?.preserveToolWhitespace === true,
       // buildStepOptions() already merges global config.lite with explicit step.config
       // (step wins) into stepConfig, so consume that single effective value instead of
       // AND-ing root and step values — an explicit step `true` must override a global `false`.

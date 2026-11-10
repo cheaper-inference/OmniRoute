@@ -20,7 +20,10 @@ const providerCatalog = await import("../../src/lib/providers/catalog.ts");
 test("kmca legacy alias exposes the stable Kimi Code fallback models", () => {
   const models = getModelsByProviderId("kmca");
   const ids = new Set(models.map((m) => m.id));
-  assert.deepEqual([...ids], ["k3", "kimi-for-coding", "kimi-for-coding-highspeed"]);
+  assert.deepEqual(
+    [...ids],
+    ["k3.1-pro", "k3.1-pro-highspeed", "k3", "kimi-for-coding", "kimi-for-coding-highspeed"]
+  );
 });
 
 test("kmca stable fallback only carries documented static capabilities", () => {

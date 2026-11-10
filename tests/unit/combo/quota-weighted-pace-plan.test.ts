@@ -260,8 +260,10 @@ test("live Codex plan: fetch preserves trimmed plan_type and planType, omits inv
 
 test("live Codex single-window Pro: real fetch and pace draw use 0.6/100 times ten", async () => {
   const pro = await liveQuota(usagePayload({ plan_type: "pro" }));
-  assert.deepEqual(pro.window5h, { percentUsed: 0.4, resetAt: resetAt(100) });
-  assert.deepEqual(pro.window7d, { percentUsed: 0, resetAt: null });
+  assert.equal(pro.window5h, undefined);
+  assert.equal(pro.window7d?.percentUsed, 0.4);
+  assert.equal(pro.window7d?.resetAt, resetAt(100));
+  assert.deepEqual(Object.keys(pro.windows ?? {}), ["weekly"]);
   const targets = await seedTargets([quotaAt("plus"), pro]);
   // Plus owns 1/11, not 1/2; straddling that threshold proves the real projection's weight.
   assert.deepEqual(await draw(targets, 1 / 11 - 1e-8), [0, 1]);

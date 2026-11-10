@@ -433,7 +433,7 @@ server/
 
 ---
 
-## 4. `open-sse/` — 流媒体引擎工作区
+## 4. `open-sse/` —流媒体引擎工作区
 
 单独的 npm 工作区发布为`@omniroute/open-sse`。拥有请求处理、执行器、翻译器、服务、变压器和MCP服务器。
 
@@ -445,7 +445,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -475,11 +475,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 个顶级执行器模块（`*.ts`减去`base.ts`、 `index.ts`和测试 - `npm run check:docs-counts`测量的计数）。每个执行器类直接或通过`DefaultExecutor`或另一个执行器扩展`BaseExecutor` (`base.ts`)；其余模块是每个提供者的帮助程序（工具模式、 fetch/TTS适配器、怪异处理程序）。执行者包括：
+159 个顶级执行器模块（`*.ts`减去`base.ts`、 `index.ts`并测试—计数`npm run check:docs-counts`测量值）。每个执行器类直接或通过`DefaultExecutor`或另一个执行器扩展`BaseExecutor` (`base.ts`)；其余模块是每个提供者的帮助程序（工具模式、 fetch/TTS适配器、怪异处理程序）。执行者包括：
 
 `antigravity`、 `azure-openai`、 `blackbox-web`、 `cliproxyapi`、 `chatgpt-web-codex`、 `cloudflare-ai`、 `codex`、 `commandCode`、 `cursor`、 `default`、 `devin-cli`、 `muse-spark-web`、 `nlpcloud`、 `opencode`、 `perplexity-web`、 `petals`、 `pollinations`、 `qoder`、 `vertex`、 `devin-desktop`，加上`claudeIdentity.ts` （共享身份助手）和`index.ts` （注册表）。
 
-> 注意：此处未列出的提供者由`default.ts`使用通用 OpenAI 兼容执行器提供服务。完整的提供者目录（377 个提供者）位于`src/shared/constants/providers.ts`中。
+> 注意：此处未列出的提供者由`default.ts`使用通用 OpenAI 兼容执行器提供服务。完整的提供者目录（381 个提供者）位于`src/shared/constants/providers.ts`中。
 
 ### 4.3 `open-sse/translator/`
 
@@ -508,7 +508,7 @@ open-sse/
 | 缓存           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | 路由智能       | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | 模型处理       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| 压缩           | `compression/` — 全压缩引擎接线                                                                                                                                                                                                                          |
+| 压缩           | `compression/` —全压缩发动机接线                                                                                                                                                                                                                         |
 | 令牌+会话      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | 等级/清单      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP /网络       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -517,9 +517,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 个独特的工具**连接到`server.ts` （ `schemas/tools.ts` +内存、技能、GitHub 技能、池、游戏化、插件、 Notion、 Obsidian、本地语料库和压缩模块中的 45 个规范 - 由`countUniqueMcpTools`计数的联合）。
+- **110 个独特的工具**连接到`server.ts` （ `schemas/tools.ts` +内存、技能、GitHub 技能、池、游戏化、插件、 Notion、 Obsidian、本地语料库和压缩模块—联合中的 45 个规范由`countUniqueMcpTools`计数）。
 - **3 次运输**：stdio、 HTTP可流式传输、 SSE。
-- **33 个范围**在运行时强制 - `src/shared/constants/mcpScopes.ts`中的基本列表，完整集是每个工具模块声明的范围的并集。
+- **33 个范围**在运行时强制执行`src/shared/constants/mcpScopes.ts`中的—基列表，完整集是每个工具模块声明的范围的并集。
 - 审核表： `mcp_tool_audit` （由`audit.ts`填充）。
 - 文件： `server.ts`、 `index.ts`、 `httpTransport.ts`、 `audit.ts`、 `scopeEnforcement.ts`、 `runtimeHeartbeat.ts`、 `descriptionCompressor.ts`、 `schemas/{tools, a2a, audit, index}.ts`、 `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`，以及`__tests__/`下的测试。
 - 请参阅[MCP-SERVER.md](../frameworks/MCP-SERVER.md)了解完整的工具目录。

@@ -13,6 +13,7 @@ import { vertexGenerateVideo } from "../executors/vertexMedia.ts";
 import { handleGoogleFlowVideoGeneration } from "./videoGeneration/googleFlowHandler.ts";
 import { handleDeepinfraVideoGeneration } from "./videoGeneration/deepinfraHandler.ts";
 import { handleLeonardoVideoGeneration } from "./videoGeneration/leonardoHandler.ts";
+import { handleRenderhourVideoGeneration } from "./videoGeneration/renderhourHandler.ts";
 import { handleDashscopeVideoGeneration } from "./videoGeneration/dashscopeHandler.ts";
 import { handleMinimaxVideoGeneration } from "./videoGeneration/minimaxHandler.ts";
 import { handleNovitaVideoGeneration } from "./videoGeneration/novitaHandler.ts";
@@ -30,9 +31,11 @@ import {
 import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./videoGeneration/abort.ts";
 import { sleep } from "../utils/sleep.ts";
 import {
+  downloadResultVideo,
   extractRunwayFailureMessage,
   normalizeRunwayVideoResult,
   resolvePositiveInteger,
+  resultVideoErrorText,
   resolveRunwayDuration,
   resolveRunwayPromptImage,
   resolveRunwayRatio,
@@ -190,6 +193,7 @@ export async function handleVideoGeneration({
   resolvedProvider = null,
   // #16372 — route-injected media sink (owner + public origin) for auth-gated job results.
   mediaSink = undefined,
+  prepareFalInput = null,
   signal = null,
 }) {
   if (signal?.aborted) return abortedVideoResult();
@@ -298,7 +302,16 @@ export async function handleVideoGeneration({
   }
 
   if (providerConfig.format === "fal-ai-video") {
-    return handleFalVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleFalVideoGeneration({
+      prepareFalInput,
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "google-flow") {
@@ -324,6 +337,19 @@ export async function handleVideoGeneration({
 
   if (providerConfig.format === "kie-video") {
     return handleKieVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+  }
+
+  if (providerConfig.format === "renderhour-video") {
+    return handleRenderhourVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+      recordCall: recordVideoJobCall,
+    });
   }
 
   if (providerConfig.format === "runwayml") {
@@ -1057,7 +1083,7 @@ async function handleRunwayVideoGeneration({
       const status = String(task?.status || "").toUpperCase();
 
       if (status === "SUCCEEDED") {
-        const videos = await normalizeRunwayVideoResult(task, body);
+        const videos = await normalizeRunwayVideoResult(task, body, signal);
         saveCallLog({
           method: "POST",
           path: "/v1/videos/generations",
@@ -1135,6 +1161,32 @@ const RUNWAY_TERMINAL_FAILURE_STATUSES = new Set([
   "DELETED",
 ]);
 
+/** Downloads a finished Haiper video and builds the handler result. */
+async function deliverHaiperVideo({ videoUrl, model, provider, startTime, signal }) {
+  let buf: Buffer;
+  try {
+    buf = await downloadResultVideo(videoUrl, signal);
+  } catch (err) {
+    if (signal?.aborted) return abortedVideoResult();
+    return { success: false, status: 502, error: resultVideoErrorText(err) };
+  }
+  saveCallLog({
+    method: "POST",
+    path: "/v1/videos/generations",
+    status: 200,
+    model: `${provider}/${model}`,
+    provider,
+    duration: Date.now() - startTime,
+  }).catch(() => {});
+  return {
+    success: true,
+    data: {
+      created: Math.floor(Date.now() / 1000),
+      data: [{ b64_json: buf.toString("base64"), format: "mp4" }],
+    },
+  };
+}
+
 async function handleHaiperVideoGeneration({
   model,
   provider,
@@ -1178,23 +1230,7 @@ async function handleHaiperVideoGeneration({
     if (status.status === "completed" || status.status === "succeeded") {
       const videoUrl = status.creation_url || status.output?.video_url;
       if (videoUrl) {
-        const videoRes = await fetch(videoUrl);
-        const buf = await videoRes.arrayBuffer();
-        saveCallLog({
-          method: "POST",
-          path: "/v1/videos/generations",
-          status: 200,
-          model: `${provider}/${model}`,
-          provider,
-          duration: Date.now() - startTime,
-        }).catch(() => {});
-        return {
-          success: true,
-          data: {
-            created: Math.floor(Date.now() / 1000),
-            data: [{ b64_json: Buffer.from(buf).toString("base64"), format: "mp4" }],
-          },
-        };
+        return deliverHaiperVideo({ videoUrl, model, provider, startTime, signal });
       }
     }
     if (status.status === "failed") {

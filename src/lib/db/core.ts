@@ -154,6 +154,8 @@ const CRITICAL_DB_TABLES: CriticalTableSpec[] = [
   { table: "account_key_limits", maxRows: 10_000 },
   { table: "upstream_proxy_config", maxRows: 5_000 },
   { table: "webhooks", maxRows: 5_000 },
+  // Key Templates: editable, secret-free key policy snapshots (operator configuration).
+  { table: "key_templates", maxRows: 5_000 },
 ];
 
 /**
@@ -503,6 +505,19 @@ const SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_provider_time ON quota_snapshots(provider, created_at);
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_connection_time ON quota_snapshots(connection_id, created_at);
   CREATE INDEX IF NOT EXISTS idx_quota_snapshots_created_at ON quota_snapshots(created_at);
+
+  -- Key Templates are secret-free policy snapshots copied into independent keys.
+  CREATE TABLE IF NOT EXISTS key_templates (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    revision INTEGER NOT NULL DEFAULT 1 CHECK (revision > 0),
+    schema_version INTEGER NOT NULL DEFAULT 1,
+    policy TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_key_templates_name ON key_templates(name COLLATE NOCASE);
 `;
 
 // `CREATE TABLE IF NOT EXISTS` is a no-op against a legacy database that already owns the
@@ -1009,7 +1024,7 @@ export function getDbInstance(): SqliteDatabase {
         driver: "sql.js",
         open: true,
         name: ":memory:",
-        prepare: () => noopStatement,
+        prepare: <Row = unknown>() => noopStatement as PreparedStatement<Row>,
         exec: () => {},
         pragma: () => undefined,
         transaction: <T>(fn: (...args: unknown[]) => T) => fn,
