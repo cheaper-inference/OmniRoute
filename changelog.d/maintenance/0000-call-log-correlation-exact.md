@@ -1,1 +1,0 @@
-- **perf(call-logs):** The call-log query accepts an exact `correlationIdExact` filter that uses the correlation index. The substring `correlationId` filter is unchanged.

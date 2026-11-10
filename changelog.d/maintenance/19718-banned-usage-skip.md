@@ -1,0 +1,1 @@
+- **perf(usage):** the scheduled provider-limits sweep no longer polls accounts marked banned, so it stops adding upstream rejections to them. Manual refreshes and the per-card read still check live, so a wrongly banned account can clear itself. ([#19718](https://github.com/cheaper-inference/OmniRoute/pull/19718))
