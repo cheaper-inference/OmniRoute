@@ -5529,6 +5529,7 @@
     "stepProgress": "Хід налаштування"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Поріг маршрутизації нових сеансів (0 = вимкнено)",
     "tosAvoidNoticeTitle": "Цього провайдера типово виключено з auto",
     "tosAvoidNoticeDescription": "Його статус ToS позначено як avoid. Підключення облікового запису не змінює цю політику. Перегляньте умови провайдера, перш ніж увімкнути загальну опцію для всіх комбінацій auto.",
     "tosAvoidNoticeAction": "Переглянути політику auto",

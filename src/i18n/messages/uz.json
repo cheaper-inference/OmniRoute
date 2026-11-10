@@ -5529,6 +5529,7 @@
     "stepProgress": "Sozlash jarayoni"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Yangi seanslarni yo‘naltirish chegarasi (0 = o‘chiq)",
     "tosAvoidNoticeTitle": "Bu provayder sukut bo‘yicha auto tarkibidan chiqarilgan",
     "tosAvoidNoticeDescription": "Uning ToS holati avoid deb belgilangan. Hisobni ulash bu siyosatni o‘zgartirmaydi. Barcha auto kombinatsiyalari uchun umumiy parametrni yoqishdan oldin provayder shartlarini o‘qing.",
     "tosAvoidNoticeAction": "auto siyosatini ko‘rish",

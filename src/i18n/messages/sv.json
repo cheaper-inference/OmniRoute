@@ -5529,6 +5529,7 @@
     "stepProgress": "Konfigurationsförlopp"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Routningströskel för nya sessioner (0 = av)",
     "tosAvoidNoticeTitle": "Den här leverantören är som standard utesluten från auto",
     "tosAvoidNoticeDescription": "Dess ToS-status är märkt avoid. Att ansluta ett konto ändrar inte policyn. Läs leverantörens villkor innan du aktiverar det globala alternativet för alla auto-kombinationer.",
     "tosAvoidNoticeAction": "Visa auto-policyn",

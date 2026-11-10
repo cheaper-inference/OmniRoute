@@ -5529,6 +5529,7 @@
     "stepProgress": "सेटअप की प्रगति"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "नए सत्र की रूटिंग सीमा (0 = बंद)",
     "tosAvoidNoticeTitle": "यह प्रदाता डिफ़ॉल्ट रूप से auto से बाहर है",
     "tosAvoidNoticeDescription": "इसकी सेवा की शर्तों की स्थिति avoid चिह्नित है। खाता जोड़ने से यह नीति नहीं बदलती। सभी auto कॉम्बो के लिए वैश्विक अनुमति चालू करने से पहले प्रदाता की शर्तें पढ़ें।",
     "tosAvoidNoticeAction": "auto नीति की समीक्षा करें",

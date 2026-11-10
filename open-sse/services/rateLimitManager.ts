@@ -36,6 +36,8 @@ import {
 } from "./rateLimitManager/headers";
 import { checkQueueAdmission } from "./rateLimitManager/admission";
 import { isConnectionAutoProtected } from "./rateLimitManager/autoProtection";
+import { enabledConnections } from "./rateLimitManager/protectionState";
+export { isRateLimitEnabled } from "./rateLimitManager/protectionState";
 import { buildOverrideUpdates, loadOverrideMap } from "./rateLimitManager/overrideUpdates";
 import {
   markLocalRateLimitError,
@@ -85,9 +87,6 @@ function toRecord(value: unknown): JsonRecord {
 
 // Store limiters keyed by "provider:connectionId" (and optionally ":model")
 const limiters = new Map<string, Bottleneck>();
-
-// Store connections that have rate limit protection enabled
-const enabledConnections = new Set<string>();
 
 // Store per-connection rate limit overrides (RPM, TPM, TPD, minTime, maxConcurrent)
 // Populated from provider_connections.rateLimitOverrides on startup and refresh.
@@ -499,13 +498,6 @@ export function disableRateLimitProtection(connectionId) {
       trackAsyncOperation(limiter.disconnect());
     }
   }
-}
-
-/**
- * Check if rate limit protection is enabled for a connection
- */
-export function isRateLimitEnabled(connectionId) {
-  return enabledConnections.has(connectionId);
 }
 
 /**

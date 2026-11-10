@@ -5529,6 +5529,7 @@
     "stepProgress": "Voortgang van de configuratie"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Routeringsdrempel voor nieuwe sessies (0 = uit)",
     "tosAvoidNoticeTitle": "Deze provider is standaard uitgesloten van auto",
     "tosAvoidNoticeDescription": "De ToS-status is avoid. Het verbinden van een account verandert dit beleid niet. Bekijk de voorwaarden van de provider voordat je de globale optie voor alle auto-combo’s inschakelt.",
     "tosAvoidNoticeAction": "Het auto-beleid bekijken",

@@ -5529,6 +5529,7 @@
     "stepProgress": "Maendeleo ya usanidi"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Kizingiti cha kuelekeza vipindi vipya (0 = imezimwa)",
     "tosAvoidNoticeTitle": "Mtoa huduma huyu ameondolewa kwenye auto kwa chaguo-msingi",
     "tosAvoidNoticeDescription": "Hali yake ya ToS imewekwa alama avoid. Kuunganisha akaunti hakubadilishi sera hii. Soma masharti ya mtoa huduma kabla ya kuwezesha chaguo la jumla kwa michanganyiko yote ya auto.",
     "tosAvoidNoticeAction": "Angalia sera ya auto",

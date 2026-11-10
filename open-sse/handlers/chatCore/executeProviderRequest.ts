@@ -16,7 +16,7 @@ import { prepareUpstreamBody } from "./upstreamBody.ts";
 import { getExecutionConnectionId } from "./executionCredentials.ts";
 import {
   resolveAccountSemaphoreKey,
-  resolveAccountSemaphoreMaxConcurrency,
+  resolveTrackedAccountSemaphoreMaxConcurrency,
   resolveModelSemaphore,
 } from "./executorHelpers.ts";
 import {
@@ -262,7 +262,7 @@ export async function executeProviderRequest(
           const execCreds = getExecutionCredentials();
           const executionConnectionId = getExecutionConnectionId(execCreds);
           const attemptConnectionId = executionConnectionId || connectionId;
-          const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
+          const accountSemaphoreMaxConcurrency = resolveTrackedAccountSemaphoreMaxConcurrency(
             execCreds,
             typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
           );

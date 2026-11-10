@@ -5529,6 +5529,7 @@
     "stepProgress": "Ход настройки"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Порог маршрутизации новых сеансов (0 = выключено)",
     "tosAvoidNoticeTitle": "Этот провайдер по умолчанию исключён из auto",
     "tosAvoidNoticeDescription": "Его статус ToS отмечен как avoid. Подключение аккаунта не меняет эту политику. Ознакомьтесь с условиями провайдера перед включением общей опции для всех комбинаций auto.",
     "tosAvoidNoticeAction": "Посмотреть политику auto",

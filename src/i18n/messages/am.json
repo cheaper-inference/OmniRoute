@@ -5529,6 +5529,7 @@
     "stepProgress": "የማዋቀር ሂደት"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "የአዲስ ክፍለ ጊዜ ማዞሪያ ገደብ (0 = ጠፍቷል)",
     "tosAvoidNoticeTitle": "ይህ አቅራቢ በነባሪ ከauto ተገልሏል",
     "tosAvoidNoticeDescription": "የአገልግሎት ውሎች ሁኔታው avoid ተብሎ ተሰይሟል። መለያ ማገናኘት ይህን ፖሊሲ አይቀይርም። ለሁሉም የauto ጥምረቶች የጋራ ፈቃድ ከማብራትዎ በፊት የአቅራቢውን ውሎች ይከልሱ።",
     "tosAvoidNoticeAction": "የauto ፖሊሲን ይከልሱ",

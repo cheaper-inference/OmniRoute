@@ -5529,6 +5529,7 @@
     "stepProgress": "Kemajuan persediaan"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Ambang penghalaan sesi baharu (0 = mati)",
     "tosAvoidNoticeTitle": "Penyedia ini dikecualikan daripada auto secara lalai",
     "tosAvoidNoticeDescription": "Status ToS penyedia ini ditandakan avoid. Menyambungkan akaun tidak mengubah dasar ini. Semak syarat penyedia sebelum mengaktifkan pilihan global untuk semua kombo auto.",
     "tosAvoidNoticeAction": "Semak dasar auto",

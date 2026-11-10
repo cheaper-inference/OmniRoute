@@ -83,6 +83,7 @@ export interface ConnectionRateLimitOverrides {
   tpd?: number;
   minTime?: number;
   maxConcurrent?: number;
+  newSessionMaxConcurrent?: number;
   maxWaitMs?: number;
   executionMaxWaitMs?: number;
   modelConcurrency?: ModelConcurrencyMap;
@@ -119,6 +120,7 @@ export function sanitizeRateLimitOverrides(value: unknown): SanitizeOverridesRes
     "tpd",
     "minTime",
     "maxConcurrent",
+    "newSessionMaxConcurrent",
     "maxWaitMs",
     "executionMaxWaitMs",
   ]);
@@ -135,7 +137,12 @@ export function sanitizeRateLimitOverrides(value: unknown): SanitizeOverridesRes
       rejected.push(key);
       continue;
     }
-    if (typeof v === "number" && Number.isInteger(v) && v >= 0) {
+    if (
+      typeof v === "number" &&
+      Number.isInteger(v) &&
+      v >= 0 &&
+      (key !== "newSessionMaxConcurrent" || v <= 10_000)
+    ) {
       (map as Record<string, number>)[key] = v;
     } else {
       rejected.push(key);

@@ -5529,6 +5529,7 @@
     "stepProgress": "Progresul configurării"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Prag de rutare pentru sesiuni noi (0 = dezactivat)",
     "tosAvoidNoticeTitle": "Acest furnizor este exclus implicit din auto",
     "tosAvoidNoticeDescription": "Starea sa ToS este marcată avoid. Conectarea unui cont nu modifică această politică. Consultă termenii furnizorului înainte de a activa opțiunea globală pentru toate combinațiile auto.",
     "tosAvoidNoticeAction": "Consultă politica auto",

@@ -5529,6 +5529,7 @@
     "stepProgress": "Einrichtungsfortschritt"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Routing-Schwelle für neue Sitzungen (0 = aus)",
     "tosAvoidNoticeTitle": "Dieser Anbieter ist standardmäßig von auto ausgeschlossen",
     "tosAvoidNoticeDescription": "Sein Status für die Nutzungsbedingungen ist als avoid markiert. Das Verbinden eines Kontos ändert diese Richtlinie nicht. Prüfen Sie die Bedingungen des Anbieters, bevor Sie die globale Freigabe für alle auto-Kombinationen aktivieren.",
     "tosAvoidNoticeAction": "Richtlinie für auto prüfen",

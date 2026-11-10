@@ -5529,6 +5529,7 @@
     "stepProgress": "設定進度"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "新工作階段路由門檻（0 = 關閉）",
     "tosAvoidNoticeTitle": "此提供者預設排除在 auto 之外",
     "tosAvoidNoticeDescription": "其 ToS 狀態標記為 avoid。連線帳戶不會改變此政策。在為所有 auto 組合啟用全域選項之前，請查閱提供者的條款。",
     "tosAvoidNoticeAction": "查看 auto 政策",

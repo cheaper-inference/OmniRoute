@@ -5529,6 +5529,7 @@
     "stepProgress": "Ìlọsíwájú ìṣètò"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Ààlà ìdarí àkókò tuntun (0 = pa)",
     "tosAvoidNoticeTitle": "A yọ olùpèsè yìí kúrò nínú auto ní ìbẹ̀rẹ̀",
     "tosAvoidNoticeDescription": "A samisi ipò ToS rẹ̀ sí avoid. Síso àkọọlẹ̀ pọ̀ kò yí ìlànà yìí padà. Ka àwọn àdéhùn olùpèsè kí o tó tan àṣàyàn àpapọ̀ fún gbogbo àkójọpọ̀ auto.",
     "tosAvoidNoticeAction": "Wo ìlànà auto",

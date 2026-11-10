@@ -5529,6 +5529,7 @@
     "stepProgress": "સેટઅપની પ્રગતિ"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "નવા સત્રની રૂટિંગ મર્યાદા (0 = બંધ)",
     "tosAvoidNoticeTitle": "આ પ્રદાતા ડિફૉલ્ટ રૂપે auto માંથી બાકાત છે",
     "tosAvoidNoticeDescription": "તેની સેવાની શરતોની સ્થિતિ avoid તરીકે ચિહ્નિત છે. ખાતું જોડવાથી આ નીતિ બદલાતી નથી. બધી auto સંયોજન માટે વૈશ્વિક મંજૂરી ચાલુ કરતા પહેલાં પ્રદાતાની શરતો વાંચો.",
     "tosAvoidNoticeAction": "auto નીતિની સમીક્ષા કરો",

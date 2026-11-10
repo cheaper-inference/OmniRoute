@@ -5529,6 +5529,7 @@
     "stepProgress": "Ọganihu nhazi"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Oke ụzọ maka nnọkọ ọhụrụ (0 = gbanyụọ)",
     "tosAvoidNoticeTitle": "A na-ewepụ onye na-enye ọrụ a na auto na ndabara",
     "tosAvoidNoticeDescription": "Akara ọnọdụ usoro ọrụ ya bụ avoid. Ijikọta akaụntụ anaghị agbanwe iwu a. Nyochaa usoro onye na-enye ọrụ tupu ị gbanye nkwenye zuru ụwa ọnụ maka ngwakọta auto niile.",
     "tosAvoidNoticeAction": "Nyochaa iwu auto",

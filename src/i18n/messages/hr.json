@@ -5529,6 +5529,7 @@
     "stepProgress": "Napredak postavljanja"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Prag usmjeravanja novih sesija (0 = isključeno)",
     "tosAvoidNoticeTitle": "Ovaj je pružatelj prema zadanim postavkama isključen iz auto",
     "tosAvoidNoticeDescription": "Njegov status uvjeta korištenja označen je kao avoid. Povezivanje računa ne mijenja ova pravila. Pregledajte uvjete pružatelja prije uključivanja zajedničke suglasnosti za sve auto kombinacije.",
     "tosAvoidNoticeAction": "Pregledaj pravila za auto",

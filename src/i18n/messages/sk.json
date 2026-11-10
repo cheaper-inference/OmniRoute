@@ -5529,6 +5529,7 @@
     "stepProgress": "Priebeh nastavenia"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Prah smerovania nových relácií (0 = vypnuté)",
     "tosAvoidNoticeTitle": "Tento poskytovateľ je predvolene vylúčený z auto",
     "tosAvoidNoticeDescription": "Jeho stav ToS je označený ako avoid. Pripojenie účtu tieto pravidlá nemení. Pred zapnutím globálnej možnosti pre všetky kombinácie auto si prečítajte podmienky poskytovateľa.",
     "tosAvoidNoticeAction": "Zobraziť pravidlá auto",

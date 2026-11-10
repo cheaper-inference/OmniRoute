@@ -5529,6 +5529,7 @@
     "stepProgress": "セットアップの進捗"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "新規セッションのルーティングしきい値（0 = 無効）",
     "tosAvoidNoticeTitle": "このプロバイダーはデフォルトで auto から除外されています",
     "tosAvoidNoticeDescription": "利用規約のステータスが avoid とマークされています。アカウントを接続しても、このポリシーは変わりません。すべての auto コンボに対する共通の許可を有効にする前に、プロバイダーの規約を確認してください。",
     "tosAvoidNoticeAction": "auto のポリシーを確認",

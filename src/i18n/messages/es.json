@@ -5529,6 +5529,7 @@
     "stepProgress": "Progreso de la configuración"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "Umbral de enrutamiento de nuevas sesiones (0 = desactivado)",
     "tosAvoidNoticeTitle": "Este proveedor está excluido de auto de forma predeterminada",
     "tosAvoidNoticeDescription": "Su estado de condiciones de servicio está marcado como avoid. Conectar una cuenta no cambia esta política. Revisa las condiciones del proveedor antes de activar la autorización global para todas las combinaciones auto.",
     "tosAvoidNoticeAction": "Revisar la política de auto",

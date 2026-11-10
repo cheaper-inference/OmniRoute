@@ -5529,6 +5529,7 @@
     "stepProgress": "පිහිටුවීමේ ප්රගතිය"
   },
   "providers": {
+    "newSessionMaxConcurrentLabel": "නව සැසි මාර්ගගත කිරීමේ සීමාව (0 = අක්‍රිය)",
     "tosAvoidNoticeTitle": "මෙම සපයන්නා පෙරනිමියෙන් auto වෙතින් ඉවත් කර ඇත",
     "tosAvoidNoticeDescription": "එහි ToS තත්ත්වය avoid ලෙස සලකුණු කර ඇත. ගිණුමක් සම්බන්ධ කිරීමෙන් මෙම ප්‍රතිපත්තිය වෙනස් නොවේ. සියලු auto සංයෝජන සඳහා පොදු විකල්පය සක්‍රිය කිරීමට පෙර සපයන්නාගේ කොන්දේසි කියවන්න.",
     "tosAvoidNoticeAction": "auto ප්‍රතිපත්තිය බලන්න",

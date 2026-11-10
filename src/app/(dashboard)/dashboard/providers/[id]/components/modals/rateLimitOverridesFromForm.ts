@@ -14,6 +14,7 @@ export interface RateLimitOverridesFormFields {
   maxWaitMs: string;
   rateLimitMaxConcurrent: string;
   modelConcurrency: string;
+  newSessionMaxConcurrent?: string;
 }
 
 const NUMERIC_FIELDS = ["rpm", "rpd", "tpm", "tpd", "minTime", "maxWaitMs"] as const;
@@ -39,6 +40,8 @@ export function buildRateLimitOverridesFromForm(
   }
   if (form.rateLimitMaxConcurrent.trim())
     overrides.maxConcurrent = Number(form.rateLimitMaxConcurrent);
+  if (form.newSessionMaxConcurrent?.trim())
+    overrides.newSessionMaxConcurrent = Number(form.newSessionMaxConcurrent);
   if (typeof existing?.executionMaxWaitMs === "number")
     overrides.executionMaxWaitMs = existing.executionMaxWaitMs;
   const parsed = parseModelConcurrencyInput(form.modelConcurrency);

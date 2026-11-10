@@ -57,6 +57,7 @@ import {
   type ProviderConnectionView,
 } from "@/lib/db/providers/lazyConnectionView";
 import { buildConnectionConcurrencyFields } from "./connectionConcurrencyFields.ts"; // #13700
+import { filterFreshSessionAdmission, needsFreshSessionAdmission } from "./freshSessionAdmission";
 import { getConnectionErrorPenalty, getConnectionRecencyPenalty } from "./p2cScoreTerms.ts";
 import { getP2CLatencyPenalties } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
 import {
@@ -1753,9 +1754,17 @@ export async function getProviderCredentials(
     }
 
     const subscriptionFirst = holdBackCodexCreditOnlyAccounts(provider, withQuota, requestedModel);
-    const policyValidLeaseCandidates = options._leaseCandidateIds
-      ? subscriptionFirst.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
+    const admissionPool = needsFreshSessionAdmission(subscriptionFirst, options)
+      ? await filterFreshSessionAdmission(
+          subscriptionFirst,
+          provider,
+          options,
+          sessionAffinityTtlMs
+        )
       : subscriptionFirst;
+    const policyValidLeaseCandidates = options._leaseCandidateIds
+      ? admissionPool.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
+      : admissionPool;
     if (policyValidLeaseCandidates.length === 0) return null;
     const leasePolicy = await applyExclusiveConnectionLeasePolicy(
       policyValidLeaseCandidates,
