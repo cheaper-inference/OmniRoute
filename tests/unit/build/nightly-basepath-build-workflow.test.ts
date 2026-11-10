@@ -7,7 +7,9 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { load } from "js-yaml";
@@ -63,6 +65,52 @@ test("the job timeout leaves room for the test's own 40-minute build limit", () 
   const { job } = proofStep(readWorkflow());
   assert.ok((job["timeout-minutes"] ?? 0) > 40, "job must outlive the build's 40 min limit");
   assert.ok((job["timeout-minutes"] ?? 0) <= 90, "a hung build must not hold a runner for hours");
+});
+
+/** Runs the resolve-branch script with a stub `git` that lists `refs` as remote branches. */
+function resolveTarget(refs: string[], input = ""): { status: number; target: string } {
+  const step = readWorkflow().jobs?.["resolve-branch"]?.steps?.find((s) =>
+    s.run?.includes("GITHUB_OUTPUT")
+  );
+  assert.ok(step?.run, "resolve-branch has a script that writes the target");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "nightly-basepath-"));
+  try {
+    const bin = path.join(dir, "bin");
+    fs.mkdirSync(bin);
+    fs.writeFileSync(path.join(dir, "refs"), refs.map((r) => `origin/${r}\n`).join(""));
+    fs.writeFileSync(path.join(bin, "git"), `#!/bin/sh\ncat "${path.join(dir, "refs")}"\n`, {
+      mode: 0o755,
+    });
+    const output = path.join(dir, "output");
+    fs.writeFileSync(output, "");
+    const run = spawnSync("bash", ["-c", step.run], {
+      env: {
+        PATH: `${bin}:${process.env.PATH}`,
+        INPUT_BRANCH: input,
+        GITHUB_OUTPUT: output,
+      },
+      encoding: "utf8",
+    });
+    const target = /^target=(.*)$/m.exec(fs.readFileSync(output, "utf8"))?.[1] ?? "";
+    return { status: run.status ?? -1, target };
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+test("the nightly picks the highest exact release/vX.Y.Z, never a suffixed branch", () => {
+  const refs = ["release/v3.8.53", "release/v3.9.0-rc1", "release/v3.8.54", "release/v3.10.0x"];
+  assert.deepEqual(resolveTarget(refs), { status: 0, target: "release/v3.8.54" });
+});
+
+test("a manual branch must be an exact release/vX.Y.Z name", () => {
+  assert.deepEqual(resolveTarget([], "release/v3.8.54"), {
+    status: 0,
+    target: "release/v3.8.54",
+  });
+  for (const input of ["release/v3.9.0-rc1", "main", "release/v3.8.54;id"]) {
+    assert.notEqual(resolveTarget([], input).status, 0, `${input} must be refused`);
+  }
 });
 
 test("a failed night is reported, and a single run owns the concurrency group", () => {
