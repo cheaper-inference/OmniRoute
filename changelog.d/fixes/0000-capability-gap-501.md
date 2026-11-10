@@ -1,1 +1,0 @@
-- **fix(resilience):** an HTTP 501 or a gRPC `Unimplemented` answer (a provider that lacks one modality, such as rerank) now skips to the next target without cooling the connection or tripping the provider breaker, and a context-size or gRPC message-size rejection behind a 5xx is no longer retried on other accounts

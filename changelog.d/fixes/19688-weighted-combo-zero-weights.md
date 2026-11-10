@@ -1,0 +1,1 @@
+- **fix(combo):** a weighted combo whose targets all have weight 0 now spreads requests over every target instead of sending all of them to the first one. ([#19688](https://github.com/cheaper-inference/OmniRoute/pull/19688))

@@ -1,1 +1,0 @@
-- **perf(sse):** releasing a concurrency seat now wakes only the next waiter of the freed gates instead of re-checking every queued request, so deep queues no longer cost CPU on each release.

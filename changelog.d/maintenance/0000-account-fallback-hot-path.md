@@ -1,1 +1,0 @@
-- **perf(resilience):** the per-connection model-lock check returns at once when no model is locked, and long upstream error text is trimmed to its head and tail before classification, so a very long error body can no longer stall failover decisions
