@@ -7,7 +7,7 @@ import CodexAccountActions from "./CodexAccountActions";
 import ConnectionQuotaRefreshButton from "./ConnectionQuotaRefreshButton";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
-import { getCodexPlanLabel } from "../codexPlanLabel";
+import { formatCodexPlanLabel, getCodexAccountSummary, getCodexPlanLabel } from "../codexPlanLabel";
 import { providerText } from "../providerPageHelpers";
 import { getStatusPresentation } from "./connectionRowStatus";
 import { shouldShowConnectionLastError } from "./connectionRowHelpers";
@@ -111,7 +111,8 @@ function IdentityCell({
   const { connection, quotaCache } = props;
   const plan =
     getCodexPlanLabel(true, connection.providerSpecificData) ||
-    (typeof quotaCache?.plan === "string" ? quotaCache.plan : null);
+    (typeof quotaCache?.plan === "string" ? quotaCache.plan : "");
+  const account = getCodexAccountSummary(true, connection.providerSpecificData);
   const resetCredits =
     connection.quotaVisible !== false ? (quotaCache?.bankedResetCredits ?? 0) : 0;
   return (
@@ -124,7 +125,14 @@ function IdentityCell({
           {name}
         </p>
         <p className="mt-1 text-xs text-text-muted">
-          <span className="capitalize">{plan || "—"}</span>
+          <span title={plan || undefined}>{plan ? formatCodexPlanLabel(plan) : "—"}</span>
+          {account && (
+            <span title={account.role ? t("codexAccountRole", { role: account.role }) : undefined}>
+              {" · "}
+              {t(account.kind === "business" ? "codexAccountBusiness" : "codexAccountPersonal")}
+              {account.workspaceName ? ` · ${account.workspaceName}` : ""}
+            </span>
+          )}
           <span className="mx-2 text-border">/</span>#{connection.priority ?? "—"}
           {resetCredits > 0 && (
             <span className="ml-2 text-text-muted">
