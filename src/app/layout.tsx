@@ -18,6 +18,7 @@ import { THEME_BOOT_SCRIPT } from "@/shared/utils/themeBootScript";
 
 export const viewport: Viewport = {
   // Page background of the default (Editions) palette per colour scheme (pwaThemeColors.ts).
+  // THEME_BOOT_SCRIPT and the theme store rewrite these tags to the stored palette and mode.
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: PWA_THEME_COLORS.light },
     { media: "(prefers-color-scheme: dark)", color: PWA_THEME_COLORS.dark },

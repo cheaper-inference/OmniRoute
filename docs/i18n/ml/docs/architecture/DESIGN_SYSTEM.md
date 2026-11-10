@@ -18,97 +18,128 @@
 
 ## 1. കാര്യങ്ങൾ എവിടെയാണ് സ്ഥിതിചെയ്യുന്നത്
 
-- **കിറ്റ്.** `packages/ui-kit/src` എന്നത് `packages/ui-kit/UPSTREAM.md`-ൽ പിൻ ചെയ്തിരിക്കുന്ന കമ്മിറ്റിലെ അപ്സ്ട്രീം `src/`-ന്റെ ബൈറ്റ്-ഫോർ-ബൈറ്റ് പകർപ്പാണ് (`packages/ui-kit/UPSTREAM.md` ലൈസൻസ് അനുമതിയും രേഖപ്പെടുത്തുന്നു); പ്രാദേശിക പാച്ചുകൾ `PATCHES.md` പട്ടികപ്പെടുത്തുന്നു (ഒന്നുമില്ല). ബിൽഡ് ഇല്ലാതെ ഇത് സോഴ്സായി ഉപയോഗിക്കുന്നു: `next.config.mjs` അതിനെ ട്രാൻസ്പൈൽ ചെയ്യുന്നു, കൂടാതെ
-  `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` എന്നും `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` എന്നും മാപ്പ് ചെയ്യുന്നു (`vitest.config.ts`, `vitest.mcp.config.ts` എന്നിവയിലും ഇതേ അപരനാമമുണ്ട്). ഒരു
-  കിറ്റ് ഘടകം അതിന്റെ സബ്പാത്ത് വഴി ഇംപോർട്ട് ചെയ്യുക (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ഒരിക്കലും
-  `@omniroute/ui-kit` ബാരൽ വഴി ചെയ്യരുത്: ബാരൽ എല്ലാ ഘടകങ്ങളെയും (തീയതി പിക്കർ ഉൾപ്പെടെ)
-  ഓരോ ഇംപോർട്ടറിലേക്കും ഉൾപ്പെടുത്തുന്നു. കിറ്റ് സ്റ്റൈൽഷീറ്റ് `src/app/globals.css` വഴി പ്രവേശിക്കുന്നു
-  (`@import "../../packages/ui-kit/src/ci-styles.css"`, പൂർണ്ണമായ ഷീറ്റ്: കോർ `ci-ui.css` കൂടാതെ എല്ലാ പാറ്റേൺ കുടുംബങ്ങളും).
-- **ടോക്കണുകൾ.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ടോക്കണുകൾ പ്രഖ്യാപിക്കുന്നു; `src/app/globals.css`
-  അവയെ ലെഗസി OmniRoute പേരുകളിലേക്ക് (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) ബന്ധിപ്പിക്കുന്നു, അതിനാൽ നിലവിലുള്ള `var(--color-*)` റീഡുകളും Tailwind
-  യൂട്ടിലിറ്റികളും തുടർന്നും പ്രവർത്തിക്കുന്നു. പുതിയ കോഡ് Tailwind യൂട്ടിലിറ്റികൾ (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) അല്ലെങ്കിൽ കിറ്റ് ക്ലാസുകൾ ഉപയോഗിക്കുന്നു — ഹെക്സ് മൂല്യം ഒരിക്കലും ഉപയോഗിക്കരുത്
-  (`tests/unit/design-kit-bridge.test.ts` ഈ ബന്ധം നിർബന്ധമാക്കുന്നു). `text-primary`,
-  `--text-color-primary` വഴി `--color-primary-ink` ആയി പരിഹരിക്കപ്പെടുന്നതിനാൽ പ്രൈമറി ടെക്സ്റ്റ് വായിക്കാവുന്നതായി തുടരുന്നു; അതേസമയം
-  `bg-primary`/`border-primary` ആക്സന്റ് സർഫേസ് നിലനിർത്തുന്നു: Editions-ൽ അത് കിറ്റിന്റെ
-  `--ci-color-accent-active` ആണ് (ലൈറ്റിൽ ഡീപ് കോപ്പർ `#99562f`, ഡാർക്കിൽ കോപ്പർ ആക്സന്റ്); Classic-ൽ,
-  ലൈറ്റിൽ lime-800-ഉം ഡാർക്കിൽ ലൈം ആക്സന്റുമാണ്. ചാർട്ട് സീരീസ്
-  `--color-chart-1` … `--color-chart-5` ഉപയോഗിക്കുന്നു.
-- **തീമുകൾ.** `<html className="ci-theme">` (`src/app/layout.tsx`) ഡോക്യുമെന്റിനെ കിറ്റ് തീമിലേക്ക് ഉൾപ്പെടുത്തുന്നു.
-  മുൻഗണന `light`, `dark` അല്ലെങ്കിൽ `system` ആണ് (`src/shared/constants/appConfig.ts`-ൽ `THEME_CONFIG.defaultTheme = "system"`;
-  `system`, `prefers-color-scheme` പിന്തുടരുന്നു). `src/store/themeStore.ts`-ലെ `applyTheme()` (ഹൈഡ്രേഷനു മുമ്പ് പ്രവർത്തിക്കുന്ന,
-  `src/app/layout.tsx`-ൽ ഇൻലൈൻ ചെയ്ത `THEME_BOOT_SCRIPT` ഇതിനെ പ്രതിഫലിപ്പിക്കുന്നു)
-  `data-theme="dark"|"light"` സജ്ജമാക്കുകയും അതോടൊപ്പം `<html>`-ലെ `.dark` ക്ലാസ് ടോഗിൾ ചെയ്യുകയും ചെയ്യുന്നു.
-  കിറ്റിന്റെ ഡാർക്ക് ടോക്കൺ സെറ്റ് `data-theme="dark"`-നെ അടിസ്ഥാനമാക്കിയുള്ളതാണ് (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute-ന്റെ സ്വന്തം ഡാർക്ക് ഓവർറൈഡുകളും (`globals.css`-ലെ `.dark` ബ്ലോക്ക്) ലെഗസി Tailwind `dark:`
-  യൂട്ടിലിറ്റികളും `.dark` ക്ലാസിനെ അടിസ്ഥാനമാക്കുന്നു. ആക്സന്റ് നിറ പ്രീസെറ്റുകളൊന്നുമില്ല: ആക്സന്റ് എല്ലായ്പ്പോഴും
-  കിറ്റിൽ നിന്നാണ് വരുന്നത്, പഴയ ബിൽഡിൽ നിന്നുള്ള പെർസിസ്റ്റ് ചെയ്ത പ്രീസെറ്റ് സ്റ്റോർ ലോഡ് ചെയ്യുമ്പോൾ ഒഴിവാക്കപ്പെടുന്നു.
-- **പാലറ്റുകൾ.** രണ്ടെണ്ണം, രണ്ടും കിറ്റിൽ നിന്നുള്ളവ (`src/shared/constants/appearancePalette.ts`): ഡിഫോൾട്ടായ `editions`,
-  കൂടാതെ `classic`. Editions എന്നത് `<html>`-ലെ കിറ്റിന്റെ `data-ci-appearance="editions"` ആട്രിബ്യൂട്ടാണ്; `ci-editions.css`
-  (`ci-ui.css` ഇംപോർട്ട് ചെയ്യുന്നത്) അതിനെ `data-theme`-നൊപ്പം സംയോജിപ്പിക്കുന്നു; Classic എന്നത് ആട്രിബ്യൂട്ട്
-  ഇല്ലാത്ത അവസ്ഥയാണ്. റൂട്ട് ലേഔട്ട് സെർവറിൽ ആട്രിബ്യൂട്ട് റെൻഡർ ചെയ്യുന്നതിനാൽ ഒന്നും സ്റ്റോർ ചെയ്തിട്ടില്ലാത്ത (അല്ലെങ്കിൽ JS ഇല്ലാത്ത)
-  സന്ദർശകന് എല്ലാ സർഫേസിലും — ഡാഷ്ബോർഡ്, ലോഗിൻ, `/status`, എറർ പേജുകൾ, `/docs`, PWA എന്നിവയിൽ — Editions ലഭിക്കുന്നു. തിരഞ്ഞെടുത്തത്
-  അതേ `theme` സ്റ്റോറിൽ തീമിനടുത്തായി പെർസിസ്റ്റ് ചെയ്യപ്പെടുന്നു (`src/store/themeStore.ts`-ലെ `palette`, `setPalette()`, `applyPalette()`)
-  കൂടാതെ പെയിന്റിന് മുമ്പ് `THEME_BOOT_SCRIPT`
-  (`src/shared/utils/themeBootScript.ts`, ലേഔട്ടിന്റെ `<head>`-ൽ ഇൻലൈൻ ചെയ്തത്) പ്രയോഗിക്കുന്നു; സ്റ്റോർ ചെയ്ത പാലറ്റ്
-  `"classic"` ആയിരിക്കുമ്പോൾ മാത്രം ഇത് ആട്രിബ്യൂട്ട് നീക്കംചെയ്യുന്നു; റൂട്ട് ലേഔട്ടിന് പുറത്തുള്ള `src/app/global-error.tsx`
-  അതേ സ്റ്റോറിൽ നിന്ന് ഇത് പ്രയോഗിക്കുന്നു. മറ്റേതെങ്കിലും എലമെന്റിൽ `data-ci-appearance` ഇടരുത്: കിറ്റ് അതിനെ
-  `html:root:has([data-ci-appearance="editions"])` ഉപയോഗിച്ച് മാച്ച് ചെയ്യുന്നതിനാൽ ഒരു ഡിസെൻഡന്റ് പോലും മുഴുവൻ ഡോക്യുമെന്റിനെ മാറ്റും.
-  Editions-ലെ `data-ci-editions-variant="landing"` വേരിയന്റ് മാർക്കറ്റിംഗ് പേജുകൾക്കുള്ളതാണ്, ഡാഷ്ബോർഡിനുള്ളതല്ല.
-  ബ്രൗസർ ക്രോമിന് (`viewport.themeColor`, വെബ് മാനിഫെസ്റ്റ്) CSS-ഓ സ്റ്റോർ ചെയ്ത തിരഞ്ഞെടുപ്പോ വായിക്കാനാകില്ല, അതിനാൽ അത്
-  ഡിഫോൾട്ട് പിന്തുടരുന്നു: `src/shared/constants/pwaThemeColors.ts`-ലെ `PWA_THEME_COLORS` ആണ്
-  Editions-ലെ `--ci-color-background`-ന്റെ (`#f3f1e9` / `#11120f`) ഏക പ്രതിഫലനം; ഇത്
-  `tests/unit/pwa-theme-colors.test.ts` വഴി `ci-editions.css`-ലേക്ക് പിൻ ചെയ്തിരിക്കുന്നു. Monaco അതിന്റെ നിറങ്ങൾ ഒരു പ്രോബിൽ നിന്ന് വായിക്കുന്നു (`monacoKitTheme.ts`);
-  Editions-ൽ, കിറ്റ് Editions ലൈറ്റ്/ഡാർക്ക് റൂട്ടിൽ നിന്ന് പരിഹരിക്കുന്നതിനാൽ, ഒരൊറ്റ സിങ്ക്രണസ് പാസിനായി പ്രോബ് റീഡ് റൂട്ട് `data-theme` ഫ്ലിപ്പ് ചെയ്യുന്നു.
-- **ഘടകങ്ങൾ (അഡാപ്റ്ററുകൾ).** `src/shared/components/index.tsx` OmniRoute ഘടക API നിലനിർത്തുന്നു (അതേ
-  പേരുകൾ, ഡിഫോൾട്ട് എക്സ്പോർട്ടുകൾ, പ്രോപ്പുകൾ), അതിന് പിന്നിലെ പ്രിമിറ്റീവുകൾ കിറ്റിന് മുകളിലുള്ള അഡാപ്റ്ററുകളാണ്: ഫോമുകൾ
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ഓവർലേകളും ഫീഡ്ബാക്കും
+- **കിറ്റ്.** `packages/ui-kit/src` എന്നത്
+  `packages/ui-kit/UPSTREAM.md`-ൽ പിൻ ചെയ്തിരിക്കുന്ന commit-ലെ upstream `src/`-ന്റെ byte-for-byte പകർപ്പാണ് (license authorization-ഉം അതിൽ രേഖപ്പെടുത്തിയിരിക്കുന്നു); പ്രാദേശിക patches (ഒന്നുമില്ല)
+  `PATCHES.md`-ൽ പട്ടികപ്പെടുത്തിയിരിക്കുന്നു. Build ഇല്ലാതെ source ആയി ഇത് ഉപയോഗിക്കുന്നു: `next.config.mjs` അതിനെ transpile ചെയ്യുന്നു,
+  കൂടാതെ `tsconfig.json`, `@omniroute/ui-kit` → `packages/ui-kit/src` എന്നും `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` എന്നും map ചെയ്യുന്നു (`vitest.config.ts`, `vitest.mcp.config.ts` എന്നിവയിലും ഇതേ alias ഉണ്ട്). ഒരു
+  kit component അതിന്റെ subpath വഴി import ചെയ്യുക (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ഒരിക്കലും
+  `@omniroute/ui-kit` barrel വഴി ചെയ്യരുത്: barrel എല്ലാ component-കളെയും (date picker ഉൾപ്പെടെ)
+  ഓരോ importer-ലേക്കും ഉൾപ്പെടുത്തുന്നു. Kit stylesheet, `src/app/globals.css` വഴിയാണ് പ്രവേശിക്കുന്നത്
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, പൂർണ്ണമായ sheet: അടിസ്ഥാന `ci-ui.css`-ഉം എല്ലാ pattern family-കളും).
+- **ടോക്കണുകൾ.** `packages/ui-kit/src/ci-tokens.css`, `--ci-*` tokens പ്രഖ്യാപിക്കുന്നു; `src/app/globals.css`
+  അവയെ പഴയ OmniRoute പേരുകളുമായി (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) ബന്ധിപ്പിക്കുന്നു, അതിനാൽ നിലവിലുള്ള `var(--color-*)` reads-ഉം Tailwind
+  utilities-ഉം തുടർന്നും പ്രവർത്തിക്കും. പുതിയ code Tailwind utilities (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) അല്ലെങ്കിൽ kit classes ഉപയോഗിക്കണം — hex value ഒരിക്കലും
+  ഉപയോഗിക്കരുത് (`tests/unit/design-kit-bridge.test.ts` ഈ bridge നിർബന്ധമാക്കുന്നു). `text-primary`,
+  `--text-color-primary` വഴി `--color-primary-ink`-ലേക്ക് resolve ചെയ്യുന്നതിനാൽ primary text വായിക്കാൻ കഴിയുന്നതായി തുടരുന്നു;
+  അതേസമയം `bg-primary`/`border-primary` accent surface നിലനിർത്തുന്നു: Editions-ൽ ഇത് kit-ന്റെ
+  `--ci-color-accent-active` ആണ് (light-ൽ കടും copper `#99562f`, dark-ൽ copper accent); Classic-ൽ,
+  light-ൽ lime-800-ഉം dark-ൽ lime accent-ഉം. Chart series-കൾ
+  `--color-chart-1` … `--color-chart-8` ഉപയോഗിക്കുന്നു; ഓരോന്നിനും text-safe ആയ `--color-chart-N-ink`-ഉം opaque ആയ
+  `--color-chart-N-subtle` chip tint-ഉം ഉണ്ട്, kit series ക്രമത്തിൽ (`ciChartSeriesOrder`) assign ചെയ്തിരിക്കുന്നു.
+- **തീമുകൾ.** `<html className="ci-theme">` (`src/app/layout.tsx`) document-നെ kit theme-ലേക്ക് opt in ചെയ്യുന്നു.
+  Preference `light`, `dark` അല്ലെങ്കിൽ `system` ആണ് (`src/shared/constants/appConfig.ts`-ൽ
+  `THEME_CONFIG.defaultTheme = "system"`; `system`, `prefers-color-scheme` പിന്തുടരുന്നു). `src/store/themeStore.ts`-ലെ
+  `applyTheme()` (hydration-ന് മുമ്പ് പ്രവർത്തിക്കുന്ന വിധത്തിൽ `src/app/layout.tsx`-ൽ inline ചെയ്ത
+  `THEME_BOOT_SCRIPT`-ലും ഇത് പ്രതിഫലിപ്പിച്ചിട്ടുണ്ട്) `data-theme="dark"|"light"` set ചെയ്യുകയും `<html>`-ലെ `.dark` class
+  അതോടൊപ്പം toggle ചെയ്യുകയും ചെയ്യുന്നു. Kit-ന്റെ dark token set, `data-theme="dark"` അടിസ്ഥാനമാക്കിയാണ്
+  (`packages/ui-kit/src/ci-tokens.css`); OmniRoute-ന്റെ സ്വന്തം dark overrides (`globals.css`-ലെ `.dark` block), പഴയ Tailwind
+  `dark:` utilities എന്നിവ `.dark` class അടിസ്ഥാനമാക്കുന്നു. Accent color presets ഒന്നുമില്ല: accent എല്ലായ്പ്പോഴും
+  kit-ൽ നിന്നാണ് വരുന്നത്; പഴയ build-ൽ നിന്ന് persist ചെയ്ത preset, store load ചെയ്യുമ്പോൾ നീക്കം ചെയ്യപ്പെടുന്നു.
+- **പാലറ്റുകൾ.** രണ്ടെണ്ണമുണ്ട്, രണ്ടും kit-ൽ നിന്ന് (`src/shared/constants/appearancePalette.ts`): default ആയ `editions`,
+  കൂടാതെ `classic`. Editions എന്നത് `<html>`-ലെ kit-ന്റെ `data-ci-appearance="editions"` attribute ആണ്; `ci-ui.css` import ചെയ്യുന്ന
+  `ci-editions.css`, ഇതിനെ `data-theme`-നൊപ്പം സംയോജിപ്പിക്കുന്നു; Classic എന്നത് ആ attribute-ന്റെ
+  അഭാവമാണ്. Root layout ഈ attribute server-render ചെയ്യുന്നതിനാൽ ഒന്നും store ചെയ്തിട്ടില്ലാത്ത (അല്ലെങ്കിൽ JS ഇല്ലാത്ത) visitor-ന്
+  എല്ലാ surface-ലും Editions ലഭിക്കുന്നു — dashboard, login, `/status`, error pages, `/docs`, PWA എന്നിവയിൽ. ഈ choice
+  theme-നോടൊപ്പം അതേ `theme` store-ൽ persist ചെയ്യുന്നു (`src/store/themeStore.ts`-ലെ `palette`, `setPalette()`, `applyPalette()`);
+  layout-ന്റെ `<head>`-ൽ inline ചെയ്തിരിക്കുന്ന `THEME_BOOT_SCRIPT`
+  (`src/shared/utils/themeBootScript.ts`) paint-ന് മുമ്പ് ഇത് apply ചെയ്യുന്നു; store ചെയ്ത palette `"classic"` ആണെങ്കിൽ മാത്രമാണ്
+  script attribute നീക്കം ചെയ്യുന്നത്. Root layout-ന് പുറത്തുള്ള `src/app/global-error.tsx`, അതേ store-ൽ നിന്ന് ഇത് apply ചെയ്യുന്നു.
+  മറ്റൊരു element-ലും `data-ci-appearance` നൽകരുത്: kit അതിനെ
+  `html:root:has([data-ci-appearance="editions"])` ഉപയോഗിച്ച് match ചെയ്യുന്നതിനാൽ, ഒരു descendant പോലും മുഴുവൻ document-നെയും switch ചെയ്യും.
+  Editions-ന്റെ `data-ci-editions-variant="landing"` variant marketing pages-നുള്ളതാണ്, dashboard-നുള്ളതല്ല.
+  Browser chrome: server, default ആയ Editions-നെ `viewport.themeColor`-ലും (ഓരോ
+  `prefers-color-scheme`-നും ഓരോ tag) web manifest-ലും render ചെയ്യുന്നു — `src/shared/constants/pwaThemeColors.ts`-ലെ
+  `PWA_THEME_COLORS`, Editions-ന്റെ `--ci-color-background`-ന്റെ ഏക mirror ആണ്
+  (`#f3f1e9` / `#11120f`); `tests/unit/pwa-theme-colors.test.ts` അതിനെ `ci-editions.css`-ലേക്ക് pin ചെയ്യുന്നു. തുടർന്ന് live
+  `<meta name="theme-color">`, store ചെയ്ത palette-ഉം mode-ഉം പിന്തുടരുന്നു: `THEME_BOOT_SCRIPT` paint-ന് മുമ്പ് tags rewrite ചെയ്യുന്നു,
+  കൂടാതെ theme store-ന്റെ actions ഓരോ മാറ്റത്തിലും അത് ചെയ്യുന്നു (`src/shared/utils/themeColorMeta.ts`-ലെ `resolveThemeColor()` /
+  `applyThemeColor()`; kit-ന്റെ `ciTokens`-ൽ നിന്ന് `CLASSIC_PAGE_BACKGROUND` വായിക്കുന്നു). വ്യക്തമായി light/dark theme set ചെയ്താൽ,
+  എല്ലാ tag-കളും ആ mode-ലേക്ക് set ചെയ്യപ്പെടുന്നു; `system`, ഓരോ scheme-നും ഒരു colour നിലനിർത്തുന്നു. Manifest Editions ആയി തന്നെ തുടരുന്നു:
+  preference ഇല്ലാതെ, ഓരോ install-നും ഒരിക്കൽ മാത്രമാണ് അത് fetch ചെയ്യപ്പെടുന്നത്. Monaco അതിന്റെ colours ഒരു probe-ൽ നിന്ന് വായിക്കുന്നു
+  (`monacoKitTheme.ts`); Editions-ൽ, kit Editions light/dark root-ൽ നിന്നാണ് resolve ചെയ്യുന്നത് എന്നതിനാൽ,
+  ഒരു synchronous pass-നായി probe read root-ന്റെ `data-theme` flip ചെയ്യുന്നു.
+- **കമ്പോണന്റുകൾ (അഡാപ്റ്ററുകൾ).** `src/shared/components/index.tsx`, OmniRoute component API അതേപടി നിലനിർത്തുന്നു (അതേ
+  പേരുകൾ, default exports, props); അതിന് പിന്നിലെ primitives kit-നെ പൊതിഞ്ഞ adapters ആണ്: forms
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays-ഉം feedback-ഉം
   (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  ഘടന (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`), ടേബിളുകൾ
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). ഒരു അഡാപ്റ്റർ കിറ്റ്
-  ഘടകത്തെ സബ്പാത്ത് വഴി ഇംപോർട്ട് ചെയ്ത് ലെഗസി പ്രോപ്പുകൾ അതിലേക്ക് മാപ്പ് ചെയ്യുന്നു — ഉദാഹരണത്തിന് `Button variant="primary"` എന്നത്
-  കിറ്റിലെ `default` ബട്ടണാണ് (`--ci-button-primary-*`: ലൈറ്റിൽ ഇൻവേഴ്സ് സർഫേസ്, ഡാർക്കിൽ അതിന്റെ
-  `--ci-color-accent-foreground` ഇങ്കോടുകൂടിയ ആക്സന്റ്), `danger` എന്നത് `destructive` ആണ്, `warning` എന്നത് `outline`-നൊപ്പം
-  `.ci-button--warning` എക്സ്റ്റൻഷനാണ്. `globals.css`-ന്റെ അവസാനത്തിലുള്ള (`@layer components`)
-  `.ci-button--warning`, `.ci-badge[data-tone]` നിയമങ്ങൾ കിറ്റ് ക്ലാസുകൾക്ക് മുകളിലുള്ള OmniRoute എക്സ്റ്റൻഷനുകളാണ്.
-  `tests/unit/ui/adapters/*.test.tsx` ഓരോ അഡാപ്റ്ററും പിൻ ചെയ്യുന്നു.
-- **ഷെൽ.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout` റെൻഡർ ചെയ്യുന്നു; അത്
+  structure (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`), tables
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`) എന്നിവ. ഒരു adapter, kit
+  component-നെ subpath വഴി import ചെയ്ത് പഴയ props അതിലേക്ക് map ചെയ്യുന്നു — ഉദാഹരണത്തിന് `Button variant="primary"` എന്നത് kit-ന്റെ
+  `default` button ആണ് (`--ci-button-primary-*`: light-ൽ inverse surface, dark-ൽ അതിന്റെ
+  `--ci-color-accent-foreground` ink ഉള്ള accent); `danger` എന്നത് `destructive` ആണ്, `warning` എന്നത് kit-ന്റെ `warning`
+  button ആണ്. `Badge` status variants kit tones ആണ്; `<option>` children ഉള്ള `Select`, kit-ന്റെ
+  `NativeSelect` render ചെയ്യുന്നു.
+  ഓരോ adapter-നെയും `tests/unit/ui/adapters/*.test.tsx` pin ചെയ്യുന്നു.
+- **ഷെൽ.** `src/app/(dashboard)/layout.tsx` എന്നത് `DashboardLayout` റെൻഡർ ചെയ്യുന്നു, അത്
   `src/shared/components/layouts/DashboardShell.tsx` റെൻഡർ ചെയ്യുന്നു: കിറ്റിലെ `SidebarProvider` / `Sidebar` /
   `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), കൂടാതെ OmniRoute-ന്റെ നാവിഗേഷൻ ലോജിക്
-  `src/shared/components/Sidebar.tsx`-ലുണ്ട്. `#main-content`-ലേക്കുള്ള "ഉള്ളടക്കത്തിലേക്ക് പോകുക" ലിങ്കാണ് ഫോക്കസ് ചെയ്യാവുന്ന ആദ്യത്തെ
+  `src/shared/components/Sidebar.tsx`-ൽ. `#main-content`-ലേക്കുള്ള ഒരു "ഉള്ളടക്കത്തിലേക്ക് കടക്കുക" ലിങ്കാണ് ആദ്യം ഫോക്കസ് ചെയ്യാനാകുന്ന
   എലമെന്റ്. `src/shared/components/Header.tsx`-ൽ കിറ്റിലെ `SidebarTrigger` (ഷെല്ലിലെ ഏക സൈഡ്ബാർ
-  ടോഗിൾ), Keak `ProductSwitcher`, കമാൻഡ്-പാലറ്റ് ഓപ്പണർ എന്നിവയുണ്ട്; `#main-content`-നുള്ളിൽ കിറ്റ് `PageHeader`
-  (`.ci-page-header`) മൗണ്ട് ചെയ്തിട്ടില്ലാത്തപ്പോൾ മാത്രം ഇത് റൂട്ട് ടൈറ്റിൽ കാണിക്കുന്നു, അതിനാൽ സ്വന്തം
-  `PageHeader` ഉള്ള പേജിന് ഒരൊറ്റ `h1` മാത്രമേ ഉണ്ടാകൂ. `src/shared/components/CommandPalette.tsx` ഒരു കിറ്റ് `Dialog` ആണ്.
+  ടോഗിൾ), Keak `ProductSwitcher`, കമാൻഡ്-പാലറ്റ് ഓപ്പണർ എന്നിവ ഉൾപ്പെടുന്നു; `#main-content`-നുള്ളിൽ കിറ്റിലെ `PageHeader` (`.ci-page-header`)
+  മൗണ്ട് ചെയ്തിട്ടില്ലാത്തപ്പോൾ മാത്രമാണ് ഇത് റൂട്ട് ശീർഷകം കാണിക്കുന്നത്, അതിനാൽ സ്വന്തമായി
+  `PageHeader` ഉള്ള ഒരു പേജിൽ ഒരൊറ്റ `h1` മാത്രമേ ഉണ്ടാകൂ. `src/shared/components/CommandPalette.tsx` കിറ്റിലെ ഒരു `Dialog` ആണ്.
 - **ഐക്കണുകൾ.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) പേര് (സ്ക്രീനുകൾ ഉപയോഗിക്കുന്ന
   Material Symbols പദാവലി) `ICON_MAP` (`src/shared/constants/iconMap.ts`) വഴി ഒരു
-  Lucide ഗ്ലിഫിലേക്ക് പരിഹരിക്കുന്നു. Material Symbols ഫോണ്ടും പാക്കേജും നീക്കംചെയ്തിരിക്കുന്നു: മാപ്പിൽ ഇല്ലാത്ത ഒരു പേര്
-  നിഷ്പക്ഷമായ ഒരു പ്ലേസ്ഹോൾഡർ ഗ്ലിഫ് (`data-icon-missing="true"`) റെൻഡർ ചെയ്യുകയും production-ന് പുറത്ത് ഒരു കൺസോൾ മുന്നറിയിപ്പ് ലോഗ് ചെയ്യുകയും ചെയ്യുന്നു.
-  `npm run gen:icon-map` ഉപയോഗത്തിലുള്ളതും മാപ്പിൽ ഇല്ലാത്തതുമായ പേരുകൾ പ്രിന്റ് ചെയ്യുന്നു
-  (`tests/unit/icon-map-coverage.test.ts` Lucide ഐക്കൺ ഇല്ലാത്ത ഏതൊരു പേരിലും പരാജയപ്പെടുന്നു;
-  `tests/unit/icon-map-object-values.test.ts` ലുക്കപ്പ് ഒബ്ജക്റ്റുകളിൽ സംഭരിച്ചിരിക്കുന്ന പേരുകൾ പരിശോധിക്കുന്നു);
+  Lucide ഗ്ലിഫിലേക്ക് പരിഹരിക്കുന്നു. Material Symbols ഫോണ്ടും പാക്കേജും നീക്കംചെയ്തു: മാപ്പിൽ ഇല്ലാത്ത ഒരു പേര് നിഷ്പക്ഷമായ ഒരു
+  പ്ലേസ്ഹോൾഡർ ഗ്ലിഫ് (`data-icon-missing="true"`) റെൻഡർ ചെയ്യുകയും production-ന് പുറത്ത് ഒരു കൺസോൾ മുന്നറിയിപ്പ് ലോഗ് ചെയ്യുകയും ചെയ്യുന്നു.
+  `npm run gen:icon-map` ഉപയോഗത്തിലുണ്ടെങ്കിലും മാപ്പിൽ ഇല്ലാത്ത പേരുകൾ പ്രിന്റ് ചെയ്യുന്നു
+  (Lucide ഐക്കൺ ഇല്ലാത്ത ഏത് പേരിലും `tests/unit/icon-map-coverage.test.ts` പരാജയപ്പെടുന്നു;
+  ലുക്കപ്പ് ഒബ്ജക്റ്റുകളിൽ സംഭരിച്ചിരിക്കുന്ന പേരുകൾ `tests/unit/icon-map-object-values.test.ts` പരിശോധിക്കുന്നു);
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ലിറ്ററൽ
   `<span className="material-symbols-outlined">` സ്പാനുകളെ `<Icon>` ആയി മാറ്റിയെഴുതുന്നു.
-- **ബ്രാൻഡ്.** `src/shared/components/OmniRouteLogo.tsx` കിറ്റിനെ പൊതിയുന്നു: ഡിഫോൾട്ട് എക്സ്പോർട്ടായ `OmniRouteLogo`
-  `ProductIcon product="omniroute" variant="glyph"` (ഇൻലൈൻ SVG, `basePath`-സുരക്ഷിതം) റെൻഡർ ചെയ്യുകയും
-  `OmniRouteLockup` `ProductLockup product="omniroute"` (ആക്സസ് ചെയ്യാവുന്ന പേര് "Keak OmniRoute") റെൻഡർ ചെയ്യുകയും ചെയ്യുന്നു; അല്ലെങ്കിൽ,
-  വൈറ്റ്-ലേബൽ ഓപ്പറേറ്റർമാർക്കായി അവരുടെ സ്വന്തം `name`/`logoSrc` റെൻഡർ ചെയ്യുന്നു. പ്രോഡക്റ്റ്-സ്വിച്ചർ ലക്ഷ്യസ്ഥാനങ്ങൾ
-  `src/shared/constants/keakProducts.ts`-ൽ (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) ലഭ്യമാണ്. സ്വതന്ത്ര
-  സ്ക്രീനുകൾ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+- **ബ്രാൻഡ്.** `src/shared/components/OmniRouteLogo.tsx` കിറ്റിനെ റാപ്പ് ചെയ്യുന്നു: ഡിഫോൾട്ട് എക്സ്പോർട്ടായ `OmniRouteLogo`
+  `ProductIcon product="omniroute" variant="glyph"` (ഇൻലൈൻ SVG, `basePath`-സുരക്ഷിതം) റെൻഡർ ചെയ്യുന്നു, കൂടാതെ
+  `OmniRouteLockup` എന്നത് `ProductLockup product="omniroute"` (ആക്സസിബിൾ പേര് "Keak OmniRoute") അല്ലെങ്കിൽ,
+  വൈറ്റ്-ലേബൽ ഓപ്പറേറ്റർമാർക്കായി, അവരുടെ സ്വന്തം `name`/`logoSrc` റെൻഡർ ചെയ്യുന്നു. പ്രൊഡക്റ്റ്-സ്വിച്ചർ ലക്ഷ്യസ്ഥാനങ്ങൾ
+  `src/shared/constants/keakProducts.ts`-ൽ (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) സ്ഥിതിചെയ്യുന്നു. സ്വതന്ത്ര
+  സ്ക്രീനുകളായ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx`, `src/shared/components/ErrorPageScaffold.tsx`
-  എന്നിവ — ലോക്കപ്പ് കാണിക്കുന്നു; `tests/unit/brand-pages-static.test.ts` അത് സംരക്ഷിക്കുന്നു.
+  — ലോക്കപ്പ് കാണിക്കുന്നു; `tests/unit/brand-pages-static.test.ts` അത് സംരക്ഷിക്കുന്നു.
 
 ## 2. നിയമങ്ങൾ
 
-1. ടോക്കണുകൾ, ഒരിക്കലും അക്ഷരങ്ങൾ. ഒഴിവാക്കലുകൾ ഉദ്ദേശ്യത്തോടെ സൂക്ഷിക്കുന്നു: എല്ലായ്പ്പോഴും ഇരുണ്ട കൺസോൾ ടെർമിനലും `STATUS_HEX` (`src/shared/constants/statusColors.ts`), അക്ഷരീയ ഹെക്സ് ആവശ്യമുള്ള വിളിക്കുന്നവർക്കുള്ള കിറ്റ് സ്റ്റാറ്റസ് പാലറ്റിൻ്റെ പരിഹരിച്ച ഹെക്സ് മിററും. വർഗ്ഗീകരണ പാലറ്റുകളും ഇനി ഒരു അപവാദമല്ല: അവ കിറ്റിൻ്റെ അഞ്ച് ചാർട്ട് ടോക്കണുകളിൽ (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` വഴിയും, റൂട്ടിംഗ് തന്ത്രങ്ങൾക്ക് `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` വഴിയും സഞ്ചരിക്കുന്നു; ReactFlow അരികുകളും ഓർക്കസ്ട്രേഷൻ ക്യാൻവാസും തീം-അവബോധമുള്ള `--orch-status-*` വേരിയബിളുകൾ (`src/shared/components/flow/edgeStyles.ts`) വായിക്കുന്നു.
-2. കൈകൊണ്ട് ഒരിക്കലും `packages/ui-kit/src` പാച്ച് ചെയ്യരുത്: `scripts/dev/sync-ui-kit.sh <commit>` മായി സമന്വയിപ്പിക്കുക ; പിൻ ചെയ്ത അപ്സ്ട്രീം കമ്മിറ്റിൽ നിന്ന് വ്യത്യസ്തമായ ഏതൊരു ബൈറ്റിലും പ്രീ-കമ്മിറ്റ് ഗേറ്റ് `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) പരാജയപ്പെടുന്നു (അപ്സ്ട്രീം ക്ലോൺ, `UI_KIT_CLONE` അല്ലെങ്കിൽ `_references/cheaper-inference-ui-kit`, ഇല്ലാത്തപ്പോൾ ഒരു മുന്നറിയിപ്പോടെ അത് ഒഴിവാക്കുന്നു). കിറ്റിന് എന്തെങ്കിലും കുറവുണ്ടാകുമ്പോൾ, അഡാപ്റ്ററിലോ സ്ക്രീനിലോ അതിന് ചുറ്റും പ്രവർത്തിച്ച് അപ്സ്ട്രീമിനായി ആവശ്യപ്പെടുക.
-3. കിറ്റ് ടെക്സ്റ്റ് ഡിഫോൾട്ടുകൾ ഇംഗ്ലീഷാണ് (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ഒരു കിറ്റ് ഘടകം ടെക്സ്റ്റ് റെൻഡർ ചെയ്യുമ്പോൾ `useTranslations(...)` ൽ നിന്ന് വിവർത്തനം ചെയ്ത സ്ട്രിംഗുകൾ കൈമാറുക.
-4. ടെയിൽവിൻഡ് യൂട്ടിലിറ്റികൾ കിറ്റ് കോംപോണൻ്റ് ക്ലാസുകളിൽ വിജയിക്കുന്നു (കിറ്റ് `@layer theme, base, components, utilities` പ്രഖ്യാപിക്കുകയും അതിൻ്റെ നിയമങ്ങൾ `components` ൽ ജീവിക്കുകയും ചെയ്യുന്നു) — കിറ്റ് ഘടകങ്ങൾ വീണ്ടും കളർ ചെയ്യാതിരിക്കാൻ സ്പെയ്സിംഗിനും ലേഔട്ടിനുമായി യൂട്ടിലിറ്റികൾ ഉപയോഗിക്കുക.
-5. തലക്കെട്ടുകൾ: പേജിനും വിഭാഗ ശീർഷകങ്ങൾക്കും `.ci-heading` ; പിശക്-പേജ് സ്റ്റാറ്റസ് കോഡ് പോലുള്ള വലുതും വിരളവുമായ ഡിസ്പ്ലേ ടെക്സ്റ്റുകൾക്ക് മാത്രം `.ci-dashboard-display`. ഇരുവരും സ്വിറ്റ്സർ ഉപയോഗിക്കുന്നു.
-6. കിറ്റ് ദത്തെടുക്കലിനെ`tests/unit/dashboard-kit-sweep.test.ts` കാക്കുന്നു: `src/app` അല്ലെങ്കിൽ `src/shared/components` കീഴിൽ മെറ്റീരിയൽ ലിഗേച്ചർ സ്പാൻ ഇല്ല; ഡാഷ്ബോർഡ് ട്രീയിൽ (`src/app/(dashboard)`, `src/shared/components`) റോ `<select>`, `<textarea>` അല്ലെങ്കിൽ `<table>`, കൂടാതെ ലിസ്റ്റ് ചെയ്ത ഒഴിവാക്കലുകൾക്ക് പുറത്ത് ഹാൻഡ്-റോൾഡ് `role="dialog"` ഇല്ല ( `Select` അഡാപ്റ്ററിൻ്റെ നേറ്റീവ് ബ്രാഞ്ച്, `RequestLoggerDetail`); എല്ലാ അസംസ്കൃത `<button>` അല്ലെങ്കിൽ `<input>` `kit-exception:` (കാരണസഹിതം) അതിന് മുകളിൽ 3 വരികളിൽ അവസാനിക്കുന്ന ഒരു അഭിപ്രായം ആവശ്യമാണ്; പാലറ്റ് ഹ്യൂസും `dark:` വേരിയൻ്റുകളും ടെസ്റ്റ് ലിസ്റ്റ് ചെയ്യുന്ന ഫയലുകളിൽ മാത്രം.
-7. ഒരു PR (സ്ക്രീൻഷോട്ടുകൾ) മുമ്പായി രണ്ട് തീമുകളും 390 px വ്യൂപോർട്ടും പരിശോധിക്കുക; `tests/e2e/a11y.spec.ts` കോടാലി പ്രവർത്തിപ്പിക്കുന്നു.
+1. ലിറ്ററലുകൾ അല്ല, ടോക്കണുകൾ ഉപയോഗിക്കുക. മനഃപൂർവം നിലനിർത്തിയിട്ടുള്ള ഒഴിവുകൾ: എല്ലായ്പ്പോഴും ഡാർക്ക് ആയ കൺസോൾ ടെർമിനലും
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ഉം—ലിറ്ററൽ ഹെക്സ് ആവശ്യമുള്ള കോളർമാർക്കായി കിറ്റ് സ്റ്റാറ്റസ്
+   പാലറ്റിന്റെ റിസോൾവ് ചെയ്ത ഹെക്സ് മിറർ. കാറ്റഗറിക്കൽ പാലറ്റുകൾ ഇനി ഒരു ഒഴിവല്ല:
+   കിറ്റ് സീരീസ് ക്രമത്തിൽ, അവ കിറ്റിന്റെ എട്ട് ചാർട്ട് ടോക്കണുകൾ (`--color-chart-1..8`, കൂടാതെ `-ink`/`-subtle`) ഉപയോഗിക്കുന്നു,
+   ഇതിനായി
+   `src/shared/utils/categoricalPalette.ts` ഉം, റൂട്ടിംഗ് സ്ട്രാറ്റജികൾക്കായി,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ഉം ഉപയോഗിക്കുന്നു; ReactFlow എഡ്ജുകളും ഓർക്കസ്ട്രേഷൻ
+   കാൻവാസും തീം-അവബോധമുള്ള `--orch-status-*` വേരിയബിളുകൾ വായിക്കുന്നു (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` ഒരിക്കലും കൈകൊണ്ട് പാച്ച് ചെയ്യരുത്: `scripts/dev/sync-ui-kit.sh <commit>` ഉപയോഗിച്ച് സിങ്ക് ചെയ്യുക;
+   പിൻ ചെയ്ത അപ്സ്ട്രീം കമ്മിറ്റിൽ നിന്ന് ഏതെങ്കിലും ബൈറ്റ് വ്യത്യസ്തമായാൽ, പ്രീ-കമ്മിറ്റ് ഗേറ്റ്
+   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) പരാജയപ്പെടും (അപ്സ്ട്രീം ക്ലോണായ
+   `UI_KIT_CLONE` അല്ലെങ്കിൽ `_references/cheaper-inference-ui-kit` ഇല്ലെങ്കിൽ, മുന്നറിയിപ്പോടെ അത് സ്കിപ്പ് ചെയ്യും).
+   കിറ്റിൽ എന്തെങ്കിലും ഇല്ലെങ്കിൽ, അഡാപ്റ്ററിലോ സ്ക്രീനിലോ അതിനൊരു പരിഹാരമാർഗം ഒരുക്കുകയും അത് അപ്സ്ട്രീമിനോട് ആവശ്യപ്പെടുകയും ചെയ്യുക.
+3. കിറ്റിലെ ടെക്സ്റ്റിന്റെ ഡിഫോൾട്ടുകൾ ഇംഗ്ലീഷിലാണ് (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ഒരു കിറ്റ്
+   ഘടകം ടെക്സ്റ്റ് റെൻഡർ ചെയ്യുമ്പോഴെല്ലാം `useTranslations(...)`-ൽ നിന്നുള്ള വിവർത്തനം ചെയ്ത സ്ട്രിങ്ങുകൾ നൽകുക.
+4. Tailwind യൂട്ടിലിറ്റികൾക്ക് കിറ്റ് ഘടക ക്ലാസുകളേക്കാൾ മുൻഗണനയുണ്ട് (കിറ്റ്
+   `@layer theme, base, components, utilities` പ്രഖ്യാപിക്കുകയും അതിന്റെ നിയമങ്ങൾ `components`-ൽ നിലനിൽക്കുകയും ചെയ്യുന്നു) —
+   സ്പേസിംഗിനും ലേഔട്ടിനും യൂട്ടിലിറ്റികൾ ഉപയോഗിക്കുക; കിറ്റ് ഘടകങ്ങളുടെ നിറം മാറ്റാൻ അവ ഉപയോഗിക്കരുത്.
+5. ഹെഡിങ്ങുകൾ: പേജ്, സെക്ഷൻ ശീർഷകങ്ങൾക്ക് `.ci-heading`; പിശക് പേജിലെ സ്റ്റാറ്റസ് കോഡ് പോലുള്ള വലുതും വിരളവുമായ
+   ഡിസ്പ്ലേ ടെക്സ്റ്റിന് മാത്രം `.ci-dashboard-display`. രണ്ടും Switzer ഉപയോഗിക്കുന്നു.
+6. `tests/unit/dashboard-kit-sweep.test.ts` കിറ്റ് അഡോപ്ഷൻ സംരക്ഷിക്കുന്നു: `src/app` അല്ലെങ്കിൽ
+   `src/shared/components` എന്നതിനു കീഴിൽ Material ലിഗേച്ചർ span പാടില്ല; ഡാഷ്ബോർഡ് ട്രീയിൽ
+   (`src/app/(dashboard)` ഉം `src/shared/components` ഉം) അസംസ്കൃത `<select>`, `<textarea>` അല്ലെങ്കിൽ `<table>`
+   പാടില്ല, കൂടാതെ പട്ടികപ്പെടുത്തിയിട്ടുള്ള ഒഴിവുകൾക്ക് പുറത്ത് കൈകൊണ്ട് തയ്യാറാക്കിയ `role="dialog"` പാടില്ല
+   (`Select` അഡാപ്റ്ററിന്റെ നേറ്റീവ് ബ്രാഞ്ച്, `RequestLoggerDetail`); അവിടെയുള്ള ഓരോ അസംസ്കൃത `<button>` അല്ലെങ്കിൽ
+   `<input>`-നും അതിന്റെ പരമാവധി 3 വരികൾ മുകളിൽ അവസാനിക്കുന്ന, കാരണം സഹിതമുള്ള `kit-exception:` അടങ്ങിയ ഒരു കമന്റ്
+   ആവശ്യമാണ്; പാലറ്റ് ഹ്യൂകളും `dark:` വേരിയന്റുകളും ടെസ്റ്റ് പട്ടികപ്പെടുത്തുന്ന ഫയലുകളിൽ മാത്രം അനുവദനീയമാണ്.
+7. ഒരു PR-ന് മുമ്പ് രണ്ട് തീമുകളും 390 px വ്യൂപോർട്ടും പരിശോധിക്കുക (സ്ക്രീൻഷോട്ടുകൾ); `tests/e2e/a11y.spec.ts`
+   axe പ്രവർത്തിപ്പിക്കുന്നു.
 
 ## 3. ഒരു സ്ക്രീൻ ചേർക്കൽ
 
@@ -178,7 +209,7 @@
 - `packages/ui-kit/UPSTREAM.md` — പിൻ ചെയ്ത അപ്സ്ട്രീം കമ്മിറ്റും ലൈസൻസ് അംഗീകാരവും; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
   `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` കൂടാതെ അതിനടുത്തുള്ള അഡാപ്റ്ററുകൾ; `src/shared/components/layouts/DashboardShell.tsx`,
+- `src/shared/components/index.tsx`-ഉം അതിനടുത്തുള്ള അഡാപ്റ്ററുകളും; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`

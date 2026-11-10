@@ -33,12 +33,31 @@ and the merged combination is Release-Green's job (`docs/ops/RUNNER_BOX.md` → 
 and merge groups use hosted runners for jobs that otherwise select self-hosted
 runners; sufficient hosted capacity must be verified before rollout.
 
+An ordinary PR runs the fast selection. The `full-code` and `full-code-e2e` lanes of the
+admission policy (E2E, integration, package artifact, Electron smoke, Bun SQLite, ecosystem
+and protocol clients) run only on a Mergify queue draft or on a full run:
+`gh workflow run ci.yml --ref <branch>`.
+
 Each JSON receipt identifies the checked-out SHA, workflow run and attempt.
 The CLI rejects a checkout/event SHA mismatch. Workflow tests bind policy membership
 to the verdict job's `needs` list so a new or removed lane cannot silently disappear.
 The receipts cover their own workflow, not publication, deployment, or the internals
 of an existing advisory scanner. Activating both check names in branch rules is a
 separate administrative change; adding these jobs does not itself protect a branch.
+
+### Merge queue
+
+The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify opens a draft PR on
+a `mergify/merge-queue/` branch, CI runs the full selection there, and the original PR merges
+when `Gate / CI`, `Gate / Quality` and `Merge integrity (changelog + generated skills)` pass.
+
+Mergify writes its queue summary into the draft's description, and other apps can edit it too.
+A `pull_request` `edited` event on such a draft takes its own concurrency group
+(`-queue-edit-<run_id>`) so it cannot cancel the draft's real run, and it skips the gate and the
+matrix. Only `Merge integrity` still runs. The skipped gate job carries a different check name,
+because Mergify reads a skipped `Gate / CI` as a failed check and dequeues the PR.
+
+After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queue` on it.
 
 ### Static scan inventory
 
@@ -70,20 +89,19 @@ The CI source of truth is `.github/workflows/ci.yml`.
 `.github/workflows/quality.yml` complements CI on main/release PRs, pushes to `main`,
 dispatch and merge groups. PRs use path-filtered fast checks. The permanently
 disabled duplicate build was removed; the real build/package/boot checks remain in CI.
+The unit suite and vitest run only in CI (`Unit Tests (N/8)` and `Vitest`).
 
-| Job                                              | Scope                                                                                                                                                                                        | Blocking             |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs and docs-all                                                                                                                                                    | Yes                  |
-| `Fast Quality Gates`                             | Code PRs; static checks, typecheck, dashboard typecheck, impacted unit tests                                                                                                                 | Yes                  |
-| `Forgotten sibling tests`                        | Code PRs; changed modules traced to static consumers and candidate sibling tests; barrel and dynamic-import paths are reported as advisory diagnostics, with referenced allowlist exceptions | **Advisory**         |
-| `Vitest (fast-path)`                             | Code PRs; fast vitest suite                                                                                                                                                                  | Yes                  |
-| `Unit Tests fast-path`                           | Code PRs; 4-shard unit suite                                                                                                                                                                 | Yes                  |
-| `No new ESLint warnings`                         | Code PRs; suppressions-aware lint guard                                                                                                                                                      | Yes, including forks |
-| `Merge integrity (changelog + generated skills)` | Non-draft PRs; changelog and generated skill sync                                                                                                                                            | Yes, including forks |
+| Job                                              | Scope                                                                                                            | Blocking             |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `Docs Gates (fast-path)`                         | Docs/code PRs; API docs refs and docs-all                                                                        | Yes                  |
+| `Fast Quality Gates`                             | Code PRs; static checks, typecheck, dashboard typecheck, impacted unit tests, forgotten sibling tests (advisory) |
+| `No new ESLint warnings`                         | Code PRs; suppressions-aware lint guard                                                                          | Yes, including forks |
+| `Merge integrity (changelog + generated skills)` | Non-draft PRs; changelog and generated skill sync                                                                | Yes, including forks |
 
 #### Forgotten sibling tests report
 
-`npm run check:forgotten-sibling-tests` reuses the import resolver behind the test-impact map.
+`npm run check:forgotten-sibling-tests` runs as an advisory step of `Fast Quality Gates` and reuses
+the import resolver behind the test-impact map.
 For every changed production module, it reports deterministic
 `changed module/symbol -> static consumer -> candidate sibling test` chains when the candidate
 test is absent from the pull-request diff. The Markdown summary and JSON result are retained as

@@ -1,1 +1,0 @@
-- **fix(dashboard): keep dark warning ink before the theme script runs**: without `data-theme` (before the boot script, or with JavaScript off) the kit follows the system preference, so a dark system no longer gets the light-only `#8c5a1b` warning ink on the dark Editions background.

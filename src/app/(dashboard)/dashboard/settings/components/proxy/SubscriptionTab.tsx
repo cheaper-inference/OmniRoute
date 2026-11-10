@@ -6,6 +6,7 @@ import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { Field } from "@omniroute/ui-kit/field";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
 import { Badge, Button, Card, Checkbox, EmptyState, Input, Textarea } from "@/shared/components";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { isNeedsCoreNode } from "@/lib/proxySubscription/needsCore";
 import { parseLocalCoreEndpoints } from "@/lib/proxySubscription/coreEndpoint";
 import { parseSelectorTag } from "@/lib/proxySubscription/selectorEndpoint";
@@ -264,6 +265,7 @@ export default function SubscriptionTab() {
   const [error, setError] = useState<string | null>(null);
 
   const t = useTranslations("settings");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const localCoreId = useId();
 
   // Map a stored refusal kind to a generic display label. Unknown future
@@ -450,7 +452,7 @@ export default function SubscriptionTab() {
   };
 
   const remove = async (sub: SubscriptionRecord) => {
-    if (!window.confirm(t("proxySubscription.confirmDelete", { name: sub.name }))) return;
+    if (!(await requestConfirm(t("proxySubscription.confirmDelete", { name: sub.name })))) return;
     setBusyId(sub.id);
     try {
       const res = await fetch(`/api/v1/management/proxy-subscriptions/${sub.id}`, {
@@ -837,6 +839,7 @@ export default function SubscriptionTab() {
           );
         })}
       </div>
+      {confirmDialog}
     </div>
   );
 }

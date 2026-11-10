@@ -31,35 +31,11 @@ osv 和 Trivy 會將依賴項與**持續增長**的 CVE 資料庫進行比較。
 
 當工具不存在或測量失敗時（例如 osv-scanner 不在 PATH 中、osv.dev/網路無法連線、JSON 無效），這兩個關卡都會**優雅地跳過**（exit 0）— **測量**失敗絕不會阻擋，只有**測量到的**退化才會阻擋。
 
-## 已知接受的風險
+## 退休依賴風險
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+升級固定的promptfoo開發工具後，根鎖定檔案不再包含`extract-zip`或其依賴邊緣。這將廢棄先前接受的`promptfoo` → `@openai/codex-security` → `extract-zip`鏈，該鏈在#14482中追蹤。 `tests/unit/extract-zip-14482-exposure.test.ts`中的迴歸檢查拒絕其重新引入，並保留從生產代碼匯入的禁止。
 
-`extract-zip@2.0.1` 帶有兩個未修補的高嚴重性符號連結遍歷諮詢。
-根據上述 CVE 差異補救措施的「無上游修復」分支，這是一個
-**已接受的風險**，而不是版本升級：
-
-- **鏈條：** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`。
-  透過 `package-lock.json` 確認 — 整個依賴樹中只有一個套件
-  (`@openai/codex-security`) 宣告了 `extract-zip`，並且只有一個套件
-  (`promptfoo`) 宣告了 `@openai/codex-security`。
-- **鏈條中不存在任何已修復的版本。** `extract-zip@2.0.1` (2020 年發布) 是該套件的最終版本 — 它已不再維護。`@openai/codex-security` 的
-  當前 npm-latest (`0.1.29`) 仍然拉取 `extract-zip@2.0.1`。
-- **無法從生產環境中觸及。** `promptfoo` 僅為 devDependency (從未列在
-  `dependencies` 下)，並且 `src/`、`open-sse/` 或 `bin/` 下沒有任何檔案匯入
-  `extract-zip` npm 套件 — OmniRoute 自己的 `extractZip()` 輔助函數
-  (`src/lib/versionManager/binaryManager.ts:93`) 呼叫原生 `unzip`/`tar`
-  且與之無關。`@openai/codex-security` 還在其 `extract-zip` 的 onEntry 回調之上
-  提供了自己的符號連結遍歷防護。
-- **請勿** 透過 `package.json` `overrides` 別名 `extract-zip` — 唯一可行的
-  替代品是 Electron-org-internal 且與
-  `@openai/codex-security` 自己的 onEntry/defaultDirMode/defaultFileMode 檢查
-  API 不相容；覆蓋它將會默默地破壞該套件的安全檢查。
-- **基準線：** 測量的 osv `vulnCount` (3) 已經遠低於凍結的
-  `config/quality/quality-baseline.json` 基準線 (27) — 無需棘輪變更。
-- **回歸防護：** `tests/unit/extract-zip-14482-exposure.test.ts` 斷言了
-  上述鏈條和非生產匯入不變式；如果其中任何一個被破壞 (例如，未來的 PR 使 `extract-zip` 可從生產環境中觸及)，它將導致 CI 失敗。
-- **追蹤：** 問題 #14482。
+目前的相依性修復也將相容性覆蓋範圍限制為 Azure 識別碼的MSAL用戶端和 get-uri 的FTP用戶端。 Azure 令牌取得和FTP擷取透過受控傳輸進行測試；兩個OpenCode套件都執行自己的建置和測試套件。註冊表建議計數是某個時間點的測量結果，並且可能會在提交鎖定文件後發生變化。
 
 ## 待辦事項：記分卡諮詢 → 阻擋
 

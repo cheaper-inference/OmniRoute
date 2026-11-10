@@ -110,9 +110,10 @@ export function projectComboStep(step: Record<string, unknown>): PublicComboStep
     if (typeof step.providerId === "string" && step.providerId.length > 0) {
       out.providerId = step.providerId;
     }
-    // Same shape test as providerId above. `cleanupComboConnectionRefs` drops the
-    // key when the connection is deleted, so a step whose pinned account is gone
-    // reports false rather than pointing at nothing.
+    // Same shape test as providerId above. This says the step pins an account, not
+    // that the account is live: `cleanupComboConnectionRefs` keeps the key when the
+    // connection is deleted (#18954), so a dead pin reports true and the step fails
+    // closed on it instead of serving from another account.
     out.accountPinned = typeof step.connectionId === "string" && step.connectionId.length > 0;
     return out;
   }

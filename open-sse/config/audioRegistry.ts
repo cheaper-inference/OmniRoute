@@ -10,6 +10,7 @@
 import { getProviderAlias } from "@/shared/constants/providers";
 import { isLoopbackNodeHost } from "@/shared/network/loopbackNodeHost";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import { RENDERHOUR_SPEECH_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
 import {
   toRegistrySpeechModels as toSyntxSpeechModels,
   toRegistryTranscriptionModels as toSyntxTranscriptionModels,
@@ -84,6 +85,18 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
+  mistral: {
+    id: "mistral",
+    baseUrl: "https://api.mistral.ai/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      { id: "voxtral-mini-latest", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-2602", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-transcribe-3", name: "Voxtral Mini Transcribe 3" },
+    ],
+  },
+
   openrouter: {
     id: "openrouter",
     baseUrl: "https://openrouter.ai/api/v1/audio/transcriptions",
@@ -148,6 +161,19 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     models: [{ id: "whisper", name: "Pollinations Whisper (Free)" }],
   },
 
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    // Ct2 adds native word-level timestamps and diarized_json.
+    models: [
+      { id: "WhisperLargeV3Ct2", name: "Whisper Large v3 CT2 (deAPI)" },
+      { id: "WhisperLargeV3", name: "Whisper Large v3 (deAPI)" },
+    ],
+  },
+
   together: {
     id: "together",
     baseUrl: "https://api.together.xyz/v1/audio/transcriptions",
@@ -201,7 +227,10 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
 
   huggingface: {
     id: "huggingface",
-    baseUrl: "https://api-inference.huggingface.co/models",
+    // HF retired api-inference.huggingface.co; ASR now routes through
+    // router.huggingface.co with the hf-inference provider pinned in the path
+    // (same convention as the image entry in imageRegistryData.ts).
+    baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
     format: "huggingface-asr",
@@ -395,6 +424,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
+  // Mistral is deliberately absent. Its /v1/audio/speech takes `voice_id` and answers
+  // JSON `{ "audio_data": "<base64>" }`, while the default path below sends `voice` and
+  // streams the body back as audio. Listing it needs a dedicated format handler.
+
   hyperbolic: {
     id: "hyperbolic",
     baseUrl: "https://api.hyperbolic.xyz/v1/audio/generation",
@@ -457,7 +490,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
 
   huggingface: {
     id: "huggingface",
-    baseUrl: "https://api-inference.huggingface.co/models",
+    // HF retired api-inference.huggingface.co; TTS now routes through
+    // router.huggingface.co with the hf-inference provider pinned in the path
+    // (same convention as the image entry in imageRegistryData.ts).
+    baseUrl: "https://router.huggingface.co/hf-inference/models",
     authType: "apikey",
     authHeader: "bearer",
     format: "huggingface-tts",
@@ -625,6 +661,24 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     models: [{ id: "speech-2.8-hd", name: "Speech 2.8 HD" }],
   },
 
+  // deAPI maps the OpenAI stock voices (alloy, nova, ...) onto each model's own
+  // voices, so the default "alloy" works on every model; native ids (af_bella,
+  // Vivian, ...) are accepted too. mp3 only. VoiceDesign needs `instructions`.
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    supportedFormats: ["mp3"],
+    models: [
+      { id: "Kokoro", name: "Kokoro (deAPI)" },
+      { id: "Chatterbox", name: "Chatterbox (deAPI)" },
+      { id: "Qwen3_TTS_12Hz_1_7B_CustomVoice", name: "Qwen3 TTS 1.7B (deAPI)" },
+      { id: "Qwen3_TTS_12Hz_1_7B_VoiceDesign", name: "Qwen3 TTS Voice Design (deAPI)" },
+    ],
+  },
+
   together: {
     id: "together",
     baseUrl: "https://api.together.xyz/v1/audio/speech",
@@ -710,6 +764,7 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     format: "syntx-audio",
     models: toSyntxSpeechModels(),
   },
+  renderhour: RENDERHOUR_SPEECH_PROVIDER,
 };
 
 /**

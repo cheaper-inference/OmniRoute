@@ -44,6 +44,8 @@ import {
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
 import { chatGptWebStorageStateFromCookieHeader } from "@omniroute/open-sse/utils/chatgptWebExecutorAdapter.ts";
 import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
+import { parseM365RefreshToken } from "@/lib/providers/m365RefreshToken";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 
 function normalizeCodexLimitPolicy(
   incoming: unknown,
@@ -164,7 +166,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       perKeyProxyEnabled,
       quotaVisible,
       projectId,
-      providerSpecificData: incomingPsd,
+      providerSpecificData: rawIncomingPsd,
       rateLimitOverrides,
     } = body;
 
@@ -175,7 +177,31 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const retirementResponse = rejectRetiredCommonChatGptWebProvider(existing.provider);
     if (retirementResponse) return retirementResponse;
 
+    const m365Token = parseM365RefreshToken(existing.provider, rawIncomingPsd);
+    if (!m365Token.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: sanitizeErrorMessage("Invalid request"),
+            details: [
+              {
+                field: "providerSpecificData.refreshToken",
+                message: sanitizeErrorMessage("Refresh token must be a bounded plaintext string"),
+              },
+            ],
+          },
+        },
+        { status: 400 }
+      );
+    }
+    const incomingPsd = rawIncomingPsd ? { ...rawIncomingPsd } : rawIncomingPsd;
+    if (existing.provider === "copilot-m365-web" && incomingPsd) {
+      // Blank/missing input must not overwrite a legacy nested fallback during the merge.
+      delete incomingPsd.refreshToken;
+    }
+
     const updateData: Record<string, any> = {};
+    if (m365Token.data.refreshToken) updateData.refreshToken = m365Token.data.refreshToken;
     if (name !== undefined) updateData.name = name;
     if (priority !== undefined) updateData.priority = priority;
     if (globalPriority !== undefined) updateData.globalPriority = globalPriority;
@@ -297,6 +323,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         );
       }
       const mergedPsd = { ...existingPsd, ...incomingPsd };
+      if (m365Token.data.refreshToken) delete mergedPsd.refreshToken;
       delete mergedPsd.validationId;
       delete mergedPsd.runtimeKey;
 

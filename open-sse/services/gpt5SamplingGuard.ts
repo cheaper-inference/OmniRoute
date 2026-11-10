@@ -37,8 +37,8 @@ function asRecord(value: unknown): JsonRecord | null {
 
 /**
  * True when the request carries an active reasoning effort (any level other than
- * `none`). When there is no signal at all we return false: GPT-5.1+ defaults to
- * `none`, so the safe assumption is "reasoning off → sampling allowed".
+ * `none`). When there is no signal at all: GPT-5.1+ defaults to `none` (reasoning
+ * off → sampling allowed), whereas GPT-6 defaults to reasoning on (#16440).
  */
 function hasActiveReasoning(record: JsonRecord, model: string): boolean {
   const effort = record.reasoning_effort;
@@ -51,7 +51,7 @@ function hasActiveReasoning(record: JsonRecord, model: string): boolean {
 
   if (NONE_EFFORT_SUFFIX.test(model)) return false;
   if (ACTIVE_EFFORT_SUFFIX.test(model)) return true;
-  return false;
+  return /^gpt-6/i.test(model);
 }
 
 export function stripGpt5SamplingWhenReasoning<T extends Record<string, unknown>>(
