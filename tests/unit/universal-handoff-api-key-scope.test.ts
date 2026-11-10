@@ -38,6 +38,7 @@ const { recordModelLockoutFailure, clearAllModelLockouts } =
   await import("../../open-sse/services/accountFallback.ts");
 const { clearCooldownState } = await import("../../open-sse/services/providerCooldownTracker.ts");
 const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuitBreaker.ts");
+const { _setEgressProbeForTests, clearEgressCache } = await import("../../src/lib/proxyEgress.ts");
 
 let openaiConnectionId = "";
 
@@ -88,6 +89,7 @@ function installFetch() {
   }) as typeof fetch;
 }
 
+/** Wait for the exact caller-scoped session and combo, never an unrelated summary row. */
 async function waitForHandoff(sessionId: string | null, comboName = "scope-pri") {
   assert.ok(sessionId, "precondition: the handoff has a scoped session id");
   for (let i = 0; i < 100 && !handoffDb.hasActiveHandoff(sessionId, comboName); i++) {
@@ -179,6 +181,13 @@ async function writeSecretAsA(
   await waitForHandoff(scope(rawSessionId, a.id), combo);
 }
 
+test.before(() => {
+  // Handoff isolation needs no real network identity; the egress probe uses undici,
+  // independently of the provider fetch stub installed below.
+  clearEgressCache();
+  _setEgressProbeForTests(async () => ({ ip: "192.0.2.1", latencyMs: 0, complete: true }));
+});
+
 test.afterEach(async () => {
   // Let fire-and-forget summary generation finish before storage is reset.
   await new Promise((resolve) => setTimeout(resolve, 150));
@@ -192,7 +201,12 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   process.env.REQUIRE_API_KEY = "false";
-  await h.cleanup();
+  try {
+    await h.cleanup();
+  } finally {
+    clearEgressCache();
+    _setEgressProbeForTests(null);
+  }
 });
 
 test("handoff wait ignores rows for other callers, sessions, and combos", async () => {
