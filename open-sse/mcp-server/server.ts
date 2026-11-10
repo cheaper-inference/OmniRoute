@@ -106,7 +106,10 @@ import { obsidianTools } from "./tools/obsidianTools.ts";
 import { localCorpusTools } from "./tools/localCorpusTools.ts";
 import { compressMcpRegistryMetadata } from "./descriptionCompressor.ts";
 import { reduceToolManifest, readMcpToolProfileFromEnv } from "./toolCardinality.ts";
-import { smartFilterText } from "../services/compression/engines/mcpAccessibility/index.ts";
+import {
+  propagateTruncationToStructuredContent,
+  smartFilterText,
+} from "../services/compression/engines/mcpAccessibility/index.ts";
 import {
   DEFAULT_MCP_ACCESSIBILITY_CONFIG,
   clampMcpAccessibilityConfig,
@@ -276,7 +279,10 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
               }
             }
           }
-          return result;
+          // A JSON result truncated by the filter flags `truncated` on the text;
+          // mirror that mark onto `structuredContent` (when present) so the two
+          // views of one result do not diverge. `isError` is never touched.
+          return propagateTruncationToStructuredContent(result);
         }
       : handler;
     const registered = registerTool(name, metadata, filteredHandler as never);

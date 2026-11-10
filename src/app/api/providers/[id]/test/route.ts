@@ -56,7 +56,8 @@ export { classifyFailure, projectProviderRuntimeForPublicResponse } from "./publ
 // Match the API-key path's 30s timeout so a hung OAuth upstream cannot block the test queue.
 const OAUTH_TEST_TIMEOUT_MS = 30_000;
 
-import { CLI_RUNTIME_PROVIDER_MAP } from "./cliRuntimeProviderMap";
+import { CLI_RUNTIME_PROVIDER_MAP, hasQoderToken } from "./cliRuntimeProviderMap";
+import { testChatGptConnection } from "./chatgptTest";
 import { isOperatorDisabled } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
@@ -64,19 +65,6 @@ import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 const providerConnectionTestBodySchema = z.object({
   validationModelId: z.string().max(500).optional(),
 });
-
-function hasQoderToken(connection: any): boolean {
-  if (typeof connection?.apiKey === "string" && connection.apiKey.trim().length > 0) return true;
-  const psd = connection?.providerSpecificData;
-  if (psd && typeof psd === "object") {
-    const pat =
-      (psd as Record<string, unknown>).personalAccessToken ??
-      (psd as Record<string, unknown>).pat ??
-      (psd as Record<string, unknown>).accessToken;
-    if (typeof pat === "string" && pat.trim().length > 0) return true;
-  }
-  return false;
-}
 
 // GHSA-jmq6-8j86-8xqj: getCliRuntimeStatus() spawns on the host (LOCAL_ONLY capability),
 // but these routes stay remote-reachable — only loopback/LAN callers and the scheduler probe.
@@ -373,6 +361,7 @@ export async function testOAuthConnection(
   connection: any,
   timeoutMs: number = OAUTH_TEST_TIMEOUT_MS
 ) {
+  if (connection.provider === "chatgpt") return testChatGptConnection(connection);
   const config = OAUTH_TEST_CONFIG[connection.provider];
 
   if (!config) {

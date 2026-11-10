@@ -64,6 +64,7 @@ import CustomModelsSection from "./components/CustomModelsSection";
 import ConnectionsListPanel from "./components/ConnectionsListPanel";
 import CoolingConnectionsPanel from "./components/CoolingConnectionsPanel";
 import ConnectionsHeaderToolbar from "./components/ConnectionsHeaderToolbar";
+import { ChatGptPlanNotice } from "@/shared/components/ChatGptPlanUi";
 import { ConnectionPinTip } from "./components/ConnectionIdChip";
 import VolcengineConnectModal from "./components/VolcengineConnectModal";
 import ProviderAccountRoutingCard from "../../settings/components/ProviderAccountRoutingCard";
@@ -532,7 +533,11 @@ export default function ProviderDetailPageClient() {
   } = useAuthFileHandlers({ parseApiErrorMessage, getAttachmentFilename, notify, t });
 
   // Phase 1e: compat-state derivations
-  const compat = useModelCompatState(modelMeta.customModels, modelMeta.modelCompatOverrides);
+  const compat = useModelCompatState(
+    modelMeta.customModels,
+    modelMeta.modelCompatOverrides,
+    providerId
+  );
   // Combo membership for every model on this provider — drives the small
   // "used in combo X" badge behind each model row (#16216).
   const comboUsage = useModelComboUsage(providerId);
@@ -664,6 +669,13 @@ export default function ProviderDetailPageClient() {
             providerKey={providerId}
             connectionCount={connections.length}
           />
+          {providerId === "chatgpt" && (
+            <ChatGptPlanNotice
+              connected={connections.some(
+                (connection) => connection.isActive !== false && connection.testStatus === "active"
+              )}
+            />
+          )}
           <ConnectionsHeaderToolbar
             providerId={providerId}
             providerInfo={providerInfo}

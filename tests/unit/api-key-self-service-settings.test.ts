@@ -274,6 +274,8 @@ test("historical self-service migration 228 moves to 233 and frees the slot for 
     DELETE FROM _omniroute_migrations WHERE version = '228';
     UPDATE _omniroute_migrations SET version = '228'
       WHERE version = '233' AND name = 'api_key_self_service_settings';
+    INSERT INTO key_value (namespace, key, value)
+      VALUES ('syncedAvailableModels', 'openai:historical-228-orphan', '[]');
   `);
   const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
   runMigrations(db);
@@ -289,6 +291,14 @@ test("historical self-service migration 228 moves to 233 and frees the slot for 
       { version: "228", name: "purge_orphaned_provider_catalogs" },
       { version: "233", name: "api_key_self_service_settings" },
     ]
+  );
+  assert.equal(
+    db
+      .prepare(
+        "SELECT 1 FROM key_value WHERE namespace = 'syncedAvailableModels' AND key = 'openai:historical-228-orphan'"
+      )
+      .get(),
+    undefined
   );
 });
 

@@ -67,10 +67,7 @@ import { buildXaiImageRequest } from "./imageGeneration/providers/xaiImage.ts";
 import { handleMaxaiImageGeneration } from "./imageGeneration/providers/maxaiImage.ts";
 import { handleAdobeFireflyImageGeneration } from "./imageGeneration/providers/adobeFirefly.ts";
 import { handleSyntxImageGeneration } from "./imageGeneration/providers/syntx.ts";
-import {
-  geminiInlineImagePart,
-  geminiReferenceImageError,
-} from "./imageGeneration/providers/geminiInline.ts";
+import * as geminiInline from "./imageGeneration/providers/geminiInline.ts";
 import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibabaImage.ts";
 import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihorde.ts";
 import * as codexImages from "./imageGeneration/providers/codexImages.ts";
@@ -79,6 +76,7 @@ import { handleMuseImageGeneration } from "./imageGeneration/providers/museImage
 import { handleM365ImageGeneration } from "./imageGeneration/providers/m365Image.ts";
 import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
 import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
+import { handleRenderhourImageGeneration } from "./imageGeneration/providers/renderhour.ts";
 import {
   fanOutSingleImageCalls,
   IMAGE_FANOUT_MAX_N,
@@ -693,6 +691,18 @@ export async function handleImageGeneration({
     });
   }
 
+  if (providerConfig.format === "renderhour-image") {
+    return handleRenderhourImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
+  }
+
   if (providerConfig.format === "black-forest-labs") {
     return handleBlackForestLabsImageGeneration({
       model,
@@ -1237,19 +1247,11 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
     });
   }
 
-  const referenceError = geminiReferenceImageError(body);
-  if (referenceError) {
-    return saveImageErrorResult({
-      provider,
-      model,
-      status: 400,
-      startTime,
-      error: referenceError,
-      requestBody: logRequestBody,
-    });
+  const refs = geminiInline.buildGeminiImageUserParts(body, promptText);
+  if ("error" in refs) {
+    const err = { provider, model, status: 400, startTime, requestBody: logRequestBody };
+    return saveImageErrorResult({ ...err, error: refs.error, retryable: false });
   }
-
-  const inlineImage = geminiInlineImagePart(body);
   const antigravityBody = {
     project: projectId,
     requestId: `image_gen/${Date.now()}/${randomUUID()}/0`,
@@ -1257,7 +1259,7 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
       contents: [
         {
           role: "user",
-          parts: [...(inlineImage ? [inlineImage] : []), { text: promptText }],
+          parts: refs.parts,
         },
       ],
       generationConfig: {
@@ -1284,7 +1286,7 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
     const promptPreview = promptText.slice(0, 60);
     log.info(
       "IMAGE",
-      `antigravity/${model} (gemini) | prompt: "${promptPreview}..." | ${aspectRatio} ${imageSize ?? "default"}`
+      `antigravity/${model} (gemini) | prompt: "${promptPreview}..." | ${aspectRatio} ${imageSize ?? "default"} | refs: ${refs.referenceCount}`
     );
   }
 
@@ -1321,19 +1323,11 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
     const data = await response.json();
     const responseBody = data.response || data;
 
-    // Extract image data from Antigravity's wrapped Gemini response.
-    const images = [];
-    const candidates = responseBody.candidates || [];
-    for (const candidate of candidates) {
-      const parts = candidate.content?.parts || [];
-      for (const part of parts) {
-        if (part.inlineData) {
-          images.push({
-            b64_json: part.inlineData.data,
-            revised_prompt: parts.find((p) => p.text)?.text || promptText,
-          });
-        }
-      }
+    // Extract image data from Antigravity's wrapped Gemini response; text-only answers fail.
+    const extracted = geminiInline.extractGeminiImageResults(responseBody, promptText);
+    if (extracted.error) {
+      const err = { provider, model, status: 502, startTime, requestBody: logRequestBody };
+      return saveImageErrorResult({ ...err, error: sanitizeErrorMessage(extracted.error) });
     }
 
     saveCallLog({
@@ -1345,14 +1339,14 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
       duration: Date.now() - startTime,
       tokens: { prompt_tokens: 0, completion_tokens: 0 },
       requestBody: logRequestBody,
-      responseBody: { images_count: images.length },
+      responseBody: { images_count: extracted.images.length },
     }).catch(() => {});
 
     return {
       success: true,
       data: {
         created: Math.floor(Date.now() / 1000),
-        data: images,
+        data: extracted.images,
       },
     };
   } catch (err) {

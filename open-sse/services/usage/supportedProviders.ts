@@ -102,6 +102,9 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "tokenrouter",
   // Kilo Code personal USD balance (GET /api/profile/balance, existing OAuth token)
   "kilocode",
+  // MegaBrain plan session + weekly limits (GET /api/profile/limits, OAuth token or mb-v1 key)
+  "megabrain",
+  "mb",
   // OpenRouter key limits + account credits (GET /api/v1/key + /api/v1/credits)
   "openrouter",
   // Muse Code has no live quota endpoint; its fetcher surfaces persisted subscription metadata.
