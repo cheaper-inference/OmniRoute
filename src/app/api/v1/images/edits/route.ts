@@ -428,6 +428,15 @@ async function dispatchImageEditTarget(
 
   // #18671: Leonardo uploads the reference as an init image and runs image-to-image.
   if (providerConfig?.format === "leonardo-image") {
+    // One init image per generation: reject extra references as the single-model path does,
+    // rather than editing with the first and dropping the rest.
+    if (images.length > 1) {
+      return {
+        success: false,
+        status: HTTP_STATUS.BAD_REQUEST,
+        error: "This image edit provider currently supports only one reference image",
+      };
+    }
     return (await handleLeonardoImageGeneration({
       provider: parsed.provider,
       model: parsed.model,

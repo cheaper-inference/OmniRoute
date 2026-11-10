@@ -209,3 +209,73 @@ test("POST /v1/images/edits routes a leonardo model to the Leonardo edit instead
   assert.equal(seen.generationBody?.width, 576);
   assert.equal(seen.generationBody?.height, 1024);
 });
+
+// A combo target takes one reference too: the single-model route answers 400 for two, and a
+// combo must not upload only the first and silently drop the rest.
+const combosDb = await import("../../src/lib/db/combos.ts");
+
+function comboEdit(model: string) {
+  return imageEditRoute.POST(
+    new Request("http://localhost/api/v1/images/edits", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model,
+        prompt: "make the apple green",
+        images: [1, 2].map(
+          (n) =>
+            `data:image/png;base64,${Buffer.concat([REFERENCE, Buffer.from([n])]).toString("base64")}`
+        ),
+      }),
+    })
+  );
+}
+
+test("a Leonardo combo target given two references returns 400 and uploads nothing", async () => {
+  await combosDb.createCombo({
+    name: "leonardo-only-edits",
+    strategy: "priority",
+    models: ["leonardo/phoenix"],
+  });
+  const seen = installFakeLeonardo();
+
+  const response = await comboEdit("leonardo-only-edits");
+
+  const body = (await response.json()) as { error?: { message?: string } };
+  assert.equal(response.status, 400, JSON.stringify(body));
+  assert.match(String(body.error?.message), /only one reference image/);
+  assert.equal(seen.initImageBody, null);
+  assert.equal(seen.generationBody, null);
+});
+
+test("a combo with two references moves past Leonardo to a provider that takes them", async () => {
+  providersDb.createProviderConnection({
+    provider: "openrouter",
+    authType: "apikey",
+    name: "openrouter-test",
+    apiKey: "sk-or-test",
+    isActive: true,
+    testStatus: "active",
+  });
+  await combosDb.createCombo({
+    name: "leonardo-then-openrouter-edits",
+    strategy: "priority",
+    models: ["leonardo/phoenix", "openrouter/google/gemini-3.1-flash-image-preview"],
+  });
+  const seen = installFakeLeonardo();
+  const leonardoFetch = globalThis.fetch;
+  let openRouterCalled = false;
+  globalThis.fetch = (async (url: unknown, options?: RequestInit) => {
+    if (String(url).startsWith("https://openrouter.ai/")) {
+      openRouterCalled = true;
+      return json({ data: [{ b64_json: Buffer.from([9]).toString("base64") }] });
+    }
+    return leonardoFetch(url as string, options);
+  }) as typeof fetch;
+
+  const response = await comboEdit("leonardo-then-openrouter-edits");
+
+  assert.equal(response.status, 200, JSON.stringify(await response.clone().json()));
+  assert.equal(openRouterCalled, true);
+  assert.equal(seen.initImageBody, null);
+});
