@@ -134,21 +134,27 @@ function declaresStructuredProperty(schema: ToolSchema | undefined): boolean {
 }
 
 // Decode a string only when the schema says array/object (and never string) and the
-// text parses to that type; anything else comes back unchanged. `changed.v` records a repair.
+// text parses to that type; undefined means "leave the string as it is".
+function decodeStructuredString(value: string, types: string[]): unknown {
+  const wantArray = types.includes("array");
+  const wantObject = types.includes("object");
+  if (types.includes("string") || !(wantArray || wantObject)) return undefined;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    return undefined;
+  }
+  return (Array.isArray(parsed) ? wantArray : asRecord(parsed) !== null && wantObject)
+    ? parsed
+    : undefined;
+}
+
+// Repair one value against its schema; anything else comes back unchanged. `changed.v` records a repair.
 function repairValue(value: unknown, schema: unknown, changed: { v: boolean }): unknown {
-  const types = declaredTypes(schema);
   if (typeof value === "string") {
-    const wantArray = types.includes("array");
-    const wantObject = types.includes("object");
-    if (types.includes("string") || !(wantArray || wantObject)) return value;
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(value);
-    } catch {
-      return value;
-    }
-    if (!(Array.isArray(parsed) ? wantArray : asRecord(parsed) !== null && wantObject))
-      return value;
+    const parsed = decodeStructuredString(value, declaredTypes(schema));
+    if (parsed === undefined) return value;
     changed.v = true;
     return repairValue(parsed, schema, changed);
   }
