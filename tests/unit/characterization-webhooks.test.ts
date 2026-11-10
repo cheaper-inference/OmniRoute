@@ -109,6 +109,7 @@ test("surface: event catalogue (values ↔ descriptions)", () => {
       "quota.exceeded",
       "proxy.set_aside",
       "proxy.pool.exhausted",
+      "provider.reset_redeemed",
       "test.ping",
     ]
   );
