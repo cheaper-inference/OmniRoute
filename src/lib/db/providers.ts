@@ -12,6 +12,8 @@ import { createLazyRowProxy } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
 import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
+import { findChatGptConnectionByRegistration } from "./chatgpt";
+import { sanitizeMergedConnectionOverrides } from "./providers/connectionUpdateSanitize";
 import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
 import { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
 import { registerConnectionStore } from "@omniroute/open-sse/utils/registeredConnectionStore.ts";
@@ -505,7 +507,9 @@ export async function createProviderConnection(data: JsonRecord) {
   const workspaceId = toStringOrNull(providerSpecificData.workspaceId);
   const chatgptUserId = toStringOrNull(providerSpecificData.chatgptUserId);
 
-  if (data.authType === "oauth" && data.provider === "copilot-m365-web") {
+  if (data.authType === "oauth" && data.provider === "chatgpt") {
+    existing = findChatGptConnectionByRegistration(providerSpecificData);
+  } else if (data.authType === "oauth" && data.provider === "copilot-m365-web") {
     const candidates = db
       .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth'")
       .all(data.provider) as JsonRecord[];
@@ -1027,8 +1031,6 @@ export async function updateProviderConnection(
     data = { ...data, modelMap: requireSanitizedConnectionModelMap(data.modelMap) };
   }
   const db = getDbInstance() as unknown as DbLike;
-  const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
-  if (!existing) return null;
 
   // The incoming value only. A connection that already holds the password has
   // to stay editable, or an operator cannot repair the one this guard exists
@@ -1036,68 +1038,52 @@ export async function updateProviderConnection(
   // on every unrelated field edit.
   await assertApiKeyIsNotManagementPassword(data.apiKey);
 
-  const existingCamel = toRecord(rowToCamel(existing));
-  const merged: JsonRecord = {
-    ...existingCamel,
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-  merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
-    data,
-    normalizeConnectionProviderSpecificData(
-      toStringOrNull(merged.provider),
-      merged.providerSpecificData,
-      merged,
-      existingCamel.providerSpecificData
-    )
-  );
-  // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
-  // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
-  // so that sweep never retests it, whenever the flag is turned on.
-  if (typeof data.isActive === "boolean") {
-    merged.providerSpecificData = applyAutomaticDisableMarker(
-      merged.providerSpecificData,
-      existingCamel.isActive,
-      data.isActive,
-      undefined,
-      {
-        stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
-        permanentBan: opts?.permanentBan === true,
-      }
+  // Read only after asynchronous validation, inside the write transaction.
+  // Otherwise a metadata update can snapshot old credentials, yield to a rotation,
+  // and then write the consumed refresh token back over its replacement.
+  const persisted = db.transaction(() => {
+    const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
+    if (!existing) return null;
+    const existingCamel = toRecord(rowToCamel(existing));
+    const merged: JsonRecord = {
+      ...existingCamel,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
+      data,
+      normalizeConnectionProviderSpecificData(
+        toStringOrNull(merged.provider),
+        merged.providerSpecificData,
+        merged,
+        existingCamel.providerSpecificData
+      )
     );
-  }
-  // Mirror the sanitization the create path applies — keep the returned
-  // object in lockstep with what we persist.
-  if ("quotaWindowThresholds" in merged) {
-    const result = sanitizeQuotaWindowThresholds(merged.quotaWindowThresholds);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist quotaWindowThresholds with rejected keys: ${result.rejected.join(", ")}`
+    sanitizeMergedConnectionOverrides(merged);
+    if (typeof data.isActive === "boolean") {
+      merged.providerSpecificData = applyAutomaticDisableMarker(
+        merged.providerSpecificData,
+        existingCamel.isActive,
+        data.isActive,
+        undefined,
+        {
+          stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+          permanentBan: opts?.permanentBan === true,
+        }
       );
     }
-    // For updates we always carry the key forward (even as null) so the read
-    // path surfaces the cleared state to callers that merged it.
-    merged.quotaWindowThresholds = result.sanitized;
-  }
-  if ("rateLimitOverrides" in merged) {
-    const result = sanitizeRateLimitOverrides(merged.rateLimitOverrides);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist rateLimitOverrides with rejected keys: ${result.rejected.join(", ")}`
-      );
-    }
-    merged.rateLimitOverrides = result.sanitized;
-  }
-  const existingRecord = toRecord(existing);
+    const existingRecord = toRecord(existing);
 
-  db.transaction(() => {
     reconcileCodexUsageHistory(db, {
       connectionId: id,
       existing: existingRecord,
       merged,
     });
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
+    return { existing, merged };
   })();
+  if (!persisted) return null;
+  const { existing, merged } = persisted;
   backupDbFile("pre-write");
   invalidateConnectionUpdate(id, data, opts);
   bumpProxyConfigGeneration();

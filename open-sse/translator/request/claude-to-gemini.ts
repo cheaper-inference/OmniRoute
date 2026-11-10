@@ -24,6 +24,7 @@ import { getModelSpec } from "../../../src/shared/constants/modelSpecs.ts";
 import {
   gemini38ThinkingConfig,
   isGeminiThinkingLevelModel,
+  resolveClaudeNativeGeminiThinking,
 } from "../../services/thinkingBudget.ts";
 
 import {
@@ -440,7 +441,13 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
   // Priority: thinking.budget_tokens (Claude native) > output_config.effort (Claude Code).
   // Models without thinking support (TTS, transcription, gemini-2.5-flash-image)
   // 400 on ANY thinkingConfig, so they skip both paths below (#16928).
-  if (model.startsWith("gemma-4") || geminiModelRejectsThinkingConfig(model)) {
+  const rejectsThinkingConfig = geminiModelRejectsThinkingConfig(model);
+  const nativeThinking = rejectsThinkingConfig
+    ? null
+    : resolveClaudeNativeGeminiThinking(model, body);
+  if (nativeThinking !== null) {
+    result.generationConfig.thinkingConfig = nativeThinking;
+  } else if (model.startsWith("gemma-4") || rejectsThinkingConfig) {
     // gemma-4 models returns - 400: Thinking budget is not supported for this model
   } else if (body.thinking?.type === "enabled" && typeof body.thinking.budget_tokens === "number") {
     // typeof check ensures only numeric budget_tokens triggers the thinking path;

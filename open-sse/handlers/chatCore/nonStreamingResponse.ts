@@ -109,6 +109,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     effectiveModel,
     effectiveServiceTier: _effectiveServiceTier,
     emitRequestGamificationEvent,
+    agentContext,
     endpointPath,
     executeProviderRequest,
     executeRefreshCredentials,
@@ -764,6 +765,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       comboStrategy,
       endpoint: endpointPath,
       cpaAuthIndex: readCpaAuthIndex(providerResponse),
+      agentContext,
     });
 
     // #12150 P1b surface 3 (fix round 1): a video-bridge-observed request's
