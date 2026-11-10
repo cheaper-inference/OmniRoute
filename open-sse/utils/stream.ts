@@ -186,11 +186,11 @@ type StreamCompletePayload = {
 const DEFAULT_STREAM_BUFFER_BYTES = 16384;
 
 /**
- * Longest upstream SSE line (no newline yet) the stream keeps in memory. A line past it ends
- * the stream with one error frame. Generous on purpose (same size as the non-streaming
+ * Longest upstream SSE line (bytes, newline excluded) the stream keeps in memory. A line past
+ * it ends the stream with one error frame. Generous on purpose (same size as the non-streaming
  * response cap): one inline base64 image frame can reach tens of MiB.
  */
-const MAX_PENDING_SSE_LINE_CHARS = 64 * 1024 * 1024;
+const MAX_PENDING_SSE_LINE_BYTES = 64 * 1024 * 1024;
 
 /**
  * Same window as `appendBoundedText` in streamHelpers.ts. Streamed answer text at or past it
@@ -945,6 +945,8 @@ export function createSSEStream(options: StreamOptions = {}) {
     !clientExpectsResponsesStream && !clientExpectsClaudeStream && !clientExpectsAntigravityStream;
 
   let buffer = "";
+  /** UTF-8 bytes of the unfinished line held in `buffer`, counted per chunk. */
+  let pendingLineBytes = 0;
   let usage: UsageLike | null = null;
   const mergePassthroughCacheCreationUsage = (value: unknown) => {
     if (!value) return;
@@ -1647,6 +1649,18 @@ export function createSSEStream(options: StreamOptions = {}) {
         const now = Date.now();
         timing.markByte();
         lastChunkTime = now;
+        // Count the pending line in bytes through its first newline BEFORE it is buffered or parsed.
+        const firstNl = chunk.indexOf(10);
+        if (
+          pendingLineBytes + (firstNl >= 0 ? firstNl : chunk.byteLength) >
+          MAX_PENDING_SSE_LINE_BYTES
+        ) {
+          abortOversizePendingLine(controller);
+          return;
+        }
+        const lastNl = chunk.lastIndexOf(10);
+        pendingLineBytes =
+          lastNl >= 0 ? chunk.byteLength - lastNl - 1 : pendingLineBytes + chunk.byteLength;
         const text = decoder.decode(chunk, { stream: true });
         buffer += text;
         reqLogger?.appendProviderChunk?.(text);
@@ -2898,8 +2912,6 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
           }
         }
-        // Complete lines above are already handled; what is left is one unfinished line.
-        if (buffer.length > MAX_PENDING_SSE_LINE_CHARS) abortOversizePendingLine(controller);
       },
 
       async flush(controller) {
