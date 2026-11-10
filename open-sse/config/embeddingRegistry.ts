@@ -610,6 +610,7 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
 };
 
 const EMBEDDING_PROVIDER_ALIASES: Record<string, string> = {
+  lr: "lunaroute",
   jina: "jina-ai",
   voyage: "voyage-ai",
   // The dashboard stores LM Studio connections under the hyphenated provider

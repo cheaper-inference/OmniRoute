@@ -45,6 +45,7 @@ export const LUNAROUTE_SYSTEM_ONE_MODELS = [
   },
 ] as const;
 
+/** Return every statically discoverable System One model for the unified catalog. */
 export function getAllSystemOneModels() {
   return LUNAROUTE_SYSTEM_ONE_MODELS.map((model) => ({
     ...model,

@@ -1,8 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { EMBEDDING_PROVIDERS } from "../../open-sse/config/embeddingRegistry.ts";
+import {
+  EMBEDDING_PROVIDERS,
+  parseEmbeddingModel,
+} from "../../open-sse/config/embeddingRegistry.ts";
+import {
+  AUDIO_TRANSCRIPTION_PROVIDERS,
+  parseTranscriptionModel,
+} from "../../open-sse/config/audioRegistry.ts";
 import { IMAGE_PROVIDERS } from "../../open-sse/config/imageRegistryData.ts";
+import { RERANK_PROVIDERS, parseRerankModel } from "../../open-sse/config/rerankRegistry.ts";
 import { getRegistryMediaKinds } from "../../open-sse/config/mediaServiceKinds.ts";
 import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
 import {
@@ -26,14 +34,19 @@ const EMBEDDING_MODELS = ["emb-granite", "emb-nomic-code", "emb-nomic-moe", "emb
 
 const IMAGE_MODELS = ["flux2-klein", "qwen-image-2.1", "qwen-image-2512", "qwen-image-edit-2511"];
 
+const RERANK_MODELS = ["bge-rr-v2-m3"];
+const TRANSCRIPTION_MODELS = ["whisper-large-v3"];
+
 test("LunaRoute is a selectable API-key provider with dynamically derived media kinds", () => {
   const provider = APIKEY_PROVIDERS.lunaroute;
   assert.ok(provider);
   assert.equal(provider.name, "LunaRoute");
   assert.equal(provider.alias, "lr");
   assert.deepEqual(provider.serviceKinds, ["llm"]);
-  assert.deepEqual(getRegistryMediaKinds("lunaroute").sort(), ["embedding", "image"]);
+  assert.deepEqual(getRegistryMediaKinds("lunaroute").sort(), ["embedding", "image", "stt"]);
   assert.match(provider.apiHint ?? "", /\/embeddings\/models/);
+  assert.match(provider.apiHint ?? "", /\/rerank\/models/);
+  assert.match(provider.apiHint ?? "", /\/audio\/transcriptions\/models/);
   assert.match(provider.apiHint ?? "", /\/images\/models/);
 });
 
@@ -67,6 +80,40 @@ test("LunaRoute registers the complete current embeddings surface", () => {
     provider.models.map((model) => model.id),
     EMBEDDING_MODELS
   );
+  assert.deepEqual(parseEmbeddingModel("lr/emb-qwen3"), {
+    provider: "lunaroute",
+    model: "emb-qwen3",
+  });
+});
+
+test("LunaRoute registers the current rerank surface and short alias", () => {
+  const provider = RERANK_PROVIDERS.lunaroute;
+  assert.ok(provider);
+  assert.equal(provider.baseUrl, "https://gw.lunaroute.com/v1/rerank");
+  assert.equal(provider.authHeader, "bearer");
+  assert.deepEqual(
+    provider.models.map((model) => model.id),
+    RERANK_MODELS
+  );
+  assert.deepEqual(parseRerankModel("lr/bge-rr-v2-m3"), {
+    provider: "lunaroute",
+    model: "bge-rr-v2-m3",
+  });
+});
+
+test("LunaRoute registers the current transcription surface and short alias", () => {
+  const provider = AUDIO_TRANSCRIPTION_PROVIDERS.lunaroute;
+  assert.ok(provider);
+  assert.equal(provider.baseUrl, "https://gw.lunaroute.com/v1/audio/transcriptions");
+  assert.equal(provider.authHeader, "bearer");
+  assert.deepEqual(
+    provider.models.map((model) => model.id),
+    TRANSCRIPTION_MODELS
+  );
+  assert.deepEqual(parseTranscriptionModel("lr/whisper-large-v3"), {
+    provider: "lunaroute",
+    model: "whisper-large-v3",
+  });
 });
 
 test("LunaRoute registers the complete current image-generation surface", () => {
@@ -99,4 +146,6 @@ test("LunaRoute registers and resolves every current System One model", () => {
     assert.equal(target?.upstreamModel, model.id);
     assert.equal(target?.upstreamUrl, LUNAROUTE_SYSTEM_ONE_URL);
   }
+  assert.equal(resolveSystemOneTarget("lunaroute/unknown"), null);
+  assert.equal(resolveSystemOneTarget("lunaroute/"), null);
 });

@@ -7,6 +7,7 @@ import {
   handleOpenRouterImageEdit,
   handleSyntxImageGeneration,
 } from "@omniroute/open-sse/handlers/imageGeneration.ts";
+import { handleLunaRouteImageEdit } from "@omniroute/open-sse/handlers/imageGeneration/providers/lunaroute.ts";
 import {
   falImageEditBody,
   falImageEditMaxReferences,
@@ -259,7 +260,8 @@ function classifyImageEditTarget(
       providerConfig.format === "syntx-image" ||
       (providerConfig.format === "fal-ai" &&
         isFalImageEditModel(parsed.model, getFalCompatibilityPreparer() !== null)) ||
-      providerConfig.id === "openrouter"
+      providerConfig.id === "openrouter" ||
+      providerConfig.id === "lunaroute"
     ) {
       return parsed.provider ? { credKey: parsed.provider } : null;
     }
@@ -421,6 +423,19 @@ async function dispatchImageEditTarget(
       },
       credentials: credentials as never,
       log,
+      signal: request.signal,
+    })) as ImageComboDispatchResult;
+  }
+
+  if (providerConfig?.id === "lunaroute") {
+    return (await handleLunaRouteImageEdit({
+      model: parsed.model,
+      prompt,
+      images,
+      credentials: credentials as { apiKey?: string; accessToken?: string },
+      size,
+      responseFormat,
+      options: ctx.options,
       signal: request.signal,
     })) as ImageComboDispatchResult;
   }
@@ -974,6 +989,59 @@ async function postHandler(request: Request, _context?: unknown) {
         })
     );
 
+    if (result.success) {
+      await clearRecoveredProviderState(credentials);
+      return jsonResponse(result.data);
+    }
+    return jsonResponse(
+      toJsonErrorPayload(result.error, "Image edit provider error"),
+      result.status
+    );
+  }
+
+  // LunaRoute edits are stateful: upload the source bytes first, then send the
+  // resulting image ids to its JSON /v1/images/edits endpoint.
+  if (providerConfig?.id === "lunaroute") {
+    const credentials = await getProviderCredentialsWithQuotaPreflight(
+      parsed.provider,
+      null,
+      allowedConnections,
+      resolvedModel
+    );
+    if (!credentials) {
+      return errorResponse(
+        HTTP_STATUS.UNAUTHORIZED,
+        `No credentials for provider: ${parsed.provider}`
+      );
+    }
+    const rateLimitInfo = credentials as {
+      allRateLimited?: boolean;
+      retryAfter?: string | number | Date | null;
+      retryAfterHuman?: string;
+    };
+    if (rateLimitInfo.allRateLimited) {
+      return unavailableResponse(
+        HTTP_STATUS.RATE_LIMITED,
+        `[${parsed.provider}] All accounts rate limited`,
+        rateLimitInfo.retryAfter,
+        rateLimitInfo.retryAfterHuman
+      );
+    }
+
+    const result = await runImageRequestWithAccounting(
+      editAccounting(accounting, parsed.provider, parsed.model, credentials),
+      () =>
+        handleLunaRouteImageEdit({
+          model: parsed.model,
+          prompt,
+          images,
+          credentials: credentials as { apiKey?: string; accessToken?: string },
+          size,
+          responseFormat,
+          options: input.options,
+          signal: request.signal,
+        })
+    );
     if (result.success) {
       await clearRecoveredProviderState(credentials);
       return jsonResponse(result.data);

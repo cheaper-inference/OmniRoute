@@ -323,6 +323,15 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "bearer",
     models: [{ id: "whisper", name: "Whisper" }],
   },
+  lunaroute: {
+    id: "lunaroute",
+    alias: "lr",
+    baseUrl: "https://gw.lunaroute.com/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    models: [{ id: "whisper-large-v3", name: "Whisper Large v3" }],
+  },
   syntx: {
     id: "syntx",
     alias: "stx",
