@@ -120,15 +120,15 @@
 
 ## 📖 提供者設定
 
-若要從 CSV 或 JSON 檔案批次新增 API 金鑰連線，請使用 **控制台 → 提供者 → 從檔案匯入**。欄位採用固定位置順序（`provider,name,apiKey,baseUrl,priority`）；`provider` 必須已作為受管理的提供者或相容節點存在。請參閱[從 CSV 或 JSON 檔案匯入提供者](../providers/CSV-IMPORT.md)。
+若要從 CSV 或 JSON 檔案大量新增 API 金鑰連線，請使用 **儀表板 → 提供者 → 從檔案匯入**。欄位依位置排列（`provider,name,apiKey,baseUrl,priority`）；`provider` 必須已經存在，且是受管理的提供者或相容節點。請參閱[從 CSV 或 JSON 檔案匯入提供者](../providers/CSV-IMPORT.md)。
 
 ### 🔐 訂閱型提供者
 
-#### Claude Code (Pro/Max)
+#### Claude Code（Pro/Max）
 
 ```bash
-控制台 → 提供者 → 連線 Claude Code
-→ OAuth 登入 → 自動重新整理權杖
+儀表板 → 提供者 → 連線 Claude Code
+→ OAuth 登入 → 自動更新權杖
 → 5 小時 + 每週配額追蹤
 
 模型：
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**專業提示：**複雜任務使用 Opus，追求速度則使用 Sonnet。OmniRoute 會追蹤各模型的配額！
+**專業提示：** 複雜工作使用 Opus，追求速度使用 Sonnet。OmniRoute 會依模型追蹤配額！
 
-OmniRoute 主機上沒有瀏覽器？請在任何已登入 Claude Code 的環境執行 `claude setup-token`，並將一年期權杖貼到 **Setup Token** 分頁中。請參閱[使用設定權杖的 Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)。
+沒有瀏覽器可供 OmniRoute 主機使用？請在任何已登入 Claude Code 的位置執行 `claude setup-token`，然後將一年期權杖貼到 **設定權杖** 分頁。請參閱[使用設定權杖搭配 Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)。
 
-Claude 與 Claude Code 相容路由會保留 Opus 和 Sonnet 模型的 `max` 思考強度。Haiku 模型不接受 `max` 強度層級，因此 OmniRoute 會在將該要求傳送至上游之前，將其降級為高思考預算。
+Claude 與 Claude Code 相容的路由會為 Opus 和 Sonnet
+模型保留 `max` 思考強度。Haiku 模型不接受 `max` 強度層級，因此 OmniRoute 會在將該
+請求傳送至上游之前，將其降級為高思考預算。
 
-#### OpenAI Codex (Plus/Pro)
+#### OpenAI Codex（Plus/Pro）
 
 ```bash
-控制台 → 提供者 → 連線 Codex
+儀表板 → 提供者 → 連線 Codex
 → OAuth 登入（連接埠 1455）
-→ 每 5 小時 + 每週重設
+→ 5 小時 + 每週重設
 
 模型：
   cx/gpt-5.5
@@ -160,8 +162,8 @@ Claude 與 Claude Code 相容路由會保留 Opus 和 Sonnet 模型的 `max` 思
 #### GitHub Copilot
 
 ```bash
-控制台 → 提供者 → 連線 GitHub
-→ 透過 GitHub 進行 OAuth
+儀表板 → 提供者 → 連線 GitHub
+→ 透過 GitHub 使用 OAuth
 → 每月重設（每月 1 日）
 
 模型：
@@ -172,56 +174,61 @@ Claude 與 Claude Code 相容路由會保留 Opus 和 Sonnet 模型的 `max` 思
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 平價提供者
+**AI 點數（以權杖計費）。** 當 GitHub 回報帳戶的 `credits_used` 時，提供者限制卡片會顯示 **AI 點數** 列，其中包含目前計費期間消耗的點數，包括不限量的組織方案。
+
+**本機 AI 點數限制。** 編輯 GitHub 連線，並設定每個**計費期間的 AI 點數限制**（`providerSpecificData.githubCreditLimit`）。留白可停用此限制；設為 `0` 則一律略過該連線。當最後一次使用量讀值大於或等於限制時，帳戶選取會略過該連線，路由會回退至其他連線，其行為與配額原則截斷相同。此檢查會讀取定期配額重新整理已收集的使用量——不會在請求路徑上呼叫 GitHub——並採取故障開放原則：缺少讀值、讀值過時（超過 15 分鐘），或讀值來自已重設的計費期間，都不會封鎖該連線。這是本機防護措施，**不是保證的支出上限**：GitHub 回報延遲、重新整理間隔、執行中的請求，以及 OmniRoute 之外的使用量，都可能使實際使用量超過此限制。若需要硬性上限，請使用 GitHub 自己的支出控制。
+
+### 💰 低價提供者
 
 #### GLM-4.7（每日重設，$0.6/1M）
 
-1. 註冊：[Zhipu AI](https://open.bigmodel.cn)
+1. 註冊：[智譜 AI](https://open.bigmodel.cn)
 2. 從 Coding Plan 取得 API 金鑰
-3. 控制台 → 新增 API 金鑰：提供者：`glm`，API 金鑰：`your-key`
+3. 儀表板 → 新增 API 金鑰：提供者：`glm`，API 金鑰：`your-key`
 
-**使用方式：**`glm/glm-4.7` — **專業提示：**Coding Plan 以 1/7 的成本提供 3 倍配額！每日上午 10:00 重設。
+**使用方式：** `glm/glm-4.7` — **專業提示：** Coding Plan 以 1/7 的成本提供 3 倍配額！每日上午 10:00 重設。
 
-#### MiniMax M2.1（每 5 小時重設，$0.20/1M）
+#### MiniMax M2.1（5 小時重設，$0.20/1M）
 
 1. 註冊：[MiniMax](https://www.minimax.io)
-2. 取得 API 金鑰 → 控制台 → 新增 API 金鑰
+2. 取得 API 金鑰 → 儀表板 → 新增 API 金鑰
 
-**使用方式：**`minimax/MiniMax-M2.1` — **專業提示：**這是長上下文（1M 個權杖）最便宜的選項！
+**使用方式：** `minimax/MiniMax-M2.1` — **專業提示：** 長內容的最低價選項（1M 權杖）！
 
 #### Kimi K2（每月固定 $9）
 
 1. 訂閱：[Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. 取得 API 金鑰 → 控制台 → 新增 API 金鑰
+2. 取得 API 金鑰 → 儀表板 → 新增 API 金鑰
 
-**使用方式：**`kimi/kimi-k2.5` — **專業提示：**每月固定 $9 可使用 10M 個權杖，實際成本為 $0.90/1M！
+**使用方式：** `kimi/kimi-k2.5` — **專業提示：** 每月固定 $9 可使用 10M 權杖 = 實際成本 $0.90/1M！
 
 #### Baidu Qianfan / ERNIE
 
 1. 註冊：[Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. 建立 Qianfan API 金鑰 → 控制台 → 新增 API 金鑰：提供者：`qianfan`
+2. 建立 Qianfan API 金鑰 → 儀表板 → 新增 API 金鑰：提供者：`qianfan`
 
-**使用方式：**`qianfan/ernie-5.1`、`qianfan/ernie-x1.1`，或其他與 OpenAI 相容的 Qianfan 模型 ID。
+**使用方式：** `qianfan/ernie-5.1`、`qianfan/ernie-x1.1`，或其他 Qianfan OpenAI 相容模型 ID。
 
 ### 🆓 免費提供者
 
-無須驗證的免費提供者，其提供者頁面上的 **不需要驗證** 旁設有開關。
-關閉該開關會停用該提供者、將其從「已設定的提供者」／精簡檢視中移除，並從 `/v1/models` 移除其模型。
+無需驗證的免費提供者，其提供者頁面上的 **不需要驗證** 旁邊會有一個切換開關。
+關閉該開關會停用提供者，將其從已設定提供者／精簡檢視中移除，
+並將其模型從 `/v1/models` 移除。
 
 #### Qoder（9 個免費模型）
 
 ```bash
-控制台 → 連線 Qoder → OAuth 登入 → 存取權受目前提供者限制約束
+儀表板 → 連線 Qoder → OAuth 登入 → 存取受目前提供者限制約束
 
-模型：if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+模型：if/qwen3.8-max-preview、if/qwen3.7-max、if/qwen3.7-plus、if/kimi-k3、if/kimi-k2.7-code、if/glm-5.2、if/deepseek-v4-pro、if/deepseek-v4-flash、if/minimax-m3
 ```
 
-#### Kiro（免費 Claude）
+#### Kiro（Claude 免費版）
 
 ```bash
-控制台 → 連線 Kiro → AWS Builder ID 或 Google/GitHub → 每月約 50 點額度
+儀表板 → 連線 Kiro → AWS Builder ID 或 Google/GitHub → 每月約 50 點數
 
-模型：kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+模型：kr/claude-sonnet-4.5、kr/claude-haiku-4.5
 ```
 
 ---
@@ -334,65 +341,65 @@ API 金鑰：[來自儀表板]
 
 ---
 
-## 🚀 部署
+## 🚀部署
 
 ### 全域 npm 安裝（建議）
 
 ```bash
 npm install -g omniroute
 
-# 建立設定目錄
+# Create config directory
 mkdir -p ~/.omniroute
 
-# 建立 .env 檔案（請參閱 .env.example）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# 啟動伺服器
+# Start server
 omniroute
-# 或使用自訂連接埠：
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI 會自動從 `~/.omniroute/.env` 或 `./.env` 載入 `.env`。
+CLI自動從`~/.omniroute/.env`或`./.env`載入`.env` 。工作目錄中的`./.env`只能設定一個簡短的鍵允許清單（連接埠、 `REQUIRE_API_KEY`、區域設定和顏色設定）；將其他所有內容放入`~/.omniroute/.env`中。參見[CLI啟動合約](CLI-LAUNCH-CONTRACTS.md#working-directory-env)。
 
-### 系統匣模式
+### 托盤模式
 
-在系統匣中啟動 OmniRoute：
+在系統托盤中啟動OmniRoute ：
 
 ```bash
 omniroute serve --tray
 ```
 
-伺服器與系統匣準備就緒後，此命令便會返回。
+該命令在伺服器和托盤準備就緒後返回。
 
-伺服器會在沒有終端機的情況下繼續執行。
+伺服器在沒有終端的情況下繼續運作。
 
-系統匣模式支援 macOS、Windows 與具有圖形介面的 Linux 工作階段。系統匣模式不會自動開啟儀表板。
+托盤模式支援macOS、 Windows和圖形Linux會話。托盤模式不會自動打開儀表板。
 
-使用系統匣選單執行下列操作：
+使用托盤選單執行以下操作：
 
-- 開啟儀表板。
-- 開啟 `/dashboard/logs`。
-- 變更自動啟動設定。
-- 停止 OmniRoute。
+- 打開儀表板。
+- 打開`/dashboard/logs`.
+- 更改自動啟動。
+- 停止OmniRoute。
 
-請勿將 `--tray` 與下列選項搭配使用：
+不要將`--tray`與以下選項結合使用：
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-這些模式需要不同的程序擁有權。
+這些模式需要不同的進程所有權。
 
-啟用下次登入機器時自動啟動：
+啟用下次機器登入時啟動：
 
 ```bash
 omniroute autostart enable
 ```
 
-在 macOS、Windows 與具有圖形介面的 Linux 工作階段中，自動啟動會使用系統匣模式。無頭 Linux 則使用現有的 systemd 使用者服務。
+自動啟動在macOS、 Windows和圖形Linux會話上使用托盤模式。 Headless Linux使用現有的 systemd 使用者服務。
 
-停用登入時自動啟動：
+停用登入時啟動：
 
 ```bash
 omniroute autostart disable
@@ -400,16 +407,16 @@ omniroute autostart disable
 
 ### 解除安裝
 
-當你不再需要 OmniRoute 時，我們提供兩個快速指令碼，可乾淨地將其移除：
+當您不再需要OmniRoute時，我們提供兩個快速腳本來徹底刪除：
 
-| 命令                     | 動作                                                             |
-| ------------------------ | ---------------------------------------------------------------- |
-| `npm run uninstall`      | 移除系統應用程式，但會**保留 `~/.omniroute` 中的資料庫與設定**。 |
-| `npm run uninstall:full` | 移除應用程式，並永久**清除所有設定、金鑰與資料庫**。             |
+| 命令                     | 行動                                                      |
+| ------------------------ | --------------------------------------------------------- |
+| `npm run uninstall`      | 刪除系統應用程序，但**保留您的DB和配置**在`~/.omniroute`. |
+| `npm run uninstall:full` | 永久刪除應用程式AND**刪除所有配置、金鑰和資料庫**。       |
 
-> 注意：若要執行這些命令，請前往 OmniRoute 專案資料夾（如果你已複製該專案），然後執行命令。或者，若是以全域方式安裝，只需執行 `npm uninstall -g omniroute`。
+> 注意：要執行這些命令，請導航至OmniRoute專案資料夾（如果您克隆了它）並運行它們。或者，如果全域安裝，您可以簡單地執行`npm uninstall -g omniroute`。
 
-### VPS 部署
+### VPS部署
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -425,25 +432,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# 或：pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 部署（低記憶體）
+### PM2部署（低記憶體）
 
-對於 RAM 有限的伺服器，請使用記憶體限制選項：
+對於RAM有限的伺服器，請使用記憶體限制選項：
 
 ```bash
-# 使用 512MB 限制（預設）
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# 或使用自訂記憶體限制
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# 或使用 ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-建立 `ecosystem.config.js`：
+創建`ecosystem.config.js`：
 
 ```javascript
 module.exports = {
@@ -468,24 +475,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# 建置映像檔（預設 = 預先安裝 codex/claude/droid 的 runner-cli）
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# 可攜式模式（建議）
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-如需包含 CLI 二進位檔的主機整合模式，請參閱主要文件中的 Docker 章節。
+使用CLI二進位檔案的主機整合模式，請參閱主文件中的Docker部分。
 
-### Void Linux (xbps-src)
+### 作廢Linux (xbps-src)
 
-Void Linux 使用者可以透過 `xbps-src` 交叉編譯框架，以原生方式封裝並安裝 OmniRoute。此框架會自動執行 Node.js 獨立建置，並包含所需的 `better-sqlite3` 原生繫結。
+void Linux使用者可以使用`xbps-src`交叉編譯框架原生打包安裝OmniRoute 。這會自動執行Node.js獨立建置以及所需的`better-sqlite3`本機綁定。
 
 <details>
-<summary><b>檢視 xbps-src 範本</b></summary>
+<summary><b>查看xbps-src模板</b></summary>
 
 ```bash
-# 'omniroute' 的範本檔案
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -506,7 +513,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# 判斷 node-gyp 的目標 CPU 架構
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -515,29 +522,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) 安裝所有相依套件 – 略過指令碼
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) 建置 Next.js 獨立套件
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 將靜態資源複製到獨立套件中
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) 編譯 better-sqlite3 原生繫結
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) 將已編譯的繫結放入獨立套件中
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) 移除架構特定的 sharp 套件
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) 複製 Next.js 靜態分析所遺漏的 pino 執行階段相依套件：
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -551,7 +558,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# 防止安裝後掛鉤移除空的 Next.js 應用程式路由器目錄
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -579,158 +586,163 @@ post_install() {
 
 ### 環境變數
 
-| 變數                                    | 預設值                               | 說明                                                                             |
-| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 簽署密鑰（**在正式環境中請務必更改**）                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 首次登入密碼                                                                     |
-| `DATA_DIR`                              | `~/.omniroute`                       | 資料目錄（資料庫、使用量、日誌）                                                 |
-| `PORT`                                  | 框架預設值                           | 服務連接埠（範例中為 `20128`）                                                   |
-| `HOSTNAME`                              | 框架預設值                           | 綁定主機（Docker 預設為 `0.0.0.0`）                                              |
-| `NODE_ENV`                              | 執行階段預設值                       | 部署時設為 `production`                                                          |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | 提供給儀表板並公開給伺服器的公開基礎 URL（取代舊版的 `BASE_URL`）                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | 雲端同步端點的基礎 URL（取代舊版的 `CLOUD_URL`）                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 用於產生 API 金鑰的 HMAC 密鑰                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | 強制要求在 `/v1/*` 使用 Bearer API 金鑰                                          |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 允許已驗證的儀表板使用者視需要顯示完整的已儲存 API 金鑰值                        |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | 伺服器端重新整理快取 Provider Limits 資料的頻率；UI 重新整理按鈕仍會觸發手動同步 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 停用寫入／匯入／還原前的自動 SQLite 快照；手動備份仍可運作                       |
-| `APP_LOG_TO_FILE`                       | `true`                               | 啟用將應用程式與稽核日誌輸出至磁碟                                               |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | 強制使用 `Secure` 驗證 Cookie（位於 HTTPS 反向代理之後）                         |
-| `CLOUDFLARED_BIN`                       | 未設定                               | 使用現有的 `cloudflared` 二進位檔，而非受管理的下載版本                          |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 受管理 Quick Tunnels 的傳輸協定（`http2`、`quic` 或 `auto`）                     |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js 堆積記憶體限制（MB）                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | 提示詞快取項目的最大數量                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | 語意快取項目的最大數量                                                           |
+| 多變的                                  | 預設                     | 描述                                                                                     |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _（自動產生）_           | JWT簽章秘密—在第一次執行時自動產生並保留到`server.env`；當資料目錄是暫存目錄時明確設定它 |
+| `INITIAL_PASSWORD`                      | _（未設定）_             | 第一個登入密碼。 npm/source安裝以`CHANGEME`開頭：取代它。取消設定：入門精靈              |
+| `DATA_DIR`                              | `~/.omniroute`           | 資料目錄（資料庫、使用情況、日誌）                                                       |
+| `PORT`                                  | 框架預設                 | 服務連接埠（範例中為`20128` ）                                                           |
+| `HOSTNAME`                              | 框架預設                 | 綁定主機（Docker預設為`0.0.0.0`）                                                        |
+| `NODE_ENV`                              | 運行時預設值             | 設定`production`進行部署                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | 公共基礎URL出現在儀表板上並暴露給伺服器（取代舊版`BASE_URL`）                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | 雲端同步端點基礎URL （取代舊版`CLOUD_URL`）                                              |
+| `API_KEY_SECRET`                        | _（自動產生）_           | HMAC產生的API金鑰的秘密—在第一次執行時自動產生並儲存到`server.env`                       |
+| `REQUIRE_API_KEY`                       | `false`                  | 在`/v1/*`上強制執行 Bearer API金鑰                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | 允許經過驗證的儀表板使用者按需顯示完整儲存的API金鑰值                                    |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 快取的提供者限制資料的伺服器端刷新節奏； UI刷新按鈕仍會觸發手動同步                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | 在writes/import/restore之前停用自動SQLite快照；手動備份仍然有效                          |
+| `APP_LOG_TO_FILE`                       | `true`                   | 啟用應用程式和審核日誌輸出到磁碟                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | 強制`Secure` auth cookie（在HTTPS反向代理後面）                                          |
+| `CLOUDFLARED_BIN`                       | 未設定                   | 使用現有的`cloudflared`二進位檔案而不是託管下載                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | 託管快速隧道的傳輸（`http2`、 `quic`或`auto`）                                           |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB中的Node.js堆限制                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | 最大提示快取條目數                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | 最大語意快取條目數                                                                       |
 
-如需完整的環境變數參考，請參閱 [README](../README.md)。
+有關完整的環境變數參考，請參閱[README](../README.md) 。
 
 ---
 
 ## 📊 可用模型
 
 <details>
-<summary><b>查看所有可用模型</b></summary>
+<summary><b>檢視所有可用模型</b></summary>
 
-> 以下列表整理自 v3.8.0 的 `open-sse/config/providerRegistry.ts`。雲端目錄（Gemini、OpenRouter 等）會動態同步——如需完整的即時目錄，請開啟 **Dashboard → Providers → [provider] → Available Models**，或呼叫 `GET /api/models/catalog`。
+> 以下清單整理自 `open-sse/config/providerRegistry.ts`，適用於 v3.8.0。雲端目錄（Gemini、OpenRouter 等）會動態同步 — 如需完整的即時目錄，請開啟 **儀表板 → 提供者 → [provider] → 可用模型**，或呼叫 `GET /api/models/catalog`。
 >
-> 如果某提供者的內建清單已與上游不一致，請在該頁面使用 **Import from /models**（或啟用 **Auto-Sync**）來拉取即時的上游目錄。此流程已在 v3.8.50 中針對 LLM7.io（`gemini-3.1-flash-lite`）與 UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）完成驗證；在同一輪測試中，Pollinations 的匿名存取仍受上游限制。
+> 如果提供者的內建清單已經過時，請在該頁面使用 **從 /models 匯入**（或啟用 **自動同步**），以取得上游的即時目錄。此功能已在 v3.8.50 中針對 LLM7.io（`gemini-3.1-flash-lite`）和 UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）完成驗證；在同一輪測試期間，Pollinations 的匿名存取仍受上游限制。
 
-**Claude Code（`cc/`）** — Pro/Max OAuth：`cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth：`cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
 
-**Codex（`cx/`）** — Plus/Pro OAuth：`cx/gpt-5.5`（+ effort 層級：`gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth：`cx/gpt-5.5`（+ 效能層級：`gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot（`gh/`）** — OAuth：`gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth：`gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
 
-**Kiro（`kr/`）** — 免費 OAuth：請使用 **Dashboard → Providers → Kiro → Available Models** 下顯示的即時目錄。可用性取決於帳號與方案。
+**Kiro (`kr/`)** — 免費 OAuth：請使用 **儀表板 → 提供者 → Kiro → 可用模型** 下顯示的即時目錄。可用性取決於帳戶和方案。
 
-**Qoder（`if/`）** — 免費 OAuth：`if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
+**Qoder (`if/`)** — 免費 OAuth：`if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
 
-**GLM（`glm/`、`glm-cn/`、`zai/`、`glmt/`）** — $0.2–0.6/1M：`glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
+**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2–0.6/1M：`glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
 
-**MiniMax（`minimax/`、`minimax-cn/`）** — $0.2/1M：`minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`、`minimax-cn/`)** — $0.2/1M：`minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
 
-**Kimi（`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`）** — $9/月固定費率或按量計費：`kimi/kimi-k2.6`、`kimi/kimi-k2.5`
+**Kimi (`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** — $9/月固定費用或按用量計費：`kimi/kimi-k2.6`、`kimi/kimi-k2.5`
 
-**DeepSeek（`ds/`）** — API 金鑰：`ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API 金鑰：`ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
 
-**Groq（`groq/`）** — 超高速：`groq/llama-3.3-70b-versatile`、`groq/meta-llama/llama-4-maverick-17b-128e-instruct`、`groq/qwen/qwen3-32b`、`groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — 超高速：`groq/llama-3.3-70b-versatile`、`groq/meta-llama/llama-4-maverick-17b-128e-instruct`、`groq/qwen/qwen3-32b`、`groq/openai/gpt-oss-120b`
 
-**xAI（`xai/`）** — Grok 原生：`xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — 原生 Grok：`xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
 
-**Mistral（`mistral/`）** — 歐盟託管：`mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
+**Mistral (`mistral/`)** — 歐盟託管：`mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/codestral-latest`
 
-**Perplexity（`pplx/`）** — 搜尋增強：`pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
+**Perplexity (`pplx/`)** — 搜尋增強：`pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
 
-**Together AI（`together/`）** — 開源：`together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`（免費）、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — 開放原始碼：`together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`（免費）、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI（`fireworks/`）** — 快速推論：`fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — 快速推論：`fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras（`cerebras/`）** — 晶圓級：`cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — 晶圓級：`cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
 
-**Cohere（`cohere/`）** — 專注 RAG：`cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — 專注於 RAG：`cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
 
-**NVIDIA NIM（`nvidia/`）** — 企業級：`nvidia/z-ai/glm-5.1`、`nvidia/minimaxai/minimax-m2.7`、`nvidia/google/gemma-4-31b-it`、`nvidia/mistralai/mistral-small-4-119b-2603`、`nvidia/mistralai/mistral-large-3-675b-instruct-2512`、`nvidia/qwen/qwen3.5-397b-a17b`、`nvidia/deepseek-ai/deepseek-v4-pro`、`nvidia/openai/gpt-oss-120b`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — 企業級：`nvidia/google/gemma-4-31b-it`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`、`nvidia/nvidia/nemotron-3-ultra-550b-a55b`、`nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan（`qianfan/`）** — ERNIE：`qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE：`qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
 
-**Ollama Cloud（`ollama-cloud/`）**：`ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**：`ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
 
-**Gemini（Google Cloud `gemini/`）**：依 API 金鑰從 Google 即時同步——無靜態清單。請在 **Dashboard → Providers** 中連接金鑰，然後使用 **Available Models** 匯入目前的目錄（例如 `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
+**Gemini（Google Cloud `gemini/`）**：依據 Google 的 API 金鑰即時同步 — 沒有靜態清單。請在 **儀表板 → 提供者** 中連結金鑰，然後使用 **可用模型** 匯入目前的目錄（例如 `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
 
-**其他相容提供者**（節選）：`cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（透過 `aws-bedrock`）、`azure-ai`、`openrouter`（透傳目錄）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。每個提供者都在 `providerRegistry.ts` 中維護各自的模型清單，並可在提供者提供 `/models` 端點時自動同步。
+**其他相容的提供者**（部分）：`cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（透過 `aws-bedrock`）、`azure-ai`、`openrouter`（直通目錄）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。每個提供者都在 `providerRegistry.ts` 中維護自己的模型清單；當提供者提供 `/models` 端點時，也可以自動同步。
 
-**關於模型 ID 的說明：** OmniRoute 使用提供者原生 ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）。部分 ID 含有帶點的版本號，因為這正是上游 API 所要求的格式。如果某個模型未列於上方，請執行 `omniroute models --search <term>` 或呼叫 `GET /api/models/catalog` 以確認可用性。
+**模型 ID 注意事項：** OmniRoute 使用提供者原生 ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）。部分 ID 包含點號版本，因為上游 API 要求使用這種格式。如果上方未列出某個模型，請執行 `omniroute models --search <term>`，或呼叫 `GET /api/models/catalog` 以確認可用性。
 
 </details>
 
 ---
 
-## 🧩 進階功能
+## 🧩進階功能
 
-### 自訂模型
+### 客製化型號
 
-將任何模型 ID 新增至任何提供者，無須等待應用程式更新：
+將任何模型ID新增至任何提供者，無需等待應用程式更新：
 
 ```bash
-# 透過 API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# 列出：curl http://localhost:20128/api/provider-models?provider=openai
-# 移除：curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-或使用儀表板：**提供者 → [提供者] → 自訂模型**。
+或使用儀表板：**提供者→ [提供者] →自訂模型**。
 
-注意事項：
+筆記：
 
-- OpenRouter 與 OpenAI/Anthropic 相容提供者僅透過**可用模型**進行管理。手動新增、匯入及自動同步都會進入同一份可用模型清單，因此這些提供者不會有獨立的「自訂模型」區段。
-- **自訂模型**區段適用於不提供受管理可用模型匯入功能的提供者。
+- OpenRouter和OpenAI/Anthropic-compatible提供者由以下機構管理**可用型號**僅有的。手動新增、匯入和自動同步都位於相同可用模型清單中，因此這些提供者沒有單獨的自訂模型部分。
+- 這**客製化型號**部分適用於不公開託管可用模型匯入的提供者。
 
-### 自訂 OpenAI 相容提供者
+### 客製化 OpenAI 相容提供者
 
-任何支援 OpenAI API 的閘道（自行託管的代理伺服器、vLLM、第三方彙整服務）
-都可新增為獨立的提供者節點：
+任何使用OpenAI API （自架代理、vLLM、第三方聚合器）的網關都可以新增為其自己的提供者節點：
 
-1. **提供者 → 新增 OpenAI 相容提供者**。
-2. **名稱**：節點的顯示標籤。
-3. **前綴**：路由名稱。用戶端會以 `<prefix>/<model>` 呼叫模型，因此前綴為
-   `mygw` 的節點會提供 `mygw/gpt-4o-mini`。此欄位為必填；沒有字元限制。
-4. **API 類型**：閘道提供的端點系列（Chat Completions、Responses、
-   Embeddings、音訊、圖片）。
-5. **基礎 URL**：截至並包含 `/v1` 的 API 根路徑（例如
-   `https://gateway.example.com/v1`），而非完整的 `/chat/completions` 路徑。若閘道使用
-   非標準路徑，請在**進階設定**中設定（聊天路徑、模型路徑）。
-6. **API 金鑰（用於檢查）**欄位只會測試連線。建立節點後，
-   開啟該節點並使用**新增連線**，以儲存請求實際使用的金鑰。
+1. **提供者→添加OpenAI相容**。
+2. **姓名**：節點的顯示標籤。
+3. **前綴**：路由名稱。客戶端將模型稱為`<prefix>/<model>`，因此前綴為`mygw`節點服務`mygw/gpt-4o-mini`。必需的;沒有字元限制。
+4. **API型**：網關服務的端點系列（聊天完成、回應、嵌入、音訊、影像）。
+5. **基地URL** ： API根目錄，直到並包括`/v1` （例如`https://gateway.example.com/v1`），而不是完整的`/chat/completions`路徑。具有非標準路徑的網關將其設定為**進階設定**（聊天路徑，模型路徑）。
+6. 這**API密鑰（用於檢查）**字段僅測試連接。創建節點後，打開並使用**新增連接**儲存請求將使用的金鑰。
 
-節點會取得格式為 `openai-compatible-<apiType>-<uuid>` 的內部 ID；你永遠
-不需要輸入它，前綴就是公開名稱。
+節點獲得`openai-compatible-<apiType>-<uuid>`形式的內部 id；您永遠不需要鍵入它，前綴是公共名稱。
 
 #### 保留前綴
 
-前綴不得為內建提供者的 ID 或別名（例如 `openai`、`cf`），也不得為
-已停用提供者的 ID。模型解析器會先檢查內建 ID 和別名，再檢查
-自訂節點，因此使用這些前綴的節點永遠不會收到流量：
-`<prefix>/model` 會改由內建提供者處理；若該提供者已停用，則會以封閉方式失敗。
-若使用這類前綴建立或編輯節點，將遭拒絕並顯示：
+前綴不能是內建提供者的 ID 或別名（例如`openai`、 `cf`），也不能是已停用提供者的 ID。模型解析器在自訂節點之前檢查內建 ID 和別名，因此使用這些前綴之一的節點永遠不會接收流量： `<prefix>/model`將轉至內建提供程序，或者如果該提供者已停用，則會失敗關閉。建立或編輯具有此類前綴的節點將被拒絕：
 
 ```text
-prefix: "<prefix>" 是保留的提供者前綴 — 請選擇其他前綴（保留的 ID/別名不能用於自訂節點，因為像 <prefix>/model 這樣的請求會路由至內建提供者，或在該提供者停用時以封閉方式失敗）
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-請選擇不重複的前綴（`mygw`、`acme-proxy`）。如果傳送至自訂節點的請求失敗，且
-錯誤訊息提及內建提供者或其認證資訊，請檢查節點的前綴是否為
-保留前綴：在此規則出現之前儲存的節點仍會保留，但其前綴會路由至
-內建提供者。請編輯節點並指定新的前綴。
+選擇一個不同的前綴（`mygw`、 `acme-proxy`）。如果對自訂節點的請求失敗並出現命名內建提供者或其憑證的錯誤，請檢查該節點的前綴是否已保留：在此規則存在之前保存的節點仍會存儲，但它們的前綴路由到內建提供者。編輯節點並為其指定新的前綴。
 
-### 串接 OmniRoute 對等節點
+#### 每個連線網關選項
 
-另一個 OmniRoute 閘道可新增為**自訂 OpenAI 相容**提供者。請使用
-對等節點的 `/v1` 基礎 URL，以及由該對等節點核發、權限最小化的專用 API 金鑰。
+這些密鑰位於連接的`providerSpecificData` （例如透過`PUT /api/providers/{id}`）：
 
-對於雙向或多跳串接，請在每個閘道上啟用選擇加入式迴圈防護：
+- `toolNameMaxLength` （整數，1-1024）— 用於OpenAI聊天格式相容的連接，其網關拒絕長工具名稱。較長的名稱會作為短別名發送並在回應中恢復。
+- `quotaEndpoint` — 閘道的quota/credits端點，讀取儀表板配額條與配額感知路由。適用於 OpenAI 和 Anthropic 相容連接；完整的形狀記錄在`open-sse/services/usage/openaiCompatible.ts`。
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### 連結OmniRoute對等點
+
+可以再增加一個OmniRoute網關作為**自訂 OpenAI 相容**提供者。使用對等點的`/v1`基礎URL和該對等點所頒發的專用的、最低權限的API鑰。
+
+對於互惠或多跳鏈，在每個網關上啟用選擇加入環路防護：
 
 ```bash
 # gateway-a
@@ -746,17 +758,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-只有傳送至明確加入允許清單之對等節點 URL 的請求，才會收到
-`X-OmniRoute-Peer-Trace` 標頭。若執行個體 ID 重複或跳數
-額度已用盡，閘道會以 HTTP `508 Loop Detected` 拒絕請求；一般上游提供者不會收到任何對等節點中繼資料。
+只有發送到明確列入白名單的對等點URL的請求才會收到`X-OmniRoute-Peer-Trace`標頭。閘道拒絕重複實例ID或使用HTTP `508 Loop Detected`耗盡跳預算；一般上游提供者不接收對等元資料。
 
-對等節點串接並非資料庫複寫或主機容錯移轉。每個閘道都會保有獨立的
-SQLite 狀態、快取、速率計數器及工作階段。若要實現主動／被動或主動／主動可用性，請使用具備健康狀態檢查的反向代理伺服器或用戶端
-容錯移轉，且切勿將同一個 SQLite 資料庫掛載至多個執行中的 OmniRoute 執行個體。
+對等連結不是資料庫複製或主機故障轉移。每個網關保留獨立的SQLite狀態、快取、速率計數器和會話。使用運行狀況檢查的反向代理或客戶端故障轉移來確保active/passive或active/active可用性，並且切勿將一個SQLite資料庫掛載到多個正在運行的OmniRoute實例中。
 
-### 專用提供者路由
+### 專用提供者路線
 
-將請求直接路由至特定提供者，並執行模型驗證：
+透過模型驗證將請求直接路由到特定提供者：
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -764,140 +772,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-若缺少提供者前綴，系統會自動新增。模型不相符時會傳回 `400`。
+如果缺少提供者前綴，則會自動新增。不匹配的模型回傳`400`。
 
-### 網路代理伺服器設定
+### 網路代理配置
 
 ```bash
-# 設定全域代理伺服器
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# 各提供者的代理伺服器
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# 測試代理伺服器
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**優先順序：**特定金鑰 → 特定組合 → 特定提供者 → 全域 → 環境。
+**優先：**特定於金鑰的→特定於組合的→特定於提供者的→全域→環境。
 
-### 模型目錄 API
+### 型號目錄API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-傳回依提供者分組的模型及其類型（`chat`、`embedding`、`image`）。
+傳回按類型（`chat`、 `embedding`、 `image`）提供者分組的模型。
 
 ### 雲端同步
 
-- 跨裝置同步提供者、組合及設定
-- 自動背景同步，具備逾時與快速失敗機制
-- 在正式環境中優先使用伺服器端的 `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
+- 跨裝置同步提供者、組合和設置
+- 超時自動後台同步+快速失敗
+- 在生產上偏好伺服器端`NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
 
-### Cloudflare 快速通道
+### Cloudflare快速隧道
 
-- 適用於 Docker 與其他自行託管的部署，可在 **儀表板 → 端點** 中使用
-- 建立臨時的 `https://*.trycloudflare.com` URL，並將流量轉送至您目前與 OpenAI 相容的 `/v1` 端點
-- 首次啟用時僅會在需要時安裝 `cloudflared`；後續重新啟動時會重複使用相同的受管理執行檔
-- OmniRoute 或容器重新啟動後，不會自動還原 Quick Tunnel；需要時請從儀表板重新啟用
-- Tunnel URL 為暫時性，每次停止／啟動 Tunnel 時都會變更
-- 受管理的 Quick Tunnel 預設使用 HTTP/2 傳輸，以避免在資源受限的容器中出現大量 QUIC UDP 緩衝區警告
-- 若要覆寫受管理的傳輸方式，請將 `CLOUDFLARED_PROTOCOL` 設為 `quic` 或 `auto`
-- 若您偏好使用預先安裝的 `cloudflared` 執行檔，而非受管理的下載版本，請設定 `CLOUDFLARED_BIN`
-- Cloudflare Quick Tunnel、Tailscale Funnel 與 ngrok Tunnel 面板可在 **設定 → 外觀** 中顯示或隱藏。隱藏面板不會停止正在執行的 Tunnel。
+- 可用於**儀表板→端點**適用於Docker和其他自架部署
+- 建立一個臨時`https://*.trycloudflare.com` URL ，轉發到目前與 OpenAI 相容的`/v1`端點
+- 首先enable僅在需要時安裝`cloudflared` ；稍後重新啟動，重複使用相同的託管二進位檔案
+- OmniRoute或容器重新啟動後，快速隧道不會自動恢復；需要時從儀表板重新啟用它們
+- 隧道URLs是短暫的，每次您stop/start隧道時都會發生變化
+- 託管快速隧道預設為HTTP/2傳輸，以避免受限容器中出現嘈雜的QUIC UDP緩衝區警告
+- 如果要覆蓋託管傳輸選擇，請設定`CLOUDFLARED_PROTOCOL=quic`或`auto`
+- 如果您喜歡使用預先安裝的`cloudflared`二進位檔案而不是託管下載，請設定`CLOUDFLARED_BIN`
+- Cloudflare Quick Tunnel、 Tailscale Funnel 和ngrok Tunnel 面板可以顯示或隱藏**設定→外觀**。隱藏面板並不會阻止運作的隧道。
 
-### LLM Gateway 智慧功能（第 9 階段）
+### LLM網關智慧（第9階段）
 
-- **語意快取** — 自動快取非串流且 temperature=0 的回應（可透過 `X-OmniRoute-No-Cache: true` 略過）
-- **請求冪等性** — 透過 `Idempotency-Key` 或 `X-Request-Id` 標頭，對 5 秒內的請求進行去重
-- **進度追蹤** — 透過 `X-OmniRoute-Progress: true` 標頭選擇啟用 SSE `event: progress` 事件
+- **語意快取**— 自動快取非流、溫度= 0 回應（使用`X-OmniRoute-No-Cache: true`繞過）
+- **請求冪等性**— 透過`Idempotency-Key`或`X-Request-Id`標頭在 5 秒內刪除重複請求
+- **進度追蹤**— 透過`X-OmniRoute-Progress: true`標頭選擇加入SSE `event: progress`事件
 
 ---
 
-### Translator Playground
+### 翻譯遊樂場
 
-可透過 **儀表板 → Translator** 存取。偵錯並視覺化 OmniRoute 如何在提供者之間轉譯 API 請求。
+訪問透過**儀表板→翻譯器**。偵錯並視覺化OmniRoute如何在提供者之間轉換API請求。
 
-| 模式             | 用途                                                    |
-| ---------------- | ------------------------------------------------------- |
-| **Playground**   | 選取來源／目標格式、貼上請求，並立即查看轉譯後的輸出    |
-| **Chat Tester**  | 透過 Proxy 傳送即時聊天訊息，並檢查完整的請求／回應週期 |
-| **Test Bench**   | 對多種格式組合執行批次測試，以驗證轉譯的正確性          |
-| **Live Monitor** | 在請求流經 Proxy 時監看即時轉譯                         |
+| 模式           | 目的                                                         |
+| -------------- | ------------------------------------------------------------ |
+| **操場**       | 選擇source/target格式，貼上請求，然後立即查看翻譯後的輸出    |
+| **聊天測試儀** | 透過代理程式發送即時聊天訊息並檢查完整的request/response週期 |
+| **測試台**     | 跨多種格式組合執行批次測試以驗證翻譯的正確性                 |
+| **即時監控**   | 當請求流經代理時觀看即時翻譯                                 |
 
 **使用案例：**
 
-- 偵錯特定用戶端／提供者組合失敗的原因
-- 驗證思考標籤、工具呼叫與系統提示是否正確轉譯
-- 比較 OpenAI、Claude、Gemini 與 Responses API 格式之間的差異
+- 調試特定client/provider組合失敗的原因
+- 驗證思維標籤、工具呼叫和系統提示是否正確翻譯
+- 比較OpenAI、 Claude、 Gemini和 Responses API格式之間的格式差異
 
 ---
 
 ### 路由策略
 
-透過 **儀表板 → 設定 → 路由** 進行設定。儀表板提供六種最常用的策略；組合與自動路由器在內部支援更廣泛的策略。
+配置透過**儀表板→設定→路由**。儀表板顯示了六種最常用的策略；組合和自動路由器內部支援更廣泛的集合。
 
-**儀表板中可見的策略（帳戶層級路由）：**
+**儀表板可見策略（帳號層級路由）：**
 
-| 策略                    | 說明                                                                    |
-| ----------------------- | ----------------------------------------------------------------------- |
-| **優先填滿**            | 按優先順序使用帳戶——主要帳戶會處理所有請求，直到無法使用為止            |
-| **輪詢**                | 循環使用所有帳戶，並採用可設定的黏著限制（預設：每個帳戶 3 次呼叫）     |
-| **P2C（兩個隨機選擇）** | 隨機選取 2 個帳戶，並將請求路由至健康狀況較佳者——兼顧健康狀況以平衡負載 |
-| **隨機**                | 使用 Fisher-Yates 洗牌，為每個請求隨機選取一個帳戶                      |
-| **最少使用**            | 將請求路由至 `lastUsedAt` 時間戳記最早的帳戶，以平均分配流量            |
-| **成本最佳化**          | 將請求路由至優先順序值最低的帳戶，以選用成本最低的提供者                |
+| 策略                       | 描述                                                              |
+| -------------------------- | ----------------------------------------------------------------- |
+| **先填寫**                 | 按優先順序使用帳戶 - 主帳戶處理所有請求，直到不可用               |
+| **循環賽**                 | 循環瀏覽具有可配置黏性限制的所有帳戶（預設值：每個帳戶 3 次呼叫） |
+| **P2C （兩種選擇的力量）** | 隨機選擇 2 個帳戶並前往更健康的帳戶 — 平衡負載與健康意識          |
+| **隨機的**                 | 使用 Fisher-Yates shuffle 為每個請求隨機選擇一個帳戶              |
+| **最少使用**               | 路由到具有最舊`lastUsedAt`時間戳記的帳戶，均勻分配流量            |
+| **成本最佳化**             | 路由至具有最低優先權值的帳戶，針對成本最低的提供者進行最佳化      |
 
-**進階組合與自動策略**（可按組合設定，或透過 `auto/*` 前綴設定——請參閱 [AUTO-COMBO.md](../routing/AUTO-COMBO.md)）：
+**進階組合和自動策略**（可依組合或透過`auto/*`前綴進行設定 - 請參閱[AUTO-COMBO.md](../routing/AUTO-COMBO.md) ）：
 
-- `priority` — 嚴格依序選用，絕不輪詢
-- `weighted` — 依各模型的權重按比例分配流量
-- `fill-first` — 持續使用第一個模型，直到達到限制
+- `priority`嚴格的順序，絕不循環賽
+- `weighted` — 依模型權重劃分的比例流量
+- `fill-first` — 耗盡第一個模型直到達到限制
 - `round-robin` / `strict-random` / `random`
-- `p2c`（兩個隨機選擇）
-- `least-used` 與 `cost-optimized`
-- `auto` — 根據分數在所有候選項目中選擇
-- `lkgp`（最後已知的良好提供者）— 固定使用最後一次成功的提供者，之後再依規則進行後援
-- `context-optimized` — 選取可用上下文視窗最大的模型
-- `context-relay` — 串接長上下文模型以處理後續對話輪次
+- `p2c` （兩種選擇的力量）
+- `least-used`和`cost-optimized`
+- `auto`所有考生的分數驅動
+- `lkgp` （最後一個已知的良好提供者）- 固定到最後一個成功的提供者，然後退回到規則
+- `context-optimized` — 選擇具有最大自由上下文視窗的模型
+- `context-relay` — 連結長上下文模型以進行後續輪次
 
-#### 外部黏著工作階段標頭
+#### 外部黏性會話標頭
 
-如需外部工作階段親和性（例如位於反向 Proxy 後方的 Claude Code/Codex Agent），請傳送：
+對於外部會話親和性（例如，反向代理後面的Claude Code/Codex代理），發送：
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute 也接受 `x_session_id`，並在 `X-OmniRoute-Session-Id` 中傳回實際使用的工作階段金鑰。
+OmniRoute也接受`x_session_id`並回傳`X-OmniRoute-Session-Id`中的有效會話金鑰。
 
-若您使用 Nginx 並傳送底線形式的標頭，請啟用：
+如果您使用 Nginx 並發送下劃線形式的標頭，請啟用：
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### 萬用字元模型別名
+#### 通配符模型別名
 
-建立萬用字元模式以重新映射模型名稱：
-
-```
-模式：claude-sonnet-*     →  目標：cc/claude-sonnet-4-6
-模式：gpt-*               →  目標：gh/gpt-5.3-codex
-```
-
-萬用字元支援 `*`（任意字元）與 `?`（單一字元）。
-
-#### 後援鏈
-
-定義套用至所有請求的全域後援鏈：
+建立通配符模式來重新映射模型名稱：
 
 ```
-鏈：production-fallback
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+```
+
+通配符支援`*` （任何字元）和`?` （單一字元）。
+
+#### 後備鏈
+
+定義適用於所有請求的全域後備鏈：
+
+```
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -905,22 +913,22 @@ underscores_in_headers on;
 
 ---
 
-### 常見提供者組合與路由模式
+### 常見的提供者組合和路由模式
 
-以下是在 OmniRoute 中結合多個提供者並在其間進行路由的範例模式：
+以下是在OmniRoute中組合多個提供者並在它們之間進行路由的範例模式：
 
-#### 1. 程式設計 Agent 組合：高階推理搭配成本／速度後援
+#### 1. 編碼代理組合：帶有Cost/Speed後備的高端推理
 
-適合程式設計 Agent（OpenCode、Claude Code、Cursor、Cline）。最初將請求路由至前沿推理模型，並在配額耗盡或發生錯誤時，後援至快速的程式設計模型。
+非常適合編碼代理（OpenCode、 Claude Code、 Cursor、 Cline）。最初路由到前緣推理模型，在配額耗盡或錯誤時回退到快速編碼模型。
 
-- **儀表板**：組合 → 新增組合 → 名稱：`agent-coding` → 策略：`Priority`
-- **模型**：
-  1. `claude/claude-sonnet-4-6`（主要程式設計 Agent）
-  2. `openai/gpt-4o`（次要高容量後援）
-  3. `deepseek/deepseek-v4-flash`（高效率、具成本效益的後援）
+- **儀表板**：組合→新組合→名稱： `agent-coding` →策略： `Priority`
+- **型號**:
+  1. `claude/claude-sonnet-4-6` （主要編碼代理）
+  2. `openai/gpt-4o` （二次高容量後備）
+  3. `deepseek/deepseek-v4-flash` （高效率、高性價比的後備）
 
 ```bash
-# 透過 API 的範例
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -935,183 +943,179 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. 免費方案自動容錯移轉組合
+#### 2. 免費層自動故障轉移組合
 
-串接多個免費方案與無需金鑰的提供者，在不產生 API 成本的情況下最大化正常運作時間。
+連結多個免費層和無密鑰提供者，以最大限度地延長正常運行時間，而無需API成本。
 
-- **策略**：`Least Used` 或 `Round Robin`（將負載分散至各配額）
-- **模型**：
+- **策略**： `Least Used`或`Round Robin` （跨配額分配負荷）
+- **型號**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# 透過 CLI 的範例
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. 多模態／視覺與文字管線
+#### 3. 多模式/視覺和文字管道
 
-將專門的視覺模型與高速文字生成模型配對，用於涉及影像理解與程式碼生成的工作流程。
+將專門的視覺模型與高速文字生成配對，以實現涉及圖像理解和程式碼生成的工作流程。
 
-- **模式**：一個 `Priority` 組合，先列出支援視覺的模型，最後列出高輸送量的文字／程式碼模型。
-- **模型**：
-  1. `gemini/gemini-2.5-pro`（強大的影像／多模態理解能力）
-  2. `openai/gpt-4o`（兼顧視覺與工具使用）
-  3. `deepseek/deepseek-v4-flash`（文字／程式碼生成）
+- **圖案**：一個`Priority`組合，首先列出具有視覺功能的模型，最後列出高吞吐量text/code模型。
+- **型號**:
+  1. `gemini/gemini-2.5-pro` （強image/multimodal理解）
+  2. `openai/gpt-4o` （平衡願景與工具使用）
+  3. `deepseek/deepseek-v4-flash` （Text/code一代）
 
 ---
 
-### 韌性與斷路器
+### 彈性和斷路器
 
-透過 **儀表板 → 設定 → 韌性** 進行設定。
+配置透過**儀表板→設定→彈性**。
 
-OmniRoute 透過五個元件實作提供者層級的韌性：
+OmniRoute透過五個元件實現提供者層級彈性：
 
-1. **請求佇列與速率控制** — 系統層級的請求流量塑形：
-   - **每分鐘請求數（RPM）** — 每個帳戶每分鐘的最大請求數
-   - **請求之間的最短時間** — 請求之間的最小間隔（毫秒）
-   - **最大並行請求數** — 每個帳戶可同時執行的最大請求數
+1. **請求隊列和節奏**— 系統級請求整形：
+   - **每分鐘請求數 (RPM)** — 每個帳戶每分鐘的最大請求數
+   - **請求之間的最短時間**— 請求之間的最小間隔（以毫秒為單位）
+   - **最大並發請求數**— 每個帳戶的最大同時請求數
 
-2. **連線冷卻** — 單一連線在發生可重試失敗後，依驗證類型進行設定：
-   - **基礎冷卻時間** — 可重試上游失敗的預設冷卻時間範圍
-   - **使用上游重試提示** — 若有提供，則採用具權威性的 `Retry-After` 或重設提示
-   - **最大退避步數** — 重複失敗時的最大指數退避層級
+2. **連接冷卻**— 可重試失敗後單一連線的依身份驗證類型設定：
+   - **基礎冷卻時間**— 可重試上游故障的預設冷卻窗口
+   - **使用上游重試提示**— 尊重權威的`Retry-After`或提供時重置提示
+   - **最大退避步數**— 重複失敗的最大指數退避級別
 
-3. **提供者斷路器** — 追蹤端對端的提供者失敗，在達到設定的警告閾值時將提供者標記為降級，並在達到設定的失敗閾值時開啟斷路器：
-   - **降級閾值** — 進入 `DEGRADED` 前允許的連續提供者失敗次數
-   - **失敗閾值** — 進入 `OPEN` 前允許的連續提供者失敗次數
-   - **重設逾時** — 再次測試提供者前的等待時間範圍
-   - **CLOSED**（健康）— 請求正常流通
-   - **DEGRADED** — 請求仍會流通，同時追蹤升高的失敗率
-   - **OPEN** — 提供者在重複失敗後暫時遭到封鎖
+3. **提供者斷路器**— 追蹤端到端提供者故障，將提供者標記為在配置的警告閾值處降級，並在達到配置的故障閾值時開啟斷路器：
+   - **退化閾值**— 進入`DEGRADED`之前連續提供者失敗
+   - **失敗閾值**— 進入`OPEN`之前連續提供者失敗
+   - **重置超時**— 再次測試提供者之前的時間窗口
+   - **CLOSED** (Healthy) — 請求正常流動
+   - **DEGRADED** — 在追蹤增加的故障時請求仍然流動
+   - **OPEN** — 多次失敗後提供者暫時阻止
    - **HALF_OPEN** — 測試提供者是否已恢復
 
-   連線範圍的 `429` 速率限制會保留在**連線冷卻**中，且不會計入提供者斷路器。
+   連接範圍的`429`速率限制保持不變**連接冷卻**並且不計入提供者破壞者。
 
-   提供者斷路器的執行階段狀態僅顯示於**儀表板 → 健康狀態**。
+   提供者斷路器運行時狀態顯示在**儀表板→健康**僅有的。
 
-4. **等待冷卻結束** — 若所有候選連線都已處於冷卻狀態，OmniRoute 可等待最早結束的冷卻時間，並自動重試相同的用戶端請求。
+4. **等待冷卻**— 如果每個候選連線已經冷卻， OmniRoute可以等待最早的冷卻並自動重試相同的客戶端請求。
 
-5. **自動偵測速率限制** — 啟用此設定後，當上游提供者傳回明確的等待時間範圍時，這些提示會覆寫本機連線的冷卻時間。
+5. **速率限制自動偵測**— 當上游提供者傳回明確等待視窗時，這些提示會在啟用該設定時覆蓋本機連線冷卻時間。
 
-**專業提示：**在服務中斷後，請使用**健康狀態**頁面檢查並重設即時提供者斷路器。韌性頁面僅用於變更設定。
+**專業提示：**使用**健康**頁面用於在中斷後檢查並重置即時提供者斷路器。 “彈性”頁面僅更改配置。
 
 ---
 
-### 資料庫匯出／匯入
+### 資料庫匯出/匯入
 
-在**儀表板 → 設定 → 系統與儲存空間**中管理資料庫備份。
+管理資料庫備份**儀表板→設定→系統和存儲**。
 
-| 動作                    | 說明                                                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **匯出資料庫**          | 將目前的 SQLite 資料庫下載為 `.sqlite` 檔案                                                                   |
-| **全部匯出（.tar.gz）** | 下載完整備份封存檔，包括：資料庫、設定、組合、提供者連線（不含憑證）、API 金鑰中繼資料                        |
-| **匯入資料庫**          | 上傳 `.sqlite` 檔案以取代目前的資料庫。除非 `DISABLE_SQLITE_AUTO_BACKUP=true`，否則系統會在匯入前自動建立備份 |
+| 行動                   | 描述                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| **匯出資料庫**         | 將目前SQLite資料庫下載為`.sqlite`文件                                                            |
+| **全部導出 (.tar.gz)** | 下載完整的備份存檔，包括：資料庫、設定、組合、提供者連線（無憑證）、 API鑰元數據                 |
+| **導入資料庫**         | 上傳`.sqlite`檔案來取代目前資料庫。除非`DISABLE_SQLITE_AUTO_BACKUP=true`否則會自動建立匯入前備份 |
 
 ```bash
-# API：匯出資料庫
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API：全部匯出（完整封存檔）
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API：匯入資料庫
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**匯入驗證：**系統會驗證匯入檔案的完整性（SQLite pragma 檢查）、必要資料表（`provider_connections`、`provider_nodes`、`combos`、`api_keys`）以及大小（最大 100MB）。
+**導入驗證：**匯入的檔案經過完整性驗證（SQLite pragma 檢查）、所需表（`provider_connections`、 `provider_nodes`、 `combos`、 `api_keys`）和大小（最大 100MB）。
 
 **使用案例：**
 
-- 在不同機器之間移轉 OmniRoute
-- 建立外部備份以供災難復原
-- 在團隊成員之間分享設定（全部匯出 → 分享封存檔）
+- 在機器之間遷移OmniRoute
+- 建立外部備份以進行災難復原
+- 團隊成員之間共用配置（匯出所有→共用檔案）
 
 ---
 
 ### 設定儀表板
 
-設定頁面分為 **7 個分頁**，方便瀏覽：
+設定頁面分為**7 個標籤**為了方便導航：
 
-| 分頁       | 內容                                                                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **一般**   | 系統儲存工具、預設行為、Endpoint 通道可見性                                                                                     |
-| **外觀**   | 佈景主題控制（淺色／深色／系統）、側邊欄可見性、Cloudflare/Tailscale/ngrok 通道卡片的面板切換                                   |
-| **AI**     | 思考預算（直通／自動移除／自訂／自適應——請參閱 [THINKING_BUDGET.md](./THINKING_BUDGET.md)）、全域系統提示詞、提示詞快取統計資料 |
-| **安全性** | 登入／密碼設定、IP 存取控制、`/models` 的 API 驗證、提供者封鎖、提示詞注入防護                                                  |
-| **路由**   | 全域路由策略（優先填滿／輪詢／P2C／隨機／最少使用／成本最佳化）、萬用字元模型別名、後備鏈、組合預設值                           |
-| **韌性**   | 請求佇列、連線冷卻、提供者斷路器設定，以及等待冷卻行為                                                                          |
-| **進階**   | 全域代理伺服器設定（HTTP/SOCKS5）、個別提供者的代理伺服器覆寫                                                                   |
+| 選項卡     | 內容                                                                                                                    |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **一般的** | 系統儲存工具、預設行為、端點隧道可見性                                                                                  |
+| **外貌**   | 主題控制 (light/dark/system)、側邊欄可見、 Cloudflare/Tailscale/ngrok隧道卡的面板切換                                   |
+| **AI**     | 思考預算（直通/自動剝離/自訂/自適應 - 參見[THINKING_BUDGET.md](./THINKING_BUDGET.md) ）、全域系統提示、提示快取統計信息 |
+| **安全**   | Login/Password設定、 IP存取控制、 `/models`的API驗證、提供者封鎖、提示注入防護                                          |
+| **路由**   | 全域路由策略（首先填充/循環/ P2C /隨機/最少使用/成本最佳化）、通配符模型別名、後備鏈、組合預設值                        |
+| **彈性**   | 請求佇列、連接冷卻、提供者斷路器配置和等待冷卻行為                                                                      |
+| **先進的** | 全域代理配置（HTTP/SOCKS5），每個提供者代理程式覆蓋                                                                     |
 
-「一般」不再重複顯示唯讀的日誌與快取附註。資料庫保留與
-最佳化設定會透過 `/api/settings/database` 持久儲存；手動清除快取則使用
-`DELETE /api/cache`。請求與代理伺服器日誌的資料列上限由
-`CALL_LOGS_TABLE_MAX_ROWS` 和 `PROXY_LOGS_TABLE_MAX_ROWS` 控制。
+一般不再重複唯讀日誌記錄和快取註解。資料庫保留和最佳化設定透過`/api/settings/database`持久化；手動快取清除使用`DELETE /api/cache`。請求和代理日誌行上限由`CALL_LOGS_TABLE_MAX_ROWS`和`PROXY_LOGS_TABLE_MAX_ROWS`控制。
 
 ---
 
 ### 成本與預算管理
 
-透過 **儀表板 → 成本** 存取。
+訪問透過**儀表板→成本**。
 
-| 分頁     | 用途                                                         |
-| -------- | ------------------------------------------------------------ |
-| **預算** | 為每個 API 金鑰設定每日／每週／每月支出上限，並即時追蹤      |
-| **定價** | 檢視及編輯模型定價項目——各提供者每 1K 個輸入／輸出權杖的成本 |
+| 選項卡   | 目的                                                            |
+| -------- | --------------------------------------------------------------- |
+| **預算** | 透過daily/weekly/monthly預算和即時追蹤設定每個API密鑰的支出限制 |
+| **定價** | 查看和編輯模型定價條目 - 每個提供者每 1K input/output代幣的成本 |
 
 ```bash
-# API：設定預算
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API：取得目前的預算狀態
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**成本追蹤：**每個請求都會記錄權杖使用量，並使用定價表計算成本。可在 **儀表板 → 使用量** 中依提供者、模型和 API 金鑰檢視明細。
+**成本追蹤：**每個請求都會記錄令牌的使用情況並使用定價表計算成本。查看細分**儀表板→用法**按提供者、型號和API密鑰。
 
 ---
 
 ### 音訊轉錄
 
-OmniRoute 透過與 OpenAI 相容的端點支援音訊轉錄：
+OmniRoute透過 OpenAI 相容端點支援音訊轉錄：
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# 使用 curl 的範例
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` 是 Deepgram 原生路由，需要 Deepgram API 金鑰。
-如果只設定了 OpenRouter，請使用 `openrouter/deepgram/nova-3`。
+`deepgram/nova-3`是 Deepgram 的原生路由，需要 Deepgram API金鑰。如果僅配置了OpenRouter ，則使用`openrouter/deepgram/nova-3`。
 
 **語音轉文字（轉錄）**提供者：
 
-- `openai/`（與 whisper 相容）
-- `groq/`（Groq Whisper Turbo）
-- `deepgram/`（Nova 系列）
+- `openai/` （相容耳語）
+- `groq/` （Groq Whisper Turbo）
+- `deepgram/` （諾瓦家族）
 - `assemblyai/`
-- `nvidia/`（Parakeet、Canary）
-- `huggingface/`（whisper 變體）
+- `nvidia/` （鸚鵡、金絲雀）
+- `huggingface/` （耳語變體）
 - `qwen/`
 
-**文字轉語音（`POST /v1/audio/speech`）**提供者：
+**文字轉語音 (`POST /v1/audio/speech`)**提供者：
 
-- `openai/`（tts-1、tts-1-hd）
+- `openai/` （tts-1、tts-1-hd）
 - `hyperbolic/`
-- `deepgram/`（Aura）
-- `nvidia/`（Magpie TTS）
+- `deepgram/` （光環）
+- `nvidia/` (喜鵲TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1120,54 +1124,48 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `kie/`
 - `aws-polly/`
 - `xiaomi-mimo/`
-- `coqui/`、`tortoise/`
+- `coqui/`, `tortoise/`
 - `qwen/`
 
-支援的轉錄音訊格式：`mp3`、`wav`、`m4a`、`flac`、`ogg`、`webm`。TTS 輸出格式取決於提供者（mp3、wav、opus、pcm、mulaw）。
+支援的轉錄音訊格式： `mp3`、 `wav`、 `m4a`、 `flac`、 `ogg`、 `webm`。 TTS輸出格式取決於提供者（mp3、wav、opus、pcm、mulaw）。
 
 ---
 
 ### 組合平衡策略
 
-在 **儀表板 → 組合 → 建立／編輯 → 策略** 中設定個別組合的平衡方式。
+配置每個組合的平衡**儀表板→組合→ Create/Edit →策略**。
 
-| 策略           | 說明                                               |
-| -------------- | -------------------------------------------------- |
-| **輪詢**       | 依序輪替使用各個模型                               |
-| **優先順序**   | 一律先嘗試第一個模型；僅在發生錯誤時才使用後備模型 |
-| **隨機**       | 為每個請求從組合中隨機選擇一個模型                 |
-| **加權**       | 根據為各模型指派的權重按比例路由                   |
-| **最少使用**   | 路由至近期請求數最少的模型（使用組合指標）         |
-| **成本最佳化** | 路由至最便宜的可用模型（使用定價表）               |
+| 策略           | 描述                                     |
+| -------------- | ---------------------------------------- |
+| **循環賽**     | 按順序輪換模型                           |
+| **優先事項**   | 總是嘗試第一個模型；僅在錯誤時回退       |
+| **隨機的**     | 為每個請求從組合中選擇一個隨機模型       |
+| **加權**       | 根據每個模型分配的權重按比例路由         |
+| **最少使用的** | 路由到最近要求最少的模型（使用組合指標） |
+| **成本最佳化** | 通往最便宜可用型號的路線（使用定價表）   |
 
-全域組合預設值可在 **儀表板 → 設定 → 路由 → 組合預設值** 中設定。
-組合目標的逾時預設會繼承目前的請求逾時。僅當較短的個別目標限制應
-更快觸發後備機制時，才在組合預設值或個別組合上使用 **目標逾時
-（秒）**。
+全域組合預設值可以在**儀表板→設定→路由→組合預設值**。預設情況下，組合目標逾時繼承目前請求逾時。使用**目標超時（秒）**只有當較短的每個目標限制應觸發更快的回退時，才在組合預設值或單一組合上。
 
-零延遲組合最佳化為選擇性啟用。停用 **零延遲最佳化**，以避免這些
-延遲功能搶先競逐後備目標、根據 TTFT 歷史記錄略過目標，或壓縮後備
-請求；啟用後，則允許已設定的對沖、預測性 TTFT 略過和主動後備壓縮，
-以犧牲路由／請求保真度來換取較低的尾端延遲。
+零延遲組合最佳化是可選的。離開**零延遲優化**停用以防止這些延遲功能與回退目標競爭、根據TTFT歷史跳過目標或壓縮回退請求；啟用它允許配置對沖、預測TTFT跳過和主動回退壓縮，以犧牲routing/request保真度來降低尾部延遲。
 
-當上游提供者要求嚴格遵守 `max_tokens` / `maxOutputTokens` 限制時，請停用 **推理權杖緩衝區**。啟用後，組合路由僅會針對具有已知輸出上限的模型增加推理模型的預留空間；若安全緩衝後的值會超過該上限，則用戶端的權杖限制將維持不變。如果用戶端限制已高於已知上限，OmniRoute 會先將其下調至該上限，再傳送上游請求。
+停用**推理令牌緩衝區**當上游提供者需要嚴格的`max_tokens` / `maxOutputTokens`限制時。啟用後，組合路由只會為具有已知輸出上限的模型添加推理模型餘裕，並在安全緩衝值超過該上限時保持客戶端令牌限制不變。如果客戶端限制已經高於已知上限， OmniRoute在發送上游請求之前將其限製到該上限。
 
 ---
 
-### 健康狀態儀表板
+### 健康儀表板
 
-透過 **儀表板 → 健康狀態** 存取。以 6 張資訊卡即時呈現系統健康狀態概覽：
+訪問透過**儀表板→健康**。 6張卡片即時系統健康概覽：
 
-| 資訊卡             | 顯示內容                                     |
-| ------------------ | -------------------------------------------- |
-| **系統狀態**       | 運作時間、版本、記憶體用量、資料目錄         |
-| **提供者健康狀態** | 全域提供者斷路器的執行階段狀態               |
-| **速率限制**       | 各帳戶啟用中的連線冷卻狀態及剩餘時間         |
-| **啟用中的鎖定**   | 啟用中的模型範圍鎖定與暫時排除項目           |
-| **簽章快取**       | 去重複快取統計資料（啟用中的索引鍵、命中率） |
-| **延遲遙測**       | 各提供者的 p50/p95/p99 延遲彙總              |
+| 卡片           | 它顯示了什麼                                 |
+| -------------- | -------------------------------------------- |
+| **系統狀態**   | 正常運作時間、版本、記憶體使用情況、資料目錄 |
+| **提供者健康** | 全域提供者斷路器運行時狀態                   |
+| **速率限制**   | 每個帳戶的活動連接冷卻時間和剩餘時間         |
+| **主動鎖定**   | 活動模型範圍的鎖定和臨時排除                 |
+| **簽名快取**   | 重複資料刪除快取統計資料（活動鍵、命中率）   |
+| **延遲遙測**   | 每個提供者的p50/p95/p99延遲聚合              |
 
-**專業提示：** 健康狀態頁面每 10 秒自動重新整理一次。使用斷路器資訊卡來識別哪些提供者發生問題。
+**專業提示：**健康頁面每 10 秒自動刷新一次。使用斷路器卡來識別哪些提供者遇到問題。
 
 ---
 
@@ -1287,36 +1285,36 @@ OmniRoute 可與雲端程式設計代理程式（**OpenAI Codex Cloud**、**Devi
 
 ---
 
-## 🛠️ 程式化管理
+## 🛠️程式化管理
 
-您可以使用**具有 `manage` 範圍的 Bearer 金鑰**,透過 HTTP 管理所有 OmniRoute 資源(providers、combos、金鑰、設定)。
+您可以使用HTTP來管理每個OmniRoute資源（提供者、組合、鍵、設定）**具有`manage`範圍的承載金鑰**。
 
-在**儀表板 → API 金鑰 → 新增金鑰 → 範圍:manage** 產生金鑰,然後:
+產生金鑰**儀表板→ API密鑰→新密鑰→範圍：管理**， 然後：
 
 ```bash
-# 列出 providers
+# List providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# 新增 provider 連線
+# Add a provider connection
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# 建立 combo
+# Create a combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# 列出/建立 API 金鑰
+# List/create API keys
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-完整的端點目錄與請求/回應結構描述,請參閱 [API_REFERENCE.md](../reference/API_REFERENCE.md)。
+有關完整端點目錄和request/response架構，請參閱[API_REFERENCE.md](../reference/API_REFERENCE.md) 。
 
 ---
 

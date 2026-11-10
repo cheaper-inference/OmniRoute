@@ -34,8 +34,24 @@ test("Responses route builds one keepalive frame per request from the request mo
   assert.match(routeSource, /const keepaliveFrame = buildRequestKeepaliveFrame\(resolvedBody\);/);
   assert.match(
     routeSource,
-    /function buildRequestKeepaliveFrame\([\s\S]*?id: buildKeepaliveResponseId\(\),[\s\S]*?typeof model === "string" \? model : undefined/,
+    /function buildRequestKeepaliveFrame\([\s\S]*?id: buildKeepaliveResponseId\(\),[\s\S]*?typeof model === "string"/,
     "each request gets a fresh keepalive id and its own model, never a shared constant frame"
+  );
+});
+
+test("Responses route retains opt-in quota recovery outside the streaming branch", () => {
+  const streamingStart = routeSource.indexOf("if (wantsStreaming) {");
+  const nonStreamingStart = routeSource.indexOf(
+    "const handlerResponse = await handleChat(resolved, null, resolvedBody, correlationId);"
+  );
+  assert.ok(streamingStart >= 0 && nonStreamingStart > streamingStart);
+  assert.doesNotMatch(
+    routeSource.slice(streamingStart, nonStreamingStart),
+    /maybeQueueQuotaSessionRecovery/
+  );
+  assert.match(
+    routeSource.slice(nonStreamingStart),
+    /const recoveryResponse = await maybeQueueQuotaSessionRecovery\(\{\s*request: resolved,\s*body: resolvedBody,\s*response: handlerResponse,\s*endpoint: "responses",\s*\}\);\s*return finishAdmission\(recoveryResponse\);/
   );
 });
 

@@ -4,160 +4,79 @@
 
 ---
 
-> **الحالة:** بُنيت لوحة المعلومات باستخدام **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)، وهي مُضمَّنة
-> محليًا كمساحة العمل `packages/ui-kit` (`@omniroute/ui-kit`؛ وتُثبَّت لقطة المصدر الأساسي في
-> `packages/ui-kit/UPSTREAM.md` ويجري التحقق منها بواسطة `npm run check:ui-kit-snapshot`). السمة الفاتحة هي السمة
-> القياسية؛ والتفضيل الافتراضي هو `system`. اللون البارز هو الأخضر الليموني من Keak (`--ci-color-accent`). خط Inter
-> (بتباعد أحرف قدره 0، `--ci-letter-spacing-ui`) هو عائلة خطوط واجهة المستخدم، ويُستخدم Instrument Serif فقط لنصوص العرض الكبيرة
-> والمتباعدة (`.ci-dashboard-display`)، ويُستخدم IBM Plex Mono للشيفرة — وجميعها مستضافة ذاتيًا من خلال
-> استيرادات `@fontsource/*` في أعلى `src/app/globals.css`. كل أيقونة هي رمز من Lucide.
+> **حالة:** لوحة القيادة مبنية على** طقم كيك CI UI** (`@keak/cheaper-inference-ui-kit`) ، يتم بيعها كمساحة العمل `packages/ui-kit` (`@omniroute/ui-kit`؛ يتم تثبيت اللقطة الأولية في `packages/ui-kit/UPSTREAM.md` وحمايتها بواسطة `npm run check:ui-kit-snapshot`). الضوء هو الموضوع الأساسي. التفضيل الافتراضي هو `system`. اللوحة الافتراضية هي المجموعة** طبعات** المظهر (ورق محايد دافئ ولهجة النحاس `#e5ac82`، `packages/ui-kit/src/ci-editions.css`)؛ إعدادات → المظهر → عروض لوحة الألوان** كلاسيكي** ، الرموز الأساسية للمجموعة مع لمسة الليمون. Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` يلتزمان بها)، وتتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). مخطوطات سويتزر تفتقر إلى الحروف الرسومية التي تتخللها (`src/app/globals.css`): Inter للسيريلية واليونانية والفيتنامية، وتحت `html[dir="rtl"]` فقط، Vazirmatn للنص العربي. كل أيقونة عبارة عن حرف رسومي من Lucide.
 
-## 1. أماكن العناصر
+## 1. أين تعيش الأشياء
 
-- **الحزمة.** يُعدّ `packages/ui-kit/src` نسخة مطابقة بايتًا ببايت من `src/` الأصلي عند الالتزام المثبّت في
-  `packages/ui-kit/UPSTREAM.md` (الذي يسجّل أيضًا تفويض الترخيص)؛ ويسرد `PATCHES.md` التصحيحات المحلية
-  (لا توجد أي تصحيحات). تُستهلك بوصفها شيفرة مصدرية من دون عملية بناء: إذ يقوم `next.config.mjs` بتحويلها، ويربط
-  `tsconfig.json` الاسم `@omniroute/ui-kit` ← `packages/ui-kit/src` والاسم `@omniroute/ui-kit/*` ←
-  `packages/ui-kit/src/*` (ويحمل `vitest.config.ts` و`vitest.mcp.config.ts` الاسم المستعار نفسه). استورد أحد
-  مكوّنات الحزمة عبر مساره الفرعي (`@omniroute/ui-kit/table`، `@omniroute/ui-kit/page-header`…)، وليس
-  عبر ملف التجميع `@omniroute/ui-kit` مطلقًا: إذ يجلب ملف التجميع كل مكوّن (بما في ذلك منتقي التاريخ)
-  إلى كل ملف مستورِد. تدخل ورقة أنماط الحزمة عبر `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **الرموز.** يعرّف `packages/ui-kit/src/ci-tokens.css` رموز `--ci-*`؛ ويربطها `src/app/globals.css`
-  بأسماء OmniRoute القديمة (`--color-*`، `--radius-*`، `--font-sans`/`--font-mono`،
-  `--table-*`، `--orch-status-*`، `--color-fd-*`)، بحيث تستمر قراءات `var(--color-*)` الحالية وأدوات Tailwind
-  في العمل. تستخدم الشيفرة الجديدة أدوات Tailwind (`bg-surface`، `text-text-muted`،
-  `border-border`، `text-success`، `bg-success-bg`، `bg-chart-1`…) أو أصناف الحزمة — ولا تستخدم قيمة سداسية
-  مطلقًا (`tests/unit/design-kit-bridge.test.ts` يفرض هذا الربط). يُحلّ `text-primary` إلى
-  `--color-primary-ink` عبر `--text-color-primary` (lime-800 في الوضع الفاتح، ولون lime البارز في الوضع الداكن)، لذلك
-  يظل النص الأساسي مقروءًا، بينما يحافظ `bg-primary`/`border-primary` على سطح lime. تستخدم سلاسل المخططات
-  `--color-chart-1` … `--color-chart-5`.
-- **السمات.** يُدخِل `<html className="ci-theme">` (`src/app/layout.tsx`) المستند ضمن سمة الحزمة.
-  يكون التفضيل `light` أو `dark` أو `system` (`THEME_CONFIG.defaultTheme = "system"` في
-  `src/shared/constants/appConfig.ts`؛ ويتبع `system` الإعداد `prefers-color-scheme`). تقوم `applyTheme()` في
-  `src/store/themeStore.ts` (ويحاكيها نص التمهيد المضمّن في `src/app/layout.tsx`، الذي يعمل
-  قبل الإماهة) بتعيين `data-theme="dark"|"light"` وتبديل الصنف `.dark` على `<html>` معًا.
-  تعتمد مجموعة الرموز الداكنة في الحزمة على `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`)؛
-  بينما تعتمد تجاوزات الوضع الداكن الخاصة بـ OmniRoute (كتلة `.dark` في `globals.css`) وأدوات Tailwind القديمة `dark:`
-  على الصنف `.dark`. لا توجد إعدادات مسبقة للون البارز: فاللون البارز يأتي دائمًا من
-  الحزمة، ويُحذف أي إعداد مسبق محفوظ من إصدار أقدم عند تحميل المخزن.
-- **المكوّنات (المهايئات).** يحافظ `src/shared/components/index.tsx` على واجهة برمجة مكوّنات OmniRoute (الأسماء
-  نفسها، وعمليات التصدير الافتراضية والخصائص نفسها)، والعناصر الأولية التي تقف خلفها هي مهايئات مبنية فوق الحزمة: النماذج
-  (`Button`، `Input`، `Textarea`، `Checkbox`، `Select`، `Toggle`، `Badge`، `Card`)، والطبقات المتراكبة والملاحظات
-  (`Modal`/`ConfirmModal`، `Tooltip`/`InfoTooltip`، `NotificationToast`، `EmptyState`، `Loading`)،
-  والبنية (`Collapsible`، `CollapsibleSection`، `SegmentedControl`، `Breadcrumbs`، `Avatar`) والجداول
-  (`DataTable`، `FilterBar`، `ColumnToggle`، `FilterPills`، `PresetSlider`). يستورد المهايئ مكوّن الحزمة
-  عبر مساره الفرعي ويربط الخصائص القديمة به — فعلى سبيل المثال، يكون `Button variant="primary"` هو زر
-  `default` في الحزمة (`--ci-button-primary-*`: السطح المعكوس في الوضع الفاتح، واللون البارز مع لون النص
-  `--ci-color-accent-foreground` الخاص به في الوضع الداكن)، ويقابل `danger` الخيار `destructive`، ويقابل `warning` الخيار `outline` مع
-  الامتداد `.ci-button--warning`. تُعد قواعد `.ci-button--warning` و`.ci-badge[data-tone]` في
-  نهاية `globals.css` (`@layer components`) امتدادات خاصة بـ OmniRoute فوق أصناف الحزمة.
-  تثبّت اختبارات `tests/unit/ui/adapters/*.test.tsx` سلوك كل مهايئ.
-- **الهيكل.** يعرض `src/app/(dashboard)/layout.tsx` المكوّن `DashboardLayout`، الذي يعرض
-  `src/shared/components/layouts/DashboardShell.tsx`: أي مكوّنات الحزمة `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)، مع منطق تنقّل OmniRoute في
-  `src/shared/components/Sidebar.tsx`. يكون رابط «التخطي إلى المحتوى» المؤدي إلى `#main-content` أول عنصر
-  يمكن التركيز عليه. يحتوي `src/shared/components/Header.tsx` على `SidebarTrigger` الخاص بالحزمة (مفتاح تبديل
-  الشريط الجانبي الوحيد في الهيكل)، و`ProductSwitcher` من Keak، وفاتح لوحة الأوامر؛ ولا يعرض عنوان المسار إلا عندما
-  لا يكون أي `PageHeader` من الحزمة (`.ci-page-header`) مركّبًا داخل `#main-content`، بحيث تحتوي الصفحة التي لديها
-  `PageHeader` خاص بها على عنصر `h1` واحد. يمثّل `src/shared/components/CommandPalette.tsx` مكوّن `Dialog` من الحزمة.
-- **الأيقونات.** يحلّ `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) الاسم (من
-  مفردات Material Symbols التي تستخدمها الشاشات) عبر `ICON_MAP` (`src/shared/constants/iconMap.ts`) إلى
-  رمز Lucide. أُزيل خط Material Symbols وحزمته: ويؤدي الاسم غير الموجود في الخريطة إلى عرض
-  رمز عنصر نائب محايد (`data-icon-missing="true"`) وتسجيل تحذير في وحدة التحكم خارج بيئة الإنتاج.
-  يطبع `npm run gen:icon-map` الأسماء المستخدمة والمفقودة من الخريطة
-  (يفشل `tests/unit/icon-map-coverage.test.ts` عند وجود أي اسم بلا أيقونة Lucide؛
-  ويغطي `tests/unit/icon-map-object-values.test.ts` الأسماء المخزنة في كائنات البحث)؛
-  ويعيد `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` كتابة عناصر
-  `<span className="material-symbols-outlined">` الحرفية إلى `<Icon>`.
-- **العلامة التجارية.** يغلّف `src/shared/components/OmniRouteLogo.tsx` الحزمة: إذ يعرض التصدير الافتراضي `OmniRouteLogo`
-  المكوّن `ProductIcon product="omniroute" variant="glyph"` (SVG مضمّن ومتوافق مع `basePath`)، بينما يعرض
-  `OmniRouteLockup` المكوّن `ProductLockup product="omniroute"` (بالاسم المتاح «Keak OmniRoute»)، أو يعرض، بالنسبة
-  إلى مشغّلي العلامات البيضاء، `name`/`logoSrc` الخاصين بهم. توجد وجهات محوّل المنتجات في
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`، `KEAK_ACTIVE_PRODUCT`). تعرض الشاشات المستقلة
-  — `src/app/login/page.tsx`، `src/app/status/page.tsx`، `src/app/maintenance/page.tsx`،
-  `src/app/offline/page.tsx`، `src/app/not-found.tsx` و`src/shared/components/ErrorPageScaffold.tsx`
-  — قفل الشعار؛ ويحمي الاختبار `tests/unit/brand-pages-static.test.ts` ذلك.
+- **عدة.** `packages/ui-kit/src` هي نسخة بايت مقابل بايت من `src/` المنبع عند الالتزام المثبت في `packages/ui-kit/UPSTREAM.md` (الذي يسجل أيضًا ترخيص الترخيص)؛ يسرد `PATCHES.md` التصحيحات المحلية (لا شيء). يتم استهلاكه كمصدر، بدون إنشاء: يقوم `next.config.mjs` بنقله، وخرائط `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` و `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (يحمل `vitest.config.ts` و `vitest.mcp.config.ts` نفس الاسم المستعار). قم باستيراد مكون مجموعة من خلال المسار الفرعي الخاص به (`@omniroute/ui-kit/table`، `@omniroute/ui-kit/page-header`…)، وليس من خلال برميل `@omniroute/ui-kit` أبدًا: يسحب البرميل كل مكون (بما في ذلك منتقي التاريخ) إلى كل مستورد. تدخل ورقة أنماط المجموعة من خلال `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`، الورقة الكاملة: `ci-ui.css` الأساسية بالإضافة إلى كل عائلة نمط).
+- **الرموز.** `packages/ui-kit/src/ci-tokens.css` تعلن عن رموز `--ci-*` ؛ تقوم `src/app/globals.css` بتوصيلها بأسماء OmniRoute القديمة (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) ، بحيث تستمر قراءات `var(--color-*)` الحالية وأدوات Tailwind في العمل. يستخدم الكود الجديد الأدوات المساعدة Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) أو فئات kit — لا تحتوي أبدًا على قيمة سداسية عشرية (`tests/unit/design-kit-bridge.test.ts` يفرض الجسر). يتحول `text-primary` إلى `--color-primary-ink` حتى `--text-color-primary`، لذلك يظل النص الأساسي قابلاً للقراءة بينما يحتفظ `bg-primary`/`border-primary` بسطح التمييز: ضمن Editions يكون `--ci-color-accent-active` الخاص بالمجموعة ( `#99562f` النحاسي العميق في الضوء، واللكنة النحاسية في الظلام)؛ تحت الكلاسيكي، lime-800 في الضوء ولهجة الليمون في الظلام. تستخدم سلسلة المخططات `--color-chart-1` … `--color-chart-8`، كل منها مزود بـ `--color-chart-N-ink` آمن للنص ولون شريحة `--color-chart-N-subtle` معتم، يتم تعيينهما في ترتيب سلسلة المجموعة (`ciChartSeriesOrder`).
+- **المواضيع.** `<html className="ci-theme">` (`src/app/layout.tsx`) يختار المستند في سمة المجموعة. التفضيل هو `light` أو `dark` أو `system` (`THEME_CONFIG.defaultTheme = "system"` في `src/shared/constants/appConfig.ts`؛ `system` يتبع `prefers-color-scheme`). `applyTheme()` في `src/store/themeStore.ts` (المنسوخ بواسطة `THEME_BOOT_SCRIPT`، المضمن في `src/app/layout.tsx`، والذي يعمل قبل الترطيب) يقوم بتعيين `data-theme="dark"|"light"` وتبديل فئة `.dark` على `<html>` معًا. تم تحديد مجموعة الرموز الداكنة الخاصة بالمجموعة على `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) ؛ التجاوزات المظلمة الخاصة بـ OmniRoute(كتلة `.dark` في `globals.css`) ومفتاح الأدوات المساعدة Tailwind `dark:` القديم في فئة `.dark`. لا توجد إعدادات مسبقة للألوان المميزة: تأتي التمييزات دائمًا من المجموعة، ويتم إسقاط الإعداد المسبق المستمر من إصدار أقدم عند تحميل المتجر.
+- **لوحات.** اثنان، كلاهما من المجموعة (`src/shared/constants/appearancePalette.ts`): `editions`، الافتراضي، و `classic`. Editions هي سمة `data-ci-appearance="editions"` الخاصة بالمجموعة على `<html>`، والتي يتم دمجها مع `ci-editions.css` (المستوردة بواسطة `ci-ui.css`) مع `data-theme`؛ الكلاسيكية هي غياب السمة. يعرض خادم التخطيط الجذر السمة، لذلك يحصل الزائر الذي ليس لديه أي شيء مخزّن (أو لا يوجد JS) على إصدارات على كل سطح من لوحة تحكم — وتسجيل الدخول و `/status` وصفحات الخطأ و `/docs` و PWA. يتم الاحتفاظ بالاختيار بجوار السمة في نفس متجر `theme` (`palette`، `setPalette()`، `applyPalette()` في `src/store/themeStore.ts`) ويتم تطبيقه قبل الطلاء بواسطة `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`، مضمن في `<head>` الخاص بالتخطيط)، مما يؤدي إلى إزالة السمة فقط عندما تكون اللوحة المخزنة `"classic"`؛ `src/app/global-error.tsx`، خارج المخطط الجذري، يطبقه من نفس المتجر. لا تضع `data-ci-appearance` على أي عنصر آخر: فالمجموعة تطابقه مع `html:root:has([data-ci-appearance="editions"])`، بحيث يقوم أحد التابعين بتبديل المستند بأكمله. متغير Editions `data-ci-editions-variant="landing"` مخصص لصفحات التسويق، وليس للوحة المعلومات. متصفح chrome: يعرض الخادم الإصدار الافتراضي، Editions، في `viewport.themeColor` (علامة واحدة لكل `prefers-color-scheme`) وبيان الويب — `PWA_THEME_COLORS` في `src/shared/constants/pwaThemeColors.ts`، المرآة الوحيدة للإصدارات `--ci-color-background` (`#f3f1e9` / `#11120f`) ، المثبتة على `ci-editions.css` بواسطة `tests/unit/pwa-theme-colors.test.ts`. يتبع `<meta name="theme-color">` المباشر اللوحة والوضع المخزنين: يعيد `THEME_BOOT_SCRIPT` كتابة العلامات قبل الطلاء وتقوم إجراءات متجر السمات بذلك عند كل تغيير (`resolveThemeColor()` / `applyThemeColor()` في `src/shared/utils/themeColorMeta.ts`، مع قراءة `CLASSIC_PAGE_BACKGROUND` من `ciTokens` الخاص بالمجموعة). يقوم موضوع light/dark الصريح بتعيين كل علامة على هذا الوضع؛ يحتفظ `system` بلون واحد لكل مخطط. يبقى البيان "الإصدارات": يتم جلبه مرة واحدة لكل تثبيت، دون التفضيل. تقرأ موناكو ألوانها من مسبار (`monacoKitTheme.ts`)؛ ضمن الإصدارات، تقوم قراءة المسبار بقلب `data-theme` الجذر لتمرير متزامن واحد، لأن المجموعة تقوم بتحليل الإصدارات light/dark من الجذر.
+- **المكونات (المحولات).** يحتفظ `src/shared/components/index.tsx` بمكون OmniRoute API (نفس الأسماء والصادرات الافتراضية والدعائم)، والأوليات الموجودة خلفه هي محولات فوق المجموعة: النماذج (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`)، والتراكبات والتعليقات (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`)، الهيكل (`Collapsible`، `CollapsibleSection`، `SegmentedControl`، `Breadcrumbs`، `Avatar`) والجداول (`DataTable`، `FilterBar`، `ColumnToggle`، `FilterPills`، `PresetSlider`). يستورد المحول مكون المجموعة عن طريق المسار الفرعي ويعين الدعائم القديمة عليه — على سبيل المثال `Button variant="primary"` هو زر المجموعة `default` (`--ci-button-primary-*`: السطح المعكوس في الضوء، والتمييز بحبر `--ci-color-accent-foreground` الخاص به باللون الداكن)، `danger` هو `destructive`، و `warning` هو زر المجموعة `warning`. متغيرات حالة `Badge` هي نغمات المجموعة، و `Select` مع أطفال `<option>` يعرض المجموعة `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` دبوس كل محول.
+- **صدَفَة.** `src/app/(dashboard)/layout.tsx` يعرض `DashboardLayout`، الذي يعرض `src/shared/components/layouts/DashboardShell.tsx`: المجموعة `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)، مع منطق التنقل الخاص بـ OmniRoute في `src/shared/components/Sidebar.tsx`. يعد رابط "الانتقال إلى المحتوى" إلى `#main-content` هو العنصر الأول الذي يمكن التركيز عليه. يحمل `src/shared/components/Header.tsx` مجموعة `SidebarTrigger` (تبديل الشريط الجانبي الوحيد للصدفة)، وKeak `ProductSwitcher` وفتاحة لوحة الأوامر؛ فهو يعرض عنوان المسار فقط بينما لا يتم تثبيت أي مجموعة `PageHeader` (`.ci-page-header`) داخل `#main-content`، لذا فإن الصفحة التي تحتوي على `PageHeader` الخاصة بها تحتوي على `h1` واحد. `src/shared/components/CommandPalette.tsx` عبارة عن مجموعة `Dialog`.
+- **أيقونات.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) يحل الاسم (مفردات رموز المواد التي تستخدمها الشاشات) من خلال `ICON_MAP` (`src/shared/constants/iconMap.ts`) إلى حرف رسومي Lucide. اختفى خط وحزمة رموز المواد: يعرض الاسم المفقود من الخريطة رمزًا رمزيًا لعنصر نائب محايد (`data-icon-missing="true"`) ويسجل تحذير وحدة التحكم خارج الإنتاج. يقوم `npm run gen:icon-map` بطباعة الأسماء المستخدمة والمفقودة من الخريطة (يفشل `tests/unit/icon-map-coverage.test.ts` في أي اسم بدون أيقونة Lucide؛ ويغطي `tests/unit/icon-map-object-values.test.ts` الأسماء المخزنة في كائنات البحث)؛ يقوم `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` بإعادة كتابة امتدادات `<span className="material-symbols-outlined">` الحرفية إلى `<Icon>`.
+- **ماركة.** `src/shared/components/OmniRouteLogo.tsx` يغلف المجموعة: التصدير الافتراضي `OmniRouteLogo` يعرض `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) و `OmniRouteLockup` يعرض `ProductLockup product="omniroute"` (الاسم الذي يمكن الوصول إليه "Keak OmniRoute") أو، بالنسبة لمشغلي العلامة البيضاء، `name`/`logoSrc` الخاص بهم. توجد وجهات تبديل المنتجات في `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). تُظهر الشاشات المستقلة — `src/app/login/page.tsx` و `src/app/status/page.tsx` و `src/app/maintenance/page.tsx` و `src/app/offline/page.tsx` و `src/app/not-found.tsx` و `src/shared/components/ErrorPageScaffold.tsx` — القفل؛ `tests/unit/brand-pages-static.test.ts` يحرسها.
 
 ## 2. القواعد
 
-1. رموز (tokens) دائمًا، ولا قيم حرفية أبدًا. الاستثناءات مُبقاة عن قصد: طرفية وحدة التحكم الداكنة دائمًا و
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، وهي مرآة القيم hex المحسومة للوحة حالات
-   الحزمة، للمتصلين الذين يحتاجون قيمة hex حرفية. لم تعد اللوحات الفئوية استثناءً بعد الآن:
-   فهي تعتمد على رموز المخططات الخمسة في الحزمة (`--color-chart-1..5`) عبر
-   `src/shared/utils/categoricalPalette.ts`، وبالنسبة لاستراتيجيات التوجيه،
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`؛ وتقرأ حواف ReactFlow ولوحة التنسيق
-   متغيرات `--orch-status-*` الواعية بالسمة (`src/shared/components/flow/edgeStyles.ts`).
-2. لا تُرقّع `packages/ui-kit/src` يدويًا أبدًا: زامِن باستخدام `scripts/dev/sync-ui-kit.sh <commit>`؛
-   بوابة ما قبل الالتزام `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) تفشل عند أي بايت
-   يختلف عن الالتزام المثبَّت في المنبع (تُتخطَّى مع تحذير عندما يكون استنساخ المنبع،
-   `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`، غائبًا). عندما تفتقر الحزمة إلى شيء،
-   تحايَل عليه في المحوِّل أو الشاشة واطلبه من المنبع.
-3. النصوص الافتراضية في الحزمة إنجليزية (`label = "Loading"`، `loadingLabel = "Loading table"`…) — مرِّر
-   سلاسل مترجمة من `useTranslations(...)` كلما عرض مكوّن من الحزمة نصًا.
-4. الأدوات المساعدة في Tailwind تتغلّب على فئات مكونات الحزمة (فالحزمة تُعلن
-   `@layer theme, base, components, utilities` وقواعدها تعيش في `components`) — استخدم الأدوات المساعدة
-   للتباعد والتخطيط، لا لإعادة تلوين مكونات الحزمة.
-5. العناوين: `.ci-heading` (خط Inter، بلا تباعد أحرف) لعناوين الصفحات والأقسام؛ `.ci-dashboard-display`
-   (Instrument Serif) فقط لنصوص العرض الكبيرة القليلة مثل رمز الحالة في صفحة الخطأ.
-6. `tests/unit/dashboard-kit-sweep.test.ts` يحرس اعتماد الحزمة: ممنوع أي span برباط حروف Material تحت
-   `src/app` أو `src/shared/components`؛ وفي شجرة لوحة التحكم (`src/app/(dashboard)` و
-   `src/shared/components`) ممنوع وجود `<select>` أو `<textarea>` أو `<table>` خام، وممنوع أي
-   `role="dialog"` مُنفَّذ يدويًا خارج الاستثناءات المدرجة (الفرع الأصيل لمحوِّل `Select`،
-   `RequestLoggerDetail`)؛ وكل `<button>` أو `<input>` خام هناك يحتاج تعليقًا يتضمن
-   `kit-exception:` (مع ذكر السبب) ينتهي قبله بثلاثة أسطر على الأكثر؛ وتدرجات ألوان اللوحة ومتغيرات `dark:`
-   مقصورة على الملفات التي يعدّدها الاختبار.
-7. تحقّق من كلتا السمتين ومن منفذ العرض بعرض 390 px قبل فتح PR (بلقطات شاشة)؛ `tests/e2e/a11y.spec.ts` يشغّل
-   axe.
+1. الرموز، ليست حرفية أبدًا. الاستثناءات التي يتم الاحتفاظ بها عن قصد: محطة وحدة التحكم المظلمة دائمًا و `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ، المرآة السداسية التي تم حلها في لوحة حالة المجموعة للمتصلين الذين يحتاجون إلى رقم سداسي عشري حرفي. لم تعد اللوحات الفئوية استثناءً بعد الآن: فهي تعتمد على الرموز المميزة للمخططات الثمانية للمجموعة (`--color-chart-1..8`، بالإضافة إلى `-ink`/`-subtle`) ، في ترتيب سلسلة المجموعة، من خلال `src/shared/utils/categoricalPalette.ts` ، ولاستراتيجيات التوجيه، `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`؛ تقوم حواف ReactFlow ولوحة التنسيق بقراءة متغيرات `--orch-status-*` المدركة للموضوع (`src/shared/components/flow/edgeStyles.ts`).
+2. لا تقم مطلقًا بتصحيح `packages/ui-kit/src` يدويًا: قم بالمزامنة مع `scripts/dev/sync-ui-kit.sh <commit>`؛ تفشل بوابة الالتزام المسبق `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) على أي بايت يختلف عن التزام المنبع المثبت (يتم تخطيها مع تحذير عند غياب استنساخ المنبع، `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`). عندما تفتقر المجموعة إلى شيء ما، قم بحل المشكلة في المحول أو الشاشة واطلب ذلك من المنبع.
+3. الإعدادات الافتراضية لنص المجموعة هي الإنجليزية (`label = "Loading"`، `loadingLabel = "Loading table"`...) — لتمرير السلاسل المترجمة من `useTranslations(...)` عندما يعرض أحد مكونات المجموعة نصًا.
+4. تفوز أدوات Tailwind بفئات مكونات المجموعة (تعلن المجموعة عن `@layer theme, base, components, utilities` وقواعدها موجودة في `components`) وتستخدم — الأدوات المساعدة للتباعد والتخطيط، وليس لإعادة تلوين مكونات المجموعة.
+5. العناوين: `.ci-heading` لعناوين الصفحات والأقسام؛ `.ci-dashboard-display` فقط لنص العرض الكبير والمتفرق مثل رمز حالة صفحة الخطأ. كلاهما يستخدم سويتزر.
+6. `tests/unit/dashboard-kit-sweep.test.ts` تحمي اعتماد المجموعة: لا يوجد رباط مادي تحت `src/app` أو `src/shared/components`؛ في شجرة لوحة المعلومات (`src/app/(dashboard)` و `src/shared/components`) لا يوجد `<select>` أو `<textarea>` أو `<table>` خام ولا يوجد `role="dialog"` ملفوف يدويًا خارج الاستثناءات المدرجة (الفرع الأصلي لمحول `Select` ، `RequestLoggerDetail`)؛ كل `<button>` أو `<input>` خام يحتاج إلى تعليق يحتوي على `kit-exception:` (مع السبب) وينتهي فوقه بثلاثة أسطر على الأكثر؛ ألوان اللوحة ومتغيرات `dark:` فقط في الملفات التي يسردها الاختبار.
+7. تحقق من كلا الموضوعين وإطار العرض 390 بكسل قبل PR (لقطات الشاشة)؛ `tests/e2e/a11y.spec.ts` يدير الفأس.
 
 ## 3. إضافة شاشة
 
-1. افتح الصفحة باستخدام `PageHeader` الخاص بالحزمة (`@omniroute/ui-kit/page-header`، مع `compact` داخل
-   لوحة المعلومات) — مع العنوان والوصف و`actions`. عندئذٍ يتوقف رأس الغلاف عن عرض عنوانه الخاص.
-2. أنشئ عناصر التحكم من `@/shared/components` (المكيّفات)، واستخدم مكونات الحزمة عبر المسار الفرعي عندما لا
-   يوجد مكيّف (`Table`/`TableScrollArea`/`DataTableShell`، و`Field`، و`Alert`، و`Tabs`، و`RadioGroup`،
-   و`Slider`…).
-3. الأيقونات: `<Icon name="…" />`. أضف أي اسم جديد إلى `ICON_MAP` مع مكوّن Lucide المطابق له دلاليًا؛ ويسرد `npm run gen:icon-map` الأسماء التي لا تزال مفقودة.
-4. الألوان: استخدم الأدوات الدلالية (`text-success`، و`bg-warning-bg`، و`border-border`…) و
-   `var(--color-chart-N)` لسلاسل المخططات؛ لا تستخدم قيمًا سداسية عشرية ولا متغيرات `dark:` التي تكرر لونًا فقط.
-5. النصوص: يجب أن تأتي كل سلسلة، بما في ذلك التسميات التي تمررها إلى مكونات الحزمة، من `useTranslations`. تُضاف
-   المفاتيح الجديدة إلى `src/i18n/messages/en.json` و`pt-BR.json` و`vi.json` (يثبّت اختبار تكافؤ اللغة الفيتنامية
-   كل مفتاح إنجليزي)؛ وتُملأ اللغات الأخرى عبر مزامنة i18n.
-6. شغّل أدوات الحماية قبل إنشاء طلب الدمج: `tests/unit/dashboard-kit-sweep.test.ts`،
-   و`tests/unit/icon-map-coverage.test.ts`، و`tests/unit/icon-map-object-values.test.ts`،
-   و`npm run check:dashboard-typecheck` (الفحص الوحيد الذي يكتشف استيرادًا مكررًا في `iconMap.ts`)،
-   و`npm run check:ui-icu`، واختبارات الشاشة نفسها.
+1. ابدأ الصفحة بمكوّن `PageHeader` من المجموعة (`@omniroute/ui-kit/page-header`، مع `compact` داخل لوحة التحكم) — العنوان والوصف و`actions`. عندئذٍ تُسقِط ترويسة الهيكل عنوانها الخاص.
+2. ابنِ عناصر التحكم من `@/shared/components` (المحوِّلات)، واستخدم مكوّنات المجموعة عبر الاستيراد بالمسار الفرعي حيث لا يوجد محوِّل (`Table`/`TableScrollArea`/`DataTableShell`، `Field`، `Alert`، `Tabs`، `RadioGroup`، `Slider`…).
+3. الأيقونات: `<Icon name="…" />`. يُضاف أي اسم جديد إلى `ICON_MAP` مع مكوّن Lucide المطابق له دلاليًا؛ ويسرد `npm run gen:icon-map` الأسماء التي ما تزال مفقودة.
+4. الألوان: الأدوات المساعدة الدلالية (`text-success`، `bg-warning-bg`، `border-border`…) و`var(--color-chart-N)` لسلاسل المخططات؛ لا قيم hex، ولا متغيرات `dark:` تكرر لونًا فحسب.
+5. النصوص: كل سلسلة نصية، بما في ذلك التسميات التي تمررها إلى مكوّنات المجموعة، تأتي من `useTranslations`. تُضاف المفاتيح الجديدة إلى `src/i18n/messages/en.json` و`pt-BR.json` و`vi.json` (اختبار التطابق الفيتنامي يثبّت كل مفتاح إنجليزي)؛ أما اللغات الأخرى فتُملأ عبر مزامنة i18n.
+6. شغِّل أدوات الحماية قبل طلب الدمج: `tests/unit/dashboard-kit-sweep.test.ts`، و`tests/unit/icon-map-coverage.test.ts`، و`tests/unit/icon-map-object-values.test.ts`، و`npm run check:dashboard-typecheck` (الفحص الوحيد الذي يكشف الاستيراد المكرر في `iconMap.ts`)، و`npm run check:ui-icu`، والاختبارات الخاصة بالشاشة نفسها.
 
-## 4. إضافة مُكيِّف أو تغييره
+## 4. إضافة مُحوِّل أو تعديله
 
-1. حافظ على الواجهة البرمجية العامة لـ `src/shared/components/index.tsx`: أسماء التصدير نفسها، وعمليات التصدير الافتراضية،
-   والخصائص المقبولة. اربط الخصائص القديمة بنظيراتها في الحزمة داخل المُكيِّف (راجع `Button.tsx`:‏ `VARIANT_TO_KIT`،
-   و`SIZE_TO_KIT`).
-2. استورد الحزمة عبر المسار الفرعي (`@omniroute/ui-kit/<component>`).
-3. يجب أن تبقى الحلول البديلة لأوجه القصور في الحزمة داخل المُكيِّف (أو في `globals.css` ضمن `@layer components` عندما يكون الإصلاح
-   متعلقًا بالأنماط)، وليس في `packages/ui-kit/src` مطلقًا.
-4. أضف الاختبار `tests/unit/ui/adapters/<name>.test.tsx` أو حدّثه. بالنسبة إلى مُكيِّف لديه العديد من مواضع الاستدعاء، قارن
-   الترميز المُصيَّر قبل التغيير وبعده — إذ تنتشر تغييرات الحشو أو الأغلفة إلى كل شاشة.
+1. حافظ على الواجهة البرمجية العامة لـ `src/shared/components/index.tsx`: نفس أسماء التصدير، والتصديرات الافتراضية، والخصائص (props) المقبولة. عيِّن الخصائص القديمة إلى المجموعة داخل المُحوِّل (انظر `Button.tsx`: `VARIANT_TO_KIT`،
+   `SIZE_TO_KIT`).
+2. استورد المجموعة عبر المسار الفرعي (`@omniroute/ui-kit/<component>`).
+3. تكون الحلول البديلة لثغرات المجموعة في المُحوِّل (أو في `globals.css` ضمن `@layer components` عندما يكون الإصلاح متعلقًا بالتنسيق)، وليس في `packages/ui-kit/src` أبدًا.
+4. أضِف أو حدِّث `tests/unit/ui/adapters/<name>.test.tsx`. بالنسبة لمُحوِّل له مستخدِمون كثر، قارِن الشيفرة المُصيَّرة (markup) قبل التغيير وبعده — فتغييرات الحشوة أو الغلاف تنتشر إلى كل شاشة.
 
-## 5. تحديث الحزمة
+## 5. تحديث المجموعة
 
-ينسخ `scripts/dev/sync-ui-kit.sh <commit> [clone]` مجلد `src/` من المصدر في ذلك الالتزام إلى
-`packages/ui-kit/src` ويطبّق التحويل الوحيد المسموح به (إذ يحذف اللاحقة `.js` من
-عمليات الاستيراد النسبية). بعد ذلك: راجع `git diff packages/ui-kit`، وأجرِ مراجعة مرئية للمزوّدات والإعدادات والتوليفات
-والاستخدام ونقطة النهاية في كلا النسقين، وشغّل `npm run check:ui-kit-snapshot` و`npm run test:vitest:ui`، ثم
-افتح طلب الدمج مع سجل تغييرات المصدر.
+يقارن `npm run check:ui-kit-upstream` الإصدار المثبت في `packages/ui-kit/UPSTREAM.md` مع أحدث علامة `v*` في الريبو الأولي ويطبع أمر المزامنة عند انتهاء الإصدار.
 
-## 6. فهرس المراجع
+يقوم سير عمل `UI Kit upstream watch` اليومي (`.github/workflows/ui-kit-upstream-watch.yml`) بإجراء نفس الفحص. أثناء وجود الدبوس في الخلف، يحتفظ `scripts/ci/ui-kit-sync-pr.sh` بمزامنة PR واحدة مفتوحة مقابل أعلى فرع `release/vX.Y.Z` ، على الفرع المتداول `chore/ui-kit-sync-latest`. لا يتم دمجها أبدًا: لا يزال كل إصدار لمجموعة بحاجة إلى فحص بصري لملف VPS المحلي. تتم إعادة بناء الفرع عند صدور إصدار أحدث وتركه بمفرده. لا تتم الكتابة فوق PR المفتوح مع الالتزامات المدفوعة يدويًا، ويظل PR للإصدار الذي أغلقه المشرف غير مدمج مغلقًا حتى إصدار أحدث.
 
-- `src/app/globals.css` — جسر الرموز، وتجاوزات `.dark`، وامتدادات OmniRoute ضمن `@layer components`
-- `packages/ui-kit/UPSTREAM.md` — الالتزام المثبّت من المصدر وتفويض الترخيص؛ `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`، و`packages/ui-kit/src/ci-ui.css`، و`packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` والمُكيِّفات الموجودة بجانبه؛ `src/shared/components/layouts/DashboardShell.tsx`،
-  و`src/shared/components/Sidebar.tsx`، و`src/shared/components/Header.tsx`، و`src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`، و`src/shared/constants/iconMap.ts`، و`scripts/dev/gen-icon-map.mjs`،
-  و`scripts/dev/codemod-material-icons.mjs`
-- `src/shared/components/OmniRouteLogo.tsx`، و`src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`، و`src/shared/constants/appConfig.ts`، و`src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`، و`tests/unit/dashboard-kit-sweep.test.ts`،
-  و`tests/unit/icon-map-coverage.test.ts`، و`tests/unit/icon-map-object-values.test.ts`،
-  و`tests/unit/brand-pages-static.test.ts`، و`tests/unit/ui/adapters/*.test.tsx`
+عندما لا يمكن فتح PR (يتم تجميد الإصدار المستهدف، أو يتم دفع التزامات PR يدويًا، أو يتم إغلاق PR ، أو لا يتم تعيين رمز مميز PR )، فإن سير العمل يبقي مشكلة تتبع واحدة مفتوحة توضح السبب.
+
+يستخدم سير العمل سرين:
+
+- `secrets.UI_KIT_READ_TOKEN`: رمز مميز للقراءة فقط لمستودعات الريبو الأولية الخاصة. عندما يتعذر على سير العمل القراءة من المنبع (لا يوجد رمز مميز، أو رمز مميز توقف عن العمل، أو لا يمكن الوصول إلى GitHub )، يظل التشغيل باللون الأخضر ولكنه يكتب تحذيرًا ويبقي مشكلة واحدة منفصلة مفتوحة، والتي تغلق نفسها بمجرد أن تتمكن عملية تشغيل لاحقة من القراءة من المنبع مرة أخرى.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: رمز مميز في هذا المستودع مع إمكانية الوصول للكتابة للمحتويات وطلبات السحب. لا يمكن `GITHUB_TOKEN` الافتراضي إنشاء PRs هنا، ولن يؤدي PR الذي فتحه إلى تشغيل CI. بدون هذا الرمز، يقوم سير العمل بدفع الفرع فقط.
+
+ينسخ `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` المنبع `src/` عند ذلك الالتزام (`latest` = أحدث علامة `v*` ) إلى `packages/ui-kit/src`، ويطبق التحويل الفردي المسموح به (يسقط لاحقة `.js` من الواردات النسبية)، ويضبط إصدار مساحة العمل في `packages/ui-kit/package.json` و `package-lock.json` على الإصدار المنبع. بعد ذلك: قم بمراجعة `git diff packages/ui-kit`، وقم بإجراء تمريرة مرئية على الموفرين، والإعدادات، والمجموعات، والاستخدام ونقطة النهاية في كلا الموضوعين، وقم بتشغيل `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui`، وافتح PR باستخدام سجل التغيير الأولي.
+
+## 6. المخططات README
+
+الرسوم البيانية الاثني عشر التي يتضمنها جذر `README.md` (`docs/diagrams/*.svg`) هي المجموعة المطبقة على صورة ثابتة، ويتم إنشاؤها، وليس رسمها يدويًا: 13 ملف مولد في `scripts/docs/gen-readme-*.mjs` (اثني عشر مخططًا بالإضافة إلى برنامج تشغيل `gen-readme-diagrams.mjs` ) و12 اختبارًا للتلف في `tests/unit/docs/readme-*-svg.test.ts`، واحد لكل رسم تخطيطي، كل بايت يقارن الملف الملتزم بمخرجات المولد (وظيفة `test-unit`).
+
+- **الرموز.** `scripts/docs/readme-diagram-theme.mjs` ينسخ لوحة Editions (المظهر الافتراضي) من `packages/ui-kit/src/ci-editions.css` (مثبت على هذا الملف بواسطة `tests/unit/docs/readme-diagram-theme.test.ts`، والذي يتحقق أيضًا من WCAG AA لكل لون نص على كل سطح في كلا المخططين؛ الاستثناء الوحيد، light `warn`، هو تحذير المجموعة معتم بنسبة 10% لأن قيمة المجموعة هي 4.46:1 على القماش) ويحدد أدوار النص على مقياس نوع المجموعة (`ci-tokens.css`): Switzer عند أوزان المجموعة (400/500/600، عرض عند 500) وتتبع كل شيء، باستثناء أدوار التعليمات البرمجية (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`)، وهي IBM Plex Mono وهي مخصصة فقط للأوامر و URLs والمعرفات والشاشات الطرفية. توجد القيم الفاتحة على `:root`، والقيم الداكنة خلف `prefers-color-scheme: dark`، داخل الملف، بحيث تتبع كل صورة مخطط المشاهد على GitHub.
+- **الخطوط.** GitHub Markdown لا يحمل أي CSS ويقوم وكيل camo بحظر كل عملية جلب خارجية، لذلك يجب أن ينتقل نوع المجموعة داخل الملف. `scripts/docs/readme-outline.mjs`، الخطوة الأخيرة في كل مولد، تشكل أدوار سويتزر باستخدام HarfBuzz وترسمها كمخططات متجهة (مسارات `<defs>` و `<use>`)، باستخدام الأسهم والرموز الهندسية التي لا يرسمها سويتزر بمقاييسه الخاصة. الخطوط العريضة، وليس الخط المضمن أبدًا: ترخيص Switzer (`packages/ui-kit/src/fonts/FFL.txt`) يحظر التحويل الفرعي والتنسيق دون موافقة كتابية ويسمح بالرسومات المتجهة، لذا لا تقم بإعادة تقديم Switzer `@font-face` أو `data:` URI. الخط الوحيد المتبقي في الملف هو المجموعة الفرعية OFL IBM Plex Mono لما يبقى نص الكود الحقيقي (`scripts/docs/readme-fonts.mjs`)، المبني من تلك الأحرف؛ أي حرف رسومي لا يمكن تضمينه في الرميات.
+- **تجديد.** يعيد `npm run docs:readme-diagrams` كتابة جميع الملفات الاثني عشر بترتيب README ويطبع سطرًا واحدًا لكل ملف بحجمه. يعمل مولد واحد أيضًا من تلقاء نفسه (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` يحتاج `node --import tsx/esm` لأن أرقامه تأتي من محمل الكتالوج المباشر في `open-sse/config/freeModelCatalog.ts`؛ ونتيجة CI لتغيير الكتالوج تكون في `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). قم بإلزام المولد و SVG معًا.
+- **دليل.** يعرض `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ملفًا بالطريقة التي يخدمها بها GitHub (علامة `<img>` ، وcamo's `Content-Security-Policy`، `image/svg+xml`)، ويلتقط إطارًا فاتحًا وداكنًا ويبلغ عن طلبات الخط الخارجي التي تم إنشاؤها في الصفحة (يجب أن يكون 0).
+- **ميزانية.** أقل من 200 KB لكل ملف (كل اختبار للفساد يؤكد ذلك)؛ 500 KB هو الحد الأقصى لأي صورة README (قاعدة مدقق SVG studio).
+- **نسخ دون تغيير، التهم من البوابة.** لقد غيرت العلامة التجارية النوع واللوحة، وليس الكلمات: يحمل كل مولد نسخة الرسم التخطيطي الخاص به في ثابت `*_COPY` (أو يبنيها من الكتالوج المباشر) وهو النص المرسوم ومدخل خطوة التخطيط. تظل الأشكال الأساسية في عقد `<text>` (غير مرئية بمجرد تحديدها، `fill-opacity:0`) ، وتقرأها `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ؛ تعمل اختبارات ثبات الرسوم البيانية التي تقرأها البوابة أيضًا على تشغيل أدوات التحقق الخاصة بها على الملف الذي تم إنشاؤه، لذا فإن الشكل الذي ينحرف عن الكود يفشل في اختبار — في إصلاح المصدر الذي تقرأه البوابة، وليس الرقم الموجود في المولد أبدًا.
+
+## 7. الفهرس المرجعي
+
+- جسر الرمز `src/app/globals.css` — ، تجاوزات `.dark` ، ملحقات OmniRoute `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — الالتزام المنبع المثبت وترخيص الترخيص؛ `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` والمحولات المجاورة لها؛ `src/shared/components/layouts/DashboardShell.tsx`، `src/shared/components/Sidebar.tsx`، `src/shared/components/Header.tsx`، `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

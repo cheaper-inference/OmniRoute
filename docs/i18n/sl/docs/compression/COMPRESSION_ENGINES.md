@@ -305,6 +305,95 @@ Kombinacije stiskanja so poimenovani profili stiskanja, ki jih je mogoče dodeli
 
 Mesto na nadzorni plošči: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Predpogoji/vodnik za operaterja (CCR & session-dedup)
+
+CCR (`ccr`) in `session-dedup` nadomestita ali izbrišeta besedilo in pustita a** marker** zadaj. Ta razdelek je operaterjeva referenca za ožičenje odjemalca, branje dveh označevalcev in pridobivanje ali diagnosticiranje izključene vsebine. Mehanika vsakega motorja je zajeta zgoraj; to je sloj "kako ga zaženem".
+
+### Prevozi in končne točke
+
+Do strežnika MCP, ki razkriva orodja CCR lahko pridete na tri načine. Privzeta osnova URL je `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transport                              | URL / ukaz                              | Opombe                                                                                                                       |
+| -------------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Pretočna HTTP (odjemalec, priporočeno) | `http://localhost:20128/api/mcp/stream` | Končna točka, s katero se pogovarjajo trenutni odjemalci MCP.                                                                |
+| Zapuščina SSE singleton                | `http://localhost:20128/api/mcp/sse`    | Starejši enojni prevoz. To** zapira** pretočne seje; uporabite odjemalce `streamable-http` proti `/api/mcp/stream`, ne tega. |
+| stdio                                  | `omniroute --mcp`                       | Za konfiguracijo IDE MCP, ki sproži postopek. Zastavice `--dev` ni; `omniroute --mcp` je vstopna točka stdio.                |
+
+### Stopnje shranjevanja (kaj preživi ponovni zagon)
+
+CCR je a** dvonivojski** shranjevanje, ne samo v pomnilniku:
+
+- **Vroča raven v pomnilniku** — na blok zgornja meja 2 MiB, na glavnico 16 MiB, globalno 64 MiB. Vnosi so privzeto 24-urni TTL (največ 7 dni). Polno pridobivanje MCP iz pomnilnika je omejeno na 256 KiB; vse, kar je večje, je še vedno dosegljivo prek načinov ranged/grep.
+- **Vzdržljiva stopnja SQLite** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, privzeto vklopljeno) — podpira raven v pomnilniku, tako da blok preživi izgon LRU, ponovni zagon ali pridobitev, ki pristane na drugi instanci. Vrstica ohranja TTL bloka, tako da blok mimo njegovega TTL izgine iz obeh ravni.
+
+Trije stražarji ohranjajo vzdržljivo raven omejeno — blok ostane samo pomnilnik, ko:
+
+1. bloka je konec** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. izvajalno okolje je izvajalno okolje v oblaku (brez lokalnega diska);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Torej "blok je izginil" ni zgodba o splošnem ponovnem zagonu: blok sub-512 KB v lokalnem izvajalnem okolju, ki ni v oblaku, preživi ponovni zagon prek vzdržljive ravni, dokler se njegov TTL ne izprazni. Glejte [Referenca okolja](../reference/ENVIRONMENT.md) za spremenljivko.
+
+### Dva markerja
+
+| Marker                                | Pomen                                                                                                                                        | Kaj mora narediti model                                                                                                                                                                                                |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Velik blok je bil shranjen z vsebinskim naslovom.                                                                                            | Pokličite `omniroute_ccr_retrieve` z** 24-hex hash dobesedno kopiran** da dobite nazaj izvirno besedilo.                                                                                                               |
+| `[dedup:ref sha=…]`                   | `session-dedup` izbrisano besedilo, ki je bilo že poslano v prejšnji vrsti iste seje. To je** nameren pogled nazaj** , ne izguba ali napaka. | naredi** ne** pokličite katero koli orodje in naredite** ne** poskusite ga "rekonstruirati". Prvo pojavljanje besedila je kanonični izvod; trenutni zavoj ni nikoli prepisan, ampak je odstranjen na kasnejšem zavoju. |
+
+Pogled nazaj `[dedup:ref]` je premišljena protokolarna odločitev — rekonstrukcije pred pošiljanjem ni. Obravnavajte ga kot "natančno to besedilo je bilo že na žici prej v tej seji."
+
+### Predpogoji za stranko
+
+- **Ključ (stdio):** klicatelj stdio nima identitete na zahtevo, zato se overi z `OMNIROUTE_API_KEY` (nastavljeno v `env` strežnika MCP ). Brez tega je klicatelj anonimen in orodja, ki zahtevajo principala, se lahko poslabšajo.
+- **`tools[]` je predpogoj za injiciranje.** Vstavljeno je navodilo protokola za pridobivanje CCR (#8033).** samo** ko oglaševani `tools[]` zahteve dokaže, da lahko stranka dejansko doseže `omniroute_ccr_retrieve`. Ujemanje je ujemanje končnega segmenta, omejeno z ločilom (`__`, `.`, `/`, `:`) — nikoli goli podniz — tako da ime v imenskem prostoru, kot je `mcp__gateway__omniroute_ccr_retrieve` še vedno šteje. Odsoten ali neujemajoč se `tools[]` pomeni, da navodilo _ni_ vstavljeno po načrtu.
+- **`codemode:false` (OpenCode odjemalci).** OpenCode je privzeto nastavljen na Code Mode, ki modelu in** ne** postavite orodja MCP na izvorni seznam `tools[]`. Nastavite `codemode: false` na vnosu strežnika MCP, tako da bodo orodja `omniroute_ccr_*` oglaševana. To je a** stranka** nastavitev, ne OmniRoute. Navodilo CCR še ni vstavljeno: OpenCode poimenuje orodje `<server>_<tool>`, zato strežnik z imenom `omniroute` izpostavi `omniroute_omniroute_ccr_retrieve`, `_` pa ni eden od ujemajočih se ločil.
+- **Ravnatelji.** Shranjevanje in iskanje sta izolirana na overjenega principala (na ključ API ). Ključ vidi samo svoje bloke.
+
+### Obseg na orodje
+
+Uveljavljanje obsega je vedno vklopljeno za klicatelje HTTP/SSE z ozkim obsegom. Orodja `omniroute_` CCR zahtevajo:
+
+| Orodje                   | Področje uporabe    |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Manjkajoči obseg vrne** rezultat napake orodja MCP** (`isError: true`, ne HTTP 403 — `403 LOCAL_ONLY` je ločena avt za zaščito poti s povratno zanko): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Minimalni oddaljeni ključ lahko vsebuje `mcp:connect` (dovoljuje `/api/mcp/` samo lokalno izločanje) in poseben obseg read/write ki ga potrebuje.
+
+### Matrica odjemalca
+
+| Stranka            | Transport                                    | Konfiguracija za uporabo                                                                                                                                                                                                                           | `tools[]` oglašuje? (vstavljeno navodilo → CCR )                                                                                                                                          |
+| ------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| koda Claude        | streamable-http                              | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                  | Da — MCP zmožen; vbrizgal.                                                                                                                                                                |
+| Cursor / Cline     | `stdio`** oz** `streamable-http`             | stdio: `omniroute --mcp` z `OMNIROUTE_API_KEY` v `env`; ali oddaljeni vnos MCP ki kaže na `http://localhost:20128/api/mcp/stream` (glejte [Navodila za namestitev → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Da — oglašuje orodja `omniroute_ccr_*`.                                                                                                                                                   |
+| OpenCode           | streamable-http                              | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` plus `codemode: false`                                                                                                                                                    | Orodja, oglaševana samo z `codemode: false`; navodilo še vedno ni vstavljeno, ker se `omniroute_omniroute_ccr_retrieve` ne ujema (glejte [Predpogoji odjemalca](#client-prerequisites) ). |
+| Združljiv z OpenAI | HTTP, združljiv z OpenAI (zaključki klepeta) | standardni odjemalec za dokončanje klepeta proti končni točki, združljivi z OpenAI                                                                                                                                                                 | **Nikoli** — navadnemu klicatelju, združljivemu z OpenAI, ni nikoli rečeno, naj pokliče orodje, in navodilo ni vstavljeno.                                                                |
+
+### Omejitve iskanja in številčenje strani
+
+besedilni rezultati orodja MCP so obrezani okoli `mcpAccessibility.maxTextChars` (privzeto `50000`). Pridobivanje `full` bloka je omejeno na 256 KiB —** neomejenega popolnega pridobivanja ni** . Ko je `chars=N` bloka velik, ga postranite, namesto da povlečete celotno stvar:
+
+- Osnovno pravilo:**`chars > 40000` → uporabite `mode`** , nikoli golo polno.
+- `mode:"grep"` — regex `pattern` ujema se vrstica za vrstico, do 1000 ujemajočih se vrstic (`unique: true` spusti ponovitve), najceneje za "najdi eno vrstico, ki jo potrebujem."
+- `mode:"lines"` — vrstic z 1 indeksom; potrebuje tako `start` kot `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` črte.
+- `mode:"stats"` — število vrstic, znakov in bajtov brez telesa.
+
+Uporabite `mode:"lines"` z `start`/`end`, da se sprehodite po dolgem bloku strani, namesto da zahtevate vse naenkrat.
+
+### Poimenovanje orodja
+
+Orodje za pridobivanje se trenutno imenuje `omniroute_ccr_retrieve` (predpona `omniroute_` je zastarela rešitev za trke imen med strežniki). Čisteje ime orodja z omejeno pripono in popravek za rezultate MCP JSON okrnjene na sredini niza, se sledita kot nadaljnja dejanja navzgor; ta stran dokumentira samo trenutno obnašanje pri pošiljanju.
+
+### Življenjski cikel seje
+
+Streamable-HTTP seje ne delujejo in strežnik jih izkoristi; okno nedejavnosti nastavi `OMNIROUTE_MCP_SESSION_IDLE_MS` (privzeto 5 minut; nanj se sklicuje ime, ne trdo kodirana vrednost, tako da se ta stran ne premika, ko se spremeni). Simptom idle-reaped seje je HTTP 404 z `Unknown Mcp-Session-Id` — rešitev je ponovna povezava ali ponovni zagon seje,** ne** za vrtenje ključa, spreminjanje obsega ali preimenovanje orodja.
+
 ## Površina API-ja
 
 | Pot                                    | Namen                                                                      |
@@ -388,7 +477,7 @@ predpomnilnik občutljive predpone itd.).
 
 ## Validacija
 
-Osredotočena vrata za to področje so:
+Osredotočena vrata za to območje so:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

@@ -17,7 +17,7 @@ import { registerDefaultGuardrails } from "@/lib/guardrails/registry";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 
 const TestRequestSchema = z.object({
-  input: z.union([z.string(), z.record(z.unknown()), z.array(z.unknown())]),
+  input: z.union([z.string(), z.record(z.string(), z.unknown()), z.array(z.unknown())]),
   disabledGuardrails: z.array(z.string()).optional(),
 });
 

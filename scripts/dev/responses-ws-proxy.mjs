@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { STATUS_CODES } from "node:http";
-import { relayForwardingHeaders } from "./peer-stamp.mjs";
+import { relayForwardingHeaders, stampPeerIp } from "./peer-stamp.mjs";
 
 const _wreqRequire = createRequire(import.meta.url);
 
@@ -18,6 +18,36 @@ function getWebSocketTransport() {
     _websocketFn = null;
   }
   return _websocketFn;
+}
+
+// Newest plain chrome profile the installed wreq-js ships, mirroring
+// newestChromeProfile() in open-sse/utils/tlsClient.ts (kept dependency-free
+// here because this dev proxy is plain .mjs).
+let _newestChrome = null;
+function newestChromeBrowser() {
+  if (_newestChrome) return _newestChrome;
+  let best = null;
+  let bestVersion = -1;
+  try {
+    const mod = _wreqRequire("wreq-js");
+    const profiles = typeof mod.getProfiles === "function" ? mod.getProfiles() : [];
+    for (const profile of profiles) {
+      if (!profile.startsWith("chrome_")) continue;
+      const versionStr = profile.slice("chrome_".length);
+      const version = Number(versionStr);
+      if (versionStr !== "" && Number.isInteger(version) && version > bestVersion) {
+        best = profile;
+        bestVersion = version;
+      }
+    }
+  } catch (err) {
+    throw new Error(`wreq-js browser profiles unavailable: ${err?.message ?? err}`);
+  }
+  if (best === null) {
+    throw new Error("wreq-js exposes no chrome_* browser profiles");
+  }
+  _newestChrome = best;
+  return _newestChrome;
 }
 
 export const RESPONSES_WS_PUBLIC_PATHS = new Set([
@@ -361,6 +391,27 @@ function getAuthHeaders(requestUrl, requestHeaders, forwarding) {
     "user-agent",
   ]) {
     if (isText(requestHeaders[key])) headers[key] = requestHeaders[key];
+  }
+  return headers;
+}
+
+// Handshake headers the bridge's Origin check needs (see src/server/origin/wsOrigin.ts).
+// Keep in sync with HANDSHAKE_ORIGIN_HEADERS in src/app/api/internal/codex-responses-ws/route.ts.
+const HANDSHAKE_ORIGIN_HEADERS = [
+  "host",
+  "x-forwarded-host",
+  "x-forwarded-proto",
+  "forwarded",
+  "x-omniroute-peer-ip",
+];
+
+/** Host, forwarding headers and a token-stamped peer IP, read from a copy of the upgrade request. */
+export function getHandshakeOriginHeaders(req) {
+  const copy = { headers: { ...req.headers }, socket: req.socket };
+  stampPeerIp(copy);
+  const headers = {};
+  for (const name of HANDSHAKE_ORIGIN_HEADERS) {
+    if (isText(copy.headers[name])) headers[name] = copy.headers[name];
   }
   return headers;
 }
@@ -720,9 +771,9 @@ class ResponsesWsSession {
       const prepared = await this.runPrepare(firstMessage, responseBody);
 
       const wsOptions = {
-        // #5591: chrome_149 is not a wreq-js 2.3.1 profile (max chrome_147); the
-        // prepare route now sends chrome_142, this fallback matches it.
-        browser: prepared.json.browser || "chrome_142",
+        // Match the prepare route (src/app/api/internal/codex-responses-ws/route.ts),
+        // which resolves the newest profile from the installed wreq-js catalog.
+        browser: prepared.json.browser || newestChromeBrowser(),
         os: prepared.json.os || "windows",
         headers: prepared.json.headers || {},
       };
@@ -1061,6 +1112,7 @@ export function createResponsesWsProxy({
           {
             requestUrl: req.url || pathname,
             headers: getAuthHeaders(req.url || pathname, req.headers, forwarding),
+            handshake: getHandshakeOriginHeaders(req),
           },
           forwarding
         );

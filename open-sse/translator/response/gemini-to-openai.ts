@@ -5,6 +5,7 @@ import {
   storeGeminiThoughtSignature,
 } from "../../services/geminiThoughtSignatureStore.ts";
 import { caseInsensitiveToolNameLookup } from "../helpers/toolCallHelper.ts";
+import { stripGeminiPlaceholderArgs } from "../helpers/geminiPlaceholderArgs.ts";
 import {
   parseTextualToolCallCandidate,
   containsTextualToolCallMarker,
@@ -15,6 +16,7 @@ import {
 } from "../../utils/finishReason.ts";
 import { stripAnsiCodes } from "../../utils/streamHelpers.ts";
 import { stripObfuscationZeroWidth } from "../../utils/zeroWidth.ts";
+import { GeminiPlanningLeakFilter } from "../../utils/geminiPlanningLeak.ts";
 
 type GeminiToOpenAIState = {
   functionIndex: number;
@@ -27,6 +29,8 @@ type GeminiToOpenAIState = {
   signatureNamespace?: string | null;
   toolCalls: Map<number, unknown>;
   toolNameMap?: Map<string, string>;
+  /** The CLIENT request's tools[], used to drop the synthetic `reason` argument. */
+  clientTools?: unknown;
   textualToolCallBuffer?: string;
   textualReasoningTagBuffer?: string;
   activeTextualReasoningTag?: string;
@@ -43,6 +47,8 @@ type GeminiToOpenAIState = {
       reasoning_tokens: number;
     };
   };
+  planningLeak?: GeminiPlanningLeakFilter;
+  planningLeakEnabled?: boolean;
 };
 
 type GeminiFunctionCallPart = {
@@ -260,7 +266,11 @@ function emitFunctionCallPart(
 ) {
   const rawToolName = part.functionCall.name;
   const fcName = caseInsensitiveToolNameLookup(rawToolName, state.toolNameMap) ?? rawToolName;
-  const fcArgs = normalizeToolCallArgs(part.functionCall.args || {});
+  const fcArgs = stripGeminiPlaceholderArgs(
+    fcName,
+    normalizeToolCallArgs(part.functionCall.args || {}),
+    state.clientTools
+  );
   const toolCallIndex = state.functionIndex++;
   const toolCall = {
     id: buildToolCallId(part.functionCall, fcName, toolCallIndex),
@@ -411,7 +421,7 @@ export function geminiToOpenAIResponse(chunk, state) {
       // Normalize the part text once: strip ANSI/VT100 escape codes that some
       // upstreams (gemini-cli terminal redraws) inject, so the `<thinking>` /
       // `[Tool call:]` textual parsers below never see stray control bytes (#2273).
-      const partText = stripAnsiCodes(part.text);
+      let partText = stripAnsiCodes(part.text);
       const hasThoughtSig = part.thoughtSignature || part.thought_signature;
       const isThought = part.thought === true;
       if (hasThoughtSig && typeof hasThoughtSig === "string") {
@@ -475,6 +485,16 @@ export function geminiToOpenAIResponse(chunk, state) {
       // back to a structured OpenAI tool call so clients/tools do not see it as
       // assistant prose.
       if (partText !== undefined && partText !== "") {
+        if (state.planningLeakEnabled === undefined) {
+          state.planningLeakEnabled = /gemini.*flash/i.test(state.model || "");
+          if (state.planningLeakEnabled) {
+            state.planningLeak = new GeminiPlanningLeakFilter();
+          }
+        }
+        if (state.planningLeak) {
+          partText = state.planningLeak.feed(partText);
+        }
+        if (!partText) continue;
         const afterReasoning = parseTextualReasoningTags
           ? consumeTextualReasoningTags(partText, state, results)
           : partText;
@@ -740,6 +760,25 @@ export function geminiToOpenAIResponse(chunk, state) {
 
   // Finish reason - include usage in final chunk
   if (candidate.finishReason) {
+    if (state.planningLeak) {
+      const flushed = state.planningLeak.flush();
+      if (flushed) {
+        state.hasEmittedContent = true;
+        results.push({
+          id: `chatcmpl-${state.messageId}`,
+          object: "chat.completion.chunk",
+          created: Math.floor(Date.now() / 1000),
+          model: state.model,
+          choices: [
+            {
+              index: 0,
+              delta: { content: flushed },
+              finish_reason: null,
+            },
+          ],
+        });
+      }
+    }
     if (parseTextualReasoningTags) {
       flushOpenTextualReasoning(state, results);
     }

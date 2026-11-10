@@ -53,6 +53,10 @@ const IGNORE_FROM_CODE = new Set([
   // Quality-gate harness knobs (optional cache/report paths for CI scripts — not product config).
   "ESLINT_RESULTS_JSON",
   "COMPLEXITY_ESLINT_REPORT",
+  // Back-off unit (ms) between `docker buildx imagetools inspect` retries in
+  // scripts/ci/docker-image-complete.mjs (#18749). Lets tests set 0; a CI-script tuning knob
+  // with a built-in default, never OmniRoute runtime config.
+  "DOCKER_IMAGE_COMPLETE_RETRY_DELAY_MS",
   // Agent environment / system execution paths.
   "PROJECT_ROOT",
   "ARTIFACTS_DIR",

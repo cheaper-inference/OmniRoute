@@ -2,7 +2,8 @@
 // both schemes) terminal window cycling three real OmniRoute CLI commands with a clipPath
 // typewriter (calcMode="discrete"), their output revealing line by line, and a scrolling
 // subcommand ticker — the same 18 s / 55 s choreography and keyTimes as the previous file; only
-// type (IBM Plex Mono via .term), color (kit tokens) and the per-glyph widths changed.
+// type (IBM Plex Mono via .term), color (kit tokens) and the per-glyph widths changed. A terminal
+// is code all the way down, so this is the one diagram with nothing for the outlining step to draw.
 // The output is committed as docs/diagrams/cli-terminal.svg and
 // tests/unit/docs/readme-cli-terminal-svg.test.ts fails when the committed file no longer
 // matches this generator (it also runs the counts gate on the output: the provider total is a
@@ -18,7 +19,7 @@
 //   Ticker: 32 commands scrolling left, one full period every 55 s.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildFontFaceCss } from "./readme-fonts.mjs";
+import { drawnSymbol, outlineSvg } from "./readme-outline.mjs";
 import { KIT, svgOpen, esc } from "./readme-diagram-theme.mjs";
 
 const NB = " "; // NBSP runs keep the column alignment (spaces collapse in <text>)
@@ -32,7 +33,7 @@ const INV = KIT.dark;
 // The gate-checked provider total (scripts/check/check-docs-counts-sync.mjs reads
 // "<n> providers" from the title); the health line and the "… N more providers" footer of the
 // providers screen derive from it so the three numbers can never disagree.
-const PROVIDER_TOTAL = 376;
+const PROVIDER_TOTAL = 388;
 
 // The three screens: command, then header + 4 lines + a dim footer line. Segments are plain
 // strings or { t, c } with c ∈ ok | warn | err | dim.
@@ -103,11 +104,14 @@ const SCREENS = [
       [`${nb(2)}Requests (24h): 18,412${nb(3)}p95: 412ms`],
       [
         `${nb(2)}Breakers: `,
-        { t: "● 24 closed", c: "ok" },
+        { t: "●", c: "ok" },
+        { t: " 24 closed", c: "ok" },
         nb(2),
-        { t: "◒ 1 half-open", c: "warn" },
+        { t: "◒", c: "warn" },
+        { t: " 1 half-open", c: "warn" },
         nb(2),
-        { t: "○ 0 open", c: "err" },
+        { t: "○", c: "err" },
+        { t: " 0 open", c: "err" },
       ],
       [`${nb(2)}Providers: ${PROVIDER_TOTAL} registered${nb(3)}150+ free tiers`],
     ],
@@ -128,7 +132,7 @@ const SCREENS = [
 
 SCREENS[0].footer = `… ${PROVIDER_TOTAL - SCREENS[0].lines.length} more providers`;
 
-// Subcommand ticker: 32 top-level commands, the lime ones are the diagram's brand emphasis.
+// Subcommand ticker: 32 top-level commands, the accent ones are the diagram's brand emphasis.
 const TICKER = [
   ["providers", true],
   ["oauth"],
@@ -207,20 +211,48 @@ const CHAR_W = 10; // .term-lg screen lines
 const TICKER_CHAR_W = 8; // .term ticker
 const pin = (s, w = CHAR_W) => `textLength="${s.length * w}" lengthAdjust="spacing"`;
 const CMD_X = 64;
+const LINE_X = 40;
 const LINE_Y = [100, 128, 154, 180, 206, 232];
 const STEPS = 8; // the previous file typed each command in 8 discrete steps
 
 const r1 = (n) => Math.round(n * 10) / 10;
 const INV_FILL = { ok: "--inv-ok", warn: "--inv-warn", err: "--inv-err" };
 
-function lineMarkup(segs) {
-  return segs
+// A screen row on a fixed column grid: every segment is pinned to its column, so what follows a
+// status dot cannot drift. The plex subset has no ● ○ ◒ and no system font may draw them, so each dot
+// is a drawn shape in its column, and the character itself stays in the file as invisible text.
+const STATUS_DOTS = new Set(["●", "○", "◒"]);
+const DOT_SIZE = 14; // px; drawn a little under the 16 px line so a dot stays inside its 10 px column
+
+function dotShape(char, col, y, attrs) {
+  const { d, advance } = drawnSymbol(char);
+  const scale = DOT_SIZE / 1000;
+  const x = r1(LINE_X + col * CHAR_W + (CHAR_W - advance * scale) / 2);
+  return `<path d="${d}" transform="translate(${x} ${y}) scale(${scale} ${-scale})"${attrs}/>`;
+}
+
+function lineMarkup(segs, y) {
+  const shapes = [];
+  let col = 0;
+  const text = segs
     .map((s) => {
-      if (typeof s === "string") return esc(s);
-      if (s.c === "dim") return `<tspan fill-opacity="0.65">${esc(s.t)}</tspan>`;
-      return `<tspan style="fill:var(${INV_FILL[s.c]})">${esc(s.t)}</tspan>`;
+      const str = segText(s);
+      const x = LINE_X + col * CHAR_W;
+      if (STATUS_DOTS.has(str)) {
+        const fill = s.c === "dim" ? "--inv-muted" : INV_FILL[s.c];
+        const dim = s.c === "dim" ? ' fill-opacity="0.65"' : "";
+        shapes.push(dotShape(str, col, y, ` style="fill:var(${fill})"${dim}`));
+        col += str.length;
+        return `<tspan x="${x}" class="ol">${esc(str)}</tspan>`;
+      }
+      col += str.length;
+      let attrs = "";
+      if (s.c === "dim") attrs = ' fill-opacity="0.65"';
+      else if (s.c) attrs = ` style="fill:var(${INV_FILL[s.c]})"`;
+      return `<tspan x="${x}" ${pin(str)}${attrs}>${esc(str)}</tspan>`;
     })
     .join("");
+  return { text, shapes: shapes.join("") };
 }
 
 // A screen's output lines — header, four rows, dim footer — with optional reveal animations.
@@ -232,10 +264,13 @@ function screenLines(s, animated) {
   const op = animated ? ' opacity="0"' : "";
   const rows = [
     `<text x="40" y="${LINE_Y[0]}" class="term-lg" style="fill:var(--inv-info)"${op}>${reveal(0)}${esc(s.header)}</text>`,
-    ...s.lines.map(
-      (l, i) =>
-        `<text x="40" y="${LINE_Y[i + 1]}" class="term-lg" style="fill:var(--inv-muted)"${op}>${reveal(i + 1)}${lineMarkup(l)}</text>`
-    ),
+    ...s.lines.map((l, i) => {
+      const { text, shapes } = lineMarkup(l, LINE_Y[i + 1]);
+      const open = `<text x="${LINE_X}" y="${LINE_Y[i + 1]}" class="term-lg" style="fill:var(--inv-muted)"`;
+      if (!shapes) return `${open}${op}>${reveal(i + 1)}${text}</text>`;
+      // A row with drawn dots reveals as one group, text and shapes together.
+      return `<g${op}>${reveal(i + 1)}${open}>${text}</text>${shapes}</g>`;
+    }),
     `<text x="40" y="${LINE_Y[5]}" class="term-lg" style="fill:var(--inv-muted)" fill-opacity="0.65"${op}>${reveal(5)}${esc(s.footer)}</text>`,
   ];
   return rows.map((r) => `  ${r}`).join("\n");
@@ -251,10 +286,6 @@ function typingValues(cmd) {
 
 export async function renderCliTerminal() {
   const C = CLI_TERMINAL_COPY;
-  const { css } = await buildFontFaceCss({
-    mono: Object.values(C).flat().join(""),
-  });
-
   // One typing ramp per screen: the clip widths and the caret x positions come from it.
   const ramps = SCREENS.map((s) => typingValues(s.cmd));
 
@@ -289,43 +320,42 @@ export async function renderCliTerminal() {
     s.hl ? `<tspan style="fill:var(--accent)">${esc(s.t)}</tspan>` : esc(s.t)
   ).join("");
 
-  return (
+  return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 350",
       title: TITLE,
       desc: DESC,
-      fontFaceCss: css,
       extraCss:
         `:root{--inv-ok:${INV.ok};--inv-warn:${INV.warn};--inv-err:${INV.err};` +
         `--inv-info:${INV.info};--inv-muted:${INV.muted}}`,
     }) +
-    `  <defs>\n` +
-    `    <clipPath id="cli-ticker"><rect x="12" y="304" width="1176" height="40"/></clipPath>\n` +
-    clipPaths.join("\n") +
-    `\n  </defs>\n` +
-    `  <rect class="bg" x="0" y="0" width="1200" height="350"/>\n` +
-    // The window: inverse surface with a 1 px border so it keeps an edge on the dark canvas.
-    `  <rect x="0.5" y="0.5" width="1199" height="349" rx="12" class="inverse rule" stroke-width="1"/>\n` +
-    `  <g style="fill:var(--inverse-text)" opacity="0.06">` +
-    `<rect x="0.5" y="0.5" width="1199" height="34" rx="12"/><rect x="0.5" y="22" width="1199" height="12.5"/></g>\n` +
-    `  <path d="M 0.5 34.5 L 1199.5 34.5" style="stroke:var(--inverse-text)" stroke-opacity="0.12" stroke-width="1"/>\n` +
-    `  <circle cx="24" cy="17" r="6" style="fill:var(--inv-err)"/>` +
-    `<circle cx="46" cy="17" r="6" style="fill:var(--inv-warn)"/>` +
-    `<circle cx="68" cy="17" r="6" style="fill:var(--inv-ok)"/>\n` +
-    `  <text x="600" y="22" text-anchor="middle" class="term" style="fill:var(--inv-muted)">${esc(C.header[0])}</text>\n` +
-    // Frame 0: the completed providers screen, fading out as the typing starts.
-    `  <g>\n` +
-    `  <animate attributeName="opacity" values="1;0;0" keyTimes="0;0.006;1" dur="18s" repeatCount="indefinite"/>\n` +
-    `  <text x="${CMD_X}" y="66" class="term-lg" ${pin(SCREENS[0].cmd)}>${esc(SCREENS[0].cmd)}</text>\n` +
-    screenLines(SCREENS[0], false) +
-    `\n  </g>\n` +
-    screens.join("\n") +
-    `\n  <path d="M 0.5 300.5 L 1199.5 300.5" style="stroke:var(--inverse-text)" stroke-opacity="0.12" stroke-width="1"/>\n` +
-    `  <g clip-path="url(#cli-ticker)"><g class="term" style="fill:var(--inv-muted)">\n` +
-    `    <animateTransform attributeName="transform" type="translate" from="0 0" to="-${period} 0" dur="55s" repeatCount="indefinite"/>\n` +
-    `    <text x="24" y="330" ${tickerPin}>${tickerText}</text><text x="${r1(24 + period)}" y="330" ${tickerPin}>${tickerText}</text>\n` +
-    `  </g></g>\n` +
-    "</svg>\n"
+      `  <defs>\n` +
+      `    <clipPath id="cli-ticker"><rect x="12" y="304" width="1176" height="40"/></clipPath>\n` +
+      clipPaths.join("\n") +
+      `\n  </defs>\n` +
+      `  <rect class="bg" x="0" y="0" width="1200" height="350"/>\n` +
+      // The window: inverse surface with a 1 px border so it keeps an edge on the dark canvas.
+      `  <rect x="0.5" y="0.5" width="1199" height="349" rx="12" class="inverse rule" stroke-width="1"/>\n` +
+      `  <g style="fill:var(--inverse-text)" opacity="0.06">` +
+      `<rect x="0.5" y="0.5" width="1199" height="34" rx="12"/><rect x="0.5" y="22" width="1199" height="12.5"/></g>\n` +
+      `  <path d="M 0.5 34.5 L 1199.5 34.5" style="stroke:var(--inverse-text)" stroke-opacity="0.12" stroke-width="1"/>\n` +
+      `  <circle cx="24" cy="17" r="6" style="fill:var(--inv-err)"/>` +
+      `<circle cx="46" cy="17" r="6" style="fill:var(--inv-warn)"/>` +
+      `<circle cx="68" cy="17" r="6" style="fill:var(--inv-ok)"/>\n` +
+      `  <text x="600" y="22" text-anchor="middle" class="term" style="fill:var(--inv-muted)">${esc(C.header[0])}</text>\n` +
+      // Frame 0: the completed providers screen, fading out as the typing starts.
+      `  <g>\n` +
+      `  <animate attributeName="opacity" values="1;0;0" keyTimes="0;0.006;1" dur="18s" repeatCount="indefinite"/>\n` +
+      `  <text x="${CMD_X}" y="66" class="term-lg" ${pin(SCREENS[0].cmd)}>${esc(SCREENS[0].cmd)}</text>\n` +
+      screenLines(SCREENS[0], false) +
+      `\n  </g>\n` +
+      screens.join("\n") +
+      `\n  <path d="M 0.5 300.5 L 1199.5 300.5" style="stroke:var(--inverse-text)" stroke-opacity="0.12" stroke-width="1"/>\n` +
+      `  <g clip-path="url(#cli-ticker)"><g class="term" style="fill:var(--inv-muted)">\n` +
+      `    <animateTransform attributeName="transform" type="translate" from="0 0" to="-${period} 0" dur="55s" repeatCount="indefinite"/>\n` +
+      `    <text x="24" y="330" ${tickerPin}>${tickerText}</text><text x="${r1(24 + period)}" y="330" ${tickerPin}>${tickerText}</text>\n` +
+      `  </g></g>\n` +
+      "</svg>\n"
   );
 }
 

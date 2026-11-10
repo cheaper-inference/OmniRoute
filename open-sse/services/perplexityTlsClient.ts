@@ -9,6 +9,7 @@
  * surface.
  */
 
+import { newestFirefoxProfile } from "../utils/browserProfiles.ts";
 import {
   createTlsClientModule,
   type TlsFetchOptions,
@@ -22,7 +23,7 @@ const HARD_TIMEOUT_GRACE_MS =
 
 export const tlsClientModule = createTlsClientModule({
   providerName: "Perplexity",
-  tlsProfile: "firefox_151",
+  tlsProfile: newestFirefoxProfile,
   emulationOs: "macos",
   domain: "https://www.perplexity.ai",
   streamEofPolicy: "include",

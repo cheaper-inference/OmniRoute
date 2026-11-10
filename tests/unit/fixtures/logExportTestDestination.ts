@@ -21,8 +21,18 @@ export const testDestination: LogExportDestinationType = {
     serviceAccountJson: z.string().optional(),
   }),
   createClient(config) {
-    let batches = 0;
+    // Ignore SIGTERM as soon as the child knows it is the hang fixture. Installing it only
+    // when the first batch arrives raced the run timeout on a loaded runner: the timeout fired
+    // first, the default SIGTERM handler killed the child, and the escalation test saw
+    // SIGTERM instead of SIGKILL.
     const output = String(config.output);
+    if (config.mode === "hang" && process.send) {
+      process.on("SIGTERM", () => {});
+      // Written only after the handler is installed: a parent that sees this file knows any
+      // later SIGTERM was ignored, so the run must have ended through the SIGKILL escalation.
+      fs.writeFileSync(`${output}.hang-ready`, String(process.pid));
+    }
+    let batches = 0;
     return {
       async test() {
         return { ok: true, detail: "fixture" };
@@ -94,7 +104,8 @@ export const testDestination: LogExportDestinationType = {
         }
         if (config.mode === "crash" && batches === 3 && process.send) process.exit(23);
         if (config.mode === "hang" && process.send) {
-          process.on("SIGTERM", () => {});
+          process.on("SIGTERM", () => fs.writeFileSync(`${output}.term-ignored`, "ready"));
+          fs.writeFileSync(`${output}.hang-ready`, "ready");
           await new Promise(() => {
             setInterval(() => {}, 1000);
           });

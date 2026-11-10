@@ -1,0 +1,1 @@
+- **fix(sse):** A normal empty Codex turn over the Responses-over-WebSocket transport (for example the last agent turn after a tool result) now ends as a clean `finish_reason: "stop"` instead of `Provider returned empty content` / 502; only the Codex endpoint accepts the `wss:` form ([#19210](https://github.com/diegosouzapw/OmniRoute/pull/19210)) — thanks @tada5hi

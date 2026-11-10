@@ -45,6 +45,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/search/providers/route.ts": 3,
     "src/app/api/v1/_shared/elevenLabsProxy.ts": 1,
     "src/app/api/v1/_shared/fishAudioProxy.ts": 1,
+    // #13987: System One decisions (/v1/systemone), same
+    // scoped quota-preflight credential lookup as /v1/classify (class B).
+    "src/app/api/v1/_shared/systemOneRoute.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
@@ -94,6 +97,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
     "src/lib/embeddings/service.ts": 5,
+    // Fal inference uses the scoped quota-preflight resolver; existing-job reads
+    // cannot dispatch. Ownership, connection limits and later-message budgets are route-tested.
+    "src/lib/fal/runtime.ts": 1,
     "src/lib/images/adobeFireflyEdit.ts": 1,
     // PR #11390: second site is the generic derived-provider listing fallback —
     // read-only key presence probe used to decide whether a configured chat
@@ -147,6 +153,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // just used so clearAccountError() can wipe a stale lastError/testStatus — a
     // post-dispatch state read, not connection selection, so it stays class C.
     "open-sse/handlers/search/searchProxy.ts": 1,
+    // The deep research tool reads one connection by id to take its cookie and
+    // check its cooldown. The caller names the connection; this is not selection.
+    "open-sse/mcp-server/tools/perplexityResearch.ts": 1,
     // v3.8.50 back-merge additions (f95b03d7): combo routing infra and the
     // volcengine-plan binding/auto-sync services query connections the same
     // way as their classified siblings.
@@ -160,15 +169,22 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // getCachedProviderConnections() read cache (its getProviderConnections site is the one
     // already inventoried under src/lib/db/readCache.ts). Read-only state lookup, no dispatch, 1->0.
     "open-sse/services/tokenRefresh.ts": 1,
+    // Read-only adoption for the already-selected connection; it never selects an account.
+    "open-sse/services/tokenRefresh/passiveCodex.ts": 1,
     // #15138: per-account test message config/send — reads the row for its stored test model
     // and active flag; dispatch goes through runSingleModelTest, which refuses managed-lease
     // connections itself (class C).
     "src/app/api/providers/[id]/test-message/route.ts": 3,
+    // Fal management reads its pinned account only for catalog/schema discovery (class C).
+    "src/app/api/providers/[id]/fal/route.ts": 1,
     "src/lib/providers/volcPlanAutoSyncBackfill.ts": 1,
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/app/(dashboard)/dashboard/tools/agent-bridge/page.tsx": 1,
     "src/app/api/cloud/auth/route.ts": 1,
     "src/app/api/cloud/credentials/update/route.ts": 1,
+    // #16747: combo import reads the connection rows only for their provider names, to warn
+    // about combos whose provider has no connection; no selection or dispatch (class C).
+    "src/app/api/combos/import/route.ts": 1,
     "src/app/api/models/route.ts": 1,
     // #13487 (61198da9e): Test-all reads the provider's rows once only to reject
     // with 409 when every connection is disabled — a state read behind the
@@ -177,6 +193,13 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/models/test-all/route.ts": 1,
     "src/app/api/monitoring/health/route.ts": 1,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
+    // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
+    // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
+    "src/app/api/oauth/[provider]/[action]/m365Auth.ts": 1,
+    // #15201: the ChatGPT sign-in session route reads the target connection row twice
+    // (existing-registration check on start, and again on completion) behind management
+    // auth — state reads, never connection selection or dispatch (class C).
+    "src/app/api/oauth/chatgpt/session/route.ts": 2,
     "src/app/api/oauth/codex/import/route.ts": 1,
     "src/app/api/oauth/kiro/api-key/route.ts": 1,
     "src/app/api/oauth/kiro/auto-import/route.ts": 2,
@@ -208,7 +231,12 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/settings/export-json/route.ts": 1,
     "src/app/api/settings/qdrant/embedding-models/route.ts": 1,
     "src/app/api/settings/route.ts": 1,
-    "src/app/api/token-health/route.ts": 1,
+    // 18666 (token bulk refresh wave): the POST /api/token-health refresh-all
+    // endpoint reads the active OAuth connection rows once to build the wave
+    // (exclusions + per-connection ids). Read-only lookup behind
+    // requireManagementAuth; it never selects a connection to serve a
+    // request, so it stays class C.
+    "src/app/api/token-health/route.ts": 2,
     "src/app/api/translator/send/route.ts": 1,
     "src/app/api/translator/translate/route.ts": 1,
     "src/app/api/usage/call-logs/route.ts": 1,
@@ -218,12 +246,20 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // the handlers it delegates to carry the auxiliary-lease fence themselves. It
     // never selects a connection to serve a request, so it stays class C.
     "src/app/api/usage/codex-reset-credit/route.ts": 1,
+    // #15201: connection-local usage summary looks the row up by id behind management
+    // auth to bound the result to a real ChatGPT connection — a state read (class C).
+    "src/app/api/usage/local-summary/route.ts": 1,
     "src/app/api/usage/quota/route.ts": 1,
     "src/app/api/usage/utilization/route.ts": 1,
     "src/app/api/v1beta/models/route.ts": 1,
     "src/instrumentation-node.ts": 1,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,
     "src/lib/chaos/chaosExecutor.ts": 1,
+    // #17999: CLIProxyAPI management compat (/v0/management/api-call) re-resolves the
+    // connection named by auth_index and sends the allowlisted usage request with its
+    // stored OAuth token, so it is a direct dispatch site (class B) and carries the
+    // exclusive-lease auxiliary fence (see auxiliaryIsolationSources below).
+    "src/lib/cliproxyCompat/managementApi.ts": 1,
     "src/lib/cloudAgent/api.ts": 1,
     "src/lib/cloudSync.ts": 1,
     "src/lib/combos/builderOptions.ts": 1,
@@ -240,10 +276,17 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #15485: the priority-0 move-to-top edit re-reads the row by id after reorderConnections (3 -> 4).
     "src/lib/db/providers.ts": 4,
     "src/lib/db/readCache.ts": 2,
+    // #16472: guarded session-affinity eviction resolves the failed connection's shared
+    // account identity before a compare-and-delete on the optional Redis store. Read-only
+    // identity lookup; it never selects a connection or dispatches (class C).
+    "src/lib/db/sessionAffinity/requestEviction.ts": 1,
     // Local embedding providers: reads the active rows only to build the allowlist of
     // connections whose default model does not conflict with the requested one; the
     // connection itself is still selected by getProviderCredentials (class C).
     "src/lib/embeddings/service.ts": 1,
+    // Read-only validation of a pinned Fal row. New inference still goes through
+    // the credential resolver above; existing receipts never choose another account (class C).
+    "src/lib/fal/runtime.ts": 1,
     "src/lib/freeProviderRankings.ts": 1,
     "src/lib/guardrails/visionBridgeCredentials.ts": 2,
     "src/lib/kimi/tokenRefresh.ts": 1,
@@ -270,6 +313,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/lib/proxyEgress.ts": 1,
     "src/lib/quota/connectionRecovery.ts": 2,
+    // #18630: the opt-in reset-credit auto-spend sweep lists the active Codex OAuth
+    // connections only to hand each id to spendExpiringResetCredits() in
+    // codexResetCredits.ts, whose loadCodexConnection() carries the auxiliary-lease
+    // fence (class B there). The listing itself never selects or dispatches (class C).
+    "src/lib/services/codexResetCreditAutospend.ts": 1,
     "src/lib/sync/bundle.ts": 1,
     // #11495: verify-only sweep queries oauth + cookie connections
     // #13874: the health check re-reads the row inside the refresh lane to see whether
@@ -293,6 +341,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // lookup behind the health endpoint, never connection selection or dispatch (class C).
     "src/lib/usage/comboHealth.ts": 1,
     "src/lib/usage/comboScoringInspector.ts": 1,
+    // #18864: after a confirmed GLM reset-card redemption (whose caller already passed the
+    // auxiliary-lease gate) the row is re-read only to confirm the captured cooldown is
+    // unchanged before the compare-and-clear — a state read, never connection selection or
+    // dispatch, so class C (same shape as resetCreditCooldownRelease.ts).
+    "src/lib/usage/glmResetCardRecovery.ts": 1,
     "src/lib/usage/glmResetCards.ts": 1,
     // v3.8.51 #12805 (c042a5188): grok-cli sibling of codexResetCredits.ts, same
     // shape — isConnectionUnavailableToAuxiliaryActivity() gates the lookup, so an
@@ -312,6 +365,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/warmupScheduler.ts": 1,
     "src/shared/services/codexCatalogRevalidation.ts": 2,
     "src/shared/services/modelSyncScheduler.ts": 1,
+    // #15234: Muse session ownership lists the active muse-code OAuth connections only to
+    // pick/validate the session's owner account. It selects nothing for dispatch — every
+    // attempt still resolves credentials through the class-A path in chat.ts, pinned to that
+    // owner's connection id — so this is a state read (class C).
+    "src/sse/handlers/chat/museOwnership.ts": 1,
     "src/sse/handlers/chatHelpers.ts": 1,
     "src/sse/services/auth.ts": 4,
   },
@@ -350,6 +408,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "open-sse/services/combo/executeTargetGates.ts",
         "open-sse/services/tokenRefresh.ts",
         "src/app/api/translator/send/route.ts",
+        "src/lib/cliproxyCompat/managementApi.ts",
         "src/lib/credentialHealth/scheduler.ts",
         "src/lib/modelValidation/runner.ts",
         "src/lib/providers/volcPlanAutoSyncBackfill.ts",
@@ -464,6 +523,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/app/api/translator/send/route.ts",
     "src/app/api/translator/translate/route.ts",
     "src/lib/api/modelTestRunner.ts",
+    "src/lib/cliproxyCompat/managementApi.ts",
     "src/lib/modelValidation/runner.ts",
     "src/lib/services/quotaAutoPing.ts",
     "src/lib/services/quotaAutoPingManual.ts",
@@ -513,16 +573,16 @@ test("managed request surfaces are fenced centrally or rejected before independe
   );
   const rotationPolicySites = [
     ...nonStreamingLeg.matchAll(
-      /allowAccountRotation: !managedLease && comboStrategy !== "context-relay"/g
+      /allowAccountRotation:\s*!managedLease && comboStrategy !== "context-relay" && !forcedConnectionId/g
     ),
     ...streamingLeg.matchAll(
-      /allowAccountRotation: !managedLease && comboStrategy !== "context-relay"/g
+      /allowAccountRotation:\s*!managedLease && comboStrategy !== "context-relay" && !forcedConnectionId/g
     ),
   ];
   assert.equal(
     rotationPolicySites?.length,
     2,
-    "both the streaming and the non-streaming leg must derive account rotation from !managedLease"
+    "both the streaming and the non-streaming leg must derive account rotation from !managedLease and the connection pin"
   );
   assert.match(pipeline, /const canRotateAccount = policy\.allowAccountRotation && !isolateProbe;/);
   assert.match(pipeline, /canRotateAccount &&\s*target\.provider === "codex"/);

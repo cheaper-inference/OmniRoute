@@ -1,7 +1,7 @@
 ---
 title: "Claude Code CLI — Configuration with OmniRoute"
 version: 3.8.40
-lastUpdated: 2026-07-24
+lastUpdated: 2026-09-25
 ---
 
 # Claude Code CLI — Configuration with OmniRoute
@@ -44,9 +44,76 @@ endpoint with environment variables (it has no `--base-url` flag):
 
 > Env vars are read **once at startup** — restart Claude Code after changing them.
 
+For a credential that rotates instead of a fixed string, set `apiKeyHelper` in
+`~/.claude/settings.json` to a command that prints the current credential to
+stdout. Claude Code caches its output for five minutes by default
+(`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` overrides that) and sends the value in both
+`Authorization: Bearer` and `x-api-key`. The script must print the credential
+and nothing else — a banner alongside it fails the helper on v2.1.227+.
+
+This is how Entra ID SSO works: `scripts/cli/omniroute-sso.mjs token` prints a
+short-lived Entra access token that OmniRoute verifies instead of an API key.
+See [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` sets all of these for you: it resolves the base URL + token
 from the active context (so `omniroute connect <vps>` then `omniroute launch`
 just works), health-checks the server, and execs `claude`.
+
+---
+
+## Usage attribution: sessions and projects
+
+OmniRoute groups each API key's requests into **agent sessions** and records which **project**
+each session worked on (`agent_sessions` table), so usage and cost can be reported per team member,
+per project and per session.
+
+What is recorded without any client setup:
+
+| Field   | Source                                                                                                                                                         |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Session | `x-claude-code-session-id` header (same value as `metadata.user_id.session_id`), stable per session                                                            |
+| Project | The `Primary working directory:` line Claude Code sends in its environment message; worktree folders under `.claude/worktrees/` resolve to the repository name |
+| Branch  | `Current branch:` from the git status Claude Code sends with the first message                                                                                 |
+| Client  | `user-agent` (`claude-cli/<version>`)                                                                                                                          |
+
+Codex (`<environment_context><cwd>`) and OpenCode (`x-opencode-session`) are recognized the same
+way. Keys with **no-log** enabled keep only the session id and header-supplied project fields;
+nothing read from the prompt (path, branch) is stored.
+
+### Naming the project explicitly (recommended)
+
+The working directory differs between machines, so the same repository can show up under different
+paths. Send the project explicitly instead: Claude Code adds any headers listed in
+`ANTHROPIC_CUSTOM_HEADERS` to every model request, and OmniRoute reads two of them:
+
+| Header                     | Value                                                       |
+| -------------------------- | ----------------------------------------------------------- |
+| `x-omniroute-project`      | Project name, e.g. `omniroute`                              |
+| `x-omniroute-project-repo` | Normalized remote, e.g. `github.com/diegosouzapw/OmniRoute` |
+
+Both are only read for attribution; they are never forwarded to the upstream provider.
+
+`ANTHROPIC_CUSTOM_HEADERS` is read once at startup, and settings files store literal values, so
+compute it when Claude Code launches. Add this to `~/.zshrc` or `~/.bashrc` and keep starting
+`claude` from the project folder:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+The `sed` expression strips any credentials embedded in the remote URL. IDE extensions launch
+Claude Code without your shell, so their sessions fall back to the working directory.
 
 ---
 

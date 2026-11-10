@@ -3,10 +3,14 @@
  *
  * When a request fails due to budget exhaustion (HTTP 402 or budget keywords
  * in the error body), optionally redirect to a free-tier model
- * (default provider/model: nvidia + openai/gpt-oss-120b at $0.00/M tokens).
+ * (default provider/model: nvidia + nvidia/nemotron-3.5-super-vl-120b-a12b on
+ * NVIDIA's free API trial endpoint).
  *
- * Inspired by ClawRouter: "gpt-oss-120b costs nothing and serves as
- * automatic fallback when wallet is empty."
+ * Inspired by ClawRouter's free fallback model for an empty wallet. The original
+ * default, nvidia + openai/gpt-oss-120b, reached end of life on NVIDIA's free
+ * endpoint on 2026-09-03 and now answers 410 (#18418). The default must always
+ * be a model listed as free for nvidia in freeModelCatalog.data.ts; the NVIDIA
+ * EOL catalog test enforces that.
  *
  * Operators can disable the redirect entirely with
  * `OMNIROUTE_EMERGENCY_FALLBACK=false` (or `0`). Default remains enabled.
@@ -29,7 +33,7 @@ export interface EmergencyFallbackConfig {
   triggerOn402: boolean;
   triggerOnBudgetKeywords: boolean;
   budgetKeywords: string[];
-  /** Skip fallback for tool requests (gpt-oss-120b may not support structured tool calling) */
+  /** Skip fallback for tool requests (the free fallback model is not vetted for tool calling) */
   skipForToolRequests: boolean;
   maxOutputTokens: number;
 }
@@ -37,7 +41,7 @@ export interface EmergencyFallbackConfig {
 export const EMERGENCY_FALLBACK_CONFIG: EmergencyFallbackConfig = {
   enabled: true,
   provider: "nvidia",
-  model: "openai/gpt-oss-120b",
+  model: "nvidia/nemotron-3.5-super-vl-120b-a12b",
   triggerOn402: true,
   triggerOnBudgetKeywords: true,
   budgetKeywords: [

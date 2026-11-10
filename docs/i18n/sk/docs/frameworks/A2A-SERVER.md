@@ -152,22 +152,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Dostupné zručnosti
 
-OmniRoute sprístupňuje 6 zručností A2A zapojených v `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Každý modul zručnosti sa nachádza v `src/lib/a2a/skills/`.
+OmniRoute odhaľuje 6 zručností A2A zapojených v `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Každý modul zručností žije v `src/lib/a2a/skills/`.
 
-| Zručnosť                   | ID                   | Popis                                                                                                                                                 | Značky                          | Príklady                                   |
-| :------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :----------------------------------------- |
-| Inteligentné smerovanie    | `smart-routing`      | Smeruje prompt cez optimálneho poskytovateľa/kombináciu pomocou kombinačného enginu OmniRoute a skórovania                                            | smerovanie, poskytovatelia      | „Nasmeruj tento prompt cez najlepší model" |
-| Správa kvót                | `quota-management`   | Hlási stav kvót jednotlivých poskytovateľov, pomáha volajúcim rozhodnúť, kedy obmedziť/prepnúť                                                        | kvóty, poskytovatelia           | „Skontroluj kvótu pre anthropic"           |
-| Objavovanie poskytovateľov | `provider-discovery` | Vypisuje nainštalovaných poskytovateľov so schopnosťami, príznakmi bezplatnej úrovne a stavom OAuth                                                   | poskytovatelia, objavovanie     | „Akí poskytovatelia sú dostupní?"          |
-| Analýza nákladov           | `cost-analysis`      | Odhaduje náklady požiadavky/konverzácie na základe katalógu a nedávneho využitia                                                                      | náklady, využitie               | „Odhadni náklady tejto konverzácie"        |
-| Správa o stave             | `health-report`      | Agreguje stav circuit breakera, cooldownu a zablokovania pre jednotlivých poskytovateľov                                                              | stav, odolnosť                  | „Zobraz stav všetkých poskytovateľov"      |
-| Zoznam schopností          | `list-capabilities`  | Vracia kompletný 45-položkový katalóg Agent Skills (23 API + 21 CLI + 1 config) ako markdown tabuľku s priamymi URL na SKILL.md pre vloženie kontextu | katalóg, objavovanie, zručnosti | „Vypíš všetky schopnosti OmniRoute"        |
+| Zručnosť                | ID                   | Popis                                                                                                                                                          | Tagy                       | Príklady                                          |
+| :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------ |
+| Inteligentné smerovanie | `smart-routing`      | Smeruje výzvu cez optimálne provider/combo pomocou OmniRoute's combo engine + skóre                                                                            | smerovanie, poskytovatelia | "Nasmerovať túto výzvu cez najlepší model"        |
+| Správa kvót             | `quota-management`   | Hlási stav kvóty podľa poskytovateľa, pomáha volajúcim rozhodnúť sa, kedy throttle/switch                                                                      | kvóta, poskytovatelia      | "Skontrolujte kvótu pre antropické"               |
+| Objav poskytovateľa     | `provider-discovery` | Uvádza zoznam nainštalovaných poskytovateľov so schopnosťami, príznakmi voľnej úrovne, stavom OAuth                                                            | poskytovatelia, objav      | "Ktorí poskytovatelia sú k dispozícii?"           |
+| Analýza nákladov        | `cost-analysis`      | Odhaduje náklady na request/conversation vzhľadom na nedávne použitie katalógu +                                                                               | náklady, použitie          | "Odhad nákladov na túto konverzáciu"              |
+| Správa o zdraví         | `health-report`      | Súhrnný istič, chladenie, stav blokovania podľa poskytovateľa                                                                                                  | zdravie, odolnosť          | "Zobraziť zdravotný stav všetkých poskytovateľov" |
+| Zoznam schopností       | `list-capabilities`  | Vráti úplný katalóg zručností agenta so 45 položkami (konfigurácia 23 API + 21 CLI + 1) ako tabuľka značiek s nespracovaným SKILL.md URLs na vloženie kontextu | katalóg, objav, zručnosti  | "Vypísať všetky schopnosti OmniRoute "            |
 
-> Agent Card by mal byť udržiavaný v súlade so živým katalógom 376 poskytovateľov; počty poskytovateľov a metadáta o bezplatnom prístupe/bez autentifikácie pochádzajú z runtime registra.
+> Karta agenta by mala byť zarovnaná s aktuálnym katalógom poskytovateľov 381; počty poskytovateľov a metaúdaje free/no-auth sa získavajú z registra runtime.
 
-### Detail zručnosti `list-capabilities`
+### `list-capabilities` Detail zručnosti
 
-Zručnosť `list-capabilities` je obzvlášť užitočná pre externých agentov, ktorí potrebujú pred odoslaním API volaní zistiť, čo OmniRoute sprístupňuje. Vracia štruktúrovaný artefakt vo forme markdown tabuľky:
+Zručnosť `list-capabilities` je užitočná najmä pre externých agentov, ktorí potrebujú zistiť, čo OmniRoute odhaľuje pred odoslaním volaní API. Vracia štruktúrovaný artefakt tabuľky markdown:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,46 +176,54 @@ Zručnosť `list-capabilities` je obzvlášť užitočná pre externých agentov
 ...
 ```
 
-Každý riadok obsahuje stĺpec `rawUrl`, takže agenti môžu okamžite stiahnuť kompletný SKILL.md. Pole `metadata.totalSkills` zrkadlí veľkosť katalógu (dnes 45). Implementácia: `src/lib/a2a/skills/listCapabilities.ts`. Pozri tiež [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Každý riadok obsahuje stĺpec `rawUrl`, takže agenti môžu okamžite získať celý SKILL.md. Pole `metadata.totalSkills` odzrkadľuje veľkosť katalógu (dnes 45). Implementácia: `src/lib/a2a/skills/listCapabilities.ts`. Pozri tiež [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST API (pomocné)
+## REST API (pomocný)
 
-Koncový bod JSON-RPC `/a2a` je štandardným vstupným bodom A2A. Nižšie uvedené koncové body REST poskytujú pomocný prístup pre informačné panely a externé nástroje:
+Koncový bod JSON-RPC `/a2a` je kanonický vstupný bod A2A. Nižšie uvedené koncové body REST poskytujú pomocný prístup k ovládacím panelom a externým nástrojom:
 
-| Koncový bod                  | Metóda | Popis                                                                  | Autorizácia                                      |
-| :--------------------------- | :----- | :--------------------------------------------------------------------- | :----------------------------------------------- |
-| `/api/a2a/status`            | GET    | Stav servera, registrované zručnosti                                   | (verejné)                                        |
-| `/api/a2a/tasks`             | GET    | Zoznam úloh s filtrami                                                 | správa                                           |
-| `/api/a2a/tasks/[id]`        | GET    | Získanie úlohy podľa ID                                                | správa                                           |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Zrušenie spustenej úlohy                                               | správa                                           |
-| `/.well-known/agent.json`    | GET    | Karta agenta (vyhľadávanie A2A)                                        | (verejné, uložené vo vyrovnávacej pamäti 3600 s) |
-| `/api/a2a/tasks`             | POST   | Prichádzajúce delegovanie do flotily OmniConductor (Conductor PRD RF5) | Bearer voči `OMNIROUTE_API_KEY` + `a2aEnabled`   |
+| Koncový bod                  | Metóda | Popis                                                            | Auth                                                                                                        |
+| :--------------------------- | :----- | :--------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Stav servera, registrované zručnosti                             | (verejné)                                                                                                   |
+| `/api/a2a/tasks`             | GET    | Zoznam úloh s filtrami                                           | manažment alebo kľúč API (pozri nižšie)                                                                     |
+| `/api/a2a/tasks/[id]`        | GET    | Získajte úlohu podľa ID                                          | manažment alebo kľúč API (pozri nižšie)                                                                     |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Zrušiť spustenú úlohu                                            | manažment alebo kľúč API (pozri nižšie)                                                                     |
+| `/.well-known/agent.json`    | GET    | Karta agenta (objavenie A2A )                                    | (verejné, vo vyrovnávacej pamäti 3600s)                                                                     |
+| `/api/a2a/tasks`             | POST   | Prichádzajúca delegácia do flotily OmniConductor (vodič PRD RF5) | rovnaké ako `GET`, plus `OMNIROUTE_API_KEY` ak je nastavené, keď je `REQUIRE_API_KEY` vypnuté; `a2aEnabled` |
 
-**Prichádzajúce delegovanie Conductor (`POST /api/a2a/tasks`):** externí agenti A2A delegujú programátorské úlohy flotile OmniConductor prostredníctvom OmniRoute. Telo: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — delegovať možno iba zručnosti flotily Conductor (tie, ktoré sú uvedené na karte agenta); `metadata.conductor.repo.url` je povinné (flotila pracuje s repozitármi git). Trasa vykoná prevod na `POST /v1/tasks` centra pomocou tokenu `CONDUCTOR_ORCHESTRATOR_TOKEN` na strane servera (s náhradným použitím `CONDUCTOR_HUB_TOKEN`) a vráti `201 { conductor_task_id, state: "submitted" }`; stavy úloh sa prenášajú späť prostredníctvom zrkadlenia SSE→A2A (RF1) a sú viditeľné cez `GET /api/a2a/tasks?skill=conductor`.
+Kto sa dostane k trasám `/api/a2a/tasks*` závisí od prihlásenia a nastavení kľúča API:
+
+- `requireLogin=true` (predvolené): middleware pripúšťa iba poverenia na správu (reláciu dashboardu, kľúč `manage` -scope API, prístupový token `oma_` ) a `OMNIROUTE_API_KEY`. Jednoduchý inferenčný kľúč dostane `403`. V hlavičke `Authorization` middleware berie iba `OMNIROUTE_API_KEY` ako `Bearer <key>`; holý kľúč alebo tabulátor po `Bearer` získa `401`.
+- `requireLogin=false` alebo okno spätnej slučky pred prihlásením: so `REQUIRE_API_KEY=true` sa akceptuje akýkoľvek platný kľúč OmniRoute API alebo poverenie správy a anonymní volajúci dostanú `401`; so `REQUIRE_API_KEY` mimo cesty sú otvorené.
+- `POST /api/a2a/tasks` navyše vyžaduje `OMNIROUTE_API_KEY` v hlavičke `Authorization` keď je táto premenná nastavená a `REQUIRE_API_KEY` je vypnuté. Ostatné hlavičky, ako napríklad `x-api-key`, sa tam nepočítajú. Pri odhlásení alebo pred zaradením kľúč prechádza s predponou `Bearer` alebo bez nej; so zapnutým prihlásením sa cez middleware dostane iba `Bearer <key>`.
+
+Ak sa vyžaduje poverenie, token `read` -scope `oma_` funguje iba pre `GET`.
+
+**Delegovanie prichádzajúceho dirigenta (`POST /api/a2a/tasks`):** externí agenti A2A delegujú prácu kódovania na flotilu OmniConductor prostredníctvom OmniRoute. Telo: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — len zručnosti flotily vodiča (tie uvedené na karte agenta) sú delegovateľné; Vyžaduje sa `metadata.conductor.repo.url` (flotila funguje na git repo). Trasa sa preloží do `POST /v1/tasks` rozbočovača pomocou `CONDUCTOR_ORCHESTRATOR_TOKEN` na strane servera (záložné `CONDUCTOR_HUB_TOKEN`) a vráti `201 { conductor_task_id, state: "submitted" }`; stavy úloh prúdia späť cez zrkadlo SSE→A2A (RF1) a sú viditeľné cez `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
 ## Pridanie novej zručnosti
 
-1. **Vytvorte súbor zručnosti:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Vytvorte súbor zručností:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportujte asynchrónnu funkciu `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Dodržte štruktúru existujúcich zručností, napríklad `smartRouting.ts`.
+   Exportujte asynchrónnu funkciu `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Postupujte podľa tvaru existujúcich zručností, ako je `smartRouting.ts`. Ak zručnosť volá späť do OmniRoute cez HTTP, vytvorte hlavičky so `buildSelfLoopHeaders(caller)` z `src/lib/a2a/selfLoopAuth.ts`, aby sa volanie spustilo s kľúčom volajúceho A2A, nie `OMNIROUTE_API_KEY`, a odovzdajte `redirect: "error"` do `fetch`, aby presmerovanie nikdy nezískalo kľúč. Pomocník vytvára iba hlavičky; každá zručnosť si sama nastavuje politiku presmerovania. Vyhodí `UnsafeSelfLoopTargetError` namiesto toho, aby pripojil kľúč, keď je vyriešený základný URL obyčajný http mimo privátnej siete (spätná slučka, názov kontajnera alebo služby a súkromné adresy sú v poriadku) alebo obsahuje poverenia, takže zručnosť, ktorá prehltne odmietnuté hovory, musí túto chybu zopakovať.
 
-2. **Zaregistrujte obslužnú funkciu:** v súbore `src/lib/a2a/taskExecution.ts` pridajte položku do `A2A_SKILL_HANDLERS`:
+2. **Spracovateľ registrácie:** v `src/lib/a2a/taskExecution.ts` pridajte záznam do `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...existujúce zručnosti
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Sprístupnite ju na karte agenta:** v súbore `src/app/.well-known/agent.json/route.ts` ju pridajte do poľa `skills`:
+3. **Vystaviť na karte agenta:** v `src/lib/a2a/agentCardMetadata.ts` (zdieľané `/.well-known/agent.json` a `/.well-known/agent-card.json`), pripojte do poľa `skills` :
 
    ```json
    {
@@ -227,9 +235,9 @@ Koncový bod JSON-RPC `/a2a` je štandardným vstupným bodom A2A. Nižšie uved
    }
    ```
 
-4. **Napíšte testy:** `tests/unit/a2a-<your-skill>.test.ts`. Pokryte úspešný priebeh aj chybový scenár.
+4. **Napíšte testy:** `tests/unit/a2a-<your-skill>.test.ts`. Pokryť šťastnú cestu + chybová cesta.
 
-5. **Zdokumentujte** novú zručnosť v tabuľke `Available Skills` v tomto súbore.
+5. **Dokument** nová zručnosť v tabuľke `Available Skills` tohto súboru.
 
 ---
 
@@ -268,7 +276,7 @@ submitted → working → completed
 
 ## Príklady integrácie
 
-### Python (requests)
+### Python (žiadosti)
 
 ```python
 import requests
@@ -287,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (načítanie)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

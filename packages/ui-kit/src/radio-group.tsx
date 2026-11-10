@@ -9,7 +9,7 @@ import {
   useId,
   useState,
 } from "react";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { cn } from "./lib/utils";
 
 /**
@@ -60,6 +60,21 @@ export interface RadioGroupProps extends Omit<
   /** Error message under the group (string) — also flips the pink styling. */
   error?: ReactNode;
   orientation?: RadioOrientation;
+  /**
+   * Lay the items out in a responsive grid of up to this many columns (for
+   * example card choices on a wide settings page). Overrides the `orientation`
+   * layout; columns drop as the group narrows below `minItemWidth` per item.
+   * Non-integers are floored; values below 1, `NaN` and `Infinity` keep the
+   * `orientation` layout. A value larger than fits is not capped: the grid shows
+   * as many columns of at least `minItemWidth` as the container holds.
+   */
+  columns?: number;
+  /**
+   * Narrowest an item may get before the grid drops a column. Any CSS length
+   * (for example "14rem", "240px", "30%"); default "14rem". An invalid length
+   * falls back to a single column. Only used with `columns`.
+   */
+  minItemWidth?: string;
   /** Disable every item in the group. */
   disabled?: boolean;
 }
@@ -74,6 +89,8 @@ export function RadioGroup({
   description,
   error,
   orientation = "vertical",
+  columns,
+  minItemWidth,
   disabled = false,
   children,
   ...props
@@ -87,6 +104,17 @@ export function RadioGroup({
   const isControlled = controlled !== undefined;
   const value = isControlled ? controlled : uncontrolled;
   const hasError = error != null && error !== false;
+  const gridColumns =
+    typeof columns === "number" && Number.isFinite(columns) && columns >= 1
+      ? Math.floor(columns)
+      : undefined;
+  const gridStyle =
+    gridColumns === undefined
+      ? undefined
+      : ({
+          "--ci-radio-group-columns": gridColumns,
+          ...(minItemWidth ? { "--ci-radio-group-min-item-width": minItemWidth } : {}),
+        } as CSSProperties);
 
   const select = useCallback(
     (next: string) => {
@@ -127,6 +155,8 @@ export function RadioGroup({
             "ci-radio-group__items",
             `ci-radio-group__items--${orientation}`,
           )}
+          data-layout={gridColumns === undefined ? undefined : "grid"}
+          style={gridStyle}
         >
           {children}
         </div>

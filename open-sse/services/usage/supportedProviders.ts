@@ -97,10 +97,17 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "qwen-cloud-token-plan",
   // AgentRouter (New-API) console balance quota (consoleApiKey + newApiUserId)
   "agentrouter",
+  // TokenRouter wallet + per-key quota (optional Management Key in consoleApiKey)
+  "tokenrouter",
   // Kilo Code personal USD balance (GET /api/profile/balance, existing OAuth token)
   "kilocode",
+  // MegaBrain plan session + weekly limits (GET /api/profile/limits, OAuth token or mb-v1 key)
+  "megabrain",
+  "mb",
   // OpenRouter key limits + account credits (GET /api/v1/key + /api/v1/credits)
   "openrouter",
+  // Muse Code has no live quota endpoint; its fetcher surfaces persisted subscription metadata.
+  "muse-code",
   // LLM Gateway DevPass allowance (GET /v1/key → monthly + weekly premium)
   "llmgateway",
   // Lyceum credit balance (GET /api/v2/external/billing/credits)
@@ -112,4 +119,6 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "cpl",
   // Cloudflare Workers AI daily neurons vs the 10k/day free allocation (needs Analytics: Read)
   "cloudflare-ai",
+  // Zed Hosted Models USD credit (optional Orb billing portal link)
+  "zed-hosted",
 ];

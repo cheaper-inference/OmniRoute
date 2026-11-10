@@ -17,7 +17,7 @@ It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic acr
 
 Core capabilities:
 
-- OpenAI-compatible API surface for CLI/tools (376 providers, 156 executor modules)
+- OpenAI-compatible API surface for CLI/tools (388 providers, 159 executor modules)
 - Request/response translation across provider formats
 - Model combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`
@@ -445,7 +445,13 @@ have to assemble lockout/budget/fallback logic themselves.
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Model availability snapshots: `src/domain/modelAvailability.ts`
 - Provider expiration tracking: `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI
+  dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter
+  attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's
+  full window set: a window known earlier but absent from it is retired, in the cache, in the
+  `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted
+  Codex quota state and in Claude's saturation buckets. Partial evidence (response headers,
+  stale copies) only updates the windows it carries.
 - Degradation state: `src/domain/degradation.ts`
 - Configuration audit: `src/domain/configAudit.ts`
 - OmniRoute response metadata builder: `src/domain/omnirouteResponseMeta.ts`
@@ -496,6 +502,10 @@ the global circuit breaker / connection cooldown / model lockout layers:
   identity, scrubs response headers, drives credits/version tracking via
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (per-request budget of
+  upstream 429s across all hosts, `ANTIGRAVITY_MAX_429_ATTEMPTS`; an identical re-send of a
+  refused body is answered locally; `src/sse/handlers/chat.ts` does not restart such a request
+  through the cooldown-aware retry)
 - ModelScope quota policy: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
   plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
@@ -941,6 +951,22 @@ Each provider has a specialized executor extending `BaseExecutor` (in `open-sse/
 | `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | Imported API key + Connect-protobuf chat streaming                   |
 
 All other providers (including custom compatible nodes) use the `DefaultExecutor`.
+
+### Automated probes and web-session accounts
+
+Model tests, Test All, combo tests and assessments send real chat requests. A web-session
+provider acts as the signed-in user, so each of those requests would be saved as a
+conversation on that account; automated probes that left such conversations got an account
+suspended (#14780). The chat pipeline therefore refuses every target an automated probe
+reaches whose provider takes a web-session credential, once the target's provider is
+resolved and before a credential is chosen (`src/lib/providers/chatProbePolicy.ts`). The
+refusal is `422` with `error.code` `chat_probe_not_isolated`, and the probe runners report
+it as a skip, not a failure.
+
+An executor that runs every chat in the provider's own no-history mode declares it with
+`ChatProbeIsolatingExecutor` (`open-sse/executors/chatProbeIsolation.ts`); probes to that
+provider are then allowed. ChatGPT Web declares `temporary-chat`. Pin a declaration to its
+mechanism with a test, so the claim cannot outlive the code that makes it true.
 
 ## Provider Compatibility Matrix
 

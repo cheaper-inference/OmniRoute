@@ -8,7 +8,7 @@
  */
 import React from "react";
 import { act } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/image", () => ({
@@ -26,6 +26,7 @@ const { default: ProviderIcon } = await import("@/shared/components/ProviderIcon
 const { default: useThemeStore } = await import("@/store/themeStore");
 
 const containers: HTMLElement[] = [];
+const roots: Root[] = [];
 
 function renderIcon(providerId: string): HTMLElement {
   const container = document.createElement("div");
@@ -33,6 +34,7 @@ function renderIcon(providerId: string): HTMLElement {
   containers.push(container);
 
   const root = createRoot(container);
+  roots.push(root);
   act(() => {
     root.render(<ProviderIcon providerId={providerId} size={26} type="color" />);
   });
@@ -46,7 +48,18 @@ beforeEach(() => {
   useThemeStore.getState().setTheme("light");
 });
 
-afterEach(() => {
+afterEach(async () => {
+  // Unmount before the environment goes away. A root left mounted keeps React's
+  // scheduler alive, and the theme reset below schedules an update that then
+  // runs after jsdom is gone ("ReferenceError: window is not defined"). The
+  // await is load-bearing: act() returns a thenable for concurrent roots, and
+  // without it the unmount can still be pending when the environment is torn
+  // down.
+  await act(async () => {
+    while (roots.length > 0) {
+      roots.pop()?.unmount();
+    }
+  });
   while (containers.length > 0) {
     containers.pop()?.remove();
   }

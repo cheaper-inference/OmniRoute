@@ -473,9 +473,9 @@ test("geminiHelper converts content, safely parses JSON and cleans complex schem
 
   const cleaned = geminiHelper.cleanJSONSchemaForAntigravity(schema);
   assert.equal(cleaned.type, "array");
-  assert.deepEqual(cleaned.required.sort(), ["a", "b"]);
-  assert.equal(cleaned.properties.a.minLength, undefined);
-  assert.deepEqual(cleaned.properties.b.enum, ["fixed"]);
+  // The node flattens to `array`, so `properties` and `required` from allOf are pruned.
+  assert.equal(cleaned.required, undefined);
+  assert.equal(cleaned.properties, undefined);
   assert.deepEqual(cleaned.enum, ["1", "2"]);
   assert.equal(cleaned.items.type, "integer");
   assert.equal(cleaned.additionalProperties, undefined);
@@ -483,6 +483,19 @@ test("geminiHelper converts content, safely parses JSON and cleans complex schem
   assert.equal(cleaned.if, undefined);
   assert.equal(cleaned.default, undefined);
   assert.equal(cleaned.examples, undefined);
+
+  // An object node keeps its merged allOf members: the old asserts for that merge live here.
+  const merged = geminiHelper.cleanJSONSchemaForAntigravity({
+    type: "object",
+    allOf: [
+      { properties: { a: { type: "string", minLength: 2 } }, required: ["a"] },
+      { properties: { b: { const: "fixed" } }, required: ["b"] },
+    ],
+  });
+  assert.equal(merged.type, "object");
+  assert.deepEqual(merged.required.sort(), ["a", "b"]);
+  assert.equal(merged.properties.a.minLength, undefined);
+  assert.deepEqual(merged.properties.b.enum, ["fixed"]);
 
   const placeholder = geminiHelper.cleanJSONSchemaForAntigravity({
     type: "object",
@@ -609,6 +622,85 @@ test("fixMissingToolResponses keeps OpenAI role:tool when assistant uses OpenAI 
   assert.equal(fixed.messages[1].tool_call_id, "call_a");
   assert.equal(fixed.messages[2].role, "tool");
   assert.equal(fixed.messages[2].tool_call_id, "call_b");
+});
+
+test("fixMissingToolResponses inserts missing response when only some tool calls are answered (#17946)", () => {
+  const fixed = toolCallHelper.fixMissingToolResponses({
+    messages: [
+      {
+        role: "assistant",
+        tool_calls: [
+          { id: "call_a", type: "function", function: { name: "lookup", arguments: "{}" } },
+          { id: "call_b", type: "function", function: { name: "search", arguments: "{}" } },
+        ],
+      },
+      { role: "tool", tool_call_id: "call_a", content: "result a" },
+      { role: "user", content: "continue" },
+    ],
+  });
+
+  assert.equal(fixed.messages.length, 4);
+  assert.equal(fixed.messages[1].role, "tool");
+  assert.equal(fixed.messages[1].tool_call_id, "call_a");
+  assert.equal(fixed.messages[1].content, "result a");
+  assert.equal(fixed.messages[2].role, "tool");
+  assert.equal(fixed.messages[2].tool_call_id, "call_b");
+  assert.equal(fixed.messages[2].content, "");
+  assert.equal(fixed.messages[3].role, "user");
+});
+
+test("fixMissingToolResponses merges missing Claude tool_result blocks into the existing results message (#17946)", () => {
+  const resultsMessage = {
+    role: "user",
+    content: [
+      { type: "tool_result", tool_use_id: "tool_a", content: "result a" },
+      { type: "text", text: "continue" },
+    ],
+  };
+  const fixed = toolCallHelper.fixMissingToolResponses({
+    messages: [
+      { role: "user", content: [{ type: "text", text: "do it" }] },
+      {
+        role: "assistant",
+        content: [
+          { type: "tool_use", id: "tool_a", name: "bash", input: { cmd: "ls" } },
+          { type: "tool_use", id: "tool_b", name: "bash", input: { cmd: "pwd" } },
+        ],
+      },
+      resultsMessage,
+    ],
+  });
+
+  // Anthropic requires every tool_result in the user message right after the
+  // tool_use turn: no second user message, the missing block joins the existing one
+  // after the existing tool_result blocks and before any text block.
+  assert.equal(fixed.messages.length, 3);
+  const merged = fixed.messages[2];
+  assert.equal(merged.role, "user");
+  assert.deepEqual(merged.content, [
+    { type: "tool_result", tool_use_id: "tool_a", content: "result a" },
+    { type: "tool_result", tool_use_id: "tool_b", content: "" },
+    { type: "text", text: "continue" },
+  ]);
+  // The caller's message object is not mutated.
+  assert.equal(resultsMessage.content.length, 2);
+});
+
+test("fixMissingToolResponses inserts responses when assistant with tool_calls is the last message (#17946)", () => {
+  const fixed = toolCallHelper.fixMissingToolResponses({
+    messages: [
+      { role: "user", content: "run tools" },
+      {
+        role: "assistant",
+        tool_calls: [{ id: "call_1", type: "function", function: { name: "f1", arguments: "{}" } }],
+      },
+    ],
+  });
+
+  assert.equal(fixed.messages.length, 3);
+  assert.equal(fixed.messages[2].role, "tool");
+  assert.equal(fixed.messages[2].tool_call_id, "call_1");
+  assert.equal(fixed.messages[2].content, "");
 });
 
 test("fallbackToolCallId returns the right id shape with and without an index", () => {

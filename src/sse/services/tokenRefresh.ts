@@ -1,5 +1,8 @@
 // Re-export from open-sse with local logger
 import * as log from "../utils/logger";
+import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import { resolveProxyForConnection } from "@/lib/db/settings";
@@ -83,7 +86,9 @@ export const refreshAccessToken = async (
   refreshToken: string,
   credentials: any
 ) => {
-  const proxy = await resolveProxyForCredentials(provider, credentials);
+  const proxy = passive.isPassiveCodex(provider)
+    ? null
+    : await resolveProxyForCredentials(provider, credentials);
   return _refreshAccessToken(provider, refreshToken, credentials, log, proxy);
 };
 
@@ -104,6 +109,7 @@ export const refreshGoogleToken = async (
 };
 
 export const refreshCodexToken = async (refreshToken: string, credentials?: any) => {
+  if (passive.isPassiveCodex("codex")) return passive.resolvePassiveCodex(credentials);
   const proxy = await resolveProxyForCredentials("codex", credentials);
   return _refreshCodexToken(refreshToken, log, proxy);
 };
@@ -141,7 +147,7 @@ export function resolveCopilotTokenBaseUrl(
   if (provider !== "ghe-copilot") return undefined;
   const gheUrl = credentials?.providerSpecificData?.gheUrl;
   if (typeof gheUrl === "string" && gheUrl.trim().length > 0) {
-    return `${gheUrl.trim().replace(/\/+$/, "")}/api/v3`;
+    return `${stripTrailingSlashes(gheUrl.trim())}/api/v3`;
   }
   return undefined;
 }
@@ -151,19 +157,36 @@ export const getAccessToken = async (
   credentials: any,
   onPersist?: (result: any) => Promise<void>
 ) => {
-  const proxy = await resolveProxyForCredentials(provider, credentials);
+  const proxy = passive.isPassiveCodex(provider)
+    ? null
+    : await resolveProxyForCredentials(provider, credentials);
   return _getAccessToken(provider, credentials, log, proxy, onPersist);
 };
 
 export const refreshTokenByProvider = async (provider: string, credentials: any) => {
-  const proxy = await resolveProxyForCredentials(provider, credentials);
+  const proxy = passive.isPassiveCodex(provider)
+    ? null
+    : await resolveProxyForCredentials(provider, credentials);
   return _refreshTokenByProvider(provider, credentials, log, proxy);
 };
 
 export const formatProviderCredentials = (provider: string, credentials: any) =>
   _formatProviderCredentials(provider, credentials, log);
 
-export const getAllAccessTokens = (userInfo: any) => _getAllAccessTokens(userInfo, log);
+export const getAllAccessTokens = (userInfo: any) =>
+  _getAllAccessTokens(userInfo, log, {
+    // Per-connection proxy parity with the single-connection refresh path
+    // (#13470): a connection with an assigned proxy pool must not egress its
+    // refresh directly. Resolution failure fails closed (the connection
+    // counts as failed, never refreshed on a direct connection).
+    resolveProxy: (provider: string, connectionId: string | null) =>
+      resolveProxyForCredentials(provider, { connectionId: connectionId ?? undefined }),
+    // Rotated tokens are persisted by the caller (open-sse stays free of
+    // `@/lib/db` imports); the write is atomic with the refresh inside the
+    // per-connection mutex.
+    onPersist: (connectionId: string, result: any) =>
+      updateProviderCredentials(connectionId, result),
+  });
 
 // Local-specific: Update credentials in localDb
 export async function updateProviderCredentials(connectionId: string, newCredentials: any) {
@@ -291,6 +314,7 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
 
         updatedCredentials = {
           ...updatedCredentials,
+          ...(passive.isPassiveCodex(provider) ? newCredentials : {}),
           accessToken: newCredentials.accessToken,
           refreshToken: newCredentials.refreshToken || updatedCredentials.refreshToken,
           expiresAt: newCredentials.expiresAt
@@ -350,6 +374,8 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
 }
 
 // Local-specific: Refresh GitHub and Copilot tokens together
+registerCredentialRefresher(checkAndRefreshToken);
+
 export async function refreshGitHubAndCopilotTokens(credentials: any) {
   const newGitHubCredentials = await refreshGitHubToken(credentials.refreshToken, credentials);
   if (newGitHubCredentials?.accessToken) {

@@ -63,6 +63,7 @@ import {
   type NotionAgentOptions,
 } from "../services/notionTranscriptBuilder.ts";
 import { tlsFetchNotion } from "../services/notionTlsClient.ts";
+import { chromeUserAgent, newestChromeVersion } from "../utils/browserProfiles.ts";
 import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 
 // Re-exported for unit tests that destructure `mod.<name>` on this module.
@@ -86,8 +87,11 @@ export {
 // Both app.notion.com and www.notion.so work; prefer the AI surface host.
 const BASE_URL = "https://app.notion.com";
 const NOTION_URL = `${BASE_URL}/api/v3/runInferenceTranscript`;
-const USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36";
+// Resolved lazily: computing the UA at module scope would throw at import
+// time when the wreq-js runtime is unavailable.
+function notionUserAgent(): string {
+  return chromeUserAgent("Windows NT 10.0; Win64; x64", newestChromeVersion());
+}
 // Match a recent live browser capture (web_providers/notion.txt, 2026-07-20).
 const NOTION_CLIENT_VERSION = "23.13.20260720.1949";
 
@@ -404,7 +408,7 @@ function buildNotionExecuteHeaders(opts: {
     isCustom && agentPathId ? `${BASE_URL}/agent/${agentPathId}?wfv=chat` : `${BASE_URL}/ai`;
   const reqHeaders: Record<string, string> = {
     "Content-Type": "application/json",
-    "User-Agent": USER_AGENT,
+    "User-Agent": notionUserAgent(),
     Accept: "application/x-ndjson",
     Cookie: opts.cookie,
     Origin: BASE_URL,

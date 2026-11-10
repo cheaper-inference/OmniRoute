@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Mga Available na Skill
+## Magagamit na Kasanayan
 
-Nag-eexpose ang OmniRoute ng 6 A2A skill na nakakabit sa `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ang bawat skill module ay matatagpuan sa `src/lib/a2a/skills/`.
+Inilalantad OmniRoute ang 6 na kasanayan A2A na naka-wire sa `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ang bawat module ng kasanayan ay nakatira sa `src/lib/a2a/skills/`.
 
-| Skill              | ID                   | Paglalarawan                                                                                                                                                  | Tags                       | Mga Halimbawa                          |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------- |
-| Smart Routing      | `smart-routing`      | Nagre-route ng prompt sa pamamagitan ng optimal na provider/combo gamit ang combo engine + scoring ng OmniRoute                                               | routing, providers         | "Route this prompt via the best model" |
-| Quota Management   | `quota-management`   | Nag-uulat ng quota state ng bawat provider, tumutulong sa mga caller na magpasya kung kailan mag-throttle/mag-switch                                          | quota, providers           | "Check quota for anthropic"            |
-| Provider Discovery | `provider-discovery` | Nagli-lista ng mga naka-install na provider kasama ang mga capability, free-tier flag, at OAuth status                                                        | providers, discovery       | "What providers are available?"        |
-| Cost Analysis      | `cost-analysis`      | Nag-eestimate ng gastos ng isang request/kombensasyon batay sa catalog + kamakailang usage                                                                    | cost, usage                | "Estimate cost for this conversation"  |
-| Health Report      | `health-report`      | Nag-a-aggregate ng circuit breaker, cooldown, at lockout state ng bawat provider                                                                              | health, resilience         | "Show health status of all providers"  |
-| List Capabilities  | `list-capabilities`  | Nagbabalik ng buong 45-entry na Agent Skills catalog (23 API + 21 CLI + 1 config) bilang markdown table na may mga raw SKILL.md URL para sa context injection | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| Kasanayan                 | ID                   | Paglalarawan                                                                                                                                                    | Mga tag                        | Mga halimbawa                                                       |
+| :------------------------ | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------------------------ |
+| Smart Routing             | `smart-routing`      | Nagruruta ng prompt sa pinakamainam provider/combo gamit ang combo engine + scoring ng OmniRoute                                                                | pagruruta, mga provider        | "Iruta ang prompt na ito sa pamamagitan ng pinakamahusay na modelo" |
+| Pamamahala ng Quota       | `quota-management`   | Ang mga ulat sa estado ng quota ng bawat provider, ay tumutulong sa mga tumatawag na magpasya kung kailan mag throttle/switch                                   | quota, mga provider            | "Suriin ang quota para sa anthropic"                                |
+| Pagtuklas ng Provider     | `provider-discovery` | Naglilista ng mga naka-install na provider na may mga kakayahan, free-tier na mga flag, OAuth status                                                            | provider, pagtuklas            | "Anong mga provider ang available?"                                 |
+| Pagsusuri ng Gastos       | `cost-analysis`      | Tinatantya ang halaga ng isang request/conversation na ibinigay sa catalog + kamakailang paggamit                                                               | gastos, paggamit               | "Tantyahin ang gastos para sa pag-uusap na ito"                     |
+| Ulat sa Kalusugan         | `health-report`      | Pinagsasama-sama ang circuit breaker, cooldown, estado ng lockout bawat provider                                                                                | kalusugan, katatagan           | "Ipakita ang katayuan sa kalusugan ng lahat ng provider"            |
+| Listahan ng mga Kakayahan | `list-capabilities`  | Ibinabalik ang buong 45-entry na katalogo ng Agent Skills (23 API + 21 CLI + 1 config) bilang markdown table na may raw SKILL.md URLs para sa context injection | katalogo, pagtuklas, kasanayan | "Ilista ang lahat ng kakayahan OmniRoute "                          |
 
-> Ang Agent Card ay dapat panatilihing naka-align sa live na 376-provider catalog; ang mga bilang ng provider at free/no-auth metadata ay mula sa runtime registry.
+> Ang Agent Card ay dapat panatilihing nakahanay sa live na 381-provider catalog; Ang mga bilang ng provider at free/no-auth metadata ay mula sa runtime registry.
 
-### Detalye ng `list-capabilities` Skill
+### `list-capabilities` Detalye ng Kasanayan
 
-Ang `list-capabilities` skill ay partikular na kapaki-pakinabang para sa mga external agent na kailangang tuklasin kung ano ang ine-expose ng OmniRoute bago magpadala ng mga API call. Nagbabalik ito ng structured markdown table artifact:
+Ang kasanayan `list-capabilities` ay partikular na kapaki-pakinabang para sa mga panlabas na ahente na kailangang matuklasan kung ano ang inilalantad ng OmniRoute bago magpadala ng mga tawag API. Nagbabalik ito ng structured markdown table artifact:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,46 +176,54 @@ Ang `list-capabilities` skill ay partikular na kapaki-pakinabang para sa mga ext
 ...
 ```
 
-Ang bawat row ay may kasamang `rawUrl` column para agad makuha ng mga agent ang buong SKILL.md. Ang `metadata.totalSkills` field ay sumasalamin sa laki ng catalog (45 sa ngayon). Implementasyon: `src/lib/a2a/skills/listCapabilities.ts`. Tingnan din ang [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Kasama sa bawat row ang column `rawUrl` para makuha agad ng mga ahente ang buong SKILL.md. Sinasalamin ng field `metadata.totalSkills` ang laki ng catalog (45 ngayon). Pagpapatupad: `src/lib/a2a/skills/listCapabilities.ts`. Tingnan din [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
 ## REST API (pantulong)
 
-Ang JSON-RPC endpoint na `/a2a` ang kanonikal na A2A entry point. Nagbibigay ang mga REST endpoint sa ibaba ng pantulong na access para sa mga dashboard at panlabas na tooling:
+Ang JSON-RPC endpoint `/a2a` ay ang canonical A2A entry point. Ang mga REST endpoint sa ibaba ay nagbibigay ng pantulong na pag-access para sa mga dashboard at panlabas na tooling:
 
-| Endpoint                     | Pamamaraan | Paglalarawan                                                     | Awtorisasyon                                 |
-| :--------------------------- | :--------- | :--------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET        | Katayuan ng server, mga nakarehistrong skill                     | (pampubliko)                                 |
-| `/api/a2a/tasks`             | GET        | Ilista ang mga task gamit ang mga filter                         | pamamahala                                   |
-| `/api/a2a/tasks/[id]`        | GET        | Kunin ang task ayon sa ID                                        | pamamahala                                   |
-| `/api/a2a/tasks/[id]/cancel` | POST       | Kanselahin ang tumatakbong task                                  | pamamahala                                   |
-| `/.well-known/agent.json`    | GET        | Agent Card (A2A discovery)                                       | (pampubliko, naka-cache nang 3600s)          |
-| `/api/a2a/tasks`             | POST       | Papasok na delegasyon sa OmniConductor fleet (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Endpoint                     | Pamamaraan | Paglalarawan                                                     | Awth                                                                                                           |
+| :--------------------------- | :--------- | :--------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET        | Katayuan ng server, mga nakarehistrong kasanayan                 | (pampubliko)                                                                                                   |
+| `/api/a2a/tasks`             | GET        | Maglista ng mga gawain na may mga filter                         | pamamahala o API key (tingnan sa ibaba)                                                                        |
+| `/api/a2a/tasks/[id]`        | GET        | Kumuha ng gawain sa pamamagitan ng ID                            | pamamahala o API key (tingnan sa ibaba)                                                                        |
+| `/api/a2a/tasks/[id]/cancel` | POST       | Kanselahin ang pagpapatakbo ng gawain                            | pamamahala o API key (tingnan sa ibaba)                                                                        |
+| `/.well-known/agent.json`    | GET        | Card ng Ahente ( pagtuklas ng A2A )                              | (pampubliko, naka-cache na 3600s)                                                                              |
+| `/api/a2a/tasks`             | POST       | Papasok na delegasyon sa OmniConductor fleet (Conductor PRD RF5) | katulad ng `GET`, plus `OMNIROUTE_API_KEY` kung nakatakda habang naka-off ang `REQUIRE_API_KEY` ; `a2aEnabled` |
 
-**Papasok na delegasyon ng Conductor (`POST /api/a2a/tasks`):** idinedelega ng mga panlabas na A2A agent ang gawaing coding sa OmniConductor fleet sa pamamagitan ng OmniRoute. Body: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — tanging mga skill ng Conductor fleet (ang mga inanunsyo sa Agent Card) ang maaaring delegahan; kinakailangan ang `metadata.conductor.repo.url` (gumagana ang fleet sa mga git repo). Isinasalin ng route ito sa `POST /v1/tasks` ng hub gamit ang server-side na `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback na `CONDUCTOR_HUB_TOKEN`) at nagbabalik ng `201 { conductor_task_id, state: "submitted" }`; dumadaloy pabalik ang mga katayuan ng task sa pamamagitan ng SSE→A2A mirror (RF1) at makikita ang mga ito sa pamamagitan ng `GET /api/a2a/tasks?skill=conductor`.
+Kung sino ang makakarating sa mga ruta `/api/a2a/tasks*` ay nakasalalay sa mga setting ng pag-login at API-key:
+
+- `requireLogin=true` (default): tinatanggap lang ng middleware ang mga kredensyal sa pamamahala (dashboard session, `manage` -scope API key, `oma_` access token) at `OMNIROUTE_API_KEY`. Ang isang simpleng inference key ay nakakakuha ng `403`. Sa `Authorization` header ang middleware ay kumukuha lamang `OMNIROUTE_API_KEY` bilang `Bearer <key>`; isang hubad na key o isang tab pagkatapos `Bearer` ay makakakuha ng `401`.
+- `requireLogin=false`, o ang loopback na window bago mag-onboard: sa `REQUIRE_API_KEY=true` ang anumang wastong OmniRoute API key o kredensyal sa pamamahala ay tinatanggap at ang mga hindi kilalang tumatawag ay nakakakuha `401`; may `REQUIRE_API_KEY` off ang mga ruta ay bukas.
+- `POST /api/a2a/tasks` ay nangangailangan din ng `OMNIROUTE_API_KEY` sa `Authorization` header kapag nakatakda ang variable na iyon at naka-off `REQUIRE_API_KEY`. Ang ibang mga header, gaya ng `x-api-key`, ay hindi binibilang doon. Kapag naka-off ang pag-log in o bago mag-onboard, pumasa ang key na mayroon o walang prefix `Bearer` ; kapag naka-on ang pag-login, ang `Bearer <key>` lang ang makakalagpas sa middleware.
+
+Kung saan kinakailangan ang kredensyal, gagana lang ang `read` -scope `oma_` token para sa `GET`.
+
+**Delegasyon ng Inbound Conductor (`POST /api/a2a/tasks`):** itinalaga ng mga panlabas na ahente A2A ang coding work sa OmniConductor fleet sa pamamagitan ng OmniRoute. Katawan: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — lamang ang mga kasanayan sa fleet ng konduktor (ang mga inihayag sa Agent Card) ay delegado; `metadata.conductor.repo.url` ay kinakailangan (ang fleet ay gumagana sa git repos). Ang ruta ay isinasalin sa `POST /v1/tasks` ng hub gamit ang server-side `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) at nagbabalik `201 { conductor_task_id, state: "submitted" }`; Ang mga estado ng gawain ay dumadaloy pabalik sa pamamagitan ng SSE→A2A mirror (RF1) at makikita sa pamamagitan ng `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Pagdaragdag ng Bagong Skill
+## Pagdaragdag ng Bagong Kasanayan
 
 1. **Gumawa ng skill file:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Mag-export ng async function na `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Sundin ang anyo ng mga kasalukuyang skill gaya ng `smartRouting.ts`.
+   Mag-export ng async function `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Sundin ang hugis ng mga umiiral na kasanayan tulad ng `smartRouting.ts`. Kung ang kasanayan ay tumatawag pabalik sa OmniRoute sa ibabaw ng HTTP, buuin ang mga header na may `buildSelfLoopHeaders(caller)` mula sa `src/lib/a2a/selfLoopAuth.ts` para tumakbo ang tawag gamit ang A2A na susi ng tumatawag, hindi `OMNIROUTE_API_KEY`, at ipasa `redirect: "error"` sa `fetch` upang ang isang pag-redirect ay hindi kailanman makakakuha ng susi. Ang katulong ay gumagawa lamang ng mga header; itinatakda ng bawat kasanayan ang mismong patakaran sa pag-redirect. Inihagis nito `UnsafeSelfLoopTargetError` sa halip na mag-attach ng key kapag ang naresolbang base URL ay plain http sa labas ng pribadong network (loopback, isang container o pangalan ng serbisyo, at ang mga pribadong address ay maayos) o may hawak na mga kredensyal, kaya ang isang kasanayang lumulunok sa mga tinanggihang tawag ay dapat ibalik ang error na iyon.
 
-2. **Irehistro ang handler:** sa `src/lib/a2a/taskExecution.ts`, magdagdag ng entry sa `A2A_SKILL_HANDLERS`:
+2. **Register handler:** sa `src/lib/a2a/taskExecution.ts`, magdagdag ng entry sa `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mga kasalukuyang skill
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Ilantad sa Agent Card:** sa `src/app/.well-known/agent.json/route.ts`, idagdag sa dulo ng `skills` array:
+3. **Expose sa Agent Card:** sa `src/lib/a2a/agentCardMetadata.ts` (ibinahagi ng `/.well-known/agent.json` at `/.well-known/agent-card.json`), idagdag sa `skills` array:
 
    ```json
    {
@@ -227,9 +235,9 @@ Ang JSON-RPC endpoint na `/a2a` ang kanonikal na A2A entry point. Nagbibigay ang
    }
    ```
 
-4. **Sumulat ng mga test:** `tests/unit/a2a-<your-skill>.test.ts`. Saklawin ang matagumpay na path + error path.
+4. **Sumulat ng mga pagsubok:** `tests/unit/a2a-<your-skill>.test.ts`. Takpan ang happy path + error path.
 
-5. **Idokumento** ang bagong skill sa talahanayang `Available Skills` ng file na ito.
+5. **Dokumento** ang bagong kasanayan sa `Available Skills` table ng file na ito.
 
 ---
 
@@ -266,9 +274,9 @@ naisumite → ginagawa → nakumpleto
 
 ---
 
-## Mga Halimbawa ng Integrasyon
+## Mga Halimbawa ng Pagsasama
 
-### Python (requests)
+### Python (mga kahilingan)
 
 ```python
 import requests
@@ -287,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (kunin)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

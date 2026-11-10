@@ -75,7 +75,7 @@ test("a response served by the emergency fallback names the swap in a header", a
         headers: { "Content-Type": "application/json" },
       });
     }
-    return buildOpenAIResponse("served by fallback", "gpt-oss-120b");
+    return buildOpenAIResponse("served by fallback", "nvidia/nemotron-3.5-super-vl-120b-a12b");
   };
 
   const response = await handleChat(
@@ -93,7 +93,7 @@ test("a response served by the emergency fallback names the swap in a header", a
   assert.equal(calls, 2);
   assert.equal(
     response.headers.get(EMERGENCY_HEADER),
-    "from=openai/gpt-4.1; to=nvidia/openai/gpt-oss-120b"
+    "from=openai/gpt-4.1; to=nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b"
   );
 });
 

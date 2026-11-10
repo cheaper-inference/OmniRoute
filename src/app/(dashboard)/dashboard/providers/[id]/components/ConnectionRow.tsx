@@ -3,6 +3,11 @@
 import Icon from "@/shared/components/Icon";
 
 import { buttonVariants } from "@omniroute/ui-kit/button";
+import {
+  ChatGptManageUsageButton,
+  ChatGptUsageLimitNotice,
+} from "@/shared/components/ChatGptPlanUi";
+import { hasChatGptUsageLimit } from "@/shared/utils/chatgptPlanUi";
 import ConnectionTestButton from "@/shared/components/ConnectionTestButton";
 
 // Phase 1d extraction — Issue #3501
@@ -16,15 +21,16 @@ import { Badge, Button, Checkbox, ReorderControl, Select, Toggle } from "@/share
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
-import { shouldShowConnectionLastError } from "./connectionRowHelpers";
+import { shouldShowConnectionLastError, formatRelativeAge } from "./connectionRowHelpers";
 import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import type { ConnectionRowProps } from "./connectionRowTypes";
 import { getStatusPresentation } from "./connectionRowStatus";
 import { getCodexEffectiveServiceTier } from "@/lib/providers/codexFastTier";
 import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers";
-import { getCodexPlanLabel } from "../codexPlanLabel";
+import { formatCodexPlanLabel, getCodexAccountSummary, getCodexPlanLabel } from "../codexPlanLabel";
 import CodexAccountDetails from "./CodexAccountDetails";
 import ConnectionQuotaPanel from "./ConnectionQuotaPanel";
+import ConnectionQuotaRefreshButton from "./ConnectionQuotaRefreshButton";
 import ConnectionIdChip from "./ConnectionIdChip";
 import {
   isProviderQuotaVisible,
@@ -139,9 +145,12 @@ export default function ConnectionRow({
   onToggleProxyEnabled,
   quotaCache,
   quotaRefreshing,
+  quotaRefreshState,
   onRefreshQuota,
 }: ConnectionRowProps) {
   const t = useTranslations("providers");
+  const isChatGpt = connection.provider === "chatgpt";
+  const chatGptRenewsAutomatically = isChatGpt && connection.testStatus === "active";
   const locale = useLocale();
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const displayName = isOAuth
@@ -270,6 +279,7 @@ export default function ConnectionRow({
     : false;
   const codexPaidCreditsEnabled = connection.providerSpecificData?.allowPaidCredits === true;
   const codexPlanLabel = getCodexPlanLabel(!!isCodex, connection.providerSpecificData);
+  const codexAccount = getCodexAccountSummary(!!isCodex, connection.providerSpecificData);
   // Per-account quota strip — gated per connection (not per page) so family
   // aliases and openai-compatible-* nodes with their own quotaEndpoint qualify.
   const quotaPanelSupported =
@@ -293,33 +303,36 @@ export default function ConnectionRow({
   const effectiveUpstreamProxyMode = upstreamProxyMode ?? "native";
   const autoSyncEnabled = !!(connection.providerSpecificData as Record<string, unknown> | undefined)
     ?.autoSync;
-  const [syncClock, setSyncClock] = useState<number | null>(null);
+  // One clock for the whole row: the age of the last catalog sync and the age
+  // of the last discovery outcome both read from it, so the two never
+  // disagree — and the row never calls Date.now() while rendering.
+  const [rowClock, setRowClock] = useState<number | null>(null);
   useEffect(() => {
-    const update = () => setSyncClock(Date.now());
+    const update = () => setRowClock(Date.now());
     update();
     const timer = setInterval(update, 60_000);
     return () => clearInterval(timer);
   }, []);
   const lastSync = connection.syncedModelsAt ? Date.parse(connection.syncedModelsAt) : NaN;
   const validSync = Number.isFinite(lastSync) && lastSync > 0;
-  const ageMinutes =
-    validSync && syncClock !== null
-      ? Math.max(0, Math.floor((syncClock - lastSync) / 60_000))
-      : null;
-  const ageUnit =
-    ageMinutes === null ? null : ageMinutes < 60 ? "minute" : ageMinutes < 1440 ? "hour" : "day";
-  const ageValue =
-    ageMinutes === null
-      ? 0
-      : ageUnit === "minute"
-        ? ageMinutes
-        : ageUnit === "hour"
-          ? Math.floor(ageMinutes / 60)
-          : Math.floor(ageMinutes / 1440);
-  const syncAgeLabel =
-    ageUnit === null
-      ? null
-      : new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(-ageValue, ageUnit);
+  const syncAgeLabel = rowClock === null ? null : formatRelativeAge(lastSync, rowClock, locale);
+  // The outcome of the last discovery of this connection. Only a failure is
+  // shown: the cause is a technical value next to the label, never a sentence,
+  // and the label says nothing about the model list the page displays.
+  const discoveryState = connection.discoveryState;
+  const discoveryFailed = discoveryState?.status === "degraded";
+  const discoveryAt = discoveryState?.at ? Date.parse(discoveryState.at) : NaN;
+  const discoveryAgeLabel =
+    rowClock === null ? null : formatRelativeAge(discoveryAt, rowClock, locale);
+  const discoveryCause = discoveryFailed && discoveryState?.cause ? discoveryState.cause : null;
+  const discoveryTitle = discoveryFailed
+    ? [
+        discoveryState?.at ? new Date(discoveryState.at).toLocaleString(locale) : null,
+        discoveryCause,
+      ]
+        .filter(Boolean)
+        .join(" — ")
+    : "";
 
   return (
     <div
@@ -346,15 +359,33 @@ export default function ConnectionRow({
           className="hidden text-text-muted sm:inline-block"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium break-words sm:truncate">{displayName}</p>
+          <p className="text-sm font-medium break-words sm:truncate">
+            {displayName}
+            {codexAccount && (
+              <span
+                className="font-normal text-text-muted"
+                title={
+                  codexAccount.role ? t("codexAccountRole", { role: codexAccount.role }) : undefined
+                }
+              >
+                {" · "}
+                {t(
+                  codexAccount.kind === "business" ? "codexAccountBusiness" : "codexAccountPersonal"
+                )}
+                {codexAccount.workspaceName ? ` · ${codexAccount.workspaceName}` : ""}
+              </span>
+            )}
+          </p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <Badge variant={statusPresentation.statusVariant as any} size="sm" dot>
               {statusPresentation.statusLabel}
             </Badge>
             {codexPlanLabel && (
-              <Badge variant="primary" size="sm" className="capitalize">
-                {codexPlanLabel}
-              </Badge>
+              <span title={codexPlanLabel}>
+                <Badge variant="primary" size="sm">
+                  {formatCodexPlanLabel(codexPlanLabel)}
+                </Badge>
+              </span>
             )}
             {planLabel && (
               <span title={t("quotaPlanBadge")}>
@@ -382,10 +413,16 @@ export default function ConnectionRow({
                 ) : null
               ) : tokenMinsLeft < 30 ? (
                 <Badge
-                  variant="warning"
+                  variant={chatGptRenewsAutomatically ? "info" : "warning"}
                   size="sm"
-                  icon={<Icon name="warning" size={11} />}
-                  title={t("tokenExpiresSoonTitle", { minutes: tokenMinsLeft })}
+                  icon={
+                    <Icon name={chatGptRenewsAutomatically ? "autorenew" : "warning"} size={11} />
+                  }
+                  title={
+                    chatGptRenewsAutomatically
+                      ? t("chatgptTokenRenewsTitle", { minutes: tokenMinsLeft })
+                      : t("tokenExpiresSoonTitle", { minutes: tokenMinsLeft })
+                  }
                 >
                   {`~${tokenMinsLeft}m`}
                 </Badge>
@@ -397,6 +434,14 @@ export default function ConnectionRow({
               <Badge variant={statusPresentation.errorBadge.variant} size="sm">
                 {t(statusPresentation.errorBadge.labelKey)}
               </Badge>
+            )}
+            {connection.prefixShadowed && connection.isActive !== false && (
+              <span
+                className="text-xs text-warning truncate max-w-[300px]"
+                title={connection.prefixShadowed.message}
+              >
+                {connection.prefixShadowed.code}: {connection.prefixShadowed.message}
+              </span>
             )}
             {shouldShowConnectionLastError(connection) && (
               <span
@@ -447,6 +492,13 @@ export default function ConnectionRow({
                 onToggle={onToggleQuotaVisibility}
               />
             )}
+            {connection.provider === "codex" && onRefreshQuota && (
+              <ConnectionQuotaRefreshButton
+                refreshing={quotaRefreshing}
+                state={quotaRefreshState}
+                onRefresh={onRefreshQuota}
+              />
+            )}
             {onToggleAutoSync && (
               <>
                 <span className="hidden text-text-muted/30 select-none sm:inline">|</span>
@@ -477,6 +529,21 @@ export default function ConnectionRow({
                     : t("autoSyncNeverSynced")}
                 </span>
               </>
+            )}
+            {discoveryFailed && discoveryAgeLabel && (
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-warning/15 text-warning"
+                title={discoveryTitle}
+                data-testid="connection-discovery-state"
+              >
+                <Icon name="warning" size={11} />
+                {t("discoveryDegradedStatus", { time: discoveryAgeLabel })}
+                {discoveryCause && (
+                  <span className="font-mono opacity-80" data-testid="connection-discovery-cause">
+                    {discoveryCause}
+                  </span>
+                )}
+              </span>
             )}
             {isClaude && (
               <>
@@ -539,12 +606,12 @@ export default function ConnectionRow({
                   }
                   className="w-auto"
                   selectClassName="text-xs font-medium"
-                  title="Upstream proxy routing for Claude Code traffic"
+                  title={t("claudeCodeRoutingTitle")}
                 >
-                  <option value="native">Native</option>
+                  <option value="native">{t("routingNative")}</option>
                   <option value="cliproxyapi">CLIProxyAPI</option>
                   <option value="dario">Dario</option>
-                  <option value="fallback">Fallback</option>
+                  <option value="fallback">{t("routingFallback")}</option>
                 </Select>
                 {effectiveUpstreamProxyMode === "fallback" && (
                   <Select
@@ -558,7 +625,7 @@ export default function ConnectionRow({
                     }
                     className="w-auto"
                     selectClassName="text-xs font-medium"
-                    title="Fallback retry backend"
+                    title={t("fallbackRetryBackendTitle")}
                   >
                     <option value="cliproxyapi">→ CLIProxyAPI</option>
                     <option value="dario">→ Dario</option>
@@ -716,6 +783,7 @@ export default function ConnectionRow({
           >
             <span className="hidden sm:inline">{t("retest")}</span>
           </Button>
+          {isChatGpt && <ChatGptManageUsageButton />}
           {/* T12: Manual token refresh for OAuth accounts */}
           {onRefreshToken && (
             <Button
@@ -726,10 +794,14 @@ export default function ConnectionRow({
               disabled={connection.isActive === false || isRefreshing}
               onClick={onRefreshToken}
               className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-warning hover:text-warning"
-              aria-label={t("tokenShort")}
-              title={t("refreshOauthTokenTitle")}
+              aria-label={isChatGpt ? t("chatgptRefreshToken") : t("tokenShort")}
+              title={isChatGpt ? t("chatgptRefreshTokenTitle") : t("refreshOauthTokenTitle")}
             >
-              <span className="hidden sm:inline">{t("tokenShort")}</span>
+              {isChatGpt ? (
+                <span className="hidden sm:inline">{t("chatgptRefreshToken")}</span>
+              ) : (
+                <span className="hidden sm:inline">{t("tokenShort")}</span>
+              )}
             </Button>
           )}
           {isCodex && isOAuth && connection.provider === "codex" && (
@@ -811,6 +883,7 @@ export default function ConnectionRow({
                 size="icon-sm"
                 icon="passkey"
                 onClick={onReauth}
+                aria-haspopup="dialog"
                 className="size-7 min-h-7 rounded hover:bg-warning/10 text-warning"
                 title={t("reauthenticateConnection")}
                 aria-label={t("reauthenticateConnection")}
@@ -863,6 +936,11 @@ export default function ConnectionRow({
           </div>
         </div>
       </div>
+      {hasChatGptUsageLimit(connection) && (
+        <div className="w-full pt-3">
+          <ChatGptUsageLimitNotice />
+        </div>
+      )}
       {isCodex && connection.codexAccountPool ? (
         <div className="basis-full min-w-0">
           <CodexAccountDetails pool={connection.codexAccountPool} />
@@ -875,7 +953,7 @@ export default function ConnectionRow({
             connection={connection}
             cache={quotaCache}
             refreshing={quotaRefreshing}
-            onRefresh={onRefreshQuota}
+            onRefresh={connection.provider === "codex" ? undefined : onRefreshQuota}
           />
         </div>
       ) : null}

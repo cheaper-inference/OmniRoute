@@ -188,6 +188,24 @@ describe("PlaygroundStudio", () => {
     expect(textContents.some((t) => t.includes("tabBuild"))).toBe(true);
   });
 
+  // #18071: below `md` the config pane stacks under the tab content instead of squeezing it.
+  it("stacks the tab content above the config pane below md (#18071)", () => {
+    const el = renderStudio();
+    const aside = el.querySelector("aside");
+    const main = aside?.parentElement;
+    const classes = (main?.className ?? "").split(/\s+/);
+    expect(classes).toContain("flex-col");
+    expect(classes).toContain("md:flex-row");
+    // Stacked, the tab content keeps a usable minimum height on short screens and scrolls
+    // (ApiTab has no height of its own); from md it is the clipped flex column it was before.
+    const content = main?.firstElementChild;
+    const contentClasses = (content?.className ?? "").split(/\s+/);
+    expect(contentClasses).toContain("min-h-40");
+    expect(contentClasses).toContain("overflow-y-auto");
+    expect(contentClasses).toContain("md:min-h-0");
+    expect(contentClasses).toContain("md:overflow-hidden");
+  });
+
   it("defaults to Chat tab as active", () => {
     const el = renderStudio();
     const activeTab = el.querySelector("[role='tab'][aria-selected='true']");
