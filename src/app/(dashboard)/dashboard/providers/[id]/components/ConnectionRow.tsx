@@ -177,10 +177,13 @@ export default function ConnectionRow({
   const cookieExpiresAt = readCookieExpiresAt(connection.providerSpecificData);
   // Antigravity 403 VALIDATION_REQUIRED: Google link that unlocks the account (validated host).
   const storedVerificationUrl = readStoredVerificationUrl(connection.providerSpecificData);
-  const verificationUrl = targetGoogleVerificationUrl(
-    storedVerificationUrl,
-    connection.email || connection.name
-  );
+  const verificationEmail =
+    typeof connection.email === "string" && connection.email.includes("@")
+      ? connection.email
+      : typeof connection.name === "string" && connection.name.includes("@")
+        ? connection.name
+        : undefined;
+  const verificationUrl = targetGoogleVerificationUrl(storedVerificationUrl, verificationEmail);
   const effectiveExpiresAt = connection.tokenExpiresAt || connection.expiresAt || cookieExpiresAt;
   const hasExpirySource = isOAuth || Boolean(cookieExpiresAt);
   const getTokenMinsLeft = () => {

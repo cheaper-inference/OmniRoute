@@ -894,7 +894,7 @@ export async function testOAuthConnection(
         ? `Access denied: ${sanitizeUpstreamBodyText(bodyText)}`
         : "Access denied";
     const storedVUrl =
-      connection.provider === "antigravity" || connection.provider === "agy"
+      (connection.provider === "antigravity" || connection.provider === "agy") && res.status === 403
         ? (recordedVerificationUrl ?? readStoredVerificationUrl(connection.providerSpecificData))
         : null;
 

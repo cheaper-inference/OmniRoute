@@ -1,3 +1,4 @@
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 /**
  * #11284 — Antigravity OAuth connect-time DEGRADE marking for accounts without
  * a Cloud Code projectId. Shared helper used by the OAuth route's `exchange`,
@@ -69,8 +70,8 @@ export function antigravityDegradedProjectState(
 
   const psd = toRecord(tokenData?.providerSpecificData);
   const verificationUrl =
-    (typeof tokenData?.verificationUrl === "string" && tokenData.verificationUrl) ||
-    (typeof psd.verificationUrl === "string" && psd.verificationUrl) ||
+    readStoredVerificationUrl({ verificationUrl: tokenData?.verificationUrl }) ||
+    readStoredVerificationUrl(psd) ||
     "";
 
   if (verificationUrl) {

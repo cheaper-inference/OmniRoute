@@ -188,21 +188,21 @@ export function targetGoogleVerificationUrl(
   const trimmedUrl = url.trim();
   if (!trimmedUrl) return null;
 
-  // The QR code challenge (accounts.google.com/signin/continue) and the appeal form (forms.gle)
-  // carry session-specific continuation tokens and must open directly without wrapping.
-  // ONLY generic Google MyAccount pages (like age-verification) require targeting the specific
-  // account email to prevent the browser from defaulting to the primary signed-in Google profile.
-  if (!trimmedUrl.includes("myaccount.google.com")) {
-    return trimmedUrl;
-  }
-
-  const trimmedEmail = typeof email === "string" ? email.trim() : "";
-  if (!trimmedEmail || !trimmedEmail.includes("@")) {
-    return trimmedUrl;
-  }
-
   try {
     const parsed = new URL(trimmedUrl);
+    const host = parsed.hostname.toLowerCase();
+    // The QR code challenge (accounts.google.com/signin/continue) and the appeal form (forms.gle)
+    // carry session-specific continuation tokens and must open directly without wrapping.
+    // ONLY generic Google MyAccount pages (like age-verification) require targeting the specific
+    // account email to prevent the browser from defaulting to the primary signed-in Google profile.
+    if (host !== GOOGLE_MYACCOUNT_HOST) {
+      return trimmedUrl;
+    }
+
+    const trimmedEmail = typeof email === "string" ? email.trim() : "";
+    if (!trimmedEmail || !trimmedEmail.includes("@")) {
+      return trimmedUrl;
+    }
     if (
       parsed.hostname.toLowerCase() === "accounts.google.com" &&
       parsed.pathname === "/AccountChooser"
