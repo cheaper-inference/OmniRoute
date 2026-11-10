@@ -104,6 +104,22 @@ type ToolCallCarrier = {
   item?: { type?: unknown } | null;
 };
 
+function isToolItem(item: { type?: unknown } | null | undefined): boolean {
+  return item?.type === "function_call" || item?.type === "custom_tool_call";
+}
+
+/** Gemini `functionCall` parts, Claude `tool_use` start event, Responses item events. */
+function carriesStreamOrGeminiToolCall(r: ToolCallCarrier): boolean {
+  const fromCandidates = (Array.isArray(r.candidates) ? r.candidates : []).some((c) =>
+    (Array.isArray(c?.content?.parts) ? c.content.parts : []).some((p) => !!p?.functionCall)
+  );
+  const fromClaudeEvent = r.type === "content_block_start" && r.content_block?.type === "tool_use";
+  const fromResponsesEvent =
+    (r.type === "response.output_item.added" || r.type === "response.output_item.done") &&
+    isToolItem(r.item);
+  return fromCandidates || fromClaudeEvent || fromResponsesEvent;
+}
+
 /**
  * True when a response (or one stream chunk) carries client-visible tool calls: OpenAI
  * `tool_calls` / `function_call`, Claude `tool_use` (block or stream start event), Gemini
@@ -120,24 +136,8 @@ function carriesToolCalls(response: unknown): boolean {
   const fromBlocks = (Array.isArray(r.content) ? r.content : []).some(
     (b) => b?.type === "tool_use"
   );
-  const fromOutput = (Array.isArray(r.output) ? r.output : []).some(
-    (i) => i?.type === "function_call" || i?.type === "custom_tool_call"
-  );
-  const fromCandidates = (Array.isArray(r.candidates) ? r.candidates : []).some((c) =>
-    (Array.isArray(c?.content?.parts) ? c.content.parts : []).some((p) => !!p?.functionCall)
-  );
-  const fromClaudeEvent = r.type === "content_block_start" && r.content_block?.type === "tool_use";
-  const fromResponsesEvent =
-    (r.type === "response.output_item.added" || r.type === "response.output_item.done") &&
-    (r.item?.type === "function_call" || r.item?.type === "custom_tool_call");
-  return (
-    fromChoices ||
-    fromBlocks ||
-    fromOutput ||
-    fromCandidates ||
-    fromClaudeEvent ||
-    fromResponsesEvent
-  );
+  const fromOutput = (Array.isArray(r.output) ? r.output : []).some(isToolItem);
+  return fromChoices || fromBlocks || fromOutput || carriesStreamOrGeminiToolCall(r);
 }
 
 function stringifyValue(val: unknown): string {
