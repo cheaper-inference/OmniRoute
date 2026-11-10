@@ -1330,7 +1330,11 @@ export async function getProviderCredentials(
         connectionFilterStatus.set(c.id, "excluded");
         return false;
       }
-      if (provider === "codex" && options.requirePaidCodexPlan && isCodexFreePlan(c.providerSpecificData)) {
+      if (
+        provider === "codex" &&
+        options.requirePaidCodexPlan &&
+        isCodexFreePlan(c.providerSpecificData)
+      ) {
         connectionFilterStatus.set(c.id, "freePlan");
         return false;
       }
@@ -1470,8 +1474,10 @@ export async function getProviderCredentials(
         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
         const codexScopeCooldownMs =
           provider === "codex" &&
-          !(options.requirePaidCodexPlan &&
-            isCodexTextQuotaPreflightCooldown(connection, requestedModel))
+          !(
+            options.requirePaidCodexPlan &&
+            isCodexTextQuotaPreflightCooldown(connection, requestedModel)
+          )
             ? parseFutureDateMs(getCodexChildCooldown(connection, requestedModel))
             : null;
         const modelLockout = requestedModel

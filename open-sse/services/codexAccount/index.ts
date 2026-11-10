@@ -180,8 +180,12 @@ export function isCodexTextQuotaPreflightCooldown(
   if (typeof model !== "string" || !model.trim()) return false;
   const scope = getCodexModelScope(model);
   const sources = connection.providerSpecificData.codexScopeRateLimitSource;
-  return !!sources && typeof sources === "object" && !Array.isArray(sources) &&
-    (sources as Record<string, unknown>)[scope] === "quota_preflight";
+  return (
+    !!sources &&
+    typeof sources === "object" &&
+    !Array.isArray(sources) &&
+    (sources as Record<string, unknown>)[scope] === "quota_preflight"
+  );
 }
 
 /** Return the active cooldown for the requested model's virtual child. */

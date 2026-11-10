@@ -521,22 +521,39 @@ test("an upstream Codex cooldown replaces preflight provenance and still blocks 
   });
   const resetAt = futureIso(120_000);
   await codexAccount.persistCodexChildCooldown({
-    connectionId: account.id, model: "gpt-5.5", rateLimitedUntil: resetAt,
+    connectionId: account.id,
+    model: "gpt-5.5",
+    rateLimitedUntil: resetAt,
     source: "quota_preflight",
   });
   await codexAccount.persistCodexChildCooldown({
-    connectionId: account.id, model: "gpt-5.5", rateLimitedUntil: futureIso(180_000),
+    connectionId: account.id,
+    model: "gpt-5.5",
+    rateLimitedUntil: futureIso(180_000),
   });
   // A late preflight must not overwrite the newer real upstream cooldown.
   await codexAccount.persistCodexChildCooldown({
-    connectionId: account.id, model: "gpt-5.5", rateLimitedUntil: futureIso(240_000),
+    connectionId: account.id,
+    model: "gpt-5.5",
+    rateLimitedUntil: futureIso(240_000),
     source: "quota_preflight",
   });
   const persisted = await providersDb.getProviderConnectionById(account.id);
   assert.equal(persisted.providerSpecificData.codexScopeRateLimitSource.codex, "fallback");
-  assert.equal(codexAccount.isCodexTextQuotaPreflightCooldown(persisted as never, "gpt-5.5"), false);
-  const result = await auth.getProviderCredentialsWithQuotaPreflight(
-    "codex", null, [account.id], "gpt-5.5", imageQuotaPreflightOptions("codex")
+  assert.equal(
+    codexAccount.isCodexTextQuotaPreflightCooldown(persisted as never, "gpt-5.5"),
+    false
   );
-  assert.notEqual(result?.connectionId, account.id, "real upstream cooldown must still block images");
+  const result = await auth.getProviderCredentialsWithQuotaPreflight(
+    "codex",
+    null,
+    [account.id],
+    "gpt-5.5",
+    imageQuotaPreflightOptions("codex")
+  );
+  assert.notEqual(
+    result?.connectionId,
+    account.id,
+    "real upstream cooldown must still block images"
+  );
 });

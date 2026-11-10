@@ -675,10 +675,8 @@ test("v1 image edit POST rejects Codex free-plan accounts before upstream", asyn
   );
   const body = (await response.json()) as ErrorResponseBody;
 
-  // The edit route intentionally uses the generic no-credentials response
-  // when every configured connection fails eligibility (including free plans).
-  assert.equal(response.status, 401);
-  assert.match(body.error.message, /No credentials for provider: codex/i);
+  assert.equal(response.status, 400);
+  assert.match(body.error.message, /paid ChatGPT\/Codex plan/i);
 });
 
 test("v1 image edit POST executes Codex through the configured connection proxy", async () => {
