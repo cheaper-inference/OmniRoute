@@ -1,1 +1,0 @@
-- **fix(resilience):** a key whose base URL is loopback or a private address is now benched for at most 5 seconds after a 429 or transient failure, so one slow local generation no longer parks the key for minutes.

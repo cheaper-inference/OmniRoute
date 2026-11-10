@@ -1,0 +1,1 @@
+- **fix(usage):** Requests rejected by API key policy or guardrails now count against the key in per-key usage reports, so a key with only rejected traffic no longer shows zero requests. ([#19632](https://github.com/cheaper-inference/OmniRoute/pull/19632))
