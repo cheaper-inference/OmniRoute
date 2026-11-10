@@ -1,1 +1,0 @@
-- **fix(usage):** text-to-speech, speech-to-text and rerank spend now counts toward a key's daily, weekly and 5-hour USD limits. Transcription is priced per second from the duration the provider reports.
