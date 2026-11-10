@@ -164,7 +164,7 @@ test("model card: icon + full name on top, copy pinned top-right, details below"
   const row = read(`${providerComponents}/ModelRow.tsx`);
   assert.match(row, /relative flex h-full w-full min-w-0 flex-col gap-1\.5/);
   assert.match(row, /<code className="min-w-0 break-all pt-px font-mono/);
-  assert.match(row, /<div className="flex min-w-0 items-center gap-2 pl-6">/);
+  assert.match(row, /<div className="flex min-w-0 flex-wrap items-center/);
   assert.match(
     read(`${providerComponents}/ModelCompatPopover.tsx`),
     /<span className="hidden sm:inline">\{t\("compatButtonLabel"\)\}<\/span>/

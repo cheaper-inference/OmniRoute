@@ -379,50 +379,52 @@ export default function ModelRow({
         title={t("copyModel")}
         aria-label={t("copyModel")}
       />
-      {/* Line 2 (never wraps): source, alias (truncates) and the actions, in the name's column. */}
-      <div className="flex min-w-0 items-center gap-2 pl-6">
-        <ModelSourceBadge source={model.source} />
-        {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
-        {onSaveContextWindowOverride && (
-          <ContextWindowOverrideField
-            editor={contextEditor}
-            override={contextWindowOverride}
-            saving={savingContextOverride}
-            t={t}
-          />
-        )}
-        {onSetAlias && (
-          <span className="flex min-w-0 flex-1 items-center text-[10px] gap-1">
-            {editing ? (
-              <KitInput
-                ref={inputRef}
-                type="text"
-                size="sm"
-                value={aliasValue}
-                onChange={(e) => setAliasValue(e.target.value)}
-                onBlur={handleAliasSubmit}
-                onKeyDown={handleKeyDown}
-                placeholder={providerText(t, "aliasInputPlaceholder", "alias name")}
-                aria-label={providerText(t, "aliasInputPlaceholder", "alias name")}
-                className="h-5 min-h-0 w-24 px-1 text-[9px]"
-              />
-            ) : (
-              <span
-                className={`min-w-0 truncate text-[10px] italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
-                onClick={startEditing}
-                title={
-                  alias
-                    ? providerText(t, "clickToEditAlias", "Alias: {alias} (click to edit)", {
-                        alias,
-                      })
-                    : providerText(t, "clickToSetAlias", "Click to set alias")
-                }
-              >
-                {alias || model.name || providerText(t, "clickToSetAlias", "Click to set alias")}
-              </span>
-            )}
-          </span>
-        )}
+      {/* Line 2: source, alias, combo badges and actions wrap gracefully instead of overflowing the card (#19543) */}
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-1.5 pl-6">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+          <ModelSourceBadge source={model.source} />
+          {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
+          {onSaveContextWindowOverride && (
+            <ContextWindowOverrideField
+              editor={contextEditor}
+              override={contextWindowOverride}
+              saving={savingContextOverride}
+              t={t}
+            />
+          )}
+          {onSetAlias && (
+            <span className="flex min-w-0 flex-1 items-center text-[10px] gap-1">
+              {editing ? (
+                <KitInput
+                  ref={inputRef}
+                  type="text"
+                  size="sm"
+                  value={aliasValue}
+                  onChange={(e) => setAliasValue(e.target.value)}
+                  onBlur={handleAliasSubmit}
+                  onKeyDown={handleKeyDown}
+                  placeholder={providerText(t, "aliasInputPlaceholder", "alias name")}
+                  aria-label={providerText(t, "aliasInputPlaceholder", "alias name")}
+                  className="h-5 min-h-0 w-24 px-1 text-[9px]"
+                />
+              ) : (
+                <span
+                  className={`min-w-0 truncate text-[10px] italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
+                  onClick={startEditing}
+                  title={
+                    alias
+                      ? providerText(t, "clickToEditAlias", "Alias: {alias} (click to edit)", {
+                          alias,
+                        })
+                      : providerText(t, "clickToSetAlias", "Click to set alias")
+                  }
+                >
+                  {alias || model.name || providerText(t, "clickToSetAlias", "Click to set alias")}
+                </span>
+              )}
+            </span>
+          )}
+        </div>
         <div className="ml-auto flex shrink-0 items-center gap-1">
           {onToggleHidden && testStatus === "error" && (
             <Button

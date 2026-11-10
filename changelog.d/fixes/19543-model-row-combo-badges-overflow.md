@@ -1,0 +1,1 @@
+- Allow Available Models card details and combo badges in `ModelRow` to wrap gracefully and prevent pills and action buttons from overflowing card boundaries on narrow grids (#19543).

@@ -35,7 +35,7 @@ export default function ModelComboBadge({ combos, t }: ModelComboBadgeProps) {
           key={name}
           href="/dashboard/combos"
           onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center gap-0.5 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide leading-none text-primary hover:border-primary/60 hover:bg-primary/20 transition-colors"
+          className="inline-flex shrink-0 whitespace-nowrap items-center gap-0.5 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide leading-none text-primary hover:border-primary/60 hover:bg-primary/20 transition-colors"
           title={providerText(t, "openComboTooltip", "Open Combos — used by {combo}", {
             combo: name,
           })}
