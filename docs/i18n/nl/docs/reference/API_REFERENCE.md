@@ -994,30 +994,28 @@ in plaats van tweemaal te worden verzonden. Bron: `src/lib/quota/quotaSessionRec
 
 ---
 
-## Zelfbedieningsgebruik (`/api/usage/om-usage`)
+## Selfservicegebruik (`/api/usage/om-usage`)
 
-Elke API-sleutel kan zijn **eigen** gebruik en quota lezen — zonder beheerdersauthenticatie. Dit is het endpoint dat een
-client (CLI, het OmniCopilot-paneel) gebruikt om de uitgaven van een sleutelhouder weer te geven.
+Elke API -sleutel kan lezen** zijn eigen** gebruik en quota — geen beheerauthenticatie. Dit is het eindpunt dat een klant (CLI, het OmniCopilot paneel) gebruikt om de uitgaven van een sleutelhouder te tonen.
 
 ```bash
-# Tekstvorm (het historische contract — platte tekst voor een terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Gestructureerde vorm — wat een UI gebruikt
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Voor de sleutel moet **`allowUsageCommand`** zijn ingeschakeld (standaard uitgeschakeld — de API-sleutelbeheerder van
-het dashboard schakelt dit per sleutel in of uit). Zonder deze optie antwoordt het endpoint met `403`.
+De sleutel moet hebben**`allowUsageCommand`** ingeschakeld (standaard uitgeschakeld — de API-sleutelbeheerder van het dashboard schakelt dit per sleutel). Zonder dit antwoord antwoordt het eindpunt `403`.
 
-`?format=json` retourneert een gediscrimineerde structuur, zodat een aanroeper nooit een gegevensveld uit een weigering leest. Bij succes:
+`?format=json` retourneert een onderscheidende vorm, zodat een beller nooit een gegevensveld van een weigering leest. Over succes:
 
 ```jsonc
 {
   "allowed": true,
-  // alleen aanwezig wanneer de sleutel heeft gekozen voor gebruikslimieten per sleutel (dagelijkse/wekelijkse USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1026,9 +1024,9 @@ het dashboard schakelt dit per sleutel in of uit). Zonder deze optie antwoordt h
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // de quota-snapshot van de geselecteerde provider, of null wanneer er nog niets in de cache staat:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // de snapshot van elke verbinding, zodat een UI verschillende providers naast elkaar kan weergeven:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1036,32 +1034,25 @@ het dashboard schakelt dit per sleutel in of uit). Zonder deze optie antwoordt h
 }
 ```
 
-Bij een weigering (`401` ongeldige sleutel / `403` niet toegestaan) retourneert dezelfde route
-`{ "allowed": false, "error": { "message": "…" } }` — een aanwezige maar lege `personal`/`provider`
-(sleutel toegestaan, maar er is nog niets bekend) is een andere status dan een weigering, en alleen de JSON-vorm
-maakt dit onderscheid.
+Bij weigering (`401` slechte sleutel / `403` niet toegestaan) retourneert dezelfde route `{ "allowed": false, "error": { "message": "…" } }` — een huidige maar lege `personal`/`provider` (sleutel toegestaan, nog niets geleerd) is een andere staat dan een weigering, en alleen de JSON vorm onderscheidt ze.
 
-**Authenticatie:** de eigen Bearer API-sleutel van de aanroeper, gevalideerd met `isValidApiKey` — dit is _niet_ het
-beheeroppervlak (`/api/keys/…`), dat achter `requireManagementAuth` blijft.
+**Autorisatie:** de eigen Bearer API sleutel van de beller, gevalideerd met `isValidApiKey` — dit is _niet_ het beheeroppervlak (`/api/keys/…`), dat achter `requireManagementAuth` blijft.
 
-### Ruwe versus cutoff-aangepaste quotapercentages
+### Ruwe versus voor cutoff aangepaste quotapercentages
 
-Bij het gebruik van `/api/usage/om-usage` moeten aanroepers rekening houden met het verschil tussen de
-percentages die worden gepresenteerd door de **platte tekstuitvoer** en de gestructureerde **JSON-uitvoer**:
+Bij het consumeren `/api/usage/om-usage` moeten bellers letten op het onderscheid tussen de percentages die worden weergegeven door de** uitvoer in platte tekst** en het gestructureerde**JSON uitvoer** :
 
-| Aspect                 | Tekstformaat (`/api/usage/om-usage` / `@@om-usage`)                                                      | JSON-formaat (`?format=json`)                                                    |
-| :--------------------- | :------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
-| **Uitvoerveld**        | `NN% left` (bijv. `20% left`)                                                                            | `provider.quotas` / `providers[].quotas`                                         |
-| **Meting**             | **Cutoff-aangepaste bruikbare limiet**: resterende capaciteit boven de cutoffdrempel                     | **Ruwe upstream-quota**: ongewijzigde meting van de provider                     |
-| **Cutoff-schaling**    | Geschaald via `effectiveRemainingPercent()`, zodat de beschermde reserve als `0% left` wordt weergegeven | Geen (ruwe snapshotwaarden zoals gerapporteerd door de provider)                 |
-| **Drempelgegevens**    | Verwerkt in het weergegeven percentage                                                                   | Opgeslagen in `quotaWindowThresholds` per verbinding (of serverstandaardwaarden) |
-| **Primaire consument** | Interactieve CLI's, terminalprompts, menselijke operators                                                | Programmatische integraties, dashboards, analyses, factureringstrackers          |
+| Aspect                 | Platte tekstformaat (`/api/usage/om-usage` / `@@om-usage`)                                             | JSON -formaat (`?format=json`)                                              |
+| :--------------------- | :----------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| **Uitvoerveld**        | `NN% left` (bijv. `20% left`)                                                                          | `provider.quotas` / `providers[].quotas`                                    |
+| **Meting**             | **Voor de cutoff aangepaste bruikbare hoeveelheid** : resterende capaciteit boven de uitschakeldrempel | **Ruw stroomopwaarts quotum** : niet-gecorrigeerde providermeting           |
+| **Cutoff-schaling**    | Geschaald via `effectiveRemainingPercent()` zodat de beschermde reserve luidt als `0% left`            | Geen (onbewerkte momentopnamewaarden zoals gerapporteerd door de provider)  |
+| **Drempelgegevens**    | Verwerkt in het weergegeven percentage                                                                 | Opgeslagen in `quotaWindowThresholds` per verbinding (of serverstandaarden) |
+| **Primaire consument** | Interactieve CLIs, terminalprompts, menselijke operators                                               | Programmatische integraties, dashboards, analyses, factureringstrackers     |
 
-#### De cutoff-aanpassingsformule
+#### De Cutoff-aanpassingsformule
 
-OmniRoute ondersteunt proactieve quota-cutoffs om uitputting upstream te voorkomen (geconfigureerd via de verbinding
-`quotaWindowThresholds`, standaardwaarden van de provider of globale veerkrachtinstellingen). Wanneer een cutoffdrempel
-(bijvoorbeeld `cutoff = 25%`) actief is voor een quotavenster, berekent de tekstweergave de resterende limiet als:
+OmniRoute ondersteunt proactieve quota-afsluitingen om stroomopwaartse uitputting te voorkomen (geconfigureerd via verbinding `quotaWindowThresholds`, standaardinstellingen van de provider of instellingen voor mondiale veerkracht). Wanneer een drempelwaarde (bijv. `cutoff = 25%`) actief is in een quotavenster, berekent de tekstrenderer de resterende ruimte als:
 
 - Als `remaining <= cutoff`: retourneert `0%`.
 - Als `remaining > cutoff`: retourneert `((remaining - cutoff) / (100 - cutoff)) * 100`.
@@ -1070,22 +1061,22 @@ De opgemaakte tekstuitvoer rondt dit af op het dichtstbijzijnde gehele getal (`M
 
 #### Illustratief voorbeeld
 
-Beschouw een providervenster met **60% raw gebruik** (dus **40% raw resterend quotum**) en een geconfigureerde drempel voor **25% resterend quotum**:
+Overweeg een providervenster met** 60% ruw gebruik** (vandaar** 40% onbewerkt resterend quotum** ) en een geconfigureerd** 25% resterende quotalimiet** drempelwaarde:
 
-| Representatie                  | Berekening                                         | Resterend |               Impliciet gebruikt               |
-| :----------------------------- | :------------------------------------------------- | :-------: | :--------------------------------------------: |
-| **Raw JSON (`?format=json`)**  | Upstream-snapshot (`quotas[window]`)               |  **40%**  |                    **60%**                     |
-| **Tekstindeling (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**  | **80%** (bij berekening van `100 - remaining`) |
+| Vertegenwoordiging             | Berekening                                         | Overig  |              Impliciet gebruikt               |
+| :----------------------------- | :------------------------------------------------- | :-----: | :-------------------------------------------: |
+| **Ruwe JSON (`?format=json`)** | Stroomopwaartse momentopname (`quotas[window]`)    | **40%** |                    **60%**                    |
+| **Tekstformaat (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (bij het berekenen `100 - remaining`) |
 
-- **Waarom tekst 20% resterend toont:** Van de 40% fysieke quotum die nog beschikbaar is op het account, wordt 25% gereserveerd door het cutoffbeleid. De aanroeper heeft nog slechts 15% van de 75% bruikbare headroom voordat de router stopt met routeren naar deze verbinding. Schalen zorgt ervoor dat de verbinding precies **`0% left`** signaleert wanneer het routeren stopt.
-- **Waarom JSON raw waarden behoudt:** De JSON-payload retourneert de exacte provid momentopname (`UsageSnapshot`), zodat externe tools toegang hebben tot de werkelijke upstream-benutting en de verbindingsspecifieke `quotaWindowThresholds` zonder verliesgevende schaling aan de serverzijde.
+- **Waarom tekst nog 20% over heeft:** Van de 40% fysieke quota die nog op de rekening staan, wordt 25% gereserveerd door het afsluitingsbeleid. De beller heeft nog slechts 15% van de 75% bruikbare ruimte over voordat de router stopt met routeren naar deze verbinding. Schalen zorgt ervoor dat de verbindingssignalen uitgeput raken (`0% left`) precies op het moment dat de routering stopt.
+- **Waarom JSON ruwe waarden behoudt:** De JSON payload retourneert de exacte momentopname van de provider (`UsageSnapshot`), zodat externe tools toegang hebben tot ground-truth upstream-gebruik en `quotaWindowThresholds` op verbindingsniveau zonder verliesgevende schaling aan de serverzijde.
 
-#### Migratiehandleiding voor consumenten
+#### Begeleiding van consumentenmigratie
 
-Als een externe integratie (zoals een editorplug-in of agentextensie) voorheen het teksteindpunt (`NN% left`) uitleesde en het gebruikte percentage berekende als `100 - NN`, betekent migratie naar `?format=json` het volgende:
+Als een externe integratie (zoals een editorplug-in of agentextensie) eerder het teksteindpunt (`NN% left`) heeft geschraapt en het gebruikte percentage als `100 - NN` heeft berekend, betekent migreren naar `?format=json` het volgende:
 
-- Het lezen van raw JSON-waarden weerspiegelt het **werkelijke upstream-verbruik** (in het bovenstaande voorbeeld 60% gebruikt).
-- Als de integratie de semantiek van de bruikbare toelage van het teksteindpunt wil behouden, kan deze de formule voor effectief resterend quotum client-side evalueren met behulp van `quotaWindowThresholds` voor overschrijvingen op verbindingsniveau.
+- Het lezen van ruwe JSON -waarden zal reflecteren** werkelijke stroomopwaartse consumptie** (60% gebruikt in het bovenstaande voorbeeld).
+- Als de integratie de semantiek van het teksteindpunt wil behouden, kan deze de effectieve resterende formule aan de clientzijde evalueren met behulp van `quotaWindowThresholds` voor overschrijvingen op verbindingsniveau.
 
 ---
 
@@ -1265,36 +1256,37 @@ Implementatie: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/mode
 
 `PATCH /api/keys/{id}` werkt de machtigingen van een bestaande sleutel bij. Zoals elke `/api/keys*` route heeft deze beheerautorisatie nodig (zie [Beheerauthenticatie](../guides/MANAGEMENT-AUTH.md) ), geen inferentiesleutel. Stuur alleen de velden die u wilt wijzigen; een verzoek dat geen van beide bevat, wordt afgewezen met `No valid fields to update`. De geaccepteerde velden worden gedefinieerd door `updateKeyPermissionsSchema` in `src/shared/validation/schemas/keys.ts`.
 
-| Veld                                        | Type                                                                         | Opmerkingen                                                                                                                                     |
-| ------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | tekenreeks, 1-200 tekens                                                     |                                                                                                                                                 |
-| `isActive`                                  | Booleaans                                                                    |                                                                                                                                                 |
-| `isBanned`                                  | Booleaans                                                                    |                                                                                                                                                 |
-| `expiresAt`                                 | ISO 8601 datetime of `null`                                                  | `null` wist de vervaldatum                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                        | `allowedModels` moet leeg zijn als de modus `all` is                                                                                            |
-| `allowedModels`, `blockedModels`            | reeks tekenreeksen, maximaal 1000                                            |                                                                                                                                                 |
-| `allowedCombos`                             | reeks tekenreeksen, maximaal 500                                             | Poorten welke combo's de sleutel kan oproepen; directe modellen worden beheerst door `modelAccessMode` / `allowedModels`                        |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                        | `allowedConnections` moet niet leeg zijn als `restricted` en leeg als `all`                                                                     |
-| `allowedConnections`                        | array van UUIDs, maximaal 100                                                |                                                                                                                                                 |
-| `allowAutoCombos`                           | Booleaans                                                                    | `false` wijst verzoeken voor `auto/*` modellen met deze sleutel af; sleutels die het nooit instellen zijn toegestaan                            |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                | Wat `GET /v1/models` vermeldt voor deze sleutel (alleen combo's, alleen modellen of beide); het verandert niets aan wat de sleutel kan oproepen |
-| `forcedModel`                               | tekenreeks tot 300 tekens, of `null`                                         | Stuurt chatverzoeken naar deze model/combo, via `X-Route-Model` en `body.model`; de limieten van de sleutel zijn nog steeds van toepassing      |
-| `noLog`, `autoResolve`                      | Booleaans                                                                    |                                                                                                                                                 |
-| `throttleDelayMs`                           | geheel getal, 0-300000                                                       |                                                                                                                                                 |
-| `maxSessions`                               | geheel getal, 0-10000                                                        |                                                                                                                                                 |
-| `rateLimits`                                | reeks `{ limit, window }` (positieve gehele getallen, maximaal 50) of `null` | `null` verlegt de grenzen                                                                                                                       |
-| `accessSchedule`                            | schemaobject of `null`                                                       | `null` maakt het schema leeg                                                                                                                    |
-| `scopes`                                    | reeks tekenreeksen, maximaal 32                                              |                                                                                                                                                 |
-| `allowedEndpoints`                          | reeks tekenreeksen, maximaal 20                                              |                                                                                                                                                 |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                           |                                                                                                                                                 |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                         | Zie [Cache-bypass per sleutel](#per-key-cache-bypass)                                                                                           |
-| `compressionEnabled`                        | Booleaans                                                                    |                                                                                                                                                 |
-| `codexServiceMode`                          | een van de Codex -servicemodi                                                |                                                                                                                                                 |
-| `disableNonPublicModels`                    | Booleaans                                                                    |                                                                                                                                                 |
-| `allowUsageCommand`                         | Booleaans                                                                    |                                                                                                                                                 |
-| `usageLimitEnabled`                         | Booleaans                                                                    |                                                                                                                                                 |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | getal >= 0 of `null`                                                         |                                                                                                                                                 |
-| `chaosModeEnabled`                          | Booleaans                                                                    |                                                                                                                                                 |
+| Veld                                        | Type                                                                         | Opmerkingen                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | tekenreeks, 1-200 tekens                                                     |                                                                                                                                                                                                                                                                                              |
+| `isActive`                                  | Booleaans                                                                    |                                                                                                                                                                                                                                                                                              |
+| `isBanned`                                  | Booleaans                                                                    |                                                                                                                                                                                                                                                                                              |
+| `expiresAt`                                 | ISO 8601 datetime of `null`                                                  | `null` wist de vervaldatum                                                                                                                                                                                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                        | `allowedModels` moet leeg zijn als de modus `all` is                                                                                                                                                                                                                                         |
+| `allowedModels`, `blockedModels`            | reeks tekenreeksen, maximaal 1000                                            |                                                                                                                                                                                                                                                                                              |
+| `allowedCombos`                             | reeks tekenreeksen, maximaal 500                                             | Poorten welke combo's de sleutel kan oproepen; directe modellen worden beheerst door `modelAccessMode` / `allowedModels`                                                                                                                                                                     |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                        | `allowedConnections` moet niet leeg zijn als `restricted` en leeg als `all`                                                                                                                                                                                                                  |
+| `allowedConnections`                        | array van UUIDs, maximaal 100                                                |                                                                                                                                                                                                                                                                                              |
+| `allowAutoCombos`                           | Booleaans                                                                    | `false` wijst verzoeken voor `auto/*` modellen met deze sleutel af; sleutels die het nooit instellen zijn toegestaan                                                                                                                                                                         |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                | Wat `GET /v1/models` vermeldt voor deze sleutel (alleen combo's, alleen modellen of beide); het verandert niets aan wat de sleutel kan oproepen                                                                                                                                              |
+| `forcedModel`                               | tekenreeks tot 300 tekens, of `null`                                         | Stuurt chatverzoeken naar deze model/combo, via `X-Route-Model` en `body.model`; de limieten van de sleutel zijn nog steeds van toepassing                                                                                                                                                   |
+| `noLog`, `autoResolve`                      | Booleaans                                                                    |                                                                                                                                                                                                                                                                                              |
+| `throttleDelayMs`                           | geheel getal, 0-300000                                                       |                                                                                                                                                                                                                                                                                              |
+| `maxSessions`                               | geheel getal, 0-10000                                                        |                                                                                                                                                                                                                                                                                              |
+| `rateLimits`                                | reeks `{ limit, window }` (positieve gehele getallen, maximaal 50) of `null` | `null` verlegt de grenzen                                                                                                                                                                                                                                                                    |
+| `accessSchedule`                            | schemaobject of `null`                                                       | `null` maakt het schema leeg                                                                                                                                                                                                                                                                 |
+| `scopes`                                    | reeks tekenreeksen, maximaal 32                                              |                                                                                                                                                                                                                                                                                              |
+| `allowedEndpoints`                          | reeks tekenreeksen, maximaal 20                                              |                                                                                                                                                                                                                                                                                              |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                           |                                                                                                                                                                                                                                                                                              |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                         | Zie [Cache-bypass per sleutel](#per-key-cache-bypass)                                                                                                                                                                                                                                        |
+| `compressionEnabled`                        | Booleaans                                                                    |                                                                                                                                                                                                                                                                                              |
+| `codexServiceMode`                          | een van de Codex -servicemodi                                                |                                                                                                                                                                                                                                                                                              |
+| `disableNonPublicModels`                    | Booleaans                                                                    |                                                                                                                                                                                                                                                                                              |
+| `allowUsageCommand`                         | Booleaans                                                                    |                                                                                                                                                                                                                                                                                              |
+| `usageLimitEnabled`                         | Booleaans                                                                    |                                                                                                                                                                                                                                                                                              |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | getal >= 0 of `null`                                                         |                                                                                                                                                                                                                                                                                              |
+| `fiveHourUsageLimitUsd`                     | getal >= 0 of `null`                                                         | Rollend USD budget van 5 uur, afgedwongen zoals de dagelijkse en wekelijkse limieten (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` is wanneer de oudste uitgave in de periode veroudert, waardoor een sleutel ver boven de limiet nog steeds geblokkeerd kan blijven. |
+| `chaosModeEnabled`                          | Booleaans                                                                    |                                                                                                                                                                                                                                                                                              |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

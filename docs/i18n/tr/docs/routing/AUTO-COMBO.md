@@ -317,57 +317,51 @@ curl -sS http://localhost:20128/v1/chat/completions \
 
 ## Tüm Yönlendirme Stratejileri
 
-OmniRoute'un combo motoru **20 yönlendirme stratejisini** destekler (`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` içinde bildirilmiştir). Auto Combo motorunun kendisi `auto` stratejisi altında sunulur; diğerleri kalıcı combo'lar için kullanılabilir.
+OmniRoute birleşik motor destekleri** 20 yönlendirme stratejisi** ( `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` bildirildi). Auto Combo motorunun kendisi `auto` stratejisi kapsamında ortaya çıkıyor; diğerleri kalıcı kombinasyonlar için kullanılabilir.
 
-| Strateji            | Açıklama                                                                                                                                                                                                                             |
-| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Açık önceliğe sahip, ilk hedef odaklı sıralı liste                                                                                                                                                                                   |
-| `weighted`          | Hedef başına ağırlığa göre ağırlıklı rastgele seçim                                                                                                                                                                                  |
-| `round-robin`       | Hedefler arasında sırayla döngü (toplu olarak; aşağıya bakın)                                                                                                                                                                        |
-| `context-relay`     | Bağlamı hedefler arasında devretme (uzun konuşmalar)                                                                                                                                                                                 |
-| `fill-first`        | Bir sonraki hedefe geçmeden önce her hedefin kotasını doldurma                                                                                                                                                                       |
-| `p2c`               | İkinin gücü seçimleriyle rastgele yük dengeleme                                                                                                                                                                                      |
-| `random`            | Tekdüze rastgele seçim                                                                                                                                                                                                               |
-| `least-used`        | Mevcut yükü en düşük hedefi seçme                                                                                                                                                                                                    |
-| `cost-optimized`    | Katalog fiyatlandırmasına göre istek başına maliyeti en aza indirme                                                                                                                                                                  |
-| `reset-aware` ⭐    | Kota sıfırlama zamanına göre önceliklendirme — kısa sıfırlama aralıkları daha üstte sıralanır                                                                                                                                        |
-| `reset-window`      | Kota aralığı en kısa sürede sıfırlanacak hedefleri tercih etme                                                                                                                                                                       |
-| `headroom`          | En fazla kalan kota payına sahip hedefi seçme                                                                                                                                                                                        |
-| `quota-weighted`    | Kotası tükenmiş hesapları atlama, ardından kalanlar arasından kalan kotanın devam eden yüke bölünmesiyle orantılı olarak seçim yapma; mevcut konuşmalar sabitlenmiş olarak kalır                                                     |
-| `strict-random`     | Tekrarları tekilleştirmeden rastgele seçim                                                                                                                                                                                           |
-| `auto`              | Auto Combo puanlamasını (16 faktörlü) kullanma — **önerilir**                                                                                                                                                                        |
-| `lkgp`              | Bilinen Son İyi Yol (son başarılı sağlayıcıya sabitler, ardından kurallara geri döner)                                                                                                                                               |
-| `context-optimized` | Mevcut bağlam boyutuna en uygun hedefi seçme                                                                                                                                                                                         |
-| `cache-optimized`   | Hedefleri istem önbelleği yakınlığına göre yeniden sıralama — bu isteğin önbelleğe alınmış ön ekini hâlihazırda barındırma olasılığı en yüksek bağlantı ilk olarak denenir (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Bir model paneline paralel olarak dağıtma, ardından bir değerlendirici aracılığıyla tek bir yanıt sentezleme (aşağıya bakın)                                                                                                         |
-| `pipeline`          | Hedefleri sırayla çalıştırarak her adımın çıktısını bir sonraki adımın girdisine aktarma; yalnızca nihai yanıt döndürülür (#6396)                                                                                                    |
+| Strateji            | Tanım                                                                                                                                                                                                            |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Açık önceliğe sahip ilk hedef sıralı liste                                                                                                                                                                       |
+| `weighted`          | Hedef ağırlığa göre rastgele ağırlıklandırılmış                                                                                                                                                                  |
+| `round-robin`       | Hedefler arasında sırayla geçiş yapın (toplu; aşağıya bakın)                                                                                                                                                     |
+| `context-relay`     | Hedefler arasında bağlamın dağıtılması (uzun konuşmalar)                                                                                                                                                         |
+| `fill-first`        | Bir sonrakine geçmeden önce her hedefin kotasını doldurun                                                                                                                                                        |
+| `p2c`               | Power-of-2-choices rastgele yük dengeleme                                                                                                                                                                        |
+| `random`            | Tek tip rastgele seçim                                                                                                                                                                                           |
+| `least-used`        | En düşük akım yüküne sahip hedefi seç                                                                                                                                                                            |
+| `cost-optimized`    | Katalog fiyatlandırmasına göre istek başına $'ı en aza indirin                                                                                                                                                   |
+| `reset-aware` ⭐    | Kota sıfırlama süresine göre önceliklendirin — kısa sıfırlama aralıkları daha üst sıralarda yer alır                                                                                                             |
+| `reset-window`      | Kota penceresi en kısa sürede sıfırlanan hedefleri tercih edin                                                                                                                                                   |
+| `headroom`          | En fazla kota boşluğuna sahip hedefi seçin                                                                                                                                                                       |
+| `quota-weighted`    | Tükenen hesapları atlayın, ardından kalan kotanın uçuş sırasındaki yüke bölünmesiyle orantılı olarak geri kalanlar arasından seçim yapın; mevcut görüşmeler sabit kalıyor                                        |
+| `strict-random`     | Tekrarların tekilleştirilmesi olmadan rastgele                                                                                                                                                                   |
+| `auto`              | Otomatik Birleşik puanlamayı (16 faktörlü) — kullanın** tavsiye edilen**                                                                                                                                         |
+| `lkgp`              | Bilinen Son İyi Yol (son başarılı sağlayıcıya sabitlenir, ardından kurallara geri döner)                                                                                                                         |
+| `context-optimized` | Mevcut bağlam boyutuna en uygun hedefi seçin                                                                                                                                                                     |
+| `cache-optimized`   | Hedefleri istem-önbellek benzeşimine göre yeniden sıralayın — bu isteğin önbelleğe alınmış önekini zaten tutması en muhtemel bağlantı ilk önce denenir (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Modellerden oluşan bir paneli paralel olarak genişletin, ardından bir jüri aracılığıyla bir cevabı sentezleyin (aşağıya bakın)                                                                                   |
+| `pipeline`          | Her adımın çıktısını bir sonraki adımın girdisine aktararak hedefleri sırayla çalıştırın; yalnızca son yanıt döndürülür (#6396)                                                                                  |
 
-⭐ = v3.8.0 sürümünde yeni · 🧬 = v3.8.36 sürümünde yeni
+⭐ = v3.8.0'daki yenilikler · 🧬 = v3.8.36'daki yenilikler
 
-### `weighted` semantiği
+### `weighted` anlambilimi
 
-`weighted`, bir dengeleyici değil, **istek başına orantılı rastgele çekiliştir**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`):
+`weighted` bir** istek başına orantılı rastgele çekiliş** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), ekolayzır değil:
 
-- Her istek, `weight / totalWeight` olasılığıyla **bir** adım seçer; kalan adımlar,
-  o isteğin geri dönüş zinciri olarak ağırlığa göre azalan sırada düzenlenir.
-- Ağırlığı `0` olan (veya ağırlığı belirtilmeyen) bir adım, başka herhangi bir adımın
-  ağırlığı > 0 olduğu sürece **asla seçilmez** — yalnızca seçilen adım başarısız olduktan sonra geri dönüş olarak kullanılabilir. Seçim yalnızca **tüm**
-  ağırlıklar 0 olduğunda tekdüze hâle gelir.
-- Tüm hedefleri kullanılamaz durumda olan adımlar — sağlayıcı devre kesicisi `OPEN`, bağlantı
-  bekleme süresi, model kilitlemesi — çekiliş gerçekleşmeden önce çekilişten çıkarılır
-  (`open-sse/services/combo/targetResolution.ts`); dolayısıyla tek bir sağlıklı adım geçici olarak
-  her isteği kazanabilir.
-- `stickyWeightedLimit` (combo yapılandırması, varsayılan `1` = kapalı), yeniden çekiliş yapmadan önce seçilen adımı bu sayıdaki
-  ardışık başarı boyunca sabitler.
+- Her istek çeker** bir** olasılık `weight / totalWeight` ile adım; geri kalan adımlar, söz konusu isteğe yönelik geri dönüş zinciri olarak azalan ağırlığa göre sıralanır.
+- Ağırlığı `0` olan (veya eksik olan) bir adım** asla çizilmemiş** diğer herhangi bir adımın ağırlığı > 0 — iken, yalnızca çizilen adım başarısız olduktan sonra bir geri dönüş görevi görebilir. Sadece ne zaman** Tümü** ağırlıklar 0 ise seçim tekdüze hale gelir.
+- Hedeflerinin tümü kullanılamayan — sağlayıcı devre kesicisi `OPEN`, bağlantı bekleme süresi, model kilitleme — olan adımlar, bu gerçekleşmeden önce çekilişten kaldırılır (`open-sse/services/combo/targetResolution.ts`), böylece tek bir sağlıklı adım, her isteği geçici olarak kazanabilir.
+- `stickyWeightedLimit` (combo config, varsayılan `1` = kapalı), yeniden çizimden önce o kadar çok ardışık başarı için çizilen adımı sabitler.
 
-Kesin rotasyon için `round-robin` kullanın; `weighted` üzerinde eşit ağırlıklar, kesin değil istatistiksel bir denge sağlar.
+Kesin rotasyon için `round-robin` kullanın; `weighted` üzerindeki eşit ağırlıklar kesin — dengesini değil istatistiksel — verir.
 
-### Aracılı işlem hattı modu
+### Ajan boru hattı modu
 
-En az iki modele sahip bir `pipeline` kombosu, `config.agenticOrchestration.enabled` ile planlayıcı/yürütücü yönlendirmesini etkinleştirebilir. İlk hedef, planlamayı ve nihai yanıtları üstlenir; ikinci hedef, istemciye özgü araç çağrıları üretir. OmniRoute, istek protokolündeki araç sonucu devamlarını algılar, planlayıcıya başka bir araç turunun gerekli olup olmadığını sorar ve istemciye sunulan son adım olarak yürütücüyü veya planlayıcıyı dinamik biçimde seçer.
+En az iki modele sahip bir `pipeline` kombinasyonu, `config.agenticOrchestration.enabled` ile planner/executor yönlendirmeyi tercih edebilir. İlk hedef planlama ve nihai cevaplara sahiptir; ikinci hedef istemciye özgü araç çağrıları yayar. OmniRoute istek protokolünden gelen araç-sonuç devamlılıklarını tespit eder, planlayıcıya başka bir araç turunun gerekli olup olmadığını sorar ve dinamik olarak yürütücüyü veya planlayıcıyı müşteriye yönelik son adım yapar.
 
-İkinci hedeften sonraki ek modeller, sıralı yürütücü yedekleridir. Başarısız bir HTTP yanıtı veya aktarım istisnası, aynı planlayıcı kararı ve yerel araçlar korunarak bir sonraki yürütücüye geçilmesini sağlar; ancak o yürütücünün kendi adım istemi ve çözümlenmiş bağlantısı kullanılır. İlk başarılı yanıt, SSE akışı dâhil olmak üzere değiştirilmeden döndürülür; başarılı bir akış başladıktan sonraki hatalar burada yeniden denenemez. Tüm yürütücüler başarısız olursa son hata döndürülür. İstemci iptalleri dağıtımı durdurur.
+Araç-sonucu devamlılıklarında OmniRoute, birbirini takip eden iki tamamlanmış tur aynı araç çağrılarını değişmeden sonuçlarla tekrarladığında veya ardışık iki turda açıkça işaretlenen her sonuç başarısız olduğunda yürütmeyi durdurur. Değiştirilen sonuçlar tekrarlanan aramalara (örneğin yoklama) izin verir. Koruma, yeni bir kullanıcı isteği üzerine sıfırlanır, paralel çağrıları tek bir turda gruplandırır ve Anthropic, Sohbet Tamamlamaları, Yanıtlar ve Gemini geçmişlerini destekler. Planlayıcı nedeni alır ve başka bir araç turu talep etse bile nihai cevabın sahibi olur.
+
+İkinci hedeften sonraki ek modeller, sipariş edilen yürütücü yedeklemeleridir. Başarısız bir HTTP yanıtı veya aktarım istisnası, aynı planlayıcı kararını ve yerel araçları taşıyarak bir sonraki yürütücüye ilerler, ancak bu yürütücünün kendi adım istemi ve çözülmüş bağlantısını taşır. İlk başarılı yanıt, SSE akışı da dahil olmak üzere değişmeden döndürülür; Başarılı bir yayın başlatıldıktan sonraki hatalar burada yeniden denenemez. Tüm uygulayıcılar başarısız olursa, son başarısızlık döndürülür. İstemci durdurma gönderimini iptal eder.
 
 ```json
 {
@@ -379,17 +373,17 @@ En az iki modele sahip bir `pipeline` kombosu, `config.agenticOrchestration.enab
 }
 ```
 
-Yürütücü, tek bir yanıtta birden fazla bağımsız çağrı üretebilir. Bağımlı çağrılar, sonraki istemci araç sonucu turlarında işlenir ve planlayıcı her sonucu inceler. `maxToolRounds` varsayılan olarak `8` değerini kullanır ve `1`–`32` aralığını kabul eder; sınıra ulaşıldığında planlayıcı, mevcut en iyi nihai yanıtı üretmelidir. Dahili planlayıcı kararları arabelleğe alınırken istemciye sunulmak üzere seçilen yanıt, özgün akış tercihini korur.
+Yürütücü tek bir yanıtta birden fazla bağımsız çağrı yapabilir. Bağımlı çağrılar, planlayıcının her sonucu gözden geçirmesiyle daha sonraki istemci aracı-sonuç dönüşlerinde ele alınır. `maxToolRounds` varsayılan olarak `8` ve `1`–`32` kabul eder; Bir kez ulaşıldığında planlamacı mevcut en iyi nihai cevabı üretmelidir. Dahili planlayıcının kararları arabelleğe alınırken seçilen müşteriye yönelik yanıt orijinal akış tercihini korur.
 
-### `round-robin` yapışkan gruplama ve hesap genişletme
+### `round-robin` yapışkan toplu iş ve hesap genişletme
 
-Round-robin, istek başına tek adım şeklinde değil, gruplar hâlinde çalışır:
+Round-robin, adım başına bir istek yerine toplu olarak gerçekleştirilir:
 
-- `stickyRoundRobinLimit` (önce kombo yapılandırması, ardından `comboStickyRoundRobinLimit`, sonra `settings.stickyRoundRobinLimit`; varsayılan **3**), rotasyondan önce aynı hedefi belirtilen sayıda ardışık başarı boyunca kullanır. Her istekten sonra rotasyon için kombo geçersiz kılma değerini `1` olarak ayarlayın. Kombo düzenleyicisi, etkin değeri ve bu değerin hangi katmandan geldiğini gösterir.
-- `connectionAwareExpansion` (önce kombo yapılandırması, ardından ayarlar; varsayılan **false**), rotasyondan önce sağlayıcı düzeyindeki her adımı hesap başına hedeflere genişletir. Grup-B stratejileri (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline), bu seçenek etkinleştirilene kadar sağlayıcı düzeyindeki görünümü korur. Kombo düzenleyicisi devral / açık / kapalı seçeneklerini sunar; devral seçeneği genel varsayılanı (kapalı) kullanır.
-- İstem önbelleği yerelliği yönlendirmesi (`promptCacheAffinityEnabled`, varsayılan **true`), eşleşen önbellek anahtarlarının tek bir hesapta kalması için sabitlenmiş bağlantıları yeniden sıralar. Hesap başına sabitlenmiş adımlar arasındaki round-robin ve weighted rotasyonundan önceliklidir. Kesin rotasyona ihtiyacınız varsa Ayarlar → Kombo varsayılanları altında bu seçeneği kapatın. Kombo başına geçersiz kılma yoktur.
+- `stickyRoundRobinLimit` (birleşik yapılandırma, ardından `comboStickyRoundRobinLimit`, ardından `settings.stickyRoundRobinLimit`, varsayılan** 3** ) dönmeden önce art arda birçok başarı için aynı hedefi korur. Tek istek rotasyonu için kombo geçersiz kılmayı `1` olarak ayarlayın. Birleşik düzenleyici, etkin değeri ve bunun hangi katmandan geldiğini gösterir.
+- `connectionAwareExpansion` (birleşik yapılandırma, ardından ayarlar, varsayılan** YANLIŞ** ), sağlayıcı düzeyindeki her adımı rotasyondan önce hesap başına hedeflere genişletir. Grup B stratejileri (öncelik, ağırlıklı, hepsini bir kez deneme, rastgele, p2c, en az kullanılan, maliyet açısından optimize edilmiş, lkgp, ilk önce doldur, katı rastgele, bağlam açısından optimize edilmiş, önbellek için optimize edilmiş, bağlam aktarımı, füzyon, boru hattı), bu açık olana kadar sağlayıcı düzeyinde bir görünümü korur. Birleşik düzenleyici, devralmayı / açmayı / kapatmayı gösterir; inherit genel varsayılanı (kapalı) kullanır.
+- İstem önbellek konumu yönlendirmesi (`promptCacheAffinityEnabled`, varsayılan** doğru** ) eşleşen önbellek anahtarlarının tek bir hesapta kalması için sabitlenmiş bağlantıları yeniden sıralar. Hesap başına sabitlenmiş adımlar boyunca çevrimsel ve ağırlıklı rotasyona göre önceliklidir. Katı rotasyona ihtiyacınız varsa Ayarlar → Birleşik varsayılanlar altında bunu kapatın. Kombinasyon başına geçersiz kılma yoktur.
 
-Tek bir modelde çok hesaplı rotasyon için üç sabitlenmiş `connectionId` yerine yapışkanlık sınırı `1` olan **tek bir dinamik hesap adımını** (boş `connectionId`, tüm havuz) tercih edin. Sabitlenmiş adımlar ile yakınlık özelliğinin birlikte kullanılması, RR sayacı ilerlese bile seçimleri aynı hesapta toplar.
+Tek bir modelde çoklu hesap rotasyonu için şunu tercih edin:** tek dinamik hesap adımı** (boş `connectionId`, tüm havuz) yapışkan limitli `1`, üç sabitlenmiş `connectionId` s değil. Sabitlenmiş adımlar artı benzeşim, RR sayacı ilerlerken bile aynı hesaba çöker.
 
 ## Fusion Stratejisi
 
