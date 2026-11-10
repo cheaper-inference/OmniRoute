@@ -654,6 +654,11 @@ export function createErrorResult(
      * for internal callers that inspect the returned object.
      */
     rawMessage: string;
+    /**
+     * The parsed upstream error JSON, for internal classifiers only (it has the fields the
+     * client-safe `response` body drops: `status`, `details`). Never part of the HTTP response.
+     */
+    upstreamErrorBody?: unknown;
     errorType?: string;
     errorCode?: string;
     response: Response;
@@ -674,6 +679,10 @@ export function createErrorResult(
   // Add retryAfterMs if available (for Antigravity quota errors)
   if (retryAfterMs) {
     result.retryAfterMs = retryAfterMs;
+  }
+
+  if (upstreamDetails !== undefined && upstreamDetails !== null) {
+    result.upstreamErrorBody = upstreamDetails;
   }
 
   // Opt-in relay of the recursively sanitized upstream JSON shape (Claude Code

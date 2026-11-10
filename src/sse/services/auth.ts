@@ -205,7 +205,10 @@ import { resolveAccountProxiesFromRegistry } from "./noAuthProxyResolution";
 import { getNoAuthHydrationProviderIds } from "./noAuthProviderSiblings";
 import { loadOptionalNoAuthApiKeyCredentials } from "./noAuthOptionalApiKey";
 import { getResource404Bypass } from "./requestResourceHealth";
-import { isVertexConnectionWidePermissionDenied } from "./vertexErrorClassifier";
+import {
+  isVertexConnectionWidePermissionDenied,
+  isVertexSharedCapacity429,
+} from "./vertexErrorClassifier";
 import { maybeAutoDisableBannedAccount } from "./autoDisableBannedAccount";
 import {
   buildAntigravityRoutingFields,
@@ -2463,35 +2466,6 @@ function resolveUpstreamResetMs(fallback: {
   return fallback.quotaResetHintMs ?? null;
 }
 
-/**
- * Vertex answers a shared-capacity 429 (the whole region is busy) with a bare
- * `RESOURCE_EXHAUSTED` "Resource exhausted. Please try again later." and no `details`. It says
- * nothing about this account's quota, so the account must stay in rotation. Quota wording,
- * provisioned throughput and any body with `details` (RetryInfo, QuotaFailure) are not matched.
- */
-function isVertexSharedCapacity429(
-  provider: string | null,
-  status: number,
-  errorText: string
-): boolean {
-  if (status !== 429 || (provider !== "vertex" && provider !== "vertex-partner")) return false;
-  try {
-    const parsed = JSON.parse(errorText);
-    const error = (Array.isArray(parsed) ? parsed[0] : parsed)?.error;
-    const message = typeof error?.message === "string" ? error.message : "";
-    const hasDetails = Array.isArray(error?.details) && error.details.length > 0;
-    return (
-      error?.status === "RESOURCE_EXHAUSTED" &&
-      !hasDetails &&
-      /resource exhausted/i.test(message) &&
-      /try again later/i.test(message) &&
-      !/quota|provisioned throughput/i.test(message)
-    );
-  } catch {
-    return false;
-  }
-}
-
 /** Record provider/account health failures while keeping upload-admission errors request-scoped. */
 export async function markAccountUnavailable(
   connectionId: string,
@@ -2511,6 +2485,8 @@ export async function markAccountUnavailable(
     avalancheCooldownMs?: number;
     suppressFallback?: boolean;
     structuredError?: { code?: string | null; type?: string | null } | null;
+    /** Parsed upstream error body; `errorText` is only the extracted message. */
+    upstreamErrorBody?: unknown;
   } = {}
 ) {
   // Preserve the transport's original 429; cooling Opus would hide the cause and
@@ -2724,7 +2700,7 @@ export async function markAccountUnavailable(
     );
 
     // Shared Vertex capacity is not this account's fault: no model lock, no connection cooldown.
-    if (isVertexSharedCapacity429(provider, status, errorText)) {
+    if (isVertexSharedCapacity429(provider, status, errorText, options.upstreamErrorBody)) {
       log.info(
         "AUTH",
         `${connectionId.slice(0, 8)} ${provider} shared-capacity 429 — no cooldown, trying the next account`

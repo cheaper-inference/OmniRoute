@@ -12,6 +12,7 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const auth = await import("../../src/sse/services/auth.ts");
 const fallback = await import("../../open-sse/services/accountFallback.ts");
+const { createErrorResult } = await import("../../open-sse/utils/error.ts");
 
 const MODEL = "gemini-2.5-pro";
 const SHARED =
@@ -89,4 +90,92 @@ test("a 503 with the same body is not a shared-capacity 429 and still locks the 
   assert.equal(result.shouldFallback, true);
   assert.ok(result.cooldownMs > 0);
   assert.ok((await coolingState("vertex", id)).modelLock);
+});
+
+// handleChat does not pass the upstream JSON as errorText. It passes `result.rawMessage` (the
+// extracted error message, plain text) and the parsed upstream body in `options.upstreamErrorBody`.
+// Build both the way createErrorResult does.
+const productionInput = (upstream: string) => {
+  const upstreamBody = JSON.parse(upstream);
+  const result = createErrorResult(
+    429,
+    upstreamBody.error.message,
+    null,
+    undefined,
+    undefined,
+    upstreamBody
+  );
+  return { message: result.rawMessage, options: { upstreamErrorBody: result.upstreamErrorBody } };
+};
+
+for (const provider of ["vertex", "vertex-partner"]) {
+  test(`${provider}: plain message plus the upstream body, shared capacity neither locks nor cools`, async () => {
+    const id = await seed(provider, `${provider}-shared-plain`);
+    const { message, options } = productionInput(SHARED);
+    const result = await auth.markAccountUnavailable(
+      id,
+      429,
+      message,
+      provider,
+      MODEL,
+      null,
+      options
+    );
+
+    assert.equal(result.shouldFallback, true);
+    assert.equal(result.cooldownMs, 0);
+    const state = await coolingState(provider, id);
+    assert.equal(state.modelLock, null);
+    assert.equal(state.connectionUntil, null);
+  });
+
+  test(`${provider}: plain message plus a quota body still cools`, async () => {
+    const id = await seed(provider, `${provider}-quota-plain`);
+    const { message, options } = productionInput(QUOTA);
+    const result = await auth.markAccountUnavailable(
+      id,
+      429,
+      message,
+      provider,
+      MODEL,
+      null,
+      options
+    );
+    assert.ok(result.cooldownMs > 0);
+  });
+
+  test(`${provider}: plain message plus a body with retry details still cools`, async () => {
+    const id = await seed(provider, `${provider}-details-plain`);
+    const { options } = productionInput(WITH_RETRY_INFO);
+    const { message } = productionInput(SHARED);
+    const result = await auth.markAccountUnavailable(
+      id,
+      429,
+      message,
+      provider,
+      MODEL,
+      null,
+      options
+    );
+    assert.ok(result.cooldownMs > 0);
+  });
+}
+
+test("a plain message with no upstream body is not enough to skip the cooldown", async () => {
+  const id = await seed("vertex", "vertex-message-only");
+  const result = await auth.markAccountUnavailable(
+    id,
+    429,
+    productionInput(SHARED).message,
+    "vertex",
+    MODEL
+  );
+  assert.ok(result.cooldownMs > 0);
+});
+
+test("an error result keeps the parsed upstream body for the account matcher", () => {
+  const upstream = JSON.parse(SHARED);
+  const result = createErrorResult(429, "m", null, undefined, undefined, upstream);
+  assert.deepEqual(result.upstreamErrorBody, upstream);
+  assert.equal(createErrorResult(429, "m").upstreamErrorBody, undefined);
 });

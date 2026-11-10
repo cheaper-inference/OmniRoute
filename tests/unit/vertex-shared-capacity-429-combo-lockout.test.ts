@@ -24,6 +24,15 @@ const QUOTA =
   '{"error":{"code":429,"message":"Quota exceeded for aiplatform.googleapis.com/generate_content_requests_per_minute_per_project_per_base_model.","status":"RESOURCE_EXHAUSTED"}}';
 const WITH_RETRY_INFO =
   '{"error":{"code":429,"message":"Resource exhausted. Please try again later.","status":"RESOURCE_EXHAUSTED","details":[{"@type":"type.googleapis.com/google.rpc.RetryInfo","retryDelay":"30s"}]}}';
+// handleChat does not hand the combo the upstream body. It returns the client-safe error JSON built
+// by createErrorResult: the message is kept, `status` and `details` are gone, and a parsed retry
+// hint rides the Retry-After header. Build the responses the same way, so these tests follow the
+// production response path.
+const { createErrorResult } = await import("../../open-sse/utils/error.ts");
+const clientSafe = (upstream: string, retryAfterMs: number | null = null) => {
+  const { response } = createErrorResult(429, JSON.parse(upstream).error.message, retryAfterMs);
+  return { body: response.text(), retryAfter: response.headers.get("retry-after") };
+};
 const MODEL = "gemini-2.5-pro";
 const SETTINGS = {
   modelLockout: {
@@ -45,7 +54,14 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-async function runCombo(provider: string, status: number, body: string, maxRetries = 0) {
+async function runCombo(
+  provider: string,
+  status: number,
+  body: string | Promise<string>,
+  maxRetries = 0,
+  extraHeaders: Record<string, string> = {}
+) {
+  const text = await body;
   const connection = await providersDb.createProviderConnection({
     provider,
     authType: "apikey",
@@ -64,9 +80,10 @@ async function runCombo(provider: string, status: number, body: string, maxRetri
       config: { maxRetries, retryDelayMs: 0, fallbackDelayMs: 0 },
     },
     handleSingleModel: async () =>
-      new Response(body, {
+      new Response(text, {
         status,
         headers: {
+          ...extraHeaders,
           "content-type": "application/json",
           "X-OmniRoute-Selected-Connection-Id": connectionId,
         },
@@ -107,4 +124,28 @@ test("the same body on another provider still locks the model in the combo", asy
 
 test("a 503 with the same body on vertex still locks the model in the combo", async () => {
   assert.equal(await runCombo("vertex", 503, SHARED), true);
+});
+
+for (const provider of ["vertex", "vertex-partner"]) {
+  test(`${provider}: the client-safe shared-capacity 429 that handleChat returns does not lock the model`, async () => {
+    assert.equal(await runCombo(provider, 429, clientSafe(SHARED).body), false);
+  });
+
+  test(`${provider}: the client-safe quota 429 that handleChat returns still locks the model`, async () => {
+    assert.equal(await runCombo(provider, 429, clientSafe(QUOTA).body), true);
+  });
+
+  test(`${provider}: a client-safe 429 that carries a retry hint still locks the model`, async () => {
+    // WITH_RETRY_INFO has details, so the pipeline sets Retry-After on the rebuilt response.
+    const hinted = clientSafe(WITH_RETRY_INFO, 30_000);
+    assert.equal(hinted.retryAfter, "30");
+    assert.equal(
+      await runCombo(provider, 429, hinted.body, 0, { "retry-after": hinted.retryAfter ?? "" }),
+      true
+    );
+  });
+}
+
+test("the client-safe shared-capacity body on another provider still locks the model", async () => {
+  assert.equal(await runCombo("gemini", 429, clientSafe(SHARED).body), true);
 });

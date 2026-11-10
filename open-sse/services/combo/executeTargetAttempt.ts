@@ -124,36 +124,7 @@ import {
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
-
-/**
- * Vertex answers a shared-capacity 429 (the whole region is busy) with a bare `RESOURCE_EXHAUSTED`
- * "Resource exhausted. Please try again later." and no `details`. It says nothing about this
- * account's quota, so the combo must not lock the model for it. Mirrors the matcher of the same
- * name in src/sse/services/auth.ts (account path). shortcut: a local copy, because that one is
- * private and auth.ts is not part of this change; export it there and import it here to dedupe.
- */
-function isVertexSharedCapacity429(
-  provider: string | null | undefined,
-  status: number,
-  errorText: string
-): boolean {
-  if (status !== 429 || (provider !== "vertex" && provider !== "vertex-partner")) return false;
-  try {
-    const parsed = JSON.parse(errorText);
-    const error = (Array.isArray(parsed) ? parsed[0] : parsed)?.error;
-    const message = typeof error?.message === "string" ? error.message : "";
-    const hasDetails = Array.isArray(error?.details) && error.details.length > 0;
-    return (
-      error?.status === "RESOURCE_EXHAUSTED" &&
-      !hasDetails &&
-      /resource exhausted/i.test(message) &&
-      /try again later/i.test(message) &&
-      !/quota|provisioned throughput/i.test(message)
-    );
-  } catch {
-    return false;
-  }
-}
+import { isVertexSharedCapacityResponse } from "../../../src/sse/services/vertexErrorClassifier.ts";
 
 /**
  * Executes an admitted target with configured retries and response validation. Returns a
@@ -1180,10 +1151,13 @@ export async function executeTargetAttempt(
     }
 
     // Shared Vertex capacity is not this model's fault: no model lockout (auth.ts does the same).
-    const vertexSharedCapacity = isVertexSharedCapacity429(
+    // handleChat hands the combo a client-safe body (no `status`, no `details`), so a retry
+    // hint in the Retry-After header stands in for `details`.
+    const vertexSharedCapacity = isVertexSharedCapacityResponse(
       provider,
       result.status,
-      failure.bodyText ?? ""
+      failure.bodyText,
+      Boolean(result.headers?.get("retry-after"))
     );
     const quotaExhausted = isQuotaExhaustionFailure(failure, provider, rawModel, profile);
     recordQuotaExhaustionClassification(result, quotaExhausted);
