@@ -307,7 +307,6 @@ export default function LimitsTab({
   setFiveHourUsageLimitUsd,
   errors,
 }: LimitsTabProps) {
-
   return (
     <div className="flex flex-col gap-5">
       <TabErrorList errors={errors} />
