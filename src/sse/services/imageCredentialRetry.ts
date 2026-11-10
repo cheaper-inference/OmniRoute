@@ -78,11 +78,13 @@ function finalImageRetryFailure(
       error: "No image-provider connection is allowed for this API key",
     };
   }
-  return lastResult || {
-    success: false,
-    status: 401,
-    error: "Authentication failed for all eligible image-provider accounts",
-  };
+  return (
+    lastResult || {
+      success: false,
+      status: 401,
+      error: "Authentication failed for all eligible image-provider accounts",
+    }
+  );
 }
 
 /**
@@ -182,7 +184,8 @@ export async function executeImageWithCredentialFallback({
     // Defense in depth: selectors and test hooks must never bypass the caller
     // API key's connection allowlist, even during image credential rotation.
     const scopedDenial = outOfScopeImageCredential(
-      currentCredentials, allowedConnections,
+      currentCredentials,
+      allowedConnections,
       "Image credential is outside the API key's allowed connections"
     );
     if (scopedDenial) return scopedDenial;
@@ -209,7 +212,8 @@ export async function executeImageWithCredentialFallback({
 
     // A refresh must not silently substitute a different or unscoped account.
     const refreshedScopeDenial = outOfScopeImageCredential(
-      currentCredentials, allowedConnections,
+      currentCredentials,
+      allowedConnections,
       "Refreshed image credential is outside the API key's allowed connections"
     );
     if (refreshedScopeDenial) return refreshedScopeDenial;
