@@ -1,5 +1,4 @@
 import { getAntigravityContentHeaders } from "../services/antigravityHeaders.ts";
-import { buildKiroServiceUserAgent } from "../services/kiroIdentity.ts";
 import type { AntigravityClientProfile } from "@/shared/constants/antigravityClientProfile";
 import {
   BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
@@ -451,9 +450,16 @@ export function resetCodeBuddyCnVersionCache(): void {
 // (live A/B: q.eu-central-1 + kiro-cli/3.1.0 → 403, + KiroIDE-1.4.121-<machineId>
 // → 200). The executor overrides these per connection; this fallback keeps
 // registry/static callers above the gate without a connection context.
-const KIRO_FALLBACK_IDENTITY = buildKiroServiceUserAgent(null);
-export const KIRO_SDK_USER_AGENT = KIRO_FALLBACK_IDENTITY.userAgent;
-export const KIRO_AMZ_USER_AGENT = KIRO_FALLBACK_IDENTITY.amzUserAgent;
+// This module is reachable from client bundles (the dashboard imports provider
+// configs), so it must stay free of Node-only imports — kiroIdentity.ts pulls in
+// node:crypto and would break the webpack client build. The per-connection
+// fingerprint lives there and is applied by KiroExecutor.buildHeaders(); these
+// literals are only the connection-less fallback for static registry callers.
+const KIRO_FALLBACK_MACHINE_ID = "0000000000000000000000000000000000000000000000000000000000000000";
+export const KIRO_SDK_USER_AGENT =
+  "aws-sdk-js/1.0.0 ua/2.1 os/windows#10.0.26200 lang/js md/nodejs#22.21.1 " +
+  `api/codewhispererstreaming#1.0.0 m/E KiroIDE-1.4.121-${KIRO_FALLBACK_MACHINE_ID}`;
+export const KIRO_AMZ_USER_AGENT = `aws-sdk-js/1.0.0 KiroIDE-1.4.121-${KIRO_FALLBACK_MACHINE_ID}`;
 export const KIRO_STREAMING_TARGET =
   "AmazonCodeWhispererStreamingService.GenerateAssistantResponse";
 

@@ -376,6 +376,17 @@ export class KiroExecutor extends BaseExecutor {
     super(providerId, PROVIDERS[providerId] || PROVIDERS.kiro);
   }
 
+  /**
+   * Build the upstream request headers for a Kiro inference call.
+   *
+   * Adds the per-connection IDE fingerprint Kiro's client-version gate expects
+   * (#19607) on top of the static registry headers, then the bearer token plus the
+   * auth-method-specific token-type labels (API key / external IdP).
+   * @param credentials - connection credentials, including providerSpecificData
+   * @param stream - whether the request is a streaming call (streaming uses the
+   *   event-stream Accept header from the registry config)
+   * @returns the merged header map sent to the Amazon Q / gateway endpoint
+   */
   buildHeaders(credentials: ProviderCredentials, stream = true) {
     void stream;
     const headers = {
@@ -496,7 +507,7 @@ export class KiroExecutor extends BaseExecutor {
     mergeUpstreamExtraHeaders(headers, upstreamExtraHeaders);
     const transformedBody = await this.transformRequest(model, body, stream, credentials);
 
-    // Branded gateway first, raw CodeWhisperer host on an auth/profile-shaped failure.
+    // Branded gateway first, regional Amazon Q host on an auth/profile-shaped failure.
     // Shared with the one-shot tool_call repair retry so it takes the same path.
     const send = async (payload: unknown, sendSignal: AbortSignal | null | undefined) => {
       let res!: Response;

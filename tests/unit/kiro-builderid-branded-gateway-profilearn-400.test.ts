@@ -26,7 +26,7 @@ function jsonResponse(status: number, body: unknown) {
   });
 }
 
-test("KiroExecutor.execute falls back to the CodeWhisperer host when the branded gateway rejects a profileArn-less (Builder ID) account", async () => {
+test("KiroExecutor.execute falls back to the regional Amazon Q host when the branded gateway rejects a profileArn-less (Builder ID) account", async () => {
   const executor = new KiroExecutor();
   const originalFetch = globalThis.fetch;
   const calledUrls: string[] = [];
@@ -64,7 +64,7 @@ test("KiroExecutor.execute falls back to the CodeWhisperer host when the branded
     assert.equal(
       calledUrls.length,
       2,
-      "must retry on the CodeWhisperer host after the gateway 400"
+      "must retry on the regional Amazon Q host after the gateway 400"
     );
     assert.match(calledUrls[0], /runtime\.us-east-1\.kiro\.dev/);
     assert.match(calledUrls[1], /q\.us-east-1\.amazonaws\.com/);

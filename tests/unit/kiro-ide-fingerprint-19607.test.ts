@@ -65,3 +65,27 @@ test("API-key catalogue probes keep the API_KEY token type", () => {
   // API keys authenticate on a different token type than SSO/social sessions.
   assert.equal(headers.tokentype, "API_KEY");
 });
+
+test("external-IdP catalogue probes carry the token-type header, IdC does not", () => {
+  // Org-IdP (external_idp) tokens must be labelled or CodeWhisperer resolves the
+  // wrong ARN; SSO/IdC tokens must NOT carry it. The shared builder must keep that
+  // split now that catalogue probes route through it.
+  const externalIdp = buildKiroFingerprintHeaders(
+    { clientId: "client-abc", authMethod: "external_idp" },
+    "token-1"
+  );
+  assert.ok(externalIdp["TokenType"] || externalIdp["tokentype"], "expected a token-type header");
+  assert.equal(
+    Object.values(externalIdp).filter((v) => String(v).toUpperCase() === "EXTERNAL_IDP").length,
+    1
+  );
+
+  const idc = buildKiroFingerprintHeaders(
+    { clientId: "client-abc", authMethod: "idc" },
+    "token-1"
+  );
+  assert.equal(
+    Object.values(idc).filter((v) => String(v).toUpperCase() === "EXTERNAL_IDP").length,
+    0
+  );
+});
