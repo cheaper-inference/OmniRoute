@@ -47,24 +47,28 @@ export function RequestRow({ request, selected, onClick, onSameContext, style }:
   const pathShort = request.path.length > 32 ? `…${request.path.slice(-30)}` : request.path;
   const sc = statusColor(request.status);
 
+  // The row holds two sibling controls: the select toggle and the context-filter chip. They
+  // used to be nested (a `div role="button"` around the chip, axe `nested-interactive`); the
+  // chip now sits over the toggle's reserved last line instead (#18077).
   return (
     <div
-      role="button"
-      tabIndex={0}
       data-testid="request-row"
-      aria-pressed={selected}
-      onClick={onClick}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onClick()}
       style={style}
       className={cn(
-        "flex items-stretch gap-1 border-b border-border/40 cursor-pointer hover:bg-bg-subtle",
-        "focus-ring",
+        "relative flex items-stretch gap-1 border-b border-border/40 hover:bg-bg-subtle",
         selected && "bg-surface"
       )}
     >
       <ContextColorBar contextKey={request.contextKey} />
-      <div className="flex-1 min-w-0 px-2 py-1.5">
-        <div className="flex items-center gap-2 text-xs">
+      {/* kit-exception: dense two-line virtualised row; the kit Tile's padding, border and
+          surface would triple the row height. */}
+      <button
+        type="button"
+        aria-pressed={selected}
+        onClick={onClick}
+        className="block flex-1 min-w-0 cursor-pointer px-2 py-1.5 text-start focus-ring"
+      >
+        <span className="flex items-center gap-2 text-xs">
           <span className="text-text-muted shrink-0 font-mono">
             {formatTime(request.timestamp)}
           </span>
@@ -82,27 +86,27 @@ export function RequestRow({ request, selected, onClick, onSameContext, style }:
               <Icon name="settings" size={14} className="leading-none" /> {request.processName}
             </span>
           )}
-        </div>
-        <div className="text-xs text-text-muted truncate font-mono mt-0.5">
+        </span>
+        <span className="block text-xs text-text-muted truncate font-mono mt-0.5">
           {request.host}
           <span className="text-text-main">{pathShort}</span>
-        </div>
-        {request.contextKey && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto min-h-0 px-1 py-0 font-mono text-[10px] text-text-muted"
-            title={t("filterByContext")}
-            aria-label={`${t("filterByContext")} #${request.contextKey.slice(0, 6)}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSameContext?.(request.contextKey as string);
-            }}
-          >
-            ctx #{request.contextKey.slice(0, 6)}
-          </Button>
-        )}
-      </div>
+        </span>
+        {/* Room for the context chip, which is positioned over this line. */}
+        {request.contextKey && <span aria-hidden="true" className="block h-4" />}
+      </button>
+      {request.contextKey && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute bottom-1.5 start-[15px] h-4 min-h-0 px-1 py-0 font-mono text-[10px] text-text-muted"
+          // No aria-label: the visible "ctx #…" is the accessible name (WCAG 2.5.3 label in
+          // name); the title describes what the chip does.
+          title={t("filterByContext")}
+          onClick={() => onSameContext?.(request.contextKey as string)}
+        >
+          ctx #{request.contextKey.slice(0, 6)}
+        </Button>
+      )}
     </div>
   );
 }
