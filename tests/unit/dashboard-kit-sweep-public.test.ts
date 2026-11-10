@@ -266,7 +266,6 @@ const STALE_KIT_EXCEPTION_ALLOWED: Allow = Object.fromEntries(
     ["src/app/(dashboard)/dashboard/batch/components/wizard/InputStep.tsx", 1],
     ["src/app/(dashboard)/dashboard/combos/AutoComboCatalog.tsx", 1],
     ["src/app/(dashboard)/dashboard/combos/ComboHeaderActions.tsx", 1],
-    ["src/app/(dashboard)/dashboard/combos/page.tsx", 2],
     ["src/app/(dashboard)/dashboard/context/rtk/RtkTomlImportCard.tsx", 1],
     ["src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab.tsx", 1],
     ["src/app/(dashboard)/dashboard/omni-skills/OmniSkillsPageClient.tsx", 1],
