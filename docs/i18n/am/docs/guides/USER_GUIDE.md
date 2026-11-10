@@ -359,80 +359,80 @@ API ቁልፍ፦ [ከዳሽቦርድ]
 
 ## 🚀 ማሰማራት
 
-### አጠቃላይ npm ጭነት (የሚመከር)
+### ዓለም አቀፍ npm መጫን (የሚመከር)
 
 ```bash
 npm install -g omniroute
 
-# የውቅር ማውጫ ይፍጠሩ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# የ.env ፋይል ይፍጠሩ (.env.exampleን ይመልከቱ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# አገልጋዩን ያስጀምሩ
+# Start server
 omniroute
-# ወይም ብጁ port በመጠቀም፦
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLIው `.env`ን ከ`~/.omniroute/.env` ወይም `./.env` በራስ-ሰር ይጭናል።
+CLI በራስሰር `.env` ከ `~/.omniroute/.env` ወይም `./.env` ይጭናል። በስራ ማውጫው ውስጥ ያለው `./.env` አጭር የተፈቀደ ቁልፍ ዝርዝር ብቻ ሊያዘጋጅ ይችላል (ወደቦች ፣ `REQUIRE_API_KEY`፣ የአካባቢ እና የቀለም ቅንጅቶች)። ሁሉንም ነገር በ `~/.omniroute/.env` ውስጥ ያስቀምጡ. [CLI ማስጀመሪያ ውሎችን](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ይመልከቱ።
 
-### የማሳወቂያ ሳጥን ሁነታ
+### የትሪ ሁነታ
 
-OmniRouteን በስርዓቱ የማሳወቂያ ሳጥን ውስጥ ያስጀምሩ፦
+በስርዓት መሣቢያው ውስጥ OmniRoute ጀምር
 
 ```bash
 omniroute serve --tray
 ```
 
-አገልጋዩና የማሳወቂያ ሳጥኑ ዝግጁ ከሆኑ በኋላ ትዕዛዙ ይጠናቀቃል።
+ትዕዛዙ አገልጋዩ እና ትሪው ዝግጁ ከሆኑ በኋላ ይመለሳል።
 
-አገልጋዩ ያለ terminal መስራቱን ይቀጥላል።
+አገልጋዩ ያለ ተርሚናል ይቀጥላል።
 
-የማሳወቂያ ሳጥን ሁነታ macOSን፣ Windowsን እና ግራፊክሳዊ የLinux ክፍለ-ጊዜዎችን ይደግፋል። የማሳወቂያ ሳጥን ሁነታ ዳሽቦርዱን በራስ-ሰር አይከፍትም።
+ትሬይ ሁነታ macOS, Windows, እና በግራፊክ Linux ክፍለ ጊዜዎችን ይደግፋል. የትሬይ ሁነታ ዳሽቦርዱን በራስ ሰር አይከፍትም።
 
-ለእነዚህ ድርጊቶች የማሳወቂያ ሳጥን ምናሌውን ይጠቀሙ፦
+ለእነዚህ ድርጊቶች የትሪ ምናሌውን ይጠቀሙ፡-
 
 - ዳሽቦርዱን ይክፈቱ።
-- `/dashboard/logs`ን ይክፈቱ።
-- ራስ-ሰር ማስጀመርን ይቀይሩ።
-- OmniRouteን ያቁሙ።
+- `/dashboard/logs` ን ይክፈቱ።
+- ራስ-ሰር ጅምርን ይቀይሩ።
+- OmniRoute አቁም .
 
-`--tray`ን ከእነዚህ አማራጮች ጋር አያጣምሩ፦
+`--tray` ከእነዚህ አማራጮች ጋር አታጣምር፡-
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-እነዚህ ሁነታዎች የተለየ የሂደት ባለቤትነት ይፈልጋሉ።
+እነዚህ ሁነታዎች የተለያየ የሂደት ባለቤትነት ያስፈልጋቸዋል።
 
-በሚቀጥለው የማሽን መግቢያ ጊዜ ማስጀመርን ያንቁ፦
+በሚቀጥለው የማሽን መግቢያ ላይ ጅምርን አንቃ፡-
 
 ```bash
 omniroute autostart enable
 ```
 
-ራስ-ሰር ማስጀመር በmacOS፣ Windows እና ግራፊክሳዊ የLinux ክፍለ-ጊዜዎች ላይ የማሳወቂያ ሳጥን ሁነታን ይጠቀማል። ማሳያ የሌለው Linux ነባሩን የsystemd ተጠቃሚ አገልግሎት ይጠቀማል።
+ራስ-ጀምር በ macOS፣ Windows እና በግራፊክ Linux ክፍለ-ጊዜዎች ላይ የመሳቢያ ሁነታን ይጠቀማል። ጭንቅላት የሌለው Linux ያለውን የስርዓት ተጠቃሚ አገልግሎት ይጠቀማል።
 
-በመግቢያ ጊዜ ማስጀመርን ያሰናክሉ፦
+በመግቢያው ላይ ጅምርን ያሰናክሉ፡
 
 ```bash
 omniroute autostart disable
 ```
 
-### ማራገፍ
+### በማራገፍ ላይ
 
-ከአሁን በኋላ OmniRoute በማያስፈልግዎት ጊዜ፣ ሙሉ በሙሉ ለማስወገድ ሁለት ፈጣን ስክሪፕቶችን አቅርበናል፦
+OmniRoute በማይፈልጉበት ጊዜ፣ ለንፁህ ማስወገጃ ሁለት ፈጣን ስክሪፕቶችን እናቀርባለን።
 
-| ትዕዛዝ                     | ድርጊት                                                                          |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| `npm run uninstall`      | የስርዓት መተግበሪያውን ያስወግዳል፣ ነገር ግን በ`~/.omniroute` ውስጥ **የውሂብ ጎታዎንና ውቅሮችዎን ያቆያል**። |
-| `npm run uninstall:full` | መተግበሪያውን ያስወግዳል፣ እንዲሁም **ሁሉንም ውቅሮች፣ ቁልፎች እና የውሂብ ጎታዎች እስከመጨረሻው ይሰርዛል**።       |
+| ትዕዛዝ                     | ድርጊት                                                                   |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `npm run uninstall`      | የስርዓት መተግበሪያን ያስወግዳል ግን** የእርስዎን DB እና ውቅሮች ይጠብቃል።** በ `~/.omniroute`. |
+| `npm run uninstall:full` | መተግበሪያው AND በቋሚነት ያስወግዳል** ሁሉንም አወቃቀሮች፣ ቁልፎች እና የውሂብ ጎታዎችን ይሰርዛል** .   |
 
-> ማስታወሻ፦ እነዚህን ትዕዛዞች ለማስኬድ፣ ወደ OmniRoute ፕሮጀክት አቃፊ ይሂዱ (clone ካደረጉት) እና ያስኪዷቸው። እንደ አማራጭ፣ በአጠቃላይ የተጫነ ከሆነ፣ `npm uninstall -g omniroute`ን ብቻ ማስኬድ ይችላሉ።
+> ማሳሰቢያ፡ እነዚህን ትዕዛዞች ለማስኬድ ወደ OmniRoute ፕሮጀክት ማህደር (ክሎድ ካደረጉት) ይሂዱ እና ያሂዱ። በአማራጭ፣ በአለምአቀፍ ደረጃ ከተጫነ በቀላሉ `npm uninstall -g omniroute` ማሄድ ይችላሉ።
 
-### በVPS ላይ ማሰማራት
+### VPS ማሰማራት
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -448,25 +448,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# ወይም፦ pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### በPM2 ላይ ማሰማራት (ዝቅተኛ ማህደረ ትውስታ)
+### PM2 ማሰማራት (ዝቅተኛ ማህደረ ትውስታ)
 
-የRAM አቅማቸው ውስን ለሆኑ አገልጋዮች፣ የማህደረ ትውስታ ገደብ አማራጩን ይጠቀሙ፦
+ውስን RAM ላላቸው አገልጋዮች የማህደረ ትውስታ ገደብ አማራጩን ይጠቀሙ፡-
 
 ```bash
-# በ512MB ገደብ (ነባሪ)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# ወይም ብጁ የማህደረ ትውስታ ገደብ በመጠቀም
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# ወይም ecosystem.config.jsን በመጠቀም
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js`ን ይፍጠሩ፦
+`ecosystem.config.js` ይፍጠሩ:
 
 ```javascript
 module.exports = {
@@ -491,30 +491,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Image ይገንቡ (ነባሪ = codex/claude/droid አስቀድሞ የተጫነበት runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# ተንቀሳቃሽ ሁነታ (የሚመከር)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-ከCLI binaries ጋር ለhost-የተዋሃደ ሁነታ፣ በዋናዎቹ ሰነዶች ውስጥ ያለውን የDocker ክፍል ይመልከቱ።
+ለአስተናጋጅ የተዋሃደ ሁነታ ከ CLI ሁለትዮሾች ጋር፣ በዋናው ሰነዶች ውስጥ የ Docker ክፍልን ይመልከቱ።
 
-### Void Linux (xbps-src)
+### ባዶ Linux (xbps-src)
 
-Void Linux ተጠቃሚዎች `xbps-src` የመስቀለኛ-ማጠናቀር ማዕቀፍን በመጠቀም OmniRouteን በስርዓቱ ቤተኛ መንገድ ማሸግ እና መጫን ይችላሉ። ይህም የNode.js ራሱን የቻለ ግንባታን ከሚያስፈልጉት `better-sqlite3` ቤተኛ bindings ጋር በራስ-ሰር ያከናውናል።
+ባዶ Linux ተጠቃሚዎች የ `xbps-src` ማጠቃለያ ማዕቀፍን በመጠቀም OmniRoute ማሸግ እና መጫን ይችላሉ። ይህ የ Node.js ብቻውን ግንባታ ከሚፈለገው `better-sqlite3` ቤተኛ ማሰሪያዎች ጋር በራስ ሰር ያደርገዋል።
 
 <details>
-<summary><b>የxbps-src አብነትን ይመልከቱ</b></summary>
+<summary><b>የ xbps-src አብነት ይመልከቱ</b></summary>
 
 ```bash
-# የ'omniroute' አብነት ፋይል
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="ብዙ LLM አቅራቢዎችን በብልህ ማዘዋወር የሚያስተዳድር ሁለንተናዊ AI መግቢያ"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -529,7 +529,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# ለnode-gyp የዒላማውን CPU መዋቅር ይወስኑ
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -538,29 +538,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) ሁሉንም ጥገኛዎች ይጫኑ – ስክሪፕቶችን ይዝለሉ
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) ራሱን የቻለውን የNext.js ጥቅል ይገንቡ
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) የማይንቀሳቀሱ ሀብቶችን ወደ ራሱን የቻለው ጥቅል ይቅዱ
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) የbetter-sqlite3 ቤተኛ bindingን ያጠናቅሩ
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) የተጠናቀረውን binding በራሱን የቻለው ጥቅል ውስጥ ያስቀምጡ
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) ለተወሰነ መዋቅር የተዘጋጁ sharp ጥቅሎችን ያስወግዱ
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) በNext.js የማይንቀሳቀስ ትንተና የተዘለሉትን የpino runtime ጥገኛዎች ይቅዱ፦
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -574,7 +574,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ከመጫን በኋላ ባለው hook ባዶ የNext.js መተግበሪያ router ማውጫዎች እንዳይወገዱ ይከላከሉ
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -602,30 +602,30 @@ post_install() {
 
 ### የአካባቢ ተለዋዋጮች
 
-| ተለዋዋጭ                                   | ነባሪ                                  | መግለጫ                                                                           |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT መፈረሚያ ሚስጥር (**በምርት አካባቢ ይቀይሩት**)                                           |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | የመጀመሪያ መግቢያ የይለፍ ቃል                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | የውሂብ ማውጫ (የውሂብ ጎታ፣ አጠቃቀም፣ ምዝግቦች)                                               |
-| `PORT`                                  | የፍሬምወርኩ ነባሪ                          | የአገልግሎት ወደብ (በምሳሌዎች ውስጥ `20128`)                                               |
-| `HOSTNAME`                              | የፍሬምወርኩ ነባሪ                          | የማስተሳሰሪያ አስተናጋጅ (የDocker ነባሪ `0.0.0.0` ነው)                                     |
-| `NODE_ENV`                              | የአሂድ ጊዜ ነባሪ                          | ለማሰማራት `production` ያዘጋጁ                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ለዳሽቦርዱ የሚታይ እና ለአገልጋዩ የሚጋለጥ ይፋዊ መሠረታዊ URL (የቀድሞውን `BASE_URL` ይተካል)             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | የደመና ማመሳሰያ መጨረሻ ነጥብ መሠረታዊ URL (የቀድሞውን `CLOUD_URL` ይተካል)                        |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | ለሚፈጠሩ API ቁልፎች የHMAC ሚስጥር                                                      |
-| `REQUIRE_API_KEY`                       | `false`                              | በ`/v1/*` ላይ የBearer API ቁልፍን ያስገድዱ                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | ማንነታቸው የተረጋገጠ የዳሽቦርድ ተጠቃሚዎች ሲጠይቁ ሙሉ የተከማቹ API ቁልፍ እሴቶችን እንዲመለከቱ ይፍቀዱ           |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ለተሸጎጠ የአቅራቢ ገደቦች ውሂብ የአገልጋይ-ወገን ማደሻ ድግግሞሽ፤ የUI ማደሻ አዝራሮች አሁንም በእጅ ማመሳሰልን ያስነሳሉ |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ከመጻፍ/ማስመጣት/መመለስ በፊት ራስ-ሰር የSQLite ቅጽበተ ቅጂዎችን ያሰናክሉ፤ በእጅ የሚደረጉ ምትኬዎች አሁንም ይሠራሉ  |
-| `APP_LOG_TO_FILE`                       | `true`                               | የመተግበሪያ እና የኦዲት ምዝግብ ውጤትን ወደ ዲስክ ማስቀመጥን ያነቃል                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` የማረጋገጫ ኩኪን ያስገድዱ (ከHTTPS ተገላቢጦሽ ፕሮክሲ በስተጀርባ)                          |
-| `CLOUDFLARED_BIN`                       | አልተዋቀረም                              | በሚተዳደር ማውረድ ፈንታ ነባር `cloudflared` ባይነሪን ይጠቀሙ                                   |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | በሚተዳደሩ Quick Tunnels የሚጠቀመው ማጓጓዣ (`http2`፣ `quic`፣ ወይም `auto`)                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | የNode.js ሂፕ ገደብ በMB                                                            |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ከፍተኛው የጥያቄ መሸጎጫ ግቤቶች ብዛት                                                       |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | ከፍተኛው የፍቺ መሸጎጫ ግቤቶች ብዛት                                                        |
+| ተለዋዋጭ                                   | ነባሪ                      | መግለጫ                                                                                                  |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(በራስ-ሰር የተፈጠረ)_         | JWT ፊርማ ሚስጥራዊ — በራስ የመነጨ በመጀመሪያ ሩጫ እና እስከ `server.env` ድረስ ቀጠለ; የውሂብ ማውጫው ጊዜያዊ በሚሆንበት ጊዜ በግልጽ ያስቀምጡት። |
+| `INITIAL_PASSWORD`                      | _(ያልተቀናበረ)_              | መጀመሪያ የመግቢያ የይለፍ ቃል. npm/source ጭነቶች በ `CHANGEME` ይጀምራሉ: ይተኩ. አልተዋቀረም፡ የመሳፈር አዋቂ                      |
+| `DATA_DIR`                              | `~/.omniroute`           | የውሂብ ማውጫ (ዲቢ፣ አጠቃቀም፣ ምዝግብ ማስታወሻዎች)                                                                    |
+| `PORT`                                  | ማዕቀፍ ነባሪ                 | የአገልግሎት ወደብ (`20128` በምሳሌዎች)                                                                          |
+| `HOSTNAME`                              | ማዕቀፍ ነባሪ                 | አስረው አስተናጋጅ (Docker ነባሪ ወደ `0.0.0.0`)                                                                 |
+| `NODE_ENV`                              | የሩጫ ጊዜ ነባሪ               | ለማሰማራት `production` አዘጋጅ                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | የህዝብ መሰረት URL ወደ ዳሽቦርዱ ወጣ እና ለአገልጋዩ ተጋልጧል (የቆየ `BASE_URL` ይተካዋል)                                      |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | የክላውድ ማመሳሰል የመጨረሻ ነጥብ ቤዝ URL (የቆየ `CLOUD_URL` ን ይተካዋል)                                                |
+| `API_KEY_SECRET`                        | _(በራስ-ሰር የተፈጠረ)_         | HMAC ሚስጥር ለተፈጠሩ API ቁልፎች — በራስ ሰር የተፈጠረ እና በ `server.env` ጸንቷል                                        |
+| `REQUIRE_API_KEY`                       | `false`                  | Bearer API ቁልፍን በ `/v1/*` ላይ ያስፈጽሙ                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | የተረጋገጡ የዳሽቦርድ ተጠቃሚዎች ሙሉ የተከማቹ API ቁልፍ እሴቶችን በፍላጎት እንዲያሳዩ ይፍቀዱላቸው                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | ለተሸጎጠ የአቅራቢ ገደብ ውሂብ የአገልጋይ-ጎን አድስ ማረጋገጫ; UI አድስ አዝራሮች አሁንም በእጅ ማመሳሰልን ይቀሰቅሳሉ                          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | ከ writes/import/restore በፊት አውቶማቲክ SQLite ቅጽበተ-ፎቶዎችን አሰናክል; በእጅ ምትኬዎች አሁንም ይሰራሉ                       |
+| `APP_LOG_TO_FILE`                       | `true`                   | የመተግበሪያ እና የኦዲት ምዝግብ ማስታወሻን ወደ ዲስክ ያነቃል።                                                              |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth ኩኪን አስገድድ (ከ HTTPS ተገላቢጦሽ ፕሮክሲ ጀርባ)                                                     |
+| `CLOUDFLARED_BIN`                       | አልተዋቀረም።                 | ከሚተዳደር ማውረድ ይልቅ ነባር `cloudflared` ሁለትዮሽ ይጠቀሙ                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | ለሚተዳደሩ ፈጣን ዋሻዎች መጓጓዣ (`http2`፣ `quic` ወይም `auto`)                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js ክምር ገደብ በ MB                                                                                  |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | ከፍተኛው ፈጣን መሸጎጫ ግቤቶች                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | ከፍተኛው የትርጉም መሸጎጫ ግቤቶች                                                                                 |
 
-የአካባቢ ተለዋዋጮችን ሙሉ ማጣቀሻ ለማየት [README](../README.md)ን ይመልከቱ።
+ለሙሉ አካባቢ ተለዋዋጭ ማጣቀሻ፣ [README](../README.md) ይመልከቱ።
 
 ---
 

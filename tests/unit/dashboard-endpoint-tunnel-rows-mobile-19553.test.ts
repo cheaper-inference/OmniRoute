@@ -21,7 +21,11 @@ const ROWS = [
   { name: "ngrok Tunnel", marker: "{/* ngrok Tunnel */}", icon: "public" },
 ];
 
-/** className of the row container and of the title wrapper that follows its icon. */
+/**
+ * className of the row container and of its title wrapper. The icon sits inside the title wrapper
+ * on the Tailscale and ngrok rows (it moved into the toggle Button, #18071) and before it on the
+ * Cloudflare row, so the wrapper is located from the row, not from the icon.
+ */
 function rowClasses(marker: string, icon: string) {
   const start = source.indexOf(marker);
   assert.ok(start > 0, `${marker} section must be present`);
@@ -30,8 +34,11 @@ function rowClasses(marker: string, icon: string) {
   assert.ok(iconIdx > 0, `row icon ${icon} must be present`);
   const beforeIcon = section.slice(0, iconIdx);
   const rowMatches = [...beforeIcon.matchAll(/<div[^>]*?className="([^"]*\bpy-3\b[^"]*)"/g)];
-  const row = rowMatches.at(-1)?.[1] ?? "";
-  const title = section.slice(iconIdx).match(/<div className="([^"]+)">/)?.[1] ?? "";
+  const rowMatch = rowMatches.at(-1);
+  assert.ok(rowMatch, `${marker} row container must be present`);
+  const row = rowMatch[1];
+  const afterRow = section.slice(rowMatch.index + rowMatch[0].length);
+  const title = afterRow.match(/<div className="([^"]*\bflex-1\b[^"]*)">/)?.[1] ?? "";
   return { row: row.split(/\s+/), title: title.split(/\s+/) };
 }
 
@@ -48,7 +55,7 @@ for (const { name, marker, icon } of ROWS) {
   });
 }
 
-test("Tailscale and ngrok rows keep their button semantics and hover styling", () => {
+test("Tailscale and ngrok rows keep their full-width click target and hover styling", () => {
   for (const { marker, icon } of ROWS.slice(1)) {
     const { row } = rowClasses(marker, icon);
     for (const cls of ["w-full", "hover:bg-surface/40", "cursor-pointer"]) {

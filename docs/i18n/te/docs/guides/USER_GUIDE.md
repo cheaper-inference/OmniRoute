@@ -355,82 +355,82 @@ API కీ: [డ్యాష్బోర్డ్ నుండి]
 
 ---
 
-## 🚀 డిప్లాయ్మెంట్
+## 🚀 విస్తరణ
 
 ### గ్లోబల్ npm ఇన్స్టాల్ (సిఫార్సు చేయబడింది)
 
 ```bash
 npm install -g omniroute
 
-# కాన్ఫిగ్ డైరెక్టరీని సృష్టించండి
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ఫైల్ను సృష్టించండి (.env.example చూడండి)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# సర్వర్ను ప్రారంభించండి
+# Start server
 omniroute
-# లేదా అనుకూల పోర్ట్తో:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env`ను లోడ్ చేస్తుంది.
+CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env` ని లోడ్ చేస్తుంది. వర్కింగ్ డైరెక్టరీలో ఒక `./.env` కీల యొక్క చిన్న అనుమతి జాబితాను మాత్రమే సెట్ చేయవచ్చు (పోర్ట్లు, `REQUIRE_API_KEY`, లొకేల్ మరియు రంగు సెట్టింగ్లు); మిగతావన్నీ `~/.omniroute/.env` లో ఉంచండి. [CLI ప్రయోగ ఒప్పందాలను](CLI-LAUNCH-CONTRACTS.md#working-directory-env) చూడండి.
 
 ### ట్రే మోడ్
 
-OmniRouteను సిస్టమ్ ట్రేలో ప్రారంభించండి:
+సిస్టమ్ ట్రేలో OmniRoute ప్రారంభించండి:
 
 ```bash
 omniroute serve --tray
 ```
 
-సర్వర్ మరియు ట్రే సిద్ధమైన తర్వాత కమాండ్ ముగుస్తుంది.
+సర్వర్ మరియు ట్రే సిద్ధంగా ఉన్న తర్వాత కమాండ్ తిరిగి వస్తుంది.
 
-టెర్మినల్ లేకుండానే సర్వర్ కొనసాగుతుంది.
+సర్వర్ టెర్మినల్ లేకుండా కొనసాగుతుంది.
 
-ట్రే మోడ్ macOS, Windows మరియు గ్రాఫికల్ Linux సెషన్లకు మద్దతు ఇస్తుంది. ట్రే మోడ్ డ్యాష్బోర్డ్ను స్వయంచాలకంగా తెరవదు.
+ట్రే మోడ్ macOS, Windows, మరియు గ్రాఫికల్ Linux సెషన్లకు మద్దతు ఇస్తుంది. ట్రే మోడ్ స్వయంచాలకంగా డాష్బోర్డ్ను తెరవదు.
 
-ఈ చర్యల కోసం ట్రే మెనూను ఉపయోగించండి:
+ఈ చర్యల కోసం ట్రే మెనుని ఉపయోగించండి:
 
-- డ్యాష్బోర్డ్ను తెరవండి.
-- `/dashboard/logs`ను తెరవండి.
-- ఆటో-స్టార్ట్ను మార్చండి.
-- OmniRouteను ఆపండి.
+- డాష్బోర్డ్ను తెరవండి.
+- `/dashboard/logs` తెరవండి.
+- స్వీయ-ప్రారంభాన్ని మార్చండి.
+- OmniRoute ఆపు.
 
-ఈ ఆప్షన్లతో `--tray`ను కలిపి ఉపయోగించవద్దు:
+ఈ ఎంపికలతో `--tray` కలపవద్దు:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-ఈ మోడ్లకు వేర్వేరు ప్రాసెస్ యాజమాన్యం అవసరం.
+ఈ మోడ్లకు విభిన్న ప్రాసెస్ యాజమాన్యం అవసరం.
 
-తదుపరి మెషీన్ లాగిన్ సమయంలో స్టార్టప్ను ప్రారంభించండి:
+తదుపరి మెషిన్ లాగిన్లో ప్రారంభాన్ని ప్రారంభించండి:
 
 ```bash
 omniroute autostart enable
 ```
 
-macOS, Windows మరియు గ్రాఫికల్ Linux సెషన్లలో ఆటో-స్టార్ట్ ట్రే మోడ్ను ఉపయోగిస్తుంది. హెడ్లెస్ Linux ఇప్పటికే ఉన్న systemd యూజర్ సర్వీస్ను ఉపయోగిస్తుంది.
+స్వీయ-ప్రారంభం macOS, Windows, మరియు గ్రాఫికల్ Linux సెషన్లలో ట్రే మోడ్ను ఉపయోగిస్తుంది. హెడ్లెస్ Linux ఇప్పటికే ఉన్న systemd వినియోగదారు సేవను ఉపయోగిస్తుంది.
 
-లాగిన్ సమయంలో స్టార్టప్ను నిలిపివేయండి:
+లాగిన్ వద్ద ప్రారంభాన్ని నిలిపివేయండి:
 
 ```bash
 omniroute autostart disable
 ```
 
-### అన్ఇన్స్టాల్ చేయడం
+### అన్ఇన్స్టాల్ చేస్తోంది
 
-మీకు ఇకపై OmniRoute అవసరం లేనప్పుడు, పూర్తిగా తొలగించడానికి మేము రెండు శీఘ్ర స్క్రిప్ట్లను అందిస్తున్నాము:
+మీకు ఇకపై OmniRoute అవసరం లేనప్పుడు, మేము క్లీన్ రిమూవల్ కోసం రెండు శీఘ్ర స్క్రిప్ట్లను అందిస్తాము:
 
-| కమాండ్                   | చర్య                                                                                             |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | సిస్టమ్ యాప్ను తొలగిస్తుంది, కానీ `~/.omniroute`లోని **మీ DB మరియు కాన్ఫిగరేషన్లను ఉంచుతుంది**.  |
-| `npm run uninstall:full` | యాప్ను తొలగించడంతో పాటు **అన్ని కాన్ఫిగరేషన్లు, కీలు మరియు డేటాబేస్లను శాశ్వతంగా తొలగిస్తుంది**. |
+| ఆదేశం                    | చర్య                                                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | సిస్టమ్ యాప్ని తొలగిస్తుంది కానీ** మీ DB మరియు కాన్ఫిగరేషన్లను ఉంచుతుంది** `~/.omniroute` లో.        |
+| `npm run uninstall:full` | AND యాప్ని శాశ్వతంగా తొలగిస్తుంది** అన్ని కాన్ఫిగరేషన్లు, కీలు మరియు డేటాబేస్లను చెరిపివేస్తుంది** . |
 
-> గమనిక: ఈ కమాండ్లను అమలు చేయడానికి, OmniRoute ప్రాజెక్ట్ ఫోల్డర్కు వెళ్లి (మీరు దాన్ని క్లోన్ చేసి ఉంటే) వాటిని అమలు చేయండి. ప్రత్యామ్నాయంగా, గ్లోబల్గా ఇన్స్టాల్ చేసి ఉంటే, మీరు కేవలం `npm uninstall -g omniroute`ను అమలు చేయవచ్చు.
+> గమనిక: ఈ ఆదేశాలను అమలు చేయడానికి, OmniRoute ప్రాజెక్ట్ ఫోల్డర్కి నావిగేట్ చేయండి (మీరు దానిని క్లోన్ చేస్తే) మరియు వాటిని అమలు చేయండి. ప్రత్యామ్నాయంగా, ప్రపంచవ్యాప్తంగా ఇన్స్టాల్ చేసినట్లయితే, మీరు కేవలం `npm uninstall -g omniroute` అమలు చేయవచ్చు.
 
-### VPS డిప్లాయ్మెంట్
+### VPS విస్తరణ
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -446,25 +446,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# లేదా: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 డిప్లాయ్మెంట్ (తక్కువ మెమరీ)
+### PM2 విస్తరణ (తక్కువ మెమరీ)
 
-పరిమిత RAM ఉన్న సర్వర్ల కోసం, మెమరీ పరిమితి ఆప్షన్ను ఉపయోగించండి:
+పరిమిత RAM ఉన్న సర్వర్ల కోసం, మెమరీ పరిమితి ఎంపికను ఉపయోగించండి:
 
 ```bash
-# 512MB పరిమితితో (డిఫాల్ట్)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# లేదా అనుకూల మెమరీ పరిమితితో
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# లేదా ecosystem.config.jsను ఉపయోగించి
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js`ను సృష్టించండి:
+`ecosystem.config.js` సృష్టించండి:
 
 ```javascript
 module.exports = {
@@ -489,24 +489,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# ఇమేజ్ను బిల్డ్ చేయండి (డిఫాల్ట్ = codex/claude/droid ముందే ఇన్స్టాల్ చేయబడిన runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# పోర్టబుల్ మోడ్ (సిఫార్సు చేయబడింది)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI బైనరీలతో హోస్ట్-ఇంటిగ్రేటెడ్ మోడ్ కోసం, ప్రధాన డాక్యుమెంటేషన్లోని Docker విభాగాన్ని చూడండి.
+CLI బైనరీలతో హోస్ట్-ఇంటిగ్రేటెడ్ మోడ్ కోసం, ప్రధాన డాక్స్లోని Docker విభాగాన్ని చూడండి.
 
-### Void Linux (xbps-src)
+### శూన్యం Linux (xbps-src)
 
-Void Linux వినియోగదారులు `xbps-src` క్రాస్-కంపైలేషన్ ఫ్రేమ్వర్క్ను ఉపయోగించి OmniRouteను స్థానికంగా ప్యాకేజ్ చేసి ఇన్స్టాల్ చేయవచ్చు. ఇది అవసరమైన `better-sqlite3` నేటివ్ బైండింగ్లతో పాటు Node.js స్వతంత్ర బిల్డ్ను ఆటోమేట్ చేస్తుంది.
+శూన్యమైన Linux వినియోగదారులు `xbps-src` క్రాస్-కంపైలేషన్ ఫ్రేమ్వర్క్ని ఉపయోగించి స్థానికంగా OmniRoute ప్యాకేజీ చేయవచ్చు మరియు ఇన్స్టాల్ చేయవచ్చు. ఇది అవసరమైన `better-sqlite3` స్థానిక బైండింగ్లతో పాటు Node.js స్వతంత్ర నిర్మాణాన్ని ఆటోమేట్ చేస్తుంది.
 
 <details>
-<summary><b>xbps-src టెంప్లేట్ను వీక్షించండి</b></summary>
+<summary><b>xbps-src టెంప్లేట్ని వీక్షించండి</b></summary>
 
 ```bash
-# 'omniroute' కోసం టెంప్లేట్ ఫైల్
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -527,7 +527,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp కోసం లక్ష్య CPU ఆర్కిటెక్చర్ను నిర్ధారించండి
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -536,29 +536,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) అన్ని డిపెండెన్సీలను ఇన్స్టాల్ చేయండి – స్క్రిప్ట్లను దాటవేయండి
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js స్వతంత్ర బండిల్ను బిల్డ్ చేయండి
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) స్టాటిక్ అసెట్లను స్వతంత్ర బండిల్లోకి కాపీ చేయండి
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 నేటివ్ బైండింగ్ను కంపైల్ చేయండి
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) కంపైల్ చేసిన బైండింగ్ను స్వతంత్ర బండిల్లో ఉంచండి
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) ఆర్కిటెక్చర్-నిర్దిష్ట sharp బండిల్లను తొలగించండి
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js స్టాటిక్ విశ్లేషణ విస్మరించిన pino రన్టైమ్ డిపెండెన్సీలను కాపీ చేయండి:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -572,7 +572,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# పోస్ట్-ఇన్స్టాల్ హుక్ ద్వారా ఖాళీ Next.js యాప్ రౌటర్ డైరెక్టరీలు తొలగించబడకుండా నిరోధించండి
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -600,30 +600,30 @@ post_install() {
 
 ### ఎన్విరాన్మెంట్ వేరియబుల్స్
 
-| వేరియబుల్                               | డిఫాల్ట్                             | వివరణ                                                                                                                                   |
-| --------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT సంతకం కోసం రహస్యం (**ప్రొడక్షన్లో మార్చండి**)                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | మొదటి లాగిన్ పాస్వర్డ్                                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                       | డేటా డైరెక్టరీ (db, వినియోగం, లాగ్లు)                                                                                                   |
-| `PORT`                                  | ఫ్రేమ్వర్క్ డిఫాల్ట్                 | సేవా పోర్ట్ (ఉదాహరణల్లో `20128`)                                                                                                        |
-| `HOSTNAME`                              | ఫ్రేమ్వర్క్ డిఫాల్ట్                 | బైండ్ హోస్ట్ (Docker డిఫాల్ట్ `0.0.0.0`)                                                                                                |
-| `NODE_ENV`                              | రన్టైమ్ డిఫాల్ట్                     | డిప్లాయ్మెంట్ కోసం `production`గా సెట్ చేయండి                                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | డాష్బోర్డ్లో చూపబడే మరియు సర్వర్కు అందుబాటులో ఉండే పబ్లిక్ బేస్ URL (లెగసీ `BASE_URL`ను భర్తీ చేస్తుంది)                                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | క్లౌడ్ సింక్ ఎండ్పాయింట్ బేస్ URL (లెగసీ `CLOUD_URL`ను భర్తీ చేస్తుంది)                                                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | రూపొందించిన API కీల కోసం HMAC రహస్యం                                                                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*`పై Bearer API కీని తప్పనిసరి చేయండి                                                                                              |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | ప్రామాణీకరించబడిన డాష్బోర్డ్ వినియోగదారులు అభ్యర్థనపై నిల్వ చేసిన పూర్తి API కీ విలువలను చూసేందుకు అనుమతించండి                          |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | క్యాష్ చేసిన ప్రొవైడర్ పరిమితుల డేటా కోసం సర్వర్-వైపు రిఫ్రెష్ వ్యవధి; UI రిఫ్రెష్ బటన్లు ఇప్పటికీ మాన్యువల్ సింక్ను ట్రిగ్గర్ చేస్తాయి |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | రైట్/ఇంపోర్ట్/రిస్టోర్కు ముందు ఆటోమేటిక్ SQLite స్నాప్షాట్లను నిలిపివేయండి; మాన్యువల్ బ్యాకప్లు ఇప్పటికీ పనిచేస్తాయి                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | అప్లికేషన్ మరియు ఆడిట్ లాగ్ అవుట్పుట్ను డిస్క్లోకి ప్రారంభిస్తుంది                                                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` ప్రామాణీకరణ కుకీని బలవంతం చేయండి (HTTPS రివర్స్ ప్రాక్సీ వెనుక)                                                                |
-| `CLOUDFLARED_BIN`                       | సెట్ చేయబడలేదు                       | నిర్వహిత డౌన్లోడ్కు బదులుగా ఇప్పటికే ఉన్న `cloudflared` బైనరీని ఉపయోగించండి                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | నిర్వహిత క్విక్ టన్నెల్స్ కోసం ట్రాన్స్పోర్ట్ (`http2`, `quic`, లేదా `auto`)                                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MBలో Node.js హీప్ పరిమితి                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ప్రాంప్ట్ క్యాష్ ఎంట్రీల గరిష్ఠ సంఖ్య                                                                                                   |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | సెమాంటిక్ క్యాష్ ఎంట్రీల గరిష్ఠ సంఖ్య                                                                                                   |
+| వేరియబుల్                               | డిఫాల్ట్                         | వివరణ                                                                                                                                                            |
+| --------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(స్వయంచాలకంగా రూపొందించబడింది)_ | JWT సంతకం రహస్య — మొదటి రన్లో స్వయంచాలకంగా రూపొందించబడింది మరియు `server.env` వరకు కొనసాగింది; డేటా డైరెక్టరీ అశాశ్వతంగా ఉన్నప్పుడు దానిని స్పష్టంగా సెట్ చేయండి |
+| `INITIAL_PASSWORD`                      | _(సెట్ చేయనిది)_                 | మొదటి లాగిన్ పాస్వర్డ్. npm/source ఇన్స్టాల్లు `CHANGEME` తో ప్రారంభమవుతాయి : దాన్ని భర్తీ చేయండి. సెట్ చేయబడలేదు: ఆన్బోర్డింగ్ విజార్డ్                         |
+| `DATA_DIR`                              | `~/.omniroute`                   | డేటా డైరెక్టరీ (db, వినియోగం, లాగ్లు)                                                                                                                            |
+| `PORT`                                  | ఫ్రేమ్వర్క్ డిఫాల్ట్             | సర్వీస్ పోర్ట్ (ఉదాహరణలలో`20128` )                                                                                                                               |
+| `HOSTNAME`                              | ఫ్రేమ్వర్క్ డిఫాల్ట్             | హోస్ట్ని బైండ్ చేయండి (Docker డిఫాల్ట్లు `0.0.0.0`)                                                                                                              |
+| `NODE_ENV`                              | రన్టైమ్ డిఫాల్ట్                 | విస్తరణ కోసం `production` సెట్ చేయండి                                                                                                                            |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`         | పబ్లిక్ బేస్ URL డాష్బోర్డ్కు కనిపించింది మరియు సర్వర్కు బహిర్గతమైంది (లెగసీ `BASE_URL` స్థానంలో ఉంది)                                                           |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`          | క్లౌడ్ సింక్ ఎండ్పాయింట్ బేస్ URL (లెగసీ `CLOUD_URL` స్థానంలో ఉంది)                                                                                              |
+| `API_KEY_SECRET`                        | _(స్వయంచాలకంగా రూపొందించబడింది)_ | ఉత్పత్తి చేయబడిన API కీల కోసంHMAC రహస్యం — మొదటి రన్లో స్వయంచాలకంగా రూపొందించబడింది మరియు `server.env` వరకు కొనసాగుతుంది                                         |
+| `REQUIRE_API_KEY`                       | `false`                          | `/v1/*` లో బేరర్ API కీని అమలు చేయండి                                                                                                                            |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                          | ప్రామాణీకరించబడిన డాష్బోర్డ్ వినియోగదారులను డిమాండ్పై పూర్తి నిల్వ చేసిన API కీ విలువలను బహిర్గతం చేయడానికి అనుమతించండి                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                             | కాష్ చేసిన ప్రొవైడర్ పరిమితుల డేటా కోసం సర్వర్ వైపు రిఫ్రెష్ కాడెన్స్; UI రిఫ్రెష్ బటన్లు ఇప్పటికీ మాన్యువల్ సమకాలీకరణను ట్రిగ్గర్ చేస్తాయి                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                          | writes/import/restore కంటే ముందు ఆటోమేటిక్ SQLite స్నాప్షాట్లను నిలిపివేయండి; మాన్యువల్ బ్యాకప్ ఇప్పటికీ పని చేస్తుంది                                           |
+| `APP_LOG_TO_FILE`                       | `true`                           | డిస్క్కి అప్లికేషన్ మరియు ఆడిట్ లాగ్ అవుట్పుట్ను ప్రారంభిస్తుంది                                                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                          | ఫోర్స్ `Secure` auth కుక్కీ ( HTTPS రివర్స్ ప్రాక్సీ వెనుక)                                                                                                      |
+| `CLOUDFLARED_BIN`                       | సెట్ చేయబడలేదు                   | నిర్వహించబడే డౌన్లోడ్కు బదులుగా ఇప్పటికే ఉన్న `cloudflared` బైనరీని ఉపయోగించండి                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                          | నిర్వహించబడే త్వరిత సొరంగాల కోసం రవాణా (`http2`, `quic`, లేదా `auto`)                                                                                            |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                            | MB లోNode.js కుప్ప పరిమితి                                                                                                                                       |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                             | గరిష్ట ప్రాంప్ట్ కాష్ ఎంట్రీలు                                                                                                                                   |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                            | గరిష్ట సెమాంటిక్ కాష్ ఎంట్రీలు                                                                                                                                   |
 
-పూర్తి ఎన్విరాన్మెంట్ వేరియబుల్ సూచన కోసం, [README](../README.md) చూడండి.
+పూర్తి పర్యావరణ వేరియబుల్ సూచన కోసం, [README](../README.md) చూడండి.
 
 ---
 
