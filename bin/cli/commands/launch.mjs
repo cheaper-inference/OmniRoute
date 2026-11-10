@@ -59,7 +59,7 @@ export function buildClaudeEnv(baseEnv, baseUrlOrPort, authToken, opts = {}) {
 }
 
 /** The model a claude invocation will use: pass-through `--model` wins over the profile model. */
-function routedModel(claudeArgs, fallback) {
+export function routedModel(claudeArgs, fallback) {
   for (let i = 0; i < claudeArgs.length; i++) {
     const arg = String(claudeArgs[i]);
     if (arg === "--model") return String(claudeArgs[i + 1] ?? "") || fallback;
@@ -73,7 +73,7 @@ function routedModel(claudeArgs, fallback) {
  * undefined when it cannot be read. Fail-open: launch must never wait on or fail
  * because of the catalog.
  */
-async function fetchModelContextWindow(baseUrl, authToken, model) {
+export async function fetchModelContextWindow(baseUrl, authToken, model) {
   if (!model) return undefined;
   try {
     const res = await fetch(`${baseUrl}/v1/models`, {
