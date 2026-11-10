@@ -18,10 +18,12 @@ test("MAX_SESSIONS constant exists and is 200", () => {
   assert.equal(Number(match[1]), 200, "MAX_SESSIONS must be 200");
 });
 
-test("SESSION_TTL_MS is 15 minutes (15 * 60 * 1000)", () => {
+test("SESSION_TTL_MS resolves from OMNIROUTE_SESSION_TTL_MIN with a 15-minute default", () => {
+  // The TTL is env-configurable (see open-sse/utils/ttlFromEnv.ts); the guard
+  // pins the wiring and the default so the knob cannot silently vanish.
   assert.ok(
-    src.includes("15 * 60 * 1000"),
-    "SESSION_TTL_MS should be 15 * 60 * 1000"
+    src.includes('resolveTtlMsFromEnv("OMNIROUTE_SESSION_TTL_MIN", 15)'),
+    "SESSION_TTL_MS should resolve from OMNIROUTE_SESSION_TTL_MIN with the 15-minute default"
   );
 });
 
@@ -272,7 +274,9 @@ test("cleanup timer is unref'd to avoid blocking process exit", () => {
 // ── Source-level: eviction uses lastActive not createdAt ──────────────────────
 
 test("eviction loop sorts by lastActive, not createdAt", () => {
-  const evictBlock = src.match(/while\s*\(sessions\.size\s*>\s*MAX_SESSIONS\)[\s\S]*?sessions\.delete\(oldestKey\)/);
+  const evictBlock = src.match(
+    /while\s*\(sessions\.size\s*>\s*MAX_SESSIONS\)[\s\S]*?sessions\.delete\(oldestKey\)/
+  );
   assert.ok(evictBlock, "hard-cap eviction loop must exist");
   assert.ok(
     evictBlock[0].includes("entry.lastActive"),

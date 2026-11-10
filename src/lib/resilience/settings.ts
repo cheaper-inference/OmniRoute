@@ -6,6 +6,10 @@ import {
 
 import type { JsonRecord, ResilienceSettings, ResilienceSettingsPatch } from "./settings/types";
 import {
+  normalizePreferredFailoverSettings,
+  readPreferredFailoverSettings,
+} from "@/sse/services/preferredConnectionFailover";
+import {
   asRecord,
   toBoolean,
   toInteger,
@@ -84,6 +88,7 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 })();
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+  preferredAccountFailover: readPreferredFailoverSettings(),
   antigravityAdaptiveHealth: {
     enabled: process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED === "true",
   },
@@ -367,6 +372,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
+    preferredAccountFailover: DEFAULT_RESILIENCE_SETTINGS.preferredAccountFailover,
     antigravityAdaptiveHealth: DEFAULT_RESILIENCE_SETTINGS.antigravityAdaptiveHealth,
     antigravityTimingTelemetry: DEFAULT_RESILIENCE_SETTINGS.antigravityTimingTelemetry,
   };
@@ -408,6 +414,10 @@ export function resolveResilienceSettings(
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
+    preferredAccountFailover: normalizePreferredFailoverSettings(
+      current.preferredAccountFailover,
+      fallback.preferredAccountFailover
+    ),
     antigravityAdaptiveHealth: normalizeAntigravityToggle(
       current.antigravityAdaptiveHealth,
       legacyAntigravitySettings.adaptiveHealthEnabled,
@@ -476,6 +486,10 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
+    preferredAccountFailover: normalizePreferredFailoverSettings(
+      updates.preferredAccountFailover,
+      current.preferredAccountFailover
+    ),
     antigravityAdaptiveHealth: normalizeAntigravityToggle(
       updates.antigravityAdaptiveHealth,
       undefined,

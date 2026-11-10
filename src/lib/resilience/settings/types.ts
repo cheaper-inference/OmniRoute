@@ -277,6 +277,17 @@ export interface StreamThroughputWatchdogSettings {
   minUsefulBytes: number;
 }
 
+/** Opt-in preferred-account response-start failover, available to API-key-preferred connections across chat providers. */
+export interface PreferredAccountFailoverSettings {
+  enabled: boolean;
+  /** Default response-start deadline in milliseconds for other providers. */
+  defaultTimeoutMs: number;
+  /** Exact provider ID -> milliseconds; 0 disables the policy for that provider. */
+  providerTimeoutsMs: Record<string, number>;
+  /** provider/model or provider/model* -> milliseconds; 0 disables. */
+  modelTimeoutsMs: Record<string, number>;
+}
+
 /** Per-request Antigravity account/model quarantine toggle. */
 export interface AntigravityAdaptiveHealthSettings {
   enabled: boolean;
@@ -288,6 +299,7 @@ export interface AntigravityTimingTelemetrySettings {
 }
 
 export interface ResilienceSettings {
+  preferredAccountFailover: PreferredAccountFailoverSettings;
   antigravityAdaptiveHealth: AntigravityAdaptiveHealthSettings;
   antigravityTimingTelemetry: AntigravityTimingTelemetrySettings;
   requestQueue: RequestQueueSettings;
@@ -307,6 +319,7 @@ export interface ResilienceSettings {
 }
 
 export interface ResilienceSettingsPatch {
+  preferredAccountFailover?: Partial<PreferredAccountFailoverSettings>;
   antigravityAdaptiveHealth?: Partial<AntigravityAdaptiveHealthSettings>;
   antigravityTimingTelemetry?: Partial<AntigravityTimingTelemetrySettings>;
   requestQueue?: Partial<RequestQueueSettings>;
