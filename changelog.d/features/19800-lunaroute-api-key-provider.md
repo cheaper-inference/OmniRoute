@@ -1,0 +1,1 @@
+- **feat(providers):** add LunaRoute (`lunaroute` / `lr`) as an API-key provider with its complete current chat, Responses, Anthropic Messages, embeddings, image generation/edit, and System One typed-decision catalogs, including live chat model discovery and multimodal metadata ([#19800](https://github.com/cheaper-inference/OmniRoute/pull/19800)) — thanks @seanford
