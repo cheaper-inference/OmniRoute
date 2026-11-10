@@ -2804,7 +2804,14 @@ export async function markAccountUnavailable(
     // per-model lockout branches (per-model quota 403/404, codex scope) are left
     // as-is — extending disableCooling to model lockout is a follow-up.
     const disableCooling = connProviderSpecificData.disableCooling === true;
-    const claudeQuotaScope = readClaudeScope({ connectionId, provider, status, errorText, model });
+    const claudeQuotaScope = readClaudeScope({
+      connectionId,
+      provider,
+      status,
+      errorText,
+      model,
+      headers: options.headers,
+    });
     const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
     // #18296: headroom-scoped decisions carry no cached reset, so they use the 429's own hint
     // under the operator's maxCooldownMs instead of an uncapped "upstream reset".

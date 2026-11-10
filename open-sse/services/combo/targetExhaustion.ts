@@ -209,6 +209,7 @@ function deriveTargetFailure(
     status: opts.result.status,
     errorText: opts.errorText,
     model: opts.rawModel,
+    headers: opts.result.headers,
   });
   const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
   const isConnectionScopedClaudeQuota =
