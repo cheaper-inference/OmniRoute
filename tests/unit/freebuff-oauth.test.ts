@@ -135,6 +135,30 @@ test("requestDeviceCode throws on upstream failure or incomplete payload", async
   }
 });
 
+test("requestDeviceCode accepts numeric epoch timestamp for expiresAt", async () => {
+  const epochMs = Date.now() + 240 * 1000;
+  const { calls, restore } = stubFetch(() =>
+    json({
+      loginUrl: "https://freebuff.com/login?auth_code=abc",
+      fingerprintHash: "fh-numeric",
+      expiresAt: epochMs,
+      expiresInMs: 240000,
+    })
+  );
+  try {
+    const device = await freebuff.requestDeviceCode(FREEBUFF_CONFIG);
+    assert.equal(calls.length, 1);
+    assert.equal(device.verification_uri, "https://freebuff.com/login?auth_code=abc");
+    assert.ok(device.expires_in > 200 && device.expires_in <= 240);
+    const decoded = decodeFreebuffLoginState(device.device_code);
+    assert.ok(decoded);
+    assert.equal(decoded.fingerprintHash, "fh-numeric");
+    assert.equal(decoded.expiresAt, new Date(epochMs).toISOString());
+  } finally {
+    restore();
+  }
+});
+
 test("pollToken sends all three login values as query params", async () => {
   const expiresAt = futureIso();
   const { calls, restore } = stubFetch(() => new Response("", { status: 401 }));

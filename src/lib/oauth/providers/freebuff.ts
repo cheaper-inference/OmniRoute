@@ -109,13 +109,19 @@ export const freebuff = {
       fingerprintHash?: unknown;
       expiresAt?: unknown;
     };
+    const expiresAt =
+      typeof data.expiresAt === "number" && Number.isFinite(data.expiresAt)
+        ? new Date(data.expiresAt).toISOString()
+        : typeof data.expiresAt === "string" && data.expiresAt
+          ? data.expiresAt
+          : null;
+
     if (
       typeof data.loginUrl !== "string" ||
       typeof data.fingerprintHash !== "string" ||
-      typeof data.expiresAt !== "string" ||
+      !expiresAt ||
       !data.loginUrl ||
-      !data.fingerprintHash ||
-      !data.expiresAt
+      !data.fingerprintHash
     ) {
       throw new Error("Freebuff login URL response is missing required fields");
     }
@@ -124,12 +130,12 @@ export const freebuff = {
       device_code: encodeFreebuffLoginState({
         fingerprintId,
         fingerprintHash: data.fingerprintHash,
-        expiresAt: data.expiresAt,
+        expiresAt,
       }),
       user_code: fingerprintId.replace(/^codebuff-cli-/, ""),
       verification_uri: data.loginUrl,
       verification_uri_complete: data.loginUrl,
-      expires_in: secondsUntil(data.expiresAt, config.loginTimeoutSec),
+      expires_in: secondsUntil(expiresAt, config.loginTimeoutSec),
       interval: Math.max(1, Math.floor(config.pollInterval / 1000)),
     };
   },
