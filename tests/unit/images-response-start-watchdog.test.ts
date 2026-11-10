@@ -17,9 +17,10 @@ const NON_IMAGE_BODY = JSON.stringify({
 });
 
 test("image generation URL target raises TTFB floor to 300s by default (#19479)", () => {
+  // Codex image POSTs (chatgpt.com/backend-api/codex/images/{generations,edits}) are not listed:
+  // production gives them the dedicated OMNIROUTE_CODEX_IMAGE_RESPONSE_START_TIMEOUT_MS deadline
+  // and never consults this resolver (#18891). This floor covers the other image endpoints.
   const imageEndpoints = [
-    "https://chatgpt.com/backend-api/codex/images/generations",
-    "https://chatgpt.com/backend-api/codex/images/edits",
     "https://api.openai.com/v1/images/generations",
     "https://api.openai.com/v1/images/edits",
     "https://api.stability.ai/v2beta/stable-image/generate/core",
@@ -61,7 +62,7 @@ test("image target honors OMNIROUTE_DIRECT_IMAGE_HEADERS_TIMEOUT_MS override (#1
     null,
     0,
     false,
-    "https://chatgpt.com/backend-api/codex/images/generations"
+    "https://api.openai.com/v1/images/generations"
   );
   assert.equal(got, 450_000, "explicit OMNIROUTE_DIRECT_IMAGE_HEADERS_TIMEOUT_MS must be honored");
 });
@@ -75,7 +76,7 @@ test("image target preserves higher OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS floor (#
     null,
     0,
     false,
-    "https://chatgpt.com/backend-api/codex/images/generations"
+    "https://api.openai.com/v1/images/generations"
   );
   assert.equal(got, 600_000, "operator override above image floor is preserved");
 });
@@ -94,7 +95,7 @@ test("non-image chat requests preserve 30s default dead socket detection (#19479
 test("directHeadersTimeoutResolver passes image budget on attempt 0 (#19479)", () => {
   const resolver = directHeadersTimeoutResolver(
     { body: null },
-    "https://chatgpt.com/backend-api/codex/images/generations"
+    "https://api.openai.com/v1/images/generations"
   );
   assert.equal(resolver(0), 300_000);
 });
