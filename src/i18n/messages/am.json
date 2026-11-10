@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "የChatGPT ተዛዳዊ አገናኝ",
     "doctorChecking": "ሁኔታን በማረጋገጥ ላይ…",
     "doctorCheck": "የዶክተር ሁኔታ ማረጋገጫ",
-    "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ"
+    "fallbackRetryBackendTitle": "ፋሎቤክ ረትሪ ቤክ-ኤንድ",
+    "statusVerificationRequired": "ማረጋገጫ ያስፈልጋል",
+    "errorTypeVerificationRequired": "ማረጋገጫ ያስፈልጋል",
+    "errorTypeAgeVerification": "የዕድሜ ማረጋገጫ ያስፈልጋል"
   },
   "settings": {
     "proxyTraffic": {

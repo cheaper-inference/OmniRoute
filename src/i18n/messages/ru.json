@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "Пользовательский коннектор ChatGPT",
     "doctorChecking": "Проверка состояния…",
     "doctorCheck": "Проверить состояние doctor",
-    "fallbackRetryBackendTitle": "Запасной сервер повторов"
+    "fallbackRetryBackendTitle": "Запасной сервер повторов",
+    "statusVerificationRequired": "Требуется проверка",
+    "errorTypeVerificationRequired": "Требуется проверка",
+    "errorTypeAgeVerification": "Требуется подтверждение возраста"
   },
   "settings": {
     "proxyTraffic": {

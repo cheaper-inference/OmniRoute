@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ChatGPTカスタムコネクタ",
     "doctorChecking": "状態を確認中…",
     "doctorCheck": "ドクター状態を確認する",
-    "fallbackRetryBackendTitle": "フォールバック再試行バックエンド"
+    "fallbackRetryBackendTitle": "フォールバック再試行バックエンド",
+    "statusVerificationRequired": "確認が必要です",
+    "errorTypeVerificationRequired": "確認が必要です",
+    "errorTypeAgeVerification": "年齢確認が必要です"
   },
   "settings": {
     "proxyTraffic": {

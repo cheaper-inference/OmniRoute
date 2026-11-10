@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "Konnezzjoni ċċattiva ChatGPT",
     "doctorChecking": "Nistaqsi d-dejja…",
     "doctorCheck": "Iċċekkja d-dejja tad-doctor",
-    "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback"
+    "fallbackRetryBackendTitle": "Backend ta' ritentattiv fallback",
+    "statusVerificationRequired": "Verifika meħtieġa",
+    "errorTypeVerificationRequired": "Verifika meħtieġa",
+    "errorTypeAgeVerification": "Verifika tal-età meħtieġa"
   },
   "settings": {
     "proxyTraffic": {

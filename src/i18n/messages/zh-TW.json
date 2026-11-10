@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ChatGPT 自訂連接器",
     "doctorChecking": "正在檢查狀態…",
     "doctorCheck": "檢查診斷狀態",
-    "fallbackRetryBackendTitle": "回退重試後端"
+    "fallbackRetryBackendTitle": "回退重試後端",
+    "statusVerificationRequired": "需要驗證",
+    "errorTypeVerificationRequired": "需要驗證",
+    "errorTypeAgeVerification": "需要年齡驗證"
   },
   "settings": {
     "proxyTraffic": {

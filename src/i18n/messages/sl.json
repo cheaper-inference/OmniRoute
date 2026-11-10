@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "Češni adapter ChatGPT",
     "doctorChecking": "Preverjanje stanja …",
     "doctorCheck": "Preveri zdravstveno stanje",
-    "fallbackRetryBackendTitle": "Backend za ponovna poskuse ob neuspehu"
+    "fallbackRetryBackendTitle": "Backend za ponovna poskuse ob neuspehu",
+    "statusVerificationRequired": "Zahtevano preverjanje",
+    "errorTypeVerificationRequired": "Zahtevano preverjanje",
+    "errorTypeAgeVerification": "Zahtevano preverjanje starosti"
   },
   "settings": {
     "proxyTraffic": {

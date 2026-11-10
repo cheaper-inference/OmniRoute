@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ChatGPT egyedi csatlakozó",
     "doctorChecking": "Állapot ellenőrzése…",
     "doctorCheck": "Orvos állapotának ellenőrzése",
-    "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere"
+    "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere",
+    "statusVerificationRequired": "Ellenőrzés szükséges",
+    "errorTypeVerificationRequired": "Ellenőrzés szükséges",
+    "errorTypeAgeVerification": "Életkor ellenőrzése szükséges"
   },
   "settings": {
     "proxyTraffic": {

@@ -36,12 +36,15 @@ import { mergeProviderLimitsCacheEntry, toProviderLimitsCacheEntry } from "./pro
 import { getCredentialRefreshExecutor } from "@omniroute/open-sse/executors/credential.ts";
 import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
 import {
+  extractVerificationUrl,
+  readStoredVerificationUrl,
+} from "@omniroute/open-sse/services/antigravityVerification.ts";
+import {
   fetchAndSeedClaudeResetCreditUsage,
   withClaudeResetCreditCount,
 } from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
-import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   extractCodeAssistOnboardTierId,
   extractCodeAssistSubscriptionTier,
@@ -836,6 +839,15 @@ async function syncAntigravitySubscriptionIfNeeded(
     : { changed: false };
   let changed = subscriptionResult.changed;
   const nextProjectId = subscriptionResult.nextProjectId;
+
+  if (usage.subscriptionInfo) {
+    const vUrl = extractVerificationUrl(usage.subscriptionInfo);
+    if (vUrl && readStoredVerificationUrl(nextPsd) !== vUrl) {
+      nextPsd.verificationUrl = vUrl;
+      nextPsd.verificationAt = new Date().toISOString();
+      changed = true;
+    }
+  }
 
   if (typeof usage.hasArgon === "boolean") {
     const argonResult = applyAntigravityArgonEligibilityToPsd(nextPsd, usage.hasArgon);

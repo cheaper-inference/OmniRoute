@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ChatGPT کسٹم کنیکٹر",
     "doctorChecking": "حالت کا جائزہ لیا جا رہا ہے…",
     "doctorCheck": "ڈاکٹر کی حالت کا جائزہ لیں",
-    "fallbackRetryBackendTitle": "متبادل دوبارہ کوشش بیک اینڈ"
+    "fallbackRetryBackendTitle": "متبادل دوبارہ کوشش بیک اینڈ",
+    "statusVerificationRequired": "تصدیق درکار ہے",
+    "errorTypeVerificationRequired": "تصدیق درکار ہے",
+    "errorTypeAgeVerification": "عمر کی تصدیق درکار ہے"
   },
   "settings": {
     "proxyTraffic": {

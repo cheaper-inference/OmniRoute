@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "Prilagodljivi konektor ChatGPT",
     "doctorChecking": "Provjeravanje statusa…",
     "doctorCheck": "Provjeri status doktoriranja",
-    "fallbackRetryBackendTitle": "Poslužnik za ponovna pokretanja u slučaju pada"
+    "fallbackRetryBackendTitle": "Poslužnik za ponovna pokretanja u slučaju pada",
+    "statusVerificationRequired": "Potrebna verifikacija",
+    "errorTypeVerificationRequired": "Potrebna verifikacija",
+    "errorTypeAgeVerification": "Potrebna verifikacija dobi"
   },
   "settings": {
     "proxyTraffic": {

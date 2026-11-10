@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "Vlastní konektor ChatGPT",
     "doctorChecking": "Kontroluje se stav…",
     "doctorCheck": "Zkontrolovat stav diagnostiky",
-    "fallbackRetryBackendTitle": "Záložní backend pro opakování"
+    "fallbackRetryBackendTitle": "Záložní backend pro opakování",
+    "statusVerificationRequired": "Vyžadováno ověření",
+    "errorTypeVerificationRequired": "Vyžadováno ověření",
+    "errorTypeAgeVerification": "Vyžadováno ověření věku"
   },
   "settings": {
     "proxyTraffic": {

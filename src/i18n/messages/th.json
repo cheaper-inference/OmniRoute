@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "Custom connector ของ ChatGPT",
     "doctorChecking": "กำลังตรวจสอบสถานะ…",
     "doctorCheck": "ตรวจสถานะ doctor",
-    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่"
+    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่",
+    "statusVerificationRequired": "จำเป็นต้องยืนยันตัวตน",
+    "errorTypeVerificationRequired": "จำเป็นต้องยืนยันตัวตน",
+    "errorTypeAgeVerification": "จำเป็นต้องยืนยันอายุ"
   },
   "settings": {
     "proxyTraffic": {

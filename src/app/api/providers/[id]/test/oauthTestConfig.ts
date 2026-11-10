@@ -10,6 +10,7 @@ import {
   ensureAntigravityProjectAssigned,
   ANTIGRAVITY_REQUIRES_MANUAL_PROJECT,
 } from "@omniroute/open-sse/services/antigravityProjectBootstrap.ts";
+import { mergeConnectionProviderSpecificData } from "@/lib/db/providers";
 import { isGeoBlockedError } from "@omniroute/open-sse/services/errorClassifier.ts";
 
 // Real model-surface probe for antigravity/agy. The previous probe only hit the
@@ -41,13 +42,22 @@ async function buildAntigravityProbe(
       ? providerSpecificData.projectId.trim()
       : undefined;
   let projectId = connectionProjectId || storedProjectId;
+  const connectionId = (connection as { id?: string })?.id;
   if (!projectId && accessToken) {
     try {
       const discoveredProjectId = await ensureAntigravityProjectAssigned(
         accessToken,
         fetch,
         profile,
-        AbortSignal.timeout(8000)
+        AbortSignal.timeout(8000),
+        async (url) => {
+          if (connectionId) {
+            await mergeConnectionProviderSpecificData(connectionId, {
+              verificationUrl: url,
+              verificationAt: new Date().toISOString(),
+            }).catch(() => {});
+          }
+        }
       );
       if (discoveredProjectId && discoveredProjectId !== ANTIGRAVITY_REQUIRES_MANUAL_PROJECT) {
         projectId = discoveredProjectId;

@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ਛੇਟਜੀਪੀਟੀ ਕਸਟਮ ਕਨੈਕਟਰ",
     "doctorChecking": "ਸਥਿਤੀ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ…",
     "doctorCheck": "ਡਾਕਟਰ ਸਥਿਤੀ ਦੀ ਜਾਂਚ ਕਰੋ",
-    "fallbackRetryBackendTitle": "ਫਾਲਬੈਕ ਰੀਟ੍ਰਾਈ ਬੈਕਏਂਡ"
+    "fallbackRetryBackendTitle": "ਫਾਲਬੈਕ ਰੀਟ੍ਰਾਈ ਬੈਕਏਂਡ",
+    "statusVerificationRequired": "ਪੁਸ਼ਟੀਕਰਨ ਲੋੜੀਂਦਾ ਹੈ",
+    "errorTypeVerificationRequired": "ਪੁਸ਼ਟੀਕਰਨ ਲੋੜੀਂਦਾ ਹੈ",
+    "errorTypeAgeVerification": "ਉਮਰ ਦੀ ਪੁਸ਼ਟੀ ਲੋੜੀਂਦੀ ਹੈ"
   },
   "settings": {
     "proxyTraffic": {

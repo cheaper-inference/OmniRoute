@@ -7,6 +7,7 @@ import {
   getAntigravityOAuthUserAgent,
 } from "@omniroute/open-sse/services/antigravityHeaders.ts";
 import { extractCodeAssistOnboardTierId } from "@omniroute/open-sse/services/codeAssistSubscription.ts";
+import { extractVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   BUILTIN_ANTIGRAVITY_CLIENT,
   type GoogleOauthClientMarker,
@@ -39,12 +40,16 @@ type AntigravityTokenPayload = {
  * - "discovery_failed": loadCodeAssist/onboardUser errored, timed out, or
  *   still returned empty after a successful onboarding round-trip.
  */
-type AntigravityProjectDiscoveryOutcome = "requires_manual_project" | "discovery_failed";
+type AntigravityProjectDiscoveryOutcome =
+  | "requires_manual_project"
+  | "discovery_failed"
+  | "verification_required";
 type AntigravityPostExchange = {
   projectId: string;
   tierId: string;
   userInfo: { email?: string };
   projectDiscoveryOutcome?: AntigravityProjectDiscoveryOutcome;
+  verificationUrl?: string | null;
   /** Literal issuer of the connection's refresh token: "builtin" or "custom:<clientId>". */
   oauthClient?: GoogleOauthClientMarker;
 };
@@ -176,6 +181,7 @@ async function postExchangeAntigravity(
 
   let projectId = "";
   let tierId = "legacy-tier";
+  let verificationUrl: string | null = null;
   // #11284: classify WHY discovery fails instead of silently swallowing it.
   let loadFailed = false;
   try {
@@ -187,6 +193,7 @@ async function postExchangeAntigravity(
     const data = (await response.json()) as Record<string, unknown>;
     projectId = extractProjectId(data);
     tierId = extractCodeAssistOnboardTierId(data);
+    verificationUrl = extractVerificationUrl(data);
   } catch (error) {
     loadFailed = true;
     console.log("Failed to load code assist:", error);
@@ -233,15 +240,20 @@ async function postExchangeAntigravity(
         userInfo,
         projectId,
         tierId,
-        projectDiscoveryOutcome: onboardSucceeded ? "requires_manual_project" : "discovery_failed",
+        verificationUrl,
+        projectDiscoveryOutcome: verificationUrl
+          ? "verification_required"
+          : onboardSucceeded
+            ? "requires_manual_project"
+            : "discovery_failed",
       };
     }
   } else if (loadFailed) {
     // No onboarding path configured and discovery hard-failed — do not report
     // this account as healthy-with-no-project (#11284).
-    return { userInfo, projectId, tierId, projectDiscoveryOutcome: "discovery_failed" };
+    return { userInfo, projectId, tierId, verificationUrl, projectDiscoveryOutcome: "discovery_failed" };
   }
-  return { userInfo, projectId, tierId };
+  return { userInfo, projectId, tierId, verificationUrl };
 }
 
 function mapAntigravityTokens(
@@ -259,10 +271,13 @@ function mapAntigravityTokens(
     // #11284: let the OAuth route reject connects that ended without a Cloud
     // Code project instead of persisting a dead "active" row.
     projectDiscoveryOutcome: extra?.projectDiscoveryOutcome,
+    verificationUrl: extra?.verificationUrl ?? undefined,
     providerSpecificData: {
       clientProfile,
       projectId: extra?.projectId,
       tier: extra?.tierId,
+      verificationUrl: extra?.verificationUrl ?? undefined,
+      verificationAt: extra?.verificationUrl ? new Date().toISOString() : undefined,
       // Which OAuth client issued this connection's refresh token. The token
       // refresh must present the same client Google saw at authorize time;
       // switching the operator's custom client via env afterwards must not

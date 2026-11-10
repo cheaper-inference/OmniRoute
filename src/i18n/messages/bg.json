@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "Персонализиран конектор на ChatGPT",
     "doctorChecking": "Проверява се състоянието…",
     "doctorCheck": "Проверка на състоянието на doctor",
-    "fallbackRetryBackendTitle": "Резервен backend за повторни опити"
+    "fallbackRetryBackendTitle": "Резервен backend за повторни опити",
+    "statusVerificationRequired": "Изисква се потвърждение",
+    "errorTypeVerificationRequired": "Изисква се потвърждение",
+    "errorTypeAgeVerification": "Изисква се потвърждение на възрастта"
   },
   "settings": {
     "proxyTraffic": {

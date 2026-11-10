@@ -7438,7 +7438,10 @@
     "quotaRefreshStale": "Server je vratio stare podatke o kvoti. Ovo nije novo očitanje.",
     "quotaRefreshPartial": "Dostupan je samo dio podataka o kvoti.",
     "quotaWindowUnavailable": "Kvota za {window} nije dostupna",
-    "quotaConnectionRefreshFailed": "Provjera kvote je završena, ali lista računa nije mogla biti osvježena."
+    "quotaConnectionRefreshFailed": "Provjera kvote je završena, ali lista računa nije mogla biti osvježena.",
+    "statusVerificationRequired": "Potrebna verifikacija",
+    "errorTypeVerificationRequired": "Potrebna verifikacija",
+    "errorTypeAgeVerification": "Potrebna verifikacija starosti"
   },
   "settings": {
     "proxyTraffic": {

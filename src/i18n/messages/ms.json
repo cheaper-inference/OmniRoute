@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "Pembangun litar khas ChatGPT",
     "doctorChecking": "Memeriksa status…",
     "doctorCheck": "Semak status doktor",
-    "fallbackRetryBackendTitle": "Backend percubaan semula semula jadi"
+    "fallbackRetryBackendTitle": "Backend percubaan semula semula jadi",
+    "statusVerificationRequired": "Pengesahan Diperlukan",
+    "errorTypeVerificationRequired": "Pengesahan diperlukan",
+    "errorTypeAgeVerification": "Pengesahan umur diperlukan"
   },
   "settings": {
     "proxyTraffic": {

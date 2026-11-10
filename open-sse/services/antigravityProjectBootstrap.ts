@@ -19,6 +19,7 @@ import {
   getAntigravityLoadCodeAssistMetadata,
 } from "./antigravityHeaders.ts";
 import { extractCodeAssistOnboardTierId } from "./codeAssistSubscription.ts";
+import { extractVerificationUrl } from "./antigravityVerification.ts";
 import type { AntigravityClientProfile } from "./antigravityClientProfile.ts";
 import {
   ANTIGRAVITY_BOOTSTRAP_BASE_URLS,
@@ -113,7 +114,11 @@ function getProjectCacheKey(accessToken: string, clientProfile: AntigravityClien
   return `${clientProfile}:${accessToken}`;
 }
 
-type LoadCodeAssistResult = { projectId: string | null; tierId: string };
+type LoadCodeAssistResult = {
+  projectId: string | null;
+  tierId: string;
+  verificationUrl?: string | null;
+};
 
 /**
  * Attempt loadCodeAssist against each known base URL in order.
@@ -163,15 +168,16 @@ async function tryLoadCodeAssist(
             : "";
 
       const tierId = extractCodeAssistOnboardTierId(data) || DEFAULT_TIER_ID;
+      const verificationUrl = extractVerificationUrl(data);
 
       if (projectId) {
-        return { projectId, tierId };
+        return { projectId, tierId, verificationUrl };
       }
 
       // Continue to next URL if available — a different endpoint might
       // have the project. Only return empty when this is the last URL.
       if (i === urls.length - 1) {
-        return { projectId: null, tierId };
+        return { projectId: null, tierId, verificationUrl };
       }
       console.warn(
         `[models] antigravity loadCodeAssist at ${url} returned no project id — trying next`
@@ -343,7 +349,8 @@ export async function ensureAntigravityProjectAssigned(
   accessToken: string,
   fetchImpl: FetchLike = fetch,
   clientProfile: AntigravityClientProfile = "ide",
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onVerification?: (url: string) => void | Promise<void>
 ): Promise<string | undefined> {
   const cacheKey = getProjectCacheKey(accessToken, clientProfile);
   if (projectCache.has(cacheKey)) {
@@ -354,12 +361,18 @@ export async function ensureAntigravityProjectAssigned(
     return cached;
   }
 
-  const { projectId: initialProjectId, tierId } = await tryLoadCodeAssist(
+  const { projectId: initialProjectId, tierId, verificationUrl } = await tryLoadCodeAssist(
     accessToken,
     fetchImpl,
     clientProfile,
     signal
   );
+
+  if (verificationUrl && onVerification) {
+    try {
+      await onVerification(verificationUrl);
+    } catch {}
+  }
 
   let projectId = initialProjectId;
 
@@ -404,7 +417,7 @@ export async function ensureAntigravityProjectAssigned(
               return;
             }
           }
-        } catch (e) {
+        } catch (_e) {
           aborted = signal?.aborted === true;
           return;
         } finally {

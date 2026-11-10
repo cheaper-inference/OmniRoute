@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ChatGPT Custom Connector",
     "doctorChecking": "Status wird geprüft…",
     "doctorCheck": "Doctor-Status prüfen",
-    "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen"
+    "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen",
+    "statusVerificationRequired": "Überprüfung erforderlich",
+    "errorTypeVerificationRequired": "Überprüfung erforderlich",
+    "errorTypeAgeVerification": "Altersüberprüfung erforderlich"
   },
   "settings": {
     "proxyTraffic": {

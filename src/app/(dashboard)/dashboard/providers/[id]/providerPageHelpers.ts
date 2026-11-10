@@ -1039,6 +1039,9 @@ export const ERROR_TYPE_LABELS: Record<
   upstream_error: { labelKey: "errorTypeUpstreamError", variant: "error" },
   banned: { labelKey: "errorTypeBanned", variant: "error" },
   credits_exhausted: { labelKey: "errorTypeCreditsExhausted", variant: "warning" },
+  verification_required: { labelKey: "errorTypeVerificationRequired", variant: "warning" },
+  oauth_verification_required: { labelKey: "errorTypeVerificationRequired", variant: "warning" },
+  age_verification_required: { labelKey: "errorTypeAgeVerification", variant: "warning" },
 };
 
 // ---------------------------------------------------------------------------

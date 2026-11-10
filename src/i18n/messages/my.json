@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ChatGPT စိတ်ကြိုက် connector",
     "doctorChecking": "အခြေအနေစစ်ဆေးနေသည်…",
     "doctorCheck": "doctor အခြေအနေ စစ်ဆေးရန်",
-    "fallbackRetryBackendTitle": "အစမ်းပြန်လည်စက်"
+    "fallbackRetryBackendTitle": "အစမ်းပြန်လည်စက်",
+    "statusVerificationRequired": "အတည်ပြုရန် လိုအပ်သည်",
+    "errorTypeVerificationRequired": "အတည်ပြုရန် လိုအပ်သည်",
+    "errorTypeAgeVerification": "အသက် အတည်ပြုရန် လိုအပ်သည်"
   },
   "settings": {
     "proxyTraffic": {

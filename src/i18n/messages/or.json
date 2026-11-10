@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ଚାଟ୍ ଜି ପି ଟି କଷ୍ଟମ୍ କୋନେକ୍ଟର",
     "doctorChecking": "ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରାଯାଉଛି…",
     "doctorCheck": "ଡକ୍ଟର ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରନ୍ତୁ",
-    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend"
+    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend",
+    "statusVerificationRequired": "ଯାଞ୍ଚ ଆବଶ୍ୟକ",
+    "errorTypeVerificationRequired": "ଯାଞ୍ଚ ଆବଶ୍ୟକ",
+    "errorTypeAgeVerification": "ବୟସ ଯାଞ୍ଚ ଆବଶ୍ୟକ"
   },
   "settings": {
     "proxyTraffic": {

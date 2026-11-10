@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ChatGPT-ის თვითონ შესქმნელი კონექტორი",
     "doctorChecking": "სტატუსის შემოწმება…",
     "doctorCheck": "დოქტორის სტატუსის შემოწმება",
-    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend"
+    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend",
+    "statusVerificationRequired": "საჭიროა ვერიფიკაცია",
+    "errorTypeVerificationRequired": "საჭიროა ვერიფიკაცია",
+    "errorTypeAgeVerification": "საჭიროა ასაკის ვერიფიკაცია"
   },
   "settings": {
     "proxyTraffic": {

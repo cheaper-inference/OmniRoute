@@ -7438,7 +7438,10 @@
     "chatgptConnectorLabel": "ಚಾಟ್‌ಜಿಪಿಟಿ ಕಸ್ಟಮ್ ಕನೆಕ್ಟರ್",
     "doctorChecking": "ಸ್ಟೇಟಸ್ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…",
     "doctorCheck": "ಡಾಕ್ಟರ್ ಸ್ಟೇಟಸ್ ಪರಿಶೀಲಿಸಿ",
-    "fallbackRetryBackendTitle": "ಬ್ಯಾಕ್‌ಅಪ್ ರಿಟ್ರೈ ಬ್ಯಾಕೆಂಡ್"
+    "fallbackRetryBackendTitle": "ಬ್ಯಾಕ್‌ಅಪ್ ರಿಟ್ರೈ ಬ್ಯಾಕೆಂಡ್",
+    "statusVerificationRequired": "ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ",
+    "errorTypeVerificationRequired": "ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ",
+    "errorTypeAgeVerification": "ವಯಸ್ಸಿನ ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ"
   },
   "settings": {
     "proxyTraffic": {
