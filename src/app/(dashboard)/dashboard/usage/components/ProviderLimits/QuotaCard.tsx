@@ -46,6 +46,7 @@ interface QuotaCardProps {
           quotaGroups?: Array<Record<string, unknown>>;
           paidCredits?: CodexPaidCredits;
           speed?: unknown;
+          modelUsage?: unknown;
         };
         stale?: { since?: string; reason?: string } | null;
       }
@@ -187,6 +188,7 @@ export default function QuotaCard({
         onHideQuota={onHideQuota}
         onShowQuota={onShowQuota}
         speed={quota?.raw?.speed}
+        cursorModelUsage={connection.provider === "cursor" ? quota?.raw?.modelUsage : undefined}
         canEditCutoff={canEditCutoff}
         hasCutoffOverrides={hasOverrides}
         canRedeemResetCredit={canRedeemResetCredit}
