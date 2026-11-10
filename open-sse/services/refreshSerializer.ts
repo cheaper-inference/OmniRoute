@@ -46,6 +46,9 @@ export const ROTATION_LOCK_GROUP: Record<string, string> = {
   // product line from racing itself; whether rotation actually happens is a
   // per-response property, not something this entry asserts.
   "grok-bot": "grok-bot",
+  // RenderHour rotates its refresh tokens (rhrt_*): each refresh returns a new pair
+  // and the old token stops working at once, so siblings get their own lane.
+  renderhour: "renderhour",
 };
 
 // Protective settle gap (ms) between two consecutive sibling refreshes when the

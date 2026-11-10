@@ -251,7 +251,10 @@ async function readPlannerDecision(
 ): Promise<RouteDecision | Response> {
   let decisionText = "";
   try {
-    decisionText = extractPanelText(await response.clone().json());
+    // The internal planner decision is never returned to the client. Reading
+    // the original response avoids teeing its stream and leaving an unread
+    // clone branch retained until the response is collected.
+    decisionText = extractPanelText(await response.json());
   } catch {
     return errorResponse(502, `Agentic planner (${model}) returned an unparseable response`);
   }

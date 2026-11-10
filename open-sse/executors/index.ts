@@ -39,6 +39,7 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   "amazon-q": () => import("./kiro.ts").then((m) => new m.KiroExecutor("amazon-q")),
   bedrock: () => import("./bedrock.ts").then((m) => new m.BedrockExecutor()),
   codex: () => import("./codex.ts").then((m) => new m.CodexExecutor()),
+  chatgpt: () => import("./chatgpt.ts").then((m) => new m.ChatGptExecutor()),
   "codex-app-server": () =>
     Promise.all([import("./codex-app-server.ts"), import("./codex.ts")]).then(
       ([appServer, codex]) =>

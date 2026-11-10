@@ -5,6 +5,16 @@
 import { GITLAB_DUO_OAUTH_SETUP_MESSAGE } from "@/shared/constants/gitlabDuoSetupMessage";
 
 export const OAUTH_PROVIDERS = {
+  chatgpt: {
+    id: "chatgpt",
+    alias: "chatgpt",
+    name: "ChatGPT",
+    serviceKinds: ["llm"],
+    icon: "chat",
+    color: "#10A37F",
+    authHint:
+      "Sign in with ChatGPT to authorize eligible requests using your ChatGPT plan. Separate from Codex and ChatGPT Web. Preview limitations apply.",
+  },
   "ghe-copilot": {
     id: "ghe-copilot",
     serviceKinds: ["llm"],
@@ -48,6 +58,17 @@ export const OAUTH_PROVIDERS = {
       "Free tier: includes Qwen3.8 27b and Llama 3.2 3B — see openference.com/pricing for current terms",
     authHint:
       "Sign in with your Openference account to route requests through api.openference.com. Includes free-tier access to Qwen3.8 27b and Llama 3.2 3B — see openference.com/pricing for current plan terms.",
+  },
+  renderhour: {
+    id: "renderhour",
+    serviceKinds: ["image", "video", "tts"],
+    name: "RenderHour",
+    icon: "movie",
+    color: "#FF5A1F",
+    textIcon: "RH",
+    website: "https://renderhour.com",
+    authHint:
+      "Sign in with your RenderHour account to spend its subscription credits on images (Nano Banana Pro, GPT Image 2, Seedream), video (Seedance, Kling, Veo) and speech, or paste an rh_… API key from renderhour.com/developers to pay from the API's dollar balance. Address models as renderhour/<model>.",
   },
   "grok-cli": {
     id: "grok-cli",
@@ -259,6 +280,18 @@ export const OAUTH_PROVIDERS = {
     anonymousFallback: true,
     authHint:
       "Sign in with your Kilo Code account (device-code OAuth), or paste a direct API key from app.kilo.ai → Settings → API Keys. Multiple API keys are supported and rotated automatically — add each as a separate connection. Without any connection, free anonymous models are available via the anonymousFallback.",
+  },
+  megabrain: {
+    id: "megabrain",
+    serviceKinds: ["llm"],
+    alias: "mb",
+    name: "MegaBrain",
+    icon: "psychology",
+    color: "#6D5DF6",
+    textIcon: "MB",
+    website: "https://getmegabrain.com",
+    authHint:
+      "Sign in with your MegaBrain account (device code), or paste an mb-v1-… MegaBrain API key (add each key as a separate connection to rotate them). A paid plan covers the included models (Auto, GLM, Kimi, MiniMax, Grok, DeepSeek, Qwen) within its session and weekly limits; Claude, GPT and Gemini are paid from the account's credits, from Pro up or with Extra Usage turned on. Address models as mb/<model> or megabrain/<model>.",
   },
   cline: {
     id: "cline",

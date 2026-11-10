@@ -1,5 +1,15 @@
 {
-  "root": ["auth", "common", "docs", "endpoint", "header", "landing", "miniapp", "publicSystem"],
+  "root": [
+    "auth",
+    "chatgptSignIn",
+    "common",
+    "docs",
+    "endpoint",
+    "header",
+    "landing",
+    "miniapp",
+    "publicSystem"
+  ],
   "chrome": [
     "agentSkills",
     "analytics",
@@ -1419,6 +1429,7 @@
       "analytics",
       "breadcrumbs",
       "cache",
+      "chatgptSignIn",
       "cliproxyHealth",
       "cliproxyProviderExposure",
       "cloudSyncStatus",
