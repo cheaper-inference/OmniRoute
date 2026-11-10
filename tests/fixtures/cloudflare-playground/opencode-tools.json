@@ -1,0 +1,313 @@
+[
+  {
+    "name": "edit",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "File to edit"
+        },
+        "oldString": {
+          "type": "string",
+          "description": "Exact text to find and replace"
+        },
+        "newString": {
+          "type": "string",
+          "description": "Text to replace oldString with (must differ from oldString)"
+        },
+        "replaceAll": {
+          "type": "boolean",
+          "description": "Whether to replace every occurrence of oldString. When false, oldString must match exactly once. Defaults to false."
+        }
+      },
+      "required": ["path", "oldString", "newString"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "execute",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        }
+      },
+      "required": ["code"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "glob",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "Glob pattern to match files against"
+        },
+        "path": {
+          "type": "string",
+          "description": "Directory to search. Defaults to the current working directory."
+        },
+        "hidden": {
+          "type": "boolean",
+          "description": "Include hidden files and directories (default: false)."
+        },
+        "limit": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "Maximum number of matching files to return (default: 100)"
+        }
+      },
+      "required": ["pattern"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "grep",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Regular expression or literal text to match in file contents."
+        },
+        "path": {
+          "type": "string",
+          "description": "File or directory to search. Defaults to the current working directory."
+        },
+        "include": {
+          "type": "string",
+          "description": "Glob pattern to filter files (for example, \"*.js\" or \"*.{ts,tsx}\")"
+        },
+        "literal": {
+          "type": "boolean",
+          "description": "Treat `pattern` as exact text instead of a regular expression (default: false)."
+        },
+        "caseSensitive": {
+          "type": "boolean",
+          "description": "Use case-sensitive matching (default: true)."
+        },
+        "limit": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "Maximum number of matching lines to return (default: 100)"
+        }
+      },
+      "required": ["pattern"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "question",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "string",
+                "description": "Complete question"
+              },
+              "header": {
+                "type": "string",
+                "description": "Very short label (max 30 chars)"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "description": "Display text (1-5 words, concise)"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Explanation of choice"
+                    }
+                  },
+                  "required": ["label", "description"],
+                  "additionalProperties": false
+                },
+                "description": "Available choices"
+              },
+              "multiple": {
+                "type": "boolean"
+              }
+            },
+            "required": ["question", "header", "options"],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "description": "Questions to ask"
+        }
+      },
+      "required": ["questions"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "read",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "File or directory to read"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The line or directory entry to start reading from (1-based)"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The maximum number of lines or directory entries to read (defaults to and capped at 2000)"
+        }
+      },
+      "required": ["path"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shell",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "Shell command string to execute"
+        },
+        "workdir": {
+          "type": "string",
+          "description": "Working directory to execute the command in. Defaults to the current working directory. When possible, avoid changing directories in the command and set the working directory here instead."
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Timeout in milliseconds. Set to 0 to disable the timeout. Defaults to 120000 for foreground commands. Background commands have no timeout by default."
+        },
+        "background": {
+          "type": "boolean",
+          "description": "Run the command in the background and return immediately (useful for dev servers and long-running builds). You do not need to use '&' at the end of the command when using this parameter. You will be notified when it completes. DO NOT poll for completion."
+        }
+      },
+      "required": ["command"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "skill",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The ID of an available skill or a skill explicitly referenced by the user"
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "subagent",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "type": "string",
+          "description": "The type of specialized agent to use for this task. If the user asks for a subagent by a name that is not one of the available subagents, they most likely mean a model: pick a suitable agent and pass the name through the model parameter instead."
+        },
+        "description": {
+          "type": "string",
+          "description": "A short 3-5 word label for the task, displayed to the user"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "The task for the subagent to perform"
+        },
+        "model": {
+          "type": "string",
+          "description": "NEVER set this unless the user explicitly asks for a particular model or variant. The value is written as \"providerID/modelID\", or \"providerID/modelID#variant\" to include a variant. Do not guess the ID: look the model up with the models tool, filtering to your own provider first."
+        },
+        "sessionID": {
+          "type": "string",
+          "pattern": "^ses",
+          "description": "Continue a specific previous subagent conversation by passing its sessionID. Calls without a sessionID start a new conversation."
+        },
+        "background": {
+          "type": "boolean",
+          "description": "Run the subagent in the background and return immediately. You will be notified when it completes. DO NOT sleep, poll, or proactively check on its progress."
+        }
+      },
+      "required": ["agent", "description", "prompt"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "webfetch",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "The HTTP or HTTPS URL to fetch content from"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["text", "markdown", "html"],
+          "description": "The format to return the content in. Defaults to markdown."
+        },
+        "timeout": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 120,
+          "description": "Optional timeout in seconds (maximum: 120)"
+        }
+      },
+      "required": ["url"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "websearch",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Websearch query"
+        }
+      },
+      "required": ["query"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "write",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to the file to write to"
+        },
+        "content": {
+          "type": "string",
+          "description": "Content to write to the file"
+        }
+      },
+      "required": ["path", "content"],
+      "additionalProperties": false
+    }
+  }
+]

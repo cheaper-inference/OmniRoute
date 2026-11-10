@@ -1,3 +1,4 @@
+import { CLI_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsCli";
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
 
@@ -1122,66 +1123,21 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  {
+    key: "CLOUDFLARE_PLAYGROUND_STRICT_TOOL_RECOVERY_ENABLED",
+    label: "Cloudflare Playground Strict Tool Recovery",
+    description:
+      "How Cloudflare Playground handles a reply that never becomes a valid tool call. Off by default: up to 3 repair retries, then the last reply is returned as a normal answer. On: up to 10 repair retries, 5 seconds apart, each in a new playground session, then HTTP 502 (streaming sends a tool_call_recovery_failed error chunk before [DONE]), so a stalled turn cannot look finished and combos can fall back.",
+    descriptionI18nKey: "featureFlagCloudflarePlaygroundStrictToolRecoveryEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
 
   // ──────────────── CLI (5) ────────────────
-  {
-    key: "CLI_COMPAT_ALL",
-    label: "CLI Compat All",
-    description: "Enable compatibility mode for all CLI clients",
-    descriptionI18nKey: "featureFlagCliCompatAllDescription",
-    category: "cli",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: true,
-    warningLevel: "info",
-  },
-  {
-    key: "MODEL_ALIAS_COMPAT_ENABLED",
-    label: "Model Alias Compat",
-    description: "Enable model alias compatibility layer",
-    descriptionI18nKey: "featureFlagModelAliasCompatEnabledDescription",
-    category: "cli",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "info",
-  },
-  {
-    key: "PRICING_SYNC_ENABLED",
-    label: "Pricing Sync",
-    description:
-      "Enable automatic pricing data synchronization (requires the PRICING_SYNC_ENABLED environment variable to be set to true)",
-    descriptionI18nKey: "featureFlagPricingSyncEnabledDescription",
-    category: "cli",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "info",
-  },
-  {
-    key: "OMNIROUTE_AUTO_SYNC_CODEX_PROFILES",
-    label: "Auto-Sync Codex Profiles",
-    description:
-      "After a provider model sync, automatically (re)write ~/.codex/*.config.toml profile files from the live catalog. Never changes the active/default Codex config. Off by default.",
-    descriptionI18nKey: "featureFlagOmnirouteAutoSyncCodexProfilesDescription",
-    category: "cli",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
-  {
-    key: "OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES",
-    label: "Auto-Sync Claude Code Profiles",
-    description:
-      "After a provider model sync, automatically (re)write ~/.claude/profiles/'<name>'/settings.json Claude Code profiles from the live catalog. Never changes the active/default Claude config. Off by default.",
-    descriptionI18nKey: "featureFlagOmnirouteAutoSyncClaudeProfilesDescription",
-    category: "cli",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
+  ...CLI_FEATURE_FLAG_DEFINITIONS,
 
   // ──────────────── Health (3) ────────────────
   {

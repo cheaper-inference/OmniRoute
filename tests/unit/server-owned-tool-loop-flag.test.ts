@@ -78,7 +78,8 @@ describe("feature-flags-settings count update", () => {
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
     // FAL_NATIVE_ENABLED (#18849, schema-driven Fal gateway, default off) adds the 120th flag.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 120);
+    // CLOUDFLARE_PLAYGROUND_STRICT_TOOL_RECOVERY_ENABLED (#18313, default off) to 121.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 121);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.

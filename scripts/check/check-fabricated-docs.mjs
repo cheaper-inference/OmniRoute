@@ -582,14 +582,16 @@ export function buildCodebaseIndex(root = ROOT) {
   // `process.env[definition.key]` (src/shared/utils/featureFlags.ts), never a
   // literal `process.env.<KEY>`, so the code-read index cannot see those reads.
   // Every key in FEATURE_FLAG_DEFINITIONS is therefore a real, env-overridable
-  // knob (docs/reference/FEATURE_FLAGS.md documents the catalog 1:1).
+  // knob (docs/reference/FEATURE_FLAGS.md documents the catalog 1:1). The catalog
+  // is split across featureFlagDefinitions*.ts (sections moved out for file size).
   function readFeatureFlagContract() {
     try {
-      const t = fs.readFileSync(
-        path.join(root, "src", "shared", "constants", "featureFlagDefinitions.ts"),
-        "utf8"
-      );
-      for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);
+      const dir = path.join(root, "src", "shared", "constants");
+      for (const name of fs.readdirSync(dir)) {
+        if (!/^featureFlagDefinitions\w*\.ts$/.test(name)) continue;
+        const t = fs.readFileSync(path.join(dir, name), "utf8");
+        for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);
+      }
     } catch {
       /* ignore */
     }

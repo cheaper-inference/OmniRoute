@@ -1127,6 +1127,7 @@
   "featureFlagXaiOauthLiveModelDiscoveryDescription": "고정된 정적 시드 대신 OAuth Bearer 토큰을 사용하여 https://api.x.ai/v1/models에서 xai-oauth 연결용 실시간 xAI 모델 카탈로그를 가져옵니다. 기본적으로 꺼져 있으며, xai-oauth는 변경 없이 정적 시드를 계속 제공합니다. 모델 확인 중 오류가 발생하면 검색은 시드로 대체됩니다.",
   "featureFlagDbHealthcheckStartupDeferredEnabledDescription": "시작 데이터베이스 무결성/상태 검사가 완료될 때까지 서버 시작을 차단하는 대신, 서버가 요청을 수락하기 시작한 후 검사를 실행합니다. 기본적으로 꺼져 있습니다. 시작 과정은 이 변경 전과 정확히 동일하게 검사가 끝날 때까지 차단되므로, 손상된 데이터베이스는 여전히 첫 번째 요청이 처리되기 전에 감지됩니다.",
   "featureFlagCatalogMirrorRefinementsEnabledDescription": "/v1/models에서 claude/ 검색 및 functional-gateway 미러를 개선합니다. 기본적으로 비활성화되어 있으며, 비활성화 시 두 미러 패스 모두 이전과 동일하게 동작합니다. 활성화 시 claude/ 검색 미러에는 나열된 reasoning-effort 변형(-low/-medium/-high/-xhigh)도 포함되며, 요청 경로에서 구체화할 수 없는 기본 제공 auto/* ID와 이미 나열된 별칭은 건너뜁니다. functional-gateway 미러는 조합 및 OmniRoute에서 합성된 ID(claude/, no-think/)를 건너뛰고, owned_by에서 소유자를 가져오며, 소유자 자체를 게이트웨이로 사용하지 않고, blockedProviders에서 비활성화된 게이트웨이와 게이트웨이의 신뢰 가능한 라이브 카탈로그에 없는 모델을 건너뜁니다.",
+  "featureFlagCloudflarePlaygroundStrictToolRecoveryEnabledDescription": "__MISSING__:How Cloudflare Playground handles a reply that never becomes a valid tool call. Off by default: up to 3 repair retries, then the last reply is returned as a normal answer. On: up to 10 repair retries, 5 seconds apart, each in a new playground session, then HTTP 502 (streaming sends a tool_call_recovery_failed error chunk before [DONE]), so a stalled turn cannot look finished and combos can fall back.",
   "featureFlagOpencodePublishedCatalogRoutingEnabledDescription": "명시적인 레지스트리 엔드포인트가 없는 OpenCode Zen 및 OpenCode Go 모델이 백그라운드에서 6시간마다 읽어 오는 공개 models.opencode.ai 카탈로그를 기반으로 요청 인터페이스(@ai-sdk/openai의 경우 Responses, @ai-sdk/anthropic의 경우 Messages)를 사용하도록 합니다. 기본적으로 꺼져 있습니다. 꺼진 경우 엔드포인트는 이전과 완전히 동일하게 레지스트리 휴리스틱을 통해 결정되며 카탈로그는 가져오지 않습니다.",
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go 요청에 OpenCode v2 CLI 클라이언트 핑거프린트를 전송합니다. 즉, opencode/latest/<2.x>/cli User-Agent와 x-opencode-client cli를 전송하고, 무료 티어 요청에는 v2 세션 헤더와 v2 CLI read/shell 도구 스키마를 사용하며 tool_choice \"none\"은 사용하지 않습니다. 기본값은 꺼짐입니다. 모든 OpenCode 요청은 현재 식별 정보, 헤더 및 본문을 변경 없이 유지합니다.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "도구 호출 사전 필터가 실행되기 전에 자동 콤보의 후보 풀이 이미 비어 있는 경우(쿨다운, 잠금 또는 소진으로 인해 모든 대상이 제외된 경우), 기존의 400 \"도구 호출을 지원하는 대상이 없습니다\" capability_mismatch 대신 503 no_eligible_targets로 응답합니다. 기본값은 꺼짐이며, 후보 풀이 비어 있으면 기존 400 응답이 유지됩니다.",
@@ -14672,6 +14673,10 @@
       "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
         "label": "카탈로그 미러 개선",
         "description": "/v1/models의 claude/ 디스커버리 및 functional-gateway 미러를 개선합니다. 기본값은 꺼짐입니다: 두 미러 패스 모두 이전과 정확히 동일하게 동작합니다. 켜짐: claude/ 디스커버리 미러가 나열된 reasoning-effort 변형(-low/-medium/-high/-xhigh)도 포함하고, 요청 경로에서 구체화할 수 없는 기본 내장 auto/* id를 건너뛰며, 이미 나열된 별칭을 건너뜁니다. functional-gateway 미러는 콤보 및 OmniRoute에서 합성한 id(claude/, no-think/)를 건너뛰고, owned_by에서 소유자를 가져오며, 소유자를 자체 게이트웨이로 절대 사용하지 않고, blockedProviders에서 비활성화된 게이트웨이 및 게이트웨이의 공식 라이브 카탈로그 외부에 있는 모델을 건너뜁니다."
+      },
+      "CLOUDFLARE_PLAYGROUND_STRICT_TOOL_RECOVERY_ENABLED": {
+        "label": "__MISSING__:Cloudflare Playground Strict Tool Recovery",
+        "description": "__MISSING__:How Cloudflare Playground handles a reply that never becomes a valid tool call. Off by default: up to 3 repair retries, then the last reply is returned as a normal answer. On: up to 10 repair retries, 5 seconds apart, each in a new playground session, then HTTP 502 (streaming sends a tool_call_recovery_failed error chunk before [DONE]), so a stalled turn cannot look finished and combos can fall back."
       },
       "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
         "label": "프록시 상태: 거부 시 연속 실패 초기화",
