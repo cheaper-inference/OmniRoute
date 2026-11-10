@@ -49,7 +49,7 @@ import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { saveCallLog } from "@/lib/usageDb";
 import { isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
 import { orderAutoSearchFallbacks } from "@/lib/search/codexSearchAutoFallback";
-import { lockBorrowedSearchKey, searchKeyLockModel } from "@/lib/search/executeWebSearch";
+import { searchKeyLockModel } from "@omniroute/open-sse/handlers/search/borrowedKeyLock.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -429,7 +429,6 @@ async function postHandler(request: Request, context: unknown) {
       });
 
       if (!result.success) {
-        lockBorrowedSearchKey(providerConfig.id, credentials, result.status);
         throw new SearchError(result.error || "Search failed", result.status || 502);
       }
 

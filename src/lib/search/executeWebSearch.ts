@@ -1,8 +1,7 @@
 import { getSettings } from "@/lib/db/settings";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { getProviderCredentials } from "@/sse/services/auth";
-import { COOLDOWN_MS, HTTP_STATUS, RateLimitReason } from "@omniroute/open-sse/config/constants.ts";
-import { lockModel } from "@omniroute/open-sse/services/accountFallback.ts";
+import { searchKeyLockModel } from "@omniroute/open-sse/handlers/search/borrowedKeyLock.ts";
 import { isCredentialDiagnosticSentinel } from "@/sse/services/credentialSentinel";
 import { isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
 import { orderAutoSearchFallbacks } from "@/lib/search/codexSearchAutoFallback";
@@ -68,39 +67,6 @@ export class WebSearchExecutionError extends Error {
     super(message);
     this.statusCode = statusCode;
   }
-}
-
-/**
- * A search provider with no keys of its own borrows a chat key (SEARCH_CREDENTIAL_FALLBACKS).
- * A rate limit on that search says nothing about the key's chat health, so the failure is
- * recorded as a model lock on a synthetic model that only search asks for. Chat never selects
- * that model, so it keeps the key; search skips the key until the lock expires.
- */
-export const searchKeyLockModel = (searchProviderId: string) => `websearch:${searchProviderId}`;
-
-const SEARCH_KEY_LOCK_STATUSES = new Set<number>([
-  HTTP_STATUS.PAYMENT_REQUIRED,
-  HTTP_STATUS.RATE_LIMITED,
-  HTTP_STATUS.PLAN_LIMIT_EXCEEDED,
-]);
-
-/** Lock the borrowed key for search after a rate-limit or quota failure. No-op for other keys. */
-export function lockBorrowedSearchKey(
-  searchProviderId: string,
-  credentials: Record<string, any> | null | undefined,
-  status: number | undefined
-): void {
-  const owner = credentials?.provider;
-  const connectionId = credentials?.connectionId;
-  if (typeof owner !== "string" || typeof connectionId !== "string") return;
-  if (owner === searchProviderId || !status || !SEARCH_KEY_LOCK_STATUSES.has(status)) return;
-  lockModel(
-    owner,
-    connectionId,
-    searchKeyLockModel(searchProviderId),
-    RateLimitReason.RATE_LIMIT_EXCEEDED,
-    COOLDOWN_MS.rateLimit
-  );
 }
 
 async function resolveSearchCredentials(providerId: string) {
@@ -364,7 +330,6 @@ export async function executeWebSearch(
     });
 
     if (!result.success || !result.data) {
-      lockBorrowedSearchKey(providerConfig.id, credentials, result.status);
       throw new WebSearchExecutionError(result.error || "Search failed", result.status || 502);
     }
 
