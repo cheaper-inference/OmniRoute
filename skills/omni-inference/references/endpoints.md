@@ -93,6 +93,8 @@
 - [`PUT /api/v1/management/proxies/bulk-assign`](#put-apiv1managementproxiesbulk-assign)
 - [`GET /api/v1/management/proxies/health`](#get-apiv1managementproxieshealth)
 - [`GET /api/v1/me/status`](#get-apiv1mestatus)
+- [`GET /api/v1/me/sessions`](#get-apiv1mesessions)
+- [`GET /api/v1/me/sessions/{id}`](#get-apiv1mesessionsid)
 - [`GET /api/v1/muse-code/models`](#get-apiv1muse-codemodels)
 - [`GET /api/v1/music/generations`](#get-apiv1musicgenerations)
 - [`POST /api/v1/music/generations`](#post-apiv1musicgenerations)
@@ -1129,8 +1131,32 @@ curl http://localhost:20128/api/v1/management/proxies/health \
 
 GET me › status
 
+Self-service usage status for the calling API key (also served at /v1/me/status). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope `self:usage`. `accountQuotas` / `accountQuota` are included only with scope `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting. `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly` are cached per key for 60 s, so they may lag by up to 60 s.
+
 ```bash
 curl http://localhost:20128/api/v1/me/status \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions
+
+GET me › sessions
+
+List agent sessions opened by the calling API key (also served at /v1/me/sessions). Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`. Every filter applies on top of the calling key, so other keys' sessions are never listed. Session `costUsd` is the list-price cost of the session's requests; flat-rate providers are not counted as $0. It has the same meaning as `/v1/me/status` `listPriceUsd`, except that sessions are priced when each request is recorded and status with the current prices, so the two differ if prices changed in between. `unpricedCount` counts the requests that used tokens but had no known price and are therefore missing from `costUsd`, like status `unpricedRequests`.
+
+```bash
+curl http://localhost:20128/api/v1/me/sessions \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions/{id}
+
+GET me › sessions › <id>
+
+Get details and recent requests of a session owned by the calling API key.
+
+```bash
+curl http://localhost:20128/api/v1/me/sessions/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
