@@ -172,6 +172,24 @@ export function isOpaqueReasoningDetail(value: unknown, parentKey: string): bool
   );
 }
 
+/**
+ * A synthetic text-tail flush must not replay opaque records already forwarded in the
+ * original frames. Call only on the cloned flush template, never on an incoming frame.
+ */
+export function omitEmittedOpaqueReasoningFromFlush(value: unknown): void {
+  if (!value || typeof value !== "object") return;
+  const record = value as Record<string, unknown>;
+  for (const [key, child] of Object.entries(record)) {
+    if (key === "reasoning_details" && Array.isArray(child)) {
+      const remaining = child.filter((detail) => !isOpaqueReasoningDetail(detail, key));
+      if (remaining.length) record[key] = remaining;
+      else delete record[key];
+    } else {
+      omitEmittedOpaqueReasoningFromFlush(child);
+    }
+  }
+}
+
 // Back-compat helper kept for any external caller expecting a category rather than `null`
 // for metadata; internal call sites use `classifyField` so they can skip metadata entirely.
 export function getFieldCategory(key: string): FieldCategory {
@@ -340,8 +358,15 @@ export function createSseTextTransform(
             for (const key of Object.keys(obj)) {
               if (typeof obj[key] === "string") {
                 const val = obj[key];
-                // Preserve Chat Completions aliases without changing native-format routing.
-                const fieldName = Array.isArray(json.choices) ? key : undefined;
+                // Keep wire aliases distinct in Chat and generic text envelopes. Native
+                // Responses/Gemini retain their format-specific buffer/flush routing.
+                const fieldName =
+                  Array.isArray(json.choices) ||
+                  (key === "reasoning_content" &&
+                    !Array.isArray(json.candidates) &&
+                    !String(json.type ?? "").startsWith("response."))
+                    ? key
+                    : undefined;
                 const field =
                   key === "delta" && obj === json && isResponsesToolArgsDelta(json)
                     ? "toolArgs"

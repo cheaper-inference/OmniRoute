@@ -348,6 +348,46 @@ test("ordinary fields named data remain processed rather than becoming opaque", 
   );
 });
 
+for (const mode of ["credential", "pii", "composed", "reverse-composed"] as const) {
+  for (const termination of ["done", "eof"] as const) {
+    test(`${mode}: generic text-tail flush cannot replay or corrupt encrypted records on ${termination}`, async () => {
+      const details = [encrypted(), encrypted(3, opaqueB)];
+      // Metadata comes first: a generic flush must not consume answer buffers into it.
+      const input =
+        frame({ reasoning_details: details, content: "held answer" }) +
+        (termination === "done" ? "data: [DONE]\n\n" : "");
+      const output = await run(input, mode, 1);
+      assert.deepEqual(
+        output.flatMap((event) => event.reasoning_details ?? []),
+        details
+      );
+      assert.equal(output.map((event) => event.content ?? "").join(""), "held answer");
+    });
+    test(`${mode}: generic flush retains protocol identifiers and separate reasoning aliases on ${termination}`, async () => {
+      const metadata = {
+        id: "synthetic-root",
+        type: "synthetic-result",
+        encrypted_content: opaqueA,
+        signature: opaqueB,
+      };
+      const input =
+        frame({ ...metadata, content: "answer", reasoning: "why", reasoning_content: "how" }) +
+        (termination === "done" ? "data: [DONE]\n\n" : "");
+      const output = await run(input, mode);
+      for (const [key, value] of Object.entries(metadata)) {
+        assert.ok(
+          output.every((event) => event[key] === undefined || event[key] === value),
+          key + " corrupted by text-tail flush"
+        );
+        assert.equal(output[0][key], value);
+      }
+      assert.equal(output.map((event) => event.content ?? "").join(""), "answer");
+      assert.equal(output.map((event) => event.reasoning ?? "").join(""), "why");
+      assert.equal(output.map((event) => event.reasoning_content ?? "").join(""), "how");
+    });
+  }
+}
+
 test("model-free continuation serializes every encrypted record and the matching tool result unchanged", async () => {
   const output = await run(minimal().map(frame).join("") + frame(finish()), "pipeline");
   const call = tools(output).get(0)!;

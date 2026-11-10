@@ -3,7 +3,7 @@ import {
   createSseTextTransform,
   FieldCategory,
   classifyField,
-  isOpaqueReasoningDetail,
+  omitEmittedOpaqueReasoningFromFlush,
 } from "./sseTextTransform";
 import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
 import {
@@ -247,12 +247,12 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     // 5. Generic fallback
     const templateJson = lastContentJson || lastJson;
     const finalJson = JSON.parse(JSON.stringify(templateJson));
+    omitEmittedOpaqueReasoningFromFlush(finalJson);
     // Skip recognized system metadata (same `classifyField`/METADATA_KEYS as sanitizeObject
     // in sseTextTransform.ts) — fields like `provider` or `native_finish_reason` must never
     // be cleared to "" or refilled with buffered answer text here either. See #13488.
     const clearDeltas = (obj: any, parentKey = "") => {
       if (!obj || typeof obj !== "object") return;
-      if (isOpaqueReasoningDetail(obj, parentKey)) return;
       const isArray = Array.isArray(obj);
       for (const key of Object.keys(obj)) {
         if (typeof obj[key] === "string") {
@@ -274,7 +274,6 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
       parentKey = ""
     ) => {
       if (!obj || typeof obj !== "object") return;
-      if (isOpaqueReasoningDetail(obj, parentKey)) return;
 
       const { choiceIdx, toolIdx } = resolveStreamIndices(
         obj,
@@ -293,9 +292,10 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
             continue;
           }
           const choiceBuf = getBuffers(compositeKey);
-          if (choiceBuf[field]) {
-            obj[key] = (obj[key] || "") + choiceBuf[field];
-            choiceBuf[field] = "";
+          const bucket = bufferField(field, key);
+          if (choiceBuf[bucket]) {
+            obj[key] = (obj[key] || "") + choiceBuf[bucket];
+            choiceBuf[bucket] = "";
           }
         } else if (typeof obj[key] === "object") {
           populateRemaining(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key);
