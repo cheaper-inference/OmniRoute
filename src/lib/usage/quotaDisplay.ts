@@ -1,4 +1,4 @@
-import { getQuotaCacheState } from "@/domain/quotaCacheState";
+import { getQuotaCacheState, type QuotaCacheEntry } from "@/domain/quotaCacheState";
 import { getAllProviderLimitsCache, type ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import {
   getQuotaDisplaySnapshots,
@@ -101,18 +101,25 @@ export function getProviderLimitsDisplayMap(): Record<string, ProviderLimitsCach
   // cover unchanged percentages whose durable history write was deliberately deduplicated.
   for (const [id, entry] of getQuotaCacheState().cache) {
     if (!known.has(id) || entry.provider === "codex") continue;
-    for (const [key, quota] of Object.entries(entry.quotas)) {
-      const observed = quota.observedAt ?? entry.fetchedAt;
-      if (!Number.isFinite(observed)) continue;
-      snapshots.push({
-        connection_id: id,
-        window_key: key,
-        remaining_percentage: quota.remainingPercentage,
-        next_reset_at: quota.resetAt,
-        created_at: new Date(observed).toISOString(),
-        raw_data: quota.fractionReported === false ? '{"fractionReported":false}' : null,
-      });
-    }
+    appendRuntimeSnapshots(snapshots, id, entry);
   }
   return projectQuotaDisplay(caches, snapshots);
+}
+function appendRuntimeSnapshots(
+  snapshots: QuotaDisplaySnapshot[],
+  id: string,
+  entry: QuotaCacheEntry
+): void {
+  for (const [key, quota] of Object.entries(entry.quotas)) {
+    const observed = quota.observedAt ?? entry.fetchedAt;
+    if (!Number.isFinite(observed)) continue;
+    snapshots.push({
+      connection_id: id,
+      window_key: key,
+      remaining_percentage: quota.remainingPercentage,
+      next_reset_at: quota.resetAt,
+      created_at: new Date(observed).toISOString(),
+      raw_data: quota.fractionReported === false ? '{"fractionReported":false}' : null,
+    });
+  }
 }

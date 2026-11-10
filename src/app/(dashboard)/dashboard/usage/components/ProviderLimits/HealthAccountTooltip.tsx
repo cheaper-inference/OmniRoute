@@ -121,9 +121,10 @@ function TooltipCells({ account }: { account: DisplayAccount }) {
               {cell.awaitingSync
                 ? t("healthAwaitingSync")
                 : format.number(cell.percent / 100, { style: "percent", maximumFractionDigits: 1 })}
-              {cell.resetAt
-                ? ` · ${t("resetsIn")} ${recovery(cell.resetAt)}`
-                : ` · ${t("healthRecoveryUnknown")}`}
+              {!cell.awaitingSync &&
+                (cell.resetAt
+                  ? ` · ${t("resetsIn")} ${recovery(cell.resetAt)}`
+                  : ` · ${t("healthRecoveryUnknown")}`)}
             </span>
           </div>
           {/* Remaining quota: any visible fill is the success tone (an empty bar draws nothing). */}
