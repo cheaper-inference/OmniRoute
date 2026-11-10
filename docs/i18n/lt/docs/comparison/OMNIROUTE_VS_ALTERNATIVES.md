@@ -39,11 +39,11 @@ Objektyvus funkcijų palyginimas su populiariausiais atvirojo kodo AI maršrutiz
 
 ## Kada rinktis OmniRoute
 
-- Savarankiškai priimate ir norite** maksimali teikėjo aprėptis** (380 teikėjų, 155 free/no-auth katalogo įrašai)
+- Savarankiškai priimate ir norite** maksimali teikėjo aprėptis** (381 teikėjas, 155 free/no-auth katalogo įrašai)
 - Jums reikia a** įmontuotas MCP serveris** (LLM įrankiai, atmintis, įgūdžiai rodomi kaip įrankiai)
 - Tau reikia**A2A protokolas** tarp agentų darbo eigoms
 - Tu nori** pirštų atspaudų slėpimas** (JA3/JA4), kad būtų išvengta aptikimo prieš srovę CAPTCHAs
-- Tau reikia** įmonės ypatybės** (sargiai, evals, audito seka) be SaaS vekselio
+- Tau reikia** įmonės ypatybės** (sargai, evals, audito seka) be SaaS vekselio
 
 ## Kada rinktis LiteLLM
 
