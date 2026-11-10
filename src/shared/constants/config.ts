@@ -74,6 +74,8 @@ export const PROVIDER_ENDPOINTS = {
   demonroute: "https://api.demonroute.com/v1/chat/completions",
   daoxe: "https://api.daoxe.com/v1/chat/completions",
   gisoo: "https://gisoo.pro/api/v1/chat/completions",
+  paraloncloud: "https://paraloncloud.com/v1/chat/completions",
+  empiriolabs: "https://api.empiriolabs.ai/v1/chat/completions",
   jembatanai: "https://freeai.jembatanai.com/v1/chat/completions",
   openai: "https://api.openai.com/v1/chat/completions",
   anthropic: "https://api.anthropic.com/v1/messages",

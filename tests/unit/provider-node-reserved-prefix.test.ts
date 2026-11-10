@@ -225,14 +225,20 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // Gisoo (#18112) adds id and alias "gisoo" (+1 distinct prefix: 435 -> 436).
   // MiniMax Code (#17286) registers id "minimax-code" and alias "mmcode" — two
   // more (436 -> 438).
-  // JembatanAI adds id and alias "jembatanai" (+1 distinct prefix: 438 -> 439).
-  assert.equal(RESERVED_PREFIX_COUNT, 439);
+  // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 438 -> 439).
+  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 439 -> 441).
+  // MegaBrain (#18129) registers id "megabrain" and alias "mb" (+2: 441 -> 443).
+  // JembatanAI adds id and alias "jembatanai" (+1 distinct prefix: 443 -> 444).
+  assert.equal(RESERVED_PREFIX_COUNT, 444);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("runcrate"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("gisoo"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("minimax-code"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("mmcode"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("empiriolabs"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("megabrain"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("mb"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("jembatanai"), true);
 });
 
