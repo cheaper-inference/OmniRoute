@@ -1,8 +1,23 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 
-// Kept out of featureFlagDefinitions.ts so that catalog stays under the file-size cap; it is
-// listed there right after the other PII flags. Hard Rule 20: default "false", guarded by
+// PII flags kept out of featureFlagDefinitions.ts so that catalog stays under the file-size cap;
+// both are listed there right after the other PII flags. The two data-mutating PII flags
+// (Hard Rule 20) stay in the catalog itself; the vault flag also defaults to "false", guarded by
 // tests/unit/pii-opt-in-default.test.ts.
+export const PII_RESPONSE_SANITIZATION_MODE_FLAG: FeatureFlagDefinition = {
+  key: "PII_RESPONSE_SANITIZATION_MODE",
+  label: "PII Response Sanitization Mode",
+  description:
+    "Mode for PII response sanitization: redact (replace PII), warn (log only), block (reject), off (disable)",
+  descriptionI18nKey: "featureFlagPiiResponseSanitizationModeDescription",
+  category: "security",
+  defaultValue: "redact",
+  type: "enum",
+  enumValues: ["redact", "warn", "block", "off"],
+  requiresRestart: false,
+  warningLevel: "info",
+};
+
 export const PII_REVERSIBLE_VAULT_FLAG: FeatureFlagDefinition = {
   key: "PII_REVERSIBLE_VAULT_ENABLED",
   label: "Reversible PII Token Vault",
