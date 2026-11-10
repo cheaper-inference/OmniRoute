@@ -3903,6 +3903,29 @@
       "stream": "https://api.llmgateway.io/v1/chat/completions"
     }
   },
+  "llmtr": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://llmtr.com/v1/chat/completions",
+      "stream": "https://llmtr.com/v1/chat/completions"
+    }
+  },
   "lmarena": {
     "format": "openai",
     "headers": {
