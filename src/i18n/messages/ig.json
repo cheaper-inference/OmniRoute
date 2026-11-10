@@ -10704,7 +10704,10 @@
     "quotaRefreshStale": "Sava weghachiri data oke ojiji ochie. Nke a abụghị nlele ọhụrụ.",
     "quotaRefreshPartial": "Naanị akụkụ data oke ojiji dị.",
     "quotaWindowUnavailable": "Oke ojiji {window} adịghị",
-    "quotaConnectionRefreshFailed": "Nnyocha oke ojiji agwụla, mana enweghị ike imelite ndepụta akaụntụ."
+    "quotaConnectionRefreshFailed": "Nnyocha oke ojiji agwụla, mana enweghị ike imelite ndepụta akaụntụ.",
+    "codexAccountPersonal": "Nke onwe",
+    "codexAccountBusiness": "Azụmahịa",
+    "codexAccountRole": "Ọkwa: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Zuru ụwa ọnụ",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "Achọpụtara ọdịda mgbe a na-emegharị token ọhụrụ",
       "unknown": "Amaghị ọnọdụ ahụike"
     },
+    "tokenHealthRefreshAll": "Megharịa ha niile",
+    "tokenHealthRefreshResult": "{refreshed} emeliterela, {failed} agbasaghị, {skipped} agafeere",
     "systemMonitor": {
       "metricsAriaLabel": "Metrik sistemụ",
       "memory": "Ebe nchekwa",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "Enweghị ike ịgbanwe iyi ahụ"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (usoro a)",
+    "cursorModelUsageBilledHint": "Cursor gbara ụgwọ",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Ntinye",
+    "cursorModelUsageOutput": "Nsonaazụ",
+    "cursorModelUsageCacheRead": "Ọgụgụ cache",
+    "cursorModelUsageCacheWrite": "Ide na Cache",
+    "cursorModelUsageCost": "Ọnụ ahịa",
     "healthExtraUsageBypass": "Oke ojiji agwụla; a na-ekwe ka ojiji agbakwunyere, ya mere ọrụ na-aga n’ihu.",
     "healthPaidCreditsBypass": "Oke ojiji agwụla; kredit akwụgoro dịnụ na-eme ka ọrụ gaa n’ihu.",
     "healthFilteringBypass": "Oke ojiji agwụla; agbanyụrụ nzacha oke ojiji mpaghara, ya mere ọrụ na-aga n’ihu.",

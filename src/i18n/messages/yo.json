@@ -10704,7 +10704,10 @@
     "quotaRefreshStale": "Sẹ́fà dá dátà ìwọ̀n lílo àtijọ́ padà. Èyí kì í ṣe àkíyèsí tuntun.",
     "quotaRefreshPartial": "Apá kan nínú dátà ìwọ̀n lílo nìkan ló wà.",
     "quotaWindowUnavailable": "Ìwọ̀n lílo fún {window} kò sí",
-    "quotaConnectionRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo ti parí, ṣùgbọ́n a kò lè ṣe àtúnṣe àtòjọ àwọn àkọọ́lẹ̀."
+    "quotaConnectionRefreshFailed": "Àyẹ̀wò ìwọ̀n lílo ti parí, ṣùgbọ́n a kò lè ṣe àtúnṣe àtòjọ àwọn àkọọ́lẹ̀.",
+    "codexAccountPersonal": "Ti ara ẹni",
+    "codexAccountBusiness": "Iṣòwò",
+    "codexAccountRole": "Ipa: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Gbogbogbo",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "A ṣàwárí àwọn ìkùnà ìmúdójúìwọ̀n tóókì",
       "unknown": "Ipò ìlera jẹ́ àìmọ̀"
     },
+    "tokenHealthRefreshAll": "Tún gbogbo rẹ̀ ṣe",
+    "tokenHealthRefreshResult": "{refreshed} ti tuntun si, {failed} kùṣẹ́, {skipped} ti kọ̀",
     "systemMonitor": {
       "metricsAriaLabel": "Àwọn ìwọ̀n ètò",
       "memory": "Ìrántí",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "Yíyí ṣiṣàn padà kùnà"
   },
   "usage": {
+    "cursorModelUsageTitle": "Àwọn tọ́kẹ́ẹ̀nì API (àyíká yìí)",
+    "cursorModelUsageBilledHint": "Cursor ló gba owó",
+    "cursorModelUsageModel": "Àwòṣe",
+    "cursorModelUsageInput": "Àbáwọlé",
+    "cursorModelUsageOutput": "Àbájáde",
+    "cursorModelUsageCacheRead": "Kíkà cache",
+    "cursorModelUsageCacheWrite": "Kíkọ sí Cache",
+    "cursorModelUsageCost": "Iye owó",
     "healthExtraUsageBypass": "Ààlà lílò ti tán; a gba àfikún lílò láàyè, nítorí náà iṣẹ́ ń bá a lọ.",
     "healthPaidCreditsBypass": "Ààlà lílò ti tán; kírẹ́dítì tí a sanwó fún tó wà jẹ́ kí iṣẹ́ lè bá a lọ.",
     "healthFilteringBypass": "Ààlà lílò ti tán; a ti pa àlẹ̀mọ́ ààlà lílò àdúgbò, nítorí náà iṣẹ́ ń bá a lọ.",

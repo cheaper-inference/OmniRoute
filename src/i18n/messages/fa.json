@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "کلید مدیریت (اختیاری)",
     "tokenrouterManagementKeyHint": "کلید حساب از داشبورد TokenRouter (Settings → Management Key). فقط برای خواندن سهمیه و موجودی استفاده می‌شود و هرگز برای درخواست‌ها به کار نمی‌رود. کلید ذخیره‌شده نمایش داده نمی‌شود؛ برای حفظ آن خالی بگذارید.",
     "commandCodeZdrLabel": "الزام به عدم نگهداری داده (ZDR)",
-    "commandCodeZdrHint": "با هر درخواستی که با این کلید API انجام شود x-cmd-zdr: 1 ارسال می‌کند. مدل‌هایی که upstream دارای ZDR ندارند ممکن است در دسترس نباشند."
+    "commandCodeZdrHint": "با هر درخواستی که با این کلید API انجام شود x-cmd-zdr: 1 ارسال می‌کند. مدل‌هایی که upstream دارای ZDR ندارند ممکن است در دسترس نباشند.",
+    "codexAccountPersonal": "شخصی",
+    "codexAccountBusiness": "کسبوکار",
+    "codexAccountRole": "نقش: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "سراسری",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "خطاهای تازه‌سازی توکن شناسایی شدند",
       "unknown": "وضعیت سلامتی ناشناخته است"
     },
+    "tokenHealthRefreshAll": "تازهسازی همه",
+    "tokenHealthRefreshResult": "{refreshed} تازه‌سازی شد، {failed} ناموفق، {skipped} نادیده گرفته شد",
     "systemMonitor": {
       "metricsAriaLabel": "معیارهای سیستم",
       "memory": "حافظه",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "تبدیل استریم ناموفق بود"
   },
   "usage": {
+    "cursorModelUsageTitle": "توکن‌های API (این دوره)",
+    "cursorModelUsageBilledHint": "صورتحساب توسط Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ورودی",
+    "cursorModelUsageOutput": "خروجی",
+    "cursorModelUsageCacheRead": "خواندن از کش",
+    "cursorModelUsageCacheWrite": "نوشتن در حافظه نهان",
+    "cursorModelUsageCost": "هزینه",
     "healthExtraUsageBypass": "سهمیه تمام شده است؛ مصرف اضافه مجاز است، بنابراین سرویس ادامه دارد.",
     "healthPaidCreditsBypass": "سهمیه تمام شده است؛ اعتبار پولی موجود امکان ادامه سرویس را می‌دهد.",
     "healthFilteringBypass": "سهمیه تمام شده است؛ فیلتر محلی سهمیه غیرفعال است، بنابراین سرویس ادامه دارد.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "میزان استفاده",
     "grokExtraUsageCredits": "اعتبارات اضافی مصرف",
     "grokAutoTopUp": "شارژ خودکار",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "استفاده از این اعتبار، بلافاصله محدودیت‌های واجد شرایط استفاده از Claude را بازنشانی کرده و این اعتبار را به‌طور دائم مصرف می‌کند.",
     "claudeResetCreditsModalTitle": "اعتبارهای بازنشانی Claude",
     "claudeResetCreditsModalExplainer": "اعتبارهای در دسترس بازنشانی Claude و بازنشانی‌های هفتگی نشست برای این حساب کاربری.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "بر اساس مشاهدات اخیر، نه آزمایش زنده. برای جزئیات یک حساب را انتخاب کنید.",
     "healthRecovery": "زمان بازیابی مورد انتظار",
     "healthAvailable": "در دسترس",

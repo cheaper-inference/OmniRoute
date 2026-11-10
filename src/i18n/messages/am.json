@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "የአስተዳደር ቁልፍ (አማራጭ)",
     "tokenrouterManagementKeyHint": "ከTokenRouter ዳሽቦርድ የሚገኝ የመለያ ቁልፍ (Settings → Management Key)። ኮታን እና ቀሪ ሂሳብን ለማንበብ ብቻ ያገለግላል፣ ለጥያቄዎች በፍጹም አይውልም። የተቀመጠው ቁልፍ አይታይም፤ ለማቆየት ባዶ ይተዉት።",
     "commandCodeZdrLabel": "ዜሮ የውሂብ ማቆያ (ZDR) ጠይቅ",
-    "commandCodeZdrHint": "በዚህ የAPI ቁልፍ በሚደረግ እያንዳንዱ ጥያቄ x-cmd-zdr: 1 ይልካል። ZDR የሚደግፍ upstream የሌላቸው ሞዴሎች ላይገኙ ይችላሉ።"
+    "commandCodeZdrHint": "በዚህ የAPI ቁልፍ በሚደረግ እያንዳንዱ ጥያቄ x-cmd-zdr: 1 ይልካል። ZDR የሚደግፍ upstream የሌላቸው ሞዴሎች ላይገኙ ይችላሉ።",
+    "codexAccountPersonal": "የግል",
+    "codexAccountBusiness": "የንግድ",
+    "codexAccountRole": "ሚና፦ {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "አጠቃላይ",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "የቶከን እድሳት አለመሳካቶች ተገኝተዋል",
       "unknown": "የጤንነት ሁኔታው አይታወቅም"
     },
+    "tokenHealthRefreshAll": "ሁሉንም አድስ",
+    "tokenHealthRefreshResult": "{refreshed} ታድሷል፣ {failed} አልተሳካም፣ {skipped} ተዘለለ",
     "systemMonitor": {
       "metricsAriaLabel": "የስርዓት መለኪያዎች",
       "memory": "ማህደረ ትውስታ",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "ዥረቱን መለወጥ አልተሳካም"
   },
   "usage": {
+    "cursorModelUsageTitle": "የAPI ቶከኖች (በዚህ ዑደት)",
+    "cursorModelUsageBilledHint": "በCursor የተከፈለ",
+    "cursorModelUsageModel": "ሞዴል",
+    "cursorModelUsageInput": "ግቤት",
+    "cursorModelUsageOutput": "ውጤት",
+    "cursorModelUsageCacheRead": "የመሸጎጫ ንባብ",
+    "cursorModelUsageCacheWrite": "ወደ መሸጎጫ መጻፍ",
+    "cursorModelUsageCost": "ወጪ",
     "healthExtraUsageBypass": "ኮታው አልቋል፤ ተጨማሪ አጠቃቀም ስለተፈቀደ አገልግሎቱ ይቀጥላል።",
     "healthPaidCreditsBypass": "ኮታው አልቋል፤ ያሉት የተከፈሉ ክሬዲቶች አገልግሎቱ እንዲቀጥል ያስችላሉ።",
     "healthFilteringBypass": "ኮታው አልቋል፤ የአካባቢ ኮታ ማጣሪያ ስለጠፋ አገልግሎቱ ይቀጥላል።",

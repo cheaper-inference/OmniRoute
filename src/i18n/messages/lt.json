@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "Valdymo raktas (neprivaloma)",
     "tokenrouterManagementKeyHint": "Paskyros raktas iš TokenRouter valdymo skydelio (Settings → Management Key). Naudojamas tik kvotai ir likučiui nuskaityti, niekada užklausoms. Išsaugotas raktas nerodomas; palikite tuščią, kad jį išlaikytumėte.",
     "commandCodeZdrLabel": "Reikalauti nulinio duomenų saugojimo (ZDR)",
-    "commandCodeZdrHint": "Su kiekviena šiuo API raktu atliekama užklausa siunčia x-cmd-zdr: 1. Modeliai be ZDR upstream gali būti nepasiekiami."
+    "commandCodeZdrHint": "Su kiekviena šiuo API raktu atliekama užklausa siunčia x-cmd-zdr: 1. Modeliai be ZDR upstream gali būti nepasiekiami.",
+    "codexAccountPersonal": "Asmeninis",
+    "codexAccountBusiness": "Verslui",
+    "codexAccountRole": "Vaidmuo: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Visuotinis",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "Aptikta žetonų atnaujinimo klaidų",
       "unknown": "Būklė nežinoma"
     },
+    "tokenHealthRefreshAll": "Atnaujinti viską",
+    "tokenHealthRefreshResult": "{refreshed} atnaujinta, {failed} nepavyko, {skipped} praleista",
     "systemMonitor": {
       "metricsAriaLabel": "Sistemos metrikos",
       "memory": "Atmintis",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "Nepavyko transformuoti srauto"
   },
   "usage": {
+    "cursorModelUsageTitle": "API žetonai (šis ciklas)",
+    "cursorModelUsageBilledHint": "Apmokestino Cursor",
+    "cursorModelUsageModel": "Modelis",
+    "cursorModelUsageInput": "Įvestis",
+    "cursorModelUsageOutput": "Išvestis",
+    "cursorModelUsageCacheRead": "Talpyklos skaitymas",
+    "cursorModelUsageCacheWrite": "Įrašymas į talpyklą",
+    "cursorModelUsageCost": "Kaina",
     "healthExtraUsageBypass": "Kvota išnaudota; papildomas naudojimas leidžiamas, todėl paslauga tęsiama.",
     "healthPaidCreditsBypass": "Kvota išnaudota; turimi mokami kreditai leidžia tęsti paslaugą.",
     "healthFilteringBypass": "Kvota išnaudota; vietinis kvotų filtravimas išjungtas, todėl paslauga tęsiama.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Naudojimas",
     "grokExtraUsageCredits": "Papildomo naudojimo kreditai",
     "grokAutoTopUp": "Automatinis papildymas",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "Panaudojus iš karto atstatomi atitinkami Claude naudojimo limitai ir visam laikui sunaudojamas šis kreditas.",
     "claudeResetCreditsModalTitle": "Claude atstatymo kreditai",
     "claudeResetCreditsModalExplainer": "Šiai paskyrai pasiekiami Claude atstatymo kreditai ir savaitiniai seansų atstatymai.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Pagal naujausius stebėjimus, ne tiesioginį patikrinimą. Pasirinkite paskyrą išsamiai informacijai.",
     "healthRecovery": "Numatomas atkūrimas",
     "healthAvailable": "Prieinama",

@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "ପରିଚାଳନା କି (ବୈକଳ୍ପିକ)",
     "tokenrouterManagementKeyHint": "TokenRouter ଡ୍ୟାସବୋର୍ଡରୁ ଆକାଉଣ୍ଟ କି (Settings → Management Key)। କେବଳ କୋଟା ଏବଂ ବାଲାନ୍ସ ପଢ଼ିବା ପାଇଁ ବ୍ୟବହୃତ ହୁଏ, ଅନୁରୋଧ ପାଇଁ କେବେ ନୁହେଁ। ସଞ୍ଚିତ କି ଦେଖାଯାଏ ନାହିଁ; ଏହାକୁ ରଖିବା ପାଇଁ ଖାଲି ଛାଡ଼ନ୍ତୁ।",
     "commandCodeZdrLabel": "ଶୂନ୍ୟ ଡାଟା ସଂରକ୍ଷଣ (ZDR) ଆବଶ୍ୟକ କରନ୍ତୁ",
-    "commandCodeZdrHint": "ଏହି API କି ସହିତ କରାଯାଇଥିବା ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ସହ x-cmd-zdr: 1 ପଠାଏ। ZDR upstream ନଥିବା ମଡେଲଗୁଡ଼ିକ ଉପଲବ୍ଧ ନ ହୋଇପାରେ।"
+    "commandCodeZdrHint": "ଏହି API କି ସହିତ କରାଯାଇଥିବା ପ୍ରତ୍ୟେକ ଅନୁରୋଧ ସହ x-cmd-zdr: 1 ପଠାଏ। ZDR upstream ନଥିବା ମଡେଲଗୁଡ଼ିକ ଉପଲବ୍ଧ ନ ହୋଇପାରେ।",
+    "codexAccountPersonal": "ବ୍ୟକ୍ତିଗତ",
+    "codexAccountBusiness": "ବ୍ୟବସାୟ",
+    "codexAccountRole": "ଭୂମିକା: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "ଗ୍ଲୋବାଲ୍",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "ଟୋକେନ୍ ରିଫ୍ରେଶ୍ ବିଫଳତା ଚିହ୍ନଟ ହୋଇଛି",
       "unknown": "ସ୍ୱାସ୍ଥ୍ୟ ସ୍ଥିତି ଅଜଣା"
     },
+    "tokenHealthRefreshAll": "ସବୁ ରିଫ୍ରେଶ କରନ୍ତୁ",
+    "tokenHealthRefreshResult": "{refreshed} ରିଫ୍ରେସ୍ ହୋଇଛି, {failed} ବିଫଳ, {skipped} ବାଦ୍ ଦିଆଯାଇଛି",
     "systemMonitor": {
       "metricsAriaLabel": "ସିଷ୍ଟମ୍ ମେଟ୍ରିକ୍ସ",
       "memory": "ମେମୋରି",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "ଷ୍ଟ୍ରିମ୍ ରୂପାନ୍ତର କରିବାରେ ବିଫଳ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ଟୋକେନ୍‌ଗୁଡ଼ିକ (ଏହି ଚକ୍ର)",
+    "cursorModelUsageBilledHint": "Cursor ଦ୍ୱାରା ବିଲ୍ କରାଯାଇଛି",
+    "cursorModelUsageModel": "ମଡେଲ୍",
+    "cursorModelUsageInput": "ଇନ୍ପୁଟ୍",
+    "cursorModelUsageOutput": "ଆଉଟପୁଟ୍",
+    "cursorModelUsageCacheRead": "କ୍ୟାଶ୍ ପଠନ",
+    "cursorModelUsageCacheWrite": "କ୍ୟାଶ୍ ଲେଖନ",
+    "cursorModelUsageCost": "ଖର୍ଚ୍ଚ",
     "healthExtraUsageBypass": "କୋଟା ଶେଷ ହୋଇଛି; ଅତିରିକ୍ତ ବ୍ୟବହାର ଅନୁମୋଦିତ ଥିବାରୁ ସେବା ଜାରି ରହେ।",
     "healthPaidCreditsBypass": "କୋଟା ଶେଷ ହୋଇଛି; ଉପଲବ୍ଧ ଦେୟଯୁକ୍ତ କ୍ରେଡିଟ୍‌ ଦ୍ୱାରା ସେବା ଜାରି ରହିପାରେ।",
     "healthFilteringBypass": "କୋଟା ଶେଷ ହୋଇଛି; ସ୍ଥାନୀୟ କୋଟା ଫିଲ୍ଟର୍ ବନ୍ଦ ଥିବାରୁ ସେବା ଜାରି ରହେ।",

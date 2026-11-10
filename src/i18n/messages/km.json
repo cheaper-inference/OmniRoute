@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "សោគ្រប់គ្រង (ស្រេចចិត្ត)",
     "tokenrouterManagementKeyHint": "សោគណនីពីផ្ទាំងគ្រប់គ្រង TokenRouter (Settings → Management Key)។ ប្រើសម្រាប់តែអានកូតា និងសមតុល្យប៉ុណ្ណោះ មិនដែលប្រើសម្រាប់សំណើទេ។ សោដែលបានរក្សាទុកមិនត្រូវបានបង្ហាញទេ; ទុកឱ្យទទេដើម្បីរក្សាវាទុក។",
     "commandCodeZdrLabel": "តម្រូវឱ្យមានការរក្សាទុកទិន្នន័យសូន្យ (ZDR)",
-    "commandCodeZdrHint": "ផ្ញើ x-cmd-zdr: 1 ជាមួយសំណើនីមួយៗដែលធ្វើឡើងដោយសោ API នេះ។ ម៉ូដែលដែលគ្មាន upstream ZDR ប្រហែលជាមិនអាចប្រើបាន។"
+    "commandCodeZdrHint": "ផ្ញើ x-cmd-zdr: 1 ជាមួយសំណើនីមួយៗដែលធ្វើឡើងដោយសោ API នេះ។ ម៉ូដែលដែលគ្មាន upstream ZDR ប្រហែលជាមិនអាចប្រើបាន។",
+    "codexAccountPersonal": "ផ្ទាល់ខ្លួន",
+    "codexAccountBusiness": "អាជីវកម្ម",
+    "codexAccountRole": "តួនាទី៖ {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "សកល",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "បានរកឃើញការបរាជ័យក្នុងការធ្វើឱ្យថូខឹនស្រស់ឡើងវិញ",
       "unknown": "មិនស្គាល់ស្ថានភាពរបស់ថូខឹន"
     },
+    "tokenHealthRefreshAll": "ធ្វើឱ្យស្រស់ទាំងអស់",
+    "tokenHealthRefreshResult": "{refreshed} បានធ្វើបច្ចុប្បន្នភាព, {failed} បានបរាជ័យ, {skipped} បានរំលង",
     "systemMonitor": {
       "metricsAriaLabel": "សូចនាករប្រព័ន្ធ",
       "memory": "អង្គចងចាំ",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "មិនអាចបំប្លែងទិន្នន័យបន្តបន្ទាប់បានទេ"
   },
   "usage": {
+    "cursorModelUsageTitle": "ថូខឹន API (វដ្តនេះ)",
+    "cursorModelUsageBilledHint": "គិតថ្លៃដោយ Cursor",
+    "cursorModelUsageModel": "ម៉ូដែល",
+    "cursorModelUsageInput": "ទិន្នន័យបញ្ចូល",
+    "cursorModelUsageOutput": "លទ្ធផល",
+    "cursorModelUsageCacheRead": "ការអានពីឃ្លាំងសម្ងាត់",
+    "cursorModelUsageCacheWrite": "ការសរសេរឃ្លាំងសម្ងាត់",
+    "cursorModelUsageCost": "ថ្លៃចំណាយ",
     "healthExtraUsageBypass": "កូតាអស់ហើយ ប៉ុន្តែអនុញ្ញាតឱ្យប្រើប្រាស់បន្ថែម ដូច្នេះសេវាបន្តដំណើរការ។",
     "healthPaidCreditsBypass": "កូតាអស់ហើយ ប៉ុន្តែឥណទានដែលបានបង់ប្រាក់នៅសល់អនុញ្ញាតឱ្យសេវាបន្តដំណើរការ។",
     "healthFilteringBypass": "កូតាអស់ហើយ ប៉ុន្តែការត្រងកូតាក្នុងមូលដ្ឋានត្រូវបានបិទ ដូច្នេះសេវាបន្តដំណើរការ។",

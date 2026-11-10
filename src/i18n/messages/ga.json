@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "Eochair bhainistíochta (roghnach)",
     "tokenrouterManagementKeyHint": "Eochair chuntais ó dheais TokenRouter (Settings → Management Key). Úsáidtear í chun cuóta agus iarmhéid a léamh amháin, riamh le haghaidh iarratas. Ní thaispeántar an eochair shábháilte; fág folamh í chun í a choinneáil.",
     "commandCodeZdrLabel": "Éiligh coinneáil nialasach sonraí (ZDR)",
-    "commandCodeZdrHint": "Seolann sé x-cmd-zdr: 1 le gach iarratas a dhéantar leis an eochair API seo. B'fhéidir nach mbeidh samhlacha gan upstream ZDR ar fáil."
+    "commandCodeZdrHint": "Seolann sé x-cmd-zdr: 1 le gach iarratas a dhéantar leis an eochair API seo. B'fhéidir nach mbeidh samhlacha gan upstream ZDR ar fáil.",
+    "codexAccountPersonal": "Pearsanta",
+    "codexAccountBusiness": "Gnó",
+    "codexAccountRole": "Ról: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Domhanda",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "Braitheadh teipeanna athnuachana ceadchomharthaí",
       "unknown": "Stádas sláinte anaithnid"
     },
+    "tokenHealthRefreshAll": "Athnuashonraigh iad Uile",
+    "tokenHealthRefreshResult": "{refreshed} athnuadaithe, {failed} theip, {skipped} fágtha amuigh",
     "systemMonitor": {
       "metricsAriaLabel": "Méadrachtaí an chórais",
       "memory": "Cuimhne",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "Theip ar chlaochlú an tsrutha"
   },
   "usage": {
+    "cursorModelUsageTitle": "Comharthaí API (an timthriall seo)",
+    "cursorModelUsageBilledHint": "Billeáilte ag Cursor",
+    "cursorModelUsageModel": "Samhail",
+    "cursorModelUsageInput": "Ionchur",
+    "cursorModelUsageOutput": "Aschur",
+    "cursorModelUsageCacheRead": "Léamh taisce",
+    "cursorModelUsageCacheWrite": "Taisce a Scríobh",
+    "cursorModelUsageCost": "Costas",
     "healthExtraUsageBypass": "Tá an cuóta ídithe; ceadaítear úsáid bhreise, mar sin leanann an tseirbhís ar aghaidh.",
     "healthPaidCreditsBypass": "Tá an cuóta ídithe; ceadaíonn na creidmheasanna íoctha atá ar fáil don tseirbhís leanúint ar aghaidh.",
     "healthFilteringBypass": "Tá an cuóta ídithe; tá scagadh áitiúil cuótaí díchumasaithe, mar sin leanann an tseirbhís ar aghaidh.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Úsáid",
     "grokExtraUsageCredits": "Creidmheachtaí Úsáide Breise",
     "grokAutoTopUp": "Breisiú Uathoibríoch",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "Athshocraíonn fuascailt láithreach na teorainneacha úsáide incháilithe Claude agus ídíonn sé an creidmheas seo go buan.",
     "claudeResetCreditsModalTitle": "Creidmheasanna athshocraithe Claude",
     "claudeResetCreditsModalExplainer": "Creidmheasanna athshocraithe Claude agus athshocruithe seisiúin sheachtainiúla atá ar fáil don chuntas seo.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Bunaithe ar bhreathnuithe le déanaí, ní tástáil bheo. Roghnaigh cuntas le haghaidh sonraí.",
     "healthRecovery": "Am téarnaimh measta",
     "healthAvailable": "Ar Fáil",

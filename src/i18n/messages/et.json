@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "Haldusvõti (valikuline)",
     "tokenrouterManagementKeyHint": "Kontovõti TokenRouteri juhtpaneelilt (Settings → Management Key). Kasutatakse ainult kvoodi ja saldo lugemiseks, mitte kunagi päringuteks. Salvestatud võtit ei kuvata; selle säilitamiseks jätke väli tühjaks.",
     "commandCodeZdrLabel": "Nõua andmete nullsäilitamist (ZDR)",
-    "commandCodeZdrHint": "Saadab x-cmd-zdr: 1 iga selle API-võtmega tehtud päringuga. Mudelid ilma ZDR-toega upstreamita ei pruugi olla saadaval."
+    "commandCodeZdrHint": "Saadab x-cmd-zdr: 1 iga selle API-võtmega tehtud päringuga. Mudelid ilma ZDR-toega upstreamita ei pruugi olla saadaval.",
+    "codexAccountPersonal": "Isiklik",
+    "codexAccountBusiness": "Äriklient",
+    "codexAccountRole": "Roll: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globaalne",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "Tuvastati tokenite värskendamise tõrkeid",
       "unknown": "Seisund pole teada"
     },
+    "tokenHealthRefreshAll": "Värskenda kõiki",
+    "tokenHealthRefreshResult": "{refreshed} uuendatud, {failed} nurjunud, {skipped} vahele jäetud",
     "systemMonitor": {
       "metricsAriaLabel": "Süsteemimõõdikud",
       "memory": "Mälu",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "Voo teisendamine nurjus"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokenid (see tsükkel)",
+    "cursorModelUsageBilledHint": "Arveldab Cursor",
+    "cursorModelUsageModel": "Mudel",
+    "cursorModelUsageInput": "Sisend",
+    "cursorModelUsageOutput": "Väljund",
+    "cursorModelUsageCacheRead": "Vahemälust lugemine",
+    "cursorModelUsageCacheWrite": "Vahemällu kirjutamine",
+    "cursorModelUsageCost": "Maksumus",
     "healthExtraUsageBypass": "Kvoot on ammendunud; lisakasutus on lubatud, seega teenus jätkub.",
     "healthPaidCreditsBypass": "Kvoot on ammendunud; saadaolevad tasulised krediidid võimaldavad teenust jätkata.",
     "healthFilteringBypass": "Kvoot on ammendunud; kohalik kvoodifiltreerimine on välja lülitatud, seega teenus jätkub.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Kasutus",
     "grokExtraUsageCredits": "Täiendavad kasutuskrediidid",
     "grokAutoTopUp": "Automaatne saldo täiendamine",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "Lunastamine lähtestab kohe kohaldatavad Claude'i kasutuslimiidid ja kulutab selle krediidi jäädavalt.",
     "claudeResetCreditsModalTitle": "Claude'i lähtestuskrediidid",
     "claudeResetCreditsModalExplainer": "Selle konto saadaolevad Claude'i lähtestuskrediidid ja iganädalased seansilähtestused.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Põhineb viimastel vaatlustel, mitte reaalajas kontrollil. Üksikasjade jaoks valige konto.",
     "healthRecovery": "Eeldatav taastumine",
     "healthAvailable": "Saadaval",

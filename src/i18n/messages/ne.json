@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "व्यवस्थापन कुञ्जी (वैकल्पिक)",
     "tokenrouterManagementKeyHint": "TokenRouter ड्यासबोर्डबाट खाता कुञ्जी (Settings → Management Key)। कोटा र ब्यालेन्स पढ्न मात्र प्रयोग हुन्छ, अनुरोधहरूका लागि कहिल्यै होइन। सुरक्षित गरिएको कुञ्जी देखाइँदैन; यसलाई राख्न खाली छोड्नुहोस्।",
     "commandCodeZdrLabel": "शून्य डेटा अवधारण (ZDR) आवश्यक गर्नुहोस्",
-    "commandCodeZdrHint": "यो API कुञ्जीबाट गरिने हरेक अनुरोधसँग x-cmd-zdr: 1 पठाउँछ। ZDR upstream नभएका मोडेलहरू उपलब्ध नहुन सक्छन्।"
+    "commandCodeZdrHint": "यो API कुञ्जीबाट गरिने हरेक अनुरोधसँग x-cmd-zdr: 1 पठाउँछ। ZDR upstream नभएका मोडेलहरू उपलब्ध नहुन सक्छन्।",
+    "codexAccountPersonal": "व्यक्तिगत",
+    "codexAccountBusiness": "व्यावसायिक",
+    "codexAccountRole": "भूमिका: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "विश्वव्यापी",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "टोकन रिफ्रेस विफलताहरू पत्ता लागे",
       "unknown": "स्वास्थ्य स्थिति अज्ञात छ"
     },
+    "tokenHealthRefreshAll": "सबै रिफ्रेस गर्नुहोस्",
+    "tokenHealthRefreshResult": "{refreshed} रिफ्रेस गरियो, {failed} असफल, {skipped} छोडियो",
     "systemMonitor": {
       "metricsAriaLabel": "प्रणाली मेट्रिक्स",
       "memory": "मेमोरी",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "स्ट्रिम रूपान्तरण गर्न असफल भयो"
   },
   "usage": {
+    "cursorModelUsageTitle": "API टोकनहरू (यो चक्र)",
+    "cursorModelUsageBilledHint": "Cursor द्वारा बिल गरिएको",
+    "cursorModelUsageModel": "मोडेल",
+    "cursorModelUsageInput": "इनपुट",
+    "cursorModelUsageOutput": "आउटपुट",
+    "cursorModelUsageCacheRead": "क्यास रिड",
+    "cursorModelUsageCacheWrite": "क्यास लेखन",
+    "cursorModelUsageCost": "लागत",
     "healthExtraUsageBypass": "कोटा सकिएको छ; थप प्रयोगको अनुमति भएकाले सेवा जारी रहन्छ।",
     "healthPaidCreditsBypass": "कोटा सकिएको छ; उपलब्ध सशुल्क क्रेडिटले सेवा जारी राख्न सकिन्छ।",
     "healthFilteringBypass": "कोटा सकिएको छ; स्थानीय कोटा फिल्टर बन्द भएकाले सेवा जारी रहन्छ।",

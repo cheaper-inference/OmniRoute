@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "ਪ੍ਰਬੰਧਨ ਕੁੰਜੀ (ਵਿਕਲਪਿਕ)",
     "tokenrouterManagementKeyHint": "TokenRouter ਡੈਸ਼ਬੋਰਡ ਤੋਂ ਖਾਤਾ ਕੁੰਜੀ (Settings → Management Key)। ਸਿਰਫ਼ ਕੋਟਾ ਅਤੇ ਬਕਾਇਆ ਪੜ੍ਹਨ ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਹੈ, ਬੇਨਤੀਆਂ ਲਈ ਕਦੇ ਨਹੀਂ। ਸੰਭਾਲੀ ਕੁੰਜੀ ਨਹੀਂ ਦਿਖਾਈ ਜਾਂਦੀ; ਇਸਨੂੰ ਰੱਖਣ ਲਈ ਖਾਲੀ ਛੱਡੋ।",
     "commandCodeZdrLabel": "ਜ਼ੀਰੋ ਡਾਟਾ ਰਿਟੈਂਸ਼ਨ (ZDR) ਲਾਜ਼ਮੀ ਕਰੋ",
-    "commandCodeZdrHint": "ਇਸ API ਕੁੰਜੀ ਨਾਲ ਕੀਤੀ ਹਰ ਬੇਨਤੀ ਨਾਲ x-cmd-zdr: 1 ਭੇਜਦਾ ਹੈ। ZDR upstream ਤੋਂ ਬਿਨਾਂ ਮਾਡਲ ਉਪਲਬਧ ਨਹੀਂ ਹੋ ਸਕਦੇ।"
+    "commandCodeZdrHint": "ਇਸ API ਕੁੰਜੀ ਨਾਲ ਕੀਤੀ ਹਰ ਬੇਨਤੀ ਨਾਲ x-cmd-zdr: 1 ਭੇਜਦਾ ਹੈ। ZDR upstream ਤੋਂ ਬਿਨਾਂ ਮਾਡਲ ਉਪਲਬਧ ਨਹੀਂ ਹੋ ਸਕਦੇ।",
+    "codexAccountPersonal": "ਨਿੱਜੀ",
+    "codexAccountBusiness": "ਕਾਰੋਬਾਰ",
+    "codexAccountRole": "ਭੂਮਿਕਾ: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "ਗਲੋਬਲ",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "ਟੋਕਨ ਰਿਫ੍ਰੈਸ਼ ਅਸਫਲਤਾਵਾਂ ਮਿਲੀਆਂ",
       "unknown": "ਸਿਹਤ ਸਥਿਤੀ ਅਣਜਾਣ ਹੈ"
     },
+    "tokenHealthRefreshAll": "ਸਭ ਨੂੰ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ",
+    "tokenHealthRefreshResult": "{refreshed} ਤਾਜ਼ਾ ਕੀਤੇ, {failed} ਅਸਫਲ, {skipped} ਛੱਡੇ",
     "systemMonitor": {
       "metricsAriaLabel": "ਸਿਸਟਮ ਮੈਟ੍ਰਿਕਸ",
       "memory": "ਮੈਮੋਰੀ",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "ਸਟ੍ਰੀਮ ਨੂੰ ਰੂਪਾਂਤਰਿਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ਟੋਕਨ (ਇਹ ਚੱਕਰ)",
+    "cursorModelUsageBilledHint": "Cursor ਵੱਲੋਂ ਬਿੱਲ ਕੀਤਾ",
+    "cursorModelUsageModel": "ਮਾਡਲ",
+    "cursorModelUsageInput": "ਇਨਪੁੱਟ",
+    "cursorModelUsageOutput": "ਆਉਟਪੁੱਟ",
+    "cursorModelUsageCacheRead": "ਕੈਸ਼ ਰੀਡ",
+    "cursorModelUsageCacheWrite": "ਕੈਸ਼ ਲਿਖਾਈ",
+    "cursorModelUsageCost": "ਲਾਗਤ",
     "healthExtraUsageBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਵਾਧੂ ਵਰਤੋਂ ਦੀ ਇਜਾਜ਼ਤ ਹੈ, ਇਸ ਲਈ ਸੇਵਾ ਜਾਰੀ ਹੈ।",
     "healthPaidCreditsBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਉਪਲਬਧ ਭੁਗਤਾਨ ਕੀਤੇ ਕ੍ਰੈਡਿਟ ਨਾਲ ਸੇਵਾ ਜਾਰੀ ਰਹਿ ਸਕਦੀ ਹੈ।",
     "healthFilteringBypass": "ਕੋਟਾ ਮੁੱਕ ਗਿਆ ਹੈ; ਸਥਾਨਕ ਕੋਟਾ ਫਿਲਟਰ ਬੰਦ ਹੈ, ਇਸ ਲਈ ਸੇਵਾ ਜਾਰੀ ਹੈ।",

@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "მართვის გასაღები (არასავალდებულო)",
     "tokenrouterManagementKeyHint": "ანგარიშის გასაღები TokenRouter-ის პანელიდან (Settings → Management Key). გამოიყენება მხოლოდ კვოტისა და ბალანსის წასაკითხად, არასდროს მოთხოვნებისთვის. შენახული გასაღები არ ჩანს; მის შესანარჩუნებლად დატოვეთ ცარიელი.",
     "commandCodeZdrLabel": "მოითხოვე მონაცემთა ნულოვანი შენახვა (ZDR)",
-    "commandCodeZdrHint": "აგზავნის x-cmd-zdr: 1-ს ამ API გასაღებით შესრულებულ ყველა მოთხოვნასთან ერთად. მოდელები ZDR upstream-ის გარეშე შეიძლება მიუწვდომელი იყოს."
+    "commandCodeZdrHint": "აგზავნის x-cmd-zdr: 1-ს ამ API გასაღებით შესრულებულ ყველა მოთხოვნასთან ერთად. მოდელები ZDR upstream-ის გარეშე შეიძლება მიუწვდომელი იყოს.",
+    "codexAccountPersonal": "პირადი",
+    "codexAccountBusiness": "ბიზნესი",
+    "codexAccountRole": "როლი: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "გლობალური",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "გამოვლინდა ტოკენების განახლების შეცდომები",
       "unknown": "მდგომარეობა უცნობია"
     },
+    "tokenHealthRefreshAll": "ყველას განახლება",
+    "tokenHealthRefreshResult": "{refreshed} განახლდა, {failed} ვერ მოხერხდა, {skipped} გამოტოვებული",
     "systemMonitor": {
       "metricsAriaLabel": "სისტემური მეტრიკები",
       "memory": "მეხსიერება",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "ნაკადის გარდაქმნა ვერ მოხერხდა"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ტოკენები (ეს ციკლი)",
+    "cursorModelUsageBilledHint": "ანგარიში Cursor-ისგან",
+    "cursorModelUsageModel": "მოდელი",
+    "cursorModelUsageInput": "შეყვანა",
+    "cursorModelUsageOutput": "გამომავალი მონაცემები",
+    "cursorModelUsageCacheRead": "ქეშიდან წაკითხვა",
+    "cursorModelUsageCacheWrite": "ქეშში ჩაწერა",
+    "cursorModelUsageCost": "ღირებულება",
     "healthExtraUsageBypass": "კვოტა ამოწურულია; დამატებითი გამოყენება ნებადართულია, ამიტომ მომსახურება გრძელდება.",
     "healthPaidCreditsBypass": "კვოტა ამოწურულია; ხელმისაწვდომი ფასიანი კრედიტები მომსახურების გაგრძელების საშუალებას იძლევა.",
     "healthFilteringBypass": "კვოტა ამოწურულია; ლოკალური კვოტის ფილტრაცია გამორთულია, ამიტომ მომსახურება გრძელდება.",

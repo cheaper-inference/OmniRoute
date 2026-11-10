@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "Pārvaldības atslēga (neobligāti)",
     "tokenrouterManagementKeyHint": "Konta atslēga no TokenRouter informācijas paneļa (Settings → Management Key). Tiek izmantota tikai kvotas un atlikuma nolasīšanai, nekad pieprasījumiem. Saglabātā atslēga netiek rādīta; atstājiet tukšu, lai to paturētu.",
     "commandCodeZdrLabel": "Pieprasīt nulles datu saglabāšanu (ZDR)",
-    "commandCodeZdrHint": "Ar katru pieprasījumu, kas veikts ar šo API atslēgu, nosūta x-cmd-zdr: 1. Modeļi bez ZDR upstream var nebūt pieejami."
+    "commandCodeZdrHint": "Ar katru pieprasījumu, kas veikts ar šo API atslēgu, nosūta x-cmd-zdr: 1. Modeļi bez ZDR upstream var nebūt pieejami.",
+    "codexAccountPersonal": "Personīgais",
+    "codexAccountBusiness": "Uzņēmējdarbība",
+    "codexAccountRole": "Loma: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globālais",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "Konstatētas tokenu atjaunošanas kļūmes",
       "unknown": "Stāvoklis nav zināms"
     },
+    "tokenHealthRefreshAll": "Atjaunināt visu",
+    "tokenHealthRefreshResult": "{refreshed} atjaunināti, {failed} neizdevušies, {skipped} izlaisti",
     "systemMonitor": {
       "metricsAriaLabel": "Sistēmas rādītāji",
       "memory": "Atmiņa",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "Neizdevās pārveidot straumi"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokeni (šis cikls)",
+    "cursorModelUsageBilledHint": "Rēķinu izrāda Cursor",
+    "cursorModelUsageModel": "Modelis",
+    "cursorModelUsageInput": "Ievade",
+    "cursorModelUsageOutput": "Izvade",
+    "cursorModelUsageCacheRead": "Kešatmiņas nolasīšana",
+    "cursorModelUsageCacheWrite": "Kešatmiņas rakstīšana",
+    "cursorModelUsageCost": "Izmaksas",
     "healthExtraUsageBypass": "Kvota izsmelta; papildu lietojums ir atļauts, tāpēc pakalpojums turpinās.",
     "healthPaidCreditsBypass": "Kvota izsmelta; pieejamie apmaksātie kredīti ļauj turpināt pakalpojumu.",
     "healthFilteringBypass": "Kvota izsmelta; lokālā kvotu filtrēšana ir izslēgta, tāpēc pakalpojums turpinās.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Lietojums",
     "grokExtraUsageCredits": "Papildu lietojuma kredīti",
     "grokAutoTopUp": "Automātiska bilances papildināšana",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "Izmantošana nekavējoties atiestata atbilstošos Claude lietojuma limitus un neatgriezeniski iztērē šo kredītu.",
     "claudeResetCreditsModalTitle": "Claude atiestatīšanas kredīti",
     "claudeResetCreditsModalExplainer": "Šim kontam pieejamie Claude atiestatīšanas kredīti un iknedēļas sesiju atiestatīšanas.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Balstīts uz neseniem novērojumiem, nevis tiešsaistes pārbaudi. Atlasiet kontu, lai skatītu informāciju.",
     "healthRecovery": "Paredzamā atjaunošana",
     "healthAvailable": "Pieejams",

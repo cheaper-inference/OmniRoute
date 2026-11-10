@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "Кључ за управљање (опционо)",
     "tokenrouterManagementKeyHint": "Кључ налога са TokenRouter контролне табле (Settings → Management Key). Користи се само за читање квоте и стања, никада за захтеве. Сачувани кључ се не приказује; оставите празно да бисте га задржали.",
     "commandCodeZdrLabel": "Захтевај нулто задржавање података (ZDR)",
-    "commandCodeZdrHint": "Шаље x-cmd-zdr: 1 уз сваки захтев упућен овим API кључем. Модели без ZDR upstream-а можда неће бити доступни."
+    "commandCodeZdrHint": "Шаље x-cmd-zdr: 1 уз сваки захтев упућен овим API кључем. Модели без ZDR upstream-а можда неће бити доступни.",
+    "codexAccountPersonal": "Лично",
+    "codexAccountBusiness": "Пословно",
+    "codexAccountRole": "Улога: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Глобално",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "Откривене су грешке при обнови токена",
       "unknown": "Стање није познато"
     },
+    "tokenHealthRefreshAll": "Освежи све",
+    "tokenHealthRefreshResult": "{refreshed} osveženo, {failed} neuspešno, {skipped} preskočeno",
     "systemMonitor": {
       "metricsAriaLabel": "Системске метрике",
       "memory": "Меморија",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "Трансформација стрима није успела"
   },
   "usage": {
+    "cursorModelUsageTitle": "API токени (овај циклус)",
+    "cursorModelUsageBilledHint": "Наплаћује Cursor",
+    "cursorModelUsageModel": "Модел",
+    "cursorModelUsageInput": "Улаз",
+    "cursorModelUsageOutput": "Излаз",
+    "cursorModelUsageCacheRead": "Читање из кеша",
+    "cursorModelUsageCacheWrite": "Упис у кеш",
+    "cursorModelUsageCost": "Cena",
     "healthExtraUsageBypass": "Квота је исцрпљена; додатна потрошња је дозвољена, па се услуга наставља.",
     "healthPaidCreditsBypass": "Квота је исцрпљена; расположиви плаћени кредити омогућавају наставак услуге.",
     "healthFilteringBypass": "Квота је исцрпљена; локално филтрирање квота је искључено, па се услуга наставља.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Коришћење",
     "grokExtraUsageCredits": "Кредити за додатно коришћење",
     "grokAutoTopUp": "Аутоматско допуњавање",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "Искоришћавање одмах ресетује одговарајућа Claude ограничења коришћења и трајно троши овај кредит.",
     "claudeResetCreditsModalTitle": "Claude кредити за ресетовање",
     "claudeResetCreditsModalExplainer": "Доступни Claude кредити за ресетовање и недељна ресетовања сесија за овај налог.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "На основу недавних запажања, не провере уживо. Изаберите налог за детаље.",
     "healthRecovery": "Очекивани опоравак",
     "healthAvailable": "Доступно",

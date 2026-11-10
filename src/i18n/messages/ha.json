@@ -10704,7 +10704,10 @@
     "quotaRefreshStale": "Sabar ta dawo da tsoffin bayanan iyakar amfani. Wannan ba sabon bayani ba ne.",
     "quotaRefreshPartial": "Wani ɓangare na bayanan iyakar amfani kaɗai yake samuwa.",
     "quotaWindowUnavailable": "Babu bayanin iyakar amfani na {window}",
-    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu."
+    "quotaConnectionRefreshFailed": "An gama duba iyakar amfani, amma an kasa sabunta jerin asusu.",
+    "codexAccountPersonal": "Na Kai",
+    "codexAccountBusiness": "Kasuwanci",
+    "codexAccountRole": "Matsayi: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Na Gabaɗaya",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "An gano gazawar sabunta token",
       "unknown": "Ba a san halin lafiyar ba"
     },
+    "tokenHealthRefreshAll": "Sabunta Duk",
+    "tokenHealthRefreshResult": "{refreshed} an sabunta, {failed} an gaza, {skipped} an wuce",
     "systemMonitor": {
       "metricsAriaLabel": "Ma'aunan tsarin",
       "memory": "Ƙwaƙwalwa",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "An kasa canza rafi"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokunan API (wannan zagaye)",
+    "cursorModelUsageBilledHint": "Cursor ne ya caje",
+    "cursorModelUsageModel": "Samfuri",
+    "cursorModelUsageInput": "Shigarwa",
+    "cursorModelUsageOutput": "Sakamako",
+    "cursorModelUsageCacheRead": "Karatu daga cache",
+    "cursorModelUsageCacheWrite": "Rubutawa a Ma'ajiyar Wucin Gadi",
+    "cursorModelUsageCost": "Kuɗi",
     "healthExtraUsageBypass": "Iyakar amfani ta ƙare; an yarda da ƙarin amfani, don haka sabis yana ci gaba.",
     "healthPaidCreditsBypass": "Iyakar amfani ta ƙare; kuɗaɗen amfani da aka biya da suke akwai suna ba da damar ci gaba da sabis.",
     "healthFilteringBypass": "Iyakar amfani ta ƙare; an kashe tace iyakar amfani ta gida, don haka sabis yana ci gaba.",

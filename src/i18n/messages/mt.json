@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "Ċavetta tal-ġestjoni (mhux obbligatorja)",
     "tokenrouterManagementKeyHint": "Ċavetta tal-kont mid-dashboard ta’ TokenRouter (Settings → Management Key). Tintuża biss biex jinqraw il-kwota u l-bilanċ, qatt għal talbiet. Iċ-ċavetta salvata ma tintweriex; ħalliha vojta biex iżżommha.",
     "commandCodeZdrLabel": "Itlob żamma żero tad-data (ZDR)",
-    "commandCodeZdrHint": "Jibgħat x-cmd-zdr: 1 ma' kull talba magħmula b'din iċ-ċavetta API. Mudelli mingħajr upstream ZDR jistgħu ma jkunux disponibbli."
+    "commandCodeZdrHint": "Jibgħat x-cmd-zdr: 1 ma' kull talba magħmula b'din iċ-ċavetta API. Mudelli mingħajr upstream ZDR jistgħu ma jkunux disponibbli.",
+    "codexAccountPersonal": "Personali",
+    "codexAccountBusiness": "Negozju",
+    "codexAccountRole": "Rwol: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globali",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "Instabu fallimenti fit-tiġdid tat-tokens",
       "unknown": "L-istatus tas-saħħa mhux magħruf"
     },
+    "tokenHealthRefreshAll": "Aġġorna kollox",
+    "tokenHealthRefreshResult": "{refreshed} aġġornati, {failed} fallati, {skipped} mwarrfa",
     "systemMonitor": {
       "metricsAriaLabel": "Metriċi tas-sistema",
       "memory": "Memorja",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "It-trasformazzjoni tal-fluss falliet"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokens tal-API (dan iċ-ċiklu)",
+    "cursorModelUsageBilledHint": "Iffatturat minn Cursor",
+    "cursorModelUsageModel": "Mudell",
+    "cursorModelUsageInput": "Dħul",
+    "cursorModelUsageOutput": "Riżultat",
+    "cursorModelUsageCacheRead": "Qari mill-cache",
+    "cursorModelUsageCacheWrite": "Kitba fil-Cache",
+    "cursorModelUsageCost": "Spiża",
     "healthExtraUsageBypass": "Il-kwota ntużat kollha; l-użu żejjed huwa permess, għalhekk is-servizz ikompli.",
     "healthPaidCreditsBypass": "Il-kwota ntużat kollha; il-krediti mħallsa disponibbli jippermettu li s-servizz ikompli.",
     "healthFilteringBypass": "Il-kwota ntużat kollha; il-filtrazzjoni lokali tal-kwoti hija diżattivata, għalhekk is-servizz ikompli.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Użu",
     "grokExtraUsageCredits": "Krediti Addizzjonali għall-Użu",
     "grokAutoTopUp": "Rikarga Awtomatika",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "It-tifdija tirrisettja immedjatament il-limiti eliġibbli tal-użu ta' Claude u tikkonsma dan il-kreditu b'mod permanenti.",
     "claudeResetCreditsModalTitle": "Krediti għall-irrisettjar ta' Claude",
     "claudeResetCreditsModalExplainer": "Krediti disponibbli għall-irrisettjar ta' Claude u rrisettjar ta' sessjonijiet ta' kull ġimgħa għal dan il-kont.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Ibbażat fuq osservazzjonijiet reċenti, mhux test dirett. Agħżel kont għad-dettalji.",
     "healthRecovery": "Irkupru mistenni",
     "healthAvailable": "Disponibbli",

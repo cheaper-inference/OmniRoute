@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "කළමනාකරණ යතුර (විකල්ප)",
     "tokenrouterManagementKeyHint": "TokenRouter උපකරණ පුවරුවෙන් ගිණුම් යතුර (Settings → Management Key). කෝටාව සහ ශේෂය කියවීමට පමණක් භාවිත වේ, ඉල්ලීම් සඳහා කිසිදා නොවේ. සුරකින ලද යතුර පෙන්වන්නේ නැත; එය තබා ගැනීමට හිස්ව තබන්න.",
     "commandCodeZdrLabel": "ශුන්‍ය දත්ත රඳවා ගැනීම (ZDR) අවශ්‍ය කරන්න",
-    "commandCodeZdrHint": "මෙම API යතුර සමඟ කරන සෑම ඉල්ලීමක් සමඟම x-cmd-zdr: 1 යවයි. ZDR upstream නොමැති මාදිලි ලබා ගත නොහැකි විය හැක."
+    "commandCodeZdrHint": "මෙම API යතුර සමඟ කරන සෑම ඉල්ලීමක් සමඟම x-cmd-zdr: 1 යවයි. ZDR upstream නොමැති මාදිලි ලබා ගත නොහැකි විය හැක.",
+    "codexAccountPersonal": "පුද්ගලික",
+    "codexAccountBusiness": "ව්යාපාරික",
+    "codexAccountRole": "භූමිකාව: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "ගෝලීය",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "ටෝකන නැවුම් කිරීමේ අසාර්ථකවීම් අනාවරණය විය",
       "unknown": "සෞඛ්ය තත්ත්වය නොදනී"
     },
+    "tokenHealthRefreshAll": "සියල්ල නැවුම් කරන්න",
+    "tokenHealthRefreshResult": "{refreshed} යාවත්කාලීන කරන ලදි, {failed} අසාර්ථක විය, {skipped} මඟ හැරිණි",
     "systemMonitor": {
       "metricsAriaLabel": "පද්ධති ප්රමිතික",
       "memory": "මතකය",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "ප්රවාහය පරිණාමනය කිරීමට අසමත් විය"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ටෝකන (මෙම චක්‍රය)",
+    "cursorModelUsageBilledHint": "Cursor විසින් බිල් කළ",
+    "cursorModelUsageModel": "මාදිලිය",
+    "cursorModelUsageInput": "ආදානය",
+    "cursorModelUsageOutput": "ප්රතිදානය",
+    "cursorModelUsageCacheRead": "කෑෂ් කියවීම",
+    "cursorModelUsageCacheWrite": "කෑෂයට ලිවීම",
+    "cursorModelUsageCost": "පිරිවැය",
     "healthExtraUsageBypass": "කෝටාව අවසන් වී ඇත; අමතර භාවිතයට අවසර ඇති බැවින් සේවාව දිගටම ක්‍රියාත්මක වේ.",
     "healthPaidCreditsBypass": "කෝටාව අවසන් වී ඇත; පවතින ගෙවූ බැර මඟින් සේවාව දිගටම පවත්වාගත හැක.",
     "healthFilteringBypass": "කෝටාව අවසන් වී ඇත; දේශීය කෝටා පෙරීම අක්‍රිය බැවින් සේවාව දිගටම ක්‍රියාත්මක වේ.",

@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "മാനേജ്മെന്റ് കീ (ഐച്ഛികം)",
     "tokenrouterManagementKeyHint": "TokenRouter ഡാഷ്ബോർഡിൽ നിന്നുള്ള അക്കൗണ്ട് കീ (Settings → Management Key). ക്വോട്ടയും ബാലൻസും വായിക്കാൻ മാത്രം ഉപയോഗിക്കുന്നു, അഭ്യർത്ഥനകൾക്ക് ഒരിക്കലും ഉപയോഗിക്കില്ല. സംരക്ഷിച്ച കീ കാണിക്കില്ല; അത് നിലനിർത്താൻ ശൂന്യമായി വിടുക.",
     "commandCodeZdrLabel": "പൂജ്യം ഡാറ്റ നിലനിർത്തൽ (ZDR) ആവശ്യപ്പെടുക",
-    "commandCodeZdrHint": "ഈ API കീ ഉപയോഗിച്ചുള്ള ഓരോ അഭ്യർത്ഥനയ്‌ക്കൊപ്പവും x-cmd-zdr: 1 അയയ്ക്കുന്നു. ZDR upstream ഇല്ലാത്ത മോഡലുകൾ ലഭ്യമല്ലാതിരിക്കാം."
+    "commandCodeZdrHint": "ഈ API കീ ഉപയോഗിച്ചുള്ള ഓരോ അഭ്യർത്ഥനയ്‌ക്കൊപ്പവും x-cmd-zdr: 1 അയയ്ക്കുന്നു. ZDR upstream ഇല്ലാത്ത മോഡലുകൾ ലഭ്യമല്ലാതിരിക്കാം.",
+    "codexAccountPersonal": "വ്യക്തിഗതം",
+    "codexAccountBusiness": "ബിസിനസ്",
+    "codexAccountRole": "റോൾ: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "ആഗോളം",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "ടോക്കൺ പുതുക്കൽ പരാജയങ്ങൾ കണ്ടെത്തി",
       "unknown": "ആരോഗ്യനില അജ്ഞാതമാണ്"
     },
+    "tokenHealthRefreshAll": "എല്ലാം പുതുക്കുക",
+    "tokenHealthRefreshResult": "{refreshed} പുതുക്കി, {failed} പരാജയപ്പെട്ടു, {skipped} ഒഴിവാക്കി",
     "systemMonitor": {
       "metricsAriaLabel": "സിസ്റ്റം മെട്രിക്കുകൾ",
       "memory": "മെമ്മറി",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "സ്ട്രീം പരിവർത്തനം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ടോക്കണുകൾ (ഈ സൈക്കിൾ)",
+    "cursorModelUsageBilledHint": "Cursor ബിൽ ചെയ്തത്",
+    "cursorModelUsageModel": "മോഡൽ",
+    "cursorModelUsageInput": "ഇൻപുട്ട്",
+    "cursorModelUsageOutput": "ഔട്ട്പുട്ട്",
+    "cursorModelUsageCacheRead": "കാഷ് റീഡ്",
+    "cursorModelUsageCacheWrite": "കാഷിലേക്ക് എഴുതൽ",
+    "cursorModelUsageCost": "ചെലവ്",
     "healthExtraUsageBypass": "ക്വാട്ട തീർന്നു; അധിക ഉപയോഗം അനുവദിച്ചതിനാൽ സേവനം തുടരുന്നു.",
     "healthPaidCreditsBypass": "ക്വാട്ട തീർന്നു; ലഭ്യമായ പണമടച്ച ക്രെഡിറ്റുകൾ ഉപയോഗിച്ച് സേവനം തുടരാം.",
     "healthFilteringBypass": "ക്വാട്ട തീർന്നു; പ്രാദേശിക ക്വാട്ട ഫിൽട്ടറിംഗ് ഓഫാക്കിയതിനാൽ സേവനം തുടരുന്നു.",

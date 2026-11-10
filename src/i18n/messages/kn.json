@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "ನಿರ್ವಹಣಾ ಕೀ (ಐಚ್ಛಿಕ)",
     "tokenrouterManagementKeyHint": "TokenRouter ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಿಂದ ಖಾತೆ ಕೀ (Settings → Management Key). ಕೋಟಾ ಮತ್ತು ಬಾಕಿಯನ್ನು ಓದಲು ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ, ವಿನಂತಿಗಳಿಗೆ ಎಂದಿಗೂ ಅಲ್ಲ. ಉಳಿಸಿದ ಕೀಯನ್ನು ತೋರಿಸಲಾಗುವುದಿಲ್ಲ; ಅದನ್ನು ಉಳಿಸಿಕೊಳ್ಳಲು ಖಾಲಿ ಬಿಡಿ.",
     "commandCodeZdrLabel": "ಶೂನ್ಯ ಡೇಟಾ ಉಳಿಕೆ (ZDR) ಅಗತ್ಯಪಡಿಸಿ",
-    "commandCodeZdrHint": "ಈ API ಕೀ ಮೂಲಕ ಮಾಡಿದ ಪ್ರತಿ ವಿನಂತಿಯೊಂದಿಗೆ x-cmd-zdr: 1 ಕಳುಹಿಸುತ್ತದೆ. ZDR upstream ಇಲ್ಲದ ಮಾದರಿಗಳು ಲಭ್ಯವಿಲ್ಲದಿರಬಹುದು."
+    "commandCodeZdrHint": "ಈ API ಕೀ ಮೂಲಕ ಮಾಡಿದ ಪ್ರತಿ ವಿನಂತಿಯೊಂದಿಗೆ x-cmd-zdr: 1 ಕಳುಹಿಸುತ್ತದೆ. ZDR upstream ಇಲ್ಲದ ಮಾದರಿಗಳು ಲಭ್ಯವಿಲ್ಲದಿರಬಹುದು.",
+    "codexAccountPersonal": "ವೈಯಕ್ತಿಕ",
+    "codexAccountBusiness": "ವ್ಯವಹಾರ",
+    "codexAccountRole": "ಪಾತ್ರ: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "ಜಾಗತಿಕ",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "ಟೋಕನ್ ರಿಫ್ರೆಶ್ ವೈಫಲ್ಯಗಳು ಪತ್ತೆಯಾಗಿವೆ",
       "unknown": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ ತಿಳಿದಿಲ್ಲ"
     },
+    "tokenHealthRefreshAll": "ಎಲ್ಲವನ್ನೂ ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "tokenHealthRefreshResult": "{refreshed} ಪುನರ್ನವೀಕರಿಸಲಾಗಿದೆ, {failed} ವಿಫಲವಾಗಿದೆ, {skipped} ಬಿಟ್ಟುಹೋಗಿದೆ",
     "systemMonitor": {
       "metricsAriaLabel": "ಸಿಸ್ಟಂ ಮೆಟ್ರಿಕ್ಗಳು",
       "memory": "ಮೆಮೊರಿ",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "ಸ್ಟ್ರೀಮ್ ಅನ್ನು ಪರಿವರ್ತಿಸಲು ವಿಫಲವಾಗಿದೆ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ಟೋಕನ್‌ಗಳು (ಈ ಚಕ್ರ)",
+    "cursorModelUsageBilledHint": "Cursor ಬಿಲ್ ಮಾಡಿದೆ",
+    "cursorModelUsageModel": "ಮಾಡೆಲ್",
+    "cursorModelUsageInput": "ಇನ್ಪುಟ್",
+    "cursorModelUsageOutput": "ಔಟ್ಪುಟ್",
+    "cursorModelUsageCacheRead": "ಕ್ಯಾಶ್ ಓದುವಿಕೆ",
+    "cursorModelUsageCacheWrite": "ಕ್ಯಾಶ್ ಬರವಣಿಗೆ",
+    "cursorModelUsageCost": "ವೆಚ್ಚ",
     "healthExtraUsageBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಹೆಚ್ಚುವರಿ ಬಳಕೆಗೆ ಅನುಮತಿ ಇರುವುದರಿಂದ ಸೇವೆ ಮುಂದುವರಿಯುತ್ತದೆ.",
     "healthPaidCreditsBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಲಭ್ಯವಿರುವ ಪಾವತಿಸಿದ ಕ್ರೆಡಿಟ್‌ಗಳಿಂದ ಸೇವೆ ಮುಂದುವರಿಯಬಹುದು.",
     "healthFilteringBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಸ್ಥಳೀಯ ಕೋಟಾ ಫಿಲ್ಟರಿಂಗ್ ನಿಷ್ಕ್ರಿಯವಾಗಿರುವುದರಿಂದ ಸೇವೆ ಮುಂದುವರಿಯುತ್ತದೆ.",

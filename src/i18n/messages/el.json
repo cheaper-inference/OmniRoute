@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "Κλειδί διαχείρισης (προαιρετικό)",
     "tokenrouterManagementKeyHint": "Κλειδί λογαριασμού από τον πίνακα ελέγχου του TokenRouter (Settings → Management Key). Χρησιμοποιείται μόνο για ανάγνωση ορίου χρήσης και υπολοίπου, ποτέ για αιτήματα. Το αποθηκευμένο κλειδί δεν εμφανίζεται· αφήστε κενό για να το διατηρήσετε.",
     "commandCodeZdrLabel": "Απαίτηση μηδενικής διατήρησης δεδομένων (ZDR)",
-    "commandCodeZdrHint": "Στέλνει x-cmd-zdr: 1 με κάθε αίτημα που γίνεται με αυτό το κλειδί API. Μοντέλα χωρίς upstream με ZDR ενδέχεται να μην είναι διαθέσιμα."
+    "commandCodeZdrHint": "Στέλνει x-cmd-zdr: 1 με κάθε αίτημα που γίνεται με αυτό το κλειδί API. Μοντέλα χωρίς upstream με ZDR ενδέχεται να μην είναι διαθέσιμα.",
+    "codexAccountPersonal": "Προσωπικό",
+    "codexAccountBusiness": "Επιχείρηση",
+    "codexAccountRole": "Ρόλος: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "Καθολικό",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "Εντοπίστηκαν αποτυχίες ανανέωσης διακριτικών",
       "unknown": "Η κατάσταση των διακριτικών είναι άγνωστη"
     },
+    "tokenHealthRefreshAll": "Ανανέωση όλων",
+    "tokenHealthRefreshResult": "{refreshed} ανανεώθηκαν, {failed} απέτυχαν, {skipped} παραλείφθηκαν",
     "systemMonitor": {
       "metricsAriaLabel": "Μετρικά συστήματος",
       "memory": "Μνήμη",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "Αποτυχία μετασχηματισμού της ροής"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (αυτός ο κύκλος)",
+    "cursorModelUsageBilledHint": "Χρέωση από το Cursor",
+    "cursorModelUsageModel": "Μοντέλο",
+    "cursorModelUsageInput": "Είσοδος",
+    "cursorModelUsageOutput": "Έξοδος",
+    "cursorModelUsageCacheRead": "Ανάγνωση κρυφής μνήμης",
+    "cursorModelUsageCacheWrite": "Εγγραφή στην κρυφή μνήμη",
+    "cursorModelUsageCost": "Κόστος",
     "healthExtraUsageBypass": "Το όριο εξαντλήθηκε· επιτρέπεται επιπλέον χρήση, οπότε η υπηρεσία συνεχίζεται.",
     "healthPaidCreditsBypass": "Το όριο εξαντλήθηκε· οι διαθέσιμες πληρωμένες πιστώσεις επιτρέπουν τη συνέχιση της υπηρεσίας.",
     "healthFilteringBypass": "Το όριο εξαντλήθηκε· το τοπικό φιλτράρισμα ορίων είναι απενεργοποιημένο, οπότε η υπηρεσία συνεχίζεται.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Χρήση",
     "grokExtraUsageCredits": "Πρόσθετες πιστώσεις χρήσης",
     "grokAutoTopUp": "Αυτόματη αναπλήρωση",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "Η εξαργύρωση επαναφέρει άμεσα τα επιλέξιμα όρια χρήσης Claude και καταναλώνει οριστικά αυτήν την πίστωση.",
     "claudeResetCreditsModalTitle": "Πιστώσεις επαναφοράς Claude",
     "claudeResetCreditsModalExplainer": "Διαθέσιμες πιστώσεις επαναφοράς Claude και εβδομαδιαίες επαναφορές συνεδριών για αυτόν τον λογαριασμό.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Με βάση τις τελευταίες παρατηρήσεις, όχι ζωντανό έλεγχο. Επιλέξτε λογαριασμό για λεπτομέρειες.",
     "healthRecovery": "Αναμενόμενη αποκατάσταση",
     "healthAvailable": "Διαθέσιμο",

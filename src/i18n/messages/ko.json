@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "관리 키(선택 사항)",
     "tokenrouterManagementKeyHint": "TokenRouter 대시보드의 계정 키(Settings → Management Key)입니다. 할당량과 잔액을 읽는 데만 사용되며 요청에는 절대 사용되지 않습니다. 저장된 키는 표시되지 않으며, 유지하려면 비워 두세요.",
     "commandCodeZdrLabel": "제로 데이터 보존(ZDR) 필수",
-    "commandCodeZdrHint": "이 API 키로 보내는 모든 요청에 x-cmd-zdr: 1을 전송합니다. ZDR 업스트림이 없는 모델은 사용할 수 없을 수 있습니다."
+    "commandCodeZdrHint": "이 API 키로 보내는 모든 요청에 x-cmd-zdr: 1을 전송합니다. ZDR 업스트림이 없는 모델은 사용할 수 없을 수 있습니다.",
+    "codexAccountPersonal": "개인",
+    "codexAccountBusiness": "비즈니스",
+    "codexAccountRole": "역할: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "글로벌",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "토큰 갱신 실패가 감지되었습니다",
       "unknown": "건강 상태 불명"
     },
+    "tokenHealthRefreshAll": "모두 새로 고침",
+    "tokenHealthRefreshResult": "{refreshed} 새로고침됨, {failed} 실패, {skipped} 건너뜀",
     "systemMonitor": {
       "metricsAriaLabel": "시스템 메트릭스",
       "memory": "메모리",
@@ -15765,9 +15770,21 @@
     "streamTransformFailed": "스트림 변환 실패"
   },
   "usage": {
+    "cursorModelUsageTitle": "API 토큰(이번 주기)",
+    "cursorModelUsageBilledHint": "Cursor 청구 금액",
+    "cursorModelUsageModel": "모델",
+    "cursorModelUsageInput": "입력",
+    "cursorModelUsageOutput": "출력",
+    "cursorModelUsageCacheRead": "캐시 읽기",
+    "cursorModelUsageCacheWrite": "캐시 쓰기",
+    "cursorModelUsageCost": "비용",
     "healthExtraUsageBypass": "할당량을 소진했지만 추가 사용이 허용되어 서비스를 계속합니다.",
     "healthPaidCreditsBypass": "할당량을 소진했지만 사용 가능한 유료 크레딧으로 서비스를 계속합니다.",
     "healthFilteringBypass": "할당량을 소진했지만 로컬 할당량 필터링이 꺼져 있어 서비스를 계속합니다.",
+    "codexPaidCreditsLabel": "Codex 유료 크레딧",
+    "codexPaidCreditsAvailable": "사용 가능(잔액 미보고)",
+    "codexPaidCreditsUnavailable": "사용 불가 또는 지출 한도 도달",
+    "codexPaidCreditsUnlimited": "무제한",
     "title": "사용량",
     "grokExtraUsageCredits": "추가 사용 크레딧",
     "grokAutoTopUp": "자동 충전",
@@ -16225,10 +16242,6 @@
     "confirmRedeemClaudeResetCredit": "사용 시 대상 Claude 사용 한도가 즉시 초기화되며 이 크레딧은 영구적으로 소진됩니다.",
     "claudeResetCreditsModalTitle": "Claude 초기화 크레딧",
     "claudeResetCreditsModalExplainer": "이 계정에서 사용 가능한 Claude 초기화 크레딧 및 주간 세션 초기화입니다.",
-    "codexPaidCreditsLabel": "Codex 유료 크레딧",
-    "codexPaidCreditsAvailable": "사용 가능(잔액 미보고)",
-    "codexPaidCreditsUnavailable": "사용 불가 또는 지출 한도 도달",
-    "codexPaidCreditsUnlimited": "무제한",
     "healthAccountHint": "최근 관측에 기반한 상태이며 실시간 연결 테스트가 아닙니다. 계정을 선택하면 세부 정보를 볼 수 있습니다.",
     "healthRecovery": "예상 복구 시간",
     "healthAvailable": "사용 가능",

@@ -10704,7 +10704,10 @@
     "tokenrouterManagementKeyLabel": "စီမံခန့်ခွဲမှုကီး (ရွေးချယ်နိုင်)",
     "tokenrouterManagementKeyHint": "TokenRouter ဒက်ရှ်ဘုတ်မှ အကောင့်ကီး (Settings → Management Key)။ ခွဲတမ်းနှင့် လက်ကျန်ငွေကို ဖတ်ရန်အတွက်သာ အသုံးပြုပြီး တောင်းဆိုမှုများအတွက် ဘယ်တော့မှ မသုံးပါ။ သိမ်းထားသောကီးကို မပြပါ။ ထိန်းသိမ်းထားရန် ဗလာထားပါ။",
     "commandCodeZdrLabel": "ဒေတာ သုည သိမ်းဆည်းမှု (ZDR) လိုအပ်စေရန်",
-    "commandCodeZdrHint": "ဤ API ကီးဖြင့် ပြုလုပ်သော တောင်းဆိုမှုတိုင်းတွင် x-cmd-zdr: 1 ကို ပို့သည်။ ZDR upstream မရှိသော မော်ဒယ်များကို အသုံးပြု၍ မရနိုင်ပါ။"
+    "commandCodeZdrHint": "ဤ API ကီးဖြင့် ပြုလုပ်သော တောင်းဆိုမှုတိုင်းတွင် x-cmd-zdr: 1 ကို ပို့သည်။ ZDR upstream မရှိသော မော်ဒယ်များကို အသုံးပြု၍ မရနိုင်ပါ။",
+    "codexAccountPersonal": "ကိုယ်ရေးကိုယ်တာ",
+    "codexAccountBusiness": "လုပ်ငန်း",
+    "codexAccountRole": "အခန်းကဏ္ဍ: {role}"
   },
   "proxyConfigModal": {
     "levelGlobal": "စနစ်တစ်ခုလုံးဆိုင်ရာ",
@@ -15102,6 +15105,8 @@
       "refreshFailures": "တိုကင်ပြန်လည်ဆန်းသစ်မှု မအောင်မြင်ခြင်းများ တွေ့ရှိထားသည်",
       "unknown": "အခြေအနေကို မသိရှိရပါ"
     },
+    "tokenHealthRefreshAll": "အားလုံးကို ပြန်လည်စစ်ဆေးရန်",
+    "tokenHealthRefreshResult": "{refreshed} ပြန်လည်ဆွဲယူပြီး၊ {failed} မအောင်မြင်၊ {skipped} ကျော်လွှာ",
     "systemMonitor": {
       "metricsAriaLabel": "စနစ်တိုင်းတာချက်များ",
       "memory": "မှတ်ဉာဏ်",
@@ -15765,6 +15770,14 @@
     "streamTransformFailed": "ဒေတာစီးကြောင်းကို ပြောင်းလဲ၍ မရပါ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API တိုကင်များ (ဤစက်ဝန်း)",
+    "cursorModelUsageBilledHint": "Cursor မှ ငွေတောင်းခံထားသည်",
+    "cursorModelUsageModel": "မော်ဒယ်",
+    "cursorModelUsageInput": "ထည့်သွင်းချက်",
+    "cursorModelUsageOutput": "အထွက်ရလဒ်",
+    "cursorModelUsageCacheRead": "Cache ဖတ်ရှုမှု",
+    "cursorModelUsageCacheWrite": "ကက်ရှ်သို့ ရေးသားခြင်း",
+    "cursorModelUsageCost": "ကုန်ကျစရိတ်",
     "healthExtraUsageBypass": "ခွဲတမ်းကုန်သွားသော်လည်း အပိုအသုံးပြုခွင့်ရှိသဖြင့် ဝန်ဆောင်မှု ဆက်လက်ပေးနေသည်။",
     "healthPaidCreditsBypass": "ခွဲတမ်းကုန်သွားသော်လည်း အသုံးပြုနိုင်သော အခပေးခရက်ဒစ်များဖြင့် ဝန်ဆောင်မှု ဆက်ပေးနိုင်သည်။",
     "healthFilteringBypass": "ခွဲတမ်းကုန်သွားသော်လည်း စက်တွင်းခွဲတမ်းစစ်ထုတ်မှု ပိတ်ထားသဖြင့် ဝန်ဆောင်မှု ဆက်လက်ပေးနေသည်။",
