@@ -10,35 +10,30 @@
 
 ## Nwụnye
 
-E tinyere OmniRoute MCP n’ime ya. Jiri nke a malite ya:
+OmniRoute MCP arụnyere n'ime ya. Malite ya na:
 
 ```bash
 omniroute --mcp
 ```
 
-Ma ọ bụ site na open-sse transport:
+Ma ọ bụ site na ụgbọ njem mepere emepe:
 
 ```bash
-# HTTP transport nwere ike ibufe data n’usoro iyi (ọdụ ụgbọ mmiri 20130)
-omniroute --dev  # MCP na-amalite na-akpaghị aka na /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-A na-agbanyụ HTTP transports (`sse` / `streamable-http`, nke dashboard server na-enye n’ime otu usoro ahụ)
-na ndabara, ma na mbụ, naanị site na ibe `/dashboard/mcp` ka a pụrụ isi gbanye ma ọ bụ gbanyụọ ha. Malite na v3.8.51,
-CLI nwekwara otu ikike ahụ:
+Ụgbọ njem HTTP (`sse` / `streamable-http`, nke sava dashboard na-arụ ọrụ na-arụ ọrụ) agbanyụrụ na ndabara ma na mbụ enwere ike ịgbanwe ya naanị site na ibe `/dashboard/mcp`. Dịka nke v3.8.51 CLI nwere oke:
 
 ```bash
-omniroute mcp status                                  # agbanyere/online, transport, ọnụ ọgụgụ tools
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # na-atọgharị sessions sse/streamable-http ndị na-arụ ọrụ
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` na-eji PATCH emelite otu ntọala `mcpEnabled` ahụ (yana `mcpTransport` ma ọ bụrụ na achọrọ)
-nke dashboard na-agbanye ma ọ bụ na-agbanyụ site na `/api/settings`. `mcp restart` na-akpọ `POST /api/mcp/restart`: ọ na-emechi
-sessions `sse`/`streamable-http` ndị na-arụ ọrụ ka arịrịọ na-esote nwee ike ịmalitegharị ha nke ọma, na-eweghachi
-`409` ma ọ bụrụ na agbanyụrụ MCP, yana `501` maka `stdio` transport (ndị ahịa stdio na-achịkwa
-subprocess nke ha — ọ dịghị handle dị n’ime usoro ahụ a ga-amalitegharị).
+`mcp enable`/`mcp disable` PATCH otu `mcpEnabled` (na nhọrọ `mcpTransport`) ịtọ ntọala dashboard site na `/api/settings`. `mcp restart` na-akpọ `POST /api/mcp/restart`: ọ na-akwatu nnọkọ `sse`/`streamable-http` na-arụ ọrụ ka arịrịọ na-esote ga-amaliteghachi nke ọma, weghachi `409` ma ọ bụrụ na MCP nwere nkwarụ, yana `501` maka njem `stdio` (ndị ahịa stdio nwere nke ha subprocess — enweghị njikwa usoro iji malitegharịa).
 
 ## Ụzọ Mbupu
 
@@ -131,55 +126,42 @@ Cursor, Cline, na MCP client ndị dakọtara.
 | `omniroute_cache_stats` | `read:cache`  | Ndekọ semantic cache, prompt-cache, na idempotency        |
 | `omniroute_cache_flush` | `write:cache` | Hichapụ cache n'ebe niile ma ọ bụ site na signature/model |
 
-## Ngwaọrụ Mkpakọ (13)
+## Ngwa mkpakọ (13)
 
-| Ngwaọrụ                             | Oke Ikike           | Nkọwa                                                                                                                                 |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | Ntọala mkpakọ, nchịkọta nyocha, na ndekọ na-eburu cache n'uche (gụnyere metadata `analytics.mcpDescriptionCompression`)               |
-| `omniroute_compression_configure`   | `write:compression` | Hazie ọnọdụ mkpakọ, oke mbido, oke nha ebumnuche, ichekwa system-prompt, na njikwa ịgbanye/ịgbanyụ mkpakọ nkọwa MCP                   |
-| `omniroute_set_compression_engine`  | `write:compression` | Họrọ engine na-arụ ọrụ (off/caveman/rtk/stacked) na ogo ike Caveman/RTK                                                               |
-| `omniroute_list_compression_combos` | `read:compression`  | Depụta compression combo ndị akpọrọ aha na usoro engine ha                                                                            |
-| `omniroute_compression_combo_stats` | `read:compression`  | Nnyocha e kewara dịka compression combo na engine si dị                                                                               |
-| `omniroute_ccr_store`               | `write:compression` | Chekwaa ọdịnaya e kewapụrụ maka onye na-akpọ oku n'ime ebe nchekwa CCR nwere oke dị na memory, ma weghachite akara na ntụaka `ccr://` |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Weghachite ọdịnaya CCR n'uju ma ọ bụ site na ọnọdụ head, tail, lines, grep, na stats                                                  |
-| `omniroute_ccr_inspect`             | `read:compression`  | Nyochaa metadata CCR nke onye na-akpọ oku nwere n'eweghachighị ọdịnaya                                                                |
-| `omniroute_ccr_list`                | `read:compression`  | Depụta metadata e kewara na peeji maka ngọngọ CCR nke onye na-akpọ oku nwere                                                          |
-| `omniroute_ccr_delete`              | `write:compression` | Hichapụ ngọngọ CCR nke onye na-akpọ oku nwere                                                                                         |
-| `omniroute_ccr_stats`               | `read:compression`  | Kọwaa ojiji memory nke onye na-akpọ oku, ọnụọgụ lifecycle, na oke ebe nchekwa                                                         |
-| `omniroute_rtk_discover`            | `read:compression`  | Chọpụta mkpọtụ na-eme ugboro ugboro n'ime sample mmepụta RTK ndị e kwere ka e jiri mee ihe                                            |
-| `omniroute_rtk_learn`               | `read:compression`  | Mepụta RTK filter draft enwere ike inyocha site na sample ndị e kwere ka e jiri mee ihe                                               |
+| Ngwá ọrụ                            | Oke                 | Nkọwa                                                                                                                                |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Ntọala mkpakọ, nchịkọta nchịkọta, na stats cache-aware (gụnyere `analytics.mcpDescriptionCompression` metadata)                      |
+| `omniroute_compression_configure`   | `write:compression` | Hazie ụdị mkpakọ, ọnụ ụzọ, oke ebumnuche, nchekwa ngwa ngwa sistemụ, mgbagharị mkpakọ nkọwa MCP                                      |
+| `omniroute_set_compression_engine`  | `write:compression` | Họrọ injin na-arụ ọrụ (off/caveman/rtk/stacked) na ike Caveman/RTK                                                                   |
+| `omniroute_list_compression_combos` | `read:compression`  | Ndepụta aha combos mkpakọ na pipeline engine ha                                                                                      |
+| `omniroute_compression_combo_stats` | `read:compression`  | Achịkọtara nchịkọta site na mkpokọta mkpakọ na injin                                                                                 |
+| `omniroute_ccr_store`               | `write:compression` | Chekwaa ọdịnaya dịpụrụ adịpụ nke onye na-akpọ oku n'ime ụlọ nchekwa CCR nwere oke wee weghachi akara gbakwunyere ntụnye aka `ccr://` |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Weghachite ọdịnaya CCR n'uju ma ọ bụ jiri isi, ọdụ, ahịrị, grep na ụdị stats                                                         |
+| `omniroute_ccr_inspect`             | `read:compression`  | Nyochaa metadata CCR nwere onye ọkpụkpọ na-eweghachiteghị ọdịnaya                                                                    |
+| `omniroute_ccr_list`                | `read:compression`  | Depụta metadata emechiri emechi maka ngọngọ CCR nwere onye ọkpụkpọ                                                                   |
+| `omniroute_ccr_delete`              | `write:compression` | Hichapụ ngọngọ CCR nwere onye ọkpụkpọ                                                                                                |
+| `omniroute_ccr_stats`               | `read:compression`  | Kpesa ojiji ebe nchekwa gbakọtara nke onye ọkpụkpọ, counter okirikiri ndụ, yana oke ụlọ ahịa                                         |
+| `omniroute_rtk_discover`            | `read:compression`  | Chọpụta mkpọtụ na-akpụgharị n'ọnụ n'ụdị mmepụta RTK                                                                                  |
+| `omniroute_rtk_learn`               | `read:compression`  | Mepụta ihe nzacha RTK nwere ike nyochaa site na nlele nnabata                                                                        |
 
-Ndenye CCR dị naanị na memory ma na-apụ n'anya mgbe a malitegharịrị sistemụ. Oke ngọngọ ọ bụla bụ 2 MiB, oke
-principal ọ bụla bụ 16 MiB, ebe oke ebe nchekwa zuru ụwa ọnụ bụ 64 MiB. Ndenye na-eji TTL nke awa 24 na ndabara (nke kachasị
-bụ ụbọchị asaa). Nweghachite MCP zuru ezu nwere oke 256 KiB; ngọngọ ndị ka ukwuu ka dị site na
-ọnọdụ ranged na grep. Nchekwa, nweghachite, ndepụta, nyocha, nhichapụ, na stats bụ ndị e kewapụrụ dịka
-principal API-key e nyochara njirimara ya si dị. Ndekọ audit nwere hash na metadata nha, ọ dịghị mgbe ha na-enwe ọdịnaya.
+ntinye CCR na-eji ụlọ ahịa okpukpu abụọ: ebe nchekwa na-ekpo ọkụ na-akwado, na oge ịgba ọsọ na-abụghị nke ígwé ojii, site na ọkwa SQLite na-adịgide adịgide (`ccr_blocks`, na ndabara) ya mere ngọngọ na-adị ndụ nchụpụ ma ọ bụ malitegharịa ruo mgbe TTL ya kwụsịrị — ma e wezụga ngọngọ n'elu 512 KB na ígwé ojii na-agba ọsọ, nke na-anọ na ebe nchekwa. Ihe mgbochi ọ bụla nwere oke na 2 MiB, onye isi ọ bụla na 16 MiB, yana ụlọ ahịa zuru ụwa ọnụ na 64 MiB. Ndenye ndabara na TTL awa 24 (kachasị ụbọchị asaa). Mweghachi MCP zuru ezu bụ naanị 256 KiB; nnukwu ngọngọ na-adị site na ụdị grep na grep. Nchekwa, iweghachite, ndepụta, nyocha, ihichapụ, na stats bụ ndị isi API-igodo akwadoro kewapụrụ. Ndekọ nyocha nwere hashes na metadata nha, ọ nweghị ọdịnaya ọ bụla. Nkọwa onye ọrụ na-eche ihu (nkara abụọ ahụ, ihe ndị ahịa chọrọ, `codemode:false`, scopes per-tool, pagination, and a diagnostic matrix) bi na [Compression Engines → Prerequisites/operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` na-akọ mkpakọ nkọwa MCP iche n’okpuru
-`analytics.mcpDescriptionCompression`. Uru ndị ahụ bụ atụmatụ nha metadata maka nkọwa MCP ndị enwere ike
-idepụta (`tools`, `prompts`, `resources`, na `resourceTemplates`); ha abụghị ndekọ ojiji sitere n’aka onye
-na-eweta ọrụ, a na-ejikwa `source: "mcp_metadata_estimate"` kaa ha akara.
+`omniroute_compression_status` na-akọ mkpokọta nkọwa MCP iche iche n'okpuru `analytics.mcpDescriptionCompression`. Ụkpụrụ ndị ahụ bụ atụmatụ nha metadata maka nkọwa MCP nwere ike ịkọwa (`tools`, `prompts`, `resources`, na `resourceTemplates`); ha abụghị nnata ojiji nke onye na-eweta ya ma akara ya na `source: "mcp_metadata_estimate"`.
 
-### Nzacha Osisi Nnweta MCP (v3.8.0)
+### Ihe nzacha nnweta nke osisi MCP (v3.8.0)
 
-N’adabereghị na ngwaọrụ mkpakọ ndị dị n’elu, OmniRoute gụnyere nzacha na-arụ ọrụ mgbe mmezu gasịrị nke
-na-akpakọ **nsonaazụ ngwaọrụ** nke ngwaọrụ ihe nchọgharị/nnweta MCP tupu eweghachite ha nye
-onye nnọchi anya. Nzacha a abụghị ngwaọrụ n’onwe ya — ọ na-arụ ọrụ n’enweghị onye ọrụ ịhụ ya na nsonaazụ ngwaọrụ ọ bụla nwere
-ederede osisi-nnweta ma ọ bụ nseta ihuenyo-ihe nchọgharị buru ibu (≥2000 mkpụrụedemede).
+Kewapụ na ngwaọrụ mkpakọ dị n'elu, OmniRoute gụnyere ihe nzacha mgbe emechara nke na-akpakọba ihe** nsonaazụ ngwá ọrụ** nke MCP browser/accessibility ngwá ọrụ tupu e weghachi ha na ndị nnọchiteanya. Ihe nzacha a abụghị n'onwe ya ngwá ọrụ — ọ na-agba ọsọ n'ụzọ doro anya na nsonaazụ ngwaọrụ ọ bụla nwere verbose accessibility-osisi ma ọ bụ ihe nchọgharị-snapshot ederede (≥ 2000 chars).
 
-Omume ndị bụ isi:
+Àgwà ndị isi:
 
-- Na-achịkọta ahịrị ụmụnne ≥30 na-esochi ibe ha ma na-emegharị ugboro ugboro ka ọ bụrụ nchịkọta isi + ọdụ
-- Na-echekwa njikọ-arịlịka `[ref=eXX]` ndị Playwright/computer-use chọrọ
-- Na-ebipụ ederede buru oke ibu (>50,000 mkpụrụedemede) n’ụzọ siri ike ma tinye ntụnye maka ngagharị
-- Nchekwa a na-atụ anya ya: **60–80%** na data nseta ihuenyo ihe nchọgharị
+- Na-akwatu ahịrị nwanne ugboro iri atọ na-esochi ≥ n'ime nchịkọta ọdụ ọdụ + isi.
+- Na-echekwa arịlịka `[ref=eXX]` nke Playwright/computer-use chọrọ
+- Ederede siri ike buru ibu (> 50,000 chars) nwere ntụnye igodo
+- Nchekwa ndị a tụrụ anya** 60-80%** na ihe nchọgharị snapshot ugwo
 
-Nhazi: `compression.mcpAccessibility` n’ime ntọala zuru ụwa ọnụ (mbugharị 056).
-Mmejuputa: `open-sse/services/compression/engines/mcpAccessibility/`.
-Akwụkwọ nkọwa zuru ezu: [Igwe Mkpakọ — Nzacha Osisi Nnweta MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Nhazi: `compression.mcpAccessibility` na ntọala zuru ụwa ọnụ (mbugharị 056). Mmejuputa: `open-sse/services/compression/engines/mcpAccessibility/`. Docs zuru ezu: [Ngwa mkpakọ — MCP nnweta Osisi Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Lee [Igwe Mkpakọ](../compression/COMPRESSION_ENGINES.md) na [Mkpakọ RTK](../compression/RTK_COMPRESSION.md) maka
-usoro mkpakọ oge-ọsọ nke na-akwado ngwaọrụ ndị a.
+Hụ [Injin mkpakọ](../compression/COMPRESSION_ENGINES.md) na [RTK mkpakọ](../compression/RTK_COMPRESSION.md) maka ụdị mkpakọ oge agba n'azụ ngwaọrụ ndị a.
 
 ## Ngwaọrụ 1Proxy (3)
 

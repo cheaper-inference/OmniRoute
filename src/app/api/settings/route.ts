@@ -435,6 +435,9 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
     const body: typeof validation.data & { password?: string } = { ...validation.data };
+    // The schema strips keys it does not know. Name them in the 200 body so a typo or a stale
+    // client never looks like a saved setting.
+    const ignoredKeys = Object.keys(rawBody).filter((key) => !Object.hasOwn(validation.data, key));
 
     const operatorOnly = await rejectMachineSecurityPolicyWrite(
       request,
@@ -671,6 +674,9 @@ export async function PATCH(request: Request) {
       [REVOKED_SESSIONS_SETTING]: _revokedSessions,
       googleClientSecret,
       githubClientSecret,
+      // A JSON import can store an unknown setting named `ignoredKeys`. Only this request's
+      // dropped keys may fill the response field.
+      ignoredKeys: _storedIgnoredKeys,
       ...safeSettings
     } = settings;
     const settingsRevision = await getSettingsRevision();
@@ -680,6 +686,7 @@ export async function PATCH(request: Request) {
         googleClientSecretConfigured: Boolean(googleClientSecret),
         githubClientSecretConfigured: Boolean(githubClientSecret),
         settingsRevision,
+        ...(ignoredKeys.length > 0 ? { ignoredKeys } : {}),
       },
       { headers: settingsResponseHeaders(settingsRevision) }
     );

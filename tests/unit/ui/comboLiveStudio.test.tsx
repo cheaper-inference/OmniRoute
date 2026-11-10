@@ -126,9 +126,83 @@ describe("ComboLiveStudio", () => {
       expect(container.textContent).toContain("priority");
     });
 
-    it("shows the outcome in the toolbar", () => {
+    it("shows the outcome in the run summary", () => {
       const container = mount(<ComboLiveStudio run={SAMPLE_RUN} />);
-      expect(container.querySelector("[data-testid='run-outcome']")?.textContent).toBe("succeeded");
+      // #18072: the outcome is a kit Stat now; its value slot carries the outcome text.
+      const outcome = container.querySelector("[data-testid='run-outcome']");
+      expect(outcome?.querySelector(".ci-stat__value")?.textContent).toBe("succeeded");
+    });
+
+    describe("live run summary on kit Stat (#18072)", () => {
+      function stats(container: HTMLElement) {
+        const row = container.querySelector<HTMLElement>("[data-testid='combo-live-stats']");
+        expect(row?.classList.contains("ci-stat-row")).toBe(true);
+        return Array.from(row!.querySelectorAll<HTMLElement>(".ci-stat")).map((stat) => ({
+          label: stat.querySelector(".ci-stat__label-text")?.textContent,
+          value: stat.querySelector(".ci-stat__value")?.textContent,
+          tone: Array.from(stat.classList).find((c) => c.startsWith("ci-stat--")),
+          format: stat.dataset.valueFormat,
+        }));
+      }
+
+      it("summarizes strategy, targets, failed attempts and outcome in a StatRow", () => {
+        const container = mount(<ComboLiveStudio run={SAMPLE_RUN} />);
+        expect(stats(container)).toEqual([
+          { label: "Strategy", value: "priority", tone: "ci-stat--default", format: "text" },
+          { label: "Targets", value: "3", tone: "ci-stat--default", format: "number" },
+          { label: "Failed attempts", value: "2", tone: "ci-stat--critical", format: "number" },
+          { label: "Outcome", value: "succeeded", tone: "ci-stat--positive", format: "text" },
+        ]);
+      });
+
+      it("shows the final numbers at once, without a NumberTicker recount on each event", () => {
+        // The kit Stat's NumberTicker restarts from 0 whenever the value changes, so in a
+        // view that updates on every attempt event it would recount from zero each time.
+        const container = mount(<ComboLiveStudio run={SAMPLE_RUN} />);
+        const row = container.querySelector("[data-testid='combo-live-stats']")!;
+        const numeric = Array.from(row.querySelectorAll<HTMLElement>(".ci-stat")).filter(
+          (stat) => stat.dataset.valueFormat === "number"
+        );
+        expect(numeric.map((stat) => stat.querySelector(".ci-stat__value")?.innerHTML)).toEqual([
+          "3",
+          "2",
+        ]);
+      });
+
+      it("marks an exhausted run critical and a run without failures neutral", () => {
+        const exhausted: ComboRunModel = {
+          ...SAMPLE_RUN,
+          strategy: "",
+          outcome: "exhausted",
+          targets: SAMPLE_RUN.targets.slice(0, 1),
+        };
+        const container = mount(<ComboLiveStudio run={exhausted} />);
+        expect(stats(container)).toEqual([
+          { label: "Strategy", value: "—", tone: "ci-stat--default", format: "text" },
+          { label: "Targets", value: "1", tone: "ci-stat--default", format: "number" },
+          { label: "Failed attempts", value: "1", tone: "ci-stat--critical", format: "number" },
+          { label: "Outcome", value: "exhausted", tone: "ci-stat--critical", format: "text" },
+        ]);
+        const running: ComboRunModel = {
+          ...SAMPLE_RUN,
+          outcome: "running",
+          targets: [{ ...SAMPLE_RUN.targets[2], state: "attempting" }],
+        };
+        const second = mount(<ComboLiveStudio run={running} />);
+        const [, , failed, outcome] = stats(second);
+        expect(failed).toMatchObject({ value: "0", tone: "ci-stat--default" });
+        expect(outcome).toMatchObject({ value: "running", tone: "ci-stat--default" });
+      });
+
+      it("hides the run summary in fleet mode and with no run", () => {
+        const empty = mount(<ComboLiveStudio run={null} />);
+        expect(empty.querySelector("[data-testid='combo-live-stats']")).toBeNull();
+        const container = mount(<ComboLiveStudio run={SAMPLE_RUN} comboEvents={[]} />);
+        act(() => {
+          (container.querySelector("[data-testid='mode-fleet']") as HTMLButtonElement).click();
+        });
+        expect(container.querySelector("[data-testid='combo-live-stats']")).toBeNull();
+      });
     });
 
     it("shows provider names from target nodes", () => {

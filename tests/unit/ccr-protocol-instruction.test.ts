@@ -16,6 +16,7 @@ import {
   CCR_PROTOCOL_MARKER_SENTINEL,
   callerSupportsCcrRetrieve,
   injectCcrProtocolInstruction,
+  resolveCcrRetrieveToolName,
 } from "../../open-sse/services/compression/engines/ccr/protocolInstruction.ts";
 import {
   registerBuiltinCompressionEngines,
@@ -62,7 +63,7 @@ describe("ccr protocol instruction (#8033)", () => {
     assert.ok(engine, "getCompressionEngine('ccr') must return the engine");
   });
 
-  it("MCP-capable caller + a replaced block → instruction present exactly once as a leading system message", () => {
+  it("MCP-capable caller + a replaced block → marker present, engine does not self-inject the instruction", () => {
     resetCcrStore();
     const body = makeBody([{ role: "user", content: LARGE_TEXT }], [RETRIEVE_TOOL_OPENAI]);
     const result = ccrEngine.apply(body);
@@ -70,17 +71,22 @@ describe("ccr protocol instruction (#8033)", () => {
     assert.equal(result.compressed, true, "large block should compress");
     const messages = result.body["messages"] as Array<{ role: string; content: unknown }>;
 
-    assert.equal(messages[0].role, "system", "instruction must be a leading system message");
     assert.ok(
-      typeof messages[0].content === "string" &&
-        messages[0].content.startsWith(CCR_PROTOCOL_MARKER_SENTINEL),
-      "leading system message must start with the CCR protocol sentinel"
+      messages.some(
+        (m) =>
+          typeof m.content === "string" &&
+          /\[CCR retrieve hash=[0-9a-f]{24} chars=\d+\]/.test(m.content)
+      ),
+      "a message must carry the CCR retrieve marker"
     );
-
     const occurrences = messages.filter(
       (m) => typeof m.content === "string" && m.content.includes(CCR_PROTOCOL_MARKER_SENTINEL)
     );
-    assert.equal(occurrences.length, 1, "instruction must be present exactly once");
+    assert.equal(
+      occurrences.length,
+      0,
+      "the engine must not self-inject the protocol instruction (pipeline post-pass does)"
+    );
   });
 
   it("plain OpenAI-compatible caller (no tools) → NO instruction at all", () => {
@@ -127,7 +133,7 @@ describe("ccr protocol instruction (#8033)", () => {
     assert.equal(result.body, body, "body must be returned unchanged when nothing was replaced");
   });
 
-  it("idempotency: a body whose history already carries the sentinel is not injected twice", () => {
+  it("idempotency: a body whose history already carries the sentinel is left untouched", () => {
     resetCcrStore();
     const alreadyInstructed: Msg = {
       role: "system",
@@ -147,20 +153,115 @@ describe("ccr protocol instruction (#8033)", () => {
   });
 
   it("instruction text contains the tool name, the marker shape, and the verbatim-24-char warning", () => {
-    resetCcrStore();
-    const body = makeBody([{ role: "user", content: LARGE_TEXT }], [RETRIEVE_TOOL_OPENAI]);
-    const result = ccrEngine.apply(body);
-    const messages = result.body["messages"] as Array<{ role: string; content: unknown }>;
-    const instruction = messages[0].content as string;
-
-    assert.ok(instruction.includes("omniroute_ccr_retrieve"), "must mention the tool name");
-    assert.ok(
-      instruction.includes("[CCR retrieve hash=<24hex> chars=N]"),
-      "must show the marker shape"
+    const instruction = injectCcrProtocolInstruction(
+      [{ role: "user", content: `[CCR retrieve hash=abcdefabcdefabcdefabcdef chars=900]` }],
+      { tools: [RETRIEVE_TOOL_OPENAI] }
     );
-    assert.match(instruction, /verbatim|exact/i, "must stress verbatim/exact copying of the hash");
-    assert.match(instruction, /24/, "must mention the 24-character length of the hash");
-    assert.ok(instruction.includes("dedup:ref"), "must mention the dedup:ref contract");
+    const text = instruction[0].content as string;
+    assert.ok(text.includes("omniroute_ccr_retrieve"), "must mention the announced tool name");
+    assert.ok(text.includes("[CCR retrieve hash=<24hex> chars=N]"), "must show the marker shape");
+    assert.match(text, /verbatim|exact/i, "must stress verbatim/exact copying of the hash");
+    assert.match(text, /24/, "must mention the 24-character length of the hash");
+    assert.ok(text.includes("dedup:ref"), "must mention the dedup:ref contract");
+  });
+
+  it("injectCcrProtocolInstruction is a pure helper usable directly", () => {
+    const messages: Msg[] = [{ role: "user", content: "[dedup:ref sha=12345678]" }];
+    const withInstruction = injectCcrProtocolInstruction(messages, { tools: [RETRIEVE_TOOL_FLAT] });
+    assert.equal(withInstruction.length, 2);
+    assert.equal(withInstruction[0].role, "system");
+
+    const withoutInstruction = injectCcrProtocolInstruction(messages, {});
+    assert.equal(withoutInstruction.length, 2);
+    assert.equal(
+      withoutInstruction[0].role,
+      "system",
+      "dedup marker alone still explains look-back"
+    );
+    assert.ok(
+      !(withoutInstruction[0].content as string).includes("omniroute_ccr_retrieve"),
+      "no tool name may be announced when none is advertised"
+    );
+
+    const noMarkers = injectCcrProtocolInstruction([{ role: "user", content: "hi" }], {
+      tools: [RETRIEVE_TOOL_FLAT],
+    });
+    assert.equal(noMarkers.length, 1, "no marker, no injection");
+  });
+
+  it("dedup marker only, no tool advertised → look-back note without any tool name", () => {
+    const result = injectCcrProtocolInstruction(
+      [{ role: "user", content: "earlier text\n[dedup:ref sha=deadbeef]" }],
+      {}
+    );
+    assert.equal(result.length, 2, "instruction injected for the dedup marker");
+    assert.equal(result[0].role, "system");
+    const text = result[0].content as string;
+    assert.ok(text.startsWith(CCR_PROTOCOL_MARKER_SENTINEL), "sentinel-led note");
+    assert.ok(text.includes("dedup:ref"), "explains the dedup marker");
+    assert.match(text, /look back/i, "teaches looking back in history");
+    assert.ok(
+      !text.includes("omniroute_ccr_retrieve"),
+      "no tool name when the caller cannot reach one"
+    );
+  });
+
+  it("dedup marker only, tool advertised → real name + look-back clause", () => {
+    const result = injectCcrProtocolInstruction(
+      [{ role: "user", content: "earlier text\n[dedup:ref sha=deadbeef]" }],
+      { tools: [{ name: "omniroute_omniroute_ccr_retrieve" }] }
+    );
+    assert.equal(result.length, 2);
+    const text = result[0].content as string;
+    assert.ok(
+      text.includes("omniroute_omniroute_ccr_retrieve"),
+      "the actually-announced (namespaced) name must be taught, not the canonical one"
+    );
+    assert.ok(
+      !text.includes("`omniroute_ccr_retrieve`"),
+      "canonical name must not replace the real one"
+    );
+    assert.ok(text.includes("dedup:ref"), "look-back clause still present");
+  });
+
+  it("CCR marker only, tool advertised → full instruction with the real name", () => {
+    const result = injectCcrProtocolInstruction(
+      [{ role: "user", content: "[CCR retrieve hash=abcdefabcdefabcdefabcdef chars=900]" }],
+      { tools: [{ name: "mcp__docker__omniroute__omniroute_ccr_retrieve" }] }
+    );
+    assert.equal(result.length, 2);
+    const text = result[0].content as string;
+    assert.ok(text.includes("mcp__docker__omniroute__omniroute_ccr_retrieve"), "announced name");
+    assert.ok(text.includes("[CCR retrieve hash=<24hex> chars=N]"), "marker shape");
+  });
+
+  it("CCR marker only, no tool advertised → no injection (engine would have been skipped)", () => {
+    const messages: Msg[] = [
+      { role: "user", content: "[CCR retrieve hash=abcdefabcdefabcdefabcdef chars=900]" },
+    ];
+    const result = injectCcrProtocolInstruction(messages, {});
+    assert.equal(result.length, 1, "no instruction: the caller cannot retrieve");
+  });
+
+  it("no marker at all → no injection even for a capable caller", () => {
+    const messages: Msg[] = [{ role: "user", content: "plain message, no markers" }];
+    const result = injectCcrProtocolInstruction(messages, { tools: [RETRIEVE_TOOL_OPENAI] });
+    assert.equal(result.length, 1, "no marker, no injection");
+    assert.equal(result, messages, "unchanged reference when nothing to explain");
+  });
+
+  it("sentinel already present → no second injection, even with markers", () => {
+    const result = injectCcrProtocolInstruction(
+      [
+        { role: "system", content: `${CCR_PROTOCOL_MARKER_SENTINEL} already told once` },
+        { role: "user", content: "[dedup:ref sha=deadbeef]" },
+      ],
+      { tools: [RETRIEVE_TOOL_OPENAI] }
+    );
+    const occurrences = result.filter(
+      (m) => typeof m.content === "string" && m.content.includes(CCR_PROTOCOL_MARKER_SENTINEL)
+    );
+    assert.equal(occurrences.length, 1, "sentinel stays single across turns");
   });
 
   it("recognizes all three tools[] shapes: OpenAI nested, flat, Claude", () => {
@@ -181,6 +282,114 @@ describe("ccr protocol instruction (#8033)", () => {
       callerSupportsCcrRetrieve({ tools: "not-an-array" }),
       false,
       "non-array tools field"
+    );
+  });
+
+  it("resolveCcrRetrieveToolName returns the announced name, verbatim", () => {
+    assert.equal(
+      resolveCcrRetrieveToolName({ tools: [RETRIEVE_TOOL_OPENAI] }),
+      "omniroute_ccr_retrieve",
+      "exact canonical name, OpenAI nested shape"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({ tools: [{ name: "omniroute_ccr_retrieve" }] }),
+      "omniroute_ccr_retrieve",
+      "exact canonical name, flat shape"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({ tools: [RETRIEVE_TOOL_CLAUDE] }),
+      "omniroute_ccr_retrieve",
+      "exact canonical name, Claude shape"
+    );
+  });
+
+  it("resolveCcrRetrieveToolName matches namespaced names via separator-bounded suffix", () => {
+    assert.equal(
+      resolveCcrRetrieveToolName({
+        tools: [{ type: "function", function: { name: "omniroute__omniroute_ccr_retrieve" } }],
+      }),
+      "omniroute__omniroute_ccr_retrieve",
+      "double-underscore prefix"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({
+        tools: [{ type: "function", function: { name: "omniroute_omniroute_ccr_retrieve" } }],
+      }),
+      "omniroute_omniroute_ccr_retrieve",
+      "single-underscore prefix (OpenCode style)"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({
+        tools: [
+          {
+            type: "function",
+            function: { name: "mcp__docker__omniroute__omniroute_ccr_retrieve" },
+          },
+        ],
+      }),
+      "mcp__docker__omniroute__omniroute_ccr_retrieve",
+      "gateway namespaced prefix"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({
+        tools: [{ type: "function", function: { name: "omniroute.omniroute_ccr_retrieve" } }],
+      }),
+      "omniroute.omniroute_ccr_retrieve",
+      "dotted prefix"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({
+        tools: [{ type: "function", function: { name: "omniroute/omniroute_ccr_retrieve" } }],
+      }),
+      "omniroute/omniroute_ccr_retrieve",
+      "slashed prefix"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({
+        tools: [{ type: "function", function: { name: "omniroute:omniroute_ccr_retrieve" } }],
+      }),
+      "omniroute:omniroute_ccr_retrieve",
+      "colon prefix"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({
+        tools: [{ name: "other_tool", other: "omniroute_ccr_retrieve" }],
+      }),
+      null,
+      "unrelated tool with the canonical name in another field"
+    );
+  });
+
+  it("resolveCcrRetrieveToolName rejects near-miss names (no bare endsWith)", () => {
+    assert.equal(
+      resolveCcrRetrieveToolName({ tools: [{ name: "omniroute_ccr_retrieve_v2" }] }),
+      null,
+      "versioned near-miss"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({ tools: [{ name: "xomniroute_ccr_retrieve" }] }),
+      null,
+      "glued prefix without a separator"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({ tools: [{ name: "x_omniroute_ccr_retrieve" }] }),
+      "x_omniroute_ccr_retrieve",
+      "arbitrary single-underscore prefix is separator-bounded, not glued"
+    );
+  });
+
+  it("resolveCcrRetrieveToolName fails closed on malformed tools", () => {
+    assert.equal(resolveCcrRetrieveToolName({ tools: [] }), null, "empty tools array");
+    assert.equal(resolveCcrRetrieveToolName({}), null, "absent tools field");
+    assert.equal(
+      resolveCcrRetrieveToolName({ tools: "not-an-array" }),
+      null,
+      "non-array tools field"
+    );
+    assert.equal(
+      resolveCcrRetrieveToolName({ tools: [null, 42, { type: "function" }, { name: 7 }] }),
+      null,
+      "malformed entries"
     );
   });
 
@@ -225,15 +434,5 @@ describe("ccr protocol instruction (#8033)", () => {
       false,
       "no separator boundary before the suffix must not match"
     );
-  });
-
-  it("injectCcrProtocolInstruction is a pure helper usable directly", () => {
-    const messages: Msg[] = [{ role: "user", content: "hi" }];
-    const withInstruction = injectCcrProtocolInstruction(messages, { tools: [RETRIEVE_TOOL_FLAT] });
-    assert.equal(withInstruction.length, 2);
-    assert.equal(withInstruction[0].role, "system");
-
-    const withoutInstruction = injectCcrProtocolInstruction(messages, {});
-    assert.equal(withoutInstruction, messages, "unchanged reference when caller cannot retrieve");
   });
 });

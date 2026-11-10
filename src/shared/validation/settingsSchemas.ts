@@ -28,6 +28,11 @@ import {
 // routeGuard drags in server runtime (→ ioredis) that breaks the client/CLI build.
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 import { isHttpUrl } from "@/shared/validation/schemas/misc";
+import {
+  BANKED_RESET_ACCOUNT_SCOPES,
+  BANKED_RESET_LIMITS,
+  BANKED_RESET_MODES,
+} from "@/shared/constants/bankedResetAutoApply";
 
 const signatureCacheModeValues = ["enabled", "bypass", "bypass-strict"] as const;
 
@@ -113,6 +118,47 @@ const socialRedirectPathSchema = z
   .string()
   .max(500)
   .regex(/^\/(?!\/)[A-Za-z0-9/_.~-]*$/, "must be an absolute same-origin path");
+
+const bankedResetPercentSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.percentMax);
+const bankedResetHoursSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.hoursMax);
+const bankedResetMinutesSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.minutesMax);
+const bankedResetCapSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.capMax);
+const bankedResetHourOfDaySchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.hourOfDayMax);
+
+/**
+ * Opt-in auto-apply of banked resets (Codex reset credits, Claude banked grants, Claude
+ * weekly session reset). Every field is optional: the stored object is merged with the
+ * off-by-default values by mergeBankedResetAutoApplySettings (src/lib/usage/bankedResetPolicy.ts).
+ */
+export const bankedResetAutoApplySchema = z.object({
+  enabled: z.boolean().optional(),
+  mode: z.enum(BANKED_RESET_MODES).optional(),
+  creditTypes: z
+    .object({
+      codexCredits: z.boolean().optional(),
+      claudeCredits: z.boolean().optional(),
+      claudeSessionReset: z.boolean().optional(),
+    })
+    .optional(),
+  accountScope: z.enum(BANKED_RESET_ACCOUNT_SCOPES).optional(),
+  connections: z.record(z.string().max(100), z.boolean()).optional(),
+  sessionResetGuardMinutes: bankedResetMinutesSchema.optional(),
+  weeklyResetGuardHours: bankedResetHoursSchema.optional(),
+  weeklyFloorPercent: bankedResetPercentSchema.optional(),
+  expiringCreditHours: bankedResetHoursSchema.optional(),
+  expiringCreditMinUsedPercent: bankedResetPercentSchema.optional(),
+  poolHeadroomPercent: bankedResetPercentSchema.optional(),
+  maxPerAccountPerDay: bankedResetCapSchema.optional(),
+  maxPerDay: bankedResetCapSchema.optional(),
+  minSpacingMinutes: bankedResetMinutesSchema.optional(),
+  schedule: z
+    .object({
+      enabled: z.boolean().optional(),
+      startHourUtc: bankedResetHourOfDaySchema.optional(),
+      endHourUtc: bankedResetHourOfDaySchema.optional(),
+    })
+    .optional(),
+});
 
 /** Operator error rules accept a custom cooldown of up to 30 days. */
 const OPERATOR_ERROR_MAX_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
@@ -368,6 +414,26 @@ export const updateSettingsSchema = z.object({
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
+  // Opt-in auto-apply of banked resets; off by default (see bankedResetAutoApplySchema).
+  bankedResetAutoApply: bankedResetAutoApplySchema.optional(),
+  // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the
+  // master switch (default false in src/lib/db/settings.ts); `connections` narrows
+  // it to specific provider_connections ids (key absent = every eligible Codex
+  // connection, empty map = nobody); `maxPerDay` caps redemptions per connection per calendar day and
+  // `horizonHours` sets how close to expiry a credit must be to be spendable.
+  codexSpendExpiringResetCredits: z
+    .object({
+      enabled: z.boolean().optional(),
+      horizonHours: z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 30)
+        .optional(),
+      maxPerDay: z.number().int().min(1).max(50).optional(),
+      connections: z.record(z.string().max(100), z.boolean()).optional(),
+    })
+    .optional(),
   // #8848: opt-in per-connection Claude proactive warmup. `connections` maps a
   // provider_connections id -> enabled; default is an empty map (off for everyone)
   // until the operator flips a specific OAuth connection on from the settings UI.
@@ -474,6 +540,12 @@ export const updateSettingsSchema = z.object({
   quotaVisibility: z
     .record(z.string().trim().min(1), z.object({ hidden: z.array(z.string()).max(500).optional() }))
     .optional(),
+  /**
+   * Per-operator provider group order on the Quota Tracker (drag-to-reorder).
+   * Display-only — never feeds routing priority. Ported from upstream
+   * decolua/9router#4920.
+   */
+  quotaProviderOrder: z.array(z.string().trim().min(1).max(64)).max(200).optional(),
   requestRetry: z.number().int().min(0).max(10).optional(),
   maxRetryIntervalSec: z.number().int().min(0).max(300).optional(),
   maxBodySizeMb: z
