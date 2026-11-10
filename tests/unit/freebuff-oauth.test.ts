@@ -120,6 +120,46 @@ test("requestDeviceCode posts the fingerprint and packs the login state", async 
   }
 });
 
+test("requestDeviceCode accepts a numeric epoch-ms expiresAt and polls with it verbatim", async () => {
+  // Current freebuff.com shape: `expiresAt` is epoch milliseconds, not an ISO string.
+  const expiresAt = Date.now() + 3_600_000;
+  const { calls, restore } = stubFetch((url) =>
+    url === FREEBUFF_CONFIG.codeUrl
+      ? json({
+          fingerprintId: "codebuff-cli-test1234",
+          fingerprintHash: "fh-num",
+          loginUrl: "https://freebuff.com/login?auth_code=abc",
+          expiresAt,
+          expiresInMs: 3_600_000,
+        })
+      : new Response("", { status: 401 })
+  );
+  try {
+    const device = await freebuff.requestDeviceCode(FREEBUFF_CONFIG);
+    assert.ok(device.expires_in > 3500 && device.expires_in <= 3600, `${device.expires_in}`);
+    const state = decodeFreebuffLoginState(device.device_code);
+    assert.equal(state?.fingerprintHash, "fh-num");
+    assert.equal(state?.expiresAt, String(expiresAt));
+
+    const result = await freebuff.pollToken(FREEBUFF_CONFIG, device.device_code);
+    assert.deepEqual(result, { ok: false, data: { error: "authorization_pending" } });
+    const url = new URL(calls[1].url);
+    assert.equal(url.searchParams.get("expiresAt"), String(expiresAt));
+  } finally {
+    restore();
+  }
+});
+
+test("pollToken reports expired_token for a past epoch-ms expiresAt", async () => {
+  const { restore } = stubFetch(() => new Response("", { status: 401 }));
+  try {
+    const result = await freebuff.pollToken(FREEBUFF_CONFIG, loginState(String(Date.now() - 1000)));
+    assert.equal(result.data.error, "expired_token");
+  } finally {
+    restore();
+  }
+});
+
 test("requestDeviceCode throws on upstream failure or incomplete payload", async () => {
   let stub = stubFetch(() => new Response("nope", { status: 400 }));
   try {
@@ -128,6 +168,14 @@ test("requestDeviceCode throws on upstream failure or incomplete payload", async
     stub.restore();
   }
   stub = stubFetch(() => json({ loginUrl: "https://freebuff.com/login" }));
+  try {
+    await assert.rejects(() => freebuff.requestDeviceCode(FREEBUFF_CONFIG), /missing required/);
+  } finally {
+    stub.restore();
+  }
+  stub = stubFetch(() =>
+    json({ loginUrl: "https://freebuff.com/login", fingerprintHash: "fh", expiresAt: {} })
+  );
   try {
     await assert.rejects(() => freebuff.requestDeviceCode(FREEBUFF_CONFIG), /missing required/);
   } finally {

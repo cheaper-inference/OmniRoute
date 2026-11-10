@@ -1,0 +1,1 @@
+- **fix(oauth):** Freebuff browser login accepts the numeric epoch-ms `expiresAt` that freebuff.com now returns, instead of failing with "Freebuff login URL response is missing required fields"; login expiry is computed for both ISO and epoch-ms values.
