@@ -182,8 +182,31 @@ describe("StreamTransformerAccordion", () => {
       toggleBtn?.click();
     });
     expect(toggleBtn?.getAttribute("aria-expanded")).toBe("false");
-    // Content still in DOM (hidden class applied, not unmounted).
-    expect(container.querySelector(".hidden")).toBeTruthy();
+    // Content still in DOM, hidden by the kit Disclosure region (not unmounted).
+    const textarea = container.querySelector("[data-testid='raw-sse-input']");
+    expect(textarea).toBeTruthy();
+    expect(textarea?.closest("[hidden]")).toBeTruthy();
+  });
+
+  it("is a controlled kit Disclosure whose trigger controls the content region (#18074)", async () => {
+    const container = await renderAccordion({ forceOpen: false });
+    const disclosure = container.querySelector("[data-slot='disclosure']");
+    expect(disclosure).toBeTruthy();
+    const trigger = container.querySelector(
+      "[data-slot='disclosure-trigger']"
+    ) as HTMLButtonElement | null;
+    expect(trigger).toBe(container.querySelector("button[aria-expanded]"));
+    const region = container.querySelector("[data-slot='disclosure-content']") as HTMLElement;
+    expect(trigger?.getAttribute("aria-controls")).toBe(region.id);
+    // Closed and never opened: nothing rendered inside the region yet (lazy render).
+    expect(region.hidden).toBe(true);
+    expect(region.childElementCount).toBe(0);
+
+    await act(async () => {
+      trigger?.click();
+    });
+    expect(region.hidden).toBe(false);
+    expect(region.querySelector("[data-testid='raw-sse-input']")).toBeTruthy();
   });
 
   // ── 3. forceOpen prop ──────────────────────────────────────────────────────
