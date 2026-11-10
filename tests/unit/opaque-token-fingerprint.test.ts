@@ -91,6 +91,8 @@ const MIGRATED_FILES = [
   "src/server/authz/entra/evaluate.ts",
   "open-sse/executors/m365ImageGeneration.ts",
   "open-sse/services/combo/handoffSessionScope.ts",
+  // Sign in with ChatGPT (#15201): the attempt owner is a fingerprint of the dashboard session.
+  "src/app/api/oauth/chatgpt/session/route.ts",
   "src/lib/db/agentSessions.ts",
   "src/lib/db/proxyTraffic.ts",
 ];

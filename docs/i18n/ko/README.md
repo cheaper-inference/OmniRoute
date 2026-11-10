@@ -73,7 +73,7 @@ OMNIROUTE가 비용을 절약하고 작업을 더 쉽게 만드는 데 도움이
 
 |                         |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 제공업체             |            352            |   **358**   |          390          |
+| 🌐 제공업체             |            352            |   **358**   |          391          |
 | 🧠 고유 채팅 모델 ID    |           1320            |  **1374**   |         1491          |
 | 🖼️ 모달리티 브리지      | 🆕 비전 + 오디오 + 비디오 |      ✓      |           ✓           |
 | 📡 Radar 무료 카탈로그  |         🆕 옵트인         |      ✓      |           ✓           |
@@ -114,7 +114,7 @@ OMNIROUTE가 비용을 절약하고 작업을 더 쉽게 만드는 데 도움이
   <tr>
     <td align="right"><b>⚙️ 기능</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 콤보</a></td>
-    <td align="center"><a href="#-390-ai-providers--153-catalog-marked-free">🌐 제공업체</a></td>
+    <td align="center"><a href="#-391-ai-providers--153-catalog-marked-free">🌐 제공업체</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI 및 MCP</a></td>
   </tr>
   <tr>

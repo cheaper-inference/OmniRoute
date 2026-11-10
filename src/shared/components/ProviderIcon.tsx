@@ -317,6 +317,10 @@ const THEMED_SVGS: Record<string, { light: string; dark: string }> = {
     light: "/providers/orcarouter-original.png",
     dark: "/providers/orcarouter-original.png",
   },
+  chatgpt: {
+    light: "/providers/chatgpt-logo-black.svg",
+    dark: "/providers/chatgpt-logo-white.svg",
+  },
   // Kimi (Moonshot AI) official-partnership logomarks (2026-07): the official
   // rounded-square badge in Kimi's brand blue (#1783FF — see KIMI_BRAND_COLOR in
   // featuredProviders.ts) for the 3 visible Kimi-family cards. This replaces two
