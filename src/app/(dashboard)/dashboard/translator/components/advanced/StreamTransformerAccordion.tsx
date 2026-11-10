@@ -1,7 +1,6 @@
 "use client";
 
-// Header toggle imports the Button module directly so tests can keep stubbing the barrel.
-import HeaderButton from "@/shared/components/Button";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import Icon from "@/shared/components/Icon";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -9,7 +8,6 @@ import { useTranslations } from "next-intl";
 
 import { Button, Card } from "@/shared/components";
 import { copyToClipboard } from "@/shared/utils/clipboard";
-import { cn } from "@/shared/utils/cn";
 import {
   Table,
   TableBody,
@@ -169,12 +167,14 @@ export default function StreamTransformerAccordion({
     }
   }, [forceOpen, onOpenChange]);
 
-  const handleToggle = useCallback(() => {
-    const next = !open;
-    setOpen(next);
-    if (next) setHasOpened(true);
-    onOpenChange?.(next);
-  }, [open, onOpenChange]);
+  const handleOpenChange = useCallback(
+    (next: boolean) => {
+      setOpen(next);
+      if (next) setHasOpened(true);
+      onOpenChange?.(next);
+    },
+    [onOpenChange]
+  );
 
   // ── Transform state (only matters once content is mounted) ────────────────
   const [rawSse, setRawSse] = useState(SAMPLE_TEXT);
@@ -242,36 +242,25 @@ export default function StreamTransformerAccordion({
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="rounded-lg border border-border bg-surface">
-      {/* ── Collapsible header — mirrors Collapsible.tsx visual style ──── */}
-      <div
-        className={cn(
-          "flex items-center gap-3 p-4 transition-colors hover:bg-bg-subtle",
-          open && "border-b border-border"
-        )}
-      >
-        <HeaderButton
-          variant="ghost"
-          onClick={handleToggle}
-          aria-expanded={open}
-          className="-m-1 h-auto min-w-0 flex-1 justify-start gap-3 p-1 text-left"
-        >
-          <Icon
-            name={open ? "expand_more" : "chevron_right"}
-            size={20}
-            className="text-text-muted"
-          />
+    <Disclosure
+      open={open}
+      onOpenChange={handleOpenChange}
+      className="rounded-lg border border-border bg-surface"
+    >
+      <DisclosureTrigger className="gap-3 p-4">
+        <span className="flex min-w-0 items-center gap-3">
           <Icon name="swap_horiz" size={18} className="text-text-muted" />
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-text-main truncate">{title}</div>
-            <div className="text-xs text-text-muted truncate">{subtitle}</div>
-          </div>
-        </HeaderButton>
-      </div>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium text-text-main">{title}</span>
+            <span className="block truncate text-xs text-text-muted">{subtitle}</span>
+          </span>
+        </span>
+      </DisclosureTrigger>
 
-      {/* ── Content: lazy-render guard (D7) ────────────────────────────── */}
-      {(open || hasOpened) && (
-        <div className={cn("p-4", !open && "hidden")}>
+      {/* ── Content: lazy-render guard (D7) — mounted on first open, then kept (hidden)
+          so the pasted SSE and the last result survive closing the section. ───── */}
+      <DisclosureContent keepMounted={hasOpened} className="border-t border-border">
+        <div className="p-4">
           <div className="space-y-5 min-w-0">
             {/* Info banner */}
             <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
@@ -462,7 +451,7 @@ export default function StreamTransformerAccordion({
             </Card>
           </div>
         </div>
-      )}
-    </div>
+      </DisclosureContent>
+    </Disclosure>
   );
 }
