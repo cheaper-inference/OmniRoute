@@ -867,6 +867,40 @@ test("google PSE validator rejects HTTP 400 (invalid key or cx) but keeps 429 va
   assert.deepEqual(statuses, [400, 429]);
 });
 
+test("google PSE validator probes the base URL saved on the connection", async () => {
+  const urls: string[] = [];
+  globalThis.fetch = async (url) => {
+    urls.push(String(url));
+    return new Response(JSON.stringify({ items: [] }), { status: 200 });
+  };
+
+  const custom = await validateProviderApiKey({
+    provider: "google-pse-search",
+    apiKey: "google-key",
+    providerSpecificData: {
+      cx: "engine-id",
+      baseUrl: " https://search.example.com/customsearch/v1/ ",
+    },
+  });
+  const blank = await validateProviderApiKey({
+    provider: "google-pse-search",
+    apiKey: "google-key",
+    providerSpecificData: { cx: "engine-id", baseUrl: "   " },
+  });
+
+  assert.equal(custom.valid, true);
+  assert.equal(blank.valid, true);
+  assert.equal(urls.length, 2);
+  assert.match(
+    urls[0],
+    /^https:\/\/search\.example\.com\/customsearch\/v1\?key=google-key&cx=engine-id&/
+  );
+  assert.match(
+    urls[1],
+    /^https:\/\/www\.googleapis\.com\/customsearch\/v1\?key=google-key&cx=engine-id&/
+  );
+});
+
 test("search validator keeps the lenient 400 policy for providers other than Google PSE", async () => {
   globalThis.fetch = async () =>
     new Response(JSON.stringify({ error: "bad request" }), { status: 400 });
