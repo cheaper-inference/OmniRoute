@@ -1,4 +1,4 @@
--- 236_call_logs_pending_detail_index.sql
+-- 237_call_logs_pending_detail_index.sql
 -- expirePendingCallLogDetails() runs about once a minute during traffic and before
 -- each log export. Its predicate (detail_state = 'pending' AND detail_pending_until
 -- IS NULL OR <= now) has no index, so every run scans the whole call_logs table.
