@@ -1,5 +1,5 @@
 import { createRequire } from "module";
-import { scopeCodexServiceTierDefault } from "@/lib/providers/codexServiceTierModels";
+import { scopeCodexServiceTierDefault } from "../config/codexServiceTierModels.ts";
 import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { copyCodexRequestForMutation } from "./codex/requestCopy.ts";

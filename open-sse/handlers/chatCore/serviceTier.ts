@@ -1,4 +1,3 @@
-import { scopeCodexServiceTierDefault } from "@/lib/providers/codexServiceTierModels";
 /**
  * chatCore Codex service-tier resolvers (Quality Gate v2 / Fase 9 — chatCore god-file
  * decomposition, #3501).
@@ -15,6 +14,7 @@ import {
   normalizeCodexServiceTier,
   type CodexServiceTier,
 } from "@/lib/providers/requestDefaults";
+import { scopeCodexServiceTierDefault } from "../../config/codexServiceTierModels.ts";
 
 /** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
 export type EffectiveServiceTier = "standard" | CodexServiceTier;
