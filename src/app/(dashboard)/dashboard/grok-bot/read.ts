@@ -1,4 +1,7 @@
-import { readConnectFrames } from "../../../../../open-sse/utils/connectFrames";
+import {
+  frameConnectJson,
+  readConnectFrames,
+} from "../../../../../open-sse/utils/connectFrames";
 
 const SERVICE = "aiserver.v1.GrokBotService";
 const BASE = "https://api2.cursor.sh";
@@ -62,7 +65,9 @@ export async function* grokBotReadStream(input: {
       "x-sand-box-namespace": "prod",
       "user-agent": "connect-es/1.6.1",
     },
-    body: JSON.stringify(input.payload),
+    // Streaming RPCs carry the same five-byte frame header as the executor;
+    // an unframed body is rejected as an incomplete envelope.
+    body: frameConnectJson(JSON.stringify(input.payload)),
     signal: input.signal,
   });
   if (!response.ok || !response.body) {

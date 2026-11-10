@@ -12,6 +12,30 @@ function traceLive(live: LiveAgent | undefined): string {
   return `liveId=${String(live?.agentId ?? "")} liveRunning=${String(live?.isRunning ?? "")} liveRunningTurn=${String(live?.isRunningTurn ?? "")} staleAfter=${String(live?.staleAfterMs ?? "")} updatedAt=${String(live?.updatedAtMs ?? "")}`;
 }
 
+/**
+ * Delay before reconnecting the watch stream. A failed upstream read otherwise
+ * tears down and immediately rebuilds the stream, so a persistent 5xx or a
+ * refused connection spins as fast as the socket can fail. Backs off from 250ms
+ * and caps at 4s, well inside the turn's own deadline.
+ */
+export function grokReconnectDelayMs(attempt: number): number {
+  if (attempt <= 0) return 0;
+  return Math.min(4000, 250 * 2 ** Math.min(attempt - 1, 4));
+}
+
+function sleepUnlessAborted(ms: number, signal: AbortSignal | null): Promise<void> {
+  if (ms <= 0) return Promise.resolve();
+  return new Promise((resolve) => {
+    const timer = setTimeout(finish, ms);
+    function finish(): void {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", finish);
+      resolve();
+    }
+    signal?.addEventListener("abort", finish, { once: true });
+  });
+}
+
 /** One turn's cursor, settlement and reconnect state. Never shared between requests. */
 class GrokWatchSession {
   private seenRunning = false;
@@ -25,6 +49,7 @@ class GrokWatchSession {
   private staleAbort: AbortController | null = null;
   private readonly deadline = Date.now() + WATCH_IDLE_TIMEOUT_MS;
   private lastTrace = "";
+  private reconnectAttempt = 0;
   private readonly frames: GrokWatchFrameReader;
 
   constructor(
@@ -60,6 +85,7 @@ class GrokWatchSession {
       while (Date.now() < this.deadline) {
         const answer = await this.readStream();
         if (answer !== null) return answer;
+        await sleepUnlessAborted(grokReconnectDelayMs(this.reconnectAttempt), this.signal);
       }
       if (!this.seenRunning) throw new Error("watch stream ended before the agent started running");
       throw Object.assign(new Error("turn ended without explicit completion"), {
@@ -161,6 +187,7 @@ class GrokWatchSession {
       this.cursor.ack = "0";
       this.pendingSeqs.clear();
       this.pendingAcks.clear();
+      this.reconnectAttempt += 1;
       return null;
     }
     if (this.signal?.aborted) throw error;
@@ -168,10 +195,12 @@ class GrokWatchSession {
       this.stopStale();
       return this.submitted;
     }
+    this.reconnectAttempt += 1;
     return null;
   }
 
   private trace(event: unknown): void {
+    this.reconnectAttempt = 0;
     if (process.env.GROK_BOT_WATCH_TRACE !== "1") return;
     const frame = event as WatchFrame;
     const live = frame.agentState?.live?.[0];

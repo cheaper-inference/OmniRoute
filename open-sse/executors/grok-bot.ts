@@ -27,6 +27,14 @@ export {
 } from "./grok-bot-protocol.ts";
 
 /**
+ * Budget for the cleanup drain that runs before a conversation. The drain is a
+ * best-effort reconciler, so it must not add unbounded latency to the request
+ * that triggered it.
+ */
+const CLEANUP_BUDGET_MS = 3000;
+const CLEANUP_MAX_PER_RUN = 5;
+
+/**
  * Grok Bot executor -- single-account, plain-conversation path.
  *
  * Wire contract (spec: _tasks/superpowers/specs/2026-09-22-grok-bot-executor-integration.md):
@@ -76,7 +84,14 @@ export class GrokBotExecutor extends BaseExecutor {
     return PROVIDERS["grok-bot"]?.baseUrl ?? "https://api2.cursor.sh";
   }
 
-  /** Drain pending cleanups for this connection before a new conversation. */
+  /**
+   * Drain pending cleanups for this connection before a new conversation.
+   *
+   * Bounded on purpose: this runs on the request path, so an upstream that
+   * stalls must not hold the request. Each RPC carries the same deadline, and
+   * only a few items are attempted per turn; whatever is left stays on disk for
+   * the next one.
+   */
   private async drainPendingCleanups(
     connectionId: string | null | undefined,
     accessToken: string,
@@ -87,28 +102,36 @@ export class GrokBotExecutor extends BaseExecutor {
     const mine = q.filter((i) => i.connectionId === connectionId);
     if (mine.length === 0) return;
     const t = getTransport(accessToken);
+    const deadline = AbortSignal.timeout(CLEANUP_BUDGET_MS);
     const remaining: PendingCleanup[] = [];
+    let attempted = 0;
     for (const item of q) {
       if (item.connectionId !== connectionId) {
         remaining.push(item);
         continue;
       }
+      if (attempted >= CLEANUP_MAX_PER_RUN || deadline.aborted) {
+        remaining.push(item);
+        continue;
+      }
+      attempted += 1;
       try {
         let rowId = item.rowId;
         if (!rowId && item.agentId) {
-          const roster = (await t.rpc("ListGrokBotAgents", {})) as {
+          const roster = (await t.rpc("ListGrokBotAgents", {}, { signal: deadline })) as {
             agents?: { id?: string; agentId?: string }[];
           };
           const row = roster?.agents?.find((a) => a.agentId === item.agentId);
           if (!row?.id) {
-            // Roster failure keeps the item; roster miss means it is gone.
+            // A roster miss and a roster failure look the same here, so the item
+            // stays queued rather than being dropped on a guess.
             remaining.push(item);
             continue;
           }
           rowId = row.id;
         }
         if (rowId) {
-          await t.rpc("DeleteGrokBotAgent", { id: rowId });
+          await t.rpc("DeleteGrokBotAgent", { id: rowId }, { signal: deadline });
         }
         // Remove this item from the on-disk queue immediately, inside one
         // synchronous read-filter-write section. The previous shape wrote the

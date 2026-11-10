@@ -3,6 +3,7 @@ import { PROVIDERS } from "../config/constants.ts";
 import { readConnectFrames } from "../utils/connectFrames.ts";
 import { startBridgeTurn } from "./grok-bot-bridge.ts";
 import type { BridgeCloseReason } from "../services/grokBotBridgeRegistry";
+import { frameConnectJson } from "../utils/connectFrames.ts";
 
 const GROK_BOT_SERVICE = "aiserver.v1.GrokBotService";
 export const CREATE_TIMEOUT_MS = 45_000;
@@ -74,18 +75,7 @@ async function connectRpc(
   const base = (config?.baseUrl ?? "https://api2.cursor.sh").replace(/\/$/, "");
   const contentType = opts.stream ? "application/connect+json" : "application/json";
   const body = JSON.stringify(payload);
-  const framed = opts.stream
-    ? (() => {
-        const json = new TextEncoder().encode(body);
-        const head = new Uint8Array(5);
-        head[0] = 0;
-        new DataView(head.buffer).setUint32(1, json.length, false);
-        const out = new Uint8Array(5 + json.length);
-        out.set(head);
-        out.set(json, 5);
-        return out;
-      })()
-    : body;
+  const framed = opts.stream ? frameConnectJson(body) : body;
   const headers: Record<string, string> = {
     authorization: `Bearer ${accessToken}`,
     "content-type": contentType,

@@ -113,7 +113,7 @@ function FanoutCard({
               checked={fanout.includes(account.id)}
               onChange={(event) =>
                 onToggle((current) =>
-                  toggleFanout(current, account.id, event.target.checked, account.email ?? "")
+                  toggleFanout(current, account.id, event.target.checked)
                 )
               }
             />

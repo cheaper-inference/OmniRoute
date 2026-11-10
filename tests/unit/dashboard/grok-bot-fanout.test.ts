@@ -62,19 +62,21 @@ test("with no bot named on screen nothing is addressed at all", () => {
   assert.deepEqual(targets, []);
 });
 
-test("the protected mailbox cannot be ticked and eight is the ceiling", () => {
-  const eight = ["1", "2", "3", "4", "5", "6", "7", "8"];
-  assert.deepEqual(toggleFanout(eight, "9", true), eight);
-  assert.deepEqual(toggleFanout([], "connection-id", true, "MichaelNoble5072@outlook.com"), []);
-  assert.deepEqual(toggleFanout([], "connection-id", true, ""), []);
-  assert.deepEqual(toggleFanout([], "connection-id", true, "   "), []);
-  assert.deepEqual(toggleFanout([], "connection-id", true, "Michael\u200bNoble5072"), []);
-  assert.deepEqual(toggleFanout([], "connection-id", true, "Michael.Noble5072@outlook.com"), []);
-  assert.deepEqual(
-    toggleFanout([], "connection-id", true, "\uff4dichael.noble5072@outlook.com"),
-    []
-  );
+test("any account can be ticked and eight is the ceiling", () => {
+  assert.deepEqual(toggleFanout(["1", "2", "3", "4", "5", "6", "7", "8"], "9", true), [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+  ]);
+  // An account with no email address is a normal account and must stay selectable.
+  assert.deepEqual(toggleFanout([], "connection-id", true), ["connection-id"]);
   assert.deepEqual(toggleFanout(["1", "2"], "2", false), ["1"]);
+  assert.deepEqual(toggleFanout(["1", "1"], "2", true), ["1", "2"]);
 });
 
 test("a bot without an id is not addressed", () => {

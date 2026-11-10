@@ -10,18 +10,7 @@ export type FanoutTarget = { account: string; agentId: string };
  * An account that has no roster, or lacks the bot named on screen, is left out.
  * Nothing is ever retargeted to a different agent.
  */
-export function toggleFanout(
-  current: string[],
-  id: string,
-  checked: boolean,
-  email = ""
-): string[] {
-  const mailbox = email
-    .normalize("NFKC")
-    .replace(/[^\x21-\x7e]/g, "")
-    .replace(/\./g, "")
-    .toLowerCase();
-  if (checked && (mailbox === "" || mailbox.includes("michaelnoble5072"))) return current;
+export function toggleFanout(current: string[], id: string, checked: boolean): string[] {
   const next = checked ? [...current, id] : current.filter((held) => held !== id);
   const kept = next.filter((held, index) => next.indexOf(held) === index);
   return kept.slice(0, 8);
