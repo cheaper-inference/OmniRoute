@@ -16,13 +16,13 @@ const { updatePricing } = await import("../../src/lib/db/settings.ts");
 
 const now = Date.parse("2026-06-28T12:00:00Z");
 
-async function seed(count: number, extraCost: boolean) {
+async function seed(count: number, extraCost: boolean, keyCount = 1) {
   const db = core.getDbInstance();
   db.exec("DELETE FROM usage_history; DELETE FROM domain_cost_history;");
   await updatePricing({ codex: { "test-model": { input: 1, output: 1 } } });
   const usage = db.prepare(`INSERT INTO usage_history
     (provider, model, connection_id, api_key_id, api_key_name, tokens_input, timestamp)
-    VALUES ('codex', 'test-model', 'synthetic-connection', 'synthetic-key', 'Synthetic', ?, ?)`);
+    VALUES ('codex', 'test-model', 'synthetic-connection', ?, 'Synthetic', ?, ?)`);
   const cost = db.prepare(
     "INSERT INTO domain_cost_history (api_key_id, cost, timestamp) VALUES ('synthetic-key', 2, ?)"
   );
@@ -30,7 +30,8 @@ async function seed(count: number, extraCost: boolean) {
     for (let i = 0; i < count; i++) {
       const at = now - 86400000 + i * 1000;
       // Distinct vectors exercise batch pricing yields rather than ledger matching.
-      usage.run(1_000_000 + i, new Date(at).toISOString());
+      const apiKeyId = keyCount === 1 ? "synthetic-key" : `synthetic-key-${i % keyCount}`;
+      usage.run(apiKeyId, 1_000_000 + i, new Date(at).toISOString());
       cost.run(at);
     }
     // An unrelated budget entry must not affect this connection's API value.
@@ -50,18 +51,28 @@ test.after(() => {
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("request-vector pricing yields to an HTTP heartbeat before analytics completes", async () => {
-  await seed(4096, true);
+async function assertHttpHeartbeat(count: number, keyCount: number, expectedCost: number) {
+  await seed(count, true, keyCount);
   let completed = false;
   let servedBeforeCompletion = false;
+  let analytics: ReturnType<typeof breakdown>;
   const server = http.createServer((_request, response) => {
-    servedBeforeCompletion = !completed;
-    response.end("healthy");
+    // Queue the real HTTP response before starting pricing in this I/O callback.
+    // This removes connection-setup timing from a fixture with just one batch yield.
+    setImmediate(() => {
+      servedBeforeCompletion = !completed;
+      response.end("healthy");
+    });
+    analytics = breakdown().then((result) => {
+      completed = true;
+      return result;
+    });
   });
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
   const address = server.address();
   assert.ok(address && typeof address !== "string");
+
   let sendHeartbeat: () => void;
   const heartbeat = new Promise<void>((resolve, reject) => {
     sendHeartbeat = () => {
@@ -75,11 +86,11 @@ test("request-vector pricing yields to an HTTP heartbeat before analytics comple
   });
   try {
     sendHeartbeat();
-    const result = await breakdown();
-    completed = true;
     await heartbeat;
-    assert.equal(result.totalCostUsd, 4104.38656);
-    assert.equal(result.rows[0].requests, 4096);
+    const result = await analytics;
+    assert.equal(result.totalCostUsd, expectedCost);
+    assert.equal(result.rows.length, keyCount);
+    for (const row of result.rows) assert.equal(row.requests, count / keyCount);
     assert.ok(
       servedBeforeCompletion,
       "HTTP must make progress while request-vector pricing is still running"
@@ -88,6 +99,14 @@ test("request-vector pricing yields to an HTTP heartbeat before analytics comple
     server.closeAllConnections();
     await new Promise<void>((resolve) => server.close(() => resolve()));
   }
+}
+
+test("request-vector pricing yields to an HTTP heartbeat before analytics completes", async () => {
+  await assertHttpHeartbeat(4096, 1, 4104.38656);
+});
+
+test("pricing yields across API keys with fewer than 512 vectors each", async () => {
+  await assertHttpHeartbeat(800, 4, 800.3196);
 });
 
 test("API value never loads ledger allocations or detailed usage records", async () => {

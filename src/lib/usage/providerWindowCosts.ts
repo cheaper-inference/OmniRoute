@@ -360,6 +360,7 @@ function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCo
 
 async function buildApiKeyCostAllocations(args: {
   groups: AggregatedUsageCostRow[];
+  pricingBatch: { processed: number };
 }): Promise<{ costs: number[]; unpriced: number[] }> {
   const calculatedCosts: number[] = [];
   const unpriced: number[] = [];
@@ -389,7 +390,8 @@ async function buildApiKeyCostAllocations(args: {
     }
     calculatedCosts.push(costUsd);
     unpriced.push(missing);
-    if (calculatedCosts.length % COST_BATCH_SIZE === 0) await yieldToEventLoop();
+    args.pricingBatch.processed++;
+    if (args.pricingBatch.processed % COST_BATCH_SIZE === 0) await yieldToEventLoop();
   }
   return { costs: calculatedCosts, unpriced };
 }
@@ -429,6 +431,8 @@ export async function getProviderWindowCostBreakdown({
     groupsByApiKey.set(apiKeyKey, list);
   }
 
+  // Carry batch progress across keys; small keys must not restart the yield threshold.
+  const pricingBatch = { processed: 0 };
   for (const [apiKeyKey, groups] of groupsByApiKey.entries()) {
     const first = groups[0];
     const apiKeyId = first.apiKeyId || null;
@@ -438,7 +442,7 @@ export async function getProviderWindowCostBreakdown({
       apiKeyName ||
       apiKeyId ||
       "Unattributed";
-    const groupCosts = await buildApiKeyCostAllocations({ groups });
+    const groupCosts = await buildApiKeyCostAllocations({ groups, pricingBatch });
 
     let limitUsd: number | null = null;
     let limitPeriod: string | null = null;
