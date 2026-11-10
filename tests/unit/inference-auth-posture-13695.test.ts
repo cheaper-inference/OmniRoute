@@ -9,9 +9,9 @@ import {
   warnIfInferenceServerExposed,
 } from "@/lib/startup/nonLoopbackApiKeyGuard";
 
-// #13695: `/v1/models` follows the dashboard login posture while inference
-// follows REQUIRE_API_KEY, so probing `/v1/models` can report "protected" for
-// an instance whose `/v1/responses` is open to anyone who can reach the port.
+// #13695: the catalog has an additional login check after the shared client API
+// proxy. With REQUIRE_API_KEY disabled, `/v1/models` can still report "protected"
+// while `/v1/responses` is open to anyone who can reach the port.
 // #12568 added the boot warning for the API bridge and live-WS servers; the
 // Next server that actually answers inference was left uncovered, and it is
 // the one that binds every interface by default.
@@ -152,11 +152,12 @@ test("the Next boot hook actually invokes the inference exposure guard", () => {
   assert.match(boot, /warnIfInferenceServerExposed\(\)/);
 });
 
-test("docs state which setting gates /v1/models and which gates inference", () => {
+test("docs state the shared client API policy and the additional catalog check", () => {
   const env = fs.readFileSync(path.join(REPO_ROOT, "docs/reference/ENVIRONMENT.md"), "utf8");
   const row = env.split("\n").find((line) => line.startsWith("| `REQUIRE_API_KEY`"));
   assert.ok(row, "REQUIRE_API_KEY row missing from ENVIRONMENT.md");
-  assert.match(row, /does not gate `GET \/v1\/models`/);
+  assert.match(row, /including `GET \/v1\/models` before its handler/);
+  assert.match(row, /cannot bypass the proxy/);
   assert.match(row, /requireAuthForModels/);
 
   const doc = fs.readFileSync(
