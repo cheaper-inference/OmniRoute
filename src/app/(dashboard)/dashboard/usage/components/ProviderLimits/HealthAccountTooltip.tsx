@@ -120,7 +120,12 @@ function TooltipCells({ account }: { account: DisplayAccount }) {
             <span>
               {cell.awaitingSync
                 ? t("healthAwaitingSync")
-                : format.number(cell.percent / 100, { style: "percent", maximumFractionDigits: 1 })}
+                : cell.quotaUnknown
+                  ? t("tierUnknown")
+                  : format.number(cell.percent / 100, {
+                      style: "percent",
+                      maximumFractionDigits: 1,
+                    })}
               {!cell.awaitingSync &&
                 (cell.resetAt
                   ? ` · ${t("resetsIn")} ${recovery(cell.resetAt)}`
@@ -128,7 +133,7 @@ function TooltipCells({ account }: { account: DisplayAccount }) {
             </span>
           </div>
           {/* Remaining quota: any visible fill is the success tone (an empty bar draws nothing). */}
-          {!cell.awaitingSync && (
+          {!cell.awaitingSync && !cell.quotaUnknown && (
             <Progress
               className="mt-1"
               aria-label={windowLabel(cell)}

@@ -15,6 +15,7 @@ const snapshots = await import("../../src/lib/db/quotaSnapshots.ts");
 const usage = await import("../../src/lib/usage/providerLimits.ts");
 const { getQuotaCacheState } = await import("../../src/domain/quotaCacheState.ts");
 const availabilityRoute = await import("../../src/app/api/usage/availability/route.ts");
+const { buildConnectionQuotaAvailability } = await import("../../src/lib/usage/availability.ts");
 const { buildHealthAccount } =
   await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/healthOverview.ts");
 const { displayAccount } =
@@ -138,6 +139,58 @@ test("runtime observations cover deduplicated history and availability reads the
   const connection = body.connections.find((row: { id: string }) => row.id === c.id);
   assert.equal(connection.account.fetchedAt, entry.fetchedAt);
   assert.deepEqual(state.cache.get(c.id), before);
+});
+
+for (const [previous, latest] of [
+  [0, 57],
+  [57, 0],
+]) {
+  test(`availability reconciles newer snapshot ${latest}% over runtime ${previous}% privately`, async () => {
+    const c = await account();
+    const state = getQuotaCacheState();
+    state.cache.set(c.id, {
+      connectionId: c.id,
+      provider: "claude",
+      fetchedAt: Date.parse(oldTime),
+      quotas: { session: { remainingPercentage: previous, resetAt } },
+      modelQuotas: {},
+      exhausted: previous === 0,
+      nextResetAt: previous === 0 ? resetAt : null,
+    });
+    const before = structuredClone(state.cache.get(c.id));
+    save(c.id, "session", latest);
+    const entry = (await usage.getSanitizedCachedProviderLimitsMap())[c.id];
+    const verdict = buildConnectionQuotaAvailability(
+      { id: c.id, provider: "claude", isActive: true },
+      entry,
+      { enabled: true, defaultThresholdPercent: 2, providerWindowDefaults: {} }
+    );
+    assert.equal(verdict.account.usable, latest > 2);
+    assert.deepEqual(state.cache.get(c.id), before);
+  });
+}
+
+test("an unreported limiting window does not borrow its known sibling percentage", () => {
+  const now = Date.now();
+  const a = buildHealthAccount(
+    { id: "unknown", provider: "claude", isActive: true },
+    {
+      quotas: [
+        { name: "session", remainingPercentage: 0, fractionReported: false, resetAt },
+        { name: "weekly", remainingPercentage: 80, resetAt },
+      ],
+      raw: { fetchedAt: new Date(now).toISOString() },
+    },
+    {},
+    now,
+    {
+      availability: availability("unknown"),
+      availabilityObservedAt: now,
+      cooldown: { id: "unknown", status: "healthy", lockouts: [] },
+      observedAt: now,
+    }
+  );
+  assert.equal(displayAccount(a, now).remainingPct, null);
 });
 
 test("a reset awaiting synchronization contributes neither old zero nor invented full quota", () => {

@@ -149,7 +149,12 @@ function selectWaterPercentages(
       })[0].percent
   );
   // An unknown limiting window cannot be replaced by a known sibling percentage.
-  return { percentages: waterCells.some((cell) => cell.awaitingSync) ? [] : percentages, bypassed };
+  return {
+    percentages: waterCells.some((cell) => cell.awaitingSync || cell.quotaUnknown)
+      ? []
+      : percentages,
+    bypassed,
+  };
 }
 function lowestPercent(values: number[]): number | null {
   let lowest = Number.POSITIVE_INFINITY;
@@ -160,7 +165,7 @@ function lowestPercent(values: number[]): number | null {
 }
 /** Lowest percentage the given cells report, or null when none reports a finite one. */
 export function reportedPercent(cells: HealthAccount["cells"]): number | null {
-  return cells.some((cell) => cell.awaitingSync)
+  return cells.some((cell) => cell.awaitingSync || cell.quotaUnknown)
     ? null
     : lowestPercent(cells.map((cell) => cell.percent));
 }
