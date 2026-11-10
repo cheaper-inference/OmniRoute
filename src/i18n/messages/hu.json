@@ -12804,6 +12804,8 @@
     },
     "attempts": "kísérletek",
     "detail": {
+      "tabOverview": "Áttekintés",
+      "tabPayloads": "Adatcsomagok",
       "omittedHttpAttempts": "{count} HTTP-küldés nincs megőrizve",
       "noHttpResponse": "Nem észlelt HTTP-választ",
       "transportError": "Átviteli hiba",

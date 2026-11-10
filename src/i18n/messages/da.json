@@ -12804,6 +12804,8 @@
     },
     "attempts": "forsøg",
     "detail": {
+      "tabOverview": "Oversigt",
+      "tabPayloads": "Nyttelaster",
       "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
       "noHttpResponse": "Intet HTTP-svar blev observeret",
       "transportError": "Transportfejl",

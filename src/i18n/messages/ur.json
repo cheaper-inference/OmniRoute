@@ -12804,6 +12804,8 @@
     },
     "attempts": "کوششیں",
     "detail": {
+      "tabOverview": "جائزہ",
+      "tabPayloads": "پے لوڈز",
       "omittedHttpAttempts": "{count} HTTP ارسال محفوظ نہیں کیے گئے",
       "noHttpResponse": "کوئی HTTP جواب مشاہدے میں نہیں آیا",
       "transportError": "نقل و حمل کی خرابی",

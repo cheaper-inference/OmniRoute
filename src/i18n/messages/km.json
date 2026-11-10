@@ -12804,6 +12804,8 @@
     },
     "attempts": "ការព្យាយាម",
     "detail": {
+      "tabOverview": "ទិដ្ឋភាពទូទៅ",
+      "tabPayloads": "Payload",
       "omittedHttpAttempts": "ការផ្ញើ HTTP ចំនួន {count} មិនត្រូវបានរក្សាទុកទេ",
       "noHttpResponse": "មិនបានសង្កេតឃើញការឆ្លើយតប HTTP ទេ",
       "transportError": "កំហុសការដឹកជញ្ជូន",

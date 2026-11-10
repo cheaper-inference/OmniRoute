@@ -12804,6 +12804,8 @@
     },
     "attempts": "försök",
     "detail": {
+      "tabOverview": "Översikt",
+      "tabPayloads": "Nyttolaster",
       "omittedHttpAttempts": "{count} HTTP-sändningar sparades inte",
       "noHttpResponse": "Inget HTTP-svar observerades",
       "transportError": "Transportfel",

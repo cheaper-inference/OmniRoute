@@ -12804,6 +12804,8 @@
     },
     "attempts": "முயற்சிகள்",
     "detail": {
+      "tabOverview": "மேலோட்டம்",
+      "tabPayloads": "பேலோடுகள்",
       "omittedHttpAttempts": "{count} HTTP அனுப்புதல்கள் தக்கவைக்கப்படவில்லை",
       "noHttpResponse": "HTTP பதில் எதுவும் காணப்படவில்லை",
       "transportError": "பரிமாற்றப் பிழை",

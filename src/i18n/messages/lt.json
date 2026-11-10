@@ -12804,6 +12804,8 @@
     },
     "attempts": "bandymai",
     "detail": {
+      "tabOverview": "Apžvalga",
+      "tabPayloads": "Naudingosios apkrovos",
       "omittedHttpAttempts": "{count} HTTP siuntimų neišsaugota",
       "noHttpResponse": "HTTP atsakymas nepastebėtas",
       "transportError": "Perdavimo klaida",

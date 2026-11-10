@@ -12804,6 +12804,8 @@
     },
     "attempts": "시도 횟수",
     "detail": {
+      "tabOverview": "개요",
+      "tabPayloads": "페이로드",
       "omittedHttpAttempts": "HTTP 전송 {count}개가 보관되지 않았습니다",
       "noHttpResponse": "HTTP 응답이 관찰되지 않았습니다",
       "transportError": "전송 오류",

@@ -12804,6 +12804,8 @@
     },
     "attempts": "lần thử",
     "detail": {
+      "tabOverview": "Tổng quan",
+      "tabPayloads": "Payload",
       "omittedHttpAttempts": "{count} lần gửi HTTP không được lưu giữ",
       "noHttpResponse": "Chưa quan sát thấy phản hồi HTTP",
       "transportError": "Lỗi truyền tải",

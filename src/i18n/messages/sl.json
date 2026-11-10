@@ -12804,6 +12804,8 @@
     },
     "attempts": "poskusi",
     "detail": {
+      "tabOverview": "Pregled",
+      "tabPayloads": "Koristne vsebine",
       "omittedHttpAttempts": "{count} pošiljanj HTTP ni bilo shranjenih",
       "noHttpResponse": "Odgovor HTTP ni bil zaznan",
       "transportError": "Napaka prenosa",

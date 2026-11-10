@@ -12804,6 +12804,8 @@
     },
     "attempts": "ಪ್ರಯತ್ನಗಳು",
     "detail": {
+      "tabOverview": "ಅವಲೋಕನ",
+      "tabPayloads": "ಪೇಲೋಡ್ಗಳು",
       "omittedHttpAttempts": "{count} HTTP ಕಳುಹಿಸುವಿಕೆಗಳನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ",
       "noHttpResponse": "ಯಾವುದೇ HTTP ಪ್ರತಿಕ್ರಿಯೆ ಕಂಡುಬಂದಿಲ್ಲ",
       "transportError": "ಸಾಗಣೆ ದೋಷ",

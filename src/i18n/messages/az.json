@@ -12804,6 +12804,8 @@
     },
     "attempts": "cəhdlər",
     "detail": {
+      "tabOverview": "Ümumi baxış",
+      "tabPayloads": "Faydalı yüklər",
       "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
       "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
       "transportError": "Nəqliyyat xətası",

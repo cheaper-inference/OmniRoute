@@ -12804,6 +12804,8 @@
     },
     "attempts": "denemeler",
     "detail": {
+      "tabOverview": "Genel Bakış",
+      "tabPayloads": "Yükler",
       "omittedHttpAttempts": "{count} HTTP gönderimi saklanmadı",
       "noHttpResponse": "HTTP yanıtı gözlemlenmedi",
       "transportError": "Aktarım hatası",

@@ -12804,6 +12804,8 @@
     },
     "attempts": "চেষ্টা",
     "detail": {
+      "tabOverview": "সারসংক্ষেপ",
+      "tabPayloads": "পেলোডসমূহ",
       "omittedHttpAttempts": "{count}টি HTTP প্রেরণ সংরক্ষিত হয়নি",
       "noHttpResponse": "কোনো HTTP প্রতিক্রিয়া পর্যবেক্ষণ করা যায়নি",
       "transportError": "পরিবহন ত্রুটি",

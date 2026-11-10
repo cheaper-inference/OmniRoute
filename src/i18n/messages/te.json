@@ -12804,6 +12804,8 @@
     },
     "attempts": "ప్రయత్నాలు",
     "detail": {
+      "tabOverview": "అవలోకనం",
+      "tabPayloads": "పేలోడ్లు",
       "omittedHttpAttempts": "{count} HTTP పంపకాలు నిల్వ చేయబడలేదు",
       "noHttpResponse": "HTTP ప్రతిస్పందన గమనించబడలేదు",
       "transportError": "రవాణా లోపం",

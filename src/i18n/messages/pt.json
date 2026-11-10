@@ -12804,6 +12804,8 @@
     },
     "attempts": "tentativas",
     "detail": {
+      "tabOverview": "Visão geral",
+      "tabPayloads": "Cargas úteis",
       "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
       "noHttpResponse": "Não foi observada qualquer resposta HTTP",
       "transportError": "Erro de transporte",

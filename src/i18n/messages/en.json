@@ -12804,6 +12804,8 @@
     },
     "attempts": "attempts",
     "detail": {
+      "tabOverview": "Overview",
+      "tabPayloads": "Payloads",
       "omittedHttpAttempts": "{count} HTTP sends not retained",
       "noHttpResponse": "No HTTP response observed",
       "transportError": "Transport error",

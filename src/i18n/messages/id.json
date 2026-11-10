@@ -12804,6 +12804,8 @@
     },
     "attempts": "upaya",
     "detail": {
+      "tabOverview": "Ikhtisar",
+      "tabPayloads": "Payload",
       "omittedHttpAttempts": "{count} pengiriman HTTP tidak disimpan",
       "noHttpResponse": "Tidak ada respons HTTP yang teramati",
       "transportError": "Kesalahan transportasi",

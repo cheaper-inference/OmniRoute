@@ -12804,6 +12804,8 @@
     },
     "attempts": "प्रयास",
     "detail": {
+      "tabOverview": "सिंहावलोकन",
+      "tabPayloads": "पेलोड",
       "omittedHttpAttempts": "{count} HTTP प्रेषण सहेजे नहीं गए",
       "noHttpResponse": "कोई HTTP प्रतिक्रिया देखी नहीं गई",
       "transportError": "परिवहन त्रुटि",

@@ -12804,6 +12804,8 @@
     },
     "attempts": "tentativi",
     "detail": {
+      "tabOverview": "Panoramica",
+      "tabPayloads": "Payload",
       "omittedHttpAttempts": "{count} invii HTTP non conservati",
       "noHttpResponse": "Nessuna risposta HTTP osservata",
       "transportError": "Errore di trasporto",

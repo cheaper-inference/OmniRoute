@@ -12804,6 +12804,8 @@
     },
     "attempts": "încercări",
     "detail": {
+      "tabOverview": "Prezentare generală",
+      "tabPayloads": "Payloaduri",
       "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
       "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
       "transportError": "Eroare de transport",

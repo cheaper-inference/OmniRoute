@@ -12804,6 +12804,8 @@
     },
     "attempts": "tentatives",
     "detail": {
+      "tabOverview": "Aperçu",
+      "tabPayloads": "Charges utiles",
       "omittedHttpAttempts": "{count} envois HTTP non conservés",
       "noHttpResponse": "Aucune réponse HTTP observée",
       "transportError": "Erreur de transport",

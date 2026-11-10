@@ -12804,6 +12804,8 @@
     },
     "attempts": "nnwale",
     "detail": {
+      "tabOverview": "Nchịkọta",
+      "tabPayloads": "Ibu ozi",
       "omittedHttpAttempts": "Edebeghị izipu HTTP {count}",
       "noHttpResponse": "Ahụghị nzaghachi HTTP ọ bụla",
       "transportError": "Njehie mbufe",

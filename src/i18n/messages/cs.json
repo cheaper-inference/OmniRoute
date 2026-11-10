@@ -12804,6 +12804,8 @@
     },
     "attempts": "pokusy",
     "detail": {
+      "tabOverview": "Přehled",
+      "tabPayloads": "Datové obsahy",
       "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
       "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
       "transportError": "Chyba přenosu",

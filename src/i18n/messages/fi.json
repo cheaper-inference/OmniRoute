@@ -12804,6 +12804,8 @@
     },
     "attempts": "yritykset",
     "detail": {
+      "tabOverview": "Yleiskatsaus",
+      "tabPayloads": "Hyötykuormat",
       "omittedHttpAttempts": "{count} HTTP-lähetystä ei säilytetty",
       "noHttpResponse": "HTTP-vastausta ei havaittu",
       "transportError": "Siirtovirhe",

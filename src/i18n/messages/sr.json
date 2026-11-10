@@ -12804,6 +12804,8 @@
     },
     "attempts": "покушаји",
     "detail": {
+      "tabOverview": "Преглед",
+      "tabPayloads": "Садржаји",
       "omittedHttpAttempts": "{count} HTTP слања није сачувано",
       "noHttpResponse": "HTTP одговор није забележен",
       "transportError": "Грешка у преносу",
