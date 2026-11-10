@@ -202,106 +202,115 @@ Mekanisme terkait tetap terpisah:
 - Semaphore akun memberikan izin konkurensi permintaan dan berakhir saat permintaan selesai.
 - Lease sesi terkelola eksklusif adalah kepemilikan siklus hidup yang tahan lama dengan batas generasi.
 
-## 3. Model Lockout
+## 3. Penguncian Model
 
-**Cakupan:** tripel provider + koneksi + model.
+**Cakupan:** triple provider + connection + model.
 
-**Cakupan kunci berdasarkan status:** status yang gagal menentukan kunci mana yang
-ditulis oleh lockout (`resolveLockoutScope()` di `open-sse/services/accountFallback/exactModelLock.ts`):
+**Cakupan berdasarkan status:** status yang gagal menentukan kunci yang digunakan oleh penguncian
+(`resolveLockoutScope()` di `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — sinyal kuota atau entitlement — mengunci **keluarga kuota**:
-  untuk codex seluruh cakupan `codex` / `spark` (setiap model `gpt-5*` milik
-  koneksi tersebut), untuk provider lain `getQuotaScopedModelForProvider()`.
-- `404` mengunci model tunggal (`getModelLockKey()` mempersempit `not_found`).
-- Status lainnya — kegagalan transport/server `5xx` dan `502` hasil sintesis
-  OmniRoute sendiri dari validasi kualitas — hanya mengunci tupel
-  provider/koneksi/model yang **persis**. Stream yang buruk pada satu model bukanlah
-  bukti tentang kuota akun; sebelum aturan ini, satu respons kosong pada
-  `codex/gpt-5.6-luna` menghapus setiap model `gpt-5*` milik koneksi tersebut dari
-  routing selama 2–30 menit (bertingkat) padahal kuotanya tidak terganggu.
-- Opsi `scope` eksplisit dari pemanggil selalu menang (Antigravity meneruskan `"exact"`).
+- `429` / `403` / `402` — sinyal kuota atau hak akses — mengunci **keluarga kuota**:
+  untuk codex, seluruh cakupan `codex` / `spark` (setiap model
+  `gpt-5*` dari connection), untuk provider lain `getQuotaScopedModelForProvider()`.
+- `404` mengunci model dasar (`getModelLockKey()` mempersempit `not_found`).
+- Status lainnya — kegagalan transport/server `5xx` dan `502` yang disintesis oleh OmniRoute
+  sendiri dari validasi kualitas — hanya mengunci tuple provider/connection/model **yang
+  tepat**. Stream yang buruk pada satu model bukan bukti tentang kuota account; sebelum
+  aturan ini, satu respons kosong pada `codex/gpt-5.6-luna` menghapus setiap model
+  `gpt-5*` dari connection tersebut dari routing selama 2–30 menit (meningkat secara
+  bertahap), sementara kuotanya tidak tersentuh.
+- Opsi `scope` eksplisit dari caller selalu diprioritaskan (Antigravity meneruskan `"exact"`).
 
-**Tujuan:** menghindari penonaktifan seluruh koneksi ketika hanya satu model yang tidak tersedia atau dibatasi kuotanya.
+**Tujuan:** menghindari penonaktifan seluruh connection ketika hanya satu model yang tidak
+tersedia atau dibatasi kuota.
 
 **Contoh:**
 
-- Provider kuota per-model yang mengembalikan 429
-- Provider lokal yang mengembalikan 404 untuk satu model yang hilang
+- Provider dengan kuota per model yang mengembalikan 429
+- Provider lokal yang mengembalikan 404 untuk satu model yang tidak ada
 - Kegagalan izin mode/model khusus provider (misalnya mode Grok)
 
 **Implementasi:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Dasbor Model Cooldowns (v3.8.0)
+### Dasbor Cooldown Model (v3.8.0)
 
-UI: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+UI: Pengaturan → Cooldown Model (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Menampilkan lockout aktif dengan: provider, koneksi, model, alasan, expiresAt. Operator dapat mengaktifkan kembali model secara manual dari kartu tersebut.
+Menampilkan penguncian aktif dengan: provider, connection, model, alasan, expiresAt. Operator
+dapat mengaktifkan kembali model secara manual dari kartu tersebut.
 
 **REST API:**
 
-- `GET /api/resilience/model-cooldowns` — daftar lockout aktif
-- `DELETE /api/resilience/model-cooldowns` — pengaktifan ulang manual. Body: `{provider, connection, model}`. Autentikasi: management.
+- `GET /api/resilience/model-cooldowns` — mencantumkan penguncian aktif
+- `DELETE /api/resilience/model-cooldowns` — mengaktifkan kembali secara manual. Body: `{provider, connection, model}`. Auth: management.
 
-### Cooldown Manager
+### Pengelola Cooldown
 
-UI: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+UI: Pemantauan → Pengelola Cooldown (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-Satu halaman untuk setiap koneksi yang dikeluarkan dari routing karena alasan sementara, alih-alih
-membuka setiap halaman provider satu per satu. Halaman ini menampilkan cooldown koneksi, lockout model, dan
-status terminal, membersihkannya per koneksi, untuk satu pilihan, atau untuk semua koneksi milik suatu provider,
-serta mengedit aturan cooldown yang paling sering disesuaikan: `streamStallCooldown.enabled` dan
-cooldown dasar `connectionCooldown` untuk OAuth / API-key beserta langkah backoff maksimum (disimpan melalui
-`PATCH /api/resilience`). Status terminal (`banned`, `expired`, `credits_exhausted`)
-ditampilkan tetapi tidak pernah dibersihkan di sini.
+Satu halaman untuk setiap connection yang berada di luar routing karena alasan sementara, alih-alih
+membuka halaman setiap provider. Halaman ini mencantumkan cooldown connection, penguncian
+model, dan status terminal, menghapusnya per connection, untuk pilihan tertentu, atau untuk
+semua connection dari suatu provider, serta mengedit aturan cooldown yang paling sering
+disesuaikan: `streamStallCooldown.enabled` dan cooldown dasar `connectionCooldown` OAuth /
+API-key serta jumlah langkah backoff maksimum (disimpan melalui
+`PATCH /api/resilience`). Status terminal (`banned`, `expired`, `credits_exhausted`) dicantumkan
+tetapi tidak pernah dihapus di sini.
 
-**REST API** (`src/lib/resilience/cooldownManager.ts`, autentikasi: management):
+Kartu **Aturan cooldown error** di halaman yang sama mengedit aturan error operator
+(`settings.providerErrorRules`) dan default catch-all per provider
+(`settings.providerErrorDefaults`) melalui `PATCH /api/settings` — lihat "Aturan yang
+dideklarasikan operator" di §7 untuk cara pencocokannya. Durasi yang tersedia adalah Bawaan
+(tidak ada cooldown eksplisit), 30 menit, 1 jam, 5 jam, 24 jam, atau 1 hingga 43.200 menit
+(30 hari) khusus.
 
-- `GET /api/resilience/cooldowns[?provider=]` — koneksi dengan status, sisa cooldown,
-  level backoff, jenis error terakhir, dan lockout model (tanpa kredensial)
+**REST API** (`src/lib/resilience/cooldownManager.ts`, auth: management):
+
+- `GET /api/resilience/cooldowns[?provider=]` — connection dengan status, sisa cooldown,
+  level backoff, tipe error terakhir, dan penguncian model (tanpa kredensial)
 - `POST /api/resilience/cooldowns` — body `{connectionIds: string[]}` atau
   `{all: true, provider?}`; mengembalikan `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### UI pengaturan lockout + pemulihan success-decay (v3.8.23)
+### UI pengaturan penguncian + pemulihan success-decay (v3.8.23)
 
-Model lockout berubah dari perilaku hardcoded yang selalu aktif menjadi fitur
-opt-in yang sepenuhnya dapat dikonfigurasi dengan kartu pengaturan sendiri dan jalur pemulihan self-healing.
+Penguncian model berubah dari perilaku hardcode yang selalu aktif menjadi fitur yang sepenuhnya
+dapat dikonfigurasi dan bersifat opt-in, dengan kartu pengaturan tersendiri serta jalur
+pemulihan yang dapat memperbaiki dirinya sendiri.
 
-**Kartu pengaturan:** Settings → Model Lockout
+**Kartu pengaturan:** Pengaturan → Penguncian Model
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Kartu ini **berbeda** dari `ModelCooldownsCard` di atas yang bersifat read-only (yang hanya
-_menampilkan_ lockout aktif) — kartu baru ini _mengonfigurasi parameternya_. Nilai default
-ada di `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+Ini **berbeda** dari `ModelCooldownsCard` yang hanya-baca di atas (yang hanya
+_mencantumkan_ penguncian aktif) — kartu baru ini _mengonfigurasi parameternya_. Default
+berada di `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Pengaturan              | Default                          | Arti                                                              |
-| ----------------------- | -------------------------------- | ----------------------------------------------------------------- |
-| `enabled`               | `false`                          | Saklar utama — model lockout **nonaktif secara default**.         |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Status upstream yang dihitung sebagai kegagalan lingkup model.    |
-| `baseCooldownMs`        | `120_000` (120 s)                | Durasi lockout awal untuk kegagalan pertama.                      |
-| `maxCooldownMs`         | `1_800_000` (30 menit)           | Batas atas cooldown yang bertingkat.                              |
-| `maxBackoffSteps`       | `10`                             | Langkah eskalasi exponential-backoff maksimum.                    |
-| `useExponentialBackoff` | `true`                           | Apakah kegagalan berulang menaikkan cooldown secara eksponensial. |
+| Pengaturan              | Default                          | Arti                                                                            |
+| ----------------------- | -------------------------------- | ------------------------------------------------------------------------------- |
+| `enabled`               | `false`                          | Toggle utama — penguncian model **nonaktif secara default**.                    |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Status upstream yang dihitung sebagai kegagalan berskala model.                 |
+| `baseCooldownMs`        | `120_000` (120 s)                | Durasi penguncian awal untuk kegagalan pertama.                                 |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Batas atas cooldown yang meningkat.                                             |
+| `maxBackoffSteps`       | `10`                             | Jumlah maksimum langkah peningkatan exponential-backoff.                        |
+| `useExponentialBackoff` | `true`                           | Menentukan apakah kegagalan berulang meningkatkan cooldown secara eksponensial. |
 
-Pengaturan tersimpan melalui penyimpanan pengaturan normal dan divalidasi melalui
-skema pengaturan resilience; kartu tersebut membatasi (clamp) `baseCooldownMs`/`maxCooldownMs`
+Pengaturan disimpan melalui penyimpanan pengaturan normal dan divalidasi melalui skema
+pengaturan resilience; kartu membatasi `baseCooldownMs`/`maxCooldownMs`
 (dengan `maxCooldownMs ≥ baseCooldownMs`) dan `maxBackoffSteps`.
 
-**Pemulihan success-decay:** pemulihan **tidak** murni berdasarkan kedaluwarsa timer. Respons
-yang sehat menurunkan kembali jumlah kegagalan model sehingga model yang pulih
-di tengah jendela berhenti bertingkat (dan dibersihkan) sebelum timernya berakhir. Pada
-target combo yang berhasil, `open-sse/services/combo.ts` memanggil `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), yang **membagi dua**
-`failureCount` yang tersimpan (`Math.floor(failureCount / 2)`); ketika mencapai `0`, entri lockout
-dihapus sepenuhnya. Pasangannya, `recordModelLockoutFailure()`,
-menambah jumlah tersebut (dan menaikkan cooldown) pada kegagalan di dalam
-jendela eskalasi. Success-decay ini merupakan tambahan dari kedaluwarsa timer biasa —
-kedua jalur dapat mengaktifkan kembali suatu model.
+**Pemulihan success-decay:** pemulihan **tidak** semata-mata bergantung pada berakhirnya timer.
+Respons yang sehat menurunkan kembali jumlah kegagalan model sehingga model yang pulih
+di tengah-window berhenti mengalami peningkatan (dan dibersihkan) sebelum timer berakhir.
+Pada target combo yang berhasil, `open-sse/services/combo.ts` memanggil `decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`), yang **membagi dua** `failureCount` yang tersimpan
+(`Math.floor(failureCount / 2)`); ketika mencapai `0`, entri penguncian dihapus sepenuhnya.
+Pasangannya, `recordModelLockoutFailure()`, menambah jumlah tersebut (dan meningkatkan
+cooldown) pada kegagalan dalam window peningkatan. Success-decay ini merupakan tambahan
+dari berakhirnya timer biasa — kedua jalur tersebut dapat mengaktifkan kembali model.
 
-**State:** lockout disimpan **di memori** (`Map` per-proses berisi
-`ModelLockoutEntry` dengan kunci `provider:connectionId:model`, kunci lingkup-exact dengan
-`provider:connectionId:exact:model`), tidak disimpan ke
-DB — hilang saat restart. _Pengaturan_ disimpan secara persisten; _state_ lockout
-aktif bersifat ephemeral.
+**Status:** lockout disimpan **di dalam memori** (`Map`s per proses dari
+`ModelLockoutEntry` yang dikunci berdasarkan `provider:connectionId:model`, kunci dengan cakupan exact berdasarkan
+`provider:connectionId:exact:model`), bukan dipersistenkan ke
+DB — lockout tersebut hilang saat dimulai ulang. _Pengaturan_ dipersistenkan; _status lockout_ aktif bersifat sementara.
 
 ---
 
@@ -554,295 +563,325 @@ Jika diaktifkan, pembatalan pengawas hanya diterapkan pada upaya hulu yang aktif
 
 ---
 
-## 7. Penyajian Ulang Status Upstream (error kuota dengan status yang keliru)
+## 7. Restatement Status Upstream (kesalahan status kuota)
 
 **Cakupan:** satu gateway upstream yang melaporkan kehabisan kuota sementara dengan status HTTP yang salah.
 
-**Tujuan:** memperbaiki status yang menyesatkan SEBELUM klasifikasi, sehingga konsumen downstream (mesin fallback, agregasi combo, respons yang menghadap klien) melihat sifat kegagalan yang sebenarnya dapat dicoba ulang.
+**Tujuan:** memperbaiki status yang menyesatkan SEBELUM klasifikasi, sehingga konsumen downstream (mesin fallback, agregasi combo, respons yang ditujukan kepada klien) melihat sifat kegagalan yang sebenarnya dapat dicoba ulang.
 
-Beberapa gateway menandai kehabisan kuota SEMENTARA dengan status HTTP
-yang tidak dapat dicoba ulang. `agentrouter.org` mengembalikan `403` (kadang `400`) dengan body berbahasa Tionghoa
+Beberapa gateway menandai kehabisan kuota SEMENTARA dengan status HTTP yang tidak dapat dicoba ulang. `agentrouter.org` mengembalikan `403` (terkadang `400`) dengan body berbahasa Tionghoa
 (`用户额度不足` / `额度不足`) alih-alih `429` standar. Klien seperti Claude
-Code memperlakukan `403` sebagai permanen dan membatalkan sesi, dan tanpa koreksi
-mesin fallback akan mengklasifikasikannya sebagai `AUTH_ERROR` alih-alih peristiwa
-kuota.
+Code menganggap `403` sebagai kesalahan permanen dan menghentikan sesi, dan tanpa
+koreksi mesin fallback akan mengklasifikasikannya sebagai `AUTH_ERROR`, bukan
+sebagai peristiwa kuota.
 
 **Implementasi:**
 
-- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` —
-  daftar aturan per penyedia (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), dicocokkan melalui `applyStatusRestatement()`.
-- Lokasi pemanggilan: blok `providerFailure:` di `open-sse/handlers/chatCore.ts`
+- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` — daftar
+  aturan per penyedia (`{id, fromStatuses, toStatus, textMarkers,
+excludeMarkers, defaultRetryAfterMs}`), yang dicocokkan melalui
+  `applyStatusRestatement()`.
+- Call site: blok `providerFailure:` di `open-sse/handlers/chatCore.ts`
   (sekitar baris 3654), tepat setelah `parseUpstreamError()` mengurai respons
   upstream dengan status HTTP error (`!providerResponse.ok`), dan sebelum
   klasifikasi apa pun dijalankan, sehingga setiap konsumen downstream melihat
-  status yang telah dikoreksi. Error yang tertanam di dalam stream SSE `200`
-  mengikuti jalur penguraian stream yang terpisah dan terjadi kemudian, serta
-  **tidak** dicakup oleh hook ini saat ini — keterbatasan yang diketahui,
-  belum diperlukan untuk kesalahan status agentrouter (yang muncul sebagai
-  status HTTP error).
-- Kelayakan retry: `429` ada di `RETRY_AFTER_ELIGIBLE_STATUSES`
+  status yang telah dikoreksi. Error yang disisipkan di dalam stream SSE
+  `200` mengikuti jalur parsing stream terpisah yang dijalankan kemudian dan
+  **belum** tercakup oleh hook ini — keterbatasan yang diketahui dan belum
+  diperlukan untuk kesalahan status agentrouter (yang muncul sebagai status
+  HTTP error).
+- Kelayakan percobaan ulang: `429` terdapat di
+  `RETRY_AFTER_ELIGIBLE_STATUSES`
   (`open-sse/services/combo/unavailableRetryGate.ts`), sehingga error yang
-  disajikan ulang membawa jendela retry yang nyata alih-alih muncul sebagai
-  `403` mati.
-- `defaultRetryAfterMs` sintetis `60s` (`upstreamStatusRestatement.ts`)
-  hanyalah apa yang diberitahukan respons yang disajikan ulang kepada
-  **klien**; itu sendiri bukan durasi cooldown/lockout internal koneksi —
-  hal itu diatur secara terpisah oleh mekanisme apa pun yang benar-benar
-  menangani error yang disajikan ulang (backoff bertingkat Connection
-  Cooldown, §2, dasar `3s` untuk penyedia API-key; atau Model Lockout, §3,
-  untuk penyedia kuota per model seperti agentrouter). Router dapat menjadi
-  layak untuk mencoba ulang secara internal lebih cepat daripada jendela 60
-  detik yang diiklankannya kepada klien — ruang cadangan yang disengaja,
-  bukan bug.
+  telah di-restatement membawa jendela percobaan ulang yang nyata, alih-alih
+  muncul sebagai `403` yang tidak dapat dipulihkan.
+- `defaultRetryAfterMs` sintetis sebesar `60s` (`upstreamStatusRestatement.ts`)
+  hanya merupakan informasi yang disampaikan respons hasil restatement kepada
+  **klien**; nilai ini bukan durasi cooldown/lockout internal koneksi — durasi
+  tersebut diatur secara terpisah oleh mekanisme yang benar-benar menangani
+  error hasil restatement (backoff bertingkat Connection Cooldown, §2, dengan
+  nilai dasar `3s` untuk penyedia berbasis API-key; atau Model Lockout, §3, untuk
+  penyedia berbasis kuota per model seperti agentrouter). Router dapat menjadi
+  eligible untuk mencoba ulang secara internal sebelum jendela `60s` yang
+  diberitahukan kepada klien berakhir — ini merupakan kelonggaran yang
+  disengaja, bukan bug.
 
-Error permanen (`无权访问模型` milik agentrouter — tidak ada akses ke model ini)
-TIDAK PERNAH disajikan ulang: `excludeMarkers` memveto aturan bahkan ketika
+Error permanen (`无权访问模型` milik agentrouter — tidak memiliki akses ke model
+ini) TIDAK PERNAH di-restatement: `excludeMarkers` membatalkan aturan meskipun
 `textMarkers` cocok, sehingga error mempertahankan status aslinya dan tidak ada
-yang mencobanya ulang selamanya. Aturan klasifikasi penyedia yang cocok
+yang mencoba ulang tanpa batas. Aturan klasifikasi penyedia yang cocok
 (`agentrouter-model-access-denied` di `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, cooldown dasar `6h` yang dideklarasikan)
-dikonsultasikan oleh `checkFallbackError` (`open-sse/services/accountFallback.ts`)
-_sebelum_ early-return `FORBIDDEN` kategori apikey generik, digerbangi oleh
+`reason: "auth_error"`, `scope: "model"`, base cooldown yang dideklarasikan
+`6h`) dikonsultasikan oleh `checkFallbackError`
+(`open-sse/services/accountFallback.ts`)
+_sebelum_ early-return kategori apikey generik `FORBIDDEN`, dengan syarat
 `honorsRuleLockScope(provider)` (#10334 — saat ini eksklusif untuk agentrouter
 melalui allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` di
-`providerErrorRules.ts`). Cooldown 6 jam yang dideklarasikan aturan mengalir
-sebagai `fallbackResult.baseCooldownMs`, tetapi tetap masuk ke jalur lockout
-kuota per model yang sudah ada sebelumnya (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, tidak diubah oleh #10334 kecuali untuk sumber
-cooldown): dibatasi ke `mlSettings.maxCooldownMs` milik operator
-(default `1_800_000ms` / 30 menit), seperti setiap model lockout lainnya, dan
-_alasan lockout yang dipersistensi_ tetap `"forbidden"` hardcoded yang sudah ada
-sebelumnya, bukan `"auth_error"` milik aturan — hanya durasi cooldown yang
-dihormati secara end-to-end, bukan string alasannya. Koneksi itu sendiri tetap
-aktif; model-model saudara pada koneksi yang sama tidak terpengaruh.
+`providerErrorRules.ts`). Cooldown 6 jam yang dideklarasikan aturan tersebut
+diteruskan sebagai `fallbackResult.baseCooldownMs`, tetapi tetap masuk ke jalur
+lockout per model berbasis kuota yang sudah ada
+(`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, yang tidak berubah oleh #10334 selain sumber
+cooldown): nilainya dibatasi oleh `mlSettings.maxCooldownMs` milik operator
+(default `1_800_000ms` / 30 menit), seperti semua lockout model lainnya, dan
+_alasan lockout yang disimpan_ tetap berupa `"forbidden"` hardcode yang sudah
+ada, bukan `"auth_error"` milik aturan — hanya durasi cooldown yang dihormati
+secara menyeluruh, bukan string alasannya. Koneksi itu sendiri tetap aktif;
+model-model saudara pada koneksi yang sama tidak terpengaruh.
 
-Error kuota yang disajikan ulang (`额度不足`) mencapai aturan penyedia di
-produksi (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
+Error kuota hasil restatement (`额度不足`) mencapai aturan penyedia di produksi
+(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
 "connection"`, tanpa cooldown yang dideklarasikan sendiri — default backoff
-berskala lapisan persistensi yang berlaku). Sejak #10334, `scope` pada
-`ProviderErrorRuleMatch` BENAR-BENAR dikonsumsi secara end-to-end, tetapi
-**hanya** untuk penyedia dalam allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-(`providerErrorRules.ts` — hari ini hanya `"agentrouter"`, digerbangi melalui
-`honorsRuleLockScope()`). Untuk setiap penyedia lainnya, `scope` tetap bersifat
-informasional, persis seperti sebelum #10334.
-`checkFallbackError` memunculkan scope aturan yang cocok sebagai
+berskala milik lapisan persistensi yang berlaku). Sejak #10334, `scope` pada
+`ProviderErrorRuleMatch` DIKONSUMSI secara menyeluruh, tetapi **hanya** untuk
+penyedia dalam allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
+(`providerErrorRules.ts` — saat ini hanya `"agentrouter"`, melalui
+`honorsRuleLockScope()`). Untuk penyedia lainnya, `scope` tetap bersifat
+informasi, persis seperti sebelum #10334.
+`checkFallbackError` meneruskan scope aturan yang cocok sebagai
 `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
-(`src/sse/services/auth.ts`) adalah guard bersama yang mengonfirmasi bahwa
-`ruleScope` benar-benar aman untuk dihormati sebagai sinyal cakupan koneksi
-yang dapat pulih sendiri (scope `"connection"`, alasan `quota_exhausted`,
-tidak pernah `permanent`, tidak pernah `creditsExhausted` — pertahanan
-terhadap kemungkinan aturan di masa depan yang memasangkan scope
-`"connection"` dengan status akun permanen). Dua konsumen memanggilnya:
+(`src/sse/services/auth.ts`) adalah guard bersama yang memastikan bahwa
+`ruleScope` benar-benar aman untuk diterapkan sebagai sinyal pemulihan mandiri
+yang berlaku di seluruh koneksi (scope `"connection"`, reason
+`quota_exhausted`, tidak pernah `permanent`, tidak pernah `creditsExhausted` —
+sebagai perlindungan terhadap kemungkinan aturan di masa mendatang yang
+memasangkan scope `"connection"` dengan status akun permanen). Dua konsumen
+memanggilnya:
 
 - **Persistensi** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  alih-alih jatuh ke cabang lockout **per-model** passthrough-provider
-  (agentrouter adalah `passthroughModels: true` → `hasPerModelQuota()`
-  mengembalikan `true`), ia menerapkan **cooldown koneksi sementara** —
-  `testStatus: "unavailable"` + `rateLimitedUntil`, tidak pernah status
+  alih-alih masuk ke cabang penguncian **per-model** passthrough-provider
+  (`agentrouter` memiliki `passthroughModels: true` → `hasPerModelQuota()`
+  mengembalikan `true`), mekanisme ini menerapkan **cooldown koneksi sementara** —
+  `testStatus: "unavailable"` + `rateLimitedUntil`, tidak pernah menjadi status
   terminal (`credits_exhausted`/`banned`/`expired`) — sehingga koneksi pulih
-  sendiri begitu cooldown berakhir, alih-alih memerlukan reset kredensial
-  manual. Dilewati untuk koneksi dengan `disableCooling: true` (#2997):
-  opt-out tersebut justru diteruskan ke lockout per-model (trade-off yang
-  terdokumentasi — lihat komentar kode di atas cabang tersebut).
-- **Routing combo same-request** (`applyComboTargetExhaustion()`,
+  sendiri setelah cooldown berakhir, tanpa memerlukan reset kredensial manual.
+  Dilewati untuk koneksi dengan `disableCooling: true` (#2997): opt-out tersebut
+  justru diteruskan ke penguncian per-model (trade-off yang telah
+  didokumentasikan — lihat komentar kode di atas cabang tersebut).
+- **Perutean combo dalam permintaan yang sama** (`applyComboTargetExhaustion()`,
   `open-sse/services/combo/targetExhaustion.ts`): guard yang sama menandai
   koneksi ke dalam set `exhaustedConnections` di memori, dengan kunci
-  `${provider}:${connectionId}`. Ini hanya melewati target SAME-REQUEST
-  tersisa yang _dirinya sendiri sudah membawa `connectionId` yang persis
-  itu_ pada objek targetnya sendiri (`getExhaustedTargetSkipReason()`,
+  `${provider}:${connectionId}`. Ini hanya melewati target SAME-REQUEST yang
+  tersisa dan _target itu sendiri sudah membawa `connectionId` yang persis sama_
+  pada objek targetnya sendiri (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
 connectionId)` sebelum pencarian `exhaustedConnections`) — combo daftar-model
-  biasa, di mana target-target selevel tidak membawa `connectionId` ter-pin
-  miliknya sendiri dan sebuah `connectionId` hanya diresolusi per-dispatch
-  dari header `X-OmniRoute-Selected-Connection-Id` pada respons, tidak pernah
-  mencapai kecocokan kunci tersebut. Untuk kasus umum itu, perlindungan
-  sesungguhnya terhadap leg tersisa yang memakai ulang akun yang baru saja
-  exhausted BUKANlah Set ini — melainkan lapisan persistensi di atas
-  (`rateLimitedUntil` koneksi kini berada di masa depan) yang dipadukan dengan
-  guard yang sama ini menekan `transientRateLimitedProviders` untuk kegagalan
-  tersebut (lihat "Desain dua tahap" dan komentar kode pada cabang
-  `isAgentrouterConnectionQuotaScope` di `targetExhaustion.ts`): dengan Set
-  itu dibiarkan tidak ditandai, force-allow `allowRateLimitedConnection`
-  milik `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`)
-  TIDAK ikut berlaku untuk leg-leg tersisa provider tersebut, sehingga filter
-  `rateLimitedUntil` milik pemilihan kredensial
-  (`src/sse/services/auth.ts:1238`) dipatuhi secara normal dan leg tersisa
-  entah memilih koneksi agentrouter lain yang masih eligible atau gagal tanpa
-  kredensial yang tersedia — ia tidak memaksa jalannya kembali ke koneksi
-  yang baru saja di-cooldown oleh cabang ini.
+  biasa, yang target saudaranya tidak membawa `connectionId` tersemat miliknya
+  sendiri dan hanya diselesaikan per-dispatch dari header
+  `X-OmniRoute-Selected-Connection-Id` pada respons, tidak pernah menemukan
+  kecocokan kunci tersebut. Untuk kasus umum itu, perlindungan sebenarnya
+  terhadap leg yang tersisa agar tidak menggunakan kembali akun yang baru saja
+  kehabisan kuota BUKAN set ini — melainkan lapisan persistensi di atas
+  (`rateLimitedUntil` koneksi kini berada di masa mendatang), yang digabungkan
+  dengan guard yang sama untuk menekan `transientRateLimitedProviders` pada
+  kegagalan (lihat "Desain dua tahap" dan komentar kode pada cabang
+  `isAgentrouterConnectionQuotaScope` di `targetExhaustion.ts`): karena set
+  tersebut tidak ditandai, force-allow `allowRateLimitedConnection` milik
+  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) TIDAK
+  aktif untuk leg penyedia yang tersisa, sehingga filter
+  `rateLimitedUntil` pada pemilihan kredensial (`src/sse/services/auth.ts:1238`)
+  dipatuhi secara normal dan leg yang tersisa akan memilih koneksi agentrouter
+  lain yang masih memenuhi syarat atau gagal karena tidak ada kredensial yang
+  tersedia — leg tersebut tidak memaksa kembali ke koneksi yang baru saja
+  didinginkan oleh cabang ini.
 
-### Desain dua tahap: restatement status, lalu klasifikasi
+### Desain dua tahap: penyataan ulang status, lalu klasifikasi
 
-Restatement status (`upstreamStatusRestatement.ts`) dan aturan klasifikasi
-provider (`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`)
-adalah registri terpisah yang keduanya berkunci pada id provider dan penanda
-teks, tetapi keduanya berjalan di tempat yang berbeda dan melayani tujuan
-yang berbeda: restatement menulis ulang status HTTP lebih awal di
-`chatCore.ts`; aturan klasifikasi memilih `reason` fallback dan mengunci
-`scope` (`model` / `provider` / `connection`) di dalam `checkFallbackError()`
-(`open-sse/services/accountFallback.ts`).
+Penyataan ulang status (`upstreamStatusRestatement.ts`) dan aturan klasifikasi
+penyedia (`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) adalah registry terpisah yang sama-sama menggunakan id
+penyedia dan penanda teks sebagai kunci, tetapi dijalankan di tempat yang
+berbeda dan memiliki tujuan yang berbeda: penyataan ulang menulis ulang status
+HTTP lebih awal di `chatCore.ts`; aturan klasifikasi memilih `reason` fallback
+dan mengunci `scope` (`model` / `provider` / `connection`) di dalam
+`checkFallbackError()` (`open-sse/services/accountFallback.ts`).
 
-Aturan klasifikasi hanya melihat **teks** error lengkap (diperlukan untuk
-mencocokkan penanda body seperti `额度不足`) untuk provider yang tercantum
-dalam allowlist `FULL_TEXT_RULE_PROVIDERS` di `providerErrorRules.ts` — saat
-ini hanya `"agentrouter"`. Untuk setiap provider **katalog bawaan** lainnya,
-`checkFallbackError` hanya menyerahkan error terstruktur (`{code, type}`) ke
-`getProviderErrorRuleMatch`, yang cukup untuk aturan berbasis
-header/status/kode tetapi buta terhadap penanda teks body. Helper
-`resolveRuleMatchBody()` melakukan pemilihan ini: teks error lengkap untuk
-provider yang di-allowlist, error terstruktur untuk selebihnya. Menambahkan
-provider **bawaan** ke `FULL_TEXT_RULE_PROVIDERS` adalah opt-in eksplisit
-per-provider — mekanisme ini ada agar jalur default untuk setiap provider
-yang tidak ada dalam daftar tetap tidak berubah byte demi byte.
+Aturan klasifikasi hanya melihat **teks** kesalahan lengkap (diperlukan untuk
+mencocokkan penanda body seperti `额度不足`) untuk penyedia yang tercantum dalam
+allowlist `FULL_TEXT_RULE_PROVIDERS` di `providerErrorRules.ts` — saat ini hanya
+`"agentrouter"`. Untuk setiap penyedia **katalog bawaan** lainnya,
+`checkFallbackError` hanya memberikan kesalahan terstruktur (`{code, type}`)
+kepada `getProviderErrorRuleMatch`, yang cukup untuk aturan berbasis
+header/status/code tetapi tidak dapat melihat penanda teks body.
+Helper `resolveRuleMatchBody()` melakukan pemilihan ini: teks kesalahan lengkap
+untuk penyedia dalam allowlist, dan kesalahan terstruktur untuk penyedia
+lainnya. Menambahkan penyedia **bawaan** ke `FULL_TEXT_RULE_PROVIDERS` adalah
+opt-in eksplisit per penyedia — mekanisme ini ada agar jalur default untuk setiap
+penyedia yang tidak berada dalam daftar tetap tidak berubah byte demi byte.
 
-`scope` suatu aturan (`model` / `provider` / `connection`) adalah opt-in
-yang terpisah dari `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` hanya
-menampilkannya sebagai `fallbackResult.ruleScope`, dan konsumen downstream
-hanya mematuhinya sebagai lebih dari sekadar label informasional, untuk
-provider dalam allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` di file yang sama
-(digerbangi melalui `honorsRuleLockScope()` — saat ini hanya
-`"agentrouter"`). Lihat "Error kuota yang dinyatakan ulang" di atas untuk apa
-yang sebenarnya dilakukan oleh kecocokan `scope: "connection"` setelah sebuah
-provider berada di allowlist tersebut.
+`scope` suatu aturan (`model` / `provider` / `connection`) adalah opt-in yang
+terpisah dari `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` hanya
+menampilkannya sebagai `fallbackResult.ruleScope`, dan konsumen downstream hanya
+menghormatinya sebagai sesuatu selain label informasional untuk penyedia yang
+tercantum dalam allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` di file yang sama
+(dikendalikan melalui `honorsRuleLockScope()` — saat ini hanya
+`"agentrouter"`). Lihat "Kesalahan kuota yang dinyatakan ulang" di atas untuk
+penjelasan tentang apa yang sebenarnya dilakukan kecocokan
+`scope: "connection"` setelah penyedia berada dalam allowlist tersebut.
 
 **#11104 — aturan yang dideklarasikan operator melewati kedua allowlist.**
-Operator dapat mendeklarasikan aturan per-provider saat runtime melalui
+Operator dapat mendeklarasikan aturan per penyedia saat runtime melalui
 `settings.providerErrorRules`
 (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-tanpa mengedit file ini. Mengerbangi aturan operator di balik
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — allowlist
-yang dimaksudkan untuk melindungi perilaku **default** aturan katalog bawaan —
-akan membuat mekanisme pengaturan menjadi inert untuk setiap provider kecuali
-yang sudah tercantum di sana, karena mendeklarasikan aturan itu sendiri sudah
-merupakan opt-in eksplisit dari operator. `resolveRuleMatchBody()` dan
-`honorsRuleLockScope()` sama-sama memeriksa `hasOperatorRuleForProvider()`
-terlebih dahulu: provider dengan aturan operator mendapatkan teks error
-mentah dan `scope` yang dideklarasikannya dipatuhi, terlepas dari apakah
-provider itu juga muncul di salah satu allowlist.
+tanpa mengedit file ini. Menempatkan aturan operator di balik
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — allowlist yang
+dimaksudkan untuk melindungi perilaku **default** aturan katalog bawaan — akan
+membuat mekanisme settings tidak berfungsi untuk setiap penyedia kecuali yang
+sudah tercantum di sana, karena deklarasi aturan tersebut sudah merupakan
+opt-in eksplisit dari operator. `resolveRuleMatchBody()` dan
+`honorsRuleLockScope()` sama-sama memeriksa `hasOperatorRuleForProvider()` lebih
+dahulu: penyedia yang memiliki aturan operator akan mendapatkan teks kesalahan
+mentah dan `scope` yang dideklarasikannya akan dihormati, terlepas dari apakah
+penyedia tersebut juga muncul dalam salah satu allowlist.
 
-**Celah yang diketahui — `providerRuleRegistry` tidak pernah dikonsultasikan
-untuk HTTP 400.** Cabang `BAD_REQUEST` milik `checkFallbackError`
-mengklasifikasikan status 400 sepenuhnya melalui array polanya sendiri
-(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`, dll. di
-`accountFallback.ts`) dan return sebelum cabang
-`configuredRule`/`getProviderErrorRuleMatch` di atasnya tercapai. Aturan
-katalog bawaan (atau aturan operator) dengan `status: 400` valid secara
-sintaksis tetapi tidak akan pernah terpicu. Belum ada aturan yang menargetkan
-400 saat ini, jadi tidak ada apa pun di produksi yang terpengaruh — tetapi
-aturan 400 di masa depan mengharuskan cabang ini disentuh terlebih dahulu,
-yang merupakan perubahan lebih besar daripada sekadar menambahkan aturan
-(perubahan itu mengklasifikasi ulang 400 untuk setiap provider yang sudah
-bergantung pada perilaku array pola) dan berada di luar cakupan penambahan
-aturan untuk satu provider.
+**Aturan yang dideklarasikan operator** (`OperatorProviderErrorRule`): setiap
+aturan memiliki `status` opsional dan `match` opsional (substring biasa yang
+tidak membedakan huruf besar-kecil dari teks kesalahan, bukan RegExp, sehingga
+tidak dapat menyebabkan ReDoS), dan harus menetapkan setidaknya salah satunya.
+Jika keduanya ditetapkan, keduanya digabungkan dengan AND; field yang dihilangkan
+cocok dengan apa pun, sehingga `{match: "insufficient_quota"}` cocok dengan
+status apa pun yang membawa kode tersebut. Aturan pertama yang cocok akan
+digunakan. `cooldownMs` menerima hingga 30 hari; total maksimal 50 aturan.
+
+**Default serba-cakup** (`settings.providerErrorDefaults`, opt-in, ditetapkan melalui
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+dengan `cooldownMs` dari 1 menit hingga 30 hari. Default hanya berlaku jika tidak
+ada aturan operator maupun aturan katalog bawaan yang cocok, dan hanya untuk error
+402, 403, 408, 429, dan 5xx. Error berbentuk permintaan (400, 404, 409, 413, 422)
+dan 401 tanpa detail tetap menggunakan penanganannya sendiri. Jika tidak ada
+`reason` yang eksplisit, alasan diambil dari status, dengan cara yang sama seperti
+yang dilakukan `classifyError`. Mendeklarasikan default dianggap sebagai aturan
+operator oleh `hasOperatorRuleForProvider()`, sehingga `scope`-nya (default
+`"connection"`) diterapkan. Cooldown efektif dari sebuah default adalah yang lebih
+lama antara `cooldownMs`-nya dan petunjuk percobaan ulang milik provider
+(`Retry-After`, `x-ratelimit-reset`, atau petunjuk reset di body, yaitu petunjuk
+yang sama yang diterapkan engine saat pengaturan connection-cooldown
+"use upstream retry hints" aktif), sehingga default dapat memperpanjang petunjuk
+upstream yang singkat, tetapi tidak pernah mempersingkat reset yang sebenarnya.
+Aturan operator eksplisit mempertahankan `cooldownMs`-nya secara persis. Baik
+aturan maupun default tidak melewati guard connection-cooldown di
+`markAccountUnavailable`: cooldown aktif yang lebih lama tidak pernah dipersingkat
+dan status terminal tidak pernah ditimpa. Detektor teks bawaan yang berjalan lebih
+awal di `checkFallbackError` (kredit habis, kuota harian, akun dinonaktifkan) tetap
+mendapat prioritas untuk frasa masing-masing.
+
+**Kesenjangan yang diketahui — `providerRuleRegistry` tidak pernah diperiksa untuk HTTP 400.**
+Cabang `BAD_REQUEST` pada `checkFallbackError` sepenuhnya mengklasifikasikan status
+400 melalui array pola miliknya sendiri (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS`, dan sebagainya di `accountFallback.ts`) dan keluar
+sebelum cabang `configuredRule`/`getProviderErrorRuleMatch` di atasnya tercapai.
+Aturan katalog bawaan (atau aturan operator) dengan `status: 400` valid secara
+sintaksis, tetapi tidak akan pernah dijalankan. Saat ini tidak ada aturan yang
+menargetkan 400, sehingga tidak ada dampak pada production — tetapi aturan 400 di
+masa mendatang perlu menyentuh cabang ini terlebih dahulu, yang merupakan perubahan
+lebih besar daripada sekadar menambahkan aturan (perubahan ini
+mengklasifikasikan ulang 400 untuk setiap provider yang sudah mengandalkan perilaku
+array pola tersebut) dan berada di luar cakupan penambahan aturan untuk satu
+provider.
 
 ### Menambahkan gateway baru yang salah menyatakan kuota
 
 1. Daftarkan satu array aturan di `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). Jaga agar `textMarkers`
-   tetap spesifik per provider; jangan pernah memakai ulang frasa bahasa Inggris
-   generik yang bertabrakan dengan
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`).
+   (`open-sse/config/upstreamStatusRestatement.ts`). Pertahankan `textMarkers`
+   khusus untuk provider; jangan pernah menggunakan ulang frasa bahasa Inggris
+   generik yang bertabrakan dengan `CREDITS_EXHAUSTED_SIGNALS`
+   (`open-sse/services/accountFallback.ts`).
 2. Secara opsional, daftarkan aturan klasifikasi di
    `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) untuk memilih
    cakupan lock yang tepat (`connection` untuk kuota seluruh akun, `model` untuk
-   error per model). Langkah ini hanya berlaku di produksi untuk
-   provider yang aturannya memerlukan teks error lengkap (penanda body): tambahkan
-   id provider ke `FULL_TEXT_RULE_PROVIDERS` di file yang sama — jika tidak,
-   `checkFallbackError` hanya akan meneruskan error terstruktur
-   `{code, type}` ke aturan tersebut, dan aturan berbasis teks body tidak akan
-   pernah cocok dengan trafik langsung.
-   Aturan yang cocok murni berdasarkan `status`/`headers` (seperti milik Opencode
-   atau Minimax) tidak memerlukan opt-in ini. Secara terpisah, jika aturan
-   mendeklarasikan `scope: "connection"` dan maksudnya adalah cooldown seluruh
-   koneksi yang sebenarnya ditambah pelewatan combo pada permintaan yang sama
-   (bukan sekadar label informasional), tambahkan id provider ke
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` di file yang sama — inilah yang mengontrol
-   konsumsi ala `isAgentrouterConnectionQuotaScope()` di
-   `markAccountUnavailable()` (`src/sse/services/auth.ts`) dan
-   `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); tanpanya, `scope`
-   tetap mengalir melalui `fallbackResult.ruleScope` tetapi tidak ada yang
-   menindaklanjutinya.
-3. Tambahkan unit test yang mencerminkan `tests/unit/upstream-status-restatement.test.ts`
-   dan `tests/unit/agentrouter-error-rules.test.ts` (termasuk pengaman
-   not-permanent / not-creditsExhausted, dan — jika provider memerlukan
-   allowlist — sebuah test yang memastikan `resolveRuleMatchBody()` mengembalikan
+   error per model). Langkah ini hanya berlaku di production untuk provider yang
+   aturannya memerlukan teks error lengkap (penanda body): tambahkan id provider ke
+   `FULL_TEXT_RULE_PROVIDERS` di file yang sama — jika tidak, `checkFallbackError`
+   hanya akan memberikan error terstruktur `{code, type}` kepada aturan tersebut dan
+   aturan berbasis teks body tidak akan pernah cocok dengan traffic langsung.
+   Aturan yang hanya mencocokkan `status`/`headers` (seperti milik Opencode atau
+   Minimax) tidak memerlukan opt-in ini. Secara terpisah, jika aturan mendeklarasikan
+   `scope: "connection"` dan tujuannya adalah cooldown seluruh koneksi yang
+   sebenarnya sekaligus combo skip untuk request yang sama (bukan sekadar label
+   informatif), tambahkan id provider ke `HONORS_RULE_LOCK_SCOPE_PROVIDERS` di file
+   yang sama — inilah yang mengatur konsumsi bergaya
+   `isAgentrouterConnectionQuotaScope()` di `markAccountUnavailable()`
+   (`src/sse/services/auth.ts`) dan `applyComboTargetExhaustion()`
+   (`open-sse/services/combo/targetExhaustion.ts`); tanpanya, `scope` tetap mengalir
+   melalui `fallbackResult.ruleScope`, tetapi tidak ada tindakan yang dilakukan
+   terhadapnya.
+3. Tambahkan pengujian unit yang meniru
+   `tests/unit/upstream-status-restatement.test.ts`
+   dan `tests/unit/agentrouter-error-rules.test.ts` (termasuk guard
+   not-permanent / not-creditsExhausted, serta — jika provider memerlukan
+   allowlist — pengujian yang memastikan `resolveRuleMatchBody()` mengembalikan
    teks lengkap hanya untuk provider tersebut).
 
 Tidak diperlukan perubahan pada `chatCore.ts`, `classifyError`, atau combo.
 
-#### Penguncian berbasis bucket egress (#10880)
+#### Lock berbasis bucket egress (#10880)
 
 Provider dalam `EGRESS_BUCKETED_LOCK_PROVIDERS` (keluarga opencode) diperlakukan
-sebagai upstream yang ter-bucket per IP (tier gratis opencode ter-bucket per IP,
-bukan ter-bucket per akun — lihat #9611): sebuah status-429 yang diklasifikasikan
-sebagai `quota_exhausted` **atau** `rate_limit_exceeded` akan mendinginkan setiap
-koneksi keluarga yang masuk allowlist yang IP egress terakhirnya yang diketahui
-cocok dengan milik koneksi yang gagal, sebelum rotasi sempat mencobanya
-— sehingga menghindari N-1 panggilan upstream yang pasti gagal (pola yang sama
-seperti #10460/#10525).
-`rate_limit_exceeded` disertakan secara sengaja: di jalur `markAccountUnavailable`
-aturan spesifik opencode tidak pernah cocok (tidak ada headers/body yang diberikan
-ke `checkFallbackError`, opencode tidak ada di `FULL_TEXT_RULE_PROVIDERS`), sehingga
-429 yang body-nya memuat teks kuota langganan ("monthly usage limit
-reached") diklasifikasikan sebagai `quota_exhausted` oleh fallback teks-kuota
+sebagai upstream berbasis bucket IP (free tier opencode berbasis IP, bukan berbasis
+akun — lihat #9611): status-429 yang diklasifikasikan sebagai `quota_exhausted`
+**atau** `rate_limit_exceeded` mendinginkan setiap koneksi dari keluarga yang
+diizinkan yang IP egress terakhirnya diketahui cocok dengan IP koneksi yang gagal,
+sebelum rotasi dapat mencoba koneksi tersebut
+— sehingga menghindari pemanggilan upstream yang dijamin gagal sebanyak N-1
+(bentuk yang sama seperti #10460/#10525).
+`rate_limit_exceeded` disertakan secara sengaja: pada jalur
+`markAccountUnavailable`, aturan khusus opencode tidak pernah cocok (tidak ada
+headers/body yang diberikan ke `checkFallbackError`, opencode tidak termasuk dalam
+`FULL_TEXT_RULE_PROVIDERS`), sehingga 429 yang body-nya memuat teks kuota
+langganan ("monthly usage limit reached") diklasifikasikan sebagai
+`quota_exhausted` oleh fallback teks kuota
 (`buildSubscriptionQuotaFallback`, `accountFallback.ts`; cooldown 1 jam) sebelum
-aturan `status_429` pernah tercapai — sementara 429 tanpa teks kuota (rate
-limiting biasa) diklasifikasikan melalui aturan `status_429` sebagai
+aturan `status_429` tercapai — sementara 429 tanpa teks kuota (pembatasan laju
+biasa) diklasifikasikan melalui aturan `status_429` sebagai
 `rate_limit_exceeded` dan tetap mendinginkan keluarga IP tersebut. Untuk provider
-yang masuk allowlist, rate limit yang ter-bucket per IP adalah sinyal yang sama
-dengan kuota yang habis. Batasan yang jujur:
+yang diizinkan, rate limit berbasis IP merupakan sinyal yang sama dengan kuota yang
+habis. Batasan yang wajar:
 
-- **Upaya terbaik (best-effort)**: kunci menyelesaikan `egress_ip` terakhir
-  yang diketahui milik koneksi dari `proxy_logs` (jendela 24 jam, sinkron,
-  tanpa cache). Cache dingin (IP egress tidak pernah diperiksa) atau tidak ada
-  baris → koneksi yang gagal tetap didinginkan oleh cabang ini (dicatat seperti
-  biasa), hanya saja tidak ada sibling yang dikunci.
-- **Tidak pernah terminal**: cooldown adalah jendela kuota yang terus
-  diperbarui (`testStatus: "unavailable"`); status permanen tidak pernah
-  diturunkan dari sinyal tingkat IP. Koneksi `disableCooling` melewati cabang
-  ini sepenuhnya.
-- **Granularitas kunci berubah untuk keluarga yang di-allowlist**: ini adalah
-  perubahan cakupan, bukan sekadar optimasi sibling. opencode adalah provider
-  `passthroughModels`, jadi sebelum cabang ini kode 429 menghasilkan penguncian
-  per-MODEL; kini menghasilkan cooldown koneksi — termasuk untuk operator yang
-  menjalankan satu koneksi tanpa sibling sama sekali. Itulah granularitas yang
-  sudah dideklarasikan benar oleh tabel aturan opencode
-  (`scope: "connection"`, `providerErrorRules.ts`), yang selama ini tidak
-  pernah diterapkan karena opencode tidak ada di
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Cabang ini menulis sendiri cooldown
-  koneksi yang gagal + `backoffLevel`, meniru cabang agentrouter yang
-  bercakupan koneksi, lalu kembali — blok per-model dan jalur generik di bawah
-  tidak pernah tercapai.
-- **Combo disertakan**: seperti cabang agentrouter, cakupan ini dengan sengaja
+- **Upaya terbaik**: lock menyelesaikan `egress_ip` terakhir yang diketahui dari koneksi
+  melalui `proxy_logs` (jendela 24 jam, sinkron, tanpa cache). Cache dingin (IP
+  egress belum pernah diproba) atau tidak ada baris → koneksi yang gagal tetap
+  didinginkan oleh branch (dicatat seperti saat ini), hanya sibling yang tidak
+  di-lock.
+- **Tidak pernah terminal**: cooldown adalah jendela kuota yang diperbarui
+  (`testStatus: "unavailable"`); state permanen tidak pernah diturunkan dari
+  sinyal tingkat IP. Koneksi `disableCooling` melewati branch sepenuhnya.
+- **Granularitas lock berubah untuk keluarga yang di-allowlist**: ini adalah
+  perubahan scope, bukan hanya optimasi sibling. opencode adalah provider
+  `passthroughModels`, sehingga sebelum branch ini, 429 menghasilkan lockout
+  per-MODEL; sekarang 429 menghasilkan cooldown koneksi — termasuk bagi operator
+  yang menjalankan satu koneksi tanpa sibling sama sekali. Itulah granularitas
+  yang sudah dinyatakan benar oleh tabel aturan opencode (`scope: "connection"`,
+  `providerErrorRules.ts`), tetapi sejauh ini tidak pernah dipatuhi karena opencode
+  tidak ada di `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Branch ini menulis cooldown
+  koneksi yang gagal + `backoffLevel` itu sendiri, meniru branch
+  agentrouter dengan scope koneksi, lalu mengembalikan hasil — blok per-model dan
+  jalur generik di bawahnya tidak pernah tercapai.
+- **Combo disertakan**: seperti branch agentrouter, scope ini sengaja
   mengabaikan downgrade `persistUnavailableState`/`isCombo` yang diterapkan
-  pemanggil combo pada kode 429. Penguncian per-model bukan bentuk yang lebih
-  lemah dari cakupan ini, melainkan unit yang salah: ia tidak mengatakan apa
-  pun tentang IP yang habis, sehingga rotasi combo akan terus membakar satu
-  panggilan yang pasti gagal per sibling.
+  caller combo pada 429. Lockout per-model bukan bentuk yang lebih lemah dari
+  scope ini, melainkan unit yang keliru: ia tidak memberi informasi apa pun
+  tentang IP yang telah kehabisan kuota, sehingga rotasi combo akan terus
+  menghabiskan satu panggilan yang dijamin gagal pada setiap sibling.
 - **Keamanan sibling**: sibling yang sudah terminal (banned/credits_exhausted)
   atau sudah berada dalam cooldown yang lebih lama tidak pernah ditimpa.
 - **Allowlist eksklusif**: memperluas `EGRESS_BUCKETED_LOCK_PROVIDERS` adalah
-  keputusan eksplisit pemilik; tanpa wiring generik (pola #10334/#10419).
-  Kueri sibling mengikat allowlist yang sama alih-alih mengulanginya sebagai
-  literal SQL, sehingga memperluasnya tetap menjadi perubahan satu baris.
-- **Rotasi IP egress, dua arah**: jendela pencarian (24 jam) jauh lebih lebar
-  daripada TTL cache IP egress (5 menit), jadi "IP terakhir yang diketahui"
-  adalah riwayat, bukan keadaan saat ini. Jika proxy sebuah koneksi berotasi
-  dalam jendela tersebut, kunci mungkin **melewatkan** IP yang benar-benar
-  dipakai bersama (IP yang tercatat adalah IP baru yang belum habis) — dan
-  secara simetris ia mungkin **mendinginkan sibling yang sejak itu telah
-  berotasi menjauh** dari IP yang habis. Kasus kedua membebankan sibling
-  tersebut satu jendela cooldown; keduanya adalah batasan best-effort yang
-  diterima dari pencarian berbasis riwayat.
-- **Biaya**: dua pemindaian terbatas pada `proxy_logs` (difilter per jendela
-  melalui `idx_pl_timestamp`), hanya pada frekuensi 429. Tidak ada indeks baru
-  (migrasi 134 YAGNI). Diukur pada salinan DB lalu lintas nyata berukuran
-  sedang; instans dengan throughput tinggi menyimpan lebih banyak baris secara
-  proporsional dalam jendela yang sama.
-
----
+  keputusan eksplisit pemilik; tidak ada wiring generik (pattern #10334/#10419).
+  Query sibling menggunakan allowlist yang sama tersebut, bukan mengulanginya
+  sebagai literal SQL, sehingga perluasan tetap menjadi perubahan satu baris.
+- **Rotasi IP egress, kedua arah**: jendela pencarian (24 jam) jauh lebih lebar
+  daripada TTL cache IP egress (5 menit), sehingga "IP terakhir yang diketahui"
+  adalah riwayat, bukan state saat ini. Jika proxy suatu koneksi berotasi dalam
+  jendela tersebut, lock dapat **melewatkan** IP yang benar-benar digunakan
+  bersama (IP yang tercatat adalah IP baru yang belum kehabisan kuota) — dan
+  secara simetris dapat **mendinginkan sibling yang sejak itu telah berotasi
+  menjauh** dari IP yang kehabisan kuota. Kasus kedua membebani sibling tersebut
+  dengan satu jendela cooldown; keduanya diterima sebagai batasan best-effort
+  dari pencarian berbasis riwayat.
+- **Biaya**: dua pemindaian terbatas pada `proxy_logs` (difilter berdasarkan
+  jendela melalui `idx_pl_timestamp`), hanya pada frekuensi 429. Tidak ada indeks
+  baru (migrasi 134 YAGNI). Diukur pada salinan DB dengan lalu lintas nyata
+  berukuran sedang; instance dengan throughput tinggi menyimpan lebih banyak
+  baris secara proporsional dalam jendela yang sama.
 
 ## Fitur Ketahanan Lainnya
 
