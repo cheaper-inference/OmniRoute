@@ -15,7 +15,7 @@
 
 **由 [Diego Souza](https://github.com/diegosouzapw) 建立**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下寫程式的腳步。每個 AI 工具 → 381 個提供者 — 其中 150+ 個免費 — 透過單一端點。Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 皆可連接至免費的 Claude / GPT / Gemini，並具備自動備援。RTK + Caveman 堆疊式壓縮可節省 15–95% 的 token（平均約 89%）— 永遠不會觸及限制。381 個 AI 提供者 · 150+ 個免費方案 · 每月約 16.2 億個免費 token · 20 種路由策略 · $0 即可開始。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下寫程式的腳步。每個 AI 工具 → 386 個提供者 — 其中 150+ 個免費 — 透過單一端點。Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 皆可連接至免費的 Claude / GPT / Gemini，並具備自動備援。RTK + Caveman 堆疊式壓縮可節省 15–95% 的 token（平均約 89%）— 永遠不會觸及限制。386 個 AI 提供者 · 150+ 個免費方案 · 每月約 16.2 億個免費 token · 20 種路由策略 · $0 即可開始。"/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                         |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 提供者               |          352          |   **358**   |          381          |
+| 🌐 提供者               |          352          |   **358**   |          386          |
 | 🧠 唯一聊天模型 ID      |         1320          |  **1374**   |         1491          |
 | 🖼️ 模態橋接             | 🆕 視覺 + 音訊 + 影片 |      ✓      |           ✓           |
 | 📡 Radar 免費目錄       |      🆕 選擇加入      |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ 功能</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 組合</a></td>
-    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
+    <td align="center"><a href="#-386-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI 與 MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="願景 — 單一端點和 381 個提供者。只要仍有其他健康目標可用，自動備援就會持續進行路由。六大支柱：跨 381 個提供者的韌性備援 · 符合資格的工作負載最多可節省 95% 的權杖 · 150+ 個免費方案及 52 個定期提供／免金鑰永久免費的提供者，$0 即可開始 · 透過單一設定支援 39 個 CLI／代理程式整合 · 在 /v1 相容於 OpenAI、Claude、Gemini 和 Responses API · 生產環境控制項，包括斷路器、TLS 隱匿、MCP 110 個工具、A2A、記憶體、防護措施、評估，以及分布於 7,800+ 個受追蹤測試檔案中的 56,000+ 個靜態測試宣告。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="願景 — 單一端點和 386 個提供者。只要仍有其他健康目標可用，自動備援就會持續進行路由。六大支柱：跨 386 個提供者的韌性備援 · 符合資格的工作負載最多可節省 95% 的權杖 · 150+ 個免費方案及 52 個定期提供／免金鑰永久免費的提供者，$0 即可開始 · 透過單一設定支援 39 個 CLI／代理程式整合 · 在 /v1 相容於 OpenAI、Claude、Gemini 和 Responses API · 生產環境控制項，包括斷路器、TLS 隱匿、MCP 110 個工具、A2A、記憶體、防護措施、評估，以及分布於 7,800+ 個受追蹤測試檔案中的 56,000+ 個靜態測試宣告。"/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處 — 與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 項功能上的當期功能快照比較。OmniRoute：381 個提供者、內建 150 多個免費層級、20 種路由策略、12 引擎權杖壓縮、內建支援 110 個工具的 MCP 伺服器、A2A 代理程式通訊協定、持久記憶體、安全防護、雲端代理程式、TLS 指紋隱匿、Desktop/Termux/PWA，以及支援 67 種語言的 i18n UI。OmniRoute 採用 MIT 授權並可自行託管。競爭對手的功能與數量可能會變更；請參閱連結的方法論。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處 — 與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 項功能上的當期功能快照比較。OmniRoute：386 個提供者、內建 150 多個免費層級、20 種路由策略、12 引擎權杖壓縮、內建支援 110 個工具的 MCP 伺服器、A2A 代理程式通訊協定、持久記憶體、安全防護、雲端代理程式、TLS 指紋隱匿、Desktop/Termux/PWA，以及支援 67 種語言的 i18n UI。OmniRoute 採用 MIT 授權並可自行託管。競爭對手的功能與數量可能會變更；請參閱連結的方法論。"/>
 
 <sub>📊 完整方法論與相較於 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 的各功能詳細資訊 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar 採選擇加入制，且僅使用 GET。OmniRoute 用戶端不會上傳提
 - **🖼️ 新端點** — `/v1/ocr`（Mistral OCR）與 `/v1/audio/translations`（Whisper 風格）補足媒體功能範圍。→ [API 參考](docs/reference/API_REFERENCE.md)
 - **🎨 圖像／影片／音訊生成** — 以單一 API 提供媒體功能：xAI Grok Imagine 與 Novita AI 影片、ComfyUI、Magnific、Adobe Firefly、Segmind，以及 ElevenLabs 等語音提供者。→ [API 參考](docs/reference/API_REFERENCE.md)
 - **🌍 部署與作業** — 反向代理 `basePath`、瀏覽器語言自動偵測、每金鑰裝置追蹤、免 root 的 MITM 信任，以及 zh-TW 在地化。→ [環境](docs/reference/ENVIRONMENT.md)
-- **🤝 更多提供者與代理** — 雲端代理（Codex Cloud、Cursor、Devin、Jules）、具備瀏覽器＋OAuth 登入功能的 Grok Build（xAI）、一級支援卡片的 Ollama、Claude Opus 5 與 Sonnet 5、Kimi 官方合作夥伴（Code／Web／Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及更新後的 **381 個提供者目錄**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 更多提供者與代理** — 雲端代理（Codex Cloud、Cursor、Devin、Jules）、具備瀏覽器＋OAuth 登入功能的 Grok Build（xAI）、一級支援卡片的 Ollama、Claude Opus 5 與 Sonnet 5、Kimi 官方合作夥伴（Code／Web／Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及更新後的 **386 個提供者目錄**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 路由透明度** — 每個回應都會攜帶 `X-OmniRoute-Decision` 標頭，指出提供服務的策略／提供者／延遲；新增的 `cache-optimized` 組合策略，以及 Auto-Combo 的 `cacheAffinity` 因子，會將重複請求重新路由至持有快取前綴的連線；唯讀的 `/v1/auto-combo/{channel}/candidates` 端點則會公開 `auto/*` 頻道的即時候選池。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)。
 - **⚡ 本機效能與基礎架構** — 一鍵部署本機 Redis、Cloudflare Workers / Deno Deploy 中繼部署工具，以及由 Bifrost 與 Mux 擔任受監督的嵌入式服務。→ [嵌入式服務](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 內建功能** — 外掛框架與市集、Omni/Agent/GitHub 技能框架、Obsidian vault 整合（22 個 MCP 工具）、相容於 OpenAI 的 Batch 與 Files API、語意回應快取、具排行榜的遊戲化功能、ACP 代理程式探索（15 個內建代理程式）、排程將日誌匯出至 BigQuery、`auto/chaos` 平行多模型扇出、Telegram 機器人橋接器、應用程式內版本管理器，以及 LMArena-ELO 免費提供者排名。→ [文件](docs/README.md)
@@ -689,11 +689,11 @@ Shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 381 個 AI 提供者 — 153 個標記為免費
+## 🌐 386 個 AI 提供者 — 153 個標記為免費
 
 </div>
 
-> **381 個已註冊的提供者** 分布於標準聊天、媒體、搜尋、本機、雲端代理程式和系統集合，其中包括 **153 個帶有 `hasFree: true` 探索中繼資料的提供者**。聊天模型註冊表涵蓋 **239 個提供者 / 3,059 個不同的提供者-模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則有 **471 個逐模型資料列**、**34 個週期性配額池**，以及 **52 個週期性／免金鑰的永久免費提供者**。這些分母是刻意區分的；定義與去除配額池重複項目的計算方式，請參閱[提供者參考](docs/reference/PROVIDER_REFERENCE.md)和[免費方案](docs/reference/FREE_TIERS.md)。
+> **386 個已註冊的提供者** 分布於標準聊天、媒體、搜尋、本機、雲端代理程式和系統集合，其中包括 **153 個帶有 `hasFree: true` 探索中繼資料的提供者**。聊天模型註冊表涵蓋 **239 個提供者 / 3,059 個不同的提供者-模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則有 **471 個逐模型資料列**、**34 個週期性配額池**，以及 **52 個週期性／免金鑰的永久免費提供者**。這些分母是刻意區分的；定義與去除配額池重複項目的計算方式，請參閱[提供者參考](docs/reference/PROVIDER_REFERENCE.md)和[免費方案](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
@@ -1295,7 +1295,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> 涵蓋 <code>src/</code> 與 <code>open-sse/</code>（自 v2.0 起核心中沒有任何 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌記錄）+ LowDB（JSON 舊版）— 147 個領域模組、229 次遷移</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌記錄）+ LowDB（JSON 舊版）— 147 個領域模組、233 次遷移</td></tr>
   <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文搜尋 + int8 量化向量嵌入、具類型衰減</td></tr>
   <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 合約</td></tr>
   <tr><td nowrap><b>通訊協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
