@@ -88,3 +88,25 @@ test("a longer upstream retry hint inside an active lock still extends the lock"
   const after = fallback.getModelLockoutInfo("gemini", id, MODEL)!.remainingMs;
   assert.ok(after > before + 60_000, `lock extended from ${before} to ${after}`);
 });
+
+test("repeated capped model-unavailable 400s count as one step and keep the capped lock", async () => {
+  const created = await providersDb.createProviderConnection({
+    provider: "opencode-zen",
+    authType: "apikey",
+    name: "episode-capped-400",
+    apiKey: `synthetic-${"episode-capped-400"}`,
+    isActive: true,
+    testStatus: "active",
+  });
+  const id = created.id as string;
+  const body =
+    '{"type":"server_error","message":"Error from provider (Console): Upstream request failed: Model is unavailable."}';
+  const hit = () => auth.markAccountUnavailable(id, 400, body, "opencode-zen", MODEL, null);
+  await hit();
+  const first = fallback.getModelLockoutInfo("opencode-zen", id, MODEL)!;
+  assert.ok(first, "the first 400 locks the model");
+  await Promise.all([hit(), hit(), hit()]);
+  const after = fallback.getModelLockoutInfo("opencode-zen", id, MODEL)!;
+  assert.equal(after.failureCount, 1, "repeat hits of the capped 400 are one episode");
+  assert.equal(after.lockedAt, first.lockedAt, "a repeat hit must not restart the lock");
+});

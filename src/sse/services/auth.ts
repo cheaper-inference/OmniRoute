@@ -815,7 +815,17 @@ function recordModelLockoutFailure(...args: Parameters<typeof recordModelLockout
   const lock = getModelLockoutInfo(provider, connectionId, model);
   if (lock && lock.reason === reason && lock.remainingMs > 0) {
     const appliedMs = lock.remainingMs + Date.now() - Date.parse(lock.lockedAt);
-    const hintMs = options?.exactCooldownMs;
+    // The applied cooldown is already clamped, so clamp a non-authoritative hint the same way
+    // before comparing; an authoritative upstream reset keeps its full length.
+    const cap = options?.maxCooldownMs;
+    const rawHintMs = options?.exactCooldownMs;
+    const hintMs =
+      typeof rawHintMs === "number" &&
+      typeof cap === "number" &&
+      cap > 0 &&
+      !options?.exactCooldownIsUpstreamReset
+        ? Math.min(rawHintMs, cap)
+        : rawHintMs;
     if (typeof hintMs !== "number" || hintMs <= appliedMs) {
       return { cooldownMs: lock.remainingMs, failureCount: lock.failureCount };
     }
