@@ -1,0 +1,1 @@
+- **fix(codex):** The Codex ChatGPT Web and app-server adapters now cap the buffered event backlog by retained text size and merge adjacent small text deltas, so a fast producer behind a slow client can no longer grow memory without bound. ([#19733](https://github.com/cheaper-inference/OmniRoute/pull/19733))

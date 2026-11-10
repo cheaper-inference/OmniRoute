@@ -1,1 +1,0 @@
-- **fix(gemini):** a non-streaming Gemini or Antigravity reply whose `[Tool call: ...]` text arrives in several stream parts now returns one tool call, and a tool-only stream cut before its finish reason is now marked as cut so a combo can try the next target.

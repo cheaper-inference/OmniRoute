@@ -1,0 +1,1 @@
+- **fix(translator):** Gemini requests now map content roles `function` and `tool` to user messages, and infer a missing role from the parts, so single-turn Gemini requests without a role no longer reach the upstream as assistant messages. ([#19733](https://github.com/cheaper-inference/OmniRoute/pull/19733))
