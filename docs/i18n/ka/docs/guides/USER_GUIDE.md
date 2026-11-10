@@ -355,65 +355,65 @@ API-ის გასაღები: [მართვის პანელი�
 
 ---
 
-## 🚀 განთავსება
+## 🚀 განლაგება
 
-### გლობალური npm-ინსტალაცია (რეკომენდებული)
+### გლობალური npm ინსტალაცია (რეკომენდირებულია)
 
 ```bash
 npm install -g omniroute
 
-# შექმენით კონფიგურაციის დირექტორია
+# Create config directory
 mkdir -p ~/.omniroute
 
-# შექმენით .env ფაილი (იხილეთ .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# გაუშვით სერვერი
+# Start server
 omniroute
-# ან მორგებული პორტით:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ავტომატურად ტვირთავს `.env`-ს `~/.omniroute/.env`-დან ან `./.env`-დან.
+CLI ავტომატურად იტვირთება `.env` `~/.omniroute/.env` დან ან `./.env`. სამუშაო დირექტორიაში `./.env` შეუძლია დააყენოს კლავიშების მხოლოდ მოკლე დაშვებული სია (პორტები, `REQUIRE_API_KEY`, ლოკალი და ფერის პარამეტრები); ყველაფერი დანარჩენი `~/.omniroute/.env` ში ჩადეთ. იხილეთ [CLI გაშვების კონტრაქტები](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### სისტემურ პანელში მუშაობის რეჟიმი
+### უჯრის რეჟიმი
 
-გაუშვით OmniRoute სისტემურ პანელში:
+დაიწყეთ OmniRoute სისტემის უჯრაში:
 
 ```bash
 omniroute serve --tray
 ```
 
-ბრძანება მუშაობას ასრულებს მას შემდეგ, რაც სერვერი და სისტემური პანელის ხატულა მზად იქნება.
+ბრძანება ბრუნდება მას შემდეგ, რაც სერვერი და უჯრა მზად იქნება.
 
-სერვერი ტერმინალის გარეშე აგრძელებს მუშაობას.
+სერვერი გრძელდება ტერმინალის გარეშე.
 
-სისტემურ პანელში მუშაობის რეჟიმი მხარდაჭერილია macOS-ზე, Windows-ზე და გრაფიკულ Linux-სესიებში. ამ რეჟიმში მართვის პანელი ავტომატურად არ იხსნება.
+უჯრის რეჟიმი მხარს უჭერს macOS, Windows და გრაფიკულ Linux სესიებს. უჯრის რეჟიმი ავტომატურად არ ხსნის დაფას.
 
-შემდეგი მოქმედებებისთვის გამოიყენეთ სისტემური პანელის მენიუ:
+გამოიყენეთ უჯრის მენიუ ამ მოქმედებებისთვის:
 
-- გახსენით მართვის პანელი.
+- გახსენით დაფა.
 - გახსენით `/dashboard/logs`.
-- შეცვალეთ ავტომატური გაშვების პარამეტრი.
-- გააჩერეთ OmniRoute.
+- შეცვალეთ ავტომატური დაწყება.
+- შეაჩერე OmniRoute.
 
-არ გამოიყენოთ `--tray` შემდეგ პარამეტრებთან ერთად:
+არ დააკავშიროთ `--tray` ამ ვარიანტებთან:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-ამ რეჟიმებს პროცესზე ფლობის განსხვავებული მოდელები სჭირდება.
+ეს რეჟიმები მოითხოვს სხვადასხვა პროცესის მფლობელობას.
 
-ჩართეთ ავტომატური გაშვება სისტემაში მომდევნო შესვლისას:
+ჩართეთ გაშვება მანქანიდან მომდევნო შესვლისას:
 
 ```bash
 omniroute autostart enable
 ```
 
-ავტომატური გაშვება macOS-ზე, Windows-ზე და გრაფიკულ Linux-სესიებში სისტემურ პანელში მუშაობის რეჟიმს იყენებს. გრაფიკული გარემოს გარეშე Linux იყენებს არსებულ systemd-ის მომხმარებლის სერვისს.
+ავტომატური დაწყება იყენებს უჯრის რეჟიმს macOS, Windows და გრაფიკული Linux სესიებზე. Headless Linux იყენებს არსებულ systemd მომხმარებლის სერვისს.
 
-გამორთეთ სისტემაში შესვლისას ავტომატური გაშვება:
+გამორთეთ გაშვება შესვლისას:
 
 ```bash
 omniroute autostart disable
@@ -421,16 +421,16 @@ omniroute autostart disable
 
 ### დეინსტალაცია
 
-როდესაც OmniRoute აღარ დაგჭირდებათ, სრულად წასაშლელად გთავაზობთ ორ სწრაფ სკრიპტს:
+როდესაც აღარ გჭირდებათ OmniRoute, ჩვენ გთავაზობთ ორ სწრაფ სკრიპტს სუფთა ამოღებისთვის:
 
-| ბრძანება                 | მოქმედება                                                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | შლის სისტემურ აპლიკაციას, მაგრამ `~/.omniroute`-ში **ინარჩუნებს თქვენს მონაცემთა ბაზასა და კონფიგურაციებს**. |
-| `npm run uninstall:full` | შლის აპლიკაციას და სამუდამოდ **შლის ყველა კონფიგურაციას, გასაღებსა და მონაცემთა ბაზას**.                     |
+| ბრძანება                 | მოქმედება                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | შლის სისტემის აპს მაგრამ** ინახავს თქვენს DB და კონფიგურაციებს** `~/.omniroute` ში.  |
+| `npm run uninstall:full` | სამუდამოდ შლის აპს AND** წაშლის ყველა კონფიგურაციას, გასაღებს და მონაცემთა ბაზას** . |
 
-> შენიშვნა: ამ ბრძანებების გასაშვებად გადადით OmniRoute-ის პროექტის საქაღალდეში (თუ მისი კლონირება მოახდინეთ) და გაუშვით ისინი. ალტერნატიულად, თუ ის გლობალურადაა დაინსტალირებული, შეგიძლიათ უბრალოდ გაუშვათ `npm uninstall -g omniroute`.
+> შენიშვნა: ამ ბრძანებების გასაშვებად, გადადით OmniRoute პროექტის საქაღალდეში (თუ თქვენ კლონირებული გაქვთ) და გაუშვით ისინი. ალტერნატიულად, თუ გლობალურად არის დაინსტალირებული, შეგიძლიათ უბრალოდ გაუშვათ `npm uninstall -g omniroute`.
 
-### VPS-ზე განთავსება
+### VPS განლაგება
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -446,21 +446,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# ან: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2-ით განთავსება (მეხსიერების მცირე მოხმარება)
+### PM2 განლაგება (დაბალი მეხსიერება)
 
-შეზღუდული RAM-ის მქონე სერვერებისთვის გამოიყენეთ მეხსიერების ლიმიტის პარამეტრი:
+შეზღუდული RAM სერვერებისთვის გამოიყენეთ მეხსიერების ლიმიტის ვარიანტი:
 
 ```bash
-# 512MB ლიმიტით (ნაგულისხმევი)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# ან მორგებული მეხსიერების ლიმიტით
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# ან ecosystem.config.js-ის გამოყენებით
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -489,24 +489,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# ააგეთ იმიჯი (ნაგულისხმევი = runner-cli წინასწარ დაინსტალირებული codex/claude/droid-ით)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# პორტატიული რეჟიმი (რეკომენდებული)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI-ის ბინარულ ფაილებთან ჰოსტში ინტეგრირებული რეჟიმის შესახებ იხილეთ Docker-ის განყოფილება ძირითად დოკუმენტაციაში.
+ჰოსტში ინტეგრირებული რეჟიმისთვის CLI ბინარებით, იხილეთ Docker განყოფილება მთავარ დოკუმენტებში.
 
-### Void Linux (xbps-src)
+### ბათილად Linux (xbps-src)
 
-Void Linux-ის მომხმარებლებს შეუძლიათ OmniRoute-ის პაკეტირება და ნატიურად ინსტალაცია `xbps-src` კროსკომპილაციის ფრეიმვორკის გამოყენებით. ეს ავტომატიზაციას უკეთებს Node.js-ის დამოუკიდებელ აგებას საჭირო `better-sqlite3` ნატიურ ბაინდინგებთან ერთად.
+Void Linux მომხმარებლებს შეუძლიათ შეფუთონ და დააინსტალირონ OmniRoute მშობლიურად `xbps-src` ჯვარედინი კომპილაციის ჩარჩოს გამოყენებით. ეს ავტომატიზირებს Node.js დამოუკიდებელ კონსტრუქციას საჭირო `better-sqlite3` მშობლიურ კავშირებთან ერთად.
 
 <details>
-<summary><b>xbps-src-ის შაბლონის ნახვა</b></summary>
+<summary><b>xbps-src შაბლონის ნახვა</b></summary>
 
 ```bash
-# შაბლონის ფაილი 'omniroute'-ისთვის
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -527,7 +527,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp-ისთვის სამიზნე CPU-ის არქიტექტურის განსაზღვრა
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -536,29 +536,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) ყველა დამოკიდებულების ინსტალაცია – სკრიპტების გამოტოვებით
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js-ის დამოუკიდებელი პაკეტის აგება
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) სტატიკური რესურსების დამოუკიდებელ პაკეტში კოპირება
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3-ის ნატიური ბაინდინგის კომპილაცია
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) კომპილირებული ბაინდინგის დამოუკიდებელ პაკეტში მოთავსება
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) არქიტექტურისთვის სპეციფიკური sharp პაკეტების წაშლა
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js-ის სტატიკური ანალიზის მიერ გამოტოვებული pino-ს გაშვების გარემოს დამოკიდებულებების კოპირება:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -572,7 +572,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ინსტალაციის შემდგომი ჰუკის მიერ Next.js-ის აპის როუტერის ცარიელი დირექტორიების წაშლის თავიდან აცილება
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -600,30 +600,30 @@ post_install() {
 
 ### გარემოს ცვლადები
 
-| ცვლადი                                  | ნაგულისხმევი მნიშვნელობა                    | აღწერა                                                                                                                                                  |
-| --------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me`        | JWT-ის ხელმოწერის საიდუმლო გასაღები (**შეცვალეთ საწარმოო გარემოში**)                                                                                    |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                                  | პირველი შესვლის პაროლი                                                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                              | მონაცემთა დირექტორია (მონაცემთა ბაზა, გამოყენების მონაცემები, ჟურნალები)                                                                                |
-| `PORT`                                  | ფრეიმვორკის ნაგულისხმევი მნიშვნელობა        | სერვისის პორტი (მაგალითებში — `20128`)                                                                                                                  |
-| `HOSTNAME`                              | ფრეიმვორკის ნაგულისხმევი მნიშვნელობა        | მისაბმელი ჰოსტი (Docker-ის ნაგულისხმევი მნიშვნელობაა `0.0.0.0`)                                                                                         |
-| `NODE_ENV`                              | შესრულების გარემოს ნაგულისხმევი მნიშვნელობა | განთავსებისთვის მიუთითეთ `production`                                                                                                                   |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`                    | საჯარო საბაზისო URL, რომელიც აისახება მართვის პანელზე და ხელმისაწვდომია სერვერისთვის (ანაცვლებს მოძველებულ `BASE_URL`-ს)                                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`                     | ღრუბელთან სინქრონიზაციის ბოლო წერტილის საბაზისო URL (ანაცვლებს მოძველებულ `CLOUD_URL`-ს)                                                                |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`             | HMAC-ის საიდუმლო გასაღები გენერირებული API გასაღებებისთვის                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                                     | `/v1/*`-ზე Bearer API გასაღების სავალდებულო გამოყენება                                                                                                  |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                                     | ავტორიზებულ მართვის პანელის მომხმარებლებს მოთხოვნისამებრ შენახული API გასაღებების სრული მნიშვნელობების ნახვის უფლება                                    |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                        | პროვაიდერის ლიმიტების კეშირებული მონაცემების სერვერის მხრიდან განახლების პერიოდულობა; ინტერფეისის განახლების ღილაკები კვლავ ხელით სინქრონიზაციას იწვევს |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                                     | ჩაწერის/იმპორტის/აღდგენის წინ SQLite-ის ავტომატური სარეზერვო ასლების შექმნის გამორთვა; ხელით სარეზერვო ასლების შექმნა კვლავ მუშაობს                     |
-| `APP_LOG_TO_FILE`                       | `true`                                      | რთავს აპლიკაციისა და აუდიტის ჟურნალების დისკზე ჩაწერას                                                                                                  |
-| `AUTH_COOKIE_SECURE`                    | `false`                                     | ავტორიზაციის ქუქის `Secure` ატრიბუტის იძულებით გამოყენება (HTTPS უკუ-პროქსის უკან)                                                                      |
-| `CLOUDFLARED_BIN`                       | არ არის დაყენებული                          | მართული ჩამოტვირთვის ნაცვლად არსებული `cloudflared` ბინარული ფაილის გამოყენება                                                                          |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                                     | მართული Quick Tunnels-ის ტრანსპორტი (`http2`, `quic` ან `auto`)                                                                                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                       | Node.js-ის heap-ის ლიმიტი MB-ში                                                                                                                         |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                        | მოთხოვნების კეშის ჩანაწერების მაქსიმალური რაოდენობა                                                                                                     |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                       | სემანტიკური კეშის ჩანაწერების მაქსიმალური რაოდენობა                                                                                                     |
+| ცვლადი                                  | ნაგულისხმევი                 | აღწერა                                                                                                                                                           |
+| --------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ავტომატურად გენერირებული)_ | JWT ხელმოწერის საიდუმლო — ავტომატურად გენერირებულია პირველ გაშვებაზე და გრძელდება `server.env` მდე; დააყენეთ ის აშკარად, როდესაც მონაცემთა დირექტორია ეფემერულია |
+| `INITIAL_PASSWORD`                      | _(დაუყენებელი)_              | პირველი შესვლის პაროლი. npm/source ინსტალაცია იწყება `CHANGEME` ით: შეცვალეთ იგი. გაუქმებულია: ჩასვლის ოსტატი                                                    |
+| `DATA_DIR`                              | `~/.omniroute`               | მონაცემთა დირექტორია (დბ, გამოყენება, ჟურნალები)                                                                                                                 |
+| `PORT`                                  | ჩარჩო ნაგულისხმევი           | სერვისის პორტი (`20128` მაგალითებში)                                                                                                                             |
+| `HOSTNAME`                              | ჩარჩო ნაგულისხმევი           | ჰოსტის მიბმა (Docker ნაგულისხმევად არის `0.0.0.0`)                                                                                                               |
+| `NODE_ENV`                              | გაშვების ნაგულისხმევი        | დააყენეთ `production` განლაგებისთვის                                                                                                                             |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | საზოგადოებრივი ბაზა URL გამოჩნდა საინფორმაციო დაფაზე და ექვემდებარება სერვერს (ანაცვლებს მოძველებულ `BASE_URL`)                                                  |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | ღრუბლის სინქრონიზაციის ბოლო წერტილის ბაზა URL (ანაცვლებს მოძველებულ `CLOUD_URL`)                                                                                 |
+| `API_KEY_SECRET`                        | _(ავტომატურად გენერირებული)_ | HMAC საიდუმლო გენერირებული API კლავიშებისთვის — ავტომატურად გენერირებულია პირველ გაშვებაზე და გრძელდება `server.env` მდე                                         |
+| `REQUIRE_API_KEY`                       | `false`                      | შეასრულეთ Bearer API გასაღები `/v1/*` ზე                                                                                                                         |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                      | ნება მიეცით ავთენტიფიცირებულ დაფის მომხმარებლებს გამოავლინონ სრული შენახული API გასაღების მნიშვნელობები მოთხოვნისამებრ                                           |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                         | სერვერის მხრიდან განახლების კადენცია ქეშირებული პროვაიდერის ლიმიტების მონაცემებისთვის; UI განახლების ღილაკები კვლავ ახდენენ ხელით სინქრონიზაციას                 |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                      | გამორთეთ ავტომატური SQLite სნეპშოტები writes/import/restore მდე; მექანიკური სარეზერვო ასლები ჯერ კიდევ მუშაობს                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                       | რთავს აპლიკაციისა და აუდიტის ჟურნალის გამოტანას დისკზე                                                                                                           |
+| `AUTH_COOKIE_SECURE`                    | `false`                      | `Secure` auth ქუქი-ფაილის იძულება ( HTTPS საპირისპირო პროქსის უკან)                                                                                              |
+| `CLOUDFLARED_BIN`                       | დაუყენებელი                  | გამოიყენეთ არსებული `cloudflared` ორობითი მართული ჩამოტვირთვის ნაცვლად                                                                                           |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                      | ტრანსპორტი მართული სწრაფი გვირაბებისთვის (`http2`, `quic` ან `auto`)                                                                                             |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                        | Node.js გროვის ლიმიტი MB ში                                                                                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                         | მაქსიმალური სწრაფი ქეში ჩანაწერები                                                                                                                               |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                        | მაქსიმალური სემანტიკური ქეში ჩანაწერები                                                                                                                          |
 
-გარემოს ცვლადების სრული ცნობარისთვის იხილეთ [README](../README.md).
+გარემოს ცვლადის სრული მითითებისთვის იხილეთ [README](../README.md).
 
 ---
 

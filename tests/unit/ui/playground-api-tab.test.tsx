@@ -37,9 +37,15 @@ vi.mock("@/shared/components/MonacoEditor", () => ({
   ),
 }));
 
-vi.mock("@/shared/components", () => ({
-  Card: ({ children }: { children: React.ReactNode }) => <div data-testid="card">{children}</div>,
-  Button: ({
+// ApiTab imports the adapters by subpath (#18071), so each one is mocked at its own path.
+vi.mock("@/shared/components/Card", () => ({
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="card">{children}</div>
+  ),
+}));
+
+vi.mock("@/shared/components/Button", () => ({
+  default: ({
     children,
     onClick,
     disabled,
@@ -52,7 +58,10 @@ vi.mock("@/shared/components", () => ({
       {children}
     </button>
   ),
-  Select: ({
+}));
+
+vi.mock("@/shared/components/Select", () => ({
+  default: ({
     value,
     onChange,
     options,
@@ -70,7 +79,10 @@ vi.mock("@/shared/components", () => ({
       ))}
     </select>
   ),
-  Badge: ({ children }: { children: React.ReactNode }) => (
+}));
+
+vi.mock("@/shared/components/Badge", () => ({
+  default: ({ children }: { children: React.ReactNode }) => (
     <span data-testid="badge">{children}</span>
   ),
 }));
