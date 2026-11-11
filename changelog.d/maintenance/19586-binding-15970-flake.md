@@ -1,0 +1,1 @@
+- **test(providers):** the #15970 provider-binding suite now waits for the post-create auto-test probe, so a late `/models` call no longer leaks into the next test and fails it intermittently ([#19586](https://github.com/cheaper-inference/OmniRoute/pull/19586))
