@@ -50,13 +50,59 @@ async function importParsedSettings(settingsJson: string) {
   invalidateDbCache();
 }
 
+/** Settings keys actually persisted — the import must not lose the row on the way in. */
+function storedSettingKeys(): string[] {
+  return (
+    core
+      .getDbInstance()
+      .prepare("SELECT key FROM key_value WHERE namespace = 'settings'")
+      .all() as Array<{ key: string }>
+  ).map((row) => row.key);
+}
+
+function storedSettingRows(): Array<{ key: string; value: string }> {
+  return core
+    .getDbInstance()
+    .prepare("SELECT key, value FROM key_value WHERE namespace = 'settings'")
+    .all() as Array<{ key: string; value: string }>;
+}
+
+test("Object.assign, which a downlevelled spread compiles to, drops the key", () => {
+  const parsed = JSON.parse('{"__proto__":{"a":1}}') as Record<string, unknown>;
+  const copied = Object.assign({}, parsed);
+  assert.equal(Object.hasOwn(copied, "__proto__"), false);
+  assert.notEqual(Object.getPrototypeOf(copied), Object.prototype);
+});
+
 test("a __proto__ settings row survives as an own key", async () => {
   await importParsedSettings('{"__proto__":{"sessionsValidAfter":9999999999}}');
 
+  assert.equal(storedSettingKeys().includes("__proto__"), true, "the import dropped the row");
+
   const settings = (await settingsDb.getSettings()) as Record<string, unknown>;
 
-  assert.equal(Object.hasOwn(settings, "__proto__"), true);
+  assert.equal(
+    Object.hasOwn(settings, "__proto__"),
+    true,
+    `rows read=${JSON.stringify(storedSettingRows())}`
+  );
   assert.deepEqual(settings.__proto__, { sessionsValidAfter: 9999999999 });
+});
+
+test("a directly written __proto__ row is read back as an own key", async () => {
+  core
+    .getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('settings', ?, ?)")
+    .run("__proto__", '{"sessionsValidAfter":9999999999}');
+  invalidateDbCache();
+
+  const settings = (await settingsDb.getSettings()) as Record<string, unknown>;
+
+  assert.equal(
+    Object.hasOwn(settings, "__proto__"),
+    true,
+    `rows read=${JSON.stringify(storedSettingRows())}`
+  );
 });
 
 test("a __proto__ row does not become the settings prototype", async () => {
