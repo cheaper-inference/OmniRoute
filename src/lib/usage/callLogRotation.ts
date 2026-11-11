@@ -242,6 +242,14 @@ export function cleanupOrphanCallLogFiles(
   }
 }
 
+function takeOverflowArtifactSlots(paths: string[], baseDir: string): number {
+  let progress = 0;
+  for (const relativePath of paths) {
+    if (takeOverflowArtifactSlot(relativePath, baseDir)) progress++;
+  }
+  return progress;
+}
+
 export function cleanupOverflowCallLogFiles(
   baseDir: string | null = getCallLogsDir(),
   maxEntries?: number,
@@ -260,10 +268,7 @@ export function cleanupOverflowCallLogFiles(
         Math.min(DELETE_ID_CHUNK_SIZE, maxDeletes - deleted)
       );
       if (paths.length === 0) break;
-      let progress = 0;
-      for (const relativePath of paths) {
-        if (takeOverflowArtifactSlot(relativePath, baseDir)) progress++;
-      }
+      const progress = takeOverflowArtifactSlots(paths, baseDir);
       deleted += progress;
       if (progress === 0) break;
     }
