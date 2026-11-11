@@ -553,6 +553,7 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
   // `credentialHealthCheck` joined in #12043 (the sweep's intervalMinutes setting);
   // `streamStallCooldown` decides whether a stream content stall cools the account;
   // `p2cLatency` is the opt-in latency weight for p2c account selection.
+  // `preferredAccountFailover` configures timeouts and overrides, not live failover state.
   // `streamRecovery` joined the projection with this change: the route stores the
   // block on every PATCH, so GET exposes it like every other stored block.
   assert.deepEqual(Object.keys(json).sort(), [
@@ -562,6 +563,7 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
     "credentialHealthCheck",
     "legacy",
     "p2cLatency",
+    "preferredAccountFailover",
     "providerBreaker",
     "providerCooldown",
     "providerQuotaOverrides",
@@ -575,6 +577,12 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
   ]);
   assert.equal("providerBreakers" in json, false);
   assert.equal("runtime" in json, false);
+  assert.deepEqual(Object.keys(json.preferredAccountFailover).sort(), [
+    "defaultTimeoutMs",
+    "enabled",
+    "modelTimeoutsMs",
+    "providerTimeoutsMs",
+  ]);
 });
 
 test("request queue serializes concurrent requests on the same connection", async () => {

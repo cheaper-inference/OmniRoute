@@ -18,6 +18,7 @@ const HIGH_RISK_METHOD_RULES = [
   [/^\/api\/keys\/[^/]+\/devices\/?$/, ["GET"]],
   [/^\/api\/keys\/[^/]+\/access\/?$/, ["POST"]],
   [/^\/api\/keys\/[^/]+\/self-service\/?$/, ["GET", "HEAD", "PUT"]],
+  [/^\/api\/keys\/[^/]+\/template-policy\/?$/, ["GET", "HEAD"]],
 ];
 
 let installed = false;

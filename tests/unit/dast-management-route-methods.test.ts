@@ -16,6 +16,7 @@ const routes = [
   // Next automatically supplies HEAD for handlers that implement GET.
   { path: "/api/auth/mfa/status", methods: ["GET", "HEAD"] },
   { path: "/api/keys/qg-fixture/self-service", methods: ["GET", "HEAD", "PUT"] },
+  { path: "/api/keys/qg-fixture/template-policy", methods: ["GET", "HEAD"] },
 ];
 
 function responseRecorder() {
@@ -77,6 +78,8 @@ test("new method rules do not claim neighboring route segments", () => {
     "/api/auth/mfa/other",
     "/api/keys/qg-fixture/self-service/extra",
     "/api/keys/qg-fixture/self-service-extra",
+    "/api/keys/qg-fixture/template-policy/extra",
+    "/api/keys/qg-fixture/template-policy-extra",
   ]) {
     assert.equal(maybeHandleDisallowedMethod({ method: "QUERY", url }, responseRecorder()), false);
   }
