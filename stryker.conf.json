@@ -812,7 +812,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/quota-sticky-only.test.ts",
       "tests/unit/provider-max-active-accounts.test.ts",
-      "tests/unit/failure-window-penalty.test.ts"
+      "tests/unit/failure-window-penalty.test.ts",
+      "tests/unit/tier-spillover.test.ts"
     ],
     "nodeArgs": [
       "--import",

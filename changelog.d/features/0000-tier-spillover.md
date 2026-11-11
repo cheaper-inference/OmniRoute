@@ -1,0 +1,1 @@
+- **feat(routing):** opt-in `OMNIROUTE_TIER_SPILLOVER=true` makes fill-first account selection move to the next priority tier only when every account of the top tier has 20% or less quota left; the default is unchanged.

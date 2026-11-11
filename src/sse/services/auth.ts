@@ -70,6 +70,7 @@ import {
   recordWindowedFailure,
   sortByFailureWindow,
 } from "./failureWindowPenalty.ts";
+import { isTierSpilloverEnabled, pickTierSpillover } from "./tierSpillover.ts";
 import { getP2CLatencyPenalties } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
 import {
   getCachedClaudeQuotaScopeDecision as readClaudeScope,
@@ -2186,6 +2187,12 @@ export async function getProviderCredentials(
     } else {
       // Default: fill-first (already sorted by priority in getProviderConnections)
       connection = orderedConnections[0];
+      if (isTierSpilloverEnabled()) {
+        connection =
+          pickTierSpillover(orderedConnections, (c) =>
+            getConnectionQuotaHeadroomPercent(provider, c, requestedModel)
+          ) ?? connection;
+      }
     }
 
     if (
