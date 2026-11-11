@@ -811,7 +811,8 @@
       "tests/unit/stream-lifecycle-timer-cleanup-18669.test.ts",
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/token-refresh-retry-jitter.test.ts",
-      "tests/unit/token-health-google-refresh-gap.test.ts"
+      "tests/unit/token-health-google-refresh-gap.test.ts",
+      "tests/unit/token-health-check-provider-cap.test.ts"
     ],
     "nodeArgs": [
       "--import",
