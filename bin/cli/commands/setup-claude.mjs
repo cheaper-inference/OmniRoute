@@ -41,7 +41,8 @@ function effortLevelFor(cfg, model) {
   if (!wanted || !Array.isArray(tiers) || tiers.length === 0 || tiers.includes(wanted)) {
     return wanted;
   }
-  const order = ["minimal", "low", "medium", "high", "xhigh", "max"];
+  // "minimal" is not a Claude Code effortLevel, so it is never a clamp target.
+  const order = ["low", "medium", "high", "xhigh", "max"];
   const below = order.slice(0, order.indexOf(wanted)).reverse();
   return below.find((level) => tiers.includes(level));
 }
@@ -51,10 +52,10 @@ const DEFAULT_COMPACT_WINDOW = 190000;
 /**
  * Claude Code assumes a 200K window for any model id it does not recognize, so the
  * profile tells it the real one: 95% of the catalog's context window (the old fixed
- * 190000 is 95% of 200K), or 190000 when the catalog reports none.
+ * 190000 is 95% of 200K), else of the category's known window, else 190000.
  */
-function compactWindowFor(model) {
-  const ctx = Number(model?.context_length ?? model?.max_input_tokens);
+function compactWindowFor(model, cfg) {
+  const ctx = Number(model?.context_length ?? model?.max_input_tokens ?? cfg?.ctx);
   return Number.isFinite(ctx) && ctx > 0 ? Math.floor(ctx * 0.95) : DEFAULT_COMPACT_WINDOW;
 }
 
@@ -128,7 +129,7 @@ export function buildProfileSettings(modelId, baseUrl, cfg, model) {
     ANTHROPIC_BASE_URL: baseUrl,
     ANTHROPIC_MODEL: modelId,
     CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY: "1",
-    CLAUDE_CODE_AUTO_COMPACT_WINDOW: String(compactWindowFor(model)),
+    CLAUDE_CODE_AUTO_COMPACT_WINDOW: String(compactWindowFor(model, cfg)),
   };
   const settings = {
     $schema: "https://json.schemastore.org/claude-code-settings.json",

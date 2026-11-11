@@ -65,8 +65,8 @@ test("buildProfileSettings sizes the compact window from the catalog context win
   assert.equal(small.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW, "121600");
 });
 
-test("buildProfileSettings keeps the 190000 compact window when the catalog has no context", () => {
-  const cfg = categoriseModel("glm/glm-5.2");
+test("buildProfileSettings keeps the 190000 compact window when nothing reports a context", () => {
+  const cfg = { ...categoriseModel("glm/glm-5.2"), ctx: undefined };
   const json = JSON.parse(
     buildProfileSettings("glm/glm-5.2", "http://x:20128", cfg, { id: "glm/glm-5.2" })
   );
@@ -106,6 +106,24 @@ test("syncClaudeProfilesFromModels passes each catalog row's context window into
   } finally {
     await fs.rm(claudeHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
+});
+
+test("buildProfileSettings falls back to the category's known window when the catalog has none", () => {
+  const cfg = { ...categoriseModel("glm/glm-5.2"), ctx: 131072 };
+  const json = JSON.parse(
+    buildProfileSettings("glm/glm-5.2", "http://x:20128", cfg, { id: "glm/glm-5.2" })
+  );
+  assert.equal(json.env.CLAUDE_CODE_AUTO_COMPACT_WINDOW, "124518");
+});
+
+test("buildProfileSettings never clamps effortLevel down to minimal", () => {
+  const cfg = categoriseModel("glm/glm-5.2"); // xhigh
+  const json = JSON.parse(
+    buildProfileSettings("glm/glm-5.2", "http://x:20128", cfg, {
+      capabilities: { effort_tiers: ["minimal", "max"] },
+    })
+  );
+  assert.equal("effortLevel" in json, false);
 });
 
 test("buildProfileSettings omits effortLevel for the simple tier", () => {
