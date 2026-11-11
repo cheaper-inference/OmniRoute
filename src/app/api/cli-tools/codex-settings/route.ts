@@ -125,6 +125,16 @@ export async function GET(request: Request) {
 }
 
 // POST - Update OmniRoute settings (merge with existing config)
+// The catalog file's mtime cannot prove that a running Codex picker re-read it, so an Apply that
+// wrote a catalog can say "reload needed" (opt-in, advice only: OmniRoute never restarts Codex).
+const CODEX_RELOAD_HINT = {
+  reloadNeeded: true,
+  reloadHint:
+    "The model catalog was written. A running Codex session may still show the old model list: restart Codex or reload its model picker to see it.",
+} as const;
+const isCodexReloadHintEnabled = () =>
+  /^(1|true|yes|on)$/i.test(process.env.OMNIROUTE_CODEX_RELOAD_HINT?.trim() ?? "");
+
 export async function POST(request: Request) {
   const authError = await requireCliToolsAuth(request);
   if (authError) return authError;
@@ -259,6 +269,7 @@ export async function POST(request: Request) {
         ? { catalogPath: catalog.catalogPath, catalogModelCount: catalog.count }
         : {}),
       ...(catalog?.warning ? { catalogWarning: catalog.warning } : {}),
+      ...(catalog?.catalogPath && isCodexReloadHintEnabled() ? CODEX_RELOAD_HINT : {}),
     });
   } catch (error) {
     const refusal = configClobberRefusalResponse(error);

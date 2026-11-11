@@ -1,0 +1,1 @@
+- **feat(cli-tools):** set `OMNIROUTE_CODEX_RELOAD_HINT=true` and the Codex settings Apply response adds `reloadNeeded` and a `reloadHint` after it writes a model catalog (off by default; advice only).
