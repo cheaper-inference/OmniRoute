@@ -546,7 +546,9 @@ returning the 429 — this covers Gemini-class TPM/RPM windows (~60s retry-after
 on multi-model combos, e.g. both targets of a 2-model combo hitting a per-model
 rate limit. Bounded by `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
 `budgetMs`) in **Settings → Resilience**. It never waits on `quota_exhausted`
-(locked until midnight) or auth/not-found reasons.
+(locked until midnight) or auth/not-found reasons. With `comboTimeoutMs` set, a
+wait that cannot finish before that deadline does not start (#18998): the combo
+answers at once with its terminal response instead of a `COMBO_TIMEOUT` 504.
 
 A combo can opt out with `config.comboCooldownWaitEnabled: false`. Only literal
 `false` disables these shared combo waits (post-dispatch cooldown and pre-dispatch

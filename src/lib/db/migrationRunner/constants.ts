@@ -16,6 +16,32 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "call_logs_summary_storage",
   },
   {
+    // Earlier revisions used 228, 231, 233 or 236; canonical upstream rows stay put.
+    // Match the name too: canonical cleanup/cache rows must never be rehomed.
+    fromVersion: "228",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "231",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "233",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
+    fromVersion: "236",
+    fromName: "usage_history_calculated_cost",
+    toVersion: "237",
+    toName: "usage_history_calculated_cost",
+  },
+  {
     fromVersion: "028",
     fromName: "provider_connection_max_concurrent",
     toVersion: "029",

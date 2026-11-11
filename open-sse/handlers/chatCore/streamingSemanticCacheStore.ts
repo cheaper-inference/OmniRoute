@@ -15,6 +15,7 @@ import {
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedStreamBody as defaultIsTruncatedStreamBody,
+  responseCarriesToolCalls,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
 import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
@@ -127,7 +128,8 @@ export function storeStreamingSemanticCacheResponse(
     args.streamStatus !== 200 ||
     !args.streamResponseBody ||
     !deps.isCacheableForWrite(args.body, args.headers) ||
-    (deps.isTruncatedStreamBody ?? defaultIsTruncatedStreamBody)(args.streamResponseBody)
+    (deps.isTruncatedStreamBody ?? defaultIsTruncatedStreamBody)(args.streamResponseBody) ||
+    responseCarriesToolCalls(args.streamResponseBody)
   ) {
     return;
   }
