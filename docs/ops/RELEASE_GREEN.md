@@ -43,11 +43,11 @@ Do not raise a baseline merely to obtain a passing result.
 The nightly release and compatibility resolvers select a canonical release branch.
 That selection must match the branch that triggered the workflow, and the suites
 use the event's immutable SHA. For manual execution, select the intended release
-in `RELEASE_BRANCH` and dispatch on that same ref:
+in `release_branch` and dispatch on that same ref:
 
 ```bash
-gh workflow run nightly-release-green.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
-gh workflow run nightly-compat.yml --ref "$RELEASE_BRANCH" -f branch="$RELEASE_BRANCH"
+gh workflow run nightly-release-green.yml --ref "$release_branch" -f branch="$release_branch"
+gh workflow run nightly-compat.yml --ref "$release_branch" -f branch="$release_branch"
 ```
 
 Cross-branch dispatch is rejected before executing the selected code. Hosted main
