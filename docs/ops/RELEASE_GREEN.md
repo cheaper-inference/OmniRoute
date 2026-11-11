@@ -24,8 +24,8 @@ combined candidate before accepting the results.
 
 ## Local validation
 
-Run the observer in an owned worktree after preparing its dependencies. Use the
-[worktree and resource protocol](WORKTREE_ISOLATION.md) before heavy validation.
+Run the observer in an owned worktree after preparing its dependencies. Follow the
+worktree and resource protocol in `docs/ops/WORKTREE_ISOLATION.md` before heavy validation.
 
 ```bash
 npm run check:release-green -- --quick --json
