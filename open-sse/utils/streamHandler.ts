@@ -679,7 +679,13 @@ export function createDisconnectAwareStream(
     }
   };
 
+  // Budget the client-facing queue in bytes: a bare highWaterMark counts chunks, so
+  // 16384 let a stalled client pin thousands of frames (see byteQueueStrategy.ts).
   const highWaterMark = options.highWaterMark ?? 16384;
+  const queueStrategy = {
+    highWaterMark,
+    size: (chunk: unknown) => (chunk instanceof Uint8Array ? chunk.byteLength : 1),
+  };
 
   return new ReadableStream(
     {
@@ -838,7 +844,7 @@ export function createDisconnectAwareStream(
         await Promise.allSettled([reader.cancel(reason), writer.abort(reason)]);
       },
     },
-    { highWaterMark }
+    queueStrategy
   );
 }
 

@@ -177,7 +177,11 @@ export function createSSEDataLineNormalizer(): SSEDataLineNormalizer {
     }
 
     output.push(...passthroughLines);
-    if (dataLines.length > 0) {
+    if (dataLines.length === 1 && dataLines[0].trim()) {
+      // One data line is already a whole payload: forward its text and leave parsing to the
+      // consumer. A parse and stringify here only repeated what the consumer does next.
+      output.push(`data: ${dataLines[0].trim()}`);
+    } else if (dataLines.length > 0) {
       const parsed = parseSSEDataLines(dataLines, { logWarning: false });
       if (parsed) {
         output.push(parsed.done === true ? "data: [DONE]" : `data: ${JSON.stringify(parsed)}`);

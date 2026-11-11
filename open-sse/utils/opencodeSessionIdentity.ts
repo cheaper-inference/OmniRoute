@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 /** Explicit conversation identity, before the existing fingerprint fallback. */
 const HEADER_NAMES = [
   "x-opencode-session",
@@ -29,7 +31,13 @@ function record(value: unknown): Record<string, unknown> | undefined {
 function identity(value: unknown): string | undefined {
   if (typeof value !== "string" || value.length > 256 || /[\u0000-\u001f\u007f]/.test(value))
     return undefined;
-  return value.trim() || undefined;
+  const id = value.trim();
+  // Node's Headers rejects any code point above U+00FF, which would fail the whole request
+  // at header build. Hash such an id: one conversation keeps one stable, header-safe value.
+  if (/[^\u0000-\u00ff]/.test(id)) {
+    return `sid_${createHash("sha256").update(id).digest("hex").slice(0, 32)}`;
+  }
+  return id || undefined;
 }
 
 function bodyIdentity(value: unknown): string | undefined {
