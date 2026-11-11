@@ -1134,10 +1134,11 @@ async function main() {
     const lintReportPath = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
     mkdirSync(dirname(lintReportPath), { recursive: true });
     writeFileSync(lintReportPath, "", { flag: "wx", mode: 0o600 });
+    // Execute the installed CLI directly: npm exec/npx adds an avoidable shell boundary.
     const lintRun = await run(
-      "npx",
+      process.execPath,
       [
-        "eslint",
+        join(ROOT, "node_modules", "eslint", "bin", "eslint.js"),
         ".",
         "--cache",
         "--cache-location",
