@@ -812,7 +812,8 @@
       "tests/unit/auth-selection-skips-full-account.test.ts",
       "tests/unit/token-refresh-retry-jitter.test.ts",
       "tests/unit/token-health-google-refresh-gap.test.ts",
-      "tests/unit/token-health-check-provider-cap.test.ts"
+      "tests/unit/token-health-check-provider-cap.test.ts",
+      "tests/unit/wake-recovery.test.ts"
     ],
     "nodeArgs": [
       "--import",

@@ -1,0 +1,1 @@
+- **feat(network):** Opt-in `OMNIROUTE_WAKE_RECOVERY=1` flushes pooled upstream connections once after the host wakes from sleep, so the first requests after resume do not reuse dead sockets.
