@@ -11981,6 +11981,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "रीफ़्रेश करें",
     "clearAll": "Clear All",
+    "clearAllConfirm": "इस कैश की सभी प्रविष्टियाँ हटा दी जाएँगी। इसे पूर्ववत नहीं किया जा सकता।",
     "memoryEntries": "मेमोरी प्रविष्टियाँ",
     "memoryEntriesSub": "इन-मेमोरी LRU",
     "dbEntries": "DB प्रविष्टियाँ",

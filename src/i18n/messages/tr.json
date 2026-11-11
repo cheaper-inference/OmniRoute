@@ -11981,6 +11981,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Yenile",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Bu önbellekteki tüm girdiler silinecek. Bu işlem geri alınamaz.",
     "memoryEntries": "Bellek Kayıtları",
     "memoryEntriesSub": "Bellek içi LRU",
     "dbEntries": "Veritabanı Kayıtları",

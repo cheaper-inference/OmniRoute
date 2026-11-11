@@ -11981,6 +11981,7 @@
     "description": "監控提供者側 Prompt Cache 的效率，以及本地 Semantic Cache 的回應複用情況。",
     "refresh": "重新整理",
     "clearAll": "清空語義快取",
+    "clearAllConfirm": "此快取中的所有項目都將被刪除。此操作無法復原。",
     "memoryEntries": "記憶體條目",
     "memoryEntriesSub": "記憶體 LRU",
     "dbEntries": "資料庫條目",

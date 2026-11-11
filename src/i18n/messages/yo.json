@@ -11981,6 +11981,7 @@
     "description": "Ṣàbójútó bí cache prompt olupèsè ṣe munadoko àti àtúnlò àwọn ìdáhùn onítumọ̀ agbègbè.",
     "refresh": "Sọ di tuntun",
     "clearAll": "Pa Cache Onítumọ̀ Rẹ́",
+    "clearAllConfirm": "Gbogbo àwọn àkọsílẹ̀ inú cache yìí ni a ó pa rẹ́. A kò lè yí èyí padà.",
     "memoryEntries": "Àwọn Àkọsílẹ̀ Ìrántí",
     "memoryEntriesSub": "LRU inú ìrántí",
     "dbEntries": "Àwọn Àkọsílẹ̀ DB",
