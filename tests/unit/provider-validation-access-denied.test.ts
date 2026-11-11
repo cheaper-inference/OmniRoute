@@ -11,8 +11,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 const { validateProviderApiKey } = await import("../../src/lib/providers/validation.ts");
-const { classifyValidationRejection, buildValidationLogRecord, sanitizeValidationEndpoint } =
-  await import("../../src/lib/providers/validation/upstreamRejection.ts");
+const {
+  classifyValidationRejection,
+  buildValidationLogRecord,
+  sanitizeValidationEndpoint,
+  refineValidationResult,
+  redactValidationText,
+  recordValidationResponse,
+  runWithValidationTrace,
+} = await import("../../src/lib/providers/validation/upstreamRejection.ts");
 
 const SECRET = "sk-test-SECRETSECRETSECRET1234567890";
 
@@ -112,10 +119,93 @@ test("an upstream body that echoes the key is redacted in the surfaced message",
   assert.ok(!String(result.error).includes(SECRET), String(result.error));
 });
 
+test("a generic 'Validation failed: <status>' over an explicit refusal becomes access denied", () => {
+  const { result, outcome } = refineValidationResult(
+    { valid: false, error: "Validation failed: 400" },
+    [
+      {
+        endpoint: "https://api.provider.example/v1/models",
+        status: 400,
+        body: '{"error":{"message":"User location is not supported for the API use."}}',
+      },
+    ],
+    SECRET
+  );
+  assert.equal(outcome, "access_denied");
+  assert.match(String(result.error), /^Access denied by provider \(HTTP 400: User location/);
+});
+
+test("a key accepted on 429 keeps valid:true but gains a rate-limit warning", () => {
+  const { result } = refineValidationResult(
+    { valid: true, error: null },
+    [{ endpoint: "https://api.provider.example/v1/chat", status: 429, body: "slow down" }],
+    SECRET
+  );
+  assert.equal(result.valid, true);
+  assert.match(
+    String(result.warning),
+    /rate limited the validation request \(HTTP 429: slow down\)/
+  );
+});
+
+test("search providers record their response so a 403 HTML page is refined too", async () => {
+  const { result } = await withFetch(
+    () => new Response(NGINX_403, { status: 403, headers: { "content-type": "text/html" } }),
+    () =>
+      validateProviderApiKey({
+        provider: "tavily-search",
+        apiKey: SECRET,
+        providerSpecificData: {},
+      })
+  );
+  assert.equal(result.valid, false);
+  assert.match(String(result.error), /access denied by provider \(HTTP 403: 403 Forbidden\)/i);
+});
+
+test("a stalled error body does not hang validation and its read is cancelled", async () => {
+  let cancelled = false;
+  const stalled = new ReadableStream({
+    start(controller) {
+      controller.enqueue(new TextEncoder().encode("partial"));
+    },
+    cancel() {
+      cancelled = true;
+    },
+  });
+  const started = performance.now();
+  const original = new Response(stalled, { status: 403 });
+  const { responses } = await runWithValidationTrace(SECRET, async () => {
+    await recordValidationResponse("https://api.provider.example/v1/models", original);
+  });
+  assert.ok(performance.now() - started < 3000);
+  assert.equal(responses[0]?.body, "partial");
+  // A tee'd source is cancelled only once BOTH branches are: cancelling the
+  // validator's branch must now reach the source, proving the clone was released.
+  assert.equal(cancelled, false, "recording must never cancel the validator's response");
+  await original.body?.cancel();
+  assert.ok(cancelled, "the clone's branch must already be cancelled after the timeout");
+});
+
+test("redaction covers individual cookie values and a key embedded in the endpoint path", () => {
+  const cookieKey = "session=abcdefSESSIONVALUE123; csrf=zyxwvCSRFVALUE987";
+  assert.equal(
+    redactValidationText("echo: csrf=zyxwvCSRFVALUE987 only", cookieKey).includes("CSRFVALUE"),
+    false
+  );
+  const record = buildValidationLogRecord({
+    provider: "custom",
+    apiKey: SECRET,
+    outcome: "access_denied",
+    rejection: { endpoint: `https://api.provider.example/${SECRET}/v1/models`, status: 403 },
+  });
+  assert.ok(!String(record.endpoint).includes(SECRET), String(record.endpoint));
+});
+
 test("classifyValidationRejection buckets statuses", () => {
   assert.equal(classifyValidationRejection(401, "nope").kind, "auth");
   assert.equal(classifyValidationRejection(403, '{"error":"invalid api key"}').kind, "auth");
   assert.equal(classifyValidationRejection(403, "Incorrect API key provided").kind, "auth");
+  assert.equal(classifyValidationRejection(403, "bad key").kind, "auth");
   assert.equal(classifyValidationRejection(403, NGINX_403).kind, "access_denied");
   assert.equal(classifyValidationRejection(403, "").kind, "forbidden_ambiguous");
   assert.equal(

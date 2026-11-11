@@ -135,6 +135,7 @@ import {
 } from "./validation/specialtyInline";
 import {
   buildValidationLogRecord,
+  recordValidationResponse,
   refineValidationResult,
   runWithValidationTrace,
 } from "./validation/upstreamRejection";
@@ -171,6 +172,8 @@ export async function validateFreebuffProvider({ apiKey }: { apiKey: string }) {
       body: JSON.stringify({}),
       signal: AbortSignal.timeout(15000),
     });
+    // Direct fetch (not the shared transport): record it explicitly.
+    await recordValidationResponse("https://www.codebuff.com/api/v1/freebuff/session", res);
 
     if (res.ok || res.status === 409) {
       return { valid: true, error: null };

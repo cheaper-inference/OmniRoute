@@ -56,7 +56,7 @@ const GEO_OR_EGRESS_SIGNALS =
 
 // Wording that identifies a genuine credential rejection carried by a 403.
 const AUTH_REJECTION_SIGNALS =
-  /invalid[\s_-]*(api[\s_-]*)?key|incorrect[\s_-]*(api[\s_-]*)?key|api[\s_-]*key[\s\w]*(invalid|not valid|expired|revoked|disabled)|invalid[\s_-]*(access[\s_-]*)?token|token[\s\w]*(invalid|expired|revoked)|unauthori[sz]ed|unauthenticated|authentication|invalid[\s_-]*credential|API_KEY_INVALID|invalid_api_key/i;
+  /(invalid|incorrect|bad|wrong|unknown)[\s_-]*(api[\s_-]*)?key|api[\s_-]*key[\s\w]*(invalid|not valid|expired|revoked|disabled)|invalid[\s_-]*(access[\s_-]*)?token|token[\s\w]*(invalid|expired|revoked)|unauthori[sz]ed|unauthenticated|authentication|invalid[\s_-]*credential|API_KEY_INVALID|invalid_api_key/i;
 
 // Wording of a network / policy refusal that is not about the credential.
 const ACCESS_BLOCK_SIGNALS =
@@ -99,20 +99,14 @@ export async function recordValidationResponse(url: string, response: Response):
     status: response.status,
   };
   if (!response.ok && typeof response.clone === "function") {
-    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const text = await Promise.race([
-        readBodyPrefix(response.clone(), MAX_CAPTURED_BODY_CHARS),
-        new Promise<string>((resolve) => {
-          timer = setTimeout(() => resolve(""), BODY_READ_TIMEOUT_MS);
-          (timer as { unref?: () => void }).unref?.();
-        }),
-      ]);
-      entry.body = text.slice(0, MAX_CAPTURED_BODY_CHARS);
+      entry.body = await readBodyPrefix(
+        response.clone(),
+        MAX_CAPTURED_BODY_CHARS,
+        BODY_READ_TIMEOUT_MS
+      );
     } catch {
       // Body unavailable (already consumed / aborted) — status alone still counts.
-    } finally {
-      if (timer) clearTimeout(timer);
     }
   }
   trace.responses.push(entry);
@@ -120,24 +114,36 @@ export async function recordValidationResponse(url: string, response: Response):
 }
 
 /**
- * Read at most `maxChars` of a (cloned) body and cancel the rest, so a huge or
- * never-ending error body cannot stall validation or balloon memory.
+ * Read at most `maxChars` of a (cloned) body within `timeoutMs`, then cancel the
+ * clone's stream, so a huge, stalled or never-ending error body can neither
+ * stall validation nor leave a pending read / retained stream behind. Only the
+ * clone is cancelled — the response handed to the validator is untouched.
  */
-async function readBodyPrefix(response: Response, maxChars: number): Promise<string> {
+async function readBodyPrefix(
+  response: Response,
+  maxChars: number,
+  timeoutMs: number
+): Promise<string> {
   const body = response.body;
-  if (!body || typeof body.getReader !== "function") {
-    return (await response.text()).slice(0, maxChars);
-  }
+  if (!body || typeof body.getReader !== "function") return "";
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let text = "";
+  let timedOut = false;
+  // Cancelling the reader settles a pending read() with { done: true }.
+  const timer = setTimeout(() => {
+    timedOut = true;
+    reader.cancel().catch(() => {});
+  }, timeoutMs);
+  (timer as { unref?: () => void }).unref?.();
   try {
-    while (text.length < maxChars) {
+    while (!timedOut && text.length < maxChars) {
       const { done, value } = await reader.read();
       if (done) break;
       text += decoder.decode(value, { stream: true });
     }
   } finally {
+    clearTimeout(timer);
     reader.cancel().catch(() => {});
   }
   return text.slice(0, maxChars);
@@ -192,11 +198,36 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** Strip the validated key and anything that looks like a credential. */
+/** Shortest credential fragment worth redacting (shorter ones would mangle prose). */
+const MIN_REDACTED_FRAGMENT_CHARS = 6;
+
+/**
+ * The whole credential plus its individual pieces: web-cookie / composite
+ * credentials (`a=...; b=...`, `user:secret`) can be echoed back one cookie or
+ * one part at a time, which a whole-string match would miss. Longest first so
+ * the full value is replaced before its pieces.
+ */
+function credentialFragments(apiKey: string | null): string[] {
+  if (!apiKey || apiKey.length < MIN_REDACTED_FRAGMENT_CHARS) return [];
+  const fragments = new Set<string>([apiKey]);
+  for (const part of apiKey.split(/[;,\s]+/)) {
+    const trimmed = part.trim();
+    if (trimmed.length >= MIN_REDACTED_FRAGMENT_CHARS) fragments.add(trimmed);
+    const eq = trimmed.indexOf("=");
+    const value = eq >= 0 ? trimmed.slice(eq + 1) : "";
+    if (value.length >= MIN_REDACTED_FRAGMENT_CHARS) fragments.add(value);
+    for (const piece of trimmed.split(":")) {
+      if (piece.length >= MIN_REDACTED_FRAGMENT_CHARS && piece !== trimmed) fragments.add(piece);
+    }
+  }
+  return [...fragments].sort((a, b) => b.length - a.length);
+}
+
+/** Strip the validated key (and its fragments) and anything that looks like a credential. */
 export function redactValidationText(text: string, apiKey: string | null): string {
   let out = text;
-  if (apiKey && apiKey.length >= 6) {
-    out = out.replace(new RegExp(escapeRegExp(apiKey), "g"), "[REDACTED]");
+  for (const secret of credentialFragments(apiKey)) {
+    out = out.replace(new RegExp(escapeRegExp(secret), "g"), "[REDACTED]");
   }
   return out
     .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]{6,}/gi, "Bearer [REDACTED]")
@@ -269,6 +300,7 @@ type ValidationResultLike = {
 };
 
 const CANNED_INVALID_KEY = /^invalid api key$/i;
+const GENERIC_STATUS_FAILURE = /^validation failed: (\d{3})$/i;
 
 function describe(status: number, summary: string): string {
   return summary ? `HTTP ${status}: ${summary})` : `HTTP ${status})`;
@@ -310,10 +342,32 @@ export function refineValidationResult<T extends ValidationResultLike>(
 
   const { kind, explicit } = classifyValidationRejection(decisive.status, decisive.body);
   const summary = summarizeUpstreamBody(decisive.body, apiKey);
-  const isCannedInvalid =
+  const errorText = typeof result.error === "string" ? result.error.trim() : "";
+  const isCannedInvalid = result.valid === false && CANNED_INVALID_KEY.test(errorText);
+  // A bare "Validation failed: <same status>" carries no more than the status.
+  const isGenericFailure =
     result.valid === false &&
-    typeof result.error === "string" &&
-    CANNED_INVALID_KEY.test(result.error.trim());
+    GENERIC_STATUS_FAILURE.exec(errorText)?.[1] === String(decisive.status);
+
+  if (kind === "access_denied" && explicit && isGenericFailure) {
+    return {
+      result: { ...result, error: buildAccessDeniedMessage(decisive.status, summary) },
+      outcome: "access_denied",
+      decisive,
+    };
+  }
+  // Validators deliberately accept a key on 429 (authentication passed) — keep
+  // the verdict, but do not hide that the provider is throttling.
+  if (kind === "rate_limited" && result.valid === true && !result.warning) {
+    return {
+      result: {
+        ...result,
+        warning: `Provider rate limited the validation request (${describe(decisive.status, summary)}`,
+      },
+      outcome: "valid",
+      decisive,
+    };
+  }
 
   // A bare 403 only overrides the canned "Invalid API key"; overriding a
   // `valid: true` verdict needs an explicit refusal (451 / geo wording), since
@@ -395,7 +449,9 @@ export function buildValidationLogRecord({
   };
   if (typeof probes === "number") record.probes = probes;
   if (rejection) {
-    record.endpoint = sanitizeValidationEndpoint(rejection.endpoint);
+    // Query/userinfo are already gone; a credential embedded in the path
+    // (custom base URLs) is caught by the key-fragment redaction.
+    record.endpoint = redactValidationText(sanitizeValidationEndpoint(rejection.endpoint), key);
     record.status = rejection.status;
     if (rejection.body) {
       record.body = truncate(

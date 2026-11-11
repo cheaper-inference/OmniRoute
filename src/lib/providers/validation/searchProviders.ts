@@ -5,6 +5,7 @@ import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { withCustomUserAgent } from "./headers";
 import { toValidationErrorResult, validationWrite } from "./transport";
+import { recordValidationResponse } from "./upstreamRejection";
 import {
   NIMBLE_CLIENT_SOURCE,
   NIMBLE_CLIENT_SOURCE_HEADER,
@@ -32,6 +33,9 @@ export async function validateSearchProvider(
       guard: isLocal ? "none" : getProviderOutboundGuard(),
       ...withCustomUserAgent(init, providerSpecificData),
     });
+    // Uses its own outbound guard, so it bypasses fetchWithProxyFallback —
+    // record the response explicitly for verdict refinement + the log line.
+    await recordValidationResponse(url, response);
     if (response.ok) return { valid: true, error: null, unsupported: false };
     if (response.status === 401 || response.status === 403) {
       return { valid: false, error: "Invalid API key", unsupported: false };
