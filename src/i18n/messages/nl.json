@@ -11984,6 +11984,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Vernieuwen",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Alle items in deze cache worden verwijderd. Dit kan niet ongedaan worden gemaakt.",
     "memoryEntries": "Geheugenitems",
     "memoryEntriesSub": "LRU in het geheugen",
     "dbEntries": "Database-items",

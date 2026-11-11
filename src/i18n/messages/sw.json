@@ -11984,6 +11984,7 @@
     "description": "Fuatilia ufanisi wa akiba ya maelekezo ya mtoa huduma na utumiaji tena wa majibu ya kisemantiki ya ndani.",
     "refresh": "Onyesha Upya",
     "clearAll": "Futa Akiba ya Kisemantiki",
+    "clearAllConfirm": "Maingizo yote katika kashe hii yatafutwa. Hatua hii haiwezi kutenduliwa.",
     "memoryEntries": "Vipengee vya Kumbukumbu",
     "memoryEntriesSub": "LRU ya kwenye kumbukumbu",
     "dbEntries": "Vipengee vya DB",

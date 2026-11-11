@@ -11984,6 +11984,7 @@
     "description": "Pratite efikasnost keša promptova provajdera i lokalnu ponovnu upotrebu semantičkih odgovora.",
     "refresh": "Osvježi",
     "clearAll": "Obriši semantički keš",
+    "clearAllConfirm": "Svi unosi u ovoj keš memoriji bit će izbrisani. Ovo se ne može poništiti.",
     "memoryEntries": "Unosi u memoriji",
     "memoryEntriesSub": "LRU u memoriji",
     "dbEntries": "Unosi u bazi podataka",

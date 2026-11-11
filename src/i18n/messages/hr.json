@@ -11984,6 +11984,7 @@
     "description": "Pratite učinkovitost predmemorije upita davatelja usluga i lokalnu ponovnu upotrebu semantički sličnih odgovora.",
     "refresh": "Osvježi",
     "clearAll": "Obriši semantičku predmemoriju",
+    "clearAllConfirm": "Svi unosi u ovoj predmemoriji bit će izbrisani. Ovo se ne može poništiti.",
     "memoryEntries": "Unosi u memoriji",
     "memoryEntriesSub": "LRU u memoriji",
     "dbEntries": "Unosi u bazi podataka",

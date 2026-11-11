@@ -11984,6 +11984,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Reîmprospătare",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Toate intrările din acest cache vor fi șterse. Această acțiune nu poate fi anulată.",
     "memoryEntries": "Intrări în memorie",
     "memoryEntriesSub": "LRU în memorie",
     "dbEntries": "Intrări în baza de date",

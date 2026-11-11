@@ -11984,6 +11984,7 @@
     "description": "Spremljajte učinkovitost predpomnilnika pozivov ponudnika in lokalno ponovno uporabo semantičnih odgovorov.",
     "refresh": "Osveži",
     "clearAll": "Počisti semantični predpomnilnik",
+    "clearAllConfirm": "Vsi vnosi v tem predpomnilniku bodo izbrisani. Tega dejanja ni mogoče razveljaviti.",
     "memoryEntries": "Zapisi v pomnilniku",
     "memoryEntriesSub": "LRU v pomnilniku",
     "dbEntries": "Zapisi v podatkovni zbirki",

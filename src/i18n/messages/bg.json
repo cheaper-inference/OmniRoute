@@ -11984,6 +11984,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "Обновяване",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Всички записи в този кеш ще бъдат изтрити. Това действие не може да бъде отменено.",
     "memoryEntries": "Записи в паметта",
     "memoryEntriesSub": "LRU в паметта",
     "dbEntries": "Записи в базата данни",

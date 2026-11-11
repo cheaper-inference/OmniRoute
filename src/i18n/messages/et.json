@@ -11984,6 +11984,7 @@
     "description": "Jälgi teenusepakkuja viipade vahemälu tõhusust ja kohalike semantiliste vastuste taaskasutust.",
     "refresh": "Värskenda",
     "clearAll": "Tühjenda semantiline vahemälu",
+    "clearAllConfirm": "Kõik selle vahemälu kirjed kustutatakse. Seda ei saa tagasi võtta.",
     "memoryEntries": "Mälus olevad kirjed",
     "memoryEntriesSub": "Mälusisene LRU",
     "dbEntries": "Andmebaasi kirjed",

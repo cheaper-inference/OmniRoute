@@ -11984,6 +11984,7 @@
     "description": "Monitor and manage semantic response cache, hit rates, and token savings.",
     "refresh": "I-refresh",
     "clearAll": "Clear All",
+    "clearAllConfirm": "Mabubura ang lahat ng entry sa cache na ito. Hindi na ito maibabalik.",
     "memoryEntries": "Mga Entry sa Memorya",
     "memoryEntriesSub": "In-memory na LRU",
     "dbEntries": "Mga Entry sa DB",
