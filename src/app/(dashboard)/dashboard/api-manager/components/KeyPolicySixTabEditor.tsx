@@ -123,14 +123,14 @@ function PolicyTabList() {
             <span>{t(tabDef.labelKey)}</span>
             {errCount > 0 && (
               <span
-                className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-error text-bg"
+                className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-error text-bg"
                 title={t("errorBadgeLabel", { count: errCount })}
               >
                 {errCount}
               </span>
             )}
             {errCount === 0 && warnCount > 0 && (
-              <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-warning text-bg">
+              <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-warning text-bg">
                 {warnCount}
               </span>
             )}
