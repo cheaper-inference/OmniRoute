@@ -1,0 +1,1 @@
+- **fix(chatcore):** DeepSeek, Kimi and other non-Claude Anthropic-shape targets no longer receive Claude Code's per-turn billing line in the system prompt, so their prompt cache prefix stays stable between turns. ([#19448](https://github.com/cheaper-inference/OmniRoute/pull/19448))

@@ -344,6 +344,33 @@ function mergeNativeToolCalls(
   return calls;
 }
 
+const TERMINAL_STREAM_EVENT_TYPES = new Set([
+  "message_stop",
+  "response.completed",
+  "response.incomplete",
+  "response.failed",
+  "response.done",
+  "response.cancelled",
+  "response.canceled",
+]);
+
+/** True for a parsed upstream payload that ends its turn: `[DONE]`, a finish reason or a terminal event. */
+function isTerminalStreamPayload(payload: unknown): boolean {
+  const record = asRecord(payload);
+  if (record.done === true) return true;
+  if (typeof record.type === "string" && TERMINAL_STREAM_EVENT_TYPES.has(record.type)) return true;
+  const finished = (list: unknown, key: string) =>
+    Array.isArray(list) && list.some((entry) => asRecord(entry)[key] != null);
+  return finished(record.choices, "finish_reason") || finished(record.candidates, "finishReason");
+}
+
+/** True for a `data:` line whose payload is neither `[DONE]` nor JSON. Empty `data:` is not counted. */
+function isUnparsableDataLine(line: string): boolean {
+  if (!line.startsWith("data:")) return false;
+  const payload = line.slice(5).trim();
+  return payload !== "" && parseSSEDataPayload(payload, { logWarning: false }) === null;
+}
+
 function addRestoredResponsesToolSchemas(
   schemas: Map<string, JsonRecord> | null,
   aliases: ReadonlyMap<string, string> | null,
@@ -981,6 +1008,12 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughHasToolCalls = false;
   /** Passthrough: whether a chunk with non-null finish_reason was seen (#7800) */
   let passthroughSawFinishReason = false;
+  /** Passthrough: a terminal event (finish reason, [DONE], response.completed, message_stop) was seen */
+  let passthroughSawTerminalEvent = false;
+  /** Passthrough: the newest `data:` payload was not JSON and no valid payload followed it */
+  let passthroughUnparsableDataTail = false;
+  /** A success or failure outcome was already recorded; the flush catch must not record a second one */
+  let outcomeRecorded = false;
   /** Passthrough: accumulate tool_calls deltas for call log responseBody */
   const passthroughToolCalls = new Map<string, ToolCall>();
   let passthroughToolCallSeq = 0;
@@ -1317,6 +1350,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     decrementPendingRequest = true
   ) => {
     clearIdleTimer();
+    outcomeRecorded = true;
     const msg = "Claude returned an empty response (no content block)";
     console.warn(
       `[STREAM] Empty Claude stream at flush - emitting error (${provider || "provider"}:${model || "unknown"})`
@@ -1523,7 +1557,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     }
   };
 
-  const abortStreamFailure = createStreamFailureAborter({
+  const abortStreamFailureRaw = createStreamFailureAborter({
     onFailure,
     onComplete,
     attachFailureSnapshot: () => buildStreamFailureSnapshot(providerPayloadCollector),
@@ -1539,6 +1573,10 @@ export function createSSEStream(options: StreamOptions = {}) {
     markPendingRequestCleared: markStreamPendingRequestCleared,
     model,
   });
+  const abortStreamFailure: typeof abortStreamFailureRaw = (...args) => {
+    outcomeRecorded = true;
+    return abortStreamFailureRaw(...args);
+  };
 
   // Keep queued chunks only once client-visible content was forwarded. A
   // pre-content failure must still reject the stream, while a post-content
@@ -1557,27 +1595,44 @@ export function createSSEStream(options: StreamOptions = {}) {
     return { preserveQueuedChunks, terminate: preserveQueuedChunks && !flushing };
   };
 
-  const abortOversizePendingLine = (controller: TransformStreamDefaultController<Uint8Array>) => {
-    buffer = "";
+  // One sanitized error frame in the client's protocol, one onFailure, one failure completion.
+  const abortWithPublicStreamError = (
+    controller: TransformStreamDefaultController<Uint8Array>,
+    message: string,
+    code: string
+  ) => {
     const failure: StreamFailurePayload = {
       status: 502,
-      message: "Upstream SSE line exceeded the size limit",
-      code: "invalid_sse_payload",
+      message,
+      code,
       type: "server_error",
       streamSnapshot: buildStreamFailureSnapshot(providerPayloadCollector),
     };
-    const output = formatTranslatedStreamError(
-      failure,
-      (mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat : sourceFormat) ?? undefined
-    );
-    reqLogger?.appendConvertedChunk?.(output);
-    forward(controller, encoder.encode(output));
+    try {
+      const output = formatTranslatedStreamError(
+        failure,
+        (mode === STREAM_MODE.PASSTHROUGH ? clientResponseFormat : sourceFormat) ?? undefined
+      );
+      reqLogger?.appendConvertedChunk?.(output);
+      forward(controller, encoder.encode(output));
+    } catch (e) {
+      console.debug(`[STREAM] failed to queue the error frame (${model || "unknown"}):`, e);
+    }
     upstreamErrorForwarded = true;
     doneSent = true;
-    abortStreamFailure(controller, failure, failure.message, {
+    abortStreamFailure(controller, failure, message, {
       notifyComplete: true,
       ...failureBoundaryOptions(),
     });
+  };
+
+  const abortOversizePendingLine = (controller: TransformStreamDefaultController<Uint8Array>) => {
+    buffer = "";
+    abortWithPublicStreamError(
+      controller,
+      "Upstream SSE line exceeded the size limit",
+      "invalid_sse_payload"
+    );
   };
 
   const emitTranslatedFailureAndAbort = (
@@ -1754,6 +1809,8 @@ export function createSSEStream(options: StreamOptions = {}) {
               const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
               if (providerPayload) {
                 providerPayloadCollector.push(providerPayload);
+                passthroughUnparsableDataTail = false;
+                if (isTerminalStreamPayload(providerPayload)) passthroughSawTerminalEvent = true;
                 if ((providerPayload as { done?: unknown }).done === true) {
                   continue;
                 }
@@ -2623,6 +2680,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                 // Skip non-JSON data lines silently — don't forward garbage to clients.
                 // Upstream providers sometimes return plain-text errors (HTML, rate-limit
                 // messages) in the SSE stream that would break downstream JSON decoders.
+                // Remember it, though: if the stream ends on this line with no terminal
+                // event, flush() reports one error frame instead of a clean success.
+                if (
+                  parsedPassthroughData == null &&
+                  !passthroughSawTerminalEvent &&
+                  isUnparsableDataLine(trimmed)
+                ) {
+                  passthroughUnparsableDataTail = true;
+                }
                 continue;
               }
             }
@@ -3017,6 +3083,12 @@ export function createSSEStream(options: StreamOptions = {}) {
             };
 
             for (const line of normalizedTailLines) {
+              if (!skipPassthroughEvent && isUnparsableDataLine(line.trim())) {
+                // Same policy as the raw tail below: never forward it, report it once.
+                if (!passthroughSawTerminalEvent) passthroughUnparsableDataTail = true;
+                clearPendingPassthroughEvent();
+                continue;
+              }
               if (processBufferedPassthroughLine(line, tailProcessorContext)) {
                 return;
               }
@@ -3024,6 +3096,10 @@ export function createSSEStream(options: StreamOptions = {}) {
             const bufferedLine = buffer.trim();
             if (skipPassthroughEvent || /^event:\s*keepalive\b/i.test(bufferedLine)) {
               skipPassthroughEvent = false;
+              clearPendingPassthroughEvent();
+            } else if (isUnparsableDataLine(bufferedLine)) {
+              // A cut or plain-text `data:` tail is not forwarded raw as a broken SSE frame.
+              if (!passthroughSawTerminalEvent) passthroughUnparsableDataTail = true;
               clearPendingPassthroughEvent();
             } else if (buffer) {
               let output = buffer;
@@ -3034,6 +3110,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               let bufferedPayload = parseSSELine(bufferedLine);
               if (bufferedPayload) {
                 providerPayloadCollector.push(bufferedPayload);
+                passthroughUnparsableDataTail = false;
                 bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
                 if (bufferedProjectedFailure) {
                   bufferedPayload = bufferedProjectedFailure.publicPayload;
@@ -3129,6 +3206,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                 );
                 return;
               }
+            }
+
+            if (passthroughUnparsableDataTail) {
+              abortWithPublicStreamError(
+                controller,
+                "Upstream sent a stream event that is not valid JSON",
+                "invalid_sse_payload"
+              );
+              return;
             }
 
             if (shouldAbortClaudeStream()) {
@@ -3330,6 +3416,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     passthroughAccumulatedReasoning
                   ),
                 };
+                outcomeRecorded = true;
                 onComplete({
                   status: 200,
                   usage,
@@ -3740,6 +3827,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 _streamed: true,
                 ...summaryTextTailMarker(state?.accumulatedContent, state?.accumulatedReasoning),
               };
+              outcomeRecorded = true;
               onComplete({
                 status: 200,
                 usage: accountingUsage,
@@ -3793,6 +3881,23 @@ export function createSSEStream(options: StreamOptions = {}) {
           }
         } catch (error) {
           console.log(`[STREAM] Error in flush (${model || "unknown"}):`, error.message || error);
+          // A throw while closing the stream (e.g. a malformed tail frame) still needs one
+          // terminal outcome: an error frame, onFailure, a failure completion, pending cleanup.
+          if (!outcomeRecorded) {
+            try {
+              abortWithPublicStreamError(
+                controller,
+                "Upstream stream could not be processed",
+                "stream_error"
+              );
+            } catch (abortError) {
+              console.debug(
+                `[STREAM] flush failure path error (${model || "unknown"}):`,
+                abortError
+              );
+              clearPendingRequestFromStream();
+            }
+          }
         }
       },
       cancel: () => clearIdleTimer(),

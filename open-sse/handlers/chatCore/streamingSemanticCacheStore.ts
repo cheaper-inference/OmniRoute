@@ -15,6 +15,7 @@ import {
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedStreamBody as defaultIsTruncatedStreamBody,
+  responseCarriesToolCalls,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
 import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
@@ -117,7 +118,8 @@ export function storeStreamingSemanticCacheResponse(
     !deps.isCacheableForWrite(args.body, args.headers) ||
     // The stream summary keeps only a bounded text tail; it is not the whole answer.
     args.streamResponseBody._summary_text_tail === true ||
-    (deps.isTruncatedStreamBody ?? defaultIsTruncatedStreamBody)(args.streamResponseBody)
+    (deps.isTruncatedStreamBody ?? defaultIsTruncatedStreamBody)(args.streamResponseBody) ||
+    responseCarriesToolCalls(args.streamResponseBody)
   ) {
     return;
   }
