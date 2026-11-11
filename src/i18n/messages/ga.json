@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} iarr. · {success} rathúil · {latency} · cuóta {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Tugtar tosaíocht do chostais a thuairiscíonn an soláthraí; murach sin úsáidtear praghsanna API atá cumraithe faoi láthair. Ní táille síntiúis ná asbhaint ó bhuiséad na heochrach é seo. Is meastachán é réamh-mheastachán an chuóta, ní liúntas seasta síntiúis.",
     "usdUsageQuota": "Cuóta úsáide USD",
     "usdUsageQuotaDescription": "Bacann sé an eochair seo le hearráid API 400 nuair a shroicheann a caiteachas áitiúil USD an cuóta laethúil nó seachtainiúil cumraithe.",
     "dailyQuotaUsd": "Cuóta laethúil (USD)",

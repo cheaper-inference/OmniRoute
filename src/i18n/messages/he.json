@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} בקשות · {success} הצלחה · {latency} · מכסה {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "עלויות שדווחו על ידי הספק מקבלות עדיפות; אחרת נעשה שימוש במחירי API המוגדרים כעת. זהו לא חיוב מנוי או ניכוי מתקציב המפתח. תחזית המכסה היא הערכה ולא הקצאת מנוי קבועה.",
     "usdUsageQuota": "מכסת שימוש ב-USD",
     "usdUsageQuotaDescription": "חוסם מפתח זה עם שגיאת API 400 לאחר שההוצאה המקומית שלו ב-USD מגיעה למכסה היומית או השבועית המוגדרת.",
     "dailyQuotaUsd": "מכסה יומית (USD)",

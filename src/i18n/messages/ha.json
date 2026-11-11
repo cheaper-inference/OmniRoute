@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "buƙatu {requests} · nasara {success} · {latency} · iyaka {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "An fi ba kuɗin da mai ba da sabis ya bayar fifiko; in babu, ana amfani da farashin API da aka saita yanzu. Wannan ba kuɗin rajista ba ne ko ragi daga kasafin maɓalli. Hasashen kaso ƙiyasi ne, ba tsayayyen kaso na rajista ba.",
     "usdUsageQuota": "Iyakar amfani da USD",
     "usdUsageQuotaDescription": "Yana toshe wannan maɓalli da kuskuren API na 400 bayan adadin USD da aka kashe a gida ya kai iyakar yau da kullum ko ta mako-mako da aka saita.",
     "dailyQuotaUsd": "Iyakar yau da kullum (USD)",

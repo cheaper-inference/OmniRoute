@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} päringut · {success} õnnestunud · {latency} · kvoot {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Pakkuja teatatud kulud on esmatähtsad; muidu kasutatakse praegu seadistatud API hindu. See ei ole tellimustasu ega võtme eelarvest mahaarvamine. Kvoodiprognoos on hinnang, mitte tellimuse kindel kasutusmaht.",
     "usdUsageQuota": "USD-kasutuskvoot",
     "usdUsageQuotaDescription": "Blokeerib selle võtme API veakoodiga 400, kui selle kohalikud USD-kulud jõuavad seadistatud päeva- või nädalakvoodini.",
     "dailyQuotaUsd": "Päevakvoot (USD)",

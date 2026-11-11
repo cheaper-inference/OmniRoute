@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} zahtev · {success} uspešnih · {latency} · kvota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Prednost imajo stroški, ki jih sporoči ponudnik; sicer se uporabijo trenutno nastavljene cene API. To ni naročnina ali odbitek od proračuna ključa. Projekcija kvote je ocena, ne fiksna naročniška količina.",
     "usdUsageQuota": "Kvota porabe v USD",
     "usdUsageQuotaDescription": "Uporabo tega ključa blokira z napako API 400, ko njegova lokalna poraba v USD doseže nastavljeno dnevno ali tedensko kvoto.",
     "dailyQuotaUsd": "Dnevna kvota (USD)",

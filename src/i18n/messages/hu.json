@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} lekérés · {success} sikeres · {latency} · kvóta {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "A szolgáltató által jelentett költségek elsőbbséget élveznek; egyébként a jelenleg beállított API-árak érvényesek. Ez nem előfizetési díj vagy a kulcs keretéből levont összeg. A kvóta előrejelzése becslés, nem rögzített előfizetési keret.",
     "usdUsageQuota": "USD használati kvóta",
     "usdUsageQuotaDescription": "Letiltja ezt a kulcsot egy 400-as API-hibával, miután a helyi USD-költése eléri a beállított napi vagy heti kvótát.",
     "dailyQuotaUsd": "Napi kvóta (USD)",

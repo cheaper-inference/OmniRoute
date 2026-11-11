@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} ጥያቄ · {success} ስኬት · {latency} · ኮታ {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "በአቅራቢው የተዘገበ ወጪ ቅድሚያ ይሰጠዋል፤ ካልሆነ አሁን የተዋቀሩ API ዋጋዎች ይጠቀማሉ። ይህ የደንበኝነት ክፍያ ወይም ከቁልፍ በጀት ቅነሳ አይደለም። የኮታ ትንበያ ግምት ነው፣ ቋሚ የደንበኝነት ድርሻ አይደለም።",
     "usdUsageQuota": "የUSD አጠቃቀም ኮታ",
     "usdUsageQuotaDescription": "የዚህ ቁልፍ አካባቢያዊ የUSD ወጪ የተዋቀረው ዕለታዊ ወይም ሳምንታዊ ኮታ ላይ ከደረሰ በኋላ፣ በ400 API ስህተት ያግደዋል።",
     "dailyQuotaUsd": "ዕለታዊ ኮታ (USD)",

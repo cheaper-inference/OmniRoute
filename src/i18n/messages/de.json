@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} Anfr. · {success} erfolgreich · {latency} · Kontingent {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Vom Anbieter gemeldete Kosten haben Vorrang; andernfalls gelten die aktuell konfigurierten API-Preise. Dies ist weder eine Abonnementgebühr noch ein Abzug vom Schlüsselbudget. Die Quotenhochrechnung ist eine Schätzung, kein festes Abonnementguthaben.",
     "usdUsageQuota": "USD-Nutzungskontingent",
     "usdUsageQuotaDescription": "Blockiert diesen Schlüssel mit einem 400-API-Fehler, nachdem seine lokalen USD-Ausgaben das konfigurierte tägliche oder wöchentliche Kontingent erreichen.",
     "dailyQuotaUsd": "Tägliches Kontingent (USD)",

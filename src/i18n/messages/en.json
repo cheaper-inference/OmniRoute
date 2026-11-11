@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} success · {latency} · quota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Provider-reported costs take priority; otherwise, requests use current configured API prices. This is not a subscription charge or a key budget deduction. The quota projection is an estimate, not a fixed subscription allowance.",
     "usdUsageQuota": "USD usage quota",
     "usdUsageQuotaDescription": "Blocks this key with a 400 API error after its local USD spend reaches the configured daily or weekly quota.",
     "dailyQuotaUsd": "Daily quota (USD)",

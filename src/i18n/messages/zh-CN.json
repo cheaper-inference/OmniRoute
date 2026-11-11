@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} 请求 · {success} 成功 · {latency} · 配额 {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "优先采用提供者报告的费用；否则按当前配置的 API 价格计算请求等值。这不是订阅扣款或密钥预算扣减。配额外推只是估算，并非固定的订阅额度。",
     "usdUsageQuota": "美元使用配额",
     "usdUsageQuotaDescription": "在此密钥的本地美元支出达到配置的每日或每周配额后，将阻止该密钥并返回 400 API 错误。",
     "dailyQuotaUsd": "每日配额 (USD)",

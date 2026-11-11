@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} succès · {latency} · quota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Les coûts déclarés par le fournisseur sont prioritaires ; sinon, les requêtes utilisent les tarifs API actuellement configurés. Il ne s’agit ni de frais d’abonnement ni d’une déduction du budget de la clé. La projection du quota est une estimation, pas une allocation fixe de l’abonnement.",
     "usdUsageQuota": "Quota d'utilisation en USD",
     "usdUsageQuotaDescription": "Bloque cette clé avec une erreur API 400 lorsque ses dépenses locales en USD atteignent le quota quotidien ou hebdomadaire configuré.",
     "dailyQuotaUsd": "Quota quotidien (USD)",

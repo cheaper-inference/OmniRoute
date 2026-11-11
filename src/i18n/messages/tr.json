@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} istek · {success} başarılı · {latency} · kota {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Sağlayıcının bildirdiği maliyetler önceliklidir; aksi halde güncel yapılandırılmış API fiyatları kullanılır. Bu bir abonelik ücreti veya anahtar bütçesi kesintisi değildir. Kota projeksiyonu bir tahmindir, sabit abonelik hakkı değildir.",
     "usdUsageQuota": "USD kullanım kotası",
     "usdUsageQuotaDescription": "Yerel USD harcaması yapılandırılmış günlük veya haftalık kotaya ulaştığında bu anahtarı 400 API hatasıyla engeller.",
     "dailyQuotaUsd": "Günlük kota (USD)",

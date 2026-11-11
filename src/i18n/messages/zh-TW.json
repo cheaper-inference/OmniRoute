@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} 請求 · {success} 成功 · {latency} · 配額 {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "優先採用供應商回報的費用；否則依目前設定的 API 價格計算請求等值。這不是訂閱扣款或金鑰預算扣減。配額推估僅為估算，並非固定的訂閱額度。",
     "usdUsageQuota": "USD 用量配額",
     "usdUsageQuotaDescription": "當此金鑰的本地 USD 支出達到設定的每日或每週配額後，會以 400 API 錯誤封鎖該金鑰。",
     "dailyQuotaUsd": "每日配額（USD）",

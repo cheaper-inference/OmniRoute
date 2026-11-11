@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "Ìbéèrè {requests} · àṣeyọrí {success} · {latency} · ìwọ̀n {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Iye owó tí olùpèsè ròyìn ni àkọ́kọ́; bí kò bá sí, a lo iye owó API tí a ṣètò lọ́wọ́lọ́wọ́. Èyí kì í ṣe owó ìforúkọsílẹ̀ tàbí ayọkúrò nínú ìnáwó kọ́kọ́rọ́. Àsọtẹ́lẹ̀ ìpín jẹ́ ìṣírò, kì í ṣe ìpín ìforúkọsílẹ̀ tí ó dúró ṣinṣin.",
     "usdUsageQuota": "Ìwọ̀n lílo USD",
     "usdUsageQuotaDescription": "Yóò dí kọ́kọ́rọ́ yìí pẹ̀lú àṣìṣe API 400 lẹ́yìn tí ìnáwó USD àdúgbò rẹ̀ bá dé ìwọ̀n ojoojúmọ́ tàbí ọ̀sọ̀ọ̀sẹ̀ tí a ṣètò.",
     "dailyQuotaUsd": "Ìwọ̀n ojoojúmọ́ (USD)",

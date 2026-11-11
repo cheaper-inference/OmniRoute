@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} pyyntöä · {success} onnistunut · {latency} · kiintiö {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Palveluntarjoajan ilmoittamat kulut ovat etusijalla; muuten käytetään nykyisiä määritettyjä API-hintoja. Tämä ei ole tilausmaksu eikä avaimen budjetista tehtävä vähennys. Kiintiöennuste on arvio, ei tilauksen kiinteä käyttövara.",
     "usdUsageQuota": "USD-käyttökiintiö",
     "usdUsageQuotaDescription": "Estää tämän avaimen 400 API -virheellä, kun sen paikallinen USD-kulutus saavuttaa määritetyn päivittäisen tai viikoittaisen kiintiön.",
     "dailyQuotaUsd": "Päivittäinen kiintiö (USD)",

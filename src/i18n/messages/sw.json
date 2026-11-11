@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} mafanikio · {latency} · kiwango {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Gharama zilizoripotiwa na mtoa huduma hupewa kipaumbele; vinginevyo bei za API zilizowekwa sasa hutumika. Hii si ada ya usajili wala makato ya bajeti ya ufunguo. Makadirio ya mgao ni tathmini, si mgao wa kudumu wa usajili.",
     "usdUsageQuota": "Kiwango cha matumizi cha USD",
     "usdUsageQuotaDescription": "Huzuia ufunguo huu kwa kosa la API la 400 baada ya matumizi yake ya ndani ya USD kufikia kiwango kilichosanidiwa cha kila siku au kila wiki.",
     "dailyQuotaUsd": "Kiwango cha kila siku (USD)",

@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} yêu cầu · {success} thành công · {latency} · hạn ngạch {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Ưu tiên chi phí do nhà cung cấp báo cáo; nếu không có, dùng giá API hiện được cấu hình. Đây không phải phí đăng ký hay khoản trừ ngân sách khóa. Dự báo hạn mức chỉ là ước tính, không phải định mức đăng ký cố định.",
     "usdUsageQuota": "Hạn ngạch sử dụng USD",
     "usdUsageQuotaDescription": "Chặn khóa này bằng lỗi API 400 khi chi tiêu USD cục bộ đạt hạn ngạch ngày hoặc tuần đã cấu hình.",
     "dailyQuotaUsd": "Hạn ngạch ngày (USD)",

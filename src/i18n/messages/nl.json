@@ -15089,6 +15089,7 @@
     "resolvedTargetMetrics": "{requests} req · {success} geslaagd · {latency} · quotum {quota}"
   },
   "usageLimits": {
+    "apiValueNotice": "Door de provider gemelde kosten hebben voorrang; anders gelden de huidige ingestelde API-prijzen. Dit is geen abonnementskostenpost of aftrek van het sleutelbudget. De quotaprognose is een schatting, geen vast abonnementstegoed.",
     "usdUsageQuota": "USD-gebruiksquotum",
     "usdUsageQuotaDescription": "Blokkeert deze sleutel met een 400 API-fout nadat de lokale USD-uitgaven het geconfigureerde dagelijkse of wekelijkse quotum bereiken.",
     "dailyQuotaUsd": "Dagelijks quotum (USD)",
